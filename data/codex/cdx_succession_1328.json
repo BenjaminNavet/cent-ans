@@ -1,0 +1,12 @@
+{
+  "id": "cdx_succession_1328",
+  "title": "La crise successorale de 1328",
+  "category": "institution",
+  "aliases": ["loi salique", "succession de 1328", "crise dynastique de 1328"],
+  "era": { "from": "1316", "to": "1328" },
+  "summary": "À la mort sans héritier mâle de Charles IV en 1328, les pairs du royaume écartent [[cdx_edouard_iii|Édouard III]], petit-fils du roi défunt par les femmes, et couronnent [[cdx_philippe_vi|Philippe VI]] de Valois, cousin par les hommes. Cette exclusion des femmes deviendra plus tard la « loi salique ».",
+  "body": "En 1316, la mort du roi Louis X sans héritier mâle vivant avait déjà posé la question de la transmission de la couronne : son frère Philippe V est préféré à la fille du défunt, Jeanne, au nom d'un principe encore informel selon lequel les femmes ne peuvent transmettre la couronne de France ni y accéder elles-mêmes. Ce précédent se répète en 1322 et surtout en 1328, à la mort de Charles IV, dernier fils de Philippe le Bel, qui ne laisse qu'une fille.\n\nDeux candidats se présentent alors : [[cdx_edouard_iii|Édouard III d'Angleterre]], petit-fils de Philippe le Bel par sa mère Isabelle, et Philippe, comte de Valois, neveu de Philippe le Bel par les hommes. Une assemblée de barons et de prélats du royaume tranche en faveur du second, couronné [[cdx_philippe_vi|Philippe VI]], jugeant qu'un royaume ne saurait être gouverné, ni sa couronne transmise, par une femme ou par un descendant issu d'une femme.\n\nUn point d'histoire mérite d'être précisé : en 1328, personne n'invoque encore explicitement la « loi salique », un code juridique franc du haut Moyen Âge tombé dans l'oubli depuis des siècles. C'est seulement vers 1358 que le juriste Richard Lescot exhume ce texte pour lui faire dire, par une lecture forcée d'un article sur l'héritage des terres, qu'il interdit la succession féminine à la couronne. L'argument ne devient une doctrine constitutionnelle pleinement assumée qu'au XVe siècle, lors des controverses avec l'Angleterre.",
+  "anachronism": "L'invocation explicite de la « loi salique » pour justifier l'exclusion des femmes est une construction juridique postérieure (vers 1358, puis surtout au XVe siècle) : en 1328, les pairs se contentent d'écarter Édouard III sans citer ce texte.",
+  "see_also": ["cdx_edouard_iii", "cdx_philippe_vi", "cdx_charles_le_mauvais"],
+  "sources": ["Loi salique", "Philippe VI (roi de France)"]
+}

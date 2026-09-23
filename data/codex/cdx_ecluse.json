@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ecluse",
+  "title": "Bataille de l'Écluse",
+  "category": "bataille",
+  "aliases": ["l'Écluse", "Sluys", "bataille navale de l'Écluse"],
+  "era": { "from": "1340", "to": "1340" },
+  "summary": "Le 24 juin 1340, la flotte d'[[cdx_edouard_iii|Édouard III]] anéantit la marine franco-génoise au large de l'Écluse, dans l'estuaire du Zwin, assurant à l'Angleterre la maîtrise de la Manche pour de longues années.",
+  "body": "Trois ans après le début de la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]], la couronne de [[cdx_philippe_vi|Philippe VI]] rassemble une flotte considérable, renforcée de galères génoises louées, dans l'estuaire du Zwin, près de la ville de l'Écluse, sur la côte de [[cdx_flandre_laine|Flandre]]. Le commandement français fait la faute d'enchaîner les navires entre eux pour former une ligne défensive immobile, tactique pensée pour repousser un abordage mais qui prive la flotte de toute manœuvrabilité.\n\nÉdouard III, qui traverse la Manche pour rejoindre ses alliés flamands, découvre cette flotte figée et lance l'assaut le 24 juin 1340. Les archers anglais, tirant depuis les hauteurs des châteaux de proue avec l'[[cdx_arc_long|arc long]], déciment les équipages français avant même l'abordage, tandis que l'immobilité de la ligne ennemie empêche toute retraite ou manœuvre de dégagement. La défaite est totale : l'essentiel de la flotte française et génoise est détruit ou capturé.\n\nCette victoire navale ne se traduit pas immédiatement par une victoire terrestre décisive, mais elle assure à l'Angleterre, pour l'essentiel des décennies suivantes, une maîtrise de la Manche qui lui permet de débarquer librement des armées sur le continent et de soutenir ses alliés flamands, notamment Jacob van Artevelde, meneur du parti pro-anglais à Gand.\n\nLa nouvelle du désastre est si mal reçue à la cour de France que, selon une anecdote célèbre, les courtisans n'osent en informer directement Philippe VI, et c'est un bouffon qui se charge, par une plaisanterie, de la lui apprendre.",
+  "entity": "evt_sluys",
+  "see_also": ["cdx_edouard_iii", "cdx_philippe_vi", "cdx_arc_long", "cdx_flandre_laine"],
+  "sources": ["Bataille de l'Écluse"]
+}

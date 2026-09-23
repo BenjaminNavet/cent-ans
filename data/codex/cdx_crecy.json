@@ -1,0 +1,12 @@
+{
+  "id": "cdx_crecy",
+  "title": "Bataille de Crécy",
+  "category": "bataille",
+  "aliases": ["Crécy", "Crécy-en-Ponthieu"],
+  "era": { "from": "1346", "to": "1346" },
+  "summary": "Le 26 août 1346, près de Crécy-en-Ponthieu, l'armée d'[[cdx_edouard_iii|Édouard III]] inflige une lourde défaite à celle de [[cdx_philippe_vi|Philippe VI]], grâce notamment à l'efficacité de l'[[cdx_arc_long|arc long]] anglais.",
+  "body": "En juillet 1346, Édouard III débarque en Normandie et lance une [[cdx_chevauchee|chevauchée]] dévastatrice à travers le duché avant de remonter vers le nord, poursuivi par l'armée de [[cdx_philippe_vi|Philippe VI]]. Ne pouvant franchir la Somme sans risquer d'être pris de flanc, il choisit de livrer bataille en position défensive sur les hauteurs de Crécy-en-Ponthieu, en Picardie.\n\nLes archers anglais et gallois, postés sur les flancs et armés de l'[[cdx_arc_long|arc long]], déciment les arbalétriers génois engagés en tête de l'armée française, gênés par une pluie récente qui a détendu leurs cordes. Les charges successives et désordonnées de la cavalerie française, lancées à travers leurs propres arbalétriers en déroute, se brisent l'une après l'autre sous les flèches anglaises.\n\nParmi les morts figure le roi aveugle Jean de Luxembourg, roi de Bohême, qui s'est fait conduire au combat attaché à son cheval par ses chevaliers. Philippe VI, blessé, doit fuir le champ de bataille à la nuit tombée, laissant des milliers de morts derrière lui, dont une large part de la haute noblesse française.\n\nCette victoire ouvre la voie au siège de Calais, que les Anglais conservent ensuite pendant plus de deux siècles. Dix ans plus tard, le fils d'Édouard III, le [[cdx_prince_noir|Prince noir]], reproduira une tactique défensive similaire lors de la bataille de [[cdx_poitiers|Poitiers]], avec le même succès désastreux pour la chevalerie française.",
+  "entity": "evt_crecy",
+  "see_also": ["cdx_arc_long", "cdx_edouard_iii", "cdx_philippe_vi", "cdx_poitiers"],
+  "sources": ["Bataille de Crécy"]
+}
