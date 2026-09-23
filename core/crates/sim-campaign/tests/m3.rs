@@ -325,7 +325,7 @@ fn completed_building_effects_apply_to_the_province() {
     let mut state = france(&data, 110);
     let province = prov("prov_agenais");
     // bld_guild_hall requires bld_market (already present) and adds +5
-    // wealth / -5 unrest (both targeted at burghers, summed province-wide).
+    // wealth / -5 unrest, both targeted at burghers (F1: class targeting).
     let guild_hall = building("bld_guild_hall");
     let turns = data.buildings[&guild_hall].build_time_turns;
     let effects_before = state.province_effects(&data, &province);
@@ -344,17 +344,27 @@ fn completed_building_effects_apply_to_the_province() {
     let buildings = &state.province_state(&province).unwrap().buildings;
     assert!(buildings.contains(&guild_hall));
     let effects_after = state.province_effects(&data, &province);
-    assert!(
-        effects_after.wealth.flat >= effects_before.wealth.flat + 5.0,
-        "before={:?} after={:?}",
-        effects_before.wealth,
-        effects_after.wealth
+    let (before, after) = (
+        effects_before.classes.burghers,
+        effects_after.classes.burghers,
     );
     assert!(
-        effects_after.unrest.flat <= effects_before.unrest.flat - 5.0,
+        after.wealth.flat >= before.wealth.flat + 5.0,
         "before={:?} after={:?}",
-        effects_before.unrest,
-        effects_after.unrest
+        before.wealth,
+        after.wealth
+    );
+    assert!(
+        after.unrest.flat <= before.unrest.flat - 5.0,
+        "before={:?} after={:?}",
+        before.unrest,
+        after.unrest
+    );
+    // Untargeted totals do not move: the other classes are unaffected.
+    assert_eq!(effects_after.wealth, effects_before.wealth);
+    assert_eq!(
+        effects_after.classes.peasants,
+        effects_before.classes.peasants
     );
 }
 

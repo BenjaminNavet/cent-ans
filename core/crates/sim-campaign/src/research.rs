@@ -139,15 +139,15 @@ pub fn faction_tech_effects(
     let mut totals = EffectTotals::default();
     for tech in acquired(state, data, faction) {
         for effect in &tech.effects {
-            totals.add(effect.effect, effect.mode, effect.value);
+            totals.add_effect(effect);
         }
     }
     totals
 }
 
 /// The subset of [`faction_tech_effects`] applied to province income
-/// (`TaxIncome`, `TradeIncome`) and population (`Health`, `Growth`,
-/// `Unrest`), spec § 2.
+/// (`TaxIncome`, `TradeIncome`, F1 `Production`) and population (`Health`,
+/// `Growth`, `Unrest`, F1 `Wealth` and every class-targeted effect), spec § 2.
 pub fn faction_province_tech_effects(
     state: &CampaignState,
     data: &GameData,
@@ -160,6 +160,9 @@ pub fn faction_province_tech_effects(
         health: all.health,
         growth: all.growth,
         unrest: all.unrest,
+        wealth: all.wealth,
+        production: all.production,
+        classes: all.classes,
         ..EffectTotals::default()
     }
 }

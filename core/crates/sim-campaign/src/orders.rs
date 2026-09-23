@@ -565,7 +565,7 @@ impl CampaignState {
         let mut option = RecruitOption {
             unit_type: unit_type_id.clone(),
             name: unit_type.name.display.clone(),
-            cost: unit_type.cost.money,
+            cost: self.recruit_cost(data, faction, province_id, unit_type),
             upkeep: unit_type.upkeep,
             available: true,
             reason: None,
@@ -624,13 +624,35 @@ impl CampaignState {
         if class.count < u64::from(unit_type.soldiers) * 10 {
             return Some("classe sociale trop peu nombreuse".to_owned());
         }
-        if faction_state.treasury < i64::from(unit_type.cost.money) {
-            return Some(format!(
-                "trésor insuffisant ({} livres nécessaires)",
-                unit_type.cost.money
-            ));
+        let cost = self.recruit_cost(data, faction, province_id, unit_type);
+        if faction_state.treasury < i64::from(cost) {
+            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }
         None
+    }
+
+    /// Money cost of recruiting `unit_type` in `province` for `faction`
+    /// (F1 `RecruitCost`): the province's buildings and governor (stables:
+    /// cavalry −10 %) and the faction's technologies (francs-archers:
+    /// ranged −10 %), global or per unit family. Never below a quarter of
+    /// the base cost.
+    pub fn recruit_cost(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+        unit_type: &data_model::UnitType,
+    ) -> u32 {
+        let mut effects = self.province_effects(data, province);
+        effects.merge(&research::faction_tech_effects(self, data, faction));
+        let targeted = effects.unit_categories.get(unit_type.category).recruit_cost;
+        let flat = effects.recruit_cost.flat + targeted.flat;
+        let percent = (effects.recruit_cost.percent + targeted.percent).max(-75.0);
+        let base = f64::from(unit_type.cost.money);
+        ((base + flat) * (1.0 + percent / 100.0))
+            .round()
+            .max(base / 4.0)
+            .max(0.0) as u32
     }
 
     fn order_create_army(

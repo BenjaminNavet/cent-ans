@@ -178,6 +178,16 @@ pub fn garrison_upkeep(data: &GameData, units: &[Unit]) -> i64 {
     units_upkeep(data, units) * GARRISON_UPKEEP_PERCENT / 100
 }
 
+/// Garrison units a province keeps at no cost to the crown (F1: building
+/// and governor `Garrison` effects, "unités de garnison gratuites").
+pub fn free_garrison_slots(effects: &EffectTotals) -> usize {
+    effects.garrison.apply(0.0).max(0.0).round() as usize
+}
+
+/// Strength (per cent of `max_strength`) a garrison regains each season per
+/// point of `Garrison` effect, when the town is neither besieged nor occupied.
+pub const GARRISON_REINFORCE_PERCENT_PER_POINT: u32 = 5;
+
 impl CampaignState {
     /// Income the faction would collect this turn (controlled, unbesieged provinces).
     pub fn faction_income(&self, faction: &data_model::FactionId) -> i64 {
@@ -188,19 +198,40 @@ impl CampaignState {
             .sum()
     }
 
-    /// Upkeep of every army and garrison of the faction.
+    /// Upkeep of every army and garrison of the faction: garrisons keep
+    /// their free `Garrison` slots (F1), and the faction's `ArmyUpkeep`
+    /// technologies (global or per unit family, F1) scale the bill.
     pub fn faction_upkeep(&self, data: &GameData, faction: &data_model::FactionId) -> i64 {
+        let tech = crate::research::faction_tech_effects(self, data, faction);
+        let unit_cost = |unit: &Unit| -> i64 {
+            let mut percent = tech.army_upkeep.percent;
+            if let Some(unit_type) = data.unit_types.get(&unit.unit_type) {
+                percent += tech
+                    .unit_categories
+                    .get(unit_type.category)
+                    .army_upkeep
+                    .percent;
+            }
+            let raw = unit_upkeep(data, unit) as f64 * (1.0 + percent.max(-90.0) / 100.0);
+            raw.round() as i64
+        };
         let armies: i64 = self
             .armies
             .values()
             .filter(|a| &a.faction == faction)
-            .map(|a| units_upkeep(data, &a.units))
+            .flat_map(|a| a.units.iter())
+            .map(unit_cost)
             .sum();
         let garrisons: i64 = self
             .provinces
-            .values()
-            .filter(|p| &p.controller == faction)
-            .map(|p| garrison_upkeep(data, &p.garrison))
+            .iter()
+            .filter(|(_, p)| &p.controller == faction && !p.garrison.is_empty())
+            .map(|(id, p)| {
+                let free = free_garrison_slots(&self.province_effects(data, id));
+                let mut costs: Vec<i64> = p.garrison.iter().map(unit_cost).collect();
+                costs.sort_unstable_by(|a, b| b.cmp(a));
+                costs.iter().skip(free).sum::<i64>() * GARRISON_UPKEEP_PERCENT / 100
+            })
             .sum();
         armies + garrisons
     }
@@ -353,13 +384,35 @@ pub(crate) fn resolve_economy(
     }
 
     let player = state.player_faction.clone();
+    // F1: effects read by the recruitment delivery (recruits' experience)
+    // and by the garrison reinforcement, computed before the mutable pass.
+    let local_effects: BTreeMap<data_model::ProvinceId, EffectTotals> = state
+        .provinces
+        .iter()
+        .filter(|(_, p)| !p.recruit_queue.is_empty() || !p.garrison.is_empty())
+        .map(|(id, p)| {
+            let mut effects = state.province_effects(data, id);
+            effects.merge(&crate::research::faction_tech_effects(
+                state,
+                data,
+                &p.controller,
+            ));
+            (id.clone(), effects)
+        })
+        .collect();
     for (province_id, province) in state.provinces.iter_mut() {
+        let Some(effects) = local_effects.get(province_id) else {
+            continue;
+        };
+        reinforce_garrison(province, effects);
         let queue = std::mem::take(&mut province.recruit_queue);
         for unit_type_id in queue {
             let Some(unit_type) = data.unit_types.get(&unit_type_id) else {
                 continue;
             };
-            province.garrison.push(Unit::fresh(unit_type));
+            let mut unit = Unit::fresh(unit_type);
+            unit.experience = recruit_experience(effects, unit_type.category);
+            province.garrison.push(unit);
             if province.controller == player {
                 events.push(
                     GameEvent::new(
@@ -381,6 +434,56 @@ pub(crate) fn resolve_economy(
     }
 }
 
+/// Initial experience (0-10) of a recruit of `category` (F1): the flat
+/// `ArmyExperience` of the province's buildings (archery butts, armoury), of
+/// its governor and of the controller's technologies (standing companies).
+pub fn recruit_experience(effects: &EffectTotals, category: data_model::UnitCategory) -> u8 {
+    let targeted = effects.unit_categories.get(category).army_experience;
+    (effects.army_experience.flat + targeted.flat)
+        .round()
+        .clamp(0.0, 10.0) as u8
+}
+
+/// F1 `Garrison`: a town held by its owner and not besieged musters local
+/// levies that bring its garrison back towards full strength.
+fn reinforce_garrison(province: &mut ProvinceState, effects: &EffectTotals) {
+    let points = effects.garrison.apply(0.0).max(0.0).round() as u32;
+    if points == 0 || province.siege.is_some() || province.owner != province.controller {
+        return;
+    }
+    let percent = (points * GARRISON_REINFORCE_PERCENT_PER_POINT).min(50);
+    for unit in &mut province.garrison {
+        let gain = (unit.max_strength * percent).div_ceil(100);
+        unit.strength = (unit.strength + gain).min(unit.max_strength.max(unit.strength));
+    }
+}
+
+/// F1 `Supply`: `(recovery bonus, loss relief %)` of an army. In friendly
+/// territory the province's buildings (ports) and the general's flat
+/// `Supply` add to the seasonal recovery; outside it the general's `Supply`
+/// and `AttritionResistance` percents shrink the supply lost.
+fn supply_modifiers(
+    state: &CampaignState,
+    data: &GameData,
+    location: &data_model::ProvinceId,
+    friendly: bool,
+    general: Option<&data_model::CharacterId>,
+) -> (f64, f64) {
+    let general_fx = general
+        .map(|g| crate::skills::character_effects(state, data, g))
+        .unwrap_or_default();
+    if friendly {
+        let province_fx = state.province_effects(data, location);
+        let bonus = province_fx.supply.apply(0.0) + general_fx.supply.flat;
+        (bonus, 0.0)
+    } else {
+        let relief = general_fx.supply.percent
+            + general_fx.attrition_resistance.percent
+            + general_fx.attrition_resistance.flat;
+        (0.0, relief.clamp(-100.0, 90.0))
+    }
+}
+
 /// Phase 6: supply and attrition for field armies.
 pub(crate) fn resolve_attrition(
     state: &mut CampaignState,
@@ -390,21 +493,33 @@ pub(crate) fn resolve_attrition(
     let ids: Vec<ArmyId> = state.armies.keys().cloned().collect();
     let winter = state.season == Season::Winter;
     for army_id in ids {
-        let (faction, location) = {
+        let (faction, location, general) = {
             let army = &state.armies[&army_id];
-            (army.faction.clone(), army.location.clone())
+            (
+                army.faction.clone(),
+                army.location.clone(),
+                army.general.clone(),
+            )
         };
         let friendly = state.is_friendly_territory(&faction, &location);
+        let (recovery_bonus, loss_relief) =
+            supply_modifiers(state, data, &location, friendly, general.as_ref());
         let army = state.armies.get_mut(&army_id).expect("exists");
         if friendly {
-            army.supply = army.supply.saturating_add(SUPPLY_RECOVERY).min(100);
+            let recovery = (f64::from(SUPPLY_RECOVERY) + recovery_bonus)
+                .round()
+                .clamp(0.0, 100.0) as u8;
+            army.supply = army.supply.saturating_add(recovery).min(100);
             continue;
         }
-        let loss = if winter {
+        let base_loss = if winter {
             ATTRITION_SUPPLY_LOSS_WINTER
         } else {
             ATTRITION_SUPPLY_LOSS
         };
+        let loss = (f64::from(base_loss) * (1.0 - loss_relief / 100.0))
+            .round()
+            .clamp(0.0, 100.0) as u8;
         army.supply = army.supply.saturating_sub(loss);
         if army.supply == 0 {
             let mut lost = 0;
