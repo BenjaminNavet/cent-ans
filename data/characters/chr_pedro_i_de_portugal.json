@@ -1,0 +1,50 @@
+{
+  "id": "chr_pedro_i_de_portugal",
+  "name": {
+    "display": "Pierre de Portugal",
+    "local": "Pedro de Portugal",
+    "local_language": "portugais"
+  },
+  "epithet": "le Justicier",
+  "sex": "male",
+  "house": "Bourgogne-Portugal",
+  "faction": "fac_portugal",
+  "role": "heir",
+  "birth": {
+    "value": "1320-04-08",
+    "place": "Coimbra"
+  },
+  "death": {
+    "value": "1367-01-18",
+    "place": "Estremoz"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Portugal et de l'Algarve",
+      "from": {
+        "value": "1357-05-28"
+      },
+      "note": "Futur Pierre Ier."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 3
+  },
+  "traits": [
+    "trait_just",
+    "trait_vengeful"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_afonso_iv"
+  },
+  "starting_location": "prov_lisboa",
+  "status": "at_court",
+  "description": "Fils aîné survivant d'Alphonse IV, 17 ans en 1337 ; marié par procuration à Constance Manuel (1336). Son amour pour Inès de Castro, assassinée en 1355, le dressera contre son père. Futur Pierre Ier (1357-1367).",
+  "sources": [
+    "Pierre Ier de Portugal"
+  ]
+}
