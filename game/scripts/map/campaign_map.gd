@@ -55,6 +55,7 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -110,6 +111,9 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	flow = FlowController.new()  # F3
+	add_child(flow)
+	flow.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -217,6 +221,8 @@ func refresh_all() -> void:
 	_refresh_research()  # M6
 	if _tech_open:
 		_show_tech_panel()
+	if flow != null:  # F3
+		flow.refresh()
 
 
 func _city_available() -> bool:
@@ -721,6 +727,8 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 func _on_end_turn() -> void:
 	if sim == null or ui.is_dialog_open():
 		return
+	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
+		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
@@ -738,6 +746,8 @@ func _on_end_turn() -> void:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
+	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
+		flow.after_end_turn(events)
 	_offer_pending_battles()  # M7
 
 
