@@ -1,0 +1,11 @@
+{
+  "id": "cdx_henri_v",
+  "title": "Henri V d'Angleterre",
+  "category": "personnage",
+  "aliases": ["Henri V", "Henry V", "Henri d'Angleterre", "roi Henri"],
+  "era": { "from": "1386", "to": "1422" },
+  "summary": "Roi d'Angleterre de 1413 à 1422, Henri V de Lancastre rouvre la guerre, triomphe à [[cdx_azincourt|Azincourt]] en 1415, conquiert la Normandie et se fait reconnaître héritier de la couronne de France au [[cdx_traite_troyes|traité de Troyes]]. Il meurt à trente-cinq ans.",
+  "body": "Henri naît en 1386, petit-fils de [[cdx_jean_de_gand|Jean de Gand]], duc de Lancastre. Son père Henri Bolingbroke s'empare du trône en 1399 en déposant Richard II : les Lancastre sont donc une dynastie neuve, qui a besoin de prestige. Jeune prince, Henri combat les rebelles gallois et anglais ; à la bataille de Shrewsbury, en 1403, une flèche l'atteint au visage, et il ne doit la vie qu'à l'habileté d'un chirurgien.\n\nDevenu roi en 1413, il réprime les [[cdx_lollards|lollards]] et reprend les revendications de ses ancêtres sur la couronne de France, profitant de la guerre civile française. En 1415, il prend Harfleur puis remporte la victoire écrasante d'[[cdx_azincourt|Azincourt]], qui fait de lui un héros national.\n\nÀ partir de 1417, il entreprend la conquête méthodique de la Normandie, ville après ville, avec une puissante artillerie : [[cdx_rouen|Rouen]] tombe en janvier 1419 après un siège terrible. L'alliance de la Bourgogne, après le meurtre de [[cdx_jean_sans_peur|Jean sans Peur]], lui ouvre la voie du [[cdx_traite_troyes|traité de Troyes]] (1420) : il épouse Catherine, fille de [[cdx_charles_vi|Charles VI]], et devient régent et héritier du royaume de France.\n\nIl ne portera jamais la couronne française : atteint de dysenterie pendant le siège de Meaux, il meurt au château de Vincennes le 31 août 1422, sept semaines avant Charles VI. Son fils Henri VI, âgé de neuf mois, hérite des deux couronnes. Shakespeare a fait de lui, dans Henry V, le modèle du roi chevalier.",
+  "see_also": ["cdx_azincourt", "cdx_traite_troyes", "cdx_plantagenets", "cdx_rouen"],
+  "sources": ["Henri V (roi d'Angleterre)", "Siège de Rouen (1418-1419)"]
+}
