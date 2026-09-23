@@ -148,6 +148,27 @@ pub struct Unit {
     /// Attacked on the flank / rear during the current tick.
     #[serde(skip)]
     pub flanked: u8,
+    /// Leader's orders (F10b): temporary morale added by a war cry (also
+    /// added to `morale_cap`) and the seconds it still lasts.
+    #[serde(default)]
+    pub order_morale: f64,
+    #[serde(default)]
+    pub order_morale_timer: f64,
+    /// Pavises raised: multiplier of the missile casualties taken; the
+    /// regiment stands still until its next move order.
+    #[serde(default)]
+    pub pavise: Option<f64>,
+    /// Seconds since the regiment last took missile casualties.
+    #[serde(default = "never")]
+    pub missile_timer: f64,
+    /// Heavy horse fighting on foot (order or siege assault).
+    #[serde(default)]
+    pub dismounted: bool,
+}
+
+/// `missile_timer` of a regiment never shot at.
+fn never() -> f64 {
+    1.0e6
 }
 
 impl Unit {
@@ -199,6 +220,32 @@ impl Unit {
             blocked_by: None,
             tick_losses: 0.0,
             flanked: 0,
+            order_morale: 0.0,
+            order_morale_timer: 0.0,
+            pavise: None,
+            missile_timer: never(),
+            dismounted: false,
+        }
+    }
+
+    /// The riders leave their horses (irreversible): foot soldiers, no
+    /// charge, speed at most `speed_max`, `armor` points of armour added.
+    /// Shared by the "pied à terre" order and the siege assault.
+    pub fn dismount(&mut self, speed_max: u8, armor: u8) {
+        self.mounted = false;
+        self.dismounted = true;
+        if self.category == UnitCategory::Cavalry {
+            self.category = UnitCategory::Infantry;
+        }
+        self.stats.speed = self.stats.speed.min(speed_max);
+        self.stats.armor = self.stats.armor.saturating_add(armor).min(120);
+        self.stats.charge = None;
+        self.charge_timer = 0.0;
+        if self.formation == Formation::Wedge {
+            self.formation = Formation::Line;
+        }
+        if self.state == UnitState::Charging {
+            self.state = UnitState::Marching;
         }
     }
 
