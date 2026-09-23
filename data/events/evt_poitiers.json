@@ -35,6 +35,11 @@
       "text": "Confier le gouvernement au dauphin",
       "effects": [
         {
+          "type": "capture_character",
+          "id": "ruler",
+          "captor": "fac_england"
+        },
+        {
           "type": "prestige",
           "amount": -25
         },
@@ -56,6 +61,11 @@
       "text": "Réunir les États généraux pour la rançon",
       "effects": [
         {
+          "type": "capture_character",
+          "id": "ruler",
+          "captor": "fac_england"
+        },
+        {
           "type": "prestige",
           "amount": -25
         },
@@ -73,6 +83,11 @@
           "character": "chr_edward_of_woodstock",
           "faction": "fac_england",
           "amount": 25
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_rancon_du_roi",
+          "delay": 4
         }
       ],
       "ai_weight": 1

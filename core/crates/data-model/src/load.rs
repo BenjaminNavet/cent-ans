@@ -905,6 +905,32 @@ mod tests {
     }
 
     #[test]
+    fn schedule_event_is_validated() {
+        let fixture = Fixture::new("event-schedule");
+        let scheduling = |delay: u32, target: &str| {
+            EVENT.replace(
+                r#"{"type":"treasury","amount":100}"#,
+                &format!(r#"{{"type":"schedule_event","event":"{target}","delay":{delay}}}"#),
+            )
+        };
+        write_event(&fixture, &scheduling(0, "evt_other"));
+        assert!(matches!(
+            fixture.load(),
+            Err(DataError::InvalidEvent { .. })
+        ));
+        write_event(&fixture, &scheduling(2, "evt_test"));
+        assert!(matches!(
+            fixture.load(),
+            Err(DataError::InvalidEvent { .. })
+        ));
+        write_event(&fixture, &scheduling(2, "evt_other"));
+        let (_, warnings) = fixture.load().unwrap();
+        assert!(warnings
+            .iter()
+            .any(|w| w.field == "effects.event" && w.message.contains("evt_other")));
+    }
+
+    #[test]
     fn event_unknown_effect_field_is_rejected() {
         let fixture = Fixture::new("event-field");
         write_event(

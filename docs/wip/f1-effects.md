@@ -63,4 +63,4 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 - `CharacterState::captor` (serde par défaut) : faction qui détient un captif (bataille, chronique).
 
 ## Prochaine étape
-Point 5 (capture, rançon, effets différés, Charles VI).
+Point 5 en cours : modèle, schéma, validation, chronique et données faits ; tests `f1_effects.rs` à écrire.
