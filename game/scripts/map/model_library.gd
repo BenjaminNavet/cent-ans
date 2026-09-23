@@ -12,10 +12,10 @@ extends RefCounted
 
 const MODELS_DIR := "res://assets/models/"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
-## Échelle monde des modèles de ville (≈ 2,5 unités Blender → ≈ 10 px de carte).
-const CITY_SCALE := 4.0
+## Échelle monde des modèles de ville (≈ 2,5 unités Blender → ≈ 16 px de carte).
+const CITY_SCALE := 6.5
 ## Échelle du porte-étendard dans l'espace local du marqueur d'armée (hampe placeholder ≈ 7).
-const ARMY_SCALE := 2.3
+const ARMY_SCALE := 3.2
 const MODEL_NODE := "M10Model"
 
 static var _scenes: Dictionary = {}  # nom → PackedScene ou null
