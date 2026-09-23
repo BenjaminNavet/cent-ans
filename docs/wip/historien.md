@@ -6,10 +6,10 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md`.
 |---|---|---|---|
 | H1 Audit historique | **fusionné** (fcbcb01) | — | données seulement ; rapport `docs/histoire/audit-2026-09-23.md` |
 | H2 Codex et bulles (infra + amorce) | **fusionné** (9ffd82f) | — | nouveaux fichiers game/ ; hooks minimaux |
-| H3+H4 Table et médecine (core + données) | vague 1 | worktree agent | Rust + data + pont ; pas d'UI |
-| H7 Événements historiques manquants (≈ 22, d’après l’audit) | en cours | worktree agent | data/events, data/characters |
-| UI Table + onglet Médecine | vague 2 | — | |
-| H8 Rédaction codex (~120 fiches) + liens | en cours | worktree agent | hors cuisine/médecine/monnaie ; corrige les onglets masqués |
+| H3+H4 Table et médecine (core + données) | **fusionné** (453f2e6) | — | API : `docs/design/h3-h4-api.md` ; reste UI, libellés d'effets, genres table/medicine dans season_report, herbier |
+| H7 Événements historiques manquants (≈ 22, d’après l’audit) | relancé après quota (finalisation) | worktree agent | data/events, data/characters |
+| H9 UI Table + Médecine + herbier + rapport de saison | en cours | worktree agent | hook minimal dans province_panel.gd |
+| H8 Rédaction codex (~120 fiches) + liens | relancé après quota | worktree agent | hors cuisine/médecine/monnaie ; corrige les onglets masqués |
 | H5 Monnaie + H6 Chevalerie et rançons (core + données) | vague 2 | — | |
 | UI monnaie, rançons, ordres ; événements éducatifs ; relecture | vague 3 | — | |
 
