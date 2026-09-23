@@ -233,14 +233,17 @@ func _make_banner(unit: Dictionary) -> void:
 	pole.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	node.add_child(pole)
 	var flag := MeshInstance3D.new()
-	flag.mesh = BattleMeshes.flag(2.6, 1.7)
 	var flag_mat := ShaderMaterial.new()
 	flag_mat.shader = BANNER_SHADER
 	flag_mat.set_shader_parameter("livery", side_colors[side])
-	var arms := PortraitLoader.heraldry_texture(str((setup[side] as Dictionary).get("faction", "")))
-	flag_mat.set_shader_parameter("heraldry", arms)
-	flag_mat.set_shader_parameter("has_heraldry", arms != null)
 	flag_mat.set_shader_parameter("phase", float(id) * 1.7)
+	var cloth := _banner_cloth(unit, str((setup[side] as Dictionary).get("faction", "")))
+	var flag_size: Vector2 = cloth["size"]
+	flag.mesh = BattleMeshes.flag(flag_size.x, flag_size.y)
+	flag_mat.set_shader_parameter("heraldry", cloth["texture"])
+	flag_mat.set_shader_parameter("has_heraldry", cloth["texture"] != null)
+	flag_mat.set_shader_parameter("full_texture", cloth["full"])
+	flag_mat.set_shader_parameter("flag_length", flag_size.x)
 	flag.material_override = flag_mat
 	flag.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
@@ -253,7 +256,7 @@ func _make_banner(unit: Dictionary) -> void:
 	label.pixel_size = 0.02
 	label.outline_size = 10
 	label.modulate = Color(1, 0.97, 0.88)
-	label.position = Vector3(1.3, BANNER_HEIGHT - 0.9, 0.05)
+	label.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - minf(flag_size.y, 1.7) * 0.5, 0.05)
 	node.add_child(label)
 	var count := Label3D.new()
 	count.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -261,7 +264,7 @@ func _make_banner(unit: Dictionary) -> void:
 	count.font_size = 40
 	count.pixel_size = 0.02
 	count.outline_size = 8
-	count.position = Vector3(1.3, BANNER_HEIGHT - 2.3, 0)
+	count.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - flag_size.y - 0.6, 0)
 	node.add_child(count)
 	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count, "routing": false}
 	var ring := MeshInstance3D.new()
@@ -274,6 +277,30 @@ func _make_banner(unit: Dictionary) -> void:
 	ring.visible = false
 	add_child(ring)
 	_rings[id] = ring
+
+
+## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
+## portrait 1:2) pour la noblesse, fanion (4:1) pour les autres, oriflamme / Saint-Georges pour le
+## général de France / d'Angleterre ; à défaut, centre de l'écu de la faction (repli historique).
+func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
+	var dir := "res://assets/heraldry/banners/"
+	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
+	var candidates: Array = []
+	if bool(unit.get("is_general", false)):
+		if faction == "fac_france":
+			candidates.append([dir + "oriflamme.png", Vector2(1.3, 2.6)])
+		elif faction == "fac_england":
+			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	if noble or str(unit.get("render", "")) == "siege":
+		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
+	else:
+		candidates.append([dir + "%s_pennon.png" % faction, Vector2(3.0, 0.75)])
+		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
+	for candidate in candidates:
+		var texture := PortraitLoader.load_texture(candidate[0])
+		if texture != null:
+			return {"texture": texture, "size": candidate[1], "full": true}
+	return {"texture": PortraitLoader.heraldry_texture(faction), "size": Vector2(2.6, 1.7), "full": false}
 
 
 func _frame_camera() -> void:
@@ -699,6 +726,8 @@ func _stage_screenshot() -> void:
 	var contact_time := -1.0
 	for _i in 3000:
 		battle.call("tick", 0.1)
+		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
+		soldiers.update(battle, battle.call("get_units"), 0.1, [])
 		if contact_time < 0.0:
 			for unit in battle.call("get_units"):
 				if str(unit["state"]) == "melee":
@@ -707,6 +736,7 @@ func _stage_screenshot() -> void:
 		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
 			break
 	paused = true
+	print("BattleScene: capture at %.0f s, %d corpses" % [float(battle.call("get_elapsed")), soldiers.corpse_count])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0
@@ -753,6 +783,7 @@ func _stage_siege_screenshot() -> void:
 	var climb_time := -1.0
 	for _i in 2400:
 		battle.call("tick", 0.1)
+		soldiers.update(battle, battle.call("get_units"), 0.1, [])
 		var elapsed := float(battle.call("get_elapsed"))
 		if climb_time < 0.0:
 			for unit in battle.call("get_units"):

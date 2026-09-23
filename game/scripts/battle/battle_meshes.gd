@@ -281,10 +281,10 @@ static func _legs(f: Fig, armored: bool, hip_y: float = 0.93) -> void:
 		var x: float = 0.1 * side
 		f.set_part(P_LEG_L if side > 0.0 else P_LEG_R, Vector2(hip_y, 0.0))
 		f.set_style(MAIL if armored else HOSE, C_EXACT if armored else C_CLOTH)
-		f.cyl(Vector3(x, hip_y, 0.0), Vector3(x * 1.05, 0.5, 0.01), 0.085, 0.062, 6, false)
+		f.cyl(Vector3(x, hip_y, 0.0), Vector3(x * 1.05, 0.5, 0.01), 0.095, 0.07, 6, false)
 		if armored:
 			f.set_style(STEEL, C_METAL)
-		f.cyl(Vector3(x * 1.05, 0.5, 0.01), Vector3(x * 1.08, 0.09, 0.0), 0.062, 0.05, 6, false)
+		f.cyl(Vector3(x * 1.05, 0.5, 0.01), Vector3(x * 1.08, 0.09, 0.0), 0.07, 0.052, 6, false)
 		f.set_style(LEATHER, C_EXACT)
 		f.box(Vector3(x * 1.08, 0.045, 0.045), Vector3(0.1, 0.09, 0.26))
 
@@ -293,10 +293,12 @@ static func _legs(f: Fig, armored: bool, hip_y: float = 0.93) -> void:
 static func _torso(f: Fig, under: Color, under_code: int, surcoat: bool, skirt_to: float = 0.55) -> void:
 	f.set_part(P_BODY)
 	f.set_style(under, under_code)
-	f.cyl(Vector3(0, 0.9, 0), Vector3(0, 1.45, 0), 0.17, 0.2, 8, true, 0.72)
+	f.cyl(Vector3(0, 0.9, 0), Vector3(0, 1.45, 0), 0.17, 0.215, 8, true, 0.7)
+	for side in [-1.0, 1.0]:
+		f.ellipsoid(Vector3(0.2 * side, 1.4, 0.0), Vector3(0.085, 0.07, 0.085), 3, 6)
 	if surcoat:
 		f.set_style(Color.WHITE, C_LIVERY)
-		f.cyl(Vector3(0, 0.95, 0), Vector3(0, 1.43, 0), 0.185, 0.215, 8, false, 0.74)
+		f.cyl(Vector3(0, 0.95, 0), Vector3(0, 1.4, 0), 0.185, 0.22, 8, false, 0.72)
 	f.set_part(P_CLOTH)
 	f.set_style(Color.WHITE if surcoat else under, C_LIVERY if surcoat else under_code)
 	f.cyl(Vector3(0, 0.97, 0), Vector3(0, skirt_to, 0), 0.19, 0.25, 8, false, 0.8)
@@ -317,8 +319,8 @@ static func _arms(f: Fig, sleeve: Color, sleeve_code: int, gauntlet: Color, shou
 		var shoulder := Vector3(0.23 * side, shoulder_y, 0.0)
 		var elbow := Vector3(0.26 * side, shoulder_y - 0.3, -0.02)
 		var hand := Vector3(0.25 * side, shoulder_y - 0.5, 0.12)
-		f.cyl(shoulder, elbow, 0.062, 0.052, 5, false)
-		f.cyl(elbow, hand, 0.052, 0.043, 5, false)
+		f.cyl(shoulder, elbow, 0.068, 0.056, 6, false)
+		f.cyl(elbow, hand, 0.056, 0.046, 6, false)
 		f.set_style(gauntlet, C_METAL if gauntlet == STEEL else C_EXACT)
 		f.ellipsoid(hand + Vector3(0, -0.02, 0.01), Vector3(0.045, 0.05, 0.05), 2, 5)
 
@@ -330,7 +332,7 @@ static func _helmet(f: Fig, style: String) -> void:
 		"bassinet":
 			f.set_style(STEEL, C_METAL)
 			f.cyl(Vector3(0, 1.62, 0.0), Vector3(0, 1.72, -0.01), 0.112, 0.105, 8, false)
-			f.cyl(Vector3(0, 1.72, -0.01), Vector3(0, 1.88, -0.05), 0.105, 0.0, 8, false)
+			f.cyl(Vector3(0, 1.72, -0.01), Vector3(0, 1.82, -0.04), 0.105, 0.0, 8, false)
 			f.set_style(MAIL, C_METAL)
 			f.cyl(Vector3(0, 1.62, -0.01), Vector3(0, 1.43, 0.0), 0.115, 0.17, 8, false)
 		"kettle":
@@ -564,7 +566,7 @@ static func _cavalry(f: Fig, variant: int) -> void:
 				prev = p
 		_:  # Chevaliers : caparaçon, heaume, surcot, lance, écu.
 			_horse(f, HORSE_COATS[1], true)
-			_rider(f, MAIL, C_METAL, true, "greathelm")
+			_rider(f, MAIL, C_METAL, true, "bassinet")
 			f.set_part(P_ARM_L, Vector2(1.4 + dy, -0.05))
 			_heater(f, Vector3(0.36, 1.12 + dy, 0.1), 0.44, 0.56, 0.35)
 			_lance(f, dy)

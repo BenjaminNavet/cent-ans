@@ -39,7 +39,7 @@ uniform float highlight = 0.0;            // régiment sélectionné : léger é
 varying vec3 v_color;
 varying float v_code;
 varying vec3 v_var;
-varying float v_metal;
+varying float v_height;
 
 float hash1(float n) {
 	return fract(sin(n * 12.9898 + 4.1414) * 43758.5453);
@@ -326,6 +326,8 @@ void vertex() {
 
 	VERTEX = v;
 	NORMAL = normalize(n);
+	// Hauteur relative (occlusion d'ambiance approchée : bas des jambes et dessous plus sombres).
+	v_height = corpse ? 1.0 : clamp(v.y / (mounted ? 1.9 : 1.1), 0.0, 1.0);
 	v_color = COLOR.rgb;
 	v_code = COLOR.a * 5.0;
 	// Variation par soldat : teinte des vêtements, du teint, des lots de teinture.
@@ -359,7 +361,8 @@ void fragment() {
 	} else if (code == 4) {
 		albedo = v_color * mix(0.92, 1.06, v_var.z);
 	}
-	ALBEDO = albedo * (1.0 + highlight * 0.25);
+	float ao = mix(0.55, 1.0, smoothstep(0.0, 1.0, v_height));
+	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = 0.4;
