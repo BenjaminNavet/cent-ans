@@ -5,8 +5,8 @@
 | M0 | Fondations : outils, dépôt, squelette Rust+Godot, schémas, docs | terminé (2026-09-23) |
 | M1 | Carte de campagne réelle (provinces, terrain 3D, caméra, villes) | terminé (2026-09-23) |
 | M2 | Boucle de campagne minimale jouable (tours, armées, auto-résolution, sauvegarde, UI) | terminé (2026-09-23) |
-| M3 | Villes et économie (classes, bâtiments, jauges, ressources) | en cours |
-| M4 | Personnages et dynasties | à faire |
+| M3 | Villes et économie (classes, bâtiments, jauges, ressources) | terminé (2026-09-23) |
+| M4 | Personnages et dynasties | en cours |
 | M5 | Diplomatie et religion | à faire |
 | M6 | Technologies | à faire |
 | M7 | Batailles temps réel 3D | à faire |
