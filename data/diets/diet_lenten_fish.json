@@ -1,0 +1,32 @@
+{
+  "id": "diet_lenten_fish",
+  "name": {
+    "display": "Hareng saur et poisson de carême"
+  },
+  "description": "Plus de cent cinquante [[cdx_jours_maigres|jours maigres]] par an : le [[cdx_hareng|hareng]] salé ou saur des pêcheries de la [[cdx_hanse|Hanse]] et de la Manche remplit les tonneaux. En 1429, la [[cdx_bataille_des_harengs|bataille des Harengs]] se livre autour d'un convoi de poisson de [[cdx_careme|Carême]] destiné aux Anglais devant Orléans.",
+  "requirements": {
+    "resources": [
+      "res_fish",
+      "res_salt"
+    ]
+  },
+  "cost_per_thousand": 0.15,
+  "effects": [
+    {
+      "effect": "health",
+      "value": 2
+    },
+    {
+      "effect": "goods_satisfaction",
+      "class": "clergy",
+      "value": 4
+    }
+  ],
+  "lent_rule": "fish",
+  "sources": [
+    "Hareng saur",
+    "Ligue hanséatique",
+    "Bataille des Harengs",
+    "Carême"
+  ]
+}

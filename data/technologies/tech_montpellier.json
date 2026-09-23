@@ -1,0 +1,28 @@
+{
+  "id": "tech_montpellier",
+  "name": {
+    "display": "Faculté de médecine de Montpellier"
+  },
+  "branch": "medicine",
+  "tier": 3,
+  "cost": 320,
+  "prerequisites": [
+    "tech_regimen_sanitatis"
+  ],
+  "historical_year": {
+    "value": "1220",
+    "note": "Statuts donnés par le cardinal Conrad d'Urach le 17 août 1220 ; la bulle Quia sapientia de Nicolas IV (1289) fonde l'université."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "research_points",
+      "value": 2
+    }
+  ],
+  "description": "La plus ancienne faculté de médecine encore en activité : on y lit Hippocrate, Galien et Avicenne, et l'on y forme les médecins des princes.",
+  "sources": [
+    "Faculté de médecine de Montpellier",
+    "Université de Montpellier"
+  ]
+}

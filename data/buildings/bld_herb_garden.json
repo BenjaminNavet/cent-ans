@@ -1,0 +1,29 @@
+{
+  "id": "bld_herb_garden",
+  "name": {
+    "display": "Jardin des simples"
+  },
+  "category": "sanitary",
+  "tier": 1,
+  "cost": {
+    "money": 400
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "required_technology": "tech_herb_garden",
+  "effects": [
+    {
+      "effect": "health",
+      "value": 3
+    },
+    {
+      "effect": "research_points",
+      "value": 0.5
+    }
+  ],
+  "description": "Carrés de plantes médicinales entretenus par un moine infirmier : remèdes pour la province et savoir pour les médecins.",
+  "sources": [
+    "Jardin médiéval",
+    "Capitulaire De Villis"
+  ]
+}
