@@ -2,7 +2,8 @@ class_name PreBattleDialog
 extends PanelContainer
 
 ## Dialogue d'avant-bataille (fin de tour, spec M7 § 4) : forces en présence, terrain, météo
-## prévue, « Livrer bataille » / « Résolution automatique ». La météo est lue sur un
+## prévue, « Livrer bataille » / « Résolution automatique ». Pour un assaut (M8 § 2) :
+## « Assaut en vue », état des murailles et « Livrer l'assaut ». La météo est lue sur un
 ## `BattleSim` construit avec la même graine que la bataille qui sera livrée.
 
 signal fight_requested(index: int, seed: int)
@@ -70,8 +71,15 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	battle = p_battle
 	var index := int(battle.get("index", 0))
 	var setup: Dictionary = sim.call("get_battle_setup", index)
-	title_label.text = "Bataille en vue : %s" % str(battle.get("province_name", ""))
+	var siege := bool(battle.get("siege", false))
+	title_label.text = ("Assaut en vue : %s" if siege else "Bataille en vue : %s") % str(battle.get("province_name", ""))
+	fight_button.text = "Livrer l'assaut" if siege else "Livrer bataille"
 	var lines: Array[String] = []
+	if siege:
+		var breach := int(battle.get("breach", 0))
+		lines.append("Murailles : fortifications de niveau %d, brèche %d %%%s." % [
+			int(battle.get("fortification", 0)), breach,
+			" (déjà ouverte)" if breach >= 50 else " — échelles, tours de siège et bélier"])
 	var player_side := str(battle.get("player_side", ""))
 	for side in ["attacker", "defender"]:
 		var side_setup: Dictionary = setup.get(side, {})
@@ -80,8 +88,11 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		if general is Dictionary:
 			general_text = ", menée par %s" % str(general.get("name", ""))
 		var you := " (vous)" if side == player_side else ""
-		lines.append("%s%s : %d hommes en %d régiments%s." % [
-			str(battle.get("%s_name" % side, side)), you, int(battle.get("%s_strength" % side, 0)),
+		var role := ""
+		if siege:
+			role = " (assiégeants)" if side == "attacker" else " (garnison)"
+		lines.append("%s%s%s : %d hommes en %d régiments%s." % [
+			str(battle.get("%s_name" % side, side)), role, you, int(battle.get("%s_strength" % side, 0)),
 			(side_setup.get("units", []) as Array).size(), general_text,
 		])
 		lines.append("    " + _composition(side_setup.get("units", [])))

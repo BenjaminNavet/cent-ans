@@ -18,8 +18,11 @@ extends SceneTree
 ##     panneau des technologies (un nœud par technologie), ordre `research` sur la technologie
 ##     disponible la moins chère, `get_research` non vide, refus d'une technologie connue,
 ##     20 fins de tour → au moins une technologie acquise et un événement `technology_researched`.
-##  8. batailles (M7) : BattleSim headless (2 000 ticks, fin, resolve_battle), puis dialogue
+##  8. batailles (M7) : BattleSim headless (≤ 12 000 ticks, fin, resolve_battle), puis dialogue
 ##     d'avant-bataille → battle.tscn (60 images) → écran de fin → retour à la carte.
+##  9. bataille de siège (M8 § 2) : assaut français de la Guyenne (`debug_stage_siege`),
+##     murailles (`get_siege`), défenseurs sur le rempart, IA des deux camps jusqu'à la fin,
+##     `resolve_battle` ; puis battle.tscn sur un siège (murailles maillées, 40 images).
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -52,6 +55,7 @@ func _init() -> void:
 	await _run_technologies()
 	await _run_diplomacy()
 	await _run_battle()
+	await _run_siege_battle()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -578,7 +582,7 @@ func _run_diplomacy() -> void:
 		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
 			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
 ## M7 (docs/design/m7-battles.md § 4) : bataille réelle France–Angleterre mise en scène par
-## `debug_stage_battle`, 2 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
+## `debug_stage_battle`, ≤ 12 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
 ## `resolve_battle` accepté ; puis la boucle complète par la carte : dialogue d'avant-bataille,
 ## « Livrer bataille », scène `battle.tscn` 60 images, fin de bataille, « Retour à la campagne ».
 func _run_battle() -> void:
@@ -610,12 +614,12 @@ func _run_battle() -> void:
 	var refused: Dictionary = battle.call("issue_command", {"type": "halt", "units": [units.size() - 1]})
 	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
 	var ticks := 0
-	for _i in 2000:
+	for _i in 12000:
 		battle.call("tick", 0.1)
 		ticks += 1
 		if battle.call("is_finished"):
 			break
-	if not _check(battle.call("is_finished"), "battle: not finished after 2000 ticks"):
+	if not _check(battle.call("is_finished"), "battle: not finished after 12000 ticks"):
 		return
 	var outcome: Dictionary = battle.call("get_outcome")
 	var events: Array = battle.call("get_events")
@@ -687,4 +691,80 @@ func _run_battle() -> void:
 	if _failures == 0:
 		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
 	map.queue_free()
+	await process_frame
+
+
+## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis
+## dans la scène 3D.
+func _run_siege_battle() -> void:
+	if not ClassDB.instantiate("CampaignSim").has_method("debug_stage_siege"):
+		_fail("siege battle: CampaignSim.debug_stage_siege not registered (run core/build.sh)")
+		return
+	var data_dir := _project_root().path_join("data")
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", data_dir, "fac_france", 1337), "siege battle: new_campaign failed"):
+		return
+	var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
+	var index: int = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+	var pending: Array = sim.call("get_pending_battles")
+	if not _check(index == 0 and pending.size() == 1 and bool(pending[0].get("siege", false)), "siege battle: debug_stage_siege should record 1 pending siege battle"):
+		return
+	_check(int(pending[0].get("defender_strength", 0)) > 0, "siege battle: the garrison should have soldiers")
+	var setup: Dictionary = sim.call("get_battle_setup", index)
+	_check(setup.has("siege"), "siege battle: setup without siege parameters")
+	var battle: Object = ClassDB.instantiate("BattleSim")
+	if not _check(battle.call("setup", setup, int(pending[0]["seed"])), "siege battle: BattleSim.setup refused the siege setup"):
+		return
+	battle.call("set_ai", "attacker", true)
+	var siege: Dictionary = battle.call("get_siege")
+	_check((siege.get("pieces", []) as Array).size() >= 10, "siege battle: wall pieces missing")
+	_check((battle.call("get_terrain") as Dictionary).has("siege"), "siege battle: get_terrain should carry the walls")
+	var on_wall := 0
+	for unit in battle.call("get_units"):
+		if bool(unit.get("on_wall", false)):
+			on_wall += 1
+	_check(on_wall > 0, "siege battle: no defender on the walls")
+	var ticks := 0
+	for _i in 36000:
+		battle.call("tick", 0.1)
+		ticks += 1
+		if battle.call("is_finished"):
+			break
+	if not _check(battle.call("is_finished"), "siege battle: not finished after 36000 ticks"):
+		return
+	var outcome: Dictionary = battle.call("get_outcome")
+	var integrity := float((battle.call("get_siege") as Dictionary).get("integrity", 1.0))
+	var result: Dictionary = sim.call("resolve_battle", index, outcome)
+	_check(result.get("ok", false), "siege battle: resolve_battle refused: %s" % result.get("error", "?"))
+	_check((sim.call("get_pending_battles") as Array).is_empty(), "siege battle: pending battle should be gone")
+	print("smoke siege battle: %d ticks, winner %s, losses %d / %d, walls %d %%" % [ticks, outcome["winner"], int(outcome["attacker"]["total_losses"]), int(outcome["defender"]["total_losses"]), int(integrity * 100.0)])
+
+	# La scène 3D sur un second assaut.
+	var sim2: Object = ClassDB.instantiate("CampaignSim")
+	sim2.call("new_campaign", data_dir, "fac_france", 1338)
+	var armies2: Array = BattleScene.main_armies(sim2, "fac_france", "fac_england")
+	var index2: int = sim2.call("debug_stage_siege", armies2[0], "prov_guyenne")
+	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
+	scene.configure(sim2, index2, 7)
+	root.add_child(scene)
+	for _i in 40:
+		await process_frame
+	if not _check(scene.siege_view != null and scene.siege_view.get_child_count() > 10, "siege scene: walls not built"):
+		scene.queue_free()
+		return
+	_check(scene.hud.siege_panel.visible, "siege scene: siege status should be shown")
+	scene.battle.call("set_ai", scene.player_side, true)
+	for _i in 36000:
+		scene.battle.call("tick", 0.1)
+		if scene.battle.call("is_finished"):
+			break
+	for _i in 3:
+		await process_frame
+	_check(scene.finished_shown, "siege scene: end screen should be visible")
+	scene._on_return()
+	await process_frame
+	_check((sim2.call("get_pending_battles") as Array).is_empty(), "siege scene: pending siege should be resolved")
+	if _failures == 0:
+		print("smoke OK: siege battle (headless %d ticks, scene with %d wall nodes, resolved)" % [ticks, scene.siege_view.get_child_count()])
+	scene.queue_free()
 	await process_frame

@@ -63,6 +63,9 @@ func _on_assault() -> void:
 	if result.get("ok", false):
 		var pending: Array = map.sim.call("get_pending_events")
 		map.ui.show_toast(str(pending[-1].get("text_fr", "L'assaut est donné.")) if not pending.is_empty() else "L'assaut est donné.")
+		# M8 § 2 : avec les batailles interactives, l'assaut attend en bataille de siège.
+		if map.has_method("_offer_pending_battles"):
+			map._offer_pending_battles()
 	else:
 		map.ui.show_toast(str(result.get("error", "Assaut impossible")), true)
 	map.refresh_all()
