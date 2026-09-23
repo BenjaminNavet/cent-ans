@@ -11,7 +11,7 @@ Plan : `docs/design/v2-finalisation.md`.
 | F5 Batailles | prêt (ui-tw fusionné 1177714) | | lancer dès qu’un agent de la vague 2 se libère ; marge 216 px de leader_orders_bar |
 | F6 Rendu carte | **transféré** | session parallèle « visual » | refonte visuelle semi-réaliste (shaders, terrain, marqueurs, modèles, battle_meshes/terrain) : ne pas toucher ces fichiers |
 | F7 Contenu | factions faites (3a49557) ; F7b 30 événements lancé (vague 2) | main / worktree | 13 factions, 18 personnages, 6 listes de noms, meubles héraldiques |
-| F8 Tutoriel / encyclopédie | lancé (vague 2) | worktree agent | + docs/manuel.md |
+| F8 Tutoriel / encyclopédie | **fusionné** (touche L ; K = codex d'une autre session) | | manuel à écrire en F9 |
 | F9 Recette | à faire (vague 3) | | |
 
 Prochaine étape : attendre les rapports de la vague 1, fusionner dans main, tests, puis vague 2.
@@ -31,3 +31,5 @@ Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas d
 
 ## Portée ajoutée à F5 (demande ui-tw, audit UI § 3.2)
 HUD de bataille (`battle_hud.gd`) : cartes d'unités moitié moins larges (icône de classe, effectif, barres fines moral/fatigue/munitions, plus de ligne « Formation »), noms jamais coupés au milieu d'un mot ; cartes groupées par « bataille » (avant-garde / corps / arrière-garde) avec Ctrl+1..9 ; plus de ligne d'aide permanente (F1) ; vitesses en icônes (pause, ×1, ×2, ×3) en bas à droite ; minicarte ; `leader_orders_bar` reste au-dessus des cartes (marge 216 px à ajuster par une constante).
+
+- Autre flux découvert : lots H (session « historien » ? : régimes et médecine H3/H4, codex historique H2/H8 dans `data/codex`, touche K). L'encyclopédie F8 (données de jeu) et le codex (récit historique) coexistent.
