@@ -15,7 +15,7 @@ budget_app = typer.Typer(
 models_app = typer.Typer(help="Modèles d'images OpenRouter.", no_args_is_help=True)
 blender_app = typer.Typer(help="Scripts Blender.", no_args_is_help=True)
 geo_app = typer.Typer(
-    help="Carte de campagne : terrain depuis ETOPO / Natural Earth.",
+    help="Carte de campagne : terrain depuis ETOPO / Natural Earth, provinces.",
     no_args_is_help=True,
 )
 app.add_typer(budget_app, name="budget")
@@ -100,26 +100,64 @@ def geo_build(
         False, "--force", help="Retélécharge les données brutes"
     ),
 ) -> None:
-    """Construit data/map/ (heightmap, masque, rivières, côte) et l'aperçu docs/img."""
+    """Construit data/map/ (terrain puis provinces) et les aperçus docs/img."""
     from cent_ans_tools.geo import build as geo_builder
 
     result = geo_builder.build(force=force)
-    table = Table(title="Sorties de la carte")
+    _print_sizes(
+        "Sorties du terrain",
+        [
+            result.map_json,
+            result.heightmap,
+            result.land_mask,
+            result.rivers,
+            result.coastline,
+            result.preview,
+        ],
+    )
+    _report_provinces(result.provinces)
+
+
+@geo_app.command("provinces")
+def geo_provinces() -> None:
+    """Génère provinces.geojson, province_ids.png et docs/img/provinces-preview.png."""
+    from cent_ans_tools.geo import provinces as geo_provinces_step
+
+    _report_provinces(geo_provinces_step.build())
+
+
+def _print_sizes(title: str, paths: list) -> None:
+    from cent_ans_tools.geo import build as geo_builder
+
+    table = Table(title=title)
     table.add_column("Fichier")
     table.add_column("Taille", justify="right")
-    for path in (
-        result.map_json,
-        result.heightmap,
-        result.land_mask,
-        result.rivers,
-        result.coastline,
-        result.preview,
-    ):
+    for path in paths:
         table.add_row(
             str(path.relative_to(geo_builder.REPO_DIR)),
             f"{path.stat().st_size / 1e6:.1f} Mo",
         )
     console.print(table)
+
+
+def _report_provinces(result) -> None:  # noqa: ANN001
+    _print_sizes(
+        "Sorties des provinces", [result.geojson, result.id_raster, result.preview]
+    )
+    counts = list(result.neighbour_counts.values())
+    console.print(
+        f"{len(counts)} provinces en {result.seconds:.1f} s ; voisins terrestres : "
+        f"min {min(counts)}, moyenne {sum(counts) / len(counts):.1f}, max {max(counts)} ; "
+        f"liaisons maritimes : {sum(result.sea_neighbour_counts.values()) // 2}"
+    )
+    if result.snapped_seeds:
+        console.print(
+            f"[yellow]Seeds déplacés sur la terre[/yellow] : {', '.join(result.snapped_seeds)}"
+        )
+    if result.snapped_capitals:
+        console.print(
+            f"[yellow]Capitales rapprochées de leur province[/yellow] : {', '.join(result.snapped_capitals)}"
+        )
 
 
 @geo_app.command("info")

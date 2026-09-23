@@ -5,5 +5,6 @@ Modules:
     project: EPSG:3035 grid definition and pixel <-> projected helpers.
     terrain: heightmap and land mask rasters.
     vectors: rivers and coastline in map pixel coordinates.
+    provinces: weighted cost-distance Voronoi, id raster, neighbour graph.
     build: orchestration (``cent-ans geo build``).
 """

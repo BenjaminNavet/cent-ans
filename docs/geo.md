@@ -1,9 +1,9 @@
 # Pipeline géographique (`tools/cent_ans_tools/geo`)
 
 Construit le terrain de la carte de campagne (`data/map/`) depuis des données ouvertes,
-conformément au contrat de `docs/design/m1-campaign-map.md`. Les polygones de provinces
-(`provinces.geojson`, `province_ids.png`) sont produits par une autre étape qui s'appuie sur
-ces sorties (grille, masque terre, rivières).
+conformément au contrat de `docs/design/m1-campaign-map.md`, puis les provinces
+(`provinces.geojson`, `province_ids.png`, voir la section « Provinces » ci-dessous) à partir
+de ces sorties (grille, masque terre, rivières) et des seeds de `data/provinces/`.
 
 ![Aperçu de la carte](img/map-preview.png)
 
@@ -24,8 +24,9 @@ présent n'est jamais retéléchargé sauf avec `--force`.
 ## Commandes
 
 ```sh
-uv run --project tools cent-ans geo build            # télécharge (cache) puis génère data/map/ et docs/img/map-preview.png
+uv run --project tools cent-ans geo build            # télécharge (cache) puis génère data/map/ (terrain + provinces) et docs/img/*-preview.png
 uv run --project tools cent-ans geo build --force    # retélécharge les données brutes
+uv run --project tools cent-ans geo provinces        # provinces seules (≈ 10 s), après modification de seeds ou de poids
 uv run --project tools cent-ans geo info             # métadonnées, plage d'altitudes, fraction de terre, tailles
 uv run --project tools pytest tests/test_geo.py      # tests sans réseau (grille, encodage des altitudes)
 ```
@@ -76,3 +77,61 @@ rivières en bleu) pour vérification visuelle.
 Pour changer l'emprise ou la résolution, modifier les constantes de
 `cent_ans_tools/geo/project.py` (`LON_MIN`… `SIZE_PX`) et la plage d'altitudes dans
 `terrain.py`, puis reconstruire et mettre à jour le contrat de design.
+
+## Provinces (`cent_ans_tools/geo/provinces.py`)
+
+![Aperçu des provinces](img/provinces-preview.png)
+
+Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaque
+`data/provinces/*.json`, `geo.seed_lonlat`, `geo.capital_lonlat`, `geo.voronoi_weight`, `owner`,
+`name.display`. Les provinces sont indexées de 1 à 132 dans l'ordre alphabétique des ids
+(`index` dans les propriétés du GeoJSON).
+
+### Méthode : Voronoï pondéré par distance de coût
+
+1. **Grille de travail 1024²** (blocs de 4 px, terre si ≥ 8 des 16 pixels sont terre). Chaque
+   province a deux sources : son seed et sa capitale (la capitale appartient par définition à
+   sa province ; un seed en mer est ramené sur la terre la plus proche, cas de Gênes).
+2. **Coût par cellule** : terre = 1, cellule traversée par un fleuve majeur (`scalerank ≤ 4`,
+   rastérisé) = 4, mer = infranchissable. Pour chaque province, `skimage.graph.MCP_Geometric`
+   (Dijkstra géodésique, 8-connexité) donne la distance de coût depuis ses sources ; la cellule
+   va à la province minimisant `coût / voronoi_weight`. Les provinces ne sautent donc jamais
+   un détroit (Manche, Pyrénées contournées par les cols…) et les fleuves font frontière douce.
+   132 propagations sur 1024² ≈ 8 s.
+3. **Retour à 4096²** : suréchantillonnage au plus proche, masquage par `land_mask.png`,
+   puis remplissage des pixels terre sans étiquette (îles sans seed — Man, Wight, Anglesey,
+   Baléares mineures — et pixels perdus par le sous-échantillonnage) par l'étiquette la plus
+   proche (distance euclidienne), **sauf** les masses continentales sans seed de plus de
+   64 000 px (≈ 33 000 km²) qui restent à 0 : c'est l'Afrique du Nord (≈ 600 000 px), qui n'est
+   pas jouable. Lissage des frontières par filtre majoritaire 5 × 5 (la mer est d'abord
+   remplie par le plus proche voisin pour ne pas éroder les côtes, puis remasquée).
+4. **Vectorisation** : `rasterio.features.shapes` (coins de pixels, 4-connexité) → union →
+   `simplify(1,5 px, topologie préservée)` → parties < 30 px² supprimées (au moins une partie
+   conservée). Les polygones sont simplifiés indépendamment : de minuscules écarts entre
+   voisins sont possibles ; `province_ids.png` reste la référence pour le picking.
+5. **Propriétés** : `centroid` = centroïde de la plus grande partie si elle le contient, sinon
+   `representative_point` ; `capital_px` = projection de `capital_lonlat`, ramenée au pixel le
+   plus proche de sa province si elle tombe en mer ou ailleurs (le rapport de construction le
+   signale) ; `neighbors` = provinces partageant ≥ 3 paires de pixels adjacents (4-connexité)
+   ; `sea_neighbors` = provinces non voisines par terre dont des pixels côtiers (1 sur 4,
+   KD-tree) sont à moins de 60 px (≈ 43 km) ; `area_px` = nombre de pixels.
+
+### Sorties
+
+| Fichier | Contenu |
+|---|---|
+| `data/map/province_ids.png` | PNG RGB 4096² : `R = index & 255`, `G = index >> 8`, `B = 0`, 0 = mer ou aucune. |
+| `data/map/provinces.geojson` | `FeatureCollection` en coordonnées carte (1 décimale), propriétés `id`, `index`, `name`, `owner`, `centroid`, `capital_px`, `neighbors`, `sea_neighbors`, `area_px`. |
+| `docs/img/provinces-preview.png` | 1024² : remplissage par `heraldry.primary_color` du propriétaire sur ombrage du relief, frontières noires, capitales en points blancs. |
+
+Relevé de la construction du 2026-09-23 : 10 s, 0,35 Mo de GeoJSON (34 multipolygones), 302
+arêtes terrestres (0 à 10 voisins, 4,6 en moyenne ; la Sardaigne n'a que des liaisons
+maritimes), 15 liaisons maritimes (Kent–Boulonnais, Boulonnais–Flandre, Flandre–Hollande,
+Corse–Sardaigne, Normandie–Ponthieu, Galloway–Highlands…). Seed déplacé : Gênes (en mer sur la
+grille de travail). Capitales ramenées : Corse (Ajaccio) et Vénétie (Venise), toutes deux en mer
+sur le masque.
+
+Pour retoucher une frontière : modifier `seed_lonlat` / `voronoi_weight` dans
+`data/provinces/<id>.json`, relancer `cent-ans geo provinces`, vérifier l'aperçu, commiter
+`data/map/provinces.geojson`, `data/map/province_ids.png` et `docs/img/provinces-preview.png`
+ensemble.

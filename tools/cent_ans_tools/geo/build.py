@@ -1,4 +1,4 @@
-"""Orchestrate the terrain build: ``data/map/`` and the documentation preview."""
+"""Orchestrate the map build: terrain, then provinces, and the documentation previews."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image, ImageDraw
 
-from cent_ans_tools.geo import download, terrain, vectors
+from cent_ans_tools.geo import download, provinces, terrain, vectors
 from cent_ans_tools.geo.project import (
     CRS_MAP,
     LAT_MAX,
@@ -39,6 +39,7 @@ class BuildResult:
     rivers: Path
     coastline: Path
     preview: Path
+    provinces: provinces.ProvinceResult
 
 
 def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
@@ -172,6 +173,7 @@ def build(
     )
 
     render_preview(height_m, land_mask, rivers, coast, grid, preview_path)
+    province_result = provinces.build(map_dir=map_dir)
     return BuildResult(
         map_json_path,
         heightmap_path,
@@ -179,6 +181,7 @@ def build(
         rivers_path,
         coast_path,
         preview_path,
+        province_result,
     )
 
 
