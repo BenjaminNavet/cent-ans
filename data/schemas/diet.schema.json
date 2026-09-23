@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/diet.schema.json",
+  "title": "Régime alimentaire",
+  "description": "Régime d'une province (H3 « La Table ») : conditions, coût saisonnier pour 1 000 habitants, effets sur la population, règles de Carême et d'hiver. Les règles vivent dans `sim-campaign::table`.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/diet_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "description": {
+      "type": "string",
+      "description": "Texte français ; peut contenir des liens codex `[[cdx_id]]` ou `[[cdx_id|libellé]]`."
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Toutes les conditions listées doivent être remplies.",
+      "properties": {
+        "resources": {
+          "type": "array",
+          "description": "Ressources accessibles à la faction qui contrôle la province (produites par une province contrôlée ou alliée, comme pour la satisfaction en biens).",
+          "items": { "$ref": "common.schema.json#/$defs/resource_id" },
+          "uniqueItems": true
+        },
+        "coastal": { "type": "boolean", "default": false, "description": "La province doit être côtière." },
+        "technology": { "$ref": "common.schema.json#/$defs/technology_id" },
+        "any_building": {
+          "type": "array",
+          "description": "Au moins un de ces bâtiments doit exister dans la province.",
+          "items": { "$ref": "common.schema.json#/$defs/building_id" },
+          "uniqueItems": true
+        },
+        "terrains": {
+          "type": "array",
+          "description": "Terrains admis (vide : tous).",
+          "items": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "cost_per_thousand": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Livres tournois par saison pour 1 000 habitants."
+    },
+    "effects": {
+      "type": "array",
+      "description": "Effets sur la population de la province (`class` : une seule classe).",
+      "items": { "$ref": "common.schema.json#/$defs/effect" }
+    },
+    "lent_rule": {
+      "type": "string",
+      "enum": ["none", "meat", "fish", "dairy"],
+      "default": "none",
+      "description": "Carême (printemps) : `meat`/`dairy` = −piété et +mécontentement du clergé ; `fish` = +piété."
+    },
+    "winter_rule": {
+      "type": "string",
+      "enum": ["none", "fresh"],
+      "default": "none",
+      "description": "`fresh` : coût ×1,5 en hiver."
+    },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "description", "cost_per_thousand"],
+  "additionalProperties": false
+}

@@ -1,0 +1,38 @@
+{
+  "id": "tech_herb_garden",
+  "name": {
+    "display": "Jardin des simples"
+  },
+  "branch": "medicine",
+  "tier": 1,
+  "cost": 120,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "0800",
+    "uncertain": true,
+    "note": "Le capitulaire De Villis (v. 795-800) énumère près de cent plantes à cultiver dans les domaines royaux ; le plan de Saint-Gall (v. 820-830) dessine l'herbularius du monastère."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_herb_garden"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "health",
+      "value": 2
+    }
+  ],
+  "description": "Carrés de plantes médicinales cultivées par les moines : sauge, rue, menthe et fenouil soignent sans quitter le cloître.",
+  "sources": [
+    "Capitulaire De Villis",
+    "Plan de Saint-Gall",
+    "Jardin médiéval"
+  ],
+  "herbs": [
+    "cdx_sauge",
+    "cdx_rue",
+    "cdx_menthe",
+    "cdx_fenouil"
+  ]
+}

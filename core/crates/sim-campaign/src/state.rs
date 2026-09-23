@@ -258,6 +258,10 @@ pub struct ProvinceState {
     pub heresy: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub heresy_religion: Option<ReligionId>,
+    /// H3 « La Table »: diet chosen by the controller (`None`: the default
+    /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diet: Option<crate::table::DietChoice>,
 }
 
 impl ProvinceState {
@@ -354,6 +358,10 @@ pub struct FactionState {
     /// Progress kept for abandoned research (switching back resumes it).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub research_banked: BTreeMap<TechnologyId, u32>,
+    // ----- H3: La Table -------------------------------------------------------
+    /// Diets paid during the last resolved turn (budget line « Table »).
+    #[serde(default)]
+    pub table_upkeep_last_turn: i64,
 }
 
 fn default_faction_loyalty() -> u8 {
