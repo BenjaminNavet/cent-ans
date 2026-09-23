@@ -26,10 +26,10 @@ var _decision_id: int = -1
 func _ready() -> void:
 	if theme == null:
 		theme = load("res://scenes/ui/parchment_theme.tres")
-	set_anchors_preset(Control.PRESET_CENTER)
+	# Positionnée à la main (centre de l'écran) : la hauteur dépend du texte et des choix.
+	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	custom_minimum_size = Vector2(620, 0)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical = Control.GROW_DIRECTION_BOTH
+	resized.connect(_center_on_screen)
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
 	add_child(root)
@@ -109,8 +109,10 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	for option in options:
 		_options_box.add_child(_option_row(option))
 	_queue_label.text = "Décision 1 sur %d" % queue_size if queue_size > 1 else ""
-	reset_size()
 	show()
+	reset_size()
+	_center_on_screen()
+	call_deferred("_fit")
 
 
 func current_decision() -> int:
@@ -138,6 +140,19 @@ func _option_row(option: Dictionary) -> Control:
 		summary.custom_minimum_size = Vector2(580, 0)
 		row.add_child(summary)
 	return row
+
+
+## Ramène la fenêtre à la taille de son contenu une fois le texte mis en page.
+func _fit() -> void:
+	reset_size()
+	_center_on_screen()
+
+
+func _center_on_screen() -> void:
+	if not is_inside_tree():
+		return
+	var area := get_viewport_rect().size
+	position = ((area - size) / 2.0).floor()
 
 
 func _close() -> void:
