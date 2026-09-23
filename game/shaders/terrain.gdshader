@@ -107,9 +107,12 @@ void fragment() {
 		if (mask_enabled) {
 			float m = texelFetch(province_mask, ivec2(clamp(id, 0, textureSize(province_mask, 0).x - 1), 0), 0).r;
 			if (m > 0.75) {
-				col = mix(col, path_color, 0.45);
+				col = mix(col, path_color, 0.5);
 			} else if (m > 0.25) {
-				col = mix(col, reachable_color, 0.35);
+				col = mix(col, reachable_color, 0.5);
+			} else {
+				// Hors de portée : assombri pour faire ressortir les provinces atteignables.
+				col *= 0.7;
 			}
 		}
 		if (id == selected_id) {
