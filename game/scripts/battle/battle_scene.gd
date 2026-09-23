@@ -789,7 +789,7 @@ func _stage_siege_screenshot() -> void:
 	var siege: Dictionary = battle.call("get_siege")
 	var gate: Dictionary = siege["pieces"][int(siege["gate"])]
 	var focus := Vector3((gate["a"] as Vector2).x, 0, (gate["a"] as Vector2).y)
-	camera_rig.look_at_point(focus + Vector3(-20, 0, -45), 150.0, PI + 0.55)
+	camera_rig.look_at_point(focus + Vector3(-10, 0, -30), 105.0, PI + 0.5)
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2 and int(unit.get("climbing", -1)) >= 0:
 			selected.append(int(unit["id"]))

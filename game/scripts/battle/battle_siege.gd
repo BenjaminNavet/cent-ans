@@ -452,11 +452,11 @@ func _make_ram() -> Node3D:
 static func _make_ladder(length: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for x in [-0.45, 0.45]:
-		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.18, length, 0.18), LADDER)
-	var rungs := int(length / 0.5)
+	for x in [-0.8, 0.8]:
+		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.4, length, 0.4), LADDER)
+	var rungs := int(length / 0.7)
 	for i in rungs:
-		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.5, 0), Vector3(0.9, 0.1, 0.1), LADDER)
+		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.7, 0), Vector3(1.6, 0.25, 0.25), LADDER)
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
