@@ -665,11 +665,8 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             .sum()
     };
 
-    let claims: BTreeSet<ProvinceId> = state.factions[ctx.faction]
-        .claims
-        .iter()
-        .filter_map(|c| c.province.clone())
-        .collect();
+    // F4: a throne claim makes every province of that crown a claimed target.
+    let claims = sim_campaign::diplomacy::claimed_provinces(state, ctx.faction);
     let enemy_capitals: BTreeSet<ProvinceId> = ctx
         .enemies
         .iter()

@@ -651,6 +651,27 @@ pub fn evaluate(
             } else if ratio < 0.3 {
                 reasons.push(("Allié faible".to_owned(), -10));
             }
+            // F4: shared rivals, counterweight against a menacing neighbour,
+            // and no alliance with a rival's friend.
+            let proposer_rivals = rivals(state, proposer);
+            let recipient_rivals = rivals(state, recipient);
+            if !proposer_rivals.is_disjoint(&recipient_rivals) {
+                reasons.push(("Rival commun".to_owned(), 15));
+            }
+            let menaced = proposer_rivals.iter().any(|r| {
+                state.faction_power(r) > 1.5 * state.faction_power(recipient).max(1.0)
+                    && state.are_neighbors(data, recipient, r)
+            });
+            if menaced {
+                reasons.push(("Contrepoids à un voisin menaçant".to_owned(), 10));
+            }
+            let friend_of_rival = state
+                .factions
+                .get(proposer)
+                .is_some_and(|f| f.allies.iter().any(|a| recipient_rivals.contains(a)));
+            if friend_of_rival {
+                reasons.push(("Allié de nos rivaux".to_owned(), -40));
+            }
         }
         Proposal::Vassalage => {
             let already = state
@@ -745,6 +766,27 @@ fn peace_reasons(
     reasons.push(("Attitude".to_owned(), attitude / 5));
     reasons.push(("Tempérament belliqueux".to_owned(), -(aggression - 50) / 5));
     reasons.push(("Attrait de la victoire".to_owned(), -5));
+    // F4: a stronger enemy on another front calls for peace here; a
+    // pretender does not give up its claim lightly.
+    let other_front = state.factions.get(recipient).is_some_and(|f| {
+        f.at_war_with.iter().any(|e| {
+            e != proposer && !is_rebels(e) && state.faction_power(e) > state.faction_power(proposer)
+        })
+    });
+    if other_front {
+        reasons.push(("Guerre sur un autre front".to_owned(), 15));
+    }
+    if score > -30 {
+        let stakes = claim_stakes(state, recipient, proposer);
+        if stakes.throne {
+            reasons.push((
+                "Prétention au trône".to_owned(),
+                -PRETENDER_PEACE_RELUCTANCE,
+            ));
+        } else if stakes.provinces > 0 {
+            reasons.push(("Provinces revendiquées".to_owned(), -5));
+        }
+    }
 }
 
 // =========================================================================
@@ -878,14 +920,7 @@ impl CampaignState {
             if self.is_allied(&ally, aggressor) {
                 continue; // bound to both sides: stays out
             }
-            let ally_state = &self.factions[&ally];
-            let joins = if ally_state.suzerain.as_ref() == Some(defender) {
-                ally_state.loyalty >= CALL_TO_ARMS_LOYALTY
-            } else if self.factions[defender].suzerain.as_ref() == Some(&ally) {
-                true
-            } else {
-                ally == self.player_faction || self.attitude(data, &ally, defender).0 > 0
-            };
+            let joins = answers_call_to_arms(self, data, &ally, defender, aggressor);
             if joins {
                 self.start_war(&ally, aggressor);
                 let text = format!(
@@ -1696,10 +1731,178 @@ pub(crate) fn on_line_extinct(
 }
 
 // =========================================================================
-// Minimal diplomatic AI (pure)
+// Diplomatic AI (pure; M5 § 2.3, F4 « guerre de Cent Ans vivante »)
 // =========================================================================
 
-/// Diplomatic orders of an AI faction for this turn (spec § 2.3).
+/// A pretender may attack a stronger crown down to this power ratio when it
+/// has allies or a bridgehead on the target's borders (F4).
+pub const PRETENDER_RATIO: f64 = 0.5;
+/// Peace reluctance of a pretender towards the crown it claims.
+pub const PRETENDER_PEACE_RELUCTANCE: i32 = 10;
+/// Same, without allies nor bridgehead.
+pub const PRETENDER_RATIO_ALONE: f64 = 0.8;
+/// Power ratio of an opportunistic war without claim.
+pub const OPPORTUNIST_RATIO: f64 = 1.5;
+/// Minimum aggression to press a claim / to wage an opportunistic war.
+pub const PRETENDER_AGGRESSION: i32 = 45;
+pub const OPPORTUNIST_AGGRESSION: i32 = 60;
+/// Turns between two war declarations of the same faction.
+pub const WAR_REST_TURNS: u32 = 12;
+/// Alliances (vassal ties excluded) an AI seeks at most.
+pub const MAX_ALLIANCES: usize = 4;
+/// Ratio (own coalition / enemy coalition) needed to join an ally's war.
+pub const JOIN_WAR_RATIO: f64 = 0.6;
+/// War score below which a vassal deserts its losing suzerain.
+pub const DESERTION_WAR_SCORE: i32 = -25;
+
+/// What `a` claims from `b`: the crown, and how many of `b`'s provinces.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ClaimStakes {
+    pub throne: bool,
+    pub provinces: usize,
+}
+
+impl ClaimStakes {
+    pub fn any(self) -> bool {
+        self.throne || self.provinces > 0
+    }
+}
+
+/// Claims `a` holds against `b` (F4).
+pub fn claim_stakes(state: &CampaignState, a: &FactionId, b: &FactionId) -> ClaimStakes {
+    let mut stakes = ClaimStakes::default();
+    let Some(fa) = state.factions.get(a) else {
+        return stakes;
+    };
+    let mut seen = BTreeSet::new();
+    for claim in &fa.claims {
+        match claim.kind {
+            ClaimKind::Throne => stakes.throne |= claim.faction.as_ref() == Some(b),
+            ClaimKind::Province => {
+                if let Some(p) = &claim.province {
+                    if state.provinces.get(p).is_some_and(|ps| &ps.owner == b) && seen.insert(p) {
+                        stakes.provinces += 1;
+                    }
+                }
+            }
+        }
+    }
+    stakes
+}
+
+/// Provinces `faction` considers rightfully its own: claimed provinces and
+/// every province of a crown it claims (F4: an English army lands anywhere
+/// in France).
+pub fn claimed_provinces(state: &CampaignState, faction: &FactionId) -> BTreeSet<ProvinceId> {
+    let Some(f) = state.factions.get(faction) else {
+        return BTreeSet::new();
+    };
+    let thrones: BTreeSet<&FactionId> = f
+        .claims
+        .iter()
+        .filter(|c| c.kind == ClaimKind::Throne)
+        .filter_map(|c| c.faction.as_ref())
+        .collect();
+    let mut provinces: BTreeSet<ProvinceId> =
+        f.claims.iter().filter_map(|c| c.province.clone()).collect();
+    provinces.extend(
+        state
+            .provinces
+            .iter()
+            .filter(|(_, p)| thrones.contains(&p.owner))
+            .map(|(id, _)| id.clone()),
+    );
+    provinces
+}
+
+/// Factions `faction` quarrels with: current enemies, the targets of its
+/// claims and the factions claiming its lands.
+pub fn rivals(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId> {
+    let Some(me) = state.factions.get(faction) else {
+        return BTreeSet::new();
+    };
+    state
+        .factions
+        .iter()
+        .filter(|(id, f)| *id != faction && f.alive && !is_rebels(id))
+        .filter(|(id, _)| {
+            me.at_war_with.contains(*id)
+                || claim_stakes(state, faction, id).any()
+                || claim_stakes(state, id, faction).any()
+        })
+        .map(|(id, _)| id.clone())
+        .collect()
+}
+
+/// Can `faction` afford a new war: no regency, no debt, a season of upkeep
+/// in the chest and a free ruler (F4 tempo).
+pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
+    let Some(me) = state.factions.get(faction) else {
+        return false;
+    };
+    let ruler_free = me
+        .ruler
+        .as_ref()
+        .and_then(|r| state.characters.get(r))
+        .is_none_or(|r| !r.captive);
+    !me.regency && ruler_free && me.treasury > 0 && me.treasury >= me.upkeep_last_turn.max(0)
+}
+
+/// Power of the enemies `faction` already fights (rebels excluded).
+fn enemy_power(state: &CampaignState, faction: &FactionId) -> f64 {
+    state.factions.get(faction).map_or(0.0, |f| {
+        f.at_war_with
+            .iter()
+            .filter(|e| !is_rebels(e))
+            .map(|e| state.faction_power(e))
+            .sum()
+    })
+}
+
+/// Alliances proper (vassal ties excluded).
+fn alliance_count(state: &CampaignState, faction: &FactionId) -> usize {
+    state.factions.get(faction).map_or(0, |f| {
+        f.allies
+            .iter()
+            .filter(|a| state.relation(faction, a) == RelationKind::Alliance)
+            .count()
+    })
+}
+
+/// Would `ally` answer the call to arms of `defender` attacked by
+/// `aggressor` (M5 § 2.3, F4)? Vassals follow a loyal tie, overlords
+/// protect their vassals, other allies march unless they resent the
+/// defender or are crippled (regency and empty treasury).
+pub fn answers_call_to_arms(
+    state: &CampaignState,
+    data: &GameData,
+    ally: &FactionId,
+    defender: &FactionId,
+    aggressor: &FactionId,
+) -> bool {
+    let Some(ally_state) = state.factions.get(ally) else {
+        return false;
+    };
+    if ally_state.suzerain.as_ref() == Some(defender) {
+        return ally_state.loyalty >= CALL_TO_ARMS_LOYALTY;
+    }
+    if state
+        .factions
+        .get(defender)
+        .is_some_and(|f| f.suzerain.as_ref() == Some(ally))
+    {
+        return true;
+    }
+    if ally == &state.player_faction {
+        return true;
+    }
+    let attitude = state.attitude(data, ally, defender).0;
+    let crippled = ally_state.regency && ally_state.treasury < 0;
+    let grudge = rivals(state, ally).contains(aggressor);
+    !crippled && (attitude > 0 || (grudge && attitude > -20))
+}
+
+/// Diplomatic orders of an AI faction for this turn (spec § 2.3, F4).
 pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
     let mut orders = Vec::new();
     if is_rebels(faction) {
@@ -1721,100 +1924,42 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         .map_or(50, i32::from);
 
     // Peace: offer a white peace when we would accept one ourselves; when
-    // clearly winning, ask for the occupied provinces instead.
+    // clearly winning, ask for the occupied provinces; when clearly losing,
+    // cede what the enemy holds rather than lose everything (F4).
     if (turn + slot).is_multiple_of(2) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
-            let score = state.war_score(data, faction, enemy);
-            let proposal = if score > 40 {
-                let taken: Vec<ProvinceId> = state
-                    .provinces
-                    .iter()
-                    .filter(|(_, p)| &p.owner == enemy && &p.controller == faction)
-                    .map(|(id, _)| id.clone())
-                    .take(2)
-                    .collect();
-                Proposal::Peace {
-                    provinces: taken,
+            if let Some(provinces) = peace_terms(state, data, faction, enemy) {
+                orders.push(Order::ProposePeace {
+                    target: enemy.clone(),
+                    provinces,
                     tribute: 0,
-                }
-            } else {
-                let white = Proposal::Peace {
-                    provinces: Vec::new(),
-                    tribute: 0,
-                };
-                if !evaluate(state, data, enemy, faction, &white).accept {
-                    continue;
-                }
-                white
-            };
-            let answer_known = enemy != &state.player_faction;
-            if answer_known && !evaluate(state, data, faction, enemy, &proposal).accept {
-                continue;
+                });
+                break;
             }
-            orders.push(Order::ProposePeace {
-                target: enemy.clone(),
-                provinces: match &proposal {
-                    Proposal::Peace { provinces, .. } => provinces.clone(),
-                    _ => Vec::new(),
-                },
-                tribute: 0,
-            });
-            break;
         }
     }
 
-    // Alliance against a current enemy.
-    if (turn + slot) % 4 == 1 && !me.at_war_with.is_empty() && me.allies.len() < 3 {
-        let candidate = state
-            .factions
-            .iter()
-            .filter(|(id, f)| {
-                *id != faction
-                    && f.alive
-                    && !is_rebels(id)
-                    && !state.is_allied(faction, id)
-                    && !state.is_at_war(faction, id)
-            })
-            .filter(|(id, _)| {
-                me.at_war_with
-                    .iter()
-                    .any(|e| !is_rebels(e) && state.is_at_war(id, e))
-            })
-            .map(|(id, _)| id.clone())
-            .find(|id| {
-                state.attitude(data, faction, id).0 > 10
-                    && (id == &state.player_faction
-                        || evaluate(state, data, faction, id, &Proposal::Alliance).accept)
-            });
-        if let Some(target) = candidate {
-            orders.push(Order::ProposeAlliance { target });
-        }
-    }
+    plan_alliances(state, data, faction, slot, &mut orders);
 
-    // War: aggressive, idle factions attack a weaker rival they hold a claim on.
-    let at_peace = me.at_war_with.iter().all(is_rebels);
-    let rested = me.last_war_declared.is_none_or(|t| t + 12 <= turn);
-    if aggression >= 60 && at_peace && rested && turn >= 4 && (turn + slot) % 4 == 2 {
-        let my_power = state.coalition_power(faction);
-        let target = state
-            .factions
-            .iter()
-            .filter(|(id, f)| {
-                *id != faction
-                    && f.alive
-                    && !is_rebels(id)
-                    && id.as_str() != PAPACY_FACTION
-                    && !state.is_allied(faction, id)
-                    && !state.has_truce(faction, id)
-            })
-            .filter(|(id, _)| state.casus_belli(data, faction, id).is_some())
-            .filter(|(id, _)| state.attitude(data, faction, id).0 < 0)
-            .map(|(id, _)| (id.clone(), my_power / state.coalition_power(id).max(1.0)))
-            .filter(|(_, ratio)| *ratio >= 1.5)
-            .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
-        if let Some((target, _)) = target {
+    let rested = me
+        .last_war_declared
+        .is_none_or(|t| t + WAR_REST_TURNS <= turn);
+    let ready = turn >= 4 && rested && war_ready(state, faction);
+    let mut declared = false;
+    if ready && (turn + slot).is_multiple_of(2) {
+        if let Some(target) = war_target(state, data, faction, aggression) {
             orders.push(Order::DeclareWar { target });
+            declared = true;
         }
+    }
+    if ready && !declared && (turn + slot) % 2 == 1 {
+        if let Some(target) = ally_war_to_join(state, data, faction) {
+            orders.push(Order::DeclareWar { target });
+            declared = true;
+        }
+    }
+    if ready && !declared {
+        orders.extend(desert_losing_suzerain(state, data, faction, slot));
     }
 
     // Lift pointless embargoes, drop hated allies.
@@ -1841,5 +1986,248 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     if religion::is_excommunicated(state, faction) && me.treasury > 8000 {
         orders.push(Order::DonateToChurch { amount: 2000 });
     }
+    orders
+}
+
+/// Peace terms `faction` offers `enemy` this turn, if any would be accepted.
+fn peace_terms(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    enemy: &FactionId,
+) -> Option<Vec<ProvinceId>> {
+    let score = state.war_score(data, faction, enemy);
+    let capital = |f: &FactionId| state.factions.get(f).map(|s| s.capital.clone());
+    let held_by = |owner: &FactionId, holder: &FactionId| -> Vec<ProvinceId> {
+        let capital = capital(owner);
+        let mut list: Vec<ProvinceId> = state
+            .provinces
+            .iter()
+            .filter(|(_, p)| &p.owner == owner && &p.controller == holder)
+            .map(|(id, _)| id.clone())
+            .collect();
+        // Capitals last: they are the costliest to give up.
+        list.sort_by_key(|id| (Some(id) == capital.as_ref(), id.clone()));
+        list.truncate(2);
+        list
+    };
+    let answer_known = enemy != &state.player_faction;
+    let accepted = |provinces: &[ProvinceId]| {
+        let proposal = Proposal::Peace {
+            provinces: provinces.to_vec(),
+            tribute: 0,
+        };
+        !answer_known || evaluate(state, data, faction, enemy, &proposal).accept
+    };
+    if score > 40 {
+        let taken = held_by(enemy, faction);
+        return accepted(&taken).then_some(taken);
+    }
+    let white = Proposal::Peace {
+        provinces: Vec::new(),
+        tribute: 0,
+    };
+    if evaluate(state, data, enemy, faction, &white).accept && accepted(&[]) {
+        return Some(Vec::new());
+    }
+    if score < -40 {
+        let lost = held_by(faction, enemy);
+        if !lost.is_empty() && accepted(&lost) {
+            return Some(lost);
+        }
+    }
+    None
+}
+
+/// The war `faction` declares this turn, if any: a pretender presses its
+/// claim even against a stronger crown when it has allies or a bridgehead;
+/// aggressive realms fall on weaker rivals they hold a casus belli against.
+fn war_target(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    aggression: i32,
+) -> Option<FactionId> {
+    let my_power = state.coalition_power(faction);
+    // Never a new front while the current wars weigh.
+    if enemy_power(state, faction) > 0.5 * state.faction_power(faction) {
+        return None;
+    }
+    let has_allies = state.factions[faction]
+        .allies
+        .iter()
+        .any(|a| state.factions.get(a).is_some_and(|f| f.alive));
+    state
+        .factions
+        .iter()
+        .filter(|(id, f)| {
+            *id != faction
+                && f.alive
+                && !is_rebels(id)
+                && id.as_str() != PAPACY_FACTION
+                && !state.is_allied(faction, id)
+                && !state.is_at_war(faction, id)
+                && !state.has_truce(faction, id)
+        })
+        .filter_map(|(id, _)| {
+            let stakes = claim_stakes(state, faction, id);
+            if stakes.any() && aggression >= PRETENDER_AGGRESSION {
+                let ratio = my_power / state.faction_power(id).max(1.0);
+                let supported = has_allies || state.are_neighbors(data, faction, id);
+                let needed = if supported {
+                    PRETENDER_RATIO
+                } else {
+                    PRETENDER_RATIO_ALONE
+                };
+                let weight = if stakes.throne { 3.0 } else { 0.0 } + stakes.provinces as f64;
+                return (ratio >= needed && state.attitude(data, faction, id).0 < 20)
+                    .then(|| (id.clone(), weight + ratio));
+            }
+            if aggression >= OPPORTUNIST_AGGRESSION
+                && state.casus_belli(data, faction, id).is_some()
+                && state.attitude(data, faction, id).0 < 0
+            {
+                let ratio = my_power / state.coalition_power(id).max(1.0);
+                return (ratio >= OPPORTUNIST_RATIO).then(|| (id.clone(), ratio));
+            }
+            None
+        })
+        .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(&a.0)))
+        .map(|(id, _)| id)
+}
+
+/// An ally's war `faction` joins (co-belligerence, F4): the Low Countries
+/// follow Edward III into France, Scotland falls on the English border.
+fn ally_war_to_join(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<FactionId> {
+    let me = state.factions.get(faction)?;
+    if enemy_power(state, faction) > 0.5 * state.faction_power(faction) {
+        return None;
+    }
+    for ally in &me.allies {
+        let Some(ally_state) = state.factions.get(ally) else {
+            continue;
+        };
+        if !ally_state.alive || state.attitude(data, faction, ally).0 <= 10 {
+            continue;
+        }
+        for enemy in ally_state.at_war_with.iter().filter(|e| !is_rebels(e)) {
+            if enemy == faction
+                || state.is_allied(faction, enemy)
+                || state.is_at_war(faction, enemy)
+                || state.has_truce(faction, enemy)
+                || !state.factions.get(enemy).is_some_and(|f| f.alive)
+            {
+                continue;
+            }
+            let reachable = state.are_neighbors(data, faction, enemy)
+                || claim_stakes(state, faction, enemy).any();
+            let ratio = state.coalition_power(faction) / state.coalition_power(enemy).max(1.0);
+            if reachable && ratio >= JOIN_WAR_RATIO {
+                return Some(enemy.clone());
+            }
+        }
+    }
+    None
+}
+
+/// Alliances against our rivals (F4): partners sharing a rival, or fearing
+/// it more than they like it (the counterweight of distant England for the
+/// Low Countries, of France for Scotland).
+fn plan_alliances(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    slot: u32,
+    orders: &mut Vec<Order>,
+) {
+    if (state.turn + slot) % 4 != 1 || alliance_count(state, faction) >= MAX_ALLIANCES {
+        return;
+    }
+    let my_rivals = rivals(state, faction);
+    if my_rivals.is_empty() {
+        return;
+    }
+    let candidate = state
+        .factions
+        .iter()
+        .filter(|(id, f)| {
+            *id != faction
+                && f.alive
+                && !is_rebels(id)
+                && id.as_str() != PAPACY_FACTION
+                && !state.is_allied(faction, id)
+                && !state.is_at_war(faction, id)
+                && !my_rivals.contains(*id)
+                && f.allies.iter().all(|a| !my_rivals.contains(a))
+        })
+        .filter(|(id, _)| {
+            let theirs = rivals(state, id);
+            !theirs.is_disjoint(&my_rivals)
+                || my_rivals.iter().any(|r| {
+                    let towards_rival = state.attitude(data, id, r).0;
+                    towards_rival < 0 && state.attitude(data, id, faction).0 > towards_rival + 10
+                })
+        })
+        .map(|(id, _)| (id.clone(), state.attitude(data, id, faction).0))
+        .filter(|(id, _)| state.attitude(data, faction, id).0 > 0)
+        .filter(|(id, _)| {
+            id == &state.player_faction
+                || evaluate(state, data, faction, id, &Proposal::Alliance).accept
+        })
+        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
+    if let Some((target, _)) = candidate {
+        orders.push(Order::ProposeAlliance { target });
+    }
+}
+
+/// An opportunistic vassal (Burgundy) deserts a suzerain that is losing to
+/// a stronger coalition: white peace with the winner, then independence.
+fn desert_losing_suzerain(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    slot: u32,
+) -> Vec<Order> {
+    let me = &state.factions[faction];
+    let Some(lord) = me.suzerain.clone() else {
+        return Vec::new();
+    };
+    if (state.turn + slot) % 4 != 3 || me.loyalty >= 50 || faction == &state.player_faction {
+        return Vec::new();
+    }
+    let winner = state.factions[&lord]
+        .at_war_with
+        .iter()
+        .filter(|e| !is_rebels(e) && *e != faction)
+        .find(|e| {
+            state.war_score(data, &lord, e) <= DESERTION_WAR_SCORE
+                && state.coalition_power(e) > state.coalition_power(&lord)
+                && state.attitude(data, faction, e).0 > -40
+        })
+        .cloned();
+    let Some(winner) = winner else {
+        return Vec::new();
+    };
+    let mut orders = Vec::new();
+    if state.is_at_war(faction, &winner) {
+        let white = Proposal::Peace {
+            provinces: Vec::new(),
+            tribute: 0,
+        };
+        if winner == state.player_faction || !evaluate(state, data, faction, &winner, &white).accept
+        {
+            return Vec::new();
+        }
+        orders.push(Order::ProposePeace {
+            target: winner.clone(),
+            provinces: Vec::new(),
+            tribute: 0,
+        });
+    }
+    orders.push(Order::DeclareWar { target: lord });
     orders
 }
