@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 [autoload]
 
 MapPaths="*res://scripts/map/map_paths.gd"
+SimFacade="*res://scripts/sim/sim_facade.gd"
 
 [display]
 
