@@ -1,0 +1,73 @@
+{
+  "id": "evt_rancon_de_nevers",
+  "title": "La rançon de Jean de Nevers",
+  "text": "Le sultan Bayezid a fixé la rançon du comte de Nevers et des derniers barons captifs à deux cent mille florins. Les marchands génois de Péra et le roi de Chypre avancent l'argent ; la Bourgogne remboursera, avec les intérêts.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Payer les deux cent mille florins",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -12000
+        },
+        {
+          "type": "prestige",
+          "character": "heir",
+          "amount": 15
+        },
+        {
+          "type": "add_trait",
+          "character": "heir",
+          "trait": "trait_captive_ransomed"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Emprunter aux Lombards et taxer les Flandres",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        },
+        {
+          "type": "prestige",
+          "character": "heir",
+          "amount": 10
+        },
+        {
+          "type": "add_trait",
+          "character": "heir",
+          "trait": "trait_captive_ransomed"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1397-06-24"
+  },
+  "sources": [
+    "Bataille de Nicopolis",
+    "Jean sans Peur",
+    "Bertrand Schnerb, Jean sans Peur, Payot, 2005"
+  ]
+}

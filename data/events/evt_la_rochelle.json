@@ -1,0 +1,77 @@
+{
+  "id": "evt_la_rochelle",
+  "title": "La bataille de La Rochelle",
+  "text": "Devant La Rochelle, les galères de Castille, alliées du roi de France, attaquent la flotte du comte de Pembroke. Deux jours durant, elles lancent huile et feu sur les nefs anglaises ; Pembroke est pris, et avec lui la solde de l'armée d'Aquitaine.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1372,
+      "season": "summer"
+    },
+    "until_year": 1373,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Racheter Pembroke aux Castillans",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_castile",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Abandonner la flotte perdue",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_guyenne",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_castile",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_saintonge",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1372-06-23"
+  },
+  "sources": [
+    "Bataille de La Rochelle (1372)",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}
