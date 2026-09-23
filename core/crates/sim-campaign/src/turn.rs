@@ -6,8 +6,8 @@ use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
-    ai_minimal, buildings, characters, chronicle, diplomacy, dynasty, economy, movement, population, religion,
-    research, siege,
+    ai_minimal, buildings, characters, chronicle, diplomacy, dynasty, economy, movement,
+    population, religion, research, siege,
 };
 
 impl CampaignState {
