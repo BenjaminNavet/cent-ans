@@ -28,6 +28,7 @@
 pub mod ai;
 pub mod command;
 pub mod field;
+pub mod orders;
 pub mod outcome;
 pub mod rng;
 pub mod setup;
@@ -40,6 +41,7 @@ pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
+pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;
 pub use setup::{

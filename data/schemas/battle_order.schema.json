@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_order.schema.json",
+  "title": "Ordre du chef",
+  "description": "Ordre que le général donne en bataille (cri de guerre, pas de quartier, pied à terre, pavois, ralliement) : textes, portée, recharge et effets (data/battle_orders/). Les règles sont dans core/crates/sim-battle.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^order_[a-z0-9_]+$" },
+    "kind": {
+      "type": "string",
+      "enum": ["war_cry", "no_quarter", "dismount", "pavise", "rally"],
+      "description": "Règle appliquée par la simulation."
+    },
+    "rank": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Position dans la barre d'ordres." },
+    "name": { "type": "string", "description": "Nom générique en français." },
+    "label": { "type": "string", "description": "Libellé par défaut quand la faction n'a pas le sien (sinon `name`)." },
+    "labels_by_faction": {
+      "type": "object",
+      "description": "Libellé propre à une faction (cri de guerre, bannière).",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/faction_id" },
+      "additionalProperties": { "type": "string" }
+    },
+    "description": { "type": "string", "description": "Description en français avec la référence historique." },
+    "icon": { "type": "string", "description": "Nom d'icône facultatif (game/assets/ui/orders/<icon>.png)." },
+    "scope": {
+      "type": "string",
+      "enum": ["radius", "army", "selected"],
+      "description": "radius : régiments dans le rayon du général ; army : toute l'armée ; selected : régiments désignés (tous les régiments éligibles si aucun)."
+    },
+    "requires_general": { "type": "boolean", "default": true },
+    "cooldown": { "type": "number", "minimum": 0, "description": "Recharge en secondes simulées." },
+    "duration": { "type": "number", "minimum": 0, "description": "Durée de l'effet en secondes (0 : instantané ou toute la bataille)." },
+    "radius": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon autour du général, en mètres." },
+    "uses_per_battle": { "type": "integer", "minimum": 1 },
+    "eligible": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["infantry", "ranged", "cavalry", "siege"] },
+          "uniqueItems": true
+        },
+        "mounted": { "type": "boolean" },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["stakes", "shield_wall", "pike_square", "volley", "skirmish", "dismount", "charge_lance", "pavise", "wall_breach", "wall_assault", "rain_penalty"]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "effects": {
+      "type": "object",
+      "properties": {
+        "morale": { "type": "number", "description": "Points de moral ajoutés (et au plafond de récupération pendant la durée)." },
+        "speed_max": { "type": "integer", "minimum": 1, "maximum": 255, "description": "Pied à terre : vitesse maximale à pied." },
+        "armor": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Pied à terre : points d'armure ajoutés." },
+        "missile_damage_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Pavois : multiplicateur des pertes par le trait." },
+        "rally_chance": { "type": "number", "minimum": 0, "maximum": 1, "description": "Ralliement : chance de base." },
+        "rally_chance_per_command": { "type": "number", "minimum": 0, "maximum": 1, "description": "Ralliement : chance ajoutée par point de commandement." },
+        "rally_morale": { "type": "number", "minimum": 0, "maximum": 100, "description": "Ralliement : moral d'un régiment rallié." }
+      },
+      "additionalProperties": false
+    },
+    "journal": { "type": "string", "description": "Ligne du journal ; jokers {label}, {faction}, {of_faction}, {general}, {unit}, {count}." },
+    "journal_failure": { "type": "string", "description": "Ligne du journal en cas d'échec (ralliement)." },
+    "journal_assault": { "type": "string", "description": "Pied à terre automatique avant un assaut de siège." },
+    "ai": {
+      "type": "object",
+      "description": "Quand l'IA tactique donne l'ordre.",
+      "properties": {
+        "enemy_within": { "type": "number", "exclusiveMinimum": 0 },
+        "min_units": { "type": "integer", "minimum": 1 },
+        "max_strength_ratio": { "type": "number", "exclusiveMinimum": 0 },
+        "rivals": {
+          "type": "array",
+          "description": "Ennemis héréditaires (paires de factions).",
+          "items": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/faction_id" },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "under_fire_within": { "type": "number", "exclusiveMinimum": 0 },
+        "when_defensive": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "kind", "name", "description", "scope", "cooldown", "journal"],
+  "additionalProperties": false
+}

@@ -3,7 +3,7 @@
 //! The setup is plain serde data so that it crosses the GDExtension boundary
 //! as a `Dictionary` (via JSON) and can be stored in tests as fixtures.
 
-use data_model::{Ability, Terrain, UnitCategory, UnitStats, UnitType};
+use data_model::{Ability, BattleOrder, Terrain, UnitCategory, UnitStats, UnitType};
 use serde::{Deserialize, Serialize};
 
 /// One of the two sides of a battle.
@@ -169,6 +169,10 @@ pub struct BattleSetup {
     /// Siege battle: the defender holds the town walls (M8 § 2).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub siege: Option<SiegeSetup>,
+    /// Catalogue of the leader's orders (`data/battle_orders/`, F10b); no
+    /// order can be given when empty.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub orders: Vec<BattleOrder>,
 }
 
 impl BattleSetup {
