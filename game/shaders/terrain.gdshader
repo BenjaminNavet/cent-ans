@@ -67,6 +67,7 @@ uniform vec3 sea_deep_color = vec3(0.006, 0.028, 0.050);
 // Détail : taille d'une tuile de texture (pixels carte), part du détail, force des normales.
 uniform float tile_px = 3.0;
 uniform float farm_tile_px = 0.6;
+uniform float tile_screen_px = 72.0;
 uniform float detail_strength = 0.85;
 uniform float detail_normal_strength = 0.55;
 // Parcellaire : champs par pixel carte (0,9 ≈ parcelles de 800 m), largeur des haies (fraction).
@@ -272,10 +273,15 @@ void fragment() {
 	vec3 dn = vec3(0.0, 0.0, 0.0);
 	float wsum = w_grass + w_farm + w_forest + w_rock + w_heath + snow + sand;
 	if (has_textures && detail_fade > 0.0) {
-		vec2 uv_a = p / tile_px;
+		// Échelle de tuilage adaptée au zoom : une tuile garde ~tile_screen_px pixels à l'écran
+		// (pas de trame de points répétés au zoom moyen) ; fondu entre deux octaves d'échelle,
+		// la seconde tournée pour casser l'alignement.
+		float lvl = max(log2(tile_screen_px * footprint / tile_px), 0.0);
+		float tile_a = tile_px * exp2(floor(lvl));
 		float ang = 0.9;
-		vec2 uv_b = mat2(vec2(cos(ang), sin(ang)), vec2(-sin(ang), cos(ang))) * p / (tile_px * 3.7) + 0.37;
-		float mix_b = smoothstep(0.3, 0.7, value_noise(p * 0.11 + 5.0));
+		vec2 uv_a = p / tile_a + 0.21 * floor(lvl);
+		vec2 uv_b = mat2(vec2(cos(ang), sin(ang)), vec2(-sin(ang), cos(ang))) * p / (tile_a * 2.0) + 0.37;
+		float mix_b = fract(lvl);
 		float det = detail_strength * detail_fade;
 		if (w_grass > 0.01) { sample_layer(0, uv_a, uv_b, mix_b, tint_grass, det, albedo, dn, w_grass); }
 		if (w_farm > 0.01) {

@@ -32,7 +32,7 @@ uniform float roughness_far = 0.55;
 uniform float specular_amount = 0.06;
 // Reflet du soleil (modèle de Blinn-Phong borné, remplace le spéculaire par défaut).
 uniform float sun_spec_power = 180.0;
-uniform float sun_spec_intensity = 0.14;
+uniform float sun_spec_intensity = 0.1;
 uniform float sun_spec_max = 0.1;
 
 varying float v_far;
@@ -96,7 +96,7 @@ void fragment() {
 	float h0 = swell(q, t);
 	float hx = swell(q + vec2(e, 0.0), t) - h0;
 	float hz = swell(q + vec2(0.0, e), t) - h0;
-	float ws = wave_strength * (1.0 - smoothstep(0.25, 1.2, footprint));
+	float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
 	vec3 n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
