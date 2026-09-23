@@ -204,5 +204,19 @@ def assets_heraldry() -> None:
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
 
 
+@assets_app.command("audio")
+def assets_audio(
+    no_music: bool = typer.Option(False, "--no-music", help="Effets seulement"),
+) -> None:
+    """Synthétise les effets (sfx/) et les 3 musiques modales (music/) en OGG ou WAV."""
+    from cent_ans_tools import audio
+
+    paths = audio.build(music=not no_music)
+    total = sum(path.stat().st_size for path in paths) / 1e6
+    console.print(
+        f"[green]OK[/green] : {len(paths)} fichiers ({total:.1f} Mo) dans {audio.AUDIO_DIR}"
+    )
+
+
 if __name__ == "__main__":
     app()
