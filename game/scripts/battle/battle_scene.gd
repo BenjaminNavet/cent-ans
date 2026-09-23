@@ -10,7 +10,8 @@ extends Node3D
 ## bataille France–Angleterre mise en scène (`debug_stage_battle`).
 ## Options (après `--`) : `--screenshot=<png>` (joue la bataille jusqu'au contact, capture, quitte),
 ## `--units=<n>` (complète chaque camp à n régiments, banc d'essai sans retour campagne),
-## `--benchmark` (mesure les FPS sur 600 images puis quitte), `--autoplay` (IA des deux camps).
+## `--benchmark` (mesure les FPS sur 600 images puis quitte), `--autoplay` (IA des deux camps),
+## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8).
 
 signal returned(result: Dictionary)
 
@@ -38,6 +39,8 @@ var padded: bool = false
 var finished_shown: bool = false
 var resolved: bool = false
 var standalone: bool = false
+var siege_view: BattleSiege = null  # batailles de siège (M8)
+var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # "side/kind" -> MultiMeshInstance3D
 var _banners: Dictionary = {}  # id -> {node, flag_mat, label, count}
@@ -104,7 +107,11 @@ func _stage_standalone() -> bool:
 	var armies := main_armies(sim, "fac_france", "fac_england")
 	if armies.is_empty():
 		return false
-	var index: int = sim.call("debug_stage_battle", armies[0], armies[1])
+	var index: int = -1
+	if siege_demo and sim.has_method("debug_stage_siege"):
+		index = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+	else:
+		index = sim.call("debug_stage_battle", armies[0], armies[1])
 	if index < 0:
 		return false
 	configure(sim, index, 1337)
@@ -146,13 +153,20 @@ func begin() -> bool:
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
 	var weather: Dictionary = battle.call("get_weather")
-	terrain.build(battle.call("get_terrain"), str(weather.get("key", "clear")))
+	var terrain_data: Dictionary = battle.call("get_terrain")
+	terrain.build(terrain_data, str(weather.get("key", "clear")))
+	if terrain_data.has("siege"):
+		siege_view = BattleSiege.new()
+		siege_view.name = "Siege"
+		add_child(siege_view)
+		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	_apply_weather(str(weather.get("key", "clear")))
 	_build_soldier_layers()
 	units = battle.call("get_units")
 	for unit in units:
 		_make_banner(unit)
-	hud.set_title("Bataille de %s" % str(setup.get("province_name", "")), str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
+	var title := ("Assaut de %s" if siege_view != null else "Bataille de %s") % str(setup.get("province_name", ""))
+	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.height_at(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -357,6 +371,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			buffer.resize(mm.instance_count * 12)
 			mm.buffer = buffer
 			mm.visible_instance_count = count
+	if siege_view != null:
+		siege_view.update(battle.call("get_siege"), units)
 	var banner_scale := _banner_scale()
 	for unit in units:
 		var id := int(unit["id"])
@@ -389,10 +405,33 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		_hud_timer = 0.1
 		hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
+		if siege_view != null:
+			hud.set_siege_status(siege_status(battle.call("get_siege")))
 		hud.update_cards(units, player_side, selected)
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
+
+
+## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
+static func siege_status(siege: Dictionary) -> String:
+	if siege.is_empty():
+		return ""
+	var breaches := 0
+	var gate_open := false
+	for piece in siege.get("pieces", []):
+		if not bool(piece["intact"]):
+			if str(piece["kind"]) == "gate":
+				gate_open = true
+			else:
+				breaches += 1
+	var text := "Murailles %d %%" % int(round(float(siege.get("integrity", 1.0)) * 100.0))
+	text += " · %d brèche(s)" % breaches
+	text += " · porte %s" % ("enfoncée" if gate_open else "tenue")
+	var hold := float(siege.get("hold_time", 0.0))
+	if hold > 0.0:
+		text += " · place centrale tenue %d / %d s" % [int(hold), int(float(siege.get("hold_to_win", 60.0)))]
+	return text
 
 
 func _banner_scale() -> float:
@@ -683,6 +722,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--autoplay":
 			autoplay = true
+		elif arg == "--siege":
+			siege_demo = true
 	if _screenshot_path != "":
 		call_deferred("_stage_screenshot")
 
@@ -694,6 +735,9 @@ func _stage_screenshot() -> void:
 		get_tree().quit(1)
 		return
 	camera_rig.edge_pan_enabled = false
+	if siege_view != null:
+		await _stage_siege_screenshot()
+		return
 	var contact_time := -1.0
 	for _i in 3000:
 		battle.call("tick", 0.1)
@@ -717,6 +761,37 @@ func _stage_screenshot() -> void:
 		camera_rig.look_at_point(focus + Vector3(0, 0, -25 if player_side == "attacker" else 25), 120.0, (PI if player_side == "attacker" else 0.0) + 0.5)
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
+			selected.append(int(unit["id"]))
+	_refresh_view(true)
+	for _i in 40:
+		await get_tree().process_frame
+	_take_screenshot(_screenshot_path, true)
+
+
+## Capture de siège : l'assaut jusqu'aux premières échelles (+ 10 s) ou 4 min, vue sur le front
+## des murailles depuis l'extérieur.
+func _stage_siege_screenshot() -> void:
+	var climb_time := -1.0
+	for _i in 2400:
+		battle.call("tick", 0.1)
+		var elapsed := float(battle.call("get_elapsed"))
+		if climb_time < 0.0:
+			for unit in battle.call("get_units"):
+				if int(unit.get("climbing", -1)) >= 0 or bool(unit.get("on_wall", false)) and str(unit["side"]) == "attacker":
+					climb_time = elapsed
+					break
+		elif elapsed > climb_time + 10.0:
+			break
+		if battle.call("is_finished"):
+			break
+	paused = true
+	units = battle.call("get_units")
+	var siege: Dictionary = battle.call("get_siege")
+	var gate: Dictionary = siege["pieces"][int(siege["gate"])]
+	var focus := Vector3((gate["a"] as Vector2).x, 0, (gate["a"] as Vector2).y)
+	camera_rig.look_at_point(focus + Vector3(-20, 0, -45), 150.0, PI + 0.55)
+	for unit in units:
+		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2 and int(unit.get("climbing", -1)) >= 0:
 			selected.append(int(unit["id"]))
 	_refresh_view(true)
 	for _i in 40:

@@ -69,8 +69,15 @@ fn parse_side(raw: &GString) -> Option<SideId> {
     SideId::parse(&raw.to_string())
 }
 
-/// Rendering family of a regiment: `infantry`, `archer`, `cavalry`, `siege`.
+/// Rendering family of a regiment: `infantry`, `archer`, `cavalry`, `siege`,
+/// or `ram` / `tower` (siege battles: drawn as one machine, not soldiers).
 fn render_key(unit: &Unit) -> &'static str {
+    if unit.ram {
+        return "ram";
+    }
+    if unit.siege_tower() {
+        return "tower";
+    }
     match unit.category {
         UnitCategory::Siege => "siege",
         _ if unit.mounted => "cavalry",
