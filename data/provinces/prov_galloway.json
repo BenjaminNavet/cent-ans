@@ -95,7 +95,7 @@
   ],
   "fortification_level": 1,
   "base_supply": 2500,
-  "description": "Galloway, patrimoine des Balliol, et Annandale (Bruce) : base d'Édouard Balliol, roi d'Écosse sous protection anglaise (faction Balliol à créer ou rattachée à fac_england). Comté de Carrick.",
+  "description": "Galloway, patrimoine des Balliol, et Annandale (Bruce) : base d'Édouard Balliol, roi d'Écosse sous protection anglaise (rattaché dans le jeu à l'Angleterre). Comté de Carrick.",
   "sources": [
     "Galloway",
     "Édouard Balliol",
