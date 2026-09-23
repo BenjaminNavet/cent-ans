@@ -30,5 +30,13 @@
   "description": "Obédience romaine (Urbain VI puis Boniface IX, Innocent VII, Grégoire XII) suivie par l'Angleterre, l'Empire, l'Italie du Nord et la Flandre pendant le Grand Schisme.",
   "sources": [
     "Grand Schisme d'Occident"
+  ],
+  "historical_adherents": [
+    "fac_england",
+    "fac_empire",
+    "fac_flanders",
+    "fac_portugal",
+    "fac_milan",
+    "fac_genoa"
   ]
 }

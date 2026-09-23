@@ -70,6 +70,28 @@ pub struct Relation {
     pub note: Option<String>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ClaimKind {
+    /// Claim on the throne of `faction`.
+    Throne,
+    /// Claim on `province`.
+    Province,
+}
+
+/// A starting claim (casus belli), M5.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ClaimData {
+    pub kind: ClaimKind,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub faction: Option<FactionId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub province: Option<ProvinceId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AiPersonality {
@@ -119,6 +141,8 @@ pub struct Faction {
     pub starting_technologies: Vec<TechnologyId>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub relations: Vec<Relation>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub claims: Vec<ClaimData>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ai_personality: Option<AiPersonality>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

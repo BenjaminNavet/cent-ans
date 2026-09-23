@@ -28,5 +28,11 @@
   "sources": [
     "Lollards",
     "John Wyclif"
+  ],
+  "origin_provinces": [
+    "prov_oxford",
+    "prov_middlesex",
+    "prov_warwick",
+    "prov_gloucester"
   ]
 }

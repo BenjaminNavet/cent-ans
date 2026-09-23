@@ -26,5 +26,8 @@
   "sources": [
     "Hussites",
     "Jan Hus"
+  ],
+  "origin_provinces": [
+    "prov_bohemia"
   ]
 }

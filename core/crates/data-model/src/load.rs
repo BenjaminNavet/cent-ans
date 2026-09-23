@@ -322,6 +322,14 @@ impl ReferenceChecker<'_> {
             for relation in &faction.relations {
                 self.require(id, "relations.faction", &relation.faction, &data.factions);
             }
+            for claim in &faction.claims {
+                if let Some(target) = &claim.faction {
+                    self.require(id, "claims.faction", target, &data.factions);
+                }
+                if let Some(province) = &claim.province {
+                    self.require(id, "claims.province", province, &data.provinces);
+                }
+            }
         }
     }
 
@@ -436,6 +444,12 @@ impl ReferenceChecker<'_> {
             }
             if let Some(head) = &religion.head_faction {
                 self.require(id, "head_faction", head, &data.factions);
+            }
+            for faction in &religion.historical_adherents {
+                self.require(id, "historical_adherents", faction, &data.factions);
+            }
+            for province in &religion.origin_provinces {
+                self.require(id, "origin_provinces", province, &data.provinces);
             }
         }
     }

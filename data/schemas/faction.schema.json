@@ -70,6 +70,21 @@
         "additionalProperties": false
       }
     },
+    "claims": {
+      "type": "array",
+      "description": "Prétentions de départ (casus belli) : trône d'une autre faction ou province.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": { "type": "string", "enum": ["throne", "province"] },
+          "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
+          "province": { "$ref": "common.schema.json#/$defs/province_id" },
+          "note": { "type": "string" }
+        },
+        "required": ["kind"],
+        "additionalProperties": false
+      }
+    },
     "ai_personality": {
       "type": "object",
       "properties": {
