@@ -36,6 +36,7 @@ func _init() -> void:
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
+	_run_city_economy()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -225,6 +226,74 @@ func _run_campaign_loop() -> void:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
 	map.queue_free()
 	await process_frame
+
+
+## M3 : construit le bâtiment le moins cher disponible à Paris (marché si absent), passe les
+## tours nécessaires, vérifie qu'il apparaît dans `buildings` et que `projected_income` a
+## augmenté ; passe l'impôt à Haut et vérifie une nouvelle hausse. Avec la vraie simulation si
+## elle expose `get_province_city`/`get_faction_economy` (imprimé), sinon avec le mock sur les
+## vraies données (`data/`, qui a les bâtiments/ressources ; pas les fixtures).
+func _run_city_economy() -> void:
+	const PROVINCE_ID := "prov_ile_de_france"
+	const FACTION_ID := "fac_france"
+	var data_dir := _project_root().path_join("data")
+	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
+		and ClassDB.instantiate("CampaignSim").has_method("get_province_city")
+	var sim: Object
+	if real_capable:
+		sim = ClassDB.instantiate("CampaignSim")
+	else:
+		sim = CampaignSimMock.new()
+	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "city/economy: new_campaign failed"):
+		return
+	print("smoke city/economy: simulation %s" % ["REAL" if real_capable else "MOCK"])
+
+	var city: Dictionary = sim.call("get_province_city", PROVINCE_ID)
+	if not _check(not city.is_empty(), "get_province_city(%s) should not be empty" % PROVINCE_ID):
+		return
+	_check(city.has("classes") and (city["classes"] as Dictionary).size() == 4, "get_province_city should expose 4 population classes")
+
+	var buildable: Array = city.get("buildable", [])
+	var choice: Dictionary = {}
+	for row in buildable:
+		if not bool(row.get("available", false)):
+			continue
+		if choice.is_empty() or int(row["cost"]) < int(choice["cost"]):
+			choice = row
+	if not _check(not choice.is_empty(), "no buildable building available in %s" % PROVINCE_ID):
+		return
+	print("smoke city/economy: building %s (%d livres, %d tour(s))" % [choice["building"], choice["cost"], choice["turns"]])
+
+	var economy_before: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(not economy_before.is_empty(), "get_faction_economy should not be empty")
+
+	var build_result: Dictionary = sim.call("submit_order", {"type": "build", "province": PROVINCE_ID, "building": choice["building"]})
+	_check(build_result.get("ok", false), "build order refused: %s" % build_result.get("error", "?"))
+
+	for _i in int(choice["turns"]):
+		sim.call("end_turn")
+
+	var city_after: Dictionary = sim.call("get_province_city", PROVINCE_ID)
+	var built_ids: Array = []
+	for entry in city_after.get("buildings", []):
+		built_ids.append(str(entry.get("id", "")))
+	_check(built_ids.has(str(choice["building"])), "%s should be in buildings after %d turn(s), got %s" % [choice["building"], choice["turns"], built_ids])
+
+	var economy_after: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(int(economy_after.get("projected_income", 0)) > int(economy_before.get("projected_income", 0)),
+		"projected_income should increase after construction: %d -> %d" % [economy_before.get("projected_income", 0), economy_after.get("projected_income", 0)])
+
+	var tax_result: Dictionary = sim.call("submit_order", {"type": "set_tax_rate", "rate": "high"})
+	_check(tax_result.get("ok", false), "set_tax_rate high refused: %s" % tax_result.get("error", "?"))
+	sim.call("end_turn")
+	var economy_high_tax: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(int(economy_high_tax.get("income", 0)) > int(economy_after.get("income", 0)),
+		"income should rise with high tax: %d -> %d" % [economy_after.get("income", 0), economy_high_tax.get("income", 0)])
+
+	if _failures == 0:
+		print("smoke OK: city/economy (%s), built %s, income %d -> %d -> %d (high tax)" % [
+			"real" if real_capable else "mock", choice["building"],
+			economy_before.get("projected_income", 0), economy_after.get("projected_income", 0), economy_high_tax.get("income", 0)])
 
 
 static func _project_root() -> String:
