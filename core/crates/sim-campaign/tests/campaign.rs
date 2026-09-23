@@ -462,6 +462,8 @@ fn sea_move_kent_to_boulonnais_requires_ports() {
 fn entering_an_enemy_army_triggers_a_battle() {
     let data = data();
     let mut state = france(&data, 3);
+    // Auto-resolved battle (interactive battles are covered by tests/m7.rs).
+    state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
     // Teleport the English army next door for the test.
@@ -664,7 +666,10 @@ fn save_load_round_trip() {
         state.end_turn(&data);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":3"));
+    assert!(json.contains(&format!(
+        "\"state_version\":{}",
+        sim_campaign::STATE_VERSION
+    )));
     assert!(json.contains("\"tax_rate\""), "new field round-trips");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
@@ -678,8 +683,11 @@ fn save_load_round_trip() {
     b.end_turn(&data);
     assert_eq!(a.save_json(), b.save_json());
 
-    let err = CampaignState::load_json(&json.replace("\"state_version\":3", "\"state_version\":1"))
-        .unwrap_err();
+    let err = CampaignState::load_json(&json.replace(
+        &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
+        "\"state_version\":1",
+    ))
+    .unwrap_err();
     assert!(matches!(
         err,
         sim_campaign::CampaignError::VersionMismatch { found: 1, .. }
