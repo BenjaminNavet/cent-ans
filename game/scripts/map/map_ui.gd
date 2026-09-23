@@ -13,9 +13,13 @@ signal main_menu_requested
 signal quit_requested
 signal recruit_requested(province_id: String, unit_type: String)
 signal create_army_requested(province_id: String, unit_indices: Array)
+signal build_requested(province_id: String, building_id: String)
+signal cancel_build_requested(province_id: String)
+signal tax_rate_changed(faction_id: String, rate: String)
 signal stance_changed(army_id: String, stance: String)
 signal army_panel_closed
 signal province_panel_closed
+signal faction_panel_requested
 
 const MENU_SAVE := 0
 const MENU_LOAD := 1
@@ -40,6 +44,7 @@ const TOAST_SECONDS := 3.5
 @onready var log_text: RichTextLabel = %LogText
 @onready var army_panel: ArmyPanel = %ArmyPanel
 @onready var province_panel: ProvincePanel = %ProvincePanel
+@onready var faction_panel: FactionPanel = %FactionPanel
 @onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
 
 var _log_lines: PackedStringArray = PackedStringArray()
@@ -59,10 +64,17 @@ func _ready() -> void:
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
 	province_panel.create_army_requested.connect(func(p: String, i: Array) -> void: create_army_requested.emit(p, i))
+	province_panel.build_requested.connect(func(p: String, b: String) -> void: build_requested.emit(p, b))
+	province_panel.cancel_build_requested.connect(func(p: String) -> void: cancel_build_requested.emit(p))
 	province_panel.closed.connect(func() -> void: province_panel_closed.emit())
+	faction_panel.closed.connect(func() -> void: faction_panel.hide())
+	faction_panel.tax_rate_changed.connect(func(f: String, r: String) -> void: tax_rate_changed.emit(f, r))
+	faction_swatch.gui_input.connect(_on_faction_swatch_input)
+	faction_label.gui_input.connect(_on_faction_swatch_input)
 	army_panel.hide()
 	army_panel.stance_changed.connect(func(a: String, s: String) -> void: stance_changed.emit(a, s))
 	army_panel.closed.connect(func() -> void: army_panel_closed.emit())
+	faction_panel.hide()
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
 	save_load_dialog.load_confirmed.connect(func(p: String) -> void: load_requested.emit(p))
 	save_load_dialog.dialog_closed.connect(func() -> void: end_turn_button.disabled = false)
@@ -79,9 +91,14 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-func set_treasury(treasury: int, income: int) -> void:
+## `projected` : revenu prévisionnel (`get_faction_economy`), -1 si indisponible (repli
+## sans le second nombre).
+func set_treasury(treasury: int, income: int, projected: int = -1) -> void:
 	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
-	income_label.text = "Revenu : %s%s ℔" % ["+" if income >= 0 else "", ProvincePanel._thousands(income)]
+	var text := "Revenu : %s%s" % ["+" if income >= 0 else "", ProvincePanel._thousands(income)]
+	if projected != -1:
+		text += " (prév. %s%s)" % ["+" if projected >= 0 else "", ProvincePanel._thousands(projected)]
+	income_label.text = text + " ℔"
 
 
 func set_date(text: String) -> void:
@@ -193,12 +210,29 @@ func log_line_count() -> int:
 # --- Panneaux ----------------------------------------------------------------------
 
 
-func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable()) -> void:
-	province_panel.show_province(province, state, recruitable, is_player_owner, label_of)
+func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable(), city: Dictionary = {}) -> void:
+	province_panel.show_province(province, state, recruitable, is_player_owner, label_of, city)
 
 
 func hide_province() -> void:
 	province_panel.hide()
+
+
+func show_faction(id: String, label: String, color: Color, economy: Dictionary) -> void:
+	faction_panel.show_faction(id, label, color, economy)
+
+
+func hide_faction() -> void:
+	faction_panel.hide()
+
+
+func faction_panel_visible() -> bool:
+	return faction_panel.visible
+
+
+func _on_faction_swatch_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		faction_panel_requested.emit()
 
 
 func show_army(army_id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable) -> void:
