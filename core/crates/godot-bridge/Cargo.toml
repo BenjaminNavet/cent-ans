@@ -14,3 +14,4 @@ sim-campaign = { path = "../sim-campaign" }
 sim-battle = { path = "../sim-battle" }
 data-model = { path = "../data-model" }
 png = "0.17"
+serde_json.workspace = true
