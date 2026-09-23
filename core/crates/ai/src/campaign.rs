@@ -22,10 +22,10 @@ pub const SIEGE_SUPERIORITY: f64 = 1.5;
 /// An army defends a province when it is at least this strong relative to the threat.
 pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
-pub const WAR_MILITARY_SHARE: f64 = 0.6;
-pub const PEACE_MILITARY_SHARE: f64 = 0.3;
-/// Recruitment orders per turn at most.
-pub const MAX_RECRUITS_PER_TURN: usize = 3;
+pub const WAR_MILITARY_SHARE: f64 = 0.7;
+pub const PEACE_MILITARY_SHARE: f64 = 0.4;
+/// Recruitment orders per turn: one per this much seasonal income (1 to 8).
+pub const INCOME_PER_RECRUIT: i64 = 6000;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
 
@@ -151,7 +151,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         0.0
     };
-    let rate = if unrest > 55.0 {
+    // A treasury worth ten seasons of income is idle money: spend it, and
+    // lighten taxes at peace.
+    let rich = ctx.treasury > 10 * ctx.income.max(1);
+    let rate = if unrest > 55.0 || (rich && !ctx.at_war()) {
         TaxRate::Low
     } else if ctx.at_war() && unrest < 30.0 {
         TaxRate::High
@@ -176,6 +179,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         PEACE_MILITARY_SHARE
     };
+    let share = if rich { share + 0.3 } else { share };
     let target_upkeep = (ctx.income as f64 * share) as i64;
     let mut planned_upkeep = ctx.army_upkeep;
 
@@ -190,6 +194,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
     let mut recruits = 0;
+    let max_recruits = (ctx.income / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
     'sites: for site in &sites {
         if !ctx.owns(site) {
             continue;
@@ -206,7 +211,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         let Some(option) = best else {
             continue;
         };
-        while recruits < MAX_RECRUITS_PER_TURN
+        while recruits < max_recruits
             && planned_upkeep + i64::from(option.upkeep)
                 <= target_upkeep.max(i64::from(option.upkeep))
             && budget >= i64::from(option.cost)
@@ -218,7 +223,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;
-            if !ctx.at_war() {
+            if !ctx.at_war() && recruits % 2 == 0 {
                 continue 'sites;
             }
         }
