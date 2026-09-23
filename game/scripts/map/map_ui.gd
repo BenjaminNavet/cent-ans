@@ -219,6 +219,18 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#2a5a7a]★ %s[/color]" % text
 		elif kind == "appointment":
 			line = "[color=#4a3a10]⚑ %s[/color]" % text
+		elif kind == "war_declared":
+			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
+		elif kind == "peace_signed":
+			line = "[color=#2a6a2a][b]☮ %s[/b][/color]" % text
+		elif kind == "alliance_formed" or kind == "vassalage":
+			line = "[color=#1a3a8b][b]⚜ %s[/b][/color]" % text
+		elif kind == "alliance_broken" or kind == "vassal_rebellion":
+			line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
+		elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
+			line = "[color=#4a3a10]✉ %s[/color]" % text
+		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
+			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
 		elif kind == "income":
 			line = "[color=#4a3a10]%s[/color]" % text
 		else:
