@@ -115,6 +115,13 @@ pub fn learn_skill(
     let character = state.characters.get_mut(id).expect("checked above");
     character.skill_points -= skill.cost;
     character.skills_learned.insert(skill.id.clone());
+    // Each learned skill raises its branch level by one (0-10 scale).
+    let level = match skill.branch {
+        data_model::SkillBranch::Command => &mut character.skills.command,
+        data_model::SkillBranch::Governance => &mut character.skills.governance,
+        data_model::SkillBranch::Court => &mut character.skills.court,
+    };
+    *level = (*level + 1).min(10);
     Ok(())
 }
 

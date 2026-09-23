@@ -7,13 +7,14 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
-    BuildingId, CharacterId, FactionId, GameData, PopulationClass, ProvinceId, ResourceCategory,
+    BuildingId, CharacterId, Effect, FactionId, GameData, PopulationClass, ProvinceId,
+    ResourceCategory, Role, Skill, SkillBranch,
 };
 use godot::classes::RefCounted;
 use godot::prelude::*;
 use sim_campaign::{
-    Army, ArmyId, BuildOption, CampaignState, Construction, EffectTotals, EffectValue,
-    FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
+    Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, EffectTotals,
+    EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
 };
 
 use crate::convert::variant_to_json;
@@ -227,6 +228,16 @@ impl CampaignSim {
             "devastation" => i64::from(province.devastation),
             "population_total" => province.population.total() as i64,
         };
+        if let Some(governor) = ProvinceId::new(id.to_string())
+            .ok()
+            .and_then(|p| state.province_governor(&p))
+        {
+            dict.set("governor", governor.as_str());
+            dict.set(
+                "governor_name",
+                state.character_name(data, governor).as_str(),
+            );
+        }
         if let Some(siege) = &province.siege {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
@@ -255,7 +266,7 @@ impl CampaignSim {
         let Some(army) = ArmyId::parse(&id.to_string()).and_then(|id| state.army(&id)) else {
             return VarDictionary::new();
         };
-        army_dict(data, army)
+        army_dict(state, data, army)
     }
 
     /// `{province_id: cost}` for every province the army can reach this turn.
@@ -347,6 +358,94 @@ impl CampaignSim {
         events_array(&state.end_turn(data))
     }
 
+    /// Character sheet (spec M4 § 3), or an empty dictionary for an unknown id.
+    #[func]
+    fn get_character(&self, id: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(view) = CharacterId::new(id.to_string())
+            .ok()
+            .and_then(|id| state.character_view(data, &id))
+        else {
+            return VarDictionary::new();
+        };
+        character_dict(state, data, &view)
+    }
+
+    /// Living characters of `faction`: ruler, heir, then by age.
+    #[func]
+    fn get_faction_characters(&self, faction: GString) -> VarArray {
+        let Some(state) = &self.state else {
+            return VarArray::new();
+        };
+        let Ok(faction) = FactionId::new(faction.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .faction_characters(&faction)
+            .iter()
+            .map(|id| GString::from(id.as_str()).to_variant())
+            .collect()
+    }
+
+    /// The whole skill tree, sorted by branch, tier, then id.
+    #[func]
+    fn get_skill_tree(&self) -> VarArray {
+        let Some(data) = &self.data else {
+            return VarArray::new();
+        };
+        let mut skills: Vec<&Skill> = data.skills.values().collect();
+        skills.sort_by_key(|s| (branch_key(s.branch), s.tier, s.id.clone()));
+        skills
+            .into_iter()
+            .map(|skill| skill_dict(skill).to_variant())
+            .collect()
+    }
+
+    /// Skills `character` could learn now (prerequisites met, not learned).
+    #[func]
+    fn get_learnable(&self, character: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(id) = CharacterId::new(character.to_string()) else {
+            return VarArray::new();
+        };
+        let points = state.character(&id).map_or(0, |c| c.skill_points);
+        state
+            .learnable_skills(data, &id)
+            .iter()
+            .filter(|skill| data.skills.get(*skill).is_some_and(|s| s.cost <= points))
+            .map(|skill| GString::from(skill.as_str()).to_variant())
+            .collect()
+    }
+
+    /// `[{id, name, age, faction}]` of valid spouses for `character`.
+    #[func]
+    fn get_marriage_candidates(&self, character: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(id) = CharacterId::new(character.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .marriage_candidates(data, &id)
+            .iter()
+            .filter_map(|candidate| state.character_view(data, candidate))
+            .map(|view| {
+                vdict! {
+                    "id" => view.id.as_str(),
+                    "name" => view.name.as_str(),
+                    "age" => i64::from(view.age),
+                    "faction" => view.faction.as_str(),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// Events of the last resolved turn.
     #[func]
     fn get_events(&self) -> VarArray {
@@ -391,16 +490,15 @@ fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
         .collect()
 }
 
-fn character_name(data: &GameData, id: Option<&CharacterId>) -> String {
-    id.and_then(|id| data.characters.get(id))
-        .map_or_else(String::new, |c| c.name.display.clone())
-}
-
-fn army_dict(data: &GameData, army: &Army) -> VarDictionary {
+fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictionary {
+    let general_name = army
+        .general
+        .as_ref()
+        .map_or_else(String::new, |id| state.character_name(data, id));
     vdict! {
         "faction" => army.faction.as_str(),
         "general" => army.general.as_ref().map_or("", |id| id.as_str()),
-        "general_name" => character_name(data, army.general.as_ref()).as_str(),
+        "general_name" => general_name.as_str(),
         "location" => army.location.as_str(),
         "units" => &units_array(data, &army.units),
         "movement_points" => i64::from(army.movement_points),
@@ -603,4 +701,159 @@ fn events_array(events: &[GameEvent]) -> VarArray {
             .to_variant()
         })
         .collect()
+}
+
+fn branch_key(branch: SkillBranch) -> &'static str {
+    match branch {
+        SkillBranch::Command => "command",
+        SkillBranch::Governance => "governance",
+        SkillBranch::Court => "court",
+    }
+}
+
+fn role_label_fr(role: Role) -> &'static str {
+    match role {
+        Role::Ruler => "Souverain(e)",
+        Role::Consort => "Conjoint(e) royal(e)",
+        Role::Heir => "Héritier(ère)",
+        Role::Prince => "Prince/Princesse",
+        Role::Commander => "Commandant(e)",
+        Role::Noble => "Noble",
+        Role::Prelate => "Prélat",
+        Role::Burgher => "Bourgeois(e)",
+        Role::Exile => "Exilé(e)",
+        Role::Claimant => "Prétendant(e)",
+        Role::Regent => "Régent(e)",
+    }
+}
+
+fn province_name(data: &GameData, id: &ProvinceId) -> String {
+    data.provinces
+        .get(id)
+        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
+}
+
+/// Current activity as shown by the court panel (its filters match on the
+/// prefixes "général", "gouverneur" and the exact "à la cour").
+fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) -> String {
+    if view.captive {
+        return "Captif(ve)".to_owned();
+    }
+    if let Some(province) = &view.governor_of {
+        return format!("gouverneur de {}", province_name(data, province));
+    }
+    if let Some(army) = view.army.as_ref().and_then(|a| state.army(a)) {
+        return format!(
+            "général de l'armée en {}",
+            province_name(data, &army.location)
+        );
+    }
+    "à la cour".to_owned()
+}
+
+fn effects_array(effects: &[Effect]) -> VarArray {
+    effects
+        .iter()
+        .map(|effect| {
+            let kind = serde_json::to_value(effect.effect)
+                .ok()
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default();
+            let mode = serde_json::to_value(effect.mode)
+                .ok()
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default();
+            vdict! {
+                "kind" => kind.as_str(),
+                "value" => effect.value,
+                "mode" => mode.as_str(),
+            }
+            .to_variant()
+        })
+        .collect()
+}
+
+fn skill_dict(skill: &Skill) -> VarDictionary {
+    vdict! {
+        "id" => skill.id.as_str(),
+        "name" => skill.name.display.as_str(),
+        "branch" => branch_key(skill.branch),
+        "tier" => i64::from(skill.tier),
+        "prerequisites" => &ids(skill.prerequisites.iter()),
+        "cost" => i64::from(skill.cost),
+        "description" => skill.description.as_str(),
+        "effects" => &effects_array(&skill.effects),
+    }
+}
+
+fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) -> VarDictionary {
+    let traits: VarArray = view
+        .traits
+        .iter()
+        .map(|t| {
+            let description = data
+                .traits
+                .get(&t.id)
+                .map_or("", |d| d.description.as_str());
+            vdict! {
+                "id" => t.id.as_str(),
+                "name" => t.name.as_str(),
+                "category" => t.category.as_str(),
+                "description" => description,
+            }
+            .to_variant()
+        })
+        .collect();
+    let children: VarArray = view
+        .children
+        .iter()
+        .map(|child| {
+            vdict! {
+                "id" => child.id.as_str(),
+                "name" => child.name.as_str(),
+                "age" => i64::from(child.age),
+            }
+            .to_variant()
+        })
+        .collect();
+    let title = view
+        .title
+        .clone()
+        .or_else(|| view.role.map(|r| role_label_fr(r).to_owned()))
+        .unwrap_or_else(|| "Membre de la maison".to_owned());
+    let learned = view.skills_learned.len();
+    let opt = |id: &Option<CharacterId>| id.as_ref().map_or(String::new(), |i| i.to_string());
+    vdict! {
+        "id" => view.id.as_str(),
+        "name" => view.name.as_str(),
+        "epithet" => view.epithet.as_deref().unwrap_or(""),
+        "sex" => match view.sex { data_model::Sex::Male => "male", data_model::Sex::Female => "female" },
+        "age" => i64::from(view.age),
+        "alive" => view.alive,
+        "faction" => view.faction.as_str(),
+        "house" => view.house.as_str(),
+        "title" => title.as_str(),
+        "role" => activity_label(state, data, view).as_str(),
+        "skills" => &vdict! {
+            "command" => i64::from(view.skills.command),
+            "governance" => i64::from(view.skills.governance),
+            "court" => i64::from(view.skills.court),
+        },
+        "experience" => i64::from(view.experience),
+        "skill_points" => i64::from(view.skill_points),
+        "xp_to_next" => i64::from(sim_campaign::skills::xp_for_next_point(learned)),
+        "skills_learned" => &ids(view.skills_learned.iter()),
+        "traits" => &traits,
+        "spouse" => opt(&view.spouse).as_str(),
+        "spouse_name" => view.spouse_name.as_deref().unwrap_or(""),
+        "children" => &children,
+        "father" => opt(&view.father).as_str(),
+        "mother" => opt(&view.mother).as_str(),
+        "location" => view.location.as_ref().map_or("", |p| p.as_str()),
+        "army" => view.army.as_ref().map_or(String::new(), |a| a.to_string()).as_str(),
+        "governor_of" => view.governor_of.as_ref().map_or("", |p| p.as_str()),
+        "captive" => view.captive,
+        "piety" => i64::from(view.piety),
+        "prestige" => i64::from(view.prestige),
+    }
 }

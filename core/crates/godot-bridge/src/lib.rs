@@ -209,6 +209,48 @@ impl GameDataStore {
         }
     }
 
+    /// Trait definition `{id, name, category, description, opposites[]}`
+    /// (spec M4 § 3), or an empty dictionary for an unknown id.
+    #[func]
+    fn get_trait(&self, id: GString) -> VarDictionary {
+        let Some(definition) = self
+            .data
+            .as_ref()
+            .and_then(|data| data.traits.get(id.to_string().as_str()))
+        else {
+            return VarDictionary::new();
+        };
+        vdict! {
+            "id" => definition.id.as_str(),
+            "name" => definition.name.display.as_str(),
+            "category" => format!("{:?}", definition.category).to_lowercase(),
+            "description" => definition.description.as_str(),
+            "opposites" => &ids_of(definition.opposites.iter()),
+        }
+    }
+
+    /// Skill definition `{id, name, branch, tier, prerequisites[], cost,
+    /// description}` (spec M4 § 3), or an empty dictionary for an unknown id.
+    #[func]
+    fn get_skill(&self, id: GString) -> VarDictionary {
+        let Some(skill) = self
+            .data
+            .as_ref()
+            .and_then(|data| data.skills.get(id.to_string().as_str()))
+        else {
+            return VarDictionary::new();
+        };
+        vdict! {
+            "id" => skill.id.as_str(),
+            "name" => skill.name.display.as_str(),
+            "branch" => format!("{:?}", skill.branch).to_lowercase(),
+            "tier" => i64::from(skill.tier),
+            "prerequisites" => &ids_of(skill.prerequisites.iter()),
+            "cost" => i64::from(skill.cost),
+            "description" => skill.description.as_str(),
+        }
+    }
+
     /// Primary heraldry colour of each province's owner, in the order of
     /// `province_ids`. Unknown provinces or factions give magenta so that a
     /// missing colour is visible on the map.

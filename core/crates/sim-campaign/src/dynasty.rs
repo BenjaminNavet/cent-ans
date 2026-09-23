@@ -950,6 +950,14 @@ impl CampaignState {
 
     /// Living characters of `faction`, ruler and heir first, then by age
     /// (spec § 3 `get_faction_characters`).
+    /// Living governor of `province`, if any.
+    pub fn province_governor(&self, province: &ProvinceId) -> Option<&CharacterId> {
+        self.characters
+            .iter()
+            .find(|(_, c)| c.alive && c.governor_of.as_ref() == Some(province))
+            .map(|(id, _)| id)
+    }
+
     pub fn faction_characters(&self, faction: &FactionId) -> Vec<CharacterId> {
         let faction_state = self.factions.get(faction);
         let ruler = faction_state.and_then(|f| f.ruler.clone());
