@@ -355,7 +355,8 @@ impl CampaignSim {
             godot_warn!("CampaignSim.end_turn called before new_campaign");
             return VarArray::new();
         };
-        events_array(&state.end_turn(data))
+        // M9: every AI faction plays with the strategic planner.
+        events_array(&state.end_turn_with(data, ai::plan_turn))
     }
 
     /// Character sheet (spec M4 § 3), or an empty dictionary for an unknown id.
