@@ -79,6 +79,14 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   (villes et armées 3D, bannière teintée, repli sur les marqueurs). Tout fonctionne sans assets.
   Captures : `docs/img/godot-portraits.png`, `docs/img/godot-campaign-models.png`.
 
+- Écrans et flux (F3) : menu de départ illustré par une carte ancienne rendue depuis `data/map/`
+  (`cent-ans assets menu-art`), écran de chargement à étapes, menu pause (Échap), réglages persistés
+  (autoload `Settings` : affichage, interface, caméra, sauvegarde auto, confirmation de fin de tour,
+  batailles 3D ou auto, volumes), emplacements de sauvegarde avec vignette et fiche, sauvegarde
+  automatique tournante sur 3 emplacements, « Continuer », rapport de saison cliquable, alertes
+  persistantes, crédits. Smoke § 12 « flow ». Voir `docs/godot-map.md` § Écrans et flux. Captures :
+  `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-flow-*.png`, `godot-credits.png`.
+
 ## Limites connues
 - M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
   mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
