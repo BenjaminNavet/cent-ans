@@ -29,7 +29,7 @@ revient dans la campagne. Design général : `docs/design/2026-09-23-cent-ans-de
 - Fin : un camp n'a plus d'unité en état de combattre, ou quitte le champ, ou 60 min simulées (défenseur
   vainqueur). Résultat : vainqueur, pertes par unité, général tué/capturé.
 - IA de bataille minimale (M9 l'étoffe) : le camp IA avance en ligne, tire à portée, charge avec la
-  cavalerie quand l'ennemi est à moins de 150 m, maintient les archers derrière l'infanterie.
+  cavalerie quand l'ennemi est à moins de 150 m, maintient les archers derrière l'infanterie. (Remplacée depuis par l'IA tactique M9, `m9-ai.md` § 2, et rééquilibrée.)
 - Commandes : `move(units, point, run)`, `attack(units, target)`, `halt`, `formation(units, kind)`,
   `fire_at_will(units, bool)`, `withdraw(units)`. Validation et effets purement dans `sim-battle`.
 - Tests (≥ 10) : déterminisme, tir hors portée sans effet, pluie réduit le tir, charge de flanc plus

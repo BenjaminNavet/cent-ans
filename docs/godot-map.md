@@ -362,10 +362,39 @@ godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20 
   (4 800 soldats, 8 MultiMesh mis à jour à chaque image) : **60 FPS** vsync (58,7 de moyenne sur 600
   images, démarrage compris), **141 FPS** de moyenne sans vsync (pointe 188). Pas de simulation :
   0,12 ms en debug, 0,02 ms en release pour 40 régiments.
-- **Smoke** (§ 6 de `tests/smoke.gd`) : bataille réelle France–Angleterre, 2 000 ticks headless de
-  `BattleSim` avec les deux IA (fin atteinte, ~1 800 ticks), `resolve_battle` accepté ; puis la boucle
+- **Smoke** (§ 8 de `tests/smoke.gd`) : bataille réelle France–Angleterre, jusqu'à 12 000 ticks headless
+  de `BattleSim` avec les deux IA (fin atteinte, ≈ 3 500 ticks depuis l'IA M9), `resolve_battle` accepté ; puis la boucle
   complète par la carte : dialogue visible, « Livrer bataille », `battle.tscn` 60 images (soldats
   dessinés), un ordre, fin de bataille, écran de fin, « Retour à la campagne », bataille résolue.
+- **IA de bataille** (M9, `m9-ai.md` § 2) : le camp que le joueur ne commande pas (les deux en
+  `--autoplay`) est joué par l'IA tactique de `sim-battle` (rôles, posture défensive sur hauteur avec
+  pieux quand il est plus faible, duel d'archers, charges de flanc, réserve, retraits) ; aucune règle côté
+  Godot.
+
+### Batailles de siège (M8 § 2)
+
+![Bataille de siège](img/godot-siege-battle.png)
+
+- **Entrée** : bouton « Donner l'assaut » du panneau d'armée (`siege_controller.gd`) → avec les
+  batailles interactives, l'assaut attend en bataille de siège et le dialogue s'ouvre aussitôt
+  (« Assaut en vue », fortifications et brèche, « Livrer l'assaut » / « Résolution automatique ») ; un
+  assaut de l'IA contre une place du joueur arrive au même dialogue en fin de tour.
+- **Scène** : `battle.tscn` détecte `get_terrain().siege` et ajoute un nœud `Siege`
+  (`scripts/battle/battle_siege.gd`, `BattleSiege`) : courtines crénelées (une par pan, axe local X le long
+  du pan, Z vers l'extérieur), tours rondes à toit conique, porte (linteau et vantaux), place pavée avec
+  puits, maisons et église dans la moitié arrière (modèle M10 `assets/models/cathedral.glb` s'il
+  existe). `update(get_siege(), units)` à chaque image : pans battus assombris et abaissés, effondrés en
+  éboulis (brèche), vantaux disparus (porte enfoncée) ; beffroi et bélier dessinés d'un seul tenant
+  (`render` = `tower` / `ram`, pas de MultiMesh de soldats), échelles appuyées devant les régiments qui
+  escaladent. Les défenseurs sur le chemin de ronde sont dessinés à sa hauteur (`y` du pont). HUD : ligne
+  « Murailles x % · n brèche(s) · porte tenue/enfoncée · place centrale tenue t / 60 s », titre
+  « Assaut de … ».
+- **Ligne de commande** : `godot --path game res://scenes/battle/battle.tscn -- --siege
+  --screenshot=/chemin/absolu/godot-siege-battle.png` (démo : la plus grande armée française assiège la
+  Guyenne, `debug_stage_siege` ; capture 10 s après les premières échelles, vue sur la façade).
+- **Smoke** (§ 11) : assaut réel de la Guyenne headless (murailles, défenseurs sur le rempart, fin,
+  `resolve_battle`), puis `battle.tscn` sur un second assaut (murailles maillées, ligne d'état, fin,
+  retour).
 
 ## Chronique : événements historiques et aléatoires (M10)
 
