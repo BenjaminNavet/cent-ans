@@ -230,5 +230,57 @@ def assets_models() -> None:
     console.print(table)
 
 
+@assets_app.command("portraits")
+def assets_portraits(
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal de portraits"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : le moins cher retenu)"
+    ),
+    envelope: float = typer.Option(
+        10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """Génère les portraits manquants (256×256) dans game/assets/portraits/."""
+    from decimal import Decimal
+
+    from cent_ans_tools import portraits
+
+    model = model or portraits.DEFAULT_MODEL
+    jobs = portraits.plan(limit=limit)
+    if dry_run:
+        for job in jobs:
+            console.rule(job.character_id)
+            console.print(job.prompt)
+        unit = portraits.KNOWN_PRICES.get(model)
+        cost = (
+            f"≈ {unit * len(jobs):.2f} $"
+            if unit is not None
+            else "tarif inconnu hors ligne"
+        )
+        console.print(
+            f"{len(jobs)} portrait(s) avec {model} : {cost} (aucun appel réseau)"
+        )
+        return
+    if not jobs:
+        console.print("[green]OK[/green] : tous les portraits existent déjà")
+        return
+    result = portraits.generate(
+        jobs,
+        model,
+        envelope=Decimal(str(envelope)),
+        on_progress=lambda job, spent: console.print(
+            f"{job.character_id} ({spent:.4f} $)"
+        ),
+    )
+    console.print(
+        f"[green]OK[/green] : {len(result.written)} portrait(s), estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
+    )
+
+
 if __name__ == "__main__":
     app()
