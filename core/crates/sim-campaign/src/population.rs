@@ -168,6 +168,11 @@ fn update_class(
     }
     // Building `Unrest` effects: negative values are appeasement.
     unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
+    // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
+    // to its lord.
+    if class == SocialClass::Nobility {
+        unrest_target -= effects.loyalty.apply(0.0);
+    }
     unrest_target = unrest_target.clamp(0.0, 100.0);
     entry.unrest = move_towards(entry.unrest, unrest_target, UNREST_SPEED);
 }
