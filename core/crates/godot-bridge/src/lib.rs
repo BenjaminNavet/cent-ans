@@ -3,7 +3,9 @@
 //! Only plain values cross the boundary (integers, strings, packed arrays);
 //! Godot never holds a pointer into the simulation.
 
-use std::path::PathBuf;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::{Path, PathBuf};
 
 use data_model::{GameData, HistoricalDate};
 use godot::classes::RefCounted;
@@ -79,6 +81,7 @@ impl CampaignSim {
 pub struct GameDataStore {
     data: Option<GameData>,
     warnings: Vec<String>,
+    last_image_size: Vector2i,
     base: Base<RefCounted>,
 }
 
@@ -88,6 +91,7 @@ impl IRefCounted for GameDataStore {
         GameDataStore {
             data: None,
             warnings: Vec::new(),
+            last_image_size: Vector2i::ZERO,
             base,
         }
     }
@@ -255,6 +259,127 @@ impl GameDataStore {
                 .map_or("", |id| id.as_str()),
         }
     }
+
+    /// Primary heraldry colour of each province's owner, in the order of
+    /// `province_ids`. Unknown provinces or factions give magenta so that a
+    /// missing colour is visible on the map.
+    #[func]
+    fn get_province_owner_colors(&self, province_ids: PackedStringArray) -> PackedColorArray {
+        let Some(data) = &self.data else {
+            return PackedColorArray::new();
+        };
+        province_ids
+            .as_slice()
+            .iter()
+            .map(|id| {
+                data.provinces
+                    .get(id.to_string().as_str())
+                    .and_then(|province| data.factions.get(&province.owner))
+                    .map_or(Color::MAGENTA, |faction| {
+                        html_color(&faction.heraldry.primary_color)
+                    })
+            })
+            .collect()
+    }
+
+    /// Decodes a 16-bit grayscale PNG into little-endian `u16` samples
+    /// (row-major, `width * height * 2` bytes). Empty array (and an error
+    /// message) if the file is missing or not 16-bit grayscale. The image
+    /// size is available afterwards through `get_last_image_size`.
+    #[func]
+    fn load_heightmap_u16(&mut self, path: GString) -> PackedByteArray {
+        self.decode_png(&path, png::ColorType::Grayscale, png::BitDepth::Sixteen)
+    }
+
+    /// Decodes an 8-bit grayscale PNG into one byte per pixel (row-major).
+    #[func]
+    fn load_mask_u8(&mut self, path: GString) -> PackedByteArray {
+        self.decode_png(&path, png::ColorType::Grayscale, png::BitDepth::Eight)
+    }
+
+    /// Decodes an 8-bit RGB PNG into three bytes per pixel (row-major, RGB).
+    #[func]
+    fn load_rgb8(&mut self, path: GString) -> PackedByteArray {
+        self.decode_png(&path, png::ColorType::Rgb, png::BitDepth::Eight)
+    }
+
+    /// Size in pixels of the last image decoded by `load_heightmap_u16`,
+    /// `load_mask_u8` or `load_rgb8` (zero if the last decode failed).
+    #[func]
+    fn get_last_image_size(&self) -> Vector2i {
+        self.last_image_size
+    }
+}
+
+impl GameDataStore {
+    /// Decodes `path` and checks that it has exactly the expected colour type
+    /// and bit depth. 16-bit samples are converted from PNG's big-endian to
+    /// little-endian so that GDScript can read them with `decode_u16`.
+    fn decode_png(
+        &mut self,
+        path: &GString,
+        color_type: png::ColorType,
+        bit_depth: png::BitDepth,
+    ) -> PackedByteArray {
+        self.last_image_size = Vector2i::ZERO;
+        match decode_png_file(Path::new(&path.to_string()), color_type, bit_depth) {
+            Ok((bytes, width, height)) => {
+                self.last_image_size = Vector2i::new(width as i32, height as i32);
+                PackedByteArray::from(bytes)
+            }
+            Err(error) => {
+                godot_error!("GameDataStore: cannot decode {path}: {error}");
+                PackedByteArray::new()
+            }
+        }
+    }
+}
+
+/// Reads a PNG with exactly `color_type` / `bit_depth`; returns raw samples
+/// (little-endian for 16-bit) plus the image size.
+fn decode_png_file(
+    path: &Path,
+    color_type: png::ColorType,
+    bit_depth: png::BitDepth,
+) -> Result<(Vec<u8>, u32, u32), String> {
+    let file = File::open(path).map_err(|error| error.to_string())?;
+    let mut decoder = png::Decoder::new(BufReader::new(file));
+    // Keep the raw 16-bit samples instead of letting the decoder truncate them.
+    decoder.set_transformations(png::Transformations::IDENTITY);
+    let mut reader = decoder.read_info().map_err(|error| error.to_string())?;
+    let info = reader.info();
+    if info.color_type != color_type || info.bit_depth != bit_depth {
+        return Err(format!(
+            "expected {color_type:?}/{bit_depth:?}, got {:?}/{:?}",
+            info.color_type, info.bit_depth
+        ));
+    }
+    let (width, height) = (info.width, info.height);
+    let mut bytes = vec![0u8; reader.output_buffer_size()];
+    let frame = reader
+        .next_frame(&mut bytes)
+        .map_err(|error| error.to_string())?;
+    bytes.truncate(frame.buffer_size());
+    if bit_depth == png::BitDepth::Sixteen {
+        swap_u16_endianness(&mut bytes);
+    }
+    Ok((bytes, width, height))
+}
+
+/// Swaps the two bytes of every 16-bit sample in place. Works on eight bytes
+/// at a time so that it stays fast in unoptimised builds (a 4096² heightmap is
+/// 16M samples).
+fn swap_u16_endianness(bytes: &mut [u8]) {
+    const LOW_BYTES: u64 = 0x00ff_00ff_00ff_00ff;
+    let (words, rest) = bytes.as_chunks_mut::<8>();
+    for word in words {
+        let value = u64::from_ne_bytes(*word);
+        let swapped = ((value & LOW_BYTES) << 8) | ((value >> 8) & LOW_BYTES);
+        *word = swapped.to_ne_bytes();
+    }
+    for sample in rest.as_chunks_mut::<2>().0 {
+        sample.swap(0, 1);
+    }
 }
 
 /// Collects ids into a `PackedStringArray`.
@@ -281,4 +406,42 @@ fn html_color(html: &str) -> Color {
 
 fn vector2(point: [f64; 2]) -> Vector2 {
     Vector2::new(point[0] as f32, point[1] as f32)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn swaps_every_sample_including_tail() {
+        let mut bytes: Vec<u8> = (0u8..18).collect();
+        swap_u16_endianness(&mut bytes);
+        let expected: Vec<u8> = (0u8..18).map(|i| i ^ 1).collect();
+        assert_eq!(bytes, expected);
+    }
+
+    #[test]
+    fn real_heightmap_decodes_to_little_endian_u16() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data/map/heightmap.png");
+        if !path.exists() {
+            return;
+        }
+        let (bytes, width, height) =
+            decode_png_file(&path, png::ColorType::Grayscale, png::BitDepth::Sixteen).unwrap();
+        assert_eq!(bytes.len(), (width * height * 2) as usize);
+        let centre = ((height / 2) * width + width / 2) as usize * 2;
+        let sample = u16::from_le_bytes([bytes[centre], bytes[centre + 1]]);
+        assert!(sample > 0, "centre of the map should be land");
+    }
+
+    #[test]
+    fn wrong_bit_depth_is_refused() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data/map/land_mask.png");
+        if !path.exists() {
+            return;
+        }
+        let error =
+            decode_png_file(&path, png::ColorType::Grayscale, png::BitDepth::Sixteen).unwrap_err();
+        assert!(error.contains("expected"), "{error}");
+    }
 }

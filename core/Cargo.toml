@@ -19,3 +19,18 @@ serde_json = "1"
 rand = "0.8"
 rand_chacha = "0.3"
 thiserror = "2"
+
+# PNG decoding (4096x4096 16-bit heightmap) must stay well under 500 ms even in
+# debug builds: optimise only the decoding crates, never our own code.
+[profile.dev.package.png]
+opt-level = 3
+[profile.dev.package.fdeflate]
+opt-level = 3
+[profile.dev.package.flate2]
+opt-level = 3
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+[profile.dev.package.crc32fast]
+opt-level = 3
+[profile.dev.package.simd-adler32]
+opt-level = 3
