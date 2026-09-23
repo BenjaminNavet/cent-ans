@@ -7,7 +7,7 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 2. [x] Technologies : `army_upkeep`, `army_experience`, `recruit_cost`, `movement`, `production`,
    `siege_resistance`, `fortification_level`, `wealth`, `prestige` ; surplus de recherche conservé.
 3. [x] Traits/compétences : `research_civil`/`research_military`, `Diplomacy`, `Intrigue`, `Loyalty`.
-4. [ ] Armées alliées de la province dans la bataille (auto-résolution + `battle_setup`).
+4. [x] Armées alliées de la province dans la bataille (auto-résolution + `battle_setup`).
 5. [ ] Événements : capture (+ rançon), effets différés (chaînes), Charles VI + Jeanne de Bourbon, folie.
 6. [ ] `docs/status.md` (Limites connues) + paragraphes « F1 » des specs.
 
@@ -51,5 +51,16 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
   dans une province, la `Loyalty` des bâtiments (château) et du gouverneur réduit le mécontentement de la
   noblesse.
 
+## Choix (point 4)
+- Coalition (`movement::battle_coalition`) : l'armée de la rencontre puis les autres armées de la province,
+  de la même faction ou alliées, en guerre contre la faction adverse (ordre des identifiants).
+- Auto-résolution : régiments concaténés (chacun avec les techs de sa faction), général commandant = meilleur
+  commandement (`coalition_commander`), ravitaillement moyen pondéré par l'effectif ; pertes réparties par
+  régiment sur chaque armée ; seul le commandant peut être capturé ; tous les vaincus retraitent.
+- `battle_setup` / `resolve_pending_battle` : une armée combinée (`coalition_army`) de même ordre ; le camp
+  garde l'id et la faction de l'armée de tête. La bataille est différée si le joueur est dans l'une des
+  coalitions (même comme allié). Les assauts de siège restent à deux (armée assiégeante contre garnison).
+- `CharacterState::captor` (serde par défaut) : faction qui détient un captif (bataille, chronique).
+
 ## Prochaine étape
-Point 4 (armées alliées dans la bataille).
+Point 5 (capture, rançon, effets différés, Charles VI).

@@ -465,7 +465,110 @@ pub(crate) fn fight(
     );
 }
 
-/// Auto-resolves a field battle between two armies standing in the same province.
+/// Armies fighting on `lead`'s side in its province (F1): `lead` first, then
+/// every other army of the province belonging to `lead`'s faction or to an
+/// ally of it, and at war with `enemy` (id order).
+pub fn battle_coalition(state: &CampaignState, lead: &ArmyId, enemy: &FactionId) -> Vec<ArmyId> {
+    let Some(lead_army) = state.armies.get(lead) else {
+        return Vec::new();
+    };
+    let mut ids = vec![lead.clone()];
+    ids.extend(
+        state
+            .armies
+            .iter()
+            .filter(|(id, army)| {
+                *id != lead
+                    && army.location == lead_army.location
+                    && state.is_allied(&lead_army.faction, &army.faction)
+                    && state.is_at_war(&army.faction, enemy)
+            })
+            .map(|(id, _)| id.clone()),
+    );
+    ids
+}
+
+/// The army of a coalition whose general commands it (F1): the best
+/// general by command skill (ties: the first in coalition order).
+pub fn coalition_commander(state: &CampaignState, ids: &[ArmyId]) -> Option<ArmyId> {
+    let mut best: Option<(&ArmyId, u8)> = None;
+    for id in ids {
+        let Some(command) = state
+            .armies
+            .get(id)
+            .and_then(|a| a.general.as_ref())
+            .and_then(|g| state.characters.get(g))
+            .filter(|c| c.alive)
+            .map(|c| c.skills.command)
+        else {
+            continue;
+        };
+        if best.is_none_or(|(_, b)| command > b) {
+            best = Some((id, command));
+        }
+    }
+    best.map(|(id, _)| id.clone())
+}
+
+/// One army standing for a whole coalition (F1): every regiment in
+/// coalition order, the commander's general, the lead's faction and the
+/// strength-weighted supply. Used for the 3D battle setup and to validate
+/// its result.
+pub(crate) fn coalition_army(state: &CampaignState, ids: &[ArmyId]) -> Option<Army> {
+    let mut combined = state.armies.get(ids.first()?)?.clone();
+    combined.general = coalition_commander(state, ids)
+        .and_then(|id| state.armies.get(&id))
+        .and_then(|a| a.general.clone());
+    let mut weighted_supply = f64::from(combined.supply) * f64::from(combined.total_strength());
+    let mut strength = f64::from(combined.total_strength());
+    for id in &ids[1..] {
+        let Some(army) = state.armies.get(id) else {
+            continue;
+        };
+        weighted_supply += f64::from(army.supply) * f64::from(army.total_strength());
+        strength += f64::from(army.total_strength());
+        combined.units.extend(army.units.iter().cloned());
+    }
+    if strength > 0.0 {
+        combined.supply = (weighted_supply / strength).round().clamp(0.0, 100.0) as u8;
+    }
+    Some(combined)
+}
+
+/// Battle description of a coalition (F1): the regiments of every army
+/// (each with its own faction's technologies), the commander's general and
+/// the strength-weighted supply.
+pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[ArmyId]) -> Side {
+    let commander = coalition_commander(state, ids);
+    let mut side = Side::default();
+    let mut weighted_supply = 0.0;
+    let mut strength = 0.0;
+    for id in ids {
+        let Some(army) = state.armies.get(id) else {
+            continue;
+        };
+        let part = side_from_army(state, data, army);
+        if commander.as_ref() == Some(id) {
+            side.general_command = part.general_command;
+            side.general_morale_bonus = part.general_morale_bonus;
+            side.general_charge_percent = part.general_charge_percent;
+            side.general_ranged_percent = part.general_ranged_percent;
+            side.general_defense_percent = part.general_defense_percent;
+            side.general_intrigue = part.general_intrigue;
+        }
+        let men = f64::from(army.total_strength());
+        weighted_supply += f64::from(part.supply) * men;
+        strength += men;
+        side.units.extend(part.units);
+    }
+    if strength > 0.0 {
+        side.supply = (weighted_supply / strength).round().clamp(0.0, 100.0) as u8;
+    }
+    side
+}
+
+/// Auto-resolves a field battle between two armies standing in the same
+/// province; the allied armies of the province join either side (F1).
 pub(crate) fn auto_fight(
     state: &mut CampaignState,
     data: &GameData,
@@ -491,31 +594,69 @@ pub(crate) fn auto_fight(
         river_crossing: province.is_some_and(|p| !p.rivers.is_empty()),
         walls: false,
     };
-    let attacker_side = side_from_army(state, data, attacker);
-    let defender_side = side_from_army(state, data, defender);
+    let attackers = battle_coalition(state, attacker_id, &defender.faction);
+    let defenders = battle_coalition(state, defender_id, &attacker.faction);
+    let attacker_side = coalition_side(state, data, &attackers);
+    let defender_side = coalition_side(state, data, &defenders);
     let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
     apply_battle_result(
         state,
         data,
-        attacker_id,
-        defender_id,
+        &attackers,
+        &defenders,
         attacker_origin,
         &result,
         events,
     );
 }
 
+/// Splits a coalition's outcome into one outcome per army (F1): each army
+/// takes the losses of its own regiments; only the commander's general can
+/// be captured.
+fn split_outcome(
+    state: &CampaignState,
+    ids: &[ArmyId],
+    outcome: &crate::battle_auto::SideOutcome,
+) -> Vec<(ArmyId, crate::battle_auto::SideOutcome)> {
+    let commander = coalition_commander(state, ids);
+    let mut offset = 0;
+    ids.iter()
+        .filter_map(|id| {
+            let count = state.armies.get(id)?.units.len();
+            let end = (offset + count).min(outcome.losses.len());
+            let losses = outcome.losses[offset.min(end)..end].to_vec();
+            offset += count;
+            Some((
+                id.clone(),
+                crate::battle_auto::SideOutcome {
+                    power: outcome.power,
+                    total_losses: losses.iter().sum(),
+                    losses,
+                    morale_delta: outcome.morale_delta,
+                    routed: outcome.routed,
+                    general_captured: outcome.general_captured && commander.as_ref() == Some(id),
+                },
+            ))
+        })
+        .collect()
+}
+
 /// Applies a battle result (auto-resolved or fought in 3D, M7): journal,
-/// losses, captures, general XP/traits (M4 hooks) and the loser's retreat.
+/// losses (spread over each coalition's armies, F1), captures, the
+/// commanding generals' XP/traits (M4 hooks) and the losers' retreat.
+/// `attackers` / `defenders` start with the two armies of the encounter.
 pub(crate) fn apply_battle_result(
     state: &mut CampaignState,
     data: &GameData,
-    attacker_id: &ArmyId,
-    defender_id: &ArmyId,
+    attackers: &[ArmyId],
+    defenders: &[ArmyId],
     attacker_origin: &ProvinceId,
     result: &crate::battle_auto::BattleResult,
     events: &mut Vec<GameEvent>,
 ) {
+    let (Some(attacker_id), Some(defender_id)) = (attackers.first(), defenders.first()) else {
+        return;
+    };
     let (Some(attacker), Some(defender)) =
         (state.armies.get(attacker_id), state.armies.get(defender_id))
     else {
@@ -525,8 +666,13 @@ pub(crate) fn apply_battle_result(
     let province = data.provinces.get(&province_id);
     let attacker_faction = attacker.faction.clone();
     let defender_faction = defender.faction.clone();
-    let attacker_general = attacker.general.clone();
-    let defender_general = defender.general.clone();
+    let general_of = |state: &CampaignState, ids: &[ArmyId]| {
+        coalition_commander(state, ids)
+            .and_then(|id| state.armies.get(&id))
+            .and_then(|a| a.general.clone())
+    };
+    let attacker_general = general_of(state, attackers);
+    let defender_general = general_of(state, defenders);
 
     let province_name =
         province.map_or_else(|| province_id.to_string(), |p| p.name.display.clone());
@@ -539,13 +685,22 @@ pub(crate) fn apply_battle_result(
         Winner::Attacker => &attacker_faction,
         Winner::Defender => &defender_faction,
     };
+    let allies_note = |ids: &[ArmyId]| {
+        if ids.len() > 1 {
+            format!(" (+{} armée(s) alliée(s))", ids.len() - 1)
+        } else {
+            String::new()
+        }
+    };
     events.push(
         GameEvent::new(
             EventKind::Battle,
             format!(
-                "Bataille de {province_name} : {} attaque {}. Vainqueur : {}. Pertes : {} contre {}.",
+                "Bataille de {province_name} : {}{} attaque {}{}. Vainqueur : {}. Pertes : {} contre {}.",
                 faction_name(&attacker_faction),
+                allies_note(attackers),
                 faction_name(&defender_faction),
+                allies_note(defenders),
                 faction_name(winner_faction),
                 result.attacker.total_losses,
                 result.defender.total_losses
@@ -556,8 +711,24 @@ pub(crate) fn apply_battle_result(
         .faction(winner_faction),
     );
 
-    apply_outcome(state, data, attacker_id, &result.attacker, events);
-    apply_outcome(state, data, defender_id, &result.defender, events);
+    let attacker_parts = split_outcome(state, attackers, &result.attacker);
+    let defender_parts = split_outcome(state, defenders, &result.defender);
+    for (id, outcome) in attacker_parts.iter().chain(defender_parts.iter()) {
+        apply_outcome(state, data, id, outcome, events);
+    }
+    // F1: a captured commander is held by the victor.
+    for (general, captor) in [
+        (&attacker_general, &defender_faction),
+        (&defender_general, &attacker_faction),
+    ] {
+        if let Some(c) = general
+            .as_ref()
+            .and_then(|g| state.characters.get_mut(g))
+            .filter(|c| c.captive && c.captor.is_none())
+        {
+            c.captor = Some(captor.clone());
+        }
+    }
     // M5 war score: a lopsided battle counts double.
     let (winner, loser, winner_losses, loser_losses) = match result.winner {
         Winner::Attacker => (
@@ -576,8 +747,8 @@ pub(crate) fn apply_battle_result(
     state.record_battle(winner, loser, loser_losses > 2 * winner_losses.max(1));
 
     // Spec § 2: XP, `trait_veteran`, wounded and death chance for both
-    // generals (only if they weren't captured, which already removed them
-    // from command).
+    // commanding generals (only if they weren't captured, which already
+    // removed them from command).
     if let Some(general) = &attacker_general {
         if state.characters.get(general).is_some_and(|c| c.alive) {
             dynasty::on_battle_resolved(
@@ -601,15 +772,22 @@ pub(crate) fn apply_battle_result(
         }
     }
 
-    let (loser_id, retreat_to) = match result.winner {
-        Winner::Attacker => (defender_id, retreat_province(state, data, defender_id)),
-        Winner::Defender => (attacker_id, Some(attacker_origin.clone())),
+    let losers = match result.winner {
+        Winner::Attacker => defenders,
+        Winner::Defender => attackers,
     };
-    if let (Some(army), Some(target)) = (state.armies.get_mut(loser_id), retreat_to) {
-        army.location = target;
-        army.movement_points = 0;
-        army.path.clear();
-        move_general(state, loser_id);
+    for loser_id in losers {
+        let retreat_to = if result.winner == Winner::Defender && loser_id == attacker_id {
+            Some(attacker_origin.clone())
+        } else {
+            retreat_province(state, data, loser_id)
+        };
+        if let (Some(army), Some(target)) = (state.armies.get_mut(loser_id), retreat_to) {
+            army.location = target;
+            army.movement_points = 0;
+            army.path.clear();
+            move_general(state, loser_id);
+        }
     }
 }
 
