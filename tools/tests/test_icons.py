@@ -97,3 +97,12 @@ def test_credits_rows_group_by_author():
     rows = icons.credits_rows()
     assert "Lorc" in rows and "Delapouite" in rows
     assert "crossed-swords" in rows["Lorc"]
+
+
+def test_credits_file_lists_every_author_and_icon():
+    """CREDITS.md at the repository root attributes every icon (CC BY 3.0)."""
+    credits = (icons.REPO_DIR / "CREDITS.md").read_text(encoding="utf-8")
+    assert "CC BY 3.0" in credits
+    for author, names in icons.credits_rows().items():
+        row = f"| {author} | {len(names)} | {', '.join(names)} |"
+        assert row in credits, author

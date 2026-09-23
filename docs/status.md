@@ -79,7 +79,32 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   (villes et armées 3D, bannière teintée, repli sur les marqueurs). Tout fonctionne sans assets.
   Captures : `docs/img/godot-portraits.png`, `docs/img/godot-campaign-models.png`.
 
+- Icônes et infobulles (F2) : 106 icônes SVG de game-icons.net (CC BY 3.0, attribution dans
+  `CREDITS.md`) teintées encre sépia par `cent-ans assets icons` (cache local, hors ligne possible,
+  gratuit), 144 identifiants dans `game/assets/icons/icons.json` : 13 unités, 26 bâtiments,
+  9 ressources, 33 technologies (+ 2 familles), 4 classes, jauges, barre du haut (trésor, revenu,
+  recherche, 4 saisons, diplomatie, chronique, cour, technologies, fin du tour), branches de
+  compétences et catégories de traits, replis par catégorie. Autoload `IconLibrary`
+  (`get_icon(id)`, BBCode `[img]`), infobulles riches parchemin (`RichTooltip` + `RichButton`,
+  `RichPanel`, `RichLabel`, `IconChip`) : unité (coût, entretien, levée, stats, forces/faiblesses,
+  capacités, prérequis, refus), bâtiment (coût, matériaux, durée, entretien, effets, prérequis),
+  technologie (coût effectif, date historique, effets, déblocages, prérequis), ressource, classe,
+  jauge (explication), trait, compétence. Intégrées : barre du haut (boutons Cour, Technologies,
+  Diplomatie en icône seule), province (ressources, classes et jauges, bâtiments, constructible,
+  garnison, recrutement), armée (cartes d'unité), bataille (cartes), arbre des technologies,
+  cour, fiche personnage, faction. Smoke `_run_icons`, 9 tests pytest. Captures (après) :
+  `docs/img/godot-icons-{hud,city,tooltips,tech,character,court,faction,battle}.png` (avant :
+  `godot-campaign-hud.png`, `godot-city-panel.png`, `godot-tech-tree.png`, `godot-skill-tree.png`,
+  `godot-court.png`, `godot-faction-panel.png`, `godot-battle.png`). Capture des infobulles :
+  `--stage=tooltips`.
+
 ## Limites connues
+- F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
+  les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
+  disponibilités et refus viennent de `CampaignSim`). À remplacer par des accesseurs Rust
+  (`get_unit_type`, `get_building`, `get_resource`). Forces/faiblesses d'unité : statistiques à
+  ±30 % de la moyenne des types d'unités (heuristique d'affichage). Les infobulles des traits
+  n'ont qu'une icône par catégorie, celles des compétences une par branche.
 - M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
   mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
   0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro

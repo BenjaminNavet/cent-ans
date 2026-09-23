@@ -135,7 +135,7 @@ func _ready() -> void:
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
 
 
-const TOP_ICON_SIZE := 22.0
+const TOP_ICON_SIZE := 20.0
 var _season_icon: TextureRect
 var _treasury_icon: TextureRect
 var _income_icon: TextureRect
@@ -144,6 +144,7 @@ var _research_icon: TextureRect
 
 func _decorate_top_bar() -> void:
 	var bar := treasury_label.get_parent()
+	bar.add_theme_constant_override("separation", 5)
 	_treasury_icon = _insert_icon_before(treasury_label, "hud_treasury")
 	_income_icon = _insert_icon_before(income_label, "hud_income")
 	_season_icon = _insert_icon_before(date_label, "hud_season_spring")
