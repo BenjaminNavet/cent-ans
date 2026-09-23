@@ -1,0 +1,11 @@
+{
+  "id": "cdx_livre_tournois",
+  "title": "La livre tournois",
+  "category": "economie",
+  "aliases": ["sou tournois", "denier tournois", "mutation monétaire"],
+  "era": { "from": "1266", "to": "1420" },
+  "summary": "Monnaie de compte du royaume de France, la livre tournois se divise en vingt sous et deux cent quarante deniers ; ses fréquentes mutations financent l'effort de guerre avant d'être stabilisées par [[cdx_charles_v|Charles V]].",
+  "body": "La livre tournois n'est pas une pièce que l'on porte dans sa bourse, mais une unité de compte, fondée sur l'étalon frappé à l'atelier monétaire de Tours et généralisée sous le règne de Saint Louis au XIIIe siècle. Elle se divise en vingt sous tournois, eux-mêmes divisés en douze deniers tournois chacun, système duodécimal qui sert de référence à l'ensemble des transactions et des comptes royaux jusqu'à la fin de l'Ancien Régime.\n\nLes rois de France, confrontés aux coûts considérables de la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]], recourent fréquemment à des mutations monétaires : ils réduisent la teneur en métal précieux des pièces réellement frappées, tout en maintenant leur valeur nominale en livres tournois, procédé qui permet de payer davantage de soldats avec un stock d'argent constant, au prix d'une inflation et d'une défiance croissante des marchands.\n\nCes pratiques atteignent un point critique après la capture du roi [[cdx_jean_ii|Jean II]] à [[cdx_poitiers|Poitiers]] en 1356, lorsqu'il faut réunir l'énorme rançon fixée par le traité de [[cdx_bretigny|Brétigny]], ce qui pousse également à la mise en place de nouveaux impôts comme la [[cdx_gabelle|gabelle]] sur le sel.\n\nDevenu roi, [[cdx_charles_v|Charles V]] s'attache, avec l'aide de conseillers comme Nicole Oresme, auteur d'un traité hostile aux mutations monétaires, à stabiliser durablement la livre tournois à partir des années 1360, restaurant une confiance monétaire précieuse pour financer la reconquête menée par [[cdx_du_guesclin|Bertrand du Guesclin]].",
+  "see_also": ["cdx_charles_v", "cdx_peste_noire", "cdx_jean_ii", "cdx_gabelle"],
+  "sources": ["Livre tournois"]
+}

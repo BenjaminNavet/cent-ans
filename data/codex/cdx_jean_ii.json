@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_ii",
+  "title": "Jean II le Bon",
+  "category": "personnage",
+  "aliases": ["Jean II", "Jean le Bon", "duc de Normandie Jean"],
+  "era": { "from": "1319", "to": "1364" },
+  "summary": "Fils de [[cdx_philippe_vi|Philippe VI]], duc de Normandie puis roi de France (1350-1364), Jean II est capturé par le [[cdx_prince_noir|Prince noir]] à la bataille de [[cdx_poitiers|Poitiers]] en 1356, désastre qui livre le royaume à son fils [[cdx_charles_v|Charles V]].",
+  "body": "Né en 1319, Jean est duc de Normandie sous le règne de son père [[cdx_philippe_vi|Philippe VI]] ; c'est à ce titre qu'il gouverne encore lorsque s'ouvre la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]] en 1337. Il succède à son père en 1350, dans un royaume déjà éprouvé par la défaite de [[cdx_crecy|Crécy]] et par la [[cdx_peste_noire|Peste noire]].\n\nSon règne est dominé par le désastre de [[cdx_poitiers|Poitiers]], le 19 septembre 1356 : à la tête d'une armée pourtant supérieure en nombre, Jean II est vaincu et capturé par le [[cdx_prince_noir|Prince noir]], fils d'[[cdx_edouard_iii|Édouard III]], aux côtés de son plus jeune fils Philippe. Emmené captif à Londres, il laisse le royaume à son fils aîné, le dauphin [[cdx_charles_v|Charles V]], confronté à la révolte d'Étienne Marcel et à la [[cdx_jacquerie|Jacquerie]] de 1358.\n\nLe traité de [[cdx_bretigny|Brétigny]] (1360) fixe sa rançon à trois millions d'écus, somme colossale pour le royaume, et prévoit sa libération contre la remise d'otages, dont son fils Louis d'Anjou. Lorsque Louis s'évade de sa captivité en 1363, Jean II, par un scrupule d'honneur chevaleresque resté célèbre, choisit de retourner volontairement se constituer prisonnier à Londres plutôt que de laisser son fils répondre de sa parole.\n\nIl meurt en captivité à Londres en 1364, laissant à Charles V la lourde tâche de redresser un royaume exsangue, humilié et privé d'une partie de son autorité sur la noblesse.",
+  "entity": "chr_jean_de_normandie",
+  "see_also": ["cdx_poitiers", "cdx_prince_noir", "cdx_charles_v", "cdx_bretigny"],
+  "sources": ["Jean II (roi de France)"]
+}
