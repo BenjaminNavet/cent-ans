@@ -128,6 +128,20 @@ func _make_row(row: Dictionary) -> Control:
 	name_box.add_child(sub_label)
 	line.add_child(name_box)
 
+	# F2 : icône du rôle (général, gouverneur, cour) avec infobulle de la branche associée.
+	var role: String = str(row.get("role", ""))
+	var branch := "court"
+	var role_icon := "hud_court"
+	if role.begins_with("général"):
+		branch = "command"
+		role_icon = "hud_army"
+	elif role.begins_with("gouverneur"):
+		branch = "governance"
+		role_icon = "hud_governor"
+	var role_chip := IconChip.create(role_icon, "", RichTooltip.branch(branch), 24.0)
+	line.add_child(role_chip)
+	line.move_child(role_chip, 1)
+
 	var open_button := Button.new()
 	open_button.text = "Voir"
 	var character_id: String = str(row.get("id", ""))

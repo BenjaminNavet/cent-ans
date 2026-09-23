@@ -30,13 +30,8 @@ const RESOURCE_CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
 }
-## `get_province_city().resources` ne donne que des ids (§ 2) : noms français locaux pour
-## les ressources connues (`data/resources/*.json`), repli sur l'id mis en forme sinon.
-const RESOURCE_NAMES := {
-	"res_wheat": "Blé", "res_wine": "Vin", "res_stone": "Pierre", "res_wood": "Bois",
-	"res_wool": "Laine", "res_iron": "Fer", "res_salt": "Sel", "res_fish": "Poisson",
-	"res_cloth": "Drap",
-}
+## F2 : taille des icônes des lignes du panneau.
+const ROW_ICON := 20.0
 
 @onready var name_label: Label = %NameLabel
 @onready var owner_value: Label = %OwnerValue
@@ -79,6 +74,20 @@ func _ready() -> void:
 		hide()
 		closed.emit())
 	governor_court_button.pressed.connect(func() -> void: court_requested.emit())
+	# F2 : infobulles des jauges de la grille, icônes des boutons d'action.
+	for pair in [[population_value, "population"], [unrest_value, "unrest"], [devastation_value, "devastation"]]:
+		var label: Label = pair[0]
+		label.set_script(RichLabel)
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+		label.tooltip_text = RichTooltip.gauge(pair[1])
+	IconLibrary.decorate_button(recruit_button, "cat_unit", int(ROW_ICON))
+	IconLibrary.decorate_button(create_army_button, "hud_army", int(ROW_ICON))
+	IconLibrary.decorate_button(governor_court_button, "hud_court", int(ROW_ICON))
+	IconLibrary.decorate_button(cancel_build_button, "cat_building", int(ROW_ICON))
+	tabs.add_theme_constant_override("icon_max_width", 18)
+	tabs.set_tab_icon(0, IconLibrary.get_icon("hud_army"))
+	if tabs.get_tab_count() > 1:
+		tabs.set_tab_icon(1, IconLibrary.get_icon("cat_class"))
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -104,6 +113,8 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	population_value.text = _thousands(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
 	devastation_value.text = ("%d %%" % int(state["devastation"])) if state.has("devastation") else "—"
+	unrest_value.tooltip_text = RichTooltip.gauge("unrest", float(state.get("unrest", -1)))
+	devastation_value.tooltip_text = RichTooltip.gauge("devastation", float(state.get("devastation", -1)))
 	var siege: Dictionary = state.get("siege", {}) if state.get("siege") is Dictionary else {}
 	if siege.is_empty():
 		siege_value.text = "Aucun"
@@ -145,10 +156,8 @@ func _fill_resources(resources: Array) -> void:
 		resources_list.add_child(label)
 		return
 	for res in resources:
-		var chip := Label.new()
-		chip.text = "◆ %s" % str(RESOURCE_NAMES.get(res, str(res).trim_prefix("res_").capitalize()))
-		chip.add_theme_font_size_override("font_size", 13)
-		resources_list.add_child(chip)
+		var res_id := str(res)
+		resources_list.add_child(IconChip.create(res_id, GameCatalog.display_name(res_id), RichTooltip.resource(res_id), ROW_ICON, 13))
 
 
 func _fill_classes(classes: Dictionary) -> void:
@@ -168,36 +177,50 @@ func _fill_classes(classes: Dictionary) -> void:
 func _make_class_row(class_id: String, data: Dictionary) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var name_label := Label.new()
-	name_label.text = str(CLASS_LABELS.get(class_id, class_id))
-	name_label.custom_minimum_size = Vector2(78, 0)
-	row.add_child(name_label)
+	var name_chip := IconChip.create("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), RichTooltip.population_class(class_id, data), ROW_ICON, 14)
+	name_chip.custom_minimum_size = Vector2(104, 0)
+	row.add_child(name_chip)
 	var count_label := Label.new()
 	count_label.text = _thousands(int(data.get("count", 0)))
-	count_label.custom_minimum_size = Vector2(70, 0)
+	count_label.custom_minimum_size = Vector2(62, 0)
 	row.add_child(count_label)
 	for spec in GAUGE_SPECS:
 		var key: String = spec[0]
 		var invert: bool = spec[2]
 		var value := float(data.get(key, 0))
-		row.add_child(_make_gauge(value, invert, spec[1]))
+		row.add_child(_make_gauge(value, invert, spec[1], key))
 	return row
 
 
-## Petite jauge colorée (fond gris, remplissage vert → rouge selon `invert`).
-func _make_gauge(value: float, invert: bool, label_text: String) -> Control:
+## Petite jauge colorée (fond gris, remplissage vert → rouge selon `invert`), icône et
+## infobulle d'explication (F2).
+func _make_gauge(value: float, invert: bool, label_text: String, key: String = "") -> Control:
+	var holder := RichPanel.new()
+	holder.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	holder.mouse_filter = Control.MOUSE_FILTER_STOP
+	holder.tooltip_text = RichTooltip.gauge(key, value) if key != "" else label_text
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
 	box.custom_minimum_size = Vector2(46, 0)
-	var caption := Label.new()
-	caption.text = label_text
-	caption.add_theme_font_size_override("font_size", 10)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(box)
+	var caption := HBoxContainer.new()
+	caption.alignment = BoxContainer.ALIGNMENT_CENTER
+	caption.add_theme_constant_override("separation", 2)
+	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if key != "":
+		caption.add_child(IconLibrary.make_rect("gauge_" + key, 12.0))
+	var caption_label := Label.new()
+	caption_label.text = label_text
+	caption_label.add_theme_font_size_override("font_size", 10)
+	caption.add_child(caption_label)
 	box.add_child(caption)
 	var track := ColorRect.new()
 	track.color = Color(0.55, 0.50, 0.40)
 	track.custom_minimum_size = Vector2(44, 10)
+	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var fill := ColorRect.new()
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var ratio := clampf(value / 100.0, 0.0, 1.0)
 	fill.color = _gauge_color(ratio, invert)
 	fill.size = Vector2(44.0 * ratio, 10.0)
@@ -209,7 +232,7 @@ func _make_gauge(value: float, invert: bool, label_text: String) -> Control:
 	value_label.add_theme_font_size_override("font_size", 10)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(value_label)
-	return box
+	return holder
 
 
 static func _gauge_color(ratio01: float, invert: bool) -> Color:
@@ -227,10 +250,9 @@ func _fill_buildings(buildings: Array) -> void:
 		buildings_list.add_child(label)
 		return
 	for entry in buildings:
-		var line := Label.new()
-		line.text = "• %s (entretien %s ℔)" % [str(entry.get("name", entry.get("id", "?"))), _thousands(int(entry.get("upkeep", 0)))]
-		line.add_theme_font_size_override("font_size", 14)
-		buildings_list.add_child(line)
+		var building_id: String = str(entry.get("id", ""))
+		var text := "%s (entretien %s ℔)" % [str(entry.get("name", building_id)), _thousands(int(entry.get("upkeep", 0)))]
+		buildings_list.add_child(IconChip.create(building_id, text, RichTooltip.building(building_id, entry), ROW_ICON, 14, "building"))
 
 
 func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void:
@@ -261,13 +283,14 @@ func _fill_buildable(buildable: Array, is_player_owner: bool, built_ids: Array =
 	for row in rows:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 8)
-		var button := Button.new()
+		var button := RichButton.new()
 		button.text = "%s — %s ℔ / %d tour(s)" % [str(row.get("name", row.get("building", "?"))), _thousands(int(row.get("cost", 0))), int(row.get("turns", 1))]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var building_id: String = str(row.get("building", ""))
+		IconLibrary.decorate_button(button, building_id, int(ROW_ICON), "building")
 		button.pressed.connect(func() -> void: build_requested.emit(province_id, building_id))
 		line.add_child(button)
 		if not available:
@@ -275,8 +298,8 @@ func _fill_buildable(buildable: Array, is_player_owner: bool, built_ids: Array =
 			reason.text = str(row.get("reason", "Indisponible"))
 			reason.add_theme_font_size_override("font_size", 13)
 			reason.add_theme_color_override("font_color", Color(0.55, 0.20, 0.15))
-			button.tooltip_text = reason.text
 			line.add_child(reason)
+		button.tooltip_text = RichTooltip.building(building_id, row)
 		buildable_list.add_child(line)
 
 
@@ -290,16 +313,18 @@ func _fill_garrison(garrison: Array, selectable: bool) -> void:
 		var text := "%s — %d/%d, moral %d" % [
 			unit_label(unit), int(unit.get("strength", 0)),
 			int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
+		var unit_type: String = str(unit.get("unit_type", ""))
 		if selectable:
 			var check := CheckBox.new()
 			check.text = text
 			check.button_pressed = true
+			check.set_script(RichButton)
+			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
+			check.tooltip_text = RichTooltip.unit(unit_type, unit)
 			garrison_list.add_child(check)
 			_garrison_checks.append(check)
 		else:
-			var label := Label.new()
-			label.text = "• " + text
-			garrison_list.add_child(label)
+			garrison_list.add_child(IconChip.create(unit_type, text, RichTooltip.unit(unit_type, unit), ROW_ICON, 14, "unit"))
 	create_army_button.disabled = garrison.is_empty()
 
 
@@ -309,13 +334,15 @@ func _fill_recruitable(recruitable: Array) -> void:
 	recruit_button.disabled = recruitable.is_empty()
 	for row in recruitable:
 		var line := HBoxContainer.new()
-		var button := Button.new()
+		var button := RichButton.new()
 		button.text = "%s — %s ℔ / %s ℔" % [str(row.get("name", row.get("unit_type", "?"))), _thousands(int(row.get("cost", 0))), _thousands(int(row.get("upkeep", 0)))]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var unit_type: String = str(row.get("unit_type", ""))
+		IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
+		button.tooltip_text = RichTooltip.unit(unit_type, row)
 		button.pressed.connect(func() -> void: recruit_requested.emit(province_id, unit_type))
 		line.add_child(button)
 		if not available:
@@ -323,7 +350,6 @@ func _fill_recruitable(recruitable: Array) -> void:
 			reason.text = str(row.get("reason", "Indisponible"))
 			reason.add_theme_font_size_override("font_size", 13)
 			reason.add_theme_color_override("font_color", Color(0.55, 0.20, 0.15))
-			button.tooltip_text = reason.text
 			line.add_child(reason)
 		recruit_list.add_child(line)
 
