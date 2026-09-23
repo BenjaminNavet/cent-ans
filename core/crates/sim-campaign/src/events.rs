@@ -57,6 +57,10 @@ pub enum EventKind {
     TechnologyResearched,
     /// Historical or random chronicle event (M10).
     Chronicle,
+    /// H3 « La Table »: diet fallback, Lent.
+    Table,
+    /// H4: tended wounded, epidemic contained.
+    Medicine,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.
