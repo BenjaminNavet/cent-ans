@@ -1,7 +1,6 @@
 # H1 — Audit historique (état)
 
 - Branche : worktree-agent-a62a0232514bd83d9
-- État : lecture complète des données faite (personnages, factions, événements, techs, bâtiments, unités, traits, provinces, noms, religions) ; liste de constats établie.
-- Corrections appliquées : characters/ (26 fichiers). Script de correction : scratchpad `patch.py` (groupes characters, factions, events_misc, provinces).
-- Corrections appliquées aussi : factions, événements, techs, unités, religions, noms, provinces (notes « faction à créer » retirées).
-- Prochaine étape : rapport `docs/histoire/audit-2026-09-23.md`, puis `cargo test` complet.
+- État : **terminé**. Toutes les données relues ; corrections appliquées dans `data/` ; rapport `docs/histoire/audit-2026-09-23.md` rédigé.
+- Tests : `cd core && cargo test` passe (dont `data-model/tests/real_data.rs`).
+- Suites possibles : points « non vérifiés » du rapport (Renaud II vicaire impérial, adelantado de Murcie, blason de Navarre) ; suggestions de contenu (§ 7 du rapport) à confier à un lot ultérieur.
