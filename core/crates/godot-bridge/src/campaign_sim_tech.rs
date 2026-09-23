@@ -5,7 +5,7 @@
 //! The `research { technology }` order goes through the existing
 //! `submit_order`.
 
-use data_model::{FactionId, TechBranch, Technology};
+use data_model::{FactionId, ProvinceId, TechBranch, Technology};
 use godot::prelude::*;
 use sim_campaign::research::{effective_cost, tech_progress, tech_status};
 
@@ -17,11 +17,13 @@ fn tech_branch_key(branch: TechBranch) -> &'static str {
 
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Both technology trees as seen by `faction`, sorted by branch, tier,
-    /// then id: `[{id, name, branch, tier, cost, effective_cost,
-    /// prerequisites[], unlocks{units[], buildings[]}, effects[{kind, value,
-    /// mode}], description, historical_year, state, progress}]` where `state`
-    /// is `"known" | "available" | "locked" | "researching"`.
+    /// The three technology trees as seen by `faction`, sorted by branch
+    /// (`"civil" | "medicine" | "military"`), tier, then id: `[{id, name,
+    /// branch, tier, cost, effective_cost, prerequisites[], unlocks{units[],
+    /// buildings[]}, effects[{kind, value, mode, unit_category, class}],
+    /// description, historical_year, historical_note, state, progress,
+    /// herbs[]}]` where `state` is `"known" | "available" | "locked" |
+    /// "researching"` and `herbs` lists codex ids (`cdx_…`).
     #[func]
     fn get_tech_tree(&self, faction: GString) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -63,6 +65,7 @@ impl CampaignSim {
                         )
                     })
                     .collect();
+                let herbs: PackedStringArray = tech.herbs.iter().map(GString::from).collect();
                 let historical_year = tech
                     .historical_year
                     .as_ref()
@@ -87,6 +90,8 @@ impl CampaignSim {
                     "historical_uncertain" => tech.historical_year.as_ref().is_some_and(|d| d.uncertain),
                     "state" => tech_status(state, &faction, tech).key(),
                     "progress" => i64::from(tech_progress(state, &faction, &tech.id)),
+                    "herbs" => &herbs,
+                    "historical_note" => tech.historical_year.as_ref().and_then(|d| d.note.as_deref()).unwrap_or(""),
                 }
                 .to_variant()
             })
@@ -124,6 +129,30 @@ impl CampaignSim {
             "points_per_turn" => i64::from(info.points_per_turn),
             "turns_left" => turns_left,
         }
+    }
+
+    /// H4: plague resistance of `province` in percent (0-50): buildings plus
+    /// the controller's technologies.
+    #[func]
+    fn get_plague_resistance(&self, province: GString) -> f64 {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return 0.0;
+        };
+        ProvinceId::new(province.to_string()).map_or(0.0, |p| {
+            sim_campaign::medicine::plague_resistance(state, data, &p) * 100.0
+        })
+    }
+
+    /// H4: share (percent, 0-50) of battle losses `faction` recovers as
+    /// tended wounded.
+    #[func]
+    fn get_wound_recovery(&self, faction: GString) -> f64 {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return 0.0;
+        };
+        FactionId::new(faction.to_string()).map_or(0.0, |f| {
+            sim_campaign::medicine::wound_recovery(state, data, &f) * 100.0
+        })
     }
 
     /// Research points `faction` produces per turn (shown when idle).
