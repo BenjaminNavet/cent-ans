@@ -4,6 +4,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 ## Où en est-on
 - **M0 à M4 terminés.** Jeu jouable avec villes vivantes et dynasties : personnages qui gagnent de l'expérience, apprennent des compétences, se marient, ont des enfants, meurent et héritent. Prochain jalon : M5 Diplomatie et religion.
+- **M7 Batailles temps réel 3D terminé** (développé en parallèle de M5/M6) : quand une armée du joueur rencontre une armée ennemie, dialogue « Livrer bataille » / « Résolution automatique », bataille 3D avec pause, résultat rendu à la campagne.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -27,6 +28,8 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 - Personnages et dynasties (M4) : XP (batailles, gouvernance), arbre de 30 compétences à trois branches, ~30 traits (acquis par événements, opposés exclusifs), généraux et gouverneurs qui modifient batailles et provinces, mariages, naissances (générées et historiques : Charles V naît en 1338 si Jean et Bonne sont mariés), succession par loi (salique, préférence masculine, cognatique, élective), régence des mineurs. Panneau Cour, fiche personnage avec arbre de compétences. 16 tests M4. Sonde : `cargo run -p sim-campaign --example dynasty_probe`.
 
+- Batailles (M7) : `core/crates/sim-battle` simule au pas fixe de 0,1 s un champ procédural 1200 × 800 m (collines selon le terrain de la province, forêts, boue, rivière à deux gués), la météo de saison (pluie : arcs et arbalètes −40 %, brouillard : portée −30 %, neige), des régiments en ligne/colonne/schiltron/coin avec moral, fatigue, munitions, charge, flancs (+50 %) et dos (+100 %), piques contre cavalerie, pieux des archers, déroute et ralliement, aura et mort du général, et une IA minimale. Déterministe (même graine + mêmes ordres aux mêmes ticks = même bataille), 14 tests. `sim-campaign` met les batailles du joueur en attente (`pending_battles`, réglage `interactive_battles`), fournit `battle_setup`, applique `resolve_pending_battle` (pertes, moral, captures, général tombé, XP/traits M4, retraite) ou `auto_resolve_pending` ; les restes sont auto-résolus au tour suivant ; 8 tests M7. Godot : `scenes/battle/` (terrain maillé, arbres, soldats en MultiMesh par camp et famille, bannières, caméra RTS, sélection rectangle, ordres clic droit / glisser-droit, pause, vitesses ×1/×2/×4, HUD parchemin, écran de fin). 2 × 20 régiments de 120 soldats : 60 FPS (vsync), ~140 FPS sans vsync sur M4 Pro. Captures : `docs/img/godot-battle.png`, `docs/img/godot-battle-dialog.png`. Sonde : `cargo run -p sim-battle --example probe -- ai`.
+
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
@@ -39,6 +42,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
 - Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
+- Batailles (M7) : l'IA de bataille est minimale (avance en ligne, archers derrière, charge à 150 m) et les batailles d'IA décident vite (≈ 2-3 min simulées, déroute en cascade) ; pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée ; les armées alliées présentes dans la province ne participent pas (seules les deux armées de la rencontre). Équilibrage à reprendre en M9/M10.
 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.
