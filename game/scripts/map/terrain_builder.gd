@@ -38,6 +38,10 @@ var _coast_texture: ImageTexture
 var _albedo_array: Texture2DArray
 var _normal_array: Texture2DArray
 var _layer_means: PackedVector3Array = PackedVector3Array()
+## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
+## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).
+var _smooth_bytes: PackedByteArray = PackedByteArray()
+var _smooth_size: Vector2i = Vector2i.ZERO
 var _ids_texture: ImageTexture
 var _faction_texture: ImageTexture
 var _mask_texture: ImageTexture
@@ -190,6 +194,13 @@ func _height_image_for_gpu() -> Image:
 		image = map_data.height_image.duplicate()
 	if map_data.height_bpp == 1 or image.get_format() == Image.FORMAT_R16:
 		image.generate_mipmaps()
+	_smooth_bytes = PackedByteArray()
+	_smooth_size = Vector2i.ZERO
+	if image.get_format() == Image.FORMAT_R16 and image.get_mipmap_count() >= 2:
+		var level_size := image.get_size() / 4
+		var start := image.get_mipmap_offset(2)
+		_smooth_bytes = image.get_data().slice(start, start + level_size.x * level_size.y * 2)
+		_smooth_size = level_size
 	return image
 
 
@@ -330,6 +341,10 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 	var scale := MapData.HEIGHT_SCALE
 	var vertices := PackedVector3Array()
 	vertices.resize(side * side)
+	# LOD lointain : bilinéaire dans le mipmap 4×4 (filtre ≈ 8 px), si le pas est multiple de 4.
+	var smooth := step >= far_step and step % 4 == 0 and not _smooth_bytes.is_empty()
+	var sw := _smooth_size.x
+	var sh := _smooth_size.y
 	var k := 0
 	for j in side:
 		var py := mini(y0 + j * step, height - 1)
@@ -337,7 +352,18 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 		for i in side:
 			var px := mini(x0 + i * step, width - 1)
 			var v01: float
-			if bpp == 2:
+			if smooth:
+				# Centre du texel mip k = 4k + 1,5 : pour px ≡ 0 (mod 4), poids 0,375 / 0,625.
+				var kx0 := clampi(px / 4 - 1, 0, sw - 1)
+				var kx1 := clampi(px / 4, 0, sw - 1)
+				var ky0 := clampi(py / 4 - 1, 0, sh - 1)
+				var ky1 := clampi(py / 4, 0, sh - 1)
+				var a := _smooth_bytes.decode_u16((ky0 * sw + kx0) * 2)
+				var b := _smooth_bytes.decode_u16((ky0 * sw + kx1) * 2)
+				var c := _smooth_bytes.decode_u16((ky1 * sw + kx0) * 2)
+				var d := _smooth_bytes.decode_u16((ky1 * sw + kx1) * 2)
+				v01 = ((a * 0.375 + b * 0.625) * 0.375 + (c * 0.375 + d * 0.625) * 0.625) / 65535.0
+			elif bpp == 2:
 				var o := (row + px) * 2
 				if little_endian:
 					v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0

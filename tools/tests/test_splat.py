@@ -70,7 +70,9 @@ def test_border_distance_is_small_on_borders_and_grows_inside() -> None:
 
 def test_region_colouring_separates_neighbours() -> None:
     """Adjacent regions never share a colour."""
-    ids = np.array([[1, 1, 2, 2], [1, 3, 3, 2], [4, 3, 3, 5], [4, 4, 5, 5]], dtype=np.uint16)
+    ids = np.array(
+        [[1, 1, 2, 2], [1, 3, 3, 2], [4, 3, 3, 5], [4, 4, 5, 5]], dtype=np.uint16
+    )
     labels = splat.region_labels(ids, np.ones(ids.shape, dtype=bool))
     colours = splat.colour_regions(labels)
     for a, b in [(1, 2), (1, 3), (2, 3), (3, 4), (3, 5), (4, 5), (1, 4), (2, 5)]:
