@@ -178,13 +178,11 @@ impl CampaignState {
                         .is_some_and(|f| f.at_war_with.iter().any(|enemy| !is_rebels(enemy))),
                 }
             }
-            Condition::Controls { faction, province } => {
-                scope_faction(faction).is_some_and(|f| {
-                    self.provinces
-                        .get(province)
-                        .is_some_and(|p| p.controller == f)
-                })
-            }
+            Condition::Controls { faction, province } => scope_faction(faction).is_some_and(|f| {
+                self.provinces
+                    .get(province)
+                    .is_some_and(|p| p.controller == f)
+            }),
             Condition::CharacterAlive { id } => self.characters.get(id).is_some_and(|c| c.alive),
             Condition::CharacterCaptive { id } => self
                 .characters
@@ -221,14 +219,19 @@ impl CampaignState {
                 .is_some_and(|f| f.treasury > *amount),
             Condition::ProvincesBelow { faction, count } => {
                 scope_faction(faction).is_some_and(|f| {
-                    let controlled = self.provinces.values().filter(|p| p.controller == f).count();
+                    let controlled = self
+                        .provinces
+                        .values()
+                        .filter(|p| p.controller == f)
+                        .count();
                     controlled < *count as usize
                 })
             }
-            Condition::ReligionIs { faction, religion } => scope_faction(faction)
-                .is_some_and(|f| {
+            Condition::ReligionIs { faction, religion } => {
+                scope_faction(faction).is_some_and(|f| {
                     religion::faction_religion(self, data, &f).as_ref() == Some(religion)
-                }),
+                })
+            }
             Condition::Schism { active } => self.schism == *active,
             Condition::NotFired { event } => !self.chronicle.fired_events.contains(event),
             Condition::Fired { event } => self.chronicle.fired_events.contains(event),
@@ -240,7 +243,12 @@ impl CampaignState {
     }
 
     /// `true` when every trigger condition of `event` holds in `ctx`.
-    pub fn event_conditions_hold(&self, data: &GameData, event: &Event, ctx: &EventContext) -> bool {
+    pub fn event_conditions_hold(
+        &self,
+        data: &GameData,
+        event: &Event,
+        ctx: &EventContext,
+    ) -> bool {
         event
             .trigger
             .conditions
@@ -340,7 +348,12 @@ impl CampaignState {
     }
 
     /// French one-line summary of an effect (tooltips).
-    pub fn describe_effect(&self, data: &GameData, effect: &EventEffect, ctx: &EventContext) -> String {
+    pub fn describe_effect(
+        &self,
+        data: &GameData,
+        effect: &EventEffect,
+        ctx: &EventContext,
+    ) -> String {
         let signed = |value: i64| {
             if value >= 0 {
                 format!("+{value}")
@@ -370,10 +383,18 @@ impl CampaignState {
         };
         match effect {
             EventEffect::Treasury { faction, amount } => {
-                format!("Trésor {} livres{}", signed(*amount), faction_label(faction))
+                format!(
+                    "Trésor {} livres{}",
+                    signed(*amount),
+                    faction_label(faction)
+                )
             }
             EventEffect::Unrest { province, amount } => {
-                format!("Mécontentement {}{}", signed(i64::from(*amount)), where_(province))
+                format!(
+                    "Mécontentement {}{}",
+                    signed(i64::from(*amount)),
+                    where_(province)
+                )
             }
             EventEffect::Population { province, percent } => format!(
                 "Population {} %{}",
@@ -384,10 +405,18 @@ impl CampaignState {
                 format!("Santé {}{}", signed(i64::from(*amount)), where_(province))
             }
             EventEffect::Wealth { province, amount } => {
-                format!("Richesse {}{}", signed(i64::from(*amount)), where_(province))
+                format!(
+                    "Richesse {}{}",
+                    signed(i64::from(*amount)),
+                    where_(province)
+                )
             }
             EventEffect::Devastation { province, amount } => {
-                format!("Dévastation {}{}", signed(i64::from(*amount)), where_(province))
+                format!(
+                    "Dévastation {}{}",
+                    signed(i64::from(*amount)),
+                    where_(province)
+                )
             }
             EventEffect::Prestige {
                 character,
@@ -511,14 +540,15 @@ impl CampaignState {
             CharacterRef::Heir => self.factions.get(faction?)?.heir.clone()?,
             CharacterRef::Id(id) => id.clone(),
         };
-        self.characters
-            .get(&id)
-            .filter(|c| c.alive)
-            .map(|_| id)
+        self.characters.get(&id).filter(|c| c.alive).map(|_| id)
     }
 
     /// Provinces targeted by a province effect.
-    fn effect_provinces(&self, target: &Option<ProvinceRef>, ctx: &EventContext) -> Vec<ProvinceId> {
+    fn effect_provinces(
+        &self,
+        target: &Option<ProvinceRef>,
+        ctx: &EventContext,
+    ) -> Vec<ProvinceId> {
         let all = || match &ctx.faction {
             Some(faction) => self
                 .provinces
@@ -915,8 +945,11 @@ fn fire(
             options: (0..event.options.len()).collect(),
             expires_turn: state.turn + DECISION_TURNS,
         });
-        let mut entry = GameEvent::new(EventKind::Chronicle, format!("Chronique : {}.", event.title))
-            .faction(&faction);
+        let mut entry = GameEvent::new(
+            EventKind::Chronicle,
+            format!("Chronique : {}.", event.title),
+        )
+        .faction(&faction);
         if let Some(p) = &province {
             entry = entry.province(p);
         }
@@ -1082,11 +1115,10 @@ pub(crate) fn resolve_chronicle(
 ) {
     // 1. Expired player decisions: the first option applies.
     let turn = state.turn;
-    let (expired, kept): (Vec<Decision>, Vec<Decision>) = std::mem::take(
-        &mut state.chronicle.pending_decisions,
-    )
-    .into_iter()
-    .partition(|d| d.expires_turn <= turn);
+    let (expired, kept): (Vec<Decision>, Vec<Decision>) =
+        std::mem::take(&mut state.chronicle.pending_decisions)
+            .into_iter()
+            .partition(|d| d.expires_turn <= turn);
     state.chronicle.pending_decisions = kept;
     for decision in expired {
         let first = decision.options.first().copied().unwrap_or(0);
@@ -1213,10 +1245,12 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),
         );
-        if let Some(own) = struck
-            .iter()
-            .find(|p| state.provinces.get(*p).is_some_and(|s| s.controller == player))
-        {
+        if let Some(own) = struck.iter().find(|p| {
+            state
+                .provinces
+                .get(*p)
+                .is_some_and(|s| s.controller == player)
+        }) {
             entry = entry.province(own).faction(&player);
         }
         events.push(entry);
