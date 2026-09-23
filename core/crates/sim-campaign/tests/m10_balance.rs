@@ -91,3 +91,54 @@ fn a_vanished_faction_leaves_no_war_or_alliance() {
         assert!(!faction.allies.contains(&navarre));
     }
 }
+
+#[test]
+fn landing_on_a_hostile_shore_costs_men_and_movement() {
+    use sim_campaign::movement::{edge_cost, is_sea_crossing, sea_neighbors};
+    let data = data();
+    let england = fac("fac_england");
+    let mut state = CampaignState::new_1337(&data, england.clone(), 1).unwrap();
+    // An English port facing a hostile (French) port across the sea.
+    let (from, to) = state
+        .provinces
+        .iter()
+        .filter(|(_, p)| p.controller == england)
+        .flat_map(|(id, _)| {
+            sea_neighbors(&data, id)
+                .into_iter()
+                .map(move |n| (id.clone(), n))
+        })
+        .find(|(from, to)| {
+            is_sea_crossing(&data, from, to)
+                && edge_cost(&data, from, to).is_some()
+                && state.is_hostile_territory(&england, to)
+                && state.hostile_armies_in(&england, to).is_empty()
+        })
+        .expect("an English port faces a hostile one");
+    let army_id = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == england)
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    {
+        let army = state.armies.get_mut(&army_id).unwrap();
+        army.location = from.clone();
+        army.path.clear();
+    }
+    let before: u32 = state.armies[&army_id].units.iter().map(|u| u.strength).sum();
+    state
+        .submit_order(
+            &data,
+            Order::MoveArmy {
+                army: army_id.clone(),
+                path: vec![to.clone()],
+            },
+        )
+        .unwrap();
+    let events = state.end_turn_with(&data, idle);
+    assert_eq!(state.armies[&army_id].location, to);
+    let after: u32 = state.armies[&army_id].units.iter().map(|u| u.strength).sum();
+    assert!(after < before, "landing losses: {before} -> {after}");
+    assert!(events.iter().any(|e| e.text_fr.contains("Débarquement")));
+}

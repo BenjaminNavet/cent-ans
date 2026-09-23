@@ -21,7 +21,7 @@ fn main() {
     let mut refusals: BTreeMap<String, u32> = BTreeMap::new();
     for turn in 0..turns {
         if std::env::var("TRACE").is_ok() && turn % 24 == 0 {
-            for id in ["fac_navarre", "fac_burgundy"] {
+            for id in ["fac_england", "fac_france"] {
                 let f = &state.factions[&data_model::FactionId::new(id).unwrap()];
                 let garrison: usize = state
                     .provinces
