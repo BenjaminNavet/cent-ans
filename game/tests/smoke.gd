@@ -9,6 +9,11 @@ extends SceneTree
 ##     première armée du joueur, provinces atteignables non vides, ordre de déplacement vers la
 ##     première atteignable, 4 fins de tour, sauvegarde `user://saves/smoke.json`, rechargement,
 ##     égalité des dates. Sur les vraies données `data/` si la sim réelle est disponible.
+##  5. personnages et dynasties (M4, réelle si elle expose `get_character`, sinon mock dédié sur
+##     `data/` — imprimé) : panneau de cour (≥ 1 personnage), `debug_grant_xp` + `learn_skill`
+##     sur le dirigeant, `assign_governor` d'un courtisan à `prov_normandie` (ou la première
+##     province contrôlée ≠ capitale), `propose_marriage` entre deux candidats valides (ou skip
+##     explicite si aucun), 40 fins de tour → au moins une naissance ou une mort au journal.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -37,6 +42,7 @@ func _init() -> void:
 	await _run_start_menu()
 	await _run_campaign_loop()
 	_run_city_economy()
+	await _run_characters()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -353,3 +359,93 @@ func _fail(message: String) -> void:
 	_failures += 1
 	push_error("smoke FAIL: " + message)
 	printerr("smoke FAIL: " + message)
+
+
+## M4 : personnages et dynasties (docs/design/m4-characters-dynasties.md § 5). Avec la vraie
+## simulation si elle expose `get_character` (imprimé), sinon un `CampaignSimMock` dédié sur
+## `data/` (qui a les personnages ; pas les fixtures).
+func _run_characters() -> void:
+	const FACTION_ID := "fac_france"
+	var data_dir := _project_root().path_join("data")
+	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
+		and ClassDB.instantiate("CampaignSim").has_method("get_character")
+	var sim: Object = ClassDB.instantiate("CampaignSim") if real_capable else CampaignSimMock.new()
+	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "characters: new_campaign failed"):
+		return
+	print("smoke characters: simulation %s" % ["REAL" if real_capable else "MOCK"])
+
+	var ids: Array = sim.call("get_faction_characters", FACTION_ID)
+	if not _check(not ids.is_empty(), "get_faction_characters(fac_france) should not be empty"):
+		return
+
+	# Panneau de cour : au moins 1 personnage listé, via la scène réelle.
+	var court_scene: PackedScene = load("res://scenes/ui/court_panel.tscn")
+	# Type dynamique (Node) : les classes globales fraîchement ajoutées (CourtPanel) ne sont pas
+	# toujours résolues pour un typage statique au moment où `--script` compile ce fichier.
+	var court: Node = court_scene.instantiate()
+	root.add_child(court)
+	await process_frame
+	var rows: Array[Dictionary] = []
+	for id in ids:
+		rows.append(sim.call("get_character", id))
+	court.show_court(rows, "France", Color(0.2, 0.3, 0.7))
+	_check(court.rows_list.get_child_count() >= 1, "court panel should list at least 1 character")
+	court.queue_free()
+
+	# XP + apprentissage d'une compétence de commandement de rang 1 sur le dirigeant.
+	var ruler: String = str(ids[0])
+	var grant: Dictionary = sim.call("submit_order", {"type": "debug_grant_xp", "character": ruler, "amount": 400})
+	_check(grant.get("ok", false), "debug_grant_xp refused: %s" % grant.get("error", "?"))
+	var tier1_command := ""
+	for node in sim.call("get_skill_tree"):
+		if str(node["branch"]) == "command" and int(node["tier"]) == 1:
+			tier1_command = str(node["id"])
+			break
+	if _check(tier1_command != "", "no tier-1 command skill in get_skill_tree()"):
+		var learn: Dictionary = sim.call("submit_order", {"type": "learn_skill", "character": ruler, "skill": tier1_command})
+		_check(learn.get("ok", false), "learn_skill(%s, %s) refused: %s" % [ruler, tier1_command, learn.get("error", "?")])
+
+	# Gouverneur : un courtisan (pas le dirigeant) nommé à Normandie, sinon la première province
+	# contrôlée différente de la capitale.
+	var target_province := ""
+	for candidate in ["prov_normandie", "prov_picardie", "prov_champagne", "prov_orleanais", "prov_anjou"]:
+		var state: Dictionary = sim.call("get_province_state", candidate)
+		if str(state.get("owner", "")) == FACTION_ID and candidate != "prov_ile_de_france":
+			target_province = candidate
+			break
+	var courtier := ""
+	for id in ids:
+		if str(id) != ruler:
+			courtier = str(id)
+			break
+	if _check(target_province != "" and courtier != "", "no province/courtier available for assign_governor"):
+		var gov: Dictionary = sim.call("submit_order", {"type": "assign_governor", "character": courtier, "province": target_province})
+		_check(gov.get("ok", false), "assign_governor(%s, %s) refused: %s" % [courtier, target_province, gov.get("error", "?")])
+		var after: Dictionary = sim.call("get_province_state", target_province)
+		_check(str(after.get("governor", "")) == courtier, "province %s should report %s as governor" % [target_province, courtier])
+
+	# Mariage entre deux candidats valides, sinon skip explicite (raison imprimée).
+	var married := false
+	for id in ids:
+		var candidates: Array = sim.call("get_marriage_candidates", id)
+		if not candidates.is_empty():
+			var spouse: String = str(candidates[0]["id"])
+			var marriage: Dictionary = sim.call("submit_order", {"type": "propose_marriage", "character": id, "spouse": spouse})
+			_check(marriage.get("ok", false), "propose_marriage(%s, %s) refused: %s" % [id, spouse, marriage.get("error", "?")])
+			married = true
+			break
+	if not married:
+		print("smoke characters: propose_marriage skipped, no valid candidates in fac_france at 1337")
+
+	# 40 fins de tour : au moins une naissance ou une mort dans le journal.
+	var found_birth_or_death := false
+	for _i in 40:
+		for event in sim.call("end_turn"):
+			var kind: String = str(event.get("kind", ""))
+			if kind == "birth" or kind == "death":
+				found_birth_or_death = true
+	_check(found_birth_or_death, "no birth or death event in 40 end_turn() calls")
+
+	if _failures == 0:
+		print("smoke OK: characters (%s), court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
+			"real" if real_capable else "mock", rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
