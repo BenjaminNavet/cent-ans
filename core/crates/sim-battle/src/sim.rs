@@ -39,9 +39,9 @@ pub const CHARGE_IMPACT: f64 = 4.0;
 /// Seconds an archer unit must stand still before its stakes are planted.
 pub const STAKES_DELAY: f64 = 15.0;
 
-const MELEE_RATE: f64 = 0.05;
-const RANGED_RATE: f64 = 0.4;
-const LOSS_MORALE_FACTOR: f64 = 120.0;
+const MELEE_RATE: f64 = 0.035;
+const RANGED_RATE: f64 = 0.3;
+const LOSS_MORALE_FACTOR: f64 = 60.0;
 
 /// Why a setup cannot start a battle.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -162,7 +162,7 @@ pub fn of_faction(name: &str) -> String {
 }
 
 /// Relative position of an attacker around a defender: 0 front, 1 flank, 2 rear.
-fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
+pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
     if defender.formation == Formation::Square {
         return 0;
     }
@@ -1989,7 +1989,7 @@ impl BattleSim {
                     nearest_enemy = nearest_enemy.min(d2.sqrt());
                 }
             }
-            morale -= f64::from(routing_friends.min(3)) * 1.0 * DT;
+            morale -= f64::from(routing_friends.min(3)) * 0.4 * DT;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
