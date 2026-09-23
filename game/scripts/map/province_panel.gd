@@ -120,9 +120,13 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 func _fill_city(city: Dictionary, is_player_owner: bool) -> void:
 	_fill_resources(city.get("resources", []))
 	_fill_classes(city.get("classes", {}))
-	_fill_buildings(city.get("buildings", []))
+	var buildings: Array = city.get("buildings", [])
+	_fill_buildings(buildings)
 	_fill_construction(city.get("construction", {}), is_player_owner)
-	_fill_buildable(city.get("buildable", []), is_player_owner)
+	var built_ids: Array = []
+	for entry in buildings:
+		built_ids.append(str(entry.get("id", "")))
+	_fill_buildable(city.get("buildable", []), is_player_owner, built_ids)
 
 
 func _fill_resources(resources: Array) -> void:
@@ -230,17 +234,24 @@ func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void
 	cancel_build_button.visible = is_player_owner
 
 
-func _fill_buildable(buildable: Array, is_player_owner: bool) -> void:
+## `built_ids` filtre les entrées déjà construites (la vraie simulation les inclut dans
+## `buildable` avec `available=false, reason="déjà construit"` ; déjà visibles dans la liste
+## des bâtiments, inutile de les répéter ici).
+func _fill_buildable(buildable: Array, is_player_owner: bool, built_ids: Array = []) -> void:
 	for child in buildable_list.get_children():
 		child.queue_free()
 	if not is_player_owner:
 		return
-	if buildable.is_empty():
+	var rows: Array = []
+	for row in buildable:
+		if not built_ids.has(str(row.get("building", ""))):
+			rows.append(row)
+	if rows.is_empty():
 		var label := Label.new()
 		label.text = "—"
 		buildable_list.add_child(label)
 		return
-	for row in buildable:
+	for row in rows:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 8)
 		var button := Button.new()

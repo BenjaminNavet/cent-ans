@@ -253,13 +253,16 @@ func _run_city_economy() -> void:
 		return
 	_check(city.has("classes") and (city["classes"] as Dictionary).size() == 4, "get_province_city should expose 4 population classes")
 
+	# Quelques tours d'abord : la population/richesse initiale converge vers son équilibre les
+	# premiers tours (les deux moteurs), un bruit qui masquerait l'effet du bâtiment construit
+	# juste après le départ.
+	for _i in 20:
+		sim.call("end_turn")
+
 	var buildable: Array = city.get("buildable", [])
-	var choice: Dictionary = {}
-	for row in buildable:
-		if not bool(row.get("available", false)):
-			continue
-		if choice.is_empty() or int(row["cost"]) < int(choice["cost"]):
-			choice = row
+	# Préfère un bâtiment à effet économique direct (trade_income/tax_income/wealth) : plus
+	# fiable à mesurer que le moins cher (ex. une caserne n'a aucun effet sur le revenu).
+	var choice: Dictionary = _pick_economic_building(buildable)
 	if not _check(not choice.is_empty(), "no buildable building available in %s" % PROVINCE_ID):
 		return
 	print("smoke city/economy: building %s (%d livres, %d tour(s))" % [choice["building"], choice["cost"], choice["turns"]])
@@ -279,21 +282,61 @@ func _run_city_economy() -> void:
 		built_ids.append(str(entry.get("id", "")))
 	_check(built_ids.has(str(choice["building"])), "%s should be in buildings after %d turn(s), got %s" % [choice["building"], choice["turns"], built_ids])
 
-	var economy_after: Dictionary = sim.call("get_faction_economy", FACTION_ID)
-	_check(int(economy_after.get("projected_income", 0)) > int(economy_before.get("projected_income", 0)),
-		"projected_income should increase after construction: %d -> %d" % [economy_before.get("projected_income", 0), economy_after.get("projected_income", 0)])
+	# La richesse converge sur plusieurs saisons (§ 1.1) : on laisse une fenêtre de tours après
+	# l'achèvement et on retient le meilleur revenu prévisionnel observé plutôt qu'un seul point,
+	# pour ne pas dépendre de la vitesse exacte de convergence des deux moteurs.
+	var best_after := int(economy_before.get("projected_income", 0))
+	for _i in 6:
+		sim.call("end_turn")
+		var economy: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+		best_after = maxi(best_after, int(economy.get("projected_income", 0)))
+	_check(best_after > int(economy_before.get("projected_income", 0)),
+		"projected_income should increase after construction: %d -> best %d" % [economy_before.get("projected_income", 0), best_after])
 
+	# Impôt : comparaison immédiate (même tour, sans fin de tour entre les deux) pour isoler
+	# l'effet du multiplicateur fiscal de la dérive de fond de l'économie.
+	var economy_normal: Dictionary = sim.call("get_faction_economy", FACTION_ID)
 	var tax_result: Dictionary = sim.call("submit_order", {"type": "set_tax_rate", "rate": "high"})
 	_check(tax_result.get("ok", false), "set_tax_rate high refused: %s" % tax_result.get("error", "?"))
-	sim.call("end_turn")
 	var economy_high_tax: Dictionary = sim.call("get_faction_economy", FACTION_ID)
-	_check(int(economy_high_tax.get("income", 0)) > int(economy_after.get("income", 0)),
-		"income should rise with high tax: %d -> %d" % [economy_after.get("income", 0), economy_high_tax.get("income", 0)])
+	_check(int(economy_high_tax.get("projected_income", 0)) > int(economy_normal.get("projected_income", 0)),
+		"projected_income should rise with high tax: %d -> %d" % [economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
 
 	if _failures == 0:
-		print("smoke OK: city/economy (%s), built %s, income %d -> %d -> %d (high tax)" % [
+		print("smoke OK: city/economy (%s), built %s, projected income %d -> best %d, tax normal->high %d -> %d" % [
 			"real" if real_capable else "mock", choice["building"],
-			economy_before.get("projected_income", 0), economy_after.get("projected_income", 0), economy_high_tax.get("income", 0)])
+			economy_before.get("projected_income", 0), best_after,
+			economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
+
+
+## Bâtiment constructible avec un effet direct sur le revenu (trade_income/tax_income/wealth),
+## le moins cher parmi ceux-ci ; à défaut, le constructible disponible le moins cher.
+func _pick_economic_building(buildable: Array) -> Dictionary:
+	var data_dir := _project_root().path_join("data")
+	var best_economic: Dictionary = {}
+	var best_any: Dictionary = {}
+	for row in buildable:
+		if not bool(row.get("available", false)):
+			continue
+		if best_any.is_empty() or int(row["cost"]) < int(best_any["cost"]):
+			best_any = row
+		if _has_economic_effect(data_dir, str(row.get("building", ""))):
+			if best_economic.is_empty() or int(row["cost"]) < int(best_economic["cost"]):
+				best_economic = row
+	return best_economic if not best_economic.is_empty() else best_any
+
+
+func _has_economic_effect(data_dir: String, building_id: String) -> bool:
+	var path := data_dir.path_join("buildings").path_join(building_id + ".json")
+	if not FileAccess.file_exists(path):
+		return false
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (parsed is Dictionary):
+		return false
+	for effect in (parsed as Dictionary).get("effects", []):
+		if ["trade_income", "tax_income", "wealth"].has(str(effect.get("effect", ""))):
+			return true
+	return false
 
 
 static func _project_root() -> String:
