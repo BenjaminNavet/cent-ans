@@ -125,7 +125,7 @@ fn class_targeted_building_effects_reach_only_their_class() {
 }
 
 #[test]
-fn garrison_effect_makes_garrison_units_free() {
+fn garrison_effect_lowers_garrison_upkeep() {
     let data = data();
     let mut state = quiet_france(&data, 3);
     let france_id = fac("fac_france");
@@ -145,7 +145,7 @@ fn garrison_effect_makes_garrison_units_free() {
     let after = state.faction_upkeep(&data, &france_id);
     assert!(
         after < before,
-        "palisade: one free unit ({before} -> {after})"
+        "palisade: the town pays 10 % ({before} -> {after})"
     );
 }
 

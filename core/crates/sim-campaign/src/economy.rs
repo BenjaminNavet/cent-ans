@@ -189,10 +189,17 @@ pub fn garrison_upkeep(data: &GameData, units: &[Unit]) -> i64 {
     units_upkeep(data, units) * GARRISON_UPKEEP_PERCENT / 100
 }
 
-/// Garrison units a province keeps at no cost to the crown (F1: building
-/// and governor `Garrison` effects, "unités de garnison gratuites").
-pub fn free_garrison_slots(effects: &EffectTotals) -> usize {
-    effects.garrison.apply(0.0).max(0.0).round() as usize
+/// Share (per cent) of a garrison's upkeep the town itself pays, per point
+/// of `Garrison` effect (F1: walls and castles house and feed their
+/// garrison, "unités de garnison gratuites" spread over the whole garrison).
+pub const GARRISON_RELIEF_PERCENT_PER_POINT: i64 = 10;
+/// Ceiling of that relief.
+pub const GARRISON_RELIEF_MAX_PERCENT: i64 = 50;
+
+/// Upkeep relief (per cent) of a province's garrison (F1 `Garrison`).
+pub fn garrison_relief_percent(effects: &EffectTotals) -> i64 {
+    let points = effects.garrison.apply(0.0).max(0.0).round() as i64;
+    (points * GARRISON_RELIEF_PERCENT_PER_POINT).min(GARRISON_RELIEF_MAX_PERCENT)
 }
 
 /// Strength (per cent of `max_strength`) a garrison regains each season per
@@ -209,8 +216,8 @@ impl CampaignState {
             .sum()
     }
 
-    /// Upkeep of every army and garrison of the faction: garrisons keep
-    /// their free `Garrison` slots (F1), and the faction's `ArmyUpkeep`
+    /// Upkeep of every army and garrison of the faction: fortified towns pay
+    /// part of their garrison's upkeep (`Garrison`, F1), and the faction's `ArmyUpkeep`
     /// technologies (global or per unit family, F1) scale the bill.
     pub fn faction_upkeep(&self, data: &GameData, faction: &data_model::FactionId) -> i64 {
         let tech = crate::research::faction_tech_effects(self, data, faction);
@@ -238,10 +245,9 @@ impl CampaignState {
             .iter()
             .filter(|(_, p)| &p.controller == faction && !p.garrison.is_empty())
             .map(|(id, p)| {
-                let free = free_garrison_slots(&self.province_effects(data, id));
-                let mut costs: Vec<i64> = p.garrison.iter().map(unit_cost).collect();
-                costs.sort_unstable_by(|a, b| b.cmp(a));
-                costs.iter().skip(free).sum::<i64>() * GARRISON_UPKEEP_PERCENT / 100
+                let relief = garrison_relief_percent(&self.province_effects(data, id));
+                let raw: i64 = p.garrison.iter().map(unit_cost).sum();
+                raw * GARRISON_UPKEEP_PERCENT / 100 * (100 - relief) / 100
             })
             .sum();
         armies + garrisons
