@@ -7,6 +7,8 @@ extends Node
 
 signal province_hovered(index: int)
 signal province_selected(index: int)
+## Clic droit (sans glisser) sur une province (index 0 = mer / hors carte).
+signal province_right_clicked(index: int)
 
 const REFINE_ITERATIONS := 8
 const REFINE_EPSILON := 0.02
@@ -17,8 +19,13 @@ var map_data: MapData
 var hovered_index: int = 0
 var selected_index: int = 0
 
+## Interception des clics gauches : `Callable(screen_position: Vector2) -> bool` ; si elle
+## renvoie vrai (ex. une armée a été cliquée), la sélection de province n'a pas lieu.
+var click_interceptor: Callable = Callable()
+
 var _mouse_dirty := false
 var _press_position := Vector2.ZERO
+var _press_button := 0
 
 
 func setup(view_camera: Camera3D, data: MapData) -> void:
@@ -31,12 +38,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mouse_dirty = true
 	elif event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if mb.button_index != MOUSE_BUTTON_LEFT:
+		if mb.button_index != MOUSE_BUTTON_LEFT and mb.button_index != MOUSE_BUTTON_RIGHT:
 			return
 		if mb.pressed:
 			_press_position = mb.position
-		elif mb.position.distance_to(_press_position) <= CLICK_MAX_DRAG_PX:
-			select_index(pick_screen(mb.position))
+			_press_button = mb.button_index
+		elif mb.button_index == _press_button and mb.position.distance_to(_press_position) <= CLICK_MAX_DRAG_PX:
+			if mb.button_index == MOUSE_BUTTON_RIGHT:
+				province_right_clicked.emit(pick_screen(mb.position))
+			elif click_interceptor.is_valid() and click_interceptor.call(mb.position):
+				return
+			else:
+				select_index(pick_screen(mb.position))
 
 
 func _process(_delta: float) -> void:

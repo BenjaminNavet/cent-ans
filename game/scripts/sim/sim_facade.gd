@@ -27,6 +27,7 @@ var pending_load_path: String = ""
 func _ready() -> void:
 	_init_store()
 	_init_sim()
+	print("SimFacade: using %s" % ("real CampaignSim" if is_real else "CampaignSimMock"))
 
 
 func _init_store() -> void:
@@ -46,11 +47,9 @@ func _init_sim() -> void:
 		if candidate.has_method("get_army_ids"):
 			sim = candidate
 			is_real = true
-			print("SimFacade: using real CampaignSim")
 			return
 	sim = CampaignSimMock.new()
 	is_real = false
-	print("SimFacade: using CampaignSimMock")
 
 
 func store_loaded() -> bool:
@@ -61,8 +60,18 @@ func engine_label() -> String:
 	return "réelle" if is_real else "factice"
 
 
-## Démarre une nouvelle campagne ; l'échec d'une vraie sim retombe sur le mock.
+## Repointe `data/` (tests) : recharge le store et une simulation neuve.
+func set_data_dir(data_dir: String) -> void:
+	MapPaths.data_dir = data_dir
+	store = null
+	_init_store()
+	_init_sim()
+
+
+## Démarre une nouvelle campagne sur une simulation neuve (réelle si disponible) ;
+## l'échec de la vraie sim (ex. dossier de données incomplet) retombe sur le mock.
 func new_campaign(faction: String, seed: int) -> bool:
+	_init_sim()
 	if sim.call("new_campaign", MapPaths.data_dir, faction, seed):
 		return true
 	if is_real:
@@ -136,6 +145,7 @@ func load_game(path: String) -> bool:
 		push_error("SimFacade: invalid save %s" % path)
 		return false
 	var engine: String = str(wrapper.get("engine", "mock"))
+	_init_sim()
 	if engine == "mock" and is_real:
 		push_warning("SimFacade: save made with the mock; loading with mock")
 		sim = CampaignSimMock.new()

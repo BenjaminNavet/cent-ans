@@ -1,32 +1,209 @@
 class_name MapUI
 extends CanvasLayer
 
-## Couche UI de la carte : barre supérieure (date, fin du tour), panneau de province,
-## étiquette de survol.
+## Couche UI de la carte de campagne : barre supérieure (faction, trésor, revenu, date,
+## fin du tour, menu), journal des événements (bas gauche, repliable), panneau d'armée,
+## panneau de province, aperçu de chemin au survol, notifications, dialogue sauver/charger.
+## Ne connaît pas la simulation : `CampaignMap` alimente les vues et reçoit les signaux.
 
 signal end_turn_pressed
+signal save_requested(save_name: String)
+signal load_requested(path: String)
+signal main_menu_requested
+signal quit_requested
+signal recruit_requested(province_id: String, unit_type: String)
+signal create_army_requested(province_id: String, unit_indices: Array)
+signal stance_changed(army_id: String, stance: String)
+signal army_panel_closed
+signal province_panel_closed
 
+const MENU_SAVE := 0
+const MENU_LOAD := 1
+const MENU_MAIN := 3
+const MENU_QUIT := 4
+const MAX_LOG_LINES := 200
+const TOAST_SECONDS := 3.5
+
+@onready var faction_swatch: ColorRect = %FactionSwatch
+@onready var faction_label: Label = %FactionLabel
+@onready var treasury_label: Label = %TreasuryLabel
+@onready var income_label: Label = %IncomeLabel
 @onready var date_label: Label = %DateLabel
 @onready var end_turn_button: Button = %EndTurnButton
+@onready var menu_button: MenuButton = %MenuButton
+@onready var toast: Label = %Toast
 @onready var hover_label: Label = %HoverLabel
+@onready var event_log: PanelContainer = %EventLog
+@onready var log_title: Label = %LogTitle
+@onready var log_toggle: Button = %LogToggle
+@onready var log_scroll: ScrollContainer = %LogScroll
+@onready var log_text: RichTextLabel = %LogText
+@onready var army_panel: ArmyPanel = %ArmyPanel
 @onready var province_panel: ProvincePanel = %ProvincePanel
+@onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
+
+var _log_lines: PackedStringArray = PackedStringArray()
+var _toast_timer: SceneTreeTimer
 
 
 func _ready() -> void:
 	end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
+	var shortcut := Shortcut.new()
+	var action := InputEventAction.new()
+	action.action = "campaign_end_turn"
+	shortcut.events = [action]
+	end_turn_button.shortcut = shortcut
+	end_turn_button.tooltip_text = "Termine le tour (Entrée)"
+	menu_button.get_popup().id_pressed.connect(_on_menu_item)
+	log_toggle.pressed.connect(_toggle_log)
 	province_panel.hide()
+	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
+	province_panel.create_army_requested.connect(func(p: String, i: Array) -> void: create_army_requested.emit(p, i))
+	province_panel.closed.connect(func() -> void: province_panel_closed.emit())
+	army_panel.hide()
+	army_panel.stance_changed.connect(func(a: String, s: String) -> void: stance_changed.emit(a, s))
+	army_panel.closed.connect(func() -> void: army_panel_closed.emit())
+	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
+	save_load_dialog.load_confirmed.connect(func(p: String) -> void: load_requested.emit(p))
+	save_load_dialog.dialog_closed.connect(func() -> void: end_turn_button.disabled = false)
 	hover_label.text = ""
 	hover_label.hide()
+	toast.hide()
+
+
+# --- Barre supérieure ------------------------------------------------------------
+
+
+func set_faction(label: String, color: Color) -> void:
+	faction_label.text = label
+	faction_swatch.color = color
+
+
+func set_treasury(treasury: int, income: int) -> void:
+	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
+	income_label.text = "Revenu : %s%s ℔" % ["+" if income >= 0 else "", ProvincePanel._thousands(income)]
 
 
 func set_date(text: String) -> void:
 	date_label.text = text
 
 
+func set_end_turn_enabled(enabled: bool) -> void:
+	end_turn_button.disabled = not enabled
+
+
+func _on_menu_item(id: int) -> void:
+	match id:
+		MENU_SAVE:
+			end_turn_button.disabled = true
+			save_load_dialog.open_save("partie_%s" % Time.get_date_string_from_system())
+		MENU_LOAD:
+			end_turn_button.disabled = true
+			save_load_dialog.open_load()
+		MENU_MAIN:
+			main_menu_requested.emit()
+		MENU_QUIT:
+			quit_requested.emit()
+
+
+func is_dialog_open() -> bool:
+	return save_load_dialog.visible
+
+
+# --- Survol et notifications -------------------------------------------------------
+
+
 func set_hovered(province: Dictionary) -> void:
-	hover_label.text = province.get("name", "") if not province.is_empty() else ""
+	hover_label.text = str(province.get("display_name", province.get("name", ""))) if not province.is_empty() else ""
 	hover_label.visible = hover_label.text != ""
 
 
-func show_province(province: Dictionary) -> void:
-	province_panel.show_province(province)
+## Survol d'une destination avec une armée sélectionnée : nom, coût et faisabilité.
+func set_hover_path(province_name: String, steps: int, cost: int, reachable_this_turn: bool) -> void:
+	if steps <= 0:
+		hover_label.text = "%s — aucun chemin" % province_name
+	elif reachable_this_turn:
+		hover_label.text = "→ %s : %d étape%s, coût %d — clic droit pour partir" % [province_name, steps, "s" if steps > 1 else "", cost]
+	else:
+		hover_label.text = "→ %s : %d étape%s, plusieurs tours — clic droit pour partir" % [province_name, steps, "s" if steps > 1 else ""]
+	hover_label.visible = true
+
+
+func show_toast(text: String, is_error: bool = false) -> void:
+	toast.text = text
+	toast.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else Color(0.22, 0.14, 0.07))
+	toast.show()
+	_toast_timer = get_tree().create_timer(TOAST_SECONDS)
+	var timer := _toast_timer
+	timer.timeout.connect(func() -> void:
+		if _toast_timer == timer:
+			toast.hide())
+
+
+# --- Journal des événements ------------------------------------------------------------
+
+
+## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
+func add_events(events: Array, date_text: String) -> void:
+	var new_lines := PackedStringArray()
+	for event in events:
+		var kind: String = str(event.get("kind", ""))
+		var text: String = str(event.get("text_fr", event.get("text", "")))
+		if text == "":
+			continue
+		var line: String
+		if kind == "battle" or kind == "siege" or kind == "province_taken":
+			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
+		elif kind == "income":
+			line = "[color=#4a3a10]%s[/color]" % text
+		else:
+			line = text
+		new_lines.append(line)
+	if new_lines.is_empty():
+		new_lines.append("[i]Rien à signaler.[/i]")
+	var header := "[b]— %s —[/b]" % date_text
+	var block := PackedStringArray([header])
+	block.append_array(new_lines)
+	block.append_array(_log_lines)
+	_log_lines = block.slice(0, mini(block.size(), MAX_LOG_LINES))
+	_render_log()
+	log_title.text = "Journal (%d)" % new_lines.size()
+
+
+func clear_log() -> void:
+	_log_lines = PackedStringArray()
+	log_text.text = "[i]Aucun événement pour l'instant.[/i]"
+	log_title.text = "Journal"
+
+
+func _render_log() -> void:
+	log_text.text = "\n".join(_log_lines)
+	log_scroll.scroll_vertical = 0
+
+
+func _toggle_log() -> void:
+	log_scroll.visible = not log_scroll.visible
+	log_toggle.text = "Replier" if log_scroll.visible else "Déplier"
+
+
+func log_line_count() -> int:
+	return _log_lines.size()
+
+
+# --- Panneaux ----------------------------------------------------------------------
+
+
+func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable()) -> void:
+	province_panel.show_province(province, state, recruitable, is_player_owner, label_of)
+
+
+func hide_province() -> void:
+	province_panel.hide()
+
+
+func show_army(army_id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable) -> void:
+	army_panel.show_army(army_id, army, faction_label, color, is_player, province_name_of)
+
+
+func hide_army() -> void:
+	army_panel.hide()
