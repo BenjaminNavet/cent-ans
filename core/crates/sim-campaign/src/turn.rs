@@ -73,6 +73,7 @@ impl CampaignState {
         // 10. Characters: governance XP, deaths, winter births, regencies
         // (M4), then dead factions.
         dynasty::resolve_governance(self);
+        dynasty::resolve_court_prestige(self, data);
         characters::resolve_characters(self, data, &mut events);
         dynasty::resolve_births(self, data, &mut events);
         dynasty::resolve_regencies(self, data, &mut events);
@@ -80,9 +81,15 @@ impl CampaignState {
 
         // 11. New season.
         self.advance_date();
-        let movement_points = self.season.movement_points();
-        for army in self.armies.values_mut() {
-            army.movement_points = movement_points;
+        let allowances: Vec<(crate::state::ArmyId, u32)> = self
+            .armies
+            .iter()
+            .map(|(id, army)| (id.clone(), self.army_movement_allowance(data, army)))
+            .collect();
+        for (id, points) in allowances {
+            if let Some(army) = self.armies.get_mut(&id) {
+                army.movement_points = points;
+            }
         }
         let turn = self.turn;
         for faction in self.factions.values_mut() {

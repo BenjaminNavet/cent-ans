@@ -771,6 +771,64 @@ pub(crate) fn resolve_regencies(
     }
 }
 
+/// Prestige effects (buildings, technologies, the ruler's traits and skills)
+/// are yearly figures divided by this (F1): a cathedral adds 2 a year.
+pub const PRESTIGE_EFFECT_DIVISOR: f64 = 5.0;
+
+/// Yearly prestige of a faction's ruler from its `Prestige` effects (F1):
+/// buildings of the provinces it controls, its technologies (gothic
+/// flamboyant, printing press) and the ruler's own traits and skills.
+pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    let Some(ruler) = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.ruler.clone())
+        .filter(|r| state.characters.get(r).is_some_and(|c| c.alive))
+    else {
+        return 0;
+    };
+    let buildings: f64 = state
+        .provinces
+        .values()
+        .filter(|p| &p.controller == faction)
+        .map(|p| {
+            crate::buildings::effects_of(data, &p.buildings)
+                .prestige
+                .apply(0.0)
+        })
+        .sum();
+    let tech = crate::research::faction_tech_effects(state, data, faction)
+        .prestige
+        .apply(0.0);
+    let own = skills::character_effects(state, data, &ruler)
+        .prestige
+        .apply(0.0);
+    ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
+}
+
+/// Phase (winter): every ruler gains its [`yearly_court_prestige`].
+pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData) {
+    if state.season != crate::state::Season::Winter {
+        return;
+    }
+    let factions: Vec<FactionId> = state
+        .factions
+        .iter()
+        .filter(|(_, f)| f.alive)
+        .map(|(id, _)| id.clone())
+        .collect();
+    for faction in factions {
+        let gain = yearly_court_prestige(state, data, &faction);
+        if gain == 0 {
+            continue;
+        }
+        let ruler = state.factions[&faction].ruler.clone();
+        if let Some(c) = ruler.and_then(|r| state.characters.get_mut(&r)) {
+            c.prestige += gain;
+        }
+    }
+}
+
 /// Phase: governors whose province was lost, or who died or were captured,
 /// lose the post; the others gain governance XP (spec § 2: +2 per turn).
 pub(crate) fn resolve_governance(state: &mut CampaignState) {

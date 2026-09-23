@@ -278,7 +278,7 @@ impl CampaignState {
                 province,
                 units_from_garrison,
                 general,
-            } => self.order_create_army(faction, &province, &units_from_garrison, general),
+            } => self.order_create_army(data, faction, &province, &units_from_garrison, general),
             Order::MergeArmies { source, target } => self.order_merge(faction, &source, &target),
             Order::SplitArmy { army, unit_indices } => {
                 self.order_split(faction, &army, &unit_indices)
@@ -657,6 +657,7 @@ impl CampaignState {
 
     fn order_create_army(
         &mut self,
+        data: &GameData,
         faction: &FactionId,
         province: &ProvinceId,
         indices: &[usize],
@@ -690,6 +691,12 @@ impl CampaignState {
         if let Some(character) = general {
             self.attach_general(&id, &character);
         }
+        // F1: siege trains and movement effects set the pace from the start.
+        let allowance = self.army_movement_allowance(data, &self.armies[&id]);
+        self.armies
+            .get_mut(&id)
+            .expect("just created")
+            .movement_points = allowance;
         Ok(())
     }
 

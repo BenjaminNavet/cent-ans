@@ -457,7 +457,39 @@ impl CampaignState {
             .and_then(|p| p.fortification_level)
             .unwrap_or(0);
         let effects = self.province_effects(data, province);
-        effects.fortification_level.apply(f64::from(base)).max(0.0) as u32
+        let walls = effects.fortification_level.apply(f64::from(base)).max(0.0);
+        // F1: the controller's masonry techniques strengthen existing walls
+        // (an open town gains nothing).
+        let tech = self.provinces.get(province).map_or(0.0, |p| {
+            crate::research::faction_tech_effects(self, data, &p.controller)
+                .fortification_level
+                .flat
+        });
+        let level = if walls >= 1.0 { walls + tech } else { walls };
+        level.max(0.0) as u32
+    }
+
+    /// Siege resistance (0-80 %) of `province` against `attacker` (F1): its
+    /// buildings (walls, castle, artillery bastion), the controller's
+    /// fortification technologies (positive `SiegeResistance`) and the
+    /// attacker's siegecraft (negative `SiegeResistance`: engineering,
+    /// bombards). It shrinks the wall damage of each siege turn.
+    pub fn siege_resistance(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+        attacker: &data_model::FactionId,
+    ) -> f64 {
+        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+            return 0.0;
+        };
+        let buildings = self
+            .province_effects(data, province)
+            .siege_resistance
+            .apply(0.0);
+        let (defence, _) = crate::research::tech_siege_resistance(self, data, &controller);
+        let (_, siegecraft) = crate::research::tech_siege_resistance(self, data, attacker);
+        (buildings + defence + siegecraft).clamp(0.0, 80.0)
     }
 
     /// Buildable options of `province` for its controller (spec § 1.2).

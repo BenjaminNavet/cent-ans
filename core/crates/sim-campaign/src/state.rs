@@ -344,7 +344,8 @@ pub struct FactionState {
     /// Technology being researched, if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub research: Option<TechnologyId>,
-    /// Points accumulated towards `research`.
+    /// Points accumulated towards `research`; while no research runs, the
+    /// surplus of the last completed technology, carried over to the next (F1).
     #[serde(default)]
     pub research_progress: u32,
     /// Points produced during the last resolved turn.
