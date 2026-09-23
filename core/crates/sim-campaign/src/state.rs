@@ -510,6 +510,9 @@ pub struct CampaignState {
     /// next turn's journal.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub pending_events: Vec<GameEvent>,
+    /// The player's campaign outcome, once reached (M10).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outcome: Option<crate::victory::Outcome>,
 }
 
 impl CampaignState {
@@ -540,6 +543,7 @@ impl CampaignState {
             schism: false,
             next_offer_id: 1,
             pending_events: Vec::new(),
+            outcome: None,
         }
     }
 

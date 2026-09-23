@@ -72,5 +72,50 @@
     "Eudes IV de Bourgogne",
     "Jeanne III de Bourgogne",
     "Armorial des ducs de Bourgogne"
-  ]
+  ],
+  "victory": {
+    "end_year": 1477,
+    "summary": "Bâtir entre France et Empire l'État bourguignon : les Pays-Bas, l'indépendance, le lien entre les deux Bourgognes.",
+    "objectives": [
+      {
+        "id": "obj_bu_independence",
+        "title": "Un duc sans suzerain",
+        "description": "Se libérer de la tutelle du roi de France.",
+        "condition": {
+          "kind": "independent"
+        }
+      },
+      {
+        "id": "obj_bu_low_countries",
+        "title": "Le grand-duc d'Occident",
+        "description": "Réunir les Pays-Bas : Flandre, Artois, Brabant, Hainaut, Hollande, Namur et Luxembourg.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_flandre",
+            "prov_artois",
+            "prov_brabant",
+            "prov_hainaut",
+            "prov_holland",
+            "prov_namur",
+            "prov_luxembourg"
+          ]
+        }
+      },
+      {
+        "id": "obj_bu_lorraine",
+        "title": "Le lien lorrain",
+        "description": "Tenir la Lorraine et la Champagne pour relier les deux Bourgognes aux Pays-Bas, le rêve de Charles le Téméraire.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_bourgogne",
+            "prov_franche_comte",
+            "prov_lorraine",
+            "prov_champagne"
+          ]
+        }
+      }
+    ]
+  }
 }

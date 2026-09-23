@@ -81,6 +81,8 @@ impl CampaignState {
         for faction in self.factions.values_mut() {
             faction.truces.retain(|_, until| *until > turn);
         }
+        // M10: victory, defeat or end of the campaign for the player.
+        crate::victory::resolve_victory(self, data, &mut events);
         self.pending_battles.clear();
         self.events = events.clone();
         events

@@ -103,6 +103,10 @@ func _build_cards() -> void:
 
 		var description := Label.new()
 		description.text = entry["description"]
+		# M10 : objectifs historiques de la faction.
+		var summary := str(info.get("victory_summary", ""))
+		if summary != "":
+			description.text += "\n\nObjectifs (avant %d) : %s" % [int(info.get("victory_end_year", 0)), summary]
 		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		description.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		vbox.add_child(description)

@@ -49,6 +49,7 @@ var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
 var sieges: SiegeController = null  # M8
+var victory: VictoryController = null  # M10
 var _tech_open: bool = false  # M6
 
 var _screenshot_path: String = ""
@@ -94,7 +95,10 @@ func _ready() -> void:
 	sieges = SiegeController.new()
 	add_child(sieges)
 	sieges.setup(self)
+	victory = VictoryController.new()
+	add_child(victory)
 	_setup_campaign()
+	victory.setup(self)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -705,6 +709,8 @@ func _on_end_turn() -> void:
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
+	if victory != null:
+		victory.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
@@ -757,6 +763,8 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if diplomacy != null and diplomacy.handle_input(event):
 		return
+	if victory != null and victory.handle_input(event):
+		return
 	if event.is_action_pressed("map_screenshot"):
 		var path := MapPaths.project_root().path_join("docs/img/godot-map-%d.png" % Time.get_unix_time_from_system())
 		_take_screenshot(path, false)
@@ -803,6 +811,9 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_skills()
 				"siege":
 					_stage_screenshot_siege()  # M8
+				"objectives":
+					_focus_capital()
+					victory.open_panel()  # M10
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
