@@ -3,7 +3,7 @@
   "name": {
     "display": "Quarantaine"
   },
-  "branch": "civil",
+  "branch": "medicine",
   "tier": 4,
   "cost": 450,
   "prerequisites": [
@@ -23,6 +23,10 @@
       "effect": "growth",
       "value": 3,
       "mode": "percent"
+    },
+    {
+      "effect": "plague_resistance",
+      "value": 10
     }
   ],
   "description": "Isolement des navires et voyageurs venus des régions touchées par la peste.",

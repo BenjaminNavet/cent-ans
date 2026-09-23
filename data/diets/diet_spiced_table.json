@@ -1,0 +1,37 @@
+{
+  "id": "diet_spiced_table",
+  "name": {
+    "display": "Table épicée à la mode de Taillevent"
+  },
+  "description": "La cuisine des cours décrite par le [[cdx_viandier|Viandier]], attribué à [[cdx_taillevent|Taillevent]], queux de Charles V et de Charles VI : sauce [[cdx_cameline|cameline]], [[cdx_poivre|poivre]], [[cdx_maniguette|maniguette]], [[cdx_blanc_manger|blanc-manger]] et [[cdx_hypocras|hypocras]]. Les épices viennent des marchés et des foires ; elles coûtent une fortune et disent le rang.",
+  "requirements": {
+    "any_building": [
+      "bld_market",
+      "bld_fair"
+    ]
+  },
+  "cost_per_thousand": 0.6,
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 1
+    },
+    {
+      "effect": "unrest",
+      "class": "nobility",
+      "value": -6
+    },
+    {
+      "effect": "goods_satisfaction",
+      "class": "nobility",
+      "value": 8
+    }
+  ],
+  "sources": [
+    "Le Viandier",
+    "Guillaume Tirel",
+    "Hypocras",
+    "Blanc-manger",
+    "Maniguette"
+  ]
+}
