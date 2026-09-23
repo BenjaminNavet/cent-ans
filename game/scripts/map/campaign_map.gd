@@ -51,6 +51,7 @@ var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
+var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 
 var _screenshot_path: String = ""
@@ -100,6 +101,9 @@ func _ready() -> void:
 	add_child(victory)
 	_setup_campaign()
 	victory.setup(self)
+	help = HelpController.new()
+	add_child(help)
+	help.setup(self)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -768,6 +772,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if victory != null and victory.handle_input(event):
 		return
+	if help != null and help.handle_input(event):
+		return
 	if event.is_action_pressed("map_screenshot"):
 		var path := MapPaths.project_root().path_join("docs/img/godot-map-%d.png" % Time.get_unix_time_from_system())
 		_take_screenshot(path, false)
@@ -814,6 +820,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_skills()
 				"siege":
 					_stage_screenshot_siege()  # M8
+				"help":
+					help.toggle()  # M10
 				"objectives":
 					_focus_capital()
 					victory.open_panel()  # M10
