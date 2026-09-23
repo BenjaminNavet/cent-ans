@@ -16,6 +16,7 @@ extends Node3D
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
 ##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
+##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -56,6 +57,7 @@ var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
+var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -114,6 +116,9 @@ func _ready() -> void:
 	flow = FlowController.new()  # F3
 	add_child(flow)
 	flow.setup(self)
+	tutorial = TutorialController.new()  # F8
+	add_child(tutorial)
+	tutorial.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -871,6 +876,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_battle()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
+				"tutorial", "encyclopedia":  # F8
+					tutorial.stage_screenshot(_screenshot_stage)
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
