@@ -3,7 +3,7 @@
 Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 
 ## Où en est-on
-- **M0 à M4 et M6 terminés** (M5 diplomatie et M7 batailles en cours en parallèle). Jeu jouable avec villes vivantes et dynasties : personnages qui gagnent de l'expérience, apprennent des compétences, se marient, ont des enfants, meurent et héritent. Prochain jalon : M5 Diplomatie et religion.
+- **M0 à M6 terminés** (M7 batailles en cours). Jeu jouable avec villes vivantes, dynasties, technologies, diplomatie et religion : guerres et paix négociées, alliances, vassaux, embargos, Papauté, Grand Schisme, hérésies.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -34,6 +34,9 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   branches. Panneau Technologies (touche T) à deux onglets, jauge de recherche dans la barre.
   10 tests M6, smoke `_run_technologies`. Capture : `docs/img/godot-tech-tree.png`.
 
+- Diplomatie et religion (M5) : attitude calculée avec raisons, casus belli (prétentions de 1337 : Édouard III sur la France, Philippe VI sur la Guyenne…), déclaration de guerre (réputation, parjure), appel aux armes, paix négociée (score de guerre, cessions, tribut, trêve de 5 ans), alliances, embargos (revenu), vassaux (tribut, loyauté, rébellion), mariages entre factions et prétentions dynastiques, union personnelle, propositions de l'IA au joueur, IA diplomatique minimale ; faveur pontificale, dons, médiation, excommunication, Grand Schisme 1378-1417 (obédiences historiques), Lollards (1381) et Hussites (1419). Une faction sans héritier voit une nouvelle maison (ou un élu) prendre le pouvoir. Panneau Diplomatie (P), modes de carte N/R. 18 tests M5. Sonde : `cargo run --release -p sim-campaign --example diplomacy_probe`.
+- Correctif M4 : les effets du gouverneur s'appliquent désormais à la population et aux impôts.
+
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
@@ -44,8 +47,8 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
 - L'addon Blender MCP exige Blender ouvert en mode graphique ; le fallback headless est `tools/cent_ans_tools/blender.py`.
 
-- Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
-- Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
+- L'IA ne propose pas encore de mariages ; les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences restent sans effet (M9).
+- M5 : l'IA diplomatique est volontairement prudente (peu de déclarations de guerre) ; la guerre de Cent Ans peut se conclure tôt par une paix blanche. Les noms des maisons générées viennent de la capitale ; le Portugal n'a pas de liste de prénoms dédiée.
 - M6 : les effets de tech `army_upkeep`, `army_experience`, `recruit_cost`, `movement`, `production`,
   `siege_resistance`, `fortification_level`, `wealth`, `prestige` sont affichés mais pas encore appliqués ;
   `research_civil`/`research_military` (traits, compétences) sont inertes. Le surplus de points à

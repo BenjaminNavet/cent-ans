@@ -48,6 +48,7 @@ func _init() -> void:
 	_run_city_economy()
 	await _run_characters()
 	await _run_technologies()
+	await _run_diplomacy()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -513,3 +514,63 @@ func _run_technologies() -> void:
 	if _failures == 0:
 		print("smoke OK: technologies (real), %d nodes, research %s (%d pts, %d/turn), known %d -> %d" % [
 			tree.size(), cheapest, cheapest_cost, int(research.get("points_per_turn", 0)), known_before, known_after])
+
+
+## M5 : diplomatie et religion (docs/design/m5-diplomacy-religion.md § 4). Vraie simulation
+## uniquement (le mock n'a pas de diplomatie).
+func _run_diplomacy() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_diplomacy")):
+		print("smoke diplomacy: skipped, CampaignSim has no get_diplomacy (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "diplomacy: new_campaign failed"):
+		return
+	var entries: Array = sim.call("get_diplomacy", FACTION_ID)
+	_check(entries.size() >= 10, "get_diplomacy should list >= 10 factions, got %d" % entries.size())
+	var england: Dictionary = {}
+	for entry in entries:
+		if str(entry["id"]) == "fac_england":
+			england = entry
+	_check(str(england.get("status", "")) == "war", "France and England should be at war in 1337")
+	_check(not (england.get("attitude_reasons", []) as Array).is_empty(), "attitude reasons expected")
+
+	# Évaluation d'une paix blanche avec l'Angleterre (lue, pas forcément acceptée).
+	var verdict: Dictionary = sim.call("evaluate_proposal", {"type": "propose_peace", "target": "fac_england", "provinces": [], "tribute": 0})
+	_check(verdict.has("accept") and not (verdict.get("reasons", []) as Array).is_empty(), "evaluate_proposal should give a verdict with reasons")
+	var war_verdict: Dictionary = sim.call("evaluate_proposal", {"type": "declare_war", "target": "fac_navarre"})
+	_check(not (war_verdict.get("reasons", []) as Array).is_empty(), "declare_war evaluation should list consequences")
+
+	# Embargo puis guerre contre une faction voisine.
+	var embargo: Dictionary = sim.call("submit_order", {"type": "set_embargo", "target": "fac_aragon", "active": true})
+	_check(embargo.get("ok", false), "set_embargo refused: %s" % embargo.get("error", "?"))
+	var war: Dictionary = sim.call("submit_order", {"type": "declare_war", "target": "fac_navarre"})
+	_check(war.get("ok", false), "declare_war refused: %s" % war.get("error", "?"))
+
+	# Panneau réel : instanciation et rafraîchissement.
+	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
+	root.add_child(panel)
+	await process_frame
+	panel.sim = sim
+	panel.player_faction = FACTION_ID
+	panel.refresh()
+	panel.select_faction("fac_england")
+	await process_frame
+	panel.queue_free()
+
+	# 20 tours : pas d'erreur ; offres et religion lisibles.
+	var diplomatic_events := 0
+	for _i in 20:
+		for event in sim.call("end_turn"):
+			var kind := str(event.get("kind", ""))
+			if kind in ["war_declared", "peace_signed", "alliance_formed", "alliance_broken", "diplomatic_offer", "embargo", "vassal_rebellion"]:
+				diplomatic_events += 1
+		for offer in sim.call("get_offers"):
+			_check(str(offer.get("text", "")) != "", "offer text expected")
+	var religion: Dictionary = sim.call("get_religion_state", FACTION_ID)
+	_check(religion.has("papal_favor"), "get_religion_state should report papal favour")
+	var province_religion: Dictionary = sim.call("get_province_religion", "prov_ile_de_france")
+	_check(province_religion.has("heresy"), "get_province_religion should report heresy")
+	if _failures == 0:
+		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
+			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
