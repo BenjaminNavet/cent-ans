@@ -438,20 +438,26 @@ Données : `factions/*.json` gagne `claims[{kind: "throne"|"province", faction?,
 `religions/*.json` gagne `historical_adherents[]` (obédience au Schisme) et `origin_provinces[]` (hérésies).
 ### 7.8 Batailles (M7) : `CampaignSim` et `BattleSim`
 
-Spécification : `docs/design/m7-battles.md`. Sauvegarde : `STATE_VERSION` = 4 (`interactive_battles`,
-`pending_battles` conservées d'un tour à l'autre, `BattleRequest.attacker_origin`).
+Spécification : `docs/design/m7-battles.md` (sièges : `m8-sieges.md` § 2, IA : `m9-ai.md` § 2).
+Sauvegarde : `STATE_VERSION` = 4 (`interactive_battles`, `pending_battles` conservées d'un tour à
+l'autre, `BattleRequest.attacker_origin`, `BattleRequest.siege` — M8, `#[serde(default)]`).
 
 Côté campagne (`core/crates/sim-campaign/src/battle_request.rs`, pont dans
 `core/crates/godot-bridge/src/battle_sim.rs`, bloc `#[godot_api(secondary)]`) :
 
 | Méthode `CampaignSim` | Retour |
 |---|---|
-| `get_pending_battles()` | `[{index, attacker, defender, province, province_name, attacker_name, defender_name, player_side: "attacker"\|"defender", attacker_strength, defender_strength, seed}]` ; `seed` est la graine à passer à `BattleSim.setup` (même météo que l'aperçu) |
-| `get_battle_setup(index)` | `BattleSetup` sérialisé : `{province, province_name, terrain, river, season, player_side, attacker, defender}` avec, par camp, `{faction, faction_name, army, units: [{unit_type, name, category, mounted, soldiers, max_soldiers, morale, experience, stats{melee, ranged, range, armor, morale, speed, ammo, charge?}, abilities[]}], general?: {character, name, command, unit_index, morale_bonus, charge_percent, ranged_percent, defense_percent}}` (effets du général = `character_effects` M4) ; `{}` si inconnue ou périmée |
+| `get_pending_battles()` | `[{index, attacker, defender, province, province_name, attacker_name, defender_name, player_side: "attacker"\|"defender", attacker_strength, defender_strength, seed, siege, fortification, breach}]` ; `seed` est la graine à passer à `BattleSim.setup` (même météo que l'aperçu) ; `siege` = assaut d'une place (le défenseur est la garnison, `defender_strength` son effectif) |
+| `get_battle_setup(index)` | `BattleSetup` sérialisé : `{province, province_name, terrain, river, season, player_side, attacker, defender}` avec, par camp, `{faction, faction_name, army, units: [{unit_type, name, category, mounted, soldiers, max_soldiers, morale, experience, stats{melee, ranged, range, armor, morale, speed, ammo, charge?}, abilities[]}], general?: {character, name, command, unit_index, morale_bonus, charge_percent, ranged_percent, defense_percent}}` (effets du général = `character_effects` M4) ; assaut : `siege: {fortification, breach}`, défenseur = garnison (général = gouverneur), pas de rivière ; `{}` si inconnue ou périmée |
 | `resolve_battle(index, outcome)` | `{ok, error, events}` : pertes par unité, moral ±, général tombé (`kill`) ou capturé, XP/traits (`on_battle_resolved`), retraite du vaincu, journal |
 | `auto_resolve_battle(index)` | événements (résolution `battle_auto`) |
 | `set_interactive_battles(bool)`, `get_interactive_battles()` | réglage joueur (défaut `true`) ; `false` = tout auto-résolu comme avant M7 |
 | `debug_stage_battle(attacker, defender)` | index de la bataille mise en scène (le défenseur est amené chez l'attaquant), -1 sinon ; tests et captures |
+| `debug_stage_siege(army, province)` | index de l'assaut mis en scène (l'armée assiège `province`, garnison de 3 milices si vide), -1 sinon |
+
+Assaut (M8 § 2) : avec `interactive_battles`, l'ordre `assault` du joueur, ou d'une IA contre une place
+du joueur, crée une bataille en attente `siege` au lieu d'être résolu ; `resolve_battle` applique alors
+les pertes à l'armée et à la garnison et, en cas de victoire, la prise de la place.
 
 Classe `BattleSim` (`RefCounted`) :
 
@@ -459,12 +465,13 @@ Classe `BattleSim` (`RefCounted`) :
 |---|---|
 | `setup(setup_dict, seed) -> bool` | construit le champ (relief, forêts, boue, rivière), la météo et déploie les deux armées |
 | `tick(dt)` | avance de `dt` secondes par pas fixes de 0,1 s |
-| `issue_command(dict) -> {ok, error}` | `{type: "move", units, x, z, run?, facing?}`, `{type: "attack", units, target, run?}`, `{type: "halt", units}`, `{type: "formation", units, kind: "line"\|"column"\|"square"\|"wedge"}`, `{type: "fire_at_will", units, enabled}`, `{type: "withdraw", units}` ; seules les unités du camp du joueur sont acceptées ; ids entiers |
-| `set_ai(side, bool)` | IA de bataille d'un camp (autoplay, tests) |
-| `get_units()` | `[{id, side, type, name, category, render, soldiers, max_soldiers, initial_soldiers, morale, fatigue, ammo, max_ammo, state, state_label, formation, x, z, y, facing, width, depth, is_general, present, left_field, fire_at_will, can_shoot, running, withdrawing, stakes, target, destination?}]` ; `state` ∈ idle, marching, charging, melee, shooting, routing, rallied ; `render` ∈ infantry, archer, cavalry, siege |
+| `issue_command(dict) -> {ok, error}` | `{type: "move", units, x, z, run?, facing?}`, `{type: "attack", units, target, run?}`, `{type: "halt", units}`, `{type: "formation", units, kind: "line"\|"column"\|"square"\|"wedge"}`, `{type: "fire_at_will", units, enabled}`, `{type: "withdraw", units}`, `{type: "target_wall", units, piece}` (siège : engins contre un pan) ; seules les unités du camp du joueur sont acceptées ; ids entiers |
+| `set_ai(side, bool)` | IA de bataille d'un camp (autoplay, tests) ; IA tactique M9, décisions toutes les 2 s |
+| `get_units()` | `[{id, side, type, name, category, render, soldiers, max_soldiers, initial_soldiers, morale, fatigue, ammo, max_ammo, state, state_label, formation, x, z, y, facing, width, depth, is_general, present, left_field, fire_at_will, can_shoot, running, withdrawing, stakes, target, destination?, on_wall, climbing (pan, -1), climb_progress, ladders, synthetic, ram, siege_tower, wall_breaker}]` ; `state` ∈ idle, marching, charging, melee, shooting, routing, rallied, climbing ; `render` ∈ infantry, archer, cavalry, siege, ram, tower ; `y` = hauteur du chemin de ronde pour les régiments sur les murs |
 | `get_soldier_transforms(side)` | `PackedFloat32Array` (x, y, z, angle) par soldat vivant |
 | `get_soldier_buffer(side, render)` | `PackedFloat32Array` au format `MultiMesh.buffer` (12 flottants par soldat) |
-| `get_terrain()` | `{width, depth, resolution, nx, nz, heights: PackedFloat32Array, forests: [{x, z, radius}], mud: [...], river?: {points: PackedVector2Array, width, fords: [{x, z, half_width}]}}` |
+| `get_terrain()` | `{width, depth, resolution, nx, nz, heights: PackedFloat32Array, forests: [{x, z, radius}], mud: [...], river?: {points: PackedVector2Array, width, fords: [{x, z, half_width}]}, siege?: get_siege()}` |
+| `get_siege()` | siège seulement (`{}` sinon) : `{fortification, center: Vector2, square_radius, thickness, wall_height, gate, hold_time, hold_to_win, integrity, pieces: [{index, kind: "wall"\|"gate", a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower}], towers: [{x, z, radius, height}]}` ; à relire pour afficher les dégâts |
 | `get_weather()` | `{key: "clear"\|"rain"\|"fog"\|"snow", label}` |
 | `get_setup()`, `get_strength(side)`, `get_elapsed()`, `get_ticks()`, `get_height(x, z)` | lecture |
 | `is_finished()`, `get_outcome()` | `{winner, attacker, defender: {losses[] (par unité de campagne), total_losses, morale_delta, routed, general_killed, general_captured}, duration}` (format accepté par `resolve_battle`) ; `{}` tant que la bataille dure |
