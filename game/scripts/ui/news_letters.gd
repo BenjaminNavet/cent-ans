@@ -24,7 +24,26 @@ const KIND_LABELS := {
 	"death": "Décès",
 	"succession": "Succession",
 	"city_captured": "Prise de ville",
+	# Types du journal de la simulation (`CampaignSim.end_turn`, `EventKind` en snake_case).
+	"peace_signed": "Traité de paix",
+	"province_captured": "Prise de ville",
+	"alliance_formed": "Alliance",
+	"alliance_broken": "Rupture d'alliance",
+	"marriage": "Mariage",
+	"faction_destroyed": "Chute d'une maison",
+	"vassalage": "Hommage",
+	"vassal_rebellion": "Révolte d'un vassal",
+	"excommunication": "Excommunication",
+	"regency": "Régence",
+	"general_captured": "Chef capturé",
+	"revolt": "Révolte",
+	"plague": "Peste",
 }
+## Types d'événements de la simulation qui méritent une lettre (les autres restent au journal).
+const NEWS_EVENT_KINDS := [
+	"war_declared", "peace_signed", "alliance_formed", "alliance_broken", "marriage", "birth", "death",
+	"succession", "province_captured", "faction_destroyed", "vassalage", "vassal_rebellion",
+	"excommunication", "regency", "general_captured", "revolt", "plague"]
 const LETTER_WIDTH := 300.0
 const SEAL_RADIUS := 21.0
 ## Nombre maximal de lettres conservées (les plus anciennes sont oubliées).
@@ -110,6 +129,17 @@ func activate(index: int) -> void:
 	_rebuild()
 
 
+## Convertit un événement de `CampaignSim.end_turn()` / `get_events()`
+## (`{kind, text_fr, province, army, faction}`) en lettre, ou `{}` s'il ne mérite pas de lettre.
+static func news_from_event(event: Dictionary) -> Dictionary:
+	var kind := str(event.get("kind", ""))
+	if not NEWS_EVENT_KINDS.has(kind):
+		return {}
+	var text := str(event.get("text_fr", ""))
+	return {"kind": kind, "title": text, "text": text,
+		"faction_id": str(event.get("faction", "")), "province_id": str(event.get("province", ""))}
+
+
 ## Rubrique affichée pour un type de nouvelle.
 static func kind_label(kind: String) -> String:
 	return str(KIND_LABELS.get(kind, "Nouvelle"))
@@ -118,7 +148,7 @@ static func kind_label(kind: String) -> String:
 ## Couleur de cire selon le type : verte pour la paix (actes perpétuels), brune pour un décès.
 static func wax_color(kind: String) -> Color:
 	match kind:
-		"peace", "faction_met":
+		"peace", "peace_signed", "faction_met", "alliance_formed", "marriage", "vassalage":
 			return HudStyle.WAX_GREEN
 		"death":
 			return Color(0.25, 0.14, 0.09, 1.0)
@@ -199,7 +229,7 @@ class Letter:
 			title.text_overrun_behavior = TextServer.OVERRUN_TRIM_WORD_ELLIPSIS
 		column.add_child(title)
 		var text := str(item.get("text", ""))
-		if expanded and text != "":
+		if expanded and text != "" and text != title.text:
 			var rule := ColorRect.new()
 			rule.color = HudStyle.GOLD
 			rule.custom_minimum_size = Vector2(0, 1)

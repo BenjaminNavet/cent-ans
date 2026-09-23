@@ -159,5 +159,8 @@ func _test_news_letters() -> void:
 	_check(letters.get_items().size() == 5, "dismiss should remove a letter")
 	letters.clear()
 	_check(letters.get_items().is_empty(), "clear should empty the pile")
+	var war := NewsLetters.news_from_event({"kind": "war_declared", "text_fr": "L'Angleterre déclare la guerre à la France.", "faction": "fac_england", "province": "", "army": ""})
+	_check(war.get("kind") == "war_declared" and war.get("faction_id") == "fac_england", "news_from_event: %s" % war)
+	_check(NewsLetters.news_from_event({"kind": "income", "text_fr": "Revenus"}).is_empty(), "income is not news")
 	letters.queue_free()
 	await process_frame
