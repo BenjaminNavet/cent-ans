@@ -1,0 +1,47 @@
+{
+  "id": "names_br",
+  "language": "breton",
+  "cultures": [
+    "cul_breton"
+  ],
+  "male_first_names": [
+    "Jean",
+    "Alain",
+    "Hervé",
+    "Yves",
+    "Guy",
+    "Olivier",
+    "Bertrand",
+    "Tanguy",
+    "Even",
+    "Rivallon",
+    "Conan",
+    "Judicaël",
+    "Geoffroy",
+    "Raoul",
+    "Pierre",
+    "Guillaume",
+    "Morvan"
+  ],
+  "female_first_names": [
+    "Jeanne",
+    "Marguerite",
+    "Aliénor",
+    "Tiphaine",
+    "Constance",
+    "Isabeau",
+    "Anne",
+    "Azénor",
+    "Héloïse",
+    "Catherine",
+    "Plézou"
+  ],
+  "surnames": [
+    "de Rohan",
+    "de Clisson",
+    "de Laval",
+    "de Rieux",
+    "de Beaumanoir",
+    "du Guesclin"
+  ]
+}

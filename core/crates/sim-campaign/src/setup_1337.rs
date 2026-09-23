@@ -337,6 +337,18 @@ impl CampaignState {
             );
         }
         link_families(&mut state, data);
+        // Republics whose data names no ruler (Florence, the Confederates)
+        // start with an elected head, like a realm whose dynasty died out.
+        let rulerless: Vec<FactionId> = state
+            .factions
+            .iter()
+            .filter(|(id, f)| id.as_str() != REBELS_FACTION && f.ruler.is_none())
+            .map(|(id, _)| id.clone())
+            .collect();
+        for id in rulerless {
+            let ruler = crate::dynasty::spawn_ruler(&mut state, data, &id);
+            state.factions.get_mut(&id).expect("exists").ruler = Some(ruler);
+        }
         // Factions whose data names no heir get the one their succession law
         // designates (spec M4 § 1: "héritier calculable").
         let ids: Vec<FactionId> = state.factions.keys().cloned().collect();

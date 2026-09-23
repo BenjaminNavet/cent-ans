@@ -2,7 +2,8 @@
   "id": "names_fr",
   "language": "français médiéval / ancien français",
   "cultures": [
-    "cul_french"
+    "cul_french",
+    "cul_savoyard"
   ],
   "male_first_names": [
     "Jehan",

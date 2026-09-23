@@ -1,0 +1,50 @@
+{
+  "id": "names_nordic",
+  "language": "vieux norrois (suédois, danois)",
+  "cultures": [
+    "cul_swedish",
+    "cul_danish"
+  ],
+  "male_first_names": [
+    "Magnus",
+    "Erik",
+    "Håkan",
+    "Birger",
+    "Valdemar",
+    "Knut",
+    "Christoffer",
+    "Olof",
+    "Nils",
+    "Sten",
+    "Bo",
+    "Karl",
+    "Niels",
+    "Peder",
+    "Ingvar",
+    "Sune",
+    "Folke",
+    "Torgils"
+  ],
+  "female_first_names": [
+    "Ingeborg",
+    "Blanka",
+    "Märta",
+    "Kristina",
+    "Margareta",
+    "Katarina",
+    "Cecilia",
+    "Helvig",
+    "Ragnhild",
+    "Birgitta",
+    "Sigrid",
+    "Ingrid"
+  ],
+  "surnames": [
+    "Eriksson",
+    "Magnusson",
+    "Jonsson",
+    "Ebbesen",
+    "Grip",
+    "Porse"
+  ]
+}

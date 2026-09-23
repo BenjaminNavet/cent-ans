@@ -1,0 +1,40 @@
+{
+  "id": "chr_guillaume_ii_de_hainaut",
+  "name": {
+    "display": "Guillaume II de Hainaut",
+    "local": "Willem IV van Holland",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "male",
+  "house": "Avesnes",
+  "faction": "fac_hainaut",
+  "role": "heir",
+  "birth": {
+    "value": "1307-01-01"
+  },
+  "death": {
+    "value": "1345-09-26",
+    "note": "Tué à la bataille de Warns contre les Frisons."
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_brave",
+    "trait_reckless",
+    "trait_tourney_champion"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_guillaume_i_de_hainaut"
+  },
+  "starting_location": "prov_holland",
+  "status": "at_court",
+  "description": "Chevalier batailleur, allié d'Édouard III en 1339-1340 ; tué par les Frisons à Warns (1345).",
+  "sources": [
+    "Guillaume II de Hainaut"
+  ]
+}

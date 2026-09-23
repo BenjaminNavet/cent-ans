@@ -1,0 +1,45 @@
+{
+  "id": "chr_robert_d_anjou",
+  "name": {
+    "display": "Robert d'Anjou, roi de Naples",
+    "local": "Roberto d'Angiò",
+    "local_language": "napolitain"
+  },
+  "epithet": "le Sage",
+  "sex": "male",
+  "house": "Anjou-Sicile",
+  "faction": "fac_naples",
+  "role": "ruler",
+  "birth": {
+    "value": "1277-01-01"
+  },
+  "death": {
+    "value": "1343-01-20"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Sicile (Naples)",
+      "from": {
+        "value": "1309-05-05"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 7,
+    "court": 8
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_cultured",
+    "trait_pious"
+  ],
+  "piety": 75,
+  "starting_location": "prov_napoli",
+  "status": "at_court",
+  "description": "Roi de Naples depuis 1309, chef des guelfes d'Italie, mécène de Pétrarque et de Boccace. Sa petite-fille Jeanne est son héritière.",
+  "sources": [
+    "Robert Ier de Naples"
+  ]
+}

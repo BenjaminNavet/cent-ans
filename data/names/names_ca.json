@@ -1,0 +1,49 @@
+{
+  "id": "names_ca",
+  "language": "catalan",
+  "cultures": [
+    "cul_catalan"
+  ],
+  "male_first_names": [
+    "Pere",
+    "Jaume",
+    "Alfons",
+    "Joan",
+    "Martí",
+    "Ramon",
+    "Berenguer",
+    "Bernat",
+    "Guillem",
+    "Arnau",
+    "Ferran",
+    "Galceran",
+    "Hug",
+    "Dalmau",
+    "Ponç",
+    "Gispert",
+    "Francesc"
+  ],
+  "female_first_names": [
+    "Elionor",
+    "Constança",
+    "Maria",
+    "Violant",
+    "Sibil·la",
+    "Blanca",
+    "Isabel",
+    "Margarida",
+    "Elisenda",
+    "Teresa",
+    "Beatriu",
+    "Sança",
+    "Brunissenda"
+  ],
+  "surnames": [
+    "de Barcelona",
+    "de Cardona",
+    "de Montcada",
+    "de Cabrera",
+    "de Pallars",
+    "d'Urgell"
+  ]
+}

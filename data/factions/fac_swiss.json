@@ -1,0 +1,50 @@
+{
+  "id": "fac_swiss",
+  "name": {
+    "display": "Confédération des Waldstätten",
+    "local": "Eidgenossenschaft",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Confédérés",
+  "adjective": "confédéré",
+  "government": "republic",
+  "playable": false,
+  "capital": "prov_waldstatten",
+  "capital_city": "Lucerne",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "De gueules à la croix alésée d'argent.",
+    "description": "Croix blanche des Confédérés (bannière de Schwytz, plus tard de toute la Confédération).",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Confédération d'Uri, Schwytz, Unterwald et Lucerne"
+  ],
+  "treasury": 8000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_austria",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 35,
+    "trade": 50,
+    "piety": 55
+  },
+  "description": "Pacte des Waldstätten (1291) élargi à Lucerne (1332) ; Berne, alliée, écrase la noblesse à Laupen (1339) et entrera dans la Confédération en 1353. Piquiers redoutés.",
+  "sources": [
+    "Ancienne Confédération suisse",
+    "Bataille de Laupen"
+  ]
+}

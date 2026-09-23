@@ -1,0 +1,41 @@
+{
+  "id": "chr_otton_d_autriche",
+  "name": {
+    "display": "Otton d'Autriche",
+    "local": "Otto der Fröhliche",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "le Joyeux",
+  "sex": "male",
+  "house": "Habsbourg",
+  "faction": "fac_austria",
+  "role": "prince",
+  "birth": {
+    "value": "1301-07-23"
+  },
+  "death": {
+    "value": "1339-02-17"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_lustful",
+    "trait_generous"
+  ],
+  "piety": 50,
+  "family": {
+    "siblings": [
+      "chr_albert_ii_d_autriche"
+    ]
+  },
+  "starting_location": "prov_austria",
+  "status": "at_court",
+  "description": "Frère cadet et co-duc d'Albert II, duc de Carinthie (1335).",
+  "sources": [
+    "Otton d'Autriche"
+  ]
+}

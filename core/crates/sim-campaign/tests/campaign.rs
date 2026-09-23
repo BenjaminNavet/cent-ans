@@ -47,7 +47,7 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 fn new_1337_matches_game_data() {
     let data = data();
     let state = france(&data, 1);
-    assert_eq!(state.factions.len(), 16, "including the virtual fac_rebels");
+    assert_eq!(state.factions.len(), 29, "including the virtual fac_rebels");
     assert_eq!(state.provinces.len(), 132);
     assert_eq!(state.date_label(), "Printemps 1337");
     assert_eq!(state.turn(), 0);
@@ -89,7 +89,7 @@ fn new_1337_matches_game_data() {
     let paris = state.province_state(&prov("prov_ile_de_france")).unwrap();
     assert_eq!(paris.garrison.len(), 4, "capital garrison");
     assert!(state.provinces.values().all(|p| !p.garrison.is_empty()));
-    assert_eq!(state.armies().len(), 15, "one main army per faction");
+    assert_eq!(state.armies().len(), 28, "one main army per faction");
 }
 
 #[test]

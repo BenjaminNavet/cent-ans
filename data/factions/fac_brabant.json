@@ -1,0 +1,61 @@
+{
+  "id": "fac_brabant",
+  "name": {
+    "display": "Duché de Brabant",
+    "local": "Hertogdom Brabant",
+    "local_language": "moyen néerlandais"
+  },
+  "short_name": "Brabant",
+  "adjective": "brabançon",
+  "government": "duchy",
+  "playable": false,
+  "ruler": "chr_jean_iii_de_brabant",
+  "capital": "prov_brabant",
+  "capital_city": "Louvain",
+  "religion": "rel_catholic",
+  "culture": "cul_flemish",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De sable au lion d'or, armé et lampassé de gueules.",
+    "description": "Lion d'or des ducs de Brabant et de Lothier.",
+    "primary_color": "#1A1A1A",
+    "secondary_color": "#E8B923"
+  },
+  "titles": [
+    "Duc de Brabant",
+    "Duc de Limbourg",
+    "Duc de Lothier"
+  ],
+  "treasury": 25000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_windmills",
+    "tech_hanseatic_trade",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "peace",
+      "note": "Anvers devient l'étape de la laine anglaise en 1338 : Jean III louvoie."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 70,
+    "trade": 85,
+    "piety": 50
+  },
+  "description": "Duché riche de Louvain, Bruxelles, Malines et Anvers. Jean III vend son alliance au plus offrant entre Édouard III et Philippe VI ; la Joyeuse Entrée de 1356 bornera le pouvoir ducal.",
+  "sources": [
+    "Duché de Brabant",
+    "Jean III de Brabant"
+  ]
+}

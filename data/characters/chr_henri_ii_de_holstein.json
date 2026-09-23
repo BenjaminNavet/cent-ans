@@ -1,0 +1,39 @@
+{
+  "id": "chr_henri_ii_de_holstein",
+  "name": {
+    "display": "Henri de Holstein",
+    "local": "Heinrich II. von Holstein-Rendsburg",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "de Fer",
+  "sex": "male",
+  "house": "Schauenbourg",
+  "faction": "fac_holstein",
+  "role": "heir",
+  "birth": {
+    "value": "1317-01-01"
+  },
+  "death": {
+    "value": "1384-01-01"
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_brave",
+    "trait_mercenary"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_gerhard_iii_de_holstein"
+  },
+  "starting_location": "prov_holstein",
+  "status": "at_court",
+  "description": "Fils de Gérard III, dit « de Fer », capitaine de mercenaires jusqu'en France et en Italie.",
+  "sources": [
+    "Henri II de Holstein-Rendsburg"
+  ]
+}

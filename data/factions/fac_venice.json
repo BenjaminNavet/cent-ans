@@ -1,0 +1,65 @@
+{
+  "id": "fac_venice",
+  "name": {
+    "display": "République de Venise",
+    "local": "Serenìsima Repùblica Vèneta",
+    "local_language": "vénitien"
+  },
+  "short_name": "Venise",
+  "adjective": "vénitien",
+  "government": "republic",
+  "playable": false,
+  "ruler": "chr_francesco_dandolo",
+  "capital": "prov_venezia",
+  "capital_city": "Venise",
+  "religion": "rel_catholic",
+  "culture": "cul_venetian",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "De gueules au lion de saint Marc d'or.",
+    "description": "Lion ailé de l'évangéliste Marc, patron de la cité.",
+    "primary_color": "#9B1B1B",
+    "secondary_color": "#E8B923"
+  },
+  "titles": [
+    "Doge de Venise",
+    "Seigneur d'un quart et demi de l'Empire romain"
+  ],
+  "treasury": 45000,
+  "prestige": 60,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_double_entry",
+    "tech_letters_of_credit",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_verona",
+      "status": "war",
+      "since": {
+        "value": "1336-06-01"
+      },
+      "note": "Ligue de Venise, Florence et des Visconti contre Mastino II (1336-1339) ; Padoue tombe en août 1337."
+    },
+    {
+      "faction": "fac_florence",
+      "status": "alliance",
+      "note": "Ligue contre les Scaliger (1336)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 60,
+    "trade": 95,
+    "piety": 40
+  },
+  "description": "Thalassocratie marchande : galées de Romanie et de Flandre, Arsenal, Grand Conseil fermé depuis 1297. En 1337, elle prend pied sur la Terre Ferme (Trévise, Padoue) aux dépens des Scaliger.",
+  "sources": [
+    "République de Venise",
+    "Francesco Dandolo"
+  ]
+}

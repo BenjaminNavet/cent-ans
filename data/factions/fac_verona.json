@@ -1,0 +1,63 @@
+{
+  "id": "fac_verona",
+  "name": {
+    "display": "Seigneurie de Vérone",
+    "local": "Signoria scaligera",
+    "local_language": "vénitien"
+  },
+  "short_name": "Vérone",
+  "adjective": "véronais",
+  "government": "lordship",
+  "playable": false,
+  "ruler": "chr_mastino_ii_della_scala",
+  "capital": "prov_verona",
+  "capital_city": "Vérone",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules à l'échelle d'argent posée en pal.",
+    "description": "L'échelle (scala) des della Scala.",
+    "primary_color": "#A31F24",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Seigneur de Vérone",
+    "Vicaire impérial"
+  ],
+  "treasury": 25000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_venice",
+      "status": "war",
+      "since": {
+        "value": "1336-06-01"
+      }
+    },
+    {
+      "faction": "fac_florence",
+      "status": "war",
+      "since": {
+        "value": "1336-06-01"
+      }
+    }
+  ],
+  "ai_personality": {
+    "aggression": 70,
+    "diplomacy": 40,
+    "trade": 60,
+    "piety": 35
+  },
+  "description": "Seigneurie des Scaliger à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques), assaillie depuis 1336 par Venise, Florence et les Visconti ; la paix de 1339 la réduira à Vérone et Vicence.",
+  "sources": [
+    "Mastino II della Scala",
+    "Scaligeri"
+  ]
+}
