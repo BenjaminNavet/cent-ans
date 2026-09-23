@@ -747,7 +747,20 @@ impl CampaignState {
                     return Err(OrderError::InvalidUnitIndex(unit_index));
                 }
                 if army.units.len() == 1 {
-                    return Err(OrderError::WouldEmptyArmy);
+                    // Dismissing the last unit disbands the army (M10), unless
+                    // it is about to fight.
+                    let fighting = self
+                        .pending_battles
+                        .iter()
+                        .any(|b| &b.attacker == army_id || &b.defender == army_id);
+                    if fighting {
+                        return Err(OrderError::WouldEmptyArmy);
+                    }
+                    if let Some(general) = army.general.clone() {
+                        self.detach_general(&general);
+                    }
+                    self.armies.remove(army_id);
+                    return Ok(());
                 }
                 self.armies
                     .get_mut(army_id)

@@ -69,6 +69,11 @@ pub const ADMINISTRATION_PER_PROVINCE: f64 = 0.01;
 /// Ceiling of the administration share.
 pub const ADMINISTRATION_MAX: f64 = 0.35;
 
+/// A treasury above this many seasons of income feeds an opulent court.
+pub const OPULENCE_SEASONS: i64 = 8;
+/// Share of that excess spent by the court every season (percent).
+pub const OPULENCE_PERCENT: i64 = 3;
+
 /// Share of income taken by administration for a realm of `provinces`.
 pub fn administration_rate(provinces: usize) -> f64 {
     (ADMINISTRATION_BASE + ADMINISTRATION_PER_PROVINCE * provinces as f64).min(ADMINISTRATION_MAX)
@@ -240,15 +245,21 @@ impl CampaignState {
     }
 
     /// Court and administration costs of the season: a share of income that
-    /// grows with the number of provinces held (M10 balance).
+    /// grows with the number of provinces held, plus 3 % of any treasury
+    /// above eight seasons of income (M10 balance).
     pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
         let provinces = self
             .provinces
             .values()
             .filter(|p| &p.controller == faction)
             .count();
-        (self.faction_income_effective(data, faction) as f64 * administration_rate(provinces))
-            .round() as i64
+        let income = self.faction_income_effective(data, faction);
+        let share = (income as f64 * administration_rate(provinces)).round() as i64;
+        // An idle hoard feeds court luxury, patronage and embezzlement.
+        let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
+        let opulence =
+            (treasury - OPULENCE_SEASONS * income.max(0)).max(0) * OPULENCE_PERCENT / 100;
+        share + opulence
     }
 
     /// Full economic snapshot for the bridge (spec § 2).
