@@ -1,0 +1,583 @@
+//! Player and AI orders: validation and immediate application.
+//!
+//! Every order is validated before anything is mutated; a rejected order
+//! leaves the state untouched. Move orders are only recorded (`Army::path`)
+//! and resolved in `end_turn`; all other orders apply immediately.
+
+use data_model::{CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, UnitTypeId};
+use serde::{Deserialize, Serialize};
+
+use crate::movement;
+use crate::state::{Army, ArmyId, CampaignState, Stance, Unit};
+
+/// An order issued by a faction (player through `submit_order`, AI through the planner).
+///
+/// Serialised as `{"type": "move_army", "army": "...", "path": [...]}`; the
+/// variant and field names are the contract with the Godot bridge.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum Order {
+    /// Walk along `path` (adjacent provinces, the army's own location excluded).
+    MoveArmy {
+        army: ArmyId,
+        path: Vec<ProvinceId>,
+    },
+    /// Pay for a unit that joins the province garrison at the end of the turn.
+    Recruit {
+        province: ProvinceId,
+        unit_type: UnitTypeId,
+    },
+    /// Form a new army from garrison units (indices into the garrison).
+    CreateArmy {
+        province: ProvinceId,
+        units_from_garrison: Vec<usize>,
+        #[serde(default)]
+        general: Option<CharacterId>,
+    },
+    /// Move every unit of `source` into `target` (same province); `source` disappears.
+    MergeArmies {
+        source: ArmyId,
+        target: ArmyId,
+    },
+    /// Detach `unit_indices` of `army` into a new army in the same province.
+    SplitArmy {
+        army: ArmyId,
+        unit_indices: Vec<usize>,
+    },
+    /// Dismiss one unit of an army (`army`) or of a garrison (`province`).
+    DisbandUnit {
+        #[serde(default)]
+        army: Option<ArmyId>,
+        #[serde(default)]
+        province: Option<ProvinceId>,
+        unit_index: usize,
+    },
+    SetStance {
+        army: ArmyId,
+        stance: Stance,
+    },
+    AssignGeneral {
+        army: ArmyId,
+        character: CharacterId,
+    },
+}
+
+/// Why an order was refused (messages in French for the UI).
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum OrderError {
+    #[error("armée inconnue : {0}")]
+    UnknownArmy(ArmyId),
+    #[error("province inconnue : {0}")]
+    UnknownProvince(ProvinceId),
+    #[error("type d'unité inconnu : {0}")]
+    UnknownUnitType(UnitTypeId),
+    #[error("personnage inconnu : {0}")]
+    UnknownCharacter(CharacterId),
+    #[error("cette armée n'appartient pas à la faction {0}")]
+    NotYourArmy(FactionId),
+    #[error("cette province n'est pas contrôlée par la faction {0}")]
+    NotYourProvince(FactionId),
+    #[error("chemin vide")]
+    EmptyPath,
+    #[error("chemin invalide : {from} et {to} ne sont pas reliées (terre ou mer avec ports)")]
+    NotAdjacent { from: ProvinceId, to: ProvinceId },
+    #[error("recrutement impossible : {0}")]
+    RecruitUnavailable(String),
+    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    InsufficientFunds { needed: i64, available: i64 },
+    #[error("indice d'unité invalide : {0}")]
+    InvalidUnitIndex(usize),
+    #[error("aucune unité sélectionnée")]
+    NoUnitsSelected,
+    #[error("une armée doit garder au moins une unité")]
+    WouldEmptyArmy,
+    #[error("les deux armées doivent être dans la même province")]
+    NotSameProvince,
+    #[error("les deux armées doivent appartenir à la même faction")]
+    NotSameFaction,
+    #[error("ce personnage ne peut pas commander (mort, captif, mineur ou d'une autre faction)")]
+    CharacterUnavailable,
+    #[error("ce personnage n'est pas dans cette province")]
+    CharacterElsewhere,
+    #[error("il faut préciser soit une armée soit une province")]
+    AmbiguousTarget,
+    #[error("faction inconnue : {0}")]
+    UnknownFaction(FactionId),
+}
+
+/// One line of the recruitment panel.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RecruitOption {
+    pub unit_type: UnitTypeId,
+    pub name: String,
+    pub cost: u32,
+    pub upkeep: u32,
+    pub available: bool,
+    /// French explanation when `available` is `false`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
+impl CampaignState {
+    /// Validates and applies (or records, for moves) an order of the player faction.
+    pub fn submit_order(&mut self, data: &GameData, order: Order) -> Result<(), OrderError> {
+        let player = self.player_faction.clone();
+        self.apply_order(data, &player, order)
+    }
+
+    /// Validates and applies an order on behalf of `faction`.
+    pub fn apply_order(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        order: Order,
+    ) -> Result<(), OrderError> {
+        if !self.factions.contains_key(faction) {
+            return Err(OrderError::UnknownFaction(faction.clone()));
+        }
+        match order {
+            Order::MoveArmy { army, path } => self.order_move(data, faction, &army, path),
+            Order::Recruit {
+                province,
+                unit_type,
+            } => self.order_recruit(data, faction, &province, &unit_type),
+            Order::CreateArmy {
+                province,
+                units_from_garrison,
+                general,
+            } => self.order_create_army(faction, &province, &units_from_garrison, general),
+            Order::MergeArmies { source, target } => self.order_merge(faction, &source, &target),
+            Order::SplitArmy { army, unit_indices } => {
+                self.order_split(faction, &army, &unit_indices)
+            }
+            Order::DisbandUnit {
+                army,
+                province,
+                unit_index,
+            } => self.order_disband(faction, army.as_ref(), province.as_ref(), unit_index),
+            Order::SetStance { army, stance } => {
+                self.own_army_mut(faction, &army)?.stance = stance;
+                Ok(())
+            }
+            Order::AssignGeneral { army, character } => {
+                self.order_assign_general(faction, &army, &character)
+            }
+        }
+    }
+
+    fn own_army(&self, faction: &FactionId, id: &ArmyId) -> Result<&Army, OrderError> {
+        let army = self
+            .armies
+            .get(id)
+            .ok_or_else(|| OrderError::UnknownArmy(id.clone()))?;
+        if &army.faction != faction {
+            return Err(OrderError::NotYourArmy(faction.clone()));
+        }
+        Ok(army)
+    }
+
+    fn own_army_mut(&mut self, faction: &FactionId, id: &ArmyId) -> Result<&mut Army, OrderError> {
+        self.own_army(faction, id)?;
+        Ok(self.armies.get_mut(id).expect("checked above"))
+    }
+
+    fn own_province_index(&self, faction: &FactionId, id: &ProvinceId) -> Result<(), OrderError> {
+        let province = self
+            .provinces
+            .get(id)
+            .ok_or_else(|| OrderError::UnknownProvince(id.clone()))?;
+        if &province.controller != faction {
+            return Err(OrderError::NotYourProvince(faction.clone()));
+        }
+        Ok(())
+    }
+
+    fn order_move(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        army_id: &ArmyId,
+        mut path: Vec<ProvinceId>,
+    ) -> Result<(), OrderError> {
+        let army = self.own_army(faction, army_id)?;
+        if path.first() == Some(&army.location) {
+            path.remove(0);
+        }
+        if path.is_empty() {
+            return Err(OrderError::EmptyPath);
+        }
+        movement::validate_path(data, &army.location, &path)?;
+        self.armies.get_mut(army_id).expect("checked").path = path;
+        Ok(())
+    }
+
+    fn order_recruit(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+        unit_type: &UnitTypeId,
+    ) -> Result<(), OrderError> {
+        let option = self
+            .recruit_option(data, faction, province, unit_type)
+            .ok_or_else(|| OrderError::UnknownUnitType(unit_type.clone()))?;
+        if !option.available {
+            let reason = option.reason.unwrap_or_default();
+            let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
+            return if reason.starts_with("trésor") {
+                Err(OrderError::InsufficientFunds {
+                    needed: i64::from(option.cost),
+                    available: treasury,
+                })
+            } else {
+                Err(OrderError::RecruitUnavailable(reason))
+            };
+        }
+        let faction_state = self.factions.get_mut(faction).expect("checked");
+        faction_state.treasury -= i64::from(option.cost);
+        self.provinces
+            .get_mut(province)
+            .expect("checked")
+            .recruit_queue
+            .push(unit_type.clone());
+        Ok(())
+    }
+
+    /// Recruitment options of `province` for its controller (the player's view).
+    pub fn recruitable(&self, data: &GameData, province: &ProvinceId) -> Vec<RecruitOption> {
+        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+            return Vec::new();
+        };
+        data.unit_types
+            .keys()
+            .filter_map(|unit_type| self.recruit_option(data, &controller, province, unit_type))
+            .collect()
+    }
+
+    /// Availability of one unit type in one province for `faction`.
+    pub fn recruit_option(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province_id: &ProvinceId,
+        unit_type_id: &UnitTypeId,
+    ) -> Option<RecruitOption> {
+        let unit_type = data.unit_types.get(unit_type_id)?;
+        let mut option = RecruitOption {
+            unit_type: unit_type_id.clone(),
+            name: unit_type.name.display.clone(),
+            cost: unit_type.cost.money,
+            upkeep: unit_type.upkeep,
+            available: true,
+            reason: None,
+        };
+        let reason = self.recruit_blocker(data, faction, province_id, unit_type);
+        if let Some(reason) = reason {
+            option.available = false;
+            option.reason = Some(reason);
+        }
+        Some(option)
+    }
+
+    fn recruit_blocker(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province_id: &ProvinceId,
+        unit_type: &data_model::UnitType,
+    ) -> Option<String> {
+        let province_state = self.provinces.get(province_id)?;
+        let province = data.provinces.get(province_id)?;
+        let faction_state = self.factions.get(faction)?;
+        if &province_state.owner != faction || &province_state.controller != faction {
+            return Some("la province doit être possédée et contrôlée".to_owned());
+        }
+        if province_state.siege.is_some() {
+            return Some("la province est assiégée".to_owned());
+        }
+        if let Some(building) = &unit_type.required_building {
+            if !province.buildings.contains(building) {
+                let name = data
+                    .buildings
+                    .get(building)
+                    .map_or_else(|| building.to_string(), |b| b.name.display.clone());
+                return Some(format!("bâtiment requis : {name}"));
+            }
+        }
+        if let Some(tech) = &unit_type.required_technology {
+            if !faction_state.technologies.contains(tech) {
+                let name = data
+                    .technologies
+                    .get(tech)
+                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                return Some(format!("technologie requise : {name}"));
+            }
+        }
+        if !unit_type.required_faction.is_empty() && !unit_type.required_faction.contains(faction) {
+            return Some("réservé à d'autres factions".to_owned());
+        }
+        if !unit_type.required_culture.is_empty()
+            && !unit_type.required_culture.contains(&province.culture)
+        {
+            return Some("culture locale inadaptée".to_owned());
+        }
+        let class = province_state.population.get(unit_type.source_class);
+        if class.count < u64::from(unit_type.soldiers) * 10 {
+            return Some("classe sociale trop peu nombreuse".to_owned());
+        }
+        if faction_state.treasury < i64::from(unit_type.cost.money) {
+            return Some(format!(
+                "trésor insuffisant ({} livres nécessaires)",
+                unit_type.cost.money
+            ));
+        }
+        None
+    }
+
+    fn order_create_army(
+        &mut self,
+        faction: &FactionId,
+        province: &ProvinceId,
+        indices: &[usize],
+        general: Option<CharacterId>,
+    ) -> Result<(), OrderError> {
+        self.own_province_index(faction, province)?;
+        let garrison_len = self.provinces[province].garrison.len();
+        let indices = unique_sorted(indices, garrison_len)?;
+        if let Some(character) = &general {
+            self.check_general(faction, character, province)?;
+        }
+        let units = take_indices(
+            &mut self.provinces.get_mut(province).expect("checked").garrison,
+            &indices,
+        );
+        let id = self.allocate_army_id();
+        let movement_points = self.season.movement_points();
+        self.armies.insert(
+            id.clone(),
+            Army {
+                faction: faction.clone(),
+                general: None,
+                location: province.clone(),
+                units,
+                movement_points,
+                supply: 100,
+                stance: Stance::Normal,
+                path: Vec::new(),
+            },
+        );
+        if let Some(character) = general {
+            self.attach_general(&id, &character);
+        }
+        Ok(())
+    }
+
+    fn order_merge(
+        &mut self,
+        faction: &FactionId,
+        source: &ArmyId,
+        target: &ArmyId,
+    ) -> Result<(), OrderError> {
+        let source_army = self.own_army(faction, source)?.clone();
+        let target_army = self.own_army(faction, target)?;
+        if source == target {
+            return Err(OrderError::NotSameProvince);
+        }
+        if source_army.location != target_army.location {
+            return Err(OrderError::NotSameProvince);
+        }
+        let general = source_army.general.clone();
+        self.armies.remove(source);
+        let target_mut = self.armies.get_mut(target).expect("checked");
+        target_mut.units.extend(source_army.units);
+        target_mut.movement_points = target_mut.movement_points.min(source_army.movement_points);
+        if target_mut.general.is_none() {
+            if let Some(general) = general {
+                self.attach_general(target, &general);
+            }
+        } else if let Some(general) = general {
+            self.detach_general(&general);
+        }
+        Ok(())
+    }
+
+    fn order_split(
+        &mut self,
+        faction: &FactionId,
+        army_id: &ArmyId,
+        indices: &[usize],
+    ) -> Result<(), OrderError> {
+        let army = self.own_army(faction, army_id)?;
+        let indices = unique_sorted(indices, army.units.len())?;
+        if indices.len() == army.units.len() {
+            return Err(OrderError::WouldEmptyArmy);
+        }
+        let template = army.clone();
+        let units = take_indices(
+            &mut self.armies.get_mut(army_id).expect("checked").units,
+            &indices,
+        );
+        let id = self.allocate_army_id();
+        self.armies.insert(
+            id,
+            Army {
+                faction: faction.clone(),
+                general: None,
+                location: template.location,
+                units,
+                movement_points: template.movement_points,
+                supply: template.supply,
+                stance: template.stance,
+                path: Vec::new(),
+            },
+        );
+        Ok(())
+    }
+
+    fn order_disband(
+        &mut self,
+        faction: &FactionId,
+        army: Option<&ArmyId>,
+        province: Option<&ProvinceId>,
+        unit_index: usize,
+    ) -> Result<(), OrderError> {
+        match (army, province) {
+            (Some(army_id), None) => {
+                let army = self.own_army(faction, army_id)?;
+                if unit_index >= army.units.len() {
+                    return Err(OrderError::InvalidUnitIndex(unit_index));
+                }
+                if army.units.len() == 1 {
+                    return Err(OrderError::WouldEmptyArmy);
+                }
+                self.armies
+                    .get_mut(army_id)
+                    .expect("checked")
+                    .units
+                    .remove(unit_index);
+                Ok(())
+            }
+            (None, Some(province_id)) => {
+                self.own_province_index(faction, province_id)?;
+                let garrison = &mut self
+                    .provinces
+                    .get_mut(province_id)
+                    .expect("checked")
+                    .garrison;
+                if unit_index >= garrison.len() {
+                    return Err(OrderError::InvalidUnitIndex(unit_index));
+                }
+                garrison.remove(unit_index);
+                Ok(())
+            }
+            _ => Err(OrderError::AmbiguousTarget),
+        }
+    }
+
+    fn order_assign_general(
+        &mut self,
+        faction: &FactionId,
+        army_id: &ArmyId,
+        character: &CharacterId,
+    ) -> Result<(), OrderError> {
+        let location = self.own_army(faction, army_id)?.location.clone();
+        self.check_general(faction, character, &location)?;
+        if let Some(previous) = self.armies[army_id].general.clone() {
+            self.detach_general(&previous);
+        }
+        self.attach_general(army_id, character);
+        Ok(())
+    }
+
+    fn check_general(
+        &self,
+        faction: &FactionId,
+        character: &CharacterId,
+        province: &ProvinceId,
+    ) -> Result<(), OrderError> {
+        let state = self
+            .characters
+            .get(character)
+            .ok_or_else(|| OrderError::UnknownCharacter(character.clone()))?;
+        if !state.alive || state.captive || &state.faction != faction {
+            return Err(OrderError::CharacterUnavailable);
+        }
+        let in_province = state.location.as_ref() == Some(province)
+            || state
+                .army
+                .as_ref()
+                .and_then(|a| self.armies.get(a))
+                .is_some_and(|a| &a.location == province);
+        if !in_province {
+            return Err(OrderError::CharacterElsewhere);
+        }
+        Ok(())
+    }
+
+    /// Makes `character` the general of `army`, detaching it from its previous army.
+    pub(crate) fn attach_general(&mut self, army_id: &ArmyId, character: &CharacterId) {
+        if let Some(previous_army) = self.characters.get(character).and_then(|c| c.army.clone()) {
+            if let Some(previous) = self.armies.get_mut(&previous_army) {
+                if previous.general.as_ref() == Some(character) {
+                    previous.general = None;
+                }
+            }
+        }
+        if let Some(army) = self.armies.get_mut(army_id) {
+            army.general = Some(character.clone());
+            let location = army.location.clone();
+            if let Some(state) = self.characters.get_mut(character) {
+                state.army = Some(army_id.clone());
+                state.location = Some(location);
+            }
+        }
+    }
+
+    /// Removes `character` from the army it commands (stays in the province).
+    pub(crate) fn detach_general(&mut self, character: &CharacterId) {
+        let Some(state) = self.characters.get_mut(character) else {
+            return;
+        };
+        if let Some(army_id) = state.army.take() {
+            if let Some(army) = self.armies.get(&army_id) {
+                state.location = Some(army.location.clone());
+            }
+            if let Some(army) = self.armies.get_mut(&army_id) {
+                if army.general.as_ref() == Some(character) {
+                    army.general = None;
+                }
+            }
+        }
+    }
+}
+
+/// `true` when a character with this static status may command at the start.
+pub(crate) fn status_allows_command(status: Option<CharacterStatus>) -> bool {
+    !matches!(
+        status,
+        Some(CharacterStatus::Minor) | Some(CharacterStatus::Captive)
+    )
+}
+
+fn unique_sorted(indices: &[usize], len: usize) -> Result<Vec<usize>, OrderError> {
+    if indices.is_empty() {
+        return Err(OrderError::NoUnitsSelected);
+    }
+    let mut sorted: Vec<usize> = indices.to_vec();
+    sorted.sort_unstable();
+    sorted.dedup();
+    if let Some(&bad) = sorted.iter().find(|&&i| i >= len) {
+        return Err(OrderError::InvalidUnitIndex(bad));
+    }
+    Ok(sorted)
+}
+
+/// Removes the units at `sorted_indices` (ascending, unique) and returns them in order.
+fn take_indices(units: &mut Vec<Unit>, sorted_indices: &[usize]) -> Vec<Unit> {
+    let mut taken = Vec::with_capacity(sorted_indices.len());
+    for &index in sorted_indices.iter().rev() {
+        taken.push(units.remove(index));
+    }
+    taken.reverse();
+    taken
+}
