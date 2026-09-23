@@ -518,7 +518,7 @@ func _run_technologies() -> void:
 	root.add_child(panel)
 	await process_frame
 	panel.show_tree(tree, {}, int(sim.call("get_research_points", FACTION_ID)), "France", Color(0.2, 0.3, 0.7))
-	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size()
+	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size() + panel.medicine_view.buttons.size()
 	_check(buttons == tree.size(), "tech panel should show %d nodes, got %d" % [tree.size(), buttons])
 	panel.queue_free()
 
