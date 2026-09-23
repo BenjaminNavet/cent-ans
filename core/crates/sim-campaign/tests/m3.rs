@@ -500,9 +500,10 @@ fn save_json_round_trips_the_new_m3_fields() {
 fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
     let data = data();
     let state = france(&data, 115);
-    let json = state
-        .save_json()
-        .replace("\"state_version\":4", "\"state_version\":1");
+    let json = state.save_json().replace(
+        &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
+        "\"state_version\":1",
+    );
     let err = CampaignState::load_json(&json).unwrap_err();
     assert!(matches!(
         err,

@@ -687,7 +687,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
     }
 }
 
-fn events_array(events: &[GameEvent]) -> VarArray {
+pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {
     events
         .iter()
         .map(|event| {

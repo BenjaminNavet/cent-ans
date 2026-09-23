@@ -15,4 +15,5 @@ ai = { path = "../ai" }
 sim-battle = { path = "../sim-battle" }
 data-model = { path = "../data-model" }
 png = "0.17"
+serde.workspace = true
 serde_json.workspace = true

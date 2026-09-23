@@ -225,6 +225,7 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
      retient le meilleur `projected_income` observé (la richesse converge sur plusieurs saisons, § 1.1) et
      vérifie qu'il dépasse celui d'avant construction ; `set_tax_rate` à « high » et vérifie la hausse
      immédiate de `projected_income` (comparaison sans fin de tour, isolée de la dérive de fond).
+  6. batailles (M7) : voir « Batailles (M7) » ci-dessous.
   Un script `--script` est compilé avant l'enregistrement des autoloads : le test accède à `SimFacade`
   et `MapPaths` par `/root/...` (seules les constantes/statics sont utilisables directement).
 
@@ -292,6 +293,75 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 - Journal : couleurs pour guerre, paix, alliances, rébellions, embargos, offres, excommunication, schisme, hérésie.
 - Captures : `--stage=diplomacy` (`docs/img/godot-diplomacy.png`), `--stage=diplomacy_map`
   (`docs/img/godot-diplomacy-map.png`).
+## Batailles (M7)
+
+Contrat : `docs/design/m7-battles.md` ; API : `docs/design/data-model.md` § 7.6. Toutes les règles
+sont dans `BattleSim` (Rust) ; la scène ne fait qu'afficher et envoyer des commandes.
+
+![Bataille](img/godot-battle.png)
+![Dialogue d'avant-bataille](img/godot-battle-dialog.png)
+
+- **Fin de tour** (`campaign_map.gd`, section « Batailles (M7) ») : après `end_turn`, si
+  `get_pending_battles()` n'est pas vide, `scenes/battle/pre_battle_dialog.tscn` s'ouvre (forces en
+  présence, composition, général, terrain, saison, météo prévue lue sur un `BattleSim` construit avec
+  la graine de la bataille). « Résolution automatique » → `auto_resolve_battle` ; « Livrer bataille » →
+  la carte est mise en sommeil (`visible = false`, `PROCESS_MODE_DISABLED`, HUD caché ; la simulation
+  n'est pas recréée) et `scenes/battle/battle.tscn` est ajoutée à la racine (`configure(sim, index,
+  seed)`). « Retour à la campagne » appelle `resolve_battle` puis signal `returned` → la carte revient,
+  journal et marqueurs rafraîchis, bataille suivante proposée. Une fin de tour avec un dialogue ouvert
+  le ferme : la simulation auto-résout d'elle-même les batailles restées en attente.
+- **Scène** (`scripts/battle/`) :
+
+```
+Battle (Node3D, battle_scene.gd)   tick, rendu, entrées, écran de fin
+├── WorldEnvironment / Sun          ciel procédural ; brouillard/pluie/neige selon get_weather
+├── Terrain (BattleTerrain)         grille get_terrain() colorée par sommet (herbe/altitude, sous-bois,
+│                                   boue, berges, gués), ruban d'eau, arbres MultiMesh, sol lointain
+├── CameraRig (BattleCamera)        caméra RTS ; enfant Camera3D
+├── HUD (BattleHud, CanvasLayer)    barre du haut, journal, cartes d'unité, ordres, écran de fin
+├── attacker_infantry … defender_siege   8 MultiMeshInstance3D (camp × famille), buffer = get_soldier_buffer
+└── BannerN + anneau de sélection   hampe, drapeau (couleur de faction, blanc en déroute), icône, effectif
+```
+
+- **Maillages** : `BattleMeshes` (SurfaceTool) construit fantassin, archer, cavalier, engin, arbre et
+  hampe en pavés low-poly ; surface 0 = livrée (couleur de faction via le matériau), surface 1 = neutre
+  (couleurs de sommets sRGB). Les triangles sont orientés selon la normale (`BattleMeshes.tri`).
+- **Contrôles** :
+
+| Action | Entrée |
+|---|---|
+| Caméra | W A S D (positions physiques), bords d'écran, glisser bouton du milieu ; molette ; Q / E rotation |
+| Sélection | clic gauche (unité ou carte d'unité), rectangle en glissant, Maj pour ajouter / retirer ; Échap vide |
+| Déplacer / attaquer | clic droit au sol / sur une unité ennemie ; double clic droit = au pas de course |
+| Orienter la ligne | glisser-droit : les régiments s'alignent sur le segment, front à l'opposé de la caméra |
+| Formation | F (cycle autorisé : ligne → colonne → schiltron pour l'infanterie, ligne → coin → colonne pour la cavalerie) |
+| Tir à volonté | G (bascule pour les tireurs sélectionnés) |
+| Halte / retraite | H ; boutons « Retraite » (sélection) et « Retraite générale » |
+| Temps | Espace = pause (ordres possibles en pause), 1 / 2 / 3 = ×1 / ×2 / ×4 |
+| Capture | F12 → `docs/img/godot-battle-<horodatage>.png` |
+
+- **Ligne de commande** :
+
+```sh
+godot --path game res://scenes/battle/battle.tscn                       # démo France–Angleterre
+godot --path game res://scenes/battle/battle.tscn -- --screenshot=/chemin/absolu/godot-battle.png
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=/chemin/absolu/godot-battle-dialog.png --stage=battle
+godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20 --benchmark
+```
+
+  Seule, la scène crée une campagne France 1337 et met en scène (`debug_stage_battle`) la plus grande
+  armée française contre la plus grande anglaise. `--screenshot` joue les deux IA jusqu'au premier
+  contact + 12 s puis capture ; `--units=n` complète chaque camp à n régiments de 120 soldats (banc
+  d'essai, pas de retour campagne) ; `--benchmark` mesure les FPS sur 600 images ; `--autoplay` confie
+  aussi le camp du joueur à l'IA.
+- **Performances** (M4 Pro, Metal, bibliothèque Rust en debug) : 2 × 20 régiments de 120 soldats
+  (4 800 soldats, 8 MultiMesh mis à jour à chaque image) : **60 FPS** vsync (58,7 de moyenne sur 600
+  images, démarrage compris), **141 FPS** de moyenne sans vsync (pointe 188). Pas de simulation :
+  0,12 ms en debug, 0,02 ms en release pour 40 régiments.
+- **Smoke** (§ 6 de `tests/smoke.gd`) : bataille réelle France–Angleterre, 2 000 ticks headless de
+  `BattleSim` avec les deux IA (fin atteinte, ~1 800 ticks), `resolve_battle` accepté ; puis la boucle
+  complète par la carte : dialogue visible, « Livrer bataille », `battle.tscn` 60 images (soldats
+  dessinés), un ordre, fin de bataille, écran de fin, « Retour à la campagne », bataille résolue.
 
 ## Performances mesurées (M4 Pro)
 
