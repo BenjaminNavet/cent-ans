@@ -363,16 +363,10 @@ fn pick_name(
 
 /// "Hugues de Valois", "Jeanne d'Évreux": first name + house.
 fn generated_full_name(first_name: &str, house: &str) -> String {
-    let starts_with_vowel = house
-        .chars()
-        .next()
-        .is_some_and(|c| "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(c));
     if house.is_empty() {
         first_name.to_owned()
-    } else if starts_with_vowel {
-        format!("{first_name} d'{house}")
     } else {
-        format!("{first_name} de {house}")
+        format!("{first_name} {}", crate::events::de(house))
     }
 }
 
