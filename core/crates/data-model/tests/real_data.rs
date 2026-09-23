@@ -91,6 +91,52 @@ fn real_data_loads_without_errors() {
     let before = tech_names.len();
     tech_names.dedup();
     assert_eq!(tech_names.len(), before, "duplicate technology names");
+    // H4: a third tree, medicine, with codex herbs.
+    let medicine: Vec<_> = data
+        .technologies
+        .values()
+        .filter(|t| t.branch == data_model::TechBranch::Medicine)
+        .collect();
+    assert!(medicine.len() >= 12, "only {} medicine techs", medicine.len());
+    for tech in data.technologies.values() {
+        for herb in &tech.herbs {
+            assert!(herb.starts_with("cdx_"), "{}: bad herb id {herb}", tech.id);
+        }
+    }
+    assert!(medicine.iter().any(|t| !t.herbs.is_empty()));
+    for id in ["bld_herb_garden", "bld_apothecary"] {
+        assert_eq!(
+            data.buildings[id].category,
+            data_model::BuildingCategory::Sanitary
+        );
+    }
+    for kind in [
+        data_model::EffectKind::PlagueResistance,
+        data_model::EffectKind::WoundRecovery,
+        data_model::EffectKind::DietHealth,
+    ] {
+        assert!(
+            data.technologies
+                .values()
+                .any(|t| t.effects.iter().any(|e| e.effect == kind)),
+            "no technology carries {kind:?}"
+        );
+    }
+
+    // H3: seven diets, the default one neutral and free, every other one
+    // with a price or a condition.
+    assert_eq!(data.diets.len(), 7);
+    let default = &data.diets["diet_bread_pottage"];
+    assert_eq!(default.cost_per_thousand, 0.0);
+    assert!(default.effects.is_empty());
+    assert_eq!(default.requirements, data_model::DietRequirements::default());
+    for diet in data.diets.values().filter(|d| d.id != default.id) {
+        assert!(diet.cost_per_thousand > 0.0, "{} is free", diet.id);
+        assert!(!diet.effects.is_empty(), "{} has no effect", diet.id);
+        assert!(diet.description.contains("[[cdx_"), "{} has no codex link", diet.id);
+        assert!(!diet.sources.is_empty(), "{} has no sources", diet.id);
+    }
+
     let research_buildings = data
         .buildings
         .values()
