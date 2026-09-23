@@ -62,7 +62,7 @@ def test_build_is_idempotent_and_cached(tmp_path: Path):
     rows, written = icons.build(out_dir, cache, fetch=fake_fetcher(calls))
     sources = {row.source for row in rows}
     assert len(calls) == len(sources)
-    assert written == len(sources) + 1  # SVG files + icons.json
+    assert written == 2 * len(sources) + 1  # SVG + .import files + icons.json
     table = json.loads((out_dir / "icons.json").read_text(encoding="utf-8"))
     assert set(table["icons"]) == set(icons_catalog.ICONS)
     assert table["icons"]["unit_knights"]["author"] == "Skoll"

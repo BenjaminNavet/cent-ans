@@ -105,6 +105,7 @@ func make_rect(id: String, size: float = 20.0, category: String = "") -> Texture
 	rect.custom_minimum_size = Vector2(size, size)
 	rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	rect.name = "Icon_%s" % id
 	return rect
 
@@ -113,6 +114,7 @@ func make_rect(id: String, size: float = 20.0, category: String = "") -> Texture
 func decorate_button(button: Button, id: String, size: int = 20, category: String = "") -> void:
 	button.icon = get_icon(id, category)
 	button.expand_icon = false
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	button.add_theme_constant_override("icon_max_width", size)
 
 
