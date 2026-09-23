@@ -135,8 +135,8 @@ func _run() -> void:
 	_check_keys(city, PROVINCE_CITY_KEYS, "province city")
 	var classes: Dictionary = city.get("classes", {})
 	_check_keys(classes, ["peasants", "burghers", "clergy", "nobility"], "province city classes")
-	for class_name in classes:
-		_check_keys(classes[class_name], CLASS_KEYS, "population class %s" % class_name)
+	for class_key in classes:
+		_check_keys(classes[class_key], CLASS_KEYS, "population class %s" % class_key)
 	for building in city.get("buildings", []):
 		_check_keys(building, BUILDING_SUMMARY_KEYS, "city building")
 	var buildable: Array = city.get("buildable", [])
