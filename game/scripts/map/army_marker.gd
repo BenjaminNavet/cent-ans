@@ -12,6 +12,13 @@ extends Node3D
 ## projetteraient des ombres démesurées).
 const SHADOW_MAX_SCALE := 2.6
 const RING_SELECTED := Color(1.0, 0.82, 0.3, 1.0)
+## Bannières peintes (autre session) : `<id>_banner.png` (256×512) et spéciales ; `dragon.png`
+## et les flammes `<id>_pennon.png` ne sont pas encore utilisées.
+const BANNERS_DIR := "res://assets/heraldry/banners/"
+const ROYAL_STANDARDS := {"fac_france": "oriflamme", "fac_england": "st_george"}
+## Hauteur de la hampe de la scène, et hauteur portée pour une bannière verticale.
+const POLE_HEIGHT := 8.4
+const POLE_TALL := 10.4
 
 var army_id: String = ""
 var province_id: String = ""
@@ -27,6 +34,8 @@ var faction_color: Color = Color.WHITE
 var base_position: Vector3 = Vector3.ZERO
 var offset_dir: Vector2 = Vector2.ZERO
 var marker_scale: float = 1.0
+## Mode de l'étendard (0 drapeau armorié, 1 flamme, 2 bannière verticale).
+var standard_mode: int = 0
 
 @onready var banner: MeshInstance3D = $Banner
 @onready var pole: MeshInstance3D = $Pole
@@ -65,10 +74,7 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 	status = army_status(army)
 	name = "Army_" + id
 	_flag_material.set_shader_parameter("faction_color", color)
-	var heraldry := _heraldry(faction_id)
-	_flag_material.set_shader_parameter("has_heraldry", heraldry != null)
-	if heraldry != null:
-		_flag_material.set_shader_parameter("heraldry", heraldry)
+	_apply_standard(standard_for(faction_id, army))
 	(banner.material_override as StandardMaterial3D).albedo_color = color
 	# Figurines 3D (ou cogue, + camp de siège) si les modèles existent.
 	ModelLibrary.dress_army_marker(self, army, color)
@@ -76,8 +82,60 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		# À bord : l'étendard flotte au mât de la cogue.
 		pole.visible = false
 		$Finial.visible = false
-		flag.position = Vector3(0.1, 9.6, 0.0)
+		flag.position = Vector3(0.1, 11.0 if standard_mode == 2 else 9.6, 0.0)
 	_update_ring()
+
+
+## Étendard d'une armée : {texture, mode} (modes de `map_banner.gdshader`). Ordre de recherche :
+## bannière spéciale de l'armée royale (`banners/oriflamme.png` pour le roi de France,
+## `banners/st_george.png` pour celui d'Angleterre), bannière de faction
+## (`banners/<id>_banner.png`), écu (`heraldry/<id>.png`, rogné), sinon couleur unie.
+## Une texture plus large que haute est une flamme attachée à gauche (mode 1), sinon une
+## bannière verticale (mode 2).
+static func standard_for(faction: String, army: Dictionary) -> Dictionary:
+	var candidates := PackedStringArray()
+	var general := str(army.get("general", ""))
+	if general != "" and general == ModelLibrary.faction_ruler(faction):
+		var special: String = ROYAL_STANDARDS.get(faction, "")
+		if special != "":
+			candidates.append(BANNERS_DIR + special + ".png")
+	if faction != "":
+		candidates.append(BANNERS_DIR + faction + "_banner.png")
+	for path in candidates:
+		if ResourceLoader.exists(path):
+			var texture := load(path) as Texture2D
+			if texture != null:
+				var wide := texture.get_width() > texture.get_height() * 1.2
+				return {"texture": texture, "mode": 1 if wide else 2}
+	return {"texture": _heraldry(faction), "mode": 0}
+
+
+func _apply_standard(standard: Dictionary) -> void:
+	var texture: Texture2D = standard.get("texture")
+	standard_mode = int(standard.get("mode", 0))
+	_flag_material.set_shader_parameter("mode", standard_mode)
+	_flag_material.set_shader_parameter("has_heraldry", texture != null)
+	if texture != null:
+		_flag_material.set_shader_parameter("heraldry", texture)
+	var quad := QuadMesh.new()
+	if standard_mode == 2:
+		# Bannière suspendue, un peu surdimensionnée, hampe plus haute.
+		quad.size = Vector2(2.4, 4.8)
+		quad.subdivide_width = 3
+		quad.subdivide_depth = 10
+		quad.center_offset = Vector3(0.0, -2.4, 0.0)
+		flag.mesh = quad
+		flag.position = Vector3(pole.position.x, POLE_TALL - 0.35, pole.position.z)
+		pole.scale = Vector3(1.0, POLE_TALL / POLE_HEIGHT, 1.0)
+		pole.position.y = POLE_TALL * 0.5
+		$Finial.position.y = POLE_TALL + 0.15
+	elif standard_mode == 1:
+		var aspect := float(texture.get_height()) / maxf(texture.get_width(), 1.0)
+		quad.size = Vector2(4.2, 4.2 * aspect)
+		quad.subdivide_width = 12
+		quad.subdivide_depth = 1
+		quad.center_offset = Vector3(2.1, -2.1 * aspect, 0.0)
+		flag.mesh = quad
 
 
 ## "siege", "moving", "embarked" ou "" (lecture de l'état exposé par la simulation).
@@ -127,7 +185,7 @@ func face(direction: Vector2) -> void:
 
 ## Point écran de référence pour le picking (milieu de l'étendard).
 func pick_position() -> Vector3:
-	return flag.global_position + Vector3(0.0, -1.0, 0.0) * marker_scale
+	return flag.global_position + Vector3(0.0, -2.4 if standard_mode == 2 else -1.0, 0.0) * marker_scale
 
 
 ## Points de picking : étendard et figurines.
@@ -135,9 +193,16 @@ func pick_positions() -> PackedVector3Array:
 	return PackedVector3Array([pick_position(), global_position + Vector3(0.0, 1.5, 0.0) * marker_scale])
 
 
-## Sommet de l'étendard : ancre de la plaque d'effectif.
+## Ancre de la plaque d'effectif : sous une bannière verticale (`plate_below()`), sinon
+## au-dessus du drapeau.
 func plate_anchor() -> Vector3:
+	if standard_mode == 2:
+		return flag.global_position + Vector3(0.0, -4.95, 0.0) * marker_scale
 	return flag.global_position + Vector3(0.0, 0.9, 0.0) * marker_scale
+
+
+func plate_below() -> bool:
+	return standard_mode == 2
 
 
 func apply_scale(new_scale: float) -> void:

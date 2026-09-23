@@ -27,6 +27,7 @@ static var _capitals: Dictionary = {}  # province_id → true
 static var _capitals_loaded := false
 static var _tinted_meshes: Dictionary = {}  # "mesh|couleur" → Mesh teinté
 static var _unit_categories: Dictionary = {}  # unit_type → catégorie
+static var _rulers: Dictionary = {}  # faction_id → personnage
 
 
 ## Vide les caches statiques (appelé en fin de smoke test pour éviter les fuites signalées).
@@ -37,6 +38,7 @@ static func clear_cache() -> void:
 	_capitals_loaded = false
 	_tinted_meshes.clear()
 	_unit_categories.clear()
+	_rulers.clear()
 
 
 static func has_model(model_name: String) -> bool:
@@ -269,3 +271,10 @@ static func dress_army_marker(marker: Node3D, army: Dictionary, color: Color) ->
 	if placeholder != null:
 		placeholder.visible = false
 	return true
+
+
+## Dirigeant d'une faction d'après les données (`data/factions/<id>.json`, champ `ruler`), "" sinon.
+static func faction_ruler(faction_id: String) -> String:
+	if not _rulers.has(faction_id):
+		_rulers[faction_id] = str(_read_json(_data_dir().path_join("factions").path_join(faction_id + ".json")).get("ruler", ""))
+	return _rulers[faction_id]

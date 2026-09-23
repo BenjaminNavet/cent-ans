@@ -275,5 +275,6 @@ func _update_plates() -> void:
 		var screen := camera.unproject_position(anchor)
 		var size := plate.get_combined_minimum_size()
 		plate.size = size
-		plate.position = (screen - Vector2(size.x * 0.5, size.y + 2.0)).round()
+		var lift := -2.0 if marker.plate_below() else size.y + 2.0
+		plate.position = (screen - Vector2(size.x * 0.5, lift)).round()
 		plate.visible = viewport_rect.grow(40.0).has_point(screen)
