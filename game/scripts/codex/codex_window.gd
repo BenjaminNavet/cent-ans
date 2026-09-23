@@ -1,0 +1,289 @@
+class_name CodexWindow
+extends PanelContainer
+
+## Fenêtre Codex (H2, touche K) : onglets par grande famille, liste des fiches à gauche (non
+## découvertes en grisé ; les ouvrir les découvre), fiche à droite (titre, catégorie, période,
+## corps aux mots cliquables avec bulles, liberté prise par le jeu, « Voir aussi », sources),
+## recherche, compteur des découvertes, historique précédent / suivant. Construite en code comme
+## `ChronicleWindow` ; créée et affichée par `CodexBubbles` (`open_entry`, `window()`).
+
+const INK := Color(0.22, 0.14, 0.07)
+const FADED_INK := Color(0.40, 0.30, 0.18)
+const RUBRIC := Color(0.55, 0.12, 0.10)
+const UNREAD := Color(0.52, 0.46, 0.38)
+const SIZE := Vector2(980, 640)
+const ALL_TAB := "Toutes"
+
+var current_id: String = ""
+var _history: Array = []
+var _history_index: int = -1
+var _visible_ids: Array = []
+
+var _counter_label: Label
+var _back_button: Button
+var _forward_button: Button
+var _search: LineEdit
+var _tabs: TabBar
+var _list: ItemList
+var _title_label: Label
+var _meta_label: Label
+var _body: RichTextLabel
+var _anachronism_box: PanelContainer
+var _anachronism: RichTextLabel
+var _see_also: RichTextLabel
+var _sources: Label
+var _scroll: ScrollContainer
+
+
+func _ready() -> void:
+	theme = load("res://scenes/ui/parchment_theme.tres")
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = SIZE
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 8)
+	add_child(root)
+	root.add_child(_build_header())
+
+	_search = LineEdit.new()
+	_search.placeholder_text = "Rechercher un nom, un lieu, un mot…"
+	_search.clear_button_enabled = true
+	_search.text_changed.connect(func(_text: String) -> void: _refresh_list())
+	root.add_child(_search)
+
+	_tabs = TabBar.new()
+	_tabs.add_tab(ALL_TAB)
+	for family in _families():
+		_tabs.add_tab(str(family[0]))
+	_tabs.tab_changed.connect(func(_tab: int) -> void: _refresh_list())
+	root.add_child(_tabs)
+
+	var split := HBoxContainer.new()
+	split.add_theme_constant_override("separation", 12)
+	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_child(split)
+	_list = ItemList.new()
+	_list.custom_minimum_size = Vector2(270, 0)
+	_list.add_theme_font_size_override("font_size", 15)
+	_list.item_selected.connect(func(index: int) -> void: navigate.call_deferred(str(_list.get_item_metadata(index))))
+	split.add_child(_list)
+	split.add_child(VSeparator.new())
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	split.add_child(_scroll)
+	_scroll.add_child(_build_page())
+	_update_history_buttons()
+
+
+func _build_header() -> Control:
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 8)
+	var title := Label.new()
+	title.text = "✠ Codex"
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", RUBRIC)
+	header.add_child(title)
+	_counter_label = Label.new()
+	_counter_label.add_theme_font_size_override("font_size", 14)
+	_counter_label.add_theme_color_override("font_color", FADED_INK)
+	_counter_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_counter_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	header.add_child(_counter_label)
+	_back_button = _header_button("◀", "Fiche précédente", back)
+	header.add_child(_back_button)
+	_forward_button = _header_button("▶", "Fiche suivante", forward)
+	header.add_child(_forward_button)
+	header.add_child(_header_button("×", "Fermer (Échap)", hide))
+	return header
+
+
+func _header_button(text: String, tip: String, action: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.tooltip_text = tip
+	button.pressed.connect(action)
+	return button
+
+
+func _build_page() -> Control:
+	var page := VBoxContainer.new()
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("separation", 8)
+	_title_label = Label.new()
+	_title_label.add_theme_font_size_override("font_size", 26)
+	_title_label.add_theme_color_override("font_color", INK)
+	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(_title_label)
+	_meta_label = Label.new()
+	_meta_label.add_theme_font_size_override("font_size", 14)
+	_meta_label.add_theme_color_override("font_color", FADED_INK)
+	page.add_child(_meta_label)
+	page.add_child(HSeparator.new())
+	_body = _rich_text(16)
+	page.add_child(_body)
+
+	_anachronism_box = PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.88, 0.80, 0.62, 1)
+	style.border_color = RUBRIC
+	style.border_width_left = 4
+	style.set_content_margin_all(10)
+	_anachronism_box.add_theme_stylebox_override("panel", style)
+	_anachronism = _rich_text(14)
+	_anachronism_box.add_child(_anachronism)
+	page.add_child(_anachronism_box)
+
+	_see_also = _rich_text(15)
+	page.add_child(_see_also)
+	_sources = Label.new()
+	_sources.add_theme_font_size_override("font_size", 12)
+	_sources.add_theme_color_override("font_color", FADED_INK)
+	_sources.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(_sources)
+	return page
+
+
+func _rich_text(font_size: int) -> RichTextLabel:
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.scroll_active = false
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.add_theme_color_override("default_color", INK)
+	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
+		label.add_theme_font_size_override(key, font_size)
+	var bubbles := _bubbles()
+	if bubbles != null:
+		bubbles.call("attach", label)
+	return label
+
+
+# --- API -------------------------------------------------------------------------------------
+
+
+## Affiche la fenêtre (centrée) sur la fiche `id`, ou sur la dernière consultée si vide.
+func open(id: String = "") -> void:
+	show()
+	var area := get_viewport_rect().size
+	size = SIZE
+	position = ((area - SIZE) / 2.0).floor()
+	if id != "":
+		navigate(id)
+	elif current_id == "":
+		_refresh_list()
+		if not _visible_ids.is_empty():
+			navigate(str(_visible_ids[0]))
+	else:
+		_refresh_list()
+
+
+## Affiche la fiche `id` (la découvre) et l'ajoute à l'historique.
+func navigate(id: String, record: bool = true) -> void:
+	var codex := _store()
+	if codex == null or not bool(codex.call("has_entry", id)):
+		return
+	if record and (current_id != id):
+		_history.resize(_history_index + 1)
+		_history.append(id)
+		_history_index = _history.size() - 1
+	codex.call("discover", id)
+	current_id = id
+	_show_entry(id)
+	if not _visible_ids.has(id):
+		_tabs.current_tab = 0
+	_refresh_list()
+	_update_history_buttons()
+
+
+func back() -> void:
+	if _history_index > 0:
+		_history_index -= 1
+		navigate(str(_history[_history_index]), false)
+
+
+func forward() -> void:
+	if _history_index < _history.size() - 1:
+		_history_index += 1
+		navigate(str(_history[_history_index]), false)
+
+
+func counter_text() -> String:
+	return _counter_label.text
+
+
+func body_label() -> RichTextLabel:
+	return _body
+
+
+# --- Contenu ---------------------------------------------------------------------------------
+
+
+func _show_entry(id: String) -> void:
+	var codex := _store()
+	var entry: Dictionary = codex.call("entry", id)
+	_title_label.text = str(entry.get("title", id))
+	var meta := PackedStringArray([str(codex.call("category_label", id))])
+	var era := str(codex.call("era_label", id))
+	if era != "":
+		meta.append(era)
+	_meta_label.text = " · ".join(meta)
+	_body.text = CodexText.format(str(entry.get("body", entry.get("summary", ""))))
+	var anachronism := str(entry.get("anachronism", ""))
+	_anachronism_box.visible = anachronism != ""
+	_anachronism.text = "[b]Liberté prise par le jeu[/b]\n%s" % CodexText.format(anachronism)
+	var links := PackedStringArray()
+	for other in entry.get("see_also", []):
+		if bool(codex.call("has_entry", str(other))):
+			links.append(CodexText.link(str(other)))
+	_see_also.visible = not links.is_empty()
+	_see_also.text = "[b]Voir aussi :[/b] " + " · ".join(links)
+	var sources: Array = entry.get("sources", [])
+	_sources.text = "Sources (Wikipédia) : " + " ; ".join(PackedStringArray(sources)) if not sources.is_empty() else ""
+	_scroll.scroll_vertical = 0
+
+
+func _refresh_list() -> void:
+	var codex := _store()
+	if codex == null or _list == null:
+		return
+	var ids: Array = codex.call("ids_in_family", _tabs.current_tab - 1)
+	var query := _search.text.strip_edges().to_lower()
+	_visible_ids.clear()
+	_list.clear()
+	for id in ids:
+		if query != "" and not _matches(codex.call("entry", id), query):
+			continue
+		_visible_ids.append(id)
+		var discovered := bool(codex.call("is_discovered", id))
+		var index := _list.add_item(str(codex.call("title", id)))
+		_list.set_item_metadata(index, id)
+		_list.set_item_tooltip(index, "" if discovered else "À découvrir…")
+		_list.set_item_custom_fg_color(index, INK if discovered else UNREAD)
+		if id == current_id:
+			_list.select(index)
+			_list.ensure_current_is_visible()
+	_counter_label.text = "%d / %d découvertes" % [int(codex.call("discovered_count")), int(codex.call("total_count"))]
+
+
+static func _matches(entry: Dictionary, query: String) -> bool:
+	var haystack := "%s %s %s" % [entry.get("title", ""), " ".join(PackedStringArray(entry.get("aliases", []))), entry.get("summary", "")]
+	return CodexText.plain(haystack).to_lower().contains(query)
+
+
+func _update_history_buttons() -> void:
+	_back_button.disabled = _history_index <= 0
+	_forward_button.disabled = _history_index >= _history.size() - 1
+
+
+func _families() -> Array:
+	var codex := _store()
+	return codex.call("families") if codex != null else []
+
+
+func _store() -> Node:
+	return CodexText.store()
+
+
+func _bubbles() -> Node:
+	return get_node_or_null("/root/CodexBubbles")
