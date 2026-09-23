@@ -15,4 +15,4 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md`.
 Coordination : sessions parallèles orchestrateur (2b, F1-F9), ui-tw (e3), visual (76).
 Ne stager que ses propres chemins. F8 (encyclopédie) doit s'appuyer sur le Codex.
 
-Prochaine étape : lancer la vague 1.
+Vague 1 lancée (3 agents worktree : H1, H2, H3+H4). Prochaine étape : fusionner leurs branches, puis vague 2.

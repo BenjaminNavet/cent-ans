@@ -27,3 +27,4 @@ Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas d
 - Panneau de province : ligne de debug « Identifiant prov_… (index N) » à retirer.
 - Menu « Menu principal » de la barre du haut quitte sans confirmation (seul le menu pause confirme).
 - Rapport de saison : n'inclut pas les batailles résolues par le dialogue après la fin du tour.
+- **Session « historien »** (`docs/wip/historien.md`, conception `docs/design/2026-09-23-histoire-et-savoir.md`) : audit historique de `data/`, **Codex** (`data/codex/`, bulles imbriquées `game/scripts/codex/`, touche K) → **F8 encyclopédie doit s'appuyer sur le Codex** ; régimes alimentaires (`SetDiet`), 3e branche de techs Médecine, puis monnaie et rançons. Touche `tech_panel.gd`, `character_sheet.gd`, `chronicle_window.gd` (hooks minimaux) ; le panneau de province (section « La Table ») sera négocié avec ui-tw en vague 2.
