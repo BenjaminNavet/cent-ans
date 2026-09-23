@@ -17,4 +17,4 @@ __pycache__/
 .env
 # Big raw datasets (rebuilt by tools/geo)
 tools/geo/raw/
-.claude/settings.local.json
+.claude/
