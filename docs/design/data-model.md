@@ -370,3 +370,40 @@ dictionnaire vide. Vérification headless : `core/checks/campaign_sim_check.gd`.
 | `GameDataStore.get_trait(id)`, `get_skill(id)` | définitions statiques |
 
 Événements M4 : `birth`, `death`, `succession`, `regency`, `no_heir`, `trait_acquired`.
+
+### 7.6 Batailles (M7) : `CampaignSim` et `BattleSim`
+
+Spécification : `docs/design/m7-battles.md`. Sauvegarde : `STATE_VERSION` = 4 (`interactive_battles`,
+`pending_battles` conservées d'un tour à l'autre, `BattleRequest.attacker_origin`).
+
+Côté campagne (`core/crates/sim-campaign/src/battle_request.rs`, pont dans
+`core/crates/godot-bridge/src/battle_sim.rs`, bloc `#[godot_api(secondary)]`) :
+
+| Méthode `CampaignSim` | Retour |
+|---|---|
+| `get_pending_battles()` | `[{index, attacker, defender, province, province_name, attacker_name, defender_name, player_side: "attacker"\|"defender", attacker_strength, defender_strength, seed}]` ; `seed` est la graine à passer à `BattleSim.setup` (même météo que l'aperçu) |
+| `get_battle_setup(index)` | `BattleSetup` sérialisé : `{province, province_name, terrain, river, season, player_side, attacker, defender}` avec, par camp, `{faction, faction_name, army, units: [{unit_type, name, category, mounted, soldiers, max_soldiers, morale, experience, stats{melee, ranged, range, armor, morale, speed, ammo, charge?}, abilities[]}], general?: {character, name, command, unit_index, morale_bonus, charge_percent, ranged_percent, defense_percent}}` (effets du général = `character_effects` M4) ; `{}` si inconnue ou périmée |
+| `resolve_battle(index, outcome)` | `{ok, error, events}` : pertes par unité, moral ±, général tombé (`kill`) ou capturé, XP/traits (`on_battle_resolved`), retraite du vaincu, journal |
+| `auto_resolve_battle(index)` | événements (résolution `battle_auto`) |
+| `set_interactive_battles(bool)`, `get_interactive_battles()` | réglage joueur (défaut `true`) ; `false` = tout auto-résolu comme avant M7 |
+| `debug_stage_battle(attacker, defender)` | index de la bataille mise en scène (le défenseur est amené chez l'attaquant), -1 sinon ; tests et captures |
+
+Classe `BattleSim` (`RefCounted`) :
+
+| Méthode | Retour |
+|---|---|
+| `setup(setup_dict, seed) -> bool` | construit le champ (relief, forêts, boue, rivière), la météo et déploie les deux armées |
+| `tick(dt)` | avance de `dt` secondes par pas fixes de 0,1 s |
+| `issue_command(dict) -> {ok, error}` | `{type: "move", units, x, z, run?, facing?}`, `{type: "attack", units, target, run?}`, `{type: "halt", units}`, `{type: "formation", units, kind: "line"\|"column"\|"square"\|"wedge"}`, `{type: "fire_at_will", units, enabled}`, `{type: "withdraw", units}` ; seules les unités du camp du joueur sont acceptées ; ids entiers |
+| `set_ai(side, bool)` | IA de bataille d'un camp (autoplay, tests) |
+| `get_units()` | `[{id, side, type, name, category, render, soldiers, max_soldiers, initial_soldiers, morale, fatigue, ammo, max_ammo, state, state_label, formation, x, z, y, facing, width, depth, is_general, present, left_field, fire_at_will, can_shoot, running, withdrawing, stakes, target, destination?}]` ; `state` ∈ idle, marching, charging, melee, shooting, routing, rallied ; `render` ∈ infantry, archer, cavalry, siege |
+| `get_soldier_transforms(side)` | `PackedFloat32Array` (x, y, z, angle) par soldat vivant |
+| `get_soldier_buffer(side, render)` | `PackedFloat32Array` au format `MultiMesh.buffer` (12 flottants par soldat) |
+| `get_terrain()` | `{width, depth, resolution, nx, nz, heights: PackedFloat32Array, forests: [{x, z, radius}], mud: [...], river?: {points: PackedVector2Array, width, fords: [{x, z, half_width}]}}` |
+| `get_weather()` | `{key: "clear"\|"rain"\|"fog"\|"snow", label}` |
+| `get_setup()`, `get_strength(side)`, `get_elapsed()`, `get_ticks()`, `get_height(x, z)` | lecture |
+| `is_finished()`, `get_outcome()` | `{winner, attacker, defender: {losses[] (par unité de campagne), total_losses, morale_delta, routed, general_killed, general_captured}, duration}` (format accepté par `resolve_battle`) ; `{}` tant que la bataille dure |
+| `get_events()` | `[{time, text_fr, side}]` depuis le dernier appel (« Les Chevaliers de France chargent ! », « Les Archers à l'arc long d'Angleterre sont à court de flèches. ») |
+
+Conversion : les soldats d'un régiment sont la force de campagne (`Unit.strength`, déjà un effectif) ;
+les pertes reviennent unité par unité ; un régiment retiré ou sorti du champ garde ses survivants.

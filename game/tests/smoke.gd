@@ -14,6 +14,8 @@ extends SceneTree
 ##     sur le dirigeant, `assign_governor` d'un courtisan à `prov_normandie` (ou la première
 ##     province contrôlée ≠ capitale), `propose_marriage` entre deux candidats valides (ou skip
 ##     explicite si aucun), 40 fins de tour → au moins une naissance ou une mort au journal.
+##  6. batailles (M7) : BattleSim headless (2 000 ticks, fin, resolve_battle), puis dialogue
+##     d'avant-bataille → battle.tscn (60 images) → écran de fin → retour à la carte.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 

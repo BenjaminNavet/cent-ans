@@ -9,7 +9,7 @@
 | M4 | Personnages et dynasties | terminé (2026-09-23) |
 | M5 | Diplomatie et religion | à faire |
 | M6 | Technologies | à faire |
-| M7 | Batailles temps réel 3D | à faire |
+| M7 | Batailles temps réel 3D | terminé |
 | M8 | Sièges | à faire |
 | M9 | IA de campagne et de bataille | à faire |
 | M10 | Assets, sons, événements, équilibrage | à faire |
