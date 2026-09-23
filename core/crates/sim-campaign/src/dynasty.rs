@@ -4,8 +4,8 @@
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, CharacterStatus, Family, FactionId, GameData, ProvinceId, Role, Sex, Skills,
-    SkillId, SuccessionLaw, TraitId,
+    CharacterId, CharacterStatus, FactionId, Family, GameData, ProvinceId, Role, Sex, SkillId,
+    Skills, SuccessionLaw, TraitId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -44,12 +44,6 @@ pub const PRESTIGE_TITLE: i32 = 10;
 /// culture (spec § 1 asks for ~30 per culture; this is a tiny safety net).
 const FALLBACK_MALE_NAMES: &[&str] = &["Jean", "Guillaume", "Pierre", "Robert", "Thomas"];
 const FALLBACK_FEMALE_NAMES: &[&str] = &["Jeanne", "Marguerite", "Isabelle", "Agnès", "Blanche"];
-
-fn character_name(data: &GameData, id: &CharacterId) -> String {
-    data.characters
-        .get(id)
-        .map_or_else(|| id.to_string(), |c| c.name.display.clone())
-}
 
 fn faction_name(data: &GameData, id: &FactionId) -> String {
     data.factions
@@ -154,7 +148,9 @@ pub fn marriage_candidates(
     let Some(character) = state.characters.get(id) else {
         return Vec::new();
     };
-    if !character.alive || character.spouse.is_some() || character.age(state.year) < MARRIAGE_MIN_AGE
+    if !character.alive
+        || character.spouse.is_some()
+        || character.age(state.year) < MARRIAGE_MIN_AGE
     {
         return Vec::new();
     }
@@ -228,7 +224,11 @@ pub fn assign_governor(
         .find(|(id, c)| c.governor_of.as_ref() == Some(province) && *id != character)
         .map(|(id, _)| id.clone());
     if let Some(previous) = previous {
-        state.characters.get_mut(&previous).expect("exists").governor_of = None;
+        state
+            .characters
+            .get_mut(&previous)
+            .expect("exists")
+            .governor_of = None;
     }
     // A character governs one province at a time: reassigning simply moves
     // `governor_of` to the new province (no-op if it was already `province`).
@@ -253,7 +253,11 @@ pub fn on_battle_resolved(
     won: bool,
     events: &mut Vec<GameEvent>,
 ) {
-    let xp = if won { skills::BATTLE_VICTORY_XP } else { skills::BATTLE_XP };
+    let xp = if won {
+        skills::BATTLE_VICTORY_XP
+    } else {
+        skills::BATTLE_XP
+    };
     skills::grant_experience(state, general, xp);
     if won {
         let c = state.characters.get_mut(general).expect("exists");
@@ -275,7 +279,10 @@ pub fn on_battle_resolved(
                 events.push(
                     GameEvent::new(
                         EventKind::TraitAcquired,
-                        format!("{} est blessé au combat.", character_name(data, general)),
+                        format!(
+                            "{} est blessé au combat.",
+                            state.character_name(data, general)
+                        ),
                     )
                     .faction(&state.characters[general].faction),
                 );
@@ -322,7 +329,12 @@ pub fn on_ransomed(state: &mut CampaignState, data: &GameData, character: &Chara
 // Births (spec § 2, resolved once per winter turn)
 // =========================================================================
 
-fn pick_name(data: &GameData, faction: &FactionId, sex: Sex, rng: &mut crate::rng::CampaignRng) -> String {
+fn pick_name(
+    data: &GameData,
+    faction: &FactionId,
+    sex: Sex,
+    rng: &mut crate::rng::CampaignRng,
+) -> String {
     let culture = data.factions.get(faction).map(|f| f.culture.clone());
     let list = culture.as_ref().and_then(|culture| {
         data.names
@@ -349,6 +361,21 @@ fn pick_name(data: &GameData, faction: &FactionId, sex: Sex, rng: &mut crate::rn
     names[index].to_owned()
 }
 
+/// "Hugues de Valois", "Jeanne d'Évreux": first name + house.
+fn generated_full_name(first_name: &str, house: &str) -> String {
+    let starts_with_vowel = house
+        .chars()
+        .next()
+        .is_some_and(|c| "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(c));
+    if house.is_empty() {
+        first_name.to_owned()
+    } else if starts_with_vowel {
+        format!("{first_name} d'{house}")
+    } else {
+        format!("{first_name} de {house}")
+    }
+}
+
 /// Allocates the next generated character id (`chr_gen_NNNN`).
 fn next_generated_id(state: &CampaignState) -> CharacterId {
     let mut n = state.characters.len() as u32 + 1;
@@ -369,18 +396,31 @@ fn random_starting_skills(rng: &mut crate::rng::CampaignRng) -> Skills {
     }
 }
 
-fn spawn_child(
-    state: &mut CampaignState,
-    data: &GameData,
+/// Identity of a newborn, historical or generated (`spawn_child`).
+struct NewChild {
     id: CharacterId,
+    /// `None` for historical characters, named by `data.characters`.
+    name: Option<String>,
     faction: FactionId,
     house: String,
     sex: Sex,
-    birth_year: i32,
-    father: Option<CharacterId>,
-    mother: Option<CharacterId>,
+    father: CharacterId,
+    mother: CharacterId,
     location: Option<ProvinceId>,
-) -> CharacterId {
+}
+
+fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> CharacterId {
+    let NewChild {
+        id,
+        name,
+        faction,
+        house,
+        sex,
+        father,
+        mother,
+        location,
+    } = child;
+    let birth_year = state.year;
     let mut traits = BTreeSet::new();
     let personality: Vec<TraitId> = data
         .traits
@@ -396,6 +436,7 @@ fn spawn_child(
     state.characters.insert(
         id.clone(),
         CharacterState {
+            name,
             faction,
             alive: true,
             birth_year,
@@ -411,8 +452,8 @@ fn spawn_child(
             traits,
             spouse: None,
             children: Vec::new(),
-            father: father.clone(),
-            mother: mother.clone(),
+            father: Some(father.clone()),
+            mother: Some(mother.clone()),
             piety: 50,
             prestige: 0,
             loyalty: 100,
@@ -423,14 +464,9 @@ fn spawn_child(
             raids_led: 0,
         },
     );
-    if let Some(father) = &father {
-        if let Some(f) = state.characters.get_mut(father) {
-            f.children.push(id.clone());
-        }
-    }
-    if let Some(mother) = &mother {
-        if let Some(m) = state.characters.get_mut(mother) {
-            m.children.push(id.clone());
+    for parent in [&father, &mother] {
+        if let Some(p) = state.characters.get_mut(parent) {
+            p.children.push(id.clone());
         }
     }
     id
@@ -439,7 +475,11 @@ fn spawn_child(
 /// Phase: winter births (generated children of every married, fertile
 /// couple) and historical births (`CharacterStatus::Unborn` characters whose
 /// `birth` year matches, spec § 2).
-pub(crate) fn resolve_births(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
+pub(crate) fn resolve_births(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+) {
     if state.season != crate::state::Season::Winter {
         return;
     }
@@ -481,23 +521,28 @@ pub(crate) fn resolve_births(state: &mut CampaignState, data: &GameData, events:
         if !parents_ready {
             continue;
         }
-        let location = state.characters.get(mother).and_then(|m| m.location.clone());
+        let location = state
+            .characters
+            .get(mother)
+            .and_then(|m| m.location.clone());
         spawn_child(
             state,
             data,
-            id.clone(),
-            character.faction.clone(),
-            character.house.clone(),
-            character.sex,
-            year,
-            Some(father.clone()),
-            Some(mother.clone()),
-            location,
+            NewChild {
+                id: id.clone(),
+                name: None,
+                faction: character.faction.clone(),
+                house: character.house.clone(),
+                sex: character.sex,
+                father: father.clone(),
+                mother: mother.clone(),
+                location,
+            },
         );
         events.push(
             GameEvent::new(
                 EventKind::Birth,
-                format!("Naissance de {}.", character_name(data, &id)),
+                format!("Naissance de {}.", state.character_name(data, &id)),
             )
             .faction(&character.faction),
         );
@@ -540,31 +585,39 @@ pub(crate) fn resolve_births(state: &mut CampaignState, data: &GameData, events:
         if !state.rng.chance_permille(permille) {
             continue;
         }
-        let sex = if state.rng.below(2) == 0 { Sex::Male } else { Sex::Female };
+        let sex = if state.rng.below(2) == 0 {
+            Sex::Male
+        } else {
+            Sex::Female
+        };
         let faction = mother.faction.clone();
         let house = state.characters[&father_id].house.clone();
         let location = mother.location.clone();
-        let name = pick_name(data, &faction, sex, &mut state.rng);
+        let first_name = pick_name(data, &faction, sex, &mut state.rng);
+        let full_name = generated_full_name(&first_name, &house);
         let id = next_generated_id(state);
         spawn_child(
             state,
             data,
-            id.clone(),
-            faction.clone(),
-            house,
-            sex,
-            year,
-            Some(father_id.clone()),
-            Some(mother_id.clone()),
-            location,
+            NewChild {
+                id,
+                name: Some(full_name.clone()),
+                faction: faction.clone(),
+                house,
+                sex,
+                father: father_id.clone(),
+                mother: mother_id.clone(),
+                location,
+            },
         );
         events.push(
             GameEvent::new(
                 EventKind::Birth,
                 format!(
-                    "{name} {} à {}.",
-                    if sex == Sex::Male { "naît" } else { "naît" },
-                    faction_name(data, &faction)
+                    "Naissance de {full_name} ({}), {} de {}.",
+                    faction_name(data, &faction),
+                    if sex == Sex::Male { "fils" } else { "fille" },
+                    state.character_name(data, &father_id)
                 ),
             )
             .faction(&faction),
@@ -576,39 +629,92 @@ pub(crate) fn resolve_births(state: &mut CampaignState, data: &GameData, events:
 // Majority, regency (spec § 2)
 // =========================================================================
 
-/// Phase: opens/lifts regencies for every faction whose ruler is a minor,
-/// and applies the regency unrest penalty (spec § 2: +5 while regent).
-pub(crate) fn resolve_regencies(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
+/// Phase: opens/lifts regencies for every faction whose ruler is a minor
+/// and applies the regency unrest penalty each turn it lasts (spec § 2: +5
+/// while regent). The journal reports the start and the end only.
+pub(crate) fn resolve_regencies(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+) {
     let year = state.year;
     let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
     for faction_id in ids {
-        let Some(ruler) = state.factions[&faction_id].ruler.clone() else {
-            continue;
-        };
-        let Some(ruler_state) = state.characters.get(&ruler) else {
-            continue;
-        };
-        if ruler_state.is_major(year) {
+        let faction = &state.factions[&faction_id];
+        if !faction.alive {
             continue;
         }
-        for province in state
-            .provinces
-            .values_mut()
-            .filter(|p| p.controller == faction_id)
-        {
-            province.unrest = province.unrest.saturating_add(REGENCY_UNREST_PENALTY).min(100);
+        let was_regency = faction.regency;
+        let ruler = faction.ruler.clone();
+        let minor_ruler = ruler
+            .as_ref()
+            .and_then(|r| state.characters.get(r))
+            .filter(|r| r.alive && !r.is_major(year))
+            .is_some();
+        state.factions.get_mut(&faction_id).expect("exists").regency = minor_ruler;
+        let ruler_name = ruler
+            .as_ref()
+            .map(|r| state.character_name(data, r))
+            .unwrap_or_default();
+        if minor_ruler {
+            for province in state
+                .provinces
+                .values_mut()
+                .filter(|p| p.controller == faction_id)
+            {
+                province.unrest = province
+                    .unrest
+                    .saturating_add(REGENCY_UNREST_PENALTY)
+                    .min(100);
+            }
+            if !was_regency {
+                events.push(
+                    GameEvent::new(
+                        EventKind::Regency,
+                        format!(
+                            "{ruler_name} est mineur : une régence gouverne {}.",
+                            faction_name(data, &faction_id)
+                        ),
+                    )
+                    .faction(&faction_id),
+                );
+            }
+        } else if was_regency && ruler.is_some() {
+            events.push(
+                GameEvent::new(
+                    EventKind::Regency,
+                    format!(
+                        "{ruler_name} atteint sa majorité : fin de la régence en {}.",
+                        faction_name(data, &faction_id)
+                    ),
+                )
+                .faction(&faction_id),
+            );
         }
-        events.push(
-            GameEvent::new(
-                EventKind::Regency,
-                format!(
-                    "{} est mineur : une régence gouverne {}.",
-                    character_name(data, &ruler),
-                    faction_name(data, &faction_id)
-                ),
-            )
-            .faction(&faction_id),
-        );
+    }
+}
+
+/// Phase: governors whose province was lost, or who died or were captured,
+/// lose the post; the others gain governance XP (spec § 2: +2 per turn).
+pub(crate) fn resolve_governance(state: &mut CampaignState) {
+    let governors: Vec<(CharacterId, ProvinceId)> = state
+        .characters
+        .iter()
+        .filter_map(|(id, c)| c.governor_of.clone().map(|p| (id.clone(), p)))
+        .collect();
+    for (id, province) in governors {
+        let character = &state.characters[&id];
+        let keeps_post = character.alive
+            && !character.captive
+            && state
+                .provinces
+                .get(&province)
+                .is_some_and(|p| p.controller == character.faction);
+        if keeps_post {
+            skills::grant_experience(state, &id, skills::GOVERNANCE_XP_PER_TURN);
+        } else {
+            state.characters.get_mut(&id).expect("exists").governor_of = None;
+        }
     }
 }
 
@@ -702,7 +808,10 @@ pub(crate) fn pick_heir_by_law(
             rest.first().map(|(id, _)| (*id).clone())
         }
         Some(SuccessionLaw::CognaticPrimogeniture) => {
-            let mut children: Vec<_> = members.iter().filter(|(_, c)| is_parent_of(ruler, c)).collect();
+            let mut children: Vec<_> = members
+                .iter()
+                .filter(|(_, c)| is_parent_of(ruler, c))
+                .collect();
             children.sort_by_key(|(id, c)| (c.birth_year, (*id).clone()));
             if let Some((id, _)) = children.first() {
                 return Some((*id).clone());
@@ -804,14 +913,14 @@ impl CampaignState {
                 let child = self.characters.get(child_id)?;
                 Some(ChildView {
                     id: child_id.clone(),
-                    name: character_name(data, child_id),
+                    name: self.character_name(data, child_id),
                     age: child.age(self.year),
                 })
             })
             .collect();
         Some(CharacterView {
             id: id.clone(),
-            name: character_name(data, id),
+            name: self.character_name(data, id),
             epithet: static_data.and_then(|s| s.epithet.clone()),
             sex: c.sex,
             age: c.age(self.year),
@@ -826,7 +935,7 @@ impl CampaignState {
             skills_learned: c.skills_learned.iter().cloned().collect(),
             traits,
             spouse: c.spouse.clone(),
-            spouse_name: c.spouse.as_ref().map(|s| character_name(data, s)),
+            spouse_name: c.spouse.as_ref().map(|s| self.character_name(data, s)),
             children,
             father: c.father.clone(),
             mother: c.mother.clone(),

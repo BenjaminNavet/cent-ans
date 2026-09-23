@@ -399,12 +399,24 @@ pub(crate) fn fight(
     // from command).
     if let Some(general) = &attacker_general {
         if state.characters.get(general).is_some_and(|c| c.alive) {
-            dynasty::on_battle_resolved(state, data, general, result.winner == Winner::Attacker, events);
+            dynasty::on_battle_resolved(
+                state,
+                data,
+                general,
+                result.winner == Winner::Attacker,
+                events,
+            );
         }
     }
     if let Some(general) = &defender_general {
         if state.characters.get(general).is_some_and(|c| c.alive) {
-            dynasty::on_battle_resolved(state, data, general, result.winner == Winner::Defender, events);
+            dynasty::on_battle_resolved(
+                state,
+                data,
+                general,
+                result.winner == Winner::Defender,
+                events,
+            );
         }
     }
 
@@ -463,10 +475,7 @@ fn apply_outcome(
             if let Some(character) = state.characters.get_mut(general) {
                 character.captive = true;
             }
-            let name = data
-                .characters
-                .get(general)
-                .map_or_else(|| general.to_string(), |c| c.name.display.clone());
+            let name = state.character_name(data, general);
             events.push(
                 GameEvent::new(
                     EventKind::GeneralCaptured,

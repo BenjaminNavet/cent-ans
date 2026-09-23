@@ -272,6 +272,10 @@ pub struct FactionState {
     pub building_upkeep_last_turn: i64,
     #[serde(default)]
     pub projected_income: i64,
+    /// A regency governs for a minor ruler (M4 spec § 2); tracked so the
+    /// journal reports its start and end once instead of every turn.
+    #[serde(default)]
+    pub regency: bool,
 }
 
 /// Dynamic state of a character.
@@ -290,6 +294,10 @@ pub struct CharacterState {
     pub captive: bool,
 
     // ----- M4: characters & dynasties (spec § 2) ---------------------------
+    /// Display name of a generated character (historical ones take theirs
+    /// from `data.characters`); see [`CampaignState::character_name`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Accumulated experience not yet converted into a skill point.
     #[serde(default)]
     pub experience: u32,
@@ -338,6 +346,18 @@ pub struct CharacterState {
 
 fn default_loyalty() -> u8 {
     100
+}
+
+impl CampaignState {
+    /// Display name of a character: the static historical name, else the
+    /// generated one, else the raw id.
+    pub fn character_name(&self, data: &GameData, id: &CharacterId) -> String {
+        data.characters
+            .get(id)
+            .map(|c| c.name.display.clone())
+            .or_else(|| self.characters.get(id).and_then(|c| c.name.clone()))
+            .unwrap_or_else(|| id.to_string())
+    }
 }
 
 impl CharacterState {

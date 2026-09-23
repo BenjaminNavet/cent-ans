@@ -147,6 +147,7 @@ impl CampaignState {
                 army_upkeep_last_turn: 0,
                 building_upkeep_last_turn: 0,
                 projected_income: 0,
+                regency: false,
             };
             if let Some(suzerain) = &faction.suzerain {
                 faction_state.allies.insert(suzerain.clone());
@@ -243,6 +244,7 @@ impl CampaignState {
             state.characters.insert(
                 id.clone(),
                 CharacterState {
+                    name: None,
                     faction: character.faction.clone(),
                     alive: character
                         .death
@@ -286,6 +288,24 @@ impl CampaignState {
             );
         }
         link_families(&mut state, data);
+        // Factions whose data names no heir get the one their succession law
+        // designates (spec M4 § 1: "héritier calculable").
+        let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
+        for id in ids {
+            let faction_state = &state.factions[&id];
+            let heir_alive = faction_state
+                .heir
+                .as_ref()
+                .is_some_and(|h| state.characters.get(h).is_some_and(|c| c.alive));
+            if heir_alive {
+                continue;
+            }
+            let heir = faction_state
+                .ruler
+                .clone()
+                .and_then(|ruler| crate::dynasty::pick_heir_by_law(&state, data, &id, &ruler));
+            state.factions.get_mut(&id).expect("exists").heir = heir;
+        }
 
         // Main armies (the virtual rebels faction owns no province and never
         // fields troops of its own; it only ever inherits a garrison already
@@ -332,12 +352,16 @@ fn link_families(state: &mut CampaignState, data: &GameData) {
     for id in &ids {
         let family = data.characters.get(id).and_then(|c| c.family.as_ref());
         let is_alive = |other: &CharacterId| state.characters.get(other).is_some_and(|c| c.alive);
-        let spouse = family.and_then(|f| {
-            f.spouses.iter().find(|s| is_alive(s)).cloned()
-        });
+        let spouse = family.and_then(|f| f.spouses.iter().find(|s| is_alive(s)).cloned());
         let character = &state.characters[id];
-        let father = character.father.clone().filter(|f| state.characters.contains_key(f));
-        let mother = character.mother.clone().filter(|m| state.characters.contains_key(m));
+        let father = character
+            .father
+            .clone()
+            .filter(|f| state.characters.contains_key(f));
+        let mother = character
+            .mother
+            .clone()
+            .filter(|m| state.characters.contains_key(m));
         let character = state.characters.get_mut(id).expect("exists");
         character.spouse = if character.alive { spouse } else { None };
         character.father = father;

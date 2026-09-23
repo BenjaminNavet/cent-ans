@@ -55,7 +55,7 @@ pub use battle_auto::{
 };
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
 pub use dynasty::{
-    ChildView, CharacterView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
+    CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
     MARRIAGE_MIN_AGE,
 };
 pub use economy::{FactionEconomy, TaxRate};

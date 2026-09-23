@@ -87,9 +87,11 @@ pub(crate) fn resolve_sieges(
         }
         let fortification = state.fortification_level(data, &province_id);
         let besieging_general = state.armies[&besiegers[0]].general.clone();
-        let siege_speed_percent = besieging_general
-            .as_ref()
-            .map_or(0.0, |g| skills::character_effects(state, data, g).siege_speed.apply(0.0));
+        let siege_speed_percent = besieging_general.as_ref().map_or(0.0, |g| {
+            skills::character_effects(state, data, g)
+                .siege_speed
+                .apply(0.0)
+        });
         let province = state.provinces.get_mut(&province_id).expect("exists");
         match &mut province.siege {
             Some(siege) if siege.attacker == attacker => {
