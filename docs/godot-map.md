@@ -165,6 +165,7 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Mode mécontentement (M3) | M (action `map_toggle_unrest`) ; ignoré avec un message si `get_province_city` est indisponible |
 | Cour (M4) | C |
 | Diplomatie (M5) | P ; modes de carte N (diplomatie) et R (religion) |
+| Chronique (M10) | bouton « Chronique (n) » ; la fenêtre s'ouvre seule en fin de tour quand une décision attend |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
 Options de ligne de commande (après `--`) :
@@ -224,6 +225,10 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
      retient le meilleur `projected_income` observé (la richesse converge sur plusieurs saisons, § 1.1) et
      vérifie qu'il dépasse celui d'avant construction ; `set_tax_rate` à « high » et vérifie la hausse
      immédiate de `projected_income` (comparaison sans fin de tour, isolée de la dérive de fond).
+  6. personnages (M4), technologies (M6), diplomatie (M5) : voir les sections dédiées ;
+  7. chronique (M10, `_run_chronicle`) : 60 tours France sur la vraie simulation, au moins une décision
+     historique et une aléatoire, la première résolue par `submit_order({"type": "choose_event_option"})`,
+     les autres par `choose_event_option`, refus d'une décision inconnue, fenêtre instanciée.
   Un script `--script` est compilé avant l'enregistrement des autoloads : le test accède à `SimFacade`
   et `MapPaths` par `/root/...` (seules les constantes/statics sont utilisables directement).
 
@@ -291,6 +296,25 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 - Journal : couleurs pour guerre, paix, alliances, rébellions, embargos, offres, excommunication, schisme, hérésie.
 - Captures : `--stage=diplomacy` (`docs/img/godot-diplomacy.png`), `--stage=diplomacy_map`
   (`docs/img/godot-diplomacy-map.png`).
+
+## Chronique : événements historiques et aléatoires (M10)
+
+- **Fenêtre « Chronique »** : `scenes/ui/chronicle_window.tscn` + `scripts/ui/chronicle_window.gd`
+  (`ChronicleWindow`, parchemin construit en code), branchée par `scripts/map/chronicle_controller.gd`
+  (`ChronicleController` ; `campaign_map.gd` n'appelle que `setup`, `refresh`, `after_end_turn`, blocs
+  marqués M10). Rubrique (« Chronique du temps » pour un historique, « Nouvelles du royaume » pour un
+  aléatoire), titre, province et délai (« à décider sous 2 tours »), texte d'époque en italique, un bouton
+  par choix avec ses effets en info-bulle et résumés en petit dessous. « Plus tard » / × referme sans
+  répondre : sans choix, le premier s'applique d'office à l'expiration (2 tours).
+- **File** : la fenêtre montre la première décision de `get_pending_decisions()` ; après chaque choix
+  (`choose_event_option`), la suivante s'affiche, puis la fenêtre se ferme. Elle s'ouvre seule en fin de
+  tour s'il y a une décision ; le bouton « Chronique (n) » de la barre la rouvre (grisé à 0, masqué si la
+  simulation n'expose pas l'API, par exemple le mock).
+- Journal : couleur brune dédiée « § » pour `chronicle` (déclenchements, choix, choix d'office).
+- Capture : `--stage=chronicle` (`docs/img/godot-chronicle.png`) : joue jusqu'à la première décision
+  historique (au plus 60 tours, les décisions aléatoires tranchées au premier choix), puis ouvre la fenêtre.
+
+![Fenêtre de chronique](img/godot-chronicle.png)
 
 ## Performances mesurées (M4 Pro)
 

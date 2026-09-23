@@ -22,6 +22,7 @@ data/
   traits/             trait_*.json    59 traits de personnage (M4)
   skills/             skill_*.json    30 compétences, 3 branches (M4)
   names/              names_<code>.json  7 listes de prénoms par culture (M4)
+  events/             evt_*.json      48 événements de chronique : 26 historiques, 22 aléatoires (M10)
 ```
 
 Règle : **le nom du fichier est l'`id` de l'entité** (`data/factions/fac_france.json` contient `"id": "fac_france"`).
@@ -435,3 +436,67 @@ province listée passe à l'autre partie ; tribut positif payé par la cible), `
 
 Données : `factions/*.json` gagne `claims[{kind: "throne"|"province", faction?, province?, note}]` ;
 `religions/*.json` gagne `historical_adherents[]` (obédience au Schisme) et `origin_provinces[]` (hérésies).
+
+### 7.8 Événements de chronique (M10)
+
+Spec : `docs/design/m10-events.md`. Données `data/events/evt_*.json` (schéma
+`data/schemas/event.schema.json`, dossier facultatif), types `data_model::entities::event`, règles
+`core/crates/sim-campaign/src/chronicle.rs`, pont `core/crates/godot-bridge/src/campaign_sim_events.rs`.
+
+**Format.** `id` (`evt_`), `title`, `text` (français), `kind` (`historical` | `random`), `trigger`,
+`scope`, `options` (1 à 3 : `text`, `effects[]`, `ai_weight` défaut 1), `historical_date?`, `sources[]`.
+- `trigger` : historique → `date {year, season?}` et `until_year?` (défaut : année + 2) ; aléatoire →
+  `mean_time_to_happen` (tours ; chance par tour = ⌈1000 / mtth⌉ ‰) ou `chance_permille` ; `conditions[]`
+  (toutes requises).
+- `scope` : `{type: "global"}` (le joueur décide), `{type: "faction", faction?}` (la faction nommée, sinon
+  chaque faction qui remplit les conditions), `{type: "province", faction?, province?}` (la province
+  nommée, sinon une tirée parmi celles qui remplissent, restreinte aux provinces de `faction` ; son
+  contrôleur décide).
+- Conditions (`type`) : `faction_exists {faction}`, `faction_is_player {faction}`, `at_war {a?, b?}` (b
+  absent : en guerre contre quiconque), `controls {faction?, province}`, `character_alive {id}`,
+  `character_captive {id}`, `ruler_is {faction, character}`, `ruler_trait {faction?, trait}`,
+  `ruler_house {faction?, house}`, `ruler_age_between {faction?, min, max}`, `year_between {from, to}`,
+  `province_unrest_above {province?, amount}`, `province_besieged {province?, by?}`,
+  `province_coastal {province?}`, `treasury_above {faction?, amount}`, `provinces_below {faction?, count}`,
+  `religion_is {faction?, religion}`, `schism {active}`, `not_fired {event}`, `fired {event}`,
+  `season {season}`, `any_of {conditions[]}`. Un `faction`/`province` absent vaut la faction/province visée.
+- Effets (`type`) : `treasury {faction?, amount}`, `unrest|health|wealth|devastation {province?, amount}`,
+  `population {province?, percent}` (`province` : `"all"` = toutes les provinces contrôlées par la faction
+  qui décide, un `prov_`, ou absent = province visée sinon toutes), `prestige|piety {character?, faction?,
+  amount}` (`character` : `"ruler"` défaut, `"heir"` ou un `chr_`), `papal_favor {faction?, amount}`,
+  `opinion {faction, towards?, amount, reason, duration?}` (attitude de `faction` envers `towards`,
+  défaut : la faction qui décide ; 20 tours), `declare_war {a, b}`, `peace {a, b}` (trêve de 5 ans),
+  `add_trait {character?, faction?, trait}`, `kill_character {id, faction?}`,
+  `spawn_army {faction?, province?, units[]}`, `claim {faction?, kind: throne|province, target}`,
+  `loyalty {vassal?, amount}` (défaut : tous les vassaux), `plague_wave {from_year, to_year}`.
+
+**Chargement.** Erreur (`DataError::InvalidEvent`) : 0 ou plus de 3 options, historique sans `date`,
+aléatoire sans `mean_time_to_happen`/`chance_permille`, `mean_time_to_happen` nul ; clé ou `type` inconnu
+→ `DataError::Json` (`deny_unknown_fields`). Avertissement (`Warning`, entité `evt_…`) pour tout id
+inconnu dans une condition ou un effet : la simulation l'ignore. Test pytest
+`tools/tests/test_events_schema.py` : chaque fichier valide le schéma JSON.
+
+**Simulation.** `CampaignState.chronicle` (`ChronicleState`, `#[serde(default)]`, `STATE_VERSION`
+inchangé = 4) : `fired_events` (historiques déjà déclenchés), `pending_decisions[{id, event, faction,
+province?, options[], expires_turn}]`, `next_decision_id`, `plague_wave? {start_turn, duration}`.
+Phase de fin de tour après la religion, avant la population :
+1. décisions expirées (`expires_turn` ≤ tour) : premier choix appliqué, journal « (délai écoulé) » ;
+2. historiques non déclenchés dont la date est atteinte et `until_year` non dépassé, si les conditions
+   tiennent pour au moins une cible (sinon rien : l'histoire diverge ; passé `until_year`, jamais) ;
+3. aléatoires : un tirage par faction vivante et par événement (RNG de campagne, déterministe), au plus
+   un aléatoire par faction et par tour ; les aléatoires des IA restent hors journal ;
+4. vague de peste : les provinces triées par latitude de leur capitale (sud d'abord) sont frappées une
+   fois chacune sur `(to_year − from_year) × 4` tours (Peste noire : 12) : santé −30, population −15 à
+   −30 % (tirage), mécontentement +20 pour chaque classe ; un événement `plague` par tour.
+Une IA applique aussitôt le choix de plus fort `ai_weight` (égalité : RNG) ; le joueur reçoit une
+décision de 2 tours (événement `chronicle` « Chronique : titre. »). Les effets passent tous par
+`chronicle::apply_effect`.
+
+| Méthode `CampaignSim` | Retour |
+|---|---|
+| `get_pending_decisions()` | décisions du joueur : `[{id, event, title, text, historical, options[{index, text, effects_text}], expires_in, province, province_name}]` ; `effects_text` = une ligne française par effet ; `expires_in` = fins de tour restantes (1 = ce tour-ci) |
+| `choose_event_option(decision, option)` | `{ok, error}` (équivaut à l'ordre `choose_event_option`) |
+
+Ordre (`submit_order`) : `choose_event_option{decision, option}` ; refus « décision inconnue » /
+« choix invalide ». Événement de journal M10 : `chronicle` (le résultat d'un choix par ordre ouvre le
+journal du tour suivant, comme les ordres M5).
