@@ -355,3 +355,18 @@ permet `load_from_string` sur un objet neuf.
 
 `unit` = `{unit_type, name, strength, max_strength, morale}`. Les identifiants inconnus donnent un
 dictionnaire vide. Vérification headless : `core/checks/campaign_sim_check.gd`.
+
+### 7.5 `CampaignSim` : personnages et dynasties (M4)
+
+| Méthode | Retour |
+|---|---|
+| `get_character(id)` | `{id, name, epithet, sex: "male"\|"female", age, alive, faction, house, title, role, skills{command, governance, court}, experience, skill_points, xp_to_next, skills_learned[], traits[{id, name, category, description}], spouse, spouse_name, children[{id, name, age}], father, mother, location, army, governor_of, captive, piety, prestige}`. `role` est l'activité affichée : `"général de l'armée en X"`, `"gouverneur de Y"`, `"à la cour"` ou `"Captif(ve)"`. |
+| `get_faction_characters(faction)` | ids vivants : dirigeant, héritier, puis par âge |
+| `get_skill_tree()` | `[{id, name, branch, tier, prerequisites[], cost, description, effects[{kind, value, mode}]}]` |
+| `get_learnable(character)` | ids apprenables maintenant (prérequis appris, points suffisants) |
+| `get_marriage_candidates(character)` | `[{id, name, age, faction}]` |
+| `get_province_state(id)` | gagne `governor` et `governor_name` quand un gouverneur est nommé |
+| ordres | `learn_skill{character, skill}`, `assign_governor{province, character}`, `propose_marriage{character, spouse}`, `debug_grant_xp{character, amount}` (tests headless) |
+| `GameDataStore.get_trait(id)`, `get_skill(id)` | définitions statiques |
+
+Événements M4 : `birth`, `death`, `succession`, `regency`, `no_heir`, `trait_acquired`.
