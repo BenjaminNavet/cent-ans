@@ -8,8 +8,8 @@
 | M3 | Villes et économie (classes, bâtiments, jauges, ressources) | terminé (2026-09-23) |
 | M4 | Personnages et dynasties | terminé (2026-09-23) |
 | M5 | Diplomatie et religion | terminé (2026-09-23) |
-| M6 | Technologies | terminé |
-| M7 | Batailles temps réel 3D | à faire |
-| M8 | Sièges | campagne terminée (2026-09-23), bataille de siège 3D après M7 |
-| M9 | IA de campagne et de bataille | campagne terminée (2026-09-23), bataille après M7 |
+| M6 | Technologies | terminé (2026-09-23) |
+| M7 | Batailles temps réel 3D | terminé (2026-09-23) |
+| M8 | Sièges | campagne terminée (2026-09-23), bataille de siège 3D en cours |
+| M9 | IA de campagne et de bataille | campagne terminée (2026-09-23), bataille en cours |
 | M10 | Assets, sons, événements, équilibrage | à faire |

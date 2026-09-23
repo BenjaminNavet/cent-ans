@@ -11,6 +11,7 @@ use data_model::{GameData, HistoricalDate};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 
+mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_diplomacy;
 mod campaign_sim_siege;
@@ -18,6 +19,7 @@ mod campaign_sim_tech;
 mod campaign_sim_victory;
 mod convert;
 
+pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 
 struct CentAnsExtension;

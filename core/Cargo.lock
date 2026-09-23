@@ -117,6 +117,7 @@ dependencies = [
  "data-model",
  "godot",
  "png",
+ "serde",
  "serde_json",
  "sim-battle",
  "sim-campaign",
@@ -355,6 +356,8 @@ name = "sim-battle"
 version = "0.1.0"
 dependencies = [
  "data-model",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -366,6 +369,7 @@ dependencies = [
  "rand_chacha",
  "serde",
  "serde_json",
+ "sim-battle",
  "thiserror",
 ]
 

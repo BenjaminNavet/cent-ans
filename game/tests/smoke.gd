@@ -18,6 +18,8 @@ extends SceneTree
 ##     panneau des technologies (un nœud par technologie), ordre `research` sur la technologie
 ##     disponible la moins chère, `get_research` non vide, refus d'une technologie connue,
 ##     20 fins de tour → au moins une technologie acquise et un événement `technology_researched`.
+##  8. batailles (M7) : BattleSim headless (2 000 ticks, fin, resolve_battle), puis dialogue
+##     d'avant-bataille → battle.tscn (60 images) → écran de fin → retour à la carte.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -49,6 +51,7 @@ func _init() -> void:
 	await _run_characters()
 	await _run_technologies()
 	await _run_diplomacy()
+	await _run_battle()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -574,3 +577,114 @@ func _run_diplomacy() -> void:
 	if _failures == 0:
 		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
 			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
+## M7 (docs/design/m7-battles.md § 4) : bataille réelle France–Angleterre mise en scène par
+## `debug_stage_battle`, 2 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
+## `resolve_battle` accepté ; puis la boucle complète par la carte : dialogue d'avant-bataille,
+## « Livrer bataille », scène `battle.tscn` 60 images, fin de bataille, « Retour à la campagne ».
+func _run_battle() -> void:
+	if not ClassDB.class_exists("BattleSim") or not ClassDB.instantiate("CampaignSim").has_method("debug_stage_battle"):
+		_fail("battle: BattleSim / CampaignSim.debug_stage_battle not registered (run core/build.sh)")
+		return
+	var data_dir := _project_root().path_join("data")
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", data_dir, "fac_france", 1337), "battle: new_campaign failed"):
+		return
+	var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
+	if not _check(armies.size() == 2, "battle: no French or English army"):
+		return
+	var index: int = sim.call("debug_stage_battle", armies[0], armies[1])
+	var pending: Array = sim.call("get_pending_battles")
+	_check(index == 0 and pending.size() == 1, "battle: debug_stage_battle should record 1 pending battle, got %d" % pending.size())
+	_check(str(pending[0].get("player_side", "")) == "attacker", "battle: France should attack")
+	var setup: Dictionary = sim.call("get_battle_setup", index)
+	var battle: Object = ClassDB.instantiate("BattleSim")
+	if not _check(battle.call("setup", setup, int(pending[0]["seed"])), "battle: BattleSim.setup refused the campaign setup"):
+		return
+	battle.call("set_ai", "attacker", true)
+	var units: Array = battle.call("get_units")
+	_check(units.size() == (setup["attacker"]["units"] as Array).size() + (setup["defender"]["units"] as Array).size(), "battle: unit count mismatch")
+	var terrain: Dictionary = battle.call("get_terrain")
+	_check((terrain["heights"] as PackedFloat32Array).size() == int(terrain["nx"]) * int(terrain["nz"]), "battle: terrain grid size")
+	var soldiers: PackedFloat32Array = battle.call("get_soldier_transforms", "attacker")
+	_check(soldiers.size() > 0 and soldiers.size() % 4 == 0, "battle: soldier transforms empty")
+	var refused: Dictionary = battle.call("issue_command", {"type": "halt", "units": [units.size() - 1]})
+	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
+	var ticks := 0
+	for _i in 2000:
+		battle.call("tick", 0.1)
+		ticks += 1
+		if battle.call("is_finished"):
+			break
+	if not _check(battle.call("is_finished"), "battle: not finished after 2000 ticks"):
+		return
+	var outcome: Dictionary = battle.call("get_outcome")
+	var events: Array = battle.call("get_events")
+	_check(not events.is_empty(), "battle: no battle journal")
+	var result: Dictionary = sim.call("resolve_battle", index, outcome)
+	_check(result.get("ok", false), "battle: resolve_battle refused: %s" % result.get("error", "?"))
+	_check((sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be gone")
+	print("smoke battle: %d ticks, winner %s, losses %d / %d, %d journal lines" % [ticks, outcome["winner"], int(outcome["attacker"]["total_losses"]), int(outcome["defender"]["total_losses"]), events.size()])
+
+	# Boucle complète par la carte de campagne (vraies données).
+	facade.set_data_dir(data_dir)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null and facade.is_real, "battle: campaign map with the real simulation failed to start"):
+		map.queue_free()
+		return
+	var map_armies: Array = BattleScene.main_armies(map.sim, "fac_france", "fac_england")
+	map.sim.call("debug_stage_battle", map_armies[0], map_armies[1])
+	map._offer_pending_battles()
+	var dialog: Node = map._battle_dialog
+	if not _check(dialog != null and dialog.visible, "battle: pre-battle dialog should be visible"):
+		map.queue_free()
+		return
+	_check(str(dialog.body_label.text).contains("Météo prévue"), "battle: dialog should show the weather forecast")
+	dialog.fight_button.emit_signal("pressed")
+	await process_frame
+	var scene: Node = null
+	for child in root.get_children():
+		if child is BattleScene:
+			scene = child
+	if not _check(scene != null, "battle: battle.tscn not opened by « Livrer bataille »"):
+		map.queue_free()
+		return
+	_check(not map.visible and map.process_mode == Node.PROCESS_MODE_DISABLED, "battle: campaign map should sleep during the battle")
+	for _i in 60:
+		await process_frame
+	_check(scene.units.size() > 0, "battle scene: no units")
+	_check(scene.terrain.get_child_count() > 0, "battle scene: no terrain")
+	var drawn := 0
+	for key in scene._mm:
+		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
+	_check(drawn > 0, "battle scene: no soldier instances")
+	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
+	var own: int = -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side:
+			own = int(unit["id"])
+			break
+	var order: Dictionary = scene.issue({"type": "move", "units": [own], "x": 600.0, "z": 330.0, "run": false})
+	_check(order.get("ok", false), "battle scene: move order refused: %s" % order.get("error", "?"))
+	scene.battle.call("set_ai", scene.player_side, true)
+	for _i in 36000:
+		scene.battle.call("tick", 0.1)
+		if scene.battle.call("is_finished"):
+			break
+	await process_frame
+	await process_frame
+	_check(scene.finished_shown and scene.hud.end_panel.visible, "battle scene: end screen should be visible")
+	scene._on_return()
+	await process_frame
+	_check(map.visible and map.process_mode == Node.PROCESS_MODE_INHERIT, "battle: campaign map should be back after the battle")
+	_check((map.sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be resolved after « Retour à la campagne »")
+	_check(map.ui.log_line_count() > 0, "battle: campaign journal should list the battle")
+	if _failures == 0:
+		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
+	map.queue_free()
+	await process_frame
