@@ -8,9 +8,11 @@ Three files are written next to the heightmap in ``data/map/``:
     dominant terrain of each province (``data/provinces/*.json``), altitude,
     slope, distance to the coast and fractal noise.
 ``province_border_dist.png``
-    L8, full resolution: distance (in map pixels, ``value / BORDER_DIST_SCALE``)
-    to the nearest land border between two provinces, lightly smoothed so the
-    shader can draw anti-aliased borders with ``smoothstep``.
+    RGB8, full resolution: three signed distance fields (map pixels,
+    ``(value - 128) / BORDER_DIST_SCALE``) to the nearest land border between two
+    provinces; ``min(|R|, |G|, |B|)`` after bilinear filtering is a sub-pixel
+    distance to the border line, so the shader draws anti-aliased borders with
+    ``smoothstep`` (see :func:`compute_border_dist`).
 ``coast_dist.png``
     L8, full resolution: signed distance to the shore (sea level or lakes),
     ``(value - 128) / COAST_DIST_SCALE`` pixels, positive on land.
@@ -34,8 +36,10 @@ MAP_DIR = REPO_DIR / "data" / "map"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 
 SPLAT_SIZE = 2048
-BORDER_DIST_SCALE = 8.0  # 1 px = 8 levels, range 0..~32 px
-BORDER_SMOOTH_SIGMA = 0.8
+BORDER_DIST_SCALE = 6.0  # 1 px = 6 levels, signed range ±21 px
+BORDER_RANGE_PX = 127.0 / BORDER_DIST_SCALE
+BORDER_CHANNELS = 3
+BORDER_SMOOTH_SIGMA = 0.7
 COAST_DIST_SCALE = 2.0  # 1 px = 2 levels, range ±64 px
 NOISE_SEED = 1337
 
@@ -207,36 +211,92 @@ def encode_splat(weights: np.ndarray) -> np.ndarray:
     return np.clip(quantised, 0, 255).astype(np.uint8)
 
 
-def border_pixels(ids: np.ndarray, land: np.ndarray) -> np.ndarray:
-    """Pixels on a land border between two different provinces (both sides marked)."""
-    border = np.zeros(ids.shape, dtype=bool)
-    for axis in (0, 1):
-        a = ids.take(range(0, ids.shape[axis] - 1), axis=axis)
-        b = ids.take(range(1, ids.shape[axis]), axis=axis)
-        la = land.take(range(0, ids.shape[axis] - 1), axis=axis)
-        lb = land.take(range(1, ids.shape[axis]), axis=axis)
-        diff = (a != b) & la & lb & ((a > 0) | (b > 0))
-        if axis == 0:
-            border[:-1, :] |= diff
-            border[1:, :] |= diff
-        else:
-            border[:, :-1] |= diff
-            border[:, 1:] |= diff
+def _neighbour_pairs(labels: np.ndarray):
+    """Yield ``(a, b, slice_a, slice_b)`` for horizontal and vertical 4-neighbours."""
+    yield labels[:-1, :], labels[1:, :], (slice(None, -1), slice(None)), (slice(1, None), slice(None))
+    yield labels[:, :-1], labels[:, 1:], (slice(None), slice(None, -1)), (slice(None), slice(1, None))
+
+
+def region_labels(ids: np.ndarray, land: np.ndarray) -> np.ndarray:
+    """Land regions: province index, ``max + 1`` for land outside every province, -1 at sea."""
+    labels = ids.astype(np.int32)
+    labels[(labels == 0) & land] = int(ids.max()) + 1
+    labels[~land] = -1
+    return labels
+
+
+def border_pixels(labels: np.ndarray) -> np.ndarray:
+    """Pixels on a land border between two different regions (both sides marked)."""
+    border = np.zeros(labels.shape, dtype=bool)
+    for a, b, slice_a, slice_b in _neighbour_pairs(labels):
+        diff = (a != b) & (a >= 0) & (b >= 0)
+        border[slice_a] |= diff
+        border[slice_b] |= diff
     return border
 
 
+def colour_regions(labels: np.ndarray, channels: int = BORDER_CHANNELS) -> dict[int, int]:
+    """Greedy colouring of the region adjacency graph with at most ``2**channels`` colours.
+
+    Adjacent regions get different colours, hence differ in at least one bit, so at
+    least one channel of the signed field changes sign across every border.
+    """
+    neighbours: dict[int, set[int]] = {}
+    for a, b, _, _ in _neighbour_pairs(labels):
+        mask = (a != b) & (a >= 0) & (b >= 0)
+        for x, y in set(zip(a[mask].tolist(), b[mask].tolist(), strict=True)):
+            neighbours.setdefault(x, set()).add(y)
+            neighbours.setdefault(y, set()).add(x)
+    for region in np.unique(labels[labels >= 0]).tolist():
+        neighbours.setdefault(region, set())
+    colours: dict[int, int] = {}
+    for region in sorted(neighbours, key=lambda r: (-len(neighbours[r]), r)):
+        used = {colours[n] for n in neighbours[region] if n in colours}
+        colour = next(c for c in range(2**channels) if c not in used)
+        colours[region] = colour
+    return colours
+
+
 def compute_border_dist(ids: np.ndarray, land: np.ndarray) -> np.ndarray:
-    """Distance (px) to the nearest province border, 0.5 on border pixels, smoothed."""
-    border = border_pixels(ids, land)
+    """Signed distances to province borders, ``(rows, cols, BORDER_CHANNELS)`` in px.
+
+    Every channel holds the distance to the nearest land border (0.5 on border
+    pixels); its sign is one bit of the region colour (:func:`colour_regions`).
+    With bilinear filtering, ``min(|channel|)`` is then a sub-pixel distance to
+    the border line (zero exactly between two provinces). Sea pixels take the
+    sign of the nearest land region so coasts never produce a sign change.
+    """
+    labels = region_labels(ids, land)
+    border = border_pixels(labels)
     if not border.any():
-        return np.full(ids.shape, 255.0 / BORDER_DIST_SCALE, dtype=np.float32)
+        return np.full((*ids.shape, BORDER_CHANNELS), BORDER_RANGE_PX, dtype=np.float32)
     dist = ndimage.distance_transform_edt(~border).astype(np.float32) + 0.5
-    return ndimage.gaussian_filter(dist, BORDER_SMOOTH_SIGMA)
+    if (~land).any() and land.any():
+        nearest = ndimage.distance_transform_edt(
+            ~land, return_distances=False, return_indices=True
+        )
+        labels = labels[nearest[0], nearest[1]]
+    colours = colour_regions(labels)
+    lut = np.zeros(int(labels.max()) + 1, dtype=np.int32)
+    for region, colour in colours.items():
+        lut[region] = colour
+    colour_map = lut[np.maximum(labels, 0)]
+    out = np.empty((*ids.shape, BORDER_CHANNELS), dtype=np.float32)
+    for channel in range(BORDER_CHANNELS):
+        sign = np.where((colour_map >> channel) & 1, -1.0, 1.0).astype(np.float32)
+        out[..., channel] = ndimage.gaussian_filter(sign * dist, BORDER_SMOOTH_SIGMA)
+    return out
 
 
 def encode_border_dist(dist: np.ndarray) -> np.ndarray:
-    """``uint8`` encoding of :func:`compute_border_dist` (``BORDER_DIST_SCALE`` levels/px)."""
-    return np.clip(np.rint(dist * BORDER_DIST_SCALE), 0, 255).astype(np.uint8)
+    """``uint8`` encoding: 128 + ``BORDER_DIST_SCALE`` levels per px (±``BORDER_RANGE_PX``)."""
+    return np.clip(np.rint(128.0 + dist * BORDER_DIST_SCALE), 0, 255).astype(np.uint8)
+
+
+def decode_border_dist(encoded: np.ndarray) -> np.ndarray:
+    """Unsigned distance to the nearest border (min over channels), as the shader does."""
+    signed = (encoded.astype(np.float32) - 128.0) / BORDER_DIST_SCALE
+    return np.abs(signed).min(axis=-1)
 
 
 def compute_coast_dist(water: np.ndarray) -> np.ndarray:
@@ -272,9 +332,9 @@ def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> Splat
     terrain.write_png8(encode_coast_dist(compute_coast_dist(water)), coast_path)
 
     border_path = map_dir / "province_border_dist.png"
-    terrain.write_png8(
-        encode_border_dist(compute_border_dist(ids_full, land_full)), border_path
-    )
+    Image.fromarray(
+        encode_border_dist(compute_border_dist(ids_full, land_full)), mode="RGB"
+    ).save(border_path, compress_level=9)
 
     factor = max(1, height.shape[0] // SPLAT_SIZE)
     height_small = downsample_mean(height, factor)

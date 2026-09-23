@@ -8,6 +8,7 @@ extends Node3D
 ## Options de ligne de commande (après `--`) :
 ##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte
 ##                              (sélectionne la première armée du joueur + aperçu de chemin).
+##   --stage=map                avec --screenshot : carte seule (aucune sélection, aucun panneau).
 ##   --stage=province           avec --screenshot : sélectionne plutôt la capitale du joueur
 ##                              et ouvre le panneau de recrutement.
 ##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
@@ -837,6 +838,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_skills()
 				"siege":
 					_stage_screenshot_siege()  # M8
+				"map":
+					pass  # V2 : carte seule, sans sélection ni panneau (captures du terrain)
 				"help":
 					help.toggle()  # M10
 				"objectives":
