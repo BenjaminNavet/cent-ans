@@ -16,6 +16,7 @@ godot --headless --path "$ROOT/game" --import
 godot --headless --path "$ROOT/game" --export-release "macOS" "$APP"
 mkdir -p "$APP/Contents/Resources"
 rsync -a --delete --exclude "schemas" "$ROOT/data/" "$APP/Contents/Resources/data/"
+cp "$ROOT/CREDITS.md" "$APP/Contents/Resources/CREDITS.md"
 # Ad-hoc signature after adding data (no Apple developer identity).
 codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
 du -sh "$APP"
