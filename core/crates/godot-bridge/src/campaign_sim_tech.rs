@@ -12,10 +12,7 @@ use sim_campaign::research::{effective_cost, tech_progress, tech_status};
 use crate::campaign_sim::{effects_array, ids, CampaignSim};
 
 fn tech_branch_key(branch: TechBranch) -> &'static str {
-    match branch {
-        TechBranch::Military => "military",
-        TechBranch::Civil => "civil",
-    }
+    branch.key()
 }
 
 #[godot_api(secondary)]

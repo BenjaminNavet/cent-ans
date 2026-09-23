@@ -41,6 +41,7 @@ pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
 pub mod events;
+pub mod medicine;
 pub mod movement;
 pub mod orders;
 pub mod population;
@@ -52,6 +53,7 @@ pub mod setup_1337;
 pub mod siege;
 pub mod skills;
 pub mod state;
+pub mod table;
 pub mod turn;
 pub mod victory;
 
@@ -79,6 +81,7 @@ pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::CampaignError;
 pub use skills::LearnSkillError;
+pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use state::{
     Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
     FactionSummary, ProvinceState, Season, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS,

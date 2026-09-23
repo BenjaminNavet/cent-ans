@@ -79,6 +79,13 @@ pub struct EffectTotals {
     pub diplomacy: EffectValue,
     pub intrigue: EffectValue,
     pub fertility: EffectValue,
+    /// H4: `PlagueResistance`, `WoundRecovery`, `DietHealth`.
+    #[serde(default)]
+    pub plague_resistance: EffectValue,
+    #[serde(default)]
+    pub wound_recovery: EffectValue,
+    #[serde(default)]
+    pub diet_health: EffectValue,
 }
 
 impl EffectTotals {
@@ -116,6 +123,9 @@ impl EffectTotals {
         merge_field!(diplomacy);
         merge_field!(intrigue);
         merge_field!(fertility);
+        merge_field!(plague_resistance);
+        merge_field!(wound_recovery);
+        merge_field!(diet_health);
     }
 }
 
@@ -152,6 +162,9 @@ impl EffectTotals {
             EffectKind::Diplomacy => &mut self.diplomacy,
             EffectKind::Intrigue => &mut self.intrigue,
             EffectKind::Fertility => &mut self.fertility,
+            EffectKind::PlagueResistance => &mut self.plague_resistance,
+            EffectKind::WoundRecovery => &mut self.wound_recovery,
+            EffectKind::DietHealth => &mut self.diet_health,
             _ => return,
         };
         slot.add(mode, value);

@@ -9,6 +9,7 @@ use serde::de::DeserializeOwned;
 
 use crate::entities::building::Building;
 use crate::entities::character::Character;
+use crate::entities::diet::Diet;
 use crate::entities::event::Event;
 use crate::entities::faction::Faction;
 use crate::entities::names::NameList;
@@ -20,8 +21,8 @@ use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
-    BuildingId, CharacterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId,
-    SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, DietId, EventId, FactionId, NamesId, ProvinceId, ReligionId,
+    ResourceId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -40,6 +41,8 @@ pub mod folders {
     pub const NAMES: &str = "names";
     /// Chronicle events (M10); optional folder.
     pub const EVENTS: &str = "events";
+    /// Province diets (H3 « La Table »); optional folder.
+    pub const DIETS: &str = "diets";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -139,6 +142,8 @@ pub struct GameData {
     pub names: BTreeMap<NamesId, NameList>,
     /// Chronicle events (M10), empty when `data/events/` is absent.
     pub events: BTreeMap<EventId, Event>,
+    /// Province diets (H3), empty when `data/diets/` is absent.
+    pub diets: BTreeMap<DietId, Diet>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -167,12 +172,17 @@ impl GameData {
             skills: load_entities(&root.join(folders::SKILLS), |s: &Skill| &s.id)?,
             names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
             events: BTreeMap::new(),
+            diets: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
             data.events = load_entities(&events_dir, |e: &Event| &e.id)?;
+        }
+        let diets_dir = root.join(folders::DIETS);
+        if diets_dir.is_dir() {
+            data.diets = load_entities(&diets_dir, |d: &Diet| &d.id)?;
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.validate_references(&mut warnings)?;
@@ -256,6 +266,7 @@ impl GameData {
         checker.check_religions();
         checker.check_traits();
         checker.check_skills();
+        checker.check_diets();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -499,6 +510,28 @@ impl ReferenceChecker<'_> {
         let data = self.data;
         for (id, skill) in &data.skills {
             self.require_all(id, "prerequisites", &skill.prerequisites, &data.skills);
+        }
+    }
+
+    fn check_diets(&mut self) {
+        let data = self.data;
+        for (id, diet) in &data.diets {
+            let requirements = &diet.requirements;
+            self.require_all(
+                id,
+                "requirements.resources",
+                &requirements.resources,
+                &data.resources,
+            );
+            if let Some(tech) = &requirements.technology {
+                self.require(id, "requirements.technology", tech, &data.technologies);
+            }
+            self.require_all(
+                id,
+                "requirements.any_building",
+                &requirements.any_building,
+                &data.buildings,
+            );
         }
     }
 }

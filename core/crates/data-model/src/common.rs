@@ -137,6 +137,15 @@ pub enum EffectKind {
     BattleDefense,
     /// M6: research points per turn (research buildings, technologies).
     ResearchPoints,
+    /// H4: resistance to plague and epidemics, in percent points (reduces
+    /// both the chance and the severity; capped by the simulation).
+    PlagueResistance,
+    /// H4: percent of a battle's casualties recovered as wounded by the
+    /// surviving units (capped by the simulation).
+    WoundRecovery,
+    /// H3/H4: percent bonus to the `Health` effects of province diets
+    /// (*Regimen sanitatis*).
+    DietHealth,
 }
 
 /// How an effect value combines with the base value.

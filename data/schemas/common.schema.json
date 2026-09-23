@@ -17,6 +17,7 @@
     "skill_id": { "type": "string", "pattern": "^skill_[a-z0-9_]+$" },
     "names_id": { "type": "string", "pattern": "^names_[a-z]{2}$" },
     "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
+    "diet_id": { "type": "string", "pattern": "^diet_[a-z0-9_]+$" },
     "date_string": {
       "type": "string",
       "description": "Date ISO partielle : AAAA, AAAA-MM ou AAAA-MM-JJ (calendrier julien pour l'époque).",
@@ -82,7 +83,8 @@
             "piety", "prestige", "supply", "movement", "attrition_resistance", "loyalty",
             "siege_speed", "construction_speed", "diplomacy", "intrigue", "fertility",
             "battle_charge", "battle_ranged", "battle_defense",
-            "research_points"
+            "research_points",
+            "plague_resistance", "wound_recovery", "diet_health"
           ]
         },
         "class": { "$ref": "#/$defs/social_class", "description": "Classe visée pour les effets de population ; absent = toute la province." },
