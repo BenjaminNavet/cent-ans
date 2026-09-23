@@ -15,10 +15,11 @@ const REFRESH := 0.2
 const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B, KEY_N]
 const ICON_DIR := "res://assets/ui/orders/"
 ## Repli quand l'icône PNG n'existe pas : un glyphe par nature d'ordre.
-const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♘", "pavise": "▮", "no_quarter": "⚔"}
-## Au-dessus du bandeau des cartes d'unités de `battle_hud.gd` (panneau haut de 182 px).
-const BOTTOM_MARGIN := 190.0
-const BUTTON_SIZE := Vector2(96, 64)
+const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♞", "pavise": "▮", "no_quarter": "⚔"}
+## Au-dessus du bandeau des cartes d'unités de `battle_hud.gd` (panneau haut de 182 px) et de sa
+## ligne d'aide.
+const BOTTOM_MARGIN := 216.0
+const BUTTON_SIZE := Vector2(108, 62)
 
 var scene: Node = null  # BattleScene
 var panel: PanelContainer
@@ -160,7 +161,7 @@ func _update_button(entry: Dictionary, order: Dictionary) -> void:
 	var name_label: Label = entry["name"]
 	name_label.text = str(order["name"])
 	button.disabled = not available
-	button.modulate = Color(1, 1, 1) if available else Color(0.78, 0.74, 0.7)
+	button.modulate = Color(1, 1, 1) if available else Color(0.85, 0.8, 0.75, 0.6)
 	var shade: ColorRect = entry["shade"]
 	var total := float(order.get("cooldown", 0.0))
 	var timer: Label = entry["timer"]

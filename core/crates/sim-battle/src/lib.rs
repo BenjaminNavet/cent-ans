@@ -24,6 +24,9 @@
 //!   breach the walls, victory by holding the central square.
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
+//! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
+//!   cry, no quarter, dismount, pavises, rally, from the catalogue of
+//!   `data/battle_orders/` carried by [`BattleSetup::orders`].
 
 pub mod ai;
 pub mod command;
