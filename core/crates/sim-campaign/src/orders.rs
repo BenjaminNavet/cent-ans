@@ -10,6 +10,7 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::CANCEL_REFUND_PERCENT;
+use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
 use crate::movement;
@@ -101,6 +102,58 @@ pub enum Order {
         character: CharacterId,
         amount: u32,
     },
+    // ----- M5: diplomacy & religion (spec § 2.3) --------------------------
+    DeclareWar {
+        target: FactionId,
+    },
+    /// Each listed province passes to the other party; `tribute` is paid by
+    /// `target` (negative: paid to it).
+    ProposePeace {
+        target: FactionId,
+        #[serde(default)]
+        provinces: Vec<ProvinceId>,
+        #[serde(default)]
+        tribute: i64,
+    },
+    ProposeAlliance {
+        target: FactionId,
+    },
+    BreakAlliance {
+        target: FactionId,
+    },
+    SetEmbargo {
+        target: FactionId,
+        active: bool,
+    },
+    DemandVassalage {
+        target: FactionId,
+    },
+    ReleaseVassal {
+        target: FactionId,
+    },
+    SendGift {
+        target: FactionId,
+        amount: i64,
+    },
+    /// Cross-faction marriage proposal (`character` ours, `spouse` theirs).
+    ProposeFactionMarriage {
+        target: FactionId,
+        character: CharacterId,
+        spouse: CharacterId,
+    },
+    AnswerOffer {
+        offer: u32,
+        accept: bool,
+    },
+    RequestPapalMediation {
+        target: FactionId,
+    },
+    DonateToChurch {
+        amount: i64,
+    },
+    ChooseObedience {
+        religion: data_model::ReligionId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -160,6 +213,8 @@ pub enum OrderError {
     Governor(#[from] GovernorError),
     #[error(transparent)]
     Marriage(#[from] MarriageError),
+    #[error(transparent)]
+    Diplomacy(#[from] crate::diplomacy::DiplomacyError),
 }
 
 /// One line of the recruitment panel.
@@ -252,6 +307,57 @@ impl CampaignState {
                 skills::grant_experience(self, &character, amount);
                 Ok(())
             }
+            Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),
+            Order::ProposePeace {
+                target,
+                provinces,
+                tribute,
+            } => Ok(self.propose(
+                data,
+                faction,
+                &target,
+                Proposal::Peace { provinces, tribute },
+            )?),
+            Order::ProposeAlliance { target } => {
+                Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
+            }
+            Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
+            Order::SetEmbargo { target, active } => {
+                Ok(self.set_embargo(data, faction, &target, active)?)
+            }
+            Order::DemandVassalage { target } => {
+                Ok(self.propose(data, faction, &target, Proposal::Vassalage)?)
+            }
+            Order::ReleaseVassal { target } => Ok(self.release_vassal(data, faction, &target)?),
+            Order::SendGift { target, amount } => {
+                Ok(self.send_gift(data, faction, &target, amount)?)
+            }
+            Order::ProposeFactionMarriage {
+                target,
+                character,
+                spouse,
+            } => {
+                self.check_owned_character(faction, &character)?;
+                if self.characters.get(&spouse).map(|c| &c.faction) != Some(&target) {
+                    return Err(OrderError::NotYourCharacter(target));
+                }
+                Ok(self.propose(
+                    data,
+                    faction,
+                    &target,
+                    Proposal::Marriage { character, spouse },
+                )?)
+            }
+            Order::AnswerOffer { offer, accept } => {
+                Ok(self.answer_offer(data, faction, offer, accept)?)
+            }
+            Order::RequestPapalMediation { target } => {
+                Ok(self.request_papal_mediation(data, faction, &target)?)
+            }
+            Order::DonateToChurch { amount } => Ok(self.donate_to_church(data, faction, amount)?),
+            Order::ChooseObedience { religion } => Ok(crate::religion::set_obedience(
+                self, data, faction, &religion,
+            )?),
         }
     }
 

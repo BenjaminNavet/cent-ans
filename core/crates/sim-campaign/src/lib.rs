@@ -36,12 +36,14 @@ pub mod ai_minimal;
 pub mod battle_auto;
 pub mod buildings;
 pub mod characters;
+pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
 pub mod events;
 pub mod movement;
 pub mod orders;
 pub mod population;
+pub mod religion;
 pub mod rng;
 pub mod save;
 pub mod setup_1337;
@@ -54,6 +56,10 @@ pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
 };
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use diplomacy::{
+    Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
+    RelationKind,
+};
 pub use dynasty::{
     CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
     MARRIAGE_MIN_AGE,

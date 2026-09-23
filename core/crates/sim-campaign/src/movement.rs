@@ -393,6 +393,22 @@ pub(crate) fn fight(
 
     apply_outcome(state, data, attacker_id, &result.attacker, events);
     apply_outcome(state, data, defender_id, &result.defender, events);
+    // M5 war score: a lopsided battle counts double.
+    let (winner, loser, winner_losses, loser_losses) = match result.winner {
+        Winner::Attacker => (
+            &attacker_faction,
+            &defender_faction,
+            result.attacker.total_losses,
+            result.defender.total_losses,
+        ),
+        Winner::Defender => (
+            &defender_faction,
+            &attacker_faction,
+            result.defender.total_losses,
+            result.attacker.total_losses,
+        ),
+    };
+    state.record_battle(winner, loser, loser_losses > 2 * winner_losses.max(1));
 
     // Spec § 2: XP, `trait_veteran`, wounded and death chance for both
     // generals (only if they weren't captured, which already removed them

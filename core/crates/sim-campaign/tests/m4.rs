@@ -550,7 +550,7 @@ fn save_round_trip_keeps_m4_fields() {
         state.end_turn_with(&data, idle);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":3"));
+    assert!(json.contains("\"state_version\":4"));
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
     let c = loaded.character(&raoul).unwrap();

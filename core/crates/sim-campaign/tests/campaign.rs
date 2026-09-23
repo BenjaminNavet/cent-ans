@@ -625,9 +625,17 @@ fn france_income_is_positive_and_in_target_range() {
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();
     assert_eq!(summary.income, effective_income);
+    // M5: vassals pay 10 % of their income as tribute.
+    let tribute: i64 = state
+        .factions
+        .values()
+        .filter(|f| f.suzerain.as_ref() == Some(&france_id))
+        .map(|f| f.income_last_turn * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100)
+        .sum();
+    assert!(tribute > 0, "Burgundy, Brittany and Flanders pay tribute");
     assert_eq!(
         summary.treasury,
-        treasury_before + effective_income - effective_upkeep
+        treasury_before + effective_income - effective_upkeep + tribute
     );
     assert_eq!(summary.provinces_count, 27);
 }
@@ -664,7 +672,7 @@ fn save_load_round_trip() {
         state.end_turn(&data);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":3"));
+    assert!(json.contains("\"state_version\":4"));
     assert!(json.contains("\"tax_rate\""), "new field round-trips");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
@@ -678,7 +686,7 @@ fn save_load_round_trip() {
     b.end_turn(&data);
     assert_eq!(a.save_json(), b.save_json());
 
-    let err = CampaignState::load_json(&json.replace("\"state_version\":3", "\"state_version\":1"))
+    let err = CampaignState::load_json(&json.replace("\"state_version\":4", "\"state_version\":1"))
         .unwrap_err();
     assert!(matches!(
         err,

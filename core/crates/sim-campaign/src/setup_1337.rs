@@ -14,6 +14,7 @@ use data_model::{
     UnitTypeId,
 };
 
+use crate::diplomacy::{Claim, FOREVER};
 use crate::economy::TaxRate;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
@@ -124,6 +125,8 @@ impl CampaignState {
                     buildings: province.buildings.clone(),
                     construction: None,
                     revolt_seasons: 0,
+                    heresy: 0,
+                    heresy_religion: None,
                 },
             );
         }
@@ -148,6 +151,32 @@ impl CampaignState {
                 building_upkeep_last_turn: 0,
                 projected_income: 0,
                 regency: false,
+                embargoes: BTreeSet::new(),
+                suzerain: faction.suzerain.clone(),
+                loyalty: 100,
+                claims: faction
+                    .claims
+                    .iter()
+                    .map(|claim| Claim {
+                        kind: claim.kind,
+                        faction: claim.faction.clone(),
+                        province: claim.province.clone(),
+                        text_fr: claim
+                            .note
+                            .clone()
+                            .unwrap_or_else(|| "prétention historique".to_owned()),
+                        expires_turn: None,
+                    })
+                    .collect(),
+                modifiers: Vec::new(),
+                war_scores: Default::default(),
+                war_started: Default::default(),
+                religion: Some(faction.religion.clone()),
+                papal_favor: 50,
+                excommunicated_until: None,
+                offers: Vec::new(),
+                last_offer_turn: Default::default(),
+                last_war_declared: None,
             };
             if let Some(suzerain) = &faction.suzerain {
                 faction_state.allies.insert(suzerain.clone());
@@ -206,10 +235,26 @@ impl CampaignState {
                             .truces
                             .insert(id.clone(), until);
                     }
-                    RelationStatus::Peace
-                    | RelationStatus::Embargo
-                    | RelationStatus::MarriageTie => {}
+                    RelationStatus::Embargo => {
+                        state
+                            .factions
+                            .get_mut(id)
+                            .expect("exists")
+                            .embargoes
+                            .insert(other.clone());
+                    }
+                    RelationStatus::MarriageTie => {
+                        state.add_modifier(id, other, 15, "Alliance matrimoniale", FOREVER);
+                    }
+                    RelationStatus::Peace => {}
                 }
+            }
+        }
+        for faction in state.factions.values_mut() {
+            let enemies: Vec<FactionId> = faction.at_war_with.iter().cloned().collect();
+            for enemy in enemies {
+                faction.war_started.insert(enemy.clone(), 0);
+                faction.war_scores.insert(enemy, 0);
             }
         }
         // A faction never fights its allies at the start.
@@ -340,6 +385,16 @@ impl CampaignState {
             }
         }
         crate::economy::resolve_goods(&mut state, data);
+        // Vassal loyalty starts at its equilibrium (M5).
+        let vassals: Vec<(FactionId, FactionId)> = state
+            .factions
+            .iter()
+            .filter_map(|(id, f)| f.suzerain.clone().map(|s| (id.clone(), s)))
+            .collect();
+        for (vassal, suzerain) in vassals {
+            let loyalty = crate::diplomacy::loyalty_target(&state, data, &vassal, &suzerain);
+            state.factions.get_mut(&vassal).expect("exists").loyalty = loyalty;
+        }
         Ok(state)
     }
 }

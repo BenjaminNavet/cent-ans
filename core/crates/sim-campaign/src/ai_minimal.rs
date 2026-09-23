@@ -29,7 +29,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if !faction_state.alive {
         return Vec::new();
     }
-    let mut orders = Vec::new();
+    // Diplomacy first (M5): peace, alliances, wars change what the armies do.
+    let mut orders = crate::diplomacy::plan_diplomacy(state, data, faction);
     let capital = faction_state.capital.clone();
 
     // In debt and still losing money: dismiss the most expensive field unit.
