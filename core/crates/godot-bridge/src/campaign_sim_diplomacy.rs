@@ -258,13 +258,21 @@ fn verdict(accept: bool, score: i32, reasons: &[(String, i32)]) -> VarDictionary
     }
 }
 
-fn war_verdict(state: &CampaignState, data: &GameData, player: &FactionId, target: &FactionId) -> VarDictionary {
+fn war_verdict(
+    state: &CampaignState,
+    data: &GameData,
+    player: &FactionId,
+    target: &FactionId,
+) -> VarDictionary {
     let mut reasons = Vec::new();
     if state.is_at_war(player, target) {
         return verdict(false, 0, &[("Déjà en guerre".to_owned(), 0)]);
     }
     if state.has_truce(player, target) {
-        reasons.push(("Trêve rompue : parjure (-40 auprès de tous)".to_owned(), -40));
+        reasons.push((
+            "Trêve rompue : parjure (-40 auprès de tous)".to_owned(),
+            -40,
+        ));
     }
     match state.casus_belli(data, player, target) {
         Some(motive) => reasons.push((format!("Motif : {motive}"), 0)),
@@ -274,10 +282,17 @@ fn war_verdict(state: &CampaignState, data: &GameData, player: &FactionId, targe
         .allies
         .iter()
         .filter(|a| *a != player)
-        .filter_map(|a| data.factions.get(a).map(|f| f.short_or_display_name().to_owned()))
+        .filter_map(|a| {
+            data.factions
+                .get(a)
+                .map(|f| f.short_or_display_name().to_owned())
+        })
         .collect();
     if !allies.is_empty() {
-        reasons.push((format!("Alliés appelés aux armes : {}", allies.join(", ")), 0));
+        reasons.push((
+            format!("Alliés appelés aux armes : {}", allies.join(", ")),
+            0,
+        ));
     }
     let score = reasons.iter().map(|(_, v)| v).sum();
     verdict(true, score, &reasons)

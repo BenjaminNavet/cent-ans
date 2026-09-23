@@ -256,6 +256,24 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 - Captures : `--stage=court` et `--stage=skills` (`docs/img/godot-court.png`, `godot-skill-tree.png`).
   Le mock `campaign_sim_mock.gd` n'est plus utilisé que si l'extension n'expose pas `get_character`.
 
+## Technologies (M6)
+
+- **Technologies** (bouton « Technologies », touche T, ou clic sur la jauge de recherche de la barre) :
+  `scenes/ui/tech_panel.tscn` (`TechPanel`). Onglets Militaire et Civil ; chaque onglet est un
+  `TechTreeView` (`scripts/ui/tech_tree_view.gd`) : colonnes par rang, nœuds reliés par des lignes de
+  prérequis (vertes si le prérequis est acquis ; les sauts de rang passent dans l'interligne), états
+  colorés (vert acquise, or en cours, clair disponible, gris verrouillée). Info-bulle : description,
+  effets, déblocages, année historique, coût (surcoût anachronique signalé). Clic sur une tech
+  disponible = ordre `research`. En tête : recherche en cours, progression, points par tour.
+- Barre supérieure : jauge de la recherche en cours (nom + barre, détail en info-bulle) ; masquée si la
+  simulation n'expose pas `get_tech_tree` (mock).
+- Journal : couleur violette dédiée ⚙ pour `technology_researched`. Le journal est masqué tant que
+  le panneau est ouvert.
+- Captures : `--stage=tech` (`docs/img/godot-tech-tree.png`), `--stage=tech_civil` (onglet Civil) :
+  lance la première tech militaire disponible, joue deux tours, ouvre le panneau.
+- Le mock `CampaignSimMock` n'implémente pas les technologies : bouton et jauge affichent
+  « indisponible », le smoke test saute l'étape (message imprimé).
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |

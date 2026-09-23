@@ -49,6 +49,8 @@ pub enum EventKind {
     Excommunication,
     Schism,
     Heresy,
+    /// A faction completes a technology (M6).
+    TechnologyResearched,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

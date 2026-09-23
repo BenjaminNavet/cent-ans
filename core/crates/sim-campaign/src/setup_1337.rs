@@ -177,6 +177,10 @@ impl CampaignState {
                 offers: Vec::new(),
                 last_offer_turn: Default::default(),
                 last_war_declared: None,
+                research: None,
+                research_progress: 0,
+                research_points_last_turn: 0,
+                research_banked: Default::default(),
             };
             if let Some(suzerain) = &faction.suzerain {
                 faction_state.allies.insert(suzerain.clone());

@@ -463,7 +463,7 @@ pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
     }
 }
 
-fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {
+pub(crate) fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {
     iter.map(|id| GString::from(id.as_ref())).collect()
 }
 
@@ -751,7 +751,7 @@ fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) 
     "à la cour".to_owned()
 }
 
-fn effects_array(effects: &[Effect]) -> VarArray {
+pub(crate) fn effects_array(effects: &[Effect]) -> VarArray {
     effects
         .iter()
         .map(|effect| {
@@ -763,10 +763,16 @@ fn effects_array(effects: &[Effect]) -> VarArray {
                 .ok()
                 .and_then(|v| v.as_str().map(str::to_owned))
                 .unwrap_or_default();
+            let unit_category = effect
+                .unit_category
+                .and_then(|c| serde_json::to_value(c).ok())
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default();
             vdict! {
                 "kind" => kind.as_str(),
                 "value" => effect.value,
                 "mode" => mode.as_str(),
+                "unit_category" => unit_category.as_str(),
             }
             .to_variant()
         })

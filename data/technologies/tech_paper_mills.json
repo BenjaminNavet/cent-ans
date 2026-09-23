@@ -17,8 +17,8 @@
   "unlocks": {},
   "effects": [
     {
-      "effect": "research_civil",
-      "value": 8
+      "effect": "research_points",
+      "value": 2
     }
   ],
   "description": "Papier de chiffon fabriqué au moulin : chancelleries et universités mieux dotées.",

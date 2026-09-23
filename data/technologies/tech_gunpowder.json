@@ -14,8 +14,8 @@
   "unlocks": {},
   "effects": [
     {
-      "effect": "research_military",
-      "value": 5
+      "effect": "research_points",
+      "value": 1
     }
   ],
   "description": "Fabrication de poudre (salpêtre, soufre, charbon) par les artilleurs royaux.",

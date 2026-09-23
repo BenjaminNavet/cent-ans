@@ -5,7 +5,8 @@
 //! and resolved in `end_turn`; all other orders apply immediately.
 
 use data_model::{
-    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId,
+    TechnologyId, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +15,7 @@ use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
 use crate::movement;
+use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
 use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 
@@ -154,6 +156,10 @@ pub enum Order {
     ChooseObedience {
         religion: data_model::ReligionId,
     },
+    /// Researches `technology` (M6); switching keeps the abandoned progress.
+    Research {
+        technology: TechnologyId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -215,6 +221,8 @@ pub enum OrderError {
     Marriage(#[from] MarriageError),
     #[error(transparent)]
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
+    #[error(transparent)]
+    Research(#[from] ResearchError),
 }
 
 /// One line of the recruitment panel.
@@ -358,6 +366,10 @@ impl CampaignState {
             Order::ChooseObedience { religion } => Ok(crate::religion::set_obedience(
                 self, data, faction, &religion,
             )?),
+            Order::Research { technology } => {
+                research::start_research(self, data, faction, &technology)?;
+                Ok(())
+            }
         }
     }
 

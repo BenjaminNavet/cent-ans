@@ -200,9 +200,14 @@ pub(crate) fn resolve_population(
         // Obediences of one church are not foreign to each other (M5).
         let foreign_religion = crate::religion::faction_religion(state, data, &controller)
             .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_data.religion));
-        // Buildings plus governor (M4), plus regency, excommunication,
-        // embargo and heresy unrest (M5).
+        // Buildings plus governor (M4), technologies (M6), plus regency,
+        // excommunication, embargo and heresy unrest (M5).
         let mut effects = state.province_effects(data, &id);
+        effects.merge(&crate::research::faction_province_tech_effects(
+            state,
+            data,
+            &controller,
+        ));
         effects.unrest.flat += state.political_unrest(&id);
         let cap = capacity(data, &id, &buildings);
 

@@ -1,7 +1,7 @@
 {
   "id": "tech_bookkeeping",
   "name": {
-    "display": "Comptabilité en partie double"
+    "display": "Comptabilité marchande"
   },
   "branch": "civil",
   "tier": 3,
@@ -11,7 +11,7 @@
   ],
   "historical_year": {
     "value": "1340",
-    "note": "Registres de la commune de Gênes (1340) ; comptabilité toscane."
+    "note": "Livres de comptes des compagnies toscanes (Bardi, Peruzzi) ; Chambre des comptes de Paris (1320)."
   },
   "unlocks": {
     "buildings": [
@@ -25,7 +25,7 @@
       "mode": "percent"
     }
   ],
-  "description": "Techniques marchandes italiennes : lettres de change, comptes en partie double, banques lombardes.",
+  "description": "Techniques marchandes italiennes : livres de raison, inventaires, banques lombardes et comptes royaux vérifiés.",
   "sources": [
     "Guerre de Cent Ans",
     "Armure de plates",

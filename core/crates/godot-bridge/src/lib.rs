@@ -13,6 +13,7 @@ use godot::prelude::*;
 
 mod campaign_sim;
 mod campaign_sim_diplomacy;
+mod campaign_sim_tech;
 mod convert;
 
 pub use campaign_sim::CampaignSim;

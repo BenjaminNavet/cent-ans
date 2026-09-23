@@ -1,0 +1,33 @@
+{
+  "id": "tech_gothic_flamboyant",
+  "name": {
+    "display": "Gothique flamboyant"
+  },
+  "branch": "civil",
+  "tier": 3,
+  "cost": 300,
+  "prerequisites": [
+    "tech_masonry"
+  ],
+  "historical_year": {
+    "value": "1380",
+    "uncertain": true,
+    "note": "Chapelle Notre-Dame-de-la-Grange d'Amiens (vers 1375-1380) ; essor au XVe siècle."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -3
+    },
+    {
+      "effect": "prestige",
+      "value": 3
+    }
+  ],
+  "description": "Remplages en flammes et voûtes à liernes : chantiers qui font la fierté des villes et des princes.",
+  "sources": [
+    "Gothique flamboyant",
+    "Architecture gothique"
+  ]
+}
