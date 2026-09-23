@@ -1,9 +1,9 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 1, fin de M1).
+Dernière mise à jour : 2026-09-23 (session 1, fin de M2).
 
 ## Où en est-on
-- **M0 Fondations : terminé. M1 Carte de campagne : terminé.** Prochain jalon : M2 Boucle de campagne.
+- **M0, M1, M2 terminés.** Le jeu est jouable : campagne France/Angleterre/Bourgogne, déplacement, recrutement, batailles auto, sièges, sauvegarde. Prochain jalon : M3 Villes et économie.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -18,9 +18,16 @@ Dernière mise à jour : 2026-09-23 (session 1, fin de M1).
 - Godot : scène `campaign_map.tscn` avec terrain par tuiles et LOD, frontières et teintes de faction en shader, mer animée, rivières, côtes, marqueurs de villes, caméra RTS, sélection de province, panneau parchemin. Captures : `docs/img/godot-real-map.png`.
 - Rust : `GameDataStore` charge toutes les données typées et les expose à Godot.
 
+- Simulation de campagne (`core/crates/sim-campaign`) : état complet, ordres validés, mouvement Dijkstra terre/mer, batailles auto, sièges, chevauchées, économie, ravitaillement, personnages (mort, succession), IA minimale, sauvegarde JSON, déterminisme testé sur 20 tours. 24 tests.
+- Pont `CampaignSim` (GDExtension) : API complète spec M2 § 2, vérification headless `core/checks/campaign_sim_check.gd`.
+- Interface Godot : menu de départ (3 factions), HUD parchemin (trésor, revenu, date, fin de tour, journal), panneaux armée et province, recrutement avec raisons, formation d'armée, marqueurs d'armées, ordre de déplacement au clic droit avec aperçu de chemin, sauvegarde/chargement. Captures : `docs/img/godot-campaign-hud.png`, `godot-campaign-province.png`, `godot-start-menu.png`.
+- Équilibrage observé : France ≈ 24 000 livres/saison, armée royale de 8 unités ≈ 13 % du revenu.
+
 ## Limites connues
-- Le panneau de province lit encore le GeoJSON, pas `GameDataStore` (capitale/terrain affichés « — ») : à brancher en M2.
-- Premier chargement de la heightmap 16 bits ≈ 5 s (décodage PNG en GDScript, cache ensuite) : à déplacer côté Rust en M2.
+- Le revenu affiché est 0 au tour 0 (revenu du dernier tour) ; un revenu prévisionnel viendra avec M3.
+- Pas d'ordre d'assaut : les sièges se résolvent par durée uniquement.
+- L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
+- La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
 - L'addon Blender MCP exige Blender ouvert en mode graphique ; le fallback headless est `tools/cent_ans_tools/blender.py`.
 

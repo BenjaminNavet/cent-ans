@@ -30,9 +30,17 @@ func _ready() -> void:
 	print("SimFacade: using %s" % ("real CampaignSim" if is_real else "CampaignSimMock"))
 
 
+## Vrai si `data_dir` contient les données de jeu complètes (pas seulement `map/`).
+static func has_game_data(data_dir: String) -> bool:
+	return DirAccess.dir_exists_absolute(data_dir.path_join("factions"))
+
+
 func _init_store() -> void:
 	if not ClassDB.class_exists("GameDataStore"):
 		push_warning("SimFacade: GameDataStore not available (run core/build.sh)")
+		return
+	if not has_game_data(MapPaths.data_dir):
+		push_warning("SimFacade: %s has no game data (factions/); store unavailable" % MapPaths.data_dir)
 		return
 	var candidate: Object = ClassDB.instantiate("GameDataStore")
 	if candidate.call("load", MapPaths.data_dir):
@@ -72,6 +80,10 @@ func set_data_dir(data_dir: String) -> void:
 ## l'échec de la vraie sim (ex. dossier de données incomplet) retombe sur le mock.
 func new_campaign(faction: String, seed: int) -> bool:
 	_init_sim()
+	if is_real and not has_game_data(MapPaths.data_dir):
+		push_warning("SimFacade: %s has no game data; using mock" % MapPaths.data_dir)
+		sim = CampaignSimMock.new()
+		is_real = false
 	if sim.call("new_campaign", MapPaths.data_dir, faction, seed):
 		return true
 	if is_real:
