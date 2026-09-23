@@ -1,0 +1,83 @@
+{
+  "id": "evt_cocherel",
+  "title": "La victoire de Cocherel",
+  "text": "Le 16 mai 1364, à Cocherel, sur l'Eure, [[cdx_du_guesclin|Bertrand du Guesclin]] attire par une fausse retraite l'armée navarraise du captal de Buch, Jean de Grailly, hors de sa colline, puis l'enveloppe. Le captal est pris. Trois jours plus tard, Charles V est sacré à Reims : la victoire est un présent de joyeux avènement et brise les ambitions de Charles le Mauvais en Normandie.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1364,
+      "season": "spring"
+    },
+    "until_year": 1365,
+    "conditions": [
+      {
+        "type": "ruler_house",
+        "faction": "fac_france",
+        "house": "Valois"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_navarre"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_normandie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Ouvrir le règne sous de bons auspices",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_navarre",
+          "amount": -15,
+          "reason": "Défaite de Cocherel"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Confisquer les terres normandes du Navarrais",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_navarre",
+          "amount": -30,
+          "reason": "Terres normandes confisquées"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_normandie",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1364-05-16"
+  },
+  "sources": [
+    "Battle of Cocherel",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+  ]
+}
