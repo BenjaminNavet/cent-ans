@@ -1,0 +1,406 @@
+class_name FlowController
+extends Node
+
+## F3 — « enveloppe » de la carte de campagne : menu pause (Échap), réglages appliqués à la
+## carte (caméra, pan par bords, batailles interactives), sauvegardes avec fiche et vignette,
+## sauvegarde automatique tournante, confirmation de fin de tour, rapport de saison et
+## alertes persistantes. `campaign_map.gd` n'appelle que `setup`, `refresh`,
+## `before_end_turn` et `after_end_turn` ; tout le reste passe par les signaux de `MapUI`.
+## Aucune règle de jeu : lecture de l'état et envoi des demandes existantes.
+
+const START_MENU_SCENE := "res://scenes/start_menu.tscn"
+const PAUSE_MENU_SCENE := "res://scenes/ui/pause_menu.tscn"
+const SEASON_REPORT_SCENE := "res://scenes/ui/season_report.tscn"
+const ALERTS_SCENE := "res://scenes/ui/alerts.tscn"
+const MENU_SETTINGS_ID := 910
+const MENU_PAUSE_ID := 911
+const BASE_PAN_SPEED := 1.2
+
+var map: Node = null  # CampaignMap
+var settings: Node = null
+var pause_menu: PauseMenu = null
+var season_report: SeasonReport = null
+var alerts: AlertsPanel = null
+var last_events: Array = []
+var last_autosave: String = ""
+var _last_saved_turn: int = 0
+var _pause_snapshot: Image = null
+var _end_turn_confirmed := false
+var _confirm_panel: PanelContainer = null
+var _confirm_label: Label = null
+var _confirm_yes: Button = null
+var _settings_menu: SettingsMenu = null
+
+
+func setup(campaign_map: Node) -> void:
+	map = campaign_map
+	settings = get_node_or_null("/root/Settings")
+	var ui: Node = map.get("ui")
+	season_report = (load(SEASON_REPORT_SCENE) as PackedScene).instantiate()
+	season_report.name = "SeasonReport"
+	ui.add_child(season_report)
+	# Sous la fenêtre de chronique et le dialogue de bataille (ajoutés plus tôt / plus tard).
+	var chronicle: Node = map.get("chronicle")
+	if chronicle != null and chronicle.get("window") != null:
+		ui.move_child(season_report, (chronicle.get("window") as Node).get_index())
+	season_report.entry_selected.connect(_on_report_entry)
+	season_report.disable_requested.connect(func() -> void:
+		if settings != null:
+			settings.call("set_value", "interface/season_report", false))
+	alerts = (load(ALERTS_SCENE) as PackedScene).instantiate()
+	alerts.name = "Alerts"
+	ui.add_child(alerts)
+	ui.move_child(alerts, season_report.get_index())
+	alerts.alert_pressed.connect(_on_alert_pressed)
+	for panel_name in ["army_panel", "province_panel", "faction_panel"]:
+		var panel: Control = ui.get(panel_name)
+		if panel != null:
+			panel.visibility_changed.connect(_update_alerts_visibility)
+	ui.save_requested.connect(_on_save_requested)
+	ui.load_requested.connect(_on_load_requested)
+	var popup: PopupMenu = ui.menu_button.get_popup()
+	popup.add_item("Réglages…", MENU_SETTINGS_ID)
+	popup.add_item("Menu pause (Échap)", MENU_PAUSE_ID)
+	popup.id_pressed.connect(func(id: int) -> void:
+		if id == MENU_SETTINGS_ID:
+			open_settings()
+		elif id == MENU_PAUSE_ID:
+			open_pause())
+	if settings != null:
+		settings.changed.connect(_on_setting_changed)
+	_last_saved_turn = _turn()
+	apply_settings()
+
+
+func _setting(key: String, fallback: Variant) -> Variant:
+	return settings.call("get_value", key) if settings != null else fallback
+
+
+func _turn() -> int:
+	var sim: Object = map.get("sim")
+	return int(sim.call("get_turn")) if sim != null else 0
+
+
+func unsaved_turns() -> int:
+	return maxi(0, _turn() - _last_saved_turn)
+
+
+# --- Réglages ---------------------------------------------------------------------
+
+
+func apply_settings() -> void:
+	var rig: CampaignCamera = map.get("camera_rig")
+	if rig != null:
+		rig.edge_pan_enabled = bool(_setting("camera/edge_pan", true))
+		rig.pan_speed = BASE_PAN_SPEED * float(_setting("camera/speed", 1.0))
+	var sim: Object = map.get("sim")
+	if sim != null and sim.has_method("set_interactive_battles"):
+		sim.call("set_interactive_battles", bool(_setting("game/interactive_battles", true)))
+
+
+func _on_setting_changed(key: String) -> void:
+	if key.begins_with("camera/") or key == "game/interactive_battles":
+		apply_settings()
+
+
+func open_settings() -> void:
+	if _settings_menu != null and is_instance_valid(_settings_menu):
+		return
+	_settings_menu = SettingsMenu.new()
+	_settings_menu.closed.connect(func() -> void: _settings_menu = null)
+	map.get("ui").add_child(_settings_menu)
+
+
+# --- Menu pause -------------------------------------------------------------------
+
+
+func is_paused() -> bool:
+	return pause_menu != null and is_instance_valid(pause_menu)
+
+
+func open_pause() -> void:
+	if is_paused() or not map.get("visible"):
+		return
+	_pause_snapshot = _capture_now()
+	pause_menu = (load(PAUSE_MENU_SCENE) as PackedScene).instantiate()
+	pause_menu.name = "PauseMenu"
+	pause_menu.unsaved_turns = unsaved_turns()
+	pause_menu.default_save_name = _default_save_name()
+	var ui: Node = map.get("ui")
+	ui.add_child(pause_menu)
+	pause_menu.resume_requested.connect(close_pause)
+	pause_menu.save_requested.connect(func(save_name: String) -> void:
+		ui.save_requested.emit(save_name)
+		pause_menu.unsaved_turns = unsaved_turns())
+	pause_menu.load_requested.connect(func(path: String) -> void:
+		close_pause()
+		ui.load_requested.emit(path))
+	pause_menu.help_requested.connect(func() -> void:
+		close_pause()
+		var help: Node = map.get("help")
+		if help != null:
+			help.call("toggle"))
+	pause_menu.main_menu_requested.connect(go_to_main_menu)
+	pause_menu.quit_requested.connect(func() -> void:
+		get_tree().paused = false
+		get_tree().quit())
+	get_tree().paused = true
+
+
+func close_pause() -> void:
+	if is_paused():
+		pause_menu.queue_free()
+	pause_menu = null
+	_pause_snapshot = null
+	get_tree().paused = false
+
+
+func toggle_pause() -> void:
+	if is_paused():
+		close_pause()
+	else:
+		open_pause()
+
+
+func go_to_main_menu() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file(START_MENU_SCENE)
+
+
+func _default_save_name() -> String:
+	var sim: Object = map.get("sim")
+	if sim == null:
+		return "partie"
+	var facade := get_node_or_null("/root/SimFacade")
+	var faction := str(facade.call("faction_short_name", map.get("player_faction"))) if facade != null else "partie"
+	return ("%s %s" % [faction, sim.call("get_date_label")]).to_lower().replace(" ", "_")
+
+
+## Échap : ferme ce qui est ouvert (réglages, rapport), laisse la carte désélectionner
+## l'armée, sinon ouvre ou ferme le menu pause. La pause gère elle-même Échap.
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("ui_cancel") or not map.get("visible"):
+		return
+	if _settings_menu != null and is_instance_valid(_settings_menu):
+		return  # la fenêtre de réglages se ferme elle-même
+	if _confirm_panel != null and _confirm_panel.visible:
+		_confirm_panel.hide()
+	elif season_report != null and season_report.visible:
+		season_report.close()
+	elif str(map.get("selected_army")) != "":
+		return  # campaign_map désélectionne
+	else:
+		open_pause()
+	get_viewport().set_input_as_handled()
+
+
+# --- Sauvegardes ------------------------------------------------------------------
+
+
+func _capture_now() -> Image:
+	if DisplayServer.get_name() == "headless":
+		return null
+	var texture := get_viewport().get_texture()
+	return texture.get_image() if texture != null else null
+
+
+## Après `CampaignMap._on_save` (connecté avant) : fiche et vignette de l'emplacement.
+func _on_save_requested(save_name: String) -> void:
+	var path: String = SaveSlots.SAVES_DIR.path_join(save_name.validate_filename() + ".json")
+	if not FileAccess.file_exists(path):
+		return
+	SaveSlots.write_meta(save_name)
+	_last_saved_turn = _turn()
+	if _pause_snapshot != null:
+		SaveSlots.write_thumbnail(save_name, _pause_snapshot)
+	elif DisplayServer.get_name() != "headless":
+		# La boîte de dialogue se ferme juste après : vignette sur l'image suivante.
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		SaveSlots.write_thumbnail(save_name, _capture_now())
+
+
+func _on_load_requested(_path: String) -> void:
+	_last_saved_turn = _turn()
+	last_events = []
+	if season_report != null:
+		season_report.hide()
+	apply_settings()
+	refresh()
+
+
+func autosave() -> String:
+	var interval := int(_setting("game/autosave_interval", 4))
+	var saved := SaveSlots.autosave(_turn(), interval, _capture_now())
+	if saved != "":
+		last_autosave = saved
+		_last_saved_turn = _turn()
+	return saved
+
+
+# --- Fin de tour ------------------------------------------------------------------
+
+
+## Vrai si la fin de tour peut avoir lieu ; sinon ouvre la confirmation (réglage).
+func before_end_turn() -> bool:
+	if is_paused():
+		return false
+	if _end_turn_confirmed or not bool(_setting("interface/confirm_end_turn", false)):
+		_end_turn_confirmed = false
+		return true
+	_show_end_turn_confirm()
+	return false
+
+
+func _show_end_turn_confirm() -> void:
+	if _confirm_panel == null:
+		_confirm_panel = PanelContainer.new()
+		_confirm_panel.theme = load("res://scenes/ui/parchment_theme.tres")
+		_confirm_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		_confirm_panel.offset_left = -220
+		_confirm_panel.offset_right = 220
+		_confirm_panel.offset_top = 90
+		var box := VBoxContainer.new()
+		_confirm_panel.add_child(box)
+		_confirm_label = Label.new()
+		_confirm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_confirm_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(_confirm_label)
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 12)
+		box.add_child(row)
+		var no := Button.new()
+		no.text = "Pas encore"
+		no.pressed.connect(func() -> void: _confirm_panel.hide())
+		row.add_child(no)
+		_confirm_yes = Button.new()
+		_confirm_yes.text = "Terminer le tour"
+		_confirm_yes.pressed.connect(confirm_end_turn)
+		row.add_child(_confirm_yes)
+		map.get("ui").add_child(_confirm_panel)
+	var armies_idle := 0
+	var sim: Object = map.get("sim")
+	for army_id in map.call("player_army_ids"):
+		var army: Dictionary = sim.call("get_army", army_id)
+		if (army.get("path", []) as Array).is_empty() and int(army.get("movement_points", 0)) > 0:
+			armies_idle += 1
+	var question := "Terminer le tour (%s) ?" % sim.call("get_date_label")
+	if armies_idle > 0:
+		question += "\n%d armée%s sans ordre de marche." % [armies_idle, "s" if armies_idle > 1 else ""]
+	_confirm_label.text = question
+	_confirm_panel.show()
+	_confirm_yes.grab_focus()
+
+
+func confirm_end_turn() -> void:
+	if _confirm_panel != null:
+		_confirm_panel.hide()
+	_end_turn_confirmed = true
+	map.call("_on_end_turn")
+
+
+## Après `end_turn` : sauvegarde auto, alertes, rapport de saison.
+func after_end_turn(events: Array) -> void:
+	last_events = events
+	autosave()
+	refresh()
+	if bool(_setting("interface/season_report", true)):
+		show_season_report(events)
+
+
+func report_groups(events: Array) -> Array:
+	return SeasonReport.build_groups(events, _concerns_player)
+
+
+func show_season_report(events: Array) -> bool:
+	var sim: Object = map.get("sim")
+	if sim == null or season_report == null:
+		return false
+	return season_report.show_report(str(sim.call("get_date_label")), report_groups(events))
+
+
+func _concerns_player(event: Dictionary) -> bool:
+	var player := str(map.get("player_faction"))
+	if str(event.get("faction", "")) == player:
+		return true
+	var sim: Object = map.get("sim")
+	var province_id := str(event.get("province", ""))
+	if province_id != "":
+		var state: Dictionary = sim.call("get_province_state", province_id)
+		if str(state.get("owner", "")) == player or str(state.get("controller", "")) == player:
+			return true
+	var army_id := str(event.get("army", ""))
+	if army_id != "":
+		return str((sim.call("get_army", army_id) as Dictionary).get("faction", "")) == player
+	return false
+
+
+# --- Alertes et navigation --------------------------------------------------------
+
+
+func refresh() -> void:
+	if alerts == null or map.get("sim") == null:
+		return
+	alerts.set_alerts(AlertsPanel.collect(map, last_events))
+	_update_alerts_visibility()
+
+
+func _update_alerts_visibility() -> void:
+	if alerts == null:
+		return
+	var ui: Node = map.get("ui")
+	var covered := false
+	for panel_name in ["army_panel", "province_panel", "faction_panel"]:
+		var panel: Control = ui.get(panel_name)
+		if panel != null and panel.visible:
+			covered = true
+	alerts.visible = not covered
+
+
+func _on_alert_pressed(alert: Dictionary) -> void:
+	var ui: Node = map.get("ui")
+	match str(alert.get("kind", "")):
+		"enemy_army":
+			focus_army(str(alert.get("army", "")))
+		"siege", "building":
+			focus_province(str(alert.get("province", "")))
+		"debt":
+			ui.faction_panel_requested.emit()
+		"research":
+			ui.tech_panel_requested.emit()
+		"chronicle":
+			var chronicle: Node = map.get("chronicle")
+			if chronicle != null:
+				chronicle.call("open_window")
+
+
+func _on_report_entry(event: Dictionary) -> void:
+	var army_id := str(event.get("army", ""))
+	var armies: ArmyMarkers = map.get("armies")
+	if army_id != "" and armies != null and armies.has_army(army_id):
+		focus_army(army_id)
+	else:
+		focus_province(str(event.get("province", "")))
+
+
+func focus_province(province_id: String) -> void:
+	var map_data: MapData = map.get("map_data")
+	var index := map_data.index_of_id(province_id)
+	if index <= 0:
+		return
+	var centroid := map_data.centroid_of_id(province_id)
+	var rig: CampaignCamera = map.get("camera_rig")
+	var extent := maxf(map_data.size.x, map_data.size.y)
+	rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), extent * 0.09)
+	(map.get("picker") as ProvincePicker).select_index(index)
+
+
+func focus_army(army_id: String) -> void:
+	var armies: ArmyMarkers = map.get("armies")
+	if armies == null or not armies.has_army(army_id):
+		return
+	var map_data: MapData = map.get("map_data")
+	var rig: CampaignCamera = map.get("camera_rig")
+	rig.look_at_point(armies.world_position_of(army_id), maxf(map_data.size.x, map_data.size.y) * 0.09)
+	map.call("select_army", army_id)
