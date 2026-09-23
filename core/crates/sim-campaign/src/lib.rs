@@ -24,13 +24,12 @@
 //!
 //! - The `ai` crate depends on this crate, so `end_turn` cannot call
 //!   `ai::plan_turn` without a dependency cycle. The minimal M2 planner lives in
-//!   [`ai_minimal::plan_turn`] and the `ai` crate re-exports it as
-//!   `ai::plan_turn`. [`CampaignState::end_turn_with`] accepts any planner.
+//!   [`ai_minimal::plan_turn`] (re-exported as `ai::plan_turn_minimal`) as a
+//!   fallback; the strategic planner (M9) is `ai::plan_turn`, passed to
+//!   [`CampaignState::end_turn_with`], which accepts any planner.
 //! - Every faction (not only playable ones) starts with a main army so that AI
 //!   factions can act; minor factions get 3 units.
 //! - Vassal/overlord relations are treated as alliances (friendly territory).
-//! - Population is stored per province but does not evolve yet (M3).
-//! - No assault order: sieges are only resolved by duration.
 
 pub mod ai_minimal;
 pub mod battle_auto;
