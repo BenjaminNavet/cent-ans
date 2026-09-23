@@ -111,16 +111,19 @@ pub fn province_income_effective(
     province: &ProvinceState,
     tax_rate: TaxRate,
 ) -> f64 {
-    province_income_with_effects(province, tax_rate, &effects_of(data, &province.buildings))
+    province_income_with(data, province, tax_rate, &EffectTotals::default())
 }
 
-/// [`province_income_effective`] with explicit effects (buildings plus
-/// governor, see [`CampaignState::province_effects`]).
-pub fn province_income_with_effects(
+/// [`province_income_effective`] with `extra` effects (the controller's
+/// technologies, M6) merged on top of the buildings'.
+pub fn province_income_with(
+    data: &GameData,
     province: &ProvinceState,
     tax_rate: TaxRate,
-    effects: &EffectTotals,
+    extra: &EffectTotals,
 ) -> f64 {
+    let mut effects = effects_of(data, &province.buildings);
+    effects.merge(extra);
     let mut base = 0.0;
     let mut burgher_base = 0.0;
     for (class, entry) in province.population.iter() {
@@ -205,13 +208,16 @@ impl CampaignState {
             .get(faction)
             .map(|f| f.tax_rate)
             .unwrap_or_default();
+        let tech = crate::research::faction_province_tech_effects(self, data, faction);
         let gross: i64 = self
             .provinces
             .iter()
             .filter(|(_, p)| &p.controller == faction && p.siege.is_none())
             .map(|(id, p)| {
-                province_income_with_effects(p, tax_rate, &self.province_effects(data, id)).round()
-                    as i64
+                // Buildings + governor (M4) + technologies (M6).
+                let mut extra = self.governor_effects(data, id);
+                extra.merge(&tech);
+                province_income_with(data, p, tax_rate, &extra).round() as i64
             })
             .sum();
         // Embargoes (M5) cut trade.

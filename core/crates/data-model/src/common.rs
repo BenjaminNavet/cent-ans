@@ -116,6 +116,8 @@ pub enum EffectKind {
     ArmyMorale,
     ArmyArmor,
     ArmyRanged,
+    /// M6: flat melee bonus per `unit_category` (technologies).
+    ArmyMelee,
     Garrison,
     FortificationLevel,
     SiegeResistance,
@@ -133,6 +135,8 @@ pub enum EffectKind {
     BattleCharge,
     BattleRanged,
     BattleDefense,
+    /// M6: research points per turn (research buildings, technologies).
+    ResearchPoints,
 }
 
 /// How an effect value combines with the base value.

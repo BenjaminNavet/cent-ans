@@ -1,0 +1,29 @@
+{
+  "id": "tech_pavise",
+  "name": {
+    "display": "Pavois"
+  },
+  "branch": "military",
+  "tier": 1,
+  "cost": 130,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1340",
+    "uncertain": true,
+    "note": "Grands boucliers des arbalétriers génois et flamands ; restés dans les bagages à Crécy (1346)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_armor",
+      "unit_category": "ranged",
+      "value": 5
+    }
+  ],
+  "description": "Grand bouclier planté devant l'arbalétrier pendant le rechargement, porté par un pavescheur.",
+  "sources": [
+    "Pavois (bouclier)",
+    "Bataille de Crécy",
+    "Arbalétriers génois"
+  ]
+}

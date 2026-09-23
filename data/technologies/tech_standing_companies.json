@@ -1,18 +1,18 @@
 {
   "id": "tech_standing_companies",
   "name": {
-    "display": "Compagnies d'ordonnance"
+    "display": "Armée permanente"
   },
   "branch": "military",
   "tier": 5,
   "cost": 800,
   "prerequisites": [
-    "tech_full_plate",
+    "tech_compagnies_d_ordonnance",
     "tech_field_artillery"
   ],
   "historical_year": {
-    "value": "1445",
-    "note": "Ordonnance de Louppy-le-Châtel (1445) : quinze compagnies de cent lances."
+    "value": "1448",
+    "note": "Taille permanente, compagnies d'ordonnance (1445) et francs-archers (1448) : première armée permanente soldée du royaume."
   },
   "unlocks": {},
   "effects": [

@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=24 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
 [ext_resource type="Script" path="res://scripts/map/terrain_builder.gd" id="2_terrain"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://scripts/map/construction_markers.gd" id="17_construction"]
 [ext_resource type="PackedScene" path="res://scenes/ui/court_panel.tscn" id="18_court_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/character_sheet.tscn" id="19_character_sheet"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tech_panel.tscn" id="20_tech_panel"]
 
 [sub_resource type="Environment" id="Environment_map"]
 background_mode = 1
@@ -157,6 +158,37 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Cour"
 
+[node name="TechButton" type="Button" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Technologies (T)"
+theme_override_font_sizes/font_size = 18
+text = "Technologies"
+
+[node name="ResearchBox" type="VBoxContainer" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+tooltip_text = "Recherche en cours (clic : technologies)"
+theme_override_constants/separation = 1
+
+[node name="ResearchLabel" type="Label" parent="UI/TopBar/HBox/ResearchBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Aucune recherche"
+clip_text = true
+
+[node name="ResearchBar" type="ProgressBar" parent="UI/TopBar/HBox/ResearchBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+show_percentage = false
+
 [node name="EndTurnButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -277,6 +309,9 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="CharacterSheet" parent="UI" instance=ExtResource("19_character_sheet")]
+unique_name_in_owner = true
+
+[node name="TechPanel" parent="UI" instance=ExtResource("20_tech_panel")]
 unique_name_in_owner = true
 
 [node name="SaveLoadDialog" parent="UI" instance=ExtResource("14_dialog")]

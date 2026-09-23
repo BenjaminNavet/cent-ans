@@ -508,7 +508,7 @@ fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
         err,
         sim_campaign::CampaignError::VersionMismatch {
             found: 1,
-            expected: 4
+            expected: sim_campaign::STATE_VERSION
         }
     ));
     let message = err.to_string();

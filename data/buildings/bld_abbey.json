@@ -21,12 +21,12 @@
       "value": -5
     },
     {
-      "effect": "research_civil",
-      "value": 5
-    },
-    {
       "effect": "health",
       "value": 2
+    },
+    {
+      "effect": "research_points",
+      "value": 0.25
     }
   ],
   "description": "Monastère bénédictin ou cistercien : scriptorium, hospitalité, mise en valeur des terres.",

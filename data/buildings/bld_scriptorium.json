@@ -1,0 +1,29 @@
+{
+  "id": "bld_scriptorium",
+  "name": {
+    "display": "Scriptorium"
+  },
+  "category": "religious",
+  "tier": 2,
+  "cost": {
+    "money": 600
+  },
+  "build_time_turns": 2,
+  "upkeep": 8,
+  "required_building": "bld_parish_church",
+  "effects": [
+    {
+      "effect": "research_points",
+      "value": 1
+    },
+    {
+      "effect": "piety",
+      "value": 1
+    }
+  ],
+  "description": "Atelier de copie et bibliothèque : chroniques, traités et comptes y sont transcrits.",
+  "sources": [
+    "Scriptorium",
+    "Économie médiévale"
+  ]
+}

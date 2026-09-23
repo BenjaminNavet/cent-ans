@@ -33,7 +33,8 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// (experience, skills, traits, marriage, children, governors, prestige...).
 /// `4`: M5 diplomacy & religion (claims, embargoes, vassals, opinion
 /// modifiers, war scores, offers, papal favour, schism, heresy), M6
-/// technologies and M7 pending interactive battles.
+/// technologies (research in progress, progress, banked progress) and M7
+/// pending interactive battles.
 /// [`CampaignState::load_json`] refuses any other version.
 pub const STATE_VERSION: u32 = 4;
 
@@ -322,6 +323,19 @@ pub struct FactionState {
     /// Last turn this faction declared a war (AI throttling).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_war_declared: Option<u32>,
+    // ----- M6: research (spec § 2, `research.rs`) --------------------------
+    /// Technology being researched, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub research: Option<TechnologyId>,
+    /// Points accumulated towards `research`.
+    #[serde(default)]
+    pub research_progress: u32,
+    /// Points produced during the last resolved turn.
+    #[serde(default)]
+    pub research_points_last_turn: u32,
+    /// Progress kept for abandoned research (switching back resumes it).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub research_banked: BTreeMap<TechnologyId, u32>,
 }
 
 fn default_faction_loyalty() -> u8 {

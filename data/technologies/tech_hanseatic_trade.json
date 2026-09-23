@@ -1,0 +1,28 @@
+{
+  "id": "tech_hanseatic_trade",
+  "name": {
+    "display": "Commerce hanséatique"
+  },
+  "branch": "civil",
+  "tier": 2,
+  "cost": 220,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1356",
+    "note": "Première diète générale de la Hanse à Lübeck (1356) ; comptoirs de Bruges et de Londres."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 8,
+      "mode": "percent"
+    }
+  ],
+  "description": "Ligue des villes marchandes de la Baltique et de la mer du Nord : draps, harengs, bois, sel.",
+  "sources": [
+    "Hanse",
+    "Bruges",
+    "Économie médiévale"
+  ]
+}

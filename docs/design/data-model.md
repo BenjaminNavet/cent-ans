@@ -14,8 +14,8 @@ data/
   factions/           fac_*.json      15 factions (3 jouables)
   provinces/          prov_*.json     8 provinces d'échantillon (carte complète : pipeline géo, M1)
   unit_types/         unit_*.json     13 unités de bataille
-  buildings/          bld_*.json      25 bâtiments en 6 catégories
-  technologies/       tech_*.json     10 militaires + 12 civiles
+  buildings/          bld_*.json      26 bâtiments en 6 catégories (M6 : + bld_scriptorium)
+  technologies/       tech_*.json     16 militaires + 17 civiles (M6)
   characters/         chr_*.json      50 personnages réels de 1337-1346
   resources/          res_*.json      9 ressources
   religions/          rel_*.json      6 religions / obédiences / hérésies
@@ -64,7 +64,7 @@ Cultures utilisées dans les données de départ : `cul_french`, `cul_english`, 
 | `uncertain_integer` | même principe pour un entier estimé. |
 | `percent` | entier 0-100 (jauges de population). |
 | `social_class` | `peasants`, `burghers`, `clergy`, `nobility`. |
-| `effect` | modificateur `{effect, class?, unit_category?, value, mode: add|percent}` ; liste fermée d'effets (`wealth`, `health`, `unrest`, `goods_satisfaction`, `tax_income`, `trade_income`, `research_civil`, `army_armor`, `fortification_level`, `siege_resistance`, `piety`...). |
+| `effect` | modificateur `{effect, class?, unit_category?, value, mode: add|percent}` ; liste fermée d'effets (`wealth`, `health`, `unrest`, `goods_satisfaction`, `tax_income`, `trade_income`, `research_civil`, `army_armor`, `fortification_level`, `siege_resistance`, `piety`... ; M6 : `research_points`, `army_melee`). |
 | `cost` | `{money, resources?}` en livres tournois + ressources. |
 | `sources` | liste de titres de pages Wikipédia ou d'ouvrages. |
 
@@ -127,6 +127,15 @@ enceinte de pierre → château → boulevard d'artillerie), `cost`, `build_time
 `unlocks.buildings`, `effects`. Exemples de chaînes : poudre noire → bombardes → artillerie de
 campagne → compagnies d'ordonnance ; moulins à eau → moulins à vent ; fiscalité royale →
 comptabilité ; réforme hospitalière → hygiène urbaine.
+
+M6 : 33 technologies (16 militaires, 17 civiles, rangs 1-5), chacune datée (`historical_year`) et
+sourcée ; ajouts : pavois, brigandine, bâtons à feu → exercice des couleuvriniers, compagnies
+d'ordonnance (1445) → armée permanente (`tech_standing_companies`), francs-archers (1448),
+comptabilité en partie double, lettres de change, quarantaine (Raguse 1377), commerce hanséatique,
+gothique flamboyant. Les effets de recherche sont unifiés en `research_points` (points par tour) :
+abbaye 0,25, cathédrale 0,25, maison des métiers 0,5, scriptorium (nouveau) 1, université 3 ;
+technologies : universités 2, poudre 1, moulins à papier 2, imprimerie 5. `research_civil` /
+`research_military` restent dans le schéma pour les traits et compétences (sans effet).
 
 ### 4.6 Personnage (`character.schema.json`)
 `name`, `epithet`, `sex`, `house`, `faction`, `role` (ruler, consort, heir, commander, noble,
@@ -268,7 +277,7 @@ le chargement, ce qui rend visible toute dérive entre `data/schemas/` et le cod
 | Module | Types |
 |---|---|
 | `ids` | Newtypes `FactionId`, `ProvinceId`, `UnitTypeId`, `BuildingId`, `TechnologyId`, `CharacterId`, `ResourceId`, `ReligionId`, `CultureId`, `TraitId`, `SkillId`, `NamesId`, `SeaZoneId`. La désérialisation valide le préfixe et l'alphabet `[a-z0-9_]` (`common.schema.json`) : un `prov_` placé dans un champ `owner` est refusé. |
-| `common` | `LocalizedName`, `HistoricalDate` (`value`, `uncertain`, `place`, `note` ; `year()`), `UncertainInteger`, `Percent`, `SocialClass` (+ `ALL`, `key()`), `UnitCategory`, `EffectKind` (liste fermée, étendue M4 : `SiegeSpeed`, `ConstructionSpeed`, `Diplomacy`, `Intrigue`, `Fertility`, `BattleCharge`, `BattleRanged`, `BattleDefense`), `EffectMode`, `Effect`, `Cost` (`resources: BTreeMap<ResourceId, u32>`), `Sources`. |
+| `common` | `LocalizedName`, `HistoricalDate` (`value`, `uncertain`, `place`, `note` ; `year()`), `UncertainInteger`, `Percent`, `SocialClass` (+ `ALL`, `key()`), `UnitCategory`, `EffectKind` (liste fermée, étendue M4 : `SiegeSpeed`, `ConstructionSpeed`, `Diplomacy`, `Intrigue`, `Fertility`, `BattleCharge`, `BattleRanged`, `BattleDefense` ; M6 : `ArmyMelee`, `ResearchPoints`), `EffectMode`, `Effect`, `Cost` (`resources: BTreeMap<ResourceId, u32>`), `Sources`. |
 | `entities::faction` | `Faction`, `Government`, `SuccessionLaw`, `Heraldry`, `Relation`, `RelationStatus`, `AiPersonality`. |
 | `entities::province` | `Province`, `Terrain`, `Climate`, `CapitalCity`, `Population`, `PopulationClasses` (`get(class)`, `iter()`, `total()`), `PopulationClass`, `ProvinceGeo` (`geo` optionnel : `capital_lonlat`, `seed_lonlat`, `voronoi_weight?`, écrit par `tools/geo`). |
 | `entities::unit_type` | `UnitType`, `UnitStats`, `Ability`. |
@@ -370,3 +379,31 @@ dictionnaire vide. Vérification headless : `core/checks/campaign_sim_check.gd`.
 | `GameDataStore.get_trait(id)`, `get_skill(id)` | définitions statiques |
 
 Événements M4 : `birth`, `death`, `succession`, `regency`, `no_heir`, `trait_acquired`.
+
+### 7.6 `CampaignSim` : technologies (M6)
+
+Règles : `core/crates/sim-campaign/src/research.rs` (spec `docs/design/m6-technologies.md`).
+`FactionState` gagne `research` (tech en cours), `research_progress`, `research_points_last_turn` et
+`research_banked` (progression conservée des recherches abandonnées) ; `STATE_VERSION` = 4.
+
+| Méthode | Retour |
+|---|---|
+| `get_tech_tree(faction)` | `[{id, name, branch: "military"\|"civil", tier, cost, effective_cost, prerequisites[], unlocks{units[], buildings[]}, unlock_names{units[], buildings[]}, effects[{kind, value, mode, unit_category}], description, historical_year, historical_uncertain, state: "known"\|"available"\|"locked"\|"researching", progress}]`, trié par branche, rang, id. `progress` = progression en cours ou mise de côté. |
+| `get_research(faction)` | `{technology, name, progress, cost, points_per_turn, turns_left}` ; vide si aucune recherche. `cost` = coût effectif ; `turns_left` = -1 si aucun point. |
+| `get_research_points(faction)` | points de recherche par tour (affichés même sans recherche) |
+| ordre | `research{technology}` via `submit_order` : refusé si inconnue, déjà acquise ou prérequis manquant ; changer de recherche met la progression de côté |
+
+- Points par tour = 5 + Σ effets `research_points` des bâtiments des provinces **possédées** + Σ ceux des
+  technologies acquises + ⌈gouvernance du dirigeant / 2⌉ ; versés en fin de tour juste après
+  l'économie. France 1337 ≈ 20 points/tour.
+- Coût effectif = `cost` × 1,25 (arrondi au supérieur) si `historical_year` > année courante + 20.
+- Achèvement : tech ajoutée, recherche vidée (surplus perdu), événement `technology_researched`
+  (toutes factions, texte « X maîtrise une nouvelle technologie : Y. »).
+- Effets : `tax_income`, `trade_income` (revenu), `health`, `growth`, `unrest` (population) de toutes
+  les techs acquises s'ajoutent à ceux des bâtiments de chaque province **contrôlée** ;
+  `army_morale`, `army_melee`, `army_ranged`, `army_armor` (mode `add`, par `unit_category`, toutes
+  catégories si absent) s'ajoutent aux statistiques de chaque unité dans la bataille automatique.
+  Déblocages : `required_technology` des unités et bâtiments (déjà vérifié par le recrutement et la
+  construction) ; `tests/m6.rs` vérifie que chaque `unlocks.*` correspond.
+- IA minimale : sans recherche en cours, choisit la tech disponible la moins chère de la branche où
+  elle en possède le moins.

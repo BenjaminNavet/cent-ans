@@ -7,7 +7,7 @@ use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
     ai_minimal, buildings, characters, diplomacy, dynasty, economy, movement, population, religion,
-    siege,
+    research, siege,
 };
 
 impl CampaignState {
@@ -49,6 +49,7 @@ impl CampaignState {
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
+        research::resolve_research(self, data, &mut events);
         economy::resolve_attrition(self, data, &mut events);
         economy::resolve_decay(self);
 

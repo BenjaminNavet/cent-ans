@@ -1,0 +1,86 @@
+[gd_scene load_steps=4 format=3 uid="uid://cent_ans_tech_panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/tech_panel.gd" id="1_panel"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/tech_tree_view.gd" id="3_tree"]
+
+[node name="TechPanel" type="PanelContainer"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -650.0
+offset_top = -300.0
+offset_right = 650.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_panel")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="TechTitle" type="Label" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Technologies"
+
+[node name="TechCloseButton" type="Button" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="ResearchStatus" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Aucune recherche en cours."
+
+[node name="ResearchStatusBar" type="ProgressBar" parent="VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+show_percentage = false
+
+[node name="Legend" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Vert : acquise · Or : en cours · Clair : disponible (clic pour rechercher) · Gris : verrouillée. Survolez une technologie pour ses effets et son année historique."
+
+[node name="TechTabs" type="TabContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="MilitaryScroll" type="ScrollContainer" parent="VBox/TechTabs"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="MilitaryTree" type="Control" parent="VBox/TechTabs/MilitaryScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("3_tree")
+
+[node name="CivilScroll" type="ScrollContainer" parent="VBox/TechTabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="CivilTree" type="Control" parent="VBox/TechTabs/CivilScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("3_tree")

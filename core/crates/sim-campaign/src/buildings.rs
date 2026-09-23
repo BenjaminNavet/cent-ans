@@ -236,15 +236,15 @@ impl CampaignState {
             .get(province)
             .map(|p| effects_of(data, &p.buildings))
             .unwrap_or_default();
-        if let Some(governor) = self
-            .characters
-            .iter()
-            .find(|(_, c)| c.alive && c.governor_of.as_ref() == Some(province))
-            .map(|(id, _)| id.clone())
-        {
-            totals.merge(&crate::skills::character_effects(self, data, &governor));
-        }
+        totals.merge(&self.governor_effects(data, province));
         totals
+    }
+
+    /// Trait/skill effects of the living governor of `province` (M4), or none.
+    pub fn governor_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
+        self.province_governor(province)
+            .map(|governor| crate::skills::character_effects(self, data, governor))
+            .unwrap_or_default()
     }
 
     /// Fortification level used by sieges: the province's base level (data)

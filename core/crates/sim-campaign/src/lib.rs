@@ -44,6 +44,7 @@ pub mod movement;
 pub mod orders;
 pub mod population;
 pub mod religion;
+pub mod research;
 pub mod rng;
 pub mod save;
 pub mod setup_1337;
@@ -67,6 +68,7 @@ pub use dynasty::{
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
 pub use orders::{Order, OrderError, RecruitOption};
+pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::CampaignError;
 pub use skills::LearnSkillError;
