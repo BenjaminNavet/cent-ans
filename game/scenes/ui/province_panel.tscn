@@ -12,13 +12,14 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -400.0
-offset_top = -640.0
+offset_top = -820.0
 offset_right = -16.0
 offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
 theme = ExtResource("2_theme")
 script = ExtResource("1_panel")
+clip_contents = true
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -135,13 +136,16 @@ layout_mode = 2
 
 [node name="Tabs" type="TabContainer" parent="VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 340)
+custom_minimum_size = Vector2(0, 500)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Garnison" type="ScrollContainer" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 500)
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
+clip_contents = true
 
 [node name="GarrisonBox" type="VBoxContainer" parent="VBox/Tabs/Garnison"]
 layout_mode = 2
@@ -196,8 +200,11 @@ layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="Ville" type="ScrollContainer" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 500)
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
+clip_contents = true
 
 [node name="VilleBox" type="VBoxContainer" parent="VBox/Tabs/Ville"]
 layout_mode = 2
