@@ -1,0 +1,95 @@
+{
+  "id": "prov_ferrara",
+  "name": {
+    "display": "Ferrare et Mantoue",
+    "local": "Ferara",
+    "local_language": "vénitien"
+  },
+  "region": "italie_nord",
+  "terrain": "marsh",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pô",
+    "Mincio",
+    "Reno"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ferrare",
+      "local": "Ferara",
+      "local_language": "vénitien"
+    },
+    "lat": 44.8381,
+    "lon": 11.6198
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.6198,
+      44.8381
+    ],
+    "seed_lonlat": [
+      11.2,
+      45.0
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_papacy",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Ferrare compte environ 15 000 habitants, Mantoue 15 000.",
+    "classes": {
+      "peasants": {
+        "count": 165061,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 37800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1889,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3500,
+  "description": "Ferrare, fief pontifical tenu par les Este (Obizzo III, vicaire du pape depuis 1332 ; faction à créer) ; Mantoue des Gonzague (Luigi Ier, vicaire impérial). Delta du Pô, valli de pêche.",
+  "sources": [
+    "Maison d'Este",
+    "Obizzo III d'Este",
+    "Gonzague"
+  ]
+}

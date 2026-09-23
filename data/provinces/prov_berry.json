@@ -1,0 +1,97 @@
+{
+  "id": "prov_berry",
+  "name": {
+    "display": "Berry",
+    "local": "Berri",
+    "local_language": "ancien français"
+  },
+  "region": "france_centre",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Cher",
+    "Indre",
+    "Yèvre"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bourges",
+      "local": "Bourges",
+      "local_language": "ancien français"
+    },
+    "lat": 47.081,
+    "lon": 2.3988
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.3988,
+      47.081
+    ],
+    "seed_lonlat": [
+      2.2,
+      47.0
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bourges compte environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 273920,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 35200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Vicomté de Bourges royale depuis 1101 ; le duché de Berry ne sera créé qu'en 1360. Champagne berrichonne, moutons, forges du Boischaut.",
+  "sources": [
+    "Berry (province)",
+    "Bourges"
+  ]
+}

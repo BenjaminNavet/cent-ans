@@ -1,0 +1,95 @@
+{
+  "id": "prov_bearn",
+  "name": {
+    "display": "Béarn et Bigorre",
+    "local": "Bearn",
+    "local_language": "gascon"
+  },
+  "region": "aquitaine",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Gave de Pau",
+    "Gave d'Oloron",
+    "Adour"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wool",
+    "res_iron",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Orthez",
+      "local": "Ortès",
+      "local_language": "gascon"
+    },
+    "lat": 43.4884,
+    "lon": -0.7712
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.7712,
+      43.4884
+    ],
+    "seed_lonlat": [
+      -0.3,
+      43.15
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Orthez, cour de Foix-Béarn, compte environ 4 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 124040,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 11200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1260,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Vicomté de Béarn (tenue en alleu selon Gaston II de Foix-Béarn, faction à créer) et comté de Foix, alliés du roi de France ; comté de Bigorre disputé, en garde royale. Vassalité contestée entre France et Angleterre.",
+  "sources": [
+    "Vicomté de Béarn",
+    "Gaston II de Foix-Béarn",
+    "Comté de Bigorre"
+  ]
+}

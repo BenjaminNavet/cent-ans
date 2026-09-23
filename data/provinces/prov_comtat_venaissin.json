@@ -1,0 +1,104 @@
+{
+  "id": "prov_comtat_venaissin",
+  "name": {
+    "display": "Comtat Venaissin et Avignon",
+    "local": "Comtat Venaicin",
+    "local_language": "occitan"
+  },
+  "region": "provence_alpes",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Rhône",
+    "Durance",
+    "Ouvèze"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Avignon",
+      "local": "Avinhon",
+      "local_language": "occitan"
+    },
+    "lat": 43.9493,
+    "lon": 4.8055
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.8055,
+      43.9493
+    ],
+    "seed_lonlat": [
+      5.05,
+      44.1
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_papacy",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Avignon compte environ 30 000 habitants avec la Curie.",
+    "classes": {
+      "peasants": {
+        "count": 67761,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 38500,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 989,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_university"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3000,
+  "description": "Comtat Venaissin, terre pontificale depuis 1274. Avignon même relève du comte de Provence (Robert de Naples) jusqu'à son achat par Clément VI en 1348, mais la cour de Benoît XII y réside et y bâtit le Palais des papes.",
+  "sources": [
+    "Comtat Venaissin",
+    "Papauté d'Avignon",
+    "Palais des papes d'Avignon"
+  ]
+}

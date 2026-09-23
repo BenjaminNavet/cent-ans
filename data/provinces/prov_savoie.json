@@ -1,0 +1,100 @@
+{
+  "id": "prov_savoie",
+  "name": {
+    "display": "Savoie",
+    "local": "Savoè",
+    "local_language": "franco-provençal"
+  },
+  "region": "provence_alpes",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Isère",
+    "Arc",
+    "Rhône"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wool",
+    "res_salt",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Chambéry",
+      "local": "Chambèri",
+      "local_language": "franco-provençal"
+    },
+    "lat": 45.5646,
+    "lon": 5.9178
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.9178,
+      45.5646
+    ],
+    "seed_lonlat": [
+      6.4,
+      45.85
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_savoy",
+  "overlord": "fac_empire",
+  "holder": "chr_aymon_de_savoie",
+  "culture": "cul_savoyard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Chambéry compte environ 4 000 habitants, Genève 6 000.",
+    "classes": {
+      "peasants": {
+        "count": 280320,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 28800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Comté de Savoie, Bresse, Bugey, Genevois et Valais (évêché de Sion) : passes du Mont-Cenis et du Grand-Saint-Bernard. Aymon le Pacifique en guerre contre le Dauphin.",
+  "sources": [
+    "Comté de Savoie",
+    "Aymon de Savoie",
+    "Chambéry"
+  ]
+}

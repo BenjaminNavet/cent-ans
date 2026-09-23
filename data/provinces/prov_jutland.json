@@ -1,0 +1,105 @@
+{
+  "id": "prov_jutland",
+  "name": {
+    "display": "Jutland",
+    "local": "Jylland",
+    "local_language": "vieux danois"
+  },
+  "region": "scandinavie",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Gudenå"
+  ],
+  "coastal": true,
+  "ports": [
+    "Ribe",
+    "Aarhus",
+    "Aalborg"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ribe",
+      "local": "Ripæ",
+      "local_language": "vieux danois"
+    },
+    "lat": 55.33,
+    "lon": 8.7628
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.7628,
+      55.33
+    ],
+    "seed_lonlat": [
+      9.3,
+      56.2
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_empire",
+  "culture": "cul_danish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Ribe compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 283520,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 25600,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 4500,
+  "description": "Danemark sans roi (interrègne 1332-1340) : le Jutland est engagé au comte Gérard III de Holstein (faction Danemark/Holstein à créer). Révolte paysanne en gestation.",
+  "sources": [
+    "Interrègne danois (1332-1340)",
+    "Gérard III de Holstein",
+    "Ribe"
+  ]
+}

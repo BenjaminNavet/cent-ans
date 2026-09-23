@@ -1,0 +1,98 @@
+{
+  "id": "prov_navarra",
+  "name": {
+    "display": "Navarre",
+    "local": "Nafarroa",
+    "local_language": "basque"
+  },
+  "region": "iberie_nord",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Èbre",
+    "Arga",
+    "Ega"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pampelune",
+      "local": "Iruñea",
+      "local_language": "basque"
+    },
+    "lat": 42.8125,
+    "lon": -1.6432
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.6432,
+      42.8125
+    ],
+    "seed_lonlat": [
+      -1.6,
+      42.65
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_navarre",
+  "holder": "chr_jeanne_ii_de_navarre",
+  "culture": "cul_navarrese",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Pampelune compte environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 93061,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 13200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 989,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Royaume de Navarre de Jeanne II et Philippe d'Évreux, indépendant depuis 1328 après le rejet des Valois ; Pampelune, Estella, Tudela ; cols de Roncevaux, chemin de Saint-Jacques.",
+  "sources": [
+    "Royaume de Navarre",
+    "Jeanne II de Navarre",
+    "Pampelune"
+  ]
+}

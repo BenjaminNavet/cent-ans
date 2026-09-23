@@ -1,0 +1,108 @@
+{
+  "id": "prov_bologna",
+  "name": {
+    "display": "Bologne et Romagne",
+    "local": "Bulåggna",
+    "local_language": "lombard"
+  },
+  "region": "italie_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Reno",
+    "Savio",
+    "Ronco"
+  ],
+  "coastal": true,
+  "ports": [
+    "Ravenne",
+    "Rimini"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_cloth",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bologne",
+      "local": "Bulåggna",
+      "local_language": "lombard"
+    },
+    "lat": 44.4949,
+    "lon": 11.3426
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.3426,
+      44.4949
+    ],
+    "seed_lonlat": [
+      11.8,
+      44.3
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_papacy",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bologne compte environ 40 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 223800,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 66000,
+        "unrest": 20,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2700,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_university"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Bologne, terre d'Église sous la seigneurie de Taddeo Pepoli (1337) après la révolte contre le légat Bertrand du Pouget (1334) ; Romagne pontificale morcelée entre seigneurs (Polenta à Ravenne, Malatesta à Rimini). Université de droit.",
+  "sources": [
+    "Taddeo Pepoli",
+    "Bologne",
+    "Romagne"
+  ]
+}

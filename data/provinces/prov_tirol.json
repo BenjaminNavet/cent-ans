@@ -1,0 +1,96 @@
+{
+  "id": "prov_tirol",
+  "name": {
+    "display": "Tyrol et Trente",
+    "local": "Tirol",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_sud",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Inn",
+    "Adige",
+    "Eisack"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_salt",
+    "res_iron",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Innsbruck",
+      "local": "Innsbruck",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 47.2692,
+    "lon": 11.4041
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.4041,
+      47.2692
+    ],
+    "seed_lonlat": [
+      11.2,
+      46.9
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bolzano et Trente comptent chacune environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 194921,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 17600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comté de Tyrol tenu par Marguerite Maultasch et Jean-Henri de Luxembourg (répudié en 1341) ; évêchés de Brixen et de Trente. Col du Brenner, sel de Hall, argent de Schwaz.",
+  "sources": [
+    "Comté de Tyrol",
+    "Marguerite de Tyrol",
+    "Principauté épiscopale de Trente"
+  ]
+}

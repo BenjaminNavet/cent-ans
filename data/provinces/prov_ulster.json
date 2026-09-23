@@ -1,0 +1,106 @@
+{
+  "id": "prov_ulster",
+  "name": {
+    "display": "Ulster et Connacht",
+    "local": "Ulaidh",
+    "local_language": "gaélique irlandais"
+  },
+  "region": "irlande",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Bann",
+    "Shannon",
+    "Erne",
+    "Foyle"
+  ],
+  "coastal": true,
+  "ports": [
+    "Carrickfergus",
+    "Galway",
+    "Sligo"
+  ],
+  "sea_zones": [
+    "sea_irish_sea",
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Carrickfergus",
+      "local": "Carraig Fhearghais",
+      "local_language": "gaélique irlandais"
+    },
+    "lat": 54.7147,
+    "lon": -5.806
+  },
+  "geo": {
+    "capital_lonlat": [
+      -5.806,
+      54.7147
+    ],
+    "seed_lonlat": [
+      -7.5,
+      54.3
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_england",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Aucune ville ne dépasse 3 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 201521,
+        "unrest": 40,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 11000,
+        "unrest": 40,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 40,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 4000,
+  "description": "Comté d'Ulster en déshérence depuis le meurtre de Guillaume de Burgh (1333) ; Connacht aux Burke gaélisés et aux Ó Conchobhair ; Ó Néill de Tír Eoghain, Ó Domhnaill. Autorité anglaise réduite à Carrickfergus et Galway (faction gaélique à créer).",
+  "sources": [
+    "Comté d'Ulster",
+    "Connacht",
+    "Ó Néill"
+  ]
+}

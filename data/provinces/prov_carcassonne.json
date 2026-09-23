@@ -1,0 +1,109 @@
+{
+  "id": "prov_carcassonne",
+  "name": {
+    "display": "Carcassès et Narbonnais",
+    "local": "Carcassés",
+    "local_language": "occitan"
+  },
+  "region": "languedoc",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Aude",
+    "Orb",
+    "Hérault"
+  ],
+  "coastal": true,
+  "ports": [
+    "Narbonne",
+    "Agde"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_salt",
+    "res_cloth",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Carcassonne",
+      "local": "Carcassona",
+      "local_language": "occitan"
+    },
+    "lat": 43.213,
+    "lon": 2.3508
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.3508,
+      43.213
+    ],
+    "seed_lonlat": [
+      2.7,
+      43.3
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Narbonne compte environ 25 000 habitants, Carcassonne 10 000.",
+    "classes": {
+      "peasants": {
+        "count": 300961,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 46800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3239,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 5000,
+  "description": "Sénéchaussée de Carcassonne et Béziers : Cité de Carcassonne, Narbonne (archevêché, port ensablé), Béziers. Draperies, vignes, salines.",
+  "sources": [
+    "Sénéchaussée de Carcassonne",
+    "Narbonne",
+    "Carcassonne"
+  ]
+}

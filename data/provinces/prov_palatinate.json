@@ -1,0 +1,98 @@
+{
+  "id": "prov_palatinate",
+  "name": {
+    "display": "Palatinat du Rhin",
+    "local": "Pfalz",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Neckar"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Heidelberg",
+      "local": "Heidelberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 49.3988,
+    "lon": 8.6724
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.6724,
+      49.3988
+    ],
+    "seed_lonlat": [
+      8.3,
+      49.4
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Worms et Spire comptent chacune environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 219960,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 31200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comté palatin du Rhin, tenu par les Wittelsbach palatins (Rodolphe II et Robert Ier), neveux rivaux de l'empereur Louis IV (traité de Pavie, 1329). Worms et Spire, cités impériales.",
+  "sources": [
+    "Palatinat du Rhin",
+    "Traité de Pavie (1329)",
+    "Heidelberg"
+  ]
+}

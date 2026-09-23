@@ -1,0 +1,100 @@
+{
+  "id": "prov_hainaut",
+  "name": {
+    "display": "Hainaut",
+    "local": "Hainau",
+    "local_language": "ancien français"
+  },
+  "region": "pays_bas",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Escaut",
+    "Haine",
+    "Sambre"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_cloth",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mons",
+      "local": "Mons",
+      "local_language": "ancien français"
+    },
+    "lat": 50.4542,
+    "lon": 3.9522
+  },
+  "geo": {
+    "capital_lonlat": [
+      3.9522,
+      50.4542
+    ],
+    "seed_lonlat": [
+      3.9,
+      50.4
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Valenciennes compte environ 20 000 habitants, Mons 8 000.",
+    "classes": {
+      "peasants": {
+        "count": 235800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 54000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2700,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Comté de Hainaut tenu par Guillaume II d'Avesnes (faction Hainaut-Hollande à créer), beau-frère d'Édouard III ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
+  "sources": [
+    "Comté de Hainaut",
+    "Guillaume II de Hainaut",
+    "Valenciennes"
+  ]
+}

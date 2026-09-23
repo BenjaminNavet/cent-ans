@@ -1,0 +1,100 @@
+{
+  "id": "prov_lyonnais",
+  "name": {
+    "display": "Lyonnais et Forez",
+    "local": "Lyonnois",
+    "local_language": "ancien français"
+  },
+  "region": "france_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Rhône",
+    "Saône",
+    "Loire"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lyon",
+      "local": "Lion",
+      "local_language": "franco-provençal"
+    },
+    "lat": 45.764,
+    "lon": 4.8357
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.8357,
+      45.764
+    ],
+    "seed_lonlat": [
+      4.5,
+      45.7
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Lyon compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 269280,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 49500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2970,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Lyon, rattachée au royaume en 1312 (traité de Vienne) ; comté de Forez (Guy VII, faction à créer) et sire de Beaujeu en fief du roi. Carrefour Rhône-Saône.",
+  "sources": [
+    "Lyonnais",
+    "Comté de Forez",
+    "Lyon"
+  ]
+}

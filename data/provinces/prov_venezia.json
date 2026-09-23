@@ -1,0 +1,113 @@
+{
+  "id": "prov_venezia",
+  "name": {
+    "display": "Vénétie et Frioul",
+    "local": "Venexia",
+    "local_language": "vénitien"
+  },
+  "region": "italie_nord",
+  "terrain": "marsh",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Piave",
+    "Brenta",
+    "Tagliamento",
+    "Livenza"
+  ],
+  "coastal": true,
+  "ports": [
+    "Venise",
+    "Chioggia",
+    "Trieste"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Venise",
+      "local": "Venexia",
+      "local_language": "vénitien"
+    },
+    "lat": 45.4408,
+    "lon": 12.3155
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.3155,
+      45.4408
+    ],
+    "seed_lonlat": [
+      12.4,
+      45.75
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_empire",
+  "culture": "cul_venetian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Venise compte environ 100 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 234081,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 133000,
+        "unrest": 5,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 5000,
+  "description": "République de Venise (doge Francesco Dandolo ; faction à créer, indépendante de l'Empire malgré le substitut fac_empire), qui s'empare de Trévise et Padoue (1337) ; patriarcat d'Aquilée (Udine) au nord-est. Sel, verre de Murano, arsenal, commerce d'Orient.",
+  "sources": [
+    "République de Venise",
+    "Francesco Dandolo",
+    "Patriarcat d'Aquilée"
+  ]
+}

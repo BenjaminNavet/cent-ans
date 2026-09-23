@@ -1,0 +1,101 @@
+{
+  "id": "prov_nivernais",
+  "name": {
+    "display": "Nivernais et Auxerrois",
+    "local": "Nevers",
+    "local_language": "ancien français"
+  },
+  "region": "france_centre",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Loire",
+    "Nièvre",
+    "Yonne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wine",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nevers",
+      "local": "Nevers",
+      "local_language": "ancien français"
+    },
+    "lat": 46.9896,
+    "lon": 3.158
+  },
+  "geo": {
+    "capital_lonlat": [
+      3.158,
+      46.9896
+    ],
+    "seed_lonlat": [
+      3.4,
+      47.3
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_flanders",
+  "overlord": "fac_france",
+  "holder": "chr_louis_de_nevers",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Nevers et Auxerre comptent chacune 6 000 à 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 225160,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 26000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comté de Nevers (et Rethel) tenu par Louis Ier de Nevers, comte de Flandre. Le comté d'Auxerre (Jean II de Chalon-Auxerre, faction à créer) et l'évêché d'Auxerre y sont rattachés. Bois du Morvan flottés vers Paris.",
+  "sources": [
+    "Comté de Nevers",
+    "Comté d'Auxerre",
+    "Louis Ier de Flandre"
+  ]
+}

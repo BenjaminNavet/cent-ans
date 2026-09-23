@@ -1,0 +1,108 @@
+{
+  "id": "prov_milano",
+  "name": {
+    "display": "Milanais",
+    "local": "Milan",
+    "local_language": "lombard"
+  },
+  "region": "italie_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pô",
+    "Tessin",
+    "Adda",
+    "Oglio"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_iron",
+    "res_cloth",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Milan",
+      "local": "Milan",
+      "local_language": "lombard"
+    },
+    "lat": 45.4642,
+    "lon": 9.19
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.19,
+      45.4642
+    ],
+    "seed_lonlat": [
+      9.4,
+      45.5
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_milan",
+  "overlord": "fac_empire",
+  "holder": "chr_azzone_visconti",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Milan compte environ 100 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 608601,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 212500,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 21250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 7649,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_forge",
+    "bld_armoury"
+  ],
+  "fortification_level": 3,
+  "base_supply": 9000,
+  "description": "Seigneurie d'Azzone Visconti, vicaire impérial : Milan, Côme, Bergame, Crémone, Lodi, Pavie ; Brescia prise aux Scaligeri en 1337. Armuriers milanais, canaux d'irrigation.",
+  "sources": [
+    "Azzone Visconti",
+    "Seigneurie de Milan",
+    "Milan"
+  ]
+}

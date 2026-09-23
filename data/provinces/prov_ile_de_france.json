@@ -31,6 +31,17 @@
     "lat": 48.8566,
     "lon": 2.3522
   },
+  "geo": {
+    "capital_lonlat": [
+      2.3522,
+      48.8566
+    ],
+    "seed_lonlat": [
+      2.4,
+      48.75
+    ],
+    "voronoi_weight": 0.9
+  },
   "owner": "fac_france",
   "culture": "cul_french",
   "religion": "rel_catholic",
@@ -39,50 +50,52 @@
     "note": "Paris compte 200 000 à 250 000 habitants vers 1330, première ville d'Occident ; totaux régionaux estimés.",
     "classes": {
       "peasants": {
-        "count": 420000,
+        "count": 423176,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 180000,
-        "unrest": 15,
+        "count": 181540,
+        "unrest": 10,
         "health": 45,
-        "wealth": 65,
-        "goods_satisfaction": 70
+        "wealth": 70,
+        "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 20000,
+        "count": 15650,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 6000,
+        "count": 5634,
         "unrest": 10,
         "health": 60,
-        "wealth": 80,
-        "goods_satisfaction": 80
+        "wealth": 70,
+        "goods_satisfaction": 75
       }
     }
   },
   "buildings": [
     "bld_market",
-    "bld_fair",
-    "bld_water_mill",
     "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
     "bld_abbey",
     "bld_cathedral",
-    "bld_university",
+    "bld_fair",
+    "bld_guild_hall",
     "bld_hotel_dieu",
     "bld_stone_walls",
+    "bld_castle",
     "bld_muster_field",
-    "bld_armoury"
+    "bld_stables"
   ],
   "fortification_level": 3,
-  "base_supply": 8000,
+  "base_supply": 7000,
   "description": "Domaine royal autour de Paris : le Louvre, Notre-Dame, l'université, l'Hôtel-Dieu, Saint-Denis et le Lendit. Cœur politique et fiscal du royaume.",
   "sources": [
     "Paris au Moyen Âge",

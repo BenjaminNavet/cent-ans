@@ -1,0 +1,101 @@
+{
+  "id": "prov_mainz",
+  "name": {
+    "display": "Mayence et Hesse",
+    "local": "Mainz",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Main",
+    "Lahn",
+    "Fulda"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mayence",
+      "local": "Mainz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 49.9929,
+    "lon": 8.2711
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.2711,
+      49.9929
+    ],
+    "seed_lonlat": [
+      8.8,
+      50.4
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Mayence compte environ 15 000 habitants, Francfort 10 000.",
+    "classes": {
+      "peasants": {
+        "count": 310081,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 57000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Électorat de Mayence (archevêque Henri de Virnebourg), Francfort (cité impériale, foires) et landgraviat de Hesse (Henri II). Chancellerie de l'Empire.",
+  "sources": [
+    "Électorat de Mayence",
+    "Landgraviat de Hesse",
+    "Francfort-sur-le-Main"
+  ]
+}

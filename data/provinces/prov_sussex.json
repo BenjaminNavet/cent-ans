@@ -1,0 +1,106 @@
+{
+  "id": "prov_sussex",
+  "name": {
+    "display": "Sussex et Surrey",
+    "local": "Sussex",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Arun",
+    "Ouse",
+    "Wey"
+  ],
+  "coastal": true,
+  "ports": [
+    "Hastings",
+    "Rye",
+    "Winchelsea",
+    "Shoreham"
+  ],
+  "sea_zones": [
+    "sea_channel"
+  ],
+  "resources": [
+    "res_iron",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Chichester",
+      "local": "Chichestre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 50.8365,
+    "lon": -0.7792
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.7792,
+      50.8365
+    ],
+    "seed_lonlat": [
+      -0.3,
+      51.0
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Aucune ville ne dépasse 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 138560,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1440,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3500,
+  "description": "Sussex (rapes de Lewes, Arundel, Pevensey) et Surrey : forêt du Weald, forges, Cinque Ports de Hastings, Rye et Winchelsea. Comte d'Arundel Richard FitzAlan.",
+  "sources": [
+    "Sussex",
+    "Weald",
+    "Cinque Ports"
+  ]
+}

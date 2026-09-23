@@ -1,0 +1,105 @@
+{
+  "id": "prov_sardegna",
+  "name": {
+    "display": "Sardaigne",
+    "local": "Sardigna",
+    "local_language": "sarde"
+  },
+  "region": "italie_sud",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Tirso",
+    "Flumendosa"
+  ],
+  "coastal": true,
+  "ports": [
+    "Cagliari",
+    "Alghero",
+    "Sassari"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cagliari",
+      "local": "Casteddu",
+      "local_language": "sarde"
+    },
+    "lat": 39.2238,
+    "lon": 9.1217
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.1217,
+      39.2238
+    ],
+    "seed_lonlat": [
+      9.0,
+      40.1
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_aragon",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Cagliari compte environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 230360,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 20800,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 4000,
+  "description": "Royaume de Sardaigne conquis sur Pise en 1323-1326 par l'infant Alphonse ; le judicat d'Arborea (Hugues II, à Oristano) reste vassal turbulent. Sel, argent d'Iglesias, révoltes sardes.",
+  "sources": [
+    "Royaume de Sardaigne",
+    "Judicat d'Arborea",
+    "Cagliari"
+  ]
+}

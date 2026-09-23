@@ -1,0 +1,105 @@
+{
+  "id": "prov_lazio",
+  "name": {
+    "display": "Latium et Patrimoine",
+    "local": "Roma",
+    "local_language": "latin"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Tibre",
+    "Aniene"
+  ],
+  "coastal": true,
+  "ports": [
+    "Civitavecchia",
+    "Ostie"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Rome",
+      "local": "Roma",
+      "local_language": "latin"
+    },
+    "lat": 41.9028,
+    "lon": 12.4964
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.4964,
+      41.9028
+    ],
+    "seed_lonlat": [
+      12.6,
+      42.2
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_papacy",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Rome compte environ 25 000 habitants, ombre de sa grandeur.",
+    "classes": {
+      "peasants": {
+        "count": 321481,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 45600,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Rome sans pape, livrée aux luttes des Colonna et des Orsini ; Patrimoine de saint Pierre en Tuscia (Viterbe) et Campagne. Cola di Rienzo y prendra le pouvoir en 1347.",
+  "sources": [
+    "Rome au Moyen Âge",
+    "Patrimoine de saint Pierre",
+    "Cola di Rienzo"
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "id": "prov_middlesex",
+  "name": {
+    "display": "Londres, Middlesex et Essex",
+    "local": "Middlesex",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Tamise",
+    "Lea",
+    "Colne"
+  ],
+  "coastal": true,
+  "ports": [
+    "Londres",
+    "Colchester",
+    "Maldon"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Londres",
+      "local": "London",
+      "local_language": "moyen anglais"
+    },
+    "lat": 51.5074,
+    "lon": -0.1276
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.1276,
+      51.5074
+    ],
+    "seed_lonlat": [
+      0.1,
+      51.65
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_england",
+  "holder": "chr_edward_iii",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Londres compte environ 50 000 habitants, la plus grande ville des îles Britanniques.",
+    "classes": {
+      "peasants": {
+        "count": 192080,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 78400,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2520,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_archery_butts",
+    "bld_counting_house",
+    "bld_armoury"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Cité de Londres (capitale de jeu de l'Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street.",
+  "sources": [
+    "Londres au Moyen Âge",
+    "Westminster",
+    "Essex"
+  ]
+}

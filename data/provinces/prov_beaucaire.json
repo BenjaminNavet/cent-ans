@@ -1,0 +1,107 @@
+{
+  "id": "prov_beaucaire",
+  "name": {
+    "display": "Nîmois et Vivarais",
+    "local": "Nemze",
+    "local_language": "occitan"
+  },
+  "region": "languedoc",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Rhône",
+    "Gard",
+    "Ardèche",
+    "Loire"
+  ],
+  "coastal": true,
+  "ports": [
+    "Aigues-Mortes"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_salt",
+    "res_wine",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nîmes",
+      "local": "Nimes",
+      "local_language": "occitan"
+    },
+    "lat": 43.8367,
+    "lon": 4.3601
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.3601,
+      43.8367
+    ],
+    "seed_lonlat": [
+      4.0,
+      44.3
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Nîmes compte environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 321481,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 45600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Sénéchaussée de Beaucaire-Nîmes, Vivarais, Gévaudan et Velay : rive droite du Rhône. Aigues-Mortes, port royal sur la Méditerranée ; salins de Peccais.",
+  "sources": [
+    "Sénéchaussée de Beaucaire",
+    "Nîmes",
+    "Aigues-Mortes"
+  ]
+}

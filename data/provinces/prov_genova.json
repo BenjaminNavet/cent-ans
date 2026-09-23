@@ -1,0 +1,114 @@
+{
+  "id": "prov_genova",
+  "name": {
+    "display": "Ligurie",
+    "local": "Zena",
+    "local_language": "ligure"
+  },
+  "region": "italie_nord",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Polcevera",
+    "Bisagno"
+  ],
+  "coastal": true,
+  "ports": [
+    "Gênes",
+    "Savone",
+    "Portovenere"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_cloth",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Gênes",
+      "local": "Zena",
+      "local_language": "ligure"
+    },
+    "lat": 44.4056,
+    "lon": 8.9463
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.9463,
+      44.4056
+    ],
+    "seed_lonlat": [
+      8.8,
+      44.4
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_genoa",
+  "overlord": "fac_empire",
+  "culture": "cul_ligurian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Gênes compte environ 60 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 160160,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 91000,
+        "unrest": 30,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "République de Gênes déchirée entre guelfes et gibelins ; Savone rivale. Arbalétriers loués à la France, comptoirs d'outre-mer, alun, épices. Simone Boccanegra sera élu doge le 23 septembre 1339.",
+  "sources": [
+    "République de Gênes",
+    "Simone Boccanegra",
+    "Gênes"
+  ]
+}

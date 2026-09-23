@@ -1,0 +1,110 @@
+{
+  "id": "prov_montpellier",
+  "name": {
+    "display": "Seigneurie de Montpellier",
+    "local": "Montpeslier",
+    "local_language": "occitan"
+  },
+  "region": "languedoc",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Lez",
+    "Hérault"
+  ],
+  "coastal": true,
+  "ports": [
+    "Lattes"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Montpellier",
+      "local": "Montpelhièr",
+      "local_language": "occitan"
+    },
+    "lat": 43.6108,
+    "lon": 3.8767
+  },
+  "geo": {
+    "capital_lonlat": [
+      3.8767,
+      43.6108
+    ],
+    "seed_lonlat": [
+      3.85,
+      43.65
+    ],
+    "voronoi_weight": 0.45
+  },
+  "owner": "fac_aragon",
+  "overlord": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Montpellier compte environ 30 000 habitants, l'une des plus grandes villes du Midi.",
+    "classes": {
+      "peasants": {
+        "count": 36120,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 31500,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 630,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_university"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Seigneurie de Montpellier tenue par Jacques III, roi de Majorque (faction à créer), en fief du roi de France ; vendue à la France en 1349. Université de médecine, épices, draps écarlates.",
+  "sources": [
+    "Seigneurie de Montpellier",
+    "Royaume de Majorque",
+    "Montpellier"
+  ]
+}

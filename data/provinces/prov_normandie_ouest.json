@@ -1,0 +1,112 @@
+{
+  "id": "prov_normandie_ouest",
+  "name": {
+    "display": "Normandie (Caen)",
+    "local": "Normendie",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "bocage",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_normandie",
+    "prov_bretagne"
+  ],
+  "rivers": [
+    "Orne",
+    "Vire",
+    "Dives"
+  ],
+  "coastal": true,
+  "ports": [
+    "Barfleur",
+    "Cherbourg",
+    "Caen",
+    "Granville"
+  ],
+  "sea_zones": [
+    "sea_channel"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Caen",
+      "local": "Caem",
+      "local_language": "ancien français"
+    },
+    "lat": 49.1829,
+    "lon": -0.3707
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.3707,
+      49.1829
+    ],
+    "seed_lonlat": [
+      -0.9,
+      49.0
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_france",
+  "holder": "chr_jean_de_normandie",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Caen compte environ 15 000 habitants ; Mont-Saint-Michel et Bayeux pèsent sur le clergé.",
+    "classes": {
+      "peasants": {
+        "count": 355321,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 50400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 10500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3779,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5500,
+  "description": "Basse-Normandie : Bessin, Cotentin, Avranchin, bocage et herbages. Partie de l'apanage de Jean de Normandie ; le comté de Mortain a été cédé à Jeanne II de Navarre en 1336. Les îles anglo-normandes (Jersey, Guernesey) restent anglaises.",
+  "sources": [
+    "Duché de Normandie",
+    "Caen",
+    "Cotentin"
+  ]
+}

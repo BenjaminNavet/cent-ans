@@ -1,0 +1,109 @@
+{
+  "id": "prov_sicilia",
+  "name": {
+    "display": "Sicile",
+    "local": "Sicilia",
+    "local_language": "sicilien"
+  },
+  "region": "italie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Simeto",
+    "Salso"
+  ],
+  "coastal": true,
+  "ports": [
+    "Palerme",
+    "Messine",
+    "Trapani",
+    "Syracuse"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Palerme",
+      "local": "Palermu",
+      "local_language": "sicilien"
+    },
+    "lat": 38.1157,
+    "lon": 13.3615
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.3615,
+      38.1157
+    ],
+    "seed_lonlat": [
+      14.1,
+      37.6
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_aragon",
+  "culture": "cul_sicilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Palerme et Messine comptent chacune environ 25 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 530400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 97500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 16250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 5850,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 7000,
+  "description": "Royaume de Trinacrie (Sicile) tenu par Frédéric III puis Pierre II d'Aragon-Sicile (branche cadette ; faction à créer, fac_aragon n'est qu'un substitut), en guerre intermittente contre Naples depuis les Vêpres siciliennes. Grenier à blé.",
+  "sources": [
+    "Royaume de Sicile",
+    "Frédéric III de Sicile",
+    "Palerme"
+  ]
+}

@@ -39,6 +39,17 @@
     "lat": 51.2802,
     "lon": 1.0789
   },
+  "geo": {
+    "capital_lonlat": [
+      1.0789,
+      51.2802
+    ],
+    "seed_lonlat": [
+      0.75,
+      51.2
+    ],
+    "voronoi_weight": 0.6
+  },
   "owner": "fac_england",
   "culture": "cul_english",
   "religion": "rel_catholic",
@@ -47,29 +58,29 @@
     "note": "Estimation d'après les rôles du poll tax de 1377 corrigés de la peste.",
     "classes": {
       "peasants": {
-        "count": 150000,
+        "count": 150913,
         "unrest": 10,
         "health": 55,
-        "wealth": 50,
+        "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 35000,
+        "count": 34560,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 6000,
+        "count": 4800,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1500,
-        "unrest": 5,
+        "count": 1727,
+        "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -78,18 +89,16 @@
   },
   "buildings": [
     "bld_market",
-    "bld_port",
-    "bld_windmill",
-    "bld_forge",
     "bld_parish_church",
-    "bld_abbey",
-    "bld_cathedral",
+    "bld_water_mill",
+    "bld_port",
     "bld_stone_walls",
+    "bld_castle",
     "bld_muster_field",
     "bld_archery_butts"
   ],
   "fortification_level": 3,
-  "base_supply": 4000,
+  "base_supply": 3500,
   "description": "Porte de l'Angleterre face au continent : les Cinque Ports (Douvres, Sandwich, Hythe, Romney) fournissent la flotte royale ; Cantorbéry est le siège du primat. Fer du Weald.",
   "sources": [
     "Kent",

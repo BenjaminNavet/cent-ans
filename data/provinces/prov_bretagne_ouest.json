@@ -1,0 +1,112 @@
+{
+  "id": "prov_bretagne_ouest",
+  "name": {
+    "display": "Basse-Bretagne",
+    "local": "Breizh-Izel",
+    "local_language": "breton"
+  },
+  "region": "france_ouest",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Blavet",
+    "Odet",
+    "Aulne",
+    "Élorn"
+  ],
+  "coastal": true,
+  "ports": [
+    "Brest",
+    "Vannes",
+    "Morlaix",
+    "Quimper"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_bay_of_biscay",
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Quimper",
+      "local": "Kemper",
+      "local_language": "breton"
+    },
+    "lat": 47.996,
+    "lon": -4.097
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.097,
+      47.996
+    ],
+    "seed_lonlat": [
+      -3.6,
+      48.2
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_brittany",
+  "overlord": "fac_france",
+  "holder": "chr_jean_iii_de_bretagne",
+  "culture": "cul_breton",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Aucune ville ne dépasse 6 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 425280,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 38400,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 12000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4320,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 6000,
+  "description": "Pays bretonnant : Léon, Cornouaille, Trégor, Vannetais. Noblesse nombreuse et pauvre, cabotage, pêche, landes. Hennebont et Brest seront les places fortes montfortistes.",
+  "sources": [
+    "Basse-Bretagne",
+    "Cornouaille",
+    "Léon (Bretagne)"
+  ]
+}

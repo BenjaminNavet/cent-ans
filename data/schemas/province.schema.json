@@ -5,8 +5,12 @@
   "description": "Province de la carte de campagne : géographie, propriétaire en 1337, population par classe, ressources.",
   "type": "object",
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/province_id" },
-    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "id": {
+      "$ref": "common.schema.json#/$defs/province_id"
+    },
+    "name": {
+      "$ref": "common.schema.json#/$defs/localized_name"
+    },
     "region": {
       "type": "string",
       "description": "Grande région géographique (ex. 'france_nord', 'aquitaine', 'angleterre_sud')."
@@ -14,47 +18,123 @@
     "terrain": {
       "type": "string",
       "description": "Terrain dominant, module mouvement et bataille.",
-      "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"]
+      "enum": [
+        "plains",
+        "hills",
+        "mountains",
+        "forest",
+        "marsh",
+        "heath",
+        "bocage"
+      ]
     },
-    "climate": { "type": "string", "enum": ["oceanic", "continental", "mediterranean", "mountain"] },
+    "climate": {
+      "type": "string",
+      "enum": [
+        "oceanic",
+        "continental",
+        "mediterranean",
+        "mountain"
+      ]
+    },
     "neighbors": {
       "type": "array",
       "description": "Provinces adjacentes par voie terrestre.",
-      "items": { "$ref": "common.schema.json#/$defs/province_id" },
+      "items": {
+        "$ref": "common.schema.json#/$defs/province_id"
+      },
       "uniqueItems": true
     },
     "rivers": {
       "type": "array",
       "description": "Rivières principales traversant ou bordant la province (noms français).",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true
     },
-    "coastal": { "type": "boolean" },
+    "coastal": {
+      "type": "boolean"
+    },
     "ports": {
       "type": "array",
       "description": "Ports utilisables pour le transport maritime abstrait.",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true
     },
     "sea_zones": {
       "type": "array",
       "description": "Zones maritimes bordées (Manche, mer du Nord, golfe de Gascogne...).",
-      "items": { "$ref": "common.schema.json#/$defs/sea_zone_id" },
+      "items": {
+        "$ref": "common.schema.json#/$defs/sea_zone_id"
+      },
       "uniqueItems": true
     },
     "resources": {
       "type": "array",
-      "items": { "$ref": "common.schema.json#/$defs/resource_id" },
+      "items": {
+        "$ref": "common.schema.json#/$defs/resource_id"
+      },
       "uniqueItems": true
     },
     "capital_city": {
       "type": "object",
       "properties": {
-        "name": { "$ref": "common.schema.json#/$defs/localized_name" },
-        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
-        "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+        "name": {
+          "$ref": "common.schema.json#/$defs/localized_name"
+        },
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
       },
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "geo": {
+      "type": "object",
+      "description": "Ancrage géographique pour le pipeline carte (tools/geo) : capitale et graine du diagramme de Voronoï pondéré, en degrés WGS84 [lon, lat].",
+      "properties": {
+        "capital_lonlat": {
+          "type": "array",
+          "description": "Position de la capitale [lon, lat].",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "seed_lonlat": {
+          "type": "array",
+          "description": "Centre géographique de la province [lon, lat] (graine Voronoï, distinct de la capitale).",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "voronoi_weight": {
+          "type": "number",
+          "description": "Poids de la graine : une grande province prend plus de place (0,6 à 1,8).",
+          "minimum": 0.1,
+          "maximum": 3.0,
+          "default": 1.0
+        }
+      },
+      "required": [
+        "capital_lonlat",
+        "seed_lonlat"
+      ],
       "additionalProperties": false
     },
     "owner": {
@@ -69,53 +149,121 @@
       "$ref": "common.schema.json#/$defs/character_id",
       "description": "Personnage tenant la province en apanage ou fief (ex. Jean, duc de Normandie)."
     },
-    "culture": { "$ref": "common.schema.json#/$defs/culture_id" },
-    "religion": { "$ref": "common.schema.json#/$defs/religion_id" },
+    "culture": {
+      "$ref": "common.schema.json#/$defs/culture_id"
+    },
+    "religion": {
+      "$ref": "common.schema.json#/$defs/religion_id"
+    },
     "population": {
       "type": "object",
       "description": "Population par classe sociale, avec jauges 0-100.",
       "properties": {
-        "uncertain": { "type": "boolean", "default": true },
-        "note": { "type": "string" },
+        "uncertain": {
+          "type": "boolean",
+          "default": true
+        },
+        "note": {
+          "type": "string"
+        },
         "classes": {
           "type": "object",
           "properties": {
-            "peasants": { "$ref": "#/$defs/population_class" },
-            "burghers": { "$ref": "#/$defs/population_class" },
-            "clergy": { "$ref": "#/$defs/population_class" },
-            "nobility": { "$ref": "#/$defs/population_class" }
+            "peasants": {
+              "$ref": "#/$defs/population_class"
+            },
+            "burghers": {
+              "$ref": "#/$defs/population_class"
+            },
+            "clergy": {
+              "$ref": "#/$defs/population_class"
+            },
+            "nobility": {
+              "$ref": "#/$defs/population_class"
+            }
           },
-          "required": ["peasants", "burghers", "clergy", "nobility"],
+          "required": [
+            "peasants",
+            "burghers",
+            "clergy",
+            "nobility"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["classes"],
+      "required": [
+        "classes"
+      ],
       "additionalProperties": false
     },
     "buildings": {
       "type": "array",
       "description": "Bâtiments présents au départ.",
-      "items": { "$ref": "common.schema.json#/$defs/building_id" },
+      "items": {
+        "$ref": "common.schema.json#/$defs/building_id"
+      },
       "uniqueItems": true
     },
-    "fortification_level": { "type": "integer", "minimum": 0, "maximum": 5 },
-    "base_supply": { "type": "integer", "minimum": 0, "description": "Capacité de ravitaillement (soldats nourris par saison sans attrition)." },
-    "description": { "type": "string" },
-    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+    "fortification_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "base_supply": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Capacité de ravitaillement (soldats nourris par saison sans attrition)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "sources": {
+      "$ref": "common.schema.json#/$defs/sources"
+    }
   },
-  "required": ["id", "name", "region", "terrain", "neighbors", "coastal", "resources", "capital_city", "owner", "culture", "religion", "population"],
+  "required": [
+    "id",
+    "name",
+    "region",
+    "terrain",
+    "neighbors",
+    "coastal",
+    "resources",
+    "capital_city",
+    "owner",
+    "culture",
+    "religion",
+    "population"
+  ],
   "additionalProperties": false,
   "$defs": {
     "population_class": {
       "type": "object",
       "properties": {
-        "count": { "type": "integer", "minimum": 0 },
-        "unrest": { "$ref": "common.schema.json#/$defs/percent" },
-        "health": { "$ref": "common.schema.json#/$defs/percent" },
-        "wealth": { "$ref": "common.schema.json#/$defs/percent" },
-        "goods_satisfaction": { "$ref": "common.schema.json#/$defs/percent" }
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unrest": {
+          "$ref": "common.schema.json#/$defs/percent"
+        },
+        "health": {
+          "$ref": "common.schema.json#/$defs/percent"
+        },
+        "wealth": {
+          "$ref": "common.schema.json#/$defs/percent"
+        },
+        "goods_satisfaction": {
+          "$ref": "common.schema.json#/$defs/percent"
+        }
       },
-      "required": ["count", "unrest", "health", "wealth", "goods_satisfaction"],
+      "required": [
+        "count",
+        "unrest",
+        "health",
+        "wealth",
+        "goods_satisfaction"
+      ],
       "additionalProperties": false
     }
   }

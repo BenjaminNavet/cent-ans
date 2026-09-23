@@ -1,0 +1,114 @@
+{
+  "id": "prov_napoli",
+  "name": {
+    "display": "Royaume de Naples",
+    "local": "Napule",
+    "local_language": "napolitain"
+  },
+  "region": "italie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Volturno",
+    "Garigliano",
+    "Sele"
+  ],
+  "coastal": true,
+  "ports": [
+    "Naples",
+    "Gaète",
+    "Amalfi",
+    "Salerne"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Naples",
+      "local": "Napule",
+      "local_language": "napolitain"
+    },
+    "lat": 40.8518,
+    "lon": 14.2681
+  },
+  "geo": {
+    "capital_lonlat": [
+      14.2681,
+      40.8518
+    ],
+    "seed_lonlat": [
+      14.5,
+      40.9
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_papacy",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Naples compte environ 40 000 habitants ; population du royaume continental dans l'emprise estimée.",
+    "classes": {
+      "peasants": {
+        "count": 930600,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 132000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 27500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 9900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_university"
+  ],
+  "fortification_level": 3,
+  "base_supply": 11000,
+  "description": "Royaume de Sicile citérieure (Naples), fief pontifical tenu par Robert d'Anjou (faction angevine à créer, également comte de Provence ; fac_empire n'est qu'un substitut) ; Abruzzes, Campanie, Pouille et Calabre. Guerre contre la Sicile aragonaise.",
+  "sources": [
+    "Royaume de Naples",
+    "Robert Ier de Naples",
+    "Naples"
+  ]
+}

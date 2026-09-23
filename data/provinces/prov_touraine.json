@@ -1,0 +1,96 @@
+{
+  "id": "prov_touraine",
+  "name": {
+    "display": "Touraine",
+    "local": "Touraine",
+    "local_language": "ancien français"
+  },
+  "region": "france_centre",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Loire",
+    "Cher",
+    "Indre",
+    "Vienne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tours",
+      "local": "Tors",
+      "local_language": "ancien français"
+    },
+    "lat": 47.3941,
+    "lon": 0.6848
+  },
+  "geo": {
+    "capital_lonlat": [
+      0.6848,
+      47.3941
+    ],
+    "seed_lonlat": [
+      0.7,
+      47.3
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Tours compte environ 15 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 181721,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 30800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Domaine royal depuis 1204 ; Tours, ville de Saint-Martin, est un grand centre de pèlerinage. Vins de Loire, tuffeau.",
+  "sources": [
+    "Touraine",
+    "Tours"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "id": "prov_biscay",
+  "name": {
+    "display": "Biscaye et Guipuscoa",
+    "local": "Bizkaia",
+    "local_language": "basque"
+  },
+  "region": "iberie_nord",
+  "terrain": "mountains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Nervión",
+    "Deba",
+    "Bidassoa"
+  ],
+  "coastal": true,
+  "ports": [
+    "Bilbao",
+    "Bermeo",
+    "Saint-Sébastien",
+    "Fontarrabie"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_iron",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bilbao",
+      "local": "Bilbo",
+      "local_language": "basque"
+    },
+    "lat": 43.263,
+    "lon": -2.935
+  },
+  "geo": {
+    "capital_lonlat": [
+      -2.935,
+      43.263
+    ],
+    "seed_lonlat": [
+      -2.6,
+      43.05
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_castile",
+  "culture": "cul_basque",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bilbao, fondée en 1300, compte environ 3 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 138560,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1440,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_palisade",
+    "bld_muster_field",
+    "bld_forge"
+  ],
+  "fortification_level": 1,
+  "base_supply": 3500,
+  "description": "Seigneurie de Biscaye (Juan Núñez de Lara, en révolte contre Alphonse XI jusqu'en 1336), Guipuscoa et Alava sous la couronne de Castille. Fer basque, chantiers navals, baleiniers.",
+  "sources": [
+    "Seigneurie de Biscaye",
+    "Juan Núñez III de Lara",
+    "Bilbao"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "id": "prov_gueldre",
+  "name": {
+    "display": "Gueldre",
+    "local": "Gelre",
+    "local_language": "moyen néerlandais"
+  },
+  "region": "pays_bas",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Meuse",
+    "Waal",
+    "IJssel"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Arnhem",
+      "local": "Arnhem",
+      "local_language": "moyen néerlandais"
+    },
+    "lat": 51.9851,
+    "lon": 5.8987
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.8987,
+      51.9851
+    ],
+    "seed_lonlat": [
+      6.0,
+      51.9
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_dutch",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Nimègue compte environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 179521,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 33000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II (faction à créer), marié à Éléonore, sœur d'Édouard III : allié anglais. Nimègue, ville impériale engagée.",
+  "sources": [
+    "Duché de Gueldre",
+    "Renaud II de Gueldre",
+    "Nimègue"
+  ]
+}

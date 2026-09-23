@@ -1,0 +1,105 @@
+{
+  "id": "prov_fife",
+  "name": {
+    "display": "Fife et Perth",
+    "local": "Fife",
+    "local_language": "scots"
+  },
+  "region": "ecosse",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Forth",
+    "Tay",
+    "Earn"
+  ],
+  "coastal": true,
+  "ports": [
+    "Saint Andrews",
+    "Dundee",
+    "Stirling"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saint Andrews",
+      "local": "Sanct Andrewis",
+      "local_language": "scots"
+    },
+    "lat": 56.3398,
+    "lon": -2.7967
+  },
+  "geo": {
+    "capital_lonlat": [
+      -2.7967,
+      56.3398
+    ],
+    "seed_lonlat": [
+      -3.4,
+      56.35
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_scotland",
+  "culture": "cul_scottish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Perth compte environ 3 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 77941,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 809,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2500,
+  "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d'Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu'en 1339, Stirling jusqu'en 1342).",
+  "sources": [
+    "Fife",
+    "Perth (Écosse)",
+    "Seconde guerre d'indépendance écossaise"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "id": "prov_holstein",
+  "name": {
+    "display": "Holstein et Lübeck",
+    "local": "Holsten",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Elbe",
+    "Trave",
+    "Eider"
+  ],
+  "coastal": true,
+  "ports": [
+    "Lübeck",
+    "Hambourg",
+    "Kiel"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lübeck",
+      "local": "Lübeck",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 53.8655,
+    "lon": 10.6866
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.6866,
+      53.8655
+    ],
+    "seed_lonlat": [
+      9.9,
+      54.0
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Lübeck compte environ 20 000 habitants, Hambourg 8 000.",
+    "classes": {
+      "peasants": {
+        "count": 172921,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 39600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comtés de Holstein (Gérard III de Rendsbourg, maître du Danemark) et villes libres de Lübeck (tête de la Hanse) et Hambourg. Hareng de Scanie, sel de Lunebourg.",
+  "sources": [
+    "Comté de Holstein",
+    "Gérard III de Holstein",
+    "Lübeck"
+  ]
+}

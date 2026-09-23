@@ -1,0 +1,106 @@
+{
+  "id": "prov_picardie",
+  "name": {
+    "display": "Picardie et Vermandois",
+    "local": "Picardie",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Somme",
+    "Oise",
+    "Aisne"
+  ],
+  "coastal": true,
+  "ports": [
+    "Saint-Valery-sur-Somme"
+  ],
+  "sea_zones": [
+    "sea_channel"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_cloth",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Amiens",
+      "local": "Amiens",
+      "local_language": "ancien français"
+    },
+    "lat": 49.8942,
+    "lon": 2.2957
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.2957,
+      49.8942
+    ],
+    "seed_lonlat": [
+      2.7,
+      49.8
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Amiens compte environ 20 000 habitants, Saint-Quentin 15 000.",
+    "classes": {
+      "peasants": {
+        "count": 424320,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 78000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 13000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4680,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 6000,
+  "description": "Amiénois, Vermandois (Saint-Quentin), Laonnois et Beauvaisis : domaine royal riche en blé et en draperies (waide d'Amiens). Amiens et Saint-Quentin sont de grandes communes.",
+  "sources": [
+    "Picardie",
+    "Vermandois",
+    "Amiens"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "id": "prov_namur",
+  "name": {
+    "display": "Namur",
+    "local": "Namur",
+    "local_language": "ancien français"
+  },
+  "region": "pays_bas",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Meuse",
+    "Sambre"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_stone",
+    "res_iron",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Namur",
+      "local": "Namur",
+      "local_language": "ancien français"
+    },
+    "lat": 50.4669,
+    "lon": 4.8673
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.8673,
+      50.4669
+    ],
+    "seed_lonlat": [
+      4.9,
+      50.3
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Namur compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 76141,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 809,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Comté de Namur tenu par Jean Ier de Namur, de la maison de Dampierre (faction à créer), cousin du comte de Flandre. Carrières de pierre bleue.",
+  "sources": [
+    "Comté de Namur",
+    "Namur"
+  ]
+}

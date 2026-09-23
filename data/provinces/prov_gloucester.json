@@ -1,0 +1,108 @@
+{
+  "id": "prov_gloucester",
+  "name": {
+    "display": "Gloucester et Bristol",
+    "local": "Gloucestre",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_centre",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Severn",
+    "Wye",
+    "Avon"
+  ],
+  "coastal": true,
+  "ports": [
+    "Bristol"
+  ],
+  "sea_zones": [
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wool",
+    "res_wine",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bristol",
+      "local": "Bristowe",
+      "local_language": "moyen anglais"
+    },
+    "lat": 51.4545,
+    "lon": -2.5879
+  },
+  "geo": {
+    "capital_lonlat": [
+      -2.5879,
+      51.4545
+    ],
+    "seed_lonlat": [
+      -2.4,
+      52.0
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bristol compte environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 220320,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 40500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2430,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Gloucestershire, Worcestershire, Herefordshire, Shropshire : Bristol (deuxième port du royaume, vins de Gascogne), marches galloises des Mortimer et des Bohun, forêt de Dean (fer).",
+  "sources": [
+    "Bristol",
+    "Marches galloises",
+    "Forêt de Dean"
+  ]
+}

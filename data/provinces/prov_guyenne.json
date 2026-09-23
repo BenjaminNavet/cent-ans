@@ -37,38 +37,49 @@
     "lat": 44.8378,
     "lon": -0.5792
   },
+  "geo": {
+    "capital_lonlat": [
+      -0.5792,
+      44.8378
+    ],
+    "seed_lonlat": [
+      -0.5,
+      44.75
+    ],
+    "voronoi_weight": 1.0
+  },
   "owner": "fac_england",
   "overlord": "fac_france",
   "culture": "cul_occitan",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Bordeaux compte environ 30 000 habitants ; population totale du duché réduit (Bordelais, Bazadais, Landes, Agenais partiel) estimée.",
+    "note": "Bordeaux compte environ 30 000 habitants ; population du Bordelais, Bazadais et Entre-deux-Mers estimée.",
     "classes": {
       "peasants": {
-        "count": 380000,
+        "count": 377808,
         "unrest": 15,
         "health": 55,
-        "wealth": 50,
+        "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 70000,
-        "unrest": 10,
+        "count": 69450,
+        "unrest": 15,
         "health": 50,
-        "wealth": 70,
-        "goods_satisfaction": 70
+        "wealth": 60,
+        "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9000,
+        "count": 11575,
         "unrest": 5,
         "health": 60,
-        "wealth": 65,
-        "goods_satisfaction": 70
+        "wealth": 70,
+        "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4000,
-        "unrest": 20,
+        "count": 4167,
+        "unrest": 15,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -77,16 +88,17 @@
   },
   "buildings": [
     "bld_market",
-    "bld_fair",
+    "bld_parish_church",
+    "bld_windmill",
     "bld_port",
     "bld_vineyard_press",
-    "bld_parish_church",
+    "bld_abbey",
     "bld_cathedral",
     "bld_stone_walls",
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
+  "base_supply": 5500,
   "description": "Duché d'Aquitaine tenu par Édouard III en fief du roi de France (hommage de 1329 et 1331). Confisqué par Philippe VI le 24 mai 1337 : c'est la cause immédiate de la guerre. Le commerce du vin avec l'Angleterre y est vital.",
   "sources": [
     "Duché d'Aquitaine",

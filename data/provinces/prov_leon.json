@@ -1,0 +1,106 @@
+{
+  "id": "prov_leon",
+  "name": {
+    "display": "León et Asturies",
+    "local": "León",
+    "local_language": "castillan"
+  },
+  "region": "iberie_nord",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Esla",
+    "Duero",
+    "Órbigo"
+  ],
+  "coastal": true,
+  "ports": [
+    "Avilés",
+    "Gijón"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "León",
+      "local": "León",
+      "local_language": "castillan"
+    },
+    "lat": 42.5987,
+    "lon": -5.5671
+  },
+  "geo": {
+    "capital_lonlat": [
+      -5.5671,
+      42.5987
+    ],
+    "seed_lonlat": [
+      -5.8,
+      42.6
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "León compte environ 6 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 372121,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 33600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 10500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3779,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5500,
+  "description": "Royaume de León et principauté des Asturies (Oviedo), uni à la Castille depuis 1230. Transhumance de la Mesta, chemin de Saint-Jacques.",
+  "sources": [
+    "Royaume de León",
+    "Asturies",
+    "León (Espagne)"
+  ]
+}

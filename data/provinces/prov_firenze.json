@@ -1,0 +1,115 @@
+{
+  "id": "prov_firenze",
+  "name": {
+    "display": "Toscane",
+    "local": "Fiorenza",
+    "local_language": "toscan"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Arno",
+    "Ombrone",
+    "Serchio"
+  ],
+  "coastal": true,
+  "ports": [
+    "Pise",
+    "Porto Pisano",
+    "Talamone"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wine",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Florence",
+      "local": "Fiorenza",
+      "local_language": "toscan"
+    },
+    "lat": 43.7696,
+    "lon": 11.2558
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.2558,
+      43.7696
+    ],
+    "seed_lonlat": [
+      11.0,
+      43.5
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_empire",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Florence compte environ 90 000 habitants, Pise 40 000, Sienne 50 000.",
+    "classes": {
+      "peasants": {
+        "count": 480201,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 196000,
+        "unrest": 20,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 17500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6299,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_counting_house",
+    "bld_university"
+  ],
+  "fortification_level": 3,
+  "base_supply": 7500,
+  "description": "République de Florence (faction à créer ; fac_empire n'est qu'un substitut) : compagnies des Bardi et Peruzzi, banquiers d'Édouard III, guerre contre Mastino della Scala pour Lucques ; républiques de Pise et de Sienne rivales.",
+  "sources": [
+    "République de Florence",
+    "Compagnie des Bardi",
+    "Pise"
+  ]
+}

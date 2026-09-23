@@ -1,0 +1,98 @@
+{
+  "id": "prov_cordoba",
+  "name": {
+    "display": "Andalousie (Cordoue et Jaén)",
+    "local": "Córdoba",
+    "local_language": "castillan"
+  },
+  "region": "iberie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Guadalquivir",
+    "Guadalimar"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cordoue",
+      "local": "Córdoba",
+      "local_language": "castillan"
+    },
+    "lat": 37.8882,
+    "lon": -4.7794
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.7794,
+      37.8882
+    ],
+    "seed_lonlat": [
+      -4.2,
+      38.0
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Cordoue compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 247800,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 42000,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2700,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Royaumes de Cordoue et de Jaén, marche face à l'émirat de Grenade ; cuirs de Cordoue, oliviers, ordres militaires sur la frontière.",
+  "sources": [
+    "Royaume de Cordoue",
+    "Royaume de Jaén",
+    "Cordoue"
+  ]
+}

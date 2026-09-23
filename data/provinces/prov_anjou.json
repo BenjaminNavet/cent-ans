@@ -1,0 +1,98 @@
+{
+  "id": "prov_anjou",
+  "name": {
+    "display": "Anjou",
+    "local": "Anjou",
+    "local_language": "ancien français"
+  },
+  "region": "france_ouest",
+  "terrain": "bocage",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Loire",
+    "Maine",
+    "Sarthe",
+    "Mayenne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Angers",
+      "local": "Angiers",
+      "local_language": "ancien français"
+    },
+    "lat": 47.4784,
+    "lon": -0.5541
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.5541,
+      47.4784
+    ],
+    "seed_lonlat": [
+      -0.5,
+      47.45
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Angers compte environ 15 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 270720,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 38400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Comté d'Anjou, apanage de Charles de Valois puis de Philippe VI avant son accession : entré au domaine en 1328. Ardoise d'Angers, vins.",
+  "sources": [
+    "Comté d'Anjou",
+    "Angers"
+  ]
+}
