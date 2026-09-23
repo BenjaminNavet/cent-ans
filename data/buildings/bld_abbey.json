@@ -21,11 +21,11 @@
       "value": -5
     },
     {
-      "effect": "research_civil",
-      "value": 5
+      "effect": "health",
+      "value": 2
     },
     {
-      "effect": "health",
+      "effect": "research_points",
       "value": 2
     }
   ],

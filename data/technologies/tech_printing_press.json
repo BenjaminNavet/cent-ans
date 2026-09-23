@@ -17,11 +17,11 @@
   "unlocks": {},
   "effects": [
     {
-      "effect": "research_civil",
-      "value": 25
+      "effect": "prestige",
+      "value": 5
     },
     {
-      "effect": "prestige",
+      "effect": "research_points",
       "value": 5
     }
   ],

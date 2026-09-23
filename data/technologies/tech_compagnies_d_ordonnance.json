@@ -1,0 +1,35 @@
+{
+  "id": "tech_compagnies_d_ordonnance",
+  "name": {
+    "display": "Compagnies d'ordonnance"
+  },
+  "branch": "military",
+  "tier": 4,
+  "cost": 560,
+  "prerequisites": [
+    "tech_full_plate"
+  ],
+  "historical_year": {
+    "value": "1445",
+    "note": "Ordonnance de Charles VII (Louppy-le-Château, 1445) : quinze compagnies de cent lances."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_morale",
+      "unit_category": "cavalry",
+      "value": 5
+    },
+    {
+      "effect": "army_melee",
+      "unit_category": "cavalry",
+      "value": 5
+    }
+  ],
+  "description": "Lances fournies soldées en permanence par le roi : première cavalerie lourde d'une armée régulière.",
+  "sources": [
+    "Compagnie d'ordonnance",
+    "Charles VII (roi de France)",
+    "Guerre de Cent Ans"
+  ]
+}

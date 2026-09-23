@@ -1,0 +1,36 @@
+{
+  "id": "tech_francs_archers",
+  "name": {
+    "display": "Francs-archers"
+  },
+  "branch": "military",
+  "tier": 4,
+  "cost": 450,
+  "prerequisites": [
+    "tech_pavise",
+    "tech_crossbow_windlass"
+  ],
+  "historical_year": {
+    "value": "1448",
+    "note": "Ordonnance de Montils-lès-Tours (28 avril 1448) : un archer équipé par cinquante feux, exempté de taille."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_morale",
+      "unit_category": "ranged",
+      "value": 4
+    },
+    {
+      "effect": "recruit_cost",
+      "unit_category": "ranged",
+      "value": -10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Milice d'archers et d'arbalétriers levée par paroisse, exemptée de taille en échange de l'entraînement.",
+  "sources": [
+    "Francs-archers",
+    "Charles VII (roi de France)"
+  ]
+}

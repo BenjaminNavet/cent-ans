@@ -1,0 +1,35 @@
+{
+  "id": "tech_brigandine",
+  "name": {
+    "display": "Brigandine"
+  },
+  "branch": "military",
+  "tier": 2,
+  "cost": 210,
+  "prerequisites": [
+    "tech_coat_of_plates"
+  ],
+  "historical_year": {
+    "value": "1370",
+    "uncertain": true,
+    "note": "Plaquettes rivetées sous toile, répandues dans la piétaille à la fin du XIVe siècle."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_armor",
+      "unit_category": "infantry",
+      "value": 4
+    },
+    {
+      "effect": "army_armor",
+      "unit_category": "ranged",
+      "value": 2
+    }
+  ],
+  "description": "Corselet de petites plaques d'acier rivetées sous du drap : protection bon marché des gens de pied.",
+  "sources": [
+    "Brigandine",
+    "Armure de plates"
+  ]
+}

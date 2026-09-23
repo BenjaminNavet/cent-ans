@@ -14,16 +14,12 @@
   "required_building": "bld_cathedral",
   "effects": [
     {
-      "effect": "research_civil",
-      "value": 15
-    },
-    {
-      "effect": "research_military",
-      "value": 5
-    },
-    {
       "effect": "prestige",
       "value": 5
+    },
+    {
+      "effect": "research_points",
+      "value": 6
     }
   ],
   "description": "Studium generale à privilèges pontificaux (Paris, Oxford, Montpellier, Toulouse).",
