@@ -19,6 +19,11 @@ static func default_data_dir() -> String:
 	var from_env := OS.get_environment(ENV_VAR)
 	if from_env != "":
 		return from_env.simplify_path()
+	# Jeu exporté (macOS) : `data/` est copié dans `Cent Ans.app/Contents/Resources/data`.
+	if OS.has_feature("template"):
+		var bundled := OS.get_executable_path().get_base_dir().path_join("../Resources/data").simplify_path()
+		if DirAccess.dir_exists_absolute(bundled):
+			return bundled
 	return project_root().path_join("data")
 
 
