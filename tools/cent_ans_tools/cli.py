@@ -131,6 +131,29 @@ def geo_provinces() -> None:
     _report_provinces(geo_provinces_step.build())
 
 
+@geo_app.command("splat")
+def geo_splat() -> None:
+    """Génère splat.png, province_border_dist.png et coast_dist.png (shader du terrain)."""
+    from cent_ans_tools.geo import splat as geo_splat_step
+
+    result = geo_splat_step.build()
+    _print_sizes(
+        "Rasters du shader de terrain",
+        [result.splat, result.border_dist, result.coast_dist],
+    )
+
+
+@geo_app.command("textures")
+def geo_textures(
+    force: bool = typer.Option(False, "--force", help="Retélécharge les textures"),
+) -> None:
+    """Télécharge les textures PBR CC0 (Poly Haven) du terrain de campagne."""
+    from cent_ans_tools.geo import textures as geo_textures_step
+
+    paths = geo_textures_step.build(force=force)
+    _print_sizes("Textures du terrain", paths)
+
+
 def _print_sizes(title: str, paths: list) -> None:
     from cent_ans_tools.geo import build as geo_builder
 
