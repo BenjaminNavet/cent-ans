@@ -71,6 +71,7 @@ dependencies = [
 name = "godot-bridge"
 version = "0.1.0"
 dependencies = [
+ "data-model",
  "godot",
  "sim-battle",
  "sim-campaign",

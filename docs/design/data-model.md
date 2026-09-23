@@ -198,3 +198,76 @@ Connaissances générales vérifiées contre les pages Wikipédia (fr/en) suivan
   de Louis IV) sont des choix de jeu, ces États n'ayant pas de capitale fixe.
 - Jean de Luxembourg, roi de Bohême, est rattaché à `fac_france` comme commandeur allié, faute de
   faction Bohême dans la v1.
+
+## 7. Chargement Rust (`core/crates/data-model`)
+
+Statut : v1 (jalon M1, section 5 de `m1-campaign-map.md`). Le crate `data-model` charge `data/` en
+structs typées et vérifie les références ; `godot-bridge` en expose une vue en lecture seule à Godot.
+
+### 7.1 Structs
+
+Chaque schéma a sa struct `serde`, toutes marquées `#[serde(deny_unknown_fields)]` : une clé
+inconnue dans un fichier (ou un champ ajouté au schéma sans mettre à jour la struct) fait échouer
+le chargement, ce qui rend visible toute dérive entre `data/schemas/` et le code.
+
+| Module | Types |
+|---|---|
+| `ids` | Newtypes `FactionId`, `ProvinceId`, `UnitTypeId`, `BuildingId`, `TechnologyId`, `CharacterId`, `ResourceId`, `ReligionId`, `CultureId`, `TraitId`, `SeaZoneId`. La désérialisation valide le préfixe et l'alphabet `[a-z0-9_]` (`common.schema.json`) : un `prov_` placé dans un champ `owner` est refusé. |
+| `common` | `LocalizedName`, `HistoricalDate` (`value`, `uncertain`, `place`, `note` ; `year()`), `UncertainInteger`, `Percent`, `SocialClass` (+ `ALL`, `key()`), `UnitCategory`, `EffectKind` (liste fermée), `EffectMode`, `Effect`, `Cost` (`resources: BTreeMap<ResourceId, u32>`), `Sources`. |
+| `entities::faction` | `Faction`, `Government`, `SuccessionLaw`, `Heraldry`, `Relation`, `RelationStatus`, `AiPersonality`. |
+| `entities::province` | `Province`, `Terrain`, `Climate`, `CapitalCity`, `Population`, `PopulationClasses` (`get(class)`, `iter()`, `total()`), `PopulationClass`, `ProvinceGeo` (`geo` optionnel : `capital_lonlat`, `seed_lonlat`, `voronoi_weight?`, écrit par `tools/geo`). |
+| `entities::unit_type` | `UnitType`, `UnitStats`, `Ability`. |
+| `entities::building` | `Building`, `BuildingCategory`. |
+| `entities::technology` | `Technology`, `TechBranch`, `TechUnlocks`. |
+| `entities::character` | `Character`, `Sex`, `Role`, `CharacterStatus`, `Title`, `Skills`, `Family`. |
+| `entities::resource` | `Resource`, `ResourceCategory`. |
+| `entities::religion` | `Religion`, `ReligionKind`. |
+| `map` | `MapMeta` (`data/map/map.json`) et `ProvinceGeometry` (une feature de `data/map/provinces.geojson` : `id`, `centroid`, `neighbors`, `capital_px`, polygone brut dans `geometry: serde_json::Value`). Ces deux types sont produits par un outil : les clés inconnues sont conservées dans `extra` au lieu d'être refusées. |
+| `load` | `GameData` (un `BTreeMap<Id, T>` par entité, `map: Option<MapMeta>`, `province_geometry`), `Warning`, `ReferenceError`, `DataError`, `load_entities`. |
+
+Les champs optionnels du schéma sont des `Option<T>` ; les listes optionnelles sont des `Vec<T>`
+vides par défaut ; les booléens à `default` du schéma (`playable`, `mounted`, `historical`,
+`population.uncertain`...) reprennent la même valeur par défaut.
+
+### 7.2 `GameData::load(root) -> Result<(GameData, Vec<Warning>), DataError>`
+
+1. Lit chaque dossier d'entités (`factions/`, `provinces/`, ... ; un dossier manquant est une erreur),
+   fichiers triés par nom pour un chargement déterministe.
+2. Erreur si le nom de fichier diffère de l'`id`, si un `id` est en double, si le JSON est invalide
+   ou contient une clé inconnue.
+3. Lit `map/map.json` et `map/provinces.geojson` s'ils existent (absents tant que le pipeline géo n'a
+   pas tourné) ; avertissement pour un polygone sans province ou une province sans polygone.
+4. Vérifie les références croisées :
+
+| Sévérité | Références |
+|---|---|
+| **Avertissement** (`Warning`) | toute référence à une **province** inconnue : `faction.capital`, `province.neighbors`, `character.starting_location`, ids de `provinces.geojson`. Toléré tant que la carte est partielle (section 4.2). |
+| **Erreur** (`DataError::References`, toutes listées d'un coup) | faction : `ruler`, `heir`, `religion`, `suzerain`, `starting_technologies`, `relations[].faction` ; province : `owner`, `overlord`, `holder`, `religion`, `resources`, `buildings` ; unité : `required_technology`, `required_building`, `required_faction`, `cost.resources` ; bâtiment : `upgrades_from`, `required_technology`, `required_building`, `required_resource`, `enables_units`, `cost.resources` ; technologie : `prerequisites`, `unlocks.units`, `unlocks.buildings` ; personnage : `faction`, `family.*` ; religion : `parent`, `head_faction`. |
+
+Les cultures (`cul_`), traits (`trait_`) et zones maritimes (`sea_`) sont des vocabulaires libres :
+seul le préfixe est vérifié. Sur les données actuelles, le chargement réussit avec 32 avertissements,
+tous des provinces hors échantillon (`prov_middlesex`, `prov_toledo`...).
+
+Tests : `cargo test -p data-model` charge le vrai dossier `data/` (test `real_data`, avertissements
+imprimés avec `--nocapture`) et des fixtures minimales écrites dans un dossier temporaire pour chaque
+règle de validation.
+
+### 7.3 API GDExtension : `GameDataStore` (`core/crates/godot-bridge`)
+
+`RefCounted` utilisable en autoload. Ne renvoie que des valeurs Godot simples ; un id inconnu donne un
+`Dictionary` vide. Godot ne lit jamais `data/` directement (hors images de `data/map/`).
+
+| Méthode | Retour |
+|---|---|
+| `load(data_dir: String) -> bool` | Charge `data_dir` (chemin absolu vers `data/`). `false` + `push_error` en cas d'erreur. |
+| `is_loaded() -> bool` | Vrai après un `load` réussi. |
+| `get_warnings() -> PackedStringArray` | Avertissements du dernier chargement (`entité.champ: message`). |
+| `get_province_ids() -> PackedStringArray` | Ids triés. |
+| `get_province(id) -> Dictionary` | `id`, `display_name`, `local_name` (repli sur `display_name`), `region`, `terrain`, `coastal`, `port` (au moins un port), `capital` (nom français), `owner`, `owner_display_name` (`short_name` de la faction), `overlord` (`""` si absent), `holder`, `population` (`{peasants, burghers, clergy, nobility}` en effectifs), `population_total`, `neighbors` (`PackedStringArray`) ; et, quand `provinces.geojson` existe, `centroid` et `capital_px` en `Vector2`. |
+| `get_faction_ids() -> PackedStringArray` | Ids triés. |
+| `get_faction(id) -> Dictionary` | `id`, `name`, `short_name`, `playable`, `color` (`Color` depuis `heraldry.primary_color`), `secondary_color` (blanc si absent), `blazon`, `capital`, `ruler`. |
+| `get_character_ids() -> PackedStringArray` | Ids triés. |
+| `get_character(id) -> Dictionary` | `id`, `name`, `epithet`, `birth` / `death` (`{value, uncertain, year}` ; vide si inconnu), `faction`, `role`, `titles` (`PackedStringArray`), `skills` (`{command, governance, court}`), `starting_location`. |
+
+Vérification headless : `godot --headless --path game --script "$PWD/core/checks/data_store_check.gd"`
+(après `core/build.sh`) charge `data/` et vérifie que `prov_normandie` appartient à `fac_france`.

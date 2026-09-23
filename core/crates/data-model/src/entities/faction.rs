@@ -1,0 +1,135 @@
+//! Faction: a state or power on the campaign map (`faction.schema.json`).
+
+use serde::{Deserialize, Serialize};
+
+use crate::common::{HistoricalDate, LocalizedName, Percent, Sources};
+use crate::ids::{CharacterId, CultureId, FactionId, ProvinceId, ReligionId, TechnologyId};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Government {
+    Kingdom,
+    Duchy,
+    County,
+    Principality,
+    Republic,
+    Theocracy,
+    Empire,
+    Lordship,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SuccessionLaw {
+    Salic,
+    MalePreferencePrimogeniture,
+    CognaticPrimogeniture,
+    Elective,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RelationStatus {
+    War,
+    Peace,
+    Alliance,
+    Truce,
+    Embargo,
+    Vassal,
+    Overlord,
+    MarriageTie,
+}
+
+/// Coat of arms: French blazon plus UI colours (`#RRGGBB`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Heraldry {
+    pub blazon: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub primary_color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub secondary_color: Option<String>,
+    #[serde(default)]
+    pub uncertain: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+}
+
+/// Starting diplomatic relation with another faction.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Relation {
+    pub faction: FactionId,
+    pub status: RelationStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub since: Option<HistoricalDate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub until: Option<HistoricalDate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiPersonality {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub aggression: Option<Percent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diplomacy: Option<Percent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trade: Option<Percent>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub piety: Option<Percent>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Faction {
+    pub id: FactionId,
+    pub name: LocalizedName,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub short_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub adjective: Option<String>,
+    pub government: Government,
+    #[serde(default)]
+    pub playable: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ruler: Option<CharacterId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heir: Option<CharacterId>,
+    pub capital: ProvinceId,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capital_city: Option<String>,
+    pub religion: ReligionId,
+    pub culture: CultureId,
+    pub succession_law: SuccessionLaw,
+    /// Faction this one is a vassal of at campaign start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub suzerain: Option<FactionId>,
+    pub heraldry: Heraldry,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub titles: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub treasury: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prestige: Option<u32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub starting_technologies: Vec<TechnologyId>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub relations: Vec<Relation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ai_personality: Option<AiPersonality>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sources: Sources,
+}
+
+impl Faction {
+    /// UI-friendly short name, falling back to the display name.
+    pub fn short_or_display_name(&self) -> &str {
+        self.short_name.as_deref().unwrap_or(&self.name.display)
+    }
+}
