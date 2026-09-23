@@ -15,6 +15,9 @@ extends RefCounted
 
 enum Kind { DECIDUOUS, CONIFER, HEDGE }
 const KIND_COUNT := 3
+## La tuile est rendue en PARTS_SIDE × PARTS_SIDE parties (culling et LOD plus fins).
+const PARTS_SIDE := 2
+const PARTS := PARTS_SIDE * PARTS_SIDE
 const FLOATS_PER_INSTANCE := 16
 
 var mask: VegetationMask
@@ -27,7 +30,7 @@ var tree_scale: float = 1.0
 ## Cercles d'exclusion (villes) : Vector3(x, y, rayon) en pixels de carte.
 var exclusions: PackedVector3Array = PackedVector3Array()
 
-## Résultats : un tampon et un nombre d'instances par `Kind`.
+## Résultats : un tampon et un nombre d'instances par emplacement `part * KIND_COUNT + kind`.
 var buffers: Array[PackedFloat32Array] = []
 var counts: PackedInt32Array = PackedInt32Array()
 var build_ms: float = 0.0
@@ -48,14 +51,14 @@ func run() -> void:
 	grove_noise.fractal_octaves = 2
 	_sample_coarse(noise, grove_noise)
 	var raw: Array = []
-	for kind in KIND_COUNT:
+	for slot in PARTS * KIND_COUNT:
 		raw.append([])
 	_scatter(raw)
 	buffers.clear()
-	counts.resize(KIND_COUNT)
-	for kind in KIND_COUNT:
-		var items: Array = raw[kind]
-		counts[kind] = items.size()
+	counts.resize(PARTS * KIND_COUNT)
+	for slot in PARTS * KIND_COUNT:
+		var items: Array = raw[slot]
+		counts[slot] = items.size()
 		buffers.append(_pack(items))
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
 
@@ -84,6 +87,14 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			_hedge[k] = s["hedge"]
 			_grove[k] = smoothstep(0.28, 0.42, grove_noise.get_noise_2d(x, y))
 			k += 1
+
+
+## Emplacement de résultat d'une instance (partie de la tuile contenant (x, y), essence).
+func _slot(kind: int, x: float, y: float) -> int:
+	var part_px := float(size_px) / PARTS_SIDE
+	var px := clampi(int((x - origin_px.x) / part_px), 0, PARTS_SIDE - 1)
+	var py := clampi(int((y - origin_px.y) / part_px), 0, PARTS_SIDE - 1)
+	return (py * PARTS_SIDE + px) * KIND_COUNT + kind
 
 
 func _lerp_grid(grid: PackedFloat32Array, gx: float, gy: float) -> float:
@@ -144,7 +155,7 @@ func _scatter(raw: Array) -> void:
 			var ground := data.height_world_at(x, y)
 			if ground <= 0.0:
 				continue
-			raw[kind].append(_make_instance(rng, kind, x, ground, y, yaw, scale_factor))
+			raw[_slot(kind, x, y)].append(_make_instance(rng, kind, x, ground, y, yaw, scale_factor))
 	_scatter_hedges(raw, rng)
 
 
@@ -211,7 +222,7 @@ func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 				if crops < 0.2:
 					continue
 				var hedge := _lerp_grid(_hedge, gx, gy)
-				if edge_roll > crops * lerpf(0.06, 0.8, hedge):
+				if edge_roll > crops * lerpf(0.045, 0.8, hedge):
 					continue
 				if not exclusions.is_empty() and _excluded(x, y):
 					continue
@@ -220,7 +231,7 @@ func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 				var ground := data.height_world_at(jx, jy)
 				if ground <= 0.0:
 					continue
-				raw[Kind.HEDGE].append(_make_instance(rng, Kind.HEDGE, jx, ground, jy, line_yaw + rng.randf_range(-0.2, 0.2), 1.0))
+				raw[_slot(Kind.HEDGE, jx, jy)].append(_make_instance(rng, Kind.HEDGE, jx, ground, jy, line_yaw + rng.randf_range(-0.2, 0.2), 1.0))
 
 
 static func _hash01(n: int) -> float:

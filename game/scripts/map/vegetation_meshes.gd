@@ -58,12 +58,35 @@ static func hedge() -> ArrayMesh:
 	return _cache["hedge"]
 
 
+## Haie lointaine : octaèdre aplati (8 triangles).
+static func hedge_low() -> ArrayMesh:
+	if not _cache.has("hedge_low"):
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var top := Vector3(0, 0.56, 0)
+		var ring := [Vector3(0.55, 0.28, 0), Vector3(0, 0.28, 0.2), Vector3(-0.55, 0.28, 0), Vector3(0, 0.28, -0.2)]
+		var bottom := Vector3(0, 0.0, 0)
+		for i in 4:
+			var a: Vector3 = ring[i]
+			var b: Vector3 = ring[(i + 1) % 4]
+			for v in [top, a, b]:
+				st.set_color(Color(LEAF_LIGHT.r, LEAF_LIGHT.g, LEAF_LIGHT.b, (v as Vector3).y))
+				st.set_normal(((v as Vector3) - Vector3(0, 0.2, 0)).normalized())
+				st.add_vertex(v)
+			for v in [bottom, b, a]:
+				st.set_color(Color(LEAF_DARK.r, LEAF_DARK.g, LEAF_DARK.b, (v as Vector3).y))
+				st.set_normal(((v as Vector3) - Vector3(0, 0.3, 0)).normalized())
+				st.add_vertex(v)
+		_cache["hedge_low"] = st.commit()
+	return _cache["hedge_low"]
+
+
 static func _build_deciduous() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_add_trunk(st, 0.055, 0.42, 5)
 	# Trois masses : centrale haute, deux latérales plus basses (silhouette irrégulière).
-	_add_blob(st, Vector3(0.0, 0.66, 0.0), Vector3(0.42, 0.33, 0.42), 11, true)
+	_add_blob(st, Vector3(0.0, 0.66, 0.0), Vector3(0.42, 0.33, 0.42), 11, false)
 	_add_blob(st, Vector3(0.2, 0.52, 0.09), Vector3(0.28, 0.22, 0.28), 23, false)
 	_add_blob(st, Vector3(-0.17, 0.50, -0.14), Vector3(0.27, 0.21, 0.27), 37, false)
 	return st.commit()

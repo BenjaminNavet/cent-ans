@@ -10,6 +10,9 @@ render_mode diffuse_lambert_wrap, specular_schlick_ggx;
 uniform vec3 view_origin = vec3(0.0);
 uniform float fade_start = 400.0;
 uniform float fade_end = 700.0;
+// Densité globale (1 = toutes les instances) : au dézoom, seules les graines > 1 − density
+// restent, agrandies de 1/√density pour garder le même couvert.
+uniform float density : hint_range(0.05, 1.0) = 1.0;
 uniform float wind_strength = 0.035;
 uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
@@ -40,7 +43,8 @@ void vertex() {
 	float seed = INSTANCE_CUSTOM.a;
 	float dist = distance(origin.xz, view_origin.xz) + abs(origin.y - view_origin.y) * 0.5;
 	float t = clamp((dist - fade_start) / max(fade_end - fade_start, 1.0), 0.0, 1.0);
-	float keep = smoothstep(0.0, 0.18, seed - t);
+	t = max(t, 1.0 - density);
+	float keep = smoothstep(0.0, 0.18, seed - t) * (1.0 + 0.5 * t) * inversesqrt(density);
 	// Vent : rafales lentes qui balaient la carte, plus un frémissement propre à chaque arbre.
 	float phase = TIME * wind_speed + origin.x * 0.045 + origin.z * 0.03;
 	float gust = 0.6 + 0.4 * sin(phase * 0.37);

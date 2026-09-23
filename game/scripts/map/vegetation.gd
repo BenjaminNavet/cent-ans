@@ -18,20 +18,25 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
-@export var spacing: float = 1.25
+@export var spacing: float = 1.35
 @export var tree_scale: float = 1.0
 ## Au-delà de cette distance caméra → point visé, plus d'arbres.
 @export var max_camera_distance: float = 700.0
 ## Portée de l'éclaircissement, en multiples de la distance caméra (bornes absolues en plus).
-@export var fade_start_factor: float = 1.5
-@export var fade_end_factor: float = 2.6
+@export var fade_start_factor: float = 1.2
+@export var fade_end_factor: float = 2.1
 @export var fade_min_start: float = 110.0
 @export var fade_min_end: float = 200.0
-## Tuiles à moins de `detail_factor` × distance caméra : maillage détaillé.
-@export var detail_factor: float = 1.3
-@export var max_concurrent_jobs: int = 3
+## Tuiles (point le plus proche) à moins de cette distance de la caméra : maillage détaillé ;
+## au-delà, les arbres font moins de ≈ 10 pixels et la variante ≈ 20 triangles suffit.
+@export var detail_distance: float = 170.0
+## Densité globale selon la distance caméra : 1 jusqu'à `density_full_distance`, puis
+## décroissance linéaire jusqu'à `density_min` à `max_camera_distance`.
+@export var density_full_distance: float = 200.0
+@export var density_min: float = 0.3
+@export var max_concurrent_jobs: int = 5
 ## Tuiles semées d'un coup (et attendues) au premier affichage.
-@export var warm_start_tiles: int = 9
+@export var warm_start_tiles: int = 12
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 
@@ -115,7 +120,7 @@ func _process(_delta: float) -> void:
 
 func _try_autobind() -> void:
 	var parent := get_parent()
-	if parent == null or not bool(parent.get("load_ok")):
+	if parent == null or parent.get("load_ok") != true:
 		return
 	var data: Variant = parent.get("map_data")
 	if data is MapData:
@@ -138,21 +143,27 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_material.set_shader_parameter("view_origin", camera_position)
 	_material.set_shader_parameter("fade_start", fade_start)
 	_material.set_shader_parameter("fade_end", maxf(fade_end, fade_start + 1.0))
-	var detail_distance := camera_distance * detail_factor
+	var density := lerpf(1.0, density_min, clampf((camera_distance - density_full_distance) / maxf(max_camera_distance - density_full_distance, 1.0), 0.0, 1.0))
+	_material.set_shader_parameter("density", density)
 	var wanted: Array = []
+	var camera_xz := Vector2(camera_position.x, camera_position.z)
+	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
+	var lift := absf(camera_position.y) * 0.5
 	for cy in TerrainBuilder.CHUNKS:
 		for cx in TerrainBuilder.CHUNKS:
 			var index := cy * TerrainBuilder.CHUNKS + cx
-			var rect := Rect2(cx * chunk_px, cy * chunk_px, chunk_px, chunk_px)
-			var nearest := Vector2(clampf(camera_position.x, rect.position.x, rect.end.x), clampf(camera_position.z, rect.position.y, rect.end.y))
-			var d := nearest.distance_to(Vector2(camera_position.x, camera_position.z))
+			var d := _rect_distance(Rect2(cx * chunk_px, cy * chunk_px, chunk_px, chunk_px), camera_xz) + lift
 			var in_range := d < fade_end
 			if _tiles.has(index):
 				var entry: Dictionary = _tiles[index]
 				(entry["node"] as Node3D).visible = in_range
 				if in_range:
 					entry["last_seen"] = _frame
-					_apply_lod(entry, d, detail_distance, fade_start, fade_end)
+					for part: Dictionary in entry["parts"]:
+						var part_d := _rect_distance(part["rect"], camera_xz) + lift
+						(part["node"] as Node3D).visible = part_d < fade_end
+						if part_d < fade_end:
+							_apply_lod(part, part_d, fade_start, fade_end, density)
 			elif in_range and not _jobs.has(index):
 				wanted.append([d, index])
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
@@ -178,9 +189,14 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_evict()
 
 
+static func _rect_distance(rect: Rect2, point: Vector2) -> float:
+	var nearest := Vector2(clampf(point.x, rect.position.x, rect.end.x), clampf(point.y, rect.position.y, rect.end.y))
+	return nearest.distance_to(point)
+
+
 ## Maillage selon la distance et nombre d'instances visibles : les graines (triées) inférieures
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
-func _apply_lod(entry: Dictionary, d: float, detail_distance: float, fade_start: float, fade_end: float) -> void:
+func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float) -> void:
 	var detailed := d < detail_distance
 	if entry.get("detailed", null) != detailed:
 		entry["detailed"] = detailed
@@ -190,9 +206,10 @@ func _apply_lod(entry: Dictionary, d: float, detail_distance: float, fade_start:
 			var mmi: MultiMeshInstance3D = mmis[kind]
 			if mmi != null:
 				mmi.multimesh.mesh = meshes[kind]
+				# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus).
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_shadows and detailed else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var t := clampf((d - fade_start) / maxf(fade_end - fade_start, 1.0), 0.0, 1.0)
-	var fraction := clampf(1.0 - t + 0.02, 0.0, 1.0)
+	var fraction := clampf(minf(1.0 - t, density) + 0.02, 0.0, 1.0)
 	for mmi in entry["mmis"]:
 		if mmi != null:
 			var multimesh: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
@@ -202,7 +219,7 @@ func _apply_lod(entry: Dictionary, d: float, detail_distance: float, fade_start:
 func _meshes(detailed: bool) -> Array:
 	if detailed:
 		return [VegetationMeshes.deciduous(), VegetationMeshes.conifer(), VegetationMeshes.hedge()]
-	return [VegetationMeshes.deciduous_low(), VegetationMeshes.conifer_low(), VegetationMeshes.hedge()]
+	return [VegetationMeshes.deciduous_low(), VegetationMeshes.conifer_low(), VegetationMeshes.hedge_low()]
 
 
 func _start_job(index: int) -> void:
@@ -239,28 +256,37 @@ func _wait_all_jobs() -> void:
 func _install_tile(index: int, job: VegetationTileJob) -> void:
 	var node := Node3D.new()
 	node.name = "Tile_%d" % index
-	var mmis: Array = []
+	var parts: Array = []
 	var meshes := _meshes(false)
-	for kind in VegetationTileJob.KIND_COUNT:
-		var count: int = job.counts[kind]
-		if count == 0:
-			mmis.append(null)
-			continue
-		var multimesh := MultiMesh.new()
-		multimesh.transform_format = MultiMesh.TRANSFORM_3D
-		multimesh.use_custom_data = true
-		multimesh.mesh = meshes[kind]
-		multimesh.instance_count = count
-		multimesh.buffer = job.buffers[kind]
-		var mmi := MultiMeshInstance3D.new()
-		mmi.name = ["Deciduous", "Conifer", "Hedge"][kind]
-		mmi.multimesh = multimesh
-		mmi.material_override = _material
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.add_child(mmi)
-		mmis.append(mmi)
+	var part_px := float(chunk_px) / VegetationTileJob.PARTS_SIDE
+	for part_index in VegetationTileJob.PARTS:
+		var part_node := Node3D.new()
+		part_node.name = "Part_%d" % part_index
+		var mmis: Array = []
+		for kind in VegetationTileJob.KIND_COUNT:
+			var slot := part_index * VegetationTileJob.KIND_COUNT + kind
+			var count: int = job.counts[slot]
+			if count == 0:
+				mmis.append(null)
+				continue
+			var multimesh := MultiMesh.new()
+			multimesh.transform_format = MultiMesh.TRANSFORM_3D
+			multimesh.use_custom_data = true
+			multimesh.mesh = meshes[kind]
+			multimesh.instance_count = count
+			multimesh.buffer = job.buffers[slot]
+			var mmi := MultiMeshInstance3D.new()
+			mmi.name = ["Deciduous", "Conifer", "Hedge"][kind]
+			mmi.multimesh = multimesh
+			mmi.material_override = _material
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			part_node.add_child(mmi)
+			mmis.append(mmi)
+		node.add_child(part_node)
+		var cell := Vector2(part_index % VegetationTileJob.PARTS_SIDE, part_index / VegetationTileJob.PARTS_SIDE)
+		parts.append({"node": part_node, "mmis": mmis, "rect": Rect2(Vector2(job.origin_px) + cell * part_px, Vector2(part_px, part_px))})
 	add_child(node)
-	_tiles[index] = {"node": node, "mmis": mmis, "counts": job.counts, "last_seen": _frame}
+	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame}
 	stats["tiles"] = _tiles.size()
 	stats["instances"] = int(stats["instances"]) + job.instance_total()
 	stats["build_ms_total"] = float(stats["build_ms_total"]) + job.build_ms
