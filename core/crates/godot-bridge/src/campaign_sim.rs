@@ -6,10 +6,15 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, OnceLock};
 
-use data_model::{CharacterId, FactionId, GameData, ProvinceId};
+use data_model::{
+    BuildingId, CharacterId, FactionId, GameData, PopulationClass, ProvinceId, ResourceCategory,
+};
 use godot::classes::RefCounted;
 use godot::prelude::*;
-use sim_campaign::{Army, ArmyId, CampaignState, GameEvent, Order, Unit};
+use sim_campaign::{
+    Army, ArmyId, BuildOption, CampaignState, Construction, EffectTotals, EffectValue,
+    FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
+};
 
 use crate::convert::variant_to_json;
 
@@ -163,7 +168,43 @@ impl CampaignSim {
             "provinces_count" => summary.provinces_count as i64,
             "armies_count" => summary.armies_count as i64,
             "alive" => summary.alive,
+            "projected_income" => summary.projected_income,
+            "army_upkeep" => summary.army_upkeep,
+            "building_upkeep" => summary.building_upkeep,
+            "tax_rate" => tax_rate_key(summary.tax_rate),
         }
+    }
+
+    /// Full city panel of a province (spec M3 § 2), or an empty dictionary
+    /// for an unknown id.
+    #[func]
+    fn get_province_city(&self, id: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(city) = ProvinceId::new(id.to_string())
+            .ok()
+            .and_then(|id| state.province_city(data, &id))
+        else {
+            return VarDictionary::new();
+        };
+        province_city_dict(data, &city)
+    }
+
+    /// Full economic panel of a faction (spec M3 § 2), or an empty
+    /// dictionary for an unknown id.
+    #[func]
+    fn get_faction_economy(&self, id: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(economy) = FactionId::new(id.to_string())
+            .ok()
+            .and_then(|id| state.faction_economy(data, &id))
+        else {
+            return VarDictionary::new();
+        };
+        faction_economy_dict(&economy)
     }
 
     /// `{owner, controller, garrison[], siege?, unrest, devastation, population_total}`.
@@ -374,6 +415,173 @@ fn stance_key(stance: sim_campaign::Stance) -> &'static str {
         sim_campaign::Stance::Normal => "normal",
         sim_campaign::Stance::Raid => "raid",
         sim_campaign::Stance::Siege => "siege",
+    }
+}
+
+fn tax_rate_key(rate: TaxRate) -> &'static str {
+    match rate {
+        TaxRate::Low => "low",
+        TaxRate::Normal => "normal",
+        TaxRate::High => "high",
+    }
+}
+
+fn resource_category_key(category: ResourceCategory) -> &'static str {
+    match category {
+        ResourceCategory::Food => "food",
+        ResourceCategory::RawMaterial => "raw_material",
+        ResourceCategory::Manufactured => "manufactured",
+        ResourceCategory::Luxury => "luxury",
+    }
+}
+
+fn building_category_key(category: data_model::BuildingCategory) -> &'static str {
+    match category {
+        data_model::BuildingCategory::Production => "production",
+        data_model::BuildingCategory::Commerce => "commerce",
+        data_model::BuildingCategory::Military => "military",
+        data_model::BuildingCategory::Religious => "religious",
+        data_model::BuildingCategory::Sanitary => "sanitary",
+        data_model::BuildingCategory::Fortification => "fortification",
+    }
+}
+
+fn population_class_dict(entry: &PopulationClass) -> VarDictionary {
+    vdict! {
+        "count" => entry.count as i64,
+        "unrest" => i64::from(entry.unrest),
+        "health" => i64::from(entry.health),
+        "wealth" => i64::from(entry.wealth),
+        "goods_satisfaction" => i64::from(entry.goods_satisfaction),
+    }
+}
+
+fn population_classes_dict(classes: &data_model::PopulationClasses) -> VarDictionary {
+    vdict! {
+        "peasants" => &population_class_dict(&classes.peasants),
+        "burghers" => &population_class_dict(&classes.burghers),
+        "clergy" => &population_class_dict(&classes.clergy),
+        "nobility" => &population_class_dict(&classes.nobility),
+    }
+}
+
+fn building_summary_dict(data: &GameData, id: &BuildingId) -> VarDictionary {
+    let Some(building) = data.buildings.get(id) else {
+        return vdict! {
+            "id" => id.as_str(),
+            "name" => id.as_str(),
+            "category" => "",
+            "upkeep" => 0,
+        };
+    };
+    vdict! {
+        "id" => id.as_str(),
+        "name" => building.name.display.as_str(),
+        "category" => building_category_key(building.category),
+        "upkeep" => i64::from(building.upkeep.unwrap_or(0)),
+    }
+}
+
+fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
+    buildings
+        .iter()
+        .map(|id| building_summary_dict(data, id).to_variant())
+        .collect()
+}
+
+fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
+    let name = data
+        .buildings
+        .get(&construction.building)
+        .map_or_else(|| construction.building.to_string(), |b| b.name.display.clone());
+    vdict! {
+        "building" => construction.building.as_str(),
+        "name" => name.as_str(),
+        "turns_left" => i64::from(construction.turns_left),
+    }
+}
+
+fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
+    let category = data
+        .buildings
+        .get(&option.building)
+        .map_or("", |b| building_category_key(b.category));
+    vdict! {
+        "building" => option.building.as_str(),
+        "name" => option.name.as_str(),
+        "category" => category,
+        "cost" => i64::from(option.cost),
+        "turns" => i64::from(option.turns),
+        "available" => option.available,
+        "reason" => option.reason.as_deref().unwrap_or(""),
+    }
+}
+
+fn buildable_array(data: &GameData, options: &[BuildOption]) -> VarArray {
+    options
+        .iter()
+        .map(|option| build_option_dict(data, option).to_variant())
+        .collect()
+}
+
+fn effect_value_dict(value: EffectValue) -> VarDictionary {
+    vdict! {
+        "flat" => value.flat,
+        "percent" => value.percent,
+    }
+}
+
+fn effect_totals_dict(effects: &EffectTotals) -> VarDictionary {
+    vdict! {
+        "tax_income" => &effect_value_dict(effects.tax_income),
+        "trade_income" => &effect_value_dict(effects.trade_income),
+        "health" => &effect_value_dict(effects.health),
+        "unrest" => &effect_value_dict(effects.unrest),
+        "wealth" => &effect_value_dict(effects.wealth),
+        "goods_satisfaction" => &effect_value_dict(effects.goods_satisfaction),
+        "growth" => &effect_value_dict(effects.growth),
+        "garrison" => &effect_value_dict(effects.garrison),
+        "fortification_level" => &effect_value_dict(effects.fortification_level),
+        "recruit_cost" => &effect_value_dict(effects.recruit_cost),
+        "supply" => &effect_value_dict(effects.supply),
+    }
+}
+
+fn province_city_dict(data: &GameData, city: &ProvinceCity) -> VarDictionary {
+    let mut dict = vdict! {
+        "classes" => &population_classes_dict(&city.classes),
+        "buildings" => &buildings_array(data, &city.buildings),
+        "fortification_level" => i64::from(city.fortification_level),
+        "capacity" => city.capacity as i64,
+        "buildable" => &buildable_array(data, &city.buildable),
+        "resources" => &ids(city.resources.iter()),
+        "effects" => &effect_totals_dict(&city.effects),
+    };
+    if let Some(construction) = &city.construction {
+        dict.set("construction", &construction_dict(data, construction));
+    }
+    dict
+}
+
+fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
+    let mut goods = VarDictionary::new();
+    for (resource, count) in &economy.goods {
+        goods.set(resource.as_str(), i64::from(*count));
+    }
+    let goods_categories: PackedStringArray = economy
+        .goods_categories
+        .iter()
+        .map(|category| GString::from(resource_category_key(*category)))
+        .collect();
+    vdict! {
+        "treasury" => economy.treasury,
+        "income" => economy.income,
+        "projected_income" => economy.projected_income,
+        "army_upkeep" => economy.army_upkeep,
+        "building_upkeep" => economy.building_upkeep,
+        "tax_rate" => tax_rate_key(economy.tax_rate),
+        "goods" => &goods,
+        "goods_categories" => &goods_categories,
     }
 }
 
