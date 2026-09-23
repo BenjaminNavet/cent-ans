@@ -7,6 +7,7 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md`.
 | H1 Audit historique | **fusionné** (fcbcb01) | — | données seulement ; rapport `docs/histoire/audit-2026-09-23.md` |
 | H2 Codex et bulles (infra + amorce) | vague 1 | worktree agent | nouveaux fichiers game/ ; hooks minimaux |
 | H3+H4 Table et médecine (core + données) | vague 1 | worktree agent | Rust + data + pont ; pas d'UI |
+| H7 Événements historiques manquants (≈ 22, d’après l’audit) | en cours | worktree agent | data/events, data/characters |
 | UI Table + onglet Médecine | vague 2 | — | |
 | Rédaction codex (~150 fiches) + liens | vague 2 | — | |
 | H5 Monnaie + H6 Chevalerie et rançons (core + données) | vague 2 | — | |
