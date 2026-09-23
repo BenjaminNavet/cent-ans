@@ -1,0 +1,12 @@
+{
+  "id": "cdx_grandes_compagnies",
+  "title": "Les routiers et les Grandes Compagnies",
+  "category": "guerre",
+  "aliases": ["Grandes Compagnies", "routiers", "routier", "Tard-Venus", "compagnie de routiers", "Brignais"],
+  "era": { "from": "1356", "to": "1370" },
+  "summary": "Les routiers sont des soldats professionnels qui vivent de la guerre. Privés de solde par la paix de [[cdx_bretigny|Brétigny]] en 1360, ils se regroupent en Grandes Compagnies qui rançonnent le royaume, jusqu'à ce que [[cdx_du_guesclin|Du Guesclin]] les emmène en Castille.",
+  "body": "Au XIVe siècle, les armées ne sont plus seulement faites de vassaux venus servir leur seigneur, comme l'ancien [[cdx_ost_feodal|ost]] : les princes engagent des soldats payés, réunis en compagnies sous un capitaine. Anglais, Gascons, Bretons, Navarrais, Allemands ou Hennuyers, ces hommes font de la guerre un métier. Quand la solde manque, ils se paient sur le pays : pillage, rançons, et surtout les « pâtis », tribut régulier exigé des villages pour ne pas être attaqués.\n\nLa paix de [[cdx_bretigny|Brétigny]] (1360) laisse des milliers de ces hommes sans emploi. Au lieu de rentrer chez eux, ils se regroupent en Grandes Compagnies de plusieurs milliers de combattants ; les derniers arrivés sont surnommés les Tard-Venus. Ils prennent Pont-Saint-Esprit à la fin de 1360, menacent le pape à Avignon, qui doit les payer pour qu'ils s'éloignent, et écrasent le 6 avril 1362 à Brignais, près de Lyon, l'armée royale envoyée contre eux.\n\nCertains capitaines deviennent célèbres : Arnaud de Cervole, dit l'Archiprêtre, Seguin de Badefol, l'Anglais [[cdx_robert_knolles|Robert Knolles]] ou Hugh Calveley. D'autres partent chercher fortune en Italie, où John Hawkwood et sa Compagnie blanche louent leurs services aux cités rivales.\n\nPour en débarrasser le royaume, [[cdx_charles_v|Charles V]] confie en 1365 à [[cdx_du_guesclin|Du Guesclin]] la mission de les conduire en Castille, soutenir Henri de Trastamare contre son demi-frère [[cdx_pierre_le_cruel|Pierre le Cruel]]. L'expédition vide la France d'une partie des compagnies, et la reprise de la guerre en 1369 absorbe les autres. Le problème des soldats sans emploi ne sera vraiment réglé qu'au siècle suivant, par la création d'une armée permanente, les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]].",
+  "entity": "evt_grandes_compagnies",
+  "see_also": ["cdx_du_guesclin", "cdx_bretigny", "cdx_chevauchee", "cdx_compagnies_ordonnance"],
+  "sources": ["Grandes compagnies", "Routier (Moyen Âge)", "Bataille de Brignais"]
+}

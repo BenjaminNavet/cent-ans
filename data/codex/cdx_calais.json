@@ -1,0 +1,12 @@
+{
+  "id": "cdx_calais",
+  "title": "Calais, siège et ville anglaise",
+  "category": "bataille",
+  "aliases": ["Calais", "siège de Calais", "bourgeois de Calais", "Eustache de Saint-Pierre"],
+  "era": { "from": "1346", "to": "1558" },
+  "summary": "Assiégée par [[cdx_edouard_iii|Édouard III]] au lendemain de [[cdx_crecy|Crécy]], Calais se rend en août 1347 après onze mois de siège. Elle reste anglaise jusqu'en 1558 : c'est la porte de l'Angleterre sur le continent.",
+  "body": "Après sa victoire de [[cdx_crecy|Crécy]], Édouard III ne marche pas sur Paris : il lui faut un port sûr, face à Douvres, pour débarquer hommes et chevaux. Il met le siège devant Calais dès le 4 septembre 1346. La ville, bien fortifiée et entourée de marais, est défendue par Jean de Vienne. Les Anglais bâtissent devant elle une véritable ville de bois, surnommée Villeneuve-la-Hardie, avec son marché, et bloquent le port avec leur flotte.\n\nLa faim fait son œuvre. [[cdx_philippe_vi|Philippe VI]] rassemble une armée de secours à l'été 1347, mais n'ose pas attaquer les lignes anglaises retranchées et se retire. Abandonnée, Calais capitule début août 1347, après onze mois de siège.\n\nLe récit le plus célèbre du siège vient du chroniqueur [[cdx_jean_le_bel|Jean le Bel]], repris par [[cdx_froissart|Froissart]] : Édouard exige que six notables, en chemise et la corde au cou, lui apportent les clefs de la ville. Eustache de Saint-Pierre se désigne le premier. Le roi veut les faire décapiter, mais la reine [[cdx_philippa_de_hainaut|Philippa]], enceinte, obtient leur grâce à genoux. La scène, peut-être embellie, a inspiré à Rodin son groupe des Bourgeois de Calais (1889).\n\nÉdouard expulse une partie des habitants et repeuple la ville d'Anglais. Calais devient en 1363 le siège de l'étape de la laine, le marché obligé des laines anglaises exportées vers la [[cdx_flandre_laine|Flandre]], et une garnison permanente y tient la marche de Calais. Elle survit à la fin de la guerre en 1453 et n'est reprise par le duc de Guise qu'en janvier 1558, sous Henri II.",
+  "entity": "evt_siege_calais",
+  "see_also": ["cdx_crecy", "cdx_edouard_iii", "cdx_philippa_de_hainaut", "cdx_bretigny"],
+  "sources": ["Siège de Calais (1346-1347)", "Les Bourgeois de Calais", "Calais"]
+}

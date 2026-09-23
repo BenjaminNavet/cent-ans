@@ -1,0 +1,12 @@
+{
+  "id": "cdx_bretigny",
+  "title": "Traité de Brétigny",
+  "category": "institution",
+  "aliases": ["traité de Brétigny", "paix de Brétigny", "Brétigny", "traité de Brétigny-Calais", "traité de Calais"],
+  "era": { "from": "1360", "to": "1369" },
+  "summary": "Conclu en mai 1360 près de Chartres et ratifié à Calais en octobre, le traité de Brétigny fixe la rançon de [[cdx_jean_ii|Jean II]] à trois millions d'écus et cède à [[cdx_edouard_iii|Édouard III]] une grande Aquitaine en pleine souveraineté.",
+  "body": "Après la capture de [[cdx_jean_ii|Jean II]] à [[cdx_poitiers|Poitiers]] en 1356, le royaume de France est exsangue : le roi est prisonnier à Londres, Paris s'est soulevée avec [[cdx_etienne_marcel|Étienne Marcel]] et les campagnes ont connu la [[cdx_jacquerie|Jacquerie]]. En 1359, Édouard III lance une nouvelle [[cdx_chevauchee|chevauchée]] pour se faire sacrer à Reims, mais la ville lui ferme ses portes ; un violent orage de grêle frappe son armée près de Chartres, au printemps 1360. Les deux camps sont épuisés : on négocie.\n\nLes préliminaires sont arrêtés le 8 mai 1360 au hameau de Brétigny, près de Chartres. Le roi d'Angleterre reçoit en pleine souveraineté, c'est-à-dire sans hommage au roi de France, une Aquitaine agrandie : la [[cdx_guyenne|Guyenne]] et la Gascogne, mais aussi le Poitou, la Saintonge, l'Angoumois, le Limousin, le Périgord, le Quercy, le Rouergue et l'Agenais, ainsi que [[cdx_calais|Calais]], Guînes et le Ponthieu. En échange, Édouard renonce à la couronne de France.\n\nLa rançon du roi Jean est fixée à trois millions d'écus d'or, une somme colossale, payable par tranches ; des otages de haut rang, dont ses fils Louis d'Anjou et Jean de Berry, garantissent le paiement. Pour la lever, le dauphin Charles crée en décembre 1360 le [[cdx_franc_a_cheval|franc à cheval]] et fait voter des [[cdx_aides|aides]] et la [[cdx_gabelle|gabelle]] qui deviendront durables.\n\nLors de la ratification à Calais, le 24 octobre 1360, les renonciations réciproques (Édouard à la couronne, Jean à sa souveraineté sur l'Aquitaine) sont renvoyées à un acte séparé qui ne sera jamais échangé. Ce détail juridique permet à [[cdx_charles_v|Charles V]] de recevoir en 1368-1369 l'appel des seigneurs gascons contre le [[cdx_prince_noir|Prince noir]] et de rouvrir la guerre en toute légalité. La paix n'aura duré que neuf ans.",
+  "entity": "evt_bretigny",
+  "see_also": ["cdx_jean_ii", "cdx_poitiers", "cdx_rancon", "cdx_charles_v", "cdx_guyenne"],
+  "sources": ["Traité de Brétigny", "Jean II (roi de France)"]
+}

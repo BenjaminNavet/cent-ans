@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jacquerie",
+  "title": "La Jacquerie",
+  "category": "evenement",
+  "aliases": ["Jacquerie", "Jacques Bonhomme", "Guillaume Carle", "Guillaume Cale"],
+  "era": { "from": "1358", "to": "1358" },
+  "summary": "Au printemps 1358, les paysans du Beauvaisis et de l'Île-de-France se soulèvent contre une noblesse jugée incapable de les protéger. La révolte, brève et sanglante, est écrasée en quelques semaines par [[cdx_charles_le_mauvais|Charles le Mauvais]].",
+  "body": "En 1358, le royaume est sans roi : [[cdx_jean_ii|Jean II]] est captif à Londres depuis [[cdx_poitiers|Poitiers]]. Les campagnes autour de Paris sont ravagées par les [[cdx_grandes_compagnies|routiers]] et par les troupes des partis en lutte, tandis que les seigneurs, dont beaucoup ont été pris ou rançonnés, exigent de leurs paysans l'argent de leur propre [[cdx_rancon|rançon]]. La noblesse, vaincue à Poitiers, a perdu aux yeux des paysans sa raison d'être : protéger ceux qui travaillent.\n\nLe 28 mai 1358, à Saint-Leu-d'Esserent, près de Creil, des paysans tuent plusieurs chevaliers. Le mouvement gagne en quelques jours le Beauvaisis, le Valois, la Brie et la Picardie : des châteaux sont pillés et brûlés, des familles nobles massacrées. Les nobles appellent ces révoltés les Jacques, du sobriquet de Jacques Bonhomme qu'ils donnent au paysan ; le mot jacquerie désignera ensuite toute révolte rurale.\n\nLes Jacques trouvent un chef, Guillaume Carle (ou Cale), qui tente de discipliner ses bandes, et un allié intéressé, le prévôt des marchands [[cdx_etienne_marcel|Étienne Marcel]], qui leur envoie des Parisiens. Le 9 juin, une troupe de Jacques et de Parisiens attaque le Marché de Meaux, où s'est réfugiée la duchesse de Normandie ; elle est taillée en pièces par des chevaliers revenant de croisade en Prusse, parmi lesquels Gaston Fébus, comte de Foix.\n\nLe lendemain, près de Mello, [[cdx_charles_le_mauvais|Charles le Mauvais]] invite Guillaume Carle à parlementer, le fait prisonnier puis charge son armée privée de chef. Carle est exécuté à Clermont-en-Beauvaisis. Suit une terrible répression nobiliaire, qui fait bien plus de morts que la révolte elle-même. Les chroniqueurs, tous du côté des nobles, en ont laissé un récit horrifié ; les historiens y voient aujourd'hui une révolte de paysans aisés, excédés par la guerre et l'impôt autant que par la misère.",
+  "entity": "evt_jacquerie",
+  "see_also": ["cdx_etienne_marcel", "cdx_charles_le_mauvais", "cdx_poitiers", "cdx_trois_ordres"],
+  "sources": ["Grande Jacquerie", "Guillaume Carle"]
+}
