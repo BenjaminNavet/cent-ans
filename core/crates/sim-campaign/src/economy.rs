@@ -25,6 +25,8 @@ pub fn tax_per_head(class: SocialClass) -> f64 {
 pub const TAX_EFFICIENCY: f64 = 0.09;
 /// Months of upkeep billed per season turn.
 pub const UPKEEP_MONTHS_PER_SEASON: i64 = 4;
+/// Garrison units are part-time local levies: they cost this share of field upkeep.
+pub const GARRISON_UPKEEP_PERCENT: i64 = 50;
 /// Morale lost by every unit when the treasury is negative.
 pub const BANKRUPTCY_MORALE_PENALTY: u8 = 10;
 /// Supply lost per turn outside friendly territory.
@@ -60,9 +62,14 @@ pub fn unit_upkeep(data: &GameData, unit: &Unit) -> i64 {
         * UPKEEP_MONTHS_PER_SEASON
 }
 
-/// Seasonal upkeep of a list of units.
+/// Seasonal upkeep of a list of field units.
 pub fn units_upkeep(data: &GameData, units: &[Unit]) -> i64 {
     units.iter().map(|unit| unit_upkeep(data, unit)).sum()
+}
+
+/// Seasonal upkeep of a garrison (see [`GARRISON_UPKEEP_PERCENT`]).
+pub fn garrison_upkeep(data: &GameData, units: &[Unit]) -> i64 {
+    units_upkeep(data, units) * GARRISON_UPKEEP_PERCENT / 100
 }
 
 impl CampaignState {
@@ -87,7 +94,7 @@ impl CampaignState {
             .provinces
             .values()
             .filter(|p| &p.controller == faction)
-            .map(|p| units_upkeep(data, &p.garrison))
+            .map(|p| garrison_upkeep(data, &p.garrison))
             .sum();
         armies + garrisons
     }

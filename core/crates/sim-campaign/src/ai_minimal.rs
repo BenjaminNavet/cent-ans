@@ -32,6 +32,14 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     let mut orders = Vec::new();
     let capital = faction_state.capital.clone();
 
+    // In debt and still losing money: dismiss the most expensive field unit.
+    if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn
+    {
+        if let Some(order) = disband_most_expensive(state, data, faction) {
+            orders.push(order);
+        }
+    }
+
     // Recruit the cheapest affordable unit in the capital.
     if state
         .provinces
@@ -160,6 +168,49 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         }
     }
     orders
+}
+
+/// Dismisses the costliest unit of the largest army (never its last unit), or a
+/// garrison unit when no army can spare one.
+fn disband_most_expensive(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<Order> {
+    let upkeep =
+        |unit: &crate::state::Unit| data.unit_types.get(&unit.unit_type).map_or(0, |t| t.upkeep);
+    let army = state
+        .armies
+        .iter()
+        .filter(|(_, a)| &a.faction == faction && a.units.len() > 1)
+        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())));
+    if let Some((id, army)) = army {
+        let (index, _) = army
+            .units
+            .iter()
+            .enumerate()
+            .max_by_key(|(i, u)| (upkeep(u), std::cmp::Reverse(*i)))?;
+        return Some(Order::DisbandUnit {
+            army: Some(id.clone()),
+            province: None,
+            unit_index: index,
+        });
+    }
+    let (province_id, province) = state
+        .provinces
+        .iter()
+        .filter(|(_, p)| &p.controller == faction && p.garrison.len() > 1)
+        .max_by_key(|(id, p)| (p.garrison.len(), std::cmp::Reverse((*id).clone())))?;
+    let (index, _) = province
+        .garrison
+        .iter()
+        .enumerate()
+        .max_by_key(|(i, u)| (upkeep(u), std::cmp::Reverse(*i)))?;
+    Some(Order::DisbandUnit {
+        army: None,
+        province: Some(province_id.clone()),
+        unit_index: index,
+    })
 }
 
 /// Strength of hostile armies inside or one edge away from `province`.
