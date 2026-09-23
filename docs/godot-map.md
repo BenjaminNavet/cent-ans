@@ -165,6 +165,7 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Mode mécontentement (M3) | M (action `map_toggle_unrest`) ; ignoré avec un message si `get_province_city` est indisponible |
 | Cour (M4) | C |
 | Diplomatie (M5) | P ; modes de carte N (diplomatie) et R (religion) |
+| Objectifs (M10) | O (ou Menu → Objectifs) ; écran de fin de campagne automatique |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
 Options de ligne de commande (après `--`) :

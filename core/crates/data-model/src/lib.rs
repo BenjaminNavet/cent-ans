@@ -20,8 +20,8 @@ pub use common::{
 pub use entities::building::{Building, BuildingCategory};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::faction::{
-    AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Relation, RelationStatus,
-    SuccessionLaw,
+    AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
+    ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
 pub use entities::names::NameList;
 pub use entities::province::{

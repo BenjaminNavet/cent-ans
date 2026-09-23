@@ -15,6 +15,7 @@ mod campaign_sim;
 mod campaign_sim_diplomacy;
 mod campaign_sim_siege;
 mod campaign_sim_tech;
+mod campaign_sim_victory;
 mod convert;
 
 pub use campaign_sim::CampaignSim;
@@ -164,6 +165,8 @@ impl GameDataStore {
             "blazon" => heraldry.blazon.as_str(),
             "capital" => faction.capital.as_str(),
             "ruler" => faction.ruler.as_ref().map_or("", |id| id.as_str()),
+            "victory_summary" => faction.victory.as_ref().and_then(|v| v.summary.as_deref()).unwrap_or(""),
+            "victory_end_year" => faction.victory.as_ref().map_or(0, |v| i64::from(v.end_year)),
         }
     }
 

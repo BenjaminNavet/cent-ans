@@ -52,6 +52,7 @@ pub mod siege;
 pub mod skills;
 pub mod state;
 pub mod turn;
+pub mod victory;
 
 pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,

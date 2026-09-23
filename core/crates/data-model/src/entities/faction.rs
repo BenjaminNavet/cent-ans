@@ -92,6 +92,49 @@ pub struct ClaimData {
     pub note: Option<String>,
 }
 
+/// One condition of a campaign objective (M10 victory).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ObjectiveCondition {
+    /// The faction controls every listed province.
+    ControlAll { provinces: Vec<ProvinceId> },
+    /// The faction controls at least `count` of the listed provinces.
+    ControlCount {
+        provinces: Vec<ProvinceId>,
+        count: u32,
+    },
+    /// `faction` controls none of the listed provinces.
+    NoForeignControl {
+        faction: FactionId,
+        provinces: Vec<ProvinceId>,
+    },
+    /// The faction has no suzerain.
+    Independent,
+    /// `faction` is our vassal, or has disappeared.
+    Subjugate { faction: FactionId },
+}
+
+/// A campaign objective shown to the player.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Objective {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub condition: ObjectiveCondition,
+}
+
+/// Victory conditions of a playable faction: every objective met before
+/// `end_year` wins the campaign.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VictoryConditions {
+    pub end_year: i32,
+    pub objectives: Vec<Objective>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AiPersonality {
@@ -143,6 +186,8 @@ pub struct Faction {
     pub relations: Vec<Relation>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub claims: Vec<ClaimData>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub victory: Option<VictoryConditions>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ai_personality: Option<AiPersonality>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
