@@ -96,14 +96,21 @@ pub fn effects_of(data: &GameData, buildings: &[BuildingId]) -> EffectTotals {
 
 /// Population capacity of a province: [`BASE_CAPACITY`] times one plus the
 /// sum of the tiers of its `production`-category buildings (spec § 1.1).
-pub fn capacity(data: &GameData, buildings: &[BuildingId]) -> u64 {
+pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]) -> u64 {
     let bonus_tiers: u64 = buildings
         .iter()
         .filter_map(|id| data.buildings.get(id))
         .filter(|b| b.category == data_model::BuildingCategory::Production)
         .map(|b| u64::from(b.tier))
         .sum();
-    BASE_CAPACITY * (1 + bonus_tiers)
+    // The 1337 population is the reference: a province can grow ~25 % above
+    // it before crowding hurts health, plus 10 % per production tier.
+    let base = data
+        .provinces
+        .get(province)
+        .map_or(BASE_CAPACITY, |p| p.population.classes.total())
+        .max(BASE_CAPACITY);
+    base * (125 + 10 * bonus_tiers) / 100
 }
 
 /// Total upkeep of the completed buildings of a province (spec § 1.2).
@@ -276,7 +283,7 @@ impl CampaignState {
             buildings: state.buildings.clone(),
             construction: state.construction.clone(),
             fortification_level: self.fortification_level(data, id),
-            capacity: capacity(data, &state.buildings),
+            capacity: capacity(data, id, &state.buildings),
             buildable: self.buildable(data, id),
             resources: province_data.resources.clone(),
             effects: self.province_effects(data, id),

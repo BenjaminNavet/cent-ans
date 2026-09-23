@@ -34,6 +34,16 @@ impl TaxRate {
             TaxRate::High => 1.4,
         }
     }
+
+    /// Share of the population's wealth taken by the crown (0-1): the
+    /// "taux d'imposition" of the wealth and unrest formulas (spec § 1.1).
+    pub fn burden(self) -> f64 {
+        match self {
+            TaxRate::Low => 0.2,
+            TaxRate::Normal => 0.35,
+            TaxRate::High => 0.5,
+        }
+    }
 }
 
 /// Faction-level economic snapshot for the bridge (spec § 2).

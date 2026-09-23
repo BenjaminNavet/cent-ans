@@ -14,13 +14,14 @@ Pour chaque classe (paysans, bourgeois, clergé, noblesse) : `count`, `unrest`, 
   0,3 % bourgeois, 0,05 % clergé, 0,1 % noblesse ; `f(health) = (health - 50) / 50` (santé < 50 → déclin) ;
   dévastation > 50 → croissance nulle. Recrutement retire les soldats de la classe source (déjà partiel).
 - Santé : tend vers `50 + effets bâtiments sanitaires (Health) + (goods_satisfaction - 50) / 4 - surpopulation`
-  (surpopulation = max(0, count / capacité_province - 1) × 20, capacité = 40 000 × (1 + niveaux de bâtiments
-  de production)). Vitesse : 20 % de l'écart par saison.
-- Richesse : tend vers `base_classe + effets (Wealth, TradeIncome) - taux d'imposition × 30 - dévastation / 2`
+  (surpopulation = max(0, population / capacité - 1) × 20, capacité = population de 1337 × (1,25 + 0,10 × niveaux
+  de bâtiments de production), minimum 40 000). Vitesse : 20 % de l'écart par saison.
+- Richesse : tend vers `base_classe + effets (Wealth, TradeIncome) - fardeau_fiscal × 30 - dévastation / 2`
+  (fardeau fiscal = 0,20 Bas / 0,35 Normal / 0,50 Haut ; distinct du multiplicateur de revenu 0,7 / 1,0 / 1,4)
   ; base 30 paysans, 55 bourgeois, 50 clergé, 70 noblesse. Vitesse 15 %/saison.
 - Satisfaction en biens : dépend des ressources accessibles à la faction (§ 1.3) et des bâtiments de
   commerce (GoodsSatisfaction) : `40 + 10 × nb_catégories_de_biens_disponibles (max 5) + effets`, vitesse 25 %.
-- Mécontentement : tend vers `taux d'imposition × 40 + dévastation / 2 + (50 - goods_satisfaction) / 3
+- Mécontentement : tend vers `fardeau_fiscal × 40 + dévastation / 2 + (50 - goods_satisfaction) / 3
   + (50 - health) / 4 + occupation étrangère (+25 si contrôleur ≠ propriétaire) + religion différente (+10)
   - garnison (min(20, effectif / 100)) - effets Unrest (négatifs = apaisement)`, borné 0-100, vitesse 20 %.
 - Révolte : si mécontentement moyen pondéré > 75 pendant 2 saisons consécutives → événement `revolt`,

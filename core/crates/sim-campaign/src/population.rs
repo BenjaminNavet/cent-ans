@@ -95,7 +95,7 @@ fn update_class(
     entry: &mut PopulationClass,
     class: SocialClass,
     devastation: u8,
-    tax_multiplier: f64,
+    tax_burden: f64,
     goods_category_count: usize,
     occupied: bool,
     foreign_religion: bool,
@@ -135,7 +135,7 @@ fn update_class(
         + effects.wealth.flat
         + effects.wealth.percent
         + effects.trade_income.flat
-        - tax_multiplier * 30.0
+        - tax_burden * 30.0
         - f64::from(devastation) / 2.0;
     entry.wealth = move_towards(entry.wealth, wealth_target, WEALTH_SPEED);
 
@@ -148,7 +148,7 @@ fn update_class(
 
     // ----- unrest ----------------------------------------------------------
     let garrison_relief = f64::from(garrison_strength / 100).min(20.0);
-    let mut unrest_target = tax_multiplier * 40.0
+    let mut unrest_target = tax_burden * 40.0
         + f64::from(devastation) / 2.0
         + (50.0 - f64::from(entry.goods_satisfaction)) / 3.0
         + (50.0 - f64::from(entry.health)) / 4.0
@@ -187,10 +187,10 @@ pub(crate) fn resolve_population(
         let Some(province_data) = data.provinces.get(&id) else {
             continue;
         };
-        let tax_multiplier = state
+        let tax_burden = state
             .factions
             .get(&controller)
-            .map_or(1.0, |f| f.tax_rate.multiplier());
+            .map_or(0.35, |f| f.tax_rate.burden());
         let goods = state
             .factions
             .get(&controller)
@@ -202,7 +202,7 @@ pub(crate) fn resolve_population(
             .get(&controller)
             .is_some_and(|f| f.religion != province_data.religion);
         let effects = effects_of(data, &buildings);
-        let cap = capacity(data, &buildings);
+        let cap = capacity(data, &id, &buildings);
 
         let province = state.provinces.get_mut(&id).expect("exists");
         let population_total = province.population.total();
@@ -218,7 +218,7 @@ pub(crate) fn resolve_population(
                 entry,
                 class,
                 devastation,
-                tax_multiplier,
+                tax_burden,
                 goods_categories_count,
                 occupied,
                 foreign_religion,
