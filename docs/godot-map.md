@@ -166,6 +166,7 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Cour (M4) | C |
 | Diplomatie (M5) | P ; modes de carte N (diplomatie) et R (religion) |
 | Objectifs (M10) | O (ou Menu → Objectifs) ; écran de fin de campagne automatique |
+| Chronique (M10) | bouton « Chronique (n) » ; la fenêtre s'ouvre seule en fin de tour quand une décision attend |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
 Options de ligne de commande (après `--`) :
@@ -226,6 +227,9 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
      vérifie qu'il dépasse celui d'avant construction ; `set_tax_rate` à « high » et vérifie la hausse
      immédiate de `projected_income` (comparaison sans fin de tour, isolée de la dérive de fond).
   6. batailles (M7) : voir « Batailles (M7) » ci-dessous.
+  7. chronique (M10, `_run_chronicle`) : 60 tours France sur la vraie simulation, au moins une décision
+     historique et une aléatoire, la première résolue par `submit_order({"type": "choose_event_option"})`,
+     les autres par `choose_event_option`, refus d'une décision inconnue, fenêtre instanciée.
   Un script `--script` est compilé avant l'enregistrement des autoloads : le test accède à `SimFacade`
   et `MapPaths` par `/root/...` (seules les constantes/statics sont utilisables directement).
 
@@ -362,6 +366,62 @@ godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20 
   `BattleSim` avec les deux IA (fin atteinte, ~1 800 ticks), `resolve_battle` accepté ; puis la boucle
   complète par la carte : dialogue visible, « Livrer bataille », `battle.tscn` 60 images (soldats
   dessinés), un ordre, fin de bataille, écran de fin, « Retour à la campagne », bataille résolue.
+
+## Chronique : événements historiques et aléatoires (M10)
+
+- **Fenêtre « Chronique »** : `scenes/ui/chronicle_window.tscn` + `scripts/ui/chronicle_window.gd`
+  (`ChronicleWindow`, parchemin construit en code), branchée par `scripts/map/chronicle_controller.gd`
+  (`ChronicleController` ; `campaign_map.gd` n'appelle que `setup`, `refresh`, `after_end_turn`, blocs
+  marqués M10). Rubrique (« Chronique du temps » pour un historique, « Nouvelles du royaume » pour un
+  aléatoire), titre, province et délai (« à décider sous 2 tours »), texte d'époque en italique, un bouton
+  par choix avec ses effets en info-bulle et résumés en petit dessous. « Plus tard » / × referme sans
+  répondre : sans choix, le premier s'applique d'office à l'expiration (2 tours).
+- **File** : la fenêtre montre la première décision de `get_pending_decisions()` ; après chaque choix
+  (`choose_event_option`), la suivante s'affiche, puis la fenêtre se ferme. Elle s'ouvre seule en fin de
+  tour s'il y a une décision ; le bouton « Chronique (n) » de la barre la rouvre (grisé à 0, masqué si la
+  simulation n'expose pas l'API, par exemple le mock).
+- Journal : couleur brune dédiée « § » pour `chronicle` (déclenchements, choix, choix d'office).
+- Capture : `--stage=chronicle` (`docs/img/godot-chronicle.png`) : joue jusqu'à la première décision
+  historique (au plus 60 tours, les décisions aléatoires tranchées au premier choix), puis ouvre la fenêtre.
+
+![Fenêtre de chronique](img/godot-chronicle.png)
+
+## Assets, sons et musique (M10, partie 2)
+
+Tout est facultatif : un fichier absent laisse le placeholder d'origine (le smoke test vérifie les
+replis). Les points d'accroche dans les scripts existants sont marqués `# M10 assets`.
+
+- **`ModelLibrary`** (`scripts/map/model_library.gd`) : charge `res://assets/models/*.glb` (cache).
+  `CityMarkers` pose `city_model(province_id)` à la place du cylindre, à l'échelle 6,5 : `castle` pour
+  la capitale d'une faction (`data/factions/*.json` → `capital`), `cathedral` si la province a
+  `bld_cathedral`, `town` si murailles ou `fortification_level ≥ 2`, sinon `village` (lecture des
+  données au rendu seulement). `ArmyMarker.setup` appelle `dress_army_marker` : porte-étendard
+  (échelle 3,2, bannière et caparaçon au matériau `Banner` teintés à la couleur de faction par
+  duplication du maillage, mis en cache par couleur), camp de siège ajouté si `stance == "siege"`,
+  cogue si l'armée expose `embarked`/`at_sea` ; hampe, bannière billboard et pommeau sont masqués
+  (la bannière reste le point de picking).
+- **`PortraitLoader`** (`scripts/ui/portrait_loader.gd`) : `res://assets/portraits/<personnage>.png`
+  puis, à défaut, `res://assets/heraldry/<faction>.png` (personnages générés ou pas encore peints) ;
+  import Godot si présent, sinon `Image.load_from_file`. Utilisé par la Cour (48 px), la fiche
+  personnage (96 px), la barre supérieure, la liste de la Diplomatie et les cartes du menu de départ.
+- **`AudioDirector`** (autoload, `scripts/audio/audio_director.gd`) : bus « Musique » et « Effets »,
+  volumes 0..1 persistés dans `user://settings.cfg` (section `audio`), curseurs sous les boutons du
+  menu de départ et fenêtre « Son… » du menu de la carte. Musique en boucle avec fondu de 1,5 s :
+  `campaign` (menu et paix), `war` dès que `get_diplomacy(joueur)` contient un statut `war`, `court`
+  tant que le panneau de la Cour est ouvert. Effets : clic sur tout bouton (`SceneTree.node_added`),
+  page tournée à l'ouverture d'un panneau de la carte, cloche de fin de tour puis, 0,7 s après,
+  l'effet de l'événement le plus marquant (bataille → choc d'armes, siège/guerre → cor, prise de
+  province/paix/naissance/mariage → fanfare, mort/succession/religion → chœur). En headless, les flux
+  sont chargés mais pas joués.
+- Accès depuis les scripts : `get_node_or_null("/root/AudioDirector")` (compatible smoke test).
+
+![Cour avec portraits](img/godot-portraits.png)
+![Modèles 3D sur la carte](img/godot-campaign-models.png)
+
+```sh
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=$PWD/docs/img/godot-portraits.png --stage=court
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=$PWD/docs/img/godot-campaign-models.png --focus=2150,1880,230
+```
 
 ## Performances mesurées (M4 Pro)
 

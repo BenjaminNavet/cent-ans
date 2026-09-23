@@ -1,0 +1,97 @@
+{
+  "id": "evt_azincourt",
+  "title": "Azincourt",
+  "text": "Harfleur prise, l'armée anglaise épuisée cherche à gagner Calais. Entre les bois d'Azincourt et de Tramecourt, dans une terre détrempée, la chevalerie de France s'enlise sous les flèches. Le roi Henri fait massacrer les prisonniers ; les princes survivants partent pour de longues années de captivité.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1415,
+      "season": "autumn"
+    },
+    "until_year": 1416,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Pleurer la fleur de la chevalerie",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 25
+        },
+        {
+          "type": "spawn_army",
+          "faction": "fac_england",
+          "province": "prov_normandie",
+          "units": [
+            "unit_longbowmen",
+            "unit_longbowmen",
+            "unit_men_at_arms_foot"
+          ]
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "S'enfermer derrière les murailles",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "devastation",
+          "province": "prov_normandie",
+          "amount": 15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 25
+        },
+        {
+          "type": "spawn_army",
+          "faction": "fac_england",
+          "province": "prov_normandie",
+          "units": [
+            "unit_longbowmen",
+            "unit_longbowmen",
+            "unit_men_at_arms_foot"
+          ]
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1415-10-25"
+  },
+  "sources": [
+    "Bataille d'Azincourt",
+    "Anne Curry, Agincourt: A New History, 2005"
+  ]
+}

@@ -9,6 +9,7 @@ use serde::de::DeserializeOwned;
 
 use crate::entities::building::Building;
 use crate::entities::character::Character;
+use crate::entities::event::Event;
 use crate::entities::faction::Faction;
 use crate::entities::names::NameList;
 use crate::entities::province::Province;
@@ -19,8 +20,8 @@ use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
-    BuildingId, CharacterId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SkillId,
-    TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId,
+    SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -37,6 +38,8 @@ pub mod folders {
     pub const TRAITS: &str = "traits";
     pub const SKILLS: &str = "skills";
     pub const NAMES: &str = "names";
+    /// Chronicle events (M10); optional folder.
+    pub const EVENTS: &str = "events";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -106,6 +109,8 @@ pub enum DataError {
         expected: &'static str,
         found: String,
     },
+    #[error("invalid event {id}: {message}")]
+    InvalidEvent { id: String, message: String },
     #[error("{} dangling reference(s):\n{}", .0.len(), format_reference_errors(.0))]
     References(Vec<ReferenceError>),
 }
@@ -132,6 +137,8 @@ pub struct GameData {
     pub traits: BTreeMap<TraitId, Trait>,
     pub skills: BTreeMap<SkillId, Skill>,
     pub names: BTreeMap<NamesId, NameList>,
+    /// Chronicle events (M10), empty when `data/events/` is absent.
+    pub events: BTreeMap<EventId, Event>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -159,11 +166,17 @@ impl GameData {
             traits: load_entities(&root.join(folders::TRAITS), |t: &Trait| &t.id)?,
             skills: load_entities(&root.join(folders::SKILLS), |s: &Skill| &s.id)?,
             names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
+            events: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
         };
+        let events_dir = root.join(folders::EVENTS);
+        if events_dir.is_dir() {
+            data.events = load_entities(&events_dir, |e: &Event| &e.id)?;
+        }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.validate_references(&mut warnings)?;
+        crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))
     }
 
@@ -851,5 +864,58 @@ mod tests {
         let fixture = Fixture::new("missing-dir");
         fs::remove_dir_all(fixture.root.join(folders::RELIGIONS)).unwrap();
         assert!(matches!(fixture.load(), Err(DataError::Io { .. })));
+    }
+
+    const EVENT: &str = r#"{"id":"evt_test","title":"Essai","text":"Un texte.","kind":"historical","trigger":{"date":{"year":1340,"season":"summer"},"conditions":[{"type":"at_war","a":"fac_france","b":"fac_atlantis"}]},"scope":{"type":"faction","faction":"fac_france"},"options":[{"text":"Oui","effects":[{"type":"treasury","amount":100},{"type":"prestige","character":"ruler","amount":5}],"ai_weight":2}]}"#;
+
+    fn write_event(fixture: &Fixture, json: &str) {
+        fs::create_dir_all(fixture.root.join(folders::EVENTS)).unwrap();
+        fixture.write(folders::EVENTS, "evt_test", json);
+    }
+
+    #[test]
+    fn event_with_unknown_faction_loads_with_a_warning() {
+        let fixture = Fixture::new("event-warning");
+        write_event(&fixture, EVENT);
+        let (data, warnings) = fixture.load().unwrap();
+        assert_eq!(data.events.len(), 1);
+        assert!(warnings
+            .iter()
+            .any(|w| w.entity == "evt_test" && w.message.contains("fac_atlantis")));
+    }
+
+    #[test]
+    fn event_structure_errors_are_fatal() {
+        let fixture = Fixture::new("event-structure");
+        let four = EVENT.replace(
+            r#""options":[{"text":"Oui""#,
+            r#""options":[{"text":"a"},{"text":"b"},{"text":"c"},{"text":"Oui""#,
+        );
+        write_event(&fixture, &four);
+        assert!(matches!(
+            fixture.load(),
+            Err(DataError::InvalidEvent { .. })
+        ));
+        let undated = EVENT.replace(r#""date":{"year":1340,"season":"summer"},"#, "");
+        write_event(&fixture, &undated);
+        assert!(matches!(
+            fixture.load(),
+            Err(DataError::InvalidEvent { .. })
+        ));
+    }
+
+    #[test]
+    fn event_unknown_effect_field_is_rejected() {
+        let fixture = Fixture::new("event-field");
+        write_event(
+            &fixture,
+            &EVENT.replace(r#""amount":100"#, r#""amount":100,"oops":1"#),
+        );
+        assert!(matches!(fixture.load(), Err(DataError::Json { .. })));
+        write_event(
+            &fixture,
+            &EVENT.replace(r#""type":"treasury""#, r#""type":"teleport""#),
+        );
+        assert!(matches!(fixture.load(), Err(DataError::Json { .. })));
     }
 }

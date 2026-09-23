@@ -6,3 +6,5 @@ reloadable = true
 [libraries]
 macos.debug.arm64 = "res://bin/libcent_ans.debug.dylib"
 macos.release.arm64 = "res://bin/libcent_ans.release.dylib"
+macos.debug = "res://bin/libcent_ans.debug.dylib"
+macos.release = "res://bin/libcent_ans.release.dylib"

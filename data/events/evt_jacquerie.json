@@ -1,0 +1,70 @@
+{
+  "id": "evt_jacquerie",
+  "title": "La Jacquerie",
+  "text": "En Beauvaisis, les « Jacques » se lèvent contre les nobles qui n'ont su défendre le pays. Les châteaux flambent, les familles seigneuriales sont massacrées. Guillaume Carle mène une armée de paysans que la noblesse s'apprête à écraser.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1358,
+      "season": "spring"
+    },
+    "until_year": 1359,
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_picardie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_picardie"
+  },
+  "options": [
+    {
+      "text": "Laisser la noblesse châtier les Jacques",
+      "effects": [
+        {
+          "type": "population",
+          "percent": -4
+        },
+        {
+          "type": "devastation",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "amount": -15
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Promettre des remises de tailles",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "unrest",
+          "amount": -25
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1358-05-28"
+  },
+  "sources": [
+    "Jacquerie",
+    "Siméon Luce, Histoire de la Jacquerie, 1859",
+    "Georges Duby (dir.), Histoire de la France rurale, t. 2, Seuil, 1975"
+  ]
+}

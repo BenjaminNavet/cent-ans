@@ -6,8 +6,8 @@ use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
-    ai_minimal, battle_request, buildings, characters, diplomacy, dynasty, economy, movement,
-    population, religion, research, siege,
+    ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
+    movement, population, religion, research, siege,
 };
 
 impl CampaignState {
@@ -62,6 +62,9 @@ impl CampaignState {
         // population reads their unrest (M5).
         diplomacy::resolve_diplomacy(self, data, &mut events);
         religion::resolve_religion(self, data, &mut events);
+
+        // 8c. Chronicle: historical and random events (M10).
+        chronicle::resolve_chronicle(self, data, &mut events);
 
         // 9. Population dynamics: growth, health, wealth, goods
         // satisfaction, unrest, revolt, plague, famine (M3).

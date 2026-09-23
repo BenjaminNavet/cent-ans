@@ -1,0 +1,52 @@
+{
+  "id": "evt_disette",
+  "title": "La disette",
+  "text": "Pluies d'automne, semailles pourries : le pain manque et son prix triple. On voit des enfants manger l'herbe des fossés, et les boulangers sont menacés sur les marchés.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "winter"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Ouvrir les greniers du prince",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "health",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser faire le marché",
+      "effects": [
+        {
+          "type": "health",
+          "amount": -12
+        },
+        {
+          "type": "unrest",
+          "amount": 12
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Georges Duby (dir.), Histoire de la France rurale, t. 2, Seuil, 1975",
+    "William Chester Jordan, The Great Famine, 1996"
+  ]
+}

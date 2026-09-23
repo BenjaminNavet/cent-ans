@@ -1,0 +1,82 @@
+{
+  "id": "evt_roosebeke",
+  "title": "La bataille de Roosebeke",
+  "text": "Les Gantois de Philippe van Artevelde se sont soulevés contre le comte de Flandre. L'ost de France vient au secours du comte : à Roosebeke, les milices flamandes, serrées en un bloc, sont étouffées sous la chevalerie. Artevelde est retrouvé parmi les morts.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1382,
+      "season": "autumn"
+    },
+    "until_year": 1383,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_flanders"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_flanders"
+  },
+  "options": [
+    {
+      "text": "Se soumettre au comte et au roi de France",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "population",
+          "province": "prov_flandre",
+          "percent": -3
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 10,
+          "reason": "Soumission après Roosebeke"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Appeler les Anglais à l'aide",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 20,
+          "reason": "Appel des Gantois"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -20,
+          "reason": "Les Flamands appellent l'Anglais"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1382-11-27"
+  },
+  "sources": [
+    "Bataille de Roosebeke",
+    "Jean Froissart, Chroniques, livre I"
+  ]
+}

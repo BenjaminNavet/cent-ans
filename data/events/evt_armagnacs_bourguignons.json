@@ -1,0 +1,79 @@
+{
+  "id": "evt_armagnacs_bourguignons",
+  "title": "Le meurtre de la rue Vieille-du-Temple",
+  "text": "Louis, duc d'Orléans, frère du roi, est assassiné de nuit dans une rue de Paris par les hommes du duc de Bourgogne, qui avoue le crime et le fait justifier en place publique. Les partisans d'Orléans se rangent derrière le comte d'Armagnac : la guerre civile menace.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1407,
+      "season": "winter"
+    },
+    "until_year": 1410,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Pardonner au duc de Bourgogne",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 20,
+          "reason": "Pardon royal après le meurtre d'Orléans"
+        },
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_ile_de_france",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Se ranger derrière les Armagnacs",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -40,
+          "reason": "Le roi soutient les Armagnacs"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "declare_war",
+          "a": "fac_burgundy",
+          "b": "fac_france"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1407-11-23"
+  },
+  "sources": [
+    "Guerre civile entre Armagnacs et Bourguignons",
+    "Bernard Guenée, Un meurtre, une société, Gallimard, 1992"
+  ]
+}

@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_chronicle_window"]
+
+[ext_resource type="Script" path="res://scripts/ui/chronicle_window.gd" id="1_window"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+
+[node name="ChronicleWindow" type="PanelContainer"]
+theme = ExtResource("2_theme")
+script = ExtResource("1_window")

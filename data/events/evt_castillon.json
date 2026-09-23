@@ -1,0 +1,87 @@
+{
+  "id": "evt_castillon",
+  "title": "La bataille de Castillon",
+  "text": "Le vieux Talbot, rappelé pour sauver la Guyenne, se jette sur le camp retranché des Français devant Castillon. L'artillerie des frères Bureau fauche ses rangs ; Talbot tombe, son cheval abattu par un boulet. Bordeaux ne peut plus tenir.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1453,
+      "season": "summer"
+    },
+    "until_year": 1454,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_england",
+        "province": "prov_guyenne"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Abandonner la Guyenne",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 20
+        },
+        {
+          "type": "unrest",
+          "province": "prov_guyenne",
+          "amount": 20
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Envoyer une nouvelle armée",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "treasury",
+          "amount": -8000
+        },
+        {
+          "type": "devastation",
+          "province": "prov_guyenne",
+          "amount": 20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 20
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1453-07-17"
+  },
+  "sources": [
+    "Bataille de Castillon",
+    "Malcolm Vale, English Gascony 1399-1453, 1970"
+  ]
+}
