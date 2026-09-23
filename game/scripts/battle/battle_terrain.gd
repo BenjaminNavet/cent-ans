@@ -471,7 +471,7 @@ func _build_river(river: Dictionary) -> void:
 	var points := _river_points
 	if points.size() < 2:
 		return
-	# Niveau : au-dessus du fond du lit (0,9 m d'eau, 0,35 m sur les gués), lissé le long du cours.
+	# Niveau : au-dessus du fond du lit (0,5 m d'eau, 0,2 m sur les gués), lissé le long du cours.
 	var levels := PackedFloat32Array()
 	levels.resize(points.size())
 	var dirs: Array[Vector2] = []
@@ -482,7 +482,7 @@ func _build_river(river: Dictionary) -> void:
 		dirs.append(Vector2(-dir.y, dir.x))
 		var p := points[i]
 		var inside := p.x >= 0.0 and p.x <= FIELD_W
-		levels[i] = world_height(p.x, p.y) + (0.35 if inside and _in_ford(p.x) else 0.9)
+		levels[i] = world_height(p.x, p.y) + (0.2 if inside and _in_ford(p.x) else 0.5)
 	for _pass in 8:
 		var smoothed := levels.duplicate()
 		for i in range(1, points.size() - 1):
@@ -502,7 +502,7 @@ func _build_river(river: Dictionary) -> void:
 		for s in 2:
 			var sign := 1.0 if s == 0 else -1.0
 			var d := 1.0
-			while d < RIVER_SPAN + 6.0:
+			while d < 16.0:
 				var q := p + n * sign * d
 				if world_height(q.x, q.y) > levels[i] + 0.08:
 					break

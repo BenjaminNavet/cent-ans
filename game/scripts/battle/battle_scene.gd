@@ -13,7 +13,8 @@ extends Node3D
 ## `--benchmark` (mesure les FPS sur 600 images puis quitte), `--autoplay` (IA des deux camps),
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
-## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne).
+## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
+## `--camera=x,z,distance,lacet` (capture : position de caméra imposée).
 
 signal returned(result: Dictionary)
 
@@ -62,6 +63,7 @@ var _bench_time: float = 0.0
 var _pad_units: int = 0
 var _closeup: bool = false
 var _weather_override: String = ""
+var _camera_override: String = ""
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -385,7 +387,7 @@ static func siege_status(siege: Dictionary) -> String:
 
 
 func _banner_scale() -> float:
-	return clampf(camera_rig.distance * 0.014, 2.0, 9.0)
+	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
 
 
 func _show_end() -> void:
@@ -674,6 +676,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--camera="):
+			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -737,6 +741,7 @@ func _stage_screenshot() -> void:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
 	_refresh_view(true)
+	_apply_camera_override()
 	for _i in 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
@@ -768,9 +773,20 @@ func _stage_siege_screenshot() -> void:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2 and int(unit.get("climbing", -1)) >= 0:
 			selected.append(int(unit["id"]))
 	_refresh_view(true)
+	_apply_camera_override()
 	for _i in 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
+func _apply_camera_override() -> void:
+	if _camera_override == "":
+		return
+	var parts := _camera_override.split(",")
+	if parts.size() < 4:
+		return
+	camera_rig.look_at_point(Vector3(float(parts[0]), 0, float(parts[1])), float(parts[2]), deg_to_rad(float(parts[3])))
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
