@@ -139,6 +139,7 @@ Le jeu `data/map/` produit par le pipeline géo se charge tel quel (4096², 132 
   unités monde, non adaptée au zoom.
 - Le panneau affiche « — » pour capitale et terrain avec les données réelles (propriétés absentes du
   GeoJSON) : ces champs viendront de `core/` (données `data/provinces/`) en M2.
-- Étiquettes masquées au-delà de 0,35 × taille de carte ; pas de dé-chevauchement.
+- Étiquettes masquées au-delà de 0,35 × taille × √(20 / nombre de provinces) (≈ 560 unités avec
+  132 provinces) ; pas de dé-chevauchement.
 - Panneau alimenté par les propriétés GeoJSON ; le vrai propriétaire viendra de `CampaignSim`.
 - macOS arm64 uniquement testé (Metal, Forward+).

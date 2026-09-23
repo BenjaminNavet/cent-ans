@@ -44,10 +44,12 @@ func _ready() -> void:
 	terrain.build(map_data)
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
-	rivers.minor_max_distance = maxf(map_data.size.x, map_data.size.y) * 0.35
+	var map_extent := maxf(map_data.size.x, map_data.size.y)
+	rivers.minor_max_distance = map_extent * 0.35
 	rivers.build(map_data)
 	coast.build(map_data)
-	cities.label_max_distance = maxf(map_data.size.x, map_data.size.y) * 0.35
+	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
+	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
 	cities.build(map_data)
 	var t3 := Time.get_ticks_msec()
 
