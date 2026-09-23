@@ -55,8 +55,8 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct CampaignSim {
-    data: Option<Arc<GameData>>,
-    state: Option<CampaignState>,
+    pub(crate) data: Option<Arc<GameData>>,
+    pub(crate) state: Option<CampaignState>,
     base: Base<RefCounted>,
 }
 
@@ -456,7 +456,7 @@ impl CampaignSim {
     }
 }
 
-fn order_result(result: Result<(), String>) -> VarDictionary {
+pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
     match result {
         Ok(()) => vdict! { "ok" => true, "error" => "" },
         Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
