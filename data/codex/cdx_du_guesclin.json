@@ -1,0 +1,12 @@
+{
+  "id": "cdx_du_guesclin",
+  "title": "Bertrand du Guesclin",
+  "category": "personnage",
+  "aliases": ["Du Guesclin", "connétable Du Guesclin", "l'Aigle de Bretagne"],
+  "era": { "from": "1320", "to": "1380" },
+  "summary": "Chevalier breton devenu connétable de France en 1370 sous [[cdx_charles_v|Charles V]], Bertrand du Guesclin reconquiert méthodiquement les terres perdues face aux Anglais en évitant les batailles rangées, à l'inverse de la [[cdx_chevauchee|chevauchée]] anglaise.",
+  "body": "Né vers 1320 près de Broons, en Bretagne, dans une famille de petite noblesse, Bertrand du Guesclin se forge une réputation de guerrier redoutable dans les tournois puis dans la guerre de Succession de Bretagne. Sa carrière prend une ampleur nationale lorsqu'il met son épée au service de la couronne de France, alors dirigée par le jeune roi [[cdx_charles_v|Charles V]].\n\nAprès sa défaite et sa capture à la bataille d'Auray en 1364, il est rançonné puis chargé d'une mission délicate : débarrasser le royaume des [[cdx_grandes_compagnies|Grandes Compagnies]], ces bandes de routiers démobilisés qui ravagent les campagnes depuis le traité de [[cdx_bretigny|Brétigny]]. Il les entraîne en Castille en 1366 pour soutenir Henri de Trastamare contre Pierre le Cruel, allié du [[cdx_prince_noir|Prince noir]], éloignant ainsi ces compagnies du sol français.\n\nNommé connétable de France en 1370, il applique une stratégie radicalement opposée à celle des Anglais : plutôt que d'affronter leurs armées en bataille rangée comme à [[cdx_crecy|Crécy]] ou à [[cdx_poitiers|Poitiers]], il mène une guerre de sièges et de harcèlement, reprenant ville après ville le Poitou, la Saintonge et une grande partie de la Guyenne anglaise entre 1369 et 1374. Cette patience méthodique redonne à Charles V la maîtrise d'une large partie du royaume.\n\nBertrand du Guesclin meurt en 1380 devant les murs de Châteauneuf-de-Randon, en Gévaudan, lors d'un ultime siège contre des garnisons de routiers. Son corps est inhumé à la basilique Saint-Denis, honneur exceptionnel pour un simple chevalier, témoignant du prestige qu'il avait acquis au service du roi.",
+  "entity": "evt_du_guesclin",
+  "see_also": ["cdx_charles_v", "cdx_chevauchee", "cdx_grandes_compagnies", "cdx_bretigny"],
+  "sources": ["Bertrand du Guesclin"]
+}

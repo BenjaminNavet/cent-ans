@@ -696,7 +696,8 @@ pub(crate) fn apply_battle_result(
         GameEvent::new(
             EventKind::Battle,
             format!(
-                "Bataille de {province_name} : {}{} attaque {}{}. Vainqueur : {}. Pertes : {} contre {}.",
+                "Bataille {} : {}{} attaque {}{}. Vainqueur : {}. Pertes : {} contre {}.",
+                crate::events::de(&province_name),
                 faction_name(&attacker_faction),
                 allies_note(attackers),
                 faction_name(&defender_faction),
@@ -811,11 +812,23 @@ pub(crate) fn apply_outcome(
     outcome: &crate::battle_auto::SideOutcome,
     events: &mut Vec<GameEvent>,
 ) {
+    // H4: barber-surgeons tend the wounded of the surviving units.
+    let recovery = state.armies.get(army_id).map_or(0.0, |a| {
+        crate::medicine::wound_recovery(state, data, &a.faction)
+    });
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };
+    let mut tended = 0;
     for (unit, losses) in army.units.iter_mut().zip(&outcome.losses) {
-        unit.strength = unit.strength.saturating_sub(*losses);
+        let lost = (*losses).min(unit.strength);
+        unit.strength -= lost;
+        let survives = unit.strength > 0 && unit.strength * 20 >= unit.max_strength;
+        if survives && recovery > 0.0 {
+            let wounded = crate::medicine::recovered_wounded(lost, recovery);
+            unit.strength = (unit.strength + wounded).min(unit.max_strength);
+            tended += wounded;
+        }
         unit.morale = (i32::from(unit.morale) + outcome.morale_delta).clamp(0, 100) as u8;
         if outcome.morale_delta > 0 {
             unit.experience = (unit.experience + 1).min(10);
@@ -825,6 +838,17 @@ pub(crate) fn apply_outcome(
         .retain(|unit| unit.strength > 0 && unit.strength * 20 >= unit.max_strength);
     let location = army.location.clone();
     let faction = army.faction.clone();
+    if tended > 0 && faction == state.player_faction {
+        events.push(
+            GameEvent::new(
+                EventKind::Medicine,
+                format!("{tended} blessés soignés rejoignent les rangs de l'armée {army_id}."),
+            )
+            .province(&location)
+            .army(army_id)
+            .faction(&faction),
+        );
+    }
     let general = army.general.clone();
     let destroyed = army.units.is_empty();
 

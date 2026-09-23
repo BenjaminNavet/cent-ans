@@ -1,0 +1,43 @@
+{
+  "id": "tech_theriac",
+  "name": {
+    "display": "Thériaque et apothicaires"
+  },
+  "branch": "medicine",
+  "tier": 3,
+  "cost": 300,
+  "prerequisites": [
+    "tech_willow_bark"
+  ],
+  "historical_year": {
+    "value": "1353",
+    "note": "Ordonnance de Jean II le Bon (août 1353) réglementant apothicaires et épiciers de Paris ; la thériaque, héritée de Galien, est réputée à Venise."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_apothecary"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "health",
+      "value": 2
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 3
+    }
+  ],
+  "description": "Les apothicaires-épiciers préparent électuaires, sirops et la fameuse thériaque aux dizaines d'ingrédients. Débloque l'apothicairerie.",
+  "sources": [
+    "Thériaque",
+    "Histoire du métier d'apothicaire",
+    "Apothicaire"
+  ],
+  "herbs": [
+    "cdx_theriaque",
+    "cdx_aloes",
+    "cdx_safran"
+  ]
+}

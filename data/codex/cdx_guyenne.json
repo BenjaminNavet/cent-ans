@@ -1,0 +1,12 @@
+{
+  "id": "cdx_guyenne",
+  "title": "La Guyenne anglaise",
+  "category": "lieu",
+  "aliases": ["Guyenne", "Gascogne", "duché de Guyenne"],
+  "era": { "from": "1259", "to": "1453" },
+  "summary": "Duché du Sud-Ouest tenu par les rois d'Angleterre depuis le mariage d'Aliénor d'Aquitaine, la Guyenne, dont [[cdx_bordeaux|Bordeaux]] est la capitale, est au cœur des rivalités féodales qui déclenchent la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]].",
+  "body": "Depuis le mariage d'Aliénor d'Aquitaine avec Henri Plantagenêt en 1152, le duché d'Aquitaine, alors réduit pour l'essentiel à la Gascogne et souvent appelé Guyenne, appartient en fief à la couronne d'Angleterre. Le traité de Paris de 1259 confirme cette situation, mais impose au roi d'Angleterre, en tant que duc de Guyenne, de rendre hommage au roi de France pour ce territoire : une sujétion féodale mal supportée qui nourrit des décennies de contentieux.\n\nLa Guyenne tire sa richesse du commerce du vin, exporté en grandes quantités depuis [[cdx_bordeaux|Bordeaux]] vers l'Angleterre, où le claret bordelais devient une boisson prisée de l'aristocratie ; ce commerce lucratif explique en partie l'attachement des Gascons à la couronne anglaise, souvent perçue comme plus favorable à leurs intérêts marchands que la couronne française.\n\nLes tensions autour de l'hommage dû par [[cdx_edouard_iii|Édouard III]] pour ce duché atteignent leur paroxysme en 1337, lorsque [[cdx_philippe_vi|Philippe VI]] prononce la confiscation de la Guyenne, prétexte immédiat au déclenchement de la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]]. Le duché reste néanmoins la base arrière des expéditions anglaises sur le continent, notamment celles du [[cdx_prince_noir|Prince noir]], qui y établit sa cour princière à partir de 1362.\n\nMalgré les reconquêtes françaises menées par [[cdx_du_guesclin|Bertrand du Guesclin]] à partir de 1369, la Guyenne reste anglaise jusqu'à la toute fin de la guerre : elle n'est définitivement rattachée au royaume de France qu'après la bataille de Castillon, en 1453, qui marque la fin du conflit.",
+  "entity": "prov_guyenne",
+  "see_also": ["cdx_bordeaux", "cdx_edouard_iii", "cdx_prince_noir", "cdx_guerre_de_cent_ans"],
+  "sources": ["Guyenne", "Duché d'Aquitaine"]
+}

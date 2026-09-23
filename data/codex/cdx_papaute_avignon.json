@@ -1,0 +1,12 @@
+{
+  "id": "cdx_papaute_avignon",
+  "title": "La papauté d'Avignon",
+  "category": "religion",
+  "aliases": ["papes d'Avignon", "captivité de Babylone", "Palais des Papes"],
+  "era": { "from": "1309", "to": "1377" },
+  "summary": "De 1309 à 1377, sept papes successifs résident à Avignon plutôt qu'à Rome, dans une proximité avec la couronne de France qui nourrit la méfiance anglaise durant la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]], jusqu'à jouer un rôle diplomatique lors de la [[cdx_peste_noire|Peste noire]].",
+  "body": "En 1309, le pape Clément V, ancien archevêque de Bordeaux, installe la curie pontificale à Avignon plutôt qu'à Rome, alors en proie à l'anarchie politique et aux rivalités entre familles romaines. Ses successeurs, tous français, maintiennent cette résidence pendant près de soixante-dix ans, période que l'écrivain Pétrarque comparera plus tard, non sans exagération polémique, à la « captivité de Babylone » des Hébreux.\n\nCette proximité géographique et culturelle avec le royaume de France, alors engagé dans la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]] contre l'Angleterre, alimente la suspicion anglaise d'une papauté inféodée aux intérêts des rois Valois, [[cdx_philippe_vi|Philippe VI]] puis [[cdx_jean_ii|Jean II]], même si les papes avignonnais tentent à plusieurs reprises une médiation entre les deux couronnes.\n\nLe pape Clément VI, qui achète la ville d'Avignon en 1348 et y fait édifier le somptueux Palais des Papes, joue un rôle notable lors de l'irruption de la [[cdx_peste_noire|Peste noire]] la même année : il accorde des indulgences aux victimes privées de sacrements et prend position, dans une bulle, contre les persécutions visant les communautés juives accusées à tort de propager le fléau.\n\nLe retour de la papauté à Rome, décidé par Grégoire XI en 1377, ne met pas fin aux troubles : dès l'année suivante éclate le Grand Schisme d'Occident, qui voit deux, puis trois papes rivaux se disputer la légitimité pontificale jusqu'en 1417, période durant laquelle le royaume de France est également absorbé par la reprise de la guerre contre l'Angleterre.",
+  "entity": "fac_papacy",
+  "see_also": ["cdx_peste_noire", "cdx_guerre_de_cent_ans", "cdx_charles_v", "cdx_grand_schisme"],
+  "sources": ["Papauté d'Avignon"]
+}

@@ -390,15 +390,17 @@ fn ai_research_is_deterministic_and_alternates_branches() {
     let choice = research::ai_choose_research(&started, &data, &england).unwrap();
     let chosen = &data.technologies[&choice];
     let known = &started.factions[&england].technologies;
-    let military = known
-        .iter()
-        .filter(|t| data.technologies[*t].branch == data_model::TechBranch::Military)
-        .count();
-    let civil = known.len() - military;
-    let expected_branch = if military <= civil {
-        data_model::TechBranch::Military
-    } else {
-        data_model::TechBranch::Civil
+    // H4: three branches; the one with the fewest acquired techs wins
+    // (ties in military, civil, medicine order).
+    let count = |branch: data_model::TechBranch| {
+        known
+            .iter()
+            .filter(|t| data.technologies[*t].branch == branch)
+            .count()
     };
+    let expected_branch = data_model::TechBranch::ALL
+        .into_iter()
+        .min_by_key(|b| count(*b))
+        .unwrap();
     assert_eq!(chosen.branch, expected_branch);
 }

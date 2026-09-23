@@ -1,0 +1,12 @@
+{
+  "id": "cdx_philippe_vi",
+  "title": "Philippe VI de Valois",
+  "category": "personnage",
+  "aliases": ["Philippe VI", "Philippe de Valois", "Philippe le Fortuné"],
+  "era": { "from": "1293", "to": "1350" },
+  "summary": "Premier roi de la maison de Valois (1328-1350), choisi par les pairs du royaume lors de la [[cdx_succession_1328|crise de succession]] au détriment d'[[cdx_edouard_iii|Édouard III]]. Son règne voit l'ouverture de la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]] et les défaites de [[cdx_ecluse|l'Écluse]] et de [[cdx_crecy|Crécy]].",
+  "body": "Neveu de Philippe le Bel par son père Charles de Valois, Philippe naît en 1293. À la mort sans héritier mâle de Charles IV en 1328, il est régent puis roi, désigné par une assemblée de barons et de prélats qui écarte la candidature d'[[cdx_edouard_iii|Édouard III d'Angleterre]], petit-fils de Philippe le Bel par sa mère Isabelle. Cette [[cdx_succession_1328|crise de succession]] installe la maison de Valois sur le trône, mais laisse une rivalité durable avec la couronne d'Angleterre.\n\nPhilippe VI cherche d'abord à affirmer son autorité sur les grands féodaux, en particulier sur le duc de [[cdx_guyenne|Guyenne]], qui n'est autre qu'Édouard III lui-même, tenu à l'hommage pour ses terres gasconnes. Les tensions autour de cet hommage, ajoutées au soutien anglais aux villes drapières de [[cdx_flandre_laine|Flandre]], conduisent à la confiscation de la Guyenne en 1337 et à la rupture ouverte qui inaugure la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]].\n\nLe règne est marqué par deux désastres militaires : la destruction de la flotte française à [[cdx_ecluse|l'Écluse]] en 1340, puis la lourde défaite de [[cdx_crecy|Crécy]] le 26 août 1346, où Philippe lui-même doit fuir le champ de bataille après la mort de nombreux grands seigneurs, dont le roi aveugle Jean de Bohême. Calais, assiégée dans la foulée, tombe aux mains des Anglais en 1347.\n\nLes dernières années du règne sont assombries par l'irruption de la [[cdx_peste_noire|Peste noire]] en 1348, qui décime le royaume et paralyse l'effort de guerre. Philippe VI meurt en 1350, laissant à son fils [[cdx_jean_ii|Jean II]] un royaume affaibli, humilié militairement et bientôt confronté à un nouveau désastre à [[cdx_poitiers|Poitiers]].",
+  "entity": "chr_philippe_vi",
+  "see_also": ["cdx_succession_1328", "cdx_crecy", "cdx_ecluse", "cdx_edouard_iii"],
+  "sources": ["Philippe VI (roi de France)"]
+}
