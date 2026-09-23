@@ -18,7 +18,7 @@ const BANNERS_DIR := "res://assets/heraldry/banners/"
 const ROYAL_STANDARDS := {"fac_france": "oriflamme", "fac_england": "st_george"}
 ## Hauteur de la hampe de la scène, et hauteur portée pour une bannière verticale.
 const POLE_HEIGHT := 8.4
-const POLE_TALL := 10.4
+const POLE_TALL := 11.0
 
 var army_id: String = ""
 var province_id: String = ""
@@ -120,10 +120,10 @@ func _apply_standard(standard: Dictionary) -> void:
 	var quad := QuadMesh.new()
 	if standard_mode == 2:
 		# Bannière suspendue, un peu surdimensionnée, hampe plus haute.
-		quad.size = Vector2(2.4, 4.8)
+		quad.size = Vector2(3.0, 6.0)
 		quad.subdivide_width = 3
 		quad.subdivide_depth = 10
-		quad.center_offset = Vector3(0.0, -2.4, 0.0)
+		quad.center_offset = Vector3(0.0, -3.0, 0.0)
 		flag.mesh = quad
 		flag.position = Vector3(pole.position.x, POLE_TALL - 0.35, pole.position.z)
 		pole.scale = Vector3(1.0, POLE_TALL / POLE_HEIGHT, 1.0)
@@ -185,7 +185,7 @@ func face(direction: Vector2) -> void:
 
 ## Point écran de référence pour le picking (milieu de l'étendard).
 func pick_position() -> Vector3:
-	return flag.global_position + Vector3(0.0, -2.4 if standard_mode == 2 else -1.0, 0.0) * marker_scale
+	return flag.global_position + Vector3(0.0, -2.1 if standard_mode == 2 else -1.0, 0.0) * marker_scale
 
 
 ## Points de picking : étendard et figurines.
@@ -197,7 +197,8 @@ func pick_positions() -> PackedVector3Array:
 ## au-dessus du drapeau.
 func plate_anchor() -> Vector3:
 	if standard_mode == 2:
-		return flag.global_position + Vector3(0.0, -4.95, 0.0) * marker_scale
+		# Le tissu occupe les 352 px du haut (sur 512) : plaque sous le bord ondulé.
+		return flag.global_position + Vector3(0.0, -4.3, 0.0) * marker_scale
 	return flag.global_position + Vector3(0.0, 0.9, 0.0) * marker_scale
 
 
