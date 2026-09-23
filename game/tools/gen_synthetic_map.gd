@@ -30,7 +30,7 @@ const CAPITALS := ["Ormeval", "Brenne", "Losse", "Combe-le-Haut", "Aunis", "Ferr
 const OWNERS := ["fac_france", "fac_england", "fac_france", "fac_burgundy", "fac_england", "fac_france"]
 const RIVER_SOURCES := [Vector2i(250, 270), Vector2i(320, 205)]
 const RIVER_NAMES := ["Orme", "Brenne"]
-const RIVER_STRAHLER := [3, 2]
+const RIVER_STRAHLER := [4, 3]
 
 var out_dir: String
 var base_field := PackedFloat32Array()

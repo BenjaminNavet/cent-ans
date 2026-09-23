@@ -40,7 +40,8 @@ var ids_bpp: int = 3
 var provinces: Dictionary = {}
 var province_count: int = 0
 
-## Rivières : {name, strahler: int, points: PackedVector2Array}
+## Rivières : {name, importance: int (0..6, 6 = fleuve majeur), points: PackedVector2Array}
+## `importance` = ordre de Strahler si présent, sinon 12 − scalerank (Natural Earth).
 var rivers: Array[Dictionary] = []
 var coastlines: Array[PackedVector2Array] = []
 
@@ -213,9 +214,13 @@ func _load_rivers() -> void:
 		return
 	for feature in geo.get("features", []):
 		var props: Dictionary = feature.get("properties", {})
-		var strahler := int(props.get("strahler", props.get("scalerank", 1)))
+		var importance: int
+		if props.has("strahler"):
+			importance = clampi(int(props["strahler"]), 1, 6)
+		else:
+			importance = clampi(12 - int(props.get("scalerank", 10)), 0, 6)
 		for line in _linestrings(feature.get("geometry", {})):
-			rivers.append({"name": str(props.get("name", "")), "strahler": strahler, "points": line})
+			rivers.append({"name": str(props.get("name", "")), "importance": importance, "points": line})
 
 
 func _load_coastline() -> void:

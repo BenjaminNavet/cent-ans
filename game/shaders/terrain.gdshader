@@ -20,6 +20,8 @@ uniform float faction_alpha = 0.30;
 uniform vec3 border_color : source_color = vec3(0.24, 0.15, 0.08);
 uniform vec3 parchment : source_color = vec3(0.87, 0.79, 0.62);
 uniform float parchment_amount = 0.12;
+// Exagération du relief pour l'ombrage seulement (plus douce que la géométrie).
+uniform float shading_relief = 0.6;
 
 varying vec3 world_pos;
 
@@ -54,8 +56,8 @@ void fragment() {
 
 	// Normale par différences finies sur la heightmap (pas de couture entre tuiles).
 	float hc = height_m(uv);
-	float hx = (height_m(uv + du) - height_m(uv - du)) * height_scale * 0.25;
-	float hz = (height_m(uv + dv) - height_m(uv - dv)) * height_scale * 0.25;
+	float hx = (height_m(uv + du) - height_m(uv - du)) * height_scale * shading_relief * 0.25;
+	float hz = (height_m(uv + dv) - height_m(uv - dv)) * height_scale * shading_relief * 0.25;
 	vec3 n = normalize(vec3(-hx, 1.0, -hz));
 	float slope = 1.0 - n.y;
 
@@ -84,7 +86,7 @@ void fragment() {
 		col = mix(mountain, snow, clamp((hc - 2500.0) / 400.0, 0.0, 1.0));
 	}
 	// Les pentes raides tirent vers la roche.
-	col = mix(col, mountain * 0.9, clamp(slope * 6.0, 0.0, 0.7) * step(0.0, hc));
+	col = mix(col, mountain * 0.9, clamp(slope * 4.0, 0.0, 0.5) * step(0.0, hc));
 	col = mix(col, parchment, parchment_amount);
 
 	// Provinces.
