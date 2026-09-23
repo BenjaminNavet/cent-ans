@@ -1,0 +1,51 @@
+{
+  "id": "evt_loups",
+  "title": "Les loups",
+  "text": "L'hiver est si rude que les loups sortent des forêts et entrent dans les villages. On en a vu jusque sous les murs de la ville.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "winter"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Organiser une grande battue",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -500
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les paysans se défendre",
+      "effects": [
+        {
+          "type": "population",
+          "percent": -1
+        },
+        {
+          "type": "unrest",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Journal d'un bourgeois de Paris (1405-1449)"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "id": "evt_siege_calais",
+  "title": "Les bourgeois de Calais",
+  "text": "Après onze mois de siège, Calais affamée se rend au roi Édouard. Six bourgeois, la corde au cou, viennent lui porter les clefs de la ville. La reine Philippa, enceinte, implore leur grâce à genoux.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1347,
+      "season": "summer"
+    },
+    "until_year": 1348,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Écouter la reine et épargner les six bourgeois",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_boulonnais"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 5,
+          "reason": "Clémence envers les bourgeois de Calais"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Faire un exemple et peupler Calais d'Anglais",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "add_trait",
+          "trait": "trait_cruel"
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_boulonnais"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -20,
+          "reason": "Cruauté à Calais"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1347-08-04"
+  },
+  "sources": [
+    "Siège de Calais (1346-1347)",
+    "Jean Froissart, Chroniques, livre I",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

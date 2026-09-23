@@ -1,0 +1,50 @@
+{
+  "id": "evt_pelerinage",
+  "title": "Le pèlerinage",
+  "text": "Le prince fait vœu de se rendre en pèlerinage à Saint-Jacques ou au Puy. Les clercs l'y encouragent ; les conseillers rappellent le coût d'une telle absence.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Partir en pèlerinage",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 12
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        },
+        {
+          "type": "papal_favor",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Envoyer une riche offrande à sa place",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Pèlerinage de Saint-Jacques-de-Compostelle",
+    "Catherine Vincent, Église et société en Occident, XIIIe-XVe siècle, Armand Colin, 2009"
+  ]
+}

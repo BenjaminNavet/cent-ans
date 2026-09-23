@@ -1,0 +1,48 @@
+{
+  "id": "evt_defection_capitaine",
+  "title": "La défection d'un capitaine",
+  "text": "Un capitaine de routiers, mal payé depuis des mois, menace de passer à l'ennemi avec sa compagnie. Il réclame ses arriérés et une place forte.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "at_war"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Payer ses arriérés",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2500
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Le laisser partir",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, La Guerre de Cent Ans, PUF (Que sais-je ?), 2010",
+    "Kenneth Fowler, Medieval Mercenaries, 2001"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "id": "evt_etienne_marcel",
+  "title": "Étienne Marcel à Paris",
+  "text": "Le prévôt des marchands Étienne Marcel soulève Paris contre le dauphin. Ses partisans au chaperon rouge et bleu envahissent le palais et massacrent les maréchaux de Champagne et de Normandie sous les yeux du prince. Les bourgeois exigent de contrôler l'impôt.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1357,
+      "season": "spring"
+    },
+    "until_year": 1358,
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_ile_de_france"
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "fired",
+            "event": "evt_poitiers"
+          },
+          {
+            "type": "character_captive",
+            "id": "chr_jean_de_normandie"
+          },
+          {
+            "type": "province_unrest_above",
+            "province": "prov_ile_de_france",
+            "amount": 40
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_ile_de_france"
+  },
+  "options": [
+    {
+      "text": "Accepter la Grande Ordonnance",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Quitter Paris et l'assiéger",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 20
+        },
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1358-02-22"
+  },
+  "sources": [
+    "Étienne Marcel",
+    "Raymond Cazelles, Étienne Marcel, Tallandier, 1984",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

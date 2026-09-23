@@ -1,0 +1,49 @@
+{
+  "id": "evt_epidemie_locale",
+  "title": "Une épidémie",
+  "text": "Une fièvre maligne frappe la ville et ses environs. Les médecins prescrivent saignées et processions ; les riches fuient à la campagne.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Fermer les portes et isoler les malades",
+      "effects": [
+        {
+          "type": "health",
+          "amount": -8
+        },
+        {
+          "type": "wealth",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Organiser des processions",
+      "effects": [
+        {
+          "type": "health",
+          "amount": -15
+        },
+        {
+          "type": "population",
+          "percent": -2
+        },
+        {
+          "type": "piety",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jean-Noël Biraben, Les Hommes et la peste en France, 1975"
+  ]
+}

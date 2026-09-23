@@ -20,6 +20,10 @@ extends SceneTree
 ##     20 fins de tour → au moins une technologie acquise et un événement `technology_researched`.
 ##  8. batailles (M7) : BattleSim headless (2 000 ticks, fin, resolve_battle), puis dialogue
 ##     d'avant-bataille → battle.tscn (60 images) → écran de fin → retour à la carte.
+##  9. chronique (M10, vraie simulation si elle expose `get_pending_decisions`, sinon skip) :
+##     60 tours France, au moins un événement historique et un aléatoire proposés au joueur, une
+##     décision résolue par l'ordre `choose_event_option` (les autres par la méthode dédiée),
+##     fenêtre `ChronicleWindow` instanciée sur une décision réelle.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -52,6 +56,7 @@ func _init() -> void:
 	await _run_technologies()
 	await _run_diplomacy()
 	await _run_battle()
+	await _run_chronicle()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -262,6 +267,9 @@ func _run_city_economy() -> void:
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "city/economy: new_campaign failed"):
 		return
 	print("smoke city/economy: simulation %s" % ["REAL" if real_capable else "MOCK"])
+	# M10 : pas d'événements de chronique pendant la mesure (le bruit masquerait l'effet du bâtiment).
+	if sim.has_method("set_chronicle_enabled"):
+		sim.call("set_chronicle_enabled", false)
 
 	var city: Dictionary = sim.call("get_province_city", PROVINCE_ID)
 	if not _check(not city.is_empty(), "get_province_city(%s) should not be empty" % PROVINCE_ID):
@@ -688,3 +696,56 @@ func _run_battle() -> void:
 		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
 	map.queue_free()
 	await process_frame
+
+
+func _run_chronicle() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_pending_decisions")):
+		print("smoke chronicle: skipped, CampaignSim has no get_pending_decisions (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "chronicle: new_campaign failed"):
+		return
+	var historical := 0
+	var random := 0
+	var by_order := 0
+	var journal := 0
+	var sample: Dictionary = {}
+	for _i in 60:
+		for event in sim.call("end_turn"):
+			if str(event.get("kind", "")) == "chronicle":
+				journal += 1
+		for decision in sim.call("get_pending_decisions"):
+			if decision.get("historical", false):
+				historical += 1
+			else:
+				random += 1
+			_check(str(decision.get("title", "")) != "" and not (decision.get("options", []) as Array).is_empty(), "decision needs a title and options")
+			if sample.is_empty() and decision.get("historical", false):
+				sample = decision
+			var result: Dictionary
+			if by_order == 0:
+				result = sim.call("submit_order", {"type": "choose_event_option", "decision": int(decision["id"]), "option": 0})
+				by_order += 1
+			else:
+				result = sim.call("choose_event_option", int(decision["id"]), 0)
+			_check(result.get("ok", false), "choose_event_option refused: %s" % result.get("error", "?"))
+	_check(historical >= 1, "60 turns should bring at least one historical event, got %d" % historical)
+	_check(random >= 1, "60 turns should bring at least one random event, got %d" % random)
+	_check(by_order == 1, "one decision should be resolved by order")
+	_check((sim.call("get_pending_decisions") as Array).is_empty(), "no decision should remain")
+	var refused: Dictionary = sim.call("choose_event_option", 99999, 0)
+	_check(not refused.get("ok", true), "unknown decision should be refused")
+
+	# Fenêtre réelle sur une décision historique.
+	var window: Node = (load("res://scenes/ui/chronicle_window.tscn") as PackedScene).instantiate()
+	root.add_child(window)
+	await process_frame
+	if not sample.is_empty():
+		window.call("show_decision", sample, 2)
+		await process_frame
+		_check(window.visible, "chronicle window should be visible")
+	window.queue_free()
+	if _failures == 0:
+		print("smoke OK: chronicle (real), %d historical + %d random decisions in 60 turns, %d journal entries, sample « %s »" % [
+			historical, random, journal, str(sample.get("title", "?"))])

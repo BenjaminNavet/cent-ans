@@ -1,0 +1,37 @@
+{
+  "id": "evt_preteurs_lombards",
+  "title": "Les prêteurs lombards",
+  "text": "Des banquiers italiens proposent une avance sur les revenus des aides à venir. L'intérêt est lourd, mais les coffres sont vides et les soldes attendent.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Emprunter",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 5000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Refuser",
+      "effects": [],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Bardi (famille)",
+    "Armando Sapori, La crisi delle compagnie mercantili dei Bardi e dei Peruzzi, 1926"
+  ]
+}

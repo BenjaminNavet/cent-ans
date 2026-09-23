@@ -1,0 +1,97 @@
+{
+  "id": "evt_jeanne_d_arc",
+  "title": "La Pucelle d'Orléans",
+  "text": "Une jeune fille de Domrémy, vêtue en homme, s'est présentée au dauphin à Chinon : ses voix lui ordonnent de délivrer Orléans et de mener le roi se faire sacrer à Reims. Les capitaines rient, mais le peuple la suit.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1429,
+      "season": "spring"
+    },
+    "until_year": 1431,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "province_besieged",
+            "province": "prov_orleanais"
+          },
+          {
+            "type": "provinces_below",
+            "faction": "fac_france",
+            "count": 22
+          },
+          {
+            "type": "controls",
+            "faction": "fac_england",
+            "province": "prov_ile_de_france"
+          },
+          {
+            "type": "controls",
+            "faction": "fac_england",
+            "province": "prov_normandie"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Donner une armée à la Pucelle",
+      "effects": [
+        {
+          "type": "spawn_army",
+          "province": "prov_orleanais",
+          "units": [
+            "unit_knights",
+            "unit_men_at_arms_foot",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen"
+          ]
+        },
+        {
+          "type": "prestige",
+          "amount": 20
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Se méfier de la bergère",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1429-05-08"
+  },
+  "sources": [
+    "Jeanne d'Arc",
+    "Régine Pernoud, Jeanne d'Arc par elle-même et ses témoins, 1962",
+    "Colette Beaune, Jeanne d'Arc, Perrin, 2004"
+  ]
+}

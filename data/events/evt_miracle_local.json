@@ -1,0 +1,50 @@
+{
+  "id": "evt_miracle_local",
+  "title": "Un miracle",
+  "text": "Une statue de la Vierge aurait pleuré, un aveugle recouvré la vue devant les reliques d'un saint. Les pèlerins affluent de toute la contrée.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Faire bâtir une chapelle",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1000
+        },
+        {
+          "type": "unrest",
+          "amount": -10
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "papal_favor",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser l'évêque enquêter",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Catherine Vincent, Église et société en Occident, XIIIe-XVe siècle, Armand Colin, 2009",
+    "André Vauchez, La Sainteté en Occident aux derniers siècles du Moyen Âge, 1981"
+  ]
+}
