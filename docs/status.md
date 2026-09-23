@@ -39,7 +39,26 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 
 - IA de campagne stratégique (M9, partie campagne) : crate `ai` (`ai::plan_turn`), utilisée par le pont pour toutes les factions IA. Objectifs par armée (défense des provinces menacées, sièges des provinces les plus précieuses, chevauchées des factions agressives, regroupement, retraite), fusion des armées, budget militaire (60 % du revenu en guerre, 30 % en paix), recrutement de la meilleure unité par livre, construction par rendement, impôts selon la guerre et l'ordre public, licenciement en cas de dette, gouverneurs, généraux, compétences, mariages ; diplomatie (M5) et recherche (M6) réutilisées. 9 tests. Sonde : `cargo run --release -p ai --example ai_probe` (100 tours, 0 % d'ordres refusés côté France). L'IA de bataille arrive avec M7.
 
+- Assets (M10, partie 2) : écus procéduraux des 16 factions (`cent-ans assets heraldry`, Pillow,
+  interprétation simple du blasonnement), 10 effets sonores et 3 musiques modales de 72-80 s
+  (`cent-ans assets audio`, numpy : Karplus-Strong, vièle, orgue portatif, chœur à formants, cloche ;
+  OGG Vorbis via ffmpeg), 7 modèles low-poly glTF (`cent-ans assets models`, Blender headless,
+  116 à 618 triangles : château, ville fortifiée, village, cathédrale, porte-étendard, camp de siège,
+  cogue), portraits OpenRouter (`cent-ans assets portraits`, idempotent, enveloppe de lot, `--dry-run`
+  hors ligne). Godot : autoload `AudioDirector` (bus Musique/Effets, volumes dans `user://settings.cfg`,
+  menu de départ et entrée « Son… » du menu de carte, musique campagne/guerre/cour, effets de clic,
+  panneaux, fin de tour et événements), `PortraitLoader` (portraits, écus en repli), `ModelLibrary`
+  (villes et armées 3D, bannière teintée, repli sur les marqueurs). Tout fonctionne sans assets.
+  Captures : `docs/img/godot-portraits.png`, `docs/img/godot-campaign-models.png`.
+
 ## Limites connues
+- M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
+  mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
+  0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro
+  mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
+- M10 assets : les cogues ne s'affichent que si l'armée expose `embarked`/`at_sea` (pas encore fourni par
+  le pont) ; l'armée et le château de la capitale se chevauchent quand l'armée est au centroïde voisin.
+  Headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
 - Les trésors s'accumulent vite (France ≈ 1,7 M, Empire ≈ 2,9 M livres en 25 ans avec l'IA stratégique) : l'équilibrage revenus/coûts est à faire en M10.
