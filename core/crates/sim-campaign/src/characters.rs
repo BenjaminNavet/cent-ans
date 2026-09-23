@@ -233,7 +233,23 @@ pub(crate) fn resolve_faction_deaths(
         let has_province = state.provinces.values().any(|p| p.controller == id);
         let has_army = state.armies.values().any(|a| a.faction == id);
         if !has_province && !has_army {
-            state.factions.get_mut(&id).expect("exists").alive = false;
+            let dead = state.factions.get_mut(&id).expect("exists");
+            dead.alive = false;
+            dead.at_war_with.clear();
+            dead.allies.clear();
+            dead.truces.clear();
+            dead.embargoes.clear();
+            dead.suzerain = None;
+            // Wars, alliances and vassal ties with a vanished faction end.
+            for other in state.factions.values_mut() {
+                other.at_war_with.remove(&id);
+                other.allies.remove(&id);
+                other.truces.remove(&id);
+                other.embargoes.remove(&id);
+                if other.suzerain.as_ref() == Some(&id) {
+                    other.suzerain = None;
+                }
+            }
             events.push(
                 GameEvent::new(
                     EventKind::FactionDestroyed,

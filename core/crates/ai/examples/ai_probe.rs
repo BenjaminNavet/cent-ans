@@ -19,7 +19,25 @@ fn main() {
     let mut counts: BTreeMap<String, u32> = BTreeMap::new();
     let (mut issued, mut refused) = (0u32, 0u32);
     let mut refusals: BTreeMap<String, u32> = BTreeMap::new();
-    for _ in 0..turns {
+    for turn in 0..turns {
+        if std::env::var("TRACE").is_ok() && turn % 24 == 0 {
+            for id in ["fac_navarre", "fac_burgundy"] {
+                let f = &state.factions[&data_model::FactionId::new(id).unwrap()];
+                let garrison: usize = state
+                    .provinces
+                    .values()
+                    .filter(|p| p.controller.as_str() == id)
+                    .map(|p| p.garrison.len())
+                    .sum();
+                let field: usize = state
+                    .armies
+                    .values()
+                    .filter(|a| a.faction.as_str() == id)
+                    .map(|a| a.units.len())
+                    .sum();
+                println!("TRACE {} {id} treasury {} income {} upkeep {} army {} build {} garrison {garrison} field {field} tax {:?} suzerain {:?} war {:?}", state.date_label(), f.treasury, f.income_last_turn, f.upkeep_last_turn, f.army_upkeep_last_turn, f.building_upkeep_last_turn, f.tax_rate, f.suzerain, f.at_war_with);
+            }
+        }
         for order in ai::plan_turn(&state, &data, &player) {
             issued += 1;
             let label = format!("{order:?}")
@@ -33,7 +51,11 @@ fn main() {
             }
         }
         for event in state.end_turn_with(&data, ai::plan_turn) {
-            let key = format!("{:?}", event.kind);
+            let key = if event.kind == EventKind::Bankruptcy {
+                format!("Bankruptcy {:?}", event.faction)
+            } else {
+                format!("{:?}", event.kind)
+            };
             *counts.entry(key).or_default() += 1;
             if matches!(
                 event.kind,
@@ -67,8 +89,8 @@ fn main() {
                 .count();
             let armies = state.armies.values().filter(|a| &a.faction == id).count();
             println!(
-                "{id:14} treasury {:>8} income {:>6} provinces {provinces:3} armies {armies:2} power {:>6.0} war {:?}",
-                f.treasury, f.income_last_turn, state.faction_power(id), f.at_war_with
+                "{id:14} treasury {:>8} income {:>6} upkeep {:>6} (army {:>6}, build {:>5}) provinces {provinces:3} armies {armies:2} power {:>6.0} war {:?}",
+                f.treasury, f.income_last_turn, f.upkeep_last_turn, f.army_upkeep_last_turn, f.building_upkeep_last_turn, state.faction_power(id), f.at_war_with
             );
         }
     }

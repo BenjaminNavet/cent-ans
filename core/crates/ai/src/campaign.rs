@@ -24,6 +24,8 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
+/// A debt must be repaid within this many turns, or units are dismissed.
+const DEBT_REPAYMENT_TURNS: i64 = 20;
 /// Recruitment orders per turn: one per this much seasonal income (1 to 8).
 pub const INCOME_PER_RECRUIT: i64 = 6000;
 /// Minimum estimated odds (%) before the AI storms a besieged town.
@@ -61,9 +63,17 @@ impl<'a> Context<'a> {
             faction,
             enemies: me.at_war_with.clone(),
             aggression,
-            // Net of court and administration (M10 balance).
-            income: state.faction_income_effective(data, faction)
-                - state.faction_administration_upkeep(data, faction),
+            // Net of court and administration (M10 balance) and of the
+            // tribute owed to a suzerain.
+            income: {
+                let gross = state.faction_income_effective(data, faction);
+                let tribute = if me.suzerain.is_some() {
+                    (gross * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
+                } else {
+                    0
+                };
+                gross - state.faction_administration_upkeep(data, faction) - tribute
+            },
             army_upkeep: state.faction_army_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
             treasury: me.treasury,
@@ -158,9 +168,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // A treasury worth ten seasons of income is idle money: spend it, and
     // lighten taxes at peace.
     let rich = ctx.treasury > 10 * ctx.income.max(1);
+    let in_debt = ctx.treasury < 0;
     let rate = if unrest > 55.0 || (rich && !ctx.at_war()) {
         TaxRate::Low
-    } else if ctx.at_war() && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt) && unrest < 30.0 {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -169,8 +180,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         orders.push(Order::SetTaxRate { rate });
     }
 
-    // Debt: dismiss the costliest unit.
-    if ctx.treasury < 0 && ctx.income < ctx.upkeep() {
+    // Debt: dismiss the costliest unit until the surplus repays the debt
+    // within `DEBT_REPAYMENT_TURNS`.
+    if ctx.treasury < 0 && ctx.income - ctx.upkeep() < -ctx.treasury / DEBT_REPAYMENT_TURNS {
         if let Some(order) = disband_costliest(ctx) {
             orders.push(order);
         }
@@ -339,15 +351,16 @@ fn building_value(
     value - f64::from(def.upkeep.unwrap_or(0)) * 1.5
 }
 
-/// Dismisses the costliest unit of the largest army, or else of the largest
-/// garrison (never the last unit of either).
+/// In debt, dismisses the costliest unit: field armies first, then garrisons
+/// (the capital keeps its last unit, besieged places keep theirs).
 fn disband_costliest(ctx: &Context) -> Option<Order> {
+    let me_capital = &ctx.state.factions[ctx.faction].capital;
     let upkeep = |t: &UnitTypeId| ctx.data.unit_types.get(t).map_or(0, |u| u.upkeep);
     let army = ctx
         .state
         .armies
         .iter()
-        .filter(|(_, a)| &a.faction == ctx.faction && a.units.len() > 1)
+        .filter(|(_, a)| &a.faction == ctx.faction && !a.units.is_empty())
         .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())));
     if let Some((id, army)) = army {
         let (index, _) = army
@@ -365,7 +378,11 @@ fn disband_costliest(ctx: &Context) -> Option<Order> {
         .state
         .provinces
         .iter()
-        .filter(|(_, p)| &p.controller == ctx.faction && p.garrison.len() > 1)
+        .filter(|(id, p)| {
+            &p.controller == ctx.faction
+                && p.siege.is_none()
+                && (p.garrison.len() > 1 || (*id != me_capital && !p.garrison.is_empty()))
+        })
         .max_by_key(|(id, p)| (p.garrison.len(), std::cmp::Reverse((*id).clone())))?;
     let (index, _) = garrison
         .garrison
