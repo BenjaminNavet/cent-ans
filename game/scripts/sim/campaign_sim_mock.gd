@@ -728,7 +728,10 @@ func _apply_population() -> void:
 			c["unrest"] = int(clampf(lerpf(float(c.get("unrest", 0)), target_unrest, 0.2), 0.0, 100.0))
 			var target_health: float = 50.0 + (goods - 50.0) / 4.0
 			c["health"] = int(clampf(lerpf(health, target_health, 0.2), 0.0, 100.0))
-			var target_wealth: float = float(CLASS_WEALTH_BASE.get(class_id, 40.0)) - tax_pct * 0.3
+			# Ancré sur la richesse courante (pas une base absolue) : seuls la fiscalité et
+			# l'effet Wealth des bâtiments la font dériver, pas de décroissance systémique.
+			var wealth_effect: float = float(_province_effects(province).get("wealth", 0.0))
+			var target_wealth: float = float(c.get("wealth", CLASS_WEALTH_BASE.get(class_id, 40.0))) - (tax_pct - 15.0) * 0.3 + wealth_effect
 			c["wealth"] = int(clampf(lerpf(float(c.get("wealth", 40)), target_wealth, 0.15), 0.0, 100.0))
 
 
