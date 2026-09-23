@@ -1,0 +1,33 @@
+{
+  "id": "chr_jean_de_gand",
+  "name": {
+    "display": "Jean de Gand",
+    "local": "John of Gaunt",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Plantagenêt",
+  "faction": "fac_england",
+  "role": "prince",
+  "birth": {
+    "value": "1340-03-06",
+    "place": "Gand"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [],
+  "family": {
+    "father": "chr_edward_iii",
+    "mother": "chr_philippa_of_hainault"
+  },
+  "starting_location": "prov_middlesex",
+  "status": "unborn",
+  "description": "Fils né à Gand pendant le séjour flamand d'Édouard III ; futur duc de Lancastre.",
+  "sources": [
+    "Jean de Gand"
+  ]
+}

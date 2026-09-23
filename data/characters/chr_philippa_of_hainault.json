@@ -42,7 +42,9 @@
       "chr_edward_iii"
     ],
     "children": [
-      "chr_edward_of_woodstock"
+      "chr_edward_of_woodstock",
+      "chr_lionel_d_anvers",
+      "chr_jean_de_gand"
     ]
   },
   "starting_location": "prov_middlesex",

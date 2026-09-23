@@ -1,0 +1,33 @@
+{
+  "id": "chr_jean_de_berry",
+  "name": {
+    "display": "Jean de Berry"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "prince",
+  "birth": {
+    "value": "1340-11-30",
+    "place": "Vincennes"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [
+    "trait_cultured"
+  ],
+  "family": {
+    "father": "chr_jean_de_normandie",
+    "mother": "chr_bonne_de_luxembourg"
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Futur duc de Berry, grand mécène et bibliophile (Très Riches Heures).",
+  "sources": [
+    "Jean Ier de Berry"
+  ]
+}

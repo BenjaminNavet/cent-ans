@@ -46,5 +46,13 @@
   "description": "Roi énergique qui a maté la noblesse ; vainqueur des Mérinides au Salado (1340) et conquérant d'Algésiras (1344).",
   "sources": [
     "Alphonse XI de Castille"
-  ]
+  ],
+  "family": {
+    "spouses": [
+      "chr_maria_de_portugal_castile"
+    ],
+    "children": [
+      "chr_pedro_i_de_castille"
+    ]
+  }
 }

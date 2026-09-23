@@ -1,0 +1,31 @@
+{
+  "id": "chr_louis_d_anjou",
+  "name": {
+    "display": "Louis d'Anjou"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "prince",
+  "birth": {
+    "value": "1339-07-23",
+    "place": "Vincennes"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [],
+  "family": {
+    "father": "chr_jean_de_normandie",
+    "mother": "chr_bonne_de_luxembourg"
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Troisième fils de Jean de Normandie ; futur premier duc d'Anjou et fondateur de la maison capétienne d'Anjou-Valois.",
+  "sources": [
+    "Louis Ier d'Anjou"
+  ]
+}

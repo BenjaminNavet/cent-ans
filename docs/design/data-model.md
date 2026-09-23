@@ -16,9 +16,12 @@ data/
   unit_types/         unit_*.json     13 unités de bataille
   buildings/          bld_*.json      25 bâtiments en 6 catégories
   technologies/       tech_*.json     10 militaires + 12 civiles
-  characters/         chr_*.json      39 personnages réels de 1337
+  characters/         chr_*.json      50 personnages réels de 1337-1346
   resources/          res_*.json      9 ressources
   religions/          rel_*.json      6 religions / obédiences / hérésies
+  traits/             trait_*.json    59 traits de personnage (M4)
+  skills/             skill_*.json    30 compétences, 3 branches (M4)
+  names/              names_<code>.json  7 listes de prénoms par culture (M4)
 ```
 
 Règle : **le nom du fichier est l'`id` de l'entité** (`data/factions/fac_france.json` contient `"id": "fac_france"`).
@@ -36,7 +39,9 @@ Règle : **le nom du fichier est l'`id` de l'entité** (`data/factions/fac_franc
 | `res_` | ressource | `res_wheat`, `res_wool` |
 | `rel_` | religion | `rel_catholic`, `rel_lollard` |
 | `cul_` | culture (vocabulaire libre, pas d'entité) | `cul_french`, `cul_english`, `cul_flemish` |
-| `trait_` | trait de personnage (vocabulaire libre) | `trait_chivalrous`, `trait_pious` |
+| `trait_` | trait de personnage | `trait_chivalrous`, `trait_pious` |
+| `skill_` | compétence de l'arbre à trois branches | `skill_hardiesse`, `skill_bon_justicier` |
+| `names_` | liste de prénoms par culture/langue (`names_<code langue 2 lettres>`) | `names_fr`, `names_en` |
 | `sea_` | zone maritime (transport abstrait) | `sea_channel`, `sea_north_sea`, `sea_bay_of_biscay` |
 
 - `snake_case` ASCII uniquement (`[a-z0-9_]`) ; les patterns sont imposés par `common.schema.json`.
@@ -132,6 +137,56 @@ datée), `skills` (`command`, `governance`, `court` de 0 à 10), `traits`, `piet
 captive, on_campaign, minor). Les enfants (Édouard de Woodstock, 7 ans ; Philippe « Monsieur »,
 13 ans ; David II, 13 ans ; Louis de Male, 6 ans) ont des compétences basses qui progressent.
 
+### 4.6bis Compléments personnages (M4)
+
+`data/characters/` compte désormais 50 personnages. Ajouts pour couvrir les successions jusque
+vers 1360 pour les maisons royales de France, Angleterre, Bourgogne, Écosse, Navarre, Castille et
+Bretagne :
+
+- France (Jean de Normandie × Bonne de Luxembourg) : Charles V (21/01/1338), Louis d'Anjou
+  (23/07/1339), Jean de Berry (30/11/1340), Philippe le Hardi (17/01/1342) — `status: "unborn"`.
+- Angleterre (Édouard III × Philippa de Hainaut) : Lionel d'Anvers (29/11/1338), Jean de Gand
+  (06/03/1340) — `status: "unborn"`.
+- Bourgogne : Jeanne Ire d'Auvergne (épouse de Philippe de Bourgogne « Monsieur ») et leur fils
+  posthume Philippe de Rouvres (24/11/1346, `status: "unborn"`), dernier duc capétien.
+- Navarre : Charles II de Navarre « le Mauvais » (10/10/1332, fils de Philippe d'Évreux et Jeanne II) ;
+  `fac_navarre.heir` renseigné.
+- Castille : Marie de Portugal (épouse d'Alphonse XI, fille d'Alphonse IV de Portugal) et leur fils
+  Pierre Ier « le Cruel » (30/08/1334) ; `fac_castile.heir` renseigné.
+
+Chaque ajout porte `historical: true`, des sources Wikipédia et des liens familiaux bidirectionnels
+(`father`/`mother` sur l'enfant, `children` sur les deux parents, `spouses` sur les deux conjoints).
+Le champ `status: "unborn"` marque un personnage historique dont la date de naissance (`birth`) est
+postérieure à 1337 : la simulation (`sim-campaign`) le fait naître à cette date si les deux parents
+sont vivants et mariés à ce moment-là, sinon l'histoire diverge et il n'apparaît jamais.
+
+### 4.9 Trait (`trait.schema.json`)
+
+`data/traits/` (59 fichiers) couvre l'intégralité des `trait_*` référencés dans `data/characters/`
+plus les traits acquis en jeu (blessure, captivité, spécialisations militaires). Champs : `id`,
+`name` (français), `category` (`personality`, `martial`, `governance`, `physical`, `acquired`),
+`effects` (liste d'`Effect`, réutilisant `EffectKind`), `opposites` (traits mutuellement exclusifs,
+ex. `trait_generous`/`trait_greedy`, `trait_chivalrous`/`trait_ruthless`), `description`. Les traits
+ne sont plus un vocabulaire libre : toute référence `trait_*` (personnage, opposé) doit pointer vers
+un fichier de `data/traits/` (erreur de chargement sinon).
+
+### 4.10 Compétence (`skill.schema.json`)
+
+`data/skills/` (30 fichiers) forme un arbre à trois branches — `command` (commandement),
+`governance` (gouvernance), `court` — de 10 compétences chacune, réparties en 3 tiers avec
+prérequis internes à la branche (`prerequisites`) et un coût en points égal au tier (`cost`).
+Chaque nœud porte des `effects` (`Effect`, `EffectKind` étendu pour l'occasion de
+`siege_speed`, `construction_speed`, `diplomacy`, `intrigue`, `fertility`, `battle_charge`,
+`battle_ranged`, `battle_defense`), un nom français et une description.
+
+### 4.11 Liste de prénoms (`names.schema.json`)
+
+`data/names/names_<code>.json` (7 fichiers : `fr`, `en`, `nl`, `oc`, `es`, `it`, `de` — codes de
+langue à deux lettres, distincts des identifiants `cul_*`) fournit, par langue/culture d'époque,
+une trentaine de prénoms masculins et féminins (formes médiévales : Jehan, Guillaume, Aliénor,
+Isabeau...) et quelques surnoms/épithètes neutres, plus la liste des `cultures` (`cul_*`)
+associées. Utilisée par `sim-campaign` pour nommer les personnages générés à la naissance.
+
 ### 4.7 Ressource (`resource.schema.json`)
 `category` (food, raw_material, manufactured, luxury), `base_price`, `satisfies_classes`.
 Blé, laine, vin, sel, fer, bois, pierre, poisson, drap.
@@ -212,18 +267,21 @@ le chargement, ce qui rend visible toute dérive entre `data/schemas/` et le cod
 
 | Module | Types |
 |---|---|
-| `ids` | Newtypes `FactionId`, `ProvinceId`, `UnitTypeId`, `BuildingId`, `TechnologyId`, `CharacterId`, `ResourceId`, `ReligionId`, `CultureId`, `TraitId`, `SeaZoneId`. La désérialisation valide le préfixe et l'alphabet `[a-z0-9_]` (`common.schema.json`) : un `prov_` placé dans un champ `owner` est refusé. |
-| `common` | `LocalizedName`, `HistoricalDate` (`value`, `uncertain`, `place`, `note` ; `year()`), `UncertainInteger`, `Percent`, `SocialClass` (+ `ALL`, `key()`), `UnitCategory`, `EffectKind` (liste fermée), `EffectMode`, `Effect`, `Cost` (`resources: BTreeMap<ResourceId, u32>`), `Sources`. |
+| `ids` | Newtypes `FactionId`, `ProvinceId`, `UnitTypeId`, `BuildingId`, `TechnologyId`, `CharacterId`, `ResourceId`, `ReligionId`, `CultureId`, `TraitId`, `SkillId`, `NamesId`, `SeaZoneId`. La désérialisation valide le préfixe et l'alphabet `[a-z0-9_]` (`common.schema.json`) : un `prov_` placé dans un champ `owner` est refusé. |
+| `common` | `LocalizedName`, `HistoricalDate` (`value`, `uncertain`, `place`, `note` ; `year()`), `UncertainInteger`, `Percent`, `SocialClass` (+ `ALL`, `key()`), `UnitCategory`, `EffectKind` (liste fermée, étendue M4 : `SiegeSpeed`, `ConstructionSpeed`, `Diplomacy`, `Intrigue`, `Fertility`, `BattleCharge`, `BattleRanged`, `BattleDefense`), `EffectMode`, `Effect`, `Cost` (`resources: BTreeMap<ResourceId, u32>`), `Sources`. |
 | `entities::faction` | `Faction`, `Government`, `SuccessionLaw`, `Heraldry`, `Relation`, `RelationStatus`, `AiPersonality`. |
 | `entities::province` | `Province`, `Terrain`, `Climate`, `CapitalCity`, `Population`, `PopulationClasses` (`get(class)`, `iter()`, `total()`), `PopulationClass`, `ProvinceGeo` (`geo` optionnel : `capital_lonlat`, `seed_lonlat`, `voronoi_weight?`, écrit par `tools/geo`). |
 | `entities::unit_type` | `UnitType`, `UnitStats`, `Ability`. |
 | `entities::building` | `Building`, `BuildingCategory`. |
 | `entities::technology` | `Technology`, `TechBranch`, `TechUnlocks`. |
-| `entities::character` | `Character`, `Sex`, `Role`, `CharacterStatus`, `Title`, `Skills`, `Family`. |
+| `entities::character` | `Character`, `Sex`, `Role`, `CharacterStatus` (M4 : + `Unborn`), `Title`, `Skills`, `Family`. |
 | `entities::resource` | `Resource`, `ResourceCategory`. |
 | `entities::religion` | `Religion`, `ReligionKind`. |
+| `entities::trait` (fichier `trait_.rs`, module `r#trait`) | `Trait`, `TraitCategory`. |
+| `entities::skill` | `Skill`, `SkillBranch`. |
+| `entities::names` | `NameList`. |
 | `map` | `MapMeta` (`data/map/map.json`) et `ProvinceGeometry` (une feature de `data/map/provinces.geojson` : `id`, `centroid`, `neighbors`, `capital_px`, polygone brut dans `geometry: serde_json::Value`). Ces deux types sont produits par un outil : les clés inconnues sont conservées dans `extra` au lieu d'être refusées. |
-| `load` | `GameData` (un `BTreeMap<Id, T>` par entité, `map: Option<MapMeta>`, `province_geometry`), `Warning`, `ReferenceError`, `DataError`, `load_entities`. |
+| `load` | `GameData` (un `BTreeMap<Id, T>` par entité — dont `traits`, `skills`, `names` — `map: Option<MapMeta>`, `province_geometry`), `Warning`, `ReferenceError`, `DataError`, `load_entities`. |
 
 Les champs optionnels du schéma sont des `Option<T>` ; les listes optionnelles sont des `Vec<T>`
 vides par défaut ; les booléens à `default` du schéma (`playable`, `mounted`, `historical`,
@@ -242,11 +300,12 @@ vides par défaut ; les booléens à `default` du schéma (`playable`, `mounted`
 | Sévérité | Références |
 |---|---|
 | **Avertissement** (`Warning`) | toute référence à une **province** inconnue : `faction.capital`, `province.neighbors`, `character.starting_location`, ids de `provinces.geojson`. Toléré tant que la carte est partielle (section 4.2). |
-| **Erreur** (`DataError::References`, toutes listées d'un coup) | faction : `ruler`, `heir`, `religion`, `suzerain`, `starting_technologies`, `relations[].faction` ; province : `owner`, `overlord`, `holder`, `religion`, `resources`, `buildings` ; unité : `required_technology`, `required_building`, `required_faction`, `cost.resources` ; bâtiment : `upgrades_from`, `required_technology`, `required_building`, `required_resource`, `enables_units`, `cost.resources` ; technologie : `prerequisites`, `unlocks.units`, `unlocks.buildings` ; personnage : `faction`, `family.*` ; religion : `parent`, `head_faction`. |
+| **Erreur** (`DataError::References`, toutes listées d'un coup) | faction : `ruler`, `heir`, `religion`, `suzerain`, `starting_technologies`, `relations[].faction` ; province : `owner`, `overlord`, `holder`, `religion`, `resources`, `buildings` ; unité : `required_technology`, `required_building`, `required_faction`, `cost.resources` ; bâtiment : `upgrades_from`, `required_technology`, `required_building`, `required_resource`, `enables_units`, `cost.resources` ; technologie : `prerequisites`, `unlocks.units`, `unlocks.buildings` ; personnage : `faction`, `family.*`, **`traits` (M4 : chaque `trait_*` doit exister dans `data/traits/`)** ; religion : `parent`, `head_faction` ; **trait : `opposites` (M4)** ; **compétence : `prerequisites` (M4)**. |
 
-Les cultures (`cul_`), traits (`trait_`) et zones maritimes (`sea_`) sont des vocabulaires libres :
-seul le préfixe est vérifié. Sur les données actuelles, le chargement réussit avec 32 avertissements,
-tous des provinces hors échantillon (`prov_middlesex`, `prov_toledo`...).
+Les cultures (`cul_`) et zones maritimes (`sea_`) restent un vocabulaire libre : seul le préfixe est
+vérifié. Depuis M4, les traits (`trait_`) ne le sont plus : `character.traits[]` et `trait.opposites[]`
+doivent pointer vers un fichier existant de `data/traits/`, de même que `skill.prerequisites[]` vers
+`data/skills/`.
 
 Tests : `cargo test -p data-model` charge le vrai dossier `data/` (test `real_data`, avertissements
 imprimés avec `--nocapture`) et des fixtures minimales écrites dans un dossier temporaire pour chaque

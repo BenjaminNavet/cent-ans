@@ -1,0 +1,33 @@
+{
+  "id": "chr_lionel_d_anvers",
+  "name": {
+    "display": "Lionel d'Anvers",
+    "local": "Lionel of Antwerp",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Plantagenêt",
+  "faction": "fac_england",
+  "role": "prince",
+  "birth": {
+    "value": "1338-11-29",
+    "place": "Anvers"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [],
+  "family": {
+    "father": "chr_edward_iii",
+    "mother": "chr_philippa_of_hainault"
+  },
+  "starting_location": "prov_middlesex",
+  "status": "unborn",
+  "description": "Second fils survivant d'Édouard III, né à Anvers ; futur duc de Clarence.",
+  "sources": [
+    "Lionel d'Anvers"
+  ]
+}

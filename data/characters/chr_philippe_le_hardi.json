@@ -1,0 +1,33 @@
+{
+  "id": "chr_philippe_le_hardi",
+  "name": {
+    "display": "Philippe le Hardi"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "prince",
+  "birth": {
+    "value": "1342-01-17",
+    "place": "Pontoise"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [
+    "trait_brave"
+  ],
+  "family": {
+    "father": "chr_jean_de_normandie",
+    "mother": "chr_bonne_de_luxembourg"
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Futur premier duc Valois de Bourgogne (1363), fondateur de la puissance bourguignonne.",
+  "sources": [
+    "Philippe II de Bourgogne"
+  ]
+}

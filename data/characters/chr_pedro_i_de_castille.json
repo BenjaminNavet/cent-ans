@@ -1,0 +1,34 @@
+{
+  "id": "chr_pedro_i_de_castille",
+  "name": {
+    "display": "Pierre Ier de Castille"
+  },
+  "epithet": "le Cruel",
+  "sex": "male",
+  "house": "Bourgogne-Ivrée",
+  "faction": "fac_castile",
+  "role": "heir",
+  "birth": {
+    "value": "1334-08-30",
+    "place": "Burgos"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [
+    "trait_wrathful"
+  ],
+  "family": {
+    "father": "chr_alfonso_xi",
+    "mother": "chr_maria_de_portugal_castile"
+  },
+  "starting_location": "prov_toledo",
+  "status": "minor",
+  "description": "Fils légitime d'Alphonse XI et de Marie de Portugal, 3 ans en 1337 ; seul héritier légitime face aux nombreux demi-frères Trastamare.",
+  "sources": [
+    "Pierre Ier de Castille"
+  ]
+}
