@@ -20,7 +20,6 @@ Ids déjà cités par des fiches H8, fiches en cours d'écriture :
 - `cdx_armagnacs_bourguignons` — cité par cdx_azincourt, cdx_charles_vi, cdx_traite_troyes
 - `cdx_avignon` — cité par cdx_grand_schisme
 - `cdx_bal_des_ardents` — cité par cdx_charles_vi
-- `cdx_bataille_des_harengs` — cité par cdx_orleans
 - `cdx_bombarde` — cité par cdx_orleans
 - `cdx_bruges` — cité par cdx_jacob_van_artevelde
 - `cdx_castillon` — cité par cdx_bordeaux, cdx_charles_vii, cdx_compagnies_ordonnance

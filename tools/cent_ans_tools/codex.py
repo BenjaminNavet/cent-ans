@@ -4,7 +4,7 @@ Checks performed by `validate_codex`:
 
 - every entry matches `data/schemas/codex.schema.json` and its id equals its file name;
 - every `[[cdx_id]]` / `[[cdx_id|label]]` link, in the codex and in every text field of
-  `data/**/*.json`, resolves to an entry or to an id listed in `data/codex/_todo.md`;
+  `data/**/*.json`, resolves to an entry or to an id listed in a `data/codex/_*.md` file;
 - `see_also` ids resolve the same way;
 - aliases (and titles) are unique across entries, case-insensitively;
 - `entity` points to an existing game entity file.
@@ -75,12 +75,12 @@ def links_in(text: str) -> list[str]:
     return [match.strip() for match in LINK_PATTERN.findall(text)]
 
 
-def load_todo_ids(codex_dir: Path) -> set[str]:
-    """Ids of the entries planned in `_todo.md` (links to them are tolerated)."""
-    todo = codex_dir / "_todo.md"
-    if not todo.exists():
-        return set()
-    return set(TODO_ID_PATTERN.findall(todo.read_text(encoding="utf-8")))
+def load_todo_ids(codex_dir: Path, pattern: str = "_todo.md") -> set[str]:
+    """Ids of the entries planned in the `pattern` files (links to them are tolerated)."""
+    ids: set[str] = set()
+    for path in sorted(codex_dir.glob(pattern)):
+        ids |= set(TODO_ID_PATTERN.findall(path.read_text(encoding="utf-8")))
+    return ids
 
 
 def validate_codex(data_dir: Path) -> CodexReport:
@@ -88,7 +88,8 @@ def validate_codex(data_dir: Path) -> CodexReport:
     report = CodexReport()
     codex_dir = data_dir / "codex"
     validator = schema_validator(data_dir, "codex.schema.json")
-    report.todo_ids = load_todo_ids(codex_dir)
+    report.todo_ids = load_todo_ids(codex_dir, "_*.md")
+    todo_only = load_todo_ids(codex_dir)
 
     for path in sorted(codex_dir.glob("*.json")):
         try:
@@ -105,7 +106,7 @@ def validate_codex(data_dir: Path) -> CodexReport:
         report.entries[path.stem] = entry
 
     known = set(report.entries) | report.todo_ids
-    overlap = report.todo_ids & set(report.entries)
+    overlap = todo_only & set(report.entries)
     if overlap:
         report.errors.append(
             f"_todo.md lists entries already written: {sorted(overlap)}"
