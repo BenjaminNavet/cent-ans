@@ -29,7 +29,7 @@ def test_every_event_matches_the_schema() -> None:
     validator = _validator()
     files = sorted((DATA / "events").glob("*.json"))
     assert len(files) >= 40
-    kinds = {"historical": 0, "random": 0}
+    kinds = {"historical": 0, "random": 0, "chained": 0}
     for path in files:
         event = json.loads(path.read_text(encoding="utf-8"))
         errors = [error.message for error in validator.iter_errors(event)]
