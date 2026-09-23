@@ -139,24 +139,94 @@ func _scatter(raw: Array) -> void:
 					if roll < crops * grove * 0.55:
 						kind = Kind.DECIDUOUS
 						scale_factor = 0.9
-					else:
-						# Haies : quadrillage de parcelles légèrement biaisé (bocage dense, ailleurs rare).
-						var hedge := _lerp_grid(_hedge, gx, gy)
-						var u := (x + 0.35 * y) / 7.0
-						var v := (y - 0.35 * x) / 5.5
-						var fu := u - floorf(u)
-						var fv := v - floorf(v)
-						var on_line := minf(fu, fv) < 0.16
-						if on_line and roll < crops * lerpf(0.10, 0.9, hedge):
-							kind = Kind.HEDGE
-							# Axe long du buisson le long de la haie.
-							yaw = atan2(0.35, 1.0) + (PI * 0.5 if fu < fv else 0.0)
 			if kind < 0 or (not exclusions.is_empty() and _excluded(x, y)):
 				continue
 			var ground := data.height_world_at(x, y)
 			if ground <= 0.0:
 				continue
 			raw[kind].append(_make_instance(rng, kind, x, ground, y, yaw, scale_factor))
+	_scatter_hedges(raw, rng)
+
+
+## Haies : bords d'un parcellaire biaisé (u, v) = ((x + k y) / FIELD_U, (y − k x) / FIELD_V) ;
+## chaque bord de parcelle est planté ou non (hasard par bord), les buissons s'y suivent tous
+## les `HEDGE_STEP` px. Denses dans le bocage, rares ailleurs.
+const FIELD_U := 5.0
+const FIELD_V := 4.2
+const FIELD_SKEW := 0.35
+const HEDGE_STEP := 0.7
+
+
+func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
+	var data := mask.map_data
+	var k := FIELD_SKEW
+	var det := 1.0 + k * k
+	# Bornes (u, v) couvrant la tuile.
+	var corners := [Vector2(origin_px), Vector2(origin_px) + Vector2(size_px, 0), Vector2(origin_px) + Vector2(0, size_px), Vector2(origin_px) + Vector2(size_px, size_px)]
+	var u_min := INF
+	var u_max := -INF
+	var v_min := INF
+	var v_max := -INF
+	for c: Vector2 in corners:
+		u_min = minf(u_min, (c.x + k * c.y) / FIELD_U)
+		u_max = maxf(u_max, (c.x + k * c.y) / FIELD_U)
+		v_min = minf(v_min, (c.y - k * c.x) / FIELD_V)
+		v_max = maxf(v_max, (c.y - k * c.x) / FIELD_V)
+	var rect := Rect2(Vector2(origin_px), Vector2(size_px, size_px))
+	for axis in 2:
+		var line_min := floori(u_min if axis == 0 else v_min)
+		var line_max := ceili(u_max if axis == 0 else v_max)
+		var along_min := v_min if axis == 0 else u_min
+		var along_max := v_max if axis == 0 else u_max
+		var along_scale := FIELD_V if axis == 0 else FIELD_U
+		var steps := ceili((along_max - along_min) * along_scale / HEDGE_STEP)
+		# Lacet qui aligne l'axe X local du buisson sur la ligne : (−k, 1) pour u constant,
+		# (1, k) pour v constant (Basis(UP, a) envoie X sur (cos a, 0, −sin a)).
+		var line_yaw := atan2(-1.0, -k) if axis == 0 else atan2(-k, 1.0)
+		for line in range(line_min, line_max + 1):
+			var edge_roll := -1.0
+			var edge_index := -1
+			for step in steps:
+				var along := along_min + step * HEDGE_STEP / along_scale
+				var u: float = float(line) if axis == 0 else along
+				var v: float = along if axis == 0 else float(line)
+				# Inversion de (u, v) → (x, y).
+				var a := u * FIELD_U
+				var b := v * FIELD_V
+				var x0 := (a - k * b) / det
+				var y0 := (b + k * a) / det
+				# Déformation douce : parcelles irrégulières, haies légèrement sinueuses.
+				var x := x0 + 0.9 * sin(0.23 * y0 + 1.3 * sin(0.061 * x0))
+				var y := y0 + 0.9 * sin(0.19 * x0 + 1.1 * sin(0.047 * y0))
+				if not rect.has_point(Vector2(x, y)):
+					continue
+				# Un tirage par bord de parcelle (entre deux lignes transverses).
+				var edge := floori(along)
+				if edge != edge_index:
+					edge_index = edge
+					edge_roll = _hash01(line * 7919 + edge * 104729 + axis * 31)
+				var gx := (x - origin_px.x) / coarse_step
+				var gy := (y - origin_px.y) / coarse_step
+				var crops := _lerp_grid(_crops, gx, gy)
+				if crops < 0.2:
+					continue
+				var hedge := _lerp_grid(_hedge, gx, gy)
+				if edge_roll > crops * lerpf(0.06, 0.8, hedge):
+					continue
+				if not exclusions.is_empty() and _excluded(x, y):
+					continue
+				var jx := x + rng.randf_range(-0.12, 0.12)
+				var jy := y + rng.randf_range(-0.12, 0.12)
+				var ground := data.height_world_at(jx, jy)
+				if ground <= 0.0:
+					continue
+				raw[Kind.HEDGE].append(_make_instance(rng, Kind.HEDGE, jx, ground, jy, line_yaw + rng.randf_range(-0.2, 0.2), 1.0))
+
+
+static func _hash01(n: int) -> float:
+	var h := (n * 1103515245 + 12345) & 0x7fffffff
+	h = (h ^ (h >> 13)) * 1274126177 & 0x7fffffff
+	return float(h % 100000) / 100000.0
 
 
 func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: float, y: float, yaw: float, scale_factor: float) -> Array:

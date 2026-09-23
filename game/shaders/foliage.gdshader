@@ -16,6 +16,24 @@ uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
 
 varying float v_ao;
 varying vec3 v_tint;
+varying vec3 v_local;
+
+// Bruit de valeur 3D : touffes de feuillage (variation d'albédo à l'échelle des feuilles).
+float hash3(vec3 p) {
+	p = fract(p * 0.3183099 + 0.1);
+	p *= 17.0;
+	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float value_noise(vec3 p) {
+	vec3 i = floor(p);
+	vec3 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(
+		mix(mix(hash3(i), hash3(i + vec3(1, 0, 0)), f.x), mix(hash3(i + vec3(0, 1, 0)), hash3(i + vec3(1, 1, 0)), f.x), f.y),
+		mix(mix(hash3(i + vec3(0, 0, 1)), hash3(i + vec3(1, 0, 1)), f.x), mix(hash3(i + vec3(0, 1, 1)), hash3(i + vec3(1, 1, 1)), f.x), f.y),
+		f.z);
+}
 
 void vertex() {
 	vec3 origin = MODEL_MATRIX[3].xyz;
@@ -28,6 +46,7 @@ void vertex() {
 	float gust = 0.6 + 0.4 * sin(phase * 0.37);
 	float sway = (sin(phase + seed * 6.2831) * gust + 0.3 * sin(TIME * 2.3 + seed * 20.0)) * wind_strength;
 	float weight = COLOR.a * COLOR.a;
+	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
 	VERTEX.x += sway * weight;
 	VERTEX.z += sway * 0.6 * weight;
 	VERTEX *= keep;
@@ -37,7 +56,8 @@ void vertex() {
 
 void fragment() {
 	vec3 tint = v_tint;
-	ALBEDO = COLOR.rgb * tint;
+	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
+	ALBEDO = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
 	ROUGHNESS = roughness_value;
 	SPECULAR = 0.25;
 	AO = v_ao;

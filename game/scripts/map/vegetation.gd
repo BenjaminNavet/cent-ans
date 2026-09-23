@@ -30,6 +30,8 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 ## Tuiles à moins de `detail_factor` × distance caméra : maillage détaillé.
 @export var detail_factor: float = 1.3
 @export var max_concurrent_jobs: int = 3
+## Tuiles semées d'un coup (et attendues) au premier affichage.
+@export var warm_start_tiles: int = 9
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 
@@ -47,6 +49,7 @@ var _exclusions := PackedVector3Array()
 var _rig: Node3D
 var _frame: int = 0
 var _log_bursts := false
+var _warm := false
 
 
 func _ready() -> void:
@@ -81,6 +84,7 @@ func clear() -> void:
 	for entry in _tiles.values():
 		(entry["node"] as Node).queue_free()
 	_tiles.clear()
+	_warm = false
 	stats["tiles"] = 0
 	stats["instances"] = 0
 
@@ -152,10 +156,25 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 			elif in_range and not _jobs.has(index):
 				wanted.append([d, index])
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	# Premier affichage : les tuiles les plus proches sont semées en parallèle et attendues
+	# (pas d'apparition progressive au lancement ni dans les captures).
+	var budget := max_concurrent_jobs if _warm else maxi(max_concurrent_jobs, warm_start_tiles)
 	for item in wanted:
-		if _jobs.size() >= max_concurrent_jobs:
+		if _jobs.size() >= budget:
 			break
 		_start_job(item[1])
+	if not _warm and not wanted.is_empty():
+		_warm = true
+		var t0 := Time.get_ticks_msec()
+		for item in _jobs.values():
+			WorkerThreadPool.wait_for_task_completion(item["task"])
+		var ready_jobs := _jobs.duplicate()
+		_jobs.clear()
+		for index in ready_jobs:
+			_install_tile(index, ready_jobs[index]["job"])
+		stats["warm_start_ms"] = Time.get_ticks_msec() - t0
+		if _log_bursts:
+			print("Vegetation (warm start): %s" % JSON.stringify(stats))
 	_evict()
 
 
