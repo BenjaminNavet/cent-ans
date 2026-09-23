@@ -204,6 +204,17 @@ def assets_heraldry() -> None:
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
 
 
+@assets_app.command("menu-art")
+def assets_menu_art() -> None:
+    """Dessine l'illustration du menu (carte ancienne 2560×1440) dans game/assets/ui/."""
+    from cent_ans_tools import menu_art
+
+    path = menu_art.build()
+    console.print(
+        f"[green]OK[/green] : {path} ({path.stat().st_size / 1e6:.1f} Mo) + {menu_art.SIDECAR_NAME}"
+    )
+
+
 @assets_app.command("audio")
 def assets_audio(
     no_music: bool = typer.Option(False, "--no-music", help="Effets seulement"),
