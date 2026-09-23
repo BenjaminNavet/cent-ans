@@ -160,6 +160,13 @@ pub(crate) fn succeed(
         }
         None => {
             state.factions.get_mut(faction).expect("exists").ruler = None;
+            if let Some(house) = dead_ruler
+                .as_ref()
+                .and_then(|r| state.characters.get(r))
+                .map(|c| c.house.clone())
+            {
+                crate::diplomacy::on_line_extinct(state, data, faction, &house, events);
+            }
             let has_living_member = state
                 .characters
                 .values()

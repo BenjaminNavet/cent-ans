@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 use data_model::{FactionId, GameData, ResourceCategory, ResourceId, SocialClass};
 use serde::{Deserialize, Serialize};
 
-use crate::buildings::{effects_of, goods_map, province_building_upkeep};
+use crate::buildings::{effects_of, goods_map, province_building_upkeep, EffectTotals};
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState, ProvinceState, Season, Unit};
 
@@ -111,7 +111,16 @@ pub fn province_income_effective(
     province: &ProvinceState,
     tax_rate: TaxRate,
 ) -> f64 {
-    let effects = effects_of(data, &province.buildings);
+    province_income_with_effects(province, tax_rate, &effects_of(data, &province.buildings))
+}
+
+/// [`province_income_effective`] with explicit effects (buildings plus
+/// governor, see [`CampaignState::province_effects`]).
+pub fn province_income_with_effects(
+    province: &ProvinceState,
+    tax_rate: TaxRate,
+    effects: &EffectTotals,
+) -> f64 {
     let mut base = 0.0;
     let mut burgher_base = 0.0;
     for (class, entry) in province.population.iter() {
@@ -196,11 +205,17 @@ impl CampaignState {
             .get(faction)
             .map(|f| f.tax_rate)
             .unwrap_or_default();
-        self.provinces
-            .values()
-            .filter(|p| &p.controller == faction && p.siege.is_none())
-            .map(|p| province_income_effective(data, p, tax_rate).round() as i64)
-            .sum()
+        let gross: i64 = self
+            .provinces
+            .iter()
+            .filter(|(_, p)| &p.controller == faction && p.siege.is_none())
+            .map(|(id, p)| {
+                province_income_with_effects(p, tax_rate, &self.province_effects(data, id)).round()
+                    as i64
+            })
+            .sum();
+        // Embargoes (M5) cut trade.
+        (gross as f64 * self.embargo_income_factor(faction)).round() as i64
     }
 
     /// Full economic snapshot for the bridge (spec § 2).

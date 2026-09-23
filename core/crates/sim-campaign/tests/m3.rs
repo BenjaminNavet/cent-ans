@@ -502,13 +502,13 @@ fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
     let state = france(&data, 115);
     let json = state
         .save_json()
-        .replace("\"state_version\":3", "\"state_version\":1");
+        .replace("\"state_version\":4", "\"state_version\":1");
     let err = CampaignState::load_json(&json).unwrap_err();
     assert!(matches!(
         err,
         sim_campaign::CampaignError::VersionMismatch {
             found: 1,
-            expected: 3
+            expected: 4
         }
     ));
     let message = err.to_string();

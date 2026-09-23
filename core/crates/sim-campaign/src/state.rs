@@ -9,8 +9,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 use data_model::{
-    BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ResourceId, Sex,
-    SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
+    BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ReligionId,
+    ResourceId, Sex, SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -31,8 +31,11 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// `2`: M3 cities & economy (buildings, construction, goods, tax rate, the
 /// four population gauges are now dynamic). `3`: M4 characters & dynasties
 /// (experience, skills, traits, marriage, children, governors, prestige...).
+/// `4`: M5 diplomacy & religion (claims, embargoes, vassals, opinion
+/// modifiers, war scores, offers, papal favour, schism, heresy), M6
+/// technologies and M7 pending interactive battles.
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 3;
+pub const STATE_VERSION: u32 = 4;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -232,6 +235,11 @@ pub struct ProvinceState {
     /// above the revolt threshold (spec § 1.1); resets to 0 below it.
     #[serde(default)]
     pub revolt_seasons: u32,
+    /// Share (0-100) of the population following `heresy_religion` (M5).
+    #[serde(default)]
+    pub heresy: u8,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heresy_religion: Option<ReligionId>,
 }
 
 impl ProvinceState {
@@ -276,6 +284,52 @@ pub struct FactionState {
     /// journal reports its start and end once instead of every turn.
     #[serde(default)]
     pub regency: bool,
+
+    // ----- M5: diplomacy & religion ----------------------------------------
+    /// Factions this faction imposes an embargo on.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub embargoes: BTreeSet<FactionId>,
+    /// Overlord of a vassal faction (also listed in `allies`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub suzerain: Option<FactionId>,
+    /// Loyalty (0-100) of a vassal towards its suzerain.
+    #[serde(default = "default_faction_loyalty")]
+    pub loyalty: u8,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub claims: Vec<crate::diplomacy::Claim>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modifiers: Vec<crate::diplomacy::OpinionModifier>,
+    /// Battle part of the war score against each enemy (-100..100).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub war_scores: BTreeMap<FactionId, i32>,
+    /// Turn at which each ongoing war started (war weariness).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub war_started: BTreeMap<FactionId, u32>,
+    /// State religion or obedience (changes at the Great Schism).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub religion: Option<ReligionId>,
+    /// 0-100.
+    #[serde(default = "default_papal_favor")]
+    pub papal_favor: u8,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub excommunicated_until: Option<u32>,
+    /// Proposals received by the player, answered with `answer_offer`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub offers: Vec<crate::diplomacy::Offer>,
+    /// Last turn an AI faction sent an offer to the player (throttling).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub last_offer_turn: BTreeMap<FactionId, u32>,
+    /// Last turn this faction declared a war (AI throttling).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_war_declared: Option<u32>,
+}
+
+fn default_faction_loyalty() -> u8 {
+    100
+}
+
+fn default_papal_favor() -> u8 {
+    50
 }
 
 /// Dynamic state of a character.
@@ -418,6 +472,15 @@ pub struct CampaignState {
     pub events: Vec<GameEvent>,
     pub pending_battles: Vec<BattleRequest>,
     pub(crate) next_army_index: u32,
+    /// Great Western Schism in progress (M5, 1378-1417).
+    #[serde(default)]
+    pub schism: bool,
+    #[serde(default)]
+    pub(crate) next_offer_id: u32,
+    /// Events produced by orders (they apply immediately); they open the
+    /// next turn's journal.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pending_events: Vec<GameEvent>,
 }
 
 impl CampaignState {
@@ -445,6 +508,9 @@ impl CampaignState {
             events: Vec::new(),
             pending_battles: Vec::new(),
             next_army_index: 1,
+            schism: false,
+            next_offer_id: 1,
+            pending_events: Vec::new(),
         }
     }
 

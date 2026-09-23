@@ -5,7 +5,10 @@ use data_model::{FactionId, GameData};
 use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
-use crate::{ai_minimal, buildings, characters, dynasty, economy, movement, population, siege};
+use crate::{
+    ai_minimal, buildings, characters, diplomacy, dynasty, economy, movement, population, religion,
+    siege,
+};
 
 impl CampaignState {
     /// Resolves the turn with the built-in minimal AI for every non-player faction.
@@ -48,6 +51,12 @@ impl CampaignState {
         economy::resolve_economy(self, data, &mut events);
         economy::resolve_attrition(self, data, &mut events);
         economy::resolve_decay(self);
+
+        // 8b. Diplomacy (vassal tribute after the economy, expiries,
+        // rebellions) and religion (favour, Schism, heresy) before the
+        // population reads their unrest (M5).
+        diplomacy::resolve_diplomacy(self, data, &mut events);
+        religion::resolve_religion(self, data, &mut events);
 
         // 9. Population dynamics: growth, health, wealth, goods
         // satisfaction, unrest, revolt, plague, famine (M3).

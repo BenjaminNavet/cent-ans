@@ -34,6 +34,21 @@ pub enum EventKind {
     Regency,
     /// A character acquires a trait through an in-game event (spec § 2).
     TraitAcquired,
+    // ----- M5 ---------------------------------------------------------------
+    Marriage,
+    WarDeclared,
+    PeaceSigned,
+    AllianceFormed,
+    AllianceBroken,
+    Vassalage,
+    VassalRebellion,
+    Embargo,
+    DiplomaticOffer,
+    /// Other diplomatic news (gifts, claims...).
+    Diplomacy,
+    Excommunication,
+    Schism,
+    Heresy,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

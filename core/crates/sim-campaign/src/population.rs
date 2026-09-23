@@ -3,7 +3,7 @@
 
 use data_model::{FactionId, GameData, PopulationClass, ProvinceId, SocialClass};
 
-use crate::buildings::{capacity, effects_of, EffectTotals};
+use crate::buildings::{capacity, EffectTotals};
 use crate::events::{EventKind, GameEvent};
 use crate::state::CampaignState;
 
@@ -197,11 +197,13 @@ pub(crate) fn resolve_population(
             .map(|f| f.goods.clone())
             .unwrap_or_default();
         let occupied = controller != owner;
-        let foreign_religion = data
-            .factions
-            .get(&controller)
-            .is_some_and(|f| f.religion != province_data.religion);
-        let effects = effects_of(data, &buildings);
+        // Obediences of one church are not foreign to each other (M5).
+        let foreign_religion = crate::religion::faction_religion(state, data, &controller)
+            .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_data.religion));
+        // Buildings plus governor (M4), plus regency, excommunication,
+        // embargo and heresy unrest (M5).
+        let mut effects = state.province_effects(data, &id);
+        effects.unrest.flat += state.political_unrest(&id);
         let cap = capacity(data, &id, &buildings);
 
         let province = state.provinces.get_mut(&id).expect("exists");
