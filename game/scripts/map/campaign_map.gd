@@ -44,6 +44,7 @@ func _ready() -> void:
 	terrain.build(map_data)
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
+	rivers.minor_max_distance = maxf(map_data.size.x, map_data.size.y) * 0.35
 	rivers.build(map_data)
 	coast.build(map_data)
 	cities.label_max_distance = maxf(map_data.size.x, map_data.size.y) * 0.35
@@ -118,6 +119,7 @@ func _process(_delta: float) -> void:
 		return
 	terrain.update_lod(camera.global_position)
 	cities.update_visibility(camera_rig.distance)
+	rivers.update_visibility(camera_rig.distance)
 	if _screenshot_countdown > 0:
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:

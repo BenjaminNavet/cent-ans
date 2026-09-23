@@ -16,7 +16,7 @@ background_mode = 1
 background_color = Color(0.72, 0.66, 0.52, 1)
 ambient_light_source = 1
 ambient_light_color = Color(0.85, 0.82, 0.75, 1)
-ambient_light_energy = 0.4
+ambient_light_energy = 0.5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 content_margin_left = 16.0

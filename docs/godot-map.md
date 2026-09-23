@@ -13,7 +13,7 @@ CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, gère le cycl
 ├── WorldEnvironment / Sun (DirectionalLight3D)
 ├── Terrain   (TerrainBuilder)   16 × 16 tuiles ArrayMesh depuis la heightmap, 2 LOD
 ├── Sea       (Sea)              plan d'eau Y = 0 (shader animé) + fond opaque à −4,5
-├── Rivers    (RiversRenderer)   rubans bleus (largeur selon Strahler)
+├── Rivers    (RiversRenderer)   rubans bleus (largeur selon importance ; mineurs masqués de loin)
 ├── Coast     (CoastRenderer)    ruban brun sur le trait de côte
 ├── Cities    (CityMarkers)      cylindre + Label3D par capitale (`capital_px`)
 ├── CameraRig (CampaignCamera)   caméra RTS ; enfant Camera3D
@@ -36,7 +36,9 @@ surchargé par la variable d'environnement `CENT_ANS_DATA_DIR` ; `MapPaths.map_d
   est mis en cache dans `user://cache/heightmap_<md5>_<mtime>.u16be` ; les chargements suivants
   prennent quelques millisecondes. Si le PNG n'est pas en 16 bits gris, repli en L8 (avertissement).
 - `province_ids.png` (RGB8, index = R + 256·G, 0 = mer), `land_mask.png` (optionnel).
-- `provinces.geojson`, `rivers.geojson`, `coastline.geojson` via `JSON.parse_string`.
+- `provinces.geojson`, `rivers.geojson`, `coastline.geojson` via `JSON.parse_string`. Importance d'une
+  rivière = `strahler` si présent, sinon `12 − scalerank` (Natural Earth) ; ≥ 3 = fleuve majeur toujours
+  affiché, sinon affiché seulement sous 0,35 × taille de carte.
 - Accès : `height_m_at(x, y)` (bilinéaire), `height_world_at`, `surface_world_at` (≥ 0),
   `province_index_at(x, y)`, `get_province(index)`.
 
@@ -119,6 +121,13 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 20 000 lectures pick + hauteur : 23 ms. Mémoire résidente ≈ 120 Mo (heightmap LA8 32 Mo +
 ids RGB8 48 Mo + copies CPU).
 
+## Données réelles (`tools/geo`)
+
+Le jeu `data/map/` produit par le pipeline géo se charge tel quel (4096², 132 provinces, 485 rivières,
+289 lignes de côte) : 5,3 s au premier lancement (décodage 16 bits), 0,2 s ensuite.
+
+![Carte réelle](img/godot-real-map.png)
+
 ## Limites connues
 
 - Premier chargement d'une heightmap 16 bits : ~5 s si les lignes PNG sont filtrées (Paeth…),
@@ -128,6 +137,8 @@ ids RGB8 48 Mo + copies CPU).
 - Pas de jupes entre tuiles de LOD différents : petites fissures possibles vues de très près.
 - Rivières et côte sont rendues sans test de profondeur (visibles à travers le relief) ; largeur en
   unités monde, non adaptée au zoom.
+- Le panneau affiche « — » pour capitale et terrain avec les données réelles (propriétés absentes du
+  GeoJSON) : ces champs viendront de `core/` (données `data/provinces/`) en M2.
 - Étiquettes masquées au-delà de 0,35 × taille de carte ; pas de dé-chevauchement.
 - Panneau alimenté par les propriétés GeoJSON ; le vrai propriétaire viendra de `CampaignSim`.
 - macOS arm64 uniquement testé (Metal, Forward+).
