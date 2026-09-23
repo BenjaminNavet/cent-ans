@@ -57,6 +57,12 @@ pub struct FactionEconomy {
     /// Court and administration (M10 balance), see [`administration_rate`].
     #[serde(default)]
     pub administration_upkeep: i64,
+    /// H3 « Table »: diets of the controlled provinces this season.
+    #[serde(default)]
+    pub table_upkeep: i64,
+    /// H3 « Table »: diets paid during the last resolved turn.
+    #[serde(default)]
+    pub table_upkeep_last_turn: i64,
     pub tax_rate: TaxRate,
     pub goods: BTreeMap<ResourceId, u32>,
     pub goods_categories: Vec<ResourceCategory>,
@@ -331,6 +337,8 @@ impl CampaignState {
             army_upkeep,
             building_upkeep,
             administration_upkeep: self.faction_administration_upkeep(data, id),
+            table_upkeep: self.faction_table_upkeep(data, id),
+            table_upkeep_last_turn: faction.table_upkeep_last_turn,
             tax_rate: faction.tax_rate,
             goods: faction.goods.clone(),
             goods_categories,
@@ -353,8 +361,14 @@ pub(crate) fn resolve_economy(
         let army_upkeep = state.faction_army_upkeep(data, &faction_id);
         let building_upkeep = state.faction_building_upkeep(data, &faction_id);
         let administration = state.faction_administration_upkeep(data, &faction_id);
-        let upkeep = army_upkeep + building_upkeep + administration;
+        let available = state.factions[&faction_id].treasury + income
+            - (army_upkeep + building_upkeep + administration);
+        // H3: the diets of the provinces (« Table »), those the purse cannot
+        // cover fall back to the default.
+        let table = crate::table::pay_table(state, data, &faction_id, available, events);
+        let upkeep = army_upkeep + building_upkeep + administration + table;
         let faction = state.factions.get_mut(&faction_id).expect("exists");
+        faction.table_upkeep_last_turn = table;
         faction.treasury += income - upkeep;
         faction.income_last_turn = income;
         faction.upkeep_last_turn = upkeep;
@@ -417,18 +431,32 @@ pub(crate) fn resolve_economy(
             (id.clone(), effects)
         })
         .collect();
+    // H3: a hearty diet raises the morale of the troops levied there.
+    let morale_bonus: BTreeMap<data_model::ProvinceId, f64> = state
+        .provinces
+        .iter()
+        .filter(|(_, p)| !p.recruit_queue.is_empty())
+        .map(|(id, _)| {
+            (
+                id.clone(),
+                crate::table::recruit_morale_bonus(state, data, id),
+            )
+        })
+        .collect();
     for (province_id, province) in state.provinces.iter_mut() {
         let Some(effects) = local_effects.get(province_id) else {
             continue;
         };
         reinforce_garrison(province, effects);
         let queue = std::mem::take(&mut province.recruit_queue);
+        let bonus = morale_bonus.get(province_id).copied().unwrap_or(0.0);
         for unit_type_id in queue {
             let Some(unit_type) = data.unit_types.get(&unit_type_id) else {
                 continue;
             };
             let mut unit = Unit::fresh(unit_type);
             unit.experience = recruit_experience(effects, unit_type.category);
+            unit.morale = crate::research::boosted(unit.morale, bonus, 100);
             province.garrison.push(unit);
             if province.controller == player {
                 events.push(

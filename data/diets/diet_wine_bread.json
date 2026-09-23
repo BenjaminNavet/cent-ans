@@ -1,0 +1,35 @@
+{
+  "id": "diet_wine_bread",
+  "name": {
+    "display": "Pain blanc et vin"
+  },
+  "description": "Pain de froment blanc et vin à chaque repas : l'ordinaire des bourgeois. Le [[cdx_vin_de_gascogne|vin de Gascogne]], ce [[cdx_clairet|clairet]] que les Anglais appellent « claret », fait la fortune du [[cdx_commerce_de_bordeaux|commerce de Bordeaux]].",
+  "requirements": {
+    "resources": [
+      "res_wine"
+    ]
+  },
+  "cost_per_thousand": 0.25,
+  "effects": [
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 5
+    },
+    {
+      "effect": "goods_satisfaction",
+      "class": "burghers",
+      "value": 5
+    },
+    {
+      "effect": "unrest",
+      "class": "burghers",
+      "value": -3
+    }
+  ],
+  "sources": [
+    "Vin de Bordeaux",
+    "Clairet",
+    "Cuisine médiévale"
+  ]
+}
