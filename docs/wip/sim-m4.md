@@ -25,4 +25,5 @@ reconnecter plus tard (voir rapport final).
 10. tests/m4.rs: >= 14 tests.
 
 ## Statut
-En cours — voir commits `wip:`.
+Étapes 1-8 faites (compile, tests existants verts). `data.traits/skills/names` existent
+désormais (commit 4bd1316) et sont utilisés directement. Prochaine étape : 9 (turn.rs), puis 10 (tests/m4.rs), puis pont GDExtension (§ 3).

@@ -1,7 +1,9 @@
-//! Ageing, natural death and succession (spec § 1.3 step 8).
+//! Ageing, natural death and succession (spec § 1.3 step 8, spec § 2 for the
+//! M4 trait modifiers and the law-driven succession).
 
-use data_model::{CharacterId, FactionId, GameData, Sex};
+use data_model::{CharacterId, FactionId, GameData};
 
+use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
 use crate::state::CampaignState;
 
@@ -13,6 +15,23 @@ pub fn death_permille(age: i32) -> u32 {
         a if a < 75 => 20,
         _ => 80,
     }
+}
+
+/// `death_permille` scaled by `trait_sickly` (×2) / `trait_strong` (×0.7),
+/// spec § 2.
+pub fn death_permille_for(state: &CampaignState, id: &CharacterId) -> u32 {
+    let Some(character) = state.characters.get(id) else {
+        return 0;
+    };
+    let mut permille = death_permille(character.age(state.year)) as f64;
+    let has = |name: &str| character.traits.iter().any(|t| t.as_str() == name);
+    if has("trait_sickly") {
+        permille *= 2.0;
+    }
+    if has("trait_strong") {
+        permille *= 0.7;
+    }
+    permille.round().min(1000.0) as u32
 }
 
 fn character_name(data: &GameData, id: &CharacterId) -> String {
@@ -33,7 +52,6 @@ pub(crate) fn resolve_characters(
     data: &GameData,
     events: &mut Vec<GameEvent>,
 ) {
-    let year = state.year;
     let ids: Vec<CharacterId> = state
         .characters
         .iter()
@@ -41,8 +59,7 @@ pub(crate) fn resolve_characters(
         .map(|(id, _)| id.clone())
         .collect();
     for id in ids {
-        let age = state.characters[&id].age(year);
-        let permille = death_permille(age);
+        let permille = death_permille_for(state, &id);
         if permille == 0 || !state.rng.chance_permille(permille) {
             continue;
         }
@@ -86,57 +103,45 @@ pub fn kill(
         .get(&faction)
         .is_some_and(|f| f.heir.as_ref() == Some(id))
     {
-        let heir = pick_heir(state, &faction, None);
+        let heir = state
+            .factions
+            .get(&faction)
+            .and_then(|f| f.ruler.clone())
+            .and_then(|ruler| dynasty::pick_heir_by_law(state, data, &faction, &ruler));
         state.factions.get_mut(&faction).expect("exists").heir = heir;
     }
 }
 
-/// Eldest living male of the ruler's house (excluding `exclude`), if any.
-fn pick_heir(
-    state: &CampaignState,
-    faction: &FactionId,
-    exclude: Option<&CharacterId>,
-) -> Option<CharacterId> {
-    let faction_state = state.factions.get(faction)?;
-    let house = faction_state
-        .ruler
-        .as_ref()
-        .and_then(|r| state.characters.get(r))
-        .map(|r| r.house.clone())?;
-    state
-        .characters
-        .iter()
-        .filter(|(id, c)| {
-            c.alive
-                && c.sex == Sex::Male
-                && &c.faction == faction
-                && c.house == house
-                && Some(*id) != faction_state.ruler.as_ref()
-                && Some(*id) != exclude
-        })
-        .min_by_key(|(id, c)| (c.birth_year, (*id).clone()))
-        .map(|(id, _)| id.clone())
-}
-
-/// Replaces the dead ruler of `faction` by its heir, or the eldest male of the house.
+/// Replaces the dead ruler of `faction` by its designated heir if still
+/// alive, otherwise the heir picked by the faction's `succession_law` (spec
+/// § 2; `dynasty::pick_heir_by_law` falls back to the eldest living male of
+/// the house for laws it does not special-case, matching the pre-M4
+/// behaviour). No heir at all: the faction keeps its provinces/armies under
+/// perpetual AI regency (`NoHeir`) unless it has no living character left,
+/// in which case it is destroyed outright.
 pub(crate) fn succeed(
     state: &mut CampaignState,
     data: &GameData,
     faction: &FactionId,
     events: &mut Vec<GameEvent>,
 ) {
+    let dead_ruler = state.factions.get(faction).and_then(|f| f.ruler.clone());
     let designated = state
         .factions
         .get(faction)
         .and_then(|f| f.heir.clone())
         .filter(|h| state.characters.get(h).is_some_and(|c| c.alive));
-    let successor = designated.or_else(|| pick_heir(state, faction, None));
+    let successor = designated.or_else(|| {
+        dead_ruler
+            .as_ref()
+            .and_then(|ruler| dynasty::pick_heir_by_law(state, data, faction, ruler))
+    });
     match successor {
         Some(new_ruler) => {
             let faction_state = state.factions.get_mut(faction).expect("exists");
             faction_state.ruler = Some(new_ruler.clone());
             faction_state.heir = None;
-            let next_heir = pick_heir(state, faction, Some(&new_ruler));
+            let next_heir = dynasty::pick_heir_by_law(state, data, faction, &new_ruler);
             state.factions.get_mut(faction).expect("exists").heir = next_heir;
             events.push(
                 GameEvent::new(
@@ -152,13 +157,31 @@ pub(crate) fn succeed(
         }
         None => {
             state.factions.get_mut(faction).expect("exists").ruler = None;
-            events.push(
-                GameEvent::new(
-                    EventKind::NoHeir,
-                    format!("{} se retrouve sans héritier.", faction_name(data, faction)),
-                )
-                .faction(faction),
-            );
+            let has_living_member = state.characters.values().any(|c| c.alive && &c.faction == faction);
+            if has_living_member {
+                events.push(
+                    GameEvent::new(
+                        EventKind::NoHeir,
+                        format!(
+                            "{} se retrouve sans héritier : une régence perpétuelle s'installe.",
+                            faction_name(data, faction)
+                        ),
+                    )
+                    .faction(faction),
+                );
+            } else {
+                state.factions.get_mut(faction).expect("exists").alive = false;
+                events.push(
+                    GameEvent::new(
+                        EventKind::FactionDestroyed,
+                        format!(
+                            "{} s'éteint faute d'héritier.",
+                            faction_name(data, faction)
+                        ),
+                    )
+                    .faction(faction),
+                );
+            }
         }
     }
 }

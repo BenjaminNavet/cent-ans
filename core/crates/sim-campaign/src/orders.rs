@@ -5,13 +5,15 @@
 //! and resolved in `end_turn`; all other orders apply immediately.
 
 use data_model::{
-    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::CANCEL_REFUND_PERCENT;
+use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
 use crate::movement;
+use crate::skills::{self, LearnSkillError};
 use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 
 /// An order issued by a faction (player through `submit_order`, AI through the planner).
@@ -77,6 +79,28 @@ pub enum Order {
     SetTaxRate {
         rate: TaxRate,
     },
+    /// Spends a skill point of `character` on `skill` (spec § 2).
+    LearnSkill {
+        character: CharacterId,
+        skill: SkillId,
+    },
+    /// Makes `character` the governor of `province` (spec § 2).
+    AssignGovernor {
+        province: ProvinceId,
+        character: CharacterId,
+    },
+    /// Marries `character` and `spouse` (spec § 2).
+    ProposeMarriage {
+        character: CharacterId,
+        spouse: CharacterId,
+    },
+    /// Headless-only debug order: grants `amount` XP to `character`, always
+    /// accepted (spec § 3, "smoke test"). Never issued by the Godot bridge
+    /// UI in a released build.
+    DebugGrantXp {
+        character: CharacterId,
+        amount: u32,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -92,6 +116,8 @@ pub enum OrderError {
     UnknownCharacter(CharacterId),
     #[error("cette armée n'appartient pas à la faction {0}")]
     NotYourArmy(FactionId),
+    #[error("ce personnage n'appartient pas à la faction {0}")]
+    NotYourCharacter(FactionId),
     #[error("cette province n'est pas contrôlée par la faction {0}")]
     NotYourProvince(FactionId),
     #[error("chemin vide")]
@@ -126,6 +152,12 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette province")]
     NoConstruction,
+    #[error(transparent)]
+    LearnSkill(#[from] LearnSkillError),
+    #[error(transparent)]
+    Governor(#[from] GovernorError),
+    #[error(transparent)]
+    Marriage(#[from] MarriageError),
 }
 
 /// One line of the recruitment panel.
@@ -196,7 +228,43 @@ impl CampaignState {
                     .tax_rate = rate;
                 Ok(())
             }
+            Order::LearnSkill { character, skill } => {
+                self.check_owned_character(faction, &character)?;
+                skills::learn_skill(self, data, &character, &skill)?;
+                Ok(())
+            }
+            Order::AssignGovernor { province, character } => {
+                self.check_owned_character(faction, &character)?;
+                dynasty::assign_governor(self, &province, &character)?;
+                Ok(())
+            }
+            Order::ProposeMarriage { character, spouse } => {
+                self.check_owned_character(faction, &character)?;
+                dynasty::propose_marriage(self, data, &character, &spouse)?;
+                Ok(())
+            }
+            Order::DebugGrantXp { character, amount } => {
+                skills::grant_experience(self, &character, amount);
+                Ok(())
+            }
         }
+    }
+
+    /// `character` exists and belongs to `faction` (used by the M4 orders
+    /// that are not army/province scoped).
+    fn check_owned_character(
+        &self,
+        faction: &FactionId,
+        character: &CharacterId,
+    ) -> Result<(), OrderError> {
+        let state = self
+            .characters
+            .get(character)
+            .ok_or_else(|| OrderError::UnknownCharacter(character.clone()))?;
+        if &state.faction != faction {
+            return Err(OrderError::NotYourCharacter(faction.clone()));
+        }
+        Ok(())
     }
 
     fn order_build(

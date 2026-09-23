@@ -28,6 +28,12 @@ pub enum EventKind {
     Revolt,
     Plague,
     Famine,
+    /// A character is born (generated or historical, spec § 2).
+    Birth,
+    /// A regency is opened for a minor ruler (spec § 2).
+    Regency,
+    /// A character acquires a trait through an in-game event (spec § 2).
+    TraitAcquired,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

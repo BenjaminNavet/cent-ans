@@ -36,6 +36,7 @@ pub mod ai_minimal;
 pub mod battle_auto;
 pub mod buildings;
 pub mod characters;
+pub mod dynasty;
 pub mod economy;
 pub mod events;
 pub mod movement;
@@ -45,6 +46,7 @@ pub mod rng;
 pub mod save;
 pub mod setup_1337;
 pub mod siege;
+pub mod skills;
 pub mod state;
 pub mod turn;
 
@@ -52,11 +54,16 @@ pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
 };
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use dynasty::{
+    ChildView, CharacterView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
+    MARRIAGE_MIN_AGE,
+};
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
 pub use orders::{Order, OrderError, RecruitOption};
 pub use rng::CampaignRng;
 pub use save::CampaignError;
+pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
     FactionSummary, ProvinceState, Season, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS,

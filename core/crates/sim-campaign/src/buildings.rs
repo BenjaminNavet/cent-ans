@@ -43,6 +43,15 @@ impl EffectValue {
 /// the simulation reads (spec § 1.2): `TaxIncome`, `TradeIncome`, `Health`,
 /// `Unrest`, `Wealth`, `GoodsSatisfaction`, `Growth`, `Garrison`,
 /// `FortificationLevel`, `RecruitCost`, `Supply`. Other kinds are ignored.
+///
+/// M4 (spec § 2) extends this with the kinds carried by character traits and
+/// skills (general in battle, governor in a province): `ArmyMorale`,
+/// `ArmyExperience`, `Piety`, `Prestige`, `Loyalty`, `Movement`, plus the
+/// battle/siege/construction/court kinds `data_model::EffectKind` adds for M4
+/// (`BattleCharge`, `BattleRanged`, `BattleDefense`, `SiegeSpeed`,
+/// `ConstructionSpeed`, `Diplomacy`, `Intrigue`, `Fertility`); see
+/// `skills::character_effects`, which reuses [`EffectTotals::add`] on
+/// `Trait`/`Skill` effects the same way this module uses it on buildings.
 #[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
 pub struct EffectTotals {
     pub tax_income: EffectValue,
@@ -56,10 +65,67 @@ pub struct EffectTotals {
     pub fortification_level: EffectValue,
     pub recruit_cost: EffectValue,
     pub supply: EffectValue,
+    pub army_morale: EffectValue,
+    pub army_experience: EffectValue,
+    pub piety: EffectValue,
+    pub prestige: EffectValue,
+    pub loyalty: EffectValue,
+    pub movement: EffectValue,
+    pub battle_charge: EffectValue,
+    pub battle_ranged: EffectValue,
+    pub battle_defense: EffectValue,
+    pub siege_speed: EffectValue,
+    pub construction_speed: EffectValue,
+    pub diplomacy: EffectValue,
+    pub intrigue: EffectValue,
+    pub fertility: EffectValue,
 }
 
 impl EffectTotals {
-    fn add(&mut self, kind: EffectKind, mode: EffectMode, value: f64) {
+    /// Merges `other`'s flat/percent totals into `self` (used to combine
+    /// building effects with a governor's `character_effects`).
+    pub fn merge(&mut self, other: &EffectTotals) {
+        macro_rules! merge_field {
+            ($field:ident) => {
+                self.$field.flat += other.$field.flat;
+                self.$field.percent += other.$field.percent;
+            };
+        }
+        merge_field!(tax_income);
+        merge_field!(trade_income);
+        merge_field!(health);
+        merge_field!(unrest);
+        merge_field!(wealth);
+        merge_field!(goods_satisfaction);
+        merge_field!(growth);
+        merge_field!(garrison);
+        merge_field!(fortification_level);
+        merge_field!(recruit_cost);
+        merge_field!(supply);
+        merge_field!(army_morale);
+        merge_field!(army_experience);
+        merge_field!(piety);
+        merge_field!(prestige);
+        merge_field!(loyalty);
+        merge_field!(movement);
+        merge_field!(battle_charge);
+        merge_field!(battle_ranged);
+        merge_field!(battle_defense);
+        merge_field!(siege_speed);
+        merge_field!(construction_speed);
+        merge_field!(diplomacy);
+        merge_field!(intrigue);
+        merge_field!(fertility);
+    }
+}
+
+impl EffectTotals {
+    /// Adds one [`Effect`](data_model::Effect)'s worth of value to the
+    /// matching slot; unmapped kinds (e.g. population-only kinds this crate
+    /// does not read yet) are ignored. Shared by building effects
+    /// ([`effects_of`]) and character trait/skill effects
+    /// (`skills::character_effects`).
+    pub(crate) fn add(&mut self, kind: EffectKind, mode: EffectMode, value: f64) {
         let slot = match kind {
             EffectKind::TaxIncome => &mut self.tax_income,
             EffectKind::TradeIncome => &mut self.trade_income,
@@ -72,6 +138,20 @@ impl EffectTotals {
             EffectKind::FortificationLevel => &mut self.fortification_level,
             EffectKind::RecruitCost => &mut self.recruit_cost,
             EffectKind::Supply => &mut self.supply,
+            EffectKind::ArmyMorale => &mut self.army_morale,
+            EffectKind::ArmyExperience => &mut self.army_experience,
+            EffectKind::Piety => &mut self.piety,
+            EffectKind::Prestige => &mut self.prestige,
+            EffectKind::Loyalty => &mut self.loyalty,
+            EffectKind::Movement => &mut self.movement,
+            EffectKind::BattleCharge => &mut self.battle_charge,
+            EffectKind::BattleRanged => &mut self.battle_ranged,
+            EffectKind::BattleDefense => &mut self.battle_defense,
+            EffectKind::SiegeSpeed => &mut self.siege_speed,
+            EffectKind::ConstructionSpeed => &mut self.construction_speed,
+            EffectKind::Diplomacy => &mut self.diplomacy,
+            EffectKind::Intrigue => &mut self.intrigue,
+            EffectKind::Fertility => &mut self.fertility,
             _ => return,
         };
         slot.add(mode, value);
@@ -148,12 +228,23 @@ pub struct ProvinceCity {
 }
 
 impl CampaignState {
-    /// Sum of the building effects currently active in `province`.
+    /// Sum of the building effects currently active in `province`, plus its
+    /// governor's trait/skill effects if any (spec § 2).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
-        self.provinces
+        let mut totals = self
+            .provinces
             .get(province)
             .map(|p| effects_of(data, &p.buildings))
-            .unwrap_or_default()
+            .unwrap_or_default();
+        if let Some(governor) = self
+            .characters
+            .iter()
+            .find(|(_, c)| c.alive && c.governor_of.as_ref() == Some(province))
+            .map(|(id, _)| id.clone())
+        {
+            totals.merge(&crate::skills::character_effects(self, data, &governor));
+        }
+        totals
     }
 
     /// Fortification level used by sieges: the province's base level (data)

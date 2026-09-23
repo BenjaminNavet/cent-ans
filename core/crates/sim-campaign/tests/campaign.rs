@@ -664,7 +664,7 @@ fn save_load_round_trip() {
         state.end_turn(&data);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":2"));
+    assert!(json.contains("\"state_version\":3"));
     assert!(json.contains("\"tax_rate\""), "new field round-trips");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
@@ -678,7 +678,7 @@ fn save_load_round_trip() {
     b.end_turn(&data);
     assert_eq!(a.save_json(), b.save_json());
 
-    let err = CampaignState::load_json(&json.replace("\"state_version\":2", "\"state_version\":1"))
+    let err = CampaignState::load_json(&json.replace("\"state_version\":3", "\"state_version\":1"))
         .unwrap_err();
     assert!(matches!(
         err,
@@ -791,11 +791,30 @@ fn succession_follows_heir_then_house_then_none() {
         .expect("house heir");
     assert_eq!(state.character(&ruler).unwrap().house, "Valois");
 
-    // Navarre's queen has no heir and no male of her house: no heir event.
+    // Navarre (cognatic): the queen's son inherits although he belongs to
+    // his father's house (Évreux).
     let jeanne = data_model::CharacterId::new("chr_jeanne_ii_de_navarre").unwrap();
+    let charles = data_model::CharacterId::new("chr_charles_ii_de_navarre").unwrap();
     let mut events = Vec::new();
     sim_campaign::characters::kill(&mut state, &data, &jeanne, &mut events);
-    assert!(events.iter().any(|e| e.kind == EventKind::NoHeir));
+    assert_eq!(
+        state.faction_state(&fac("fac_navarre")).unwrap().ruler,
+        Some(charles)
+    );
+
+    // Kill every ruler in turn: the line eventually runs out.
+    let mut ended = false;
+    for _ in 0..10 {
+        let Some(ruler) = state.faction_state(&fac("fac_navarre")).unwrap().ruler.clone() else {
+            break;
+        };
+        let mut events = Vec::new();
+        sim_campaign::characters::kill(&mut state, &data, &ruler, &mut events);
+        ended |= events
+            .iter()
+            .any(|e| matches!(e.kind, EventKind::NoHeir | EventKind::FactionDestroyed));
+    }
+    assert!(ended, "no_heir or faction_destroyed once the line is extinct");
     assert_eq!(
         state.faction_state(&fac("fac_navarre")).unwrap().ruler,
         None
