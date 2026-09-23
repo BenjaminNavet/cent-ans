@@ -34,11 +34,20 @@ static func add_box(st: SurfaceTool, center: Vector3, size: Vector3, color: Colo
 	for face in faces:
 		var idx: Array = face[0]
 		var normal: Vector3 = basis * (face[1] as Vector3)
-		for tri in [[0, 1, 2], [0, 2, 3]]:
-			for k in tri:
-				st.set_color(color)
-				st.set_normal(normal)
-				st.add_vertex(corners[idx[k]])
+		tri(st, corners[idx[0]], corners[idx[1]], corners[idx[2]], normal, color)
+		tri(st, corners[idx[0]], corners[idx[2]], corners[idx[3]], normal, color)
+
+
+## Ajoute un triangle en ordre horaire vu du côté de `normal` (face avant pour Godot).
+static func tri(st: SurfaceTool, p0: Vector3, p1: Vector3, p2: Vector3, normal: Vector3, color: Color) -> void:
+	if (p1 - p0).cross(p2 - p0).dot(normal) > 0.0:
+		var swap := p1
+		p1 = p2
+		p2 = swap
+	for v in [p0, p1, p2]:
+		st.set_color(color)
+		st.set_normal(normal)
+		st.add_vertex(v)
 
 
 ## Cône (ou tronc de cône) à `sides` pans, de `base_y` à `top_y`.
@@ -51,15 +60,9 @@ static func add_cone(st: SurfaceTool, center: Vector3, radius: float, height: fl
 		var t0 := center + Vector3(cos(a0) * top_radius, height, sin(a0) * top_radius)
 		var t1 := center + Vector3(cos(a1) * top_radius, height, sin(a1) * top_radius)
 		var normal := (Vector3(cos((a0 + a1) * 0.5), radius / maxf(height, 0.01), sin((a0 + a1) * 0.5))).normalized()
-		for v in [p0, t0, p1]:
-			st.set_color(color)
-			st.set_normal(normal)
-			st.add_vertex(v)
+		tri(st, p0, t0, p1, normal, color)
 		if top_radius > 0.0:
-			for v in [p1, t0, t1]:
-				st.set_color(color)
-				st.set_normal(normal)
-				st.add_vertex(v)
+			tri(st, p1, t0, t1, normal, color)
 
 
 ## Assemble les deux surfaces (livrée, neutre) en un ArrayMesh avec leurs matériaux.
@@ -73,6 +76,7 @@ static func _commit_two(livery: SurfaceTool, neutral: SurfaceTool, color: Color)
 	livery_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var neutral_mat := StandardMaterial3D.new()
 	neutral_mat.vertex_color_use_as_albedo = true
+	neutral_mat.vertex_color_is_srgb = true
 	neutral_mat.roughness = 0.85
 	neutral_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, livery_mat)
@@ -141,6 +145,7 @@ static func tree() -> ArrayMesh:
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
 	mat.roughness = 1.0
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, mat)
@@ -156,19 +161,21 @@ static func pole() -> ArrayMesh:
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
 	mesh.surface_set_material(0, mat)
 	return mesh
 
 
-## Contour rectangulaire unitaire (1 × 1, épaisseur relative `thickness`) posé à plat,
+## Contour rectangulaire `width` × `depth` (épaisseur `t` en mètres) posé à plat, centré,
 ## pour l'anneau de sélection d'un régiment.
-static func outline(thickness: float) -> ArrayMesh:
+static func outline(width: float, depth: float, t: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var t := thickness
+	var hw := width * 0.5
+	var hd := depth * 0.5
 	var quads := [
-		Rect2(-0.5, -0.5, 1.0, t), Rect2(-0.5, 0.5 - t, 1.0, t),
-		Rect2(-0.5, -0.5, t, 1.0), Rect2(0.5 - t, -0.5, t, 1.0),
+		Rect2(-hw, -hd, width, t), Rect2(-hw, hd - t, width, t),
+		Rect2(-hw, -hd, t, depth), Rect2(hw - t, -hd, t, depth),
 	]
 	for q in quads:
 		var r: Rect2 = q

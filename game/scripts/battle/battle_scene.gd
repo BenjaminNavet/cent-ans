@@ -42,7 +42,6 @@ var standalone: bool = false
 var _mm: Dictionary = {}  # "side/kind" -> MultiMeshInstance3D
 var _banners: Dictionary = {}  # id -> {node, flag_mat, label, count}
 var _rings: Dictionary = {}  # id -> MeshInstance3D
-var _ring_mesh: ArrayMesh
 var _left_press: Vector2 = Vector2(-1, -1)
 var _right_press: Vector2 = Vector2(-1, -1)
 var _right_press_ground: Vector3 = Vector3.ZERO
@@ -150,7 +149,6 @@ func begin() -> bool:
 	terrain.build(battle.call("get_terrain"), str(weather.get("key", "clear")))
 	_apply_weather(str(weather.get("key", "clear")))
 	_build_soldier_layers()
-	_ring_mesh = BattleMeshes.outline(0.035)
 	units = battle.call("get_units")
 	for unit in units:
 		_make_banner(unit)
@@ -258,6 +256,7 @@ func _make_banner(unit: Dictionary) -> void:
 	var pole := MeshInstance3D.new()
 	pole.mesh = BattleMeshes.pole()
 	pole.scale = Vector3(1, BANNER_HEIGHT, 1)
+	pole.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	node.add_child(pole)
 	var flag := MeshInstance3D.new()
 	var quad := QuadMesh.new()
@@ -269,6 +268,7 @@ func _make_banner(unit: Dictionary) -> void:
 	flag_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	quad.material = flag_mat
 	flag.mesh = quad
+	flag.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	flag.position = Vector3(1.3, BANNER_HEIGHT - 0.9, 0)
 	node.add_child(flag)
 	var label := Label3D.new()
@@ -291,7 +291,6 @@ func _make_banner(unit: Dictionary) -> void:
 	node.add_child(count)
 	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count}
 	var ring := MeshInstance3D.new()
-	ring.mesh = _ring_mesh
 	var ring_mat := StandardMaterial3D.new()
 	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
 	ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -379,7 +378,10 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if ring.visible:
 			ring.position = pos + Vector3(0, 0.6, 0)
 			ring.rotation = Vector3(0, float(unit["facing"]), 0)
-			ring.scale = Vector3(float(unit["width"]) + 3.0, 1, float(unit["depth"]) + 3.0)
+			var size := Vector2(float(unit["width"]) + 3.0, float(unit["depth"]) + 3.0)
+			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
+				ring.set_meta("size", size)
+				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
 	_hud_timer -= delta
 	if force or _hud_timer <= 0.0:
 		_hud_timer = 0.1
@@ -392,7 +394,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 
 
 func _banner_scale() -> float:
-	return clampf(camera_rig.distance * 0.011, 1.4, 8.0)
+	return clampf(camera_rig.distance * 0.014, 2.0, 9.0)
 
 
 func _show_end() -> void:
