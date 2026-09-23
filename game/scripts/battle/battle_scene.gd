@@ -178,10 +178,12 @@ func _pad_setup(count: int) -> void:
 		var base := list.duplicate(true)
 		var i := 0
 		while list.size() < count and not base.is_empty():
-			var copy: Dictionary = base[i % base.size()].duplicate(true)
-			copy["soldiers"] = copy["max_soldiers"]
-			list.append(copy)
+			list.append(base[i % base.size()].duplicate(true))
 			i += 1
+		# Banc d'essai de la spec (§ 5) : régiments de 120 soldats.
+		for unit in list:
+			unit["soldiers"] = 120
+			unit["max_soldiers"] = 120
 		setup[side]["units"] = list
 
 
