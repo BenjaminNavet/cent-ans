@@ -11,7 +11,7 @@ extends Node
 ## (`tutorial/step`, `tutorial/done`) ; désactivable (`tutorial/enabled`, bouton « Passer le
 ## tutoriel ») ; ne démarre qu'en début de partie et jamais pendant les captures.
 ##
-## Encyclopédie : touche K ou Menu → Encyclopédie. Menu → Tutoriel relance le guide.
+## Encyclopédie : touche L ou Menu → Encyclopédie. Menu → Tutoriel relance le guide.
 ## Aucune règle de jeu : lecture de l'état seulement.
 
 const TUTORIAL_SCENE := "res://scenes/ui/tutorial.tscn"
@@ -56,7 +56,7 @@ func setup(campaign_map: Node) -> void:
 	var menu_button: MenuButton = ui.get("menu_button")
 	if menu_button != null:
 		var popup := menu_button.get_popup()
-		popup.add_item("Encyclopédie (K)", MENU_ENCYCLOPEDIA_ID)
+		popup.add_item("Encyclopédie (L)", MENU_ENCYCLOPEDIA_ID)
 		popup.add_item("Tutoriel", MENU_TUTORIAL_ID)
 		popup.id_pressed.connect(func(id: int) -> void:
 			if id == MENU_ENCYCLOPEDIA_ID:
@@ -204,7 +204,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo or not map.get("visible"):
 		return
 	var key := event as InputEventKey
-	if key.physical_keycode == KEY_K and not key.ctrl_pressed and not key.meta_pressed:
+	if key.physical_keycode == KEY_L and not key.ctrl_pressed and not key.meta_pressed:
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
 
