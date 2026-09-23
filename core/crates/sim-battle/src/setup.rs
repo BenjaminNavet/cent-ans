@@ -137,6 +137,16 @@ pub struct SideSetup {
     pub general: Option<GeneralSetup>,
 }
 
+/// Siege battle parameters (M8 § 2): the defender holds a walled town.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct SiegeSetup {
+    /// Campaign fortification level (0-3): wall thickness, height and HP.
+    pub fortification: u32,
+    /// Campaign wall damage (0-100): from 50 a breach is already open.
+    #[serde(default)]
+    pub breach: u8,
+}
+
 /// Full description of a battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BattleSetup {
@@ -156,6 +166,9 @@ pub struct BattleSetup {
     /// driven by the battle AI.
     #[serde(default)]
     pub player_side: Option<SideId>,
+    /// Siege battle: the defender holds the town walls (M8 § 2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub siege: Option<SiegeSetup>,
 }
 
 impl BattleSetup {

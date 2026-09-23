@@ -4,20 +4,23 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
-use data_model::{Ability, UnitCategory};
+use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
 use crate::command::{Command, CommandError};
 use crate::field::{Battlefield, Weather, ATTACKER_LINE_Z, DEFENDER_LINE_Z};
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
-use crate::setup::{BattleSetup, SideId};
+use crate::setup::{BattleSetup, SideId, UnitSetup};
+use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitState};
 
 /// Fixed simulation step, in seconds.
 pub const DT: f64 = 0.1;
 /// A battle lasts at most one simulated hour; the defender then wins.
 pub const MAX_DURATION: f64 = 3600.0;
+/// Seconds between two battle-AI decisions (M9: every 2 simulated seconds).
+pub const AI_PERIOD: f64 = 2.0;
 /// Upper bound of fixed steps run by a single [`BattleSim::tick`] call.
 const MAX_STEPS_PER_CALL: u32 = 600;
 
@@ -77,6 +80,36 @@ pub struct BattleSim {
     events: Vec<BattleEvent>,
     events_read: usize,
     charge_announced: Vec<bool>,
+    /// Siege battles: the town walls (M8 § 2).
+    siege: Option<SiegeWorks>,
+    square_announced: bool,
+}
+
+/// The battering ram every besieging army brings to a siege battle
+/// (battle-only regiment: its crew is not a campaign unit).
+fn ram_setup() -> UnitSetup {
+    UnitSetup {
+        unit_type: "battle_ram".to_owned(),
+        name: "Bélier".to_owned(),
+        category: UnitCategory::Siege,
+        mounted: false,
+        soldiers: 12,
+        max_soldiers: 12,
+        morale: 60,
+        experience: 0,
+        stats: UnitStats {
+            melee: 5,
+            ranged: 0,
+            range: 0,
+            armor: 75,
+            morale: 60,
+            speed: 22,
+            ammo: 0,
+            charge: None,
+            siege_attack: None,
+        },
+        abilities: Vec::new(),
+    }
 }
 
 fn angle_to(dx: f64, dz: f64) -> f64 {
@@ -98,6 +131,16 @@ fn wrap_angle(a: f64) -> f64 {
 fn turn_towards(from: f64, to: f64, max_step: f64) -> f64 {
     let diff = wrap_angle(to - from);
     wrap_angle(from + diff.clamp(-max_step, max_step))
+}
+
+/// A new order interrupts a climb (the ladders stay behind).
+fn stop_climbing(unit: &mut Unit) {
+    if unit.climbing.take().is_some() {
+        unit.climb_progress = 0.0;
+        if unit.state == UnitState::Climbing {
+            unit.state = UnitState::Idle;
+        }
+    }
 }
 
 /// Armour reduction factor (armour 0-100, 130 = invulnerable).
@@ -146,7 +189,16 @@ impl BattleSim {
         }
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
-        let field = Battlefield::generate(setup.terrain, setup.river, weather, &mut rng);
+        let is_siege = setup.siege.is_some();
+        let mut field =
+            Battlefield::generate(setup.terrain, setup.river && !is_siege, weather, &mut rng);
+        let siege = setup
+            .siege
+            .as_ref()
+            .map(|s| SiegeWorks::generate(s.fortification, s.breach, &mut rng));
+        if is_siege {
+            field.prepare_for_siege();
+        }
         let mut units = Vec::new();
         for side in SideId::BOTH {
             let side_setup = setup.side(side);
@@ -163,6 +215,17 @@ impl BattleSim {
                 }
                 units.push(unit);
             }
+        }
+        if is_siege {
+            let mut ram = Unit::from_setup(
+                units.len() as u32,
+                SideId::Attacker,
+                usize::MAX,
+                &ram_setup(),
+            );
+            ram.synthetic = true;
+            ram.ram = true;
+            units.push(ram);
         }
         let ai_enabled = match setup.player_side {
             Some(SideId::Attacker) => [false, true],
@@ -197,8 +260,14 @@ impl BattleSim {
             events: Vec::new(),
             events_read: 0,
             charge_announced: vec![false; count],
+            siege,
+            square_announced: false,
         };
-        sim.deploy();
+        if sim.siege.is_some() {
+            sim.deploy_siege();
+        } else {
+            sim.deploy();
+        }
         let text = match sim.weather {
             Weather::Clear => "Le ciel est dégagé sur le champ de bataille.".to_owned(),
             Weather::Rain => "Il pleut : les cordes des arcs se détendent.".to_owned(),
@@ -206,6 +275,16 @@ impl BattleSim {
             Weather::Snow => "La neige tombe sur le champ de bataille.".to_owned(),
         };
         sim.log(text, None);
+        if let Some(works) = &sim.siege {
+            let open = works.openings().len();
+            let text = if open > 0 {
+                format!("Siège : {open} brèche(s) déjà ouverte(s) dans l'enceinte.")
+            } else {
+                "Siège : les murailles sont intactes ; échelles, tours et bélier sont prêts."
+                    .to_owned()
+            };
+            sim.log(text, None);
+        }
         Ok(sim)
     }
 
@@ -243,28 +322,154 @@ impl BattleSim {
             if !infantry.is_empty() {
                 self.place_row(&foot_ranged, line_z + back * 45.0, back);
             }
-            // Cavalry on the wings, alternating left and right.
-            let mut left = 600.0 - front_width * 0.5 - 20.0;
-            let mut right = 600.0 + front_width * 0.5 + 20.0;
-            for (k, &i) in cavalry.iter().enumerate() {
-                let (w, _) = self.units[i].extent();
-                let x = if k % 2 == 0 {
-                    right += w * 0.5;
-                    let x = right;
-                    right += w * 0.5 + 12.0;
-                    x
-                } else {
-                    left -= w * 0.5;
-                    let x = left;
-                    left -= w * 0.5 + 12.0;
-                    x
-                };
-                let unit = &mut self.units[i];
-                unit.x = x.clamp(30.0, self.field.width - 30.0);
-                unit.z = line_z + back * 15.0;
-            }
+            self.place_wings(&cavalry, front_width, line_z + back * 15.0);
             self.place_row(&siege, line_z + back * 95.0, back);
         }
+    }
+
+    /// Cavalry on the wings of a front `front_width` wide, alternating right
+    /// and left.
+    fn place_wings(&mut self, cavalry: &[usize], front_width: f64, z: f64) {
+        let mut left = 600.0 - front_width * 0.5 - 20.0;
+        let mut right = 600.0 + front_width * 0.5 + 20.0;
+        for (k, &i) in cavalry.iter().enumerate() {
+            let (w, _) = self.units[i].extent();
+            let x = if k % 2 == 0 {
+                right += w * 0.5;
+                let x = right;
+                right += w * 0.5 + 12.0;
+                x
+            } else {
+                left -= w * 0.5;
+                let x = left;
+                left -= w * 0.5 + 12.0;
+                x
+            };
+            let unit = &mut self.units[i];
+            unit.x = x.clamp(30.0, self.field.width - 30.0);
+            unit.z = z;
+        }
+    }
+
+    fn side_units(&self, side: SideId, keep: impl Fn(&Unit) -> bool) -> Vec<usize> {
+        (0..self.units.len())
+            .filter(|&i| self.units[i].side == side && keep(&self.units[i]))
+            .collect()
+    }
+
+    /// Siege deployment (M8 § 2): the besiegers south of the walls (shooters
+    /// ahead of the infantry, towers and ram in front, engines behind); the
+    /// garrison on the wall walk facing out (shooters first), a guard behind
+    /// the gate and a reserve in the central square.
+    fn deploy_siege(&mut self) {
+        let works = self.siege.clone().expect("siege battle");
+        let front_z = works
+            .vertices
+            .iter()
+            .map(|v| v.1)
+            .fold(f64::INFINITY, f64::min);
+        // Besiegers.
+        let a = SideId::Attacker;
+        for i in self.side_units(a, |_| true) {
+            self.units[i].facing = 0.0;
+        }
+        let infantry = self.side_units(a, |u| u.category == UnitCategory::Infantry);
+        let shooters = self.side_units(a, |u| u.category == UnitCategory::Ranged && !u.mounted);
+        let cavalry = self.side_units(a, |u| {
+            u.category == UnitCategory::Cavalry || (u.mounted && u.category == UnitCategory::Ranged)
+        });
+        let towers = self.side_units(a, Unit::siege_tower);
+        let engines = self.side_units(a, |u| {
+            u.category == UnitCategory::Siege && !u.siege_tower() && !u.ram
+        });
+        let rams = self.side_units(a, |u| u.ram);
+        let width = self.place_row(&infantry, front_z - 130.0, -1.0);
+        self.place_row(&shooters, front_z - 100.0, -1.0);
+        self.place_wings(&cavalry, width.max(200.0), front_z - 165.0);
+        self.place_row(&engines, front_z - 200.0, -1.0);
+        let front = works.front_walls();
+        for (k, &i) in towers.iter().enumerate() {
+            let (mx, mz) = works.pieces[front[k % front.len()]].midpoint();
+            let unit = &mut self.units[i];
+            unit.x = mx + 15.0 * (k / front.len()) as f64;
+            unit.z = mz - 110.0;
+        }
+        let (gx, gz) = works.pieces[works.gate].midpoint();
+        for &i in &rams {
+            self.units[i].x = gx;
+            self.units[i].z = gz - 105.0;
+        }
+        // Garrison.
+        let d = SideId::Defender;
+        for i in self.side_units(d, |_| true) {
+            self.units[i].facing = std::f64::consts::PI;
+        }
+        let wall_shooters =
+            self.side_units(d, |u| u.category == UnitCategory::Ranged && !u.mounted);
+        let foot = self.side_units(d, |u| u.category == UnitCategory::Infantry && !u.mounted);
+        let others = self.side_units(d, |u| {
+            u.mounted || matches!(u.category, UnitCategory::Cavalry | UnitCategory::Siege)
+        });
+        let reserve_count = if foot.len() >= 2 {
+            foot.len().div_ceil(3)
+        } else {
+            0
+        };
+        let (reserve, wall_foot) = foot.split_at(reserve_count);
+        let mut on_walls = wall_shooters;
+        on_walls.extend_from_slice(wall_foot);
+        let mut order = front.clone();
+        let mut rest: Vec<usize> = (0..works.pieces.len())
+            .filter(|p| works.pieces[*p].kind == PieceKind::Wall && !front.contains(p))
+            .collect();
+        rest.sort_by(|&x, &y| {
+            works.pieces[x]
+                .midpoint()
+                .1
+                .total_cmp(&works.pieces[y].midpoint().1)
+                .then(x.cmp(&y))
+        });
+        order.extend(rest);
+        let mut used = vec![4.0; works.pieces.len()];
+        let mut leftover: Vec<usize> = reserve.to_vec();
+        for i in on_walls {
+            let (w, _) = self.units[i].extent();
+            let slot = order.iter().copied().find(|&p| {
+                works.pieces[p].intact() && used[p] + w + 4.0 <= works.pieces[p].length()
+            });
+            let Some(p) = slot else {
+                leftover.push(i);
+                continue;
+            };
+            let piece = &works.pieces[p];
+            let (tx, tz) = piece.tangent();
+            let (nx, nz) = piece.outward();
+            let along = used[p] + w * 0.5;
+            used[p] += w + 6.0;
+            let inset = works.thickness * 0.25;
+            let unit = &mut self.units[i];
+            unit.x = piece.a.0 + tx * along - nx * inset;
+            unit.z = piece.a.1 + tz * along - nz * inset;
+            unit.facing = angle_to(nx, nz);
+            unit.on_wall = true;
+        }
+        // A guard behind the gate, the rest in the square.
+        leftover.sort_unstable();
+        let (nx, nz) = works.pieces[works.gate].outward();
+        let mut square: Vec<usize> = Vec::new();
+        for (k, &i) in leftover.iter().enumerate() {
+            if k == 0 && self.units[i].category == UnitCategory::Infantry {
+                let unit = &mut self.units[i];
+                unit.x = gx - nx * 30.0;
+                unit.z = gz - nz * 30.0;
+                unit.facing = angle_to(nx, nz);
+            } else {
+                square.push(i);
+            }
+        }
+        let (_, cz) = works.center;
+        self.place_row(&square, cz - 15.0, 1.0);
+        self.place_row(&others, cz + 30.0, 1.0);
     }
 
     /// Places `row` side by side, centred on x = 600, wrapping into extra rows
@@ -317,6 +522,40 @@ impl BattleSim {
 
     pub fn weather(&self) -> Weather {
         self.weather
+    }
+
+    /// The town walls of a siege battle.
+    pub fn siege(&self) -> Option<&SiegeWorks> {
+        self.siege.as_ref()
+    }
+
+    /// Mutable walls, for tests and scripted scenarios.
+    pub fn siege_mut(&mut self) -> Option<&mut SiegeWorks> {
+        self.siege.as_mut()
+    }
+
+    /// Height at which `unit`'s soldiers stand at (x, z): the ground, raised
+    /// to the wall walk on the walls and part-way up while climbing.
+    pub fn standing_height(&self, unit: &Unit, x: f64, z: f64) -> f64 {
+        let ground = self.field.height(x, z);
+        let Some(works) = &self.siege else {
+            return ground;
+        };
+        if unit.on_wall {
+            ground + works.wall_height
+        } else if unit.climbing.is_some() {
+            ground + works.wall_height * unit.climb_progress.clamp(0.0, 1.0)
+        } else {
+            ground
+        }
+    }
+
+    /// `true` while `unit` scales a wall with ladders (no docked tower).
+    pub fn on_ladders(&self, unit: &Unit) -> bool {
+        match (unit.climbing, &self.siege) {
+            (Some(p), Some(works)) => works.pieces[p].docked_tower.is_none(),
+            _ => false,
+        }
     }
 
     pub fn units(&self) -> &[Unit] {
@@ -382,8 +621,9 @@ impl BattleSim {
 
     /// Effective shooting range of `unit` (weather, height advantage).
     pub fn effective_range(&self, unit: &Unit, target_x: f64, target_z: f64) -> f64 {
-        let height_gain =
-            (self.field.height(unit.x, unit.z) - self.field.height(target_x, target_z)).max(0.0);
+        let height_gain = (self.standing_height(unit, unit.x, unit.z)
+            - self.field.height(target_x, target_z))
+        .max(0.0);
         f64::from(unit.stats.range) * self.weather.range_factor() * (1.0 + height_gain / 100.0)
     }
 
@@ -456,6 +696,7 @@ impl BattleSim {
                     unit.target = None;
                     unit.running = run;
                     unit.withdrawing = false;
+                    stop_climbing(unit);
                     unit.disengaging = unit.state == UnitState::Melee;
                     if unit.state != UnitState::Melee {
                         unit.state = UnitState::Marching;
@@ -484,6 +725,7 @@ impl BattleSim {
                     unit.running = run;
                     unit.withdrawing = false;
                     unit.disengaging = false;
+                    stop_climbing(unit);
                 }
             }
             Command::Halt { units } => {
@@ -494,6 +736,7 @@ impl BattleSim {
                     unit.destination_facing = None;
                     unit.running = false;
                     unit.disengaging = false;
+                    stop_climbing(unit);
                     if matches!(unit.state, UnitState::Marching | UnitState::Charging) {
                         unit.state = UnitState::Idle;
                     }
@@ -541,6 +784,7 @@ impl BattleSim {
                         SideId::Defender => depth + 50.0,
                     };
                     unit.withdrawing = true;
+                    stop_climbing(unit);
                     unit.target = None;
                     unit.destination = Some((unit.x, edge_z));
                     unit.destination_facing = None;
@@ -564,6 +808,24 @@ impl BattleSim {
                 };
                 let side = self.units[units[0] as usize].side;
                 self.log(text, Some(side));
+            }
+            Command::TargetWall { units, piece } => {
+                let Some(works) = &self.siege else {
+                    return Err(CommandError::NotASiege);
+                };
+                if piece >= works.pieces.len() {
+                    return Err(CommandError::UnknownPiece(piece));
+                }
+                for &id in &units {
+                    if !self.units[id as usize].wall_breaker() {
+                        return Err(CommandError::NotAnEngine(id));
+                    }
+                }
+                for &id in &units {
+                    let unit = &mut self.units[id as usize];
+                    unit.wall_target = Some(piece);
+                    unit.target = None;
+                }
             }
         }
         Ok(())
@@ -649,7 +911,8 @@ impl BattleSim {
             unit.tick_losses = 0.0;
             unit.flanked = 0;
         }
-        if self.ticks.is_multiple_of(10) {
+        let ai_ticks = (AI_PERIOD / DT).round() as u64;
+        if self.ticks.is_multiple_of(ai_ticks) {
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
@@ -660,6 +923,7 @@ impl BattleSim {
         }
         let contacts = self.contacts();
         self.resolve_movement(&contacts);
+        self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.resolve_melee(&contacts);
@@ -694,13 +958,29 @@ impl BattleSim {
                 };
                 let gap_ab = a.distance_to_rect(b.x, b.z) - b.support(dir);
                 let gap_ba = b.distance_to_rect(a.x, a.z) - a.support(dir);
-                if gap_ab.max(gap_ba) < CONTACT_GAP {
+                if gap_ab.max(gap_ba) < CONTACT_GAP && !self.wall_between(a, b) {
                     result[i].push(j);
                     result[j].push(i);
                 }
             }
         }
         result
+    }
+
+    /// An intact wall separates the two regiments for melee: only climbers
+    /// fight the defenders above them, and regiments on the wall walk fight
+    /// each other.
+    fn wall_between(&self, a: &Unit, b: &Unit) -> bool {
+        let Some(works) = &self.siege else {
+            return false;
+        };
+        if works.crosses_intact((a.x, a.z), (b.x, b.z)).is_none() {
+            return false;
+        }
+        let bridged = (a.climbing.is_some() && b.on_wall)
+            || (b.climbing.is_some() && a.on_wall)
+            || (a.on_wall && b.on_wall);
+        !bridged
     }
 
     fn nearest_enemy(&self, index: usize, able_only: bool) -> Option<(usize, f64)> {
@@ -776,9 +1056,17 @@ impl BattleSim {
         let step = (self.speed(unit, dir) * DT).min(dist);
         let heading = angle_to(dx, dz);
         let (width, depth) = (self.field.width, self.field.depth);
+        let from = (unit.x, unit.z);
+        let to = (unit.x + dir.0 * step, unit.z + dir.1 * step);
+        let blocked = self.wall_block(index, from, to);
         let unit = &mut self.units[index];
-        unit.x += dir.0 * step;
-        unit.z += dir.1 * step;
+        unit.blocked_by = blocked;
+        if blocked.is_some() {
+            unit.facing = turn_towards(unit.facing, heading, Self::turn_rate(unit) * 4.0);
+            return dist;
+        }
+        unit.x = to.0;
+        unit.z = to.1;
         if !may_leave {
             unit.x = unit.x.clamp(1.0, width - 1.0);
             unit.z = unit.z.clamp(1.0, depth - 1.0);
@@ -792,6 +1080,243 @@ impl BattleSim {
         unit.still_time = 0.0;
         unit.stakes_planted = false;
         dist - step
+    }
+
+    /// The intact wall piece that stops a move from `from` to `to`, if any.
+    /// Routing regiments slip through posterns and are never stopped;
+    /// defenders step onto the wall walk from inside but not beyond it;
+    /// attackers on the wall walk go where they please.
+    fn wall_block(&self, index: usize, from: (f64, f64), to: (f64, f64)) -> Option<usize> {
+        let works = self.siege.as_ref()?;
+        let unit = &self.units[index];
+        if unit.state == UnitState::Routing || unit.left_field {
+            return None;
+        }
+        let defender_inside =
+            unit.side == SideId::Defender && (unit.on_wall || works.inside(from.0, from.1));
+        let band = works.band();
+        for (k, piece) in works.pieces.iter().enumerate() {
+            if !piece.intact() {
+                continue;
+            }
+            if defender_inside {
+                // Never further out than the middle of the wall walk.
+                let out_to = piece.outside_offset(to.0, to.1);
+                if piece.distance(to.0, to.1) < band
+                    && out_to > 0.0
+                    && out_to > piece.outside_offset(from.0, from.1)
+                {
+                    return Some(k);
+                }
+                continue;
+            }
+            if unit.on_wall {
+                continue;
+            }
+            let d_to = piece.distance(to.0, to.1);
+            if piece.crossed_by(from, to)
+                || (d_to < band && d_to < piece.distance(from.0, from.1) - 1e-9)
+            {
+                return Some(k);
+            }
+        }
+        None
+    }
+
+    /// Where `index` should head to reach (tx, tz): straight, or through the
+    /// best opening in the walls when an intact wall is in the way (climbers
+    /// keep going straight unless the detour is short).
+    fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
+        let Some(works) = &self.siege else {
+            return (tx, tz);
+        };
+        let unit = &self.units[index];
+        if unit.on_wall || unit.state == UnitState::Routing {
+            return (tx, tz);
+        }
+        let from = (unit.x, unit.z);
+        if works.crosses_intact(from, (tx, tz)).is_none() {
+            return (tx, tz);
+        }
+        let Some(opening) = works.best_opening(from, (tx, tz)) else {
+            return (tx, tz);
+        };
+        let climber = unit.side == SideId::Attacker && unit.can_climb();
+        if climber {
+            let dist =
+                |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
+            let mid = works.pieces[opening].midpoint();
+            let detour = dist(from, mid) + dist(mid, (tx, tz));
+            if detour > dist(from, (tx, tz)) * 1.6 + 40.0 {
+                return (tx, tz);
+            }
+        }
+        works.waypoint_through(opening, from)
+    }
+
+    /// A regiment stopped by an intact wall: foot soldiers of the attacker
+    /// raise their ladders (or cross from a docked siege tower).
+    fn start_climb(&mut self, i: usize) {
+        let Some(piece) = self.units[i].blocked_by else {
+            return;
+        };
+        let unit = &self.units[i];
+        if unit.side != SideId::Attacker || !unit.can_climb() || unit.climbing.is_some() {
+            return;
+        }
+        let Some(works) = &self.siege else {
+            return;
+        };
+        let tower = works.pieces[piece].docked_tower.is_some_and(|t| {
+            let t = &self.units[t as usize];
+            (t.x - unit.x).powi(2) + (t.z - unit.z).powi(2) < 40.0 * 40.0
+        });
+        let unit = &mut self.units[i];
+        unit.climbing = Some(piece);
+        unit.climb_progress = 0.0;
+        unit.state = UnitState::Climbing;
+        let text = if tower {
+            format!(
+                "Les {} s'élancent de la tour de siège sur le rempart.",
+                self.unit_label(i)
+            )
+        } else {
+            format!(
+                "Les {} dressent leurs échelles contre la muraille.",
+                self.unit_label(i)
+            )
+        };
+        let side = self.units[i].side;
+        self.log(text, Some(side));
+    }
+
+    /// One step of climbing; on the top the regiment stands on the wall walk
+    /// and resumes its order.
+    fn progress_climb(&mut self, i: usize, piece: usize, engaged: bool) {
+        let Some(works) = &self.siege else {
+            return;
+        };
+        let p = &works.pieces[piece];
+        if !p.intact() {
+            // The wall came down under them: walk through the breach.
+            let unit = &mut self.units[i];
+            unit.climbing = None;
+            unit.climb_progress = 0.0;
+            unit.state = UnitState::Marching;
+            return;
+        }
+        let unit = &self.units[i];
+        let tower = p.docked_tower.is_some_and(|t| {
+            let t = &self.units[t as usize];
+            (t.x - unit.x).powi(2) + (t.z - unit.z).powi(2) < 40.0 * 40.0
+        });
+        let duration = if tower {
+            siege::TOWER_CLIMB_TIME
+        } else {
+            siege::LADDER_TIME
+        };
+        let mut rate = DT / duration * (1.0 - unit.fatigue / 200.0);
+        if engaged {
+            rate *= 0.35;
+        }
+        let (cx, cz) = p.closest_point(unit.x, unit.z);
+        let (nx, nz) = p.outward();
+        let inset = works.thickness * 0.25;
+        let unit = &mut self.units[i];
+        unit.climb_progress += rate;
+        if unit.climb_progress >= 1.0 {
+            unit.climbing = None;
+            unit.climb_progress = 0.0;
+            unit.on_wall = true;
+            unit.x = cx - nx * inset;
+            unit.z = cz - nz * inset;
+            unit.state = UnitState::Marching;
+            let text = format!("Les {} prennent pied sur le rempart !", self.unit_label(i));
+            let side = self.units[i].side;
+            self.log(text, Some(side));
+        }
+    }
+
+    /// Siege battles, after movement: wall-walk status, docked towers, the
+    /// ram against the gate, and the hold of the central square.
+    fn resolve_siege_works(&mut self) {
+        let Some(works) = self.siege.as_mut() else {
+            return;
+        };
+        let band = works.band();
+        let mut logs: Vec<(String, Option<SideId>)> = Vec::new();
+        // Wall walk.
+        for unit in self.units.iter_mut() {
+            if !unit.present() {
+                continue;
+            }
+            if unit.state == UnitState::Routing {
+                unit.on_wall = false;
+                continue;
+            }
+            let near = works.nearest_intact(unit.x, unit.z);
+            unit.on_wall = match unit.side {
+                SideId::Defender => near.is_some_and(|(p, d)| {
+                    d < band + 1.0 && works.pieces[p].outside_offset(unit.x, unit.z) <= 0.5
+                }),
+                SideId::Attacker => unit.on_wall && near.is_some_and(|(_, d)| d < band + 3.0),
+            };
+        }
+        // Siege towers dock against the wall they touch.
+        for piece in works.pieces.iter_mut() {
+            piece.docked_tower = None;
+        }
+        for unit in self.units.iter() {
+            if !unit.siege_tower() || !unit.able() {
+                continue;
+            }
+            if let Some((p, d)) = works.nearest_intact(unit.x, unit.z) {
+                if d < band + 4.0 && works.pieces[p].kind == PieceKind::Wall {
+                    works.pieces[p].docked_tower = Some(unit.id);
+                }
+            }
+        }
+        // The ram batters the gate.
+        let gate = works.gate;
+        for unit in self.units.iter_mut() {
+            if !unit.ram || !unit.able() || !works.pieces[gate].intact() {
+                continue;
+            }
+            if works.pieces[gate].distance(unit.x, unit.z) < band + 4.0 {
+                let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
+                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * DT;
+                if works.pieces[gate].hp <= 0.0 {
+                    works.pieces[gate].hp = 0.0;
+                    logs.push((
+                        "La porte cède sous les coups du bélier !".to_owned(),
+                        Some(SideId::Attacker),
+                    ));
+                }
+            }
+        }
+        // The central square.
+        let held_by = |side: SideId| {
+            self.units
+                .iter()
+                .any(|u| u.side == side && u.able() && !u.synthetic && works.in_square(u.x, u.z))
+        };
+        let attackers_in = held_by(SideId::Attacker);
+        let defenders_in = held_by(SideId::Defender);
+        if attackers_in && !defenders_in {
+            works.hold_time += DT;
+            if !self.square_announced {
+                self.square_announced = true;
+                logs.push((
+                    "Les assaillants s'emparent de la place centrale !".to_owned(),
+                    Some(SideId::Attacker),
+                ));
+            }
+        } else {
+            works.hold_time = (works.hold_time - DT * 0.5).max(0.0);
+        }
+        for (text, side) in logs {
+            self.log(text, side);
+        }
     }
 
     fn resolve_movement(&mut self, contacts: &[Vec<usize>]) {
@@ -834,6 +1359,10 @@ impl BattleSim {
                 }
             }
             let in_contact = !contacts[i].is_empty();
+            if let Some(piece) = self.units[i].climbing {
+                self.progress_climb(i, piece, in_contact);
+                continue;
+            }
             if in_contact && !self.units[i].disengaging {
                 self.enter_melee(i, &contacts[i]);
                 continue;
@@ -874,11 +1403,20 @@ impl BattleSim {
                 } else if !charging {
                     self.units[i].state = UnitState::Marching;
                 }
-                self.advance(i, tx, tz, false);
+                let (gx, gz) = self.route(i, tx, tz);
+                self.advance(i, gx, gz, false);
+                self.start_climb(i);
                 continue;
             }
             if let Some((tx, tz)) = self.units[i].destination {
-                let remaining = self.advance(i, tx, tz, false);
+                let (gx, gz) = self.route(i, tx, tz);
+                self.advance(i, gx, gz, false);
+                self.start_climb(i);
+                let unit = &self.units[i];
+                let remaining = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
+                if self.units[i].climbing.is_some() {
+                    continue;
+                }
                 if remaining < 1.5 {
                     let unit = &mut self.units[i];
                     unit.destination = None;
@@ -1028,6 +1566,10 @@ impl BattleSim {
                 self.units[i].reload -= DT;
                 continue;
             }
+            if let Some(piece) = self.pick_wall_target(i) {
+                self.fire_at_wall(i, piece);
+                continue;
+            }
             let Some(target) = self.pick_shooting_target(i) else {
                 if self.units[i].state == UnitState::Shooting && self.units[i].target.is_none() {
                     self.units[i].state = UnitState::Idle;
@@ -1041,6 +1583,20 @@ impl BattleSim {
     fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
         if self.field.in_forest(target.x, target.z) && dist > 60.0 {
             return false;
+        }
+        if let Some(works) = &self.siege {
+            // Walls hide what is behind them, except from (or of) the wall
+            // walk; engines lob over them.
+            if shooter.category != UnitCategory::Siege
+                && !shooter.on_wall
+                && !target.on_wall
+                && target.climbing.is_none()
+                && works
+                    .crosses_intact((shooter.x, shooter.z), (target.x, target.z))
+                    .is_some()
+            {
+                return false;
+            }
         }
         shooter.has(Ability::Volley)
             || !self
@@ -1092,6 +1648,9 @@ impl BattleSim {
         if let Some(general) = self.general_bonus(shooter.side) {
             accuracy *= 1.0 + general.ranged_percent / 100.0;
         }
+        if shooter.on_wall {
+            accuracy *= 1.25;
+        }
         let mut kills = shots * accuracy * f64::from(shooter.stats.ranged) / 100.0
             * armor_factor(self.defense_points(target))
             * RANGED_RATE;
@@ -1103,6 +1662,12 @@ impl BattleSim {
         }
         if target.formation == Formation::Square {
             kills *= 1.2;
+        }
+        if target.on_wall && !shooter.on_wall {
+            kills *= 0.5; // merlons
+        }
+        if self.on_ladders(target) {
+            kills *= 1.5;
         }
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;
@@ -1142,6 +1707,93 @@ impl BattleSim {
         }
         if self.units[t].hp <= 0.0 {
             self.unit_destroyed(t);
+        }
+    }
+
+    /// Wall piece an engine batters this volley: its ordered piece, else
+    /// (fire at will, no unit target) the nearest wall stretch in range
+    /// facing it.
+    fn pick_wall_target(&self, i: usize) -> Option<usize> {
+        let works = self.siege.as_ref()?;
+        let unit = &self.units[i];
+        if !unit.wall_breaker() || unit.target.is_some() {
+            return None;
+        }
+        let range = f64::from(unit.stats.range) * self.weather.range_factor();
+        let in_range = |p: usize| {
+            let piece = &works.pieces[p];
+            piece.intact()
+                && piece.distance(unit.x, unit.z) <= range
+                && piece.outside_offset(unit.x, unit.z) > 0.0
+        };
+        if let Some(p) = unit.wall_target.filter(|&p| in_range(p)) {
+            return Some(p);
+        }
+        if !unit.fire_at_will {
+            return None;
+        }
+        (0..works.pieces.len())
+            .filter(|&p| works.pieces[p].kind == PieceKind::Wall && in_range(p))
+            .min_by(|&a, &b| {
+                let da = works.pieces[a].distance(unit.x, unit.z);
+                let db = works.pieces[b].distance(unit.x, unit.z);
+                da.total_cmp(&db).then(a.cmp(&b))
+            })
+    }
+
+    /// An engine's shot at a wall piece; the defenders standing on it suffer
+    /// a little, and all of them fall off when it comes down.
+    fn fire_at_wall(&mut self, i: usize, piece: usize) {
+        let unit = &self.units[i];
+        let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
+        let damage =
+            f64::from(unit.stats.siege_attack.unwrap_or(0)) * siege::ENGINE_WALL_FACTOR * crew;
+        let heading = {
+            let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
+            angle_to(mx - unit.x, mz - unit.z)
+        };
+        let shooter = &mut self.units[i];
+        shooter.reload = 12.0;
+        shooter.ammo = shooter.ammo.saturating_sub(1);
+        shooter.facing = turn_towards(shooter.facing, heading, 0.5);
+        if shooter.state != UnitState::Marching {
+            shooter.state = UnitState::Shooting;
+        }
+        let works = self.siege.as_mut().expect("siege");
+        let band = works.band();
+        let p = &mut works.pieces[piece];
+        p.hp = (p.hp - damage).max(0.0);
+        let breached = p.hp <= 0.0;
+        let kind = p.kind;
+        let p = works.pieces[piece].clone();
+        let mut fell = Vec::new();
+        for (j, u) in self.units.iter_mut().enumerate() {
+            if !u.present() || !u.on_wall || p.distance(u.x, u.z) > band + 2.0 {
+                continue;
+            }
+            let loss = if breached { u.hp * 0.12 } else { u.hp * 0.01 };
+            u.hp -= loss;
+            u.tick_losses += loss;
+            if breached {
+                u.on_wall = false;
+                u.morale -= 10.0;
+                fell.push(j);
+            }
+        }
+        if breached {
+            let text = match kind {
+                PieceKind::Gate => "La porte vole en éclats !".to_owned(),
+                PieceKind::Wall => {
+                    "Un pan de muraille s'effondre : la brèche est ouverte !".to_owned()
+                }
+            };
+            let side = self.units[i].side;
+            self.log(text, Some(side));
+        }
+        for j in fell {
+            if self.units[j].hp <= 0.0 {
+                self.unit_destroyed(j);
+            }
         }
     }
 
@@ -1188,6 +1840,15 @@ impl BattleSim {
         }
         if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
             damage *= 1.8;
+        }
+        // Siege: ladders are a poor place to fight from.
+        if self.on_ladders(attacker) {
+            damage *= 0.5;
+        } else if attacker.climbing.is_some() {
+            damage *= 0.9;
+        }
+        if self.on_ladders(defender) {
+            damage *= 1.5;
         }
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
@@ -1298,7 +1959,9 @@ impl BattleSim {
             let label = self.unit_label(i);
             let unit = &mut self.units[i];
             let mut morale = unit.morale;
-            morale -= unit.tick_losses / f64::from(unit.max_soldiers) * LOSS_MORALE_FACTOR;
+            // Behind battlements the garrison takes its losses more calmly.
+            let cover = if unit.on_wall { 0.7 } else { 1.0 };
+            morale -= unit.tick_losses / f64::from(unit.max_soldiers) * LOSS_MORALE_FACTOR * cover;
             if unit.flanked & 1 != 0 {
                 morale -= 1.5 * DT;
             }
@@ -1354,7 +2017,7 @@ impl BattleSim {
                 UnitState::Marching if unit.running || unit.withdrawing => 0.25,
                 UnitState::Marching => 0.05,
                 UnitState::Charging => 0.4,
-                UnitState::Melee => 0.3,
+                UnitState::Melee | UnitState::Climbing => 0.3,
                 UnitState::Routing => 0.3,
             };
             if rate > 0.0 {
@@ -1374,6 +2037,11 @@ impl BattleSim {
                 unit.destination = None;
                 unit.stakes_planted = false;
                 unit.charge_timer = 0.0;
+                unit.climbing = None;
+                unit.climb_progress = 0.0;
+                if std::mem::take(&mut unit.on_wall) {
+                    new_events.push((format!("Les {label} abandonnent le rempart !"), unit.side));
+                }
                 new_events.push((format!("Les {label} sont en déroute !"), unit.side));
             } else if unit.state == UnitState::Routing
                 && unit.morale > RALLY_MORALE
@@ -1397,14 +2065,18 @@ impl BattleSim {
         let able = SideId::BOTH.map(|side| {
             self.units
                 .iter()
-                .filter(|u| u.side == side && u.able())
+                .filter(|u| u.side == side && u.able() && !u.synthetic)
                 .count()
         });
         let timeout = self.elapsed >= MAX_DURATION - 1e-9;
-        if able[0] > 0 && able[1] > 0 && !timeout {
+        let square_held = self
+            .siege
+            .as_ref()
+            .is_some_and(|w| w.hold_time >= siege::HOLD_TO_WIN);
+        if able[0] > 0 && able[1] > 0 && !timeout && !square_held {
             return;
         }
-        let winner = if able[1] == 0 && able[0] > 0 {
+        let winner = if (able[1] == 0 && able[0] > 0) || (square_held && able[0] > 0) {
             SideId::Attacker
         } else {
             SideId::Defender
@@ -1432,7 +2104,12 @@ impl BattleSim {
                 }
             }
         }
-        let text = if timeout && able[0] > 0 && able[1] > 0 {
+        let text = if square_held && winner == SideId::Attacker && able[1] > 0 {
+            format!(
+                "{} tient la place centrale : la ville est prise !",
+                self.setup.side(winner).faction_name
+            )
+        } else if timeout && able[0] > 0 && able[1] > 0 {
             format!(
                 "La nuit tombe : {} tient le terrain.",
                 self.setup.side(winner).faction_name
@@ -1454,7 +2131,7 @@ impl BattleSim {
         let side_result = |side: SideId| -> SideResult {
             let setup = self.setup.side(side);
             let mut losses = vec![0u32; setup.units.len()];
-            for unit in self.units.iter().filter(|u| u.side == side) {
+            for unit in self.units.iter().filter(|u| u.side == side && !u.synthetic) {
                 losses[unit.setup_index] = unit.initial_soldiers.saturating_sub(unit.soldiers());
             }
             let won = side == winner;
@@ -1479,7 +2156,7 @@ impl BattleSim {
     pub fn strength(&self, side: SideId) -> u32 {
         self.units
             .iter()
-            .filter(|u| u.side == side && u.able())
+            .filter(|u| u.side == side && u.able() && !u.synthetic)
             .map(Unit::soldiers)
             .sum()
     }
@@ -1498,7 +2175,7 @@ impl BattleSim {
             .filter(|u| u.side == side && category.is_none_or(|c| c == u.category))
         {
             for (x, z, angle) in unit.soldier_positions() {
-                result.push([x, self.field.height(x, z), z, angle]);
+                result.push([x, self.standing_height(unit, x, z), z, angle]);
             }
         }
         result

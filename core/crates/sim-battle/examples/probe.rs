@@ -48,6 +48,7 @@ fn main() {
                 attacker: side(army(20)),
                 defender: side(army(20)),
                 player_side: None,
+                siege: None,
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
@@ -82,6 +83,7 @@ fn main() {
         attacker: side(vec![unit(&data, a)]),
         defender: side(vec![unit(&data, d)]),
         player_side: None,
+        siege: None,
     };
     let mut sim = BattleSim::new(setup, 7).unwrap();
     sim.set_ai(SideId::Attacker, false);
