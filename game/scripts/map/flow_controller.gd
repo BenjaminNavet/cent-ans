@@ -7,6 +7,10 @@ extends Node
 ## alertes persistantes. `campaign_map.gd` n'appelle que `setup`, `refresh`,
 ## `before_end_turn` et `after_end_turn` ; tout le reste passe par les signaux de `MapUI`.
 ## Aucune règle de jeu : lecture de l'état et envoi des demandes existantes.
+##
+## Captures (après `--`) : `--flow-stage=pause|save|settings|report|alerts|confirm`
+## `--flow-shot=<chemin.png>` met l'écran en scène, capture puis quitte (la pause arrête
+## `CampaignMap._process`, d'où une capture propre au contrôleur).
 
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 const PAUSE_MENU_SCENE := "res://scenes/ui/pause_menu.tscn"
@@ -70,6 +74,7 @@ func setup(campaign_map: Node) -> void:
 		settings.changed.connect(_on_setting_changed)
 	_last_saved_turn = _turn()
 	apply_settings()
+	_run_stage.call_deferred()
 
 
 func _setting(key: String, fallback: Variant) -> Variant:
@@ -179,7 +184,7 @@ func _default_save_name() -> String:
 ## Échap : ferme ce qui est ouvert (réglages, rapport), laisse la carte désélectionner
 ## l'armée, sinon ouvre ou ferme le menu pause. La pause gère elle-même Échap.
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed("ui_cancel") or not map.get("visible"):
+	if not (event.is_action_pressed("campaign_pause") or event.is_action_pressed("ui_cancel")) or not map.get("visible"):
 		return
 	if _settings_menu != null and is_instance_valid(_settings_menu):
 		return  # la fenêtre de réglages se ferme elle-même
@@ -404,3 +409,62 @@ func focus_army(army_id: String) -> void:
 	var rig: CampaignCamera = map.get("camera_rig")
 	rig.look_at_point(armies.world_position_of(army_id), maxf(map_data.size.x, map_data.size.y) * 0.09)
 	map.call("select_army", army_id)
+
+
+# --- Captures (--flow-stage) ------------------------------------------------------
+
+
+func _run_stage() -> void:
+	var stage := ""
+	var shot := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--flow-stage="):
+			stage = arg.trim_prefix("--flow-stage=")
+		elif arg.begins_with("--flow-shot="):
+			shot = arg.trim_prefix("--flow-shot=")
+	if stage == "" or map.get("sim") == null:
+		return
+	var rig: CampaignCamera = map.get("camera_rig")
+	rig.edge_pan_enabled = false
+	for _i in 5:
+		await get_tree().process_frame
+	var sim: Object = map.get("sim")
+	match stage:
+		"pause":
+			open_pause()
+		"save":
+			SaveSlots.autosave(4, 4, _capture_now())
+			open_pause()
+			pause_menu.open_save()
+		"settings":
+			open_settings()
+		"confirm":
+			settings.call("set_value", "interface/confirm_end_turn", true, false)
+			map.call("_on_end_turn")
+		"report", "alerts":
+			var interactive: bool = sim.call("get_interactive_battles") if sim.has_method("get_interactive_battles") else true
+			if sim.has_method("set_interactive_battles"):
+				sim.call("set_interactive_battles", false)
+			var chronicle: Node = map.get("chronicle")
+			for _turn_index in 6:
+				map.call("_on_end_turn")
+				if chronicle != null:
+					(chronicle.get("window") as Control).hide()
+				if stage == "report" and season_report.visible and season_report.line_count() >= 4:
+					break
+			if sim.has_method("set_interactive_battles"):
+				sim.call("set_interactive_battles", interactive)
+			if stage == "alerts":
+				season_report.close()
+				map.get("ui").call("hide_province")
+	for _i in 45:
+		await get_tree().process_frame
+	if shot == "":
+		return
+	await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	DirAccess.make_dir_recursive_absolute(shot.get_base_dir())
+	var err := image.save_png(shot)
+	print("FlowController: screenshot %s (%s)" % [shot, error_string(err)])
+	get_tree().paused = false
+	get_tree().quit(0 if err == OK else 1)

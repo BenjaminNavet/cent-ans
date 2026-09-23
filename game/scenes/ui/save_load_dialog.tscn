@@ -28,12 +28,16 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Sauvegarder"
 
-[node name="SavesList" type="ItemList" parent="Panel/VBox"]
-unique_name_in_owner = true
+[node name="SavesScroll" type="ScrollContainer" parent="Panel/VBox"]
 custom_minimum_size = Vector2(600, 400)
 layout_mode = 2
-max_text_lines = 3
-fixed_icon_size = Vector2i(160, 90)
+horizontal_scroll_mode = 0
+
+[node name="SavesRows" type="VBoxContainer" parent="Panel/VBox/SavesScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
 [node name="NameRow" type="HBoxContainer" parent="Panel/VBox"]
 unique_name_in_owner = true

@@ -92,6 +92,9 @@ func _ready() -> void:
 			open_settings()
 		elif arg == "--menu-stage=credits":
 			open_credits()
+		elif arg == "--menu-stage=loading":
+			_on_start.call_deferred()
+			return
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
