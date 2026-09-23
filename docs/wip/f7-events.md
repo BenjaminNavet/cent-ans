@@ -12,12 +12,12 @@ Branche : `worktree-agent-a65b4684eae74eccc`. Tests : `core/crates/sim-campaign/
 
 ## Points
 1. [x] Squelette du test `f7_events.rs` (simulation 1337-1453).
-2. [ ] ≈ 40 nouveaux événements (27 historiques, 7 chaînés, 6 aléatoires).
-3. [ ] Chaînes : Tournai → Esplechin ; succession de Bretagne → Hennebont ; Neville's Cross → rançon de
+2. [x] ≈ 40 nouveaux événements (27 historiques, 7 chaînés, 6 aléatoires).
+3. [x] Chaînes : Tournai → Esplechin ; succession de Bretagne → Hennebont ; Neville's Cross → rançon de
    David II ; Rienzo → chute ; Nicopolis → rançon de Nevers ; Montereau → alliance anglo-bourguignonne →
    Troyes ; Jeanne d'Arc → sacre de Reims.
-4. [ ] Test : ≥ 20 nouveaux historiques déclenchés.
-5. [ ] Docs (`m10-events.md`, `status.md`), build + smoke Godot.
+4. [x] Test : ≥ 20 nouveaux historiques déclenchés.
+5. [x] Docs (`m10-events.md`, `status.md`). [ ] build + smoke Godot.
 
 ## Prochaine étape
-Écrire les événements (script générateur dans le scratchpad, sortie JSON dans `data/events/`).
+Lancer `core/build.sh`, import Godot puis smoke ; rapport final.
