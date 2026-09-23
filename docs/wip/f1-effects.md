@@ -8,7 +8,7 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
    `siege_resistance`, `fortification_level`, `wealth`, `prestige` ; surplus de recherche conservé.
 3. [x] Traits/compétences : `research_civil`/`research_military`, `Diplomacy`, `Intrigue`, `Loyalty`.
 4. [x] Armées alliées de la province dans la bataille (auto-résolution + `battle_setup`).
-5. [ ] Événements : capture (+ rançon), effets différés (chaînes), Charles VI + Jeanne de Bourbon, folie.
+5. [x] Événements : capture (+ rançon), effets différés (chaînes), Charles VI + Jeanne de Bourbon, folie.
 6. [ ] `docs/status.md` (Limites connues) + paragraphes « F1 » des specs.
 
 ## Choix (point 1)
@@ -62,5 +62,20 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
   coalitions (même comme allié). Les assauts de siège restent à deux (armée assiégeante contre garnison).
 - `CharacterState::captor` (serde par défaut) : faction qui détient un captif (bataille, chronique).
 
+## Choix (point 5)
+- Effets `capture_character { id, faction?, captor }` (le captif quitte armée et gouvernement, un souverain
+  garde sa couronne), `release_character { id, faction?, ransom }` (rançon versée au geôlier `captor`, même à
+  découvert ; trait « racheté »), `schedule_event { event, delay }` (≥ 1, pas d'auto-programmation), `marry
+  { a, b }` (mariage historique). Nouvelle catégorie `chained` : ne se déclenche que programmée (avertissement
+  si jamais programmée). `ChronicleState::scheduled` (serde par défaut). Un événement programmé au tour N
+  avec un délai k part avec la fin du tour N + k, conditions vérifiées alors, pour la même faction/province.
+- Poitiers capture le souverain (Jean II) ; l'option des États programme « La rançon du roi Jean » (+4).
+  Brétigny : condition inchangée (captivité de Jean ou, en repli, Poitiers a eu lieu) ; signer la paix
+  libère Jean contre 40 000 livres (payées seulement s'il est encore captif ; remplace l'ancien transfert).
+- Jeanne de Bourbon (naissance 1338 sans parents modélisés : naissance inconditionnelle, nouveau cas de
+  `resolve_births`), « Les noces du dauphin » (1350, effet `marry`), Charles VI (1368, fils de Charles V et
+  Jeanne si mariés et vivants). La folie vise `chr_charles_vi` (condition : il règne, 18-40 ans).
+- `tools/tests/test_events_schema.py` : ajout de la clé `chained` (ajustement minimal indispensable).
+
 ## Prochaine étape
-Point 5 en cours : modèle, schéma, validation, chronique et données faits ; tests `f1_effects.rs` à écrire.
+Point 6 (docs), puis build GDExtension + smoke Godot + sonde IA.

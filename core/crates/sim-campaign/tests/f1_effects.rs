@@ -6,9 +6,10 @@
 use std::path::PathBuf;
 
 use data_model::{
-    BuildingId, CharacterId, FactionId, GameData, ProvinceId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, CharacterRef, Condition, EventEffect, EventId, FactionId, GameData,
+    ProvinceId, TechnologyId, TraitId, UnitTypeId,
 };
-use sim_campaign::{ArmyId, CampaignState, Order, Unit};
+use sim_campaign::{ArmyId, CampaignState, EventContext, Order, Season, Unit};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
@@ -760,4 +761,225 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         .resolve_pending_battle(&data, index, &outcome)
         .unwrap();
     assert_eq!(state.armies[&split].total_strength(), split_before - 7);
+}
+
+// =========================================================================
+// 5. Chronicle: capture, ransom, delayed events, Charles VI
+// =========================================================================
+
+fn chr(id: &str) -> CharacterId {
+    CharacterId::new(id).unwrap()
+}
+
+fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: EventEffect) {
+    let ctx = EventContext {
+        faction: Some(fac(faction)),
+        province: None,
+    };
+    let mut events = Vec::new();
+    sim_campaign::chronicle::apply_effect(state, data, &effect, &ctx, &mut events);
+}
+
+#[test]
+fn capture_and_ransom_move_the_king_and_the_money() {
+    let data = data();
+    let mut state = quiet_france(&data, 41);
+    let jean = chr("chr_jean_de_normandie");
+    let (france_id, england) = (fac("fac_france"), fac("fac_england"));
+    apply(
+        &mut state,
+        &data,
+        "fac_france",
+        EventEffect::CaptureCharacter {
+            id: CharacterRef::Id(jean.clone()),
+            faction: None,
+            captor: england.clone(),
+        },
+    );
+    let c = &state.characters[&jean];
+    assert!(c.captive);
+    assert_eq!(c.captor.as_ref(), Some(&england));
+    assert!(c.army.is_none());
+    assert!(state.condition_holds(
+        &data,
+        &Condition::CharacterCaptive { id: jean.clone() },
+        &EventContext::default()
+    ));
+
+    let (france_before, england_before) = (
+        state.factions[&france_id].treasury,
+        state.factions[&england].treasury,
+    );
+    apply(
+        &mut state,
+        &data,
+        "fac_france",
+        EventEffect::ReleaseCharacter {
+            id: CharacterRef::Id(jean.clone()),
+            faction: None,
+            ransom: 5000,
+        },
+    );
+    let c = &state.characters[&jean];
+    assert!(!c.captive && c.captor.is_none());
+    assert!(c
+        .traits
+        .contains(&TraitId::new("trait_captive_ransomed").unwrap()));
+    assert_eq!(state.factions[&france_id].treasury, france_before - 5000);
+    assert_eq!(state.factions[&england].treasury, england_before + 5000);
+    // A second release costs nothing: he is free.
+    apply(
+        &mut state,
+        &data,
+        "fac_france",
+        EventEffect::ReleaseCharacter {
+            id: CharacterRef::Id(jean),
+            faction: None,
+            ransom: 5000,
+        },
+    );
+    assert_eq!(state.factions[&france_id].treasury, france_before - 5000);
+}
+
+#[test]
+fn poitiers_captures_the_king_and_bretigny_requires_it() {
+    let data = data();
+    let mut state = quiet_france(&data, 42);
+    let france_id = fac("fac_france");
+    let jean = chr("chr_jean_de_normandie");
+    state.factions.get_mut(&france_id).unwrap().ruler = Some(jean.clone());
+    let poitiers = &data.events[&EventId::new("evt_poitiers").unwrap()];
+    for effect in &poitiers.options[1].effects {
+        apply(&mut state, &data, "fac_france", effect.clone());
+    }
+    assert!(state.characters[&jean].captive);
+    assert_eq!(state.chronicle.scheduled.len(), 1, "the ransom follows");
+    let bretigny = &data.events[&EventId::new("evt_bretigny").unwrap()];
+    let ctx = EventContext {
+        faction: Some(france_id.clone()),
+        province: None,
+    };
+    assert!(state.event_conditions_hold(&data, bretigny, &ctx));
+    // Signing the peace frees the king against the ransom.
+    let england = fac("fac_england");
+    let england_before = state.factions[&england].treasury;
+    for effect in &bretigny.options[0].effects {
+        apply(&mut state, &data, "fac_france", effect.clone());
+    }
+    assert!(!state.characters[&jean].captive);
+    assert!(!state.is_at_war(&france_id, &england));
+    assert_eq!(state.factions[&england].treasury, england_before + 40_000);
+}
+
+#[test]
+fn a_scheduled_event_fires_k_turns_later() {
+    let data = data();
+    let mut state = france(&data, 43);
+    let jean = chr("chr_jean_de_normandie");
+    apply(
+        &mut state,
+        &data,
+        "fac_france",
+        EventEffect::CaptureCharacter {
+            id: CharacterRef::Id(jean),
+            faction: None,
+            captor: fac("fac_england"),
+        },
+    );
+    let ransom = EventId::new("evt_rancon_du_roi").unwrap();
+    apply(
+        &mut state,
+        &data,
+        "fac_france",
+        EventEffect::ScheduleEvent {
+            event: ransom.clone(),
+            delay: 3,
+        },
+    );
+    let pending = |state: &CampaignState| {
+        state
+            .chronicle
+            .pending_decisions
+            .iter()
+            .any(|d| d.event == ransom)
+    };
+    // Survives a save/load round trip.
+    let json = state.save_json();
+    let mut state = CampaignState::load_json(&json).unwrap();
+    // Scheduled at the turn N = 0 with k = 3: it fires with the end of turn
+    // N + 3, as the original event fired with the end of turn N.
+    for _ in 0..=3 {
+        assert!(!pending(&state));
+        state.end_turn_with(&data, idle);
+    }
+    assert!(pending(&state), "fired at N+3 as a decision for the player");
+    assert!(state.chronicle.scheduled.is_empty());
+    assert!(state.chronicle.fired_events.contains(&ransom));
+}
+
+#[test]
+fn charles_vi_is_born_to_charles_and_jeanne_and_goes_mad() {
+    let data = data();
+    let mut state = quiet_france(&data, 44);
+    // Winter 1338: Charles (Jean and Bonne's son) and Jeanne de Bourbon
+    // (no modelled parents) are born.
+    state.year = 1338;
+    state.season = Season::Winter;
+    state.end_turn_with(&data, idle);
+    let (charles, jeanne) = (chr("chr_charles_v"), chr("chr_jeanne_de_bourbon"));
+    assert!(state.characters.contains_key(&charles), "Charles V born");
+    assert!(
+        state.characters.contains_key(&jeanne),
+        "Jeanne de Bourbon born"
+    );
+    // 1350: the dauphin's wedding.
+    let wedding = &data.events[&EventId::new("evt_noces_du_dauphin").unwrap()];
+    for effect in &wedding.options[0].effects {
+        apply(&mut state, &data, "fac_france", effect.clone());
+    }
+    assert_eq!(state.characters[&charles].spouse.as_ref(), Some(&jeanne));
+    // Winter 1368: Charles VI.
+    state.year = 1368;
+    state.season = Season::Winter;
+    state.end_turn_with(&data, idle);
+    let charles_vi = chr("chr_charles_vi");
+    let child = state.characters.get(&charles_vi).expect("Charles VI born");
+    assert_eq!(child.father.as_ref(), Some(&charles));
+    assert_eq!(child.mother.as_ref(), Some(&jeanne));
+    // 1392: the madness strikes him once he reigns.
+    let madness = &data.events[&EventId::new("evt_folie_charles_vi").unwrap()];
+    let ctx = EventContext {
+        faction: Some(fac("fac_france")),
+        province: None,
+    };
+    state.year = 1392;
+    assert!(!state.event_conditions_hold(&data, madness, &ctx));
+    state.factions.get_mut(&fac("fac_france")).unwrap().ruler = Some(charles_vi.clone());
+    assert!(state.event_conditions_hold(&data, madness, &ctx));
+    for effect in &madness.options[0].effects {
+        apply(&mut state, &data, "fac_france", effect.clone());
+    }
+    assert!(state.characters[&charles_vi]
+        .traits
+        .contains(&TraitId::new("trait_mad").unwrap()));
+}
+
+#[test]
+fn new_chronicle_data_loads_without_warnings() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    let (_, warnings) = GameData::load(&root).expect("game data loads");
+    for id in [
+        "evt_poitiers",
+        "evt_bretigny",
+        "evt_rancon_du_roi",
+        "evt_noces_du_dauphin",
+        "evt_folie_charles_vi",
+        "chr_charles_vi",
+        "chr_jeanne_de_bourbon",
+    ] {
+        assert!(
+            !warnings.iter().any(|w| w.entity == id),
+            "{id}: {warnings:?}"
+        );
+    }
 }
