@@ -13,10 +13,16 @@ extends Control
 
 ## Demande d'ouvrir la fiche du personnage.
 signal general_requested(character_id: String)
+## Posture choisie dans le menu de la posture (armée du joueur seulement, `can_change_stance`).
+signal stance_selected(stance: String)
 
 const SEAL_RADIUS := 58.0
 const PLATE_WIDTH := 212.0
+const STANCES := ["normal", "raid", "siege"]
 const STANCE_LABELS := {"normal": "Normale", "raid": "Chevauchée", "siege": "Siège"}
+
+## Vrai pour une armée du joueur : la posture devient un menu (clic) qui émet `stance_selected`.
+@export var can_change_stance: bool = true
 
 var character: Dictionary = {}
 var army: Dictionary = {}
@@ -126,11 +132,17 @@ func _refresh() -> void:
 	_skills_label.text = "Cdt %d · Gouv %d · Cour %d" % [
 		int(skills.get("command", 0)), int(skills.get("governance", 0)), int(skills.get("court", 0))]
 	_skills_label.tooltip_text = "Commandement, gouvernement, cour"
+	_skills_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	for child in _status_row.get_children():
 		child.queue_free()
 	if not army.is_empty():
 		var stance := str(army.get("stance", "normal"))
-		_add_status("stance_" + stance, str(STANCE_LABELS.get(stance, stance)), "Posture")
+		var stance_item := _add_status("stance_" + stance, str(STANCE_LABELS.get(stance, stance)), "Posture")
+		if can_change_stance:
+			stance_item.tooltip_text = "Posture : clic pour changer (Normale, Chevauchée, Siège)"
+			stance_item.mouse_filter = Control.MOUSE_FILTER_STOP
+			stance_item.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			stance_item.gui_input.connect(_on_stance_input.bind(stance_item))
 		var supply := int(army.get("supply", 0))
 		_add_status("supply", "%d %%" % supply, "Ravitaillement", HudStyle.gauge_color(supply / 100.0))
 		var moves := int(army.get("movement_points", 0))
@@ -139,10 +151,10 @@ func _refresh() -> void:
 	queue_redraw()
 
 
-func _add_status(glyph: String, text: String, tip: String, color: Color = HudStyle.INK) -> void:
+func _add_status(glyph: String, text: String, tip: String, color: Color = HudStyle.INK) -> HBoxContainer:
 	var item := HBoxContainer.new()
 	item.add_theme_constant_override("separation", 3)
-	item.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item.mouse_filter = Control.MOUSE_FILTER_PASS  # infobulle, clic transmis au sceau
 	var icon := GlyphIcon.new()
 	icon.glyph = glyph
 	icon.color = color
@@ -152,6 +164,22 @@ func _add_status(glyph: String, text: String, tip: String, color: Color = HudSty
 	item.add_child(label)
 	item.tooltip_text = tip
 	_status_row.add_child(item)
+	return item
+
+
+func _on_stance_input(event: InputEvent, item: Control) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	item.accept_event()
+	var menu := PopupMenu.new()
+	for stance in STANCES:
+		menu.add_radio_check_item(str(STANCE_LABELS[stance]))
+		menu.set_item_checked(menu.item_count - 1, stance == str(army.get("stance", "normal")))
+	menu.id_pressed.connect(func(id: int) -> void: stance_selected.emit(STANCES[id]))
+	menu.popup_hide.connect(menu.queue_free)
+	add_child(menu)
+	menu.popup(Rect2i(Vector2i(item.get_screen_position() + Vector2(0, item.size.y + 2)), Vector2i.ZERO))
 
 
 func _tooltip_text() -> String:
