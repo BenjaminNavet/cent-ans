@@ -38,7 +38,7 @@ func _init() -> void:
 		await process_frame
 	var sim := FakeSim.new()
 	sim.armies = {
-		"army_fr": {"faction": "fac_france", "location": "prov_maine", "stance": "normal", "path": [],
+		"army_fr": {"faction": "fac_france", "general": "chr_philippe_vi", "location": "prov_maine", "stance": "normal", "path": [],
 			"units": _units([["unit_knights", 3, 60], ["unit_men_at_arms_foot", 4, 80], ["unit_crossbowmen", 3, 100]])},
 		"army_en_march": {"faction": "fac_england", "location": "prov_normandie", "stance": "normal", "path": ["prov_ile_de_france"],
 			"units": _units([["unit_longbowmen", 4, 100], ["unit_men_at_arms_foot", 2, 80]])},
