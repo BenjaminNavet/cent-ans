@@ -961,7 +961,10 @@ fn fire(
     events: &mut Vec<GameEvent>,
 ) {
     // H4: a local epidemic may be contained before it spreads.
-    if let Some(p) = province.as_ref().filter(|_| crate::medicine::is_epidemic(&event.id)) {
+    if let Some(p) = province
+        .as_ref()
+        .filter(|_| crate::medicine::is_epidemic(&event.id))
+    {
         let resistance = crate::medicine::plague_resistance(state, data, p);
         if resistance > 0.0 && state.rng.unit_f64() < resistance {
             if decider.as_ref() == Some(&state.player_faction) {

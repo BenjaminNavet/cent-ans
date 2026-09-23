@@ -104,8 +104,7 @@ impl CampaignSim {
             .into_iter()
             .filter_map(|option| {
                 let diet = data.diets.get(&option.diet)?;
-                let reasons: PackedStringArray =
-                    option.reasons.iter().map(GString::from).collect();
+                let reasons: PackedStringArray = option.reasons.iter().map(GString::from).collect();
                 let sources: PackedStringArray = diet.sources.iter().map(GString::from).collect();
                 Some(
                     vdict! {

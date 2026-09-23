@@ -41,8 +41,8 @@ pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use ids::{
-    BuildingId, CharacterId, CultureId, DietId, EventId, FactionId, NamesId, ProvinceId, ReligionId,
-    ResourceId, SeaZoneId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, CultureId, DietId, EventId, FactionId, NamesId, ProvinceId,
+    ReligionId, ResourceId, SeaZoneId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
