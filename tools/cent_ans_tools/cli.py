@@ -218,5 +218,17 @@ def assets_audio(
     )
 
 
+@assets_app.command("models")
+def assets_models() -> None:
+    """Construit les modèles low-poly (Blender headless) dans game/assets/models/*.glb."""
+    counts = blender.build_models()
+    table = Table(title="Modèles glTF")
+    table.add_column("Modèle")
+    table.add_column("Triangles", justify="right")
+    for name, triangles in counts.items():
+        table.add_row(name, str(triangles))
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()

@@ -33,6 +33,8 @@ func setup(id: String, army: Dictionary, color: Color, is_player: bool) -> void:
 	# Le joueur voit ses armées avec un liseré doré, les autres en sombre.
 	count_label.outline_modulate = Color(0.95, 0.80, 0.30) if is_player else Color(0.10, 0.08, 0.05)
 	name = "Army_" + id
+	# M10 assets : porte-étendard 3D (ou cogue, + camp de siège) si le modèle existe.
+	ModelLibrary.dress_army_marker(self, army, color)
 
 
 func set_selected(selected: bool) -> void:
