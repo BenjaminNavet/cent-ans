@@ -13,6 +13,7 @@ signal skip_all_pressed
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const PANEL_WIDTH := 500.0
+const BOTTOM_MARGIN := 18.0
 const HALO_COLOR := Color(0.85, 0.55, 0.10)
 const ARROW_COLOR := Color(0.55, 0.12, 0.08)
 const MUTED := "#6b5a40"
@@ -40,12 +41,7 @@ func _ready() -> void:
 	panel = PanelContainer.new()
 	panel.name = "StepPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
-	panel.offset_left = -PANEL_WIDTH / 2.0
-	panel.offset_right = PANEL_WIDTH / 2.0
-	panel.offset_bottom = -18
-	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.95, 0.89, 0.74, 0.97)
 	style.border_color = Color(0.45, 0.28, 0.12)
@@ -142,6 +138,8 @@ func set_target(new_target: Dictionary) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	if visible:
+		# Calé en bas au centre, quelle que soit la hauteur du texte de l'étape.
+		panel.position = Vector2(roundf((size.x - panel.size.x) * 0.5), size.y - panel.size.y - BOTTOM_MARGIN)
 		queue_redraw()
 
 

@@ -116,6 +116,8 @@ func _ready() -> void:
 	search_field.placeholder_text = "Rechercher…"
 	search_field.clear_button_enabled = true
 	search_field.custom_minimum_size = Vector2(260, 0)
+	search_field.add_theme_color_override("font_placeholder_color", Color(0.45, 0.36, 0.25))
+	search_field.add_theme_color_override("font_color", Color(0.22, 0.14, 0.07))
 	search_field.text_changed.connect(set_query)
 	header.add_child(search_field)
 	var close := Button.new()
@@ -151,6 +153,11 @@ func _ready() -> void:
 	entry_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	entry_list.fixed_icon_size = Vector2i(22, 22)
 	entry_list.add_theme_font_size_override("font_size", 15)
+	entry_list.add_theme_color_override("font_selected_color", Color(0.98, 0.94, 0.84))
+	var selected := StyleBoxFlat.new()
+	selected.bg_color = Color(0.45, 0.28, 0.12)
+	entry_list.add_theme_stylebox_override("selected", selected)
+	entry_list.add_theme_stylebox_override("selected_focus", selected)
 	entry_list.item_selected.connect(func(index: int) -> void:
 		if index >= 0 and index < _visible_ids.size():
 			open_entry(_visible_ids[index]))
