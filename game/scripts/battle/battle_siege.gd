@@ -16,6 +16,7 @@ const WOOD := Color(0.42, 0.29, 0.17)
 const WOOD_DARK := Color(0.30, 0.20, 0.12)
 const PAVING := Color(0.55, 0.52, 0.46)
 const PLASTER := Color(0.82, 0.77, 0.66)
+const LADDER := Color(0.72, 0.55, 0.30)
 
 var siege: Dictionary = {}
 var height_at: Callable
@@ -412,11 +413,11 @@ func _make_ram() -> Node3D:
 static func _make_ladder(length: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for x in [-0.3, 0.3]:
-		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.1, length, 0.1), WOOD)
-	var rungs := int(length / 0.45)
+	for x in [-0.45, 0.45]:
+		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.18, length, 0.18), LADDER)
+	var rungs := int(length / 0.5)
 	for i in rungs:
-		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.45, 0), Vector3(0.6, 0.06, 0.06), WOOD)
+		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.5, 0), Vector3(0.9, 0.1, 0.1), LADDER)
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
