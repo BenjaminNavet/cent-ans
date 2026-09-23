@@ -4,7 +4,8 @@ Checks performed by `validate_codex`:
 
 - every entry matches `data/schemas/codex.schema.json` and its id equals its file name;
 - every `[[cdx_id]]` / `[[cdx_id|label]]` link, in the codex and in every text field of
-  `data/**/*.json`, resolves to an entry or to an id listed in `data/codex/_todo.md`;
+  `data/**/*.json`, resolves to an entry or to an id listed in `data/codex/_todo.md` or in another
+  pending list `data/codex/_*.md` (links recorded by the diet, medicine and event lots);
 - `see_also` ids resolve the same way;
 - aliases (and titles) are unique across entries, case-insensitively;
 - `entity` points to an existing game entity file.
@@ -83,6 +84,14 @@ def load_todo_ids(codex_dir: Path) -> set[str]:
     return set(TODO_ID_PATTERN.findall(todo.read_text(encoding="utf-8")))
 
 
+def load_pending_ids(codex_dir: Path) -> set[str]:
+    """Ids cited in every pending list `_*.md` (`_todo.md`, `_diet_links.md`...)."""
+    ids: set[str] = set()
+    for path in sorted(codex_dir.glob("_*.md")):
+        ids |= set(TODO_ID_PATTERN.findall(path.read_text(encoding="utf-8")))
+    return ids
+
+
 def validate_codex(data_dir: Path) -> CodexReport:
     """Validates `data_dir/codex` and the codex links of every JSON file of `data_dir`."""
     report = CodexReport()
@@ -104,7 +113,7 @@ def validate_codex(data_dir: Path) -> CodexReport:
             )
         report.entries[path.stem] = entry
 
-    known = set(report.entries) | report.todo_ids
+    known = set(report.entries) | load_pending_ids(codex_dir)
     overlap = report.todo_ids & set(report.entries)
     if overlap:
         report.errors.append(
