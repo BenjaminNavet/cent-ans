@@ -1,0 +1,62 @@
+{
+  "id": "evt_rancon_du_roi",
+  "title": "La rançon du roi Jean",
+  "text": "Depuis Londres, le roi Jean fait savoir ses conditions : les Anglais demandent une rançon énorme. Les États ont promis l'argent ; reste à le lever sur un royaume ravagé par les compagnies.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "character_captive",
+        "id": "chr_jean_de_normandie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Lever l'aide de la rançon",
+      "effects": [
+        {
+          "type": "release_character",
+          "id": "chr_jean_de_normandie",
+          "ransom": 30000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser le roi à Londres",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Rançon du roi Jean refusée"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1357",
+    "uncertain": true,
+    "note": "Premier traité de Londres (1358) ; rançon fixée à Brétigny (1360)."
+  },
+  "sources": [
+    "Jean II le Bon",
+    "Traité de Brétigny",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

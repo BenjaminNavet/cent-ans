@@ -139,15 +139,15 @@ pub fn faction_tech_effects(
     let mut totals = EffectTotals::default();
     for tech in acquired(state, data, faction) {
         for effect in &tech.effects {
-            totals.add(effect.effect, effect.mode, effect.value);
+            totals.add_effect(effect);
         }
     }
     totals
 }
 
 /// The subset of [`faction_tech_effects`] applied to province income
-/// (`TaxIncome`, `TradeIncome`) and population (`Health`, `Growth`,
-/// `Unrest`), spec § 2.
+/// (`TaxIncome`, `TradeIncome`, F1 `Production`) and population (`Health`,
+/// `Growth`, `Unrest`, F1 `Wealth` and every class-targeted effect), spec § 2.
 pub fn faction_province_tech_effects(
     state: &CampaignState,
     data: &GameData,
@@ -160,8 +160,35 @@ pub fn faction_province_tech_effects(
         health: all.health,
         growth: all.growth,
         unrest: all.unrest,
+        wealth: all.wealth,
+        production: all.production,
+        classes: all.classes,
         ..EffectTotals::default()
     }
+}
+
+/// `(defence, siegecraft)` parts of `faction`'s technology
+/// `SiegeResistance` effects (F1): positive values strengthen the faction's
+/// own towns, negative ones weaken the towns it besieges.
+pub fn tech_siege_resistance(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> (f64, f64) {
+    let mut defence = 0.0;
+    let mut siegecraft = 0.0;
+    for tech in acquired(state, data, faction) {
+        for effect in &tech.effects {
+            if effect.effect == EffectKind::SiegeResistance && effect.mode == EffectMode::Add {
+                if effect.value >= 0.0 {
+                    defence += effect.value;
+                } else {
+                    siegecraft += effect.value;
+                }
+            }
+        }
+    }
+    (defence, siegecraft)
 }
 
 /// Battle bonuses of `faction`'s technologies for units of `category`.
@@ -266,13 +293,30 @@ impl CampaignState {
                 add(effect.effect, effect.mode, effect.value);
             }
         }
-        let governance = faction_state
+        let ruler = faction_state
             .ruler
             .as_ref()
+            .filter(|id| self.characters.get(*id).is_some_and(|c| c.alive));
+        let governance = ruler
             .and_then(|id| self.characters.get(id))
-            .filter(|c| c.alive)
             .map_or(0, |c| c.skills.governance);
         flat += f64::from(governance.div_ceil(2));
+        // F1: the ruler's `ResearchCivil` / `ResearchMilitary` traits and
+        // skills speed up research in the branch being researched.
+        let branch = faction_state
+            .research
+            .as_ref()
+            .and_then(|t| data.technologies.get(t))
+            .map(|t| t.branch);
+        if let (Some(ruler), Some(branch)) = (ruler, branch) {
+            let effects = crate::skills::character_effects(self, data, ruler);
+            let bonus = match branch {
+                TechBranch::Civil => effects.research_civil,
+                TechBranch::Military => effects.research_military,
+            };
+            flat += bonus.flat;
+            percent += bonus.percent;
+        }
         (flat * (1.0 + percent / 100.0)).round().max(0.0) as u32
     }
 
@@ -332,12 +376,19 @@ pub fn start_research(
     if f.research.as_ref() == Some(technology) {
         return Ok(());
     }
+    // F1: with no research running, `research_progress` holds the surplus
+    // of the last completed technology; it carries over to the new one.
+    let surplus = if f.research.is_none() {
+        f.research_progress
+    } else {
+        0
+    };
     if let Some(previous) = f.research.take() {
         if f.research_progress > 0 {
             f.research_banked.insert(previous, f.research_progress);
         }
     }
-    f.research_progress = f.research_banked.remove(technology).unwrap_or(0);
+    f.research_progress = f.research_banked.remove(technology).unwrap_or(0) + surplus;
     f.research = Some(technology.clone());
     Ok(())
 }
@@ -375,7 +426,9 @@ pub(crate) fn resolve_research(
         }
         f.technologies.insert(technology.clone());
         f.research = None;
-        f.research_progress = 0;
+        // F1: the surplus is kept for the next research (see
+        // `start_research`, which carries it over).
+        f.research_progress -= effective_cost(tech, year);
         let faction_name = data
             .factions
             .get(&faction_id)

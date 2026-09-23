@@ -136,14 +136,14 @@ pub fn character_effects(state: &CampaignState, data: &GameData, id: &CharacterI
     for trait_id in &character.traits {
         if let Some(def) = data.traits.get(trait_id) {
             for effect in &def.effects {
-                totals.add(effect.effect, effect.mode, effect.value);
+                totals.add_effect(effect);
             }
         }
     }
     for skill_id in &character.skills_learned {
         if let Some(def) = data.skills.get(skill_id) {
             for effect in &def.effects {
-                totals.add(effect.effect, effect.mode, effect.value);
+                totals.add_effect(effect);
             }
         }
     }

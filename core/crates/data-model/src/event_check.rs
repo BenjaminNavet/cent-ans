@@ -42,6 +42,29 @@ pub(crate) fn validate_events(
         if event.trigger.mean_time_to_happen == Some(0) {
             return Err(invalid("mean_time_to_happen must be positive"));
         }
+        for option in &event.options {
+            for effect in &option.effects {
+                if let EventEffect::ScheduleEvent {
+                    event: target,
+                    delay,
+                } = effect
+                {
+                    if *delay == 0 {
+                        return Err(invalid("schedule_event.delay must be at least 1 turn"));
+                    }
+                    if target == id {
+                        return Err(invalid("an event cannot schedule itself"));
+                    }
+                }
+            }
+        }
+        if event.kind == EventCategory::Chained && !is_scheduled(data, id) {
+            warnings.push(Warning {
+                entity: id.to_string(),
+                field: "kind".to_owned(),
+                message: "chained event never scheduled by another event (never fires)".to_owned(),
+            });
+        }
         let mut refs = EventRefs {
             data,
             entity: id.to_string(),
@@ -65,6 +88,15 @@ pub(crate) fn validate_events(
         }
     }
     Ok(())
+}
+
+/// `true` when some event option schedules `target` (F1 chains).
+fn is_scheduled(data: &GameData, target: &crate::ids::EventId) -> bool {
+    data.events
+        .values()
+        .flat_map(|e| e.options.iter())
+        .flat_map(|o| o.effects.iter())
+        .any(|effect| matches!(effect, EventEffect::ScheduleEvent { event, .. } if event == target))
 }
 
 /// Reports unknown ids referenced by an event as warnings.
@@ -255,6 +287,26 @@ impl EventRefs<'_> {
                 self.faction("effects.vassal", vassal.as_ref());
             }
             EventEffect::PlagueWave { .. } => {}
+            EventEffect::CaptureCharacter {
+                id,
+                faction,
+                captor,
+            } => {
+                self.character_ref("effects.id", id);
+                self.faction("effects.faction", faction.as_ref());
+                self.faction("effects.captor", Some(captor));
+            }
+            EventEffect::ReleaseCharacter { id, faction, .. } => {
+                self.character_ref("effects.id", id);
+                self.faction("effects.faction", faction.as_ref());
+            }
+            EventEffect::ScheduleEvent { event, .. } => {
+                self.check("effects.event", Some(event), &data.events);
+            }
+            EventEffect::Marry { a, b } => {
+                self.character("effects.a", Some(a));
+                self.character("effects.b", Some(b));
+            }
         }
     }
 }
