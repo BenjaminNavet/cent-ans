@@ -1,0 +1,86 @@
+{
+  "id": "evt_montereau",
+  "title": "Le meurtre de Montereau",
+  "text": "Sur le pont de Montereau, une barrière a été dressée pour l'entrevue du duc de Bourgogne et du dauphin Charles. Le duc met genou en terre ; Tanguy du Chastel lui fend le crâne d'un coup de hache. Les Bourguignons crient vengeance.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1419,
+      "season": "autumn"
+    },
+    "until_year": 1420,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Venger le duc et traiter avec l'Anglais",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "ruler"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -40,
+          "reason": "Meurtre de Montereau"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "towards": "fac_france",
+          "amount": -40,
+          "reason": "Meurtre de Montereau"
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_alliance_anglo_bourguignonne",
+          "delay": 1
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Pleurer le duc et rester fidèle au roi",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "ruler"
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "towards": "fac_france",
+          "amount": -20,
+          "reason": "Meurtre de Montereau"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1419-09-10"
+  },
+  "sources": [
+    "Assassinat de Jean sans Peur",
+    "Jean sans Peur",
+    "Bertrand Schnerb, Les Armagnacs et les Bourguignons, Perrin, 1988"
+  ]
+}

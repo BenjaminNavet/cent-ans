@@ -1,0 +1,79 @@
+{
+  "id": "evt_achat_dauphine",
+  "title": "L'achat du Dauphiné",
+  "text": "Criblé de dettes et sans enfant, le dauphin Humbert II vend sa principauté au roi de France, à condition que l'héritier du trône en porte le titre et que le Dauphiné ne soit jamais uni au royaume. Le prince Charles devient le premier dauphin de France.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1349,
+      "season": "spring"
+    },
+    "until_year": 1350,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_empire",
+        "province": "prov_dauphine"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Payer le prix d'Humbert (traité de Romans)",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -12000
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_dauphine"
+        },
+        {
+          "type": "prestige",
+          "character": "heir",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": -10,
+          "reason": "Achat du Dauphiné"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser le Savoyard acheter la principauté",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_savoy",
+          "amount": 10,
+          "reason": "Dauphiné laissé à la Savoie"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1349-07-16"
+  },
+  "sources": [
+    "Transport du Dauphiné à la France",
+    "Humbert II de Viennois"
+  ]
+}

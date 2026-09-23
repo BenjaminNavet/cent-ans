@@ -1,0 +1,64 @@
+{
+  "id": "evt_chute_de_rienzo",
+  "title": "La chute du tribun",
+  "text": "Le tribun s'est fait couronner de sept couronnes et vêtir de pourpre ; il lève des impôts et fait décapiter à tort. Les barons reviennent, le peuple se détourne : Cola s'enfuit du Capitole déguisé en moine.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_papacy",
+        "province": "prov_lazio"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_lazio"
+  },
+  "options": [
+    {
+      "text": "Rendre la ville au légat et aux barons",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "papal_favor",
+          "faction": "fac_papacy",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Soutenir le tribun contre les barons",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "devastation",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1347-12-15"
+  },
+  "sources": [
+    "Cola di Rienzo"
+  ]
+}

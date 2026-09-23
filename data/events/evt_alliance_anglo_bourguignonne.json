@@ -1,0 +1,78 @@
+{
+  "id": "evt_alliance_anglo_bourguignonne",
+  "title": "L'alliance anglo-bourguignonne",
+  "text": "À Arras, le nouveau duc Philippe, fils du duc assassiné, s'engage auprès du roi d'Angleterre : il reconnaîtra Henri pour héritier de France, et le dauphin, meurtrier de son père, sera poursuivi jusqu'au bout.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Sceller l'alliance avec Henri V",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "towards": "fac_england",
+          "amount": 30,
+          "reason": "Alliance d'Arras"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 30,
+          "reason": "Alliance d'Arras"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -20,
+          "reason": "Alliance anglo-bourguignonne"
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder ses distances avec l'Anglais",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "towards": "fac_england",
+          "amount": 10,
+          "reason": "Pourparlers d'Arras"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1419-12-02",
+    "note": "Accords d'Arras (2 décembre 1419) préparant le traité de Troyes."
+  },
+  "sources": [
+    "Traité de Troyes",
+    "Philippe III de Bourgogne"
+  ]
+}
