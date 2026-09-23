@@ -41,7 +41,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   Armagnacs et Bourguignons, Constance, Azincourt, Troyes, Jeanne d'Arc, Arras, Castillon… — et 22
   aléatoires à choix), conditions et effets typés, choix de l'IA par poids, décisions du joueur (fenêtre
   « Chronique », 2 tours avant choix d'office), ordre `choose_event_option`, vague de Peste noire du sud
-  vers le nord sur 12 tours. 12 tests M10, smoke `_run_chronicle`. Capture : `docs/img/godot-chronicle.png`.
+  vers le nord sur 12 tours. 13 tests M10, smoke `_run_chronicle`. Capture : `docs/img/godot-chronicle.png`.
 - Correctif M4 : les effets du gouverneur s'appliquent désormais à la population et aux impôts.
 
 - IA de campagne stratégique (M9, partie campagne) : crate `ai` (`ai::plan_turn`), utilisée par le pont pour toutes les factions IA. Objectifs par armée (défense des provinces menacées, sièges des provinces les plus précieuses, chevauchées des factions agressives, regroupement, retraite), fusion des armées, budget militaire (60 % du revenu en guerre, 30 % en paix), recrutement de la meilleure unité par livre, construction par rendement, impôts selon la guerre et l'ordre public, licenciement en cas de dette, gouverneurs, généraux, compétences, mariages ; diplomatie (M5) et recherche (M6) réutilisées. 9 tests. Sonde : `cargo run --release -p ai --example ai_probe` (100 tours, 0 % d'ordres refusés côté France). L'IA de bataille arrive avec M7.
