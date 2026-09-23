@@ -1,0 +1,18 @@
+{
+  "id": "skill_courtisan",
+  "name": {
+    "display": "Courtisan"
+  },
+  "branch": "court",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Se fait apprécier des grands de ce monde."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "skill_bon_justicier",
+  "name": {
+    "display": "Bon justicier"
+  },
+  "branch": "governance",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "description": "Rend une justice qui apaise le mécontentement."
+}

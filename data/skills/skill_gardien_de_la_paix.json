@@ -1,0 +1,20 @@
+{
+  "id": "skill_gardien_de_la_paix",
+  "name": {
+    "display": "Gardien de la paix"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_bon_justicier"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -8,
+      "mode": "add"
+    }
+  ],
+  "description": "Maintient l'ordre par une administration attentive."
+}

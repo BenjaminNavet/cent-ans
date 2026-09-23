@@ -1,0 +1,23 @@
+{
+  "id": "trait_greedy",
+  "name": {
+    "display": "Avide"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_generous"
+  ],
+  "description": "Amasse richesses et fiefs sans retenue."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "trait_excommunicated",
+  "name": {
+    "display": "Excommunié"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": -20,
+      "mode": "add"
+    },
+    {
+      "effect": "unrest",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Frappé d'excommunication par l'Église."
+}

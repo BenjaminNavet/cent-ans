@@ -1,0 +1,15 @@
+{
+  "id": "trait_brave",
+  "name": {
+    "display": "Brave"
+  },
+  "category": "martial",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Ne recule jamais devant le danger au combat."
+}

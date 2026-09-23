@@ -1,0 +1,20 @@
+{
+  "id": "trait_maimed",
+  "name": {
+    "display": "Mutilé"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": -10,
+      "mode": "add"
+    },
+    {
+      "effect": "health",
+      "value": -15,
+      "mode": "add"
+    }
+  ],
+  "description": "A perdu l'usage d'un membre au combat."
+}

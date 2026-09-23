@@ -1,0 +1,15 @@
+{
+  "id": "trait_failing_sight",
+  "name": {
+    "display": "Vue déclinante"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "description": "La vue baisse avec l'âge, gênant le commandement à distance."
+}

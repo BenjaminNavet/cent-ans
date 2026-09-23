@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/trait.schema.json",
+  "title": "Trait de personnage",
+  "description": "Trait de personnalité, martial, de gouvernance, physique ou acquis (data/traits/).",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/trait_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "category": {
+      "type": "string",
+      "enum": ["personality", "martial", "governance", "physical", "acquired"]
+    },
+    "effects": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/effect" }
+    },
+    "opposites": {
+      "type": "array",
+      "description": "Traits mutuellement exclusifs avec celui-ci.",
+      "items": { "$ref": "common.schema.json#/$defs/trait_id" },
+      "uniqueItems": true
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "category", "effects", "description"],
+  "additionalProperties": false
+}

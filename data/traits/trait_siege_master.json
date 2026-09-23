@@ -1,0 +1,15 @@
+{
+  "id": "trait_siege_master",
+  "name": {
+    "display": "Maître des sièges"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "siege_speed",
+      "value": 20,
+      "mode": "percent"
+    }
+  ],
+  "description": "A conduit victorieusement plusieurs sièges."
+}

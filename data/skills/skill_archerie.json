@@ -1,0 +1,18 @@
+{
+  "id": "skill_archerie",
+  "name": {
+    "display": "Art de l'arc"
+  },
+  "branch": "command",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "battle_ranged",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Les tireurs sous son commandement gagnent en efficacité."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "skill_intendant",
+  "name": {
+    "display": "Intendant"
+  },
+  "branch": "governance",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Gère le domaine avec rigueur et profit."
+}

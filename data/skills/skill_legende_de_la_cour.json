@@ -1,0 +1,21 @@
+{
+  "id": "skill_legende_de_la_cour",
+  "name": {
+    "display": "Légende de la cour"
+  },
+  "branch": "court",
+  "tier": 3,
+  "prerequisites": [
+    "skill_mecene",
+    "skill_orateur_des_etats"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 10,
+      "mode": "add"
+    }
+  ],
+  "description": "Son nom seul impressionne les cours étrangères."
+}

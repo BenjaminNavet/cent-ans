@@ -1,0 +1,18 @@
+{
+  "id": "trait_resolute",
+  "name": {
+    "display": "Résolu"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_impulsive"
+  ],
+  "description": "Une fois décidé, rien ne le détourne de son but."
+}

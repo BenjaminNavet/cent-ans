@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/skill.schema.json",
+  "title": "Compétence",
+  "description": "Nœud de l'arbre de compétences à trois branches (command, governance, court) (data/skills/).",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/skill_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "branch": {
+      "type": "string",
+      "enum": ["command", "governance", "court"]
+    },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "prerequisites": {
+      "type": "array",
+      "description": "Compétences requises, toujours dans la même branche.",
+      "items": { "$ref": "common.schema.json#/$defs/skill_id" },
+      "uniqueItems": true
+    },
+    "cost": { "type": "integer", "minimum": 1, "description": "Coût en points de compétence (= tier)." },
+    "effects": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/effect" }
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "branch", "tier", "prerequisites", "cost", "effects", "description"],
+  "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+{
+  "id": "skill_agronome",
+  "name": {
+    "display": "Agronome"
+  },
+  "branch": "governance",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "growth",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Encourage l'amélioration des terres et des récoltes."
+}

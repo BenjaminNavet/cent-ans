@@ -1,0 +1,18 @@
+{
+  "id": "skill_beau_parleur",
+  "name": {
+    "display": "Beau parleur"
+  },
+  "branch": "court",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "description": "Sait tourner un compliment ou une menace avec autant d'aisance."
+}

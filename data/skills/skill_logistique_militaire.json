@@ -1,0 +1,25 @@
+{
+  "id": "skill_logistique_militaire",
+  "name": {
+    "display": "Logistique militaire"
+  },
+  "branch": "command",
+  "tier": 3,
+  "prerequisites": [
+    "skill_maitre_des_sieges"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "supply",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "attrition_resistance",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "Organise ravitaillement et étapes sur longue campagne."
+}

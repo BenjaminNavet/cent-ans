@@ -1,0 +1,15 @@
+{
+  "id": "trait_lame",
+  "name": {
+    "display": "Boiteux"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "description": "Une blessure ou une malformation gêne sa marche."
+}

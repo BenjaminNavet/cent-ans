@@ -1,0 +1,25 @@
+{
+  "id": "skill_confesseur",
+  "name": {
+    "display": "Confesseur influent"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_piete"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10,
+      "mode": "add"
+    },
+    {
+      "effect": "unrest",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "description": "Son entourage religieux rassure la cour et le peuple."
+}

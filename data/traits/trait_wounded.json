@@ -1,0 +1,20 @@
+{
+  "id": "trait_wounded",
+  "name": {
+    "display": "Blessé"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": -5,
+      "mode": "add"
+    },
+    {
+      "effect": "health",
+      "value": -10,
+      "mode": "add"
+    }
+  ],
+  "description": "Porte les séquelles d'une blessure de guerre récente."
+}

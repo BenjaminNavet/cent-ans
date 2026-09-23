@@ -1,0 +1,19 @@
+{
+  "id": "trait_sickly",
+  "name": {
+    "display": "Maladif"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "health",
+      "value": -15,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_energetic",
+    "trait_strong"
+  ],
+  "description": "Santé fragile, sujet aux fièvres."
+}

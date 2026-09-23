@@ -1,0 +1,18 @@
+{
+  "id": "trait_austere",
+  "name": {
+    "display": "Austère"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_spendthrift"
+  ],
+  "description": "Rejette le faste ; donne l'exemple de la frugalité."
+}

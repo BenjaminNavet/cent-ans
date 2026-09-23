@@ -1,0 +1,15 @@
+{
+  "id": "trait_scholar",
+  "name": {
+    "display": "Érudit"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Passionné de science et de droit."
+}

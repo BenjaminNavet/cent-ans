@@ -1,0 +1,15 @@
+{
+  "id": "trait_mercenary",
+  "name": {
+    "display": "Mercenaire dans l'âme"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "recruit_cost",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Ne sert que pour l'or, mais s'y entend en soldats."
+}

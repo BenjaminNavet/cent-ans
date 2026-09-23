@@ -1,0 +1,25 @@
+{
+  "id": "skill_ordre_de_bataille",
+  "name": {
+    "display": "Ordre de bataille"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_discipline"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "battle_defense",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Sait disposer ses lignes pour tenir le choc."
+}

@@ -10,14 +10,17 @@ use serde::de::DeserializeOwned;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
 use crate::entities::faction::Faction;
+use crate::entities::names::NameList;
 use crate::entities::province::Province;
+use crate::entities::r#trait::Trait;
 use crate::entities::religion::Religion;
 use crate::entities::resource::Resource;
+use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
-    BuildingId, CharacterId, FactionId, ProvinceId, ReligionId, ResourceId, TechnologyId,
-    UnitTypeId,
+    BuildingId, CharacterId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SkillId,
+    TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -31,6 +34,9 @@ pub mod folders {
     pub const CHARACTERS: &str = "characters";
     pub const RESOURCES: &str = "resources";
     pub const RELIGIONS: &str = "religions";
+    pub const TRAITS: &str = "traits";
+    pub const SKILLS: &str = "skills";
+    pub const NAMES: &str = "names";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -123,6 +129,9 @@ pub struct GameData {
     pub characters: BTreeMap<CharacterId, Character>,
     pub resources: BTreeMap<ResourceId, Resource>,
     pub religions: BTreeMap<ReligionId, Religion>,
+    pub traits: BTreeMap<TraitId, Trait>,
+    pub skills: BTreeMap<SkillId, Skill>,
+    pub names: BTreeMap<NamesId, NameList>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -147,6 +156,9 @@ impl GameData {
             characters: load_entities(&root.join(folders::CHARACTERS), |c: &Character| &c.id)?,
             resources: load_entities(&root.join(folders::RESOURCES), |r: &Resource| &r.id)?,
             religions: load_entities(&root.join(folders::RELIGIONS), |r: &Religion| &r.id)?,
+            traits: load_entities(&root.join(folders::TRAITS), |t: &Trait| &t.id)?,
+            skills: load_entities(&root.join(folders::SKILLS), |s: &Skill| &s.id)?,
+            names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
             map: None,
             province_geometry: BTreeMap::new(),
         };
@@ -229,6 +241,8 @@ impl GameData {
         checker.check_technologies();
         checker.check_characters();
         checker.check_religions();
+        checker.check_traits();
+        checker.check_skills();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -402,6 +416,7 @@ impl ReferenceChecker<'_> {
         let data = self.data;
         for (id, character) in &data.characters {
             self.require(id, "faction", &character.faction, &data.factions);
+            self.require_all(id, "traits", &character.traits, &data.traits);
             if let Some(family) = &character.family {
                 for (field, relative) in family.references() {
                     self.require(id, field, relative, &data.characters);
@@ -422,6 +437,20 @@ impl ReferenceChecker<'_> {
             if let Some(head) = &religion.head_faction {
                 self.require(id, "head_faction", head, &data.factions);
             }
+        }
+    }
+
+    fn check_traits(&mut self) {
+        let data = self.data;
+        for (id, character_trait) in &data.traits {
+            self.require_all(id, "opposites", &character_trait.opposites, &data.traits);
+        }
+    }
+
+    fn check_skills(&mut self) {
+        let data = self.data;
+        for (id, skill) in &data.skills {
+            self.require_all(id, "prerequisites", &skill.prerequisites, &data.skills);
         }
     }
 }
@@ -521,6 +550,9 @@ mod tests {
                 folders::CHARACTERS,
                 folders::RESOURCES,
                 folders::RELIGIONS,
+                folders::TRAITS,
+                folders::SKILLS,
+                folders::NAMES,
             ] {
                 fs::create_dir_all(root.join(folder)).unwrap();
             }
@@ -529,6 +561,9 @@ mod tests {
             fixture.write(folders::RESOURCES, "res_wheat", RESOURCE);
             fixture.write(folders::TECHNOLOGIES, "tech_masonry", TECHNOLOGY);
             fixture.write(folders::BUILDINGS, "bld_market", BUILDING);
+            fixture.write(folders::TRAITS, "trait_proud", TRAIT);
+            fixture.write(folders::SKILLS, "skill_hardiesse", SKILL);
+            fixture.write(folders::NAMES, "names_fr", NAMES_LIST);
             fixture.write(folders::CHARACTERS, "chr_philippe_vi", CHARACTER);
             fixture.write(folders::FACTIONS, "fac_france", FACTION);
             fixture.write(folders::PROVINCES, "prov_normandie", PROVINCE);
@@ -560,6 +595,9 @@ mod tests {
         r#"{"id":"res_wheat","name":{"display":"Blé"},"category":"food","base_price":4}"#;
     const TECHNOLOGY: &str = r#"{"id":"tech_masonry","name":{"display":"Maçonnerie"},"branch":"civil","tier":1,"cost":100,"prerequisites":[]}"#;
     const BUILDING: &str = r#"{"id":"bld_market","name":{"display":"Marché"},"category":"commerce","tier":1,"cost":{"money":500,"resources":{"res_wheat":1}},"build_time_turns":2,"effects":[{"effect":"trade_income","value":10,"mode":"percent"}]}"#;
+    const TRAIT: &str = r#"{"id":"trait_proud","name":{"display":"Fier"},"category":"personality","effects":[{"effect":"prestige","value":3,"mode":"add"}],"description":"Orgueilleux."}"#;
+    const SKILL: &str = r#"{"id":"skill_hardiesse","name":{"display":"Hardiesse"},"branch":"command","tier":1,"prerequisites":[],"cost":1,"effects":[{"effect":"battle_charge","value":10,"mode":"percent"}],"description":"Charge plus forte."}"#;
+    const NAMES_LIST: &str = r#"{"id":"names_fr","language":"français médiéval","cultures":["cul_french"],"male_first_names":["Jehan"],"female_first_names":["Aliénor"]}"#;
     const CHARACTER: &str = r#"{"id":"chr_philippe_vi","name":{"display":"Philippe VI"},"sex":"male","house":"Valois","faction":"fac_france","role":"ruler","birth":{"value":"1293","uncertain":true},"skills":{"command":5,"governance":4,"court":6},"traits":["trait_proud"],"starting_location":"prov_normandie"}"#;
     const FACTION: &str = r##"{"id":"fac_france","name":{"display":"Royaume de France"},"government":"kingdom","playable":true,"ruler":"chr_philippe_vi","capital":"prov_normandie","religion":"rel_catholic","culture":"cul_french","succession_law":"salic","heraldry":{"blazon":"D'azur semé de fleurs de lis d'or.","primary_color":"#1F3A93"},"starting_technologies":["tech_masonry"]}"##;
     const PROVINCE: &str = r#"{"id":"prov_normandie","name":{"display":"Normandie","local":"Normendie","local_language":"ancien français"},"region":"france_nord","terrain":"bocage","neighbors":["prov_ile_de_france"],"coastal":true,"ports":["Rouen"],"resources":["res_wheat"],"capital_city":{"name":{"display":"Rouen"},"lat":49.44,"lon":1.1},"owner":"fac_france","holder":"chr_philippe_vi","culture":"cul_french","religion":"rel_catholic","population":{"classes":{"peasants":{"count":750000,"unrest":10,"health":55,"wealth":50,"goods_satisfaction":60},"burghers":{"count":130000,"unrest":10,"health":50,"wealth":65,"goods_satisfaction":70},"clergy":{"count":20000,"unrest":5,"health":60,"wealth":70,"goods_satisfaction":75},"nobility":{"count":6000,"unrest":10,"health":60,"wealth":75,"goods_satisfaction":80}},"uncertain":true},"buildings":["bld_market"]}"#;

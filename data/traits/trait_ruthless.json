@@ -1,0 +1,23 @@
+{
+  "id": "trait_ruthless",
+  "name": {
+    "display": "Impitoyable"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "intrigue",
+      "value": 3,
+      "mode": "add"
+    },
+    {
+      "effect": "loyalty",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_chivalrous"
+  ],
+  "description": "N'a de scrupule ni pour vaincre ni pour gouverner."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "skill_espion_a_gages",
+  "name": {
+    "display": "Espion à gages"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_courtisan"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "intrigue",
+      "value": 4,
+      "mode": "add"
+    }
+  ],
+  "description": "Entretient un réseau d'informateurs discret."
+}

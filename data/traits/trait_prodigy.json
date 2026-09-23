@@ -1,0 +1,15 @@
+{
+  "id": "trait_prodigy",
+  "name": {
+    "display": "Prodige"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Enfant précoce, apprend plus vite que ses pairs."
+}

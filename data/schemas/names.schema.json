@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/names.schema.json",
+  "title": "Liste de prénoms par culture",
+  "description": "Prénoms d'époque masculins et féminins et surnoms/épithètes neutres, utilisés pour générer les personnages nés en cours de partie (data/names/).",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/names_id" },
+    "language": { "type": "string", "description": "Langue ou groupe linguistique (ex. 'français médiéval', 'moyen anglais')." },
+    "cultures": {
+      "type": "array",
+      "description": "Cultures (`cul_*`) associées à cette liste de prénoms.",
+      "items": { "$ref": "common.schema.json#/$defs/culture_id" },
+      "uniqueItems": true
+    },
+    "male_first_names": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "female_first_names": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "surnames": {
+      "type": "array",
+      "description": "Surnoms ou épithètes neutres pouvant s'ajouter au prénom.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "language", "cultures", "male_first_names", "female_first_names"],
+  "additionalProperties": false
+}

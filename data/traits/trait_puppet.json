@@ -1,0 +1,15 @@
+{
+  "id": "trait_puppet",
+  "name": {
+    "display": "Fantoche"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": -10,
+      "mode": "add"
+    }
+  ],
+  "description": "Règne sous la tutelle d'un régent ou d'un conseiller tout-puissant."
+}

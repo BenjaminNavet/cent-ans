@@ -1,0 +1,20 @@
+{
+  "id": "trait_disgraced",
+  "name": {
+    "display": "Disgracié"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": -10,
+      "mode": "add"
+    },
+    {
+      "effect": "unrest",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "A perdu la faveur de son suzerain ou de sa cour."
+}

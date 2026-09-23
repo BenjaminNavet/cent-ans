@@ -1,0 +1,18 @@
+{
+  "id": "trait_kind",
+  "name": {
+    "display": "Bienveillant"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "loyalty",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_cruel"
+  ],
+  "description": "Traite son entourage avec bonté."
+}

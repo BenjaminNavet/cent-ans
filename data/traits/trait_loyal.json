@@ -1,0 +1,18 @@
+{
+  "id": "trait_loyal",
+  "name": {
+    "display": "Loyal"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "loyalty",
+      "value": 8,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_deceitful"
+  ],
+  "description": "Sa parole donnée vaut engagement."
+}

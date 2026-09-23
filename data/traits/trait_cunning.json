@@ -1,0 +1,15 @@
+{
+  "id": "trait_cunning",
+  "name": {
+    "display": "Rusé"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "intrigue",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Excelle dans les manœuvres et les intrigues."
+}

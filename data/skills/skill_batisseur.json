@@ -1,0 +1,20 @@
+{
+  "id": "skill_batisseur",
+  "name": {
+    "display": "Bâtisseur"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_intendant"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "construction_speed",
+      "value": 20,
+      "mode": "percent"
+    }
+  ],
+  "description": "Accélère la construction des grands travaux."
+}

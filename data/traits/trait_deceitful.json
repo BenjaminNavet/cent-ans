@@ -1,0 +1,23 @@
+{
+  "id": "trait_deceitful",
+  "name": {
+    "display": "Fourbe"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "intrigue",
+      "value": 2,
+      "mode": "add"
+    },
+    {
+      "effect": "loyalty",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_loyal"
+  ],
+  "description": "Ne recule devant aucun mensonge pour parvenir à ses fins."
+}

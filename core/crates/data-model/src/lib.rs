@@ -22,17 +22,20 @@ pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Ski
 pub use entities::faction::{
     AiPersonality, Faction, Government, Heraldry, Relation, RelationStatus, SuccessionLaw,
 };
+pub use entities::names::NameList;
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,
 };
+pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
+pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use ids::{
-    BuildingId, CharacterId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
-    TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, CultureId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId,
+    SeaZoneId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

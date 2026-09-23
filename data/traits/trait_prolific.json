@@ -1,0 +1,18 @@
+{
+  "id": "trait_prolific",
+  "name": {
+    "display": "Prolifique"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "fertility",
+      "value": 30,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_childless"
+  ],
+  "description": "Engendre de nombreux enfants."
+}

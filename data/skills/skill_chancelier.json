@@ -1,0 +1,26 @@
+{
+  "id": "skill_chancelier",
+  "name": {
+    "display": "Chancelier"
+  },
+  "branch": "governance",
+  "tier": 3,
+  "prerequisites": [
+    "skill_reformateur_fiscal",
+    "skill_gardien_de_la_paix"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "description": "Administre le royaume comme un véritable premier ministre."
+}

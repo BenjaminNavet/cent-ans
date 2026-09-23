@@ -1,0 +1,20 @@
+{
+  "id": "trait_stern",
+  "name": {
+    "display": "Sévère"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -2,
+      "mode": "add"
+    },
+    {
+      "effect": "loyalty",
+      "value": -2,
+      "mode": "add"
+    }
+  ],
+  "description": "Gouverne d'une main de fer."
+}

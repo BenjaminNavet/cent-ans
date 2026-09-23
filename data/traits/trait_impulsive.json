@@ -1,0 +1,18 @@
+{
+  "id": "trait_impulsive",
+  "name": {
+    "display": "Impulsif"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_resolute"
+  ],
+  "description": "Agit sur un coup de tête, pour le meilleur et pour le pire."
+}

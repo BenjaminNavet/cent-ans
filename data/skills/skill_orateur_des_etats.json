@@ -1,0 +1,26 @@
+{
+  "id": "skill_orateur_des_etats",
+  "name": {
+    "display": "Orateur des États"
+  },
+  "branch": "court",
+  "tier": 3,
+  "prerequisites": [
+    "skill_entremetteur",
+    "skill_espion_a_gages"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "intrigue",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Sa parole pèse jusque devant les assemblées d'états."
+}

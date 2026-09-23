@@ -1,0 +1,20 @@
+{
+  "id": "trait_mad",
+  "name": {
+    "display": "Fou"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": 10,
+      "mode": "add"
+    },
+    {
+      "effect": "prestige",
+      "value": -15,
+      "mode": "add"
+    }
+  ],
+  "description": "Sujet à des crises de folie qui inquiètent la cour (cf. Charles VI)."
+}

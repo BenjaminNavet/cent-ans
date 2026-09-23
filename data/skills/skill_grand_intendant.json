@@ -1,0 +1,20 @@
+{
+  "id": "skill_grand_intendant",
+  "name": {
+    "display": "Grand intendant"
+  },
+  "branch": "governance",
+  "tier": 3,
+  "prerequisites": [
+    "skill_chancelier"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "wealth",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Fait fructifier le trésor de la faction entière."
+}

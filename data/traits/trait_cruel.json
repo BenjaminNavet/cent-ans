@@ -1,0 +1,24 @@
+{
+  "id": "trait_cruel",
+  "name": {
+    "display": "Cruel"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "intrigue",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_just",
+    "trait_kind"
+  ],
+  "description": "Inspire la crainte plus que le respect."
+}

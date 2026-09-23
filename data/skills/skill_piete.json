@@ -1,0 +1,18 @@
+{
+  "id": "skill_piete",
+  "name": {
+    "display": "Piété"
+  },
+  "branch": "court",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10,
+      "mode": "add"
+    }
+  ],
+  "description": "Cultive une réputation de dévotion exemplaire."
+}

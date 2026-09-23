@@ -1,0 +1,20 @@
+{
+  "id": "trait_captive_ransomed",
+  "name": {
+    "display": "Ancien captif rançonné"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "wealth",
+      "value": -10,
+      "mode": "percent"
+    },
+    {
+      "effect": "prestige",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "description": "A été capturé puis libéré contre rançon ; sa maison en porte le poids financier."
+}

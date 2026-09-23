@@ -125,6 +125,14 @@ pub enum EffectKind {
     Movement,
     AttritionResistance,
     Loyalty,
+    SiegeSpeed,
+    ConstructionSpeed,
+    Diplomacy,
+    Intrigue,
+    Fertility,
+    BattleCharge,
+    BattleRanged,
+    BattleDefense,
 }
 
 /// How an effect value combines with the base value.

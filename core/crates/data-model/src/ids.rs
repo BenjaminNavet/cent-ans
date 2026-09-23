@@ -131,9 +131,19 @@ define_id!(
     "cul_"
 );
 define_id!(
-    /// Character trait tag (`trait_pious`); free vocabulary.
+    /// Identifier of a character trait (`trait_pious`).
     TraitId,
     "trait_"
+);
+define_id!(
+    /// Identifier of a skill tree node (`skill_hardiesse`).
+    SkillId,
+    "skill_"
+);
+define_id!(
+    /// Identifier of a per-culture name list (`names_fr`).
+    NamesId,
+    "names_"
 );
 define_id!(
     /// Abstract sea zone (`sea_channel`); free vocabulary.

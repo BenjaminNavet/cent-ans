@@ -1,0 +1,20 @@
+{
+  "id": "skill_reformateur_fiscal",
+  "name": {
+    "display": "Réformateur fiscal"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_intendant"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 8,
+      "mode": "percent"
+    }
+  ],
+  "description": "Rationalise la levée des impôts."
+}

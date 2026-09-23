@@ -1,0 +1,25 @@
+{
+  "id": "skill_mecene",
+  "name": {
+    "display": "Mécène"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_courtisan"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "research_civil",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Protège artistes et lettrés, rayonnement de la cour."
+}

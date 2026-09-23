@@ -1,0 +1,26 @@
+{
+  "id": "skill_urbaniste",
+  "name": {
+    "display": "Urbaniste"
+  },
+  "branch": "governance",
+  "tier": 3,
+  "prerequisites": [
+    "skill_batisseur",
+    "skill_maitre_des_travaux"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "construction_speed",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "trade_income",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Planifie villes et marchés pour la prospérité commune."
+}

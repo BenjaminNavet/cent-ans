@@ -1,0 +1,18 @@
+{
+  "id": "trait_peaceful",
+  "name": {
+    "display": "Pacifique"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_wrathful"
+  ],
+  "description": "Répugne à la guerre et cherche l'accommodement."
+}

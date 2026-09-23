@@ -1,0 +1,15 @@
+{
+  "id": "trait_charismatic",
+  "name": {
+    "display": "Charismatique"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "description": "Sait convaincre et rallier."
+}

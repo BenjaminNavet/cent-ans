@@ -1,0 +1,15 @@
+{
+  "id": "trait_one_eyed",
+  "name": {
+    "display": "Borgne"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "value": -10,
+      "mode": "percent"
+    }
+  ],
+  "description": "A perdu un œil, au combat ou par maladie."
+}
