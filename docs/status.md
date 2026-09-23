@@ -47,7 +47,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
-- Les trésors s'accumulent vite (France ≈ 1,7 M, Empire ≈ 2,9 M livres en 25 ans avec l'IA stratégique) : l'équilibrage revenus/coûts est à faire en M10.
+- Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province contrôlée (plafond 35 %) ; l'IA dépense ses trésors dormants. Sur une campagne complète 1337-1453 (464 tours, ≈ 10 s en release), les revenus des grands royaumes quadruplent (population, bâtiments, techs) et l'Empire garde un trésor élevé (≈ 12 saisons de revenu) : à surveiller.
 - L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
 - La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.

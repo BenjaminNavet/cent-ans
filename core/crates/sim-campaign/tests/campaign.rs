@@ -622,7 +622,8 @@ fn france_income_is_positive_and_in_target_range() {
 
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
     let effective_upkeep = state.faction_army_upkeep(&data, &france_id)
-        + state.faction_building_upkeep(&data, &france_id);
+        + state.faction_building_upkeep(&data, &france_id)
+        + state.faction_administration_upkeep(&data, &france_id);
     let events = state.end_turn_with(&data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();

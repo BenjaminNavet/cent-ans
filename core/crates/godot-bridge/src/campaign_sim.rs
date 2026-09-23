@@ -681,6 +681,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "projected_income" => economy.projected_income,
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
+        "administration_upkeep" => economy.administration_upkeep,
         "tax_rate" => tax_rate_key(economy.tax_rate),
         "goods" => &goods,
         "goods_categories" => &goods_categories,
