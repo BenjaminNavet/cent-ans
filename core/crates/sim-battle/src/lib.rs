@@ -1,39 +1,42 @@
-//! Real-time-with-pause battle simulation (fixed tick).
+//! Real-time-with-pause battle simulation (spec `docs/design/m7-battles.md` § 1).
 //!
-//! Placeholder for M0: only tracks elapsed time. The real simulation (units,
-//! morale, terrain, weather) arrives at M7.
+//! Pure and deterministic: a [`BattleSim`] is built from a [`BattleSetup`] and
+//! a seed, advanced by fixed ticks of [`DT`] seconds and driven by
+//! [`Command`]s. The same setup, seed and commands issued at the same ticks
+//! always give the same battle. No Godot dependency: `godot-bridge` wraps the
+//! simulation, `sim-campaign` builds the setup and applies the
+//! [`BattleOutcome`].
+//!
+//! # Model (summary)
+//!
+//! - Field of [`FIELD_WIDTH`] × [`FIELD_DEPTH`] metres with procedural hills,
+//!   forests, mud and an optional river with two fords ([`Battlefield`]);
+//!   weather drawn from the season ([`Weather`]).
+//! - Each regiment ([`Unit`]) is an oriented rectangle whose size follows its
+//!   formation; soldiers are laid out in a grid for rendering.
+//! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
+//!   range, line of sight, weather and armour; melee on contact with charge,
+//!   flank (+50 %) and rear (+100 %) bonuses, pikes/schiltron against
+//!   cavalry, archers' stakes; morale, rout and rally; a general whose aura
+//!   steadies nearby regiments.
+//! - Minimal battle AI ([`ai`]) for the side the player does not command.
 
-/// State of one battle.
-#[derive(Debug, Clone, Default)]
-pub struct BattleSim {
-    /// Simulated seconds elapsed since the battle started.
-    pub elapsed: f64,
-    /// Number of ticks processed so far.
-    pub ticks: u64,
-}
+pub mod ai;
+pub mod command;
+pub mod field;
+pub mod outcome;
+pub mod rng;
+pub mod setup;
+pub mod sim;
+pub mod unit;
 
-impl BattleSim {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Advances the simulation by `dt` seconds.
-    pub fn tick(&mut self, dt: f64) {
-        self.elapsed += dt;
-        self.ticks += 1;
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn tick_accumulates_time() {
-        let mut sim = BattleSim::new();
-        sim.tick(0.5);
-        sim.tick(0.25);
-        assert_eq!(sim.ticks, 2);
-        assert!((sim.elapsed - 0.75).abs() < f64::EPSILON);
-    }
-}
+pub use command::{Command, CommandError};
+pub use field::{
+    Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
+    FIELD_WIDTH, GRID_RESOLUTION,
+};
+pub use outcome::{BattleEvent, BattleOutcome, SideResult};
+pub use rng::BattleRng;
+pub use setup::{BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, UnitSetup};
+pub use sim::{BattleSim, SetupError, DT, MAX_DURATION};
+pub use unit::{Formation, Unit, UnitState};
