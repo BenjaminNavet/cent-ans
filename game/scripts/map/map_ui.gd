@@ -365,10 +365,10 @@ func tech_panel_visible() -> bool:
 ## Barre supérieure : recherche en cours (`get_research`, vide si aucune).
 func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 	if research.is_empty():
-		research_label.text = "Aucune recherche (+%d/tour)" % points_per_turn
+		research_label.text = "Aucune recherche"
 		research_bar.max_value = 1
 		research_bar.value = 0
-		research_box.tooltip_text = "Aucune recherche en cours : les points sont perdus (clic : technologies)."
+		research_box.tooltip_text = "Aucune recherche en cours : %d points par tour perdus (clic : technologies)." % points_per_turn
 		return
 	var turns := int(research.get("turns_left", -1))
 	research_label.text = str(research.get("name", ""))
