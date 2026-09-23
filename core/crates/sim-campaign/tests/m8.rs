@@ -132,6 +132,7 @@ fn a_breach_makes_assaults_easier() {
 fn assault_takes_the_town_or_bloodies_the_attacker() {
     let data = data();
     let (mut state, army) = besiege_guyenne(&data, 4, &[]);
+    state.interactive_battles = false; // auto-resolved assault (M8 § 1)
     state.end_turn_with(&data, idle);
     let before: u32 = state.armies[&army].units.iter().map(|u| u.strength).sum();
     state

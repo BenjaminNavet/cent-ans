@@ -15,7 +15,7 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 use sim_battle::{
     BattleOutcome, BattleSeason, BattleSetup, GeneralSetup, SideId, SideResult, SideSetup,
-    UnitSetup,
+    SiegeSetup, UnitSetup,
 };
 
 use crate::battle_auto::{BattleResult, SideOutcome, Winner};
@@ -35,6 +35,9 @@ pub struct PendingBattle {
     pub defender_name: String,
     /// Side of the player (`None` if the player is in neither army).
     pub player_side: Option<SideId>,
+    /// M8: assault on the town's walls (the defender is the garrison).
+    #[serde(default)]
+    pub siege: bool,
 }
 
 /// Why a pending battle cannot be set up or resolved.
@@ -96,6 +99,7 @@ pub(crate) fn defer_player_battle(
         defender: defender_id.clone(),
         province,
         attacker_origin: Some(attacker_origin.clone()),
+        siege: false,
     });
     true
 }
@@ -108,6 +112,12 @@ pub(crate) fn auto_resolve_all_pending(
 ) {
     let pending = std::mem::take(&mut state.pending_battles);
     for request in pending {
+        if request.siege {
+            if is_live(state, &request) {
+                crate::siege::auto_assault(state, data, &request.attacker, events);
+            }
+            continue;
+        }
         if is_live(state, &request) {
             let origin = request
                 .attacker_origin
@@ -125,8 +135,24 @@ pub(crate) fn auto_resolve_all_pending(
     }
 }
 
-/// Both armies still exist, stand in the battle's province and are at war.
+/// Both armies still exist, stand in the battle's province and are at war
+/// (siege: the besiegers still besiege a garrisoned town).
 fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
+    if request.siege {
+        let (Some(army), Some(province)) = (
+            state.armies.get(&request.attacker),
+            state.provinces.get(&request.province),
+        ) else {
+            return false;
+        };
+        return army.location == request.province
+            && !province.garrison.is_empty()
+            && province
+                .siege
+                .as_ref()
+                .is_some_and(|s| s.attacker == army.faction)
+            && state.is_at_war(&army.faction, &province.controller);
+    }
     match (
         state.armies.get(&request.attacker),
         state.armies.get(&request.defender),
@@ -268,7 +294,13 @@ impl CampaignState {
             .map(|(index, request)| {
                 let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
                 let attacker_faction = faction(&request.attacker);
-                let defender_faction = faction(&request.defender);
+                let defender_faction = if request.siege {
+                    self.provinces
+                        .get(&request.province)
+                        .map(|p| p.controller.clone())
+                } else {
+                    faction(&request.defender)
+                };
                 let player_side = if attacker_faction.as_ref() == Some(&self.player_faction) {
                     Some(SideId::Attacker)
                 } else if defender_faction.as_ref() == Some(&self.player_faction) {
@@ -286,6 +318,7 @@ impl CampaignState {
                     attacker_name: name(attacker_faction),
                     defender_name: name(defender_faction),
                     player_side,
+                    siege: request.siege,
                 }
             })
             .collect()
@@ -303,6 +336,9 @@ impl CampaignState {
             .ok_or(BattleRequestError::UnknownBattle(index))?;
         if !is_live(self, request) {
             return Err(BattleRequestError::Stale(index));
+        }
+        if request.siege {
+            return Ok(self.siege_battle_setup(data, request));
         }
         let attacker = &self.armies[&request.attacker];
         let defender = &self.armies[&request.defender];
@@ -346,8 +382,14 @@ impl CampaignState {
             self.pending_battles.remove(index);
             return Err(BattleRequestError::Stale(index));
         }
+        let garrison = request
+            .siege
+            .then(|| crate::siege::garrison_army(self, &request.province))
+            .flatten();
         let attacker = &self.armies[&request.attacker];
-        let defender = &self.armies[&request.defender];
+        let defender = garrison
+            .as_ref()
+            .unwrap_or_else(|| &self.armies[&request.defender]);
         let attacker_outcome = side_outcome("l'attaquant", attacker, &outcome.attacker)?;
         let defender_outcome = side_outcome("le défenseur", defender, &outcome.defender)?;
         let fallen: Vec<CharacterId> =
@@ -382,6 +424,20 @@ impl CampaignState {
             attacker: attacker_outcome,
             defender: defender_outcome,
         };
+        if request.siege {
+            let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.province);
+            crate::siege::apply_assault_result(
+                self,
+                data,
+                &request.attacker,
+                &request.province,
+                &result,
+                walls,
+                &mut events,
+            );
+            self.events.extend(events.iter().cloned());
+            return Ok(events);
+        }
         let origin = request
             .attacker_origin
             .clone()
@@ -397,6 +453,110 @@ impl CampaignState {
         );
         self.events.extend(events.iter().cloned());
         Ok(events)
+    }
+
+    /// Setup of a siege battle: the besieging army against the garrison
+    /// (general: the governor) behind walls of the town's fortification
+    /// level, with the campaign breach already done.
+    fn siege_battle_setup(&self, data: &GameData, request: &BattleRequest) -> BattleSetup {
+        let attacker = &self.armies[&request.attacker];
+        let garrison = crate::siege::garrison_army(self, &request.province).expect("live siege");
+        let province = data.provinces.get(&request.province);
+        let player_side = if attacker.faction == self.player_faction {
+            Some(SideId::Attacker)
+        } else if garrison.faction == self.player_faction {
+            Some(SideId::Defender)
+        } else {
+            None
+        };
+        let breach = self
+            .provinces
+            .get(&request.province)
+            .and_then(|p| p.siege.as_ref())
+            .map_or(0, |s| s.breach);
+        let mut defender = side_setup(self, data, &request.attacker, &garrison);
+        defender.army = String::new();
+        BattleSetup {
+            province: request.province.to_string(),
+            province_name: province_name(data, &request.province),
+            terrain: province.map_or(Terrain::Plains, |p| p.terrain),
+            river: false,
+            season: battle_season(self.season),
+            attacker: side_setup(self, data, &request.attacker, attacker),
+            defender,
+            player_side,
+            siege: Some(SiegeSetup {
+                fortification: self.fortification_level(data, &request.province),
+                breach,
+            }),
+        }
+    }
+
+    /// Debug helper for headless tests and screenshots: puts `army` in
+    /// siege of the enemy province `province` (moving it there, giving the
+    /// town a garrison if it has none) and records a pending siege battle.
+    /// Returns the battle index.
+    pub fn debug_stage_siege(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        province: &ProvinceId,
+    ) -> Result<usize, BattleRequestError> {
+        let index = self.pending_battles.len();
+        let Some(a) = self.armies.get(army) else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        let faction = a.faction.clone();
+        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        if !self.is_at_war(&faction, &controller) {
+            return Err(BattleRequestError::Stale(index));
+        }
+        let army_state = self.armies.get_mut(army).expect("exists");
+        army_state.location = province.clone();
+        army_state.path.clear();
+        army_state.stance = crate::state::Stance::Siege;
+        if let Some(general) = army_state.general.clone() {
+            if let Some(c) = self.characters.get_mut(&general) {
+                c.location = Some(province.clone());
+            }
+        }
+        let p = self.provinces.get_mut(province).expect("exists");
+        if p.garrison.is_empty() {
+            if let Some(unit_type) = data
+                .unit_types
+                .values()
+                .find(|t| t.id.as_str() == "unit_urban_militia")
+            {
+                for _ in 0..3 {
+                    p.garrison.push(crate::state::Unit {
+                        unit_type: unit_type.id.clone(),
+                        strength: unit_type.soldiers,
+                        max_strength: unit_type.soldiers,
+                        morale: unit_type.stats.morale,
+                        experience: 0,
+                    });
+                }
+            }
+        }
+        if p.siege.is_none() {
+            p.siege = Some(crate::state::SiegeState {
+                attacker: faction,
+                turns_left: 4,
+                turns_elapsed: 1,
+                supplies: 80,
+                breach: 0,
+            });
+        }
+        self.pending_battles.push(BattleRequest {
+            attacker: army.clone(),
+            defender: army.clone(),
+            province: province.clone(),
+            attacker_origin: None,
+            siege: true,
+        });
+        Ok(index)
     }
 
     /// Debug helper for headless tests and screenshots: moves `defender` into
@@ -428,6 +588,7 @@ impl CampaignState {
             defender: defender.clone(),
             province: province.clone(),
             attacker_origin: Some(province),
+            siege: false,
         });
         Ok(index)
     }
@@ -445,6 +606,12 @@ impl CampaignState {
         let request = self.pending_battles.remove(index);
         if !is_live(self, &request) {
             return Err(BattleRequestError::Stale(index));
+        }
+        if request.siege {
+            let mut events = Vec::new();
+            crate::siege::auto_assault(self, data, &request.attacker, &mut events);
+            self.events.extend(events.iter().cloned());
+            return Ok(events);
         }
         let origin = request
             .attacker_origin

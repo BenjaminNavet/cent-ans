@@ -81,6 +81,26 @@ pub fn run_to_end(sim: &mut BattleSim) {
     }
 }
 
+/// Shooters of `side` hold their fire (lab scenarios about something else).
+pub fn hold_fire(sim: &mut BattleSim, side: SideId) {
+    let shooters: Vec<u32> = sim
+        .units()
+        .iter()
+        .filter(|u| u.side == side && u.can_shoot())
+        .map(|u| u.id)
+        .collect();
+    if !shooters.is_empty() {
+        sim.apply_command(
+            sim_battle::Command::FireAtWill {
+                units: shooters,
+                enabled: false,
+            },
+            None,
+        )
+        .unwrap();
+    }
+}
+
 pub fn has_event(sim: &BattleSim, needle: &str) -> bool {
     sim.events().iter().any(|e| e.text_fr.contains(needle))
 }

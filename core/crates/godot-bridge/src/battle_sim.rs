@@ -98,6 +98,7 @@ fn state_label_fr(state: UnitState) -> &'static str {
         UnitState::Shooting => "tir",
         UnitState::Routing => "déroute",
         UnitState::Rallied => "rallié",
+        UnitState::Climbing => "escalade",
     }
 }
 
@@ -195,7 +196,7 @@ impl BattleSim {
                     "formation" => unit.formation.key(),
                     "x" => unit.x,
                     "z" => unit.z,
-                    "y" => sim.field().height(unit.x, unit.z),
+                    "y" => sim.standing_height(unit, unit.x, unit.z),
                     "facing" => unit.facing,
                     "width" => width,
                     "depth" => depth,
@@ -208,6 +209,14 @@ impl BattleSim {
                     "withdrawing" => unit.withdrawing,
                     "stakes" => unit.stakes_planted,
                     "target" => unit.target.map_or(-1, i64::from),
+                    "on_wall" => unit.on_wall,
+                    "climbing" => unit.climbing.map_or(-1, |p| p as i64),
+                    "climb_progress" => unit.climb_progress,
+                    "ladders" => sim.on_ladders(unit),
+                    "synthetic" => unit.synthetic,
+                    "ram" => unit.ram,
+                    "siege_tower" => unit.siege_tower(),
+                    "wall_breaker" => unit.wall_breaker(),
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
@@ -245,7 +254,7 @@ impl BattleSim {
             .filter(|u| u.side == side && render_key(u) == render)
         {
             for (x, z, angle) in unit.soldier_positions() {
-                let y = sim.field().height(x, z);
+                let y = sim.standing_height(unit, x, z);
                 let (s, c) = (angle.sin() as f32, angle.cos() as f32);
                 buffer.extend_from_slice(&[
                     c, 0.0, s, x as f32, 0.0, 1.0, 0.0, y as f32, -s, 0.0, c, z as f32,
@@ -256,7 +265,8 @@ impl BattleSim {
     }
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],
-    /// mud[..], river?{points: PackedVector2Array, width, fords[{x, z, half_width}]}}`.
+    /// mud[..], river?{points: PackedVector2Array, width, fords[{x, z, half_width}]},
+    /// siege?{...}}` (siege geometry: see [`Self::get_siege`]).
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -299,7 +309,66 @@ impl BattleSim {
                 &vdict! { "points" => &points, "width" => river.width, "fords" => &fords },
             );
         }
+        if sim.siege().is_some() {
+            dict.set("siege", &self.get_siege());
+        }
         dict
+    }
+
+    /// Siege battle walls (empty dictionary in a field battle):
+    /// `{fortification, center: Vector2, square_radius, thickness, wall_height,
+    /// gate, hold_time, hold_to_win, integrity, pieces[{index, kind: "wall"|"gate",
+    /// a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower}],
+    /// towers[{x, z, radius, height}]}`. Pieces lose HP during the battle:
+    /// call it again to show the damage.
+    #[func]
+    fn get_siege(&self) -> VarDictionary {
+        let Some(works) = self.sim.as_ref().and_then(|s| s.siege()) else {
+            return VarDictionary::new();
+        };
+        let v2 = |p: (f64, f64)| Vector2::new(p.0 as f32, p.1 as f32);
+        let pieces: VarArray = works
+            .pieces
+            .iter()
+            .enumerate()
+            .map(|(index, piece)| {
+                vdict! {
+                    "index" => index as i64,
+                    "kind" => match piece.kind {
+                        sim_battle::PieceKind::Wall => "wall",
+                        sim_battle::PieceKind::Gate => "gate",
+                    },
+                    "a" => v2(piece.a),
+                    "b" => v2(piece.b),
+                    "hp" => piece.hp,
+                    "max_hp" => piece.max_hp,
+                    "intact" => piece.intact(),
+                    "docked_tower" => piece.docked_tower.map_or(-1, i64::from),
+                }
+                .to_variant()
+            })
+            .collect();
+        let towers: VarArray = works
+            .towers
+            .iter()
+            .map(|t| {
+                vdict! { "x" => t.x, "z" => t.z, "radius" => t.radius, "height" => t.height }
+                    .to_variant()
+            })
+            .collect();
+        vdict! {
+            "fortification" => i64::from(works.fortification),
+            "center" => v2(works.center),
+            "square_radius" => works.square_radius,
+            "thickness" => works.thickness,
+            "wall_height" => works.wall_height,
+            "gate" => works.gate as i64,
+            "hold_time" => works.hold_time,
+            "hold_to_win" => sim_battle::siege::HOLD_TO_WIN,
+            "integrity" => works.integrity(),
+            "pieces" => &pieces,
+            "towers" => &towers,
+        }
     }
 
     /// Ground height at (x, z).
@@ -399,6 +468,17 @@ impl CampaignSim {
                 let strength = |id: &sim_campaign::ArmyId| {
                     state.army(id).map_or(0, |a| i64::from(a.total_strength()))
                 };
+                let province_state = state.province_state(&view.province);
+                let defender_strength = if view.siege {
+                    province_state.map_or(0, |p| {
+                        p.garrison.iter().map(|u| i64::from(u.strength)).sum()
+                    })
+                } else {
+                    strength(&view.defender)
+                };
+                let breach = province_state
+                    .and_then(|p| p.siege.as_ref())
+                    .map_or(0, |s| i64::from(s.breach));
                 let province_name = data
                     .provinces
                     .get(&view.province)
@@ -417,7 +497,10 @@ impl CampaignSim {
                     "defender_name" => view.defender_name.as_str(),
                     "player_side" => view.player_side.map_or("", |s| s.key()),
                     "attacker_strength" => strength(&view.attacker),
-                    "defender_strength" => strength(&view.defender),
+                    "defender_strength" => defender_strength,
+                    "siege" => view.siege,
+                    "fortification" => i64::from(state.fortification_level(data, &view.province)),
+                    "breach" => breach,
                     "seed" => (seed & 0x7FFF_FFFF_FFFF) as i64,
                 }
                 .to_variant()
@@ -490,6 +573,29 @@ impl CampaignSim {
     #[func]
     fn get_interactive_battles(&self) -> bool {
         self.state.as_ref().is_some_and(|s| s.interactive_battles)
+    }
+
+    /// Debug (smoke test, screenshots): puts `army` in siege of `province`
+    /// (garrisoned if empty) and records a pending siege battle; returns its
+    /// index or -1.
+    #[func]
+    fn debug_stage_siege(&mut self, army: GString, province: GString) -> i64 {
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
+            return -1;
+        };
+        let Ok(province) = data_model::ProvinceId::new(province.to_string().as_str()) else {
+            return -1;
+        };
+        match state.debug_stage_siege(data, &army, &province) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_siege: {error}");
+                -1
+            }
+        }
     }
 
     /// Debug (smoke test, screenshots): brings `defender` to `attacker` and
