@@ -139,6 +139,8 @@ func get_faction_summary(id: String) -> Dictionary:
 	for army_id in _armies:
 		if _armies[army_id]["faction"] == id:
 			army_count += 1
+	var army_upkeep := _army_upkeep_of(id)
+	var building_upkeep := _building_upkeep_of(id)
 	return {
 		"treasury": faction["treasury"],
 		"income": faction["income"],
@@ -147,6 +149,10 @@ func get_faction_summary(id: String) -> Dictionary:
 		"provinces_count": province_count,
 		"armies_count": army_count,
 		"alive": faction["alive"],
+		"projected_income": _projected_income(id, building_upkeep, army_upkeep),
+		"army_upkeep": army_upkeep,
+		"building_upkeep": building_upkeep,
+		"tax_rate": str(faction.get("tax_rate", "normal")),
 	}
 
 
@@ -286,14 +292,16 @@ func get_province_city(id: String) -> Dictionary:
 			"id": bld_id, "name": info.get("name", bld_id),
 			"category": info.get("category", ""), "upkeep": int(info.get("upkeep", 0)),
 		})
+	var effects: Dictionary = _province_effects(province)
+	var fortification_bonus: float = float((effects.get("fortification_level", {}) as Dictionary).get("flat", 0.0))
 	var result := {
 		"classes": classes,
 		"buildings": buildings,
-		"fortification_level": int(province.get("fortification_level", 0)),
+		"fortification_level": int(province.get("fortification_level", 0)) + int(fortification_bonus),
 		"capacity": _capacity_of(province),
 		"buildable": _buildable_list(province),
 		"resources": (province.get("resources", []) as Array).duplicate(),
-		"effects": _province_effects(province),
+		"effects": effects,
 	}
 	var construction: Variant = province.get("construction")
 	if construction != null:
@@ -345,14 +353,17 @@ func _capacity_of(province: Dictionary) -> int:
 	return 40000 * (1 + production_levels)
 
 
-## Somme brute des `value` d'`effects` de tous les bâtiments, par type d'effet (mode
-## `flat`/`percent` mélangés : approximation suffisante pour l'affichage et le mock).
+## Somme des `value` d'`effects` de tous les bâtiments, par type d'effet : `{flat, percent}`
+## (docs/design/data-model.md § 7.4, même forme que `CampaignSim.get_province_city`).
 func _province_effects(province: Dictionary) -> Dictionary:
 	var totals := {}
 	for bld_id in province.get("buildings", []):
 		for effect in _buildings.get(bld_id, {}).get("effects", []):
 			var key: String = str(effect.get("effect", ""))
-			totals[key] = float(totals.get(key, 0.0)) + float(effect.get("value", 0))
+			if not totals.has(key):
+				totals[key] = {"flat": 0.0, "percent": 0.0}
+			var bucket: String = "percent" if str(effect.get("mode", "flat")) == "percent" else "flat"
+			totals[key][bucket] = float(totals[key][bucket]) + float(effect.get("value", 0))
 	return totals
 
 
@@ -431,8 +442,8 @@ func _province_tax_income(province: Dictionary, mult: float) -> int:
 		base += float(c.get("count", 0)) * 0.0006 * float(c.get("wealth", 50)) / 50.0
 	var devastation_factor := 1.0 - float(province.get("devastation", 0)) / 100.0
 	var effects: Dictionary = _province_effects(province)
-	var trade_bonus := 1.0 + float(effects.get("trade_income", 0)) / 100.0
-	var tax_bonus := 1.0 + float(effects.get("tax_income", 0)) / 100.0
+	var trade_bonus := 1.0 + float((effects.get("trade_income", {}) as Dictionary).get("percent", 0.0)) / 100.0
+	var tax_bonus := 1.0 + float((effects.get("tax_income", {}) as Dictionary).get("percent", 0.0)) / 100.0
 	return int(base * devastation_factor * mult * tax_bonus * trade_bonus)
 
 
@@ -730,7 +741,7 @@ func _apply_population() -> void:
 			c["health"] = int(clampf(lerpf(health, target_health, 0.2), 0.0, 100.0))
 			# Ancré sur la richesse courante (pas une base absolue) : seuls la fiscalité et
 			# l'effet Wealth des bâtiments la font dériver, pas de décroissance systémique.
-			var wealth_effect: float = float(_province_effects(province).get("wealth", 0.0))
+			var wealth_effect: float = float((_province_effects(province).get("wealth", {}) as Dictionary).get("flat", 0.0))
 			var target_wealth: float = float(c.get("wealth", CLASS_WEALTH_BASE.get(class_id, 40.0))) - (tax_pct - 15.0) * 0.3 + wealth_effect
 			c["wealth"] = int(clampf(lerpf(float(c.get("wealth", 40)), target_wealth, 0.15), 0.0, 100.0))
 
