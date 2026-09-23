@@ -10,8 +10,8 @@ extends RefCounted
 const BARK := Color(0.23, 0.17, 0.11)
 const LEAF_DARK := Color(0.06, 0.11, 0.035)
 const LEAF_LIGHT := Color(0.17, 0.25, 0.07)
-const NEEDLE_DARK := Color(0.03, 0.07, 0.04)
-const NEEDLE_LIGHT := Color(0.08, 0.14, 0.07)
+const NEEDLE_DARK := Color(0.04, 0.09, 0.05)
+const NEEDLE_LIGHT := Color(0.10, 0.17, 0.08)
 
 static var _cache: Dictionary = {}
 
@@ -82,7 +82,7 @@ static func _build_conifer() -> ArrayMesh:
 static func _build_hedge() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_add_blob(st, Vector3(0.0, 0.3, 0.0), Vector3(0.55, 0.3, 0.26), 51, false)
+	_add_blob(st, Vector3(0.0, 0.28, 0.0), Vector3(0.55, 0.28, 0.2), 51, false)
 	return st.commit()
 
 
@@ -136,7 +136,7 @@ static func _add_cone(st: SurfaceTool, y0: float, y1: float, radius: float, side
 		var nm := Vector3(cos(am), slope, sin(am)).normalized()
 		var dark := NEEDLE_DARK
 		var light := NEEDLE_LIGHT
-		for v in [[b0, n0, dark], [apex, nm, light], [b1, n1, dark]]:
+		for v in [[b0, n0, dark], [b1, n1, dark], [apex, nm, light]]:
 			var c: Color = v[2]
 			c.a = clampf((v[0] as Vector3).y, 0.0, 1.0)
 			st.set_color(c)
@@ -144,7 +144,7 @@ static func _add_cone(st: SurfaceTool, y0: float, y1: float, radius: float, side
 			st.add_vertex(v[0])
 		# Dessous de la jupe (visible en vue rasante) : un triangle vers l'axe.
 		var inner := Vector3(0.0, y0 + (y1 - y0) * 0.2, 0.0)
-		for v in [[b0, b1, inner]]:
+		for v in [[b0, inner, b1]]:
 			for p in v:
 				var c2 := dark.darkened(0.35)
 				c2.a = clampf((p as Vector3).y, 0.0, 1.0)
