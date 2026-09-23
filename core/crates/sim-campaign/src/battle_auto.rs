@@ -27,13 +27,38 @@ pub struct BattleUnit {
 }
 
 /// One army in a battle.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Side {
     pub units: Vec<BattleUnit>,
     /// Command skill of the general (0 when none).
     pub general_command: u8,
     /// 0-100.
     pub supply: u8,
+    /// Flat morale bonus from the general's traits/skills (spec § 2
+    /// `ArmyMorale`).
+    pub general_morale_bonus: f64,
+    /// Percent bonus to melee power from the general's traits/skills (spec §
+    /// 2 `BattleCharge`).
+    pub general_charge_percent: f64,
+    /// Percent bonus to ranged power (spec § 2 `BattleRanged`).
+    pub general_ranged_percent: f64,
+    /// Percent reduction to incoming damage, folded into effective armour
+    /// (spec § 2 `BattleDefense`).
+    pub general_defense_percent: f64,
+}
+
+impl Default for Side {
+    fn default() -> Self {
+        Side {
+            units: Vec::new(),
+            general_command: 0,
+            supply: 100,
+            general_morale_bonus: 0.0,
+            general_charge_percent: 0.0,
+            general_ranged_percent: 0.0,
+            general_defense_percent: 0.0,
+        }
+    }
 }
 
 /// Situation modifiers.
@@ -103,25 +128,36 @@ pub fn average_armor(side: &Side) -> f64 {
         / f64::from(total)
 }
 
-/// Effective power of `side` facing an enemy of average armour `enemy_armor`.
+/// Effective power of `side` facing an enemy of average armour `enemy_armor`
+/// (increased by the enemy general's `BattleDefense`, spec § 2).
 pub fn side_power(side: &Side, enemy_armor: f64, modifier: f64) -> f64 {
     let base: f64 = side
         .units
         .iter()
         .map(|unit| {
             let attack = if unit.is_ranged {
-                f64::from(unit.ranged) * (1.0 - enemy_armor / 200.0)
+                f64::from(unit.ranged)
+                    * (1.0 - enemy_armor / 200.0)
+                    * (1.0 + side.general_ranged_percent / 100.0)
             } else {
-                f64::from(unit.melee)
+                f64::from(unit.melee) * (1.0 + side.general_charge_percent / 100.0)
             };
             f64::from(unit.strength) / 100.0 * attack * (1.0 + f64::from(unit.experience) / 10.0)
         })
         .sum();
-    let morale = average(side.units.iter().map(|u| f64::from(u.morale)));
+    let morale = (average(side.units.iter().map(|u| f64::from(u.morale)))
+        + side.general_morale_bonus)
+        .clamp(0.0, 100.0);
     let morale_factor = 0.5 + morale / 200.0;
     let supply_factor = 0.7 + 0.3 * f64::from(side.supply) / 100.0;
     let general_factor = 1.0 + f64::from(side.general_command) * 0.03;
     base * morale_factor * supply_factor * general_factor * modifier
+}
+
+/// `average_armor` plus the general's `BattleDefense` bonus, folded in the
+/// same units (percentage points of the 0-100 armour scale, spec § 2).
+pub fn effective_armor(side: &Side) -> f64 {
+    (average_armor(side) + side.general_defense_percent).clamp(0.0, 100.0)
 }
 
 /// Resolves a battle. Deterministic for a given RNG state.
@@ -143,8 +179,8 @@ pub fn resolve_auto(
     } else {
         1.0
     };
-    let attacker_power = side_power(attacker, average_armor(defender), attacker_modifier);
-    let defender_power = side_power(defender, average_armor(attacker), defender_modifier);
+    let attacker_power = side_power(attacker, effective_armor(defender), attacker_modifier);
+    let defender_power = side_power(defender, effective_armor(attacker), defender_modifier);
 
     // Fortune of war: ±10 % on each side.
     let attacker_roll = attacker_power * (0.9 + 0.2 * rng.unit_f64());
@@ -222,8 +258,7 @@ mod tests {
     fn side(units: Vec<BattleUnit>) -> Side {
         Side {
             units,
-            general_command: 0,
-            supply: 100,
+            ..Default::default()
         }
     }
 

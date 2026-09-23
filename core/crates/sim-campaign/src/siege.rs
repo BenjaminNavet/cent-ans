@@ -1,9 +1,13 @@
-//! Sieges, captures and chevauchées (spec § 1.3 steps 3 and 4).
+//! Sieges, captures and chevauchées (spec § 1.3 steps 3 and 4; spec § 2 for
+//! the besieging general's `SiegeSpeed` and the `trait_siege_master`/
+//! `trait_cruel` triggers).
 
 use data_model::{FactionId, GameData, ProvinceId};
 
+use crate::dynasty;
 use crate::economy::province_income;
 use crate::events::{EventKind, GameEvent};
+use crate::skills;
 use crate::state::{ArmyId, CampaignState, SiegeState, Stance};
 
 /// Base siege duration in turns, added to the fortification level.
@@ -82,6 +86,10 @@ pub(crate) fn resolve_sieges(
             continue;
         }
         let fortification = state.fortification_level(data, &province_id);
+        let besieging_general = state.armies[&besiegers[0]].general.clone();
+        let siege_speed_percent = besieging_general
+            .as_ref()
+            .map_or(0.0, |g| skills::character_effects(state, data, g).siege_speed.apply(0.0));
         let province = state.provinces.get_mut(&province_id).expect("exists");
         match &mut province.siege {
             Some(siege) if siege.attacker == attacker => {
@@ -89,12 +97,19 @@ pub(crate) fn resolve_sieges(
                 if siege.turns_left == 0 {
                     province.garrison.clear();
                     capture(state, data, &province_id, &attacker, events);
+                    if let Some(general) = besieging_general {
+                        dynasty::on_siege_won(state, data, &general);
+                    }
                 }
             }
             _ => {
+                let base_duration = SIEGE_BASE_TURNS + fortification;
+                let turns_left = ((f64::from(base_duration) * (1.0 - siege_speed_percent / 100.0))
+                    .round()
+                    .max(1.0)) as u32;
                 province.siege = Some(SiegeState {
                     attacker: attacker.clone(),
-                    turns_left: SIEGE_BASE_TURNS + fortification,
+                    turns_left,
                 });
                 events.push(
                     GameEvent::new(
@@ -160,6 +175,7 @@ pub(crate) fn resolve_raids(
         if !state.is_hostile_territory(&faction, &province_id) {
             continue;
         }
+        let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
         let loot = (province_income(province) * RAID_LOOT_SHARE).round() as i64;
         province.devastation = province
@@ -169,6 +185,9 @@ pub(crate) fn resolve_raids(
         province.unrest = province.unrest.saturating_add(RAID_UNREST).min(100);
         if let Some(faction_state) = state.factions.get_mut(&faction) {
             faction_state.treasury += loot;
+        }
+        if let Some(general) = general {
+            dynasty::on_raid_led(state, data, &general);
         }
         events.push(
             GameEvent::new(

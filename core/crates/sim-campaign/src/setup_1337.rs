@@ -223,8 +223,13 @@ impl CampaignState {
                 .retain(|f| !allies.contains(f));
         }
 
-        // Characters.
+        // Characters. Historical characters not yet born in 1337 stay out of
+        // the state: `dynasty::resolve_births` spawns them at their real
+        // date if their parents are alive and married (spec M4 § 2).
         for (id, character) in &data.characters {
+            if character.status == Some(CharacterStatus::Unborn) {
+                continue;
+            }
             let location = character
                 .starting_location
                 .clone()
@@ -234,6 +239,7 @@ impl CampaignState {
                         .get(&character.faction)
                         .map(|f| f.capital.clone())
                 });
+            let family = character.family.as_ref();
             state.characters.insert(
                 id.clone(),
                 CharacterState {
@@ -250,9 +256,36 @@ impl CampaignState {
                     army: None,
                     skills: character.skills,
                     captive: character.status == Some(CharacterStatus::Captive),
+                    experience: 0,
+                    skill_points: 0,
+                    skills_learned: BTreeSet::new(),
+                    traits: character
+                        .traits
+                        .iter()
+                        .filter(|t| data.traits.contains_key(*t))
+                        .cloned()
+                        .collect(),
+                    spouse: None,
+                    children: Vec::new(),
+                    father: family.and_then(|f| f.father.clone()),
+                    mother: family.and_then(|f| f.mother.clone()),
+                    piety: character.piety.unwrap_or(50).min(100),
+                    prestige: 0,
+                    loyalty: 100,
+                    title: character
+                        .titles
+                        .iter()
+                        .find(|t| t.to.is_none())
+                        .or_else(|| character.titles.first())
+                        .map(|t| t.title.clone()),
+                    governor_of: None,
+                    battles_fought: 0,
+                    sieges_won: 0,
+                    raids_led: 0,
                 },
             );
         }
+        link_families(&mut state, data);
 
         // Main armies (the virtual rebels faction owns no province and never
         // fields troops of its own; it only ever inherits a garrison already
@@ -288,6 +321,55 @@ impl CampaignState {
         }
         crate::economy::resolve_goods(&mut state, data);
         Ok(state)
+    }
+}
+
+/// Resolves family links against the characters actually present in 1337:
+/// parents and children must exist in the state, and a spouse is kept only
+/// when alive and when the link is mutual (first living spouse listed).
+fn link_families(state: &mut CampaignState, data: &GameData) {
+    let ids: Vec<CharacterId> = state.characters.keys().cloned().collect();
+    for id in &ids {
+        let family = data.characters.get(id).and_then(|c| c.family.as_ref());
+        let is_alive = |other: &CharacterId| state.characters.get(other).is_some_and(|c| c.alive);
+        let spouse = family.and_then(|f| {
+            f.spouses.iter().find(|s| is_alive(s)).cloned()
+        });
+        let character = &state.characters[id];
+        let father = character.father.clone().filter(|f| state.characters.contains_key(f));
+        let mother = character.mother.clone().filter(|m| state.characters.contains_key(m));
+        let character = state.characters.get_mut(id).expect("exists");
+        character.spouse = if character.alive { spouse } else { None };
+        character.father = father;
+        character.mother = mother;
+    }
+    // Spouses must point at each other; children derive from parent links so
+    // both directions agree even when the data lists only one side.
+    for id in &ids {
+        let spouse = state.characters[id].spouse.clone();
+        if let Some(spouse) = spouse {
+            let mutual = state.characters[&spouse].spouse.as_ref() == Some(id);
+            if !mutual {
+                let spouse_state = state.characters.get_mut(&spouse).expect("exists");
+                if spouse_state.spouse.is_none() {
+                    spouse_state.spouse = Some(id.clone());
+                } else {
+                    state.characters.get_mut(id).expect("exists").spouse = None;
+                }
+            }
+        }
+    }
+    for id in &ids {
+        let (father, mother) = {
+            let c = &state.characters[id];
+            (c.father.clone(), c.mother.clone())
+        };
+        for parent in [father, mother].into_iter().flatten() {
+            let parent_state = state.characters.get_mut(&parent).expect("exists");
+            if !parent_state.children.contains(id) {
+                parent_state.children.push(id.clone());
+            }
+        }
     }
 }
 

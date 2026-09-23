@@ -10,7 +10,7 @@ use std::fmt;
 
 use data_model::{
     BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ResourceId, Sex,
-    Skills, TechnologyId, UnitType, UnitTypeId,
+    SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -29,9 +29,10 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// Version of the serialised state; bump when the JSON layout changes.
 ///
 /// `2`: M3 cities & economy (buildings, construction, goods, tax rate, the
-/// four population gauges are now dynamic). [`CampaignState::load_json`]
-/// refuses any other version.
-pub const STATE_VERSION: u32 = 2;
+/// four population gauges are now dynamic). `3`: M4 characters & dynasties
+/// (experience, skills, traits, marriage, children, governors, prestige...).
+/// [`CampaignState::load_json`] refuses any other version.
+pub const STATE_VERSION: u32 = 3;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -287,11 +288,66 @@ pub struct CharacterState {
     pub army: Option<ArmyId>,
     pub skills: Skills,
     pub captive: bool,
+
+    // ----- M4: characters & dynasties (spec § 2) ---------------------------
+    /// Accumulated experience not yet converted into a skill point.
+    #[serde(default)]
+    pub experience: u32,
+    /// Unspent skill points.
+    #[serde(default)]
+    pub skill_points: u32,
+    /// `data.skills` ids learned (`learn_skill`).
+    #[serde(default)]
+    pub skills_learned: BTreeSet<SkillId>,
+    #[serde(default)]
+    pub traits: BTreeSet<TraitId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spouse: Option<CharacterId>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub children: Vec<CharacterId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub father: Option<CharacterId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mother: Option<CharacterId>,
+    /// 0-100.
+    #[serde(default)]
+    pub piety: u8,
+    #[serde(default)]
+    pub prestige: i32,
+    /// 0-100 (vassal loyalty, mostly relevant from M5).
+    #[serde(default = "default_loyalty")]
+    pub loyalty: u8,
+    /// Principal title displayed by the UI (the first title with no `to`
+    /// date in the static `Character::titles`, spec § 2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub governor_of: Option<ProvinceId>,
+
+    /// Battles fought (general), for the `trait_veteran` trigger (spec § 2:
+    /// after 5 battles).
+    #[serde(default)]
+    pub battles_fought: u32,
+    /// Sieges won as the besieging general, for `trait_siege_master` (after 3).
+    #[serde(default)]
+    pub sieges_won: u32,
+    /// Chevauchées led, for `trait_cruel` (after 3).
+    #[serde(default)]
+    pub raids_led: u32,
+}
+
+fn default_loyalty() -> u8 {
+    100
 }
 
 impl CharacterState {
     pub fn age(&self, year: i32) -> i32 {
         year - self.birth_year
+    }
+
+    /// `true` once the character has reached majority (spec § 2: 15 years).
+    pub fn is_major(&self, year: i32) -> bool {
+        self.age(year) >= crate::dynasty::MAJORITY_AGE
     }
 }
 

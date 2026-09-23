@@ -12,8 +12,10 @@ use std::collections::{BTreeMap, BinaryHeap};
 use data_model::{FactionId, GameData, ProvinceId, Terrain};
 
 use crate::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
+use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::OrderError;
+use crate::skills;
 use crate::state::{Army, ArmyId, CampaignState};
 
 /// Movement points spent on a port-to-port crossing.
@@ -290,6 +292,11 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
         .as_ref()
         .and_then(|id| state.characters.get(id))
         .map_or(0, |c| c.skills.command);
+    let general_effects = army
+        .general
+        .as_ref()
+        .map(|id| skills::character_effects(state, data, id))
+        .unwrap_or_default();
     Side {
         units: army
             .units
@@ -315,6 +322,10 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
             .collect(),
         general_command,
         supply: army.supply,
+        general_morale_bonus: general_effects.army_morale.apply(0.0),
+        general_charge_percent: general_effects.battle_charge.apply(0.0),
+        general_ranged_percent: general_effects.battle_ranged.apply(0.0),
+        general_defense_percent: general_effects.battle_defense.apply(0.0),
     }
 }
 
@@ -348,6 +359,8 @@ pub(crate) fn fight(
     let defender_side = side_from_army(state, data, defender);
     let attacker_faction = attacker.faction.clone();
     let defender_faction = defender.faction.clone();
+    let attacker_general = attacker.general.clone();
+    let defender_general = defender.general.clone();
     let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
 
     let province_name =
@@ -380,6 +393,20 @@ pub(crate) fn fight(
 
     apply_outcome(state, data, attacker_id, &result.attacker, events);
     apply_outcome(state, data, defender_id, &result.defender, events);
+
+    // Spec § 2: XP, `trait_veteran`, wounded and death chance for both
+    // generals (only if they weren't captured, which already removed them
+    // from command).
+    if let Some(general) = &attacker_general {
+        if state.characters.get(general).is_some_and(|c| c.alive) {
+            dynasty::on_battle_resolved(state, data, general, result.winner == Winner::Attacker, events);
+        }
+    }
+    if let Some(general) = &defender_general {
+        if state.characters.get(general).is_some_and(|c| c.alive) {
+            dynasty::on_battle_resolved(state, data, general, result.winner == Winner::Defender, events);
+        }
+    }
 
     let (loser_id, retreat_to) = match result.winner {
         Winner::Attacker => (defender_id, retreat_province(state, data, defender_id)),
