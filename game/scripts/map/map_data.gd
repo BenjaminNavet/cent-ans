@@ -35,6 +35,12 @@ var height_little_endian: bool = false
 var height_decoder: String = ""
 
 var land_mask: Image
+## Rasters optionnels du shader de terrain (`cent-ans geo splat`), null si absents :
+## splat RGBA8 (R prairie, G cultures, B forêt, A roche/lande), distances signées aux
+## frontières (RGB8) et à la côte (L8). Voir `tools/cent_ans_tools/geo/splat.py`.
+var splat_image: Image
+var border_dist_image: Image
+var coast_dist_image: Image
 var province_ids_image: Image
 var ids_bytes: PackedByteArray
 var ids_bpp: int = 3
@@ -69,6 +75,9 @@ func _load() -> void:
 		return
 	var t2 := Time.get_ticks_msec()
 	land_mask = _load_image_optional("land_mask.png")
+	splat_image = _load_image_optional("splat.png", Image.FORMAT_RGBA8)
+	border_dist_image = _load_image_optional("province_border_dist.png", Image.FORMAT_RGB8)
+	coast_dist_image = _load_image_optional("coast_dist.png", Image.FORMAT_L8)
 	if not _load_province_ids():
 		return
 	var t3 := Time.get_ticks_msec()
@@ -188,11 +197,14 @@ func _load_heightmap_16(path: String) -> Dictionary:
 	return decoded
 
 
-func _load_image_optional(file_name: String) -> Image:
+func _load_image_optional(file_name: String, format: int = -1) -> Image:
 	var path := map_dir.path_join(file_name)
 	if not FileAccess.file_exists(path):
 		return null
-	return Image.load_from_file(path)
+	var img := Image.load_from_file(path)
+	if img != null and format >= 0 and img.get_format() != format:
+		img.convert(format)
+	return img
 
 
 func _load_province_ids() -> bool:

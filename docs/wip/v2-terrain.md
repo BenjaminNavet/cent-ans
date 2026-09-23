@@ -6,16 +6,20 @@ Plan : `docs/design/visuel-semi-realiste.md` (lot V2), ADR 0004.
 
 - [x] Exagération verticale de la géométrie ramenée de ×14 à ×4,3 (`MapData.HEIGHT_SCALE` 0,02 → 0,006,
       paramètre unique utilisé par terrain, villes, armées, picker, fleuves).
-- [ ] Heightmap en texture `FORMAT_R16` (filtrage matériel exact + mipmaps) au lieu de LA8.
-- [ ] Splatmap + champs de distance (frontières, côte) : `tools/cent_ans_tools/geo/splat.py`.
-- [ ] Textures PBR Poly Haven (`game/assets/textures/terrain/`) + `Texture2DArray`.
-- [ ] Shader terrain (matériaux, frontières SDF, couleur politique au dézoom).
-- [ ] Eau (profondeur, vagues, fresnel, écume), fleuves affinés.
+- [x] Heightmap en texture `FORMAT_R16` (filtrage matériel exact + mipmaps) au lieu de LA8.
+- [x] Splatmap + champs de distance (frontières, côte) : `tools/cent_ans_tools/geo/splat.py`,
+      `uv run --project tools cent-ans geo splat`.
+- [x] Textures PBR Poly Haven (`game/assets/textures/terrain/`, `cent-ans geo textures`) + `Texture2DArray`.
+- [x] Shader terrain (matériaux, parcellaire, frontières SDF, couleur politique au dézoom) — premier jet.
+- [x] Eau (profondeur, vagues, reflet borné, écume), fleuves et côte en traits fins (`terrain_line.gdshader`).
+- [ ] Réglages visuels (reflets du ciel sur la mer, teintes), mesure de performance.
 - [ ] Captures `docs/img/visuel/v2_*.png`.
+
+Changement minime hors périmètre : `campaign_map.gd` accepte `--stage=map` (capture sans sélection).
 
 ## Prochaine étape
 
-Heightmap R16, puis outil Python splat/distances.
+Itérer sur les captures (near/mid/far/Alpes/côte), mesurer les i/s, captures finales.
 
 ## Contrat avec V3 (végétation) et les autres lots
 

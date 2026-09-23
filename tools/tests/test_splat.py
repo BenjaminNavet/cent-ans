@@ -51,16 +51,31 @@ def test_splat_is_deterministic() -> None:
 
 
 def test_border_distance_is_small_on_borders_and_grows_inside() -> None:
-    """The border between provinces 1 and 2 is ~0.5 px; coasts are not borders."""
+    """The border between provinces 1 and 2 is at 0 px; coasts are not borders."""
     _, land, ids = _toy_map()
-    dist = splat.compute_border_dist(ids, land)
+    signed = splat.compute_border_dist(ids, land)
+    assert signed.shape == (64, 64, splat.BORDER_CHANNELS)
+    dist = np.abs(signed).min(axis=-1)
     assert dist[32, 35] < 1.0 and dist[32, 36] < 1.0
     assert dist[32, 25] > 9.0
     # La côte (colonne 10) n'est pas une frontière de province.
     assert dist[32, 10] > 20.0
-    encoded = splat.encode_border_dist(dist)
-    assert encoded[32, 35] < splat.BORDER_DIST_SCALE
-    assert encoded[32, 20] > encoded[32, 33]
+    # Au moins un canal change de signe à la frontière : zéro sous-pixel entre 35 et 36.
+    assert np.any(np.sign(signed[32, 35]) != np.sign(signed[32, 36]))
+    midpoint = np.abs(0.5 * (signed[32, 35] + signed[32, 36])).min()
+    assert midpoint < 0.1
+    decoded = splat.decode_border_dist(splat.encode_border_dist(signed))
+    assert decoded[32, 20] > decoded[32, 33]
+
+
+def test_region_colouring_separates_neighbours() -> None:
+    """Adjacent regions never share a colour."""
+    ids = np.array([[1, 1, 2, 2], [1, 3, 3, 2], [4, 3, 3, 5], [4, 4, 5, 5]], dtype=np.uint16)
+    labels = splat.region_labels(ids, np.ones(ids.shape, dtype=bool))
+    colours = splat.colour_regions(labels)
+    for a, b in [(1, 2), (1, 3), (2, 3), (3, 4), (3, 5), (4, 5), (1, 4), (2, 5)]:
+        assert colours[a] != colours[b]
+    assert max(colours.values()) < 2**splat.BORDER_CHANNELS
 
 
 def test_coast_distance_is_signed() -> None:
