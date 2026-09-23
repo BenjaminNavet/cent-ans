@@ -1,0 +1,12 @@
+{
+  "id": "cdx_charles_v",
+  "title": "Charles V le Sage",
+  "category": "personnage",
+  "aliases": ["Charles V", "Charles le Sage", "le dauphin Charles"],
+  "era": { "from": "1338", "to": "1380" },
+  "summary": "Roi de France de 1364 à 1380, Charles V redresse le royaume après le désastre de [[cdx_poitiers|Poitiers]] en s'appuyant sur [[cdx_du_guesclin|Bertrand du Guesclin]] et sur une réforme monétaire durable de la [[cdx_livre_tournois|livre tournois]].",
+  "body": "Né en 1338, fils aîné de [[cdx_jean_ii|Jean II le Bon]], Charles devient dauphin et duc de Normandie dès l'enfance. La capture de son père à [[cdx_poitiers|Poitiers]] en 1356 le propulse, à dix-huit ans, à la tête d'un royaume en pleine crise : il doit affronter la révolte parisienne d'Étienne Marcel et la [[cdx_jacquerie|Jacquerie]] paysanne de 1358, tout en négociant la libération de son père, scellée par le traité de [[cdx_bretigny|Brétigny]] en 1360.\n\nCouronné roi en 1364 après la mort de Jean II, resté prisonnier volontaire à Londres par souci d'honneur, Charles V mène une politique de reconquête méthodique. Il confie en 1370 la charge de connétable à [[cdx_du_guesclin|Bertrand du Guesclin]], qui reprend aux Anglais l'essentiel du Poitou et du Limousin en évitant soigneusement les batailles rangées, préférant sièges et petites opérations à la manière de la [[cdx_chevauchee|chevauchée]] anglaise qu'il combat.\n\nSurnommé « le Sage », Charles V s'entoure de conseillers savants comme Nicole Oresme et réforme profondément les finances royales : il stabilise durablement la [[cdx_livre_tournois|livre tournois]], mise à mal par des décennies de mutations monétaires destinées à financer la guerre et la rançon de son père. Il fait aussi bâtir la Bastille et enrichit la bibliothèque royale du Louvre.\n\nSa cour raffinée reflète le goût du temps pour le faste : son cuisinier Guillaume Tirel, dit Taillevent, y compose les recettes qui nourriront le [[cdx_viandier|Viandier]]. Charles V meurt en 1380 à Beauté-sur-Marne, laissant un royaume largement restauré, avant que les difficultés ne reprennent sous le règne de son fils mineur Charles VI.",
+  "entity": "chr_charles_v",
+  "see_also": ["cdx_jean_ii", "cdx_du_guesclin", "cdx_livre_tournois", "cdx_viandier"],
+  "sources": ["Charles V (roi de France)"]
+}

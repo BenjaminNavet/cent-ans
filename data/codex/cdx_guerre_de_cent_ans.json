@@ -1,0 +1,24 @@
+{
+  "id": "cdx_guerre_de_cent_ans",
+  "title": "Guerre de Cent Ans",
+  "category": "guerre",
+  "aliases": [
+    "guerre de Cent-Ans",
+    "conflit franco-anglais"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Long conflit dynastique et féodal (1337-1453) entre les couronnes de France et d'Angleterre, né de la [[cdx_succession_1328|crise de succession de 1328]] et des rivalités autour de la [[cdx_guyenne|Guyenne]] et de la [[cdx_flandre_laine|Flandre]]. Il oppose [[cdx_edouard_iii|Édouard III]] puis ses successeurs aux rois de la maison de Valois.",
+  "body": "La guerre trouve son origine dans l'entrelacement des liens féodaux et dynastiques entre les deux royaumes : le roi d'Angleterre est aussi duc de [[cdx_guyenne|Guyenne]] et doit hommage au roi de France pour ce fief, tandis que la [[cdx_succession_1328|crise de succession]] de 1328 a écarté [[cdx_edouard_iii|Édouard III]] du trône de France au profit de [[cdx_philippe_vi|Philippe VI]]. En 1337, la confiscation de la Guyenne par Philippe VI pousse Édouard à revendiquer ouvertement la couronne française, ouvrant les hostilités.\n\nLa première phase, dite édouardienne, est marquée par les grandes victoires anglaises : la destruction de la flotte française à [[cdx_ecluse|l'Écluse]] en 1340, puis les batailles de [[cdx_crecy|Crécy]] (1346) et de [[cdx_poitiers|Poitiers]] (1356), où le roi [[cdx_jean_ii|Jean II]] est capturé par le [[cdx_prince_noir|Prince noir]]. Ces désastres, aggravés par la [[cdx_peste_noire|Peste noire]] de 1347-1352, conduisent au traité de [[cdx_bretigny|Brétigny]] en 1360, qui cède à l'Angleterre une large part du Sud-Ouest ; les papes résidant alors à Avignon, voir la [[cdx_papaute_avignon|papauté d'Avignon]], tentent à plusieurs reprises, sans grand succès durable, une médiation entre les deux couronnes.\n\nLa reconquête menée par [[cdx_charles_v|Charles V]] et son connétable [[cdx_du_guesclin|Bertrand du Guesclin]], à partir de 1369, renverse la situation en évitant systématiquement la bataille rangée au profit de sièges méthodiques, à rebours de la [[cdx_chevauchee|chevauchée]] anglaise qui avait fait la force de l'arme anglaise, notamment grâce à l'[[cdx_arc_long|arc long]].\n\nAprès une longue accalmie, le conflit reprend avec la victoire anglaise d'Azincourt en 1415, puis le traité de Troyes (1420) qui déshérite le dauphin français. Le siège d'Orléans (1428-1429), levé grâce à Jeanne d'Arc, marque le tournant décisif de la reconquête française, achevée en 1453 à la bataille de Castillon, qui met fin à plus d'un siècle de guerre et laisse à l'Angleterre la seule ville de Calais.",
+  "see_also": [
+    "cdx_succession_1328",
+    "cdx_crecy",
+    "cdx_poitiers",
+    "cdx_chevauchee"
+  ],
+  "sources": [
+    "Guerre de Cent Ans"
+  ]
+}
