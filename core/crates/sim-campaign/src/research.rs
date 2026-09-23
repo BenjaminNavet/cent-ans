@@ -293,13 +293,30 @@ impl CampaignState {
                 add(effect.effect, effect.mode, effect.value);
             }
         }
-        let governance = faction_state
+        let ruler = faction_state
             .ruler
             .as_ref()
+            .filter(|id| self.characters.get(*id).is_some_and(|c| c.alive));
+        let governance = ruler
             .and_then(|id| self.characters.get(id))
-            .filter(|c| c.alive)
             .map_or(0, |c| c.skills.governance);
         flat += f64::from(governance.div_ceil(2));
+        // F1: the ruler's `ResearchCivil` / `ResearchMilitary` traits and
+        // skills speed up research in the branch being researched.
+        let branch = faction_state
+            .research
+            .as_ref()
+            .and_then(|t| data.technologies.get(t))
+            .map(|t| t.branch);
+        if let (Some(ruler), Some(branch)) = (ruler, branch) {
+            let effects = crate::skills::character_effects(self, data, ruler);
+            let bonus = match branch {
+                TechBranch::Civil => effects.research_civil,
+                TechBranch::Military => effects.research_military,
+            };
+            flat += bonus.flat;
+            percent += bonus.percent;
+        }
         (flat * (1.0 + percent / 100.0)).round().max(0.0) as u32
     }
 

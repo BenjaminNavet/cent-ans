@@ -6,7 +6,7 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 1. [x] Bâtiments : `Garrison`, `RecruitCost`, `Supply`, ciblage par classe (et par catégorie d'unité).
 2. [x] Technologies : `army_upkeep`, `army_experience`, `recruit_cost`, `movement`, `production`,
    `siege_resistance`, `fortification_level`, `wealth`, `prestige` ; surplus de recherche conservé.
-3. [ ] Traits/compétences : `research_civil`/`research_military`, `Diplomacy`, `Intrigue`, `Loyalty`.
+3. [x] Traits/compétences : `research_civil`/`research_military`, `Diplomacy`, `Intrigue`, `Loyalty`.
 4. [ ] Armées alliées de la province dans la bataille (auto-résolution + `battle_setup`).
 5. [ ] Événements : capture (+ rançon), effets différés (chaînes), Charles VI + Jeanne de Bourbon, folie.
 6. [ ] `docs/status.md` (Limites connues) + paragraphes « F1 » des specs.
@@ -40,5 +40,16 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 - Surplus de recherche : gardé dans `research_progress` tant qu'aucune recherche ne tourne, reporté sur la
   suivante par `start_research` (pas de nouveau champ de sauvegarde).
 
+## Choix (point 3)
+- `research_civil` / `research_military` : effets du souverain appliqués aux points de recherche quand la
+  recherche en cours est de la branche.
+- `Diplomacy` : attitude de A envers B + 2 × diplomatie du souverain de B (±20), raison « Diplomatie de son
+  souverain » ; l'acceptation des propositions passe par l'attitude.
+- `Intrigue` (choix : chance de capture) : chance de capturer un général vaincu = 10 % + 2 points par point
+  d'intrigue d'écart entre le général vainqueur et le vaincu (0-50 %) ; `Side::general_intrigue`.
+- `Loyalty` : cible de loyauté d'un vassal + loyauté du souverain vassal + celle du suzerain (±20 chacune) ;
+  dans une province, la `Loyalty` des bâtiments (château) et du gouverneur réduit le mécontentement de la
+  noblesse.
+
 ## Prochaine étape
-Point 3 (traits : research_*, Diplomacy, Intrigue, Loyalty).
+Point 4 (armées alliées dans la bataille).

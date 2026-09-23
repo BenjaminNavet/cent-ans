@@ -430,6 +430,7 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
         general_charge_percent: general_effects.battle_charge.apply(0.0),
         general_ranged_percent: general_effects.battle_ranged.apply(0.0),
         general_defense_percent: general_effects.battle_defense.apply(0.0),
+        general_intrigue: general_effects.intrigue.apply(0.0),
     }
 }
 

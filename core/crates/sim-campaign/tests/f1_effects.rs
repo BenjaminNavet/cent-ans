@@ -5,7 +5,9 @@
 
 use std::path::PathBuf;
 
-use data_model::{BuildingId, FactionId, GameData, ProvinceId, TechnologyId, UnitTypeId};
+use data_model::{
+    BuildingId, CharacterId, FactionId, GameData, ProvinceId, TechnologyId, TraitId, UnitTypeId,
+};
 use sim_campaign::{ArmyId, CampaignState, Order, Unit};
 
 fn data() -> GameData {
@@ -41,6 +43,22 @@ fn grant_tech(state: &mut CampaignState, faction: &str, id: &str) {
         .unwrap()
         .technologies
         .insert(tech(id));
+}
+
+fn ruler_of(state: &CampaignState, faction: &str) -> CharacterId {
+    state.factions[&fac(faction)]
+        .ruler
+        .clone()
+        .expect("a ruler")
+}
+
+fn give_trait(state: &mut CampaignState, character: &CharacterId, id: &str) {
+    state
+        .characters
+        .get_mut(character)
+        .unwrap()
+        .traits
+        .insert(TraitId::new(id).unwrap());
 }
 
 fn france(data: &GameData, seed: u64) -> CampaignState {
@@ -446,4 +464,172 @@ fn research_surplus_carries_over_to_the_next_technology() {
         sim_campaign::research::tech_progress(&state, &france_id, &second),
         points - 1
     );
+}
+
+// =========================================================================
+// 3. Traits and skills: research, Diplomacy, Intrigue, Loyalty
+// =========================================================================
+
+#[test]
+fn scholar_ruler_speeds_up_civil_research_only() {
+    let data = data();
+    let mut state = quiet_france(&data, 21);
+    let france_id = fac("fac_france");
+    let ruler = ruler_of(&state, "fac_france");
+    for id in ["trait_scholar", "trait_cultured", "trait_prodigy"] {
+        state
+            .characters
+            .get_mut(&ruler)
+            .unwrap()
+            .traits
+            .remove(&TraitId::new(id).unwrap());
+    }
+    let available = |branch: data_model::TechBranch| {
+        data.technologies
+            .values()
+            .find(|t| {
+                t.branch == branch
+                    && sim_campaign::research::tech_status(&state, &france_id, t)
+                        == sim_campaign::TechStatus::Available
+            })
+            .map(|t| t.id.clone())
+            .expect("an available technology")
+    };
+    let civil = available(data_model::TechBranch::Civil);
+    let military = available(data_model::TechBranch::Military);
+    let points = |state: &mut CampaignState, technology: &TechnologyId| {
+        state
+            .submit_order(
+                &data,
+                Order::Research {
+                    technology: technology.clone(),
+                },
+            )
+            .unwrap();
+        state.research_points_per_turn(&data, &france_id)
+    };
+    let civil_plain = points(&mut state, &civil);
+    let military_plain = points(&mut state, &military);
+    assert_eq!(civil_plain, military_plain);
+    give_trait(&mut state, &ruler, "trait_scholar");
+    assert_eq!(points(&mut state, &military), military_plain);
+    let civil_scholar = points(&mut state, &civil);
+    assert_eq!(
+        civil_scholar,
+        (f64::from(civil_plain) * 1.1).round() as u32,
+        "scholar: +10 % civil research"
+    );
+}
+
+#[test]
+fn a_diplomat_ruler_improves_foreign_attitudes() {
+    let data = data();
+    let mut state = quiet_france(&data, 22);
+    let (england, france_id) = (fac("fac_england"), fac("fac_france"));
+    let before = state.attitude(&data, &england, &france_id).0;
+    let ruler = ruler_of(&state, "fac_france");
+    give_trait(&mut state, &ruler, "trait_diplomat");
+    let (after, reasons) = state.attitude(&data, &england, &france_id);
+    assert!(after > before, "{before} -> {after}");
+    assert!(reasons
+        .iter()
+        .any(|(text, value)| text == "Diplomatie de son souverain" && *value > 0));
+}
+
+#[test]
+fn intrigue_makes_captures_likelier() {
+    use sim_campaign::battle_auto::capture_chance_percent;
+    use sim_campaign::{resolve_auto, BattleContext, BattleUnit, CampaignRng, Side};
+    assert_eq!(capture_chance_percent(0.0, 0.0), 10);
+    assert!(capture_chance_percent(4.0, 0.0) > 10);
+    assert!(capture_chance_percent(0.0, 4.0) < 10);
+    let unit = |strength| BattleUnit {
+        strength,
+        max_strength: strength,
+        experience: 0,
+        morale: 60,
+        melee: 50,
+        ranged: 0,
+        armor: 30,
+        is_ranged: false,
+    };
+    let loser = Side {
+        units: vec![unit(100); 2],
+        general_command: 3,
+        ..Side::default()
+    };
+    let winner = |intrigue| Side {
+        units: vec![unit(100); 8],
+        general_command: 3,
+        general_intrigue: intrigue,
+        ..Side::default()
+    };
+    let captures = |intrigue| {
+        (0..400)
+            .filter(|seed| {
+                let mut rng = CampaignRng::from_seed(*seed);
+                resolve_auto(
+                    &winner(intrigue),
+                    &loser,
+                    &BattleContext::default(),
+                    &mut rng,
+                )
+                .defender
+                .general_captured
+            })
+            .count()
+    };
+    assert!(captures(10.0) > captures(0.0) + 40);
+}
+
+#[test]
+fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
+    let data = data();
+    let mut state = quiet_france(&data, 23);
+    let (brittany, france_id) = (fac("fac_brittany"), fac("fac_france"));
+    assert_eq!(
+        state.factions[&brittany].suzerain.as_ref(),
+        Some(&france_id)
+    );
+    let duke = ruler_of(&state, "fac_brittany");
+    state.characters.get_mut(&duke).unwrap().traits.clear();
+    let before = sim_campaign::diplomacy::loyalty_target(&state, &data, &brittany, &france_id);
+    give_trait(&mut state, &duke, "trait_loyal");
+    let after = sim_campaign::diplomacy::loyalty_target(&state, &data, &brittany, &france_id);
+    assert!(after > before, "loyal duke: {before} -> {after}");
+
+    // A castle's `Loyalty` calms the local nobility only.
+    let province = prov("prov_ile_de_france");
+    let mut with = quiet_france(&data, 24);
+    with.provinces
+        .get_mut(&province)
+        .unwrap()
+        .buildings
+        .retain(|b| b != &bld("bld_castle"));
+    // A ravaged province: the nobility's unrest target is well above zero.
+    with.provinces.get_mut(&province).unwrap().devastation = 100;
+    let mut without = with.clone();
+    for p in with.provinces.values_mut() {
+        for class in [&mut p.population.nobility, &mut p.population.peasants] {
+            class.unrest = 50;
+        }
+    }
+    for p in without.provinces.values_mut() {
+        for class in [&mut p.population.nobility, &mut p.population.peasants] {
+            class.unrest = 50;
+        }
+    }
+    with.provinces
+        .get_mut(&province)
+        .unwrap()
+        .buildings
+        .push(bld("bld_castle"));
+    for _ in 0..3 {
+        with.end_turn_with(&data, idle);
+        without.end_turn_with(&data, idle);
+    }
+    let a = &with.provinces[&province].population;
+    let b = &without.provinces[&province].population;
+    assert!(a.nobility.unrest < b.nobility.unrest);
+    assert_eq!(a.peasants.unrest, b.peasants.unrest);
 }
