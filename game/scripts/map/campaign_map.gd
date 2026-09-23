@@ -12,6 +12,7 @@ extends Node3D
 ##                              et ouvre le panneau de recrutement.
 ##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
 ##   --stage=faction            panneau de faction (trésor, revenus, impôts, biens).
+##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -627,6 +628,7 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 func _on_end_turn() -> void:
 	if sim == null or ui.is_dialog_open():
 		return
+	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
 	refresh_all()
@@ -634,6 +636,7 @@ func _on_end_turn() -> void:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
+	_offer_pending_battles()  # M7
 
 
 # --- Sauvegarde ----------------------------------------------------------------------
@@ -718,6 +721,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"battle":
+					_stage_screenshot_battle()
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
@@ -865,3 +870,85 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
+
+
+# --- Batailles (M7) --------------------------------------------------------------------
+# Dialogue d'avant-bataille en fin de tour, lancement de la scène 3D (la carte est mise en
+# sommeil, pas détruite : la simulation reste la même) et retour avec le résultat appliqué.
+
+const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
+const PRE_BATTLE_DIALOG := "res://scenes/battle/pre_battle_dialog.tscn"
+
+var _battle_dialog: PreBattleDialog = null
+
+
+func _battles_available() -> bool:
+	return sim != null and sim.has_method("get_pending_battles")
+
+
+## Ouvre le dialogue sur la première bataille en attente (s'il y en a une).
+func _offer_pending_battles() -> void:
+	if not _battles_available():
+		return
+	var pending: Array = sim.call("get_pending_battles")
+	if pending.is_empty():
+		_close_battle_dialog()
+		return
+	if _battle_dialog == null:
+		_battle_dialog = load(PRE_BATTLE_DIALOG).instantiate()
+		ui.add_child(_battle_dialog)
+		_battle_dialog.fight_requested.connect(_on_battle_fight)
+		_battle_dialog.auto_requested.connect(_on_battle_auto)
+	_battle_dialog.show_battle(sim, pending[0])
+
+
+func _close_battle_dialog() -> void:
+	if _battle_dialog != null:
+		_battle_dialog.visible = false
+
+
+func _on_battle_auto(index: int) -> void:
+	var events: Array = sim.call("auto_resolve_battle", index)
+	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
+	refresh_all()
+	_offer_pending_battles()
+
+
+func _on_battle_fight(index: int, seed: int) -> void:
+	var battle: Node = load(BATTLE_SCENE).instantiate()
+	battle.configure(sim, index, seed)
+	battle.returned.connect(_on_battle_returned.bind(battle))
+	_set_campaign_active(false)
+	get_tree().root.add_child(battle)
+
+
+func _on_battle_returned(result: Dictionary, battle: Node) -> void:
+	battle.queue_free()
+	_set_campaign_active(true)
+	if result.get("ok", false):
+		ui.add_events(result.get("events", []), "%s (bataille)" % sim.call("get_date_label"))
+	else:
+		ui.show_toast("Résultat de bataille refusé : %s" % result.get("error", "?"), true)
+	refresh_all()
+	_offer_pending_battles()
+
+
+func _set_campaign_active(active: bool) -> void:
+	visible = active
+	ui.visible = active
+	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	if active:
+		camera.make_current()
+
+
+## `--stage=battle` : bataille France–Angleterre mise en scène, dialogue ouvert.
+func _stage_screenshot_battle() -> void:
+	if not _battles_available() or not sim.has_method("debug_stage_battle"):
+		return
+	var enemy := "fac_england" if player_faction != "fac_england" else "fac_france"
+	var armies := BattleScene.main_armies(sim, player_faction, enemy)
+	if armies.is_empty():
+		return
+	sim.call("debug_stage_battle", armies[0], armies[1])
+	refresh_all()
+	_offer_pending_battles()

@@ -6,8 +6,8 @@ extends Node3D
 ## arbres low-poly instanciés (MultiMesh) dans les zones de forêt, et un sol lointain pour
 ## que l'horizon ne soit pas vide. Rendu seulement : les zones viennent de la simulation.
 
-const GRASS_LOW := Color(0.47, 0.60, 0.29)
-const GRASS_HIGH := Color(0.66, 0.66, 0.38)
+const GRASS_LOW := Color(0.33, 0.43, 0.22)
+const GRASS_HIGH := Color(0.50, 0.50, 0.30)
 const FOREST_FLOOR := Color(0.22, 0.33, 0.15)
 const MUD := Color(0.36, 0.28, 0.18)
 const BANK := Color(0.48, 0.42, 0.28)
@@ -93,7 +93,7 @@ func _in_ford(x: float) -> bool:
 func _ground_color(x: float, z: float, h: float, min_h: float, max_h: float, weather: String) -> Color:
 	var t := clampf((h - min_h) / maxf(max_h - min_h, 1.0), 0.0, 1.0)
 	var noise := sin(x * 0.043 + z * 0.021) * 0.5 + sin(x * 0.011 - z * 0.037) * 0.5
-	var color := GRASS_LOW.lerp(GRASS_HIGH, t).lerp(Color(0.38, 0.5, 0.22), 0.2 + 0.2 * noise)
+	var color := GRASS_LOW.lerp(GRASS_HIGH, t).lerp(Color(0.42, 0.44, 0.24), 0.25 + 0.25 * noise)
 	if _in_zones(terrain.get("forests", []), x, z, 4.0):
 		color = FOREST_FLOOR
 	if _in_zones(terrain.get("mud", []), x, z):
@@ -142,7 +142,7 @@ func _build_ground(weather: String) -> void:
 			var b := a + 1
 			var c := a + _nx
 			var d := c + 1
-			indices.append_array([a, c, b, b, c, d])
+			indices.append_array([a, b, c, b, d, c])
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
@@ -153,6 +153,7 @@ func _build_ground(weather: String) -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
 	mat.roughness = 1.0
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, mat)
@@ -199,9 +200,8 @@ func _build_river(river: Dictionary) -> void:
 		var a1 := Vector3(a.x - n.x, ya, a.y - n.y)
 		var b0 := Vector3(b.x + n.x, yb, b.y + n.y)
 		var b1 := Vector3(b.x - n.x, yb, b.y - n.y)
-		for v in [a0, b0, a1, a1, b0, b1]:
-			st.set_normal(Vector3.UP)
-			st.add_vertex(v)
+		BattleMeshes.tri(st, a0, b0, a1, Vector3.UP, Color.WHITE)
+		BattleMeshes.tri(st, a1, b0, b1, Vector3.UP, Color.WHITE)
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.22, 0.38, 0.52, 0.85)
