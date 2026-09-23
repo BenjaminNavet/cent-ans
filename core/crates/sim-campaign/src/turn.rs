@@ -5,7 +5,9 @@ use data_model::{FactionId, GameData};
 use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
-use crate::{ai_minimal, buildings, characters, dynasty, economy, movement, population, siege};
+use crate::{
+    ai_minimal, buildings, characters, dynasty, economy, movement, population, research, siege,
+};
 
 impl CampaignState {
     /// Resolves the turn with the built-in minimal AI for every non-player faction.
@@ -46,6 +48,7 @@ impl CampaignState {
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
+        research::resolve_research(self, data, &mut events);
         economy::resolve_attrition(self, data, &mut events);
         economy::resolve_decay(self);
 

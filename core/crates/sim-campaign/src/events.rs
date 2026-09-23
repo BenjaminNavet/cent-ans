@@ -34,6 +34,8 @@ pub enum EventKind {
     Regency,
     /// A character acquires a trait through an in-game event (spec § 2).
     TraitAcquired,
+    /// A faction completes a technology (M6).
+    TechnologyResearched,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

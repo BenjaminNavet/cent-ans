@@ -32,6 +32,11 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     let mut orders = Vec::new();
     let capital = faction_state.capital.clone();
 
+    // Research (M6): pick the cheapest available technology when idle.
+    if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
+        orders.push(Order::Research { technology });
+    }
+
     // In debt and still losing money: dismiss the most expensive field unit.
     if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn
     {

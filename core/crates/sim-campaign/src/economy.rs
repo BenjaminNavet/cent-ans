@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 use data_model::{FactionId, GameData, ResourceCategory, ResourceId, SocialClass};
 use serde::{Deserialize, Serialize};
 
-use crate::buildings::{effects_of, goods_map, province_building_upkeep};
+use crate::buildings::{effects_of, goods_map, province_building_upkeep, EffectTotals};
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState, ProvinceState, Season, Unit};
 
@@ -111,7 +111,19 @@ pub fn province_income_effective(
     province: &ProvinceState,
     tax_rate: TaxRate,
 ) -> f64 {
-    let effects = effects_of(data, &province.buildings);
+    province_income_with(data, province, tax_rate, &EffectTotals::default())
+}
+
+/// [`province_income_effective`] with `extra` effects (the controller's
+/// technologies, M6) merged on top of the buildings'.
+pub fn province_income_with(
+    data: &GameData,
+    province: &ProvinceState,
+    tax_rate: TaxRate,
+    extra: &EffectTotals,
+) -> f64 {
+    let mut effects = effects_of(data, &province.buildings);
+    effects.merge(extra);
     let mut base = 0.0;
     let mut burgher_base = 0.0;
     for (class, entry) in province.population.iter() {
@@ -196,10 +208,11 @@ impl CampaignState {
             .get(faction)
             .map(|f| f.tax_rate)
             .unwrap_or_default();
+        let tech = crate::research::faction_province_tech_effects(self, data, faction);
         self.provinces
             .values()
             .filter(|p| &p.controller == faction && p.siege.is_none())
-            .map(|p| province_income_effective(data, p, tax_rate).round() as i64)
+            .map(|p| province_income_with(data, p, tax_rate, &tech).round() as i64)
             .sum()
     }
 

@@ -148,6 +148,10 @@ impl CampaignState {
                 building_upkeep_last_turn: 0,
                 projected_income: 0,
                 regency: false,
+                research: None,
+                research_progress: 0,
+                research_points_last_turn: 0,
+                research_banked: Default::default(),
             };
             if let Some(suzerain) = &faction.suzerain {
                 faction_state.allies.insert(suzerain.clone());
