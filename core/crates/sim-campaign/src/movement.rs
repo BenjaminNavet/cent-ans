@@ -470,7 +470,7 @@ fn retreat_province(
         .find(|id| state.is_friendly_territory(&army.faction, id))
 }
 
-fn apply_outcome(
+pub(crate) fn apply_outcome(
     state: &mut CampaignState,
     data: &GameData,
     army_id: &ArmyId,

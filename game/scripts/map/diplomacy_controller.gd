@@ -32,7 +32,7 @@ func setup(campaign_map: Node) -> void:
 	var court_button: Button = map.ui.court_button
 	button = Button.new()
 	button.text = "Diplomatie"
-	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_font_size_override("font_size", 15)
 	button.tooltip_text = "Diplomatie et religion (P)"
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())

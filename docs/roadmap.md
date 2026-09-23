@@ -10,6 +10,6 @@
 | M5 | Diplomatie et religion | terminé (2026-09-23) |
 | M6 | Technologies | terminé |
 | M7 | Batailles temps réel 3D | à faire |
-| M8 | Sièges | à faire |
+| M8 | Sièges | campagne terminée (2026-09-23), bataille de siège 3D après M7 |
 | M9 | IA de campagne et de bataille | campagne terminée (2026-09-23), bataille après M7 |
 | M10 | Assets, sons, événements, équilibrage | à faire |

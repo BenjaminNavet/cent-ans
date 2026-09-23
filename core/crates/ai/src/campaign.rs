@@ -26,6 +26,8 @@ pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
 /// Recruitment orders per turn: one per this much seasonal income (1 to 8).
 pub const INCOME_PER_RECRUIT: i64 = 6000;
+/// Minimum estimated odds (%) before the AI storms a besieged town.
+pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
 
@@ -635,6 +637,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         // Keep a siege that is going our way.
         if choice.is_none() && besieging && ctx.threat(&army.location) < power * 1.2 {
             targeted.insert(army.location.clone());
+            // Storm the walls when the odds are good (M8).
+            if state
+                .assault_odds(data, army_id)
+                .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS)
+            {
+                orders.push(Order::Assault {
+                    army: army_id.clone(),
+                });
+                continue;
+            }
             if army.stance != Stance::Siege {
                 orders.push(Order::SetStance {
                     army: army_id.clone(),

@@ -48,6 +48,7 @@ var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
+var sieges: SiegeController = null  # M8
 var _tech_open: bool = false  # M6
 
 var _screenshot_path: String = ""
@@ -90,6 +91,9 @@ func _ready() -> void:
 	diplomacy = DiplomacyController.new()
 	add_child(diplomacy)
 	diplomacy.setup(self)
+	sieges = SiegeController.new()
+	add_child(sieges)
+	sieges.setup(self)
 	_setup_campaign()
 	load_ok = true
 	startup_stats = {
@@ -296,6 +300,8 @@ func select_army(army_id: String) -> void:
 	if general_id != "" and _characters_available():
 		general_skills = (sim.call("get_character", general_id) as Dictionary).get("skills", {})
 	ui.show_army(army_id, army, SimFacade.faction_short_name(faction), SimFacade.faction_color(faction), is_player, province_name_of, general_skills)
+	if sieges != null:
+		sieges.on_army_shown(army_id, is_player)
 	ui.hide_province()
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
@@ -795,6 +801,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"siege":
+					_stage_screenshot_siege()  # M8
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
@@ -953,3 +961,39 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
+
+
+## Mise en scène « siège » (M8) : la première armée du joueur marche sur la province ennemie la
+## plus proche en posture de siège ; quelques tours passent jusqu'au siège, puis elle est sélectionnée.
+func _stage_screenshot_siege() -> void:
+	var ids := player_army_ids()
+	if ids.is_empty():
+		return
+	var army_id := str(ids[0])
+	for _turn in 6:
+		var army: Dictionary = sim.call("get_army", army_id)
+		if army.is_empty():
+			return
+		var state: Dictionary = sim.call("get_province_state", str(army["location"]))
+		var siege: Dictionary = state.get("siege", {})
+		if str(siege.get("attacker", "")) == player_faction:
+			break
+		var target := ""
+		var best := 1 << 30
+		for id in SimFacade.store.call("get_province_ids"):
+			var st: Dictionary = sim.call("get_province_state", id)
+			var summary: Dictionary = sim.call("get_faction_summary", player_faction)
+			if str(st.get("controller", "")) in summary.get("at_war_with", PackedStringArray()):
+				var path: PackedStringArray = sim.call("find_path", army_id, id)
+				if not path.is_empty() and path.size() < best:
+					best = path.size()
+					target = str(id)
+		if target != "":
+			sim.call("submit_order", {"type": "set_stance", "army": army_id, "stance": "siege"})
+			sim.call("submit_order", {"type": "move_army", "army": army_id, "path": Array(sim.call("find_path", army_id, target))})
+		sim.call("end_turn")
+	refresh_all()
+	select_army(army_id)
+	var army_now: Dictionary = sim.call("get_army", army_id)
+	var centroid := map_data.centroid_of_id(str(army_now.get("location", "")))
+	camera_rig.look_at_point(Vector3(centroid.x, 0.0, centroid.y), 260.0)
