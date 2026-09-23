@@ -775,7 +775,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if help != null and help.handle_input(event):
 		return
 	if event.is_action_pressed("map_screenshot"):
-		var path := MapPaths.project_root().path_join("docs/img/godot-map-%d.png" % Time.get_unix_time_from_system())
+		var folder := "user://" if OS.has_feature("template") else MapPaths.project_root().path_join("docs/img")
+		var path := folder.path_join("godot-map-%d.png" % Time.get_unix_time_from_system())
 		_take_screenshot(path, false)
 	elif event.is_action_pressed("map_toggle_edge_pan"):
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
