@@ -17,13 +17,9 @@ AUTHORS: dict[str, str] = {
     "caro-asercion": "Caro Asercion",
     "carl-olsen": "Carl Olsen",
     "cathelineau": "Cathelineau",
-    "darkzaitzev": "DarkZaitzev",
     "delapouite": "Delapouite",
     "heavenly-dog": "HeavenlyDog",
     "lorc": "Lorc",
-    "pierre-leducq": "Pierre Leducq",
-    "quoting": "Quoting",
-    "sbed": "Sbed",
     "skoll": "Skoll",
 }
 

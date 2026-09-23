@@ -197,7 +197,8 @@ def ensure_import_settings(svg_path: Path) -> bool:
     text = import_path.read_text(encoding="utf-8")
     if "mipmaps/generate=false" in text:
         import_path.write_text(
-            text.replace("mipmaps/generate=false", "mipmaps/generate=true"), encoding="utf-8"
+            text.replace("mipmaps/generate=false", "mipmaps/generate=true"),
+            encoding="utf-8",
         )
         return True
     return False
