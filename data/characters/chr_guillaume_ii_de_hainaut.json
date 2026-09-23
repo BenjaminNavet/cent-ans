@@ -10,7 +10,8 @@
   "faction": "fac_hainaut",
   "role": "heir",
   "birth": {
-    "value": "1307-01-01"
+    "value": "1307",
+    "uncertain": true
   },
   "death": {
     "value": "1345-09-26",

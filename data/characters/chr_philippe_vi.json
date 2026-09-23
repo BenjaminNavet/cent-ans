@@ -12,8 +12,7 @@
   "birth": {
     "value": "1293",
     "uncertain": true,
-    "place": "Fontainebleau",
-    "note": "Année généralement admise, jour inconnu."
+    "note": "Année généralement admise ; jour et lieu inconnus."
   },
   "death": {
     "value": "1350-08-22",
