@@ -11,7 +11,7 @@ extends RefCounted
 ## convention, la position 1-based de la feature dans `provinces.geojson`,
 ## sauf si la feature porte une propriété explicite `index`.
 
-const HEIGHT_SCALE := 0.02
+const HEIGHT_SCALE := 0.006
 
 var map_dir: String = ""
 var load_error: String = ""
