@@ -13,6 +13,9 @@ const SCALE_PER_DISTANCE := 0.014
 const MIN_SCALE := 0.8
 const MAX_SCALE := 14.0
 
+## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
+const CITY_CLEARANCE_PX := 26.0
+
 var map_data: MapData
 var camera: Camera3D
 var selected_army: String = ""
@@ -42,6 +45,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var centroid := map_data.centroid_of_id(location)
 		if centroid.x < 0.0:
 			continue
+		centroid = _clear_of_city(location, centroid)
 		var marker: ArmyMarker = MARKER_SCENE.instantiate()
 		add_child(marker)
 		var faction: String = str(army.get("faction", ""))
@@ -55,6 +59,19 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		_markers[army_id] = marker
 	if not _markers.has(selected_army):
 		selected_army = ""
+
+
+## Écarte l'armée du modèle de ville quand le centroïde tombe sur la capitale de la province.
+func _clear_of_city(location: String, centroid: Vector2) -> Vector2:
+	var province := map_data.get_province(map_data.index_of_id(location))
+	if not province.has("capital_px"):
+		return centroid
+	var capital: Vector2 = province["capital_px"]
+	var away := centroid - capital
+	if away.length() >= CITY_CLEARANCE_PX:
+		return centroid
+	var direction := away.normalized() if away.length() > 0.5 else Vector2(1.0, 0.6).normalized()
+	return capital + direction * CITY_CLEARANCE_PX
 
 
 func set_selected(army_id: String) -> void:

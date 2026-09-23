@@ -499,7 +499,12 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .general
         .as_ref()
         .map_or_else(String::new, |id| state.character_name(data, id));
+    // M10 : a pending sea crossing (next step not a land neighbour) shows the cog model.
+    let embarked = army.path.first().is_some_and(|next| {
+        !sim_campaign::movement::land_neighbors(data, &army.location).contains(next)
+    });
     vdict! {
+        "embarked" => embarked,
         "faction" => army.faction.as_str(),
         "general" => army.general.as_ref().map_or("", |id| id.as_str()),
         "general_name" => general_name.as_str(),
