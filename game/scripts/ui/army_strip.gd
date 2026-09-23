@@ -23,8 +23,11 @@ signal selection_changed(indices: PackedInt32Array)
 signal split_requested(indices: PackedInt32Array)
 
 const CARD_WIDTH := 84.0
-const CARD_MIN_WIDTH := 64.0
+const CARD_MIN_WIDTH := 52.0
+## Largeur minimale pour afficher le nom sous l'icône.
+const CARD_NAMED_MIN_WIDTH := 70.0
 const CARD_HEIGHT := 122.0
+const CARD_COMPACT_HEIGHT := 84.0
 const CARD_GAP := 4
 const HEADER_WIDTH := 132.0
 ## Moral de référence quand le catalogue ne fournit pas le moral de base du type.
@@ -237,29 +240,45 @@ func _refresh() -> void:
 	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
 	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s livres tournois" % HudStyle.thousands(upkeep)
 
-	var card_width := _card_width(units.size())
-	var available := max_width - HEADER_WIDTH - 10.0 - 1.0 - 10.0 - 20.0
-	var columns := maxi(1, int(floor((available + CARD_GAP) / (card_width + CARD_GAP))))
-	_grid.columns = maxi(1, mini(units.size(), columns))
+	var layout := card_layout(units.size())
+	_grid.columns = int(layout["columns"])
 	for index in units.size():
 		var card := UnitCard.new()
 		card.strip = self
 		card.index = index
 		card.unit = units[index]
-		card.custom_minimum_size = Vector2(card_width, CARD_HEIGHT)
+		card.show_name = bool(layout["show_name"])
+		card.custom_minimum_size = Vector2(float(layout["width"]), float(layout["height"]))
 		_grid.add_child(card)
 		_cards.append(card)
 	_update_selection(false)
 
 
-## Cartes pleines (84 px) tant qu'elles tiennent sur un rang, sinon rétrécies jusqu'à 64 px ;
-## au-delà, le GridContainer passe à la ligne.
-func _card_width(count: int) -> float:
+## Disposition des cartes pour `count` régiments dans `max_width` :
+## `{columns, rows, width, height, show_name}`. Un rang de cartes pleines (84 px, avec nom)
+## tant qu'elles tiennent ; sinon cartes compactes réparties sur le moins de rangs possible
+## (52 à 84 px, sans nom sous 70 px — le nom reste dans l'infobulle).
+func card_layout(count: int) -> Dictionary:
+	var available := maxf(max_width - HEADER_WIDTH - 57.0, CARD_MIN_WIDTH)
 	if count <= 0:
-		return CARD_WIDTH
-	var available := max_width - HEADER_WIDTH - 41.0
-	var fit := (available + CARD_GAP) / float(count) - CARD_GAP
-	return clampf(fit, CARD_MIN_WIDTH, CARD_WIDTH)
+		return {"columns": 1, "rows": 0, "width": CARD_WIDTH, "height": CARD_HEIGHT, "show_name": true}
+	var per_row_full := int(floor((available + CARD_GAP) / (CARD_WIDTH + CARD_GAP)))
+	if count <= per_row_full:
+		return {"columns": count, "rows": 1, "width": CARD_WIDTH, "height": CARD_HEIGHT, "show_name": true}
+	var fit_one_row := (available + CARD_GAP) / float(count) - CARD_GAP
+	if fit_one_row >= CARD_NAMED_MIN_WIDTH:
+		return {"columns": count, "rows": 1, "width": minf(fit_one_row, CARD_WIDTH), "height": CARD_HEIGHT, "show_name": true}
+	var rows := 1
+	var width := fit_one_row
+	while width < CARD_MIN_WIDTH and rows < count:
+		rows += 1
+		var per_row := ceili(float(count) / float(rows))
+		width = (available + CARD_GAP) / float(per_row) - CARD_GAP
+	var columns := ceili(float(count) / float(rows))
+	width = clampf(width, CARD_MIN_WIDTH, CARD_WIDTH)
+	var named := width >= CARD_NAMED_MIN_WIDTH
+	return {"columns": columns, "rows": rows, "width": width,
+		"height": CARD_HEIGHT if named else CARD_COMPACT_HEIGHT, "show_name": named}
 
 
 func _on_card_clicked(index: int, additive: bool) -> void:
@@ -314,6 +333,41 @@ func tooltip_for(unit: Dictionary) -> String:
 	return "\n".join(lines)
 
 
+## Nom adapté à une carte de `width` px : taille 12 à 10 jusqu'à ce que chaque mot tienne ;
+## sinon les mots trop longs sont abrégés proprement (« Arbalét. »). Renvoie `{text, font_size}`.
+static func fit_name(name: String, font: Font, width: float) -> Dictionary:
+	var words := name.split(" ", false)
+	for font_size in [12, 11, 10]:
+		var fits := true
+		for word in words:
+			if font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > width:
+				fits = false
+				break
+		if fits:
+			return {"text": name, "font_size": font_size}
+	var parts := PackedStringArray()
+	for word in words:
+		parts.append(abbreviate(word, font, width, 10))
+	return {"text": " ".join(parts), "font_size": 10}
+
+
+## Abrège `word` à la plus longue racine qui tient (au moins 3 lettres) suivie d'un point,
+## en coupant de préférence après une consonne (usage des abréviations de chancellerie).
+static func abbreviate(word: String, font: Font, width: float, font_size: int) -> String:
+	if font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x <= width:
+		return word
+	var vowels := "aeiouyàâéèêëîïôûüAEIOUY"
+	var best := word.substr(0, 3) + "."
+	for length in range(word.length() - 1, 2, -1):
+		var candidate := word.substr(0, length) + "."
+		if font.get_string_size(candidate, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > width:
+			continue
+		if not vowels.contains(word[length - 1]):
+			return candidate
+		best = candidate if best.length() < candidate.length() else best
+	return best
+
+
 ## Carte de régiment : dessin au trait + étiquette de nom (retour à la ligne aux mots).
 class UnitCard:
 	extends Control
@@ -322,6 +376,7 @@ class UnitCard:
 	var index: int = 0
 	var unit: Dictionary = {}
 	var selected := false
+	var show_name := true
 	var _hover := false
 	var _name_label: Label
 
@@ -329,13 +384,16 @@ class UnitCard:
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		tooltip_text = strip.tooltip_for(unit)
-		_name_label = HudStyle.label(strip.unit_name(unit), 12 if size.x >= 76.0 or custom_minimum_size.x >= 76.0 else 11)
+		var fitted := ArmyStrip.fit_name(strip.unit_name(unit), get_theme_default_font(), custom_minimum_size.x - 10.0)
+		_name_label = HudStyle.label(str(fitted["text"]), int(fitted["font_size"]))
 		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		_name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		# Retour à la ligne aux espaces seulement : jamais de coupure au milieu d'un mot.
+		_name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_WORD_ELLIPSIS
 		_name_label.max_lines_visible = 3
 		_name_label.add_theme_constant_override("line_spacing", -2)
+		_name_label.visible = show_name
 		add_child(_name_label)
 		mouse_entered.connect(func() -> void:
 			_hover = true
