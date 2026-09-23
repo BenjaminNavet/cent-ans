@@ -115,6 +115,7 @@ dependencies = [
  "data-model",
  "godot",
  "png",
+ "serde_json",
  "sim-battle",
  "sim-campaign",
 ]
@@ -292,6 +293,7 @@ checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
 dependencies = [
  "ppv-lite86",
  "rand_core",
+ "serde",
 ]
 
 [[package]]
@@ -361,6 +363,8 @@ dependencies = [
  "rand",
  "rand_chacha",
  "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]
