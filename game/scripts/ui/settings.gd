@@ -27,6 +27,10 @@ const DEFAULTS := {
 	"camera/speed": 1.0,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,
+	# F8 : tutoriel des premiers tours (désactivable, progression persistée).
+	"tutorial/enabled": true,
+	"tutorial/step": 0,
+	"tutorial/done": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
