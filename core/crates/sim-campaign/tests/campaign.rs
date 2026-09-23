@@ -745,3 +745,54 @@ fn unit_fresh_uses_data_stats() {
     assert_eq!(knights.strength, 60);
     assert_eq!(knights.morale, 80);
 }
+
+#[test]
+fn succession_follows_heir_then_house_then_none() {
+    let data = data();
+    let mut state = france(&data, 10);
+    let philippe = data_model::CharacterId::new("chr_philippe_vi").unwrap();
+    let jean = data_model::CharacterId::new("chr_jean_de_normandie").unwrap();
+    let mut events = Vec::new();
+    sim_campaign::characters::kill(&mut state, &data, &philippe, &mut events);
+    assert!(events.iter().any(|e| e.kind == EventKind::Death));
+    assert!(events.iter().any(|e| e.kind == EventKind::Succession));
+    let france_state = state.faction_state(&fac("fac_france")).unwrap();
+    assert_eq!(france_state.ruler, Some(jean.clone()));
+    assert!(!state.character(&philippe).unwrap().alive);
+    let army = main_army(&state, "fac_france");
+    assert_eq!(
+        state.army(&army).unwrap().general,
+        None,
+        "dead general leaves the army"
+    );
+
+    // Jean dies too: the eldest living Valois male takes over.
+    let mut events = Vec::new();
+    sim_campaign::characters::kill(&mut state, &data, &jean, &mut events);
+    let ruler = state
+        .faction_state(&fac("fac_france"))
+        .unwrap()
+        .ruler
+        .clone()
+        .expect("house heir");
+    assert_eq!(state.character(&ruler).unwrap().house, "Valois");
+
+    // Navarre's queen has no heir and no male of her house: no heir event.
+    let jeanne = data_model::CharacterId::new("chr_jeanne_ii_de_navarre").unwrap();
+    let mut events = Vec::new();
+    sim_campaign::characters::kill(&mut state, &data, &jeanne, &mut events);
+    assert!(events.iter().any(|e| e.kind == EventKind::NoHeir));
+    assert_eq!(
+        state.faction_state(&fac("fac_navarre")).unwrap().ruler,
+        None
+    );
+}
+
+#[test]
+fn natural_death_probability_by_age() {
+    use sim_campaign::characters::death_permille;
+    assert_eq!(death_permille(39), 0);
+    assert_eq!(death_permille(40), 5);
+    assert_eq!(death_permille(60), 20);
+    assert_eq!(death_permille(75), 80);
+}

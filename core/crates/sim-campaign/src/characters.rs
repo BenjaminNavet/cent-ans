@@ -51,7 +51,7 @@ pub(crate) fn resolve_characters(
 }
 
 /// Marks `id` dead, removes it from its army and triggers succession if it ruled.
-pub(crate) fn kill(
+pub fn kill(
     state: &mut CampaignState,
     data: &GameData,
     id: &CharacterId,
