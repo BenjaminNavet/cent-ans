@@ -167,31 +167,53 @@ pub(crate) fn succeed(
             {
                 crate::diplomacy::on_line_extinct(state, data, faction, &house, events);
             }
-            let has_living_member = state
+            // Personal union may have made the realm a vassal; either way it
+            // needs a ruler: the eldest living adult of the faction, or else
+            // a newly elected / newly risen lord.
+            let year = state.year;
+            let fallback = state
                 .characters
-                .values()
-                .any(|c| c.alive && &c.faction == faction);
-            if has_living_member {
-                events.push(
-                    GameEvent::new(
-                        EventKind::NoHeir,
+                .iter()
+                .filter(|(_, c)| c.alive && &c.faction == faction && c.is_major(year))
+                .min_by_key(|(id, c)| (c.birth_year, (*id).clone()))
+                .map(|(id, _)| id.clone());
+            let elective = data
+                .factions
+                .get(faction)
+                .is_some_and(|f| f.succession_law == data_model::SuccessionLaw::Elective);
+            let (ruler, text) = match fallback {
+                Some(ruler) => {
+                    let text = format!(
+                        "{} s'empare du pouvoir en {}, faute d'héritier légitime.",
+                        state.character_name(data, &ruler),
+                        faction_name(data, faction)
+                    );
+                    (ruler, text)
+                }
+                None => {
+                    let ruler = crate::dynasty::spawn_ruler(state, data, faction);
+                    let text = if elective {
                         format!(
-                            "{} se retrouve sans héritier : une régence perpétuelle s'installe.",
+                            "{} est élu à la tête de {}.",
+                            state.character_name(data, &ruler),
                             faction_name(data, faction)
-                        ),
-                    )
-                    .faction(faction),
-                );
-            } else {
-                state.factions.get_mut(faction).expect("exists").alive = false;
-                events.push(
-                    GameEvent::new(
-                        EventKind::FactionDestroyed,
-                        format!("{} s'éteint faute d'héritier.", faction_name(data, faction)),
-                    )
-                    .faction(faction),
-                );
-            }
+                        )
+                    } else {
+                        format!(
+                            "La lignée s'éteint : {} fonde une nouvelle maison à la tête de {}.",
+                            state.character_name(data, &ruler),
+                            faction_name(data, faction)
+                        )
+                    };
+                    (ruler, text)
+                }
+            };
+            let faction_state = state.factions.get_mut(faction).expect("exists");
+            faction_state.ruler = Some(ruler.clone());
+            faction_state.heir = None;
+            let next_heir = dynasty::pick_heir_by_law(state, data, faction, &ruler);
+            state.factions.get_mut(faction).expect("exists").heir = next_heir;
+            events.push(GameEvent::new(EventKind::Succession, text).faction(faction));
         }
     }
 }
@@ -204,7 +226,8 @@ pub(crate) fn resolve_faction_deaths(
 ) {
     let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
     for id in ids {
-        if !state.factions[&id].alive {
+        // The virtual rebels faction lives on without land (spec M3 § 1.1).
+        if !state.factions[&id].alive || id.as_str() == crate::diplomacy::REBELS_FACTION {
             continue;
         }
         let has_province = state.provinces.values().any(|p| p.controller == id);

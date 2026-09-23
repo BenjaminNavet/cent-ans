@@ -396,6 +396,83 @@ fn random_starting_skills(rng: &mut crate::rng::CampaignRng) -> Skills {
     }
 }
 
+/// Brings a new adult ruler to a faction whose dynasty has died out: an
+/// elected pontiff or emperor for elective realms, otherwise a lord of a new
+/// house named after the capital (M5: realms with land never simply vanish).
+pub(crate) fn spawn_ruler(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> CharacterId {
+    let first_name = pick_name(data, faction, Sex::Male, &mut state.rng);
+    let elective = data
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.succession_law == SuccessionLaw::Elective);
+    let capital = state.factions.get(faction).map(|f| f.capital.clone());
+    // The capital city ("Lisbonne (Alcáçova)" -> "Lisbonne"), else the province.
+    let seat = data
+        .factions
+        .get(faction)
+        .and_then(|f| f.capital_city.as_deref())
+        .map(|city| city.split(" (").next().unwrap_or(city).to_owned())
+        .or_else(|| {
+            capital
+                .as_ref()
+                .and_then(|c| data.provinces.get(c))
+                .map(|p| p.name.display.clone())
+        })
+        .unwrap_or_else(|| faction.to_string());
+    let house = if elective {
+        format!("élu de {seat}")
+    } else {
+        seat.clone()
+    };
+    let age = 30 + state.rng.below(20) as i32;
+    let id = next_generated_id(state);
+    let mut skills = random_starting_skills(&mut state.rng);
+    skills.command += 2;
+    skills.governance += 2;
+    skills.court += 2;
+    let name = if elective {
+        first_name.clone()
+    } else {
+        generated_full_name(&first_name, &house)
+    };
+    state.characters.insert(
+        id.clone(),
+        CharacterState {
+            name: Some(name),
+            faction: faction.clone(),
+            alive: true,
+            birth_year: state.year - age,
+            sex: Sex::Male,
+            house,
+            location: capital,
+            army: None,
+            skills,
+            captive: false,
+            experience: 0,
+            skill_points: 0,
+            skills_learned: BTreeSet::new(),
+            traits: BTreeSet::new(),
+            spouse: None,
+            children: Vec::new(),
+            father: None,
+            mother: None,
+            piety: 50,
+            prestige: 0,
+            loyalty: 100,
+            title: None,
+            governor_of: None,
+            battles_fought: 0,
+            sieges_won: 0,
+            raids_led: 0,
+        },
+    );
+    id
+}
+
 /// Identity of a newborn, historical or generated (`spawn_child`).
 struct NewChild {
     id: CharacterId,

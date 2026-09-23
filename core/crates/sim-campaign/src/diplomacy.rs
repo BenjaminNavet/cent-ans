@@ -1692,7 +1692,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
 
     // Peace: offer a white peace when we would accept one ourselves; when
     // clearly winning, ask for the occupied provinces instead.
-    if (turn + slot) % 2 == 0 {
+    if (turn + slot).is_multiple_of(2) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
             let score = state.war_score(data, faction, enemy);
             let proposal = if score > 40 {
