@@ -1,0 +1,33 @@
+{
+  "id": "tech_chauliac_surgery",
+  "name": {
+    "display": "Grande Chirurgie"
+  },
+  "branch": "medicine",
+  "tier": 4,
+  "cost": 450,
+  "prerequisites": [
+    "tech_soporific_sponge",
+    "tech_montpellier"
+  ],
+  "historical_year": {
+    "value": "1363",
+    "note": "Guy de Chauliac, médecin des papes d'Avignon, achève sa Chirurgia magna (Inventarium) en 1363."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "wound_recovery",
+      "value": 10
+    },
+    {
+      "effect": "health",
+      "value": 2
+    }
+  ],
+  "description": "Le traité de chirurgie de référence jusqu'au XVIIe siècle : plaies, fractures, luxations et hernies, par le médecin qui a survécu à la peste d'Avignon.",
+  "sources": [
+    "Guy de Chauliac",
+    "Chirurgia magna"
+  ]
+}

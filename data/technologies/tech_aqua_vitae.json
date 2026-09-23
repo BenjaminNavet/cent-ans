@@ -1,0 +1,40 @@
+{
+  "id": "tech_aqua_vitae",
+  "name": {
+    "display": "Eau-de-vie des médecins"
+  },
+  "branch": "medicine",
+  "tier": 5,
+  "cost": 700,
+  "prerequisites": [
+    "tech_theriac",
+    "tech_montpellier"
+  ],
+  "historical_year": {
+    "value": "1351",
+    "uncertain": true,
+    "note": "Jean de Roquetaillade décrit la distillation de l'aqua ardens dans le De consideratione quintae essentiae (v. 1351-1352) ; des traités attribués à Arnaud de Villeneuve (m. 1311) vantent l'aqua vitae. L'« eau de la reine de Hongrie » au romarin est une légende attachée à 1370, attestée seulement au XVIIe siècle : anachronisme léger."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "health",
+      "value": 3
+    },
+    {
+      "effect": "trade_income",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "La quintessence tirée du vin par l'alambic : remède universel des médecins avant d'être boisson.",
+  "sources": [
+    "Eau-de-vie",
+    "Jean de Roquetaillade",
+    "Arnaud de Villeneuve",
+    "Eau de la reine de Hongrie"
+  ],
+  "herbs": [
+    "cdx_romarin"
+  ]
+}

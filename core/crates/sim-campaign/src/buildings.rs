@@ -106,6 +106,13 @@ pub struct EffectTotals {
     pub research_civil: EffectValue,
     #[serde(default)]
     pub research_military: EffectValue,
+    /// H4: `PlagueResistance`, `WoundRecovery`, `DietHealth`.
+    #[serde(default)]
+    pub plague_resistance: EffectValue,
+    #[serde(default)]
+    pub wound_recovery: EffectValue,
+    #[serde(default)]
+    pub diet_health: EffectValue,
     /// Effects restricted to one social class (`Effect::class`).
     #[serde(default)]
     pub classes: ClassEffectTotals,
@@ -259,6 +266,9 @@ impl EffectTotals {
             attrition_resistance,
             research_civil,
             research_military,
+            plague_resistance,
+            wound_recovery,
+            diet_health,
         );
         for class in SocialClass::ALL {
             self.classes.get_mut(class).merge(other.classes.get(class));
@@ -345,6 +355,9 @@ impl EffectTotals {
             EffectKind::AttritionResistance => &mut self.attrition_resistance,
             EffectKind::ResearchCivil => &mut self.research_civil,
             EffectKind::ResearchMilitary => &mut self.research_military,
+            EffectKind::PlagueResistance => &mut self.plague_resistance,
+            EffectKind::WoundRecovery => &mut self.wound_recovery,
+            EffectKind::DietHealth => &mut self.diet_health,
             _ => return,
         };
         slot.add(mode, value);

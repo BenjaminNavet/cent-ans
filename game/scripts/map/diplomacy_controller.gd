@@ -58,6 +58,8 @@ func open_panel(faction_id: String = "") -> void:
 	panel.player_faction = map.player_faction
 	panel.province_name_of = map.province_name_of
 	panel.refresh()
+	# Panneau central : ferme les panneaux latéraux qu'il recouvrirait.
+	map.ui.hide_province()
 	if faction_id != "":
 		panel.select_faction(faction_id)
 	panel.show()

@@ -37,6 +37,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
         orders.push(Order::Research { technology });
     }
+    // The table (H3).
+    orders.extend(crate::table::ai_choose_diets(state, data, faction));
 
     // In debt and still losing money: dismiss the most expensive field unit.
     if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn

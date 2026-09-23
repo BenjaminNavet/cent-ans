@@ -38,8 +38,17 @@
 //! - **Garrison**: shooters and foot hold the wall walk; wall foot attack
 //!   climbers and attackers on the walls nearby; the reserve and the gate
 //!   guard block the openings, then hunt the attackers inside the walls.
+//!
+//! # Leader's orders (F10b)
+//!
+//! Given when the conditions of the order's `ai` block hold (all numbers in
+//! `data/battle_orders/`): the war cry when the regiments around the
+//! general close with the enemy, rally as soon as regiments flee near him,
+//! dismount when the side stands on the defensive (the garrison of a siege
+//! too), pavises for crossbowmen standing under fire, and no quarter only
+//! for an outnumbered army facing its hereditary enemy.
 
-use data_model::{Ability, UnitCategory};
+use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCategory};
 
 use crate::command::Command;
 use crate::setup::SideId;
@@ -287,6 +296,9 @@ pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
         (Some(works), SideId::Defender) => plan_siege_defence(&mut view, works),
         (None, _) => plan_field(&mut view),
     }
+    if sim.siege().is_some() {
+        plan_orders(&mut view, side == SideId::Defender);
+    }
     view.commands
 }
 
@@ -499,6 +511,7 @@ fn plan_field(view: &mut View) {
     }
 
     react(view, &roles);
+    plan_orders(view, defensive);
 }
 
 /// Enemy regiment opposite `i` (smallest lateral offset, a bit of depth).
@@ -823,6 +836,97 @@ fn react(view: &mut View, roles: &Roles) {
                 }
             }
         }
+    }
+}
+
+// ----- leader's orders ---------------------------------------------------------
+
+/// Is `id` already given a move (or attack, withdraw) in this step?
+fn ordered_to_move(view: &View, id: u32) -> bool {
+    view.commands.iter().any(|c| {
+        matches!(
+            c,
+            Command::Move { .. } | Command::Attack { .. } | Command::Withdraw { .. }
+        ) && c.units().contains(&id)
+    })
+}
+
+fn rivals(order: &BattleOrder, own: &str, enemy: &str) -> bool {
+    order.ai.as_ref().is_none_or(|ai| {
+        ai.rivals.is_empty()
+            || ai.rivals.iter().any(|[a, b]| {
+                (a.as_str() == own && b.as_str() == enemy)
+                    || (a.as_str() == enemy && b.as_str() == own)
+            })
+    })
+}
+
+/// Leader's orders of this step (after the movement plan).
+fn plan_orders(view: &mut View, defensive: bool) {
+    let sim = view.sim;
+    let side = view.side;
+    let own_faction = &sim.setup().side(side).faction;
+    let enemy_faction = &sim.setup().side(side.other()).faction;
+    let mut orders: Vec<&BattleOrder> = sim.order_catalog().iter().collect();
+    orders.sort_by(|a, b| a.rank.cmp(&b.rank).then_with(|| a.id.cmp(&b.id)));
+    for order in orders {
+        let Some(ai) = &order.ai else {
+            continue;
+        };
+        if sim.order_unavailable(side, order).is_some()
+            || !rivals(order, own_faction, enemy_faction)
+        {
+            continue;
+        }
+        if let Some(max) = ai.max_strength_ratio {
+            if view.power(true) / view.power(false).max(1.0) >= max {
+                continue;
+            }
+        }
+        let mut targets = sim.order_targets(side, order, &[]);
+        if let Some(reach) = ai.enemy_within {
+            let close = targets.iter().any(|&i| {
+                view.nearest_enemy(i, |_| true)
+                    .is_some_and(|(_, d)| d < reach)
+            });
+            if !close {
+                continue;
+            }
+        }
+        match order.kind {
+            BattleOrderKind::Dismount => {
+                if ai.when_defensive && !defensive {
+                    continue;
+                }
+                let units = view.units;
+                targets.retain(|&i| view.free(i) && units[i].state != UnitState::Charging);
+            }
+            BattleOrderKind::Pavise => {
+                let window = ai.under_fire_within.unwrap_or(f64::INFINITY);
+                let units = view.units;
+                targets.retain(|&i| {
+                    let u = &units[i];
+                    u.missile_timer <= window
+                        && u.destination.is_none()
+                        && matches!(u.state, UnitState::Idle | UnitState::Shooting)
+                        && !ordered_to_move(view, u.id)
+                });
+            }
+            BattleOrderKind::WarCry | BattleOrderKind::NoQuarter | BattleOrderKind::Rally => {}
+        }
+        if targets.len() < ai.min_units as usize {
+            continue;
+        }
+        let units = if order.scope == BattleOrderScope::Selected {
+            targets.iter().map(|&i| view.units[i].id).collect()
+        } else {
+            Vec::new()
+        };
+        view.commands.push(Command::LeaderOrder {
+            side: Some(side),
+            order: order.id.clone(),
+            units,
+        });
     }
 }
 
