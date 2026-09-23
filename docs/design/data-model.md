@@ -271,3 +271,26 @@ règle de validation.
 
 Vérification headless : `godot --headless --path game --script "$PWD/core/checks/data_store_check.gd"`
 (après `core/build.sh`) charge `data/` et vérifie que `prov_normandie` appartient à `fac_france`.
+
+### 7.4 `CampaignSim` (M2)
+
+Objet GDExtension exposant une partie en cours (`core/crates/godot-bridge/src/campaign_sim.rs`).
+Les données de jeu sont chargées une fois par processus et partagées entre instances, ce qui
+permet `load_from_string` sur un objet neuf.
+
+| Méthode | Retour |
+|---|---|
+| `new_campaign(data_dir, player, seed) -> bool` | charge `data/` et construit le départ 1337 |
+| `save_to_string() -> String`, `load_from_string(json) -> bool` | sauvegarde JSON versionnée |
+| `get_turn()`, `get_date_label()`, `get_player_faction()` | `-1` / `""` avant `new_campaign` |
+| `get_faction_summary(id)` | `{treasury, income, at_war_with[], allies[], provinces_count, armies_count, alive}` |
+| `get_province_state(id)` | `{owner, controller, garrison[unit], siege{attacker, turns_left}?, unrest, devastation, population_total}` |
+| `get_army_ids()`, `get_army(id)` | `{faction, general, general_name, location, units[unit], movement_points, supply, stance, path[]}` |
+| `get_reachable(army)` | `{province_id: coût}` |
+| `find_path(army, target)` | `PackedStringArray` (vide si inatteignable ou déjà sur place) |
+| `get_recruitable(province)` | `[{unit_type, name, cost, upkeep, available, reason}]` |
+| `submit_order({type, ...})` | `{ok, error}` — types snake_case identiques aux variantes Rust `Order` |
+| `end_turn()`, `get_events()` | `[{kind, text_fr, province, army, faction}]` |
+
+`unit` = `{unit_type, name, strength, max_strength, morale}`. Les identifiants inconnus donnent un
+dictionnaire vide. Vérification headless : `core/checks/campaign_sim_check.gd`.
