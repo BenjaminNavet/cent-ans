@@ -91,7 +91,7 @@ func _fill_garrison(garrison: Array, selectable: bool) -> void:
 	for i in garrison.size():
 		var unit: Dictionary = garrison[i]
 		var text := "%s — %d/%d, moral %d" % [
-			str(unit.get("name", unit.get("unit_type", "?"))), int(unit.get("strength", 0)),
+			unit_label(unit), int(unit.get("strength", 0)),
 			int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
 		if selectable:
 			var check := CheckBox.new()
@@ -139,6 +139,14 @@ func _on_create_army() -> void:
 	if indices.is_empty():
 		return
 	create_army_requested.emit(province_id, indices)
+
+
+## Nom d'unité : `name` si la simulation le fournit, sinon l'id rendu lisible.
+static func unit_label(unit: Dictionary) -> String:
+	var name: String = str(unit.get("name", ""))
+	if name != "":
+		return name
+	return str(unit.get("unit_type", "?")).trim_prefix("unit_").capitalize()
 
 
 static func _faction_label(faction_id: String, display_name: String, label_of: Callable) -> String:

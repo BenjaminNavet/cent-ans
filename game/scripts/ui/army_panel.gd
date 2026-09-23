@@ -71,7 +71,7 @@ func show_army(id: String, army: Dictionary, faction_label: String, color: Color
 		total += int(unit.get("strength", 0))
 		var label := Label.new()
 		label.text = "• %s — %d/%d, moral %d" % [
-			str(unit.get("name", unit.get("unit_type", "?"))), int(unit.get("strength", 0)),
+			ProvincePanel.unit_label(unit), int(unit.get("strength", 0)),
 			int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
 		units_list.add_child(label)
 	units_header.text = "Unités (%d, %d hommes)" % [units.size(), total]

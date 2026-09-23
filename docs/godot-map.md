@@ -1,51 +1,88 @@
-# Carte de campagne Godot (M1)
+# Carte et interface de campagne Godot (M1 + M2)
 
 Rendu et interaction de la carte de campagne dans `game/` (GDScript). Aucune règle de jeu
-ici : la scène lit `data/map/` (images + GeoJSON), affiche, et remonte des identifiants.
-Contrat de données : `docs/design/m1-campaign-map.md`.
+ici : la scène lit `data/map/` (images + GeoJSON), affiche, remonte des identifiants et soumet
+des ordres à la simulation Rust (`CampaignSim`) via l'autoload `SimFacade`.
+Contrats : `docs/design/m1-campaign-map.md` (données carte), `docs/design/m2-campaign-loop.md`
+(§ 2 API `CampaignSim`, § 3 interface).
 
-![Carte synthétique](img/godot-synthetic-map.png)
+![HUD de campagne](img/godot-campaign-hud.png)
 
-## Architecture de la scène `scenes/campaign_map.tscn`
+## Scènes
+
+| Scène | Rôle |
+|---|---|
+| `scenes/start_menu.tscn` (scène principale) | Écran de démarrage : 3 cartes de faction (nom, blason, couleur depuis `GameDataStore.get_faction`, accroche en deux lignes), graine, « Commencer », « Charger une partie », « Quitter ». |
+| `scenes/campaign_map.tscn` | Carte 3D + HUD de campagne. |
+| `scenes/ui/province_panel.tscn` | Panneau parchemin de province (identité, état, garnison, recrutement, formation d'armée). |
+| `scenes/ui/army_panel.tscn` | Panneau d'armée (général, position, mouvement, ravitaillement, ordre, posture, unités). |
+| `scenes/ui/save_load_dialog.tscn` | Dialogue sauver / charger (`user://saves/*.json`). |
+| `scenes/map/army_marker.tscn` | Marqueur d'armée : hampe + bannière billboard (couleur de faction), nombre d'unités, halo de sélection. |
+| `scenes/ui/parchment_theme.tres` | Thème commun (police serif système, panneaux, boutons, champs). |
+
+## Architecture de `campaign_map.tscn`
 
 ```
-CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, gère le cycle de vie
+CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, relie UI ↔ SimFacade.sim
 ├── WorldEnvironment / Sun (DirectionalLight3D)
-├── Terrain   (TerrainBuilder)   16 × 16 tuiles ArrayMesh depuis la heightmap, 2 LOD
-├── Sea       (Sea)              plan d'eau Y = 0 (shader animé) + fond opaque à −4,5
-├── Rivers    (RiversRenderer)   rubans bleus (largeur selon importance ; mineurs masqués de loin)
-├── Coast     (CoastRenderer)    ruban brun sur le trait de côte
-├── Cities    (CityMarkers)      cylindre + Label3D par capitale (`capital_px`)
-├── CameraRig (CampaignCamera)   caméra RTS ; enfant Camera3D
-├── Picker    (ProvincePicker)   rayon → terrain → `province_ids.png` → signaux
-└── UI        (MapUI, CanvasLayer)
-    ├── TopBar        date de campagne (CampaignSim, Rust) + bouton « Fin du tour »
-    ├── HoverLabel    nom de la province survolée
-    └── ProvincePanel (scenes/ui/province_panel.tscn) panneau parchemin de sélection
+├── Terrain     (TerrainBuilder)   16 × 16 tuiles ArrayMesh depuis la heightmap, 2 LOD
+├── Sea         (Sea)              plan d'eau Y = 0 (shader animé) + fond opaque à −4,5
+├── Rivers      (RiversRenderer)   rubans bleus (largeur selon importance ; mineurs masqués de loin)
+├── Coast       (CoastRenderer)    ruban brun sur le trait de côte
+├── Cities      (CityMarkers)      cylindre + Label3D par capitale (`capital_px`)
+├── PathPreview (PathPreview)      ruban orange : chemin prévisualisé / ordre en cours
+├── Armies      (ArmyMarkers)      un `army_marker.tscn` par armée au centroïde de sa province
+├── CameraRig   (CampaignCamera)   caméra RTS ; enfant Camera3D
+├── Picker      (ProvincePicker)   rayon → terrain → `province_ids.png` → signaux (clic gauche / droit)
+└── UI          (MapUI, CanvasLayer)
+    ├── TopBar         couleur + nom de faction, trésor, revenu, date, « Fin du tour ⏎ », Menu
+    ├── Toast          notification (ordre refusé, sauvegarde, bataille), 3,5 s
+    ├── HoverLabel     province survolée, ou « → cible : n étapes, coût c » avec une armée sélectionnée
+    ├── EventLog       journal du tour (bas gauche, repliable, plus récent en haut, batailles en rouge)
+    ├── ArmyPanel      scenes/ui/army_panel.tscn
+    ├── ProvincePanel  scenes/ui/province_panel.tscn
+    └── SaveLoadDialog scenes/ui/save_load_dialog.tscn
 ```
 
-Autoload `MapPaths` (`scripts/map/map_paths.gd`) : `data_dir` = `<dépôt>/data` par défaut,
-surchargé par la variable d'environnement `CENT_ANS_DATA_DIR` ; `MapPaths.map_dir()` = `data_dir/map`.
+### Autoloads
+
+- `MapPaths` (`scripts/map/map_paths.gd`) : `data_dir` = `<dépôt>/data` par défaut, surchargé par
+  la variable d'environnement `CENT_ANS_DATA_DIR` ; `MapPaths.map_dir()` = `data_dir/map`.
+- `SimFacade` (`scripts/sim/sim_facade.gd`) : point d'accès unique à la simulation.
+  - `sim` = la vraie `CampaignSim` (GDExtension) si `ClassDB.class_exists("CampaignSim")` et
+    qu'elle expose `get_army_ids` (API M2), sinon `CampaignSimMock` (`scripts/sim/campaign_sim_mock.gd`,
+    même API, données factices : voisinage depuis `provinces.geojson`, 3 armées, batailles à pile ou
+    face). `is_real` indique le moteur ; l'écran de démarrage l'affiche (« Simulation réelle/factice »).
+  - `store` = `GameDataStore` chargé sur `MapPaths.data_dir` (null sur les fixtures de test).
+  - `new_campaign(faction, seed)` recrée une simulation neuve ; si la vraie refuse (dossier de données
+    incomplet), repli sur le mock avec avertissement.
+  - `pending_faction` / `pending_seed` / `pending_load_path` : requête transmise du menu à la carte.
+  - Sauvegardes : `save_game(nom)` écrit `user://saves/<nom>.json` =
+    `{version, engine: "real"|"mock", faction, date, turn, timestamp, state: sim.save_to_string()}` ;
+    `load_game(chemin)` restaure (`load_from_string`) ; `list_saves()` trié par date décroissante.
+    Une sauvegarde `real` ne se charge pas avec le mock (erreur explicite).
 
 ### Chargement (`MapData`, `scripts/map/map_data.gd`)
 
 - `map.json` → taille, bornes d'altitude, CRS.
-- `heightmap.png` : Godot 4.7 réduit les PNG 16 bits à 8 bits. `Png16` (`scripts/map/png16.gd`)
-  décode donc le flux lui-même (inflate natif + défiltrage GDScript) et le stocke en
-  `Image.FORMAT_LA8` (L = octet fort, A = octet faible), sans boucle de conversion. Le tampon brut
-  est mis en cache dans `user://cache/heightmap_<md5>_<mtime>.u16be` ; les chargements suivants
-  prennent quelques millisecondes. Si le PNG n'est pas en 16 bits gris, repli en L8 (avertissement).
+- `heightmap.png` 16 bits : décodé par `GameDataStore.load_heightmap_u16` (crate `png` côté Rust,
+  ~100 ms pour 4096²) en little-endian ; l'image est stockée en `Image.FORMAT_LA8` avec
+  `height_little_endian = true` (L = octet faible, A = octet fort). Repli sans GDExtension :
+  `Png16` (`scripts/map/png16.gd`, décodage GDScript big-endian + cache `user://cache/`), puis
+  `Image.load_from_file` 8 bits en dernier recours. `MapData.height_decoder` ∈ {rust, png16, 8bit}.
+  Le shader et le constructeur de maillage lisent l'ordre d'octets via `height_little_endian`.
 - `province_ids.png` (RGB8, index = R + 256·G, 0 = mer), `land_mask.png` (optionnel).
 - `provinces.geojson`, `rivers.geojson`, `coastline.geojson` via `JSON.parse_string`. Importance d'une
   rivière = `strahler` si présent, sinon `12 − scalerank` (Natural Earth) ; ≥ 3 = fleuve majeur toujours
   affiché, sinon affiché seulement sous 0,35 × taille de carte.
 - Accès : `height_m_at(x, y)` (bilinéaire), `height_world_at`, `surface_world_at` (≥ 0),
-  `province_index_at(x, y)`, `get_province(index)`.
+  `province_index_at(x, y)`, `get_province(index)`, `index_of_id(id)`, `centroid_of_id(id)`.
 
 **Convention d'index** : l'index raster d'une province est la position 1-based de sa feature dans
 `provinces.geojson`, sauf si la propriété `index` est présente (recommandé pour `tools/geo`).
-Les propriétés optionnelles `name`, `owner`, `terrain`, `capital_name` alimentent le panneau en
-attendant que `core/` expose ces données (M2).
+Les noms d'affichage (`display_name`, `capital`, `terrain`, `owner_display_name`) viennent de
+`GameDataStore.get_province` (`CampaignMap.province_info`) ; les propriétés GeoJSON `name`, `owner`,
+`terrain`, `capital_name` ne servent que de repli (fixtures).
 
 ### Coordonnées
 
@@ -60,20 +97,48 @@ X monde = x carte (pixel), Z monde = y carte, Y monde = altitude (m) × `MapData
   Pas réglés par la scène selon la taille : 4096² → 4/8, 512² → 1/2.
 - Les maillages ne portent que positions + indices ; le shader dérive la normale de la heightmap
   (différences finies sur ±2 px), donc aucune couture entre tuiles ni entre LOD.
-- Shader : palette par altitude (mer, rivage, plaine, colline, montagne, neige > 2500 m), pentes
-  tirant vers la roche, teinte parchemin ; frontières par comparaison `texelFetch` des voisins de
-  `province_ids` (largeur ~constante à l'écran grâce à `fwidth`) ; teinte de faction depuis une
-  texture 1D `faction_colors` (largeur = nombre de provinces + 1) ; surbrillance `hovered_id` /
-  `selected_id`.
-- Couleurs de faction : palette de repli déterministe par propriétaire (ordre d'apparition).
-  `TerrainBuilder.set_owner_colors({fac_id: Color})` permettra à `core/` de fournir les vraies.
+- Shader : palette par altitude, pentes tirant vers la roche, teinte parchemin ; frontières par
+  comparaison `texelFetch` des voisins de `province_ids` (largeur ~constante à l'écran grâce à
+  `fwidth`) ; surbrillance `hovered_id` / `selected_id`.
+- **Couleurs de faction** : texture 1D `faction_colors` (largeur = nombre de provinces + 1) remplie par
+  `TerrainBuilder.set_province_colors(PackedColorArray)` depuis `CampaignMap._refresh_owner_colors` :
+  base `GameDataStore.get_province_owner_colors(ids)`, puis couleur héraldique du propriétaire courant
+  selon `CampaignSim.get_province_state(id).owner` (les conquêtes recolorent la carte). Sans
+  `GameDataStore` (fixtures), palette de repli déterministe par propriétaire.
+- **Masque atteignable** : texture 1D `province_mask` (R8, indexée par province) posée par
+  `set_reachable(reachable, path)` : ~0,5 = atteignable ce tour (teinte jaune), 1 = sur le chemin
+  prévisualisé (orange), 0 = assombri (×0,7) tant qu'une armée est sélectionnée.
+
+### Armées (`ArmyMarkers`, `ArmyMarker`, `PathPreview`)
+
+- `ArmyMarkers.refresh(sim, color_of, player_faction)` reconstruit tous les marqueurs depuis
+  `get_army_ids` / `get_army` (après chaque fin de tour, ordre ou chargement). Position = centroïde de la
+  province ; armées empilées décalées en anneau (rayon 6 × échelle). Échelle = distance caméra × 0,014
+  (bornée 0,8..14) pour rester lisible ; le `Label3D` du nombre d'unités compense l'échelle.
+- `pick_screen(pos)` : armée la plus proche du curseur (< 26 px après projection), prioritaire sur la
+  province via `ProvincePicker.click_interceptor`.
+- `PathPreview.show_path([départ, …chemin], distance)` : ruban `PolylineMesh` posé sur le relief,
+  segments subdivisés tous les 12 px.
 
 ### Picking (`ProvincePicker`)
 
 Rayon caméra → intersection avec Y = 0, puis point fixe `t = (h(x(t), z(t)) − o.y) / d.y` (≤ 8
-itérations, arrêt sous 0,02 unité). Converge car pente × cot(tangage) < 1 avec l'exagération 0,02.
-Lecture ensuite de `province_ids` au pixel. Signaux `province_hovered(index)` et
-`province_selected(index)` (clic gauche sans glisser). Pas de corps physique.
+itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixel. Signaux
+`province_hovered(index)`, `province_selected(index)` (clic gauche sans glisser, sauf si
+`click_interceptor` a consommé le clic) et `province_right_clicked(index)`. Pas de corps physique.
+
+## Boucle de jeu côté Godot (`campaign_map.gd`)
+
+| Action | Appel simulation | Rafraîchissement |
+|---|---|---|
+| Clic gauche sur une armée | `get_army`, `get_reachable` (si armée du joueur) | panneau d'armée, halo, masque atteignable, chemin en cours |
+| Survol d'une province, armée sélectionnée | `find_path(armée, cible)` | ruban + provinces du chemin en orange, étiquette « n étapes, coût c » |
+| Clic droit sur une province | `find_path` puis `submit_order({"type": "move_army", "army", "path"})` | `refresh_all()` ; erreur → notification |
+| Posture (panneau d'armée) | `submit_order({"type": "set_stance", …})` | idem |
+| « Recruter » → ligne | `get_recruitable(province)` puis `submit_order({"type": "recruit", …})` | idem ; lignes indisponibles désactivées avec la raison |
+| « Former une armée » | `submit_order({"type": "create_army", "province", "units_from_garrison": [indices cochés]})` | sélectionne la nouvelle armée si la réponse contient `army` |
+| « Fin du tour » / Entrée | `end_turn()` → événements | journal (plus récent en haut), notification de bataille, tout rafraîchi |
+| Menu → Sauvegarder / Charger | `SimFacade.save_game` / `load_game` | carte, HUD et journal restaurés |
 
 ## Contrôles
 
@@ -82,16 +147,31 @@ Lecture ensuite de `province_ids` au pixel. Signaux `province_hovered(index)` et
 | Déplacement | W A S D (positions physiques : Z Q S D en AZERTY), flèches, bords d'écran (F2 pour désactiver), glisser bouton du milieu |
 | Zoom | molette, borné 30..1500 unités |
 | Rotation | Q / E (positions physiques : A / E en AZERTY) |
-| Inclinaison | automatique : 35° en vue rapprochée → 70° à `pitch_far_distance` (0,45 × taille de carte, ≤ 1500) |
-| Sélection | clic gauche sur une province ; survol = surbrillance + nom |
+| Inclinaison | automatique : 35° en vue rapprochée → 70° à `pitch_far_distance` |
+| Sélection | clic gauche : armée (prioritaire) ou province ; survol = surbrillance + nom ; Échap désélectionne l'armée |
+| Ordre de déplacement | clic droit sur une province avec une armée sélectionnée |
+| Fin du tour | bouton ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue) |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
-Options de ligne de commande (après `--`) : `--screenshot=<chemin.png>` (capture après 40 frames,
-sélectionne la province 3, puis quitte), `--focus=<x>,<y>,<distance>` (placement initial de la caméra).
+Options de ligne de commande (après `--`) :
+- `--screenshot=<chemin.png>` : capture après 40 frames puis quitte. Sur `campaign_map.tscn`, met en
+  scène la première armée du joueur sélectionnée avec l'aperçu de chemin vers la province atteignable la
+  plus coûteuse ; avec `--stage=province`, sélectionne la capitale du joueur et ouvre le recrutement.
+  Sur `start_menu.tscn`, capture l'écran de démarrage.
+- `--focus=<x>,<y>,<distance>` : placement initial de la caméra.
+
+```sh
+godot --path game                                   # menu de démarrage
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/godot-campaign-hud.png
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=out.png --stage=province
+```
+
+![Panneau de province](img/godot-campaign-province.png)
+![Écran de démarrage](img/godot-start-menu.png)
 
 ## Pointer sur les vraies données
 
-Par défaut la scène lit `<dépôt>/data/map/`. Pour un autre dossier :
+Par défaut la scène lit `<dépôt>/data/`. Pour un autre dossier :
 
 ```sh
 CENT_ANS_DATA_DIR=/chemin/vers/data godot --path game
@@ -104,42 +184,40 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 
 - `game/tools/gen_synthetic_map.gd` : `godot --headless --path game --script res://tools/gen_synthetic_map.gd`
   écrit dans `game/tests/fixtures/map/` une île 512² (bosses gaussiennes + bruit), 6 provinces de
-  Voronoï (polygones tracés depuis le raster), 2 rivières (descente de gradient), trait de côte,
-  `map.json`. Le PNG 16 bits est encodé à la main (Godot n'écrit que du 8 bits).
-- `game/tests/smoke.gd` : CampaignSim (10 tours) + chargement de la scène sur les fixtures,
-  256 tuiles, 2 rivières, 6 marqueurs, picking au centroïde de la province 3 par coordonnées monde
-  et par projection écran. `godot --headless --path game --script res://tests/smoke.gd` → code 0.
+  Voronoï, 2 rivières, trait de côte, `map.json`. Le PNG 16 bits est encodé à la main.
+- `game/tests/smoke.gd` (`godot --headless --path game --script res://tests/smoke.gd` → code 0) :
+  1. `CampaignSim` : 10 tours, date « Automne 1339 » (API M2 `new_campaign(data, "fac_france", 1337)`
+     sur `data/` si disponible, sinon ancienne signature) ;
+  2. carte sur les fixtures : décodeur 16 bits (imprimé), 256 tuiles, 2 rivières, 6 marqueurs, picking
+     de la province 3, panneau de province ;
+  3. écran de démarrage : 3 cartes, France par défaut ;
+  4. boucle de campagne France via `SimFacade` (réelle sur `data/` si disponible, sinon mock sur les
+     fixtures — imprimé « REAL »/« MOCK ») : sélection de la première armée du joueur, atteignables non
+     vides, aperçu de chemin, ordre de déplacement, 4 fins de tour, sauvegarde `user://saves/smoke.json`,
+     un tour de plus, rechargement, égalité des dates (sim et étiquette du HUD).
+  Un script `--script` est compilé avant l'enregistrement des autoloads : le test accède à `SimFacade`
+  et `MapPaths` par `/root/...` (seules les constantes/statics sont utilisables directement).
 
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |
 |---|---|---|---|
-| Fixtures 512², 6 provinces | 4 ms | 17 ms (74 k sommets, pas 2) | < 1 ms |
-| Synthétique 4096², 120 provinces, PNG 16 bits filtré Paeth, cache froid | 5,0 s (décodage GDScript) | 62 ms (279 k sommets, pas 8) | 0,9 ms (pas 4) |
-| Idem, cache chaud | 36 ms | 62 ms | 0,9 ms |
+| Fixtures 512², 6 provinces | 5 ms | 17 ms (74 k sommets, pas 2) | < 1 ms |
+| Réel 4096², 132 provinces, décodage Rust | 0,23 s (heightmap 107 ms, masques 98 ms) | 96 ms (279 k sommets, pas 8) | 0,9 ms (pas 4) |
+| Idem, repli `Png16` GDScript, cache froid | 5,3 s | idem | idem |
 
-20 000 lectures pick + hauteur : 23 ms. Mémoire résidente ≈ 120 Mo (heightmap LA8 32 Mo +
-ids RGB8 48 Mo + copies CPU).
-
-## Données réelles (`tools/geo`)
-
-Le jeu `data/map/` produit par le pipeline géo se charge tel quel (4096², 132 provinces, 485 rivières,
-289 lignes de côte) : 5,3 s au premier lancement (décodage 16 bits), 0,2 s ensuite.
-
-![Carte réelle](img/godot-real-map.png)
+20 000 lectures pick + hauteur : 23 ms. Mémoire résidente ≈ 120 Mo.
 
 ## Limites connues
 
-- Premier chargement d'une heightmap 16 bits : ~5 s si les lignes PNG sont filtrées (Paeth…),
-  quasi nul avec le filtre 0. Piste M2 : `core/` (crate `png`) décode et transmet un
-  `PackedByteArray`, supprimant `Png16` et le cache.
 - Frontières en escalier de près (résolution de `province_ids`) ; lissage possible plus tard.
 - Pas de jupes entre tuiles de LOD différents : petites fissures possibles vues de très près.
-- Rivières et côte sont rendues sans test de profondeur (visibles à travers le relief) ; largeur en
-  unités monde, non adaptée au zoom.
-- Le panneau affiche « — » pour capitale et terrain avec les données réelles (propriétés absentes du
-  GeoJSON) : ces champs viendront de `core/` (données `data/provinces/`) en M2.
-- Étiquettes masquées au-delà de 0,35 × taille × √(20 / nombre de provinces) (≈ 560 unités avec
-  132 provinces) ; pas de dé-chevauchement.
-- Panneau alimenté par les propriétés GeoJSON ; le vrai propriétaire viendra de `CampaignSim`.
+- Rivières, côte, chemin et marqueurs sont rendus sans test de profondeur (visibles à travers le relief).
+- Étiquettes de capitales sans dé-chevauchement ; elles peuvent recouvrir un marqueur d'armée.
+- Le mock ne connaît ni liens maritimes ni coûts de terrain (1 point par lien) ; ses batailles sont
+  aléatoires. Tout cela est remplacé par `core/` dès que `CampaignSim` expose l'API M2.
+- « Former une armée » prend les unités cochées de la garnison ; pas encore de fusion/scission d'armées
+  ni d'affectation de général depuis l'interface (`MergeArmies`, `SplitArmy`, `AssignGeneral` du § 1.2).
+- Un `Label3D` de compte est affiché même quand plusieurs armées se superposent exactement ; l'anneau
+  de décalage n'est appliqué qu'aux armées d'une même province.
 - macOS arm64 uniquement testé (Metal, Forward+).
