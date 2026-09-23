@@ -1,0 +1,64 @@
+{
+  "id": "evt_crue",
+  "title": "La crue",
+  "text": "Après des semaines de pluie, la rivière est sortie de son lit. Les moulins sont emportés, les champs noyés et les faubourgs submergés jusqu'aux étages.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "season",
+            "season": "spring"
+          },
+          {
+            "type": "season",
+            "season": "winter"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Faire relever les levées",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "devastation",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Attendre la décrue",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 12
+        },
+        {
+          "type": "population",
+          "percent": -1
+        },
+        {
+          "type": "health",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Maurice Champion, Les Inondations en France depuis le VIe siècle, 1858"
+  ]
+}

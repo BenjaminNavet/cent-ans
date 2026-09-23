@@ -1,0 +1,41 @@
+{
+  "id": "evt_black_death",
+  "title": "La Grande Mortalité",
+  "text": "Des galères venues de Caffa ont apporté à Marseille une pestilence inouïe. Les malades crachent le sang et meurent en trois jours ; les vivants ne suffisent plus à enterrer les morts. Le mal remonte le Rhône et gagne tout le royaume, puis les îles et le Nord.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1347,
+      "season": "autumn"
+    },
+    "until_year": 1349
+  },
+  "scope": {
+    "type": "global"
+  },
+  "options": [
+    {
+      "text": "Que Dieu ait pitié de nous",
+      "effects": [
+        {
+          "type": "plague_wave",
+          "from_year": 1347,
+          "to_year": 1350
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1347-11"
+  },
+  "sources": [
+    "Peste noire",
+    "Jean Favier, La Guerre de Cent Ans, ch. « La peste »",
+    "Ole J. Benedictow, The Black Death 1346-1353, Boydell, 2004"
+  ]
+}

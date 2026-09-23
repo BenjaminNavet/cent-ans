@@ -1,0 +1,49 @@
+{
+  "id": "evt_incendie",
+  "title": "L'incendie de la ville",
+  "text": "Un four de boulanger mal éteint a mis le feu à une rue entière. Les maisons de bois et de torchis flambent comme paille ; il faut des jours pour éteindre les dernières braises.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Aider à rebâtir en pierre",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "devastation",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les bourgeois s'en charger",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "wealth",
+          "amount": -8
+        },
+        {
+          "type": "unrest",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jacques Rossiaud, dans Histoire de la France urbaine, t. 2, Seuil, 1980"
+  ]
+}

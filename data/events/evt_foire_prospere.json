@@ -1,0 +1,48 @@
+{
+  "id": "evt_foire_prospere",
+  "title": "Une foire prospère",
+  "text": "Drapiers de Flandre, marchands lombards et changeurs se pressent à la foire. Les halles sont pleines et les péages rapportent comme jamais.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "summer"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Percevoir les droits de foire",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Accorder des franchises aux marchands",
+      "effects": [
+        {
+          "type": "wealth",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Foires de Champagne",
+    "Robert-Henri Bautier, Les Foires de Champagne, 1953"
+  ]
+}

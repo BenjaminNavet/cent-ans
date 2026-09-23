@@ -1,0 +1,52 @@
+{
+  "id": "evt_revolte_fiscale",
+  "title": "L'émeute contre l'impôt",
+  "text": "Les collecteurs de la taille ont été chassés à coups de pierres. Les bourgeois ferment les portes et jurent de ne plus rien payer tant que les abus ne cesseront.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 40,
+    "conditions": [
+      {
+        "type": "province_unrest_above",
+        "amount": 35
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Accorder une remise d'impôt",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "unrest",
+          "amount": -15
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Envoyer les sergents",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 10
+        },
+        {
+          "type": "devastation",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Harelle",
+    "Michel Mollat et Philippe Wolff, Ongles bleus, Jacques et Ciompi, 1970"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "evt_nicopolis",
+  "title": "Le désastre de Nicopolis",
+  "text": "La croisade menée contre les Turcs par Jean, comte de Nevers, fils du duc de Bourgogne, s'est brisée devant Nicopolis. Les chevaliers français ont chargé sans attendre les Hongrois ; le sultan Bayezid fait décapiter les prisonniers et ne garde que les plus riches contre rançon.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1396,
+      "season": "autumn"
+    },
+    "until_year": 1397,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Payer la rançon de l'héritier",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -15000
+        },
+        {
+          "type": "prestige",
+          "character": "heir",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever une aide sur les Flandres pour la rançon",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1396-09-25"
+  },
+  "sources": [
+    "Bataille de Nicopolis",
+    "Bertrand Schnerb, Jean sans Peur, Payot, 2005"
+  ]
+}

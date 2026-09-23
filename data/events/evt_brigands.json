@@ -1,0 +1,46 @@
+{
+  "id": "evt_brigands",
+  "title": "Les brigands",
+  "text": "Une bande de brigands et de soldats sans maître tient les bois et rançonne les voyageurs. Les marchands n'osent plus prendre la route.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Envoyer des sergents",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1200
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser les seigneurs locaux s'en charger",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "wealth",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, La Guerre de Cent Ans, PUF (Que sais-je ?), 2010",
+    "Écorcheurs"
+  ]
+}

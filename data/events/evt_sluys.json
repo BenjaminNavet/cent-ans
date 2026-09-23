@@ -1,0 +1,73 @@
+{
+  "id": "evt_sluys",
+  "title": "La bataille de L'Écluse",
+  "text": "Au port de L'Écluse, la flotte du roi Philippe est prise au piège par les nefs anglaises. Les archers d'Angleterre balaient les ponts et la mer se teint de sang. Nul n'ose dire au roi que ses navires sont perdus.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "summer"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Reconstruire la flotte à grands frais",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Renoncer à la mer et garder les côtes",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_normandie",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1340-06-24"
+  },
+  "sources": [
+    "Bataille de L'Écluse",
+    "Jean Froissart, Chroniques, livre I",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

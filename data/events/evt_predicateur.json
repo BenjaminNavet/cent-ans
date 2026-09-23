@@ -1,0 +1,46 @@
+{
+  "id": "evt_predicateur",
+  "title": "Un prédicateur exalté",
+  "text": "Un frère mendiant prêche sur les places contre le luxe des prélats et annonce la fin des temps. La foule le suit ; l'évêque demande qu'on le fasse taire.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 90
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Le livrer à l'inquisiteur",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 8
+        },
+        {
+          "type": "papal_favor",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Le laisser prêcher",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -5
+        },
+        {
+          "type": "papal_favor",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Flagellants",
+    "Jean Delumeau, La Peur en Occident, 1978"
+  ]
+}

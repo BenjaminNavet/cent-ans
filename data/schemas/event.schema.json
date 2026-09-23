@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/event.schema.json",
+  "title": "Événement de chronique",
+  "description": "Événement historique daté ou aléatoire, à conditions typées et 1 à 3 choix (data/events/, M10). Les champs `faction`/`province` optionnels des conditions et effets désignent par défaut la faction ou la province visée par l'événement.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "#/$defs/event_id" },
+    "title": { "type": "string", "description": "Titre (français)." },
+    "text": { "type": "string", "description": "Texte d'époque (français, 2 à 4 phrases)." },
+    "kind": { "type": "string", "enum": ["historical", "random"] },
+    "trigger": { "$ref": "#/$defs/trigger" },
+    "scope": { "$ref": "#/$defs/scope" },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/option" }
+    },
+    "historical_date": { "$ref": "common.schema.json#/$defs/historical_date", "description": "Date réelle de l'événement historique." },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "title", "text", "kind", "trigger", "scope", "options"],
+  "additionalProperties": false,
+  "$defs": {
+    "event_id": { "type": "string", "pattern": "^evt_[a-z0-9_]+$" },
+    "season": { "type": "string", "enum": ["spring", "summer", "autumn", "winter"] },
+    "faction_id": { "$ref": "common.schema.json#/$defs/faction_id" },
+    "province_id": { "$ref": "common.schema.json#/$defs/province_id" },
+    "province_ref": {
+      "description": "« all » (toutes les provinces contrôlées par la faction visée) ou un identifiant de province. Absent : la province visée, sinon « all ».",
+      "anyOf": [
+        { "const": "all" },
+        { "$ref": "common.schema.json#/$defs/province_id" }
+      ]
+    },
+    "character_ref": {
+      "description": "« ruler », « heir » (de la faction visée) ou un identifiant de personnage.",
+      "anyOf": [
+        { "enum": ["ruler", "heir"] },
+        { "$ref": "common.schema.json#/$defs/character_id" }
+      ]
+    },
+    "trigger": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "object",
+          "description": "Historique : date au plus tôt.",
+          "properties": {
+            "year": { "type": "integer" },
+            "season": { "$ref": "#/$defs/season" }
+          },
+          "required": ["year"],
+          "additionalProperties": false
+        },
+        "until_year": { "type": "integer", "description": "Historique : dernière année possible (défaut : année + 2)." },
+        "mean_time_to_happen": { "type": "integer", "minimum": 1, "description": "Aléatoire : nombre moyen de tours avant déclenchement." },
+        "chance_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Aléatoire : chance par tour, en pour mille." },
+        "conditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } }
+      },
+      "additionalProperties": false
+    },
+    "condition": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        { "properties": { "type": { "const": "faction_exists" }, "faction": { "$ref": "#/$defs/faction_id" } }, "required": ["faction"], "additionalProperties": false },
+        { "properties": { "type": { "const": "faction_is_player" }, "faction": { "$ref": "#/$defs/faction_id" } }, "required": ["faction"], "additionalProperties": false },
+        { "properties": { "type": { "const": "at_war" }, "a": { "$ref": "#/$defs/faction_id" }, "b": { "$ref": "#/$defs/faction_id" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "controls" }, "faction": { "$ref": "#/$defs/faction_id" }, "province": { "$ref": "#/$defs/province_id" } }, "required": ["province"], "additionalProperties": false },
+        { "properties": { "type": { "const": "character_alive" }, "id": { "$ref": "common.schema.json#/$defs/character_id" } }, "required": ["id"], "additionalProperties": false },
+        { "properties": { "type": { "const": "character_captive" }, "id": { "$ref": "common.schema.json#/$defs/character_id" } }, "required": ["id"], "additionalProperties": false },
+        { "properties": { "type": { "const": "ruler_is" }, "faction": { "$ref": "#/$defs/faction_id" }, "character": { "$ref": "common.schema.json#/$defs/character_id" } }, "required": ["faction", "character"], "additionalProperties": false },
+        { "properties": { "type": { "const": "ruler_trait" }, "faction": { "$ref": "#/$defs/faction_id" }, "trait": { "$ref": "common.schema.json#/$defs/trait_id" } }, "required": ["trait"], "additionalProperties": false },
+        { "properties": { "type": { "const": "ruler_house" }, "faction": { "$ref": "#/$defs/faction_id" }, "house": { "type": "string" } }, "required": ["house"], "additionalProperties": false },
+        { "properties": { "type": { "const": "ruler_age_between" }, "faction": { "$ref": "#/$defs/faction_id" }, "min": { "type": "integer" }, "max": { "type": "integer" } }, "required": ["min", "max"], "additionalProperties": false },
+        { "properties": { "type": { "const": "year_between" }, "from": { "type": "integer" }, "to": { "type": "integer" } }, "required": ["from", "to"], "additionalProperties": false },
+        { "properties": { "type": { "const": "province_unrest_above" }, "province": { "$ref": "#/$defs/province_id" }, "amount": { "type": "integer", "minimum": 0, "maximum": 100 } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "province_besieged" }, "province": { "$ref": "#/$defs/province_id" }, "by": { "$ref": "#/$defs/faction_id" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "province_coastal" }, "province": { "$ref": "#/$defs/province_id" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "treasury_above" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "provinces_below" }, "faction": { "$ref": "#/$defs/faction_id" }, "count": { "type": "integer", "minimum": 0 } }, "required": ["count"], "additionalProperties": false },
+        { "properties": { "type": { "const": "religion_is" }, "faction": { "$ref": "#/$defs/faction_id" }, "religion": { "$ref": "common.schema.json#/$defs/religion_id" } }, "required": ["religion"], "additionalProperties": false },
+        { "properties": { "type": { "const": "schism" }, "active": { "type": "boolean", "default": true } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "not_fired" }, "event": { "$ref": "#/$defs/event_id" } }, "required": ["event"], "additionalProperties": false },
+        { "properties": { "type": { "const": "fired" }, "event": { "$ref": "#/$defs/event_id" } }, "required": ["event"], "additionalProperties": false },
+        { "properties": { "type": { "const": "season" }, "season": { "$ref": "#/$defs/season" } }, "required": ["season"], "additionalProperties": false },
+        { "properties": { "type": { "const": "any_of" }, "conditions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/condition" } } }, "required": ["conditions"], "additionalProperties": false }
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        { "properties": { "type": { "const": "global" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "faction" }, "faction": { "$ref": "#/$defs/faction_id" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "province" }, "faction": { "$ref": "#/$defs/faction_id" }, "province": { "$ref": "#/$defs/province_id" } }, "additionalProperties": false }
+      ]
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "ai_weight": { "type": "integer", "minimum": 0, "default": 1 }
+      },
+      "required": ["text"],
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        { "properties": { "type": { "const": "treasury" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "unrest" }, "province": { "$ref": "#/$defs/province_ref" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "population" }, "province": { "$ref": "#/$defs/province_ref" }, "percent": { "type": "integer", "minimum": -100 } }, "required": ["percent"], "additionalProperties": false },
+        { "properties": { "type": { "const": "health" }, "province": { "$ref": "#/$defs/province_ref" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "wealth" }, "province": { "$ref": "#/$defs/province_ref" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "devastation" }, "province": { "$ref": "#/$defs/province_ref" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "prestige" }, "character": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "piety" }, "character": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "papal_favor" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "opinion" }, "faction": { "$ref": "#/$defs/faction_id" }, "towards": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" }, "reason": { "type": "string" }, "duration": { "type": "integer", "minimum": 1 } }, "required": ["faction", "amount", "reason"], "additionalProperties": false },
+        { "properties": { "type": { "const": "declare_war" }, "a": { "$ref": "#/$defs/faction_id" }, "b": { "$ref": "#/$defs/faction_id" } }, "required": ["a", "b"], "additionalProperties": false },
+        { "properties": { "type": { "const": "peace" }, "a": { "$ref": "#/$defs/faction_id" }, "b": { "$ref": "#/$defs/faction_id" } }, "required": ["a", "b"], "additionalProperties": false },
+        { "properties": { "type": { "const": "add_trait" }, "character": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" }, "trait": { "$ref": "common.schema.json#/$defs/trait_id" } }, "required": ["trait"], "additionalProperties": false },
+        { "properties": { "type": { "const": "kill_character" }, "id": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" } }, "required": ["id"], "additionalProperties": false },
+        { "properties": { "type": { "const": "spawn_army" }, "faction": { "$ref": "#/$defs/faction_id" }, "province": { "$ref": "#/$defs/province_id" }, "units": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/unit_type_id" } } }, "required": ["units"], "additionalProperties": false },
+        { "properties": { "type": { "const": "claim" }, "faction": { "$ref": "#/$defs/faction_id" }, "kind": { "enum": ["throne", "province"] }, "target": { "type": "string", "pattern": "^(fac|prov)_[a-z0-9_]+$" } }, "required": ["kind", "target"], "additionalProperties": false },
+        { "properties": { "type": { "const": "loyalty" }, "vassal": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
+        { "properties": { "type": { "const": "plague_wave" }, "from_year": { "type": "integer" }, "to_year": { "type": "integer" } }, "required": ["from_year", "to_year"], "additionalProperties": false }
+      ]
+    }
+  }
+}
