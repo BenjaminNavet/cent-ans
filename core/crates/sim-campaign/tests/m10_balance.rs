@@ -126,7 +126,11 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         army.location = from.clone();
         army.path.clear();
     }
-    let before: u32 = state.armies[&army_id].units.iter().map(|u| u.strength).sum();
+    let before: u32 = state.armies[&army_id]
+        .units
+        .iter()
+        .map(|u| u.strength)
+        .sum();
     state
         .submit_order(
             &data,
@@ -138,7 +142,11 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         .unwrap();
     let events = state.end_turn_with(&data, idle);
     assert_eq!(state.armies[&army_id].location, to);
-    let after: u32 = state.armies[&army_id].units.iter().map(|u| u.strength).sum();
+    let after: u32 = state.armies[&army_id]
+        .units
+        .iter()
+        .map(|u| u.strength)
+        .sum();
     assert!(after < before, "landing losses: {before} -> {after}");
     assert!(events.iter().any(|e| e.text_fr.contains("Débarquement")));
 }

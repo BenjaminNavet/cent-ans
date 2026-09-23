@@ -651,6 +651,25 @@ fn effect_totals_dict(effects: &EffectTotals) -> VarDictionary {
         "fortification_level" => &effect_value_dict(effects.fortification_level),
         "recruit_cost" => &effect_value_dict(effects.recruit_cost),
         "supply" => &effect_value_dict(effects.supply),
+        "production" => &effect_value_dict(effects.production),
+        "siege_resistance" => &effect_value_dict(effects.siege_resistance),
+        // F1: effects aimed at one social class.
+        "by_class" => &vdict! {
+            "peasants" => &class_effects_dict(&effects.classes.peasants),
+            "burghers" => &class_effects_dict(&effects.classes.burghers),
+            "clergy" => &class_effects_dict(&effects.classes.clergy),
+            "nobility" => &class_effects_dict(&effects.classes.nobility),
+        },
+    }
+}
+
+fn class_effects_dict(effects: &sim_campaign::buildings::ClassEffects) -> VarDictionary {
+    vdict! {
+        "wealth" => &effect_value_dict(effects.wealth),
+        "health" => &effect_value_dict(effects.health),
+        "unrest" => &effect_value_dict(effects.unrest),
+        "goods_satisfaction" => &effect_value_dict(effects.goods_satisfaction),
+        "growth" => &effect_value_dict(effects.growth),
     }
 }
 
