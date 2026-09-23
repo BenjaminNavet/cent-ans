@@ -11,7 +11,8 @@
   "faction": "fac_brabant",
   "role": "ruler",
   "birth": {
-    "value": "1300-01-01"
+    "value": "1300",
+    "uncertain": true
   },
   "death": {
     "value": "1355-12-05"

@@ -10,7 +10,8 @@
   "faction": "fac_verona",
   "role": "ruler",
   "birth": {
-    "value": "1308-01-01"
+    "value": "1308",
+    "uncertain": true
   },
   "death": {
     "value": "1351-06-03"
