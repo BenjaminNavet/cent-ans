@@ -18,6 +18,10 @@ pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
     Sources, UncertainInteger, UnitCategory,
 };
+pub use entities::battle_order::{
+    BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
+    BattleOrderScope,
+};
 pub use entities::building::{Building, BuildingCategory};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::event::{

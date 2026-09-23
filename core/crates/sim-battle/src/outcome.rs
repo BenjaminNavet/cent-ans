@@ -17,6 +17,10 @@ pub struct SideResult {
     pub general_killed: bool,
     #[serde(default)]
     pub general_captured: bool,
+    /// The side gave the "no quarter" order (oriflamme, dragon banner): it
+    /// took no prisoners. The campaign may use it later (lost ransoms).
+    #[serde(default)]
+    pub no_quarter: bool,
 }
 
 /// Result of a battle, accepted by `CampaignState::resolve_pending_battle`.

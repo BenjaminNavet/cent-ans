@@ -360,6 +360,7 @@ impl CampaignState {
             defender: side_setup(self, data, &request.defender, defender),
             player_side,
             siege: None,
+            orders: data.battle_orders.values().cloned().collect(),
         })
     }
 
@@ -489,6 +490,7 @@ impl CampaignState {
                 fortification: self.fortification_level(data, &request.province),
                 breach,
             }),
+            orders: data.battle_orders.values().cloned().collect(),
         }
     }
 
