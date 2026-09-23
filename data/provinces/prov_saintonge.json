@@ -1,0 +1,106 @@
+{
+  "id": "prov_saintonge",
+  "name": {
+    "display": "Saintonge et Aunis",
+    "local": "Xaintonge",
+    "local_language": "ancien français"
+  },
+  "region": "aquitaine",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Charente",
+    "Boutonne"
+  ],
+  "coastal": true,
+  "ports": [
+    "La Rochelle",
+    "Saint-Jean-d'Angély",
+    "Royan"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_salt",
+    "res_wine",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saintes",
+      "local": "Xaintes",
+      "local_language": "ancien français"
+    },
+    "lat": 45.7448,
+    "lon": -0.6326
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.6326,
+      45.7448
+    ],
+    "seed_lonlat": [
+      -0.7,
+      45.85
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "La Rochelle compte environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 212160,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 39000,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Saintonge au nord de la Charente et Aunis (La Rochelle), royales ; la Saintonge méridionale relève du duché d'Aquitaine anglais jusqu'à la confiscation de 1337. Sel des marais, vins exportés vers l'Angleterre et la Flandre.",
+  "sources": [
+    "Saintonge",
+    "Aunis",
+    "La Rochelle"
+  ]
+}

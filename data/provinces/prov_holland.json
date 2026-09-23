@@ -1,0 +1,110 @@
+{
+  "id": "prov_holland",
+  "name": {
+    "display": "Hollande et Zélande",
+    "local": "Holland",
+    "local_language": "moyen néerlandais"
+  },
+  "region": "pays_bas",
+  "terrain": "marsh",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Meuse",
+    "Rhin",
+    "Escaut",
+    "Amstel"
+  ],
+  "coastal": true,
+  "ports": [
+    "Dordrecht",
+    "Middelbourg",
+    "Amsterdam",
+    "Zierikzee"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Dordrecht",
+      "local": "Dordrecht",
+      "local_language": "moyen néerlandais"
+    },
+    "lat": 51.8133,
+    "lon": 4.6901
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.6901,
+      51.8133
+    ],
+    "seed_lonlat": [
+      4.5,
+      52.1
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_dutch",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Dordrecht compte environ 8 000 habitants, Middelbourg 5 000.",
+    "classes": {
+      "peasants": {
+        "count": 208880,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 61600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2520,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Comtés de Hollande et de Zélande tenus par Guillaume II d'Avesnes, comte de Hainaut (faction à créer). Polders, digues, harengs ; Dordrecht détient l'étape des marchandises rhénanes.",
+  "sources": [
+    "Comté de Hollande",
+    "Comté de Zélande",
+    "Dordrecht"
+  ]
+}

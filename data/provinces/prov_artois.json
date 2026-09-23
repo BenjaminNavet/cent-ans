@@ -32,6 +32,17 @@
     "lat": 50.291,
     "lon": 2.7775
   },
+  "geo": {
+    "capital_lonlat": [
+      2.7775,
+      50.291
+    ],
+    "seed_lonlat": [
+      2.5,
+      50.45
+    ],
+    "voronoi_weight": 0.8
+  },
   "owner": "fac_burgundy",
   "overlord": "fac_france",
   "holder": "chr_jeanne_iii_de_bourgogne",
@@ -39,48 +50,48 @@
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Arras et Saint-Omer comptent 20 000 à 30 000 habitants chacune ; Calais (côte) n'est pas incluse dans cette province de l'échantillon.",
+    "note": "Arras et Saint-Omer comptent 20 000 à 30 000 habitants chacune ; Calais est dans le Boulonnais.",
     "classes": {
       "peasants": {
-        "count": 280000,
+        "count": 280137,
         "unrest": 15,
         "health": 55,
-        "wealth": 50,
+        "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 70000,
+        "count": 68590,
         "unrest": 15,
         "health": 50,
-        "wealth": 65,
+        "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9000,
+        "count": 9025,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2500,
-        "unrest": 20,
+        "count": 3248,
+        "unrest": 15,
         "health": 60,
         "wealth": 70,
-        "goods_satisfaction": 70
+        "goods_satisfaction": 75
       }
     }
   },
   "buildings": [
     "bld_market",
-    "bld_fair",
+    "bld_parish_church",
     "bld_windmill",
     "bld_weaving_workshop",
-    "bld_parish_church",
     "bld_abbey",
     "bld_cathedral",
     "bld_stone_walls",
-    "bld_muster_field"
+    "bld_muster_field",
+    "bld_stables"
   ],
   "fortification_level": 2,
   "base_supply": 5000,

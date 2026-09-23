@@ -1,0 +1,102 @@
+{
+  "id": "prov_swabia",
+  "name": {
+    "display": "Souabe",
+    "local": "Schwaben",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_sud",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Neckar",
+    "Lech",
+    "Iller"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Augsbourg",
+      "local": "Augsburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 48.3705,
+    "lon": 10.8978
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.8978,
+      48.3705
+    ],
+    "seed_lonlat": [
+      9.6,
+      48.4
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Augsbourg compte environ 15 000 habitants, Ulm 8 000.",
+    "classes": {
+      "peasants": {
+        "count": 429520,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 72800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 13000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4680,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 6000,
+  "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d'Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
+  "sources": [
+    "Duché de Souabe",
+    "Comté de Wurtemberg",
+    "Augsbourg"
+  ]
+}

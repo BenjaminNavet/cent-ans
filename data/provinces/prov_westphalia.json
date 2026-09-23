@@ -1,0 +1,100 @@
+{
+  "id": "prov_westphalia",
+  "name": {
+    "display": "Westphalie",
+    "local": "Westfalen",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Ems",
+    "Lippe",
+    "Weser"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Münster",
+      "local": "Münster",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.9607,
+    "lon": 7.6261
+  },
+  "geo": {
+    "capital_lonlat": [
+      7.6261,
+      51.9607
+    ],
+    "seed_lonlat": [
+      8.1,
+      51.8
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Dortmund et Münster comptent chacune environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 296101,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 42000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3149,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Duché de Westphalie (archevêque de Cologne), évêchés de Münster, Paderborn et Osnabrück, comté de La Marck (Adolphe II). Villes hanséatiques de Dortmund et Soest.",
+  "sources": [
+    "Westphalie",
+    "Principauté épiscopale de Münster",
+    "Dortmund"
+  ]
+}

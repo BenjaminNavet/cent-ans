@@ -1,0 +1,108 @@
+{
+  "id": "prov_granada",
+  "name": {
+    "display": "Grenade et Almería",
+    "local": "Gharnata",
+    "local_language": "arabe andalou"
+  },
+  "region": "iberie_sud",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Genil",
+    "Andarax"
+  ],
+  "coastal": true,
+  "ports": [
+    "Almería",
+    "Motril"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wine",
+    "res_wheat",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Grenade",
+      "local": "Gharnata",
+      "local_language": "arabe andalou"
+    },
+    "lat": 37.1773,
+    "lon": -3.5986
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.5986,
+      37.1773
+    ],
+    "seed_lonlat": [
+      -2.9,
+      37.15
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_castile",
+  "culture": "cul_andalusi",
+  "religion": "rel_islam",
+  "population": {
+    "uncertain": true,
+    "note": "Grenade compte environ 50 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 220080,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 50400,
+        "unrest": 20,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2520,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Émirat nasride de Grenade sous Yusuf Ier (faction musulmane à créer ; fac_castile n'est qu'un substitut, l'émirat étant tributaire de la Castille par intermittence). Alhambra, soie, vega irriguée ; Almería, port vers le Maghreb.",
+  "sources": [
+    "Royaume de Grenade",
+    "Yusuf Ier de Grenade",
+    "Almería"
+  ]
+}

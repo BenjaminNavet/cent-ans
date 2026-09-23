@@ -1,0 +1,111 @@
+{
+  "id": "prov_wessex",
+  "name": {
+    "display": "Wessex (Hampshire, Wiltshire, Dorset)",
+    "local": "Westsex",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Avon",
+    "Test",
+    "Itchen",
+    "Stour"
+  ],
+  "coastal": true,
+  "ports": [
+    "Southampton",
+    "Portsmouth",
+    "Poole",
+    "Weymouth"
+  ],
+  "sea_zones": [
+    "sea_channel"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_cloth",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Winchester",
+      "local": "Wynchestre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 51.0632,
+    "lon": -1.308
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.308,
+      51.0632
+    ],
+    "seed_lonlat": [
+      -1.7,
+      51.0
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Southampton et Winchester comptent chacune environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 304561,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 43200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3239,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Hampshire, Wiltshire, Dorset et Berkshire : Winchester (étape de la laine), Southampton (port des vins de Gascogne, brûlé par les Franco-Génois en 1338), Salisbury. Moutons des Downs, pierre de Portland.",
+  "sources": [
+    "Wessex",
+    "Southampton",
+    "Winchester"
+  ]
+}

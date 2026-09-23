@@ -1,0 +1,102 @@
+{
+  "id": "prov_cologne",
+  "name": {
+    "display": "Cologne",
+    "local": "Köln",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Ruhr",
+    "Erft"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cologne",
+      "local": "Köln",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 50.9375,
+    "lon": 6.9603
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.9603,
+      50.9375
+    ],
+    "seed_lonlat": [
+      6.9,
+      51.1
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Cologne compte environ 40 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 238720,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 70400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4500,
+  "description": "Électorat de Cologne (archevêque Walram de Juliers) et ville libre de Cologne, la plus grande cité d'Allemagne ; comtés de Juliers (Guillaume, allié d'Édouard III, marquis en 1336), de Berg et de Clèves.",
+  "sources": [
+    "Électorat de Cologne",
+    "Cologne",
+    "Duché de Juliers"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "id": "prov_utrecht",
+  "name": {
+    "display": "Utrecht",
+    "local": "Utrecht",
+    "local_language": "moyen néerlandais"
+  },
+  "region": "pays_bas",
+  "terrain": "marsh",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Vecht",
+    "IJssel"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Utrecht",
+      "local": "Utrecht",
+      "local_language": "moyen néerlandais"
+    },
+    "lat": 52.0907,
+    "lon": 5.1214
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.1214,
+      52.0907
+    ],
+    "seed_lonlat": [
+      5.4,
+      52.4
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_dutch",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Utrecht compte environ 10 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 84261,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 22000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 989,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Principauté épiscopale d'Utrecht (Nedersticht et Oversticht : Deventer, Zwolle, Kampen), évêque Jean IV d'Arkel (faction à créer). Villes de l'IJssel liées à la Hanse.",
+  "sources": [
+    "Principauté épiscopale d'Utrecht",
+    "Utrecht"
+  ]
+}

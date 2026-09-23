@@ -1,0 +1,98 @@
+{
+  "id": "prov_orleanais",
+  "name": {
+    "display": "Orléanais et Blésois",
+    "local": "Orlenois",
+    "local_language": "ancien français"
+  },
+  "region": "france_centre",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Loire",
+    "Loiret",
+    "Loir"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Orléans",
+      "local": "Orliens",
+      "local_language": "ancien français"
+    },
+    "lat": 47.9029,
+    "lon": 1.9039
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.9039,
+      47.9029
+    ],
+    "seed_lonlat": [
+      1.7,
+      47.85
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Orléans compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 313881,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 53200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Domaine royal (duché d'Orléans créé en 1344 pour Philippe, frère du roi) et comté de Blois, tenu par Guy Ier de Châtillon, frère de Charles de Blois. Beauce céréalière, forêt d'Orléans, Sologne.",
+  "sources": [
+    "Orléanais",
+    "Comté de Blois",
+    "Orléans"
+  ]
+}

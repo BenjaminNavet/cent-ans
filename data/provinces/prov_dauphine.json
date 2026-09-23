@@ -1,0 +1,101 @@
+{
+  "id": "prov_dauphine",
+  "name": {
+    "display": "Dauphiné",
+    "local": "Dalfinat",
+    "local_language": "franco-provençal"
+  },
+  "region": "provence_alpes",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Isère",
+    "Rhône",
+    "Drôme",
+    "Durance"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wood",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Grenoble",
+      "local": "Grenoblo",
+      "local_language": "franco-provençal"
+    },
+    "lat": 45.1885,
+    "lon": 5.7245
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.7245,
+      45.1885
+    ],
+    "seed_lonlat": [
+      5.8,
+      44.85
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Grenoble compte environ 6 000 habitants, Vienne 8 000.",
+    "classes": {
+      "peasants": {
+        "count": 311761,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 36000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3239,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Dauphiné de Viennois, terre d'Empire tenue par le dauphin Humbert II (maison de La Tour-du-Pin, faction à créer), en guerre contre la Savoie ; le transport à la France n'a lieu qu'en 1349. Le nord parle franco-provençal, le sud occitan.",
+  "sources": [
+    "Dauphiné de Viennois",
+    "Humbert II de Viennois",
+    "Grenoble"
+  ]
+}

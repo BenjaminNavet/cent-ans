@@ -1,0 +1,98 @@
+{
+  "id": "prov_auvergne",
+  "name": {
+    "display": "Auvergne",
+    "local": "Alvernhe",
+    "local_language": "occitan"
+  },
+  "region": "france_centre",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Allier",
+    "Dordogne",
+    "Sioule"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_stone",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Clermont",
+      "local": "Clarmont",
+      "local_language": "occitan"
+    },
+    "lat": 45.7772,
+    "lon": 3.087
+  },
+  "geo": {
+    "capital_lonlat": [
+      3.087,
+      45.7772
+    ],
+    "seed_lonlat": [
+      3.0,
+      45.45
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Clermont et Montferrand comptent ensemble environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 402960,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 41400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 11500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4140,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5500,
+  "description": "Terre royale d'Auvergne (Riom, bailliage royal) et comté d'Auvergne tenu par Guillaume XII (faction à créer : Auvergne-Boulogne). Dauphiné d'Auvergne, évêché de Clermont. Volcans, estives, fromages.",
+  "sources": [
+    "Comté d'Auvergne",
+    "Terre d'Auvergne",
+    "Clermont-Ferrand"
+  ]
+}

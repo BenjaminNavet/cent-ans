@@ -1,0 +1,100 @@
+{
+  "id": "prov_liege",
+  "name": {
+    "display": "Liège",
+    "local": "Liège",
+    "local_language": "ancien français"
+  },
+  "region": "pays_bas",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Meuse",
+    "Ourthe",
+    "Sambre"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Liège",
+      "local": "Liège",
+      "local_language": "ancien français"
+    },
+    "lat": 50.6326,
+    "lon": 5.5797
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.5797,
+      50.6326
+    ],
+    "seed_lonlat": [
+      5.5,
+      50.5
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Liège compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 199160,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 52000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_forge"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Principauté épiscopale de Liège, évêque Adolphe de La Marck (faction à créer), allié de la France. Houillères et forges de la Meuse, Huy, Dinant (dinanderie).",
+  "sources": [
+    "Principauté de Liège",
+    "Adolphe de La Marck",
+    "Liège"
+  ]
+}

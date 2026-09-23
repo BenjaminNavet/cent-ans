@@ -39,6 +39,17 @@
     "lat": 51.0543,
     "lon": 3.7174
   },
+  "geo": {
+    "capital_lonlat": [
+      3.7174,
+      51.0543
+    ],
+    "seed_lonlat": [
+      3.5,
+      51.0
+    ],
+    "voronoi_weight": 1.0
+  },
   "owner": "fac_flanders",
   "overlord": "fac_france",
   "holder": "chr_louis_de_nevers",
@@ -49,50 +60,51 @@
     "note": "Gand 60 000 hab., Bruges 45 000, Ypres 25 000 : la région la plus urbanisée au nord des Alpes. Mécontentement bourgeois élevé à cause de l'embargo anglais sur la laine (1336).",
     "classes": {
       "peasants": {
-        "count": 350000,
+        "count": 343982,
         "unrest": 20,
         "health": 55,
         "wealth": 45,
-        "goods_satisfaction": 55
+        "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 220000,
+        "count": 223060,
         "unrest": 45,
         "health": 45,
-        "wealth": 60,
-        "goods_satisfaction": 35
+        "wealth": 70,
+        "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 15000,
-        "unrest": 10,
-        "health": 60,
-        "wealth": 65,
-        "goods_satisfaction": 70
-      },
-      "nobility": {
-        "count": 2500,
-        "unrest": 25,
+        "count": 14675,
+        "unrest": 5,
         "health": 60,
         "wealth": 70,
-        "goods_satisfaction": 70
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 5283,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
       }
     }
   },
   "buildings": [
     "bld_market",
-    "bld_fair",
-    "bld_port",
-    "bld_windmill",
-    "bld_weaving_workshop",
-    "bld_guild_hall",
     "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
     "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
     "bld_hotel_dieu",
     "bld_stone_walls",
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 6000,
+  "base_supply": 6500,
   "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s'oppose à ses bourgeois qui dépendent de la laine anglaise.",
   "sources": [
     "Comté de Flandre",

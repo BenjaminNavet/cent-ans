@@ -1,0 +1,110 @@
+{
+  "id": "prov_sevilla",
+  "name": {
+    "display": "Andalousie (Séville)",
+    "local": "Sevilla",
+    "local_language": "castillan"
+  },
+  "region": "iberie_sud",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Guadalquivir",
+    "Guadalete"
+  ],
+  "coastal": true,
+  "ports": [
+    "Séville",
+    "Cadix",
+    "Sanlúcar",
+    "Tarifa"
+  ],
+  "sea_zones": [
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Séville",
+      "local": "Sevilla",
+      "local_language": "castillan"
+    },
+    "lat": 37.3891,
+    "lon": -5.9845
+  },
+  "geo": {
+    "capital_lonlat": [
+      -5.9845,
+      37.3891
+    ],
+    "seed_lonlat": [
+      -6.1,
+      37.4
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Séville compte environ 25 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 259380,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 59400,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2970,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4500,
+  "description": "Séville, Cadix, Jerez : frontière maritime face aux Mérinides (Gibraltar perdu en 1333 ; la bataille du Salado aura lieu en octobre 1340). Flotte castillane de Séville, chantier des Atarazanas.",
+  "sources": [
+    "Séville",
+    "Bataille du Salado",
+    "Cadix"
+  ]
+}

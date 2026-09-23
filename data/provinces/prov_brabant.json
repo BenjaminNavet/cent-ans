@@ -1,0 +1,109 @@
+{
+  "id": "prov_brabant",
+  "name": {
+    "display": "Brabant",
+    "local": "Brabant",
+    "local_language": "moyen néerlandais"
+  },
+  "region": "pays_bas",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Escaut",
+    "Dyle",
+    "Senne",
+    "Meuse"
+  ],
+  "coastal": true,
+  "ports": [
+    "Anvers"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Louvain",
+      "local": "Leuven",
+      "local_language": "moyen néerlandais"
+    },
+    "lat": 50.8798,
+    "lon": 4.7005
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.7005,
+      50.8798
+    ],
+    "seed_lonlat": [
+      4.7,
+      51.0
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_flemish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bruxelles et Louvain comptent chacune 20 000 à 25 000 habitants, Malines 15 000.",
+    "classes": {
+      "peasants": {
+        "count": 288121,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 117600,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 10500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3779,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5500,
+  "description": "Duché de Brabant et Limbourg tenu par Jean III (faction à créer), qui louvoie entre France et Angleterre ; Louvain, Bruxelles, Malines et Anvers (étape de la laine anglaise en 1338).",
+  "sources": [
+    "Duché de Brabant",
+    "Jean III de Brabant",
+    "Louvain"
+  ]
+}

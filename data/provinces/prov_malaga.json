@@ -1,0 +1,107 @@
+{
+  "id": "prov_malaga",
+  "name": {
+    "display": "Málaga et Ronda",
+    "local": "Malaqa",
+    "local_language": "arabe andalou"
+  },
+  "region": "iberie_sud",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Guadalhorce",
+    "Guadiaro"
+  ],
+  "coastal": true,
+  "ports": [
+    "Málaga",
+    "Algésiras",
+    "Gibraltar"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wine",
+    "res_salt",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Málaga",
+      "local": "Malaqa",
+      "local_language": "arabe andalou"
+    },
+    "lat": 36.7213,
+    "lon": -4.4214
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.4214,
+      36.7213
+    ],
+    "seed_lonlat": [
+      -4.8,
+      36.8
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_castile",
+  "culture": "cul_andalusi",
+  "religion": "rel_islam",
+  "population": {
+    "uncertain": true,
+    "note": "Málaga compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 179521,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 33000,
+        "unrest": 20,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Ouest de l'émirat de Grenade : Málaga, Ronda, Algésiras ; Gibraltar reprise par les Mérinides en 1333 et tenue avec Algésiras par le sultan Abu al-Hasan (faction à créer). Porte des invasions marocaines.",
+  "sources": [
+    "Royaume de Grenade",
+    "Siège de Gibraltar (1333)",
+    "Málaga"
+  ]
+}

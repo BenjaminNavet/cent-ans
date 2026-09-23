@@ -1,0 +1,94 @@
+{
+  "id": "prov_extremadura",
+  "name": {
+    "display": "Estrémadure",
+    "local": "Extremadura",
+    "local_language": "castillan"
+  },
+  "region": "iberie_centre",
+  "terrain": "heath",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Tage",
+    "Guadiana"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Badajoz",
+      "local": "Badajoz",
+      "local_language": "castillan"
+    },
+    "lat": 38.8794,
+    "lon": -6.9706
+  },
+  "geo": {
+    "capital_lonlat": [
+      -6.9706,
+      38.8794
+    ],
+    "seed_lonlat": [
+      -6.2,
+      39.1
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Badajoz compte environ 6 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 197121,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 15400,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Estrémadure léonaise (Badajoz, Cáceres, Plasencia), frontière avec le Portugal en guerre (1336-1339) ; terres des ordres militaires d'Alcántara et de Santiago, pâturages de la Mesta.",
+  "sources": [
+    "Estrémadure",
+    "Ordre d'Alcántara",
+    "Guerre luso-castillane (1336-1339)"
+  ]
+}

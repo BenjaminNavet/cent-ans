@@ -1,0 +1,102 @@
+{
+  "id": "prov_sjaelland",
+  "name": {
+    "display": "Seeland et Scanie",
+    "local": "Sjælland",
+    "local_language": "vieux danois"
+  },
+  "region": "scandinavie",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [],
+  "coastal": true,
+  "ports": [
+    "Copenhague",
+    "Lund",
+    "Skanör"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Roskilde",
+      "local": "Roskilde",
+      "local_language": "vieux danois"
+    },
+    "lat": 55.6415,
+    "lon": 12.0803
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.0803,
+      55.6415
+    ],
+    "seed_lonlat": [
+      12.5,
+      55.7
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_empire",
+  "culture": "cul_danish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Lund et Roskilde comptent chacune environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 245280,
+        "unrest": 25,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 25200,
+        "unrest": 25,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2520,
+        "unrest": 25,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 4000,
+  "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s'est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu'à Valdemar IV (1340).",
+  "sources": [
+    "Interrègne danois (1332-1340)",
+    "Scanie",
+    "Roskilde"
+  ]
+}

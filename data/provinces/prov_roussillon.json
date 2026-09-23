@@ -1,0 +1,105 @@
+{
+  "id": "prov_roussillon",
+  "name": {
+    "display": "Roussillon et Cerdagne",
+    "local": "Rosselló",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Têt",
+    "Tech",
+    "Agly"
+  ],
+  "coastal": true,
+  "ports": [
+    "Collioure"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wine",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Perpignan",
+      "local": "Perpinyà",
+      "local_language": "catalan"
+    },
+    "lat": 42.6887,
+    "lon": 2.8954
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.8954,
+      42.6887
+    ],
+    "seed_lonlat": [
+      2.5,
+      42.55
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_aragon",
+  "overlord": "fac_aragon",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Perpignan compte environ 12 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 70741,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 809,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Comtés de Roussillon et de Cerdagne, terres continentales du royaume de Majorque (Jacques III, faction à créer) ; Perpignan, sa capitale drapière. Réunis à l'Aragon en 1344.",
+  "sources": [
+    "Royaume de Majorque",
+    "Comté de Roussillon",
+    "Perpignan"
+  ]
+}

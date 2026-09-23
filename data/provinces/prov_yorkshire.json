@@ -1,0 +1,111 @@
+{
+  "id": "prov_yorkshire",
+  "name": {
+    "display": "Yorkshire",
+    "local": "Everwykshire",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_nord",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Ouse",
+    "Humber",
+    "Aire",
+    "Swale"
+  ],
+  "coastal": true,
+  "ports": [
+    "Hull",
+    "Scarborough",
+    "Whitby"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_cloth",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "York",
+      "local": "Everwyk",
+      "local_language": "moyen anglais"
+    },
+    "lat": 53.96,
+    "lon": -1.0873
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.0873,
+      53.96
+    ],
+    "seed_lonlat": [
+      -1.1,
+      54.1
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "York compte environ 12 000 habitants, Hull 5 000.",
+    "classes": {
+      "peasants": {
+        "count": 355321,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 50400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 10500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3779,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 3,
+  "base_supply": 5500,
+  "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d'Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux.",
+  "sources": [
+    "Yorkshire",
+    "York",
+    "Kingston upon Hull"
+  ]
+}

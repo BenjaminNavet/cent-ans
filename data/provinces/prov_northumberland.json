@@ -1,0 +1,108 @@
+{
+  "id": "prov_northumberland",
+  "name": {
+    "display": "Northumberland et Cumbrie",
+    "local": "Northumbreland",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_nord",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Tyne",
+    "Tweed",
+    "Eden",
+    "Wear"
+  ],
+  "coastal": true,
+  "ports": [
+    "Newcastle",
+    "Berwick",
+    "Carlisle"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_iron",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Newcastle",
+      "local": "Newcastel",
+      "local_language": "moyen anglais"
+    },
+    "lat": 54.9783,
+    "lon": -1.6178
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.6178,
+      54.9783
+    ],
+    "seed_lonlat": [
+      -2.4,
+      54.95
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Newcastle compte environ 6 000 habitants ; Andrew Murray a ravagé la région en 1337.",
+    "classes": {
+      "peasants": {
+        "count": 192721,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 19800,
+        "unrest": 20,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Marches d'Écosse : Northumberland (Percy), palatinat de Durham, Cumberland et Westmorland (Carlisle). Berwick reprise en 1333. Charbon de Newcastle, raids écossais.",
+  "sources": [
+    "Northumberland",
+    "Marches anglo-écossaises",
+    "Berwick-upon-Tweed"
+  ]
+}

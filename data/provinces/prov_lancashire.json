@@ -1,0 +1,106 @@
+{
+  "id": "prov_lancashire",
+  "name": {
+    "display": "Lancastre et Cheshire",
+    "local": "Lancastreshire",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_nord",
+  "terrain": "marsh",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Ribble",
+    "Mersey",
+    "Lune",
+    "Dee"
+  ],
+  "coastal": true,
+  "ports": [
+    "Liverpool",
+    "Chester"
+  ],
+  "sea_zones": [
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lancastre",
+      "local": "Lancastre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 54.0466,
+    "lon": -2.8007
+  },
+  "geo": {
+    "capital_lonlat": [
+      -2.8007,
+      54.0466
+    ],
+    "seed_lonlat": [
+      -2.6,
+      53.6
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_england",
+  "holder": "chr_henry_of_grosmont",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Chester compte environ 4 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 115180,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1170,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Comté palatin de Lancastre (Henri de Lancastre, père d'Henri de Grosmont) et comté palatin de Chester (domaine du prince). Sel de Cheshire, archers du Cheshire, Chester, port vers l'Irlande.",
+  "sources": [
+    "Comté de Lancastre",
+    "Cheshire",
+    "Henri de Lancastre (1281-1345)"
+  ]
+}

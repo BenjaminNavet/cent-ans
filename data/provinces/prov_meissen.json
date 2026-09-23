@@ -1,0 +1,102 @@
+{
+  "id": "prov_meissen",
+  "name": {
+    "display": "Misnie et Thuringe",
+    "local": "Meißen",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Elbe",
+    "Saale",
+    "Mulde",
+    "Unstrut"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Meissen",
+      "local": "Meißen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.1622,
+    "lon": 13.4737
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.4737,
+      51.1622
+    ],
+    "seed_lonlat": [
+      12.4,
+      51.0
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Erfurt compte environ 18 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 325281,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 41800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3419,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Marche de Misnie et landgraviat de Thuringe tenus par Frédéric II de Wettin (faction à créer) ; Erfurt (Mayence), Leipzig (foires). Mines d'argent de Freiberg.",
+  "sources": [
+    "Marche de Misnie",
+    "Frédéric II de Misnie",
+    "Erfurt"
+  ]
+}

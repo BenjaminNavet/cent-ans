@@ -1,0 +1,104 @@
+{
+  "id": "prov_boulonnais",
+  "name": {
+    "display": "Boulonnais et Calaisis",
+    "local": "Boulenois",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Liane",
+    "Aa"
+  ],
+  "coastal": true,
+  "ports": [
+    "Boulogne",
+    "Calais",
+    "Wissant"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Boulogne",
+      "local": "Bouloigne",
+      "local_language": "ancien français"
+    },
+    "lat": 50.7264,
+    "lon": 1.6136
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.6136,
+      50.7264
+    ],
+    "seed_lonlat": [
+      1.75,
+      50.7
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Calais compte environ 8 000 habitants, Boulogne 6 000.",
+    "classes": {
+      "peasants": {
+        "count": 70741,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 809,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Comté de Boulogne, tenu par Robert VII d'Auvergne (faction à créer : maison d'Auvergne-Boulogne) en fief du roi. Calais est une ville française du comté d'Artois / Boulonnais ; sa prise par Édouard III n'aura lieu qu'en 1347.",
+  "sources": [
+    "Comté de Boulogne",
+    "Calais",
+    "Siège de Calais (1346-1347)"
+  ]
+}

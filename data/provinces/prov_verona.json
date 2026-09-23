@@ -1,0 +1,102 @@
+{
+  "id": "prov_verona",
+  "name": {
+    "display": "Vérone et Vicence",
+    "local": "Verona",
+    "local_language": "vénitien"
+  },
+  "region": "italie_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Adige",
+    "Brenta",
+    "Mincio"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_cloth",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Vérone",
+      "local": "Verona",
+      "local_language": "vénitien"
+    },
+    "lat": 45.4384,
+    "lon": 10.9916
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.9916,
+      45.4384
+    ],
+    "seed_lonlat": [
+      11.0,
+      45.55
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Vérone compte environ 30 000 habitants, Padoue 35 000.",
+    "classes": {
+      "peasants": {
+        "count": 321721,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 84000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 10500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3779,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 5500,
+  "description": "Seigneurie de Mastino II della Scala (faction à créer), à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques) mais attaquée depuis 1336 par la ligue Venise-Florence-Visconti ; Padoue perdue en août 1337. Mantoue des Gonzague au sud.",
+  "sources": [
+    "Mastino II della Scala",
+    "Seigneurie de Vérone",
+    "Guerre de Vérone (1336-1339)"
+  ]
+}

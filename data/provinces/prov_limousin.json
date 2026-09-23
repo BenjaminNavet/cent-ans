@@ -1,0 +1,97 @@
+{
+  "id": "prov_limousin",
+  "name": {
+    "display": "Limousin",
+    "local": "Lemosin",
+    "local_language": "occitan"
+  },
+  "region": "france_centre",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Vienne",
+    "Vézère",
+    "Creuse"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Limoges",
+      "local": "Lemòtges",
+      "local_language": "occitan"
+    },
+    "lat": 45.8336,
+    "lon": 1.2611
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.2611,
+      45.8336
+    ],
+    "seed_lonlat": [
+      1.5,
+      45.65
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Limoges compte environ 12 000 habitants (Cité et Château).",
+    "classes": {
+      "peasants": {
+        "count": 262800,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 27000,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2700,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Vicomté de Limoges disputée entre la maison de Bretagne (Jean III) et Jeanne de Penthièvre, sous suzeraineté française contestée par le duc d'Aquitaine. Émaux de Limoges, abbaye de Saint-Martial.",
+  "sources": [
+    "Limousin",
+    "Vicomté de Limoges",
+    "Limoges"
+  ]
+}

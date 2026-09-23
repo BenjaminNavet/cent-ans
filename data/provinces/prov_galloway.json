@@ -1,0 +1,104 @@
+{
+  "id": "prov_galloway",
+  "name": {
+    "display": "Galloway et Annandale",
+    "local": "Gallowa",
+    "local_language": "scots"
+  },
+  "region": "ecosse",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Nith",
+    "Annan",
+    "Dee"
+  ],
+  "coastal": true,
+  "ports": [
+    "Kirkcudbright",
+    "Dumfries"
+  ],
+  "sea_zones": [
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Dumfries",
+      "local": "Dumfries",
+      "local_language": "scots"
+    },
+    "lat": 55.0703,
+    "lon": -3.611
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.611,
+      55.0703
+    ],
+    "seed_lonlat": [
+      -4.1,
+      55.0
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_england",
+  "holder": "chr_edward_balliol",
+  "culture": "cul_scottish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Aucune ville ne dépasse 2 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 63420,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 630,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_palisade",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2500,
+  "description": "Galloway, patrimoine des Balliol, et Annandale (Bruce) : base d'Édouard Balliol, roi d'Écosse sous protection anglaise (faction Balliol à créer ou rattachée à fac_england). Comté de Carrick.",
+  "sources": [
+    "Galloway",
+    "Édouard Balliol",
+    "Annandale"
+  ]
+}

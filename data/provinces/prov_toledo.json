@@ -1,0 +1,101 @@
+{
+  "id": "prov_toledo",
+  "name": {
+    "display": "Nouvelle-Castille",
+    "local": "Toledo",
+    "local_language": "castillan"
+  },
+  "region": "iberie_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Tage",
+    "Guadiana",
+    "Jarama"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tolède",
+      "local": "Toledo",
+      "local_language": "castillan"
+    },
+    "lat": 39.8628,
+    "lon": -4.0273
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.0273,
+      39.8628
+    ],
+    "seed_lonlat": [
+      -3.7,
+      40.1
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_castile",
+  "holder": "chr_alfonso_xi",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Tolède compte environ 25 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 439920,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 62400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 13000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4680,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_stables",
+    "bld_forge"
+  ],
+  "fortification_level": 3,
+  "base_supply": 6000,
+  "description": "Royaume de Tolède : Tolède (primat des Espagnes, capitale de jeu de la Castille), Madrid, Cuenca, Guadalajara. Aciers de Tolède, juiveries, ordres militaires de Calatrava et Santiago dans la Manche.",
+  "sources": [
+    "Alphonse XI de Castille",
+    "Tolède",
+    "Ordre de Calatrava"
+  ]
+}

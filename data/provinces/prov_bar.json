@@ -1,0 +1,94 @@
+{
+  "id": "prov_bar",
+  "name": {
+    "display": "Barrois",
+    "local": "Bar",
+    "local_language": "ancien français"
+  },
+  "region": "france_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Meuse",
+    "Ornain",
+    "Marne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bar-le-Duc",
+      "local": "Bar",
+      "local_language": "ancien français"
+    },
+    "lat": 48.7728,
+    "lon": 5.1611
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.1611,
+      48.7728
+    ],
+    "seed_lonlat": [
+      5.35,
+      48.75
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bar-le-Duc compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 113880,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 11700,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1170,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Comté de Bar tenu par Henri IV de Bar (faction à créer) : le Barrois mouvant, à l'ouest de la Meuse, est fief du roi de France depuis 1301 ; le reste relève de l'Empire.",
+  "sources": [
+    "Comté de Bar",
+    "Barrois mouvant"
+  ]
+}

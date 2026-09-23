@@ -1,0 +1,106 @@
+{
+  "id": "prov_munster",
+  "name": {
+    "display": "Munster",
+    "local": "Mumhain",
+    "local_language": "gaélique irlandais"
+  },
+  "region": "irlande",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Shannon",
+    "Suir",
+    "Lee",
+    "Blackwater"
+  ],
+  "coastal": true,
+  "ports": [
+    "Cork",
+    "Limerick",
+    "Youghal",
+    "Kinsale"
+  ],
+  "sea_zones": [
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cork",
+      "local": "Corcaigh",
+      "local_language": "gaélique irlandais"
+    },
+    "lat": 51.8985,
+    "lon": -8.4756
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.4756,
+      51.8985
+    ],
+    "seed_lonlat": [
+      -8.6,
+      52.4
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_england",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Cork et Limerick comptent chacune environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 192721,
+        "unrest": 30,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 19800,
+        "unrest": 30,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1979,
+        "unrest": 30,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Munster : comtes de Desmond (Maurice FitzGerald) et d'Ormond (James Butler, 1328 ; faction anglo-irlandaise à créer), villes royales de Cork et Limerick ; rois gaéliques Mac Carthaigh et Ó Briain dans le Kerry et le Thomond.",
+  "sources": [
+    "Munster",
+    "Comte de Desmond",
+    "Cork"
+  ]
+}

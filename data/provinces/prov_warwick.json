@@ -1,0 +1,100 @@
+{
+  "id": "prov_warwick",
+  "name": {
+    "display": "Mercie (Warwick et Stafford)",
+    "local": "Warwyk",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_centre",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Avon",
+    "Trent",
+    "Severn"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wool",
+    "res_cloth",
+    "res_iron",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Coventry",
+      "local": "Coventre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 52.4068,
+    "lon": -1.5197
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.5197,
+      52.4068
+    ],
+    "seed_lonlat": [
+      -1.7,
+      52.6
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Coventry compte environ 7 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 308161,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 39600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3239,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Warwickshire, Staffordshire, Leicestershire, Derbyshire, Nottinghamshire : Coventry (draps bleus), forêt d'Arden, Sherwood, plomb du Peak. Comté de Derby créé le 16 mars 1337 pour Henri de Grosmont.",
+  "sources": [
+    "Mercie",
+    "Coventry",
+    "Henri de Grosmont"
+  ]
+}

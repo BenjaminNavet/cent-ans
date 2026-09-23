@@ -1,0 +1,108 @@
+{
+  "id": "prov_valencia",
+  "name": {
+    "display": "Valence",
+    "local": "València",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Turia",
+    "Júcar",
+    "Segura"
+  ],
+  "coastal": true,
+  "ports": [
+    "Valence",
+    "Alicante",
+    "Peñíscola"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_salt",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Valence",
+      "local": "València",
+      "local_language": "catalan"
+    },
+    "lat": 39.4699,
+    "lon": -0.3763
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.3763,
+      39.4699
+    ],
+    "seed_lonlat": [
+      -0.5,
+      39.5
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_aragon",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Valence compte environ 25 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 212220,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 48600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2430,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Royaume de Valence, huerta irriguée par les mudéjars (majorité rurale musulmane), Alicante et Orihuela acquises en 1304. Bases de la flotte aragonaise.",
+  "sources": [
+    "Royaume de Valence",
+    "Valence (Espagne)"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "prov_alsace",
+  "name": {
+    "display": "Alsace",
+    "local": "Elsass",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Ill"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Strasbourg",
+      "local": "Straßburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 48.5734,
+    "lon": 7.7521
+  },
+  "geo": {
+    "capital_lonlat": [
+      7.7521,
+      48.5734
+    ],
+    "seed_lonlat": [
+      7.5,
+      48.4
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Strasbourg compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 290161,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 57600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3239,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Landgraviat de Haute-Alsace (Habsbourg), évêché et cité libre de Strasbourg, Décapole en gestation. Vignes, Rhin navigable.",
+  "sources": [
+    "Alsace",
+    "Strasbourg",
+    "Haute-Alsace"
+  ]
+}

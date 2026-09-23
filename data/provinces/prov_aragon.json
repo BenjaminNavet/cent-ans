@@ -1,0 +1,101 @@
+{
+  "id": "prov_aragon",
+  "name": {
+    "display": "Aragon",
+    "local": "Aragón",
+    "local_language": "castillan"
+  },
+  "region": "aragon",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Èbre",
+    "Jalón",
+    "Cinca",
+    "Gállego"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saragosse",
+      "local": "Çaragoça",
+      "local_language": "castillan"
+    },
+    "lat": 41.6488,
+    "lon": -0.8891
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.8891,
+      41.6488
+    ],
+    "seed_lonlat": [
+      -0.8,
+      41.7
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_aragon",
+  "holder": "chr_pedro_iv",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Saragosse compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 219960,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 31200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4000,
+  "description": "Royaume d'Aragon proprement dit (Saragosse, Huesca, Teruel), noblesse jalouse de ses fueros face à Pierre IV le Cérémonieux. Vallée de l'Èbre irriguée, mudéjars nombreux.",
+  "sources": [
+    "Royaume d'Aragon",
+    "Pierre IV d'Aragon",
+    "Saragosse"
+  ]
+}

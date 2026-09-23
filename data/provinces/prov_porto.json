@@ -1,0 +1,107 @@
+{
+  "id": "prov_porto",
+  "name": {
+    "display": "Entre-Douro-et-Minho",
+    "local": "Antre Doiro e Minho",
+    "local_language": "portugais"
+  },
+  "region": "portugal",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Douro",
+    "Minho",
+    "Lima"
+  ],
+  "coastal": true,
+  "ports": [
+    "Porto",
+    "Viana"
+  ],
+  "sea_zones": [
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_wine",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Porto",
+      "local": "Porto",
+      "local_language": "portugais"
+    },
+    "lat": 41.1579,
+    "lon": -8.6291
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.6291,
+      41.1579
+    ],
+    "seed_lonlat": [
+      -8.2,
+      41.4
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_portugal",
+  "holder": "chr_afonso_iv",
+  "culture": "cul_portuguese",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Porto compte environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 280320,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 28800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Nord du Portugal : Porto, Braga (primat), Guimarães, Trás-os-Montes. Terre la plus peuplée du royaume, vins du Douro.",
+  "sources": [
+    "Royaume de Portugal",
+    "Porto",
+    "Braga"
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "id": "prov_cornwall",
+  "name": {
+    "display": "Cornouailles",
+    "local": "Kernow",
+    "local_language": "cornique"
+  },
+  "region": "angleterre_sud",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Tamar",
+    "Fal",
+    "Camel"
+  ],
+  "coastal": true,
+  "ports": [
+    "Fowey",
+    "Falmouth",
+    "Padstow"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_iron",
+    "res_fish",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Launceston",
+      "local": "Lanstefan",
+      "local_language": "cornique"
+    },
+    "lat": 50.637,
+    "lon": -4.36
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.36,
+      50.637
+    ],
+    "seed_lonlat": [
+      -4.9,
+      50.4
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_england",
+  "holder": "chr_edward_of_woodstock",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Aucune ville ne dépasse 3 000 habitants ; l'étain figure ici sous res_iron faute de ressource dédiée.",
+    "classes": {
+      "peasants": {
+        "count": 75311,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2125,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 764,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_palisade",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2500,
+  "description": "Duché de Cornouailles créé le 17 mars 1337 pour Édouard de Woodstock, fils aîné du roi ; stannaries (étain), pêche, langue cornique encore vivante.",
+  "sources": [
+    "Duché de Cornouailles",
+    "Édouard de Woodstock",
+    "Cornouailles"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "prov_murcia",
+  "name": {
+    "display": "Murcie",
+    "local": "Murcia",
+    "local_language": "castillan"
+  },
+  "region": "iberie_sud",
+  "terrain": "heath",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Segura"
+  ],
+  "coastal": true,
+  "ports": [
+    "Carthagène"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Murcie",
+      "local": "Murcia",
+      "local_language": "castillan"
+    },
+    "lat": 37.9922,
+    "lon": -1.1307
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.1307,
+      37.9922
+    ],
+    "seed_lonlat": [
+      -1.5,
+      38.3
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Murcie compte environ 10 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 90861,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 15400,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 989,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Royaume de Murcie castillan (adelantado Pedro López de Ayala), amputé d'Alicante et Orihuela cédées à l'Aragon en 1304. Frontière aride avec Grenade, huerta irriguée.",
+  "sources": [
+    "Royaume de Murcie",
+    "Murcie"
+  ]
+}

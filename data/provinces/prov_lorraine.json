@@ -1,0 +1,100 @@
+{
+  "id": "prov_lorraine",
+  "name": {
+    "display": "Lorraine",
+    "local": "Lorraine",
+    "local_language": "ancien français"
+  },
+  "region": "empire_rhin",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Moselle",
+    "Meurthe",
+    "Meuse"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_salt",
+    "res_wood",
+    "res_iron",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nancy",
+      "local": "Nancei",
+      "local_language": "ancien français"
+    },
+    "lat": 48.6921,
+    "lon": 6.1844
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.1844,
+      48.6921
+    ],
+    "seed_lonlat": [
+      6.4,
+      48.55
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Metz, ville libre, compte environ 25 000 habitants ; Nancy 3 000.",
+    "classes": {
+      "peasants": {
+        "count": 277120,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 32000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Duché de Lorraine tenu par Raoul de Lorraine (faction à créer), fief d'Empire d'expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois.",
+  "sources": [
+    "Duché de Lorraine",
+    "Raoul de Lorraine",
+    "Metz"
+  ]
+}

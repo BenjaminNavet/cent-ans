@@ -1,0 +1,110 @@
+{
+  "id": "prov_brandenburg",
+  "name": {
+    "display": "Brandebourg et Mecklembourg",
+    "local": "Brandenburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_est",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Elbe",
+    "Havel",
+    "Oder",
+    "Spree"
+  ],
+  "coastal": true,
+  "ports": [
+    "Rostock",
+    "Wismar",
+    "Stralsund"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Berlin",
+      "local": "Berlin",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 52.52,
+    "lon": 13.405
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.405,
+      52.52
+    ],
+    "seed_lonlat": [
+      12.8,
+      52.9
+    ],
+    "voronoi_weight": 1.7
+  },
+  "owner": "fac_empire",
+  "holder": "chr_ludwig_iv",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Berlin-Cölln compte environ 7 000 habitants, Stralsund 10 000.",
+    "classes": {
+      "peasants": {
+        "count": 285780,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 33000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2970,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Marche de Brandebourg donnée en 1323 par Louis IV à son fils Louis le Brandebourgeois ; seigneuries de Mecklembourg et Poméranie occidentale (villes hanséatiques de Rostock, Wismar, Stralsund).",
+  "sources": [
+    "Marche de Brandebourg",
+    "Louis V de Bavière",
+    "Mecklembourg"
+  ]
+}

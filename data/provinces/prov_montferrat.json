@@ -1,0 +1,94 @@
+{
+  "id": "prov_montferrat",
+  "name": {
+    "display": "Montferrat",
+    "local": "Monfrà",
+    "local_language": "lombard"
+  },
+  "region": "italie_nord",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pô",
+    "Tanaro"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Casal",
+      "local": "Casal",
+      "local_language": "lombard"
+    },
+    "lat": 45.1339,
+    "lon": 8.4548
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.4548,
+      45.1339
+    ],
+    "seed_lonlat": [
+      8.3,
+      44.85
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Casal compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 93061,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 13200,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 989,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Marquisat de Montferrat tenu par Jean II Paléologue (faction à créer), en lutte avec Milan et les Angevins d'Asti pour Alexandrie et Asti.",
+  "sources": [
+    "Marquisat de Montferrat",
+    "Jean II de Montferrat"
+  ]
+}

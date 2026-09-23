@@ -1,0 +1,113 @@
+{
+  "id": "prov_devon",
+  "name": {
+    "display": "Devon et Somerset",
+    "local": "Devenshire",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Exe",
+    "Parrett",
+    "Avon",
+    "Tamar"
+  ],
+  "coastal": true,
+  "ports": [
+    "Exeter",
+    "Dartmouth",
+    "Plymouth",
+    "Bridgwater"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_atlantic",
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_cloth",
+    "res_fish",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Exeter",
+      "local": "Excestre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 50.7184,
+    "lon": -3.5339
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.5339,
+      50.7184
+    ],
+    "seed_lonlat": [
+      -3.4,
+      50.95
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Exeter compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 273920,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 35200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d'embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset.",
+  "sources": [
+    "Devon",
+    "Somerset",
+    "Exeter"
+  ]
+}

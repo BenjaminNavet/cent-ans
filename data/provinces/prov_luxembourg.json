@@ -1,0 +1,95 @@
+{
+  "id": "prov_luxembourg",
+  "name": {
+    "display": "Luxembourg",
+    "local": "Lützelburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "pays_bas",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Moselle",
+    "Sûre",
+    "Alzette"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_iron",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Luxembourg",
+      "local": "Lützelburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 49.6116,
+    "lon": 6.1296
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.1296,
+      49.6116
+    ],
+    "seed_lonlat": [
+      6.0,
+      49.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_empire",
+  "overlord": "fac_empire",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Luxembourg compte environ 4 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 132900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 12000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1350,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Comté de Luxembourg tenu par Jean l'Aveugle, roi de Bohême (faction à créer ; allié de la France). Ardenne forestière, mines de fer.",
+  "sources": [
+    "Comté de Luxembourg",
+    "Jean Ier de Bohême"
+  ]
+}

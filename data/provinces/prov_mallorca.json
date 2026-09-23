@@ -1,0 +1,106 @@
+{
+  "id": "prov_mallorca",
+  "name": {
+    "display": "Majorque",
+    "local": "Mallorca",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [],
+  "coastal": true,
+  "ports": [
+    "Ciutat de Mallorca",
+    "Mahón",
+    "Ibiza"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Palma",
+      "local": "Ciutat de Mallorca",
+      "local_language": "catalan"
+    },
+    "lat": 39.5696,
+    "lon": 2.6502
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.6502,
+      39.5696
+    ],
+    "seed_lonlat": [
+      2.9,
+      39.6
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_aragon",
+  "overlord": "fac_aragon",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Ciutat de Mallorca compte environ 20 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 43120,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 24500,
+        "unrest": 10,
+        "health": 45,
+        "wealth": 70,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 630,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_port",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Royaume de Majorque (Majorque, Minorque, Ibiza) de Jacques III (faction à créer), vassal de l'Aragon ; il sera dépossédé par Pierre IV en 1343. Cartographes, commerce avec le Maghreb.",
+  "sources": [
+    "Royaume de Majorque",
+    "Jacques III de Majorque",
+    "Palma"
+  ]
+}

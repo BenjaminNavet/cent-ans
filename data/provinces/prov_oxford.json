@@ -1,0 +1,99 @@
+{
+  "id": "prov_oxford",
+  "name": {
+    "display": "Vallée de la Tamise (Oxford)",
+    "local": "Oxenford",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_centre",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Tamise",
+    "Cherwell",
+    "Ouse"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Oxford",
+      "local": "Oxenford",
+      "local_language": "moyen anglais"
+    },
+    "lat": 51.752,
+    "lon": -1.2577
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.2577,
+      51.752
+    ],
+    "seed_lonlat": [
+      -1.1,
+      51.95
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Oxford compte environ 6 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 273920,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 35200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 8000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2880,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts",
+    "bld_university"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4500,
+  "description": "Oxfordshire, Buckinghamshire, Bedfordshire, Northamptonshire : université d'Oxford, laine des Cotswolds, château de Windsor. Ancienne Mercie méridionale.",
+  "sources": [
+    "Oxford",
+    "Université d'Oxford",
+    "Cotswolds"
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "id": "prov_toulousain",
+  "name": {
+    "display": "Toulousain",
+    "local": "Tolosan",
+    "local_language": "occitan"
+  },
+  "region": "languedoc",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Garonne",
+    "Ariège",
+    "Tarn"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Toulouse",
+      "local": "Tolosa",
+      "local_language": "occitan"
+    },
+    "lat": 43.6047,
+    "lon": 1.4442
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.4442,
+      43.6047
+    ],
+    "seed_lonlat": [
+      1.3,
+      43.45
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Toulouse compte environ 30 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 378820,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 75200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 11750,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4230,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_vineyard_press",
+    "bld_weaving_workshop",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 6000,
+  "description": "Sénéchaussée de Toulouse, domaine royal depuis 1271 (héritage d'Alphonse de Poitiers). Toulouse, capitale du Languedoc, siège d'un parlement futur. Pastel, blé du Lauragais.",
+  "sources": [
+    "Comté de Toulouse",
+    "Toulouse",
+    "Languedoc"
+  ]
+}
