@@ -11,9 +11,9 @@
     "until_year": 1394,
     "conditions": [
       {
-        "type": "ruler_house",
+        "type": "ruler_is",
         "faction": "fac_france",
-        "house": "Valois"
+        "character": "chr_charles_vi"
       },
       {
         "type": "ruler_age_between",
@@ -33,7 +33,8 @@
       "effects": [
         {
           "type": "add_trait",
-          "trait": "trait_mad"
+          "trait": "trait_mad",
+          "character": "chr_charles_vi"
         },
         {
           "type": "prestige",
@@ -53,7 +54,8 @@
       "effects": [
         {
           "type": "add_trait",
-          "trait": "trait_mad"
+          "trait": "trait_mad",
+          "character": "chr_charles_vi"
         },
         {
           "type": "prestige",

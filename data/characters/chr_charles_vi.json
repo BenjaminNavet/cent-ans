@@ -1,0 +1,39 @@
+{
+  "id": "chr_charles_vi",
+  "name": {
+    "display": "Charles de France"
+  },
+  "epithet": "le Bien-Aimé",
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "prince",
+  "birth": {
+    "value": "1368-12-03",
+    "place": "Paris, hôtel Saint-Pol"
+  },
+  "death": {
+    "value": "1422-10-21",
+    "place": "Paris, hôtel Saint-Pol"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [
+    "trait_generous"
+  ],
+  "family": {
+    "father": "chr_charles_v",
+    "mother": "chr_jeanne_de_bourbon"
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Futur Charles VI le Bien-Aimé, puis le Fol ; naît le 3 décembre 1368 si Charles et Jeanne de Bourbon sont mariés et vivants à cette date. Sa folie (1392) le vise.",
+  "sources": [
+    "Charles VI de France",
+    "Françoise Autrand, Charles VI, Fayard, 1986"
+  ]
+}

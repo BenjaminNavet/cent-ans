@@ -397,7 +397,7 @@ fn sixty_turns_bring_historical_and_random_events() {
         state.end_turn(&data);
         for decision in state.chronicle.pending_decisions.clone() {
             match data.events[&decision.event].kind {
-                EventCategory::Historical => historical += 1,
+                EventCategory::Historical | EventCategory::Chained => historical += 1,
                 EventCategory::Random => random += 1,
             }
             state

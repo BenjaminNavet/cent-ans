@@ -8,7 +8,7 @@
     "id": { "$ref": "#/$defs/event_id" },
     "title": { "type": "string", "description": "Titre (français)." },
     "text": { "type": "string", "description": "Texte d'époque (français, 2 à 4 phrases)." },
-    "kind": { "type": "string", "enum": ["historical", "random"] },
+    "kind": { "type": "string", "enum": ["historical", "random", "chained"], "description": "chained : ne se déclenche que programmé par un autre événement (effet schedule_event, F1)." },
     "trigger": { "$ref": "#/$defs/trigger" },
     "scope": { "$ref": "#/$defs/scope" },
     "options": {
@@ -129,7 +129,11 @@
         { "properties": { "type": { "const": "spawn_army" }, "faction": { "$ref": "#/$defs/faction_id" }, "province": { "$ref": "#/$defs/province_id" }, "units": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/unit_type_id" } } }, "required": ["units"], "additionalProperties": false },
         { "properties": { "type": { "const": "claim" }, "faction": { "$ref": "#/$defs/faction_id" }, "kind": { "enum": ["throne", "province"] }, "target": { "type": "string", "pattern": "^(fac|prov)_[a-z0-9_]+$" } }, "required": ["kind", "target"], "additionalProperties": false },
         { "properties": { "type": { "const": "loyalty" }, "vassal": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
-        { "properties": { "type": { "const": "plague_wave" }, "from_year": { "type": "integer" }, "to_year": { "type": "integer" } }, "required": ["from_year", "to_year"], "additionalProperties": false }
+        { "properties": { "type": { "const": "plague_wave" }, "from_year": { "type": "integer" }, "to_year": { "type": "integer" } }, "required": ["from_year", "to_year"], "additionalProperties": false },
+        { "description": "F1 : le personnage est fait prisonnier par captor.", "properties": { "type": { "const": "capture_character" }, "id": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" }, "captor": { "$ref": "#/$defs/faction_id" } }, "required": ["id", "captor"], "additionalProperties": false },
+        { "description": "F1 : un captif est libéré ; sa faction verse ransom livres à son geôlier.", "properties": { "type": { "const": "release_character" }, "id": { "$ref": "#/$defs/character_ref" }, "faction": { "$ref": "#/$defs/faction_id" }, "ransom": { "type": "integer", "minimum": 0 } }, "required": ["id"], "additionalProperties": false },
+        { "description": "F1 : programme event dans delay tours (chaînes d'événements), pour la même faction et la même province.", "properties": { "type": { "const": "schedule_event" }, "event": { "$ref": "#/$defs/event_id" }, "delay": { "type": "integer", "minimum": 1 } }, "required": ["event", "delay"], "additionalProperties": false },
+        { "description": "F1 : mariage historique de deux personnages vivants et non mariés.", "properties": { "type": { "const": "marry" }, "a": { "type": "string", "pattern": "^chr_[a-z0-9_]+$" }, "b": { "type": "string", "pattern": "^chr_[a-z0-9_]+$" } }, "required": ["a", "b"], "additionalProperties": false }
       ]
     }
   }

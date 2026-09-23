@@ -1,0 +1,34 @@
+{
+  "id": "chr_jeanne_de_bourbon",
+  "name": {
+    "display": "Jeanne de Bourbon"
+  },
+  "sex": "female",
+  "house": "Bourbon",
+  "faction": "fac_france",
+  "role": "consort",
+  "birth": {
+    "value": "1338-02-03",
+    "place": "Vincennes"
+  },
+  "death": {
+    "value": "1378-02-06",
+    "place": "Paris"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 2,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cultured"
+  ],
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Fille de Pierre Ier de Bourbon et d'Isabelle de Valois (hors du jeu : naissance sans condition). Épouse le dauphin Charles en 1350 (événement « Les noces du dauphin ») ; mère de Charles VI.",
+  "sources": [
+    "Jeanne de Bourbon (1338-1378)"
+  ]
+}

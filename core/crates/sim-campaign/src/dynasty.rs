@@ -482,8 +482,10 @@ struct NewChild {
     faction: FactionId,
     house: String,
     sex: Sex,
-    father: CharacterId,
-    mother: CharacterId,
+    /// `None` only for a historical character born outside the modelled
+    /// families (F1: a future consort such as Jeanne de Bourbon).
+    father: Option<CharacterId>,
+    mother: Option<CharacterId>,
     location: Option<ProvinceId>,
 }
 
@@ -531,8 +533,8 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             traits,
             spouse: None,
             children: Vec::new(),
-            father: Some(father.clone()),
-            mother: Some(mother.clone()),
+            father: father.clone(),
+            mother: mother.clone(),
             piety: 50,
             prestige: 0,
             loyalty: 100,
@@ -543,7 +545,7 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             raids_led: 0,
         },
     );
-    for parent in [&father, &mother] {
+    for parent in [&father, &mother].into_iter().flatten() {
         if let Some(p) = state.characters.get_mut(parent) {
             p.children.push(id.clone());
         }
@@ -581,6 +583,36 @@ pub(crate) fn resolve_births(
         let Some(character) = data.characters.get(&id) else {
             continue;
         };
+        // F1: a historical character with no modelled parents (a future
+        // consort from a house outside the game) is born unconditionally.
+        let parentless = character
+            .family
+            .as_ref()
+            .is_none_or(|f| f.father.is_none() && f.mother.is_none());
+        if parentless {
+            spawn_child(
+                state,
+                data,
+                NewChild {
+                    id: id.clone(),
+                    name: None,
+                    faction: character.faction.clone(),
+                    house: character.house.clone(),
+                    sex: character.sex,
+                    father: None,
+                    mother: None,
+                    location: character.starting_location.clone(),
+                },
+            );
+            events.push(
+                GameEvent::new(
+                    EventKind::Birth,
+                    format!("Naissance de {}.", state.character_name(data, &id)),
+                )
+                .faction(&character.faction),
+            );
+            continue;
+        }
         let Some(Family {
             father: Some(father),
             mother: Some(mother),
@@ -613,8 +645,8 @@ pub(crate) fn resolve_births(
                 faction: character.faction.clone(),
                 house: character.house.clone(),
                 sex: character.sex,
-                father: father.clone(),
-                mother: mother.clone(),
+                father: Some(father.clone()),
+                mother: Some(mother.clone()),
                 location,
             },
         );
@@ -684,8 +716,8 @@ pub(crate) fn resolve_births(
                 faction: faction.clone(),
                 house,
                 sex,
-                father: father_id.clone(),
-                mother: mother_id.clone(),
+                father: Some(father_id.clone()),
+                mother: Some(mother_id.clone()),
                 location,
             },
         );
