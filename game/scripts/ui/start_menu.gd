@@ -50,7 +50,17 @@ func _ready() -> void:
 	_select_faction(SimFacade.pending_faction if _card_buttons.has(SimFacade.pending_faction) else "fac_france")
 	var store_text := "données chargées" if SimFacade.store_loaded() else "données de jeu indisponibles (core/build.sh ?)"
 	status_label.text = "Simulation %s — %s — %d sauvegarde(s)" % [SimFacade.engine_label(), store_text, SimFacade.list_saves().size()]
-	for arg in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
+	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
+	for arg in args:
+		if arg.begins_with("--autostart"):
+			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
+			if faction != "" and _card_buttons.has(faction):
+				_select_faction(faction)
+			_on_start.call_deferred()
+			return
+	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
 

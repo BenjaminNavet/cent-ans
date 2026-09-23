@@ -99,3 +99,21 @@ Ordre de grandeur pour la v1 : 50 $ permettent environ 1 250 images avec
   (~0,16 $/image), à utiliser avec parcimonie.
 - Toujours passer par `generate_image` afin que chaque appel soit vérifié et consigné dans
   `docs/budget.md`.
+
+## Export macOS (`tools/export_macos.sh`)
+
+Produit `export/Cent Ans.app` (Apple Silicon, ≈ 190 Mo) : build release de la GDExtension
+(`core/build.sh --release`), export Godot avec le préréglage « macOS » (`game/export_presets.cfg`,
+modèle universel, bibliothèque Rust arm64 dans `Contents/Frameworks`), copie de `data/` dans
+`Contents/Resources/data` (lu par `MapPaths` quand `OS.has_feature("template")`), signature ad hoc.
+
+Prérequis : modèles d'export Godot 4.7.2 installés dans
+`~/Library/Application Support/Godot/export_templates/4.7.2.stable/` (seul `macos.zip` est nécessaire).
+Le jeu exporté ne peut pas recevoir de scène en argument : `-- --autostart[=fac_x]` lance directement une
+campagne (tests), suivi des options habituelles de la carte (`--screenshot=…`, `--stage=…`).
+
+```sh
+tools/export_macos.sh
+open "export/Cent Ans.app"
+"export/Cent Ans.app/Contents/MacOS/Cent Ans" -- --autostart --screenshot=/tmp/exported.png
+```

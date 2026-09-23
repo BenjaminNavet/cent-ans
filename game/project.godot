@@ -77,4 +77,6 @@ map_toggle_court={
 
 [rendering]
 
+textures/vram_compression/import_etc2_astc=true
+
 renderer/rendering_method="forward_plus"
