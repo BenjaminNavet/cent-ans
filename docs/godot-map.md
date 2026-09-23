@@ -452,6 +452,58 @@ godot --path game res://scenes/campaign_map.tscn -- --screenshot=$PWD/docs/img/g
 godot --path game res://scenes/campaign_map.tscn -- --screenshot=$PWD/docs/img/godot-campaign-models.png --focus=2150,1880,230
 ```
 
+## Écrans et flux (F3)
+
+Enveloppe du jeu autour de la carte ; aucune règle de jeu (lecture de l'état, demandes existantes).
+
+- **Illustration** : `uv run --project tools cent-ans assets menu-art` rend depuis `data/map/` une
+  carte ancienne 2560 × 1440 (`game/assets/ui/menu_map.jpg`, Pillow + numpy, déterministe) : parchemin,
+  lignes d'eau le long des côtes, lignes de rhumb et rose des vents placée en mer, lavis d'ombrage et
+  hachures de relief, taupinières au-dessus de 1300 m, côtes à l'encre, rivières, frontières, capitales
+  des factions, cartouche « Cent Ans », cadre gradué. `menu_map.json` donne le rectangle du cartouche.
+  `MenuBackground` (`scripts/ui/menu_background.gd`) l'affiche calée en haut à droite, avec un lent
+  zoom ; repli brun uni sans image.
+- **Menu de départ** (`start_menu.gd`) : fond illustré, cartes de faction (écu, blason, accroche,
+  objectifs historiques ; double clic = commencer), Continuer (sauvegarde la plus récente
+  chargeable), Commencer, Charger, Réglages, Crédits, Quitter ; fondu à l'ouverture et vers le
+  chargement. Options : `--menu-stage=settings|credits|loading`, `--screenshot=`, `--autostart`.
+- **Chargement** (`loading_screen.gd`, `LoadingScreen.start(tree)`) : `CanvasLayer` persistant qui
+  charge `campaign_map.tscn` en tâche de fond (progression du `ResourceLoader`), dessine l'étape
+  « relief, provinces, terrain, campagne » puis instancie la carte (le `_ready` de la carte est
+  synchrone, ≈ 0,5 s), attend les premières images et se fond. `--loading-shot=<png>` pour la capture.
+- **`FlowController`** (`scripts/map/flow_controller.gd`) : créé par `campaign_map.gd`, qui n'appelle
+  que `setup`, `refresh` (fin de `refresh_all`), `before_end_turn` et `after_end_turn(events)`.
+  - Menu pause (Échap, action `campaign_pause`, ou Menu → Menu pause) : `PauseMenu`, arbre en pause
+    (les fenêtres de la pause tournent en `PROCESS_MODE_ALWAYS`), Reprendre / Sauvegarder / Charger /
+    Réglages / Aide / Menu principal / Quitter ; confirmation si des tours n'ont pas été sauvegardés.
+    Échap ferme d'abord la fenêtre ouverte (réglages, rapport, confirmation) et laisse la carte
+    désélectionner une armée.
+  - Réglages : autoload `Settings` (`scripts/ui/settings.gd`), `user://settings.cfg` partagé avec
+    `AudioDirector` (section `audio` conservée) — plein écran, résolution, vsync, échelle
+    d'interface (`content_scale_factor`), pan par bords, vitesse de caméra, sauvegarde auto
+    (0/1/2/4/8 tours), confirmation de fin de tour, rapport de saison, batailles 3D ou résolution
+    automatique (`CampaignSim.set_interactive_battles`). Fenêtre `SettingsMenu` (4 onglets), aussi
+    dans le menu de départ et Menu → Réglages….
+  - Sauvegardes (`SaveSlots`, `scripts/ui/save_slots.gd`) : à côté de `user://saves/<nom>.json`, une
+    fiche `<nom>.meta.json` (faction, date de jeu, tour, date réelle, moteur) et une vignette
+    `<nom>.png` 320 × 180 (capture avant l'ouverture de la pause, ou image suivant la fermeture du
+    dialogue). Sauvegarde automatique après la fin de tour, tous les N tours, sur `auto_1..3`
+    tournants. Le dialogue `SaveLoadDialog` liste vignette, nom, faction, date, tour et date réelle,
+    confirme l'écrasement et la suppression.
+  - Rapport de saison (`SeasonReport`) : événements du tour groupés (batailles et sièges, diplomatie
+    et Église, cour, royaume, chronique), ceux qui concernent le joueur plus les nouvelles du monde ;
+    clic → caméra et sélection (province ou armée) ; « Ne plus afficher ».
+  - Alertes (`AlertsPanel.collect`) à droite, masquées quand un panneau occupe la colonne : armée
+    ennemie dans ou au contact d'une province du joueur, province assiégée, trésor négatif, aucune
+    recherche, bâtiment terminé ce tour, décision de chronique ; clic → caméra ou panneau.
+  - Captures : `--flow-stage=pause|save|settings|report|alerts|confirm --flow-shot=<png>`.
+- **Crédits** (`credits_screen.gd`) : `CREDITS.md` à la racine (ou à côté de `data/` dans le jeu
+  exporté), sinon texte intégré ; Markdown simple → BBCode, défilement automatique.
+
+Captures : `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-credits.png`,
+`godot-flow-pause.png`, `godot-flow-settings.png`, `godot-flow-save.png`, `godot-flow-report.png`,
+`godot-flow-alerts.png`.
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |
@@ -484,3 +536,7 @@ godot --path game res://scenes/campaign_map.tscn -- --screenshot=$PWD/docs/img/g
 - Le panneau de faction n'affiche pas le détail catégorie → liste de ressources (juste les catégories
   puis la liste complète des ressources) : `get_faction_economy` ne donne pas la catégorie par ressource,
   seulement `goods_categories` global.
+- F3 : le rapport de saison ne montre que les événements du `end_turn` (pas ceux des batailles
+  résolues ensuite via le dialogue) ; les alertes d'armée ennemie ne regardent que les voisins
+  terrestres (`neighbors`), pas les débarquements possibles. La confirmation « partie non
+  sauvegardée » compte les tours, pas les ordres donnés dans le tour.

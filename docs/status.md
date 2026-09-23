@@ -97,6 +97,13 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   `godot-campaign-hud.png`, `godot-city-panel.png`, `godot-tech-tree.png`, `godot-skill-tree.png`,
   `godot-court.png`, `godot-faction-panel.png`, `godot-battle.png`). Capture des infobulles :
   `--stage=tooltips`.
+- Écrans et flux (F3) : menu de départ illustré par une carte ancienne rendue depuis `data/map/`
+  (`cent-ans assets menu-art`), écran de chargement à étapes, menu pause (Échap), réglages persistés
+  (autoload `Settings` : affichage, interface, caméra, sauvegarde auto, confirmation de fin de tour,
+  batailles 3D ou auto, volumes), emplacements de sauvegarde avec vignette et fiche, sauvegarde
+  automatique tournante sur 3 emplacements, « Continuer », rapport de saison cliquable, alertes
+  persistantes, crédits. Smoke § 12 « flow ». Voir `docs/godot-map.md` § Écrans et flux. Captures :
+  `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-flow-*.png`, `godot-credits.png`.
 
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
