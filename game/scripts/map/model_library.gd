@@ -12,8 +12,9 @@ extends RefCounted
 
 const MODELS_DIR := "res://assets/models/"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
-## Échelle monde des modèles de ville (≈ 2,5 unités Blender → ≈ 16 px de carte).
-const CITY_SCALE := 6.5
+## Échelle monde des modèles de ville (lot V3 : une ville fortifiée ≈ 2,1 unités Blender
+## → ≈ 10 px de carte ; maisons de la taille des arbres, cohérentes avec le relief).
+const CITY_SCALE := 4.8
 ## Échelle du porte-étendard dans l'espace local du marqueur d'armée (hampe placeholder ≈ 7).
 const ARMY_SCALE := 3.2
 const MODEL_NODE := "M10Model"
@@ -141,7 +142,11 @@ static func city_kind(province_id: String) -> String:
 ## Modèle de ville prêt à poser, ou null (repli sur le cylindre).
 static func city_model(province_id: String) -> Node3D:
 	var kind := city_kind(province_id)
-	var node := instantiate(kind, CITY_SCALE)
+	# Lot V3 : la ville épiscopale entière (`city_cathedral`) ; `cathedral` seul reste le
+	# bâtiment isolé (décor des batailles de siège).
+	var node := instantiate("city_cathedral", CITY_SCALE) if kind == "cathedral" else null
+	if node == null:
+		node = instantiate(kind, CITY_SCALE)
 	if node == null and kind != "village":
 		node = instantiate("village", CITY_SCALE)
 	return node
