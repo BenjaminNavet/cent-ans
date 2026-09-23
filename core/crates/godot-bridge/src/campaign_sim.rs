@@ -653,6 +653,7 @@ fn effect_totals_dict(effects: &EffectTotals) -> VarDictionary {
         "supply" => &effect_value_dict(effects.supply),
         "production" => &effect_value_dict(effects.production),
         "siege_resistance" => &effect_value_dict(effects.siege_resistance),
+        "plague_resistance" => &effect_value_dict(effects.plague_resistance),
         // F1: effects aimed at one social class.
         "by_class" => &vdict! {
             "peasants" => &class_effects_dict(&effects.classes.peasants),
@@ -706,6 +707,8 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
         "administration_upkeep" => economy.administration_upkeep,
+        "table_upkeep" => economy.table_upkeep,
+        "table_upkeep_last_turn" => economy.table_upkeep_last_turn,
         "tax_rate" => tax_rate_key(economy.tax_rate),
         "goods" => &goods,
         "goods_categories" => &goods_categories,
@@ -802,6 +805,7 @@ pub(crate) fn effects_array(effects: &[Effect]) -> VarArray {
                 "value" => effect.value,
                 "mode" => mode.as_str(),
                 "unit_category" => unit_category.as_str(),
+                "class" => effect.class.map_or("", |c| c.key()),
             }
             .to_variant()
         })

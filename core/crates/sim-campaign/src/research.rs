@@ -311,7 +311,8 @@ impl CampaignState {
         if let (Some(ruler), Some(branch)) = (ruler, branch) {
             let effects = crate::skills::character_effects(self, data, ruler);
             let bonus = match branch {
-                TechBranch::Civil => effects.research_civil,
+                // Medicine is learned lore: civil scholarship speeds it up.
+                TechBranch::Civil | TechBranch::Medicine => effects.research_civil,
                 TechBranch::Military => effects.research_military,
             };
             flat += bonus.flat;
@@ -448,7 +449,7 @@ pub(crate) fn resolve_research(
 
 /// Minimal AI (spec § 2): when idle, research the cheapest available
 /// technology, preferring the branch with fewer acquired technologies so that
-/// the two trees alternate.
+/// the three trees (military, civil, medicine) alternate.
 pub fn ai_choose_research(
     state: &CampaignState,
     data: &GameData,
@@ -463,11 +464,12 @@ pub fn ai_choose_research(
             .filter(|t| t.branch == branch)
             .count()
     };
-    let preferred = if count(TechBranch::Military) <= count(TechBranch::Civil) {
-        TechBranch::Military
-    } else {
-        TechBranch::Civil
-    };
+    // The branch with the fewest acquired technologies (ties: military,
+    // civil, then medicine) so that the three trees alternate (H4).
+    let preferred = TechBranch::ALL
+        .into_iter()
+        .min_by_key(|branch| count(*branch))
+        .unwrap_or(TechBranch::Military);
     data.technologies
         .values()
         .filter(|t| tech_status(state, faction, t) == TechStatus::Available)
