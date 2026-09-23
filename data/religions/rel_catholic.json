@@ -1,7 +1,7 @@
 {
   "id": "rel_catholic",
   "name": {
-    "display": "Catholicisme (obédience d'Avignon)",
+    "display": "Catholicisme",
     "local": "Ecclesia catholica",
     "local_language": "latin"
   },
@@ -14,7 +14,7 @@
       "value": 5
     }
   ],
-  "description": "Église latine unifiée, dirigée depuis Avignon par Benoît XII (1334-1342). Les papes résident en Avignon depuis 1309.",
+  "description": "Église latine, dirigée depuis Avignon par Benoît XII (1334-1342) : les papes y résident depuis 1309 et jusqu'en 1377. Pendant le Grand Schisme (1378-1417), elle représente l'obédience d'Avignon ; le concile de Constance la réunifie.",
   "sources": [
     "Papauté d'Avignon",
     "Benoît XII"
