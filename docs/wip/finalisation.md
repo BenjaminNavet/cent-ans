@@ -5,7 +5,7 @@ Plan : `docs/design/v2-finalisation.md`.
 | Lot | État | Branche / agent | Notes |
 |---|---|---|---|
 | F1 Règles inertes | lancé | worktree agent | |
-| F2 Icônes et infobulles | lancé | worktree agent | |
+| F2 Icônes et infobulles | **fusionné** (b1405fe) | | 144 ids → 106 SVG, RichTooltip, CREDITS.md ; reste : accesseurs GameDataStore pour retirer GameCatalog |
 | F3 Écrans et flux | lancé | worktree agent | |
 | F4 Guerre vivante | à faire (vague 2) | | après fusion F1 |
 | F5 Batailles | à faire (vague 2) | | après fusion F2 (battle_hud) |
