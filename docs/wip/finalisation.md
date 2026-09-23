@@ -8,7 +8,7 @@ Plan : `docs/design/v2-finalisation.md`.
 | F2 Icônes et infobulles | **fusionné** (b1405fe) | | 144 ids → 106 SVG, RichTooltip, CREDITS.md ; reste : accesseurs GameDataStore pour retirer GameCatalog |
 | F3 Écrans et flux | **fusionné** | | menu illustré, chargement, pause, réglages, emplacements + auto, rapport de saison, alertes, crédits |
 | F4 Guerre vivante | lancé (vague 2) | worktree agent | + bug lignée Portugal |
-| F5 Batailles | prêt (ui-tw fusionné 1177714) | | lancer dès qu’un agent de la vague 2 se libère ; marge 216 px de leader_orders_bar |
+| F5 Batailles | lancé | worktree agent | + HUD de bataille (audit ui-tw) |
 | F6 Rendu carte | **transféré** | session parallèle « visual » | refonte visuelle semi-réaliste (shaders, terrain, marqueurs, modèles, battle_meshes/terrain) : ne pas toucher ces fichiers |
 | F7 Contenu | factions faites (3a49557) ; F7b 30 événements lancé (vague 2) | main / worktree | 13 factions, 18 personnages, 6 listes de noms, meubles héraldiques |
 | F8 Tutoriel / encyclopédie | **fusionné** (touche L ; K = codex d'une autre session) | | manuel à écrire en F9 |
