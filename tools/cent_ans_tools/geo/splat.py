@@ -213,8 +213,18 @@ def encode_splat(weights: np.ndarray) -> np.ndarray:
 
 def _neighbour_pairs(labels: np.ndarray):
     """Yield ``(a, b, slice_a, slice_b)`` for horizontal and vertical 4-neighbours."""
-    yield labels[:-1, :], labels[1:, :], (slice(None, -1), slice(None)), (slice(1, None), slice(None))
-    yield labels[:, :-1], labels[:, 1:], (slice(None), slice(None, -1)), (slice(None), slice(1, None))
+    yield (
+        labels[:-1, :],
+        labels[1:, :],
+        (slice(None, -1), slice(None)),
+        (slice(1, None), slice(None)),
+    )
+    yield (
+        labels[:, :-1],
+        labels[:, 1:],
+        (slice(None), slice(None, -1)),
+        (slice(None), slice(1, None)),
+    )
 
 
 def region_labels(ids: np.ndarray, land: np.ndarray) -> np.ndarray:
@@ -235,7 +245,9 @@ def border_pixels(labels: np.ndarray) -> np.ndarray:
     return border
 
 
-def colour_regions(labels: np.ndarray, channels: int = BORDER_CHANNELS) -> dict[int, int]:
+def colour_regions(
+    labels: np.ndarray, channels: int = BORDER_CHANNELS
+) -> dict[int, int]:
     """Greedy colouring of the region adjacency graph with at most ``2**channels`` colours.
 
     Adjacent regions get different colours, hence differ in at least one bit, so at
