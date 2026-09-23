@@ -486,7 +486,8 @@ Spec : `docs/design/m10-events.md`. Données `data/events/evt_*.json` (schéma
 `data/schemas/event.schema.json`, dossier facultatif), types `data_model::entities::event`, règles
 `core/crates/sim-campaign/src/chronicle.rs`, pont `core/crates/godot-bridge/src/campaign_sim_events.rs`.
 
-**Format.** `id` (`evt_`), `title`, `text` (français), `kind` (`historical` | `random`), `trigger`,
+**Format.** `id` (`evt_`), `title`, `text` (français), `kind` (`historical` | `random` | `chained`,
+F1 : ne part que programmé par `schedule_event`), `trigger`,
 `scope`, `options` (1 à 3 : `text`, `effects[]`, `ai_weight` défaut 1), `historical_date?`, `sources[]`.
 - `trigger` : historique → `date {year, season?}` et `until_year?` (défaut : année + 2) ; aléatoire →
   `mean_time_to_happen` (tours ; chance par tour = ⌈1000 / mtth⌉ ‰) ou `chance_permille` ; `conditions[]`
@@ -511,12 +512,16 @@ Spec : `docs/design/m10-events.md`. Données `data/events/evt_*.json` (schéma
   défaut : la faction qui décide ; 20 tours), `declare_war {a, b}`, `peace {a, b}` (trêve de 5 ans),
   `add_trait {character?, faction?, trait}`, `kill_character {id, faction?}`,
   `spawn_army {faction?, province?, units[]}`, `claim {faction?, kind: throne|province, target}`,
-  `loyalty {vassal?, amount}` (défaut : tous les vassaux), `plague_wave {from_year, to_year}`.
+  `loyalty {vassal?, amount}` (défaut : tous les vassaux), `plague_wave {from_year, to_year}` ; F1 :
+  `capture_character {id, faction?, captor}`, `release_character {id, faction?, ransom?}` (rançon versée
+  au geôlier), `schedule_event {event, delay}` (l'événement part `delay` tours plus tard pour la même
+  faction et province, conditions vérifiées alors), `marry {a, b}` (mariage historique).
 
 **Chargement.** Erreur (`DataError::InvalidEvent`) : 0 ou plus de 3 options, historique sans `date`,
-aléatoire sans `mean_time_to_happen`/`chance_permille`, `mean_time_to_happen` nul ; clé ou `type` inconnu
+aléatoire sans `mean_time_to_happen`/`chance_permille`, `mean_time_to_happen` nul, `schedule_event` de
+délai nul ou visant l'événement lui-même ; clé ou `type` inconnu
 → `DataError::Json` (`deny_unknown_fields`). Avertissement (`Warning`, entité `evt_…`) pour tout id
-inconnu dans une condition ou un effet : la simulation l'ignore. Test pytest
+inconnu dans une condition ou un effet : la simulation l'ignore ; événement `chained` jamais programmé. Test pytest
 `tools/tests/test_events_schema.py` : chaque fichier valide le schéma JSON.
 
 **Simulation.** `CampaignState.chronicle` (`ChronicleState`, `#[serde(default)]`, `STATE_VERSION`

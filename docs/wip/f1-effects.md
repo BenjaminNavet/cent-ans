@@ -9,7 +9,7 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 3. [x] Traits/compétences : `research_civil`/`research_military`, `Diplomacy`, `Intrigue`, `Loyalty`.
 4. [x] Armées alliées de la province dans la bataille (auto-résolution + `battle_setup`).
 5. [x] Événements : capture (+ rançon), effets différés (chaînes), Charles VI + Jeanne de Bourbon, folie.
-6. [ ] `docs/status.md` (Limites connues) + paragraphes « F1 » des specs.
+6. [x] `docs/status.md` (Limites connues) + paragraphes « F1 » des specs.
 
 ## Choix (point 1)
 - Ciblage : un effet avec `class` ne touche que cette classe (`EffectTotals::classes`), un effet avec
@@ -89,4 +89,4 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 - `./core/build.sh` puis smoke Godot : OK.
 
 ## Prochaine étape
-Point 6 (docs), puis build GDExtension + smoke Godot + sonde IA.
+Lot terminé : fusion par l'orchestrateur.
