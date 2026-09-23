@@ -1,0 +1,32 @@
+{
+  "id": "tech_leprosaria",
+  "name": {
+    "display": "Léproseries et maladreries"
+  },
+  "branch": "medicine",
+  "tier": 4,
+  "cost": 380,
+  "prerequisites": [
+    "tech_hospital_reform"
+  ],
+  "historical_year": {
+    "value": "1179",
+    "note": "Le troisième concile du Latran (1179) donne aux lépreux leurs églises et cimetières ; en 1226, le testament de Louis VIII lègue à deux mille léproseries du royaume."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "plague_resistance",
+      "value": 10
+    },
+    {
+      "effect": "unrest",
+      "value": -2
+    }
+  ],
+  "description": "Hors les murs, maladreries et léproseries isolent les malades : un réseau de charité qui apprend aussi à séparer les contagieux.",
+  "sources": [
+    "Léproserie",
+    "Troisième concile du Latran"
+  ]
+}

@@ -41,6 +41,7 @@ pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
 pub mod events;
+pub mod medicine;
 pub mod movement;
 pub mod orders;
 pub mod population;
@@ -52,6 +53,7 @@ pub mod setup_1337;
 pub mod siege;
 pub mod skills;
 pub mod state;
+pub mod table;
 pub mod turn;
 pub mod victory;
 
@@ -84,3 +86,4 @@ pub use state::{
     FactionSummary, ProvinceState, Season, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS,
     START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
+pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};

@@ -1,0 +1,35 @@
+{
+  "id": "bld_apothecary",
+  "name": {
+    "display": "Apothicairerie"
+  },
+  "category": "sanitary",
+  "tier": 2,
+  "cost": {
+    "money": 1200
+  },
+  "build_time_turns": 3,
+  "upkeep": 15,
+  "required_technology": "tech_theriac",
+  "required_building": "bld_market",
+  "effects": [
+    {
+      "effect": "health",
+      "value": 4
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 4
+    },
+    {
+      "effect": "plague_resistance",
+      "value": 10
+    }
+  ],
+  "description": "Boutique d'apothicaire-épicier : drogues, électuaires, épices et thériaque, sous le contrôle des médecins jurés.",
+  "sources": [
+    "Apothicaire",
+    "Histoire du métier d'apothicaire"
+  ]
+}

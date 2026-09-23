@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/technology.schema.json",
   "title": "Technologie",
-  "description": "Nœud d'un des deux arbres (militaire, civil) : coût en points, prérequis, déblocages, effets.",
+  "description": "Nœud d'un des trois arbres (militaire, civil, médecine) : coût en points, prérequis, déblocages, effets.",
   "type": "object",
   "properties": {
     "id": { "$ref": "common.schema.json#/$defs/technology_id" },
     "name": { "$ref": "common.schema.json#/$defs/localized_name" },
-    "branch": { "type": "string", "enum": ["military", "civil"] },
+    "branch": { "type": "string", "enum": ["military", "civil", "medicine"] },
     "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
-    "cost": { "type": "integer", "minimum": 0, "description": "Points de recherche de la branche." },
+    "cost": { "type": "integer", "minimum": 0, "description": "Points de recherche (réserve unique de la faction, toutes branches confondues)." },
     "prerequisites": {
       "type": "array",
       "items": { "$ref": "common.schema.json#/$defs/technology_id" },
@@ -29,7 +29,13 @@
     },
     "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/effect" } },
     "description": { "type": "string" },
-    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+    "sources": { "$ref": "common.schema.json#/$defs/sources" },
+    "herbs": {
+      "type": "array",
+      "description": "Fiches codex (catégorie « plante ») des plantes que la technologie fait entrer dans l'Herbier.",
+      "items": { "type": "string", "pattern": "^cdx_[a-z0-9_]+$" },
+      "uniqueItems": true
+    }
   },
   "required": ["id", "name", "branch", "tier", "cost", "prerequisites"],
   "additionalProperties": false

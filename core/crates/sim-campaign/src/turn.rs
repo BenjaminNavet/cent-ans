@@ -7,7 +7,7 @@ use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
     ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
-    movement, population, religion, research, siege,
+    movement, population, religion, research, siege, table,
 };
 
 impl CampaignState {
@@ -50,6 +50,8 @@ impl CampaignState {
         // 5. Buildings and goods, ahead of the economy that reads them (M3).
         buildings::resolve_construction(self, data, &mut events);
         economy::resolve_goods(self, data);
+        // H3: diets whose requirements no longer hold fall back to the default.
+        table::resolve_requirements(self, data, &mut events);
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
@@ -65,6 +67,9 @@ impl CampaignState {
 
         // 8c. Chronicle: historical and random events (M10).
         chronicle::resolve_chronicle(self, data, &mut events);
+
+        // 8d. The table: ruler piety/prestige and Lent in spring (H3).
+        table::resolve_lent(self, data, &mut events);
 
         // 9. Population dynamics: growth, health, wealth, goods
         // satisfaction, unrest, revolt, plague, famine (M3).

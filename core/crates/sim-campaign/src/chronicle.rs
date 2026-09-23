@@ -1098,9 +1098,36 @@ fn apply_option(
     let Some(option) = event.options.get(option) else {
         return;
     };
+    // H4: medicine softens the harm of a local epidemic.
+    let resistance = match &ctx.province {
+        Some(province) if crate::medicine::is_epidemic(&event.id) => {
+            crate::medicine::plague_resistance(state, data, province)
+        }
+        _ => 0.0,
+    };
     for effect in &option.effects {
-        apply_effect(state, data, effect, ctx, events);
+        let effect = if resistance > 0.0 {
+            mitigate_effect(effect, resistance)
+        } else {
+            effect.clone()
+        };
+        apply_effect(state, data, &effect, ctx, events);
     }
+}
+
+/// `effect` with its health and population harm scaled by `1 - resistance`.
+fn mitigate_effect(effect: &EventEffect, resistance: f64) -> EventEffect {
+    let mut effect = effect.clone();
+    match &mut effect {
+        EventEffect::Health { amount, .. } => {
+            *amount = crate::medicine::mitigated(*amount, resistance);
+        }
+        EventEffect::Population { percent, .. } => {
+            *percent = crate::medicine::mitigated(*percent, resistance);
+        }
+        _ => {}
+    }
+    effect
 }
 
 /// Option of highest `ai_weight`, ties broken by the campaign RNG.
@@ -1129,6 +1156,29 @@ fn fire(
     province: Option<ProvinceId>,
     events: &mut Vec<GameEvent>,
 ) {
+    // H4: a local epidemic may be contained before it spreads.
+    if let Some(p) = province
+        .as_ref()
+        .filter(|_| crate::medicine::is_epidemic(&event.id))
+    {
+        let resistance = crate::medicine::plague_resistance(state, data, p);
+        if resistance > 0.0 && state.rng.unit_f64() < resistance {
+            if decider.as_ref() == Some(&state.player_faction) {
+                events.push(
+                    GameEvent::new(
+                        EventKind::Medicine,
+                        format!(
+                            "Une fièvre s'est déclarée à {} : les médecins l'ont circonscrite.",
+                            province_name(data, p)
+                        ),
+                    )
+                    .province(p)
+                    .faction(&state.player_faction),
+                );
+            }
+            return;
+        }
+    }
     let historical = event.kind != EventCategory::Random;
     let player_decides = decider
         .as_ref()
@@ -1455,20 +1505,54 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         state.chronicle.plague_wave = None;
         return;
     }
-    let struck = plague_slice(state, data, step, wave.duration);
+    let reached = plague_slice(state, data, step, wave.duration);
     let (low, high) = PLAGUE_POPULATION_LOSS;
-    for id in &struck {
+    let mut struck = Vec::new();
+    let mut spared = Vec::new();
+    for id in reached {
         let loss = low + state.rng.below(high - low + 1);
-        let factor = f64::from(100 - loss) / 100.0;
-        for_each_class(state, id, |c| {
-            c.health = add_clamped(c.health, -PLAGUE_HEALTH_LOSS);
-            c.unrest = add_clamped(c.unrest, PLAGUE_UNREST);
+        // H4: plague resistance may spare the province (the roll only
+        // happens with some resistance) and softens the blow.
+        let resistance = crate::medicine::plague_resistance(state, data, &id);
+        if resistance > 0.0
+            && state.rng.unit_f64()
+                < resistance * crate::medicine::BLACK_DEATH_SPARE_PERCENT / 100.0
+        {
+            spared.push(id);
+            continue;
+        }
+        let factor = 1.0 - f64::from(loss) / 100.0 * (1.0 - resistance);
+        let health = crate::medicine::mitigated(-PLAGUE_HEALTH_LOSS, resistance);
+        let unrest = -crate::medicine::mitigated(-PLAGUE_UNREST, resistance);
+        for_each_class(state, &id, |c| {
+            c.health = add_clamped(c.health, health);
+            c.unrest = add_clamped(c.unrest, unrest);
             c.count = (c.count as f64 * factor).round() as u64;
         });
+        struck.push(id);
+    }
+    let player = state.player_faction.clone();
+    for id in &spared {
+        if state
+            .provinces
+            .get(id)
+            .is_some_and(|p| p.controller == player)
+        {
+            events.push(
+                GameEvent::new(
+                    EventKind::Medicine,
+                    format!(
+                        "La Grande Mortalité épargne {} : quarantaine, fumigations et apothicaires ont tenu.",
+                        province_name(data, id)
+                    ),
+                )
+                .province(id)
+                .faction(&player),
+            );
+        }
     }
     if !struck.is_empty() {
         let names: Vec<String> = struck.iter().map(|p| province_name(data, p)).collect();
-        let player = state.player_faction.clone();
         let mut entry = GameEvent::new(
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),

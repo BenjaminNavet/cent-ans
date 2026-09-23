@@ -3,7 +3,7 @@
   "name": {
     "display": "Réforme hospitalière"
   },
-  "branch": "civil",
+  "branch": "medicine",
   "tier": 2,
   "cost": 180,
   "prerequisites": [],
