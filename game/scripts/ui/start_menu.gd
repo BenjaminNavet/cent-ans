@@ -50,6 +50,11 @@ func _ready() -> void:
 	_select_faction(SimFacade.pending_faction if _card_buttons.has(SimFacade.pending_faction) else "fac_france")
 	var store_text := "données chargées" if SimFacade.store_loaded() else "données de jeu indisponibles (core/build.sh ?)"
 	status_label.text = "Simulation %s — %s — %d sauvegarde(s)" % [SimFacade.engine_label(), store_text, SimFacade.list_saves().size()]
+	# M10 assets : musique du menu et curseurs de volume.
+	var audio := get_node_or_null("/root/AudioDirector")
+	if audio != null:
+		audio.enter_menu()
+		$Center/VBox.add_child(audio.make_volume_controls())
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot="):
 			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
@@ -86,6 +91,15 @@ func _build_cards() -> void:
 		swatch.custom_minimum_size = Vector2(0, 12)
 		swatch.color = info.get("color", Color(0.5, 0.5, 0.5))
 		vbox.add_child(swatch)
+		# M10 assets : écu procédural de la faction sous la bande de couleur.
+		var shield_texture := PortraitLoader.heraldry_texture(faction_id)
+		if shield_texture != null:
+			var shield := TextureRect.new()
+			shield.texture = shield_texture
+			shield.custom_minimum_size = Vector2(0, 72)
+			shield.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			vbox.add_child(shield)
 
 		var name_label := Label.new()
 		name_label.text = str(info.get("name", entry["fallback_name"])) if SimFacade.store_loaded() else entry["fallback_name"]
