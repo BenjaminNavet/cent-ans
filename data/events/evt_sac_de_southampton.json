@@ -1,0 +1,96 @@
+{
+  "id": "evt_sac_de_southampton",
+  "title": "Le sac de Southampton",
+  "text": "Le 4 octobre 1338, les galères et les nefs de l'amiral [[cdx_hugues_quieret|Hugues Quiéret]] et de Nicolas Béhuchet, renforcées de marins génois, surgissent devant Southampton. Repoussés d'abord, les assaillants forcent la ville, la pillent et l'incendient avant de rembarquer chargés de butin. La côte anglaise découvre à son tour la guerre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1338,
+      "season": "autumn"
+    },
+    "until_year": 1339,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_england",
+        "province": "prov_wessex"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_wessex"
+  },
+  "options": [
+    {
+      "text": "Ceindre la ville de murailles de pierre",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_france",
+          "amount": 2000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser les bourgeois rebâtir à leurs frais",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 15
+        },
+        {
+          "type": "wealth",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_france",
+          "amount": 2000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1338-10-04",
+    "note": "Attaque du 4 octobre, départ des pillards le 5 ; Froissart place l'assaut pendant la messe du dimanche."
+  },
+  "sources": [
+    "English Channel naval campaign, 1338–1339",
+    "Nicolas Béhuchet",
+    "Jonathan Sumption, The Hundred Years War, vol. I : Trial by Battle, 1990"
+  ]
+}

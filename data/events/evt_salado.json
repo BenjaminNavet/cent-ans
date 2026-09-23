@@ -1,0 +1,90 @@
+{
+  "id": "evt_salado",
+  "title": "La bataille du Salado",
+  "text": "Le 30 octobre 1340, sur le rio Salado près de Tarifa, Alphonse XI de Castille et son beau-père Afonso IV de Portugal écrasent l'armée du sultan mérinide Abu al-Hasan et de Yusuf Ier de Grenade. Les Mérinides repassent en Afrique : c'est la dernière grande armée venue du Maroc qui ait envahi la péninsule. La voie est ouverte vers le détroit et vers Algésiras.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "autumn"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "ruler_is",
+        "faction": "fac_castile",
+        "character": "chr_alfonso_xi"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_granada"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_castile"
+  },
+  "options": [
+    {
+      "text": "Rendre grâce à Dieu et partager la gloire avec le Portugal",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        },
+        {
+          "type": "papal_favor",
+          "amount": 15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_portugal",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_granada",
+          "amount": -15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_portugal",
+          "amount": 15,
+          "reason": "Frères d'armes du Salado"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder le butin pour assiéger Algésiras",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_granada",
+          "amount": -15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1340-10-30"
+  },
+  "sources": [
+    "Battle of Río Salado",
+    "Joseph F. O'Callaghan, The Gibraltar Crusade, 2011"
+  ]
+}
