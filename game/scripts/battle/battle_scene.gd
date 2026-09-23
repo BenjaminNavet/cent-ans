@@ -167,7 +167,7 @@ func begin() -> bool:
 	units = battle.call("get_units")
 	for unit in units:
 		_make_banner(unit)
-	var title := ("Assaut de %s" if siege_view != null else "Bataille de %s") % str(setup.get("province_name", ""))
+	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.height_at(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
@@ -810,3 +810,11 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("BattleScene: screenshot %s (%s)" % [path, error_string(err)])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
+
+
+## « de » élidé devant voyelle (« d'Île-de-France », « de Guyenne ») ; même règle que
+## `events::de` côté Rust.
+static func de(name: String) -> String:
+	if name != "" and "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(name[0]):
+		return "d'" + name
+	return "de " + name

@@ -696,7 +696,8 @@ pub(crate) fn apply_battle_result(
         GameEvent::new(
             EventKind::Battle,
             format!(
-                "Bataille de {province_name} : {}{} attaque {}{}. Vainqueur : {}. Pertes : {} contre {}.",
+                "Bataille {} : {}{} attaque {}{}. Vainqueur : {}. Pertes : {} contre {}.",
+                crate::events::de(&province_name),
                 faction_name(&attacker_faction),
                 allies_note(attackers),
                 faction_name(&defender_faction),
