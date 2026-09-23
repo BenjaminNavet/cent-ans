@@ -234,6 +234,8 @@ func _build_houses() -> void:
 	# L'église, au fond de la ville.
 	var church := center + Vector2(0, 75)
 	if Geometry2D.is_point_in_polygon(church, _ring()):
+		if _place_model("cathedral", church, 28.0):
+			return
 		_house(church, 22.0, 10.0, 11.0, 0.0)
 		var spire := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
@@ -245,6 +247,43 @@ func _build_houses() -> void:
 		spire.material_override = _material(SLATE, 0.8)
 		spire.position = Vector3(church.x - 8.0, _ground(church.x, church.y) + 11.0 + 7.0 + 4.0, church.y)
 		add_child(spire)
+
+
+## Modèle Blender de M10 (`assets/models/<name>.glb`) mis à l'échelle (plus grande dimension
+## horizontale ≈ `size` m) ; `false` s'il manque (repli procédural).
+func _place_model(model_name: String, p: Vector2, size: float) -> bool:
+	if not ModelLibrary.has_model(model_name):
+		return false
+	var model := ModelLibrary.instantiate(model_name)
+	if model == null:
+		return false
+	var box := AABB()
+	var first := true
+	for child in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		var local := _relative_transform(mesh_instance, model) * mesh_instance.mesh.get_aabb()
+		box = local if first else box.merge(local)
+		first = false
+	var extent := maxf(box.size.x, box.size.z)
+	if first or extent <= 0.0:
+		model.queue_free()
+		return false
+	model.scale = Vector3.ONE * (size / extent)
+	model.position = Vector3(p.x, _ground(p.x, p.y) - 0.3, p.y)
+	add_child(model)
+	return true
+
+
+static func _relative_transform(node: Node3D, root: Node3D) -> Transform3D:
+	var t := Transform3D.IDENTITY
+	var current: Node = node
+	while current != null and current != root:
+		if current is Node3D:
+			t = (current as Node3D).transform * t
+		current = current.get_parent()
+	return t
 
 
 func _ring() -> PackedVector2Array:
