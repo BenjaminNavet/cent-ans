@@ -10,6 +10,7 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 • Entrée : fin du tour. Échap : désélectionner.
 • C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. F1 : cette aide.
 • Modes de carte : M mécontentement, N diplomatie, R religion. F12 : capture d'écran.
+• Volumes de la musique et des effets : menu de départ ou Menu → Son….
 
 [b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
