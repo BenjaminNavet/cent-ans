@@ -1,0 +1,18 @@
+{
+  "id": "trait_spendthrift",
+  "name": {
+    "display": "Dépensier"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "wealth",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_austere"
+  ],
+  "description": "Vide les caisses aussi vite qu'elles se remplissent."
+}

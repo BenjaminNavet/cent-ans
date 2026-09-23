@@ -1,0 +1,23 @@
+{
+  "id": "trait_chivalrous",
+  "name": {
+    "display": "Chevaleresque"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "army_morale",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_ruthless"
+  ],
+  "description": "Suit le code de la chevalerie : loyauté, courtoisie, protection des faibles."
+}

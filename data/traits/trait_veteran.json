@@ -1,0 +1,20 @@
+{
+  "id": "trait_veteran",
+  "name": {
+    "display": "Vétéran"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "army_experience",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "army_morale",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "A survécu à de nombreuses batailles."
+}

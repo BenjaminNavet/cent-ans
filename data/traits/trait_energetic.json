@@ -1,0 +1,18 @@
+{
+  "id": "trait_energetic",
+  "name": {
+    "display": "Énergique"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "army_experience",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_sickly"
+  ],
+  "description": "Déborde de vitalité, infatigable en campagne."
+}

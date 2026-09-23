@@ -14,6 +14,8 @@
     "religion_id": { "type": "string", "pattern": "^rel_[a-z0-9_]+$" },
     "culture_id": { "type": "string", "pattern": "^cul_[a-z0-9_]+$" },
     "trait_id": { "type": "string", "pattern": "^trait_[a-z0-9_]+$" },
+    "skill_id": { "type": "string", "pattern": "^skill_[a-z0-9_]+$" },
+    "names_id": { "type": "string", "pattern": "^names_[a-z]{2}$" },
     "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
     "date_string": {
       "type": "string",
@@ -77,7 +79,9 @@
             "research_civil", "research_military",
             "recruit_slots", "recruit_cost", "army_upkeep", "army_experience", "army_morale", "army_armor", "army_ranged",
             "garrison", "fortification_level", "siege_resistance",
-            "piety", "prestige", "supply", "movement", "attrition_resistance", "loyalty"
+            "piety", "prestige", "supply", "movement", "attrition_resistance", "loyalty",
+            "siege_speed", "construction_speed", "diplomacy", "intrigue", "fertility",
+            "battle_charge", "battle_ranged", "battle_defense"
           ]
         },
         "class": { "$ref": "#/$defs/social_class", "description": "Classe visée pour les effets de population ; absent = toute la province." },

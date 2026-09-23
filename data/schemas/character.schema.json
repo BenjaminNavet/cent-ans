@@ -67,7 +67,7 @@
       "$ref": "common.schema.json#/$defs/province_id",
       "description": "Province où se trouve le personnage au printemps 1337 (peut être hors de l'échantillon de provinces avant le pipeline géo)."
     },
-    "status": { "type": "string", "enum": ["at_court", "in_exile", "captive", "on_campaign", "minor"] },
+    "status": { "type": "string", "enum": ["at_court", "in_exile", "captive", "on_campaign", "minor", "unborn"] },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },

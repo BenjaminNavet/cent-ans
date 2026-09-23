@@ -1,0 +1,20 @@
+{
+  "id": "skill_maitre_des_travaux",
+  "name": {
+    "display": "Maître des travaux"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_agronome"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "production",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Dirige ateliers et chantiers avec efficacité."
+}

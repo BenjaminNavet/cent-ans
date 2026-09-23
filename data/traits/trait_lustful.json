@@ -1,0 +1,23 @@
+{
+  "id": "trait_lustful",
+  "name": {
+    "display": "Luxurieux"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "fertility",
+      "value": 20,
+      "mode": "percent"
+    },
+    {
+      "effect": "piety",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_ascetic"
+  ],
+  "description": "Multiplie les liaisons, au mépris du scandale."
+}

@@ -1,0 +1,15 @@
+{
+  "id": "trait_builder",
+  "name": {
+    "display": "Bâtisseur"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "construction_speed",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "Passionné de fortifications et de grands travaux."
+}

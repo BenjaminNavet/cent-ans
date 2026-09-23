@@ -1,0 +1,18 @@
+{
+  "id": "skill_hardiesse",
+  "name": {
+    "display": "Hardiesse"
+  },
+  "branch": "command",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "La charge de la cavalerie gagne en puissance."
+}

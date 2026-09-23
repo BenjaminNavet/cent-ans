@@ -1,0 +1,15 @@
+{
+  "id": "trait_archer_captain",
+  "name": {
+    "display": "Capitaine d'archers"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "battle_ranged",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "A fait ses preuves à la tête des tireurs."
+}

@@ -1,0 +1,15 @@
+{
+  "id": "trait_diplomat",
+  "name": {
+    "display": "Diplomate"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Doué pour la négociation entre puissances."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "trait_tourney_champion",
+  "name": {
+    "display": "Champion de tournoi"
+  },
+  "category": "martial",
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 8,
+      "mode": "percent"
+    },
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "S'est illustré dans les joutes et tournois."
+}

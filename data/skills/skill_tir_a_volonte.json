@@ -1,0 +1,20 @@
+{
+  "id": "skill_tir_a_volonte",
+  "name": {
+    "display": "Tir à volonté"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_archerie"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "battle_ranged",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Coordonne des tirs nourris et soutenus."
+}

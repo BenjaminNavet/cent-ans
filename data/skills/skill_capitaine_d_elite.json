@@ -1,0 +1,21 @@
+{
+  "id": "skill_capitaine_d_elite",
+  "name": {
+    "display": "Capitaine d'élite"
+  },
+  "branch": "command",
+  "tier": 3,
+  "prerequisites": [
+    "skill_tir_a_volonte",
+    "skill_maitre_des_sieges"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "army_experience",
+      "value": 20,
+      "mode": "percent"
+    }
+  ],
+  "description": "Forme des troupes d'élite reconnues sur les champs de bataille."
+}

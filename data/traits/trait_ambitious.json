@@ -1,0 +1,15 @@
+{
+  "id": "trait_ambitious",
+  "name": {
+    "display": "Ambitieux"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Vise toujours plus haut, quitte à prendre des risques."
+}

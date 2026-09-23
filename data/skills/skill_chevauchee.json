@@ -1,0 +1,20 @@
+{
+  "id": "skill_chevauchee",
+  "name": {
+    "display": "Chevauchée"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_hardiesse"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "movement",
+      "value": 1,
+      "mode": "add"
+    }
+  ],
+  "description": "Mène ses troupes à travers le pays avec célérité."
+}

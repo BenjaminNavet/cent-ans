@@ -1,0 +1,18 @@
+{
+  "id": "trait_vengeful",
+  "name": {
+    "display": "Vindicatif"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "intrigue",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_peaceful"
+  ],
+  "description": "N'oublie ni ne pardonne un affront."
+}

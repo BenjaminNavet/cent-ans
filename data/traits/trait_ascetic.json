@@ -1,0 +1,18 @@
+{
+  "id": "trait_ascetic",
+  "name": {
+    "display": "Ascète"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_lustful"
+  ],
+  "description": "Mène une vie de renoncement et de prière."
+}

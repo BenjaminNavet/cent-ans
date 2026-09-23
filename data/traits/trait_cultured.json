@@ -1,0 +1,15 @@
+{
+  "id": "trait_cultured",
+  "name": {
+    "display": "Cultivé"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Ami des lettres et des arts."
+}

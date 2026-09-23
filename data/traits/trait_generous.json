@@ -1,0 +1,23 @@
+{
+  "id": "trait_generous",
+  "name": {
+    "display": "Généreux"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "loyalty",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "tax_income",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_greedy"
+  ],
+  "description": "Distribue largement dons et faveurs."
+}

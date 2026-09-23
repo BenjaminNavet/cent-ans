@@ -1,0 +1,20 @@
+{
+  "id": "trait_stubborn",
+  "name": {
+    "display": "Entêté"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 3,
+      "mode": "add"
+    },
+    {
+      "effect": "diplomacy",
+      "value": -3,
+      "mode": "add"
+    }
+  ],
+  "description": "Ne change jamais d'avis, même à tort."
+}

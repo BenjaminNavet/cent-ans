@@ -1,0 +1,18 @@
+{
+  "id": "skill_discipline",
+  "name": {
+    "display": "Discipline"
+  },
+  "branch": "command",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Une troupe mieux tenue résiste plus longtemps."
+}

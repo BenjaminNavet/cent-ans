@@ -1,0 +1,20 @@
+{
+  "id": "trait_proud",
+  "name": {
+    "display": "Fier"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 3,
+      "mode": "add"
+    },
+    {
+      "effect": "diplomacy",
+      "value": -2,
+      "mode": "add"
+    }
+  ],
+  "description": "Son orgueil précède souvent sa raison."
+}

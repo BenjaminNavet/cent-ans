@@ -1,0 +1,23 @@
+{
+  "id": "trait_reckless",
+  "name": {
+    "display": "Téméraire"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "attrition_resistance",
+      "value": -10,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_cautious"
+  ],
+  "description": "Fonce sans mesurer le danger."
+}

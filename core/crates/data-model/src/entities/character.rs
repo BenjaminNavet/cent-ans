@@ -36,6 +36,9 @@ pub enum CharacterStatus {
     Captive,
     OnCampaign,
     Minor,
+    /// Historical character not born yet; the simulation spawns it at its
+    /// recorded `birth` date if both parents are alive and married.
+    Unborn,
 }
 
 /// A dated title held by the character.

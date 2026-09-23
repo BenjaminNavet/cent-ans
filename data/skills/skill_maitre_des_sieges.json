@@ -1,0 +1,20 @@
+{
+  "id": "skill_maitre_des_sieges",
+  "name": {
+    "display": "Maître des sièges"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_discipline"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "siege_speed",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "Réduit la durée des sièges qu'il conduit."
+}

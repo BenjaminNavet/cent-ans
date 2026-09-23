@@ -1,0 +1,15 @@
+{
+  "id": "trait_admiral",
+  "name": {
+    "display": "Amiral"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "movement",
+      "value": 1,
+      "mode": "add"
+    }
+  ],
+  "description": "Commande les flottes avec autorité."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "trait_cautious",
+  "name": {
+    "display": "Prudent"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "attrition_resistance",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_reckless"
+  ],
+  "description": "Pèse chaque décision avant d'agir."
+}

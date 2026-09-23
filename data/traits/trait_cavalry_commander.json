@@ -1,0 +1,15 @@
+{
+  "id": "trait_cavalry_commander",
+  "name": {
+    "display": "Chef de cavalerie"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "Commande la cavalerie avec une maîtrise reconnue."
+}

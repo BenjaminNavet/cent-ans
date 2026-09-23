@@ -1,0 +1,18 @@
+{
+  "id": "trait_strong",
+  "name": {
+    "display": "Robuste"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "health",
+      "value": 15,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_sickly"
+  ],
+  "description": "Constitution solide, résiste bien aux épreuves."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "trait_unpopular",
+  "name": {
+    "display": "Impopulaire"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "loyalty",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "description": "Le peuple ou la cour lui sont hostiles."
+}

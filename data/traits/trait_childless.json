@@ -1,0 +1,18 @@
+{
+  "id": "trait_childless",
+  "name": {
+    "display": "Sans enfant"
+  },
+  "category": "physical",
+  "effects": [
+    {
+      "effect": "fertility",
+      "value": -100,
+      "mode": "percent"
+    }
+  ],
+  "opposites": [
+    "trait_prolific"
+  ],
+  "description": "N'a pas ou plus d'enfant en âge de procréer."
+}

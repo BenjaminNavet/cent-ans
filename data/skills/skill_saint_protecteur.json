@@ -1,0 +1,25 @@
+{
+  "id": "skill_saint_protecteur",
+  "name": {
+    "display": "Protecteur de l'Église"
+  },
+  "branch": "court",
+  "tier": 3,
+  "prerequisites": [
+    "skill_confesseur"
+  ],
+  "cost": 3,
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 15,
+      "mode": "add"
+    },
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Devient un pilier reconnu de l'Église dans le royaume."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "trait_inquisitor",
+  "name": {
+    "display": "Inquisiteur"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 8,
+      "mode": "add"
+    },
+    {
+      "effect": "unrest",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "description": "Traque l'hérésie avec zèle."
+}

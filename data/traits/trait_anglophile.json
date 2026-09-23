@@ -1,0 +1,15 @@
+{
+  "id": "trait_anglophile",
+  "name": {
+    "display": "Anglophile"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "loyalty",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "description": "Sympathise avec la couronne d'Angleterre."
+}

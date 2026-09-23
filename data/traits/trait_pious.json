@@ -1,0 +1,15 @@
+{
+  "id": "trait_pious",
+  "name": {
+    "display": "Pieux"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10,
+      "mode": "add"
+    }
+  ],
+  "description": "Vit sa foi avec ferveur et régularité."
+}

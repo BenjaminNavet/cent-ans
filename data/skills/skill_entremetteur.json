@@ -1,0 +1,20 @@
+{
+  "id": "skill_entremetteur",
+  "name": {
+    "display": "Entremetteur"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_beau_parleur"
+  ],
+  "cost": 2,
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Arrange mariages et alliances avec habileté."
+}

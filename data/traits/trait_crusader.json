@@ -1,0 +1,15 @@
+{
+  "id": "trait_crusader",
+  "name": {
+    "display": "Croisé"
+  },
+  "category": "personality",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10,
+      "mode": "add"
+    }
+  ],
+  "description": "A pris ou souhaite prendre la croix."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "trait_just",
+  "name": {
+    "display": "Juste"
+  },
+  "category": "governance",
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -5,
+      "mode": "add"
+    }
+  ],
+  "opposites": [
+    "trait_cruel"
+  ],
+  "description": "Rend une justice équitable, respectée du peuple."
+}
