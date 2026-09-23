@@ -2,7 +2,7 @@
   "id": "unit_longbowmen",
   "name": {
     "display": "Archers à l'arc long",
-    "local": "longbowmen",
+    "local": "archers",
     "local_language": "moyen anglais"
   },
   "category": "ranged",

@@ -70,6 +70,10 @@ func _ready() -> void:
 	_text_label.add_theme_font_size_override("italics_font_size", 17)
 	_text_label.add_theme_color_override("default_color", INK)
 	root.add_child(_text_label)
+	# H2 : mots du Codex cliquables (bulles imbriquées).
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", _text_label)
 	root.add_child(HSeparator.new())
 
 	_options_box = VBoxContainer.new()
@@ -102,7 +106,7 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	var expires := int(decision.get("expires_in", 0))
 	meta.append("à décider ce tour-ci" if expires <= 1 else "à décider sous %d tours" % expires)
 	_meta_label.text = " — ".join(meta)
-	_text_label.text = "[i]%s[/i]" % str(decision.get("text", ""))
+	_text_label.text = "[i]%s[/i]" % CodexText.format(str(decision.get("text", "")), true)
 	for child in _options_box.get_children():
 		child.queue_free()
 	var options: Array = decision.get("options", [])

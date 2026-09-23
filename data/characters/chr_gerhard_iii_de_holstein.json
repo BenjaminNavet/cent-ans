@@ -11,7 +11,8 @@
   "faction": "fac_holstein",
   "role": "ruler",
   "birth": {
-    "value": "1292-01-01"
+    "value": "1292",
+    "uncertain": true
   },
   "death": {
     "value": "1340-04-01",

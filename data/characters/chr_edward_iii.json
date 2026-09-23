@@ -42,7 +42,7 @@
     {
       "title": "Comte de Ponthieu",
       "from": {
-        "value": "1325-09-10"
+        "value": "1325-09-02"
       }
     }
   ],
@@ -70,7 +70,7 @@
   },
   "starting_location": "prov_middlesex",
   "status": "at_court",
-  "description": "Roi à 14 ans, maître du pouvoir depuis le coup de Nottingham (1330). Petit-fils de Philippe IV le Bel par sa mère, il revendiquera la couronne de France en 1340.",
+  "description": "Roi à 14 ans, maître du pouvoir depuis le coup de Nottingham (1330). Petit-fils de Philippe IV le Bel par sa mère, il revendique la couronne de France dès l'automne 1337 et en prend le titre à Gand en janvier 1340.",
   "sources": [
     "Édouard III"
   ]
