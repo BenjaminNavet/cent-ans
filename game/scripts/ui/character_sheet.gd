@@ -76,6 +76,9 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	picker_panel.hide()
 
 	swatch.color = SimFacade.faction_color(str(character.get("faction", "")))
+	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
+	if PortraitLoader.overlay_portrait(swatch, character_id, str(character.get("faction", "")), Vector2(96, 96)):
+		swatch.color = Color(0, 0, 0, 0)
 	var epithet: String = str(character.get("epithet", ""))
 	name_label.text = "%s%s" % [str(character.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
 	subtitle_label.text = "%s — %s ans — %s — Maison %s" % [

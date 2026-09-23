@@ -117,6 +117,41 @@ def _extract_image(payload: dict[str, Any]) -> bytes:
     raise RuntimeError("Aucune image base64 dans la réponse OpenRouter")
 
 
+def request_image(
+    model: str,
+    prompt: str,
+    client: httpx.Client | None = None,
+    max_tokens: int | None = None,
+) -> tuple[bytes, Decimal | None]:
+    """Paid call without budget bookkeeping: return (image bytes, ``usage.cost`` or None).
+
+    Callers must check and record the budget themselves (see :func:`generate_image`
+    or ``cent_ans_tools.portraits``, which records one row per batch).
+    """
+    body = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "modalities": ["image", "text"],
+        "usage": {"include": True},
+    }
+    if max_tokens is not None:
+        # Caps the credit OpenRouter reserves up front (402 on low key limits).
+        body["max_tokens"] = max_tokens
+    own_client = client is None
+    client = client or httpx.Client(timeout=180)
+    try:
+        response = client.post(
+            f"{API_BASE}/chat/completions", headers=_headers(), json=body
+        )
+        response.raise_for_status()
+        payload = response.json()
+    finally:
+        if own_client:
+            client.close()
+    cost = (payload.get("usage") or {}).get("cost")
+    return _extract_image(payload), (Decimal(str(cost)) if cost is not None else None)
+
+
 def generate_image(
     model: str,
     prompt: str,
@@ -137,25 +172,7 @@ def generate_image(
             f"Estimation {estimated} $ + cumul {budget.total(budget_path)} $ dépasse le plafond"
         )
 
-    body = {
-        "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "modalities": ["image", "text"],
-        "usage": {"include": True},
-    }
-    own_client = client is None
-    client = client or httpx.Client(timeout=180)
-    try:
-        response = client.post(
-            f"{API_BASE}/chat/completions", headers=_headers(), json=body
-        )
-        response.raise_for_status()
-        payload = response.json()
-    finally:
-        if own_client:
-            client.close()
-
-    actual_raw = (payload.get("usage") or {}).get("cost")
+    image, actual_raw = request_image(model, prompt, client)
     actual = to_money(actual_raw) if actual_raw is not None else estimated
     budget.add_entry(
         date.today().isoformat(),
@@ -168,5 +185,5 @@ def generate_image(
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(_extract_image(payload))
+    out_path.write_bytes(image)
     return out_path

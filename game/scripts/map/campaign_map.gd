@@ -109,6 +109,9 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
+	if audio_director != null:
+		audio_director.attach_campaign(self)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -229,6 +232,7 @@ func _characters_available() -> bool:
 
 func _refresh_top_bar() -> void:
 	ui.set_faction(SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
+	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
 	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
 	var projected := -1
@@ -719,6 +723,9 @@ func _on_end_turn() -> void:
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
+	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
+	if audio != null:
+		audio.on_turn_events(events)
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
