@@ -16,3 +16,7 @@ Plan : `docs/design/v2-finalisation.md`.
 
 Prochaine étape : attendre les rapports de la vague 1, fusionner dans main, tests, puis vague 2.
 Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas de portraits cette session.
+
+## Coordination avec les sessions parallèles
+- **game-project-76 (« visual »)** : refonte semi-réaliste, possède shaders, terrain, côtes, rivières, mer, marqueurs (villes, armées, constructions, chemin), `battle_meshes.gd`, `battle_terrain.gd`, assets models/textures, `tools/geo`, réglages de rendu de `project.godot`. Fusionne lui-même dans main après rebase.
+- **game-project-e3 (« ui-tw », audit UI Total War, `docs/design/2026-09-23-audit-ui-total-war.md`)** : nouveaux fichiers `game/scripts/ui/{army_strip,general_seal,end_turn_cluster,news_letters}.gd` ; ordres de chef en bataille dans `sim-battle` + `data/battle_orders`. **F5 attend sa fusion.** Son lot A (défauts 1-5, 10-15 : economy.rs, movement.rs, map_ui.gd, province_panel.gd, thème) après fusion de F1/F2/F3 → **le prévenir quand c'est fusionné.**
