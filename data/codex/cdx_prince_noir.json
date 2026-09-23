@@ -1,0 +1,12 @@
+{
+  "id": "cdx_prince_noir",
+  "title": "Édouard de Woodstock, le Prince noir",
+  "category": "personnage",
+  "aliases": ["Prince noir", "Édouard de Woodstock", "prince de Galles Édouard"],
+  "era": { "from": "1330", "to": "1376" },
+  "summary": "Fils aîné d'[[cdx_edouard_iii|Édouard III]], le Prince noir remporte la bataille de [[cdx_poitiers|Poitiers]] en 1356 et capture le roi [[cdx_jean_ii|Jean II]], avant de gouverner la principauté d'Aquitaine depuis [[cdx_bordeaux|Bordeaux]].",
+  "body": "Né en 1330, Édouard de Woodstock, prince de Galles, est le fils aîné d'[[cdx_edouard_iii|Édouard III]]. Il se distingue dès l'âge de seize ans à la bataille de [[cdx_crecy|Crécy]] en 1346, où il commande l'une des ailes de l'armée anglaise aux côtés de ses fameux archers armés de l'[[cdx_arc_long|arc long]].\n\nSon fait d'armes le plus retentissant survient le 19 septembre 1356 : parti de Guyenne en [[cdx_chevauchee|chevauchée]] à travers le Berry et le Poitou, il affronte l'armée royale française près de [[cdx_poitiers|Poitiers]] et remporte une victoire éclatante, capturant le roi [[cdx_jean_ii|Jean II]] et son fils Philippe. Il traite son prisonnier avec une courtoisie chevaleresque restée célèbre, le servant lui-même à table lors du retour vers Londres.\n\nÀ partir de 1362, son père lui confie la principauté d'Aquitaine, gouvernée depuis [[cdx_bordeaux|Bordeaux]], capitale de la [[cdx_guyenne|Guyenne]] anglaise. Il intervient en 1367 en Castille pour rétablir sur le trône Pierre le Cruel, allié anglais, en battant Henri de Trastamare et [[cdx_du_guesclin|Bertrand du Guesclin]] à Nájera, victoire militaire qui l'endette lourdement et le pousse à alourdir la fiscalité en Aquitaine, ce qui alimente le mécontentement des seigneurs gascons.\n\nAffaibli par une maladie contractée en Espagne, probablement une forme de dysenterie chronique, il ordonne en 1370 le sac brutal de Limoges avant de rentrer malade en Angleterre. Il meurt en 1376, un an avant son père, sans avoir régné : c'est son fils, Richard II, encore enfant, qui hérite de la couronne d'Angleterre.",
+  "entity": "chr_edward_of_woodstock",
+  "see_also": ["cdx_poitiers", "cdx_edouard_iii", "cdx_jean_ii", "cdx_guyenne"],
+  "sources": ["Édouard de Woodstock"]
+}

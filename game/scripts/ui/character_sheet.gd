@@ -39,6 +39,7 @@ const SEX_LABELS := {"male": "Homme", "female": "Femme"}
 @onready var close_button: Button = %CloseButton
 
 var character_id: String = ""
+var _description: RichTextLabel  # H2 : description avec mots du Codex
 var _skill_tree: Array = []
 var _learnable: Array = []
 var _skills_learned: Array = []
@@ -53,6 +54,7 @@ func _ready() -> void:
 	marry_button.pressed.connect(func() -> void: _open_picker("marry", "Marier avec…", marriage_candidates))
 	picker_close.pressed.connect(func() -> void: picker_panel.hide())
 	_decorate()  # F2
+	_add_description()  # H2
 
 
 # --- F2 : icônes des branches et des actions ---------------------------------------------
@@ -77,6 +79,43 @@ func _decorate() -> void:
 	IconLibrary.decorate_button(governor_button, "hud_governor", 20)
 	IconLibrary.decorate_button(general_button, "hud_army", 20)
 	IconLibrary.decorate_button(marry_button, "class_nobility", 20)
+
+# --- H2 : description et fiche du Codex --------------------------------------------------
+
+
+func _add_description() -> void:
+	_description = RichTextLabel.new()
+	_description.name = "Description"
+	_description.bbcode_enabled = true
+	_description.fit_content = true
+	_description.scroll_active = false
+	_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_description.add_theme_font_size_override("normal_font_size", 14)
+	_description.add_theme_font_size_override("italics_font_size", 14)
+	_description.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
+	var content := get_node_or_null("VBox/Scroll/Content")
+	if content == null:
+		return
+	content.add_child(_description)
+	content.move_child(_description, 0)
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", _description)
+
+
+func _fill_description(character: Dictionary) -> void:
+	if _description == null:
+		return
+	var definition: Dictionary = GameCatalog.definitions("characters").get(character_id, {})
+	var text := CodexText.format(str(character.get("description", definition.get("description", ""))), true)
+	if text != "":
+		text = "[i]%s[/i]" % text
+	var codex := CodexText.store()
+	var entry_id := str(codex.call("entry_for_entity", character_id)) if codex != null else ""
+	if entry_id != "":
+		text += ("\n" if text != "" else "") + "✠ " + CodexText.link(entry_id, "Lire la fiche du Codex")
+	_description.text = text
+	_description.visible = text != ""
 
 var governable_provinces: Array = []
 var commandable_armies: Array = []
@@ -119,6 +158,7 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	for branch in _branch_chips:
 		(_branch_chips[branch] as Control).tooltip_text = RichTooltip.branch(branch, int((character.get("skills", {}) as Dictionary).get(branch, 0)))
 
+	_fill_description(character)
 	_fill_traits(character.get("traits", []))
 	_fill_family(character)
 
