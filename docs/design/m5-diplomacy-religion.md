@@ -99,14 +99,14 @@ sauvegarde round-trip, déterminisme 40 tours.
 - `get_province_state` gagne `heresy`, `heresy_religion`.
 
 ## 4. Interface Godot
-- Panneau « Diplomatie » (bouton, touche D) : liste des factions (couleur, nom, statut, barre d'attitude,
+- Panneau « Diplomatie » (bouton, touche P — D est prise par la caméra) : liste des factions (couleur, nom, statut, barre d'attitude,
   icônes trêve/embargo/prétention), fiche de faction sélectionnée : raisons de l'attitude, score de
   guerre, actions (déclarer la guerre, proposer la paix avec choix des provinces à céder et du tribut,
   alliance, embargo, vassalité, cadeau, médiation), prédiction « Accepterait / Refuserait » avec raisons
   avant envoi.
 - Fenêtre d'offre reçue (accepter/refuser) en début de tour ; choix d'obédience au Schisme.
 - Mode carte « Diplomatie » (touche N) : provinces teintées selon la relation avec le joueur (guerre
-  rouge, allié bleu, vassal violet, trêve jaune, neutre gris) ; mode « Religion » (touche R, hérésie).
+  rouge, allié bleu, vassal violet, trêve jaune, neutre gris) ; mode « Religion » (touche R, hérésie). Revenu : embargo -8 % par embargo subi, -3 % par embargo imposé (plancher 50 %) sur le revenu total..
 - Panneau faction : section religion (faveur pontificale, excommunication, obédience).
 - Journal : couleurs pour guerre/paix/alliance/rébellion/excommunication/schisme.
 - Smoke : proposer la paix à l'Angleterre (évaluation lue), déclarer la guerre à une faction avec

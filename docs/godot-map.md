@@ -163,6 +163,8 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Ordre de déplacement | clic droit sur une province avec une armée sélectionnée |
 | Fin du tour | bouton ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue) |
 | Mode mécontentement (M3) | M (action `map_toggle_unrest`) ; ignoré avec un message si `get_province_city` est indisponible |
+| Cour (M4) | C |
+| Diplomatie (M5) | P ; modes de carte N (diplomatie) et R (religion) |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
 Options de ligne de commande (après `--`) :
@@ -273,6 +275,22 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
   lance la première tech militaire disponible, joue deux tours, ouvre le panneau.
 - Le mock `CampaignSimMock` n'implémente pas les technologies : bouton et jauge affichent
   « indisponible », le smoke test saute l'étape (message imprimé).
+
+## Diplomatie et religion (M5)
+
+- **Diplomatie** (bouton « Diplomatie », touche P ; D est prise par la caméra) : `scripts/ui/diplomacy_panel.gd`,
+  construit en code et branché par `scripts/map/diplomacy_controller.gd`. Liste des factions (couleur,
+  statut, barre d'attitude), fiche (raisons de l'attitude, score de guerre, casus belli, prétentions,
+  religion, loyauté des vassaux) et actions : guerre, paix (provinces à céder/exiger, tribut), alliance,
+  rupture, embargo, vassalité, libération, présents, médiation pontificale, don à l'Église. Le survol
+  d'une action affiche le verdict de la simulation (« Accepterait / Refuserait » et raisons).
+- **Propositions reçues** : en tête du panneau (Accepter / Refuser) ; le panneau s'ouvre en fin de tour
+  quand il y en a. Le choix d'obédience du Grand Schisme arrive par ce canal.
+- **Modes de carte** : N diplomatie (or = soi, rouge = guerre, bleu = allié, violet = vassal/suzerain,
+  jaune = trêve, gris = paix) ; R religion (bleu = Église/Avignon, or = Rome, vert = hérésie).
+- Journal : couleurs pour guerre, paix, alliances, rébellions, embargos, offres, excommunication, schisme, hérésie.
+- Captures : `--stage=diplomacy` (`docs/img/godot-diplomacy.png`), `--stage=diplomacy_map`
+  (`docs/img/godot-diplomacy-map.png`).
 
 ## Performances mesurées (M4 Pro)
 

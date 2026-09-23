@@ -391,9 +391,11 @@ func _peace_order(enemy: String) -> Dictionary:
 ## Provinces de l'ennemi que nous occupons (à exiger) et les nôtres qu'il occupe (à céder).
 func _occupied_between(enemy: String) -> Array:
 	var result: Array = []
-	if not SimFacade.store_loaded():
+	# Autoload lu à l'exécution : ce script est aussi compilé par le smoke test (--script).
+	var facade: Node = get_node_or_null("/root/SimFacade")
+	if facade == null or not facade.call("store_loaded"):
 		return result
-	for id in SimFacade.store.call("get_province_ids"):
+	for id in facade.get("store").call("get_province_ids"):
 		var state: Dictionary = sim.call("get_province_state", id)
 		if state.is_empty():
 			continue

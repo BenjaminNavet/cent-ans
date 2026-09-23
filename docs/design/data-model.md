@@ -407,3 +407,31 @@ Règles : `core/crates/sim-campaign/src/research.rs` (spec `docs/design/m6-techn
   construction) ; `tests/m6.rs` vérifie que chaque `unlocks.*` correspond.
 - IA minimale : sans recherche en cours, choisit la tech disponible la moins chère de la branche où
   elle en possède le moins.
+
+### 7.7 `CampaignSim` : diplomatie et religion (M5)
+
+Méthodes dans `core/crates/godot-bridge/src/campaign_sim_diplomacy.rs` (bloc `#[godot_api(secondary)]`).
+
+| Méthode | Retour |
+|---|---|
+| `get_diplomacy(faction)` | `[{id, name, color, status: "war"\|"truce"\|"peace"\|"alliance"\|"vassal"\|"suzerain", attitude, attitude_reasons[{text, value}], truce_turns_left, embargo_by_us, embargo_on_us, war_score, casus_belli, claims[], religion, religion_name, loyalty (-1 si pas vassal), power, allies[]}]` ; `attitude` = attitude de l'autre faction envers `faction`. |
+| `evaluate_proposal(order)` | `{accept, score, reasons[{text, value}]}` pour `propose_peace`, `propose_alliance`, `demand_vassalage`, `propose_faction_marriage`, `request_papal_mediation` ; pour `declare_war`, `reasons` liste motif, parjure et alliés appelés aux armes. |
+| `get_offers()` | `[{id, from, from_name, kind, text, expires_in}]` (propositions reçues par le joueur). |
+| `answer_offer(id, accept)` | `{ok, error}` (équivaut à l'ordre `answer_offer`). |
+| `get_religion_state(faction)` | `{religion, religion_name, papal_favor, excommunicated, turns_left, schism, obedience_choice_pending}` |
+| `get_province_religion(id)` | `{religion, religion_name, heresy, heresy_religion, heresy_name}` |
+| `get_province_relations(ids)` | relation du joueur avec le contrôleur de chaque province : `"self"`, `"war"`, `"truce"`, `"peace"`, `"alliance"`, `"vassal"`, `"suzerain"`. |
+
+Ordres (`submit_order`) : `declare_war{target}`, `propose_peace{target, provinces[], tribute}` (chaque
+province listée passe à l'autre partie ; tribut positif payé par la cible), `propose_alliance{target}`,
+`break_alliance{target}`, `set_embargo{target, active}`, `demand_vassalage{target}`,
+`release_vassal{target}`, `send_gift{target, amount}`, `propose_faction_marriage{target, character, spouse}`,
+`answer_offer{offer, accept}`, `request_papal_mediation{target}`, `donate_to_church{amount}`,
+`choose_obedience{religion}`. Une proposition refusée renvoie `ok = false` et `error` = « X refuse : raisons ».
+
+Événements M5 : `war_declared`, `peace_signed`, `alliance_formed`, `alliance_broken`, `vassalage`,
+`vassal_rebellion`, `embargo`, `diplomatic_offer`, `diplomacy`, `marriage`, `excommunication`, `schism`,
+`heresy`. Les événements produits par des ordres ouvrent le journal du tour suivant (`pending_events`).
+
+Données : `factions/*.json` gagne `claims[{kind: "throne"|"province", faction?, province?, note}]` ;
+`religions/*.json` gagne `historical_adherents[]` (obédience au Schisme) et `origin_provinces[]` (hérésies).

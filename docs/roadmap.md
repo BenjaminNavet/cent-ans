@@ -7,7 +7,7 @@
 | M2 | Boucle de campagne minimale jouable (tours, armées, auto-résolution, sauvegarde, UI) | terminé (2026-09-23) |
 | M3 | Villes et économie (classes, bâtiments, jauges, ressources) | terminé (2026-09-23) |
 | M4 | Personnages et dynasties | terminé (2026-09-23) |
-| M5 | Diplomatie et religion | à faire |
+| M5 | Diplomatie et religion | terminé (2026-09-23) |
 | M6 | Technologies | terminé |
 | M7 | Batailles temps réel 3D | à faire |
 | M8 | Sièges | à faire |
