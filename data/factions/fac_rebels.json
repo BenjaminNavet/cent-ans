@@ -1,0 +1,25 @@
+{
+  "id": "fac_rebels",
+  "name": {
+    "display": "Rebelles"
+  },
+  "short_name": "Rebelles",
+  "government": "lordship",
+  "playable": false,
+  "capital": "prov_ile_de_france",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "De sable plain.",
+    "description": "Bannière noire sans figure, portée par les provinces soulevées contre leur seigneur.",
+    "primary_color": "#1A1A1A",
+    "secondary_color": "#8B0000"
+  },
+  "treasury": 0,
+  "prestige": 0,
+  "description": "Faction virtuelle et non jouable : provinces tombées en révolte ouverte (M3, § 1.1).",
+  "sources": [
+    "docs/design/m3-cities-economy.md"
+  ]
+}

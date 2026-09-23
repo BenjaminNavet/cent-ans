@@ -47,7 +47,7 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 fn new_1337_matches_game_data() {
     let data = data();
     let state = france(&data, 1);
-    assert_eq!(state.factions.len(), 15);
+    assert_eq!(state.factions.len(), 16, "including the virtual fac_rebels");
     assert_eq!(state.provinces.len(), 132);
     assert_eq!(state.date_label(), "Printemps 1337");
     assert_eq!(state.turn(), 0);
@@ -497,7 +497,7 @@ fn siege_captures_after_fortification_dependent_duration() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 4).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = prov("prov_boulonnais");
-    let fortification = data.provinces[&boulogne].fortification_level.unwrap_or(0) as u32;
+    let fortification = state.fortification_level(&data, &boulogne);
     state.armies.get_mut(&english).unwrap().location = boulogne.clone();
     state
         .submit_order(
@@ -609,12 +609,26 @@ fn france_income_is_positive_and_in_target_range() {
     assert!((0.08..=0.18).contains(&share), "8-unit army share {share}");
     assert!(income > upkeep, "France must run a surplus at the start");
 
+    // The actually-collected income (spec § 1.4: tax rate + building
+    // effects) stays in the same target range with the default Normal rate.
+    let effective_income = state.faction_income_effective(&data, &france_id);
+    println!("France effective income (Normal tax) {effective_income}");
+    assert!(
+        (20_000..=30_000).contains(&effective_income),
+        "France effective income {effective_income}"
+    );
+
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
+    let effective_upkeep =
+        state.faction_army_upkeep(&data, &france_id) + state.faction_building_upkeep(&data, &france_id);
     let events = state.end_turn_with(&data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();
-    assert_eq!(summary.income, income);
-    assert_eq!(summary.treasury, treasury_before + income - upkeep);
+    assert_eq!(summary.income, effective_income);
+    assert_eq!(
+        summary.treasury,
+        treasury_before + effective_income - effective_upkeep
+    );
     assert_eq!(summary.provinces_count, 27);
 }
 
@@ -650,7 +664,8 @@ fn save_load_round_trip() {
         state.end_turn(&data);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":1"));
+    assert!(json.contains("\"state_version\":2"));
+    assert!(json.contains("\"tax_rate\""), "new field round-trips");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
     assert_eq!(loaded.save_json(), json);
@@ -664,11 +679,11 @@ fn save_load_round_trip() {
     assert_eq!(a.save_json(), b.save_json());
 
     let err =
-        CampaignState::load_json(&json.replace("\"state_version\":1", "\"state_version\":99"))
+        CampaignState::load_json(&json.replace("\"state_version\":2", "\"state_version\":1"))
             .unwrap_err();
     assert!(matches!(
         err,
-        sim_campaign::CampaignError::VersionMismatch { found: 99, .. }
+        sim_campaign::CampaignError::VersionMismatch { found: 1, .. }
     ));
     assert!(CampaignState::load_json("not json").is_err());
 }
