@@ -1,0 +1,53 @@
+{
+  "crs": "EPSG:3035",
+  "bounds_projected": [
+    2169486.0,
+    1327858.0,
+    5114414.0,
+    4272786.0
+  ],
+  "size_px": [
+    4096,
+    4096
+  ],
+  "meters_per_px": 718.9765625,
+  "height_min_m": -200.0,
+  "height_max_m": 4800.0,
+  "extent_lonlat": [
+    -11.0,
+    35.0,
+    16.0,
+    60.0
+  ],
+  "sources": {
+    "dem": {
+      "name": "ETOPO 2022 v1 15s surface",
+      "tiles": [
+        "ETOPO_2022_v1_15s_N75W030_surface.tif",
+        "ETOPO_2022_v1_15s_N75W015_surface.tif",
+        "ETOPO_2022_v1_15s_N75E000_surface.tif",
+        "ETOPO_2022_v1_15s_N75E015_surface.tif",
+        "ETOPO_2022_v1_15s_N60W030_surface.tif",
+        "ETOPO_2022_v1_15s_N60W015_surface.tif",
+        "ETOPO_2022_v1_15s_N60E000_surface.tif",
+        "ETOPO_2022_v1_15s_N60E015_surface.tif",
+        "ETOPO_2022_v1_15s_N45W030_surface.tif",
+        "ETOPO_2022_v1_15s_N45W015_surface.tif",
+        "ETOPO_2022_v1_15s_N45E000_surface.tif",
+        "ETOPO_2022_v1_15s_N45E015_surface.tif"
+      ]
+    },
+    "vectors": {
+      "name": "Natural Earth 10m physical",
+      "layers": [
+        "ne_10m_coastline",
+        "ne_10m_land",
+        "ne_10m_rivers_lake_centerlines",
+        "ne_10m_rivers_europe",
+        "ne_10m_lakes",
+        "ne_10m_lakes_europe"
+      ]
+    }
+  },
+  "generated_at": "2026-09-23T08:09:23+00:00"
+}
