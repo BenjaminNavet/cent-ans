@@ -38,15 +38,20 @@ fn main() {
                 .map(|i| unit(&data, kinds[i % kinds.len()]))
                 .collect()
         };
-        for seed in 0..5 {
+        let size: usize = std::env::args()
+            .nth(2)
+            .and_then(|a| a.parse().ok())
+            .unwrap_or(20);
+        let (mut total, mut att_wins) = (0.0, 0);
+        for seed in 0..10 {
             let setup = BattleSetup {
                 province: String::new(),
                 province_name: String::new(),
                 terrain: Terrain::Plains,
                 river: seed % 2 == 0,
                 season: BattleSeason::Summer,
-                attacker: side(army(20)),
-                defender: side(army(20)),
+                attacker: side(army(size)),
+                defender: side(army(size)),
                 player_side: None,
                 siege: None,
             };
@@ -58,8 +63,18 @@ fn main() {
                 steps += 1;
             }
             let outcome = sim.outcome().unwrap();
+            if std::env::var("EVENTS").is_ok() && seed == 0 {
+                for e in sim.events() {
+                    println!("  {:.0} {:?} {}", e.time, e.side, e.text_fr);
+                }
+            }
+            total += sim.elapsed();
+            if outcome.winner == SideId::Attacker {
+                att_wins += 1;
+            }
             println!(
-                "seed {seed}: {steps} steps ({:.2} ms/step), winner {:?}, losses {} / {}, weather {:?}",
+                "seed {seed}: {:.0} s ({:.2} ms/step), winner {:?}, losses {} / {}, weather {:?}",
+                sim.elapsed(),
                 start.elapsed().as_secs_f64() * 1000.0 / steps as f64,
                 outcome.winner,
                 outcome.attacker.total_losses,
@@ -67,6 +82,7 @@ fn main() {
                 sim.weather()
             );
         }
+        println!("mean {:.0} s, attacker wins {att_wins}/10", total / 10.0);
         return;
     }
     let (a, d) = match scen.as_str() {
