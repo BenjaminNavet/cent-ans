@@ -15,8 +15,13 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
 - Ciblage : un effet avec `class` ne touche que cette classe (`EffectTotals::classes`), un effet avec
   `unit_category` que cette famille d'unités (`EffectTotals::unit_categories`) ; les champs de premier
   niveau ne gardent que les effets non ciblés. Le pont expose `effects.by_class`.
-- `Garrison` N : les N unités de garnison les plus chères ne coûtent rien ; la garnison d'une ville tenue
-  par son propriétaire et non assiégée regagne 5 % × N de son effectif max par saison (plafond 50 %).
+- `Garrison` N : la ville paie 10 % × N de l'entretien de sa garnison (plafond 50 %) — une première version
+  « N unités gratuites » divisait l'entretien des garnisons par deux et l'IA sur-recrutait (banqueroutes) ;
+  la garnison d'une ville tenue par son propriétaire et non assiégée regagne 5 % × N de son effectif max par
+  saison (plafond 50 %).
+- Rééquilibrage : les effets ciblés (richesse des bourgeois, des paysans…) s'appliquaient à toutes les
+  classes et gonflaient la richesse ; le ciblage faisait perdre ≈ 25 % de revenu en 10 ans. Richesse de base
+  +8 par classe (`CLASS_TARGETING_WEALTH_OFFSET`) : richesse à 10 ans identique à l'avant-F1 (±2).
 - `RecruitCost` : province (bâtiments + gouverneur) + techs de la faction, global ou par famille ;
   pourcentages additionnés, plancher 25 % du prix de base.
 - `Supply` : en territoire ami, bâtiments de la province + `Supply` fixe du général ajoutés à la
@@ -76,6 +81,12 @@ Branche : `worktree-agent-ae66d663ee24e14ab`. Tests : `core/crates/sim-campaign/
   `resolve_births`), « Les noces du dauphin » (1350, effet `marry`), Charles VI (1368, fils de Charles V et
   Jeanne si mariés et vivants). La folie vise `chr_charles_vi` (condition : il règne, 18-40 ans).
 - `tools/tests/test_events_schema.py` : ajout de la clé `chained` (ajustement minimal indispensable).
+
+## Vérifications
+- Sonde IA (`ai_probe`, graines 1-5, 100 tours) : 0 % d'ordres refusés côté France ; banqueroutes totales
+  64 en moyenne contre 79 avant F1, batailles 39 contre 35, provinces prises 16 contre 21 (sièges plus longs :
+  résistance, maçonnerie) ; France jamais en banqueroute.
+- `./core/build.sh` puis smoke Godot : OK.
 
 ## Prochaine étape
 Point 6 (docs), puis build GDExtension + smoke Godot + sonde IA.

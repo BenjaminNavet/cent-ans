@@ -18,14 +18,23 @@ fn base_growth(class: SocialClass) -> f64 {
 }
 
 /// Base wealth every class tends towards absent any modifier.
+///
+/// F1: raised by [`CLASS_TARGETING_WEALTH_OFFSET`] when class-targeted
+/// building effects stopped reaching every class (they used to be summed
+/// province-wide, which inflated every class's wealth and the M3 income
+/// calibration relied on it).
 fn base_wealth(class: SocialClass) -> f64 {
-    match class {
-        SocialClass::Peasants => 30.0,
-        SocialClass::Burghers => 55.0,
-        SocialClass::Clergy => 50.0,
-        SocialClass::Nobility => 70.0,
-    }
+    CLASS_TARGETING_WEALTH_OFFSET
+        + match class {
+            SocialClass::Peasants => 30.0,
+            SocialClass::Burghers => 55.0,
+            SocialClass::Clergy => 50.0,
+            SocialClass::Nobility => 70.0,
+        }
 }
+
+/// See [`base_wealth`] (F1 rebalancing).
+pub const CLASS_TARGETING_WEALTH_OFFSET: f64 = 8.0;
 
 /// Devastation above which growth stalls entirely (spec § 1.1).
 pub const GROWTH_DEVASTATION_CAP: u8 = 50;
