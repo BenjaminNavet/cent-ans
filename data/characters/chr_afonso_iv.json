@@ -42,5 +42,10 @@
   "description": "En guerre contre son gendre Alphonse XI (1336-1339) ; il combattra à ses côtés au Salado en 1340.",
   "sources": [
     "Alphonse IV de Portugal"
-  ]
+  ],
+  "family": {
+    "children": [
+      "chr_maria_de_portugal_castile"
+    ]
+  }
 }

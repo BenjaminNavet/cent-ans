@@ -40,6 +40,12 @@
     "father": "chr_jean_de_luxembourg",
     "spouses": [
       "chr_jean_de_normandie"
+    ],
+    "children": [
+      "chr_charles_v",
+      "chr_louis_d_anjou",
+      "chr_jean_de_berry",
+      "chr_philippe_le_hardi"
     ]
   },
   "starting_location": "prov_normandie",

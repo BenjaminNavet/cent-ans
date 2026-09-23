@@ -1,0 +1,33 @@
+{
+  "id": "chr_charles_v",
+  "name": {
+    "display": "Charles de France"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "prince",
+  "birth": {
+    "value": "1338-01-21",
+    "place": "Vincennes"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [
+    "trait_scholar"
+  ],
+  "family": {
+    "father": "chr_jean_de_normandie",
+    "mother": "chr_bonne_de_luxembourg"
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "unborn",
+  "description": "Second des Valois, futur Charles V le Sage ; naît le 21 janvier 1338 si Jean et Bonne sont mariés et vivants à cette date.",
+  "sources": [
+    "Charles V de France"
+  ]
+}

@@ -53,6 +53,9 @@
   "family": {
     "spouses": [
       "chr_philippe_d_evreux"
+    ],
+    "children": [
+      "chr_charles_ii_de_navarre"
     ]
   },
   "starting_location": "prov_navarra",

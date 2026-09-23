@@ -1,0 +1,31 @@
+{
+  "id": "chr_philippe_de_rouvres",
+  "name": {
+    "display": "Philippe de Rouvres"
+  },
+  "sex": "male",
+  "house": "Bourgogne",
+  "faction": "fac_burgundy",
+  "role": "prince",
+  "birth": {
+    "value": "1346-11-24",
+    "place": "Rouvres"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 0,
+    "court": 0
+  },
+  "traits": [],
+  "family": {
+    "father": "chr_philippe_monsieur",
+    "mother": "chr_jeanne_d_auvergne"
+  },
+  "starting_location": "prov_bourgogne",
+  "status": "unborn",
+  "description": "Fils posthume de Philippe de Bourgogne dit Monsieur, né plus de trois mois après sa mort ; dernier duc capétien de Bourgogne (1349-1361).",
+  "sources": [
+    "Philippe Ier de Rouvres"
+  ]
+}

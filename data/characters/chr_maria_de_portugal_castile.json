@@ -1,0 +1,41 @@
+{
+  "id": "chr_maria_de_portugal_castile",
+  "name": {
+    "display": "Marie de Portugal"
+  },
+  "sex": "female",
+  "house": "Bourgogne-Portugal",
+  "faction": "fac_castile",
+  "role": "consort",
+  "birth": {
+    "value": "1313",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1357"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_sickly"
+  ],
+  "family": {
+    "father": "chr_afonso_iv",
+    "spouses": [
+      "chr_alfonso_xi"
+    ],
+    "children": [
+      "chr_pedro_i_de_castille"
+    ]
+  },
+  "starting_location": "prov_toledo",
+  "status": "at_court",
+  "description": "Reine consort de Castille (mariée en 1328), fille d'Alphonse IV de Portugal ; délaissée par Alphonse XI au profit de Leonor de Guzmán.",
+  "sources": [
+    "Marie de Portugal (1313-1357)"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "chr_jeanne_d_auvergne",
+  "name": {
+    "display": "Jeanne Ire d'Auvergne"
+  },
+  "sex": "female",
+  "house": "Auvergne-Boulogne",
+  "faction": "fac_burgundy",
+  "role": "noble",
+  "birth": {
+    "value": "1326",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1360",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [],
+  "family": {
+    "spouses": [
+      "chr_philippe_monsieur"
+    ],
+    "children": [
+      "chr_philippe_de_rouvres"
+    ]
+  },
+  "starting_location": "prov_bourgogne",
+  "status": "at_court",
+  "description": "Comtesse d'Auvergne et de Boulogne, épouse (1338) de Philippe de Bourgogne dit Monsieur ; mère de Philippe de Rouvres, né après la mort de son père.",
+  "sources": [
+    "Jeanne Ire d'Auvergne"
+  ]
+}
