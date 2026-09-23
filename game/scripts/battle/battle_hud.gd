@@ -13,7 +13,7 @@ signal return_pressed
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
 const MAX_LOG := 9
-const CATEGORY_ICON := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙"}
+const CATEGORY_ICON := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙", "tower": "♜", "ram": "⚒"}
 
 var root: Control
 var title_label: Label
@@ -28,6 +28,8 @@ var end_panel: PanelContainer
 var end_title: Label
 var end_body: Label
 var help_label: Label
+var siege_panel: PanelContainer
+var siege_label: Label
 var _cards: Dictionary = {}  # unit id -> {panel, name, count, morale, fatigue, ammo, state}
 var _balance: Array = [1, 1]
 var _colors: Array = [Color.RED, Color.BLUE]
@@ -83,6 +85,18 @@ func _build_top_bar() -> void:
 	balance_bar.custom_minimum_size = Vector2(220, 12)
 	balance_bar.draw.connect(_draw_balance)
 	balance.add_child(balance_bar)
+	# Siège (M8) : murailles, brèches, porte, place centrale ; caché en bataille rangée.
+	siege_panel = PanelContainer.new()
+	siege_panel.anchor_left = 0.5
+	siege_panel.anchor_right = 0.5
+	siege_panel.offset_left = -300
+	siege_panel.offset_right = 300
+	siege_panel.offset_top = 62
+	siege_panel.visible = false
+	root.add_child(siege_panel)
+	siege_label = _label("", 14)
+	siege_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	siege_panel.add_child(siege_label)
 
 
 func _draw_balance() -> void:
@@ -191,6 +205,11 @@ func set_clock(seconds: float, speed: float, paused: bool) -> void:
 	clock_label.text = "%02d:%02d" % [total / 60, total % 60]
 	speed_label.text = "Pause" if paused else "×%d" % int(speed)
 	speed_label.add_theme_color_override("font_color", Color(0.6, 0.1, 0.08) if paused else INK)
+
+
+func set_siege_status(text: String) -> void:
+	siege_panel.visible = text != ""
+	siege_label.text = text
 
 
 func set_balance(player_name: String, player_strength: int, enemy_name: String, enemy_strength: int) -> void:

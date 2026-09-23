@@ -277,6 +277,40 @@ impl Battlefield {
         }
     }
 
+    /// Siege battles: flattens the ground under and around the town and
+    /// clears forests and mud from the town and the attacker's approach.
+    pub fn prepare_for_siege(&mut self) {
+        let (cx, cz) = crate::siege::TOWN_CENTER;
+        let radius = crate::siege::RING_RADIUS;
+        let center_height = self.height(cx, cz);
+        for iz in 0..self.nz {
+            for ix in 0..self.nx {
+                let x = ix as f64 * self.resolution;
+                let z = iz as f64 * self.resolution;
+                let d = ((x - cx).powi(2) + (z - cz).powi(2)).sqrt();
+                let weight = if d < radius + 90.0 {
+                    1.0
+                } else if d < radius + 200.0 {
+                    1.0 - (d - radius - 90.0) / 110.0
+                } else {
+                    0.0
+                };
+                let h = &mut self.heights[iz * self.nx + ix];
+                *h += (center_height - *h) * weight * 0.9;
+            }
+        }
+        let keep = |zone: &Zone| {
+            let d = ((zone.x - cx).powi(2) + (zone.z - cz).powi(2)).sqrt();
+            let approach = zone.z - zone.radius < cz - radius + 20.0
+                && zone.z + zone.radius > 120.0
+                && (zone.x - cx).abs() < 450.0 + zone.radius;
+            d > radius + 60.0 + zone.radius && !approach
+        };
+        self.forests.retain(keep);
+        self.mud.retain(keep);
+        self.river = None;
+    }
+
     /// Bilinear height at (x, z), clamped to the field.
     pub fn height(&self, x: f64, z: f64) -> f64 {
         let fx = (x / self.resolution).clamp(0.0, (self.nx - 1) as f64);

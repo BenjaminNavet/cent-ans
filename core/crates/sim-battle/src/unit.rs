@@ -50,6 +50,8 @@ pub enum UnitState {
     Routing,
     /// Just rallied; back to `Idle` after a few seconds.
     Rallied,
+    /// Scaling a town wall (ladders or siege tower bridge).
+    Climbing,
 }
 
 impl UnitState {
@@ -62,6 +64,7 @@ impl UnitState {
             UnitState::Shooting => "shooting",
             UnitState::Routing => "routing",
             UnitState::Rallied => "rallied",
+            UnitState::Climbing => "climbing",
         }
     }
 }
@@ -119,6 +122,26 @@ pub struct Unit {
     pub stakes_planted: bool,
     /// Seconds left in the `Rallied` state.
     pub rally_timer: f64,
+    /// Siege battles: standing on the wall walk (shooting and cover bonus).
+    #[serde(default)]
+    pub on_wall: bool,
+    /// Siege battles: wall piece being scaled and progress (0-1).
+    #[serde(default)]
+    pub climbing: Option<usize>,
+    #[serde(default)]
+    pub climb_progress: f64,
+    /// Siege battles: wall piece an engine is ordered to batter.
+    #[serde(default)]
+    pub wall_target: Option<usize>,
+    /// Battle-only regiment (the ram): not a campaign unit, no losses reported.
+    #[serde(default)]
+    pub synthetic: bool,
+    /// The battering ram.
+    #[serde(default)]
+    pub ram: bool,
+    /// Wall piece that stopped the last move (siege battles).
+    #[serde(skip)]
+    pub blocked_by: Option<usize>,
     /// Casualties taken during the current tick (for morale).
     #[serde(skip)]
     pub tick_losses: f64,
@@ -167,6 +190,13 @@ impl Unit {
             still_time: 0.0,
             stakes_planted: false,
             rally_timer: 0.0,
+            on_wall: false,
+            climbing: None,
+            climb_progress: 0.0,
+            wall_target: None,
+            synthetic: false,
+            ram: false,
+            blocked_by: None,
             tick_losses: 0.0,
             flanked: 0,
         }
@@ -197,6 +227,21 @@ impl Unit {
     /// Present and not routing: counts for the end of the battle.
     pub fn able(&self) -> bool {
         self.present() && self.state != UnitState::Routing && !self.withdrawing
+    }
+
+    /// Engine able to batter walls (`siege_attack`).
+    pub fn wall_breaker(&self) -> bool {
+        self.stats.siege_attack.unwrap_or(0) > 0 && self.can_shoot()
+    }
+
+    /// Siege tower (`wall_assault`).
+    pub fn siege_tower(&self) -> bool {
+        self.has(Ability::WallAssault)
+    }
+
+    /// Foot soldiers who can scale walls with ladders.
+    pub fn can_climb(&self) -> bool {
+        !self.mounted && !self.synthetic && self.category == UnitCategory::Infantry
     }
 
     pub fn forward(&self) -> (f64, f64) {

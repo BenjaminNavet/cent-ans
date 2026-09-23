@@ -187,7 +187,10 @@ pub fn breach_per_turn(
 }
 
 /// A field army made of a province's garrison, for siege battles.
-fn garrison_army(state: &CampaignState, province: &ProvinceId) -> Option<crate::state::Army> {
+pub(crate) fn garrison_army(
+    state: &CampaignState,
+    province: &ProvinceId,
+) -> Option<crate::state::Army> {
     let p = state.provinces.get(province)?;
     Some(crate::state::Army {
         faction: p.controller.clone(),
@@ -254,7 +257,9 @@ impl CampaignState {
     }
 
     /// `assault { army }`: storm the walls now (M8). Victory takes the town;
-    /// defeat bloodies the besiegers, the siege goes on.
+    /// defeat bloodies the besiegers, the siege goes on. With
+    /// `interactive_battles`, an assault by or against the player becomes a
+    /// pending siege battle (M8 § 2) fought in 3D or auto-resolved.
     pub fn assault(
         &mut self,
         data: &GameData,
@@ -274,64 +279,135 @@ impl CampaignState {
         if !besieging {
             return Err(AssaultError::NotBesieging);
         }
-        let mut events = Vec::new();
-        let breach = self.provinces[&province]
-            .siege
-            .as_ref()
-            .map_or(0, |s| s.breach);
-        let walls = breach < 50 && !has_siege_towers(self, data, army);
-        let garrison = garrison_army(self, &province).expect("province exists");
-        let attacker_side = crate::movement::side_from_army(self, data, &self.armies[army]);
-        let defender_side = crate::movement::side_from_army(self, data, &garrison);
-        let context = crate::battle_auto::BattleContext {
-            defender_terrain_bonus: false,
-            river_crossing: false,
-            walls,
-        };
-        let result = crate::battle_auto::resolve_auto(
-            &attacker_side,
-            &defender_side,
-            &context,
-            &mut self.rng,
-        );
-        let defender_faction = garrison.faction.clone();
-        let won = result.winner == crate::battle_auto::Winner::Attacker;
-        crate::movement::apply_outcome(self, data, army, &result.attacker, &mut events);
-        apply_garrison_losses(self, &province, &result.defender);
-        let text = format!(
-            "Assaut de {} contre {}{} : {}. Pertes : {} contre {}.",
-            faction_name(data, faction),
-            province_name(data, &province),
-            if walls {
-                " (murailles intactes)"
-            } else {
-                " (par la brèche)"
-            },
-            if won {
-                "la place est emportée"
-            } else {
-                "les assaillants sont repoussés"
-            },
-            result.attacker.total_losses,
-            result.defender.total_losses
-        );
-        events.push(
-            GameEvent::new(EventKind::Battle, text)
-                .province(&province)
-                .faction(faction),
-        );
-        let general = self.armies.get(army).and_then(|a| a.general.clone());
-        if won {
-            self.record_battle(faction, &defender_faction, true);
-            capture(self, data, &province, faction, &mut events);
-            if let Some(general) = general {
-                dynasty::on_siege_won(self, data, &general);
+        let controller = self.provinces[&province].controller.clone();
+        let player_involved = faction == &self.player_faction || controller == self.player_faction;
+        if self.interactive_battles && player_involved {
+            let already = self
+                .pending_battles
+                .iter()
+                .any(|r| r.siege && &r.attacker == army);
+            if !already {
+                self.pending_battles.push(crate::state::BattleRequest {
+                    attacker: army.clone(),
+                    defender: army.clone(),
+                    province: province.clone(),
+                    attacker_origin: None,
+                    siege: true,
+                });
+                self.pending_events.push(
+                    GameEvent::new(
+                        EventKind::Battle,
+                        format!(
+                            "{} se prépare à donner l'assaut à {}.",
+                            faction_name(data, faction),
+                            province_name(data, &province)
+                        ),
+                    )
+                    .province(&province)
+                    .army(army)
+                    .faction(faction),
+                );
             }
-        } else {
-            self.record_battle(&defender_faction, faction, false);
+            return Ok(());
         }
+        let mut events = Vec::new();
+        auto_assault(self, data, army, &mut events);
         self.pending_events.extend(events);
         Ok(())
+    }
+}
+
+/// `true` while the walls of `province` still count against `army`'s
+/// assault (breach under 50 and no siege tower).
+pub(crate) fn walls_stand(
+    state: &CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    province: &ProvinceId,
+) -> bool {
+    let breach = state
+        .provinces
+        .get(province)
+        .and_then(|p| p.siege.as_ref())
+        .map_or(0, |s| s.breach);
+    breach < 50 && !has_siege_towers(state, data, army)
+}
+
+/// Auto-resolved assault of `army` on the town it besieges.
+pub(crate) fn auto_assault(
+    state: &mut CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(province) = state.armies.get(army).map(|a| a.location.clone()) else {
+        return;
+    };
+    let walls = walls_stand(state, data, army, &province);
+    let Some(garrison) = garrison_army(state, &province) else {
+        return;
+    };
+    let attacker_side = crate::movement::side_from_army(state, data, &state.armies[army]);
+    let defender_side = crate::movement::side_from_army(state, data, &garrison);
+    let context = crate::battle_auto::BattleContext {
+        defender_terrain_bonus: false,
+        river_crossing: false,
+        walls,
+    };
+    let result =
+        crate::battle_auto::resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
+    apply_assault_result(state, data, army, &province, &result, walls, events);
+}
+
+/// Applies an assault result (auto-resolved or fought in 3D): losses on
+/// both sides, journal line, capture of the town on victory.
+pub(crate) fn apply_assault_result(
+    state: &mut CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    province: &ProvinceId,
+    result: &crate::battle_auto::BattleResult,
+    walls: bool,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(faction) = state.armies.get(army).map(|a| a.faction.clone()) else {
+        return;
+    };
+    let defender_faction = state.provinces[province].controller.clone();
+    let won = result.winner == crate::battle_auto::Winner::Attacker;
+    crate::movement::apply_outcome(state, data, army, &result.attacker, events);
+    apply_garrison_losses(state, province, &result.defender);
+    let text = format!(
+        "Assaut de {} contre {}{} : {}. Pertes : {} contre {}.",
+        faction_name(data, &faction),
+        province_name(data, province),
+        if walls {
+            " (murailles intactes)"
+        } else {
+            " (par la brèche)"
+        },
+        if won {
+            "la place est emportée"
+        } else {
+            "les assaillants sont repoussés"
+        },
+        result.attacker.total_losses,
+        result.defender.total_losses
+    );
+    events.push(
+        GameEvent::new(EventKind::Battle, text)
+            .province(province)
+            .faction(&faction),
+    );
+    let general = state.armies.get(army).and_then(|a| a.general.clone());
+    if won {
+        state.record_battle(&faction, &defender_faction, true);
+        capture(state, data, province, &faction, events);
+        if let Some(general) = general {
+            dynasty::on_siege_won(state, data, &general);
+        }
+    } else {
+        state.record_battle(&defender_faction, &faction, false);
     }
 }
 
