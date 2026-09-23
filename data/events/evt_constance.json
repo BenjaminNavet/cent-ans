@@ -1,0 +1,59 @@
+{
+  "id": "evt_constance",
+  "title": "Le concile de Constance",
+  "text": "À l'appel de l'empereur Sigismond, prélats, docteurs et princes de toute la chrétienté se réunissent à Constance pour rendre à l'Église un seul pasteur. Le concile se proclame au-dessus des papes et entend juger aussi l'hérésie de Jean Hus.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1414,
+      "season": "autumn"
+    },
+    "until_year": 1416,
+    "conditions": [
+      {
+        "type": "schism",
+        "active": true
+      }
+    ]
+  },
+  "scope": {
+    "type": "global"
+  },
+  "options": [
+    {
+      "text": "Envoyer une ambassade solennelle",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "papal_favor",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Suivre les débats de loin",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1414-11-05"
+  },
+  "sources": [
+    "Concile de Constance",
+    "Catherine Vincent, Église et société en Occident, XIIIe-XVe siècle, Armand Colin, 2009"
+  ]
+}

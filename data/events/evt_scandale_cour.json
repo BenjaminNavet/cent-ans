@@ -1,0 +1,53 @@
+{
+  "id": "evt_scandale_cour",
+  "title": "Un scandale à la cour",
+  "text": "On chuchote dans les galeries : une liaison, une dette de jeu, un poison peut-être. Le nom d'un proche du prince circule jusque dans les tavernes.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Bannir les coupables",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Étouffer l'affaire à prix d'or",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1500
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser dire",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Affaire de la tour de Nesle",
+    "Françoise Autrand, Charles VI, Fayard, 1986"
+  ]
+}

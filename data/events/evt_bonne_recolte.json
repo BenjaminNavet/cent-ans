@@ -1,0 +1,51 @@
+{
+  "id": "evt_bonne_recolte",
+  "title": "Une bonne récolte",
+  "text": "Le printemps a été doux et l'été sans grêle : les granges débordent de blé et les vignes ploient. Les paysans bénissent le ciel et les marchands comptent déjà leurs profits.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "autumn"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Remplir les greniers",
+      "effects": [
+        {
+          "type": "health",
+          "amount": 8
+        },
+        {
+          "type": "wealth",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Vendre le surplus aux villes",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "wealth",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Georges Duby (dir.), Histoire de la France rurale, t. 2, Seuil, 1975"
+  ]
+}

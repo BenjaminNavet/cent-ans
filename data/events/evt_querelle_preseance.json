@@ -1,0 +1,45 @@
+{
+  "id": "evt_querelle_preseance",
+  "title": "Une querelle de préséance",
+  "text": "Deux grands seigneurs se disputent la première place au banquet et dans le cortège. Chacun menace de quitter la cour avec ses gens si le prince ne tranche pas en sa faveur.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Trancher selon la coutume",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "loyalty",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Apaiser les deux par des dons",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1200
+        },
+        {
+          "type": "loyalty",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Bernard Guenée, L'Occident aux XIVe et XVe siècles : les États, PUF, 1971"
+  ]
+}

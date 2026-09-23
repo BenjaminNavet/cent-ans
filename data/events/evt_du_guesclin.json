@@ -1,0 +1,70 @@
+{
+  "id": "evt_du_guesclin",
+  "title": "Du Guesclin connétable",
+  "text": "Le roi Charles fait de Bertrand du Guesclin, petit noble breton rompu à la guerre d'embuscade, le connétable de France. Plus de grandes batailles rangées : on harcèlera l'Anglais, on reprendra ses places une à une.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1370,
+      "season": "autumn"
+    },
+    "until_year": 1372,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "ruler_house",
+        "faction": "fac_france",
+        "house": "Valois"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Adopter la guerre d'usure",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "spawn_army",
+          "units": [
+            "unit_men_at_arms_foot",
+            "unit_mounted_sergeants",
+            "unit_crossbowmen"
+          ]
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder la chevalerie à sa tête",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1370-10-02"
+  },
+  "sources": [
+    "Bertrand Du Guesclin",
+    "Philippe Contamine, Guerre, État et société à la fin du Moyen Âge, 1972"
+  ]
+}

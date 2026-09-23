@@ -1,0 +1,85 @@
+{
+  "id": "evt_troyes",
+  "title": "Le traité de Troyes",
+  "text": "Le duc de Bourgogne a été assassiné sur le pont de Montereau ; son fils s'est jeté dans les bras de l'Anglais. À Troyes, la reine Isabeau fait signer au roi malade un traité qui déshérite le dauphin : Henri d'Angleterre épousera Catherine de France et sera régent, puis roi.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1420,
+      "season": "spring"
+    },
+    "until_year": 1422,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "fired",
+        "event": "evt_azincourt"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_england",
+        "province": "prov_normandie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Signer le traité « de la honte »",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "claim",
+          "faction": "fac_england",
+          "kind": "throne",
+          "target": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": -30
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Soutenir le dauphin et rejeter le traité",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -30,
+          "reason": "Rejet du traité de Troyes"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1420-05-21"
+  },
+  "sources": [
+    "Traité de Troyes",
+    "Colette Beaune, Naissance de la nation France, 1985",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

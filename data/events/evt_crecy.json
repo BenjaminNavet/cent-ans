@@ -1,0 +1,78 @@
+{
+  "id": "evt_crecy",
+  "title": "Le désastre de Crécy",
+  "text": "Près de Crécy-en-Ponthieu, la chevalerie de France charge sans ordre contre les archers anglais retranchés. Le duc d'Alençon, le roi de Bohême et la fleur de la noblesse restent sur le champ. Le roi s'enfuit de nuit vers le château de La Broye.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Pleurer la chevalerie tombée et rallier les survivants",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 20
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever une aide extraordinaire pour un nouvel ost",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": 8000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 20
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-08-26"
+  },
+  "sources": [
+    "Bataille de Crécy",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

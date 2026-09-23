@@ -1,0 +1,37 @@
+{
+  "id": "evt_chroniqueur",
+  "title": "Le chroniqueur",
+  "text": "Un clerc lettré, à la manière de Froissart, demande la protection du prince pour écrire la chronique des prouesses de son temps.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 100
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Le prendre à son service",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -600
+        },
+        {
+          "type": "prestige",
+          "amount": 6
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Le renvoyer à ses livres",
+      "effects": [],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jean Froissart",
+    "Jean Froissart, Chroniques, livre I"
+  ]
+}

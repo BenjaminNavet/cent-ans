@@ -1,0 +1,45 @@
+{
+  "id": "evt_vassal_mecontent",
+  "title": "Un vassal mécontent",
+  "text": "Un grand vassal se plaint d'avoir été oublié dans les faveurs et laisse entendre qu'il pourrait écouter d'autres princes.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Le couvrir de présents",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "loyalty",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Lui rappeler son serment",
+      "effects": [
+        {
+          "type": "loyalty",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Bernard Guenée, L'Occident aux XIVe et XVe siècles : les États, PUF, 1971"
+  ]
+}

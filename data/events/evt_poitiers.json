@@ -1,0 +1,89 @@
+{
+  "id": "evt_poitiers",
+  "title": "La prise du roi à Poitiers",
+  "text": "À Maupertuis, près de Poitiers, le prince de Galles écrase l'armée de France. Le roi Jean, combattant à pied avec son jeune fils Philippe, est pris et emmené à Bordeaux puis à Londres. Le royaume est sans tête.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1356,
+      "season": "autumn"
+    },
+    "until_year": 1357,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_jean_de_normandie"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_france",
+        "character": "chr_jean_de_normandie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Confier le gouvernement au dauphin",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -25
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "character": "chr_edward_of_woodstock",
+          "faction": "fac_england",
+          "amount": 25
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réunir les États généraux pour la rançon",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -25
+        },
+        {
+          "type": "treasury",
+          "amount": 10000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 18
+        },
+        {
+          "type": "prestige",
+          "character": "chr_edward_of_woodstock",
+          "faction": "fac_england",
+          "amount": 25
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1356-09-19"
+  },
+  "sources": [
+    "Bataille de Poitiers (1356)",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

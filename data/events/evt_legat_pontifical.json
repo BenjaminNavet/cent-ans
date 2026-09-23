@@ -1,0 +1,57 @@
+{
+  "id": "evt_legat_pontifical",
+  "title": "Le légat pontifical",
+  "text": "Un légat du pape arrive, porteur de bulles et de demandes de décimes. Il sollicite l'aide du prince pour les affaires de l'Église et fait miroiter la bienveillance du Saint-Père.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 90,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Accorder la décime",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "papal_favor",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Refuser poliment",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Papauté d'Avignon",
+    "Catherine Vincent, Église et société en Occident, XIIIe-XVe siècle, Armand Colin, 2009"
+  ]
+}

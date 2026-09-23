@@ -1,0 +1,92 @@
+{
+  "id": "evt_bretigny",
+  "title": "Le traité de Brétigny",
+  "text": "Le roi Jean est toujours captif à Londres. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d'écus de rançon et l'Aquitaine en pleine souveraineté contre la renonciation d'Édouard à la couronne de France.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1360,
+      "season": "spring"
+    },
+    "until_year": 1361,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "character_captive",
+            "id": "chr_jean_de_normandie"
+          },
+          {
+            "type": "fired",
+            "event": "evt_poitiers"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Signer la paix et payer la rançon",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "treasury",
+          "amount": -40000
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_england",
+          "amount": 40000
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Refuser et poursuivre la guerre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -15,
+          "reason": "Refus de la paix de Brétigny"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1360-05-08"
+  },
+  "sources": [
+    "Traité de Brétigny",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}
