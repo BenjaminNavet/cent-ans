@@ -1,9 +1,9 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
+Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 
 ## Où en est-on
-- **M0 à M4 terminés.** Jeu jouable avec villes vivantes et dynasties : personnages qui gagnent de l'expérience, apprennent des compétences, se marient, ont des enfants, meurent et héritent. Prochain jalon : M5 Diplomatie et religion.
+- **M0 à M4 et M6 terminés** (M5 diplomatie et M7 batailles en cours en parallèle). Jeu jouable avec villes vivantes et dynasties : personnages qui gagnent de l'expérience, apprennent des compétences, se marient, ont des enfants, meurent et héritent. Prochain jalon : M5 Diplomatie et religion.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -27,6 +27,13 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 - Personnages et dynasties (M4) : XP (batailles, gouvernance), arbre de 30 compétences à trois branches, ~30 traits (acquis par événements, opposés exclusifs), généraux et gouverneurs qui modifient batailles et provinces, mariages, naissances (générées et historiques : Charles V naît en 1338 si Jean et Bonne sont mariés), succession par loi (salique, préférence masculine, cognatique, élective), régence des mineurs. Panneau Cour, fiche personnage avec arbre de compétences. 16 tests M4. Sonde : `cargo run -p sim-campaign --example dynasty_probe`.
 
+- Technologies (M6) : 33 technologies (16 militaires, 17 civiles) datées et sourcées, points de recherche
+  (base 5 + bâtiments de recherche + technologies + gouvernance du dirigeant ; France ≈ 20/tour), ordre
+  `research` avec progression conservée en cas de changement, surcoût de 25 % pour les techs en avance
+  de plus de 20 ans, effets appliqués au revenu, à la population et aux batailles, IA qui alterne les
+  branches. Panneau Technologies (touche T) à deux onglets, jauge de recherche dans la barre.
+  10 tests M6, smoke `_run_technologies`. Capture : `docs/img/godot-tech-tree.png`.
+
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
@@ -39,6 +46,10 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
 - Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
+- M6 : les effets de tech `army_upkeep`, `army_experience`, `recruit_cost`, `movement`, `production`,
+  `siege_resistance`, `fortification_level`, `wealth`, `prestige` sont affichés mais pas encore appliqués ;
+  `research_civil`/`research_military` (traits, compétences) sont inertes. Le surplus de points à
+  l'achèvement est perdu. Le mock GDScript n'a pas de technologies.
 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.
