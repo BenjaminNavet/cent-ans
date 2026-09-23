@@ -43,6 +43,12 @@ pub enum Command {
     Withdraw {
         units: Vec<u32>,
     },
+    /// Siege battles: engines batter wall piece `piece` (index in the
+    /// `siege.pieces` of the terrain).
+    TargetWall {
+        units: Vec<u32>,
+        piece: usize,
+    },
 }
 
 fn default_true() -> bool {
@@ -57,7 +63,8 @@ impl Command {
             | Command::Halt { units }
             | Command::Formation { units, .. }
             | Command::FireAtWill { units, .. }
-            | Command::Withdraw { units } => units,
+            | Command::Withdraw { units }
+            | Command::TargetWall { units, .. } => units,
         }
     }
 }
@@ -75,6 +82,9 @@ pub enum CommandError {
     NoMissile(u32),
     OutsideField,
     Finished,
+    NotASiege,
+    UnknownPiece(usize),
+    NotAnEngine(u32),
 }
 
 impl std::fmt::Display for CommandError {
@@ -96,6 +106,11 @@ impl std::fmt::Display for CommandError {
             CommandError::NoMissile(id) => write!(f, "l'unité {id} n'a pas d'armes de trait"),
             CommandError::OutsideField => write!(f, "destination hors du champ de bataille"),
             CommandError::Finished => write!(f, "la bataille est terminée"),
+            CommandError::NotASiege => write!(f, "il n'y a pas de murailles dans cette bataille"),
+            CommandError::UnknownPiece(i) => write!(f, "pan de muraille inconnu : {i}"),
+            CommandError::NotAnEngine(id) => {
+                write!(f, "l'unité {id} ne peut pas battre les murailles")
+            }
         }
     }
 }

@@ -470,6 +470,10 @@ pub struct BattleRequest {
     /// Province the attacker came from (where it retreats when beaten).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attacker_origin: Option<ProvinceId>,
+    /// M8: an assault on the town of `province`; the defender is its
+    /// garrison (`defender` then repeats the attacker's id).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub siege: bool,
 }
 
 /// Aggregated view of a faction for the UI.

@@ -19,7 +19,11 @@
 //!   flank (+50 %) and rear (+100 %) bonuses, pikes/schiltron against
 //!   cavalry, archers' stakes; morale, rout and rally; a general whose aura
 //!   steadies nearby regiments.
-//! - Minimal battle AI ([`ai`]) for the side the player does not command.
+//! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
+//!   walls with towers and a gate, ladders, siege towers, ram, engines that
+//!   breach the walls, victory by holding the central square.
+//! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
+//!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 
 pub mod ai;
 pub mod command;
@@ -27,6 +31,7 @@ pub mod field;
 pub mod outcome;
 pub mod rng;
 pub mod setup;
+pub mod siege;
 pub mod sim;
 pub mod unit;
 
@@ -37,6 +42,9 @@ pub use field::{
 };
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;
-pub use setup::{BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, UnitSetup};
-pub use sim::{BattleSim, SetupError, DT, MAX_DURATION};
+pub use setup::{
+    BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
+};
+pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
+pub use sim::{BattleSim, SetupError, AI_PERIOD, DT, MAX_DURATION};
 pub use unit::{Formation, Unit, UnitState};

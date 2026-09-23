@@ -1,5 +1,5 @@
 //! Debug probe: prints a few lab scenarios tick by tick.
-//! `cargo run -p sim-battle --example probe -- <front|flank|stakes|rally>`
+//! `cargo run -p sim-battle --example probe -- <front|flank|stakes|rally|ai [size]|siege [breach] [engines,...]>`
 
 use std::path::PathBuf;
 
@@ -25,6 +25,107 @@ fn main() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let data = GameData::load(&root).unwrap().0;
     let scen = std::env::args().nth(1).unwrap_or_default();
+    if scen == "siege" {
+        let breach: u8 = std::env::args()
+            .nth(2)
+            .and_then(|a| a.parse().ok())
+            .unwrap_or(0);
+        let kinds: Vec<&str> = std::env::args()
+            .nth(3)
+            .map(|k| k.leak().split(',').collect())
+            .unwrap_or_else(|| vec!["unit_trebuchet", "unit_trebuchet", "unit_siege_tower"]);
+        let mut attackers: Vec<UnitSetup> = [
+            "unit_men_at_arms_foot",
+            "unit_men_at_arms_foot",
+            "unit_urban_militia",
+            "unit_urban_militia",
+            "unit_urban_militia",
+            "unit_longbowmen",
+            "unit_longbowmen",
+            "unit_knights",
+        ]
+        .iter()
+        .map(|k| unit(&data, k))
+        .collect();
+        attackers.extend(
+            kinds
+                .iter()
+                .filter(|k| !k.is_empty())
+                .map(|k| unit(&data, k)),
+        );
+        let defenders: Vec<UnitSetup> = [
+            "unit_urban_militia",
+            "unit_urban_militia",
+            "unit_crossbowmen",
+            "unit_crossbowmen",
+            "unit_men_at_arms_foot",
+        ]
+        .iter()
+        .map(|k| unit(&data, k))
+        .collect();
+        let (mut total, mut wins) = (0.0, 0);
+        for seed in 0..6 {
+            let setup = BattleSetup {
+                province: String::new(),
+                province_name: String::new(),
+                terrain: Terrain::Plains,
+                river: false,
+                season: BattleSeason::Summer,
+                attacker: side(attackers.clone()),
+                defender: side(defenders.clone()),
+                player_side: None,
+                siege: Some(SiegeSetup {
+                    fortification: 2,
+                    breach,
+                }),
+            };
+            let mut sim = BattleSim::new(setup, seed).unwrap();
+            while !sim.is_finished() {
+                sim.step();
+                if std::env::var("TRACE").is_ok()
+                    && seed == 0
+                    && (sim.ticks() < 3 || sim.ticks().is_multiple_of(300))
+                {
+                    for u in sim.units() {
+                        println!(
+                            "t={:.0} #{} {:?} {} ({:.0},{:.0}) {:?} m{:.0} hp{:.0} wall{} climb{:?}",
+                            sim.elapsed(),
+                            u.id,
+                            u.side,
+                            u.name,
+                            u.x,
+                            u.z,
+                            u.state,
+                            u.morale,
+                            u.hp,
+                            u.on_wall,
+                            u.climbing
+                        );
+                    }
+                }
+            }
+            let outcome = sim.outcome().unwrap();
+            if std::env::var("EVENTS").is_ok() && seed == 0 {
+                for e in sim.events() {
+                    println!("  {:.0} {:?} {}", e.time, e.side, e.text_fr);
+                }
+            }
+            total += sim.elapsed();
+            if outcome.winner == SideId::Attacker {
+                wins += 1;
+            }
+            println!(
+                "seed {seed}: {:.0} s, winner {:?}, losses {} / {}, walls {:.0} %",
+                sim.elapsed(),
+                outcome.winner,
+                outcome.attacker.total_losses,
+                outcome.defender.total_losses,
+                sim.siege().unwrap().integrity() * 100.0
+            );
+        }
+        println!("mean {:.0} s, attacker wins {wins}/6", total / 6.0);
+        return;
+    }
     if scen == "ai" {
         let army = |n: usize| -> Vec<UnitSetup> {
             let kinds = [
@@ -38,16 +139,22 @@ fn main() {
                 .map(|i| unit(&data, kinds[i % kinds.len()]))
                 .collect()
         };
-        for seed in 0..5 {
+        let size: usize = std::env::args()
+            .nth(2)
+            .and_then(|a| a.parse().ok())
+            .unwrap_or(20);
+        let (mut total, mut att_wins) = (0.0, 0);
+        for seed in 0..10 {
             let setup = BattleSetup {
                 province: String::new(),
                 province_name: String::new(),
                 terrain: Terrain::Plains,
                 river: seed % 2 == 0,
                 season: BattleSeason::Summer,
-                attacker: side(army(20)),
-                defender: side(army(20)),
+                attacker: side(army(size)),
+                defender: side(army(size)),
                 player_side: None,
+                siege: None,
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
@@ -57,8 +164,18 @@ fn main() {
                 steps += 1;
             }
             let outcome = sim.outcome().unwrap();
+            if std::env::var("EVENTS").is_ok() && seed == 0 {
+                for e in sim.events() {
+                    println!("  {:.0} {:?} {}", e.time, e.side, e.text_fr);
+                }
+            }
+            total += sim.elapsed();
+            if outcome.winner == SideId::Attacker {
+                att_wins += 1;
+            }
             println!(
-                "seed {seed}: {steps} steps ({:.2} ms/step), winner {:?}, losses {} / {}, weather {:?}",
+                "seed {seed}: {:.0} s ({:.2} ms/step), winner {:?}, losses {} / {}, weather {:?}",
+                sim.elapsed(),
                 start.elapsed().as_secs_f64() * 1000.0 / steps as f64,
                 outcome.winner,
                 outcome.attacker.total_losses,
@@ -66,6 +183,7 @@ fn main() {
                 sim.weather()
             );
         }
+        println!("mean {:.0} s, attacker wins {att_wins}/10", total / 10.0);
         return;
     }
     let (a, d) = match scen.as_str() {
@@ -82,6 +200,7 @@ fn main() {
         attacker: side(vec![unit(&data, a)]),
         defender: side(vec![unit(&data, d)]),
         player_side: None,
+        siege: None,
     };
     let mut sim = BattleSim::new(setup, 7).unwrap();
     sim.set_ai(SideId::Attacker, false);
