@@ -521,7 +521,7 @@ func _run_technologies() -> void:
 	root.add_child(panel)
 	await process_frame
 	panel.show_tree(tree, {}, int(sim.call("get_research_points", FACTION_ID)), "France", Color(0.2, 0.3, 0.7))
-	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size()
+	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size() + panel.medicine_view.buttons.size()
 	_check(buttons == tree.size(), "tech panel should show %d nodes, got %d" % [tree.size(), buttons])
 	panel.queue_free()
 
@@ -640,6 +640,13 @@ func _run_battle() -> void:
 	_check(soldiers.size() > 0 and soldiers.size() % 4 == 0, "battle: soldier transforms empty")
 	var refused: Dictionary = battle.call("issue_command", {"type": "halt", "units": [units.size() - 1]})
 	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
+	# F10b : ordres du chef (catalogue de data/battle_orders, cri de guerre propre à la faction).
+	var orders: Array = battle.call("get_leader_orders", "attacker")
+	_check(orders.size() == 5, "battle: expected 5 leader's orders, got %d" % orders.size())
+	if not orders.is_empty():
+		_check(str(orders[0]["label"]) == "Montjoie ! Saint-Denis !", "battle: French war cry label is %s" % orders[0]["label"])
+		var cry: Dictionary = battle.call("issue_command", {"type": "leader_order", "order": "order_war_cry", "units": []})
+		_check(bool(cry.get("ok", false)) or str(cry.get("error", "")).contains("impossible"), "battle: war cry command malformed: %s" % cry.get("error", "?"))
 	var ticks := 0
 	for _i in 12000:
 		battle.call("tick", 0.1)

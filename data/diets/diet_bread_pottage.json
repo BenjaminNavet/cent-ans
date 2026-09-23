@@ -1,0 +1,14 @@
+{
+  "id": "diet_bread_pottage",
+  "name": {
+    "display": "Pain bis et potage",
+    "local": "pain bis et potage",
+    "local_language": "ancien français"
+  },
+  "description": "L'ordinaire du royaume : [[cdx_pain_bis|pain bis]] cuit au [[cdx_four_banal|four banal]] du seigneur, [[cdx_potage|potage]] de choux, poireaux et raves, un peu de lard les jours gras. Ni disette ni abondance.",
+  "cost_per_thousand": 0,
+  "sources": [
+    "Cuisine médiévale",
+    "Banalité (droit féodal)"
+  ]
+}

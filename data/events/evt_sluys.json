@@ -1,7 +1,7 @@
 {
   "id": "evt_sluys",
-  "title": "La bataille de L'Écluse",
-  "text": "Au port de L'Écluse, la flotte du roi Philippe est prise au piège par les nefs anglaises. Les archers d'Angleterre balaient les ponts et la mer se teint de sang. Nul n'ose dire au roi que ses navires sont perdus.",
+  "title": "La bataille de l'Écluse",
+  "text": "Au port de l'Écluse, la flotte du roi Philippe est prise au piège par les nefs anglaises. Les archers d'Angleterre balaient les ponts et la mer se teint de sang. Nul n'ose dire au roi que ses navires sont perdus.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -66,7 +66,7 @@
     "value": "1340-06-24"
   },
   "sources": [
-    "Bataille de L'Écluse",
+    "Bataille de l'Écluse",
     "Jean Froissart, Chroniques, livre I",
     "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
   ]

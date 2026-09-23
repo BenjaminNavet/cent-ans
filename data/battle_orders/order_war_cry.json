@@ -1,0 +1,29 @@
+{
+  "id": "order_war_cry",
+  "kind": "war_cry",
+  "rank": 1,
+  "name": "Cri de guerre",
+  "labels_by_faction": {
+    "fac_france": "Montjoie ! Saint-Denis !",
+    "fac_england": "Saint George !",
+    "fac_burgundy": "Montjoie Saint-Andrieu !",
+    "fac_scotland": "Saint Andrew !",
+    "fac_castile": "¡Santiago!"
+  },
+  "description": "Le chef lance le cri d'armes de sa maison, repris par les régiments qui l'entourent : le moral remonte pour un temps. Chaque ost avait le sien : « Montjoie ! Saint-Denis ! » pour le roi de France, « Saint George ! » pour les Anglais d'Édouard III, « Montjoie Saint-Andrieu ! » pour les Bourguignons.",
+  "icon": "war_cry",
+  "scope": "radius",
+  "requires_general": true,
+  "cooldown": 120.0,
+  "duration": 30.0,
+  "radius": 150.0,
+  "effects": {
+    "morale": 12.0
+  },
+  "journal": "« {label} » : l'ost {of_faction} pousse son cri de guerre autour de {general}.",
+  "ai": {
+    "enemy_within": 90.0,
+    "min_units": 2
+  },
+  "sources": ["Cri de guerre", "Montjoie Saint-Denis"]
+}

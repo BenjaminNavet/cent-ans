@@ -153,8 +153,10 @@ impl BattleSim {
         }
     }
 
-    /// `{type: "move"|"attack"|"halt"|"formation"|"fire_at_will"|"withdraw",
-    /// units: [ids], ...}` → `{ok, error}`.
+    /// `{type: "move"|"attack"|"halt"|"formation"|"fire_at_will"|"withdraw"
+    /// |"target_wall"|"leader_order", units: [ids], ...}` → `{ok, error}`.
+    /// A leader's order: `{type: "leader_order", order: "order_war_cry",
+    /// units: [ids] (selected-scope orders; empty = every eligible one)}`.
     #[func]
     fn issue_command(&mut self, command: VarDictionary) -> VarDictionary {
         let Some(sim) = &mut self.sim else {
@@ -164,6 +166,34 @@ impl BattleSim {
             .map_err(|e| format!("ordre invalide : {e}"))
             .and_then(|command| sim.issue_command(command).map_err(|e| e.to_string()));
         result_dict(result)
+    }
+
+    /// The leader's order bar of `side`: `[{id, kind, name, label,
+    /// description, icon, available, reason, cooldown, cooldown_remaining,
+    /// uses, uses_per_battle}]` by rank (`label` is the faction's wording,
+    /// e.g. « Montjoie ! Saint-Denis ! »; `reason` is empty when available).
+    #[func]
+    fn get_leader_orders(&self, side: GString) -> VarArray {
+        let (Some(sim), Some(side)) = (&self.sim, parse_side(&side)) else {
+            return VarArray::new();
+        };
+        sim.leader_orders(side)
+            .iter()
+            .map(|view| {
+                serde_json::to_value(view)
+                    .map(|json| json_to_variant(&json))
+                    .unwrap_or_default()
+            })
+            .collect()
+    }
+
+    /// Did `side` give the "no quarter" order?
+    #[func]
+    fn get_no_quarter(&self, side: GString) -> bool {
+        match (&self.sim, parse_side(&side)) {
+            (Some(sim), Some(side)) => sim.no_quarter(side),
+            _ => false,
+        }
     }
 
     /// Lets the AI command `side` (`"attacker"`/`"defender"`), e.g. for autoplay.
@@ -224,6 +254,9 @@ impl BattleSim {
                     "ram" => unit.ram,
                     "siege_tower" => unit.siege_tower(),
                     "wall_breaker" => unit.wall_breaker(),
+                    "pavise" => unit.pavise.is_some(),
+                    "dismounted" => unit.dismounted,
+                    "order_morale" => unit.order_morale,
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));

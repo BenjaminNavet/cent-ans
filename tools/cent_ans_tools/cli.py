@@ -204,6 +204,15 @@ def assets_heraldry() -> None:
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
 
 
+@assets_app.command("banners")
+def assets_banners() -> None:
+    """Dessine bannières (256×512) et pennons (512×128) de chaque faction (F10c)."""
+    from cent_ans_tools import banners
+
+    paths = banners.build()
+    console.print(f"[green]OK[/green] : {len(paths)} images dans {banners.BANNERS_DIR}")
+
+
 @assets_app.command("icons")
 def assets_icons(
     offline: bool = typer.Option(
