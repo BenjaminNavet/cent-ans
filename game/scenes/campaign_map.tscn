@@ -108,7 +108,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
 [node name="HBox" type="HBoxContainer" parent="UI/TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 
 [node name="FactionSwatch" type="ColorRect" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
@@ -126,7 +126,7 @@ layout_mode = 2
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 tooltip_text = "Panneau de faction"
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 15
 text = "Cent Ans"
 
 [node name="Sep1" type="VSeparator" parent="UI/TopBar/HBox"]
@@ -135,39 +135,39 @@ layout_mode = 2
 [node name="TreasuryLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Trésor : —"
 
 [node name="IncomeLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Revenu : —"
 
 [node name="DateLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 17
 text = "Printemps 1337"
 horizontal_alignment = 1
 
 [node name="CourtButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Cour"
 
 [node name="TechButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Technologies (T)"
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Technologies"
 
 [node name="ResearchBox" type="VBoxContainer" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 0
@@ -192,13 +192,13 @@ show_percentage = false
 [node name="EndTurnButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Fin du tour  ⏎"
 
 [node name="MenuButton" type="MenuButton" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "Menu"
 flat = false
 item_count = 5

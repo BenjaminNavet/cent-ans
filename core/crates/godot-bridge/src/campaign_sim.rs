@@ -242,6 +242,9 @@ impl CampaignSim {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
                 "turns_left" => i64::from(siege.turns_left),
+                "turns_elapsed" => i64::from(siege.turns_elapsed),
+                "supplies" => i64::from(siege.supplies),
+                "breach" => i64::from(siege.breach),
             };
             dict.set("siege", &siege_dict);
         }

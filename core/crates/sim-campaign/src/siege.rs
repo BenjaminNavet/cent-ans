@@ -92,12 +92,32 @@ pub(crate) fn resolve_sieges(
                 .siege_speed
                 .apply(0.0)
         });
+        // M8: the garrison sallies out when it outmatches the besiegers.
+        if sortie(state, data, &province_id, &besiegers, events) {
+            continue;
+        }
+        let breach_gain = breach_per_turn(state, data, &besiegers, fortification);
+        let drain = supplies_drain(fortification, siege_speed_percent);
         let province = state.provinces.get_mut(&province_id).expect("exists");
         match &mut province.siege {
             Some(siege) if siege.attacker == attacker => {
-                siege.turns_left = siege.turns_left.saturating_sub(1);
-                if siege.turns_left == 0 {
+                siege.turns_elapsed += 1;
+                siege.breach = siege.breach.saturating_add(breach_gain).min(100);
+                siege.supplies = siege.supplies.saturating_sub(drain);
+                siege.turns_left = turns_to_starve(siege.supplies, drain);
+                if siege.supplies == 0 {
                     province.garrison.clear();
+                    events.push(
+                        GameEvent::new(
+                            EventKind::ProvinceCaptured,
+                            format!(
+                                "Affamée, la garnison de {} capitule.",
+                                province_name(data, &province_id)
+                            ),
+                        )
+                        .province(&province_id)
+                        .faction(&attacker),
+                    );
                     capture(state, data, &province_id, &attacker, events);
                     if let Some(general) = besieging_general {
                         dynasty::on_siege_won(state, data, &general);
@@ -105,13 +125,14 @@ pub(crate) fn resolve_sieges(
                 }
             }
             _ => {
-                let base_duration = SIEGE_BASE_TURNS + fortification;
-                let turns_left = ((f64::from(base_duration) * (1.0 - siege_speed_percent / 100.0))
-                    .round()
-                    .max(1.0)) as u32;
+                let supplies = 100u8.saturating_sub(province.devastation / 2).max(10);
+                let turns_left = turns_to_starve(supplies, drain);
                 province.siege = Some(SiegeState {
                     attacker: attacker.clone(),
                     turns_left,
+                    turns_elapsed: 0,
+                    supplies,
+                    breach: 0,
                 });
                 events.push(
                     GameEvent::new(
@@ -129,6 +150,248 @@ pub(crate) fn resolve_sieges(
             }
         }
     }
+}
+
+/// Food lost per turn of siege: a town lasts `SIEGE_BASE_TURNS +
+/// fortification` turns, shortened by the besieging general's `SiegeSpeed`.
+pub fn supplies_drain(fortification: u32, siege_speed_percent: f64) -> u8 {
+    let base_duration = f64::from(SIEGE_BASE_TURNS + fortification);
+    let duration = (base_duration * (1.0 - siege_speed_percent / 100.0)).max(1.0);
+    (100.0 / duration).ceil().min(100.0) as u8
+}
+
+fn turns_to_starve(supplies: u8, drain: u8) -> u32 {
+    u32::from(supplies).div_ceil(u32::from(drain.max(1)))
+}
+
+/// Wall damage per turn from the besiegers' engines (`siege_attack`).
+pub fn breach_per_turn(
+    state: &CampaignState,
+    data: &GameData,
+    besiegers: &[ArmyId],
+    fortification: u32,
+) -> u8 {
+    let attack: f64 = besiegers
+        .iter()
+        .filter_map(|id| state.armies.get(id))
+        .flat_map(|a| a.units.iter())
+        .filter_map(|u| {
+            let t = data.unit_types.get(&u.unit_type)?;
+            let ratio = f64::from(u.strength) / f64::from(u.max_strength.max(1));
+            t.stats.siege_attack.map(|v| f64::from(v) * ratio)
+        })
+        .sum();
+    (attack / (2.0 * (1.0 + f64::from(fortification))))
+        .round()
+        .min(100.0) as u8
+}
+
+/// A field army made of a province's garrison, for siege battles.
+fn garrison_army(state: &CampaignState, province: &ProvinceId) -> Option<crate::state::Army> {
+    let p = state.provinces.get(province)?;
+    Some(crate::state::Army {
+        faction: p.controller.clone(),
+        general: state.province_governor(province).cloned(),
+        location: province.clone(),
+        units: p.garrison.clone(),
+        movement_points: 0,
+        supply: 100,
+        stance: Stance::Normal,
+        path: Vec::new(),
+    })
+}
+
+fn apply_garrison_losses(
+    state: &mut CampaignState,
+    province: &ProvinceId,
+    outcome: &crate::battle_auto::SideOutcome,
+) {
+    if let Some(p) = state.provinces.get_mut(province) {
+        for (unit, losses) in p.garrison.iter_mut().zip(&outcome.losses) {
+            unit.strength = unit.strength.saturating_sub(*losses);
+            unit.morale = (i32::from(unit.morale) + outcome.morale_delta).clamp(0, 100) as u8;
+        }
+        p.garrison
+            .retain(|u| u.strength > 0 && u.strength * 20 >= u.max_strength);
+    }
+}
+
+/// `true` when the besiegers carry siege towers (`wall_assault`).
+fn has_siege_towers(state: &CampaignState, data: &GameData, army: &ArmyId) -> bool {
+    state.armies.get(army).is_some_and(|a| {
+        a.units.iter().any(|u| {
+            data.unit_types
+                .get(&u.unit_type)
+                .is_some_and(|t| t.abilities.contains(&data_model::Ability::WallAssault))
+        })
+    })
+}
+
+/// Why an assault order was refused.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum AssaultError {
+    #[error("armée inconnue")]
+    UnknownArmy,
+    #[error("cette armée n'assiège pas cette place")]
+    NotBesieging,
+}
+
+impl CampaignState {
+    /// Odds (0-100) that `army` storms the town it besieges, and whether the
+    /// walls still stand (for the UI; a quick estimate, not the resolution).
+    pub fn assault_odds(&self, data: &GameData, army: &ArmyId) -> Option<(u32, bool)> {
+        let a = self.armies.get(army)?;
+        let siege = self.provinces.get(&a.location)?.siege.as_ref()?;
+        if siege.attacker != a.faction {
+            return None;
+        }
+        let walls = siege.breach < 50 && !has_siege_towers(self, data, army);
+        let attack = self.army_power(data, army) * if walls { 0.7 } else { 1.0 };
+        let defence = crate::state::unit_power(data, &self.provinces[&a.location].garrison)
+            * (1.0 + f64::from(self.fortification_level(data, &a.location)) * 0.1);
+        let odds = (100.0 * attack / (attack + defence).max(1.0)).round() as u32;
+        Some((odds, walls))
+    }
+
+    /// `assault { army }`: storm the walls now (M8). Victory takes the town;
+    /// defeat bloodies the besiegers, the siege goes on.
+    pub fn assault(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        army: &ArmyId,
+    ) -> Result<(), AssaultError> {
+        let a = self.armies.get(army).ok_or(AssaultError::UnknownArmy)?;
+        if &a.faction != faction {
+            return Err(AssaultError::UnknownArmy);
+        }
+        let province = a.location.clone();
+        let besieging = self
+            .provinces
+            .get(&province)
+            .and_then(|p| p.siege.as_ref())
+            .is_some_and(|s| &s.attacker == faction);
+        if !besieging {
+            return Err(AssaultError::NotBesieging);
+        }
+        let mut events = Vec::new();
+        let breach = self.provinces[&province]
+            .siege
+            .as_ref()
+            .map_or(0, |s| s.breach);
+        let walls = breach < 50 && !has_siege_towers(self, data, army);
+        let garrison = garrison_army(self, &province).expect("province exists");
+        let attacker_side = crate::movement::side_from_army(self, data, &self.armies[army]);
+        let defender_side = crate::movement::side_from_army(self, data, &garrison);
+        let context = crate::battle_auto::BattleContext {
+            defender_terrain_bonus: false,
+            river_crossing: false,
+            walls,
+        };
+        let result = crate::battle_auto::resolve_auto(
+            &attacker_side,
+            &defender_side,
+            &context,
+            &mut self.rng,
+        );
+        let defender_faction = garrison.faction.clone();
+        let won = result.winner == crate::battle_auto::Winner::Attacker;
+        crate::movement::apply_outcome(self, data, army, &result.attacker, &mut events);
+        apply_garrison_losses(self, &province, &result.defender);
+        let text = format!(
+            "Assaut de {} contre {}{} : {}. Pertes : {} contre {}.",
+            faction_name(data, faction),
+            province_name(data, &province),
+            if walls {
+                " (murailles intactes)"
+            } else {
+                " (par la brèche)"
+            },
+            if won {
+                "la place est emportée"
+            } else {
+                "les assaillants sont repoussés"
+            },
+            result.attacker.total_losses,
+            result.defender.total_losses
+        );
+        events.push(
+            GameEvent::new(EventKind::Battle, text)
+                .province(&province)
+                .faction(faction),
+        );
+        let general = self.armies.get(army).and_then(|a| a.general.clone());
+        if won {
+            self.record_battle(faction, &defender_faction, true);
+            capture(self, data, &province, faction, &mut events);
+            if let Some(general) = general {
+                dynasty::on_siege_won(self, data, &general);
+            }
+        } else {
+            self.record_battle(&defender_faction, faction, false);
+        }
+        self.pending_events.extend(events);
+        Ok(())
+    }
+}
+
+/// The garrison attacks the besiegers when clearly stronger; returns `true`
+/// when the siege is broken.
+fn sortie(
+    state: &mut CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+    besiegers: &[ArmyId],
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(target) = besiegers.first() else {
+        return false;
+    };
+    let Some(garrison) = garrison_army(state, province) else {
+        return false;
+    };
+    let garrison_power = crate::state::unit_power(data, &garrison.units);
+    if garrison_power <= 1.3 * state.army_power(data, target) {
+        return false;
+    }
+    let sallying = crate::movement::side_from_army(state, data, &garrison);
+    let besieging = crate::movement::side_from_army(state, data, &state.armies[target]);
+    let result = crate::battle_auto::resolve_auto(
+        &sallying,
+        &besieging,
+        &crate::battle_auto::BattleContext::default(),
+        &mut state.rng,
+    );
+    let besieger_faction = state.armies[target].faction.clone();
+    apply_garrison_losses(state, province, &result.attacker);
+    crate::movement::apply_outcome(state, data, target, &result.defender, events);
+    let won = result.winner == crate::battle_auto::Winner::Attacker;
+    events.push(
+        GameEvent::new(
+            EventKind::Battle,
+            format!(
+                "Sortie de la garnison de {} : {}.",
+                province_name(data, province),
+                if won {
+                    "les assiégeants sont mis en fuite"
+                } else {
+                    "elle est repoussée"
+                }
+            ),
+        )
+        .province(province)
+        .faction(&garrison.faction),
+    );
+    if won {
+        state.record_battle(&garrison.faction, &besieger_faction, false);
+        if let Some(p) = state.provinces.get_mut(province) {
+            p.siege = None;
+        }
+        if let Some(army) = state.armies.get_mut(target) {
+            army.stance = Stance::Normal;
+        }
+    }
+    won
 }
 
 /// Hands `province` to `new_controller` (occupation: the de jure owner is kept).

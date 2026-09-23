@@ -198,7 +198,22 @@ impl Army {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SiegeState {
     pub attacker: FactionId,
+    /// Estimated turns before the garrison runs out of food and capitulates.
     pub turns_left: u32,
+    // ----- M8: siege warfare --------------------------------------------------
+    #[serde(default)]
+    pub turns_elapsed: u32,
+    /// Food left in the besieged town (0-100); capitulation at 0.
+    #[serde(default = "full_supplies")]
+    pub supplies: u8,
+    /// Damage to the walls (0-100) from siege engines; from 50 an assault
+    /// no longer suffers the wall penalty.
+    #[serde(default)]
+    pub breach: u8,
+}
+
+fn full_supplies() -> u8 {
+    100
 }
 
 /// A building under construction in a province (spec § 1.2); one at a time.

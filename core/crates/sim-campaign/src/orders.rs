@@ -156,6 +156,10 @@ pub enum Order {
     ChooseObedience {
         religion: data_model::ReligionId,
     },
+    /// Storms the town the army besieges (M8).
+    Assault {
+        army: ArmyId,
+    },
     /// Researches `technology` (M6); switching keeps the abandoned progress.
     Research {
         technology: TechnologyId,
@@ -223,6 +227,8 @@ pub enum OrderError {
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
     #[error(transparent)]
     Research(#[from] ResearchError),
+    #[error(transparent)]
+    Assault(#[from] crate::siege::AssaultError),
 }
 
 /// One line of the recruitment panel.
@@ -366,6 +372,7 @@ impl CampaignState {
             Order::ChooseObedience { religion } => Ok(crate::religion::set_obedience(
                 self, data, faction, &religion,
             )?),
+            Order::Assault { army } => Ok(self.assault(data, faction, &army)?),
             Order::Research { technology } => {
                 research::start_research(self, data, faction, &technology)?;
                 Ok(())
