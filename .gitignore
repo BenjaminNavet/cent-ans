@@ -1,0 +1,19 @@
+# Rust
+core/target/
+# Godot
+game/.godot/
+game/*.import
+!game/**/*.import
+game/export/
+# Python
+.venv/
+__pycache__/
+*.pyc
+# Blender
+*.blend1
+# macOS
+.DS_Store
+# Secrets
+.env
+# Big raw datasets (rebuilt by tools/geo)
+tools/geo/raw/
