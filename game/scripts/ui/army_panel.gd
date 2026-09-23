@@ -14,6 +14,7 @@ const STANCE_LABELS := ["Normale", "Chevauchée", "Siège"]
 @onready var swatch: ColorRect = %Swatch
 @onready var title_label: Label = %TitleLabel
 @onready var general_value: Label = %GeneralValue
+@onready var general_skills_value: Label = %GeneralSkillsValue
 @onready var location_value: Label = %LocationValue
 @onready var movement_value: Label = %MovementValue
 @onready var supply_value: Label = %SupplyValue
@@ -38,7 +39,9 @@ func _ready() -> void:
 
 
 ## `province_name_of(id) -> String` traduit les ids de province en noms affichables.
-func show_army(id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable) -> void:
+## `general_skills` : `CampaignSim.get_character(army.general).skills` si disponible
+## (§ 3), vide sinon (« Compétences du général » reste à « — »).
+func show_army(id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable, general_skills: Dictionary = {}) -> void:
 	if army.is_empty():
 		hide()
 		return
@@ -48,6 +51,11 @@ func show_army(id: String, army: Dictionary, faction_label: String, color: Color
 	var general_name: String = str(army.get("general_name", ""))
 	title_label.text = "Armée de %s" % faction_label
 	general_value.text = general_name if general_name != "" else "Aucun"
+	if general_skills.is_empty():
+		general_skills_value.text = "—"
+	else:
+		general_skills_value.text = "Cdt %d / Gouv %d / Cour %d" % [
+			int(general_skills.get("command", 0)), int(general_skills.get("governance", 0)), int(general_skills.get("court", 0))]
 	location_value.text = str(province_name_of.call(str(army.get("location", ""))))
 	movement_value.text = "%d point(s)" % int(army.get("movement_points", 0))
 	supply_value.text = "%d %%" % int(army.get("supply", 0))

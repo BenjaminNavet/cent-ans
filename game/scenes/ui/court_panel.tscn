@@ -1,0 +1,84 @@
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_court_panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/court_panel.gd" id="1_panel"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+
+[node name="CourtPanel" type="PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 16.0
+offset_top = -320.0
+offset_right = 436.0
+offset_bottom = 320.0
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_panel")
+clip_contents = true
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Cour"
+
+[node name="CloseButton" type="Button" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="Separator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Controls" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SortLabel" type="Label" parent="VBox/Controls"]
+layout_mode = 2
+text = "Trier :"
+
+[node name="SortOption" type="OptionButton" parent="VBox/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FilterLabel" type="Label" parent="VBox/Controls"]
+layout_mode = 2
+text = "Filtrer :"
+
+[node name="FilterOption" type="OptionButton" parent="VBox/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Separator2" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 480)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RowsList" type="VBoxContainer" parent="VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="EmptyLabel" type="Label" parent="VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Aucun personnage."
+horizontal_alignment = 1

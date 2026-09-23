@@ -1,0 +1,218 @@
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_character_sheet"]
+
+[ext_resource type="Script" path="res://scripts/ui/character_sheet.gd" id="1_sheet"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+
+[node name="CharacterSheet" type="PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 0)
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -340.0
+offset_right = -16.0
+offset_bottom = 340.0
+grow_horizontal = 0
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_sheet")
+clip_contents = true
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Swatch" type="ColorRect" parent="VBox/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(0.4, 0.4, 0.4, 1)
+
+[node name="NameBox" type="VBoxContainer" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="NameLabel" type="Label" parent="VBox/Header/NameBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Personnage"
+
+[node name="SubtitleLabel" type="Label" parent="VBox/Header/NameBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="CloseButton" type="Button" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="RoleLabel" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Statut actuel : à la cour"
+
+[node name="Separator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 560)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SkillsHeader" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Compétences"
+
+[node name="SkillsGrid" type="GridContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 14
+
+[node name="CommandKey" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+layout_mode = 2
+text = "Commandement"
+
+[node name="CommandValue" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="GovernanceKey" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+layout_mode = 2
+text = "Gouvernance"
+
+[node name="GovernanceValue" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="CourtKey" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+layout_mode = 2
+text = "Cour"
+
+[node name="CourtValue" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="XpKey" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+layout_mode = 2
+text = "Expérience"
+
+[node name="XpValue" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="PointsKey" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+layout_mode = 2
+text = "Points disponibles"
+
+[node name="PointsValue" type="Label" parent="VBox/Scroll/Content/SkillsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="TraitsHeader" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Traits"
+
+[node name="TraitsList" type="HFlowContainer" parent="VBox/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 4
+
+[node name="FamilyHeader" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Famille"
+
+[node name="FamilyList" type="VBoxContainer" parent="VBox/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ActionsHeader" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Actions"
+
+[node name="Actions" type="HBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GovernorButton" type="Button" parent="VBox/Scroll/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Nommer gouverneur"
+
+[node name="GeneralButton" type="Button" parent="VBox/Scroll/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Donner le commandement"
+
+[node name="MarryButton" type="Button" parent="VBox/Scroll/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Marier"
+
+[node name="PickerPanel" type="VBoxContainer" parent="VBox/Scroll/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PickerHeader" type="HBoxContainer" parent="VBox/Scroll/Content/PickerPanel"]
+layout_mode = 2
+
+[node name="PickerTitle" type="Label" parent="VBox/Scroll/Content/PickerPanel/PickerHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Choisir…"
+
+[node name="PickerClose" type="Button" parent="VBox/Scroll/Content/PickerPanel/PickerHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Annuler"
+
+[node name="PickerList" type="VBoxContainer" parent="VBox/Scroll/Content/PickerPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="SkillTreeHeader" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Arbre de compétences"
+
+[node name="SkillColumns" type="HBoxContainer" parent="VBox/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
