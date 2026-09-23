@@ -146,19 +146,30 @@ pub fn province_income_with(
     effects.merge(extra);
     let mut base = 0.0;
     let mut burgher_base = 0.0;
+    // F1 `Production` (mills, forges, workshops; water/wind mill
+    // technologies): the produce of peasants and burghers is worth more,
+    // half of the gain reaching the crown ([`PRODUCTION_TAX_SHARE`]).
+    let production = 1.0 + PRODUCTION_TAX_SHARE * effects.production.percent / 100.0;
     for (class, entry) in province.population.iter() {
-        let share = entry.count as f64 * tax_per_head(class) * f64::from(entry.wealth) / 50.0;
+        let mut share = entry.count as f64 * tax_per_head(class) * f64::from(entry.wealth) / 50.0;
+        if matches!(class, SocialClass::Peasants | SocialClass::Burghers) {
+            share *= production.max(0.0);
+        }
         base += share;
         if class == SocialClass::Burghers {
             burgher_base = share;
         }
     }
+    base += effects.production.flat;
     base *= tax_rate.multiplier();
     base *= 1.0 + effects.tax_income.percent / 100.0;
     base += effects.tax_income.flat;
     let trade = burgher_base * (effects.trade_income.percent / 100.0) + effects.trade_income.flat;
     ((base + trade) * (1.0 - f64::from(province.devastation) / 100.0) * TAX_EFFICIENCY).max(0.0)
 }
+
+/// Share of a `Production` bonus that reaches the tax base (F1).
+pub const PRODUCTION_TAX_SHARE: f64 = 0.5;
 
 /// Seasonal upkeep of one unit (livres).
 pub fn unit_upkeep(data: &GameData, unit: &Unit) -> i64 {

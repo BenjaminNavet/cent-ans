@@ -337,6 +337,50 @@ fn move_general(state: &mut CampaignState, army_id: &ArmyId) {
     }
 }
 
+/// Pace (per cent) of an army hauling siege engines (F1): trebuchets and
+/// bombards slow the march unless `Movement` effects for the `siege` family
+/// (field artillery) make up for it.
+pub const SIEGE_TRAIN_PACE_PERCENT: f64 = -20.0;
+
+impl CampaignState {
+    /// Movement points `army` receives at the start of a turn (F1): the
+    /// season's allowance scaled by the pace of its slowest unit family
+    /// (technologies' `Movement` percents, global or per family; siege
+    /// trains [`SIEGE_TRAIN_PACE_PERCENT`]), plus the flat `Movement` of its
+    /// general (admiral, chevauchée) and of the faction's technologies.
+    pub fn army_movement_allowance(&self, data: &GameData, army: &Army) -> u32 {
+        let base = f64::from(self.season.movement_points());
+        let tech = research::faction_tech_effects(self, data, &army.faction);
+        let general = army
+            .general
+            .as_ref()
+            .map(|id| skills::character_effects(self, data, id))
+            .unwrap_or_default();
+        let common = tech.movement.percent + general.movement.percent;
+        let pace = army
+            .units
+            .iter()
+            .filter_map(|unit| data.unit_types.get(&unit.unit_type))
+            .map(|unit_type| {
+                let mut percent = common
+                    + tech
+                        .unit_categories
+                        .get(unit_type.category)
+                        .movement
+                        .percent;
+                if unit_type.category == data_model::UnitCategory::Siege {
+                    percent += SIEGE_TRAIN_PACE_PERCENT;
+                }
+                percent
+            })
+            .fold(common, f64::min);
+        let points = (base * (1.0 + pace / 100.0) + 1e-9).floor()
+            + tech.movement.flat
+            + general.movement.flat;
+        points.max(1.0) as u32
+    }
+}
+
 /// Builds the pure battle description of an army.
 pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Side {
     let general_command = army

@@ -167,6 +167,30 @@ pub fn faction_province_tech_effects(
     }
 }
 
+/// `(defence, siegecraft)` parts of `faction`'s technology
+/// `SiegeResistance` effects (F1): positive values strengthen the faction's
+/// own towns, negative ones weaken the towns it besieges.
+pub fn tech_siege_resistance(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> (f64, f64) {
+    let mut defence = 0.0;
+    let mut siegecraft = 0.0;
+    for tech in acquired(state, data, faction) {
+        for effect in &tech.effects {
+            if effect.effect == EffectKind::SiegeResistance && effect.mode == EffectMode::Add {
+                if effect.value >= 0.0 {
+                    defence += effect.value;
+                } else {
+                    siegecraft += effect.value;
+                }
+            }
+        }
+    }
+    (defence, siegecraft)
+}
+
 /// Battle bonuses of `faction`'s technologies for units of `category`.
 pub fn tech_unit_bonus(
     state: &CampaignState,
@@ -335,12 +359,19 @@ pub fn start_research(
     if f.research.as_ref() == Some(technology) {
         return Ok(());
     }
+    // F1: with no research running, `research_progress` holds the surplus
+    // of the last completed technology; it carries over to the new one.
+    let surplus = if f.research.is_none() {
+        f.research_progress
+    } else {
+        0
+    };
     if let Some(previous) = f.research.take() {
         if f.research_progress > 0 {
             f.research_banked.insert(previous, f.research_progress);
         }
     }
-    f.research_progress = f.research_banked.remove(technology).unwrap_or(0);
+    f.research_progress = f.research_banked.remove(technology).unwrap_or(0) + surplus;
     f.research = Some(technology.clone());
     Ok(())
 }
@@ -378,7 +409,9 @@ pub(crate) fn resolve_research(
         }
         f.technologies.insert(technology.clone());
         f.research = None;
-        f.research_progress = 0;
+        // F1: the surplus is kept for the next research (see
+        // `start_research`, which carries it over).
+        f.research_progress -= effective_cost(tech, year);
         let faction_name = data
             .factions
             .get(&faction_id)
