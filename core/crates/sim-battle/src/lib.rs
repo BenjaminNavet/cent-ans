@@ -27,6 +27,7 @@ pub mod field;
 pub mod outcome;
 pub mod rng;
 pub mod setup;
+pub mod siege;
 pub mod sim;
 pub mod unit;
 
@@ -37,6 +38,9 @@ pub use field::{
 };
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;
-pub use setup::{BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, UnitSetup};
+pub use setup::{
+    BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
+};
+pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use sim::{BattleSim, SetupError, DT, MAX_DURATION};
 pub use unit::{Formation, Unit, UnitState};

@@ -323,6 +323,7 @@ impl CampaignState {
             attacker: side_setup(self, data, &request.attacker, attacker),
             defender: side_setup(self, data, &request.defender, defender),
             player_side,
+            siege: None,
         })
     }
 
