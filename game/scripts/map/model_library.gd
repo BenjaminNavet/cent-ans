@@ -6,7 +6,9 @@ extends RefCounted
 ## fonctions renvoient null / false et les marqueurs gardent leurs placeholders.
 ##
 ## Villes : castle (capitale de faction), cathedral (bâtiment `bld_cathedral`), town
-## (murailles ou fortification ≥ 2), village sinon. Armées : porte-étendard, plus camp de
+## (murailles ou fortification ≥ 2), village sinon ; lot V3 : villes fortifiées entières
+## (`city_cathedral` pour les cathédrales). Armées : chef monté et escorte (fantassins,
+## arbalétriers, cavaliers) selon la composition, plus camp de
 ## siège (posture `siege`) ou cogue (`embarked`/`at_sea` vrai). Le matériau `Banner`
 ## est teinté à la couleur de la faction.
 
@@ -16,7 +18,7 @@ const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 ## → ≈ 10 px de carte ; maisons de la taille des arbres, cohérentes avec le relief).
 const CITY_SCALE := 4.8
 ## Échelle du porte-étendard dans l'espace local du marqueur d'armée (hampe placeholder ≈ 7).
-const ARMY_SCALE := 3.2
+const ARMY_SCALE := 3.8
 const MODEL_NODE := "M10Model"
 
 static var _scenes: Dictionary = {}  # nom → PackedScene ou null
@@ -24,6 +26,7 @@ static var _city_kinds: Dictionary = {}  # province_id → nom de modèle
 static var _capitals: Dictionary = {}  # province_id → true
 static var _capitals_loaded := false
 static var _tinted_meshes: Dictionary = {}  # "mesh|couleur" → Mesh teinté
+static var _unit_categories: Dictionary = {}  # unit_type → catégorie
 
 
 ## Vide les caches statiques (appelé en fin de smoke test pour éviter les fuites signalées).
@@ -33,6 +36,7 @@ static func clear_cache() -> void:
 	_capitals.clear()
 	_capitals_loaded = false
 	_tinted_meshes.clear()
+	_unit_categories.clear()
 
 
 static func has_model(model_name: String) -> bool:
@@ -154,6 +158,14 @@ static func city_model(province_id: String) -> Node3D:
 
 # --- Armées ------------------------------------------------------------------------
 
+## Figurines d'escorte (en plus du chef) selon l'effectif : [seuil d'hommes, nombre].
+const ESCORT_BY_MEN := [[400, 2], [1200, 3], [1000000000, 4]]
+## Places des figurines d'escorte dans le repère du marqueur (le groupe regarde +X).
+const ESCORT_SLOTS := [
+	Vector3(-1.5, 0.0, 1.2), Vector3(-1.1, 0.0, -1.5), Vector3(-2.9, 0.0, 0.2), Vector3(-2.7, 0.0, 1.9),
+]
+const SIEGE_CAMP_OFFSET := Vector3(3.2, 0.0, 2.2)
+
 
 static func army_kind(army: Dictionary) -> String:
 	if bool(army.get("embarked", false)) or bool(army.get("at_sea", false)):
@@ -161,26 +173,99 @@ static func army_kind(army: Dictionary) -> String:
 	return "army"
 
 
-## Habille un `ArmyMarker` : modèle 3D (+ camp de siège) teinté, placeholders masqués.
+## Catégorie d'un type d'unité (`data/unit_types/<id>.json` : cavalry, infantry, ranged, siege).
+static func unit_category(unit_type: String) -> String:
+	if _unit_categories.has(unit_type):
+		return _unit_categories[unit_type]
+	var data := _read_json(_data_dir().path_join("unit_types").path_join(unit_type + ".json"))
+	var category := str(data.get("category", "infantry"))
+	_unit_categories[unit_type] = category
+	return category
+
+
+## Modèles des figurines d'escorte, proportionnels à la composition de l'armée.
+static func escort_models(army: Dictionary) -> PackedStringArray:
+	var units: Array = army.get("units", [])
+	var men := 0
+	var weights := {"army_foot": 0, "army_archer": 0, "army": 0}
+	for unit in units:
+		men += int(unit.get("strength", 0))
+		match unit_category(str(unit.get("unit_type", ""))):
+			"ranged":
+				weights["army_archer"] += 1
+			"cavalry":
+				weights["army"] += 1
+			_:
+				weights["army_foot"] += 1
+	var count := 0
+	for step in ESCORT_BY_MEN:
+		if men < int(step[0]):
+			count = int(step[1])
+			break
+	var total: int = weights["army_foot"] + weights["army_archer"] + weights["army"]
+	var result := PackedStringArray()
+	if total == 0:
+		for i in count:
+			result.append("army_foot")
+		return result
+	# Répartition au plus fort reste, fantassins d'abord.
+	var remaining := count
+	var shares := {}
+	for model_name in ["army_foot", "army_archer", "army"]:
+		shares[model_name] = int(floor(float(weights[model_name]) * count / total))
+		remaining -= shares[model_name]
+	for model_name in ["army_foot", "army_archer", "army"]:
+		if remaining <= 0:
+			break
+		if weights[model_name] > 0 and float(weights[model_name]) * count / total - shares[model_name] > 0.0:
+			shares[model_name] += 1
+			remaining -= 1
+	for model_name in ["army_foot", "army_archer", "army"]:
+		for i in shares[model_name]:
+			result.append(model_name)
+	while result.size() < count:
+		result.append("army_foot")
+	return result
+
+
+## Habille un `ArmyMarker` : groupe de figurines teintées (chef monté + escorte selon la
+## composition) ou cogue, plus camp de siège ; le placeholder `Banner` est masqué.
 ## Renvoie false (placeholders conservés) si le modèle n'est pas disponible.
 static func dress_army_marker(marker: Node3D, army: Dictionary, color: Color) -> bool:
 	var previous := marker.get_node_or_null(MODEL_NODE)
 	if previous != null:
 		marker.remove_child(previous)
 		previous.queue_free()
-	var model := instantiate(army_kind(army), ARMY_SCALE)
-	if model == null:
+	var kind := army_kind(army)
+	var leader := instantiate(kind, ARMY_SCALE if kind == "army" else ARMY_SCALE * 1.5)
+	if leader == null:
 		return false
+	var group := Node3D.new()
+	group.name = MODEL_NODE
+	leader.name = "Leader"
+	leader.position = Vector3(0.6, 0.0, 0.0)
+	group.add_child(leader)
+	if kind == "army":
+		var escort := escort_models(army)
+		for i in mini(escort.size(), ESCORT_SLOTS.size()):
+			var figure := instantiate(escort[i], ARMY_SCALE * (0.8 if escort[i] == "army" else 1.0))
+			if figure == null:
+				continue
+			figure.name = "Escort_%d" % i
+			figure.position = ESCORT_SLOTS[i]
+			figure.rotation.y = randf_range(-0.12, 0.12)
+			group.add_child(figure)
 	if str(army.get("stance", "")) == "siege":
-		var camp := instantiate("siege_camp", 1.0)
+		var camp := instantiate("siege_camp", ARMY_SCALE * 0.9)
 		if camp != null:
 			camp.name = "SiegeCamp"
-			camp.position = Vector3(1.6, 0.0, 0.8)
-			model.add_child(camp)
-	tint_banner(model, color)
-	marker.add_child(model)
-	for placeholder in ["Pole", "Finial", "Banner"]:
-		var node := marker.get_node_or_null(placeholder) as Node3D
-		if node != null:
-			node.visible = false
+			camp.position = SIEGE_CAMP_OFFSET
+			group.add_child(camp)
+	tint_banner(group, color)
+	for figure in group.find_children("*", "GeometryInstance3D", true, false):
+		(figure as GeometryInstance3D).layers = 2
+	marker.add_child(group)
+	var placeholder := marker.get_node_or_null("Banner") as Node3D
+	if placeholder != null:
+		placeholder.visible = false
 	return true

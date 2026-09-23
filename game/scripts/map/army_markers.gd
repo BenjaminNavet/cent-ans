@@ -5,6 +5,10 @@ extends Node3D
 ## quand plusieurs armées partagent une province. `refresh(sim)` reconstruit l'ensemble
 ## (appelé après chaque fin de tour ou ordre) ; `pick_screen` renvoie l'armée sous le
 ## curseur (priorité sur la province).
+##
+## Lot V3 : chaque armée a une plaque d'effectif 2D (cartouche parchemin : écu de la faction,
+## nombre d'hommes, état « en marche » / « siège » / « à bord »), de taille constante à l'écran,
+## posée au-dessus de l'étendard (couche `PLATE_LAYER`, sous l'interface).
 
 const MARKER_SCENE := preload("res://scenes/map/army_marker.tscn")
 const PICK_RADIUS_PX := 26.0
@@ -16,17 +20,33 @@ const MAX_SCALE := 14.0
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
 
+## Couche des plaques : au-dessus du monde 3D, sous l'interface (`CanvasLayer` 1).
+const PLATE_LAYER := 0
+const PLATE_FONT_SIZE := 15
+const INK := Color(0.16, 0.10, 0.05)
+const PARCHMENT := Color(0.94, 0.89, 0.76, 0.94)
+const PLAYER_BORDER := Color(0.85, 0.66, 0.2)
+const OTHER_BORDER := Color(0.30, 0.20, 0.12)
+const STATUS_TEXT := {"moving": "»", "siege": "siège", "embarked": "à bord"}
+
 var map_data: MapData
 var camera: Camera3D
 var selected_army: String = ""
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
+var _plates: Dictionary = {}  # army_id → PanelContainer
+var _plate_layer: CanvasLayer
 var _current_scale: float = 1.0
 
 
 func setup(data: MapData, view_camera: Camera3D) -> void:
 	map_data = data
 	camera = view_camera
+	if _plate_layer == null:
+		_plate_layer = CanvasLayer.new()
+		_plate_layer.name = "Plates"
+		_plate_layer.layer = PLATE_LAYER
+		add_child(_plate_layer)
 
 
 ## Reconstruit les marqueurs depuis la simulation. `color_of(faction_id) -> Color`.
@@ -34,6 +54,9 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 	for marker in _markers.values():
 		marker.queue_free()
 	_markers.clear()
+	for plate in _plates.values():
+		plate.queue_free()
+	_plates.clear()
 	if sim == null or map_data == null:
 		return
 	var per_province: Dictionary = {}
@@ -54,11 +77,28 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var stack: int = per_province.get(location, 0)
 		per_province[location] = stack + 1
 		marker.offset_dir = Vector2.ZERO if stack == 0 else Vector2.RIGHT.rotated(stack * TAU / 6.0)
+		marker.face(_heading(army, centroid))
 		marker.set_selected(army_id == selected_army)
 		marker.apply_scale(_current_scale)
 		_markers[army_id] = marker
+		if _plate_layer != null:
+			var plate := _make_plate(marker)
+			_plate_layer.add_child(plate)
+			_plates[army_id] = plate
 	if not _markers.has(selected_army):
 		selected_army = ""
+	_update_plates()
+
+
+## Direction d'avance (coordonnées carte) : vers la prochaine étape du chemin, sinon un
+## trois-quarts vers le sud-est (lisible avec la caméra par défaut).
+func _heading(army: Dictionary, from: Vector2) -> Vector2:
+	var path: Array = army.get("path", [])
+	if not path.is_empty():
+		var next := map_data.centroid_of_id(str(path[0]))
+		if next.x >= 0.0 and next.distance_to(from) > 0.5:
+			return (next - from).normalized()
+	return Vector2(1.0, 0.45).normalized()
 
 
 ## Écarte l'armée du modèle de ville quand le centroïde tombe sur la capitale de la province.
@@ -78,6 +118,8 @@ func set_selected(army_id: String) -> void:
 	selected_army = army_id
 	for id in _markers:
 		_markers[id].set_selected(id == army_id)
+	for id in _plates:
+		_style_plate(_plates[id], _markers[id], id == army_id)
 
 
 func has_army(army_id: String) -> bool:
@@ -88,7 +130,23 @@ func army_count() -> int:
 	return _markers.size()
 
 
-## Armée la plus proche du point écran dans `PICK_RADIUS_PX`, sinon "".
+func plate_count() -> int:
+	return _plates.size()
+
+
+## Texte de la plaque d'une armée ("" si absente) : effectif et état.
+func plate_text(army_id: String) -> String:
+	var plate: PanelContainer = _plates.get(army_id)
+	if plate == null:
+		return ""
+	var parts := PackedStringArray()
+	for label in plate.find_children("*", "Label", true, false):
+		parts.append((label as Label).text)
+	return " ".join(parts)
+
+
+## Armée la plus proche du point écran dans `PICK_RADIUS_PX` (étendard, figurines ou plaque),
+## sinon "".
 func pick_screen(screen_position: Vector2) -> String:
 	if camera == null:
 		return ""
@@ -96,13 +154,16 @@ func pick_screen(screen_position: Vector2) -> String:
 	var best_distance := PICK_RADIUS_PX
 	for id in _markers:
 		var marker: ArmyMarker = _markers[id]
-		var world := marker.pick_position()
-		if camera.is_position_behind(world):
-			continue
-		var distance := camera.unproject_position(world).distance_to(screen_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = id
+		for world in marker.pick_positions():
+			if camera.is_position_behind(world):
+				continue
+			var distance := camera.unproject_position(world).distance_to(screen_position)
+			if distance < best_distance:
+				best_distance = distance
+				best = id
+		var plate: PanelContainer = _plates.get(id)
+		if plate != null and plate.visible and plate.get_global_rect().has_point(screen_position):
+			return id
 	return best
 
 
@@ -119,3 +180,100 @@ func update_scale(camera_distance: float) -> void:
 	_current_scale = new_scale
 	for marker in _markers.values():
 		marker.apply_scale(_current_scale)
+
+
+func _process(_delta: float) -> void:
+	_update_plates()
+
+
+# --- Plaques d'effectif ------------------------------------------------------------
+
+
+func _make_plate(marker: ArmyMarker) -> PanelContainer:
+	var plate := PanelContainer.new()
+	plate.name = "Plate_" + marker.army_id
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 4)
+	plate.add_child(row)
+	var heraldry := ArmyMarker._heraldry(marker.faction_id)
+	if heraldry != null:
+		var icon := TextureRect.new()
+		icon.texture = heraldry
+		icon.custom_minimum_size = Vector2(18, 18)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(icon)
+	else:
+		var swatch := ColorRect.new()
+		swatch.color = marker.faction_color
+		swatch.custom_minimum_size = Vector2(12, 16)
+		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(swatch)
+	var count := Label.new()
+	count.text = format_men(marker.men)
+	count.tooltip_text = "%d unité(s)" % marker.unit_count
+	count.add_theme_font_size_override("font_size", PLATE_FONT_SIZE)
+	count.add_theme_color_override("font_color", INK)
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(count)
+	var status_text: String = STATUS_TEXT.get(marker.status, "")
+	if status_text != "":
+		var status := Label.new()
+		status.text = status_text
+		status.add_theme_font_size_override("font_size", PLATE_FONT_SIZE - 3)
+		status.add_theme_color_override("font_color", Color(0.45, 0.12, 0.08) if marker.status == "siege" else INK.lightened(0.25))
+		status.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(status)
+	_style_plate(plate, marker, marker.army_id == selected_army)
+	return plate
+
+
+func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool) -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = PARCHMENT if not selected else PARCHMENT.lightened(0.35)
+	var border := PLAYER_BORDER if marker.is_player else OTHER_BORDER
+	style.border_color = border if not selected else Color(1.0, 0.82, 0.3)
+	style.set_border_width_all(2 if selected or marker.is_player else 1)
+	style.set_corner_radius_all(3)
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 1
+	style.content_margin_bottom = 1
+	style.shadow_color = Color(0, 0, 0, 0.35)
+	style.shadow_size = 3
+	style.shadow_offset = Vector2(1, 2)
+	plate.add_theme_stylebox_override("panel", style)
+	plate.z_index = 1 if selected else 0
+
+
+static func format_men(men: int) -> String:
+	var text := str(men)
+	if men >= 10000:
+		text = "%s %03d" % [men / 1000, men % 1000]
+	elif men >= 1000:
+		text = "%d %03d" % [men / 1000, men % 1000]
+	return text
+
+
+func _update_plates() -> void:
+	if camera == null or _plates.is_empty():
+		return
+	var viewport_rect := get_viewport().get_visible_rect()
+	for id in _plates:
+		var plate: PanelContainer = _plates[id]
+		var marker: ArmyMarker = _markers.get(id)
+		if marker == null:
+			plate.visible = false
+			continue
+		var anchor := marker.plate_anchor()
+		if camera.is_position_behind(anchor):
+			plate.visible = false
+			continue
+		var screen := camera.unproject_position(anchor)
+		var size := plate.get_combined_minimum_size()
+		plate.size = size
+		plate.position = (screen - Vector2(size.x * 0.5, size.y + 2.0)).round()
+		plate.visible = viewport_rect.grow(40.0).has_point(screen)
