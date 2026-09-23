@@ -1,60 +1,43 @@
-[gd_scene load_steps=5 format=3 uid="uid://cent_ans_province_panel"]
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_province_panel"]
 
 [ext_resource type="Script" path="res://scripts/map/province_panel.gd" id="1_panel"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_parchment"]
-content_margin_left = 16.0
-content_margin_top = 12.0
-content_margin_right = 16.0
-content_margin_bottom = 14.0
-bg_color = Color(0.93, 0.87, 0.72, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.29, 0.16, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 6
-
-[sub_resource type="SystemFont" id="SystemFont_serif"]
-font_names = PackedStringArray("Georgia", "Palatino", "Times New Roman", "serif")
-
-[sub_resource type="Theme" id="Theme_parchment"]
-default_font = SubResource("SystemFont_serif")
-default_font_size = 16
-Label/colors/font_color = Color(0.22, 0.14, 0.07, 1)
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
 
 [node name="ProvincePanel" type="PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 0)
+custom_minimum_size = Vector2(320, 0)
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -300.0
-offset_top = -210.0
+offset_left = -340.0
+offset_top = -260.0
 offset_right = -16.0
 offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
-theme = SubResource("Theme_parchment")
-theme_override_styles/panel = SubResource("StyleBoxFlat_parchment")
+theme = ExtResource("2_theme")
 script = ExtResource("1_panel")
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="NameLabel" type="Label" parent="VBox"]
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="VBox/Header"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 24
 text = "Province"
+
+[node name="CloseButton" type="Button" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
 
 [node name="Separator" type="HSeparator" parent="VBox"]
 layout_mode = 2
@@ -63,13 +46,22 @@ layout_mode = 2
 layout_mode = 2
 columns = 2
 theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 4
+theme_override_constants/v_separation = 3
 
 [node name="OwnerKey" type="Label" parent="VBox/Grid"]
 layout_mode = 2
 text = "Propriétaire"
 
 [node name="OwnerValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="ControllerKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Contrôleur"
+
+[node name="ControllerValue" type="Label" parent="VBox/Grid"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "—"
@@ -92,6 +84,42 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "—"
 
+[node name="PopulationKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Population"
+
+[node name="PopulationValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="UnrestKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Mécontentement"
+
+[node name="UnrestValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="DevastationKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Dévastation"
+
+[node name="DevastationValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="SiegeKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Siège"
+
+[node name="SiegeValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
 [node name="IdKey" type="Label" parent="VBox/Grid"]
 layout_mode = 2
 text = "Identifiant"
@@ -101,3 +129,50 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "—"
+
+[node name="GarrisonHeader" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Garnison"
+
+[node name="GarrisonList" type="VBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Actions" type="HBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RecruitButton" type="Button" parent="VBox/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Recruter"
+
+[node name="CreateArmyButton" type="Button" parent="VBox/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Former une armée"
+
+[node name="RecruitPanel" type="VBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RecruitSeparator" type="HSeparator" parent="VBox/RecruitPanel"]
+layout_mode = 2
+
+[node name="RecruitHeader" type="Label" parent="VBox/RecruitPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Recrutement — coût / entretien par saison"
+
+[node name="RecruitList" type="VBoxContainer" parent="VBox/RecruitPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2

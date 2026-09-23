@@ -31,10 +31,13 @@ var _is_near: PackedByteArray = PackedByteArray()
 var _height_texture: ImageTexture
 var _ids_texture: ImageTexture
 var _faction_texture: ImageTexture
+var _mask_texture: ImageTexture
 var _owner_colors: Dictionary = {}
+var _province_colors: PackedColorArray = PackedColorArray()
 
 
-## Palette de repli (couleurs héraldiques) tant que `core/` n'expose pas les factions.
+## Palette de repli (couleurs héraldiques), utilisée seulement sans `GameDataStore`
+## (ex. fixtures de test) ; sinon `set_province_colors` fournit les vraies couleurs.
 const FALLBACK_PALETTE: Array[Color] = [
 	Color(0.20, 0.32, 0.75), Color(0.78, 0.18, 0.18), Color(0.85, 0.65, 0.15),
 	Color(0.25, 0.55, 0.30), Color(0.55, 0.25, 0.60), Color(0.85, 0.45, 0.15),
@@ -90,12 +93,41 @@ func near_chunk_count() -> int:
 	return _is_near.count(1)
 
 
-## Couleurs par propriétaire (id de faction → Color) ; à alimenter par `core/` en M2.
+## Couleurs par propriétaire (id de faction → Color), repli quand `set_province_colors`
+## n'est pas appelé.
 func set_owner_colors(colors: Dictionary) -> void:
 	_owner_colors = colors
 	if map_data != null:
 		_build_faction_texture()
 		material.set_shader_parameter("faction_colors", _faction_texture)
+
+
+## Couleur explicite par province (`colors[index - 1]`, alpha 0 = neutre) : source de vérité
+## quand `GameDataStore`/`CampaignSim` sont disponibles ; la palette de repli est ignorée.
+func set_province_colors(colors: PackedColorArray) -> void:
+	_province_colors = colors
+	if map_data != null:
+		_build_faction_texture()
+		material.set_shader_parameter("faction_colors", _faction_texture)
+
+
+## Masque 1D indexé par province : 1 = atteignable ce tour, 2 = sur le chemin prévisualisé.
+## `reachable` et `path` sont des index raster. Un appel avec deux tableaux vides efface tout.
+func set_reachable(reachable: PackedInt32Array, path: PackedInt32Array = PackedInt32Array()) -> void:
+	if map_data == null or material == null:
+		return
+	var width := maxi(map_data.province_count + 1, 1)
+	var image := Image.create(width, 1, false, Image.FORMAT_R8)
+	image.fill(Color(0, 0, 0, 0))
+	for index in reachable:
+		if index > 0 and index < width:
+			image.set_pixel(index, 0, Color(0.5, 0, 0))
+	for index in path:
+		if index > 0 and index < width:
+			image.set_pixel(index, 0, Color(1.0, 0, 0))
+	_mask_texture = ImageTexture.create_from_image(image)
+	material.set_shader_parameter("province_mask", _mask_texture)
+	material.set_shader_parameter("mask_enabled", not reachable.is_empty() or not path.is_empty())
 
 
 func set_highlight(hovered_index: int, selected_index: int) -> void:
@@ -144,13 +176,16 @@ func _build_faction_texture() -> void:
 			continue
 		var owner: String = province.get("owner", "")
 		var color: Color
-		if _owner_colors.has(owner):
+		if index - 1 < _province_colors.size():
+			color = _province_colors[index - 1]
+		elif _owner_colors.has(owner):
 			color = _owner_colors[owner]
+			color.a = 1.0
 		else:
 			if not palette_by_owner.has(owner):
 				palette_by_owner[owner] = FALLBACK_PALETTE[palette_by_owner.size() % FALLBACK_PALETTE.size()]
 			color = palette_by_owner[owner]
-		color.a = 1.0 if owner != "" else 0.0
+			color.a = 1.0 if owner != "" else 0.0
 		image.set_pixel(index, 0, color)
 	_faction_texture = ImageTexture.create_from_image(image)
 
@@ -160,6 +195,7 @@ func _build_material() -> void:
 	material.shader = TERRAIN_SHADER
 	material.set_shader_parameter("heightmap", _height_texture)
 	material.set_shader_parameter("height_bpp", map_data.height_bpp)
+	material.set_shader_parameter("height_little_endian", map_data.height_little_endian)
 	material.set_shader_parameter("height_min_m", map_data.height_min_m)
 	material.set_shader_parameter("height_max_m", map_data.height_max_m)
 	material.set_shader_parameter("height_scale", MapData.HEIGHT_SCALE)
@@ -179,6 +215,7 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 	var height := map_data.size.y
 	var bytes := map_data.height_bytes
 	var bpp := map_data.height_bpp
+	var little_endian := map_data.height_little_endian
 	var h_min := map_data.height_min_m
 	var h_range := map_data.height_max_m - map_data.height_min_m
 	var scale := MapData.HEIGHT_SCALE

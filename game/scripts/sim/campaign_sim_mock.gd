@@ -418,7 +418,7 @@ func _resolve_battle(attacker_id: String, defender_id: String, province_id: Stri
 	var name: String = _provinces.get(province_id, {}).get("name", province_id)
 	_events.append({
 		"kind": "battle",
-		"text_fr": "Bataille de %s : %s contre %s. Vainqueur : %s (pertes : 30 % pour le vaincu, 10 % pour le vainqueur)." % [
+		"text_fr": "Bataille de %s : %s contre %s. Vainqueur : %s (pertes : 30 %% pour le vaincu, 10 %% pour le vainqueur)." % [
 			name, _faction_label(attacker["faction"]), _faction_label(defender["faction"]), _faction_label(winner["faction"])],
 		"province": province_id,
 		"army": attacker_id,
@@ -547,9 +547,9 @@ func _setup_factions() -> void:
 		var province: Dictionary = _provinces[id]
 		if province["owner"] == "":
 			continue
-		var count := 1 + (id.hash() % 3)
+		var count: int = 1 + (str(id).hash() % 3)
 		for i in count:
-			province["garrison"].append(_make_unit(FAKE_UNIT_TYPES[(i + id.hash()) % 2]))
+			province["garrison"].append(_make_unit(FAKE_UNIT_TYPES[(i + str(id).hash()) % 2]))
 
 
 func _setup_armies() -> void:
@@ -571,7 +571,8 @@ func _setup_armies() -> void:
 		var army_id := "army_%s_%d" % [faction_id.trim_prefix("fac_"), _next_army_number]
 		_next_army_number += 1
 		var general_name: String = FAKE_GENERALS.get(faction_id, "")
-		_armies[army_id] = _make_army(faction_id, location, units, "chr_" + faction_id.trim_prefix("fac_") if general_name != "" else "", general_name)
+		var general_id: String = "chr_" + faction_id.trim_prefix("fac_") if general_name != "" else ""
+		_armies[army_id] = _make_army(faction_id, location, units, general_id, general_name)
 		created += 1
 
 

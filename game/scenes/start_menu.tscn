@@ -1,0 +1,106 @@
+[gd_scene load_steps=4 format=3 uid="uid://cent_ans_start_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/start_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="3_dialog"]
+
+[node name="StartMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.36, 0.27, 0.17, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.88, 0.70, 1)
+theme_override_font_sizes/font_size = 72
+text = "Cent Ans"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.80, 0.62, 1)
+theme_override_font_sizes/font_size = 22
+text = "La guerre de Cent Ans — printemps 1337. Choisissez votre couronne."
+horizontal_alignment = 1
+
+[node name="Cards" type="HBoxContainer" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="SeedRow" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="SeedKey" type="Label" parent="Center/VBox/SeedRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.80, 0.62, 1)
+text = "Graine"
+
+[node name="SeedEdit" type="LineEdit" parent="Center/VBox/SeedRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "1337"
+
+[node name="Buttons" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="StartButton" type="Button" parent="Center/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Commencer"
+
+[node name="LoadButton" type="Button" parent="Center/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Charger une partie"
+
+[node name="QuitButton" type="Button" parent="Center/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Quitter"
+
+[node name="StatusLabel" type="Label" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.80, 0.72, 0.56, 1)
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+
+[node name="SaveLoadDialog" parent="." instance=ExtResource("3_dialog")]
+unique_name_in_owner = true

@@ -24,10 +24,15 @@ var meters_per_px: float = 800.0
 var height_min_m: float = -200.0
 var height_max_m: float = 4800.0
 
-## Image L8 (8 bits, repli) ou LA8 (16 bits : L = octet fort, A = octet faible).
+## Image L8 (8 bits, repli) ou LA8 (16 bits, deux octets par pixel). L'ordre des octets
+## dépend de la source : `GameDataStore.load_heightmap_u16` livre du little-endian
+## (L = octet faible, A = octet fort), `Png16` du big-endian (L = octet fort).
 var height_image: Image
 var height_bytes: PackedByteArray
 var height_bpp: int = 1
+var height_little_endian: bool = false
+## "rust" (GameDataStore), "png16" (GDScript) ou "8bit" (repli Image.load_from_file).
+var height_decoder: String = ""
 
 var land_mask: Image
 var province_ids_image: Image
@@ -39,6 +44,8 @@ var ids_bpp: int = 3
 ##  capital_px: Vector2, neighbors: Array, rings: Array[PackedVector2Array]}
 var provinces: Dictionary = {}
 var province_count: int = 0
+## id de province → index raster.
+var province_index_by_id: Dictionary = {}
 
 ## Rivières : {name, importance: int (0..6, 6 = fleuve majeur), points: PackedVector2Array}
 ## `importance` = ordre de Strahler si présent, sinon 12 − scalerank (Natural Earth).
@@ -118,7 +125,9 @@ func _load_heightmap() -> bool:
 	var path := map_dir.path_join("heightmap.png")
 	if not FileAccess.file_exists(path):
 		return _fail("heightmap.png missing")
-	var raw16 := _load_heightmap_16(path)
+	var raw16 := _load_heightmap_rust(path)
+	if raw16.is_empty():
+		raw16 = _load_heightmap_16(path)
 	if raw16.is_empty():
 		var img := Image.load_from_file(path)
 		if img == null:
@@ -127,17 +136,38 @@ func _load_heightmap() -> bool:
 			img.convert(Image.FORMAT_L8)
 		height_image = img
 		height_bpp = 1
+		height_decoder = "8bit"
 		push_warning("MapData: heightmap loaded as 8-bit (precision ~%.1f m)" % ((height_max_m - height_min_m) / 255.0))
 	else:
 		height_image = Image.create_from_data(raw16.width, raw16.height, false, Image.FORMAT_LA8, raw16.data)
 		height_bpp = 2
+		height_little_endian = raw16.get("little_endian", false)
+		height_decoder = raw16.get("decoder", "png16")
 	if height_image.get_size() != size:
 		return _fail("heightmap.png size %s != map.json size_px %s" % [height_image.get_size(), size])
 	height_bytes = height_image.get_data()
 	return true
 
 
-## Décodage 16 bits avec cache disque (`user://cache/`) : le défiltrage PNG en
+## Décodage 16 bits par la GDExtension (`GameDataStore.load_heightmap_u16`, crate `png`
+## côté Rust, little-endian). `{}` si la GDExtension manque ou refuse le fichier.
+func _load_heightmap_rust(path: String) -> Dictionary:
+	if not ClassDB.class_exists("GameDataStore"):
+		return {}
+	var store: Object = ClassDB.instantiate("GameDataStore")
+	if not store.has_method("load_heightmap_u16"):
+		return {}
+	var data: PackedByteArray = store.call("load_heightmap_u16", path)
+	if data.is_empty():
+		return {}
+	var image_size: Vector2i = store.call("get_last_image_size")
+	if data.size() != image_size.x * image_size.y * 2:
+		push_warning("MapData: load_heightmap_u16 returned %d bytes for %s" % [data.size(), image_size])
+		return {}
+	return {"width": image_size.x, "height": image_size.y, "data": data, "little_endian": true, "decoder": "rust"}
+
+
+## Décodage 16 bits en GDScript (repli) avec cache disque (`user://cache/`) : le défiltrage PNG en
 ## GDScript est lent sur 4096², mais le tampon brut se relit instantanément.
 func _load_heightmap_16(path: String) -> Dictionary:
 	var mtime := FileAccess.get_modified_time(path)
@@ -146,7 +176,7 @@ func _load_heightmap_16(path: String) -> Dictionary:
 	if FileAccess.file_exists(cache_path):
 		var cached := FileAccess.get_file_as_bytes(cache_path)
 		if cached.size() == size.x * size.y * 2:
-			return {"width": size.x, "height": size.y, "data": cached}
+			return {"width": size.x, "height": size.y, "data": cached, "decoder": "png16"}
 	var decoded := Png16.load_gray16(path)
 	if decoded.is_empty():
 		return {}
@@ -204,6 +234,7 @@ func _load_provinces() -> bool:
 			"rings": _outer_rings(feature.get("geometry", {})),
 		}
 		provinces[index] = entry
+		province_index_by_id[id] = index
 		province_count = maxi(province_count, index)
 	return true
 
@@ -281,6 +312,8 @@ func height01_px(px: int, py: int) -> float:
 	var offset := py * size.x + px
 	if height_bpp == 2:
 		offset *= 2
+		if height_little_endian:
+			return float(height_bytes[offset] | (height_bytes[offset + 1] << 8)) / 65535.0
 		return float((height_bytes[offset] << 8) | height_bytes[offset + 1]) / 65535.0
 	return float(height_bytes[offset]) / 255.0
 
@@ -323,6 +356,19 @@ func province_index_at(x: float, y: float) -> int:
 
 func get_province(index: int) -> Dictionary:
 	return provinces.get(index, {})
+
+
+## Index raster d'une province par id (0 si inconnue).
+func index_of_id(id: String) -> int:
+	return int(province_index_by_id.get(id, 0))
+
+
+## Centroïde (coordonnées carte) d'une province par id ; Vector2(-1, -1) si inconnue.
+func centroid_of_id(id: String) -> Vector2:
+	var province := get_province(index_of_id(id))
+	if province.is_empty():
+		return Vector2(-1, -1)
+	return province["centroid"]
 
 
 func is_land_px(px: int, py: int) -> bool:

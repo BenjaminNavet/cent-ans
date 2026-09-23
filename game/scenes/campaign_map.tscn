@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=19 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
 [ext_resource type="Script" path="res://scripts/map/terrain_builder.gd" id="2_terrain"]
@@ -10,6 +10,11 @@
 [ext_resource type="Script" path="res://scripts/map/province_picker.gd" id="8_picker"]
 [ext_resource type="Script" path="res://scripts/map/map_ui.gd" id="9_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/province_panel.tscn" id="10_panel"]
+[ext_resource type="Script" path="res://scripts/map/army_markers.gd" id="11_armies"]
+[ext_resource type="Script" path="res://scripts/map/path_preview.gd" id="12_path"]
+[ext_resource type="PackedScene" path="res://scenes/ui/army_panel.tscn" id="13_army_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="14_dialog"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="15_theme"]
 
 [sub_resource type="Environment" id="Environment_map"]
 background_mode = 1
@@ -26,14 +31,6 @@ content_margin_bottom = 6.0
 bg_color = Color(0.93, 0.87, 0.72, 0.96)
 border_width_bottom = 2
 border_color = Color(0.42, 0.29, 0.16, 1)
-
-[sub_resource type="SystemFont" id="SystemFont_serif_top"]
-font_names = PackedStringArray("Georgia", "Palatino", "Times New Roman", "serif")
-
-[sub_resource type="Theme" id="Theme_topbar"]
-default_font = SubResource("SystemFont_serif_top")
-default_font_size = 18
-Label/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
 content_margin_left = 10.0
@@ -73,6 +70,12 @@ script = ExtResource("5_coast")
 [node name="Cities" type="Node3D" parent="."]
 script = ExtResource("6_cities")
 
+[node name="PathPreview" type="MeshInstance3D" parent="."]
+script = ExtResource("12_path")
+
+[node name="Armies" type="Node3D" parent="."]
+script = ExtResource("11_armies")
+
 [node name="CameraRig" type="Node3D" parent="."]
 script = ExtResource("7_camera")
 
@@ -92,43 +95,161 @@ script = ExtResource("9_ui")
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
-theme = SubResource("Theme_topbar")
+theme = ExtResource("15_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
 [node name="HBox" type="HBoxContainer" parent="UI/TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="UI/TopBar/HBox"]
+[node name="FactionSwatch" type="ColorRect" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
-text = "Cent Ans"
+size_flags_vertical = 4
+color = Color(0.2, 0.35, 0.75, 1)
+
+[node name="FactionLabel" type="Label" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
 theme_override_font_sizes/font_size = 22
+text = "Cent Ans"
+
+[node name="Sep1" type="VSeparator" parent="UI/TopBar/HBox"]
+layout_mode = 2
+
+[node name="TreasuryLabel" type="Label" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Trésor : —"
+
+[node name="IncomeLabel" type="Label" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Revenu : —"
 
 [node name="DateLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
 text = "Printemps 1337"
 horizontal_alignment = 1
 
 [node name="EndTurnButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Fin du tour"
+theme_override_font_sizes/font_size = 18
+text = "Fin du tour  ⏎"
+
+[node name="MenuButton" type="MenuButton" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Menu"
+flat = false
+item_count = 5
+popup/item_0/text = "Sauvegarder"
+popup/item_0/id = 0
+popup/item_1/text = "Charger"
+popup/item_1/id = 1
+popup/item_2/text = ""
+popup/item_2/id = 2
+popup/item_2/separator = true
+popup/item_3/text = "Menu principal"
+popup/item_3/id = 3
+popup/item_4/text = "Quitter le jeu"
+popup/item_4/id = 4
+
+[node name="Toast" type="Label" parent="UI"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -240.0
+offset_top = 52.0
+offset_right = 240.0
+offset_bottom = 84.0
+grow_horizontal = 2
+theme = ExtResource("15_theme")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_hover")
+text = ""
+horizontal_alignment = 1
 
 [node name="HoverLabel" type="Label" parent="UI"]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -44.0
+offset_right = 200.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("15_theme")
+theme_override_styles/normal = SubResource("StyleBoxFlat_hover")
+text = ""
+horizontal_alignment = 1
+
+[node name="EventLog" type="PanelContainer" parent="UI"]
 unique_name_in_owner = true
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -44.0
-offset_right = 260.0
+offset_top = -240.0
+offset_right = 436.0
 offset_bottom = -16.0
 grow_vertical = 0
-theme = SubResource("Theme_topbar")
-theme_override_styles/normal = SubResource("StyleBoxFlat_hover")
-text = ""
+theme = ExtResource("15_theme")
+
+[node name="VBox" type="VBoxContainer" parent="UI/EventLog"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="UI/EventLog/VBox"]
+layout_mode = 2
+
+[node name="LogTitle" type="Label" parent="UI/EventLog/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Journal"
+
+[node name="LogToggle" type="Button" parent="UI/EventLog/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Replier"
+
+[node name="LogScroll" type="ScrollContainer" parent="UI/EventLog/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 160)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="LogText" type="RichTextLabel" parent="UI/EventLog/VBox/LogScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "[i]Aucun événement pour l'instant.[/i]"
+
+[node name="ArmyPanel" parent="UI" instance=ExtResource("13_army_panel")]
+unique_name_in_owner = true
 
 [node name="ProvincePanel" parent="UI" instance=ExtResource("10_panel")]
+unique_name_in_owner = true
+
+[node name="SaveLoadDialog" parent="UI" instance=ExtResource("14_dialog")]
 unique_name_in_owner = true

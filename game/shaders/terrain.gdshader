@@ -7,6 +7,7 @@ render_mode cull_back, depth_draw_opaque;
 
 uniform sampler2D heightmap : filter_linear, repeat_disable, hint_default_black;
 uniform int height_bpp = 2;              // 2 = LA8 (16 bits), 1 = L8
+uniform bool height_little_endian = false; // LA8 : L = octet faible (Rust) ou fort (Png16)
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
 uniform float height_scale = 0.02;
@@ -16,6 +17,11 @@ uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_bl
 uniform sampler2D faction_colors : filter_nearest, repeat_disable, hint_default_transparent;
 uniform int hovered_id = 0;
 uniform int selected_id = 0;
+// Masque 1D par province (R8) : ~0,5 = atteignable par l'armée sélectionnée, 1 = sur le chemin.
+uniform sampler2D province_mask : filter_nearest, repeat_disable, hint_default_black;
+uniform bool mask_enabled = false;
+uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
+uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
 uniform float faction_alpha = 0.30;
 uniform vec3 border_color : source_color = vec3(0.24, 0.15, 0.08);
 uniform vec3 parchment : source_color = vec3(0.87, 0.79, 0.62);
@@ -28,6 +34,9 @@ varying vec3 world_pos;
 float height01(vec2 uv) {
 	vec4 t = texture(heightmap, uv);
 	if (height_bpp == 2) {
+		if (height_little_endian) {
+			return (t.a * 255.0 * 256.0 + t.r * 255.0) / 65535.0;
+		}
 		return (t.r * 255.0 * 256.0 + t.a * 255.0) / 65535.0;
 	}
 	return t.r;
@@ -95,6 +104,14 @@ void fragment() {
 	if (id > 0) {
 		vec4 fc = texelFetch(faction_colors, ivec2(clamp(id, 0, textureSize(faction_colors, 0).x - 1), 0), 0);
 		col = mix(col, fc.rgb, fc.a * faction_alpha);
+		if (mask_enabled) {
+			float m = texelFetch(province_mask, ivec2(clamp(id, 0, textureSize(province_mask, 0).x - 1), 0), 0).r;
+			if (m > 0.75) {
+				col = mix(col, path_color, 0.45);
+			} else if (m > 0.25) {
+				col = mix(col, reachable_color, 0.35);
+			}
+		}
 		if (id == selected_id) {
 			col = mix(col, vec3(0.95, 0.80, 0.30), 0.35);
 		} else if (id == hovered_id) {
