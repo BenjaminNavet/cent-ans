@@ -52,6 +52,31 @@ func _ready() -> void:
 	general_button.pressed.connect(func() -> void: _open_picker("general", "Donner le commandement de…", commandable_armies))
 	marry_button.pressed.connect(func() -> void: _open_picker("marry", "Marier avec…", marriage_candidates))
 	picker_close.pressed.connect(func() -> void: picker_panel.hide())
+	_decorate()  # F2
+
+
+# --- F2 : icônes des branches et des actions ---------------------------------------------
+
+## branche → IconChip remplaçant le libellé de la grille des compétences.
+var _branch_chips: Dictionary = {}
+
+
+func _decorate() -> void:
+	for pair in [["CommandKey", "command"], ["GovernanceKey", "governance"], ["CourtKey", "court"]]:
+		var key := find_child(pair[0], true, false) as Label
+		if key == null:
+			continue
+		var grid := key.get_parent()
+		var index := key.get_index()
+		var chip := IconChip.create("branch_" + pair[1], key.text, RichTooltip.branch(pair[1]), 20.0, 15)
+		grid.add_child(chip)
+		grid.move_child(chip, index)
+		grid.remove_child(key)
+		key.queue_free()
+		_branch_chips[pair[1]] = chip
+	IconLibrary.decorate_button(governor_button, "hud_governor", 20)
+	IconLibrary.decorate_button(general_button, "hud_army", 20)
+	IconLibrary.decorate_button(marry_button, "class_nobility", 20)
 
 var governable_provinces: Array = []
 var commandable_armies: Array = []
@@ -91,6 +116,8 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	court_value.text = str(int((character.get("skills", {}) as Dictionary).get("court", 0)))
 	xp_value.text = str(int(character.get("experience", 0)))
 	points_value.text = str(int(character.get("skill_points", 0)))
+	for branch in _branch_chips:
+		(_branch_chips[branch] as Control).tooltip_text = RichTooltip.branch(branch, int((character.get("skills", {}) as Dictionary).get(branch, 0)))
 
 	_fill_traits(character.get("traits", []))
 	_fill_family(character)
@@ -116,11 +143,8 @@ func _fill_traits(traits: Array) -> void:
 		traits_list.add_child(label)
 		return
 	for trait_entry in traits:
-		var chip := Label.new()
-		chip.text = "◆ %s" % str(trait_entry.get("name", trait_entry.get("id", "?")))
-		chip.add_theme_font_size_override("font_size", 13)
 		var category: String = str(trait_entry.get("category", ""))
-		chip.tooltip_text = "%s%s" % [str(trait_entry.get("name", "")), " (%s)" % category if category != "" else ""]
+		var chip := IconChip.create("trait_category_" + category, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 18.0, 13, "trait")
 		traits_list.add_child(chip)
 
 
@@ -195,10 +219,8 @@ func _fill_skill_tree() -> void:
 		var column := VBoxContainer.new()
 		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		column.add_theme_constant_override("separation", 6)
-		var header := Label.new()
-		header.text = str(BRANCH_LABELS.get(branch, branch))
-		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		header.add_theme_font_size_override("font_size", 15)
+		var header := IconChip.create("branch_" + branch, str(BRANCH_LABELS.get(branch, branch)), RichTooltip.branch(branch), 22.0, 15)
+		header.alignment = BoxContainer.ALIGNMENT_CENTER
 		column.add_child(header)
 		var nodes: Array = []
 		for node in _skill_tree:
@@ -226,7 +248,7 @@ func _fill_skill_tree() -> void:
 
 func _make_skill_button(node: Dictionary) -> Control:
 	var id: String = str(node["id"])
-	var button := Button.new()
+	var button := RichButton.new()
 	var learned: bool = _skills_learned.has(id)
 	var available: bool = _learnable.has(id)
 	var state_text := "Appris" if learned else ("Disponible" if available else "Verrouillé")
@@ -234,14 +256,8 @@ func _make_skill_button(node: Dictionary) -> Control:
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD
 	button.custom_minimum_size = Vector2(0, 48)
 	button.disabled = not available
-	var prereq_names: Array = []
-	for prereq in node.get("prerequisites", []):
-		prereq_names.append(str(prereq))
-	button.tooltip_text = "%s\n%s%s" % [
-		str(node.get("description", "")),
-		"Prérequis : %s\n" % ", ".join(prereq_names) if not prereq_names.is_empty() else "",
-		"Coût : %d point(s)" % int(node["cost"]),
-	]
+	IconLibrary.decorate_button(button, "branch_" + str(node.get("branch", "")), 18, "branch")
+	button.tooltip_text = RichTooltip.skill(node, state_text)  # F2
 	if learned:
 		button.add_theme_color_override("font_color", Color(0.15, 0.45, 0.15))
 	elif not available:

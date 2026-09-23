@@ -24,6 +24,10 @@ const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil"}
 func _ready() -> void:
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])
+	# F2 : icônes des familles de technologies sur les onglets.
+	tabs.add_theme_constant_override("icon_max_width", 20)
+	tabs.set_tab_icon(0, IconLibrary.get_icon("tech_branch_military"))
+	tabs.set_tab_icon(1, IconLibrary.get_icon("tech_branch_civil"))
 	military_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	civil_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	close_button.pressed.connect(func() -> void:

@@ -204,6 +204,27 @@ def assets_heraldry() -> None:
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
 
 
+@assets_app.command("icons")
+def assets_icons(
+    offline: bool = typer.Option(
+        False, "--offline", help="Cache local seulement, aucun accès réseau"
+    ),
+) -> None:
+    """Icônes game-icons.net (CC BY 3.0) teintées encre sépia dans game/assets/icons/."""
+    from cent_ans_tools import icons
+
+    missing = icons.missing_icons()
+    if missing:
+        console.print(f"[red]Icônes manquantes[/red] : {', '.join(missing)}")
+        raise typer.Exit(code=1)
+    rows, written = icons.build(offline=offline)
+    files = len({row.file for row in rows})
+    console.print(
+        f"[green]OK[/green] : {len(rows)} identifiants, {files} SVG, "
+        f"{written} fichier(s) écrit(s) dans {icons.ICONS_DIR}"
+    )
+
+
 @assets_app.command("audio")
 def assets_audio(
     no_music: bool = typer.Option(False, "--no-music", help="Effets seulement"),

@@ -15,6 +15,7 @@ extends Node3D
 ##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
+##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -858,6 +859,8 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"tooltips":  # F2
+					_stage_screenshot_tooltips()
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
@@ -987,6 +990,21 @@ func _stage_screenshot_city() -> void:
 	_ensure_city_capable_sim()
 	_focus_capital()
 	ui.province_panel.show_ville_tab()
+
+
+## F2 : panneau de recrutement de la capitale et infobulles riches figées à l'écran (une
+## unité recrutable, un bâtiment constructible), une capture ne montrant pas le survol.
+func _stage_screenshot_tooltips() -> void:
+	_stage_screenshot_province()
+	var column := VBoxContainer.new()
+	column.position = Vector2(16, 60)
+	column.add_theme_constant_override("separation", 10)
+	var recruitable: Array = sim.call("get_recruitable", str(SimFacade.faction_info(player_faction).get("capital", "")))
+	if not recruitable.is_empty():
+		column.add_child(RichTooltip.make_panel(RichTooltip.unit(str(recruitable[0].get("unit_type", "")), recruitable[0])))
+	column.add_child(RichTooltip.make_panel(RichTooltip.building("bld_castle")))
+	column.add_child(RichTooltip.make_panel(RichTooltip.gauge("unrest", 12)))
+	ui.add_child(column)
 
 
 ## Mise en scène « faction » : panneau de faction ouvert sur la capitale du joueur.

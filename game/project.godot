@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 MapPaths="*res://scripts/map/map_paths.gd"
 SimFacade="*res://scripts/sim/sim_facade.gd"
 AudioDirector="*res://scripts/audio/audio_director.gd"
+IconLibrary="*res://scripts/ui/icon_library.gd"
 
 [display]
 

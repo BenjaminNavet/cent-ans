@@ -1,0 +1,886 @@
+{
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0/",
+  "site": "https://game-icons.net",
+  "color": "#4a3219",
+  "size": 64,
+  "fallbacks": {
+    "branch": "cat_branch",
+    "building": "cat_building",
+    "class": "cat_class",
+    "default": "cat_default",
+    "gauge": "cat_gauge",
+    "hud": "cat_hud",
+    "resource": "cat_resource",
+    "skill": "cat_skill",
+    "technology": "cat_technology",
+    "trait": "cat_trait",
+    "unit": "cat_unit"
+  },
+  "icons": {
+    "bld_abbey": {
+      "file": "delapouite-abbot-meeple.svg",
+      "category": "building",
+      "source": "delapouite/abbot-meeple",
+      "author": "Delapouite"
+    },
+    "bld_archery_butts": {
+      "file": "lorc-archery-target.svg",
+      "category": "building",
+      "source": "lorc/archery-target",
+      "author": "Lorc"
+    },
+    "bld_armoury": {
+      "file": "delapouite-chest-armor.svg",
+      "category": "building",
+      "source": "delapouite/chest-armor",
+      "author": "Delapouite"
+    },
+    "bld_artillery_bastion": {
+      "file": "delapouite-military-fort.svg",
+      "category": "building",
+      "source": "delapouite/military-fort",
+      "author": "Delapouite"
+    },
+    "bld_castle": {
+      "file": "lorc-castle.svg",
+      "category": "building",
+      "source": "lorc/castle",
+      "author": "Lorc"
+    },
+    "bld_cathedral": {
+      "file": "lorc-gothic-cross.svg",
+      "category": "building",
+      "source": "lorc/gothic-cross",
+      "author": "Lorc"
+    },
+    "bld_counting_house": {
+      "file": "delapouite-abacus.svg",
+      "category": "building",
+      "source": "delapouite/abacus",
+      "author": "Delapouite"
+    },
+    "bld_fair": {
+      "file": "delapouite-medieval-pavilion.svg",
+      "category": "building",
+      "source": "delapouite/medieval-pavilion",
+      "author": "Delapouite"
+    },
+    "bld_forge": {
+      "file": "lorc-anvil.svg",
+      "category": "building",
+      "source": "lorc/anvil",
+      "author": "Lorc"
+    },
+    "bld_guild_hall": {
+      "file": "delapouite-hanging-sign.svg",
+      "category": "building",
+      "source": "delapouite/hanging-sign",
+      "author": "Delapouite"
+    },
+    "bld_hotel_dieu": {
+      "file": "lorc-hospital-cross.svg",
+      "category": "building",
+      "source": "lorc/hospital-cross",
+      "author": "Lorc"
+    },
+    "bld_market": {
+      "file": "delapouite-shop.svg",
+      "category": "building",
+      "source": "delapouite/shop",
+      "author": "Delapouite"
+    },
+    "bld_muster_field": {
+      "file": "delapouite-medieval-barracks.svg",
+      "category": "building",
+      "source": "delapouite/medieval-barracks",
+      "author": "Delapouite"
+    },
+    "bld_palisade": {
+      "file": "delapouite-palisade.svg",
+      "category": "building",
+      "source": "delapouite/palisade",
+      "author": "Delapouite"
+    },
+    "bld_parish_church": {
+      "file": "delapouite-church.svg",
+      "category": "building",
+      "source": "delapouite/church",
+      "author": "Delapouite"
+    },
+    "bld_port": {
+      "file": "delapouite-harbor-dock.svg",
+      "category": "building",
+      "source": "delapouite/harbor-dock",
+      "author": "Delapouite"
+    },
+    "bld_scriptorium": {
+      "file": "delapouite-scroll-quill.svg",
+      "category": "building",
+      "source": "delapouite/scroll-quill",
+      "author": "Delapouite"
+    },
+    "bld_siege_workshop": {
+      "file": "delapouite-hand-saw.svg",
+      "category": "building",
+      "source": "delapouite/hand-saw",
+      "author": "Delapouite"
+    },
+    "bld_stables": {
+      "file": "delapouite-stable.svg",
+      "category": "building",
+      "source": "delapouite/stable",
+      "author": "Delapouite"
+    },
+    "bld_stone_walls": {
+      "file": "delapouite-stone-wall.svg",
+      "category": "building",
+      "source": "delapouite/stone-wall",
+      "author": "Delapouite"
+    },
+    "bld_university": {
+      "file": "delapouite-graduate-cap.svg",
+      "category": "building",
+      "source": "delapouite/graduate-cap",
+      "author": "Delapouite"
+    },
+    "bld_vineyard_press": {
+      "file": "delapouite-barrel.svg",
+      "category": "building",
+      "source": "delapouite/barrel",
+      "author": "Delapouite"
+    },
+    "bld_water_mill": {
+      "file": "caro-asercion-water-mill.svg",
+      "category": "building",
+      "source": "caro-asercion/water-mill",
+      "author": "Caro Asercion"
+    },
+    "bld_water_supply": {
+      "file": "delapouite-well.svg",
+      "category": "building",
+      "source": "delapouite/well",
+      "author": "Delapouite"
+    },
+    "bld_weaving_workshop": {
+      "file": "caro-asercion-spinning-wheel.svg",
+      "category": "building",
+      "source": "caro-asercion/spinning-wheel",
+      "author": "Caro Asercion"
+    },
+    "bld_windmill": {
+      "file": "delapouite-windmill.svg",
+      "category": "building",
+      "source": "delapouite/windmill",
+      "author": "Delapouite"
+    },
+    "branch_command": {
+      "file": "lorc-crossed-swords.svg",
+      "category": "branch",
+      "source": "lorc/crossed-swords",
+      "author": "Lorc"
+    },
+    "branch_court": {
+      "file": "delapouite-throne-king.svg",
+      "category": "branch",
+      "source": "delapouite/throne-king",
+      "author": "Delapouite"
+    },
+    "branch_governance": {
+      "file": "lorc-scales.svg",
+      "category": "branch",
+      "source": "lorc/scales",
+      "author": "Lorc"
+    },
+    "building_category_commerce": {
+      "file": "delapouite-shop.svg",
+      "category": "building",
+      "source": "delapouite/shop",
+      "author": "Delapouite"
+    },
+    "building_category_fortification": {
+      "file": "delapouite-stone-wall.svg",
+      "category": "building",
+      "source": "delapouite/stone-wall",
+      "author": "Delapouite"
+    },
+    "building_category_military": {
+      "file": "delapouite-medieval-barracks.svg",
+      "category": "building",
+      "source": "delapouite/medieval-barracks",
+      "author": "Delapouite"
+    },
+    "building_category_production": {
+      "file": "lorc-anvil.svg",
+      "category": "building",
+      "source": "lorc/anvil",
+      "author": "Lorc"
+    },
+    "building_category_religious": {
+      "file": "delapouite-church.svg",
+      "category": "building",
+      "source": "delapouite/church",
+      "author": "Delapouite"
+    },
+    "building_category_sanitary": {
+      "file": "lorc-hospital-cross.svg",
+      "category": "building",
+      "source": "lorc/hospital-cross",
+      "author": "Lorc"
+    },
+    "cat_branch": {
+      "file": "lorc-laurels.svg",
+      "category": "branch",
+      "source": "lorc/laurels",
+      "author": "Lorc"
+    },
+    "cat_building": {
+      "file": "lorc-stone-tower.svg",
+      "category": "building",
+      "source": "lorc/stone-tower",
+      "author": "Lorc"
+    },
+    "cat_class": {
+      "file": "delapouite-village.svg",
+      "category": "class",
+      "source": "delapouite/village",
+      "author": "Delapouite"
+    },
+    "cat_default": {
+      "file": "lorc-tied-scroll.svg",
+      "category": "default",
+      "source": "lorc/tied-scroll",
+      "author": "Lorc"
+    },
+    "cat_gauge": {
+      "file": "lorc-scales.svg",
+      "category": "gauge",
+      "source": "lorc/scales",
+      "author": "Lorc"
+    },
+    "cat_hud": {
+      "file": "lorc-tied-scroll.svg",
+      "category": "hud",
+      "source": "lorc/tied-scroll",
+      "author": "Lorc"
+    },
+    "cat_resource": {
+      "file": "delapouite-wooden-crate.svg",
+      "category": "resource",
+      "source": "delapouite/wooden-crate",
+      "author": "Delapouite"
+    },
+    "cat_skill": {
+      "file": "lorc-laurels.svg",
+      "category": "skill",
+      "source": "lorc/laurels",
+      "author": "Lorc"
+    },
+    "cat_technology": {
+      "file": "lorc-gears.svg",
+      "category": "technology",
+      "source": "lorc/gears",
+      "author": "Lorc"
+    },
+    "cat_trait": {
+      "file": "lorc-drama-masks.svg",
+      "category": "trait",
+      "source": "lorc/drama-masks",
+      "author": "Lorc"
+    },
+    "cat_unit": {
+      "file": "lorc-crossed-swords.svg",
+      "category": "unit",
+      "source": "lorc/crossed-swords",
+      "author": "Lorc"
+    },
+    "class_burghers": {
+      "file": "caro-asercion-medieval-village-01.svg",
+      "category": "class",
+      "source": "caro-asercion/medieval-village-01",
+      "author": "Caro Asercion"
+    },
+    "class_clergy": {
+      "file": "lorc-prayer.svg",
+      "category": "class",
+      "source": "lorc/prayer",
+      "author": "Lorc"
+    },
+    "class_nobility": {
+      "file": "lorc-crown.svg",
+      "category": "class",
+      "source": "lorc/crown",
+      "author": "Lorc"
+    },
+    "class_peasants": {
+      "file": "delapouite-farmer.svg",
+      "category": "class",
+      "source": "delapouite/farmer",
+      "author": "Delapouite"
+    },
+    "gauge_devastation": {
+      "file": "delapouite-castle-ruins.svg",
+      "category": "gauge",
+      "source": "delapouite/castle-ruins",
+      "author": "Delapouite"
+    },
+    "gauge_goods_satisfaction": {
+      "file": "lorc-swap-bag.svg",
+      "category": "gauge",
+      "source": "lorc/swap-bag",
+      "author": "Lorc"
+    },
+    "gauge_health": {
+      "file": "delapouite-healing.svg",
+      "category": "gauge",
+      "source": "delapouite/healing",
+      "author": "Delapouite"
+    },
+    "gauge_morale": {
+      "file": "lorc-flying-flag.svg",
+      "category": "gauge",
+      "source": "lorc/flying-flag",
+      "author": "Lorc"
+    },
+    "gauge_movement": {
+      "file": "lorc-boot-prints.svg",
+      "category": "gauge",
+      "source": "lorc/boot-prints",
+      "author": "Lorc"
+    },
+    "gauge_population": {
+      "file": "delapouite-village.svg",
+      "category": "gauge",
+      "source": "delapouite/village",
+      "author": "Delapouite"
+    },
+    "gauge_strength": {
+      "file": "lorc-crossed-swords.svg",
+      "category": "gauge",
+      "source": "lorc/crossed-swords",
+      "author": "Lorc"
+    },
+    "gauge_supply": {
+      "file": "delapouite-bread.svg",
+      "category": "gauge",
+      "source": "delapouite/bread",
+      "author": "Delapouite"
+    },
+    "gauge_unrest": {
+      "file": "lorc-fist.svg",
+      "category": "gauge",
+      "source": "lorc/fist",
+      "author": "Lorc"
+    },
+    "gauge_wealth": {
+      "file": "delapouite-coins.svg",
+      "category": "gauge",
+      "source": "delapouite/coins",
+      "author": "Delapouite"
+    },
+    "hud_army": {
+      "file": "delapouite-knight-banner.svg",
+      "category": "hud",
+      "source": "delapouite/knight-banner",
+      "author": "Delapouite"
+    },
+    "hud_chronicle": {
+      "file": "lorc-scroll-unfurled.svg",
+      "category": "hud",
+      "source": "lorc/scroll-unfurled",
+      "author": "Lorc"
+    },
+    "hud_court": {
+      "file": "delapouite-throne-king.svg",
+      "category": "hud",
+      "source": "delapouite/throne-king",
+      "author": "Delapouite"
+    },
+    "hud_diplomacy": {
+      "file": "delapouite-shaking-hands.svg",
+      "category": "hud",
+      "source": "delapouite/shaking-hands",
+      "author": "Delapouite"
+    },
+    "hud_end_turn": {
+      "file": "lorc-hourglass.svg",
+      "category": "hud",
+      "source": "lorc/hourglass",
+      "author": "Lorc"
+    },
+    "hud_governor": {
+      "file": "lorc-wax-seal.svg",
+      "category": "hud",
+      "source": "lorc/wax-seal",
+      "author": "Lorc"
+    },
+    "hud_income": {
+      "file": "delapouite-two-coins.svg",
+      "category": "hud",
+      "source": "delapouite/two-coins",
+      "author": "Delapouite"
+    },
+    "hud_menu": {
+      "file": "lorc-tied-scroll.svg",
+      "category": "hud",
+      "source": "lorc/tied-scroll",
+      "author": "Lorc"
+    },
+    "hud_research": {
+      "file": "lorc-open-book.svg",
+      "category": "hud",
+      "source": "lorc/open-book",
+      "author": "Lorc"
+    },
+    "hud_season_autumn": {
+      "file": "lorc-falling-leaf.svg",
+      "category": "hud",
+      "source": "lorc/falling-leaf",
+      "author": "Lorc"
+    },
+    "hud_season_spring": {
+      "file": "lorc-sprout.svg",
+      "category": "hud",
+      "source": "lorc/sprout",
+      "author": "Lorc"
+    },
+    "hud_season_summer": {
+      "file": "lorc-sun.svg",
+      "category": "hud",
+      "source": "lorc/sun",
+      "author": "Lorc"
+    },
+    "hud_season_winter": {
+      "file": "lorc-snowflake-2.svg",
+      "category": "hud",
+      "source": "lorc/snowflake-2",
+      "author": "Lorc"
+    },
+    "hud_technologies": {
+      "file": "lorc-gears.svg",
+      "category": "hud",
+      "source": "lorc/gears",
+      "author": "Lorc"
+    },
+    "hud_treasury": {
+      "file": "skoll-open-treasure-chest.svg",
+      "category": "hud",
+      "source": "skoll/open-treasure-chest",
+      "author": "Skoll"
+    },
+    "res_cloth": {
+      "file": "delapouite-rolled-cloth.svg",
+      "category": "resource",
+      "source": "delapouite/rolled-cloth",
+      "author": "Delapouite"
+    },
+    "res_fish": {
+      "file": "delapouite-double-fish.svg",
+      "category": "resource",
+      "source": "delapouite/double-fish",
+      "author": "Delapouite"
+    },
+    "res_iron": {
+      "file": "lorc-metal-bar.svg",
+      "category": "resource",
+      "source": "lorc/metal-bar",
+      "author": "Lorc"
+    },
+    "res_salt": {
+      "file": "lorc-powder.svg",
+      "category": "resource",
+      "source": "lorc/powder",
+      "author": "Lorc"
+    },
+    "res_stone": {
+      "file": "delapouite-stone-pile.svg",
+      "category": "resource",
+      "source": "delapouite/stone-pile",
+      "author": "Delapouite"
+    },
+    "res_wheat": {
+      "file": "lorc-wheat.svg",
+      "category": "resource",
+      "source": "lorc/wheat",
+      "author": "Lorc"
+    },
+    "res_wine": {
+      "file": "lorc-grapes.svg",
+      "category": "resource",
+      "source": "lorc/grapes",
+      "author": "Lorc"
+    },
+    "res_wood": {
+      "file": "delapouite-wood-pile.svg",
+      "category": "resource",
+      "source": "delapouite/wood-pile",
+      "author": "Delapouite"
+    },
+    "res_wool": {
+      "file": "delapouite-wool.svg",
+      "category": "resource",
+      "source": "delapouite/wool",
+      "author": "Delapouite"
+    },
+    "tech_artillery_fortification": {
+      "file": "heavenly-dog-defensive-wall.svg",
+      "category": "technology",
+      "source": "heavenly-dog/defensive-wall",
+      "author": "HeavenlyDog"
+    },
+    "tech_bombards": {
+      "file": "lorc-cannon.svg",
+      "category": "technology",
+      "source": "lorc/cannon",
+      "author": "Lorc"
+    },
+    "tech_bookkeeping": {
+      "file": "lorc-quill-ink.svg",
+      "category": "technology",
+      "source": "lorc/quill-ink",
+      "author": "Lorc"
+    },
+    "tech_branch_civil": {
+      "file": "lorc-quill-ink.svg",
+      "category": "technology",
+      "source": "lorc/quill-ink",
+      "author": "Lorc"
+    },
+    "tech_branch_military": {
+      "file": "lorc-crossed-swords.svg",
+      "category": "technology",
+      "source": "lorc/crossed-swords",
+      "author": "Lorc"
+    },
+    "tech_brigandine": {
+      "file": "lorc-armor-vest.svg",
+      "category": "technology",
+      "source": "lorc/armor-vest",
+      "author": "Lorc"
+    },
+    "tech_coat_of_plates": {
+      "file": "lorc-breastplate.svg",
+      "category": "technology",
+      "source": "lorc/breastplate",
+      "author": "Lorc"
+    },
+    "tech_compagnies_d_ordonnance": {
+      "file": "delapouite-knight-banner.svg",
+      "category": "technology",
+      "source": "delapouite/knight-banner",
+      "author": "Delapouite"
+    },
+    "tech_crossbow_windlass": {
+      "file": "carl-olsen-crossbow.svg",
+      "category": "technology",
+      "source": "carl-olsen/crossbow",
+      "author": "Carl Olsen"
+    },
+    "tech_dismounted_tactics": {
+      "file": "lorc-spears.svg",
+      "category": "technology",
+      "source": "lorc/spears",
+      "author": "Lorc"
+    },
+    "tech_double_entry": {
+      "file": "delapouite-abacus.svg",
+      "category": "technology",
+      "source": "delapouite/abacus",
+      "author": "Delapouite"
+    },
+    "tech_field_artillery": {
+      "file": "lorc-cannon-shot.svg",
+      "category": "technology",
+      "source": "lorc/cannon-shot",
+      "author": "Lorc"
+    },
+    "tech_francs_archers": {
+      "file": "lorc-bowman.svg",
+      "category": "technology",
+      "source": "lorc/bowman",
+      "author": "Lorc"
+    },
+    "tech_full_plate": {
+      "file": "lorc-visored-helm.svg",
+      "category": "technology",
+      "source": "lorc/visored-helm",
+      "author": "Lorc"
+    },
+    "tech_gothic_flamboyant": {
+      "file": "lorc-gothic-cross.svg",
+      "category": "technology",
+      "source": "lorc/gothic-cross",
+      "author": "Lorc"
+    },
+    "tech_gunpowder": {
+      "file": "delapouite-powder-bag.svg",
+      "category": "technology",
+      "source": "delapouite/powder-bag",
+      "author": "Delapouite"
+    },
+    "tech_hand_cannon_drill": {
+      "file": "skoll-musket.svg",
+      "category": "technology",
+      "source": "skoll/musket",
+      "author": "Skoll"
+    },
+    "tech_handgonnes": {
+      "file": "lorc-gunshot.svg",
+      "category": "technology",
+      "source": "lorc/gunshot",
+      "author": "Lorc"
+    },
+    "tech_hanseatic_trade": {
+      "file": "lorc-galleon.svg",
+      "category": "technology",
+      "source": "lorc/galleon",
+      "author": "Lorc"
+    },
+    "tech_hospital_reform": {
+      "file": "lorc-bandage-roll.svg",
+      "category": "technology",
+      "source": "lorc/bandage-roll",
+      "author": "Lorc"
+    },
+    "tech_letters_of_credit": {
+      "file": "lorc-wax-seal.svg",
+      "category": "technology",
+      "source": "lorc/wax-seal",
+      "author": "Lorc"
+    },
+    "tech_longbow_drill": {
+      "file": "lorc-target-arrows.svg",
+      "category": "technology",
+      "source": "lorc/target-arrows",
+      "author": "Lorc"
+    },
+    "tech_masonry": {
+      "file": "lorc-stone-block.svg",
+      "category": "technology",
+      "source": "lorc/stone-block",
+      "author": "Lorc"
+    },
+    "tech_paper_mills": {
+      "file": "lorc-papers.svg",
+      "category": "technology",
+      "source": "lorc/papers",
+      "author": "Lorc"
+    },
+    "tech_pavise": {
+      "file": "lorc-arrows-shield.svg",
+      "category": "technology",
+      "source": "lorc/arrows-shield",
+      "author": "Lorc"
+    },
+    "tech_printing_press": {
+      "file": "lorc-open-book.svg",
+      "category": "technology",
+      "source": "lorc/open-book",
+      "author": "Lorc"
+    },
+    "tech_quarantine": {
+      "file": "delapouite-plague-doctor-profile.svg",
+      "category": "technology",
+      "source": "delapouite/plague-doctor-profile",
+      "author": "Delapouite"
+    },
+    "tech_royal_taxation": {
+      "file": "lorc-crown-coin.svg",
+      "category": "technology",
+      "source": "lorc/crown-coin",
+      "author": "Lorc"
+    },
+    "tech_siege_engineering": {
+      "file": "delapouite-trebuchet.svg",
+      "category": "technology",
+      "source": "delapouite/trebuchet",
+      "author": "Delapouite"
+    },
+    "tech_standing_companies": {
+      "file": "delapouite-barracks-tent.svg",
+      "category": "technology",
+      "source": "delapouite/barracks-tent",
+      "author": "Delapouite"
+    },
+    "tech_three_field_rotation": {
+      "file": "delapouite-plow.svg",
+      "category": "technology",
+      "source": "delapouite/plow",
+      "author": "Delapouite"
+    },
+    "tech_universities": {
+      "file": "delapouite-diploma.svg",
+      "category": "technology",
+      "source": "delapouite/diploma",
+      "author": "Delapouite"
+    },
+    "tech_urban_sanitation": {
+      "file": "delapouite-broom.svg",
+      "category": "technology",
+      "source": "delapouite/broom",
+      "author": "Delapouite"
+    },
+    "tech_water_mills": {
+      "file": "caro-asercion-water-mill.svg",
+      "category": "technology",
+      "source": "caro-asercion/water-mill",
+      "author": "Caro Asercion"
+    },
+    "tech_windmills": {
+      "file": "delapouite-windmill.svg",
+      "category": "technology",
+      "source": "delapouite/windmill",
+      "author": "Delapouite"
+    },
+    "trait_category_acquired": {
+      "file": "lorc-laurels.svg",
+      "category": "trait",
+      "source": "lorc/laurels",
+      "author": "Lorc"
+    },
+    "trait_category_governance": {
+      "file": "lorc-wax-seal.svg",
+      "category": "trait",
+      "source": "lorc/wax-seal",
+      "author": "Lorc"
+    },
+    "trait_category_martial": {
+      "file": "delapouite-sword-brandish.svg",
+      "category": "trait",
+      "source": "delapouite/sword-brandish",
+      "author": "Delapouite"
+    },
+    "trait_category_personality": {
+      "file": "lorc-drama-masks.svg",
+      "category": "trait",
+      "source": "lorc/drama-masks",
+      "author": "Lorc"
+    },
+    "trait_category_physical": {
+      "file": "lorc-muscle-up.svg",
+      "category": "trait",
+      "source": "lorc/muscle-up",
+      "author": "Lorc"
+    },
+    "unit_bombard": {
+      "file": "lorc-cannon.svg",
+      "category": "unit",
+      "source": "lorc/cannon",
+      "author": "Lorc"
+    },
+    "unit_category_archer": {
+      "file": "lorc-bowman.svg",
+      "category": "unit",
+      "source": "lorc/bowman",
+      "author": "Lorc"
+    },
+    "unit_category_cavalry": {
+      "file": "skoll-mounted-knight.svg",
+      "category": "unit",
+      "source": "skoll/mounted-knight",
+      "author": "Skoll"
+    },
+    "unit_category_infantry": {
+      "file": "lorc-crossed-swords.svg",
+      "category": "unit",
+      "source": "lorc/crossed-swords",
+      "author": "Lorc"
+    },
+    "unit_category_ram": {
+      "file": "skoll-siege-ram.svg",
+      "category": "unit",
+      "source": "skoll/siege-ram",
+      "author": "Skoll"
+    },
+    "unit_category_ranged": {
+      "file": "lorc-bowman.svg",
+      "category": "unit",
+      "source": "lorc/bowman",
+      "author": "Lorc"
+    },
+    "unit_category_siege": {
+      "file": "delapouite-trebuchet.svg",
+      "category": "unit",
+      "source": "delapouite/trebuchet",
+      "author": "Delapouite"
+    },
+    "unit_category_tower": {
+      "file": "delapouite-siege-tower.svg",
+      "category": "unit",
+      "source": "delapouite/siege-tower",
+      "author": "Delapouite"
+    },
+    "unit_crossbowmen": {
+      "file": "carl-olsen-crossbow.svg",
+      "category": "unit",
+      "source": "carl-olsen/crossbow",
+      "author": "Carl Olsen"
+    },
+    "unit_flemish_pikemen": {
+      "file": "delapouite-pikeman.svg",
+      "category": "unit",
+      "source": "delapouite/pikeman",
+      "author": "Delapouite"
+    },
+    "unit_genoese_crossbowmen": {
+      "file": "lorc-arrows-shield.svg",
+      "category": "unit",
+      "source": "lorc/arrows-shield",
+      "author": "Lorc"
+    },
+    "unit_knights": {
+      "file": "skoll-mounted-knight.svg",
+      "category": "unit",
+      "source": "skoll/mounted-knight",
+      "author": "Skoll"
+    },
+    "unit_longbowmen": {
+      "file": "lorc-bowman.svg",
+      "category": "unit",
+      "source": "lorc/bowman",
+      "author": "Lorc"
+    },
+    "unit_mangonel": {
+      "file": "heavenly-dog-catapult.svg",
+      "category": "unit",
+      "source": "heavenly-dog/catapult",
+      "author": "HeavenlyDog"
+    },
+    "unit_men_at_arms_foot": {
+      "file": "cathelineau-swordman.svg",
+      "category": "unit",
+      "source": "cathelineau/swordman",
+      "author": "Cathelineau"
+    },
+    "unit_mounted_archers": {
+      "file": "caro-asercion-cloaked-figure-on-horseback.svg",
+      "category": "unit",
+      "source": "caro-asercion/cloaked-figure-on-horseback",
+      "author": "Caro Asercion"
+    },
+    "unit_mounted_sergeants": {
+      "file": "delapouite-horse-head.svg",
+      "category": "unit",
+      "source": "delapouite/horse-head",
+      "author": "Delapouite"
+    },
+    "unit_siege_tower": {
+      "file": "delapouite-siege-tower.svg",
+      "category": "unit",
+      "source": "delapouite/siege-tower",
+      "author": "Delapouite"
+    },
+    "unit_trebuchet": {
+      "file": "delapouite-trebuchet.svg",
+      "category": "unit",
+      "source": "delapouite/trebuchet",
+      "author": "Delapouite"
+    },
+    "unit_urban_militia": {
+      "file": "lorc-halberd.svg",
+      "category": "unit",
+      "source": "lorc/halberd",
+      "author": "Lorc"
+    }
+  }
+}

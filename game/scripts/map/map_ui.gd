@@ -129,6 +129,65 @@ func _ready() -> void:
 	hover_label.text = ""
 	hover_label.hide()
 	toast.hide()
+	_decorate_top_bar()  # F2
+
+
+# --- Icônes et infobulles de la barre (F2) -------------------------------------------
+
+
+const TOP_ICON_SIZE := 20.0
+var _season_icon: TextureRect
+var _treasury_icon: TextureRect
+var _income_icon: TextureRect
+var _research_icon: TextureRect
+
+
+func _decorate_top_bar() -> void:
+	var bar := treasury_label.get_parent()
+	bar.add_theme_constant_override("separation", 5)
+	_treasury_icon = _insert_icon_before(treasury_label, "hud_treasury")
+	_income_icon = _insert_icon_before(income_label, "hud_income")
+	_season_icon = _insert_icon_before(date_label, "hud_season_spring")
+	_research_icon = _insert_icon_before(research_box, "hud_research")
+	for label in [treasury_label, income_label, date_label]:
+		label.set_script(RichLabel)
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
+	income_label.tooltip_text = RichTooltip.hud("hud_income")
+	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
+	_decorate_button(court_button, "hud_court", true)
+	_decorate_button(tech_button, "hud_technologies", true)
+	_decorate_button(end_turn_button, "hud_end_turn")
+	end_turn_button.tooltip_text = RichTooltip.hud("hud_end_turn")
+	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
+	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
+
+
+func _insert_icon_before(control: Control, icon_id: String) -> TextureRect:
+	var rect: TextureRect = IconLibrary.make_rect(icon_id, TOP_ICON_SIZE)
+	var parent := control.get_parent()
+	parent.add_child(rect)
+	parent.move_child(rect, control.get_index())
+	return rect
+
+
+func _decorate_button(button: Button, icon_id: String, icon_only: bool = false) -> void:
+	IconLibrary.decorate_button(button, icon_id, int(TOP_ICON_SIZE) + (6 if icon_only else 0))
+	if icon_only:
+		button.text = ""
+	if not (button is RichButton):
+		button.set_script(RichButton)
+	button.tooltip_text = RichTooltip.hud(icon_id)
+
+
+func _decorate_late_button(node: Node) -> void:
+	if not (node is Button) or not is_instance_valid(node) or (node as Button).icon != null:
+		return
+	var button := node as Button
+	if button.text.begins_with("Diplomatie"):
+		_decorate_button(button, "hud_diplomacy", true)
+	elif button.text.begins_with("Chronique"):
+		_decorate_button(button, "hud_chronicle")
 
 
 # --- Barre supérieure ------------------------------------------------------------
@@ -151,6 +210,10 @@ func set_treasury(treasury: int, income: int, projected: int = -1) -> void:
 
 func set_date(text: String) -> void:
 	date_label.text = text
+	var season := RichTooltip.season_of(text)
+	if _season_icon != null and season != "":
+		_season_icon.texture = IconLibrary.get_icon("hud_season_" + season)
+		date_label.tooltip_text = RichTooltip.hud("hud_season_" + season, "Un tour = une saison.")
 
 
 func set_end_turn_enabled(enabled: bool) -> void:
