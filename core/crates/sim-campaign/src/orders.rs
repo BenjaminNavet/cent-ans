@@ -5,7 +5,8 @@
 //! and resolved in `end_turn`; all other orders apply immediately.
 
 use data_model::{
-    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId,
+    TechnologyId, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +14,7 @@ use crate::buildings::CANCEL_REFUND_PERCENT;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
 use crate::movement;
+use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
 use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 
@@ -101,6 +103,10 @@ pub enum Order {
         character: CharacterId,
         amount: u32,
     },
+    /// Researches `technology` (M6); switching keeps the abandoned progress.
+    Research {
+        technology: TechnologyId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -160,6 +166,8 @@ pub enum OrderError {
     Governor(#[from] GovernorError),
     #[error(transparent)]
     Marriage(#[from] MarriageError),
+    #[error(transparent)]
+    Research(#[from] ResearchError),
 }
 
 /// One line of the recruitment panel.
@@ -250,6 +258,10 @@ impl CampaignState {
             }
             Order::DebugGrantXp { character, amount } => {
                 skills::grant_experience(self, &character, amount);
+                Ok(())
+            }
+            Order::Research { technology } => {
+                research::start_research(self, data, faction, &technology)?;
                 Ok(())
             }
         }

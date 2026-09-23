@@ -31,8 +31,9 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// `2`: M3 cities & economy (buildings, construction, goods, tax rate, the
 /// four population gauges are now dynamic). `3`: M4 characters & dynasties
 /// (experience, skills, traits, marriage, children, governors, prestige...).
+/// `4`: M6 technologies (research in progress, progress, banked progress).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 3;
+pub const STATE_VERSION: u32 = 4;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -276,6 +277,20 @@ pub struct FactionState {
     /// journal reports its start and end once instead of every turn.
     #[serde(default)]
     pub regency: bool,
+
+    // ----- M6: research (spec § 2, `research.rs`) --------------------------
+    /// Technology being researched, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub research: Option<TechnologyId>,
+    /// Points accumulated towards `research`.
+    #[serde(default)]
+    pub research_progress: u32,
+    /// Points produced during the last resolved turn.
+    #[serde(default)]
+    pub research_points_last_turn: u32,
+    /// Progress kept for abandoned research (switching back resumes it).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub research_banked: BTreeMap<TechnologyId, u32>,
 }
 
 /// Dynamic state of a character.

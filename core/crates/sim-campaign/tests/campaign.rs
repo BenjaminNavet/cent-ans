@@ -664,7 +664,7 @@ fn save_load_round_trip() {
         state.end_turn(&data);
     }
     let json = state.save_json();
-    assert!(json.contains("\"state_version\":3"));
+    assert!(json.contains("\"state_version\":4"));
     assert!(json.contains("\"tax_rate\""), "new field round-trips");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
@@ -678,7 +678,7 @@ fn save_load_round_trip() {
     b.end_turn(&data);
     assert_eq!(a.save_json(), b.save_json());
 
-    let err = CampaignState::load_json(&json.replace("\"state_version\":3", "\"state_version\":1"))
+    let err = CampaignState::load_json(&json.replace("\"state_version\":4", "\"state_version\":1"))
         .unwrap_err();
     assert!(matches!(
         err,

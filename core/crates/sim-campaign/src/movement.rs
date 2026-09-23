@@ -15,6 +15,7 @@ use crate::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
 use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::OrderError;
+use crate::research;
 use crate::skills;
 use crate::state::{Army, ArmyId, CampaignState};
 
@@ -303,14 +304,22 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
             .iter()
             .map(|unit| {
                 let stats = data.unit_types.get(&unit.unit_type);
+                // M6: technology bonuses of the army's faction, per category.
+                let tech = stats.map_or_else(Default::default, |t| {
+                    research::tech_unit_bonus(state, data, &army.faction, t.category)
+                });
                 BattleUnit {
                     strength: unit.strength,
                     max_strength: unit.max_strength,
                     experience: unit.experience,
-                    morale: unit.morale,
-                    melee: stats.map_or(30, |t| t.stats.melee),
-                    ranged: stats.map_or(0, |t| t.stats.ranged),
-                    armor: stats.map_or(20, |t| t.stats.armor),
+                    morale: research::boosted(unit.morale, tech.morale, 100),
+                    melee: research::boosted(stats.map_or(30, |t| t.stats.melee), tech.melee, 255),
+                    ranged: research::boosted(
+                        stats.map_or(0, |t| t.stats.ranged),
+                        tech.ranged,
+                        255,
+                    ),
+                    armor: research::boosted(stats.map_or(20, |t| t.stats.armor), tech.armor, 100),
                     is_ranged: stats.is_some_and(|t| {
                         matches!(
                             t.category,

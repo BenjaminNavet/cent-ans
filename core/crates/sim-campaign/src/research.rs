@@ -1,0 +1,429 @@
+//! Technologies and research (M6, `docs/design/m6-technologies.md` § 2).
+//!
+//! Technology *definitions* (branch, tier, cost, prerequisites, unlocks,
+//! effects, historical year) live in `data/technologies/*.json`. This module
+//! holds the rules that read them:
+//!
+//! - research points per turn ([`CampaignState::research_points_per_turn`]):
+//!   base [`BASE_RESEARCH_POINTS`] + the `ResearchPoints` effects of the
+//!   buildings of owned provinces and of acquired technologies + half the
+//!   ruler's governance (rounded);
+//! - the `research { technology }` order ([`start_research`]), which banks the
+//!   progress of an abandoned research in `FactionState::research_banked`;
+//! - completion at the end of the turn ([`resolve_research`], run right after
+//!   the economy phase), with the anachronism surcharge of
+//!   [`effective_cost`];
+//! - technology effects: [`faction_tech_effects`] (income and population
+//!   kinds, merged by `economy` and `population`) and [`tech_unit_bonus`]
+//!   (per-`unit_category` battle bonuses, folded into the unit stats by
+//!   `movement::side_from_army`);
+//! - the minimal AI choice ([`ai_choose_research`]).
+//!
+//! Unit and building unlocks need no code here: `recruit_blocker` and
+//! `build_blocker` already refuse a `required_technology` the faction lacks,
+//! and every `unlocks.units`/`unlocks.buildings` entry of the data carries
+//! that same `required_technology` (checked by `tests/m6.rs`).
+
+use data_model::{
+    EffectKind, EffectMode, FactionId, GameData, TechBranch, Technology, TechnologyId, UnitCategory,
+};
+use serde::{Deserialize, Serialize};
+
+use crate::battle_auto::Side;
+use crate::buildings::EffectTotals;
+use crate::events::{EventKind, GameEvent};
+use crate::state::{ArmyId, CampaignState};
+
+/// Research points every faction produces per turn before any bonus.
+pub const BASE_RESEARCH_POINTS: u32 = 5;
+/// A technology whose `historical_year` is more than this many years after
+/// the current year costs [`ANACHRONISM_SURCHARGE_PERCENT`] more.
+pub const ANACHRONISM_YEARS: i32 = 20;
+pub const ANACHRONISM_SURCHARGE_PERCENT: u32 = 25;
+
+/// Why a `research` order was refused.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum ResearchError {
+    #[error("technologie inconnue : {0}")]
+    UnknownTechnology(TechnologyId),
+    #[error("technologie déjà acquise")]
+    AlreadyKnown,
+    #[error("prérequis manquant : {0}")]
+    MissingPrerequisite(String),
+}
+
+/// State of a technology for one faction (`get_tech_tree`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TechStatus {
+    /// Acquired.
+    Known,
+    /// Prerequisites acquired, can be researched.
+    Available,
+    /// A prerequisite is missing.
+    Locked,
+    /// Currently being researched.
+    Researching,
+}
+
+impl TechStatus {
+    pub fn key(self) -> &'static str {
+        match self {
+            TechStatus::Known => "known",
+            TechStatus::Available => "available",
+            TechStatus::Locked => "locked",
+            TechStatus::Researching => "researching",
+        }
+    }
+}
+
+/// Current research of a faction (`get_research`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ResearchInfo {
+    pub technology: TechnologyId,
+    pub progress: u32,
+    /// Effective cost (anachronism surcharge included).
+    pub cost: u32,
+    pub points_per_turn: u32,
+    /// Turns until completion at the current rate.
+    pub turns_left: u32,
+}
+
+/// Flat battle bonuses a faction's technologies grant one unit category
+/// (`ArmyMorale`, `ArmyMelee`, `ArmyRanged`, `ArmyArmor`; an effect without
+/// `unit_category` applies to every category).
+#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+pub struct UnitTechBonus {
+    pub morale: f64,
+    pub melee: f64,
+    pub ranged: f64,
+    pub armor: f64,
+}
+
+/// Cost of `tech` in the given year: `cost × 1.25` when the technology's
+/// historical year is more than [`ANACHRONISM_YEARS`] ahead (spec § 2).
+pub fn effective_cost(tech: &Technology, year: i32) -> u32 {
+    let too_early = tech
+        .historical_year
+        .as_ref()
+        .and_then(|date| date.year())
+        .is_some_and(|historical| historical > year + ANACHRONISM_YEARS);
+    if too_early {
+        (tech.cost * (100 + ANACHRONISM_SURCHARGE_PERCENT)).div_ceil(100)
+    } else {
+        tech.cost
+    }
+}
+
+/// Acquired technologies of `faction` (empty for an unknown faction).
+fn acquired<'a>(
+    state: &'a CampaignState,
+    data: &'a GameData,
+    faction: &FactionId,
+) -> impl Iterator<Item = &'a Technology> {
+    state
+        .factions
+        .get(faction)
+        .into_iter()
+        .flat_map(|f| f.technologies.iter())
+        .filter_map(|id| data.technologies.get(id))
+}
+
+/// Aggregated effects of `faction`'s technologies, for the kinds
+/// [`EffectTotals`] knows (spec § 2 `faction_tech_effects`).
+pub fn faction_tech_effects(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> EffectTotals {
+    let mut totals = EffectTotals::default();
+    for tech in acquired(state, data, faction) {
+        for effect in &tech.effects {
+            totals.add(effect.effect, effect.mode, effect.value);
+        }
+    }
+    totals
+}
+
+/// The subset of [`faction_tech_effects`] applied to province income
+/// (`TaxIncome`, `TradeIncome`) and population (`Health`, `Growth`,
+/// `Unrest`), spec § 2.
+pub fn faction_province_tech_effects(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> EffectTotals {
+    let all = faction_tech_effects(state, data, faction);
+    EffectTotals {
+        tax_income: all.tax_income,
+        trade_income: all.trade_income,
+        health: all.health,
+        growth: all.growth,
+        unrest: all.unrest,
+        ..EffectTotals::default()
+    }
+}
+
+/// Battle bonuses of `faction`'s technologies for units of `category`.
+pub fn tech_unit_bonus(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    category: UnitCategory,
+) -> UnitTechBonus {
+    let mut bonus = UnitTechBonus::default();
+    for tech in acquired(state, data, faction) {
+        for effect in &tech.effects {
+            if effect.mode != EffectMode::Add || effect.unit_category.is_some_and(|c| c != category)
+            {
+                continue;
+            }
+            match effect.effect {
+                EffectKind::ArmyMorale => bonus.morale += effect.value,
+                EffectKind::ArmyMelee => bonus.melee += effect.value,
+                EffectKind::ArmyRanged => bonus.ranged += effect.value,
+                EffectKind::ArmyArmor => bonus.armor += effect.value,
+                _ => {}
+            }
+        }
+    }
+    bonus
+}
+
+/// Adds `bonus` to a 0-`max` stat.
+pub(crate) fn boosted(stat: u8, bonus: f64, max: u8) -> u8 {
+    (f64::from(stat) + bonus).round().clamp(0.0, f64::from(max)) as u8
+}
+
+/// Battle description of `army` as the auto-resolver sees it (general
+/// bonuses and technology bonuses included); exposed for tests and the M7
+/// battle setup.
+pub fn army_battle_side(state: &CampaignState, data: &GameData, army: &ArmyId) -> Option<Side> {
+    let army = state.armies.get(army)?;
+    Some(crate::movement::side_from_army(state, data, army))
+}
+
+/// Status of `tech` for `faction`.
+pub fn tech_status(state: &CampaignState, faction: &FactionId, tech: &Technology) -> TechStatus {
+    let Some(faction_state) = state.factions.get(faction) else {
+        return TechStatus::Locked;
+    };
+    if faction_state.technologies.contains(&tech.id) {
+        TechStatus::Known
+    } else if faction_state.research.as_ref() == Some(&tech.id) {
+        TechStatus::Researching
+    } else if tech
+        .prerequisites
+        .iter()
+        .all(|p| faction_state.technologies.contains(p))
+    {
+        TechStatus::Available
+    } else {
+        TechStatus::Locked
+    }
+}
+
+/// Progress already accumulated on `tech` by `faction` (current research or
+/// banked).
+pub fn tech_progress(state: &CampaignState, faction: &FactionId, tech: &TechnologyId) -> u32 {
+    let Some(f) = state.factions.get(faction) else {
+        return 0;
+    };
+    if f.research.as_ref() == Some(tech) {
+        f.research_progress
+    } else {
+        f.research_banked.get(tech).copied().unwrap_or(0)
+    }
+}
+
+impl CampaignState {
+    /// Research points `faction` produces per turn (spec § 2).
+    pub fn research_points_per_turn(&self, data: &GameData, faction: &FactionId) -> u32 {
+        let Some(faction_state) = self.factions.get(faction) else {
+            return 0;
+        };
+        let mut flat = f64::from(BASE_RESEARCH_POINTS);
+        let mut percent = 0.0;
+        let mut add = |kind: EffectKind, mode: EffectMode, value: f64| {
+            if kind == EffectKind::ResearchPoints {
+                match mode {
+                    EffectMode::Add => flat += value,
+                    EffectMode::Percent => percent += value,
+                }
+            }
+        };
+        for province in self.provinces.values().filter(|p| &p.owner == faction) {
+            for id in &province.buildings {
+                if let Some(building) = data.buildings.get(id) {
+                    for effect in &building.effects {
+                        add(effect.effect, effect.mode, effect.value);
+                    }
+                }
+            }
+        }
+        for tech in acquired(self, data, faction) {
+            for effect in &tech.effects {
+                add(effect.effect, effect.mode, effect.value);
+            }
+        }
+        let governance = faction_state
+            .ruler
+            .as_ref()
+            .and_then(|id| self.characters.get(id))
+            .filter(|c| c.alive)
+            .map_or(0, |c| c.skills.governance);
+        flat += f64::from(governance.div_ceil(2));
+        (flat * (1.0 + percent / 100.0)).round().max(0.0) as u32
+    }
+
+    /// Current research of `faction`, if any (spec § 3 `get_research`).
+    pub fn research_info(&self, data: &GameData, faction: &FactionId) -> Option<ResearchInfo> {
+        let f = self.factions.get(faction)?;
+        let technology = f.research.clone()?;
+        let tech = data.technologies.get(&technology)?;
+        let cost = effective_cost(tech, self.year);
+        let points_per_turn = self.research_points_per_turn(data, faction);
+        let remaining = cost.saturating_sub(f.research_progress);
+        let turns_left = if points_per_turn == 0 {
+            u32::MAX
+        } else {
+            remaining.div_ceil(points_per_turn)
+        };
+        Some(ResearchInfo {
+            technology,
+            progress: f.research_progress,
+            cost,
+            points_per_turn,
+            turns_left,
+        })
+    }
+}
+
+/// Validates and applies `research { technology }` for `faction` (spec § 2).
+/// Switching research banks the progress of the abandoned technology and
+/// resumes any progress banked for the new one.
+pub fn start_research(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    technology: &TechnologyId,
+) -> Result<(), ResearchError> {
+    let tech = data
+        .technologies
+        .get(technology)
+        .ok_or_else(|| ResearchError::UnknownTechnology(technology.clone()))?;
+    let Some(f) = state.factions.get_mut(faction) else {
+        return Err(ResearchError::UnknownTechnology(technology.clone()));
+    };
+    if f.technologies.contains(technology) {
+        return Err(ResearchError::AlreadyKnown);
+    }
+    if let Some(missing) = tech
+        .prerequisites
+        .iter()
+        .find(|p| !f.technologies.contains(*p))
+    {
+        let name = data
+            .technologies
+            .get(missing)
+            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        return Err(ResearchError::MissingPrerequisite(name));
+    }
+    if f.research.as_ref() == Some(technology) {
+        return Ok(());
+    }
+    if let Some(previous) = f.research.take() {
+        if f.research_progress > 0 {
+            f.research_banked.insert(previous, f.research_progress);
+        }
+    }
+    f.research_progress = f.research_banked.remove(technology).unwrap_or(0);
+    f.research = Some(technology.clone());
+    Ok(())
+}
+
+/// End-of-turn phase (after the economy): pays each faction's research
+/// points into its current research and completes it when the effective cost
+/// is reached (event `technology_researched`).
+pub(crate) fn resolve_research(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+) {
+    let factions: Vec<FactionId> = state
+        .factions
+        .iter()
+        .filter(|(_, f)| f.alive)
+        .map(|(id, _)| id.clone())
+        .collect();
+    let year = state.year;
+    for faction_id in factions {
+        let points = state.research_points_per_turn(data, &faction_id);
+        let f = state.factions.get_mut(&faction_id).expect("listed above");
+        f.research_points_last_turn = points;
+        let Some(technology) = f.research.clone() else {
+            continue;
+        };
+        let Some(tech) = data.technologies.get(&technology) else {
+            f.research = None;
+            f.research_progress = 0;
+            continue;
+        };
+        f.research_progress += points;
+        if f.research_progress < effective_cost(tech, year) {
+            continue;
+        }
+        f.technologies.insert(technology.clone());
+        f.research = None;
+        f.research_progress = 0;
+        let faction_name = data
+            .factions
+            .get(&faction_id)
+            .map_or_else(|| faction_id.to_string(), |d| d.name.display.clone());
+        events.push(
+            GameEvent::new(
+                EventKind::TechnologyResearched,
+                format!(
+                    "{faction_name} maîtrise une nouvelle technologie : {}.",
+                    tech.name.display
+                ),
+            )
+            .faction(&faction_id),
+        );
+    }
+}
+
+/// Minimal AI (spec § 2): when idle, research the cheapest available
+/// technology, preferring the branch with fewer acquired technologies so that
+/// the two trees alternate.
+pub fn ai_choose_research(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<TechnologyId> {
+    let f = state.factions.get(faction)?;
+    if f.research.is_some() {
+        return None;
+    }
+    let count = |branch: TechBranch| {
+        acquired(state, data, faction)
+            .filter(|t| t.branch == branch)
+            .count()
+    };
+    let preferred = if count(TechBranch::Military) <= count(TechBranch::Civil) {
+        TechBranch::Military
+    } else {
+        TechBranch::Civil
+    };
+    data.technologies
+        .values()
+        .filter(|t| tech_status(state, faction, t) == TechStatus::Available)
+        .min_by_key(|t| {
+            (
+                t.branch != preferred,
+                effective_cost(t, state.year),
+                t.id.clone(),
+            )
+        })
+        .map(|t| t.id.clone())
+}

@@ -201,7 +201,12 @@ pub(crate) fn resolve_population(
             .factions
             .get(&controller)
             .is_some_and(|f| f.religion != province_data.religion);
-        let effects = effects_of(data, &buildings);
+        let mut effects = effects_of(data, &buildings);
+        effects.merge(&crate::research::faction_province_tech_effects(
+            state,
+            data,
+            &controller,
+        ));
         let cap = capacity(data, &id, &buildings);
 
         let province = state.provinces.get_mut(&id).expect("exists");
