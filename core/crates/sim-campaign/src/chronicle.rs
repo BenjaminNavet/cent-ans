@@ -1297,6 +1297,17 @@ fn targets(
     }
 }
 
+/// `false` when `scope` names a faction other than `faction`.
+pub fn scope_allows(scope: &EventScope, faction: &FactionId) -> bool {
+    match scope {
+        EventScope::Faction { faction: Some(f) }
+        | EventScope::Province {
+            faction: Some(f), ..
+        } => f == faction,
+        _ => true,
+    }
+}
+
 /// Per-turn chance of a random event, in thousandths.
 pub fn random_permille(event: &Event) -> u32 {
     event.trigger.chance_permille.unwrap_or_else(|| {
@@ -1391,6 +1402,11 @@ pub(crate) fn resolve_chronicle(
         for event in random.iter().filter(|e| e.scope != EventScope::Global) {
             if !state.faction_alive(&faction) {
                 break;
+            }
+            // F7b: an event reserved to another faction costs no roll, so
+            // adding one (Venice, Bohemia…) leaves the others' luck alone.
+            if !scope_allows(&event.scope, &faction) {
+                continue;
             }
             // Roll first: the costly province scan only runs on a hit.
             if !state.rng.chance_permille(random_permille(event)) {

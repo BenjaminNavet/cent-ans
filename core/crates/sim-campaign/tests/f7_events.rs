@@ -315,3 +315,19 @@ fn print_campaign_chronicle() {
         println!("{player}/{seed}: {new_fired} new historical fired; not fired: {missing:?}");
     }
 }
+
+#[test]
+fn an_event_reserved_to_another_faction_costs_no_roll() {
+    use data_model::EventScope;
+    let venice = fac("fac_venice");
+    let france = fac("fac_france");
+    let reserved = EventScope::Faction {
+        faction: Some(venice.clone()),
+    };
+    assert!(chronicle::scope_allows(&reserved, &venice));
+    assert!(!chronicle::scope_allows(&reserved, &france));
+    assert!(chronicle::scope_allows(
+        &EventScope::Faction { faction: None },
+        &france
+    ));
+}

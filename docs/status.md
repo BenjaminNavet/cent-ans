@@ -126,7 +126,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   procès de Rouen, Fougères (1449), Formigny ; 6 aléatoires pour les factions F7 (galères vénitiennes,
   banque florentine, piquiers suisses, argent de Kutná Hora, harengs de Scanie, razzias grenadines).
   Campagne simulée 1337-1453 (graine fixe, IA) : les 27 nouveaux historiques et les 7 étapes chaînées se
-  déclenchent. 5 tests (`tests/f7_events.rs`).
+  déclenchent. Un aléatoire réservé à une faction ne consomme plus de tirage pour les autres. 6 tests (`tests/f7_events.rs`).
 
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;

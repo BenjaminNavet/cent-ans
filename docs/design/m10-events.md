@@ -105,3 +105,6 @@ d'Orléans (`evt_armagnacs_bourguignons`), Troyes, Jeanne d'Arc ; le Grand Schis
 - Test `core/crates/sim-campaign/tests/f7_events.rs` : campagne 1337-1453 (graine 1337, France jouée par
   l'IA) où ≥ 20 nouveaux historiques et ≥ 4 étapes chaînées doivent se déclencher (27/27 et 7/7 obtenus ;
   mêmes résultats pour Angleterre/7 et Bourgogne/42 via le test ignoré `print_campaign_chronicle`).
+- Tirage aléatoire (`chronicle.rs`, `scope_allows`) : un événement aléatoire réservé à une autre faction ne
+  consomme plus de tirage du RNG pour les autres factions (ajouter un événement vénitien ne rebat plus les
+  cartes de la France ; sans cela le smoke `flow` perdait son rapport de saison, sensible à la graine).

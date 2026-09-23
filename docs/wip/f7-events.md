@@ -17,7 +17,7 @@ Branche : `worktree-agent-a65b4684eae74eccc`. Tests : `core/crates/sim-campaign/
    David II ; Rienzo → chute ; Nicopolis → rançon de Nevers ; Montereau → alliance anglo-bourguignonne →
    Troyes ; Jeanne d'Arc → sacre de Reims.
 4. [x] Test : ≥ 20 nouveaux historiques déclenchés.
-5. [x] Docs (`m10-events.md`, `status.md`). [ ] build + smoke Godot.
+5. [x] Docs, build, smoke Godot vert (après `scope_allows` : un aléatoire réservé ne consomme plus de tirage pour les autres factions).
 
 ## Prochaine étape
-Lancer `core/build.sh`, import Godot puis smoke ; rapport final.
+Vérifier cargo test + clippy complets, puis rapport final.
