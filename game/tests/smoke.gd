@@ -36,6 +36,11 @@ extends SceneTree
 ##     pause ouvert puis fermé (arbre en pause), dialogue de sauvegarde, crédits.
 ## 13. codex (H2) : fiches de `data/codex`, liens `[[…]]` et auto-liens, pile de 3 bulles (dont
 ##     une ouverte par survol simulé), découvertes, fermeture après la grâce, fenêtre Codex.
+## 14. tutorial/encyclopedia (F8) : tutoriel France sur la vraie simulation, chaque objectif
+##     rempli par l'interface ou un ordre fait avancer l'étape (sélection, marche, province,
+##     onglet Ville, construction, recherche, diplomatie, fin de tour, rapport, chronique,
+##     impôt, gouverneur), progression persistée ; encyclopédie : chaque onglet > 0 entrée,
+##     fiche non vide, recherche filtrée, liens internes, retour, touche K.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -66,6 +71,7 @@ func _init() -> void:
 	if settings != null:
 		settings.call("use_test_file")
 		settings.call("set_value", "game/autosave_interval", 0, false)
+		settings.call("set_value", "tutorial/enabled", false, false)  # F8 : seulement à l'étape 13
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -80,6 +86,7 @@ func _init() -> void:
 	await _run_codex()  # H2
 	await _run_siege_battle()
 	await _run_flow()  # F3
+	await _run_tutorial()  # F8
 	quit(1 if _failures > 0 else 0)
 
 
@@ -1182,3 +1189,203 @@ func _restore_autosaves(kept: Dictionary) -> void:
 		if file != null:
 			file.store_buffer(kept[path])
 			file.close()
+
+
+## F8 : tutoriel des premiers tours (objectifs vérifiables) et encyclopédie tirée de `data/`.
+func _run_tutorial() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	var real_data := _project_root().path_join("data")
+	if not (ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json"))):
+		print("smoke tutorial: skipped, needs the real simulation and data/map")
+		return
+	if settings != null:
+		settings.call("set_value", "tutorial/enabled", true, false)
+		settings.call("set_value", "tutorial/done", false, false)
+		settings.call("set_value", "tutorial/step", 0, false)
+		settings.call("set_value", "interface/season_report", true, false)
+		settings.call("set_value", "game/interactive_battles", false, false)
+	facade.set_data_dir(real_data)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "tutorial: campaign map failed to start"):
+		return
+	var tutorial: Node = map.get("tutorial")
+	if not _check(tutorial != null and tutorial.active, "tutorial should start on a new campaign"):
+		map.queue_free()
+		return
+	var sim: Object = map.sim
+	var player: String = map.player_faction
+	var visited: PackedStringArray = PackedStringArray()
+	_check(tutorial.steps.size() >= 10 and tutorial.steps.size() <= 14, "tutorial should have 10-14 steps, got %d" % tutorial.steps.size())
+	_check(str(tutorial.steps[0]["text"]).contains("Bouter les Anglais"), "intro should list the French objectives from data")
+	_check(str(tutorial.steps[1]["advice"]).contains("Crécy"), "French advice expected")
+	_check(tutorial.current_step_id() == "intro" and not tutorial.check_now(), "intro is manual")
+	tutorial.advance()
+
+	# 1. Sélection de l'armée royale.
+	_check(tutorial.current_step_id() == "select_army" and not tutorial.check_now(), "select_army: not met before selection")
+	var royal: String = tutorial.royal_army
+	_check(royal != "" and not tutorial.resolve_target("royal_army").is_empty(), "royal army and its marker target expected")
+	map.select_army(royal)
+	_check(tutorial.check_now(), "select_army should complete after selecting the royal army")
+	visited.append("select_army")
+	# 2. Ordre de marche.
+	_check(tutorial.current_step_id() == "move_army" and not tutorial.check_now(), "move_army: not met before an order")
+	var reachable: Dictionary = map.reachable
+	if _check(not reachable.is_empty(), "tutorial: royal army has no reachable province"):
+		var result: Dictionary = map.order_move(royal, str(reachable.keys()[0]))
+		_check(result.get("ok", false), "tutorial: move refused %s" % result.get("error", "?"))
+	_check(tutorial.check_now(), "move_army should complete after a move order")
+	visited.append("move_army")
+	# 3-4. Province du joueur puis onglet Ville.
+	_check(tutorial.current_step_id() == "open_province" and not tutorial.check_now(), "open_province: not met before opening")
+	var capital: String = tutorial._capital()
+	map.picker.select_index(map.map_data.index_of_id(capital))
+	await process_frame
+	_check(tutorial.check_now(), "open_province should complete with the capital panel open")
+	_check(tutorial.current_step_id() == "city_tab" and not tutorial.check_now(), "city_tab: not met on the garrison tab")
+	_check(not tutorial.resolve_target("city_tab").is_empty(), "city tab target expected")
+	map.ui.province_panel.show_ville_tab()
+	_check(tutorial.check_now(), "city_tab should complete on the Ville tab")
+	visited.append_array(["open_province", "city_tab"])
+	# 5. Construction.
+	_check(tutorial.current_step_id() == "build" and not tutorial.check_now(), "build: not met before building")
+	var built := false
+	for province_id in tutorial._player_provinces():
+		var city: Dictionary = sim.call("get_province_city", province_id)
+		if not (city.get("construction", {}) as Dictionary).is_empty():
+			continue
+		for row in city.get("buildable", []):
+			if bool(row.get("available", false)):
+				map._on_build(province_id, str(row["building"]))
+				built = true
+				break
+		if built:
+			break
+	_check(built and tutorial.check_now(), "build should complete after a construction order")
+	visited.append("build")
+	# 6. Recherche.
+	_check(tutorial.current_step_id() == "research" and not tutorial.check_now(), "research: not met before choosing")
+	for node in sim.call("get_tech_tree", player):
+		if str(node.get("state", "")) == "available":
+			map._on_research_requested(str(node["id"]))
+			break
+	_check(tutorial.check_now(), "research should complete after choosing a technology")
+	visited.append("research")
+	# 7. Diplomatie.
+	_check(tutorial.current_step_id() == "diplomacy" and not tutorial.check_now(), "diplomacy: not met before opening")
+	_check(not tutorial.resolve_target("diplomacy").is_empty(), "diplomacy button target expected")
+	map.diplomacy.open_panel()
+	_check(tutorial.check_now(), "diplomacy should complete with the panel open")
+	map.diplomacy.panel.hide()
+	visited.append("diplomacy")
+	# 8-9. Fin du tour, rapport de saison.
+	_check(tutorial.current_step_id() == "end_turn" and not tutorial.check_now(), "end_turn: not met before ending the turn")
+	_check(tutorial.resolve_target("end_turn").has("rect"), "end turn button target expected")
+	map._on_end_turn()
+	_check(tutorial.check_now(), "end_turn should complete after end_turn")
+	visited.append("end_turn")
+	_check(tutorial.current_step_id() == "season_report", "season_report step expected")
+	var report: Control = map.flow.season_report
+	if report.visible:
+		_check(not tutorial.check_now(), "season_report: not met while the report is open")
+		report.close()
+	_check(tutorial.check_now(), "season_report should complete once the report is closed")
+	visited.append("season_report")
+	# 10. Chronique (étape passée s'il n'y a pas encore d'événement).
+	_check(tutorial.current_step_id() == "chronicle", "chronicle step expected")
+	if map.chronicle.open_window():
+		_check(tutorial.check_now(), "chronicle should complete with the window open")
+		map.chronicle.window.hide()
+		visited.append("chronicle")
+	else:
+		map.chronicle.window.hide()
+		_check(not tutorial.check_now(), "chronicle: not met without window")
+		tutorial.advance()
+		print("smoke tutorial: no chronicle decision yet, step skipped")
+	# 11. Impôt.
+	_check(tutorial.current_step_id() == "tax" and not tutorial.check_now(), "tax: not met before changing")
+	var rate := "high" if tutorial._tax_rate() != "high" else "low"
+	map._on_tax_rate_changed(player, rate)
+	_check(tutorial.check_now(), "tax should complete after changing the rate")
+	visited.append("tax")
+	# 12. Gouverneur.
+	_check(tutorial.current_step_id() == "governor" and not tutorial.check_now(), "governor: not met before appointing")
+	var appointed := false
+	var ruler := str(GameCatalog.definitions("factions").get(player, {}).get("ruler", ""))
+	for character_id in sim.call("get_faction_characters", player):
+		if str(character_id) == ruler or str((sim.call("get_character", character_id) as Dictionary).get("governor_of", "")) != "":
+			continue
+		for province_id in tutorial._player_provinces():
+			if province_id == capital:
+				continue
+			var answer: Dictionary = sim.call("submit_order", {"type": "assign_governor", "character": str(character_id), "province": province_id})
+			if answer.get("ok", false):
+				appointed = true
+				break
+		if appointed:
+			break
+	_check(appointed and tutorial.check_now(), "governor should complete after an appointment")
+	visited.append("governor")
+	# Fin : progression persistée, pas de relance.
+	_check(tutorial.current_step_id() == "outro", "outro step expected")
+	tutorial.advance()
+	_check(not tutorial.active and not tutorial.overlay.visible, "tutorial should close after the last step")
+	if settings != null:
+		_check(bool(settings.call("get_value", "tutorial/done")), "tutorial/done should be persisted")
+	_check(not tutorial.should_autostart(), "a finished tutorial must not restart")
+
+	# Encyclopédie.
+	var encyclopedia: Control = tutorial.encyclopedia
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_K
+	key.pressed = true
+	tutorial._unhandled_input(key)
+	_check(encyclopedia.visible, "K should open the encyclopedia")
+	var counts := PackedStringArray()
+	var ids: PackedStringArray = encyclopedia.tab_ids()
+	_check(ids.size() == 9, "encyclopedia should have 9 tabs")
+	for index in ids.size():
+		encyclopedia.select_tab(index)
+		_check(encyclopedia.entry_count() > 0, "encyclopedia tab %s is empty" % ids[index])
+		_check(encyclopedia.fiche.get_parsed_text().length() > 40, "encyclopedia tab %s: empty fiche for %s" % [ids[index], encyclopedia.current_entry])
+		counts.append("%s %d" % [ids[index], encyclopedia.entry_count()])
+	var broken: Array = []
+	for index in ids.size():
+		for entry in encyclopedia._entries[ids[index]]:
+			if Encyclopedia.fiche_bbcode(str(entry["id"])).length() < 40:
+				broken.append(entry["id"])
+	_check(broken.is_empty(), "encyclopedia entries without fiche: %s" % [broken])
+	encyclopedia.select_tab(0)
+	var total: int = encyclopedia.entry_count()
+	encyclopedia.set_query("arc")
+	_check(encyclopedia.entry_count() > 0 and encyclopedia.entry_count() < total and "unit_longbowmen" in encyclopedia.visible_ids(), "search 'arc' should filter the units (%d / %d)" % [encyclopedia.entry_count(), total])
+	encyclopedia.set_query("ARBALETRIER")
+	_check(encyclopedia.entry_count() > 0, "search should ignore case and accents")
+	encyclopedia.set_query("zzzzqx")
+	_check(encyclopedia.entry_count() == 0, "nonsense search should list nothing")
+	encyclopedia.set_query("")
+	_check(encyclopedia.entry_count() == total, "clearing the search should restore the list")
+	_check(encyclopedia.open_entry("unit_longbowmen"), "open unit_longbowmen")
+	_check(Encyclopedia.fiche_bbcode("unit_longbowmen").contains("[url=tech_longbow_drill]"), "unit fiche should link its technology")
+	encyclopedia.fiche.meta_clicked.emit("tech_longbow_drill")
+	_check(encyclopedia.current_entry == "tech_longbow_drill" and encyclopedia.tab_ids()[encyclopedia.current_tab] == "technologies", "internal link should open the technology")
+	encyclopedia.go_back()
+	_check(encyclopedia.current_entry == "unit_longbowmen", "back should return to the unit")
+	var france := Encyclopedia.fiche_bbcode("fac_france")
+	_check(france.contains("Philippe VI") and france.contains("Objectifs"), "faction fiche: ruler and objectives expected")
+	tutorial._unhandled_input(key)
+	_check(not encyclopedia.visible, "K should close the encyclopedia")
+
+	if settings != null:
+		settings.call("set_value", "tutorial/enabled", false, false)
+		settings.call("set_value", "game/interactive_battles", true, false)
+	map.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: tutorial (%s) and encyclopedia (%s)" % [", ".join(visited), ", ".join(counts)])
