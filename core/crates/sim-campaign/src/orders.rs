@@ -160,6 +160,11 @@ pub enum Order {
     Research {
         technology: TechnologyId,
     },
+    /// Answers a pending chronicle decision (M10).
+    ChooseEventOption {
+        decision: u32,
+        option: usize,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -223,6 +228,8 @@ pub enum OrderError {
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
     #[error(transparent)]
     Research(#[from] ResearchError),
+    #[error(transparent)]
+    Chronicle(#[from] crate::chronicle::ChronicleError),
 }
 
 /// One line of the recruitment panel.
@@ -369,6 +376,9 @@ impl CampaignState {
             Order::Research { technology } => {
                 research::start_research(self, data, faction, &technology)?;
                 Ok(())
+            }
+            Order::ChooseEventOption { decision, option } => {
+                Ok(self.choose_event_option(data, faction, decision, option)?)
             }
         }
     }
