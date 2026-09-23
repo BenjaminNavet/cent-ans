@@ -58,13 +58,13 @@ void vertex() {
 	// l'herbe se fonde dans la texture du terrain.
 	float macro2 = texture(macro_noise, wp * 0.00043 + vec2(0.3, 0.7)).r;
 	vec3 ground = mix(textureLod(albedo_array, vec3(wp / 5.0, 0.0), 7.0).rgb, textureLod(albedo_array, vec3(wp / 7.0, 1.0), 7.0).rgb, smoothstep(0.25, 0.55, macro2));
-	v_tint = base_tint * ground * vec3(3.3, 3.1, 2.3);
+	v_tint = base_tint * ground * vec3(1.12, 1.18, 1.0);
 	float in_field = outside_calm * (1.0 - sb.g) * field.z;
 	if (field.x == 1.0) {
 		density *= 1.0 - in_field;
 	} else if (field.x == 2.0) {
 		height_mul = mix(1.0, 2.1, in_field);
-		v_tint = mix(v_tint, vec3(1.6, 1.25, 0.55), in_field);
+		v_tint = mix(v_tint, vec3(0.5, 0.36, 0.11), in_field);
 	} else if (field.x == 3.0) {
 		height_mul = mix(1.0, 1.4, in_field);
 		v_tint = mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
@@ -97,8 +97,14 @@ void vertex() {
 }
 
 void fragment() {
+	// Normale « verticale » pour toutes les faces (pas d'assombrissement des faces arrière).
+	NORMAL = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
 	vec4 tex = texture(grass_texture, UV);
-	ALBEDO = tex.rgb * v_tint * v_shade;
+	// La carte ne donne que la découpe et les nuances claires/sombres des brins ; la couleur
+	// vient du sol (v_tint) pour que l'herbe prolonge la texture du terrain.
+	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / 0.14;
+	vec3 hue = tex.rgb / max(dot(tex.rgb, vec3(0.333)), 0.001) * 0.333;
+	ALBEDO = v_tint * clamp(l, 0.45, 1.5) * mix(vec3(1.0), hue * 3.0, 0.2) * v_shade;
 	ALPHA = tex.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.4;
 	ROUGHNESS = 0.9;

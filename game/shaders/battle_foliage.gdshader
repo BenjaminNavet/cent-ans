@@ -21,6 +21,8 @@ void vertex() {
 }
 
 void fragment() {
+	// Les deux faces d'une carte gardent la normale « sphérique » du houppier.
+	NORMAL = FRONT_FACING ? NORMAL : -NORMAL;
 	vec4 tex = texture(leaves, UV);
 	ALBEDO = tex.rgb * tint * COLOR.rgb;
 	ALPHA = tex.a;

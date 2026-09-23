@@ -458,7 +458,7 @@ static func _archer(f: Fig, variant: int) -> void:
 static func _horse(f: Fig, coat: Color, caparison: bool) -> void:
 	f.set_part(P_HORSE)
 	f.set_style(coat, C_EXACT)
-	f.ellipsoid(Vector3(0, 1.3, 0.0), Vector3(0.3, 0.34, 0.86), 5, 8)
+	f.ellipsoid(Vector3(0, 1.32, 0.0), Vector3(0.32, 0.38, 0.9), 5, 10)
 	f.set_part(P_HNECK, Vector2(1.45, 0.62))
 	f.cyl(Vector3(0, 1.4, 0.62), Vector3(0, 1.95, 1.0), 0.19, 0.13, 7, false, 0.8)
 	f.cyl(Vector3(0, 2.0, 0.98), Vector3(0, 1.72, 1.42), 0.12, 0.08, 6, true, 0.75)
@@ -482,7 +482,7 @@ static func _horse(f: Fig, coat: Color, caparison: bool) -> void:
 	f.cyl(Vector3(0, 1.48, -0.82), Vector3(0, 0.85, -1.0), 0.07, 0.03, 5, false)
 	if caparison:
 		f.set_style(Color.WHITE, C_LIVERY)
-		f.cyl(Vector3(0, 1.62, -0.02), Vector3(0, 0.62, -0.02), 0.36, 0.42, 10, false, 2.7)
+		f.cyl(Vector3(0, 1.64, -0.02), Vector3(0, 0.78, -0.02), 0.33, 0.37, 12, false, 2.75)
 		f.set_part(P_HNECK, Vector2(1.45, 0.62))
 		f.cyl(Vector3(0, 1.45, 0.66), Vector3(0, 1.98, 1.0), 0.21, 0.14, 8, false, 0.85)
 		f.set_part(P_HORSE)

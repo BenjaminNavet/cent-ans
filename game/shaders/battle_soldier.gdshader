@@ -338,7 +338,8 @@ void fragment() {
 	float metallic = 0.0;
 	float roughness = 0.85;
 	if (code == 0) {
-		albedo = livery * mix(0.88, 1.08, v_var.x) * v_color;
+		vec3 dyed = mix(livery, vec3(dot(livery, vec3(0.3, 0.59, 0.11))), 0.18);
+		albedo = dyed * mix(0.85, 1.08, v_var.x) * v_color;
 	} else if (code == 1) {
 		albedo = trim * v_color;
 		metallic = 0.3;
