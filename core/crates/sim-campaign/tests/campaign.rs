@@ -619,8 +619,8 @@ fn france_income_is_positive_and_in_target_range() {
     );
 
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
-    let effective_upkeep =
-        state.faction_army_upkeep(&data, &france_id) + state.faction_building_upkeep(&data, &france_id);
+    let effective_upkeep = state.faction_army_upkeep(&data, &france_id)
+        + state.faction_building_upkeep(&data, &france_id);
     let events = state.end_turn_with(&data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();
@@ -678,9 +678,8 @@ fn save_load_round_trip() {
     b.end_turn(&data);
     assert_eq!(a.save_json(), b.save_json());
 
-    let err =
-        CampaignState::load_json(&json.replace("\"state_version\":2", "\"state_version\":1"))
-            .unwrap_err();
+    let err = CampaignState::load_json(&json.replace("\"state_version\":2", "\"state_version\":1"))
+        .unwrap_err();
     assert!(matches!(
         err,
         sim_campaign::CampaignError::VersionMismatch { found: 1, .. }
