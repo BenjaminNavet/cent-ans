@@ -1,0 +1,134 @@
+[gd_scene load_steps=16 format=3 uid="uid://cent_ans_campaign_map"]
+
+[ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/map/terrain_builder.gd" id="2_terrain"]
+[ext_resource type="Script" path="res://scripts/map/sea.gd" id="3_sea"]
+[ext_resource type="Script" path="res://scripts/map/rivers_renderer.gd" id="4_rivers"]
+[ext_resource type="Script" path="res://scripts/map/coast_renderer.gd" id="5_coast"]
+[ext_resource type="Script" path="res://scripts/map/city_markers.gd" id="6_cities"]
+[ext_resource type="Script" path="res://scripts/map/campaign_camera.gd" id="7_camera"]
+[ext_resource type="Script" path="res://scripts/map/province_picker.gd" id="8_picker"]
+[ext_resource type="Script" path="res://scripts/map/map_ui.gd" id="9_ui"]
+[ext_resource type="PackedScene" path="res://scenes/ui/province_panel.tscn" id="10_panel"]
+
+[sub_resource type="Environment" id="Environment_map"]
+background_mode = 1
+background_color = Color(0.72, 0.66, 0.52, 1)
+ambient_light_source = 1
+ambient_light_color = Color(0.85, 0.82, 0.75, 1)
+ambient_light_energy = 0.4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+content_margin_left = 16.0
+content_margin_top = 6.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+bg_color = Color(0.93, 0.87, 0.72, 0.96)
+border_width_bottom = 2
+border_color = Color(0.42, 0.29, 0.16, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_serif_top"]
+font_names = PackedStringArray("Georgia", "Palatino", "Times New Roman", "serif")
+
+[sub_resource type="Theme" id="Theme_topbar"]
+default_font = SubResource("SystemFont_serif_top")
+default_font_size = 18
+Label/colors/font_color = Color(0.22, 0.14, 0.07, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+bg_color = Color(0.93, 0.87, 0.72, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.29, 0.16, 1)
+
+[node name="CampaignMap" type="Node3D"]
+script = ExtResource("1_map")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_map")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 200, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.0
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("2_terrain")
+
+[node name="Sea" type="MeshInstance3D" parent="."]
+script = ExtResource("3_sea")
+
+[node name="Rivers" type="MeshInstance3D" parent="."]
+script = ExtResource("4_rivers")
+
+[node name="Coast" type="MeshInstance3D" parent="."]
+script = ExtResource("5_coast")
+
+[node name="Cities" type="Node3D" parent="."]
+script = ExtResource("6_cities")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("7_camera")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+current = true
+fov = 55.0
+near = 1.0
+far = 6000.0
+
+[node name="Picker" type="Node" parent="."]
+script = ExtResource("8_picker")
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("9_ui")
+
+[node name="TopBar" type="PanelContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+theme = SubResource("Theme_topbar")
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="HBox" type="HBoxContainer" parent="UI/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="UI/TopBar/HBox"]
+layout_mode = 2
+text = "Cent Ans"
+theme_override_font_sizes/font_size = 22
+
+[node name="DateLabel" type="Label" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Printemps 1337"
+horizontal_alignment = 1
+
+[node name="EndTurnButton" type="Button" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Fin du tour"
+
+[node name="HoverLabel" type="Label" parent="UI"]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -44.0
+offset_right = 260.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme = SubResource("Theme_topbar")
+theme_override_styles/normal = SubResource("StyleBoxFlat_hover")
+text = ""
+
+[node name="ProvincePanel" parent="UI" instance=ExtResource("10_panel")]
+unique_name_in_owner = true
