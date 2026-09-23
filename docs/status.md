@@ -69,9 +69,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
   0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro
   mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
-- M10 assets : les cogues ne s'affichent que si l'armée expose `embarked`/`at_sea` (pas encore fourni par
-  le pont) ; l'armée et le château de la capitale se chevauchent quand l'armée est au centroïde voisin.
-  Headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
+- M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
 - Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province contrôlée (plafond 35 %) ; l'IA dépense ses trésors dormants. Sur une campagne complète 1337-1453 (464 tours, ≈ 10 s en release), les revenus des grands royaumes quadruplent (population, bâtiments, techs) et l'Empire garde un trésor élevé (≈ 12 saisons de revenu) : à surveiller.
