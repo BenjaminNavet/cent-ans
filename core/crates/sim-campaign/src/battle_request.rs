@@ -398,6 +398,39 @@ impl CampaignState {
         Ok(events)
     }
 
+    /// Debug helper for headless tests and screenshots: moves `defender` into
+    /// `attacker`'s province and records a pending battle between them
+    /// (they must be at war). Returns the battle index.
+    pub fn debug_stage_battle(
+        &mut self,
+        attacker: &ArmyId,
+        defender: &ArmyId,
+    ) -> Result<usize, BattleRequestError> {
+        let index = self.pending_battles.len();
+        let (Some(a), Some(d)) = (self.armies.get(attacker), self.armies.get(defender)) else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        if !self.is_at_war(&a.faction, &d.faction) {
+            return Err(BattleRequestError::Stale(index));
+        }
+        let province = a.location.clone();
+        let army = self.armies.get_mut(defender).expect("exists");
+        army.location = province.clone();
+        army.path.clear();
+        if let Some(general) = army.general.clone() {
+            if let Some(c) = self.characters.get_mut(&general) {
+                c.location = Some(province.clone());
+            }
+        }
+        self.pending_battles.push(BattleRequest {
+            attacker: attacker.clone(),
+            defender: defender.clone(),
+            province: province.clone(),
+            attacker_origin: Some(province),
+        });
+        Ok(index)
+    }
+
     /// Auto-resolves pending battle `index` now (the "Résolution
     /// automatique" button); events are appended to the journal and returned.
     pub fn auto_resolve_pending(

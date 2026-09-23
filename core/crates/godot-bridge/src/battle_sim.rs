@@ -491,4 +491,26 @@ impl CampaignSim {
     fn get_interactive_battles(&self) -> bool {
         self.state.as_ref().is_some_and(|s| s.interactive_battles)
     }
+
+    /// Debug (smoke test, screenshots): brings `defender` to `attacker` and
+    /// records a pending battle; returns its index or -1.
+    #[func]
+    fn debug_stage_battle(&mut self, attacker: GString, defender: GString) -> i64 {
+        let Some(state) = &mut self.state else {
+            return -1;
+        };
+        let (Some(a), Some(d)) = (
+            sim_campaign::ArmyId::parse(&attacker.to_string()),
+            sim_campaign::ArmyId::parse(&defender.to_string()),
+        ) else {
+            return -1;
+        };
+        match state.debug_stage_battle(&a, &d) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_battle: {error}");
+                -1
+            }
+        }
+    }
 }
