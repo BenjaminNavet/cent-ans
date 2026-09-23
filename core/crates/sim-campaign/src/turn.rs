@@ -5,7 +5,7 @@ use data_model::{FactionId, GameData};
 use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
-use crate::{ai_minimal, characters, economy, movement, siege};
+use crate::{ai_minimal, buildings, characters, economy, movement, population, siege};
 
 impl CampaignState {
     /// Resolves the turn with the built-in minimal AI for every non-player faction.
@@ -40,16 +40,24 @@ impl CampaignState {
         siege::resolve_sieges(self, data, &mut events);
         siege::resolve_raids(self, data, &mut events);
 
-        // 5-7. Economy, attrition, recovery.
+        // 5. Buildings and goods, ahead of the economy that reads them (M3).
+        buildings::resolve_construction(self, data, &mut events);
+        economy::resolve_goods(self, data);
+
+        // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
         economy::resolve_attrition(self, data, &mut events);
         economy::resolve_decay(self);
 
-        // 8. Characters and dead factions.
+        // 9. Population dynamics: growth, health, wealth, goods
+        // satisfaction, unrest, revolt, plague, famine (M3).
+        population::resolve_population(self, data, &mut events);
+
+        // 10. Characters and dead factions.
         characters::resolve_characters(self, data, &mut events);
         characters::resolve_faction_deaths(self, data, &mut events);
 
-        // 9. New season.
+        // 11. New season.
         self.advance_date();
         let movement_points = self.season.movement_points();
         for army in self.armies.values_mut() {

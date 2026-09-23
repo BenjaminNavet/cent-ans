@@ -24,6 +24,10 @@ pub enum EventKind {
     NoHeir,
     FactionDestroyed,
     GeneralCaptured,
+    BuildingCompleted,
+    Revolt,
+    Plague,
+    Famine,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

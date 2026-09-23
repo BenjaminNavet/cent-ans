@@ -17,7 +17,10 @@ pub enum CampaignError {
     Serialize(String),
     #[error("cannot parse campaign save: {0}")]
     Deserialize(String),
-    #[error("unsupported save version {found} (expected {expected})")]
+    #[error(
+        "version de sauvegarde {found} non prise en charge (version attendue : {expected}) ; \
+         cette partie a été créée avec une version différente du jeu"
+    )]
     VersionMismatch { found: u32, expected: u32 },
 }
 

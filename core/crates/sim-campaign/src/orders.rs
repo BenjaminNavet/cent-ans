@@ -4,11 +4,15 @@
 //! leaves the state untouched. Move orders are only recorded (`Army::path`)
 //! and resolved in `end_turn`; all other orders apply immediately.
 
-use data_model::{CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, UnitTypeId};
+use data_model::{
+    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, UnitTypeId,
+};
 use serde::{Deserialize, Serialize};
 
+use crate::buildings::CANCEL_REFUND_PERCENT;
+use crate::economy::TaxRate;
 use crate::movement;
-use crate::state::{Army, ArmyId, CampaignState, Stance, Unit};
+use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 
 /// An order issued by a faction (player through `submit_order`, AI through the planner).
 ///
@@ -60,6 +64,19 @@ pub enum Order {
         army: ArmyId,
         character: CharacterId,
     },
+    /// Starts constructing `building` in `province` (spec § 1.2).
+    Build {
+        province: ProvinceId,
+        building: BuildingId,
+    },
+    /// Cancels the ongoing construction of `province`, refunding half its cost.
+    CancelBuild {
+        province: ProvinceId,
+    },
+    /// Sets the faction's tax bracket (spec § 1.4).
+    SetTaxRate {
+        rate: TaxRate,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -103,6 +120,12 @@ pub enum OrderError {
     AmbiguousTarget,
     #[error("faction inconnue : {0}")]
     UnknownFaction(FactionId),
+    #[error("bâtiment inconnu : {0}")]
+    UnknownBuilding(BuildingId),
+    #[error("construction impossible : {0}")]
+    BuildUnavailable(String),
+    #[error("aucune construction en cours dans cette province")]
+    NoConstruction,
 }
 
 /// One line of the recruitment panel.
@@ -162,7 +185,64 @@ impl CampaignState {
             Order::AssignGeneral { army, character } => {
                 self.order_assign_general(faction, &army, &character)
             }
+            Order::Build { province, building } => {
+                self.order_build(data, faction, &province, &building)
+            }
+            Order::CancelBuild { province } => self.order_cancel_build(data, faction, &province),
+            Order::SetTaxRate { rate } => {
+                self.factions.get_mut(faction).expect("checked above").tax_rate = rate;
+                Ok(())
+            }
         }
+    }
+
+    fn order_build(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+        building: &BuildingId,
+    ) -> Result<(), OrderError> {
+        self.own_province_index(faction, province)?;
+        if !data.buildings.contains_key(building) {
+            return Err(OrderError::UnknownBuilding(building.clone()));
+        }
+        let option = self
+            .buildable(data, province)
+            .into_iter()
+            .find(|o| &o.building == building)
+            .ok_or_else(|| OrderError::UnknownBuilding(building.clone()))?;
+        if !option.available {
+            return Err(OrderError::BuildUnavailable(
+                option.reason.unwrap_or_default(),
+            ));
+        }
+        self.factions.get_mut(faction).expect("checked above").treasury -=
+            i64::from(option.cost);
+        self.provinces.get_mut(province).expect("checked above").construction = Some(Construction {
+            building: building.clone(),
+            turns_left: option.turns,
+        });
+        Ok(())
+    }
+
+    fn order_cancel_build(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+    ) -> Result<(), OrderError> {
+        self.own_province_index(faction, province)?;
+        let province_state = self.provinces.get_mut(province).expect("checked above");
+        let Some(construction) = province_state.construction.take() else {
+            return Err(OrderError::NoConstruction);
+        };
+        let refund = data
+            .buildings
+            .get(&construction.building)
+            .map_or(0, |b| b.cost.money * CANCEL_REFUND_PERCENT / 100);
+        self.factions.get_mut(faction).expect("checked above").treasury += i64::from(refund);
+        Ok(())
     }
 
     fn own_army(&self, faction: &FactionId, id: &ArmyId) -> Result<&Army, OrderError> {

@@ -81,11 +81,7 @@ pub(crate) fn resolve_sieges(
             capture(state, data, &province_id, &attacker, events);
             continue;
         }
-        let fortification = data
-            .provinces
-            .get(&province_id)
-            .and_then(|p| p.fortification_level)
-            .unwrap_or(0);
+        let fortification = state.fortification_level(data, &province_id);
         let province = state.provinces.get_mut(&province_id).expect("exists");
         match &mut province.siege {
             Some(siege) if siege.attacker == attacker => {
@@ -98,7 +94,7 @@ pub(crate) fn resolve_sieges(
             _ => {
                 province.siege = Some(SiegeState {
                     attacker: attacker.clone(),
-                    turns_left: SIEGE_BASE_TURNS + u32::from(fortification),
+                    turns_left: SIEGE_BASE_TURNS + fortification,
                 });
                 events.push(
                     GameEvent::new(

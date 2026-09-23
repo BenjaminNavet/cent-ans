@@ -9,11 +9,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 use data_model::{
-    CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, Sex, Skills, TechnologyId,
-    UnitType, UnitTypeId,
+    BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ResourceId, Sex,
+    Skills, TechnologyId, UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
+use crate::economy::TaxRate;
 use crate::events::GameEvent;
 use crate::rng::CampaignRng;
 
@@ -26,7 +27,11 @@ pub const MAX_MOVEMENT_POINTS: u32 = 3;
 /// Movement points in winter (roads impassable, short days).
 pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// Version of the serialised state; bump when the JSON layout changes.
-pub const STATE_VERSION: u32 = 1;
+///
+/// `2`: M3 cities & economy (buildings, construction, goods, tax rate, the
+/// four population gauges are now dynamic). [`CampaignState::load_json`]
+/// refuses any other version.
+pub const STATE_VERSION: u32 = 2;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -191,6 +196,13 @@ pub struct SiegeState {
     pub turns_left: u32,
 }
 
+/// A building under construction in a province (spec § 1.2); one at a time.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Construction {
+    pub building: BuildingId,
+    pub turns_left: u32,
+}
+
 /// Dynamic state of a province (static data stays in [`GameData`]).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProvinceState {
@@ -209,6 +221,16 @@ pub struct ProvinceState {
     /// Units paid for this turn that join the garrison at the end of the turn.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub recruit_queue: Vec<UnitTypeId>,
+    /// Completed buildings (spec § 1.2).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub buildings: Vec<BuildingId>,
+    /// One building under construction at a time.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub construction: Option<Construction>,
+    /// Consecutive seasons the weighted-average unrest of the province stayed
+    /// above the revolt threshold (spec § 1.1); resets to 0 below it.
+    #[serde(default)]
+    pub revolt_seasons: u32,
 }
 
 impl ProvinceState {
@@ -235,6 +257,20 @@ pub struct FactionState {
     pub heir: Option<CharacterId>,
     pub capital: ProvinceId,
     pub technologies: BTreeSet<TechnologyId>,
+    /// Tax bracket in effect (spec § 1.4); `set_tax_rate` changes it.
+    #[serde(default)]
+    pub tax_rate: TaxRate,
+    /// Number of controlled/allied provinces producing each resource (spec § 1.3).
+    #[serde(default)]
+    pub goods: BTreeMap<ResourceId, u32>,
+    /// Cached from the last `resolve_economy`, so [`CampaignState::faction_summary`]
+    /// (which does not take [`GameData`]) can still report them.
+    #[serde(default)]
+    pub army_upkeep_last_turn: i64,
+    #[serde(default)]
+    pub building_upkeep_last_turn: i64,
+    #[serde(default)]
+    pub projected_income: i64,
 }
 
 /// Dynamic state of a character.
@@ -279,6 +315,11 @@ pub struct FactionSummary {
     pub armies_count: usize,
     pub alive: bool,
     pub ruler: Option<CharacterId>,
+    /// Income the faction would collect next turn if nothing changes (spec § 1.4).
+    pub projected_income: i64,
+    pub army_upkeep: i64,
+    pub building_upkeep: i64,
+    pub tax_rate: TaxRate,
 }
 
 /// Full state of a campaign at a given turn.
@@ -404,6 +445,10 @@ impl CampaignState {
             armies_count: self.armies.values().filter(|a| &a.faction == id).count(),
             alive: faction.alive,
             ruler: faction.ruler.clone(),
+            projected_income: faction.projected_income,
+            army_upkeep: faction.army_upkeep_last_turn,
+            building_upkeep: faction.building_upkeep_last_turn,
+            tax_rate: faction.tax_rate,
         })
     }
 

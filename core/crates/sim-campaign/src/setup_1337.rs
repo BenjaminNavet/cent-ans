@@ -14,11 +14,16 @@ use data_model::{
     UnitTypeId,
 };
 
+use crate::economy::TaxRate;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
 use crate::state::{
     Army, CampaignState, CharacterState, FactionState, ProvinceState, Stance, Unit,
 };
+
+/// The virtual, non-playable faction provinces fall to on outright revolt
+/// (spec § 1.1); it never gets a starting army or garrison.
+pub const REBELS_FACTION: &str = "fac_rebels";
 
 /// Treasury for factions whose data gives none.
 pub const DEFAULT_TREASURY: i64 = 5_000;
@@ -116,6 +121,9 @@ impl CampaignState {
                     devastation: 0,
                     population: province.population.classes.clone(),
                     recruit_queue: Vec::new(),
+                    buildings: province.buildings.clone(),
+                    construction: None,
+                    revolt_seasons: 0,
                 },
             );
         }
@@ -134,6 +142,11 @@ impl CampaignState {
                 heir: faction.heir.clone(),
                 capital: faction.capital.clone(),
                 technologies: faction.starting_technologies.iter().cloned().collect(),
+                tax_rate: TaxRate::Normal,
+                goods: Default::default(),
+                army_upkeep_last_turn: 0,
+                building_upkeep_last_turn: 0,
+                projected_income: 0,
             };
             if let Some(suzerain) = &faction.suzerain {
                 faction_state.allies.insert(suzerain.clone());
@@ -241,8 +254,13 @@ impl CampaignState {
             );
         }
 
-        // Main armies.
+        // Main armies (the virtual rebels faction owns no province and never
+        // fields troops of its own; it only ever inherits a garrison already
+        // weakened by the revolt that hands it a province, spec § 1.1).
         for (id, faction) in &data.factions {
+            if id.as_str() == REBELS_FACTION {
+                continue;
+            }
             if !state.provinces.contains_key(&faction.capital) {
                 return Err(CampaignError::MissingData(format!(
                     "capital {} of {id}",
@@ -268,6 +286,7 @@ impl CampaignState {
                 state.attach_general(&army_id, &general);
             }
         }
+        crate::economy::resolve_goods(&mut state, data);
         Ok(state)
     }
 }
