@@ -21,6 +21,15 @@ use crate::state::{Army, ArmyId, CampaignState};
 
 /// Movement points spent on a port-to-port crossing.
 pub const SEA_EDGE_COST: u32 = 2;
+/// Strength lost (percent) when landing in hostile territory (doubled in winter).
+pub const LANDING_LOSS_PERCENT: u32 = 5;
+/// Morale lost by every unit landing in hostile territory.
+pub const LANDING_MORALE_LOSS: u8 = 10;
+
+/// True when `from` → `to` is a sea crossing rather than a land step.
+pub fn is_sea_crossing(data: &GameData, from: &ProvinceId, to: &ProvinceId) -> bool {
+    !land_neighbors(data, from).contains(to) && sea_neighbors(data, from).contains(to)
+}
 
 /// Cost of entering a province by land.
 pub fn terrain_cost(terrain: Terrain) -> u32 {
@@ -250,6 +259,9 @@ pub(crate) fn resolve_movement(
             }
             move_general(state, &id);
             progressed = true;
+            if is_sea_crossing(data, &from, &next) && state.is_hostile_territory(&faction, &next) {
+                land_on_hostile_shore(state, &id, &next, events);
+            }
 
             let hostiles = state.hostile_armies_in(&faction, &next);
             if let Some(defender) = strongest(state, &hostiles) {
@@ -266,6 +278,45 @@ pub(crate) fn resolve_movement(
             break;
         }
     }
+}
+
+/// A landing on a hostile shore (M10 balance): the army is spent for the turn
+/// and pays in men and morale for the disembarkation.
+fn land_on_hostile_shore(
+    state: &mut CampaignState,
+    army_id: &ArmyId,
+    province: &ProvinceId,
+    events: &mut Vec<GameEvent>,
+) {
+    let winter = state.season == crate::state::Season::Winter;
+    let percent = if winter {
+        2 * LANDING_LOSS_PERCENT
+    } else {
+        LANDING_LOSS_PERCENT
+    };
+    let Some(army) = state.armies.get_mut(army_id) else {
+        return;
+    };
+    army.movement_points = 0;
+    let mut lost = 0;
+    for unit in &mut army.units {
+        let casualties = (unit.strength * percent)
+            .div_ceil(100)
+            .min(unit.strength.saturating_sub(1));
+        unit.strength -= casualties;
+        unit.morale = unit.morale.saturating_sub(LANDING_MORALE_LOSS);
+        lost += casualties;
+    }
+    let faction = army.faction.clone();
+    events.push(
+        GameEvent::new(
+            EventKind::Attrition,
+            format!("Débarquement en terre hostile : l'armée {army_id} perd {lost} hommes."),
+        )
+        .army(army_id)
+        .province(province)
+        .faction(&faction),
+    );
 }
 
 fn strongest(state: &CampaignState, ids: &[ArmyId]) -> Option<ArmyId> {

@@ -14,7 +14,8 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 
 [b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
-• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste.
+• Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte 5 % des hommes (10 % l'hiver).
+• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (3 % de l'excédent au-delà de huit saisons de revenu). En dette, les troupes perdent du moral : licenciez.
 • Recrutez dans le panneau de province, formez des armées, donnez-leur un général (fiche personnage).
 • Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, deux tours pour choisir.
 • Posture « Siège » : l'armée assiège la place ennemie ; vivres, brèche et bouton « Donner l'assaut » apparaissent dans le panneau d'armée. Posture « Chevauchée » : pillage et butin.

@@ -19,6 +19,9 @@ use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 pub const PLANNING_RANGE: u32 = 8;
 /// An army besieges when its power exceeds the defence by this factor.
 pub const SIEGE_SUPERIORITY: f64 = 1.5;
+/// Value kept by a claimed target reached through a sea crossing (landings
+/// are costly); unclaimed provinces are never invaded by sea.
+pub const SEA_INVASION_FACTOR: f64 = 0.6;
 /// An army defends a province when it is at least this strong relative to the threat.
 pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
@@ -26,6 +29,8 @@ pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 20;
+/// Units dismissed at most per turn to cut a debt.
+const MAX_DISBANDS_PER_TURN: usize = 12;
 /// Recruitment orders per turn: one per this much seasonal income (1 to 8).
 pub const INCOME_PER_RECRUIT: i64 = 6000;
 /// Minimum estimated odds (%) before the AI storms a besieged town.
@@ -182,10 +187,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Debt: dismiss the costliest unit until the surplus repays the debt
     // within `DEBT_REPAYMENT_TURNS`.
-    if ctx.treasury < 0 && ctx.income - ctx.upkeep() < -ctx.treasury / DEBT_REPAYMENT_TURNS {
-        if let Some(order) = disband_costliest(ctx) {
-            orders.push(order);
-        }
+    let wanted_surplus = -ctx.treasury / DEBT_REPAYMENT_TURNS;
+    if ctx.treasury < 0 && ctx.income - ctx.upkeep() < wanted_surplus {
+        let savings = wanted_surplus - (ctx.income - ctx.upkeep());
+        orders.extend(disband_for_debt(ctx, savings));
         return;
     }
 
@@ -351,49 +356,91 @@ fn building_value(
     value - f64::from(def.upkeep.unwrap_or(0)) * 1.5
 }
 
-/// In debt, dismisses the costliest unit: field armies first, then garrisons
-/// (the capital keeps its last unit, besieged places keep theirs).
-fn disband_costliest(ctx: &Context) -> Option<Order> {
-    let me_capital = &ctx.state.factions[ctx.faction].capital;
-    let upkeep = |t: &UnitTypeId| ctx.data.unit_types.get(t).map_or(0, |u| u.upkeep);
-    let army = ctx
-        .state
+/// In debt, dismisses the costliest units until `savings` livres of upkeep
+/// are saved (at most [`MAX_DISBANDS_PER_TURN`]): field units first, then
+/// garrisons. The capital keeps its last unit and besieged places keep theirs;
+/// an army losing its last unit is disbanded.
+fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
+    use sim_campaign::economy::{unit_upkeep, GARRISON_UPKEEP_PERCENT};
+    enum Holder {
+        Army(ArmyId),
+        Garrison(ProvinceId),
+    }
+    let state = ctx.state;
+    let capital = &state.factions[ctx.faction].capital;
+    // (upkeep, is_garrison, holder index, unit index)
+    let mut holders: Vec<Holder> = Vec::new();
+    let mut candidates: Vec<(i64, bool, usize, usize)> = Vec::new();
+    for (id, army) in state
         .armies
         .iter()
-        .filter(|(_, a)| &a.faction == ctx.faction && !a.units.is_empty())
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())));
-    if let Some((id, army)) = army {
-        let (index, _) = army
-            .units
-            .iter()
-            .enumerate()
-            .max_by_key(|(i, u)| (upkeep(&u.unit_type), std::cmp::Reverse(*i)))?;
-        return Some(Order::DisbandUnit {
-            army: Some(id.clone()),
-            province: None,
-            unit_index: index,
-        });
+        .filter(|(_, a)| &a.faction == ctx.faction)
+    {
+        let holder = holders.len();
+        holders.push(Holder::Army(id.clone()));
+        for (index, unit) in army.units.iter().enumerate() {
+            candidates.push((unit_upkeep(ctx.data, unit), false, holder, index));
+        }
     }
-    let (province, garrison) = ctx
-        .state
+    for (id, province) in state
         .provinces
         .iter()
-        .filter(|(id, p)| {
-            &p.controller == ctx.faction
-                && p.siege.is_none()
-                && (p.garrison.len() > 1 || (*id != me_capital && !p.garrison.is_empty()))
+        .filter(|(_, p)| &p.controller == ctx.faction && p.siege.is_none())
+    {
+        let keep = usize::from(id == capital);
+        if province.garrison.len() <= keep {
+            continue;
+        }
+        let holder = holders.len();
+        holders.push(Holder::Garrison(id.clone()));
+        let mut units: Vec<(i64, usize)> = province
+            .garrison
+            .iter()
+            .enumerate()
+            .map(|(index, unit)| {
+                (
+                    unit_upkeep(ctx.data, unit) * GARRISON_UPKEEP_PERCENT / 100,
+                    index,
+                )
+            })
+            .collect();
+        // The cheapest `keep` units stay.
+        units.sort_by_key(|(upkeep, index)| (std::cmp::Reverse(*upkeep), *index));
+        units.truncate(province.garrison.len() - keep);
+        for (upkeep, index) in units {
+            candidates.push((upkeep, true, holder, index));
+        }
+    }
+    // Field units before garrisons, costliest first.
+    candidates.sort_by_key(|(upkeep, garrison, holder, index)| {
+        (*garrison, std::cmp::Reverse(*upkeep), *holder, *index)
+    });
+    let mut saved = 0;
+    let mut chosen: Vec<(usize, usize)> = Vec::new();
+    for (upkeep, _, holder, index) in candidates {
+        if saved >= savings || chosen.len() >= MAX_DISBANDS_PER_TURN {
+            break;
+        }
+        saved += upkeep;
+        chosen.push((holder, index));
+    }
+    // Highest indices first so that earlier removals keep later indices valid.
+    chosen.sort_by_key(|(holder, index)| (*holder, std::cmp::Reverse(*index)));
+    chosen
+        .into_iter()
+        .map(|(holder, unit_index)| match &holders[holder] {
+            Holder::Army(army) => Order::DisbandUnit {
+                army: Some(army.clone()),
+                province: None,
+                unit_index,
+            },
+            Holder::Garrison(province) => Order::DisbandUnit {
+                army: None,
+                province: Some(province.clone()),
+                unit_index,
+            },
         })
-        .max_by_key(|(id, p)| (p.garrison.len(), std::cmp::Reverse((*id).clone())))?;
-    let (index, _) = garrison
-        .garrison
-        .iter()
-        .enumerate()
-        .max_by_key(|(i, u)| (upkeep(&u.unit_type), std::cmp::Reverse(*i)))?;
-    Some(Order::DisbandUnit {
-        army: None,
-        province: Some(province.clone()),
-        unit_index: index,
-    })
+        .collect()
 }
 
 // =========================================================================
@@ -565,6 +612,22 @@ enum Objective {
     Retreat,
 }
 
+/// True when the planned path to `target` includes a sea crossing.
+fn crosses_sea(
+    data: &GameData,
+    table: &BTreeMap<ProvinceId, sim_campaign::movement::Reach>,
+    target: &ProvinceId,
+) -> bool {
+    let mut current = target.clone();
+    while let Some(previous) = table.get(&current).and_then(|r| r.previous.clone()) {
+        if sim_campaign::movement::is_sea_crossing(data, &previous, &current) {
+            return true;
+        }
+        current = previous;
+    }
+    false
+}
+
 fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let state = ctx.state;
     let data = ctx.data;
@@ -709,6 +772,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                     state.is_hostile_territory(ctx.faction, id) && !targeted.contains(*id)
                 })
                 .filter(|(id, _)| state.defensive_power(data, id) * SIEGE_SUPERIORITY < power)
+                // Landings only for claimed provinces (England in France, not
+                // the reverse).
+                .filter(|(id, _)| claims.contains(*id) || !crosses_sea(data, &table, id))
                 .map(|(id, reach)| {
                     let mut value = ctx.province_income(id) / 100.0 + 10.0;
                     if enemy_capitals.contains(id) {
@@ -716,6 +782,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                     }
                     if claims.contains(id) {
                         value += 30.0;
+                    }
+                    if crosses_sea(data, &table, id) {
+                        value *= SEA_INVASION_FACTOR;
                     }
                     (value / (1.0 + f64::from(reach.cost) / 2.0), id.clone())
                 })
@@ -732,6 +801,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                     state.provinces[*id].devastation < 50
                         && state.defensive_power(data, id) < power * 2.0
                         && ctx.threat(id) < power
+                        && !crosses_sea(data, &table, id)
                 })
                 .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
                 .map(|(id, _)| (Objective::Raid, id.clone()));
