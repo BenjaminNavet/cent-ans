@@ -4,11 +4,17 @@ version = "0.1.0"
 description = "Outils Python du projet Cent Ans : budget, génération d'images, scripts Blender"
 requires-python = ">=3.12"
 dependencies = [
+    "geopandas>=1.1.4",
     "httpx>=0.28.1",
     "jsonschema>=4.26.0",
+    "numpy>=2.5.3",
+    "pillow>=12.3.0",
     "pydantic>=2.13.5",
+    "pyproj>=3.8.0",
     "pyyaml>=6.0.3",
+    "rasterio>=1.5.1",
     "rich>=15.0.0",
+    "shapely>=2.1.2",
     "typer>=0.27.2",
 ]
 

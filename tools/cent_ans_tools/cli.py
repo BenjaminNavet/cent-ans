@@ -14,9 +14,14 @@ budget_app = typer.Typer(
 )
 models_app = typer.Typer(help="Modèles d'images OpenRouter.", no_args_is_help=True)
 blender_app = typer.Typer(help="Scripts Blender.", no_args_is_help=True)
+geo_app = typer.Typer(
+    help="Carte de campagne : terrain depuis ETOPO / Natural Earth.",
+    no_args_is_help=True,
+)
 app.add_typer(budget_app, name="budget")
 app.add_typer(models_app, name="models")
 app.add_typer(blender_app, name="blender")
+app.add_typer(geo_app, name="geo")
 
 console = Console()
 
@@ -87,6 +92,64 @@ def blender_smoke() -> None:
         console.print("[red]FAIL[/red] : le script Blender n'a pas imprimé OK")
         raise typer.Exit(code=1)
     console.print("[green]OK[/green] : cube exporté en glTF")
+
+
+@geo_app.command("build")
+def geo_build(
+    force: bool = typer.Option(
+        False, "--force", help="Retélécharge les données brutes"
+    ),
+) -> None:
+    """Construit data/map/ (heightmap, masque, rivières, côte) et l'aperçu docs/img."""
+    from cent_ans_tools.geo import build as geo_builder
+
+    result = geo_builder.build(force=force)
+    table = Table(title="Sorties de la carte")
+    table.add_column("Fichier")
+    table.add_column("Taille", justify="right")
+    for path in (
+        result.map_json,
+        result.heightmap,
+        result.land_mask,
+        result.rivers,
+        result.coastline,
+        result.preview,
+    ):
+        table.add_row(
+            str(path.relative_to(geo_builder.REPO_DIR)),
+            f"{path.stat().st_size / 1e6:.1f} Mo",
+        )
+    console.print(table)
+
+
+@geo_app.command("info")
+def geo_info() -> None:
+    """Affiche les métadonnées de data/map/map.json et l'état des fichiers."""
+    from cent_ans_tools.geo import build as geo_builder
+
+    summary = geo_builder.info()
+    metadata = summary["metadata"]
+    console.print(
+        f"CRS : {metadata['crs']}  taille : {metadata['size_px']}  {metadata['meters_per_px']:.1f} m/px"
+    )
+    console.print(f"Emprise projetée : {metadata['bounds_projected']}")
+    console.print(
+        f"Altitudes codées : {metadata['height_min_m']} .. {metadata['height_max_m']} m"
+    )
+    if "height_range_m" in summary:
+        low, high = summary["height_range_m"]
+        console.print(f"Altitudes présentes : {low:.0f} .. {high:.0f} m")
+    if "land_fraction" in summary:
+        console.print(f"Fraction de terre : {summary['land_fraction']:.1%}")
+    table = Table(title="Fichiers data/map")
+    table.add_column("Fichier")
+    table.add_column("Taille", justify="right")
+    for name, size in summary["files"].items():
+        table.add_row(
+            name,
+            f"{size / 1e6:.1f} Mo" if size is not None else "[yellow]absent[/yellow]",
+        )
+    console.print(table)
 
 
 if __name__ == "__main__":
