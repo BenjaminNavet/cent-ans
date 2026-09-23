@@ -115,6 +115,7 @@ dependencies = [
  "data-model",
  "godot",
  "png",
+ "serde",
  "serde_json",
  "sim-battle",
  "sim-campaign",
