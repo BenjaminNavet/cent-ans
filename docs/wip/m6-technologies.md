@@ -6,7 +6,7 @@ Spécification : `docs/design/m6-technologies.md`.
   `bld_scriptorium`, effets de recherche des bâtiments/techs convertis en `research_points`.
 - [x] 2. Simulation `research.rs` + `tests/m6.rs`, `STATE_VERSION` 3 → 4.
 - [x] 3. Bridge `campaign_sim_tech.rs`.
-- [ ] 4. Panneau Godot technologies, HUD, journal.
+- [x] 4. Panneau Godot technologies, HUD, journal.
 - [ ] 5. Smoke `_run_technologies`, capture `docs/img/godot-tech-tree.png`, docs.
 
-Prochaine étape : étape 4 (panneau Godot).
+Prochaine étape : étape 5 (smoke, capture, docs). Rééquilibrage fait : France ≈ 20 points/tour.

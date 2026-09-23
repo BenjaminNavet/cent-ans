@@ -24,7 +24,7 @@
     },
     {
       "effect": "research_points",
-      "value": 1
+      "value": 0.5
     }
   ],
   "enables_units": [

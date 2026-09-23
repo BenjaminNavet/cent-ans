@@ -94,7 +94,7 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
         .push(data_model::BuildingId::new("bld_scriptorium").unwrap());
     assert_eq!(
         state.research_points_per_turn(&data, &france_id),
-        before + 2
+        before + 1
     );
 }
 

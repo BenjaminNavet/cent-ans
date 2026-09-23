@@ -82,6 +82,15 @@ fn real_data_loads_without_errors() {
         );
         assert!(!tech.sources.is_empty(), "{} has no sources", tech.id);
     }
+    let mut tech_names: Vec<&str> = data
+        .technologies
+        .values()
+        .map(|t| t.name.display.as_str())
+        .collect();
+    tech_names.sort_unstable();
+    let before = tech_names.len();
+    tech_names.dedup();
+    assert_eq!(tech_names.len(), before, "duplicate technology names");
     let research_buildings = data
         .buildings
         .values()
