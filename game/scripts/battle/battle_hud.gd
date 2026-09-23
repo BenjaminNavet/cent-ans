@@ -293,7 +293,7 @@ func _formation_label(key: String) -> String:
 
 
 func _make_card(unit: Dictionary) -> Dictionary:
-	var panel := PanelContainer.new()
+	var panel := RichPanel.new()  # F2 : infobulle riche du type d'unité
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.93, 0.87, 0.72)
 	style.border_color = Color(0.42, 0.29, 0.16)
@@ -314,11 +314,24 @@ func _make_card(unit: Dictionary) -> Dictionary:
 	box.add_theme_constant_override("separation", 1)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(box)
-	var icon: String = CATEGORY_ICON.get(str(unit["render"]), "⚔")
-	var name_label := _label("%s %s%s" % [icon, str(unit["name"]), " ★" if bool(unit["is_general"]) else ""], 13)
+	# F2 : icône du type d'unité (repli sur la catégorie de rendu), infobulle riche.
+	var unit_type := str(unit.get("type", ""))
+	panel.tooltip_text = RichTooltip.unit(unit_type, {"name": str(unit["name"])})
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 3)
+	var name_prefix := ""
+	var library := get_node_or_null("/root/IconLibrary")
+	if library != null:
+		var fallback := "unit_category_" + str(unit.get("render", "infantry"))
+		var icon_id: String = unit_type if library.call("has_icon", unit_type) else fallback
+		head.add_child(library.call("make_rect", icon_id, 22.0, "unit"))
+	else:
+		name_prefix = str(CATEGORY_ICON.get(str(unit["render"]), "⚔")) + " "
+	var name_label := _label("%s%s%s" % [name_prefix, str(unit["name"]), " ★" if bool(unit["is_general"]) else ""], 13)
 	name_label.clip_text = true
-	name_label.custom_minimum_size = Vector2(128, 0)
-	box.add_child(name_label)
+	name_label.custom_minimum_size = Vector2(104, 0)
+	head.add_child(name_label)
+	box.add_child(head)
 	var count := _label("", 13)
 	box.add_child(count)
 	box.add_child(_label("Moral", 11))

@@ -88,6 +88,10 @@ const HUD_TEXTS := {
 	"hud_diplomacy": ["Diplomatie", "Relations, traités et religion (touche P)."],
 	"hud_chronicle": ["Chronique", "Événements historiques et aléatoires en attente de décision."],
 	"hud_end_turn": ["Fin du tour", "Termine la saison (Entrée)."],
+	"hud_season_spring": ["Printemps", ""],
+	"hud_season_summer": ["Été", ""],
+	"hud_season_autumn": ["Automne", ""],
+	"hud_season_winter": ["Hiver", ""],
 }
 const SEASON_WORDS := {"printemps": "spring", "été": "summer", "ete": "summer", "automne": "autumn", "hiver": "winter"}
 
