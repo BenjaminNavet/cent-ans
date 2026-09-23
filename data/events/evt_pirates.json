@@ -1,0 +1,47 @@
+{
+  "id": "evt_pirates",
+  "title": "Les écumeurs de mer",
+  "text": "Des nefs d'écumeurs ont surgi à l'aube, pillé le port et incendié les navires à quai. Les marchands exigent qu'on arme des galées pour protéger la côte.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70,
+    "conditions": [
+      {
+        "type": "province_coastal"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Armer des galées",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les marins se défendre seuls",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "wealth",
+          "amount": -8
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Eustache le Moine",
+    "Michel Mollat, La Vie quotidienne des gens de mer, 1983"
+  ]
+}

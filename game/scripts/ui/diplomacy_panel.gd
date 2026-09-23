@@ -187,6 +187,7 @@ func _render_list() -> void:
 		swatch.color = Color.html(str(entry["color"]))
 		swatch.custom_minimum_size = Vector2(14, 0)
 		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		PortraitLoader.overlay_heraldry(swatch, id, Vector2(28, 0))  # M10 assets
 		line.add_child(swatch)
 		var name_label := Label.new()
 		name_label.text = str(entry["name"])

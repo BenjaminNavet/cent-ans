@@ -37,6 +37,7 @@ pub mod battle_auto;
 pub mod battle_request;
 pub mod buildings;
 pub mod characters;
+pub mod chronicle;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
@@ -60,6 +61,10 @@ pub use battle_auto::{
 };
 pub use battle_request::{BattleRequestError, PendingBattle};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use chronicle::{
+    ChronicleError, ChronicleState, Decision, DecisionOptionView, DecisionView, EventContext,
+    PlagueWave,
+};
 pub use diplomacy::{
     Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
     RelationKind,

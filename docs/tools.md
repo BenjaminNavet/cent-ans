@@ -20,6 +20,10 @@ uv run pytest              # tests
 | `uv run --project tools cent-ans budget show` | Affiche le tableau de `docs/budget.md` et le cumul |
 | `uv run --project tools cent-ans budget check <montant>` | Vérifie qu'une dépense estimée tient sous le plafond (code de sortie 1 sinon) |
 | `uv run --project tools cent-ans models list` | Liste les modèles OpenRouter capables de générer des images, avec tarifs (appel gratuit) |
+| `uv run --project tools cent-ans assets heraldry` | Écu PNG 128×128 par faction dans `game/assets/heraldry/` (gratuit) |
+| `uv run --project tools cent-ans assets audio [--no-music]` | 10 effets (`sfx/`) et 3 musiques modales (`music/`) dans `game/assets/audio/`, OGG si ffmpeg sait encoder Vorbis, sinon WAV (gratuit, ~40 s) |
+| `uv run --project tools cent-ans assets models` | Modèles low-poly glTF `game/assets/models/*.glb` via Blender headless, tableau des triangles (< 3 000 exigé) |
+| `uv run --project tools cent-ans assets portraits [--limit N] [--dry-run] [--model M] [--envelope 10]` | Portraits 256×256 des personnages historiques manquants (payant, sauf `--dry-run` : prompts + estimation sans réseau) |
 | `uv run --project tools cent-ans blender smoke` | Lance Blender en arrière-plan, crée un cube, l'exporte en glTF temporaire et attend `OK` |
 
 ## Modules
@@ -64,6 +68,52 @@ plutôt ~1056 jetons en qualité moyenne, l'estimation est donc légèrement pru
 - Les scripts vivent dans `tools/blender_scripts/` ; `smoke.py` sert de test de fumée
   (vérifié avec Blender 5.2.2 LTS).
 
+### `cent_ans_tools.heraldry` (M10)
+
+- `parse_blazon(blason, primaire, secondaire)` → `Blazon(field, charge, text)` : émail du champ lu en
+  tête (`D'or`, `De gueules`…, sinon `primary_color`), meubles en `secondary_color` sauf émail nommé
+  (`lion de pourpre`). Mots-clés : semé (de lis), écartelé (château/lion), hermine, bandé, pals, croix,
+  chaînes, clefs (+ tiare), écussons, guivre, aigle, léopards, lion, bordure (de châteaux), trescheur.
+- Rendu Pillow à 4× (512²) puis réduction Lanczos, masque d'écu « heater », ombrage diagonal léger,
+  contour brun. `build()` écrit `game/assets/heraldry/<id>.png`. Sortie déterministe (test par hash).
+
+### `cent_ans_tools.audio` (M10)
+
+- Synthèse numpy/scipy à 44,1 kHz mono : Karplus-Strong (luth), dents de scie à bande limitée avec
+  vibrato (vièle), harmoniques sinusoïdales (orgue portatif), voix à formants « a » (chœur), partiels
+  inharmoniques (cloche), bruit filtré (page, flèches, galop), réverbération à peignes.
+- `SFX` : `ui_click`, `page_turn`, `turn_bell`, `fanfare`, `march_drum`, `sword_clash`, `arrow_volley`,
+  `gallop`, `war_horn`, `choir`. `PIECES` : `campaign` (ré dorien, 80 s, luth + orgue), `war` (la
+  dorien, 72 s, vièle + tambour), `court` (sol mixolydien, 76 s, luth + orgue). Mélodie : marche
+  aléatoire sur les degrés du mode (graine fixe), forme A A' B A…, bourdon tonique + quinte.
+- `write_clip` : WAV 16 bits puis OGG (`libvorbis` si présent, sinon l'encodeur Vorbis natif de ffmpeg,
+  expérimental et stéréo uniquement — c'est le cas sur cette machine) ; repli WAV sans encodeur.
+
+### `cent_ans_tools.blender` — modèles (M10)
+
+- `build_models(out_dir, *noms)` lance `tools/blender_scripts/models.py` (primitives jointes en un
+  maillage par modèle, matériaux plats nommés ; `Banner` est teinté par Godot), lit les lignes
+  `MODEL <nom> <triangles>` et refuse un modèle ≥ 3 000 triangles.
+- Relevé (Blender 5.2.2) : castle 618, town 558, village 186, cathedral 248, army 208, siege_camp 306,
+  ship 116 triangles ; 232 Ko au total.
+
+### `cent_ans_tools.portraits` (M10)
+
+- `plan(limit)` : personnages `historical` nés avant 1400 et vivants en 1337, sans PNG existant
+  (idempotence). `build_prompt` : nom (et nom local), âge en 1337 (les mineurs sont peints en jeunes
+  adultes), rang et titres, maison, blason de la faction, traits, description, puis le style unique
+  (enluminure gothique française du XIVe siècle, buste de trois quarts, fond or et azur, cadre de
+  parchemin, sans texte).
+- `generate(jobs, model, envelope=10)` : avant chaque appel, vérifie `dépensé + estimation ≤ enveloppe`
+  et `budget.check` (plafond global), sinon `BudgetExceeded` ; `max_tokens = 4096` limite la réserve de
+  crédit ; recadrage carré (haut privilégié) et réduction 256×256 ; **une seule ligne** de
+  `docs/budget.md` par lot (même interrompu).
+- `openrouter.request_image(model, prompt, client, max_tokens)` : appel payant brut (image, coût
+  `usage.cost`) sans écriture de budget ; `generate_image` l'enveloppe avec vérification + consignation.
+- Coût réel observé : `openai/gpt-5-image-mini` **0,0455 $ par portrait** (l'estimation au jeton de
+  l'API donne 0,0113 $ ; `KNOWN_PRICES` sert de plancher à l'estimation et au `--dry-run`). Qualité
+  jugée très bonne (enluminure, écu correct, fond fleurdelisé) : modèle retenu.
+
 ## Modèles d'images disponibles sur OpenRouter (relevé du 2026-09-23)
 
 Tarifs en USD par jeton, tels que renvoyés par l'API ; la dernière colonne est l'estimation
@@ -99,3 +149,21 @@ Ordre de grandeur pour la v1 : 50 $ permettent environ 1 250 images avec
   (~0,16 $/image), à utiliser avec parcimonie.
 - Toujours passer par `generate_image` afin que chaque appel soit vérifié et consigné dans
   `docs/budget.md`.
+
+## Export macOS (`tools/export_macos.sh`)
+
+Produit `export/Cent Ans.app` (Apple Silicon, ≈ 190 Mo) : build release de la GDExtension
+(`core/build.sh --release`), export Godot avec le préréglage « macOS » (`game/export_presets.cfg`,
+modèle universel, bibliothèque Rust arm64 dans `Contents/Frameworks`), copie de `data/` dans
+`Contents/Resources/data` (lu par `MapPaths` quand `OS.has_feature("template")`), signature ad hoc.
+
+Prérequis : modèles d'export Godot 4.7.2 installés dans
+`~/Library/Application Support/Godot/export_templates/4.7.2.stable/` (seul `macos.zip` est nécessaire).
+Le jeu exporté ne peut pas recevoir de scène en argument : `-- --autostart[=fac_x]` lance directement une
+campagne (tests), suivi des options habituelles de la carte (`--screenshot=…`, `--stage=…`).
+
+```sh
+tools/export_macos.sh
+open "export/Cent Ans.app"
+"export/Cent Ans.app/Contents/MacOS/Cent Ans" -- --autostart --screenshot=/tmp/exported.png
+```

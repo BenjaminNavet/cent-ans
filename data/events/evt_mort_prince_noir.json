@@ -1,0 +1,50 @@
+{
+  "id": "evt_mort_prince_noir",
+  "title": "La mort du Prince noir",
+  "text": "Rongé par une dysenterie contractée en Castille, Édouard de Woodstock, prince de Galles, s'éteint à Westminster un an avant son père. L'Angleterre perd son plus grand capitaine ; l'héritier est un enfant de neuf ans.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1376,
+      "season": "summer"
+    },
+    "until_year": 1376,
+    "conditions": [
+      {
+        "type": "character_alive",
+        "id": "chr_edward_of_woodstock"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Faire des funérailles dignes à Cantorbéry",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_edward_of_woodstock"
+        },
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1376-06-08"
+  },
+  "sources": [
+    "Édouard de Woodstock",
+    "Richard Barber, Edward, Prince of Wales and Aquitaine, 1978"
+  ]
+}

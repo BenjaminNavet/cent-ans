@@ -1,0 +1,65 @@
+{
+  "id": "evt_maillotins",
+  "title": "Les Maillotins",
+  "text": "Un percepteur ayant voulu taxer une marchande de cresson aux Halles, le peuple de Paris s'arme de maillets de plomb pris à l'Hôtel de Ville. Les collecteurs sont tués, les prisons ouvertes. Le jeune roi et ses oncles doivent choisir entre clémence et châtiment.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1382,
+      "season": "spring"
+    },
+    "until_year": 1383,
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_ile_de_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_ile_de_france"
+  },
+  "options": [
+    {
+      "text": "Supprimer les aides nouvelles",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "unrest",
+          "amount": -20
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Rentrer dans Paris en vainqueur et punir",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1382-03-01"
+  },
+  "sources": [
+    "Révolte des Maillotins",
+    "Michel Mollat et Philippe Wolff, Ongles bleus, Jacques et Ciompi, 1970"
+  ]
+}

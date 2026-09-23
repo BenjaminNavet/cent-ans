@@ -51,7 +51,9 @@ var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
+var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
+var chronicle: ChronicleController = null  # M10
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -98,8 +100,18 @@ func _ready() -> void:
 	sieges.setup(self)
 	victory = VictoryController.new()
 	add_child(victory)
+	# M10 : chronique (fenêtre de décision, bouton de la barre).
+	chronicle = ChronicleController.new()
+	add_child(chronicle)
+	chronicle.setup(self)
 	_setup_campaign()
 	victory.setup(self)
+	help = HelpController.new()
+	add_child(help)
+	help.setup(self)
+	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
+	if audio_director != null:
+		audio_director.attach_campaign(self)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -199,6 +211,8 @@ func refresh_all() -> void:
 		_show_character_sheet(_open_character_id)
 	if diplomacy != null:
 		diplomacy.refresh()
+	if chronicle != null:  # M10
+		chronicle.refresh()
 	_refresh_research()  # M6
 	if _tech_open:
 		_show_tech_panel()
@@ -218,6 +232,7 @@ func _characters_available() -> bool:
 
 func _refresh_top_bar() -> void:
 	ui.set_faction(SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
+	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
 	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
 	var projected := -1
@@ -708,11 +723,16 @@ func _on_end_turn() -> void:
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
+	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
+	if audio != null:
+		audio.on_turn_events(events)
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
 		victory.after_end_turn()
+	if chronicle != null:  # M10
+		chronicle.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
@@ -768,8 +788,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if victory != null and victory.handle_input(event):
 		return
+	if help != null and help.handle_input(event):
+		return
 	if event.is_action_pressed("map_screenshot"):
-		var path := MapPaths.project_root().path_join("docs/img/godot-map-%d.png" % Time.get_unix_time_from_system())
+		var folder := "user://" if OS.has_feature("template") else MapPaths.project_root().path_join("docs/img")
+		var path := folder.path_join("godot-map-%d.png" % Time.get_unix_time_from_system())
 		_take_screenshot(path, false)
 	elif event.is_action_pressed("map_toggle_edge_pan"):
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
@@ -814,6 +837,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_skills()
 				"siege":
 					_stage_screenshot_siege()  # M8
+				"help":
+					help.toggle()  # M10
 				"objectives":
 					_focus_capital()
 					victory.open_panel()  # M10
@@ -825,6 +850,9 @@ func _parse_cmdline() -> void:
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)
 				"tech":
 					_stage_screenshot_tech()  # M6
+				"chronicle":  # M10
+					_focus_capital()
+					chronicle.stage_screenshot()
 				"tech_civil":
 					_stage_screenshot_tech()  # M6
 					ui.tech_panel.select_branch("civil")

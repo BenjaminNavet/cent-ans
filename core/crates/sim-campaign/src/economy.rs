@@ -54,9 +54,24 @@ pub struct FactionEconomy {
     pub projected_income: i64,
     pub army_upkeep: i64,
     pub building_upkeep: i64,
+    /// Court and administration (M10 balance), see [`administration_rate`].
+    #[serde(default)]
+    pub administration_upkeep: i64,
     pub tax_rate: TaxRate,
     pub goods: BTreeMap<ResourceId, u32>,
     pub goods_categories: Vec<ResourceCategory>,
+}
+
+/// Base share of income spent on the court and administration.
+pub const ADMINISTRATION_BASE: f64 = 0.08;
+/// Extra share per province controlled.
+pub const ADMINISTRATION_PER_PROVINCE: f64 = 0.01;
+/// Ceiling of the administration share.
+pub const ADMINISTRATION_MAX: f64 = 0.35;
+
+/// Share of income taken by administration for a realm of `provinces`.
+pub fn administration_rate(provinces: usize) -> f64 {
+    (ADMINISTRATION_BASE + ADMINISTRATION_PER_PROVINCE * provinces as f64).min(ADMINISTRATION_MAX)
 }
 
 /// Livres per head and per season, by social class.
@@ -224,6 +239,18 @@ impl CampaignState {
         (gross as f64 * self.embargo_income_factor(faction)).round() as i64
     }
 
+    /// Court and administration costs of the season: a share of income that
+    /// grows with the number of provinces held (M10 balance).
+    pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
+        let provinces = self
+            .provinces
+            .values()
+            .filter(|p| &p.controller == faction)
+            .count();
+        (self.faction_income_effective(data, faction) as f64 * administration_rate(provinces))
+            .round() as i64
+    }
+
     /// Full economic snapshot for the bridge (spec § 2).
     pub fn faction_economy(&self, data: &GameData, id: &FactionId) -> Option<FactionEconomy> {
         let faction = self.factions.get(id)?;
@@ -244,6 +271,7 @@ impl CampaignState {
             projected_income: income,
             army_upkeep,
             building_upkeep,
+            administration_upkeep: self.faction_administration_upkeep(data, id),
             tax_rate: faction.tax_rate,
             goods: faction.goods.clone(),
             goods_categories,
@@ -265,7 +293,8 @@ pub(crate) fn resolve_economy(
         let income = state.faction_income_effective(data, &faction_id);
         let army_upkeep = state.faction_army_upkeep(data, &faction_id);
         let building_upkeep = state.faction_building_upkeep(data, &faction_id);
-        let upkeep = army_upkeep + building_upkeep;
+        let administration = state.faction_administration_upkeep(data, &faction_id);
+        let upkeep = army_upkeep + building_upkeep + administration;
         let faction = state.factions.get_mut(&faction_id).expect("exists");
         faction.treasury += income - upkeep;
         faction.income_last_turn = income;

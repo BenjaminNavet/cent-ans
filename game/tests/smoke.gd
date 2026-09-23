@@ -20,7 +20,14 @@ extends SceneTree
 ##     20 fins de tour → au moins une technologie acquise et un événement `technology_researched`.
 ##  8. batailles (M7) : BattleSim headless (≤ 12 000 ticks, fin, resolve_battle), puis dialogue
 ##     d'avant-bataille → battle.tscn (60 images) → écran de fin → retour à la carte.
-##  9. bataille de siège (M8 § 2) : assaut français de la Guyenne (`debug_stage_siege`),
+##  9. chronique (M10, vraie simulation si elle expose `get_pending_decisions`, sinon skip) :
+##     60 tours France, au moins un événement historique et un aléatoire proposés au joueur, une
+##     décision résolue par l'ordre `choose_event_option` (les autres par la méthode dédiée),
+##     fenêtre `ChronicleWindow` instanciée sur une décision réelle.
+##  M10 assets : autoload AudioDirector (effets, musiques, persistance des volumes dans
+##     `user://settings.cfg`), écus et portraits (`PortraitLoader`), modèles 3D (`ModelLibrary`,
+##     marqueur d'armée habillé) et replis quand un fichier manque.
+## 11. bataille de siège (M8 § 2) : assaut français de la Guyenne (`debug_stage_siege`),
 ##     murailles (`get_siege`), défenseurs sur le rempart, IA des deux camps jusqu'à la fin,
 ##     `resolve_battle` ; puis battle.tscn sur un siège (murailles maillées, 40 images).
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
@@ -55,6 +62,8 @@ func _init() -> void:
 	await _run_technologies()
 	await _run_diplomacy()
 	await _run_battle()
+	await _run_chronicle()
+	await _run_assets()  # M10 assets
 	await _run_siege_battle()
 	quit(1 if _failures > 0 else 0)
 
@@ -266,6 +275,9 @@ func _run_city_economy() -> void:
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "city/economy: new_campaign failed"):
 		return
 	print("smoke city/economy: simulation %s" % ["REAL" if real_capable else "MOCK"])
+	# M10 : pas d'événements de chronique pendant la mesure (le bruit masquerait l'effet du bâtiment).
+	if sim.has_method("set_chronicle_enabled"):
+		sim.call("set_chronicle_enabled", false)
 
 	var city: Dictionary = sim.call("get_province_city", PROVINCE_ID)
 	if not _check(not city.is_empty(), "get_province_city(%s) should not be empty" % PROVINCE_ID):
@@ -692,6 +704,130 @@ func _run_battle() -> void:
 		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
 	map.queue_free()
 	await process_frame
+
+
+func _run_chronicle() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_pending_decisions")):
+		print("smoke chronicle: skipped, CampaignSim has no get_pending_decisions (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "chronicle: new_campaign failed"):
+		return
+	var historical := 0
+	var random := 0
+	var by_order := 0
+	var journal := 0
+	var sample: Dictionary = {}
+	for _i in 60:
+		for event in sim.call("end_turn"):
+			if str(event.get("kind", "")) == "chronicle":
+				journal += 1
+		for decision in sim.call("get_pending_decisions"):
+			if decision.get("historical", false):
+				historical += 1
+			else:
+				random += 1
+			_check(str(decision.get("title", "")) != "" and not (decision.get("options", []) as Array).is_empty(), "decision needs a title and options")
+			if sample.is_empty() and decision.get("historical", false):
+				sample = decision
+			var result: Dictionary
+			if by_order == 0:
+				result = sim.call("submit_order", {"type": "choose_event_option", "decision": int(decision["id"]), "option": 0})
+				by_order += 1
+			else:
+				result = sim.call("choose_event_option", int(decision["id"]), 0)
+			_check(result.get("ok", false), "choose_event_option refused: %s" % result.get("error", "?"))
+	_check(historical >= 1, "60 turns should bring at least one historical event, got %d" % historical)
+	_check(random >= 1, "60 turns should bring at least one random event, got %d" % random)
+	_check(by_order == 1, "one decision should be resolved by order")
+	_check((sim.call("get_pending_decisions") as Array).is_empty(), "no decision should remain")
+	var refused: Dictionary = sim.call("choose_event_option", 99999, 0)
+	_check(not refused.get("ok", true), "unknown decision should be refused")
+
+	# Fenêtre réelle sur une décision historique.
+	var window: Node = (load("res://scenes/ui/chronicle_window.tscn") as PackedScene).instantiate()
+	root.add_child(window)
+	await process_frame
+	if not sample.is_empty():
+		window.call("show_decision", sample, 2)
+		await process_frame
+		_check(window.visible, "chronicle window should be visible")
+	window.queue_free()
+	if _failures == 0:
+		print("smoke OK: chronicle (real), %d historical + %d random decisions in 60 turns, %d journal entries, sample « %s »" % [
+			historical, random, journal, str(sample.get("title", "?"))])
+
+
+# --- M10 assets ------------------------------------------------------------------------
+
+
+func _run_assets() -> void:
+	var audio: Node = root.get_node_or_null("/root/AudioDirector")
+	if not _check(audio != null, "AudioDirector autoload missing"):
+		return
+	var missing_sfx: Array = []
+	for clip in ["ui_click", "page_turn", "turn_bell", "fanfare", "march_drum", "sword_clash", "arrow_volley", "gallop", "war_horn", "choir"]:
+		if not audio.call("has_sfx", clip):
+			missing_sfx.append(clip)
+	_check(missing_sfx.is_empty(), "missing sound effects: %s" % [missing_sfx])
+	for context in ["campaign", "war", "court"]:
+		_check(audio.call("has_music", context), "missing music: %s" % context)
+	_check(audio.call("play_sfx", "ui_click"), "play_sfx(ui_click) failed")
+	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
+	audio.call("play_music", "war")
+	_check(str(audio.get("current_context")) == "war", "music context should be war")
+	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
+
+	# Persistance des volumes (valeurs d'origine restaurées ensuite).
+	var original: float = audio.get("music_volume")
+	audio.call("set_music_volume", 0.35)
+	var config := ConfigFile.new()
+	_check(config.load("user://settings.cfg") == OK, "settings.cfg not written")
+	_check(is_equal_approx(float(config.get_value("audio", "music_volume", -1.0)), 0.35), "music volume not persisted")
+	audio.set("music_volume", 1.0)
+	audio.call("load_settings")
+	_check(is_equal_approx(float(audio.get("music_volume")), 0.35), "music volume not reloaded")
+	audio.call("set_music_volume", original)
+
+	# Écus, portraits et replis.
+	_check(PortraitLoader.heraldry_texture("fac_france") != null, "fac_france heraldry missing")
+	_check(PortraitLoader.portrait_texture("chr_does_not_exist") == null, "unknown portrait should be null")
+	var swatch := ColorRect.new()
+	root.add_child(swatch)
+	var placed := PortraitLoader.overlay_portrait(swatch, "chr_does_not_exist", "fac_england", Vector2(48, 48))
+	_check(placed and swatch.get_node_or_null(PortraitLoader.OVERLAY_NAME) != null, "heraldry fallback portrait expected")
+	swatch.queue_free()
+	var portraits := 0
+	var dir := DirAccess.open("res://assets/portraits")
+	if dir != null:
+		for file_name in dir.get_files():
+			if file_name.ends_with(".png") and PortraitLoader.portrait_texture(file_name.get_basename()) != null:
+				portraits += 1
+
+	# Modèles 3D.
+	var missing_models: Array = []
+	for model_name in ["castle", "town", "village", "cathedral", "army", "siege_camp", "ship"]:
+		if not ModelLibrary.has_model(model_name):
+			missing_models.append(model_name)
+	_check(missing_models.is_empty(), "missing models: %s" % [missing_models])
+	_check(ModelLibrary.instantiate("does_not_exist") == null, "unknown model should be null")
+	_check(ModelLibrary.city_kind("prov_ile_de_france") in ["castle", "town", "village", "cathedral"], "city kind expected")
+	var marker: Node3D = (load("res://scenes/map/army_marker.tscn") as PackedScene).instantiate()
+	root.add_child(marker)
+	await process_frame
+	var dressed := ModelLibrary.dress_army_marker(marker, {"stance": "siege"}, Color(0.8, 0.1, 0.1))
+	_check(dressed and marker.get_node_or_null(ModelLibrary.MODEL_NODE) != null, "army marker should get a 3D model")
+	_check(not (marker.get_node("Banner") as Node3D).visible, "placeholder banner should be hidden")
+	_check(marker.get_node_or_null("%s/SiegeCamp" % ModelLibrary.MODEL_NODE) != null, "siege camp expected")
+	marker.queue_free()
+	await process_frame
+	ModelLibrary.clear_cache()
+	PortraitLoader.clear_cache()
+	audio.call("stop_all")
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: assets, 10 sfx + 3 music, settings persisted, %d portrait(s), 7 models, siege marker dressed" % portraits)
 
 
 ## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis

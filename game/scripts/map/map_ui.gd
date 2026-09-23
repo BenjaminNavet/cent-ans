@@ -79,6 +79,10 @@ func _ready() -> void:
 	end_turn_button.shortcut = shortcut
 	end_turn_button.tooltip_text = "Termine le tour (Entrée)"
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
+	# M10 assets : entrée « Son… » (volumes Musique / Effets) dans le menu.
+	var audio := get_node_or_null("/root/AudioDirector")
+	if audio != null:
+		audio.add_sound_menu(menu_button.get_popup(), self)
 	log_toggle.pressed.connect(_toggle_log)
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
@@ -251,6 +255,8 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#4a3a10]✉ %s[/color]" % text
 		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
 			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
+		elif kind == "chronicle":  # M10
+			line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
 		elif kind == "technology_researched":
 			line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
 		elif kind == "income":
@@ -363,10 +369,10 @@ func tech_panel_visible() -> bool:
 ## Barre supérieure : recherche en cours (`get_research`, vide si aucune).
 func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 	if research.is_empty():
-		research_label.text = "Aucune recherche (+%d/tour)" % points_per_turn
+		research_label.text = "Aucune recherche"
 		research_bar.max_value = 1
 		research_bar.value = 0
-		research_box.tooltip_text = "Aucune recherche en cours : les points sont perdus (clic : technologies)."
+		research_box.tooltip_text = "Aucune recherche en cours : %d points par tour perdus (clic : technologies)." % points_per_turn
 		return
 	var turns := int(research.get("turns_left", -1))
 	research_label.text = str(research.get("name", ""))
