@@ -14,6 +14,7 @@ extends Node3D
 ##   --stage=faction            panneau de faction (trésor, revenus, impôts, biens).
 ##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
 ##   --stage=tech_civil         idem sur l'onglet Civil.
+##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -48,6 +49,9 @@ var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
+var sieges: SiegeController = null  # M8
+var victory: VictoryController = null  # M10
+var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 
@@ -91,11 +95,20 @@ func _ready() -> void:
 	diplomacy = DiplomacyController.new()
 	add_child(diplomacy)
 	diplomacy.setup(self)
+	sieges = SiegeController.new()
+	add_child(sieges)
+	sieges.setup(self)
+	victory = VictoryController.new()
+	add_child(victory)
 	# M10 : chronique (fenêtre de décision, bouton de la barre).
 	chronicle = ChronicleController.new()
 	add_child(chronicle)
 	chronicle.setup(self)
 	_setup_campaign()
+	victory.setup(self)
+	help = HelpController.new()
+	add_child(help)
+	help.setup(self)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -303,6 +316,8 @@ func select_army(army_id: String) -> void:
 	if general_id != "" and _characters_available():
 		general_skills = (sim.call("get_character", general_id) as Dictionary).get("skills", {})
 	ui.show_army(army_id, army, SimFacade.faction_short_name(faction), SimFacade.faction_color(faction), is_player, province_name_of, general_skills)
+	if sieges != null:
+		sieges.on_army_shown(army_id, is_player)
 	ui.hide_province()
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
@@ -701,17 +716,21 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 func _on_end_turn() -> void:
 	if sim == null or ui.is_dialog_open():
 		return
+	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
+	if victory != null:
+		victory.after_end_turn()
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
+	_offer_pending_battles()  # M7
 
 
 # --- Sauvegarde ----------------------------------------------------------------------
@@ -760,8 +779,13 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if diplomacy != null and diplomacy.handle_input(event):
 		return
+	if victory != null and victory.handle_input(event):
+		return
+	if help != null and help.handle_input(event):
+		return
 	if event.is_action_pressed("map_screenshot"):
-		var path := MapPaths.project_root().path_join("docs/img/godot-map-%d.png" % Time.get_unix_time_from_system())
+		var folder := "user://" if OS.has_feature("template") else MapPaths.project_root().path_join("docs/img")
+		var path := folder.path_join("godot-map-%d.png" % Time.get_unix_time_from_system())
 		_take_screenshot(path, false)
 	elif event.is_action_pressed("map_toggle_edge_pan"):
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
@@ -804,6 +828,13 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"siege":
+					_stage_screenshot_siege()  # M8
+				"help":
+					help.toggle()  # M10
+				"objectives":
+					_focus_capital()
+					victory.open_panel()  # M10
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
@@ -818,6 +849,8 @@ func _parse_cmdline() -> void:
 				"tech_civil":
 					_stage_screenshot_tech()  # M6
 					ui.tech_panel.select_branch("civil")
+				"battle":
+					_stage_screenshot_battle()
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
@@ -965,3 +998,119 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
+
+
+## Mise en scène « siège » (M8) : la première armée du joueur marche sur la province ennemie la
+## plus proche en posture de siège ; quelques tours passent jusqu'au siège, puis elle est sélectionnée.
+func _stage_screenshot_siege() -> void:
+	var ids := player_army_ids()
+	if ids.is_empty():
+		return
+	var army_id := str(ids[0])
+	for _turn in 6:
+		var army: Dictionary = sim.call("get_army", army_id)
+		if army.is_empty():
+			return
+		var state: Dictionary = sim.call("get_province_state", str(army["location"]))
+		var siege: Dictionary = state.get("siege", {})
+		if str(siege.get("attacker", "")) == player_faction:
+			break
+		var target := ""
+		var best := 1 << 30
+		for id in SimFacade.store.call("get_province_ids"):
+			var st: Dictionary = sim.call("get_province_state", id)
+			var summary: Dictionary = sim.call("get_faction_summary", player_faction)
+			if str(st.get("controller", "")) in summary.get("at_war_with", PackedStringArray()):
+				var path: PackedStringArray = sim.call("find_path", army_id, id)
+				if not path.is_empty() and path.size() < best:
+					best = path.size()
+					target = str(id)
+		if target != "":
+			sim.call("submit_order", {"type": "set_stance", "army": army_id, "stance": "siege"})
+			sim.call("submit_order", {"type": "move_army", "army": army_id, "path": Array(sim.call("find_path", army_id, target))})
+		sim.call("end_turn")
+	refresh_all()
+	select_army(army_id)
+	var army_now: Dictionary = sim.call("get_army", army_id)
+	var centroid := map_data.centroid_of_id(str(army_now.get("location", "")))
+	camera_rig.look_at_point(Vector3(centroid.x, 0.0, centroid.y), 260.0)
+# --- Batailles (M7) --------------------------------------------------------------------
+# Dialogue d'avant-bataille en fin de tour, lancement de la scène 3D (la carte est mise en
+# sommeil, pas détruite : la simulation reste la même) et retour avec le résultat appliqué.
+
+const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
+const PRE_BATTLE_DIALOG := "res://scenes/battle/pre_battle_dialog.tscn"
+
+var _battle_dialog: PreBattleDialog = null
+
+
+func _battles_available() -> bool:
+	return sim != null and sim.has_method("get_pending_battles")
+
+
+## Ouvre le dialogue sur la première bataille en attente (s'il y en a une).
+func _offer_pending_battles() -> void:
+	if not _battles_available():
+		return
+	var pending: Array = sim.call("get_pending_battles")
+	if pending.is_empty():
+		_close_battle_dialog()
+		return
+	if _battle_dialog == null:
+		_battle_dialog = load(PRE_BATTLE_DIALOG).instantiate()
+		ui.add_child(_battle_dialog)
+		_battle_dialog.fight_requested.connect(_on_battle_fight)
+		_battle_dialog.auto_requested.connect(_on_battle_auto)
+	_battle_dialog.show_battle(sim, pending[0])
+
+
+func _close_battle_dialog() -> void:
+	if _battle_dialog != null:
+		_battle_dialog.visible = false
+
+
+func _on_battle_auto(index: int) -> void:
+	var events: Array = sim.call("auto_resolve_battle", index)
+	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
+	refresh_all()
+	_offer_pending_battles()
+
+
+func _on_battle_fight(index: int, seed: int) -> void:
+	var battle: Node = load(BATTLE_SCENE).instantiate()
+	battle.configure(sim, index, seed)
+	battle.returned.connect(_on_battle_returned.bind(battle))
+	_set_campaign_active(false)
+	get_tree().root.add_child(battle)
+
+
+func _on_battle_returned(result: Dictionary, battle: Node) -> void:
+	battle.queue_free()
+	_set_campaign_active(true)
+	if result.get("ok", false):
+		ui.add_events(result.get("events", []), "%s (bataille)" % sim.call("get_date_label"))
+	else:
+		ui.show_toast("Résultat de bataille refusé : %s" % result.get("error", "?"), true)
+	refresh_all()
+	_offer_pending_battles()
+
+
+func _set_campaign_active(active: bool) -> void:
+	visible = active
+	ui.visible = active
+	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	if active:
+		camera.make_current()
+
+
+## `--stage=battle` : bataille France–Angleterre mise en scène, dialogue ouvert.
+func _stage_screenshot_battle() -> void:
+	if not _battles_available() or not sim.has_method("debug_stage_battle"):
+		return
+	var enemy := "fac_england" if player_faction != "fac_england" else "fac_france"
+	var armies := BattleScene.main_armies(sim, player_faction, enemy)
+	if armies.is_empty():
+		return
+	sim.call("debug_stage_battle", armies[0], armies[1])
+	refresh_all()
+	_offer_pending_battles()

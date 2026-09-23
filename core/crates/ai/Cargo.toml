@@ -7,3 +7,4 @@ license.workspace = true
 [dependencies]
 sim-campaign = { path = "../sim-campaign" }
 sim-battle = { path = "../sim-battle" }
+data-model = { path = "../data-model" }

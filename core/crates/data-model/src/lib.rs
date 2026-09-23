@@ -25,8 +25,8 @@ pub use entities::event::{
     EventSeason, EventTrigger, ProvinceRef,
 };
 pub use entities::faction::{
-    AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Relation, RelationStatus,
-    SuccessionLaw,
+    AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
+    ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
 pub use entities::names::NameList;
 pub use entities::province::{

@@ -242,6 +242,9 @@ impl CampaignSim {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
                 "turns_left" => i64::from(siege.turns_left),
+                "turns_elapsed" => i64::from(siege.turns_elapsed),
+                "supplies" => i64::from(siege.supplies),
+                "breach" => i64::from(siege.breach),
             };
             dict.set("siege", &siege_dict);
         }
@@ -355,7 +358,8 @@ impl CampaignSim {
             godot_warn!("CampaignSim.end_turn called before new_campaign");
             return VarArray::new();
         };
-        events_array(&state.end_turn(data))
+        // M9: every AI faction plays with the strategic planner.
+        events_array(&state.end_turn_with(data, ai::plan_turn))
     }
 
     /// Character sheet (spec M4 § 3), or an empty dictionary for an unknown id.
@@ -677,13 +681,14 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "projected_income" => economy.projected_income,
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
+        "administration_upkeep" => economy.administration_upkeep,
         "tax_rate" => tax_rate_key(economy.tax_rate),
         "goods" => &goods,
         "goods_categories" => &goods_categories,
     }
 }
 
-fn events_array(events: &[GameEvent]) -> VarArray {
+pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {
     events
         .iter()
         .map(|event| {

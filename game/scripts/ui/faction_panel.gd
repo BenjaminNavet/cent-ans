@@ -28,6 +28,7 @@ const RESOURCE_NAMES := {
 @onready var projected_value: Label = %ProjectedValue
 @onready var army_upkeep_value: Label = %ArmyUpkeepValue
 @onready var building_upkeep_value: Label = %BuildingUpkeepValue
+@onready var administration_value: Label = %AdministrationValue
 @onready var tax_low: Button = %TaxLow
 @onready var tax_normal: Button = %TaxNormal
 @onready var tax_high: Button = %TaxHigh
@@ -62,6 +63,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		projected_value.text = "—"
 		army_upkeep_value.text = "—"
 		building_upkeep_value.text = "—"
+		administration_value.text = "—"
 		tax_note.text = "Non disponible avec cette simulation."
 		_set_tax_buttons_disabled(true)
 		_fill_goods({}, [])
@@ -72,6 +74,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	projected_value.text = _signed(int(economy.get("projected_income", 0)))
 	army_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("army_upkeep", 0)))
 	building_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("building_upkeep", 0)))
+	administration_value.text = "%s ℔" % _thousands(int(economy.get("administration_upkeep", 0)))
 	_set_tax_buttons_disabled(false)
 	var rate: String = str(economy.get("tax_rate", "normal"))
 	_updating = true

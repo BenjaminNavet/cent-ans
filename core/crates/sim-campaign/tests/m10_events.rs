@@ -415,3 +415,17 @@ fn sixty_turns_bring_historical_and_random_events() {
     assert!(random >= 1, "random {random}");
     assert!(state.chronicle.pending_decisions.is_empty());
 }
+
+#[test]
+fn disabled_chronicle_fires_nothing() {
+    let data = data();
+    let mut state = start(&data, "fac_france", 13);
+    state.chronicle.disabled = true;
+    set_war(&mut state, "fac_england", "fac_france", true);
+    set_date(&mut state, 1340, Season::Summer);
+    for _ in 0..8 {
+        state.end_turn_with(&data, idle);
+    }
+    assert!(state.chronicle.fired_events.is_empty());
+    assert!(state.chronicle.pending_decisions.is_empty());
+}
