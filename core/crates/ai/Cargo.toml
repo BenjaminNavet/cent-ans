@@ -1,0 +1,9 @@
+[package]
+name = "ai"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+sim-campaign = { path = "../sim-campaign" }
+sim-battle = { path = "../sim-battle" }

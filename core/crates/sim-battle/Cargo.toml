@@ -1,0 +1,8 @@
+[package]
+name = "sim-battle"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+data-model = { path = "../data-model" }
