@@ -40,7 +40,7 @@ extends SceneTree
 ##     rempli par l'interface ou un ordre fait avancer l'étape (sélection, marche, province,
 ##     onglet Ville, construction, recherche, diplomatie, fin de tour, rapport, chronique,
 ##     impôt, gouverneur), progression persistée ; encyclopédie : chaque onglet > 0 entrée,
-##     fiche non vide, recherche filtrée, liens internes, retour, touche K.
+##     fiche non vide, recherche filtrée, liens internes, retour, touche L.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -1343,7 +1343,7 @@ func _run_tutorial() -> void:
 	# Encyclopédie.
 	var encyclopedia: Control = tutorial.encyclopedia
 	var key := InputEventKey.new()
-	key.physical_keycode = KEY_K
+	key.physical_keycode = KEY_L
 	key.pressed = true
 	tutorial._unhandled_input(key)
 	_check(encyclopedia.visible, "K should open the encyclopedia")

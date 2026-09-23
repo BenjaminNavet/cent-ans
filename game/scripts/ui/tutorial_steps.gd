@@ -99,7 +99,7 @@ const BASE := {
 	},
 	"outro": {
 		"title": "À vous de jouer",
-		"text": "Vous connaissez l'essentiel. L'encyclopédie (touche K ou Menu → Encyclopédie) décrit chaque unité, bâtiment, technologie, trait et mécanique ; l'aide (F1) rappelle les commandes ; les objectifs (O) suivent votre progression. Bonne campagne !",
+		"text": "Vous connaissez l'essentiel. L'encyclopédie (touche L ou Menu → Encyclopédie) décrit chaque unité, bâtiment, technologie, trait et mécanique ; l'aide (F1) rappelle les commandes ; les objectifs (O) suivent votre progression. Bonne campagne !",
 		"objective": "Cliquez sur « Terminer ».",
 		"target": "",
 		"manual": true,

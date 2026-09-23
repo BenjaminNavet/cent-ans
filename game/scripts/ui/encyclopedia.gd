@@ -1,7 +1,7 @@
 class_name Encyclopedia
 extends Control
 
-## F8 — encyclopédie (touche K ou Menu → Encyclopédie) : fenêtre parchemin à onglets (Unités,
+## F8 — encyclopédie (touche L ou Menu → Encyclopédie) : fenêtre parchemin à onglets (Unités,
 ## Bâtiments, Technologies, Ressources, Traits, Compétences, Factions, Religion, Mécaniques),
 ## liste filtrée par la recherche, fiche détaillée avec icônes (`IconLibrary`) et liens
 ## internes (clic sur un prérequis, un déblocage, une religion… ouvre sa fiche).
