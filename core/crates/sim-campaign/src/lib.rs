@@ -34,6 +34,7 @@
 
 pub mod ai_minimal;
 pub mod battle_auto;
+pub mod battle_request;
 pub mod buildings;
 pub mod characters;
 pub mod dynasty;
@@ -53,6 +54,7 @@ pub mod turn;
 pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
 };
+pub use battle_request::{BattleRequestError, PendingBattle};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
 pub use dynasty::{
     CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,

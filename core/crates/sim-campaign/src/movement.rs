@@ -329,8 +329,39 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
     }
 }
 
-/// Auto-resolves a field battle between two armies standing in the same province.
+/// A field battle between two armies standing in the same province: deferred
+/// to the player when interactive battles are on and the player takes part
+/// (M7, see `battle_request`), auto-resolved otherwise.
 pub(crate) fn fight(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker_id: &ArmyId,
+    defender_id: &ArmyId,
+    attacker_origin: &ProvinceId,
+    events: &mut Vec<GameEvent>,
+) {
+    if crate::battle_request::defer_player_battle(
+        state,
+        data,
+        attacker_id,
+        defender_id,
+        attacker_origin,
+        events,
+    ) {
+        return;
+    }
+    auto_fight(
+        state,
+        data,
+        attacker_id,
+        defender_id,
+        attacker_origin,
+        events,
+    );
+}
+
+/// Auto-resolves a field battle between two armies standing in the same province.
+pub(crate) fn auto_fight(
     state: &mut CampaignState,
     data: &GameData,
     attacker_id: &ArmyId,
@@ -357,11 +388,40 @@ pub(crate) fn fight(
     };
     let attacker_side = side_from_army(state, data, attacker);
     let defender_side = side_from_army(state, data, defender);
+    let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
+    apply_battle_result(
+        state,
+        data,
+        attacker_id,
+        defender_id,
+        attacker_origin,
+        &result,
+        events,
+    );
+}
+
+/// Applies a battle result (auto-resolved or fought in 3D, M7): journal,
+/// losses, captures, general XP/traits (M4 hooks) and the loser's retreat.
+pub(crate) fn apply_battle_result(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker_id: &ArmyId,
+    defender_id: &ArmyId,
+    attacker_origin: &ProvinceId,
+    result: &crate::battle_auto::BattleResult,
+    events: &mut Vec<GameEvent>,
+) {
+    let (Some(attacker), Some(defender)) =
+        (state.armies.get(attacker_id), state.armies.get(defender_id))
+    else {
+        return;
+    };
+    let province_id = attacker.location.clone();
+    let province = data.provinces.get(&province_id);
     let attacker_faction = attacker.faction.clone();
     let defender_faction = defender.faction.clone();
     let attacker_general = attacker.general.clone();
     let defender_general = defender.general.clone();
-    let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
 
     let province_name =
         province.map_or_else(|| province_id.to_string(), |p| p.name.display.clone());

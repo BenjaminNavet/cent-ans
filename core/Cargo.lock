@@ -366,6 +366,7 @@ dependencies = [
  "rand_chacha",
  "serde",
  "serde_json",
+ "sim-battle",
  "thiserror",
 ]
 
