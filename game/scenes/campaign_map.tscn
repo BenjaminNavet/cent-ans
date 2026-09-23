@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=27 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
 [ext_resource type="Script" path="res://scripts/map/terrain_builder.gd" id="2_terrain"]
@@ -12,7 +12,10 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/province_panel.tscn" id="10_panel"]
 [ext_resource type="Script" path="res://scripts/map/army_markers.gd" id="11_armies"]
 [ext_resource type="Script" path="res://scripts/map/path_preview.gd" id="12_path"]
-[ext_resource type="PackedScene" path="res://scenes/ui/army_panel.tscn" id="13_army_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/army_strip.tscn" id="21_army_strip"]
+[ext_resource type="PackedScene" path="res://scenes/ui/general_seal.tscn" id="22_general_seal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/end_turn_cluster.tscn" id="23_end_turn_cluster"]
+[ext_resource type="PackedScene" path="res://scenes/ui/news_letters.tscn" id="24_news_letters"]
 [ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="14_dialog"]
 [ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="15_theme"]
 [ext_resource type="PackedScene" path="res://scenes/ui/faction_panel.tscn" id="16_faction_panel"]
@@ -189,12 +192,6 @@ layout_mode = 2
 mouse_filter = 2
 show_percentage = false
 
-[node name="EndTurnButton" type="Button" parent="UI/TopBar/HBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Fin du tour  ⏎"
-
 [node name="MenuButton" type="MenuButton" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -296,7 +293,18 @@ fit_content = true
 scroll_active = false
 text = "[i]Aucun événement pour l'instant.[/i]"
 
-[node name="ArmyPanel" parent="UI" instance=ExtResource("13_army_panel")]
+[node name="ArmyStrip" parent="UI" instance=ExtResource("21_army_strip")]
+unique_name_in_owner = true
+visible = false
+
+[node name="GeneralSeal" parent="UI" instance=ExtResource("22_general_seal")]
+unique_name_in_owner = true
+visible = false
+
+[node name="NewsLetters" parent="UI" instance=ExtResource("24_news_letters")]
+unique_name_in_owner = true
+
+[node name="EndTurnCluster" parent="UI" instance=ExtResource("23_end_turn_cluster")]
 unique_name_in_owner = true
 
 [node name="ProvincePanel" parent="UI" instance=ExtResource("10_panel")]
