@@ -11,9 +11,11 @@ use data_model::{GameData, HistoricalDate};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 
+mod battle_sim;
 mod campaign_sim;
 mod convert;
 
+pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 
 struct CentAnsExtension;

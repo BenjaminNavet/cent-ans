@@ -55,8 +55,8 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct CampaignSim {
-    data: Option<Arc<GameData>>,
-    state: Option<CampaignState>,
+    pub(crate) data: Option<Arc<GameData>>,
+    pub(crate) state: Option<CampaignState>,
     base: Base<RefCounted>,
 }
 
@@ -683,7 +683,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
     }
 }
 
-fn events_array(events: &[GameEvent]) -> VarArray {
+pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {
     events
         .iter()
         .map(|event| {
