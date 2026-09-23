@@ -94,3 +94,13 @@ dans `data/characters` (`trait_*`, vocabulaire libre) : M4 les définit dans `da
 ## 5. Critères de fin
 - Tests Rust verts, smoke Godot vert, 60 tours en France sans crash avec dynastie vivante (Philippe VI meurt
   vers 1350 selon la table, Jean II lui succède).
+
+## F1 (v2) — effets branchés
+`Diplomacy` du souverain de B : +2 par point à l'attitude de A envers B (±20, « Diplomatie de son
+souverain »), donc à l'acceptation des propositions. `Intrigue` (choix : captures) : chance de capturer un
+général vaincu = 10 % + 2 points par point d'écart d'intrigue entre vainqueur et vaincu (0-50 %).
+`Loyalty` : loyauté des souverains vassal et suzerain ajoutée à la cible de loyauté du vassal (rébellions) ;
+dans une province (gouverneur), moins de mécontentement noble. `Movement` et `Supply`/`AttritionResistance`
+du général : points de mouvement, ravitaillement. Un captif a un geôlier (`captor`) ; `trait_captive_ransomed`
+à la libération. Un personnage historique à naître sans parents modélisés (Jeanne de Bourbon) naît sans
+condition ; Charles VI naît en 1368 si Charles V et Jeanne sont mariés et vivants.

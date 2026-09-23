@@ -83,3 +83,12 @@ revient dans la campagne. Design général : `docs/design/2026-09-23-cent-ans-de
 ## 5. Critères de fin
 Tests Rust verts, smoke vert, captures relues, 60 fps visés pour 2 × 20 unités de 120 soldats sur Apple
 Silicon (mesurer et consigner dans `docs/godot-map.md`), docs à jour (`status`, `roadmap`, `data-model`).
+
+## F1 (v2) — armées alliées
+Les armées de la province de la rencontre, de la même faction ou alliées et en guerre contre l'adversaire,
+rejoignent leur camp : auto-résolution (régiments concaténés, chacun avec les techs de sa faction, un seul
+général commandant = meilleur commandement, ravitaillement moyen pondéré) et `battle_setup` (camp portant
+l'id et la faction de l'armée de tête). Les pertes (auto-résolues ou issues de la bataille 3D, même ordre
+de régiments) sont réparties sur chaque armée, seul le commandant peut être capturé et tous les vaincus
+retraitent. La bataille est différée si le joueur est dans l'une des coalitions. Les assauts de siège
+restent à deux.

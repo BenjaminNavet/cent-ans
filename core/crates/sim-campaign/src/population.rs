@@ -18,14 +18,23 @@ fn base_growth(class: SocialClass) -> f64 {
 }
 
 /// Base wealth every class tends towards absent any modifier.
+///
+/// F1: raised by [`CLASS_TARGETING_WEALTH_OFFSET`] when class-targeted
+/// building effects stopped reaching every class (they used to be summed
+/// province-wide, which inflated every class's wealth and the M3 income
+/// calibration relied on it).
 fn base_wealth(class: SocialClass) -> f64 {
-    match class {
-        SocialClass::Peasants => 30.0,
-        SocialClass::Burghers => 55.0,
-        SocialClass::Clergy => 50.0,
-        SocialClass::Nobility => 70.0,
-    }
+    CLASS_TARGETING_WEALTH_OFFSET
+        + match class {
+            SocialClass::Peasants => 30.0,
+            SocialClass::Burghers => 55.0,
+            SocialClass::Clergy => 50.0,
+            SocialClass::Nobility => 70.0,
+        }
 }
+
+/// See [`base_wealth`] (F1 rebalancing).
+pub const CLASS_TARGETING_WEALTH_OFFSET: f64 = 8.0;
 
 /// Devastation above which growth stalls entirely (spec § 1.1).
 pub const GROWTH_DEVASTATION_CAP: u8 = 50;
@@ -104,6 +113,10 @@ fn update_class(
     population_total: u64,
     cap: u64,
 ) {
+    // F1: effects aimed at this class only (`Effect::class`).
+    let class_fx = effects.classes.get(class);
+    let class_points = |value: crate::buildings::EffectValue| value.flat + value.percent;
+
     // ----- growth ----------------------------------------------------
     let health_factor = (f64::from(entry.health) - 50.0) / 50.0;
     let devastation_factor = if devastation > GROWTH_DEVASTATION_CAP {
@@ -112,8 +125,8 @@ fn update_class(
         1.0
     };
     let mut growth_rate = base_growth(class) * health_factor * devastation_factor;
-    growth_rate += effects.growth.flat / 100.0;
-    growth_rate *= 1.0 + effects.growth.percent / 100.0;
+    growth_rate += (effects.growth.flat + class_fx.growth.flat) / 100.0;
+    growth_rate *= 1.0 + (effects.growth.percent + class_fx.growth.percent) / 100.0;
     let new_count = (entry.count as f64 * (1.0 + growth_rate)).max(0.0).round() as u64;
     entry.count = new_count;
 
@@ -126,6 +139,7 @@ fn update_class(
     let health_target = 50.0
         + effects.health.flat
         + effects.health.percent
+        + class_points(class_fx.health)
         + (f64::from(entry.goods_satisfaction) - 50.0) / 4.0
         - overpopulation;
     entry.health = move_towards(entry.health, health_target, HEALTH_SPEED);
@@ -134,6 +148,7 @@ fn update_class(
     let wealth_target = base_wealth(class)
         + effects.wealth.flat
         + effects.wealth.percent
+        + class_points(class_fx.wealth)
         + effects.trade_income.flat
         - tax_burden * 30.0
         - f64::from(devastation) / 2.0;
@@ -143,7 +158,8 @@ fn update_class(
     let goods_target = 40.0
         + 10.0 * goods_category_count as f64
         + effects.goods_satisfaction.flat
-        + effects.goods_satisfaction.percent;
+        + effects.goods_satisfaction.percent
+        + class_points(class_fx.goods_satisfaction);
     entry.goods_satisfaction = move_towards(entry.goods_satisfaction, goods_target, GOODS_SPEED);
 
     // ----- unrest ----------------------------------------------------------
@@ -160,7 +176,12 @@ fn update_class(
         unrest_target += 10.0;
     }
     // Building `Unrest` effects: negative values are appeasement.
-    unrest_target += effects.unrest.flat + effects.unrest.percent;
+    unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
+    // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
+    // to its lord.
+    if class == SocialClass::Nobility {
+        unrest_target -= effects.loyalty.apply(0.0);
+    }
     unrest_target = unrest_target.clamp(0.0, 100.0);
     entry.unrest = move_towards(entry.unrest, unrest_target, UNREST_SPEED);
 }

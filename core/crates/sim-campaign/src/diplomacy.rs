@@ -355,6 +355,27 @@ impl CampaignState {
         None
     }
 
+    /// Value of one effect of `faction`'s living ruler (traits and skills),
+    /// rounded and bounded to ±20 (F1 `Diplomacy`, `Loyalty`).
+    pub fn ruler_effect_points(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        pick: impl Fn(&crate::buildings::EffectTotals) -> f64,
+    ) -> i32 {
+        let Some(ruler) = self
+            .factions
+            .get(faction)
+            .and_then(|f| f.ruler.as_ref())
+            .filter(|r| self.characters.get(*r).is_some_and(|c| c.alive))
+        else {
+            return 0;
+        };
+        pick(&crate::skills::character_effects(self, data, ruler))
+            .round()
+            .clamp(-20.0, 20.0) as i32
+    }
+
     /// Attitude of `a` towards `b` (-100..100) with its reasons.
     pub fn attitude(
         &self,
@@ -378,6 +399,11 @@ impl CampaignState {
             .and_then(|p| p.diplomacy)
             .map_or(0, |d| (i32::from(d) - 50) / 2);
         add("Tempérament diplomatique", personality);
+        // F1: a charming (or haughty) ruler on the other side.
+        add(
+            "Diplomatie de son souverain",
+            self.ruler_effect_points(data, b, |e| e.diplomacy.apply(0.0) * 2.0),
+        );
         match self.relation(a, b) {
             RelationKind::War => add("En guerre", -50),
             RelationKind::Truce => add("Trêve récente", -10),
@@ -1589,6 +1615,10 @@ pub fn loyalty_target(
     if religion::is_excommunicated(state, suzerain) {
         target -= 20;
     }
+    // F1 `Loyalty`: a loyal vassal ruler, a generous or kind overlord.
+    let loyalty = |e: &crate::buildings::EffectTotals| e.loyalty.apply(0.0);
+    target += state.ruler_effect_points(data, vassal, loyalty)
+        + state.ruler_effect_points(data, suzerain, loyalty);
     // Embargoed by an enemy of the suzerain: the vassal's trade suffers
     // for its overlord's quarrels (Flanders and English wool, 1336).
     let squeezed = state

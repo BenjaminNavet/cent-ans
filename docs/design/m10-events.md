@@ -64,3 +64,13 @@ déclenchent qu'une fois.
 ## 4. Critères de fin
 Tests verts, smoke vert, capture relue, `docs/status.md`, `docs/godot-map.md`, `docs/design/data-model.md`
 à jour.
+
+## F1 (v2) — capture, chaînes, Charles VI
+Nouveaux effets : `capture_character { id, faction?, captor }`, `release_character { id, faction?,
+ransom }` (rançon versée au geôlier), `schedule_event { event, delay }` (≥ 1 tour) et `marry { a, b }`.
+Nouvelle catégorie `chained` : l'événement ne part que programmé, au tour N + k, pour la même faction et la
+même province, conditions vérifiées alors (`ChronicleState::scheduled`). Validation : délai nul ou
+auto-programmation refusés, cible inconnue ou événement chaîné jamais programmé signalés. Poitiers capture
+Jean II ; les États programment « La rançon du roi Jean » ; Brétigny (captivité de Jean ou, en repli,
+Poitiers) le libère contre 40 000 livres s'il est encore captif. « Les noces du dauphin » (1350) marient
+Charles et Jeanne de Bourbon ; Charles VI naît en 1368 et sa folie le vise (il règne, 18-40 ans).

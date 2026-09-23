@@ -104,6 +104,17 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   automatique tournante sur 3 emplacements, « Continuer », rapport de saison cliquable, alertes
   persistantes, crédits. Smoke § 12 « flow ». Voir `docs/godot-map.md` § Écrans et flux. Captures :
   `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-flow-*.png`, `godot-credits.png`.
+- Règles inertes branchées (F1, détail et choix dans `docs/wip/f1-effects.md`) : effets de bâtiments
+  `Garrison` (la ville paie une part de l'entretien de sa garnison et la renforce), `RecruitCost`, `Supply`,
+  ciblage par classe sociale et par famille d'unités ; effets de technologies `army_upkeep`,
+  `army_experience` (recrues aguerries), `recruit_cost`, `movement` (trains de siège plus lents, artillerie
+  de campagne), `production`, `siege_resistance`, `fortification_level`, `wealth`, `prestige` (annuel) ;
+  surplus de recherche reporté ; traits `research_civil`/`research_military`, `Diplomacy` (attitude),
+  `Intrigue` (captures), `Loyalty` (vassaux, noblesse), `Movement` et `Supply` du général ; armées alliées de
+  la province dans les batailles rangées (auto-résolution, `battle_setup`, résultat 3D réparti) ; chronique :
+  capture et rançon, événements programmés (catégorie `chained`, effet `schedule_event`), mariage historique,
+  Jeanne de Bourbon et Charles VI (naissance 1368, folie ciblée). Rééquilibrage : richesse de base +8 par
+  classe. 25 tests (`tests/f1_effects.rs`) + 1 test `data-model`.
 
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
@@ -118,22 +129,23 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
 - M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
-- Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
 - Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
 - L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
 - La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
 - L'addon Blender MCP exige Blender ouvert en mode graphique ; le fallback headless est `tools/cent_ans_tools/blender.py`.
 
-- L'IA ne propose pas encore de mariages ; les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences restent sans effet (M9).
+- L'IA ne propose pas encore de mariages (M9).
 - M5 : l'IA diplomatique est volontairement prudente (peu de déclarations de guerre) ; la guerre de Cent Ans peut se conclure tôt par une paix blanche. Les noms des maisons générées viennent de la capitale ; le Portugal n'a pas de liste de prénoms dédiée.
-- M6 : les effets de tech `army_upkeep`, `army_experience`, `recruit_cost`, `movement`, `production`,
-  `siege_resistance`, `fortification_level`, `wealth`, `prestige` sont affichés mais pas encore appliqués ;
-  `research_civil`/`research_military` (traits, compétences) sont inertes. Le surplus de points à
-  l'achèvement est perdu. Le mock GDScript n'a pas de technologies.
+- M6 : le mock GDScript n'a pas de technologies.
+- F1 : restent sans effet `recruit_slots` (bâtiments), la `Piety` des bâtiments et des traits (la piété du
+  souverain ne bouge qu'avec les événements) et `army_armor`/`army_ranged` des bâtiments (buttes de tir,
+  armurerie : seuls les bonus des technologies s'appliquent en bataille). Les assauts de siège restent à
+  deux (armée assiégeante contre garnison) : les alliés ne rejoignent que les batailles rangées. L'interface
+  n'affiche pas encore le geôlier d'un captif ni la ventilation par classe des effets (exposée par le pont :
+  `effects.by_class`). Pas d'ordre de rançon pour le joueur : les captifs sont libérés par les événements.
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
-- Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
-- Batailles (M7) : pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée ; les armées alliées présentes dans la province ne participent pas (seules les deux armées de la rencontre).
+- Batailles (M7) : pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée.
 - Sièges 3D (M8) : pas de vrai cheminement (les ordres contournent une seule ouverture à la fois ; un
   ordre à travers la ville entière peut longer un mur) ; les murs bloquent par le centre des régiments,
   leurs rectangles peuvent déborder sur la maçonnerie ; tours de la muraille décoratives (pas de tir
@@ -143,11 +155,10 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
 - IA de bataille (M9) : pas de manœuvre d'encerclement coordonnée ni d'usage du relief en attaque ;
   l'IA ne change pas de formation (schiltron) d'elle-même.
 
-- M10 : Charles VI n'existe pas dans les données (pas de naissance historique) : sa folie se déclenche
-  sur « dirigeant Valois de 18 à 40 ans en 1392-1394 ». Les événements globaux (Peste noire, Constance)
-  attendent le choix du joueur : la vague de peste ne démarre qu'une fois la décision prise (ou expirée).
-  Pas encore d'effet « capturer un personnage » : Brétigny accepte aussi « Poitiers a eu lieu ».
-  Les chaînes d'événements différés (effets au tour N+k) ne sont pas gérées.
+- M10 : les événements globaux (Peste noire, Constance) attendent le choix du joueur : la vague de peste
+  ne démarre qu'une fois la décision prise (ou expirée). La folie vise Charles VI : si la chronologie
+  diverge (Charles V non marié à Jeanne de Bourbon, Charles VI mort ou ne régnant pas en 1392-1394), elle
+  n'a pas lieu. Brétigny garde le repli « Poitiers a eu lieu » quand Jean II n'est plus captif.
 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.

@@ -45,6 +45,10 @@ pub struct Side {
     /// Percent reduction to incoming damage, folded into effective armour
     /// (spec § 2 `BattleDefense`).
     pub general_defense_percent: f64,
+    /// F1: the general's `Intrigue` (spies, ruses): raises the chance of
+    /// capturing a beaten enemy general, lowers the chance of being taken.
+    #[serde(default)]
+    pub general_intrigue: f64,
 }
 
 impl Default for Side {
@@ -57,6 +61,7 @@ impl Default for Side {
             general_charge_percent: 0.0,
             general_ranged_percent: 0.0,
             general_defense_percent: 0.0,
+            general_intrigue: 0.0,
         }
     }
 }
@@ -105,6 +110,19 @@ pub struct BattleResult {
 pub const ROUT_MORALE: f64 = 25.0;
 /// Probability (per cent) that the losing general is captured.
 pub const CAPTURE_CHANCE_PERCENT: u32 = 10;
+/// Capture chance (percentage points) per point of `Intrigue` difference
+/// between the winning and the losing general (F1).
+pub const CAPTURE_PERCENT_PER_INTRIGUE: f64 = 2.0;
+/// Ceiling of the capture chance (per cent).
+pub const CAPTURE_CHANCE_MAX_PERCENT: f64 = 50.0;
+
+/// Capture chance (per cent) of a beaten general of intrigue `loser` facing
+/// a victor of intrigue `winner` (F1).
+pub fn capture_chance_percent(winner: f64, loser: f64) -> u32 {
+    (f64::from(CAPTURE_CHANCE_PERCENT) + CAPTURE_PERCENT_PER_INTRIGUE * (winner - loser))
+        .round()
+        .clamp(0.0, CAPTURE_CHANCE_MAX_PERCENT) as u32
+}
 
 fn average(values: impl Iterator<Item = f64>) -> f64 {
     let (sum, count) = values.fold((0.0, 0usize), |(s, n), v| (s + v, n + 1));
@@ -203,7 +221,7 @@ pub fn resolve_auto(
     let loser_fraction = 0.15 + 0.25 * advantage;
     let winner_fraction = 0.15 - 0.10 * advantage;
 
-    let mut outcome = |side: &Side, power: f64, won: bool| -> SideOutcome {
+    let mut outcome = |side: &Side, enemy: &Side, power: f64, won: bool| -> SideOutcome {
         let fraction = if won { winner_fraction } else { loser_fraction };
         let losses: Vec<u32> = side
             .units
@@ -218,8 +236,10 @@ pub fn resolve_auto(
                 .map(|u| (f64::from(u.morale) + f64::from(morale_delta)).max(0.0)),
         );
         let routed = !won && morale_after < ROUT_MORALE;
-        let general_captured =
-            !won && side.general_command > 0 && rng.below(100) < CAPTURE_CHANCE_PERCENT;
+        let general_captured = !won
+            && side.general_command > 0
+            && rng.below(100)
+                < capture_chance_percent(enemy.general_intrigue, side.general_intrigue);
         SideOutcome {
             power,
             losses,
@@ -229,8 +249,18 @@ pub fn resolve_auto(
             general_captured,
         }
     };
-    let attacker_outcome = outcome(attacker, attacker_power, winner == Winner::Attacker);
-    let defender_outcome = outcome(defender, defender_power, winner == Winner::Defender);
+    let attacker_outcome = outcome(
+        attacker,
+        defender,
+        attacker_power,
+        winner == Winner::Attacker,
+    );
+    let defender_outcome = outcome(
+        defender,
+        attacker,
+        defender_power,
+        winner == Winner::Defender,
+    );
     BattleResult {
         winner,
         attacker: attacker_outcome,
