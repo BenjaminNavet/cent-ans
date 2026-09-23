@@ -2,11 +2,11 @@
 
 ## État
 - [x] Textures Poly Haven CC0 + procédurales dans `game/assets/textures/battle/` (README, `build_textures.py`)
-- [ ] Ciel, lumière, météo (`battle.tscn`, `battle_sky.gdshader`, particules GPU)
-- [ ] Sol texturé (splatmap, `battle_ground.gdshader`), anneau de collines lointaines
-- [ ] Herbe animée, arbres, buissons, rochers
-- [ ] Rivière (`battle_water.gdshader`)
-- [ ] Figurines refaites + animation par shader (`battle_soldier.gdshader`), cadavres, bannières
+- [x] Ciel, lumière, météo (`battle.tscn`, `battle_sky.gdshader`, `battle_atmosphere.gd`, particules GPU) — premier jet
+- [x] Sol texturé (splatmap, `battle_ground.gdshader`), anneaux de collines — premier jet
+- [x] Herbe (`battle_vegetation.gd`, `battle_grass.gdshader`), arbres/buissons/rochers — premier jet, à régler (herbe trop sombre)
+- [x] Rivière (`battle_water.gdshader`) — premier jet, largeur à régler
+- [x] Figurines + animation par shader (`battle_soldier.gdshader`, `battle_soldiers.gd`), cadavres, bannières (`battle_banner.gdshader`) — premier jet, caparaçon trop gros
 - [ ] Sièges (pierre, toits, maisons au sol)
 - [ ] Performance, captures après
 
@@ -16,4 +16,4 @@
 - `--benchmark --siege` (12 unités, 972 soldats) : 201,3 i/s
 
 ## Prochaine étape
-Environnement et shaders du sol.
+Itérer sur les captures (`--closeup`, `--weather=`), puis sièges (`battle_siege.gd`).
