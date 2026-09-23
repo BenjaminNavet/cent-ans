@@ -12,7 +12,7 @@ const TURNS := 4
 const FACTION_SUMMARY_KEYS := ["treasury", "income", "at_war_with", "allies", "provinces_count", "armies_count", "alive"]
 const PROVINCE_STATE_KEYS := ["owner", "controller", "garrison", "unrest", "devastation", "population_total"]
 const ARMY_KEYS := ["faction", "general", "general_name", "location", "units", "movement_points", "supply", "stance", "path"]
-const UNIT_KEYS := ["unit_type", "strength", "max_strength", "morale"]
+const UNIT_KEYS := ["unit_type", "name", "strength", "max_strength", "morale"]
 const RECRUIT_KEYS := ["unit_type", "name", "cost", "upkeep", "available", "reason"]
 const EVENT_KEYS := ["kind", "text_fr", "province", "army", "faction"]
 

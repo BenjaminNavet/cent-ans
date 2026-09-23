@@ -2,8 +2,7 @@
 //!
 //! Orders come from GDScript as a `Dictionary`; they are turned into JSON and
 //! deserialised into `sim_campaign::Order` so that the bridge never has to
-//! know the order fields. The reverse direction lets the bridge expose any
-//! serde-serialisable value as a plain `Dictionary` / `Array`.
+//! know the order fields.
 //!
 //! These functions call into the Godot runtime, so they cannot be unit-tested
 //! with `cargo test`; `core/checks/campaign_sim_check.gd` covers them headless.
@@ -61,37 +60,14 @@ pub fn variant_to_json(variant: &Variant) -> Result<Value, String> {
                 let key = match key.get_type() {
                     VariantType::STRING => key.to::<GString>().to_string(),
                     VariantType::STRING_NAME => key.to::<StringName>().to_string(),
-                    other => return Err(format!("dictionary key of type {other:?} is not a string")),
+                    other => {
+                        return Err(format!("dictionary key of type {other:?} is not a string"))
+                    }
                 };
                 map.insert(key, variant_to_json(&value)?);
             }
             Ok(Value::Object(map))
         }
         other => Err(format!("unsupported Godot type {other:?}")),
-    }
-}
-
-/// Converts JSON into a GDScript value: objects become `Dictionary`, arrays
-/// `Array`, integers `int`, other numbers `float`.
-pub fn json_to_variant(value: &Value) -> Variant {
-    match value {
-        Value::Null => Variant::nil(),
-        Value::Bool(flag) => flag.to_variant(),
-        Value::Number(number) => number
-            .as_i64()
-            .map_or_else(|| number.as_f64().unwrap_or(f64::NAN).to_variant(), |int| int.to_variant()),
-        Value::String(text) => GString::from(text).to_variant(),
-        Value::Array(items) => items
-            .iter()
-            .map(json_to_variant)
-            .collect::<VarArray>()
-            .to_variant(),
-        Value::Object(map) => {
-            let mut dict = VarDictionary::new();
-            for (key, item) in map {
-                dict.set(key.as_str(), json_to_variant(item));
-            }
-            dict.to_variant()
-        }
     }
 }
