@@ -11,7 +11,8 @@
   "faction": "fac_guelders",
   "role": "ruler",
   "birth": {
-    "value": "1295-01-01"
+    "value": "1295",
+    "uncertain": true
   },
   "death": {
     "value": "1343-10-12"

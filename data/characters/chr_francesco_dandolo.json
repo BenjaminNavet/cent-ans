@@ -11,7 +11,8 @@
   "faction": "fac_venice",
   "role": "ruler",
   "birth": {
-    "value": "1258-01-01"
+    "value": "1258",
+    "uncertain": true
   },
   "death": {
     "value": "1339-10-31"
