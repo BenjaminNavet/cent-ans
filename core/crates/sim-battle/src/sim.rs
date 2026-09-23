@@ -383,21 +383,22 @@ impl BattleSim {
             u.category == UnitCategory::Siege && !u.siege_tower() && !u.ram
         });
         let rams = self.side_units(a, |u| u.ram);
-        let width = self.place_row(&infantry, front_z - 130.0, -1.0);
-        self.place_row(&shooters, front_z - 100.0, -1.0);
-        self.place_wings(&cavalry, width.max(200.0), front_z - 165.0);
-        self.place_row(&engines, front_z - 200.0, -1.0);
+        // Out of bowshot of the wall walk; towers and ram closer in.
+        let width = self.place_row(&infantry, front_z - 265.0, -1.0);
+        self.place_row(&shooters, front_z - 215.0, -1.0);
+        self.place_wings(&cavalry, width.max(200.0), front_z - 280.0);
+        self.place_row(&engines, front_z - 240.0, -1.0);
         let front = works.front_walls();
         for (k, &i) in towers.iter().enumerate() {
             let (mx, mz) = works.pieces[front[k % front.len()]].midpoint();
             let unit = &mut self.units[i];
             unit.x = mx + 15.0 * (k / front.len()) as f64;
-            unit.z = mz - 110.0;
+            unit.z = mz - 70.0;
         }
         let (gx, gz) = works.pieces[works.gate].midpoint();
         for &i in &rams {
             self.units[i].x = gx;
-            self.units[i].z = gz - 105.0;
+            self.units[i].z = gz - 110.0;
         }
         // Garrison.
         let d = SideId::Defender;
@@ -996,6 +997,10 @@ impl BattleSim {
     /// Movement speed of `unit` heading along `dir`, in m/s.
     fn speed(&self, unit: &Unit, dir: (f64, f64)) -> f64 {
         let mut speed = f64::from(unit.stats.speed) * 0.04;
+        if unit.siege_tower() {
+            // Pushed along by the assault troops.
+            speed = speed.max(0.55);
+        }
         if unit.running || unit.state == UnitState::Routing {
             speed *= if unit.is_cavalry() && unit.state == UnitState::Charging {
                 2.5
@@ -1113,10 +1118,12 @@ impl BattleSim {
             if unit.on_wall {
                 continue;
             }
+            // Stopped only when closing in on the wall face (sliding along
+            // it or backing away is free).
             let d_to = piece.distance(to.0, to.1);
-            if piece.crossed_by(from, to)
-                || (d_to < band && d_to < piece.distance(from.0, from.1) - 1e-9)
-            {
+            let closing = piece.outside_offset(to.0, to.1).abs()
+                < piece.outside_offset(from.0, from.1).abs() - 1e-9;
+            if piece.crossed_by(from, to) || (d_to < band && closing) {
                 return Some(k);
             }
         }
@@ -1135,7 +1142,7 @@ impl BattleSim {
             return (tx, tz);
         }
         let from = (unit.x, unit.z);
-        if works.crosses_intact(from, (tx, tz)).is_none() {
+        if !works.path_blocked(from, (tx, tz)) {
             return (tx, tz);
         }
         let Some(opening) = works.best_opening(from, (tx, tz)) else {
@@ -1217,7 +1224,7 @@ impl BattleSim {
         };
         let mut rate = DT / duration * (1.0 - unit.fatigue / 200.0);
         if engaged {
-            rate *= 0.35;
+            rate *= 0.25;
         }
         let (cx, cz) = p.closest_point(unit.x, unit.z);
         let (nx, nz) = p.outward();
@@ -1669,6 +1676,9 @@ impl BattleSim {
         if self.on_ladders(target) {
             kills *= 1.5;
         }
+        if target.ram || target.siege_tower() {
+            kills *= 0.1; // roofed and hung with wet hides
+        }
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;
         }
@@ -1843,12 +1853,12 @@ impl BattleSim {
         }
         // Siege: ladders are a poor place to fight from.
         if self.on_ladders(attacker) {
-            damage *= 0.5;
+            damage *= 0.3;
         } else if attacker.climbing.is_some() {
             damage *= 0.9;
         }
         if self.on_ladders(defender) {
-            damage *= 1.5;
+            damage *= 2.0;
         }
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
@@ -1960,7 +1970,13 @@ impl BattleSim {
             let unit = &mut self.units[i];
             let mut morale = unit.morale;
             // Behind battlements the garrison takes its losses more calmly.
-            let cover = if unit.on_wall { 0.7 } else { 1.0 };
+            let cover = if unit.ram || unit.siege_tower() {
+                0.3
+            } else if unit.on_wall {
+                0.7
+            } else {
+                1.0
+            };
             morale -= unit.tick_losses / f64::from(unit.max_soldiers) * LOSS_MORALE_FACTOR * cover;
             if unit.flanked & 1 != 0 {
                 morale -= 1.5 * DT;
@@ -2004,6 +2020,11 @@ impl BattleSim {
             } else if !engaged && nearest_enemy > 100.0 {
                 if morale < unit.morale_cap {
                     morale = (morale + 0.3 * DT + aura).min(unit.morale_cap);
+                }
+            } else if unit.on_wall && unit.side == SideId::Defender {
+                // Behind their walls the burghers stand firm.
+                if morale < unit.morale_cap {
+                    morale = (morale + 0.2 * DT + aura).min(unit.morale_cap);
                 }
             } else if morale < unit.morale_cap + 10.0 {
                 morale += aura;

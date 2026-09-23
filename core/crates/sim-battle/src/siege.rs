@@ -25,11 +25,11 @@ pub const SQUARE_RADIUS: f64 = 35.0;
 /// Seconds the attacker must hold the square to take the town.
 pub const HOLD_TO_WIN: f64 = 60.0;
 /// Seconds for a regiment to scale the wall with ladders.
-pub const LADDER_TIME: f64 = 35.0;
+pub const LADDER_TIME: f64 = 45.0;
 /// Seconds to cross onto the wall from a docked siege tower.
 pub const TOWER_CLIMB_TIME: f64 = 8.0;
 /// Gate damage per second from a full-strength ram crew.
-pub const RAM_DAMAGE: f64 = 7.0;
+pub const RAM_DAMAGE: f64 = 4.0;
 /// Wall damage per engine shot, per point of `siege_attack`.
 pub const ENGINE_WALL_FACTOR: f64 = 1.6;
 
@@ -326,6 +326,31 @@ impl SiegeWorks {
         (0..self.pieces.len()).find(|&i| self.pieces[i].intact() && self.pieces[i].crossed_by(p, q))
     }
 
+    /// `true` when a regiment walking from `p` to `q` would run into an
+    /// intact piece: the path crosses one, or grazes the end of one (the
+    /// jamb of a gate or breach) closer than the blocking band.
+    pub fn path_blocked(&self, p: (f64, f64), q: (f64, f64)) -> bool {
+        if self.crosses_intact(p, q).is_some() {
+            return true;
+        }
+        let margin = self.band() + 1.0;
+        let path = WallPiece {
+            kind: PieceKind::Wall,
+            a: p,
+            b: q,
+            hp: 0.0,
+            max_hp: 0.0,
+            docked_tower: None,
+        };
+        let start_clear =
+            |end: (f64, f64)| ((end.0 - p.0).powi(2) + (end.1 - p.1).powi(2)).sqrt() > margin;
+        self.pieces.iter().filter(|w| w.intact()).any(|w| {
+            [w.a, w.b]
+                .into_iter()
+                .any(|end| start_clear(end) && path.distance(end.0, end.1) < margin)
+        })
+    }
+
     /// Nearest intact piece to (x, z) and its distance.
     pub fn nearest_intact(&self, x: f64, z: f64) -> Option<(usize, f64)> {
         (0..self.pieces.len())
@@ -363,7 +388,7 @@ impl SiegeWorks {
         let side = if offset >= 0.0 { 1.0 } else { -1.0 };
         let lateral = ((from.0 - mx) * tx + (from.1 - mz) * tz).abs();
         let aligned = lateral < (p.length() * 0.5 - 3.0).max(2.0);
-        if offset.abs() > 4.0 && !aligned {
+        if !aligned {
             (mx + nx * side * 18.0, mz + nz * side * 18.0)
         } else {
             (mx - nx * side * 20.0, mz - nz * side * 20.0)
