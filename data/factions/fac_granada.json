@@ -1,0 +1,58 @@
+{
+  "id": "fac_granada",
+  "name": {
+    "display": "Émirat de Grenade",
+    "local": "Mamlakat Gharnāṭa",
+    "local_language": "arabe andalou"
+  },
+  "short_name": "Grenade",
+  "adjective": "grenadin",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_yusuf_i",
+  "capital": "prov_granada",
+  "capital_city": "Grenade (Alhambra)",
+  "religion": "rel_islam",
+  "culture": "cul_andalusi",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules à la bande d'or engoulée de deux têtes de dragon, chargée de la devise nasride.",
+    "description": "Bande d'or des Nasrides portant « Wa-lā ghālib illā Allāh » (Nul vainqueur sinon Dieu).",
+    "primary_color": "#A31F24",
+    "secondary_color": "#E8B923"
+  },
+  "titles": [
+    "Émir de Grenade"
+  ],
+  "treasury": 25000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_urban_sanitation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_castile",
+      "status": "truce",
+      "until": {
+        "value": "1339-03-01"
+      },
+      "note": "Trêves intermittentes après le siège de Gibraltar (1333) ; la guerre reprend en 1339 et culmine au Salado (1340)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 45,
+    "trade": 75,
+    "piety": 70
+  },
+  "description": "Dernier État musulman de la péninsule : Grenade, Málaga, Almería. Yusuf Ier embellit l'Alhambra et s'allie aux Mérinides contre la Castille.",
+  "sources": [
+    "Royaume de Grenade",
+    "Yusuf Ier de Grenade",
+    "Bataille du Salado"
+  ]
+}

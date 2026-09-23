@@ -1,0 +1,39 @@
+{
+  "id": "chr_charles_de_luxembourg",
+  "name": {
+    "display": "Charles de Luxembourg",
+    "local": "Karel Lucemburský",
+    "local_language": "tchèque"
+  },
+  "sex": "male",
+  "house": "Luxembourg",
+  "faction": "fac_bohemia",
+  "role": "heir",
+  "birth": {
+    "value": "1316-05-14"
+  },
+  "death": {
+    "value": "1378-11-29"
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 8,
+    "court": 8
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_pious",
+    "trait_cunning"
+  ],
+  "piety": 70,
+  "family": {
+    "father": "chr_jean_de_luxembourg"
+  },
+  "starting_location": "prov_bohemia",
+  "status": "at_court",
+  "description": "Élevé à la cour de France, margrave de Moravie ; futur Charles IV, roi des Romains (1346) et empereur (1355), fondateur de l'université de Prague.",
+  "sources": [
+    "Charles IV (empereur du Saint-Empire)"
+  ]
+}

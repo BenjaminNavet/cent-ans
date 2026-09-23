@@ -1,0 +1,43 @@
+{
+  "id": "chr_gerhard_iii_de_holstein",
+  "name": {
+    "display": "Gérard III de Holstein",
+    "local": "Gerhard III. von Holstein-Rendsburg",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "le Grand",
+  "sex": "male",
+  "house": "Schauenbourg",
+  "faction": "fac_holstein",
+  "role": "ruler",
+  "birth": {
+    "value": "1292-01-01"
+  },
+  "death": {
+    "value": "1340-04-01",
+    "note": "Assassiné à Randers."
+  },
+  "historical": true,
+  "skills": {
+    "command": 8,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_ruthless",
+    "trait_veteran"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_henri_ii_de_holstein"
+    ]
+  },
+  "starting_location": "prov_jutland",
+  "status": "at_court",
+  "description": "Régent du Danemark sans roi, maître du Jutland ; tué dans son lit à Randers par Niels Ebbesen.",
+  "sources": [
+    "Gérard III de Holstein-Rendsburg"
+  ]
+}

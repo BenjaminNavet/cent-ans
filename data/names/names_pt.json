@@ -1,0 +1,55 @@
+{
+  "id": "names_pt",
+  "language": "galaïco-portugais",
+  "cultures": [
+    "cul_portuguese",
+    "cul_galician"
+  ],
+  "male_first_names": [
+    "Afonso",
+    "Pedro",
+    "João",
+    "Fernando",
+    "Dinis",
+    "Nuno",
+    "Gonçalo",
+    "Vasco",
+    "Álvaro",
+    "Martim",
+    "Lourenço",
+    "Estêvão",
+    "Rodrigo",
+    "Diogo",
+    "Gil",
+    "Soeiro",
+    "Egas",
+    "Lopo",
+    "Mem",
+    "Rui"
+  ],
+  "female_first_names": [
+    "Beatriz",
+    "Isabel",
+    "Constança",
+    "Inês",
+    "Maria",
+    "Leonor",
+    "Teresa",
+    "Mafalda",
+    "Urraca",
+    "Sancha",
+    "Branca",
+    "Catarina",
+    "Joana",
+    "Violante",
+    "Guiomar"
+  ],
+  "surnames": [
+    "de Borgonha",
+    "Pereira",
+    "de Castro",
+    "Coutinho",
+    "Pacheco",
+    "da Cunha"
+  ]
+}

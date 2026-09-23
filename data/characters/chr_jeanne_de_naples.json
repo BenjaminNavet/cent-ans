@@ -1,0 +1,34 @@
+{
+  "id": "chr_jeanne_de_naples",
+  "name": {
+    "display": "Jeanne d'Anjou",
+    "local": "Giovanna d'Angiò",
+    "local_language": "napolitain"
+  },
+  "sex": "female",
+  "house": "Anjou-Sicile",
+  "faction": "fac_naples",
+  "role": "heir",
+  "birth": {
+    "value": "1326-03-01"
+  },
+  "death": {
+    "value": "1382-07-27"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_prodigy"
+  ],
+  "piety": 50,
+  "starting_location": "prov_napoli",
+  "status": "minor",
+  "description": "Petite-fille et héritière de Robert, mariée enfant à André de Hongrie (1333) ; future Jeanne Ire.",
+  "sources": [
+    "Jeanne Ire de Naples"
+  ]
+}

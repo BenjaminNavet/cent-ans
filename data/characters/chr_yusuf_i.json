@@ -1,0 +1,37 @@
+{
+  "id": "chr_yusuf_i",
+  "name": {
+    "display": "Yusuf Ier, émir de Grenade",
+    "local": "Abū al-Ḥajjāj Yūsuf",
+    "local_language": "arabe andalou"
+  },
+  "sex": "male",
+  "house": "Nasrides",
+  "faction": "fac_granada",
+  "role": "ruler",
+  "birth": {
+    "value": "1318-06-29"
+  },
+  "death": {
+    "value": "1354-10-19",
+    "note": "Assassiné à la mosquée de l'Alhambra."
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 7,
+    "court": 7
+  },
+  "traits": [
+    "trait_cultured",
+    "trait_builder",
+    "trait_pious"
+  ],
+  "piety": 70,
+  "starting_location": "prov_granada",
+  "status": "at_court",
+  "description": "Émir depuis 1333 ; bâtisseur de l'Alhambra (porte de la Justice, madrasa), vaincu au Salado.",
+  "sources": [
+    "Yusuf Ier de Grenade"
+  ]
+}

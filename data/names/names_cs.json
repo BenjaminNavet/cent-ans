@@ -1,0 +1,46 @@
+{
+  "id": "names_cs",
+  "language": "vieux tchèque",
+  "cultures": [
+    "cul_czech"
+  ],
+  "male_first_names": [
+    "Václav",
+    "Karel",
+    "Jan",
+    "Přemysl",
+    "Oldřich",
+    "Boleslav",
+    "Vratislav",
+    "Jindřich",
+    "Zdeněk",
+    "Vilém",
+    "Petr",
+    "Ota",
+    "Soběslav",
+    "Bořivoj",
+    "Vok",
+    "Hynek"
+  ],
+  "female_first_names": [
+    "Eliška",
+    "Anežka",
+    "Kunhuta",
+    "Markéta",
+    "Ludmila",
+    "Blanka",
+    "Anna",
+    "Dobroslava",
+    "Jitka",
+    "Kateřina",
+    "Běta"
+  ],
+  "surnames": [
+    "z Rožmberka",
+    "z Lipé",
+    "z Hradce",
+    "ze Šternberka",
+    "z Pardubic",
+    "z Dubé"
+  ]
+}
