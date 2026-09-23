@@ -22,6 +22,16 @@ static var _scenes: Dictionary = {}  # nom → PackedScene ou null
 static var _city_kinds: Dictionary = {}  # province_id → nom de modèle
 static var _capitals: Dictionary = {}  # province_id → true
 static var _capitals_loaded := false
+static var _tinted_meshes: Dictionary = {}  # "mesh|couleur" → Mesh teinté
+
+
+## Vide les caches statiques (appelé en fin de smoke test pour éviter les fuites signalées).
+static func clear_cache() -> void:
+	_scenes.clear()
+	_city_kinds.clear()
+	_capitals.clear()
+	_capitals_loaded = false
+	_tinted_meshes.clear()
 
 
 static func has_model(model_name: String) -> bool:
@@ -52,17 +62,29 @@ static func instantiate(model_name: String, model_scale: float = 1.0) -> Node3D:
 
 
 ## Teinte les surfaces dont le matériau s'appelle `Banner` (sous-arbre de `root`).
+## Le maillage est dupliqué (un par couleur, mis en cache) plutôt que d'utiliser
+## `set_surface_override_material`, qui produit des erreurs avec le rendu factice headless.
 static func tint_banner(root: Node, color: Color) -> void:
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance.mesh == null:
 			continue
+		var key := "%s|%s" % [mesh_instance.mesh.resource_path + str(mesh_instance.mesh.get_rid().get_id()), color.to_html()]
+		if _tinted_meshes.has(key):
+			mesh_instance.mesh = _tinted_meshes[key]
+			continue
+		var tinted_mesh: Mesh = null
 		for surface in mesh_instance.mesh.get_surface_count():
 			var material := mesh_instance.mesh.surface_get_material(surface)
 			if material != null and material.resource_name == "Banner" and material is BaseMaterial3D:
+				if tinted_mesh == null:
+					tinted_mesh = mesh_instance.mesh.duplicate() as Mesh
 				var tinted := (material as BaseMaterial3D).duplicate() as BaseMaterial3D
 				tinted.albedo_color = color
-				mesh_instance.set_surface_override_material(surface, tinted)
+				tinted_mesh.surface_set_material(surface, tinted)
+		if tinted_mesh != null:
+			_tinted_meshes[key] = tinted_mesh
+			mesh_instance.mesh = tinted_mesh
 
 
 # --- Villes ------------------------------------------------------------------------

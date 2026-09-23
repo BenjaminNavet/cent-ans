@@ -110,6 +110,8 @@ func _make_row(row: Dictionary) -> Control:
 	initials.add_theme_font_size_override("font_size", 14)
 	initials.set_anchors_preset(Control.PRESET_FULL_RECT)
 	swatch.add_child(initials)
+	# M10 assets : portrait peint (ou blason de faction) par-dessus le placeholder.
+	PortraitLoader.overlay_portrait(swatch, str(row.get("id", "")), str(row.get("faction", "")), Vector2(48, 48))
 	line.add_child(portrait)
 
 	var name_box := VBoxContainer.new()

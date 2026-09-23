@@ -79,6 +79,10 @@ func _ready() -> void:
 	end_turn_button.shortcut = shortcut
 	end_turn_button.tooltip_text = "Termine le tour (Entrée)"
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
+	# M10 assets : entrée « Son… » (volumes Musique / Effets) dans le menu.
+	var audio := get_node_or_null("/root/AudioDirector")
+	if audio != null:
+		audio.add_sound_menu(menu_button.get_popup(), self)
 	log_toggle.pressed.connect(_toggle_log)
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
