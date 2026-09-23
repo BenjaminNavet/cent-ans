@@ -1,0 +1,12 @@
+{
+  "id": "cdx_charles_vi",
+  "title": "Charles VI le Bien-Aimé, dit le Fou",
+  "category": "personnage",
+  "aliases": ["Charles VI", "Charles le Fol", "Charles le Bien-Aimé", "folie du roi"],
+  "era": { "from": "1368", "to": "1422" },
+  "summary": "Roi de France de 1380 à 1422, Charles VI devient fou en 1392. Ses crises répétées livrent le royaume aux rivalités de ses oncles et de son frère, puis à la guerre civile et à la conquête anglaise.",
+  "body": "Fils de [[cdx_charles_v|Charles V]] et de Jeanne de Bourbon, Charles naît en 1368 et devient roi à onze ans, en 1380. Le pouvoir est d'abord aux mains de ses oncles, les ducs d'Anjou, de [[cdx_jean_de_berry|Berry]] et de Bourgogne ([[cdx_philippe_le_hardi|Philippe le Hardi]]), qui rétablissent les impôts et affrontent les révoltes urbaines, comme celle des [[cdx_maillotins|Maillotins]] à Paris. En 1382, le jeune roi assiste à la victoire de [[cdx_roosebeke|Roosebeke]] sur les Flamands. En 1385, il épouse [[cdx_isabeau_de_baviere|Isabeau de Bavière]].\n\nEn 1388, il renvoie ses oncles et gouverne avec les anciens conseillers de son père, que leurs ennemis surnomment les Marmousets. Le règne semble prometteur. Mais en août 1392, dans la forêt du Mans, lors d'une expédition contre le duc de Bretagne, le roi est pris d'une crise de démence : il tue plusieurs hommes de sa suite avant d'être maîtrisé. Quelques mois plus tard, le [[cdx_bal_des_ardents|bal des Ardents]] manque de le tuer.\n\nDésormais, Charles VI alterne périodes de lucidité et crises de plus en plus longues, pendant lesquelles il ne reconnaît plus ses proches ; on raconte qu'il se croyait parfois fait de verre. Ses médecins sont impuissants. Le pouvoir devient l'enjeu d'une lutte entre son frère Louis d'Orléans et son oncle, puis son cousin [[cdx_jean_sans_peur|Jean sans Peur]], qui dégénère en guerre civile entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]].\n\n[[cdx_henri_v|Henri V]] en profite : après [[cdx_azincourt|Azincourt]] et la conquête de la Normandie, le roi malade signe en 1420 le [[cdx_traite_troyes|traité de Troyes]] qui déshérite son propre fils. Charles VI meurt en octobre 1422, quelques semaines après Henri V. Le peuple, qui l'avait vu souffrir, lui garda son surnom de Bien-Aimé.",
+  "entity": "chr_charles_vi",
+  "see_also": ["cdx_bal_des_ardents", "cdx_armagnacs_bourguignons", "cdx_isabeau_de_baviere", "cdx_traite_troyes"],
+  "sources": ["Charles VI (roi de France)", "Folie de Charles VI"]
+}
