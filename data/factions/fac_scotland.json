@@ -61,5 +61,12 @@
     "David II",
     "Seconde guerre d'indépendance écossaise",
     "Armoiries de l'Écosse"
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_lothian",
+      "note": "Basses-Terres cédées à Édouard III par Édouard Balliol en 1334."
+    }
   ]
 }

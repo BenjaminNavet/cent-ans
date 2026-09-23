@@ -113,5 +113,22 @@
     "Philippe VI de France",
     "Guerre de Cent Ans",
     "Armoiries de la France"
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_guyenne",
+      "note": "Guyenne confisquée par Philippe VI le 24 mai 1337 pour félonie d'Édouard III."
+    },
+    {
+      "kind": "province",
+      "province": "prov_gascogne",
+      "note": "Partie du duché d'Aquitaine confisqué en 1337."
+    },
+    {
+      "kind": "province",
+      "province": "prov_ponthieu",
+      "note": "Comté de Ponthieu, fief du roi de France tenu par Édouard III."
+    }
   ]
 }

@@ -18,5 +18,16 @@
   "sources": [
     "Papauté d'Avignon",
     "Benoît XII"
+  ],
+  "historical_adherents": [
+    "fac_france",
+    "fac_scotland",
+    "fac_castile",
+    "fac_aragon",
+    "fac_navarre",
+    "fac_savoy",
+    "fac_brittany",
+    "fac_burgundy",
+    "fac_papacy"
   ]
 }

@@ -14,6 +14,18 @@
     "available_from": { "$ref": "common.schema.json#/$defs/historical_date", "description": "Date à partir de laquelle la religion peut apparaître dans la simulation." },
     "available_until": { "$ref": "common.schema.json#/$defs/historical_date" },
     "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/effect" } },
+    "historical_adherents": {
+      "type": "array",
+      "description": "Obédience : factions qui l'ont suivie historiquement (choix par défaut au Schisme).",
+      "items": { "$ref": "common.schema.json#/$defs/faction_id" },
+      "uniqueItems": true
+    },
+    "origin_provinces": {
+      "type": "array",
+      "description": "Hérésie : provinces où elle apparaît à sa date `available_from`.",
+      "items": { "$ref": "common.schema.json#/$defs/province_id" },
+      "uniqueItems": true
+    },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },

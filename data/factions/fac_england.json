@@ -103,5 +103,12 @@
     "Édouard III",
     "Guerre de Cent Ans",
     "Armoiries royales du Royaume-Uni"
+  ],
+  "claims": [
+    {
+      "kind": "throne",
+      "faction": "fac_france",
+      "note": "Édouard III, petit-fils de Philippe IV le Bel par sa mère Isabelle, revendique la couronne de France (1337, titre pris en 1340)."
+    }
   ]
 }

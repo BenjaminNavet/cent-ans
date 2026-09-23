@@ -73,5 +73,12 @@
     "Couronne de Castille",
     "Armoiries de l'Espagne"
   ],
-  "heir": "chr_pedro_i_de_castille"
+  "heir": "chr_pedro_i_de_castille",
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_alentejo",
+      "note": "Guerre castillano-portugaise de 1336-1339 (Alphonse XI contre Alphonse IV)."
+    }
+  ]
 }
