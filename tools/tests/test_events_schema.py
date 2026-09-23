@@ -18,7 +18,9 @@ def _validator() -> Draft202012Validator:
     registry = Registry()
     for name, schema in schemas.items():
         resource = Resource.from_contents(schema)
-        registry = registry.with_resource(schema["$id"], resource).with_resource(name, resource)
+        registry = registry.with_resource(schema["$id"], resource).with_resource(
+            name, resource
+        )
     return Draft202012Validator(schemas["event.schema.json"], registry=registry)
 
 
