@@ -10,6 +10,26 @@ use crate::ids::{BuildingId, TechnologyId, UnitTypeId};
 pub enum TechBranch {
     Military,
     Civil,
+    /// H4: medicine and herbalism.
+    Medicine,
+}
+
+impl TechBranch {
+    /// Every branch, in display order.
+    pub const ALL: [TechBranch; 3] = [
+        TechBranch::Military,
+        TechBranch::Civil,
+        TechBranch::Medicine,
+    ];
+
+    /// The `snake_case` key used in JSON files and by the bridge.
+    pub fn key(self) -> &'static str {
+        match self {
+            TechBranch::Military => "military",
+            TechBranch::Civil => "civil",
+            TechBranch::Medicine => "medicine",
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -42,4 +62,8 @@ pub struct Technology {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+    /// H4: codex entries (`cdx_…`, category `plante`) of the plants the
+    /// technology brings into the Herbarium.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub herbs: Vec<String>,
 }

@@ -1,0 +1,28 @@
+{
+  "id": "tech_humoral_theory",
+  "name": {
+    "display": "Théorie des humeurs"
+  },
+  "branch": "medicine",
+  "tier": 1,
+  "cost": 130,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1025",
+    "uncertain": true,
+    "note": "Le Canon de la médecine d'Avicenne (achevé v. 1025) systématise la doctrine d'Hippocrate (Ve-IVe s. av. J.-C.) et de Galien (IIe s.) ; traduit en latin par Gérard de Crémone à Tolède au XIIe siècle."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "research_points",
+      "value": 1
+    }
+  ],
+  "description": "Sang, phlegme, bile jaune et bile noire : la santé est l'équilibre des quatre humeurs. Toute la médecine savante des universités part de là.",
+  "sources": [
+    "Théorie des humeurs",
+    "Canon de la médecine",
+    "Galien"
+  ]
+}

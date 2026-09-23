@@ -169,6 +169,12 @@ pub enum Order {
         decision: u32,
         option: usize,
     },
+    /// Feeds `province` with `diet` (H3 « La Table »); one change per
+    /// province and per turn.
+    SetDiet {
+        province: ProvinceId,
+        diet: data_model::DietId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -236,6 +242,8 @@ pub enum OrderError {
     Chronicle(#[from] crate::chronicle::ChronicleError),
     #[error(transparent)]
     Assault(#[from] crate::siege::AssaultError),
+    #[error(transparent)]
+    Diet(#[from] crate::table::DietError),
 }
 
 /// One line of the recruitment panel.
@@ -386,6 +394,10 @@ impl CampaignState {
             }
             Order::ChooseEventOption { decision, option } => {
                 Ok(self.choose_event_option(data, faction, decision, option)?)
+            }
+            Order::SetDiet { province, diet } => {
+                crate::table::set_diet(self, data, faction, &province, &diet)?;
+                Ok(())
             }
         }
     }

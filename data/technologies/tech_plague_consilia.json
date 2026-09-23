@@ -1,0 +1,32 @@
+{
+  "id": "tech_plague_consilia",
+  "name": {
+    "display": "Conseils contre la peste"
+  },
+  "branch": "medicine",
+  "tier": 4,
+  "cost": 420,
+  "prerequisites": [
+    "tech_montpellier"
+  ],
+  "historical_year": {
+    "value": "1348",
+    "note": "Compendium de epidemia rédigé par la Faculté de médecine de Paris à la demande de Philippe VI (octobre 1348)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "plague_resistance",
+      "value": 15
+    }
+  ],
+  "description": "Les maîtres de Paris expliquent la peste par une conjonction de planètes et un air corrompu : fumigations de genièvre, vinaigre, fuite et régime prudent.",
+  "sources": [
+    "Peste noire",
+    "Compendium de epidemia"
+  ],
+  "herbs": [
+    "cdx_genievre",
+    "cdx_vinaigre"
+  ]
+}
