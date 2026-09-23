@@ -22,6 +22,11 @@ app.add_typer(budget_app, name="budget")
 app.add_typer(models_app, name="models")
 app.add_typer(blender_app, name="blender")
 app.add_typer(geo_app, name="geo")
+assets_app = typer.Typer(
+    help="Assets du jeu (héraldique, audio, modèles 3D, portraits).",
+    no_args_is_help=True,
+)
+app.add_typer(assets_app, name="assets")
 
 console = Console()
 
@@ -188,6 +193,15 @@ def geo_info() -> None:
             f"{size / 1e6:.1f} Mo" if size is not None else "[yellow]absent[/yellow]",
         )
     console.print(table)
+
+
+@assets_app.command("heraldry")
+def assets_heraldry() -> None:
+    """Dessine un écu PNG 128×128 par faction dans game/assets/heraldry/."""
+    from cent_ans_tools import heraldry
+
+    paths = heraldry.build()
+    console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
 
 
 if __name__ == "__main__":
