@@ -64,12 +64,17 @@ func has_splat() -> bool:
 
 
 func _load_splat() -> void:
-	var path := map_data.map_dir.path_join(SPLAT_FILE)
-	if not FileAccess.file_exists(path):
-		return
-	var image := Image.load_from_file(path)
+	# Déjà chargée par `MapData` (lot V2) ; sinon lecture directe (compatibilité).
+	var image: Image = map_data.get("splat_image") as Image
+	if image == null:
+		var path := map_data.map_dir.path_join(SPLAT_FILE)
+		if not FileAccess.file_exists(path):
+			return
+		image = Image.load_from_file(path)
+	if image != null and image.get_format() != Image.FORMAT_RGBA8:
+		image = image.duplicate() as Image
 	if image == null or image.is_empty():
-		push_warning("VegetationMask: %s unreadable, procedural fallback" % path)
+		push_warning("VegetationMask: %s unreadable, procedural fallback" % SPLAT_FILE)
 		return
 	if image.get_format() != Image.FORMAT_RGBA8:
 		image.convert(Image.FORMAT_RGBA8)
@@ -155,8 +160,11 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var crops: float
 	if has_splat():
 		var splat := splat_at(x, y)
-		forest = splat.b
-		crops = splat.g
+		# Poids de mélange du terrain → densité de semis : massifs nets là où la texture de
+		# forêt domine, arbres isolés rares ailleurs.
+		forest = smoothstep(0.22, 0.68, splat.b)
+		# Campagne ouverte (cultures + prairies) : bosquets, arbres isolés et haies.
+		crops = clampf(splat.g + 0.6 * splat.r, 0.0, 1.0)
 	else:
 		# Terrain moyenné sur un voisinage : les lisières ne suivent pas les frontières de province.
 		var base := 0.0

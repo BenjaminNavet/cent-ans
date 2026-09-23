@@ -147,7 +147,8 @@ func _scatter(raw: Array) -> void:
 				var crops := _lerp_grid(_crops, gx, gy)
 				if crops > 0.15:
 					var grove := _lerp_grid(_grove, gx, gy)
-					if roll < crops * grove * 0.55:
+					# Bosquets (bruit) et quelques arbres isolés dans les champs.
+					if roll < crops * (grove * 0.55 + 0.012):
 						kind = Kind.DECIDUOUS
 						scale_factor = 0.9
 			if kind < 0 or (not exclusions.is_empty() and _excluded(x, y)):
