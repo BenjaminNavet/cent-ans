@@ -1,0 +1,90 @@
+{
+  "id": "evt_artevelde",
+  "title": "Artevelde, capitaine de Gand",
+  "text": "Le 3 janvier 1338, les Gantois, affamés par l'embargo anglais sur la laine, élisent cinq capitaines ; le premier est un riche bourgeois, [[cdx_artevelde|Jacques van Artevelde]]. Il veut rouvrir les ateliers des drapiers : la Flandre restera neutre et la laine anglaise reviendra. Le comte Louis de Nevers, fidèle à Philippe VI, voit ses villes lui échapper.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1337,
+      "season": "winter"
+    },
+    "until_year": 1338,
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_flanders",
+        "province": "prov_flandre"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_jacob_van_artevelde"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_flandre"
+  },
+  "options": [
+    {
+      "text": "Laisser les villes proclamer leur neutralité",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -15
+        },
+        {
+          "type": "wealth",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 15,
+          "reason": "Neutralité flamande"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Neutralité flamande"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rester fidèle au roi de France",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 15
+        },
+        {
+          "type": "wealth",
+          "amount": -5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 10,
+          "reason": "Fidélité flamande"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1338-01-03",
+    "note": "Dans le jeu, l'hiver 1337 couvre décembre 1337 à février 1338."
+  },
+  "sources": [
+    "Jacob van Artevelde",
+    "Henri Pirenne, Histoire de Belgique, t. II",
+    "Jonathan Sumption, The Hundred Years War, vol. I : Trial by Battle, 1990"
+  ]
+}
