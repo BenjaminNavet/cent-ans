@@ -49,6 +49,10 @@ pub enum EventKind {
     Excommunication,
     Schism,
     Heresy,
+    // ----- M10: campaign outcome -------------------------------------------
+    Victory,
+    Defeat,
+    CampaignEnded,
     /// A faction completes a technology (M6).
     TechnologyResearched,
     /// Historical or random chronicle event (M10).

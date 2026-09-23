@@ -12,6 +12,7 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 name = "ai"
 version = "0.1.0"
 dependencies = [
+ "data-model",
  "sim-battle",
  "sim-campaign",
 ]
@@ -112,9 +113,11 @@ dependencies = [
 name = "godot-bridge"
 version = "0.1.0"
 dependencies = [
+ "ai",
  "data-model",
  "godot",
  "png",
+ "serde",
  "serde_json",
  "sim-battle",
  "sim-campaign",
@@ -353,6 +356,8 @@ name = "sim-battle"
 version = "0.1.0"
 dependencies = [
  "data-model",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -364,6 +369,7 @@ dependencies = [
  "rand_chacha",
  "serde",
  "serde_json",
+ "sim-battle",
  "thiserror",
 ]
 

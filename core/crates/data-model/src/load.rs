@@ -335,6 +335,27 @@ impl ReferenceChecker<'_> {
             for relation in &faction.relations {
                 self.require(id, "relations.faction", &relation.faction, &data.factions);
             }
+            if let Some(victory) = &faction.victory {
+                for objective in &victory.objectives {
+                    use crate::entities::faction::ObjectiveCondition as C;
+                    let (target, provinces): (Option<&FactionId>, &[ProvinceId]) = match &objective
+                        .condition
+                    {
+                        C::ControlAll { provinces } | C::ControlCount { provinces, .. } => {
+                            (None, provinces)
+                        }
+                        C::NoForeignControl { faction, provinces } => (Some(faction), provinces),
+                        C::Subjugate { faction } => (Some(faction), &[]),
+                        C::Independent => (None, &[]),
+                    };
+                    if let Some(target) = target {
+                        self.require(id, "victory.faction", target, &data.factions);
+                    }
+                    for province in provinces {
+                        self.require(id, "victory.provinces", province, &data.provinces);
+                    }
+                }
+            }
             for claim in &faction.claims {
                 if let Some(target) = &claim.faction {
                     self.require(id, "claims.faction", target, &data.factions);

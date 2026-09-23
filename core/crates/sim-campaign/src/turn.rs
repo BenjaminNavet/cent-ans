@@ -6,8 +6,8 @@ use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
-    ai_minimal, buildings, characters, chronicle, diplomacy, dynasty, economy, movement,
-    population, religion, research, siege,
+    ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
+    movement, population, religion, research, siege,
 };
 
 impl CampaignState {
@@ -24,6 +24,10 @@ impl CampaignState {
         P: Fn(&CampaignState, &GameData, &FactionId) -> Vec<Order>,
     {
         let mut events = Vec::new();
+
+        // 0. Player battles left pending from the previous turn are
+        // auto-resolved first (M7).
+        battle_request::auto_resolve_all_pending(self, data, &mut events);
 
         // 1. AI orders (invalid ones are silently dropped: the planner is advisory).
         let ai_factions: Vec<FactionId> = self
@@ -84,7 +88,8 @@ impl CampaignState {
         for faction in self.factions.values_mut() {
             faction.truces.retain(|_, until| *until > turn);
         }
-        self.pending_battles.clear();
+        // M10: victory, defeat or end of the campaign for the player.
+        crate::victory::resolve_victory(self, data, &mut events);
         self.events = events.clone();
         events
     }

@@ -75,6 +75,10 @@ pub struct ChronicleState {
     pub next_decision_id: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub plague_wave: Option<PlagueWave>,
+    /// No new event fires while set (tests and controlled experiments);
+    /// pending decisions still expire and the plague wave still spreads.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub disabled: bool,
 }
 
 /// Why a `choose_event_option` order was refused.
@@ -1123,6 +1127,12 @@ pub(crate) fn resolve_chronicle(
     for decision in expired {
         let first = decision.options.first().copied().unwrap_or(0);
         resolve_decision(state, data, &decision, first, true, events);
+    }
+
+    if state.chronicle.disabled {
+        resolve_plague_wave(state, data, events);
+        events.append(&mut state.pending_events);
+        return;
     }
 
     // 2. Historical events.

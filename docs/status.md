@@ -3,7 +3,7 @@
 Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 
 ## Où en est-on
-- **M0 à M6 terminés** (M7 batailles en cours). Jeu jouable avec villes vivantes, dynasties, technologies, diplomatie et religion : guerres et paix négociées, alliances, vassaux, embargos, Papauté, Grand Schisme, hérésies.
+- **M0 à M7 terminés** ; M8 (sièges) et M9 (IA) terminés côté campagne, en cours côté bataille ; M10 (finition) en cours. Jeu jouable avec villes vivantes, dynasties, technologies, diplomatie et religion, batailles 3D temps réel avec pause, objectifs historiques.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -44,11 +44,17 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   vers le nord sur 12 tours. 12 tests M10, smoke `_run_chronicle`. Capture : `docs/img/godot-chronicle.png`.
 - Correctif M4 : les effets du gouverneur s'appliquent désormais à la population et aux impôts.
 
+- IA de campagne stratégique (M9, partie campagne) : crate `ai` (`ai::plan_turn`), utilisée par le pont pour toutes les factions IA. Objectifs par armée (défense des provinces menacées, sièges des provinces les plus précieuses, chevauchées des factions agressives, regroupement, retraite), fusion des armées, budget militaire (60 % du revenu en guerre, 30 % en paix), recrutement de la meilleure unité par livre, construction par rendement, impôts selon la guerre et l'ordre public, licenciement en cas de dette, gouverneurs, généraux, compétences, mariages ; diplomatie (M5) et recherche (M6) réutilisées. 9 tests. Sonde : `cargo run --release -p ai --example ai_probe` (100 tours, 0 % d'ordres refusés côté France). L'IA de bataille arrive avec M7.
+
+- Sièges de campagne (M8, partie campagne) : vivres de la place (famine → capitulation), brèche ouverte par les engins de siège, ordre d'assaut (bouton dans le panneau d'armée avec estimation des chances), sortie de la garnison, IA qui donne l'assaut quand les chances dépassent 65 %. 7 tests M8.
+
+- Objectifs et fin de partie (M10) : objectifs historiques par faction jouable dans `data/factions/*.json` (`victory`) — France : bouter les Anglais, tenir Paris et Reims, reprendre la Guyenne, soumettre la Bourgogne (1453) ; Angleterre : sacre à Reims, héritage Plantagenêt, 15 provinces du royaume, soumettre l'Écosse (1453) ; Bourgogne : indépendance, Pays-Bas, lien lorrain (1477). Victoire, défaite ou fin de campagne avec score ; panneau Objectifs (O ou Menu), écran de fin, objectifs sur les cartes du menu de départ. 5 tests.
+- Batailles (M7) : `core/crates/sim-battle` simule au pas fixe de 0,1 s un champ procédural 1200 × 800 m (collines selon le terrain de la province, forêts, boue, rivière à deux gués), la météo de saison (pluie : arcs et arbalètes −40 %, brouillard : portée −30 %, neige), des régiments en ligne/colonne/schiltron/coin avec moral, fatigue, munitions, charge, flancs (+50 %) et dos (+100 %), piques contre cavalerie, pieux des archers, déroute et ralliement, aura et mort du général, et une IA minimale. Déterministe (même graine + mêmes ordres aux mêmes ticks = même bataille), 14 tests. `sim-campaign` met les batailles du joueur en attente (`pending_battles`, réglage `interactive_battles`), fournit `battle_setup`, applique `resolve_pending_battle` (pertes, moral, captures, général tombé, XP/traits M4, retraite) ou `auto_resolve_pending` ; les restes sont auto-résolus au tour suivant ; 8 tests M7. Godot : `scenes/battle/` (terrain maillé, arbres, soldats en MultiMesh par camp et famille, bannières, caméra RTS, sélection rectangle, ordres clic droit / glisser-droit, pause, vitesses ×1/×2/×4, HUD parchemin, écran de fin). 2 × 20 régiments de 120 soldats : 60 FPS (vsync), ~140 FPS sans vsync sur M4 Pro. Captures : `docs/img/godot-battle.png`, `docs/img/godot-battle-dialog.png`. Sonde : `cargo run -p sim-battle --example probe -- ai`.
+
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
-- Le trésor du joueur s'accumule vite (≈ 300 000 en 5 ans sans dépense) : à rééquilibrer avec les coûts de M4-M6.
-- Pas d'ordre d'assaut : les sièges se résolvent par durée uniquement.
+- Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province contrôlée (plafond 35 %) ; l'IA dépense ses trésors dormants. Sur une campagne complète 1337-1453 (464 tours, ≈ 10 s en release), les revenus des grands royaumes quadruplent (population, bâtiments, techs) et l'Empire garde un trésor élevé (≈ 12 saisons de revenu) : à surveiller.
 - L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
 - La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
@@ -60,6 +66,9 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   `siege_resistance`, `fortification_level`, `wealth`, `prestige` sont affichés mais pas encore appliqués ;
   `research_civil`/`research_military` (traits, compétences) sont inertes. Le surplus de points à
   l'achèvement est perdu. Le mock GDScript n'a pas de technologies.
+- Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
+- Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
+- Batailles (M7) : l'IA de bataille est minimale (avance en ligne, archers derrière, charge à 150 m) et les batailles d'IA décident vite (≈ 2-3 min simulées, déroute en cascade) ; pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée ; les armées alliées présentes dans la province ne participent pas (seules les deux armées de la rencontre). Équilibrage à reprendre en M9/M10.
 
 - M10 : Charles VI n'existe pas dans les données (pas de naissance historique) : sa folie se déclenche
   sur « dirigeant Valois de 18 à 40 ans en 1392-1394 ». Les événements globaux (Peste noire, Constance)

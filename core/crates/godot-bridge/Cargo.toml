@@ -11,7 +11,9 @@ crate-type = ["cdylib"]
 [dependencies]
 godot = { version = "0.5", features = ["api-4-7"] }
 sim-campaign = { path = "../sim-campaign" }
+ai = { path = "../ai" }
 sim-battle = { path = "../sim-battle" }
 data-model = { path = "../data-model" }
 png = "0.17"
+serde.workspace = true
 serde_json.workspace = true

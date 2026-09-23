@@ -48,6 +48,15 @@ impl CampaignSim {
             .collect()
     }
 
+    /// Enables or disables new chronicle events (controlled experiments such
+    /// as the smoke test's economy step); pending decisions still expire.
+    #[func]
+    fn set_chronicle_enabled(&mut self, enabled: bool) {
+        if let Some(state) = &mut self.state {
+            state.chronicle.disabled = !enabled;
+        }
+    }
+
     /// Answers a pending decision (same as the `choose_event_option` order).
     #[func]
     fn choose_event_option(&mut self, decision: i64, option: i64) -> VarDictionary {

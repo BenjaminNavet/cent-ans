@@ -33,8 +33,10 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// (experience, skills, traits, marriage, children, governors, prestige...).
 /// `4`: M5 diplomacy & religion (claims, embargoes, vassals, opinion
 /// modifiers, war scores, offers, papal favour, schism, heresy), M6
-/// technologies (research in progress, progress, banked progress) and M7
-/// pending interactive battles.
+/// technologies (research in progress, progress, banked progress), M7
+/// battles (`interactive_battles`, pending battles kept across `end_turn`,
+/// `BattleRequest::attacker_origin`), M8 siege supplies and breach, M10
+/// outcome.
 /// [`CampaignState::load_json`] refuses any other version.
 pub const STATE_VERSION: u32 = 4;
 
@@ -198,7 +200,22 @@ impl Army {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SiegeState {
     pub attacker: FactionId,
+    /// Estimated turns before the garrison runs out of food and capitulates.
     pub turns_left: u32,
+    // ----- M8: siege warfare --------------------------------------------------
+    #[serde(default)]
+    pub turns_elapsed: u32,
+    /// Food left in the besieged town (0-100); capitulation at 0.
+    #[serde(default = "full_supplies")]
+    pub supplies: u8,
+    /// Damage to the walls (0-100) from siege engines; from 50 an assault
+    /// no longer suffers the wall penalty.
+    #[serde(default)]
+    pub breach: u8,
+}
+
+fn full_supplies() -> u8 {
+    100
 }
 
 /// A building under construction in a province (spec § 1.2); one at a time.
@@ -416,6 +433,10 @@ fn default_loyalty() -> u8 {
     100
 }
 
+fn default_interactive_battles() -> bool {
+    true
+}
+
 impl CampaignState {
     /// Display name of a character: the static historical name, else the
     /// generated one, else the raw id.
@@ -439,12 +460,16 @@ impl CharacterState {
     }
 }
 
-/// A battle to resolve (all auto-resolved in M2; exposed for the 3D battle of M7).
+/// A player battle awaiting resolution (M7): fought in 3D or auto-resolved
+/// before the next `end_turn`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BattleRequest {
     pub attacker: ArmyId,
     pub defender: ArmyId,
     pub province: ProvinceId,
+    /// Province the attacker came from (where it retreats when beaten).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attacker_origin: Option<ProvinceId>,
 }
 
 /// Aggregated view of a faction for the UI.
@@ -485,6 +510,10 @@ pub struct CampaignState {
     /// Journal of the last resolved turn.
     pub events: Vec<GameEvent>,
     pub pending_battles: Vec<BattleRequest>,
+    /// Player setting (M7): battles involving the player wait in
+    /// `pending_battles` for the 3D battle instead of being auto-resolved.
+    #[serde(default = "default_interactive_battles")]
+    pub interactive_battles: bool,
     pub(crate) next_army_index: u32,
     /// Great Western Schism in progress (M5, 1378-1417).
     #[serde(default)]
@@ -498,6 +527,9 @@ pub struct CampaignState {
     /// Chronicle events fired, player decisions, Black Death wave (M10).
     #[serde(default)]
     pub chronicle: crate::chronicle::ChronicleState,
+    /// The player's campaign outcome, once reached (M10).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outcome: Option<crate::victory::Outcome>,
 }
 
 impl CampaignState {
@@ -524,11 +556,13 @@ impl CampaignState {
             characters: BTreeMap::new(),
             events: Vec::new(),
             pending_battles: Vec::new(),
+            interactive_battles: true,
             next_army_index: 1,
             schism: false,
             next_offer_id: 1,
             pending_events: Vec::new(),
             chronicle: crate::chronicle::ChronicleState::default(),
+            outcome: None,
         }
     }
 

@@ -110,5 +110,84 @@
       "faction": "fac_france",
       "note": "Édouard III, petit-fils de Philippe IV le Bel par sa mère Isabelle, revendique la couronne de France (1337, titre pris en 1340)."
     }
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "summary": "Faire valoir les droits d'Édouard III sur la couronne de France : Paris, Reims et les terres ancestrales.",
+    "objectives": [
+      {
+        "id": "obj_en_reims",
+        "title": "Le sacre à Reims",
+        "description": "Tenir Reims et Paris pour faire sacrer le roi d'Angleterre roi de France.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_ile_de_france",
+            "prov_champagne"
+          ]
+        }
+      },
+      {
+        "id": "obj_en_aquitaine",
+        "title": "L'héritage des Plantagenêts",
+        "description": "Tenir la Guyenne, la Gascogne, la Normandie et l'Anjou.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_guyenne",
+            "prov_gascogne",
+            "prov_normandie",
+            "prov_anjou"
+          ]
+        }
+      },
+      {
+        "id": "obj_en_realm",
+        "title": "Le royaume de France",
+        "description": "Contrôler au moins 15 provinces du royaume de France.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_ile_de_france",
+            "prov_normandie",
+            "prov_normandie_ouest",
+            "prov_picardie",
+            "prov_ponthieu",
+            "prov_boulonnais",
+            "prov_champagne",
+            "prov_orleanais",
+            "prov_anjou",
+            "prov_maine",
+            "prov_touraine",
+            "prov_poitou",
+            "prov_saintonge",
+            "prov_angoumois",
+            "prov_limousin",
+            "prov_perigord",
+            "prov_guyenne",
+            "prov_gascogne",
+            "prov_agenais",
+            "prov_quercy",
+            "prov_rouergue",
+            "prov_toulousain",
+            "prov_carcassonne",
+            "prov_berry",
+            "prov_auvergne",
+            "prov_bretagne",
+            "prov_bretagne_ouest"
+          ],
+          "count": 15
+        }
+      },
+      {
+        "id": "obj_en_scotland",
+        "title": "Soumettre l'Écosse",
+        "description": "L'Écosse doit devenir vassale de l'Angleterre ou disparaître.",
+        "condition": {
+          "kind": "subjugate",
+          "faction": "fac_scotland"
+        }
+      }
+    ]
+  }
 }

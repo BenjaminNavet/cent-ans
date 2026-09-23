@@ -130,5 +130,82 @@
       "province": "prov_ponthieu",
       "note": "Comté de Ponthieu, fief du roi de France tenu par Édouard III."
     }
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "summary": "Bouter les Anglais hors du royaume, garder Paris et Reims, ramener les grands vassaux dans l'obéissance.",
+    "objectives": [
+      {
+        "id": "obj_fr_expel",
+        "title": "Bouter les Anglais hors de France",
+        "description": "Aucune province du royaume (Guyenne, Gascogne, Ponthieu, Normandie…) ne doit rester aux mains de l'Angleterre.",
+        "condition": {
+          "kind": "no_foreign_control",
+          "faction": "fac_england",
+          "provinces": [
+            "prov_ile_de_france",
+            "prov_normandie",
+            "prov_normandie_ouest",
+            "prov_picardie",
+            "prov_ponthieu",
+            "prov_boulonnais",
+            "prov_champagne",
+            "prov_orleanais",
+            "prov_anjou",
+            "prov_maine",
+            "prov_touraine",
+            "prov_poitou",
+            "prov_saintonge",
+            "prov_angoumois",
+            "prov_limousin",
+            "prov_perigord",
+            "prov_guyenne",
+            "prov_gascogne",
+            "prov_agenais",
+            "prov_quercy",
+            "prov_rouergue",
+            "prov_toulousain",
+            "prov_carcassonne",
+            "prov_berry",
+            "prov_auvergne",
+            "prov_bretagne",
+            "prov_bretagne_ouest"
+          ]
+        }
+      },
+      {
+        "id": "obj_fr_crown",
+        "title": "Tenir Paris et Reims",
+        "description": "Le roi doit tenir sa capitale et la ville du sacre.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_ile_de_france",
+            "prov_champagne"
+          ]
+        }
+      },
+      {
+        "id": "obj_fr_guyenne",
+        "title": "Reprendre la Guyenne",
+        "description": "Bordeaux et Bayonne doivent revenir à la Couronne, comme après Castillon (1453).",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_guyenne",
+            "prov_gascogne"
+          ]
+        }
+      },
+      {
+        "id": "obj_fr_burgundy",
+        "title": "Soumettre la Bourgogne",
+        "description": "Le duc de Bourgogne doit rester vassal du roi, ou disparaître.",
+        "condition": {
+          "kind": "subjugate",
+          "faction": "fac_burgundy"
+        }
+      }
+    ]
+  }
 }
