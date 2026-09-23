@@ -12,6 +12,7 @@ use godot::classes::RefCounted;
 use godot::prelude::*;
 
 mod campaign_sim;
+mod campaign_sim_tech;
 mod convert;
 
 pub use campaign_sim::CampaignSim;

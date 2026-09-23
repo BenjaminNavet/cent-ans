@@ -55,8 +55,8 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct CampaignSim {
-    data: Option<Arc<GameData>>,
-    state: Option<CampaignState>,
+    pub(crate) data: Option<Arc<GameData>>,
+    pub(crate) state: Option<CampaignState>,
     base: Base<RefCounted>,
 }
 
@@ -463,7 +463,7 @@ fn order_result(result: Result<(), String>) -> VarDictionary {
     }
 }
 
-fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {
+pub(crate) fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {
     iter.map(|id| GString::from(id.as_ref())).collect()
 }
 
@@ -751,7 +751,7 @@ fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) 
     "à la cour".to_owned()
 }
 
-fn effects_array(effects: &[Effect]) -> VarArray {
+pub(crate) fn effects_array(effects: &[Effect]) -> VarArray {
     effects
         .iter()
         .map(|effect| {
