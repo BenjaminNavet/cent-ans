@@ -10,9 +10,9 @@ Branche : `feat/battle-orders`.
       erreurs FR, `SideResult::no_quarter`, `Unit::dismount` factorisé avec le siège.
 - [x] Tests Rust de chaque ordre (`tests/orders.rs`, 18 tests).
 - [x] IA tactique (`ai.rs`, `plan_orders`).
-- [ ] Pont `get_leader_orders(side)`.
-- [ ] UI `game/scripts/battle/leader_orders_bar.gd` + accroche dans `battle_scene.gd`.
+- [x] Pont `get_leader_orders(side)`, `get_no_quarter`, champs `pavise`/`dismounted` dans `get_units`.
+- [x] UI `leader_orders_bar.gd` + accroche (3 lignes) dans `battle_scene.gd` ; smoke étendu (vert).
 - [ ] Smoke, capture `docs/img/battle-leader-orders.png`, doc `docs/design/battle-orders.md`.
 
 ## Prochaine étape
-Pont GDExtension `get_leader_orders`, puis la barre UI.
+Capture `docs/img/battle-leader-orders.png`, relecture visuelle, doc.
