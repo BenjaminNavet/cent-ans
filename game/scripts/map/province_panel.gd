@@ -48,6 +48,7 @@ const RESOURCE_CATEGORY_LABELS := {
 @onready var recruit_panel: VBoxContainer = %RecruitPanel
 @onready var recruit_list: VBoxContainer = %RecruitList
 @onready var close_button: Button = %CloseButton
+@onready var tabs: TabContainer = %Tabs
 @onready var resources_list: HFlowContainer = %ResourcesList
 @onready var classes_list: VBoxContainer = %ClassesList
 @onready var buildings_list: VBoxContainer = %BuildingsList
@@ -310,6 +311,10 @@ func _on_create_army() -> void:
 	if indices.is_empty():
 		return
 	create_army_requested.emit(province_id, indices)
+
+
+func show_ville_tab() -> void:
+	tabs.current_tab = 1
 
 
 ## Nom d'unité : `name` si la simulation le fournit, sinon l'id rendu lisible.

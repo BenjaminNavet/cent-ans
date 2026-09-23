@@ -74,8 +74,7 @@ fn goods_categories(
         let Some(resource) = data.resources.get(resource_id) else {
             continue;
         };
-        if !resource.satisfies_classes.is_empty() && !resource.satisfies_classes.contains(&class)
-        {
+        if !resource.satisfies_classes.is_empty() && !resource.satisfies_classes.contains(&class) {
             continue;
         }
         if !categories.contains(&resource.category) {
@@ -304,7 +303,9 @@ pub(crate) fn resolve_population(
             events.push(
                 GameEvent::new(
                     EventKind::Plague,
-                    format!("La peste frappe {province_name} : population et ordre public en berne."),
+                    format!(
+                        "La peste frappe {province_name} : population et ordre public en berne."
+                    ),
                 )
                 .province(&id)
                 .faction(&controller),

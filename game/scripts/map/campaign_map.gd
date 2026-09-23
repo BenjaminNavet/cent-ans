@@ -10,6 +10,8 @@ extends Node3D
 ##                              (sélectionne la première armée du joueur + aperçu de chemin).
 ##   --stage=province           avec --screenshot : sélectionne plutôt la capitale du joueur
 ##                              et ouvre le panneau de recrutement.
+##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
+##   --stage=faction            panneau de faction (trésor, revenus, impôts, biens).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -577,10 +579,15 @@ func _parse_cmdline() -> void:
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 			_screenshot_countdown = SCREENSHOT_DELAY_FRAMES
 			camera_rig.edge_pan_enabled = false
-			if _screenshot_stage == "province":
-				_stage_screenshot_province()
-			else:
-				_stage_screenshot()
+			match _screenshot_stage:
+				"province":
+					_stage_screenshot_province()
+				"city":
+					_stage_screenshot_city()
+				"faction":
+					_stage_screenshot_faction()
+				_:
+					_stage_screenshot()
 		elif arg.begins_with("--focus="):
 			var parts := arg.trim_prefix("--focus=").split(",")
 			if parts.size() == 3:
@@ -630,6 +637,46 @@ func _stage_screenshot_province() -> void:
 	camera_rig.snap()
 	picker.select_index(index)
 	ui.province_panel.recruit_panel.show()
+
+
+## Remplace la simulation par le mock si la sim active n'expose pas encore `get_province_city`
+## (§ 2, en attendant `core/`) : sert uniquement aux captures `--stage=city`/`--stage=faction`.
+func _ensure_city_capable_sim() -> void:
+	if _city_available():
+		return
+	var mock := CampaignSimMock.new()
+	if not mock.new_campaign(MapPaths.data_dir, player_faction, SimFacade.pending_seed):
+		return
+	SimFacade.sim = mock
+	SimFacade.is_real = false
+	sim = mock
+	refresh_all()
+
+
+func _focus_capital() -> void:
+	var capital: String = str(SimFacade.faction_info(player_faction).get("capital", ""))
+	var index := map_data.index_of_id(capital)
+	if index == 0:
+		index = mini(3, map_data.province_count)
+	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
+	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
+	camera_rig.snap()
+	picker.select_index(index)
+
+
+## Mise en scène « ville » : capitale du joueur, panneau de province sur l'onglet Ville.
+func _stage_screenshot_city() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.province_panel.show_ville_tab()
+
+
+## Mise en scène « faction » : panneau de faction ouvert sur la capitale du joueur.
+func _stage_screenshot_faction() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.hide_province()
+	_show_faction_panel(player_faction)
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:

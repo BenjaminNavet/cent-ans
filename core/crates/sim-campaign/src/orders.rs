@@ -190,7 +190,10 @@ impl CampaignState {
             }
             Order::CancelBuild { province } => self.order_cancel_build(data, faction, &province),
             Order::SetTaxRate { rate } => {
-                self.factions.get_mut(faction).expect("checked above").tax_rate = rate;
+                self.factions
+                    .get_mut(faction)
+                    .expect("checked above")
+                    .tax_rate = rate;
                 Ok(())
             }
         }
@@ -217,9 +220,14 @@ impl CampaignState {
                 option.reason.unwrap_or_default(),
             ));
         }
-        self.factions.get_mut(faction).expect("checked above").treasury -=
-            i64::from(option.cost);
-        self.provinces.get_mut(province).expect("checked above").construction = Some(Construction {
+        self.factions
+            .get_mut(faction)
+            .expect("checked above")
+            .treasury -= i64::from(option.cost);
+        self.provinces
+            .get_mut(province)
+            .expect("checked above")
+            .construction = Some(Construction {
             building: building.clone(),
             turns_left: option.turns,
         });
@@ -241,7 +249,10 @@ impl CampaignState {
             .buildings
             .get(&construction.building)
             .map_or(0, |b| b.cost.money * CANCEL_REFUND_PERCENT / 100);
-        self.factions.get_mut(faction).expect("checked above").treasury += i64::from(refund);
+        self.factions
+            .get_mut(faction)
+            .expect("checked above")
+            .treasury += i64::from(refund);
         Ok(())
     }
 
