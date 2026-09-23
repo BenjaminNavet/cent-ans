@@ -20,6 +20,8 @@ const SPEEDS := [1.0, 2.0, 4.0]
 const DOUBLE_CLICK_MS := 350
 const PICK_RADIUS_PX := 26.0
 const BANNER_HEIGHT := 7.0
+## Barre des ordres du chef (F10b).
+const LEADER_ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
 
 var campaign_sim: Object = null
 var battle_index: int = -1
@@ -171,6 +173,7 @@ func begin() -> bool:
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
 	hud.add_events(battle.call("get_events"))
+	add_child(LEADER_ORDERS_BAR.new(self))
 	_refresh_view(true)
 	return true
 
