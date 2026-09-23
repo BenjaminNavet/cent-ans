@@ -280,15 +280,20 @@ func _make_banner(unit: Dictionary) -> void:
 
 
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
-## portrait 1:2) pour la noblesse, fanion (4:1) pour les autres, oriflamme / Saint-Georges pour le
-## général de France / d'Angleterre ; à défaut, centre de l'écu de la faction (repli historique).
+## 256×512, tissu dans le haut, bas transparent) pour la noblesse, fanion à queue d'aronde (4:1)
+## pour les autres, étendards royaux pour le général de France / d'Angleterre ; à défaut, centre
+## de l'écu de la faction (repli).
 func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 	var dir := "res://assets/heraldry/banners/"
 	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
 	var candidates: Array = []
-	if bool(unit.get("is_general", false)):
-		if faction == "fac_france":
-			candidates.append([dir + "oriflamme.png", Vector2(1.3, 2.6)])
+	if bool(unit.get("is_general", false)) and faction in ["fac_france", "fac_england"]:
+		# Pas de quartier : oriflamme (France) / dragon (Angleterre) ; sinon Saint-Georges pour
+		# l'armée royale anglaise, bannière de la faction pour la française.
+		var side := str(unit.get("side", ""))
+		var no_quarter: bool = battle != null and battle.has_method("get_no_quarter") and bool(battle.call("get_no_quarter", side))
+		if no_quarter:
+			candidates.append([dir + ("oriflamme.png" if faction == "fac_france" else "dragon.png"), Vector2(1.3, 2.6)])
 		elif faction == "fac_england":
 			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
 	if noble or str(unit.get("render", "")) == "siege":
