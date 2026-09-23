@@ -34,6 +34,8 @@ extends SceneTree
 ##     carte, sauvegarde automatique tournante (auto_1..3, les fichiers du joueur sont mis de
 ##     côté puis restaurés), rapport de saison non vide après quelques tours, alertes, menu
 ##     pause ouvert puis fermé (arbre en pause), dialogue de sauvegarde, crédits.
+## 13. codex (H2) : fiches de `data/codex`, liens `[[…]]` et auto-liens, pile de 3 bulles (dont
+##     une ouverte par survol simulé), découvertes, fermeture après la grâce, fenêtre Codex.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -75,6 +77,7 @@ func _init() -> void:
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
 	await _run_icons()  # F2
+	await _run_codex()  # H2
 	await _run_siege_battle()
 	await _run_flow()  # F3
 	quit(1 if _failures > 0 else 0)
@@ -903,6 +906,76 @@ func _run_icons() -> void:
 	chip.free()
 	if _failures == 0:
 		print("smoke OK: icons, %d entries loaded, %d data ids covered, fallbacks and rich tooltips" % [table.size(), checked])
+
+
+## H2 : Codex (fiches, liens, bulles imbriquées, découvertes, fenêtre).
+func _run_codex() -> void:
+	var store: Node = root.get_node_or_null("/root/CodexStore")
+	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
+	if not _check(store != null and bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
+		return
+	store.call("use_test_file")
+	store.call("reload", _project_root().path_join("data/codex"))
+	var total: int = store.call("total_count")
+	_check(total >= 20, "codex should have at least 20 entries, got %d" % total)
+	_check(bool(store.call("has_entry", "cdx_crecy")) and bool(store.call("has_entry", "cdx_poitiers")), "codex seed entries missing")
+	_check(str(store.call("entry_for_entity", "chr_charles_v")) == "cdx_charles_v", "entity index expected")
+
+	# Liens explicites, auto-liens (première occurrence, hors balises), couleur des fiches lues.
+	var linked := CodexText.format("[[cdx_crecy]] puis [[cdx_poitiers|la défaite du roi]].")
+	_check(linked.contains("[url=cdx:cdx_crecy]") and linked.contains("[u]") and linked.contains(str(store.call("title", "cdx_crecy"))), "explicit link: %s" % linked)
+	_check(linked.contains("[url=cdx:cdx_poitiers]") and linked.contains("la défaite du roi"), "labelled link: %s" % linked)
+	_check(CodexText.format("[[cdx_nothing_here|mot]]") == "mot", "unknown link should degrade to its label")
+	var alias := str(store.call("title", "cdx_peste_noire"))
+	var auto := CodexText.format("[img]res://x/%s.png[/img] En 1348, %s frappe ; %s encore." % [alias, alias, alias], true)
+	_check(auto.count("[url=cdx:cdx_peste_noire]") == 1 and auto.begins_with("[img]res://x/%s.png[/img]" % alias), "auto link once, outside tags: %s" % auto)
+	_check(not CodexText.format("%s." % alias).contains("[url"), "no auto link unless asked")
+	var tooltip := RichTooltip.make_panel("Voir [[cdx_arc_long]].")
+	_check(RichTooltip.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
+	_check(RichTooltip.visible_panel() == null, "a detached panel is not a visible tooltip")
+	tooltip.free()
+
+	# Pile de 3 bulles : deux ouvertes par l'API, la troisième par survol simulé d'un lien.
+	var first: Control = bubbles.call("open", "cdx_crecy", Vector2(120, 120))
+	var second: Control = bubbles.call("open", "cdx_edouard_iii", Vector2(260, 180), 0)
+	await process_frame
+	_check(first != null and second != null and int(bubbles.call("bubble_count")) == 2, "two bubbles expected")
+	var text := second.find_child("Text", true, false) as RichTextLabel
+	_check(text != null and text.text.contains("[url=cdx:"), "bubble summary should contain links")
+	text.meta_hover_started.emit("cdx:cdx_poitiers")
+	await create_timer(0.5).timeout
+	_check(int(bubbles.call("bubble_count")) == 3 and str(bubbles.call("top_id")) == "cdx_poitiers", "hovering a bubble link should open a third bubble (count %d)" % int(bubbles.call("bubble_count")))
+	for id in ["cdx_crecy", "cdx_edouard_iii", "cdx_poitiers"]:
+		_check(bool(store.call("is_discovered", id)), "%s should be discovered" % id)
+	_check(CodexText.link("cdx_crecy").contains(CodexText.READ_COLOR), "read entries use brown ink")
+	var reopened: Control = bubbles.call("open", "cdx_chevauchee", Vector2(300, 300), 0)
+	_check(reopened != null and int(bubbles.call("bubble_count")) == 2, "opening from bubble 0 should replace the bubbles above it")
+	bubbles.call("set_pinned", first, true)
+	text.meta_hover_ended.emit("cdx:cdx_poitiers")
+	await create_timer(0.7).timeout
+	_check(int(bubbles.call("bubble_count")) == 1, "unpinned bubbles should close after the grace delay (count %d)" % int(bubbles.call("bubble_count")))
+	bubbles.call("close_all")
+	_check(int(bubbles.call("bubble_count")) == 0, "close_all should empty the stack")
+	var pinned: Control = bubbles.call("open_text", RichTooltip.last_bbcode, Vector2(40, 40))
+	_check(pinned != null and bool(pinned.get_meta("pinned", false)), "pinned tooltip bubble expected")
+	bubbles.call("close_all")
+
+	# Fenêtre Codex sur une fiche, historique, compteur.
+	bubbles.call("open_entry", "cdx_charles_v")
+	await process_frame
+	var window: Control = bubbles.call("window")
+	_check(bool(bubbles.call("is_window_open")) and str(window.get("current_id")) == "cdx_charles_v", "codex window should show cdx_charles_v")
+	var body: RichTextLabel = window.call("body_label")
+	_check(body.text.length() > 200 and body.text.contains("[url=cdx:"), "codex body should be formatted with links")
+	window.call("navigate", "cdx_du_guesclin")
+	window.call("back")
+	_check(str(window.get("current_id")) == "cdx_charles_v", "history back expected")
+	var counter := str(window.call("counter_text"))
+	_check(counter == "%d / %d découvertes" % [int(store.call("discovered_count")), total], "counter: %s" % counter)
+	window.hide()
+	store.call("reset_discoveries")
+	if _failures == 0:
+		print("smoke OK: codex, %d entries, links, 3-bubble stack, discoveries, window (%s)" % [total, counter])
 
 
 ## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis

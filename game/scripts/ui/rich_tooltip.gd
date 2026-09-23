@@ -106,11 +106,13 @@ static func icon_bbcode(id: String, size: int = 18, category: String = "") -> St
 	return str(library.call("bbcode", id, size, category)) if library != null else ""
 
 
-## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
-static func make_panel(bbcode: String) -> Control:
-	var panel := PanelContainer.new()
-	if ResourceLoader.exists(THEME_PATH):
-		panel.theme = load(THEME_PATH)
+## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
+static var last_panel: WeakRef = null
+static var last_bbcode: String = ""
+
+
+## Style parchemin commun aux infobulles et aux bulles du Codex.
+static func panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.96, 0.91, 0.78, 0.98)
 	style.border_color = Color(0.42, 0.29, 0.16)
@@ -119,7 +121,16 @@ static func make_panel(bbcode: String) -> Control:
 	style.set_content_margin_all(8)
 	style.shadow_color = Color(0, 0, 0, 0.3)
 	style.shadow_size = 4
-	panel.add_theme_stylebox_override("panel", style)
+	return style
+
+
+## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
+## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués).
+static func make_panel(bbcode: String) -> Control:
+	var panel := PanelContainer.new()
+	if ResourceLoader.exists(THEME_PATH):
+		panel.theme = load(THEME_PATH)
+	panel.add_theme_stylebox_override("panel", panel_style())
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -129,9 +140,23 @@ static func make_panel(bbcode: String) -> Control:
 	label.add_theme_color_override("default_color", INK)
 	label.add_theme_font_size_override("normal_font_size", 14)
 	label.add_theme_font_size_override("bold_font_size", 15)
-	label.text = bbcode
+	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
 	panel.add_child(label)
+	last_panel = weakref(panel)
+	last_bbcode = label.text
+	return panel
+
+
+## Infobulle native actuellement affichée (dans sa fenêtre surgissante), sinon null.
+static func visible_panel() -> Control:
+	var panel: Control = last_panel.get_ref() if last_panel != null else null
+	if panel == null or not panel.is_inside_tree() or not panel.is_visible_in_tree():
+		return null
+	var window := panel.get_window()
+	var loop := Engine.get_main_loop() as SceneTree
+	if window == null or (loop != null and window == loop.root) or not window.visible:
+		return null
 	return panel
 
 

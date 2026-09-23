@@ -11,10 +11,12 @@
   "faction": "fac_holstein",
   "role": "heir",
   "birth": {
-    "value": "1317-01-01"
+    "value": "1317",
+    "uncertain": true
   },
   "death": {
-    "value": "1384-01-01"
+    "value": "1384",
+    "uncertain": true
   },
   "historical": true,
   "skills": {

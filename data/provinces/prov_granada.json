@@ -99,7 +99,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 4000,
-  "description": "Émirat nasride de Grenade sous Yusuf Ier (faction musulmane à créer ; fac_castile n'est qu'un substitut, l'émirat étant tributaire de la Castille par intermittence). Alhambra, soie, vega irriguée ; Almería, port vers le Maghreb.",
+  "description": "Émirat nasride de Grenade sous Yusuf Ier (tributaire de la Castille par intermittence). Alhambra, soie, vega irriguée ; Almería, port vers le Maghreb.",
   "sources": [
     "Royaume de Grenade",
     "Yusuf Ier de Grenade",
