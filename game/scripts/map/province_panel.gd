@@ -10,6 +10,7 @@ signal recruit_requested(province_id: String, unit_type: String)
 signal create_army_requested(province_id: String, unit_indices: Array)
 signal build_requested(province_id: String, building_id: String)
 signal cancel_build_requested(province_id: String)
+signal court_requested
 signal closed
 
 const TERRAIN_LABELS := {
@@ -63,6 +64,8 @@ const RESOURCE_NAMES := {
 @onready var construction_label: Label = %ConstructionLabel
 @onready var cancel_build_button: Button = %CancelBuildButton
 @onready var buildable_list: VBoxContainer = %BuildableList
+@onready var governor_label: Label = %GovernorLabel
+@onready var governor_court_button: Button = %GovernorCourtButton
 
 var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
@@ -75,6 +78,7 @@ func _ready() -> void:
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
+	governor_court_button.pressed.connect(func() -> void: court_requested.emit())
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -106,6 +110,9 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	else:
 		siege_value.text = "%s, %d tour(s)" % [_faction_label(str(siege.get("attacker", "")), "", label_of), int(siege.get("turns_left", 0))]
 	id_value.text = "%s (index %d)" % [province_id, int(province.get("index", 0))]
+	var governor_name: String = str(state.get("governor_name", ""))
+	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")
+	governor_court_button.visible = state.has("governor")
 	_fill_garrison(state.get("garrison", []), is_player_owner)
 	_fill_recruitable(recruitable)
 	actions.visible = is_player_owner and not state.is_empty()

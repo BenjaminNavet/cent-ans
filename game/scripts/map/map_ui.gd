@@ -20,6 +20,13 @@ signal stance_changed(army_id: String, stance: String)
 signal army_panel_closed
 signal province_panel_closed
 signal faction_panel_requested
+signal court_panel_requested
+signal province_court_requested
+signal character_selected(character_id: String)
+signal governor_requested(character_id: String, province_id: String)
+signal general_requested(character_id: String, army_id: String)
+signal marriage_requested(character_id: String, spouse_id: String)
+signal learn_skill_requested(character_id: String, skill_id: String)
 
 const MENU_SAVE := 0
 const MENU_LOAD := 1
@@ -45,6 +52,9 @@ const TOAST_SECONDS := 3.5
 @onready var army_panel: ArmyPanel = %ArmyPanel
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
+@onready var court_button: Button = %CourtButton
+@onready var court_panel: CourtPanel = %CourtPanel
+@onready var character_sheet: CharacterSheet = %CharacterSheet
 @onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
 
 var _log_lines: PackedStringArray = PackedStringArray()
@@ -67,6 +77,7 @@ func _ready() -> void:
 	province_panel.build_requested.connect(func(p: String, b: String) -> void: build_requested.emit(p, b))
 	province_panel.cancel_build_requested.connect(func(p: String) -> void: cancel_build_requested.emit(p))
 	province_panel.closed.connect(func() -> void: province_panel_closed.emit())
+	province_panel.court_requested.connect(func() -> void: province_court_requested.emit())
 	faction_panel.closed.connect(func() -> void: faction_panel.hide())
 	faction_panel.tax_rate_changed.connect(func(f: String, r: String) -> void: tax_rate_changed.emit(f, r))
 	faction_swatch.gui_input.connect(_on_faction_swatch_input)
@@ -75,6 +86,17 @@ func _ready() -> void:
 	army_panel.stance_changed.connect(func(a: String, s: String) -> void: stance_changed.emit(a, s))
 	army_panel.closed.connect(func() -> void: army_panel_closed.emit())
 	faction_panel.hide()
+	court_button.pressed.connect(func() -> void: court_panel_requested.emit())
+	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
+	court_panel.closed.connect(func() -> void: court_panel.hide())
+	court_panel.hide()
+	character_sheet.closed.connect(func() -> void: character_sheet.hide())
+	character_sheet.character_requested.connect(func(id: String) -> void: character_selected.emit(id))
+	character_sheet.governor_requested.connect(func(c: String, p: String) -> void: governor_requested.emit(c, p))
+	character_sheet.general_requested.connect(func(c: String, a: String) -> void: general_requested.emit(c, a))
+	character_sheet.marriage_requested.connect(func(c: String, s: String) -> void: marriage_requested.emit(c, s))
+	character_sheet.learn_skill_requested.connect(func(c: String, s: String) -> void: learn_skill_requested.emit(c, s))
+	character_sheet.hide()
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
 	save_load_dialog.load_confirmed.connect(func(p: String) -> void: load_requested.emit(p))
 	save_load_dialog.dialog_closed.connect(func() -> void: end_turn_button.disabled = false)
@@ -179,6 +201,22 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
 		elif kind == "building_completed":
 			line = "[color=#1a5c8b]⚒ %s[/color]" % text
+		elif kind == "birth":
+			line = "[color=#2a7a4a]✚ %s[/color]" % text
+		elif kind == "marriage":
+			line = "[color=#8a3a8a][b]♥ %s[/b][/color]" % text
+		elif kind == "death":
+			line = "[color=#3a3a3a][b]✝ %s[/b][/color]" % text
+		elif kind == "succession":
+			line = "[color=#7a5a10][b]♔ %s[/b][/color]" % text
+		elif kind == "regency":
+			line = "[color=#7a5a10]⚖ %s[/color]" % text
+		elif kind == "trait_acquired":
+			line = "[color=#2a5a7a]✦ %s[/color]" % text
+		elif kind == "skill_learned":
+			line = "[color=#2a5a7a]★ %s[/color]" % text
+		elif kind == "appointment":
+			line = "[color=#4a3a10]⚑ %s[/color]" % text
 		elif kind == "income":
 			line = "[color=#4a3a10]%s[/color]" % text
 		else:
@@ -243,9 +281,29 @@ func _on_faction_swatch_input(event: InputEvent) -> void:
 		faction_panel_requested.emit()
 
 
-func show_army(army_id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable) -> void:
-	army_panel.show_army(army_id, army, faction_label, color, is_player, province_name_of)
+func show_army(army_id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable, general_skills: Dictionary = {}) -> void:
+	army_panel.show_army(army_id, army, faction_label, color, is_player, province_name_of, general_skills)
 
 
 func hide_army() -> void:
 	army_panel.hide()
+
+
+func show_court(rows: Array[Dictionary], faction_label: String, faction_color: Color, preset_filter: int = -1) -> void:
+	court_panel.show_court(rows, faction_label, faction_color, preset_filter)
+
+
+func hide_court() -> void:
+	court_panel.hide()
+
+
+func court_panel_visible() -> bool:
+	return court_panel.visible
+
+
+func show_character(character: Dictionary, skill_tree: Array, learnable: Array, governable: Array, commandable: Array, candidates: Array) -> void:
+	character_sheet.show_character(character, skill_tree, learnable, governable, commandable, candidates)
+
+
+func hide_character() -> void:
+	character_sheet.hide()

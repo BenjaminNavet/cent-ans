@@ -47,6 +47,17 @@ var _next_army_number: int = 1
 var _buildings: Dictionary = {}
 ## resource_id → {name, category} — chargé depuis `data/resources/*.json`.
 var _resources: Dictionary = {}
+## trait_id → {name, category, description} — chargé depuis `data/traits/*.json` si présent.
+var _traits: Dictionary = {}
+## character_id → {name, epithet, sex, house, faction, role, birth_year, death_year, alive,
+## experience, skill_points, skills_learned: Array[String], traits: Array[String],
+## spouse, children: Array[String], father, mother, location, army, governor_of, captive,
+## piety, prestige, titles: Array[String]}.
+var _characters: Dictionary = {}
+var _next_generated_id: int = 1
+## [{id, name, branch, tier, prerequisites[], cost, description}] — arbre de compétences,
+## chargé depuis `data/skills/*.json` si le dossier existe, sinon `HARDCODED_SKILL_TREE`.
+var _skill_tree: Array = []
 
 
 # --- Cycle de vie -------------------------------------------------------------
@@ -63,11 +74,15 @@ func new_campaign(data_dir: String, player: String, seed: int) -> bool:
 	_events.clear()
 	_pending_recruits.clear()
 	_next_army_number = 1
+	_characters.clear()
+	_next_generated_id = 1
 	_load_catalogs(data_dir)
 	if not _load_provinces(data_dir):
 		push_error("CampaignSimMock: cannot read provinces from %s" % data_dir)
 		return false
 	_setup_factions()
+	_load_characters(data_dir)
+	_load_skill_tree(data_dir)
 	_setup_armies()
 	_setup_city(data_dir)
 	return true
@@ -86,6 +101,8 @@ func save_to_string() -> String:
 		"events": _events,
 		"pending_recruits": _pending_recruits,
 		"next_army_number": _next_army_number,
+		"characters": _characters,
+		"next_generated_id": _next_generated_id,
 	})
 
 
@@ -104,9 +121,12 @@ func load_from_string(json: String) -> bool:
 	_events.assign(parsed.get("events", []))
 	_pending_recruits.assign(parsed.get("pending_recruits", []))
 	_next_army_number = int(parsed.get("next_army_number", 1))
+	_characters = parsed.get("characters", {})
+	_next_generated_id = int(parsed.get("next_generated_id", 1))
 	var data_dir := _map_paths_data_dir()
 	if data_dir != "":
 		_load_catalogs(data_dir)
+		_load_skill_tree(data_dir)
 	return true
 
 
@@ -170,6 +190,10 @@ func get_province_state(id: String) -> Dictionary:
 	}
 	if province.has("siege"):
 		state["siege"] = province["siege"]
+	var governor: String = str(province.get("governor", ""))
+	if governor != "" and _characters.has(governor) and bool(_characters[governor]["alive"]) and str(_characters[governor]["governor_of"]) == id:
+		state["governor"] = governor
+		state["governor_name"] = str(_characters[governor]["name"])
 	return state
 
 
@@ -482,6 +506,16 @@ func submit_order(order: Dictionary) -> Dictionary:
 			return _order_cancel_build(order)
 		"set_tax_rate":
 			return _order_set_tax_rate(order)
+		"learn_skill":
+			return _order_learn_skill(order)
+		"assign_governor":
+			return _order_assign_governor(order)
+		"assign_general":
+			return _order_assign_general(order)
+		"propose_marriage":
+			return _order_propose_marriage(order)
+		"debug_grant_xp":
+			return _order_debug_grant_xp(order)
 		"end_turn":
 			end_turn()
 			return {"ok": true, "error": ""}
@@ -621,6 +655,7 @@ func end_turn() -> Array:
 	_apply_population()
 	_apply_economy()
 	_apply_unrest_events()
+	_apply_character_events()
 	_turn += 1
 	_fake_events()
 	return _events.duplicate(true)
@@ -1001,10 +1036,36 @@ func _setup_armies() -> void:
 			units.append(_make_unit(FAKE_UNIT_TYPES[i % 3]))
 		var army_id := "army_%s_%d" % [faction_id.trim_prefix("fac_"), _next_army_number]
 		_next_army_number += 1
-		var general_name: String = FAKE_GENERALS.get(faction_id, "")
-		var general_id: String = "chr_" + faction_id.trim_prefix("fac_") if general_name != "" else ""
+		var general_id := _pick_general(faction_id)
+		var general_name: String = ""
+		if general_id != "":
+			general_name = str(_characters[general_id]["name"])
+			_characters[general_id]["army"] = army_id
+		else:
+			general_name = FAKE_GENERALS.get(faction_id, "")
+			general_id = "chr_" + faction_id.trim_prefix("fac_") if general_name != "" else ""
 		_armies[army_id] = _make_army(faction_id, location, units, general_id, general_name)
 		created += 1
+
+
+## Choisit un personnage vivant, non captif, adulte de la faction pour commander l'armée
+## initiale : le dirigeant en priorité (plausible en 1337), sinon un commandant connu.
+func _pick_general(faction_id: String) -> String:
+	var ruler: String = str(_faction_info(faction_id).get("ruler", ""))
+	var candidates: Array = []
+	for id in _characters:
+		var c: Dictionary = _characters[id]
+		if str(c["faction"]) != faction_id or not bool(c["alive"]) or bool(c["captive"]):
+			continue
+		if _age_of(c) < 15:
+			continue
+		if str(c["role"]) == "commander":
+			candidates.append(id)
+		elif str(c["role"]) == "ruler":
+			ruler = id
+	if not candidates.is_empty():
+		return candidates[0]
+	return ruler
 
 
 func _home_province(faction_id: String) -> String:
@@ -1075,3 +1136,631 @@ func _map_paths_data_dir() -> String:
 	if paths == null:
 		return ""
 	return str(paths.get("data_dir"))
+
+
+# --- Personnages et dynasties (docs/design/m4-characters-dynasties.md § 3) ----------------
+
+
+const XP_PER_SKILL_POINT := 100
+const MAJORITY_AGE := 15
+const MARRIAGE_MIN_AGE := 14
+const FERTILE_MIN_AGE := 16
+const FERTILE_MAX_AGE := 45
+const BIRTH_PROBABILITY := 0.25
+const ROLE_LABELS_FR := {
+	"ruler": "Souverain(e)", "consort": "Conjoint(e) royal(e)", "heir": "Héritier(ère)",
+	"prince": "Prince/Princesse", "commander": "Commandant(e)", "noble": "Noble",
+	"prelate": "Prélat", "burgher": "Bourgeois(e)", "exile": "Exilé(e)",
+	"claimant": "Prétendant(e)", "regent": "Régent(e)",
+}
+const MALE_NAMES := ["Guillaume", "Jean", "Pierre", "Louis", "Charles", "Robert", "Henri", "Thibaut", "Geoffroy", "Aymeric"]
+const FEMALE_NAMES := ["Marguerite", "Jeanne", "Isabelle", "Blanche", "Agnès", "Alix", "Mahaut", "Catherine", "Yolande", "Béatrice"]
+const PERSONALITY_TRAITS := ["trait_ambitious", "trait_brave", "trait_pious", "trait_cautious", "trait_generous", "trait_energetic", "trait_resolute", "trait_just"]
+
+## Arbre à trois branches (command/governance/court), tiers 1-3, ≈30 nœuds : repli utilisé
+## tant que `data/skills/*.json` n'existe pas (agent `data/` en parallèle, § 1 de la spec).
+const HARDCODED_SKILL_TREE := [
+	{"id": "cmd_hardiesse", "name": "Hardiesse", "branch": "command", "tier": 1, "prerequisites": [], "cost": 1, "description": "Charge +10 %."},
+	{"id": "cmd_ordre_bataille", "name": "Ordre de bataille", "branch": "command", "tier": 1, "prerequisites": [], "cost": 1, "description": "Moral d'armée +5."},
+	{"id": "cmd_chevauchee", "name": "Chevauchée", "branch": "command", "tier": 1, "prerequisites": [], "cost": 1, "description": "Mouvement +1."},
+	{"id": "cmd_tir_droit", "name": "Tir droit", "branch": "command", "tier": 1, "prerequisites": [], "cost": 1, "description": "Tir à distance +5 %."},
+	{"id": "cmd_maitre_sieges", "name": "Maître des sièges", "branch": "command", "tier": 2, "prerequisites": ["cmd_hardiesse"], "cost": 2, "description": "Durée de siège -1 tour."},
+	{"id": "cmd_charge_lourde", "name": "Charge lourde", "branch": "command", "tier": 2, "prerequisites": ["cmd_hardiesse"], "cost": 2, "description": "Charge +15 %."},
+	{"id": "cmd_discipline", "name": "Discipline", "branch": "command", "tier": 2, "prerequisites": ["cmd_ordre_bataille"], "cost": 2, "description": "Moral +10, défense +5 %."},
+	{"id": "cmd_genie_tactique", "name": "Génie tactique", "branch": "command", "tier": 3, "prerequisites": ["cmd_maitre_sieges", "cmd_discipline"], "cost": 3, "description": "Toutes statistiques de commandement +10 %."},
+	{"id": "cmd_terreur_des_champs", "name": "Terreur des champs", "branch": "command", "tier": 3, "prerequisites": ["cmd_charge_lourde"], "cost": 3, "description": "Charge +25 %, moral ennemi -10."},
+	{"id": "cmd_grand_capitaine", "name": "Grand capitaine", "branch": "command", "tier": 3, "prerequisites": ["cmd_discipline"], "cost": 3, "description": "Défense +15 %."},
+	{"id": "gov_bon_justicier", "name": "Bon justicier", "branch": "governance", "tier": 1, "prerequisites": [], "cost": 1, "description": "Mécontentement -5."},
+	{"id": "gov_intendant", "name": "Intendant", "branch": "governance", "tier": 1, "prerequisites": [], "cost": 1, "description": "Impôts +5 %."},
+	{"id": "gov_batisseur", "name": "Bâtisseur", "branch": "governance", "tier": 1, "prerequisites": [], "cost": 1, "description": "Construction -1 tour."},
+	{"id": "gov_agronome", "name": "Agronome", "branch": "governance", "tier": 1, "prerequisites": [], "cost": 1, "description": "Richesse paysanne +5."},
+	{"id": "gov_grand_intendant", "name": "Grand intendant", "branch": "governance", "tier": 2, "prerequisites": ["gov_intendant"], "cost": 2, "description": "Impôts +10 %."},
+	{"id": "gov_urbaniste", "name": "Urbaniste", "branch": "governance", "tier": 2, "prerequisites": ["gov_batisseur"], "cost": 2, "description": "Construction -2 tours."},
+	{"id": "gov_juge_equitable", "name": "Juge équitable", "branch": "governance", "tier": 2, "prerequisites": ["gov_bon_justicier"], "cost": 2, "description": "Mécontentement -10."},
+	{"id": "gov_reformateur", "name": "Réformateur", "branch": "governance", "tier": 3, "prerequisites": ["gov_grand_intendant", "gov_juge_equitable"], "cost": 3, "description": "Impôts +15 %, mécontentement -15."},
+	{"id": "gov_maitre_des_travaux", "name": "Maître des travaux", "branch": "governance", "tier": 3, "prerequisites": ["gov_urbaniste"], "cost": 3, "description": "Construction -3 tours, coût -10 %."},
+	{"id": "gov_pere_du_peuple", "name": "Père du peuple", "branch": "governance", "tier": 3, "prerequisites": ["gov_juge_equitable"], "cost": 3, "description": "Mécontentement -20."},
+	{"id": "court_beau_parleur", "name": "Beau parleur", "branch": "court", "tier": 1, "prerequisites": [], "cost": 1, "description": "Diplomatie +2 (M5)."},
+	{"id": "court_entremetteur", "name": "Entremetteur", "branch": "court", "tier": 1, "prerequisites": [], "cost": 1, "description": "Facilite les mariages."},
+	{"id": "court_piete", "name": "Piété", "branch": "court", "tier": 1, "prerequisites": [], "cost": 1, "description": "Piété +10."},
+	{"id": "court_charme", "name": "Charme", "branch": "court", "tier": 1, "prerequisites": [], "cost": 1, "description": "Prestige +5."},
+	{"id": "court_diplomate_ne", "name": "Diplomate-né", "branch": "court", "tier": 2, "prerequisites": ["court_beau_parleur"], "cost": 2, "description": "Diplomatie +5 (M5)."},
+	{"id": "court_faiseur_de_rois", "name": "Faiseur de rois", "branch": "court", "tier": 2, "prerequisites": ["court_entremetteur"], "cost": 2, "description": "Mariages : prestige supplémentaire."},
+	{"id": "court_devot", "name": "Dévot", "branch": "court", "tier": 2, "prerequisites": ["court_piete"], "cost": 2, "description": "Piété +20."},
+	{"id": "court_cardinal_gris", "name": "Cardinal gris", "branch": "court", "tier": 3, "prerequisites": ["court_diplomate_ne", "court_devot"], "cost": 3, "description": "Diplomatie +10, piété +10 (M5)."},
+	{"id": "court_grand_chambellan", "name": "Grand chambellan", "branch": "court", "tier": 3, "prerequisites": ["court_faiseur_de_rois"], "cost": 3, "description": "Prestige +15."},
+	{"id": "court_ame_de_la_cour", "name": "Âme de la cour", "branch": "court", "tier": 3, "prerequisites": ["court_devot"], "cost": 3, "description": "Piété +30."},
+]
+
+
+func _current_year() -> int:
+	return START_YEAR + _turn / 4
+
+
+func _age_of(character: Dictionary) -> int:
+	if not bool(character.get("alive", true)):
+		var death_year := int(character.get("death_year", character.get("birth_year", _current_year())))
+		return maxi(death_year - int(character.get("birth_year", death_year)), 0)
+	return maxi(_current_year() - int(character.get("birth_year", _current_year())), 0)
+
+
+func _faction_info(faction_id: String) -> Dictionary:
+	var store: Object = _data_store()
+	if store == null:
+		return {}
+	return store.call("get_faction", faction_id)
+
+
+## `data/characters/*.json` (docs/design/m4-characters-dynasties.md § 1) : famille royale
+## complète pour les factions jouables les mieux documentées (France, Angleterre : ~8
+## personnages chacune), effectif variable ailleurs — reflète les données historiques
+## réelles plutôt qu'une composition artificielle à 8 partout.
+func _load_characters(data_dir: String) -> void:
+	var dir := DirAccess.open(data_dir.path_join("characters"))
+	if dir == null:
+		return
+	for file_name in dir.get_files():
+		if not file_name.ends_with(".json"):
+			continue
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join("characters").path_join(file_name)))
+		if parsed == null or not (parsed is Dictionary):
+			continue
+		var data: Dictionary = parsed
+		var id: String = str(data.get("id", file_name.get_basename()))
+		var birth: String = str((data.get("birth", {}) as Dictionary).get("value", "1300"))
+		var death_info: Dictionary = data.get("death", {})
+		var titles: Array = []
+		for entry in data.get("titles", []):
+			titles.append(str(entry.get("title", "")))
+		var family: Dictionary = data.get("family", {})
+		var spouses: Array = family.get("spouses", [])
+		var skills: Dictionary = data.get("skills", {})
+		_characters[id] = {
+			"id": id,
+			"name": str((data.get("name", {}) as Dictionary).get("display", id)),
+			"epithet": str(data.get("epithet", "")),
+			"sex": str(data.get("sex", "male")),
+			"house": str(data.get("house", "")),
+			"faction": str(data.get("faction", "")),
+			"role": str(data.get("role", "noble")),
+			"birth_year": int(birth.substr(0, 4)) if birth.length() >= 4 and birth.substr(0, 4).is_valid_int() else 1300,
+			"death_year": int(str(death_info.get("value", "")).substr(0, 4)) if not death_info.is_empty() and str(death_info.get("value", "")).length() >= 4 else -1,
+			"alive": true,
+			"experience": int(skills.get("command", 0)) * 60 + int(skills.get("governance", 0)) * 60 + int(skills.get("court", 0)) * 60,
+			"skill_points": 0,
+			"skills_learned": [],
+			"traits": (data.get("traits", []) as Array).duplicate(),
+			"spouse": str(spouses[0]) if not spouses.is_empty() else "",
+			"children": (family.get("children", []) as Array).duplicate(),
+			"father": str(family.get("father", "")),
+			"mother": str(family.get("mother", "")),
+			"location": str(data.get("starting_location", "")),
+			"army": "",
+			"governor_of": "",
+			"captive": false,
+			"piety": int(data.get("piety", 50)),
+			"prestige": 0,
+			"titles": titles,
+			"base_skills": {
+				"command": int(skills.get("command", 0)),
+				"governance": int(skills.get("governance", 0)),
+				"court": int(skills.get("court", 0)),
+			},
+		}
+	_load_trait_dir(data_dir.path_join("traits"))
+
+
+func _load_trait_dir(path: String) -> void:
+	_traits.clear()
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	for file_name in dir.get_files():
+		if not file_name.ends_with(".json"):
+			continue
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path.path_join(file_name)))
+		if parsed == null or not (parsed is Dictionary):
+			continue
+		var data: Dictionary = parsed
+		var id: String = str(data.get("id", file_name.get_basename()))
+		_traits[id] = {
+			"name": str((data.get("name", {}) as Dictionary).get("display", data.get("name", id))) if data.get("name") is Dictionary else str(data.get("name", id)),
+			"category": str(data.get("category", "")),
+			"description": str(data.get("description", "")),
+		}
+
+
+## `data/skills/*.json` si présent (agent `data/` en parallèle), sinon `HARDCODED_SKILL_TREE`.
+func _load_skill_tree(data_dir: String) -> void:
+	var dir := DirAccess.open(data_dir.path_join("skills"))
+	if dir == null:
+		_skill_tree = HARDCODED_SKILL_TREE.duplicate(true)
+		return
+	var loaded: Array = []
+	for file_name in dir.get_files():
+		if not file_name.ends_with(".json"):
+			continue
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join("skills").path_join(file_name)))
+		if parsed == null or not (parsed is Dictionary):
+			continue
+		var data: Dictionary = parsed
+		loaded.append({
+			"id": str(data.get("id", file_name.get_basename())),
+			"name": str((data.get("name", {}) as Dictionary).get("display", data.get("name", data.get("id", "")))) if data.get("name") is Dictionary else str(data.get("name", data.get("id", ""))),
+			"branch": str(data.get("branch", "command")),
+			"tier": int(data.get("tier", 1)),
+			"prerequisites": (data.get("prerequisites", []) as Array).duplicate(),
+			"cost": int(data.get("cost", 1)),
+			"description": str(data.get("description", "")),
+		})
+	_skill_tree = loaded if not loaded.is_empty() else HARDCODED_SKILL_TREE.duplicate(true)
+
+
+# --- Lecture personnages (docs/design/m4-characters-dynasties.md § 3) ---------------------
+
+
+func get_character(id: String) -> Dictionary:
+	if not _characters.has(id):
+		return {}
+	var c: Dictionary = _characters[id]
+	var age := _age_of(c)
+	var traits_out: Array = []
+	for trait_id in c["traits"]:
+		var info: Dictionary = _traits.get(trait_id, {})
+		traits_out.append({
+			"id": trait_id,
+			"name": str(info.get("name", str(trait_id).trim_prefix("trait_").capitalize())),
+			"category": str(info.get("category", "")),
+		})
+	var children_out: Array = []
+	for child_id in c["children"]:
+		if _characters.has(child_id):
+			var child: Dictionary = _characters[child_id]
+			children_out.append({"id": child_id, "name": str(child["name"]), "age": _age_of(child)})
+	var spouse_id: String = str(c["spouse"])
+	return {
+		"id": id,
+		"name": str(c["name"]),
+		"epithet": str(c["epithet"]),
+		"sex": str(c["sex"]),
+		"age": age,
+		"alive": bool(c["alive"]),
+		"faction": str(c["faction"]),
+		"house": str(c["house"]),
+		"title": _title_of(c),
+		"role": _current_role(c),
+		"skills": {
+			"command": _branch_level(c, "command"),
+			"governance": _branch_level(c, "governance"),
+			"court": _branch_level(c, "court"),
+		},
+		"experience": int(c["experience"]),
+		"skill_points": int(c["skill_points"]),
+		"skills_learned": (c["skills_learned"] as Array).duplicate(),
+		"traits": traits_out,
+		"spouse": spouse_id,
+		"spouse_name": str(_characters.get(spouse_id, {}).get("name", "")),
+		"children": children_out,
+		"father": str(c["father"]),
+		"mother": str(c["mother"]),
+		"location": str(c["location"]),
+		"army": str(c["army"]),
+		"governor_of": str(c["governor_of"]),
+		"captive": bool(c["captive"]),
+		"piety": int(c["piety"]),
+		"prestige": int(c["prestige"]),
+	}
+
+
+## Niveau agrégé d'une branche : base des données (`data/characters` § skills 0-10) plus un
+## point par compétence apprise de cette branche (` _skill_tree`).
+func _branch_level(c: Dictionary, branch: String) -> int:
+	var base := int((c.get("base_skills", {}) as Dictionary).get(branch, 0))
+	var learned := 0
+	for skill_id in c["skills_learned"]:
+		for node in _skill_tree:
+			if str(node["id"]) == skill_id and str(node["branch"]) == branch:
+				learned += 1
+	return mini(base + learned, 10)
+
+
+func _title_of(c: Dictionary) -> String:
+	var titles: Array = c.get("titles", [])
+	if not titles.is_empty():
+		return str(titles[0])
+	if str(c["role"]) == "ruler":
+		var info := _faction_info(str(c["faction"]))
+		var faction_titles: Array = info.get("titles", [])
+		if not faction_titles.is_empty():
+			return str(faction_titles[0])
+	return str(ROLE_LABELS_FR.get(c["role"], str(c["role"]).capitalize()))
+
+
+func _current_role(c: Dictionary) -> String:
+	if bool(c["captive"]):
+		return "Captif(ve)"
+	var governor_of: String = str(c["governor_of"])
+	if governor_of != "":
+		return "gouverneur de %s" % _province_display_name(governor_of)
+	var army_id: String = str(c["army"])
+	if army_id != "" and _armies.has(army_id):
+		return "général de l'armée en %s" % _province_display_name(str(_armies[army_id]["location"]))
+	return "à la cour"
+
+
+func _province_display_name(province_id: String) -> String:
+	var store: Object = _data_store()
+	if store != null:
+		var info: Dictionary = store.call("get_province", province_id)
+		if not info.is_empty():
+			return str(info.get("display_name", province_id))
+	return str(_provinces.get(province_id, {}).get("name", province_id))
+
+
+## Vivants de la faction, dirigeant puis héritier en tête, puis par âge décroissant.
+func get_faction_characters(faction: String) -> Array:
+	var info := _faction_info(faction)
+	var ruler: String = str(info.get("ruler", ""))
+	var heir: String = str(info.get("heir", ""))
+	var ids: Array = []
+	for id in _characters:
+		if str(_characters[id]["faction"]) == faction and bool(_characters[id]["alive"]):
+			ids.append(id)
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		var rank_a := 0 if a == ruler else (1 if a == heir else 2)
+		var rank_b := 0 if b == ruler else (1 if b == heir else 2)
+		if rank_a != rank_b:
+			return rank_a < rank_b
+		return _age_of(_characters[a]) > _age_of(_characters[b]))
+	return ids
+
+
+func get_skill_tree() -> Array:
+	return _skill_tree.duplicate(true)
+
+
+func get_learnable(character: String) -> Array:
+	if not _characters.has(character):
+		return []
+	var c: Dictionary = _characters[character]
+	var learned: Array = c["skills_learned"]
+	var points := int(c["skill_points"])
+	var result: Array = []
+	for node in _skill_tree:
+		var id: String = str(node["id"])
+		if learned.has(id):
+			continue
+		if int(node["cost"]) > points:
+			continue
+		var prereqs_ok := true
+		for prereq in node["prerequisites"]:
+			if not learned.has(str(prereq)):
+				prereqs_ok = false
+				break
+		if prereqs_ok:
+			result.append(id)
+	return result
+
+
+## Candidats de mariage : même faction (interfactions = diplomatie M5, hors mock), vivants,
+## sexe opposé, ≥ 14 ans, non mariés, ni parent/enfant/frère-sœur.
+func get_marriage_candidates(character: String) -> Array:
+	if not _characters.has(character):
+		return []
+	var c: Dictionary = _characters[character]
+	var result: Array = []
+	for id in _characters:
+		if id == character:
+			continue
+		var other: Dictionary = _characters[id]
+		if not _can_marry(c, other):
+			continue
+		result.append({"id": id, "name": str(other["name"]), "age": _age_of(other), "faction": str(other["faction"])})
+	return result
+
+
+func _can_marry(a: Dictionary, b: Dictionary) -> bool:
+	if not bool(a["alive"]) or not bool(b["alive"]):
+		return false
+	if str(a["faction"]) != str(b["faction"]):
+		return false
+	if str(a["sex"]) == str(b["sex"]):
+		return false
+	if str(a["spouse"]) != "" or str(b["spouse"]) != "":
+		return false
+	if _age_of(a) < MARRIAGE_MIN_AGE or _age_of(b) < MARRIAGE_MIN_AGE:
+		return false
+	if _are_related(a, b):
+		return false
+	return true
+
+
+func _are_related(a: Dictionary, b: Dictionary) -> bool:
+	var a_id: String = str(a["id"])
+	var b_id: String = str(b["id"])
+	if str(a["father"]) == b_id or str(a["mother"]) == b_id or str(b["father"]) == a_id or str(b["mother"]) == a_id:
+		return true
+	if (a["children"] as Array).has(b_id) or (b["children"] as Array).has(a_id):
+		return true
+	var a_parents := [str(a["father"]), str(a["mother"])]
+	var b_parents := [str(b["father"]), str(b["mother"])]
+	for parent in a_parents:
+		if parent != "" and b_parents.has(parent):
+			return true
+	return false
+
+
+# --- Ordres personnages --------------------------------------------------------------------
+
+
+func _order_learn_skill(order: Dictionary) -> Dictionary:
+	var character: String = str(order.get("character", ""))
+	var skill: String = str(order.get("skill", ""))
+	if not _characters.has(character):
+		return {"ok": false, "error": "Personnage inconnu"}
+	if not get_learnable(character).has(skill):
+		return {"ok": false, "error": "Compétence non disponible pour ce personnage"}
+	var node: Dictionary = {}
+	for candidate in _skill_tree:
+		if str(candidate["id"]) == skill:
+			node = candidate
+			break
+	var c: Dictionary = _characters[character]
+	c["skill_points"] = int(c["skill_points"]) - int(node["cost"])
+	(c["skills_learned"] as Array).append(skill)
+	_events.append({
+		"kind": "skill_learned",
+		"text_fr": "%s apprend « %s »." % [str(c["name"]), str(node["name"])],
+		"character": character,
+	})
+	return {"ok": true, "error": ""}
+
+
+func _order_assign_governor(order: Dictionary) -> Dictionary:
+	var province_id: String = str(order.get("province", ""))
+	var character: String = str(order.get("character", ""))
+	if not _characters.has(character):
+		return {"ok": false, "error": "Personnage inconnu"}
+	if not _provinces.has(province_id):
+		return {"ok": false, "error": "Province inconnue"}
+	var c: Dictionary = _characters[character]
+	var province: Dictionary = _provinces[province_id]
+	if str(province["owner"]) != str(c["faction"]):
+		return {"ok": false, "error": "Province hors de la faction du personnage"}
+	if not bool(c["alive"]) or bool(c["captive"]):
+		return {"ok": false, "error": "Personnage indisponible"}
+	if _age_of(c) < MAJORITY_AGE:
+		return {"ok": false, "error": "Personnage mineur"}
+	if str(c["army"]) != "":
+		return {"ok": false, "error": "Ce personnage commande déjà une armée"}
+	# Un seul gouverneur par province : retire l'ancien.
+	for id in _characters:
+		if str(_characters[id]["governor_of"]) == province_id:
+			_characters[id]["governor_of"] = ""
+	c["governor_of"] = province_id
+	province["governor"] = character
+	_events.append({"kind": "appointment", "text_fr": "%s est nommé(e) gouverneur(e) de %s." % [str(c["name"]), _province_display_name(province_id)], "character": character, "province": province_id})
+	return {"ok": true, "error": ""}
+
+
+func _order_assign_general(order: Dictionary) -> Dictionary:
+	var army_id: String = str(order.get("army", ""))
+	var character: String = str(order.get("character", ""))
+	if not _characters.has(character):
+		return {"ok": false, "error": "Personnage inconnu"}
+	if not _armies.has(army_id):
+		return {"ok": false, "error": "Armée inconnue"}
+	var c: Dictionary = _characters[character]
+	var army: Dictionary = _armies[army_id]
+	if str(army["faction"]) != str(c["faction"]):
+		return {"ok": false, "error": "Armée hors de la faction du personnage"}
+	if not bool(c["alive"]) or bool(c["captive"]):
+		return {"ok": false, "error": "Personnage indisponible"}
+	if _age_of(c) < MAJORITY_AGE:
+		return {"ok": false, "error": "Personnage mineur"}
+	if str(c["governor_of"]) != "":
+		return {"ok": false, "error": "Ce personnage gouverne déjà une province"}
+	# Un général par armée ; retire ce personnage d'une éventuelle armée précédente.
+	for id in _armies:
+		if str(_armies[id]["general"]) == character:
+			_armies[id]["general"] = ""
+			_armies[id]["general_name"] = ""
+	army["general"] = character
+	army["general_name"] = str(c["name"])
+	c["army"] = army_id
+	_events.append({"kind": "appointment", "text_fr": "%s prend le commandement d'une armée." % str(c["name"]), "character": character, "army": army_id})
+	return {"ok": true, "error": ""}
+
+
+func _order_propose_marriage(order: Dictionary) -> Dictionary:
+	var character: String = str(order.get("character", ""))
+	var spouse: String = str(order.get("spouse", ""))
+	if not _characters.has(character) or not _characters.has(spouse):
+		return {"ok": false, "error": "Personnage inconnu"}
+	var a: Dictionary = _characters[character]
+	var b: Dictionary = _characters[spouse]
+	if not _can_marry(a, b):
+		return {"ok": false, "error": "Ce mariage n'est pas possible"}
+	a["spouse"] = spouse
+	b["spouse"] = character
+	a["prestige"] = int(a["prestige"]) + 10
+	b["prestige"] = int(b["prestige"]) + 10
+	_events.append({
+		"kind": "marriage",
+		"text_fr": "Mariage de %s et %s." % [str(a["name"]), str(b["name"])],
+		"character": character, "spouse": spouse,
+	})
+	return {"ok": true, "error": ""}
+
+
+## Réservé au mode headless (tests) : force l'expérience d'un personnage pour valider
+## `learn_skill` sans jouer les batailles/tours de gouvernance qui l'accorderaient normalement.
+func _order_debug_grant_xp(order: Dictionary) -> Dictionary:
+	var character: String = str(order.get("character", ""))
+	var amount: int = int(order.get("amount", 100))
+	if not _characters.has(character):
+		return {"ok": false, "error": "Personnage inconnu"}
+	var c: Dictionary = _characters[character]
+	c["experience"] = int(c["experience"]) + amount
+	c["skill_points"] = int(c["skill_points"]) + amount / XP_PER_SKILL_POINT
+	return {"ok": true, "error": ""}
+
+
+# --- Fin de tour : naissances, morts, succession ------------------------------------------
+
+
+## Naissances (hiver, couples mariés, femme 16-45 ans, 25 % de probabilité), morts
+## (probabilité croissant avec l'âge) et succession simplifiée sur la mort d'un dirigeant.
+func _apply_character_events() -> void:
+	var is_winter := _turn % 4 == 3
+	if is_winter:
+		_apply_births()
+	_apply_deaths()
+
+
+func _apply_births() -> void:
+	var processed: Array = []
+	for id in _characters.keys():
+		if processed.has(id):
+			continue
+		var c: Dictionary = _characters[id]
+		var spouse_id: String = str(c["spouse"])
+		if spouse_id == "" or not _characters.has(spouse_id) or processed.has(spouse_id):
+			continue
+		processed.append(id)
+		processed.append(spouse_id)
+		var mother: Dictionary = c if str(c["sex"]) == "female" else _characters[spouse_id]
+		var father: Dictionary = _characters[spouse_id] if str(c["sex"]) == "female" else c
+		if not bool(mother["alive"]) or not bool(father["alive"]):
+			continue
+		var age := _age_of(mother)
+		if age < FERTILE_MIN_AGE or age > FERTILE_MAX_AGE:
+			continue
+		if _rng.randf() >= BIRTH_PROBABILITY:
+			continue
+		_generate_child(str(father["id"]), str(mother["id"]))
+
+
+func _generate_child(father_id: String, mother_id: String) -> void:
+	var father: Dictionary = _characters[father_id]
+	var mother: Dictionary = _characters[mother_id]
+	var sex: String = "male" if _rng.randf() < 0.5 else "female"
+	var names: Array = MALE_NAMES if sex == "male" else FEMALE_NAMES
+	var name: String = names[_rng.randi_range(0, names.size() - 1)]
+	var id := "chr_gen_%d" % _next_generated_id
+	_next_generated_id += 1
+	var trait_id: String = PERSONALITY_TRAITS[_rng.randi_range(0, PERSONALITY_TRAITS.size() - 1)]
+	_characters[id] = {
+		"id": id, "name": name, "epithet": "", "sex": sex, "house": str(father["house"]),
+		"faction": str(father["faction"]), "role": "noble", "birth_year": _current_year(),
+		"death_year": -1, "alive": true,
+		"experience": 0, "skill_points": 0, "skills_learned": [],
+		"traits": [trait_id],
+		"spouse": "", "children": [], "father": father_id, "mother": mother_id,
+		"location": str(father["location"]), "army": "", "governor_of": "", "captive": false,
+		"piety": 50, "prestige": 0, "titles": [],
+		"base_skills": {
+			"command": _rng.randi_range(0, 3), "governance": _rng.randi_range(0, 3), "court": _rng.randi_range(0, 3),
+		},
+	}
+	(father["children"] as Array).append(id)
+	(mother["children"] as Array).append(id)
+	_events.append({
+		"kind": "birth",
+		"text_fr": "Naissance de %s, enfant de %s et %s." % [name, str(father["name"]), str(mother["name"])],
+		"character": id, "father": father_id, "mother": mother_id,
+	})
+	if trait_id != "":
+		_events.append({
+			"kind": "trait_acquired",
+			"text_fr": "%s acquiert le trait « %s »." % [name, str(trait_id).trim_prefix("trait_").capitalize()],
+			"character": id,
+		})
+
+
+## Mortalité simplifiée (probabilité croissante avec l'âge) : suffit à garantir des morts sur
+## un horizon de plusieurs dizaines de tours pour le smoke test, sans prétendre à une table
+## actuarielle réaliste (réservé à `core/`).
+func _apply_deaths() -> void:
+	for id in _characters.keys():
+		var c: Dictionary = _characters[id]
+		if not bool(c["alive"]):
+			continue
+		var age := _age_of(c)
+		if age < 20:
+			continue
+		var chance: float = 0.0015 + maxf(0.0, float(age - 40)) * 0.0006
+		if _rng.randf() >= chance:
+			continue
+		_kill_character(id)
+
+
+func _kill_character(id: String) -> void:
+	var c: Dictionary = _characters[id]
+	c["alive"] = false
+	c["death_year"] = _current_year()
+	if str(c["governor_of"]) != "":
+		c["governor_of"] = ""
+	if str(c["army"]) != "":
+		if _armies.has(str(c["army"])):
+			_armies[str(c["army"])]["general"] = ""
+			_armies[str(c["army"])]["general_name"] = ""
+		c["army"] = ""
+	_events.append({"kind": "death", "text_fr": "Mort de %s." % str(c["name"]), "character": id})
+	if str(c["role"]) == "ruler":
+		_handle_succession(str(c["faction"]), id)
+
+
+## Succession simplifiée : héritier désigné par `GameDataStore.get_faction().heir` s'il est
+## vivant et adulte, sinon le personnage vivant le plus âgé de la faction ; régence si mineur ;
+## la loi de succession détaillée (salique, etc.) est traitée par `core/` (§ 2 de la spec).
+func _handle_succession(faction_id: String, dead_id: String) -> void:
+	var info := _faction_info(faction_id)
+	var heir: String = str(info.get("heir", ""))
+	var successor := ""
+	if heir != "" and _characters.has(heir) and bool(_characters[heir]["alive"]):
+		successor = heir
+	else:
+		var best_age := -1
+		for id in _characters:
+			var c: Dictionary = _characters[id]
+			if str(c["faction"]) == faction_id and bool(c["alive"]):
+				var age := _age_of(c)
+				if age > best_age:
+					best_age = age
+					successor = id
+	if successor == "":
+		_events.append({"kind": "succession", "text_fr": "%s s'éteint sans héritier vivant." % _faction_info(faction_id).get("short_name", faction_id), "faction": faction_id})
+		return
+	_characters[successor]["role"] = "ruler"
+	_events.append({
+		"kind": "succession",
+		"text_fr": "%s succède à %s sur le trône." % [str(_characters[successor]["name"]), str(_characters[dead_id]["name"])],
+		"character": successor, "faction": faction_id,
+	})
+	if _age_of(_characters[successor]) < MAJORITY_AGE:
+		_events.append({
+			"kind": "regency",
+			"text_fr": "%s est mineur(e) : une régence est instaurée." % str(_characters[successor]["name"]),
+			"character": successor, "faction": faction_id,
+		})

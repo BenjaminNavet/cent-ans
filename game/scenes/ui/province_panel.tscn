@@ -131,6 +131,22 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "—"
 
+[node name="GovernorRow" type="HBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GovernorLabel" type="Label" parent="VBox/GovernorRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Gouverneur : —"
+
+[node name="GovernorCourtButton" type="Button" parent="VBox/GovernorRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cour"
+
 [node name="Separator2" type="HSeparator" parent="VBox"]
 layout_mode = 2
 

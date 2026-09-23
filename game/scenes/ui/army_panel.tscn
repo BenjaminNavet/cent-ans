@@ -61,6 +61,15 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "—"
 
+[node name="GeneralSkillsKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Compétences du général"
+
+[node name="GeneralSkillsValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
 [node name="LocationKey" type="Label" parent="VBox/Grid"]
 layout_mode = 2
 text = "Position"

@@ -43,6 +43,8 @@ var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
 var unrest_mode: bool = false
 var _faction_panel_id: String = ""
+var _court_open: bool = false
+var _open_character_id: String = ""
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -116,6 +118,13 @@ func _connect_ui() -> void:
 	ui.cancel_build_requested.connect(_on_cancel_build)
 	ui.tax_rate_changed.connect(_on_tax_rate_changed)
 	ui.faction_panel_requested.connect(_on_faction_panel_requested)
+	ui.court_panel_requested.connect(_on_court_panel_requested)
+	ui.province_court_requested.connect(_on_province_court_requested)
+	ui.character_selected.connect(_on_character_selected)
+	ui.governor_requested.connect(_on_governor_requested)
+	ui.general_requested.connect(_on_general_requested)
+	ui.marriage_requested.connect(_on_marriage_requested)
+	ui.learn_skill_requested.connect(_on_learn_skill_requested)
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.army_panel_closed.connect(func() -> void: deselect_army())
 	ui.province_panel_closed.connect(func() -> void:
@@ -166,6 +175,10 @@ func refresh_all() -> void:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
 		_show_faction_panel(_faction_panel_id)
+	if _court_open:
+		_show_court_panel()
+	if _open_character_id != "":
+		_show_character_sheet(_open_character_id)
 
 
 func _city_available() -> bool:
@@ -174,6 +187,10 @@ func _city_available() -> bool:
 
 func _economy_available() -> bool:
 	return sim != null and sim.has_method("get_faction_economy")
+
+
+func _characters_available() -> bool:
+	return sim != null and sim.has_method("get_character") and sim.has_method("get_faction_characters")
 
 
 func _refresh_top_bar() -> void:
@@ -260,7 +277,11 @@ func select_army(army_id: String) -> void:
 	var is_player := faction == player_faction
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
-	ui.show_army(army_id, army, SimFacade.faction_short_name(faction), SimFacade.faction_color(faction), is_player, province_name_of)
+	var general_skills: Dictionary = {}
+	var general_id: String = str(army.get("general", ""))
+	if general_id != "" and _characters_available():
+		general_skills = (sim.call("get_character", general_id) as Dictionary).get("skills", {})
+	ui.show_army(army_id, army, SimFacade.faction_short_name(faction), SimFacade.faction_color(faction), is_player, province_name_of, general_skills)
 	ui.hide_province()
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
@@ -433,6 +454,107 @@ func _show_faction_panel(faction_id: String) -> void:
 	ui.show_faction(faction_id, SimFacade.faction_short_name(faction_id), SimFacade.faction_color(faction_id), economy)
 
 
+# --- Personnages et dynasties (M4) --------------------------------------------------------
+
+
+func _on_court_panel_requested() -> void:
+	if not _characters_available():
+		ui.show_toast("Cour indisponible avec cette simulation.", true)
+		return
+	_court_open = true
+	_show_court_panel()
+
+
+func _show_court_panel(preset_filter: int = -1) -> void:
+	var rows: Array[Dictionary] = []
+	for id in sim.call("get_faction_characters", player_faction):
+		var character: Dictionary = sim.call("get_character", id)
+		if not character.is_empty():
+			rows.append(character)
+	ui.show_court(rows, SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction), preset_filter)
+
+
+## Bouton « Cour » du panneau de province : ouvre la cour filtrée sur les gouverneurs.
+func _on_province_court_requested() -> void:
+	if not _characters_available():
+		ui.show_toast("Cour indisponible avec cette simulation.", true)
+		return
+	_court_open = true
+	_show_court_panel(CourtPanel.FILTER_GOVERNOR)
+
+
+func _on_character_selected(character_id: String) -> void:
+	if not _characters_available():
+		return
+	_open_character_id = character_id
+	_show_character_sheet(character_id)
+
+
+func _show_character_sheet(character_id: String) -> void:
+	var character: Dictionary = sim.call("get_character", character_id)
+	if character.is_empty():
+		_open_character_id = ""
+		ui.hide_character()
+		return
+	var skill_tree: Array = sim.call("get_skill_tree") if sim.has_method("get_skill_tree") else []
+	var learnable: Array = sim.call("get_learnable", character_id) if sim.has_method("get_learnable") else []
+	var candidates: Array = sim.call("get_marriage_candidates", character_id) if sim.has_method("get_marriage_candidates") else []
+	ui.show_character(character, skill_tree, learnable, _governable_provinces(str(character.get("faction", ""))), _commandable_armies(character), candidates)
+
+
+## Provinces contrôlées par la faction du personnage : `[{id, name}]`.
+func _governable_provinces(faction_id: String) -> Array:
+	var result: Array = []
+	for index in range(1, map_data.province_count + 1):
+		var province := map_data.get_province(index)
+		var province_id: String = str(province.get("id", ""))
+		var state: Dictionary = sim.call("get_province_state", province_id)
+		if str(state.get("owner", "")) == faction_id and str(state.get("controller", state.get("owner", ""))) == faction_id:
+			result.append({"id": province_id, "name": province_name_of(province_id)})
+	return result
+
+
+## Armées de la faction du personnage dans sa province actuelle : `[{id, name}]`.
+func _commandable_armies(character: Dictionary) -> Array:
+	var result: Array = []
+	var faction_id: String = str(character.get("faction", ""))
+	var location: String = str(character.get("location", ""))
+	for army_id in sim.call("get_army_ids"):
+		var army: Dictionary = sim.call("get_army", army_id)
+		if str(army.get("faction", "")) == faction_id and str(army.get("location", "")) == location:
+			var general_name: String = str(army.get("general_name", ""))
+			result.append({"id": army_id, "name": "Armée%s" % (" (général : %s)" % general_name if general_name != "" else "")})
+	return result
+
+
+func _on_governor_requested(character_id: String, province_id: String) -> void:
+	_submit_character({"type": "assign_governor", "character": character_id, "province": province_id}, "Gouverneur nommé.")
+
+
+func _on_general_requested(character_id: String, army_id: String) -> void:
+	_submit_character({"type": "assign_general", "character": character_id, "army": army_id}, "Commandement confié.")
+
+
+func _on_marriage_requested(character_id: String, spouse_id: String) -> void:
+	_submit_character({"type": "propose_marriage", "character": character_id, "spouse": spouse_id}, "Mariage célébré.")
+
+
+func _on_learn_skill_requested(character_id: String, skill_id: String) -> void:
+	_submit_character({"type": "learn_skill", "character": character_id, "skill": skill_id}, "Compétence apprise.")
+
+
+func _submit_character(order: Dictionary, success_text: String) -> Dictionary:
+	var result := _submit(order, success_text)
+	if result.get("ok", false):
+		var character_id: String = str(order.get("character", ""))
+		if character_id != "":
+			_open_character_id = character_id
+			_show_character_sheet(character_id)
+		if _court_open:
+			_show_court_panel()
+	return result
+
+
 ## Mode d'affichage « mécontentement » (touche M) : teinte les provinces vert → rouge par
 ## mécontentement moyen pondéré au lieu de la couleur de faction. Sans `get_province_city`,
 ## le mode ne fait rien (bascule ignorée, notification).
@@ -565,6 +687,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
 	elif event.is_action_pressed("map_toggle_unrest"):
 		_toggle_unrest_mode()
+	elif event.is_action_pressed("map_toggle_court"):
+		if ui.court_panel_visible():
+			_court_open = false
+			ui.hide_court()
+		else:
+			_on_court_panel_requested()
 	elif event.is_action_pressed("ui_cancel") and selected_army != "":
 		deselect_army()
 
@@ -586,6 +714,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_city()
 				"faction":
 					_stage_screenshot_faction()
+				"court":
+					_stage_screenshot_court()
+				"skills":
+					_stage_screenshot_skills()
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
@@ -651,6 +783,48 @@ func _ensure_city_capable_sim() -> void:
 	SimFacade.is_real = false
 	sim = mock
 	refresh_all()
+
+
+## Idem pour `get_character` (§ 3, en attendant le pont M4) : sert aux captures
+## `--stage=court`/`--stage=skills` et au smoke test.
+func _ensure_characters_capable_sim() -> void:
+	if _characters_available():
+		return
+	var mock := CampaignSimMock.new()
+	if not mock.new_campaign(MapPaths.data_dir, player_faction, SimFacade.pending_seed):
+		return
+	SimFacade.sim = mock
+	SimFacade.is_real = false
+	sim = mock
+	refresh_all()
+
+
+## Mise en scène « cour » : panneau de la cour du joueur ouvert.
+func _stage_screenshot_court() -> void:
+	_ensure_characters_capable_sim()
+	_focus_capital()
+	_on_court_panel_requested()
+
+
+## Mise en scène « compétences » : fiche du dirigeant ouverte sur l'arbre de compétences.
+func _stage_screenshot_skills() -> void:
+	_ensure_characters_capable_sim()
+	_focus_capital()
+	var info := _faction_info(player_faction)
+	var ruler: String = str(info.get("ruler", ""))
+	if ruler == "":
+		var ids: Array = sim.call("get_faction_characters", player_faction)
+		if not ids.is_empty():
+			ruler = str(ids[0])
+	if ruler != "":
+		sim.call("submit_order", {"type": "debug_grant_xp", "character": ruler, "amount": 400})
+		_on_character_selected(ruler)
+
+
+func _faction_info(faction_id: String) -> Dictionary:
+	if SimFacade.store_loaded():
+		return SimFacade.store.call("get_faction", faction_id)
+	return {}
 
 
 func _focus_capital() -> void:
