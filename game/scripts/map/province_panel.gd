@@ -319,6 +319,7 @@ func _fill_garrison(garrison: Array, selectable: bool) -> void:
 			check.text = text
 			check.button_pressed = true
 			check.set_script(RichButton)
+			check.theme_type_variation = &"CheckBox"
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
 			check.tooltip_text = RichTooltip.unit(unit_type, unit)
 			garrison_list.add_child(check)

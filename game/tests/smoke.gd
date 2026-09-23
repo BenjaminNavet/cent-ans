@@ -64,6 +64,7 @@ func _init() -> void:
 	await _run_battle()
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
+	await _run_icons()  # F2
 	await _run_siege_battle()
 	quit(1 if _failures > 0 else 0)
 
@@ -828,6 +829,62 @@ func _run_assets() -> void:
 	await process_frame
 	if _failures == 0:
 		print("smoke OK: assets, 10 sfx + 3 music, settings persisted, %d portrait(s), 7 models, siege marker dressed" % portraits)
+
+
+## F2 : icônes (`IconLibrary`, `game/assets/icons/icons.json`) et infobulles riches. Toutes
+## les entrées de la table se chargent ; chaque id de `data/` (unités, bâtiments, ressources,
+## technologies) a sa propre icône, chaque branche de compétence et catégorie de trait aussi ;
+## replis par catégorie ; BBCode d'infobulle non vide et panneau constructible.
+func _run_icons() -> void:
+	var library: Node = root.get_node_or_null("/root/IconLibrary")
+	if not _check(library != null, "IconLibrary autoload missing"):
+		return
+	var table: Dictionary = library.get("icons")
+	_check(table.size() >= 100, "icons.json too small: %d entries" % table.size())
+	var broken: Array = []
+	for id in table:
+		if library.call("get_icon", str(id)) == null:
+			broken.append(id)
+	_check(broken.is_empty(), "icons not loadable: %s" % [broken])
+	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	var missing: Array = []
+	var checked := 0
+	for directory in ["unit_types", "buildings", "resources", "technologies", "skills", "traits"]:
+		var dir := DirAccess.open(data_dir.path_join(directory))
+		if not _check(dir != null, "data/%s missing" % directory):
+			continue
+		for file_name in dir.get_files():
+			if not file_name.ends_with(".json"):
+				continue
+			var entry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join(directory).path_join(file_name)))
+			var id := str(entry.get("id", ""))
+			if directory == "skills":
+				id = "branch_" + str(entry.get("branch", ""))
+			elif directory == "traits":
+				id = "trait_category_" + str(entry.get("category", ""))
+			checked += 1
+			if not library.call("has_icon", id):
+				missing.append(id)
+	_check(missing.is_empty(), "data ids without icon: %s" % [missing])
+	for hud_id in ["hud_treasury", "hud_income", "hud_research", "hud_season_spring", "hud_season_summer", "hud_season_autumn", "hud_season_winter", "hud_diplomacy", "hud_chronicle", "hud_court", "hud_technologies", "class_peasants", "class_burghers", "class_clergy", "class_nobility", "gauge_unrest", "gauge_health", "gauge_wealth", "gauge_goods_satisfaction"]:
+		if not library.call("has_icon", hud_id):
+			missing.append(hud_id)
+	_check(missing.is_empty(), "UI ids without icon: %s" % [missing])
+	_check(str(library.call("resolve", "unit_does_not_exist")) == "cat_unit", "unit fallback expected")
+	_check(str(library.call("resolve", "bld_does_not_exist")) == "cat_building", "building fallback expected")
+	_check(library.call("get_icon", "totally_unknown") != null, "default fallback expected")
+	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
+	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
+	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
+	root.add_child(panel)
+	await process_frame
+	_check(panel.get_node_or_null("Text") is RichTextLabel, "tooltip panel text expected")
+	panel.queue_free()
+	var chip := IconChip.create("res_wine", "Vin", "x")
+	_check(chip.icon_rect != null and chip.icon_rect.texture != null, "icon chip texture expected")
+	chip.free()
+	if _failures == 0:
+		print("smoke OK: icons, %d entries loaded, %d data ids covered, fallbacks and rich tooltips" % [table.size(), checked])
 
 
 ## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis
