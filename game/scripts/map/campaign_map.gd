@@ -143,8 +143,16 @@ func _connect_ui() -> void:
 	ui.end_turn_pressed.connect(_on_end_turn)
 	ui.save_requested.connect(_on_save)
 	ui.load_requested.connect(_on_load)
-	ui.main_menu_requested.connect(func() -> void: get_tree().change_scene_to_file(START_MENU_SCENE))
-	ui.quit_requested.connect(func() -> void: get_tree().quit())
+	ui.main_menu_requested.connect(func() -> void:
+		if flow != null:
+			flow.request_exit("main_menu")
+		else:
+			get_tree().change_scene_to_file(START_MENU_SCENE))
+	ui.quit_requested.connect(func() -> void:
+		if flow != null:
+			flow.request_exit("quit")
+		else:
+			get_tree().quit())
 	ui.recruit_requested.connect(_on_recruit)
 	ui.create_army_requested.connect(_on_create_army)
 	ui.build_requested.connect(_on_build)
@@ -185,6 +193,8 @@ func _setup_campaign() -> void:
 		push_error("CampaignMap: campaign could not start")
 		return
 	player_faction = str(sim.call("get_player_faction"))
+	ui.journal_player_faction = player_faction
+	ui.journal_faction_name = SimFacade.faction_short_name
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (simulation %s)" % [sim.call("get_date_label"), SimFacade.engine_label()])
 	refresh_all()
@@ -242,11 +252,10 @@ func _refresh_top_bar() -> void:
 	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
 	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
-	var projected := -1
+	var economy: Dictionary = {}
 	if _economy_available():
-		var economy: Dictionary = sim.call("get_faction_economy", player_faction)
-		projected = int(economy.get("projected_income", summary.get("income", 0)))
-	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), projected)
+		economy = sim.call("get_faction_economy", player_faction)
+	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
 
 
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
@@ -769,6 +778,7 @@ func _on_load(path: String) -> void:
 		return
 	sim = SimFacade.sim
 	player_faction = str(sim.call("get_player_faction"))
+	ui.journal_player_faction = player_faction
 	deselect_army()
 	selected_index = 0
 	ui.hide_province()

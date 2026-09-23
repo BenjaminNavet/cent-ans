@@ -198,14 +198,29 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-## `projected` : revenu prévisionnel (`get_faction_economy`), -1 si indisponible (repli
-## sans le second nombre).
-func set_treasury(treasury: int, income: int, projected: int = -1) -> void:
+## `economy` : `get_faction_economy` (vide si indisponible). Affiche le revenu **net** prévu
+## (recettes - entretien des armées, des bâtiments et de la cour) ; détail en infobulle.
+## Sans économie, repli sur `income` (revenu brut du dernier tour).
+func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
-	var text := "Revenu : %s%s" % ["+" if income >= 0 else "", ProvincePanel._thousands(income)]
-	if projected != -1:
-		text += " (prév. %s%s)" % ["+" if projected >= 0 else "", ProvincePanel._thousands(projected)]
-	income_label.text = text + " ℔"
+	if economy.is_empty():
+		income_label.text = "Revenu : %s ℔" % _signed(income)
+		income_label.tooltip_text = "Revenu brut du dernier tour."
+		return
+	var gross := int(economy.get("projected_income", income))
+	var armies := int(economy.get("army_upkeep", 0))
+	var buildings := int(economy.get("building_upkeep", 0))
+	var court := int(economy.get("administration_upkeep", 0))
+	var net := gross - armies - buildings - court
+	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
+	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
+	income_label.tooltip_text = "Prévision pour la prochaine saison\nRecettes : %s ℔\nArmées : -%s ℔\nBâtiments : -%s ℔\nCour et administration : -%s ℔\nSolde : %s ℔" % [
+		ProvincePanel._thousands(gross), ProvincePanel._thousands(armies),
+		ProvincePanel._thousands(buildings), ProvincePanel._thousands(court), _signed(net)]
+
+
+static func _signed(value: int) -> String:
+	return ("+" if value >= 0 else "-") + ProvincePanel._thousands(absi(value))
 
 
 func set_date(text: String) -> void:
@@ -271,12 +286,46 @@ func show_toast(text: String, is_error: bool = false) -> void:
 # --- Journal des événements ------------------------------------------------------------
 
 
+## Faction du joueur et nom court d'une faction (`Callable(id) -> String`) : le journal
+## masque les événements courants des autres factions et nomme la faction des autres.
+var journal_player_faction: String = ""
+var journal_faction_name: Callable = Callable()
+
+## Événements d'une autre faction sans intérêt pour le joueur (gestion interne).
+const FOREIGN_MINOR_KINDS := [
+	"income", "bankruptcy", "attrition", "recruited", "building_completed", "trait_acquired",
+	"skill_learned", "appointment", "technology_researched", "regency", "birth", "raid",
+]
+
+
+## Vrai si l'événement doit figurer au journal du joueur.
+func journal_keeps(event: Dictionary) -> bool:
+	var faction := str(event.get("faction", ""))
+	if faction == "" or journal_player_faction == "" or faction == journal_player_faction:
+		return true
+	return not FOREIGN_MINOR_KINDS.has(str(event.get("kind", "")))
+
+
+## Texte de l'événement, préfixé du nom de sa faction s'il ne la nomme pas déjà.
+func journal_text(event: Dictionary) -> String:
+	var text := str(event.get("text_fr", event.get("text", "")))
+	var faction := str(event.get("faction", ""))
+	if text == "" or faction == "" or faction == journal_player_faction or not journal_faction_name.is_valid():
+		return text
+	var name := str(journal_faction_name.call(faction))
+	if name == "" or text.contains(name):
+		return text
+	return "%s — %s" % [name, text]
+
+
 ## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
 func add_events(events: Array, date_text: String) -> void:
 	var new_lines := PackedStringArray()
 	for event in events:
+		if not journal_keeps(event):
+			continue
 		var kind: String = str(event.get("kind", ""))
-		var text: String = str(event.get("text_fr", event.get("text", "")))
+		var text: String = journal_text(event)
 		if text == "":
 			continue
 		var line: String

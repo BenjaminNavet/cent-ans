@@ -160,6 +160,13 @@ func close_pause() -> void:
 	get_tree().paused = false
 
 
+## Menu principal / quitter depuis la barre du haut : même confirmation que le menu pause
+## (partie non sauvegardée).
+func request_exit(kind: String) -> void:
+	open_pause()
+	pause_menu._request_exit(kind)
+
+
 func toggle_pause() -> void:
 	if is_paused():
 		close_pause()

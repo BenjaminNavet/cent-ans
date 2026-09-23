@@ -151,6 +151,11 @@ define_id!(
     "evt_"
 );
 define_id!(
+    /// Identifier of a province diet (`diet_bread_pottage`), H3 « La Table ».
+    DietId,
+    "diet_"
+);
+define_id!(
     /// Abstract sea zone (`sea_channel`); free vocabulary.
     SeaZoneId,
     "sea_"

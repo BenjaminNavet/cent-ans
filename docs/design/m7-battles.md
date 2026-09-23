@@ -92,3 +92,7 @@ l'id et la faction de l'armée de tête). Les pertes (auto-résolues ou issues d
 de régiments) sont réparties sur chaque armée, seul le commandant peut être capturé et tous les vaincus
 retraitent. La bataille est différée si le joueur est dans l'une des coalitions. Les assauts de siège
 restent à deux.
+
+## 6. Ordres du chef (F10b)
+Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::LeaderOrder`, catalogue
+`data/battle_orders/`, barre d'ordres en bataille. Spécification : `docs/design/battle-orders.md`.

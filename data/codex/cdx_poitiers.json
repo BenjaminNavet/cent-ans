@@ -1,0 +1,12 @@
+{
+  "id": "cdx_poitiers",
+  "title": "Bataille de Poitiers",
+  "category": "bataille",
+  "aliases": ["Poitiers", "bataille de Maupertuis"],
+  "era": { "from": "1356", "to": "1356" },
+  "summary": "Le 19 septembre 1356, près de Poitiers, le [[cdx_prince_noir|Prince noir]] défait l'armée royale française et capture le roi [[cdx_jean_ii|Jean II]], plongeant le royaume dans une profonde crise politique.",
+  "body": "À l'été 1356, le [[cdx_prince_noir|Prince noir]] mène depuis la [[cdx_guyenne|Guyenne]] une vaste [[cdx_chevauchee|chevauchée]] à travers le Limousin, le Berry et le Poitou, pillant et brûlant les campagnes. Surpris par l'armée du roi [[cdx_jean_ii|Jean II]] alors qu'il tente de rejoindre les terres anglaises, il est contraint de livrer bataille près de Nouaillé, au lieu-dit Maupertuis, non loin de Poitiers.\n\nComme à [[cdx_crecy|Crécy]] dix ans plus tôt, les Anglais adoptent une position défensive, protégés par des haies et des fossés, et laissent les archers armés de l'[[cdx_arc_long|arc long]] décimer les rangs français avant de contre-attaquer. La bataille tourne au désastre pour la chevalerie française : de nombreux seigneurs sont tués ou capturés, et le roi Jean II lui-même, combattant avec bravoure aux côtés de son jeune fils Philippe, est fait prisonnier.\n\nLa capture du roi laisse le royaume sans autorité centrale forte : le dauphin, futur [[cdx_charles_v|Charles V]], doit affronter la révolte d'Étienne Marcel à Paris et la [[cdx_jacquerie|Jacquerie]] paysanne de 1358, tandis que des bandes de routiers démobilisés, les futures [[cdx_grandes_compagnies|Grandes Compagnies]], pillent les campagnes désorganisées.\n\nLa rançon exigée pour libérer Jean II, fixée à trois millions d'écus par le traité de [[cdx_bretigny|Brétigny]] en 1360, pèsera durablement sur les finances royales et alimentera les mutations de la [[cdx_livre_tournois|livre tournois]] dans les décennies suivantes.",
+  "entity": "evt_poitiers",
+  "see_also": ["cdx_prince_noir", "cdx_jean_ii", "cdx_crecy", "cdx_bretigny"],
+  "sources": ["Bataille de Poitiers (1356)"]
+}

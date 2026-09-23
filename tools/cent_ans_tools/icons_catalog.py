@@ -155,6 +155,22 @@ ICONS: dict[str, tuple[str, str]] = {
     # Familles (branches) de technologies.
     "tech_branch_military": ("lorc/crossed-swords", "technology"),
     "tech_branch_civil": ("lorc/quill-ink", "technology"),
+    "tech_branch_medicine": ("delapouite/healing", "technology"),
+    # H4 : arbre de la médecine et bâtiments sanitaires.
+    "tech_herb_garden": ("delapouite/herbs-bundle", "technology"),
+    "tech_humoral_theory": ("lorc/drop", "technology"),
+    "tech_regimen_sanitatis": ("lorc/scroll-unfurled", "technology"),
+    "tech_willow_bark": ("lorc/falling-leaf", "technology"),
+    "tech_barber_surgeons": ("lorc/scalpel", "technology"),
+    "tech_theriac": ("lorc/potion-ball", "technology"),
+    "tech_montpellier": ("delapouite/graduate-cap", "technology"),
+    "tech_soporific_sponge": ("lorc/sleepy", "technology"),
+    "tech_plague_consilia": ("lorc/leeching-worm", "technology"),
+    "tech_chauliac_surgery": ("lorc/scalpel-strike", "technology"),
+    "tech_leprosaria": ("delapouite/hospital", "technology"),
+    "tech_aqua_vitae": ("lorc/round-bottom-flask", "technology"),
+    "bld_herb_garden": ("delapouite/herbs-bundle", "building"),
+    "bld_apothecary": ("delapouite/medicines", "building"),
     # --- Classes sociales ---
     "class_peasants": ("delapouite/farmer", "class"),
     "class_burghers": ("caro-asercion/medieval-village-01", "class"),

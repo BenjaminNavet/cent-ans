@@ -1,0 +1,12 @@
+{
+  "id": "cdx_edouard_iii",
+  "title": "Édouard III d'Angleterre",
+  "category": "personnage",
+  "aliases": ["Édouard III", "Edward III", "roi Édouard III"],
+  "era": { "from": "1312", "to": "1377" },
+  "summary": "Roi d'Angleterre de 1327 à 1377, Édouard III revendique la couronne de France par sa mère et déclenche la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]] en 1337. Vainqueur à [[cdx_ecluse|l'Écluse]] et à [[cdx_crecy|Crécy]], il est le père du [[cdx_prince_noir|Prince noir]].",
+  "body": "Né le 13 novembre 1312, Édouard III est le fils d'Édouard II d'Angleterre et d'Isabelle de France, elle-même fille de Philippe IV le Bel. Il devient roi en janvier 1327 après la déposition de son père. À la mort de Charles IV en 1328, dernier fils de Philippe le Bel, s'ouvre la [[cdx_succession_1328|crise de succession]] : Édouard, petit-fils du roi défunt par les femmes, se voit écarté par les pairs du royaume au profit de son cousin Philippe de Valois, couronné [[cdx_philippe_vi|Philippe VI]].\n\nAprès une décennie de tensions autour de l'hommage dû pour le duché de [[cdx_guyenne|Guyenne]] et autour du soutien anglais aux villes drapières de [[cdx_flandre_laine|Flandre]], Édouard revendique formellement la couronne de France en 1337, acte considéré comme le point de départ de la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]]. Il s'allie avec le meneur gantois Jacob van Artevelde, qui accepte de reconnaître son titre royal pour délier les Flamands de leur serment à Philippe VI.\n\nLe 24 juin 1340, sa flotte détruit la marine française et ses alliés génois au large de [[cdx_ecluse|l'Écluse]], lui assurant la maîtrise de la Manche pour de longues années. En 1346, débarqué en Normandie, il remporte le 26 août la bataille de [[cdx_crecy|Crécy]], où ses archers armés de l'[[cdx_arc_long|arc long]] décident du sort de la journée, avant de s'emparer de Calais après un long siège.\n\nDans les années suivantes, il confie la conduite de la guerre à son fils aîné, le [[cdx_prince_noir|Prince noir]], dont les chevauchées aboutissent à la capture du roi [[cdx_jean_ii|Jean II]] à [[cdx_poitiers|Poitiers]] en 1356. Le traité de [[cdx_bretigny|Brétigny]] (1360) marque l'apogée territorial anglais sur le continent. Édouard III meurt le 21 juin 1377, laissant un royaume affaibli par la reprise des combats et par les ravages de la [[cdx_peste_noire|Peste noire]].",
+  "entity": "chr_edward_iii",
+  "see_also": ["cdx_guerre_de_cent_ans", "cdx_succession_1328", "cdx_crecy", "cdx_prince_noir"],
+  "sources": ["Édouard III (roi d'Angleterre)"]
+}

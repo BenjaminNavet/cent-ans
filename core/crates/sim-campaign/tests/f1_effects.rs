@@ -740,6 +740,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         routed: false,
         general_killed: false,
         general_captured: false,
+        no_quarter: false,
     };
     // A result sized for the lead army alone is refused...
     let short = BattleOutcome {

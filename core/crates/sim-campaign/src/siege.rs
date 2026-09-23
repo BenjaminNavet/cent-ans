@@ -69,8 +69,8 @@ pub(crate) fn resolve_sieges(
                     GameEvent::new(
                         EventKind::SiegeLifted,
                         format!(
-                            "Le siège de {} est levé.",
-                            province_name(data, &province_id)
+                            "Le siège {} est levé.",
+                            crate::events::de(&province_name(data, &province_id))
                         ),
                     )
                     .province(&province_id)
@@ -381,8 +381,8 @@ pub(crate) fn apply_assault_result(
     crate::movement::apply_outcome(state, data, army, &result.attacker, events);
     apply_garrison_losses(state, province, &result.defender);
     let text = format!(
-        "Assaut de {} contre {}{} : {}. Pertes : {} contre {}.",
-        faction_name(data, &faction),
+        "Assaut {} contre {}{} : {}. Pertes : {} contre {}.",
+        crate::events::de(&faction_name(data, &faction)),
         province_name(data, province),
         if walls {
             " (murailles intactes)"

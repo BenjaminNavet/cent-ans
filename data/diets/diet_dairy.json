@@ -1,0 +1,33 @@
+{
+  "id": "diet_dairy",
+  "name": {
+    "display": "Laitages, fromages et œufs"
+  },
+  "description": "Beurre, fromages, lait caillé et œufs des campagnes herbagères. Les laitages étant interdits en [[cdx_careme|Carême]], on achète des dispenses : le [[cdx_beurre_de_careme|beurre de Carême]] financera la « [[cdx_tour_de_beurre|tour de beurre]] » de la cathédrale de Rouen, élevée à partir de 1485. Denrées fraîches, chères en hiver.",
+  "requirements": {
+    "terrains": [
+      "plains",
+      "hills",
+      "bocage"
+    ]
+  },
+  "cost_per_thousand": 0.12,
+  "effects": [
+    {
+      "effect": "health",
+      "value": 4
+    },
+    {
+      "effect": "growth",
+      "value": 3,
+      "mode": "percent"
+    }
+  ],
+  "lent_rule": "dairy",
+  "winter_rule": "fresh",
+  "sources": [
+    "Tour de Beurre",
+    "Carême",
+    "Cuisine médiévale"
+  ]
+}
