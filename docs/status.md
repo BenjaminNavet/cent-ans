@@ -1,9 +1,9 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 1, fin de M2).
+Dernière mise à jour : 2026-09-23 (session 2, fin de M3).
 
 ## Où en est-on
-- **M0, M1, M2 terminés.** Le jeu est jouable : campagne France/Angleterre/Bourgogne, déplacement, recrutement, batailles auto, sièges, sauvegarde. Prochain jalon : M3 Villes et économie.
+- **M0 à M3 terminés.** Jeu jouable avec villes vivantes : population par classes, bâtiments, impôts, révoltes, peste, famine. Prochain jalon : M4 Personnages et dynasties.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -23,8 +23,12 @@ Dernière mise à jour : 2026-09-23 (session 1, fin de M2).
 - Interface Godot : menu de départ (3 factions), HUD parchemin (trésor, revenu, date, fin de tour, journal), panneaux armée et province, recrutement avec raisons, formation d'armée, marqueurs d'armées, ordre de déplacement au clic droit avec aperçu de chemin, sauvegarde/chargement. Captures : `docs/img/godot-campaign-hud.png`, `godot-campaign-province.png`, `godot-start-menu.png`.
 - Équilibrage observé : France ≈ 24 000 livres/saison, armée royale de 8 unités ≈ 13 % du revenu.
 
+- Villes et économie (M3) : population par classe avec quatre jauges dynamiques, construction de bâtiments avec prérequis et effets, capacité et surpopulation, biens par catégorie, taux d'imposition (Bas/Normal/Haut), révoltes (faction virtuelle `fac_rebels`), peste, famine. Onglet « Ville », panneau faction, mode carte mécontentement (touche M), marqueurs de construction. 15 tests M3. Équilibrage : France ≈ 22 500 livres/saison stable sur 5 ans (`cargo run -p sim-campaign --example income_probe`).
+
 ## Limites connues
-- Le revenu affiché est 0 au tour 0 (revenu du dernier tour) ; un revenu prévisionnel viendra avec M3.
+- `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
+- Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
+- Le trésor du joueur s'accumule vite (≈ 300 000 en 5 ans sans dépense) : à rééquilibrer avec les coûts de M4-M6.
 - Pas d'ordre d'assaut : les sièges se résolvent par durée uniquement.
 - L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
 - La population ne varie pas encore (M3).
