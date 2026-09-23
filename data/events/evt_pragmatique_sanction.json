@@ -1,0 +1,76 @@
+{
+  "id": "evt_pragmatique_sanction",
+  "title": "La Pragmatique Sanction de Bourges",
+  "text": "Le 7 juillet 1438, à Bourges, Charles VII promulgue la Pragmatique Sanction après une assemblée du clergé de France. Évêques et abbés seront élus, le pape ne disposera plus des bénéfices du royaume, et le concile général est proclamé supérieur au pape. L'Église de France devient [[cdx_gallicanisme|gallicane]] : elle regarde vers son roi plus que vers Rome.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1438,
+      "season": "summer"
+    },
+    "until_year": 1439,
+    "conditions": [
+      {
+        "type": "ruler_house",
+        "faction": "fac_france",
+        "house": "Valois"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_berry"
+      },
+      {
+        "type": "religion_is",
+        "faction": "fac_france",
+        "religion": "rel_catholic"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Promulguer la Pragmatique Sanction",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": -20
+        },
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Ménager le pape",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1438-07-07"
+  },
+  "sources": [
+    "Pragmatique Sanction de Bourges",
+    "Pragmatic Sanction of Bourges",
+    "Philippe Contamine, Charles VII, Perrin, 2017"
+  ]
+}

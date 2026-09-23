@@ -1,0 +1,82 @@
+{
+  "id": "evt_formigny",
+  "title": "La bataille de Formigny",
+  "text": "Le 15 avril 1450, près de Formigny, l'armée de secours de Thomas Kyriell, débarquée à Cherbourg, est prise sous le feu de deux couleuvrines du comte de Clermont. Les archers quittent leurs pieux pour s'emparer des pièces ; le connétable de Richemont, accouru avec ses Bretons, les prend de flanc. Caen tombe le 12 juin, Cherbourg le 12 août : la Normandie est perdue pour l'Angleterre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1450,
+      "season": "spring"
+    },
+    "until_year": 1451,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_england",
+        "province": "prov_normandie_ouest"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Se résigner à perdre la Normandie",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 20
+        },
+        {
+          "type": "unrest",
+          "province": "prov_normandie_ouest",
+          "amount": 20
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Envoyer une nouvelle armée",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -8000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 20
+        },
+        {
+          "type": "devastation",
+          "province": "prov_normandie_ouest",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1450-04-15"
+  },
+  "sources": [
+    "Battle of Formigny",
+    "Philippe Contamine, Charles VII, Perrin, 2017"
+  ]
+}

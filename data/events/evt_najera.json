@@ -1,0 +1,92 @@
+{
+  "id": "evt_najera",
+  "title": "La bataille de Nájera",
+  "text": "Le 3 avril 1367, à Nájera, le Prince noir, venu rendre son trône à Pierre de Castille, taille en pièces l'armée d'Henri de Trastamare ; Du Guesclin est de nouveau prisonnier. Mais Henri s'est échappé, et Pierre ne paie pas les soldes promises. L'armée anglaise fond sous la dysenterie, et le prince en rapporte le mal qui le tuera.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1367,
+      "season": "spring"
+    },
+    "until_year": 1368,
+    "conditions": [
+      {
+        "type": "character_alive",
+        "id": "chr_edward_of_woodstock"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_pedro_i_de_castille"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Attendre en Castille le paiement promis",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "chr_edward_of_woodstock",
+          "amount": 15
+        },
+        {
+          "type": "add_trait",
+          "character": "chr_edward_of_woodstock",
+          "trait": "trait_sickly"
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": -20,
+          "reason": "Soldes impayées de Nájera"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Rentrer en Aquitaine et lever un fouage",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "chr_edward_of_woodstock",
+          "amount": 15
+        },
+        {
+          "type": "add_trait",
+          "character": "chr_edward_of_woodstock",
+          "trait": "trait_sickly"
+        },
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_guyenne",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1367-04-03"
+  },
+  "sources": [
+    "Battle of Nájera",
+    "Richard Barber, Edward, Prince of Wales and Aquitaine, 1978",
+    "Peter Russell, The English Intervention in Spain and Portugal, 1955"
+  ]
+}

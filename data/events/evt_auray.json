@@ -1,0 +1,95 @@
+{
+  "id": "evt_auray",
+  "title": "La bataille d'Auray",
+  "text": "Le 29 septembre 1364, devant Auray, le jeune Jean de Montfort, fils du prétendant, et le capitaine anglais John Chandos écrasent l'armée de Charles de Blois. Blois tombe, achevé sur l'ordre de ne point faire de quartier ; Du Guesclin, ses armes brisées, se rend à Chandos. Charles V en tire la leçon : au traité de Guérande, le 12 avril 1365, il reconnaît Montfort duc de Bretagne, pourvu qu'il lui prête hommage.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1364,
+      "season": "autumn"
+    },
+    "until_year": 1365,
+    "conditions": [
+      {
+        "type": "character_alive",
+        "id": "chr_charles_de_blois"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Reconnaître Montfort contre son hommage",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_charles_de_blois"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_brittany",
+          "amount": 20,
+          "reason": "Traité de Guérande"
+        },
+        {
+          "type": "loyalty",
+          "vassal": "fac_brittany",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Racheter Du Guesclin et poursuivre la guerre",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_charles_de_blois"
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_bretagne",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_brittany",
+          "amount": -10,
+          "reason": "Guerre de Bretagne prolongée"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1364-09-29",
+    "note": "Traité de Guérande le 12 avril 1365."
+  },
+  "sources": [
+    "Battle of Auray",
+    "Jean-Christophe Cassard, La Guerre de Succession de Bretagne, 2006"
+  ]
+}
