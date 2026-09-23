@@ -26,14 +26,14 @@ uniform float alpha_deep = 0.97;
 uniform float wave_scale = 0.6;      // vagues par pixel carte
 uniform float wave_speed = 0.35;
 uniform float wave_strength = 0.08;
-uniform float foam_px = 2.2;          // largeur de la bande d'écume (pixels carte)
+uniform float foam_px = 1.4;          // largeur de la bande d'écume (pixels carte)
 uniform float roughness_near = 0.3;
 uniform float roughness_far = 0.55;
-uniform float specular_amount = 0.2;
+uniform float specular_amount = 0.06;
 // Reflet du soleil (modèle de Blinn-Phong borné, remplace le spéculaire par défaut).
 uniform float sun_spec_power = 180.0;
-uniform float sun_spec_intensity = 0.6;
-uniform float sun_spec_max = 0.35;
+uniform float sun_spec_intensity = 0.14;
+uniform float sun_spec_max = 0.1;
 
 varying float v_far;
 
@@ -98,6 +98,8 @@ void fragment() {
 	float hz = swell(q + vec2(0.0, e), t) - h0;
 	float ws = wave_strength * (1.0 - smoothstep(0.25, 1.2, footprint));
 	vec3 n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
+	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
+	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.
 	float coast = has_coast_dist && inside ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : -50.0;
@@ -107,8 +109,11 @@ void fragment() {
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
 	float foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
 	foam *= 1.0 - smoothstep(foam_px * 0.2, foam_px, off) * 0.5;
-	col = mix(col, foam_color, foam * 0.75);
-	alpha = mix(alpha, 0.95, foam * 0.6);
+	col = mix(col, foam_color, foam * 0.55);
+	alpha = mix(alpha, 0.9, foam * 0.5);
+	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
+	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.
+	alpha *= 1.0 - smoothstep(-0.2, 0.6, coast);
 
 	// Fresnel discret : le large reflète un peu plus le ciel en vue rasante.
 	float fres = pow(1.0 - clamp(dot(normalize(VIEW), NORMAL), 0.0, 1.0), 5.0);

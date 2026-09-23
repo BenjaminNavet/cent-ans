@@ -58,15 +58,19 @@ uniform vec3 crop_green = vec3(0.13, 0.19, 0.05);
 uniform vec3 crop_ploughed = vec3(0.13, 0.085, 0.045);
 uniform vec3 crop_fallow = vec3(0.17, 0.19, 0.07);
 uniform vec3 hedge_color = vec3(0.03, 0.05, 0.02);
-uniform vec3 lake_color = vec3(0.025, 0.07, 0.085);
+uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
+// Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
+uniform vec3 sea_shallow_color = vec3(0.045, 0.14, 0.14);
+uniform vec3 sea_deep_color = vec3(0.006, 0.028, 0.050);
 
 // Détail : taille d'une tuile de texture (pixels carte), part du détail, force des normales.
 uniform float tile_px = 3.0;
+uniform float farm_tile_px = 0.6;
 uniform float detail_strength = 0.85;
 uniform float detail_normal_strength = 0.55;
 // Parcellaire : champs par pixel carte (0,9 ≈ parcelles de 800 m), largeur des haies (fraction).
-uniform float field_freq = 1.1;
+uniform float field_freq = 0.7;
 uniform float hedge_width = 0.06;
 // Neige : altitude de base (m) ; roche au-dessus de rock_line.
 uniform float snow_line_m = 2750.0;
@@ -223,7 +227,13 @@ void fragment() {
 	float parcel_hash = 0.5;
 	if (field_vis > 0.0 && s.g > 0.03) {
 		vec2 warp = vec2(value_noise(p * 0.21), value_noise(p * 0.21 + 31.7)) - 0.5;
-		vec2 fp = p * field_freq + warp * 0.8;
+		// Orientation du parcellaire propre à chaque terroir (cases de ~40 px carte, rotation autour
+		// du centre de la case : pas de tourbillon lié aux grandes coordonnées).
+		vec2 tp = p / 40.0 + (vec2(value_noise(p * 0.05), value_noise(p * 0.05 + 9.2)) - 0.5) * 0.6;
+		vec2 tcell = floor(tp);
+		float terroir = hash12(tcell + 5.7) * 3.14159;
+		mat2 trot = mat2(vec2(cos(terroir), sin(terroir)), vec2(-sin(terroir), cos(terroir)));
+		vec2 fp = trot * ((p - (tcell + 0.5) * 40.0) * field_freq) + warp * 0.8 + tcell * 13.0;
 		vec2 ip = floor(fp);
 		vec2 fr = fract(fp);
 		float d1 = 8.0;
@@ -235,7 +245,7 @@ void fragment() {
 				vec2 c = ip + o;
 				vec2 r = o + vec2(hash12(c), hash12(c + 17.3)) * 0.85 + 0.075 - fr;
 				// Parcelles allongées (lanières) : distance anisotrope.
-				r.x *= 0.75;
+				r.x *= 0.5;
 				float dd = dot(r, r);
 				if (dd < d1) {
 					d2 = d1;
@@ -249,8 +259,8 @@ void fragment() {
 		parcel_hash = hash12(best + 71.3);
 		float hc1 = hash12(best);
 		vec3 crop = hc1 < 0.35 ? crop_wheat : (hc1 < 0.62 ? crop_green : (hc1 < 0.8 ? crop_ploughed : crop_fallow));
-		crop *= 0.88 + 0.24 * parcel_hash;
-		farm_tint = mix(tint_farmland, crop, field_vis * 0.8);
+		crop *= 0.9 + 0.2 * parcel_hash;
+		farm_tint = mix(tint_farmland, crop, field_vis * 0.55);
 		float edge = sqrt(d2) - sqrt(d1);
 		float edge_aa = fwidth(edge);
 		hedge = (1.0 - smoothstep(hedge_width - edge_aa, hedge_width + edge_aa, edge)) * smoothstep(6.0, 14.0, cell_px);
@@ -272,11 +282,13 @@ void fragment() {
 			// Sillons orientés par parcelle.
 			float a = parcel_hash * 3.14159;
 			mat2 rot = mat2(vec2(cos(a), sin(a)), vec2(-sin(a), cos(a)));
-			vec2 uv_f = rot * p / tile_px;
-			vec3 tf = textureGrad(albedo_array, vec3(uv_f, 1.0), rot * dFdx(p) / tile_px, rot * dFdy(p) / tile_px).rgb;
-			vec3 nf = textureGrad(normal_rough_array, vec3(uv_f, 1.0), rot * dFdx(p) / tile_px, rot * dFdy(p) / tile_px).rgb;
+			// Tuile plus fine que les parcelles (sillons) : sous le pixel dès le zoom moyen, donc
+			// moyennée par les mipmaps (pas de trame régulière visible).
+			vec2 uv_f = rot * p / farm_tile_px;
+			vec3 tf = textureGrad(albedo_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
+			vec3 nf = textureGrad(normal_rough_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
 			vec3 ratio = tf / max(layer_mean[1], vec3(0.01));
-			albedo += w_farm * farm_tint * mix(vec3(1.0), ratio, det * field_vis + det * 0.3 * (1.0 - field_vis));
+			albedo += w_farm * farm_tint * mix(vec3(1.0), ratio, det * field_vis * 0.7);
 			vec2 nxy = transpose(rot) * (nf.rg * 2.0 - 1.0);
 			dn += w_farm * vec3(nxy, nf.b);
 		}
@@ -295,7 +307,7 @@ void fragment() {
 	vec3 col = albedo * mix(1.0, tone, 1.0 - snow);
 	// Canopée : ombrage de volume léger (les forêts paraissent plus sombres et granuleuses).
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;
-	col = mix(col, hedge_color, hedge * w_farm / max(wsum, 1e-3) * 0.6);
+	col = mix(col, hedge_color, hedge * w_farm / max(wsum, 1e-3) * 0.35);
 
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
@@ -306,9 +318,18 @@ void fragment() {
 	if (hc <= 0.0) {
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
-	float lake = (1.0 - land_f) * step(0.0, hc);
-	col = mix(col, lake_color, lake);
-	roughness = mix(roughness, 0.12, lake);
+	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage
+	// LOD dépasse le plan d'eau alors que la côte réelle (raster) est plus loin. Pour la mer, même
+	// rendu que water.gdshader (couleur selon la profondeur composée sur le fond marin).
+	float lake = (1.0 - land_f) * max(step(0.0, hc), step(-0.02, world_pos.y));
+	vec3 water_col = lake_color;
+	if (hc <= 0.0) {
+		float depth = -hc;
+		vec3 wc = mix(sea_shallow_color, sea_deep_color, 1.0 - exp(-depth / 70.0));
+		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
+	}
+	col = mix(col, water_col, lake);
+	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
 
 	// --- Couche politique ---
@@ -353,7 +374,7 @@ void fragment() {
 				col = mix(col, pow(reachable_color, vec3(2.2)) * max(lcol * 1.8, 0.06), 0.45);
 			} else {
 				// Hors de portée : assombri pour faire ressortir les provinces atteignables.
-				col *= 0.55;
+				col *= 0.65;
 			}
 		}
 		if (id == selected_id) {
@@ -371,7 +392,7 @@ void fragment() {
 		bool realm = other_id != id && (distance(fo.rgb, fc.rgb) > 0.02 || abs(fo.a - fc.a) > 0.1);
 		float w = realm ? realm_border_px : province_border_px;
 		// Épaisseur minimale en pixels carte de très près (sinon le trait devient un cheveu).
-		w = max(w, 0.18 / max(px, 1e-4));
+		w = max(w, 0.12 / max(px, 1e-4));
 		float line = 1.0 - smoothstep(w - 0.6, w + 0.6, d_scr);
 		float alpha = realm ? realm_border_alpha : mix(province_border_alpha * 0.8, province_border_alpha, political);
 		if (realm && fc.a > 0.0) {
@@ -384,6 +405,6 @@ void fragment() {
 
 	ALBEDO = col;
 	ROUGHNESS = roughness;
-	SPECULAR = mix(0.3, 0.5, lake);
+	SPECULAR = mix(0.3, 0.1, lake);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }
