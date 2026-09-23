@@ -17,3 +17,4 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - Contrat V2→V3 : `data/map/splat.png` RGBA (R prairie, G cultures, B forêt, A roche) ; échelle verticale unique dans `MapData`.
 - Prochaine étape : fusionner visual-v2, puis v3 et v4 dans `visual` (tests + captures), rebase sur `main`, fusion dans `main`.
 - V2 fusionné dans visual (smoke OK). V3 prévenu de fusionner visual.
+- 23 h 30 → 0 h 10 : quota épuisé, V3 et V4 interrompus (commits wip intacts). 0 h 15 : repris.
