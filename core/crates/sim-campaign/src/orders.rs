@@ -142,6 +142,8 @@ pub enum OrderError {
     CharacterUnavailable,
     #[error("ce personnage n'est pas dans cette province")]
     CharacterElsewhere,
+    #[error("ce personnage gouverne déjà une province")]
+    AlreadyGoverning,
     #[error("il faut préciser soit une armée soit une province")]
     AmbiguousTarget,
     #[error("faction inconnue : {0}")]
@@ -661,8 +663,12 @@ impl CampaignState {
             .characters
             .get(character)
             .ok_or_else(|| OrderError::UnknownCharacter(character.clone()))?;
-        if !state.alive || state.captive || &state.faction != faction {
+        if !state.alive || state.captive || &state.faction != faction || !state.is_major(self.year)
+        {
             return Err(OrderError::CharacterUnavailable);
+        }
+        if state.governor_of.is_some() {
+            return Err(OrderError::AlreadyGoverning);
         }
         let in_province = state.location.as_ref() == Some(province)
             || state
