@@ -58,8 +58,8 @@ pub const SHOOTER_SAFETY: f64 = 70.0;
 pub const ISOLATION_DISTANCE: f64 = 80.0;
 /// Radius within which cavalry looks for targets.
 pub const CAVALRY_REACH: f64 = 450.0;
-/// Seconds of archery duel before the line advances regardless.
-pub const DUEL_TIME: f64 = 100.0;
+/// Longest archery duel before the line advances regardless (seconds).
+pub const DUEL_TIME: f64 = 480.0;
 /// A weaker attacker waits this long for the defender to come to it.
 pub const ATTACKER_PATIENCE: f64 = 240.0;
 /// A defensive side gives up waiting after this long.
@@ -306,7 +306,12 @@ fn roles(view: &View) -> Roles {
         .own
         .iter()
         .copied()
-        .filter(|&i| u[i].category == UnitCategory::Infantry && !u[i].mounted)
+        .filter(|&i| {
+            let unit = &u[i];
+            !unit.mounted
+                && (unit.category == UnitCategory::Infantry
+                    || (unit.category == UnitCategory::Ranged && unit.ammo == 0))
+        })
         .collect();
     let reserve = if line.len() >= 4 {
         // The rearmost foot regiment (highest id on ties) is the reserve.
@@ -422,7 +427,7 @@ fn plan_field(view: &mut View) {
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
         && contact < 320.0
-        && elapsed < DUEL_TIME + 200.0
+        && elapsed < DUEL_TIME
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
 
     let line_center = view
@@ -462,7 +467,7 @@ fn plan_field(view: &mut View) {
 
     // Shooters: in front of the line, halt in range, fall back when threatened.
     for &i in &roles.shooters {
-        plan_shooter(view, i, anchor, facing, defensive);
+        plan_shooter(view, i, anchor, line_center.1, facing, defensive);
     }
 
     // Reserve.
@@ -510,13 +515,21 @@ fn opposite(view: &View, i: usize) -> Option<usize> {
         .map(|(j, _)| j)
 }
 
-fn plan_shooter(view: &mut View, i: usize, anchor: (f64, f64), facing: f64, defensive: bool) {
+fn plan_shooter(
+    view: &mut View,
+    i: usize,
+    anchor: (f64, f64),
+    line_z: f64,
+    facing: f64,
+    defensive: bool,
+) {
     let unit = &view.units[i];
     let threat = view.nearest_enemy(i, is_melee_troop);
     // Engaged or about to be: fall back behind the line.
     if let Some((_, d)) = threat {
         if d < SHOOTER_SAFETY || view.engaged(i) {
-            let behind = (unit.x, anchor.1 - view.forward * 45.0);
+            let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
+            let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
                 view.commands.push(Command::Move {
                     units: vec![unit.id],
@@ -741,8 +754,10 @@ fn plan_horse(
         }
         return;
     }
-    // 5. Enemy right in front and not bristling: charge.
-    if let Some((j, d)) = view.nearest_enemy(i, |e| !bristling(e)) {
+    // 5. A shaken or bled regiment right in front (not bristling): ride it down.
+    let shaken =
+        |e: &Unit| !bristling(e) && (e.morale < 40.0 || e.hp < f64::from(e.initial_soldiers) * 0.5);
+    if let Some((j, d)) = view.nearest_enemy(i, shaken) {
         if d < 110.0 && !defensive && !general_only {
             view.attack(i, j, true);
             return;
