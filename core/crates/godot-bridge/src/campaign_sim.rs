@@ -490,10 +490,10 @@ fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
 }
 
 fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
-    let name = data
-        .buildings
-        .get(&construction.building)
-        .map_or_else(|| construction.building.to_string(), |b| b.name.display.clone());
+    let name = data.buildings.get(&construction.building).map_or_else(
+        || construction.building.to_string(),
+        |b| b.name.display.clone(),
+    );
     vdict! {
         "building" => construction.building.as_str(),
         "name" => name.as_str(),
