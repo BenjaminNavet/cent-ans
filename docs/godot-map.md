@@ -1,10 +1,11 @@
-# Carte et interface de campagne Godot (M1 + M2)
+# Carte et interface de campagne Godot (M1 + M2 + M3)
 
 Rendu et interaction de la carte de campagne dans `game/` (GDScript). Aucune règle de jeu
 ici : la scène lit `data/map/` (images + GeoJSON), affiche, remonte des identifiants et soumet
 des ordres à la simulation Rust (`CampaignSim`) via l'autoload `SimFacade`.
 Contrats : `docs/design/m1-campaign-map.md` (données carte), `docs/design/m2-campaign-loop.md`
-(§ 2 API `CampaignSim`, § 3 interface).
+(§ 2 API `CampaignSim`, § 3 interface), `docs/design/m3-cities-economy.md` (§ 2 API villes et
+économie, § 3 interface).
 
 ![HUD de campagne](img/godot-campaign-hud.png)
 
@@ -14,11 +15,12 @@ Contrats : `docs/design/m1-campaign-map.md` (données carte), `docs/design/m2-ca
 |---|---|
 | `scenes/start_menu.tscn` (scène principale) | Écran de démarrage : 3 cartes de faction (nom, blason, couleur depuis `GameDataStore.get_faction`, accroche en deux lignes), graine, « Commencer », « Charger une partie », « Quitter ». |
 | `scenes/campaign_map.tscn` | Carte 3D + HUD de campagne. |
-| `scenes/ui/province_panel.tscn` | Panneau parchemin de province (identité, état, garnison, recrutement, formation d'armée). |
+| `scenes/ui/province_panel.tscn` | Panneau parchemin de province (identité, état) avec deux onglets : « Garnison » (garnison, recrutement, formation d'armée) et « Ville » (population par classe, bâtiments, construction, constructible, ressources — M3). |
+| `scenes/ui/faction_panel.tscn` | Panneau de faction (clic sur le blason/nom de la barre) : trésor, revenu, revenu prévisionnel, entretien armées/bâtiments, sélecteur d'impôt, biens par catégorie (M3). |
 | `scenes/ui/army_panel.tscn` | Panneau d'armée (général, position, mouvement, ravitaillement, ordre, posture, unités). |
 | `scenes/ui/save_load_dialog.tscn` | Dialogue sauver / charger (`user://saves/*.json`). |
 | `scenes/map/army_marker.tscn` | Marqueur d'armée : hampe + bannière billboard (couleur de faction), nombre d'unités, halo de sélection. |
-| `scenes/ui/parchment_theme.tres` | Thème commun (police serif système, panneaux, boutons, champs). |
+| `scenes/ui/parchment_theme.tres` | Thème commun (police serif système, panneaux, boutons, champs, onglets). |
 
 ## Architecture de `campaign_map.tscn`
 
@@ -32,15 +34,19 @@ CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, relie UI ↔ 
 ├── Cities      (CityMarkers)      cylindre + Label3D par capitale (`capital_px`)
 ├── PathPreview (PathPreview)      ruban orange : chemin prévisualisé / ordre en cours
 ├── Armies      (ArmyMarkers)      un `army_marker.tscn` par armée au centroïde de sa province
+├── ConstructionMarkers (ConstructionMarkers) Label3D « ⚒ » sur les provinces en construction (M3)
 ├── CameraRig   (CampaignCamera)   caméra RTS ; enfant Camera3D
 ├── Picker      (ProvincePicker)   rayon → terrain → `province_ids.png` → signaux (clic gauche / droit)
 └── UI          (MapUI, CanvasLayer)
-    ├── TopBar         couleur + nom de faction, trésor, revenu, date, « Fin du tour ⏎ », Menu
+    ├── TopBar         couleur + nom de faction (clic → panneau de faction), trésor,
+    │                  « Revenu : +X (prév. Y) », date, « Fin du tour ⏎ », Menu
     ├── Toast          notification (ordre refusé, sauvegarde, bataille), 3,5 s
     ├── HoverLabel     province survolée, ou « → cible : n étapes, coût c » avec une armée sélectionnée
-    ├── EventLog       journal du tour (bas gauche, repliable, plus récent en haut, batailles en rouge)
+    ├── EventLog       journal du tour (bas gauche, repliable, plus récent en haut ; couleurs dédiées
+    │                  batailles, révolte, peste, famine, bâtiment achevé)
     ├── ArmyPanel      scenes/ui/army_panel.tscn
-    ├── ProvincePanel  scenes/ui/province_panel.tscn
+    ├── ProvincePanel  scenes/ui/province_panel.tscn (onglets Garnison / Ville)
+    ├── FactionPanel   scenes/ui/faction_panel.tscn (M3)
     └── SaveLoadDialog scenes/ui/save_load_dialog.tscn
 ```
 
@@ -137,6 +143,11 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Posture (panneau d'armée) | `submit_order({"type": "set_stance", …})` | idem |
 | « Recruter » → ligne | `get_recruitable(province)` puis `submit_order({"type": "recruit", …})` | idem ; lignes indisponibles désactivées avec la raison |
 | « Former une armée » | `submit_order({"type": "create_army", "province", "units_from_garrison": [indices cochés]})` | sélectionne la nouvelle armée si la réponse contient `army` |
+| Panneau de province, onglet Ville → « Construire » | `submit_order({"type": "build", "province", "building"})` | idem ; lignes indisponibles désactivées avec la raison (M3) |
+| Onglet Ville → « Annuler » (construction en cours) | `submit_order({"type": "cancel_build", "province"})` | idem, remboursement à moitié affiché par le trésor (M3) |
+| Panneau de faction → sélecteur d'impôt | `submit_order({"type": "set_tax_rate", "rate": "low"\|"normal"\|"high"})` | panneau de faction rafraîchi (M3) |
+| Clic sur le blason/nom de faction (barre) | `get_faction_economy(faction)` (si disponible) | ouvre le panneau de faction (M3) |
+| Touche M | `get_province_city` sur chaque province (si disponible) | bascule la teinte des provinces (faction ↔ mécontentement, M3) |
 | « Fin du tour » / Entrée | `end_turn()` → événements | journal (plus récent en haut), notification de bataille, tout rafraîchi |
 | Menu → Sauvegarder / Charger | `SimFacade.save_game` / `load_game` | carte, HUD et journal restaurés |
 
@@ -151,22 +162,30 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Sélection | clic gauche : armée (prioritaire) ou province ; survol = surbrillance + nom ; Échap désélectionne l'armée |
 | Ordre de déplacement | clic droit sur une province avec une armée sélectionnée |
 | Fin du tour | bouton ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue) |
+| Mode mécontentement (M3) | M (action `map_toggle_unrest`) ; ignoré avec un message si `get_province_city` est indisponible |
 | Capture d'écran | F12 → `docs/img/godot-map-<timestamp>.png` |
 
 Options de ligne de commande (après `--`) :
 - `--screenshot=<chemin.png>` : capture après 40 frames puis quitte. Sur `campaign_map.tscn`, met en
   scène la première armée du joueur sélectionnée avec l'aperçu de chemin vers la province atteignable la
-  plus coûteuse ; avec `--stage=province`, sélectionne la capitale du joueur et ouvre le recrutement.
-  Sur `start_menu.tscn`, capture l'écran de démarrage.
+  plus coûteuse ; avec `--stage=province`, sélectionne la capitale du joueur et ouvre le recrutement ;
+  avec `--stage=city`, capitale du joueur et onglet Ville du panneau de province ; avec `--stage=faction`,
+  panneau de faction ouvert. `--stage=city`/`faction` basculent sur `CampaignSimMock` si la simulation
+  active n'expose pas encore `get_province_city` (`_ensure_city_capable_sim`). Sur `start_menu.tscn`,
+  capture l'écran de démarrage.
 - `--focus=<x>,<y>,<distance>` : placement initial de la caméra.
 
 ```sh
 godot --path game                                   # menu de démarrage
 godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/godot-campaign-hud.png
 godot --path game res://scenes/campaign_map.tscn -- --screenshot=out.png --stage=province
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/godot-city-panel.png --stage=city
+godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/godot-faction-panel.png --stage=faction
 ```
 
 ![Panneau de province](img/godot-campaign-province.png)
+![Panneau de ville](img/godot-city-panel.png)
+![Panneau de faction](img/godot-faction-panel.png)
 ![Écran de démarrage](img/godot-start-menu.png)
 
 ## Pointer sur les vraies données
@@ -194,9 +213,35 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
   4. boucle de campagne France via `SimFacade` (réelle sur `data/` si disponible, sinon mock sur les
      fixtures — imprimé « REAL »/« MOCK ») : sélection de la première armée du joueur, atteignables non
      vides, aperçu de chemin, ordre de déplacement, 4 fins de tour, sauvegarde `user://saves/smoke.json`,
-     un tour de plus, rechargement, égalité des dates (sim et étiquette du HUD).
+     un tour de plus, rechargement, égalité des dates (sim et étiquette du HUD) ;
+  5. villes et économie (M3), sur la vraie simulation si elle expose `get_province_city` (sinon un
+     `CampaignSimMock` dédié sur `data/` — imprimé « REAL »/« MOCK ») : 20 tours de stabilisation, choix
+     du constructible le moins cher à effet économique direct (trade_income/tax_income/wealth, sinon le
+     moins cher disponible) à `prov_ile_de_france`, `submit_order({"type": "build", ...})`, tours jusqu'à
+     achèvement, vérifie l'apparition dans `buildings`, puis une fenêtre de tours après achèvement où l'on
+     retient le meilleur `projected_income` observé (la richesse converge sur plusieurs saisons, § 1.1) et
+     vérifie qu'il dépasse celui d'avant construction ; `set_tax_rate` à « high » et vérifie la hausse
+     immédiate de `projected_income` (comparaison sans fin de tour, isolée de la dérive de fond).
   Un script `--script` est compilé avant l'enregistrement des autoloads : le test accède à `SimFacade`
   et `MapPaths` par `/root/...` (seules les constantes/statics sont utilisables directement).
+
+## Villes et économie (M3)
+
+- `CampaignSimMock` (`scripts/sim/campaign_sim_mock.gd`) étend l'API mock avec `get_province_city`,
+  `get_faction_economy` et les ordres `build`/`cancel_build`/`set_tax_rate` (mêmes formes que
+  `docs/design/data-model.md` § 7.4, y compris `effects: {clé: {flat, percent}}`) : population par
+  classe lue depuis `data/provinces/<id>.json` (non exposé par `GameDataStore.get_province`), catalogues
+  `data/buildings/*.json` / `data/resources/*.json`, dérive simplifiée des jauges de classe, révolte /
+  peste / famine / bâtiment achevé en fin de tour.
+- L'interface appelle systématiquement `sim.has_method("get_province_city" / "get_faction_economy")`
+  avant d'utiliser l'API M3 (`CampaignMap._city_available` / `_economy_available`) : avec un
+  `CampaignSim` réel qui ne les exposerait pas encore, l'onglet Ville reste vide, le panneau de faction
+  affiche « Non disponible », la touche M est sans effet (notification) et aucun marteau n'apparaît —
+  aucun crash. Depuis l'atterrissage de `get_province_city`/`get_faction_economy` côté `core/` (bridge),
+  la vraie simulation est utilisée pour tout, y compris le smoke test et les captures.
+- `--stage=city`/`--stage=faction` (capture d'écran) basculent sur un `CampaignSimMock` dédié
+  (`_ensure_city_capable_sim`) si jamais la simulation active ne les expose pas, pour garder des captures
+  exploitables pendant le développement.
 
 ## Performances mesurées (M4 Pro)
 
@@ -221,3 +266,12 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 - Un `Label3D` de compte est affiché même quand plusieurs armées se superposent exactement ; l'anneau
   de décalage n'est appliqué qu'aux armées d'une même province.
 - macOS arm64 uniquement testé (Metal, Forward+).
+- Mode mécontentement (M) : réutilise la texture 1D de couleur de province (`set_province_colors`)
+  plutôt qu'une seconde texture dédiée (approche « la moins chère » suggérée par la spec § 3) ; recalculée
+  à chaque bascule et à chaque `refresh_all`, pas par frame.
+- `ConstructionMarkers.refresh` appelle `get_province_city` pour chaque province de la carte à chaque
+  rafraîchissement (après chaque ordre ou fin de tour) : correct mais O(provinces) ; à revoir si le
+  nombre de provinces grandit beaucoup au-delà des ~130 de la carte 1337.
+- Le panneau de faction n'affiche pas le détail catégorie → liste de ressources (juste les catégories
+  puis la liste complète des ressources) : `get_faction_economy` ne donne pas la catégorie par ressource,
+  seulement `goods_categories` global.
