@@ -283,8 +283,10 @@ permet `load_from_string` sur un objet neuf.
 | `new_campaign(data_dir, player, seed) -> bool` | charge `data/` et construit le départ 1337 |
 | `save_to_string() -> String`, `load_from_string(json) -> bool` | sauvegarde JSON versionnée |
 | `get_turn()`, `get_date_label()`, `get_player_faction()` | `-1` / `""` avant `new_campaign` |
-| `get_faction_summary(id)` | `{treasury, income, at_war_with[], allies[], provinces_count, armies_count, alive}` |
+| `get_faction_summary(id)` | `{treasury, income, at_war_with[], allies[], provinces_count, armies_count, alive, projected_income, army_upkeep, building_upkeep, tax_rate}` |
 | `get_province_state(id)` | `{owner, controller, garrison[unit], siege{attacker, turns_left}?, unrest, devastation, population_total}` |
+| `get_province_city(id)` (M3) | `{classes: {peasants, burghers, clergy, nobility: {count, unrest, health, wealth, goods_satisfaction}}, buildings: [{id, name, category, upkeep}], construction: {building, name, turns_left}?, fortification_level, capacity, buildable: [{building, name, category, cost, turns, available, reason}], resources: [ids], effects: {tax_income, trade_income, health, unrest, wealth, goods_satisfaction, growth, garrison, fortification_level, recruit_cost, supply}}`. Each `effects` entry is `{flat, percent}`. `construction` is present only while a building is under way. |
+| `get_faction_economy(id)` (M3) | `{treasury, income, projected_income, army_upkeep, building_upkeep, tax_rate: "low"\|"normal"\|"high", goods: {resource_id: count}, goods_categories: [..]}` |
 | `get_army_ids()`, `get_army(id)` | `{faction, general, general_name, location, units[unit], movement_points, supply, stance, path[]}` |
 | `get_reachable(army)` | `{province_id: coût}` |
 | `find_path(army, target)` | `PackedStringArray` (vide si inatteignable ou déjà sur place) |
