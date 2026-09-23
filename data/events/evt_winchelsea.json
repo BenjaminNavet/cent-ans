@@ -1,0 +1,77 @@
+{
+  "id": "evt_winchelsea",
+  "title": "Les Espagnols sur mer",
+  "text": "Le 29 août 1350, au large de Winchelsea, Édouard III et le Prince noir attaquent la flotte castillane de Charles de la Cerda, qui redescend de Flandre chargée de marchandises. Le roi aborde en personne une grande nef ennemie ; de quatorze à vingt-six navires sont pris selon les chroniques. On l'appellera la bataille « des Espagnols sur mer », mais la Manche reste peu sûre pour les marchands anglais.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1350,
+      "season": "summer"
+    },
+    "until_year": 1351,
+    "conditions": [
+      {
+        "type": "ruler_is",
+        "faction": "fac_england",
+        "character": "chr_edward_iii"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Célébrer la victoire et tenir la mer",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": -15,
+          "reason": "Les Espagnols sur mer"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rendre les prises pour renouer avec la Castille",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": 15,
+          "reason": "Prises de Winchelsea rendues"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1350-08-29"
+  },
+  "sources": [
+    "Battle of Winchelsea",
+    "Jean Froissart, Chroniques, livre I"
+  ]
+}

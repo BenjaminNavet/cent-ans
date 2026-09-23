@@ -1,0 +1,87 @@
+{
+  "id": "evt_combat_des_trente",
+  "title": "Le combat des Trente",
+  "text": "Le 26 mars 1351, au chêne de Mi-Voie, entre Josselin et Ploërmel, trente chevaliers et écuyers du parti de Blois, menés par Jean de Beaumanoir, affrontent trente combattants du parti anglais de Robert Bemborough. Selon la tradition, Beaumanoir blessé réclame à boire et s'entend répondre : « Bois ton sang, Beaumanoir, ta soif passera. » Les Franco-Bretons l'emportent : le [[cdx_combat_des_trente|combat des Trente]] ne change rien à la guerre, mais toute la chrétienté le chante.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1351,
+      "season": "spring"
+    },
+    "until_year": 1352,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "controls",
+            "faction": "fac_brittany",
+            "province": "prov_bretagne"
+          },
+          {
+            "type": "controls",
+            "faction": "fac_france",
+            "province": "prov_bretagne"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_bretagne"
+  },
+  "options": [
+    {
+      "text": "Faire chanter la gloire des Trente",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Exiger rançon des vaincus",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1351-03-26"
+  },
+  "sources": [
+    "Combat of the Thirty",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean-Christophe Cassard, La Guerre de Succession de Bretagne, 2006"
+  ]
+}

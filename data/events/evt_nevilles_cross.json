@@ -1,0 +1,100 @@
+{
+  "id": "evt_nevilles_cross",
+  "title": "La bataille de Neville's Cross",
+  "text": "À l'appel de Philippe VI, qui veut soulager la France après Crécy, David II envahit l'Angleterre. Le 17 octobre 1346, près de Durham, les levées du Nord de Ralph Neville, Henry Percy et de l'archevêque d'York écrasent l'ost écossais. Blessé au visage par des flèches, le roi se cache sous un pont où l'écuyer John de Coupland le capture ; le Steward, lui, a quitté le champ sans combattre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "autumn"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_scotland"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_scotland",
+        "character": "chr_david_ii"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_scotland"
+  },
+  "options": [
+    {
+      "text": "Confier la garde du royaume au Steward",
+      "effects": [
+        {
+          "type": "capture_character",
+          "id": "chr_david_ii",
+          "captor": "fac_england"
+        },
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever les hommes de la frontière contre les pillards",
+      "effects": [
+        {
+          "type": "capture_character",
+          "id": "chr_david_ii",
+          "captor": "fac_england"
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "spawn_army",
+          "units": [
+            "unit_men_at_arms_foot",
+            "unit_urban_militia"
+          ]
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-10-17"
+  },
+  "sources": [
+    "Battle of Neville's Cross",
+    "David II",
+    "Ranald Nicholson, Scotland: The Later Middle Ages, 1974"
+  ]
+}
