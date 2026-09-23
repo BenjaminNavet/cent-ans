@@ -15,11 +15,13 @@ Mis à jour à chaque commit `wip:` pour qu'un agent qui reprend puisse continue
   l'agent bridge passe à `end_turn(&data)`. Les autres anciens items (`new(seed)`, `turn`, `year`,
   `date_label()`) sont conservés.
 
+- Tests d'intégration `core/crates/sim-campaign/tests/campaign.rs` (17 tests) verts sur `data/`.
+- Équilibrage observé : France 24 133 livres/saison, entretien total 6 900, armée royale (8 unités)
+  3 120 (12,9 %). 40 tours tout-IA : ~60 prises, ~13 batailles, 14 armées, 15 factions vivantes.
+
 ## Prochaine étape
-- Tests d'intégration `core/crates/sim-campaign/tests/campaign.rs` sur les vraies données `data/`
-  (new_1337, ordres invalides, mouvement, mer Kent→Boulonnais, bataille, siège, revenu, attrition,
-  round-trip, déterminisme 20 tours, 40 tours IA).
-- Ajuster `TAX_EFFICIENCY` / `UPKEEP_MONTHS_PER_SEASON` d'après les chiffres observés.
+- Rien de bloquant côté sim. Pistes : IA qui dépense ses excédents (France/Empire thésaurisent),
+  ordre d'assaut, évolution de la population (M3).
 
 ## Décisions
 - `ai` dépend de `sim-campaign` : le planificateur minimal vit dans `sim_campaign::ai_minimal`
