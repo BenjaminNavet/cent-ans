@@ -3,8 +3,8 @@
 | Jalon | Contenu | État |
 |---|---|---|
 | M0 | Fondations : outils, dépôt, squelette Rust+Godot, schémas, docs | terminé (2026-09-23) |
-| M1 | Carte de campagne réelle (provinces, terrain 3D, caméra, villes) | en cours |
-| M2 | Boucle de campagne minimale jouable (tours, armées, auto-résolution, sauvegarde, UI) | à faire |
+| M1 | Carte de campagne réelle (provinces, terrain 3D, caméra, villes) | terminé (2026-09-23) |
+| M2 | Boucle de campagne minimale jouable (tours, armées, auto-résolution, sauvegarde, UI) | en cours |
 | M3 | Villes et économie (classes, bâtiments, jauges, ressources) | à faire |
 | M4 | Personnages et dynasties | à faire |
 | M5 | Diplomatie et religion | à faire |
