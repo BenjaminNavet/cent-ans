@@ -61,7 +61,9 @@ impl<'a> Context<'a> {
             faction,
             enemies: me.at_war_with.clone(),
             aggression,
-            income: state.faction_income_effective(data, faction),
+            // Net of court and administration (M10 balance).
+            income: state.faction_income_effective(data, faction)
+                - state.faction_administration_upkeep(data, faction),
             army_upkeep: state.faction_army_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
             treasury: me.treasury,
