@@ -490,7 +490,11 @@ fn add_prestige(state: &mut CampaignState, faction: &FactionId, delta: i32) {
 
 /// Turn phase (before the population): the ruler's piety and prestige from
 /// the table, and Lent in spring.
-pub(crate) fn resolve_lent(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
+pub(crate) fn resolve_lent(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+) {
     let factions: Vec<FactionId> = state
         .factions
         .iter()
@@ -609,8 +613,8 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
     }
     let income = f.projected_income.max(f.income_last_turn).max(0);
     let mut budget = state.faction_table_upkeep(data, faction);
-    let ceiling = (income * AI_TABLE_INCOME_PERCENT / 100)
-        .min(f.treasury / AI_TABLE_RESERVE_SEASONS.max(1));
+    let ceiling =
+        (income * AI_TABLE_INCOME_PERCENT / 100).min(f.treasury / AI_TABLE_RESERVE_SEASONS.max(1));
     for id in provinces {
         let current = state.province_diet(&id);
         if current != default {

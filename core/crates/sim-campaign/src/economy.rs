@@ -372,7 +372,12 @@ pub(crate) fn resolve_economy(
         .provinces
         .iter()
         .filter(|(_, p)| !p.recruit_queue.is_empty())
-        .map(|(id, _)| (id.clone(), crate::table::recruit_morale_bonus(state, data, id)))
+        .map(|(id, _)| {
+            (
+                id.clone(),
+                crate::table::recruit_morale_bonus(state, data, id),
+            )
+        })
         .collect();
     for (province_id, province) in state.provinces.iter_mut() {
         let queue = std::mem::take(&mut province.recruit_queue);

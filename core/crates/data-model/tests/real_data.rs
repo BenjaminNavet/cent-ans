@@ -97,7 +97,11 @@ fn real_data_loads_without_errors() {
         .values()
         .filter(|t| t.branch == data_model::TechBranch::Medicine)
         .collect();
-    assert!(medicine.len() >= 12, "only {} medicine techs", medicine.len());
+    assert!(
+        medicine.len() >= 12,
+        "only {} medicine techs",
+        medicine.len()
+    );
     for tech in data.technologies.values() {
         for herb in &tech.herbs {
             assert!(herb.starts_with("cdx_"), "{}: bad herb id {herb}", tech.id);
@@ -129,11 +133,18 @@ fn real_data_loads_without_errors() {
     let default = &data.diets["diet_bread_pottage"];
     assert_eq!(default.cost_per_thousand, 0.0);
     assert!(default.effects.is_empty());
-    assert_eq!(default.requirements, data_model::DietRequirements::default());
+    assert_eq!(
+        default.requirements,
+        data_model::DietRequirements::default()
+    );
     for diet in data.diets.values().filter(|d| d.id != default.id) {
         assert!(diet.cost_per_thousand > 0.0, "{} is free", diet.id);
         assert!(!diet.effects.is_empty(), "{} has no effect", diet.id);
-        assert!(diet.description.contains("[[cdx_"), "{} has no codex link", diet.id);
+        assert!(
+            diet.description.contains("[[cdx_"),
+            "{} has no codex link",
+            diet.id
+        );
         assert!(!diet.sources.is_empty(), "{} has no sources", diet.id);
     }
 

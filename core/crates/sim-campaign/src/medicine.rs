@@ -43,8 +43,7 @@ pub fn plague_resistance(state: &CampaignState, data: &GameData, province: &Prov
         return 0.0;
     };
     let buildings = crate::buildings::effects_of(data, &p.buildings).plague_resistance;
-    let techs =
-        crate::research::faction_tech_effects(state, data, &p.controller).plague_resistance;
+    let techs = crate::research::faction_tech_effects(state, data, &p.controller).plague_resistance;
     let total = buildings.flat + buildings.percent + techs.flat + techs.percent;
     total.clamp(0.0, MAX_PLAGUE_RESISTANCE) / 100.0
 }

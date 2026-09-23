@@ -332,7 +332,8 @@ pub(crate) fn resolve_population(
             }
         } else if plague {
             let survival = 1.0 - PLAGUE_LOSS * (1.0 - resistance);
-            let unrest = crate::medicine::mitigated(-PLAGUE_UNREST, resistance).unsigned_abs() as u8;
+            let unrest =
+                crate::medicine::mitigated(-PLAGUE_UNREST, resistance).unsigned_abs() as u8;
             for (_, entry) in [
                 (SocialClass::Peasants, &mut province.population.peasants),
                 (SocialClass::Burghers, &mut province.population.burghers),

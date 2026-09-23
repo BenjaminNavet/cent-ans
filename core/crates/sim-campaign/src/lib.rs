@@ -81,9 +81,9 @@ pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::CampaignError;
 pub use skills::LearnSkillError;
-pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use state::{
     Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
     FactionSummary, ProvinceState, Season, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS,
     START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
+pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
