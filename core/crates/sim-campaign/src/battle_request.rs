@@ -76,7 +76,13 @@ pub(crate) fn defer_player_battle(
         return false;
     };
     let player = &state.player_faction;
-    if &attacker.faction != player && &defender.faction != player {
+    // F1: the player may only be an ally present in the province.
+    let involved = |lead: &ArmyId, enemy: &FactionId| {
+        movement::battle_coalition(state, lead, enemy)
+            .iter()
+            .any(|id| state.armies.get(id).is_some_and(|a| &a.faction == player))
+    };
+    if !involved(attacker_id, &defender.faction) && !involved(defender_id, &attacker.faction) {
         return false;
     }
     let province = attacker.location.clone();
@@ -286,6 +292,43 @@ fn side_outcome(
 }
 
 impl CampaignState {
+    /// Coalitions `(attackers, defenders)` of a field battle request (F1),
+    /// each led by the army of the encounter.
+    fn coalitions(&self, request: &BattleRequest) -> (Vec<ArmyId>, Vec<ArmyId>) {
+        let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
+        let (Some(attacker), Some(defender)) =
+            (faction(&request.attacker), faction(&request.defender))
+        else {
+            return (
+                vec![request.attacker.clone()],
+                vec![request.defender.clone()],
+            );
+        };
+        (
+            movement::battle_coalition(self, &request.attacker, &defender),
+            movement::battle_coalition(self, &request.defender, &attacker),
+        )
+    }
+
+    /// Side of the player in a field battle, allies included (F1).
+    fn player_side_of(&self, request: &BattleRequest) -> Option<SideId> {
+        let (attackers, defenders) = self.coalitions(request);
+        let has_player = |ids: &[ArmyId]| {
+            ids.iter().any(|id| {
+                self.armies
+                    .get(id)
+                    .is_some_and(|a| a.faction == self.player_faction)
+            })
+        };
+        if has_player(&attackers) {
+            Some(SideId::Attacker)
+        } else if has_player(&defenders) {
+            Some(SideId::Defender)
+        } else {
+            None
+        }
+    }
+
     /// Pending battles with display names, in index order.
     pub fn pending_battle_views(&self, data: &GameData) -> Vec<PendingBattle> {
         self.pending_battles
@@ -301,12 +344,16 @@ impl CampaignState {
                 } else {
                     faction(&request.defender)
                 };
-                let player_side = if attacker_faction.as_ref() == Some(&self.player_faction) {
-                    Some(SideId::Attacker)
-                } else if defender_faction.as_ref() == Some(&self.player_faction) {
-                    Some(SideId::Defender)
+                let player_side = if request.siege {
+                    if attacker_faction.as_ref() == Some(&self.player_faction) {
+                        Some(SideId::Attacker)
+                    } else if defender_faction.as_ref() == Some(&self.player_faction) {
+                        Some(SideId::Defender)
+                    } else {
+                        None
+                    }
                 } else {
-                    None
+                    self.player_side_of(request)
                 };
                 let name =
                     |f: Option<FactionId>| f.map_or_else(String::new, |f| faction_name(data, &f));
@@ -340,24 +387,20 @@ impl CampaignState {
         if request.siege {
             return Ok(self.siege_battle_setup(data, request));
         }
-        let attacker = &self.armies[&request.attacker];
-        let defender = &self.armies[&request.defender];
+        // F1: the allied armies of the province fight alongside.
+        let (attackers, defenders) = self.coalitions(request);
+        let attacker = movement::coalition_army(self, &attackers).expect("live battle");
+        let defender = movement::coalition_army(self, &defenders).expect("live battle");
         let province = data.provinces.get(&request.province);
-        let player_side = if attacker.faction == self.player_faction {
-            Some(SideId::Attacker)
-        } else if defender.faction == self.player_faction {
-            Some(SideId::Defender)
-        } else {
-            None
-        };
+        let player_side = self.player_side_of(request);
         Ok(BattleSetup {
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
             river: province.is_some_and(|p| !p.rivers.is_empty()),
             season: battle_season(self.season),
-            attacker: side_setup(self, data, &request.attacker, attacker),
-            defender: side_setup(self, data, &request.defender, defender),
+            attacker: side_setup(self, data, &request.attacker, &attacker),
+            defender: side_setup(self, data, &request.defender, &defender),
             player_side,
             siege: None,
         })
@@ -386,10 +429,26 @@ impl CampaignState {
             .siege
             .then(|| crate::siege::garrison_army(self, &request.province))
             .flatten();
-        let attacker = &self.armies[&request.attacker];
+        // F1: field battles include the allied armies of the province, in
+        // the same order as `battle_setup`.
+        let (attackers, defenders) = if request.siege {
+            (
+                vec![request.attacker.clone()],
+                vec![request.defender.clone()],
+            )
+        } else {
+            self.coalitions(&request)
+        };
+        let attacker_combined = movement::coalition_army(self, &attackers).expect("live battle");
+        let defender_combined = match &garrison {
+            Some(_) => None,
+            None => Some(movement::coalition_army(self, &defenders).expect("live battle")),
+        };
+        let attacker = &attacker_combined;
         let defender = garrison
             .as_ref()
-            .unwrap_or_else(|| &self.armies[&request.defender]);
+            .or(defender_combined.as_ref())
+            .expect("one of them");
         let attacker_outcome = side_outcome("l'attaquant", attacker, &outcome.attacker)?;
         let defender_outcome = side_outcome("le défenseur", defender, &outcome.defender)?;
         let fallen: Vec<CharacterId> =
@@ -445,8 +504,8 @@ impl CampaignState {
         movement::apply_battle_result(
             self,
             data,
-            &request.attacker,
-            &request.defender,
+            &attackers,
+            &defenders,
             &origin,
             &result,
             &mut events,

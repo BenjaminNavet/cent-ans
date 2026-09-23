@@ -307,6 +307,7 @@ impl CampaignState {
                     army: None,
                     skills: character.skills,
                     captive: character.status == Some(CharacterStatus::Captive),
+                    captor: None,
                     experience: 0,
                     skill_points: 0,
                     skills_learned: BTreeSet::new(),

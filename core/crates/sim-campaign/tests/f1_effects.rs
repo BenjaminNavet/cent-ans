@@ -633,3 +633,131 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
     assert!(a.nobility.unrest < b.nobility.unrest);
     assert_eq!(a.peasants.unrest, b.peasants.unrest);
 }
+
+// =========================================================================
+// 4. Allied armies of the province join the battle
+// =========================================================================
+
+#[test]
+fn allied_armies_in_the_province_join_the_battle() {
+    let data = data();
+    let mut state = quiet_france(&data, 31);
+    let (france_id, england, brittany) =
+        (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
+    assert!(
+        state.is_at_war(&france_id, &england),
+        "the war starts in 1337"
+    );
+    let lead = first_army_of(&state, "fac_france");
+    let enemy = first_army_of(&state, "fac_england");
+    let units = state.armies[&lead].units.len();
+    assert!(units >= 2);
+    // A second French army in the same province (split from the first)...
+    let split = state.peek_next_army_id();
+    state
+        .submit_order(
+            &data,
+            Order::SplitArmy {
+                army: lead.clone(),
+                unit_indices: vec![units - 1],
+            },
+        )
+        .unwrap();
+    // ...and a Breton ally at war with England.
+    let breton = first_army_of(&state, "fac_brittany");
+    let location = state.armies[&lead].location.clone();
+    state.armies.get_mut(&breton).unwrap().location = location.clone();
+    state
+        .factions
+        .get_mut(&brittany)
+        .unwrap()
+        .at_war_with
+        .insert(england.clone());
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .at_war_with
+        .insert(brittany.clone());
+    let breton_units = state.armies[&breton].units.len();
+    let coalition = sim_campaign::movement::battle_coalition(&state, &lead, &england);
+    assert_eq!(coalition[0], lead, "the army of the encounter leads");
+    let mut allies = coalition[1..].to_vec();
+    allies.sort();
+    let mut expected = vec![split.clone(), breton.clone()];
+    expected.sort();
+    assert_eq!(allies, expected);
+
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(&data, index).unwrap();
+    assert_eq!(setup.attacker.units.len(), units + breton_units);
+    assert_eq!(setup.attacker.army, lead.to_string());
+    assert_eq!(setup.attacker.faction, france_id.to_string());
+
+    let strength =
+        |state: &CampaignState, id: &ArmyId| state.armies.get(id).map_or(0, |a| a.total_strength());
+    let (split_before, breton_before) = (strength(&state, &split), strength(&state, &breton));
+    let events = state.auto_resolve_pending(&data, index).unwrap();
+    assert!(
+        events.iter().any(|e| e.text_fr.contains("alliée")),
+        "{events:?}"
+    );
+    assert!(
+        strength(&state, &split) < split_before,
+        "the split army took losses"
+    );
+    assert!(
+        strength(&state, &breton) < breton_before,
+        "the Breton ally took losses"
+    );
+}
+
+#[test]
+fn a_3d_battle_result_spreads_losses_over_the_coalition() {
+    use sim_battle::{BattleOutcome, SideId, SideResult};
+    let data = data();
+    let mut state = quiet_france(&data, 32);
+    let lead = first_army_of(&state, "fac_france");
+    let enemy = first_army_of(&state, "fac_england");
+    let units = state.armies[&lead].units.len();
+    let split = state.peek_next_army_id();
+    state
+        .submit_order(
+            &data,
+            Order::SplitArmy {
+                army: lead.clone(),
+                unit_indices: vec![units - 1],
+            },
+        )
+        .unwrap();
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(&data, index).unwrap();
+    let side = |count: usize, lost: u32| SideResult {
+        losses: vec![lost; count],
+        total_losses: lost * count as u32,
+        morale_delta: 0,
+        routed: false,
+        general_killed: false,
+        general_captured: false,
+    };
+    // A result sized for the lead army alone is refused...
+    let short = BattleOutcome {
+        winner: SideId::Attacker,
+        attacker: side(units - 1, 1),
+        defender: side(setup.defender.units.len(), 1),
+        duration: 60.0,
+    };
+    assert!(state.resolve_pending_battle(&data, index, &short).is_err());
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let split_before = state.armies[&split].total_strength();
+    let outcome = BattleOutcome {
+        winner: SideId::Attacker,
+        attacker: side(units, 7),
+        defender: side(setup.defender.units.len(), 1),
+        duration: 60.0,
+    };
+    state
+        .resolve_pending_battle(&data, index, &outcome)
+        .unwrap();
+    assert_eq!(state.armies[&split].total_strength(), split_before - 7);
+}
