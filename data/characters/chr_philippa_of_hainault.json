@@ -1,0 +1,54 @@
+{
+  "id": "chr_philippa_of_hainault",
+  "name": {
+    "display": "Philippa de Hainaut"
+  },
+  "sex": "female",
+  "house": "Avesnes",
+  "faction": "fac_england",
+  "role": "consort",
+  "birth": {
+    "value": "1310-06-24",
+    "uncertain": true,
+    "place": "Valenciennes",
+    "note": "Date disputée entre 1310 et 1314."
+  },
+  "death": {
+    "value": "1369-08-15",
+    "place": "Windsor"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine d'Angleterre",
+      "from": {
+        "value": "1328-01-24"
+      },
+      "note": "Mariage à York le 24 janvier 1328 ; couronnée le 4 mars 1330."
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 5,
+    "court": 8
+  },
+  "traits": [
+    "trait_kind",
+    "trait_diplomat"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_edward_iii"
+    ],
+    "children": [
+      "chr_edward_of_woodstock"
+    ]
+  },
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Fille de Guillaume Ier de Hainaut ; ses parentés dans les Pays-Bas servent la diplomatie anglaise.",
+  "sources": [
+    "Philippa de Hainaut"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "fac_scotland",
+  "name": {
+    "display": "Royaume d'Écosse",
+    "local": "Kinrick o Scotland",
+    "local_language": "scots"
+  },
+  "short_name": "Écosse",
+  "adjective": "écossais",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_david_ii",
+  "heir": "chr_robert_stewart",
+  "capital": "prov_lothian",
+  "capital_city": "Édimbourg",
+  "religion": "rel_catholic",
+  "culture": "cul_scottish",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "D'or au lion de gueules, armé et lampassé d'azur, au double trescheur fleuré et contre-fleuré du second.",
+    "description": "Lion rouge rampant dans un double trescheur fleurdelisé sur champ d'or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Roi d'Écosse"
+  ],
+  "treasury": 6000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "war",
+      "since": {
+        "value": "1332-08-11"
+      },
+      "note": "Édouard Balliol et les « déshérités » ; Andrew Murray, Gardien, mène la guérilla depuis 1335."
+    },
+    {
+      "faction": "fac_france",
+      "status": "alliance",
+      "since": {
+        "value": "1326-04-26"
+      },
+      "note": "Auld Alliance ; le roi David II, 13 ans, vit en exil en Normandie (Château-Gaillard)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 30,
+    "piety": 55
+  },
+  "description": "Royaume dévasté par la guerre contre Édouard III et Balliol ; gouverné par le Gardien Andrew Murray en l'absence du jeune roi.",
+  "sources": [
+    "David II",
+    "Seconde guerre d'indépendance écossaise",
+    "Armoiries de l'Écosse"
+  ]
+}

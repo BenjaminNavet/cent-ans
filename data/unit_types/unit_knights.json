@@ -1,0 +1,37 @@
+{
+  "id": "unit_knights",
+  "name": {
+    "display": "Chevaliers",
+    "local": "chevaliers",
+    "local_language": "ancien français"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1500
+  },
+  "upkeep": 140,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 75,
+    "ranged": 0,
+    "range": 0,
+    "armor": 80,
+    "morale": 80,
+    "speed": 70,
+    "ammo": 0,
+    "charge": 90
+  },
+  "abilities": [
+    "charge_lance",
+    "dismount"
+  ],
+  "equipment": "Destrier caparaçonné, lance de frêne, épée, mailles et plates, bassinet, cotte d'armes blasonnée.",
+  "description": "Cavalerie lourde des bannerets et bacheliers ; la charge de lance reste l'arme décisive de la chevalerie française.",
+  "sources": [
+    "Chevalerie",
+    "Bataille de Crécy"
+  ]
+}

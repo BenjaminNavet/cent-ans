@@ -1,0 +1,29 @@
+{
+  "id": "bld_market",
+  "name": {
+    "display": "Marché"
+  },
+  "category": "commerce",
+  "tier": 1,
+  "cost": {
+    "money": 300
+  },
+  "build_time_turns": 1,
+  "upkeep": 5,
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "goods_satisfaction",
+      "value": 5
+    }
+  ],
+  "description": "Halle et marché hebdomadaire ; base des échanges locaux.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "prov_ile_de_france",
+  "name": {
+    "display": "Île-de-France",
+    "local": "Isle de France",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_normandie"
+  ],
+  "rivers": [
+    "Seine",
+    "Marne",
+    "Oise"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Paris",
+      "local": "Paris",
+      "local_language": "ancien français"
+    },
+    "lat": 48.8566,
+    "lon": 2.3522
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Paris compte 200 000 à 250 000 habitants vers 1330, première ville d'Occident ; totaux régionaux estimés.",
+    "classes": {
+      "peasants": {
+        "count": 420000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 180000,
+        "unrest": 15,
+        "health": 45,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "clergy": {
+        "count": 20000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 80,
+        "goods_satisfaction": 80
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_fair",
+    "bld_water_mill",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_university",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_armoury"
+  ],
+  "fortification_level": 3,
+  "base_supply": 8000,
+  "description": "Domaine royal autour de Paris : le Louvre, Notre-Dame, l'université, l'Hôtel-Dieu, Saint-Denis et le Lendit. Cœur politique et fiscal du royaume.",
+  "sources": [
+    "Paris au Moyen Âge",
+    "Île-de-France"
+  ]
+}

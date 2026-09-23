@@ -1,0 +1,49 @@
+{
+  "id": "chr_philippe_monsieur",
+  "name": {
+    "display": "Philippe de Bourgogne, dit Monsieur"
+  },
+  "epithet": "Monsieur",
+  "sex": "male",
+  "house": "Bourgogne",
+  "faction": "fac_burgundy",
+  "role": "heir",
+  "birth": {
+    "value": "1323-11-10"
+  },
+  "death": {
+    "value": "1346-08-10",
+    "uncertain": true,
+    "place": "Siège d'Aiguillon",
+    "note": "Chute de cheval au siège d'Aiguillon ; jour discuté."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte d'Auvergne et de Boulogne (par mariage)",
+      "from": {
+        "value": "1338-09-26"
+      },
+      "note": "Épouse Jeanne Ire d'Auvergne."
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 1,
+    "court": 2
+  },
+  "traits": [
+    "trait_reckless"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_eudes_iv",
+    "mother": "chr_jeanne_iii_de_bourgogne"
+  },
+  "starting_location": "prov_bourgogne",
+  "status": "minor",
+  "description": "Fils unique d'Eudes IV, 13 ans en 1337 ; sa mort prématurée en 1346 laissera le duché à son fils posthume Philippe de Rouvres.",
+  "sources": [
+    "Philippe de Bourgogne (1323-1346)"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "tech_full_plate",
+  "name": {
+    "display": "Harnois blanc"
+  },
+  "branch": "military",
+  "tier": 3,
+  "cost": 400,
+  "prerequisites": [
+    "tech_coat_of_plates"
+  ],
+  "historical_year": {
+    "value": "1400",
+    "note": "Armure complète de plates (« harnois blanc ») vers 1400-1420.",
+    "uncertain": true
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_armor",
+      "unit_category": "cavalry",
+      "value": 10
+    },
+    {
+      "effect": "army_armor",
+      "unit_category": "infantry",
+      "value": 8
+    },
+    {
+      "effect": "recruit_cost",
+      "unit_category": "cavalry",
+      "value": 15,
+      "mode": "percent"
+    }
+  ],
+  "description": "Armure complète articulée forgée à Milan et en Allemagne ; rend les hommes d'armes presque invulnérables aux flèches.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

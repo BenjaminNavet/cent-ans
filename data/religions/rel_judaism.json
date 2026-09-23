@@ -1,0 +1,20 @@
+{
+  "id": "rel_judaism",
+  "name": {
+    "display": "Judaïsme",
+    "local": "Yahadut",
+    "local_language": "hébreu"
+  },
+  "kind": "other_faith",
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 2
+    }
+  ],
+  "description": "Communautés juives d'Ibérie, de Provence, d'Empire et d'Avignon. Expulsées d'Angleterre (1290) et de France (1306, 1322 ; retour 1315 et 1359).",
+  "sources": [
+    "Histoire des Juifs en France",
+    "Histoire des Juifs en Espagne"
+  ]
+}

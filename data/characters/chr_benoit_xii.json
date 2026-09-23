@@ -1,0 +1,76 @@
+{
+  "id": "chr_benoit_xii",
+  "name": {
+    "display": "Benoît XII (Jacques Fournier)",
+    "local": "Jacobus Fornerii",
+    "local_language": "latin"
+  },
+  "sex": "male",
+  "house": "Fournier",
+  "faction": "fac_papacy",
+  "role": "ruler",
+  "birth": {
+    "value": "1285",
+    "uncertain": true,
+    "place": "Saverdun (comté de Foix)"
+  },
+  "death": {
+    "value": "1342-04-25",
+    "place": "Avignon"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Pape",
+      "from": {
+        "value": "1334-12-20"
+      },
+      "note": "Élu le 20 décembre 1334, couronné le 8 janvier 1335."
+    },
+    {
+      "title": "Évêque de Pamiers",
+      "from": {
+        "value": "1317-03-19"
+      },
+      "to": {
+        "value": "1326"
+      }
+    },
+    {
+      "title": "Évêque de Mirepoix",
+      "from": {
+        "value": "1326"
+      },
+      "to": {
+        "value": "1327"
+      }
+    },
+    {
+      "title": "Cardinal",
+      "from": {
+        "value": "1327-12-18"
+      },
+      "to": {
+        "value": "1334-12-20"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_austere",
+    "trait_scholar",
+    "trait_inquisitor"
+  ],
+  "piety": 95,
+  "starting_location": "prov_comtat_venaissin",
+  "status": "at_court",
+  "description": "Cistercien, ancien inquisiteur de Pamiers (registre de Montaillou) ; réformateur des ordres religieux, bâtisseur du Palais des papes.",
+  "sources": [
+    "Benoît XII"
+  ]
+}

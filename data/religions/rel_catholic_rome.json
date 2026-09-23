@@ -1,0 +1,34 @@
+{
+  "id": "rel_catholic_rome",
+  "name": {
+    "display": "Catholicisme (obédience de Rome)",
+    "local": "Ecclesia catholica",
+    "local_language": "latin"
+  },
+  "kind": "obedience",
+  "parent": "rel_catholic",
+  "seat": "Rome",
+  "available_from": {
+    "value": "1378-09-20",
+    "note": "Élection de Clément VII à Fondi, début du Grand Schisme d'Occident."
+  },
+  "available_until": {
+    "value": "1417-11-11",
+    "note": "Élection de Martin V au concile de Constance."
+  },
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 3
+    },
+    {
+      "effect": "unrest",
+      "class": "clergy",
+      "value": 5
+    }
+  ],
+  "description": "Obédience romaine (Urbain VI puis Boniface IX, Innocent VII, Grégoire XII) suivie par l'Angleterre, l'Empire, l'Italie du Nord et la Flandre pendant le Grand Schisme.",
+  "sources": [
+    "Grand Schisme d'Occident"
+  ]
+}

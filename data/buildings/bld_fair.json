@@ -1,0 +1,35 @@
+{
+  "id": "bld_fair",
+  "name": {
+    "display": "Foire"
+  },
+  "category": "commerce",
+  "tier": 2,
+  "upgrades_from": "bld_market",
+  "cost": {
+    "money": 1200
+  },
+  "build_time_turns": 3,
+  "upkeep": 20,
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 5
+    },
+    {
+      "effect": "goods_satisfaction",
+      "value": 5
+    }
+  ],
+  "description": "Foire franche à privilèges royaux (Champagne, Lendit, Bruges) attirant marchands lombards et hanséates.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

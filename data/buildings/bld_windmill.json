@@ -1,0 +1,31 @@
+{
+  "id": "bld_windmill",
+  "name": {
+    "display": "Moulin à vent"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 500
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "required_technology": "tech_windmills",
+  "effects": [
+    {
+      "effect": "production",
+      "value": 8,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": 2
+    }
+  ],
+  "description": "Moulin à pivot pour les provinces sans cours d'eau puissant.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "unit_siege_tower",
+  "name": {
+    "display": "Tour de siège",
+    "local": "beffroi",
+    "local_language": "ancien français"
+  },
+  "category": "siege",
+  "source_class": "peasants",
+  "soldiers": 8,
+  "cost": {
+    "money": 900,
+    "resources": {
+      "res_wood": 3
+    }
+  },
+  "upkeep": 30,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 10,
+    "ranged": 0,
+    "range": 0,
+    "armor": 30,
+    "morale": 40,
+    "speed": 8,
+    "ammo": 0
+  },
+  "abilities": [
+    "wall_assault"
+  ],
+  "required_technology": "tech_siege_engineering",
+  "required_building": "bld_siege_workshop",
+  "equipment": "Beffroi roulant à plusieurs étages, couvert de peaux mouillées, pont-levis d'assaut.",
+  "description": "Tour roulante permettant de prendre pied sur la courtine sans brèche.",
+  "sources": [
+    "Tour de siège"
+  ]
+}

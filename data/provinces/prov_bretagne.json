@@ -1,0 +1,102 @@
+{
+  "id": "prov_bretagne",
+  "name": {
+    "display": "Bretagne",
+    "local": "Breizh",
+    "local_language": "breton"
+  },
+  "region": "france_ouest",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_normandie"
+  ],
+  "rivers": [
+    "Loire",
+    "Vilaine",
+    "Blavet",
+    "Rance"
+  ],
+  "coastal": true,
+  "ports": [
+    "Nantes",
+    "Brest",
+    "Saint-Malo",
+    "Vannes",
+    "Guérande"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nantes",
+      "local": "Naoned",
+      "local_language": "breton"
+    },
+    "lat": 47.2184,
+    "lon": -1.5536
+  },
+  "owner": "fac_brittany",
+  "overlord": "fac_france",
+  "holder": "chr_jean_iii_de_bretagne",
+  "culture": "cul_breton",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Duché entier (environ 1,2 million d'habitants avant la peste) modélisé ici comme une seule province de l'échantillon ; le pipeline géo le découpera.",
+    "classes": {
+      "peasants": {
+        "count": 950000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 25000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 6000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_water_mill",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 6000,
+  "description": "Duché à la noblesse nombreuse et pauvre, vivant du sel de Guérande, du cabotage et de la pêche ; la Basse-Bretagne parle breton, la cour ducale français.",
+  "sources": [
+    "Duché de Bretagne",
+    "Nantes"
+  ]
+}

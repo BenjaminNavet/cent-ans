@@ -1,0 +1,17 @@
+{
+  "id": "res_wine",
+  "name": {
+    "display": "Vin"
+  },
+  "category": "luxury",
+  "base_price": 10,
+  "satisfies_classes": [
+    "nobility",
+    "clergy",
+    "burghers"
+  ],
+  "description": "Vins de Gascogne (Bordeaux), de Bourgogne et d'Île-de-France, exportés en Angleterre.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

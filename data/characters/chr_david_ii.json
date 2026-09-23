@@ -1,0 +1,45 @@
+{
+  "id": "chr_david_ii",
+  "name": {
+    "display": "David II d'Écosse",
+    "local": "Dàibhidh Bruis",
+    "local_language": "gaélique écossais"
+  },
+  "sex": "male",
+  "house": "Bruce",
+  "faction": "fac_scotland",
+  "role": "ruler",
+  "birth": {
+    "value": "1324-03-05",
+    "place": "Dunfermline"
+  },
+  "death": {
+    "value": "1371-02-22",
+    "place": "Château d'Édimbourg"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi d'Écosse",
+      "from": {
+        "value": "1329-06-07"
+      },
+      "note": "Couronné et sacré à Scone le 24 novembre 1331."
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_proud"
+  ],
+  "piety": 55,
+  "starting_location": "prov_normandie",
+  "status": "in_exile",
+  "description": "Fils de Robert Bruce, roi à 5 ans ; réfugié en France à Château-Gaillard de mai 1334 à juin 1341, sous la protection de Philippe VI.",
+  "sources": [
+    "David II"
+  ]
+}

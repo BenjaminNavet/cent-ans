@@ -1,0 +1,60 @@
+{
+  "id": "chr_jean_de_luxembourg",
+  "name": {
+    "display": "Jean de Luxembourg, roi de Bohême",
+    "local": "Johann von Luxemburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "l'Aveugle",
+  "sex": "male",
+  "house": "Luxembourg",
+  "faction": "fac_france",
+  "role": "commander",
+  "birth": {
+    "value": "1296-08-10"
+  },
+  "death": {
+    "value": "1346-08-26",
+    "place": "Crécy-en-Ponthieu",
+    "note": "Tué à Crécy, aveugle, attaché à ses chevaliers."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Bohême",
+      "from": {
+        "value": "1310-08-31"
+      },
+      "note": "Couronné à Prague le 7 février 1311."
+    },
+    {
+      "title": "Comte de Luxembourg",
+      "from": {
+        "value": "1313-08-24"
+      }
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 3,
+    "court": 8
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_brave",
+    "trait_spendthrift",
+    "trait_failing_sight"
+  ],
+  "piety": 55,
+  "family": {
+    "children": [
+      "chr_bonne_de_luxembourg"
+    ]
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Prince de l'Empire, allié et beau-père du duc de Normandie, hôte assidu de la cour de France. Modélisé comme commandeur au service de la France ; sa cécité s'aggrave dès 1337 (complète vers 1340).",
+  "sources": [
+    "Jean Ier de Bohême"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/common.schema.json",
+  "title": "Définitions communes",
+  "description": "Types partagés par tous les schémas de données de Cent Ans. Les autres schémas y font référence via `common.schema.json#/$defs/...`.",
+  "$defs": {
+    "faction_id": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+    "province_id": { "type": "string", "pattern": "^prov_[a-z0-9_]+$" },
+    "unit_type_id": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+    "building_id": { "type": "string", "pattern": "^bld_[a-z0-9_]+$" },
+    "technology_id": { "type": "string", "pattern": "^tech_[a-z0-9_]+$" },
+    "character_id": { "type": "string", "pattern": "^chr_[a-z0-9_]+$" },
+    "resource_id": { "type": "string", "pattern": "^res_[a-z0-9_]+$" },
+    "religion_id": { "type": "string", "pattern": "^rel_[a-z0-9_]+$" },
+    "culture_id": { "type": "string", "pattern": "^cul_[a-z0-9_]+$" },
+    "trait_id": { "type": "string", "pattern": "^trait_[a-z0-9_]+$" },
+    "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
+    "date_string": {
+      "type": "string",
+      "description": "Date ISO partielle : AAAA, AAAA-MM ou AAAA-MM-JJ (calendrier julien pour l'époque).",
+      "pattern": "^[0-9]{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)?$"
+    },
+    "historical_date": {
+      "type": "object",
+      "description": "Date historique avec drapeau d'incertitude. `uncertain: true` signale une date approximative ou disputée ; `note` explique.",
+      "properties": {
+        "value": { "$ref": "#/$defs/date_string" },
+        "uncertain": { "type": "boolean", "default": false },
+        "place": { "type": "string" },
+        "note": { "type": "string" }
+      },
+      "required": ["value"],
+      "additionalProperties": false
+    },
+    "uncertain_integer": {
+      "type": "object",
+      "description": "Valeur entière estimée, avec drapeau d'incertitude.",
+      "properties": {
+        "value": { "type": "integer", "minimum": 0 },
+        "uncertain": { "type": "boolean", "default": false },
+        "note": { "type": "string" }
+      },
+      "required": ["value"],
+      "additionalProperties": false
+    },
+    "percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "social_class": {
+      "type": "string",
+      "enum": ["peasants", "burghers", "clergy", "nobility"]
+    },
+    "localized_name": {
+      "type": "object",
+      "description": "Nom affiché en français et nom d'époque dans la langue locale.",
+      "properties": {
+        "display": { "type": "string", "description": "Nom d'affichage en français." },
+        "local": { "type": "string", "description": "Nom d'époque dans la langue locale (ancien français, moyen anglais, flamand, gascon...)." },
+        "local_language": { "type": "string", "description": "Langue du nom local (ex. 'ancien français', 'moyen anglais')." }
+      },
+      "required": ["display"],
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "description": "Sources historiques utilisées (titres de pages Wikipédia ou références d'ouvrages).",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "effect": {
+      "type": "object",
+      "description": "Modificateur appliqué à une province, une classe sociale ou une faction.",
+      "properties": {
+        "effect": {
+          "type": "string",
+          "enum": [
+            "wealth", "health", "unrest", "goods_satisfaction", "growth",
+            "tax_income", "trade_income", "production",
+            "research_civil", "research_military",
+            "recruit_slots", "recruit_cost", "army_upkeep", "army_experience", "army_morale", "army_armor", "army_ranged",
+            "garrison", "fortification_level", "siege_resistance",
+            "piety", "prestige", "supply", "movement", "attrition_resistance", "loyalty"
+          ]
+        },
+        "class": { "$ref": "#/$defs/social_class", "description": "Classe visée pour les effets de population ; absent = toute la province." },
+        "unit_category": { "type": "string", "enum": ["infantry", "ranged", "cavalry", "siege"] },
+        "value": { "type": "number" },
+        "mode": { "type": "string", "enum": ["add", "percent"], "default": "add" }
+      },
+      "required": ["effect", "value"],
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "description": "Coût en livres tournois (l.t.) et, si besoin, en ressources.",
+      "properties": {
+        "money": { "type": "integer", "minimum": 0 },
+        "resources": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/resource_id" },
+          "additionalProperties": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "required": ["money"],
+      "additionalProperties": false
+    }
+  }
+}

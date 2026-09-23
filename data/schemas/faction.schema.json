@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/faction.schema.json",
+  "title": "Faction",
+  "description": "État ou puissance de la carte de campagne (royaume, duché, comté, république, papauté...).",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/faction_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "short_name": { "type": "string", "description": "Nom court pour l'UI (ex. 'France')." },
+    "adjective": { "type": "string", "description": "Adjectif français (ex. 'français', 'anglais')." },
+    "government": {
+      "type": "string",
+      "enum": ["kingdom", "duchy", "county", "principality", "republic", "theocracy", "empire", "lordship"]
+    },
+    "playable": { "type": "boolean", "default": false },
+    "ruler": { "$ref": "common.schema.json#/$defs/character_id" },
+    "heir": { "$ref": "common.schema.json#/$defs/character_id", "description": "Héritier présomptif en 1337 selon la loi de succession." },
+    "capital": { "$ref": "common.schema.json#/$defs/province_id" },
+    "capital_city": { "type": "string", "description": "Nom de la ville capitale (français)." },
+    "religion": { "$ref": "common.schema.json#/$defs/religion_id" },
+    "culture": { "$ref": "common.schema.json#/$defs/culture_id" },
+    "succession_law": {
+      "type": "string",
+      "description": "Règle de succession : salique (agnatique stricte), primogéniture masculine préférentielle, cognatique, élective (empire, république, papauté).",
+      "enum": ["salic", "male_preference_primogeniture", "cognatic_primogeniture", "elective"]
+    },
+    "suzerain": {
+      "$ref": "common.schema.json#/$defs/faction_id",
+      "description": "Faction dont celle-ci est vassale (hommage lige) au départ."
+    },
+    "heraldry": {
+      "type": "object",
+      "properties": {
+        "blazon": { "type": "string", "description": "Blasonnement en français héraldique." },
+        "description": { "type": "string", "description": "Description en français courant." },
+        "primary_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "secondary_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "uncertain": { "type": "boolean", "default": false },
+        "note": { "type": "string" }
+      },
+      "required": ["blazon", "primary_color"],
+      "additionalProperties": false
+    },
+    "titles": {
+      "type": "array",
+      "description": "Titres portés par le souverain de la faction en 1337.",
+      "items": { "type": "string" }
+    },
+    "treasury": { "type": "integer", "minimum": 0, "description": "Trésor de départ en livres tournois." },
+    "prestige": { "type": "integer", "minimum": 0 },
+    "starting_technologies": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/technology_id" },
+      "uniqueItems": true
+    },
+    "relations": {
+      "type": "array",
+      "description": "Relations diplomatiques de départ avec d'autres factions.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
+          "status": { "type": "string", "enum": ["war", "peace", "alliance", "truce", "embargo", "vassal", "overlord", "marriage_tie"] },
+          "since": { "$ref": "common.schema.json#/$defs/historical_date" },
+          "until": { "$ref": "common.schema.json#/$defs/historical_date" },
+          "note": { "type": "string" }
+        },
+        "required": ["faction", "status"],
+        "additionalProperties": false
+      }
+    },
+    "ai_personality": {
+      "type": "object",
+      "properties": {
+        "aggression": { "$ref": "common.schema.json#/$defs/percent" },
+        "diplomacy": { "$ref": "common.schema.json#/$defs/percent" },
+        "trade": { "$ref": "common.schema.json#/$defs/percent" },
+        "piety": { "$ref": "common.schema.json#/$defs/percent" }
+      },
+      "additionalProperties": false
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "government", "capital", "religion", "culture", "succession_law", "heraldry"],
+  "additionalProperties": false
+}

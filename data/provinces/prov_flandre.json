@@ -1,0 +1,102 @@
+{
+  "id": "prov_flandre",
+  "name": {
+    "display": "Flandre",
+    "local": "Vlaanderen",
+    "local_language": "moyen néerlandais"
+  },
+  "region": "pays_bas",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_artois"
+  ],
+  "rivers": [
+    "Escaut",
+    "Lys",
+    "Yser"
+  ],
+  "coastal": true,
+  "ports": [
+    "Bruges (L'Écluse)",
+    "Damme",
+    "Nieuport"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Gand",
+      "local": "Gent",
+      "local_language": "moyen néerlandais"
+    },
+    "lat": 51.0543,
+    "lon": 3.7174
+  },
+  "owner": "fac_flanders",
+  "overlord": "fac_france",
+  "holder": "chr_louis_de_nevers",
+  "culture": "cul_flemish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Gand 60 000 hab., Bruges 45 000, Ypres 25 000 : la région la plus urbanisée au nord des Alpes. Mécontentement bourgeois élevé à cause de l'embargo anglais sur la laine (1336).",
+    "classes": {
+      "peasants": {
+        "count": 350000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 220000,
+        "unrest": 45,
+        "health": 45,
+        "wealth": 60,
+        "goods_satisfaction": 35
+      },
+      "clergy": {
+        "count": 15000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 2500,
+        "unrest": 25,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 70
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_fair",
+    "bld_port",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_guild_hall",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_hotel_dieu",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 6000,
+  "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s'oppose à ses bourgeois qui dépendent de la laine anglaise.",
+  "sources": [
+    "Comté de Flandre",
+    "Gand",
+    "Bruges"
+  ]
+}

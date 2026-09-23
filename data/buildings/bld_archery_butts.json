@@ -1,0 +1,33 @@
+{
+  "id": "bld_archery_butts",
+  "name": {
+    "display": "Butte de tir"
+  },
+  "category": "military",
+  "tier": 1,
+  "cost": {
+    "money": 300
+  },
+  "build_time_turns": 1,
+  "upkeep": 5,
+  "required_building": "bld_muster_field",
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "unit_category": "ranged",
+      "value": 3
+    },
+    {
+      "effect": "army_experience",
+      "value": 1
+    }
+  ],
+  "enables_units": [
+    "unit_longbowmen"
+  ],
+  "description": "Buttes où les paysans s'exercent à l'arc le dimanche, sur ordre royal en Angleterre.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

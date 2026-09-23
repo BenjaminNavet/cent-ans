@@ -1,0 +1,36 @@
+{
+  "id": "tech_universities",
+  "name": {
+    "display": "Universités et scolastique"
+  },
+  "branch": "civil",
+  "tier": 2,
+  "cost": 220,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1300",
+    "note": "Paris, Oxford, Bologne, Montpellier, Toulouse fondées au XIIIe siècle."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_university"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 10
+    },
+    {
+      "effect": "research_military",
+      "value": 3
+    }
+  ],
+  "description": "Facultés de théologie, droit et médecine ; pépinière de légistes et de conseillers.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

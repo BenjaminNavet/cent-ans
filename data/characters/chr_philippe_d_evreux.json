@@ -1,0 +1,56 @@
+{
+  "id": "chr_philippe_d_evreux",
+  "name": {
+    "display": "Philippe III d'Évreux"
+  },
+  "epithet": "le Sage",
+  "sex": "male",
+  "house": "Évreux",
+  "faction": "fac_navarre",
+  "role": "consort",
+  "birth": {
+    "value": "1306-03-27"
+  },
+  "death": {
+    "value": "1343-09-16",
+    "place": "Jerez de la Frontera",
+    "note": "Mort de blessures ou de maladie au siège d'Algésiras."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte d'Évreux",
+      "from": {
+        "value": "1319"
+      }
+    },
+    {
+      "title": "Roi de Navarre (par mariage)",
+      "from": {
+        "value": "1328-04-01"
+      },
+      "note": "Couronné avec Jeanne II le 5 mars 1329."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_crusader",
+    "trait_chivalrous"
+  ],
+  "piety": 70,
+  "family": {
+    "spouses": [
+      "chr_jeanne_ii_de_navarre"
+    ]
+  },
+  "starting_location": "prov_navarra",
+  "status": "at_court",
+  "description": "Cousin germain de Philippe VI, roi consort de Navarre gouvernant conjointement avec Jeanne II ; père de Charles le Mauvais (né en 1332).",
+  "sources": [
+    "Philippe III de Navarre"
+  ]
+}

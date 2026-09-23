@@ -1,0 +1,66 @@
+{
+  "id": "chr_louis_de_nevers",
+  "name": {
+    "display": "Louis Ier de Flandre",
+    "local": "Lodewijk van Nevers",
+    "local_language": "moyen néerlandais"
+  },
+  "epithet": "de Crécy",
+  "sex": "male",
+  "house": "Dampierre",
+  "faction": "fac_flanders",
+  "role": "ruler",
+  "birth": {
+    "value": "1304",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1346-08-26",
+    "place": "Crécy-en-Ponthieu",
+    "note": "Tué à Crécy."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Flandre",
+      "from": {
+        "value": "1322-09-17"
+      }
+    },
+    {
+      "title": "Comte de Nevers",
+      "from": {
+        "value": "1322-09-17"
+      }
+    },
+    {
+      "title": "Comte de Rethel",
+      "from": {
+        "value": "1328",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_stubborn",
+    "trait_unpopular"
+  ],
+  "piety": 55,
+  "family": {
+    "children": [
+      "chr_louis_de_male"
+    ]
+  },
+  "starting_location": "prov_flandre",
+  "status": "at_court",
+  "description": "Élevé à la cour de France, restauré par Philippe VI après Cassel ; sa fidélité au Valois le brouille avec Gand, Bruges et Ypres.",
+  "sources": [
+    "Louis Ier de Flandre"
+  ]
+}

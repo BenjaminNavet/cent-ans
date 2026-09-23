@@ -1,0 +1,53 @@
+{
+  "id": "chr_azzone_visconti",
+  "name": {
+    "display": "Azzone Visconti",
+    "local": "Azzone Visconti",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Visconti",
+  "faction": "fac_milan",
+  "role": "ruler",
+  "birth": {
+    "value": "1302-12-07"
+  },
+  "death": {
+    "value": "1339-08-16",
+    "place": "Milan",
+    "note": "Mort de la goutte."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Seigneur de Milan",
+      "from": {
+        "value": "1329-01-15",
+        "uncertain": true
+      },
+      "note": "Vicaire impérial acheté à Louis IV, puis seigneur général en 1330."
+    },
+    {
+      "title": "Vicaire impérial",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_builder",
+    "trait_sickly"
+  ],
+  "piety": 40,
+  "starting_location": "prov_milano",
+  "status": "at_court",
+  "description": "Seigneur bâtisseur qui étend la domination viscontienne (Bergame, Crémone, Côme, Lodi) ; meurt sans héritier en 1339.",
+  "sources": [
+    "Azzone Visconti"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "rel_lollard",
+  "name": {
+    "display": "Lollards",
+    "local": "Lollardy",
+    "local_language": "moyen anglais"
+  },
+  "kind": "heresy",
+  "parent": "rel_catholic",
+  "available_from": {
+    "value": "1381",
+    "uncertain": true,
+    "note": "Prédication de John Wyclif à Oxford dès les années 1370, condamnation en 1382 (synode de Blackfriars)."
+  },
+  "effects": [
+    {
+      "effect": "unrest",
+      "class": "clergy",
+      "value": 10
+    },
+    {
+      "effect": "unrest",
+      "class": "peasants",
+      "value": -5
+    }
+  ],
+  "description": "Mouvement réformateur anglais issu de John Wyclif : traduction de la Bible, critique de la richesse du clergé.",
+  "sources": [
+    "Lollards",
+    "John Wyclif"
+  ]
+}

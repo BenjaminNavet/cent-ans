@@ -1,0 +1,40 @@
+{
+  "id": "bld_castle",
+  "name": {
+    "display": "Château fort"
+  },
+  "category": "fortification",
+  "tier": 3,
+  "upgrades_from": "bld_stone_walls",
+  "cost": {
+    "money": 4000,
+    "resources": {
+      "res_stone": 3
+    }
+  },
+  "build_time_turns": 8,
+  "upkeep": 50,
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 3
+    },
+    {
+      "effect": "garrison",
+      "value": 3
+    },
+    {
+      "effect": "siege_resistance",
+      "value": 20
+    },
+    {
+      "effect": "loyalty",
+      "value": 5
+    }
+  ],
+  "description": "Donjon, enceinte concentrique, citerne et réserves ; tient des mois contre un siège.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

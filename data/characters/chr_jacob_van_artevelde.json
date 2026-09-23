@@ -1,0 +1,50 @@
+{
+  "id": "chr_jacob_van_artevelde",
+  "name": {
+    "display": "Jacques van Artevelde",
+    "local": "Jacob van Artevelde",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "male",
+  "house": "Artevelde",
+  "faction": "fac_flanders",
+  "role": "burgher",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "place": "Gand"
+  },
+  "death": {
+    "value": "1345-07-24",
+    "uncertain": true,
+    "place": "Gand",
+    "note": "17 ou 24 juillet 1345 selon les sources ; tué par la foule."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Capitaine de Gand",
+      "from": {
+        "value": "1338-01-03"
+      },
+      "note": "Élu premier des cinq capitaines de Gand."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 7,
+    "court": 7
+  },
+  "traits": [
+    "trait_charismatic",
+    "trait_ambitious",
+    "trait_anglophile"
+  ],
+  "piety": 45,
+  "starting_location": "prov_flandre",
+  "status": "at_court",
+  "description": "Riche bourgeois de Gand, « le Brasseur » ; prend la tête des villes flamandes en janvier 1338, neutralité puis alliance avec Édouard III (1340).",
+  "sources": [
+    "Jacob van Artevelde"
+  ]
+}

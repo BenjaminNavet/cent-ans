@@ -1,0 +1,50 @@
+{
+  "id": "chr_alfonso_xi",
+  "name": {
+    "display": "Alphonse XI de Castille",
+    "local": "Alfonso XI",
+    "local_language": "castillan"
+  },
+  "epithet": "le Justicier",
+  "sex": "male",
+  "house": "Ivrée",
+  "faction": "fac_castile",
+  "role": "ruler",
+  "birth": {
+    "value": "1311-08-13",
+    "place": "Salamanque"
+  },
+  "death": {
+    "value": "1350-03-26",
+    "uncertain": true,
+    "place": "Siège de Gibraltar",
+    "note": "26 ou 27 mars 1350, mort de la peste."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Castille et de León",
+      "from": {
+        "value": "1312-09-07"
+      },
+      "note": "Majorité en 1325."
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_ruthless",
+    "trait_brave",
+    "trait_lustful"
+  ],
+  "piety": 60,
+  "starting_location": "prov_toledo",
+  "status": "at_court",
+  "description": "Roi énergique qui a maté la noblesse ; vainqueur des Mérinides au Salado (1340) et conquérant d'Algésiras (1344).",
+  "sources": [
+    "Alphonse XI de Castille"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "bld_university",
+  "name": {
+    "display": "Université"
+  },
+  "category": "religious",
+  "tier": 3,
+  "cost": {
+    "money": 3000
+  },
+  "build_time_turns": 6,
+  "upkeep": 60,
+  "required_technology": "tech_universities",
+  "required_building": "bld_cathedral",
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 15
+    },
+    {
+      "effect": "research_military",
+      "value": 5
+    },
+    {
+      "effect": "prestige",
+      "value": 5
+    }
+  ],
+  "description": "Studium generale à privilèges pontificaux (Paris, Oxford, Montpellier, Toulouse).",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

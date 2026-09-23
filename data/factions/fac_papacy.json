@@ -1,0 +1,69 @@
+{
+  "id": "fac_papacy",
+  "name": {
+    "display": "Papauté d'Avignon",
+    "local": "Sancta Sedes",
+    "local_language": "latin"
+  },
+  "short_name": "Papauté",
+  "adjective": "pontifical",
+  "government": "theocracy",
+  "playable": false,
+  "ruler": "chr_benoit_xii",
+  "capital": "prov_comtat_venaissin",
+  "capital_city": "Avignon",
+  "religion": "rel_catholic",
+  "culture": "cul_occitan",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "De gueules aux deux clefs d'argent et d'or passées en sautoir, liées d'azur, surmontées de la tiare.",
+    "description": "Clefs de saint Pierre sous la tiare ; Benoît XII portait pour armes personnelles celles des Fournier.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Souverain pontife",
+    "Comte de Venaissin"
+  ],
+  "treasury": 40000,
+  "prestige": 95,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_universities",
+    "tech_hospital_reform",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_england",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_empire",
+      "status": "peace",
+      "note": "Louis IV excommunié depuis 1324 ; conflit ouvert sur la légitimité impériale."
+    },
+    {
+      "faction": "fac_milan",
+      "status": "peace",
+      "note": "Les Visconti, excommuniés, sont en délicatesse avec Avignon."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 10,
+    "diplomacy": 95,
+    "trade": 40,
+    "piety": 100
+  },
+  "description": "Benoît XII, cistercien austère, entame la construction du Palais des papes (1335) et tente de prévenir la guerre entre Valois et Plantagenêt.",
+  "sources": [
+    "Benoît XII",
+    "Papauté d'Avignon"
+  ]
+}

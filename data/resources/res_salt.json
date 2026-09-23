@@ -1,0 +1,16 @@
+{
+  "id": "res_salt",
+  "name": {
+    "display": "Sel"
+  },
+  "category": "raw_material",
+  "base_price": 7,
+  "satisfies_classes": [
+    "peasants",
+    "burghers"
+  ],
+  "description": "Marais salants de Guérande, de Saintonge et de Bourgneuf ; objet de la gabelle.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/technology.schema.json",
+  "title": "Technologie",
+  "description": "Nœud d'un des deux arbres (militaire, civil) : coût en points, prérequis, déblocages, effets.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/technology_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "branch": { "type": "string", "enum": ["military", "civil"] },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "cost": { "type": "integer", "minimum": 0, "description": "Points de recherche de la branche." },
+    "prerequisites": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/technology_id" },
+      "uniqueItems": true
+    },
+    "historical_year": {
+      "$ref": "common.schema.json#/$defs/historical_date",
+      "description": "Date d'apparition historique indicative, utilisée pour freiner la recherche trop précoce."
+    },
+    "unlocks": {
+      "type": "object",
+      "properties": {
+        "units": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/unit_type_id" }, "uniqueItems": true },
+        "buildings": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/building_id" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/effect" } },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "branch", "tier", "cost", "prerequisites"],
+  "additionalProperties": false
+}

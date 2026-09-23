@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/religion.schema.json",
+  "title": "Religion",
+  "description": "Religion ou obédience : catholicisme (Avignon, puis Rome/Avignon au Schisme), hérésies, minorités.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/religion_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "kind": { "type": "string", "enum": ["church", "obedience", "heresy", "other_faith"] },
+    "parent": { "$ref": "common.schema.json#/$defs/religion_id", "description": "Religion mère (une obédience ou une hérésie dérive du catholicisme)." },
+    "head_faction": { "$ref": "common.schema.json#/$defs/faction_id", "description": "Faction qui dirige l'Église (Papauté)." },
+    "seat": { "type": "string", "description": "Siège (Avignon, Rome...)." },
+    "available_from": { "$ref": "common.schema.json#/$defs/historical_date", "description": "Date à partir de laquelle la religion peut apparaître dans la simulation." },
+    "available_until": { "$ref": "common.schema.json#/$defs/historical_date" },
+    "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/effect" } },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "kind"],
+  "additionalProperties": false
+}

@@ -1,0 +1,33 @@
+{
+  "id": "tech_siege_engineering",
+  "name": {
+    "display": "Ingénierie de siège"
+  },
+  "branch": "military",
+  "tier": 2,
+  "cost": 220,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1300",
+    "note": "Trébuchets à contrepoids courants depuis le XIIIe siècle."
+  },
+  "unlocks": {
+    "units": [
+      "unit_trebuchet",
+      "unit_siege_tower"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "siege_resistance",
+      "value": -5
+    }
+  ],
+  "description": "Maîtres charpentiers et ingénieurs : trébuchets à contrepoids, tours roulantes, sape des murailles.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

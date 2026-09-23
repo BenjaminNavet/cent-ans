@@ -1,0 +1,33 @@
+{
+  "id": "unit_urban_militia",
+  "name": {
+    "display": "Milice urbaine",
+    "local": "commune",
+    "local_language": "ancien français"
+  },
+  "category": "infantry",
+  "source_class": "burghers",
+  "soldiers": 120,
+  "cost": {
+    "money": 300
+  },
+  "upkeep": 25,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 40,
+    "ranged": 0,
+    "range": 0,
+    "armor": 30,
+    "morale": 40,
+    "speed": 40,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall"
+  ],
+  "equipment": "Vouge, guisarme ou pique, écu, gambison, chapel de fer.",
+  "description": "Bourgeois des communes tenus au service d'ost ; solides derrière des murs, fragiles en rase campagne.",
+  "sources": [
+    "Commune (Moyen Âge)"
+  ]
+}

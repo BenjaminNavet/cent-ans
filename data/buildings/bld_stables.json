@@ -1,0 +1,36 @@
+{
+  "id": "bld_stables",
+  "name": {
+    "display": "Haras"
+  },
+  "category": "military",
+  "tier": 2,
+  "cost": {
+    "money": 1100
+  },
+  "build_time_turns": 3,
+  "upkeep": 30,
+  "required_building": "bld_muster_field",
+  "effects": [
+    {
+      "effect": "recruit_slots",
+      "value": 1
+    },
+    {
+      "effect": "recruit_cost",
+      "unit_category": "cavalry",
+      "value": -10,
+      "mode": "percent"
+    }
+  ],
+  "enables_units": [
+    "unit_knights",
+    "unit_mounted_sergeants",
+    "unit_mounted_archers"
+  ],
+  "description": "Élevage de destriers et de roncins ; réduit le coût de la cavalerie.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "bld_forge",
+  "name": {
+    "display": "Forge"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 600
+  },
+  "build_time_turns": 2,
+  "upkeep": 10,
+  "required_resource": "res_iron",
+  "effects": [
+    {
+      "effect": "production",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "recruit_cost",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Forge et haut fourneau primitif ; réduit le coût des armures et des engins.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "res_fish",
+  "name": {
+    "display": "Poisson"
+  },
+  "category": "food",
+  "base_price": 5,
+  "satisfies_classes": [
+    "peasants",
+    "burghers",
+    "clergy"
+  ],
+  "description": "Hareng de la mer du Nord et de la Manche, morue ; indispensable aux jours maigres.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

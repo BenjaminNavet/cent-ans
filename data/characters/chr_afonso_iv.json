@@ -1,0 +1,46 @@
+{
+  "id": "chr_afonso_iv",
+  "name": {
+    "display": "Alphonse IV de Portugal",
+    "local": "Afonso IV",
+    "local_language": "portugais"
+  },
+  "epithet": "le Brave",
+  "sex": "male",
+  "house": "Bourgogne-Portugal",
+  "faction": "fac_portugal",
+  "role": "ruler",
+  "birth": {
+    "value": "1291-02-08",
+    "place": "Lisbonne"
+  },
+  "death": {
+    "value": "1357-05-28",
+    "place": "Lisbonne"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Portugal et de l'Algarve",
+      "from": {
+        "value": "1325-01-07"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_wrathful"
+  ],
+  "piety": 60,
+  "starting_location": "prov_lisboa",
+  "status": "at_court",
+  "description": "En guerre contre son gendre Alphonse XI (1336-1339) ; il combattra à ses côtés au Salado en 1340.",
+  "sources": [
+    "Alphonse IV de Portugal"
+  ]
+}

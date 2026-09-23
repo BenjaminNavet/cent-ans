@@ -1,0 +1,76 @@
+{
+  "id": "fac_castile",
+  "name": {
+    "display": "Couronne de Castille",
+    "local": "Corona de Castilla",
+    "local_language": "castillan"
+  },
+  "short_name": "Castille",
+  "adjective": "castillan",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_alfonso_xi",
+  "capital": "prov_toledo",
+  "capital_city": "Tolède",
+  "religion": "rel_catholic",
+  "culture": "cul_castilian",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4 de gueules au château d'or ouvert et ajouré d'azur ; aux 2 et 3 d'argent au lion de pourpre, armé, lampassé et couronné d'or.",
+    "description": "Écartelé Castille (château) et León (lion), en usage depuis Ferdinand III (1230).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Roi de Castille et de León",
+    "Roi de Tolède",
+    "Roi de Galice",
+    "Roi de Séville"
+  ],
+  "treasury": 25000,
+  "prestige": 60,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_coat_of_plates"
+  ],
+  "relations": [
+    {
+      "faction": "fac_portugal",
+      "status": "war",
+      "since": {
+        "value": "1336"
+      },
+      "note": "Guerre luso-castillane (1336-1339) née du mauvais traitement de la reine Marie de Portugal par Alphonse XI ; paix de Séville en 1339."
+    },
+    {
+      "faction": "fac_france",
+      "status": "alliance",
+      "since": {
+        "value": "1336",
+        "uncertain": true
+      }
+    },
+    {
+      "faction": "fac_aragon",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_navarre",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 65,
+    "diplomacy": 45,
+    "trade": 50,
+    "piety": 65
+  },
+  "description": "Plus grand royaume ibérique, tourné vers la Reconquista (Salado 1340, Algésiras 1344) ; sa flotte cantabrique intervient dans la Manche.",
+  "sources": [
+    "Alphonse XI de Castille",
+    "Couronne de Castille",
+    "Armoiries de l'Espagne"
+  ]
+}

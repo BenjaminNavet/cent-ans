@@ -1,0 +1,37 @@
+{
+  "id": "bld_abbey",
+  "name": {
+    "display": "Abbaye"
+  },
+  "category": "religious",
+  "tier": 2,
+  "cost": {
+    "money": 1500
+  },
+  "build_time_turns": 4,
+  "upkeep": 20,
+  "required_building": "bld_parish_church",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 5
+    },
+    {
+      "effect": "unrest",
+      "value": -5
+    },
+    {
+      "effect": "research_civil",
+      "value": 5
+    },
+    {
+      "effect": "health",
+      "value": 2
+    }
+  ],
+  "description": "Monastère bénédictin ou cistercien : scriptorium, hospitalité, mise en valeur des terres.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

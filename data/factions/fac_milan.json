@@ -1,0 +1,67 @@
+{
+  "id": "fac_milan",
+  "name": {
+    "display": "Seigneurie de Milan",
+    "local": "Signoria di Milano",
+    "local_language": "italien"
+  },
+  "short_name": "Milan",
+  "adjective": "milanais",
+  "government": "lordship",
+  "playable": false,
+  "ruler": "chr_azzone_visconti",
+  "capital": "prov_milano",
+  "capital_city": "Milan",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "heraldry": {
+    "blazon": "D'argent à la guivre d'azur couronnée d'or, issante de gueules (biscione).",
+    "description": "La guivre (biscione) des Visconti dévorant un homme, sur champ d'argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Seigneur de Milan",
+    "Vicaire impérial"
+  ],
+  "treasury": 30000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass",
+    "tech_royal_taxation",
+    "tech_bookkeeping",
+    "tech_universities"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Azzone a acheté le vicariat impérial à Louis IV en 1329."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Réconciliation partielle avec Avignon après 1330."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 55,
+    "trade": 80,
+    "piety": 40
+  },
+  "description": "Cité la plus riche de Lombardie ; armuriers réputés dans toute l'Europe. Azzone Visconti, malade de la goutte, meurt en 1339 ; ses oncles Luchino et Giovanni lui succèdent.",
+  "sources": [
+    "Azzone Visconti",
+    "Maison Visconti"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "fac_navarre",
+  "name": {
+    "display": "Royaume de Navarre",
+    "local": "Nafarroako Erresuma",
+    "local_language": "basque"
+  },
+  "short_name": "Navarre",
+  "adjective": "navarrais",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_jeanne_ii_de_navarre",
+  "capital": "prov_navarra",
+  "capital_city": "Pampelune",
+  "religion": "rel_catholic",
+  "culture": "cul_navarrese",
+  "succession_law": "cognatic_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules aux chaînes d'or posées en orle, en croix et en sautoir, chargées en cœur d'une émeraude au naturel.",
+    "description": "Chaînes d'or sur champ rouge, émeraude au centre ; les chaînes remplacent l'ancien escarboucle au XIVe siècle.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Reine de Navarre",
+    "Comtesse d'Angoulême",
+    "Comtesse de Mortain"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "marriage_tie",
+      "note": "Jeanne II, fille de Louis X, a renoncé à la Champagne et à la Brie (1336) contre Angoulême et Mortain."
+    },
+    {
+      "faction": "fac_castile",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_aragon",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 65,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Petit royaume pyrénéen gouverné par Jeanne II, dernière Capétienne directe, et son mari Philippe d'Évreux, avec de vastes possessions normandes (Évreux, Mortain).",
+  "sources": [
+    "Jeanne II de Navarre",
+    "Philippe III de Navarre",
+    "Armoiries de la Navarre"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "res_cloth",
+  "name": {
+    "display": "Drap"
+  },
+  "category": "manufactured",
+  "base_price": 14,
+  "satisfies_classes": [
+    "burghers",
+    "nobility"
+  ],
+  "description": "Draps de laine des villes flamandes, d'Artois et de Normandie ; premier produit d'exportation.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

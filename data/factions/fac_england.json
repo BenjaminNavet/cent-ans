@@ -1,0 +1,107 @@
+{
+  "id": "fac_england",
+  "name": {
+    "display": "Royaume d'Angleterre",
+    "local": "Kingdom of England",
+    "local_language": "moyen anglais"
+  },
+  "short_name": "Angleterre",
+  "adjective": "anglais",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_edward_iii",
+  "heir": "chr_edward_of_woodstock",
+  "capital": "prov_middlesex",
+  "capital_city": "Londres (Westminster)",
+  "religion": "rel_catholic",
+  "culture": "cul_english",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules à trois léopards d'or, armés et lampassés d'azur.",
+    "description": "Trois lions passants gardants (« léopards ») d'or sur champ rouge. Édouard III écartèlera ces armes avec la France ancienne en janvier 1340 en prenant le titre de roi de France.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Roi d'Angleterre",
+    "Seigneur d'Irlande",
+    "Duc d'Aquitaine",
+    "Comte de Ponthieu"
+  ],
+  "treasury": 45000,
+  "prestige": 75,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_longbow_drill",
+    "tech_dismounted_tactics",
+    "tech_coat_of_plates",
+    "tech_windmills",
+    "tech_universities"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "war",
+      "since": {
+        "value": "1337-05-24"
+      },
+      "note": "Guyenne confisquée ; Édouard III revendique la couronne de France par sa mère Isabelle."
+    },
+    {
+      "faction": "fac_scotland",
+      "status": "war",
+      "since": {
+        "value": "1332-08-11"
+      },
+      "note": "Seconde guerre d'indépendance écossaise (Dupplin Moor 1332, Halidon Hill 1333) ; soutien à Édouard Balliol."
+    },
+    {
+      "faction": "fac_flanders",
+      "status": "embargo",
+      "since": {
+        "value": "1336-08-12"
+      },
+      "note": "Embargo sur la laine anglaise (août 1336) pour faire pression sur le comte Louis de Nevers, fidèle à la France."
+    },
+    {
+      "faction": "fac_empire",
+      "status": "alliance",
+      "since": {
+        "value": "1337-08-26",
+        "uncertain": true
+      },
+      "note": "Traité avec Louis IV de Bavière (été 1337) ; Édouard nommé vicaire impérial à Coblence le 5 septembre 1338."
+    },
+    {
+      "faction": "fac_brittany",
+      "status": "peace",
+      "note": "Jean III tient le comté de Richmond de la Couronne d'Angleterre."
+    },
+    {
+      "faction": "fac_castile",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_portugal",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 70,
+    "diplomacy": 55,
+    "trade": 65,
+    "piety": 50
+  },
+  "description": "Royaume de 4 à 5 millions d'habitants, riche de sa laine, doté d'une administration fiscale efficace et d'une infanterie d'archers redoutable. Édouard III, 24 ans, sort victorieux des campagnes d'Écosse.",
+  "sources": [
+    "Édouard III",
+    "Guerre de Cent Ans",
+    "Armoiries royales du Royaume-Uni"
+  ]
+}

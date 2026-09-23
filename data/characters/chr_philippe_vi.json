@@ -1,0 +1,75 @@
+{
+  "id": "chr_philippe_vi",
+  "name": {
+    "display": "Philippe VI de Valois",
+    "local": "Philippe de Valois",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "ruler",
+  "birth": {
+    "value": "1293",
+    "uncertain": true,
+    "place": "Fontainebleau",
+    "note": "Année généralement admise, jour inconnu."
+  },
+  "death": {
+    "value": "1350-08-22",
+    "place": "Nogent-le-Roi (abbaye de Coulombs)"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de France",
+      "from": {
+        "value": "1328-04-01"
+      },
+      "note": "Proclamé roi à Vincennes le 1er avril 1328, sacré à Reims le 29 mai 1328."
+    },
+    {
+      "title": "Comte de Valois",
+      "from": {
+        "value": "1325-12-16"
+      }
+    },
+    {
+      "title": "Comte d'Anjou et du Maine",
+      "from": {
+        "value": "1325-12-16"
+      },
+      "to": {
+        "value": "1332-02-17"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 6
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_proud",
+    "trait_wrathful"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_jeanne_de_bourgogne"
+    ],
+    "children": [
+      "chr_jean_de_normandie"
+    ],
+    "siblings": [
+      "chr_charles_d_alencon"
+    ]
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Premier roi Valois, cousin des derniers Capétiens directs. Vainqueur des Flamands à Cassel (1328), il confisque la Guyenne le 24 mai 1337 et ouvre la guerre de Cent Ans.",
+  "sources": [
+    "Philippe VI de France"
+  ]
+}

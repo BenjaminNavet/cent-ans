@@ -1,0 +1,48 @@
+{
+  "id": "chr_louis_de_male",
+  "name": {
+    "display": "Louis de Male",
+    "local": "Lodewijk van Male",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "male",
+  "house": "Dampierre",
+  "faction": "fac_flanders",
+  "role": "heir",
+  "birth": {
+    "value": "1330-10-25",
+    "place": "Male, près de Bruges"
+  },
+  "death": {
+    "value": "1384-01-30",
+    "place": "Saint-Omer"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Flandre",
+      "from": {
+        "value": "1346-08-26"
+      },
+      "note": "Futur Louis II de Flandre."
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 2,
+    "court": 2
+  },
+  "traits": [
+    "trait_prodigy"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_louis_de_nevers"
+  },
+  "starting_location": "prov_flandre",
+  "status": "minor",
+  "description": "Fils unique du comte, 6 ans en 1337 ; futur Louis II, dernier comte de la maison de Dampierre.",
+  "sources": [
+    "Louis II de Flandre"
+  ]
+}

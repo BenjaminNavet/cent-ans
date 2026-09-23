@@ -1,0 +1,96 @@
+{
+  "id": "prov_guyenne",
+  "name": {
+    "display": "Guyenne",
+    "local": "Guiana",
+    "local_language": "gascon"
+  },
+  "region": "aquitaine",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Garonne",
+    "Dordogne",
+    "Gironde"
+  ],
+  "coastal": true,
+  "ports": [
+    "Bordeaux",
+    "Libourne",
+    "Soulac"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_wine",
+    "res_salt",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bordeaux",
+      "local": "Bordèu",
+      "local_language": "gascon"
+    },
+    "lat": 44.8378,
+    "lon": -0.5792
+  },
+  "owner": "fac_england",
+  "overlord": "fac_france",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bordeaux compte environ 30 000 habitants ; population totale du duché réduit (Bordelais, Bazadais, Landes, Agenais partiel) estimée.",
+    "classes": {
+      "peasants": {
+        "count": 380000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 70,
+        "goods_satisfaction": 70
+      },
+      "clergy": {
+        "count": 9000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 4000,
+        "unrest": 20,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_fair",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_parish_church",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Duché d'Aquitaine tenu par Édouard III en fief du roi de France (hommage de 1329 et 1331). Confisqué par Philippe VI le 24 mai 1337 : c'est la cause immédiate de la guerre. Le commerce du vin avec l'Angleterre y est vital.",
+  "sources": [
+    "Duché d'Aquitaine",
+    "Guyenne",
+    "Guerre de Cent Ans"
+  ]
+}

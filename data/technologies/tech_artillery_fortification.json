@@ -1,0 +1,35 @@
+{
+  "id": "tech_artillery_fortification",
+  "name": {
+    "display": "Fortification adaptée à l'artillerie"
+  },
+  "branch": "civil",
+  "tier": 4,
+  "cost": 500,
+  "prerequisites": [
+    "tech_masonry"
+  ],
+  "historical_year": {
+    "value": "1420",
+    "note": "Boulevards d'artillerie et tours basses à partir des années 1420-1440.",
+    "uncertain": true
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_artillery_bastion"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "siege_resistance",
+      "value": 15
+    }
+  ],
+  "description": "Boulevards, tours épaisses et canonnières : réponse aux bombardes.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

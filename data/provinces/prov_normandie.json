@@ -1,0 +1,103 @@
+{
+  "id": "prov_normandie",
+  "name": {
+    "display": "Normandie",
+    "local": "Normendie",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "bocage",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_ile_de_france",
+    "prov_bretagne"
+  ],
+  "rivers": [
+    "Seine",
+    "Eure",
+    "Orne",
+    "Risle"
+  ],
+  "coastal": true,
+  "ports": [
+    "Harfleur",
+    "Rouen",
+    "Dieppe",
+    "Barfleur"
+  ],
+  "sea_zones": [
+    "sea_channel"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Rouen",
+      "local": "Roem",
+      "local_language": "ancien français"
+    },
+    "lat": 49.4432,
+    "lon": 1.0993
+  },
+  "owner": "fac_france",
+  "holder": "chr_jean_de_normandie",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Rouen compte 35 000 à 40 000 habitants ; la Normandie est la province la plus peuplée et la plus riche du royaume après l'Île-de-France.",
+    "classes": {
+      "peasants": {
+        "count": 750000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 130000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "clergy": {
+        "count": 20000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 80
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 7000,
+  "description": "Ancien duché des Plantagenêts, réuni à la couronne en 1204, donné en apanage à Jean, fils du roi, en 1332. Rouen est la deuxième ville du royaume ; Château-Gaillard abrite David II d'Écosse en exil.",
+  "sources": [
+    "Duché de Normandie",
+    "Rouen"
+  ]
+}

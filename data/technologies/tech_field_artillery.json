@@ -1,0 +1,37 @@
+{
+  "id": "tech_field_artillery",
+  "name": {
+    "display": "Artillerie de campagne"
+  },
+  "branch": "military",
+  "tier": 4,
+  "cost": 600,
+  "prerequisites": [
+    "tech_bombards"
+  ],
+  "historical_year": {
+    "value": "1450",
+    "note": "Couleuvrines des frères Bureau à Formigny (1450) et Castillon (1453)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "unit_category": "siege",
+      "value": 15
+    },
+    {
+      "effect": "movement",
+      "unit_category": "siege",
+      "value": 20,
+      "mode": "percent"
+    }
+  ],
+  "description": "Canons légers sur affût mobiles, organisés par les frères Bureau ; décisifs à Castillon.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

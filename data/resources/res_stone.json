@@ -1,0 +1,13 @@
+{
+  "id": "res_stone",
+  "name": {
+    "display": "Pierre"
+  },
+  "category": "raw_material",
+  "base_price": 5,
+  "satisfies_classes": [],
+  "description": "Carrières de calcaire et de grès pour murailles, châteaux et cathédrales.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

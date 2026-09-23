@@ -1,0 +1,81 @@
+{
+  "id": "fac_empire",
+  "name": {
+    "display": "Saint-Empire romain",
+    "local": "Heiliges Römisches Reich",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Empire",
+  "adjective": "impérial",
+  "government": "empire",
+  "playable": false,
+  "ruler": "chr_ludwig_iv",
+  "capital": "prov_oberbayern",
+  "capital_city": "Munich",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
+    "description": "Aigle impériale à une tête (l'aigle bicéphale ne devient l'emblème impérial qu'avec Sigismond au XVe siècle).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Empereur des Romains",
+    "Roi de Germanie",
+    "Duc de Haute-Bavière"
+  ],
+  "treasury": 20000,
+  "prestige": 70,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass",
+    "tech_coat_of_plates"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "alliance",
+      "since": {
+        "value": "1337-08-26",
+        "uncertain": true
+      },
+      "note": "Alliance contre la France en échange de subsides anglais."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Excommunié et déposé par Jean XXII (1324) ; la Diète de Rhens (16 juillet 1338) affirme l'indépendance de l'élection impériale."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_savoy",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_milan",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "overlord"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 50,
+    "trade": 50,
+    "piety": 35
+  },
+  "description": "Empire électif dominé par la maison de Wittelsbach ; Louis IV, en lutte avec Avignon, cherche l'argent anglais. Ses vassaux rhénans et lorrains ne suivent pas toujours.",
+  "sources": [
+    "Louis IV du Saint-Empire",
+    "Saint-Empire romain germanique"
+  ]
+}

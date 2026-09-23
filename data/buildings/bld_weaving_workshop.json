@@ -1,0 +1,36 @@
+{
+  "id": "bld_weaving_workshop",
+  "name": {
+    "display": "Draperie"
+  },
+  "category": "production",
+  "tier": 2,
+  "cost": {
+    "money": 900
+  },
+  "build_time_turns": 3,
+  "upkeep": 15,
+  "required_building": "bld_market",
+  "required_resource": "res_wool",
+  "effects": [
+    {
+      "effect": "production",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 5
+    },
+    {
+      "effect": "recruit_slots",
+      "value": 1
+    }
+  ],
+  "description": "Ateliers de tisserands, foulons et teinturiers ; transforme la laine en drap.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "unit_mounted_sergeants",
+  "name": {
+    "display": "Sergents montés",
+    "local": "sergens à cheval",
+    "local_language": "ancien français"
+  },
+  "category": "cavalry",
+  "source_class": "burghers",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 800
+  },
+  "upkeep": 80,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 55,
+    "ranged": 0,
+    "range": 0,
+    "armor": 55,
+    "morale": 55,
+    "speed": 70,
+    "ammo": 0,
+    "charge": 60
+  },
+  "abilities": [
+    "charge_lance"
+  ],
+  "equipment": "Roncin, haubergeon, chapel de fer, lance et épée.",
+  "description": "Cavalerie moyenne non noble : sergents fieffés, gens de métier montés, hommes des communes.",
+  "sources": [
+    "Sergent (Moyen Âge)"
+  ]
+}

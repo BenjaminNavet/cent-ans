@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/character.schema.json",
+  "title": "Personnage",
+  "description": "Personnage historique ou généré : dates, maison, faction, titres, compétences par branche, traits, famille.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/character_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "epithet": { "type": "string", "description": "Surnom (ex. 'le Bon', 'le Cérémonieux')." },
+    "sex": { "type": "string", "enum": ["male", "female"] },
+    "house": { "type": "string", "description": "Maison ou lignage (ex. 'Valois', 'Plantagenêt')." },
+    "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
+    "role": {
+      "type": "string",
+      "enum": ["ruler", "consort", "heir", "prince", "commander", "noble", "prelate", "burgher", "exile", "claimant", "regent"]
+    },
+    "birth": { "$ref": "common.schema.json#/$defs/historical_date" },
+    "death": {
+      "$ref": "common.schema.json#/$defs/historical_date",
+      "description": "Date de mort historique ; la simulation peut la devancer ou la retarder."
+    },
+    "historical": { "type": "boolean", "default": true },
+    "titles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "from": { "$ref": "common.schema.json#/$defs/historical_date" },
+          "to": { "$ref": "common.schema.json#/$defs/historical_date" },
+          "note": { "type": "string" }
+        },
+        "required": ["title"],
+        "additionalProperties": false
+      }
+    },
+    "skills": {
+      "type": "object",
+      "description": "Niveau 0-10 dans chacune des trois branches de l'arbre de compétences.",
+      "properties": {
+        "command": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "governance": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "court": { "type": "integer", "minimum": 0, "maximum": 10 }
+      },
+      "required": ["command", "governance", "court"],
+      "additionalProperties": false
+    },
+    "traits": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/trait_id" },
+      "uniqueItems": true
+    },
+    "piety": { "$ref": "common.schema.json#/$defs/percent" },
+    "family": {
+      "type": "object",
+      "properties": {
+        "father": { "$ref": "common.schema.json#/$defs/character_id" },
+        "mother": { "$ref": "common.schema.json#/$defs/character_id" },
+        "spouses": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/character_id" }, "uniqueItems": true },
+        "children": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/character_id" }, "uniqueItems": true },
+        "siblings": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/character_id" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "starting_location": {
+      "$ref": "common.schema.json#/$defs/province_id",
+      "description": "Province où se trouve le personnage au printemps 1337 (peut être hors de l'échantillon de provinces avant le pipeline géo)."
+    },
+    "status": { "type": "string", "enum": ["at_court", "in_exile", "captive", "on_campaign", "minor"] },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "sex", "house", "faction", "role", "birth", "skills", "traits"],
+  "additionalProperties": false
+}

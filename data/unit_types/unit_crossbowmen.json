@@ -1,0 +1,35 @@
+{
+  "id": "unit_crossbowmen",
+  "name": {
+    "display": "Arbalétriers",
+    "local": "arbalestriers",
+    "local_language": "ancien français"
+  },
+  "category": "ranged",
+  "source_class": "burghers",
+  "soldiers": 100,
+  "cost": {
+    "money": 550
+  },
+  "upkeep": 50,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 35,
+    "ranged": 55,
+    "range": 180,
+    "armor": 35,
+    "morale": 45,
+    "speed": 40,
+    "ammo": 30
+  },
+  "abilities": [
+    "pavise",
+    "rain_penalty"
+  ],
+  "equipment": "Arbalète à étrier ou à crochet, pavois, chapel de fer, gambison.",
+  "description": "Arbalétriers des communes et des garnisons ; les confréries de tir des villes du Nord fournissent des tireurs entraînés.",
+  "sources": [
+    "Arbalète",
+    "Confrérie d'arbalétriers"
+  ]
+}

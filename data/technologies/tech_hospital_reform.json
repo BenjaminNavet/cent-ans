@@ -1,0 +1,32 @@
+{
+  "id": "tech_hospital_reform",
+  "name": {
+    "display": "Réforme hospitalière"
+  },
+  "branch": "civil",
+  "tier": 2,
+  "cost": 180,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1300",
+    "note": "Hôtels-Dieu réformés par les statuts épiscopaux du XIIIe siècle."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_hotel_dieu"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "health",
+      "value": 5
+    }
+  ],
+  "description": "Statuts des hôtels-Dieu, confréries soignantes, séparation des malades contagieux.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "chr_jeanne_de_bourgogne",
+  "name": {
+    "display": "Jeanne de Bourgogne"
+  },
+  "epithet": "la Boiteuse",
+  "sex": "female",
+  "house": "Bourgogne",
+  "faction": "fac_france",
+  "role": "consort",
+  "birth": {
+    "value": "1293",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1349-12-12",
+    "place": "Paris",
+    "note": "Morte de la peste."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de France",
+      "from": {
+        "value": "1328-04-01"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_stern",
+    "trait_lame"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_philippe_vi"
+    ],
+    "children": [
+      "chr_jean_de_normandie"
+    ],
+    "siblings": [
+      "chr_eudes_iv"
+    ]
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Fille de Robert II de Bourgogne, sœur d'Eudes IV ; régente durant les campagnes du roi, mécène de traductions, redoutée à la cour (« la male royne boiteuse »).",
+  "sources": [
+    "Jeanne de Bourgogne (1293-1349)"
+  ]
+}

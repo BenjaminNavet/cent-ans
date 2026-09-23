@@ -1,0 +1,61 @@
+{
+  "id": "chr_jeanne_de_penthievre",
+  "name": {
+    "display": "Jeanne de Penthièvre"
+  },
+  "epithet": "la Boiteuse",
+  "sex": "female",
+  "house": "Dreux-Bretagne",
+  "faction": "fac_brittany",
+  "role": "heir",
+  "birth": {
+    "value": "1319",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1384-09-10",
+    "place": "Guingamp"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comtesse de Penthièvre",
+      "from": {
+        "value": "1331"
+      }
+    },
+    {
+      "title": "Vicomtesse de Limoges",
+      "from": {
+        "value": "1331"
+      }
+    },
+    {
+      "title": "Duchesse de Bretagne (prétendante)",
+      "from": {
+        "value": "1341-04-30"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_stubborn",
+    "trait_proud"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_charles_de_blois"
+    ]
+  },
+  "starting_location": "prov_bretagne",
+  "status": "at_court",
+  "description": "Nièce de Jean III, mariée à Charles de Blois le 4 juin 1337 ; héritière désignée mais contestée du duché.",
+  "sources": [
+    "Jeanne de Penthièvre"
+  ]
+}

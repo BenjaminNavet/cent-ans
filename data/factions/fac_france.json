@@ -1,0 +1,117 @@
+{
+  "id": "fac_france",
+  "name": {
+    "display": "Royaume de France",
+    "local": "Royaume de France",
+    "local_language": "ancien français"
+  },
+  "short_name": "France",
+  "adjective": "français",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_philippe_vi",
+  "heir": "chr_jean_de_normandie",
+  "capital": "prov_ile_de_france",
+  "capital_city": "Paris",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "salic",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or.",
+    "description": "France ancien : champ bleu semé de fleurs de lis d'or. Les armes « France moderne » à trois fleurs de lis n'apparaissent qu'à partir de Charles V (vers 1376).",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Roi de France"
+  ],
+  "treasury": 60000,
+  "prestige": 90,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_coat_of_plates",
+    "tech_siege_engineering",
+    "tech_universities",
+    "tech_hospital_reform"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "war",
+      "since": {
+        "value": "1337-05-24"
+      },
+      "note": "Confiscation du duché de Guyenne par Philippe VI (arrêt du 24 mai 1337) ; défi d'Édouard III le 19 octobre 1337."
+    },
+    {
+      "faction": "fac_scotland",
+      "status": "alliance",
+      "since": {
+        "value": "1326-04-26"
+      },
+      "note": "Traité de Corbeil (Auld Alliance renouvelée) ; David II réfugié à Château-Gaillard depuis 1334."
+    },
+    {
+      "faction": "fac_burgundy",
+      "status": "overlord",
+      "note": "Eudes IV est le beau-frère de Philippe VI (frère de la reine Jeanne de Bourgogne)."
+    },
+    {
+      "faction": "fac_brittany",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_flanders",
+      "status": "overlord",
+      "note": "Comté relevé après la victoire de Cassel (23 août 1328)."
+    },
+    {
+      "faction": "fac_navarre",
+      "status": "marriage_tie",
+      "note": "Philippe d'Évreux, roi consort de Navarre, est cousin germain de Philippe VI ; renonciation de Jeanne II à la Champagne (1336)."
+    },
+    {
+      "faction": "fac_castile",
+      "status": "alliance",
+      "since": {
+        "value": "1336",
+        "uncertain": true
+      },
+      "note": "Rapprochement franco-castillan ; galères castillanes au service de la France dès 1337-1338."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Benoît XII tente une médiation entre Valois et Plantagenêt (1337-1341)."
+    },
+    {
+      "faction": "fac_empire",
+      "status": "peace",
+      "note": "Louis IV de Bavière, excommunié, s'allie à Édouard III à l'été 1337."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Recrutement d'arbalétriers et de galères génoises."
+    },
+    {
+      "faction": "fac_savoy",
+      "status": "peace",
+      "note": "Contingents savoyards au service du roi de France."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 60,
+    "trade": 40,
+    "piety": 65
+  },
+  "description": "Le royaume le plus peuplé d'Occident (15 à 20 millions d'habitants). Philippe VI, premier Valois, règne depuis 1328 sur un royaume où la noblesse tient encore la guerre pour son métier.",
+  "sources": [
+    "Philippe VI de France",
+    "Guerre de Cent Ans",
+    "Armoiries de la France"
+  ]
+}

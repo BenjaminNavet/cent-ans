@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/resource.schema.json",
+  "title": "Ressource",
+  "description": "Ressource naturelle ou manufacturée produite par une province et échangée.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/resource_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "category": { "type": "string", "enum": ["food", "raw_material", "manufactured", "luxury"] },
+    "base_price": { "type": "integer", "minimum": 1, "description": "Prix de base d'une unité de commerce en livres tournois." },
+    "satisfies_classes": {
+      "type": "array",
+      "description": "Classes dont la satisfaction en biens dépend de cette ressource.",
+      "items": { "$ref": "common.schema.json#/$defs/social_class" },
+      "uniqueItems": true
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "category", "base_price"],
+  "additionalProperties": false
+}

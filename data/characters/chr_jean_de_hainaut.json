@@ -1,0 +1,44 @@
+{
+  "id": "chr_jean_de_hainaut",
+  "name": {
+    "display": "Jean de Hainaut, sire de Beaumont"
+  },
+  "sex": "male",
+  "house": "Avesnes",
+  "faction": "fac_england",
+  "role": "commander",
+  "birth": {
+    "value": "1288",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1356-03-11",
+    "place": "Valenciennes"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sire de Beaumont",
+      "from": {
+        "value": "1304",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_mercenary"
+  ],
+  "piety": 50,
+  "starting_location": "prov_hainaut",
+  "status": "at_court",
+  "description": "Oncle de la reine Philippa, chef de guerre réputé ; sert Édouard III jusqu'en 1345 puis passe à Philippe VI.",
+  "sources": [
+    "Jean de Hainaut"
+  ]
+}

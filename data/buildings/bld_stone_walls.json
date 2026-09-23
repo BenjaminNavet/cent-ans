@@ -1,0 +1,38 @@
+{
+  "id": "bld_stone_walls",
+  "name": {
+    "display": "Enceinte de pierre"
+  },
+  "category": "fortification",
+  "tier": 2,
+  "upgrades_from": "bld_palisade",
+  "cost": {
+    "money": 2500,
+    "resources": {
+      "res_stone": 2
+    }
+  },
+  "build_time_turns": 6,
+  "upkeep": 30,
+  "required_technology": "tech_masonry",
+  "required_resource": "res_stone",
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 2
+    },
+    {
+      "effect": "garrison",
+      "value": 2
+    },
+    {
+      "effect": "siege_resistance",
+      "value": 10
+    }
+  ],
+  "description": "Courtines crénelées à tours flanquantes et portes fortifiées.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

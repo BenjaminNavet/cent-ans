@@ -1,0 +1,57 @@
+{
+  "id": "chr_robert_d_artois",
+  "name": {
+    "display": "Robert III d'Artois"
+  },
+  "sex": "male",
+  "house": "Artois",
+  "faction": "fac_england",
+  "role": "exile",
+  "birth": {
+    "value": "1287"
+  },
+  "death": {
+    "value": "1342-11",
+    "uncertain": true,
+    "place": "Londres",
+    "note": "Mort de blessures reçues au siège de Vannes ; jour inconnu."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Beaumont-le-Roger",
+      "from": {
+        "value": "1310"
+      },
+      "to": {
+        "value": "1332-04-08"
+      },
+      "note": "Confisqué lors de son bannissement."
+    },
+    {
+      "title": "Comte de Richmond",
+      "from": {
+        "value": "1341",
+        "uncertain": true
+      },
+      "note": "Concédé par Édouard III ; date discutée."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 7
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_vengeful",
+    "trait_deceitful"
+  ],
+  "piety": 30,
+  "starting_location": "prov_middlesex",
+  "status": "in_exile",
+  "description": "Beau-frère de Philippe VI, débouté de l'Artois, condamné pour faux (1332) et réfugié auprès d'Édouard III depuis 1334. Selon Froissart, il pousse le roi anglais à la guerre.",
+  "sources": [
+    "Robert III d'Artois"
+  ]
+}

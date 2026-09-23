@@ -1,0 +1,42 @@
+{
+  "id": "bld_cathedral",
+  "name": {
+    "display": "Cathédrale"
+  },
+  "category": "religious",
+  "tier": 3,
+  "cost": {
+    "money": 5000,
+    "resources": {
+      "res_stone": 3
+    }
+  },
+  "build_time_turns": 8,
+  "upkeep": 50,
+  "required_building": "bld_abbey",
+  "required_resource": "res_stone",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 10
+    },
+    {
+      "effect": "prestige",
+      "value": 10
+    },
+    {
+      "effect": "unrest",
+      "value": -5
+    },
+    {
+      "effect": "wealth",
+      "class": "clergy",
+      "value": 10
+    }
+  ],
+  "description": "Siège de l'évêque ; chantier gothique de plusieurs générations, source de prestige.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

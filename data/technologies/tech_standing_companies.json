@@ -1,0 +1,36 @@
+{
+  "id": "tech_standing_companies",
+  "name": {
+    "display": "Compagnies d'ordonnance"
+  },
+  "branch": "military",
+  "tier": 5,
+  "cost": 800,
+  "prerequisites": [
+    "tech_full_plate",
+    "tech_field_artillery"
+  ],
+  "historical_year": {
+    "value": "1445",
+    "note": "Ordonnance de Louppy-le-Châtel (1445) : quinze compagnies de cent lances."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_upkeep",
+      "value": -10,
+      "mode": "percent"
+    },
+    {
+      "effect": "army_experience",
+      "value": 2
+    }
+  ],
+  "description": "Armée permanente soldée par l'impôt (taille), inaugurée par Charles VII ; met fin aux grandes compagnies.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

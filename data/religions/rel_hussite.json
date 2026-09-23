@@ -1,0 +1,30 @@
+{
+  "id": "rel_hussite",
+  "name": {
+    "display": "Hussites",
+    "local": "Husité",
+    "local_language": "tchèque"
+  },
+  "kind": "heresy",
+  "parent": "rel_catholic",
+  "available_from": {
+    "value": "1419-07-30",
+    "note": "Première défenestration de Prague ; Jan Hus brûlé à Constance le 6 juillet 1415."
+  },
+  "effects": [
+    {
+      "effect": "unrest",
+      "class": "clergy",
+      "value": 15
+    },
+    {
+      "effect": "army_morale",
+      "value": 5
+    }
+  ],
+  "description": "Hérésie bohémienne issue de Jan Hus ; ses armées de chariots (Jan Žižka) battent les croisades de 1420-1431.",
+  "sources": [
+    "Hussites",
+    "Jan Hus"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "bld_palisade",
+  "name": {
+    "display": "Palissade et fossé"
+  },
+  "category": "fortification",
+  "tier": 1,
+  "cost": {
+    "money": 500
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 1
+    },
+    {
+      "effect": "garrison",
+      "value": 1
+    }
+  ],
+  "description": "Enceinte de bois et de terre ; suffit contre les bandes et les chevauchées légères.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

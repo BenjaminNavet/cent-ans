@@ -1,0 +1,62 @@
+{
+  "id": "chr_ludwig_iv",
+  "name": {
+    "display": "Louis IV de Bavière",
+    "local": "Ludwig der Bayer",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "le Bavarois",
+  "sex": "male",
+  "house": "Wittelsbach",
+  "faction": "fac_empire",
+  "role": "ruler",
+  "birth": {
+    "value": "1282-04-01",
+    "place": "Munich"
+  },
+  "death": {
+    "value": "1347-10-11",
+    "place": "Puch, près de Fürstenfeldbruck",
+    "note": "Mort lors d'une chasse à l'ours."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi des Romains",
+      "from": {
+        "value": "1314-10-20"
+      },
+      "note": "Couronné à Aix-la-Chapelle le 25 novembre 1314."
+    },
+    {
+      "title": "Empereur des Romains",
+      "from": {
+        "value": "1328-01-17"
+      },
+      "note": "Couronné à Rome par Sciarra Colonna, sans le pape."
+    },
+    {
+      "title": "Duc de Haute-Bavière",
+      "from": {
+        "value": "1294"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_excommunicated",
+    "trait_stubborn",
+    "trait_ambitious"
+  ],
+  "piety": 40,
+  "starting_location": "prov_oberbayern",
+  "status": "at_court",
+  "description": "Empereur excommunié (1324) en conflit permanent avec Avignon ; s'allie à Édouard III en 1337 et le nomme vicaire impérial en 1338.",
+  "sources": [
+    "Louis IV du Saint-Empire"
+  ]
+}

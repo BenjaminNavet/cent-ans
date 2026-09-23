@@ -1,0 +1,76 @@
+{
+  "id": "fac_burgundy",
+  "name": {
+    "display": "Duché de Bourgogne",
+    "local": "Duchié de Bourgoigne",
+    "local_language": "ancien français"
+  },
+  "short_name": "Bourgogne",
+  "adjective": "bourguignon",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_eudes_iv",
+  "heir": "chr_philippe_monsieur",
+  "capital": "prov_bourgogne",
+  "capital_city": "Dijon",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "heraldry": {
+    "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.",
+    "description": "Bourgogne ancien : bandes obliques or et bleu, bordure rouge. Armes des ducs capétiens jusqu'à Philippe de Rouvres (1361).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Duc de Bourgogne",
+    "Comte palatin de Bourgogne",
+    "Comte d'Artois",
+    "Pair de France"
+  ],
+  "treasury": 15000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_coat_of_plates"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal",
+      "note": "Pair de France ; Eudes IV a combattu à Cassel (1328) pour le roi."
+    },
+    {
+      "faction": "fac_england",
+      "status": "war",
+      "since": {
+        "value": "1337-05-24"
+      },
+      "note": "Suit son suzerain ; Robert d'Artois, réfugié en Angleterre, revendique l'Artois tenu par la duchesse Jeanne III."
+    },
+    {
+      "faction": "fac_empire",
+      "status": "peace",
+      "note": "Le comté palatin de Bourgogne (Franche-Comté) relève de l'Empire."
+    },
+    {
+      "faction": "fac_savoy",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 65,
+    "trade": 55,
+    "piety": 60
+  },
+  "description": "Le duché capétien, uni depuis 1330 au comté de Bourgogne et à l'Artois par le mariage d'Eudes IV et de Jeanne III. Puissance secondaire mais stratégique entre France et Empire ; la Bourgogne des Valois naîtra en 1363.",
+  "sources": [
+    "Eudes IV de Bourgogne",
+    "Jeanne III de Bourgogne",
+    "Armorial des ducs de Bourgogne"
+  ]
+}

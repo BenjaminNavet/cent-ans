@@ -1,0 +1,15 @@
+{
+  "id": "res_wood",
+  "name": {
+    "display": "Bois"
+  },
+  "category": "raw_material",
+  "base_price": 3,
+  "satisfies_classes": [
+    "peasants"
+  ],
+  "description": "Forêts : combustible, charpente, arcs (if), engins de siège.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

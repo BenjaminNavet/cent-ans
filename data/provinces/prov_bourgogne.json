@@ -1,0 +1,90 @@
+{
+  "id": "prov_bourgogne",
+  "name": {
+    "display": "Bourgogne (duché)",
+    "local": "Bourgoigne",
+    "local_language": "ancien français"
+  },
+  "region": "france_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Saône",
+    "Seine",
+    "Ouche",
+    "Armançon"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Dijon",
+      "local": "Digion",
+      "local_language": "ancien français"
+    },
+    "lat": 47.322,
+    "lon": 5.0415
+  },
+  "owner": "fac_burgundy",
+  "overlord": "fac_france",
+  "holder": "chr_eudes_iv",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Dijon compte 10 000 à 12 000 habitants ; Cîteaux et Cluny (hors province) pèsent sur le clergé régional.",
+    "classes": {
+      "peasants": {
+        "count": 380000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 50000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 15000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_vineyard_press",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Duché capétien, pairie de France, tenu par Eudes IV. Vignobles de la Côte, abbayes cisterciennes, route de la Saône vers la Franche-Comté et l'Empire.",
+  "sources": [
+    "Duché de Bourgogne",
+    "Dijon"
+  ]
+}

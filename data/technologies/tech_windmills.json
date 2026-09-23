@@ -1,0 +1,35 @@
+{
+  "id": "tech_windmills",
+  "name": {
+    "display": "Moulins à vent"
+  },
+  "branch": "civil",
+  "tier": 2,
+  "cost": 160,
+  "prerequisites": [
+    "tech_water_mills"
+  ],
+  "historical_year": {
+    "value": "1300",
+    "note": "Moulins à pivot répandus en Flandre, Angleterre et Normandie au XIIIe siècle."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_windmill"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "production",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Moulins à pivot pour les plaines sans rivière : Flandre, Beauce, Kent.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

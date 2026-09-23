@@ -1,0 +1,59 @@
+{
+  "id": "fac_savoy",
+  "name": {
+    "display": "Comté de Savoie",
+    "local": "Comté de Savoye",
+    "local_language": "ancien français"
+  },
+  "short_name": "Savoie",
+  "adjective": "savoyard",
+  "government": "county",
+  "playable": false,
+  "ruler": "chr_aymon_de_savoie",
+  "capital": "prov_savoie",
+  "capital_city": "Chambéry",
+  "religion": "rel_catholic",
+  "culture": "cul_savoyard",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent.",
+    "description": "Croix blanche sur champ rouge, en usage depuis Amédée V.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Comte de Savoie",
+    "Comte d'Aoste et de Maurienne",
+    "Vicaire impérial"
+  ],
+  "treasury": 7000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "Aymon a servi Philippe VI contre les Flamands ; alliance matrimoniale par sa femme Yolande de Montferrat."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 75,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Comté alpin contrôlant les cols du Mont-Cenis et du Grand-Saint-Bernard ; Aymon « le Pacifique » réforme l'administration.",
+  "sources": [
+    "Aymon de Savoie",
+    "Comté de Savoie"
+  ]
+}

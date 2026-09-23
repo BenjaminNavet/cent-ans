@@ -1,0 +1,61 @@
+{
+  "id": "chr_edward_of_woodstock",
+  "name": {
+    "display": "Édouard de Woodstock",
+    "local": "Edward of Woodstock",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Plantagenêt",
+  "faction": "fac_england",
+  "role": "heir",
+  "birth": {
+    "value": "1330-06-15",
+    "place": "Woodstock"
+  },
+  "death": {
+    "value": "1376-06-08",
+    "place": "Westminster"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Chester",
+      "from": {
+        "value": "1333-03-18"
+      }
+    },
+    {
+      "title": "Duc de Cornouailles",
+      "from": {
+        "value": "1337-03-17"
+      },
+      "note": "Premier duché créé en Angleterre."
+    },
+    {
+      "title": "Prince de Galles",
+      "from": {
+        "value": "1343-05-12"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 0,
+    "court": 1
+  },
+  "traits": [
+    "trait_prodigy"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_edward_iii",
+    "mother": "chr_philippa_of_hainault"
+  },
+  "starting_location": "prov_middlesex",
+  "status": "minor",
+  "description": "Fils aîné d'Édouard III, 7 ans au printemps 1337 ; le futur Prince Noir, vainqueur de Poitiers (1356). Ses compétences progressent avec l'âge.",
+  "sources": [
+    "Édouard de Woodstock"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "bld_vineyard_press",
+  "name": {
+    "display": "Pressoir banal"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 350
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "required_resource": "res_wine",
+  "effects": [
+    {
+      "effect": "production",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "goods_satisfaction",
+      "class": "nobility",
+      "value": 3
+    }
+  ],
+  "description": "Pressoir seigneurial et celliers pour le commerce du vin.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": "chr_jean_iii_de_bretagne",
+  "name": {
+    "display": "Jean III de Bretagne",
+    "local": "Yann III",
+    "local_language": "breton"
+  },
+  "epithet": "le Bon",
+  "sex": "male",
+  "house": "Dreux-Bretagne",
+  "faction": "fac_brittany",
+  "role": "ruler",
+  "birth": {
+    "value": "1286-03-08",
+    "place": "Château-lès-Rennes"
+  },
+  "death": {
+    "value": "1341-04-30",
+    "place": "Caen"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Bretagne",
+      "from": {
+        "value": "1312-08-27"
+      }
+    },
+    {
+      "title": "Comte de Richmond",
+      "from": {
+        "value": "1334",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Pair de France"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_childless"
+  ],
+  "piety": 60,
+  "family": {
+    "siblings": [
+      "chr_jean_de_montfort"
+    ]
+  },
+  "starting_location": "prov_bretagne",
+  "status": "at_court",
+  "description": "Trois mariages sans enfant ; hostile à son demi-frère Jean de Montfort, il favorise sa nièce Jeanne de Penthièvre sans trancher formellement.",
+  "sources": [
+    "Jean III de Bretagne"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "id": "chr_eudes_iv",
+  "name": {
+    "display": "Eudes IV de Bourgogne",
+    "local": "Eudes de Bourgoigne",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Bourgogne",
+  "faction": "fac_burgundy",
+  "role": "ruler",
+  "birth": {
+    "value": "1295"
+  },
+  "death": {
+    "value": "1349-04-03",
+    "place": "Sens"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Bourgogne",
+      "from": {
+        "value": "1315-05-09"
+      }
+    },
+    {
+      "title": "Comte palatin de Bourgogne (par mariage)",
+      "from": {
+        "value": "1330-01-21"
+      }
+    },
+    {
+      "title": "Comte d'Artois (par mariage)",
+      "from": {
+        "value": "1330-01-21"
+      }
+    },
+    {
+      "title": "Pair de France"
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_cautious"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_jeanne_iii_de_bourgogne"
+    ],
+    "children": [
+      "chr_philippe_monsieur"
+    ],
+    "siblings": [
+      "chr_jeanne_de_bourgogne"
+    ]
+  },
+  "starting_location": "prov_bourgogne",
+  "status": "at_court",
+  "description": "Duc depuis 1315, beau-frère du roi ; défend l'Artois contre Robert d'Artois et sert dans toutes les campagnes de Philippe VI.",
+  "sources": [
+    "Eudes IV de Bourgogne"
+  ]
+}

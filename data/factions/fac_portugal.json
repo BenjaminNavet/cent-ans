@@ -1,0 +1,61 @@
+{
+  "id": "fac_portugal",
+  "name": {
+    "display": "Royaume de Portugal",
+    "local": "Reino de Portugal",
+    "local_language": "portugais"
+  },
+  "short_name": "Portugal",
+  "adjective": "portugais",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_afonso_iv",
+  "capital": "prov_lisboa",
+  "capital_city": "Lisbonne",
+  "religion": "rel_catholic",
+  "culture": "cul_portuguese",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "D'argent à cinq écussons d'azur posés en croix, chacun chargé de cinq besants d'argent en sautoir ; à la bordure de gueules chargée de châteaux d'or.",
+    "description": "Les quinas (cinq écussons) dans une bordure de châteaux ajoutée par Alphonse III ; le nombre de châteaux varie (douze, puis sept).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Nombre de châteaux de la bordure variable au XIVe siècle."
+  },
+  "titles": [
+    "Roi de Portugal et de l'Algarve"
+  ],
+  "treasury": 10000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_castile",
+      "status": "war",
+      "since": {
+        "value": "1336"
+      },
+      "note": "Guerre luso-castillane (1336-1339)."
+    },
+    {
+      "faction": "fac_england",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 60
+  },
+  "description": "Royaume atlantique d'un million d'habitants ; Alphonse IV combattra aux côtés de la Castille au Salado en 1340 après la paix de 1339.",
+  "sources": [
+    "Alphonse IV de Portugal",
+    "Armoiries du Portugal"
+  ]
+}

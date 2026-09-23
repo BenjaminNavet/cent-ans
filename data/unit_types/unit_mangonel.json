@@ -1,0 +1,38 @@
+{
+  "id": "unit_mangonel",
+  "name": {
+    "display": "Mangonneau",
+    "local": "mangonel",
+    "local_language": "ancien français"
+  },
+  "category": "siege",
+  "source_class": "burghers",
+  "soldiers": 4,
+  "cost": {
+    "money": 700,
+    "resources": {
+      "res_wood": 1
+    }
+  },
+  "upkeep": 40,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 5,
+    "ranged": 45,
+    "range": 180,
+    "armor": 10,
+    "morale": 40,
+    "speed": 15,
+    "ammo": 40,
+    "siege_attack": 40
+  },
+  "abilities": [
+    "wall_breach"
+  ],
+  "required_building": "bld_siege_workshop",
+  "equipment": "Engin à traction ou à contrepoids léger, projectiles de pierre, feu grégeois occasionnel.",
+  "description": "Engin de jet léger et mobile, utile contre palissades, portes et défenseurs sur les remparts.",
+  "sources": [
+    "Mangonneau"
+  ]
+}

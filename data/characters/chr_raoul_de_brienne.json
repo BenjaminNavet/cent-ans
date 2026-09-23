@@ -1,0 +1,59 @@
+{
+  "id": "chr_raoul_de_brienne",
+  "name": {
+    "display": "Raoul Ier de Brienne, comte d'Eu"
+  },
+  "sex": "male",
+  "house": "Brienne",
+  "faction": "fac_france",
+  "role": "commander",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "note": "Date de naissance inconnue, fin du XIIIe siècle."
+  },
+  "death": {
+    "value": "1344-01-19",
+    "place": "Paris",
+    "note": "Tué dans un tournoi donné pour le mariage de sa fille."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Connétable de France",
+      "from": {
+        "value": "1329"
+      }
+    },
+    {
+      "title": "Comte d'Eu",
+      "from": {
+        "value": "1302",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Comte de Guînes",
+      "from": {
+        "value": "1331",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_brave",
+    "trait_tourney_champion"
+  ],
+  "piety": 50,
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Connétable de France depuis 1329, chef nominal de l'ost royal ; il commande en Guyenne en 1339 et en Hainaut.",
+  "sources": [
+    "Raoul Ier de Brienne"
+  ]
+}

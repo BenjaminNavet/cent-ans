@@ -1,0 +1,51 @@
+{
+  "id": "chr_isabelle_de_france",
+  "name": {
+    "display": "Isabelle de France"
+  },
+  "epithet": "la Louve de France",
+  "sex": "female",
+  "house": "Capet",
+  "faction": "fac_england",
+  "role": "noble",
+  "birth": {
+    "value": "1295",
+    "uncertain": true,
+    "place": "Paris"
+  },
+  "death": {
+    "value": "1358-08-22",
+    "place": "Château de Hertford"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine d'Angleterre (douairière)",
+      "from": {
+        "value": "1308-01-25"
+      },
+      "note": "Épouse d'Édouard II ; régente 1327-1330, écartée du pouvoir après 1330."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 6,
+    "court": 8
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_disgraced"
+  ],
+  "piety": 55,
+  "family": {
+    "children": [
+      "chr_edward_iii"
+    ]
+  },
+  "starting_location": "prov_norfolk",
+  "status": "at_court",
+  "description": "Fille de Philippe le Bel, sœur des trois derniers Capétiens directs ; c'est par elle qu'Édouard III prétend à la couronne de France. Retirée à Castle Rising.",
+  "sources": [
+    "Isabelle de France (1295-1358)"
+  ]
+}

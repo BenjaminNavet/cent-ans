@@ -1,0 +1,36 @@
+{
+  "id": "bld_armoury",
+  "name": {
+    "display": "Arsenal"
+  },
+  "category": "military",
+  "tier": 2,
+  "upgrades_from": "bld_muster_field",
+  "cost": {
+    "money": 1000
+  },
+  "build_time_turns": 3,
+  "upkeep": 25,
+  "effects": [
+    {
+      "effect": "recruit_slots",
+      "value": 1
+    },
+    {
+      "effect": "army_armor",
+      "value": 3
+    },
+    {
+      "effect": "army_experience",
+      "value": 1
+    }
+  ],
+  "enables_units": [
+    "unit_men_at_arms_foot"
+  ],
+  "description": "Réserve d'armes et d'armures de la Couronne (Tour de Londres, Louvre).",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

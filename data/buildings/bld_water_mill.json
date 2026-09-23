@@ -1,0 +1,32 @@
+{
+  "id": "bld_water_mill",
+  "name": {
+    "display": "Moulin à eau"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 400
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "required_technology": "tech_water_mills",
+  "requires_river": true,
+  "effects": [
+    {
+      "effect": "production",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": 3
+    }
+  ],
+  "description": "Moulin banal à roue hydraulique : farine, foulage du drap, martinet de forge.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

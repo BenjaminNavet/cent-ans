@@ -1,0 +1,33 @@
+{
+  "id": "tech_water_mills",
+  "name": {
+    "display": "Moulins à eau"
+  },
+  "branch": "civil",
+  "tier": 1,
+  "cost": 100,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1200",
+    "note": "Moulins hydrauliques généralisés dès le XIIe siècle (moulins à foulon, à fer)."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_water_mill"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "production",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Roues hydrauliques pour moudre, fouler le drap et actionner les martinets des forges.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

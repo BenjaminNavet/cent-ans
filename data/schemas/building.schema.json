@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/building.schema.json",
+  "title": "Bâtiment",
+  "description": "Bâtiment de province : catégorie, chaîne d'amélioration, coût, effets sur la population et la faction.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/building_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "category": {
+      "type": "string",
+      "enum": ["production", "commerce", "military", "religious", "sanitary", "fortification"]
+    },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "upgrades_from": { "$ref": "common.schema.json#/$defs/building_id" },
+    "cost": { "$ref": "common.schema.json#/$defs/cost" },
+    "build_time_turns": { "type": "integer", "minimum": 1 },
+    "upkeep": { "type": "integer", "minimum": 0 },
+    "required_technology": { "$ref": "common.schema.json#/$defs/technology_id" },
+    "required_building": { "$ref": "common.schema.json#/$defs/building_id", "description": "Autre bâtiment devant être présent (hors chaîne d'amélioration)." },
+    "required_resource": { "$ref": "common.schema.json#/$defs/resource_id" },
+    "requires_coastal": { "type": "boolean", "default": false },
+    "requires_river": { "type": "boolean", "default": false },
+    "unique_per_faction": { "type": "boolean", "default": false },
+    "effects": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/effect" }
+    },
+    "enables_units": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+      "uniqueItems": true
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "category", "tier", "cost", "build_time_turns", "effects"],
+  "additionalProperties": false
+}

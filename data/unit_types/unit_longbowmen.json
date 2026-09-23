@@ -1,0 +1,41 @@
+{
+  "id": "unit_longbowmen",
+  "name": {
+    "display": "Archers à l'arc long",
+    "local": "longbowmen",
+    "local_language": "moyen anglais"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "soldiers": 120,
+  "cost": {
+    "money": 500
+  },
+  "upkeep": 45,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 30,
+    "ranged": 70,
+    "range": 220,
+    "armor": 20,
+    "morale": 55,
+    "speed": 50,
+    "ammo": 48
+  },
+  "abilities": [
+    "volley",
+    "stakes",
+    "rain_penalty"
+  ],
+  "required_technology": "tech_longbow_drill",
+  "required_culture": [
+    "cul_english",
+    "cul_welsh"
+  ],
+  "equipment": "Arc d'if de six pieds, deux faisceaux de vingt-quatre flèches, dague, maillet à pieux, gambison.",
+  "description": "Yeomen anglais et gallois tirant dix à douze flèches par minute ; vainqueurs de Crécy, Poitiers et Azincourt.",
+  "sources": [
+    "Arc long anglais",
+    "Bataille de Crécy"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "prov_kent",
+  "name": {
+    "display": "Kent",
+    "local": "Kent",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Medway",
+    "Stour",
+    "Tamise"
+  ],
+  "coastal": true,
+  "ports": [
+    "Douvres",
+    "Sandwich",
+    "Hythe",
+    "Romney"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cantorbéry",
+      "local": "Canterbury",
+      "local_language": "moyen anglais"
+    },
+    "lat": 51.2802,
+    "lon": 1.0789
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Estimation d'après les rôles du poll tax de 1377 corrigés de la peste.",
+    "classes": {
+      "peasants": {
+        "count": 150000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 35000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_windmill",
+    "bld_forge",
+    "bld_parish_church",
+    "bld_abbey",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Porte de l'Angleterre face au continent : les Cinque Ports (Douvres, Sandwich, Hythe, Romney) fournissent la flotte royale ; Cantorbéry est le siège du primat. Fer du Weald.",
+  "sources": [
+    "Kent",
+    "Cinque Ports",
+    "Cantorbéry"
+  ]
+}

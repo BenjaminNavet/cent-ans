@@ -1,0 +1,60 @@
+{
+  "id": "chr_charles_d_alencon",
+  "name": {
+    "display": "Charles II d'Alençon"
+  },
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "commander",
+  "birth": {
+    "value": "1297"
+  },
+  "death": {
+    "value": "1346-08-26",
+    "place": "Crécy-en-Ponthieu",
+    "note": "Tué à la bataille de Crécy."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte d'Alençon",
+      "from": {
+        "value": "1325-12-16"
+      }
+    },
+    {
+      "title": "Comte du Perche",
+      "from": {
+        "value": "1325-12-16"
+      }
+    },
+    {
+      "title": "Comte de Chartres",
+      "from": {
+        "value": "1325"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_impulsive"
+  ],
+  "piety": 50,
+  "family": {
+    "siblings": [
+      "chr_philippe_vi"
+    ]
+  },
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Frère cadet de Philippe VI, comte d'Alençon ; il mène la charge désordonnée de la chevalerie française à Crécy et y meurt.",
+  "sources": [
+    "Charles II d'Alençon"
+  ]
+}

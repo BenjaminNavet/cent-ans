@@ -1,0 +1,35 @@
+{
+  "id": "tech_printing_press",
+  "name": {
+    "display": "Imprimerie"
+  },
+  "branch": "civil",
+  "tier": 5,
+  "cost": 900,
+  "prerequisites": [
+    "tech_paper_mills",
+    "tech_bookkeeping"
+  ],
+  "historical_year": {
+    "value": "1450",
+    "note": "Presse de Gutenberg à Mayence vers 1450 ; Paris 1470."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 25
+    },
+    {
+      "effect": "prestige",
+      "value": 5
+    }
+  ],
+  "description": "Caractères mobiles métalliques : diffusion massive des textes en fin de période.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

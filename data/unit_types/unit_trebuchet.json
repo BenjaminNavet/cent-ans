@@ -1,0 +1,39 @@
+{
+  "id": "unit_trebuchet",
+  "name": {
+    "display": "Trébuchet",
+    "local": "trebuchet",
+    "local_language": "ancien français"
+  },
+  "category": "siege",
+  "source_class": "burghers",
+  "soldiers": 4,
+  "cost": {
+    "money": 1200,
+    "resources": {
+      "res_wood": 2
+    }
+  },
+  "upkeep": 60,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 5,
+    "ranged": 60,
+    "range": 250,
+    "armor": 10,
+    "morale": 40,
+    "speed": 10,
+    "ammo": 40,
+    "siege_attack": 70
+  },
+  "abilities": [
+    "wall_breach"
+  ],
+  "required_technology": "tech_siege_engineering",
+  "required_building": "bld_siege_workshop",
+  "equipment": "Trébuchet à contrepoids, boulets de pierre de 50 à 100 kg, équipe de charpentiers et servants.",
+  "description": "Le plus puissant engin à contrepoids ; abat les courtines et les tours en quelques jours.",
+  "sources": [
+    "Trébuchet"
+  ]
+}

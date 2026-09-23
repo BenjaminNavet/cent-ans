@@ -1,0 +1,65 @@
+{
+  "id": "chr_jeanne_iii_de_bourgogne",
+  "name": {
+    "display": "Jeanne III de Bourgogne"
+  },
+  "sex": "female",
+  "house": "Capet",
+  "faction": "fac_burgundy",
+  "role": "consort",
+  "birth": {
+    "value": "1308-05-02",
+    "uncertain": true,
+    "note": "1er ou 2 mai 1308 selon les sources."
+  },
+  "death": {
+    "value": "1347-08-10",
+    "uncertain": true,
+    "note": "10 ou 15 août 1347 selon les sources."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comtesse palatine de Bourgogne",
+      "from": {
+        "value": "1330-01-21"
+      }
+    },
+    {
+      "title": "Comtesse d'Artois",
+      "from": {
+        "value": "1330-01-21"
+      }
+    },
+    {
+      "title": "Duchesse de Bourgogne",
+      "from": {
+        "value": "1318-06-18"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_proud",
+    "trait_just"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_eudes_iv"
+    ],
+    "children": [
+      "chr_philippe_monsieur"
+    ]
+  },
+  "starting_location": "prov_bourgogne",
+  "status": "at_court",
+  "description": "Fille aînée de Philippe V le Long ; hérite en 1330 de sa mère Jeanne II le comté de Bourgogne et l'Artois, unis au duché.",
+  "sources": [
+    "Jeanne III de Bourgogne"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "chr_jean_de_normandie",
+  "name": {
+    "display": "Jean de France, duc de Normandie",
+    "local": "Jehan de France",
+    "local_language": "ancien français"
+  },
+  "epithet": "le Bon",
+  "sex": "male",
+  "house": "Valois",
+  "faction": "fac_france",
+  "role": "heir",
+  "birth": {
+    "value": "1319-04-26",
+    "place": "Château du Gué-de-Maulny, près du Mans"
+  },
+  "death": {
+    "value": "1364-04-08",
+    "place": "Londres (palais de Savoie)"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Normandie",
+      "from": {
+        "value": "1332-02-17"
+      }
+    },
+    {
+      "title": "Comte d'Anjou et du Maine",
+      "from": {
+        "value": "1332-02-17"
+      }
+    },
+    {
+      "title": "Roi de France",
+      "from": {
+        "value": "1350-08-22"
+      },
+      "note": "Futur Jean II le Bon."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_brave",
+    "trait_chivalrous",
+    "trait_impulsive",
+    "trait_generous"
+  ],
+  "piety": 55,
+  "family": {
+    "father": "chr_philippe_vi",
+    "mother": "chr_jeanne_de_bourgogne",
+    "spouses": [
+      "chr_bonne_de_luxembourg"
+    ]
+  },
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Fils aîné de Philippe VI, 18 ans en 1337, duc de Normandie en apanage depuis 1332. Futur Jean II, capturé à Poitiers (1356).",
+  "sources": [
+    "Jean II de France"
+  ]
+}

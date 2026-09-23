@@ -1,0 +1,15 @@
+{
+  "id": "res_wool",
+  "name": {
+    "display": "Laine"
+  },
+  "category": "raw_material",
+  "base_price": 8,
+  "satisfies_classes": [
+    "burghers"
+  ],
+  "description": "Laine anglaise et castillane, matière première des draperies flamandes.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

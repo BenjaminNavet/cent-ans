@@ -1,0 +1,69 @@
+{
+  "id": "fac_aragon",
+  "name": {
+    "display": "Couronne d'Aragon",
+    "local": "Corona d'Aragó",
+    "local_language": "catalan"
+  },
+  "short_name": "Aragon",
+  "adjective": "aragonais",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_pedro_iv",
+  "capital": "prov_barcelona",
+  "capital_city": "Barcelone",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules.",
+    "description": "Les quatre pals rouges sur or de la maison de Barcelone.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Roi d'Aragon",
+    "Roi de Valence",
+    "Roi de Sardaigne et de Corse",
+    "Comte de Barcelone"
+  ],
+  "treasury": 18000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_genoa",
+      "status": "truce",
+      "since": {
+        "value": "1336",
+        "uncertain": true
+      },
+      "note": "Guerre pour la Sardaigne (1331-1336) suivie d'une trêve fragile."
+    },
+    {
+      "faction": "fac_castile",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_navarre",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 60,
+    "trade": 75,
+    "piety": 55
+  },
+  "description": "Puissance méditerranéenne (Catalogne, Valence, Baléares, Sardaigne, Sicile) ; Pierre IV, 17 ans, roi depuis janvier 1336.",
+  "sources": [
+    "Pierre IV d'Aragon",
+    "Couronne d'Aragon"
+  ]
+}

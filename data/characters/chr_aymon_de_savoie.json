@@ -1,0 +1,44 @@
+{
+  "id": "chr_aymon_de_savoie",
+  "name": {
+    "display": "Aymon de Savoie"
+  },
+  "epithet": "le Pacifique",
+  "sex": "male",
+  "house": "Savoie",
+  "faction": "fac_savoy",
+  "role": "ruler",
+  "birth": {
+    "value": "1291-12-15",
+    "place": "Bourg-en-Bresse"
+  },
+  "death": {
+    "value": "1343-06-22",
+    "place": "Montmélian"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Savoie",
+      "from": {
+        "value": "1329-11-04"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_peaceful",
+    "trait_just"
+  ],
+  "piety": 65,
+  "starting_location": "prov_savoie",
+  "status": "at_court",
+  "description": "Frère cadet d'Édouard de Savoie ; règne pacifique consacré à la réforme de l'administration comtale.",
+  "sources": [
+    "Aymon de Savoie"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "fac_genoa",
+  "name": {
+    "display": "République de Gênes",
+    "local": "Repubblica di Genova",
+    "local_language": "italien"
+  },
+  "short_name": "Gênes",
+  "adjective": "génois",
+  "government": "republic",
+  "playable": false,
+  "capital": "prov_genova",
+  "capital_city": "Gênes",
+  "religion": "rel_catholic",
+  "culture": "cul_ligurian",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "heraldry": {
+    "blazon": "D'argent à la croix de gueules.",
+    "description": "Croix de saint Georges rouge sur champ blanc.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Capitaines du peuple de Gênes"
+  ],
+  "treasury": 35000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass",
+    "tech_royal_taxation",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "truce",
+      "since": {
+        "value": "1336",
+        "uncertain": true
+      }
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "Fournit galères et arbalétriers à Philippe VI (Ayton Doria, Carlo Grimaldi)."
+    },
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 95,
+    "piety": 40
+  },
+  "description": "République marchande déchirée entre guelfes et gibelins ; sans doge avant l'élection de Simone Boccanegra le 23 septembre 1339. Exporte ses arbalétriers et ses galères.",
+  "sources": [
+    "République de Gênes",
+    "Simone Boccanegra"
+  ]
+}

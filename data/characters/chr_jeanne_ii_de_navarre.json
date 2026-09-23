@@ -1,0 +1,64 @@
+{
+  "id": "chr_jeanne_ii_de_navarre",
+  "name": {
+    "display": "Jeanne II de Navarre"
+  },
+  "sex": "female",
+  "house": "Capet",
+  "faction": "fac_navarre",
+  "role": "ruler",
+  "birth": {
+    "value": "1312-01-28",
+    "place": "Conflans"
+  },
+  "death": {
+    "value": "1349-10-06",
+    "place": "Conflans",
+    "note": "Morte de la peste."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de Navarre",
+      "from": {
+        "value": "1328-04-01"
+      },
+      "note": "Reconnue reine en 1328, couronnée à Pampelune le 5 mars 1329."
+    },
+    {
+      "title": "Comtesse d'Angoulême",
+      "from": {
+        "value": "1336-03-14",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Comtesse de Mortain",
+      "from": {
+        "value": "1336-03-14",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_stubborn",
+    "trait_diplomat"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_philippe_d_evreux"
+    ]
+  },
+  "starting_location": "prov_navarra",
+  "status": "at_court",
+  "description": "Fille de Louis X le Hutin, écartée du trône de France en 1316 ; reine de Navarre en 1328 quand la couronne passe aux Valois.",
+  "sources": [
+    "Jeanne II de Navarre"
+  ]
+}

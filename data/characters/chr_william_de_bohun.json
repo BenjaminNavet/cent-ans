@@ -1,0 +1,51 @@
+{
+  "id": "chr_william_de_bohun",
+  "name": {
+    "display": "Guillaume de Bohun",
+    "local": "William de Bohun",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Bohun",
+  "faction": "fac_england",
+  "role": "commander",
+  "birth": {
+    "value": "1312",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1360-09-16"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Northampton",
+      "from": {
+        "value": "1337-03-16"
+      }
+    },
+    {
+      "title": "Connétable d'Angleterre",
+      "from": {
+        "value": "1338",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_brave",
+    "trait_loyal"
+  ],
+  "piety": 50,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Compagnon d'Édouard III au coup de Nottingham ; vainqueur de Morlaix (1342), commande l'avant-garde à Crécy.",
+  "sources": [
+    "Guillaume de Bohun"
+  ]
+}

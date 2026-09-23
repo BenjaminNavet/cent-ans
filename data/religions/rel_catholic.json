@@ -1,0 +1,22 @@
+{
+  "id": "rel_catholic",
+  "name": {
+    "display": "Catholicisme (obédience d'Avignon)",
+    "local": "Ecclesia catholica",
+    "local_language": "latin"
+  },
+  "kind": "church",
+  "head_faction": "fac_papacy",
+  "seat": "Avignon",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 5
+    }
+  ],
+  "description": "Église latine unifiée, dirigée depuis Avignon par Benoît XII (1334-1342). Les papes résident en Avignon depuis 1309.",
+  "sources": [
+    "Papauté d'Avignon",
+    "Benoît XII"
+  ]
+}

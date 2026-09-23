@@ -1,0 +1,39 @@
+{
+  "id": "unit_flemish_pikemen",
+  "name": {
+    "display": "Piquiers flamands",
+    "local": "goedendag-dragers",
+    "local_language": "moyen néerlandais"
+  },
+  "category": "infantry",
+  "source_class": "burghers",
+  "soldiers": 120,
+  "cost": {
+    "money": 450
+  },
+  "upkeep": 40,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 55,
+    "ranged": 0,
+    "range": 0,
+    "armor": 40,
+    "morale": 60,
+    "speed": 40,
+    "ammo": 0
+  },
+  "abilities": [
+    "pike_square",
+    "shield_wall"
+  ],
+  "required_culture": [
+    "cul_flemish"
+  ],
+  "required_building": "bld_guild_hall",
+  "equipment": "Pique, goedendag (bâton ferré), chapel de fer, plates de corps.",
+  "description": "Milices des métiers de Gand, Bruges et Ypres ; ont brisé la chevalerie française à Courtrai (1302).",
+  "sources": [
+    "Bataille des éperons d'or",
+    "Goedendag"
+  ]
+}

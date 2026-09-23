@@ -1,0 +1,32 @@
+{
+  "id": "tech_masonry",
+  "name": {
+    "display": "Maçonnerie militaire"
+  },
+  "branch": "civil",
+  "tier": 1,
+  "cost": 140,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1300",
+    "note": "Châteaux philippiens et enceintes urbaines du XIIIe siècle."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_stone_walls"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 1
+    }
+  ],
+  "description": "Enceintes de pierre à tours flanquantes et courtines crénelées.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

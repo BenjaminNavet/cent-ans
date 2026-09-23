@@ -1,0 +1,51 @@
+{
+  "id": "chr_bonne_de_luxembourg",
+  "name": {
+    "display": "Bonne de Luxembourg",
+    "local": "Jutta von Luxemburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "female",
+  "house": "Luxembourg",
+  "faction": "fac_france",
+  "role": "consort",
+  "birth": {
+    "value": "1315-05-20"
+  },
+  "death": {
+    "value": "1349-09-11",
+    "place": "Abbaye de Maubuisson",
+    "note": "Morte de la peste."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duchesse de Normandie",
+      "from": {
+        "value": "1332-07-28"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured",
+    "trait_pious"
+  ],
+  "piety": 70,
+  "family": {
+    "father": "chr_jean_de_luxembourg",
+    "spouses": [
+      "chr_jean_de_normandie"
+    ]
+  },
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Fille de Jean l'Aveugle, épouse de Jean de Normandie depuis le 28 juillet 1332 ; mère du futur Charles V (né le 21 janvier 1338).",
+  "sources": [
+    "Bonne de Luxembourg"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "chr_pedro_iv",
+  "name": {
+    "display": "Pierre IV d'Aragon",
+    "local": "Pere IV",
+    "local_language": "catalan"
+  },
+  "epithet": "le Cérémonieux",
+  "sex": "male",
+  "house": "Barcelone",
+  "faction": "fac_aragon",
+  "role": "ruler",
+  "birth": {
+    "value": "1319-09-05",
+    "place": "Balaguer"
+  },
+  "death": {
+    "value": "1387-01-05",
+    "place": "Barcelone"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi d'Aragon",
+      "from": {
+        "value": "1336-01-24"
+      }
+    },
+    {
+      "title": "Roi de Valence",
+      "from": {
+        "value": "1336-01-24"
+      }
+    },
+    {
+      "title": "Roi de Sardaigne et de Corse",
+      "from": {
+        "value": "1336-01-24"
+      }
+    },
+    {
+      "title": "Comte de Barcelone",
+      "from": {
+        "value": "1336-01-24"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_stern",
+    "trait_cunning",
+    "trait_scholar"
+  ],
+  "piety": 55,
+  "starting_location": "prov_barcelona",
+  "status": "at_court",
+  "description": "Roi à 16 ans ; réannexe Majorque (1343), règne cinquante ans et rédige ses propres chroniques.",
+  "sources": [
+    "Pierre IV d'Aragon"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "id": "chr_robert_stewart",
+  "name": {
+    "display": "Robert Stewart"
+  },
+  "sex": "male",
+  "house": "Stewart",
+  "faction": "fac_scotland",
+  "role": "heir",
+  "birth": {
+    "value": "1316-03-02",
+    "place": "Paisley"
+  },
+  "death": {
+    "value": "1390-04-19",
+    "place": "Château de Dundonald"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand Sénéchal d'Écosse",
+      "from": {
+        "value": "1327-04-09",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Gardien d'Écosse",
+      "from": {
+        "value": "1338"
+      },
+      "to": {
+        "value": "1341"
+      }
+    },
+    {
+      "title": "Roi d'Écosse",
+      "from": {
+        "value": "1371-02-22"
+      },
+      "note": "Futur Robert II, premier Stewart."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_prolific"
+  ],
+  "piety": 50,
+  "starting_location": "prov_renfrew",
+  "status": "at_court",
+  "description": "Neveu de David II et héritier présomptif ; futur Robert II (1371).",
+  "sources": [
+    "Robert II d'Écosse"
+  ]
+}

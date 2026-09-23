@@ -1,0 +1,30 @@
+{
+  "id": "bld_port",
+  "name": {
+    "display": "Port"
+  },
+  "category": "commerce",
+  "tier": 1,
+  "cost": {
+    "money": 800
+  },
+  "build_time_turns": 3,
+  "upkeep": 15,
+  "requires_coastal": true,
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "supply",
+      "value": 10
+    }
+  ],
+  "description": "Quais, entrepôts et douane ; permet le transport maritime et le commerce lointain.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

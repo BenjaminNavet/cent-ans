@@ -1,0 +1,60 @@
+{
+  "id": "chr_henry_of_grosmont",
+  "name": {
+    "display": "Henri de Grosmont",
+    "local": "Henry of Grosmont",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Lancastre",
+  "faction": "fac_england",
+  "role": "commander",
+  "birth": {
+    "value": "1310",
+    "uncertain": true,
+    "place": "Grosmont (Monmouthshire)"
+  },
+  "death": {
+    "value": "1361-03-23",
+    "place": "Leicester",
+    "note": "Mort de la peste."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Derby",
+      "from": {
+        "value": "1337-03-16"
+      }
+    },
+    {
+      "title": "Comte de Lancastre",
+      "from": {
+        "value": "1345-09-22"
+      }
+    },
+    {
+      "title": "Duc de Lancastre",
+      "from": {
+        "value": "1351-03-06"
+      }
+    }
+  ],
+  "skills": {
+    "command": 9,
+    "governance": 6,
+    "court": 7
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_pious",
+    "trait_diplomat"
+  ],
+  "piety": 75,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Meilleur capitaine anglais de la première phase (Auberoche 1345, Bergerac) ; auteur du « Livre de seyntz medicines ».",
+  "sources": [
+    "Henri de Grosmont"
+  ]
+}

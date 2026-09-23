@@ -1,0 +1,28 @@
+{
+  "id": "tech_gunpowder",
+  "name": {
+    "display": "Poudre noire"
+  },
+  "branch": "military",
+  "tier": 2,
+  "cost": 250,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1338",
+    "note": "Pot-de-fer attesté à Rouen en 1338 ; poudre connue en Europe depuis les années 1260."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "research_military",
+      "value": 5
+    }
+  ],
+  "description": "Fabrication de poudre (salpêtre, soufre, charbon) par les artilleurs royaux.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

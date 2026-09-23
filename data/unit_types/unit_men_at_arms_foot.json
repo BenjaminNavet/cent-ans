@@ -1,0 +1,35 @@
+{
+  "id": "unit_men_at_arms_foot",
+  "name": {
+    "display": "Hommes d'armes à pied",
+    "local": "gens d'armes",
+    "local_language": "ancien français"
+  },
+  "category": "infantry",
+  "source_class": "nobility",
+  "soldiers": 80,
+  "cost": {
+    "money": 900
+  },
+  "upkeep": 90,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 70,
+    "ranged": 0,
+    "range": 0,
+    "armor": 75,
+    "morale": 75,
+    "speed": 35,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall",
+    "dismount"
+  ],
+  "equipment": "Haubert de mailles, cotte de plates, bassinet à visière, écu, épée, hache ou marteau d'armes.",
+  "description": "Chevaliers et écuyers combattant à pied, cœur des lignes de bataille anglaises (Halidon Hill, Crécy) et, plus tard, françaises.",
+  "sources": [
+    "Homme d'armes",
+    "Bataille de Crécy"
+  ]
+}

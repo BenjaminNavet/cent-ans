@@ -1,0 +1,13 @@
+{
+  "id": "res_iron",
+  "name": {
+    "display": "Fer"
+  },
+  "category": "raw_material",
+  "base_price": 9,
+  "satisfies_classes": [],
+  "description": "Minerai et forges (Weald du Kent, Berry, Lorraine) ; nécessaire aux armures et engins.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

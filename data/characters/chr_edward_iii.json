@@ -1,0 +1,75 @@
+{
+  "id": "chr_edward_iii",
+  "name": {
+    "display": "Édouard III",
+    "local": "Edward of Windsor",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Plantagenêt",
+  "faction": "fac_england",
+  "role": "ruler",
+  "birth": {
+    "value": "1312-11-13",
+    "place": "Windsor"
+  },
+  "death": {
+    "value": "1377-06-21",
+    "place": "Sheen"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi d'Angleterre",
+      "from": {
+        "value": "1327-01-25"
+      },
+      "note": "Couronné à Westminster le 1er février 1327."
+    },
+    {
+      "title": "Seigneur d'Irlande",
+      "from": {
+        "value": "1327-01-25"
+      }
+    },
+    {
+      "title": "Duc d'Aquitaine",
+      "from": {
+        "value": "1325-09-10"
+      },
+      "note": "Reçoit l'Aquitaine de son père Édouard II en septembre 1325."
+    },
+    {
+      "title": "Comte de Ponthieu",
+      "from": {
+        "value": "1325-09-10"
+      }
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 7,
+    "court": 8
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_chivalrous",
+    "trait_energetic"
+  ],
+  "piety": 50,
+  "family": {
+    "mother": "chr_isabelle_de_france",
+    "spouses": [
+      "chr_philippa_of_hainault"
+    ],
+    "children": [
+      "chr_edward_of_woodstock"
+    ]
+  },
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Roi à 14 ans, maître du pouvoir depuis le coup de Nottingham (1330). Petit-fils de Philippe IV le Bel par sa mère, il revendiquera la couronne de France en 1340.",
+  "sources": [
+    "Édouard III"
+  ]
+}

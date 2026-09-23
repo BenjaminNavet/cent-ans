@@ -1,0 +1,35 @@
+{
+  "id": "tech_crossbow_windlass",
+  "name": {
+    "display": "Arbalète à tour et à cranequin"
+  },
+  "branch": "military",
+  "tier": 2,
+  "cost": 180,
+  "prerequisites": [],
+  "historical_year": {
+    "value": "1340",
+    "note": "Arbalètes à moufle/tour attestées au XIVe siècle, cranequin à partir de la fin du siècle.",
+    "uncertain": true
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "unit_category": "ranged",
+      "value": 3
+    },
+    {
+      "effect": "army_armor",
+      "unit_category": "ranged",
+      "value": 2
+    }
+  ],
+  "description": "Mécanismes de bandage (tour, cranequin) qui accroissent la puissance de l'arbalète et le pavois des arbalétriers.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

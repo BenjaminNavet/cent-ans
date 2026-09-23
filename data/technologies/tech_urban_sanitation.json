@@ -1,0 +1,41 @@
+{
+  "id": "tech_urban_sanitation",
+  "name": {
+    "display": "Hygiène urbaine"
+  },
+  "branch": "civil",
+  "tier": 3,
+  "cost": 320,
+  "prerequisites": [
+    "tech_hospital_reform"
+  ],
+  "historical_year": {
+    "value": "1350",
+    "note": "Ordonnances urbaines après la Peste noire (1348) : voirie, fontaines, égouts.",
+    "uncertain": true
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_water_supply"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "health",
+      "class": "burghers",
+      "value": 8
+    },
+    {
+      "effect": "health",
+      "class": "peasants",
+      "value": 3
+    }
+  ],
+  "description": "Adduction d'eau, pavage et évacuation des immondices ; limite mortalité et épidémies.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

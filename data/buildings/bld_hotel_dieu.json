@@ -1,0 +1,31 @@
+{
+  "id": "bld_hotel_dieu",
+  "name": {
+    "display": "Hôtel-Dieu"
+  },
+  "category": "sanitary",
+  "tier": 1,
+  "cost": {
+    "money": 800
+  },
+  "build_time_turns": 3,
+  "upkeep": 20,
+  "required_technology": "tech_hospital_reform",
+  "required_building": "bld_parish_church",
+  "effects": [
+    {
+      "effect": "health",
+      "value": 8
+    },
+    {
+      "effect": "unrest",
+      "class": "peasants",
+      "value": -2
+    }
+  ],
+  "description": "Hôpital tenu par des religieux : soins, hospitalité des pauvres, quarantaine sommaire.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

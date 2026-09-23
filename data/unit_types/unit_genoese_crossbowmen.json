@@ -1,0 +1,41 @@
+{
+  "id": "unit_genoese_crossbowmen",
+  "name": {
+    "display": "Arbalétriers génois",
+    "local": "balestrieri",
+    "local_language": "italien"
+  },
+  "category": "ranged",
+  "source_class": "burghers",
+  "mercenary": true,
+  "soldiers": 100,
+  "cost": {
+    "money": 900
+  },
+  "upkeep": 100,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 35,
+    "ranged": 65,
+    "range": 200,
+    "armor": 40,
+    "morale": 50,
+    "speed": 40,
+    "ammo": 30
+  },
+  "abilities": [
+    "pavise",
+    "volley",
+    "rain_penalty"
+  ],
+  "required_faction": [
+    "fac_genoa",
+    "fac_france"
+  ],
+  "equipment": "Arbalète à étrier, pavois porté par un valet, chapel de fer, brigandine.",
+  "description": "Mercenaires professionnels de Gênes, engagés par la France ; décimés à Crécy (Ottone Doria, Carlo Grimaldi).",
+  "sources": [
+    "Arbalétriers génois",
+    "Bataille de Crécy"
+  ]
+}

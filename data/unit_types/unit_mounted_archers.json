@@ -1,0 +1,43 @@
+{
+  "id": "unit_mounted_archers",
+  "name": {
+    "display": "Archers montés",
+    "local": "mounted archers",
+    "local_language": "moyen anglais"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 100,
+  "cost": {
+    "money": 700
+  },
+  "upkeep": 60,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 30,
+    "ranged": 65,
+    "range": 220,
+    "armor": 20,
+    "morale": 50,
+    "speed": 75,
+    "ammo": 40
+  },
+  "abilities": [
+    "volley",
+    "skirmish",
+    "dismount",
+    "rain_penalty"
+  ],
+  "required_technology": "tech_longbow_drill",
+  "required_culture": [
+    "cul_english",
+    "cul_welsh"
+  ],
+  "equipment": "Arc long, cheval de selle (hobby), jaque, chapel de fer.",
+  "description": "Archers se déplaçant à cheval et combattant à pied ; ossature des chevauchées d'Édouard III.",
+  "sources": [
+    "Arc long anglais",
+    "Chevauchée"
+  ]
+}

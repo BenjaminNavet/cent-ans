@@ -1,0 +1,31 @@
+{
+  "id": "bld_water_supply",
+  "name": {
+    "display": "Adduction d'eau"
+  },
+  "category": "sanitary",
+  "tier": 2,
+  "cost": {
+    "money": 1500
+  },
+  "build_time_turns": 4,
+  "upkeep": 15,
+  "required_technology": "tech_urban_sanitation",
+  "required_building": "bld_hotel_dieu",
+  "effects": [
+    {
+      "effect": "health",
+      "value": 10
+    },
+    {
+      "effect": "growth",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Fontaines publiques, conduites et égouts ; réduit la mortalité épidémique.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

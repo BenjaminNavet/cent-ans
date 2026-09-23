@@ -1,0 +1,28 @@
+{
+  "id": "bld_parish_church",
+  "name": {
+    "display": "Église paroissiale"
+  },
+  "category": "religious",
+  "tier": 1,
+  "cost": {
+    "money": 300
+  },
+  "build_time_turns": 2,
+  "upkeep": 5,
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 3
+    },
+    {
+      "effect": "unrest",
+      "value": -3
+    }
+  ],
+  "description": "Église de paroisse : encadrement des fidèles, dîme, registres.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

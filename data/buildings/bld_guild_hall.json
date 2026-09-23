@@ -1,0 +1,38 @@
+{
+  "id": "bld_guild_hall",
+  "name": {
+    "display": "Maison des métiers"
+  },
+  "category": "commerce",
+  "tier": 2,
+  "cost": {
+    "money": 900
+  },
+  "build_time_turns": 2,
+  "upkeep": 10,
+  "required_building": "bld_market",
+  "effects": [
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 5
+    },
+    {
+      "effect": "unrest",
+      "class": "burghers",
+      "value": -5
+    },
+    {
+      "effect": "research_civil",
+      "value": 3
+    }
+  ],
+  "enables_units": [
+    "unit_flemish_pikemen"
+  ],
+  "description": "Siège des corporations ; organise les milices de métiers (Flandre) et finance la recherche civile.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

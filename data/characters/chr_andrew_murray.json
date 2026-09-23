@@ -1,0 +1,51 @@
+{
+  "id": "chr_andrew_murray",
+  "name": {
+    "display": "Andrew Murray de Bothwell",
+    "local": "Andrew Moray",
+    "local_language": "scots"
+  },
+  "sex": "male",
+  "house": "Moray",
+  "faction": "fac_scotland",
+  "role": "regent",
+  "birth": {
+    "value": "1298",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1338",
+    "uncertain": true,
+    "place": "Avoch (Ross)",
+    "note": "Mort au printemps 1338."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Gardien d'Écosse",
+      "from": {
+        "value": "1335"
+      },
+      "note": "Second gardiennat, 1335-1338 ; premier en 1332."
+    },
+    {
+      "title": "Seigneur de Bothwell"
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_resolute",
+    "trait_ruthless"
+  ],
+  "piety": 55,
+  "starting_location": "prov_lothian",
+  "status": "on_campaign",
+  "description": "Fils du compagnon de Wallace ; vainqueur de Culblean (30 novembre 1335), il reconquiert les forteresses et pratique la terre brûlée.",
+  "sources": [
+    "Andrew Murray (1298-1338)"
+  ]
+}

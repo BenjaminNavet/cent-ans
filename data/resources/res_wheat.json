@@ -1,0 +1,16 @@
+{
+  "id": "res_wheat",
+  "name": {
+    "display": "Blé"
+  },
+  "category": "food",
+  "base_price": 4,
+  "satisfies_classes": [
+    "peasants",
+    "burghers"
+  ],
+  "description": "Céréale de base ; l'openfield du Bassin parisien et de l'Angleterre du Sud.",
+  "sources": [
+    "Économie médiévale (Wikipédia)"
+  ]
+}

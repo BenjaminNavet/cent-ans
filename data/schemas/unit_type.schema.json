@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/unit_type.schema.json",
+  "title": "Type d'unité",
+  "description": "Unité de bataille : catégorie, classe sociale d'origine, coûts, statistiques, prérequis.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "category": { "type": "string", "enum": ["infantry", "ranged", "cavalry", "siege"] },
+    "source_class": {
+      "$ref": "common.schema.json#/$defs/social_class",
+      "description": "Classe sociale dans laquelle l'unité est recrutée."
+    },
+    "mounted": { "type": "boolean", "default": false },
+    "mercenary": { "type": "boolean", "default": false, "description": "Recrutable contre argent sans puiser dans la population locale." },
+    "soldiers": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Effectif d'une unité complète (60-120 pour les troupes, 1-8 pour les engins)." },
+    "cost": { "$ref": "common.schema.json#/$defs/cost" },
+    "upkeep": { "type": "integer", "minimum": 0, "description": "Solde par saison en livres tournois." },
+    "recruit_time_turns": { "type": "integer", "minimum": 1 },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "melee": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ranged": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "range": { "type": "integer", "minimum": 0, "description": "Portée en mètres (0 = corps à corps)." },
+        "armor": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "morale": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "speed": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ammo": { "type": "integer", "minimum": 0 },
+        "charge": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "siege_attack": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Dégâts contre murailles (engins)." }
+      },
+      "required": ["melee", "ranged", "armor", "morale", "speed", "ammo"],
+      "additionalProperties": false
+    },
+    "abilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["stakes", "shield_wall", "pike_square", "volley", "skirmish", "dismount", "charge_lance", "pavise", "wall_breach", "wall_assault", "rain_penalty"]
+      },
+      "uniqueItems": true
+    },
+    "required_technology": { "$ref": "common.schema.json#/$defs/technology_id" },
+    "required_building": { "$ref": "common.schema.json#/$defs/building_id" },
+    "required_culture": {
+      "type": "array",
+      "description": "Cultures de province autorisées au recrutement (vide = toutes).",
+      "items": { "$ref": "common.schema.json#/$defs/culture_id" },
+      "uniqueItems": true
+    },
+    "required_faction": {
+      "type": "array",
+      "description": "Factions autorisées au recrutement (vide = toutes).",
+      "items": { "$ref": "common.schema.json#/$defs/faction_id" },
+      "uniqueItems": true
+    },
+    "equipment": { "type": "string", "description": "Équipement historique (armes, armure) pour les assets 3D." },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "category", "source_class", "soldiers", "cost", "upkeep", "stats"],
+  "additionalProperties": false
+}

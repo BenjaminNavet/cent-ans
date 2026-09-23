@@ -1,0 +1,62 @@
+{
+  "id": "fac_brittany",
+  "name": {
+    "display": "Duché de Bretagne",
+    "local": "Dugelezh Breizh",
+    "local_language": "breton"
+  },
+  "short_name": "Bretagne",
+  "adjective": "breton",
+  "government": "duchy",
+  "playable": false,
+  "ruler": "chr_jean_iii_de_bretagne",
+  "heir": "chr_jeanne_de_penthievre",
+  "capital": "prov_bretagne",
+  "capital_city": "Nantes",
+  "religion": "rel_catholic",
+  "culture": "cul_breton",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "heraldry": {
+    "blazon": "D'hermine plain.",
+    "description": "Champ d'hermine plain, adopté par Jean III en 1316 en remplacement de l'échiqueté de Dreux au franc-quartier d'hermine.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Duc de Bretagne",
+    "Comte de Richmond",
+    "Pair de France"
+  ],
+  "treasury": 10000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal",
+      "note": "Jean III, fidèle de Philippe VI, a combattu à Cassel."
+    },
+    {
+      "faction": "fac_england",
+      "status": "peace",
+      "note": "Comte de Richmond en Angleterre depuis 1334."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 60
+  },
+  "description": "Duché prospère par le sel de Guérande et le cabotage ; Jean III, sans enfant, hésite entre sa nièce Jeanne de Penthièvre et son demi-frère Jean de Montfort. La guerre de Succession éclatera en 1341.",
+  "sources": [
+    "Jean III de Bretagne",
+    "Guerre de Succession de Bretagne",
+    "Armoiries de la Bretagne"
+  ]
+}

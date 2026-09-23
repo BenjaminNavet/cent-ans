@@ -1,0 +1,31 @@
+{
+  "id": "bld_siege_workshop",
+  "name": {
+    "display": "Atelier d'engins"
+  },
+  "category": "military",
+  "tier": 2,
+  "cost": {
+    "money": 1500
+  },
+  "build_time_turns": 3,
+  "upkeep": 30,
+  "required_building": "bld_armoury",
+  "effects": [
+    {
+      "effect": "recruit_slots",
+      "value": 1
+    }
+  ],
+  "enables_units": [
+    "unit_mangonel",
+    "unit_trebuchet",
+    "unit_siege_tower",
+    "unit_bombard"
+  ],
+  "description": "Charpentiers et ingénieurs du roi ; construit engins de jet et, plus tard, bombardes.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

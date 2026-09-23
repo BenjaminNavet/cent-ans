@@ -1,0 +1,32 @@
+{
+  "id": "bld_counting_house",
+  "name": {
+    "display": "Comptoir marchand"
+  },
+  "category": "commerce",
+  "tier": 3,
+  "cost": {
+    "money": 2000
+  },
+  "build_time_turns": 3,
+  "upkeep": 30,
+  "required_technology": "tech_bookkeeping",
+  "required_building": "bld_fair",
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 20,
+      "mode": "percent"
+    },
+    {
+      "effect": "tax_income",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Loge des marchands italiens ou hanséates ; lettres de change et crédit.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

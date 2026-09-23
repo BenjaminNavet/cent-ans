@@ -1,0 +1,35 @@
+{
+  "id": "tech_bookkeeping",
+  "name": {
+    "display": "Comptabilité en partie double"
+  },
+  "branch": "civil",
+  "tier": 3,
+  "cost": 300,
+  "prerequisites": [
+    "tech_royal_taxation"
+  ],
+  "historical_year": {
+    "value": "1340",
+    "note": "Registres de la commune de Gênes (1340) ; comptabilité toscane."
+  },
+  "unlocks": {
+    "buildings": [
+      "bld_counting_house"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Techniques marchandes italiennes : lettres de change, comptes en partie double, banques lombardes.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

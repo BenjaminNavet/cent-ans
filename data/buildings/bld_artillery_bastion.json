@@ -1,0 +1,33 @@
+{
+  "id": "bld_artillery_bastion",
+  "name": {
+    "display": "Boulevard d'artillerie"
+  },
+  "category": "fortification",
+  "tier": 4,
+  "upgrades_from": "bld_castle",
+  "cost": {
+    "money": 6000,
+    "resources": {
+      "res_stone": 4
+    }
+  },
+  "build_time_turns": 8,
+  "upkeep": 60,
+  "required_technology": "tech_artillery_fortification",
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 1
+    },
+    {
+      "effect": "siege_resistance",
+      "value": 30
+    }
+  ],
+  "description": "Boulevard bas et épais, tours canonnières ; réponse à la bombarde.",
+  "sources": [
+    "Économie médiévale",
+    "Architecture militaire médiévale"
+  ]
+}

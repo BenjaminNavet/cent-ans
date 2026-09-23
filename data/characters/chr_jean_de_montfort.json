@@ -1,0 +1,54 @@
+{
+  "id": "chr_jean_de_montfort",
+  "name": {
+    "display": "Jean de Montfort"
+  },
+  "sex": "male",
+  "house": "Dreux-Bretagne",
+  "faction": "fac_brittany",
+  "role": "claimant",
+  "birth": {
+    "value": "1295",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1345-09-26",
+    "place": "Hennebont"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Montfort-l'Amaury",
+      "from": {
+        "value": "1322"
+      }
+    },
+    {
+      "title": "Duc de Bretagne (prétendant)",
+      "from": {
+        "value": "1341-04-30"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_stubborn"
+  ],
+  "piety": 50,
+  "family": {
+    "siblings": [
+      "chr_jean_iii_de_bretagne"
+    ]
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Demi-frère de Jean III, issu du second mariage d'Arthur II avec Yolande de Dreux ; il se saisira du duché en 1341 avec l'appui anglais.",
+  "sources": [
+    "Jean de Montfort (1295-1345)"
+  ]
+}

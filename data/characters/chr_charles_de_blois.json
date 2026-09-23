@@ -1,0 +1,58 @@
+{
+  "id": "chr_charles_de_blois",
+  "name": {
+    "display": "Charles de Blois"
+  },
+  "sex": "male",
+  "house": "Châtillon",
+  "faction": "fac_france",
+  "role": "noble",
+  "birth": {
+    "value": "1319",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1364-09-29",
+    "place": "Auray",
+    "note": "Tué à la bataille d'Auray."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Penthièvre (par mariage)",
+      "from": {
+        "value": "1337-06-04"
+      },
+      "note": "Épouse Jeanne de Penthièvre le 4 juin 1337 à Paris."
+    },
+    {
+      "title": "Duc de Bretagne (prétendant)",
+      "from": {
+        "value": "1341-09-07"
+      },
+      "note": "Arrêt de Conflans en sa faveur."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_ascetic",
+    "trait_brave"
+  ],
+  "piety": 90,
+  "family": {
+    "spouses": [
+      "chr_jeanne_de_penthievre"
+    ]
+  },
+  "starting_location": "prov_ile_de_france",
+  "status": "at_court",
+  "description": "Neveu de Philippe VI ; son mariage de juin 1337 avec l'héritière de Bretagne prépare la guerre de Succession (1341-1364). Béatifié en 1904.",
+  "sources": [
+    "Charles de Blois"
+  ]
+}

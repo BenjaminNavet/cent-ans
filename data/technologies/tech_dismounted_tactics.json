@@ -1,0 +1,36 @@
+{
+  "id": "tech_dismounted_tactics",
+  "name": {
+    "display": "Tactique des hommes d'armes à pied"
+  },
+  "branch": "military",
+  "tier": 2,
+  "cost": 200,
+  "prerequisites": [
+    "tech_longbow_drill"
+  ],
+  "historical_year": {
+    "value": "1332",
+    "note": "Dupplin Moor (1332), Halidon Hill (1333) : hommes d'armes démontés flanqués d'archers."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_morale",
+      "unit_category": "infantry",
+      "value": 5
+    },
+    {
+      "effect": "army_ranged",
+      "unit_category": "ranged",
+      "value": 3
+    }
+  ],
+  "description": "Doctrine anglaise : hommes d'armes combattant à pied entre des ailes d'archers protégées par des pieux.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}

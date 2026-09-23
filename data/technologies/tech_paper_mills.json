@@ -1,0 +1,31 @@
+{
+  "id": "tech_paper_mills",
+  "name": {
+    "display": "Moulins à papier"
+  },
+  "branch": "civil",
+  "tier": 3,
+  "cost": 280,
+  "prerequisites": [
+    "tech_water_mills",
+    "tech_universities"
+  ],
+  "historical_year": {
+    "value": "1348",
+    "note": "Moulin de Troyes (1348), papeteries d'Ambert et de Fabriano."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "research_civil",
+      "value": 8
+    }
+  ],
+  "description": "Papier de chiffon fabriqué au moulin : chancelleries et universités mieux dotées.",
+  "sources": [
+    "Guerre de Cent Ans",
+    "Armure de plates",
+    "Artillerie médiévale",
+    "Économie médiévale"
+  ]
+}
