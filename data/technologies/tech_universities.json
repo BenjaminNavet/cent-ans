@@ -18,12 +18,8 @@
   },
   "effects": [
     {
-      "effect": "research_civil",
-      "value": 10
-    },
-    {
-      "effect": "research_military",
-      "value": 3
+      "effect": "research_points",
+      "value": 2
     }
   ],
   "description": "Facultés de théologie, droit et médecine ; pépinière de légistes et de conseillers.",

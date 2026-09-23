@@ -1,0 +1,30 @@
+{
+  "id": "tech_handgonnes",
+  "name": {
+    "display": "Bâtons à feu"
+  },
+  "branch": "military",
+  "tier": 3,
+  "cost": 320,
+  "prerequisites": [
+    "tech_gunpowder"
+  ],
+  "historical_year": {
+    "value": "1364",
+    "uncertain": true,
+    "note": "Pérouse commande cinq cents « bombardes » portatives (1364)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "unit_category": "ranged",
+      "value": 4
+    }
+  ],
+  "description": "Canons à main tenus sous le bras et mis à feu à la mèche : bruyants, imprécis, mais redoutés.",
+  "sources": [
+    "Canon à main",
+    "Artillerie médiévale"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "tech_quarantine",
+  "name": {
+    "display": "Quarantaine"
+  },
+  "branch": "civil",
+  "tier": 4,
+  "cost": 450,
+  "prerequisites": [
+    "tech_urban_sanitation"
+  ],
+  "historical_year": {
+    "value": "1377",
+    "note": "Raguse (Dubrovnik) impose trente jours d'isolement aux arrivants des lieux infectés (27 juillet 1377)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "health",
+      "value": 6
+    },
+    {
+      "effect": "growth",
+      "value": 3,
+      "mode": "percent"
+    }
+  ],
+  "description": "Isolement des navires et voyageurs venus des régions touchées par la peste.",
+  "sources": [
+    "Quarantaine",
+    "Peste noire",
+    "République de Raguse"
+  ]
+}

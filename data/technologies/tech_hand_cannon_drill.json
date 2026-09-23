@@ -1,0 +1,36 @@
+{
+  "id": "tech_hand_cannon_drill",
+  "name": {
+    "display": "Exercice des couleuvriniers"
+  },
+  "branch": "military",
+  "tier": 4,
+  "cost": 480,
+  "prerequisites": [
+    "tech_handgonnes"
+  ],
+  "historical_year": {
+    "value": "1420",
+    "uncertain": true,
+    "note": "Tir organisé des couleuvrines à main par les Hussites (Wagenburg, années 1420)."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "army_ranged",
+      "unit_category": "ranged",
+      "value": 6
+    },
+    {
+      "effect": "army_morale",
+      "unit_category": "ranged",
+      "value": 3
+    }
+  ],
+  "description": "Couleuvriniers entraînés au tir en rang, abrités derrière pavois et chariots.",
+  "sources": [
+    "Couleuvrine",
+    "Hussites",
+    "Artillerie médiévale"
+  ]
+}

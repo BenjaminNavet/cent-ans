@@ -23,8 +23,8 @@
       "value": -5
     },
     {
-      "effect": "research_civil",
-      "value": 3
+      "effect": "research_points",
+      "value": 1
     }
   ],
   "enables_units": [

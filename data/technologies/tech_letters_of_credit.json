@@ -1,0 +1,30 @@
+{
+  "id": "tech_letters_of_credit",
+  "name": {
+    "display": "Lettres de change"
+  },
+  "branch": "civil",
+  "tier": 3,
+  "cost": 300,
+  "prerequisites": [
+    "tech_royal_taxation"
+  ],
+  "historical_year": {
+    "value": "1300",
+    "note": "Compagnies florentines (Bardi, Peruzzi) et foires de Champagne ; faillite des Bardi en 1346."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Ordre de paiement tiré sur un correspondant d'une autre place : l'argent voyage sans escorte.",
+  "sources": [
+    "Lettre de change",
+    "Compagnie des Bardi",
+    "Économie médiévale"
+  ]
+}

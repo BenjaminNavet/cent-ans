@@ -32,6 +32,10 @@
       "effect": "wealth",
       "class": "clergy",
       "value": 10
+    },
+    {
+      "effect": "research_points",
+      "value": 1
     }
   ],
   "description": "Siège de l'évêque ; chantier gothique de plusieurs générations, source de prestige.",

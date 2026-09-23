@@ -77,11 +77,12 @@
             "wealth", "health", "unrest", "goods_satisfaction", "growth",
             "tax_income", "trade_income", "production",
             "research_civil", "research_military",
-            "recruit_slots", "recruit_cost", "army_upkeep", "army_experience", "army_morale", "army_armor", "army_ranged",
+            "recruit_slots", "recruit_cost", "army_upkeep", "army_experience", "army_morale", "army_armor", "army_ranged", "army_melee",
             "garrison", "fortification_level", "siege_resistance",
             "piety", "prestige", "supply", "movement", "attrition_resistance", "loyalty",
             "siege_speed", "construction_speed", "diplomacy", "intrigue", "fertility",
-            "battle_charge", "battle_ranged", "battle_defense"
+            "battle_charge", "battle_ranged", "battle_defense",
+            "research_points"
           ]
         },
         "class": { "$ref": "#/$defs/social_class", "description": "Classe visée pour les effets de population ; absent = toute la province." },
