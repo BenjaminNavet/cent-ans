@@ -24,6 +24,9 @@ extends SceneTree
 ##     60 tours France, au moins un événement historique et un aléatoire proposés au joueur, une
 ##     décision résolue par l'ordre `choose_event_option` (les autres par la méthode dédiée),
 ##     fenêtre `ChronicleWindow` instanciée sur une décision réelle.
+##  M10 assets : autoload AudioDirector (effets, musiques, persistance des volumes dans
+##     `user://settings.cfg`), écus et portraits (`PortraitLoader`), modèles 3D (`ModelLibrary`,
+##     marqueur d'armée habillé) et replis quand un fichier manque.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -57,6 +60,7 @@ func _init() -> void:
 	await _run_diplomacy()
 	await _run_battle()
 	await _run_chronicle()
+	await _run_assets()  # M10 assets
 	quit(1 if _failures > 0 else 0)
 
 
@@ -749,3 +753,74 @@ func _run_chronicle() -> void:
 	if _failures == 0:
 		print("smoke OK: chronicle (real), %d historical + %d random decisions in 60 turns, %d journal entries, sample « %s »" % [
 			historical, random, journal, str(sample.get("title", "?"))])
+
+
+# --- M10 assets ------------------------------------------------------------------------
+
+
+func _run_assets() -> void:
+	var audio: Node = root.get_node_or_null("/root/AudioDirector")
+	if not _check(audio != null, "AudioDirector autoload missing"):
+		return
+	var missing_sfx: Array = []
+	for clip in ["ui_click", "page_turn", "turn_bell", "fanfare", "march_drum", "sword_clash", "arrow_volley", "gallop", "war_horn", "choir"]:
+		if not audio.call("has_sfx", clip):
+			missing_sfx.append(clip)
+	_check(missing_sfx.is_empty(), "missing sound effects: %s" % [missing_sfx])
+	for context in ["campaign", "war", "court"]:
+		_check(audio.call("has_music", context), "missing music: %s" % context)
+	_check(audio.call("play_sfx", "ui_click"), "play_sfx(ui_click) failed")
+	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
+	audio.call("play_music", "war")
+	_check(str(audio.get("current_context")) == "war", "music context should be war")
+	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
+
+	# Persistance des volumes (valeurs d'origine restaurées ensuite).
+	var original: float = audio.get("music_volume")
+	audio.call("set_music_volume", 0.35)
+	var config := ConfigFile.new()
+	_check(config.load("user://settings.cfg") == OK, "settings.cfg not written")
+	_check(is_equal_approx(float(config.get_value("audio", "music_volume", -1.0)), 0.35), "music volume not persisted")
+	audio.set("music_volume", 1.0)
+	audio.call("load_settings")
+	_check(is_equal_approx(float(audio.get("music_volume")), 0.35), "music volume not reloaded")
+	audio.call("set_music_volume", original)
+
+	# Écus, portraits et replis.
+	_check(PortraitLoader.heraldry_texture("fac_france") != null, "fac_france heraldry missing")
+	_check(PortraitLoader.portrait_texture("chr_does_not_exist") == null, "unknown portrait should be null")
+	var swatch := ColorRect.new()
+	root.add_child(swatch)
+	var placed := PortraitLoader.overlay_portrait(swatch, "chr_does_not_exist", "fac_england", Vector2(48, 48))
+	_check(placed and swatch.get_node_or_null(PortraitLoader.OVERLAY_NAME) != null, "heraldry fallback portrait expected")
+	swatch.queue_free()
+	var portraits := 0
+	var dir := DirAccess.open("res://assets/portraits")
+	if dir != null:
+		for file_name in dir.get_files():
+			if file_name.ends_with(".png") and PortraitLoader.portrait_texture(file_name.get_basename()) != null:
+				portraits += 1
+
+	# Modèles 3D.
+	var missing_models: Array = []
+	for model_name in ["castle", "town", "village", "cathedral", "army", "siege_camp", "ship"]:
+		if not ModelLibrary.has_model(model_name):
+			missing_models.append(model_name)
+	_check(missing_models.is_empty(), "missing models: %s" % [missing_models])
+	_check(ModelLibrary.instantiate("does_not_exist") == null, "unknown model should be null")
+	_check(ModelLibrary.city_kind("prov_ile_de_france") in ["castle", "town", "village", "cathedral"], "city kind expected")
+	var marker: Node3D = (load("res://scenes/map/army_marker.tscn") as PackedScene).instantiate()
+	root.add_child(marker)
+	await process_frame
+	var dressed := ModelLibrary.dress_army_marker(marker, {"stance": "siege"}, Color(0.8, 0.1, 0.1))
+	_check(dressed and marker.get_node_or_null(ModelLibrary.MODEL_NODE) != null, "army marker should get a 3D model")
+	_check(not (marker.get_node("Banner") as Node3D).visible, "placeholder banner should be hidden")
+	_check(marker.get_node_or_null("%s/SiegeCamp" % ModelLibrary.MODEL_NODE) != null, "siege camp expected")
+	marker.queue_free()
+	await process_frame
+	ModelLibrary.clear_cache()
+	PortraitLoader.clear_cache()
+	audio.call("stop_all")
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: assets, 10 sfx + 3 music, settings persisted, %d portrait(s), 7 models, siege marker dressed" % portraits)

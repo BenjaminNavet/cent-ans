@@ -52,8 +52,26 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 - Batailles (M7) : `core/crates/sim-battle` simule au pas fixe de 0,1 s un champ procédural 1200 × 800 m (collines selon le terrain de la province, forêts, boue, rivière à deux gués), la météo de saison (pluie : arcs et arbalètes −40 %, brouillard : portée −30 %, neige), des régiments en ligne/colonne/schiltron/coin avec moral, fatigue, munitions, charge, flancs (+50 %) et dos (+100 %), piques contre cavalerie, pieux des archers, déroute et ralliement, aura et mort du général, et une IA minimale. Déterministe (même graine + mêmes ordres aux mêmes ticks = même bataille), 14 tests. `sim-campaign` met les batailles du joueur en attente (`pending_battles`, réglage `interactive_battles`), fournit `battle_setup`, applique `resolve_pending_battle` (pertes, moral, captures, général tombé, XP/traits M4, retraite) ou `auto_resolve_pending` ; les restes sont auto-résolus au tour suivant ; 8 tests M7. Godot : `scenes/battle/` (terrain maillé, arbres, soldats en MultiMesh par camp et famille, bannières, caméra RTS, sélection rectangle, ordres clic droit / glisser-droit, pause, vitesses ×1/×2/×4, HUD parchemin, écran de fin). 2 × 20 régiments de 120 soldats : 60 FPS (vsync), ~140 FPS sans vsync sur M4 Pro. Captures : `docs/img/godot-battle.png`, `docs/img/godot-battle-dialog.png`. Sonde : `cargo run -p sim-battle --example probe -- ai`.
 
 - Distribution : `tools/export_macos.sh` produit `export/Cent Ans.app` autonome (données embarquées, signature ad hoc) ; testé : la campagne démarre sur la vraie simulation. Aide en jeu (F1).
+- Assets (M10, partie 2) : écus procéduraux des 16 factions (`cent-ans assets heraldry`, Pillow,
+  interprétation simple du blasonnement), 10 effets sonores et 3 musiques modales de 72-80 s
+  (`cent-ans assets audio`, numpy : Karplus-Strong, vièle, orgue portatif, chœur à formants, cloche ;
+  OGG Vorbis via ffmpeg), 7 modèles low-poly glTF (`cent-ans assets models`, Blender headless,
+  116 à 618 triangles : château, ville fortifiée, village, cathédrale, porte-étendard, camp de siège,
+  cogue), portraits OpenRouter (`cent-ans assets portraits`, idempotent, enveloppe de lot, `--dry-run`
+  hors ligne). Godot : autoload `AudioDirector` (bus Musique/Effets, volumes dans `user://settings.cfg`,
+  menu de départ et entrée « Son… » du menu de carte, musique campagne/guerre/cour, effets de clic,
+  panneaux, fin de tour et événements), `PortraitLoader` (portraits, écus en repli), `ModelLibrary`
+  (villes et armées 3D, bannière teintée, repli sur les marqueurs). Tout fonctionne sans assets.
+  Captures : `docs/img/godot-portraits.png`, `docs/img/godot-campaign-models.png`.
 
 ## Limites connues
+- M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
+  mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
+  0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro
+  mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
+- M10 assets : les cogues ne s'affichent que si l'armée expose `embarked`/`at_sea` (pas encore fourni par
+  le pont) ; l'armée et le château de la capitale se chevauchent quand l'armée est au centroïde voisin.
+  Headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
 - Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province contrôlée (plafond 35 %) ; l'IA dépense ses trésors dormants. Sur une campagne complète 1337-1453 (464 tours, ≈ 10 s en release), les revenus des grands royaumes quadruplent (population, bâtiments, techs) et l'Empire garde un trésor élevé (≈ 12 saisons de revenu) : à surveiller.
