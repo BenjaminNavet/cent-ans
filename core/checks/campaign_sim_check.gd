@@ -9,12 +9,19 @@ extends SceneTree
 
 const PLAYER := "fac_france"
 const TURNS := 4
-const FACTION_SUMMARY_KEYS := ["treasury", "income", "at_war_with", "allies", "provinces_count", "armies_count", "alive"]
+const FACTION_SUMMARY_KEYS := ["treasury", "income", "at_war_with", "allies", "provinces_count", "armies_count", "alive", "projected_income", "army_upkeep", "building_upkeep", "tax_rate"]
 const PROVINCE_STATE_KEYS := ["owner", "controller", "garrison", "unrest", "devastation", "population_total"]
 const ARMY_KEYS := ["faction", "general", "general_name", "location", "units", "movement_points", "supply", "stance", "path"]
 const UNIT_KEYS := ["unit_type", "name", "strength", "max_strength", "morale"]
 const RECRUIT_KEYS := ["unit_type", "name", "cost", "upkeep", "available", "reason"]
 const EVENT_KEYS := ["kind", "text_fr", "province", "army", "faction"]
+const PROVINCE_CITY_KEYS := ["classes", "buildings", "fortification_level", "capacity", "buildable", "resources", "effects"]
+const CLASS_KEYS := ["count", "unrest", "health", "wealth", "goods_satisfaction"]
+const BUILDING_SUMMARY_KEYS := ["id", "name", "category", "upkeep"]
+const BUILDABLE_KEYS := ["building", "name", "category", "cost", "turns", "available", "reason"]
+const EFFECT_VALUE_KEYS := ["flat", "percent"]
+const EFFECTS_KEYS := ["tax_income", "trade_income", "health", "unrest", "wealth", "goods_satisfaction", "growth", "garrison", "fortification_level", "recruit_cost", "supply"]
+const FACTION_ECONOMY_KEYS := ["treasury", "income", "projected_income", "army_upkeep", "building_upkeep", "tax_rate", "goods", "goods_categories"]
 
 var _failures: int = 0
 
@@ -122,6 +129,57 @@ func _run() -> void:
 	_check(sim.get_date_label() == "Printemps 1338", "date after %d turns should be 'Printemps 1338', got '%s'" % [TURNS, sim.get_date_label()])
 	var moved := sim.get_army(player_army_id)
 	_check(moved.is_empty() or moved.get("location", "") == target, "player army should have arrived at %s (or been destroyed), got %s" % [target, moved.get("location", "")])
+
+	# Ville de province (spec M3 § 2).
+	var city := sim.get_province_city("prov_ile_de_france")
+	_check_keys(city, PROVINCE_CITY_KEYS, "province city")
+	var classes: Dictionary = city.get("classes", {})
+	_check_keys(classes, ["peasants", "burghers", "clergy", "nobility"], "province city classes")
+	for class_name in classes:
+		_check_keys(classes[class_name], CLASS_KEYS, "population class %s" % class_name)
+	for building in city.get("buildings", []):
+		_check_keys(building, BUILDING_SUMMARY_KEYS, "city building")
+	var buildable: Array = city.get("buildable", [])
+	_check(buildable.size() > 0, "prov_ile_de_france should have buildable options")
+	var buildable_id := ""
+	for option in buildable:
+		_check_keys(option, BUILDABLE_KEYS, "buildable option")
+		if bool(option.get("available", false)) and buildable_id == "":
+			buildable_id = str(option.get("building", ""))
+	_check(buildable_id != "", "prov_ile_de_france should have at least one available buildable option")
+	_check_keys(city.get("effects", {}), EFFECTS_KEYS, "province city effects")
+	for effect_name in city.get("effects", {}):
+		_check_keys(city["effects"][effect_name], EFFECT_VALUE_KEYS, "effect %s" % effect_name)
+	_check(sim.get_province_city("prov_atlantis").is_empty(), "unknown province should give an empty dictionary for get_province_city")
+
+	if buildable_id != "":
+		var build_result := sim.submit_order({"type": "build", "province": "prov_ile_de_france", "building": buildable_id})
+		_check(build_result.get("ok", false) == true, "build order should be accepted, got error '%s'" % build_result.get("error", ""))
+		var built := false
+		for i in range(6):
+			sim.end_turn()
+			var after_build := sim.get_province_city("prov_ile_de_france")
+			var building_ids: Array = []
+			for b in after_build.get("buildings", []):
+				building_ids.append(b.get("id", ""))
+			if building_ids.has(buildable_id):
+				built = true
+				break
+		_check(built, "%s should appear in buildings within 6 turns" % buildable_id)
+
+	# Économie de faction (spec M3 § 2).
+	var economy := sim.get_faction_economy(PLAYER)
+	_check_keys(economy, FACTION_ECONOMY_KEYS, "faction economy")
+	_check(economy.get("projected_income", 0) > 0, "France projected_income should be positive")
+	_check(sim.get_faction_economy("fac_atlantis").is_empty(), "unknown faction should give an empty dictionary for get_faction_economy")
+
+	var tax_high := sim.submit_order({"type": "set_tax_rate", "rate": "high"})
+	_check(tax_high.get("ok", false) == true, "set_tax_rate high should be accepted, got error '%s'" % tax_high.get("error", ""))
+	var economy_after := sim.get_faction_economy(PLAYER)
+	_check(economy_after.get("tax_rate", "") == "high", "tax_rate should be 'high' after set_tax_rate high")
+
+	var tax_bad := sim.submit_order({"type": "set_tax_rate", "rate": "absurd"})
+	_check(tax_bad.get("ok", true) == false, "set_tax_rate 'absurd' should be refused")
 
 	# Sauvegarde / rechargement.
 	var saved := sim.save_to_string()
