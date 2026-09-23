@@ -12,6 +12,8 @@ extends Node3D
 ##                              et ouvre le panneau de recrutement.
 ##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
 ##   --stage=faction            panneau de faction (trésor, revenus, impôts, biens).
+##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
+##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -45,6 +47,7 @@ var unrest_mode: bool = false
 var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
+var _tech_open: bool = false  # M6
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -126,6 +129,8 @@ func _connect_ui() -> void:
 	ui.marriage_requested.connect(_on_marriage_requested)
 	ui.learn_skill_requested.connect(_on_learn_skill_requested)
 	ui.stance_changed.connect(_on_stance_changed)
+	ui.tech_panel_requested.connect(_on_tech_panel_requested)  # M6
+	ui.research_requested.connect(_on_research_requested)  # M6
 	ui.army_panel_closed.connect(func() -> void: deselect_army())
 	ui.province_panel_closed.connect(func() -> void:
 		selected_index = 0
@@ -179,6 +184,9 @@ func refresh_all() -> void:
 		_show_court_panel()
 	if _open_character_id != "":
 		_show_character_sheet(_open_character_id)
+	_refresh_research()  # M6
+	if _tech_open:
+		_show_tech_panel()
 
 
 func _city_available() -> bool:
@@ -555,6 +563,59 @@ func _submit_character(order: Dictionary, success_text: String) -> Dictionary:
 	return result
 
 
+# --- Technologies (M6) --------------------------------------------------------------------
+
+
+func _tech_available() -> bool:
+	return sim != null and sim.has_method("get_tech_tree")
+
+
+func _refresh_research() -> void:
+	if not _tech_available():
+		ui.research_box.hide()
+		return
+	ui.research_box.show()
+	ui.set_research_progress(sim.call("get_research", player_faction), int(sim.call("get_research_points", player_faction)))
+
+
+func _on_tech_panel_requested() -> void:
+	if not _tech_available():
+		ui.show_toast("Technologies indisponibles avec cette simulation.", true)
+		return
+	_tech_open = true
+	_show_tech_panel()
+
+
+func _show_tech_panel() -> void:
+	ui.show_tech_tree(sim.call("get_tech_tree", player_faction), sim.call("get_research", player_faction),
+		int(sim.call("get_research_points", player_faction)),
+		SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
+
+
+func _on_research_requested(technology_id: String) -> void:
+	_submit({"type": "research", "technology": technology_id}, "Recherche lancée.")
+
+
+## Mise en scène « technologies » : première technologie militaire disponible lancée, deux
+## tours joués pour montrer la progression, panneau ouvert.
+func _stage_screenshot_tech() -> void:
+	_focus_capital()
+	ui.hide_province()
+	if not _tech_available():
+		return
+	for node in sim.call("get_tech_tree", player_faction):
+		if str(node.get("state", "")) == "available" and str(node.get("branch", "")) == "military":
+			sim.call("submit_order", {"type": "research", "technology": str(node["id"])})
+			break
+	sim.call("end_turn")
+	sim.call("end_turn")
+	ui.add_events(sim.call("get_events"), str(sim.call("get_date_label")))
+	selected_index = 0
+	ui.hide_province()
+	_on_tech_panel_requested()
+	refresh_all()
+
+
 ## Mode d'affichage « mécontentement » (touche M) : teinte les provinces vert → rouge par
 ## mécontentement moyen pondéré au lieu de la couleur de faction. Sans `get_province_city`,
 ## le mode ne fait rien (bascule ignorée, notification).
@@ -693,6 +754,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			ui.hide_court()
 		else:
 			_on_court_panel_requested()
+	elif event.is_action_pressed("map_toggle_tech"):  # M6
+		if ui.tech_panel_visible():
+			_tech_open = false
+			ui.hide_tech()
+		else:
+			_on_tech_panel_requested()
 	elif event.is_action_pressed("ui_cancel") and selected_army != "":
 		deselect_army()
 
@@ -718,6 +785,11 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"tech":
+					_stage_screenshot_tech()  # M6
+				"tech_civil":
+					_stage_screenshot_tech()  # M6
+					ui.tech_panel.select_branch("civil")
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):

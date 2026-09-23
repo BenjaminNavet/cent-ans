@@ -763,10 +763,16 @@ pub(crate) fn effects_array(effects: &[Effect]) -> VarArray {
                 .ok()
                 .and_then(|v| v.as_str().map(str::to_owned))
                 .unwrap_or_default();
+            let unit_category = effect
+                .unit_category
+                .and_then(|c| serde_json::to_value(c).ok())
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default();
             vdict! {
                 "kind" => kind.as_str(),
                 "value" => effect.value,
                 "mode" => mode.as_str(),
+                "unit_category" => unit_category.as_str(),
             }
             .to_variant()
         })

@@ -27,6 +27,9 @@ signal governor_requested(character_id: String, province_id: String)
 signal general_requested(character_id: String, army_id: String)
 signal marriage_requested(character_id: String, spouse_id: String)
 signal learn_skill_requested(character_id: String, skill_id: String)
+# M6 : technologies.
+signal tech_panel_requested
+signal research_requested(technology_id: String)
 
 const MENU_SAVE := 0
 const MENU_LOAD := 1
@@ -56,6 +59,12 @@ const TOAST_SECONDS := 3.5
 @onready var court_panel: CourtPanel = %CourtPanel
 @onready var character_sheet: CharacterSheet = %CharacterSheet
 @onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
+# M6 : technologies.
+@onready var tech_button: Button = %TechButton
+@onready var research_box: VBoxContainer = %ResearchBox
+@onready var research_label: Label = %ResearchLabel
+@onready var research_bar: ProgressBar = %ResearchBar
+@onready var tech_panel: TechPanel = %TechPanel
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
@@ -99,6 +108,17 @@ func _ready() -> void:
 	character_sheet.marriage_requested.connect(func(c: String, s: String) -> void: marriage_requested.emit(c, s))
 	character_sheet.learn_skill_requested.connect(func(c: String, s: String) -> void: learn_skill_requested.emit(c, s))
 	character_sheet.hide()
+	# --- M6 : technologies ---
+	tech_button.pressed.connect(func() -> void: tech_panel_requested.emit())
+	research_box.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			tech_panel_requested.emit())
+	tech_panel.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
+	tech_panel.closed.connect(func() -> void: tech_panel.hide())
+	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
+	tech_panel.visibility_changed.connect(func() -> void: event_log.visible = not tech_panel.visible and not court_panel.visible)
+	tech_panel.hide()
+	# --- fin M6 ---
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
 	save_load_dialog.load_confirmed.connect(func(p: String) -> void: load_requested.emit(p))
 	save_load_dialog.dialog_closed.connect(func() -> void: end_turn_button.disabled = false)
@@ -219,6 +239,8 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#2a5a7a]★ %s[/color]" % text
 		elif kind == "appointment":
 			line = "[color=#4a3a10]⚑ %s[/color]" % text
+		elif kind == "technology_researched":
+			line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
 		elif kind == "income":
 			line = "[color=#4a3a10]%s[/color]" % text
 		else:
@@ -309,3 +331,36 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 
 func hide_character() -> void:
 	character_sheet.hide()
+
+
+# --- Technologies (M6) --------------------------------------------------------------
+
+
+func show_tech_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color) -> void:
+	tech_panel.show_tree(tree, research, points_per_turn, faction_label, faction_color)
+
+
+func hide_tech() -> void:
+	tech_panel.hide()
+
+
+func tech_panel_visible() -> bool:
+	return tech_panel.visible
+
+
+## Barre supérieure : recherche en cours (`get_research`, vide si aucune).
+func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
+	if research.is_empty():
+		research_label.text = "Aucune recherche (+%d/tour)" % points_per_turn
+		research_bar.max_value = 1
+		research_bar.value = 0
+		research_box.tooltip_text = "Aucune recherche en cours : les points sont perdus (clic : technologies)."
+		return
+	var turns := int(research.get("turns_left", -1))
+	research_label.text = str(research.get("name", ""))
+	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
+	research_bar.value = int(research.get("progress", 0))
+	research_box.tooltip_text = "Recherche : %s\n%d / %d points, +%d par tour%s" % [
+		str(research.get("name", "")), int(research.get("progress", 0)), int(research.get("cost", 0)),
+		int(research.get("points_per_turn", points_per_turn)),
+		", %d tour(s) restant(s)" % turns if turns >= 0 else ""]
