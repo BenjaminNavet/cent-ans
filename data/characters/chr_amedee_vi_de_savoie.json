@@ -1,0 +1,50 @@
+{
+  "id": "chr_amedee_vi_de_savoie",
+  "name": {
+    "display": "Amédée de Savoie",
+    "local": "Amédée de Savoie",
+    "local_language": "français"
+  },
+  "epithet": "le Comte Vert",
+  "sex": "male",
+  "house": "Savoie",
+  "faction": "fac_savoy",
+  "role": "heir",
+  "birth": {
+    "value": "1334-01-04",
+    "place": "Chambéry"
+  },
+  "death": {
+    "value": "1383-03-01",
+    "place": "Campobasso"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Savoie",
+      "from": {
+        "value": "1343-06-22"
+      },
+      "note": "Futur Amédée VI, sous tutelle jusqu'en 1348."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_crusader"
+  ],
+  "piety": 65,
+  "family": {
+    "father": "chr_aymon_de_savoie"
+  },
+  "starting_location": "prov_savoie",
+  "status": "at_court",
+  "description": "Fils d'Aymon de Savoie et de Yolande de Montferrat, trois ans en 1337. Le « Comte Vert » mènera la croisade de Gallipoli (1366).",
+  "sources": [
+    "Amédée VI de Savoie"
+  ]
+}
