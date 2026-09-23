@@ -49,6 +49,7 @@ var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
 var _tech_open: bool = false  # M6
+var chronicle: ChronicleController = null  # M10
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -90,6 +91,10 @@ func _ready() -> void:
 	diplomacy = DiplomacyController.new()
 	add_child(diplomacy)
 	diplomacy.setup(self)
+	# M10 : chronique (fenêtre de décision, bouton de la barre).
+	chronicle = ChronicleController.new()
+	add_child(chronicle)
+	chronicle.setup(self)
 	_setup_campaign()
 	load_ok = true
 	startup_stats = {
@@ -190,6 +195,8 @@ func refresh_all() -> void:
 		_show_character_sheet(_open_character_id)
 	if diplomacy != null:
 		diplomacy.refresh()
+	if chronicle != null:  # M10
+		chronicle.refresh()
 	_refresh_research()  # M6
 	if _tech_open:
 		_show_tech_panel()
@@ -699,6 +706,8 @@ func _on_end_turn() -> void:
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
+	if chronicle != null:  # M10
+		chronicle.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
@@ -803,6 +812,9 @@ func _parse_cmdline() -> void:
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)
 				"tech":
 					_stage_screenshot_tech()  # M6
+				"chronicle":  # M10
+					_focus_capital()
+					chronicle.stage_screenshot()
 				"tech_civil":
 					_stage_screenshot_tech()  # M6
 					ui.tech_panel.select_branch("civil")

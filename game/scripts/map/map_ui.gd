@@ -251,6 +251,8 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#4a3a10]✉ %s[/color]" % text
 		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
 			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
+		elif kind == "chronicle":  # M10
+			line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
 		elif kind == "technology_researched":
 			line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
 		elif kind == "income":
