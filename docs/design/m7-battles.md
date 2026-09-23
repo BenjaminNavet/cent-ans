@@ -83,3 +83,7 @@ revient dans la campagne. Design général : `docs/design/2026-09-23-cent-ans-de
 ## 5. Critères de fin
 Tests Rust verts, smoke vert, captures relues, 60 fps visés pour 2 × 20 unités de 120 soldats sur Apple
 Silicon (mesurer et consigner dans `docs/godot-map.md`), docs à jour (`status`, `roadmap`, `data-model`).
+
+## 6. Ordres du chef (F10b)
+Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::LeaderOrder`, catalogue
+`data/battle_orders/`, barre d'ordres en bataille. Spécification : `docs/design/battle-orders.md`.
