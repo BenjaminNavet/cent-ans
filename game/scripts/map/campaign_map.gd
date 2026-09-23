@@ -27,6 +27,7 @@ const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var picker: ProvincePicker = $Picker
 @onready var ui: MapUI = $UI
+@onready var construction_markers: ConstructionMarkers = $ConstructionMarkers
 
 var map_data: MapData
 var load_ok: bool = false
@@ -38,6 +39,8 @@ var selected_army: String = ""
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
+var unrest_mode: bool = false
+var _faction_panel_id: String = ""
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -107,6 +110,10 @@ func _connect_ui() -> void:
 	ui.quit_requested.connect(func() -> void: get_tree().quit())
 	ui.recruit_requested.connect(_on_recruit)
 	ui.create_army_requested.connect(_on_create_army)
+	ui.build_requested.connect(_on_build)
+	ui.cancel_build_requested.connect(_on_cancel_build)
+	ui.tax_rate_changed.connect(_on_tax_rate_changed)
+	ui.faction_panel_requested.connect(_on_faction_panel_requested)
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.army_panel_closed.connect(func() -> void: deselect_army())
 	ui.province_panel_closed.connect(func() -> void:
@@ -145,6 +152,9 @@ func refresh_all() -> void:
 	_refresh_owner_colors()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
 	_refresh_top_bar()
+	_refresh_construction_markers()
+	if unrest_mode:
+		_refresh_unrest_colors()
 	if selected_army != "":
 		if armies.has_army(selected_army):
 			select_army(selected_army)
@@ -152,13 +162,27 @@ func refresh_all() -> void:
 			deselect_army()
 	if selected_index > 0:
 		_show_province_panel(selected_index)
+	if ui.faction_panel_visible() and _faction_panel_id != "":
+		_show_faction_panel(_faction_panel_id)
+
+
+func _city_available() -> bool:
+	return sim != null and sim.has_method("get_province_city")
+
+
+func _economy_available() -> bool:
+	return sim != null and sim.has_method("get_faction_economy")
 
 
 func _refresh_top_bar() -> void:
 	ui.set_faction(SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
 	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
-	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)))
+	var projected := -1
+	if _economy_available():
+		var economy: Dictionary = sim.call("get_faction_economy", player_faction)
+		projected = int(economy.get("projected_income", summary.get("income", 0)))
+	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), projected)
 
 
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
@@ -343,7 +367,8 @@ func _show_province_panel(index: int) -> void:
 	var state: Dictionary = sim.call("get_province_state", province_id)
 	var is_player_owner := str(state.get("owner", "")) == player_faction and str(state.get("controller", state.get("owner", ""))) == player_faction
 	var recruitable: Array = sim.call("get_recruitable", province_id) if is_player_owner else []
-	ui.show_province(province, state, recruitable, is_player_owner, SimFacade.faction_short_name)
+	var city: Dictionary = sim.call("get_province_city", province_id) if _city_available() else {}
+	ui.show_province(province, state, recruitable, is_player_owner, SimFacade.faction_short_name, city)
 
 
 ## Clic droit : ordre de déplacement de l'armée sélectionnée vers la province visée.
@@ -380,6 +405,87 @@ func _on_create_army(province_id: String, unit_indices: Array) -> void:
 	var result := _submit({"type": "create_army", "province": province_id, "units_from_garrison": unit_indices}, "Armée formée.")
 	if result.get("ok", false) and result.has("army"):
 		select_army(str(result["army"]))
+
+
+func _on_build(province_id: String, building_id: String) -> void:
+	_submit({"type": "build", "province": province_id, "building": building_id}, "Construction lancée.")
+
+
+func _on_cancel_build(province_id: String) -> void:
+	_submit({"type": "cancel_build", "province": province_id}, "Construction annulée (moitié du coût remboursée).")
+
+
+func _on_tax_rate_changed(faction_id: String, rate: String) -> void:
+	var result := _submit({"type": "set_tax_rate", "rate": rate}, "Taux d'imposition modifié.")
+	if result.get("ok", false):
+		_show_faction_panel(faction_id)
+
+
+func _on_faction_panel_requested() -> void:
+	_show_faction_panel(player_faction)
+
+
+func _show_faction_panel(faction_id: String) -> void:
+	_faction_panel_id = faction_id
+	var economy: Dictionary = sim.call("get_faction_economy", faction_id) if _economy_available() else {}
+	ui.show_faction(faction_id, SimFacade.faction_short_name(faction_id), SimFacade.faction_color(faction_id), economy)
+
+
+## Mode d'affichage « mécontentement » (touche M) : teinte les provinces vert → rouge par
+## mécontentement moyen pondéré au lieu de la couleur de faction. Sans `get_province_city`,
+## le mode ne fait rien (bascule ignorée, notification).
+func _toggle_unrest_mode() -> void:
+	if not _city_available():
+		ui.show_toast("Données de mécontentement indisponibles avec cette simulation.", true)
+		return
+	unrest_mode = not unrest_mode
+	if unrest_mode:
+		_refresh_unrest_colors()
+	else:
+		_refresh_owner_colors()
+
+
+## Couleur par province = vert (0 mécontentement) → rouge (100), moyenne pondérée par classe.
+func _refresh_unrest_colors() -> void:
+	var colors := PackedColorArray()
+	colors.resize(map_data.province_count)
+	for index in range(1, map_data.province_count + 1):
+		var id := str(map_data.get_province(index).get("id", ""))
+		var city: Dictionary = sim.call("get_province_city", id) if id != "" else {}
+		var classes: Dictionary = city.get("classes", {})
+		var total := 0.0
+		var weighted := 0.0
+		for class_id in classes:
+			var count := float(classes[class_id].get("count", 0))
+			total += count
+			weighted += count * float(classes[class_id].get("unrest", 0))
+		var ratio := clampf(weighted / total, 0.0, 1.0) if total > 0.0 else 0.0
+		var color := Color(0.20, 0.55, 0.20).lerp(Color(0.75, 0.15, 0.10), ratio)
+		color.a = 1.0 if not classes.is_empty() else 0.0
+		colors[index - 1] = color
+	terrain.set_province_colors(colors)
+
+
+## Marteau sur les provinces avec une construction en cours (`get_province_city`).
+func _refresh_construction_markers() -> void:
+	if not _city_available():
+		return
+	var ids := PackedStringArray()
+	for index in range(1, map_data.province_count + 1):
+		ids.append(str(map_data.get_province(index).get("id", "")))
+	construction_markers.refresh(ids, _is_under_construction, _construction_marker_position)
+
+
+func _is_under_construction(province_id: String) -> bool:
+	if sim == null or not _city_available():
+		return false
+	var city: Dictionary = sim.call("get_province_city", province_id)
+	return not (city.get("construction", {}) as Dictionary).is_empty()
+
+
+func _construction_marker_position(province_id: String) -> Vector3:
+	var centroid := map_data.centroid_of_id(province_id)
+	return Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y) + 6.0, centroid.y)
 
 
 func _submit(order: Dictionary, success_text: String) -> Dictionary:
@@ -455,6 +561,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_take_screenshot(path, false)
 	elif event.is_action_pressed("map_toggle_edge_pan"):
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
+	elif event.is_action_pressed("map_toggle_unrest"):
+		_toggle_unrest_mode()
 	elif event.is_action_pressed("ui_cancel") and selected_army != "":
 		deselect_army()
 

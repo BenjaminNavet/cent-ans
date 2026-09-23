@@ -1,0 +1,151 @@
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_faction_panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/faction_panel.gd" id="1_panel"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+
+[node name="FactionPanel" type="PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 0)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -360.0
+offset_top = 56.0
+offset_right = -16.0
+offset_bottom = 340.0
+grow_horizontal = 0
+theme = ExtResource("2_theme")
+script = ExtResource("1_panel")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Swatch" type="ColorRect" parent="VBox/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(0.2, 0.35, 0.75, 1)
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Faction"
+
+[node name="CloseButton" type="Button" parent="VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="Separator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="VBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 3
+
+[node name="TreasuryKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Trésor"
+
+[node name="TreasuryValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="IncomeKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Revenu (dernier tour)"
+
+[node name="IncomeValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="ProjectedKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Revenu prévisionnel"
+
+[node name="ProjectedValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="ArmyUpkeepKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Entretien des armées"
+
+[node name="ArmyUpkeepValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="BuildingUpkeepKey" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Entretien des bâtiments"
+
+[node name="BuildingUpkeepValue" type="Label" parent="VBox/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+
+[node name="Separator2" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="TaxHeader" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Taux d'imposition"
+
+[node name="TaxRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TaxLow" type="Button" parent="VBox/TaxRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Bas"
+
+[node name="TaxNormal" type="Button" parent="VBox/TaxRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Normal"
+
+[node name="TaxHigh" type="Button" parent="VBox/TaxRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Haut"
+
+[node name="TaxNote" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+text = "—"
+
+[node name="Separator3" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="GoodsHeader" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Biens disponibles"
+
+[node name="GoodsList" type="VBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
