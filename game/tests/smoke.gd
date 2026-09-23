@@ -14,6 +14,10 @@ extends SceneTree
 ##     sur le dirigeant, `assign_governor` d'un courtisan à `prov_normandie` (ou la première
 ##     province contrôlée ≠ capitale), `propose_marriage` entre deux candidats valides (ou skip
 ##     explicite si aucun), 40 fins de tour → au moins une naissance ou une mort au journal.
+##  6. technologies (M6, vraie simulation si elle expose `get_tech_tree`, sinon skip imprimé) :
+##     panneau des technologies (un nœud par technologie), ordre `research` sur la technologie
+##     disponible la moins chère, `get_research` non vide, refus d'une technologie connue,
+##     20 fins de tour → au moins une technologie acquise et un événement `technology_researched`.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -43,6 +47,7 @@ func _init() -> void:
 	await _run_campaign_loop()
 	_run_city_economy()
 	await _run_characters()
+	await _run_technologies()
 	quit(1 if _failures > 0 else 0)
 
 
@@ -449,3 +454,62 @@ func _run_characters() -> void:
 	if _failures == 0:
 		print("smoke OK: characters (%s), court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
 			"real" if real_capable else "mock", rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
+
+
+## M6 : technologies (docs/design/m6-technologies.md § 4). Vraie simulation uniquement (le mock
+## n'implémente pas la recherche) ; skip explicite sinon.
+func _run_technologies() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_tech_tree")):
+		print("smoke technologies: skipped, CampaignSim has no get_tech_tree (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "technologies: new_campaign failed"):
+		return
+	var tree: Array = sim.call("get_tech_tree", FACTION_ID)
+	_check(tree.size() >= 30, "get_tech_tree should list >= 30 technologies, got %d" % tree.size())
+	var known_before := 0
+	var cheapest := ""
+	var cheapest_cost := 1 << 30
+	for node in tree:
+		match str(node.get("state", "")):
+			"known":
+				known_before += 1
+			"available":
+				if int(node["effective_cost"]) < cheapest_cost:
+					cheapest_cost = int(node["effective_cost"])
+					cheapest = str(node["id"])
+
+	# Panneau des technologies (scène réelle) : un bouton par technologie.
+	var panel_scene: PackedScene = load("res://scenes/ui/tech_panel.tscn")
+	var panel: Node = panel_scene.instantiate()
+	root.add_child(panel)
+	await process_frame
+	panel.show_tree(tree, {}, int(sim.call("get_research_points", FACTION_ID)), "France", Color(0.2, 0.3, 0.7))
+	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size()
+	_check(buttons == tree.size(), "tech panel should show %d nodes, got %d" % [tree.size(), buttons])
+	panel.queue_free()
+
+	if not _check(cheapest != "", "no available technology for fac_france"):
+		return
+	var result: Dictionary = sim.call("submit_order", {"type": "research", "technology": cheapest})
+	_check(result.get("ok", false), "research(%s) refused: %s" % [cheapest, result.get("error", "?")])
+	var research: Dictionary = sim.call("get_research", FACTION_ID)
+	_check(str(research.get("technology", "")) == cheapest, "get_research should report %s, got %s" % [cheapest, research])
+	var refused: Dictionary = sim.call("submit_order", {"type": "research", "technology": "tech_masonry"})
+	_check(not refused.get("ok", true), "research of a known technology should be refused")
+
+	var researched_events := 0
+	for _i in 20:
+		for event in sim.call("end_turn"):
+			if str(event.get("kind", "")) == "technology_researched" and str(event.get("faction", "")) == FACTION_ID:
+				researched_events += 1
+	var known_after := 0
+	for node in sim.call("get_tech_tree", FACTION_ID):
+		if str(node.get("state", "")) == "known":
+			known_after += 1
+	_check(known_after > known_before, "no technology acquired in 20 turns (%d -> %d)" % [known_before, known_after])
+	_check(researched_events >= 1, "no technology_researched event for %s in 20 turns" % FACTION_ID)
+	if _failures == 0:
+		print("smoke OK: technologies (real), %d nodes, research %s (%d pts, %d/turn), known %d -> %d" % [
+			tree.size(), cheapest, cheapest_cost, int(research.get("points_per_turn", 0)), known_before, known_after])
