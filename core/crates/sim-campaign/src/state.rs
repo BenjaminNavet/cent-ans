@@ -1,0 +1,517 @@
+//! Campaign state types and read-only queries.
+//!
+//! Everything here is plain data: the rules that mutate the state live in the
+//! sibling modules (`movement`, `siege`, `economy`, ...). All collections are
+//! `BTreeMap`/`BTreeSet` so that iteration order, and therefore the simulation,
+//! is deterministic.
+
+use std::collections::{BTreeMap, BTreeSet};
+use std::fmt;
+
+use data_model::{
+    CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, Sex, Skills, TechnologyId,
+    UnitType, UnitTypeId,
+};
+use serde::{Deserialize, Serialize};
+
+use crate::events::GameEvent;
+use crate::rng::CampaignRng;
+
+/// Year the campaign starts (spring 1337, Edward III's claim to the French throne).
+pub const START_YEAR: i32 = 1337;
+/// Number of turns per year (one turn per season).
+pub const TURNS_PER_YEAR: u32 = 4;
+/// Movement points an army receives at the start of a spring/summer/autumn turn.
+pub const MAX_MOVEMENT_POINTS: u32 = 3;
+/// Movement points in winter (roads impassable, short days).
+pub const WINTER_MOVEMENT_POINTS: u32 = 2;
+/// Version of the serialised state; bump when the JSON layout changes.
+pub const STATE_VERSION: u32 = 1;
+
+/// One of the four seasons; one campaign turn spans one season.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Season {
+    Spring,
+    Summer,
+    Autumn,
+    Winter,
+}
+
+impl Season {
+    /// Seasons in turn order, starting with spring.
+    pub const ALL: [Season; 4] = [
+        Season::Spring,
+        Season::Summer,
+        Season::Autumn,
+        Season::Winter,
+    ];
+
+    /// The season following this one (winter wraps to spring).
+    pub fn next(self) -> Season {
+        match self {
+            Season::Spring => Season::Summer,
+            Season::Summer => Season::Autumn,
+            Season::Autumn => Season::Winter,
+            Season::Winter => Season::Spring,
+        }
+    }
+
+    /// French display name used by the UI.
+    pub fn label_fr(self) -> &'static str {
+        match self {
+            Season::Spring => "Printemps",
+            Season::Summer => "Été",
+            Season::Autumn => "Automne",
+            Season::Winter => "Hiver",
+        }
+    }
+
+    /// Movement points granted to every army at the start of a turn.
+    pub fn movement_points(self) -> u32 {
+        match self {
+            Season::Winter => WINTER_MOVEMENT_POINTS,
+            _ => MAX_MOVEMENT_POINTS,
+        }
+    }
+}
+
+/// Identifier of an army, `"army_0001"`, `"army_0002"`, ... allocated by the state.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct ArmyId(String);
+
+impl ArmyId {
+    pub const PREFIX: &'static str = "army_";
+
+    /// Builds the id for the `n`-th army created (`army_0001` for 1).
+    pub fn from_index(index: u32) -> Self {
+        ArmyId(format!("{}{index:04}", Self::PREFIX))
+    }
+
+    /// Parses an existing id such as `"army_0007"`.
+    pub fn parse(raw: &str) -> Option<Self> {
+        let digits = raw.strip_prefix(Self::PREFIX)?;
+        if !digits.is_empty() && digits.bytes().all(|b| b.is_ascii_digit()) {
+            Some(ArmyId(raw.to_owned()))
+        } else {
+            None
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl fmt::Debug for ArmyId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ArmyId({:?})", self.0)
+    }
+}
+
+impl fmt::Display for ArmyId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for ArmyId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+/// How an army behaves in the province it stands in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Stance {
+    /// March and fight; do not besiege.
+    #[default]
+    Normal,
+    /// Chevauchée: devastate enemy provinces for loot.
+    Raid,
+    /// Besiege enemy provinces without a field army.
+    Siege,
+}
+
+/// A regiment of a given type.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Unit {
+    pub unit_type: UnitTypeId,
+    /// Current head count.
+    pub strength: u32,
+    pub max_strength: u32,
+    /// 0-10.
+    pub experience: u8,
+    /// 0-100.
+    pub morale: u8,
+}
+
+impl Unit {
+    /// A freshly recruited, full-strength unit.
+    pub fn fresh(unit_type: &UnitType) -> Self {
+        Unit {
+            unit_type: unit_type.id.clone(),
+            strength: unit_type.soldiers,
+            max_strength: unit_type.soldiers,
+            experience: 0,
+            morale: unit_type.stats.morale,
+        }
+    }
+}
+
+/// A field army.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Army {
+    pub faction: FactionId,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub general: Option<CharacterId>,
+    pub location: ProvinceId,
+    pub units: Vec<Unit>,
+    pub movement_points: u32,
+    /// 0-100.
+    pub supply: u8,
+    pub stance: Stance,
+    /// Remaining provinces to cross, resolved in `end_turn`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub path: Vec<ProvinceId>,
+}
+
+impl Army {
+    pub fn total_strength(&self) -> u32 {
+        self.units.iter().map(|u| u.strength).sum()
+    }
+}
+
+/// An ongoing siege of a province.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SiegeState {
+    pub attacker: FactionId,
+    pub turns_left: u32,
+}
+
+/// Dynamic state of a province (static data stays in [`GameData`]).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProvinceState {
+    /// De jure owner.
+    pub owner: FactionId,
+    /// Faction occupying the province (collects taxes, recruits).
+    pub controller: FactionId,
+    pub garrison: Vec<Unit>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub siege: Option<SiegeState>,
+    /// 0-100.
+    pub unrest: u8,
+    /// 0-100, raised by chevauchées.
+    pub devastation: u8,
+    pub population: PopulationClasses,
+    /// Units paid for this turn that join the garrison at the end of the turn.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub recruit_queue: Vec<UnitTypeId>,
+}
+
+impl ProvinceState {
+    pub fn garrison_strength(&self) -> u32 {
+        self.garrison.iter().map(|u| u.strength).sum()
+    }
+}
+
+/// Dynamic state of a faction.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FactionState {
+    /// Livres tournois; may go negative.
+    pub treasury: i64,
+    pub income_last_turn: i64,
+    pub upkeep_last_turn: i64,
+    pub at_war_with: BTreeSet<FactionId>,
+    pub allies: BTreeSet<FactionId>,
+    /// Truce partner -> turn at which the truce ends.
+    pub truces: BTreeMap<FactionId, u32>,
+    pub alive: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ruler: Option<CharacterId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heir: Option<CharacterId>,
+    pub capital: ProvinceId,
+    pub technologies: BTreeSet<TechnologyId>,
+}
+
+/// Dynamic state of a character.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CharacterState {
+    pub faction: FactionId,
+    pub alive: bool,
+    pub birth_year: i32,
+    pub sex: Sex,
+    pub house: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<ProvinceId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub army: Option<ArmyId>,
+    pub skills: Skills,
+    pub captive: bool,
+}
+
+impl CharacterState {
+    pub fn age(&self, year: i32) -> i32 {
+        year - self.birth_year
+    }
+}
+
+/// A battle to resolve (all auto-resolved in M2; exposed for the 3D battle of M7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BattleRequest {
+    pub attacker: ArmyId,
+    pub defender: ArmyId,
+    pub province: ProvinceId,
+}
+
+/// Aggregated view of a faction for the UI.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FactionSummary {
+    pub treasury: i64,
+    pub income: i64,
+    pub upkeep: i64,
+    pub at_war_with: Vec<FactionId>,
+    pub allies: Vec<FactionId>,
+    pub provinces_count: usize,
+    pub armies_count: usize,
+    pub alive: bool,
+    pub ruler: Option<CharacterId>,
+}
+
+/// Full state of a campaign at a given turn.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CampaignState {
+    /// Layout version of the serialised state (see [`STATE_VERSION`]).
+    pub state_version: u32,
+    /// Zero-based turn counter; turn 0 is spring 1337.
+    pub turn: u32,
+    pub season: Season,
+    pub year: i32,
+    pub seed: u64,
+    pub rng: CampaignRng,
+    pub player_faction: FactionId,
+    pub provinces: BTreeMap<ProvinceId, ProvinceState>,
+    pub factions: BTreeMap<FactionId, FactionState>,
+    pub armies: BTreeMap<ArmyId, Army>,
+    pub characters: BTreeMap<CharacterId, CharacterState>,
+    /// Journal of the last resolved turn.
+    pub events: Vec<GameEvent>,
+    pub pending_battles: Vec<BattleRequest>,
+    pub(crate) next_army_index: u32,
+}
+
+impl CampaignState {
+    /// Creates an empty campaign at spring 1337 (no provinces, no factions).
+    ///
+    /// Legacy constructor kept for the M1 bridge; new code uses
+    /// [`CampaignState::new_1337`].
+    pub fn new(seed: u64) -> Self {
+        CampaignState::empty(FactionId::new("fac_france").expect("well-formed id"), seed)
+    }
+
+    pub(crate) fn empty(player: FactionId, seed: u64) -> Self {
+        CampaignState {
+            state_version: STATE_VERSION,
+            turn: 0,
+            season: Season::Spring,
+            year: START_YEAR,
+            seed,
+            rng: CampaignRng::from_seed(seed),
+            player_faction: player,
+            provinces: BTreeMap::new(),
+            factions: BTreeMap::new(),
+            armies: BTreeMap::new(),
+            characters: BTreeMap::new(),
+            events: Vec::new(),
+            pending_battles: Vec::new(),
+            next_army_index: 1,
+        }
+    }
+
+    // ----- date -----------------------------------------------------------
+
+    /// Human-readable date in French, e.g. `"Printemps 1337"`.
+    pub fn date_label(&self) -> String {
+        format!("{} {}", self.season.label_fr(), self.year)
+    }
+
+    pub fn turn(&self) -> u32 {
+        self.turn
+    }
+
+    pub fn season(&self) -> Season {
+        self.season
+    }
+
+    pub fn year(&self) -> i32 {
+        self.year
+    }
+
+    pub fn player_faction(&self) -> &FactionId {
+        &self.player_faction
+    }
+
+    pub(crate) fn advance_date(&mut self) {
+        self.turn += 1;
+        if self.season == Season::Winter {
+            self.year += 1;
+        }
+        self.season = self.season.next();
+    }
+
+    // ----- queries --------------------------------------------------------
+
+    pub fn events(&self) -> &[GameEvent] {
+        &self.events
+    }
+
+    pub fn army(&self, id: &ArmyId) -> Option<&Army> {
+        self.armies.get(id)
+    }
+
+    pub fn armies(&self) -> &BTreeMap<ArmyId, Army> {
+        &self.armies
+    }
+
+    pub fn province_state(&self, id: &ProvinceId) -> Option<&ProvinceState> {
+        self.provinces.get(id)
+    }
+
+    pub fn faction_state(&self, id: &FactionId) -> Option<&FactionState> {
+        self.factions.get(id)
+    }
+
+    pub fn character(&self, id: &CharacterId) -> Option<&CharacterState> {
+        self.characters.get(id)
+    }
+
+    pub fn faction_summary(&self, id: &FactionId) -> Option<FactionSummary> {
+        let faction = self.factions.get(id)?;
+        Some(FactionSummary {
+            treasury: faction.treasury,
+            income: faction.income_last_turn,
+            upkeep: faction.upkeep_last_turn,
+            at_war_with: faction.at_war_with.iter().cloned().collect(),
+            allies: faction.allies.iter().cloned().collect(),
+            provinces_count: self
+                .provinces
+                .values()
+                .filter(|p| &p.controller == id)
+                .count(),
+            armies_count: self.armies.values().filter(|a| &a.faction == id).count(),
+            alive: faction.alive,
+            ruler: faction.ruler.clone(),
+        })
+    }
+
+    /// Ids of the armies standing in `province`, in id order.
+    pub fn armies_in(&self, province: &ProvinceId) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| &army.location == province)
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// The id the next created army will receive (useful for planners that
+    /// chain a `create_army` with a `merge_armies` in the same turn).
+    pub fn peek_next_army_id(&self) -> ArmyId {
+        ArmyId::from_index(self.next_army_index)
+    }
+
+    pub(crate) fn allocate_army_id(&mut self) -> ArmyId {
+        let id = ArmyId::from_index(self.next_army_index);
+        self.next_army_index += 1;
+        id
+    }
+
+    // ----- diplomacy helpers ----------------------------------------------
+
+    pub fn is_at_war(&self, a: &FactionId, b: &FactionId) -> bool {
+        a != b
+            && self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.at_war_with.contains(b))
+    }
+
+    pub fn is_allied(&self, a: &FactionId, b: &FactionId) -> bool {
+        a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
+    }
+
+    /// `true` when `province` is controlled by `faction` or one of its allies.
+    pub fn is_friendly_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
+        self.provinces
+            .get(province)
+            .is_some_and(|p| self.is_allied(faction, &p.controller))
+    }
+
+    /// `true` when `province` is controlled by a faction `faction` is at war with.
+    pub fn is_hostile_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
+        self.provinces
+            .get(province)
+            .is_some_and(|p| self.is_at_war(faction, &p.controller))
+    }
+
+    /// Ids of the armies in `province` whose faction is at war with `faction`.
+    pub fn hostile_armies_in(&self, faction: &FactionId, province: &ProvinceId) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| {
+                &army.location == province && self.is_at_war(faction, &army.faction)
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// Ids of the armies in `province` allied with (or belonging to) `faction`.
+    pub fn friendly_armies_in(&self, faction: &FactionId, province: &ProvinceId) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| {
+                &army.location == province && self.is_allied(faction, &army.faction)
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// Sum of `strength × melee` over the garrison and the friendly armies of a
+    /// province: a cheap defensive-power estimate used by planners.
+    pub fn defensive_power(&self, data: &GameData, province: &ProvinceId) -> f64 {
+        let Some(p) = self.provinces.get(province) else {
+            return 0.0;
+        };
+        let garrison = unit_power(data, &p.garrison);
+        let field: f64 = self
+            .armies
+            .values()
+            .filter(|a| &a.location == province && self.is_allied(&p.controller, &a.faction))
+            .map(|a| unit_power(data, &a.units))
+            .sum();
+        garrison + field
+    }
+
+    /// Rough offensive-power estimate of an army (`strength × melee`).
+    pub fn army_power(&self, data: &GameData, army: &ArmyId) -> f64 {
+        self.armies
+            .get(army)
+            .map_or(0.0, |a| unit_power(data, &a.units))
+    }
+}
+
+/// `Σ strength × max(melee, ranged) / 100`.
+pub fn unit_power(data: &GameData, units: &[Unit]) -> f64 {
+    units
+        .iter()
+        .map(|unit| {
+            let attack = data
+                .unit_types
+                .get(&unit.unit_type)
+                .map_or(30.0, |t| f64::from(t.stats.melee.max(t.stats.ranged)));
+            f64::from(unit.strength) * attack / 100.0
+        })
+        .sum()
+}
