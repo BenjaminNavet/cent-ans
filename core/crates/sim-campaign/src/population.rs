@@ -44,6 +44,10 @@ pub const REVOLT_CONTROL_THRESHOLD: u8 = 90;
 pub const REVOLT_GARRISON_LOSS_PERCENT: u32 = 25;
 /// Average health below which a plague may strike.
 pub const PLAGUE_HEALTH_THRESHOLD: u8 = 30;
+/// Share of the population a local plague kills (before resistance).
+pub const PLAGUE_LOSS: f64 = 0.1;
+/// Unrest a local plague adds to every class (before resistance).
+pub const PLAGUE_UNREST: i32 = 20;
 /// Devastation above which a winter famine may strike.
 pub const FAMINE_DEVASTATION_THRESHOLD: u8 = 70;
 
@@ -210,10 +214,21 @@ pub(crate) fn resolve_population(
         ));
         effects.unrest.flat += state.political_unrest(&id);
         let cap = capacity(data, &id, &buildings);
+        // H3: the province's diet, possibly aimed at one class.
+        let class_effects: Vec<EffectTotals> = SocialClass::ALL
+            .iter()
+            .map(|class| {
+                let mut merged = effects;
+                merged.merge(&crate::table::diet_class_effects(state, data, &id, *class));
+                merged
+            })
+            .collect();
+        // H4: a resistant province may be spared, and suffers less.
+        let resistance = crate::medicine::plague_resistance(state, data, &id);
 
         let province = state.provinces.get_mut(&id).expect("exists");
         let population_total = province.population.total();
-        for class in SocialClass::ALL {
+        for (class, class_effects) in SocialClass::ALL.into_iter().zip(&class_effects) {
             let goods_categories_count = goods_categories(data, &goods, class);
             let entry = match class {
                 SocialClass::Peasants => &mut province.population.peasants,
@@ -230,7 +245,7 @@ pub(crate) fn resolve_population(
                 occupied,
                 foreign_religion,
                 garrison_strength,
-                &effects,
+                class_effects,
                 population_total,
                 cap,
             );
@@ -296,15 +311,36 @@ pub(crate) fn resolve_population(
             .map(|(_, e)| f64::from(e.health))
             .sum::<f64>()
             / 4.0;
-        if average_health < f64::from(PLAGUE_HEALTH_THRESHOLD) {
+        let plague = average_health < f64::from(PLAGUE_HEALTH_THRESHOLD);
+        // The roll only happens with some resistance, so that factions
+        // without medicine keep the exact random stream of before (H4).
+        let spared = plague && resistance > 0.0 && state.rng.unit_f64() < resistance;
+        let province = state.provinces.get_mut(&id).expect("exists");
+        if spared {
+            if controller == state.player_faction {
+                let province_name = province_data.name.display.clone();
+                events.push(
+                    GameEvent::new(
+                        EventKind::Medicine,
+                        format!(
+                            "La peste menaçait {province_name} : simples, fumigations et isolement l'ont tenue à distance."
+                        ),
+                    )
+                    .province(&id)
+                    .faction(&controller),
+                );
+            }
+        } else if plague {
+            let survival = 1.0 - PLAGUE_LOSS * (1.0 - resistance);
+            let unrest = crate::medicine::mitigated(-PLAGUE_UNREST, resistance).unsigned_abs() as u8;
             for (_, entry) in [
                 (SocialClass::Peasants, &mut province.population.peasants),
                 (SocialClass::Burghers, &mut province.population.burghers),
                 (SocialClass::Clergy, &mut province.population.clergy),
                 (SocialClass::Nobility, &mut province.population.nobility),
             ] {
-                entry.count = (entry.count as f64 * 0.9).round() as u64;
-                entry.unrest = entry.unrest.saturating_add(20).min(100);
+                entry.count = (entry.count as f64 * survival).round() as u64;
+                entry.unrest = entry.unrest.saturating_add(unrest).min(100);
             }
             let province_name = province_data.name.display.clone();
             events.push(

@@ -141,6 +141,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if let Some(technology) = sim_campaign::research::ai_choose_research(state, data, faction) {
         orders.push(Order::Research { technology });
     }
+    orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);
