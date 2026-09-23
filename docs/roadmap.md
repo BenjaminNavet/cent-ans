@@ -12,4 +12,4 @@
 | M7 | Batailles temps réel 3D | terminé (2026-09-23) |
 | M8 | Sièges | terminé (2026-09-23) |
 | M9 | IA de campagne et de bataille | terminé (2026-09-23) |
-| M10 | Assets, sons, événements, équilibrage | à faire |
+| M10 | Assets, sons, événements, équilibrage | terminé (2026-09-23) ; 49 portraits sur 50 à générer (limite de la clé OpenRouter) |
