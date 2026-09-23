@@ -5,7 +5,7 @@ use data_model::{FactionId, GameData};
 use crate::events::GameEvent;
 use crate::orders::Order;
 use crate::state::CampaignState;
-use crate::{ai_minimal, buildings, characters, economy, movement, population, siege};
+use crate::{ai_minimal, buildings, characters, dynasty, economy, movement, population, siege};
 
 impl CampaignState {
     /// Resolves the turn with the built-in minimal AI for every non-player faction.
@@ -53,8 +53,12 @@ impl CampaignState {
         // satisfaction, unrest, revolt, plague, famine (M3).
         population::resolve_population(self, data, &mut events);
 
-        // 10. Characters and dead factions.
+        // 10. Characters: governance XP, deaths, winter births, regencies
+        // (M4), then dead factions.
+        dynasty::resolve_governance(self);
         characters::resolve_characters(self, data, &mut events);
+        dynasty::resolve_births(self, data, &mut events);
+        dynasty::resolve_regencies(self, data, &mut events);
         characters::resolve_faction_deaths(self, data, &mut events);
 
         // 11. New season.

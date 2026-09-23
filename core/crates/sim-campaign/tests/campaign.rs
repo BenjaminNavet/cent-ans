@@ -805,7 +805,12 @@ fn succession_follows_heir_then_house_then_none() {
     // Kill every ruler in turn: the line eventually runs out.
     let mut ended = false;
     for _ in 0..10 {
-        let Some(ruler) = state.faction_state(&fac("fac_navarre")).unwrap().ruler.clone() else {
+        let Some(ruler) = state
+            .faction_state(&fac("fac_navarre"))
+            .unwrap()
+            .ruler
+            .clone()
+        else {
             break;
         };
         let mut events = Vec::new();
@@ -814,7 +819,10 @@ fn succession_follows_heir_then_house_then_none() {
             .iter()
             .any(|e| matches!(e.kind, EventKind::NoHeir | EventKind::FactionDestroyed));
     }
-    assert!(ended, "no_heir or faction_destroyed once the line is extinct");
+    assert!(
+        ended,
+        "no_heir or faction_destroyed once the line is extinct"
+    );
     assert_eq!(
         state.faction_state(&fac("fac_navarre")).unwrap().ruler,
         None

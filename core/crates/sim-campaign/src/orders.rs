@@ -233,7 +233,10 @@ impl CampaignState {
                 skills::learn_skill(self, data, &character, &skill)?;
                 Ok(())
             }
-            Order::AssignGovernor { province, character } => {
+            Order::AssignGovernor {
+                province,
+                character,
+            } => {
                 self.check_owned_character(faction, &character)?;
                 dynasty::assign_governor(self, &province, &character)?;
                 Ok(())

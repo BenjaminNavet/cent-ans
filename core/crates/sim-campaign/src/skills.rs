@@ -22,11 +22,13 @@ pub const BATTLE_VICTORY_XP: u32 = 20;
 /// XP granted to a governor per turn of governance (spec § 2).
 pub const GOVERNANCE_XP_PER_TURN: u32 = 2;
 
-/// XP needed for the next skill point, `100 × current tier` (spec § 2),
-/// where "current tier" is the character's highest branch level, floored at
-/// 1 so the first point always costs 100.
-pub fn xp_for_next_point(current_tier: u8) -> u32 {
-    100 * u32::from(current_tier.max(1))
+/// XP needed for the next skill point, `100 × current tier` (spec § 2).
+/// The "current tier" is the skill-tree tier the character is working
+/// through: 1 until three skills are learned, 2 until six, then 3. (Using the
+/// 0-10 branch levels instead would make historical rulers, often rated 7-9,
+/// need eight victories per point.)
+pub fn xp_for_next_point(skills_learned: usize) -> u32 {
+    100 * (skills_learned / 3 + 1).min(3) as u32
 }
 
 /// Grants `amount` XP to `character` and converts any XP threshold crossed
@@ -37,8 +39,7 @@ pub fn grant_experience(state: &mut CampaignState, character: &CharacterId, amou
         return;
     };
     c.experience += amount;
-    let tier = c.skills.command.max(c.skills.governance).max(c.skills.court);
-    let threshold = xp_for_next_point(tier);
+    let threshold = xp_for_next_point(c.skills_learned.len());
     while c.experience >= threshold {
         c.experience -= threshold;
         c.skill_points += 1;

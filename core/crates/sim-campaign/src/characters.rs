@@ -34,12 +34,6 @@ pub fn death_permille_for(state: &CampaignState, id: &CharacterId) -> u32 {
     permille.round().min(1000.0) as u32
 }
 
-fn character_name(data: &GameData, id: &CharacterId) -> String {
-    data.characters
-        .get(id)
-        .map_or_else(|| id.to_string(), |c| c.name.display.clone())
-}
-
 fn faction_name(data: &GameData, id: &FactionId) -> String {
     data.factions
         .get(id)
@@ -79,18 +73,27 @@ pub fn kill(
         return;
     };
     character.alive = false;
+    character.governor_of = None;
+    let widowed = character.spouse.clone();
     let faction = character.faction.clone();
     let location = character.location.clone();
     let age = character.age(state.year);
     let mut event = GameEvent::new(
         EventKind::Death,
-        format!("{} meurt à {age} ans.", character_name(data, id)),
+        format!("{} meurt à {age} ans.", state.character_name(data, id)),
     )
     .faction(&faction);
     if let Some(location) = location {
         event = event.province(&location);
     }
     events.push(event);
+    // The surviving spouse is free to remarry (the dead keep the link for
+    // the family tree).
+    if let Some(survivor) = widowed.and_then(|w| state.characters.get_mut(&w)) {
+        if survivor.spouse.as_ref() == Some(id) {
+            survivor.spouse = None;
+        }
+    }
 
     let ruled = state
         .factions
@@ -148,7 +151,7 @@ pub(crate) fn succeed(
                     EventKind::Succession,
                     format!(
                         "{} succède à la tête de {}.",
-                        character_name(data, &new_ruler),
+                        state.character_name(data, &new_ruler),
                         faction_name(data, faction)
                     ),
                 )
@@ -157,7 +160,10 @@ pub(crate) fn succeed(
         }
         None => {
             state.factions.get_mut(faction).expect("exists").ruler = None;
-            let has_living_member = state.characters.values().any(|c| c.alive && &c.faction == faction);
+            let has_living_member = state
+                .characters
+                .values()
+                .any(|c| c.alive && &c.faction == faction);
             if has_living_member {
                 events.push(
                     GameEvent::new(
@@ -174,10 +180,7 @@ pub(crate) fn succeed(
                 events.push(
                     GameEvent::new(
                         EventKind::FactionDestroyed,
-                        format!(
-                            "{} s'éteint faute d'héritier.",
-                            faction_name(data, faction)
-                        ),
+                        format!("{} s'éteint faute d'héritier.", faction_name(data, faction)),
                     )
                     .faction(faction),
                 );
