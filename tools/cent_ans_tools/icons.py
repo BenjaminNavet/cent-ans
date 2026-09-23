@@ -175,6 +175,34 @@ def _write_if_changed(path: Path, text: str) -> bool:
     return True
 
 
+# Minimal Godot import settings: mipmaps so that 64 px icons stay smooth at 16-28 px.
+IMPORT_TEMPLATE = """[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[params]
+
+mipmaps/generate=true
+svg/scale=1.0
+"""
+
+
+def ensure_import_settings(svg_path: Path) -> bool:
+    """Creates ``<svg>.import`` (mipmaps on) or turns mipmaps on in an existing one."""
+    import_path = svg_path.with_name(svg_path.name + ".import")
+    if not import_path.exists():
+        import_path.write_text(IMPORT_TEMPLATE, encoding="utf-8")
+        return True
+    text = import_path.read_text(encoding="utf-8")
+    if "mipmaps/generate=false" in text:
+        import_path.write_text(
+            text.replace("mipmaps/generate=false", "mipmaps/generate=true"), encoding="utf-8"
+        )
+        return True
+    return False
+
+
 def build(
     out_dir: Path = ICONS_DIR,
     cache_dir: Path = DEFAULT_CACHE_DIR,
@@ -199,6 +227,7 @@ def build(
     for source in sorted({row.source for row in rows}):
         svg = normalize_svg(cached_svg(source, cache_dir, fetch))
         written += _write_if_changed(out_dir / file_name_of(source), svg)
+        written += ensure_import_settings(out_dir / file_name_of(source))
     text = json.dumps(table(rows), ensure_ascii=False, indent=2, sort_keys=False) + "\n"
     written += _write_if_changed(out_dir / "icons.json", text)
     return rows, written
