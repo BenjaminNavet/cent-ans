@@ -19,3 +19,21 @@ def test_build_one_model(tmp_path: Path) -> None:
     counts = blender.build_models(tmp_path, "ship")
     assert 0 < counts["ship"] < blender.MAX_TRIANGLES
     assert (tmp_path / "ship.glb").stat().st_size > 1000
+
+
+def test_models_script_lists_v3_models() -> None:
+    """The Blender script declares every model the game loads (lot V3)."""
+    source = (blender.SCRIPTS_DIR / "models.py").read_text(encoding="utf-8")
+    for name in (
+        "castle",
+        "city_cathedral",
+        "town",
+        "village",
+        "cathedral",
+        "army",
+        "army_foot",
+        "army_archer",
+        "siege_camp",
+        "ship",
+    ):
+        assert f'"{name}": build_' in source
