@@ -15,11 +15,6 @@ const CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
 }
-const RESOURCE_NAMES := {
-	"res_wheat": "Blé", "res_wine": "Vin", "res_stone": "Pierre", "res_wood": "Bois",
-	"res_wool": "Laine", "res_iron": "Fer", "res_salt": "Sel", "res_fish": "Poisson",
-	"res_cloth": "Drap",
-}
 
 @onready var swatch: ColorRect = %Swatch
 @onready var title_label: Label = %TitleLabel
@@ -49,6 +44,12 @@ func _ready() -> void:
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
+	# F2 : infobulles du trésor et du revenu.
+	for pair in [[treasury_value, "hud_treasury"], [income_value, "hud_income"], [projected_value, "hud_income"]]:
+		var label: Label = pair[0]
+		label.set_script(RichLabel)
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+		label.tooltip_text = RichTooltip.hud(pair[1])
 
 
 ## `label` / `color` : identité de la faction (`SimFacade.faction_short_name` / `faction_color`).
@@ -113,15 +114,14 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 		var line := Label.new()
 		line.text = "• %s" % str(CATEGORY_LABELS.get(category, category)).capitalize()
 		goods_list.add_child(line)
-	var resources_line := Label.new()
-	var names: Array = []
+	# F2 : une puce (icône + nom + quantité) par ressource, infobulle riche.
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 10)
 	for res_id in goods:
-		var name: String = str(RESOURCE_NAMES.get(res_id, str(res_id).trim_prefix("res_").capitalize()))
-		names.append("%s (%d)" % [name, int(goods[res_id])])
-	resources_line.text = ", ".join(names)
-	resources_line.autowrap_mode = TextServer.AUTOWRAP_WORD
-	resources_line.add_theme_font_size_override("font_size", 13)
-	goods_list.add_child(resources_line)
+		var id := str(res_id)
+		var text := "%s (%d)" % [GameCatalog.display_name(id), int(goods[res_id])]
+		flow.add_child(IconChip.create(id, text, RichTooltip.resource(id, int(goods[res_id])), 20.0, 13, "resource"))
+	goods_list.add_child(flow)
 
 
 static func _signed(value: int) -> String:
