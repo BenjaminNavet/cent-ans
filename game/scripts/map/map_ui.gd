@@ -171,6 +171,14 @@ func add_events(events: Array, date_text: String) -> void:
 		var line: String
 		if kind == "battle" or kind == "siege" or kind == "province_taken":
 			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
+		elif kind == "revolt":
+			line = "[color=#a1121a][b]⚑ %s[/b][/color]" % text
+		elif kind == "plague":
+			line = "[color=#4a6b2a][b]☠ %s[/b][/color]" % text
+		elif kind == "famine":
+			line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
+		elif kind == "building_completed":
+			line = "[color=#1a5c8b]⚒ %s[/color]" % text
 		elif kind == "income":
 			line = "[color=#4a3a10]%s[/color]" % text
 		else:
