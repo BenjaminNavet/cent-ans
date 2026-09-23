@@ -10,7 +10,9 @@
   "faction": "fac_naples",
   "role": "heir",
   "birth": {
-    "value": "1326-03-01"
+    "value": "1326-03-01",
+    "uncertain": true,
+    "note": "Née vers 1325-1326 ; jour discuté."
   },
   "death": {
     "value": "1382-07-27"

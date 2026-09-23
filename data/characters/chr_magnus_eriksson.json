@@ -10,7 +10,9 @@
   "faction": "fac_sweden",
   "role": "ruler",
   "birth": {
-    "value": "1316-04-01"
+    "value": "1316-04-01",
+    "uncertain": true,
+    "note": "Né en avril ou mai 1316 ; jour inconnu."
   },
   "death": {
     "value": "1374-12-01"
