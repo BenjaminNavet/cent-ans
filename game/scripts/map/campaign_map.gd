@@ -818,6 +818,10 @@ func _stage_screenshot_skills() -> void:
 			ruler = str(ids[0])
 	if ruler != "":
 		sim.call("submit_order", {"type": "debug_grant_xp", "character": ruler, "amount": 400})
+		# Une compétence apprise pour montrer les trois états (appris/disponible/verrouillé).
+		var learnable: Array = sim.call("get_learnable", ruler)
+		if not learnable.is_empty():
+			sim.call("submit_order", {"type": "learn_skill", "character": ruler, "skill": str(learnable[0])})
 		_on_character_selected(ruler)
 
 

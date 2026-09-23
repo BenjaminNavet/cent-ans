@@ -9,6 +9,7 @@ extends PanelContainer
 signal character_selected(character_id: String)
 signal closed
 
+const SORT_RANK := 2
 const SORT_AGE := 0
 const SORT_NAME := 1
 const FILTER_ALL := 0
@@ -24,11 +25,12 @@ const FILTER_COURT := 3
 @onready var empty_label: Label = %EmptyLabel
 
 var _rows: Array[Dictionary] = []
-var _sort_mode: int = SORT_AGE
+var _sort_mode: int = SORT_RANK
 var _filter_mode: int = FILTER_ALL
 
 
 func _ready() -> void:
+	sort_option.add_item("Rang", SORT_RANK)
 	sort_option.add_item("Âge", SORT_AGE)
 	sort_option.add_item("Nom", SORT_NAME)
 	sort_option.item_selected.connect(func(index: int) -> void:
@@ -78,7 +80,9 @@ func _render() -> void:
 				if role != "à la cour":
 					continue
 		filtered.append(row)
-	if _sort_mode == SORT_AGE:
+	if _sort_mode == SORT_RANK:
+		pass  # ordre de `get_faction_characters` : dirigeant, héritier, puis par âge
+	elif _sort_mode == SORT_AGE:
 		filtered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["age"]) > int(b["age"]))
 	else:
 		filtered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a["name"]) < str(b["name"]))

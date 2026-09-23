@@ -1,9 +1,9 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 2, fin de M3).
+Dernière mise à jour : 2026-09-23 (session 3, fin de M4).
 
 ## Où en est-on
-- **M0 à M3 terminés.** Jeu jouable avec villes vivantes : population par classes, bâtiments, impôts, révoltes, peste, famine. Prochain jalon : M4 Personnages et dynasties.
+- **M0 à M4 terminés.** Jeu jouable avec villes vivantes et dynasties : personnages qui gagnent de l'expérience, apprennent des compétences, se marient, ont des enfants, meurent et héritent. Prochain jalon : M5 Diplomatie et religion.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -25,6 +25,8 @@ Dernière mise à jour : 2026-09-23 (session 2, fin de M3).
 
 - Villes et économie (M3) : population par classe avec quatre jauges dynamiques, construction de bâtiments avec prérequis et effets, capacité et surpopulation, biens par catégorie, taux d'imposition (Bas/Normal/Haut), révoltes (faction virtuelle `fac_rebels`), peste, famine. Onglet « Ville », panneau faction, mode carte mécontentement (touche M), marqueurs de construction. 15 tests M3. Équilibrage : France ≈ 22 500 livres/saison stable sur 5 ans (`cargo run -p sim-campaign --example income_probe`).
 
+- Personnages et dynasties (M4) : XP (batailles, gouvernance), arbre de 30 compétences à trois branches, ~30 traits (acquis par événements, opposés exclusifs), généraux et gouverneurs qui modifient batailles et provinces, mariages, naissances (générées et historiques : Charles V naît en 1338 si Jean et Bonne sont mariés), succession par loi (salique, préférence masculine, cognatique, élective), régence des mineurs. Panneau Cour, fiche personnage avec arbre de compétences. 16 tests M4. Sonde : `cargo run -p sim-campaign --example dynasty_probe`.
+
 ## Limites connues
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Les effets de bâtiments Garrison/RecruitCost/Supply sont exposés mais pas encore appliqués au gameplay ; le ciblage par classe des effets est ignoré.
@@ -34,6 +36,9 @@ Dernière mise à jour : 2026-09-23 (session 2, fin de M3).
 - La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
 - L'addon Blender MCP exige Blender ouvert en mode graphique ; le fallback headless est `tools/cent_ans_tools/blender.py`.
+
+- Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
+- Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.

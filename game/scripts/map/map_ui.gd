@@ -89,6 +89,8 @@ func _ready() -> void:
 	court_button.pressed.connect(func() -> void: court_panel_requested.emit())
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
 	court_panel.closed.connect(func() -> void: court_panel.hide())
+	# Le journal occupe la même colonne : masqué tant que la cour est ouverte.
+	court_panel.visibility_changed.connect(func() -> void: event_log.visible = not court_panel.visible)
 	court_panel.hide()
 	character_sheet.closed.connect(func() -> void: character_sheet.hide())
 	character_sheet.character_requested.connect(func(id: String) -> void: character_selected.emit(id))

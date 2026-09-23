@@ -243,6 +243,19 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
   (`_ensure_city_capable_sim`) si jamais la simulation active ne les expose pas, pour garder des captures
   exploitables pendant le développement.
 
+## Personnages et dynasties (M4)
+
+- **Cour** (bouton « Cour », touche C) : `scenes/ui/court_panel.tscn`. Liste des personnages vivants
+  de la faction (portrait = couleur de faction + initiales, âge, titre, activité), tri Rang/Âge/Nom,
+  filtre Généraux/Gouverneurs/À la cour. Le journal est masqué tant que la cour est ouverte.
+- **Fiche personnage** : `scenes/ui/character_sheet.tscn`. Compétences, XP, points, traits (info-bulles),
+  famille, boutons « Nommer gouverneur », « Donner le commandement », « Marier », et l'arbre de
+  compétences en trois colonnes (appris / disponible / verrouillé) ; un clic envoie `learn_skill`.
+- Panneau province : ligne « Gouverneur : X » ; panneau armée : compétences du général.
+- Journal : couleurs dédiées pour naissances, morts, successions, régences, traits acquis.
+- Captures : `--stage=court` et `--stage=skills` (`docs/img/godot-court.png`, `godot-skill-tree.png`).
+  Le mock `campaign_sim_mock.gd` n'est plus utilisé que si l'extension n'expose pas `get_character`.
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |
