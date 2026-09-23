@@ -76,5 +76,5 @@ mesh = SubResource("QuadMesh_flag")
 material_override = SubResource("ShaderMaterial_flag")
 
 [node name="Selection" type="Decal" parent="."]
-size = Vector3(9, 8, 9)
+size = Vector3(7.5, 8, 7.5)
 cull_mask = 1

@@ -111,9 +111,9 @@ func _update_ring() -> void:
 		selection.emission_energy = 1.1
 	else:
 		var ring := faction_color
-		ring.a = 0.75
+		ring.a = 0.5
 		selection.modulate = ring
-		selection.emission_energy = 0.35
+		selection.emission_energy = 0.08
 
 
 ## Oriente les figurines (en marche : vers la province suivante), `direction` en coordonnées carte.
