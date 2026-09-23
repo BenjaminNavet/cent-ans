@@ -14,6 +14,6 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Pas de ligne Co-Authored-By dans les commits.
 
 ## Commandes
-- Build GDExtension : `cd core && cargo build` (dylib copiée via `game/bin/`)
+- Build GDExtension : `core/build.sh` (build cargo + copie de la dylib dans `game/bin/`)
 - Lancer le jeu : `godot --path game`
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
