@@ -20,22 +20,22 @@ const PRESETS := {
 	"fog": {
 		"zenith": Color(0.62, 0.65, 0.68), "horizon": Color(0.78, 0.8, 0.8), "coverage": 0.92,
 		"cloud_light": Color(0.86, 0.87, 0.87), "cloud_shadow": Color(0.66, 0.68, 0.7),
-		"sun": 0.45, "sun_color": Color(1.0, 0.97, 0.92), "elevation": 26.0, "sky_energy": 0.85,
-		"fog": 0.0062, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.0, "ambient": 1.1,
+		"sun": 0.5, "sun_color": Color(1.0, 0.97, 0.92), "elevation": 26.0, "sky_energy": 0.9,
+		"fog": 0.0036, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.0, "ambient": 1.1,
 		"saturation": 0.85, "contrast": 1.0,
 	},
 	"rain": {
-		"zenith": Color(0.34, 0.37, 0.42), "horizon": Color(0.52, 0.55, 0.58), "coverage": 0.97,
-		"cloud_light": Color(0.55, 0.57, 0.6), "cloud_shadow": Color(0.3, 0.32, 0.36),
-		"sun": 0.35, "sun_color": Color(0.9, 0.93, 1.0), "elevation": 40.0, "sky_energy": 0.8,
-		"fog": 0.0022, "fog_color": Color(0.45, 0.48, 0.52), "aerial": 0.2, "ambient": 1.0,
+		"zenith": Color(0.42, 0.45, 0.5), "horizon": Color(0.6, 0.63, 0.66), "coverage": 0.97,
+		"cloud_light": Color(0.62, 0.64, 0.67), "cloud_shadow": Color(0.36, 0.38, 0.42),
+		"sun": 0.55, "sun_color": Color(0.9, 0.93, 1.0), "elevation": 40.0, "sky_energy": 1.0,
+		"fog": 0.0014, "fog_color": Color(0.52, 0.55, 0.59), "aerial": 0.2, "ambient": 1.15,
 		"saturation": 0.8, "contrast": 1.04,
 	},
 	"snow": {
 		"zenith": Color(0.58, 0.63, 0.7), "horizon": Color(0.8, 0.83, 0.87), "coverage": 0.88,
 		"cloud_light": Color(0.92, 0.93, 0.95), "cloud_shadow": Color(0.66, 0.69, 0.74),
 		"sun": 0.6, "sun_color": Color(0.95, 0.96, 1.0), "elevation": 22.0, "sky_energy": 0.95,
-		"fog": 0.0026, "fog_color": Color(0.8, 0.83, 0.87), "aerial": 0.2, "ambient": 1.05,
+		"fog": 0.0017, "fog_color": Color(0.8, 0.83, 0.87), "aerial": 0.2, "ambient": 1.05,
 		"saturation": 0.9, "contrast": 1.02,
 	},
 }
@@ -146,11 +146,11 @@ static func _add_precipitation(camera: Camera3D, rain: bool) -> void:
 	process.particle_flag_align_y = rain
 	particles.process_material = process
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(0.025, 0.9) if rain else Vector2(0.09, 0.09)
+	mesh.size = Vector2(0.012, 0.7) if rain else Vector2(0.08, 0.08)
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.75, 0.8, 0.88, 0.28) if rain else Color(1, 1, 1, 0.85)
+	mat.albedo_color = Color(0.75, 0.8, 0.88, 0.16) if rain else Color(1, 1, 1, 0.85)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y if rain else BaseMaterial3D.BILLBOARD_ENABLED
 	mat.billboard_keep_scale = true
 	mesh.material = mat

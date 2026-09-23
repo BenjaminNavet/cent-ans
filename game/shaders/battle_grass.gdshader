@@ -58,7 +58,7 @@ void vertex() {
 	// l'herbe se fonde dans la texture du terrain.
 	float macro2 = texture(macro_noise, wp * 0.00043 + vec2(0.3, 0.7)).r;
 	vec3 ground = mix(textureLod(albedo_array, vec3(wp / 5.0, 0.0), 7.0).rgb, textureLod(albedo_array, vec3(wp / 7.0, 1.0), 7.0).rgb, smoothstep(0.25, 0.55, macro2));
-	v_tint = base_tint * ground * vec3(1.12, 1.18, 1.0);
+	v_tint = mix(base_tint * ground * vec3(1.12, 1.18, 1.0), vec3(0.45, 0.45, 0.4), snow * 0.6);
 	float in_field = outside_calm * (1.0 - sb.g) * field.z;
 	if (field.x == 1.0) {
 		density *= 1.0 - in_field;
@@ -69,7 +69,7 @@ void vertex() {
 		height_mul = mix(1.0, 1.4, in_field);
 		v_tint = mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
 	}
-	density *= 1.0 - snow * 0.75;
+	density *= 1.0 - snow * 0.93;
 	height_mul *= 1.0 - snow * 0.5;
 	// Touffes clairsemées par endroits (bruit), plus de variation.
 	density *= smoothstep(0.15, 0.45, bt_value_noise(wp * 0.05));
