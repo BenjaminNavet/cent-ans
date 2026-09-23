@@ -27,7 +27,7 @@ var _time := 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	texture = PortraitLoader.load_texture(ART_PATH)
 	if FileAccess.file_exists(SIDECAR_PATH):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SIDECAR_PATH))

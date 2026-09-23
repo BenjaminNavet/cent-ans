@@ -30,6 +30,10 @@ extends SceneTree
 ## 11. bataille de siège (M8 § 2) : assaut français de la Guyenne (`debug_stage_siege`),
 ##     murailles (`get_siege`), défenseurs sur le rempart, IA des deux camps jusqu'à la fin,
 ##     `resolve_battle` ; puis battle.tscn sur un siège (murailles maillées, 40 images).
+## 12. flow (F3) : réglages écrits et relus (volumes conservés), écran de chargement jusqu'à la
+##     carte, sauvegarde automatique tournante (auto_1..3, les fichiers du joueur sont mis de
+##     côté puis restaurés), rapport de saison non vide après quelques tours, alertes, menu
+##     pause ouvert puis fermé (arbre en pause), dialogue de sauvegarde, crédits.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -54,6 +58,12 @@ func _init() -> void:
 	await process_frame
 	facade = root.get_node("/root/SimFacade")
 	paths = root.get_node("/root/MapPaths")
+	# F3 : réglages par défaut sur un fichier dédié (le fichier du joueur n'est pas touché),
+	# sans sauvegarde automatique hors de l'étape « flow ».
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("set_value", "game/autosave_interval", 0, false)
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -65,6 +75,7 @@ func _init() -> void:
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
 	await _run_siege_battle()
+	await _run_flow()  # F3
 	quit(1 if _failures > 0 else 0)
 
 
@@ -904,3 +915,133 @@ func _run_siege_battle() -> void:
 		print("smoke OK: siege battle (headless %d ticks, scene with %d wall nodes, resolved)" % [ticks, scene.siege_view.get_child_count()])
 	scene.queue_free()
 	await process_frame
+
+
+# --- F3 : écrans et flux -----------------------------------------------------------
+
+
+func _run_flow() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if not _check(settings != null, "Settings autoload missing"):
+		return
+	# Réglages : écriture, relecture, section audio conservée.
+	var test_path: String = settings.get("path")
+	_check(test_path != "user://settings.cfg", "smoke must not use the player's settings file")
+	var seeded := ConfigFile.new()
+	seeded.set_value("audio", "music_volume", 0.42)
+	seeded.save(test_path)
+	settings.call("set_value", "camera/speed", 1.7)
+	settings.call("set_value", "interface/confirm_end_turn", true)
+	settings.call("set_value", "video/resolution", Vector2i(1600, 900))
+	var config := ConfigFile.new()
+	_check(config.load(test_path) == OK, "settings file not written")
+	_check(is_equal_approx(float(config.get_value("camera", "speed", 0.0)), 1.7), "camera speed not persisted")
+	_check(is_equal_approx(float(config.get_value("audio", "music_volume", 0.0)), 0.42), "audio section lost by Settings.save_settings")
+	settings.set("values", {})
+	settings.call("load_settings")
+	_check(is_equal_approx(float(settings.call("get_value", "camera/speed")), 1.7), "camera speed not reloaded")
+	_check(bool(settings.call("get_value", "interface/confirm_end_turn")), "confirm_end_turn not reloaded")
+	_check(settings.call("get_value", "video/resolution") == Vector2i(1600, 900), "resolution not reloaded")
+	settings.call("set_value", "interface/confirm_end_turn", false, false)
+	settings.call("set_value", "interface/season_report", true, false)
+	settings.call("set_value", "game/autosave_interval", 1, false)
+	_check(SaveSlots.autosave_name_for(1, 1) == "auto_1" and SaveSlots.autosave_name_for(4, 1) == "auto_1"
+		and SaveSlots.autosave_name_for(6, 2) == "auto_3" and SaveSlots.autosave_name_for(3, 2) == "", "autosave rotation names")
+
+	# Écran de chargement jusqu'à la carte (vraies données si possible, comme la boucle de campagne).
+	var real_data := _project_root().path_join("data")
+	var use_real: bool = ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json"))
+	facade.set_data_dir(real_data if use_real else _fixtures_dir)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var backup := _backup_autosaves()
+	var screen: Node = LoadingScreen.start(self)
+	var map: Node = await screen.finished
+	if not _check(map != null and map.get("load_ok"), "loading screen did not produce a loaded campaign map"):
+		_restore_autosaves(backup)
+		return
+	_check(current_scene == map, "loading screen should make the map the current scene")
+	# Accès non typé : typer FlowController compilerait MapUI avant les autoloads.
+	var flow: Node = map.get("flow")
+	if not _check(flow != null, "campaign map has no FlowController"):
+		_restore_autosaves(backup)
+		return
+	_check(is_equal_approx(map.camera_rig.pan_speed, 1.2 * 1.7), "camera speed setting not applied")
+
+	# Tours : sauvegarde auto tournante, rapport de saison, alertes.
+	var report_lines := 0
+	for _turn in 4:
+		map._on_end_turn()
+		map.chronicle.window.hide()
+		if flow.season_report.visible:
+			report_lines = maxi(report_lines, flow.season_report.line_count())
+	await process_frame
+	var turn: int = map.sim.call("get_turn")
+	_check(turn == 4, "flow: expected turn 4, got %d" % turn)
+	for slot in ["auto_1", "auto_2", "auto_3"]:
+		_check(FileAccess.file_exists(facade.save_path(slot)) and FileAccess.file_exists(SaveSlots.meta_path(slot)), "autosave %s missing" % slot)
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(SaveSlots.meta_path("auto_1")))
+	_check(meta is Dictionary and int(meta.get("turn", -1)) == 4, "auto_1 should have rotated to turn 4, got %s" % [meta])
+	_check(flow.unsaved_turns() == 0, "autosave should reset the unsaved counter")
+	_check(not SaveSlots.latest().is_empty(), "Continue: latest save expected")
+	_check(report_lines > 0, "season report should list events after 4 turns")
+	var all_events: Array = map.sim.call("get_events")
+	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, flow.alerts.alerts.size(), all_events.size()])
+
+	# Menu pause : ouverture (arbre en pause), dialogue de sauvegarde, fermeture.
+	flow.open_pause()
+	await process_frame
+	_check(paused and flow.is_paused(), "pause menu should pause the tree")
+	flow.pause_menu.open_save()
+	_check(flow.pause_menu.save_dialog.visible and flow.pause_menu.save_dialog.save_count() >= 3, "save dialog should list the autosaves")
+	flow.pause_menu.open_settings()
+	await process_frame
+	_check(flow.pause_menu.settings_open(), "settings window should open from pause")
+	flow.close_pause()
+	await process_frame
+	_check(not paused and not flow.is_paused(), "closing the pause menu should resume")
+	map._on_end_turn()
+	_check(flow.unsaved_turns() == 0, "autosave every turn: nothing unsaved")
+
+	# Crédits (CREDITS.md ou texte intégré).
+	var credits: Node = (load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate()
+	root.add_child(credits)
+	await process_frame
+	_check(credits.text_label.text.length() > 100, "credits text should not be empty")
+	credits.queue_free()
+
+	settings.call("set_value", "game/autosave_interval", 0, false)
+	current_scene = null
+	map.queue_free()
+	await process_frame
+	_restore_autosaves(backup)
+	if _failures == 0:
+		print("smoke OK: flow (settings, loading, autosave rotation, season report, pause, credits)")
+
+
+## Met de côté les sauvegardes automatiques du joueur (`user://saves/auto_*`).
+func _backup_autosaves() -> Dictionary:
+	var kept: Dictionary = {}
+	var dir := DirAccess.open(SaveSlots.SAVES_DIR)
+	if dir == null:
+		return kept
+	for file_name in dir.get_files():
+		if file_name.begins_with(SaveSlots.AUTOSAVE_PREFIX):
+			var path := SaveSlots.SAVES_DIR.path_join(file_name)
+			kept[path] = FileAccess.get_file_as_bytes(path)
+			DirAccess.remove_absolute(path)
+	return kept
+
+
+func _restore_autosaves(kept: Dictionary) -> void:
+	var dir := DirAccess.open(SaveSlots.SAVES_DIR)
+	if dir != null:
+		for file_name in dir.get_files():
+			if file_name.begins_with(SaveSlots.AUTOSAVE_PREFIX):
+				DirAccess.remove_absolute(SaveSlots.SAVES_DIR.path_join(file_name))
+	for path in kept:
+		var file := FileAccess.open(path, FileAccess.WRITE)
+		if file != null:
+			file.store_buffer(kept[path])
+			file.close()

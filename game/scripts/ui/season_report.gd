@@ -22,8 +22,10 @@ const GROUPS := [
 ## Genres rapportés même quand ils ne concernent pas le joueur (nouvelles du monde).
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
 const MAX_ENTRIES_PER_GROUP := 12
+const MAX_LIST_HEIGHT := 440.0
 
 var title_label: Label
+var scroll: ScrollContainer
 var list_box: VBoxContainer
 var groups: Array = []  # [{title, glyph, entries: [event]}]
 
@@ -31,12 +33,9 @@ var groups: Array = []  # [{title, glyph, entries: [event]}]
 func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	set_anchors_preset(Control.PRESET_CENTER_LEFT)
-	custom_minimum_size = Vector2(520, 520)
-	offset_left = 24
-	offset_right = 544
-	offset_top = -260
-	offset_bottom = 300
+	set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	position = Vector2(20, 60)
+	custom_minimum_size = Vector2(520, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	add_child(box)
@@ -52,7 +51,7 @@ func _ready() -> void:
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
-	var scroll := ScrollContainer.new()
+	scroll = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
@@ -134,7 +133,14 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 			more.add_theme_font_size_override("font_size", 13)
 			list_box.add_child(more)
 	show()
+	_fit_height.call_deferred()
 	return true
+
+
+## Hauteur ajustée au contenu (au plus `MAX_LIST_HEIGHT`, défilement au-delà).
+func _fit_height() -> void:
+	scroll.custom_minimum_size.y = minf(list_box.get_combined_minimum_size().y, MAX_LIST_HEIGHT)
+	reset_size()
 
 
 func _entry_row(event: Dictionary) -> Control:

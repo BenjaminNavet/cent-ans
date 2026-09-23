@@ -12,6 +12,7 @@ extends CanvasLayer
 ##     l'écran est dessiné juste avant ;
 ##  3. premières images (compilation des shaders), puis fondu vers la carte.
 ## Usage : `LoadingScreen.start(get_tree())` après avoir renseigné `SimFacade.pending_*`.
+## Capture : `-- --loading-shot=<chemin.png>` enregistre l'écran à l'étape 2 puis quitte.
 
 signal finished(scene: Node)
 
@@ -64,7 +65,7 @@ func _ready() -> void:
 
 func _build() -> void:
 	_root_control = Control.new()
-	_root_control.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.theme = load("res://scenes/ui/parchment_theme.tres")
 	add_child(_root_control)
 	_background = MenuBackground.new()
@@ -72,7 +73,7 @@ func _build() -> void:
 	_root_control.add_child(_background)
 
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.add_child(center)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(620, 0)
@@ -141,7 +142,7 @@ func _build() -> void:
 	_fade = ColorRect.new()
 	_fade.color = Color(0, 0, 0, 1)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.add_child(_fade)
 
 
@@ -195,6 +196,7 @@ func run() -> void:
 	# 2. Carte et simulation (synchrone : l'écran est dessiné avant).
 	_set_step(1, 0.38)
 	await _frames(2)
+	await _maybe_screenshot()
 	var scene := packed.instantiate() if packed != null else null
 	var previous := tree.current_scene
 	if scene != null:
@@ -215,3 +217,16 @@ func run() -> void:
 	await fade_out.finished
 	finished.emit(scene)
 	queue_free()
+
+
+func _maybe_screenshot() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--loading-shot="):
+			var path := arg.trim_prefix("--loading-shot=")
+			await RenderingServer.frame_post_draw
+			var image := get_viewport().get_texture().get_image()
+			DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+			var err := image.save_png(path)
+			print("LoadingScreen: screenshot %s (%s)" % [path, error_string(err)])
+			get_tree().quit(0 if err == OK else 1)
+			await get_tree().process_frame
