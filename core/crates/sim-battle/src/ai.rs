@@ -846,6 +846,21 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         u.destination.is_some() || u.state == UnitState::Marching
     });
     let storm = !openings.is_empty();
+    // Nobody left who can get in: sound the retreat.
+    let climbers_left = own.iter().any(|&i| units[i].can_climb());
+    let ram_left = own.iter().any(|&i| units[i].ram) && works.pieces[works.gate].intact();
+    let engines_left = engines.iter().any(|&i| units[i].ammo > 0);
+    if !storm && !climbers_left && !ram_left && !engines_left {
+        let all: Vec<u32> = own
+            .iter()
+            .filter(|&&i| !units[i].withdrawing)
+            .map(|&i| units[i].id)
+            .collect();
+        if !all.is_empty() {
+            view.commands.push(Command::Withdraw { units: all });
+        }
+        return;
+    }
     let escalade = !storm
         && (!docked.is_empty()
             || elapsed > ENGINE_PATIENCE
