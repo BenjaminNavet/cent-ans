@@ -29,6 +29,13 @@ const RESOURCE_CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
 }
+## `get_province_city().resources` ne donne que des ids (§ 2) : noms français locaux pour
+## les ressources connues (`data/resources/*.json`), repli sur l'id mis en forme sinon.
+const RESOURCE_NAMES := {
+	"res_wheat": "Blé", "res_wine": "Vin", "res_stone": "Pierre", "res_wood": "Bois",
+	"res_wool": "Laine", "res_iron": "Fer", "res_salt": "Sel", "res_fish": "Poisson",
+	"res_cloth": "Drap",
+}
 
 @onready var name_label: Label = %NameLabel
 @onready var owner_value: Label = %OwnerValue
@@ -128,7 +135,7 @@ func _fill_resources(resources: Array) -> void:
 		return
 	for res in resources:
 		var chip := Label.new()
-		chip.text = "◆ %s" % str(res).trim_prefix("res_").capitalize()
+		chip.text = "◆ %s" % str(RESOURCE_NAMES.get(res, str(res).trim_prefix("res_").capitalize()))
 		chip.add_theme_font_size_override("font_size", 13)
 		resources_list.add_child(chip)
 
