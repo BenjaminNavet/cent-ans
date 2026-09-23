@@ -1,3 +1,4 @@
 # WIP — M5 diplomatie et religion
 
-État : spec écrite. Étapes : 1 données (claims, religions) ; 2 état + attitude ; 3 ordres diplomatiques ; 4 vassaux/embargo/appel aux armes ; 5 religion ; 6 IA ; 7 tests ; 8 pont ; 9 UI ; 10 smoke/captures/docs.
+État : données, simulation (diplomacy.rs, religion.rs), 18 tests M5, sonde `diplomacy_probe` faits. Correctifs : effets du gouverneur appliqués (population, impôts), factions sans lignée → nouveau souverain, rebelles jamais détruits.
+Prochaine étape : pont GDExtension (§ 3), puis UI Godot (§ 4), smoke, captures, docs.

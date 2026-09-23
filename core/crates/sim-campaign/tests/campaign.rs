@@ -810,31 +810,29 @@ fn succession_follows_heir_then_house_then_none() {
         Some(charles)
     );
 
-    // Kill every ruler in turn: the line eventually runs out.
-    let mut ended = false;
+    // Kill every ruler in turn: once the house is gone, a new lord takes
+    // over (M5: a realm with land never simply vanishes).
+    let mut new_house = false;
     for _ in 0..10 {
-        let Some(ruler) = state
+        let ruler = state
             .faction_state(&fac("fac_navarre"))
             .unwrap()
             .ruler
             .clone()
-        else {
-            break;
-        };
+            .unwrap();
         let mut events = Vec::new();
         sim_campaign::characters::kill(&mut state, &data, &ruler, &mut events);
-        ended |= events
-            .iter()
-            .any(|e| matches!(e.kind, EventKind::NoHeir | EventKind::FactionDestroyed));
+        if events.iter().any(|e| {
+            e.kind == EventKind::Succession
+                && (e.text_fr.contains("nouvelle maison") || e.text_fr.contains("s'empare"))
+        }) {
+            new_house = true;
+            break;
+        }
     }
-    assert!(
-        ended,
-        "no_heir or faction_destroyed once the line is extinct"
-    );
-    assert_eq!(
-        state.faction_state(&fac("fac_navarre")).unwrap().ruler,
-        None
-    );
+    assert!(new_house, "a new ruler once the line is extinct");
+    let navarre = state.faction_state(&fac("fac_navarre")).unwrap();
+    assert!(navarre.alive && navarre.ruler.is_some());
 }
 
 #[test]
