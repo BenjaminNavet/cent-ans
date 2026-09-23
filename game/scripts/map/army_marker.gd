@@ -47,3 +47,5 @@ func pick_position() -> Vector3:
 func apply_scale(marker_scale: float) -> void:
 	scale = Vector3.ONE * marker_scale
 	position = base_position + Vector3(offset_dir.x, 0.0, offset_dir.y) * (6.0 * marker_scale)
+	# Le Label3D `fixed_size` ne doit pas hériter de l'échelle du marqueur.
+	count_label.scale = Vector3.ONE / marker_scale

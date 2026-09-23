@@ -8,6 +8,8 @@ extends Node3D
 ## Options de ligne de commande (après `--`) :
 ##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte
 ##                              (sélectionne la première armée du joueur + aperçu de chemin).
+##   --stage=province           avec --screenshot : sélectionne plutôt la capitale du joueur
+##                              et ouvre le panneau de recrutement.
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -39,6 +41,7 @@ var startup_stats: Dictionary = {}
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
+var _screenshot_stage: String = "army"
 
 
 func _ready() -> void:
@@ -257,6 +260,9 @@ func deselect_army() -> void:
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
 	var indices := PackedInt32Array()
+	if selected_army != "" and sim != null:
+		# La province de départ compte comme atteignable (pas assombrie).
+		indices.append(map_data.index_of_id(str(sim.call("get_army", selected_army).get("location", ""))))
 	for province_id in reachable:
 		var index := map_data.index_of_id(str(province_id))
 		if index > 0:
@@ -454,12 +460,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _parse_cmdline() -> void:
-	for arg in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	for arg in args:
+		if arg.begins_with("--stage="):
+			_screenshot_stage = arg.trim_prefix("--stage=")
+	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 			_screenshot_countdown = SCREENSHOT_DELAY_FRAMES
 			camera_rig.edge_pan_enabled = false
-			_stage_screenshot()
+			if _screenshot_stage == "province":
+				_stage_screenshot_province()
+			else:
+				_stage_screenshot()
 		elif arg.begins_with("--focus="):
 			var parts := arg.trim_prefix("--focus=").split(",")
 			if parts.size() == 3:
@@ -492,6 +505,23 @@ func _stage_screenshot() -> void:
 		hovered_index = index
 		terrain.set_highlight(index, 0)
 		_preview_path(best, province_name_of(best))
+
+
+## Mise en scène « province » : capitale du joueur sélectionnée, panneau de recrutement ouvert.
+func _stage_screenshot_province() -> void:
+	var capital: String = str(SimFacade.faction_info(player_faction).get("capital", ""))
+	var index := map_data.index_of_id(capital)
+	if index == 0:
+		var ids := player_army_ids()
+		if not ids.is_empty():
+			index = map_data.index_of_id(str(sim.call("get_army", ids[0]).get("location", "")))
+	if index == 0:
+		index = mini(3, map_data.province_count)
+	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
+	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
+	camera_rig.snap()
+	picker.select_index(index)
+	ui.province_panel.recruit_panel.show()
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:

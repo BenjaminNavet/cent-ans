@@ -230,7 +230,10 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 			var v01: float
 			if bpp == 2:
 				var o := (row + px) * 2
-				v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
+				if little_endian:
+					v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
+				else:
+					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
 				v01 = float(bytes[row + px]) / 255.0
 			vertices[k] = Vector3(px - x0, (h_min + v01 * h_range) * scale, py - y0)

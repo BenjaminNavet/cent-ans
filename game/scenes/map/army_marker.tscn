@@ -24,8 +24,8 @@ no_depth_test = true
 render_priority = 3
 
 [sub_resource type="TorusMesh" id="TorusMesh_halo"]
-inner_radius = 3.6
-outer_radius = 4.6
+inner_radius = 2.6
+outer_radius = 3.3
 rings = 24
 ring_segments = 8
 
@@ -63,7 +63,7 @@ mesh = SubResource("QuadMesh_banner")
 material_override = SubResource("StandardMaterial3D_banner")
 
 [node name="CountLabel" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0, 0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.6, 0.1)
 billboard = 1
 no_depth_test = true
 fixed_size = true
@@ -73,7 +73,7 @@ modulate = Color(1, 1, 1, 1)
 outline_modulate = Color(0.1, 0.08, 0.05, 1)
 outline_size = 10
 text = "0"
-font_size = 26
+font_size = 20
 
 [node name="Halo" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.3, 0)

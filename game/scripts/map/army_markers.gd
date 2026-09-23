@@ -9,9 +9,9 @@ extends Node3D
 const MARKER_SCENE := preload("res://scenes/map/army_marker.tscn")
 const PICK_RADIUS_PX := 26.0
 ## Échelle du marqueur = distance caméra × facteur, bornée.
-const SCALE_PER_DISTANCE := 0.018
+const SCALE_PER_DISTANCE := 0.014
 const MIN_SCALE := 0.8
-const MAX_SCALE := 24.0
+const MAX_SCALE := 14.0
 
 var map_data: MapData
 var camera: Camera3D
