@@ -217,6 +217,19 @@ impl BattleSim {
             }
         }
         if is_siege {
+            // Men-at-arms who can fight on foot (`dismount`) leave their
+            // horses for the assault, as at every medieval escalade.
+            for unit in units
+                .iter_mut()
+                .filter(|u| u.side == SideId::Attacker && u.mounted && u.has(Ability::Dismount))
+            {
+                unit.mounted = false;
+                if unit.category == UnitCategory::Cavalry {
+                    unit.category = UnitCategory::Infantry;
+                }
+                unit.stats.speed = unit.stats.speed.min(35);
+                unit.stats.charge = None;
+            }
             let mut ram = Unit::from_setup(
                 units.len() as u32,
                 SideId::Attacker,
@@ -284,6 +297,23 @@ impl BattleSim {
                     .to_owned()
             };
             sim.log(text, None);
+            let dismounted = sim.units.iter().any(|u| {
+                u.side == SideId::Attacker
+                    && u.has(Ability::Dismount)
+                    && sim
+                        .setup
+                        .attacker
+                        .units
+                        .get(u.setup_index)
+                        .is_some_and(|s| s.mounted)
+            });
+            if dismounted {
+                let text = format!(
+                    "Les chevaliers {} mettent pied à terre pour l'assaut.",
+                    of_faction(&sim.setup.attacker.faction_name)
+                );
+                sim.log(text, Some(SideId::Attacker));
+            }
         }
         Ok(sim)
     }

@@ -14,7 +14,7 @@ const BESIEGERS: [&str; 8] = [
     "unit_urban_militia",
     "unit_longbowmen",
     "unit_longbowmen",
-    "unit_knights",
+    "unit_mounted_sergeants",
 ];
 const GARRISON: [&str; 5] = [
     "unit_urban_militia",
@@ -107,7 +107,8 @@ fn walls_stop_regiments_until_a_breach_opens() {
     let data = data();
     let mut sim = siege(&data, &[], 2, 0, 11);
     lab(&mut sim);
-    // The knights (id 7) ride for the square: the wall stops them.
+    hold_fire(&mut sim, SideId::Defender);
+    // The mounted sergeants (id 7) ride for the square: the wall stops them.
     let (cx, cz) = sim.siege().unwrap().center;
     sim.issue_command(Command::Move {
         units: vec![7],
@@ -118,12 +119,12 @@ fn walls_stop_regiments_until_a_breach_opens() {
     })
     .unwrap();
     run(&mut sim, 150.0);
-    let knights = &sim.units()[7];
+    let riders = &sim.units()[7];
     assert!(
-        !sim.siege().unwrap().inside(knights.x, knights.z),
-        "knights cannot climb"
+        !sim.siege().unwrap().inside(riders.x, riders.z),
+        "horsemen cannot climb"
     );
-    assert!(knights.climbing.is_none());
+    assert!(riders.climbing.is_none());
     // Knock down the nearest front wall: they find the breach and ride in.
     let front = sim.siege().unwrap().front_walls()[0];
     sim.siege_mut().unwrap().pieces[front].hp = 0.0;
@@ -148,12 +149,12 @@ fn walls_stop_regiments_until_a_breach_opens() {
     })
     .unwrap();
     run(&mut sim, 200.0);
-    let knights = &sim.units()[7];
+    let riders = &sim.units()[7];
     assert!(
-        sim.siege().unwrap().inside(knights.x, knights.z),
+        sim.siege().unwrap().inside(riders.x, riders.z),
         "through the breach: ({:.0}, {:.0})",
-        knights.x,
-        knights.z
+        riders.x,
+        riders.z
     );
 }
 
@@ -231,21 +232,7 @@ fn the_ram_breaks_the_gate() {
     let gate = &works.pieces[works.gate];
     let (mx, mz) = gate.midpoint();
     let (nx, nz) = gate.outward();
-    // Garrison holds its fire: the test is about the ram.
-    let shooters: Vec<u32> = sim
-        .units()
-        .iter()
-        .filter(|u| u.side == SideId::Defender && u.can_shoot())
-        .map(|u| u.id)
-        .collect();
-    sim.apply_command(
-        Command::FireAtWill {
-            units: shooters,
-            enabled: false,
-        },
-        None,
-    )
-    .unwrap();
+    hold_fire(&mut sim, SideId::Defender);
     sim.issue_command(Command::Move {
         units: vec![ram],
         x: mx + nx * (works.band() + 1.0),
