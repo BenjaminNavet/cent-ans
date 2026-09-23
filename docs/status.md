@@ -1,13 +1,13 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
+Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
 
 ## Où en est-on
-- **M0 à M9 terminés** (sièges et IA compris, campagne et bataille) ; M10 (finition) en cours. Jeu jouable avec villes vivantes, dynasties, technologies, diplomatie et religion, batailles 3D temps réel avec pause, objectifs historiques.
+- **M0 à M10 terminés : la v1 est complète.** Campagne 1337-1453 jouable de bout en bout avec villes vivantes, dynasties, technologies, diplomatie et religion, chronique historique, batailles et sièges 3D temps réel avec IA tactique, objectifs historiques et écran de fin, sons, musiques, modèles 3D et écus ; application macOS autonome (`tools/export_macos.sh`). Reste : 49 portraits à générer (≈ 2,25 $) quand la clé OpenRouter le permettra.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
-- `core/` : workspace Rust (data-model, sim-campaign, sim-battle, ai, godot-bridge). 10 tests, clippy propre.
+- `core/` : workspace Rust (data-model, sim-campaign, sim-battle, ai, godot-bridge). 183 tests, clippy propre.
 - `game/` : projet Godot 4.7 chargeant la GDExtension ; scène principale avec date et bouton « Fin du tour ».
 - Smoke test headless : `godot --headless --path game --script res://tests/smoke.gd` → 10 tours joués, « Automne 1339 ».
 - `tools/` : projet Python (uv) avec ledger de budget, client images OpenRouter (contrôle du plafond 50 $), pilotage Blender headless, CLI `cent-ans`. 12 tests.
