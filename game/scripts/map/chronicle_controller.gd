@@ -104,6 +104,7 @@ func stage_screenshot() -> void:
 			if not decision.get("historical", false):
 				map.sim.call("choose_event_option", int(decision["id"]), 0)
 	map.refresh_all()
+	map.ui.hide_province()
 	var date := str(map.sim.call("get_date_label"))
 	map.ui.add_events(map.sim.call("get_events"), date)
 	var decisions := pending()

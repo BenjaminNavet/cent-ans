@@ -4,12 +4,5 @@
 [ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
 
 [node name="ChronicleWindow" type="PanelContainer"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_window")
