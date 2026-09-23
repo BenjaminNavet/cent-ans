@@ -1,0 +1,42 @@
+{
+  "id": "evt_don_marchand",
+  "title": "Le don d'un marchand",
+  "text": "Un riche marchand, enrichi dans le drap et la laine, offre au prince une forte somme. Il espère en retour quelque faveur : une charge, un anoblissement, une exemption.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Accepter avec reconnaissance",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "L'anoblir en échange d'un don plus grand",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "prestige",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Jacques Cœur",
+    "Michel Mollat, Jacques Cœur ou l'esprit d'entreprise, 1988"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "evt_grandes_compagnies",
+  "title": "Les Grandes Compagnies",
+  "text": "La paix a laissé sans solde des milliers de routiers anglais, gascons et bretons. Réunis en Grandes Compagnies, ils rançonnent les villes, pillent les campagnes et ont battu l'armée royale à Brignais. On murmure qu'on pourrait les envoyer guerroyer en Castille.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1361
+    },
+    "until_year": 1368
+  },
+  "scope": {
+    "type": "province",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Payer les routiers pour qu'ils passent en Castille",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "devastation",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les compagnies vivre sur le pays",
+      "effects": [
+        {
+          "type": "devastation",
+          "amount": 25
+        },
+        {
+          "type": "unrest",
+          "amount": 15
+        },
+        {
+          "type": "population",
+          "percent": -2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1362-04-06"
+  },
+  "sources": [
+    "Grandes compagnies",
+    "Bataille de Brignais",
+    "Philippe Contamine, La Guerre de Cent Ans, PUF (Que sais-je ?), 2010"
+  ]
+}

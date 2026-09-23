@@ -55,6 +55,8 @@ pub enum EventKind {
     CampaignEnded,
     /// A faction completes a technology (M6).
     TechnologyResearched,
+    /// Historical or random chronicle event (M10).
+    Chronicle,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

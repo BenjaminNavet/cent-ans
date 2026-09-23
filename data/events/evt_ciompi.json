@@ -1,0 +1,54 @@
+{
+  "id": "evt_ciompi",
+  "title": "Le tumulte des Ciompi",
+  "text": "À Florence, les cardeurs de laine, les Ciompi, exclus des arts majeurs, prennent le palais de la Seigneurie. Ils réclament le droit de former leurs propres corporations et une part du gouvernement de la commune.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1378,
+      "season": "summer"
+    },
+    "until_year": 1379
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_firenze"
+  },
+  "options": [
+    {
+      "text": "Accorder les arts nouveaux",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -15
+        },
+        {
+          "type": "wealth",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les grandes familles rétablir l'ordre",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 10
+        },
+        {
+          "type": "devastation",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1378-07-20"
+  },
+  "sources": [
+    "Révolte des Ciompi",
+    "Alessandro Stella, La Révolte des Ciompi, EHESS, 1993"
+  ]
+}

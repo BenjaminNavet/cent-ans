@@ -1,0 +1,78 @@
+{
+  "id": "evt_folie_charles_vi",
+  "title": "La folie du roi",
+  "text": "Dans la forêt du Mans, par une chaleur accablante, un page laisse tomber une lance sur un casque. Le roi, se croyant trahi, tire l'épée et tue quatre hommes de sa suite avant d'être maîtrisé. Les médecins ne savent quel mal l'habite ; les oncles du roi reprennent le pouvoir.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1392,
+      "season": "summer"
+    },
+    "until_year": 1394,
+    "conditions": [
+      {
+        "type": "ruler_house",
+        "faction": "fac_france",
+        "house": "Valois"
+      },
+      {
+        "type": "ruler_age_between",
+        "faction": "fac_france",
+        "min": 18,
+        "max": 40
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Confier le gouvernement aux oncles du roi",
+      "effects": [
+        {
+          "type": "add_trait",
+          "trait": "trait_mad"
+        },
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 10,
+          "reason": "Le duc de Bourgogne gouverne pour le roi"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Cacher le mal et attendre la guérison",
+      "effects": [
+        {
+          "type": "add_trait",
+          "trait": "trait_mad"
+        },
+        {
+          "type": "prestige",
+          "amount": -30
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1392-08-05"
+  },
+  "sources": [
+    "Charles VI de France",
+    "Françoise Autrand, Charles VI, Fayard, 1986"
+  ]
+}

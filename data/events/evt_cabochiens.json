@@ -1,0 +1,77 @@
+{
+  "id": "evt_cabochiens",
+  "title": "La révolte cabochienne",
+  "text": "Les bouchers de Paris, menés par l'écorcheur Simon Caboche et soutenus par le duc de Bourgogne, prennent la Bastille et imposent au roi une grande ordonnance de réforme. Le chaperon blanc est partout dans les rues.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1413,
+      "season": "spring"
+    },
+    "until_year": 1414,
+    "conditions": [
+      {
+        "type": "fired",
+        "event": "evt_armagnacs_bourguignons"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_ile_de_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_ile_de_france"
+  },
+  "options": [
+    {
+      "text": "Promulguer l'ordonnance cabochienne",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 10,
+          "reason": "Ordonnance cabochienne"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Appeler les Armagnacs pour reprendre Paris",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 15
+        },
+        {
+          "type": "devastation",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -20,
+          "reason": "Paris repris par les Armagnacs"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1413-04-28"
+  },
+  "sources": [
+    "Révolte des Cabochiens",
+    "Alfred Coville, Les Cabochiens et l'ordonnance de 1413, 1888"
+  ]
+}

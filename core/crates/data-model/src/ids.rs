@@ -146,6 +146,11 @@ define_id!(
     "names_"
 );
 define_id!(
+    /// Identifier of a chronicle event (`evt_crecy`), M10.
+    EventId,
+    "evt_"
+);
+define_id!(
     /// Abstract sea zone (`sea_channel`); free vocabulary.
     SeaZoneId,
     "sea_"

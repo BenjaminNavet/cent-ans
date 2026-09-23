@@ -1,0 +1,57 @@
+{
+  "id": "evt_tournoi",
+  "title": "Un grand tournoi",
+  "text": "Hérauts et poursuivants ont crié le tournoi dans tout le pays. Chevaliers et écuyers accourent pour rompre des lances sous les yeux des dames.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 80,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "summer"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Donner un tournoi somptueux",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "add_trait",
+          "character": "heir",
+          "trait": "trait_tourney_champion"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Interdire ces vanités coûteuses",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 3
+        },
+        {
+          "type": "prestige",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Tournoi (Moyen Âge)",
+    "Richard Barber et Juliet Barker, Tournaments, 1989"
+  ]
+}

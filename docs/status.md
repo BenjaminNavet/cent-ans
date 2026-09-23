@@ -35,6 +35,13 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
   10 tests M6, smoke `_run_technologies`. Capture : `docs/img/godot-tech-tree.png`.
 
 - Diplomatie et religion (M5) : attitude calculée avec raisons, casus belli (prétentions de 1337 : Édouard III sur la France, Philippe VI sur la Guyenne…), déclaration de guerre (réputation, parjure), appel aux armes, paix négociée (score de guerre, cessions, tribut, trêve de 5 ans), alliances, embargos (revenu), vassaux (tribut, loyauté, rébellion), mariages entre factions et prétentions dynastiques, union personnelle, propositions de l'IA au joueur, IA diplomatique minimale ; faveur pontificale, dons, médiation, excommunication, Grand Schisme 1378-1417 (obédiences historiques), Lollards (1381) et Hussites (1419). Une faction sans héritier voit une nouvelle maison (ou un élu) prendre le pouvoir. Panneau Diplomatie (P), modes de carte N/R. 18 tests M5. Sonde : `cargo run --release -p sim-campaign --example diplomacy_probe`.
+- Chronique (M10, partie 1) : moteur d'événements piloté par `data/events/` (48 événements sourcés :
+  26 historiques datés et conditionnels — L'Écluse, Crécy, Calais, Peste noire, Poitiers, Étienne Marcel,
+  Jacquerie, Brétigny, Grandes Compagnies, Ciompi, révolte des Paysans, Maillotins, folie de Charles VI,
+  Armagnacs et Bourguignons, Constance, Azincourt, Troyes, Jeanne d'Arc, Arras, Castillon… — et 22
+  aléatoires à choix), conditions et effets typés, choix de l'IA par poids, décisions du joueur (fenêtre
+  « Chronique », 2 tours avant choix d'office), ordre `choose_event_option`, vague de Peste noire du sud
+  vers le nord sur 12 tours. 13 tests M10, smoke `_run_chronicle`. Capture : `docs/img/godot-chronicle.png`.
 - Correctif M4 : les effets du gouverneur s'appliquent désormais à la population et aux impôts.
 
 - IA de campagne stratégique (M9, partie campagne) : crate `ai` (`ai::plan_turn`), utilisée par le pont pour toutes les factions IA. Objectifs par armée (défense des provinces menacées, sièges des provinces les plus précieuses, chevauchées des factions agressives, regroupement, retraite), fusion des armées, budget militaire (60 % du revenu en guerre, 30 % en paix), recrutement de la meilleure unité par livre, construction par rendement, impôts selon la guerre et l'ordre public, licenciement en cas de dette, gouverneurs, généraux, compétences, mariages ; diplomatie (M5) et recherche (M6) réutilisées. 9 tests. Sonde : `cargo run --release -p ai --example ai_probe` (100 tours, 0 % d'ordres refusés côté France). L'IA de bataille arrive avec M7.
@@ -64,6 +71,12 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M6).
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
 - Les effets `Diplomacy`, `Intrigue`, `Loyalty` des traits/compétences sont stockés mais sans effet avant M5.
 - Batailles (M7) : l'IA de bataille est minimale (avance en ligne, archers derrière, charge à 150 m) et les batailles d'IA décident vite (≈ 2-3 min simulées, déroute en cascade) ; pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée ; les armées alliées présentes dans la province ne participent pas (seules les deux armées de la rencontre). Équilibrage à reprendre en M9/M10.
+
+- M10 : Charles VI n'existe pas dans les données (pas de naissance historique) : sa folie se déclenche
+  sur « dirigeant Valois de 18 à 40 ans en 1392-1394 ». Les événements globaux (Peste noire, Constance)
+  attendent le choix du joueur : la vague de peste ne démarre qu'une fois la décision prise (ou expirée).
+  Pas encore d'effet « capturer un personnage » : Brétigny accepte aussi « Poitiers a eu lieu ».
+  Les chaînes d'événements différés (effets au tour N+k) ne sont pas gérées.
 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.
