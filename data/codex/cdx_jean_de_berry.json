@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_de_berry",
+  "title": "Jean de Berry, prince mécène",
+  "category": "personnage",
+  "aliases": ["Jean de Berry", "duc de Berry", "Jean Ier de Berry"],
+  "era": { "from": "1340", "to": "1416" },
+  "summary": "Troisième fils de [[cdx_jean_ii|Jean II]], Jean, duc de Berry et d'Auvergne, est un prince avide d'impôts mais le plus grand collectionneur de son temps. Il commande aux frères de Limbourg les [[cdx_tres_riches_heures|Très Riches Heures]].",
+  "body": "Né à Vincennes en 1340, Jean est le troisième fils de [[cdx_jean_ii|Jean le Bon]]. Il combat à [[cdx_poitiers|Poitiers]] puis part en Angleterre comme otage de la rançon paternelle, en application du [[cdx_bretigny|traité de Brétigny]]. Son père l'a fait duc de Berry et d'Auvergne en 1360.\n\nFrère de [[cdx_charles_v|Charles V]], puis oncle de [[cdx_charles_vi|Charles VI]], il partage le pouvoir pendant la minorité du roi avec ses frères Louis d'Anjou et [[cdx_philippe_le_hardi|Philippe le Hardi]]. Lieutenant du roi en Languedoc, il y lève des impôts si lourds qu'ils provoquent la révolte des Tuchins. Pendant la guerre civile, il tente plusieurs fois de réconcilier les partis avant de se ranger du côté des Armagnacs.\n\nSa vraie passion est l'art. Il fait construire ou embellir des châteaux et des palais, comme ceux de Mehun-sur-Yèvre, de Poitiers et de Bourges, où il fonde une Sainte-Chapelle. Il accumule joyaux, reliques, tapisseries, animaux exotiques et surtout manuscrits enluminés : des livres d'heures somptueux, comme les Belles Heures et les [[cdx_tres_riches_heures|Très Riches Heures]], confiés aux meilleurs artistes, dont les frères de Limbourg.\n\nIl meurt à Paris en juin 1416, quelques mois après [[cdx_azincourt|Azincourt]], criblé de dettes. Ses biens sont vendus, mais les inventaires de ses collections, conservés, sont une mine pour les historiens de l'art, et plusieurs de ses manuscrits comptent aujourd'hui parmi les plus beaux du monde.",
+  "entity": "chr_jean_de_berry",
+  "see_also": ["cdx_tres_riches_heures", "cdx_enluminure", "cdx_charles_v", "cdx_charles_vi"],
+  "sources": ["Jean Ier de Berry", "Très Riches Heures du duc de Berry"]
+}
