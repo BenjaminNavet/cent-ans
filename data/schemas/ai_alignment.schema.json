@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_alignment.schema.json",
+  "title": "Réglages des changements de camp de l'IA",
+  "description": "Fichier data/ai/alignment.json : seuils des changements de camp historiques de l'IA (lots G2 et G4) — révolte de la laine, défection vers l'envahisseur dominant, grief, alliances dynastiques et fiefs-rentes. Sans ce fichier, l'IA ne change jamais de camp. Voir docs/design/m9-ai.md § 5.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "history_permille": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Chance (pour mille) qu'une campagne connaisse un changement de camp donné : un jet par prince (révolte de la laine, alliances dynastiques) ou par prince et par décennie (défection vers l'envahisseur dominant)."
+    },
+    "wool_revolt": {
+      "type": "object",
+      "description": "Révolte de la laine (Artevelde, 1338-1340) : un vassal ruiné par l'embargo de l'ennemi de son suzerain passe à cet ennemi.",
+      "properties": {
+        "loyalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Loyauté sous laquelle le vassal change de camp." }
+      },
+      "required": ["loyalty"],
+      "additionalProperties": false
+    },
+    "defection": {
+      "type": "object",
+      "description": "Défection vers l'envahisseur qui domine le royaume du protecteur (Troyes, 1420).",
+      "properties": {
+        "loyalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Loyauté sous laquelle un vassal opportuniste peut faire défection." },
+        "realm_region_provinces": { "type": "integer", "minimum": 1, "description": "Une région où la couronne tenait au moins ce nombre de provinces en 1337 fait partie de son royaume." },
+        "dominance_realm_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du royaume que l'envahisseur doit tenir pour le dominer (ou la capitale de 1337)." },
+        "crown_in_trouble_loss": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de ses terres de 1337 qu'une couronne en difficulté a perdue (ou score de guerre au seuil de désertion)." }
+      },
+      "required": ["loyalty", "realm_region_provinces", "dominance_realm_share", "crown_in_trouble_loss"],
+      "additionalProperties": false
+    },
+    "grievance": {
+      "type": "object",
+      "description": "Grief (Montereau, 1419) : un prince ulcéré par son suzerain, un allié ou un ennemi qu'il combat se tourne vers l'ennemi ou le prétendant de celui-ci.",
+      "properties": {
+        "grudge": { "type": "integer", "maximum": 0, "description": "Somme des modificateurs d'opinion négatifs en cours (hors réputation de parjure ou d'agresseur) à partir de laquelle le prince tient un grief." },
+        "min_attitude": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Attitude minimale (hors guerre entre eux) envers l'ennemi ou le prétendant rejoint." }
+      },
+      "required": ["grudge", "min_attitude"],
+      "additionalProperties": false
+    },
+    "dynastic": {
+      "type": "object",
+      "description": "Alliances dynastiques d'une couronne en guerre de succession avec les princes voisins de l'ennemi (Hainaut, Brabant).",
+      "properties": {
+        "margin": { "type": "integer", "minimum": 0, "description": "Avance d'attitude envers nous sur l'ennemi qu'un prince courtisé doit avoir." },
+        "min_attitude": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Attitude minimale envers nous d'un prince courtisé." },
+        "in_law_attitude": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Attitude envers l'un de nos alliés qui fait d'un prince son parent (aucune avance exigée)." },
+        "max_allies": { "type": "integer", "minimum": 0, "description": "Nombre d'alliés (vassaux exclus) au-delà duquel la couronne ne courtise plus (ni alliance ni fief-rente)." },
+        "max_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance maximale d'un prince courtisé, en part de la nôtre (une grande couronne n'est pas pensionnée)." }
+      },
+      "required": ["margin", "min_attitude", "in_law_attitude", "max_allies", "max_power_ratio"],
+      "additionalProperties": false
+    },
+    "money_fief": {
+      "type": "object",
+      "description": "Fiefs-rentes (pensions d'Édouard III aux princes des Pays-Bas, 1337) : présent à un prince courtisé qui hésite encore.",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 1, "description": "Montant du présent, en livres." },
+        "treasury_multiple": { "type": "integer", "minimum": 1, "description": "Le donateur garde au moins ce multiple du présent en trésor." },
+        "min_attitude": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Attitude minimale envers nous d'un prince pensionné." }
+      },
+      "required": ["amount", "treasury_multiple", "min_attitude"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["history_permille", "wool_revolt", "defection", "grievance", "dynastic", "money_fief"],
+  "additionalProperties": false
+}
