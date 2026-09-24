@@ -34,7 +34,7 @@ import landmark_monuments as monuments  # noqa: E402
 
 # name: (base colour (linear RGB), roughness)
 PALETTE = {
-    "NDStone": ((0.55, 0.50, 0.40), 0.85),
+    "NDStone": ((0.64, 0.59, 0.48), 0.85),
     "Stone": ((0.42, 0.39, 0.33), 0.88),
     "DarkStone": ((0.30, 0.28, 0.24), 0.9),
     "WallStone": ((0.40, 0.37, 0.31), 0.9),

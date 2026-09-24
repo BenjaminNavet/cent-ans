@@ -18,11 +18,19 @@ V4 lit `data/map/river_styles.json` → `custom_zones` : `{ "id": "paris", "lonl
 
 ## État
 - [x] squelette : schéma, données de Paris, test, script vide
-- [ ] générateur : Seine, îles, enceintes, rues, tissu urbain
-- [ ] Notre-Dame soignée, puis autres monuments
-- [ ] rendu campagne (remplacement de la maquette, LOD, année)
-- [ ] captures avant/après
+- [x] générateur : Seine, îles, enceintes, rues, tissu urbain (Voronoï, maisons le long des îlots)
+  `landmark_city.py` + `landmark_geometry.py` ; aperçus `landmark_preview.py` (EEVEE)
+- [x] Notre-Dame soignée, puis autres monuments (`landmark_monuments.py`)
+- [x] plan recalé sur OSM (berges, îles, vestiges des enceintes, monuments)
+- [x] rendu campagne : `LandmarkModel` (drapé shader `landmark.gdshader`, année via
+  `get_date_label`, LOD maisons/îlots), `LandmarkLibrary`, crochet dans `SettlementLayer`,
+  zoom rapproché (7) au-dessus de Paris (`CampaignCamera.close_zones`)
+- [ ] captures avant/après finales, ADR 0015
 - [ ] ville de siège (si le temps le permet)
 
+## Régénérer
+`blender --background --python tools/blender_scripts/landmark_city.py -- data/landmarks/paris.json game/assets/models/landmarks/paris.glb`
+puis `godot --headless --path game --import`. Le GLB (≈ 10 Mo) n'est commité qu'aux étapes finales.
+
 ## Prochaine étape
-Générateur Blender : maillage par matériau, loupe, Seine et îles.
+Captures finales (proche, moyen, loin, années 1340/1380), ADR, puis siège.
