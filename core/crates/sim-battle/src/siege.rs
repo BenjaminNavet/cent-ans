@@ -10,6 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::fire::Blaze;
 use crate::rng::BattleRng;
 
 /// Centre of the town (x, z), in metres.
@@ -129,6 +130,24 @@ pub struct House {
     pub x: f64,
     pub z: f64,
     pub radius: f64,
+    /// Fire state (S2): a burnt house is a ruin that no longer blocks.
+    #[serde(default)]
+    pub fire: Blaze,
+    /// A suburb house outside the walls (S2).
+    #[serde(default)]
+    pub suburb: bool,
+}
+
+impl House {
+    /// The house still blocks movement and pathing (not a burnt ruin).
+    pub fn standing(&self) -> bool {
+        !self.fire.burnt()
+    }
+
+    /// Distance from (x, z) to the edge of the house disc (negative inside).
+    pub fn edge_distance(&self, x: f64, z: f64) -> f64 {
+        ((x - self.x).powi(2) + (z - self.z).powi(2)).sqrt() - self.radius
+    }
 }
 
 /// Radii (from the town centre) of the two rings of houses.
@@ -164,6 +183,8 @@ fn build_houses(center: (f64, f64), pieces: &[WallPiece]) -> Vec<House> {
                     x: center.0 + angle.sin() * r,
                     z: center.1 + angle.cos() * r,
                     radius: HOUSE_RADIUS,
+                    fire: Blaze::default(),
+                    suburb: false,
                 });
             }
         }
@@ -195,6 +216,12 @@ pub struct SiegeWorks {
     /// The garrison sallies out: the gate lets its regiments through (F5a).
     #[serde(default)]
     pub sortie: bool,
+    /// Fire of the (wooden) gate (S2).
+    #[serde(default)]
+    pub gate_fire: Blaze,
+    /// Wind of the fires (S2): direction × strength (0-1), x and z.
+    #[serde(default)]
+    pub wind: (f64, f64),
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -296,6 +323,8 @@ impl SiegeWorks {
         let mut works = SiegeWorks {
             houses,
             sortie: false,
+            gate_fire: Blaze::default(),
+            wind: (0.0, 0.0),
             fortification,
             center: TOWN_CENTER,
             vertices,
@@ -454,11 +483,22 @@ impl SiegeWorks {
         }
     }
 
-    /// The house whose disc (plus `margin`) contains (x, z).
+    /// The standing house (not a burnt ruin) whose disc (plus `margin`)
+    /// contains (x, z).
     pub fn house_at(&self, x: f64, z: f64, margin: f64) -> Option<usize> {
-        self.houses
-            .iter()
-            .position(|h| (x - h.x).powi(2) + (z - h.z).powi(2) < (h.radius + margin).powi(2))
+        self.houses.iter().position(|h| {
+            h.standing() && (x - h.x).powi(2) + (z - h.z).powi(2) < (h.radius + margin).powi(2)
+        })
+    }
+
+    /// Houses burnt to the ground (S2).
+    pub fn burnt_houses(&self) -> usize {
+        self.houses.iter().filter(|h| h.fire.burnt()).count()
+    }
+
+    /// Houses on fire (S2).
+    pub fn burning_houses(&self) -> usize {
+        self.houses.iter().filter(|h| h.fire.burning()).count()
     }
 
     /// Share of the wall ring still standing (HUD).

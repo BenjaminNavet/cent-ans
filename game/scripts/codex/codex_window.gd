@@ -15,6 +15,10 @@ const SIZE := Vector2(980, 640)
 const ALL_TAB := "Toutes"
 const HERB_CATEGORY := "plante"
 const HERB_HEADER := "__herbier__"
+## Miniature en tête de fiche : la sienne, sinon l'image de son `entity` (portraits en entier).
+const ART_SIZE := Vector2(0, 220)
+const OWN_ART := "res://assets/illustrations/%s.jpg"
+const ENTITY_ART := ["res://assets/events/%s.jpg", "res://assets/illustrations/%s.jpg", "res://assets/portraits/%s.png"]
 
 var current_id: String = ""
 var _history: Array = []
@@ -29,6 +33,7 @@ var _tabs: TabBar
 var _list: ItemList
 var _title_label: Label
 var _meta_label: Label
+var _art: TextureRect
 ## H11 : « Voir dans l'encyclopédie » quand la fiche a une `entity` connue de l'Encyclopédie.
 var encyclopedia_button: Button
 var _body: RichTextLabel
@@ -129,6 +134,12 @@ func _build_page() -> Control:
 	_meta_label.add_theme_font_size_override("font_size", 14)
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	page.add_child(_meta_label)
+	_art = TextureRect.new()
+	_art.custom_minimum_size = ART_SIZE
+	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_art.clip_contents = true
+	_art.hide()
+	page.add_child(_art)
 	encyclopedia_button = Button.new()
 	encyclopedia_button.text = "Voir dans l'encyclopédie"
 	encyclopedia_button.tooltip_text = "Fiche de jeu (touche L)"
@@ -246,6 +257,10 @@ func _show_entry(id: String) -> void:
 	if era != "":
 		meta.append(era)
 	_meta_label.text = " · ".join(meta)
+	var art_path := art_path_of(id, str(entry.get("entity", "")))
+	_art.texture = PortraitLoader.load_texture(art_path) if art_path != "" else null
+	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED if art_path.ends_with(".png") else TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_art.visible = _art.texture != null
 	encyclopedia_button.visible = _encyclopedia() != null and not Encyclopedia.definition_of(str(entry.get("entity", ""))).is_empty()
 	_body.text = CodexText.format(str(entry.get("body", entry.get("summary", ""))))
 	var anachronism := str(entry.get("anachronism", ""))
@@ -260,6 +275,18 @@ func _show_entry(id: String) -> void:
 	var sources: Array = entry.get("sources", [])
 	_sources.text = "Sources (Wikipédia) : " + " ; ".join(PackedStringArray(sources)) if not sources.is_empty() else ""
 	_scroll.scroll_vertical = 0
+
+
+## Chemin de la miniature d'une fiche ("" si aucune) : la sienne, puis celle de son entité.
+static func art_path_of(id: String, entity: String) -> String:
+	var candidates := [OWN_ART % id]
+	if entity != "":
+		for pattern in ENTITY_ART:
+			candidates.append(pattern % entity)
+	for path in candidates:
+		if ResourceLoader.exists(path) or FileAccess.file_exists(ProjectSettings.globalize_path(path)):
+			return path
+	return ""
 
 
 func _refresh_list() -> void:

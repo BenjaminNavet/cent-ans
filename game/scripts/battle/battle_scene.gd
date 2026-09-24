@@ -455,7 +455,10 @@ static func siege_status(siege: Dictionary) -> String:
 				breaches += 1
 	var text := "Murailles %d %%" % int(round(float(siege.get("integrity", 1.0)) * 100.0))
 	text += " · %d brèche(s)" % breaches
-	text += " · porte %s" % ("enfoncée" if gate_open else "tenue")
+	var burning := int(siege.get("houses_burning", 0))
+	if burning > 0:
+		text += " · %d maison(s) en feu" % burning
+	text += " · porte %s" % ("enfoncée" if gate_open else ("en feu" if str((siege.get("gate_fire", {}) as Dictionary).get("state", "")) == "burning" else "tenue"))
 	var hold := float(siege.get("hold_time", 0.0))
 	if hold > 0.0:
 		text += " · place centrale tenue %d / %d s" % [int(hold), int(float(siege.get("hold_to_win", 60.0)))]
