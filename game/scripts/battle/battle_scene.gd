@@ -882,6 +882,8 @@ func _stage_screenshot() -> void:
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
+	if markers != null and not selected.is_empty() and not _closeup:
+		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
 	for _i in 40:
