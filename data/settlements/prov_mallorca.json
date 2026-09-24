@@ -1,0 +1,94 @@
+[
+  {
+    "id": "set_palma",
+    "province": "prov_mallorca",
+    "kind": "city",
+    "name": {
+      "display": "Palma",
+      "local": "Ciutat de Mallorca",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.6502,
+      39.5696
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Palma, capitale du royaume de Majorque, réuni à la Couronne d'Aragon en 1344 (encore autonome en 1337).",
+    "sources": [
+      "Royaume de Majorque",
+      "Jacques III de Majorque",
+      "Palma"
+    ]
+  },
+  {
+    "id": "set_mao",
+    "province": "prov_mallorca",
+    "kind": "town",
+    "name": {
+      "display": "Mahón",
+      "local": "Maó",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      4.2371,
+      39.8885
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port principal de Minorque, sur l'un des meilleurs mouillages naturels de Méditerranée.",
+    "sources": [
+      "Mahón",
+      "Minorque"
+    ]
+  },
+  {
+    "id": "set_eivissa",
+    "province": "prov_mallorca",
+    "kind": "castle",
+    "name": {
+      "display": "Ibiza",
+      "local": "Eivissa",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.4419,
+      38.9067
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ville fortifiée d'Ibiza, place du commerce du sel du royaume de Majorque.",
+    "sources": [
+      "Ibiza (ville)"
+    ]
+  }
+]

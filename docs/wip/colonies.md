@@ -11,7 +11,7 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C1 squelette cœur | fait (fusionné `a4de853`) | types data-model, `SettlementState`, cité auto, `rules.json`, getter `settlements()` |
 | C2a colonies France | fait | 41 prov., 196 colonies, 8 enclaves |
 | C2b colonies Nord | fait | 56 prov., 227 colonies ; Stirling anglais, Dunbar écossais |
-| C2c colonies Sud | en cours (vague 2) | iberie_*, aragon, portugal, italie_* (35 prov.) |
+| C2c colonies Sud | fait | 35 prov., 145 colonies ; enclaves scaligères (Lucques, Trévise), Mantoue impériale, Alghero génoise ; total 568 colonies |
 | C3 pipeline géo | en cours (vague 2) | graphe des colonies, relief 8192² tuiles, hameaux, routes |
 | C4 refonte cœur | en cours (vague 2) | graphe de repli si `settlement_graph.json` absent |
 | C5 pont + UI | à faire | |

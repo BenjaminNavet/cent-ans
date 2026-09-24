@@ -426,5 +426,59 @@ def assets_portraits(
     )
 
 
+@assets_app.command("event-art")
+def assets_event_art(
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal d'illustrations"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """Génère les miniatures d'événements manquantes (768×384) dans game/assets/events/."""
+    from decimal import Decimal
+
+    from cent_ans_tools import event_art, portraits
+
+    model = model or portraits.DEFAULT_MODEL
+    jobs = event_art.plan(limit=limit)
+    if dry_run:
+        for job in jobs:
+            console.rule(job.character_id)
+            console.print(job.prompt)
+        unit = portraits.KNOWN_PRICES.get(model)
+        cost = (
+            f"≈ {unit * len(jobs):.2f} $"
+            if unit is not None
+            else "tarif inconnu hors ligne"
+        )
+        console.print(
+            f"{len(jobs)} miniature(s) avec {model} : {cost} (aucun appel réseau)"
+        )
+        return
+    if not jobs:
+        console.print("[green]OK[/green] : toutes les miniatures existent déjà")
+        return
+    result = portraits.generate(
+        jobs,
+        model,
+        envelope=Decimal(str(envelope)),
+        subject=f"Miniatures d'événements ({len(jobs)} × {model})",
+        convert=event_art.to_miniature_jpg,
+        on_progress=lambda job, spent: console.print(
+            f"{job.character_id} ({spent:.4f} $)"
+        ),
+    )
+    console.print(
+        f"[green]OK[/green] : {len(result.written)} miniature(s), estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
+    )
+
+
 if __name__ == "__main__":
     app()

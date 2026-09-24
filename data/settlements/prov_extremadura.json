@@ -1,0 +1,114 @@
+[
+  {
+    "id": "set_badajoz",
+    "province": "prov_extremadura",
+    "kind": "city",
+    "name": {
+      "display": "Badajoz",
+      "local": "Badajoz",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.9706,
+      38.8794
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Badajoz, capitale de l'Estrémadure, ville-frontière face au Portugal.",
+    "sources": [
+      "Estrémadure",
+      "Ordre d'Alcántara",
+      "Guerre luso-castillane (1336-1339)"
+    ]
+  },
+  {
+    "id": "set_caceres",
+    "province": "prov_extremadura",
+    "kind": "town",
+    "name": {
+      "display": "Cáceres",
+      "local": "Cáceres",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.3722,
+      39.4753
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville close d'origine almohade, repeuplée après la Reconquête de 1229.",
+    "sources": [
+      "Cáceres"
+    ]
+  },
+  {
+    "id": "set_merida",
+    "province": "prov_extremadura",
+    "kind": "town",
+    "name": {
+      "display": "Mérida",
+      "local": "Mérida",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.3372,
+      38.9165
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Ancienne Augusta Emerita romaine, ville modeste au Moyen Âge malgré ses vestiges monumentaux.",
+    "sources": [
+      "Mérida (Espagne)"
+    ]
+  },
+  {
+    "id": "set_alcantara",
+    "province": "prov_extremadura",
+    "kind": "abbey",
+    "name": {
+      "display": "Alcántara",
+      "local": "Alcántara",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.8798,
+      39.7167
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Commanderie-siège de l'ordre militaire d'Alcántara depuis 1218, près du pont romain sur le Tage.",
+    "sources": [
+      "Alcántara (Espagne)",
+      "Ordre d'Alcántara"
+    ]
+  }
+]

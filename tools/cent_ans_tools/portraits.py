@@ -69,6 +69,7 @@ ROLE_LABELS = {
     "regent": "regent",
     "commander": "military commander",
     "noble": "high noble",
+    "prelate": "high prelate",
     "claimant": "claimant to a throne",
     "burgher": "rich burgher and town leader",
     "exile": "exiled lord",
@@ -222,8 +223,13 @@ def generate(
     client: httpx.Client | None = None,
     subject: str | None = None,
     on_progress: Callable[[PortraitJob, Decimal], None] | None = None,
+    convert: Callable[[bytes], bytes] = to_portrait_png,
 ) -> BatchResult:
-    """Paid batch: generate each job, guarded by the envelope and the global cap."""
+    """Paid batch: generate each job, guarded by the envelope and the global cap.
+
+    ``convert`` turns the raw model image into the saved file (portrait crop by
+    default; :mod:`cent_ans_tools.event_art` passes its wide miniature crop).
+    """
     unit = max(price_per_image(model, client), KNOWN_PRICES.get(model, Decimal("0")))
     written: list[Path] = []
     spent = Decimal("0")
@@ -244,7 +250,7 @@ def generate(
             estimated += unit
             spent += cost if cost is not None else unit
             job.out_path.parent.mkdir(parents=True, exist_ok=True)
-            job.out_path.write_bytes(to_portrait_png(image))
+            job.out_path.write_bytes(convert(image))
             written.append(job.out_path)
             if on_progress is not None:
                 on_progress(job, spent)

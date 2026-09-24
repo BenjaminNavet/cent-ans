@@ -1,0 +1,91 @@
+[
+  {
+    "id": "set_perpignan",
+    "province": "prov_roussillon",
+    "kind": "city",
+    "name": {
+      "display": "Perpignan",
+      "local": "Perpinyà",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.8954,
+      42.6887
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Perpignan, capitale du comté de Roussillon, résidence des rois de Majorque.",
+    "sources": [
+      "Royaume de Majorque",
+      "Comté de Roussillon",
+      "Perpignan"
+    ]
+  },
+  {
+    "id": "set_collioure",
+    "province": "prov_roussillon",
+    "kind": "castle",
+    "name": {
+      "display": "Collioure",
+      "local": "Cotlliure",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      3.0836,
+      42.5259
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Résidence d'été fortifiée des rois de Majorque, sur la côte roussillonnaise.",
+    "sources": [
+      "Collioure",
+      "Château royal de Collioure"
+    ]
+  },
+  {
+    "id": "set_elne",
+    "province": "prov_roussillon",
+    "kind": "town",
+    "name": {
+      "display": "Elne",
+      "local": "Elna",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.9721,
+      42.6009
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne Illiberis romaine, siège du diocèse du Roussillon (jusqu'au transfert à Perpignan en 1602).",
+    "sources": [
+      "Elne"
+    ]
+  }
+]

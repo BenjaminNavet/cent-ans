@@ -2,12 +2,14 @@
 
 Session historien, 24 septembre 2026. Source : `docs/histoire/README.md` (« Pistes pour la suite ») et audit § 7.
 
-| Lot | Contenu | Agent | État |
-|---|---|---|---|
-| S1 | 14 personnages manquants (audit § 7) + fiches Codex liées | worktree, sonnet | lancé |
-| S2 | Prénoms arabes andalous (`names_ar`, cul_andalusi) + ressource étain `res_tin` (Cornouailles, Devon) | worktree, sonnet | lancé |
-| S3 | Icônes des 7 régimes + icône `res_tin` | worktree, sonnet | lancé |
+| Lot | Contenu | État |
+|---|---|---|
+| S1 | 12 personnages (audit § 7) + 14 fiches Codex (Abu al-Hasan et Valdemar IV : fiche seule, faute de faction) | fusionné — `docs/wip/s1-personnages.md` |
+| S2 | Prénoms arabes andalous (`names_ar`, cul_andalusi) + ressource étain `res_tin` (Cornouailles, Devon) + fiche stannaries | fusionné — `docs/wip/s2-noms-etain.md` |
+| S3 | Icônes des 7 régimes + icône `res_tin` | fusionné — `docs/wip/s3-icones-regimes.md` |
 
 Hors lot : portraits des nouveaux personnages (clé OpenRouter après le 1er octobre).
 
-Fusion : worktree `../gp-historien-merge`, branche `integration/historien`, puis ff-only dans main.
+Points ouverts :
+- IA : `prov_normandie_ouest` reçoit au premier tour une armée sans général (écart entre la classification « frontière » du setup 1337 et celle du module `ai`) ; c'est pourquoi Godefroy d'Harcourt démarre en `prov_normandie`.
+- L'étain ne sert à aucun bâtiment : `required_resource` n'accepte qu'un identifiant.
