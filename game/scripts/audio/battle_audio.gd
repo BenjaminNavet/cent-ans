@@ -380,11 +380,18 @@ func _detect_events(units: Array, elapsed: float) -> void:
 			continue
 		if not present:
 			continue
+		var side := str(unit.get("side", ""))
+		# Premier mouvement d'un camp : tambour de marche ; première charge montée : cor.
+		if state == "marching" and prev_state != "marching" and not _side_cried.has(side + ":drum"):
+			_side_cried[side + ":drum"] = elapsed
+			play_event("drum", pos)
 		if state == "charging" and prev_state != "charging":
-			var side := str(unit.get("side", ""))
 			if not _side_cried.has(side):
 				_side_cried[side] = elapsed
 				play_event("war_cry", pos + _forward(unit) * 4.0)
+			if mounted and not _side_cried.has(side + ":horn"):
+				_side_cried[side + ":horn"] = elapsed
+				play_event("horn", pos)
 			play_event("charge_cry", pos)
 			if mounted:
 				play_event("horse_neigh", pos)
