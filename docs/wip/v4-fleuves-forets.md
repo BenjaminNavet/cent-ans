@@ -12,10 +12,10 @@ le relais. Tout est piloté par `data/map/river_styles.json` → `custom_zones` 
 `data/schemas/river_styles.schema.json`) :
 
 ```json
-{ "id": "paris", "name": "…", "lonlat": [2.3488, 48.8534], "radius_px": 4.5, "boundary_bridges": true }
+{ "id": "paris", "name": "…", "lonlat": [2.3488, 48.8534], "radius_px": 4.8, "boundary_bridges": true }
 ```
 
-- `lonlat` : centre (Notre-Dame) ; `radius_px` : rayon en pixels carte (1 px = 719 m).
+- `lonlat` : centre (Notre-Dame) ; `radius_px` : rayon en pixels carte (1 px = 719 m) ; 4,8 = cercle des murs de la maquette générique actuelle (rayon 6 × 0,8).
 - Après modification : `uv run --project tools cent-ans geo rivers-render` régénère
   `data/map/rivers_render.json` (tronçons d'eau **coupés** dans le cercle, zone recopiée avec son
   centre en px), `data/map/river_bed.png` (pas de lit creusé ni de berges dans le cercle) et
