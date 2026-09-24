@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gallicanisme",
+  "title": "Le gallicanisme",
+  "category": "religion",
+  "aliases": ["gallicanisme", "Église gallicane", "Pragmatique Sanction", "Pragmatique Sanction de Bourges", "libertés gallicanes"],
+  "era": { "from": "1398", "to": "1516" },
+  "summary": "Le gallicanisme désigne la volonté de l'Église de France et du roi de limiter l'autorité du pape sur le royaume. Il s'affirme avec la Pragmatique Sanction de Bourges, promulguée par [[cdx_charles_vii|Charles VII]] le 7 juillet 1438.",
+  "body": "Le mot gallicanisme n'apparaît qu'au XIXe siècle, mais l'idée est bien plus ancienne : l'Église de France, fille aînée de l'Église, prétend à des « libertés » propres, et le roi entend rester maître chez lui face à Rome. Déjà Philippe le Bel s'est violemment opposé au pape Boniface VIII au début du XIVe siècle, et la [[cdx_papaute_avignon|papauté d'Avignon]] a pris l'habitude de lever de lourdes taxes sur le clergé français.\n\nLe [[cdx_grand_schisme|Grand Schisme]] renforce ce courant. En 1398, le royaume se soustrait à l'obéissance du pape d'Avignon Benoît XIII : le clergé de France se gouverne quelque temps seul. Les docteurs de l'[[cdx_universite_paris|université de Paris]] défendent alors l'idée que le concile général, qui représente toute la chrétienté, est supérieur au pape ; c'est ce concile qui met fin au schisme à [[cdx_concile_constance|Constance]].\n\nLe 7 juillet 1438, à Bourges, Charles VII fait adopter par une assemblée du clergé la Pragmatique Sanction. Elle reprend les décrets du concile de Bâle : supériorité du concile, élection des évêques et des abbés par les chapitres et les moines, limitation des taxes versées à Rome comme les annates et des appels portés devant la cour pontificale. En pratique, elle renforce surtout l'influence du roi sur les nominations.\n\nLes papes ne cessent de réclamer son abolition. Louis XI la suspend un temps pour obtenir des avantages en Italie, puis la rétablit. Elle est finalement remplacée en 1516 par le concordat de Bologne, négocié par François Ier et Léon X, qui donne au roi la nomination des évêques. L'esprit gallican, lui, survivra jusqu'à la Révolution.",
+  "entity": "evt_pragmatique_sanction",
+  "see_also": ["cdx_papaute_avignon", "cdx_grand_schisme", "cdx_concile_constance", "cdx_charles_vii"],
+  "sources": ["Gallicanisme", "Pragmatique Sanction de Bourges"]
+}

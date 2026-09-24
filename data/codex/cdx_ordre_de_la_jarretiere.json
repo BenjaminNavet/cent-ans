@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ordre_de_la_jarretiere",
+  "title": "L'ordre de la Jarretière",
+  "category": "institution",
+  "aliases": ["ordre de la Jarretière", "Jarretière", "Honi soit qui mal y pense", "chevaliers de la Jarretière"],
+  "era": { "from": "v. 1348", "to": "1453" },
+  "summary": "Fondé par [[cdx_edouard_iii|Édouard III]] vers 1348, l'ordre de la Jarretière réunit le roi et vingt-cinq compagnons sous la devise française « Honi soit qui mal y pense ». C'est le plus ancien ordre de chevalerie anglais encore existant.",
+  "body": "Au lendemain de [[cdx_crecy|Crécy]] et de la prise de [[cdx_calais|Calais]], [[cdx_edouard_iii|Édouard III]] veut attacher à sa personne les meilleurs chevaliers de son royaume. Inspiré par la légende du roi Arthur et de la Table ronde, il fonde vers 1348 un ordre placé sous la protection de saint Georges, dont le siège est la chapelle Saint-Georges du château de Windsor.\n\nL'ordre est volontairement restreint : le souverain, le prince de Galles et vingt-quatre chevaliers, soit vingt-six membres. Parmi les fondateurs figurent le [[cdx_prince_noir|Prince noir]], [[cdx_henri_de_grosmont|Henri de Grosmont]] et plusieurs vétérans de Crécy ; [[cdx_gautier_de_mauny|Gautier de Mauny]] y entre plus tard. Chaque membre possède sa stalle à Windsor, surmontée de son heaume et de sa bannière armoriée, et l'ordre se réunit chaque année à la Saint-Georges, le 23 avril.\n\nL'insigne est une jarretière bleue, portée sous le genou gauche, où se lit en lettres d'or la devise « Honi soit qui mal y pense », en français, langue de la cour anglaise. Une anecdote, rapportée seulement bien plus tard, raconte que le roi aurait ramassé la jarretière tombée d'une dame lors d'un bal en prononçant ces mots ; le sens réel de la devise pourrait plutôt viser ceux qui contestent les droits d'Édouard à la couronne de France.\n\nLa Jarretière suscite des imitations dans toute l'Europe : l'[[cdx_ordre_de_l_etoile|ordre de l'Étoile]] de Jean le Bon en 1351, puis la [[cdx_toison_or|Toison d'or]] de Philippe le Bon en 1430. Contrairement à eux, elle a traversé les siècles et existe toujours.",
+  "entity": "evt_ordre_de_la_jarretiere",
+  "see_also": ["cdx_ordre_de_l_etoile", "cdx_toison_or", "cdx_chevalerie", "cdx_edouard_iii"],
+  "sources": ["Ordre de la Jarretière"]
+}

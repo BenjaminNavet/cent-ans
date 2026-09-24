@@ -1,0 +1,12 @@
+{
+  "id": "cdx_saint_empire",
+  "title": "Le Saint-Empire romain germanique",
+  "category": "lieu",
+  "aliases": ["Saint-Empire", "Saint-Empire romain germanique", "Empire romain germanique", "princes électeurs", "roi des Romains"],
+  "era": { "from": "962", "to": "1806" },
+  "summary": "Vaste ensemble de principautés, de villes et d'évêchés allant de la mer du Nord à l'Italie, le Saint-Empire est dirigé par un empereur élu. Ses fiefs des Pays-Bas et ses alliances font de lui un acteur de la guerre de Cent Ans.",
+  "body": "Héritier de l'empire de Charlemagne, le Saint-Empire couvre au XIVe siècle l'Allemagne, la Bohême, une partie de l'Italie du Nord, les Pays-Bas et les terres situées à l'est de la Saône et du Rhône, comme le Dauphiné ou la Provence. L'empereur n'y est pas un souverain absolu : il est élu par les princes, et son pouvoir dépend surtout de ses propres domaines familiaux.\n\nAu début de la guerre, l'empereur est [[cdx_louis_de_baviere|Louis de Bavière]], excommunié par le pape d'Avignon. Il s'allie à [[cdx_edouard_iii|Édouard III]] et lui confère en 1338 le [[cdx_vicariat_imperial|vicariat impérial]], qui lui permet de convoquer les princes des Pays-Bas, vassaux de l'Empire, contre Philippe VI. L'alliance se défait dès 1341.\n\nLa maison de Luxembourg, liée à la cour de France, s'impose ensuite. Le roi de Bohême [[cdx_jean_de_luxembourg|Jean l'Aveugle]] meurt pour Philippe VI à Crécy, et son fils devient l'empereur [[cdx_charles_iv|Charles IV]]. Sa Bulle d'or de 1356 fixe les règles de l'élection impériale : sept princes électeurs, trois archevêques et quatre princes laïques, désignent le roi des Romains, qui devient empereur une fois couronné.\n\nAu XVe siècle, l'empereur Sigismond, fils de Charles IV, réunit le [[cdx_concile_constance|concile de Constance]] qui met fin au Grand Schisme. En 1438, la couronne impériale passe aux Habsbourg, qui la garderont presque sans interruption jusqu'à la disparition de l'Empire en 1806.",
+  "entity": "fac_empire",
+  "see_also": ["cdx_louis_de_baviere", "cdx_charles_iv", "cdx_vicariat_imperial", "cdx_jean_de_luxembourg"],
+  "sources": ["Saint-Empire romain germanique", "Bulle d'or de 1356"]
+}
