@@ -63,7 +63,7 @@ pub mod victory;
 pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
 };
-pub use battle_request::{BattleRequestError, PendingBattle};
+pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
 pub use chivalry::{ChivalryError, OrderState};
 pub use chronicle::{
