@@ -2,10 +2,10 @@
 //! to England (Artevelde, 1338-1340); Burgundy abandons a beaten France for
 //! the dominant invader (Troyes, 1420).
 
-use data_model::{FactionId, GameData};
-use sim_campaign::diplomacy::{
-    claim_stakes, evaluate, war_ready, Proposal, RelationKind, DESERTION_WAR_SCORE, MAX_ALLIANCES,
-};
+use std::collections::BTreeMap;
+
+use data_model::{FactionId, GameData, ProvinceId};
+use sim_campaign::diplomacy::{claim_stakes, evaluate, war_ready, Proposal, DESERTION_WAR_SCORE};
 use sim_campaign::{CampaignState, Order};
 
 /// Below this loyalty a vassal ruined by a wool embargo turns to the
@@ -43,17 +43,38 @@ fn slot(faction: &FactionId) -> u32 {
         .fold(0u32, |a, b| a.wrapping_add(u32::from(b)))
 }
 
-/// Provinces of `crown`'s 1337 realm (`data`) controlled by `holder`.
+/// Regions where `crown` owned at least this many provinces in 1337 form
+/// its realm (the kingdom of France includes English Guyenne and Ponthieu).
+pub const REALM_REGION_PROVINCES: usize = 3;
+
+/// Provinces of `crown`'s realm: every province of the regions where it
+/// owned [`REALM_REGION_PROVINCES`] in 1337 (`data`).
+pub fn realm_provinces<'a>(data: &'a GameData, crown: &FactionId) -> Vec<&'a ProvinceId> {
+    let mut owned: BTreeMap<&str, usize> = BTreeMap::new();
+    for p in data.provinces.values().filter(|p| &p.owner == crown) {
+        *owned.entry(p.region.as_str()).or_default() += 1;
+    }
+    data.provinces
+        .iter()
+        .filter(|(_, p)| {
+            owned
+                .get(p.region.as_str())
+                .is_some_and(|n| *n >= REALM_REGION_PROVINCES)
+        })
+        .map(|(id, _)| id)
+        .collect()
+}
+
+/// Provinces of `crown`'s realm controlled by `holder`.
 pub fn realm_held_by(
     state: &CampaignState,
     data: &GameData,
     crown: &FactionId,
     holder: &FactionId,
 ) -> usize {
-    data.provinces
-        .iter()
-        .filter(|(_, p)| &p.owner == crown)
-        .filter(|(id, _)| {
+    realm_provinces(data, crown)
+        .into_iter()
+        .filter(|id| {
             state
                 .provinces
                 .get(*id)
@@ -79,12 +100,22 @@ pub fn dominates_realm(
         .get(capital)
         .is_some_and(|p| &p.controller == invader);
     let held = realm_held_by(state, data, crown, invader);
-    let realm = data
+    // Trouble is measured on the crown's own lands of 1337.
+    let own: Vec<_> = data
         .provinces
-        .values()
-        .filter(|p| &p.owner == crown)
+        .iter()
+        .filter(|(_, p)| &p.owner == crown)
+        .collect();
+    let kept = own
+        .iter()
+        .filter(|(id, _)| {
+            state
+                .provinces
+                .get(*id)
+                .is_some_and(|p| &p.controller == crown)
+        })
         .count();
-    let kept = realm_held_by(state, data, crown, crown);
+    let realm = own.len();
     let in_trouble = (kept as f64) < (1.0 - CROWN_IN_TROUBLE_LOSS) * realm as f64
         || state.war_score(data, crown, invader) <= DESERTION_WAR_SCORE;
     (seat || held >= DOMINANCE_PROVINCES) && in_trouble
@@ -203,12 +234,7 @@ pub fn plan_dynastic_alliance(
         .iter()
         .filter(|e| e.as_str() != "fac_rebels")
         .collect();
-    let alliances = me
-        .allies
-        .iter()
-        .filter(|a| state.relation(faction, a) == RelationKind::Alliance)
-        .count();
-    if enemies.is_empty() || alliances >= MAX_ALLIANCES {
+    if enemies.is_empty() {
         return None;
     }
     state
@@ -219,6 +245,9 @@ pub fn plan_dynastic_alliance(
         })
         .filter(|(id, f)| !state.is_allied(faction, id) && !f.at_war_with.contains(faction))
         .filter(|(_, f)| enemies.iter().all(|e| !f.allies.contains(*e)))
+        // Princes on our enemy's border only (no cap: the coalition of 1337
+        // is a web of in-laws, not a count of treaties).
+        .filter(|(id, _)| enemies.iter().any(|e| state.are_neighbors(data, id, e)))
         .filter(|(id, _)| campaign_roll(state, id, 7) < HISTORY_PERMILLE)
         .filter_map(|(id, _)| {
             let towards_us = state.attitude(data, id, faction).0;
