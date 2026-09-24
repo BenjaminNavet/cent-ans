@@ -32,7 +32,7 @@ m.PALETTE.setdefault("Garden", ((0.12, 0.16, 0.05), 0.95, 0.0))
 m.PALETTE.setdefault("Field", ((0.26, 0.22, 0.10), 1.0, 0.0))
 m.PALETTE.setdefault("Earth", ((0.20, 0.17, 0.11), 1.0, 0.0))
 
-MAX_TRIANGLES = 5000
+MAX_TRIANGLES = 60000
 F = m.FOUNDATION
 
 
@@ -468,6 +468,10 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     m.reset_scene()
     parts = MODELS[name]()
+    if m.KIT:
+        import kit_campaign
+
+        kit_campaign.finish_parts(parts)
     bpy.ops.object.select_all(action="DESELECT")
     for part in parts:
         part.select_set(True)
@@ -484,6 +488,7 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.export_scene.gltf(
         filepath=str(out_dir / f"{name}.glb"),
         export_format="GLB",
+        export_vertex_color="ACTIVE",
         export_yup=True,
         export_apply=True,
         use_selection=False,

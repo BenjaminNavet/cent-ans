@@ -41,6 +41,8 @@ static func clear_cache() -> void:
 	_rulers.clear()
 	_hamlet_meshes.clear()
 	_hamlet_meshes_loaded = false
+	BuildingMaterials.clear_cache()
+	BuildingKit.clear_cache()
 
 
 static func has_model(model_name: String) -> bool:
@@ -65,9 +67,17 @@ static func instantiate(model_name: String, model_scale: float = 1.0) -> Node3D:
 	var node := scene.instantiate() as Node3D
 	if node == null:
 		return null
+	if is_building_model(model_name):
+		# BR1 : matériaux PBR partagés du kit de bâtiments (textures, patine des couleurs de sommet).
+		BuildingMaterials.remap_node(node)
 	node.name = MODEL_NODE
 	node.scale = Vector3.ONE * model_scale
 	return node
+
+
+## Modèles de colonies et de villes (kit de bâtiments BR1), par opposition aux figurines d'armée.
+static func is_building_model(model_name: String) -> bool:
+	return model_name.begins_with("settlements/") or model_name in ["castle", "town", "village", "city_cathedral", "cathedral"]
 
 
 ## Teinte les surfaces dont le matériau s'appelle `Banner` (sous-arbre de `root`).
@@ -208,7 +218,7 @@ static func hamlet_meshes() -> Array:
 		var root := scene.instantiate()
 		var meshes := root.find_children("*", "MeshInstance3D", true, false)
 		if not meshes.is_empty():
-			_hamlet_meshes.append((meshes[0] as MeshInstance3D).mesh)
+			_hamlet_meshes.append(BuildingMaterials.remap_mesh((meshes[0] as MeshInstance3D).mesh))
 		root.free()
 	return _hamlet_meshes
 

@@ -24,6 +24,8 @@ from pathlib import Path
 
 import bpy
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 # name: (base colour (linear RGB), roughness, metallic)
 PALETTE = {
     "Stone": ((0.30, 0.28, 0.24), 0.88, 0.0),
@@ -48,7 +50,10 @@ PALETTE = {
     "Banner": ((0.70, 0.08, 0.08), 0.8, 0.0),
 }
 EMISSIVE = {"Fire": 4.0}
-MAX_TRIANGLES = 3000
+MAX_TRIANGLES = 60000
+# Lot BR1 (ADR 0021): houses and parish churches come from the realistic building kit
+# (``kit_campaign.py``), legacy parts get metric UVs and kit material names before export.
+KIT = True
 FOUNDATION = 0.35  # depth of building foundations below z = 0
 
 
@@ -166,6 +171,10 @@ def hip_roof(length, width, height, location, mat, angle=0.0, overhang=0.03):
 
 def house(location, size, roof_mat, wall_mat, angle=0.0, hip=False):
     """House with foundations and a gable (or hipped) roof."""
+    if KIT:
+        import kit_campaign
+
+        return kit_campaign.house(location, size, roof_mat, wall_mat, angle, hip)
     x, y, z = location
     w, d, h = size
     body = box(
@@ -337,6 +346,12 @@ def scatter_houses(
     size_scale=1.0,
 ):
     """Houses aligned on radial streets, avoiding ``keep_out`` circles [(x, y, r)]."""
+    if KIT and inside is not None:
+        import kit_campaign
+
+        return kit_campaign.street_houses(
+            rng, int(count * 2.2), radius, keep_out, inside, roofs, walls, size_scale
+        )
     parts = []
     placed = []
     tries = 0
@@ -375,6 +390,10 @@ def scatter_houses(
 
 def church(x, y, angle, scale=1.0, roof="Slate"):
     """Parish church: nave, choir, west tower with spire."""
+    if KIT:
+        import kit_campaign
+
+        return kit_campaign.church(x, y, angle, scale)
     parts = []
     ca, sa = math.cos(angle), math.sin(angle)
 
@@ -921,6 +940,10 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     reset_scene()
     parts = MODELS[name]()
+    if KIT:
+        import kit_campaign
+
+        kit_campaign.finish_parts(parts)
     bpy.ops.object.select_all(action="DESELECT")
     for part in parts:
         part.select_set(True)
@@ -937,6 +960,7 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.export_scene.gltf(
         filepath=str(out_dir / f"{name}.glb"),
         export_format="GLB",
+        export_vertex_color="ACTIVE",
         export_yup=True,
         export_apply=True,
         use_selection=False,

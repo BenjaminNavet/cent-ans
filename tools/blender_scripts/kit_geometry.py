@@ -35,7 +35,11 @@ def dot(a: Vec, b: Vec) -> float:
 
 def cross(a: Vec, b: Vec) -> Vec:
     """Cross product."""
-    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+    return (
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    )
 
 
 def length(a: Vec) -> float:
@@ -51,7 +55,11 @@ def norm(a: Vec) -> Vec:
 
 def lerp(a: Vec, b: Vec, t: float) -> Vec:
     """Linear interpolation."""
-    return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t)
+    return (
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t,
+    )
 
 
 def smoothstep(e0: float, e1: float, x: float) -> float:
@@ -77,13 +85,27 @@ def noise3(p: Vec, scale: float) -> float:
     for dx in (0, 1):
         for dy in (0, 1):
             for dz in (0, 1):
-                w = (fx if dx else 1 - fx) * (fy if dy else 1 - fy) * (fz if dz else 1 - fz)
+                w = (
+                    (fx if dx else 1 - fx)
+                    * (fy if dy else 1 - fy)
+                    * (fz if dz else 1 - fz)
+                )
                 total += w * _hash(ix + dx, iy + dy, iz + dz)
     return total
 
 
 # Weathering amplitude of the baked colour noise per material (roofs: moss and wear).
-WEATHER = {"RoofTile": 0.3, "RoofFlat": 0.32, "RoofSlate": 0.22, "Thatch": 0.3, "Plaster": 0.12, "Rubble": 0.12, "Ashlar": 0.14, "Planks": 0.16, "Timber": 0.1}
+WEATHER = {
+    "RoofTile": 0.3,
+    "RoofFlat": 0.32,
+    "RoofSlate": 0.22,
+    "Thatch": 0.3,
+    "Plaster": 0.12,
+    "Rubble": 0.12,
+    "Ashlar": 0.14,
+    "Planks": 0.16,
+    "Timber": 0.1,
+}
 
 
 def newell_normal(points: list[Vec]) -> Vec:
@@ -115,7 +137,9 @@ class Geometry:
 
     def __init__(self) -> None:
         """Start empty, identity transform, neutral tint."""
-        self.polys: dict[str, list[tuple[list[Vec], list[tuple[float, float]], list[Vec]]]] = {}
+        self.polys: dict[
+            str, list[tuple[list[Vec], list[tuple[float, float]], list[Vec]]]
+        ] = {}
         self.offset: Vec = (0.0, 0.0, 0.0)
         self.yaw = 0.0
         self.tint: Vec = (1.0, 1.0, 1.0)
@@ -130,7 +154,11 @@ class Geometry:
     def to_world(self, p: Vec) -> Vec:
         """Apply the current yaw + offset to a local point."""
         c, s = math.cos(self.yaw), math.sin(self.yaw)
-        return (p[0] * c - p[1] * s + self.offset[0], p[0] * s + p[1] * c + self.offset[1], p[2] + self.offset[2])
+        return (
+            p[0] * c - p[1] * s + self.offset[0],
+            p[0] * s + p[1] * c + self.offset[1],
+            p[2] + self.offset[2],
+        )
 
     def set_frame(self, offset: Vec = (0.0, 0.0, 0.0), yaw: float = 0.0) -> None:
         """Set the local frame (translation then rotation about Z)."""
@@ -177,7 +205,11 @@ class Geometry:
         amp = WEATHER.get(mat, 0.0)
         cols = []
         for p in world:
-            k = self.shade(p, normal, occlude) * (char if not self.char else 1.0 - self.char * (0.75 + 0.25 * smoothstep(0.0, 3.0, p[2])))
+            k = self.shade(p, normal, occlude) * (
+                char
+                if not self.char
+                else 1.0 - self.char * (0.75 + 0.25 * smoothstep(0.0, 3.0, p[2]))
+            )
             if amp:
                 q = (p[0] + self.seed_shift, p[1], p[2])
                 n = 0.65 * noise3(q, 2.6) + 0.35 * noise3(q, 0.9)
@@ -197,7 +229,9 @@ class Geometry:
 
     def triangle_count(self) -> int:
         """Triangles after fan triangulation."""
-        return sum(len(points) - 2 for polys in self.polys.values() for points, _, _ in polys)
+        return sum(
+            len(points) - 2 for polys in self.polys.values() for points, _, _ in polys
+        )
 
     def merge(self, other: "Geometry") -> None:
         """Append another geometry's polygons (already in world space)."""
@@ -214,7 +248,13 @@ class Geometry:
                 moved = []
                 for p in points:
                     x, y, z = p[0] * scale[0], p[1] * scale[1], p[2] * scale[2]
-                    moved.append((x * c - y * s + offset[0], x * s + y * c + offset[1], z + offset[2]))
+                    moved.append(
+                        (
+                            x * c - y * s + offset[0],
+                            x * s + y * c + offset[1],
+                            z + offset[2],
+                        )
+                    )
                 dst.append((moved, uvs, cols))
         return out
 
@@ -222,7 +262,16 @@ class Geometry:
 # --- solids ---------------------------------------------------------------------------------
 
 
-def obox(g: Geometry, center: Vec, axes: tuple[Vec, Vec, Vec], half: Vec, mat: str, bottom=False, back=True, **kw) -> None:
+def obox(
+    g: Geometry,
+    center: Vec,
+    axes: tuple[Vec, Vec, Vec],
+    half: Vec,
+    mat: str,
+    bottom=False,
+    back=True,
+    **kw,
+) -> None:
     """Oriented box: ``axes`` = (x, y, z) unit vectors, ``half`` = half sizes along them.
 
     ``bottom`` / ``back`` keep the -z / +y faces (skipped when hidden against a wall or ground).
@@ -232,7 +281,12 @@ def obox(g: Geometry, center: Vec, axes: tuple[Vec, Vec, Vec], half: Vec, mat: s
     def corner(sx, sy, sz):
         return add(add(add(center, mul(ax, sx)), mul(ay, sy)), mul(az, sz))
 
-    c = {(sx, sy, sz): corner(sx, sy, sz) for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)}
+    c = {
+        (sx, sy, sz): corner(sx, sy, sz)
+        for sx in (-1, 1)
+        for sy in (-1, 1)
+        for sz in (-1, 1)
+    }
     faces = [
         ((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)),  # -y
         ((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1)),  # +x
@@ -250,10 +304,26 @@ def obox(g: Geometry, center: Vec, axes: tuple[Vec, Vec, Vec], half: Vec, mat: s
 def box(g: Geometry, center: Vec, size: Vec, mat: str, yaw: float = 0.0, **kw) -> None:
     """Axis-aligned (then yawed) box of full ``size`` centred on ``center`` (local frame)."""
     c, s = math.cos(yaw), math.sin(yaw)
-    obox(g, center, ((c, s, 0.0), (-s, c, 0.0), UP), (size[0] / 2, size[1] / 2, size[2] / 2), mat, **kw)
+    obox(
+        g,
+        center,
+        ((c, s, 0.0), (-s, c, 0.0), UP),
+        (size[0] / 2, size[1] / 2, size[2] / 2),
+        mat,
+        **kw,
+    )
 
 
-def beam(g: Geometry, p0: Vec, p1: Vec, width: float, depth: float, mat: str, outward: Vec, **kw) -> None:
+def beam(
+    g: Geometry,
+    p0: Vec,
+    p1: Vec,
+    width: float,
+    depth: float,
+    mat: str,
+    outward: Vec,
+    **kw,
+) -> None:
     """Timber of section ``width`` x ``depth`` from ``p0`` to ``p1``; ``depth`` along ``outward``.
 
     The back face (against the wall, at ``-outward``) is skipped. Grain runs along the beam.
@@ -269,10 +339,27 @@ def beam(g: Geometry, p0: Vec, p1: Vec, width: float, depth: float, mat: str, ou
     center = mul(add(p0, p1), 0.5)
     vertical = abs(ax[2]) > 0.7
     kw.setdefault("grain", vertical)
-    obox(g, center, (ax, ay, az), (size / 2, depth / 2, width / 2), mat, back=False, bottom=True, **kw)
+    obox(
+        g,
+        center,
+        (ax, ay, az),
+        (size / 2, depth / 2, width / 2),
+        mat,
+        back=False,
+        bottom=True,
+        **kw,
+    )
 
 
-def slab(g: Geometry, top: list[Vec], thickness: float, mat: str, edge_mat: str | None = None, cell: float = 0.0, **kw) -> None:
+def slab(
+    g: Geometry,
+    top: list[Vec],
+    thickness: float,
+    mat: str,
+    edge_mat: str | None = None,
+    cell: float = 0.0,
+    **kw,
+) -> None:
     """Extrude a planar top polygon downwards along its normal (roof pans, eaves).
 
     ``cell`` > 0 subdivides the top face (triangle or quad) into a grid of about ``cell``
@@ -307,10 +394,22 @@ def slab(g: Geometry, top: list[Vec], thickness: float, mat: str, edge_mat: str 
     n = len(top)
     for i in range(n):
         j = (i + 1) % n
-        g.poly([bottom[i], bottom[j], top[j], top[i]], edge_mat or mat, occlude=False, **kw)
+        g.poly(
+            [bottom[i], bottom[j], top[j], top[i]], edge_mat or mat, occlude=False, **kw
+        )
 
 
-def prism_x(g: Geometry, x0: float, x1: float, y: float, z: float, half_w: float, h: float, mat: str, **kw) -> None:
+def prism_x(
+    g: Geometry,
+    x0: float,
+    x1: float,
+    y: float,
+    z: float,
+    half_w: float,
+    h: float,
+    mat: str,
+    **kw,
+) -> None:
     """Triangular ridge cap along X (apex ``h`` above ``z``, base half-width ``half_w``)."""
     a0, b0, c0 = (x0, y - half_w, z), (x0, y + half_w, z), (x0, y, z + h)
     a1, b1, c1 = (x1, y - half_w, z), (x1, y + half_w, z), (x1, y, z + h)
@@ -320,11 +419,27 @@ def prism_x(g: Geometry, x0: float, x1: float, y: float, z: float, half_w: float
     g.poly([b1, c1, a1], mat, occlude=False, **kw)
 
 
-def cylinder(g: Geometry, center: Vec, radius: float, height: float, mat: str, sides: int = 10, top=True, radius_top=None, **kw) -> None:
+def cylinder(
+    g: Geometry,
+    center: Vec,
+    radius: float,
+    height: float,
+    mat: str,
+    sides: int = 10,
+    top=True,
+    radius_top=None,
+    **kw,
+) -> None:
     """Vertical cylinder / frustum standing on ``center``."""
     rt = radius if radius_top is None else radius_top
-    ring0 = [(center[0] + radius * math.cos(a), center[1] + radius * math.sin(a), center[2]) for a in _angles(sides)]
-    ring1 = [(center[0] + rt * math.cos(a), center[1] + rt * math.sin(a), center[2] + height) for a in _angles(sides)]
+    ring0 = [
+        (center[0] + radius * math.cos(a), center[1] + radius * math.sin(a), center[2])
+        for a in _angles(sides)
+    ]
+    ring1 = [
+        (center[0] + rt * math.cos(a), center[1] + rt * math.sin(a), center[2] + height)
+        for a in _angles(sides)
+    ]
     for i in range(sides):
         j = (i + 1) % sides
         g.quad(ring0[i], ring0[j], ring1[j], ring1[i], mat, **kw)
@@ -332,10 +447,26 @@ def cylinder(g: Geometry, center: Vec, radius: float, height: float, mat: str, s
         g.poly(ring1, mat, occlude=False, **kw)
 
 
-def cone(g: Geometry, center: Vec, radius: float, height: float, mat: str, sides: int = 8, phase: float = 0.0, **kw) -> None:
+def cone(
+    g: Geometry,
+    center: Vec,
+    radius: float,
+    height: float,
+    mat: str,
+    sides: int = 8,
+    phase: float = 0.0,
+    **kw,
+) -> None:
     """Pyramid / cone (spire) standing on ``center``."""
     apex = (center[0], center[1], center[2] + height)
-    ring = [(center[0] + radius * math.cos(a + phase), center[1] + radius * math.sin(a + phase), center[2]) for a in _angles(sides)]
+    ring = [
+        (
+            center[0] + radius * math.cos(a + phase),
+            center[1] + radius * math.sin(a + phase),
+            center[2],
+        )
+        for a in _angles(sides)
+    ]
     for i in range(sides):
         g.poly([ring[i], ring[(i + 1) % sides], apex], mat, occlude=False, **kw)
 
@@ -350,7 +481,9 @@ def _angles(sides: int) -> list[float]:
 class Opening:
     """Rectangular hole in a wall (wall-local metres: ``x`` along the wall, ``y`` up)."""
 
-    def __init__(self, x0: float, y0: float, x1: float, y1: float, kind: str = "window") -> None:
+    def __init__(
+        self, x0: float, y0: float, x1: float, y1: float, kind: str = "window"
+    ) -> None:
         """Store the rectangle and its kind (``window``, ``door``, ``shop``, ``dark``)."""
         self.x0, self.y0, self.x1, self.y1, self.kind = x0, y0, x1, y1, kind
 
@@ -385,7 +518,10 @@ def wall(
     for ya, yb in zip(ys, ys[1:], strict=False):
         if yb - ya < 1e-4:
             continue
-        holes = sorted((o for o in openings if o.y0 <= ya + 1e-5 and o.y1 >= yb - 1e-5), key=lambda o: o.x0)
+        holes = sorted(
+            (o for o in openings if o.y0 <= ya + 1e-5 and o.y1 >= yb - 1e-5),
+            key=lambda o: o.x0,
+        )
         x = 0.0
         for o in holes:
             if o.x0 - x > 1e-4:
@@ -400,8 +536,24 @@ def wall(
     back_kw = {key: value for key, value in kw.items() if key not in ("grain", "color")}
     for o in openings:
         d = depth
-        g.quad(P(o.x1, o.y0), P(o.x1, o.y0, d), P(o.x0, o.y0, d), P(o.x0, o.y0), rmat, **kw)  # sill (up)
-        g.quad(P(o.x0, o.y1), P(o.x0, o.y1, d), P(o.x1, o.y1, d), P(o.x1, o.y1), rmat, **kw)  # head (down)
-        g.quad(P(o.x0, o.y0), P(o.x0, o.y0, d), P(o.x0, o.y1, d), P(o.x0, o.y1), rmat, **kw)
-        g.quad(P(o.x1, o.y1), P(o.x1, o.y1, d), P(o.x1, o.y0, d), P(o.x1, o.y0), rmat, **kw)
-        g.quad(P(o.x0, o.y0, d), P(o.x1, o.y0, d), P(o.x1, o.y1, d), P(o.x0, o.y1, d), backs[o.kind], grain=o.kind == "door", **back_kw)
+        g.quad(
+            P(o.x1, o.y0), P(o.x1, o.y0, d), P(o.x0, o.y0, d), P(o.x0, o.y0), rmat, **kw
+        )  # sill (up)
+        g.quad(
+            P(o.x0, o.y1), P(o.x0, o.y1, d), P(o.x1, o.y1, d), P(o.x1, o.y1), rmat, **kw
+        )  # head (down)
+        g.quad(
+            P(o.x0, o.y0), P(o.x0, o.y0, d), P(o.x0, o.y1, d), P(o.x0, o.y1), rmat, **kw
+        )
+        g.quad(
+            P(o.x1, o.y1), P(o.x1, o.y1, d), P(o.x1, o.y0, d), P(o.x1, o.y0), rmat, **kw
+        )
+        g.quad(
+            P(o.x0, o.y0, d),
+            P(o.x1, o.y0, d),
+            P(o.x1, o.y1, d),
+            P(o.x0, o.y1, d),
+            backs[o.kind],
+            grain=o.kind == "door",
+            **back_kw,
+        )

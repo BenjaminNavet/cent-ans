@@ -34,13 +34,33 @@ PLASTER_TINTS = [
     (0.95, 0.86, 0.66),  # yellow ochre
 ]
 DAUB_TINTS = [(0.86, 0.74, 0.58), (0.8, 0.7, 0.56), (0.9, 0.8, 0.64)]
-TIMBER_TINTS = [(0.62, 0.52, 0.44), (0.5, 0.4, 0.33), (0.7, 0.42, 0.32), (0.44, 0.36, 0.3)]
-STONE_TINTS = [(1.0, 0.97, 0.92), (0.95, 0.92, 0.86), (0.9, 0.9, 0.9), (1.0, 0.94, 0.84)]
+TIMBER_TINTS = [
+    (0.62, 0.52, 0.44),
+    (0.5, 0.4, 0.33),
+    (0.7, 0.42, 0.32),
+    (0.44, 0.36, 0.3),
+]
+STONE_TINTS = [
+    (1.0, 0.97, 0.92),
+    (0.95, 0.92, 0.86),
+    (0.9, 0.9, 0.9),
+    (1.0, 0.94, 0.84),
+]
 ROOF_TINTS = {
-    "RoofTile": [(1.0, 0.95, 0.9), (0.9, 0.82, 0.76), (1.0, 0.88, 0.78), (0.82, 0.8, 0.72)],
+    "RoofTile": [
+        (1.0, 0.95, 0.9),
+        (0.9, 0.82, 0.76),
+        (1.0, 0.88, 0.78),
+        (0.82, 0.8, 0.72),
+    ],
     "RoofFlat": [(1.0, 0.95, 0.92), (0.9, 0.86, 0.82), (0.8, 0.8, 0.74)],
     "RoofSlate": [(1.0, 1.0, 1.0), (0.9, 0.92, 0.95), (0.85, 0.86, 0.84)],
-    "Thatch": [(1.0, 0.96, 0.9), (0.86, 0.8, 0.72), (0.74, 0.7, 0.62), (0.95, 0.9, 0.78)],
+    "Thatch": [
+        (1.0, 0.96, 0.9),
+        (0.86, 0.8, 0.72),
+        (0.74, 0.7, 0.62),
+        (0.95, 0.9, 0.78),
+    ],
 }
 WHITE = (1.0, 1.0, 1.0)
 
@@ -102,26 +122,53 @@ def roof_thickness(roof: str) -> float:
     return {"Thatch": 0.5, "RoofSlate": 0.14, "RoofFlat": 0.16}.get(roof, 0.2)
 
 
-def roof_gable(g, length, depth, z_eave, style: Style, detail="high", overhang=None, gable_over=None):
+def roof_gable(
+    g,
+    length,
+    depth,
+    z_eave,
+    style: Style,
+    detail="high",
+    overhang=None,
+    gable_over=None,
+):
     """Two-pan roof, ridge along local X. Returns the ridge height (top surface)."""
     pitch = math.radians(style.pitch)
     tp = math.tan(pitch)
     t = roof_thickness(style.roof)
     oe = overhang if overhang is not None else (0.55 if style.roof == "Thatch" else 0.4)
-    og = gable_over if gable_over is not None else (0.35 if style.roof == "Thatch" else 0.25)
+    og = (
+        gable_over
+        if gable_over is not None
+        else (0.35 if style.roof == "Thatch" else 0.25)
+    )
     lift = t / math.cos(pitch)
     zr = z_eave + depth / 2 * tp + lift
     ze = z_eave - oe * tp + lift
     x0, x1, ye = -length / 2 - og, length / 2 + og, depth / 2 + oe
     with tinted(g, style.roof_tint):
         cell = 1.6 if detail == "high" else 0.0
-        k.slab(g, [(x0, -ye, ze), (x1, -ye, ze), (x1, 0, zr), (x0, 0, zr)], t, style.roof, cell=cell)
-        k.slab(g, [(x1, ye, ze), (x0, ye, ze), (x0, 0, zr), (x1, 0, zr)], t, style.roof, cell=cell)
+        k.slab(
+            g,
+            [(x0, -ye, ze), (x1, -ye, ze), (x1, 0, zr), (x0, 0, zr)],
+            t,
+            style.roof,
+            cell=cell,
+        )
+        k.slab(
+            g,
+            [(x1, ye, ze), (x0, ye, ze), (x0, 0, zr), (x1, 0, zr)],
+            t,
+            style.roof,
+            cell=cell,
+        )
         _ridge(g, x0, x1, zr, style, detail)
     return zr
 
 
-def roof_hip(g, length, depth, z_eave, style: Style, detail="high", end_run=None, overhang=None):
+def roof_hip(
+    g, length, depth, z_eave, style: Style, detail="high", end_run=None, overhang=None
+):
     """Hipped roof (``end_run`` = horizontal run of the end pans; small = half-hip look)."""
     pitch = math.radians(style.pitch)
     tp = math.tan(pitch)
@@ -136,8 +183,20 @@ def roof_hip(g, length, depth, z_eave, style: Style, detail="high", end_run=None
     cell = 1.6 if detail == "high" else 0.0
     with tinted(g, style.roof_tint):
         if hr > 1e-3:
-            k.slab(g, [(-X, -Y, ze), (X, -Y, ze), (hr, 0, zr), (-hr, 0, zr)], t, style.roof, cell=cell)
-            k.slab(g, [(X, Y, ze), (-X, Y, ze), (-hr, 0, zr), (hr, 0, zr)], t, style.roof, cell=cell)
+            k.slab(
+                g,
+                [(-X, -Y, ze), (X, -Y, ze), (hr, 0, zr), (-hr, 0, zr)],
+                t,
+                style.roof,
+                cell=cell,
+            )
+            k.slab(
+                g,
+                [(X, Y, ze), (-X, Y, ze), (-hr, 0, zr), (hr, 0, zr)],
+                t,
+                style.roof,
+                cell=cell,
+            )
             _ridge(g, -hr, hr, zr, style, detail)
         else:
             k.slab(g, [(-X, -Y, ze), (X, -Y, ze), (0, 0, zr)], t, style.roof, cell=cell)
@@ -147,7 +206,16 @@ def roof_hip(g, length, depth, z_eave, style: Style, detail="high", end_run=None
         if detail == "high" and style.roof != "Thatch":
             for sx in (-1, 1):
                 for sy in (-1, 1):
-                    k.beam(g, (sx * X, sy * Y, ze + 0.02), (sx * hr, 0, zr + 0.02), 0.22, 0.1, style.roof, (0, 0, 1), occlude=False)
+                    k.beam(
+                        g,
+                        (sx * X, sy * Y, ze + 0.02),
+                        (sx * hr, 0, zr + 0.02),
+                        0.22,
+                        0.1,
+                        style.roof,
+                        (0, 0, 1),
+                        occlude=False,
+                    )
     return zr
 
 
@@ -155,19 +223,38 @@ def _ridge(g, x0, x1, zr, style, detail):
     if style.roof == "Thatch":
         k.prism_x(g, x0 + 0.1, x1 - 0.1, 0.0, zr - 0.35, 0.55, 0.5, "Thatch")
     elif detail == "high":
-        k.prism_x(g, x0, x1, 0.0, zr - 0.08, 0.2, 0.2, style.roof if style.roof != "RoofSlate" else "RoofTile")
+        k.prism_x(
+            g,
+            x0,
+            x1,
+            0.0,
+            zr - 0.08,
+            0.2,
+            0.2,
+            style.roof if style.roof != "RoofSlate" else "RoofTile",
+        )
 
 
 def gable_wall(g, x, depth, z_eave, pitch_deg, mat, sign, color=None, vent=False):
     """Triangular gable at ``x`` (sign +1 faces +X)."""
     h = depth / 2 * math.tan(math.radians(pitch_deg))
-    a, b, c = (x, -sign * depth / 2, z_eave), (x, sign * depth / 2, z_eave), (x, 0.0, z_eave + h)
+    a, b, c = (
+        (x, -sign * depth / 2, z_eave),
+        (x, sign * depth / 2, z_eave),
+        (x, 0.0, z_eave + h),
+    )
     g.poly([a, b, c], mat, color=color)
     if vent:
         # Attic hatch (gerbière) painted dark, 1 cm proud.
         d = 0.01 * sign
         y = 0.4
-        g.quad((x + d, -sign * y, z_eave + 0.5), (x + d, sign * y, z_eave + 0.5), (x + d, sign * y, z_eave + 1.3), (x + d, -sign * y, z_eave + 1.3), "Window")
+        g.quad(
+            (x + d, -sign * y, z_eave + 0.5),
+            (x + d, sign * y, z_eave + 0.5),
+            (x + d, sign * y, z_eave + 1.3),
+            (x + d, -sign * y, z_eave + 1.3),
+            "Window",
+        )
     return h
 
 
@@ -183,7 +270,9 @@ def window_size(style: Style, floor: int) -> tuple[float, float, float]:
     return (0.65, 0.8, 1.0) if floor == 0 else (0.7, 0.85, 0.85)
 
 
-def plan_openings(rng, width, height, style: Style, floor: int, role: str) -> list[Opening]:
+def plan_openings(
+    rng, width, height, style: Style, floor: int, role: str
+) -> list[Opening]:
     """Openings of one wall of one floor. ``role``: front | back | side."""
     ops: list[Opening] = []
     if width < 1.6:
@@ -192,9 +281,13 @@ def plan_openings(rng, width, height, style: Style, floor: int, role: str) -> li
     bay_w = width / bays
     ww, wh, sill = window_size(style, floor)
     door_bay = -1
-    if floor == 0 and role == "front":
-        door_bay = rng.randrange(bays)
-    elif floor == 0 and role == "back" and rng.random() < 0.4:
+    if (
+        floor == 0
+        and role == "front"
+        or floor == 0
+        and role == "back"
+        and rng.random() < 0.4
+    ):
         door_bay = rng.randrange(bays)
     for b in range(bays):
         cx = (b + 0.5) * bay_w + rng.uniform(-0.12, 0.12) * bay_w
@@ -230,7 +323,10 @@ def timber_frame(g, origin, along, width, height, ops, style: Style, rng, detail
     color = style.timber_tint
 
     def P(x, y):
-        return k.add(k.add(origin, k.mul(along, x)), (outward[0] * proud * 0.5, outward[1] * proud * 0.5, y))
+        return k.add(
+            k.add(origin, k.mul(along, x)),
+            (outward[0] * proud * 0.5, outward[1] * proud * 0.5, y),
+        )
 
     def bm(p0, p1, w=tw):
         k.beam(g, p0, p1, w, proud, "Timber", outward, color=color)
@@ -262,7 +358,10 @@ def timber_frame(g, origin, along, width, height, ops, style: Style, rng, detail
     mid = height * 0.46
 
     def blocked(x0, x1, y):
-        return any(o.x0 - 0.05 < x1 and o.x1 + 0.05 > x0 and o.y0 - 0.05 < y < o.y1 + 0.05 for o in ops)
+        return any(
+            o.x0 - 0.05 < x1 and o.x1 + 0.05 > x0 and o.y0 - 0.05 < y < o.y1 + 0.05
+            for o in ops
+        )
 
     for x in xs:
         # A post stops at the lintel / sill of an opening it would cross.
@@ -291,7 +390,12 @@ def timber_frame(g, origin, along, width, height, ops, style: Style, rng, detail
         if style.frame == "cross" and free_low and b - a > 0.7:
             bm(P(a, 0.2), P(b, mid - 0.08), 0.13)
             bm(P(b, 0.2), P(a, mid - 0.08), 0.13)
-        elif style.frame in ("rural", "cross") and free_high and b - a > 0.6 and rng.random() < 0.7:
+        elif (
+            style.frame in ("rural", "cross")
+            and free_high
+            and b - a > 0.6
+            and rng.random() < 0.7
+        ):
             if rng.random() < 0.5:
                 bm(P(a, mid + 0.08), P(b, height - 0.2), 0.14)
             else:
@@ -306,36 +410,107 @@ def dress_openings(g, origin, along, ops, style: Style, rng, detail, stone: bool
     inward = k.mul(outward, -1.0)
 
     def P(x, y, d=0.0):
-        return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, d))
+        return k.add(
+            k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, d)
+        )
 
     for o in ops:
         w, h = o.x1 - o.x0, o.y1 - o.y0
         if o.kind == "window":
             if stone:
-                k.beam(g, P(o.x0 - 0.12, o.y0 - 0.06, 0.04), P(o.x1 + 0.12, o.y0 - 0.06, 0.04), 0.12, 0.1, style.wall if style.wall != "Plaster" else "Ashlar", outward, color=style.stone_tint)
-                k.beam(g, P(o.x0 - 0.1, o.y1 + 0.08, 0.02), P(o.x1 + 0.1, o.y1 + 0.08, 0.02), 0.16, 0.06, style.wall if style.wall != "Plaster" else "Ashlar", outward, color=style.stone_tint)
+                k.beam(
+                    g,
+                    P(o.x0 - 0.12, o.y0 - 0.06, 0.04),
+                    P(o.x1 + 0.12, o.y0 - 0.06, 0.04),
+                    0.12,
+                    0.1,
+                    style.wall if style.wall != "Plaster" else "Ashlar",
+                    outward,
+                    color=style.stone_tint,
+                )
+                k.beam(
+                    g,
+                    P(o.x0 - 0.1, o.y1 + 0.08, 0.02),
+                    P(o.x1 + 0.1, o.y1 + 0.08, 0.02),
+                    0.16,
+                    0.06,
+                    style.wall if style.wall != "Plaster" else "Ashlar",
+                    outward,
+                    color=style.stone_tint,
+                )
             if style.window == "mullion" and detail == "high":
                 c = k.add(P((o.x0 + o.x1) / 2, (o.y0 + o.y1) / 2), k.mul(inward, 0.1))
-                k.box(g, c, (0.1, 0.1, h), "Ashlar" if stone else "Timber", yaw=g_yaw(along), color=style.stone_tint if stone else style.timber_tint)
+                k.box(
+                    g,
+                    c,
+                    (0.1, 0.1, h),
+                    "Ashlar" if stone else "Timber",
+                    yaw=g_yaw(along),
+                    color=style.stone_tint if stone else style.timber_tint,
+                )
                 c2 = k.add(P((o.x0 + o.x1) / 2, o.y0 + h * 0.62), k.mul(inward, 0.1))
-                k.box(g, c2, (w, 0.1, 0.1), "Ashlar" if stone else "Timber", yaw=g_yaw(along), color=style.stone_tint if stone else style.timber_tint)
+                k.box(
+                    g,
+                    c2,
+                    (w, 0.1, 0.1),
+                    "Ashlar" if stone else "Timber",
+                    yaw=g_yaw(along),
+                    color=style.stone_tint if stone else style.timber_tint,
+                )
             if rng.random() < style.shutters:
                 closed = rng.random() < 0.2
                 if closed:
-                    c = k.add(P((o.x0 + o.x1) / 2, (o.y0 + o.y1) / 2), k.mul(inward, 0.04))
+                    c = k.add(
+                        P((o.x0 + o.x1) / 2, (o.y0 + o.y1) / 2), k.mul(inward, 0.04)
+                    )
                     k.box(g, c, (w, 0.05, h), "Planks", yaw=g_yaw(along), grain=True)
                 else:
                     for side in (-1, 1):
                         x = o.x0 - w / 4 - 0.03 if side < 0 else o.x1 + w / 4 + 0.03
                         c = P(x, (o.y0 + o.y1) / 2, 0.06)
-                        k.box(g, c, (w / 2, 0.04, h), "Planks", yaw=g_yaw(along), grain=True, color=style.extras.get("shutter_tint", WHITE))
+                        k.box(
+                            g,
+                            c,
+                            (w / 2, 0.04, h),
+                            "Planks",
+                            yaw=g_yaw(along),
+                            grain=True,
+                            color=style.extras.get("shutter_tint", WHITE),
+                        )
         elif o.kind == "door":
             if stone:
-                k.beam(g, P(o.x0 - 0.2, o.y1 + 0.14, 0.03), P(o.x1 + 0.2, o.y1 + 0.14, 0.03), 0.28, 0.08, "Ashlar", outward, color=style.stone_tint)
+                k.beam(
+                    g,
+                    P(o.x0 - 0.2, o.y1 + 0.14, 0.03),
+                    P(o.x1 + 0.2, o.y1 + 0.14, 0.03),
+                    0.28,
+                    0.08,
+                    "Ashlar",
+                    outward,
+                    color=style.stone_tint,
+                )
             else:
                 for x in (o.x0 - 0.07, o.x1 + 0.07):
-                    k.beam(g, P(x, 0.0, 0.03), P(x, o.y1 + 0.1, 0.03), 0.14, 0.07, "Timber", outward, color=style.timber_tint)
-                k.beam(g, P(o.x0 - 0.15, o.y1 + 0.08, 0.03), P(o.x1 + 0.15, o.y1 + 0.08, 0.03), 0.16, 0.07, "Timber", outward, color=style.timber_tint)
+                    k.beam(
+                        g,
+                        P(x, 0.0, 0.03),
+                        P(x, o.y1 + 0.1, 0.03),
+                        0.14,
+                        0.07,
+                        "Timber",
+                        outward,
+                        color=style.timber_tint,
+                    )
+                k.beam(
+                    g,
+                    P(o.x0 - 0.15, o.y1 + 0.08, 0.03),
+                    P(o.x1 + 0.15, o.y1 + 0.08, 0.03),
+                    0.16,
+                    0.07,
+                    "Timber",
+                    outward,
+                    color=style.timber_tint,
+                )
             if w > 2.0 and rng.random() < 0.6:
                 # Barn door left ajar: one leaf swung open against the wall.
                 c = P(o.x1 + w / 4 + 0.05, h / 2, 0.08)
@@ -348,10 +523,21 @@ def dress_openings(g, origin, along, ops, style: Style, rng, detail, stone: bool
             ax = along
             ay = k.norm(k.add(k.mul(outward, -1.0), (0, 0, -0.9)))
             az = k.norm(k.cross(ax, ay))
-            k.obox(g, top, (ax, ay, az), (w / 2, 0.45, 0.035), "Planks", back=True, bottom=True)
+            k.obox(
+                g,
+                top,
+                (ax, ay, az),
+                (w / 2, 0.45, 0.035),
+                "Planks",
+                back=True,
+                bottom=True,
+            )
             if rng.random() < 0.5:
                 for dx in (-w * 0.3, 0.0, w * 0.3):
-                    c = k.add(P((o.x0 + o.x1) / 2 + dx, o.y0 + 0.18), k.mul(outward, 0.35 + rng.uniform(-0.1, 0.1)))
+                    c = k.add(
+                        P((o.x0 + o.x1) / 2 + dx, o.y0 + 0.18),
+                        k.mul(outward, 0.35 + rng.uniform(-0.1, 0.1)),
+                    )
                     k.cylinder(g, c, 0.16, 0.3, "Planks", sides=6)
 
 
@@ -360,7 +546,22 @@ def g_yaw(along) -> float:
     return math.atan2(along[1], along[0])
 
 
-def floor_walls(g, rng, x0, y0, x1, y1, z, height, style: Style, floor, detail, wall_mat, framed, roles):
+def floor_walls(
+    g,
+    rng,
+    x0,
+    y0,
+    x1,
+    y1,
+    z,
+    height,
+    style: Style,
+    floor,
+    detail,
+    wall_mat,
+    framed,
+    roles,
+):
     """Four walls of one storey on rectangle (x0, y0)-(x1, y1) at height ``z``."""
     corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     stone = wall_mat in ("Rubble", "Ashlar")
@@ -375,7 +576,18 @@ def floor_walls(g, rng, x0, y0, x1, y1, z, height, style: Style, floor, detail, 
         tint = style.stone_tint if stone else style.wall_tint
         if detail == "high":
             reveal = "Timber" if framed else wall_mat
-            k.wall(g, origin, along, width, height, wall_mat, ops, depth=depth, reveal_mat=reveal, color=tint)
+            k.wall(
+                g,
+                origin,
+                along,
+                width,
+                height,
+                wall_mat,
+                ops,
+                depth=depth,
+                reveal_mat=reveal,
+                color=tint,
+            )
             dress_openings(g, origin, along, ops, style, rng, detail, stone)
         else:
             k.wall(g, origin, along, width, height, wall_mat, [], color=tint)
@@ -384,7 +596,9 @@ def floor_walls(g, rng, x0, y0, x1, y1, z, height, style: Style, floor, detail, 
                 d = k.mul(outward, 0.03)
 
                 def P(x, y, d=d, origin=origin, along=along):
-                    return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), d)
+                    return k.add(
+                        k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), d
+                    )
 
                 mat = "Door" if o.kind == "door" else "Window"
                 g.quad(P(o.x0, o.y0), P(o.x1, o.y0), P(o.x1, o.y1), P(o.x0, o.y1), mat)
@@ -397,11 +611,20 @@ def floor_walls(g, rng, x0, y0, x1, y1, z, height, style: Style, floor, detail, 
 
 def chimney(g, x, y, z_base, z_top, mat, tint, detail):
     """Masonry stack with a projecting cap."""
-    k.box(g, (x, y, (z_base + z_top) / 2), (0.75, 0.95, z_top - z_base), mat, color=tint)
+    k.box(
+        g, (x, y, (z_base + z_top) / 2), (0.75, 0.95, z_top - z_base), mat, color=tint
+    )
     if detail == "high":
         k.box(g, (x, y, z_top + 0.06), (0.95, 1.15, 0.12), mat, color=tint)
         k.box(g, (x, y, z_top + 0.2), (0.5, 0.5, 0.2), mat, color=tint)
-        g.quad((x - 0.2, y - 0.2, z_top + 0.31), (x + 0.2, y - 0.2, z_top + 0.31), (x + 0.2, y + 0.2, z_top + 0.31), (x - 0.2, y + 0.2, z_top + 0.31), "Window", occlude=False)
+        g.quad(
+            (x - 0.2, y - 0.2, z_top + 0.31),
+            (x + 0.2, y - 0.2, z_top + 0.31),
+            (x + 0.2, y + 0.2, z_top + 0.31),
+            (x - 0.2, y + 0.2, z_top + 0.31),
+            "Window",
+            occlude=False,
+        )
 
 
 def dormer(g, x, y_wall, z_eave, style: Style, rng, detail):
@@ -412,21 +635,57 @@ def dormer(g, x, y_wall, z_eave, style: Style, rng, detail):
     with frame(g, (x, y_wall + 0.25, 0.0), math.pi / 2):
         # Local frame: +X = world +Y (into the roof), front gable at local -X.
         depth_in = 2.4
-        k.wall(g, (-0.0, w / 2, base), (0.0, -1.0, 0.0), w, h, style.wall if style.wall != "Planks" else "Plaster", [Opening(0.3, 0.3, w - 0.3, h - 0.15)] if detail == "high" else [], depth=0.12, reveal_mat="Timber", color=style.wall_tint)
+        k.wall(
+            g,
+            (-0.0, w / 2, base),
+            (0.0, -1.0, 0.0),
+            w,
+            h,
+            style.wall if style.wall != "Planks" else "Plaster",
+            [Opening(0.3, 0.3, w - 0.3, h - 0.15)] if detail == "high" else [],
+            depth=0.12,
+            reveal_mat="Timber",
+            color=style.wall_tint,
+        )
         for sy in (-1, 1):
             a, b = (depth_in, sy * w / 2, base), (0.0, sy * w / 2, base)
             if sy < 0:
                 a, b = b, a
-            g.quad(a, b, (b[0], b[1], base + h), (a[0], a[1], base + h), style.wall if style.wall != "Planks" else "Plaster", color=style.wall_tint)
+            g.quad(
+                a,
+                b,
+                (b[0], b[1], base + h),
+                (a[0], a[1], base + h),
+                style.wall if style.wall != "Planks" else "Plaster",
+                color=style.wall_tint,
+            )
         with frame(g, (depth_in / 2 - 0.05, 0.0, 0.0)):
-            gable_wall(g, -depth_in / 2 + 0.05, w, base + h, 55, style.wall if style.wall != "Planks" else "Plaster", -1, color=style.wall_tint)
-            roof_gable(g, depth_in, w, base + h, dstyle, detail, overhang=0.18, gable_over=0.15)
+            gable_wall(
+                g,
+                -depth_in / 2 + 0.05,
+                w,
+                base + h,
+                55,
+                style.wall if style.wall != "Planks" else "Plaster",
+                -1,
+                color=style.wall_tint,
+            )
+            roof_gable(
+                g, depth_in, w, base + h, dstyle, detail, overhang=0.18, gable_over=0.15
+            )
 
 
 # --- houses -----------------------------------------------------------------------------------
 
 
-def house(g: Geometry, rng: random.Random, length: float, depth: float, style: Style, detail="high") -> dict:
+def house(
+    g: Geometry,
+    rng: random.Random,
+    length: float,
+    depth: float,
+    style: Style,
+    detail="high",
+) -> dict:
     """Generic dwelling: plinth, storeys (jettied), roof, chimneys, dormers. Returns metrics."""
     if style.gable_front:
         with frame(g, (0.0, 0.0, 0.0), math.pi / 2):
@@ -441,7 +700,13 @@ def house(g: Geometry, rng: random.Random, length: float, depth: float, style: S
     stone_tint = style.stone_tint
     plinth_mat = "Ashlar" if style.wall == "Ashlar" else "Rubble"
     # Foundations and plinth (the part above z = 0 is the visible stone course).
-    k.box(g, (0.0, 0.0, (PLINTH - FOUNDATION_DEPTH) / 2), (length + 0.12, depth + 0.12, PLINTH + FOUNDATION_DEPTH), plinth_mat, color=stone_tint)
+    k.box(
+        g,
+        (0.0, 0.0, (PLINTH - FOUNDATION_DEPTH) / 2),
+        (length + 0.12, depth + 0.12, PLINTH + FOUNDATION_DEPTH),
+        plinth_mat,
+        color=stone_tint,
+    )
     z = PLINTH
     x0, y0, x1, y1 = -length / 2, -depth / 2, length / 2, depth / 2
     # Roles by wall index: 0 front(-Y), 1 +X, 2 back(+Y), 3 -X.
@@ -460,7 +725,9 @@ def house(g: Geometry, rng: random.Random, length: float, depth: float, style: S
             else:
                 jy0 -= j
                 jy1 += j * 0.6
-            _jetty_details(g, jx0, jy0, jx1, jy1, x0, y0, x1, y1, z, style, detail, front_gable)
+            _jetty_details(
+                g, jx0, jy0, jx1, jy1, x0, y0, x1, y1, z, style, detail, front_gable
+            )
             x0, y0, x1, y1 = jx0, jy0, jx1, jy1
         if style.ground_stone and f == 0:
             wall_mat, framed = ("Ashlar" if style.wall == "Ashlar" else "Rubble"), False
@@ -470,7 +737,9 @@ def house(g: Geometry, rng: random.Random, length: float, depth: float, style: S
         if ruined:
             _ruined_walls(g, rng, x0, y0, x1, y1, z, h, wall_mat, style, detail)
         else:
-            floor_walls(g, rng, x0, y0, x1, y1, z, h, style, f, detail, wall_mat, framed, roles)
+            floor_walls(
+                g, rng, x0, y0, x1, y1, z, h, style, f, detail, wall_mat, framed, roles
+            )
         z += h
     if ruined:
         _ruin_debris(g, rng, x0, y0, x1, y1, style, detail)
@@ -480,18 +749,65 @@ def house(g: Geometry, rng: random.Random, length: float, depth: float, style: S
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     with frame(g, (cx, cy, 0.0)):
         if style.shape == "gable":
-            wm = style.wall if not style.ground_stone or style.floors == 1 else style.wall
-            gwall = "Plaster" if wm == "Planks" and style.extras.get("plaster_gable") else wm
+            wm = (
+                style.wall
+                if not style.ground_stone or style.floors == 1
+                else style.wall
+            )
+            gwall = (
+                "Plaster"
+                if wm == "Planks" and style.extras.get("plaster_gable")
+                else wm
+            )
             for sign in (-1, 1):
-                gable_wall(g, sign * L / 2, D, z, style.pitch, gwall, sign, color=style.stone_tint if gwall in ("Rubble", "Ashlar") else style.wall_tint, vent=style.extras.get("vent", False) and sign < 0)
+                gable_wall(
+                    g,
+                    sign * L / 2,
+                    D,
+                    z,
+                    style.pitch,
+                    gwall,
+                    sign,
+                    color=style.stone_tint
+                    if gwall in ("Rubble", "Ashlar")
+                    else style.wall_tint,
+                    vent=style.extras.get("vent", False) and sign < 0,
+                )
                 if style.frame and gwall == "Plaster" and detail == "high":
                     h = D / 2 * math.tan(math.radians(style.pitch))
                     xo = sign * (L / 2 + 0.02)
                     out = (sign, 0.0, 0.0)
-                    k.beam(g, (xo, 0.0, z), (xo, 0.0, z + h - 0.2), 0.17, 0.045, "Timber", out, color=style.timber_tint)
-                    k.beam(g, (xo, -D * 0.3, z + h * 0.4), (xo, D * 0.3, z + h * 0.4), 0.15, 0.045, "Timber", out, color=style.timber_tint)
+                    k.beam(
+                        g,
+                        (xo, 0.0, z),
+                        (xo, 0.0, z + h - 0.2),
+                        0.17,
+                        0.045,
+                        "Timber",
+                        out,
+                        color=style.timber_tint,
+                    )
+                    k.beam(
+                        g,
+                        (xo, -D * 0.3, z + h * 0.4),
+                        (xo, D * 0.3, z + h * 0.4),
+                        0.15,
+                        0.045,
+                        "Timber",
+                        out,
+                        color=style.timber_tint,
+                    )
                     for sy in (-1, 1):
-                        k.beam(g, (xo, sy * D / 2, z + 0.05), (xo, 0.0, z + h - 0.1), 0.16, 0.045, "Timber", out, color=style.timber_tint)
+                        k.beam(
+                            g,
+                            (xo, sy * D / 2, z + 0.05),
+                            (xo, 0.0, z + h - 0.1),
+                            0.16,
+                            0.045,
+                            "Timber",
+                            out,
+                            color=style.timber_tint,
+                        )
             zr = roof_gable(g, L, D, z, style, detail)
         elif style.shape == "hip":
             zr = roof_hip(g, L, D, z, style, detail)
@@ -504,25 +820,57 @@ def house(g: Geometry, rng: random.Random, length: float, depth: float, style: S
         if style.chimneys >= 2:
             spots.append(L / 2 - 0.9 if style.shape == "gable" else L / 4)
         for sx in spots:
-            chimney(g, sx, rng.uniform(-0.2, 0.2) if style.shape == "gable" else 0.0, z - 0.5, zr + 0.7, chim_mat, stone_tint, detail)
+            chimney(
+                g,
+                sx,
+                rng.uniform(-0.2, 0.2) if style.shape == "gable" else 0.0,
+                z - 0.5,
+                zr + 0.7,
+                chim_mat,
+                stone_tint,
+                detail,
+            )
         for i in range(style.dormers):
             dx = (i + 0.5) / style.dormers * L - L / 2
             dormer(g, dx, -D / 2, z, style, rng, detail)
     g.eave_z = None
-    return {"height": zr, "length": L, "depth": D, "eave": z, "ridge_axis": "y" if style.extras.get("rotated") else "x"}
+    return {
+        "height": zr,
+        "length": L,
+        "depth": D,
+        "eave": z,
+        "ridge_axis": "y" if style.extras.get("rotated") else "x",
+    }
 
 
-def _jetty_details(g, jx0, jy0, jx1, jy1, x0, y0, x1, y1, z, style, detail, front_gable):
+def _jetty_details(
+    g, jx0, jy0, jx1, jy1, x0, y0, x1, y1, z, style, detail, front_gable
+):
     """Soffit under the overhang, joist ends and the bressummer beam."""
     tint = style.timber_tint
     if front_gable:
-        g.quad((jx0, y1, z), (x0, y1, z), (x0, y0, z), (jx0, y0, z), "Timber", color=tint)
+        g.quad(
+            (jx0, y1, z), (x0, y1, z), (x0, y0, z), (jx0, y0, z), "Timber", color=tint
+        )
         if detail == "high":
             n = int((y1 - y0) / 0.45)
             for i in range(n + 1):
                 yy = y0 + 0.1 + (y1 - y0 - 0.2) * i / max(n, 1)
-                k.box(g, ((jx0 + x0) / 2, yy, z - 0.08), (x0 - jx0 + 0.02, 0.14, 0.16), "Timber", color=tint, bottom=True)
-            k.box(g, (jx0 + 0.1, (y0 + y1) / 2, z + 0.1), (0.24, y1 - y0 + 0.1, 0.24), "Timber", color=tint)
+                k.box(
+                    g,
+                    ((jx0 + x0) / 2, yy, z - 0.08),
+                    (x0 - jx0 + 0.02, 0.14, 0.16),
+                    "Timber",
+                    color=tint,
+                    bottom=True,
+                )
+            k.box(
+                g,
+                (jx0 + 0.1, (y0 + y1) / 2, z + 0.1),
+                (0.24, y1 - y0 + 0.1, 0.24),
+                "Timber",
+                color=tint,
+            )
         return
     for ya, yb in ((jy0, y0), (y1, jy1)):
         if abs(yb - ya) < 1e-3:
@@ -532,9 +880,22 @@ def _jetty_details(g, jx0, jy0, jx1, jy1, x0, y0, x1, y1, z, style, detail, fron
             n = int((x1 - x0) / 0.45)
             for i in range(n + 1):
                 xx = x0 + 0.1 + (x1 - x0 - 0.2) * i / max(n, 1)
-                k.box(g, (xx, (ya + yb) / 2, z - 0.08), (0.14, abs(yb - ya) + 0.02, 0.16), "Timber", color=tint, bottom=True)
+                k.box(
+                    g,
+                    (xx, (ya + yb) / 2, z - 0.08),
+                    (0.14, abs(yb - ya) + 0.02, 0.16),
+                    "Timber",
+                    color=tint,
+                    bottom=True,
+                )
             ye = ya if ya < y0 else yb
-            k.box(g, ((x0 + x1) / 2, ye + (0.1 if ya < y0 else -0.1), z + 0.1), (x1 - x0 + 0.1, 0.24, 0.24), "Timber", color=tint)
+            k.box(
+                g,
+                ((x0 + x1) / 2, ye + (0.1 if ya < y0 else -0.1), z + 0.1),
+                (x1 - x0 + 0.1, 0.24, 0.24),
+                "Timber",
+                color=tint,
+            )
 
 
 def _ruined_walls(g, rng, x0, y0, x1, y1, z, h, wall_mat, style, detail):
@@ -561,22 +922,45 @@ def _ruined_walls(g, rng, x0, y0, x1, y1, z, h, wall_mat, style, detail):
             pb = (a[0] + along[0] * xb, a[1] + along[1] * xb, z)
             ta, tb = tops[j], tops[j + 1]
             tint = style.stone_tint if mat in ("Rubble", "Ashlar") else style.wall_tint
-            g.quad(pa, pb, (pb[0], pb[1], z + tb), (pa[0], pa[1], z + ta), mat, color=tint)
+            g.quad(
+                pa, pb, (pb[0], pb[1], z + tb), (pa[0], pa[1], z + ta), mat, color=tint
+            )
             # Inner face and wall top (thickness 0.35) so the shell reads as masonry.
             ia, ib = k.add(pa, k.mul(inward, 0.35)), k.add(pb, k.mul(inward, 0.35))
-            g.quad(ib, ia, (ia[0], ia[1], z + ta), (ib[0], ib[1], z + tb), mat, color=tint)
-            g.quad((pa[0], pa[1], z + ta), (pb[0], pb[1], z + tb), (ib[0], ib[1], z + tb), (ia[0], ia[1], z + ta), mat, color=tint)
+            g.quad(
+                ib, ia, (ia[0], ia[1], z + ta), (ib[0], ib[1], z + tb), mat, color=tint
+            )
+            g.quad(
+                (pa[0], pa[1], z + ta),
+                (pb[0], pb[1], z + tb),
+                (ib[0], ib[1], z + tb),
+                (ia[0], ia[1], z + ta),
+                mat,
+                color=tint,
+            )
 
 
 def _ruin_debris(g, rng, x0, y0, x1, y1, style, detail):
     """Collapsed charred rafters and rubble heaps inside a ruin."""
     for _ in range(6 if detail == "high" else 2):
         p0 = (rng.uniform(x0, x1), rng.uniform(y0, y1), rng.uniform(0.3, 0.6))
-        p1 = (p0[0] + rng.uniform(-3, 3), p0[1] + rng.uniform(-2, 2), rng.uniform(0.3, 2.2))
+        p1 = (
+            p0[0] + rng.uniform(-3, 3),
+            p0[1] + rng.uniform(-2, 2),
+            rng.uniform(0.3, 2.2),
+        )
         k.beam(g, p0, p1, 0.2, 0.2, "Timber", (0, 0, 1), color=(0.25, 0.22, 0.2))
     for _ in range(3):
         c = (rng.uniform(x0 + 1, x1 - 1), rng.uniform(y0 + 1, y1 - 1), 0.2)
-        k.cone(g, c, rng.uniform(0.9, 1.6), rng.uniform(0.5, 0.9), "Rubble", sides=7, phase=rng.random())
+        k.cone(
+            g,
+            c,
+            rng.uniform(0.9, 1.6),
+            rng.uniform(0.5, 0.9),
+            "Rubble",
+            sides=7,
+            phase=rng.random(),
+        )
 
 
 # --- recipes --------------------------------------------------------------------------------
@@ -623,16 +1007,32 @@ def _lean_to(g, rng, L, D, st, detail):
     k.box(g, (x, 0.0, h / 2 - 0.5), (w, d, h + 1.0), "Planks", color=WHITE, grain=True)
     pitch_top = h + 0.7
     xa, xb = (x - side * w / 2 - side * 0.05), (x + side * w / 2 + side * 0.3)
-    pts = [(xb, -d / 2 - 0.3, h), (xb, d / 2 + 0.3, h), (xa, d / 2 + 0.3, pitch_top), (xa, -d / 2 - 0.3, pitch_top)]
+    pts = [
+        (xb, -d / 2 - 0.3, h),
+        (xb, d / 2 + 0.3, h),
+        (xa, d / 2 + 0.3, pitch_top),
+        (xa, -d / 2 - 0.3, pitch_top),
+    ]
     if side < 0:
         pts = [pts[1], pts[0], pts[3], pts[2]]
-    k.slab(g, pts, 0.1, "Planks" if st.roof == "Thatch" else st.roof, color=st.roof_tint)
+    k.slab(
+        g, pts, 0.1, "Planks" if st.roof == "Thatch" else st.roof, color=st.roof_tint
+    )
     # Log pile under the eaves.
     for row in range(4):
         for i in range(5 - row):
             px = x - 0.9 + 0.36 * i + 0.18 * row
             pz = 0.14 + row * 0.26
-            k.beam(g, (px, -d / 2 - 0.1, pz), (px, -d / 2 - 0.85, pz), 0.24, 0.24, "Timber", (0, 0, 1), color=(0.72, 0.6, 0.48))
+            k.beam(
+                g,
+                (px, -d / 2 - 0.1, pz),
+                (px, -d / 2 - 0.85, pz),
+                0.24,
+                0.24,
+                "Timber",
+                (0, 0, 1),
+                color=(0.72, 0.6, 0.48),
+            )
 
 
 def longere(g, rng, detail="high", length=None, depth=None, ruined=False):
@@ -756,7 +1156,13 @@ def barn(g, rng, detail="high", length=None, depth=None, ruined=False):
 
 def _barn_body(g, rng, L, D, st, detail):
     h = 4.6
-    k.box(g, (0.0, 0.0, (0.7 - FOUNDATION_DEPTH) / 2), (L + 0.1, D + 0.1, 0.7 + FOUNDATION_DEPTH), "Rubble", color=st.stone_tint)
+    k.box(
+        g,
+        (0.0, 0.0, (0.7 - FOUNDATION_DEPTH) / 2),
+        (L + 0.1, D + 0.1, 0.7 + FOUNDATION_DEPTH),
+        "Rubble",
+        color=st.stone_tint,
+    )
     z = 0.7
     x0, y0, x1, y1 = -L / 2, -D / 2, L / 2, D / 2
     corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
@@ -774,23 +1180,53 @@ def _barn_body(g, rng, L, D, st, detail):
         if st.ruined:
             continue
         if detail == "high":
-            k.wall(g, origin, along, width, h, "Planks", ops, depth=0.12, reveal_mat="Timber", back_mats={"door": "Window"}, grain=True)
+            k.wall(
+                g,
+                origin,
+                along,
+                width,
+                h,
+                "Planks",
+                ops,
+                depth=0.12,
+                reveal_mat="Timber",
+                back_mats={"door": "Window"},
+                grain=True,
+            )
             dress_openings(g, origin, along, ops, st, rng, detail, False)
             outward = (along[1], -along[0], 0.0)
             for x in [0.1, width - 0.1] + [width * t for t in (0.25, 0.5, 0.75)]:
                 if any(o.x0 - 0.2 < x < o.x1 + 0.2 for o in ops):
                     continue
                 p0 = k.add(k.add(origin, k.mul(along, x)), k.mul(outward, 0.03))
-                k.beam(g, p0, (p0[0], p0[1], z + h), 0.22, 0.06, "Timber", outward, color=st.timber_tint)
+                k.beam(
+                    g,
+                    p0,
+                    (p0[0], p0[1], z + h),
+                    0.22,
+                    0.06,
+                    "Timber",
+                    outward,
+                    color=st.timber_tint,
+                )
         else:
             k.wall(g, origin, along, width, h, "Planks", [], grain=True)
             for o in ops:
                 outward = (along[1], -along[0], 0.0)
 
                 def P(x, y, origin=origin, along=along, outward=outward):
-                    return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, 0.03))
+                    return k.add(
+                        k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)),
+                        k.mul(outward, 0.03),
+                    )
 
-                g.quad(P(o.x0, o.y0), P(o.x1, o.y0), P(o.x1, o.y1), P(o.x0, o.y1), "Door" if o.kind == "door" else "Window")
+                g.quad(
+                    P(o.x0, o.y0),
+                    P(o.x1, o.y0),
+                    P(o.x1, o.y1),
+                    P(o.x0, o.y1),
+                    "Door" if o.kind == "door" else "Window",
+                )
     if st.ruined:
         _ruined_walls(g, rng, x0, y0, x1, y1, 0.0, 1.6, "Rubble", st, detail)
         _ruin_debris(g, rng, x0, y0, x1, y1, st, detail)
@@ -813,36 +1249,92 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
     W = depth or rng.uniform(9.0, 11.0)
     tint = pick(rng, STONE_TINTS)
     roof = pick(rng, ["RoofSlate", "RoofSlate", "RoofFlat"])
-    st = Style(wall="Ashlar", roof=roof, pitch=54, stone_tint=tint, roof_tint=pick(rng, ROOF_TINTS[roof]))
+    st = Style(
+        wall="Ashlar",
+        roof=roof,
+        pitch=54,
+        stone_tint=tint,
+        roof_tint=pick(rng, ROOF_TINTS[roof]),
+    )
     tower = min(max(L * 0.21, 4.4), 6.8)
     nave_l = L * 0.52
     choir_l = L - nave_l - tower
     h = min(max(W * 0.82, 6.5), 11.0)
     nx0 = -L / 2 + tower
-    k.box(g, (tower / 2, 0.0, -FOUNDATION_DEPTH / 2 + 0.2), (L - tower, W + 0.2, FOUNDATION_DEPTH + 0.4), "Ashlar", color=tint)
-    k.box(g, (-L / 2 + tower / 2, 0.0, -FOUNDATION_DEPTH / 2), (tower + 0.2, tower + 0.2, FOUNDATION_DEPTH), "Ashlar", color=tint)
+    k.box(
+        g,
+        (tower / 2, 0.0, -FOUNDATION_DEPTH / 2 + 0.2),
+        (L - tower, W + 0.2, FOUNDATION_DEPTH + 0.4),
+        "Ashlar",
+        color=tint,
+    )
+    k.box(
+        g,
+        (-L / 2 + tower / 2, 0.0, -FOUNDATION_DEPTH / 2),
+        (tower + 0.2, tower + 0.2, FOUNDATION_DEPTH),
+        "Ashlar",
+        color=tint,
+    )
     # Nave.
     with frame(g, (nx0 + nave_l / 2, 0.0, 0.0)):
-        _stone_hall(g, rng, nave_l, W, 0.4, h, st, detail, lancets=True, buttresses=True, door_side=True)
+        _stone_hall(
+            g,
+            rng,
+            nave_l,
+            W,
+            0.4,
+            h,
+            st,
+            detail,
+            lancets=True,
+            buttresses=True,
+            door_side=True,
+        )
         g.eave_z = h + 0.4
         for sign in (1,):
-            gable_wall(g, sign * nave_l / 2, W, h + 0.4, st.pitch, "Ashlar", sign, color=tint)
+            gable_wall(
+                g, sign * nave_l / 2, W, h + 0.4, st.pitch, "Ashlar", sign, color=tint
+            )
         roof_gable(g, nave_l, W, h + 0.4, st, detail, overhang=0.3, gable_over=0.1)
         g.eave_z = None
         # South porch.
         if detail == "high":
             with frame(g, (-nave_l * 0.2, -W / 2 - 1.6, 0.0), 0.0):
                 k.box(g, (0.0, 0.0, 1.8), (3.2, 3.2, 3.6), "Ashlar", color=tint)
-                k.wall(g, (-1.0, -1.61, 0.0), (1.0, 0.0, 0.0), 2.0, 2.9, "Ashlar", [Opening(0.3, 0.0, 1.7, 2.6, "dark")], depth=0.5, color=tint)
+                k.wall(
+                    g,
+                    (-1.0, -1.61, 0.0),
+                    (1.0, 0.0, 0.0),
+                    2.0,
+                    2.9,
+                    "Ashlar",
+                    [Opening(0.3, 0.0, 1.7, 2.6, "dark")],
+                    depth=0.5,
+                    color=tint,
+                )
                 with frame(g, (0.0, 0.0, 0.0), math.pi / 2):
-                    roof_gable(g, 3.2, 3.2, 3.6, st, detail, overhang=0.2, gable_over=0.2)
+                    roof_gable(
+                        g, 3.2, 3.2, 3.6, st, detail, overhang=0.2, gable_over=0.2
+                    )
     # Choir with a three-sided apse.
     cw = W * 0.78
     ch = h * 0.85
     cx0 = nx0 + nave_l
     with frame(g, (cx0 + choir_l / 2 - cw * 0.25, 0.0, 0.0)):
         cl = max(choir_l - cw * 0.5, 1.5)
-        _stone_hall(g, rng, cl, cw, 0.4, ch, st, detail, lancets=True, buttresses=True, ends=False)
+        _stone_hall(
+            g,
+            rng,
+            cl,
+            cw,
+            0.4,
+            ch,
+            st,
+            detail,
+            lancets=True,
+            buttresses=True,
+            ends=False,
+        )
         g.eave_z = ch + 0.4
         roof_gable(g, cl, cw, ch + 0.4, st, detail, overhang=0.3, gable_over=0.0)
         _apse(g, cl / 2, cw, 0.4, ch, st, detail)
@@ -854,7 +1346,15 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
         _tower(g, rng, tower, th, st, detail)
         spire = th * rng.uniform(0.6, 0.8)
         with tinted(g, st.roof_tint):
-            k.cone(g, (0.0, 0.0, th + 0.4), tower * 0.58, spire, "RoofSlate", sides=8, phase=math.pi / 8)
+            k.cone(
+                g,
+                (0.0, 0.0, th + 0.4),
+                tower * 0.58,
+                spire,
+                "RoofSlate",
+                sides=8,
+                phase=math.pi / 8,
+            )
             if detail == "high":
                 for i in range(4):
                     a = math.pi / 4 + i * math.pi / 2
@@ -864,7 +1364,20 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
     return {"height": th + spire, "length": L, "depth": W}
 
 
-def _stone_hall(g, rng, L, W, z, h, st, detail, lancets=False, buttresses=False, ends=True, door_side=False):
+def _stone_hall(
+    g,
+    rng,
+    L,
+    W,
+    z,
+    h,
+    st,
+    detail,
+    lancets=False,
+    buttresses=False,
+    ends=True,
+    door_side=False,
+):
     """Ashlar rectangle with lancet windows and stepped buttresses (church nave, choir, hall)."""
     x0, y0, x1, y1 = -L / 2, -W / 2, L / 2, W / 2
     corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
@@ -884,11 +1397,23 @@ def _stone_hall(g, rng, L, W, z, h, st, detail, lancets=False, buttresses=False,
                     continue
                 ops.append(Opening(cx - 0.45, h * 0.35, cx + 0.45, h * 0.8, "window"))
         elif lancets and i == 1 and ends:
-            ops.append(Opening(width / 2 - 0.7, h * 0.3, width / 2 + 0.7, h * 0.85, "window"))
+            ops.append(
+                Opening(width / 2 - 0.7, h * 0.3, width / 2 + 0.7, h * 0.85, "window")
+            )
         origin = (a[0], a[1], z)
         outward = (along[1], -along[0], 0.0)
         if detail == "high":
-            k.wall(g, origin, along, width, h, "Ashlar", ops, depth=0.55, color=st.stone_tint)
+            k.wall(
+                g,
+                origin,
+                along,
+                width,
+                h,
+                "Ashlar",
+                ops,
+                depth=0.55,
+                color=st.stone_tint,
+            )
             for o in ops:
                 if o.kind == "window":
                     # Pointed arch head painted dark above the rectangular light.
@@ -896,50 +1421,128 @@ def _stone_hall(g, rng, L, W, z, h, st, detail, lancets=False, buttresses=False,
                     top = o.y1 + (o.x1 - o.x0) * 0.75
 
                     def P(x, y, origin=origin, along=along, outward=outward):
-                        return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, 0.012))
+                        return k.add(
+                            k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)),
+                            k.mul(outward, 0.012),
+                        )
 
-                    g.poly([P(o.x0, o.y1), P(o.x1, o.y1), P(o.x1 - 0.08, o.y1 + 0.35), P(cx, top), P(o.x0 + 0.08, o.y1 + 0.35)], "Window")
-                    k.beam(g, P(o.x0 - 0.12, o.y0 - 0.1), P(o.x1 + 0.12, o.y0 - 0.1), 0.14, 0.12, "Ashlar", outward, color=st.stone_tint)
-                    k.beam(g, P(cx, o.y0), P(cx, o.y1 + 0.1), 0.1, 0.02, "Ashlar", k.mul(outward, -1.0), color=st.stone_tint)
+                    g.poly(
+                        [
+                            P(o.x0, o.y1),
+                            P(o.x1, o.y1),
+                            P(o.x1 - 0.08, o.y1 + 0.35),
+                            P(cx, top),
+                            P(o.x0 + 0.08, o.y1 + 0.35),
+                        ],
+                        "Window",
+                    )
+                    k.beam(
+                        g,
+                        P(o.x0 - 0.12, o.y0 - 0.1),
+                        P(o.x1 + 0.12, o.y0 - 0.1),
+                        0.14,
+                        0.12,
+                        "Ashlar",
+                        outward,
+                        color=st.stone_tint,
+                    )
+                    k.beam(
+                        g,
+                        P(cx, o.y0),
+                        P(cx, o.y1 + 0.1),
+                        0.1,
+                        0.02,
+                        "Ashlar",
+                        k.mul(outward, -1.0),
+                        color=st.stone_tint,
+                    )
                 elif o.kind == "door":
                     cx = (o.x0 + o.x1) / 2
 
                     def P(x, y, d=0.0, origin=origin, along=along, outward=outward):
-                        return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, d))
+                        return k.add(
+                            k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)),
+                            k.mul(outward, d),
+                        )
 
-                    g.poly([P(o.x0 - 0.3, o.y1, 0.05), P(o.x1 + 0.3, o.y1, 0.05), P(o.x1 + 0.3, o.y1 + 0.4, 0.05), P(cx, o.y1 + 1.3, 0.05), P(o.x0 - 0.3, o.y1 + 0.4, 0.05)], "Ashlar", color=st.stone_tint)
+                    g.poly(
+                        [
+                            P(o.x0 - 0.3, o.y1, 0.05),
+                            P(o.x1 + 0.3, o.y1, 0.05),
+                            P(o.x1 + 0.3, o.y1 + 0.4, 0.05),
+                            P(cx, o.y1 + 1.3, 0.05),
+                            P(o.x0 - 0.3, o.y1 + 0.4, 0.05),
+                        ],
+                        "Ashlar",
+                        color=st.stone_tint,
+                    )
             if buttresses and i in (0, 2):
                 for bi in range(bays + 1):
                     x = bi * width / bays
                     if x < 0.3 or x > width - 0.3:
                         x = min(max(x, 0.45), width - 0.45)
                     base = k.add(k.add(origin, k.mul(along, x)), k.mul(outward, 0.45))
-                    k.box(g, (base[0], base[1], z + h * 0.3 - 1.0), (0.9, 0.9, h * 0.6 + 2.0), "Ashlar", yaw=g_yaw(along), color=st.stone_tint)
+                    k.box(
+                        g,
+                        (base[0], base[1], z + h * 0.3 - 1.0),
+                        (0.9, 0.9, h * 0.6 + 2.0),
+                        "Ashlar",
+                        yaw=g_yaw(along),
+                        color=st.stone_tint,
+                    )
                     top = k.add(k.add(origin, k.mul(along, x)), k.mul(outward, 0.3))
-                    k.box(g, (top[0], top[1], z + h * 0.72), (0.7, 0.6, h * 0.25), "Ashlar", yaw=g_yaw(along), color=st.stone_tint)
+                    k.box(
+                        g,
+                        (top[0], top[1], z + h * 0.72),
+                        (0.7, 0.6, h * 0.25),
+                        "Ashlar",
+                        yaw=g_yaw(along),
+                        color=st.stone_tint,
+                    )
         else:
             k.wall(g, origin, along, width, h, "Ashlar", [], color=st.stone_tint)
             for o in ops:
 
                 def P(x, y, origin=origin, along=along, outward=outward):
-                    return k.add(k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)), k.mul(outward, 0.03))
+                    return k.add(
+                        k.add(k.add(origin, k.mul(along, x)), (0.0, 0.0, y)),
+                        k.mul(outward, 0.03),
+                    )
 
-                g.quad(P(o.x0, o.y0), P(o.x1, o.y0), P(o.x1, o.y1), P(o.x0, o.y1), "Window")
+                g.quad(
+                    P(o.x0, o.y0), P(o.x1, o.y0), P(o.x1, o.y1), P(o.x0, o.y1), "Window"
+                )
 
 
 def _apse(g, x_start, W, z, h, st, detail):
     """Three-sided apse (half octagon) closing a choir at ``x_start``, with its roof."""
     r = W / 2
-    pts = [(x_start + r * math.sin(a), -r * math.cos(a)) for a in (0.0, math.pi / 4, math.pi / 2, 3 * math.pi / 4, math.pi)]
+    pts = [
+        (x_start + r * math.sin(a), -r * math.cos(a))
+        for a in (0.0, math.pi / 4, math.pi / 2, 3 * math.pi / 4, math.pi)
+    ]
     apex_z = z + h + r * math.tan(math.radians(st.pitch))
     for (ax, ay), (bx, by) in zip(pts, pts[1:], strict=False):
-        g.quad((ax, ay, z), (bx, by, z), (bx, by, z + h), (ax, ay, z + h), "Ashlar", color=st.stone_tint)
+        g.quad(
+            (ax, ay, z),
+            (bx, by, z),
+            (bx, by, z + h),
+            (ax, ay, z + h),
+            "Ashlar",
+            color=st.stone_tint,
+        )
         mx, my = (ax + bx) / 2, (ay + by) / 2
         if detail == "high":
             n = k.norm((mx - x_start, my, 0.0))
             p = (mx + n[0] * 0.02, my + n[1] * 0.02, 0.0)
             t = k.norm((bx - ax, by - ay, 0.0))
-            g.quad(k.add(p, (-t[0] * 0.4, -t[1] * 0.4, z + h * 0.35)), k.add(p, (t[0] * 0.4, t[1] * 0.4, z + h * 0.35)), k.add(p, (t[0] * 0.4, t[1] * 0.4, z + h * 0.82)), k.add(p, (-t[0] * 0.4, -t[1] * 0.4, z + h * 0.82)), "Window")
+            g.quad(
+                k.add(p, (-t[0] * 0.4, -t[1] * 0.4, z + h * 0.35)),
+                k.add(p, (t[0] * 0.4, t[1] * 0.4, z + h * 0.35)),
+                k.add(p, (t[0] * 0.4, t[1] * 0.4, z + h * 0.82)),
+                k.add(p, (-t[0] * 0.4, -t[1] * 0.4, z + h * 0.82)),
+                "Window",
+            )
         o = 0.35
         with tinted(g, st.roof_tint):
             ea = (x_start + (ax - x_start) * (1 + o / r), ay * (1 + o / r), z + h - 0.2)
@@ -954,24 +1557,79 @@ def _tower(g, rng, size, height, st, detail):
     for i in range(4):
         a, b = corners[i], corners[(i + 1) % 4]
         along = k.norm((b[0] - a[0], b[1] - a[1], 0.0))
-        ops = [Opening(size / 2 - 0.4, height - 4.2, size / 2 - 0.05, height - 1.2, "dark"), Opening(size / 2 + 0.05, height - 4.2, size / 2 + 0.4, height - 1.2, "dark")]
-        ops.append(Opening(size / 2 - 0.12, height * 0.45, size / 2 + 0.12, height * 0.45 + 1.1, "dark"))
+        ops = [
+            Opening(
+                size / 2 - 0.4, height - 4.2, size / 2 - 0.05, height - 1.2, "dark"
+            ),
+            Opening(
+                size / 2 + 0.05, height - 4.2, size / 2 + 0.4, height - 1.2, "dark"
+            ),
+        ]
+        ops.append(
+            Opening(
+                size / 2 - 0.12,
+                height * 0.45,
+                size / 2 + 0.12,
+                height * 0.45 + 1.1,
+                "dark",
+            )
+        )
         if i == 3:
             ops.append(Opening(size / 2 - 0.9, 0.0, size / 2 + 0.9, 3.4, "door"))
-        k.wall(g, (a[0], a[1], 0.0), along, size, height, "Ashlar", ops if detail == "high" else [], depth=0.6, color=st.stone_tint)
+        k.wall(
+            g,
+            (a[0], a[1], 0.0),
+            along,
+            size,
+            height,
+            "Ashlar",
+            ops if detail == "high" else [],
+            depth=0.6,
+            color=st.stone_tint,
+        )
         if detail != "high":
             outward = (along[1], -along[0], 0.0)
             for o in ops:
                 p = k.add((a[0], a[1], 0.0), k.mul(outward, 0.03))
-                g.quad(k.add(p, (along[0] * o.x0, along[1] * o.x0, o.y0)), k.add(p, (along[0] * o.x1, along[1] * o.x1, o.y0)), k.add(p, (along[0] * o.x1, along[1] * o.x1, o.y1)), k.add(p, (along[0] * o.x0, along[1] * o.x0, o.y1)), "Window")
+                g.quad(
+                    k.add(p, (along[0] * o.x0, along[1] * o.x0, o.y0)),
+                    k.add(p, (along[0] * o.x1, along[1] * o.x1, o.y0)),
+                    k.add(p, (along[0] * o.x1, along[1] * o.x1, o.y1)),
+                    k.add(p, (along[0] * o.x0, along[1] * o.x0, o.y1)),
+                    "Window",
+                )
     # Cornice and corner buttresses.
-    k.box(g, (0.0, 0.0, height + 0.2), (size + 0.5, size + 0.5, 0.4), "Ashlar", color=st.stone_tint)
+    k.box(
+        g,
+        (0.0, 0.0, height + 0.2),
+        (size + 0.5, size + 0.5, 0.4),
+        "Ashlar",
+        color=st.stone_tint,
+    )
     if detail == "high":
         for sx in (-1, 1):
             for sy in (-1, 1):
-                k.box(g, (sx * (s + 0.25), sy * (s - 0.3), height * 0.3 - 1.0), (0.5, 0.8, height * 0.6 + 2.0), "Ashlar", color=st.stone_tint)
-                k.box(g, (sx * (s - 0.3), sy * (s + 0.25), height * 0.3 - 1.0), (0.8, 0.5, height * 0.6 + 2.0), "Ashlar", color=st.stone_tint)
-        k.box(g, (0.0, 0.0, height - 4.35), (size + 0.3, size + 0.3, 0.25), "Ashlar", color=st.stone_tint)
+                k.box(
+                    g,
+                    (sx * (s + 0.25), sy * (s - 0.3), height * 0.3 - 1.0),
+                    (0.5, 0.8, height * 0.6 + 2.0),
+                    "Ashlar",
+                    color=st.stone_tint,
+                )
+                k.box(
+                    g,
+                    (sx * (s - 0.3), sy * (s + 0.25), height * 0.3 - 1.0),
+                    (0.8, 0.5, height * 0.6 + 2.0),
+                    "Ashlar",
+                    color=st.stone_tint,
+                )
+        k.box(
+            g,
+            (0.0, 0.0, height - 4.35),
+            (size + 0.3, size + 0.3, 0.25),
+            "Ashlar",
+            color=st.stone_tint,
+        )
 
 
 def _cross(g, base, detail):
@@ -985,32 +1643,72 @@ def manor(g, rng, detail="high", length=None, depth=None, ruined=False):
     """Fortified manor (maison forte): square tower with a steep hipped roof and a stone hall."""
     tint = pick(rng, STONE_TINTS)
     roof = pick(rng, ["RoofSlate", "RoofFlat"])
-    st = Style(wall="Ashlar", roof=roof, pitch=62, stone_tint=tint, roof_tint=pick(rng, ROOF_TINTS[roof]), window="mullion", floors=2, dormers=1, chimneys=2, shutters=0.2)
+    st = Style(
+        wall="Ashlar",
+        roof=roof,
+        pitch=62,
+        stone_tint=tint,
+        roof_tint=pick(rng, ROOF_TINTS[roof]),
+        window="mullion",
+        floors=2,
+        dormers=1,
+        chimneys=2,
+        shutters=0.2,
+    )
     hall_l, hall_d = rng.uniform(13.0, 16.0), rng.uniform(7.5, 8.5)
     with frame(g, (2.0, 0.0, 0.0)):
         house(g, rng, hall_l, hall_d, st, detail)
     ts = 7.0
     th = rng.uniform(14.0, 17.0)
     with frame(g, (-hall_l / 2 - ts / 2 + 2.5, -0.5, 0.0)):
-        k.box(g, (0.0, 0.0, -FOUNDATION_DEPTH / 2), (ts + 0.3, ts + 0.3, FOUNDATION_DEPTH), "Ashlar", color=tint)
+        k.box(
+            g,
+            (0.0, 0.0, -FOUNDATION_DEPTH / 2),
+            (ts + 0.3, ts + 0.3, FOUNDATION_DEPTH),
+            "Ashlar",
+            color=tint,
+        )
         s = ts / 2
         corners = [(-s, -s), (s, -s), (s, s), (-s, s)]
         for i in range(4):
             a, b = corners[i], corners[(i + 1) % 4]
             along = k.norm((b[0] - a[0], b[1] - a[1], 0.0))
-            ops = [Opening(ts / 2 - 0.15, y, ts / 2 + 0.15, y + 1.0, "dark") for y in (3.5, 7.0)]
-            ops.append(Opening(ts / 2 - 0.5, th - 3.2, ts / 2 + 0.5, th - 1.8, "window"))
+            ops = [
+                Opening(ts / 2 - 0.15, y, ts / 2 + 0.15, y + 1.0, "dark")
+                for y in (3.5, 7.0)
+            ]
+            ops.append(
+                Opening(ts / 2 - 0.5, th - 3.2, ts / 2 + 0.5, th - 1.8, "window")
+            )
             if i == 0:
                 ops.append(Opening(1.0, 0.0, 2.2, 2.5, "door"))
-            k.wall(g, (a[0], a[1], 0.0), along, ts, th, "Ashlar", ops if detail == "high" else [], depth=0.7, color=tint)
+            k.wall(
+                g,
+                (a[0], a[1], 0.0),
+                along,
+                ts,
+                th,
+                "Ashlar",
+                ops if detail == "high" else [],
+                depth=0.7,
+                color=tint,
+            )
         # Machicolated parapet band then a steep pyramid roof.
         k.box(g, (0.0, 0.0, th + 0.5), (ts + 0.8, ts + 0.8, 1.0), "Ashlar", color=tint)
         if detail == "high":
             for i in range(9):
                 for side in range(4):
                     t = -s - 0.2 + (ts + 0.4) * i / 8
-                    pos = [(t, -s - 0.3), (s + 0.3, t), (t, s + 0.3), (-s - 0.3, t)][side]
-                    k.box(g, (pos[0], pos[1], th - 0.2), (0.3, 0.3, 0.5), "Ashlar", color=tint)
+                    pos = [(t, -s - 0.3), (s + 0.3, t), (t, s + 0.3), (-s - 0.3, t)][
+                        side
+                    ]
+                    k.box(
+                        g,
+                        (pos[0], pos[1], th - 0.2),
+                        (0.3, 0.3, 0.5),
+                        "Ashlar",
+                        color=tint,
+                    )
         g.eave_z = th + 1.0
         tst = Style(roof=roof, pitch=64, roof_tint=st.roof_tint)
         zr = roof_hip(g, ts + 0.6, ts + 0.6, th + 1.0, tst, detail, overhang=0.2)
@@ -1033,16 +1731,40 @@ def market_hall(g, rng, detail="high", length=None, depth=None, ruined=False):
                 continue
             x, y = -L / 2 + L * i / nx, -D / 2 + D * j / ny
             k.box(g, (x, y, 0.15), (0.6, 0.6, 0.5), "Ashlar", color=WHITE)
-            k.box(g, (x, y, 0.4 + h / 2), (0.3, 0.3, h), "Timber", grain=True, color=TIMBER_TINTS[1])
+            k.box(
+                g,
+                (x, y, 0.4 + h / 2),
+                (0.3, 0.3, h),
+                "Timber",
+                grain=True,
+                color=TIMBER_TINTS[1],
+            )
             if detail == "high":
                 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                     if not (-L / 2 <= x + dx <= L / 2 and -D / 2 <= y + dy <= D / 2):
                         continue
-                    k.beam(g, (x, y, 0.4 + h - 0.9), (x + dx * 0.9, y + dy * 0.9, 0.4 + h), 0.14, 0.14, "Timber", (dy, -dx, 0), color=TIMBER_TINTS[1])
+                    k.beam(
+                        g,
+                        (x, y, 0.4 + h - 0.9),
+                        (x + dx * 0.9, y + dy * 0.9, 0.4 + h),
+                        0.14,
+                        0.14,
+                        "Timber",
+                        (dy, -dx, 0),
+                        color=TIMBER_TINTS[1],
+                    )
     for j in range(ny + 1):
         y = -D / 2 + D * j / ny
-        k.box(g, (0.0, y, 0.4 + h + 0.15), (L + 0.2, 0.32, 0.3), "Timber", color=TIMBER_TINTS[1])
-    k.box(g, (0.0, 0.0, 0.02), (L + 1.0, D + 1.0, 0.1), "Ashlar", color=(0.8, 0.78, 0.74))
+        k.box(
+            g,
+            (0.0, y, 0.4 + h + 0.15),
+            (L + 0.2, 0.32, 0.3),
+            "Timber",
+            color=TIMBER_TINTS[1],
+        )
+    k.box(
+        g, (0.0, 0.0, 0.02), (L + 1.0, D + 1.0, 0.1), "Ashlar", color=(0.8, 0.78, 0.74)
+    )
     g.eave_z = None
     zr = roof_hip(g, L, D, 0.4 + h + 0.3, st, detail, end_run=D * 0.35, overhang=0.9)
     return {"height": zr, "length": L, "depth": D}
@@ -1050,10 +1772,31 @@ def market_hall(g, rng, detail="high", length=None, depth=None, ruined=False):
 
 def well(g, rng, detail="high", length=None, depth=None, ruined=False):
     """Village well: round rubble curb, two posts, a small roof, a windlass and a bucket."""
-    k.cylinder(g, (0.0, 0.0, -0.3), 1.0, 1.2, "Rubble", sides=12 if detail == "high" else 8, color=WHITE)
-    g.poly([(math.cos(a) * 0.8, math.sin(a) * 0.8, 0.91) for a in [2 * math.pi * i / 10 for i in range(10)]], "Window")
+    k.cylinder(
+        g,
+        (0.0, 0.0, -0.3),
+        1.0,
+        1.2,
+        "Rubble",
+        sides=12 if detail == "high" else 8,
+        color=WHITE,
+    )
+    g.poly(
+        [
+            (math.cos(a) * 0.8, math.sin(a) * 0.8, 0.91)
+            for a in [2 * math.pi * i / 10 for i in range(10)]
+        ],
+        "Window",
+    )
     for sx in (-1, 1):
-        k.box(g, (sx * 0.85, 0.0, 1.4), (0.14, 0.14, 2.3), "Timber", grain=True, color=TIMBER_TINTS[0])
+        k.box(
+            g,
+            (sx * 0.85, 0.0, 1.4),
+            (0.14, 0.14, 2.3),
+            "Timber",
+            grain=True,
+            color=TIMBER_TINTS[0],
+        )
     k.box(g, (0.0, 0.0, 1.9), (1.8, 0.12, 0.12), "Timber", color=TIMBER_TINTS[0])
     st = Style(roof="RoofFlat", pitch=45)
     roof_gable(g, 2.0, 1.4, 2.5, st, detail, overhang=0.25, gable_over=0.1)
@@ -1066,16 +1809,58 @@ def windmill(g, rng, detail="high", length=None, depth=None, ruined=False):
     for sx in (-1, 1):
         for sy in (-1, 1):
             k.box(g, (sx * 2.2, sy * 2.2, 0.3), (0.9, 0.9, 0.8), "Rubble", color=WHITE)
-            k.beam(g, (sx * 2.2, sy * 2.2, 0.7), (0.0, 0.0, 3.4), 0.25, 0.25, "Timber", (sy, -sx, 0), color=TIMBER_TINTS[1])
-    k.box(g, (0.0, 0.0, 2.0), (0.5, 0.5, 4.0), "Timber", grain=True, color=TIMBER_TINTS[1])
+            k.beam(
+                g,
+                (sx * 2.2, sy * 2.2, 0.7),
+                (0.0, 0.0, 3.4),
+                0.25,
+                0.25,
+                "Timber",
+                (sy, -sx, 0),
+                color=TIMBER_TINTS[1],
+            )
+    k.box(
+        g, (0.0, 0.0, 2.0), (0.5, 0.5, 4.0), "Timber", grain=True, color=TIMBER_TINTS[1]
+    )
     bw, bd, bh = 3.4, 4.6, 5.2
     with frame(g, (0.0, 0.0, 3.8), rng.uniform(-0.6, 0.6)):
-        k.box(g, (0.0, 0.0, bh / 2), (bw, bd, bh), "Planks", grain=True, color=(0.95, 0.9, 0.85))
+        k.box(
+            g,
+            (0.0, 0.0, bh / 2),
+            (bw, bd, bh),
+            "Planks",
+            grain=True,
+            color=(0.95, 0.9, 0.85),
+        )
         with frame(g, (0.0, 0.0, 0.0), math.pi / 2):
-            zr = roof_gable(g, bd, bw, bh, Style(roof="RoofFlat", pitch=38), detail, overhang=0.2, gable_over=0.25)
-        k.beam(g, (0.0, -bd / 2 + 0.5, 1.4), (0.0, bd / 2 + 2.6, -3.3), 0.25, 0.25, "Timber", (1, 0, 0), color=TIMBER_TINTS[0])
+            zr = roof_gable(
+                g,
+                bd,
+                bw,
+                bh,
+                Style(roof="RoofFlat", pitch=38),
+                detail,
+                overhang=0.2,
+                gable_over=0.25,
+            )
+        k.beam(
+            g,
+            (0.0, -bd / 2 + 0.5, 1.4),
+            (0.0, bd / 2 + 2.6, -3.3),
+            0.25,
+            0.25,
+            "Timber",
+            (1, 0, 0),
+            color=TIMBER_TINTS[0],
+        )
         hub = (0.0, -bd / 2 - 0.5, bh * 0.72)
-        k.box(g, (0.0, -bd / 2 - 0.25, bh * 0.72), (0.5, 0.9, 0.5), "Timber", color=TIMBER_TINTS[0])
+        k.box(
+            g,
+            (0.0, -bd / 2 - 0.25, bh * 0.72),
+            (0.5, 0.9, 0.5),
+            "Timber",
+            color=TIMBER_TINTS[0],
+        )
         phase = rng.uniform(0, math.pi / 2)
         for i in range(4):
             a = phase + i * math.pi / 2
@@ -1091,7 +1876,16 @@ def windmill(g, rng, detail="high", length=None, depth=None, ruined=False):
             if detail == "high":
                 for t in range(1, 8):
                     a0 = k.lerp(p0, p1, t / 8)
-                    k.beam(g, a0, k.add(a0, k.mul(side, 1.75)), 0.06, 0.06, "Timber", (0, -1, 0), color=TIMBER_TINTS[0])
+                    k.beam(
+                        g,
+                        a0,
+                        k.add(a0, k.mul(side, 1.75)),
+                        0.06,
+                        0.06,
+                        "Timber",
+                        (0, -1, 0),
+                        color=TIMBER_TINTS[0],
+                    )
     return {"height": 3.8 + zr + 4.0, "length": 7.0, "depth": 7.0}
 
 
@@ -1110,7 +1904,9 @@ RECIPES = {
 }
 
 
-def build(kind: str, seed: int, detail: str = "high", ruined: bool = False, **dims) -> tuple[Geometry, dict]:
+def build(
+    kind: str, seed: int, detail: str = "high", ruined: bool = False, **dims
+) -> tuple[Geometry, dict]:
     """Build one building of ``kind`` with a deterministic ``seed``."""
     rng = random.Random(seed)
     g = Geometry()
@@ -1127,7 +1923,14 @@ def build(kind: str, seed: int, detail: str = "high", ruined: bool = False, **di
 
 
 # Settling of old timber buildings: ridge sag (m) per kind; stone buildings barely move.
-SAG = {"cottage": 0.16, "longere": 0.14, "timber": 0.14, "townhouse": 0.1, "barn": 0.22, "stonehouse": 0.04}
+SAG = {
+    "cottage": 0.16,
+    "longere": 0.14,
+    "timber": 0.14,
+    "townhouse": 0.1,
+    "barn": 0.22,
+    "stonehouse": 0.04,
+}
 
 
 def _settle(g: Geometry, info: dict, sag: float, rng: random.Random) -> None:
