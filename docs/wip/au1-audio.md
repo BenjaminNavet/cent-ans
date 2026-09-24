@@ -20,11 +20,14 @@ Agent AU1, vague 5 (session de nuit 7). Sources : `docs/audit/a5-technique.md` (
       carte ; ducking de la musique (`AudioDirector.duck_music`, déclenché par la banque).
 - [x] Test headless `game/tests/au1_audio_test.gd` (bus, banque, pool, événements, siège,
       ambiances sur la vraie carte, volumes) : OK.
-- [ ] Smoke complet + passe fenêtrée (pilote audio factice) sur une bataille et un siège.
+- [x] Smoke complet (exit 0, aucune erreur de script) ; passes fenêtrées `--audio-driver Dummy`
+      (bataille `--autoplay --benchmark --weather=snow`, siège `--siege --bench-at=60
+      --weather=rain`) sans erreur de script, 58-60 i/s médian.
 
-## Prochaine étape
+## État : terminé
 
-Smoke, essai fenêtré `--audio-driver Dummy`, puis commits finaux des lots 2-4.
+Prochaine étape éventuelle : réglage des niveaux à l'oreille dans une session avec écoute ;
+BV1 peut se brancher sur `BattleAudio.play_at` (ci-dessous).
 
 ## Architecture
 
@@ -92,5 +95,8 @@ tiré à la volée (`--with`) : pas de dépendance ajoutée au projet `tools/`.
 - Aperçus Freesound à 128 kbit/s (l'original exige un compte connecté) : qualité suffisante pour
   des sons de jeu, pas pour des gros plans.
 - Pas de météo simulée sur la carte de campagne : tirage saisonnier purement sonore.
+- Pilote audio factice (`--audio-driver Dummy`) : à la sortie, Godot signale des flux OGG
+  encore référencés (dont `music/war.ogg` de B3, préexistant) : lectures non libérées par le
+  pilote factice, sans effet en jeu.
 - Les événements de bataille n'ont pas de « kind » côté Rust : tout est déduit des transitions
   d'état des régiments (pas de cri de guerre sur ordre du joueur).
