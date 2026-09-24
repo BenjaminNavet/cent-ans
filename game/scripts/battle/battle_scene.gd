@@ -282,6 +282,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
 	effects = BattleEffects.new()
@@ -294,6 +295,8 @@ func _build_soldier_layers() -> void:
 		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
 	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
 	effects.volleys.sound_event.connect(_on_sound_event)
+	effects.sound_event.connect(_on_sound_event)
+	BattleAudio.auto_volley = _no_bv1
 	blood = BattleBlood.new()
 	blood.name = "Blood"
 	effects.add_child(blood)
@@ -322,15 +325,15 @@ func _camera_position() -> Vector3:
 	return camera.global_position if camera != null else Vector3.ZERO
 
 
-## BV1 : point d'accroche audio. Les effets n'émettent que des événements nommés
-## (« arrow_volley », « bolt_volley ») ; l'API audio du lot AU1 (`BattleAudio.play_at(event,
-## position)`, autoload ou nœud enfant « BattleAudio ») les joue si elle est présente.
-func _on_sound_event(event: StringName, position: Vector3) -> void:
-	var audio := get_node_or_null("/root/BattleAudio")
-	if audio == null:
-		audio = get_node_or_null("BattleAudio")
-	if audio != null and audio.has_method("play_at"):
-		audio.call("play_at", event, position)
+## BV1 : sons des tirs du cœur (lâcher, sifflement, impact) joués par l'API du lot AU1
+## (`BattleAudio.play_at` / `play_at_delayed`, bus et banque sonore d'AU1). `delay` en temps de
+## bataille ; `BattleAudio.auto_volley` est coupé pour ne pas doubler ses volées déduites des
+## munitions.
+func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void:
+	if delay > 0.0:
+		BattleAudio.play_at_delayed(str(event), position, delay)
+	else:
+		BattleAudio.play_at(str(event), position)
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
