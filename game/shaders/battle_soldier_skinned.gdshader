@@ -249,9 +249,9 @@ void vertex() {
 		}
 		int code = int(part + 0.5);
 		if (code >= 1 && code <= 5) {
-			float cut = part_weight(code, idx, w);
-			shown = shown && cut < 0.5;
-			v_stump = cut > 0.02 ? 1.0 : 0.0;
+			// Poids de la partie tranchée, interpolé : le fragment coupe à 0,5 (variante
+			// BV2_CORPSE du shader), le moignon rougit en deçà.
+			v_stump = part_weight(code, idx, w);
 		} else if (code == 6) {
 			// Cavalier désarçonné : le cheval détale puis disparaît.
 			float horse = part_weight(0, idx, w);
@@ -400,12 +400,18 @@ void fragment() {
 		albedo = mix(albedo, vec3(0.09, 0.005, 0.004), amount);
 		roughness = mix(roughness, 0.3, amount);
 	}
-	if (v_stump > 0.0) {
-		// Moignon : chair et sang autour de la coupure.
-		albedo = mix(albedo, vec3(0.16, 0.012, 0.01), v_stump);
-		roughness = mix(roughness, 0.35, v_stump);
-		metallic = mix(metallic, 0.0, v_stump);
+#ifdef BV2_CORPSE
+	if (v_stump > 0.5) {
+		discard;
 	}
+	if (v_stump > 0.08) {
+		// Moignon : chair et sang autour de la coupure.
+		float raw = smoothstep(0.08, 0.4, v_stump);
+		albedo = mix(albedo, vec3(0.16, 0.012, 0.01), raw);
+		roughness = mix(roughness, 0.35, raw);
+		metallic = mix(metallic, 0.0, raw);
+	}
+#endif
 	float ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, v_rest.y));
 	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);
 	METALLIC = metallic;
