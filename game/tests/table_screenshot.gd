@@ -7,7 +7,7 @@ extends SceneTree
 ## Écrit `docs/img/table-section.png` et `docs/img/tech-medicine.png`.
 
 const FACTION_ID := "fac_france"
-const PROVINCE_ID := "prov_normandie"
+const PROVINCE_ID := "prov_auvergne"  # au moins un régime indisponible (laitages)
 
 
 func _init() -> void:
