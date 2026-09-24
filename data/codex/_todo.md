@@ -15,9 +15,5 @@ Le validateur du Codex tolère les liens `[[cdx_x]]` et les entrées `see_also` 
 
 Ids déjà cités par des fiches H8, fiches en cours d'écriture :
 
-- `cdx_enluminure` — cité par cdx_jean_de_berry
-- `cdx_librairie_charles_v` — cité par cdx_nicole_oresme, cdx_paris
-- `cdx_oxford` — cité par cdx_jan_hus, cdx_john_wyclif, cdx_lollards, cdx_philippa_de_hainaut
-- `cdx_pelerinage` — cité par cdx_john_wyclif, cdx_lollards
-- `cdx_reliques` — cité par cdx_lollards
-- `cdx_tres_riches_heures` — cité par cdx_jean_de_berry
+- `cdx_christine_de_pizan` — cité par cdx_librairie_charles_v
+- `cdx_papier` — cité par cdx_enluminure

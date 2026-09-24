@@ -1,0 +1,11 @@
+{
+  "id": "cdx_librairie_charles_v",
+  "title": "La librairie de Charles V au Louvre",
+  "category": "savoir",
+  "aliases": ["librairie de Charles V", "librairie du Louvre", "tour de la Librairie", "Gilles Malet", "Raoul de Presles"],
+  "era": { "from": "1368", "to": "1424" },
+  "summary": "Vers 1368, [[cdx_charles_v|Charles V]] installe dans une tour du Louvre une bibliothèque de près de mille volumes, l'une des plus riches d'Europe. Il y fait traduire en français les grands textes savants, comme ceux d'Aristote traduits par [[cdx_nicole_oresme|Nicole Oresme]].",
+  "body": "Roi lettré, surnommé le Sage, [[cdx_charles_v|Charles V]] aime les livres. Vers 1368, il fait aménager trois étages d'une tour du palais du Louvre, la tour de la Fauconnerie, pour y ranger ses manuscrits. Les murs sont lambrissés de bois d'Irlande, les fenêtres garnies de grillages contre les oiseaux, et trente petits chandeliers permettent d'y lire la nuit.\n\nLe garde de la librairie, Gilles Malet, dresse en 1373 un inventaire qui recense plus de neuf cents volumes. On y trouve des bibles et des livres de prières, mais aussi de l'histoire, du droit, de la médecine, de l'astronomie et de l'astrologie, des romans de chevalerie. Beaucoup sont richement enluminés et reliés de soie ou de velours.\n\nLe roi veut surtout mettre le savoir à la portée de ses conseillers, qui ne lisent pas tous facilement le latin. Il commande des traductions en français : [[cdx_nicole_oresme|Nicole Oresme]] traduit et commente l'Éthique, la Politique et le traité Du ciel d'Aristote ; Raoul de Presles traduit la Cité de Dieu de saint Augustin ; d'autres traduisent des traités sur le gouvernement ou l'art de la guerre. Ces traductions enrichissent la langue française de nombreux mots savants.\n\nAprès la mort de [[cdx_charles_vi|Charles VI]], la librairie est achetée en 1424 par le régent anglais, le duc de Bedford, et dispersée. Seule une centaine de ses volumes subsiste aujourd'hui. L'idée d'une bibliothèque royale renaîtra pourtant avec les rois suivants, lointaine origine de la Bibliothèque nationale de France.",
+  "see_also": ["cdx_charles_v", "cdx_nicole_oresme", "cdx_enluminure", "cdx_christine_de_pizan"],
+  "sources": ["Librairie royale", "Gilles Malet", "Bibliothèque nationale de France"]
+}

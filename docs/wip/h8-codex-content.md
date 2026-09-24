@@ -92,7 +92,10 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
   revolte_paysans_1381 (alias Wat Tyler, John Ball : pas de fiche wat_tyler séparée), ciompi.
 - Lot 7 fait (société, fiscalité) : aides, taille (entity tech_royal_taxation), etats_generaux,
   franc_a_cheval, mutations_monetaires, trois_ordres, seigneurie (servage inclus).
-- Fiches H8b écrites : 54.
+- Lot 8 fait (religion, savoirs) : tres_riches_heures, enluminure (entity bld_scriptorium),
+  librairie_charles_v, oxford, pelerinage, reliques. Toute la liste H8 initiale + `_event_links.md`
+  est écrite.
+- Fiches H8b écrites : 60.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
