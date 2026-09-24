@@ -339,6 +339,8 @@ func _process(delta: float) -> void:
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
+		if _bench_frames == 0:
+			soldiers.start_timing()
 		_bench_frames += 1
 		_bench_time += delta
 		if _bench_frames == 600:
@@ -346,7 +348,7 @@ func _process(delta: float) -> void:
 			var soldiers := 0
 			for unit in units:
 				soldiers += int(unit["soldiers"])
-			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second()])
+			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			get_tree().quit(0)
 
 

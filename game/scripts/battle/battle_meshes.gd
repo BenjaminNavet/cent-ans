@@ -97,6 +97,9 @@ class Fig:
 	var code := C_EXACT
 	var part := P_BODY
 	var pivot := Vector2.ZERO
+	## Niveau de détail allégé (figurines lointaines) : moins de côtés, pas de cordes ni de
+	## tranches d'écu.
+	var lod := false
 
 	func _init() -> void:
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -136,6 +139,10 @@ class Fig:
 
 	## Tronc de cône elliptique de `a` à `b` (rayons ra → rb, aplatissement `squash` en Z local).
 	func cyl(a: Vector3, b: Vector3, ra: float, rb: float, sides: int = 6, caps: bool = true, squash: float = 1.0) -> void:
+		if lod:
+			if maxf(ra, rb) < 0.012:
+				return
+			sides = maxi(3, (sides + 1) / 2) if sides < 8 else sides / 2 + 1
 		var axis := (b - a).normalized()
 		var ref := Vector3.FORWARD if absf(axis.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT
 		var u := axis.cross(ref).normalized()
@@ -167,6 +174,11 @@ class Fig:
 
 	## Ellipsoïde low-poly (normales lisses).
 	func ellipsoid(c: Vector3, r: Vector3, rings: int = 4, segs: int = 6, y_min: float = -1.0) -> void:
+		if lod:
+			if maxf(r.x, maxf(r.y, r.z)) < 0.06:
+				return
+			rings = maxi(2, rings / 2)
+			segs = maxi(4, segs - 2 - segs / 4)
 		var pts: Array = []
 		for i in rings + 1:
 			var v := lerpf(-PI * 0.5, PI * 0.5, float(i) / float(rings))
@@ -239,6 +251,8 @@ class Fig:
 			color = back
 			code = C_EXACT
 			tri(a - off, c - off, b - off, -n, -n, -n)
+			if lod:
+				continue
 			# Tranche.
 			var e := (basis * Vector3(p1.x - p0.x, p1.y - p0.y, 0.0)).cross(n).normalized()
 			flat(b + off, c + off, c - off, e)
@@ -256,11 +270,12 @@ class Fig:
 
 ## Figurine de `kind` (infantry, archer, cavalry, siege) et de variante `variant` (cf. VARIANTS).
 ## Mise en cache : les régiments d'un même type partagent le maillage.
-static func soldier(kind: String, variant: int = 0) -> ArrayMesh:
-	var key := "%s/%d" % [kind, variant]
+static func soldier(kind: String, variant: int = 0, lod: bool = false) -> ArrayMesh:
+	var key := "%s/%d%s" % [kind, variant, "/lod" if lod else ""]
 	if _cache.has(key):
 		return _cache[key]
 	var f := Fig.new()
+	f.lod = lod
 	match kind:
 		"archer":
 			_archer(f, variant)
@@ -513,6 +528,7 @@ static func _rider(f: Fig, under: Color, under_code: int, surcoat: bool, helmet:
 	f.ellipsoid(Vector3(0, 1.63 + dy, -0.04), Vector3(0.095, 0.115, 0.105), 4, 7)
 	# Casque : même dessin que les fantassins, décalé à l'assise.
 	var g := Fig.new()
+	g.lod = f.lod
 	g.set_part(P_RIDER)
 	var helmet_fig := g
 	_helmet(helmet_fig, helmet)
@@ -586,6 +602,7 @@ static func _lance(f: Fig, dy: float) -> void:
 ## Servant d'engin (fantassin simplifié sans arme), posé à `pos`.
 static func _crew(f: Fig, pos: Vector3, yaw: float) -> void:
 	var g := Fig.new()
+	g.lod = f.lod
 	_legs(g, false)
 	_torso(g, HOSE, C_CLOTH, true, 0.62)
 	_arms(g, HOSE, C_CLOTH, SKIN)
@@ -665,11 +682,14 @@ const FOLIAGE_SHADER := preload("res://shaders/battle_foliage.gdshader")
 
 
 ## Arbre de `kind` : oak (chêne étalé), poplar (peuplier élancé), bush (buisson), far (arbre
-## lointain simplifié). Surface 0 = écorce texturée, surface 1 = houppier (cartes alpha).
+## lointain simplifié) ; suffixe `_lod` = même silhouette allégée (moins de cartes, plus
+## grandes, sans branches) pour la distance. Surface 0 = écorce, surface 1 = houppier.
 static func tree(kind: String = "oak") -> ArrayMesh:
 	var key := "tree/" + kind
 	if _cache.has(key):
 		return _cache[key]
+	var lod := kind.ends_with("_lod")
+	kind = kind.trim_suffix("_lod")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(kind)
 	var bark := SurfaceTool.new()
@@ -700,9 +720,12 @@ static func tree(kind: String = "oak") -> ArrayMesh:
 			clusters = 5
 			card = 5.5
 			crown_radii = Vector3(3.2, 2.6, 3.2)
+	if lod:
+		clusters = maxi(clusters / 3, 4)
+		card *= 1.55
 	if trunk_h > 0.0:
-		_bark_cyl(bark, Vector3(0, -0.3, 0), Vector3(0, trunk_h, 0), trunk_r, trunk_r * 0.6, 7)
-		if kind != "far":
+		_bark_cyl(bark, Vector3(0, -0.3, 0), Vector3(0, trunk_h, 0), trunk_r, trunk_r * 0.6, 4 if lod else 7)
+		if kind != "far" and not lod:
 			for i in 4:
 				var a := TAU * float(i) / 4.0 + rng.randf() * 0.8
 				var start := Vector3(0, trunk_h * rng.randf_range(0.55, 0.85), 0)
