@@ -40,6 +40,7 @@ var _crops := PackedFloat32Array()
 var _conifer := PackedFloat32Array()
 var _hedge := PackedFloat32Array()
 var _grove := PackedFloat32Array()
+var _region := PackedFloat32Array()
 var _side: int = 0
 
 
@@ -73,7 +74,7 @@ func instance_total() -> int:
 func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 	_side = size_px / coarse_step + 2
 	var n := _side * _side
-	for array in [_forest, _crops, _conifer, _hedge, _grove]:
+	for array in [_forest, _crops, _conifer, _hedge, _grove, _region]:
 		array.resize(n)
 	var k := 0
 	for j in _side:
@@ -86,6 +87,10 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			_conifer[k] = s["conifer"]
 			_hedge[k] = s["hedge"]
 			_grove[k] = smoothstep(0.28, 0.42, grove_noise.get_noise_2d(x, y))
+			# Région (frontière des deux trames de parcelles) : variation bien plus lente que le
+			# pas de la grille grossière (erreur d'interpolation très inférieure à la zone morte de
+			# 0,02 dans `_hedge_point`) → on évite le coût des 4 sinus par candidat de haie.
+			_region[k] = VegetationFields.region_value(x, y)
 			k += 1
 
 
@@ -185,27 +190,77 @@ func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 			u_max = maxf(u_max, uv.x)
 			v_min = minf(v_min, uv.y)
 			v_max = maxf(v_max, uv.y)
+		var k: float = params[0]
 		var fu: float = params[1]
 		var fv: float = params[2]
-		# Bords à u constant : lignes continues, un tirage par segment floor(v).
+		# `to_map` (avant déformation) est un plan affine de (u, v) : x0 = ax(u) + bx*v,
+		# y0 = ay(u) + by*v. La boîte englobante ci-dessus (coins du rectangle projetés) est très
+		# gonflée par le cisaillement des trames (jusqu'à ~3× de surface en trop pour la trame la
+		# plus cisaillée) : on resserre par ligne la plage de `v` réellement utile par intersection
+		# linéaire exacte avec `bounds`, sans changer la grille de tirage — les segments écartés
+		# étaient de toute façon rejetés par `rect.has_point` avant tout tirage aléatoire (mêmes
+		# valeurs de `v`, mêmes tirages consommés pour les segments conservés).
+		var det := 1.0 + k * k
+		var by := fv / det
+		var bx := -k * fv / det
 		var dv := HEDGE_STEP / fv
 		for line in range(floori(u_min), ceili(u_max) + 1):
+			var a0 := float(line) * fu
+			var range_v := _clip_linear(by, k * a0 / det, bounds.position.y, bounds.end.y, v_min, v_max)
+			range_v = _clip_linear(bx, a0 / det, bounds.position.x, bounds.end.x, range_v.x, range_v.y)
+			if range_v.x >= range_v.y:
+				continue
 			var v := v_min
-			while v < v_max:
-				var roll := VegetationFields.roll_u_edge(layout, line, floori(v))
-				_hedge_point(raw, rng, rect, layout, roll, VegetationFields.to_map(layout, line, v), VegetationFields.to_map(layout, line, v + dv))
+			while v < range_v.x:
 				v += dv
-		# Bords de rangée : décalés d'une colonne à l'autre (jonctions en T).
+			var cur := VegetationFields.to_map(layout, line, v)
+			while v < range_v.y:
+				var next_v := v + dv
+				var nxt := VegetationFields.to_map(layout, line, next_v)
+				var roll := VegetationFields.roll_u_edge(layout, line, floori(v))
+				_hedge_point(raw, rng, rect, layout, roll, cur, nxt)
+				v = next_v
+				cur = nxt
+		# Bords de rangée : décalés d'une colonne à l'autre (jonctions en T). Même resserrement,
+		# avec une marge couvrant la largeur de la colonne (le tirage `u` varie sur
+		# `[column, column+1]`, pas un point unique comme pour les lignes ci-dessus).
 		var du := HEDGE_STEP / fu
+		var cx := fu / det
+		var cy := k * fu / det
+		var margin_x := 0.5 * absf(cx)
+		var margin_y := 0.5 * absf(cy)
 		for column in range(floori(u_min), ceili(u_max) + 1):
 			var offset := VegetationFields.row_offset(layout, column)
-			for row in range(floori(v_min + offset) - 1, ceili(v_max + offset) + 2):
+			var u_mid := float(column) + 0.5
+			var range_row := _clip_linear(by, cy * u_mid, bounds.position.y - margin_y, bounds.end.y + margin_y, v_min, v_max)
+			range_row = _clip_linear(bx, cx * u_mid, bounds.position.x - margin_x, bounds.end.x + margin_x, range_row.x, range_row.y)
+			if range_row.x >= range_row.y:
+				continue
+			var row_lo := floori(range_row.x + offset) - 1
+			var row_hi := ceili(range_row.y + offset) + 2
+			for row in range(row_lo, row_hi):
 				var roll := VegetationFields.roll_v_edge(layout, row, column)
 				var v_row := row - offset
 				var u := float(column) + du * 0.5
+				var cur := VegetationFields.to_map(layout, u, v_row)
 				while u < column + 1.0:
-					_hedge_point(raw, rng, rect, layout, roll, VegetationFields.to_map(layout, u, v_row), VegetationFields.to_map(layout, u + du, v_row))
-					u += du
+					var next_u := u + du
+					var nxt := VegetationFields.to_map(layout, next_u, v_row)
+					_hedge_point(raw, rng, rect, layout, roll, cur, nxt)
+					u = next_u
+					cur = nxt
+
+
+## Bornes de `t` telles que `offset + coeff * t` reste dans `[lo, hi]`, croisées avec
+## `[cur_lo, cur_hi]`. Intervalle vide (résultat x >= y) si aucune valeur de `t` ne convient.
+static func _clip_linear(coeff: float, offset: float, lo: float, hi: float, cur_lo: float, cur_hi: float) -> Vector2:
+	if coeff == 0.0:
+		return Vector2(cur_lo, cur_hi) if (offset >= lo and offset <= hi) else Vector2(1.0, -1.0)
+	var t_a := (lo - offset) / coeff
+	var t_b := (hi - offset) / coeff
+	if coeff > 0.0:
+		return Vector2(maxf(cur_lo, t_a), minf(cur_hi, t_b))
+	return Vector2(maxf(cur_lo, t_b), minf(cur_hi, t_a))
 
 
 ## Un buisson (ou un arbre de haie) en `pos` si le bord est planté ; `next` donne la direction.
@@ -216,12 +271,15 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 	var gap := rng.randf()
 	var tree := rng.randf()
 	var jitter := Vector2(rng.randf_range(-0.07, 0.07), rng.randf_range(-0.07, 0.07))
-	var region := VegetationFields.region_value(pos.x, pos.y)
+	var gx := (pos.x - origin_px.x) / coarse_step
+	var gy := (pos.y - origin_px.y) / coarse_step
+	# Région interpolée sur la grille grossière (au lieu des 4 sinus de `region_value` exact) :
+	# la fonction varie sur des centaines de px, l'erreur d'interpolation est négligeable devant
+	# la zone morte de 0,02 ci-dessous.
+	var region := _lerp_grid(_region, gx, gy)
 	# Chaque trame ne plante que dans sa région ; la limite (chemin) reste dégagée.
 	if (region > 0.0) != (layout == 1) or absf(region) < 0.02:
 		return
-	var gx := (pos.x - origin_px.x) / coarse_step
-	var gy := (pos.y - origin_px.y) / coarse_step
 	var crops := _lerp_grid(_crops, gx, gy)
 	if crops < 0.2:
 		return
