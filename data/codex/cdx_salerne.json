@@ -1,0 +1,11 @@
+{
+  "id": "cdx_salerne",
+  "title": "L'école de médecine de Salerne",
+  "category": "savoir",
+  "aliases": ["école de Salerne", "Schola Medica Salernitana", "Salerne", "Constantin l'Africain", "Trotula"],
+  "era": { "from": "950", "to": "1300" },
+  "summary": "Dans ce port de l'Italie du Sud, entre le Xe et le XIIIe siècle, naît la première école de médecine de l'Occident médiéval : on y traduit les savants arabes, on y écrit des traités qui seront lus pendant des siècles.",
+  "body": "Salerne, sur le golfe du même nom au sud de Naples, est déjà réputée au Xe siècle pour ses médecins. Au carrefour des mondes latin, grec, arabe et juif, la ville voit se former, sans fondation officielle, une communauté de maîtres et d'élèves qui enseignent et pratiquent la médecine en dehors des monastères. C'est la première école de médecine laïque de l'Europe médiévale.\n\nSon essor doit beaucoup à Constantin l'Africain, marchand devenu moine au Mont-Cassin, mort vers 1087, qui traduit en latin des traités médicaux arabes, dont ceux d'Isaac Israëli et le Pantegni d'Ali ibn al-Abbas. Les maîtres salernitains produisent ensuite leurs propres ouvrages : l'Antidotarium Nicolai, recueil de recettes de remèdes composés qui deviendra le manuel des [[cdx_apothicaires|apothicaires]], le Circa instans de Matthaeus Platearius sur les drogues simples, des traités de chirurgie. Un ensemble de textes sur les maladies des femmes circule sous le nom de Trotula, associé à une femme médecin de Salerne, Trota, dont le rôle exact reste débattu.\n\nLe [[cdx_regimen_sanitatis|Régime de santé de Salerne]], poème d'hygiène dédié au « roi des Anglais », porte le nom de l'école à travers toute l'Europe. En 1231, l'empereur Frédéric II impose dans son royaume de Sicile un examen devant les maîtres de Salerne pour exercer la médecine : l'un des premiers diplômes médicaux obligatoires.\n\nAu XIIIe siècle, l'étoile de Salerne pâlit devant les universités de [[cdx_montpellier|Montpellier]], de Bologne et de Paris, qui intègrent la médecine dans des cursus organisés et commentent Avicenne. L'école survit, modestement, jusqu'à sa suppression en 1811.",
+  "see_also": ["cdx_regimen_sanitatis", "cdx_montpellier", "cdx_medecine_medievale", "cdx_apothicaires", "cdx_humeurs"],
+  "sources": ["École de médecine de Salerne", "Constantin l'Africain", "Trotula"]
+}
