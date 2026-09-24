@@ -1,0 +1,11 @@
+{
+  "id": "cdx_lollards",
+  "title": "Les lollards",
+  "category": "religion",
+  "aliases": ["lollards", "lollard", "lollardisme", "John Oldcastle"],
+  "era": { "from": "v. 1380", "to": "XVIe siècle" },
+  "summary": "Les lollards sont les disciples anglais de [[cdx_john_wyclif|John Wyclif]] : prédicateurs itinérants, lecteurs de la Bible en anglais, ils critiquent le clergé et certains sacrements. Pourchassés comme hérétiques à partir de 1401, ils survivent dans la clandestinité jusqu'à la Réforme.",
+  "body": "Le mot lollard, d'origine néerlandaise, signifie à peu près « marmonneur » : c'est un sobriquet méprisant donné aux disciples de [[cdx_john_wyclif|Wyclif]] à la fin du XIVe siècle. Parmi eux, on trouve d'abord des clercs d'[[cdx_oxford|Oxford]], puis des prêtres pauvres qui prêchent de village en village, et même quelques chevaliers de la cour de Richard II.\n\nLes lollards veulent une Église pauvre, fondée sur la seule Écriture. Ils lisent et diffusent la Bible traduite en anglais, rejettent le culte des images et des [[cdx_reliques|reliques]], les [[cdx_pelerinage|pèlerinages]], la confession obligatoire et la transsubstantiation. En 1395, ils affichent même leurs douze conclusions aux portes de Westminster pendant une session du Parlement.\n\nLa révolte des paysans de 1381, dont l'un des meneurs, John Ball, était un prêtre contestataire, fait craindre que ces idées ne menacent l'ordre social. La nouvelle dynastie de Lancastre, en quête de soutien de l'Église, durcit la répression : en 1401, une loi, le De heretico comburendo, permet de brûler les hérétiques obstinés.\n\nEn 1414, le chevalier lollard John Oldcastle, ancien compagnon d'armes d'[[cdx_henri_v|Henri V]], tente un soulèvement vite écrasé ; il est exécuté en 1417. Le mouvement perd alors ses appuis nobles, mais subsiste chez des artisans et des marchands qui se transmettent en secret les textes anglais. Au XVIe siècle, ces communautés accueilleront favorablement la Réforme.",
+  "see_also": ["cdx_john_wyclif", "cdx_hussites", "cdx_revolte_paysans_1381", "cdx_henri_v"],
+  "sources": ["Lollards", "De heretico comburendo"]
+}

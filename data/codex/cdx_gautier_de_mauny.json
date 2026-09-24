@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gautier_de_mauny",
+  "title": "Gautier de Mauny",
+  "category": "personnage",
+  "aliases": ["Gautier de Mauny", "Walter Manny", "Walter de Mauny", "Cadzand"],
+  "era": { "from": "v. 1310", "to": "1372" },
+  "summary": "Chevalier du Hainaut venu en Angleterre avec la reine [[cdx_philippa_de_hainaut|Philippa]], Gautier de Mauny devient l'un des meilleurs capitaines d'[[cdx_edouard_iii|Édouard III]] : Cadzand (1337), Hennebont (1342), Auberoche (1345). Il fonde à Londres la chartreuse où il repose.",
+  "body": "Né vers 1310 dans le comté de Hainaut, Gautier de Mauny arrive en Angleterre en 1327 comme jeune page dans la suite de [[cdx_philippa_de_hainaut|Philippa de Hainaut]], promise à [[cdx_edouard_iii|Édouard III]]. Adoubé, il se distingue dans les guerres d'Écosse et gagne la confiance du roi, qui le comble de terres et de charges.\n\nEn novembre 1337, il mène l'attaque contre l'île flamande de Cadzand, tenue par des partisans du comte de Flandre fidèle à Philippe VI : c'est l'un des premiers combats de la guerre. En 1342, il débarque en Bretagne et secourt Hennebont, où Jeanne de Flandre résiste aux troupes de Charles de Blois pendant la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]]. En 1345, il combat en Gascogne aux côtés d'[[cdx_henri_de_grosmont|Henri de Grosmont]], vainqueur à Auberoche, puis défend Aiguillon en 1346.\n\n[[cdx_froissart|Froissart]], qui s'appuie sur [[cdx_jean_le_bel|Jean le Bel]], en fait le modèle du chevalier courtois et hardi. Au siège de [[cdx_calais|Calais]] en 1347, il plaide auprès d'Édouard III en faveur des bourgeois de la ville. Il entre dans l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]] en 1359.\n\nPendant la [[cdx_peste_noire|Peste noire]], il achète un terrain près de Londres pour y enterrer les victimes. Il y fonde en 1371 une chartreuse, la Charterhouse, avec l'évêque Michael Northburgh. Mort en janvier 1372, il y est inhumé ; les archéologues ont retrouvé sa tombe en 2013.",
+  "entity": "chr_gautier_de_mauny",
+  "see_also": ["cdx_edouard_iii", "cdx_philippa_de_hainaut", "cdx_henri_de_grosmont", "cdx_guerre_de_succession_de_bretagne"],
+  "sources": ["Gautier de Mauny", "Walter Manny, 1st Baron Manny (en)"]
+}

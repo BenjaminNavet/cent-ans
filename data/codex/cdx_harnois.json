@@ -1,0 +1,12 @@
+{
+  "id": "cdx_harnois",
+  "title": "Le harnois de plates",
+  "category": "guerre",
+  "aliases": ["harnois", "harnois blanc", "armure de plates", "cotte de mailles", "brigandine"],
+  "era": { "from": "v. 1300", "to": "v. 1500" },
+  "summary": "Au cours de la guerre de Cent Ans, l'armure du combattant noble passe de la cotte de mailles renforcée de plaques au harnois blanc, une armure complète de plaques d'acier articulées. Il protège remarquablement mais coûte une fortune.",
+  "body": "Au début du XIVe siècle, l'homme d'armes porte encore surtout une cotte de mailles, faite de milliers d'anneaux de fer rivés, sur un vêtement matelassé, le gambison. Face aux coups de taille, elle est efficace, mais les flèches et les carreaux la percent à courte portée. On la renforce donc de plaques : aux genoux, aux coudes, puis sur la poitrine, avec la cotte de plates, un vêtement de cuir ou de toile doublé de lamelles de métal.\n\nVers 1400, l'évolution aboutit au harnois blanc, ainsi nommé parce que son acier poli n'est pas couvert de tissu. Le combattant est enfermé de la tête aux pieds dans des plaques articulées : bassinet ou salade sur la tête, cuirasse, brassards, gantelets, cuissots, jambières et solerets. Les meilleurs ateliers se trouvent à Milan, comme celui des Missaglia, et dans l'Allemagne du Sud, à Nuremberg et à Augsbourg.\n\nContrairement à une idée reçue, le harnois n'est pas si lourd : environ vingt-cinq kilos bien répartis sur le corps. Un homme entraîné peut y courir, sauter en selle et se relever seul. Mais il tient chaud et épuise vite, surtout à pied dans la boue : à [[cdx_azincourt|Azincourt]], en 1415, les [[cdx_hommes_d_armes|hommes d'armes]] français s'enlisent en marchant vers les Anglais.\n\nUn harnois complet coûte le prix de plusieurs chevaux ou d'une petite terre. Les moins fortunés se contentent de la brigandine, une veste de toile ou de cuir garnie de petites plaques rivées, plus légère et moins chère. L'armure de plates marque la puissance de la noblesse, jusqu'à ce que les armes à feu, au XVIe siècle, la rendent peu à peu inutile.",
+  "entity": "tech_full_plate",
+  "see_also": ["cdx_hommes_d_armes", "cdx_chevalerie", "cdx_arc_long", "cdx_azincourt"],
+  "sources": ["Armure de plates", "Harnois", "Brigandine"]
+}

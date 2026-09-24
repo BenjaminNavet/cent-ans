@@ -1,0 +1,12 @@
+{
+  "id": "cdx_franc_archer",
+  "title": "Les francs-archers",
+  "category": "guerre",
+  "aliases": ["francs-archers", "franc-archer", "francs archers", "franc archer"],
+  "era": { "from": "1448", "to": "1480" },
+  "summary": "Créés par [[cdx_charles_vii|Charles VII]] en 1448, les francs-archers sont des roturiers fournis par les paroisses, entraînés au tir et exemptés de [[cdx_taille|taille]] en échange de leur service : une tentative de donner à la France une infanterie comparable aux archers anglais.",
+  "body": "Depuis [[cdx_crecy|Crécy]], les Français ont pu mesurer l'efficacité des archers anglais et de leur [[cdx_arc_long|arc long]]. Mais l'Angleterre les recrute parmi des paysans libres entraînés depuis l'enfance, tandis que la noblesse française se méfie d'armer le peuple, surtout après la [[cdx_jacquerie|Jacquerie]].\n\nL'ordonnance de Montils-lès-Tours, le 28 avril 1448, demande à chaque paroisse de fournir un archer, en principe un pour cinquante feux (foyers). Choisi parmi les hommes robustes, il doit s'équiper d'un arc ou d'une [[cdx_arbalete|arbalète]], d'une salade (casque) et d'une brigandine, et s'exercer au tir les jours de fête. En échange, il est franc, c'est-à-dire exempté de la taille : d'où son nom.\n\nLes francs-archers complètent l'armée permanente des [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] lors de la reconquête de la Normandie et de la Guyenne. Leur valeur reste inégale : mal entraînés, parfois indisciplinés, ils deviennent la cible de moqueries, comme dans le monologue comique du Franc-archer de Bagnolet, qui met en scène un vantard terrorisé par un épouvantail.\n\nAprès leur mauvaise conduite à la bataille de Guinegatte en 1479, Louis XI les supprime et leur préfère des mercenaires suisses. Le principe d'une milice levée par paroisses réapparaîtra pourtant plus tard sous d'autres formes.",
+  "entity": "tech_francs_archers",
+  "see_also": ["cdx_compagnies_ordonnance", "cdx_arc_long", "cdx_charles_vii", "cdx_ost_feodal"],
+  "sources": ["Francs-archers", "Franc-archer de Bagnolet"]
+}

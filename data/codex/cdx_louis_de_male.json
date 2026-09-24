@@ -1,0 +1,12 @@
+{
+  "id": "cdx_louis_de_male",
+  "title": "Louis de Male, comte de Flandre",
+  "category": "personnage",
+  "aliases": ["Louis de Male", "Louis II de Flandre", "Marguerite de Male"],
+  "era": { "from": "1330", "to": "1384" },
+  "summary": "Comte de Flandre de 1346 à 1384, dernier de la maison de Dampierre, Louis de Male louvoie entre la France et l'Angleterre. En mariant sa fille unique à [[cdx_philippe_le_hardi|Philippe le Hardi]], il fait passer la Flandre aux ducs de Bourgogne.",
+  "body": "Louis naît en 1330 au château de Male, près de [[cdx_bruges|Bruges]]. Il devient comte à quinze ans, quand son père [[cdx_louis_de_nevers|Louis de Nevers]] tombe à [[cdx_crecy|Crécy]]. Les villes flamandes, alliées à l'Angleterre, veulent lui faire épouser Isabelle, fille d'[[cdx_edouard_iii|Édouard III]]. Fiancé presque de force en 1347, le jeune comte s'enfuit peu avant les noces et épouse finalement Marguerite de Brabant.\n\nPrudent et habile, il mène une politique d'équilibre. Il reste vassal du roi de France, mais ménage l'Angleterre, dont dépend la laine de ses drapiers. Il réussit à rétablir son autorité sur les villes et à faire prospérer le comté.\n\nSa fille unique, Marguerite de Male, est le plus beau parti d'Europe : elle héritera de la Flandre, de l'Artois, de Nevers, de Rethel et de la Franche-Comté. Édouard III veut la marier à son fils Edmond ; [[cdx_charles_v|Charles V]] obtient du pape qu'il refuse la dispense nécessaire et la fait épouser en 1369 à son frère [[cdx_philippe_le_hardi|Philippe le Hardi]], duc de Bourgogne.\n\nLa fin de son règne est assombrie par la grande révolte de [[cdx_gand|Gand]] (1379-1385), menée à partir de 1382 par Philippe, fils de [[cdx_jacob_van_artevelde|Jacob van Artevelde]]. Battu, chassé de Bruges, Louis appelle son gendre et le roi de France : l'armée royale écrase les Gantois à [[cdx_roosebeke|Roosebeke]] en novembre 1382. Il meurt en janvier 1384 ; la Flandre passe à la maison de Bourgogne.",
+  "entity": "chr_louis_de_male",
+  "see_also": ["cdx_louis_de_nevers", "cdx_philippe_le_hardi", "cdx_roosebeke", "cdx_comte_de_flandre"],
+  "sources": ["Louis II de Flandre", "Marguerite III de Flandre"]
+}

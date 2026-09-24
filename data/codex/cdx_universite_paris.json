@@ -1,0 +1,12 @@
+{
+  "id": "cdx_universite_paris",
+  "title": "L'université de Paris",
+  "category": "savoir",
+  "aliases": ["université de Paris", "Sorbonne", "collège de Sorbonne", "collège de Navarre"],
+  "era": { "from": "v. 1200", "to": "1453" },
+  "summary": "Née vers 1200 de l'association des maîtres et des étudiants de la montagne Sainte-Geneviève, l'université de Paris est la première école de théologie de la chrétienté. Au XIVe et au XVe siècle, elle se mêle de toutes les grandes affaires politiques et religieuses.",
+  "body": "Le mot universitas désigne d'abord une corporation : celle des maîtres et des écoliers de Paris, qui s'organisent vers 1200 pour se protéger de l'évêque et des bourgeois. Le roi Philippe Auguste leur accorde un privilège en 1200 ; la bulle Parens scientiarum du pape Grégoire IX, en 1231, garantit leur autonomie. L'université a ses propres juges, ses sceaux, et le droit de faire grève en suspendant les cours.\n\nLes étudiants, souvent très jeunes, commencent par la faculté des arts (grammaire, logique, philosophie d'Aristote), puis peuvent poursuivre en droit canonique (le décret), en médecine ou en théologie, la faculté la plus prestigieuse, dont les études durent plus de dix ans. Ils se regroupent en « nations » selon leur origine et logent dans des collèges fondés par des bienfaiteurs : la Sorbonne, créée vers 1257 par Robert de Sorbon, ou le collège de Navarre, fondé en 1305 par la reine Jeanne de Navarre, que dirigera [[cdx_nicole_oresme|Nicole Oresme]].\n\nToute la vie se fait en latin, la langue de l'enseignement, d'où le nom de Quartier latin. On y apprend par la lecture commentée des textes et la dispute, débat public et codifié entre maîtres et élèves.\n\nAu temps de la guerre de Cent Ans, l'université devient une puissance politique. Elle conseille le roi, propose des solutions au [[cdx_grand_schisme|Grand Schisme]] par la voix de son chancelier Jean Gerson, soutient souvent le parti bourguignon et fournit des juges au procès de [[cdx_jeanne_darc|Jeanne d'Arc]]. Elle sert de modèle à de nombreuses universités d'Europe, dont [[cdx_oxford|Oxford]] et Prague.",
+  "entity": "bld_university",
+  "see_also": ["cdx_oxford", "cdx_nicole_oresme", "cdx_grand_schisme", "cdx_paris"],
+  "sources": ["Université de Paris", "Collège de Sorbonne", "Collège de Navarre"]
+}

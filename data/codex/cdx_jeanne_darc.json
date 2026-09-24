@@ -1,0 +1,13 @@
+{
+  "id": "cdx_jeanne_darc",
+  "title": "Jeanne d'Arc",
+  "category": "personnage",
+  "aliases": ["Jeanne d'Arc", "la Pucelle", "Pucelle d'Orléans", "Jehanne"],
+  "era": { "from": "v. 1412", "to": "1431" },
+  "summary": "Jeune paysanne de Domrémy guidée par des voix, Jeanne d'Arc délivre [[cdx_orleans|Orléans]] en mai 1429 et fait sacrer [[cdx_charles_vii|Charles VII]] à [[cdx_reims|Reims]]. Prise à Compiègne, elle est jugée et brûlée à [[cdx_rouen|Rouen]] en 1431.",
+  "body": "Jeanne naît vers 1412 à Domrémy, village des marches de Lorraine resté fidèle au dauphin Charles. Adolescente, elle dit entendre les voix de saint Michel, sainte Catherine et sainte Marguerite, qui lui ordonnent de chasser les Anglais et de faire sacrer le dauphin. Le royaume est alors coupé en deux par le [[cdx_traite_troyes|traité de Troyes]] : le nord obéit au jeune Henri VI et à son oncle le duc de Bedford, le sud au « roi de Bourges ».\n\nAu début de 1429, elle obtient du capitaine de Vaucouleurs une escorte et gagne Chinon, où le dauphin la reçoit. Examinée par des théologiens à Poitiers, elle reçoit une armure et un étendard et rejoint l'armée de secours d'[[cdx_orleans|Orléans]], assiégée depuis octobre 1428. Entrée dans la ville le 29 avril, elle entraîne les capitaines à l'assaut des bastilles anglaises ; le 8 mai, les Anglais lèvent le siège.\n\nSuivent la victoire de Patay (18 juin 1429) et la marche vers [[cdx_reims|Reims]], à travers des villes qui ouvrent leurs portes : le 17 juillet 1429, Charles VII y est sacré, ce qui fait de lui, aux yeux de tous, le vrai roi. Mais l'attaque de Paris échoue en septembre et la cour préfère négocier avec la Bourgogne.\n\nLe 23 mai 1430, Jeanne est capturée par les Bourguignons devant Compiègne, puis vendue aux Anglais. Jugée pour hérésie à [[cdx_rouen|Rouen]] par un tribunal d'Église présidé par l'évêque Pierre Cauchon, avec l'appui de docteurs de l'[[cdx_universite_paris|université de Paris]], elle est brûlée vive le 30 mai 1431, place du Vieux-Marché. Charles VII ne tente rien pour la sauver.\n\nUn procès en nullité, voulu par le roi une fois la Normandie reconquise, la réhabilite en 1456. Figure disputée par toutes les causes au fil des siècles, elle est canonisée en 1920.",
+  "entity": "evt_jeanne_d_arc",
+  "anachronism": "Dans le jeu, la Pucelle se présente au printemps 1429 dès que la France, en guerre avec l'Angleterre, est en difficulté (Orléanais assiégé, Paris ou la Normandie aux mains des Anglais, ou royaume réduit) : le siège d'Orléans lui-même n'est pas exigé, et l'histoire de la partie peut avoir divergé.",
+  "see_also": ["cdx_orleans", "cdx_charles_vii", "cdx_reims", "cdx_traite_troyes"],
+  "sources": ["Jeanne d'Arc", "Procès de Jeanne d'Arc"]
+}

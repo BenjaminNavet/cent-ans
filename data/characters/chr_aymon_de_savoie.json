@@ -40,5 +40,10 @@
   "description": "Frère cadet d'Édouard de Savoie ; règne pacifique consacré à la réforme de l'administration comtale.",
   "sources": [
     "Aymon de Savoie"
-  ]
+  ],
+  "family": {
+    "children": [
+      "chr_amedee_vi_de_savoie"
+    ]
+  }
 }

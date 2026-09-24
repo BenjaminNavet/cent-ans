@@ -1,0 +1,12 @@
+{
+  "id": "cdx_vicariat_imperial",
+  "title": "Le vicariat impérial d'Édouard III",
+  "category": "institution",
+  "aliases": ["vicariat impérial", "vicaire impérial", "vicaire général de l'Empire", "diète de Coblence"],
+  "era": { "from": "1338", "to": "1341" },
+  "summary": "Le 5 septembre 1338, à Coblence, l'empereur [[cdx_louis_de_baviere|Louis de Bavière]] nomme [[cdx_edouard_iii|Édouard III]] vicaire général de l'Empire. Ce titre doit lui permettre de commander les princes des Pays-Bas contre Philippe VI ; il est révoqué en 1341.",
+  "body": "Pour attaquer la France par le nord, [[cdx_edouard_iii|Édouard III]] a besoin des princes des Pays-Bas : ducs de Brabant et de Gueldre, comtes de Hainaut et de Juliers. Or ces seigneurs sont vassaux de l'Empire, et beaucoup hésitent à combattre le roi de France. Le roi d'Angleterre achète leur alliance à prix d'or, mais il lui faut aussi une autorité légale sur eux.\n\nL'empereur [[cdx_louis_de_baviere|Louis de Bavière]] est alors en conflit ouvert avec la [[cdx_papaute_avignon|papauté d'Avignon]], qui l'a excommunié, et avec Philippe VI, qui soutient le pape. En échange de subsides anglais, il accepte une alliance. Le 5 septembre 1338, lors d'une grande assemblée à Coblence, sur le Rhin, les deux souverains siègent côte à côte et Louis confère à Édouard le titre de vicaire général de l'Empire pour les terres situées à l'ouest du Rhin.\n\nCe titre donne à Édouard le droit de convoquer les vassaux impériaux à la guerre. Il en use en 1339 lors de sa première campagne en Cambrésis et en Thiérache, mais les résultats sont maigres : l'armée française refuse la bataille, et les coûteux alliés se révèlent peu motivés. Les dépenses énormes de cette diplomatie contribuent à la faillite des banquiers florentins qui prêtent au roi.\n\nEn 1341, Louis de Bavière se rapproche de Philippe VI et révoque le vicariat. L'épisode illustre la première stratégie anglaise, fondée sur une coalition de princes, abandonnée ensuite au profit de la [[cdx_chevauchee|chevauchée]] et de l'alliance avec la Flandre.",
+  "entity": "evt_vicariat_imperial",
+  "see_also": ["cdx_louis_de_baviere", "cdx_saint_empire", "cdx_edouard_iii"],
+  "sources": ["Louis IV du Saint-Empire", "Édouard III d'Angleterre"]
+}
