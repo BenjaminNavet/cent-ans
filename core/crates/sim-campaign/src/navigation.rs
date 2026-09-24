@@ -158,15 +158,6 @@ struct Scratch {
     parent: Vec<u32>,
 }
 
-impl Scratch {
-    fn reset(&mut self, len: usize) {
-        self.g.clear();
-        self.g.resize(len, u32::MAX);
-        self.parent.clear();
-        self.parent.resize(len, u32::MAX);
-    }
-}
-
 thread_local! {
     static SCRATCH: RefCell<Scratch> = RefCell::new(Scratch::default());
 }
@@ -187,15 +178,125 @@ pub fn nothing_blocked(_: Cell) -> bool {
     false
 }
 
+/// A set of cells with a fast negative answer (a coarse bitmap of 32×32
+/// blocks in front of a sorted list): the blocker of the searches.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct CellSet {
+    coarse: Vec<u64>,
+    cells: Vec<u32>,
+}
+
+/// Blocks per side of the coarse bitmap (32 cells each: 4096 cells).
+const COARSE_SIDE: usize = 128;
+
+impl CellSet {
+    pub fn new() -> Self {
+        CellSet {
+            coarse: vec![0; COARSE_SIDE * COARSE_SIDE / 64],
+            cells: Vec::new(),
+        }
+    }
+
+    #[inline]
+    fn pack(cell: Cell) -> u32 {
+        (u32::from(cell.y) << 16) | u32::from(cell.x)
+    }
+
+    #[inline]
+    fn block(cell: Cell) -> Option<usize> {
+        let (bx, by) = (usize::from(cell.x) >> 5, usize::from(cell.y) >> 5);
+        (bx < COARSE_SIDE && by < COARSE_SIDE).then_some(by * COARSE_SIDE + bx)
+    }
+
+    pub fn insert(&mut self, cell: Cell) {
+        if self.coarse.is_empty() {
+            self.coarse = vec![0; COARSE_SIDE * COARSE_SIDE / 64];
+        }
+        if let Some(bit) = Self::block(cell) {
+            self.coarse[bit >> 6] |= 1 << (bit & 63);
+        }
+        let packed = Self::pack(cell);
+        if let Err(at) = self.cells.binary_search(&packed) {
+            self.cells.insert(at, packed);
+        }
+    }
+
+    #[inline]
+    pub fn contains(&self, cell: Cell) -> bool {
+        if let Some(bit) = Self::block(cell) {
+            if self
+                .coarse
+                .get(bit >> 6)
+                .is_none_or(|w| w & (1 << (bit & 63)) == 0)
+            {
+                return false;
+            }
+        }
+        self.cells.binary_search(&Self::pack(cell)).is_ok()
+    }
+
+    pub fn len(&self) -> usize {
+        self.cells.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cells.is_empty()
+    }
+}
+
+impl FromIterator<Cell> for CellSet {
+    fn from_iter<I: IntoIterator<Item = Cell>>(iter: I) -> Self {
+        let mut set = CellSet::new();
+        for cell in iter {
+            set.insert(cell);
+        }
+        set
+    }
+}
+
+impl Blocker for CellSet {
+    #[inline]
+    fn blocked(&self, cell: Cell) -> bool {
+        self.contains(cell)
+    }
+}
+
+/// Cost of entering a neighbour of `(x, y)` at offset `(dx, dy)`, read
+/// straight from the cost array (hot loops), or `None` when impassable or
+/// off the grid.
+#[inline(always)]
+fn neighbour_cost(
+    costs: &[u8],
+    width: i64,
+    height: i64,
+    nx: i64,
+    ny: i64,
+    diagonal: bool,
+) -> Option<u32> {
+    if nx < 0 || ny < 0 || nx >= width || ny >= height {
+        return None;
+    }
+    let value = costs[(ny * width + nx) as usize];
+    if value == IMPASSABLE {
+        return None;
+    }
+    let value = value.max(1);
+    Some(if diagonal {
+        diagonal_cost(value)
+    } else {
+        u32::from(value)
+    })
+}
+
 /// A* from `start` to `goal` (8 neighbours, octile heuristic), then
 /// smoothed by line of sight. `blocked` cells are never entered, except
 /// the goal. `max_cost` bounds the search (a path dearer than it is not
 /// looked for). `None` when the goal is unreachable.
-pub fn find_path(
+pub fn find_path<B: Blocker + ?Sized>(
     grid: &NavGrid,
     start: Cell,
     goal: Cell,
-    blocked: &dyn Blocker,
+    blocked: &B,
     max_cost: Option<u32>,
 ) -> Option<GridPath> {
     if start == goal {
@@ -228,31 +329,39 @@ pub fn find_path(
     Some(smooth(grid, start, &cells, blocked, goal))
 }
 
-fn astar(
+fn astar<B: Blocker + ?Sized>(
     grid: &NavGrid,
     window: Window,
     start: Cell,
     goal: Cell,
-    blocked: &dyn Blocker,
+    blocked: &B,
     max_cost: Option<u32>,
 ) -> Option<Vec<Cell>> {
     let (gx, gy) = goal.xy();
     let start_local = window.local(start.xy().0, start.xy().1)?;
     let goal_local = window.local(gx, gy)?;
+    let costs = grid.costs.as_slice();
+    let (width, height) = (i64::from(grid.width), i64::from(grid.height));
+    let limit = max_cost.unwrap_or(u32::MAX);
+    let min_cost = grid.min_cost;
     SCRATCH.with(|scratch| {
         let mut scratch = scratch.borrow_mut();
-        scratch.reset(window.len());
+        let Scratch { g: best, parent } = &mut *scratch;
+        best.clear();
+        best.resize(window.len(), u32::MAX);
+        parent.clear();
+        parent.resize(window.len(), u32::MAX);
         let mut heap: BinaryHeap<Reverse<(u32, u32, u32)>> = BinaryHeap::new();
-        scratch.g[start_local] = 0;
+        best[start_local] = 0;
         heap.push(Reverse((
-            heuristic(grid.min_cost, start.xy(), (gx, gy)),
+            heuristic(min_cost, start.xy(), (gx, gy)),
             u32::MAX,
             start_local as u32,
         )));
         while let Some(Reverse((_, depth, local))) = heap.pop() {
             let local = local as usize;
             let g = u32::MAX - depth;
-            if g > scratch.g[local] {
+            if g > best[local] {
                 continue;
             }
             if local == goal_local {
@@ -260,38 +369,42 @@ fn astar(
                 let mut current = local;
                 while current != start_local {
                     path.push(window.cell(current));
-                    current = scratch.parent[current] as usize;
+                    current = parent[current] as usize;
                 }
                 path.reverse();
                 return Some(path);
             }
-            let cell = window.cell(local);
+            let lx = local as i64 % window.width;
+            let ly = local as i64 / window.width;
+            let (x, y) = (window.x0 + lx, window.y0 + ly);
             for (dx, dy) in NEIGHBOURS {
-                let (nx, ny) = (i64::from(cell.x) + dx, i64::from(cell.y) + dy);
-                let Some(next_local) = window.local(nx, ny) else {
-                    continue;
-                };
-                let next = Cell::new(nx as u32, ny as u32);
-                let Some(step) = step_cost(grid, cell, next) else {
-                    continue;
-                };
-                if next != goal && blocked.blocked(next) {
+                let (nlx, nly) = (lx + dx, ly + dy);
+                if nlx < 0 || nly < 0 || nlx >= window.width || nly >= window.height {
                     continue;
                 }
+                let (nx, ny) = (x + dx, y + dy);
+                let Some(step) = neighbour_cost(costs, width, height, nx, ny, dx != 0 && dy != 0)
+                else {
+                    continue;
+                };
                 let total = g + step;
-                if max_cost.is_some_and(|m| total > m) || total >= scratch.g[next_local] {
+                let next_local = (nly * window.width + nlx) as usize;
+                if total > limit || total >= best[next_local] {
                     continue;
                 }
-                scratch.g[next_local] = total;
-                scratch.parent[next_local] = local as u32;
-                let f = total + heuristic(grid.min_cost, (nx, ny), (gx, gy));
+                let next = Cell::new(nx as u32, ny as u32);
+                if next_local != goal_local && blocked.blocked(next) {
+                    continue;
+                }
+                best[next_local] = total;
+                parent[next_local] = local as u32;
+                let f = total + heuristic(min_cost, (nx, ny), (gx, gy));
                 heap.push(Reverse((f, u32::MAX - total, next_local as u32)));
             }
         }
         None
     })
 }
-
 /// Cells of the 8-connected line from `a` (excluded) to `b` (included).
 pub fn line_cells(a: Cell, b: Cell) -> Vec<Cell> {
     let (mut x, mut y) = a.xy();
@@ -319,11 +432,11 @@ pub fn line_cells(a: Cell, b: Cell) -> Vec<Cell> {
 
 /// Cost of walking `cells` from `from`, or `None` if a step is impossible
 /// or enters a blocked cell other than `goal`.
-fn chain_cost(
+fn chain_cost<B: Blocker + ?Sized>(
     grid: &NavGrid,
     from: Cell,
     cells: &[Cell],
-    blocked: &dyn Blocker,
+    blocked: &B,
     goal: Cell,
 ) -> Option<u32> {
     let mut previous = from;
@@ -343,11 +456,11 @@ const MAX_SEGMENT: usize = 256;
 
 /// String pulling: from each corner, jump to the farthest cell of the A*
 /// chain in line of sight whose straight line costs no more than the chain.
-fn smooth(
+fn smooth<B: Blocker + ?Sized>(
     grid: &NavGrid,
     start: Cell,
     chain: &[Cell],
-    blocked: &dyn Blocker,
+    blocked: &B,
     goal: Cell,
 ) -> GridPath {
     // prefix[k]: cost from start to chain[k - 1] (prefix[0] = start).
@@ -395,11 +508,11 @@ fn smooth(
 
 /// Every cell reachable from `start` for at most `budget`, with its cost
 /// (bounded Dijkstra). `blocked` cells are never entered. Sorted by cell.
-pub fn reachable_area(
+pub fn reachable_area<B: Blocker + ?Sized>(
     grid: &NavGrid,
     start: Cell,
     budget: u32,
-    blocked: &dyn Blocker,
+    blocked: &B,
 ) -> Vec<(Cell, u32)> {
     let mut result = Vec::new();
     bounded_dijkstra(grid, start, budget, blocked, |cell, cost| {
@@ -411,59 +524,75 @@ pub fn reachable_area(
 }
 
 /// Bounded Dijkstra from `start`, calling `visit(cell, cost)` on every
-/// settled cell in order of cost (ties by cell); stops early when `visit`
-/// returns `true` and returns that cell with its cost.
-pub fn bounded_dijkstra(
+/// settled cell in order of cost (ties by position in the search window,
+/// row-major: deterministic); stops early when `visit` returns `true` and
+/// returns that cell with its cost. `visit` must not start another search.
+pub fn bounded_dijkstra<B: Blocker + ?Sized>(
     grid: &NavGrid,
     start: Cell,
     budget: u32,
-    blocked: &dyn Blocker,
+    blocked: &B,
     mut visit: impl FnMut(Cell, u32) -> bool,
 ) -> Option<(Cell, u32)> {
     let s = start.xy();
     let margin = i64::from(budget / u32::from(grid.min_cost.max(1))) + 1;
     let window = Window::around(grid, &[s], margin);
     let start_local = window.local(s.0, s.1)?;
+    let costs = grid.costs.as_slice();
+    let (width, height) = (i64::from(grid.width), i64::from(grid.height));
     SCRATCH.with(|scratch| {
         let mut scratch = scratch.borrow_mut();
-        scratch.reset(window.len());
-        let mut heap: BinaryHeap<Reverse<(u32, Cell, u32)>> = BinaryHeap::new();
-        scratch.g[start_local] = 0;
-        heap.push(Reverse((0, start, start_local as u32)));
-        while let Some(Reverse((g, cell, local))) = heap.pop() {
+        let Scratch {
+            g: best,
+            parent: settled,
+        } = &mut *scratch;
+        best.clear();
+        best.resize(window.len(), u32::MAX);
+        settled.clear();
+        settled.resize(window.len(), 0);
+        let mut heap: BinaryHeap<Reverse<(u32, u32)>> = BinaryHeap::new();
+        best[start_local] = 0;
+        heap.push(Reverse((0, start_local as u32)));
+        while let Some(Reverse((g, local))) = heap.pop() {
             let local = local as usize;
-            if g > scratch.g[local] || scratch.parent[local] == u32::MAX - 1 {
+            if g > best[local] || settled[local] != 0 {
                 continue;
             }
-            // Settled marker.
-            scratch.parent[local] = u32::MAX - 1;
+            settled[local] = 1;
+            let lx = local as i64 % window.width;
+            let ly = local as i64 / window.width;
+            let (x, y) = (window.x0 + lx, window.y0 + ly);
+            let cell = Cell::new(x as u32, y as u32);
             if visit(cell, g) {
                 return Some((cell, g));
             }
             for (dx, dy) in NEIGHBOURS {
-                let (nx, ny) = (i64::from(cell.x) + dx, i64::from(cell.y) + dy);
-                let Some(next_local) = window.local(nx, ny) else {
-                    continue;
-                };
-                let next = Cell::new(nx as u32, ny as u32);
-                let Some(step) = step_cost(grid, cell, next) else {
-                    continue;
-                };
-                if blocked.blocked(next) {
+                let (nlx, nly) = (lx + dx, ly + dy);
+                if nlx < 0 || nly < 0 || nlx >= window.width || nly >= window.height {
                     continue;
                 }
+                let (nx, ny) = (x + dx, y + dy);
+                let Some(step) = neighbour_cost(costs, width, height, nx, ny, dx != 0 && dy != 0)
+                else {
+                    continue;
+                };
                 let total = g + step;
-                if total > budget || total >= scratch.g[next_local] {
+                let next_local = (nly * window.width + nlx) as usize;
+                if total > budget || total >= best[next_local] {
                     continue;
                 }
-                scratch.g[next_local] = total;
-                heap.push(Reverse((total, next, next_local as u32)));
+                if blocked.blocked(Cell::new(nx as u32, ny as u32)) {
+                    continue;
+                }
+                best[next_local] = total;
+                heap.push(Reverse((total, next_local as u32)));
             }
         }
         None
     })
 }
 
+#[cfg(test)]
 #[cfg(test)]
 mod tests {
     use super::*;

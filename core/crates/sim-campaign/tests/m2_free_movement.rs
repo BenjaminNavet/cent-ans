@@ -9,9 +9,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{
-    FactionId, GameData, MapRasters, NavGrid, SettlementId, IMPASSABLE, PLAIN_COST,
-};
+use data_model::{FactionId, GameData, MapRasters, NavGrid, SettlementId, IMPASSABLE, PLAIN_COST};
 use sim_campaign::march::km_to_grid_points;
 use sim_campaign::movement::{retreat_target, Retreat};
 use sim_campaign::navigation::Cell;
@@ -98,7 +96,11 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
 
 /// France and England at war; only the French and English main armies are
 /// kept, both in the field.
-fn duel(data: &GameData, french_at: [f32; 2], english_at: [f32; 2]) -> (CampaignState, ArmyId, ArmyId) {
+fn duel(
+    data: &GameData,
+    french_at: [f32; 2],
+    english_at: [f32; 2],
+) -> (CampaignState, ArmyId, ArmyId) {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
@@ -115,7 +117,10 @@ fn duel(data: &GameData, french_at: [f32; 2], english_at: [f32; 2]) -> (Campaign
 }
 
 fn march(state: &mut CampaignState, data: &GameData, order: Order) -> sim_campaign::MoveReport {
-    match state.submit_order_outcome(data, order).expect("move accepted") {
+    match state
+        .submit_order_outcome(data, order)
+        .expect("move accepted")
+    {
         OrderOutcome::Moved(report) => report,
         other => panic!("expected a march, got {other:?}"),
     }
@@ -140,7 +145,10 @@ fn a_path_goes_round_a_river_by_the_bridge() {
     let (state, french, _) = duel(&data, start, [10.0, 10.0]);
     let target = east(&data, start, 40.0);
     let path = state.find_path(&data, &french, target).expect("a path");
-    let bridge = [Cell::new(river_x as u32, bridge_y as u32), Cell::new(river_x as u32 + 1, bridge_y as u32)];
+    let bridge = [
+        Cell::new(river_x as u32, bridge_y as u32),
+        Cell::new(river_x as u32 + 1, bridge_y as u32),
+    ];
     assert!(
         bridge.iter().all(|c| path.cells.contains(c)),
         "the path crosses at the bridge"
@@ -203,7 +211,11 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
     let (mut state, french, _) = duel(&data, start, [10.0, 10.0]);
     let allowance = state.armies[&french].movement_left;
     let target = [start[0], start[1] - 450.0 * px_per_km(&data)];
-    let report = march(&mut state, &data, Order::move_to_point(french.clone(), target));
+    let report = march(
+        &mut state,
+        &data,
+        Order::move_to_point(french.clone(), target),
+    );
     assert_eq!(report.stop, StopReason::OutOfMovement);
     assert!(report.cost <= allowance);
     assert!(!report.walked.is_empty());
@@ -235,7 +247,6 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
             "the march resumed: {moved} km"
         );
         assert!(turns <= 3, "450 km take three turns");
-
     }
     assert!(state.armies[&french].planned_path.is_empty());
     assert!(state.armies[&french].destination.is_none());
@@ -276,7 +287,10 @@ fn attack_within_reach_and_out_of_reach() {
         .pending_events
         .iter()
         .any(|e| e.kind == EventKind::Battle && e.text_fr.contains("Vainqueur")));
-    assert_eq!(state.armies[&french].movement_left, 0, "no move after a battle");
+    assert_eq!(
+        state.armies[&french].movement_left, 0,
+        "no move after a battle"
+    );
     assert!(state
         .armies
         .get(&english)
@@ -328,7 +342,11 @@ fn entering_an_enemy_place_lays_siege() {
     let point = data.settlement_point(&bordeaux).unwrap();
     state.armies.get_mut(&french).unwrap().position =
         ArmyPosition::field(east(&data, point, -12.0));
-    let report = march(&mut state, &data, Order::move_to(french.clone(), bordeaux.clone()));
+    let report = march(
+        &mut state,
+        &data,
+        Order::move_to(french.clone(), bordeaux.clone()),
+    );
     assert_eq!(
         report.stop,
         StopReason::SiegeStarted {
@@ -338,7 +356,10 @@ fn entering_an_enemy_place_lays_siege() {
     let army = &state.armies[&french];
     assert!(army.is_at(&bordeaux));
     assert_eq!(army.stance, sim_campaign::Stance::Siege);
-    let siege = state.settlements[&bordeaux].siege.clone().expect("besieged");
+    let siege = state.settlements[&bordeaux]
+        .siege
+        .clone()
+        .expect("besieged");
     assert_eq!(siege.attacker, fac("fac_france"));
     assert_eq!(siege.started_turn, state.turn());
     assert!(state
@@ -347,7 +368,10 @@ fn entering_an_enemy_place_lays_siege() {
         .any(|e| e.kind == EventKind::SiegeStarted));
     // The siege counts from the next end of turn, not twice.
     state.end_turn_with(&data, idle);
-    let siege = state.settlements[&bordeaux].siege.clone().expect("still besieged");
+    let siege = state.settlements[&bordeaux]
+        .siege
+        .clone()
+        .expect("still besieged");
     assert_eq!(siege.turns_elapsed, 0);
     state.end_turn_with(&data, idle);
     if let Some(siege) = &state.settlements[&bordeaux].siege {
@@ -361,12 +385,23 @@ fn an_ungarrisoned_place_is_taken_and_a_friendly_one_is_a_stop() {
     let bordeaux = set("set_bordeaux");
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
     let french = main_army(&state, "fac_france");
-    state.armies.retain(|id, a| *id == french || a.faction == fac("fac_france"));
-    state.settlements.get_mut(&bordeaux).unwrap().garrison.clear();
+    state
+        .armies
+        .retain(|id, a| *id == french || a.faction == fac("fac_france"));
+    state
+        .settlements
+        .get_mut(&bordeaux)
+        .unwrap()
+        .garrison
+        .clear();
     let point = data.settlement_point(&bordeaux).unwrap();
     state.armies.get_mut(&french).unwrap().position =
         ArmyPosition::field(east(&data, point, -12.0));
-    let report = march(&mut state, &data, Order::move_to(french.clone(), bordeaux.clone()));
+    let report = march(
+        &mut state,
+        &data,
+        Order::move_to(french.clone(), bordeaux.clone()),
+    );
     assert_eq!(
         report.stop,
         StopReason::SettlementTaken {
@@ -381,7 +416,11 @@ fn an_ungarrisoned_place_is_taken_and_a_friendly_one_is_a_stop() {
         Order::move_to_point(french.clone(), east(&data, point, 10.0)),
     );
     assert_eq!(out.stop, StopReason::Arrived);
-    let back = march(&mut state, &data, Order::move_to(french.clone(), bordeaux.clone()));
+    let back = march(
+        &mut state,
+        &data,
+        Order::move_to(french.clone(), bordeaux.clone()),
+    );
     assert_eq!(
         back.stop,
         StopReason::Stationed {
@@ -520,7 +559,9 @@ fn grid_searches_are_fast_enough() {
     let _ = grid.component(0, 0);
     println!("components labelled in {:?}", start.elapsed());
     let start = std::time::Instant::now();
-    let path = state.find_path(&data, &french, bayonne).expect("Paris to Bayonne");
+    let path = state
+        .find_path(&data, &french, bayonne)
+        .expect("Paris to Bayonne");
     let path_time = start.elapsed();
 
     let start = std::time::Instant::now();
