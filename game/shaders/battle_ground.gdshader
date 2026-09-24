@@ -134,6 +134,16 @@ void fragment() {
 	if (field.x == 2.0) {
 		tint = mix(tint, vec3(1.45, 1.18, 0.62), field_w);
 	}
+	// Lot V4b : taches de prairie visibles de haut (herbe sèche blonde, prairie grasse sombre,
+	// friches roussâtres) à deux échelles, pour casser l'uniformité du champ vu d'ensemble.
+	float patch = texture(macro_noise, p * 0.0013 + vec2(0.61, 0.13)).r;
+	float patch2 = texture(macro_noise, p * 0.0047 + vec2(0.27, 0.83)).r;
+	float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
+	float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
+	float rust = smoothstep(0.68, 0.8, patch2) * (1.0 - dry);
+	tint = mix(tint, tint * vec3(1.35, 1.12, 0.62), dry * 0.85);
+	tint = mix(tint, tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
+	tint = mix(tint, tint * vec3(1.15, 0.92, 0.72), rust * 0.45);
 	albedo = mix(albedo, albedo * tint, grassy);
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
 	// Sillons des labours.
@@ -142,7 +152,7 @@ void fragment() {
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
 	}
 	// Berges humides et sol trempé par la pluie.
-	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.7), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
+	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.4), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
 	albedo *= mix(1.0, 0.62, wet);
 
 	ALBEDO = albedo;

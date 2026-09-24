@@ -23,6 +23,10 @@ const NEAR_STEP := 20.0
 const FAR_RECT := Rect2(-7000, -7000, 15200, 14800)
 const FAR_STEP := 200.0
 const RIVER_CARVE := 1.6
+## Arbres : taille des tuiles (m), distance de passage au maillage allégé, portée des buissons.
+const TREE_TILE := 160.0
+const TREE_LOD_DISTANCE := 260.0
+const BUSH_DISTANCE := 520.0
 const RIVER_SPAN := 27.0  # demi-largeur creusée (width * 1.5), comme la simulation
 
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
@@ -84,7 +88,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	if terrain.has("river"):
 		_build_river(terrain["river"])
 	_build_trees()
-	_build_rocks()
+	if not OS.get_environment("BATTLE_EXP").split(",").has("norocks"): _build_rocks() #EXP
 	vegetation = BattleVegetation.new()
 	vegetation.name = "Vegetation"
 	add_child(vegetation)
@@ -262,7 +266,7 @@ func _build_textures() -> void:
 			if not SPLAT_RECT.grow(40.0).has_point(p):
 				continue
 			var ford := _in_ford(p.x)
-			_stamp_disc(a, p, width * (0.95 if ford else 0.7), 3, 4.0)
+			_stamp_disc(a, p, width * (1.05 if ford else 0.98), 3, 5.0)
 			_stamp_disc(b, p, width * 1.25, 0, 8.0)
 	for road in roads:
 		for i in range(road.size() - 1):
@@ -360,7 +364,7 @@ func _add_mesh(node_name: String, mesh: ArrayMesh, shadows: bool) -> MeshInstanc
 	instance.name = node_name
 	instance.mesh = mesh
 	instance.material_override = ground_material
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows and not OS.get_environment("BATTLE_EXP").split(",").has("nogroundshadow") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
 	return instance
 
@@ -546,6 +550,9 @@ func _build_river(river: Dictionary) -> void:
 	waves.noise = wave_noise
 	mat.set_shader_parameter("wave_normal", waves)
 	mat.set_shader_parameter("macro_noise", macro_noise)
+	# Reflet : le ciel entre horizon et zénith du préréglage météo.
+	var preset: Dictionary = BattleAtmosphere.PRESETS.get(weather_key, BattleAtmosphere.PRESETS["clear"])
+	mat.set_shader_parameter("sky_color", (preset["horizon"] as Color).lerp(preset["zenith"], 0.3))
 	if weather_key == "rain":
 		mat.set_shader_parameter("turbidity", 0.75)
 		mat.set_shader_parameter("ripple", 1.0)
@@ -673,21 +680,49 @@ func _build_trees() -> void:
 		_tree_layer(kind, sets[kind], tints[kind])
 
 
+## Arbres par tuiles (lot V4b) : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur
+## écarte ce qui est hors champ ou hors des ombres. Chênes et peupliers ont deux niveaux de
+## détail par distance (`visibility_range`) : houppier complet avec ombre portée près, maillage
+## allégé sans ombre au-delà de `TREE_LOD_DISTANCE`.
 func _tree_layer(kind: String, transforms: Array, tints: Array) -> void:
 	if transforms.is_empty():
 		return
+	var tile := TREE_TILE * (4.0 if kind == "far" else 1.0)
+	var tiles := {}
+	for i in transforms.size():
+		var t: Transform3D = transforms[i]
+		var key := Vector2i(floori(t.origin.x / tile), floori(t.origin.z / tile))
+		if not tiles.has(key):
+			tiles[key] = []
+		(tiles[key] as Array).append(i)
+	for key in tiles:
+		var members: Array = tiles[key]
+		match kind:
+			"oak", "poplar":
+				_tree_tile(kind, members, transforms, tints, key, 0.0, TREE_LOD_DISTANCE, true)
+				_tree_tile(kind + "_lod", members, transforms, tints, key, TREE_LOD_DISTANCE, 0.0, false)
+			"bush":
+				_tree_tile(kind, members, transforms, tints, key, 0.0, BUSH_DISTANCE, false)
+			_:
+				_tree_tile(kind, members, transforms, tints, key, 0.0, 0.0, false)
+
+
+func _tree_tile(kind: String, members: Array, transforms: Array, tints: Array, key: Vector2i, range_begin: float, range_end: float, shadows: bool) -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
 	mm.mesh = BattleMeshes.tree(kind)
-	mm.instance_count = transforms.size()
-	for i in transforms.size():
-		mm.set_instance_transform(i, transforms[i])
-		mm.set_instance_color(i, tints[i])
+	mm.instance_count = members.size()
+	for k in members.size():
+		var i: int = members[k]
+		mm.set_instance_transform(k, transforms[i])
+		mm.set_instance_color(k, tints[i])
 	var instance := MultiMeshInstance3D.new()
-	instance.name = "Trees_%s" % kind
+	instance.name = "Trees_%s_%d_%d" % [kind, key.x, key.y]
 	instance.multimesh = mm
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if kind == "far" else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.visibility_range_begin = range_begin
+	instance.visibility_range_end = range_end
 	add_child(instance)
 
 
