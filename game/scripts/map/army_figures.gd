@@ -12,7 +12,7 @@ extends Node3D
 ## Rendu seulement : lit le dictionnaire `get_army` du pont, aucune règle.
 
 ## Hauteur d'homme ≈ 1,8 m (maillages V2) → ≈ 4,7 unités du repère du marqueur (hampe 8,4).
-const FIGURE_SCALE := 2.6
+const FIGURE_SCALE := 2.3
 ## Échelle des navires (unités Blender → repère du marqueur) : mât ≈ 1,75 → ≈ 9,6.
 const SHIP_SCALE := 5.5
 ## Soldats d'escorte (en plus du général et du porte-étendard) : [effectif max, nombre].
@@ -21,20 +21,24 @@ const ESCORT_BY_MEN := [[300, 2], [800, 3], [1500, 4], [3000, 5], [1000000000, 6
 const MEN_PER_SHIP := 900
 const MAX_SHIPS := 3
 ## Places (repère du groupe : la troupe regarde +X, Z à droite).
-const LEADER_SLOT := Vector2(2.0, 0.3)
-const BEARER_SLOT := Vector2(0.4, -1.5)
+const LEADER_SLOT := Vector2(1.5, 0.2)
+const BEARER_SLOT := Vector2(0.1, -1.4)
 ## Pied de la hampe dans le repère du porte-étendard (main droite, un peu en avant).
 const POLE_IN_HAND := Vector2(0.35, 0.55)
-const ESCORT_ROWS_X := [-1.6, -3.8, -6.0]
-const ESCORT_FILE_Z := [-1.1, 1.1]
+const ESCORT_ROWS_X := [-1.4, -3.0]
+const ESCORT_FILE_Z := [-1.3, 0.0, 1.3]
+## Pied de la hampe de poupe (`campaign_fleet.py`, STERN_STAFF), repère du navire.
+const STERN_STAFF := Vector3(-0.9, 0.95, 0.0)
 const SHIP_SLOTS := [Vector2(0.0, 0.0), Vector2(-7.5, 5.0), Vector2(-8.0, -5.5)]
-const CAMP_SLOT := Vector3(-5.5, 0.0, 5.0)
-const SIEGE_CAMP_SLOT := Vector3(4.0, 0.0, 3.5)
+const CAMP_SLOT := Vector3(-4.5, 0.0, 4.2)
+const SIEGE_CAMP_SLOT := Vector3(4.5, 0.0, 4.0)
 ## Niveaux de détail des figurines selon la distance du rig de caméra.
 const LOD0_DISTANCE := 90.0
 const LOD1_DISTANCE := 320.0
 ## Au-delà, pas de fumée (invisible et coûteuse).
 const SMOKE_DISTANCE := 420.0
+## Le bivouac n'apparaît qu'en vue rapprochée (au palier moyen il encombrerait la carte).
+const BIVOUAC_DISTANCE := 190.0
 const SMOKE_SHADER := preload("res://shaders/fire_smoke.gdshader")
 const SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 const SAIL_SHADER := preload("res://shaders/campaign_sail.gdshader")
@@ -89,9 +93,9 @@ static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text
 		var in_field := army.has("position") and str(army.get("settlement", "")) == ""
 		var moving := ArmyMarker.army_status(army) == "moving"
 		if stance == "siege":
-			figures._build_camp("siege_camp", SIEGE_CAMP_SLOT, 0.9)
+			figures._build_camp("siege_camp", SIEGE_CAMP_SLOT, 1.3)
 		elif in_field and not moving:
-			figures._build_camp("fleet/bivouac", CAMP_SLOT, 1.0)
+			figures._build_camp("fleet/bivouac", CAMP_SLOT, 0.75)
 	return figures
 
 
@@ -240,10 +244,10 @@ func set_walking(value: bool) -> void:
 
 
 ## Pied de la hampe de l'étendard dans le repère du marqueur (suit le porte-étendard quand la
-## troupe tourne) ; Vector3.INF pour une flotte (étendard au mât).
+## troupe tourne) ; pour une flotte, pied de la hampe de poupe du navire amiral.
 func bearer_anchor() -> Vector3:
 	if kind == "fleet":
-		return Vector3.INF
+		return Basis(Vector3.UP, rotation.y) * (STERN_STAFF * SHIP_SCALE)
 	var local := Vector3(BEARER_SLOT.x + POLE_IN_HAND.x, 0.0, BEARER_SLOT.y + POLE_IN_HAND.y)
 	return Basis(Vector3.UP, rotation.y) * local
 
@@ -395,7 +399,10 @@ func set_view(camera_distance: float, weight: float) -> void:
 		for key in _groups:
 			var group: Dictionary = _groups[key]
 			(group["mm"] as MultiMeshInstance3D).multimesh.mesh = BattleSkinned.mesh(str(group["kind"]), int(group["variant"]), level)
-	var smoky := visible and camera_distance < SMOKE_DISTANCE
+	var bivouac := get_node_or_null("Bivouac") as Node3D
+	if bivouac != null:
+		bivouac.visible = camera_distance < BIVOUAC_DISTANCE
+	var smoky := visible and camera_distance < (BIVOUAC_DISTANCE if bivouac != null else SMOKE_DISTANCE)
 	for smoke in _smokes:
 		smoke.visible = smoky
 

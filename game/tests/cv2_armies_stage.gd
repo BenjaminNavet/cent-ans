@@ -72,6 +72,7 @@ func _init() -> void:
 				"position": focus + Vector2(-4, 34),
 				"units": _units([["unit_urban_militia", 2, 120]])},
 			"army_bret_ship": {"faction": "fac_brittany", "location": "prov_bretagne", "stance": "normal", "embarked": true, "path": [],
+				"position": focus + Vector2(-70, -150),
 				"units": _units([["unit_men_at_arms_foot", 6, 80], ["unit_crossbowmen", 4, 100]])},
 		}
 		var facade: Node = root.get_node("/root/SimFacade")
