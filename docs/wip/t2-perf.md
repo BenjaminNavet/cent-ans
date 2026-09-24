@@ -84,12 +84,30 @@ Sortie : une ligne `BENCH_JSON {"ok":true,"units":...,"soldiers":...,"frames":..
 "missiles_launched":...,"wall_s":...}` puis code de sortie 0 ; en cas d'échec,
 `{"ok":false,"error":"...","wall_s":...}` et code de sortie 1.
 
+## Vérification du banc de bataille (T8)
+
+Fumée, machine partagée (chiffres non comparables à l'audit, seule la fiabilité compte ici) :
+
+- `--units=20 --bench-at=5` : `BENCH_JSON {"ok":true,...}`, code de sortie 0.
+- `--units=20 --bench-at=5 --bench-repeat=2` : 1200 images regroupées, `frame_ms_median`/`p95`
+  cohérents, code de sortie 0.
+- `--units=120 --bench-at=40 --bench-timeout=3` (budget volontairement trop court) :
+  `BENCH_JSON {"ok":false,"error":"timeout advancing to --bench-at=40 (stopped at 29.9 s
+  simulated)",...}`, code de sortie **1** — confirme que le banc échoue maintenant bruyamment
+  au lieu de bloquer.
+- **`--units=120 --bench-at=40 --bench-timeout=180`** (le scénario qui ne produisait jamais de
+  résultat dans l'audit A5) : termine en 24,4 s de temps réel, `BENCH_JSON
+  {"ok":true,"units":240,"soldiers":28752,"frames":600,"fps_avg":29.9,"frame_ms_median":31.0,
+  "frame_ms_p95":55.2,...}`, code de sortie 0. Résolu (probablement la combinaison du profil
+  `dev` optimisé du lot T1 et des garde-fous T8 ; l'ancien bug racine — `_ready()` ne quittait
+  jamais le process en cas d'échec de mise en scène — est corrigé dans tous les cas).
+
 ## Prochaine étape
 
 1. Fait : mesures avant/après T2 (primitives, voir ci-dessus).
-2. Lancer le banc de bataille à 48/80/120 régiments avec les nouveaux garde-fous et consigner
-   les résultats (avant, ces bancs ne terminaient pas de façon fiable) ; la machine partagée de
-   cette session rend les i/s peu significatifs, à refaire à vide si possible.
+2. Fait : banc de bataille à 120 régiments, succès et échec contrôlé (voir ci-dessus). Refaire
+   à 48/80 régiments et à vide (machine non partagée) pour des i/s comparables à l'audit si
+   besoin d'un chiffre de référence propre.
 3. Fait : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call`.
 4. Localiser la source des 35 avertissements RGBFloat→RGBAFloat au chargement de carte
    (recherche en cours).
