@@ -170,6 +170,14 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         return Vec::new();
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+    // G2: historical side changes (Artevelde, Troyes).
+    orders.extend(crate::alignment::plan_side_change(state, data, faction));
+    orders.extend(crate::alignment::plan_dynastic_alliance(
+        state, data, faction,
+    ));
+    orders.extend(crate::alignment::lift_embargoes_on_cobelligerents(
+        state, data, faction,
+    ));
     // G2: subsidies first, out of what the donor would otherwise hoard.
     let spare = (ctx.treasury - ctx.upkeep()).max(0) / crate::support::SUBSIDY_SPARE_DIVISOR;
     for order in crate::support::plan_subsidies(state, data, faction, spare) {

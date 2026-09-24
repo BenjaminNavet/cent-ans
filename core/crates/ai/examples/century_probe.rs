@@ -43,6 +43,8 @@ struct Report {
     turns: u32,
     war_turns: u32,
     war_phases: u32,
+    /// Turns England dominates the French realm (G2).
+    dominance_turns: u32,
     alliance_turns: Vec<u32>,
     /// Alliance turns while France and England are at war (G2).
     alliance_war_turns: Vec<u32>,
@@ -168,6 +170,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
         was_at_war = at_war;
+        if ai::alignment::dominates_realm(&state, data, &england, &france) {
+            report.dominance_turns += 1;
+        }
         for (index, (_, a, b)) in PAIRS.iter().enumerate() {
             if state.is_allied(&id(a), &id(b)) {
                 report.alliance_turns[index] += 1;
@@ -329,6 +334,16 @@ fn main() {
             format!("{:.1}", f64::from(n) / decades)
         })
         .collect();
+    let dominance: Vec<String> = reports
+        .iter()
+        .map(|r| {
+            format!(
+                "{:.0} %",
+                100.0 * f64::from(r.dominance_turns) / f64::from(r.turns)
+            )
+        })
+        .collect();
+    println!("Angleterre dominant le royaume : {}", dominance.join(" | "));
     println!("Banqueroutes de l'Écosse / déc. : {}", scots.join(" | "));
     let survivors: Vec<String> = MAJORS
         .iter()

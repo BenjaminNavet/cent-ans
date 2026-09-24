@@ -5,6 +5,7 @@
 //! The simulation's own tests keep using the minimal planner of M2
 //! (`sim_campaign::ai_minimal`), which `CampaignState::end_turn` defaults to.
 
+pub mod alignment;
 pub mod campaign;
 pub mod support;
 
