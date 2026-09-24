@@ -240,7 +240,7 @@ func update_trample(units: Array, dt: float) -> void:
 		if not _trample_snow:
 			# B8 : la boue naît du passage, pas de l'attente (sinon toute la zone de déploiement
 			# devient bourbier en une minute).
-			add = int(clampf(moved * 6.0 - 2.0, 0.0, 20.0))
+			add = int(clampf(moved * 3.0 - 2.0, 0.0, 16.0))
 			if add == 0:
 				continue
 		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
