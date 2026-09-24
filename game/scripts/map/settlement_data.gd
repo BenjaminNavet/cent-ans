@@ -6,7 +6,9 @@ extends RefCounted
 ## - `data/map/settlements_px.json` : position de jeu (pixels carte 4096) ;
 ## - `data/map/hamlets.json` : hameaux décoratifs `{name, px, province}` ;
 ## - `data/map/roads.geojson` : routes `LineString` en pixels carte (`type` main / secondary /
-##   computed).
+##   computed) ;
+## - `data/map/settlement_edge_paths.json` (lot C7b) : tracé routier des arêtes `road` du graphe
+##   (`{"edges": [{from, to, points}]}`, `from < to`), pour l'aperçu de chemin d'armée.
 ## `apply_live(sim)` met à jour contrôleur / propriétaire depuis `CampaignSim.settlements()`
 ## (repli : propriétaire de la province dans `data/`). Tous les fichiers sont facultatifs.
 
@@ -20,6 +22,8 @@ var settlements: Array[Dictionary] = []
 var index_by_id: Dictionary = {}
 var hamlets: Array[Dictionary] = []  # {name, px: Vector2, province}
 var roads: Array[Dictionary] = []  # {type, main: bool, points: PackedVector2Array}
+## Tracé routier des arêtes du graphe : "from|to" (from < to) → PackedVector2Array de from à to.
+var edge_paths: Dictionary = {}
 var load_ms: int = 0
 
 
@@ -29,6 +33,7 @@ static func load_from(data_dir: String, map_dir: String) -> SettlementData:
 	result._load_settlements(data_dir, map_dir)
 	result._load_hamlets(map_dir)
 	result._load_roads(map_dir)
+	result._load_edge_paths(map_dir)
 	result.load_ms = Time.get_ticks_msec() - t0
 	return result
 
@@ -119,6 +124,30 @@ func _load_roads(map_dir: String) -> void:
 				points.append(Vector2(float(c[0]), float(c[1])))
 			if points.size() >= 2:
 				roads.append({"type": road_type, "main": road_type == "main", "points": points})
+
+
+func _load_edge_paths(map_dir: String) -> void:
+	var collection: Variant = _read_json(map_dir.path_join("settlement_edge_paths.json"))
+	if not (collection is Dictionary):
+		return
+	for entry in collection.get("edges", []):
+		if not (entry is Dictionary):
+			continue
+		var points := PackedVector2Array()
+		for c in entry.get("points", []):
+			points.append(Vector2(float(c[0]), float(c[1])))
+		if points.size() >= 2:
+			edge_paths["%s|%s" % [entry.get("from", ""), entry.get("to", "")]] = points
+
+
+## Tracé routier de l'arête `from_id` → `to_id` (orienté de `from_id` à `to_id`), vide si
+## l'arête ne suit pas de route tracée (l'aperçu trace alors un segment droit).
+func edge_path(from_id: String, to_id: String) -> PackedVector2Array:
+	if from_id < to_id:
+		return edge_paths.get("%s|%s" % [from_id, to_id], PackedVector2Array())
+	var reversed: PackedVector2Array = edge_paths.get("%s|%s" % [to_id, from_id], PackedVector2Array()).duplicate()
+	reversed.reverse()
+	return reversed
 
 
 ## Contrôleur et propriétaire courants depuis la simulation (`CampaignSim.settlements()`).
