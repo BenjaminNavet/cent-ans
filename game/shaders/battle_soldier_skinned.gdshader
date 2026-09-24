@@ -395,7 +395,8 @@ void fragment() {
 		roughness = 0.6;
 	}
 	if (v_blood > 0.0 && code != C_PLATE) {
-		float spots = noise2(q * 9.0 + v_var.xy * 40.0);
+		// Deux octaves : taches arrondies et éclaboussures fines (lot BV2).
+		float spots = noise2(q * 7.0 + v_var.xy * 40.0) * 0.7 + noise2(q * 26.0 + v_var.zw * 17.0) * 0.3;
 		float amount = smoothstep(1.0 - v_blood * 0.6, 1.0, spots);
 		albedo = mix(albedo, vec3(0.09, 0.005, 0.004), amount);
 		roughness = mix(roughness, 0.3, amount);

@@ -50,6 +50,8 @@ func _run() -> int:
 			knights = unit.duplicate(true)
 		if target.is_empty() and type == _target:
 			target = unit.duplicate(true)
+	if target.is_empty():
+		target = _from_data(data_dir, _target)
 	if knights.is_empty() or target.is_empty():
 		push_error("bv2_charge_shot: knights or %s missing" % _target)
 		return 1
@@ -125,10 +127,25 @@ func _run() -> int:
 		if shots >= _after.size():
 			break
 	print("BV2_CHARGE knocked %d, corpses %d, severed %d, drops %d" % [soldiers.knocked_count - start_knocked, soldiers.corpse_count, soldiers.severed_count, soldiers.gore.drops_emitted])
-	if impact_time < 0.0 or soldiers.knocked_count - start_knocked <= 0:
+	# Piques et pieux arrêtent la charge : aucun renversé attendu.
+	var expect_knock := _target != "unit_flemish_pikemen" and not OS.get_cmdline_user_args().has("--stakes")
+	if impact_time < 0.0 or (expect_knock and soldiers.knocked_count - start_knocked <= 0):
 		push_error("bv2_charge_shot: no knock-down")
 		return 1
 	return 0
+
+
+## Régiment de `unit_type` construit depuis `data/unit_types/` (absent des deux armées).
+func _from_data(data_dir: String, unit_type: String) -> Dictionary:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join("unit_types/%s.json" % unit_type)))
+	if not parsed is Dictionary:
+		return {}
+	var d: Dictionary = parsed
+	var stats := {}
+	for key in d["stats"]:
+		stats[key] = int(d["stats"][key])
+	d["stats"] = stats
+	return {"unit_type": unit_type, "name": str(d["name"]["display"]), "category": d["category"], "mounted": bool(d.get("mounted", false)), "soldiers": int(d["soldiers"]), "max_soldiers": int(d["soldiers"]), "morale": 70, "experience": 2, "stats": d["stats"], "abilities": d.get("abilities", [])}
 
 
 ## Le régiment des chevaliers vient d'entrer au contact (impact résolu par le cœur).

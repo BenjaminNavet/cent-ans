@@ -60,9 +60,13 @@ static func settings() -> Dictionary:
 static func blood_level() -> int:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--blood="):
-			var k := LEVEL_NAMES.find(arg.get_slice("=", 1))
+			# Noms (off, moderate, full) ou chiffres (0, 1, 2 : forme du lot BV1).
+			var value := arg.get_slice("=", 1)
+			var k := LEVEL_NAMES.find(value)
 			if k >= 0:
 				return k
+			if value.is_valid_int():
+				return clampi(int(value), 0, 2)
 	var tree := Engine.get_main_loop() as SceneTree
 	var store: Node = tree.root.get_node_or_null("/root/Settings") if tree != null else null
 	if store != null:
@@ -75,6 +79,8 @@ static func blood_level() -> int:
 ## Intensités du niveau courant ({stains, sprays, corpse_blood, dismember}).
 static func level_settings() -> Dictionary:
 	var levels: Dictionary = settings().get("levels", {})
+	if OS.get_cmdline_user_args().has("--no-bv2"):
+		return levels.get("off", {})
 	return levels.get(LEVEL_NAMES[blood_level()], {"stains": 0.0, "sprays": 0.0, "corpse_blood": 0.0, "dismember": false})
 
 

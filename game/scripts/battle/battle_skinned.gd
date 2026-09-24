@@ -326,6 +326,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
+		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.15},
 	},
 	"pike": {
@@ -334,6 +335,8 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
+		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
+		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.1},
 	},
 	"bow": {
