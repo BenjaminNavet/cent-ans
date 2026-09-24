@@ -163,7 +163,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		var near := camera_pos.distance_to(pos) < EFFECT_DISTANCE
 		var prev: Dictionary = _track.get(id, {})
 		if not prev.is_empty() and present and near:
-			if ammo < int(prev["ammo"]):
+			if not (shots is Array) and ammo < int(prev["ammo"]):
 				_on_volley(unit, by_id, soldiers, camera_pos)
 			if str(prev["state"]) == "charging" and state == "melee":
 				var fwd := _forward(unit)

@@ -42,6 +42,7 @@ const SPEED := [48.0, 62.0]
 const ARC := [0.16, 0.06]
 const STAGGER := [1.5, 0.8]
 const MASK32 := 0xFFFFFFFF
+const FIELD_AABB := AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
 const MAX_STAKE_ROWS := 60
 const MAX_PAVISE_ROWS := 60
 
@@ -94,6 +95,10 @@ func setup(height_at: Callable) -> void:
 	_add_layer("StuckArrows", _stuck, _stuck_mat)
 	_stakes = _fieldwork_layer("Stakes", _stake_mesh(), MAX_STAKE_ROWS * 64)
 	_pavises = _fieldwork_layer("Pavises", _pavise_mesh(), MAX_PAVISE_ROWS * 40)
+
+
+func chunks_drawn() -> int:
+	return _chunk_high
 
 
 func tick_time(now: float) -> void:
@@ -348,13 +353,16 @@ func _add_fieldwork(mm: MultiMesh, xf: Transform3D, tint: Color) -> void:
 
 
 func _add_layer(node_name: String, mm: MultiMesh, mat: Material) -> void:
+	# Boîte fixe aussi sur la ressource : sans elle, chaque écriture d'instance fait recalculer
+	# la boîte de toutes les instances (30 000 traits fichés).
+	mm.custom_aabb = FIELD_AABB
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = mm
 	instance.material_override = mat
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Les transformées des paquets portent des trajectoires, pas des positions : boîte fixe.
-	instance.custom_aabb = AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
+	instance.custom_aabb = FIELD_AABB
 	add_child(instance)
 
 
@@ -365,6 +373,7 @@ func _fieldwork_layer(node_name: String, mesh: Mesh, count: int) -> MultiMesh:
 	mm.mesh = mesh
 	mm.instance_count = count
 	mm.visible_instance_count = 0
+	mm.custom_aabb = FIELD_AABB
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 0.9
@@ -372,7 +381,7 @@ func _fieldwork_layer(node_name: String, mesh: Mesh, count: int) -> MultiMesh:
 	instance.name = node_name
 	instance.multimesh = mm
 	instance.material_override = mat
-	instance.custom_aabb = AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
+	instance.custom_aabb = FIELD_AABB
 	add_child(instance)
 	return mm
 
@@ -411,7 +420,7 @@ static func _chunk_mesh() -> ArrayMesh:
 		for idx in [base + 8, base + 9, base + 10, base + 8, base + 10, base + 11]:
 			st.add_index(idx)
 	var mesh := st.commit()
-	mesh.custom_aabb = AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
+	mesh.custom_aabb = FIELD_AABB
 	return mesh
 
 
