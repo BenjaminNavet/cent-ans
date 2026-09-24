@@ -1,0 +1,44 @@
+# V2b — Finitions de la carte de campagne semi-réaliste (branche `visual-v2b`)
+
+Depuis `visual` (V1-V4 fusionnés). Captures de travail dans le scratchpad, finales dans
+`docs/img/visuel/v2b_*.png`.
+
+## Plan
+1. Parcellaire commun terrain/haies : grille biaisée déformée (même fonction en GDScript et en shader),
+   enclos bordés de haies, lanières de cultures dans chaque enclos, prés, jachères, vignes.
+2. Haies plus fines, plus claires, interrompues, arbres de haie.
+3. Occupation du sol par province (vigne, sécheresse) : texture basse résolution floutée.
+4. Palette chaude, atmosphère moins bleue ; contrôle Angleterre/Écosse, Midi/Espagne, Alpes.
+5. Fondus de zoom, étiquettes (city_markers.gd), banc de performance.
+
+## État
+- Démarré : lecture, captures de base (bocage : quadrillage de haies sombres, parcelles Voronoï à facettes,
+  prairie bleutée par le brouillard).
+
+- Étapes 1-3 codées : `game/scripts/map/vegetation_fields.gd` (parcellaire partagé + occupation du
+  sol par province), `terrain.gdshader` (`field_at` : enclos, lanières, prés, vignes, chemins, pied de
+  haie), `vegetation_tile_job.gd` (haies sur les mêmes bords, fines, trouées, arbres de haie),
+  `vegetation_mask.gd` (`hedge_at` lit le canal B de l'occupation du sol). Capture `n1` : bien plus
+  naturel ; la Normandie orientale (plaine) a trop peu de haies, le bocage est trop vert/bleu.
+
+- Occupation du sol 128² dilatée sur la mer, probabilité de haie relevée (0,1 → 0,75 en bocage).
+- Atmosphère réchauffée (`campaign_map.tscn` : brouillard ocre clair, lumière ambiante chaude, ciel
+  moins contributif). Capture `n3` : bocage lisible, haies fines interrompues.
+- Étiquettes : anti-chevauchement dans `city_markers.gd` (priorité à la plus grande province,
+  rectangles projetés, mise à jour toutes les 0,2 s), `area_px` ajouté aux entrées de `MapData`.
+
+- Palette : détail des textures surtout en luminance (plus de reflets bleutés), couleurs des parcelles
+  fondues plus tard (6 → 24 px) que leur tracé (pas de damier au zoom moyen), feuillage moins
+  jaune-vert, vigne moins fréquente. Captures `scratchpad/v2b/{m2,f1,a2,s1,e1,v2}` vérifiées.
+- Attention : le scratchpad racine est partagé avec V4b (son `cap.sh` a écrasé le mien) ; les
+  scripts V2b sont dans `scratchpad/v2b/`.
+
+## État final (terminé par l'orchestrateur ; agent bloqué au banc d'essai)
+- Optimisation du shader : inversion de la déformation en 3 itérations, limite entre trames calculée seulement près de la frontière.
+- Banc `vegetation_bench.gd` (M4 Pro, vsync coupée, machine partagée) : France 67 i/s, zoom moyen 61, proche 76,
+  forêt d'Orléans 85, très proche 102, bocage 82. 2 à 4 M primitives, 129 à 847 appels de dessin.
+- Smoke 16/16. Captures `docs/img/visuel/v2b_{far,mid,near}.png`.
+
+## Points ouverts
+- Démarrage à chaud de la végétation : 4,4 s (V3 : 0,4-1 s) ; construction d'une tuile jusqu'à 4,5 s. À alléger (semis des haies).
+- Zoom moyen proche de 60 i/s : réduire le nombre d'instances visibles entre d=300 et d=500.
