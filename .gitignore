@@ -1,5 +1,5 @@
 # Rust
-core/target/
+core/target*/
 # Godot
 game/.godot/
 game/*.import
