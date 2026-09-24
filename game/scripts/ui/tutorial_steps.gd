@@ -27,7 +27,7 @@ const BASE := {
 	},
 	"select_army": {
 		"title": "Votre armée",
-		"text": "Les bannières sur la carte sont les armées. Cliquez (bouton gauche) sur la bannière de {army} : le panneau d'armée s'ouvre à droite avec ses unités, son général, son ravitaillement et ses points de mouvement.",
+		"text": "Les bannières sur la carte sont les armées. Cliquez (bouton gauche) sur la bannière de {army} : le bandeau d'ost s'ouvre en bas de l'écran avec ses unités ; à gauche, le sceau du chef montre son général, sa posture et ses points de mouvement.",
 		"objective": "Sélectionner {army}.",
 		"target": "royal_army",
 	},
@@ -133,7 +133,7 @@ const ADVICE := {
 		"build": "Un port facilite les traversées ; des buttes de tir entretiennent l'adresse des archers.",
 		"research": "L'arc long est votre arme ; la poudre et les bombardes changeront la donne au siècle suivant.",
 		"diplomacy": "La Flandre (Jacques van Artevelde, 1338) et les princes d'Empire sont vos alliés naturels ; l'Écosse est l'alliée de la France.",
-		"end_turn": "Les grandes chevauchées ravagent le pays ennemi : posture « Chevauchée » dans le panneau d'armée.",
+		"end_turn": "Les grandes chevauchées ravagent le pays ennemi : posture « Chevauchée » sur le sceau du chef, en bas à gauche.",
 		"season_report": "Surveillez l'Écosse : ses raids frappent le nord pendant que vous guerroyez en France.",
 		"chronicle": "Crécy (1346), Poitiers (1356), Azincourt (1415) : les grandes victoires attendent vos décisions.",
 		"tax": "Le Parlement consent l'impôt ; la révolte des Paysans (1381) est née d'une capitation trop lourde.",

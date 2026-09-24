@@ -207,13 +207,19 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(economy) = FactionId::new(id.to_string())
-            .ok()
-            .and_then(|id| state.faction_economy(data, &id))
-        else {
+        let Ok(faction) = FactionId::new(id.to_string()) else {
             return VarDictionary::new();
         };
-        faction_economy_dict(&economy)
+        let Some(economy) = state.faction_economy(data, &faction) else {
+            return VarDictionary::new();
+        };
+        let mut dict = faction_economy_dict(&economy);
+        // UI audit A3 E1: the booked balance of the last season, from core.
+        dict.set(
+            "net_income_last_turn",
+            state.faction_net_last_turn(&faction).unwrap_or(0),
+        );
+        dict
     }
 
     /// `{owner, controller, garrison[], siege?, unrest, devastation,
@@ -421,7 +427,7 @@ impl CampaignSim {
             .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
         let order = match parsed {
             Ok(order) => order,
-            Err(error) => return order_result(Err(format!("ordre invalide : {error}"))),
+            Err(error) => return order_result(Err(invalid_order_message(&error))),
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
@@ -564,6 +570,16 @@ pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<Set
     state.province_city_id(&province).cloned()
 }
 
+/// Player-facing message for an order the simulation cannot parse (UI
+/// audit A3: no raw serde error on screen). The technical detail goes to
+/// the Godot log for developers.
+pub(crate) fn invalid_order_message(error: &str) -> String {
+    godot_warn!("order rejected by the bridge: {error}");
+    "Cet ordre n'est pas reconnu par la simulation : la bibliothèque du jeu n'est sans doute \
+     pas à jour. Relancez le jeu après l'avoir réinstallé."
+        .to_owned()
+}
+
 pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
     match result {
         Ok(()) => vdict! { "ok" => true, "error" => "" },
@@ -628,21 +644,52 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .map_or(Vector2::ZERO, |s| {
             Vector2::new(s.lonlat[0] as f32, s.lonlat[1] as f32)
         });
-    vdict! {
-        "embarked" => embarked,
-        "faction" => army.faction.as_str(),
-        "general" => army.general.as_ref().map_or("", |id| id.as_str()),
-        "general_name" => general_name.as_str(),
-        "location" => location_str,
-        "location_province" => location_province.as_ref().map_or("", |p| p.as_str()),
-        "location_lonlat" => lonlat,
-        "path_provinces" => &path_provinces,
-        "units" => &units_array(data, &army.units),
-        "movement_points" => i64::from(army.movement_left),
-        "supply" => i64::from(army.supply),
-        "stance" => stance_key(army.stance),
-        "path" => &ids(destination.iter()),
-    }
+    // Lot M4: free position on the map (map pixels), the settlement the
+    // army stands in ("" in the field), points left and allowance, and the
+    // corners of the rest of a multi-turn march.
+    let grid = data.navgrid();
+    let point = state.army_point(data, army);
+    let planned_path: PackedVector2Array = army
+        .planned_path
+        .iter()
+        .map(|cell| {
+            let p = cell.center(grid);
+            Vector2::new(p[0], p[1])
+        })
+        .collect();
+    let destination_point = army
+        .destination
+        .as_ref()
+        .filter(|_| !army.planned_path.is_empty())
+        .and_then(|target| state.target_point(data, target))
+        .map_or(Vector2::new(-1.0, -1.0), |p| Vector2::new(p[0], p[1]));
+    let mut dict = vdict! {
+        "position" => Vector2::new(point[0], point[1]),
+        "settlement" => army.settlement().map_or("", |s| s.as_str()),
+        "movement_left" => i64::from(army.movement_left),
+        "movement_max" => i64::from(state.army_grid_allowance(data, army)),
+        "planned_path" => &planned_path,
+        "destination_point" => destination_point,
+    };
+    dict.extend_dictionary(
+        &vdict! {
+            "embarked" => embarked,
+            "faction" => army.faction.as_str(),
+            "general" => army.general.as_ref().map_or("", |id| id.as_str()),
+            "general_name" => general_name.as_str(),
+            "location" => location_str,
+            "location_province" => location_province.as_ref().map_or("", |p| p.as_str()),
+            "location_lonlat" => lonlat,
+            "path_provinces" => &path_provinces,
+            "units" => &units_array(data, &army.units),
+            "movement_points" => i64::from(army.movement_left),
+            "supply" => i64::from(army.supply),
+            "stance" => stance_key(army.stance),
+            "path" => &ids(destination.iter()),
+        },
+        true,
+    );
+    dict
 }
 
 fn stance_key(stance: sim_campaign::Stance) -> &'static str {
@@ -832,6 +879,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "treasury" => economy.treasury,
         "income" => economy.income,
         "projected_income" => economy.projected_income,
+        "net_income" => economy.net_income(),
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
         "administration_upkeep" => economy.administration_upkeep,
