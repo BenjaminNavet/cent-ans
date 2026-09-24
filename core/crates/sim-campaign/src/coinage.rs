@@ -249,13 +249,21 @@ pub fn recoinage_for(
 
 /// Seigniorage of the faction's current coinage this season.
 pub fn seigniorage(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
-    let level = state.factions.get(faction).map(|f| f.coinage).unwrap_or_default();
+    let level = state
+        .factions
+        .get(faction)
+        .map(|f| f.coinage)
+        .unwrap_or_default();
     seigniorage_for(state, data, faction, level)
 }
 
 /// Recoinage cost of the faction's current coinage this season.
 pub fn recoinage(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
-    let level = state.factions.get(faction).map(|f| f.coinage).unwrap_or_default();
+    let level = state
+        .factions
+        .get(faction)
+        .map(|f| f.coinage)
+        .unwrap_or_default();
     recoinage_for(state, data, faction, level)
 }
 
@@ -305,7 +313,11 @@ pub(crate) fn resolve_coinage(state: &mut CampaignState, events: &mut Vec<GameEv
 /// in debt, debase (heavily when deep in debt); once out of debt, return
 /// to sound money; with a comfortable surplus and high prices, strike
 /// strong money until prices are back near 100. Deterministic.
-pub fn ai_choose_coinage(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn ai_choose_coinage(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<Order> {
     let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
         return Vec::new();
     };
@@ -317,9 +329,9 @@ pub fn ai_choose_coinage(state: &CampaignState, data: &GameData, faction: &Facti
         CoinageLevel::HeavilyDebased
     } else if f.treasury < 0 && f.price_level < 160 {
         CoinageLevel::Debased.max_weakness(f.coinage)
-    } else if f.treasury >= 4 * income && f.price_level > 130 {
-        CoinageLevel::Strong
-    } else if f.coinage == CoinageLevel::Strong && f.price_level > 105 {
+    } else if (f.treasury >= 4 * income && f.price_level > 130)
+        || (f.coinage == CoinageLevel::Strong && f.price_level > 105)
+    {
         CoinageLevel::Strong
     } else if f.treasury >= 0 {
         CoinageLevel::Sound
@@ -348,7 +360,11 @@ impl CoinageLevel {
 /// shifts, merged like the H3 diets): inflation angers and impoverishes
 /// burghers and clergy (fixed money rents); debasement itself angers the
 /// burghers, a strong coinage wins them over.
-pub fn class_effects(state: &CampaignState, faction: &FactionId, class: SocialClass) -> EffectTotals {
+pub fn class_effects(
+    state: &CampaignState,
+    faction: &FactionId,
+    class: SocialClass,
+) -> EffectTotals {
     let mut totals = EffectTotals::default();
     let Some(f) = state.factions.get(faction) else {
         return totals;

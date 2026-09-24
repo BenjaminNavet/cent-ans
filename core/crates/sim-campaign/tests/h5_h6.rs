@@ -45,7 +45,11 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
 }
 
-fn set_coinage(state: &mut CampaignState, data: &GameData, level: CoinageLevel) -> Result<(), OrderError> {
+fn set_coinage(
+    state: &mut CampaignState,
+    data: &GameData,
+    level: CoinageLevel,
+) -> Result<(), OrderError> {
     state.submit_order(data, Order::SetCoinage { level })
 }
 
@@ -65,7 +69,9 @@ fn coinage_defaults_and_one_change_per_year() {
     set_coinage(&mut state, &data, CoinageLevel::Debased).unwrap();
     assert!(matches!(
         set_coinage(&mut state, &data, CoinageLevel::Sound),
-        Err(OrderError::Coinage(CoinageError::AlreadyChangedThisYear(1337)))
+        Err(OrderError::Coinage(CoinageError::AlreadyChangedThisYear(
+            1337
+        )))
     ));
     // The next year allows a new change.
     for _ in 0..4 {
@@ -188,11 +194,16 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     assert!(f.recoinage_last_turn > 0);
     assert!(strong.characters[&ruler].prestige > prestige);
     assert_eq!(
-        coinage::class_effects(&strong, &france_id, SocialClass::Burghers).unrest.flat,
+        coinage::class_effects(&strong, &france_id, SocialClass::Burghers)
+            .unrest
+            .flat,
         -6.0 + 8.0 / 6.0
     );
     // Never below 100.
-    assert_eq!(coinage::next_price_level(101, CoinageLevel::Strong), PRICE_BASE);
+    assert_eq!(
+        coinage::next_price_level(101, CoinageLevel::Strong),
+        PRICE_BASE
+    );
 }
 
 #[test]
@@ -226,7 +237,11 @@ fn ai_coinage_policy() {
             level: CoinageLevel::Sound
         }]
     );
-    state.factions.get_mut(&england).unwrap().coinage_changed_year = Some(state.year());
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .coinage_changed_year = Some(state.year());
     assert!(coinage::ai_choose_coinage(&state, &data, &england).is_empty());
 }
 
@@ -259,14 +274,23 @@ fn ransom_follows_rank_prestige_and_wealth() {
     let mut state = france(&data, 10);
     let king = chr("chr_philippe_vi");
     let heir = chr("chr_jean_de_normandie");
-    assert_eq!(ransom::captive_rank(&state, &king), ransom::CaptiveRank::Sovereign);
-    assert_eq!(ransom::captive_rank(&state, &heir), ransom::CaptiveRank::Heir);
+    assert_eq!(
+        ransom::captive_rank(&state, &king),
+        ransom::CaptiveRank::Sovereign
+    );
+    assert_eq!(
+        ransom::captive_rank(&state, &heir),
+        ransom::CaptiveRank::Heir
+    );
     let king_ransom = ransom::ransom_amount(&state, &data, &king);
     let heir_ransom = ransom::ransom_amount(&state, &data, &heir);
     assert!(king_ransom > heir_ransom, "{king_ransom} vs {heir_ransom}");
     state.characters.get_mut(&king).unwrap().prestige = 100;
     let famous = ransom::ransom_amount(&state, &data, &king);
-    assert!((famous - 2 * king_ransom).abs() <= 50, "{famous} vs {king_ransom}");
+    assert!(
+        (famous - 2 * king_ransom).abs() <= 50,
+        "{famous} vs {king_ransom}"
+    );
     assert_eq!(famous % 50, 0);
     // A poorer realm pays less for its king.
     let scot = ransom::ransom_amount(&state, &data, &chr("chr_david_ii"));
@@ -327,7 +351,10 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     let debt = state.factions[&france_id].ransom_debts[0].clone();
     assert_eq!(debt.remaining, total - installment);
     assert_eq!(debt.creditor, england);
-    assert_eq!(ransom::ransom_debt_total(&state, &france_id), total - installment);
+    assert_eq!(
+        ransom::ransom_debt_total(&state, &france_id),
+        total - installment
+    );
     // Year one: the installment is paid (due at turn 4).
     state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
     for _ in 0..5 {
@@ -357,7 +384,14 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
         .modifiers
         .iter()
         .any(|m| m.with == france_id && m.value < 0));
-    assert!(state.events().iter().chain(state.pending_events.iter()).count() > 0);
+    assert!(
+        state
+            .events()
+            .iter()
+            .chain(state.pending_events.iter())
+            .count()
+            > 0
+    );
 }
 
 #[test]
@@ -523,13 +557,17 @@ fn founding_an_order_checks_faction_year_prestige_and_money() {
     state.characters.get_mut(&ruler).unwrap().prestige = 0;
     assert!(matches!(
         found(&mut state, &data, "ord_star"),
-        Err(OrderError::Chivalry(ChivalryError::NotEnoughPrestige { .. }))
+        Err(OrderError::Chivalry(
+            ChivalryError::NotEnoughPrestige { .. }
+        ))
     ));
     state.characters.get_mut(&ruler).unwrap().prestige = 20;
     state.factions.get_mut(&france_id).unwrap().treasury = 100;
     assert!(matches!(
         found(&mut state, &data, "ord_star"),
-        Err(OrderError::Chivalry(ChivalryError::InsufficientFunds { .. }))
+        Err(OrderError::Chivalry(
+            ChivalryError::InsufficientFunds { .. }
+        ))
     ));
     state.factions.get_mut(&france_id).unwrap().treasury = 10_000;
     found(&mut state, &data, "ord_star").unwrap();
@@ -538,7 +576,10 @@ fn founding_an_order_checks_faction_year_prestige_and_money() {
         state.factions[&france_id].treasury,
         10_000 - i64::from(star.cost)
     );
-    assert_eq!(state.characters[&ruler].prestige, 20 + star.founder_prestige);
+    assert_eq!(
+        state.characters[&ruler].prestige,
+        20 + star.founder_prestige
+    );
     assert_eq!(
         found(&mut state, &data, "ord_star"),
         Err(OrderError::Chivalry(ChivalryError::AlreadyFounded))
@@ -563,7 +604,10 @@ fn members_are_named_and_gain_loyalty_and_morale() {
     let garter = &data.chivalric_orders[&ord("ord_garter")];
     assert!(!order.members.is_empty());
     assert!(order.members.len() <= garter.members as usize);
-    assert!(!order.members.contains(&edward), "the king is the sovereign");
+    assert!(
+        !order.members.contains(&edward),
+        "the king is the sovereign"
+    );
     let member = order.members[0].clone();
     assert_eq!(
         chivalry::member_morale(&state, &data, &member),
@@ -579,17 +623,25 @@ fn members_are_named_and_gain_loyalty_and_morale() {
         .map(|m| chivalry::merit(&state, m))
         .min()
         .unwrap();
-    assert!(order.members.len() < garter.members as usize
-        || state.characters.iter().all(|(id, c)| {
-            order.members.contains(id)
-                || c.faction != england
-                || !c.alive
-                || id == &edward
-                || chivalry::merit(&state, id) <= worst
-        }));
+    assert!(
+        order.members.len() < garter.members as usize
+            || state.characters.iter().all(|(id, c)| {
+                order.members.contains(id)
+                    || c.faction != england
+                    || !c.alive
+                    || id == &edward
+                    || chivalry::merit(&state, id) <= worst
+            })
+    );
     // A captured member is replaced next season (if anyone is left).
     let prestige = state.characters[&edward].prestige;
-    chronicle::capture_character(&mut state, &data, &member, &fac("fac_france"), &mut Vec::new());
+    chronicle::capture_character(
+        &mut state,
+        &data,
+        &member,
+        &fac("fac_france"),
+        &mut Vec::new(),
+    );
     state.end_turn_with(&data, idle);
     let order = state.factions[&england].chivalric_order.clone().unwrap();
     assert!(!order.members.contains(&member));
@@ -643,15 +695,31 @@ fn choose_found_option(state: &mut CampaignState, data: &GameData, event: &str, 
 fn garter_and_star_events_found_their_orders() {
     let data = data();
     let mut state = france(&data, 23);
-    choose_found_option(&mut state, &data, "evt_ordre_de_la_jarretiere", "fac_england");
+    choose_found_option(
+        &mut state,
+        &data,
+        "evt_ordre_de_la_jarretiere",
+        "fac_england",
+    );
     choose_found_option(&mut state, &data, "evt_ordre_de_l_etoile", "fac_france");
-    let garter = state.factions[&fac("fac_england")].chivalric_order.clone().unwrap();
-    let star = state.factions[&fac("fac_france")].chivalric_order.clone().unwrap();
+    let garter = state.factions[&fac("fac_england")]
+        .chivalric_order
+        .clone()
+        .unwrap();
+    let star = state.factions[&fac("fac_france")]
+        .chivalric_order
+        .clone()
+        .unwrap();
     assert_eq!(garter.order, ord("ord_garter"));
     assert_eq!(star.order, ord("ord_star"));
     assert!(!garter.members.is_empty() && !star.members.is_empty());
     // A second foundation is a no-op.
-    choose_found_option(&mut state, &data, "evt_ordre_de_la_jarretiere", "fac_england");
+    choose_found_option(
+        &mut state,
+        &data,
+        "evt_ordre_de_la_jarretiere",
+        "fac_england",
+    );
     assert_eq!(
         state.factions[&fac("fac_england")].chivalric_order,
         Some(garter)

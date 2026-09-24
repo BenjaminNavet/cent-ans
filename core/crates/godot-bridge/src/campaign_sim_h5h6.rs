@@ -38,7 +38,10 @@ fn captive_dict(
     let mut plans = VarArray::new();
     for n in 1..=ransom::MAX_INSTALLMENTS {
         let (total, installment) = ransom::installment_plan(amount, n);
-        plans.push(&vdict! { "installments" => n, "total" => total, "installment" => installment }.to_variant());
+        plans.push(
+            &vdict! { "installments" => n, "total" => total, "installment" => installment }
+                .to_variant(),
+        );
     }
     vdict! {
         "character" => id.as_str(),

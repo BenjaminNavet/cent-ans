@@ -64,7 +64,11 @@ pub fn founder_of(state: &CampaignState, order: &ChivalricOrderId) -> Option<Fac
     state
         .factions
         .iter()
-        .find(|(_, f)| f.chivalric_order.as_ref().is_some_and(|o| &o.order == order))
+        .find(|(_, f)| {
+            f.chivalric_order
+                .as_ref()
+                .is_some_and(|o| &o.order == order)
+        })
         .map(|(id, _)| id.clone())
 }
 
@@ -186,7 +190,11 @@ fn establish(
     events: &mut Vec<GameEvent>,
 ) {
     let turn = state.turn;
-    state.factions.get_mut(faction).expect("checked").chivalric_order = Some(OrderState {
+    state
+        .factions
+        .get_mut(faction)
+        .expect("checked")
+        .chivalric_order = Some(OrderState {
         order: order.clone(),
         founded_turn: turn,
         members: Vec::new(),
@@ -246,7 +254,11 @@ fn fill_members(
     faction: &FactionId,
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(current) = state.factions.get(faction).and_then(|f| f.chivalric_order.clone()) else {
+    let Some(current) = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.chivalric_order.clone())
+    else {
         return;
     };
     let Some(definition) = data.chivalric_orders.get(&current.order) else {
@@ -280,7 +292,10 @@ fn fill_members(
         }
     }
     if !named.is_empty() && faction == &state.player_faction {
-        let names: Vec<String> = named.iter().map(|id| state.character_name(data, id)).collect();
+        let names: Vec<String> = named
+            .iter()
+            .map(|id| state.character_name(data, id))
+            .collect();
         events.push(
             GameEvent::new(
                 EventKind::Chivalry,

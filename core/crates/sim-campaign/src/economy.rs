@@ -390,8 +390,7 @@ pub(crate) fn resolve_economy(
         let income = state.faction_income_effective(data, &faction_id) + seigniorage;
         let army_upkeep = state.faction_army_upkeep(data, &faction_id);
         let building_upkeep = state.faction_building_upkeep(data, &faction_id);
-        let administration =
-            state.faction_administration_upkeep(data, &faction_id) + recoinage;
+        let administration = state.faction_administration_upkeep(data, &faction_id) + recoinage;
         let available = state.factions[&faction_id].treasury + income
             - (army_upkeep + building_upkeep + administration);
         // H3: the diets of the provinces (« Table »), those the purse cannot
