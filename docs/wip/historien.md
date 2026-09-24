@@ -7,9 +7,11 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md`.
 | H1 Audit historique | **fusionné** (fcbcb01) | — | données seulement ; rapport `docs/histoire/audit-2026-09-23.md` |
 | H2 Codex et bulles (infra + amorce) | **fusionné** (9ffd82f) | — | nouveaux fichiers game/ ; hooks minimaux |
 | H3+H4 Table et médecine (core + données) | **fusionné** (453f2e6) | — | API : `docs/design/h3-h4-api.md` ; reste UI, libellés d'effets, genres table/medicine dans season_report, herbier |
-| H7 Événements historiques manquants (≈ 22, d’après l’audit) | relancé après quota (finalisation) | worktree agent | data/events, data/characters |
+| H7 Événements historiques manquants | **fusionné** (50ccf58 + correctif 44c48b0) | — | 20 événements + 3 personnages ; doublons avec F7b retirés |
 | H9 UI Table + Médecine + herbier + rapport de saison | en cours | worktree agent | hook minimal dans province_panel.gd |
-| H8 Rédaction codex (~120 fiches) + liens | relancé après quota | worktree agent | hors cuisine/médecine/monnaie ; corrige les onglets masqués |
+| H8 Rédaction codex partie 1 | **fusionné** (41 fiches, af53cdf) | — | |
+| H8b Codex partie 2 (~70 fiches) + liens + onglets | en cours | worktree agent | hors cuisine/médecine/monnaie ; corrige les onglets masqués |
+| H10 Codex Table, plantes, médecine (~55 fiches) | en cours | worktree agent | |
 | H5 Monnaie + H6 Chevalerie et rançons (core + données) | vague 2 | — | |
 | UI monnaie, rançons, ordres ; événements éducatifs ; relecture | vague 3 | — | |
 
@@ -23,3 +25,5 @@ Reste après H2 : bouton Codex dans le bandeau (`map_ui.gd`, session ui-tw) ; T 
 ## Journal des coupures
 - 2026-09-23 ~23h : limite de quota (reset 0h10) → H7, H8 coupés ; relancés.
 - 2026-09-24 : H8 bloqué (watchdog), puis limite (reset 5h10) → H7, H8, H9 coupés ; relancés tous trois avec leur contexte.
+
+Méthode de fusion (depuis l'incident 50ccf58) : worktree `../gp-historien-merge` sur la branche `integration/historien`, fusion et tests là-bas, puis `git merge --ff-only integration/historien` dans main.
