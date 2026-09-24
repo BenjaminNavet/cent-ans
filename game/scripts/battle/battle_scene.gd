@@ -509,7 +509,7 @@ func _update_markers(banner_scale: float) -> void:
 			var point := camera.unproject_position(top)
 			if screen.has_point(point):
 				anchors[int(unit["id"])] = point
-	markers.update(units, anchors, selected)
+	markers.update(units, anchors, selected, camera_rig.distance)
 
 
 ## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
