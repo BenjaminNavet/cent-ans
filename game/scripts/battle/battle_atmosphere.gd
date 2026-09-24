@@ -155,7 +155,7 @@ static func add_ground_mist(parent: Node3D, key: String, center: Vector3, size: 
 	volume.size = Vector3(size.x, 12.0, size.y)
 	volume.position = center + Vector3(0, 1.0, 0)
 	var material := FogMaterial.new()
-	material.density = 0.014
+	material.density = 0.01
 	material.albedo = (PRESETS["fog"]["fog_color"] as Color).lightened(0.1)
 	material.height_falloff = 0.35
 	material.edge_fade = 0.3

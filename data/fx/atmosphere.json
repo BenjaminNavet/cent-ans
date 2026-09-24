@@ -42,8 +42,8 @@
   "seasons": {
     "spring": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "gain": [0.99, 1.01, 1.0]},
     "summer": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03},
-    "autumn": {"temperature": 0.42, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
-    "winter": {"temperature": -0.4, "saturation": 0.8, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
+    "autumn": {"temperature": 0.34, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
+    "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
   },
   "battle": {
     "clear": {
@@ -68,7 +68,7 @@
     }
   },
   "campaign": {
-    "grade_strength": 0.65,
+    "grade_strength": 0.85,
     "seasons": {
       "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.8, 0.8, 0.76]},
       "summer": {"sky": "autumn_clear", "sky_luminance": 0.72, "haze": 0.45, "fog_color": [0.83, 0.8, 0.72]},
