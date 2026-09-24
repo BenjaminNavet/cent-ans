@@ -33,6 +33,10 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# BV1 : sang en bataille (0 désactivé, 1 modéré, 2 complet) ; taille des unités (figurines
+	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
+	"battle/blood": 1,
+	"battle/unit_size": 1.0,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
@@ -42,6 +46,8 @@ const RESOLUTIONS: Array[Vector2i] = [
 ]
 const UI_SCALES: Array[float] = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5]
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
+const BLOOD_CHOICES: Array[int] = [0, 1, 2]
+const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5]
 
 var path: String = SETTINGS_PATH
 var values: Dictionary = {}

@@ -59,6 +59,9 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
+var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
+var _blood_override: int = -1  # `--blood=<0|1|2>`
 var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
 var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
@@ -203,6 +206,9 @@ func begin() -> bool:
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
+	if not _no_bv1:
+		battle.call("set_figure_scale", _unit_size())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -278,8 +284,36 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	if not _no_bv1:
+		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
 	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
 	effects.volleys.sound_event.connect(_on_sound_event)
+	blood = BattleBlood.new()
+	blood.name = "Blood"
+	effects.add_child(blood)
+	blood.figure_scale = effects.volleys.figure_scale
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
+
+
+## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
+func _unit_size() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
+
+
+func _blood_level() -> int:
+	if _blood_override >= 0:
+		return _blood_override
+	var settings := get_node_or_null("/root/Settings")
+	return int(settings.call("get_value", "battle/blood")) if settings != null else BattleBlood.MODERATE
+
+
+func _camera_position() -> Vector3:
+	var camera := get_viewport().get_camera_3d()
+	return camera.global_position if camera != null else Vector3.ZERO
 
 
 ## BV1 : point d'accroche audio. Les effets n'émettent que des événements nommés
@@ -302,6 +336,9 @@ func _update_effects(dt: float) -> void:
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
 	var shots: Variant = battle.call("get_shots")
 	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
+	if blood != null:
+		blood.tick_time(soldiers.anim_time)
+		blood.update(units, camera_pos)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -952,6 +989,10 @@ func _parse_cmdline() -> void:
 			_no_effects = true
 		elif arg == "--no-bv1":
 			_no_bv1 = true
+		elif arg.begins_with("--unit-size="):
+			_unit_size_override = float(arg.trim_prefix("--unit-size="))
+		elif arg.begins_with("--blood="):
+			_blood_override = int(arg.trim_prefix("--blood="))
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -1004,6 +1045,8 @@ func _stage_screenshot() -> void:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
+	if effects != null and blood != null:
+		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0

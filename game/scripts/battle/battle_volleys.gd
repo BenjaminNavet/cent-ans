@@ -332,7 +332,7 @@ func _plant_pavises(unit: Dictionary) -> void:
 	var width := float(unit.get("width", 20.0))
 	var front := Vector3(float(unit["x"]), 0, float(unit["z"])) + fwd * (float(unit.get("depth", 4.0)) * 0.5 + 0.9)
 	var n := mini(int(width / 1.05), 36)
-	var tint := Color(0.85, 0.2, 0.18) if str(unit.get("side", "")) == "defender" else Color(0.2, 0.3, 0.7)
+	var tint := Color(0.62, 0.24, 0.2) if str(unit.get("side", "")) == "defender" else Color(0.3, 0.36, 0.62)
 	for k in n:
 		var p := front + right * ((float(k) - (n - 1) * 0.5) * 1.05) + fwd * _rng.randf_range(-0.12, 0.12)
 		p.y = _h(p.x, p.z)
@@ -458,7 +458,7 @@ static func _stake_mesh() -> ArrayMesh:
 static func _pavise_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	BattleMeshes.add_box(st, Vector3(0, 0.6, 0), Vector3(0.6, 1.15, 0.05), Color(0.9, 0.88, 0.8))
+	BattleMeshes.add_box(st, Vector3(0, 0.6, 0), Vector3(0.6, 1.15, 0.05), Color(0.82, 0.78, 0.7))
 	BattleMeshes.add_box(st, Vector3(0, 0.6, 0.03), Vector3(0.14, 1.0, 0.02), Color(0.35, 0.28, 0.18))
 	BattleMeshes.add_box(st, Vector3(0, 0.45, -0.3), Vector3(0.04, 0.9, 0.04), Color(0.35, 0.28, 0.18))
 	return st.commit()

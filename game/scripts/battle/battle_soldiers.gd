@@ -63,7 +63,9 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.mesh = BattleMeshes.soldier(kind, variant)
-		mm.instance_count = maxi(int(unit.get("initial_soldiers", 0)), int(unit["soldiers"]))
+		# BV1 (ADR 0016) : `figures` = figurines dessinées (soldats × taille d'unité).
+		var scale := float(unit.get("figures", unit["soldiers"])) / maxf(float(unit["soldiers"]), 1.0)
+		mm.instance_count = maxi(int(ceil(int(unit.get("initial_soldiers", 0)) * scale)), int(unit.get("figures", unit["soldiers"])))
 		mm.visible_instance_count = 0
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "Unit%d_%s" % [id, kind]
@@ -148,7 +150,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 				var id := int(unit["id"])
 				if not layers.has(id):
 					continue
-				var n := int(unit["soldiers"]) if bool(unit["present"]) else 0
+				var n := int(unit.get("figures", unit["soldiers"])) if bool(unit["present"]) else 0
 				if offset + n > total:
 					if not _warned:
 						push_warning("BattleSoldiers: soldier buffer shorter than expected (%s/%s)" % [side, kind])
