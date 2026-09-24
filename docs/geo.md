@@ -32,7 +32,7 @@ uv run --project tools cent-ans geo provinces        # provinces seules (≈ 10 
 uv run --project tools cent-ans geo relief           # relief 8192² en 16 × 16 tuiles (≈ 10 s)
 uv run --project tools cent-ans geo roads            # routes (Itiner-e + complément calculé) puis graphe des colonies
 uv run --project tools cent-ans geo roads --computed # routes entièrement calculées (repli)
-uv run --project tools cent-ans geo settlements      # graphe des colonies seul (≈ 3 s), après modification de data/settlements
+uv run --project tools cent-ans geo settlements      # graphe des colonies seul et tracé routier des arêtes (≈ 7 s), après modification de data/settlements
 uv run --project tools cent-ans geo hamlets          # hameaux GeoNames (≈ 5 s)
 uv run --project tools cent-ans geo info             # métadonnées, plage d'altitudes, fraction de terre, tailles
 uv run --project tools pytest tests/test_geo.py      # tests sans réseau (grille, encodage des altitudes)
@@ -182,6 +182,7 @@ fichiers de colonies arrivent.
 |---|---|
 | `data/map/settlement_graph.json` | `{"edges": [{"from", "to", "cost", "road", "sea"}]}`, format du lot C1 (chargé par `settlement_load.rs`, aucun autre champ). |
 | `data/map/settlements_px.json` | `{"set_…": [x, y]}` : position de jeu en pixels carte 4096 (1 décimale), pour Godot. |
+| `data/map/settlement_edge_paths.json` | Lot C7b, affichage seulement : `{"edges": [{"from", "to", "points"}]}`, tracé routier (pixels carte, 1 décimale, de `from` à `to`, extrémités sur les colonies) de chaque arête `road` qu'une route suit ; lu par `SettlementData.edge_path` pour l'aperçu de chemin d'armée. Voir ci-dessous. |
 | `docs/img/settlements-preview.png` | 2048² : provinces, colonies par type (cité rouge, ville orange, château gris, abbaye violette, village vert ; contour blanc = position ramenée), arêtes grises, routes brunes, liaisons maritimes en tirets bleus. |
 
 Relevé du 2026-09-24 (132 fichiers de colonies, aucune cité de repli) : 568 colonies,
@@ -189,6 +190,26 @@ Relevé du 2026-09-24 (132 fichiers de colonies, aucune cité de repli) : 568 co
 dans leur province (côtes et frontières du Voronoï : Saint-Malo, La Rochelle, Plymouth, Venise,
 Alicante… ; certaines sont peut-être rattachées à la mauvaise province dans les données, par ex.
 Galway en Ulster, Lund en Sjælland, Auch en Rouergue, Mantoue et Modène à Ferrare).
+
+### Tracé routier des arêtes (`cent_ans_tools/geo/edge_paths.py`, lot C7b)
+
+Écrit par la même commande (`geo settlements`, `geo roads`, `geo build`). Le graphe garde des
+arêtes droites (coûts, règles) ; ce fichier ne sert qu'à dessiner l'aperçu de chemin le long des
+vraies routes.
+
+1. **Réseau** : les routes de `roads.geojson` sont densifiées (un point par pixel au plus) ; les
+   points consécutifs sont reliés (poids = longueur) ainsi que tous les points à moins de 3 px
+   l'un de l'autre (croisements, jonctions et petits trous entre tronçons Itiner-e ; poids
+   × 1,5).
+2. **Recherche** par arête `road` : Dijkstra depuis les points de route à moins de
+   `min(16, max(6, 15 % de la longueur))` px de la première colonie (accès hors route compté
+   × 3) jusqu'aux points proches de la seconde.
+3. **Rejet** : un tracé plus long que 1,6 × le segment droit + 3 px est écarté (la route fait un
+   détour par une autre ville) ; le jeu dessine alors le segment droit. Tracé simplifié à 0,15 px.
+
+Relevé du 2026-09-24 : 533 arêtes tracées sur 633 arêtes `road` (84 %) ; détour médian 1,11,
+95ᵉ centile 1,37 ; 29 points par arête en moyenne ; 0,3 Mo ; ≈ 4 s. Les 100 autres : colonie à
+plus de 16 px d'une route (64), détour trop long (35), réseau coupé (1).
 
 ## Routes (`cent_ans_tools/geo/roads.py`)
 

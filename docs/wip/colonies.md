@@ -17,9 +17,9 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C5 pont + UI | fait (fusionné `b241608`) | panneau de colonie sur `SettlementLayer.settlement_selected(id)`, clic droit sur une colonie comme cible, aperçu de chemin sur le graphe |
 | C6 rendu paliers | fait | paliers loin > 620 / moyen 150-620 / près < 150 ; 13 maquettes Blender ; relief fin LRU ; captures `docs/img/colonies/` ; signal `settlement_selected(id)` à brancher en C5 |
 | C7a IA, équilibrage | fait (fusionné `4bcd31f`) | repli du perdant, ordre `garrison_units`, portée ÷ 3,7, sonde 50 tours ; détail `docs/wip/c7a-settlements-balance.md` |
-| C7b rendu | en cours | arbres sur relief fin, routes au palier moyen, aperçu le long des routes, panneau et minicarte |
-| C7c docs | fait (le bouton `garrison_units` reste ouvert, hors périmètre de ce lot) | `manuel.md` § 5 réécrite (colonies), passages corrigés ailleurs ; codex `cdx_places_fortes`, `cdx_deroute_debandade` ; texte des fiches Mécaniques (encyclopédie) mis à jour ; détail `docs/wip/c7c-settlements-docs.md` |
-| C7 (reste) | — | + perdant sans colonie amie voisine reste sur place ; arbres sur relief fin ; routes principales peu visibles au palier moyen |
+| C7b rendu | fait (fusionné `5603fbc`) | arbres sur relief fin, routes au palier moyen, aperçu le long des routes, panneau et minicarte |
+| C7c docs | fait | `manuel.md` § 5 réécrite, codex `cdx_places_fortes` et `cdx_deroute_debandade`, fiches Mécaniques mises à jour ; détail `docs/wip/c7c-settlements-docs.md` |
+| C7d bouton garnison | en cours | ordre `garrison_units` dans l'UI |
 
 ## Coordination
 
@@ -56,6 +56,18 @@ Hors colonies, connu : `tools/tests/test_portraits.py::test_dry_run_makes_no_net
   - la part de guerre franco-anglaise sur un siècle tombe de 64 % à 55 % (bas de la cible) ;
   - l'Écosse reste à trésor négatif ;
   - l'ordre `garrison_units` n'a pas de bouton dans l'UI.
+
+## Fusion de C7b
+
+- Fusionné sans conflit (`5603fbc`). Contenu :
+  - arbres recalés sur le relief affiché, dans un fil de travail ;
+  - shader de routes à largeur à l'écran ;
+  - `settlement_edge_paths.json` : 533 arêtes sur 633 suivent la vraie route ;
+  - panneaux à gauche de la minicarte.
+- Le premier smoke a été tué de l'extérieur (code 143, machine chargée) ; le second est passé. `main` a ensuite reçu un commit S2 sans fichier commun : seuls les tests des colonies ont été relancés.
+- Ouvert :
+  - 100 arêtes restent en segment droit ;
+  - l'étape de capture `--stage=province` (dans `campaign_map.gd`, autre session) place la capitale sous le panneau.
 
 ## Prochaine étape
 

@@ -10,11 +10,17 @@ Demande du joueur (24/09) : physique de destruction des murailles et incendies.
   - Vérifié : fmt, clippy, cargo test, smoke Godot, `wall_collapse_fx_test`, `s2_fire_fx_test`, pytest des schémas.
   - Détails, règles et mesures : `docs/design/s2-incendies.md`, ADR 0008, `docs/wip/s2-incendies.md`.
 
-## Prochaine étape
-- Capture d'un siège en feu (pas faite : mode silencieux `~/.cent-ans-quiet` interdit les fenêtres Godot).
+## Captures (24/09)
+- `game/tests/s2_fire_shot.gd` → `docs/img/s2/s2-feu-proche.png`, `s2-feu-large.png`, `s2-ruines.png`.
+- La capture a révélé un défaut invisible au test headless : flammes et fumée affichées en quads de 1 m
+  (`billboard_keep_scale` manquant, l'échelle `size_m` était perdue) et émises dans le volume des maisons.
+  Corrigé : `billboard_keep_scale`, `flame_height_m` 4,5 → 7,5, flammes en mélange alpha (l'additif virait
+  au crème en plein jour), flammes et fumée plus denses (`data/fx/siege_fire.json`).
 
 ## Limites connues à traiter plus tard
 - S1 : porte de Guyenne masquée par ses tours (géométrie antérieure) ; pas de son d'effondrement.
+- S2 : les ruines restent frustes (toit aplati sur un socle noir) ; le HUD de la capture affiche encore
+  « Déploiement » (artefact du script, bataille démarrée par l'API).
 - S2 : règles embarquées par `include_str!` (recompiler pour changer un réglage) ; l'IA n'évite pas les rues en feu
   et n'utilise `burn` que pour les faubourgs ; pas de bouton « incendier » dans l'UI ; l'église ne s'effondre pas
   visuellement ; pas de lutte contre le feu.

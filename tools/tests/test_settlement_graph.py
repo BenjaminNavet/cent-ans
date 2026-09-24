@@ -16,7 +16,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial import cKDTree
 
-from cent_ans_tools.geo import hamlets, relief, settlements
+from cent_ans_tools.geo import edge_paths, hamlets, relief, settlements
 
 MAP_DIR = settlements.MAP_DIR
 RERUN = "relancer `uv run --project tools cent-ans geo roads` puis `geo hamlets`"
@@ -259,3 +259,56 @@ def test_tiles_round_trip(tmp_path: Path) -> None:
     relief.write_tiles(array, tmp_path)
     assert len(list(tmp_path.glob("h_*_*.png"))) == 4
     np.testing.assert_array_equal(relief.read_tiles(tmp_path, 2), array)
+
+
+# ----------------------------------------------------------------------------
+# Road polylines of the graph edges (lot C7b)
+# ----------------------------------------------------------------------------
+
+
+def test_trace_follows_roads_across_small_gaps() -> None:
+    """An L-shaped road with a 2 px gap is followed; a far detour is rejected."""
+    lines = [
+        np.array([[0.0, 0.0], [40.0, 0.0]]),
+        np.array([[42.0, 0.0], [42.0, 40.0]]),
+    ]
+    network = edge_paths.build_network(lines)
+    route = edge_paths.trace(network, (0.0, 1.0), (42.0, 40.0))
+    assert route is not None
+    np.testing.assert_allclose(route[0], [0.0, 1.0])
+    np.testing.assert_allclose(route[-1], [42.0, 40.0])
+    # The corner of the road is on the route (not the straight line).
+    assert np.min(np.hypot(route[:, 0] - 41.0, route[:, 1])) < 1.5
+    # 40 px apart but the only road is a 440 px loop: rejected.
+    loop = [np.array([[0.0, 0.0], [0.0, 200.0], [40.0, 200.0], [40.0, 0.0]])]
+    assert (
+        edge_paths.trace(edge_paths.build_network(loop), (0.0, 0.0), (40.0, 0.0))
+        is None
+    )
+    # No road near an end.
+    assert edge_paths.trace(network, (0.0, 1.0), (200.0, 200.0)) is None
+
+
+def test_edge_paths_file(graph_edges: list[dict]) -> None:
+    """Road edges only, ends on the settlements, bounded detour, most road edges traced."""
+    path = _require(MAP_DIR / edge_paths.EDGE_PATHS_FILE)
+    traced = json.loads(path.read_text(encoding="utf-8"))["edges"]
+    positions = json.loads(
+        _require(MAP_DIR / settlements.POSITIONS_FILE).read_text(encoding="utf-8")
+    )
+    roads = {(e["from"], e["to"]) for e in graph_edges if e["road"]}
+    seen = set()
+    for entry in traced:
+        key = (entry["from"], entry["to"])
+        assert key in roads, f"{key} n'est pas une arête routière : {RERUN}"
+        assert key not in seen
+        seen.add(key)
+        points = np.asarray(entry["points"])
+        start, end = np.asarray(positions[key[0]]), np.asarray(positions[key[1]])
+        np.testing.assert_allclose(points[0], start, atol=0.051)
+        np.testing.assert_allclose(points[-1], end, atol=0.051)
+        length = np.hypot(*np.diff(points, axis=0).T).sum()
+        straight = np.hypot(*(end - start))
+        limit = edge_paths.MAX_DETOUR * straight + edge_paths.DETOUR_SLACK_PX + 0.5
+        assert length <= limit, key
+    assert len(traced) >= 0.75 * len(roads), f"{len(traced)} / {len(roads)} tracées"
