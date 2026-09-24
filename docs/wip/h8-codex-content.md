@@ -90,7 +90,9 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 5 fait : bruges, reims, rouen, avignon, maillotins, cabochiens, bal_des_ardents.
 - Lot 6 fait : armagnacs_bourguignons, louis_d_orleans, paix_arras, concile_constance,
   revolte_paysans_1381 (alias Wat Tyler, John Ball : pas de fiche wat_tyler séparée), ciompi.
-- Fiches H8b écrites : 47.
+- Lot 7 fait (société, fiscalité) : aides, taille (entity tech_royal_taxation), etats_generaux,
+  franc_a_cheval, mutations_monetaires, trois_ordres, seigneurie (servage inclus).
+- Fiches H8b écrites : 54.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

@@ -1,0 +1,11 @@
+{
+  "id": "cdx_franc_a_cheval",
+  "title": "Le franc à cheval",
+  "category": "economie",
+  "aliases": ["franc à cheval", "francs à cheval", "franc à pied", "franc d'or"],
+  "era": { "from": "1360", "to": "1385" },
+  "summary": "Créé le 5 décembre 1360 pour payer la rançon de [[cdx_jean_ii|Jean II]], le franc à cheval est une pièce d'or valant une livre tournois. Il montre le roi à cheval, l'épée haute, et donne son nom à la future monnaie de la France.",
+  "body": "Libéré par le traité de [[cdx_bretigny|Brétigny]] contre une [[cdx_rancon|rançon]] de trois millions d'écus, [[cdx_jean_ii|Jean II]] rentre en France à l'automne 1360. Le 5 décembre, à Compiègne, une grande ordonnance organise le paiement : elle établit les [[cdx_aides|aides]] et crée une nouvelle monnaie d'or de bonne qualité, destinée à durer.\n\nLa pièce représente le roi en armure, galopant sur un cheval couvert d'une housse fleurdelisée, l'épée levée. Elle est faite d'or presque pur, pèse un peu moins de quatre grammes et vaut exactement une livre tournois, soit vingt sous. On l'appelle « franc », mot qui signifie libre : on y voit volontiers l'image du roi redevenu franc, c'est-à-dire délivré de sa captivité.\n\nLe franc à cheval marque une rupture. Depuis des décennies, les rois avaient multiplié les [[cdx_mutations_monetaires|mutations monétaires]], modifiant sans cesse le poids et la valeur des pièces pour se procurer des ressources. Sous l'influence de penseurs comme [[cdx_nicole_oresme|Nicole Oresme]], la monarchie s'engage désormais à garder une monnaie forte et stable, ce que [[cdx_charles_v|Charles V]] respecte tout au long de son règne.\n\nEn 1365, Charles V crée le franc à pied, où il figure debout sous un dais. L'usage de désigner la livre sous le nom de franc s'installe dans la langue ; il resurgit à la fin du XVIe siècle, puis devient en 1795 le nom officiel de la monnaie française, jusqu'à l'euro.",
+  "see_also": ["cdx_livre_tournois", "cdx_mutations_monetaires", "cdx_rancon", "cdx_nicole_oresme"],
+  "sources": ["Franc à cheval", "Franc à pied"]
+}
