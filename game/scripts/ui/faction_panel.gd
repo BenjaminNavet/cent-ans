@@ -201,9 +201,9 @@ func _arrange_budget() -> void:
 	for index in order.size():
 		grid.move_child(order[index], index)
 	var seign_key: Label = grid.get_child(seigniorage_value.get_index() - 1)
-	seign_key.text = "   Seigneuriage"
+	seign_key.text = "   dont seigneuriage"
 	var recoin_key: Label = grid.get_child(recoinage_value.get_index() - 1)
-	recoin_key.text = "   Refonte des monnaies"
+	recoin_key.text = "   dont refonte des monnaies"
 
 
 static func _charge(value: int) -> String:
@@ -240,9 +240,9 @@ func _show_h11(economy: Dictionary = {}) -> void:
 	var is_player := faction_id == player or player == ""
 	if not economy.is_empty():
 		var seigniorage := int(economy.get("seigniorage", 0))
-		seigniorage_value.text = "dont %s%s ℔" % ["+" if seigniorage > 0 else "", _thousands(seigniorage)]
+		seigniorage_value.text = "%s%s ℔" % ["+" if seigniorage > 0 else "", _thousands(seigniorage)]
 		seigniorage_value.tooltip_text = "[b]Seigneuriage[/b]\nProfit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s ℔" % _thousands(int(economy.get("seigniorage_last_turn", 0)))
-		recoinage_value.text = "dont %s" % _charge(int(economy.get("recoinage", 0)))
+		recoinage_value.text = _charge(int(economy.get("recoinage", 0)))
 		recoinage_value.tooltip_text = "[b]Refonte des espèces[/b]\nCoût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s ℔" % _thousands(int(economy.get("recoinage_last_turn", 0)))
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
