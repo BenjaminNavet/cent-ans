@@ -94,9 +94,6 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 	env.adjustment_contrast = p["contrast"]
 	env.adjustment_saturation = p["saturation"]
 	_setup_sun(sun, p)
-	if OS.get_environment("BATTLE_EXP").split(",").has("nossao"): env.ssao_enabled = false #EXP
-	if OS.get_environment("BATTLE_EXP").split(",").has("nosun"): sun.shadow_enabled = false #EXP
-	if OS.get_environment("BATTLE_EXP").split(",").has("noglow"): env.glow_enabled = false #EXP
 	match key:
 		"rain":
 			_add_precipitation(camera, true)

@@ -43,8 +43,6 @@ var _warned: bool = false
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
 func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> void:
 	_rng.seed = 4242
-	if OS.get_environment("BATTLE_EXP").split(",").has("nosoldiershadow"): cast_shadows = false #EXP
-	if OS.get_environment("BATTLE_EXP").split(",").has("nosoldiers"): return #EXP
 	_side_colors = side_colors
 	for side in side_factions:
 		_side_heraldry[side] = PortraitLoader.heraldry_texture(str(side_factions[side]))

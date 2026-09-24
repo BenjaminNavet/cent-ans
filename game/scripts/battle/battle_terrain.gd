@@ -88,7 +88,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	if terrain.has("river"):
 		_build_river(terrain["river"])
 	_build_trees()
-	if not OS.get_environment("BATTLE_EXP").split(",").has("norocks"): _build_rocks() #EXP
+	_build_rocks()
 	vegetation = BattleVegetation.new()
 	vegetation.name = "Vegetation"
 	add_child(vegetation)
@@ -364,7 +364,7 @@ func _add_mesh(node_name: String, mesh: ArrayMesh, shadows: bool) -> MeshInstanc
 	instance.name = node_name
 	instance.mesh = mesh
 	instance.material_override = ground_material
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows and not OS.get_environment("BATTLE_EXP").split(",").has("nogroundshadow") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
 	return instance
 
