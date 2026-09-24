@@ -47,8 +47,12 @@ impl CampaignSim {
     /// is_city}`. Lot C5 adds `buildings_info[]` (`{id, name, category,
     /// upkeep, …}` as in `get_province_city`), `recruit_slots`,
     /// `recruit_slots_free`, `garrison_strength` (sum of unit strengths),
-    /// `port` and `province_name`. `income` is the settlement's tax share for its
-    /// controller this season (0 while besieged). Empty for an unknown id.
+    /// `port` and `province_name`. Lot C7d adds `garrison_cap` (max units a
+    /// `garrison_units` order may hold here, -1 if `data/settlements/rules.json`
+    /// sets none for this kind) and `garrison_free` (`garrison_cap` minus the
+    /// current garrison size, -1 if uncapped). `income` is the settlement's tax
+    /// share for its controller this season (0 while besieged). Empty for an
+    /// unknown id.
     #[func]
     fn settlement_detail(&self, id: GString) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -75,6 +79,14 @@ impl CampaignSim {
         };
         let lonlat = Vector2::new(entry.lonlat[0] as f32, entry.lonlat[1] as f32);
         let is_city = state.province_city_id(&live.province) == Some(&id);
+        let garrison_cap: Option<usize> = data
+            .settlement_rules
+            .as_ref()
+            .and_then(|r| r.garrison_cap.get(&live.kind))
+            .copied();
+        let garrison_free = garrison_cap
+            .map(|cap| cap.saturating_sub(live.garrison.len()) as i64)
+            .unwrap_or(-1);
         let mut dict = vdict! {
             "id" => id.as_str(),
             "province" => live.province.as_str(),
@@ -99,6 +111,8 @@ impl CampaignSim {
                 .provinces
                 .get(&live.province)
                 .map_or(live.province.as_str(), |p| p.name.display.as_str()),
+            "garrison_cap" => garrison_cap.map_or(-1, |cap| cap as i64),
+            "garrison_free" => garrison_free,
         };
         if let Some(construction) = &live.construction {
             dict.set("construction", &construction_dict(data, construction));

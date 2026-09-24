@@ -8,7 +8,9 @@ extends SceneTree
 ##  3. recrutement et construction depuis le panneau, ordres adressés à la colonie (file de
 ##     recrutement et chantier de la colonie, pas de la cité) ;
 ##  4. armée sélectionnée : anneaux des colonies atteignables, aperçu de chemin sur le graphe,
-##     clic droit sur une colonie → ordre `move_army` vers cette colonie.
+##     clic droit sur une colonie → ordre `move_army` vers cette colonie ;
+##  5. lot C7d : bouton « Garnison » du bandeau d'ost — une armée du joueur sur une colonie
+##     qu'il contrôle laisse une unité en garnison (la garnison grandit, l'armée rétrécit).
 ## Usage : godot --headless --path game --script res://tests/c5_settlements_ui_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -151,6 +153,27 @@ func _run() -> void:
 	var path: PackedStringArray = moved.get("path", PackedStringArray())
 	_check(path.size() > 0 and path[path.size() - 1] == target, "army path should end at %s, got %s" % [target, path])
 	print("c5: army %s ordered from %s to %s (%d steps, %d rings)" % [army_id, here, target, path.size(), ctl.markers.marker_count()])
+
+	# 5. Lot C7d : bouton « Garnison » du bandeau d'ost — l'armée n'a pas encore bougé
+	# (le déplacement n'est résolu qu'à la fin du tour), elle est toujours sur `here`.
+	var here_detail := sim.call("settlement_detail", here) as Dictionary
+	if _check(str(here_detail.get("controller", "")) == "fac_france", "%s should still be controlled by France" % here):
+		var strip: Control = map.ui.army_strip
+		_check(strip.visible and strip.can_garrison, "the garrison button should be offered on the army's own settlement")
+		_check(str(strip.garrison_disabled_reason) == "", "the garrison button should be enabled: %s" % strip.garrison_disabled_reason)
+		var before_army := sim.call("get_army", army_id) as Dictionary
+		var before_units: int = (before_army.get("units", []) as Array).size()
+		var before_garrison: int = (here_detail.get("garrison", []) as Array).size()
+		if _check(before_units > 1, "the test army should have more than one unit to garrison only one"):
+			strip.select([0])
+			strip._garrison_button.emit_signal("pressed")
+			var after_army := sim.call("get_army", army_id) as Dictionary
+			var after_detail := sim.call("settlement_detail", here) as Dictionary
+			_check((after_detail.get("garrison", []) as Array).size() == before_garrison + 1,
+				"garrisoning a regiment should grow %s's garrison" % here)
+			_check((after_army.get("units", []) as Array).size() == before_units - 1,
+				"the army should shrink by the garrisoned regiment")
+
 	map.queue_free()
 	await process_frame
 
