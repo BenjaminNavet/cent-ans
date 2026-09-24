@@ -1,0 +1,18 @@
+{
+  "id": "res_tin",
+  "name": {
+    "display": "Étain"
+  },
+  "category": "raw_material",
+  "base_price": 22,
+  "satisfies_classes": [
+    "burghers",
+    "nobility"
+  ],
+  "description": "Étain des stannaries de Cornouailles et du Devon (Dartmoor), régies par la charte de 1305 ; matière première de la vaisselle d'étain et de l'alliage du bronze. Voir [[cdx_tin_stannaries]].",
+  "sources": [
+    "Étain",
+    "Stannaries",
+    "Économie médiévale (Wikipédia)"
+  ]
+}
