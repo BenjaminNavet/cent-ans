@@ -62,7 +62,7 @@ def test_plan_is_idempotent(tmp_path: Path) -> None:
 
 
 def test_miniature_crop_is_wide_jpeg() -> None:
-    """A square image becomes a 2:1 JPEG band."""
+    """A square image becomes a 16:9 JPEG band."""
     buffer = io.BytesIO()
     Image.new("RGB", (1024, 1024), (10, 20, 200)).save(buffer, "PNG")
     image = Image.open(io.BytesIO(event_art.to_miniature_jpg(buffer.getvalue())))
