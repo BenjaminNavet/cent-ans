@@ -18,6 +18,7 @@ extends Node3D
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
+## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
 
 signal returned(result: Dictionary)
@@ -58,6 +59,7 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
+var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
 var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
@@ -298,7 +300,8 @@ func _update_effects(dt: float) -> void:
 		return
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
-	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, battle.call("get_shots"))
+	var shots: Variant = battle.call("get_shots")
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -419,6 +422,8 @@ func _process(delta: float) -> void:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+			if effects != null and effects.volleys != null:
+				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
 
 
@@ -945,6 +950,8 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg == "--no-effects":
 			_no_effects = true
+		elif arg == "--no-bv1":
+			_no_bv1 = true
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
