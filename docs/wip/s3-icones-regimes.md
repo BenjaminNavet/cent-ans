@@ -27,16 +27,19 @@ Branche : `worktree-agent-a4eb500d6919a0a8a`. Plan : `docs/wip/historien-suite.m
       clé d'icône, comme les autres entités. Avant ce lot, tous les régimes retombaient sur le repli
       générique `cat_resource` (caisse en bois) faute d'entrée dédiée.
 - [x] Tests : `uv run --project tools pytest -q` → 87 passés (dont `test_icons.py`, 9 tests).
+- [x] `core/build.sh` (dylib absente du worktree) puis `godot --headless --path game --import` et
+      `godot --headless --path game --script res://tests/smoke.gd` → vert (exit 0), notamment
+      `smoke OK: icons, 168 entries loaded, 184 data ids covered` et
+      `smoke OK: table/medicine, prov_agenais -> diet_dairy, ...`.
+- [x] Capture rafraîchie via le script existant `game/tests/table_screenshot.gd` (non headless) →
+      `docs/img/table-section.png` (7 régimes avec icônes distinctes dans le sélecteur) et
+      `docs/img/tech-medicine.png`.
 
 ## Prochaine étape
 
 Fusion par l'orchestrateur (voir méthode dans `docs/wip/historien.md`). `res_tin.json` sera ajouté
 par l'agent S2 (autre branche) : l'icône est déjà prête, `missing_icons()` l'exigera automatiquement
 dès que `data/resources/res_tin.json` existera (repli `resources` dans `EXPLICIT_DATA_DIRS`).
-
-Capture d'écran de la section « La Table » non prise : la dylib `core/build.sh` n'était pas
-disponible dans ce worktree et sa reconstruction dépasse le lot (voir note ci-dessous) ; le smoke
-Godot suffit à vérifier l'intégration.
 
 ## Notes
 
