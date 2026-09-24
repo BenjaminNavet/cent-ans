@@ -59,10 +59,9 @@ impl CampaignSim {
         };
         let diet = state.province_diet(&id);
         let definition = data.diets.get(&diet);
-        let changed = p
-            .diet
-            .as_ref()
-            .is_some_and(|c| c.turn == state.turn() && c.faction == p.controller);
+        let changed = p.diet.as_ref().is_some_and(|c| {
+            c.turn == state.turn() && state.province_controller(&id) == Some(&c.faction)
+        });
         vdict! {
             "diet" => diet.as_str(),
             "name" => definition.map_or(diet.as_str(), |d| d.name.display.as_str()),
@@ -143,10 +142,9 @@ impl CampaignSim {
             return VarDictionary::new();
         };
         let provinces: VarArray = state
-            .provinces
+            .controlled_provinces(&faction)
             .iter()
-            .filter(|(_, p)| p.controller == faction)
-            .filter_map(|(id, _)| {
+            .filter_map(|id| {
                 let diet = state.province_diet(id);
                 let cost = state.diet_cost(data, id, &diet);
                 (cost > 0).then(|| {

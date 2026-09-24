@@ -203,12 +203,12 @@ impl CampaignSim {
             .map(|id| {
                 let key = ProvinceId::new(id.to_string())
                     .ok()
-                    .and_then(|p| state.province_state(&p))
-                    .map_or("", |p| {
-                        if p.controller == player {
+                    .and_then(|p| state.province_controller(&p).cloned())
+                    .map_or("", |controller| {
+                        if controller == player {
                             "self"
                         } else {
-                            relation_key(state.relation(&player, &p.controller))
+                            relation_key(state.relation(&player, &controller))
                         }
                     });
                 GString::from(key)
