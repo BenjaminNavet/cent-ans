@@ -94,6 +94,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     };
     let mut seen = married(&state);
     let mut over_limit: BTreeMap<FactionId, u32> = BTreeMap::new();
+    // Rolling income (last 8 seasons): a season under siege is not the
+    // measure of a realm's revenue.
+    let mut incomes: BTreeMap<FactionId, Vec<i64>> = BTreeMap::new();
     let mut was_at_war = false;
     for _ in 0..turns {
         for order in ai::plan_turn(&state, data, &france) {
@@ -131,7 +134,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 && matches!(event.kind, EventKind::WarDeclared | EventKind::PeaceSigned)
                 && names.iter().all(|n| event.text_fr.contains(n.as_str()))
             {
-                println!("  {:>16} {}", state.date_label(), event.text_fr);
+                println!("  [{seed}] {:>16} {}", state.date_label(), event.text_fr);
             }
         }
         let at_war = state.is_at_war(&france, &england);
@@ -156,12 +159,21 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
         seen = now;
+        for (fid, f) in &state.factions {
+            let history = incomes.entry(fid.clone()).or_default();
+            history.push(f.income_last_turn);
+            if history.len() > 8 {
+                history.remove(0);
+            }
+        }
         if state.turn >= TURN_1350 {
             for (fid, f) in state.factions.iter().filter(|(_, f)| f.alive) {
                 if fid.as_str() == "fac_rebels" {
                     continue;
                 }
-                let ratio = f.treasury as f64 / f.income_last_turn.max(1) as f64;
+                let history = &incomes[fid];
+                let income = history.iter().sum::<i64>() / history.len().max(1) as i64;
+                let ratio = f.treasury as f64 / income.max(1) as f64;
                 if ratio > IDLE_SEASONS && f.treasury > 10_000 {
                     *over_limit.entry(fid.clone()).or_default() += 1;
                 }
@@ -187,8 +199,8 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     if verbose {
         let mut worst: Vec<_> = report.bankruptcies.iter().collect();
         worst.sort_by_key(|(_, n)| std::cmp::Reverse(**n));
-        println!("  bankruptcies {worst:?}");
-        println!("  idle treasuries (turns over limit) {over_limit:?}");
+        println!("  [{seed}] bankruptcies {worst:?}");
+        println!("  [{seed}] idle treasuries (turns over limit) {over_limit:?}");
     }
     report
 }
@@ -203,13 +215,20 @@ fn main() {
     let verbose = std::env::var("VERBOSE").is_ok();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let (data, _) = GameData::load(&root).expect("data");
-    let mut reports = Vec::new();
-    for seed in &seeds {
-        if verbose {
-            println!("seed {seed}");
-        }
-        reports.push(run(&data, *seed, turns, verbose));
-    }
+    // Seeds run in parallel (each campaign is deterministic on its own).
+    let reports: Vec<Report> = std::thread::scope(|scope| {
+        let handles: Vec<_> = seeds
+            .iter()
+            .map(|seed| {
+                let data = &data;
+                scope.spawn(move || run(data, *seed, turns, verbose))
+            })
+            .collect();
+        handles
+            .into_iter()
+            .map(|h| h.join().expect("campaign thread"))
+            .collect()
+    });
 
     let decades = f64::from(turns) / 40.0;
     println!(
