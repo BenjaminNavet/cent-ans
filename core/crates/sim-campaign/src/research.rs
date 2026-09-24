@@ -279,8 +279,8 @@ impl CampaignState {
                 }
             }
         };
-        for province in self.provinces.values().filter(|p| &p.owner == faction) {
-            for id in &province.buildings {
+        for settlement in self.settlements.values().filter(|s| &s.owner == faction) {
+            for id in &settlement.buildings {
                 if let Some(building) = data.buildings.get(id) {
                     for effect in &building.effects {
                         add(effect.effect, effect.mode, effect.value);

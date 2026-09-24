@@ -212,7 +212,8 @@ pub fn assign_governor(
         .characters
         .get(character)
         .ok_or_else(|| GovernorError::UnknownCharacter(character.clone()))?;
-    if c.faction != province_state.controller {
+    let _ = province_state;
+    if state.province_controller(province) != Some(&c.faction) {
         return Err(GovernorError::NotYourProvince);
     }
     if !c.alive || c.captive || !c.is_major(state.year) {
@@ -785,10 +786,12 @@ pub(crate) fn resolve_regencies(
             .map(|r| state.character_name(data, r))
             .unwrap_or_default();
         if minor_ruler {
+            let ruled = state.controlled_provinces(&faction_id);
             for province in state
                 .provinces
-                .values_mut()
-                .filter(|p| p.controller == faction_id)
+                .iter_mut()
+                .filter(|(id, _)| ruled.contains(id))
+                .map(|(_, p)| p)
             {
                 province.unrest = province
                     .unrest
@@ -846,11 +849,11 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
         return 0;
     };
     let buildings: f64 = state
-        .provinces
+        .settlements
         .values()
-        .filter(|p| &p.controller == faction)
-        .map(|p| {
-            crate::buildings::effects_of(data, &p.buildings)
+        .filter(|s| &s.controller == faction)
+        .map(|s| {
+            crate::buildings::effects_of(data, &s.buildings)
                 .prestige
                 .apply(0.0)
         })
@@ -876,11 +879,11 @@ pub const MAX_YEARLY_BUILDING_PIETY: i32 = 3;
 /// `religion::effective_piety` instead.
 pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
     let buildings: f64 = state
-        .provinces
+        .settlements
         .values()
-        .filter(|p| &p.controller == faction)
-        .map(|p| {
-            crate::buildings::effects_of(data, &p.buildings)
+        .filter(|s| &s.controller == faction)
+        .map(|s| {
+            crate::buildings::effects_of(data, &s.buildings)
                 .piety
                 .apply(0.0)
         })
@@ -928,10 +931,7 @@ pub(crate) fn resolve_governance(state: &mut CampaignState) {
         let character = &state.characters[&id];
         let keeps_post = character.alive
             && !character.captive
-            && state
-                .provinces
-                .get(&province)
-                .is_some_and(|p| p.controller == character.faction);
+            && state.controls_province(&character.faction, &province);
         if keeps_post {
             skills::grant_experience(state, &id, skills::GOVERNANCE_XP_PER_TURN);
         } else {

@@ -65,11 +65,7 @@ impl CampaignState {
         faction: &FactionId,
         condition: &ObjectiveCondition,
     ) -> (bool, String) {
-        let controls = |p: &data_model::ProvinceId| {
-            self.provinces
-                .get(p)
-                .is_some_and(|s| &s.controller == faction)
-        };
+        let controls = |p: &data_model::ProvinceId| self.controls_province(faction, p);
         match condition {
             ObjectiveCondition::ControlAll { provinces } => {
                 let held = provinces.iter().filter(|p| controls(p)).count();
@@ -88,11 +84,7 @@ impl CampaignState {
             } => {
                 let held = provinces
                     .iter()
-                    .filter(|p| {
-                        self.provinces
-                            .get(*p)
-                            .is_some_and(|s| &s.controller == foreign)
-                    })
+                    .filter(|p| self.controls_province(foreign, p))
                     .count();
                 (held == 0, format!("{held} province(s) encore occupée(s)"))
             }
@@ -129,11 +121,7 @@ impl CampaignState {
 
     /// Campaign score of `faction`: land, objectives, prestige, treasury.
     pub fn campaign_score(&self, data: &GameData, faction: &FactionId) -> i64 {
-        let provinces = self
-            .provinces
-            .values()
-            .filter(|p| &p.controller == faction)
-            .count() as i64;
+        let provinces = self.controlled_provinces(faction).len() as i64;
         let objectives = self
             .objectives(data, faction)
             .iter()
@@ -162,7 +150,7 @@ pub(crate) fn resolve_victory(
     let player = state.player_faction.clone();
     let name = crate::diplomacy::faction_name(data, &player);
     let alive = state.factions.get(&player).is_some_and(|f| f.alive)
-        && state.provinces.values().any(|p| p.controller == player);
+        && state.provinces.keys().any(|p| state.controls_province(&player, p));
     let objectives = state.objectives(data, &player);
     let victory = data.factions.get(&player).and_then(|f| f.victory.as_ref());
     let end_year = victory.map(|v| v.end_year);

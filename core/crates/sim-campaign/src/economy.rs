@@ -5,15 +5,24 @@
 //! France ≈ 268 000 livres per season, the target being 20 000-30 000.
 //! Unit upkeep in `data/unit_types` is a monthly figure; a season bills
 //! [`UPKEEP_MONTHS_PER_SEASON`] months.
+//!
+//! Lot C4: the tax of a province is shared between the controllers of its
+//! settlements in proportion to their normalised `weight` (a besieged
+//! settlement yields nothing that turn); holding every settlement of a
+//! province adds `full_province_bonus.income_percent` (`rules.json`).
+//! Garrisons, recruits and building upkeep are counted per settlement.
 
 use std::collections::BTreeMap;
 
-use data_model::{FactionId, GameData, ResourceCategory, ResourceId, SocialClass};
+use data_model::{
+    BuildingId, FactionId, GameData, ProvinceId, ResourceCategory, ResourceId, SettlementId,
+    SocialClass,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::{effects_of, goods_map, province_building_upkeep, EffectTotals};
 use crate::events::{EventKind, GameEvent};
-use crate::state::{ArmyId, CampaignState, ProvinceState, Season, Unit};
+use crate::state::{ArmyId, CampaignState, ProvinceState, Season, SettlementState, Unit};
 
 /// Tax bracket a faction can pick (spec § 1.4): `×0.7 / ×1.0 / ×1.4` on the
 /// tax base, also used as the unrest multiplier of § 1.1.
@@ -151,9 +160,10 @@ pub fn province_income(province: &ProvinceState) -> f64 {
 pub fn province_income_effective(
     data: &GameData,
     province: &ProvinceState,
+    buildings: &[BuildingId],
     tax_rate: TaxRate,
 ) -> f64 {
-    province_income_with(data, province, tax_rate, &EffectTotals::default())
+    province_income_with(data, province, buildings, tax_rate, &EffectTotals::default())
 }
 
 /// [`province_income_effective`] with `extra` effects (the controller's
@@ -161,10 +171,11 @@ pub fn province_income_effective(
 pub fn province_income_with(
     data: &GameData,
     province: &ProvinceState,
+    buildings: &[BuildingId],
     tax_rate: TaxRate,
     extra: &EffectTotals,
 ) -> f64 {
-    let mut effects = effects_of(data, &province.buildings);
+    let mut effects = effects_of(data, buildings);
     effects.merge(extra);
     let mut base = 0.0;
     let mut burgher_base = 0.0;
@@ -218,7 +229,7 @@ pub const GARRISON_RELIEF_PERCENT_PER_POINT: i64 = 10;
 /// Ceiling of that relief.
 pub const GARRISON_RELIEF_MAX_PERCENT: i64 = 50;
 
-/// Upkeep relief (per cent) of a province's garrison (F1 `Garrison`).
+/// Upkeep relief (per cent) of a settlement's garrison (F1 `Garrison`).
 pub fn garrison_relief_percent(effects: &EffectTotals) -> i64 {
     let points = effects.garrison.apply(0.0).max(0.0).round() as i64;
     (points * GARRISON_RELIEF_PERCENT_PER_POINT).min(GARRISON_RELIEF_MAX_PERCENT)
@@ -229,12 +240,52 @@ pub fn garrison_relief_percent(effects: &EffectTotals) -> i64 {
 pub const GARRISON_REINFORCE_PERCENT_PER_POINT: u32 = 5;
 
 impl CampaignState {
-    /// Income the faction would collect this turn (controlled, unbesieged provinces).
-    pub fn faction_income(&self, faction: &data_model::FactionId) -> i64 {
+    /// Share (0-1) of the tax of `province` that `faction` collects this
+    /// turn: the normalised weights of the settlements it controls that are
+    /// not besieged (lot C4). Needs the data for the weights.
+    pub fn province_tax_share(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+        faction: &FactionId,
+    ) -> f64 {
+        self.settlements_of(province)
+            .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
+            .map(|(id, _)| crate::settlements::weight_share(data, id))
+            .sum()
+    }
+
+    /// Income multiplier of the full-province bonus (spec § 4.3).
+    pub fn full_province_income_factor(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+        faction: &FactionId,
+    ) -> f64 {
+        let percent = data
+            .settlement_rules
+            .as_ref()
+            .map_or(0, |r| r.full_province_bonus.income_percent);
+        if percent != 0 && self.holds_whole_province(faction, province) {
+            1.0 + f64::from(percent) / 100.0
+        } else {
+            1.0
+        }
+    }
+
+    /// Income the faction would collect this turn (legacy formula without
+    /// buildings: its share of each province, unbesieged settlements).
+    pub fn faction_income(&self, data: &GameData, faction: &FactionId) -> i64 {
         self.provinces
-            .values()
-            .filter(|p| &p.controller == faction && p.siege.is_none())
-            .map(|p| province_income(p).round() as i64)
+            .iter()
+            .map(|(id, p)| {
+                let share = self.province_tax_share(data, id, faction);
+                if share <= 0.0 {
+                    return 0;
+                }
+                (province_income(p) * share * self.full_province_income_factor(data, id, faction))
+                    .round() as i64
+            })
             .sum()
     }
 
@@ -263,12 +314,12 @@ impl CampaignState {
             .map(unit_cost)
             .sum();
         let garrisons: i64 = self
-            .provinces
+            .settlements
             .iter()
-            .filter(|(_, p)| &p.controller == faction && !p.garrison.is_empty())
-            .map(|(id, p)| {
-                let relief = garrison_relief_percent(&self.province_effects(data, id));
-                let raw: i64 = p.garrison.iter().map(unit_cost).sum();
+            .filter(|(_, s)| &s.controller == faction && !s.garrison.is_empty())
+            .map(|(id, s)| {
+                let relief = garrison_relief_percent(&self.settlement_effects(data, id));
+                let raw: i64 = s.garrison.iter().map(unit_cost).sum();
                 raw * GARRISON_UPKEEP_PERCENT / 100 * (100 - relief) / 100
             })
             .sum();
@@ -281,19 +332,22 @@ impl CampaignState {
         self.faction_upkeep(data, faction)
     }
 
-    /// Upkeep of every completed building of the faction's provinces (spec § 1.2).
+    /// Upkeep of every completed building of the faction's settlements (spec § 1.2).
     ///
-    /// F4: a besieged province pays nothing (it pays no taxes either) and a
-    /// devastated one pays less (half its devastation, in per cent): small
-    /// realms under raids no longer sink into debt for idle buildings.
+    /// F4: a besieged settlement pays nothing (it pays no taxes either) and a
+    /// devastated province pays less (half its devastation, in per cent):
+    /// small realms under raids no longer sink into debt for idle buildings.
     pub fn faction_building_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
         let raw: i64 = self
-            .provinces
+            .settlements
             .values()
-            .filter(|p| &p.controller == faction && p.siege.is_none())
-            .map(|p| {
-                province_building_upkeep(data, &p.buildings)
-                    * (100 - i64::from(p.devastation.min(100)) / 2)
+            .filter(|s| &s.controller == faction && s.siege.is_none())
+            .map(|s| {
+                let devastation = self
+                    .provinces
+                    .get(&s.province)
+                    .map_or(0, |p| p.devastation.min(100));
+                province_building_upkeep(data, &s.buildings) * (100 - i64::from(devastation) / 2)
                     / 100
             })
             .sum();
@@ -313,12 +367,16 @@ impl CampaignState {
         let gross: i64 = self
             .provinces
             .iter()
-            .filter(|(_, p)| &p.controller == faction && p.siege.is_none())
             .map(|(id, p)| {
-                // Buildings + governor (M4) + technologies (M6).
+                let share = self.province_tax_share(data, id, faction);
+                if share <= 0.0 {
+                    return 0;
+                }
+                // Buildings of every settlement + governor (M4) + technologies (M6).
                 let mut extra = self.governor_effects(data, id);
                 extra.merge(&tech);
-                province_income_with(data, p, tax_rate, &extra).round() as i64
+                let tax = province_income_with(data, p, &self.province_buildings(id), tax_rate, &extra);
+                (tax * share * self.full_province_income_factor(data, id, faction)).round() as i64
             })
             .sum();
         // Embargoes (M5) cut trade.
@@ -329,11 +387,7 @@ impl CampaignState {
     /// grows with the number of provinces held, plus 20 % of any treasury
     /// above six seasons of income (M10 balance, F4).
     pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
-        let provinces = self
-            .provinces
-            .values()
-            .filter(|p| &p.controller == faction)
-            .count();
+        let provinces = self.controlled_provinces(faction).len();
         let income = self.faction_income_effective(data, faction);
         let share = (income as f64 * administration_rate(provinces)).round() as i64;
         // An idle hoard feeds court luxury, patronage and embezzlement.
@@ -435,12 +489,12 @@ pub(crate) fn resolve_economy(
                     unit.morale = unit.morale.saturating_sub(BANKRUPTCY_MORALE_PENALTY);
                 }
             }
-            for province in state
-                .provinces
+            for settlement in state
+                .settlements
                 .values_mut()
-                .filter(|p| p.controller == faction_id)
+                .filter(|s| s.controller == faction_id)
             {
-                for unit in &mut province.garrison {
+                for unit in &mut settlement.garrison {
                     unit.morale = unit.morale.saturating_sub(BANKRUPTCY_MORALE_PENALTY);
                 }
             }
@@ -457,39 +511,39 @@ pub(crate) fn resolve_economy(
     let player = state.player_faction.clone();
     // F1: effects read by the recruitment delivery (recruits' experience)
     // and by the garrison reinforcement, computed before the mutable pass.
-    let local_effects: BTreeMap<data_model::ProvinceId, EffectTotals> = state
-        .provinces
+    let local_effects: BTreeMap<SettlementId, EffectTotals> = state
+        .settlements
         .iter()
-        .filter(|(_, p)| !p.recruit_queue.is_empty() || !p.garrison.is_empty())
-        .map(|(id, p)| {
-            let mut effects = state.province_effects(data, id);
+        .filter(|(_, s)| !s.recruit_queue.is_empty() || !s.garrison.is_empty())
+        .map(|(id, s)| {
+            let mut effects = state.settlement_effects(data, id);
             effects.merge(&crate::research::faction_tech_effects(
                 state,
                 data,
-                &p.controller,
+                &s.controller,
             ));
             (id.clone(), effects)
         })
         .collect();
     // H3: a hearty diet raises the morale of the troops levied there.
-    let morale_bonus: BTreeMap<data_model::ProvinceId, f64> = state
-        .provinces
+    let morale_bonus: BTreeMap<SettlementId, f64> = state
+        .settlements
         .iter()
-        .filter(|(_, p)| !p.recruit_queue.is_empty())
-        .map(|(id, _)| {
+        .filter(|(_, s)| !s.recruit_queue.is_empty())
+        .map(|(id, s)| {
             (
                 id.clone(),
-                crate::table::recruit_morale_bonus(state, data, id),
+                crate::table::recruit_morale_bonus(state, data, &s.province),
             )
         })
         .collect();
-    for (province_id, province) in state.provinces.iter_mut() {
-        let Some(effects) = local_effects.get(province_id) else {
+    for (settlement_id, settlement) in state.settlements.iter_mut() {
+        let Some(effects) = local_effects.get(settlement_id) else {
             continue;
         };
-        reinforce_garrison(province, effects);
-        let queue = std::mem::take(&mut province.recruit_queue);
-        let bonus = morale_bonus.get(province_id).copied().unwrap_or(0.0);
+        reinforce_garrison(settlement, effects);
+        let queue = std::mem::take(&mut settlement.recruit_queue);
+        let bonus = morale_bonus.get(settlement_id).copied().unwrap_or(0.0);
         for unit_type_id in queue {
             let Some(unit_type) = data.unit_types.get(&unit_type_id) else {
                 continue;
@@ -497,23 +551,20 @@ pub(crate) fn resolve_economy(
             let mut unit = Unit::fresh(unit_type);
             unit.experience = recruit_experience(effects, unit_type.category);
             (unit.levy_armor, unit.levy_ranged) =
-                crate::buildings::levy_bonus(data, &province.buildings, unit_type.category);
+                crate::buildings::levy_bonus(data, &settlement.buildings, unit_type.category);
             unit.morale = crate::research::boosted(unit.morale, bonus, 100);
-            province.garrison.push(unit);
-            if province.controller == player {
+            settlement.garrison.push(unit);
+            if settlement.controller == player {
                 events.push(
                     GameEvent::new(
                         EventKind::Recruited,
                         format!(
                             "{} rejoignent la garnison de {}.",
                             unit_type.name.display,
-                            data.provinces.get(province_id).map_or_else(
-                                || province_id.to_string(),
-                                |p| p.name.display.clone()
-                            )
+                            crate::siege::settlement_name(data, settlement_id)
                         ),
                     )
-                    .province(province_id)
+                    .province(&settlement.province)
                     .faction(&player),
                 );
             }
@@ -533,13 +584,13 @@ pub fn recruit_experience(effects: &EffectTotals, category: data_model::UnitCate
 
 /// F1 `Garrison`: a town held by its owner and not besieged musters local
 /// levies that bring its garrison back towards full strength.
-fn reinforce_garrison(province: &mut ProvinceState, effects: &EffectTotals) {
+fn reinforce_garrison(settlement: &mut SettlementState, effects: &EffectTotals) {
     let points = effects.garrison.apply(0.0).max(0.0).round() as u32;
-    if points == 0 || province.siege.is_some() || province.owner != province.controller {
+    if points == 0 || settlement.siege.is_some() || settlement.owner != settlement.controller {
         return;
     }
     let percent = (points * GARRISON_REINFORCE_PERCENT_PER_POINT).min(50);
-    for unit in &mut province.garrison {
+    for unit in &mut settlement.garrison {
         let gain = (unit.max_strength * percent).div_ceil(100);
         unit.strength = (unit.strength + gain).min(unit.max_strength.max(unit.strength));
     }
@@ -552,7 +603,7 @@ fn reinforce_garrison(province: &mut ProvinceState, effects: &EffectTotals) {
 fn supply_modifiers(
     state: &CampaignState,
     data: &GameData,
-    location: &data_model::ProvinceId,
+    location: &ProvinceId,
     friendly: bool,
     general: Option<&data_model::CharacterId>,
 ) -> (f64, f64) {
@@ -580,7 +631,7 @@ pub(crate) fn resolve_attrition(
     let ids: Vec<ArmyId> = state.armies.keys().cloned().collect();
     let winter = state.season == Season::Winter;
     for army_id in ids {
-        let (faction, location, general) = {
+        let (faction, settlement, general) = {
             let army = &state.armies[&army_id];
             (
                 army.faction.clone(),
@@ -588,7 +639,12 @@ pub(crate) fn resolve_attrition(
                 army.general.clone(),
             )
         };
-        let friendly = state.is_friendly_territory(&faction, &location);
+        let Some(location) = state.settlement_province(&settlement).cloned() else {
+            continue;
+        };
+        // Lot C4: supplied in friendly territory or on a friendly settlement.
+        let friendly = state.is_friendly_territory(&faction, &location)
+            || state.is_friendly_settlement(&faction, &settlement);
         let (recovery_bonus, loss_relief) =
             supply_modifiers(state, data, &location, friendly, general.as_ref());
         let army = state.armies.get_mut(&army_id).expect("exists");
@@ -655,10 +711,29 @@ pub(crate) fn resolve_goods(state: &mut CampaignState, data: &GameData) {
     }
 }
 
-/// Phase 7: unrest and devastation slowly recover.
-pub(crate) fn resolve_decay(state: &mut CampaignState) {
-    for province in state.provinces.values_mut() {
+/// Phase 7: unrest and devastation slowly recover; a province whose
+/// settlements are all held by one faction calms down by
+/// `full_province_bonus.unrest_per_season` (lot C4).
+pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
+    let bonus = data
+        .settlement_rules
+        .as_ref()
+        .map_or(0, |r| r.full_province_bonus.unrest_per_season);
+    let whole: Vec<ProvinceId> = state
+        .provinces
+        .keys()
+        .filter(|id| {
+            state
+                .province_controller(id)
+                .is_some_and(|c| state.holds_whole_province(c, id))
+        })
+        .cloned()
+        .collect();
+    for (id, province) in state.provinces.iter_mut() {
         province.devastation = province.devastation.saturating_sub(DEVASTATION_DECAY);
         province.unrest = province.unrest.saturating_sub(UNREST_DECAY);
+        if bonus != 0 && whole.contains(id) {
+            province.unrest = (i32::from(province.unrest) + bonus).clamp(0, 100) as u8;
+        }
     }
 }
