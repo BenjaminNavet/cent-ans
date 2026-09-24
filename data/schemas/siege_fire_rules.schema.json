@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_fire_rules.schema.json",
+  "title": "Règles des incendies de siège",
+  "description": "Fichier data/rules/siege_fire.json (lot S2, docs/design/s2-incendies.md) : allumage des maisons par les tirs de l'assaillant, propagation, météo, chaleur, fumée, porte en bois, torches et faubourgs. Lu par sim-battle (FireRules).",
+  "type": "object",
+  "$defs": {
+    "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "positive": { "type": "number", "exclusiveMinimum": 0 },
+    "distance": { "type": "number", "minimum": 0, "maximum": 200 },
+    "blaze": {
+      "type": "object",
+      "properties": {
+        "initial_intensity": { "$ref": "#/$defs/chance", "description": "Intensité (0-1) à l'allumage." },
+        "growth_per_s": { "type": "number", "minimum": 0, "maximum": 1, "description": "Croissance de l'intensité par seconde." },
+        "burn_duration_s": { "$ref": "#/$defs/positive", "description": "Secondes pour consumer tout le combustible à pleine intensité." },
+        "decline_fuel": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Part de combustible sous laquelle le feu décline." },
+        "damage_per_s": { "type": "number", "minimum": 0, "description": "Porte seulement : PV perdus par seconde à pleine intensité." }
+      },
+      "required": ["initial_intensity", "growth_per_s", "burn_duration_s", "decline_fuel"],
+      "additionalProperties": false
+    },
+    "weather": {
+      "type": "object",
+      "properties": {
+        "ignition": { "type": "number", "minimum": 0, "maximum": 2 },
+        "spread": { "type": "number", "minimum": 0, "maximum": 2 },
+        "growth": { "type": "number", "minimum": 0, "maximum": 2 },
+        "duration": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 }
+      },
+      "required": ["ignition", "spread", "growth", "duration"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "ignition": {
+      "type": "object",
+      "description": "Chance d'allumage par volée d'un régiment de l'assaillant.",
+      "properties": {
+        "by_unit_type": {
+          "type": "object",
+          "description": "Chance par type d'unité (id de data/unit_types).",
+          "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
+          "additionalProperties": { "$ref": "#/$defs/chance" }
+        },
+        "by_category": {
+          "type": "object",
+          "description": "Repli par catégorie d'unité.",
+          "propertyNames": { "enum": ["infantry", "ranged", "cavalry", "siege"] },
+          "additionalProperties": { "$ref": "#/$defs/chance" }
+        },
+        "overshoot_m": { "$ref": "#/$defs/distance", "description": "Le point d'impact dépasse la cible de tant de mètres dans l'axe du tir." },
+        "reach_m": { "$ref": "#/$defs/distance", "description": "Distance maximale du point d'impact au bord d'une maison." },
+        "gate_reach_m": { "$ref": "#/$defs/distance", "description": "Distance maximale du point d'impact à la porte." }
+      },
+      "required": ["by_unit_type", "by_category", "overshoot_m", "reach_m", "gate_reach_m"],
+      "additionalProperties": false
+    },
+    "house": { "$ref": "#/$defs/blaze" },
+    "gate": {
+      "allOf": [{ "$ref": "#/$defs/blaze" }],
+      "required": ["damage_per_s"]
+    },
+    "spread": {
+      "type": "object",
+      "properties": {
+        "period_s": { "$ref": "#/$defs/positive", "description": "Secondes entre deux tirages de propagation." },
+        "chance_per_period": { "$ref": "#/$defs/chance", "description": "Chance par tirage, maison source à pleine intensité, bords jointifs." },
+        "edge_distance_m": { "$ref": "#/$defs/positive", "description": "Écart bord à bord au-delà duquel le feu ne saute plus." },
+        "wind_strength_max": { "type": "number", "minimum": 0, "maximum": 1, "description": "Force maximale du vent (0 = feu isotrope)." }
+      },
+      "required": ["period_s", "chance_per_period", "edge_distance_m", "wind_strength_max"],
+      "additionalProperties": false
+    },
+    "weather": {
+      "type": "object",
+      "description": "Facteurs par météo de bataille.",
+      "properties": {
+        "clear": { "$ref": "#/$defs/weather" },
+        "fog": { "$ref": "#/$defs/weather" },
+        "rain": { "$ref": "#/$defs/weather" },
+        "snow": { "$ref": "#/$defs/weather" }
+      },
+      "additionalProperties": false
+    },
+    "heat": {
+      "type": "object",
+      "properties": {
+        "radius_m": { "$ref": "#/$defs/distance", "description": "Distance au bord d'un foyer où la chaleur blesse." },
+        "loss_per_s": { "type": "number", "minimum": 0, "maximum": 0.1, "description": "Part des soldats perdue par seconde à pleine intensité." },
+        "morale_per_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "Moral perdu par seconde à pleine intensité." }
+      },
+      "required": ["radius_m", "loss_per_s", "morale_per_s"],
+      "additionalProperties": false
+    },
+    "smoke": {
+      "type": "object",
+      "properties": {
+        "min_intensity": { "$ref": "#/$defs/chance" },
+        "margin_m": { "$ref": "#/$defs/distance", "description": "Marge autour de la maison où la fumée gêne le tir." },
+        "accuracy_factor": { "$ref": "#/$defs/chance", "description": "Multiplicateur des pertes d'un tir à travers la fumée." }
+      },
+      "required": ["min_intensity", "margin_m", "accuracy_factor"],
+      "additionalProperties": false
+    },
+    "torch": {
+      "type": "object",
+      "properties": {
+        "reach_m": { "$ref": "#/$defs/distance" },
+        "chance": { "$ref": "#/$defs/chance" },
+        "initial_intensity": { "$ref": "#/$defs/chance" }
+      },
+      "required": ["reach_m", "chance", "initial_intensity"],
+      "additionalProperties": false
+    },
+    "suburbs": {
+      "type": "object",
+      "properties": {
+        "count": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "distance_m": { "$ref": "#/$defs/distance", "description": "Distance des faubourgs aux courtines latérales (est et ouest)." },
+        "spacing_m": { "$ref": "#/$defs/positive" },
+        "radius_m": { "$ref": "#/$defs/positive", "description": "Rayon d'une maison de faubourg." },
+        "ai_burn_chance": { "$ref": "#/$defs/chance", "description": "Chance qu'une garnison IA brûle chaque maison au premier pas." }
+      },
+      "required": ["count", "distance_m", "spacing_m", "radius_m", "ai_burn_chance"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["ignition", "house", "gate", "spread", "weather", "heat", "smoke", "torch", "suburbs"],
+  "additionalProperties": false
+}
