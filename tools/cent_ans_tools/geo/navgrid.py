@@ -638,7 +638,7 @@ def render_preview(layers: NavgridLayers, rules: dict, path: Path) -> None:
     rgb[layers.water] = PREVIEW_COLOURS["water"]
     rgb[river & impassable & ~layers.water] = PREVIEW_COLOURS["river"]
     rgb[layers.reopened & river] = PREVIEW_COLOURS["reopened"]
-    image = Image.fromarray(rgb, mode="RGB")
+    image = Image.fromarray(rgb)
     draw = ImageDraw.Draw(image)
     for crossing in layers.crossings:
         if crossing.type == "pass":
