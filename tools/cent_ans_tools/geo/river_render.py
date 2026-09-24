@@ -146,21 +146,42 @@ def in_zones(points: np.ndarray, zones: list[dict]) -> np.ndarray:
     return inside
 
 
+def _boundary_point(outside: np.ndarray, inside: np.ndarray, zones: list[dict]) -> np.ndarray:
+    """Point of segment ``outside → inside`` on the zone boundary (bisection)."""
+    lo, hi = outside, inside
+    for _ in range(16):
+        mid = 0.5 * (lo + hi)
+        if in_zones(mid[None, :], zones)[0]:
+            hi = mid
+        else:
+            lo = mid
+    return lo
+
+
 def split_outside(
     points: np.ndarray, widths: np.ndarray, zones: list[dict]
 ) -> list[tuple[np.ndarray, np.ndarray]]:
-    """Runs of consecutive points outside every zone (at least two points each)."""
+    """Runs of consecutive points outside every zone, cut exactly on the zone boundary."""
     if not zones:
         return [(points, widths)]
     inside = in_zones(points, zones)
     runs: list[tuple[np.ndarray, np.ndarray]] = []
     start = None
+    n = len(points)
     for i, flag in enumerate([*inside, True]):
         if not flag and start is None:
             start = i
         elif flag and start is not None:
-            if i - start >= 2:
-                runs.append((points[start:i], widths[start:i]))
+            run_points = [points[k] for k in range(start, i)]
+            run_widths = [widths[k] for k in range(start, i)]
+            if start > 0:
+                run_points.insert(0, _boundary_point(points[start], points[start - 1], zones))
+                run_widths.insert(0, widths[start])
+            if i < n:
+                run_points.append(_boundary_point(points[i - 1], points[i], zones))
+                run_widths.append(widths[i - 1])
+            if len(run_points) >= 2:
+                runs.append((np.asarray(run_points), np.asarray(run_widths)))
             start = None
     return runs
 
