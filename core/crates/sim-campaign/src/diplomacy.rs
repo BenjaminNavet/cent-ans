@@ -1863,7 +1863,8 @@ pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
         && ruler_free
         && me.treasury > 0
         && me.treasury >= 2 * me.upkeep_last_turn.max(0)
-        && me.income_last_turn >= me.upkeep_last_turn
+        && (me.income_last_turn >= me.upkeep_last_turn
+            || me.treasury >= 8 * me.upkeep_last_turn.max(0))
 }
 
 /// Power of the enemies `faction` already fights (rebels excluded).
