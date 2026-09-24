@@ -37,11 +37,11 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 | france_nord | prov_normandie_ouest | fait (5) |
 | france_nord | prov_picardie | fait (5) |
 | france_nord | prov_ponthieu | fait (4) |
-| france_ouest | prov_anjou | à faire |
-| france_ouest | prov_bretagne | à faire |
-| france_ouest | prov_bretagne_ouest | à faire |
-| france_ouest | prov_maine | à faire |
-| france_ouest | prov_poitou | à faire |
+| france_ouest | prov_anjou | fait (5) |
+| france_ouest | prov_bretagne | fait (5) |
+| france_ouest | prov_bretagne_ouest | fait (5) |
+| france_ouest | prov_maine | fait (4) |
+| france_ouest | prov_poitou | fait (5) |
 | languedoc | prov_beaucaire | à faire |
 | languedoc | prov_carcassonne | à faire |
 | languedoc | prov_montpellier | à faire |
@@ -64,5 +64,5 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 
 ## Prochaine étape
 
-Continuer avec `france_ouest` (5 provinces), puis `languedoc`, `provence_alpes`.
+Continuer avec `languedoc` (5 provinces), puis `provence_alpes` (4 provinces, dernière vague).
 Commit `wip:` toutes les ~8 provinces.
