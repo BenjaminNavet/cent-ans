@@ -429,7 +429,10 @@ def set_face_mask(obj, mask):
         attr.data[i].value = mask
 
 
-def export_mesh(objs, rig, alias, path, smooth_angle=50.0):
+INFLUENCES = (4, 2, 1)  # bones per vertex at each level of detail
+
+
+def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
     """Write the figure (world space, rest pose) with skinning data to `path`."""
     positions, normals, colors, uvs, bones, weights, masks = [], [], [], [], [], [], []
     indices = []
@@ -468,7 +471,7 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0):
                     if key not in rig.index:
                         continue
                     acc[rig.index[key]] = acc.get(rig.index[key], 0.0) + g.weight
-                top = sorted(acc.items(), key=lambda kv: -kv[1])[:4]
+                top = sorted(acc.items(), key=lambda kv: -kv[1])[:influences]
                 total = sum(w for _b, w in top)
                 if total <= 0.0:
                     top = [(0, 1.0)]
@@ -634,7 +637,7 @@ def export_figure(fig_name, recipe, rigs):
     for level in range(3):
         _arm, objs = build_human(recipe, level)
         name = f"{fig_name}_lod{level}.mesh.bin"
-        tris.append(export_mesh(objs, rig, human_bone_alias, os.path.join(OUT_DIR, name)))
+        tris.append(export_mesh(objs, rig, human_bone_alias, os.path.join(OUT_DIR, name), influences=INFLUENCES[level]))
         files.append(name)
     return {"rig": recipe["rig"], "lods": files, "tris": tris, "variants": recipe.get("variants", 1)}
 
