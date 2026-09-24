@@ -15,7 +15,9 @@ import subprocess
 import sys
 import urllib.parse
 
-SEARCH_URL = "https://freesound.org/search/?q={query}&f=license%3A%22Creative+Commons+0%22"
+SEARCH_URL = (
+    "https://freesound.org/search/?q={query}&f=license%3A%22Creative+Commons+0%22"
+)
 
 
 def fetch(url: str) -> str:

@@ -66,6 +66,20 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 - **Fantasy UI Borders** — Kenney ([kenney.nl](https://kenney.nl)).
 - **Parchment GUI** — zwonky ([OpenGameArt](https://opengameart.org/content/parchment-gui)).
 
+### Sons de bataille et ambiances — Freesound, CC0 1.0
+
+Banque AU1 (`game/assets/audio/battle/`, `game/assets/audio/ambience/`) : enregistrements
+[Freesound](https://freesound.org) sous licence CC0 (vérifiée page par page), découpés, mélangés
+et bouclés par `tools/cent_ans_tools/audio_bank.py`. Détail fichier par fichier (numéro, titre,
+lien, traitement) dans `game/assets/audio/SOURCE.md`. Merci aux auteurs : 6polnic, adharca,
+AlanCat, Ali_6868, Archeos, AyaDrevis, bajko, Blankened, bolkmar, bruno.auzet, Christopherderp,
+craigsmith, DeadVDI, Defelozedd94, DeVern, DigestContent, DigPro120, DRFX, ethanchase7744,
+FillMat, florianreichelt, foxen10, freefire66, greyfeather, Ittaisha, iwanPlays, jackstraton,
+jamesdrake89, JoeDinesSound, JohnBuhr, joseppujol, juryduty, kasparsj, Kinoton, Kubuzz,
+loopbasedmusic, Lucas_Schacht, modusmogulus, Mythmazter, nekoninja, omerbhatti34, pborel,
+PixelsphereStudios, PorkMuncher, qubodup, Quickmusik, SamuelGremaud, saturdaysoundguy,
+shadoWisp, Simonus18, spycrah, Twisted_Euphoria, unfa, waxsocks, WelvynZPorterSamples, xkeril.
+
 ## Données géographiques
 
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
@@ -89,8 +103,9 @@ Wikipédia ne sont pas recopiés.
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
   de `data/factions/`.
 - **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`).
-- **Sons et musiques** (`game/assets/audio/`) : synthèse procédurale (numpy/scipy), sans
-  échantillon externe.
+- **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
+  procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances
+  (`battle/`, `ambience/`) viennent de Freesound (CC0, voir plus haut).
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
 
