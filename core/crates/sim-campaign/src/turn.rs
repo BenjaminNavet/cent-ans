@@ -70,6 +70,8 @@ impl CampaignState {
         // population reads their unrest (M5).
         diplomacy::resolve_diplomacy(self, data, &mut events);
         religion::resolve_religion(self, data, &mut events);
+        // 8b'. Agents: upkeep, counter-espionage, stale intelligence (C6).
+        crate::agents::resolve_agents(self, data, &mut events);
 
         // 8c. Chronicle: historical and random events (M10).
         chronicle::resolve_chronicle(self, data, &mut events);
@@ -102,6 +104,8 @@ impl CampaignState {
                 army.movement_points = points;
             }
         }
+        // C6: agents get their points back and resume their march.
+        crate::agents::start_season(self, data);
         let turn = self.turn;
         for faction in self.factions.values_mut() {
             faction.truces.retain(|_, until| *until > turn);
