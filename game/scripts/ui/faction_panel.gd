@@ -34,6 +34,13 @@ const CATEGORY_LABELS := {
 var faction_id: String = ""
 ## H9 : ligne « Table » (régimes des provinces) ajoutée en code après l'entretien des bâtiments.
 var table_upkeep_value: Label
+## H11 : postes de la monnaie (budget), sections Monnaie et Ordre de chevalerie, fenêtre des rançons.
+var seigniorage_value: Label
+var recoinage_value: Label
+var coinage_section: CoinageSection
+var chivalry_section: ChivalrySection
+var ransom_button: Button
+var ransom_panel: RansomPanel
 var _tax_buttons: Dictionary = {}
 var _updating := false
 
@@ -47,6 +54,10 @@ func _ready() -> void:
 		hide()
 		closed.emit())
 	_add_table_row()
+	_add_h11_sections()
+	visibility_changed.connect(func() -> void:
+		if not visible and ransom_panel != null:
+			ransom_panel.hide())
 	# F2 : infobulles du trésor et du revenu.
 	for pair in [[treasury_value, "hud_treasury"], [income_value, "hud_income"], [projected_value, "hud_income"]]:
 		var label: Label = pair[0]
@@ -69,6 +80,9 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		building_upkeep_value.text = "—"
 		administration_value.text = "—"
 		table_upkeep_value.text = "—"
+		seigniorage_value.text = "—"
+		recoinage_value.text = "—"
+		_show_h11()
 		tax_note.text = "Non disponible avec cette simulation."
 		_set_tax_buttons_disabled(true)
 		_fill_goods({}, [])
@@ -81,6 +95,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	building_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("building_upkeep", 0)))
 	administration_value.text = "%s ℔" % _thousands(int(economy.get("administration_upkeep", 0)))
 	_show_table_upkeep(economy)
+	_show_h11(economy)
 	_set_tax_buttons_disabled(false)
 	var rate: String = str(economy.get("tax_rate", "normal"))
 	_updating = true
@@ -122,6 +137,72 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 			var diet: Dictionary = sim.call("get_province_diet", province)
 			lines.append("• %s : %s — %s ℔" % [str(info.get("display_name", province)), str(diet.get("name", row.get("diet", ""))), _thousands(int(row.get("cost", 0)))])
 	table_upkeep_value.tooltip_text = "\n".join(lines)
+
+
+## H11 : lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
+## sous les biens. Tout est construit en code (la scène n'est pas modifiée).
+func _add_h11_sections() -> void:
+	var anchor: Control = table_upkeep_value
+	for pair in [["Seigneuriage (revenu)", "seigniorage_value"], ["Refonte (administration)", "recoinage_value"]]:
+		var key := Label.new()
+		key.text = pair[0]
+		var value := RichLabel.new()
+		value.text = "—"
+		value.mouse_filter = Control.MOUSE_FILTER_PASS
+		anchor.add_sibling(key)
+		key.add_sibling(value)
+		set(pair[1], value)
+		anchor = value
+	coinage_section = CoinageSection.new()
+	chivalry_section = ChivalrySection.new()
+	ransom_button = RichButton.new()
+	ransom_button.text = "Captifs et rançons"
+	ransom_button.tooltip_text = "Nos captifs, nos prisonniers et les dettes de rançon."
+	ransom_button.pressed.connect(toggle_ransoms)
+	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, ransom_button]:
+		goods_list.get_parent().add_child(node)
+
+
+func _show_h11(economy: Dictionary = {}) -> void:
+	var player := _player_faction()
+	var is_player := faction_id == player or player == ""
+	if not economy.is_empty():
+		var seigniorage := int(economy.get("seigniorage", 0))
+		seigniorage_value.text = "%s%s ℔" % ["+" if seigniorage > 0 else "", _thousands(seigniorage)]
+		seigniorage_value.tooltip_text = "[b]Seigneuriage[/b]\nProfit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s ℔" % _thousands(int(economy.get("seigniorage_last_turn", 0)))
+		recoinage_value.text = "%s ℔" % _thousands(int(economy.get("recoinage", 0)))
+		recoinage_value.tooltip_text = "[b]Refonte des espèces[/b]\nCoût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s ℔" % _thousands(int(economy.get("recoinage_last_turn", 0)))
+	coinage_section.show_for(faction_id, is_player)
+	chivalry_section.show_for(is_player)
+	var sim := _sim()
+	ransom_button.visible = is_player and sim != null and sim.has_method("get_ransoms")
+	if ransom_button.visible:
+		var ransoms: Dictionary = sim.call("get_ransoms")
+		var count: int = (ransoms.get("ours", []) as Array).size() + (ransoms.get("held", []) as Array).size()
+		ransom_button.text = "Captifs et rançons (%d)" % count if count > 0 else "Captifs et rançons"
+
+
+## Ouvre ou ferme la fenêtre des rançons, posée à gauche du panneau (même calque).
+func toggle_ransoms() -> void:
+	if ransom_panel == null:
+		ransom_panel = RansomPanel.new()
+		get_parent().add_child(ransom_panel)
+		ransom_panel.ransoms_changed.connect(func() -> void: _show_h11())
+	elif ransom_panel.visible:
+		ransom_panel.close()
+		return
+	ransom_panel.refresh(_sim())
+	ransom_panel.position = Vector2(maxf(8.0, global_position.x - ransom_panel.size.x - 8.0), global_position.y)
+
+
+func _sim() -> Object:
+	var facade := get_node_or_null("/root/SimFacade")
+	return facade.get("sim") if facade != null else null
+
+
+func _player_faction() -> String:
+	var sim := _sim()
+	return str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
 
 
 func _set_tax_buttons_disabled(disabled: bool) -> void:
