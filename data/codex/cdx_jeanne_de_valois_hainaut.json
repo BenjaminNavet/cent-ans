@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jeanne_de_valois_hainaut",
+  "title": "Jeanne de Valois, comtesse de Hainaut",
+  "category": "personnage",
+  "aliases": ["Jeanne de Valois", "comtesse de Hainaut"],
+  "era": { "from": "v. 1294", "to": "1342" },
+  "summary": "Sœur de [[cdx_philippe_vi|Philippe VI]] et épouse de Guillaume Ier de Hainaut, Jeanne de Valois est la belle-mère d'[[cdx_edouard_iii|Édouard III]] ; elle négocie la trêve d'Esplechin en 1340 entre son frère et son gendre.",
+  "body": "Fille de Charles de Valois et sœur cadette de [[cdx_philippe_vi|Philippe VI]], Jeanne épouse vers 1305 Guillaume Ier d'Avesnes, comte de Hainaut, de Hollande et de Zélande. De cette union naît notamment [[cdx_philippa_de_hainaut|Philippa]], mariée en 1328 à [[cdx_edouard_iii|Édouard III]] : Jeanne se trouve ainsi à la fois sœur du roi de France et belle-mère du roi d'Angleterre, position unique au début de la guerre.\n\nVeuve le 7 juin 1337, elle garde une influence considérable à la cour de Hainaut, où son fils Guillaume II lui succède. Femme de tête et pieuse, elle œuvre sans relâche à éviter l'affrontement ouvert entre son frère et son gendre, dont les intérêts contradictoires menacent de déchirer sa propre famille.\n\nSon effort culmine à l'automne 1340 : après le siège manqué de Tournai, elle intervient personnellement auprès des deux camps et obtient la signature de la trêve d'Esplechin (25 septembre 1340), qui suspend pour un temps les hostilités. Peu après, en 1340 ou 1341 selon les sources, elle se retire à l'abbaye cistercienne de Fontenelle près de Valenciennes, où elle prend le voile sans renoncer tout à fait à son rôle de médiatrice. Elle y meurt en mars 1342.",
+  "entity": "chr_jeanne_de_valois_hainaut",
+  "see_also": ["cdx_philippe_vi", "cdx_edouard_iii", "cdx_philippa_de_hainaut"],
+  "sources": ["Jeanne de Valois (1294-1342)", "Guillaume Ier de Hainaut", "Trêve d'Esplechin"]
+}

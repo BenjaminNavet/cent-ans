@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_saragosse",
+    "province": "prov_aragon",
+    "kind": "city",
+    "name": {
+      "display": "Saragosse",
+      "local": "Çaragoça",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.8891,
+      41.6488
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Saragosse, capitale du royaume d'Aragon depuis la Reconquête de 1118, sur l'Èbre.",
+    "sources": [
+      "Royaume d'Aragon",
+      "Pierre IV d'Aragon",
+      "Saragosse"
+    ]
+  },
+  {
+    "id": "set_huesca",
+    "province": "prov_aragon",
+    "kind": "town",
+    "name": {
+      "display": "Huesca",
+      "local": "Uesca",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -0.4089,
+      42.1401
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne capitale du royaume d'Aragon, siège épiscopal.",
+    "sources": [
+      "Huesca"
+    ]
+  },
+  {
+    "id": "set_teruel",
+    "province": "prov_aragon",
+    "kind": "town",
+    "name": {
+      "display": "Teruel",
+      "local": "Teruel",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -1.1065,
+      40.3456
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de frontière repeuplée après la Reconquête, à la population mêlée chrétienne et mudéjare.",
+    "sources": [
+      "Teruel"
+    ]
+  },
+  {
+    "id": "set_calatayud",
+    "province": "prov_aragon",
+    "kind": "castle",
+    "name": {
+      "display": "Calatayud",
+      "local": "Calatayud",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -1.6439,
+      41.3536
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne forteresse musulmane fondée au VIIIe siècle, ville aragonaise fortifiée.",
+    "sources": [
+      "Calatayud"
+    ]
+  }
+]

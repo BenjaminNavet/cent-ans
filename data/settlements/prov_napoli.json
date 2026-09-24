@@ -1,0 +1,174 @@
+[
+  {
+    "id": "set_naples",
+    "province": "prov_napoli",
+    "kind": "city",
+    "name": {
+      "display": "Naples",
+      "local": "Napule",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.2681,
+      40.8518
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_university"
+    ],
+    "port": true,
+    "description": "Naples, capitale du royaume angevin de Naples.",
+    "sources": [
+      "Royaume de Naples",
+      "Robert Ier de Naples",
+      "Naples"
+    ]
+  },
+  {
+    "id": "set_salerno",
+    "province": "prov_napoli",
+    "kind": "town",
+    "name": {
+      "display": "Salerne",
+      "local": "Salierno",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.7681,
+      40.6824
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville célèbre pour son ancienne école de médecine, port du golfe de Salerne.",
+    "sources": [
+      "Salerne"
+    ]
+  },
+  {
+    "id": "set_amalfi",
+    "province": "prov_napoli",
+    "kind": "town",
+    "name": {
+      "display": "Amalfi",
+      "local": "Melfe",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.6027,
+      40.634
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Ancienne république maritime déclinée mais toujours active sur la côte tyrrhénienne.",
+    "sources": [
+      "Amalfi"
+    ]
+  },
+  {
+    "id": "set_capua",
+    "province": "prov_napoli",
+    "kind": "castle",
+    "name": {
+      "display": "Capoue",
+      "local": "Capua",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.2114,
+      41.0879
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte sur le Volturno, verrou septentrional du royaume angevin de Naples.",
+    "sources": [
+      "Capoue"
+    ]
+  },
+  {
+    "id": "set_montevergine",
+    "province": "prov_napoli",
+    "kind": "abbey",
+    "name": {
+      "display": "Montevergine",
+      "local": "Muntevergine",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.7325,
+      40.9319
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Sanctuaire bénédictin fondé en 1124 sur le Monte Vergine, en Irpinia.",
+    "sources": [
+      "Montevergine"
+    ]
+  },
+  {
+    "id": "set_montecassino",
+    "province": "prov_napoli",
+    "kind": "abbey",
+    "name": {
+      "display": "Mont-Cassin",
+      "local": "Montecassino",
+      "local_language": "latin"
+    },
+    "lonlat": [
+      13.8129,
+      41.4901
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye mère de l'ordre bénédictin, fondée par saint Benoît vers 529.",
+    "sources": [
+      "Abbaye du Mont-Cassin"
+    ]
+  }
+]

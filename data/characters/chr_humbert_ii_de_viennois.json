@@ -1,0 +1,42 @@
+{
+  "id": "chr_humbert_ii_de_viennois",
+  "name": {
+    "display": "Humbert II de Viennois",
+    "local": "Umbert II de Viena",
+    "local_language": "franco-provençal"
+  },
+  "sex": "male",
+  "house": "La Tour-du-Pin",
+  "faction": "fac_empire",
+  "role": "noble",
+  "birth": {
+    "value": "1312",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1355-05-22"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Dauphin de Viennois"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_spendthrift",
+    "trait_generous"
+  ],
+  "piety": 55,
+  "starting_location": "prov_dauphine",
+  "status": "at_court",
+  "description": "Dauphin de Viennois, terre d'Empire aux confins du royaume ; dépensier et sans héritier après la mort de son fils unique (1335), il ruine son domaine par ses fondations pieuses et son projet de croisade. Il cédera le Dauphiné au fils du roi de France en 1349 (transport du Dauphiné), donnant son titre à l'héritier de la couronne.",
+  "sources": [
+    "Humbert II de Viennois",
+    "Dauphiné de Viennois"
+  ]
+}

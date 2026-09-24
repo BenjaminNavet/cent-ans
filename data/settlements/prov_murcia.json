@@ -1,0 +1,113 @@
+[
+  {
+    "id": "set_murcie",
+    "province": "prov_murcia",
+    "kind": "city",
+    "name": {
+      "display": "Murcie",
+      "local": "Murcia",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.1307,
+      37.9922
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Murcie, capitale du royaume castillan de Murcie, ancienne frontière avec Grenade.",
+    "sources": [
+      "Royaume de Murcie",
+      "Murcie"
+    ]
+  },
+  {
+    "id": "set_cartagena",
+    "province": "prov_murcia",
+    "kind": "town",
+    "name": {
+      "display": "Carthagène",
+      "local": "Cartagena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.9862,
+      37.6058
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port méditerranéen hérité de l'Antiquité, rade naturelle protégée.",
+    "sources": [
+      "Carthagène (Espagne)"
+    ]
+  },
+  {
+    "id": "set_lorca",
+    "province": "prov_murcia",
+    "kind": "castle",
+    "name": {
+      "display": "Lorca",
+      "local": "Lorca",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.7005,
+      37.6716
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte de frontière face à Grenade, dernier bastion avant le royaume nasride.",
+    "sources": [
+      "Lorca"
+    ]
+  },
+  {
+    "id": "set_cieza",
+    "province": "prov_murcia",
+    "kind": "village",
+    "name": {
+      "display": "Cieza",
+      "local": "Cieza",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.4187,
+      38.2394
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg agricole des rives du Segura.",
+    "sources": [
+      "Cieza"
+    ]
+  }
+]

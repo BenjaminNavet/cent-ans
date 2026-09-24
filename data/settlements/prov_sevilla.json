@@ -1,0 +1,145 @@
+[
+  {
+    "id": "set_seville",
+    "province": "prov_sevilla",
+    "kind": "city",
+    "name": {
+      "display": "Séville",
+      "local": "Sevilla",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.9845,
+      37.3891
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": true,
+    "description": "Séville, grande cité andalouse reconquise en 1248, port fluvial ouvert sur l'Atlantique.",
+    "sources": [
+      "Séville",
+      "Bataille du Salado",
+      "Cadix"
+    ]
+  },
+  {
+    "id": "set_cadiz",
+    "province": "prov_sevilla",
+    "kind": "town",
+    "name": {
+      "display": "Cadix",
+      "local": "Cádiz",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.2926,
+      36.5271
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port atlantique repris aux musulmans en 1262 par Alphonse X.",
+    "sources": [
+      "Cadix"
+    ]
+  },
+  {
+    "id": "set_jerez_de_la_frontera",
+    "province": "prov_sevilla",
+    "kind": "castle",
+    "name": {
+      "display": "Jerez de la Frontera",
+      "local": "Xerez",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.1375,
+      36.685
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville-frontière fortifiée dominant la route vers Grenade, alcazar almohade.",
+    "sources": [
+      "Jerez de la Frontera"
+    ]
+  },
+  {
+    "id": "set_carmona",
+    "province": "prov_sevilla",
+    "kind": "castle",
+    "name": {
+      "display": "Carmona",
+      "local": "Carmona",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.6417,
+      37.4716
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Alcazar almohade sur un éperon dominant la campagne sévillane.",
+    "sources": [
+      "Carmona"
+    ]
+  },
+  {
+    "id": "set_san_isidoro_del_campo",
+    "province": "prov_sevilla",
+    "kind": "abbey",
+    "name": {
+      "display": "San Isidoro del Campo",
+      "local": "San Isidoro del Campo",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.0464,
+      37.4318
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère fondé en 1301 à Santiponce par Guzmán le Bon, héros de la défense de Tarifa.",
+    "sources": [
+      "Monastère de San Isidoro del Campo"
+    ]
+  }
+]

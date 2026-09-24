@@ -1,0 +1,150 @@
+[
+  {
+    "id": "set_barcelone",
+    "province": "prov_barcelona",
+    "kind": "city",
+    "name": {
+      "display": "Barcelone",
+      "local": "Barchinona",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.1734,
+      41.3851
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Barcelone, capitale de la Catalogne et principal port de la Couronne d'Aragon.",
+    "sources": [
+      "Principauté de Catalogne",
+      "Barcelone",
+      "Consulat de la mer"
+    ]
+  },
+  {
+    "id": "set_girona",
+    "province": "prov_barcelona",
+    "kind": "town",
+    "name": {
+      "display": "Gérone",
+      "local": "Girona",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.8249,
+      41.9794
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège épiscopal catalan doté d'un important quartier juif (le Call).",
+    "sources": [
+      "Gérone"
+    ]
+  },
+  {
+    "id": "set_tarragona",
+    "province": "prov_barcelona",
+    "kind": "town",
+    "name": {
+      "display": "Tarragone",
+      "local": "Tarragona",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.2578,
+      41.1189
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Siège archiépiscopal primatial de la Tarraconaise, bâtie sur les vestiges romains.",
+    "sources": [
+      "Tarragone"
+    ]
+  },
+  {
+    "id": "set_lleida",
+    "province": "prov_barcelona",
+    "kind": "town",
+    "name": {
+      "display": "Lérida",
+      "local": "Lleida",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.62,
+      41.6176
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_university",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville du bas Segre dotée d'un studium generale fondé en 1300, l'un des premiers d'Espagne.",
+    "sources": [
+      "Lérida",
+      "Université de Lérida"
+    ]
+  },
+  {
+    "id": "set_montserrat",
+    "province": "prov_barcelona",
+    "kind": "abbey",
+    "name": {
+      "display": "Montserrat",
+      "local": "Montserrat",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.8358,
+      41.5928
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère bénédictin perché sur la montagne, abritant la Vierge noire de Montserrat.",
+    "sources": [
+      "Montserrat (monastère)"
+    ]
+  }
+]

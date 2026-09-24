@@ -1,0 +1,38 @@
+{
+  "id": "bld_tin_blowing_house",
+  "name": {
+    "display": "Maison de fonte d'étain"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 550
+  },
+  "build_time_turns": 2,
+  "upkeep": 10,
+  "required_resource": "res_tin",
+  "requires_river": true,
+  "effects": [
+    {
+      "effect": "production",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "tax_income",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 3
+    }
+  ],
+  "description": "Blowing house des stannaries : four à soufflets mus par une roue à eau, où l'on fond le minerai d'étain en lingots. Les lingots sont ensuite « monnayés », c'est-à-dire pesés et taxés, dans les villes de stannaries (Lostwithiel, Helston, Tavistock, Ashburton…) ; la taxe revient au duc de Cornouailles. Voir [[cdx_tin_stannaries]].",
+  "sources": [
+    "Stannaries",
+    "Étain",
+    "Économie médiévale"
+  ]
+}

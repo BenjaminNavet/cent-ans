@@ -1,0 +1,153 @@
+[
+  {
+    "id": "set_venise",
+    "province": "prov_venezia",
+    "kind": "city",
+    "name": {
+      "display": "Venise",
+      "local": "Venexia",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.3155,
+      45.4408
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Venise, république maritime dominant l'Adriatique.",
+    "sources": [
+      "République de Venise",
+      "Francesco Dandolo",
+      "Patriarcat d'Aquilée"
+    ]
+  },
+  {
+    "id": "set_treviso",
+    "province": "prov_venezia",
+    "kind": "town",
+    "name": {
+      "display": "Trévise",
+      "local": "Trevixo",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.2431,
+      45.6669
+    ],
+    "weight": 20,
+    "owner": "fac_verona",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de la Marche trévisane conquise par Cangrande della Scala en 1329, tenue par les Scaligers de Vérone jusqu'à sa reddition à Venise en 1339.",
+    "sources": [
+      "Trévise",
+      "Guerre scaligère"
+    ]
+  },
+  {
+    "id": "set_padova",
+    "province": "prov_venezia",
+    "kind": "town",
+    "name": {
+      "display": "Padoue",
+      "local": "Padoa",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.8768,
+      45.4064
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_university",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Seigneurie de Marsilio da Carrara, restaurée en juillet 1337 avec l'appui de Venise et Florence après la domination scaligère ; université fondée en 1222.",
+    "sources": [
+      "Padoue",
+      "Marsilio da Carrara",
+      "Guerre scaligère"
+    ]
+  },
+  {
+    "id": "set_chioggia",
+    "province": "prov_venezia",
+    "kind": "town",
+    "name": {
+      "display": "Chioggia",
+      "local": "Ciosa",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.2794,
+      45.2181
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port de pêche et de sel au sud de la lagune de Venise.",
+    "sources": [
+      "Chioggia"
+    ]
+  },
+  {
+    "id": "set_praglia",
+    "province": "prov_venezia",
+    "kind": "abbey",
+    "name": {
+      "display": "Praglia",
+      "local": "Praja",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.7315,
+      45.3287
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée vers 1080 près de Padoue.",
+    "sources": [
+      "Abbaye de Praglia"
+    ]
+  }
+]

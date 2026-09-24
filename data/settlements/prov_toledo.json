@@ -1,0 +1,119 @@
+[
+  {
+    "id": "set_tolede",
+    "province": "prov_toledo",
+    "kind": "city",
+    "name": {
+      "display": "Tolède",
+      "local": "Toledo",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.0273,
+      39.8628
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Tolède, ancienne capitale wisigothique et siège primatial d'Espagne.",
+    "sources": [
+      "Alphonse XI de Castille",
+      "Tolède",
+      "Ordre de Calatrava"
+    ]
+  },
+  {
+    "id": "set_madrid",
+    "province": "prov_toledo",
+    "kind": "town",
+    "name": {
+      "display": "Madrid",
+      "local": "Madrid",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7038,
+      40.4168
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville modeste de Nouvelle-Castille dotée d'un alcázar, encore loin de son destin de capitale.",
+    "sources": [
+      "Madrid"
+    ]
+  },
+  {
+    "id": "set_cuenca",
+    "province": "prov_toledo",
+    "kind": "town",
+    "name": {
+      "display": "Cuenca",
+      "local": "Cuenca",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -2.1375,
+      40.0704
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville perchée sur ses gorges, centre du commerce de la laine.",
+    "sources": [
+      "Cuenca (Espagne)"
+    ]
+  },
+  {
+    "id": "set_calatrava_la_nueva",
+    "province": "prov_toledo",
+    "kind": "abbey",
+    "name": {
+      "display": "Calatrava la Nueva",
+      "local": "Calatrava la Nueva",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.8306,
+      38.6994
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Commanderie-siège de l'ordre militaire de Calatrava depuis 1217, après la perte de l'ancienne forteresse.",
+    "sources": [
+      "Calatrava la Nueva",
+      "Ordre de Calatrava"
+    ]
+  }
+]

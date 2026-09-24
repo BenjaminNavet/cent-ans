@@ -1,0 +1,118 @@
+[
+  {
+    "id": "set_valence",
+    "province": "prov_valencia",
+    "kind": "city",
+    "name": {
+      "display": "Valence",
+      "local": "València",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.3763,
+      39.4699
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Valence, capitale du royaume de Valence, conquise par Jacques Ier en 1238.",
+    "sources": [
+      "Royaume de Valence",
+      "Valence (Espagne)"
+    ]
+  },
+  {
+    "id": "set_xativa",
+    "province": "prov_valencia",
+    "kind": "castle",
+    "name": {
+      "display": "Xàtiva",
+      "local": "Xàtiva",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.5175,
+      38.9899
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Double forteresse royale dominant la ville, prise aux musulmans en 1244.",
+    "sources": [
+      "Xàtiva"
+    ]
+  },
+  {
+    "id": "set_alicante",
+    "province": "prov_valencia",
+    "kind": "town",
+    "name": {
+      "display": "Alicante",
+      "local": "Alacant",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.481,
+      38.3452
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Port méditerranéen dominé par le château de Santa Bárbara.",
+    "sources": [
+      "Alicante"
+    ]
+  },
+  {
+    "id": "set_peniscola",
+    "province": "prov_valencia",
+    "kind": "abbey",
+    "name": {
+      "display": "Peñíscola",
+      "local": "Peníscola",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.4,
+      40.3585
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Commanderie fortifiée de l'ordre de Montesa, héritier des biens du Temple en Aragon dissous en 1312.",
+    "sources": [
+      "Peñíscola",
+      "Ordre de Montesa"
+    ]
+  }
+]

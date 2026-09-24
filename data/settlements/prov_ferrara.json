@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_ferrare",
+    "province": "prov_ferrara",
+    "kind": "city",
+    "name": {
+      "display": "Ferrare",
+      "local": "Ferara",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.6198,
+      44.8381
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ferrare, capitale de la maison d'Este, vicaires pontificaux d'Émilie.",
+    "sources": [
+      "Maison d'Este",
+      "Obizzo III d'Este",
+      "Gonzague"
+    ]
+  },
+  {
+    "id": "set_mantova",
+    "province": "prov_ferrara",
+    "kind": "town",
+    "name": {
+      "display": "Mantoue",
+      "local": "Mantoa",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      10.7936,
+      45.1564
+    ],
+    "weight": 25,
+    "owner": "fac_empire",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Seigneurie des Gonzague, reconnus vicaires impériaux par Louis IV de Bavière en 1329.",
+    "sources": [
+      "Mantoue",
+      "Maison Gonzague"
+    ]
+  },
+  {
+    "id": "set_modena",
+    "province": "prov_ferrara",
+    "kind": "castle",
+    "name": {
+      "display": "Modène",
+      "local": "Modena",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      10.9252,
+      44.6471
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville tenue par la maison d'Este, vicaires pontificaux d'Émilie.",
+    "sources": [
+      "Modène",
+      "Maison d'Este"
+    ]
+  },
+  {
+    "id": "set_pomposa",
+    "province": "prov_ferrara",
+    "kind": "abbey",
+    "name": {
+      "display": "Pomposa",
+      "local": "Pomposa",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.1699,
+      44.8306
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine du delta du Pô, où travailla le théoricien musical Guy d'Arezzo.",
+    "sources": [
+      "Abbaye de Pomposa"
+    ]
+  }
+]

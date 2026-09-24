@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_saint_jacques",
+    "province": "prov_galicia",
+    "kind": "city",
+    "name": {
+      "display": "Saint-Jacques",
+      "local": "Santiago",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.5448,
+      42.8805
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Saint-Jacques-de-Compostelle, but du plus grand pèlerinage de la chrétienté occidentale.",
+    "sources": [
+      "Royaume de Galice",
+      "Saint-Jacques-de-Compostelle"
+    ]
+  },
+  {
+    "id": "set_a_coruna",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "La Corogne",
+      "local": "A Crunna",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.4115,
+      43.3623
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port atlantique galicien, étape des pèlerins arrivant par mer à Compostelle.",
+    "sources": [
+      "La Corogne"
+    ]
+  },
+  {
+    "id": "set_lugo",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "Lugo",
+      "local": "Lugo",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -7.556,
+      43.0121
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville ceinte de son enceinte romaine, remarquablement conservée.",
+    "sources": [
+      "Lugo"
+    ]
+  },
+  {
+    "id": "set_tui",
+    "province": "prov_galicia",
+    "kind": "castle",
+    "name": {
+      "display": "Tui",
+      "local": "Tui",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.6446,
+      42.0505
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville-forteresse frontalière face au Portugal, cathédrale fortifiée sur le Minho.",
+    "sources": [
+      "Tui"
+    ]
+  }
+]

@@ -150,6 +150,12 @@
       "source": "delapouite/stone-wall",
       "author": "Delapouite"
     },
+    "bld_tin_blowing_house": {
+      "file": "delapouite-furnace.svg",
+      "category": "building",
+      "source": "delapouite/furnace",
+      "author": "Delapouite"
+    },
     "bld_university": {
       "file": "delapouite-graduate-cap.svg",
       "category": "building",
@@ -329,6 +335,48 @@
       "category": "class",
       "source": "delapouite/farmer",
       "author": "Delapouite"
+    },
+    "diet_bread_pottage": {
+      "file": "lorc-cauldron.svg",
+      "category": "resource",
+      "source": "lorc/cauldron",
+      "author": "Lorc"
+    },
+    "diet_dairy": {
+      "file": "lorc-cheese-wedge.svg",
+      "category": "resource",
+      "source": "lorc/cheese-wedge",
+      "author": "Lorc"
+    },
+    "diet_lenten_fish": {
+      "file": "delapouite-fish-smoking.svg",
+      "category": "resource",
+      "source": "delapouite/fish-smoking",
+      "author": "Delapouite"
+    },
+    "diet_meat_salting": {
+      "file": "delapouite-bacon.svg",
+      "category": "resource",
+      "source": "delapouite/bacon",
+      "author": "Delapouite"
+    },
+    "diet_pulses": {
+      "file": "delapouite-peas.svg",
+      "category": "resource",
+      "source": "delapouite/peas",
+      "author": "Delapouite"
+    },
+    "diet_spiced_table": {
+      "file": "lorc-hot-spices.svg",
+      "category": "resource",
+      "source": "lorc/hot-spices",
+      "author": "Lorc"
+    },
+    "diet_wine_bread": {
+      "file": "lorc-wine-glass.svg",
+      "category": "resource",
+      "source": "lorc/wine-glass",
+      "author": "Lorc"
     },
     "gauge_devastation": {
       "file": "delapouite-castle-ruins.svg",
@@ -515,6 +563,12 @@
       "category": "resource",
       "source": "delapouite/stone-pile",
       "author": "Delapouite"
+    },
+    "res_tin": {
+      "file": "faithtoken-ore.svg",
+      "category": "resource",
+      "source": "faithtoken/ore",
+      "author": "Faithtoken"
     },
     "res_wheat": {
       "file": "lorc-wheat.svg",
