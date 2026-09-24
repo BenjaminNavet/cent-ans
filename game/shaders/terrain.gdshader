@@ -344,7 +344,7 @@ void fragment() {
 			vine_rows = mix(0.45, 1.0 - smoothstep(0.22 - rw, 0.22 + rw, r), fine) * field_vis;
 		}
 		// Bords : haie (tirage < probabilité), chemin de terre (autre tirage), sinon talus herbeux.
-		float p_hedge = open_land * mix(0.05, 0.6, lu.b);
+		float p_hedge = open_land * mix(0.1, 0.75, lu.b);
 		float aa = footprint * 0.75;
 		float hedge_u = step(roll_u, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, du));
 		float hedge_v = step(roll_v, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, dv));
