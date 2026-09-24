@@ -96,6 +96,7 @@ ICONS: dict[str, tuple[str, str]] = {
     "bld_siege_workshop": ("delapouite/hand-saw", "building"),
     "bld_stables": ("delapouite/stable", "building"),
     "bld_stone_walls": ("delapouite/stone-wall", "building"),
+    "bld_tin_blowing_house": ("delapouite/furnace", "building"),
     "bld_university": ("delapouite/graduate-cap", "building"),
     "bld_vineyard_press": ("delapouite/barrel", "building"),
     "bld_water_mill": ("caro-asercion/water-mill", "building"),

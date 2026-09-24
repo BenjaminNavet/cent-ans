@@ -150,6 +150,12 @@
       "source": "delapouite/stone-wall",
       "author": "Delapouite"
     },
+    "bld_tin_blowing_house": {
+      "file": "delapouite-furnace.svg",
+      "category": "building",
+      "source": "delapouite/furnace",
+      "author": "Delapouite"
+    },
     "bld_university": {
       "file": "delapouite-graduate-cap.svg",
       "category": "building",
