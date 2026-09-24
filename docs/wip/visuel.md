@@ -25,3 +25,4 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - V4b fusionné dans visual (81ffcbb) : LOD arbres/figurines/herbe, livrées variées, chevaux, rivière. 1160 soldats : 74 → 87-101 i/s ; 4800 : 54 → 73-90 i/s. Smoke 16/16. Terminé par l'orchestrateur (agent bloqué en fin de lot).
 - V2b fusionné (parcellaire organique, haies fines, cultures variées, palette chaude, étiquettes sans chevauchement ; carte 61-102 i/s). main réintégré, dylib reconstruite, smoke 17/17 OK.
 - Points ouverts pour la suite : démarrage à chaud de la végétation 4,4 s ; siège 1 170 appels de dessin (regrouper maisons/murailles en MultiMesh) ; démo de bataille qui ne va plus au contact (simulation, autre session).
+- 4351c8e : V2b+V4b dans main (orchestrateur). V6 perf lancé (Sonnet). Sièges : maisons bientôt fournies par la simulation (get_siege().houses) ; V6 isole le regroupement MultiMesh dans un script dédié.
