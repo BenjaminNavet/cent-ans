@@ -29,6 +29,8 @@ uniform vec4 splat_rect = vec4(-400.0, -400.0, 2000.0, 1600.0);
 uniform vec4 calm_rect = vec4(150.0, 60.0, 1050.0, 740.0);
 uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
+// Lot B5 : altitude des neiges (sommets de l'horizon en montagne ou en hiver).
+uniform float snow_line = 10000.0;
 uniform vec3 grass_tint : source_color = vec3(0.9, 1.0, 0.8);
 uniform float detail_scale = 1.0;
 
@@ -106,6 +108,7 @@ void fragment() {
 		w_meadow = max(w_meadow, field_w);
 	}
 	float w_snow = snow * smoothstep(0.35, 0.75, world_normal.y * 0.6 + macro * 0.5 + fine * 0.2);
+	w_snow = max(w_snow, smoothstep(snow_line, snow_line + 60.0, world_pos.y + (macro - 0.5) * 50.0) * smoothstep(0.25, 0.6, world_normal.y));
 
 	// Empilement par priorité : chaque couche recouvre les précédentes.
 	float w[9];
