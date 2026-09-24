@@ -363,8 +363,9 @@ pub fn cedable_provinces(
         .collect()
 }
 
-/// The province passes to the captor (as in a peace treaty, without claim).
-fn cede_province(
+/// The province passes to the captor (as in a peace treaty, without claim);
+/// also used by the `transfer_province` event effect (G1).
+pub(crate) fn cede_province(
     state: &mut CampaignState,
     _payer: &FactionId,
     captor: &FactionId,

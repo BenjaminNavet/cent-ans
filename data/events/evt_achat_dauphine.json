@@ -34,9 +34,9 @@
           "amount": -12000
         },
         {
-          "type": "claim",
-          "kind": "province",
-          "target": "prov_dauphine"
+          "type": "transfer_province",
+          "province": "prov_dauphine",
+          "from": "fac_empire"
         },
         {
           "type": "prestige",

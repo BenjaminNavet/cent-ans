@@ -584,6 +584,16 @@ impl CampaignState {
                     .map_or_else(|| order.to_string(), |o| o.name.display.clone());
                 format!("Fondation de l'ordre « {name} »")
             }
+            EventEffect::TransferProvince {
+                province, faction, ..
+            } => match faction {
+                Some(f) => format!(
+                    "{} passe à {}",
+                    province_name(data, province),
+                    faction_name(data, f)
+                ),
+                None => format!("{} rejoint le domaine", province_name(data, province)),
+            },
             EventEffect::Marry { a, b } => format!(
                 "Mariage de {} et {}",
                 self.character_name(data, a),
@@ -936,6 +946,22 @@ pub fn apply_effect(
         EventEffect::Marry { a, b } => {
             marry(state, data, a, b, events);
         }
+        EventEffect::TransferProvince {
+            province,
+            faction,
+            from,
+        } => {
+            let holder = state
+                .provinces
+                .get(province)
+                .map(|p| (&p.owner, &p.controller));
+            let from_ok = from
+                .as_ref()
+                .is_none_or(|f| holder.is_some_and(|(o, c)| o == f || c == f));
+            if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
+                transfer_province(state, data, province, &faction, events);
+            }
+        }
         EventEffect::FoundChivalricOrder { order, faction } => {
             if let Some(faction) = target_faction(faction) {
                 crate::chivalry::found_order_by_event(state, data, &faction, order, events);
@@ -951,6 +977,47 @@ pub fn apply_effect(
             }
         }
     }
+}
+
+/// G1 `transfer_province`: `province` passes to `faction`, ownership and
+/// control (purchase, treaty), through `ransom::cede_province`. Ignored for
+/// unknown ids, a dead recipient, a province it already holds, or the
+/// capital of its current owner. Returns whether the province changed hands.
+pub fn transfer_province(
+    state: &mut CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+    faction: &FactionId,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(p) = state.provinces.get(province) else {
+        return false;
+    };
+    let alive = state.factions.get(faction).is_some_and(|f| f.alive);
+    let held = &p.owner == faction && &p.controller == faction;
+    let capital = state
+        .factions
+        .get(&p.owner)
+        .is_some_and(|f| &f.capital == province);
+    if !alive || held || capital {
+        return false;
+    }
+    let previous = p.owner.clone();
+    crate::ransom::cede_province(state, &previous, faction, province);
+    events.push(
+        GameEvent::new(
+            EventKind::ProvinceCaptured,
+            format!(
+                "{} passe de {} à {}.",
+                province_name(data, province),
+                faction_name(data, &previous),
+                faction_name(data, faction)
+            ),
+        )
+        .province(province)
+        .faction(faction),
+    );
+    true
 }
 
 /// F1 `capture_character`: `id` becomes the prisoner of `captor` (it

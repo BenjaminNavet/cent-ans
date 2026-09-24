@@ -447,6 +447,17 @@ pub enum EventEffect {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         faction: Option<FactionId>,
     },
+    /// G1: `province` passes to `faction` (default: the deciding faction),
+    /// ownership and control (purchase, treaty). Sieges, garrison, queue and
+    /// governorship of the former holder end. With `from`, only when that
+    /// faction owns or controls it.
+    TransferProvince {
+        province: ProvinceId,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        from: Option<FactionId>,
+    },
 }
 
 /// One choice of an event.
