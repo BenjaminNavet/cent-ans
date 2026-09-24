@@ -446,8 +446,8 @@ def torso(f, under, under_code, surcoat, skirt_to=0.55, belt=True, skirt=None):
     ]
     f.loft(skirt, P_CLOTH, skirt_colour, ring=10, caps=(False, False), solidify=0.01)
     if belt and not f.far:
-        f.loft([((0.0, 0.93, 0.0), 0.175, 0.12, 0.125), ((0.0, 0.98, 0.0), 0.172, 0.118, 0.122)], P_BODY,
-               const(LEATHER), ring=10, caps=(False, False), subdiv=0)
+        f.loft([((0.0, 0.93, 0.0), 0.178, 0.12, 0.125), ((0.0, 0.98, 0.0), 0.175, 0.12, 0.125)], P_BODY,
+               const(LEATHER), ring=12, power=2.4, caps=(False, False), subdiv=0)
         if not f.lod:
             f.box((0.0, 0.955, 0.135), (0.05, 0.045, 0.012), P_BODY, const(WHITE, C_TRIM))
     # Neck and head (face, nose, ears hidden under helmets).
@@ -755,16 +755,16 @@ def horse(f, coat, caparison, dark_points):
 
     # Along +Z: r_pos = top line (croup, back, withers), r_neg = belly.
     body = [
-        ((0.0, 1.3, -1.0), 0.09, 0.1, 0.12),
-        ((0.0, 1.33, -0.93), 0.21, 0.22, 0.3),
-        ((0.0, 1.35, -0.76), 0.3, 0.28, 0.38),
-        ((0.0, 1.33, -0.48), 0.32, 0.26, 0.41),
-        ((0.0, 1.3, -0.18), 0.32, 0.29, 0.43),
-        ((0.0, 1.3, 0.14), 0.32, 0.31, 0.44),
-        ((0.0, 1.32, 0.4), 0.29, 0.33, 0.43),
-        ((0.0, 1.32, 0.58), 0.25, 0.33, 0.37),
-        ((0.0, 1.27, 0.72), 0.19, 0.27, 0.29),
-        ((0.0, 1.24, 0.8), 0.09, 0.12, 0.13),
+        ((0.0, 1.32, -1.02), 0.1, 0.14, 0.2),
+        ((0.0, 1.32, -0.95), 0.22, 0.26, 0.36),
+        ((0.0, 1.32, -0.78), 0.31, 0.31, 0.44),
+        ((0.0, 1.3, -0.5), 0.33, 0.28, 0.47),
+        ((0.0, 1.28, -0.2), 0.33, 0.3, 0.49),
+        ((0.0, 1.28, 0.12), 0.33, 0.32, 0.5),
+        ((0.0, 1.3, 0.38), 0.3, 0.35, 0.49),
+        ((0.0, 1.3, 0.58), 0.26, 0.35, 0.43),
+        ((0.0, 1.25, 0.74), 0.2, 0.28, 0.33),
+        ((0.0, 1.22, 0.83), 0.1, 0.13, 0.15),
     ]
     f.loft(body, P_HORSE, coat_fn, ring=10, side=(1.0, 0.0, 0.0), power=2.2, subdiv=1)
     neck = [
@@ -776,18 +776,18 @@ def horse(f, coat, caparison, dark_points):
     ]
     f.loft(neck, P_HNECK, coat_fn, ring=8, side=(1.0, 0.0, 0.0))
     head = [
-        ((0.0, 2.06, 0.95), 0.065, 0.075),
-        ((0.0, 2.03, 1.02), 0.092, 0.1, 0.14),
-        ((0.0, 1.95, 1.13), 0.086, 0.09, 0.12),
-        ((0.0, 1.84, 1.26), 0.066, 0.075, 0.075),
-        ((0.0, 1.74, 1.38), 0.06, 0.07, 0.065),
-        ((0.0, 1.68, 1.45), 0.056, 0.062, 0.06),
-        ((0.0, 1.65, 1.48), 0.03, 0.03),
+        ((0.0, 2.07, 0.95), 0.07, 0.08),
+        ((0.0, 2.03, 1.02), 0.1, 0.1, 0.17),
+        ((0.0, 1.93, 1.11), 0.09, 0.09, 0.13),
+        ((0.0, 1.8, 1.22), 0.07, 0.078, 0.08),
+        ((0.0, 1.68, 1.32), 0.064, 0.074, 0.074),
+        ((0.0, 1.61, 1.38), 0.06, 0.066, 0.066),
+        ((0.0, 1.575, 1.41), 0.032, 0.035),
     ]
 
     def head_fn(p):
         # Darker muzzle.
-        if p.z > 1.38:
+        if p.z > 1.3:
             return tuple(c * 0.55 for c in coat), C_EXACT
         return coat, C_EXACT
 
@@ -815,9 +815,9 @@ def horse(f, coat, caparison, dark_points):
         if front:
             knee = (0.6, z + 0.01)
             sections = [
-                ((x, 1.2, z - 0.02), 0.1, 0.16),
-                ((x, 0.95, z), 0.09, 0.14, 0.1),
-                ((x * 1.02, 0.78, z + 0.01), 0.065, 0.085),
+                ((x, 1.15, z - 0.02), 0.11, 0.17),
+                ((x, 0.92, z), 0.1, 0.15, 0.11),
+                ((x * 1.02, 0.76, z + 0.01), 0.07, 0.09),
                 ((x * 1.02, 0.6, z + 0.01), 0.05, 0.062),
                 ((x * 1.02, 0.48, z + 0.005), 0.036, 0.045),
                 ((x * 1.02, 0.27, z), 0.036, 0.045),
@@ -829,9 +829,9 @@ def horse(f, coat, caparison, dark_points):
         else:
             knee = (0.6, z - 0.17)
             sections = [
-                ((x * 0.9, 1.3, z + 0.04), 0.12, 0.2),
-                ((x, 1.02, z + 0.02), 0.1, 0.17, 0.14),
-                ((x * 1.02, 0.84, z - 0.08), 0.06, 0.09),
+                ((x * 0.9, 1.25, z + 0.04), 0.13, 0.21),
+                ((x, 0.98, z + 0.02), 0.11, 0.18, 0.15),
+                ((x * 1.02, 0.82, z - 0.08), 0.065, 0.1),
                 ((x * 1.02, 0.62, z - 0.17), 0.045, 0.07, 0.045),
                 ((x * 1.02, 0.48, z - 0.155), 0.037, 0.05),
                 ((x * 1.02, 0.26, z - 0.13), 0.037, 0.046),
@@ -870,20 +870,20 @@ def horse(f, coat, caparison, dark_points):
                    ring=5, subdiv=0)
     # Bridle: headstall, noseband, reins to the withers.
     if not f.lod:
-        f.loft([((0.0, 1.8, 1.29), 0.068, 0.078), ((0.0, 1.78, 1.315), 0.066, 0.075)], P_HNECK, const(LEATHER),
+        f.loft([((0.0, 1.71, 1.29), 0.075, 0.087), ((0.0, 1.69, 1.31), 0.073, 0.085)], P_HNECK, const(LEATHER),
                ring=8, caps=(False, False), solidify=0.01, side=(1.0, 0.0, 0.0), subdiv=0)
         f.loft([((0.0, 2.04, 1.0), 0.09, 0.1), ((0.0, 2.02, 1.035), 0.088, 0.098)], P_HNECK, const(LEATHER),
                ring=8, caps=(False, False), solidify=0.01, side=(1.0, 0.0, 0.0), subdiv=0)
         for sx in (-1.0, 1.0):
-            f.tube([(0.06 * sx, 1.74, 1.34), (0.1 * sx, 1.7, 0.95), (0.14 * sx, 1.78, 0.3)], [0.008] * 3, P_HNECK,
+            f.tube([(0.065 * sx, 1.64, 1.33), (0.1 * sx, 1.62, 0.95), (0.14 * sx, 1.74, 0.3)], [0.008] * 3, P_HNECK,
                    const(LEATHER), ring=3, subdiv=0)
     if caparison:
-        _caparison(f, body, neck, head)
+        _caparison(f, body, neck)
 
 
-def _caparison(f, body, neck, head):
+def _caparison(f, body, neck):
     """Livery trapper: a cloth over the body wrapping the chest and the hindquarters, falling
-    to mid-cannon with a wavy hem, arms on the flanks; crinet over the neck, cloth chanfron."""
+    to mid-cannon with a wavy hem, arms on the flanks; crinet over the neck."""
     n = 10 if not f.lod else 6
     drop = 4 if not f.lod else 2
     rings = []
@@ -920,10 +920,8 @@ def _caparison(f, body, neck, head):
         return (u, v) if abs(p.x) > 0.15 else (-1.0, -1.0)
 
     f.add(verts, faces, P_HORSE, const(WHITE, C_ARMS), subdiv=1, uv_fn=uv_fn)
-    crinet = [(c, rx + 0.025, rp + 0.025, rn + 0.02) for c, rx, rp, rn in neck[:-1]]
+    crinet = [(c, rx + 0.02, rp + 0.02, rn + 0.015) for c, rx, rp, rn in neck]
     f.loft(crinet, P_HNECK, const(WHITE, C_LIVERY), ring=8, side=(1.0, 0.0, 0.0), caps=(False, False))
-    chanfron = [(c, rx + 0.012, rp + 0.012, rn + 0.012) for c, rx, rp, rn in head[1:-2]]
-    f.loft(chanfron, P_HNECK, const(WHITE, C_LIVERY), ring=8, side=(1.0, 0.0, 0.0), caps=(False, False))
 
 
 def rider(f, under, under_code, surcoat, helmet_style, armored):
