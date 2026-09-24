@@ -185,7 +185,24 @@ et le Hainaut tous les 5 ans ; `TRACE=<mot>` filtre les événements).
 - *Fiefs-rentes* : le tour précédant les offres dynastiques, une couronne en guerre qui garde 4 fois le
   montant en trésor offre 1 500 livres (+15 d'attitude pendant 20 tours) au courtisan qui ne la préfère pas
   encore de `dynastic.margin` ; une pension en cours n'est pas renouvelée.
-- *Voisinage* : `CampaignState::are_neighbors` lit les `neighbors` des fichiers de province, renseignés pour
-  6 provinces sur 132 ; l'alignement utilise `alignment::borders` (frontières de la carte,
-  `movement::land_neighbors`). Corriger `are_neighbors` lui-même est un chantier d'équilibrage à part
-  (essai : appels aux armes ×5, Auld Alliance rompue sur 2 graines sur 5).
+- *Voisinage* : corrigé en G5 (§ 7) ; `CampaignState::are_neighbors` suit les frontières de la carte.
+
+## 7. G5 — Voisinage réel
+
+`CampaignState::are_neighbors` (voisins menaçants, contrepoids, fronts qui pèsent, prétendants frontaliers,
+cobelligérance, toile des Pays-Bas) suit le graphe terrestre de la carte (`movement::land_neighbors`), comme
+le mouvement et le brouillard ; l'ancien `alignment::borders` a disparu. Les voisins maritimes ne comptent
+pas : l'Angleterre borde déjà la France par la Guyenne et le Ponthieu, et la Manche ferait de chaque port un
+voisin. Réglages : `data/ai/diplomacy.json` (schéma `ai_diplomacy.schema.json`, struct
+`data_model::AiDiplomacy` ; sans le fichier, les constantes F4). Tests : `sim-campaign/tests/g5_neighbors.rs`.
+
+- *Voisin menaçant* (`menacing_neighbour`) : ×1,5 de puissance, −15 d'attitude, +10 au contrepoids.
+- *Front* (`war`) : pas de nouvelle guerre tant que les ennemis frontaliers ou occupants pèsent plus de la
+  moitié de notre puissance ; prétendant à 0,5 (allié ou frontalier), 0,8 seul.
+- *Cobelligérance* (`join_war`) : rapport de coalition 0,6, attitude > 10 envers l'allié, allié au moins aussi
+  puissant que nous (`min_ally_power_ratio` = 1 : la Gueldre suit Édouard III, la France ne suit pas la
+  Savoie) ; une frontière avec l'ennemi ne suffit que dans une guerre de prétentions de l'allié
+  (`border_only_claim_wars`), sinon il faut une prétention à nous.
+- *Paix* (`peace`) : ni capitale ni dernière province cédées (`keep_capital`) — Northampton laisse une Écosse
+  —, et cette paix solde la guerre (« Conquêtes reconnues ») ; une couronne qui ne tient plus que
+  `cornered_provinces` (1) de ses provinces demande la paix à chaque saison, quel que soit le score.
