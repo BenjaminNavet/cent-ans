@@ -171,6 +171,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 			str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), village_view.reed_count])
 		for pool in _pools:
 			print("BattleTerrain: pool (%.0f, %.0f) r %.0f" % [float(pool["x"]), float(pool["z"]), float(pool["radius"])])
+		for wood in terrain.get("forests", []):
+			print("BattleTerrain: wood (%.0f, %.0f) r %.0f, ground %.1f m" % [float(wood["x"]), float(wood["z"]), float(wood["radius"]), height_at(float(wood["x"]), float(wood["z"]))])
 
 
 ## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?

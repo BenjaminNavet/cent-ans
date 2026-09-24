@@ -11,7 +11,10 @@
 //!
 //! - Field of [`FIELD_WIDTH`] × [`FIELD_DEPTH`] metres with procedural hills,
 //!   forests, mud and an optional river with two fords ([`Battlefield`]);
-//!   weather drawn from the season ([`Weather`]).
+//!   weather drawn from the season ([`Weather`]). Lot B5 ([`site`]): the
+//!   campaign site adds the ground of the season (mud, snow), a coast on a
+//!   flank, marsh pools, a village or farm (cover, broken charges) with its
+//!   hedges, fences and ditches, bocage hedgerows.
 //! - Each regiment ([`Unit`]) is an oriented rectangle whose size follows its
 //!   formation; soldiers are laid out in a grid for rendering.
 //! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
