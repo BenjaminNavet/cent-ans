@@ -41,6 +41,9 @@ var land_mask: Image
 var splat_image: Image
 var border_dist_image: Image
 var coast_dist_image: Image
+## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
+## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
+var landuse_image: Image
 var province_ids_image: Image
 var ids_bytes: PackedByteArray
 var ids_bpp: int = 3
@@ -243,6 +246,7 @@ func _load_provinces() -> bool:
 			"centroid": centroid,
 			"capital_px": _to_vec2(props.get("capital_px", [centroid.x, centroid.y])),
 			"neighbors": props.get("neighbors", []),
+			"area_px": float(props.get("area_px", 0.0)),
 			"rings": _outer_rings(feature.get("geometry", {})),
 		}
 		provinces[index] = entry

@@ -31,6 +31,7 @@
 pub mod ai;
 pub mod command;
 pub mod field;
+pub mod formation_ai;
 pub mod orders;
 pub mod outcome;
 pub mod rng;
@@ -51,5 +52,8 @@ pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
-pub use sim::{BattleSim, SetupError, AI_PERIOD, DT, MAX_DURATION};
+pub use sim::{
+    BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, SIEGE_STANDOFF,
+    ZONE_DEPTH,
+};
 pub use unit::{Formation, Unit, UnitState};

@@ -4,6 +4,14 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod deployment;
+mod pathing;
+mod separation;
+mod siege_extra;
+
+pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
+pub use separation::FRIEND_GAP;
+
 use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
@@ -93,6 +101,10 @@ pub struct BattleSim {
     pub(crate) order_uses: OrderUses,
     /// The side gave the "no quarter" order.
     pub(crate) no_quarter: [bool; 2],
+    /// Deployment phase (F5a): time frozen until `start_battle`.
+    deploying: bool,
+    /// Siege pathing cache, one slot per regiment (F5a; derived data).
+    path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -292,6 +304,8 @@ impl BattleSim {
             square_announced: false,
             order_uses: Default::default(),
             no_quarter: [false; 2],
+            deploying: false,
+            path_cache: Default::default(),
         };
         if sim.siege.is_some() {
             sim.deploy_siege();
@@ -701,6 +715,13 @@ impl BattleSim {
         if self.finished {
             return Err(CommandError::Finished);
         }
+        let setup_order = matches!(
+            command,
+            Command::Formation { .. } | Command::FireAtWill { .. }
+        );
+        if self.deploying && !setup_order {
+            return Err(CommandError::Deploying);
+        }
         if let Command::LeaderOrder {
             side: order_side,
             order,
@@ -963,7 +984,7 @@ impl BattleSim {
     /// Advances the battle by `dt` seconds, running as many fixed steps as
     /// needed (at most a few hundred per call).
     pub fn tick(&mut self, dt: f64) {
-        if self.finished || !dt.is_finite() || dt <= 0.0 {
+        if self.finished || self.deploying || !dt.is_finite() || dt <= 0.0 {
             return;
         }
         self.accumulator += dt;
@@ -980,7 +1001,7 @@ impl BattleSim {
 
     /// Runs one fixed step of [`DT`] seconds.
     pub fn step(&mut self) {
-        if self.finished {
+        if self.finished || self.deploying {
             return;
         }
         for unit in &mut self.units {
@@ -989,6 +1010,7 @@ impl BattleSim {
         }
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
+            self.check_sortie();
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
@@ -999,9 +1021,11 @@ impl BattleSim {
         }
         let contacts = self.contacts();
         self.resolve_movement(&contacts);
+        self.separate_friends();
         self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
+        self.tower_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
@@ -1140,9 +1164,10 @@ impl BattleSim {
         let from = (unit.x, unit.z);
         let to = (unit.x + dir.0 * step, unit.z + dir.1 * step);
         let blocked = self.wall_block(index, from, to);
+        let in_house = blocked.is_none() && self.house_block(index, from, to);
         let unit = &mut self.units[index];
         unit.blocked_by = blocked;
-        if blocked.is_some() {
+        if blocked.is_some() || in_house {
             unit.facing = turn_towards(unit.facing, heading, Self::turn_rate(unit) * 4.0);
             return dist;
         }
@@ -1180,6 +1205,10 @@ impl BattleSim {
             if !piece.intact() {
                 continue;
             }
+            // Sortie (F5a): the garrison opens its gate for its own regiments.
+            if works.sortie && unit.side == SideId::Defender && piece.kind == PieceKind::Gate {
+                continue;
+            }
             if defender_inside {
                 // Never further out than the middle of the wall walk.
                 let out_to = piece.outside_offset(to.0, to.1);
@@ -1197,8 +1226,9 @@ impl BattleSim {
             // Stopped only when closing in on the wall face (sliding along
             // it or backing away is free).
             let d_to = piece.distance(to.0, to.1);
-            let closing = piece.outside_offset(to.0, to.1).abs()
-                < piece.outside_offset(from.0, from.1).abs() - 1e-9;
+            // Distance to the stretch itself (F5a): rounding the jamb of a
+            // breach or gate is free.
+            let closing = d_to < piece.distance(from.0, from.1) - 1e-9;
             if piece.crossed_by(from, to) || (d_to < band && closing) {
                 return Some(k);
             }
@@ -1214,18 +1244,16 @@ impl BattleSim {
             return (tx, tz);
         };
         let unit = &self.units[index];
-        if unit.on_wall || unit.state == UnitState::Routing {
+        let sallying = works.sortie && unit.side == SideId::Defender;
+        if (unit.on_wall && !sallying) || unit.state == UnitState::Routing {
             return (tx, tz);
         }
         let from = (unit.x, unit.z);
-        if !works.path_blocked(from, (tx, tz)) {
-            return (tx, tz);
-        }
-        let Some(opening) = works.best_opening(from, (tx, tz)) else {
-            return (tx, tz);
-        };
         let climber = unit.side == SideId::Attacker && unit.can_climb();
-        if climber {
+        if climber && works.path_blocked(from, (tx, tz)) {
+            let Some(opening) = works.best_opening(from, (tx, tz)) else {
+                return (tx, tz);
+            };
             let dist =
                 |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
             let mid = works.pieces[opening].midpoint();
@@ -1234,7 +1262,8 @@ impl BattleSim {
                 return (tx, tz);
             }
         }
-        works.waypoint_through(opening, from)
+        // F5a: A* through breaches, gate and streets (houses are obstacles).
+        self.grid_route(index, tx, tz).unwrap_or((tx, tz))
     }
 
     /// A regiment stopped by an intact wall: foot soldiers of the attacker

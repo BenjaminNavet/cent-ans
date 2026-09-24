@@ -112,6 +112,13 @@ func open_panel() -> void:
 	var outcome: Dictionary = map.sim.call("get_outcome")
 	score_label.text = "%s — échéance %d — score actuel : %d" % [
 		str(info.get("victory_summary", "")), int(info.get("victory_end_year", 0)), int(outcome.get("score", 0))]
+	var hold := int(outcome.get("hold_turns", 1))
+	if hold > 1:
+		var streak := int(outcome.get("victory_streak", 0))
+		if streak > 0:
+			score_label.text += "\nTous les objectifs sont remplis : encore %d saison(s) à les tenir pour l'emporter." % (hold - streak)
+		else:
+			score_label.text += "\nLa victoire exige de tenir tous les objectifs %d saisons d'affilée." % hold
 	score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if objectives.is_empty():
 		var none := Label.new()
