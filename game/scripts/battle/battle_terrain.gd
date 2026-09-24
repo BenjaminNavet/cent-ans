@@ -266,7 +266,7 @@ func _build_textures() -> void:
 			if not SPLAT_RECT.grow(40.0).has_point(p):
 				continue
 			var ford := _in_ford(p.x)
-			_stamp_disc(a, p, width * (0.95 if ford else 0.7), 3, 4.0)
+			_stamp_disc(a, p, width * (1.05 if ford else 0.98), 3, 5.0)
 			_stamp_disc(b, p, width * 1.25, 0, 8.0)
 	for road in roads:
 		for i in range(road.size() - 1):
@@ -550,6 +550,9 @@ func _build_river(river: Dictionary) -> void:
 	waves.noise = wave_noise
 	mat.set_shader_parameter("wave_normal", waves)
 	mat.set_shader_parameter("macro_noise", macro_noise)
+	# Reflet : le ciel entre horizon et zénith du préréglage météo.
+	var preset: Dictionary = BattleAtmosphere.PRESETS.get(weather_key, BattleAtmosphere.PRESETS["clear"])
+	mat.set_shader_parameter("sky_color", (preset["horizon"] as Color).lerp(preset["zenith"], 0.3))
 	if weather_key == "rain":
 		mat.set_shader_parameter("turbidity", 0.75)
 		mat.set_shader_parameter("ripple", 1.0)

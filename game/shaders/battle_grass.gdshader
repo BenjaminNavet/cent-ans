@@ -68,6 +68,14 @@ void vertex() {
 		float macro2 = texture(macro_noise, wp * 0.00043 + vec2(0.3, 0.7)).r;
 		vec3 ground = mix(textureLod(albedo_array, vec3(wp / 5.0, 0.0), 7.0).rgb, textureLod(albedo_array, vec3(wp / 7.0, 1.0), 7.0).rgb, smoothstep(0.25, 0.55, macro2));
 		v_tint = mix(base_tint * ground * vec3(1.12, 1.18, 1.0), vec3(0.45, 0.45, 0.4), snow * 0.6);
+		// Taches de prairie (mêmes formules que `battle_ground.gdshader`, lot V4b).
+		float patch = texture(macro_noise, wp * 0.0013 + vec2(0.61, 0.13)).r;
+		float patch2 = texture(macro_noise, wp * 0.0047 + vec2(0.27, 0.83)).r;
+		float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
+		float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
+		v_tint = mix(v_tint, v_tint * vec3(1.35, 1.12, 0.62), dry * 0.85);
+		v_tint = mix(v_tint, v_tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
+		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
 		if (field.x == 1.0) {
 			density *= 1.0 - in_field;
