@@ -17,6 +17,13 @@ const GROUP := "render_quality"
 ## Coûts par niveau. `shadow_distance` : facteur sur la portée d'ombre demandée par la scène.
 ## `volumetric` : "off", "weather" (brouillard, pluie, neige seulement) ou "always".
 const PRESETS := {
+	# Réglages d'avant le lot V3 (project.godot) : référence des mesures (`--bench-ab=`), hors menu.
+	"legacy": {
+		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,
+		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
+		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
+		"glow": true, "fog_grid": [64, 32],
+	},
 	"low": {
 		"msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 2048, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
 		"shadow_splits": 2, "shadow_distance": 0.6, "ssao": false, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_LOW,
@@ -44,12 +51,18 @@ const PRESETS := {
 }
 
 
+## Niveau imposé par le banc A/B (`BattleScene`, `--bench-ab=`), "" sinon.
+static var override_level: String = ""
+
+
 ## Niveau courant : `--quality=` puis réglage `video/quality`, sinon `DEFAULT_LEVEL`.
 static func current() -> String:
+	if override_level != "":
+		return override_level
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--quality="):
 			var forced := arg.trim_prefix("--quality=")
-			if forced in LEVELS:
+			if PRESETS.has(forced):
 				return forced
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree != null and tree.root != null:

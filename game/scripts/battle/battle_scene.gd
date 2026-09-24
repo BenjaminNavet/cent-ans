@@ -78,6 +78,10 @@ var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
 var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
+## V3 : `--bench-ab=<niveau>,<niveau>` alterne deux niveaux de `RenderQuality` toutes les 30 images
+## pendant la mesure (même charge machine pour les deux), temps GPU médian par niveau.
+var _bench_ab: PackedStringArray = []
+var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -403,8 +407,10 @@ func _process(delta: float) -> void:
 		_bench_time += delta
 		if _bench_frames > 10:
 			var viewport_rid := get_viewport().get_viewport_rid()
-			_bench_gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+			var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+			_bench_gpu_ms += gpu_ms
 			_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+			_bench_ab_step(gpu_ms)
 		if _bench_frames == 600:
 			var fps := _bench_frames / maxf(_bench_time, 0.001)
 			var soldiers := 0
@@ -413,7 +419,29 @@ func _process(delta: float) -> void:
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
 			print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [_bench_gpu_ms / (_bench_frames - 10), _bench_cpu_ms / (_bench_frames - 10), RenderQuality.current()])
+			for level in _bench_ab_ms:
+				var samples: Array = _bench_ab_ms[level]
+				samples.sort()
+				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
 			get_tree().quit(0)
+
+
+## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
+## 30 images (les 4 premières après un changement sont ignorées : mesure en retard d'une image,
+## ressources réallouées).
+func _bench_ab_step(gpu_ms: float) -> void:
+	if _bench_ab.size() < 2:
+		return
+	var slot := (_bench_frames - 11) / 30
+	var phase := (_bench_frames - 11) % 30
+	var level := _bench_ab[slot % _bench_ab.size()]
+	if phase == 0:
+		RenderQuality.override_level = level
+		RenderQuality.reapply(get_tree())
+	elif phase >= 4:
+		if not _bench_ab_ms.has(level):
+			_bench_ab_ms[level] = []
+		(_bench_ab_ms[level] as Array).append(gpu_ms)
 
 
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
@@ -922,6 +950,8 @@ func _parse_cmdline() -> void:
 			_pad_units = int(arg.trim_prefix("--units="))
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
+		elif arg.begins_with("--bench-ab="):
+			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
