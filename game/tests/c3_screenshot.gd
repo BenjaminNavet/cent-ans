@@ -6,7 +6,7 @@ extends SceneTree
 ##   godot --path game --script res://tests/c3_screenshot.gd
 ## Écrit `docs/img/c3/arbre-valois.png` et `docs/img/c3/fiche-edouard-iii.png`.
 
-const TURNS := 13  # hiver 1339 : Charles V et Louis d'Anjou sont nés
+const TURNS := 40  # 1347 : trois générations de Valois
 
 
 func _init() -> void:

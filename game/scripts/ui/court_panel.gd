@@ -100,6 +100,17 @@ func _build_tree_tab() -> void:
 	tab_bar.set_tab_icon(TAB_TREE, HudStyle.icon("class_nobility"))
 	tab_bar.set_tab_icon_max_width(TAB_LIST, 18)
 	tab_bar.set_tab_icon_max_width(TAB_TREE, 18)
+	# Onglets au registre parchemin (le thème n'en définit pas) : actif clair filet rubrique.
+	for pair in [["tab_selected", HudStyle.PARCHMENT_LIGHT, HudStyle.RUBRIC], ["tab_unselected", HudStyle.PARCHMENT_DARK, HudStyle.INK_SOFT],
+			["tab_hovered", HudStyle.PARCHMENT, HudStyle.INK]]:
+		var style := HudStyle.card_box(pair[1], pair[2], 1)
+		style.border_width_bottom = 3 if pair[0] == "tab_selected" else 1
+		style.set_content_margin_all(6)
+		style.content_margin_left = 12
+		style.content_margin_right = 12
+		tab_bar.add_theme_stylebox_override(pair[0], style)
+	for color_name in ["font_selected_color", "font_hovered_color", "font_unselected_color"]:
+		tab_bar.add_theme_color_override(color_name, HudStyle.INK if color_name != "font_unselected_color" else HudStyle.INK_SOFT)
 	tab_bar.tab_changed.connect(func(tab: int) -> void: show_tab(tab))
 	vbox.add_child(tab_bar)
 	vbox.move_child(tab_bar, 1)

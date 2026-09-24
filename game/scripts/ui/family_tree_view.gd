@@ -32,6 +32,7 @@ var _nodes: Dictionary = {}  # id → entrée de `get_family_tree`
 var _positions: Dictionary = {}  # id → coin haut-gauche (zoom 1)
 var _couples: Array = []  # [[a, b]] conjoints dessinés côte à côte
 var _drag_from: Vector2 = Vector2.INF
+var _offset_x: float = 0.0
 
 
 func _init() -> void:
@@ -40,6 +41,7 @@ func _init() -> void:
 	_canvas = FamilyTreeCanvas.new()
 	_canvas.view = self
 	add_child(_canvas)
+	resized.connect(_update_offset)
 
 
 ## `tree` : `CampaignSim.get_family_tree(id, up, down)` (`{root, ruler, heir, nodes}`).
@@ -52,6 +54,7 @@ func show_tree(tree: Dictionary) -> void:
 		_nodes[str(entry.get("id", ""))] = entry
 	_layout()
 	_rebuild()
+	_update_offset.call_deferred()
 	center_on.call_deferred(root_id)
 
 
@@ -71,6 +74,7 @@ func set_zoom(value: float) -> void:
 	var previous_center := (Vector2(scroll_horizontal, scroll_vertical) + size * 0.5) / zoom
 	zoom = clampf(value, ZOOM_MIN, ZOOM_MAX)
 	_rebuild()
+	_update_offset.call_deferred()
 	_scroll_to.call_deferred(previous_center * zoom - size * 0.5)
 
 
@@ -82,7 +86,7 @@ func _scroll_to(offset: Vector2) -> void:
 func center_on(character_id: String) -> void:
 	if not _positions.has(character_id):
 		return
-	var center: Vector2 = (_positions[character_id] + NODE_SIZE * 0.5) * zoom
+	var center: Vector2 = _screen(character_id) + NODE_SIZE * 0.5 * zoom
 	scroll_horizontal = int(center.x - size.x * 0.5)
 	scroll_vertical = int(center.y - size.y * 0.5)
 
@@ -221,14 +225,33 @@ func _rebuild() -> void:
 	var extent := Vector2.ZERO
 	for id in _positions:
 		var medallion := FamilyTreeNode.create(_nodes[id], id == ruler_id, id == heir_id, id == root_id, zoom)
-		medallion.position = (_positions[id] as Vector2) * zoom
+		medallion.position = _screen(id)
 		medallion.pressed.connect(func() -> void: character_selected.emit(id))
 		medallion.recenter.connect(func() -> void: recenter_requested.emit(id))
 		_canvas.add_child(medallion)
 		medallions[id] = medallion
 		extent = extent.max((_positions[id] as Vector2) + NODE_SIZE)
+	_offset_x = 0.0
+	for id in medallions:
+		(medallions[id] as Control).position = _screen(id)
 	_canvas.custom_minimum_size = (extent + MARGIN) * zoom
 	_canvas.queue_redraw()
+
+
+## Décalage horizontal qui centre un arbre plus étroit que la vue.
+func _update_offset() -> void:
+	var content := _canvas.custom_minimum_size.x
+	var offset := maxf(0.0, (size.x - content) * 0.5)
+	if absf(offset - _offset_x) < 0.5:
+		return
+	_offset_x = offset
+	for id in medallions:
+		(medallions[id] as Control).position = _screen(id)
+	_canvas.queue_redraw()
+
+
+func _screen(id: String) -> Vector2:
+	return (_positions[id] as Vector2) * zoom + Vector2(_offset_x, 0)
 
 
 # --- Traits à l'encre (appelé par le canevas) ------------------------------------------------
@@ -241,14 +264,30 @@ func draw_links(canvas: Control) -> void:
 	var portrait_y := (PORTRAIT_RADIUS + 10.0) * zoom
 	# Conjoints : double trait horizontal à hauteur des portraits.
 	for couple in _couples:
-		var a: Vector2 = (_positions[couple[0]] as Vector2) * zoom
-		var b: Vector2 = (_positions[couple[1]] as Vector2) * zoom
+		var a: Vector2 = _screen(couple[0])
+		var b: Vector2 = _screen(couple[1])
 		var left := a if a.x < b.x else b
 		var right := b if a.x < b.x else a
 		var from := left + Vector2(node_size.x * 0.5 + (PORTRAIT_RADIUS + 4.0) * zoom, portrait_y)
 		var to := right + Vector2(node_size.x * 0.5 - (PORTRAIT_RADIUS + 4.0) * zoom, portrait_y)
 		canvas.draw_line(from + Vector2(0, -2.5 * zoom), to + Vector2(0, -2.5 * zoom), ink, width * 0.8, true)
 		canvas.draw_line(from + Vector2(0, 2.5 * zoom), to + Vector2(0, 2.5 * zoom), ink, width * 0.8, true)
+	# Fratrie sans parents affichés (ex. Philippe VI et Charles d'Alençon) : arc pointillé.
+	if _positions.has(root_id) and _primary_parent(root_id) == "":
+		var root_top := _screen(root_id) + Vector2(node_size.x * 0.5, 2.0 * zoom)
+		for id in _nodes:
+			var entry: Dictionary = _nodes[id]
+			if id == root_id or not bool(entry.get("blood", true)) or _primary_parent(id) != "":
+				continue
+			if int(entry.get("generation", 0)) != int((_nodes[root_id] as Dictionary).get("generation", 0)):
+				continue
+			var top := _screen(id) + Vector2(node_size.x * 0.5, 2.0 * zoom)
+			var lift := Vector2(0, -16.0 * zoom)
+			canvas.draw_dashed_line(root_top, root_top + lift, ink, width * 0.7, 5.0 * zoom)
+			canvas.draw_dashed_line(root_top + lift, top + lift, ink, width * 0.7, 5.0 * zoom)
+			canvas.draw_dashed_line(top + lift, top, ink, width * 0.7, 5.0 * zoom)
+			var font := canvas.get_theme_default_font()
+			canvas.draw_string(font, (root_top + top) * 0.5 + lift + Vector2(-40.0 * zoom, -4.0 * zoom), "fratrie", HORIZONTAL_ALIGNMENT_CENTER, 80.0 * zoom, int(11.0 * zoom), HudStyle.INK_SOFT)
 	# Parents → enfants : descente depuis le couple (ou le parent seul), barre, puis chaque enfant.
 	var groups: Dictionary = {}  # clé parents → [enfants]
 	for id in _nodes:
@@ -271,7 +310,7 @@ func draw_links(canvas: Control) -> void:
 		var parents: PackedStringArray = str(key).split("|")
 		var anchor := Vector2.ZERO
 		for parent in parents:
-			anchor += (_positions[parent] as Vector2) * zoom + Vector2(node_size.x * 0.5, 0)
+			anchor += _screen(parent) + Vector2(node_size.x * 0.5, 0)
 		anchor /= float(parents.size())
 		var bottom := 0.0
 		for parent in parents:
@@ -284,14 +323,14 @@ func draw_links(canvas: Control) -> void:
 		var child_top := INF
 		var xs: Array = [anchor.x]
 		for kid in kids:
-			var top: Vector2 = (_positions[kid] as Vector2) * zoom + Vector2(node_size.x * 0.5, 0)
+			var top: Vector2 = _screen(kid) + Vector2(node_size.x * 0.5, 0)
 			child_top = minf(child_top, top.y)
 			xs.append(top.x)
 		var bar_y := child_top - 18.0 * zoom
 		canvas.draw_line(anchor, Vector2(anchor.x, bar_y), ink, width, true)
 		canvas.draw_line(Vector2(xs.min(), bar_y), Vector2(xs.max(), bar_y), ink, width, true)
 		for kid in kids:
-			var top: Vector2 = (_positions[kid] as Vector2) * zoom + Vector2(node_size.x * 0.5, 0)
+			var top: Vector2 = _screen(kid) + Vector2(node_size.x * 0.5, 0)
 			canvas.draw_line(Vector2(top.x, bar_y), top + Vector2(0, 4.0 * zoom), ink, width, true)
 			# Petite pointe de plume au bout du trait.
 			canvas.draw_circle(top + Vector2(0, 4.0 * zoom), width * 1.2, ink)
@@ -342,7 +381,7 @@ class FamilyTreeNode:
 	signal pressed
 	signal recenter
 
-	const GREY_SHADER := "shader_type canvas_item;\nuniform float amount = 0.0;\nvoid fragment() {\n\tvec4 c = texture(TEXTURE, UV) * COLOR;\n\tfloat g = dot(c.rgb, vec3(0.299, 0.587, 0.114));\n\tCOLOR = vec4(mix(c.rgb, vec3(g) * 0.95 + 0.05, amount), c.a * mix(1.0, 0.8, amount));\n}"
+	const GREY_SHADER := "shader_type canvas_item;\nuniform float amount = 0.0;\nvoid fragment() {\n\tvec4 c = texture(TEXTURE, UV) * COLOR;\n\tfloat g = dot(c.rgb, vec3(0.299, 0.587, 0.114));\n\tCOLOR = vec4(mix(c.rgb, vec3(g) * 0.95 + 0.05, amount), c.a * mix(1.0, 0.92, amount));\n}"
 	static var _grey_material: ShaderMaterial
 
 	var entry: Dictionary = {}
@@ -371,8 +410,16 @@ class FamilyTreeNode:
 		node._is_portrait = node._texture != null
 		if node._texture == null:
 			node._texture = PortraitLoader.heraldry_texture(str(data.get("faction", "")))
+		# Médaillon dessiné par un enfant : seul le portrait est grisé pour un défunt.
+		var disc := Control.new()
+		disc.name = "Disc"
+		disc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		disc.set_anchors_preset(Control.PRESET_FULL_RECT)
+		disc.size = node.size
+		disc.draw.connect(func() -> void: node._draw_disc(disc))
 		if not bool(data.get("alive", true)):
-			node.material = _grey()
+			disc.material = _grey()
+		node.add_child(disc)
 		node.tooltip_text = node._tooltip()
 		node.mouse_entered.connect(func() -> void:
 			node._hover = true
@@ -436,34 +483,39 @@ class FamilyTreeNode:
 		var card_fill := HudStyle.PARCHMENT_LIGHT if not is_root else HudStyle.PARCHMENT.lerp(HudStyle.GOLD_PALE, 0.35)
 		draw_rect(card, card_fill)
 		draw_rect(card, HudStyle.INK_SOFT if not _hover else HudStyle.RUBRIC, false, maxf(1.0, (2.0 if _hover else 1.0) * z))
-		# Médaillon : fond, portrait (ou écu), filet d'encre, anneau d'or pour le dirigeant.
-		draw_circle(center + Vector2(1.5, 2.5) * z, radius + 3.0 * z, HudStyle.SHADOW)
-		draw_circle(center, radius + 3.0 * z, HudStyle.PARCHMENT_DARK)
-		if _is_portrait:
-			HudStyle.draw_texture_disc(self, _texture, center, radius)
-		else:
-			draw_circle(center, radius, HudStyle.PARCHMENT)
-			HudStyle.draw_texture_fit(self, _texture, center, radius * 1.3)
-		var ring := HudStyle.GOLD if (is_ruler or is_heir) else HudStyle.INK
-		draw_arc(center, radius + 1.5 * z, 0.0, TAU, 64, ring, maxf(1.5, (4.0 if is_ruler else 2.5) * z), true)
-		if is_root:
-			draw_arc(center, radius + 6.0 * z, 0.0, TAU, 64, HudStyle.RUBRIC, maxf(1.0, 1.5 * z), true)
-		if is_heir:
-			_draw_crown(center + Vector2(0, -radius - 2.0 * z), 15.0 * z)
-		if is_ruler:
-			_draw_crown(center + Vector2(0, -radius - 2.0 * z), 18.0 * z)
 		# Nom (deux lignes au plus) et dates.
 		var font := get_theme_default_font()
 		var name_size := int(round(13.0 * z))
 		var text := str(entry.get("name", "?"))
 		var name_y := center.y + radius + 18.0 * z
-		var ink := HudStyle.INK if alive else HudStyle.INK_FADED
+		var ink := HudStyle.INK if alive else HudStyle.INK_SOFT
 		draw_multiline_string(font, Vector2(4, name_y), text, HORIZONTAL_ALIGNMENT_CENTER, width - 8, name_size, 2, ink)
 		var date_size := int(round(11.0 * z))
-		draw_string(font, Vector2(4, size.y - 8.0 * z), dates_text(), HORIZONTAL_ALIGNMENT_CENTER, width - 8, date_size, HudStyle.RUBRIC if alive else HudStyle.INK_FADED)
+		draw_string(font, Vector2(4, size.y - 8.0 * z), dates_text(), HORIZONTAL_ALIGNMENT_CENTER, width - 8, date_size, HudStyle.RUBRIC if alive else HudStyle.INK_SOFT)
+
+	## Médaillon : fond, portrait (ou écu), filet d'encre, anneau d'or, couronnes.
+	func _draw_disc(canvas: Control) -> void:
+		var z := zoom
+		var radius := FamilyTreeView.PORTRAIT_RADIUS * z
+		var center := Vector2(size.x * 0.5, radius + 10.0 * z)
+		canvas.draw_circle(center + Vector2(1.5, 2.5) * z, radius + 3.0 * z, HudStyle.SHADOW)
+		canvas.draw_circle(center, radius + 3.0 * z, HudStyle.PARCHMENT_DARK)
+		if _is_portrait:
+			HudStyle.draw_texture_disc(canvas, _texture, center, radius)
+		else:
+			canvas.draw_circle(center, radius, HudStyle.PARCHMENT)
+			HudStyle.draw_texture_fit(canvas, _texture, center, radius * 1.3)
+		var ring := HudStyle.GOLD if (is_ruler or is_heir) else HudStyle.INK
+		canvas.draw_arc(center, radius + 1.5 * z, 0.0, TAU, 64, ring, maxf(1.5, (4.0 if is_ruler else 2.5) * z), true)
+		if is_root:
+			canvas.draw_arc(center, radius + 6.0 * z, 0.0, TAU, 64, HudStyle.RUBRIC, maxf(1.0, 1.5 * z), true)
+		if is_heir:
+			_draw_crown(canvas, center + Vector2(0, -radius - 2.0 * z), 15.0 * z)
+		if is_ruler:
+			_draw_crown(canvas, center + Vector2(0, -radius - 2.0 * z), 18.0 * z)
 
 	## Couronne à l'encre et à l'or (cinq fleurons), posée au sommet du médaillon.
-	func _draw_crown(base_center: Vector2, crown_width: float) -> void:
+	func _draw_crown(canvas: Control, base_center: Vector2, crown_width: float) -> void:
 		var half := crown_width * 0.5
 		var h := crown_width * 0.62
 		var base := base_center + Vector2(0, h * 0.35)
@@ -471,9 +523,9 @@ class FamilyTreeNode:
 			base + Vector2(-half, 0), base + Vector2(-half, -h * 0.7), base + Vector2(-half * 0.5, -h * 0.35),
 			base + Vector2(0, -h), base + Vector2(half * 0.5, -h * 0.35), base + Vector2(half, -h * 0.7),
 			base + Vector2(half, 0)])
-		draw_colored_polygon(points, HudStyle.GOLD)
+		canvas.draw_colored_polygon(points, HudStyle.GOLD)
 		var outline := points.duplicate()
 		outline.append(points[0])
-		draw_polyline(outline, HudStyle.INK, maxf(1.0, crown_width * 0.08), true)
+		canvas.draw_polyline(outline, HudStyle.INK, maxf(1.0, crown_width * 0.08), true)
 		for tip in [points[1], points[3], points[5]]:
-			draw_circle(tip, crown_width * 0.08, HudStyle.WAX)
+			canvas.draw_circle(tip, crown_width * 0.08, HudStyle.WAX)
