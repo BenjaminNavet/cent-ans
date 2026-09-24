@@ -16,8 +16,10 @@ Branche : `worktree-agent-ac38aa74f75611f21` (partie de `main` `cda86a9`).
 - [x] `SettlementPanel` (construit en code) ; onglet « Colonies » du panneau de province.
 - [x] `SettlementController` : ouverture du panneau, ordres par colonie, clic droit sur une
   colonie, anneaux des colonies atteignables (`ReachableMarkers`), aperçu de chemin sur le graphe.
-- [ ] Test headless `game/tests/c5_settlements_ui_test.gd`, smoke, `settlements_render_test`.
-- [ ] Capture `docs/img/colonies/`.
+- [x] Test headless `game/tests/c5_settlements_ui_test.gd` (OK) ; smoke et `settlements_render_test` verts.
+- [x] Captures `docs/img/colonies/c5-panneau-colonie.png`, `c5-ordres-armee.png`
+  (`--stage=settlement`, `--stage=settlement_orders`, fenêtre non headless).
+- [x] Documentation : `docs/godot-map.md` § « Interface des colonies (lot C5) ».
 
 ## Décisions
 
@@ -31,6 +33,14 @@ Branche : `worktree-agent-ac38aa74f75611f21` (partie de `main` `cda86a9`).
 - Clic droit sur une colonie = cible ; ailleurs, comportement v1 (cité de la province).
 - Survol : la colonie sous le curseur est prioritaire sur la province survolée.
 
+## Points ouverts
+
+- L'aperçu de chemin trace des segments droits entre colonies, pas les routes réelles.
+- Portée d'une saison : depuis Paris, 233 colonies atteignables (jusqu'à Villeneuve-sur-Lot, 14
+  étapes) ; à vérifier à l'équilibrage (C7, `points_per_step`, routes ÷ 2).
+- Le panneau (comme celui de province) recouvre en partie la minicarte.
+- Pas d'onglet Colonies ni de panneau de colonie avec le mock (pas d'API de colonies).
+
 ## Prochaine étape
 
-Test headless, puis smoke et captures.
+Terminé : fusion par l'orchestrateur.

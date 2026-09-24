@@ -5,7 +5,7 @@ extends MultiMeshInstance3D
 ## Rendu seulement : la liste vient de `CampaignSim.get_reachable_settlements`. Taille à
 ## peu près constante à l'écran (proportionnelle à la distance caméra, bornée).
 
-@export var color: Color = Color(0.45, 0.95, 0.40, 0.9)
+@export var color: Color = Color(0.30, 0.95, 0.30, 0.95)
 @export var target_color: Color = Color(1.0, 0.62, 0.18, 1.0)
 @export var lift: float = 0.4
 
@@ -19,7 +19,7 @@ func _init() -> void:
 	name = "ReachableMarkers"
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := TorusMesh.new()
-	ring.inner_radius = 0.78
+	ring.inner_radius = 0.62
 	ring.outer_radius = 1.0
 	ring.rings = 24
 	ring.ring_segments = 4
@@ -72,7 +72,7 @@ func has_marker(id: String) -> bool:
 
 
 func update_scale(camera_distance: float) -> void:
-	var size := clampf(camera_distance * 0.012, 0.9, 10.0)
+	var size := clampf(camera_distance * 0.022, 1.2, 16.0)
 	if is_equal_approx(size, _scale):
 		return
 	_scale = size
