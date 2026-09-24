@@ -5,17 +5,36 @@ Squelette data-model posé : `data/economy/trade.json` (hubs + routes), chargé
 dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
 `load.rs`). Compile.
 
+## État (24/09, suite)
+- Rust fait et testé (`core/crates/sim-campaign/tests/c5_trade.rs`, 8 tests
+  verts : revenu, coupure guerre/embargo/siège, bonus d'accord, déterminisme,
+  ancienne sauvegarde) : `data/economy/trade.json` + schéma,
+  `sim-campaign/src/trade.rs` (routes dérivées d'un Dijkstra propre sur
+  `movement_graph`, `Proposal::TradeAgreement` dans `diplomacy.rs`,
+  `Order::ProposeTradeAgreement`/`BreakTradeAgreement`, appelé depuis
+  `turn.rs` après `economy::resolve_economy`). `campaign.rs` (test existant
+  de revenu de France) corrigé pour inclure `trade_income_last_turn`.
+- Bridge Godot : `campaign_sim_trade.rs` (`get_trade_routes`),
+  `get_faction_economy`/`get_diplomacy` étendus (`trade_income`,
+  `trade_agreement`), `evaluate_proposal` gère `ProposeTradeAgreement`.
+- UI : `trade_route_layer.gd` (ruban `PolylineMesh`, épaisseur = valeur,
+  brouillard C1), bouton « Commerce » + touche R (`map_toggle_trade`),
+  infobulle au survol (`campaign_map._update_trade_hover`), section
+  Commerce du panneau de diplomatie (accords, routes, revenu), ligne
+  Commerce du panneau de faction (revenu, détail en infobulle), rubrique
+  « Commerce » du rapport de saison et du journal.
+- Smoke : `_run_trade()` ajouté (routes, accord proposé/rompu, coupure par
+  embargo, revenu dans `get_faction_economy`, panneaux réels) ; stage
+  `--stage=trade` pour la capture d'écran.
+
 ## Prochaine étape
-- Écrire `data/economy/trade.json` (hubs historiques : Bruges, Calais,
-  Londres, Bordeaux, La Rochelle, Southampton, Anvers, Troyes/Provins,
-  Gênes, Venise) + `data/schemas/trade.schema.json`.
-- `core/crates/sim-campaign/src/trade.rs` : accords (Proposal::TradeAgreement
-  côté `diplomacy.rs`), routes dérivées (chemin sur `movement_graph`,
-  sécurité, embargo/guerre, coinage), phase de résolution appelée depuis
-  `turn.rs` après `economy::resolve_economy`.
-- Bridge Godot (`campaign_sim_trade.rs`) + UI (couche carte, onglet
-  Commerce, rapport de saison), smoke « trade », captures
-  `docs/img/c5-commerce/`.
+- Vérifier après `core/build.sh` + `--import` + smoke : compter les
+  « smoke OK » (24 attendues, 23 + trade) et l'absence de « SCRIPT ERROR ».
+- Capture `docs/img/c5-commerce/` via
+  `--screenshot=docs/img/c5-commerce/trade.png --stage=trade`.
+- Piste non faite (budget) : petites icônes de marchandise / navires-charrettes
+  animés sur les routes (juste le ruban parchemin pour l'instant) ; entrée
+  encyclopédie dédiée.
 
 ## Décisions
 - Un seul fichier `data/economy/trade.json` (hubs + routes) plutôt que deux
