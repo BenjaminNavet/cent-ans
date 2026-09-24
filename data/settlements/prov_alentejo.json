@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_evora",
+    "province": "prov_alentejo",
+    "kind": "city",
+    "name": {
+      "display": "Évora",
+      "local": "Evora",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.909,
+      38.5714
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Évora, capitale de l'Alentejo, résidence royale fréquente et siège épiscopal.",
+    "sources": [
+      "Alentejo",
+      "Royaume de l'Algarve",
+      "Évora"
+    ]
+  },
+  {
+    "id": "set_beja",
+    "province": "prov_alentejo",
+    "kind": "town",
+    "name": {
+      "display": "Beja",
+      "local": "Beja",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.8632,
+      38.015
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de l'Alentejo reconquise en 1162, siège d'une commanderie de l'ordre d'Aviz.",
+    "sources": [
+      "Beja",
+      "Alentejo"
+    ]
+  },
+  {
+    "id": "set_elvas",
+    "province": "prov_alentejo",
+    "kind": "castle",
+    "name": {
+      "display": "Elvas",
+      "local": "Elvas",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.1622,
+      38.8811
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte frontalière face à la Castille, enjeu constant des guerres luso-castillanes.",
+    "sources": [
+      "Elvas"
+    ]
+  },
+  {
+    "id": "set_faro",
+    "province": "prov_alentejo",
+    "kind": "town",
+    "name": {
+      "display": "Faro",
+      "local": "Santa Maria de Faaron",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.9304,
+      37.0194
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port de l'Algarve conquis en 1249, relais commercial après le déclin de Silves, l'ancienne capitale maure.",
+    "sources": [
+      "Faro",
+      "Algarve"
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_bonifacio",
+    "province": "prov_corsica",
+    "kind": "city",
+    "name": {
+      "display": "Bonifacio",
+      "local": "Bonifazio",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.1594,
+      41.3871
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Bonifacio, place forte génoise sur la pointe sud de la Corse.",
+    "sources": [
+      "Histoire de la Corse",
+      "Bonifacio"
+    ]
+  },
+  {
+    "id": "set_calvi",
+    "province": "prov_corsica",
+    "kind": "town",
+    "name": {
+      "display": "Calvi",
+      "local": "Calvi",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.7566,
+      42.5677
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port fortifié fondé par les Génois sur la côte nord de l'île.",
+    "sources": [
+      "Calvi (Haute-Corse)"
+    ]
+  },
+  {
+    "id": "set_corte",
+    "province": "prov_corsica",
+    "kind": "castle",
+    "name": {
+      "display": "Corte",
+      "local": "Corti",
+      "local_language": "corse"
+    },
+    "lonlat": [
+      9.15,
+      42.3059
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte de l'intérieur, verrou du contrôle génois sur la Corse centrale.",
+    "sources": [
+      "Corte (Haute-Corse)"
+    ]
+  }
+]
