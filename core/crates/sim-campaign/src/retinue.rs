@@ -49,6 +49,8 @@ pub enum RetinueError {
     RetinueFull(CharacterId),
     #[error("les deux généraux doivent commander des armées réunies au même endroit")]
     NotTogether,
+    #[error("{0} ne remplit pas les conditions de ce compagnon (faction, batailles, traits…)")]
+    NotEligible(CharacterId),
 }
 
 /// Most companions `data` lets one character keep (0 without a catalogue).
@@ -420,7 +422,7 @@ pub fn grant_companion(
         return Err(RetinueError::RetinueFull(id.clone()));
     }
     if !can_gain(state, data, id, companion) {
-        return Err(RetinueError::UnknownCharacter(id.clone()));
+        return Err(RetinueError::NotEligible(id.clone()));
     }
     state
         .characters
