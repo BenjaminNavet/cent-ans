@@ -22,6 +22,8 @@
 //! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
 //!   walls with towers and a gate, ladders, siege towers, ram, engines that
 //!   breach the walls, victory by holding the central square.
+//! - Siege fires ([`fire`], spec `docs/design/s2-incendies.md`): incendiary
+//!   volleys, spread from house to house, heat, smoke, burnt ruins.
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 //! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
@@ -31,6 +33,7 @@
 pub mod ai;
 pub mod command;
 pub mod field;
+pub mod fire;
 pub mod formation_ai;
 pub mod orders;
 pub mod outcome;
@@ -45,6 +48,7 @@ pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
+pub use fire::{Blaze, FireRules, FireState};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;

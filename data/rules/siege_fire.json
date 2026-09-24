@@ -1,0 +1,68 @@
+{
+  "description": "Incendies de siège (lot S2, docs/design/s2-incendies.md) : traits incendiaires et pots à feu des assiégeants, propagation de maison en maison selon la distance, le vent et la météo, chaleur et fumée, porte en bois qui brûle, faubourgs incendiés par la garnison. Embarqué dans sim-battle à la compilation.",
+  "ignition": {
+    "by_unit_type": {
+      "unit_trebuchet": 0.18,
+      "unit_mangonel": 0.22,
+      "unit_bombard": 0.10,
+      "unit_longbowmen": 0.015,
+      "unit_mounted_archers": 0.010,
+      "unit_crossbowmen": 0.006,
+      "unit_genoese_crossbowmen": 0.006
+    },
+    "by_category": {
+      "ranged": 0.01,
+      "siege": 0.15
+    },
+    "overshoot_m": 18.0,
+    "reach_m": 20.0,
+    "gate_reach_m": 12.0
+  },
+  "house": {
+    "initial_intensity": 0.3,
+    "growth_per_s": 0.02,
+    "burn_duration_s": 180.0,
+    "decline_fuel": 0.3
+  },
+  "gate": {
+    "initial_intensity": 0.3,
+    "growth_per_s": 0.02,
+    "burn_duration_s": 200.0,
+    "decline_fuel": 0.3,
+    "damage_per_s": 4.0
+  },
+  "spread": {
+    "period_s": 2.0,
+    "chance_per_period": 0.06,
+    "edge_distance_m": 30.0,
+    "wind_strength_max": 0.7
+  },
+  "weather": {
+    "clear": { "ignition": 1.0, "spread": 1.0, "growth": 1.0, "duration": 1.0 },
+    "fog": { "ignition": 0.8, "spread": 0.8, "growth": 0.9, "duration": 1.0 },
+    "rain": { "ignition": 0.2, "spread": 0.15, "growth": 0.5, "duration": 0.6 },
+    "snow": { "ignition": 0.25, "spread": 0.2, "growth": 0.6, "duration": 0.7 }
+  },
+  "heat": {
+    "radius_m": 8.0,
+    "loss_per_s": 0.002,
+    "morale_per_s": 0.8
+  },
+  "smoke": {
+    "min_intensity": 0.3,
+    "margin_m": 6.0,
+    "accuracy_factor": 0.5
+  },
+  "torch": {
+    "reach_m": 8.0,
+    "chance": 0.9,
+    "initial_intensity": 0.5
+  },
+  "suburbs": {
+    "count": 4,
+    "distance_m": 40.0,
+    "spacing_m": 34.0,
+    "radius_m": 8.0,
+    "ai_burn_chance": 0.5
+  }
+}

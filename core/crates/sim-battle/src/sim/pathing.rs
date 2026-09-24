@@ -1,7 +1,7 @@
 //! Siege pathing (F5a § 4): A* on a grid of [`CELL`]-metre cells where the
 //! intact wall bands and the houses are obstacles; breaches, the broken gate
 //! (or the open gate of a sortie, for the garrison) and the streets are
-//! free. Paths are cached per regiment and recomputed when its goal cell
+//! free, and so are burnt houses (S2). Paths are cached per regiment and recomputed when its goal cell
 //! or the walls (openings, sortie) change. Deterministic: integer costs,
 //! ties broken by cell index.
 
@@ -21,7 +21,7 @@ const HOUSE_MARGIN: f64 = 3.0;
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct CachedPath {
     goal: usize,
-    signature: (usize, bool),
+    signature: (usize, bool, usize),
     waypoints: Vec<(f64, f64)>,
 }
 
@@ -142,7 +142,7 @@ pub(crate) fn segment_clear(works: &SiegeWorks, a: (f64, f64), b: (f64, f64)) ->
     }) {
         return false;
     }
-    works.houses.iter().all(|h| {
+    works.houses.iter().filter(|h| h.standing()).all(|h| {
         let t = (((h.x - a.0) * dx + (h.z - a.1) * dz) / len2).clamp(0.0, 1.0);
         let (px, pz) = (a.0 + dx * t, a.1 + dz * t);
         (px - h.x).powi(2) + (pz - h.z).powi(2) >= (h.radius + HOUSE_MARGIN).powi(2)
@@ -159,7 +159,7 @@ impl BattleSim {
         if self.units[index].state == crate::unit::UnitState::Routing {
             return false;
         }
-        works.houses.iter().any(|h| {
+        works.houses.iter().filter(|h| h.standing()).any(|h| {
             let d = |p: (f64, f64)| ((p.0 - h.x).powi(2) + (p.1 - h.z).powi(2)).sqrt();
             d(to) < h.radius + 1.0 && d(to) < d(from)
         })
@@ -181,7 +181,7 @@ impl BattleSim {
             side: unit.side,
         };
         let goal = grid.cell(tx, tz);
-        let signature = (works.openings().len(), works.sortie);
+        let signature = (works.openings().len(), works.sortie, works.burnt_houses());
         let mut cache = self.path_cache.borrow_mut();
         if cache.len() < self.units.len() {
             cache.resize(self.units.len(), None);
