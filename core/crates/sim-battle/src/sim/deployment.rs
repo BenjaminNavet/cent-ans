@@ -169,6 +169,13 @@ impl BattleSim {
             self.units[g].x = x;
             self.units[g].z = z;
         }
+        // F5d: never in deep water (fords excepted), whatever the shifts.
+        let edge = if back < 0.0 { zone.z0 } else { zone.z1 };
+        for &i in &own {
+            let (x, z) = (self.units[i].x, self.units[i].z);
+            let dry = crate::ai::dry_z(&self.field, x, z, edge, back);
+            self.units[i].z = dry.clamp(zone.z0, zone.z1);
+        }
     }
 
     fn centroid(&self, list: &[usize]) -> (f64, f64) {
