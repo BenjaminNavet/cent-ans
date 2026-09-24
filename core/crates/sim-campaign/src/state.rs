@@ -547,6 +547,9 @@ pub struct CampaignState {
     /// The player's campaign outcome, once reached (M10).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub outcome: Option<crate::victory::Outcome>,
+    /// Consecutive seasons the player has met all objectives (F9).
+    #[serde(default)]
+    pub victory_streak: u32,
 }
 
 impl CampaignState {
@@ -580,6 +583,7 @@ impl CampaignState {
             pending_events: Vec::new(),
             chronicle: crate::chronicle::ChronicleState::default(),
             outcome: None,
+            victory_streak: 0,
         }
     }
 

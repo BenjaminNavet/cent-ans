@@ -113,6 +113,7 @@
   ],
   "victory": {
     "end_year": 1453,
+    "hold_turns": 12,
     "summary": "Faire valoir les droits d'Édouard III sur la couronne de France : Paris, Reims et les terres ancestrales.",
     "objectives": [
       {

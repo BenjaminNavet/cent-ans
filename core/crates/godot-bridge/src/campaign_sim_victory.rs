@@ -33,7 +33,8 @@ impl CampaignSim {
     }
 
     /// `{state: "ongoing"|"victory"|"defeat"|"ended", text, score, turn}`;
-    /// `score` is the current score while the campaign goes on.
+    /// `score` is the current score while the campaign goes on, with
+    /// `hold_turns` and `victory_streak` (seasons all objectives have held, F9).
     #[func]
     fn get_outcome(&self) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -52,12 +53,22 @@ impl CampaignSim {
                     "turn" => i64::from(outcome.turn),
                 }
             }
-            None => vdict! {
-                "state" => "ongoing",
-                "text" => "",
-                "score" => state.campaign_score(data, state.player_faction()),
-                "turn" => i64::from(state.turn()),
-            },
+            None => {
+                let hold = data
+                    .factions
+                    .get(state.player_faction())
+                    .and_then(|f| f.victory.as_ref())
+                    .and_then(|v| v.hold_turns)
+                    .unwrap_or(1);
+                vdict! {
+                    "state" => "ongoing",
+                    "text" => "",
+                    "score" => state.campaign_score(data, state.player_faction()),
+                    "turn" => i64::from(state.turn()),
+                    "hold_turns" => i64::from(hold),
+                    "victory_streak" => i64::from(state.victory_streak),
+                }
+            }
         }
     }
 }
