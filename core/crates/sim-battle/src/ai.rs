@@ -510,7 +510,7 @@ fn plan_field(view: &mut View) {
     } else if duel && contact < 260.0 {
         line_center
     } else {
-        (line_center.0, line_center.1 + view.forward * 45.0)
+        advance(view, line_center)
     };
 
     // Line.
@@ -565,6 +565,24 @@ fn plan_field(view: &mut View) {
 
     react(view, &roles);
     plan_orders(view, defensive);
+}
+
+/// Next step of an advancing line: 45 m towards the enemy's centroid (F5d:
+/// armies that slipped past each other turn back instead of marching on to
+/// the far edge).
+fn advance(view: &View, from: (f64, f64)) -> (f64, f64) {
+    let able: Vec<usize> = view.able_enemies().collect();
+    let Some((ex, ez)) = view.centroid(&able) else {
+        return (from.0, from.1 + view.forward * 45.0);
+    };
+    let (dx, dz) = (ex - from.0, ez - from.1);
+    let d = dx.hypot(dz);
+    if dz * view.forward > 0.5 * d {
+        // Ahead: the usual straight advance.
+        return (from.0, from.1 + view.forward * 45.0);
+    }
+    let step = d.min(45.0) / d.max(1e-6);
+    (from.0 + dx * step, from.1 + dz * step)
 }
 
 /// Enemy regiment opposite `i` (smallest lateral offset, a bit of depth).

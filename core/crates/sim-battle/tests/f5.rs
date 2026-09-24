@@ -295,10 +295,7 @@ fn towers_shoot_and_the_garrison_sallies() {
     assert!(out, "out through the gate");
 }
 
-/// F5a § 5 (staggered reinforcements beyond 20 regiments) is not done yet.
-#[test]
-#[ignore = "F5a point 5 not implemented (see docs/wip/f5a-battle-sim.md)"]
-fn reinforcements_enter_from_edge() {}
+// F5a § 5 (staggered reinforcements beyond 20 regiments): see `tests/f5d.rs`.
 
 /// Same setup, seed and deployment: same battle, field and siege alike.
 #[test]

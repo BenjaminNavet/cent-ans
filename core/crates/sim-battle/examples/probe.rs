@@ -168,7 +168,7 @@ fn main() {
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
             let mut steps = 0;
-            while !sim.is_finished() && steps < 36_000 {
+            while !sim.is_finished() && steps < 36_100 {
                 sim.step();
                 steps += 1;
             }

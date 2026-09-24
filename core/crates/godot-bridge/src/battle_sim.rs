@@ -287,6 +287,7 @@ impl BattleSim {
                     "depth" => depth,
                     "is_general" => unit.is_general,
                     "present" => unit.present(),
+                    "reserve" => unit.reserve,
                     "left_field" => unit.left_field,
                     "fire_at_will" => unit.fire_at_will,
                     "can_shoot" => unit.can_shoot(),
