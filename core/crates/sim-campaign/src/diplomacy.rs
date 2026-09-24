@@ -604,7 +604,18 @@ pub fn evaluate(
                 .filter(|(_, p)| &p.owner == proposer && &p.controller == recipient)
                 .map(|(id, _)| id)
                 .collect();
-            if !conquests.is_empty() && conquests.iter().all(|c| provinces.contains(*c)) {
+            // G5: a crown keeping its capital (or its last land, the capital
+            // being lost) under `peace.keep_capital` still settles the war.
+            let proposer_capital = state.factions.get(proposer).map(|f| f.capital.clone());
+            let missing: Vec<&&ProvinceId> = conquests
+                .iter()
+                .filter(|c| !provinces.contains(**c))
+                .collect();
+            let kept_land = data.ai_diplomacy.peace.keep_capital
+                && missing.len() == 1
+                && (proposer_capital.as_ref() == Some(*missing[0])
+                    || !state.provinces.values().any(|p| &p.controller == proposer));
+            if !conquests.is_empty() && (missing.is_empty() || kept_land) {
                 let score = state.war_score(data, recipient, proposer);
                 if score > 0 {
                     reasons.push(("Conquêtes reconnues".to_owned(), score));
