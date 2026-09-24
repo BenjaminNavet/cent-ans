@@ -160,85 +160,88 @@ func _scatter(raw: Array) -> void:
 	_scatter_hedges(raw, rng)
 
 
-## Haies : bords d'un parcellaire biaisé (u, v) = ((x + k y) / FIELD_U, (y − k x) / FIELD_V) ;
-## chaque bord de parcelle est planté ou non (hasard par bord), les buissons s'y suivent tous
-## les `HEDGE_STEP` px. Denses dans le bocage, rares ailleurs.
-const FIELD_U := 5.0
-const FIELD_V := 4.2
-const FIELD_SKEW := 0.35
-const HEDGE_STEP := 0.7
+## Haies (lot V2b) : bords d'enclos du parcellaire partagé avec le shader de terrain
+## (`VegetationFields`), plantés selon le même tirage que le pied de haie peint ; buissons tous
+## les `HEDGE_STEP` px, trouées, quelques arbres de haie. Denses dans le bocage, rares ailleurs.
+const HEDGE_STEP := 0.62
+## Part de buissons manquants (trouées courtes) et d'arbres de haie.
+const HEDGE_GAP := 0.1
+const HEDGE_TREE := 0.07
 
 
 func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
-	var data := mask.map_data
-	var k := FIELD_SKEW
-	var det := 1.0 + k * k
-	# Bornes (u, v) couvrant la tuile.
-	var corners := [Vector2(origin_px), Vector2(origin_px) + Vector2(size_px, 0), Vector2(origin_px) + Vector2(0, size_px), Vector2(origin_px) + Vector2(size_px, size_px)]
-	var u_min := INF
-	var u_max := -INF
-	var v_min := INF
-	var v_max := -INF
-	for c: Vector2 in corners:
-		u_min = minf(u_min, (c.x + k * c.y) / FIELD_U)
-		u_max = maxf(u_max, (c.x + k * c.y) / FIELD_U)
-		v_min = minf(v_min, (c.y - k * c.x) / FIELD_V)
-		v_max = maxf(v_max, (c.y - k * c.x) / FIELD_V)
 	var rect := Rect2(Vector2(origin_px), Vector2(size_px, size_px))
-	for axis in 2:
-		var line_min := floori(u_min if axis == 0 else v_min)
-		var line_max := ceili(u_max if axis == 0 else v_max)
-		var along_min := v_min if axis == 0 else u_min
-		var along_max := v_max if axis == 0 else u_max
-		var along_scale := FIELD_V if axis == 0 else FIELD_U
-		var steps := ceili((along_max - along_min) * along_scale / HEDGE_STEP)
-		# Lacet qui aligne l'axe X local du buisson sur la ligne : (−k, 1) pour u constant,
-		# (1, k) pour v constant (Basis(UP, a) envoie X sur (cos a, 0, −sin a)).
-		var line_yaw := atan2(-1.0, -k) if axis == 0 else atan2(-k, 1.0)
-		for line in range(line_min, line_max + 1):
-			var edge_roll := -1.0
-			var edge_index := -1
-			for step in steps:
-				var along := along_min + step * HEDGE_STEP / along_scale
-				var u: float = float(line) if axis == 0 else along
-				var v: float = along if axis == 0 else float(line)
-				# Inversion de (u, v) → (x, y).
-				var a := u * FIELD_U
-				var b := v * FIELD_V
-				var x0 := (a - k * b) / det
-				var y0 := (b + k * a) / det
-				# Déformation douce : parcelles irrégulières, haies légèrement sinueuses.
-				var x := x0 + 0.9 * sin(0.23 * y0 + 1.3 * sin(0.061 * x0))
-				var y := y0 + 0.9 * sin(0.19 * x0 + 1.1 * sin(0.047 * y0))
-				if not rect.has_point(Vector2(x, y)):
-					continue
-				# Un tirage par bord de parcelle (entre deux lignes transverses).
-				var edge := floori(along)
-				if edge != edge_index:
-					edge_index = edge
-					edge_roll = _hash01(line * 7919 + edge * 104729 + axis * 31)
-				var gx := (x - origin_px.x) / coarse_step
-				var gy := (y - origin_px.y) / coarse_step
-				var crops := _lerp_grid(_crops, gx, gy)
-				if crops < 0.2:
-					continue
-				var hedge := _lerp_grid(_hedge, gx, gy)
-				if edge_roll > crops * lerpf(0.045, 0.8, hedge):
-					continue
-				if not exclusions.is_empty() and _excluded(x, y):
-					continue
-				var jx := x + rng.randf_range(-0.12, 0.12)
-				var jy := y + rng.randf_range(-0.12, 0.12)
-				var ground := data.height_world_at(jx, jy)
-				if ground <= 0.0:
-					continue
-				raw[_slot(Kind.HEDGE, jx, jy)].append(_make_instance(rng, Kind.HEDGE, jx, ground, jy, line_yaw + rng.randf_range(-0.2, 0.2), 1.0))
+	# La déformation du repère déplace les lignes de ±2,3 px au plus.
+	var bounds := rect.grow(3.0)
+	for layout in VegetationFields.LAYOUTS.size():
+		var params: Array = VegetationFields.LAYOUTS[layout]
+		var u_min := INF
+		var u_max := -INF
+		var v_min := INF
+		var v_max := -INF
+		for c: Vector2 in [bounds.position, Vector2(bounds.end.x, bounds.position.y), Vector2(bounds.position.x, bounds.end.y), bounds.end]:
+			var uv := VegetationFields.to_uv(layout, c.x, c.y)
+			u_min = minf(u_min, uv.x)
+			u_max = maxf(u_max, uv.x)
+			v_min = minf(v_min, uv.y)
+			v_max = maxf(v_max, uv.y)
+		var fu: float = params[1]
+		var fv: float = params[2]
+		# Bords à u constant : lignes continues, un tirage par segment floor(v).
+		var dv := HEDGE_STEP / fv
+		for line in range(floori(u_min), ceili(u_max) + 1):
+			var v := v_min
+			while v < v_max:
+				var roll := VegetationFields.roll_u_edge(layout, line, floori(v))
+				_hedge_point(raw, rng, rect, layout, roll, VegetationFields.to_map(layout, line, v), VegetationFields.to_map(layout, line, v + dv))
+				v += dv
+		# Bords de rangée : décalés d'une colonne à l'autre (jonctions en T).
+		var du := HEDGE_STEP / fu
+		for column in range(floori(u_min), ceili(u_max) + 1):
+			var offset := VegetationFields.row_offset(layout, column)
+			for row in range(floori(v_min + offset) - 1, ceili(v_max + offset) + 2):
+				var roll := VegetationFields.roll_v_edge(layout, row, column)
+				var v_row := row - offset
+				var u := float(column) + du * 0.5
+				while u < column + 1.0:
+					_hedge_point(raw, rng, rect, layout, roll, VegetationFields.to_map(layout, u, v_row), VegetationFields.to_map(layout, u + du, v_row))
+					u += du
 
 
-static func _hash01(n: int) -> float:
-	var h := (n * 1103515245 + 12345) & 0x7fffffff
-	h = (h ^ (h >> 13)) * 1274126177 & 0x7fffffff
-	return float(h % 100000) / 100000.0
+## Un buisson (ou un arbre de haie) en `pos` si le bord est planté ; `next` donne la direction.
+func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: int, roll: float, pos: Vector2, next: Vector2) -> void:
+	if not rect.has_point(pos):
+		return
+	# Tirages consommés avant tout test : semis identique quel que soit l'ordre des rejets.
+	var gap := rng.randf()
+	var tree := rng.randf()
+	var jitter := Vector2(rng.randf_range(-0.07, 0.07), rng.randf_range(-0.07, 0.07))
+	var region := VegetationFields.region_value(pos.x, pos.y)
+	# Chaque trame ne plante que dans sa région ; la limite (chemin) reste dégagée.
+	if (region > 0.0) != (layout == 1) or absf(region) < 0.02:
+		return
+	var gx := (pos.x - origin_px.x) / coarse_step
+	var gy := (pos.y - origin_px.y) / coarse_step
+	var crops := _lerp_grid(_crops, gx, gy)
+	if crops < 0.2:
+		return
+	if roll >= VegetationFields.hedge_probability(crops, _lerp_grid(_hedge, gx, gy)):
+		return
+	if gap < HEDGE_GAP:
+		return
+	if not exclusions.is_empty() and _excluded(pos.x, pos.y):
+		return
+	var p := pos + jitter
+	var ground := mask.map_data.height_world_at(p.x, p.y)
+	if ground <= 0.0:
+		return
+	var dir := next - pos
+	# Basis(UP, a) envoie X sur (cos a, 0, −sin a) : aligne le buisson sur le bord.
+	var yaw := atan2(-dir.y, dir.x) + rng.randf_range(-0.15, 0.15)
+	if tree < HEDGE_TREE:
+		raw[_slot(Kind.DECIDUOUS, p.x, p.y)].append(_make_instance(rng, Kind.DECIDUOUS, p.x, ground, p.y, rng.randf() * TAU, 0.78))
+	else:
+		raw[_slot(Kind.HEDGE, p.x, p.y)].append(_make_instance(rng, Kind.HEDGE, p.x, ground, p.y, yaw, 1.0))
 
 
 func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: float, y: float, yaw: float, scale_factor: float) -> Array:
@@ -252,10 +255,12 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 			var b := rng.randf_range(0.8, 1.15)
 			tint = Color(b * rng.randf_range(0.9, 1.05), b, b * rng.randf_range(0.95, 1.1))
 		Kind.HEDGE:
-			height = rng.randf_range(0.55, 0.75)
-			width = rng.randf_range(0.9, 1.2)
-			var b := rng.randf_range(0.85, 1.1)
-			tint = Color(b * 1.05, b, b * 0.9)
+			# Haies basses et fines, teintes variées (aubépine, noisetier, ronces).
+			height = rng.randf_range(0.3, 0.46)
+			width = rng.randf_range(0.72, 0.95)
+			var b := rng.randf_range(1.0, 1.3)
+			var warm := rng.randf()
+			tint = Color(b * (1.12 if warm > 0.7 else 1.0), b, b * (0.78 if warm > 0.7 else 0.9))
 		_:
 			height = rng.randf_range(1.1, 1.7)
 			width = height * rng.randf_range(0.9, 1.25)
@@ -272,7 +277,7 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 	width *= tree_scale * scale_factor
 	# Légère inclinaison aléatoire (arbres pas tous au garde-à-vous).
 	var basis := Basis(Vector3.UP, yaw) * Basis(Vector3(1, 0, 0), rng.randf_range(-0.06, 0.06))
-	basis = basis.scaled_local(Vector3(width, height, width if kind != Kind.HEDGE else width * 0.9))
+	basis = basis.scaled_local(Vector3(width, height, width if kind != Kind.HEDGE else width * 0.62))
 	# Enfoncé un peu : le maillage du terrain (LOD) ne suit pas exactement l'interpolation bilinéaire.
 	var origin := Vector3(x, ground - 0.08 * height, y)
 	return [rng.randf(), Transform3D(basis, origin), tint]

@@ -2,6 +2,8 @@
 // fondent, lit visible par transparence, eau sombre au milieu), réfraction de l'écran, vaguelettes
 // qui s'écoulent le long du ruban (UV.y = mètres le long du cours), écume sur les hauts-fonds
 // (gués), reflets du ciel et du soleil laissés au moteur (faible rugosité).
+// Lot V4b : reflet de Fresnel de la couleur du ciel (l'eau vue de loin reflète le ciel au lieu
+// d'être une bande sombre), eau plus claire et verte sur les hauts-fonds (bords du ruban).
 shader_type spatial;
 render_mode blend_mix, depth_draw_always, cull_disabled, diffuse_burley, specular_schlick_ggx;
 
@@ -9,8 +11,9 @@ uniform sampler2D wave_normal : hint_normal, filter_linear_mipmap, repeat_enable
 uniform sampler2D macro_noise : filter_linear_mipmap, repeat_enable;
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
-uniform vec3 shallow_color : source_color = vec3(0.3, 0.33, 0.26);
-uniform vec3 deep_color : source_color = vec3(0.025, 0.06, 0.06);
+uniform vec3 shallow_color : source_color = vec3(0.34, 0.37, 0.28);
+uniform vec3 deep_color : source_color = vec3(0.05, 0.1, 0.1);
+uniform vec3 sky_color : source_color = vec3(0.62, 0.72, 0.82);
 uniform float river_width = 38.0;
 uniform float flow_speed = 0.55;
 uniform float clarity = 0.9; // mètres de visibilité
@@ -57,7 +60,16 @@ void fragment() {
 
 	float murk = 1.0 - exp(-vertical / clarity);
 	murk = clamp(murk + turbidity * 0.35, 0.0, 1.0);
+	// Hauts-fonds : le bord du ruban (UV.x près de 0 ou 1) garde une eau claire et verte.
+	float edge = 1.0 - smoothstep(0.0, 0.3, min(UV.x, 1.0 - UV.x));
+	murk *= mix(1.0, 0.45, edge);
 	vec3 water = mix(ground * shallow_color * 2.2, deep_color, murk);
+	// Reflet du ciel (Fresnel de Schlick) : fort en incidence rasante, donc de loin.
+	vec3 view_n = normalize(mix(up_view, (VIEW_MATRIX * vec4(n.x, n.z, n.y, 0.0)).xyz, 0.25));
+	float cos_v = clamp(dot(view_n, normalize(-VERTEX)), 0.0, 1.0);
+	float fresnel = 0.03 + 0.97 * pow(1.0 - cos_v, 5.0);
+	vec3 sky = sky_color * mix(0.85, 1.1, texture(macro_noise, world_pos.xz * 0.004).r);
+	water = mix(water, sky, clamp(fresnel * 1.1, 0.0, 0.72) * smoothstep(0.02, 0.2, vertical));
 
 	// Écume sur les hauts-fonds et le long des rives, déchiquetée et entraînée par le courant.
 	float foam_noise = texture(macro_noise, flow * vec2(0.3, 0.12) + vec2(0.0, -t * 0.35)).r;
