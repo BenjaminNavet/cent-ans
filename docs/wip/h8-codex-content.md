@@ -95,7 +95,10 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 8 fait (religion, savoirs) : tres_riches_heures, enluminure (entity bld_scriptorium),
   librairie_charles_v, oxford, pelerinage, reliques. Toute la liste H8 initiale + `_event_links.md`
   est écrite.
-- Fiches H8b écrites : 60.
+- Lot 9 fait (personnages) : christine_de_pizan, guillaume_de_machaut (Ars nova inclus, pas de
+  fiche ars_nova séparée), john_chandos, olivier_de_clisson, charles_de_blois,
+  jeanne_de_penthievre, jean_de_montfort, jeanne_de_flandre.
+- Fiches H8b écrites : 68.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

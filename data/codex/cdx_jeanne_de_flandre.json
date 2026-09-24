@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jeanne_de_flandre",
+  "title": "Jeanne de Flandre, « Jeanne la Flamme »",
+  "category": "personnage",
+  "aliases": ["Jeanne de Flandre", "Jeanne la Flamme", "comtesse de Montfort", "Hennebont", "siège d'Hennebont"],
+  "era": { "from": "v. 1295", "to": "v. 1374" },
+  "summary": "Épouse de [[cdx_jean_de_montfort|Jean de Montfort]], Jeanne de Flandre prend la tête de son parti après la capture de son mari en 1341. Assiégée dans Hennebont en 1342, elle résiste jusqu'à l'arrivée des renforts anglais, ce qui lui vaut le surnom de « Jeanne la Flamme ».",
+  "body": "Fille de Louis, comte de Nevers et de Rethel, et sœur du comte de Flandre [[cdx_louis_de_nevers|Louis de Nevers]], Jeanne épouse Jean de Montfort en 1329. Quand son mari est capturé par les Français à Nantes, fin 1341, elle refuse de céder. Selon [[cdx_jean_le_bel|Jean le Bel]] et [[cdx_froissart|Froissart]], elle présente son fils de deux ans aux partisans de Montfort pour les appeler à défendre sa cause, et parcourt les places fortes pour organiser la résistance.\n\nAu printemps 1342, [[cdx_charles_de_blois|Charles de Blois]] l'assiège dans Hennebont, près de Lorient. La comtesse, en armure, encourage les défenseurs et fait porter des pierres aux femmes de la ville. Voyant le camp ennemi dégarni pendant un assaut, elle fait une sortie à la tête de trois cents cavaliers et y met le feu ; empêchée de rentrer, elle gagne Auray, puis revient quelques jours plus tard en forçant les lignes. D'où son surnom de Jeanne la Flamme.\n\nLa ville est sur le point de se rendre lorsque la flotte anglaise de [[cdx_gautier_de_mauny|Gautier de Mauny]] apparaît. Froissart raconte que Jeanne, apercevant les voiles depuis sa fenêtre, s'écrie qu'elle voit venir le secours tant désiré. Les assiégeants se retirent.\n\nLa fin de sa vie est plus sombre. Partie en Angleterre en 1343, elle est déclarée démente et gardée pendant plus de trente ans au château de Tickhill, dans le Yorkshire, où elle meurt vers 1374. Son fils, Jean IV, devient duc de Bretagne en 1364, après la victoire d'Auray.",
+  "entity": "evt_hennebont",
+  "see_also": ["cdx_jean_de_montfort", "cdx_jeanne_de_penthievre", "cdx_gautier_de_mauny", "cdx_guerre_de_succession_de_bretagne"],
+  "sources": ["Jeanne de Flandre (1295-1374)", "Siège d'Hennebont"]
+}
