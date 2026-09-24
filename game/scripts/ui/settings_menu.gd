@@ -152,8 +152,15 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
-	var scales: Array = _constant("UI_SCALES")
-	_options(grid, "interface/ui_scale", "Échelle de l'interface", scales, scales.map(func(value: float) -> String: return "%d %%" % roundi(value * 100.0)))
+	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
+	var sizes: Array = _constant("UI_SIZES")
+	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
+	_options(grid, "interface/ui_size", "Taille de l'interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Échelle automatique selon la hauteur de la fenêtre (actuellement %d %%), multipliée par ce réglage." % roundi(float(settings.call("effective_ui_scale")) * 100.0))
+	var texts: Array = _constant("TEXT_SIZES")
+	var text_labels := {0.9: "Petite", 1.0: "Normale", 1.15: "Grande", 1.3: "Très grande"}
+	_options(grid, "interface/text_size", "Taille du texte", texts, texts.map(func(value: float) -> String: return str(text_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Agrandit les textes seuls, sans changer la taille des panneaux et des icônes.")
 
 
 func _build_map(grid: GridContainer) -> void:
