@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_coventry",
+    "province": "prov_warwick",
+    "kind": "city",
+    "name": {
+      "display": "Coventry",
+      "local": "Coventre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.5197,
+      52.4068
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Warwickshire, Staffordshire, Leicestershire, Derbyshire, Nottinghamshire : Coventry (draps bleus), forêt d'Arden, Sherwood, plomb du Peak. Comté de Derby créé le 16 mars 1337 pour Henri de Grosmont.",
+    "sources": [
+      "Mercie",
+      "Coventry",
+      "Henri de Grosmont"
+    ]
+  },
+  {
+    "id": "set_warwick",
+    "province": "prov_warwick",
+    "kind": "castle",
+    "name": {
+      "display": "Warwick",
+      "local": "Warrewic",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.5851,
+      52.2823
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Château siège des comtes de Warwick, l'une des plus puissantes familles du royaume.",
+    "sources": [
+      "Château de Warwick"
+    ]
+  },
+  {
+    "id": "set_kenilworth",
+    "province": "prov_warwick",
+    "kind": "castle",
+    "name": {
+      "display": "Kenilworth",
+      "local": "Kenillewurthe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.5852,
+      52.3486
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Vaste forteresse lacustre, ancienne possession de Thomas de Lancastre exécuté en 1322.",
+    "sources": [
+      "Château de Kenilworth"
+    ]
+  },
+  {
+    "id": "set_stoneleigh",
+    "province": "prov_warwick",
+    "kind": "abbey",
+    "name": {
+      "display": "Stoneleigh",
+      "local": "Stanleigh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4636,
+      52.3389
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne du Warwickshire.",
+    "sources": [
+      "Abbaye de Stoneleigh"
+    ]
+  }
+]
