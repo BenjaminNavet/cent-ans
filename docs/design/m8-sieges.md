@@ -122,3 +122,17 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
   déterminisme. Sonde `probe -- siege 0` : 6/6 (≈ 290 s) ; `siege 60` : 6/6 (≈ 210 s) — l'échelade
   sans brèche réussit plus souvent qu'en M8 (3/6) : l'infanterie trouve maintenant la porte enfoncée
   par le bélier. À rééquilibrer si besoin (PV de la porte, tir des tours).
+
+## F5d — rééquilibrage de l'escalade (Rust)
+- Constat : la comparaison F5a ci-dessus mélangeait deux sondes. `probe -- siege 0` (avec deux
+  trébuchets et une tour) donnait déjà 6/6 en M8 : les trébuchets ouvrent deux brèches vers 120 et
+  200 s, c'est un assaut par la brèche. L'escalade proprement dite (`probe -- siege 0 ""`, échelles et
+  bélier seulement) faisait 3/6 en M8 et était tombée à 2/6 (4/20 sur 20 graines) avec le tir des
+  tours de F5a ; le bélier, lui, ne pèse pas (il n'enfonce jamais la porte avant la décision :
+  PV de la porte, dégâts et armure du bélier testés sans effet).
+- Réglage : chaque tour tire 5 carreaux par salve au lieu de 25 (`TOWER_SHOTS`, portée 180 m et
+  cadence 8 s inchangées) : les tours pèsent sans décider seules.
+- Mesures : `siege 0 ""` → 3/6 (8/20 sur 20 graines, `SEEDS=20`) ; `siege 0` → 6/6 (≈ 290 s) ;
+  `siege 60` → 6/6 (≈ 210 s). La sonde accepte désormais `SEEDS=n`. Test
+  `f5d::a_ladder_escalade_wins_about_half_the_time` (2 à 4 victoires sur 6) ; tests de siège M8 et F5a
+  verts. Garnison en réserve au-delà de 20 régiments : entre depuis la place (`m7-battles.md` § F5d).
