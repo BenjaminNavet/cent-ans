@@ -22,6 +22,8 @@ var selected_index: int = 0
 ## Interception des clics gauches : `Callable(screen_position: Vector2) -> bool` ; si elle
 ## renvoie vrai (ex. une armée a été cliquée), la sélection de province n'a pas lieu.
 var click_interceptor: Callable = Callable()
+## Lot C5 : même principe pour le clic droit (ordre de déplacement vers une colonie).
+var right_click_interceptor: Callable = Callable()
 
 var _mouse_dirty := false
 var _press_position := Vector2.ZERO
@@ -45,6 +47,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_press_button = mb.button_index
 		elif mb.button_index == _press_button and mb.position.distance_to(_press_position) <= CLICK_MAX_DRAG_PX:
 			if mb.button_index == MOUSE_BUTTON_RIGHT:
+				if right_click_interceptor.is_valid() and right_click_interceptor.call(mb.position):
+					return
 				province_right_clicked.emit(pick_screen(mb.position))
 			elif click_interceptor.is_valid() and click_interceptor.call(mb.position):
 				return
