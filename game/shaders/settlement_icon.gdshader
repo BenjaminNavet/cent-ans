@@ -60,11 +60,12 @@ float shape(vec2 p, int kind) {
 }
 
 void fragment() {
-	vec2 p = (UV - vec2(0.5)) * vec2(2.0, -2.0);
+	// Le quad de QuadMesh a UV.y = 0 en bas dans ce repère : les formes sont décrites y vers le haut.
+	vec2 p = (UV - vec2(0.5)) * 2.0;
 	int kind = int(round(v_kind));
 	float d = shape(p, kind);
 	float aa = fwidth(d) * 1.2;
-	float fill = 1.0 - smoothstep(-aa, aa, d + 0.14);
+	float fill = 1.0 - smoothstep(-aa, aa, d + 0.22);
 	float outline = 1.0 - smoothstep(-aa, aa, d);
 	float halo = v_highlight > 0.5 ? (1.0 - smoothstep(0.0, 0.25, d)) : 0.0;
 	vec3 col = mix(ink, v_color.rgb, fill);
@@ -77,7 +78,7 @@ void fragment() {
 		float dot_d = length(p - vec2(0.0, 0.05)) - 0.18;
 		col = mix(col, vec3(0.97, 0.94, 0.86), 1.0 - smoothstep(-aa, aa, dot_d));
 	}
-	col = mix(highlight_color, col, outline);
+	col = v_highlight > 0.5 ? mix(highlight_color, col, outline) : col;
 	ALBEDO = col;
 	ALPHA = max(outline, halo) * alpha;
 }

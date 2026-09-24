@@ -21,9 +21,12 @@ const LABEL_FONT := {"city": 22, "town": 18, "castle": 16, "abbey": 16, "village
 const PICK_ICON_PX := 12.0
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
+## Partage de l'écart entre deux maquettes voisines (voir `_fit_models`).
+const FIT_WEIGHT := {"city": 3.0, "town": 2.0, "castle": 1.5, "abbey": 1.3, "village": 1.0}
+const MIN_FIT_SCALE := 0.55
 
 @export var tiers: ZoomTiers
-@export var icon_size_px: float = 15.0
+@export var icon_size_px: float = 20.0
 @export var label_color: Color = Color(0.16, 0.10, 0.05)
 @export var label_outline: Color = Color(0.95, 0.90, 0.78)
 @export var declutter_interval: float = 0.15
@@ -95,6 +98,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 		_register(_settlements_by_chunk, terrain.chunk_index_at(px.x, px.y), i)
 		_build_model(i, entry)
 		_build_label(i, entry)
+	_fit_models()
 	for i in data.hamlets.size():
 		var hpx: Vector2 = data.hamlets[i]["px"]
 		_register(_hamlets_by_chunk, terrain.chunk_index_at(hpx.x, hpx.y), i)
@@ -143,6 +147,38 @@ func _build_model(i: int, entry: Dictionary) -> void:
 	_models_root.add_child(holder)
 	_models.append(holder)
 	_ground_model(i)
+
+
+## Réduit les maquettes trop proches d'une voisine (Paris / Vincennes / Saint-Denis) : l'écart
+## entre deux colonies est partagé au prorata du poids du type, sans descendre sous
+## `MIN_FIT_SCALE`. Étiquettes et picking utilisent le rayon réduit.
+func _fit_models() -> void:
+	for i in data.settlements.size():
+		var holder: Node3D = _models[i]
+		if holder == null:
+			continue
+		var entry: Dictionary = data.settlements[i]
+		var px: Vector2 = entry["px"]
+		var weight: float = FIT_WEIGHT.get(str(entry["kind"]), 1.0)
+		var allowed := INF
+		var index := terrain.chunk_index_at(px.x, px.y)
+		for dy in [-1, 0, 1]:
+			for dx in [-1, 0, 1]:
+				var neighbor: int = index + dy * TerrainBuilder.CHUNKS + dx
+				for j in _settlements_by_chunk.get(neighbor, PackedInt32Array()):
+					if j == i:
+						continue
+					var other: Dictionary = data.settlements[j]
+					var d := px.distance_to(other["px"])
+					var other_weight: float = FIT_WEIGHT.get(str(other["kind"]), 1.0)
+					allowed = minf(allowed, d * weight / (weight + other_weight))
+		if allowed < _model_radius[i]:
+			var factor := maxf(allowed / _model_radius[i], MIN_FIT_SCALE)
+			var model := holder.get_child(0) as Node3D
+			model.scale *= factor
+			_model_radius[i] *= factor
+			_model_top[i] *= factor
+			_ground_model(i)
 
 
 static func _model_aabb(root: Node3D) -> AABB:
@@ -332,8 +368,11 @@ func _update_label_heights() -> void:
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
 			label.position.y = (_models[i] as Node3D).position.y + _model_top[i] + 0.8
+			label.offset = Vector2.ZERO
 		else:
-			label.position.y = map_data.surface_world_at(px.x, px.y) + 1.5
+			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
+			label.position.y = map_data.surface_world_at(px.x, px.y) + 0.5
+			label.offset = Vector2(0.0, icon_size_px * 0.9 + label.font_size * 0.5)
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
@@ -362,7 +401,7 @@ func declutter() -> void:
 		if alpha < 0.02 or camera.is_position_behind(label.global_position):
 			label.visible = false
 			continue
-		var center := camera.unproject_position(label.global_position)
+		var center := camera.unproject_position(label.global_position) - Vector2(0.0, label.offset.y)
 		var width := label.text.length() * label.font_size * 0.5 + declutter_margin * 2.0
 		var height := label.font_size * 1.05 + declutter_margin * 2.0
 		var rect := Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))

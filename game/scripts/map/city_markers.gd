@@ -65,7 +65,8 @@ func build(map_data: MapData) -> void:
 		var capital_name: String = province.get("capital_name", "")
 		label.text = capital_name if capital_name != "" and not labels_only else province["name"]
 		if labels_only:
-			label.text = label.text.to_upper()
+			var paren := label.text.find(" (")
+			label.text = (label.text.substr(0, paren) if paren > 0 else label.text).to_upper()
 		label.font_size = font_size
 		label.outline_size = 8
 		label.modulate = label_color
@@ -140,7 +141,7 @@ func declutter() -> void:
 			label.visible = false
 			continue
 		var center := camera.unproject_position(world)
-		var width := label.text.length() * font_size * 0.52 + declutter_margin * 2.0
+		var width := label.text.length() * font_size * (0.66 if labels_only else 0.52) + declutter_margin * 2.0
 		var height := font_size * 1.1 + declutter_margin * 2.0
 		var rect := Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
 		if not screen.intersects(rect):

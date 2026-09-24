@@ -174,8 +174,8 @@ const SETTLEMENT_VARIANTS := {
 const SETTLEMENT_FALLBACK := {"city": "city_cathedral", "town": "town", "castle": "castle", "abbey": "village", "village": "village"}
 const HAMLET_VARIANTS: Array[String] = ["hamlet_a", "hamlet_b", "hamlet_c"]
 ## Échelle monde des maquettes (unités Blender → pixels de carte).
-const SETTLEMENT_SCALE := {"city": 3.4, "town": 3.0, "castle": 3.0, "abbey": 3.0, "village": 2.6}
-const HAMLET_SCALE := 2.6
+const SETTLEMENT_SCALE := {"city": 5.0, "town": 4.4, "castle": 4.4, "abbey": 4.2, "village": 3.8}
+const HAMLET_SCALE := 3.6
 
 static var _hamlet_meshes: Array = []
 static var _hamlet_meshes_loaded := false
