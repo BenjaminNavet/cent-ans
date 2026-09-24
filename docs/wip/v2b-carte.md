@@ -15,5 +15,11 @@ Depuis `visual` (V1-V4 fusionnés). Captures de travail dans le scratchpad, fina
 - Démarré : lecture, captures de base (bocage : quadrillage de haies sombres, parcelles Voronoï à facettes,
   prairie bleutée par le brouillard).
 
+- Étapes 1-3 codées : `game/scripts/map/vegetation_fields.gd` (parcellaire partagé + occupation du
+  sol par province), `terrain.gdshader` (`field_at` : enclos, lanières, prés, vignes, chemins, pied de
+  haie), `vegetation_tile_job.gd` (haies sur les mêmes bords, fines, trouées, arbres de haie),
+  `vegetation_mask.gd` (`hedge_at` lit le canal B de l'occupation du sol). Capture `n1` : bien plus
+  naturel ; la Normandie orientale (plaine) a trop peu de haies, le bocage est trop vert/bleu.
+
 ## Prochaine étape
-- Étape 1-2.
+- Vérifier le bocage (canal B dilaté), la palette (atmosphère moins bleue), les fondus, les étiquettes.

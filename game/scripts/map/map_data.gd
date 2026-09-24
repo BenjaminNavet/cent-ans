@@ -41,6 +41,9 @@ var land_mask: Image
 var splat_image: Image
 var border_dist_image: Image
 var coast_dist_image: Image
+## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
+## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
+var landuse_image: Image
 var province_ids_image: Image
 var ids_bytes: PackedByteArray
 var ids_bpp: int = 3
