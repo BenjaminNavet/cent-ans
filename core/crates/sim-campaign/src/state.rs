@@ -40,9 +40,11 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// `BattleRequest::attacker_origin`), M8 siege supplies and breach, M10
 /// outcome. `5`: lot C4 settlements (garrison, siege, buildings,
 /// construction and recruitment move from provinces to settlements; armies
-/// stand on settlements).
+/// stand on settlements). `6`: lot M2 free movement (`Army::position`,
+/// `movement_left`, `planned_path` replace `location`, `movement_points`,
+/// `path`; field battles carry a point).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 5;
+pub const STATE_VERSION: u32 = 6;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -190,28 +192,95 @@ impl Unit {
     }
 }
 
+/// Where an army stands (lot M2, spec § 3.1).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ArmyPosition {
+    /// In the field, at a free point of the map (pixels of the 4096² map).
+    Field { x: f32, y: f32 },
+    /// Stationed in a settlement: garrison, siege or friendly stop.
+    Settlement(SettlementId),
+}
+
+impl ArmyPosition {
+    /// A field position at map pixel `point`.
+    pub fn field(point: [f32; 2]) -> Self {
+        ArmyPosition::Field {
+            x: point[0],
+            y: point[1],
+        }
+    }
+}
+
+/// Destination of a move order (lot M2): a point of the map, or a
+/// settlement to enter (siege, capture or stop).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MoveTarget {
+    Settlement(SettlementId),
+    Point { x: f32, y: f32 },
+}
+
 /// A field army.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Army {
     pub faction: FactionId,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub general: Option<CharacterId>,
-    /// Settlement (node of the movement graph) the army stands on.
-    pub location: SettlementId,
+    /// Where the army stands (lot M2).
+    pub position: ArmyPosition,
     pub units: Vec<Unit>,
-    /// In kilometres of plain (see `MovementRules`).
-    pub movement_points: u32,
+    /// Movement points left this turn, in grid costs (10 = one plain cell
+    /// of the navigation grid, about 1.44 km).
+    pub movement_left: u32,
     /// 0-100.
     pub supply: u8,
     pub stance: Stance,
-    /// Remaining settlements to walk through, resolved in `end_turn`.
+    /// Corners (grid cells) of the rest of a march spanning several turns.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub path: Vec<SettlementId>,
+    pub planned_path: Vec<crate::navigation::Cell>,
+    /// Destination of `planned_path` (a settlement is entered on arrival).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub destination: Option<MoveTarget>,
 }
 
 impl Army {
+    /// A fresh army standing at `position` with no movement left.
+    pub fn new(faction: FactionId, position: ArmyPosition, units: Vec<Unit>) -> Self {
+        Army {
+            faction,
+            general: None,
+            position,
+            units,
+            movement_left: 0,
+            supply: 100,
+            stance: Stance::Normal,
+            planned_path: Vec::new(),
+            destination: None,
+        }
+    }
+
     pub fn total_strength(&self) -> u32 {
         self.units.iter().map(|u| u.strength).sum()
+    }
+
+    /// The settlement the army is stationed in, if any.
+    pub fn settlement(&self) -> Option<&SettlementId> {
+        match &self.position {
+            ArmyPosition::Settlement(id) => Some(id),
+            ArmyPosition::Field { .. } => None,
+        }
+    }
+
+    /// `true` when the army is stationed in `settlement`.
+    pub fn is_at(&self, settlement: &SettlementId) -> bool {
+        self.settlement() == Some(settlement)
+    }
+
+    /// Forgets the rest of a multi-turn march.
+    pub fn clear_plan(&mut self) {
+        self.planned_path.clear();
+        self.destination = None;
     }
 }
 

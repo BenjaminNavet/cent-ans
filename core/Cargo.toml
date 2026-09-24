@@ -22,6 +22,10 @@ thiserror = "2"
 
 # PNG decoding (4096x4096 16-bit heightmap) must stay well under 500 ms even in
 # debug builds: optimise only the decoding crates, never our own code.
+# Lot M2: the data crate walks 4096² rasters (province ids, land mask) once
+# per process; optimise it too so that tests stay fast.
+[profile.dev.package.data-model]
+opt-level = 3
 [profile.dev.package.png]
 opt-level = 3
 [profile.dev.package.fdeflate]
