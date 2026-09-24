@@ -89,6 +89,10 @@ func _init() -> void:
 	# Fin des chutes : les corps sont libérés ou gelés.
 	fx.advance(30.0)
 	_check(fx.active_body_count() == 0, "all bodies should be settled after 30 s")
+	fx.advance(30.0)
+	if str(cfg["settle_mode"]) != "freeze":
+		# Blocs libérés (ou enfoncés puis libérés) : seules restent au plus les planches de la porte.
+		_check(fx.body_count() <= planks, "wall blocks should be gone, %d bodies left" % fx.body_count())
 	print("wall collapse fx: %d blocks + %d merlons, %d stones, %d planks, %d bodies kept" % [blocks, merlons, stones, planks, fx.body_count()])
 	fx.queue_free()
 	await process_frame

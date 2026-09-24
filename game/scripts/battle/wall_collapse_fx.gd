@@ -25,7 +25,7 @@ var _layer_bits := 0
 var _clock := 0.0
 var _primed := false
 var _states: Dictionary = {}  # index du pan -> {intact, ratio}
-var _bodies: Array = []  # [{body, settle_at, mode, frozen, settled}], du plus vieux au plus jeune
+var _bodies: Array = []  # [{body, settle_at, mode, sink, depth, frozen, settled}], du plus vieux au plus jeune
 var _timers: Array = []  # [{at, kind: "reveal"|"free", node, wall}]
 var _grounds: Dictionary = {}  # index du pan -> StaticBody3D
 var _hidden_doors: Dictionary = {}  # index du pan -> [MeshInstance3D]
@@ -128,6 +128,13 @@ func advance(delta: float) -> void:
 				body.queue_free()
 				continue
 			_freeze(entry)
+		elif entry["settled"] and entry["mode"] == "sink":
+			# Enfoncement sous le sol en `sink` s : les éboulis statiques prennent le relais.
+			var sink := maxf(float(entry["sink"]), 0.01)
+			body.global_position.y -= float(entry["depth"]) * delta / sink
+			if _clock >= float(entry["settle_at"]) + sink:
+				body.queue_free()
+				continue
 		kept.append(entry)
 	_bodies = kept
 	var pending: Array = []
@@ -158,15 +165,14 @@ func collapse_wall(index: int, view: Dictionary) -> int:
 	var rubble: Node3D = view["rubble"]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = index * 7919 + int(cfg["seed_salt"])
-	var target := rng.randi_range(int(cfg["blocks_min"]), int(cfg["blocks_max"]))
 	var mat := _debris_material(view.get("material"))
 	var outward := node.global_basis.z.normalized()
-	_ensure_ground(index, node)
+	_ensure_ground(index, view)
 	var spawned := 0
 	var extent := AABB()
 	for child in wall.get_children():
 		if child is MeshInstance3D and (child as MeshInstance3D).mesh is BoxMesh:
-			spawned += _fracture_box(child, target, rng, cfg, mat, outward)
+			spawned += _fracture_box(child, rng, cfg, mat, outward)
 			extent = _box_extent(child)
 		elif child is MultiMeshInstance3D and bool(cfg["merlons_as_bodies"]):
 			spawned += _spawn_merlons(child, rng, cfg, mat, outward)
@@ -179,31 +185,47 @@ func collapse_wall(index: int, view: Dictionary) -> int:
 	return spawned
 
 
-## Découpe une BoxMesh (repère et échelle de son MeshInstance3D) en `target` blocs : rangées aux
-## hauteurs décalées, colonnes décalées d'une rangée à l'autre (appareil de pierre).
-func _fracture_box(mesh_instance: MeshInstance3D, target: int, rng: RandomNumberGenerator, cfg: Dictionary, mat: Material, outward: Vector3) -> int:
+## Nombre de blocs d'une maçonnerie de `length` m : `blocks_per_meter`, borné à
+## [blocks_min, blocks_max].
+static func block_count(cfg: Dictionary, length: float) -> int:
+	return clampi(roundi(length * float(cfg["blocks_per_meter"])), int(cfg["blocks_min"]), int(cfg["blocks_max"]))
+
+
+## Découpe une BoxMesh (repère et échelle de son MeshInstance3D) en `block_count` blocs à peu
+## près cubiques : assises (rangées) aux hauteurs décalées, une ou plusieurs couches dans
+## l'épaisseur, joints verticaux décalés d'une assise à l'autre (appareil de pierre).
+func _fracture_box(mesh_instance: MeshInstance3D, rng: RandomNumberGenerator, cfg: Dictionary, mat: Material, outward: Vector3) -> int:
 	var box: BoxMesh = mesh_instance.mesh
 	var xf := mesh_instance.global_transform
 	var size := box.size * xf.basis.get_scale()
 	var basis := xf.basis.orthonormalized()
-	var aspect := size.x / maxf(size.y, 0.01)
-	var rows := clampi(roundi(sqrt(float(target) / maxf(aspect, 0.01))), 1, target)
+	var target := block_count(cfg, size.x)
+	var edge := pow(size.x * size.y * size.z / float(target), 1.0 / 3.0)
+	var rows := clampi(roundi(size.y / edge), 1, target)
+	var layers := clampi(roundi(size.z / edge), 1, maxi(target / rows, 1))
+	var groups := rows * layers
 	var jitter := float(cfg["cut_jitter"])
 	var row_cuts := _cuts(rows, size.y, jitter, rng)
 	var along := basis.x.normalized()
 	var spawned := 0
-	for r in rows:
-		var cols := target / rows + (1 if r < target % rows else 0)
+	for g in groups:
+		var r := g / layers
+		var l := g % layers
+		var cols := target / groups + (1 if g < target % groups else 0)
+		if cols <= 0:
+			continue
 		var col_cuts := _cuts(cols, size.x, jitter, rng)
 		var y0: float = row_cuts[r]
 		var y1: float = row_cuts[r + 1]
+		var depth := size.z / float(layers)
+		var z := -size.z * 0.5 + (float(l) + 0.5) * depth
 		var height01 := (0.5 * (y0 + y1) + size.y * 0.5) / maxf(size.y, 0.01)
 		for c in cols:
 			var x0: float = col_cuts[c]
 			var x1: float = col_cuts[c + 1]
-			var local := Vector3(0.5 * (x0 + x1), 0.5 * (y0 + y1), 0.0)
-			var block := Vector3(x1 - x0, y1 - y0, size.z)
-			var body := _spawn_body(Transform3D(basis, xf.origin + basis * local), block, mat, float(cfg["density"]), float(cfg["shape_margin"]), float(cfg["settle_seconds"]), str(cfg["settle_mode"]))
+			var local := Vector3(0.5 * (x0 + x1), 0.5 * (y0 + y1), z)
+			var block := Vector3(x1 - x0, y1 - y0, depth)
+			var body := _spawn_body(Transform3D(basis, xf.origin + basis * local), block, mat, float(cfg["density"]), float(cfg["shape_margin"]), float(cfg["settle_seconds"]), str(cfg["settle_mode"]), float(cfg["sink_seconds"]))
 			var out_speed := _rand_range(rng, cfg["outward_impulse"]) * (1.0 + float(cfg["height_boost"]) * height01)
 			var lateral := rng.randf_range(-1.0, 1.0) * float(cfg["lateral_impulse"])
 			body.linear_velocity = outward * out_speed + along * lateral + Vector3.DOWN * _rand_range(rng, cfg["downward_impulse"])
@@ -222,7 +244,7 @@ func _spawn_merlons(multi: MultiMeshInstance3D, rng: RandomNumberGenerator, cfg:
 	for i in mm.instance_count:
 		var xf := multi.global_transform * mm.get_instance_transform(i)
 		var scaled := size * xf.basis.get_scale()
-		var body := _spawn_body(Transform3D(xf.basis.orthonormalized(), xf.origin), scaled, mat, float(cfg["density"]), float(cfg["shape_margin"]), float(cfg["settle_seconds"]), str(cfg["settle_mode"]))
+		var body := _spawn_body(Transform3D(xf.basis.orthonormalized(), xf.origin), scaled, mat, float(cfg["density"]), float(cfg["shape_margin"]), float(cfg["settle_seconds"]), str(cfg["settle_mode"]), float(cfg["sink_seconds"]))
 		body.linear_velocity = outward * _rand_range(rng, cfg["outward_impulse"]) * (1.0 + float(cfg["height_boost"])) + Vector3.DOWN * _rand_range(rng, cfg["downward_impulse"])
 		body.angular_velocity = _random_unit(rng) * float(cfg["angular_impulse"])
 		spawned += 1
@@ -240,7 +262,7 @@ func collapse_gate(index: int, view: Dictionary) -> int:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = index * 7919 + int(settings["wall"]["seed_salt"]) + 1
 	var inward := -node.global_basis.z.normalized()
-	_ensure_ground(index, node)
+	_ensure_ground(index, view)
 	var hidden: Array = []
 	var spawned := 0
 	var extent := AABB()
@@ -258,7 +280,7 @@ func collapse_gate(index: int, view: Dictionary) -> int:
 		var mat := _debris_material(door.material_override)
 		for k in planks:
 			var local := Vector3(-size.x * 0.5 + (float(k) + 0.5) * width, 0, 0)
-			var body := _spawn_body(Transform3D(basis, xf.origin + basis * local), Vector3(width, size.y, size.z), mat, float(cfg["density"]), 0.9, float(cfg["settle_seconds"]), str(cfg["settle_mode"]))
+			var body := _spawn_body(Transform3D(basis, xf.origin + basis * local), Vector3(width, size.y, size.z), mat, float(cfg["density"]), 0.9, float(cfg["settle_seconds"]), str(cfg["settle_mode"]), float(cfg["sink_seconds"]))
 			body.linear_velocity = inward * _rand_range(rng, cfg["inward_impulse"])
 			# Bascule autour de l'axe du vantail (le haut part le premier), un peu de vrille.
 			body.angular_velocity = basis.x.normalized() * -float(cfg["angular_impulse"]) * rng.randf_range(0.6, 1.2) + _random_unit(rng) * 0.3
@@ -290,7 +312,7 @@ func drop_parapet(index: int, view: Dictionary) -> int:
 		return 0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = index * 7919 + int(settings["wall"]["seed_salt"]) + int(_clock * 1000.0) + 2
-	_ensure_ground(index, node)
+	_ensure_ground(index, view)
 	var xf := body_mesh.global_transform
 	var size := (body_mesh.mesh as BoxMesh).size * xf.basis.get_scale()
 	var basis := xf.basis.orthonormalized()
@@ -311,7 +333,9 @@ func drop_parapet(index: int, view: Dictionary) -> int:
 # --- Corps, sol, plafonds -----------------------------------------------------------------------
 
 
-func _spawn_body(xf: Transform3D, size: Vector3, mat: Material, density: float, margin: float, lifetime: float, mode: String) -> RigidBody3D:
+## `mode` à `lifetime` s : "free" (libéré), "freeze" (figé en décor) ou "sink" (figé puis enfoncé
+## sous le sol en `sink_seconds` s, puis libéré).
+func _spawn_body(xf: Transform3D, size: Vector3, mat: Material, density: float, margin: float, lifetime: float, mode: String, sink_seconds: float = 0.0) -> RigidBody3D:
 	var body := RigidBody3D.new()
 	body.collision_layer = _layer_bits
 	body.collision_mask = _layer_bits
@@ -330,7 +354,7 @@ func _spawn_body(xf: Transform3D, size: Vector3, mat: Material, density: float, 
 	body.add_child(collider)
 	add_child(body)
 	body.global_transform = xf
-	_bodies.append({"body": body, "settle_at": _clock + lifetime, "mode": mode, "frozen": false, "settled": false})
+	_bodies.append({"body": body, "settle_at": _clock + lifetime, "mode": mode, "sink": sink_seconds, "depth": size.length(), "frozen": false, "settled": false})
 	_enforce_caps()
 	return body
 
@@ -367,12 +391,18 @@ func _freeze(entry: Dictionary) -> void:
 
 
 ## Sol local du pan : le terrain de bataille n'a pas de collision, on échantillonne son relief
-## (`height_at`) dans une HeightMapShape3D autour du pan, sur la couche des débris. Repli : plan
-## horizontal à la base du pan.
-func _ensure_ground(index: int, node: Node3D) -> void:
+## (`height_at`) dans une HeightMapShape3D carrée (longueur du pan + 2 × `patch_margin`) sur la
+## couche des débris. Repli : pavé horizontal à la base du pan.
+func _ensure_ground(index: int, view: Dictionary) -> void:
 	if _grounds.has(index):
 		return
 	var cfg: Dictionary = settings["ground"]
+	var node: Node3D = view["node"]
+	var span := 0.0
+	for child in (view["wall"] as Node3D).get_children():
+		if child is MeshInstance3D and (child as MeshInstance3D).mesh is BoxMesh:
+			span = maxf(span, ((child as MeshInstance3D).mesh as BoxMesh).size.x * (child as Node3D).global_basis.get_scale().x)
+	var patch := span + 2.0 * float(cfg["patch_margin"])
 	var ground := StaticBody3D.new()
 	ground.name = "Ground%d" % index
 	ground.collision_layer = _layer_bits
@@ -384,7 +414,7 @@ func _ensure_ground(index: int, node: Node3D) -> void:
 	var center := node.global_position
 	if height_at.is_valid():
 		var spacing := float(cfg["patch_spacing"])
-		var samples := maxi(int(float(cfg["patch_size"]) / spacing), 2) + 1
+		var samples := maxi(int(patch / spacing), 2) + 1
 		var heights := PackedFloat32Array()
 		heights.resize(samples * samples)
 		var half := float(samples - 1) * 0.5
@@ -402,7 +432,7 @@ func _ensure_ground(index: int, node: Node3D) -> void:
 		ground.position = Vector3(center.x, 0.0, center.z)
 	else:
 		var plane := BoxShape3D.new()
-		plane.size = Vector3(float(cfg["patch_size"]), 1.0, float(cfg["patch_size"]))
+		plane.size = Vector3(patch, 1.0, patch)
 		collider.shape = plane
 		ground.position = center  # pavé de 1 m centré sur la base du pan (0,5 m sous le sol)
 	ground.add_child(collider)
@@ -455,6 +485,7 @@ func _spawn_dust(basis: Basis, extent: AABB, amount: int) -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.vertex_color_use_as_albedo = true
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.albedo_texture = _puff_texture()
 	mat.billboard_keep_scale = true
 	quad.material = mat
 	particles.draw_pass_1 = quad
@@ -503,6 +534,26 @@ func _exit_tree() -> void:
 
 
 # --- Outils -------------------------------------------------------------------------------------
+
+
+static var _puff: GradientTexture2D
+
+
+## Bouffée de poussière : disque blanc au bord fondu (la couleur vient de la rampe des particules).
+static func _puff_texture() -> GradientTexture2D:
+	if _puff == null:
+		var gradient := Gradient.new()
+		gradient.set_color(0, Color(1, 1, 1, 1))
+		gradient.set_color(1, Color(1, 1, 1, 0))
+		gradient.add_point(0.45, Color(1, 1, 1, 0.55))
+		_puff = GradientTexture2D.new()
+		_puff.gradient = gradient
+		_puff.fill = GradientTexture2D.FILL_RADIAL
+		_puff.fill_from = Vector2(0.5, 0.5)
+		_puff.fill_to = Vector2(1.0, 0.5)
+		_puff.width = 64
+		_puff.height = 64
+	return _puff
 
 
 ## Copie de la matière du pan en triplanaire local : une projection monde ferait glisser la
