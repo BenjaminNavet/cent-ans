@@ -16,9 +16,10 @@ const KINDS := ["infantry", "archer", "cavalry", "siege"]
 const MAX_CORPSES := 4000
 const TRIM_GOLD := Color(0.83, 0.66, 0.24)
 const TRIM_SILVER := Color(0.85, 0.85, 0.82)
-## Niveaux de détail (lot V4b), distance caméra → régiment (m) : maillage complet en deçà de
-## `LOD_DISTANCE` (son ombre est portée par le maillage allégé), maillage allégé au-delà, sans
-## ombre portée après `SHADOW_DISTANCE`.
+## Niveaux de détail (lots V4b, B1), distance caméra → régiment (m) : maillage complet en deçà
+## de `DETAIL_DISTANCE`, moyen jusqu'à `LOD_DISTANCE` (leur ombre est portée par le maillage
+## lointain), maillage lointain au-delà, sans ombre portée après `SHADOW_DISTANCE`.
+const DETAIL_DISTANCE := 32.0
 const LOD_DISTANCE := 75.0
 const SHADOW_DISTANCE := 190.0
 
@@ -30,7 +31,8 @@ var cast_shadows: bool = true
 
 var _materials: Dictionary = {}  # unit id -> ShaderMaterial
 var _unit_kind: Dictionary = {}  # unit id -> famille de rendu
-var _lod_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (maillage allégé)
+var _lod_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (maillage lointain)
+var _near_level: Dictionary = {}  # unit id -> niveau de détail du maillage proche (0 ou 1)
 var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
 var _corpse_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, count, next}
@@ -68,7 +70,7 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		layers[id] = instance
 		var lod_mm := MultiMesh.new()
 		lod_mm.transform_format = MultiMesh.TRANSFORM_3D
-		lod_mm.mesh = BattleMeshes.soldier(kind, variant, true)
+		lod_mm.mesh = BattleMeshes.soldier_level(kind, variant, BattleMeshes.LEVEL_FAR)
 		lod_mm.instance_count = mm.instance_count
 		lod_mm.visible_instance_count = 0
 		var lod := MultiMeshInstance3D.new()
@@ -169,6 +171,10 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	var near := distance < LOD_DISTANCE
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE
+	var level := BattleMeshes.LEVEL_FULL if distance < DETAIL_DISTANCE else BattleMeshes.LEVEL_MEDIUM
+	if near and int(_near_level.get(id, -1)) != level:
+		_near_level[id] = level
+		mm.mesh = BattleMeshes.soldier_level(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), level)
 	instance.visible = n > 0 and near
 	lod.visible = n > 0 and (not near or shadow)
 	if near:

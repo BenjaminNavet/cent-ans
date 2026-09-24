@@ -29,11 +29,13 @@ Contrats : `docs/design/m1-campaign-map.md` (données carte), `docs/design/m2-ca
 ```
 CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, relie UI ↔ SimFacade.sim
 ├── WorldEnvironment / Sun (DirectionalLight3D)
-├── Terrain     (TerrainBuilder)   16 × 16 tuiles ArrayMesh depuis la heightmap, 2 LOD
+├── Terrain     (TerrainBuilder)   16 × 16 tuiles ArrayMesh depuis la heightmap, 2 LOD + relief fin 8192² (C6)
 ├── Sea         (Sea)              plan d'eau Y = 0 (shader animé) + fond opaque à −4,5
 ├── Rivers      (RiversRenderer)   rubans bleus (largeur selon importance ; mineurs masqués de loin)
 ├── Coast       (CoastRenderer)    ruban brun sur le trait de côte
-├── Cities      (CityMarkers)      cylindre + Label3D par capitale (`capital_px`)
+├── Cities      (CityMarkers)      noms de provinces au palier loin (C6 : `labels_only`)
+├── Roads       (RoadRenderer)     créé par le code (C6) : routes principales, rubans drapés
+├── Settlements (SettlementLayer)  créé par le code (C6) : icônes, maquettes, hameaux, étiquettes
 ├── PathPreview (PathPreview)      ruban orange : chemin prévisualisé / ordre en cours
 ├── Armies      (ArmyMarkers)      un `army_marker.tscn` par armée au centroïde de sa province
 ├── ConstructionMarkers (ConstructionMarkers) Label3D « ⚒ » sur les provinces en construction (M3)
@@ -511,6 +513,106 @@ Enveloppe du jeu autour de la carte ; aucune règle de jeu (lecture de l'état, 
 Captures : `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-credits.png`,
 `godot-flow-pause.png`, `godot-flow-settings.png`, `godot-flow-save.png`, `godot-flow-report.png`,
 `godot-flow-alerts.png`.
+
+## Paliers de zoom, colonies, hameaux et routes (lot C6)
+
+Spec : `docs/design/2026-09-24-echelle-colonies.md` § 6. Rendu seulement : positions et types lus dans
+`data/`, contrôleur par `CampaignSim.settlements()`, dévastation par `get_province_state`.
+
+| Palier | Distance du rig (unités = px carte 4096) | Visible |
+|---|---|---|
+| **Loin** | > 620 (fondu 550-690) | provinces colorées, noms de provinces en capitales (`CityMarkers.labels_only`, parenthèses retirées) |
+| **Moyen** | 150-620 | icônes de colonies (forme par type, couleur du contrôleur, cité plus grande), noms des cités, puis des villes sous 380, routes principales en traits |
+| **Près** (vue comté) | < 150 (fondu 130-170) ; min 22 | maquettes 3D, hameaux, toutes les routes en rubans drapés, noms de toutes les colonies, relief fin sous 170 |
+
+Réglages : `game/resources/zoom_tiers.tres` (`ZoomTiers` : seuils, largeurs de fondu, distance des noms
+de villes, relief fin, portées des maquettes et hameaux). Caméra : `min_distance` 22 (≈ 40 km visibles,
+un comté), tangage 30° de près → 70° de loin.
+
+![Île-de-France, palier près (Paris sélectionnée)](img/colonies/ile-de-france-pres.png)
+
+Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-{pres,moyen,loin}.png`.
+
+### Composants
+
+| Script | Rôle |
+|---|---|
+| `scripts/map/zoom_tiers.gd` | Ressource des paliers : `tier_at`, `near_weight` / `medium_weight` / `far_weight` (somme 1, fondus en `smoothstep`). |
+| `scripts/map/settlement_data.gd` | Lecture de `data/settlements/*.json`, `data/map/settlements_px.json`, `hamlets.json`, `roads.geojson` ; tri par priorité d'étiquette ; `apply_live(sim)`. |
+| `scripts/map/settlement_layer.gd` (`CampaignMap/Settlements`, créé par le code) | Icônes (`MultiMesh`, `shaders/settlement_icon.gdshader`, taille constante à l'écran, sans test de profondeur), étiquettes `Label3D` dé-chevauchées (cité > ville > château > abbaye > village), maquettes, hameaux, picking, sélection. |
+| `scripts/map/road_renderer.gd` (`CampaignMap/Roads`) | Routes principales (`type` = `main`) en traits `terrain_line` au palier moyen ; rubans de chemin de terre (`shaders/road.gdshader`) par tuile de terrain au palier près. |
+| `scripts/map/fine_terrain_job.gd` | Maillage de relief fin d'une tuile, construit dans `WorkerThreadPool`. |
+| `tools/blender_scripts/settlements.py` | Générateur Blender headless des maquettes (voir ci-dessous). |
+
+### Relief fin (`TerrainBuilder`, 3ᵉ niveau)
+
+- Sous `fine_terrain_distance`, les `max_fine_chunks` (4) tuiles les plus proches du point visé (rayon
+  `fine_radius` 150) passent en relief fin : tuile `data/map/height/h_{col}_{row}.png` (512² en 16 bits,
+  alignée sur les 16 × 16 tuiles de terrain) décodée par `GameDataStore.load_heightmap_u16` (repli
+  `Png16`), maillage construit hors fil principal (sommet toutes les 0,5 unité, moyenne 2 × 2 des pixels
+  8192, ≈ 240 ms par tuile dans un fil), cache LRU de 10 tuiles, 2 tâches simultanées.
+- Pas de fissure : le pourtour d'une tuile fine reprend exactement le profil du LOD proche 4096
+  (pas 4), plus une jupe de 1,5 unité (double face) contre un voisin lointain.
+- `surface_height_at(x, y)` rend la hauteur exacte de la surface affichée (interpolation dans le triangle
+  du maillage courant, quel que soit le niveau) ; le signal `chunk_surface_changed(index)` recale
+  maquettes, hameaux et rubans de la tuile. Les normales restent tirées de la heightmap 4096 (shader).
+- Options de mesure : `--no-fine-terrain`, `--fine-step=2` (sommet par unité).
+
+### Maquettes et hameaux
+
+- `blender --background --python tools/blender_scripts/settlements.py -- game/assets/models/settlements`
+  produit 13 `.glb` (réutilise les aides de `models.py`, dont le `main()` est désormais protégé) :
+  `city_a/b` (enceinte, cathédrale, donjon, faubourg), `town_a` (enceinte irrégulière, église, halle),
+  `town_b` (bastide carrée en damier), `castle_a` (motte, donjon, basse-cour), `castle_b` (donjon carré
+  sur butte, chemise, village au pied), `abbey_a/b` (abbatiale, cloître, bâtiments conventuels, jardins,
+  enclos ; `b` avec moulin), `village_a/b` (église, chaumières, granges, lanières de champs),
+  `hamlet_a/b/c` (2 à 5 bâtiments de ferme). 500 à 2 050 triangles (plafond 5 000), matériau `Banner`
+  teinté à la couleur du contrôleur.
+- `ModelLibrary.settlement_model(kind, graine)` : variante déterministe par id, échelle monde
+  `SETTLEMENT_SCALE` (cité 5, ville/château 4,4, abbaye 4,2, village 3,8), repli sur les modèles M10.
+  Lacet déterministe ; posée au point le plus bas de son emprise (fondations sous z = 0 : rien ne flotte).
+  Deux maquettes trop proches (Paris / Vincennes / Saint-Denis) sont réduites au prorata du poids du type
+  (jusqu'à 55 %). Visibles au palier près, `visibility_range_end` = 420.
+- Hameaux : `MultiMesh` par tuile de terrain (niveau proche ou fin) et par (variante, brûlé) ; variante,
+  orientation et échelle déterministes (hachage nom + position). **Brûlés** : une part des hameaux égale à
+  la dévastation de la province (à partir de 10 %) prend un matériau calciné.
+- Végétation : cercles d'exclusion autour des colonies (rayon de la maquette) et des hameaux
+  (`Vegetation.extra_exclusions`, filtrés par tuile avant le semis).
+
+### Picking et sélection
+
+`CampaignMap._try_select_army` (intercepteur du picker) essaie les armées, puis
+`SettlementLayer.pick_screen` : icône (rayon 12 px × échelle du type) au palier moyen, emprise projetée de
+la maquette au palier près. Une colonie cliquée → `select(id)` : icône surlignée, anneau doré au sol,
+journal (`print`), toast « nom (province) » et signal `settlement_selected(id)` (le panneau de colonie
+viendra au lot C5). Ailleurs, picking de province inchangé. `--select-settlement=<id>` pour les captures.
+
+### Performances (M4 Pro, 1600 × 900, `--fps-probe`)
+
+| Vue | FPS | Primitives / appels de rendu |
+|---|---|---|
+| Comté, Île-de-France (d = 55, 4 tuiles fines) | 60-70 | 9,5 M / 1 075 |
+| Comté, Île-de-France sans relief fin | 60-63 | 3,2 M / 1 064 |
+| Comté, Île-de-France, relief fin pas 2 | 60 | 4,7 M / 1 073 |
+| Dézoom maximal (d = 1 500) | 62 | 0,3 M / 549 |
+
+Les FPS restent collés à la fréquence de l'écran (synchro verticale imposée par Metal) : la mesure ne
+révèle pas de goulot. Les couches C6 coûtent ≈ 0,3 ms de CPU par image (LOD du terrain 0,16 ms,
+colonies + routes 0,14 ms). Le gros des primitives vient des passes d'ombre du relief fin
+(2,1 M triangles pour 4 tuiles) ; `--fine-step=2` divise ce coût par 4 si besoin.
+
+`godot --headless --path game --script res://tests/settlements_render_test.gd` : charge colonies,
+hameaux et routes réels, construit le relief fin près de Paris, vérifie qu'aucune maquette ne flotte,
+les hameaux, les rubans, le picking de Paris et les poids des paliers.
+
+### Limites (C6)
+
+- Les arbres restent posés sur la heightmap 4096 bilinéaire ; sur le relief fin ils peuvent s'enfoncer
+  ou dépasser de quelques dixièmes d'unité en montagne (peu visible).
+- Les marqueurs d'armée (lot C4) utilisent encore `MapData.surface_world_at`, pas `surface_height_at`.
+- Icônes, étiquettes et routes principales sont dessinées sans test de profondeur (comme les fleuves).
+- Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
+  la caméra), largement au-delà du champ utile en vue comté.
 
 ## Performances mesurées (M4 Pro)
 

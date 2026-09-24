@@ -2,12 +2,13 @@ class_name CampaignCamera
 extends Node3D
 
 ## Caméra RTS : point de focus au sol, distance (zoom), lacet (Q/E), tangage
-## dérivé du zoom (35° de près → 70° de loin), amortissement.
+## dérivé du zoom (30° de près, plus rasant en vue comté → 70° de loin), amortissement.
 ## Entrées : WASD/flèches, bords d'écran (désactivable), molette, glisser molette.
 
-@export var min_distance: float = 30.0
+## Lot C6 : vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
+@export var min_distance: float = 22.0
 @export var max_distance: float = 1500.0
-@export var pitch_near_deg: float = 35.0
+@export var pitch_near_deg: float = 30.0
 @export var pitch_far_deg: float = 70.0
 ## Distance à laquelle le tangage atteint `pitch_far_deg` (bornée par max_distance,
 ## réglée sur la taille de carte dans `setup`).
