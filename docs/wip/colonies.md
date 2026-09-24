@@ -14,7 +14,7 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C2c colonies Sud | fait | 35 prov., 145 colonies ; enclaves scaligères (Lucques, Trévise), Mantoue impériale, Alghero génoise ; total 568 colonies |
 | C3 pipeline géo | fait (`b79fbeb`) | graphe 1 345 arêtes (634 route, 28 mer), routes Itiner-e + 70 calculées hors limes, 2 999 hameaux, relief 8192² en 256 tuiles (50 Mo) |
 | C4 refonte cœur | fait (fusionné `17aa679`) | armées sur colonies, contrôle dérivé de la cité, revenu par poids, sauvegarde v5, entretien des garnisons par type (`rules.json`) |
-| C5 pont + UI | à faire | panneau de colonie sur `SettlementLayer.settlement_selected(id)`, clic droit sur une colonie comme cible, aperçu de chemin sur le graphe |
+| C5 pont + UI | fait (fusionné `b241608`) | panneau de colonie sur `SettlementLayer.settlement_selected(id)`, clic droit sur une colonie comme cible, aperçu de chemin sur le graphe |
 | C6 rendu paliers | fait | paliers loin > 620 / moyen 150-620 / près < 150 ; 13 maquettes Blender ; relief fin LRU ; captures `docs/img/colonies/` ; signal `settlement_selected(id)` à brancher en C5 |
 | C7 IA, équilibrage, docs | à faire | + perdant sans colonie amie voisine reste sur place ; arbres sur relief fin ; routes principales peu visibles au palier moyen |
 
@@ -39,6 +39,12 @@ La session 6 (`docs/wip/tw.md`, plan `docs/design/2026-09-24-rapprochement-total
 - Vérifié sur `17aa679` : clippy, cargo test, smoke Godot, `settlements_render_test`. La dylib de `main` est reconstruite.
 
 Hors colonies, connu : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call` échoue aussi sur `main` (tous les portraits existent déjà).
+
+## Fusion de C5
+
+- C5 est fusionné sans conflit (`b241608`) : smoke, `settlements_render_test` et `c5_settlements_ui_test` sont verts. Il ajoute le panneau de colonie, l'onglet Colonies, le clic droit sur une colonie, les anneaux d'atteignabilité et l'aperçu de chemin par colonies (détail dans `docs/wip/c5-settlements-ui.md`).
+- Point transmis à C7a : une saison porte trop loin (233 colonies atteignables depuis Paris, Villeneuve-sur-Lot en 14 étapes).
+- Ouvert pour C7b : l'aperçu de chemin ne suit pas le tracé réel des routes, et le panneau recouvre la minicarte.
 
 ## Prochaine étape
 
