@@ -23,8 +23,8 @@ const LINK := "#1a3a8b"
 const ILLUSTRATIONS_DIR := "res://assets/illustrations/"
 const ILLUSTRATION_WIDTH := 660
 
-## Onglets : identifiant, libellé, dossier de `data/` (vide : entrées construites ici),
-## préfixe des identifiants, icône de l'onglet.
+## Onglets : identifiant, libellé, dossier de `data/` (vide : entrées construites ici ;
+## « @retinue » : compagnons de `data/retinue.json`, C7), préfixe des identifiants, icône.
 const TABS := [
 	{"id": "units", "label": "Unités", "dir": "unit_types", "prefix": "unit_", "icon": "cat_unit"},
 	{"id": "buildings", "label": "Bâtiments", "dir": "buildings", "prefix": "bld_", "icon": "cat_building"},
@@ -32,6 +32,7 @@ const TABS := [
 	{"id": "resources", "label": "Ressources", "dir": "resources", "prefix": "res_", "icon": "cat_resource"},
 	{"id": "traits", "label": "Traits", "dir": "traits", "prefix": "trait_", "icon": "cat_trait"},
 	{"id": "skills", "label": "Compétences", "dir": "skills", "prefix": "skill_", "icon": "cat_skill"},
+	{"id": "retinue", "label": "Suite", "dir": "@retinue", "prefix": "ret_", "icon": "hud_army"},
 	{"id": "factions", "label": "Factions", "dir": "factions", "prefix": "fac_", "icon": "hud_diplomacy"},
 	{"id": "religions", "label": "Religion", "dir": "religions", "prefix": "rel_", "icon": "bld_parish_church"},
 	{"id": "mechanics", "label": "Mécaniques", "dir": "", "prefix": "mech_", "icon": "hud_menu"},
@@ -59,7 +60,7 @@ const MECHANICS := [
 	{"id": "mech_battles", "name": "Batailles", "icon": "hud_army", "text": "Quand deux armées ennemies se rencontrent, choisissez « Livrer bataille » (bataille 3D en temps réel) ou la résolution automatique. En 3D : régiments en ligne, colonne, schiltron ou coin ; flancs et arrières vulnérables ; piques contre cavalerie ; pieux des archers ; la pluie gêne arcs et arbalètes, le brouillard réduit la portée. La mort du général fait chuter le moral. Les armées alliées présentes dans la province se joignent à la bataille."},
 	{"id": "mech_diplomacy", "name": "Diplomatie", "icon": "hud_diplomacy", "text": "L'attitude de chaque puissance envers vous est calculée (liens, guerres, religion, prétentions, réputation) et le panneau en donne les raisons. Déclarer une guerre sans casus belli ou rompre une trêve coûte en réputation. La paix se négocie selon le score de guerre (cessions, tribut, trêve). Alliances, appels aux armes, embargos, vassalité, mariages entre dynasties et unions personnelles complètent le jeu.\n\nReligion : la faveur pontificale se gagne par la piété et les dons ; l'excommunication isole. Le Grand Schisme (1378-1417) oblige à choisir une obédience.", "extra": "relations"},
 	{"id": "mech_succession", "name": "Succession", "icon": "hud_court", "text": "Les personnages vieillissent, se marient, ont des enfants et meurent. À la mort du souverain, l'héritier est désigné par la loi de succession du royaume ; un héritier mineur règne sous régence. Une faction sans héritier voit une nouvelle maison (ou un élu) prendre le pouvoir. Les prétentions dynastiques issues des mariages peuvent donner un casus belli, voire une union personnelle.", "extra": "succession"},
-	{"id": "mech_characters", "name": "Personnages", "icon": "hud_governor", "text": "Les personnages gagnent de l'expérience (batailles, gouvernance) et des points de compétence à dépenser dans trois branches : Commandement, Gouvernance, Cour. Leurs traits (personnalité, physique, martial, gouvernance, acquis) modifient batailles, provinces et diplomatie. Nommez des généraux à la tête des armées et des gouverneurs dans les provinces (fiche personnage)."},
+	{"id": "mech_characters", "name": "Personnages", "icon": "hud_governor", "text": "Les personnages gagnent de l'expérience (batailles, gouvernance) et des points de compétence à dépenser dans trois branches : Commandement, Gouvernance, Cour. Leurs traits (personnalité, physique, martial, gouvernance, acquis) modifient batailles, provinces et diplomatie. Nommez des généraux à la tête des armées et des gouverneurs dans les provinces (fiche personnage).\n\nSuite : au fil des victoires, des sièges, des chevauchées, des saisons passées dans une ville bien dotée ou des rançons touchées, des compagnons (écuyer, héraut, confesseur, barbier-chirurgien…) rejoignent un personnage, huit au plus. Leurs effets s'ajoutent à ceux de ses traits ; certains passent à l'héritier à sa mort, et deux généraux réunis peuvent s'en confier."},
 	{"id": "mech_technology", "name": "Recherche", "icon": "hud_research", "text": "Les points de recherche viennent d'une base, des bâtiments savants, des technologies et de la gouvernance du souverain. Une technologie en avance de plus de vingt ans sur sa date historique coûte davantage. Le surplus d'une technologie achevée est reporté sur la suivante ; sans recherche choisie, les points de la saison sont perdus."},
 	{"id": "mech_chronicle", "name": "Chronique", "icon": "hud_chronicle", "text": "Des événements historiques datés et conditionnels (L'Écluse, Crécy, la Peste noire, la Jacquerie, Azincourt, Jeanne d'Arc…) et des événements aléatoires demandent une décision. Vous avez deux saisons pour choisir, sinon le conseil tranche. Certains choix déclenchent des suites plusieurs saisons plus tard."},
 	{"id": "mech_victory", "name": "Victoire", "icon": "hud_end_turn", "text": "Chaque faction jouable a des objectifs historiques à remplir avant une échéance (touche O). Les remplir tous donne la victoire ; perdre toutes ses terres, la défaite ; à l'échéance, la campagne s'achève sur un score.", "extra": "victory"},
@@ -243,11 +244,27 @@ static func tab_of(entry_id: String) -> int:
 	return -1
 
 
+## C7 : compagnons de `data/retinue.json`, `id → définition`.
+static func retinue_definitions() -> Dictionary:
+	var result: Dictionary = {}
+	var path := GameCatalog.data_dir().path_join("retinue.json")
+	if not FileAccess.file_exists(path):
+		return result
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if parsed is Dictionary:
+		for companion in parsed.get("companions", []):
+			if companion is Dictionary and companion.has("id"):
+				result[str(companion["id"])] = companion
+	return result
+
+
 static func definition_of(entry_id: String) -> Dictionary:
 	var index := tab_of(entry_id)
 	if index < 0:
 		return {}
 	var directory := str(TABS[index]["dir"])
+	if directory == "@retinue":
+		return retinue_definitions().get(entry_id, {})
 	if directory == "":
 		for mechanic in MECHANICS:
 			if mechanic["id"] == entry_id:
@@ -305,7 +322,16 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 			return library.call("get_icon", "bld_parish_church")
 		"mechanics":
 			return library.call("get_icon", str(definition.get("icon", "")))
+		"retinue":
+			return library.call("get_icon", str(RETINUE_ICONS.get(str(definition.get("category", "")), "hud_army")))
 	return library.call("get_icon", entry_id)
+
+
+## C7 : icône d'une famille de compagnons.
+const RETINUE_ICONS := {
+	"military": "hud_army", "court": "hud_court", "faith": "bld_parish_church",
+	"learning": "hud_research", "commerce": "hud_treasury", "intrigue": "hud_diplomacy",
+}
 
 
 ## Construit les listes de tous les onglets depuis `data/`.
@@ -318,6 +344,8 @@ func build_entries() -> void:
 		if str(tab["dir"]) == "":
 			for mechanic in MECHANICS:
 				definitions[mechanic["id"]] = mechanic
+		elif str(tab["dir"]) == "@retinue":
+			definitions = retinue_definitions()
 		else:
 			definitions = GameCatalog.definitions(str(tab["dir"]))
 		for entry_id in definitions:
@@ -562,7 +590,43 @@ static func fiche_bbcode(entry_id: String) -> String:
 			return _religion_fiche(entry_id, definition)
 		"mechanics":
 			return _mechanic_fiche(definition)
+		"retinue":
+			return _retinue_fiche(entry_id, definition)
 	return ""
+
+
+## C7 : fiche d'un compagnon de la suite.
+static func _retinue_fiche(entry_id: String, definition: Dictionary) -> String:
+	var category := str(definition.get("category", ""))
+	var subtitle := "Compagnon de suite — %s" % str(RetinueRow.CATEGORY_LABELS.get(category, category))
+	var local: Variant = (definition.get("name", {}) as Dictionary).get("local", "") if definition.get("name") is Dictionary else ""
+	if str(local) != "":
+		subtitle += " — « %s »" % str(local)
+	var ways := PackedStringArray()
+	for rule in definition.get("acquisition", []):
+		var trigger := str((rule as Dictionary).get("trigger", ""))
+		var text := str(RetinueRow.TRIGGER_LABELS.get(trigger, trigger))
+		if trigger == "season_in_settlement":
+			text = text % link(str((rule as Dictionary).get("building", "")))
+		ways.append("• %s (%d ‰ par occasion)" % [text, int((rule as Dictionary).get("chance_permille", 0))])
+	var conditions: Dictionary = definition.get("conditions", {})
+	var limits := PackedStringArray()
+	if not (conditions.get("factions", []) as Array).is_empty():
+		limits.append("Réservé à : " + _links(conditions["factions"]))
+	if int(conditions.get("min_battles", 0)) > 0:
+		limits.append("Au moins %d batailles livrées" % int(conditions["min_battles"]))
+	if int(conditions.get("min_command", 0)) > 0:
+		limits.append("Commandement %d au moins" % int(conditions["min_command"]))
+	if not (conditions.get("excludes_traits", []) as Array).is_empty():
+		limits.append("Jamais avec : " + _links(conditions["excludes_traits"]))
+	var heir := "Passe à l'héritier (fils aîné majeur, sinon le nouveau souverain) à la mort de son maître." \
+		if bool(definition.get("inheritable", false)) else "Quitte la maison à la mort de son maître."
+	return _join([
+		_heading("", name_of(entry_id), subtitle), _description(definition),
+		_section("Effets", _effects(definition.get("effects", []))),
+		_section("Obtention", "\n".join(ways)), "\n".join(limits), _section("Transmission", heir),
+		_sources(definition),
+	])
 
 
 ## Identifiants d'un dossier dont le champ `key` (texte ou liste) contient `entry_id`.

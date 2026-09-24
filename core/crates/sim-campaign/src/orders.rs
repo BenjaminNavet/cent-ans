@@ -168,6 +168,12 @@ pub enum Order {
         character: CharacterId,
         amount: u32,
     },
+    /// Headless-only debug order (smoke test, lot C7): `companion` joins
+    /// `character`'s retinue if he may gain it (cap, conditions).
+    DebugGrantCompanion {
+        character: CharacterId,
+        companion: data_model::CompanionId,
+    },
     // ----- M5: diplomacy & religion (spec § 2.3) --------------------------
     DeclareWar {
         target: FactionId,
@@ -485,6 +491,13 @@ impl CampaignState {
             }
             Order::DebugGrantXp { character, amount } => {
                 skills::grant_experience(self, &character, amount);
+                Ok(())
+            }
+            Order::DebugGrantCompanion {
+                character,
+                companion,
+            } => {
+                crate::retinue::grant_companion(self, data, &character, &companion)?;
                 Ok(())
             }
             Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),
