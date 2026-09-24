@@ -67,6 +67,9 @@ var _closeup: bool = false
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
+var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
+var _deploy_shot: bool = false
+var _sortie_shown: bool = false
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -175,6 +178,7 @@ func begin() -> bool:
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
 	for unit in units:
@@ -401,6 +405,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
 		if siege_view != null:
 			hud.set_siege_status(siege_status(battle.call("get_siege")))
+			_check_sortie()
 		hud.update_cards(units, player_side, selected)
 		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
@@ -426,6 +431,8 @@ static func siege_status(siege: Dictionary) -> String:
 	var hold := float(siege.get("hold_time", 0.0))
 	if hold > 0.0:
 		text += " · place centrale tenue %d / %d s" % [int(hold), int(float(siege.get("hold_to_win", 60.0)))]
+	if bool(siege.get("sortie", false)):
+		text += " · sortie de la garnison !"
 	return text
 
 
@@ -484,6 +491,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
 			return
 		match event.keycode:
+			KEY_ENTER, KEY_KP_ENTER:
+				if deployment != null:
+					deployment.finish()
 			KEY_SPACE:
 				_toggle_pause()
 			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
@@ -597,6 +607,9 @@ func _finish_right(position: Vector2) -> void:
 	var press := _right_press
 	_right_press = Vector2(-1, -1)
 	if selected.is_empty():
+		return
+	if deployment != null and deployment.active:
+		_deploy_selection(press, position)
 		return
 	var now := Time.get_ticks_msec()
 	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
@@ -766,6 +779,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--autoplay":
 			autoplay = true
+		elif arg == "--deploy-shot":
+			_deploy_shot = true
 		elif arg == "--siege":
 			siege_demo = true
 		elif arg.begins_with("--camera="):
@@ -785,6 +800,9 @@ func _stage_screenshot() -> void:
 		get_tree().quit(1)
 		return
 	camera_rig.edge_pan_enabled = false
+	if _deploy_shot:
+		await _stage_deploy_screenshot()
+		return
 	if siege_view != null:
 		await _stage_siege_screenshot()
 		return
@@ -901,3 +919,58 @@ static func de(name: String) -> String:
 	if name != "" and "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(name[0]):
 		return "d'" + name
 	return "de " + name
+
+
+# --- F5c : déploiement et sortie de la garnison ------------------------------------------
+
+
+## Phase de déploiement pour toute bataille du joueur (champ et siège) ; sautée quand l'IA
+## joue les deux camps (`--autoplay`, `--screenshot`, smoke), sauf `--deploy-shot`.
+func _open_deployment() -> void:
+	if autoplay and not _deploy_shot:
+		return
+	deployment = DeploymentController.new()
+	deployment.name = "Deployment"
+	add_child(deployment)
+	if not deployment.open(self):
+		deployment.queue_free()
+		deployment = null
+
+
+func _deploy_selection(press: Vector2, release: Vector2) -> void:
+	var p1 := ground_point(release)
+	var p0 := _right_press_ground if press.x >= 0.0 and press.distance_to(release) > 20.0 else p1
+	deployment.place(selected.duplicate(), p0, p1, camera_rig.camera.global_position)
+	_refresh_view(true)
+
+
+## Sortie de la garnison (F5a) : message éphémère une fois, et mention dans la ligne du siège.
+func _check_sortie() -> void:
+	if _sortie_shown or not bool(battle.call("get_siege").get("sortie", false)):
+		return
+	_sortie_shown = true
+	hud.show_toast("La garnison ouvre ses portes et fait une sortie !", player_side == "attacker")
+
+
+## Capture `--deploy-shot` : phase de déploiement ouverte, deux régiments du joueur rangés en
+## ligne dans la zone, un placement refusé (toast), vue plongeante sur la zone.
+func _stage_deploy_screenshot() -> void:
+	if deployment == null:
+		get_tree().quit(1)
+		return
+	var zone: Dictionary = deployment.zone
+	var center := Vector3((float(zone["x0"]) + float(zone["x1"])) * 0.5, 0, (float(zone["z0"]) + float(zone["z1"])) * 0.5)
+	for unit in units:
+		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
+			selected.append(int(unit["id"]))
+	var ahead := 1.0 if player_side == "attacker" else -1.0
+	var cam := center + Vector3(0, 300, -400 * ahead)
+	deployment.place(selected.duplicate(), center + Vector3(-60, 0, 0), center + Vector3(60, 0, 0), cam)
+	var outside := Vector3(center.x, 0, (float(zone["z1"]) + 150.0) if ahead > 0.0 else (float(zone["z0"]) - 150.0))
+	deployment.place(selected.slice(0, 1), outside, outside, cam)
+	camera_rig.look_at_point(center + Vector3(0, 0, 60 * ahead), 420.0, (PI if ahead > 0.0 else 0.0) + 0.35)
+	_refresh_view(true)
+	_apply_camera_override()
+	for _i in 40:
+		await get_tree().process_frame
+	_take_screenshot(_screenshot_path, true)
