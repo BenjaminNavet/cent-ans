@@ -44,7 +44,9 @@ def main() -> None:
         if obj.type == "MESH" and obj.name in ("blocks", "louvre", "charles_v_hidden"):
             obj.hide_render = True
     # Ground plane under everything.
-    bpy.ops.mesh.primitive_plane_add(size=8000 if "siege" in model.stem else 40, location=(0, 0, -0.001))
+    bpy.ops.mesh.primitive_plane_add(
+        size=8000 if "siege" in model.stem else 40, location=(0, 0, -0.001)
+    )
     ground = bpy.context.active_object
     mat = bpy.data.materials.new("Terrain")
     mat.use_nodes = True

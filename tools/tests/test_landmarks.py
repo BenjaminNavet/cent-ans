@@ -89,7 +89,15 @@ def test_landmark_warp_is_monotonic(path: Path) -> None:
 def test_landmark_elements_have_unique_ids(path: Path) -> None:
     """Ids are unique within each list; year ranges are ordered."""
     landmark = _load(path)
-    for key in ("monuments", "walls", "bridges", "streets", "islands", "areas", "open_spaces"):
+    for key in (
+        "monuments",
+        "walls",
+        "bridges",
+        "streets",
+        "islands",
+        "areas",
+        "open_spaces",
+    ):
         items = landmark.get(key, [])
         ids = [item["id"] for item in items]
         assert len(ids) == len(set(ids)), key

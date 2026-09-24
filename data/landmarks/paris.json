@@ -6,7 +6,7 @@
   "province": "prov_ile_de_france",
   "siege": {
     "rotate_deg": 27,
-    "radius_m": 1400,
+    "radius_m": 1000,
     "bank_offset_m": 106,
     "areas": [
       "cite",

@@ -62,7 +62,12 @@ def notre_dame():
         (
             lead,
             g.gable_roof(
-                west_body + length / 2, 0, ND_VAULT, length, ND_INNER * 2, ND_RIDGE - ND_VAULT
+                west_body + length / 2,
+                0,
+                ND_VAULT,
+                length,
+                ND_INNER * 2,
+                ND_RIDGE - ND_VAULT,
             ),
         )
     )
@@ -72,21 +77,42 @@ def notre_dame():
         apse_verts.append(
             (ND_APSE_X + ND_INNER * math.cos(a), ND_INNER * math.sin(a), ND_VAULT)
         )
-    parts.append(
-        (lead, (apse_verts, [(i + 1, i + 2, 0) for i in range(apse_steps)]))
-    )
+    parts.append((lead, (apse_verts, [(i + 1, i + 2, 0) for i in range(apse_steps)])))
     # Transept (barely protruding) with gabled roof and the north and south roses.
     tx0, tx1 = -5.0, 9.0
     tcx = (tx0 + tx1) / 2
     parts.append((stone, g.box(tcx, 0, -2.0, tx1 - tx0, 50.0, ND_VAULT + 2.0)))
     parts.append(
-        (lead, g.gable_roof(tcx, 0, ND_VAULT, 50.0, tx1 - tx0, ND_RIDGE - ND_VAULT, math.pi / 2))
+        (
+            lead,
+            g.gable_roof(
+                tcx, 0, ND_VAULT, 50.0, tx1 - tx0, ND_RIDGE - ND_VAULT, math.pi / 2
+            ),
+        )
     )
     for side in (-1, 1):
-        parts.append((glass, g.disc_vertical(tcx, side * 25.0, 24.0, 5.2, side * math.pi / 2, 14, 0.3)))
-        parts.append((stone, g.disc_vertical(tcx, side * 25.0, 24.0, 1.4, side * math.pi / 2, 8, 0.5)))
-        parts.append((glass, g.panel(tcx, side * 25.0, 0.0, 5.0, 8.0, side * math.pi / 2, 0.3)))
-        parts.append((stone, g.pyramid(tcx, side * 25.3, ND_RIDGE - 1.0, 1.6, 1.2, 6.0)))
+        parts.append(
+            (
+                glass,
+                g.disc_vertical(
+                    tcx, side * 25.0, 24.0, 5.2, side * math.pi / 2, 14, 0.3
+                ),
+            )
+        )
+        parts.append(
+            (
+                stone,
+                g.disc_vertical(
+                    tcx, side * 25.0, 24.0, 1.4, side * math.pi / 2, 8, 0.5
+                ),
+            )
+        )
+        parts.append(
+            (glass, g.panel(tcx, side * 25.0, 0.0, 5.0, 8.0, side * math.pi / 2, 0.3))
+        )
+        parts.append(
+            (stone, g.pyramid(tcx, side * 25.3, ND_RIDGE - 1.0, 1.6, 1.2, 6.0))
+        )
 
     # Clerestory lancets, aisle windows and the flying buttresses of each bay.
     nave_bays = [west_body + 3.5 + 7.2 * i for i in range(6)]
@@ -94,8 +120,12 @@ def notre_dame():
     for x in nave_bays + choir_bays:
         for side in (-1, 1):
             normal = side * math.pi / 2
-            parts.append((glass, g.panel(x + 3.4, side * ND_INNER, 23.5, 3.2, 6.0, normal, 0.25)))
-            parts.append((glass, g.panel(x + 3.4, side * ND_OUTER, 2.5, 3.4, 6.0, normal, 0.25)))
+            parts.append(
+                (glass, g.panel(x + 3.4, side * ND_INNER, 23.5, 3.2, 6.0, normal, 0.25))
+            )
+            parts.append(
+                (glass, g.panel(x + 3.4, side * ND_OUTER, 2.5, 3.4, 6.0, normal, 0.25))
+            )
             parts += _flying_buttress(x, side)
     for i in range(1, apse_steps, 2):
         a = -math.pi / 2 + math.pi * i / apse_steps
@@ -134,7 +164,14 @@ def _flying_buttress(x, side):
     parts.append(("NDStone", g.beam(a, m, 1.1, 1.6)))
     parts.append(("NDStone", g.beam(m, b, 1.1, 1.6)))
     # Lower flyer.
-    parts.append(("NDStone", g.beam((x, side * (ND_OUTER + 0.2), 18.0), (x, side * 15.0, 21.0), 0.9, 1.2)))
+    parts.append(
+        (
+            "NDStone",
+            g.beam(
+                (x, side * (ND_OUTER + 0.2), 18.0), (x, side * 15.0, 21.0), 0.9, 1.2
+            ),
+        )
+    )
     return parts
 
 
@@ -228,14 +265,19 @@ def _nd_spire(x):
         parts.append(
             (
                 "Glass",
-                g.panel(3.45 * math.cos(a) + x, 3.45 * math.sin(a), base + 3.0, 1.6, 6.0, a),
+                g.panel(
+                    3.45 * math.cos(a) + x, 3.45 * math.sin(a), base + 3.0, 1.6, 6.0, a
+                ),
             )
         )
     parts.append(("Lead", g.cone(x, 0, base + 12.0, 3.6, 43.0, 8)))
     for i in range(4):
         a = 2 * math.pi * i / 4 + math.pi / 4
         parts.append(
-            ("Lead", g.cone(x + 4.6 * math.cos(a), 4.6 * math.sin(a), base, 0.9, 16.0, 6))
+            (
+                "Lead",
+                g.cone(x + 4.6 * math.cos(a), 4.6 * math.sin(a), base, 0.9, 16.0, 6),
+            )
         )
     top = base + 55.0
     parts.append(("Gold", g.box(x, 0, top - 1.0, 0.5, 0.5, 4.0)))
@@ -268,8 +310,12 @@ def sainte_chapelle():
     for i in range(6):
         x = x0 + 1.0 + 5.0 * i
         for side in (-1, 1):
-            parts.append((stone, g.box(x, side * (half + 1.3), -2.0, 1.4, 2.6, wall + 1.0)))
-            parts.append((stone, g.pyramid(x, side * (half + 1.3), wall - 1.0, 1.4, 2.6, 7.0)))
+            parts.append(
+                (stone, g.box(x, side * (half + 1.3), -2.0, 1.4, 2.6, wall + 1.0))
+            )
+            parts.append(
+                (stone, g.pyramid(x, side * (half + 1.3), wall - 1.0, 1.4, 2.6, 7.0))
+            )
             if i < 5:
                 normal = side * math.pi / 2
                 parts.append(
@@ -281,7 +327,9 @@ def sainte_chapelle():
     # West front: rose, two turrets with spirelets, porch.
     parts.append((glass, g.disc_vertical(x0, 0, 22.0, 3.8, math.pi, 14, -0.2)))
     for side in (-1, 1):
-        parts.append((stone, g.cylinder(x0 - 0.5, side * (half + 0.4), -2.0, 1.6, 36.0, 8)))
+        parts.append(
+            (stone, g.cylinder(x0 - 0.5, side * (half + 0.4), -2.0, 1.6, 36.0, 8))
+        )
         parts.append((lead, g.cone(x0 - 0.5, side * (half + 0.4), 34.0, 1.7, 9.0, 8)))
     parts.append((stone, g.box(x0 - 2.5, 0, -2.0, 5.0, 10.0, 12.0)))
     parts.append((lead, g.gable_roof(x0 - 2.5, 0, 10.0, 10.0, 5.0, 4.0, math.pi / 2)))
@@ -309,7 +357,9 @@ def palais_cite():
     parts.append((stone, g.box(48.0, 8.0, -2.0, 34.0, 16.0, 16.0)))
     parts.append((slate, g.gable_roof(48.0, 8.0, 14.0, 34.0, 16.0, 12.0)))
     parts.append((stone, g.box(-52.0, 10.0, -2.0, 22.0, 30.0, 14.0)))
-    parts.append((slate, g.gable_roof(-52.0, 10.0, 12.0, 30.0, 22.0, 10.0, math.pi / 2)))
+    parts.append(
+        (slate, g.gable_roof(-52.0, 10.0, 12.0, 30.0, 22.0, 10.0, math.pi / 2))
+    )
     # Conciergerie towers on the north quay: Bonbec, Argent, César.
     for x, r, h in ((-40.0, 5.5, 26.0), (-14.0, 6.5, 30.0), (2.0, 6.5, 30.0)):
         parts.append((stone, g.cylinder(x, 30.0, -2.0, r, h + 2.0, 10)))
@@ -321,7 +371,9 @@ def palais_cite():
     parts.append((slate, g.pyramid(72.0, 28.0, 40.0, 12.0, 12.0, 16.0)))
     for dx, dy in ((-5.5, -5.5), (5.5, -5.5), (5.5, 5.5), (-5.5, 5.5)):
         parts.append((slate, g.cone(72.0 + dx, 28.0 + dy, 38.0, 1.4, 8.0, 6)))
-    parts.append(("Gold", g.panel(72.0, 22.4, 30.0, 4.0, 4.0, -math.pi / 2, 0.1, pointed=False)))
+    parts.append(
+        ("Gold", g.panel(72.0, 22.4, 30.0, 4.0, 4.0, -math.pi / 2, 0.1, pointed=False))
+    )
     # Precinct wall with its courtyard (the Sainte-Chapelle stands in the south-east part).
     wall = [(-68.0, -78.0), (92.0, -78.0), (92.0, 36.0), (-68.0, 36.0)]
     for i in range(4):
@@ -333,7 +385,13 @@ def palais_cite():
             (
                 stone,
                 g.box(
-                    (ax + bx) / 2, (ay + by) / 2, -2.0, length, 2.0, 9.0, math.atan2(by - ay, bx - ax)
+                    (ax + bx) / 2,
+                    (ay + by) / 2,
+                    -2.0,
+                    length,
+                    2.0,
+                    9.0,
+                    math.atan2(by - ay, bx - ax),
                 ),
             )
         )
@@ -350,33 +408,82 @@ def louvre(variant=""):
     stone, slate, water = "Stone", "Slate", "Water"
     hx, hy = 39.0, 36.0
     residence = variant == "charles_v"
-    parts.append((water, g.flat([(-hx - 12, -hy - 12), (hx + 12, -hy - 12), (hx + 12, hy + 12), (-hx - 12, hy + 12)], 0.1)))
-    parts.append((stone, g.flat([(-hx - 3, -hy - 3), (hx + 3, -hy - 3), (hx + 3, hy + 3), (-hx - 3, hy + 3)], 0.2)))
+    parts.append(
+        (
+            water,
+            g.flat(
+                [
+                    (-hx - 12, -hy - 12),
+                    (hx + 12, -hy - 12),
+                    (hx + 12, hy + 12),
+                    (-hx - 12, hy + 12),
+                ],
+                0.1,
+            ),
+        )
+    )
+    parts.append(
+        (
+            stone,
+            g.flat(
+                [
+                    (-hx - 3, -hy - 3),
+                    (hx + 3, -hy - 3),
+                    (hx + 3, hy + 3),
+                    (-hx - 3, hy + 3),
+                ],
+                0.2,
+            ),
+        )
+    )
     corners = [(-hx, -hy), (hx, -hy), (hx, hy), (-hx, hy)]
     for i in range(4):
         (ax, ay), (bx, by) = corners[i], corners[(i + 1) % 4]
         parts.append(
             (
                 stone,
-                g.box((ax + bx) / 2, (ay + by) / 2, -2.0, math.hypot(bx - ax, by - ay), 3.0, 15.0, math.atan2(by - ay, bx - ax)),
+                g.box(
+                    (ax + bx) / 2,
+                    (ay + by) / 2,
+                    -2.0,
+                    math.hypot(bx - ax, by - ay),
+                    3.0,
+                    15.0,
+                    math.atan2(by - ay, bx - ax),
+                ),
             )
         )
         mx, my = (ax + bx) / 2, (ay + by) / 2
         for t in (-0.18, 0.18):
             tx, ty = mx + (bx - ax) * t, my + (by - ay) * t
             parts.append((stone, g.cylinder(tx, ty, -2.0, 4.0, 20.0, 10)))
-            parts.append((slate, g.cone(tx, ty, 18.0, 4.4, 9.0 if not residence else 13.0, 10)))
+            parts.append(
+                (slate, g.cone(tx, ty, 18.0, 4.4, 9.0 if not residence else 13.0, 10))
+            )
     for x, y in corners:
         parts.append((stone, g.cylinder(x, y, -2.0, 5.2, 24.0, 12)))
-        parts.append((slate, g.cone(x, y, 22.0, 5.6, 11.0 if not residence else 16.0, 12)))
+        parts.append(
+            (slate, g.cone(x, y, 22.0, 5.6, 11.0 if not residence else 16.0, 12))
+        )
     # Great tower (grosse tour) with its own moat.
-    parts.append((water, g.flat([(9.5 * math.cos(a), 9.5 * math.sin(a)) for a in [2 * math.pi * i / 16 for i in range(16)]], 0.25)))
+    parts.append(
+        (
+            water,
+            g.flat(
+                [
+                    (9.5 * math.cos(a), 9.5 * math.sin(a))
+                    for a in [2 * math.pi * i / 16 for i in range(16)]
+                ],
+                0.25,
+            ),
+        )
+    )
     parts.append((stone, g.cylinder(0, 0, -2.0, 7.5, 33.0, 16)))
     parts.append((slate, g.cone(0, 0, 31.0, 8.0, 16.0, 16)))
     parts.append(("Gold", g.box(0, 0, 46.5, 0.5, 0.5, 3.0)))
     if residence:
         # Charles V's lodgings along the four sides, tall roofs, stair tower and turrets.
-        for (cx, cy, length, angle) in (
+        for cx, cy, length, angle in (
             (0.0, -hy + 7.0, 2 * hx - 12, 0.0),
             (0.0, hy - 7.0, 2 * hx - 12, 0.0),
             (-hx + 7.0, 0.0, 2 * hy - 26, math.pi / 2),
@@ -384,11 +491,19 @@ def louvre(variant=""):
         ):
             parts.append((stone, g.box(cx, cy, -2.0, length, 10.0, 22.0, angle)))
             parts.append((slate, g.gable_roof(cx, cy, 20.0, length, 10.0, 12.0, angle)))
-        for x, y in ((-hx + 12, -hy + 12), (hx - 12, hy - 12), (-hx + 12, hy - 12), (hx - 12, -hy + 12)):
+        for x, y in (
+            (-hx + 12, -hy + 12),
+            (hx - 12, hy - 12),
+            (-hx + 12, hy - 12),
+            (hx - 12, -hy + 12),
+        ):
             parts.append((stone, g.cylinder(x, y, 18.0, 2.2, 16.0, 8)))
             parts.append((slate, g.cone(x, y, 34.0, 2.5, 8.0, 8)))
     else:
-        for (cx, cy, length, angle) in ((0.0, -hy + 6.0, 2 * hx - 14, 0.0), (-hx + 6.0, 0.0, 2 * hy - 26, math.pi / 2)):
+        for cx, cy, length, angle in (
+            (0.0, -hy + 6.0, 2 * hx - 14, 0.0),
+            (-hx + 6.0, 0.0, 2 * hy - 26, math.pi / 2),
+        ):
             parts.append((stone, g.box(cx, cy, -2.0, length, 8.0, 12.0, angle)))
             parts.append((slate, g.gable_roof(cx, cy, 10.0, length, 8.0, 7.0, angle)))
     return parts
@@ -417,15 +532,62 @@ def bastille():
     """Eight round towers joined by curtain walls of the same height, flat crenellated tops."""
     parts = []
     hx, hy, h = 33.0, 15.0, 24.0
-    parts.append(("Water", g.flat([(-hx - 16, -hy - 16), (hx + 16, -hy - 16), (hx + 16, hy + 16), (-hx - 16, hy + 16)], 0.1)))
+    parts.append(
+        (
+            "Water",
+            g.flat(
+                [
+                    (-hx - 16, -hy - 16),
+                    (hx + 16, -hy - 16),
+                    (hx + 16, hy + 16),
+                    (-hx - 16, hy + 16),
+                ],
+                0.1,
+            ),
+        )
+    )
     parts.append(("DarkStone", g.box(0, 0, -2.0, 2 * hx, 2 * hy, h + 2.0)))
-    parts.append(("Paving", g.flat([(-hx + 4, -hy + 4), (hx - 4, -hy + 4), (hx - 4, hy - 4), (-hx + 4, hy - 4)], h + 0.3)))
-    towers = [(-hx, -hy), (-11.0, -hy), (11.0, -hy), (hx, -hy), (hx, hy), (11.0, hy), (-11.0, hy), (-hx, hy)]
+    parts.append(
+        (
+            "Paving",
+            g.flat(
+                [
+                    (-hx + 4, -hy + 4),
+                    (hx - 4, -hy + 4),
+                    (hx - 4, hy - 4),
+                    (-hx + 4, hy - 4),
+                ],
+                h + 0.3,
+            ),
+        )
+    )
+    towers = [
+        (-hx, -hy),
+        (-11.0, -hy),
+        (11.0, -hy),
+        (hx, -hy),
+        (hx, hy),
+        (11.0, hy),
+        (-11.0, hy),
+        (-hx, hy),
+    ]
     for x, y in towers:
         parts.append(("DarkStone", g.cylinder(x, y, -2.0, 6.5, h + 4.0, 12)))
         for i in range(8):
             a = 2 * math.pi * i / 8
-            parts.append(("DarkStone", g.box(x + 6.0 * math.cos(a), y + 6.0 * math.sin(a), h + 2.0, 1.4, 1.4, 1.6)))
+            parts.append(
+                (
+                    "DarkStone",
+                    g.box(
+                        x + 6.0 * math.cos(a),
+                        y + 6.0 * math.sin(a),
+                        h + 2.0,
+                        1.4,
+                        1.4,
+                        1.6,
+                    ),
+                )
+            )
     for x in range(-28, 29, 4):
         for y in (-hy, hy):
             parts.append(("DarkStone", g.box(float(x), y, h, 1.4, 1.4, 1.5)))
@@ -457,7 +619,14 @@ def church(size=1.0, tower_spire=True):
         ("Stone", g.box(-26 * s, 0, -2.0, 9 * s, 9 * s, 30 * s)),
     ]
     if tower_spire:
-        parts.append(("Slate", g.pyramid(-26 * s, 0, 28 * s, 9.5 * s, 9.5 * s, 22 * s, math.pi / 4 * 0)))
+        parts.append(
+            (
+                "Slate",
+                g.pyramid(
+                    -26 * s, 0, 28 * s, 9.5 * s, 9.5 * s, 22 * s, math.pi / 4 * 0
+                ),
+            )
+        )
     return parts
 
 
@@ -466,15 +635,70 @@ def abbey(size=1.0):
     s = size
     parts = church(1.35 * s)
     cx, cy, half = 2 * s, -28 * s, 14 * s
-    parts.append(("Garden", g.flat([(cx - half, cy - half), (cx + half, cy - half), (cx + half, cy + half), (cx - half, cy + half)], 0.12)))
-    for angle, (ox, oy) in ((0.0, (0, -half - 5 * s)), (math.pi / 2, (half + 5 * s, 0)), (math.pi / 2, (-half - 5 * s, 0))):
-        parts.append(("Stone", g.box(cx + ox, cy + oy, -2.0, 2 * half + 20 * s, 10 * s, 12 * s, angle)))
-        parts.append(("Tile", g.gable_roof(cx + ox, cy + oy, 10 * s, 2 * half + 20 * s, 10 * s, 7 * s, angle)))
+    parts.append(
+        (
+            "Garden",
+            g.flat(
+                [
+                    (cx - half, cy - half),
+                    (cx + half, cy - half),
+                    (cx + half, cy + half),
+                    (cx - half, cy + half),
+                ],
+                0.12,
+            ),
+        )
+    )
+    for angle, (ox, oy) in (
+        (0.0, (0, -half - 5 * s)),
+        (math.pi / 2, (half + 5 * s, 0)),
+        (math.pi / 2, (-half - 5 * s, 0)),
+    ):
+        parts.append(
+            (
+                "Stone",
+                g.box(cx + ox, cy + oy, -2.0, 2 * half + 20 * s, 10 * s, 12 * s, angle),
+            )
+        )
+        parts.append(
+            (
+                "Tile",
+                g.gable_roof(
+                    cx + ox, cy + oy, 10 * s, 2 * half + 20 * s, 10 * s, 7 * s, angle
+                ),
+            )
+        )
     wall = [(-55 * s, -62 * s), (48 * s, -62 * s), (48 * s, 22 * s), (-55 * s, 22 * s)]
     for i in range(4):
         (ax, ay), (bx, by) = wall[i], wall[(i + 1) % 4]
-        parts.append(("Stone", g.box((ax + bx) / 2, (ay + by) / 2, -2.0, math.hypot(bx - ax, by - ay), 1.6 * s, 7 * s, math.atan2(by - ay, bx - ax))))
-    parts.append(("Garden", g.flat([(-50 * s, -58 * s), (-20 * s, -58 * s), (-20 * s, -30 * s), (-50 * s, -30 * s)], 0.1)))
+        parts.append(
+            (
+                "Stone",
+                g.box(
+                    (ax + bx) / 2,
+                    (ay + by) / 2,
+                    -2.0,
+                    math.hypot(bx - ax, by - ay),
+                    1.6 * s,
+                    7 * s,
+                    math.atan2(by - ay, bx - ax),
+                ),
+            )
+        )
+    parts.append(
+        (
+            "Garden",
+            g.flat(
+                [
+                    (-50 * s, -58 * s),
+                    (-20 * s, -58 * s),
+                    (-20 * s, -30 * s),
+                    (-50 * s, -30 * s),
+                ],
+                0.1,
+            ),
+        )
+    )
     return parts
 
 

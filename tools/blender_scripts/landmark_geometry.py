@@ -15,6 +15,7 @@ class Layer:
     """Triangles accumulated per material for one exported node."""
 
     def __init__(self, name):
+        """Initialise from the given parameters."""
         self.name = name
         self.parts = {}  # material -> [verts, faces, anchors, colors]
 
@@ -39,6 +40,7 @@ class Transform:
     """Local shape frame (metres or units) to world units: scale, rotation about Z, offset."""
 
     def __init__(self, origin=(0.0, 0.0), angle=0.0, k=1.0, kz=None, z0=0.0):
+        """Initialise from the given parameters."""
         self.ox, self.oy = origin
         self.cos, self.sin = math.cos(angle), math.sin(angle)
         self.k = k
@@ -95,14 +97,19 @@ def distance_to_segment(px, py, ax, ay, bx, by):
     """Distance from P to segment AB."""
     dx, dy = bx - ax, by - ay
     length2 = dx * dx + dy * dy
-    t = 0.0 if length2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / length2))
+    t = (
+        0.0
+        if length2 == 0
+        else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / length2))
+    )
     return math.hypot(px - ax - t * dx, py - ay - t * dy)
 
 
 def distance_to_polyline(px, py, points):
     """Distance from P to an open polyline."""
     return min(
-        distance_to_segment(px, py, *points[i], *points[i + 1]) for i in range(len(points) - 1)
+        distance_to_segment(px, py, *points[i], *points[i + 1])
+        for i in range(len(points) - 1)
     )
 
 
@@ -177,7 +184,12 @@ def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False):
     """Box of footprint ``sx`` x ``sy`` centred on (cx, cy), from z0 to z0 + h."""
     c, s = math.cos(angle), math.sin(angle)
     corners = []
-    for lx, ly in ((-sx / 2, -sy / 2), (sx / 2, -sy / 2), (sx / 2, sy / 2), (-sx / 2, sy / 2)):
+    for lx, ly in (
+        (-sx / 2, -sy / 2),
+        (sx / 2, -sy / 2),
+        (sx / 2, sy / 2),
+        (-sx / 2, sy / 2),
+    ):
         corners.append((cx + lx * c - ly * s, cy + lx * s + ly * c))
     verts = [(x, y, z0) for x, y in corners] + [(x, y, z0 + h) for x, y in corners]
     faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (4, 5, 6, 7)]
@@ -287,7 +299,10 @@ def hip_roof(cx, cy, z0, length, width, h, angle=0.0):
 def cylinder(cx, cy, z0, r, h, sides=8, top=True):
     """Vertical cylinder (prism of a regular polygon)."""
     poly = [
-        (cx + r * math.cos(2 * math.pi * i / sides), cy + r * math.sin(2 * math.pi * i / sides))
+        (
+            cx + r * math.cos(2 * math.pi * i / sides),
+            cy + r * math.sin(2 * math.pi * i / sides),
+        )
         for i in range(sides)
     ]
     return prism(poly, z0, z0 + h, top)
@@ -296,7 +311,11 @@ def cylinder(cx, cy, z0, r, h, sides=8, top=True):
 def cone(cx, cy, z0, r, h, sides=8, r_top=0.0):
     """Cone (or frustum) standing on z0."""
     verts = [
-        (cx + r * math.cos(2 * math.pi * i / sides), cy + r * math.sin(2 * math.pi * i / sides), z0)
+        (
+            cx + r * math.cos(2 * math.pi * i / sides),
+            cy + r * math.sin(2 * math.pi * i / sides),
+            z0,
+        )
         for i in range(sides)
     ]
     if r_top <= 0:
@@ -311,7 +330,10 @@ def cone(cx, cy, z0, r, h, sides=8, r_top=0.0):
             )
             for i in range(sides)
         ]
-        faces = [(i, (i + 1) % sides, sides + (i + 1) % sides, sides + i) for i in range(sides)]
+        faces = [
+            (i, (i + 1) % sides, sides + (i + 1) % sides, sides + i)
+            for i in range(sides)
+        ]
         faces.append(tuple(range(sides, 2 * sides)))
     return verts, faces
 
@@ -320,7 +342,12 @@ def pyramid(cx, cy, z0, sx, sy, h, angle=0.0):
     """Four-sided spire over a rectangle."""
     c, s = math.cos(angle), math.sin(angle)
     verts = []
-    for lx, ly in ((-sx / 2, -sy / 2), (sx / 2, -sy / 2), (sx / 2, sy / 2), (-sx / 2, sy / 2)):
+    for lx, ly in (
+        (-sx / 2, -sy / 2),
+        (sx / 2, -sy / 2),
+        (sx / 2, sy / 2),
+        (-sx / 2, sy / 2),
+    ):
         verts.append((cx + lx * c - ly * s, cy + lx * s + ly * c, z0))
     verts.append((cx, cy, z0 + h))
     return verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)]
@@ -353,7 +380,14 @@ def beam(a, b, width, thickness):
                     pz + uz * ht * ts,
                 )
             )
-    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (0, 3, 2, 1), (4, 5, 6, 7)]
+    faces = [
+        (0, 1, 5, 4),
+        (1, 2, 6, 5),
+        (2, 3, 7, 6),
+        (3, 0, 4, 7),
+        (0, 3, 2, 1),
+        (4, 5, 6, 7),
+    ]
     return verts, faces
 
 
