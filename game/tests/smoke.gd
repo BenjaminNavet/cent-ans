@@ -638,9 +638,45 @@ func _check_family_tree_c3(sim: Object, faction_id: String) -> void:
 		_check((after.get("skills_learned", []) as Array).has(learned_skill), "C3: %s not learned after the click" % learned_skill)
 		sheet.show_character(after, sim.call("get_skill_tree"), sim.call("get_learnable", ruler), [], [], [])
 		_check(view.state_of(learned_skill) == "learned", "C3: %s should be drawn as learned" % learned_skill)
+
+	# C7 : suite du général (vignettes à infobulles), dates de vie, repli de la fiche.
+	var retinue_count := 0
+	if sim.has_method("get_retinue_catalog"):
+		var catalog: Dictionary = sim.call("get_retinue_catalog")
+		_check((catalog.get("companions", []) as Array).size() >= 12 and int(catalog.get("max", 0)) == 8, "C7: retinue catalogue %s" % str(catalog.keys()))
+		# Deux compagnons que le souverain n'a pas encore (il a pu en gagner en 40 tours).
+		var held: Array = []
+		for entry in (sim.call("get_character", ruler).get("retinue", []) as Array):
+			held.append(str(entry.get("id", "")))
+		var granted_count := 0
+		for companion in ["ret_heraut", "ret_barbier_chirurgien", "ret_ecuyer", "ret_menestrel", "ret_espion"]:
+			if granted_count >= 2 or held.has(companion) or held.size() + granted_count >= 7:
+				continue
+			var granted: Dictionary = sim.call("submit_order", {"type": "debug_grant_companion", "character": ruler, "companion": companion})
+			if _check(bool(granted.get("ok", false)), "C7: grant %s refused: %s" % [companion, str(granted)]):
+				granted_count += 1
+		var with_retinue: Dictionary = sim.call("get_character", ruler)
+		retinue_count = (with_retinue.get("retinue", []) as Array).size()
+		_check(retinue_count >= 2 and int(with_retinue.get("retinue_max", 0)) == 8, "C7: retinue of %s: %d" % [ruler, retinue_count])
+		sheet.show_character(with_retinue, sim.call("get_skill_tree"), sim.call("get_learnable", ruler), [], [], [])
+		var row: Node = sheet.retinue_row
+		_check(row != null and row.get_child_count() == 8, "C7: retinue row should show 8 slots (companions + free)")
+		if row != null and row.get_child_count() > 0:
+			var tip := str((row.get_child(0) as Control).tooltip_text)
+			_check(tip.contains("Effets") and tip.contains("Obtention"), "C7: companion tooltip incomplete: %s" % tip)
+		_check(str(with_retinue.get("death_year", -1)) == "0", "C7: a living ruler has no death year")
+		var dead_seen := 0
+		for node in (tree.get("nodes", []) as Array):
+			if not bool(node.get("alive", true)) and int(node.get("death_year", 0)) > 0:
+				dead_seen += 1
+				_check(FamilyTreeView.life_dates(node) == "%d–%d" % [int(node["birth_year"]), int(node["death_year"])], "C7: life dates of %s" % str(node.get("id", "")))
+		sheet.fit_beside(1196.0, 1920.0)
+		_check(sheet.compact and sheet.custom_minimum_size.x <= 1920.0 - 1196.0 - 32.0 + 0.5, "C7: sheet beside the tree should fold into one column")
+		sheet.fit_beside(0.0, 1920.0)
+		_check(not sheet.compact and is_equal_approx(sheet.custom_minimum_size.x, 1000.0), "C7: sheet alone should use two columns")
 	sheet.queue_free()
 	if _failures == failures_before:
-		print("smoke OK: family tree (%d nodes, %d generations) and skill tree (%d nodes, learned %s by click)" % [shown, generations, skill_nodes, learned_skill])
+		print("smoke OK: family tree (%d nodes, %d generations), skill tree (%d nodes, learned %s by click), retinue %d" % [shown, generations, skill_nodes, learned_skill, retinue_count])
 
 
 ## M6 : technologies (docs/design/m6-technologies.md § 4). Vraie simulation uniquement (le mock
@@ -1800,7 +1836,7 @@ func _run_tutorial() -> void:
 	_check(encyclopedia.visible, "K should open the encyclopedia")
 	var counts := PackedStringArray()
 	var ids: PackedStringArray = encyclopedia.tab_ids()
-	_check(ids.size() == 9, "encyclopedia should have 9 tabs")
+	_check(ids.size() == 10, "encyclopedia should have 10 tabs")
 	for index in ids.size():
 		encyclopedia.select_tab(index)
 		_check(encyclopedia.entry_count() > 0, "encyclopedia tab %s is empty" % ids[index])

@@ -621,8 +621,9 @@ func _setup_hud() -> void:
 	army_strip.minimum_size_changed.connect(queue_layout)
 	news_letters.resized.connect(queue_layout)
 	event_log.minimum_size_changed.connect(queue_layout)
-	for panel in [province_panel, faction_panel, character_sheet]:
+	for panel in [province_panel, faction_panel, character_sheet, court_panel]:
 		panel.visibility_changed.connect(queue_layout)
+	court_panel.resized.connect(queue_layout)  # C7 : onglet arbre (panneau élargi)
 	get_viewport().size_changed.connect(queue_layout)
 	queue_layout()
 
@@ -675,6 +676,14 @@ func layout_hud() -> void:
 	province_panel.grow_vertical = Control.GROW_DIRECTION_END
 	province_panel.offset_top = top
 	province_panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
+	# C7 : la fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
+	# l'arbre de la Cour se rétrécit pour lui laisser au moins sa largeur repliée.
+	if court_panel.visible and character_sheet.visible:
+		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
+	else:
+		court_panel.set_max_right(INF)
+	# Bord droit réel (la liste peut élargir le panneau au-delà de ses marges).
+	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
 	# Minicarte (C1) puis lettres : haut droite, masquées sous un panneau de droite.
 	var right_panel_open := province_panel.visible or faction_panel.visible or character_sheet.visible
 	var letters_top := top

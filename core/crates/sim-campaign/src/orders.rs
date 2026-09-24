@@ -162,12 +162,25 @@ pub enum Order {
         character: CharacterId,
         spouse: CharacterId,
     },
+    /// C7: `companion` leaves the retinue of `from` for that of `to`, two
+    /// generals whose armies stand in the same settlement.
+    TransferCompanion {
+        from: CharacterId,
+        to: CharacterId,
+        companion: data_model::CompanionId,
+    },
     /// Headless-only debug order: grants `amount` XP to `character`, always
     /// accepted (spec § 3, "smoke test"). Never issued by the Godot bridge
     /// UI in a released build.
     DebugGrantXp {
         character: CharacterId,
         amount: u32,
+    },
+    /// Headless-only debug order (smoke test, lot C7): `companion` joins
+    /// `character`'s retinue if he may gain it (cap, conditions).
+    DebugGrantCompanion {
+        character: CharacterId,
+        companion: data_model::CompanionId,
     },
     // ----- M5: diplomacy & religion (spec § 2.3) --------------------------
     DeclareWar {
@@ -352,6 +365,8 @@ pub enum OrderError {
     #[error(transparent)]
     Governor(#[from] GovernorError),
     #[error(transparent)]
+    Retinue(#[from] crate::retinue::RetinueError),
+    #[error(transparent)]
     Marriage(#[from] MarriageError),
     #[error(transparent)]
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
@@ -476,6 +491,14 @@ impl CampaignState {
                 dynasty::assign_governor(self, &province, &character)?;
                 Ok(())
             }
+            Order::TransferCompanion {
+                from,
+                to,
+                companion,
+            } => {
+                crate::retinue::transfer_companion(self, data, faction, &from, &to, &companion)?;
+                Ok(())
+            }
             Order::ProposeMarriage { character, spouse } => {
                 self.check_owned_character(faction, &character)?;
                 dynasty::propose_marriage(self, data, &character, &spouse)?;
@@ -483,6 +506,13 @@ impl CampaignState {
             }
             Order::DebugGrantXp { character, amount } => {
                 skills::grant_experience(self, &character, amount);
+                Ok(())
+            }
+            Order::DebugGrantCompanion {
+                character,
+                companion,
+            } => {
+                crate::retinue::grant_companion(self, data, &character, &companion)?;
                 Ok(())
             }
             Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),

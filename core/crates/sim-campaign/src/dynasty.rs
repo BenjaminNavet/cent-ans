@@ -268,6 +268,27 @@ pub fn on_battle_resolved(
         let c = state.characters.get_mut(general).expect("exists");
         c.prestige += PRESTIGE_VICTORY;
     }
+    // C7: a companion may join the general (victory first, then any battle).
+    let joined = won
+        && crate::retinue::try_acquire(
+            state,
+            data,
+            general,
+            data_model::AcquisitionTrigger::BattleWon,
+            &[],
+            events,
+        )
+        .is_some();
+    if !joined {
+        crate::retinue::try_acquire(
+            state,
+            data,
+            general,
+            data_model::AcquisitionTrigger::BattleFought,
+            &[],
+            events,
+        );
+    }
     let Some(c) = state.characters.get_mut(general) else {
         return;
     };
@@ -479,6 +500,8 @@ pub(crate) fn spawn_ruler(
             battles_fought: 0,
             sieges_won: 0,
             raids_led: 0,
+            death_year: None,
+            retinue: Vec::new(),
         },
     );
     id
@@ -554,6 +577,8 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             battles_fought: 0,
             sieges_won: 0,
             raids_led: 0,
+            death_year: None,
+            retinue: Vec::new(),
         },
     );
     for parent in [&father, &mother].into_iter().flatten() {
@@ -865,6 +890,8 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
         .prestige
         .apply(0.0);
     ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
+        // C7: the retinue's prestige is already a yearly figure.
+        + crate::retinue::yearly_prestige(state, data, &ruler)
 }
 
 /// G1: `Piety` of buildings is a yearly figure divided by this (a cathedral,

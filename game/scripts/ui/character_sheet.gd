@@ -6,7 +6,9 @@ extends PanelContainer
 ## domaines, famille, actions (gouverneur/commandement/mariage) ; à droite = description
 ## (Codex), traits en pastilles illustrées (infobulles riches) et arbre de compétences
 ## visuel (`SkillTreeView` : bandes par domaine, nœuds appris/disponibles/verrouillés, clic =
-## `learn_skill_requested`). Pas de « suite » : le cœur n'a pas de concept d'entourage.
+## `learn_skill_requested`). C7 : suite du général (`RetinueRow`, vignettes à infobulles ; clic
+## = confier le compagnon à un général réuni, ordre `transfer_companion`), dates « 1310–1346 »
+## des défunts, repli en une colonne quand la place manque (`fit_beside`).
 ## Aucune règle ici : les listes de candidats et les refus viennent de `CampaignSim`
 ## (`get_learnable`, `get_marriage_candidates`, ordres).
 
@@ -62,6 +64,15 @@ var _skills_learned: Array = []
 var skill_tree_view: SkillTreeView
 var _heraldry: TextureRect
 var _branch_values: Dictionary = {}
+## C7 : suite du général, compagnon choisi pour un transfert, repli en colonne.
+var retinue_row: RetinueRow
+var _retinue_header: Label
+var _retinue_hint: Label
+var _transfer_companion: String = ""
+var compact: bool = false
+const WIDE_WIDTH := 1000.0
+const COMPACT_WIDTH := 600.0
+const SCREEN_MARGIN := 16.0
 
 
 func _ready() -> void:
@@ -75,6 +86,7 @@ func _ready() -> void:
 	_decorate()  # F2
 	_add_description()  # H2
 	_build_tw_layout()  # C3
+	_build_retinue_section()  # C7
 
 
 # --- F2 : icônes des branches et des actions ---------------------------------------------
@@ -173,7 +185,7 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	var epithet: String = str(character.get("epithet", ""))
 	name_label.text = "%s%s" % [str(character.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
 	subtitle_label.text = "%s — %s — Maison %s%s" % [
-		str(character.get("title", "")), _age_text(int(character.get("age", 0))),
+		str(character.get("title", "")), _life_text(character),
 		str(character.get("house", "")), "" if alive_now else " — défunt(e)",
 	]
 	_fill_titles(character)
@@ -191,6 +203,7 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 
 	_fill_description(character)
 	_fill_traits(character.get("traits", []))
+	_fill_retinue(character)
 	_fill_family(character)
 
 	var alive: bool = bool(character.get("alive", true))
@@ -234,12 +247,36 @@ func _build_tw_layout() -> void:
 	skill_tree_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	skill_tree_view.learn_requested.connect(func(skill_id: String) -> void: learn_skill_requested.emit(character_id, skill_id))
 	skill_columns.add_child(skill_tree_view)
+	# C7 : l'arbre (~700 px) défile horizontalement dans la colonne repliée au lieu d'élargir
+	# la fiche par-dessus la Cour (sans barre quand la place suffit).
+	var skill_scroll := ScrollContainer.new()
+	skill_scroll.name = "SkillScroll"
+	skill_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	skill_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	skill_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var columns_parent := skill_columns.get_parent()
+	var columns_index := skill_columns.get_index()
+	columns_parent.remove_child(skill_columns)
+	skill_scroll.add_child(skill_columns)
+	columns_parent.add_child(skill_scroll)
+	columns_parent.move_child(skill_scroll, columns_index)
 	name_label.add_theme_color_override("font_color", HudStyle.INK)
 	skill_points_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
 
 
 static func _age_text(age: int) -> String:
 	return "%d an%s" % [age, "s" if age > 1 else ""]
+
+
+## « 25 ans » pour un vivant ; « 1310–1346 (36 ans) » pour un défunt (C7).
+static func _life_text(character: Dictionary) -> String:
+	if bool(character.get("alive", true)):
+		return _age_text(int(character.get("age", 0)))
+	var birth := int(character.get("birth_year", 0))
+	var death := int(character.get("death_year", 0))
+	if death > 0 and birth > 0:
+		return "%s (%s)" % [FamilyTreeView.life_dates(character), _age_text(death - birth)]
+	return FamilyTreeView.life_dates(character)
 
 
 ## Titres en cours (fiche historique : titres sans date de fin), sinon le titre principal.
@@ -263,8 +300,12 @@ func _fill_stats(character: Dictionary) -> void:
 		stats_row.remove_child(child)
 		child.queue_free()
 	var age := int(character.get("age", 0))
+	var alive := bool(character.get("alive", true))
+	var age_pill := _age_text(age) if alive else FamilyTreeView.life_dates(character)
+	var age_tip := "Âge : %s (né vers %d)" % [_age_text(age), _birth_year(character)] if alive \
+		else "Dates de vie : %s" % _life_text(character)
 	var entries := [
-		["hud_chronicle", _age_text(age), "Âge : %s (né vers %d)" % [_age_text(age), _birth_year(character)]],
+		["hud_chronicle", age_pill, age_tip],
 		["class_clergy", "Piété %d" % int(character.get("piety", 0)), "Piété : %d / 100" % int(character.get("piety", 0))],
 		["class_nobility", "Prestige %d" % int(character.get("prestige", 0)), "Prestige personnel : %d" % int(character.get("prestige", 0))],
 	]
@@ -276,6 +317,8 @@ func _fill_stats(character: Dictionary) -> void:
 
 
 func _birth_year(character: Dictionary) -> int:
+	if int(character.get("birth_year", 0)) > 0:
+		return int(character.get("birth_year", 0))
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_family_tree"):
@@ -449,7 +492,118 @@ func _on_picker_entry_pressed(kind: String, target_id: String) -> void:
 			general_requested.emit(character_id, target_id)
 		"marry":
 			marriage_requested.emit(character_id, target_id)
+		"transfer":
+			_transfer_to(target_id)
 
 
 func _fill_skill_tree() -> void:
 	skill_tree_view.show_tree(_skill_tree, _skills_learned, _learnable, _branch_values)
+
+
+# --- C7 : suite du général --------------------------------------------------------------------
+
+
+func _build_retinue_section() -> void:
+	var content := get_node_or_null("VBox/Body/Scroll/Content")
+	if content == null:
+		return
+	var header := HBoxContainer.new()
+	header.name = "RetinueHeader"
+	_retinue_header = Label.new()
+	_retinue_header.text = "Suite"
+	_retinue_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_retinue_header.add_theme_font_size_override("font_size", 16)
+	header.add_child(_retinue_header)
+	_retinue_hint = Label.new()
+	_retinue_hint.add_theme_font_size_override("font_size", 12)
+	_retinue_hint.add_theme_color_override("font_color", HudStyle.INK_SOFT)
+	header.add_child(_retinue_hint)
+	retinue_row = RetinueRow.new()
+	retinue_row.name = "RetinueRow"
+	retinue_row.companion_pressed.connect(_on_companion_pressed)
+	var after := traits_list.get_index() + 1
+	content.add_child(header)
+	content.move_child(header, after)
+	content.add_child(retinue_row)
+	content.move_child(retinue_row, after + 1)
+
+
+func _fill_retinue(character: Dictionary) -> void:
+	if retinue_row == null:
+		return
+	var companions: Array = character.get("retinue", [])
+	var cap := int(character.get("retinue_max", 0))
+	_retinue_header.text = "Suite (%d / %d)" % [companions.size(), cap] if cap > 0 else "Suite"
+	retinue_row.show_retinue(companions, cap, bool(character.get("alive", true)))
+	var sim := _sim()
+	var mine := sim == null or not sim.has_method("get_player_faction") \
+		or str(character.get("faction", "")) == str(sim.call("get_player_faction"))
+	_retinue_hint.text = "Clic : confier à un général réuni" if not companions.is_empty() and mine else ""
+	if companions.is_empty():
+		_retinue_hint.text = "Aucun compagnon pour l'instant." if bool(character.get("alive", true)) else ""
+
+
+func _sim() -> Object:
+	var facade := get_node_or_null("/root/SimFacade")
+	return facade.get("sim") if facade != null else null
+
+
+## Ouvre le choix du général à qui confier `companion_id` (généraux réunis au même endroit,
+## liste fournie par la simulation).
+func _on_companion_pressed(companion_id: String) -> void:
+	var sim := _sim()
+	if sim == null or not sim.has_method("get_retinue_transfer_targets"):
+		return
+	_transfer_companion = companion_id
+	var targets: Array = sim.call("get_retinue_transfer_targets", character_id)
+	_open_picker("transfer", "Confier ce compagnon à…", targets)
+
+
+func _transfer_to(target_id: String) -> void:
+	var sim := _sim()
+	if sim == null or _transfer_companion == "":
+		return
+	var result: Dictionary = sim.call("submit_order", {
+		"type": "transfer_companion", "from": character_id, "to": target_id, "companion": _transfer_companion})
+	_transfer_companion = ""
+	if not bool(result.get("ok", false)):
+		_retinue_hint.text = "Refusé : %s" % str(result.get("error", "?"))
+		return
+	_fill_retinue(sim.call("get_character", character_id))
+
+
+# --- C7 : mise en page (la fiche ne recouvre plus la Cour) ------------------------------------
+
+
+## Place la fiche à droite de `left_edge` (bord droit du panneau ouvert à gauche, 0 sinon)
+## dans une vue de largeur `view_width` : pleine largeur (1000 px, deux colonnes) si la place
+## suffit, sinon repli en une colonne défilante, plus étroite.
+func fit_beside(left_edge: float, view_width: float) -> void:
+	var available := view_width - left_edge - 2.0 * SCREEN_MARGIN
+	var width := WIDE_WIDTH
+	if available < WIDE_WIDTH:
+		width = maxf(COMPACT_WIDTH, available)
+	set_compact(available < WIDE_WIDTH)
+	custom_minimum_size.x = width
+	offset_right = -SCREEN_MARGIN
+	offset_left = -SCREEN_MARGIN - width
+
+
+## Deux colonnes (portrait à gauche, contenu à droite) ou une seule colonne défilante.
+func set_compact(value: bool) -> void:
+	if value == compact:
+		return
+	compact = value
+	var left := find_child("Left", true, false) as Control
+	var body := get_node_or_null("VBox/Body") as Control
+	var content := get_node_or_null("VBox/Body/Scroll/Content") as Control
+	if left == null or body == null or content == null:
+		return
+	if compact:
+		left.reparent(content, false)
+		content.move_child(left, 0)
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	else:
+		left.reparent(body, false)
+		body.move_child(left, 0)
+		left.size_flags_horizontal = Control.SIZE_FILL
