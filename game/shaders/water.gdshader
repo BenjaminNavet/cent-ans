@@ -3,7 +3,8 @@ render_mode blend_mix, depth_draw_opaque, cull_disabled;
 
 // Mer (lot V2) : plan à Y = 0. Couleur et opacité selon la profondeur (heightmap), vagues par
 // normales animées (estompées au dézoom pour éviter le moiré), fresnel, reflet du soleil
-// borné (pas de tache blanche au dézoom), écume douce le long des côtes (distance à la côte).
+// borné (pas de tache blanche au dézoom), écume douce le long des côtes marines (distance à la
+// côte) ; les lacs au-dessus du niveau de la mer sont laissés au shader terrain (A1-04).
 
 uniform sampler2D heightmap : filter_linear_mipmap, repeat_disable, hint_default_black;
 uniform int height_bpp = 1;
@@ -27,6 +28,9 @@ uniform float wave_scale = 0.6;      // vagues par pixel carte
 uniform float wave_speed = 0.35;
 uniform float wave_strength = 0.08;
 uniform float foam_px = 1.4;          // largeur de la bande d'écume (pixels carte)
+uniform float lake_level_m = 0.5;     // au-dessus : plan d'eau intérieur (lac), pas la mer
+uniform float pond_max_px = 3.0;      // étendue plus étroite : étang, pas la mer
+uniform float pond_probe_px = 6.0;
 uniform float roughness_near = 0.3;
 uniform float roughness_far = 0.55;
 uniform float specular_amount = 0.06;
@@ -84,7 +88,8 @@ void fragment() {
 	v_far = far_t;
 
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
-	float depth = (has_heightmap && inside) ? max(-height_m(uv), 0.0) : 200.0;
+	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
+	float depth = max(-h_here, 0.0);
 	float depth_t = 1.0 - exp(-depth / depth_falloff_m);
 	vec3 col = mix(shallow_color, deep_color, depth_t);
 	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, depth));
@@ -114,6 +119,21 @@ void fragment() {
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
 	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.
 	alpha *= 1.0 - smoothstep(-0.2, 0.6, coast);
+	// A1-04 : lacs et étangs (eau au-dessus du niveau de la mer) : ni écume ni plan de mer ; le
+	// shader terrain les peint avec une berge fondue. L'écume reste réservée à la mer.
+	// Étang côtier sous le niveau de la mer (marais) : petite étendue d'eau reconnue parce qu'à
+	// `pond_probe_px` vers le large, on est encore à moins de `pond_max_px` de la rive.
+	float lake_f = smoothstep(lake_level_m - 0.5, lake_level_m + 0.5, h_here);
+	if (has_coast_dist && inside && coast < 0.5 && coast > -pond_max_px) {
+		vec2 ex = vec2(1.0 / map_size.x, 0.0);
+		vec2 ey = vec2(0.0, 1.0 / map_size.y);
+		vec2 cg = vec2(texture(coast_dist, uv + ex).r - texture(coast_dist, uv - ex).r,
+			texture(coast_dist, uv + ey).r - texture(coast_dist, uv - ey).r);
+		vec2 to_water = -cg / max(length(cg), 1e-5);
+		float probe = (texture(coast_dist, uv + to_water * pond_probe_px / map_size).r * 255.0 - 128.0) / coast_dist_scale;
+		lake_f = max(lake_f, smoothstep(-pond_max_px - 0.5, -pond_max_px + 0.5, probe));
+	}
+	alpha *= 1.0 - lake_f;
 
 	// Fresnel discret : le large reflète un peu plus le ciel en vue rasante.
 	float fres = pow(1.0 - clamp(dot(normalize(VIEW), NORMAL), 0.0, 1.0), 5.0);

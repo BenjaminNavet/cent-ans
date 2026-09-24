@@ -2,7 +2,9 @@ class_name BattleCamera
 extends Node3D
 
 ## Caméra RTS de bataille : pivot au sol (`target`), lacet, distance ; inclinaison automatique
-## (rasante de près, plongeante de loin). W A S D (positions physiques) et bords d'écran pour
+## (rasante de près, plongeante de loin). A1-06, à la Total War : courbe d'inclinaison adoucie
+## (presque à hauteur d'homme au zoom maximal, plongée au loin), visée relevée vers la poitrine
+## des soldats de près, hauteur minimale au-dessus du relief qui descend avec le zoom. W A S D (positions physiques) et bords d'écran pour
 ## se déplacer, molette pour zoomer, Q / E pour tourner, glisser bouton du milieu pour panoramiquer.
 ##
 ## B3 / T6 : suivi de régiment — `follow_unit(id, position_of)` verrouille `target` sur la
@@ -12,13 +14,22 @@ extends Node3D
 ## suivi au lieu de panoramiquer. Toute action manuelle (W A S D / bords d'écran, `look_at_point`
 ## appelé par un clic minicarte ou un rappel de groupe) rend la main à la caméra libre.
 
-@export var min_distance: float = 25.0
+@export var min_distance: float = 12.0
 @export var max_distance: float = 900.0
 @export var pan_speed: float = 1.1
 @export var rotate_speed: float = 1.6
 @export var edge_margin: int = 8
 
 const FOLLOW_LERP := 3.0
+## A1-06 : inclinaison (degrés) au zoom minimal et maximal, exposant de la courbe (< 1 : on
+## quitte vite la vue rasante en dézoomant), hauteur de visée (m) et garde au sol de près/loin.
+const PITCH_NEAR_DEG := 6.0
+const PITCH_FAR_DEG := 62.0
+const PITCH_CURVE := 0.55
+const AIM_HEIGHT_NEAR := 1.7
+const GROUND_CLEARANCE_NEAR := 1.6
+const GROUND_CLEARANCE_FAR := 4.0
+const CLOSE_RANGE := 80.0
 const ORBIT_MOUSE_SPEED := 0.006
 
 var target: Vector3 = Vector3(600, 0, 200)
@@ -134,11 +145,14 @@ func _unhandled_input(event: InputEvent) -> void:
 func _apply() -> void:
 	target.y = height_at.call(target.x, target.z)
 	var t := clampf((distance - min_distance) / (max_distance - min_distance), 0.0, 1.0)
-	var pitch := lerpf(deg_to_rad(17.0), deg_to_rad(60.0), t)
+	var pitch := deg_to_rad(lerpf(PITCH_NEAR_DEG, PITCH_FAR_DEG, pow(t, PITCH_CURVE)))
+	# 0 au zoom maximal, 1 à partir de CLOSE_RANGE : visée et garde au sol s'y ajustent.
+	var close := smoothstep(min_distance, CLOSE_RANGE, distance)
+	var aim := target + Vector3.UP * lerpf(AIM_HEIGHT_NEAR, 0.0, close)
 	var offset := Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * distance
-	var eye := target + offset
-	eye.y = maxf(eye.y, height_at.call(eye.x, eye.z) + 4.0)
+	var eye := aim + offset
+	eye.y = maxf(eye.y, height_at.call(eye.x, eye.z) + lerpf(GROUND_CLEARANCE_NEAR, GROUND_CLEARANCE_FAR, close))
 	if camera == null:
 		return
 	camera.global_position = eye
-	camera.look_at(target, Vector3.UP)
+	camera.look_at(aim, Vector3.UP)
