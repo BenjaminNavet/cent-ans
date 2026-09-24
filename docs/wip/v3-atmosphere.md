@@ -26,8 +26,9 @@ Agent V3, 25/09. Rendu seulement (aucune règle touchée). Source : `docs/audit/
 - [x] A1-14 : `RenderQuality` + réglage ; brouillard volumétrique (densité par météo, nappe basse
   `FogVolume` par temps de brouillard).
 - [x] A1-13 : flammes, fumée, braises, lumière vacillante (couleur et position).
-- [ ] Mesures FPS / GPU (en cours), captures `apres_*`
-- [ ] import + smoke (23 « smoke OK »)
+- [x] Mesures FPS / GPU, captures `apres_*`
+- [x] import + smoke : 23 « smoke OK », 0 erreur ; `s2_fire_fx_test` OK ; pytest 277 OK (1 échec
+  préexistant `test_portraits` signalé par A5)
 
 ## Mesures
 Banc : `godot --path game --disable-vsync --resolution 1600x900 res://scenes/battle/battle.tscn --
@@ -51,13 +52,16 @@ volumétrique permanente ≈ +1,8 ms (d'où « par mauvais temps » seulement en
 (-7 à -25 %) : l'économie vient de SSAO « high » au lieu d'« ultra » et du filtre d'ombres « high »,
 qui paient SSIL et la brume.
 
-Exécutions séparées, Metal, FPS moyens (plafonnés à 60) : avant 58,6 (médiane 60) ; voir plus bas
-les mesures finales.
+Exécutions séparées, Metal (FPS moyens, plafond 60, très bruités par la charge) : main avant V3
+58,6 (charge faible) ; finales à charge forte, l'une après l'autre : Haute 43,6, `legacy` 26,3.
 
 ## Captures (`docs/audit/captures/v3/`, 1440×900 effectif)
 `avant_*` (main) et `apres_*` : bataille clair / pluie / brouillard / neige d'hiver / automne / vue
 haute (`--camera=600,400,22,35`), Basse et Ultra, bombarde (banc B4), incendie (proche, large,
 ruines), campagne (proche, moyen, automne, hiver via `--season=`).
+
+## État final
+Terminé ; à fusionner. Prochaine étape éventuelle : ombres de nuages, maisons qui noircissent.
 
 ## Écarts et limites
 - Ombres de nuages projetées (fiche A1-14) : non faites (la lumière directionnelle de Godot n'a pas
@@ -65,4 +69,9 @@ ruines), campagne (proche, moyen, automne, hiver via `--season=`).
 - Maisons qui noircissent progressivement en brûlant : non fait (instances `MultiMesh` sans couleur).
 - Ciel HDRI statique (pas de nuages qui défilent : le recalcul de la radiance à chaque image coûte).
 - Campagne : la bascule de saison lit le libellé de date (`get_date_label`) toutes les secondes.
-- SDFGI (Ultra) mesuré dans l'ensemble Ultra, pas isolé.
+- SDFGI (Ultra) mesuré dans l'ensemble Ultra, pas isolé. Le coût du ciel HDRI et de la LUT n'est
+  pas isolé non plus (`legacy` les garde) : un A/B contre `main` en exécutions séparées donne des
+  écarts dans le bruit (base 23,7-26,8 ms, Haute 22,5-26,9 ms à charge forte).
+- Campagne en hiver : seul l'étalonnage refroidit (le terrain n'a pas de neige saisonnière).
+- Le scratchpad de session est partagé avec d'autres agents : mes scripts de mesure sont dans
+  `scratchpad/v3agent/` (un autre agent a écrasé `bench.sh` / `shots.sh`).
