@@ -56,6 +56,8 @@ pub struct DynasticRules {
     /// A crown with this many allies (vassals aside) courts no more
     /// princes, by alliance or pension.
     pub max_allies: usize,
+    /// Most power a courted prince may have, as a share of ours.
+    pub max_power_ratio: f64,
 }
 
 /// Money fiefs: a crown at war buys the goodwill of a hesitant prince on

@@ -102,6 +102,22 @@ fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
         sim_campaign::diplomacy::claim_stakes(state, &england, &burgundy).provinces,
         ai::alignment::grievance_change(state, data, &burgundy),
     );
+    if std::env::var("TRACE_EVAL").is_ok() {
+        let e = sim_campaign::diplomacy::evaluate(
+            state,
+            data,
+            &burgundy,
+            &england,
+            &sim_campaign::diplomacy::Proposal::Alliance,
+        );
+        println!(
+            "  [{seed}]     side_change {:?} grudge {} alliance en {} {:?}",
+            ai::alignment::side_change(state, data, &burgundy),
+            ai::alignment::grievance(state, &burgundy, &france),
+            e.accept,
+            e.reasons
+        );
+    }
     for low in ["fac_brabant", "fac_hainaut"] {
         let low = id(low);
         let Some(f) = state.factions.get(&low).filter(|f| f.alive) else {
@@ -288,7 +304,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 }
             }
         }
-        if trace && state.turn.is_multiple_of(20) {
+        if trace && (state.turn.is_multiple_of(20) || (328..372).contains(&state.turn)) {
             trace_burgundy(&state, data, seed);
         }
         if state.turn == TURN_1400 {

@@ -9,8 +9,8 @@ use std::collections::BTreeMap;
 
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
-    claim_stakes, evaluate, war_ready, Proposal, AGGRESSION_REASON, AT_WAR_REASON,
-    DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
+    claim_stakes, evaluate, rivals, war_ready, Proposal, RelationKind, AGGRESSION_REASON,
+    AT_WAR_REASON, DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
 };
 use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
@@ -207,9 +207,10 @@ pub fn grievance_change(
                 let pretender = claim_stakes(state, e, patron).throne;
                 let fights = state.is_at_war(e, patron);
                 // A feud already at war only draws in the patron's
-                // pretender (the Burgundians and the Lancastrian king).
+                // pretender (the Burgundians and the Lancastrian king),
+                // who may not be fighting yet.
                 if feud_at_war {
-                    pretender && fights
+                    pretender
                 } else {
                     pretender || fights
                 }
@@ -308,11 +309,25 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
         if !war_ready(state, faction) {
             return orders;
         }
-        orders.push(Order::DeclareWar { target: patron });
+        orders.push(Order::DeclareWar {
+            target: patron.clone(),
+        });
     } else if state.is_allied(faction, &patron) {
-        orders.push(Order::BreakAlliance { target: patron });
+        orders.push(Order::BreakAlliance {
+            target: patron.clone(),
+        });
     }
     if !state.is_allied(faction, &invader) {
+        // The new camp takes no friend of its rivals: the old alliances
+        // against it go first (Burgundy leaves the Scots to the dauphin).
+        let theirs = rivals(state, &invader);
+        orders.extend(
+            me.allies
+                .iter()
+                .filter(|a| **a != patron && theirs.contains(*a))
+                .filter(|a| state.relation(faction, a) == RelationKind::Alliance)
+                .map(|a| Order::BreakAlliance { target: a.clone() }),
+        );
         orders.push(Order::ProposeAlliance { target: invader });
     }
     orders
@@ -386,9 +401,18 @@ fn courted_princes<'a>(
                 .iter()
                 .all(|a| !f.at_war_with.contains(a) && !claim_stakes(state, id, a).any())
         })
-        // Princes on our enemy's border only (no cap: the coalition of 1337
-        // is a web of in-laws, not a count of treaties).
-        .filter(|(id, _)| enemies.iter().any(|e| borders(state, data, id, e)))
+        // Princes on the border of an ally fighting at our side: the
+        // coalition of 1337 grows as a web of neighbours and in-laws around
+        // the front (Guelders, Hainaut, Brabant), not across Christendom.
+        .filter(|(id, _)| {
+            me.allies.iter().any(|a| {
+                enemies.iter().any(|e| state.is_at_war(a, e)) && borders(state, data, id, a)
+            })
+        })
+        // Lesser princes only: a great crown is no pensioner.
+        .filter(|(id, _)| {
+            state.faction_power(id) <= rules.dynastic.max_power_ratio * state.faction_power(faction)
+        })
         .filter(|(id, _)| campaign_roll(state, id, DYNASTIC_SALT) < rules.history_permille)
         .filter_map(|(id, _)| {
             let towards_us = state.attitude(data, id, faction).0;
