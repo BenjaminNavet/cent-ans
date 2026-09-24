@@ -1,1397 +1,958 @@
 {
- "description": "Passages de la grille de navigation en 1337 (lot M1) : ponts, gués et bacs des grands fleuves, cols alpins et pyrénéens. Les bacs sont typés « ford ». Sources : articles de référence vérifiables.",
- "crossings": [
-  {
-   "id": "bridge_pont_des_tourelles_orleans",
-   "name": "Pont des Tourelles (Orléans)",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    1.907,
-    47.898
-   ],
-   "source": "Wikipédia (fr), « Siège d'Orléans (1428-1429) »"
-  },
-  {
-   "id": "bridge_pont_de_beaugency",
-   "name": "Pont de Beaugency",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    1.633,
-    47.775
-   ],
-   "source": "Wikipédia (fr), « Pont de Beaugency »"
-  },
-  {
-   "id": "bridge_pont_de_meung_sur_loire",
-   "name": "Pont de Meung-sur-Loire",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    1.698,
-    47.826
-   ],
-   "source": "Wikipédia (fr), « Bataille de Meung-sur-Loire »"
-  },
-  {
-   "id": "bridge_pont_de_jargeau",
-   "name": "Pont de Jargeau",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    2.124,
-    47.866
-   ],
-   "source": "Wikipédia (fr), « Bataille de Jargeau »"
-  },
-  {
-   "id": "bridge_pont_de_blois",
-   "name": "Pont de Blois",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    1.338,
-    47.584
-   ],
-   "source": "Wikipédia (fr), « Pont Jacques-Gabriel »",
-   "note": "Pont médiéval emporté en 1716."
-  },
-  {
-   "id": "bridge_pont_d_amboise",
-   "name": "Pont d'Amboise",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    0.983,
-    47.414
-   ],
-   "source": "Wikipédia (fr), « Amboise »"
-  },
-  {
-   "id": "bridge_pont_d_eudes_tours",
-   "name": "Pont d'Eudes (Tours)",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    0.688,
-    47.398
-   ],
-   "source": "Wikipédia (fr), « Pont Wilson »",
-   "note": "Pont du XIe siècle, prédécesseur du pont Wilson."
-  },
-  {
-   "id": "bridge_pont_de_saumur",
-   "name": "Pont de Saumur",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    -0.076,
-    47.26
-   ],
-   "source": "Wikipédia (fr), « Saumur »"
-  },
-  {
-   "id": "bridge_les_ponts_de_ce",
-   "name": "Les Ponts-de-Cé",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    -0.527,
-    47.424
-   ],
-   "source": "Wikipédia (fr), « Les Ponts-de-Cé »"
-  },
-  {
-   "id": "bridge_ponts_de_nantes",
-   "name": "Ponts de Nantes",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    -1.553,
-    47.208
-   ],
-   "source": "Wikipédia (fr), « Nantes »"
-  },
-  {
-   "id": "bridge_pont_de_la_charite_sur_loire",
-   "name": "Pont de La Charité-sur-Loire",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    3.014,
-    47.178
-   ],
-   "source": "Wikipédia (fr), « La Charité-sur-Loire »"
-  },
-  {
-   "id": "bridge_pont_de_nevers",
-   "name": "Pont de Nevers",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    3.158,
-    46.985
-   ],
-   "source": "Wikipédia (fr), « Nevers »"
-  },
-  {
-   "id": "bridge_ponts_de_decize",
-   "name": "Ponts de Decize",
-   "type": "bridge",
-   "river": "Loire",
-   "lonlat": [
-    3.46,
-    46.828
-   ],
-   "source": "Wikipédia (fr), « Decize »"
-  },
-  {
-   "id": "bridge_grand_pont_et_petit_pont_paris",
-   "name": "Grand-Pont et Petit-Pont (Paris)",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    2.347,
-    48.856
-   ],
-   "source": "Wikipédia (fr), « Pont au Change »",
-   "note": "Le Grand-Pont, futur pont au Change, et le Petit-Pont."
-  },
-  {
-   "id": "bridge_pont_de_rouen",
-   "name": "Pont de Rouen",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    1.093,
-    49.438
-   ],
-   "source": "Wikipédia (fr), « Rouen »",
-   "note": "Pont de pierre dit de Mathilde (XIIe siècle)."
-  },
-  {
-   "id": "bridge_pont_de_l_arche",
-   "name": "Pont-de-l'Arche",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    1.155,
-    49.304
-   ],
-   "source": "Wikipédia (fr), « Pont-de-l'Arche »"
-  },
-  {
-   "id": "bridge_pont_de_vernon",
-   "name": "Pont de Vernon",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    1.487,
-    49.093
-   ],
-   "source": "Wikipédia (fr), « Vieux-Moulin de Vernon »"
-  },
-  {
-   "id": "bridge_pont_de_mantes",
-   "name": "Pont de Mantes",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    1.722,
-    48.993
-   ],
-   "source": "Wikipédia (fr), « Vieux pont de Limay »"
-  },
-  {
-   "id": "bridge_pont_de_meulan",
-   "name": "Pont de Meulan",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    1.908,
-    48.999
-   ],
-   "source": "Wikipédia (fr), « Meulan-en-Yvelines »"
-  },
-  {
-   "id": "bridge_pont_de_poissy",
-   "name": "Pont de Poissy",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    2.044,
-    48.933
-   ],
-   "source": "Wikipédia (fr), « Poissy »",
-   "note": "Réparé et franchi par Édouard III en août 1346."
-  },
-  {
-   "id": "bridge_pont_de_corbeil",
-   "name": "Pont de Corbeil",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    2.483,
-    48.613
-   ],
-   "source": "Wikipédia (fr), « Corbeil-Essonnes »"
-  },
-  {
-   "id": "bridge_pont_de_melun",
-   "name": "Pont de Melun",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    2.656,
-    48.539
-   ],
-   "source": "Wikipédia (fr), « Melun »"
-  },
-  {
-   "id": "bridge_pont_de_montereau",
-   "name": "Pont de Montereau",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    2.954,
-    48.386
-   ],
-   "source": "Wikipédia (fr), « Montereau-Fault-Yonne »",
-   "note": "Lieu de l'assassinat de Jean sans Peur (1419)."
-  },
-  {
-   "id": "bridge_ponts_de_troyes",
-   "name": "Ponts de Troyes",
-   "type": "bridge",
-   "river": "Seine",
-   "lonlat": [
-    4.076,
-    48.297
-   ],
-   "source": "Wikipédia (fr), « Troyes »"
-  },
-  {
-   "id": "bridge_pont_de_geneve",
-   "name": "Pont de Genève",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    6.142,
-    46.206
-   ],
-   "source": "Wikipédia (fr), « Genève »"
-  },
-  {
-   "id": "bridge_pont_de_la_guillotiere_lyon",
-   "name": "Pont de la Guillotière (Lyon)",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    4.842,
-    45.757
-   ],
-   "source": "Wikipédia (fr), « Pont de la Guillotière »"
-  },
-  {
-   "id": "bridge_pont_de_vienne",
-   "name": "Pont de Vienne",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    4.874,
-    45.526
-   ],
-   "source": "Wikipédia (fr), « Vienne (Isère) »"
-  },
-  {
-   "id": "bridge_pont_de_pont_saint_esprit",
-   "name": "Pont de Pont-Saint-Esprit",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    4.644,
-    44.257
-   ],
-   "source": "Wikipédia (fr), « Pont-Saint-Esprit »",
-   "note": "Construit de 1265 à 1309."
-  },
-  {
-   "id": "bridge_pont_saint_benezet_avignon",
-   "name": "Pont Saint-Bénézet (Avignon)",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    4.805,
-    43.954
-   ],
-   "source": "Wikipédia (fr), « Pont Saint-Bénézet »"
-  },
-  {
-   "id": "bridge_pont_de_bateaux_d_arles",
-   "name": "Pont de bateaux d'Arles",
-   "type": "bridge",
-   "river": "Rhône",
-   "lonlat": [
-    4.628,
-    43.68
-   ],
-   "source": "Wikipédia (fr), « Arles »",
-   "note": "Pont de bateaux vers Trinquetaille."
-  },
-  {
-   "id": "bridge_pont_de_saone_lyon",
-   "name": "Pont de Saône (Lyon)",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    4.829,
-    45.765
-   ],
-   "source": "Wikipédia (fr), « Lyon »",
-   "note": "Pont de pierre sur la Saône, futur pont du Change."
-  },
-  {
-   "id": "bridge_pont_de_macon",
-   "name": "Pont de Mâcon",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    4.836,
-    46.307
-   ],
-   "source": "Wikipédia (fr), « Mâcon »"
-  },
-  {
-   "id": "bridge_pont_de_tournus",
-   "name": "Pont de Tournus",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    4.912,
-    46.564
-   ],
-   "source": "Wikipédia (fr), « Tournus »"
-  },
-  {
-   "id": "bridge_pont_de_chalon_sur_saone",
-   "name": "Pont de Chalon-sur-Saône",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    4.858,
-    46.782
-   ],
-   "source": "Wikipédia (fr), « Chalon-sur-Saône »"
-  },
-  {
-   "id": "bridge_pont_d_auxonne",
-   "name": "Pont d'Auxonne",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    5.387,
-    47.192
-   ],
-   "source": "Wikipédia (fr), « Auxonne »"
-  },
-  {
-   "id": "bridge_pont_de_gray",
-   "name": "Pont de Gray",
-   "type": "bridge",
-   "river": "Saône",
-   "lonlat": [
-    5.592,
-    47.446
-   ],
-   "source": "Wikipédia (fr), « Gray (Haute-Saône) »"
-  },
-  {
-   "id": "bridge_ponts_de_toulouse",
-   "name": "Ponts de Toulouse",
-   "type": "bridge",
-   "river": "Garonne",
-   "lonlat": [
-    1.437,
-    43.6
-   ],
-   "source": "Wikipédia (fr), « Pont Neuf (Toulouse) »",
-   "note": "Pont de la Daurade et pont Vieux, prédécesseurs du Pont-Neuf."
-  },
-  {
-   "id": "bridge_pont_d_agen",
-   "name": "Pont d'Agen",
-   "type": "bridge",
-   "river": "Garonne",
-   "lonlat": [
-    0.617,
-    44.203
-   ],
-   "source": "Wikipédia (fr), « Agen »"
-  },
-  {
-   "id": "ford_bac_de_la_reole",
-   "name": "Bac de La Réole",
-   "type": "ford",
-   "river": "Garonne",
-   "lonlat": [
-    -0.037,
-    44.582
-   ],
-   "source": "Wikipédia (fr), « La Réole »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_saint_macaire_et_langon",
-   "name": "Bac de Saint-Macaire et Langon",
-   "type": "ford",
-   "river": "Garonne",
-   "lonlat": [
-    -0.227,
-    44.553
-   ],
-   "source": "Wikipédia (fr), « Saint-Macaire »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_bordeaux",
-   "name": "Bac de Bordeaux",
-   "type": "ford",
-   "river": "Garonne",
-   "lonlat": [
-    -0.565,
-    44.843
-   ],
-   "source": "Wikipédia (fr), « Pont de pierre (Bordeaux) »",
-   "note": "Aucun pont avant 1822 : passage par bac."
-  },
-  {
-   "id": "bridge_pont_de_bergerac",
-   "name": "Pont de Bergerac",
-   "type": "bridge",
-   "river": "Dordogne",
-   "lonlat": [
-    0.483,
-    44.851
-   ],
-   "source": "Wikipédia (fr), « Bergerac »",
-   "note": "Pont pris par le comte de Derby en 1345."
-  },
-  {
-   "id": "ford_bac_de_sainte_foy",
-   "name": "Bac de Sainte-Foy",
-   "type": "ford",
-   "river": "Dordogne",
-   "lonlat": [
-    0.22,
-    44.84
-   ],
-   "source": "Wikipédia (fr), « Sainte-Foy-la-Grande »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_castillon",
-   "name": "Bac de Castillon",
-   "type": "ford",
-   "river": "Dordogne",
-   "lonlat": [
-    -0.042,
-    44.852
-   ],
-   "source": "Wikipédia (fr), « Castillon-la-Bataille »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_libourne",
-   "name": "Bac de Libourne",
-   "type": "ford",
-   "river": "Dordogne",
-   "lonlat": [
-    -0.244,
-    44.916
-   ],
-   "source": "Wikipédia (fr), « Libourne »",
-   "note": "Bac."
-  },
-  {
-   "id": "bridge_london_bridge",
-   "name": "London Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.088,
-    51.508
-   ],
-   "source": "Wikipedia (en), « Old London Bridge »"
-  },
-  {
-   "id": "bridge_kingston_bridge",
-   "name": "Kingston Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.308,
-    51.411
-   ],
-   "source": "Wikipedia (en), « Kingston Bridge, London »"
-  },
-  {
-   "id": "bridge_staines_bridge",
-   "name": "Staines Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.513,
-    51.435
-   ],
-   "source": "Wikipedia (en), « Staines Bridge »"
-  },
-  {
-   "id": "bridge_windsor_bridge",
-   "name": "Windsor Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.609,
-    51.487
-   ],
-   "source": "Wikipedia (en), « Windsor Bridge »"
-  },
-  {
-   "id": "bridge_henley_bridge",
-   "name": "Henley Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.902,
-    51.538
-   ],
-   "source": "Wikipedia (en), « Henley Bridge »"
-  },
-  {
-   "id": "bridge_caversham_bridge_reading",
-   "name": "Caversham Bridge (Reading)",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -0.973,
-    51.465
-   ],
-   "source": "Wikipedia (en), « Caversham Bridge »"
-  },
-  {
-   "id": "bridge_wallingford_bridge",
-   "name": "Wallingford Bridge",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -1.12,
-    51.6
-   ],
-   "source": "Wikipedia (en), « Wallingford Bridge »"
-  },
-  {
-   "id": "bridge_folly_bridge_oxford",
-   "name": "Folly Bridge (Oxford)",
-   "type": "bridge",
-   "river": "Tamise",
-   "lonlat": [
-    -1.256,
-    51.745
-   ],
-   "source": "Wikipedia (en), « Folly Bridge »",
-   "note": "Grandpont, chaussée et pont du XIe siècle."
-  },
-  {
-   "id": "bridge_pont_de_verdun",
-   "name": "Pont de Verdun",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    5.385,
-    49.16
-   ],
-   "source": "Wikipédia (fr), « Verdun »"
-  },
-  {
-   "id": "bridge_pont_de_mezieres",
-   "name": "Pont de Mézières",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    4.723,
-    49.76
-   ],
-   "source": "Wikipédia (fr), « Charleville-Mézières »"
-  },
-  {
-   "id": "bridge_pont_de_dinant",
-   "name": "Pont de Dinant",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    4.912,
-    50.261
-   ],
-   "source": "Wikipédia (fr), « Dinant »"
-  },
-  {
-   "id": "bridge_pont_de_jambes_namur",
-   "name": "Pont de Jambes (Namur)",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    4.87,
-    50.462
-   ],
-   "source": "Wikipédia (fr), « Pont de Jambes »"
-  },
-  {
-   "id": "bridge_pont_de_huy",
-   "name": "Pont de Huy",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    5.239,
-    50.519
-   ],
-   "source": "Wikipédia (fr), « Huy »"
-  },
-  {
-   "id": "bridge_pont_des_arches_liege",
-   "name": "Pont des Arches (Liège)",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    5.578,
-    50.645
-   ],
-   "source": "Wikipédia (fr), « Pont des Arches (Liège) »"
-  },
-  {
-   "id": "bridge_pont_saint_servais_maastricht",
-   "name": "Pont Saint-Servais (Maastricht)",
-   "type": "bridge",
-   "river": "Meuse",
-   "lonlat": [
-    5.697,
-    50.851
-   ],
-   "source": "Wikipédia (fr), « Pont Saint-Servais »"
-  },
-  {
-   "id": "bridge_pont_de_cambrai",
-   "name": "Pont de Cambrai",
-   "type": "bridge",
-   "river": "Escaut",
-   "lonlat": [
-    3.235,
-    50.176
-   ],
-   "source": "Wikipédia (fr), « Cambrai »"
-  },
-  {
-   "id": "bridge_pont_de_valenciennes",
-   "name": "Pont de Valenciennes",
-   "type": "bridge",
-   "river": "Escaut",
-   "lonlat": [
-    3.523,
-    50.358
-   ],
-   "source": "Wikipédia (fr), « Valenciennes »"
-  },
-  {
-   "id": "bridge_pont_des_trous_tournai",
-   "name": "Pont des Trous (Tournai)",
-   "type": "bridge",
-   "river": "Escaut",
-   "lonlat": [
-    3.383,
-    50.61
-   ],
-   "source": "Wikipédia (fr), « Pont des Trous »"
-  },
-  {
-   "id": "bridge_pont_d_audenarde",
-   "name": "Pont d'Audenarde",
-   "type": "bridge",
-   "river": "Escaut",
-   "lonlat": [
-    3.605,
-    50.846
-   ],
-   "source": "Wikipédia (fr), « Audenarde »"
-  },
-  {
-   "id": "bridge_ponts_de_gand",
-   "name": "Ponts de Gand",
-   "type": "bridge",
-   "river": "Escaut",
-   "lonlat": [
-    3.724,
-    51.054
-   ],
-   "source": "Wikipédia (fr), « Gand »"
-  },
-  {
-   "id": "ford_bac_d_anvers",
-   "name": "Bac d'Anvers",
-   "type": "ford",
-   "river": "Escaut",
-   "lonlat": [
-    4.395,
-    51.223
-   ],
-   "source": "Wikipédia (fr), « Anvers »",
-   "note": "Bac vers la Tête de Flandre."
-  },
-  {
-   "id": "bridge_pont_de_constance",
-   "name": "Pont de Constance",
-   "type": "bridge",
-   "river": "Rhin",
-   "lonlat": [
-    9.178,
-    47.666
-   ],
-   "source": "Wikipedia (de), « Konstanz »"
-  },
-  {
-   "id": "bridge_pont_de_schaffhouse",
-   "name": "Pont de Schaffhouse",
-   "type": "bridge",
-   "river": "Rhin",
-   "lonlat": [
-    8.637,
-    47.696
-   ],
-   "source": "Wikipedia (de), « Schaffhausen »"
-  },
-  {
-   "id": "bridge_pont_de_rheinfelden",
-   "name": "Pont de Rheinfelden",
-   "type": "bridge",
-   "river": "Rhin",
-   "lonlat": [
-    7.794,
-    47.555
-   ],
-   "source": "Wikipedia (de), « Rheinfelden (Aargau) »"
-  },
-  {
-   "id": "bridge_mittlere_brucke_bale",
-   "name": "Mittlere Brücke (Bâle)",
-   "type": "bridge",
-   "river": "Rhin",
-   "lonlat": [
-    7.589,
-    47.56
-   ],
-   "source": "Wikipédia (fr), « Mittlere Brücke »",
-   "note": "Pont achevé vers 1226."
-  },
-  {
-   "id": "ford_bac_de_brisach",
-   "name": "Bac de Brisach",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    7.575,
-    48.03
-   ],
-   "source": "Wikipédia (fr), « Vieux-Brisach »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_strasbourg_a_kehl",
-   "name": "Bac de Strasbourg à Kehl",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    7.796,
-    48.57
-   ],
-   "source": "Wikipédia (fr), « Strasbourg »",
-   "note": "Premier pont du Rhin en 1388 ; bac auparavant."
-  },
-  {
-   "id": "ford_bac_de_spire",
-   "name": "Bac de Spire",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    8.45,
-    49.32
-   ],
-   "source": "Wikipédia (fr), « Spire (Allemagne) »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_worms",
-   "name": "Bac de Worms",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    8.375,
-    49.634
-   ],
-   "source": "Wikipédia (fr), « Worms »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_mayence",
-   "name": "Bac de Mayence",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    8.28,
-    50.002
-   ],
-   "source": "Wikipédia (fr), « Mayence »",
-   "note": "Pas de pont fixe au Moyen Âge : bac."
-  },
-  {
-   "id": "ford_bac_de_coblence",
-   "name": "Bac de Coblence",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    7.605,
-    50.36
-   ],
-   "source": "Wikipédia (fr), « Coblence »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_bonn",
-   "name": "Bac de Bonn",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    7.11,
-    50.74
-   ],
-   "source": "Wikipédia (fr), « Bonn »",
-   "note": "Bac."
-  },
-  {
-   "id": "ford_bac_de_cologne",
-   "name": "Bac de Cologne",
-   "type": "ford",
-   "river": "Rhin",
-   "lonlat": [
-    6.965,
-    50.938
-   ],
-   "source": "Wikipédia (fr), « Cologne »",
-   "note": "Pas de pont fixe avant le XIXe siècle : bac vers Deutz."
-  },
-  {
-   "id": "bridge_pont_de_turin",
-   "name": "Pont de Turin",
-   "type": "bridge",
-   "river": "Pô",
-   "lonlat": [
-    7.698,
-    45.063
-   ],
-   "source": "Wikipédia (fr), « Turin »"
-  },
-  {
-   "id": "bridge_pont_de_bateaux_de_plaisance",
-   "name": "Pont de bateaux de Plaisance",
-   "type": "bridge",
-   "river": "Pô",
-   "lonlat": [
-    9.696,
-    45.06
-   ],
-   "source": "Wikipédia (fr), « Plaisance (Italie) »",
-   "note": "Pont de bateaux."
-  },
-  {
-   "id": "bridge_pont_de_bateaux_de_cremone",
-   "name": "Pont de bateaux de Crémone",
-   "type": "bridge",
-   "river": "Pô",
-   "lonlat": [
-    10.02,
-    45.125
-   ],
-   "source": "Wikipédia (fr), « Crémone »",
-   "note": "Pont de bateaux."
-  },
-  {
-   "id": "bridge_pont_d_alcantara_tolede",
-   "name": "Pont d'Alcántara (Tolède)",
-   "type": "bridge",
-   "river": "Tage",
-   "lonlat": [
-    -4.02,
-    39.859
-   ],
-   "source": "Wikipedia (es), « Puente de Alcántara (Toledo) »"
-  },
-  {
-   "id": "bridge_pont_de_talavera",
-   "name": "Pont de Talavera",
-   "type": "bridge",
-   "river": "Tage",
-   "lonlat": [
-    -4.833,
-    39.955
-   ],
-   "source": "Wikipedia (es), « Talavera de la Reina »"
-  },
-  {
-   "id": "bridge_pont_d_alcantara",
-   "name": "Pont d'Alcántara",
-   "type": "bridge",
-   "river": "Tage",
-   "lonlat": [
-    -6.89,
-    39.722
-   ],
-   "source": "Wikipédia (fr), « Pont d'Alcántara »",
-   "note": "Pont romain de Trajan."
-  },
-  {
-   "id": "ford_bac_de_santarem",
-   "name": "Bac de Santarém",
-   "type": "ford",
-   "river": "Tage",
-   "lonlat": [
-    -8.68,
-    39.23
-   ],
-   "source": "Wikipédia (fr), « Santarém (Portugal) »",
-   "note": "Bac."
-  },
-  {
-   "id": "bridge_pont_de_frias",
-   "name": "Pont de Frías",
-   "type": "bridge",
-   "river": "Èbre",
-   "lonlat": [
-    -3.294,
-    42.762
-   ],
-   "source": "Wikipedia (es), « Frías (Burgos) »"
-  },
-  {
-   "id": "bridge_pont_de_logrono",
-   "name": "Pont de Logroño",
-   "type": "bridge",
-   "river": "Èbre",
-   "lonlat": [
-    -2.443,
-    42.47
-   ],
-   "source": "Wikipedia (es), « Puente de Piedra (Logroño) »",
-   "note": "Pont du chemin de Saint-Jacques."
-  },
-  {
-   "id": "bridge_pont_de_tudela",
-   "name": "Pont de Tudela",
-   "type": "bridge",
-   "river": "Èbre",
-   "lonlat": [
-    -1.605,
-    42.065
-   ],
-   "source": "Wikipedia (es), « Tudela »"
-  },
-  {
-   "id": "bridge_pont_de_pierre_de_saragosse",
-   "name": "Pont de pierre de Saragosse",
-   "type": "bridge",
-   "river": "Èbre",
-   "lonlat": [
-    -0.879,
-    41.657
-   ],
-   "source": "Wikipedia (es), « Puente de Piedra (Zaragoza) »"
-  },
-  {
-   "id": "bridge_pont_de_bateaux_de_tortosa",
-   "name": "Pont de bateaux de Tortosa",
-   "type": "bridge",
-   "river": "Èbre",
-   "lonlat": [
-    0.523,
-    40.813
-   ],
-   "source": "Wikipédia (fr), « Tortosa »",
-   "note": "Pont de bateaux."
-  },
-  {
-   "id": "bridge_pont_d_ulm",
-   "name": "Pont d'Ulm",
-   "type": "bridge",
-   "river": "Danube",
-   "lonlat": [
-    9.995,
-    48.396
-   ],
-   "source": "Wikipédia (fr), « Ulm »"
-  },
-  {
-   "id": "bridge_pont_de_donauworth",
-   "name": "Pont de Donauwörth",
-   "type": "bridge",
-   "river": "Danube",
-   "lonlat": [
-    10.777,
-    48.718
-   ],
-   "source": "Wikipédia (fr), « Donauwörth »"
-  },
-  {
-   "id": "bridge_pont_d_ingolstadt",
-   "name": "Pont d'Ingolstadt",
-   "type": "bridge",
-   "river": "Danube",
-   "lonlat": [
-    11.425,
-    48.761
-   ],
-   "source": "Wikipédia (fr), « Ingolstadt »"
-  },
-  {
-   "id": "bridge_pont_de_pierre_de_ratisbonne",
-   "name": "Pont de pierre de Ratisbonne",
-   "type": "bridge",
-   "river": "Danube",
-   "lonlat": [
-    12.097,
-    49.023
-   ],
-   "source": "Wikipédia (fr), « Pont de pierre de Ratisbonne »",
-   "note": "Achevé vers 1146."
-  },
-  {
-   "id": "bridge_pont_de_passau",
-   "name": "Pont de Passau",
-   "type": "bridge",
-   "river": "Danube",
-   "lonlat": [
-    13.465,
-    48.575
-   ],
-   "source": "Wikipédia (fr), « Passau »"
-  },
-  {
-   "id": "ford_gue_de_blanchetaque",
-   "name": "Gué de Blanchetaque",
-   "type": "ford",
-   "river": "Somme",
-   "lonlat": [
-    1.73,
-    50.125
-   ],
-   "source": "Wikipédia (fr), « Bataille de Blanchetaque »",
-   "note": "Gué de la basse Somme franchi par Édouard III en 1346."
-  },
-  {
-   "id": "pass_mont_cenis",
-   "name": "Col du Mont-Cenis",
-   "type": "pass",
-   "lonlat": [
-    6.9,
-    45.26
-   ],
-   "route": [
-    [
-     6.88,
-     45.286
-    ],
-    [
-     6.9,
-     45.26
-    ],
-    [
-     7.047,
-     45.138
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Mont-Cenis »"
-  },
-  {
-   "id": "pass_montgenevre",
-   "name": "Col de Montgenèvre",
-   "type": "pass",
-   "lonlat": [
-    6.723,
-    44.933
-   ],
-   "route": [
-    [
-     6.643,
-     44.896
-    ],
-    [
-     6.723,
-     44.933
-    ],
-    [
-     6.833,
-     45.033
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col de Montgenèvre »"
-  },
-  {
-   "id": "pass_petit_saint_bernard",
-   "name": "Col du Petit-Saint-Bernard",
-   "type": "pass",
-   "lonlat": [
-    6.883,
-    45.68
-   ],
-   "route": [
-    [
-     6.77,
-     45.618
-    ],
-    [
-     6.883,
-     45.68
-    ],
-    [
-     6.952,
-     45.712
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Petit-Saint-Bernard »"
-  },
-  {
-   "id": "pass_grand_saint_bernard",
-   "name": "Col du Grand-Saint-Bernard",
-   "type": "pass",
-   "lonlat": [
-    7.17,
-    45.869
-   ],
-   "route": [
-    [
-     7.072,
-     46.102
-    ],
-    [
-     7.208,
-     45.95
-    ],
-    [
-     7.17,
-     45.869
-    ],
-    [
-     7.315,
-     45.737
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Grand-Saint-Bernard »"
-  },
-  {
-   "id": "pass_simplon",
-   "name": "Col du Simplon",
-   "type": "pass",
-   "lonlat": [
-    8.035,
-    46.251
-   ],
-   "route": [
-    [
-     7.988,
-     46.316
-    ],
-    [
-     8.035,
-     46.251
-    ],
-    [
-     8.292,
-     46.116
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Simplon »"
-  },
-  {
-   "id": "pass_saint_gothard",
-   "name": "Col du Saint-Gothard",
-   "type": "pass",
-   "lonlat": [
-    8.568,
-    46.559
-   ],
-   "route": [
-    [
-     8.594,
-     46.636
-    ],
-    [
-     8.568,
-     46.559
-    ],
-    [
-     8.61,
-     46.529
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Saint-Gothard »"
-  },
-  {
-   "id": "pass_brenner",
-   "name": "Col du Brenner",
-   "type": "pass",
-   "lonlat": [
-    11.507,
-    47.004
-   ],
-   "route": [
-    [
-     11.4,
-     47.269
-    ],
-    [
-     11.507,
-     47.004
-    ],
-    [
-     11.433,
-     46.894
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Brenner »"
-  },
-  {
-   "id": "pass_tende",
-   "name": "Col de Tende",
-   "type": "pass",
-   "lonlat": [
-    7.568,
-    44.15
-   ],
-   "route": [
-    [
-     7.594,
-     44.088
-    ],
-    [
-     7.568,
-     44.15
-    ],
-    [
-     7.576,
-     44.202
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col de Tende »"
-  },
-  {
-   "id": "pass_perthus",
-   "name": "Col du Perthus",
-   "type": "pass",
-   "lonlat": [
-    2.862,
-    42.463
-   ],
-   "route": [
-    [
-     2.833,
-     42.525
-    ],
-    [
-     2.862,
-     42.463
-    ],
-    [
-     2.874,
-     42.419
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Perthus »"
-  },
-  {
-   "id": "pass_somport",
-   "name": "Col du Somport",
-   "type": "pass",
-   "lonlat": [
-    -0.526,
-    42.795
-   ],
-   "route": [
-    [
-     -0.555,
-     42.875
-    ],
-    [
-     -0.526,
-     42.795
-    ],
-    [
-     -0.525,
-     42.716
-    ],
-    [
-     -0.55,
-     42.57
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col du Somport »"
-  },
-  {
-   "id": "pass_roncevaux",
-   "name": "Col de Roncevaux",
-   "type": "pass",
-   "lonlat": [
-    -1.323,
-    43.02
-   ],
-   "route": [
-    [
-     -1.236,
-     43.164
-    ],
-    [
-     -1.3,
-     43.092
-    ],
-    [
-     -1.323,
-     43.02
-    ],
-    [
-     -1.336,
-     42.99
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col de Roncevaux »"
-  },
-  {
-   "id": "pass_puymorens",
-   "name": "Col de Puymorens",
-   "type": "pass",
-   "lonlat": [
-    1.825,
-    42.555
-   ],
-   "route": [
-    [
-     1.8,
-     42.589
-    ],
-    [
-     1.825,
-     42.555
-    ],
-    [
-     1.928,
-     42.432
-    ]
-   ],
-   "source": "Wikipédia (fr), « Col de Puymorens »"
-  }
- ]
+  "description": "Passages de la grille de navigation en 1337 (lot M1) : ponts, gués et bacs des grands fleuves, cols alpins et pyrénéens. Les bacs sont typés « ford ». Sources : articles de référence vérifiables.",
+  "crossings": [
+    {
+      "id": "bridge_pont_des_tourelles_orleans",
+      "name": "Pont des Tourelles (Orléans)",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [1.907, 47.898],
+      "source": "Wikipédia (fr), « Siège d'Orléans (1428-1429) »"
+    },
+    {
+      "id": "bridge_pont_de_beaugency",
+      "name": "Pont de Beaugency",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [1.633, 47.775],
+      "source": "Wikipédia (fr), « Pont de Beaugency »"
+    },
+    {
+      "id": "bridge_pont_de_meung_sur_loire",
+      "name": "Pont de Meung-sur-Loire",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [1.698, 47.826],
+      "source": "Wikipédia (fr), « Bataille de Meung-sur-Loire »"
+    },
+    {
+      "id": "bridge_pont_de_jargeau",
+      "name": "Pont de Jargeau",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [2.124, 47.866],
+      "source": "Wikipédia (fr), « Bataille de Jargeau »"
+    },
+    {
+      "id": "bridge_pont_de_blois",
+      "name": "Pont de Blois",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [1.338, 47.584],
+      "source": "Wikipédia (fr), « Pont Jacques-Gabriel »",
+      "note": "Pont médiéval emporté en 1716."
+    },
+    {
+      "id": "bridge_pont_d_amboise",
+      "name": "Pont d'Amboise",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [0.983, 47.414],
+      "source": "Wikipédia (fr), « Amboise »"
+    },
+    {
+      "id": "bridge_pont_d_eudes_tours",
+      "name": "Pont d'Eudes (Tours)",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [0.688, 47.398],
+      "source": "Wikipédia (fr), « Pont Wilson »",
+      "note": "Pont du XIe siècle, prédécesseur du pont Wilson."
+    },
+    {
+      "id": "bridge_pont_de_saumur",
+      "name": "Pont de Saumur",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [-0.076, 47.26],
+      "source": "Wikipédia (fr), « Saumur »"
+    },
+    {
+      "id": "bridge_les_ponts_de_ce",
+      "name": "Les Ponts-de-Cé",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [-0.527, 47.424],
+      "source": "Wikipédia (fr), « Les Ponts-de-Cé »"
+    },
+    {
+      "id": "bridge_ponts_de_nantes",
+      "name": "Ponts de Nantes",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [-1.553, 47.208],
+      "source": "Wikipédia (fr), « Nantes »"
+    },
+    {
+      "id": "bridge_pont_de_la_charite_sur_loire",
+      "name": "Pont de La Charité-sur-Loire",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [3.014, 47.178],
+      "source": "Wikipédia (fr), « La Charité-sur-Loire »"
+    },
+    {
+      "id": "bridge_pont_de_nevers",
+      "name": "Pont de Nevers",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [3.158, 46.985],
+      "source": "Wikipédia (fr), « Nevers »"
+    },
+    {
+      "id": "bridge_ponts_de_decize",
+      "name": "Ponts de Decize",
+      "type": "bridge",
+      "river": "Loire",
+      "lonlat": [3.46, 46.828],
+      "source": "Wikipédia (fr), « Decize »"
+    },
+    {
+      "id": "bridge_grand_pont_et_petit_pont_paris",
+      "name": "Grand-Pont et Petit-Pont (Paris)",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [2.347, 48.856],
+      "source": "Wikipédia (fr), « Pont au Change »",
+      "note": "Le Grand-Pont, futur pont au Change, et le Petit-Pont."
+    },
+    {
+      "id": "bridge_pont_de_rouen",
+      "name": "Pont de Rouen",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [1.093, 49.438],
+      "source": "Wikipédia (fr), « Rouen »",
+      "note": "Pont de pierre dit de Mathilde (XIIe siècle)."
+    },
+    {
+      "id": "bridge_pont_de_l_arche",
+      "name": "Pont-de-l'Arche",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [1.155, 49.304],
+      "source": "Wikipédia (fr), « Pont-de-l'Arche »"
+    },
+    {
+      "id": "bridge_pont_de_vernon",
+      "name": "Pont de Vernon",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [1.487, 49.093],
+      "source": "Wikipédia (fr), « Vieux-Moulin de Vernon »"
+    },
+    {
+      "id": "bridge_pont_de_mantes",
+      "name": "Pont de Mantes",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [1.722, 48.993],
+      "source": "Wikipédia (fr), « Vieux pont de Limay »"
+    },
+    {
+      "id": "bridge_pont_de_meulan",
+      "name": "Pont de Meulan",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [1.908, 48.999],
+      "source": "Wikipédia (fr), « Meulan-en-Yvelines »"
+    },
+    {
+      "id": "bridge_pont_de_poissy",
+      "name": "Pont de Poissy",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [2.044, 48.933],
+      "source": "Wikipédia (fr), « Poissy »",
+      "note": "Réparé et franchi par Édouard III en août 1346."
+    },
+    {
+      "id": "bridge_pont_de_corbeil",
+      "name": "Pont de Corbeil",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [2.483, 48.613],
+      "source": "Wikipédia (fr), « Corbeil-Essonnes »"
+    },
+    {
+      "id": "bridge_pont_de_melun",
+      "name": "Pont de Melun",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [2.656, 48.539],
+      "source": "Wikipédia (fr), « Melun »"
+    },
+    {
+      "id": "bridge_pont_de_montereau",
+      "name": "Pont de Montereau",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [2.954, 48.386],
+      "source": "Wikipédia (fr), « Montereau-Fault-Yonne »",
+      "note": "Lieu de l'assassinat de Jean sans Peur (1419)."
+    },
+    {
+      "id": "bridge_ponts_de_troyes",
+      "name": "Ponts de Troyes",
+      "type": "bridge",
+      "river": "Seine",
+      "lonlat": [4.076, 48.297],
+      "source": "Wikipédia (fr), « Troyes »"
+    },
+    {
+      "id": "bridge_pont_de_geneve",
+      "name": "Pont de Genève",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [6.142, 46.206],
+      "source": "Wikipédia (fr), « Genève »"
+    },
+    {
+      "id": "bridge_pont_de_la_guillotiere_lyon",
+      "name": "Pont de la Guillotière (Lyon)",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [4.842, 45.757],
+      "source": "Wikipédia (fr), « Pont de la Guillotière »"
+    },
+    {
+      "id": "bridge_pont_de_vienne",
+      "name": "Pont de Vienne",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [4.874, 45.526],
+      "source": "Wikipédia (fr), « Vienne (Isère) »"
+    },
+    {
+      "id": "bridge_pont_de_pont_saint_esprit",
+      "name": "Pont de Pont-Saint-Esprit",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [4.644, 44.257],
+      "source": "Wikipédia (fr), « Pont-Saint-Esprit »",
+      "note": "Construit de 1265 à 1309."
+    },
+    {
+      "id": "bridge_pont_saint_benezet_avignon",
+      "name": "Pont Saint-Bénézet (Avignon)",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [4.805, 43.954],
+      "source": "Wikipédia (fr), « Pont Saint-Bénézet »"
+    },
+    {
+      "id": "bridge_pont_de_bateaux_d_arles",
+      "name": "Pont de bateaux d'Arles",
+      "type": "bridge",
+      "river": "Rhône",
+      "lonlat": [4.628, 43.68],
+      "source": "Wikipédia (fr), « Arles »",
+      "note": "Pont de bateaux vers Trinquetaille."
+    },
+    {
+      "id": "bridge_pont_de_saone_lyon",
+      "name": "Pont de Saône (Lyon)",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [4.829, 45.765],
+      "source": "Wikipédia (fr), « Lyon »",
+      "note": "Pont de pierre sur la Saône, futur pont du Change."
+    },
+    {
+      "id": "bridge_pont_de_macon",
+      "name": "Pont de Mâcon",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [4.836, 46.307],
+      "source": "Wikipédia (fr), « Mâcon »"
+    },
+    {
+      "id": "bridge_pont_de_tournus",
+      "name": "Pont de Tournus",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [4.912, 46.564],
+      "source": "Wikipédia (fr), « Tournus »"
+    },
+    {
+      "id": "bridge_pont_de_chalon_sur_saone",
+      "name": "Pont de Chalon-sur-Saône",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [4.858, 46.782],
+      "source": "Wikipédia (fr), « Chalon-sur-Saône »"
+    },
+    {
+      "id": "bridge_pont_d_auxonne",
+      "name": "Pont d'Auxonne",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [5.387, 47.192],
+      "source": "Wikipédia (fr), « Auxonne »"
+    },
+    {
+      "id": "bridge_pont_de_gray",
+      "name": "Pont de Gray",
+      "type": "bridge",
+      "river": "Saône",
+      "lonlat": [5.592, 47.446],
+      "source": "Wikipédia (fr), « Gray (Haute-Saône) »"
+    },
+    {
+      "id": "bridge_ponts_de_toulouse",
+      "name": "Ponts de Toulouse",
+      "type": "bridge",
+      "river": "Garonne",
+      "lonlat": [1.437, 43.6],
+      "source": "Wikipédia (fr), « Pont Neuf (Toulouse) »",
+      "note": "Pont de la Daurade et pont Vieux, prédécesseurs du Pont-Neuf."
+    },
+    {
+      "id": "bridge_pont_d_agen",
+      "name": "Pont d'Agen",
+      "type": "bridge",
+      "river": "Garonne",
+      "lonlat": [0.617, 44.203],
+      "source": "Wikipédia (fr), « Agen »"
+    },
+    {
+      "id": "ford_bac_de_la_reole",
+      "name": "Bac de La Réole",
+      "type": "ford",
+      "river": "Garonne",
+      "lonlat": [-0.037, 44.582],
+      "source": "Wikipédia (fr), « La Réole »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_saint_macaire_et_langon",
+      "name": "Bac de Saint-Macaire et Langon",
+      "type": "ford",
+      "river": "Garonne",
+      "lonlat": [-0.227, 44.553],
+      "source": "Wikipédia (fr), « Saint-Macaire »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_bordeaux",
+      "name": "Bac de Bordeaux",
+      "type": "ford",
+      "river": "Garonne",
+      "lonlat": [-0.565, 44.843],
+      "source": "Wikipédia (fr), « Pont de pierre (Bordeaux) »",
+      "note": "Aucun pont avant 1822 : passage par bac."
+    },
+    {
+      "id": "bridge_pont_de_bergerac",
+      "name": "Pont de Bergerac",
+      "type": "bridge",
+      "river": "Dordogne",
+      "lonlat": [0.483, 44.851],
+      "source": "Wikipédia (fr), « Bergerac »",
+      "note": "Pont pris par le comte de Derby en 1345."
+    },
+    {
+      "id": "ford_bac_de_sainte_foy",
+      "name": "Bac de Sainte-Foy",
+      "type": "ford",
+      "river": "Dordogne",
+      "lonlat": [0.22, 44.84],
+      "source": "Wikipédia (fr), « Sainte-Foy-la-Grande »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_castillon",
+      "name": "Bac de Castillon",
+      "type": "ford",
+      "river": "Dordogne",
+      "lonlat": [-0.042, 44.852],
+      "source": "Wikipédia (fr), « Castillon-la-Bataille »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_libourne",
+      "name": "Bac de Libourne",
+      "type": "ford",
+      "river": "Dordogne",
+      "lonlat": [-0.244, 44.916],
+      "source": "Wikipédia (fr), « Libourne »",
+      "note": "Bac."
+    },
+    {
+      "id": "bridge_london_bridge",
+      "name": "London Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.088, 51.508],
+      "source": "Wikipedia (en), « Old London Bridge »"
+    },
+    {
+      "id": "bridge_kingston_bridge",
+      "name": "Kingston Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.308, 51.411],
+      "source": "Wikipedia (en), « Kingston Bridge, London »"
+    },
+    {
+      "id": "bridge_staines_bridge",
+      "name": "Staines Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.513, 51.435],
+      "source": "Wikipedia (en), « Staines Bridge »"
+    },
+    {
+      "id": "bridge_windsor_bridge",
+      "name": "Windsor Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.609, 51.487],
+      "source": "Wikipedia (en), « Windsor Bridge »"
+    },
+    {
+      "id": "bridge_henley_bridge",
+      "name": "Henley Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.902, 51.538],
+      "source": "Wikipedia (en), « Henley Bridge »"
+    },
+    {
+      "id": "bridge_caversham_bridge_reading",
+      "name": "Caversham Bridge (Reading)",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-0.973, 51.465],
+      "source": "Wikipedia (en), « Caversham Bridge »"
+    },
+    {
+      "id": "bridge_wallingford_bridge",
+      "name": "Wallingford Bridge",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-1.12, 51.6],
+      "source": "Wikipedia (en), « Wallingford Bridge »"
+    },
+    {
+      "id": "bridge_folly_bridge_oxford",
+      "name": "Folly Bridge (Oxford)",
+      "type": "bridge",
+      "river": "Tamise",
+      "lonlat": [-1.256, 51.745],
+      "source": "Wikipedia (en), « Folly Bridge »",
+      "note": "Grandpont, chaussée et pont du XIe siècle."
+    },
+    {
+      "id": "bridge_pont_de_verdun",
+      "name": "Pont de Verdun",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [5.385, 49.16],
+      "source": "Wikipédia (fr), « Verdun »"
+    },
+    {
+      "id": "bridge_pont_de_mezieres",
+      "name": "Pont de Mézières",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [4.723, 49.76],
+      "source": "Wikipédia (fr), « Charleville-Mézières »"
+    },
+    {
+      "id": "bridge_pont_de_dinant",
+      "name": "Pont de Dinant",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [4.912, 50.261],
+      "source": "Wikipédia (fr), « Dinant »"
+    },
+    {
+      "id": "bridge_pont_de_jambes_namur",
+      "name": "Pont de Jambes (Namur)",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [4.87, 50.462],
+      "source": "Wikipédia (fr), « Pont de Jambes »"
+    },
+    {
+      "id": "bridge_pont_de_huy",
+      "name": "Pont de Huy",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [5.239, 50.519],
+      "source": "Wikipédia (fr), « Huy »"
+    },
+    {
+      "id": "bridge_pont_des_arches_liege",
+      "name": "Pont des Arches (Liège)",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [5.578, 50.645],
+      "source": "Wikipédia (fr), « Pont des Arches (Liège) »"
+    },
+    {
+      "id": "bridge_pont_saint_servais_maastricht",
+      "name": "Pont Saint-Servais (Maastricht)",
+      "type": "bridge",
+      "river": "Meuse",
+      "lonlat": [5.697, 50.851],
+      "source": "Wikipédia (fr), « Pont Saint-Servais »"
+    },
+    {
+      "id": "bridge_pont_de_cambrai",
+      "name": "Pont de Cambrai",
+      "type": "bridge",
+      "river": "Escaut",
+      "lonlat": [3.235, 50.176],
+      "source": "Wikipédia (fr), « Cambrai »"
+    },
+    {
+      "id": "bridge_pont_de_valenciennes",
+      "name": "Pont de Valenciennes",
+      "type": "bridge",
+      "river": "Escaut",
+      "lonlat": [3.523, 50.358],
+      "source": "Wikipédia (fr), « Valenciennes »"
+    },
+    {
+      "id": "bridge_pont_des_trous_tournai",
+      "name": "Pont des Trous (Tournai)",
+      "type": "bridge",
+      "river": "Escaut",
+      "lonlat": [3.383, 50.61],
+      "source": "Wikipédia (fr), « Pont des Trous »"
+    },
+    {
+      "id": "bridge_pont_d_audenarde",
+      "name": "Pont d'Audenarde",
+      "type": "bridge",
+      "river": "Escaut",
+      "lonlat": [3.605, 50.846],
+      "source": "Wikipédia (fr), « Audenarde »"
+    },
+    {
+      "id": "bridge_ponts_de_gand",
+      "name": "Ponts de Gand",
+      "type": "bridge",
+      "river": "Escaut",
+      "lonlat": [3.724, 51.054],
+      "source": "Wikipédia (fr), « Gand »"
+    },
+    {
+      "id": "ford_bac_d_anvers",
+      "name": "Bac d'Anvers",
+      "type": "ford",
+      "river": "Escaut",
+      "lonlat": [4.395, 51.223],
+      "source": "Wikipédia (fr), « Anvers »",
+      "note": "Bac vers la Tête de Flandre."
+    },
+    {
+      "id": "bridge_pont_de_constance",
+      "name": "Pont de Constance",
+      "type": "bridge",
+      "river": "Rhin",
+      "lonlat": [9.178, 47.666],
+      "source": "Wikipedia (de), « Konstanz »"
+    },
+    {
+      "id": "bridge_pont_de_schaffhouse",
+      "name": "Pont de Schaffhouse",
+      "type": "bridge",
+      "river": "Rhin",
+      "lonlat": [8.637, 47.696],
+      "source": "Wikipedia (de), « Schaffhausen »"
+    },
+    {
+      "id": "bridge_pont_de_rheinfelden",
+      "name": "Pont de Rheinfelden",
+      "type": "bridge",
+      "river": "Rhin",
+      "lonlat": [7.794, 47.555],
+      "source": "Wikipedia (de), « Rheinfelden (Aargau) »"
+    },
+    {
+      "id": "bridge_mittlere_brucke_bale",
+      "name": "Mittlere Brücke (Bâle)",
+      "type": "bridge",
+      "river": "Rhin",
+      "lonlat": [7.589, 47.56],
+      "source": "Wikipédia (fr), « Mittlere Brücke »",
+      "note": "Pont achevé vers 1226."
+    },
+    {
+      "id": "ford_bac_de_brisach",
+      "name": "Bac de Brisach",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [7.575, 48.03],
+      "source": "Wikipédia (fr), « Vieux-Brisach »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_strasbourg_a_kehl",
+      "name": "Bac de Strasbourg à Kehl",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [7.796, 48.57],
+      "source": "Wikipédia (fr), « Strasbourg »",
+      "note": "Premier pont du Rhin en 1388 ; bac auparavant."
+    },
+    {
+      "id": "ford_bac_de_spire",
+      "name": "Bac de Spire",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [8.45, 49.32],
+      "source": "Wikipédia (fr), « Spire (Allemagne) »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_worms",
+      "name": "Bac de Worms",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [8.375, 49.634],
+      "source": "Wikipédia (fr), « Worms »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_mayence",
+      "name": "Bac de Mayence",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [8.28, 50.002],
+      "source": "Wikipédia (fr), « Mayence »",
+      "note": "Pas de pont fixe au Moyen Âge : bac."
+    },
+    {
+      "id": "ford_bac_de_coblence",
+      "name": "Bac de Coblence",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [7.605, 50.36],
+      "source": "Wikipédia (fr), « Coblence »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_bonn",
+      "name": "Bac de Bonn",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [7.11, 50.74],
+      "source": "Wikipédia (fr), « Bonn »",
+      "note": "Bac."
+    },
+    {
+      "id": "ford_bac_de_cologne",
+      "name": "Bac de Cologne",
+      "type": "ford",
+      "river": "Rhin",
+      "lonlat": [6.965, 50.938],
+      "source": "Wikipédia (fr), « Cologne »",
+      "note": "Pas de pont fixe avant le XIXe siècle : bac vers Deutz."
+    },
+    {
+      "id": "bridge_pont_de_turin",
+      "name": "Pont de Turin",
+      "type": "bridge",
+      "river": "Pô",
+      "lonlat": [7.698, 45.063],
+      "source": "Wikipédia (fr), « Turin »"
+    },
+    {
+      "id": "bridge_pont_de_bateaux_de_plaisance",
+      "name": "Pont de bateaux de Plaisance",
+      "type": "bridge",
+      "river": "Pô",
+      "lonlat": [9.696, 45.06],
+      "source": "Wikipédia (fr), « Plaisance (Italie) »",
+      "note": "Pont de bateaux."
+    },
+    {
+      "id": "bridge_pont_de_bateaux_de_cremone",
+      "name": "Pont de bateaux de Crémone",
+      "type": "bridge",
+      "river": "Pô",
+      "lonlat": [10.02, 45.125],
+      "source": "Wikipédia (fr), « Crémone »",
+      "note": "Pont de bateaux."
+    },
+    {
+      "id": "bridge_pont_d_alcantara_tolede",
+      "name": "Pont d'Alcántara (Tolède)",
+      "type": "bridge",
+      "river": "Tage",
+      "lonlat": [-4.02, 39.859],
+      "source": "Wikipedia (es), « Puente de Alcántara (Toledo) »"
+    },
+    {
+      "id": "bridge_pont_de_talavera",
+      "name": "Pont de Talavera",
+      "type": "bridge",
+      "river": "Tage",
+      "lonlat": [-4.833, 39.955],
+      "source": "Wikipedia (es), « Talavera de la Reina »"
+    },
+    {
+      "id": "bridge_pont_d_alcantara",
+      "name": "Pont d'Alcántara",
+      "type": "bridge",
+      "river": "Tage",
+      "lonlat": [-6.89, 39.722],
+      "source": "Wikipédia (fr), « Pont d'Alcántara »",
+      "note": "Pont romain de Trajan."
+    },
+    {
+      "id": "ford_bac_de_santarem",
+      "name": "Bac de Santarém",
+      "type": "ford",
+      "river": "Tage",
+      "lonlat": [-8.68, 39.23],
+      "source": "Wikipédia (fr), « Santarém (Portugal) »",
+      "note": "Bac."
+    },
+    {
+      "id": "bridge_pont_de_frias",
+      "name": "Pont de Frías",
+      "type": "bridge",
+      "river": "Èbre",
+      "lonlat": [-3.294, 42.762],
+      "source": "Wikipedia (es), « Frías (Burgos) »"
+    },
+    {
+      "id": "bridge_pont_de_logrono",
+      "name": "Pont de Logroño",
+      "type": "bridge",
+      "river": "Èbre",
+      "lonlat": [-2.443, 42.47],
+      "source": "Wikipedia (es), « Puente de Piedra (Logroño) »",
+      "note": "Pont du chemin de Saint-Jacques."
+    },
+    {
+      "id": "bridge_pont_de_tudela",
+      "name": "Pont de Tudela",
+      "type": "bridge",
+      "river": "Èbre",
+      "lonlat": [-1.605, 42.065],
+      "source": "Wikipedia (es), « Tudela »"
+    },
+    {
+      "id": "bridge_pont_de_pierre_de_saragosse",
+      "name": "Pont de pierre de Saragosse",
+      "type": "bridge",
+      "river": "Èbre",
+      "lonlat": [-0.879, 41.657],
+      "source": "Wikipedia (es), « Puente de Piedra (Zaragoza) »"
+    },
+    {
+      "id": "bridge_pont_de_bateaux_de_tortosa",
+      "name": "Pont de bateaux de Tortosa",
+      "type": "bridge",
+      "river": "Èbre",
+      "lonlat": [0.523, 40.813],
+      "source": "Wikipédia (fr), « Tortosa »",
+      "note": "Pont de bateaux."
+    },
+    {
+      "id": "bridge_pont_d_ulm",
+      "name": "Pont d'Ulm",
+      "type": "bridge",
+      "river": "Danube",
+      "lonlat": [9.995, 48.396],
+      "source": "Wikipédia (fr), « Ulm »"
+    },
+    {
+      "id": "bridge_pont_de_donauworth",
+      "name": "Pont de Donauwörth",
+      "type": "bridge",
+      "river": "Danube",
+      "lonlat": [10.777, 48.718],
+      "source": "Wikipédia (fr), « Donauwörth »"
+    },
+    {
+      "id": "bridge_pont_d_ingolstadt",
+      "name": "Pont d'Ingolstadt",
+      "type": "bridge",
+      "river": "Danube",
+      "lonlat": [11.425, 48.761],
+      "source": "Wikipédia (fr), « Ingolstadt »"
+    },
+    {
+      "id": "bridge_pont_de_pierre_de_ratisbonne",
+      "name": "Pont de pierre de Ratisbonne",
+      "type": "bridge",
+      "river": "Danube",
+      "lonlat": [12.097, 49.023],
+      "source": "Wikipédia (fr), « Pont de pierre de Ratisbonne »",
+      "note": "Achevé vers 1146."
+    },
+    {
+      "id": "bridge_pont_de_passau",
+      "name": "Pont de Passau",
+      "type": "bridge",
+      "river": "Danube",
+      "lonlat": [13.465, 48.575],
+      "source": "Wikipédia (fr), « Passau »"
+    },
+    {
+      "id": "ford_gue_de_blanchetaque",
+      "name": "Gué de Blanchetaque",
+      "type": "ford",
+      "river": "Somme",
+      "lonlat": [1.73, 50.125],
+      "source": "Wikipédia (fr), « Bataille de Blanchetaque »",
+      "note": "Gué de la basse Somme franchi par Édouard III en 1346."
+    },
+    {
+      "id": "pass_mont_cenis",
+      "name": "Col du Mont-Cenis",
+      "type": "pass",
+      "lonlat": [6.9, 45.26],
+      "route": [
+        [6.88, 45.286],
+        [6.9, 45.26],
+        [7.047, 45.138]
+      ],
+      "source": "Wikipédia (fr), « Col du Mont-Cenis »"
+    },
+    {
+      "id": "pass_montgenevre",
+      "name": "Col de Montgenèvre",
+      "type": "pass",
+      "lonlat": [6.723, 44.933],
+      "route": [
+        [6.643, 44.896],
+        [6.723, 44.933],
+        [6.833, 45.033]
+      ],
+      "source": "Wikipédia (fr), « Col de Montgenèvre »"
+    },
+    {
+      "id": "pass_petit_saint_bernard",
+      "name": "Col du Petit-Saint-Bernard",
+      "type": "pass",
+      "lonlat": [6.883, 45.68],
+      "route": [
+        [6.77, 45.618],
+        [6.883, 45.68],
+        [6.952, 45.712]
+      ],
+      "source": "Wikipédia (fr), « Col du Petit-Saint-Bernard »"
+    },
+    {
+      "id": "pass_grand_saint_bernard",
+      "name": "Col du Grand-Saint-Bernard",
+      "type": "pass",
+      "lonlat": [7.17, 45.869],
+      "route": [
+        [7.072, 46.102],
+        [7.208, 45.95],
+        [7.17, 45.869],
+        [7.315, 45.737]
+      ],
+      "source": "Wikipédia (fr), « Col du Grand-Saint-Bernard »"
+    },
+    {
+      "id": "pass_simplon",
+      "name": "Col du Simplon",
+      "type": "pass",
+      "lonlat": [8.035, 46.251],
+      "route": [
+        [7.988, 46.316],
+        [8.035, 46.251],
+        [8.292, 46.116]
+      ],
+      "source": "Wikipédia (fr), « Col du Simplon »"
+    },
+    {
+      "id": "pass_saint_gothard",
+      "name": "Col du Saint-Gothard",
+      "type": "pass",
+      "lonlat": [8.568, 46.559],
+      "route": [
+        [8.644, 46.88],
+        [8.594, 46.636],
+        [8.568, 46.559],
+        [8.61, 46.529]
+      ],
+      "source": "Wikipédia (fr), « Col du Saint-Gothard »",
+      "note": "Route de la vallée de la Reuss (Altdorf) au Tessin, par les gorges de Schöllenen."
+    },
+    {
+      "id": "pass_brenner",
+      "name": "Col du Brenner",
+      "type": "pass",
+      "lonlat": [11.507, 47.004],
+      "route": [
+        [11.4, 47.269],
+        [11.507, 47.004],
+        [11.433, 46.894]
+      ],
+      "source": "Wikipédia (fr), « Col du Brenner »"
+    },
+    {
+      "id": "pass_tende",
+      "name": "Col de Tende",
+      "type": "pass",
+      "lonlat": [7.568, 44.15],
+      "route": [
+        [7.594, 44.088],
+        [7.568, 44.15],
+        [7.576, 44.202]
+      ],
+      "source": "Wikipédia (fr), « Col de Tende »"
+    },
+    {
+      "id": "pass_perthus",
+      "name": "Col du Perthus",
+      "type": "pass",
+      "lonlat": [2.862, 42.463],
+      "route": [
+        [2.833, 42.525],
+        [2.862, 42.463],
+        [2.874, 42.419]
+      ],
+      "source": "Wikipédia (fr), « Col du Perthus »"
+    },
+    {
+      "id": "pass_somport",
+      "name": "Col du Somport",
+      "type": "pass",
+      "lonlat": [-0.526, 42.795],
+      "route": [
+        [-0.555, 42.875],
+        [-0.526, 42.795],
+        [-0.525, 42.716],
+        [-0.55, 42.57]
+      ],
+      "source": "Wikipédia (fr), « Col du Somport »"
+    },
+    {
+      "id": "pass_roncevaux",
+      "name": "Col de Roncevaux",
+      "type": "pass",
+      "lonlat": [-1.323, 43.02],
+      "route": [
+        [-1.236, 43.164],
+        [-1.3, 43.092],
+        [-1.323, 43.02],
+        [-1.336, 42.99]
+      ],
+      "source": "Wikipédia (fr), « Col de Roncevaux »"
+    },
+    {
+      "id": "pass_puymorens",
+      "name": "Col de Puymorens",
+      "type": "pass",
+      "lonlat": [1.825, 42.555],
+      "route": [
+        [1.8, 42.589],
+        [1.825, 42.555],
+        [1.928, 42.432]
+      ],
+      "source": "Wikipédia (fr), « Col de Puymorens »"
+    }
+  ]
 }
