@@ -351,6 +351,7 @@ def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
                 "name": z.get("name", z["id"]),
                 "px": z["px"],
                 "radius_px": z["radius_px"],
+                "boundary_bridges": bool(z.get("boundary_bridges", True)),
             }
             for z in zones
         ],

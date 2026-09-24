@@ -41,6 +41,9 @@ var land_mask: Image
 var splat_image: Image
 var border_dist_image: Image
 var coast_dist_image: Image
+## Lot V4 : lit des fleuves (`cent-ans geo rivers-render`), L8, distance signée à la berge
+## ((valeur − 128) / 16 px, négative dans le lit) ; null si absent.
+var river_bed_image: Image
 ## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
 ## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
 var landuse_image: Image
@@ -81,6 +84,7 @@ func _load() -> void:
 	splat_image = _load_image_optional("splat.png", Image.FORMAT_RGBA8)
 	border_dist_image = _load_image_optional("province_border_dist.png", Image.FORMAT_RGB8)
 	coast_dist_image = _load_image_optional("coast_dist.png", Image.FORMAT_L8)
+	river_bed_image = _load_image_optional("river_bed.png", Image.FORMAT_L8)
 	if not _load_province_ids():
 		return
 	var t3 := Time.get_ticks_msec()
@@ -385,6 +389,16 @@ func centroid_of_id(id: String) -> Vector2:
 	if province.is_empty():
 		return Vector2(-1, -1)
 	return province["centroid"]
+
+
+## Lot V4 : distance signée (px carte) à la berge du fleuve le plus proche, négative dans le lit ;
+## 8 (loin de tout fleuve) sans `river_bed.png`. Plus proche voisin (semis de la végétation).
+func river_sd_at(x: float, y: float) -> float:
+	if river_bed_image == null:
+		return 8.0
+	var px := clampi(int(x), 0, river_bed_image.get_width() - 1)
+	var py := clampi(int(y), 0, river_bed_image.get_height() - 1)
+	return (river_bed_image.get_pixel(px, py).r * 255.0 - 128.0) / 16.0
 
 
 func is_land_px(px: int, py: int) -> bool:

@@ -35,6 +35,7 @@
             "maxItems": 2
           },
           "radius_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+          "boundary_bridges": { "type": "boolean", "description": "Pont-porte générique (pierre crénelée) là où un fleuve entre dans la zone ou en sort (défaut : vrai). À passer à faux quand le modèle dédié dessine ses propres entrées d'eau." },
           "note": { "type": "string" }
         },
         "required": ["id", "lonlat", "radius_px"],
