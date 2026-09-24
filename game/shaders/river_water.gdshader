@@ -83,10 +83,13 @@ void fragment() {
 	// Distance au bord de l'eau réelle (1 = berge théorique du lit).
 	float edge = abs(v_side);
 	// Épaisseur d'eau d'après le tampon de profondeur (lit creusé de près).
-	float scene_depth = texture(depth_tex, SCREEN_UV).r;
-	vec4 scene_view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, scene_depth, 1.0);
-	scene_view.xyz /= scene_view.w;
-	float thickness = max(VERTEX.z - scene_view.z, 0.0);
+	float thickness = 0.0;
+	if (v_carved > 0.001) {
+		float scene_depth = texture(depth_tex, SCREEN_UV).r;
+		vec4 scene_view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, scene_depth, 1.0);
+		scene_view.xyz /= scene_view.w;
+		thickness = max(VERTEX.z - scene_view.z, 0.0);
+	}
 	float depth_t = clamp(thickness / depth_full, 0.0, 1.0);
 	// Loin (non creusé) : profondeur fictive décroissant vers les bords du ruban.
 	float fake_depth = 1.0 - smoothstep(0.35, 1.05, edge);
@@ -103,8 +106,10 @@ void fragment() {
 	// Gués / bacs : eau claire et peu profonde, remous et cailloux au gué.
 	float ford = 0.0;
 	float riffle = 0.0;
+	// Gués : seulement de près (au loin, ils font moins d'un pixel).
+	int fords_here = fwidth(v_flow.x) < 0.5 ? ford_count : 0;
 	for (int i = 0; i < 32; i++) {
-		if (i >= ford_count) {
+		if (i >= fords_here) {
 			break;
 		}
 		vec4 f = fords[i];

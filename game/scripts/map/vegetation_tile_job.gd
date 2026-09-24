@@ -13,8 +13,12 @@ extends RefCounted
 ##
 ## Aucun accès à l'arbre de scène : sûr hors du fil principal.
 
-enum Kind { DECIDUOUS, CONIFER, HEDGE }
-const KIND_COUNT := 3
+## Lot V4 (A1-10) : essences — chêne (chênaies, bocage, arbres des champs), hêtre (hêtraies),
+## conifère de montagne (sapin, épicéa), haie.
+enum Kind { OAK, BEECH, CONIFER, HEDGE }
+const KIND_COUNT := 4
+## Lot V4 : au cœur des massifs, houppiers élargis jusqu'à se toucher (canopée continue).
+const CANOPY_SPREAD := 0.4
 ## La tuile est rendue en PARTS_SIDE × PARTS_SIDE parties (culling et LOD plus fins).
 const PARTS_SIDE := 2
 const PARTS := PARTS_SIDE * PARTS_SIDE
@@ -46,6 +50,7 @@ var build_ms: float = 0.0
 var _forest := PackedFloat32Array()
 var _crops := PackedFloat32Array()
 var _conifer := PackedFloat32Array()
+var _beech := PackedFloat32Array()
 var _hedge := PackedFloat32Array()
 var _grove := PackedFloat32Array()
 var _region := PackedFloat32Array()
@@ -82,7 +87,7 @@ func instance_total() -> int:
 func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 	_side = size_px / coarse_step + 2
 	var n := _side * _side
-	for array in [_forest, _crops, _conifer, _hedge, _grove, _region]:
+	for array in [_forest, _crops, _conifer, _beech, _hedge, _grove, _region]:
 		array.resize(n)
 	var k := 0
 	for j in _side:
@@ -93,6 +98,7 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			_forest[k] = s["forest"]
 			_crops[k] = s["crops"]
 			_conifer[k] = s["conifer"]
+			_beech[k] = s["beech"]
 			_hedge[k] = s["hedge"]
 			_grove[k] = smoothstep(0.28, 0.42, grove_noise.get_noise_2d(x, y))
 			# Région (frontière des deux trames de parcelles) : variation bien plus lente que le
@@ -155,14 +161,19 @@ func _scatter(raw: Array) -> void:
 			var scale_factor := 1.0
 			var yaw := rng.randf() * TAU
 			if roll < forest * 0.9:
-				kind = Kind.CONIFER if roll_kind < _lerp_grid(_conifer, gx, gy) else Kind.DECIDUOUS
+				if roll_kind < _lerp_grid(_conifer, gx, gy):
+					kind = Kind.CONIFER
+				else:
+					kind = Kind.BEECH if rng.randf() < _lerp_grid(_beech, gx, gy) else Kind.OAK
+				# Canopée : houppiers plus larges au cœur du massif (lisières plus claires).
+				scale_factor = 1.0 + CANOPY_SPREAD * smoothstep(0.45, 0.9, forest)
 			else:
 				var crops := _lerp_grid(_crops, gx, gy)
 				if crops > 0.15:
 					var grove := _lerp_grid(_grove, gx, gy)
 					# Bosquets (bruit) et quelques arbres isolés dans les champs.
 					if roll < crops * (grove * 0.55 + 0.012):
-						kind = Kind.DECIDUOUS
+						kind = Kind.BEECH if rng.randf() < 0.2 else Kind.OAK
 						scale_factor = 0.9
 			if kind < 0 or (not exclusions.is_empty() and _excluded(x, y)):
 				continue
@@ -318,7 +329,7 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 	# Basis(UP, a) envoie X sur (cos a, 0, −sin a) : aligne le buisson sur le bord.
 	var yaw := atan2(-dir.y, dir.x) + rng.randf_range(-0.15, 0.15)
 	if tree < HEDGE_TREE:
-		raw[_slot(Kind.DECIDUOUS, p.x, p.y)].append(_make_instance(rng, Kind.DECIDUOUS, p.x, ground, p.y, rng.randf() * TAU, 0.78))
+		raw[_slot(Kind.OAK, p.x, p.y)].append(_make_instance(rng, Kind.OAK, p.x, ground, p.y, rng.randf() * TAU, 0.78))
 	else:
 		raw[_slot(Kind.HEDGE, p.x, p.y)].append(_make_instance(rng, Kind.HEDGE, p.x, ground, p.y, yaw, 1.0))
 
@@ -364,10 +375,16 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 			var b := rng.randf_range(1.0, 1.3)
 			var warm := rng.randf()
 			tint = Color(b * (1.12 if warm > 0.7 else 1.0), b, b * (0.78 if warm > 0.7 else 0.9))
+		Kind.BEECH:
+			# Hêtre : fût élancé, houppier haut et rond (palette plus claire dans le maillage).
+			height = rng.randf_range(1.35, 1.95)
+			width = height * rng.randf_range(0.78, 0.98)
+			var b := rng.randf_range(0.88, 1.12)
+			tint = Color(b * rng.randf_range(0.95, 1.05), b, b * rng.randf_range(0.9, 1.0))
 		_:
 			height = rng.randf_range(1.1, 1.7)
-			width = height * rng.randf_range(0.9, 1.25)
-			# Variété des essences : chênes sombres, hêtres clairs, quelques teintes dorées.
+			width = height * rng.randf_range(0.95, 1.3)
+			# Chênes : teintes variées, quelques houppiers plus dorés.
 			var b := rng.randf_range(0.82, 1.18)
 			var warm := rng.randf()
 			if warm > 0.9:
@@ -376,7 +393,8 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 				tint = Color(b * 1.12, b * 1.08, b * 0.85)
 			else:
 				tint = Color(b * rng.randf_range(0.9, 1.02), b, b * rng.randf_range(0.9, 1.05))
-	height *= tree_scale * scale_factor
+	# `scale_factor` > 1 (cœur de forêt) élargit surtout le houppier.
+	height *= tree_scale * (scale_factor if scale_factor <= 1.0 else 1.0 + (scale_factor - 1.0) * 0.35)
 	width *= tree_scale * scale_factor
 	# Légère inclinaison aléatoire (arbres pas tous au garde-à-vous).
 	var basis := Basis(Vector3.UP, yaw) * Basis(Vector3(1, 0, 0), rng.randf_range(-0.06, 0.06))
