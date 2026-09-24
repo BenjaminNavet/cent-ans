@@ -39,3 +39,15 @@ Liste vivante. Chaque idée devient un lot dans `docs/wip/nuit.md` une fois plan
 - Suivi des mouvements de l'IA en fin de tour (caméra qui suit, option d'accélération).
 - Portée de mouvement en surbrillance, chemin prévisualisé avec les tours (M4, mouvement libre).
 - Événements illustrés en plein écran avec musique (enluminures existantes), cinématiques légères pour les grands moments (Crécy, peste noire, Jeanne d'Arc).
+
+## Villes emblématiques (landmarks, à la TW : Rome, Constantinople)
+
+- (J) **Paris réaliste**, sur la carte de campagne et en bataille de siège. État vers 1340-1380 :
+  - la Seine avec l'île de la Cité et l'île Notre-Dame/île aux Vaches ;
+  - Notre-Dame (façade à deux tours, flèche, arcs-boutants), la Sainte-Chapelle, le palais de la Cité ;
+  - le Louvre de Philippe Auguste (donjon) et le Louvre de Charles V ;
+  - les ponts habités (Grand-Pont, Petit-Pont) et le Châtelet ;
+  - les enceintes de Philippe Auguste, puis de Charles V (rive droite, Bastille à partir de 1370) ;
+  - les halles, les quais, Montmartre au nord.
+  Sources : plans historiques du domaine public (plan de Bâle, restitutions), Wikimedia.
+- Ensuite : Londres (la Tour, Old St Paul's, London Bridge), Avignon (palais des Papes), Calais (port fortifié), Bordeaux, Rouen, Bruges. Un gabarit réutilisable : modèle Blender procédural, données de plan dans data/, un monument par ville en maillage dédié.
