@@ -19,7 +19,7 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C7a IA, équilibrage | fait (fusionné `4bcd31f`) | repli du perdant, ordre `garrison_units`, portée ÷ 3,7, sonde 50 tours ; détail `docs/wip/c7a-settlements-balance.md` |
 | C7b rendu | fait (fusionné `5603fbc`) | arbres sur relief fin, routes au palier moyen, aperçu le long des routes, panneau et minicarte |
 | C7c docs | fait | `manuel.md` § 5 réécrite, codex `cdx_places_fortes` et `cdx_deroute_debandade`, fiches Mécaniques mises à jour ; détail `docs/wip/c7c-settlements-docs.md` |
-| C7d bouton garnison | en cours | ordre `garrison_units` dans l'UI |
+| C7d bouton garnison | fait (fusionné `617c03a`) | bouton « Garnison » du bandeau d'ost, `garrison_cap`/`garrison_free` dans `settlement_detail` |
 
 ## Coordination
 
@@ -69,10 +69,13 @@ Hors colonies, connu : `tools/tests/test_portraits.py::test_dry_run_makes_no_net
   - 100 arêtes restent en segment droit ;
   - l'étape de capture `--stage=province` (dans `campaign_map.gd`, autre session) place la capitale sous le panneau.
 
-## Prochaine étape
+## Bilan (2026-09-24)
 
-Vague 3, deux agents en parallèle, chacun dans son worktree :
-- **C5** : pont et UI (panneau de colonie, onglet Colonies, ordres par colonie, aperçu de chemin sur le graphe) ; fichier de suivi `docs/wip/c5-settlements-ui.md`.
-- **C7a** : repli du perdant, IA et équilibrage, test de 50 tours ; fichier de suivi `docs/wip/c7a-settlements-balance.md`.
+La refonte « colonies » est terminée : tous les lots (C1 à C7d) sont dans `main`, et smoke, `settlements_render_test` et `c5_settlements_ui_test` sont verts.
 
-Ensuite C7b : rendu (arbres sur le relief fin, routes au palier moyen) et documentation (`manuel.md`, codex).
+Suites possibles, hors refonte :
+- guerre franco-anglaise sur un siècle : 55 % du temps, en bas de la cible 55-75 % ; à revoir avec les réglages diplomatiques de G5 (`docs/wip/c7a-settlements-balance.md`) ;
+- trésor de l'Écosse chroniquement négatif ;
+- 100 arêtes routières sans tracé réel dans l'aperçu de chemin ;
+- étape de capture `--stage=province` : la capitale se retrouve sous le panneau ;
+- mouvement continu façon Total War (option C de l'ADR 0005), avec le graphe des colonies pour squelette.
