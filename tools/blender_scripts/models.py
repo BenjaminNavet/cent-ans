@@ -1,38 +1,55 @@
-"""Procedural low-poly campaign-map models, exported as glTF binaries (.glb).
+"""Procedural campaign-map models (semi-realistic low-poly), exported as glTF binaries (.glb).
 
 Run headless:  blender --background --python models.py -- <out_dir> [name ...]
 
 Models (Y up in Godot, built Z up in Blender; the glTF exporter converts):
-castle, town, village, cathedral, army (mounted standard-bearer), siege_camp, ship (cog).
-Each model is one joined mesh with flat-coloured materials; the material named
-``Banner`` is re-tinted by Godot with the faction colour. After export, a JSON line
-``MODEL <name> <triangles>`` is printed per model and ``OK`` at the end.
+
+* settlements: ``castle`` (faction capital: walled city and castle), ``city_cathedral``
+  (walled city around a cathedral), ``town`` (walled town), ``village`` (open village);
+* ``cathedral``: the cathedral building alone (also used by the siege battlefield);
+* army figurines: ``army`` (mounted commander), ``army_foot`` (man-at-arms with spear and
+  shield), ``army_archer`` (crossbowman), ``siege_camp``, ``ship`` (cog).
+
+Each model is one joined mesh with PBR materials (base colour, roughness, metallic): natural
+stone, slate and weathered tile roofs, thatch, plaster, timber. Surfaces whose material is
+named ``Banner`` are re-tinted by Godot with the faction colour. Buildings extend below
+``z = 0`` (foundations) so that they sit on sloped terrain without floating. After export, a
+line ``MODEL <name> <triangles>`` is printed per model and ``OK`` at the end.
 """
 
 import math
+import random
 import sys
 from pathlib import Path
 
 import bpy
 
+# name: (base colour (linear RGB), roughness, metallic)
 PALETTE = {
-    "Stone": (0.62, 0.58, 0.50),
-    "DarkStone": (0.42, 0.39, 0.34),
-    "Slate": (0.20, 0.25, 0.36),
-    "Roof": (0.55, 0.20, 0.12),
-    "Thatch": (0.70, 0.58, 0.30),
-    "Plaster": (0.86, 0.80, 0.66),
-    "Wood": (0.36, 0.22, 0.11),
-    "Canvas": (0.88, 0.84, 0.72),
-    "Horse": (0.40, 0.26, 0.15),
-    "Steel": (0.62, 0.64, 0.68),
-    "Skin": (0.85, 0.66, 0.52),
-    "Gold": (0.85, 0.66, 0.18),
-    "Fire": (0.95, 0.45, 0.10),
-    "Grass": (0.35, 0.45, 0.20),
-    "Banner": (0.80, 0.10, 0.10),
+    "Stone": ((0.30, 0.28, 0.24), 0.88, 0.0),
+    "StoneLight": ((0.40, 0.37, 0.31), 0.85, 0.0),
+    "DarkStone": ((0.18, 0.17, 0.15), 0.92, 0.0),
+    "Slate": ((0.085, 0.09, 0.1), 0.6, 0.0),
+    "Tile": ((0.27, 0.11, 0.065), 0.8, 0.0),
+    "TileOld": ((0.21, 0.12, 0.08), 0.85, 0.0),
+    "Thatch": ((0.25, 0.19, 0.09), 0.97, 0.0),
+    "Plaster": ((0.47, 0.42, 0.33), 0.92, 0.0),
+    "Timber": ((0.36, 0.29, 0.21), 0.9, 0.0),
+    "Wood": ((0.20, 0.13, 0.08), 0.82, 0.0),
+    "Dirt": ((0.27, 0.23, 0.16), 1.0, 0.0),
+    "Canvas": ((0.66, 0.61, 0.49), 0.9, 0.0),
+    "Horse": ((0.22, 0.14, 0.08), 0.7, 0.0),
+    "Leather": ((0.24, 0.15, 0.08), 0.75, 0.0),
+    "Cloth": ((0.30, 0.27, 0.22), 0.9, 0.0),
+    "Steel": ((0.52, 0.53, 0.55), 0.35, 0.9),
+    "Skin": ((0.62, 0.44, 0.32), 0.7, 0.0),
+    "Gold": ((0.78, 0.58, 0.20), 0.35, 0.9),
+    "Fire": ((0.95, 0.42, 0.08), 0.6, 0.0),
+    "Banner": ((0.70, 0.08, 0.08), 0.8, 0.0),
 }
+EMISSIVE = {"Fire": 4.0}
 MAX_TRIANGLES = 3000
+FOUNDATION = 0.35  # depth of building foundations below z = 0
 
 
 def reset_scene() -> None:
@@ -41,18 +58,23 @@ def reset_scene() -> None:
 
 
 def material(name: str) -> bpy.types.Material:
-    """Return (creating once) a flat Principled material of the palette."""
+    """Return (creating once) a Principled PBR material of the palette."""
     existing = bpy.data.materials.get(name)
     if existing is not None:
         return existing
+    color, roughness, metallic = PALETTE[name]
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     bsdf = next(node for node in mat.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
-    bsdf.inputs["Base Color"].default_value = (*PALETTE[name], 1.0)
-    bsdf.inputs["Roughness"].default_value = 0.35 if name in ("Steel", "Gold") else 0.85
-    if name in ("Steel", "Gold"):
-        bsdf.inputs["Metallic"].default_value = 0.8
-    mat.diffuse_color = (*PALETTE[name], 1.0)
+    bsdf.inputs["Base Color"].default_value = (*color, 1.0)
+    bsdf.inputs["Roughness"].default_value = roughness
+    bsdf.inputs["Metallic"].default_value = metallic
+    if name in EMISSIVE:
+        bsdf.inputs["Emission Color"].default_value = (*color, 1.0)
+        bsdf.inputs["Emission Strength"].default_value = EMISSIVE[name]
+    mat.diffuse_color = (*color, 1.0)
+    mat.roughness = roughness
+    mat.metallic = metallic
     return mat
 
 
@@ -62,7 +84,7 @@ def _finish(obj: bpy.types.Object, mat_name: str) -> bpy.types.Object:
 
 
 def box(size, location, mat, rotation=(0, 0, 0)):
-    """Axis-aligned box of full ``size`` (x, y, z) centred at ``location``."""
+    """Box of full ``size`` (x, y, z) centred at ``location``."""
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=location, rotation=rotation)
     obj = bpy.context.active_object
     obj.scale = size
@@ -94,260 +116,711 @@ def cone(radius, depth, location, mat, vertices=8, radius_top=0.0, rotation=(0, 
     return _finish(bpy.context.active_object, mat)
 
 
-def sphere(radius, location, mat, subdivisions=1):
-    """Icosphere (subdivisions 1 = 20 faces)."""
+def sphere(radius, location, mat, subdivisions=1, scale=(1, 1, 1)):
+    """Icosphere (subdivisions 1 = 80 faces)."""
     bpy.ops.mesh.primitive_ico_sphere_add(
         subdivisions=subdivisions, radius=radius, location=location
     )
-    return _finish(bpy.context.active_object, mat)
+    obj = bpy.context.active_object
+    obj.scale = scale
+    return _finish(obj, mat)
 
 
-def gable_roof(length, width, height, location, mat, angle=0.0):
-    """Triangular prism roof: ridge along local X at ``height`` above ``location``."""
-    half_l, half_w = length / 2, width / 2
-    verts = []
-    for x in (-half_l, half_l):
-        verts += [(x, -half_w, 0.0), (x, half_w, 0.0), (x, 0.0, height)]
-    faces = [(0, 1, 2), (3, 5, 4), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0)]
-    mesh = bpy.data.meshes.new("roof")
+def mesh_object(name, verts, faces, mat, location=(0, 0, 0), angle=0.0):
+    """Object from raw vertices / faces."""
+    mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(verts, [], faces)
     mesh.update()
-    obj = bpy.data.objects.new("roof", mesh)
+    obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
     obj.location = location
     obj.rotation_euler = (0, 0, angle)
     return _finish(obj, mat)
 
 
-def house(location, size, roof_mat="Roof", wall_mat="Plaster", angle=0.0):
-    """Box house with a gable roof."""
+def gable_roof(length, width, height, location, mat, angle=0.0, overhang=0.04):
+    """Triangular prism roof: ridge along local X at ``height`` above ``location``."""
+    half_l, half_w = length / 2 + overhang, width / 2 + overhang
+    verts = []
+    for x in (-half_l, half_l):
+        verts += [(x, -half_w, -0.01), (x, half_w, -0.01), (x, 0.0, height)]
+    faces = [(0, 1, 2), (3, 5, 4), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0)]
+    return mesh_object("roof", verts, faces, mat, location, angle)
+
+
+def hip_roof(length, width, height, location, mat, angle=0.0, overhang=0.03):
+    """Hipped roof (short ridge) over a ``length`` x ``width`` rectangle."""
+    hl, hw = length / 2 + overhang, width / 2 + overhang
+    ridge = max(hl - hw, 0.0)
+    verts = [
+        (-hl, -hw, 0),
+        (hl, -hw, 0),
+        (hl, hw, 0),
+        (-hl, hw, 0),
+        (-ridge, 0, height),
+        (ridge, 0, height),
+    ]
+    faces = [(0, 1, 5, 4), (2, 3, 4, 5), (1, 2, 5), (3, 0, 4), (0, 3, 2, 1)]
+    return mesh_object("hip", verts, faces, mat, location, angle)
+
+
+def house(location, size, roof_mat, wall_mat, angle=0.0, hip=False):
+    """House with foundations and a gable (or hipped) roof."""
     x, y, z = location
     w, d, h = size
-    body = box((w, d, h), (x, y, z + h / 2), wall_mat, rotation=(0, 0, angle))
-    roof = gable_roof(w * 1.1, d * 1.15, h * 0.7, (x, y, z + h), roof_mat, angle=angle)
+    body = box(
+        (w, d, h + FOUNDATION),
+        (x, y, z + (h - FOUNDATION) / 2),
+        wall_mat,
+        rotation=(0, 0, angle),
+    )
+    roof_h = d * (0.75 if roof_mat in ("Slate", "Thatch") else 0.55)
+    if hip:
+        roof = hip_roof(w, d, roof_h, (x, y, z + h), roof_mat, angle=angle)
+    else:
+        roof = gable_roof(w, d, roof_h, (x, y, z + h), roof_mat, angle=angle)
     return [body, roof]
 
 
-def crenellations(center, half_x, half_y, z, mat, spacing=0.3, size=0.12):
-    """Merlons along the rim of a rectangle."""
+def merlons(x0, y0, x1, y1, z, mat, size=0.05, spacing=0.11, thickness=0.06):
+    """Crenellation merlons along the segment (x0, y0) - (x1, y1) at height ``z``."""
+    length = math.hypot(x1 - x0, y1 - y0)
+    count = max(1, int(length / spacing))
+    angle = math.atan2(y1 - y0, x1 - x0)
     parts = []
-    cx, cy = center
-    steps_x = max(2, int(2 * half_x / spacing))
-    steps_y = max(2, int(2 * half_y / spacing))
-    for index in range(steps_x + 1):
-        x = cx - half_x + index * 2 * half_x / steps_x
-        for y in (cy - half_y, cy + half_y):
-            if index % 2 == 0:
-                parts.append(box((size, size, size), (x, y, z + size / 2), mat))
-    for index in range(1, steps_y):
-        y = cy - half_y + index * 2 * half_y / steps_y
-        for x in (cx - half_x, cx + half_x):
-            if index % 2 == 0:
-                parts.append(box((size, size, size), (x, y, z + size / 2), mat))
+    for index in range(count):
+        t = (index + 0.5) / count
+        parts.append(
+            box(
+                (size, thickness, size),
+                (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, z + size / 2),
+                "Stone",
+                rotation=(0, 0, angle),
+            )
+        )
     return parts
 
 
-def tower(location, radius, height, roof_mat="Slate", vertices=8):
-    """Round tower with a conical roof."""
-    x, y, z = location
-    return [
-        cylinder(radius, height, (x, y, z + height / 2), "Stone", vertices),
-        cone(
-            radius * 1.25,
-            height * 0.55,
-            (x, y, z + height + height * 0.27),
-            roof_mat,
+def wall_segment(x0, y0, x1, y1, height, thickness=0.07, mat="Stone", crenel=True):
+    """Curtain wall between two points (with foundations and merlons)."""
+    length = math.hypot(x1 - x0, y1 - y0)
+    angle = math.atan2(y1 - y0, x1 - x0)
+    parts = [
+        box(
+            (length + thickness * 0.5, thickness, height + FOUNDATION),
+            ((x0 + x1) / 2, (y0 + y1) / 2, (height - FOUNDATION) / 2),
+            mat,
+            rotation=(0, 0, angle),
+        )
+    ]
+    if crenel:
+        parts += merlons(x0, y0, x1, y1, height, mat, spacing=0.12)
+    return parts
+
+
+def round_tower(x, y, radius, height, roof_mat="Slate", vertices=8, roof=True):
+    """Round tower on foundations, conical roof or crenellated top."""
+    parts = [
+        cylinder(
+            radius,
+            height + FOUNDATION,
+            (x, y, (height - FOUNDATION) / 2),
+            "Stone",
             vertices,
-        ),
+        )
     ]
+    if roof:
+        parts.append(
+            cone(
+                radius * 1.2,
+                radius * 2.4,
+                (x, y, height + radius * 1.2),
+                roof_mat,
+                vertices,
+            )
+        )
+    else:
+        parts.append(
+            cylinder(radius * 1.12, 0.05, (x, y, height + 0.025), "Stone", vertices)
+        )
+    return parts
 
 
-def pennant(location, height, mat="Banner"):
-    """Pole with a small flag."""
-    x, y, z = location
+def square_tower(x, y, side, height, roof_mat="Slate", spire=0.0, angle=0.0):
+    """Square tower with a pyramidal roof (or spire of height ``spire``)."""
+    parts = [
+        box(
+            (side, side, height + FOUNDATION),
+            (x, y, (height - FOUNDATION) / 2),
+            "Stone",
+            rotation=(0, 0, angle),
+        )
+    ]
+    roof_height = spire if spire > 0 else side * 0.9
+    parts.append(
+        cone(
+            side * 0.75,
+            roof_height,
+            (x, y, height + roof_height / 2),
+            roof_mat,
+            4,
+            rotation=(0, 0, angle + math.pi / 4),
+        )
+    )
+    return parts
+
+
+def ground_patch(radius, mat="Dirt", sides=16):
+    """Flat irregular ground disc slightly above z = 0 (streets / yards), with a skirt below."""
     return [
-        cylinder(0.02, height, (x, y, z + height / 2), "Wood", 4),
-        box((0.02, 0.35, 0.2), (x, y + 0.18, z + height - 0.12), mat),
+        cylinder(radius, 0.02 + FOUNDATION, (0, 0, 0.01 - FOUNDATION / 2), mat, sides)
     ]
+
+
+def ring_points(radius, sides, rng, jitter=0.12, phase=0.0):
+    """Irregular polygon (wall line of a medieval town)."""
+    points = []
+    for index in range(sides):
+        angle = phase + index * 2 * math.pi / sides
+        r = radius * (1.0 + rng.uniform(-jitter, jitter))
+        points.append((r * math.cos(angle), r * math.sin(angle)))
+    return points
+
+
+def town_walls(points, height, tower_radius, gates=(0,)):
+    """Walls along a closed polygon, towers at the corners, gatehouses on some sides."""
+    parts = []
+    count = len(points)
+    for index in range(count):
+        x0, y0 = points[index]
+        x1, y1 = points[(index + 1) % count]
+        parts += wall_segment(x0, y0, x1, y1, height, crenel=False)
+        parts += round_tower(x0, y0, tower_radius, height * 1.45, "Slate", 8)
+        if index in gates:
+            mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+            angle = math.atan2(y1 - y0, x1 - x0)
+            parts.append(
+                box(
+                    (0.2, 0.16, height * 1.6 + FOUNDATION),
+                    (mx, my, (height * 1.6 - FOUNDATION) / 2),
+                    "Stone",
+                    rotation=(0, 0, angle),
+                )
+            )
+            parts.append(
+                gable_roof(0.2, 0.16, 0.1, (mx, my, height * 1.6), "Slate", angle=angle)
+            )
+    return parts
+
+
+def point_in_polygon(x, y, points):
+    """Ray casting test."""
+    inside = False
+    count = len(points)
+    for index in range(count):
+        x0, y0 = points[index]
+        x1, y1 = points[(index + 1) % count]
+        if (y0 > y) != (y1 > y) and x < (x1 - x0) * (y - y0) / (y1 - y0 + 1e-9) + x0:
+            inside = not inside
+    return inside
+
+
+def scatter_houses(
+    rng,
+    count,
+    radius,
+    keep_out,
+    min_gap,
+    inside=None,
+    roofs=("Tile", "TileOld", "Slate"),
+    walls=("Plaster", "Timber", "Stone"),
+    size_scale=1.0,
+):
+    """Houses aligned on radial streets, avoiding ``keep_out`` circles [(x, y, r)]."""
+    parts = []
+    placed = []
+    tries = 0
+    while len(placed) < count and tries < count * 60:
+        tries += 1
+        r = radius * math.sqrt(rng.random())
+        a = rng.random() * 2 * math.pi
+        x, y = r * math.cos(a), r * math.sin(a)
+        if inside is not None and not point_in_polygon(x, y, inside):
+            continue
+        if any(math.hypot(x - kx, y - ky) < kr for kx, ky, kr in keep_out):
+            continue
+        w = rng.uniform(0.15, 0.24) * size_scale
+        d = rng.uniform(0.10, 0.14) * size_scale
+        if any(
+            math.hypot(x - px, y - py) < (w + pw) * 0.5 * min_gap
+            for px, py, pw in placed
+        ):
+            continue
+        placed.append((x, y, w))
+        # Façade sur la rue : axe long perpendiculaire au rayon (ou le long, une fois sur trois).
+        angle = (
+            a + (math.pi / 2 if rng.random() < 0.67 else 0.0) + rng.uniform(-0.15, 0.15)
+        )
+        h = rng.uniform(0.09, 0.15) * size_scale
+        parts += house(
+            (x, y, 0.0),
+            (w, d, h),
+            rng.choice(roofs),
+            rng.choice(walls),
+            angle=angle,
+            hip=rng.random() < 0.2,
+        )
+    return parts
+
+
+def church(x, y, angle, scale=1.0, roof="Slate"):
+    """Parish church: nave, choir, west tower with spire."""
+    parts = []
+    ca, sa = math.cos(angle), math.sin(angle)
+
+    def at(dx, dy):
+        return x + dx * ca - dy * sa, y + dx * sa + dy * ca
+
+    nx, ny = at(0.0, 0.0)
+    parts.append(
+        box(
+            (0.42 * scale, 0.2 * scale, 0.2 * scale + FOUNDATION),
+            (nx, ny, (0.2 * scale - FOUNDATION) / 2),
+            "StoneLight",
+            rotation=(0, 0, angle),
+        )
+    )
+    parts.append(
+        gable_roof(
+            0.42 * scale,
+            0.2 * scale,
+            0.14 * scale,
+            (nx, ny, 0.2 * scale),
+            roof,
+            angle=angle,
+        )
+    )
+    cx, cy = at(0.27 * scale, 0.0)
+    parts.append(
+        box(
+            (0.14 * scale, 0.16 * scale, 0.17 * scale + FOUNDATION),
+            (cx, cy, (0.17 * scale - FOUNDATION) / 2),
+            "StoneLight",
+            rotation=(0, 0, angle),
+        )
+    )
+    parts.append(
+        hip_roof(
+            0.14 * scale,
+            0.16 * scale,
+            0.1 * scale,
+            (cx, cy, 0.17 * scale),
+            roof,
+            angle=angle,
+        )
+    )
+    tx, ty = at(-0.25 * scale, 0.0)
+    parts += square_tower(
+        tx, ty, 0.12 * scale, 0.42 * scale, roof, spire=0.32 * scale, angle=angle
+    )
+    return parts
+
+
+# --- Buildings ---------------------------------------------------------------------
+
+
+def cathedral_building(x=0.0, y=0.0, angle=0.0, s=1.0):
+    """Gothic cathedral: nave, aisles, transept, apse, twin west towers, crossing spire."""
+    parts = []
+    ca, sa = math.cos(angle), math.sin(angle)
+
+    def at(dx, dy):
+        return x + dx * ca - dy * sa, y + dx * sa + dy * ca
+
+    def b(size, d, z, mat="StoneLight"):
+        px, py = at(*d)
+        return box(
+            (size[0] * s, size[1] * s, size[2] * s),
+            (px, py, z * s),
+            mat,
+            rotation=(0, 0, angle),
+        )
+
+    parts.append(b((1.5, 0.36, 0.62 + FOUNDATION), (0, 0), (0.62 - FOUNDATION) / 2))
+    px, py = at(0, 0)
+    parts.append(
+        gable_roof(
+            1.5 * s, 0.36 * s, 0.26 * s, (px, py, 0.62 * s), "Slate", angle=angle
+        )
+    )
+    for side in (-1, 1):
+        parts.append(
+            b(
+                (1.3, 0.16, 0.36 + FOUNDATION),
+                (0.05, side * 0.26),
+                (0.36 - FOUNDATION) / 2,
+            )
+        )
+        ax, ay = at(0.05, side * 0.26)
+        parts.append(
+            gable_roof(
+                1.3 * s, 0.16 * s, 0.07 * s, (ax, ay, 0.36 * s), "Slate", angle=angle
+            )
+        )
+        for k in range(5):  # buttresses
+            parts.append(
+                b((0.05, 0.1, 0.5), (-0.5 + k * 0.25, side * 0.37), 0.2, "Stone")
+            )
+    parts.append(b((0.36, 1.0, 0.58 + FOUNDATION), (0.3, 0), (0.58 - FOUNDATION) / 2))
+    tx, ty = at(0.3, 0)
+    parts.append(
+        gable_roof(
+            1.0 * s,
+            0.36 * s,
+            0.24 * s,
+            (tx, ty, 0.58 * s),
+            "Slate",
+            angle=angle + math.pi / 2,
+        )
+    )
+    apx, apy = at(0.78, 0)
+    parts.append(
+        cylinder(
+            0.19 * s,
+            (0.56 + FOUNDATION) * s,
+            (apx, apy, (0.56 - FOUNDATION) / 2 * s),
+            "StoneLight",
+            10,
+        )
+    )
+    parts.append(cone(0.21 * s, 0.24 * s, (apx, apy, 0.68 * s), "Slate", 10))
+    for side in (-1, 1):
+        wx, wy = at(-0.82, side * 0.16)
+        parts.append(
+            box(
+                (0.24 * s, 0.24 * s, (1.05 + FOUNDATION) * s),
+                (wx, wy, (1.05 - FOUNDATION) / 2 * s),
+                "StoneLight",
+                rotation=(0, 0, angle),
+            )
+        )
+        parts.append(
+            cone(
+                0.19 * s,
+                0.42 * s,
+                (wx, wy, 1.26 * s),
+                "Slate",
+                4,
+                rotation=(0, 0, angle + math.pi / 4),
+            )
+        )
+    parts.append(
+        box(
+            (0.1 * s, 0.1 * s, 0.34 * s),
+            (tx, ty, 0.85 * s),
+            "StoneLight",
+            rotation=(0, 0, angle),
+        )
+    )
+    parts.append(cone(0.08 * s, 0.6 * s, (tx, ty, 1.32 * s), "Slate", 8))
+    parts.append(sphere(0.022 * s, (tx, ty, 1.63 * s), "Gold", 1))
+    return parts
+
+
+def castle_keep(x, y, s=1.0):
+    """Donjon and inner bailey with four round towers."""
+    parts = []
+    half = 0.36 * s
+    corners = [
+        (x - half, y - half),
+        (x + half, y - half),
+        (x + half, y + half),
+        (x - half, y + half),
+    ]
+    for index in range(4):
+        x0, y0 = corners[index]
+        x1, y1 = corners[(index + 1) % 4]
+        parts += wall_segment(x0, y0, x1, y1, 0.3 * s, 0.07)
+        parts += round_tower(x0, y0, 0.08 * s, 0.48 * s, "Slate", 8)
+    parts.append(
+        box(
+            (0.3 * s, 0.3 * s, (0.72 + FOUNDATION) * s),
+            (x + 0.04 * s, y + 0.03 * s, (0.72 - FOUNDATION) / 2 * s),
+            "Stone",
+        )
+    )
+    k = 0.15 * s
+    kx, ky = x + 0.04 * s, y + 0.03 * s
+    for a, b_ in (
+        ((-k, -k), (k, -k)),
+        ((k, -k), (k, k)),
+        ((k, k), (-k, k)),
+        ((-k, k), (-k, -k)),
+    ):
+        parts += merlons(
+            kx + a[0],
+            ky + a[1],
+            kx + b_[0],
+            ky + b_[1],
+            0.72 * s,
+            "Stone",
+            size=0.045,
+            spacing=0.09,
+        )
+    parts += round_tower(kx + k, ky + k, 0.06 * s, 0.92 * s, "Slate", 8)
+    parts += house(
+        (x - 0.12 * s, y - 0.2 * s, 0.0),
+        (0.34 * s, 0.12 * s, 0.16 * s),
+        "Slate",
+        "Stone",
+    )
+    parts.append(cylinder(0.006, 0.3 * s, (kx + k, ky + k, 1.22 * s), "Wood", 4))
+    parts.append(
+        box(
+            (0.005, 0.14 * s, 0.09 * s), (kx + k, ky + k + 0.07 * s, 1.31 * s), "Banner"
+        )
+    )
+    return parts
 
 
 # --- Models ------------------------------------------------------------------------
 
 
 def build_castle():
-    """Capital castle: keep, curtain wall, four corner towers, gatehouse, banner."""
-    parts = [box((2.6, 2.6, 0.1), (0, 0, 0.05), "Grass")]
-    half = 1.0
-    for x, y, sx, sy in (
-        (0, -half, 2 * half, 0.18),
-        (0, half, 2 * half, 0.18),
-        (-half, 0, 0.18, 2 * half),
-        (half, 0, 0.18, 2 * half),
-    ):
-        parts.append(box((sx, sy, 0.8), (x, y, 0.4), "Stone"))
-    parts += crenellations((0, 0), half, half, 0.8, "Stone", spacing=0.25, size=0.1)
-    for x in (-half, half):
-        for y in (-half, half):
-            parts += tower((x, y, 0), 0.25, 1.2)
-    parts.append(box((0.5, 0.35, 1.0), (0, -half, 0.5), "DarkStone"))
-    parts.append(box((0.22, 0.4, 0.4), (0, -half, 0.2), "Wood"))
-    parts.append(box((0.9, 0.9, 1.9), (0.1, 0.2, 0.95), "Stone"))
-    parts += crenellations((0.1, 0.2), 0.45, 0.45, 1.9, "Stone", spacing=0.22, size=0.1)
-    parts += tower((0.55, 0.65, 0), 0.18, 2.3)
-    parts += pennant((0.1, 0.2, 2.0), 0.9)
+    """Faction capital: large walled city, castle on the high side, cathedral-sized church."""
+    rng = random.Random(1337)
+    points = ring_points(1.45, 12, rng, 0.08)
+    parts = ground_patch(1.38)
+    parts += town_walls(points, 0.24, 0.08, gates=(1, 5, 9))
+    parts += castle_keep(0.62, -0.55, 1.0)
+    parts += church(-0.35, 0.35, 0.4, 1.3)
+    parts += scatter_houses(
+        rng,
+        70,
+        1.3,
+        [(0.62, -0.55, 0.62), (-0.35, 0.35, 0.42), (0.0, 0.0, 0.14)],
+        1.3,
+        inside=[(x * 0.93, y * 0.93) for x, y in points],
+    )
+    return parts
+
+
+def build_city_cathedral():
+    """Walled episcopal city dominated by its cathedral."""
+    rng = random.Random(4242)
+    points = ring_points(1.3, 11, rng, 0.1)
+    parts = ground_patch(1.25)
+    parts += town_walls(points, 0.22, 0.075, gates=(0, 4, 8))
+    parts += cathedral_building(0.05, 0.1, 0.25, 0.62)
+    parts += scatter_houses(
+        rng,
+        58,
+        1.18,
+        [(0.05, 0.1, 0.62)],
+        1.3,
+        inside=[(x * 0.92, y * 0.92) for x, y in points],
+    )
     return parts
 
 
 def build_town():
-    """Walled town: octagonal wall with towers, houses, a church with spire."""
-    parts = [cylinder(1.35, 0.08, (0, 0, 0.04), "Grass", 12)]
-    radius = 1.15
-    sides = 8
-    for index in range(sides):
-        angle = index * 2 * math.pi / sides
-        next_angle = (index + 1) * 2 * math.pi / sides
-        x0, y0 = radius * math.cos(angle), radius * math.sin(angle)
-        x1, y1 = radius * math.cos(next_angle), radius * math.sin(next_angle)
-        length = math.hypot(x1 - x0, y1 - y0)
-        parts.append(
-            box(
-                (length, 0.12, 0.5),
-                ((x0 + x1) / 2, (y0 + y1) / 2, 0.25),
-                "Stone",
-                rotation=(0, 0, (angle + next_angle) / 2 + math.pi / 2),
-            )
-        )
-        parts += tower((x0, y0, 0), 0.14, 0.75, "Roof", 6)
-    for (x, y), angle in zip(
-        (
-            (-0.45, -0.3),
-            (0.35, -0.5),
-            (0.5, 0.25),
-            (-0.2, 0.5),
-            (-0.6, 0.2),
-            (0.1, -0.05),
-            (0.55, -0.1),
-        ),
-        (0.2, 0.8, 1.4, 0.5, 1.9, 0.0, 2.5),
-        strict=True,
-    ):
-        parts += house((x, y, 0.08), (0.32, 0.24, 0.3), angle=angle)
-    parts.append(box((0.5, 0.25, 0.45), (-0.1, 0.1, 0.3), "Stone"))
-    parts.append(gable_roof(0.55, 0.3, 0.2, (-0.1, 0.1, 0.52), "Slate"))
-    parts.append(box((0.16, 0.16, 0.8), (-0.4, 0.1, 0.48), "Stone"))
-    parts.append(cone(0.14, 0.5, (-0.4, 0.1, 1.13), "Slate", 4))
+    """Walled market town: irregular walls, towers, a parish church and ~45 houses."""
+    rng = random.Random(7)
+    points = ring_points(1.05, 9, rng, 0.12)
+    parts = ground_patch(1.0)
+    parts += town_walls(points, 0.2, 0.07, gates=(0, 5))
+    parts += church(0.1, 0.12, 0.8, 1.0)
+    parts += scatter_houses(
+        rng,
+        44,
+        0.95,
+        [(0.1, 0.12, 0.34)],
+        1.3,
+        inside=[(x * 0.9, y * 0.9) for x, y in points],
+    )
     return parts
 
 
 def build_village():
-    """Open village: thatched cottages around a small chapel."""
-    parts = [cylinder(1.0, 0.06, (0, 0, 0.03), "Grass", 10)]
-    for (x, y), angle in zip(
-        ((-0.5, -0.3), (0.4, -0.45), (0.55, 0.3), (-0.35, 0.45), (0.0, -0.05)),
-        (0.3, 1.0, 1.7, 2.3, 0.0),
-        strict=True,
-    ):
-        parts += house((x, y, 0.06), (0.36, 0.26, 0.26), roof_mat="Thatch", angle=angle)
-    parts.append(box((0.3, 0.18, 0.3), (0.05, 0.6, 0.21), "Stone"))
-    parts.append(gable_roof(0.33, 0.2, 0.14, (0.05, 0.6, 0.36), "Roof"))
-    parts.append(box((0.1, 0.1, 0.5), (-0.12, 0.6, 0.31), "Stone"))
-    parts.append(cone(0.09, 0.25, (-0.12, 0.6, 0.68), "Roof", 4))
-    parts.append(box((0.8, 0.5, 0.02), (0.3, -1.0, 0.07), "Thatch"))
+    """Open village along a road: thatch and tile cottages, barns, a small church."""
+    rng = random.Random(99)
+    parts = [
+        box(
+            (2.2, 0.12, 0.01 + FOUNDATION),
+            (0, 0, 0.005 - FOUNDATION / 2),
+            "Dirt",
+            rotation=(0, 0, 0.3),
+        )
+    ]
+    parts += church(0.05, 0.28, 0.3, 0.8, roof="TileOld")
+    parts += scatter_houses(
+        rng,
+        16,
+        0.9,
+        [(0.05, 0.28, 0.3)],
+        1.3,
+        roofs=("Thatch", "Thatch", "TileOld", "Tile"),
+        walls=("Plaster", "Timber"),
+        size_scale=1.05,
+    )
+    for dx, dy, angle in ((-0.75, -0.35, 0.3), (0.72, 0.4, 1.9)):
+        parts += house((dx, dy, 0.0), (0.3, 0.16, 0.12), "Thatch", "Wood", angle=angle)
     return parts
 
 
 def build_cathedral():
-    """Gothic cathedral: nave, transept, apse, twin west towers, crossing spire."""
-    parts = [box((2.4, 1.3, 0.06), (0, 0, 0.03), "Grass")]
-    parts.append(box((1.8, 0.5, 0.9), (0, 0, 0.51), "Stone"))
-    parts.append(gable_roof(1.8, 0.56, 0.35, (0, 0, 0.96), "Slate"))
-    parts.append(box((0.45, 1.2, 0.8), (0.2, 0, 0.46), "Stone"))
-    parts.append(gable_roof(1.2, 0.5, 0.3, (0.2, 0, 0.86), "Slate", angle=math.pi / 2))
-    parts.append(cylinder(0.25, 0.8, (0.9, 0, 0.46), "Stone", 8))
-    parts.append(cone(0.28, 0.35, (0.9, 0, 1.03), "Slate", 8))
-    for y in (-0.2, 0.2):
-        parts.append(box((0.3, 0.3, 1.5), (-0.95, y, 0.8), "Stone"))
-        parts.append(
-            cone(0.2, 0.55, (-0.95, y, 1.83), "Slate", 4, rotation=(0, 0, math.pi / 4))
-        )
-    parts.append(box((0.16, 0.16, 0.5), (0.2, 0, 1.3), "Stone"))
-    parts.append(cone(0.12, 0.8, (0.2, 0, 1.95), "Slate", 8))
-    for x in (-0.6, -0.2, 0.4):
-        for y in (-0.33, 0.33):
-            parts.append(box((0.08, 0.14, 0.7), (x, y, 0.41), "DarkStone"))
-    parts.append(sphere(0.03, (0.2, 0, 2.37), "Gold", 1))
-    return parts
+    """Cathedral building alone (siege battlefield decoration)."""
+    return cathedral_building(0.0, 0.0, 0.0, 1.0)
 
 
-def build_army():
-    """Mounted standard-bearer: horse, rider, lance with a large banner (Banner material)."""
-    parts = []
-    parts.append(box((1.1, 0.38, 0.42), (0, 0, 0.95), "Horse"))
-    for x in (-0.42, 0.42):
-        for y in (-0.13, 0.13):
-            parts.append(box((0.1, 0.1, 0.75), (x, y, 0.38), "Horse"))
+def _horse(x, y, z, parts, coat="Horse", caparison=True):
+    """Low-poly horse facing +X with its feet at ``z``."""
+    parts.append(box((0.62, 0.22, 0.24), (x, y, z + 0.55), coat))
+    parts.append(sphere(0.13, (x - 0.24, y, z + 0.56), coat, 1, scale=(1.2, 0.9, 1.0)))
     parts.append(
         box(
-            (0.28, 0.2, 0.5),
-            (0.6, 0, 1.28),
-            "Horse",
-            rotation=(0, math.radians(-30), 0),
+            (0.16, 0.12, 0.3),
+            (x + 0.33, y, z + 0.72),
+            coat,
+            rotation=(0, math.radians(-35), 0),
         )
     )
     parts.append(
         box(
-            (0.38, 0.16, 0.18),
-            (0.82, 0, 1.5),
-            "Horse",
-            rotation=(0, math.radians(20), 0),
-        )
-    )
-    parts.append(
-        box(
-            (0.12, 0.06, 0.4),
-            (-0.6, 0, 0.95),
-            "DarkStone",
+            (0.24, 0.1, 0.11),
+            (x + 0.47, y, z + 0.84),
+            coat,
             rotation=(0, math.radians(25), 0),
         )
     )
-    parts.append(box((1.0, 0.44, 0.22), (0, 0, 0.72), "Banner"))  # caparison
-    parts.append(box((0.26, 0.3, 0.5), (-0.05, 0, 1.4), "Steel"))
-    parts.append(box((0.12, 0.1, 0.4), (0.05, -0.2, 1.35), "Steel"))
-    parts.append(sphere(0.12, (-0.05, 0, 1.75), "Steel", 1))
-    parts.append(cone(0.08, 0.12, (-0.05, 0, 1.9), "Gold", 4))
-    parts.append(box((0.08, 0.22, 0.3), (0.12, 0.26, 1.35), "Banner"))  # shield
-    parts.append(cylinder(0.025, 2.6, (-0.1, -0.24, 1.9), "Wood", 6))
-    parts.append(box((0.03, 0.9, 0.62), (-0.1, -0.7, 2.8), "Banner"))
-    parts.append(cone(0.05, 0.14, (-0.1, -0.24, 3.27), "Gold", 4))
+    for dx in (-0.22, 0.22):
+        for dy in (-0.07, 0.07):
+            parts.append(box((0.06, 0.06, 0.46), (x + dx, y + dy, z + 0.23), coat))
+    parts.append(
+        box(
+            (0.07, 0.04, 0.3),
+            (x - 0.36, y, z + 0.5),
+            "Wood",
+            rotation=(0, math.radians(25), 0),
+        )
+    )
+    if caparison:
+        parts.append(box((0.58, 0.26, 0.16), (x, y, z + 0.43), "Banner"))
+
+
+def _man(x, y, z, parts, body="Steel", helm="Steel", surcoat="Banner", seated=False):
+    """Standing (or seated) man facing +X with feet at ``z``: legs, surcoat, arms, helmet."""
+    if not seated:
+        for dy in (-0.05, 0.05):
+            parts.append(box((0.07, 0.06, 0.34), (x, y + dy, z + 0.17), "Leather"))
+        base = z + 0.34
+    else:
+        for dy in (-0.13, 0.13):
+            parts.append(
+                box((0.16, 0.05, 0.08), (x + 0.04, y + dy, z + 0.02), "Leather")
+            )
+        base = z
+    parts.append(box((0.14, 0.2, 0.3), (x, y, base + 0.15), body))
+    parts.append(box((0.15, 0.21, 0.2), (x, y, base + 0.1), surcoat))
+    parts.append(sphere(0.075, (x, y, base + 0.38), "Skin", 1))
+    parts.append(sphere(0.085, (x, y, base + 0.41), helm, 1, scale=(1.0, 1.0, 0.8)))
+    return base
+
+
+def build_army():
+    """Mounted commander: armoured knight on a caparisoned horse, lance with pennon."""
+    parts = []
+    _horse(0.0, 0.0, 0.0, parts)
+    base = _man(-0.02, 0.0, 0.68, parts, seated=True)
+    parts.append(box((0.05, 0.16, 0.2), (0.05, 0.13, base + 0.13), "Steel"))  # arm
+    parts.append(box((0.03, 0.2, 0.26), (0.03, -0.16, base + 0.12), "Banner"))  # shield
+    parts.append(
+        cylinder(
+            0.014,
+            1.3,
+            (0.05, 0.2, base + 0.45),
+            "Wood",
+            5,
+            rotation=(0, math.radians(-12), 0),
+        )
+    )
+    parts.append(
+        box(
+            (0.004, 0.2, 0.1),
+            (0.2, 0.3, base + 1.0),
+            "Banner",
+            rotation=(0, math.radians(-12), 0),
+        )
+    )
+    return parts
+
+
+def build_army_foot():
+    """Man-at-arms: mail, surcoat, kite shield and a tall spear."""
+    parts = []
+    base = _man(0.0, 0.0, 0.0, parts)
+    parts.append(box((0.04, 0.2, 0.34), (0.1, -0.13, base + 0.1), "Banner"))  # shield
+    parts.append(box((0.045, 0.21, 0.035), (0.1, -0.13, base + 0.28), "Steel"))
+    parts.append(cylinder(0.012, 1.05, (0.07, 0.14, base + 0.2), "Wood", 5))
+    parts.append(cone(0.022, 0.08, (0.07, 0.14, base + 0.76), "Steel", 4))
+    return parts
+
+
+def build_army_archer():
+    """Crossbowman: gambeson, kettle hat, crossbow held at the chest, pavise on the back."""
+    parts = []
+    base = _man(0.0, 0.0, 0.0, parts, body="Cloth", helm="Steel")
+    parts.append(
+        cylinder(0.12, 0.012, (0.0, 0.0, base + 0.44), "Steel", 8)
+    )  # kettle hat brim
+    parts.append(
+        box((0.26, 0.04, 0.04), (0.14, 0.0, base + 0.2), "Wood")
+    )  # crossbow stock
+    parts.append(box((0.03, 0.26, 0.025), (0.26, 0.0, base + 0.21), "Wood"))  # bow
+    parts.append(box((0.03, 0.26, 0.42), (-0.1, 0.0, base + 0.1), "Banner"))  # pavise
     return parts
 
 
 def build_siege_camp():
-    """Siege camp: tents, palisade stakes, a trebuchet and a campfire."""
-    parts = [cylinder(1.4, 0.05, (0, 0, 0.025), "Grass", 10)]
-    for (x, y), mat in zip(
-        ((-0.6, -0.4), (-0.1, -0.7), (0.5, -0.5), (-0.7, 0.3)),
-        ("Canvas", "Banner", "Canvas", "Canvas"),
-        strict=True,
+    """Siege camp: striped tents, palisade, a trebuchet and a campfire."""
+    rng = random.Random(3)
+    parts = [
+        cylinder(1.3, 0.01 + FOUNDATION, (0, 0, 0.005 - FOUNDATION / 2), "Dirt", 12)
+    ]
+    for x, y in (
+        (-0.6, -0.4),
+        (-0.15, -0.72),
+        (0.45, -0.55),
+        (-0.75, 0.25),
+        (-0.3, 0.55),
     ):
-        parts.append(cone(0.32, 0.55, (x, y, 0.32), mat, 6))
-        parts.append(cylinder(0.015, 0.2, (x, y, 0.65), "Wood", 4))
-    for index in range(9):
-        angle = math.radians(200 + index * 15)
+        size = rng.uniform(0.24, 0.32)
         parts.append(
             cone(
-                0.05,
-                0.4,
-                (1.2 * math.cos(angle) + 0.4, 1.2 * math.sin(angle) + 0.6, 0.2),
-                "Wood",
-                4,
+                size,
+                size * 1.6,
+                (x, y, size * 0.8),
+                rng.choice(["Canvas", "Canvas", "Banner"]),
+                8,
             )
         )
-    # Trebuchet
+        parts.append(cylinder(0.012, 0.2, (x, y, size * 1.6 + 0.05), "Wood", 4))
+    for index in range(14):
+        angle = math.radians(160 + index * 12)
+        parts.append(
+            cone(
+                0.035,
+                0.34,
+                (1.15 * math.cos(angle) + 0.25, 1.15 * math.sin(angle) + 0.35, 0.12),
+                "Wood",
+                4,
+                rotation=(math.radians(rng.uniform(-8, 8)), 0, 0),
+            )
+        )
     for y in (-0.12, 0.12):
         parts.append(
             box(
-                (0.08, 0.06, 0.9),
+                (0.06, 0.05, 0.9),
                 (0.5, 0.5 + y, 0.47),
                 "Wood",
                 rotation=(0, math.radians(12), 0),
@@ -355,56 +828,85 @@ def build_siege_camp():
         )
         parts.append(
             box(
-                (0.08, 0.06, 0.9),
+                (0.06, 0.05, 0.9),
                 (0.72, 0.5 + y, 0.47),
                 "Wood",
                 rotation=(0, math.radians(-12), 0),
             )
         )
-    parts.append(box((0.7, 0.36, 0.06), (0.61, 0.5, 0.06), "Wood"))
+    parts.append(box((0.7, 0.36, 0.05), (0.61, 0.5, 0.05), "Wood"))
     parts.append(
         box(
-            (1.4, 0.05, 0.05),
+            (1.4, 0.04, 0.04),
             (0.61, 0.5, 0.95),
             "Wood",
             rotation=(0, math.radians(-35), 0),
         )
     )
-    parts.append(box((0.2, 0.2, 0.2), (1.1, 0.5, 1.2), "DarkStone"))
-    parts.append(cone(0.1, 0.18, (-0.1, 0.1, 0.12), "Fire", 5))
+    parts.append(box((0.18, 0.18, 0.18), (1.1, 0.5, 1.2), "DarkStone"))
+    parts.append(cone(0.08, 0.16, (-0.1, 0.05, 0.1), "Fire", 5))
     for angle in (0.0, 2.1, 4.2):
         parts.append(
-            box((0.24, 0.04, 0.04), (-0.1, 0.1, 0.06), "Wood", rotation=(0, 0, angle))
+            box(
+                (0.22, 0.035, 0.035), (-0.1, 0.05, 0.03), "Wood", rotation=(0, 0, angle)
+            )
         )
     return parts
 
 
 def build_ship():
-    """Cog: clinker hull (tapered box), fore and stern castles, mast, sail, pennant."""
+    """Cog: rounded clinker hull, fore and stern castles, mast, square sail with a band."""
     parts = []
-    hull = box((1.8, 0.6, 0.45), (0, 0, 0.23), "Wood")
-    for vertex in hull.data.vertices:
-        if vertex.co.z < 0:  # bottom narrower
-            vertex.co.y *= 0.45
-            vertex.co.x *= 0.8
-    parts.append(hull)
-    parts.append(box((0.35, 0.62, 0.3), (0.78, 0, 0.6), "Wood"))
-    parts.append(box((0.45, 0.62, 0.35), (-0.72, 0, 0.62), "Wood"))
-    parts.append(box((1.1, 0.5, 0.04), (0.02, 0, 0.44), "Horse"))
-    parts.append(cylinder(0.035, 2.0, (0, 0, 1.4), "Wood", 6))
-    parts.append(box((0.03, 0.9, 0.9), (0.05, 0, 1.5), "Canvas"))
-    parts.append(box((0.035, 0.5, 0.4), (0.055, 0, 1.5), "Banner"))
-    parts.append(box((0.02, 0.4, 0.18), (0, 0.2, 2.35), "Banner"))
-    parts.append(box((0.04, 0.9, 0.04), (0, 0, 1.97), "Wood"))
+    # Coque : sections elliptiques le long de X (lofting manuel).
+    sections = [
+        (-0.95, 0.12, 0.62),
+        (-0.7, 0.28, 0.5),
+        (-0.3, 0.34, 0.44),
+        (0.2, 0.34, 0.44),
+        (0.6, 0.26, 0.5),
+        (0.95, 0.06, 0.66),
+    ]
+    ring = 8
+    verts = []
+    for x, half_width, top in sections:
+        for index in range(ring + 1):
+            t = (
+                index / ring
+            )  # 0 = bord bâbord haut, 1 = tribord haut, en passant par la quille
+            angle = math.pi * t
+            verts.append(
+                (
+                    x,
+                    -half_width * math.cos(angle),
+                    top - (top - 0.02) * math.sin(angle) ** 0.8,
+                )
+            )
+    faces = []
+    per = ring + 1
+    for s in range(len(sections) - 1):
+        for index in range(ring):
+            a = s * per + index
+            faces.append((a, a + 1, a + per + 1, a + per))
+    parts.append(mesh_object("hull", verts, faces, "Wood"))
+    parts.append(box((1.5, 0.6, 0.03), (0.0, 0, 0.42), "Leather"))  # deck
+    parts.append(box((0.36, 0.5, 0.22), (-0.78, 0, 0.72), "Wood"))  # stern castle
+    parts.append(box((0.26, 0.36, 0.18), (0.8, 0, 0.74), "Wood"))  # fore castle
+    parts.append(cylinder(0.03, 1.9, (0.0, 0, 1.3), "Wood", 6))
+    parts.append(box((0.03, 0.95, 0.04), (0.02, 0, 1.95), "Wood"))
+    parts.append(box((0.02, 0.9, 0.82), (0.04, 0, 1.52), "Canvas"))
+    parts.append(box((0.025, 0.9, 0.2), (0.045, 0, 1.52), "Banner"))
     return parts
 
 
 MODELS = {
     "castle": build_castle,
+    "city_cathedral": build_city_cathedral,
     "town": build_town,
     "village": build_village,
     "cathedral": build_cathedral,
     "army": build_army,
+    "army_foot": build_army_foot,
+    "army_archer": build_army_archer,
     "siege_camp": build_siege_camp,
     "ship": build_ship,
 }
