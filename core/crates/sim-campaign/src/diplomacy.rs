@@ -1868,11 +1868,20 @@ pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
 }
 
 /// Power of the enemies `faction` already fights (rebels excluded).
-fn enemy_power(state: &CampaignState, faction: &FactionId) -> f64 {
+/// Only fronts that press on us count: bordering enemies and enemies
+/// holding our provinces (a distant war of religion does not tie armies).
+fn enemy_power(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
     state.factions.get(faction).map_or(0.0, |f| {
         f.at_war_with
             .iter()
             .filter(|e| !is_rebels(e))
+            .filter(|e| {
+                state.are_neighbors(data, faction, e)
+                    || state
+                        .provinces
+                        .values()
+                        .any(|p| &p.owner == faction && &p.controller == *e)
+            })
             .map(|e| state.faction_power(e))
             .sum()
     })
@@ -2069,7 +2078,7 @@ fn war_target(
 ) -> Option<FactionId> {
     let my_power = state.coalition_power(faction);
     // Never a new front while the current wars weigh.
-    if enemy_power(state, faction) > 0.5 * state.faction_power(faction) {
+    if enemy_power(state, data, faction) > 0.5 * state.faction_power(faction) {
         return None;
     }
     let has_allies = state.factions[faction]
@@ -2123,7 +2132,7 @@ fn ally_war_to_join(
     faction: &FactionId,
 ) -> Option<FactionId> {
     let me = state.factions.get(faction)?;
-    if enemy_power(state, faction) > 0.5 * state.faction_power(faction) {
+    if enemy_power(state, data, faction) > 0.5 * state.faction_power(faction) {
         return None;
     }
     for ally in &me.allies {
