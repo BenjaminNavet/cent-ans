@@ -1,0 +1,11 @@
+{
+  "id": "cdx_potage",
+  "title": "Le potage",
+  "category": "recette",
+  "aliases": ["potage", "potages", "porée", "brouet"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Tout ce qui cuit dans le pot : légumes, herbes, céréales et, les jours gras, un morceau de lard. Le potage, versé sur du pain, est le plat quotidien de presque tout le royaume.",
+  "body": "Au Moyen Âge, « potage » ne désigne pas seulement une soupe, mais tout mets cuit au pot, sur le feu de l'âtre. Dans la chaumière, le pot mijote des heures : choux, poireaux, navets et raves, fèves ou pois, herbes du jardin (persil, bette, oseille), un peu de lard ou d'os les jours gras, du beurre ou de l'huile les jours maigres. On le verse sur des tranches de [[cdx_pain_bis|pain]] : c'est la « soupe » au sens premier, le pain trempé.\n\nLes livres de cuisine des grands le traitent comme un chapitre à part. Le [[cdx_viandier|Viandier]] distingue les « potages lians », épaissis au pain, aux œufs ou aux amandes, des potages clairs. Le [[cdx_menagier_de_paris|Ménagier de Paris]] (1393) consacre de longues pages à la porée, potage vert de poireaux, de bettes ou d'épinards : la « porée blanche » se fait avec le blanc des poireaux, cuit dans un bouillon, au lait d'amande les jours maigres. Le brouet est un potage plus liquide, épicé à la manière des cours.\n\nLa recette de base est simple : faire revenir un morceau de lard, ajouter l'eau, puis les légumes par ordre de cuisson, saler, laisser cuire longtemps, lier en fin de cuisson avec du pain émietté. En [[cdx_careme|Carême]], lard et bouillon de viande disparaissent : le potage se fait à l'eau, aux [[cdx_legumineuses|fèves et pois]], au poisson ou au lait d'amande.\n\nAu XXIe siècle : le potage médiéval se refait sans peine, à condition d'oublier ce qui est venu d'Amérique après 1492. Pas de pommes de terre, de tomates, de haricots verts ou de haricots secs communs (Phaseolus), ni de courges comme le potiron : on épaissit au pain, aux fèves, aux pois ou à l'orge. Chou, poireau, navet, panais, oignon, bette et fèves donnent déjà un plat très proche de ce que mangeait le paysan de 1340.",
+  "see_also": ["cdx_pain_bis", "cdx_four_banal", "cdx_legumineuses", "cdx_viandier", "cdx_menagier_de_paris", "cdx_careme"],
+  "sources": ["Potage", "Le Ménagier de Paris", "Cuisine médiévale"]
+}

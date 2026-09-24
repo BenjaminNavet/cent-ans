@@ -11,10 +11,11 @@ Branche : `worktree-agent-a038490f6abdd9c53`. Agent historien (alimentation, mé
   saignée, Hildegarde, Compendium de epidemia, quarantaine de Raguse.
 
 ## État
-- [ ] lot 1 : régimes (pain, four, potage, assolement, légumineuses, carême, jours maigres, hareng)
+- [x] lot 1 : pain_bis, four_banal, potage, assolement_triennal, legumineuses, careme, jours_maigres, hareng
+- [ ] lot 2 : hanse, bataille_des_harengs, salaison, beurre_de_careme, tour_de_beurre, vin_de_gascogne, clairet, commerce_de_bordeaux
 
 ## Décisions
 - Alias « Taillevent » et « Guillaume Tirel » déplacés de `cdx_viandier` vers `cdx_taillevent`.
 
 ## Prochaine étape
-Lot 1.
+Lot 2. Planning des ids complémentaires : `data/codex/_h10_links.md`.
