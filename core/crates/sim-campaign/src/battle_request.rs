@@ -24,6 +24,10 @@ use crate::movement;
 use crate::skills;
 use crate::state::{Army, ArmyId, BattleRequest, CampaignState, Season};
 
+/// Piety the victorious commander loses when his army gave no quarter (P1):
+/// the Church condemned the killing of knights who had surrendered.
+pub const NO_QUARTER_PIETY: i32 = 5;
+
 /// A pending battle as shown by the end-of-turn dialog.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PendingBattle {
@@ -456,14 +460,43 @@ impl CampaignState {
             .as_ref()
             .or(defender_combined.as_ref())
             .expect("one of them");
-        let attacker_outcome = side_outcome("l'attaquant", attacker, &outcome.attacker)?;
-        let defender_outcome = side_outcome("le défenseur", defender, &outcome.defender)?;
-        let fallen: Vec<CharacterId> =
-            [(attacker, &outcome.attacker), (defender, &outcome.defender)]
-                .into_iter()
-                .filter(|(_, result)| result.general_killed)
-                .filter_map(|(army, _)| army.general.clone())
-                .collect();
+        let mut attacker_outcome = side_outcome("l'attaquant", attacker, &outcome.attacker)?;
+        let mut defender_outcome = side_outcome("le défenseur", defender, &outcome.defender)?;
+        // P1 « pas de quartier »: when the victors gave no quarter, a beaten
+        // general they caught is put to the sword, never held for ransom.
+        let no_quarter = outcome.side(outcome.winner).no_quarter;
+        let loser_side = outcome.winner.other();
+        let mut fallen: Vec<CharacterId> = Vec::new();
+        for (side, army, result, side_outcome) in [
+            (
+                SideId::Attacker,
+                attacker,
+                &outcome.attacker,
+                &mut attacker_outcome,
+            ),
+            (
+                SideId::Defender,
+                defender,
+                &outcome.defender,
+                &mut defender_outcome,
+            ),
+        ] {
+            let slain = no_quarter && side == loser_side && result.general_captured;
+            if slain {
+                side_outcome.general_captured = false;
+            }
+            if result.general_killed || slain {
+                fallen.extend(army.general.clone());
+            }
+        }
+        let winner_general = match outcome.winner {
+            SideId::Attacker => attacker.general.clone(),
+            SideId::Defender => defender.general.clone(),
+        };
+        let winner_faction = match outcome.winner {
+            SideId::Attacker => attacker.faction.clone(),
+            SideId::Defender => defender.faction.clone(),
+        };
         self.pending_battles.remove(index);
 
         let mut events = Vec::new();
@@ -501,6 +534,15 @@ impl CampaignState {
                 walls,
                 &mut events,
             );
+            if no_quarter {
+                self.no_quarter_toll(
+                    data,
+                    &winner_faction,
+                    winner_general.as_ref(),
+                    &request.province,
+                    &mut events,
+                );
+            }
             self.events.extend(events.iter().cloned());
             return Ok(events);
         }
@@ -517,8 +559,57 @@ impl CampaignState {
             &result,
             &mut events,
         );
+        if no_quarter {
+            self.no_quarter_toll(
+                data,
+                &winner_faction,
+                winner_general.as_ref(),
+                &request.province,
+                &mut events,
+            );
+        }
         self.events.extend(events.iter().cloned());
         Ok(events)
+    }
+
+    /// P1: the victors gave no quarter. No noble of the beaten side is held
+    /// for ransom (the caught general is slain by the caller), and the
+    /// victorious commander loses [`NO_QUARTER_PIETY`] piety for the
+    /// slaughter of Christian knights who had yielded.
+    fn no_quarter_toll(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        general: Option<&CharacterId>,
+        province: &ProvinceId,
+        events: &mut Vec<GameEvent>,
+    ) {
+        let faction_name = data.factions.get(faction).map_or_else(
+            || faction.to_string(),
+            |f| f.short_or_display_name().to_owned(),
+        );
+        let alive_general = general.filter(|id| self.characters.get(*id).is_some_and(|c| c.alive));
+        let text = match alive_general {
+            Some(id) => {
+                let name = self.character_name(data, id);
+                let character = self.characters.get_mut(id).expect("checked");
+                character.piety =
+                    (i32::from(character.piety) - NO_QUARTER_PIETY).clamp(0, 100) as u8;
+                format!(
+                    "Pas de quartier : {faction_name} a passé les vaincus au fil de l'épée, \
+                     sans prisonnier ni rançon. {name} en perd {NO_QUARTER_PIETY} de piété."
+                )
+            }
+            None => format!(
+                "Pas de quartier : {faction_name} a passé les vaincus au fil de l'épée, \
+                 sans prisonnier ni rançon."
+            ),
+        };
+        events.push(
+            GameEvent::new(EventKind::Battle, text)
+                .province(province)
+                .faction(faction),
+        );
     }
 
     /// Setup of a siege battle: the besieging army against the garrison
