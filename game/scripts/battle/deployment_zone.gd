@@ -5,11 +5,11 @@ extends Node3D
 ## relief et liseré d'or sur le contour. Rendu seulement : le rectangle vient de
 ## `BattleSim.get_deployment_zone(side)` ({x0, z0, x1, z1}, mètres du champ).
 
-const FILL := Color(0.95, 0.8, 0.3, 0.16)
+const FILL := Color(1.0, 0.82, 0.3, 0.24)
 const EDGE := Color(1.0, 0.85, 0.35, 0.9)
 const STEP := 10.0
 const LIFT := 0.6
-const EDGE_WIDTH := 2.5
+const EDGE_WIDTH := 4.0
 
 var rect := Rect2()
 
