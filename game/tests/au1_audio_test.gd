@@ -186,6 +186,25 @@ func _check_campaign_ambience() -> void:
 		if CampaignAmbience.seasonal_weather("autumn", "Automne %d" % year) == "rain":
 			rainy += 1
 	_check(rainy > 25 and rainy < 75, "autumn should rain about half the time (%d/100)" % rainy)
+	# Vraie carte : un point en mer et le centre d'une province.
+	var map_dir := (load("res://scripts/map/map_paths.gd") as GDScript).call("default_data_dir").path_join("map") as String
+	var map_data := MapData.load_from_dir(map_dir)
+	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+		return
+	var sea_point := Vector2(-1, -1)
+	for y in range(8, map_data.size.y - 8, 16):
+		for x in range(8, map_data.size.x - 8, 16):
+			if sea_point.x < 0 and not map_data.is_land_px(x, y) and not map_data.is_land_px(x + 6, y + 6) and not map_data.is_land_px(x - 6, y - 6) and not map_data.is_land_px(x + 6, y - 6) and not map_data.is_land_px(x - 6, y + 6):
+				sea_point = Vector2(x, y)
+	var towns := PackedVector2Array()
+	var land_point := Vector2.ZERO
+	for province in map_data.provinces.values():
+		towns.append(province["capital_px"])
+		land_point = province["centroid"]
+	var at_sea := CampaignAmbience.sample_environment(map_data, sea_point, 15.0, towns)
+	_check(float(at_sea["sea"]) > 0.9, "sea sample should be sea: %s at %s" % [at_sea, sea_point])
+	var inland := CampaignAmbience.sample_environment(map_data, land_point, 15.0, towns)
+	_check(float(inland["sea"]) < 0.5 and float(inland["fields"]) + float(inland["forest"]) > 0.2, "province centre should be land: %s" % [inland])
 
 
 func _check_volumes() -> void:
