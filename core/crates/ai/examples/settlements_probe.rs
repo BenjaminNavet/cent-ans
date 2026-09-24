@@ -81,6 +81,9 @@ struct Report {
     routs: u32,
     dispersed: u32,
     battles: u32,
+    /// Landings on a hostile shore (all factions / England).
+    landings: u32,
+    landings_england: u32,
     destroyed: Vec<String>,
     turns: u32,
     seconds: f64,
@@ -162,6 +165,12 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
                     }
                 }
                 EventKind::Battle if event.text_fr.contains("Vainqueur") => report.battles += 1,
+                EventKind::Attrition if event.text_fr.starts_with("Débarquement") => {
+                    report.landings += 1;
+                    if event.faction.as_ref().is_some_and(|f| f.as_str() == "fac_england") {
+                        report.landings_england += 1;
+                    }
+                }
                 EventKind::Attrition if event.text_fr.starts_with("Débandade") => {
                     report.routs += 1
                 }
@@ -480,6 +489,12 @@ fn main() {
         sum(&|r| per_turn(r.stuck_turns, r)),
         sum(&|r| per_turn(r.stuck_l4_turns, r)),
         sum(&|r| f64::from(r.long_l4_sieges)),
+    );
+    println!(
+        "- batailles / graine {:.1} ; débarquements en terre hostile / graine {:.1} (Angleterre {:.1})",
+        sum(&|r| f64::from(r.battles)),
+        sum(&|r| f64::from(r.landings)),
+        sum(&|r| f64::from(r.landings_england)),
     );
     println!(
         "- débandades / graine {:.1} (dispersées {:.1}) ; factions disparues / graine {:.1} ; {:.1} s / graine",
