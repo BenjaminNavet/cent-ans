@@ -24,8 +24,11 @@ Un jeu de grande stratégie sur la guerre de Cent Ans (1337-1453).
 - Blender, Python, Pillow, numpy
 
 ## Données géographiques
-- ETOPO 2022 (NOAA) pour le relief
-- Natural Earth pour les côtes et les rivières
+- ETOPO 2022 (NOAA) pour le relief et les fonds marins
+- Copernicus DEM GLO-90 (© DLR e.V. 2010-2014 et © Airbus Defence and Space GmbH 2014-2018,
+  fourni dans le cadre de COPERNICUS par l'Union européenne et l'ESA) pour le relief fin
+- KK10 (Kaplan et al. 2011, PANGAEA, CC BY 3.0) pour le défrichement vers 1340
+- Natural Earth pour les côtes, les rivières et les lacs
 
 ## Assets
 - Écus, sons, musiques, modèles et illustration du menu générés de façon procédurale

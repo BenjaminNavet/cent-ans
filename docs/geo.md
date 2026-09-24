@@ -266,3 +266,28 @@ Découpé en 16 × 16 tuiles PNG de 512² : `data/map/height/h_<col>_<row>.png` 
 50,5 Mo au total (pas de LFS dans le dépôt ; sous le seuil de 150 Mo, PNG 16 bits conservé),
 ≈ 10 s. Écart moyen avec `heightmap.png` après moyenne 2 × 2 : 0,5 m.
 
+
+## Relief fin Copernicus et occupation du sol vers 1340 (lot R1, ADR 0019)
+
+Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo landcover` (après
+`geo splat`, qui l'appelle d'ailleurs à la fin). `geo relief` (ETOPO seul) reste un repli : il
+écrase les tuiles fines Copernicus.
+
+- `cent-ans geo relief-shade` (`relief_shade.py`, `copernicus.py`) : télécharge les 312 tuiles
+  Copernicus DEM GLO-90 de l'emprise jouable (lon −11 → 12, lat 41 → 60 ; ≈ 1 Go dans
+  `tools/geo/raw/copernicus/`, HTTPS anonyme, gratuit), les **moyenne** sur la grille 8192²
+  (la source à 90 m est 4 × plus fine : moyenne de zone, pas d'interpolation), ETOPO en mer et
+  hors emprise. Écrit les tuiles `height/`, `heightmap_render.png` (moyenne 2 × 2, relief de
+  rendu lu par `MapData`) et `relief_shade.png` (LA8 8192² : détail + occlusion). Rehaussement
+  de rendu (masque flou, σ 5 km, gain 0,8, ±120 m, effacé au-dessus de 600-1 600 m), trait de
+  côte identique à `heightmap.png`. `heightmap.png` et `navgrid.png` ne changent pas. ≈ 40 s
+  avec le cache `tools/geo/raw/copernicus_cache/cop_8192.npy`.
+- `cent-ans geo kk10` : extraction KK10 1330-1349 par requêtes HTTP partielles (le fichier
+  complet fait 18,5 Go) ; dépendances ponctuelles :
+  `uv run --project tools --with h5py --with fsspec --with aiohttp --with requests cent-ans geo kk10`
+  (≈ 8 min, cache `tools/geo/raw/kk10/*.npz` de 190 ko).
+- `cent-ans geo landcover` (`landcover.py`) : `splat.png` 4096² (forêts : défrichement KK10 ×
+  potentiel forestier, massifs nommés de `historical_forests.json`, allocation binaire par score
+  bruit + terrain, essarts autour des villes et hameaux), `wetlands.png` (RGB : marais, étangs,
+  prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 2048², part
+  de résineux, pour le rendu des forêts). ≈ 70 s.
