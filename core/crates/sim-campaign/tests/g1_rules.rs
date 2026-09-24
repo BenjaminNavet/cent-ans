@@ -313,3 +313,34 @@ fn the_player_pays_the_ransom_of_his_captive_heir() {
     assert!(!state.characters[&dauphin].captive);
     assert_eq!(state.factions[&fac("fac_france")].treasury, before - fair);
 }
+
+// 6. Allies in siege assaults --------------------------------------------------
+
+#[test]
+fn allied_armies_in_the_province_join_the_assault() {
+    let data = data();
+    let mut state = quiet_france(&data, 9);
+    let lead = first_army_of(&state, "fac_france");
+    let guyenne = prov("prov_guyenne");
+    let index = state.debug_stage_siege(&data, &lead, &guyenne).unwrap();
+    let units = state.armies[&lead].units.len();
+    assert!(units >= 2);
+    let ally = state.peek_next_army_id();
+    let split = Order::SplitArmy {
+        army: lead.clone(),
+        unit_indices: vec![units - 1],
+    };
+    state.submit_order(&data, split).unwrap();
+    assert_eq!(
+        sim_campaign::siege::assault_coalition(&state, &lead),
+        vec![lead.clone(), ally.clone()]
+    );
+    let setup = state.battle_setup(&data, index).unwrap();
+    assert_eq!(setup.attacker.units.len(), units);
+    assert!(setup.siege.is_some());
+    let before = state.armies[&ally].total_strength();
+    let events = state.auto_resolve_pending(&data, index).unwrap();
+    let after = state.armies.get(&ally).map_or(0, |a| a.total_strength());
+    assert!(after < before, "the ally bleeds too: {before} -> {after}");
+    assert!(events.iter().any(|e| e.text_fr.contains("alliée")));
+}
