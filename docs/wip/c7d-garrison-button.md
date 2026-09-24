@@ -6,14 +6,15 @@ demande C5/C7a « pas encore de bouton dans l'UI ». Branche :
 
 ## État
 
-- [ ] `settlement_detail` (pont) : ajout `garrison_cap` et `garrison_free`.
-- [ ] `ArmyStrip` : bouton « Garnison » (sélection multiple existante), tooltip française
+- [x] `settlement_detail` (pont) : ajout `garrison_cap` et `garrison_free`.
+- [x] `ArmyStrip` : bouton « Garnison » (sélection multiple existante), tooltip française
   si assiégée ou pleine.
-- [ ] `MapUI` / `HudController` : calcul de la disponibilité, émission de l'ordre
+- [x] `MapUI` / `HudController` : calcul de la disponibilité, émission de l'ordre
   `garrison_units`, toast d'erreur si refusé.
-- [ ] Extension de `game/tests/c5_settlements_ui_test.gd`.
-- [ ] `cargo fmt`, `clippy`, `cargo test`, `build.sh`, smoke + `settlements_render_test` +
-  `c5_settlements_ui_test`.
+- [x] Extension de `game/tests/c5_settlements_ui_test.gd` (étape 5).
+- [x] `cargo fmt`, `clippy -D warnings` : OK. `cargo test` : en cours.
+- [ ] `build.sh`, smoke + `settlements_render_test` + `c5_settlements_ui_test` (Godot) : à
+  faire.
 
 ## Décisions
 
