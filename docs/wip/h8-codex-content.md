@@ -79,7 +79,9 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 1 fait : les 10 fiches de `_event_links.md` (black_agnes, combat_des_trente, gallicanisme,
   gautier_de_mauny, guerre_de_succession_de_bretagne, henri_de_grosmont, hugues_quieret,
   ordre_de_l_etoile, ordre_de_la_jarretiere, vicariat_imperial).
-- Fiches H8b écrites : 10.
+- Lot 2 fait (guerre) : arbalete, bombarde, castillon, chevalerie, harnois, hommes_d_armes,
+  nicopolis, roosebeke, rancon, toison_or.
+- Fiches H8b écrites : 20.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

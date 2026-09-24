@@ -1,0 +1,12 @@
+{
+  "id": "cdx_castillon",
+  "title": "Bataille de Castillon",
+  "category": "bataille",
+  "aliases": ["Castillon", "bataille de Castillon", "John Talbot", "Talbot"],
+  "era": { "from": "1453", "to": "1453" },
+  "summary": "Le 17 juillet 1453, près de Castillon, en Périgord, l'artillerie française de Jean Bureau écrase l'armée anglaise de John Talbot, qui est tué. Cette victoire, suivie de la reddition de [[cdx_bordeaux|Bordeaux]], est considérée comme la dernière bataille de la guerre de Cent Ans.",
+  "body": "En 1451, les armées de [[cdx_charles_vii|Charles VII]] conquièrent la [[cdx_guyenne|Guyenne]], possession anglaise depuis trois siècles. Mais les Bordelais, liés à l'Angleterre par le commerce du vin, regrettent vite leurs anciens maîtres. Ils appellent à l'aide, et en octobre 1452 le vieux capitaine John Talbot, comte de Shrewsbury, débarque et reprend [[cdx_bordeaux|Bordeaux]] sans combat.\n\nAu printemps 1453, l'armée française revient et assiège Castillon, sur la Dordogne. Instruits par l'expérience, les Français ne se déploient pas en rase campagne : ils s'enferment dans un camp retranché, protégé par un fossé et une palissade, où le maître de l'artillerie Jean Bureau a disposé plusieurs centaines de pièces, de la grosse [[cdx_bombarde|bombarde]] à la couleuvrine.\n\nLe 17 juillet, Talbot, informé à tort que les Français se retirent, attaque le camp sans attendre toutes ses troupes. Ses hommes montent à l'assaut sous un feu dévastateur, qui fauche des rangs entiers. Une contre-attaque française, soutenue par des cavaliers bretons, achève la déroute. Talbot, qui avait près de soixante-dix ans, est tué, son cheval abattu par un boulet ; son fils meurt à ses côtés.\n\nBordeaux capitule le 19 octobre 1453. L'Angleterre ne garde plus en France que [[cdx_calais|Calais]]. Aucun traité de paix ne clôt la guerre : les rois d'Angleterre continueront même à se dire rois de France jusqu'en 1801. Mais Castillon marque bien une fin, celle d'une guerre où l'[[cdx_arc_long|arc long]] avait longtemps dominé, désormais vaincu par la poudre.",
+  "entity": "evt_castillon",
+  "see_also": ["cdx_bombarde", "cdx_bordeaux", "cdx_guyenne", "cdx_charles_vii"],
+  "sources": ["Bataille de Castillon", "John Talbot (1er comte de Shrewsbury)"]
+}

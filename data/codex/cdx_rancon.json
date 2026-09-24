@@ -1,0 +1,12 @@
+{
+  "id": "cdx_rancon",
+  "title": "La rançon des prisonniers",
+  "category": "guerre",
+  "aliases": ["rançon", "rançons", "droit de rançon", "libéré sur parole", "Charles d'Orléans"],
+  "era": { "from": "v. 1100", "to": "v. 1500" },
+  "summary": "Au Moyen Âge, un noble capturé à la guerre n'est pas tué mais rendu contre rançon. Cette pratique, qui fait de la guerre une affaire lucrative, culmine avec la rançon de trois millions d'écus de [[cdx_jean_ii|Jean II le Bon]], pris à [[cdx_poitiers|Poitiers]].",
+  "body": "Le droit des armes, respecté par la noblesse de toute l'Europe, veut qu'un adversaire qui se rend soit épargné. Le prisonnier appartient à celui qui l'a capturé, lequel doit en rendre une part, souvent le tiers, à son capitaine, qui lui-même en doit une part au roi. Le montant dépend du rang et de la fortune du captif. En attendant le paiement, il peut être gardé en prison, ou libéré sur parole pour réunir la somme, en promettant de revenir s'il échoue.\n\nPour beaucoup de combattants, la rançon est l'espoir de faire fortune d'un seul coup. On se dispute les prisonniers de marque sur le champ de bataille, on les revend, on les partage entre plusieurs associés. Des capitaines comme [[cdx_robert_knolles|Robert Knolles]] ou les chefs des [[cdx_grandes_compagnies|Grandes Compagnies]] s'enrichissent ainsi, tandis que des familles nobles se ruinent pour racheter un des leurs.\n\nLa rançon la plus célèbre est celle du roi [[cdx_jean_ii|Jean II]], capturé à [[cdx_poitiers|Poitiers]] en 1356. Le traité de [[cdx_bretigny|Brétigny]] la fixe à trois millions d'écus d'or. Pour la payer, le royaume lève de nouveaux impôts, les [[cdx_aides|aides]] et la [[cdx_gabelle|gabelle]], et frappe une nouvelle monnaie, le [[cdx_franc_a_cheval|franc à cheval]]. [[cdx_du_guesclin|Du Guesclin]], lui, est capturé deux fois et racheté à grands frais.\n\nLa rançon n'est pas toujours une protection. À [[cdx_azincourt|Azincourt]], en 1415, Henri V fait égorger une partie des prisonniers par crainte d'une contre-attaque. Et certains captifs sont trop précieux pour être libérés : le poète Charles d'Orléans, pris à Azincourt, reste vingt-cinq ans prisonnier en Angleterre et n'est libéré qu'en 1440, avec l'aide de Philippe le Bon.",
+  "entity": "evt_rancon_du_roi",
+  "see_also": ["cdx_jean_ii", "cdx_bretigny", "cdx_chevalerie", "cdx_franc_a_cheval"],
+  "sources": ["Rançon", "Traité de Brétigny", "Charles d'Orléans"]
+}
