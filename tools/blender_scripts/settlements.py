@@ -186,7 +186,16 @@ def build_town_b():
 
 def motte(x, y, radius, height):
     """Earth mound (frustum) under a keep."""
-    return [m.cone(radius, height + F, (x, y, (height - F) / 2), "Earth", 12, radius_top=radius * 0.62)]
+    return [
+        m.cone(
+            radius,
+            height + F,
+            (x, y, (height - F) / 2),
+            "Earth",
+            12,
+            radius_top=radius * 0.62,
+        )
+    ]
 
 
 def build_castle_a():
@@ -251,15 +260,43 @@ def abbey_church(x, y, angle, s):
 
     parts = []
     nx, ny = at(0.0, 0.0)
-    parts.append(m.box((1.0 * s, 0.26 * s, 0.34 * s + F), (nx, ny, (0.34 * s - F) / 2), "StoneLight", (0, 0, angle)))
-    parts.append(m.gable_roof(1.0 * s, 0.26 * s, 0.18 * s, (nx, ny, 0.34 * s), "Slate", angle))
+    parts.append(
+        m.box(
+            (1.0 * s, 0.26 * s, 0.34 * s + F),
+            (nx, ny, (0.34 * s - F) / 2),
+            "StoneLight",
+            (0, 0, angle),
+        )
+    )
+    parts.append(
+        m.gable_roof(1.0 * s, 0.26 * s, 0.18 * s, (nx, ny, 0.34 * s), "Slate", angle)
+    )
     tx, ty = at(0.22 * s, 0.0)
-    parts.append(m.box((0.24 * s, 0.7 * s, 0.3 * s + F), (tx, ty, (0.3 * s - F) / 2), "StoneLight", (0, 0, angle)))
-    parts.append(m.gable_roof(0.7 * s, 0.24 * s, 0.16 * s, (tx, ty, 0.3 * s), "Slate", angle + math.pi / 2))
-    parts += m.square_tower(tx, ty, 0.2 * s, 0.62 * s, "Slate", spire=0.3 * s, angle=angle)
+    parts.append(
+        m.box(
+            (0.24 * s, 0.7 * s, 0.3 * s + F),
+            (tx, ty, (0.3 * s - F) / 2),
+            "StoneLight",
+            (0, 0, angle),
+        )
+    )
+    parts.append(
+        m.gable_roof(
+            0.7 * s, 0.24 * s, 0.16 * s, (tx, ty, 0.3 * s), "Slate", angle + math.pi / 2
+        )
+    )
+    parts += m.square_tower(
+        tx, ty, 0.2 * s, 0.62 * s, "Slate", spire=0.3 * s, angle=angle
+    )
     axp, ayp = at(0.56 * s, 0.0)
-    parts.append(m.cylinder(0.13 * s, 0.28 * s + F, (axp, ayp, (0.28 * s - F) / 2), "StoneLight", 8))
-    parts.append(m.cone(0.15 * s, 0.14 * s, (axp, ayp, 0.28 * s + 0.07 * s), "Slate", 8))
+    parts.append(
+        m.cylinder(
+            0.13 * s, 0.28 * s + F, (axp, ayp, (0.28 * s - F) / 2), "StoneLight", 8
+        )
+    )
+    parts.append(
+        m.cone(0.15 * s, 0.14 * s, (axp, ayp, 0.28 * s + 0.07 * s), "Slate", 8)
+    )
     return parts
 
 
@@ -272,9 +309,25 @@ def cloister(x, y, side, angle):
         off = side / 2 - depth / 2
         dx, dy = math.cos(a), math.sin(a)
         gx, gy = x + dx * off, y + dy * off
-        parts.append(m.box((depth, side, 0.06 + F), (gx, gy, (0.06 - F) / 2), "StoneLight", (0, 0, a)))
-        parts.append(lean_to(side, depth, 0.05, (gx, gy, 0.06), a + math.pi / 2, "Tile"))
-    parts.append(m.box((side - 2 * depth, side - 2 * depth, 0.01 + F * 0.3), (x, y, 0.005 - F * 0.15), "Garden", (0, 0, angle)))
+        parts.append(
+            m.box(
+                (depth, side, 0.06 + F),
+                (gx, gy, (0.06 - F) / 2),
+                "StoneLight",
+                (0, 0, a),
+            )
+        )
+        parts.append(
+            lean_to(side, depth, 0.05, (gx, gy, 0.06), a + math.pi / 2, "Tile")
+        )
+    parts.append(
+        m.box(
+            (side - 2 * depth, side - 2 * depth, 0.01 + F * 0.3),
+            (x, y, 0.005 - F * 0.15),
+            "Garden",
+            (0, 0, angle),
+        )
+    )
     parts.append(m.cylinder(0.025, 0.04, (x, y, 0.02), "Stone", 6))
     return parts
 
@@ -291,13 +344,24 @@ def build_abbey(seed, s, with_mill):
     parts += m.house((-0.3, -0.06, 0.0), (0.12, 0.4, 0.12), "TileOld", "Stone", 0.0)
     parts += m.house((-0.5, 0.4, 0.0), (0.2, 0.12, 0.1), "Tile", "Plaster", 0.2)
     parts += banner(-0.45, 0.2, 0.0, 0.35)
-    parts += field_strips(0.45, -0.62, 0.0, 5, 0.34, 0.06, ("Garden", "Field", "Garden"))
+    parts += field_strips(
+        0.45, -0.62, 0.0, 5, 0.34, 0.06, ("Garden", "Field", "Garden")
+    )
     parts += field_strips(-0.5, -0.55, 0.3, 4, 0.3, 0.06)
     precinct = [(-0.85, -0.85), (0.85, -0.85), (0.9, 0.8), (-0.8, 0.85)]
     parts += low_wall(precinct)
     if with_mill:
         parts += m.house((0.72, 0.55, 0.0), (0.14, 0.12, 0.12), "Thatch", "Timber", 0.5)
-        parts.append(m.cylinder(0.07, 0.015, (0.78, 0.47, 0.07), "Wood", 8, rotation=(math.pi / 2, 0, 0.5)))
+        parts.append(
+            m.cylinder(
+                0.07,
+                0.015,
+                (0.78, 0.47, 0.07),
+                "Wood",
+                8,
+                rotation=(math.pi / 2, 0, 0.5),
+            )
+        )
     for _ in range(3):
         parts += m.house(
             (rng.uniform(0.95, 1.2), rng.uniform(-0.6, 0.3), 0.0),
@@ -325,7 +389,9 @@ def build_abbey_b():
 def build_village(seed, count, spread, church_angle):
     """Open village: parish church, cottages and barns, field strips around."""
     rng = random.Random(seed)
-    parts = [m.box((1.9, 0.1, 0.01 + F), (0, 0, 0.005 - F / 2), "Dirt", rotation=(0, 0, 0.3))]
+    parts = [
+        m.box((1.9, 0.1, 0.01 + F), (0, 0, 0.005 - F / 2), "Dirt", rotation=(0, 0, 0.3))
+    ]
     parts += m.church(0.05, 0.25, church_angle, 0.75, roof="TileOld")
     parts += m.scatter_houses(
         rng,
@@ -338,7 +404,9 @@ def build_village(seed, count, spread, church_angle):
         size_scale=1.05,
     )
     for dx, dy, angle in ((-0.72, -0.34, 0.3), (0.7, 0.42, 1.9)):
-        parts += m.house((dx, dy, 0.0), (0.28, 0.15, 0.11), "Thatch", "Wood", angle=angle)
+        parts += m.house(
+            (dx, dy, 0.0), (0.28, 0.15, 0.11), "Thatch", "Wood", angle=angle
+        )
     parts += field_strips(-0.2, -0.95, 0.3, 6, 0.6, 0.07)
     parts += field_strips(0.9, -0.2, 1.6, 5, 0.5, 0.07)
     parts += banner(0.05 - 0.19, 0.25, 0.42 * 0.75 + 0.3 * 0.75, 0.2)
@@ -365,7 +433,13 @@ def build_hamlet(seed, count):
         barn = index == 0
         parts += m.house(
             (r * math.cos(ang), r * math.sin(ang), 0.0),
-            (0.24, 0.13, 0.1) if barn else (rng.uniform(0.14, 0.19), rng.uniform(0.09, 0.12), rng.uniform(0.07, 0.09)),
+            (0.24, 0.13, 0.1)
+            if barn
+            else (
+                rng.uniform(0.14, 0.19),
+                rng.uniform(0.09, 0.12),
+                rng.uniform(0.07, 0.09),
+            ),
             "Thatch" if barn or rng.random() < 0.7 else "TileOld",
             "Wood" if barn else rng.choice(("Plaster", "Timber")),
             angle=ang + math.pi / 2 + rng.uniform(-0.2, 0.2),
