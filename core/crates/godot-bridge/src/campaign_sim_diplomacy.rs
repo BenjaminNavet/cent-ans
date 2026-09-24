@@ -56,6 +56,7 @@ impl CampaignSim {
                     "loyalty" => entry.loyalty.map_or(-1, i64::from),
                     "power" => state.faction_power(&entry.faction).round() as i64,
                     "allies" => &allies,
+                    "trade_agreement" => entry.trade_agreement,
                 }
                 .to_variant()
             })
@@ -96,6 +97,7 @@ impl CampaignSim {
                     turns: sim_campaign::diplomacy::MEDIATION_TRUCE_TURNS,
                 },
             ),
+            Order::ProposeTradeAgreement { target } => (target, Proposal::TradeAgreement),
             Order::DeclareWar { target } => return war_verdict(state, data, &player, &target),
             _ => return verdict(true, 0, &[]),
         };

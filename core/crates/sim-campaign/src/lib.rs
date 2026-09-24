@@ -61,6 +61,7 @@ pub mod siege;
 pub mod skills;
 pub mod state;
 pub mod table;
+pub mod trade;
 pub mod turn;
 pub mod victory;
 pub mod vision;
@@ -102,3 +103,4 @@ pub use state::{
     MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
+pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};

@@ -93,6 +93,13 @@ pub struct FactionEconomy {
     pub tax_rate: TaxRate,
     pub goods: BTreeMap<ResourceId, u32>,
     pub goods_categories: Vec<ResourceCategory>,
+    /// C5: trade routes' income this season if resolved now (not yet in
+    /// `income`/`projected_income`, which are the tax income alone).
+    #[serde(default)]
+    pub trade_income: i64,
+    /// C5: trade income paid during the last resolved turn.
+    #[serde(default)]
+    pub trade_income_last_turn: i64,
 }
 
 /// Base share of income spent on the court and administration.
@@ -506,6 +513,8 @@ impl CampaignState {
             tax_rate: faction.tax_rate,
             goods: faction.goods.clone(),
             goods_categories,
+            trade_income: crate::trade::faction_trade_income(self, data, id),
+            trade_income_last_turn: faction.trade_income_last_turn,
         })
     }
 }

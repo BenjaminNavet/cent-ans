@@ -18,6 +18,7 @@ pub mod retinue;
 pub mod settlement;
 pub mod skill;
 pub mod technology;
+pub mod trade;
 #[path = "trait_.rs"]
 pub mod r#trait;
 pub mod unit_type;
