@@ -140,7 +140,9 @@ def _curl(url: str, output: Path | None = None) -> str:
 
 def verify_licence(page: str) -> bool:
     """True if the sound page links the CC0 deed and no other Creative Commons licence."""
-    deeds = set(re.findall(r"creativecommons\.org/(?:licenses|publicdomain)/[a-z\-]+", page))
+    deeds = set(
+        re.findall(r"creativecommons\.org/(?:licenses|publicdomain)/[a-z\-]+", page)
+    )
     return deeds == {"creativecommons.org/publicdomain/zero"}
 
 
@@ -252,7 +254,9 @@ def onsets(x: np.ndarray, count: int, min_gap: float = 0.3) -> list[int]:
     return sorted(chosen)
 
 
-def hit(x: np.ndarray, pick: int = 0, length: float = 1.0, count: int = 6) -> np.ndarray:
+def hit(
+    x: np.ndarray, pick: int = 0, length: float = 1.0, count: int = 6
+) -> np.ndarray:
     """One attack: the ``pick``-th strongest onset (time order), ``length`` s long."""
     marks = onsets(x, count)
     start = marks[min(pick, len(marks) - 1)]
@@ -300,7 +304,9 @@ def loopify(x: np.ndarray, crossfade: float = 1.5) -> np.ndarray:
     return body
 
 
-def filtered(x: np.ndarray, kind: str, cutoff: float | list[float], order: int = 2) -> np.ndarray:
+def filtered(
+    x: np.ndarray, kind: str, cutoff: float | list[float], order: int = 2
+) -> np.ndarray:
     """Butterworth filter (``low``, ``high`` or ``band``) along time."""
     sos = signal.butter(order, cutoff, kind, fs=SAMPLE_RATE, output="sos")
     return signal.sosfilt(sos, x, axis=0).astype(np.float32)
@@ -318,7 +324,9 @@ def repitch(x: np.ndarray, factor: float) -> np.ndarray:
     ).astype(np.float32)
 
 
-def mix(parts: list[tuple[np.ndarray, float, float]], length: float | None = None) -> np.ndarray:
+def mix(
+    parts: list[tuple[np.ndarray, float, float]], length: float | None = None
+) -> np.ndarray:
     """Sum of (signal, offset s, gain) ; mono unless a part is stereo."""
     is_stereo = any(part.ndim == 2 for part, _, _ in parts)
     end = max(int(offset * SAMPLE_RATE) + len(part) for part, offset, _ in parts)
@@ -381,7 +389,9 @@ def _hit(sound: int, pick: int = 0, length: float = 1.0, count: int = 6) -> Call
     return lambda get: hit(mono(get(sound)), pick, length, count)
 
 
-def _take(sound: int, start: float = 0.0, length: float | None = None, fade_out: float = 0.2) -> Callable:
+def _take(
+    sound: int, start: float = 0.0, length: float | None = None, fade_out: float = 0.2
+) -> Callable:
     return lambda get: fade(trim(cut(mono(get(sound)), start, length)), 0.005, fade_out)
 
 
@@ -389,7 +399,9 @@ def _window(sound: int, length: float, fade_out: float = 0.3) -> Callable:
     return lambda get: fade(loudest_window(mono(get(sound)), length), 0.02, fade_out)
 
 
-def _loop(sound: int, length: float, channels: int = 2, high_pass: float = 0.0) -> Callable:
+def _loop(
+    sound: int, length: float, channels: int = 2, high_pass: float = 0.0
+) -> Callable:
     def render(get: Sources) -> np.ndarray:
         x = get(sound)
         x = mono(x) if channels == 1 else x
@@ -415,7 +427,13 @@ def _war_cry(seed: int) -> Callable:
         for index in range(9):
             voice = voices[index % len(voices)]
             factor = float(rng.uniform(0.84, 1.1))
-            parts.append((repitch(voice, factor), float(rng.uniform(0.0, 0.6)), float(rng.uniform(0.25, 0.5))))
+            parts.append(
+                (
+                    repitch(voice, factor),
+                    float(rng.uniform(0.0, 0.6)),
+                    float(rng.uniform(0.25, 0.5)),
+                )
+            )
         shout = mix(parts, length=4.5)
         shout = filtered(shout, "high", 90.0)
         return fade(shout, 0.05, 1.2)
@@ -429,7 +447,9 @@ def _rout_cry(get: Sources) -> np.ndarray:
     screams = [hit(mono(get(325548)), pick, 1.6, 8) for pick in range(4)]
     parts = [(mob, 0.0, 0.7)]
     for index, scream in enumerate(screams):
-        parts.append((repitch(scream, float(rng.uniform(0.9, 1.08))), 0.3 + index * 0.7, 0.45))
+        parts.append(
+            (repitch(scream, float(rng.uniform(0.9, 1.08))), 0.3 + index * 0.7, 0.45)
+        )
     return fade(mix(parts, length=4.0), 0.05, 1.0)
 
 
@@ -440,7 +460,13 @@ def _arrow_swarm(get: Sources) -> np.ndarray:
     parts = []
     for index in range(14):
         base = flybys[index % 2]
-        parts.append((repitch(base, float(rng.uniform(0.85, 1.2))), float(rng.uniform(0.0, 1.1)), float(rng.uniform(0.2, 0.45))))
+        parts.append(
+            (
+                repitch(base, float(rng.uniform(0.85, 1.2))),
+                float(rng.uniform(0.0, 1.1)),
+                float(rng.uniform(0.2, 0.45)),
+            )
+        )
     return fade(mix(parts, length=2.6), 0.02, 0.6)
 
 
@@ -448,10 +474,22 @@ def _war_drum(get: Sources) -> np.ndarray:
     """A war drum roll: tom and bass hits on a slow march pattern, rising at the end."""
     tom = trim(mono(get(459876)))
     bass = trim(mono(get(459875)))
-    pattern = [(0.0, bass, 0.9), (0.5, tom, 0.6), (1.0, bass, 0.9), (1.5, tom, 0.6),
-               (2.0, bass, 0.9), (2.33, tom, 0.55), (2.66, tom, 0.6), (3.0, bass, 1.0),
-               (3.25, tom, 0.6), (3.5, tom, 0.7), (3.75, tom, 0.8)]
-    return fade(mix([(hit_, at, gain) for at, hit_, gain in pattern], length=5.2), 0.0, 0.8)
+    pattern = [
+        (0.0, bass, 0.9),
+        (0.5, tom, 0.6),
+        (1.0, bass, 0.9),
+        (1.5, tom, 0.6),
+        (2.0, bass, 0.9),
+        (2.33, tom, 0.55),
+        (2.66, tom, 0.6),
+        (3.0, bass, 1.0),
+        (3.25, tom, 0.6),
+        (3.5, tom, 0.7),
+        (3.75, tom, 0.8),
+    ]
+    return fade(
+        mix([(hit_, at, gain) for at, hit_, gain in pattern], length=5.2), 0.0, 0.8
+    )
 
 
 def _trebuchet(get: Sources) -> np.ndarray:
@@ -460,7 +498,11 @@ def _trebuchet(get: Sources) -> np.ndarray:
     launch = hit(mono(get(479922)), 0, 2.2, 4)
     whoosh = filtered(trim(mono(get(789389))), "low", 900.0)
     whoosh = repitch(whoosh, 0.55)
-    return fade(mix([(creak, 0.0, 0.7), (launch, 0.9, 1.0), (whoosh, 1.1, 0.6)], length=3.4), 0.02, 0.6)
+    return fade(
+        mix([(creak, 0.0, 0.7), (launch, 0.9, 1.0), (whoosh, 1.1, 0.6)], length=3.4),
+        0.02,
+        0.6,
+    )
 
 
 def _wall_collapse(get: Sources) -> np.ndarray:
@@ -468,7 +510,19 @@ def _wall_collapse(get: Sources) -> np.ndarray:
     bricks = trim(mono(get(567249)))
     debris = trim(mono(get(703248)))
     rumble = filtered(rock, "low", 400.0)
-    return fade(mix([(rock, 0.0, 0.7), (rumble, 0.0, 0.8), (bricks, 0.6, 0.6), (debris, 1.4, 0.6)], length=6.0), 0.01, 1.5)
+    return fade(
+        mix(
+            [
+                (rock, 0.0, 0.7),
+                (rumble, 0.0, 0.8),
+                (bricks, 0.6, 0.6),
+                (debris, 1.4, 0.6),
+            ],
+            length=6.0,
+        ),
+        0.01,
+        1.5,
+    )
 
 
 def _town(get: Sources) -> np.ndarray:
@@ -476,7 +530,10 @@ def _town(get: Sources) -> np.ndarray:
     market = stereo(trim(get(424790)))
     murmur = loudest_window(get(444900), 22.0)
     length = 30.0
-    parts = [(filtered(murmur, "low", 3500.0), 0.0, 0.5), (filtered(murmur, "low", 3500.0), 20.0, 0.5)]
+    parts = [
+        (filtered(murmur, "low", 3500.0), 0.0, 0.5),
+        (filtered(murmur, "low", 3500.0), 20.0, 0.5),
+    ]
     offset = 0.0
     while offset < length:
         parts.append((market, offset, 0.8))
@@ -488,7 +545,9 @@ def _battle_distant(get: Sources) -> np.ndarray:
     """Distant battle heard from high above: muffled melee and clamour, wide stereo."""
     melee = filtered(mono(loudest_window(get(376646), 32.0)), "low", 1400.0)
     clamor = filtered(mono(loudest_window(get(384401), 32.0)), "low", 1800.0)
-    delayed = np.concatenate([np.zeros(int(0.037 * SAMPLE_RATE), dtype=np.float32), clamor])[: len(clamor)]
+    delayed = np.concatenate(
+        [np.zeros(int(0.037 * SAMPLE_RATE), dtype=np.float32), clamor]
+    )[: len(clamor)]
     left = melee * 0.8 + clamor * 0.6
     right = melee * 0.7 + delayed * 0.65
     return loopify(np.stack([left, right], axis=1).astype(np.float32), 2.0)
@@ -511,7 +570,12 @@ def _clips() -> list[Clip]:
         Clip(b + "arrow_impact_4", [708223], _hit(708223, 0, 0.9)),
         Clip(b + "arrow_whistle_1", [394004], _take(394004, 0.0, 3.5, 0.8)),
         Clip(b + "arrow_whistle_2", [675821], _take(675821, 0.0, 4.0, 0.8)),
-        Clip(b + "arrow_whistle_3", [789389, 384910], _arrow_swarm, note="mix of 14 detuned fly-bys"),
+        Clip(
+            b + "arrow_whistle_3",
+            [789389, 384910],
+            _arrow_swarm,
+            note="mix of 14 detuned fly-bys",
+        ),
         Clip(b + "bow_release_1", [263675], _hit(263675, 0, 0.8)),
         Clip(b + "bow_release_2", [394179], _hit(394179, 0, 0.5)),
         Clip(b + "bow_release_3", [384918], _hit(384918, 0, 0.8)),
@@ -519,8 +583,18 @@ def _clips() -> list[Clip]:
         Clip(b + "charge_cry_1", [621352], _window(621352, 3.5)),
         Clip(b + "charge_cry_2", [866009], _window(866009, 3.5)),
         Clip(b + "charge_cry_3", [563011], _window(563011, 4.0)),
-        Clip(b + "war_cry_1", [563011, 621352, 866009, 325548], _war_cry(11), note="crowd shout mixed from 10 cries"),
-        Clip(b + "war_cry_2", [563011, 621352, 866009, 325548], _war_cry(23), note="crowd shout mixed from 10 cries"),
+        Clip(
+            b + "war_cry_1",
+            [563011, 621352, 866009, 325548],
+            _war_cry(11),
+            note="crowd shout mixed from 10 cries",
+        ),
+        Clip(
+            b + "war_cry_2",
+            [563011, 621352, 866009, 325548],
+            _war_cry(23),
+            note="crowd shout mixed from 10 cries",
+        ),
         Clip(b + "death_groan_1", [577032], _take(577032)),
         Clip(b + "death_groan_2", [221544], _take(221544)),
         Clip(b + "death_groan_3", [610998], _hit(610998, 0, 1.2, 10)),
@@ -529,7 +603,9 @@ def _clips() -> list[Clip]:
         Clip(b + "death_groan_6", [255322], _hit(255322, 1, 1.8, 8)),
         Clip(b + "death_groan_7", [255322], _hit(255322, 5, 1.8, 8)),
         Clip(b + "rout_cry_1", [384401], _window(384401, 4.0, 1.0)),
-        Clip(b + "rout_cry_2", [384401, 325548], _rout_cry, note="mob noise + 4 screams"),
+        Clip(
+            b + "rout_cry_2", [384401, 325548], _rout_cry, note="mob noise + 4 screams"
+        ),
         Clip(b + "horse_neigh_1", [149024], _take(149024, 0.0, 3.0, 0.5)),
         Clip(b + "horse_neigh_2", [347036], _window(347036, 3.0, 0.6)),
         Clip(b + "horse_neigh_3", [269571], _take(269571)),
@@ -537,39 +613,125 @@ def _clips() -> list[Clip]:
         Clip(b + "horn_1", [539956], _take(539956, 0.0, None, 0.6)),
         Clip(b + "horn_2", [175946], _take(175946, 0.0, None, 0.6)),
         Clip(b + "horn_3", [512490], _window(512490, 8.0, 2.0)),
-        Clip(b + "drum_1", [459876, 459875], _war_drum, note="march pattern of 11 hits"),
+        Clip(
+            b + "drum_1", [459876, 459875], _war_drum, note="march pattern of 11 hits"
+        ),
         Clip(b + "bell_toll_1", [454855], _hit(454855, 0, 5.0, 4)),
         Clip(b + "bell_toll_2", [383192], _take(383192, 0.0, None, 1.0)),
         Clip(b + "ram_hit_1", [675970], _hit(675970, 0, 1.8, 6)),
         Clip(b + "ram_hit_2", [675970], _hit(675970, 2, 1.8, 6)),
         Clip(b + "ram_hit_3", [675970], _hit(675970, 4, 1.8, 6)),
-        Clip(b + "trebuchet_release_1", [231438, 479922, 789389], _trebuchet, note="rope creak + launch + low whoosh"),
+        Clip(
+            b + "trebuchet_release_1",
+            [231438, 479922, 789389],
+            _trebuchet,
+            note="rope creak + launch + low whoosh",
+        ),
         Clip(b + "stone_impact_1", [513694], _take(513694)),
         Clip(b + "stone_impact_2", [703247], _take(703247, 0.0, 3.0, 0.8)),
         Clip(b + "stone_impact_3", [567249], _take(567249, 0.0, 3.0, 0.8)),
         Clip(b + "bombard_1", [187767], _hit(187767, 0, 4.0, 3)),
         Clip(b + "bombard_2", [404166], _hit(404166, 0, 3.5, 3)),
         Clip(b + "wall_collapse_1", [712918], _take(712918, 0.0, None, 0.8)),
-        Clip(b + "wall_collapse_2", [389303, 567249, 703248], _wall_collapse, note="rockfall + bricks + debris"),
+        Clip(
+            b + "wall_collapse_2",
+            [389303, 567249, 703248],
+            _wall_collapse,
+            note="rockfall + bricks + debris",
+        ),
         Clip(b + "thunder_1", [399656], _take(399656, 0.0, 10.0, 3.0)),
         Clip(b + "thunder_2", [652690], _take(652690, 0.0, 10.0, 3.0)),
         # Nappes 3D en boucle (mono).
-        Clip(b + "melee_bed_1", [376646], _loop(376646, 40.0, 1), loop=True, level="rms"),
-        Clip(b + "melee_bed_2", [175950], _loop(175950, 30.0, 1), loop=True, level="rms"),
-        Clip(b + "clamor_bed", [384401], _loop(384401, 40.0, 1), loop=True, level="rms"),
-        Clip(b + "march_bed", [480675], _loop(480675, 25.0, 1, 60.0), loop=True, level="rms"),
-        Clip(b + "cavalry_bed", [527430], _loop(527430, 20.0, 1), loop=True, level="rms"),
+        Clip(
+            b + "melee_bed_1", [376646], _loop(376646, 40.0, 1), loop=True, level="rms"
+        ),
+        Clip(
+            b + "melee_bed_2", [175950], _loop(175950, 30.0, 1), loop=True, level="rms"
+        ),
+        Clip(
+            b + "clamor_bed", [384401], _loop(384401, 40.0, 1), loop=True, level="rms"
+        ),
+        Clip(
+            b + "march_bed",
+            [480675],
+            _loop(480675, 25.0, 1, 60.0),
+            loop=True,
+            level="rms",
+        ),
+        Clip(
+            b + "cavalry_bed", [527430], _loop(527430, 20.0, 1), loop=True, level="rms"
+        ),
         Clip(b + "fire_bed", [636178], _loop(636178, 30.0, 1), loop=True, level="rms"),
         # Ambiances 2D (stéréo).
-        Clip(a + "battle_distant", [376646, 384401], _battle_distant, loop=True, channels=2, level="rms", note="muffled melee + clamour"),
-        Clip(a + "wind", [760241], _loop(760241, 40.0), loop=True, channels=2, level="rms"),
-        Clip(a + "wind_strong", [185070], _loop(185070, 40.0), loop=True, channels=2, level="rms"),
-        Clip(a + "rain", [157487], _loop(157487, 30.0), loop=True, channels=2, level="rms"),
-        Clip(a + "sea", [534910], _loop(534910, 36.0), loop=True, channels=2, level="rms"),
-        Clip(a + "countryside", [514550], _loop(514550, 45.0, 2, 80.0), loop=True, channels=2, level="rms"),
-        Clip(a + "crickets", [522299], _loop(522299, 40.0), loop=True, channels=2, level="rms"),
-        Clip(a + "forest", [474342], _loop(474342, 45.0), loop=True, channels=2, level="rms"),
-        Clip(a + "town", [424790, 444900], _town, loop=True, channels=2, level="rms", note="market street layered over a crowd murmur"),
+        Clip(
+            a + "battle_distant",
+            [376646, 384401],
+            _battle_distant,
+            loop=True,
+            channels=2,
+            level="rms",
+            note="muffled melee + clamour",
+        ),
+        Clip(
+            a + "wind",
+            [760241],
+            _loop(760241, 40.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "wind_strong",
+            [185070],
+            _loop(185070, 40.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "rain",
+            [157487],
+            _loop(157487, 30.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "sea", [534910], _loop(534910, 36.0), loop=True, channels=2, level="rms"
+        ),
+        Clip(
+            a + "countryside",
+            [514550],
+            _loop(514550, 45.0, 2, 80.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "crickets",
+            [522299],
+            _loop(522299, 40.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "forest",
+            [474342],
+            _loop(474342, 45.0),
+            loop=True,
+            channels=2,
+            level="rms",
+        ),
+        Clip(
+            a + "town",
+            [424790, 444900],
+            _town,
+            loop=True,
+            channels=2,
+            level="rms",
+            note="market street layered over a crowd murmur",
+        ),
     ]
     return clips
 
@@ -641,7 +803,9 @@ def source_markdown(clips: list[Clip], infos: dict[int, SourceInfo]) -> str:
 
 def build(only: list[str] | None = None) -> list[Path]:
     """Fetch, verify, render and encode every clip (or those named in ``only``)."""
-    wanted = [c for c in CLIPS if not only or c.name in only or c.name.split("/")[-1] in only]
+    wanted = [
+        c for c in CLIPS if not only or c.name in only or c.name.split("/")[-1] in only
+    ]
     needed = sorted({s for clip in CLIPS for s in clip.sources})
     infos: dict[int, SourceInfo] = {}
     paths: dict[int, Path] = {}
@@ -660,13 +824,24 @@ def build(only: list[str] | None = None) -> list[Path]:
         out = AUDIO_DIR / f"{clip.name}.ogg"
         write_ogg(out, samples, clip.channels)
         written.append(out)
-        print(f"{clip.name}: {seconds(samples):.1f} s, {out.stat().st_size / 1024:.0f} Ko")
-    (AUDIO_DIR / "SOURCE.md").write_text(source_markdown(CLIPS, infos), encoding="utf-8")
+        print(
+            f"{clip.name}: {seconds(samples):.1f} s, {out.stat().st_size / 1024:.0f} Ko"
+        )
+    (AUDIO_DIR / "SOURCE.md").write_text(
+        source_markdown(CLIPS, infos), encoding="utf-8"
+    )
     manifest = {
-        str(i): {"user": infos[i].user, "title": infos[i].title, "url": infos[i].url, "licence": infos[i].licence}
+        str(i): {
+            "user": infos[i].user,
+            "title": infos[i].title,
+            "url": infos[i].url,
+            "licence": infos[i].licence,
+        }
         for i in needed
     }
-    digest = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()[:12]
+    digest = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()[
+        :12
+    ]
     print(f"{len(written)} clips, {len(needed)} CC0 sources (manifest {digest})")
     return written
 
@@ -674,7 +849,9 @@ def build(only: list[str] | None = None) -> list[Path]:
 def main() -> None:
     """Command line entry point."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("clips", nargs="*", help="only these clips (name or battle/name)")
+    parser.add_argument(
+        "clips", nargs="*", help="only these clips (name or battle/name)"
+    )
     args = parser.parse_args()
     build(args.clips or None)
 
