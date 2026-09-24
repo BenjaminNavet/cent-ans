@@ -57,8 +57,52 @@ fn a_charge_passes_through_friends() {
 }
 
 #[test]
-#[ignore]
-fn ai_changes_formation() {}
+fn ai_changes_formation() {
+    use sim_battle::formation_ai::plan_formations;
+    use sim_battle::{Formation, SideId};
+    let data = data();
+    let attacker = units(&data, &["unit_knights"]);
+    let defender = units(&data, &["unit_flemish_pikemen", "unit_urban_militia"]);
+    let mut sim = BattleSim::new(setup(attacker, defender, None), 2).unwrap();
+    lab(&mut sim);
+    place(&mut sim, 0, 600.0, 300.0, 0.0);
+    place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
+    place(&mut sim, 2, 900.0, 400.0, std::f64::consts::PI);
+    // Knights charging the militia: wedge. Pikemen 100 m from horse: schiltron.
+    let charge = Command::Attack {
+        units: vec![0],
+        target: 2,
+        run: true,
+    };
+    sim.issue_command(charge).unwrap();
+    place(&mut sim, 0, 800.0, 300.0, 0.0);
+    let kinds = |sim: &BattleSim, side| -> Vec<(u32, Formation)> {
+        plan_formations(sim, side)
+            .into_iter()
+            .filter_map(|c| match c {
+                Command::Formation { units, kind } => Some((units[0], kind)),
+                _ => None,
+            })
+            .collect()
+    };
+    assert_eq!(kinds(&sim, SideId::Attacker), vec![(0, Formation::Wedge)]);
+    place(&mut sim, 0, 640.0, 310.0, 0.0);
+    assert_eq!(kinds(&sim, SideId::Defender), vec![(1, Formation::Square)]);
+    // A long march far from the enemy: column.
+    place(&mut sim, 0, 100.0, 50.0, 0.0);
+    let far = Command::Move {
+        units: vec![2],
+        x: 900.0,
+        z: 750.0,
+        run: false,
+        facing: None,
+    };
+    sim.issue_command(far).unwrap();
+    place(&mut sim, 2, 1100.0, 400.0, 0.0);
+    sim.units_mut()[2].destination = Some((1100.0, 780.0));
+    let plan = kinds(&sim, SideId::Defender);
+    assert!(plan.contains(&(2, Formation::Column)), "{plan:?}");
+}
 
 #[test]
 #[ignore]

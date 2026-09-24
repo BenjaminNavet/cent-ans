@@ -31,6 +31,7 @@
 pub mod ai;
 pub mod command;
 pub mod field;
+pub mod formation_ai;
 pub mod orders;
 pub mod outcome;
 pub mod rng;
