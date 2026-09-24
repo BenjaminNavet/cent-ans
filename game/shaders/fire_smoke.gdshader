@@ -14,7 +14,7 @@ uniform float frames_v = 8.0;
 uniform vec3 smoke_color : source_color = vec3(0.16, 0.15, 0.14);
 uniform vec3 ember_glow : source_color = vec3(1.0, 0.38, 0.08);
 uniform float ember_glow_energy = 0.15;
-uniform float density = 2.2;
+uniform float density = 1.6;
 uniform float soft_distance = 3.0;
 // Part de la lumière des foyers (lumières ponctuelles) reçue : la fumée, très diffusante, virerait
 // sinon au rose saumon au-dessus des flammes.
