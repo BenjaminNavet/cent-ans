@@ -553,8 +553,18 @@ pub(crate) fn auto_assault(
         river_crossing: false,
         walls,
     };
-    let result =
-        crate::battle_auto::resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
+    // N1: phased auto-resolve; walls stand for the terrain, the season
+    // still brings its weather.
+    let attacker_profiles = crate::battle_auto::coalition_profiles(state, data, &attackers);
+    let defender_profiles = crate::battle_auto::army_profiles(data, &garrison);
+    let result = crate::battle_auto::resolve_profiled(
+        state,
+        data,
+        (&attacker_side, &attacker_profiles),
+        (&defender_side, &defender_profiles),
+        &context,
+        None,
+    );
     apply_assault_result(state, data, &attackers, &settlement, &result, walls, events);
 }
 
@@ -662,11 +672,19 @@ fn sortie(
     }
     let sallying = crate::movement::side_from_army(state, data, &garrison);
     let besieging = crate::movement::side_from_army(state, data, &state.armies[target]);
-    let result = crate::battle_auto::resolve_auto(
-        &sallying,
-        &besieging,
+    // N1: a sortie is a field battle before the walls.
+    let sallying_profiles = crate::battle_auto::army_profiles(data, &garrison);
+    let besieging_profiles = crate::battle_auto::army_profiles(data, &state.armies[target]);
+    let province = state
+        .settlement_province(settlement)
+        .and_then(|p| data.provinces.get(p));
+    let result = crate::battle_auto::resolve_profiled(
+        state,
+        data,
+        (&sallying, &sallying_profiles),
+        (&besieging, &besieging_profiles),
         &crate::battle_auto::BattleContext::default(),
-        &mut state.rng,
+        province,
     );
     let besieger_faction = state.armies[target].faction.clone();
     apply_garrison_losses(state, settlement, &result.attacker);
