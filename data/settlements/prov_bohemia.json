@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_prague",
+    "province": "prov_bohemia",
+    "kind": "city",
+    "name": {
+      "display": "Prague",
+      "local": "Praha",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      14.4378,
+      50.0755
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Royaume de Bohême de Jean de Luxembourg (le roi combat pour la France), gouverné en son absence par son fils Charles, margrave de Moravie. Mines d'argent de Kutná Hora.",
+    "sources": [
+      "Royaume de Bohême",
+      "Jean Ier de Bohême",
+      "Prague"
+    ]
+  },
+  {
+    "id": "set_kutna_hora",
+    "province": "prov_bohemia",
+    "kind": "town",
+    "name": {
+      "display": "Kutná Hora",
+      "local": "Kutná Hora",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      15.2686,
+      49.9477
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": false,
+    "description": "Ville minière au deuxième rang du royaume, où sont frappés les gros de Prague grâce aux mines d'argent.",
+    "sources": [
+      "Kutná Hora"
+    ]
+  },
+  {
+    "id": "set_krivoklat",
+    "province": "prov_bohemia",
+    "kind": "castle",
+    "name": {
+      "display": "Křivoklát",
+      "local": "Krzivoklat",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      13.8722,
+      50.0339
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal de chasse des Přemyslides puis des Luxembourg, dans les forêts de Bohême centrale.",
+    "sources": [
+      "Château de Křivoklát"
+    ]
+  },
+  {
+    "id": "set_zbraslav",
+    "province": "prov_bohemia",
+    "kind": "abbey",
+    "name": {
+      "display": "Zbraslav",
+      "local": "Aula Regia",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      14.3985,
+      49.9762
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée par Venceslas II, nécropole des rois de Bohême.",
+    "sources": [
+      "Abbaye de Zbraslav"
+    ]
+  }
+]

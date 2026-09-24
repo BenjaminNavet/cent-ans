@@ -1,0 +1,91 @@
+[
+  {
+    "id": "set_linz",
+    "province": "prov_austria",
+    "kind": "city",
+    "name": {
+      "display": "Linz",
+      "local": "Linz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.2858,
+      48.3069
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Duchés d'Autriche, de Styrie et de Carinthie (acquise en 1335) tenus par Albert II de Habsbourg. Vienne est hors de l'emprise de la carte ; Linz et Graz représentent les terres habsbourgeoises.",
+    "sources": [
+      "Duché d'Autriche",
+      "Albert II d'Autriche",
+      "Duché de Styrie"
+    ]
+  },
+  {
+    "id": "set_vienna",
+    "province": "prov_austria",
+    "kind": "town",
+    "name": {
+      "display": "Vienne",
+      "local": "Wienne",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.3738,
+      48.2082
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": false,
+    "description": "Résidence principale des ducs Habsbourg d'Autriche, grande place marchande sur le Danube.",
+    "sources": [
+      "Vienne (Autriche)"
+    ]
+  },
+  {
+    "id": "set_klosterneuburg",
+    "province": "prov_austria",
+    "kind": "abbey",
+    "name": {
+      "display": "Klosterneuburg",
+      "local": "Klosterneuburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.3272,
+      48.3084
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye des chanoines augustins fondée par les Babenberg, près de Vienne.",
+    "sources": [
+      "Abbaye de Klosterneuburg"
+    ]
+  }
+]

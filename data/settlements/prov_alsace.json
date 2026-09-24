@@ -1,0 +1,142 @@
+[
+  {
+    "id": "set_strasbourg",
+    "province": "prov_alsace",
+    "kind": "city",
+    "name": {
+      "display": "Strasbourg",
+      "local": "Straßburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.7521,
+      48.5734
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Landgraviat de Haute-Alsace (Habsbourg), évêché et cité libre de Strasbourg, Décapole en gestation. Vignes, Rhin navigable.",
+    "sources": [
+      "Alsace",
+      "Strasbourg",
+      "Haute-Alsace"
+    ]
+  },
+  {
+    "id": "set_colmar",
+    "province": "prov_alsace",
+    "kind": "town",
+    "name": {
+      "display": "Colmar",
+      "local": "Kolmar",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.3581,
+      48.0794
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire prospère du vignoble alsacien, gouvernée par ses propres magistrats.",
+    "sources": [
+      "Colmar"
+    ]
+  },
+  {
+    "id": "set_haguenau",
+    "province": "prov_alsace",
+    "kind": "town",
+    "name": {
+      "display": "Haguenau",
+      "local": "Hagenowe",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.7908,
+      48.8156
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire, siège du bailliage impérial de la forêt de Haguenau.",
+    "sources": [
+      "Haguenau"
+    ]
+  },
+  {
+    "id": "set_haut_koenigsbourg",
+    "province": "prov_alsace",
+    "kind": "castle",
+    "name": {
+      "display": "Haut-Kœnigsbourg",
+      "local": "Hohkönigsburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.3444,
+      48.2497
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse impériale dominant la plaine d'Alsace, tenue en fief par des dynasties rivales.",
+    "sources": [
+      "Haut-Kœnigsbourg"
+    ]
+  },
+  {
+    "id": "set_marmoutier",
+    "province": "prov_alsace",
+    "kind": "abbey",
+    "name": {
+      "display": "Marmoutier",
+      "local": "Maursmünster",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.3806,
+      48.7132
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée au VIIe siècle, l'une des plus anciennes d'Alsace.",
+    "sources": [
+      "Abbaye de Marmoutier (Bas-Rhin)"
+    ]
+  }
+]
