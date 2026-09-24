@@ -14,6 +14,6 @@
   },
   "road_cost_factor": 0.75,
   "minor_river_extra": 10,
-  "slope_impassable_threshold": 0.3,
+  "slope_impassable_threshold": 0.22,
   "embark_cost": "all"
 }
