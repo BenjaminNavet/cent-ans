@@ -4,7 +4,8 @@
     "display": "Moulin à eau"
   },
   "category": "production",
-  "tier": 1,
+  "tier": 2,
+  "upgrades_from": "bld_windmill",
   "cost": {
     "money": 400
   },

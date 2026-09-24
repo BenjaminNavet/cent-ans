@@ -253,6 +253,12 @@ pub enum Order {
         province: ProvinceId,
         diet: data_model::DietId,
     },
+    /// Lot C4: adopts `edict` in `province` (regional edict, one active at a
+    /// time, delayed effect); one change per province and per turn.
+    SetEdict {
+        province: ProvinceId,
+        edict: data_model::EdictId,
+    },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
         level: crate::coinage::CoinageLevel,
@@ -402,6 +408,8 @@ pub enum OrderError {
     Assault(#[from] crate::siege::AssaultError),
     #[error(transparent)]
     Diet(#[from] crate::table::DietError),
+    #[error(transparent)]
+    Edict(#[from] crate::edicts::EdictError),
     #[error(transparent)]
     Coinage(#[from] crate::coinage::CoinageError),
     #[error(transparent)]
@@ -602,6 +610,10 @@ impl CampaignState {
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
+                Ok(())
+            }
+            Order::SetEdict { province, edict } => {
+                crate::edicts::set_edict(self, data, faction, &province, &edict)?;
                 Ok(())
             }
             Order::SetCoinage { level } => {
