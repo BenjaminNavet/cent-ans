@@ -6,7 +6,7 @@ extends Control
 
 signal clicked(world: Vector2)
 
-const SIZE := Vector2(180, 120)
+const SIZE := Vector2(168, 104)
 const INK := Color(0.22, 0.14, 0.07)
 
 var field_size: Vector2 = Vector2(1200, 800)
@@ -20,6 +20,7 @@ var _frame := PackedVector2Array()  # cadre de la caméra au sol (monde x, z)
 func _init() -> void:
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	clip_contents = true  # bois et boues débordant du champ
 	tooltip_text = "Minicarte : cliquer pour y porter la caméra"
 
 

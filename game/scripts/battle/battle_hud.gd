@@ -201,7 +201,7 @@ func _build_corner() -> VBoxContainer:
 	for index in range(-1, 3):
 		var button := Button.new()
 		button.name = "Speed%d" % index
-		button.custom_minimum_size = Vector2(40, 24)
+		button.custom_minimum_size = Vector2(38, 22)
 		button.focus_mode = Control.FOCUS_NONE
 		button.toggle_mode = true
 		button.tooltip_text = SPEED_TOOLTIPS[index + 1]
