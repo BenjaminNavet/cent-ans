@@ -7,10 +7,10 @@ extends SceneTree
 ##     colonie ;
 ##  3. recrutement et construction depuis le panneau, ordres adressés à la colonie (file de
 ##     recrutement et chantier de la colonie, pas de la cité) ;
-##  4. armée sélectionnée : anneaux des colonies atteignables, aperçu de chemin sur le graphe,
-##     clic droit sur une colonie → ordre `move_army` vers cette colonie ;
+##  4. armée sélectionnée : lot M4, la bulle du mouvement libre remplace les anneaux C5 ;
 ##  5. lot C7d : bouton « Garnison » du bandeau d'ost — une armée du joueur sur une colonie
-##     qu'il contrôle laisse une unité en garnison (la garnison grandit, l'armée rétrécit).
+##     qu'il contrôle laisse une unité en garnison (la garnison grandit, l'armée rétrécit) ;
+##  6. clic droit sur une colonie amie atteignable → marche immédiate (M4), l'armée y stationne.
 ## Usage : godot --headless --path game --script res://tests/c5_settlements_ui_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -110,7 +110,8 @@ func _run() -> void:
 		_check(panel.construction_box.visible, "panel should show the construction")
 		_check(_first_enabled_button(panel.buildable_list) == null, "one construction at a time")
 
-	# 4. Armée : colonies atteignables, aperçu, clic droit.
+	# 4. Armée du joueur : sélection. Lot M4 : la bulle du mouvement libre remplace les
+	# anneaux C5 et l'aperçu sur le graphe des colonies.
 	var army_id := ""
 	for id in map.player_army_ids():
 		army_id = id
@@ -119,45 +120,16 @@ func _run() -> void:
 		map.queue_free()
 		return
 	map.select_army(army_id)
-	_check(ctl.markers.marker_count() > 0, "reachable settlements should be ringed")
-	var here := str(sim.call("get_army", army_id)["location"])
-	var target := ""
-	var best := -1
-	for id in ctl.reachable:
-		if str(id) != here and int(ctl.reachable[id]) > best:
-			best = int(ctl.reachable[id])
-			target = str(id)
-	if not _check(target != "", "no reachable settlement for %s" % army_id):
-		map.queue_free()
-		return
-	_check(ctl.preview_to(target, ctl.settlement_name(target)), "preview_to should handle settlements")
-	var shown: PackedStringArray = map.path_preview.call("shown_ids")
-	_check(map.path_preview.visible and shown.size() >= 2 and shown[0] == here and shown[shown.size() - 1] == target,
-		"path preview should run from %s to %s along settlements, got %s" % [here, target, shown])
-	# Clic droit à l'écran sur la colonie visée (caméra au palier moyen, icônes visibles).
-	var world: Vector3 = map.settlement_layer.world_position_of(target)
-	map.camera_rig.look_at_point(world, 300.0)
-	map.camera_rig.snap()
-	for _i in 4:
-		await process_frame
-	var screen: Vector2 = map.camera.unproject_position(world + Vector3(0.0, 0.5, 0.0))
-	var picked: String = map.settlement_layer.pick_screen(screen)
-	var ordered := false
-	if picked == target:
-		ordered = ctl._try_right_click(screen)
-	else:
-		print("c5: screen picking gave '%s' instead of %s (headless viewport), ordering directly" % [picked, target])
-		ordered = bool(ctl.order_move_to_settlement(army_id, target).get("ok", false))
-	_check(ordered, "move order to %s refused" % target)
-	var moved: Dictionary = sim.call("get_army", army_id)
-	var path: PackedStringArray = moved.get("path", PackedStringArray())
-	_check(path.size() > 0 and path[path.size() - 1] == target, "army path should end at %s, got %s" % [target, path])
-	print("c5: army %s ordered from %s to %s (%d steps, %d rings)" % [army_id, here, target, path.size(), ctl.markers.marker_count()])
+	var movement: Node = map.movement_ctl
+	_check(movement != null and movement.active(), "the free movement controller should drive the selected army")
+	_check(ctl.markers.marker_count() == 0, "the C5 rings are replaced by the reachable bubble")
+	_check(movement.bubble.visible, "the reachable bubble should be shown")
+	var here := str(sim.call("get_army", army_id)["settlement"])
 
-	# 5. Lot C7d : bouton « Garnison » du bandeau d'ost — l'armée n'a pas encore bougé
-	# (le déplacement n'est résolu qu'à la fin du tour), elle est toujours sur `here`.
+	# 5. Lot C7d : bouton « Garnison » du bandeau d'ost, avant tout déplacement (M4 : un ordre
+	# de marche est exécuté aussitôt, l'armée quitterait sa colonie).
 	var here_detail := sim.call("settlement_detail", here) as Dictionary
-	if _check(str(here_detail.get("controller", "")) == "fac_france", "%s should still be controlled by France" % here):
+	if _check(here != "" and str(here_detail.get("controller", "")) == "fac_france", "%s should be a French settlement" % here):
 		var strip: Control = map.ui.army_strip
 		_check(strip.visible and strip.can_garrison, "the garrison button should be offered on the army's own settlement")
 		_check(str(strip.garrison_disabled_reason) == "", "the garrison button should be enabled: %s" % strip.garrison_disabled_reason)
@@ -173,6 +145,37 @@ func _run() -> void:
 				"garrisoning a regiment should grow %s's garrison" % here)
 			_check((after_army.get("units", []) as Array).size() == before_units - 1,
 				"the army should shrink by the garrisoned regiment")
+
+	# 6. Clic droit sur une colonie amie atteignable → marche immédiate, l'armée y stationne.
+	var reachable: Dictionary = sim.call("get_reachable_settlements", army_id)
+	var target := ""
+	var best := -1
+	for id in reachable:
+		var entry: Dictionary = sim.call("settlement_detail", str(id))
+		if str(id) != here and str(entry.get("controller", "")) == "fac_france" and int(reachable[id]) > best:
+			best = int(reachable[id])
+			target = str(id)
+	if not _check(target != "", "no reachable French settlement for %s" % army_id):
+		map.queue_free()
+		return
+	# Clic droit à l'écran sur la colonie visée (caméra au palier moyen, icônes visibles).
+	var world: Vector3 = map.settlement_layer.world_position_of(target)
+	map.camera_rig.look_at_point(world, 300.0)
+	map.camera_rig.snap()
+	for _i in 4:
+		await process_frame
+	var screen: Vector2 = map.camera.unproject_position(world + Vector3(0.0, 0.5, 0.0))
+	var picked: String = map.settlement_layer.pick_screen(screen)
+	var ordered := false
+	if picked == target:
+		ordered = map.picker.right_click_interceptor.call(screen)
+	else:
+		print("c5: screen picking gave '%s' instead of %s (headless viewport), ordering directly" % [picked, target])
+		ordered = bool(movement.order_move_settlement(army_id, target).get("ok", false))
+	_check(ordered, "move order to %s refused" % target)
+	var moved: Dictionary = sim.call("get_army", army_id)
+	_check(str(moved.get("settlement", "")) == target, "the army should stand in %s, got '%s' at %s" % [target, moved.get("settlement", ""), moved.get("position", "")])
+	print("c5: army %s marched from %s to %s (cost %d)" % [army_id, here, target, best])
 
 	map.queue_free()
 	await process_frame

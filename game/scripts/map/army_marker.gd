@@ -144,7 +144,7 @@ static func army_status(army: Dictionary) -> String:
 		return "embarked"
 	if str(army.get("stance", "")) == "siege":
 		return "siege"
-	if not (army.get("path", []) as Array).is_empty():
+	if not (army.get("path", []) as Array).is_empty() or not (army.get("planned_path", PackedVector2Array()) as PackedVector2Array).is_empty():
 		return "moving"
 	return ""
 

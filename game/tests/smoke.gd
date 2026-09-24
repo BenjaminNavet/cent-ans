@@ -257,7 +257,13 @@ func _run_campaign_loop() -> void:
 	# Aperçu de chemin au survol de la cible.
 	var target_index: int = map.map_data.index_of_id(target)
 	map._on_province_hovered(target_index)
-	_check(map.path_preview.visible, "path preview should be visible when hovering a reachable province")
+	if map.movement_ctl != null and map.movement_ctl.active():
+		# Lot M4 : l'aperçu du mouvement libre suit le curseur jusqu'au point visé.
+		var city_world: Vector3 = map.settlement_layer.world_position_of(str(map.sim.call("get_province_state", target).get("city", "")))
+		map.movement_ctl.preview_target({"kind": "ground", "id": "", "point": Vector2(city_world.x, city_world.z)})
+		_check(map.movement_ctl.path_line.visible, "free movement path preview should be visible towards a reachable province")
+	else:
+		_check(map.path_preview.visible, "path preview should be visible when hovering a reachable province")
 	var army_before: Dictionary = map.sim.call("get_army", army_ids[0])
 	var result: Dictionary = map.order_move(army_ids[0], target)
 	_check(result.get("ok", false), "move order refused: %s" % result.get("error", "?"))
