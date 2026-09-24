@@ -21,8 +21,10 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## État
 
-- [ ] 0. Squelette
-- [ ] 1. Saisons visibles
+- [x] 0. Squelette
+- [x] 1. Saisons visibles : terrain (parcelles par saison, prés, forêts lointaines, vigne, neige
+      d'altitude et de plaine selon nord/est), feuillage 3D (roux/or à l'automne, nus et givrés
+      l'hiver, résineux gardés), ombres de nuages ; transition 2,5 s ; `--season=`
 - [ ] 2. Terroirs autour des colonies, fumées de cheminée
 - [ ] 3. Colonies qui grandissent
 - [ ] 4. Dévastation visible
@@ -39,4 +41,4 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## Prochaine étape
 
-Squelette.
+Lot 2 : terroirs (masque `TerroirMask`) et fumées de cheminée.
