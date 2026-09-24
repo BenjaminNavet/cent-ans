@@ -3,7 +3,9 @@
 use data_model::{ProvinceId, SettlementId};
 use godot::prelude::*;
 
-use crate::campaign_sim::{construction_dict, ids, units_array, CampaignSim};
+use crate::campaign_sim::{
+    buildable_array, buildings_array, construction_dict, ids, units_array, CampaignSim,
+};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -42,7 +44,10 @@ impl CampaignSim {
     /// Detail of one settlement (lot C4): `{id, province, kind, name, lonlat,
     /// owner, controller, fortification_level, weight_share, garrison[],
     /// buildings[], recruit_queue[], construction?, siege?, income,
-    /// is_city}`. `income` is the settlement's tax share for its
+    /// is_city}`. Lot C5 adds `buildings_info[]` (`{id, name, category,
+    /// upkeep, …}` as in `get_province_city`), `recruit_slots`,
+    /// `recruit_slots_free`, `garrison_strength` (sum of unit strengths),
+    /// `port` and `province_name`. `income` is the settlement's tax share for its
     /// controller this season (0 while besieged). Empty for an unknown id.
     #[func]
     fn settlement_detail(&self, id: GString) -> VarDictionary {
@@ -85,6 +90,15 @@ impl CampaignSim {
             "recruit_queue" => &ids(live.recruit_queue.iter()),
             "income" => income,
             "is_city" => is_city,
+            "buildings_info" => &buildings_array(data, &live.buildings),
+            "recruit_slots" => state.recruit_slots(data, &id) as i64,
+            "recruit_slots_free" => state.recruit_slots_free(data, &id) as i64,
+            "garrison_strength" => live.garrison.iter().map(|u| i64::from(u.strength)).sum::<i64>(),
+            "port" => entry.port,
+            "province_name" => data
+                .provinces
+                .get(&live.province)
+                .map_or(live.province.as_str(), |p| p.name.display.as_str()),
         };
         if let Some(construction) = &live.construction {
             dict.set("construction", &construction_dict(data, construction));
@@ -100,6 +114,21 @@ impl CampaignSim {
             dict.set("siege", &siege_dict);
         }
         dict
+    }
+
+    /// Build options of a settlement for its controller (lot C5):
+    /// `[{building, name, category, cost, turns, available, reason}]`, only
+    /// the buildings allowed in its kind (`Building::allowed_in`). Empty for
+    /// an unknown id. Recruitment options: `get_recruitable(settlement_id)`.
+    #[func]
+    fn settlement_buildable(&self, id: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarArray::new();
+        };
+        buildable_array(data, &state.buildable(data, &id))
     }
 
     /// Settlement ids of a province, the city first then by id (lot C4).
