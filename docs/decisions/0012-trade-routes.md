@@ -1,4 +1,4 @@
-# ADR 0010 — Routes commerciales et accords : dérivées du graphe, pas d'état de rupture
+# ADR 0012 — Routes commerciales et accords : dérivées du graphe, pas d'état de rupture
 
 Date : 2026-09-24. Statut : accepté. Lot C5 (`docs/design/2026-09-24-rapprochement-total-war.md`).
 
