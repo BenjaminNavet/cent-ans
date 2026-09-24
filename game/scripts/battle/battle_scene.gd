@@ -1128,6 +1128,7 @@ func _stage_deploy_screenshot() -> void:
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
+	print("BattleScene: deployment zone %s, player side %s" % [zone, player_side])
 	var ahead := 1.0 if player_side == "attacker" else -1.0
 	var cam := center + Vector3(0, 300, -400 * ahead)
 	deployment.place(selected.duplicate(), center + Vector3(-60, 0, 0), center + Vector3(60, 0, 0), cam)
