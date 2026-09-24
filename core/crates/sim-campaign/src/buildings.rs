@@ -1,20 +1,24 @@
 //! Buildings: construction, effects and the province "city" view (spec § 1.2).
 //!
-//! A province holds at most one [`Construction`] at a time. Effects of every
-//! completed building are summed by [`province_effects`] into an
-//! [`EffectTotals`], which the rest of the crate (taxes, population, sieges)
-//! reads instead of touching `Building::effects` directly.
+//! Lot C4: buildings stand in settlements; each settlement holds at most one
+//! [`Construction`] at a time and only accepts the buildings whose
+//! `settlement_kinds` include its kind. Effects are summed into an
+//! [`EffectTotals`] per province (every settlement's buildings,
+//! [`CampaignState::province_effects`]: taxes, population, religion) or per
+//! settlement ([`CampaignState::settlement_effects`]: garrison, walls,
+//! recruitment), which the rest of the crate reads instead of touching
+//! `Building::effects` directly.
 
 use std::collections::BTreeMap;
 
 use data_model::{
-    BuildingId, Effect, EffectKind, EffectMode, GameData, ProvinceId, ResourceId, SocialClass,
-    UnitCategory,
+    BuildingId, Effect, EffectKind, EffectMode, GameData, ProvinceId, ResourceId, SettlementId,
+    SocialClass, UnitCategory,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
-use crate::state::{CampaignState, Construction, ProvinceState};
+use crate::state::{CampaignState, Construction, SettlementState};
 
 /// Population count a province can sustain before health suffers (spec § 1.1).
 pub const BASE_CAPACITY: u64 = 40_000;
@@ -457,7 +461,9 @@ pub struct BuildOption {
     pub reason: Option<String>,
 }
 
-/// Snapshot of a province's city panel (bridge input, spec § 2).
+/// Snapshot of a province's city panel (bridge input, spec § 2): the
+/// province's population, resources and effects, the buildings,
+/// construction and build options of its city (lot C4).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProvinceCity {
     pub classes: data_model::PopulationClasses,
@@ -471,15 +477,23 @@ pub struct ProvinceCity {
 }
 
 impl CampaignState {
-    /// Sum of the building effects currently active in `province`, plus its
-    /// governor's trait/skill effects if any (spec § 2).
+    /// Sum of the building effects of every settlement of `province`, plus
+    /// its governor's trait/skill effects if any (spec § 2).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
-        let mut totals = self
-            .provinces
-            .get(province)
-            .map(|p| effects_of(data, &p.buildings))
-            .unwrap_or_default();
+        let mut totals = effects_of(data, &self.province_buildings(province));
         totals.merge(&self.governor_effects(data, province));
+        totals
+    }
+
+    /// Sum of the building effects of `settlement`, plus the trait/skill
+    /// effects of its province's governor (lot C4: garrison, walls,
+    /// recruitment).
+    pub fn settlement_effects(&self, data: &GameData, settlement: &SettlementId) -> EffectTotals {
+        let Some(state) = self.settlements.get(settlement) else {
+            return EffectTotals::default();
+        };
+        let mut totals = effects_of(data, &state.buildings);
+        totals.merge(&self.governor_effects(data, &state.province));
         totals
     }
 
@@ -490,28 +504,31 @@ impl CampaignState {
             .unwrap_or_default()
     }
 
-    /// Fortification level used by sieges: the province's base level (data)
-    /// plus building effects (spec § 1.2, replaces the former constant).
-    pub fn fortification_level(&self, data: &GameData, province: &ProvinceId) -> u32 {
-        let base = data
-            .provinces
-            .get(province)
-            .and_then(|p| p.fortification_level)
-            .unwrap_or(0);
-        let effects = self.province_effects(data, province);
+    /// Fortification level used by sieges: the settlement's base level
+    /// (data) plus its building effects (spec § 1.2).
+    pub fn fortification_level(&self, data: &GameData, settlement: &SettlementId) -> u32 {
+        let Some(state) = self.settlements.get(settlement) else {
+            return 0;
+        };
+        let base = u32::from(state.fortification_level);
+        let effects = self.settlement_effects(data, settlement);
         let walls = effects.fortification_level.apply(f64::from(base)).max(0.0);
         // F1: the controller's masonry techniques strengthen existing walls
         // (an open town gains nothing).
-        let tech = self.provinces.get(province).map_or(0.0, |p| {
-            crate::research::faction_tech_effects(self, data, &p.controller)
-                .fortification_level
-                .flat
-        });
+        let tech = crate::research::faction_tech_effects(self, data, &state.controller)
+            .fortification_level
+            .flat;
         let level = if walls >= 1.0 { walls + tech } else { walls };
         level.max(0.0) as u32
     }
 
-    /// Siege resistance (0-80 %) of `province` against `attacker` (F1): its
+    /// Fortification level of the city of `province`.
+    pub fn province_fortification_level(&self, data: &GameData, province: &ProvinceId) -> u32 {
+        self.province_city_id(province)
+            .map_or(0, |city| self.fortification_level(data, city))
+    }
+
+    /// Siege resistance (0-80 %) of `settlement` against `attacker` (F1): its
     /// buildings (walls, castle, artillery bastion), the controller's
     /// fortification technologies (positive `SiegeResistance`) and the
     /// attacker's siegecraft (negative `SiegeResistance`: engineering,
@@ -519,14 +536,15 @@ impl CampaignState {
     pub fn siege_resistance(
         &self,
         data: &GameData,
-        province: &ProvinceId,
+        settlement: &SettlementId,
         attacker: &data_model::FactionId,
     ) -> f64 {
-        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+        let Some(controller) = self.settlements.get(settlement).map(|s| s.controller.clone())
+        else {
             return 0.0;
         };
         let buildings = self
-            .province_effects(data, province)
+            .settlement_effects(data, settlement)
             .siege_resistance
             .apply(0.0);
         let (defence, _) = crate::research::tech_siege_resistance(self, data, &controller);
@@ -534,12 +552,13 @@ impl CampaignState {
         (buildings + defence + siegecraft).clamp(0.0, 80.0)
     }
 
-    /// Buildable options of `province` for its controller (spec § 1.2).
-    pub fn buildable(&self, data: &GameData, province: &ProvinceId) -> Vec<BuildOption> {
-        let Some(state) = self.provinces.get(province) else {
+    /// Buildable options of `settlement` for its controller (spec § 1.2,
+    /// lot C4).
+    pub fn buildable(&self, data: &GameData, settlement: &SettlementId) -> Vec<BuildOption> {
+        let Some(state) = self.settlements.get(settlement) else {
             return Vec::new();
         };
-        let Some(province_data) = data.provinces.get(province) else {
+        let Some(province_data) = data.provinces.get(&state.province) else {
             return Vec::new();
         };
         let Some(faction) = self.factions.get(&state.controller) else {
@@ -547,6 +566,7 @@ impl CampaignState {
         };
         data.buildings
             .values()
+            .filter(|building| building.allowed_in(state.kind))
             .map(|building| {
                 let mut option = BuildOption {
                     building: building.id.clone(),
@@ -560,9 +580,14 @@ impl CampaignState {
                     available: true,
                     reason: None,
                 };
-                if let Some(reason) =
-                    self.build_blocker(data, state, province_data, faction, building)
-                {
+                if let Some(reason) = self.build_blocker(
+                    data,
+                    settlement,
+                    state,
+                    province_data,
+                    faction,
+                    building,
+                ) {
                     option.available = false;
                     option.reason = Some(reason);
                 }
@@ -571,16 +596,27 @@ impl CampaignState {
             .collect()
     }
 
+    /// Build options of the city of `province` (v1 signature).
+    pub fn buildable_in_province(&self, data: &GameData, province: &ProvinceId) -> Vec<BuildOption> {
+        self.province_city_id(province)
+            .map(|city| self.buildable(data, city))
+            .unwrap_or_default()
+    }
+
     fn build_blocker(
         &self,
         data: &GameData,
-        state: &ProvinceState,
+        settlement: &SettlementId,
+        state: &SettlementState,
         province_data: &data_model::Province,
         faction: &crate::state::FactionState,
         building: &data_model::Building,
     ) -> Option<String> {
+        if !building.allowed_in(state.kind) {
+            return Some("impossible dans ce type de colonie".to_owned());
+        }
         if state.owner != state.controller {
-            return Some("la province doit être possédée et contrôlée".to_owned());
+            return Some("la colonie doit être possédée et contrôlée".to_owned());
         }
         if state.construction.is_some() {
             return Some("une construction est déjà en cours".to_owned());
@@ -620,17 +656,21 @@ impl CampaignState {
                 return Some("ressource requise absente".to_owned());
             }
         }
-        if building.requires_coastal && !province_data.coastal {
-            return Some("nécessite une côte".to_owned());
+        if building.requires_coastal {
+            let is_city = self.province_city_id(&state.province) == Some(settlement);
+            let port = data.settlements.get(settlement).is_some_and(|s| s.port);
+            if !province_data.coastal || !(port || is_city) {
+                return Some("nécessite une côte".to_owned());
+            }
         }
         if building.requires_river && province_data.rivers.is_empty() {
             return Some("nécessite une rivière".to_owned());
         }
         if building.unique_per_faction
-            && self.provinces.values().any(|p| {
-                p.controller == state.controller
-                    && !std::ptr::eq(p, state)
-                    && p.buildings.contains(&building.id)
+            && self.settlements.iter().any(|(id, s)| {
+                s.controller == state.controller
+                    && id != settlement
+                    && s.buildings.contains(&building.id)
             })
         {
             return Some("unique pour la faction (déjà construit ailleurs)".to_owned());
@@ -642,65 +682,69 @@ impl CampaignState {
         None
     }
 
-    /// Full city snapshot for the bridge (spec § 2).
+    /// Full city snapshot for the bridge (spec § 2): the province's
+    /// population, capacity, resources and effects; the buildings,
+    /// construction, walls and build options of its city.
     pub fn province_city(&self, data: &GameData, id: &ProvinceId) -> Option<ProvinceCity> {
         let state = self.provinces.get(id)?;
         let province_data = data.provinces.get(id)?;
+        let city = self.settlements.get(&state.city)?;
         Some(ProvinceCity {
             classes: state.population.clone(),
-            buildings: state.buildings.clone(),
-            construction: state.construction.clone(),
-            fortification_level: self.fortification_level(data, id),
-            capacity: capacity(data, id, &state.buildings),
-            buildable: self.buildable(data, id),
+            buildings: city.buildings.clone(),
+            construction: city.construction.clone(),
+            fortification_level: self.fortification_level(data, &state.city),
+            capacity: capacity(data, id, &self.province_buildings(id)),
+            buildable: self.buildable(data, &state.city),
             resources: province_data.resources.clone(),
             effects: self.province_effects(data, id),
         })
     }
 }
 
-/// Phase: progresses (and completes) constructions in every province.
+/// Phase: progresses (and completes) constructions in every settlement.
 pub(crate) fn resolve_construction(
     state: &mut CampaignState,
     data: &GameData,
     events: &mut Vec<GameEvent>,
 ) {
     let player = state.player_faction.clone();
-    let ids: Vec<ProvinceId> = state.provinces.keys().cloned().collect();
+    let ids: Vec<SettlementId> = state.settlements.keys().cloned().collect();
     for id in ids {
-        let province = state.provinces.get_mut(&id).expect("exists");
-        let Some(construction) = &mut province.construction else {
+        let settlement = state.settlements.get_mut(&id).expect("exists");
+        let Some(construction) = &mut settlement.construction else {
             continue;
         };
         construction.turns_left = construction.turns_left.saturating_sub(1);
         if construction.turns_left > 0 {
             continue;
         }
-        let Construction { building, .. } = province.construction.take().expect("checked above");
+        let Construction { building, .. } =
+            settlement.construction.take().expect("checked above");
         if let Some(from) = data
             .buildings
             .get(&building)
             .and_then(|b| b.upgrades_from.clone())
         {
-            province.buildings.retain(|b| b != &from);
+            settlement.buildings.retain(|b| b != &from);
         }
-        province.buildings.push(building.clone());
-        let controller = province.controller.clone();
+        settlement.buildings.push(building.clone());
+        let controller = settlement.controller.clone();
+        let province = settlement.province.clone();
         if controller == player {
             let name = data
                 .buildings
                 .get(&building)
                 .map_or_else(|| building.to_string(), |b| b.name.display.clone());
-            let province_name = data
-                .provinces
-                .get(&id)
-                .map_or_else(|| id.to_string(), |p| p.name.display.clone());
             events.push(
                 GameEvent::new(
                     EventKind::BuildingCompleted,
-                    format!("{name} achevé à {province_name}."),
+                    format!(
+                        "{name} achevé à {}.",
+                        crate::siege::settlement_name(data, &id)
+                    ),
                 )
-                .province(&id)
+                .province(&province)
                 .faction(&controller),
             );
         }
@@ -715,8 +759,11 @@ pub(crate) fn goods_map(
     faction: &data_model::FactionId,
 ) -> BTreeMap<ResourceId, u32> {
     let mut goods: BTreeMap<ResourceId, u32> = BTreeMap::new();
-    for (id, province) in &state.provinces {
-        if !state.is_allied(faction, &province.controller) {
+    for id in state.provinces.keys() {
+        if !state
+            .province_controller(id)
+            .is_some_and(|controller| state.is_allied(faction, controller))
+        {
             continue;
         }
         let Some(province_data) = data.provinces.get(id) else {

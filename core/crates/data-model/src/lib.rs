@@ -13,6 +13,7 @@ mod event_check;
 pub mod ids;
 pub mod load;
 pub mod map;
+pub mod movement_graph;
 pub mod settlement_load;
 
 pub use common::{
@@ -48,6 +49,7 @@ pub use entities::settlement::{
     SettlementRules,
 };
 pub use entities::skill::{Skill, SkillBranch};
+pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use ids::{

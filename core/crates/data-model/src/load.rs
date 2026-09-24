@@ -175,6 +175,9 @@ pub struct GameData {
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
     pub settlement_graph: Vec<SettlementEdge>,
+    /// Movement graph over the settlements (lot C4): `settlement_graph`, or
+    /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
+    pub movement_graph: crate::movement_graph::MovementGraph,
 }
 
 impl GameData {
@@ -208,6 +211,7 @@ impl GameData {
             settlements_by_province: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
+            movement_graph: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -227,6 +231,7 @@ impl GameData {
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
+        data.build_movement_graph();
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))
