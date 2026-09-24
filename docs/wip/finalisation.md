@@ -23,7 +23,7 @@ Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas d
 
 ## Défauts relevés à la revue (pour F9 / recette)
 - (corrigé F4) Portugal : « la lignée s'éteint » au tour 3 (Hiver 1337) alors qu'Afonso IV a un héritier (Pierre Ier) — à diagnostiquer (succession / héritier non lié ?).
-- Menu de départ : sous-titre et ligne d'état chevauchent les noms de villes de l'illustration (fond à dégager sous le texte).
+- (corrigé) Menu de départ : sous-titre et ligne d’état chevauchent les noms de villes de l'illustration (fond à dégager sous le texte).
 - (pris par ui-tw lot A) Panneau de province : ligne de debug « Identifiant prov_… (index N) » à retirer.
 - (pris par ui-tw lot A) Menu « Menu principal » de la barre du haut quitte sans confirmation (seul le menu pause confirme).
 - Rapport de saison : n'inclut pas les batailles résolues par le dialogue après la fin du tour.
