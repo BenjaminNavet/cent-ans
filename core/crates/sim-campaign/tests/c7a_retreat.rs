@@ -81,7 +81,14 @@ fn a_french_army_falls_back_on_a_french_place() {
 
 #[test]
 fn an_english_army_cut_off_near_paris_falls_back_away_from_the_victor() {
-    let data = data();
+    let mut data = data();
+    // Abbeville (English Ponthieu) lies within two steps of Saint-Denis:
+    // shrink the friendly radius so that no English place is in reach.
+    data.settlement_rules
+        .as_mut()
+        .unwrap()
+        .retreat
+        .friendly_radius_steps = 0.5;
     let (state, english) = english_at_saint_denis(&data);
     // The French victor came from Paris, south of Saint-Denis.
     match retreat_target(&state, &data, &english, paris(&data)) {
