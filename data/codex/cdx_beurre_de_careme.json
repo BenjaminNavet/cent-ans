@@ -1,0 +1,12 @@
+{
+  "id": "cdx_beurre_de_careme",
+  "title": "Le beurre de Carême et les dispenses",
+  "category": "religion",
+  "aliases": ["beurre de Carême", "dispense de beurre", "dispenses de Carême", "Butterbrief"],
+  "era": { "from": "1300", "to": "1600" },
+  "summary": "Là où l'huile manque, manger maigre sans beurre est un supplice : les pays d'élevage du nord obtiennent de l'Église, souvent contre aumône, le droit d'user de laitages en Carême. Ces dispenses financent des églises.",
+  "body": "Le [[cdx_careme|Carême]] interdit dans la plupart des diocèses non seulement la viande mais aussi les laitages et les œufs. Pour les Méditerranéens, qui cuisinent à l'huile d'olive, la privation est supportable. Pour les Normands, les Bretons, les Flamands ou les Allemands, dont la graisse quotidienne est le beurre et le lard, c'est une autre affaire : l'huile de noix ou de navette est chère, l'huile d'olive importée plus encore.\n\nD'où les dispenses. Les évêques, puis les papes, accordent à des individus, à des villes ou à des provinces entières le droit de consommer du beurre, voire du lait, pendant le Carême. En échange, les fidèles font une aumône, souvent affectée à une œuvre pieuse : construction ou réparation d'une église, d'un pont, d'un hôpital. Le plus célèbre de ces privilèges, en terre d'Empire, est la « lettre du beurre » (Butterbrief) accordée en 1491 par le pape Innocent VIII aux princes de Saxe.\n\nLe monument le plus connu de cette pratique est la « [[cdx_tour_de_beurre|tour de Beurre]] » de la cathédrale de Rouen, élevée de 1485 à 1506 et financée en partie par les offrandes des fidèles dispensés de l'abstinence de laitages. D'autres églises du nord portent une « tour de beurre » dans la tradition locale.\n\nLes réformateurs du XVIe siècle, Luther en tête, dénonceront ce commerce d'exemptions comme l'une des dérives du système des indulgences. Pour le jeu, les dispenses expliquent pourquoi le régime des laitages, fromages et œufs n'est pas totalement ruiné par le calendrier des [[cdx_jours_maigres|jours maigres]].",
+  "entity": "diet_dairy",
+  "see_also": ["cdx_careme", "cdx_tour_de_beurre", "cdx_jours_maigres", "cdx_rouen"],
+  "sources": ["Carême", "Cathédrale Notre-Dame de Rouen", "Butterbrief"]
+}
