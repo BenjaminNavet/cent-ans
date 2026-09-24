@@ -10,7 +10,7 @@ use std::fmt;
 
 use data_model::{
     BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ReligionId,
-    ResourceId, Sex, SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
+    ResourceId, SettlementId, Sex, SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -262,6 +262,34 @@ pub struct ProvinceState {
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diet: Option<crate::table::DietChoice>,
+}
+
+/// Dynamic state of a settlement (lot C1 skeleton, spec § 4.2).
+///
+/// Until lot C4 the province keeps authority over garrison, siege, buildings,
+/// construction and recruitment: this state is initialised at setup but not
+/// yet driven by the rules. The city's garrison stays empty here (the
+/// province garrison is the live one); other settlements receive the
+/// `starting_garrison` of `data/settlements/rules.json`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettlementState {
+    /// De jure holder.
+    pub owner: FactionId,
+    /// Faction occupying the settlement.
+    pub controller: FactionId,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub garrison: Vec<Unit>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub siege: Option<SiegeState>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub buildings: Vec<BuildingId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub construction: Option<Construction>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub recruit_queue: Vec<UnitTypeId>,
+    /// Base fortification level from the data (0 village, 1-4 otherwise).
+    #[serde(default)]
+    pub fortification_level: u8,
 }
 
 impl ProvinceState {
@@ -548,6 +576,9 @@ pub struct CampaignState {
     pub rng: CampaignRng,
     pub player_faction: FactionId,
     pub provinces: BTreeMap<ProvinceId, ProvinceState>,
+    /// Settlements inside provinces (lot C1; driven by the rules from C4).
+    #[serde(default)]
+    pub settlements: BTreeMap<SettlementId, SettlementState>,
     pub factions: BTreeMap<FactionId, FactionState>,
     pub armies: BTreeMap<ArmyId, Army>,
     pub characters: BTreeMap<CharacterId, CharacterState>,
@@ -598,6 +629,7 @@ impl CampaignState {
             rng: CampaignRng::from_seed(seed),
             player_faction: player,
             provinces: BTreeMap::new(),
+            settlements: BTreeMap::new(),
             factions: BTreeMap::new(),
             armies: BTreeMap::new(),
             characters: BTreeMap::new(),
@@ -661,6 +693,27 @@ impl CampaignState {
 
     pub fn province_state(&self, id: &ProvinceId) -> Option<&ProvinceState> {
         self.provinces.get(id)
+    }
+
+    pub fn settlement_state(&self, id: &SettlementId) -> Option<&SettlementState> {
+        self.settlements.get(id)
+    }
+
+    /// Settlements of `province` with their state, the city first (order of
+    /// `GameData::settlements_by_province`).
+    pub fn province_settlements<'a>(
+        &'a self,
+        data: &'a GameData,
+        province: &ProvinceId,
+    ) -> Vec<(&'a SettlementId, &'a SettlementState)> {
+        data.settlements_by_province
+            .get(province)
+            .map(|ids| {
+                ids.iter()
+                    .filter_map(|id| self.settlements.get_key_value(id))
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     pub fn faction_state(&self, id: &FactionId) -> Option<&FactionState> {
