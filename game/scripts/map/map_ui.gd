@@ -21,6 +21,9 @@ signal tax_rate_changed(faction_id: String, rate: String)
 signal stance_changed(army_id: String, stance: String)
 ## Bandeau d'ost : régiments à détacher de l'armée `army_id` (ordre `split_army`).
 signal army_split_requested(army_id: String, unit_indices: Array)
+## Bandeau d'ost (lot C7d) : régiments de l'armée `army_id` à laisser en garnison de la
+## colonie où elle se trouve (ordre `garrison_units`).
+signal army_garrison_requested(army_id: String, unit_indices: Array)
 ## Sceau du chef : fiche du chef (`character_id`), ou `""` si l'armée n'a pas de chef.
 signal army_general_clicked(character_id: String)
 ## Cloche : clic sur une pastille d'alerte (ou sur la cloche quand une décision bloque).
@@ -478,8 +481,11 @@ func _on_faction_swatch_input(event: InputEvent) -> void:
 ## F10b : armée sélectionnée dans le bandeau et le sceau. `army` = `get_army(id)`,
 ## `character` = `get_character(army.general)` (vide = sans chef), `title` = rubrique du
 ## bandeau, `status` = position et ordre en cours (étiquette au-dessus du bandeau),
-## `can_split` = la simulation accepte `split_army` et l'armée est au joueur.
-func show_army(army_id: String, army: Dictionary, character: Dictionary, faction: String, is_player: bool, title: String, status: String, can_split: bool = false) -> void:
+## `can_split` = la simulation accepte `split_army` et l'armée est au joueur. Lot C7d :
+## `can_garrison` affiche le bouton « Garnison » (armée du joueur sur une colonie qu'il
+## contrôle) ; `garrison_disabled_reason` le désactive avec une infobulle française
+## (colonie assiégée ou pleine) quand il n'est pas vide.
+func show_army(army_id: String, army: Dictionary, character: Dictionary, faction: String, is_player: bool, title: String, status: String, can_split: bool = false, can_garrison: bool = false, garrison_disabled_reason: String = "") -> void:
 	if army.is_empty():
 		hide_army()
 		return
@@ -493,6 +499,8 @@ func show_army(army_id: String, army: Dictionary, character: Dictionary, faction
 				keep.append(index)
 	current_army_id = army_id
 	army_strip.can_split = can_split
+	army_strip.can_garrison = can_garrison
+	army_strip.garrison_disabled_reason = garrison_disabled_reason
 	army_strip.set_army(army, int(army.get("max_units", DEFAULT_ARMY_CAPACITY)), _unit_catalog, title)
 	if not keep.is_empty():
 		army_strip.select(keep)
@@ -607,6 +615,9 @@ func _setup_hud() -> void:
 	army_strip.split_requested.connect(func(indices: PackedInt32Array) -> void:
 		if current_army_id != "":
 			army_split_requested.emit(current_army_id, Array(indices)))
+	army_strip.garrison_requested.connect(func(indices: PackedInt32Array) -> void:
+		if current_army_id != "":
+			army_garrison_requested.emit(current_army_id, Array(indices)))
 	news_letters.news_activated.connect(func(item: Dictionary) -> void: news_activated.emit(item))
 	army_actions = PanelContainer.new()
 	army_actions.name = "ArmyActions"

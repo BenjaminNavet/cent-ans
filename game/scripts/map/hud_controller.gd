@@ -21,6 +21,7 @@ func setup(campaign_map: Node) -> void:
 	ui.news_activated.connect(_on_news_activated)
 	ui.army_general_clicked.connect(_on_general_clicked)
 	ui.army_split_requested.connect(_on_split_requested)
+	ui.army_garrison_requested.connect(_on_garrison_requested)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
 		refresh())
@@ -36,6 +37,27 @@ func _sim() -> Object:
 func split_supported() -> bool:
 	var sim := _sim()
 	return sim != null and sim.has_method("supports_order") and bool(sim.call("supports_order", "split_army"))
+
+
+## Lot C7d : disponibilité du bouton « Garnison » pour `army` (résultat de `get_army`).
+## `{can_garrison, reason}` : `can_garrison` vrai seulement si l'armée est au joueur, sur une
+## colonie qu'il contrôle ; `reason` (français, vide = actif) désactive le bouton si la
+## colonie est assiégée ou si sa garnison est pleine. Aucune règle ici : tout vient de
+## `settlement_detail` (`garrison_cap` / `garrison_free`, lot C7d).
+func garrison_availability(army: Dictionary, is_player: bool) -> Dictionary:
+	var sim := _sim()
+	var location := str(army.get("location", ""))
+	if not is_player or location == "" or sim == null or not sim.has_method("settlement_detail"):
+		return {"can_garrison": false, "reason": ""}
+	var detail: Dictionary = sim.call("settlement_detail", location)
+	if detail.is_empty() or str(detail.get("controller", "")) != str(map.get("player_faction")):
+		return {"can_garrison": false, "reason": ""}
+	if not (detail.get("siege", {}) as Dictionary).is_empty():
+		return {"can_garrison": true, "reason": "Colonie assiégée : impossible d'y laisser une garnison."}
+	var free := int(detail.get("garrison_free", -1))
+	if free == 0:
+		return {"can_garrison": true, "reason": "Garnison complète (%d unité(s) au maximum)." % int(detail.get("garrison_cap", 0))}
+	return {"can_garrison": true, "reason": ""}
 
 
 ## Remplit le bandeau et le sceau pour l'armée `army_id` (déjà sélectionnée par la carte).
@@ -54,7 +76,9 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 	var title := "Ost de %s" % (general_name if general_name != "" else faction_name)
 	if not is_player and general_name != "":
 		title += " (%s)" % faction_name
-	ui.show_army(army_id, army, character, faction, is_player, title, army_status(army, is_player), is_player and split_supported())
+	var garrison := garrison_availability(army, is_player)
+	ui.show_army(army_id, army, character, faction, is_player, title, army_status(army, is_player),
+		is_player and split_supported(), bool(garrison["can_garrison"]), str(garrison["reason"]))
 
 
 ## Position et ordre en cours de l'armée (étiquette au-dessus du bandeau).
@@ -153,3 +177,9 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 	if not split_supported():
 		return
 	map.call("_submit", {"type": "split_army", "army": army_id, "unit_indices": unit_indices}, "Armée séparée.")
+
+
+## Lot C7d : bouton « Garnison ». Le refus éventuel du cœur (siège survenu entre-temps,
+## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
+func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
+	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment(s) laissé(s) en garnison.")
