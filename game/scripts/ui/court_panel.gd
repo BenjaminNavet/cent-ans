@@ -5,6 +5,8 @@ extends PanelContainer
 ## faction du joueur (`CampaignSim.get_faction_characters` + `get_character`), triable par
 ## âge/nom, filtrable par rôle. Portrait placeholder = carré de couleur de faction + initiales.
 ## Aucune règle ici : la simulation fournit rôle, titre, âge.
+## C3 : onglet « Arbre familial » (`FamilyTreeView`, `CampaignSim.get_family_tree`) ; le panneau
+## s'élargit tant que l'arbre est affiché.
 
 signal character_selected(character_id: String)
 signal closed
@@ -16,6 +18,12 @@ const FILTER_ALL := 0
 const FILTER_GENERAL := 1
 const FILTER_GOVERNOR := 2
 const FILTER_COURT := 3
+const TAB_LIST := 0
+const TAB_TREE := 1
+const TREE_UP := 2  # générations d'ascendants
+const TREE_DOWN := 3  # générations de descendants
+const LIST_WIDTH := 540.0
+const TREE_WIDTH := 1180.0
 
 @onready var title_label: Label = %TitleLabel
 @onready var sort_option: OptionButton = %SortOption
@@ -27,6 +35,16 @@ const FILTER_COURT := 3
 var _rows: Array[Dictionary] = []
 var _sort_mode: int = SORT_RANK
 var _filter_mode: int = FILTER_ALL
+
+## C3 : onglets, vue de l'arbre, personnage au centre de l'arbre.
+var tab_bar: TabBar
+var family_tree: FamilyTreeView
+var tree_box: VBoxContainer
+var tree_root_id: String = ""
+## Simulation interrogée pour l'arbre (défaut : `SimFacade.sim`) ; injectable pour les tests.
+var sim_source: Object = null
+var _tree_hint: Label
+var _current_tab: int = TAB_LIST
 
 
 func _ready() -> void:
@@ -46,6 +64,7 @@ func _ready() -> void:
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
+	_build_tree_tab()
 
 
 ## `rows` : `[{id, name, epithet, age, title, role, sex, faction}]` déjà résolus par
@@ -59,8 +78,100 @@ func show_court(rows: Array[Dictionary], faction_label: String, faction_color: C
 	if preset_filter != -1:
 		_filter_mode = preset_filter
 		filter_option.select(filter_option.get_item_index(preset_filter))
+		show_tab(TAB_LIST)
+	if tree_root_id == "" or not _rows.any(func(row: Dictionary) -> bool: return str(row.get("id", "")) == tree_root_id):
+		tree_root_id = str(rows[0].get("id", "")) if not rows.is_empty() else ""
 	_render()
+	if _current_tab == TAB_TREE:
+		refresh_tree()
 	show()
+
+
+# --- C3 : arbre familial ----------------------------------------------------------------------
+
+
+func _build_tree_tab() -> void:
+	var vbox := get_node("VBox") as VBoxContainer
+	tab_bar = TabBar.new()
+	tab_bar.name = "Tabs"
+	tab_bar.add_tab("Liste")
+	tab_bar.add_tab("Arbre familial")
+	tab_bar.set_tab_icon(TAB_LIST, HudStyle.icon("hud_court"))
+	tab_bar.set_tab_icon(TAB_TREE, HudStyle.icon("class_nobility"))
+	tab_bar.set_tab_icon_max_width(TAB_LIST, 18)
+	tab_bar.set_tab_icon_max_width(TAB_TREE, 18)
+	tab_bar.tab_changed.connect(func(tab: int) -> void: show_tab(tab))
+	vbox.add_child(tab_bar)
+	vbox.move_child(tab_bar, 1)
+
+	tree_box = VBoxContainer.new()
+	tree_box.name = "TreeBox"
+	tree_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tree_box.visible = false
+	var toolbar := HBoxContainer.new()
+	toolbar.add_theme_constant_override("separation", 6)
+	_tree_hint = Label.new()
+	_tree_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_tree_hint.add_theme_font_size_override("font_size", 12)
+	_tree_hint.add_theme_color_override("font_color", HudStyle.INK_SOFT)
+	toolbar.add_child(_tree_hint)
+	for spec in [["Recentrer sur le souverain", "⌂", func() -> void: recenter_tree("")],
+			["Dézoomer", "−", func() -> void: family_tree.set_zoom(family_tree.zoom / 1.2)],
+			["Zoomer", "+", func() -> void: family_tree.set_zoom(family_tree.zoom * 1.2)]]:
+		var button := Button.new()
+		button.text = spec[1]
+		button.tooltip_text = spec[0]
+		button.custom_minimum_size = Vector2(30, 0)
+		button.pressed.connect(spec[2])
+		toolbar.add_child(button)
+	tree_box.add_child(toolbar)
+	family_tree = FamilyTreeView.new()
+	family_tree.name = "FamilyTree"
+	family_tree.custom_minimum_size = Vector2(0, 480)
+	family_tree.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
+	family_tree.recenter_requested.connect(func(id: String) -> void: recenter_tree(id))
+	tree_box.add_child(family_tree)
+	vbox.add_child(tree_box)
+
+
+func show_tab(tab: int) -> void:
+	_current_tab = tab
+	if tab_bar.current_tab != tab:
+		tab_bar.set_current_tab(tab)
+	var tree := tab == TAB_TREE
+	for path in ["VBox/Controls", "VBox/Separator2", "VBox/Scroll"]:
+		(get_node(path) as Control).visible = not tree
+	empty_label.visible = not tree and rows_list.get_child_count() == 0 and not _rows.is_empty()
+	tree_box.visible = tree
+	offset_right = offset_left + (_tree_width() if tree else LIST_WIDTH)
+	if tree:
+		refresh_tree()
+
+
+func _tree_width() -> float:
+	var viewport_width := get_viewport_rect().size.x if is_inside_tree() else TREE_WIDTH
+	return clampf(viewport_width - offset_left - 16.0, LIST_WIDTH, TREE_WIDTH)
+
+
+## Recentre l'arbre sur `character_id` (vide = premier personnage de la cour, le souverain).
+func recenter_tree(character_id: String) -> void:
+	tree_root_id = character_id if character_id != "" else (str(_rows[0].get("id", "")) if not _rows.is_empty() else "")
+	refresh_tree()
+
+
+func refresh_tree() -> void:
+	var sim: Object = sim_source
+	if sim == null:
+		var facade := get_node_or_null("/root/SimFacade")
+		sim = facade.get("sim") if facade != null else null
+	if sim == null or not sim.has_method("get_family_tree") or tree_root_id == "":
+		family_tree.show_tree({})
+		_tree_hint.text = "Arbre indisponible (simulation sans liens de parenté)."
+		return
+	var tree: Dictionary = sim.call("get_family_tree", tree_root_id, TREE_UP, TREE_DOWN)
+	family_tree.show_tree(tree)
+	_tree_hint.text = "%d personnages sur %d générations — clic : fiche ; clic droit : recentrer ; Ctrl + molette : zoom" % [
+		family_tree.node_count(), family_tree.generation_count()]
 
 
 func _render() -> void:
@@ -86,7 +197,7 @@ func _render() -> void:
 		filtered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["age"]) > int(b["age"]))
 	else:
 		filtered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a["name"]) < str(b["name"]))
-	empty_label.visible = filtered.is_empty()
+	empty_label.visible = filtered.is_empty() and _current_tab == TAB_LIST
 	for row in filtered:
 		rows_list.add_child(_make_row(row))
 
