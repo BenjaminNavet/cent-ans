@@ -1,6 +1,6 @@
 # S2 — Incendies de siège : spécification
 
-Date : 2026-09-24. Lot S2 de la vague « sièges ». Nouvelle règle de la bataille de siège 3D
+Date : 2026-09-24. Lot S2 de la vague « sièges ». **État : fait** (cœur, pont, rendu, tests). Nouvelle règle de la bataille de siège 3D
 (`m8-sieges.md` § 2 et F5) : les maisons de la ville peuvent brûler. **Règle du cœur** (Rust,
 `sim-battle`) ; Godot ne fait que l'afficher (ADR `0008-incendies-regle-coeur.md`).
 
@@ -27,8 +27,9 @@ Tous les nombres sont dans `data/rules/siege_fire.json` (schéma
 - À l'allumage : `intensity` = `house.initial_intensity`, `fuel` = 1.
 - Chaque pas : `intensity` croît de `house.growth_per_s` × facteur météo `growth` jusqu'à 1 tant que
   le combustible dépasse `house.decline_fuel` ; ensuite elle décroît avec lui
-  (`intensity ≤ fuel / decline_fuel`). Le combustible baisse de `intensity × dt / burn_duration_s`,
-  la durée étant multipliée par le facteur météo `duration`. À `fuel` = 0 : `burnt`, intensité 0.
+  (`intensity ≤ fuel / decline_fuel`). Le combustible baisse de `dt / burn_duration_s` : une maison
+  brûle `burn_duration_s` × facteur météo `duration` secondes, de l'allumage à la ruine. À `fuel` = 0 :
+  `burnt`, intensité 0.
 - La porte (`SiegeWorks.gate_fire`) suit la même loi avec ses propres durées (`gate`) et perd
   `gate.damage_per_s × intensity` PV par seconde ; à 0 PV, elle est ouverte comme une porte enfoncée
   (« La porte, dévorée par les flammes, s'effondre ! »). Les pans de mur et les tours ne brûlent pas.
@@ -46,12 +47,13 @@ Tous les nombres sont dans `data/rules/siege_fire.json` (schéma
 - **Commande « incendier »** (`Command::Burn { units, house | gate }`) : un régiment (ni engin ni
   machine) à moins de `torch.reach_m` du bord de la maison (ou de la porte) y met le feu, chance
   `torch.chance` × météo `ignition`, intensité initiale `torch.initial_intensity`. Journal : « Les … mettent
-  le feu à une maison. » ou « Les torches ne prennent pas sous la pluie. ». Pour le **défenseur**,
+  le feu à une maison. » ou « Les torches des … ne prennent pas : le bois est trop mouillé. ». Pour le **défenseur**,
   les maisons des faubourgs s'incendient sans condition de distance (des hommes de la garnison
   sortent par les poternes avec des torches).
-- **Faubourgs** : `suburbs.count` maisons (`House.suburb = true`) posées à `suburbs.distance_m` en
-  avant de la façade attaquée, espacées de `suburbs.spacing_m`, en laissant libre la route de la porte
-  (`suburbs.gate_clearance_m`). Une garnison pilotée par l'IA les incendie au premier pas avec la
+- **Faubourgs** : `suburbs.count` maisons (`House.suburb = true`, rayon `suburbs.radius_m`) posées à
+  `suburbs.distance_m` à l'extérieur des courtines latérales (est et ouest), réparties entre les deux,
+  espacées de `suburbs.spacing_m` le long du mur. Pas devant la façade : placées là, elles barraient
+  la route des tours de siège et de l'infanterie (sonde : 0 victoire sur 20 à l'échelade). Une garnison pilotée par l'IA les incendie au premier pas avec la
   chance `suburbs.ai_burn_chance` (chaque maison tirée séparément) : « La garnison met le feu aux
   faubourgs pour dégager les abords des murailles. ». `count` = 0 les supprime.
 
@@ -94,35 +96,71 @@ tirages des autres règles (pas d'effet de bord sur la météo, le terrain ou le
 | allumage trébuchet / mangonneau / bombarde | 0,18 / 0,22 / 0,10 par volée |
 | allumage archers longs / archers montés / arbalétriers | 0,015 / 0,010 / 0,006 par volée |
 | repli par catégorie `ranged` / `siege` | 0,01 / 0,15 |
-| dépassement du point d'impact / portée d'allumage / porte | 18 m / 20 m / 12 m |
+| dépassement du point d'impact / portée d'allumage / porte | 18 m / 30 m / 12 m |
 | intensité initiale / croissance | 0,3 / 0,02 par s |
 | durée d'une maison / déclin sous | 180 s / 30 % de combustible |
-| propagation | toutes les 2 s, 0,05 à pleine intensité, bord à bord ≤ 20 m, vent ≤ 0,7 |
-| porte | dégâts 4 PV/s à pleine intensité, durée 200 s |
-| chaleur | ≤ 8 m du bord : 0,2 % des soldats et 0,8 de moral par s à pleine intensité |
+| propagation | toutes les 2 s, 0,06 à pleine intensité, bord à bord ≤ 30 m (les pâtés sont à 17-25 m), vent ≤ 0,7 |
+| porte | 4 PV/s à pleine intensité pendant 200 s (≈ 600 PV : une porte de fortification 0-1 cède, 2+ tient) |
+| chaleur | ≤ 8 m du bord : 0,15 % des soldats et 0,5 de moral par s à pleine intensité |
 | fumée | intensité ≥ 0,3, marge 6 m, tirs ×0,5 |
 | torche | à ≤ 8 m, chance 0,9, intensité initiale 0,5 |
-| faubourgs | 4 maisons à 55 m de la façade, espacées de 34 m, route de la porte libre sur 25 m, incendiés par l'IA avec 50 % de chance chacun |
+| faubourgs | 4 maisons (rayon 8 m) à 40 m des courtines est et ouest, espacées de 34 m, incendiées par l'IA avec 50 % de chance chacune |
+
+### Mesures (sonde, 20 graines, fortification 2)
+`cargo run --release -p sim-battle --example probe -- siege <brèche> [engins]`, avec les nouveaux
+interrupteurs `WEATHER=clear|rain|fog|snow` et `FIRE=off` :
+
+| scénario | victoires assaillant | durée moyenne | maisons touchées (sur ≈ 25) |
+|---|---|---|---|
+| `siege 0` (2 trébuchets + tour), temps clair, feu | 19/20 | 319 s | 8,2 |
+| `siege 0`, temps clair, sans feu | 20/20 | 294 s | 0 |
+| `siege 0`, pluie, feu | 20/20 | 300 s | 1,4 |
+| `siege 0 ""` (échelade), temps clair, feu | 9/20 | 255 s | 3,6 |
+| `siege 0 ""`, temps clair, sans feu | 8/20 | 256 s | 0 |
+| `siege 60`, météo tirée, feu | 19/20 | 211 s | 3,8 |
+
+Le feu ne renverse pas l'équilibre des sièges (F5d : échelade ≈ 8/20) ; par temps sec il rallonge
+l'assaut d'une demi-minute (rues brûlantes derrière la brèche), sous la pluie il reste marginal. Un
+premier réglage (chaleur 0,2 %/s et 0,8 de moral/s) donnait 16/20 et 331 s : trop pénalisant pour
+l'assaillant, dont l'IA ne contourne pas les rues en feu. Test du cœur : une maison allumée en
+atteint en moyenne 3,2 en 300 s par temps clair, 1,2 sous la pluie.
 
 ## 4. Pont et interface
 - `BattleSim.get_siege()` : chaque maison gagne `fire = {state: "intact"|"burning"|"burnt",
   intensity}` et `suburb` ; la racine gagne `gate_fire` (même forme), `wind: Vector2` (direction ×
   force), `houses_burning`, `houses_burnt`.
 - `issue_command({type: "burn", units: [ids], house: i})` ou `{type: "burn", units: [ids],
-  gate: true}`.
-- Godot : `game/scripts/battle/siege_fire_fx.gd` (flammes et fumée `GPUParticles3D` par maison en
+  gate: true}`. Refus : maison inconnue, déjà en feu, cible absente, régiment trop loin.
+- Débogage : `BattleSim.debug_ignite(house)` (la porte si `house` < 0).
+- Rendu : `game/scripts/battle/siege_fire_fx.gd` (flammes et fumée `GPUParticles3D` par maison en
   feu, fumée poussée par le vent, `OmniLight3D` vacillantes plafonnées aux 8 foyers les plus intenses,
-  maison brûlée abaissée et noircie avec des poutres calcinées), paramètres
-  `data/fx/siege_fire.json` (schéma `data/schemas/fx_siege_fire.schema.json`). `battle_siege.gd`
-  ne fait que l'appeler. Ligne HUD : « · N maison(s) en feu » à côté des brèches.
+  maison brûlée effondrée — instances abaissées dans les `MultiMesh` des maisons — avec un tas
+  noirci, des poutres calcinées et des braises), paramètres `data/fx/siege_fire.json` (schéma
+  `data/schemas/fx_siege_fire.schema.json`, valeurs par défaut dans le script si le fichier manque).
+  `battle_siege.gd` ne fait que l'appeler. Ligne HUD : « · N maison(s) en feu » à côté des brèches,
+  « porte en feu ».
+- Tests : `sim-battle/tests/fire.rs` (10 : règles embarquées et faubourgs, déterminisme,
+  propagation plus lente sous la pluie, maison qui se consume en ruine, ruine franchissable,
+  pertes et moral près d'un foyer, porte qui brûle puis cède, fumée, commande `burn`, faubourgs
+  incendiés par l'IA) ; `tools/tests/test_siege_fire_schema.py` ; scène
+  `game/tests/s2_fire_fx_test.gd` (flammes, lumières plafonnées, ligne HUD, ruines).
 
 ## 5. Choix consignés
 - **Règles embarquées** : `data/rules/siege_fire.json` est lu par `include_str!` dans `sim-battle`
   (la bataille ne reçoit pas `GameData`, et ajouter un champ à `BattleSetup`/`SiegeSetup` aurait
   touché une quinzaine de littéraux partagés avec d'autres lots). Modifier le fichier impose de
   recompiler le cœur ; le schéma est vérifié par `tools/tests/test_siege_fire_schema.py` et la
-  lecture par un test Rust.
-- **Flux RNG séparé** plutôt que le flux principal : les batailles de siège existantes gardent leurs
-  tirages (tests d'équilibrage F5d stables à feu éteint).
-- Pas de lutte contre le feu (chaînes de seaux) ni d'IA qui évite les maisons en feu : limites
-  connues, voir le rapport du lot.
+  lecture par un test Rust. ADR `0008-incendies-regle-coeur.md`.
+- **Flux RNG séparé** plutôt que le flux principal : le feu ne décale aucun autre tirage (météo,
+  terrain, combats) ; à feu éteint (`set_fire_rules(None)`) une bataille est identique à avant S2,
+  hors faubourgs.
+- **Faubourgs sur les flancs** plutôt que devant la porte (voir § 2.2).
+- **Commande `burn` du défenseur sur ses faubourgs sans condition de distance** : ses régiments sont
+  derrière les murs ; on suppose des porteurs de torches sortis par les poternes.
+- **Vent** : n'existait pas dans la simulation ; tiré au début de chaque siège dans le flux du feu, il
+  ne sert qu'au feu (propagation et dérive de la fumée à l'écran).
+- Limites connues : pas de lutte contre le feu (chaînes de seaux) ; l'IA tactique n'évite pas les
+  rues en feu et n'utilise pas la commande `burn` (sauf les faubourgs au premier pas) ; le feu ne
+  touche ni les engins ni les tours de siège (couverts de peaux mouillées, M8) ; l'église (modèle
+  unique) ne s'effondre pas à l'écran quand son disque brûle ; pas encore de bouton « incendier »
+  dans l'interface (commande disponible par le pont).

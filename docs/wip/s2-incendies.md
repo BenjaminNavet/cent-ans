@@ -1,18 +1,21 @@
 # WIP — S2 incendies de siège
 
-Spéc : `docs/design/s2-incendies.md`. Branche : `worktree-agent-a9315344c0b1dad9c`.
+Spéc : `docs/design/s2-incendies.md`. ADR : `docs/decisions/0008-incendies-regle-coeur.md`.
+Branche : `worktree-agent-a9315344c0b1dad9c` (non fusionnée).
 
 ## État
-- [x] Spéc écrite.
-- [x] Données `data/rules/siege_fire.json` + schéma `siege_fire_rules.schema.json` + pytest
-  `tools/tests/test_siege_fire_schema.py` (le cas `fx` attend `data/fx/siege_fire.json`).
-- [x] Cœur : `sim-battle/src/fire.rs` (types, règles embarquées), `src/sim/fire.rs` (tick, allumage,
-  propagation, chaleur, fumée, porte, faubourgs, commande `burn`), branché dans `sim.rs`
-  (`resolve_fire`, `incendiary_volley`, `smoke_factor`), maisons brûlées franchissables (`pathing.rs`).
-- [x] Tests `sim-battle/tests/fire.rs` (10) verts ; toute la suite sim-battle verte.
-- [ ] Pont `get_siege()` + commande `burn` (doc d'API).
-- [ ] Rendu `game/scripts/battle/siege_fire_fx.gd` + `data/fx/siege_fire.json`, ligne HUD.
-- [ ] Smoke, sonde (pluie/sans pluie), ADR 0008, spéc à jour (faubourgs latéraux, chiffres).
+- [x] Spéc écrite et mise à jour (faubourgs latéraux, durée de combustion fixe, mesures de la sonde).
+- [x] Données `data/rules/siege_fire.json` + schéma + pytest `tools/tests/test_siege_fire_schema.py`.
+- [x] Cœur : `sim-battle/src/fire.rs`, `src/sim/fire.rs`, branché dans `sim.rs` ; ruines franchissables
+  (`pathing.rs`) ; commande `burn` (`command.rs`) ; sonde `WEATHER=` / `FIRE=off`.
+- [x] Tests `sim-battle/tests/fire.rs` (10) ; `cargo test` complet vert, clippy propre.
+- [x] Pont `get_siege()` (fire, suburb, gate_fire, wind, compteurs), `burn`, `debug_ignite`.
+- [x] Rendu `game/scripts/battle/siege_fire_fx.gd` + `data/fx/siege_fire.json` (+ schéma), appel dans
+  `battle_siege.gd`, ligne HUD dans `battle_scene.gd`.
+- [x] Test Godot `game/tests/s2_fire_fx_test.gd` vert ; smoke vert.
+- [ ] Capture fenêtrée (reportée : mode silencieux actif, aucune fenêtre Godot autorisée).
 
 ## Prochaine étape
-Pont godot-bridge (`battle_sim.rs` : `get_siege`), puis rendu Godot.
+Lot terminé, en attente de fusion. Points ouverts : capture `docs/img/s2/…` quand le mode silencieux
+sera levé (`battle.tscn -- --siege`, puis `debug_ignite`), bouton « incendier » dans l'interface,
+IA tactique qui évite les rues en feu.
