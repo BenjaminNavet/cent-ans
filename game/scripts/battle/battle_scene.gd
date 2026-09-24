@@ -79,6 +79,7 @@ var _screenshot_path: String = ""
 var _benchmark: bool = false
 var _bench_frames: int = 0
 var _bench_time: float = 0.0
+var _bench_cost := Vector3.ZERO  # BV1 : cumul (script, rendu CPU, rendu GPU) en ms
 var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
 var _pad_units: int = 0
@@ -445,6 +446,8 @@ func _process(delta: float) -> void:
 			# BV1 : l'autoload `Settings` réimpose la synchro verticale du joueur (60 Hz) ; le banc
 			# d'essai la coupe pour que les FPS départagent enfin les variantes.
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 			if _bench_at > 0.0:
 				_fast_forward(_bench_at)
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
@@ -452,6 +455,11 @@ func _process(delta: float) -> void:
 			_apply_camera_override()  # banc d'essai rapproché (lot B1)
 		_bench_frames += 1
 		_bench_time += delta
+		# BV1 : temps processeur du script (ms) et du rendu (CPU / GPU, ms) : départagent les
+		# variantes quand l'écran plafonne les FPS ou que la machine est chargée.
+		var vp := get_viewport().get_viewport_rid()
+		if _bench_frames > 10:
+			_bench_cost += Vector3(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, RenderingServer.viewport_get_measured_render_time_cpu(vp), RenderingServer.viewport_get_measured_render_time_gpu(vp))
 		if _bench_frames == 600:
 			var fps := _bench_frames / maxf(_bench_time, 0.001)
 			var soldiers := 0
@@ -459,6 +467,8 @@ func _process(delta: float) -> void:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+			var cost := _bench_cost / float(_bench_frames - 10)
+			print("BattleScene benchmark: per frame %.2f ms script, %.2f ms render CPU, %.2f ms render GPU" % [cost.x, cost.y, cost.z])
 			if effects != null and effects.volleys != null:
 				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
