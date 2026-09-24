@@ -398,10 +398,11 @@ func _start_fine_job(index: int) -> void:
 	_fine_jobs[index] = {"task": task, "job": job}
 
 
-func _collect_fine_jobs() -> void:
+## Récupère les tâches de relief fin terminées (toutes, en attendant, avec `block`).
+func _collect_fine_jobs(block: bool = false) -> void:
 	for index in _fine_jobs.keys():
 		var item: Dictionary = _fine_jobs[index]
-		if not WorkerThreadPool.is_task_completed(item["task"]):
+		if not block and not WorkerThreadPool.is_task_completed(item["task"]):
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
 		_fine_jobs.erase(index)
@@ -430,9 +431,9 @@ func fine_ready() -> bool:
 
 
 ## Attend les tâches de relief fin en cours (captures, sortie).
+## Les maillages sont installés au prochain `update_lod`.
 func wait_fine_jobs() -> void:
-	for index in _fine_jobs.keys():
-		WorkerThreadPool.wait_for_task_completion(_fine_jobs[index]["task"])
+	_collect_fine_jobs(true)
 
 
 func _wait_fine_jobs() -> void:
