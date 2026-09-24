@@ -268,6 +268,50 @@ func _draw_path(ids: PackedStringArray) -> void:
 	map.path_preview.show_points(points, map.camera_rig.distance, ids)
 
 
+# --- Captures (`--stage=settlement|settlement_orders`) ---------------------------------
+
+
+func stage_screenshot(stage: String) -> void:
+	if not available():
+		return
+	if stage == "settlement":
+		# Ville du joueur la plus peuplée de bâtiments, onglet Garnison avec le recrutement ouvert.
+		var best := ""
+		var best_score := -1
+		for entry in map.sim.call("settlements"):
+			if str(entry["kind"]) != "town" or str(entry["owner"]) != map.player_faction or str(entry["controller"]) != map.player_faction:
+				continue
+			var detail: Dictionary = map.sim.call("settlement_detail", str(entry["id"]))
+			var score := (detail.get("buildings", PackedStringArray()) as PackedStringArray).size() * 10 + (detail.get("garrison", []) as Array).size()
+			if score > best_score:
+				best_score = score
+				best = str(entry["id"])
+		if best != "":
+			open_settlement(best, true)
+			map.camera_rig.snap()
+			panel.show_recruit()
+		return
+	var ids: PackedStringArray = map.player_army_ids()
+	if ids.is_empty():
+		return
+	map.select_army(ids[0])
+	# Cible à mi-portée : le chemin reste dans le cadre.
+	var costs: Array = reachable.values()
+	costs.sort()
+	var median: int = int(costs[costs.size() / 2]) if not costs.is_empty() else 0
+	var target := ""
+	for id in reachable:
+		if int(reachable[id]) >= median:
+			target = str(id)
+			break
+	var world: Vector3 = map.armies.world_position_of(ids[0])
+	map.camera_rig.look_at_point(world, 260.0)
+	map.camera_rig.snap()
+	if target != "":
+		hovered_settlement = target
+		preview_to(target, settlement_name(target))
+
+
 # --- Survol des colonies ----------------------------------------------------------------
 
 
