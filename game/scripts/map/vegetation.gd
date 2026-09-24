@@ -16,9 +16,14 @@ extends Node3D
 ##   (`TerrainBuilder.surface_grid`) et recalés quand une tuile change de niveau (relief fin
 ##   8192², LOD proche ou lointain, signal `chunk_surface_changed`) : nouveaux tampons calculés
 ##   dans une tâche `VegetationGroundJob`, installés en une fois (pas d'à-coup).
+## - Lot V4 (A1-10) : quatre essences (chêne, hêtre, conifère de montagne, haie ; maillages Blender
+##   `campaign_trees.glb`), houppiers élargis au cœur des massifs (canopée continue), teinte
+##   saisonnière (`foliage.gdshader`, saison lue dans la date de la simulation ; `--season=<0-3>`
+##   la force pour les captures). Couverture forestière : `data/map/forest_cover.json`.
 ## Purement visuel : aucune règle de jeu.
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
+const SEASON_INDEX := {"spring": 0, "summer": 1, "autumn": 2, "winter": 3}
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
@@ -78,6 +83,9 @@ var _rig: Node3D
 var _frame: int = 0
 var _log_bursts := false
 var _warm := false
+## Saison affichée (0 printemps … 3 hiver) ; -1 : lue dans la simulation.
+var season_override: int = -1
+var _season: int = -1
 
 
 func _ready() -> void:
@@ -85,6 +93,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
 			_log_bursts = true
+		elif arg.begins_with("--season="):
+			season_override = clampi(int(arg.substr(9)), 0, 3)
 
 
 func _exit_tree() -> void:
@@ -100,6 +110,7 @@ func build(data: MapData) -> void:
 	stats["source"] = mask.source
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
+	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.
 	for index in data.provinces if extra_exclusions.is_empty() else {}:
@@ -141,6 +152,22 @@ func _process(_delta: float) -> void:
 		return
 	var distance: float = _rig.get("distance") if _rig != null else camera.global_position.y
 	update_view(camera.global_position, distance)
+	if _frame % 30 == 1:
+		_update_season()
+
+
+## Saison de la carte → teinte du feuillage (printemps tendre, automne roux, hiver dénudé).
+func _update_season() -> void:
+	var value := season_override
+	if value < 0:
+		var sim: Variant = get_parent().get("sim") if get_parent() != null else null
+		if sim is Object and (sim as Object).has_method("get_date_label"):
+			value = int(SEASON_INDEX.get(RichTooltip.season_of(str((sim as Object).call("get_date_label"))), 1))
+		else:
+			value = 1
+	if value != _season and _material != null:
+		_season = value
+		_material.set_shader_parameter("season", value)
 
 
 func _try_autobind() -> void:
@@ -292,10 +319,11 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 			multimesh.visible_instance_count = ceili(multimesh.instance_count * fraction)
 
 
+## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
+## conifère modélisés sous Blender (`VegetationMeshes.essence`).
 func _meshes(detailed: bool) -> Array:
-	if detailed:
-		return [VegetationMeshes.deciduous(), VegetationMeshes.conifer(), VegetationMeshes.hedge()]
-	return [VegetationMeshes.deciduous_low(), VegetationMeshes.conifer_low(), VegetationMeshes.hedge_low()]
+	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
+		VegetationMeshes.essence("fir", detailed), VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()]
 
 
 func _start_job(index: int) -> void:
@@ -439,7 +467,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 			multimesh.instance_count = count
 			multimesh.buffer = job.buffers[slot]
 			var mmi := MultiMeshInstance3D.new()
-			mmi.name = ["Deciduous", "Conifer", "Hedge"][kind]
+			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh
 			mmi.material_override = _material
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

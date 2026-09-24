@@ -12,6 +12,9 @@ extends RefCounted
 ## des tâches de `WorkerThreadPool` (le bruit est dupliqué par tâche, voir `make_noise`).
 
 const SPLAT_FILE := "splat.png"
+## Lot V4 : sources interchangeables de la couverture forestière et des essences.
+const FOREST_COVER_FILE := "forest_cover.json"
+const CHANNELS := {"r": 0, "g": 1, "b": 2, "a": 3}
 
 ## Densité de forêt de base par terrain dominant (repli procédural).
 const FOREST_BY_TERRAIN := {
@@ -53,11 +56,23 @@ var _terrain_by_index: PackedStringArray = PackedStringArray()
 var _hedge_terrain: PackedByteArray = PackedByteArray()
 var _landuse_bytes: PackedByteArray = PackedByteArray()
 var _landuse_size: Vector2i = Vector2i.ZERO
+## Lot V4 : couverture forestière (octets RGBA8, canal, seuils) et essences optionnelles.
+var cover_source: String = ""
+var _cover_bytes: PackedByteArray = PackedByteArray()
+var _cover_size: Vector2i = Vector2i.ZERO
+var _cover_channel: int = 2
+var _cover_low: float = 0.22
+var _cover_high: float = 0.68
+var _essence_bytes: PackedByteArray = PackedByteArray()
+var _essence_size: Vector2i = Vector2i.ZERO
+var _essence_channels: Vector3i = Vector3i(0, 1, 2)
+var _beech: Dictionary = {"altitude_low_m": 150.0, "altitude_high_m": 750.0, "patch_px": 22.0, "south_oak": 0.35}
 
 
 func setup(data: MapData) -> void:
 	map_data = data
 	_load_splat()
+	_load_forest_cover()
 	_load_province_terrains()
 	# Densité de haies partagée avec le shader de terrain (canal B, bocage flouté).
 	var landuse := VegetationFields.landuse(data)
@@ -87,6 +102,64 @@ func _load_splat() -> void:
 	splat_size = image.get_size()
 	_splat_bytes = image.get_data()
 	source = "splat"
+
+
+## Lot V4 : `data/map/forest_cover.json` → raster de couverture (défaut : splat, canal B) et,
+## en option, raster des essences (chêne, hêtre, conifères).
+func _load_forest_cover() -> void:
+	var path := map_data.map_dir.path_join(FOREST_COVER_FILE)
+	var config: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	if not (config is Dictionary):
+		return
+	var cover: Dictionary = config.get("cover", {})
+	var file := str(cover.get("file", SPLAT_FILE))
+	_cover_channel = int(CHANNELS.get(str(cover.get("channel", "b")), 2))
+	_cover_low = float(cover.get("low", _cover_low))
+	_cover_high = float(cover.get("high", _cover_high))
+	if file == SPLAT_FILE and not _splat_bytes.is_empty():
+		_cover_bytes = _splat_bytes
+		_cover_size = splat_size
+		cover_source = file
+	else:
+		var image := _rgba8(map_data.map_dir.path_join(file))
+		if image != null:
+			_cover_bytes = image.get_data()
+			_cover_size = image.get_size()
+			cover_source = file
+		else:
+			push_warning("VegetationMask: forest cover %s unreadable" % file)
+	var essences: Variant = config.get("essences")
+	if essences is Dictionary:
+		var image := _rgba8(map_data.map_dir.path_join(str(essences.get("file", ""))))
+		if image != null:
+			_essence_bytes = image.get_data()
+			_essence_size = image.get_size()
+			_essence_channels = Vector3i(int(CHANNELS.get(str(essences.get("oak", "r")), 0)),
+				int(CHANNELS.get(str(essences.get("beech", "g")), 1)), int(CHANNELS.get(str(essences.get("conifer", "b")), 2)))
+	var beech: Variant = config.get("beech")
+	if beech is Dictionary:
+		_beech.merge(beech, true)
+
+
+static func _rgba8(path: String) -> Image:
+	if not FileAccess.file_exists(path):
+		return null
+	var image := Image.load_from_file(path)
+	if image == null or image.is_empty():
+		return null
+	if image.get_format() != Image.FORMAT_RGBA8:
+		image.convert(Image.FORMAT_RGBA8)
+	return image
+
+
+static func _texel(bytes: PackedByteArray, size: Vector2i, map_size: Vector2i, x: float, y: float, channel: int) -> float:
+	var px := clampi(int(x * size.x / map_size.x), 0, size.x - 1)
+	var py := clampi(int(y * size.y / map_size.y), 0, size.y - 1)
+	return bytes[(py * size.x + px) * 4 + channel] / 255.0
+
+
+func has_forest_cover() -> bool:
+	return not _cover_bytes.is_empty()
 
 
 func _load_province_terrains() -> void:
@@ -154,7 +227,7 @@ func treeline_m(y: float) -> float:
 ## `noise` : bruit propre à l'appelant (`make_noise`).
 func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var height_m := map_data.height_m_at(x, y)
-	var result := {"forest": 0.0, "crops": 0.0, "conifer": 0.0, "hedge": 0.0, "height_m": height_m}
+	var result := {"forest": 0.0, "crops": 0.0, "conifer": 0.0, "beech": 0.0, "hedge": 0.0, "height_m": height_m}
 	if height_m <= 1.0 or not map_data.is_land_px(int(x), int(y)):
 		return result
 	var slope := slope_at(x, y)
@@ -188,6 +261,8 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 		forest *= lerpf(0.55, 1.0, smoothstep(20.0, 180.0, height_m))
 		crops = crop_base * (1.0 - forest)
 		crops *= 1.0 - smoothstep(600.0, 1100.0, height_m)
+	if has_forest_cover():
+		forest = smoothstep(_cover_low, _cover_high, _texel(_cover_bytes, _cover_size, map_data.size, x, y, _cover_channel))
 	forest *= altitude_factor * slope_factor
 	result["forest"] = forest
 	result["crops"] = crops * slope_factor
@@ -195,6 +270,20 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var north := 1.0 - clampf(y / maxf(map_data.size.y, 1.0), 0.0, 1.0)
 	var conifer := smoothstep(treeline * 0.35, treeline * 0.7, height_m) + smoothstep(0.62, 0.85, north)
 	result["conifer"] = clampf(conifer + n * 0.25, 0.0, 1.0)
+	# Lot V4 : chênaie / hêtraie, par taches (le hêtre monte en altitude, recule dans le Midi).
+	var patch: float = 48.0 / float(_beech["patch_px"])
+	var n2 := noise.get_noise_2d(x * patch + 5171.0, y * patch - 3307.0)
+	var south := smoothstep(0.55, 0.78, clampf(y / maxf(map_data.size.y, 1.0), 0.0, 1.0))
+	var beech := 0.2 + 0.7 * smoothstep(float(_beech["altitude_low_m"]), float(_beech["altitude_high_m"]), height_m) + 0.9 * n2 - float(_beech["south_oak"]) * south
+	result["beech"] = smoothstep(0.35, 0.65, beech)
+	if not _essence_bytes.is_empty():
+		var oak_share := _texel(_essence_bytes, _essence_size, map_data.size, x, y, _essence_channels.x)
+		var beech_share := _texel(_essence_bytes, _essence_size, map_data.size, x, y, _essence_channels.y)
+		var conifer_share := _texel(_essence_bytes, _essence_size, map_data.size, x, y, _essence_channels.z)
+		var total := oak_share + beech_share + conifer_share
+		if total > 0.01:
+			result["conifer"] = conifer_share / total
+			result["beech"] = beech_share / maxf(oak_share + beech_share, 0.001)
 	result["hedge"] = hedge_at(x, y)
 	return result
 

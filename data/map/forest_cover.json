@@ -1,0 +1,16 @@
+{
+  "description": "Sources du rendu des forêts de la carte de campagne (lot V4, A1-10). Interchangeables : une carte de couverture forestière (ex. forêts historiques vers 1340, lot R1) remplace la splatmap sans toucher au code. Chemins relatifs à data/map/. Rendu seulement.",
+  "cover": {
+    "file": "splat.png",
+    "channel": "b",
+    "low": 0.22,
+    "high": 0.68
+  },
+  "essences": null,
+  "beech": {
+    "altitude_low_m": 150.0,
+    "altitude_high_m": 750.0,
+    "patch_px": 22.0,
+    "south_oak": 0.35
+  }
+}

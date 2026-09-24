@@ -38,7 +38,8 @@ float river_carve(vec2 p, vec2 size) {
 // bord, herbe grasse sur la berge ; berges inclinées vers l'eau dans l'ombrage (normale `n` en
 // repère monde). `footprint` : pixels carte par pixel écran.
 void river_banks(vec2 p, vec2 size, float footprint, inout vec3 col, inout float roughness, inout vec3 n) {
-	if (!has_river_bed) {
+	// Au dézoom, berges plus fines que le pixel : rien à peindre (et aucun accès texture).
+	if (!has_river_bed || footprint > river_bank_px * 2.5) {
 		return;
 	}
 	float rsd = river_sd_at(p, size);

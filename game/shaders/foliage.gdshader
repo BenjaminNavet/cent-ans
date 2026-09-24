@@ -1,6 +1,8 @@
 // Arbres de la carte de campagne (lot V3, `vegetation.gd`), instanciés par MultiMesh.
 // COLOR (sommet) : RVB = albédo de base, A = poids du vent (0 au pied, 1 en haut).
 // INSTANCE_CUSTOM : RVB = teinte multiplicative de l'instance, A = graine aléatoire [0, 1].
+// UV (lot V4) : x = essence (0 chêne, 1 hêtre, 2 conifère, 3 haie), y = 1 houppier / 0 tronc ;
+// teinte saisonnière selon `season` (0 printemps, 1 été, 2 automne, 3 hiver).
 // Disparition progressive avec la distance à `view_origin` (fournie par le script, identique
 // dans la passe d'ombre) : chaque arbre rétrécit puis disparaît à un seuil qui dépend de sa
 // graine, ce qui éclaircit la forêt au lieu de la couper net.
@@ -16,10 +18,23 @@ uniform float density : hint_range(0.05, 1.0) = 1.0;
 uniform float wind_strength = 0.035;
 uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
+// Lot V4 (A1-10) : saison de la carte (réglée par vegetation.gd depuis la date de la simulation).
+uniform int season : hint_range(0, 3) = 0;
+uniform vec3 spring_tint = vec3(1.10, 1.22, 0.78);
+uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
+uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
+uniform vec3 autumn_hedge = vec3(0.20, 0.07, 0.03);
+uniform vec3 winter_bare = vec3(0.075, 0.062, 0.050);
+// Altitude monde (unités) au-dessus de laquelle les conifères sont poudrés de neige en hiver.
+uniform float winter_snow_y = 4.0;
 
 varying float v_ao;
 varying vec3 v_tint;
 varying vec3 v_local;
+varying float v_essence;
+varying float v_crown;
+varying float v_seed;
+varying float v_world_y;
 
 // Bruit de valeur 3D : touffes de feuillage (variation d'albédo à l'échelle des feuilles).
 float hash3(vec3 p) {
@@ -50,6 +65,14 @@ void vertex() {
 	float gust = 0.6 + 0.4 * sin(phase * 0.37);
 	float sway = (sin(phase + seed * 6.2831) * gust + 0.3 * sin(TIME * 2.3 + seed * 20.0)) * wind_strength;
 	float weight = COLOR.a * COLOR.a;
+	v_essence = UV.x;
+	v_crown = UV.y;
+	v_seed = seed;
+	v_world_y = origin.y;
+	// Hiver : houppiers des feuillus dénudés, plus légers (on devine la ramure).
+	if (season == 3 && UV.y > 0.5 && UV.x < 1.5) {
+		VERTEX.xz *= 0.82;
+	}
 	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
 	VERTEX.x += sway * weight;
 	VERTEX.z += sway * 0.6 * weight;
@@ -61,11 +84,39 @@ void vertex() {
 void fragment() {
 	vec3 tint = v_tint;
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
-	ALBEDO = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
+	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
+	if (v_crown > 0.5) {
+		float lum = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+		bool broadleaf = v_essence < 1.5;
+		bool hedge = v_essence > 2.5;
+		if (season == 0 && (broadleaf || hedge)) {
+			albedo *= spring_tint;
+		} else if (season == 2) {
+			// Automne : chênes roux-olive, hêtres cuivrés, haies rousses ; quelques retardataires verts.
+			float turn = smoothstep(0.15, 0.45, fract(v_seed * 7.13)) * mix(0.7, 1.0, leaves);
+			vec3 target = v_essence < 0.5 ? autumn_oak : (v_essence < 1.5 ? autumn_beech : autumn_hedge);
+			if (v_essence > 1.5 && v_essence < 2.5) {
+				turn = 0.0;
+			}
+			albedo = mix(albedo, target * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
+		} else if (season == 3) {
+			if (broadleaf) {
+				albedo = winter_bare * mix(0.8, 1.2, leaves);
+			} else if (hedge) {
+				albedo = mix(albedo, winter_bare, 0.7);
+			} else {
+				// Conifères : plus sombres, neige sur les branches exposées en altitude.
+				albedo *= 0.8;
+				float snow = smoothstep(winter_snow_y - 1.0, winter_snow_y + 1.0, v_world_y) * smoothstep(0.35, 0.8, leaves);
+				albedo = mix(albedo, vec3(0.75, 0.78, 0.82), snow * 0.7);
+			}
+		}
+	}
+	ALBEDO = albedo;
 	ROUGHNESS = roughness_value;
 	SPECULAR = 0.25;
 	AO = v_ao;
 	AO_LIGHT_AFFECT = 0.4;
 	// Lumière transmise à travers le feuillage, vue à contre-jour.
-	BACKLIGHT = COLOR.rgb * tint * 0.35;
+	BACKLIGHT = albedo * (season == 3 && v_essence < 1.5 ? 0.1 : 0.35);
 }
