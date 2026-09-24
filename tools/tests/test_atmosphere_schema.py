@@ -26,7 +26,9 @@ def test_atmosphere_references_exist() -> None:
     atmosphere = _load("fx/atmosphere.json")
     skies = atmosphere["skies"]
     for sky in skies.values():
-        assert (ROOT / "game" / sky["path"].removeprefix("res://")).is_file(), sky["path"]
+        assert (ROOT / "game" / sky["path"].removeprefix("res://")).is_file(), sky[
+            "path"
+        ]
     for weather, look in atmosphere["battle"].items():
         for season, sky_id in look["sky"].items():
             assert sky_id in skies, (weather, season, sky_id)
