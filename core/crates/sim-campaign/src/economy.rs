@@ -69,10 +69,10 @@ pub const ADMINISTRATION_PER_PROVINCE: f64 = 0.01;
 /// Ceiling of the administration share.
 pub const ADMINISTRATION_MAX: f64 = 0.35;
 
-/// A treasury above this many seasons of income feeds an opulent court.
-pub const OPULENCE_SEASONS: i64 = 8;
-/// Share of that excess spent by the court every season (percent).
-pub const OPULENCE_PERCENT: i64 = 3;
+/// A treasury above this many seasons of income feeds an opulent court (F4: 8 → 6).
+pub const OPULENCE_SEASONS: i64 = 6;
+/// Share of that excess spent by the court every season (percent; F4: 3 → 10).
+pub const OPULENCE_PERCENT: i64 = 10;
 
 /// Share of income taken by administration for a realm of `provinces`.
 pub fn administration_rate(provinces: usize) -> f64 {
@@ -293,8 +293,8 @@ impl CampaignState {
     }
 
     /// Court and administration costs of the season: a share of income that
-    /// grows with the number of provinces held, plus 3 % of any treasury
-    /// above eight seasons of income (M10 balance).
+    /// grows with the number of provinces held, plus 10 % of any treasury
+    /// above six seasons of income (M10 balance, F4).
     pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
         let provinces = self
             .provinces

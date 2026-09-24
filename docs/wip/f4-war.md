@@ -27,5 +27,15 @@ Alliances : Auld Alliance 2 % des tours, Angleterre-Flandre/Hainaut/Brabant 0 %,
 Alphonse IV (46 ans) commande l'armée portugaise, attaque la Castille à l'été 1337, perd et meurt
 (5 % par défaite) ; son fils Pierre Ier n'existe pas dans `data/characters` → aucun héritier.
 
+## Fait (commits wip)
+- Point 6 : `chr_pedro_i_de_portugal`, `chr_amedee_vi_de_savoie`, `RULER_DEATH_PERMILLE` 10 ‰ (test `f4_succession.rs`).
+- Diplomatie IA (`diplomacy.rs`, section IA) : guerre de prétention, cobelligérance, alliances contre les rivaux,
+  vassal opportuniste, conditions de reddition, `answers_call_to_arms`, raisons d'évaluation F4.
+- Économie IA (`campaign.rs`) : trésor dormant dépensé, licenciement anticipé, budget des bâtiments, dons à l'Église ;
+  cour opulente 6 saisons / 10 % (`economy.rs`).
+- Mariages IA (souverain et héritier d'abord, âge fécond, maisons régnantes amies, offres au joueur).
+- Armées : prétention au trône = toutes les provinces de la couronne ; derniers bastions épargnés.
+- Tests IA `core/crates/ai/tests/f4_war.rs` (écrits, à faire passer).
+
 ## Prochaine étape
-Point 6 (données + mort des souverains au combat), puis guerre de prétention.
+Mesurer (century_probe), régler (Écosse, banqueroutes des petites factions), tests, docs m9-ai § F4 + status.md.
