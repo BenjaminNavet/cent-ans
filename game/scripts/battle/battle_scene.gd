@@ -276,6 +276,19 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
+	effects.volleys.sound_event.connect(_on_sound_event)
+
+
+## BV1 : point d'accroche audio. Les effets n'émettent que des événements nommés
+## (« arrow_volley », « bolt_volley ») ; l'API audio du lot AU1 (`BattleAudio.play_at(event,
+## position)`, autoload ou nœud enfant « BattleAudio ») les joue si elle est présente.
+func _on_sound_event(event: StringName, position: Vector3) -> void:
+	var audio := get_node_or_null("/root/BattleAudio")
+	if audio == null:
+		audio = get_node_or_null("BattleAudio")
+	if audio != null and audio.has_method("play_at"):
+		audio.call("play_at", event, position)
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
@@ -285,7 +298,7 @@ func _update_effects(dt: float) -> void:
 		return
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
-	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, battle.call("get_shots"))
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -389,6 +402,9 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		if _bench_frames == 0:
+			# BV1 : l'autoload `Settings` réimpose la synchro verticale du joueur (60 Hz) ; le banc
+			# d'essai la coupe pour que les FPS départagent enfin les variantes.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 			if _bench_at > 0.0:
 				_fast_forward(_bench_at)
 			_bench_start_elapsed = float(battle.call("get_elapsed"))

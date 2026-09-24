@@ -8,7 +8,9 @@ extends Node3D
 ##   cloche ou des carreaux plus tendus, avec une traînée légère, qui restent fichés au sol ;
 ## - bombardes : éclair, fumée, boulet et gerbe de terre à l'impact ; pierres des engins ;
 ## - choc des charges : gerbe de poussière au contact.
-## Sang : aucun (public large, cf. `docs/wip/b4-effets-animations.md`).
+## BV1 : les volées de traits et de carreaux viennent des événements de tir du cœur
+## (`BattleSim.get_shots()`) et sont dessinées en masse par `BattleVolleys` (traits fichés, pieux,
+## pavois, flèches enflammées) ; les touches alimentent `BattleBlood` (réglage « Sang »).
 ##
 ## Budget : émetteurs de particules GPU en nombre fixe (réaffectés chaque image aux régiments
 ## les plus proches de la caméra), traits dans deux MultiMesh à tampon circulaire dont la
@@ -41,7 +43,11 @@ const STICK := [30.0, 30.0, 0.0, 0.0]
 const DUST_COLOR := Color(0.74, 0.66, 0.52)
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
+signal hit_landed(pos: Vector3, time: float)
+
 var enabled_dust: bool = true
+## BV1 : volées massives et traits fichés.
+var volleys: BattleVolleys = null
 var time_now: float = 0.0
 ## Traits lancés depuis le début (banc d'essai, captures).
 var launched: int = 0
@@ -99,6 +105,10 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	}
 	for key in _bursts:
 		_burst_next[key] = 0
+	volleys = BattleVolleys.new()
+	volleys.name = "Volleys"
+	add_child(volleys)
+	volleys.setup(height_at)
 	_flash = OmniLight3D.new()
 	_flash.light_color = Color(1.0, 0.75, 0.4)
 	_flash.omni_range = 18.0
@@ -111,6 +121,8 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 ## Avance le temps des effets (`anim_time` de la bataille, figé en pause).
 func tick_time(now: float, dt: float) -> void:
 	time_now = now
+	if volleys != null:
+		volleys.tick_time(now)
 	for mat in _materials:
 		mat.set_shader_parameter("time_now", now)
 	while not _pending.is_empty() and float(_pending[0]["time"]) <= now:
@@ -127,11 +139,18 @@ func tick_time(now: float, dt: float) -> void:
 
 
 ## Suit les régiments (`BattleSim.get_units()`) : volées, charges, poussière, gués.
-func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3) -> void:
+## `shots` (BV1) : événements de tir du cœur (`get_shots()`) ; `null` = ancien déclencheur (baisse
+## des munitions), gardé pour les bancs d'essai hors simulation.
+func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3, shots: Variant = null) -> void:
 	tick_time(now, dt)
 	var by_id := {}
 	for unit in units:
 		by_id[int(unit["id"])] = unit
+	if shots is Array:
+		for shot in shots:
+			_on_core_shot(shot, by_id, soldiers, camera_pos)
+	if volleys != null:
+		volleys.update_fieldworks(units)
 	var dusty: Array = []
 	var wet: Array = []
 	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
@@ -268,8 +287,32 @@ func burst(pos: Vector3, kind: String, scale: float = 1.0) -> void:
 # --- Volées -----------------------------------------------------------------------------
 
 
-func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3) -> void:
-	var target := _volley_target(unit, by_id)
+## BV1 : un tir résolu par le cœur. Traits et carreaux : volée massive (`BattleVolleys`) ;
+## boulets et pierres : ancien chemin (engins, éclair, fumée).
+func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3) -> void:
+	var shooter: Dictionary = by_id.get(int(shot.get("shooter", -1)), {})
+	if shooter.is_empty() or not bool(shooter.get("present", false)):
+		return
+	var kind := str(shot.get("kind", "arrow"))
+	if kind == "arrow" or kind == "bolt":
+		if volleys == null:
+			return
+		var hits: Array = volleys.on_shot(shot, by_id, camera_pos)
+		for hit in hits:
+			hit_landed.emit(hit["pos"], float(hit["time"]))
+		return
+	var pos := Vector3(float(shooter["x"]), 0.0, float(shooter["z"]))
+	if camera_pos.distance_to(pos) >= EFFECT_DISTANCE:
+		return
+	var aim: Vector2 = shot.get("aim", Vector2(pos.x, pos.z))
+	var target: Dictionary = by_id.get(int(shot.get("target", -1)), {})
+	if target.is_empty():
+		target = {"x": aim.x, "z": aim.y, "y": _height_at.call(aim.x, aim.y) if _height_at.is_valid() else 0.0, "width": 12.0}
+	_on_volley(shooter, {-999: target}, soldiers, camera_pos, target)
+
+
+func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3, forced: Dictionary = {}) -> void:
+	var target := forced if not forced.is_empty() else _volley_target(unit, by_id)
 	if target.is_empty():
 		return
 	var pos := Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))

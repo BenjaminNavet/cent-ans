@@ -6,7 +6,7 @@
 //! through JSON with the serde types of `sim-battle`; positions go out as
 //! packed float arrays.
 
-use data_model::UnitCategory;
+use data_model::{Ability, UnitCategory};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 use serde_json::Value;
@@ -355,6 +355,8 @@ impl BattleSim {
                     "siege_tower" => unit.siege_tower(),
                     "wall_breaker" => unit.wall_breaker(),
                     "pavise" => unit.pavise.is_some(),
+                    "pavise_cover" => unit.pavise.is_some()
+                        || (unit.has(Ability::Pavise) && unit.state != UnitState::Marching),
                     "dismounted" => unit.dismounted,
                     "order_morale" => unit.order_morale,
                 };
