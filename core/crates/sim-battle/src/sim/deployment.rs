@@ -95,6 +95,24 @@ impl BattleSim {
         Ok(())
     }
 
+    /// French text of `error` naming the regiment by its display name
+    /// (« Les Chevaliers doivent être placés… ») instead of its id.
+    pub fn error_text(&self, error: &CommandError) -> String {
+        let name = |id: &u32| self.unit(*id).map(|u| u.name.clone());
+        let named = match error {
+            CommandError::OutsideZone(id) => name(id)
+                .map(|n| format!("Les {n} doivent être placés dans votre zone de déploiement")),
+            CommandError::NotYours(id) => {
+                name(id).map(|n| format!("Les {n} ne sont pas sous vos ordres"))
+            }
+            CommandError::Unavailable(id) => {
+                name(id).map(|n| format!("Les {n} ne répondent plus (déroute ou hors du champ)"))
+            }
+            _ => None,
+        };
+        named.unwrap_or_else(|| error.to_string())
+    }
+
     /// Ends the deployment phase: time runs from the next tick.
     pub fn start_battle(&mut self) -> Result<(), CommandError> {
         if !self.deploying {
