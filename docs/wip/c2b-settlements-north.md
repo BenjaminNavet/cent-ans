@@ -5,13 +5,14 @@ Tâche : `docs/design/2026-09-24-echelle-colonies.md` § 3.1. 56 provinces (rég
 
 ## État
 
-En cours. Fait : tout `empire_*`, `scandinavie`, tout `pays_bas`, tout `angleterre_sud`,
-tout `galles`, et `angleterre_centre` : gloucester, oxford, warwick — 44/56 provinces,
-185 colonies.
+En cours. Fait : tout `empire_*`, `scandinavie`, `pays_bas`, `angleterre_sud`, `galles`,
+`angleterre_centre`, `angleterre_est`, `angleterre_nord`, et `ecosse` : lothian, fife —
+50/56 provinces, 226... (compte final à la fin). Enclaves posées : Stirling (`fac_england`,
+prov_fife), Dunbar (`fac_scotland`, prov_lothian).
 
 ## Prochaine étape
 
-Continuer `angleterre_est` (norfolk), `angleterre_nord` (lancashire, northumberland,
-yorkshire), puis `ecosse` (5) et `irlande` (3). Valider avec le script de validation
-temporaire (schéma `settlement.schema.json` + `common.schema.json` via `referencing`),
-commit `wip:` toutes les ~8 provinces.
+Continuer `ecosse` (galloway, highlands, renfrew) puis `irlande` (dublin, munster,
+ulster) — dernier lot. Valider avec le script de validation temporaire (schéma
+`settlement.schema.json` + `common.schema.json` via `referencing`), commit `wip:`
+à la fin.
