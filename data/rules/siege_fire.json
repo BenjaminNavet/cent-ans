@@ -15,7 +15,7 @@
       "siege": 0.15
     },
     "overshoot_m": 18.0,
-    "reach_m": 20.0,
+    "reach_m": 30.0,
     "gate_reach_m": 12.0
   },
   "house": {
@@ -45,8 +45,8 @@
   },
   "heat": {
     "radius_m": 8.0,
-    "loss_per_s": 0.002,
-    "morale_per_s": 0.8
+    "loss_per_s": 0.0015,
+    "morale_per_s": 0.5
   },
   "smoke": {
     "min_intensity": 0.3,
