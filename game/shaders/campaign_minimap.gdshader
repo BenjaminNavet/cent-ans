@@ -67,9 +67,9 @@ void fragment() {
 		// Brouillard : province hors de vue désaturée, voilée, hachurée.
 		if (seen(id) < 0.5) {
 			float lum = dot(col, vec3(0.299, 0.587, 0.114));
-			col = mix(vec3(lum), veil, 0.45) * 0.78;
+			col = mix(vec3(lum), veil, 0.6) * 0.62;
 			float hatch = step(3.0, mod(FRAGCOORD.x + FRAGCOORD.y, 5.0));
-			col = mix(col, ink, 0.08 * hatch);
+			col = mix(col, ink, 0.18 * hatch);
 		}
 	}
 	COLOR = vec4(col, 1.0);
