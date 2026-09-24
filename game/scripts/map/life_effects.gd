@@ -7,6 +7,14 @@ extends Node3D
 ## famille), visibles au palier près (fumées d'incendie jusqu'au palier moyen).
 
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
+const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
+const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
+## Moulins à vent par type de colonie, échelle monde, position du moyeu (repère du corps).
+const WINDMILLS := {"city": 2, "town": 1, "village": 1}
+const WINDMILL_SCALE := 6.0
+const WINDMILL_HUB := Vector3(0.0, 0.3, 0.08)
+## Dévastation (%) à partir de laquelle villages et bourgs sont en ruine, et ruine maximale.
+const RUIN_MIN_DEVASTATION := 45.0
 ## Panaches de cheminée par type de colonie.
 const CHIMNEYS := {"city": 5, "town": 3, "village": 2, "abbey": 2, "castle": 1}
 ## Taille d'un panache de cheminée (largeur, hauteur) et d'incendie (unités monde).
@@ -28,7 +36,16 @@ var _fire_material: ShaderMaterial
 var _chimney_points: Array = []
 var _fire_points: Array = []
 var _reground_timer := -1.0
+var _windmill_bodies: MultiMeshInstance3D
+var _windmill_sails: MultiMeshInstance3D
+## Moulins : [Vector2 px, lacet, graine, tourne (bool)].
+var _windmill_points: Array = []
+var _overlay: ShaderMaterial
+var _overlay_timer := 0.0
+## Ruine (0-1) par indice de colonie.
+var _ruin: Dictionary = {}
 var _season_boost := 1.0
+var _snow := 0.0
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -38,6 +55,14 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	_fire_material = _smoke_material(0.9)
 	_chimneys = _make_instance("Chimneys", _chimney_material)
 	_fires = _make_instance("Fires", _fire_material)
+	_windmill_bodies = _make_instance("WindmillBodies", null)
+	_windmill_bodies.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	var sails_material := ShaderMaterial.new()
+	sails_material.shader = WINDMILL_SHADER
+	_windmill_sails = _make_instance("WindmillSails", sails_material)
+	_windmill_sails.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	_overlay = ShaderMaterial.new()
+	_overlay.shader = OVERLAY_SHADER
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_surface_changed)
 
@@ -53,7 +78,8 @@ func _smoke_material(opacity: float) -> ShaderMaterial:
 func _make_instance(node_name: String, material: ShaderMaterial) -> MultiMeshInstance3D:
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = node_name
-	mmi.material_override = material
+	if material != null:
+		mmi.material_override = material
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mmi.extra_cull_margin = 16.0
 	add_child(mmi)
@@ -96,7 +122,120 @@ func rebuild(province_states: Dictionary) -> void:
 			_chimney_points.append([hpx, 0.35, float(hseed % 1000) / 1000.0])
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE, 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
-	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size()}
+	_build_windmills(province_states)
+	_apply_ruins(province_states)
+	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size(), "windmills": _windmill_points.size(), "ruins": _ruin.size()}
+
+
+## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
+func _build_windmills(province_states: Dictionary) -> void:
+	_windmill_points.clear()
+	var data := _layer.data
+	for i in data.settlements.size():
+		var entry: Dictionary = data.settlements[i]
+		var count := int(WINDMILLS.get(str(entry["kind"]), 0))
+		var px: Vector2 = entry["px"]
+		var seed_value := absi((str(entry["id"]) + "mill").hash())
+		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
+		for k in count:
+			var angle := float((seed_value / (k + 2)) % 628) / 100.0
+			var distance := _layer.model_radius(i) * (1.35 + float((seed_value / (k + 5)) % 60) / 100.0)
+			_windmill_points.append([px + Vector2(cos(angle), sin(angle)) * distance, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION])
+	var body_mesh := _first_mesh("settlements/windmill_body")
+	var sails_mesh := _first_mesh("settlements/windmill_sails")
+	if body_mesh == null or sails_mesh == null:
+		return
+	var bodies := MultiMesh.new()
+	bodies.transform_format = MultiMesh.TRANSFORM_3D
+	bodies.mesh = body_mesh
+	bodies.instance_count = _windmill_points.size()
+	var sails := MultiMesh.new()
+	sails.transform_format = MultiMesh.TRANSFORM_3D
+	sails.use_custom_data = true
+	sails.mesh = sails_mesh
+	sails.instance_count = _windmill_points.size()
+	for n in _windmill_points.size():
+		var point: Array = _windmill_points[n]
+		var xforms := _windmill_transforms(point)
+		bodies.set_instance_transform(n, xforms[0])
+		sails.set_instance_transform(n, xforms[1])
+		sails.set_instance_custom_data(n, Color(float(point[2]), 0.9 if bool(point[3]) else 0.0, 0.0, 0.0))
+	_windmill_bodies.multimesh = bodies
+	_windmill_sails.multimesh = sails
+
+
+func _windmill_transforms(point: Array) -> Array:
+	var px: Vector2 = point[0]
+	var y := _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE)
+	var body := Transform3D(basis, Vector3(px.x, y - 0.05, px.y))
+	return [body, Transform3D(basis, body * WINDMILL_HUB)]
+
+
+static func _first_mesh(model_name: String) -> Mesh:
+	var scene := ModelLibrary.get_scene(model_name)
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	var meshes := root.find_children("*", "MeshInstance3D", true, false)
+	var mesh: Mesh = (meshes[0] as MeshInstance3D).mesh if not meshes.is_empty() else null
+	root.free()
+	return mesh
+
+
+## Ruines : villages et bourgs des provinces dévastées (suie, toits effondrés), un peu de
+## suie sur les villes assiégées. Surcouche partagée (neige l'hiver) sur toutes les maquettes.
+func _apply_ruins(province_states: Dictionary) -> void:
+	_ruin.clear()
+	var data := _layer.data
+	for i in data.settlements.size():
+		var entry: Dictionary = data.settlements[i]
+		var state: Dictionary = province_states.get(str(entry["province"]), {})
+		var devastation := float(state.get("devastation", 0.0))
+		var kind := str(entry["kind"])
+		var amount := 0.0
+		if kind == "village" or kind == "abbey":
+			amount = clampf((devastation - RUIN_MIN_DEVASTATION + 10.0) / 50.0, 0.0, 0.85)
+		elif devastation >= RUIN_MIN_DEVASTATION:
+			amount = clampf((devastation - RUIN_MIN_DEVASTATION) / 120.0, 0.0, 0.35)
+		if bool(state.get("siege", false)):
+			amount = maxf(amount, 0.3)
+		if amount > 0.0:
+			_ruin[i] = amount
+			if kind == "village":
+				# Village en ruine : fumée d'incendie au-dessus.
+				_fire_points.append([entry["px"], 0.3, float(i % 97) / 97.0])
+	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
+	_update_overlays()
+
+
+## Pose la surcouche (neige, suie) sur les maquettes et les hameaux, y compris ceux reconstruits
+## depuis (appelé périodiquement). Seulement là où elle sert (hiver, ruine) : c'est une passe de
+## rendu de plus par maquette.
+func _update_overlays() -> void:
+	if _layer == null or _layer.data == null:
+		return
+	var snowy := _snow > 0.01
+	for i in _layer.data.settlements.size():
+		var holder := _layer.model_holder(i)
+		if holder == null:
+			continue
+		var amount: float = _ruin.get(i, 0.0)
+		var wanted: ShaderMaterial = _overlay if snowy or amount > 0.0 else null
+		for geometry in holder.find_children("*", "GeometryInstance3D", true, false):
+			var g := geometry as GeometryInstance3D
+			if g.material_overlay != wanted:
+				g.material_overlay = wanted
+			if wanted != null:
+				g.set_instance_shader_parameter(&"ruin", amount)
+	var hamlets := _layer.get_node_or_null("Hamlets")
+	if hamlets != null:
+		var wanted_h: ShaderMaterial = _overlay if snowy else null
+		for node in hamlets.get_children():
+			for mmi in node.get_children():
+				var g_h := mmi as GeometryInstance3D
+				if g_h != null and g_h.material_overlay != wanted_h:
+					g_h.material_overlay = wanted_h
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
@@ -125,6 +264,11 @@ func _ground(point: Array) -> Vector3:
 
 
 func _reground() -> void:
+	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
+		for n in _windmill_points.size():
+			var xforms := _windmill_transforms(_windmill_points[n])
+			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
+			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
 	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
 		var mmi: MultiMeshInstance3D = pair[0]
 		var points: Array = pair[1]
@@ -143,6 +287,7 @@ func _on_surface_changed(_index: int) -> void:
 
 ## Plus de feux de cheminée l'hiver et à l'automne (poids de saison x, y, z, w).
 func set_season(weights: Vector4) -> void:
+	_snow = weights.w
 	_season_boost = 0.55 * weights.y + 0.8 * weights.x + 0.95 * weights.z + 1.15 * weights.w
 
 
@@ -155,6 +300,13 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
 	_fires.visible = fire_alpha > 0.02
 	_fire_material.set_shader_parameter("fade", fire_alpha)
+	var show_models := near_weight > 0.35
+	_windmill_bodies.visible = show_models
+	_windmill_sails.visible = show_models
+	_overlay_timer -= get_process_delta_time()
+	if show_models and _overlay_timer <= 0.0:
+		_overlay_timer = 0.5
+		_update_overlays()
 	if _reground_timer >= 0.0:
 		_reground_timer -= get_process_delta_time()
 		if _reground_timer < 0.0:
