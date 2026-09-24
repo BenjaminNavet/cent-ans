@@ -1,0 +1,136 @@
+{
+ "figures": {
+  "infantry_0": {
+   "lods": [
+    "infantry_0_lod0.mesh.bin",
+    "infantry_0_lod1.mesh.bin",
+    "infantry_0_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2326,
+    493,
+    239
+   ],
+   "variants": 1
+  }
+ },
+ "rigs": {
+  "human": {
+   "bones": [
+    "Root",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Wrist.L",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Wrist.R",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "Foot.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "Foot.R"
+   ],
+   "clips": {
+    "bow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 402
+    },
+    "bow_shoot": {
+     "frames": 36,
+     "loop": false,
+     "start": 366
+    },
+    "death": {
+     "frames": 26,
+     "loop": false,
+     "start": 220
+    },
+    "death_m": {
+     "frames": 26,
+     "loop": false,
+     "start": 246
+    },
+    "guard": {
+     "frames": 41,
+     "loop": true,
+     "start": 41
+    },
+    "hit": {
+     "frames": 14,
+     "loop": false,
+     "start": 206
+    },
+    "idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 0
+    },
+    "pike_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 272
+    },
+    "pike_thrust": {
+     "frames": 20,
+     "loop": false,
+     "start": 346
+    },
+    "pike_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 313
+    },
+    "run": {
+     "frames": 20,
+     "loop": true,
+     "start": 115
+    },
+    "slash": {
+     "frames": 25,
+     "loop": false,
+     "start": 135
+    },
+    "slash_m": {
+     "frames": 25,
+     "loop": false,
+     "start": 160
+    },
+    "thrust": {
+     "frames": 21,
+     "loop": false,
+     "start": 185
+    },
+    "walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 82
+    },
+    "xbow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 491
+    },
+    "xbow_shoot": {
+     "frames": 48,
+     "loop": false,
+     "start": 443
+    }
+   },
+   "fps": 24,
+   "texture": "human.bones.bin"
+  }
+ },
+ "source": "tools/blender_scripts/battle_skinned.py (Quaternius CC0, see SOURCE.md)"
+}
