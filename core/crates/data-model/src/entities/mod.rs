@@ -13,6 +13,7 @@ pub mod names;
 pub mod province;
 pub mod religion;
 pub mod resource;
+pub mod retinue;
 pub mod settlement;
 pub mod skill;
 pub mod technology;

@@ -51,6 +51,7 @@ pub mod population;
 pub mod ransom;
 pub mod religion;
 pub mod research;
+pub mod retinue;
 pub mod rng;
 pub mod save;
 pub mod settlements;

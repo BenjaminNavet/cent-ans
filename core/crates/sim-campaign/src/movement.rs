@@ -879,9 +879,7 @@ pub(crate) fn apply_outcome(
     events: &mut Vec<GameEvent>,
 ) {
     // H4: barber-surgeons tend the wounded of the surviving units.
-    let recovery = state.armies.get(army_id).map_or(0.0, |a| {
-        crate::medicine::wound_recovery(state, data, &a.faction)
-    });
+    let recovery = crate::medicine::army_wound_recovery(state, data, army_id);
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };

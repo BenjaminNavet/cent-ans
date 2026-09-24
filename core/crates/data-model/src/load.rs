@@ -21,6 +21,7 @@ use crate::entities::province::Province;
 use crate::entities::r#trait::Trait;
 use crate::entities::religion::Religion;
 use crate::entities::resource::Resource;
+use crate::entities::retinue::Retinue;
 use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
@@ -69,6 +70,8 @@ pub mod folders {
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
+    /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
+    pub const RETINUE: &str = "retinue.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -196,6 +199,9 @@ pub struct GameData {
     pub ai_diplomacy: AiDiplomacy,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// `data/retinue.json` (lot C7), absent until written: no companion
+    /// ever joins a general.
+    pub retinue: Option<Retinue>,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
@@ -235,6 +241,7 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             vision_rules: None,
+            retinue: None,
             movement_graph: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
@@ -264,6 +271,10 @@ impl GameData {
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
             data.vision_rules = Some(read_json(&vision_path)?);
+        }
+        let retinue_path = root.join(folders::RETINUE);
+        if retinue_path.is_file() {
+            data.retinue = Some(read_json(&retinue_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
@@ -351,6 +362,7 @@ impl GameData {
         checker.check_skills();
         checker.check_diets();
         checker.check_chivalric_orders();
+        checker.check_retinue();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -594,6 +606,48 @@ impl ReferenceChecker<'_> {
         let data = self.data;
         for (id, skill) in &data.skills {
             self.require_all(id, "prerequisites", &skill.prerequisites, &data.skills);
+        }
+    }
+
+    fn check_retinue(&mut self) {
+        let data = self.data;
+        let Some(retinue) = &data.retinue else {
+            return;
+        };
+        let mut seen = std::collections::BTreeSet::new();
+        for companion in &retinue.companions {
+            let id = &companion.id;
+            if !seen.insert(id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: id.to_string(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {id}"),
+                });
+            }
+            for rule in &companion.acquisition {
+                if let Some(building) = &rule.building {
+                    self.require(id, "acquisition.building", building, &data.buildings);
+                }
+            }
+            let conditions = &companion.conditions;
+            self.require_all(
+                id,
+                "conditions.factions",
+                &conditions.factions,
+                &data.factions,
+            );
+            self.require_all(
+                id,
+                "conditions.requires_traits",
+                &conditions.requires_traits,
+                &data.traits,
+            );
+            self.require_all(
+                id,
+                "conditions.excludes_traits",
+                &conditions.excludes_traits,
+                &data.traits,
+            );
         }
     }
 

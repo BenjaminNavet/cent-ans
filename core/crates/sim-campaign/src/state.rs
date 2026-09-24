@@ -508,6 +508,15 @@ pub struct CharacterState {
     /// H6: terms set by the captor while the character is captive.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ransom_terms: Option<crate::ransom::RansomTerms>,
+    /// C7: year of death, set by `characters::kill` (and at setup for the
+    /// characters already dead in 1337). `None` while alive, and for saves
+    /// written before C7.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub death_year: Option<i32>,
+    /// C7: the character's retinue (`data/retinue.json` companion ids), in
+    /// order of arrival; see `crate::retinue`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub retinue: Vec<data_model::CompanionId>,
 }
 
 fn default_loyalty() -> u8 {
