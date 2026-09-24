@@ -41,7 +41,7 @@ var _windmill_sails: MultiMeshInstance3D
 ## Moulins : [Vector2 px, lacet, graine, tourne (bool)].
 var _windmill_points: Array = []
 var _overlay: ShaderMaterial
-var _overlay_timer := 0.0
+var _overlay_snowy := false
 var _ruin_overlays: Dictionary = {}
 ## Ruine (0-1) par indice de colonie.
 var _ruin: Dictionary = {}
@@ -223,13 +223,14 @@ func _overlay_for(amount: float) -> ShaderMaterial:
 	return _ruin_overlays[step]
 
 
-## Pose la surcouche (neige, suie) sur les maquettes et les hameaux, y compris ceux reconstruits
-## depuis (appelé périodiquement). Seulement là où elle sert (hiver, ruine) : c'est une passe de
-## rendu de plus par maquette.
+## Pose la surcouche (neige, suie) sur les maquettes des colonies, seulement là où elle sert
+## (hiver, ruine) : c'est une passe de rendu de plus par maquette. Les hameaux (petits, nombreux,
+## reconstruits par tuile) n'en ont pas. Rappelée quand l'hiver arrive ou s'en va.
 func _update_overlays() -> void:
 	if _layer == null or _layer.data == null:
 		return
 	var snowy := _snow > 0.01
+	_overlay_snowy = snowy
 	for i in _layer.data.settlements.size():
 		var holder := _layer.model_holder(i)
 		if holder == null:
@@ -240,14 +241,6 @@ func _update_overlays() -> void:
 			var g := geometry as GeometryInstance3D
 			if g.material_overlay != wanted:
 				g.material_overlay = wanted
-	var hamlets := _layer.get_node_or_null("Hamlets")
-	if hamlets != null:
-		var wanted_h: ShaderMaterial = _overlay if snowy else null
-		for node in hamlets.get_children():
-			for mmi in node.get_children():
-				var g_h := mmi as GeometryInstance3D
-				if g_h != null and g_h.material_overlay != wanted_h:
-					g_h.material_overlay = wanted_h
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
@@ -315,9 +308,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	var show_models := near_weight > 0.35
 	_windmill_bodies.visible = show_models
 	_windmill_sails.visible = show_models
-	_overlay_timer -= get_process_delta_time()
-	if show_models and _overlay_timer <= 0.0:
-		_overlay_timer = 0.5
+	if (_snow > 0.01) != _overlay_snowy:
 		_update_overlays()
 	if _reground_timer >= 0.0:
 		_reground_timer -= get_process_delta_time()

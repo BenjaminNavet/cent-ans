@@ -30,6 +30,9 @@ vec4 life_season() {
 // Parcelle selon la saison. cls : 0 blé, 1 culture verte, 2 labour, 3 jachère, 4 pré, 5 foin,
 // 6 sol de vigne. h : tirage [0, 1] de la parcelle (variété d'une parcelle à l'autre).
 vec3 season_field(vec3 summer, int cls, float h) {
+	if (!life_enabled) {
+		return summer;
+	}
 	vec4 w = life_season();
 	vec3 young = vec3(0.10, 0.19, 0.045);    // blé en herbe, pousses de printemps
 	vec3 plough = vec3(0.13, 0.085, 0.048);  // labour frais
