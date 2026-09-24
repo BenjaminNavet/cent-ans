@@ -33,5 +33,12 @@ Depuis `visual` (V1-V4 fusionnés). Captures de travail dans le scratchpad, fina
 - Attention : le scratchpad racine est partagé avec V4b (son `cap.sh` a écrasé le mien) ; les
   scripts V2b sont dans `scratchpad/v2b/`.
 
-## Prochaine étape
-- Banc de performance (`game/tests/vegetation_bench.gd`), captures finales `docs/img/visuel/v2b_*.png`.
+## État final (terminé par l'orchestrateur ; agent bloqué au banc d'essai)
+- Optimisation du shader : inversion de la déformation en 3 itérations, limite entre trames calculée seulement près de la frontière.
+- Banc `vegetation_bench.gd` (M4 Pro, vsync coupée, machine partagée) : France 67 i/s, zoom moyen 61, proche 76,
+  forêt d'Orléans 85, très proche 102, bocage 82. 2 à 4 M primitives, 129 à 847 appels de dessin.
+- Smoke 16/16. Captures `docs/img/visuel/v2b_{far,mid,near}.png`.
+
+## Points ouverts
+- Démarrage à chaud de la végétation : 4,4 s (V3 : 0,4-1 s) ; construction d'une tuile jusqu'à 4,5 s. À alléger (semis des haies).
+- Zoom moyen proche de 60 i/s : réduire le nombre d'instances visibles entre d=300 et d=500.

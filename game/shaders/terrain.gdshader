@@ -212,7 +212,8 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 	float fv = lay == 0 ? 4.2 : 3.8;
 	float ph = lay == 0 ? 0.0 : 2.1;
 	vec2 q = p;
-	for (int i = 0; i < 4; i++) {
+	// Inversion de la déformation par point fixe (3 itérations suffisent : |∇warp| ≈ 0,3).
+	for (int i = 0; i < 3; i++) {
 		q = p - field_warp(q, ph);
 	}
 	float u = (q.x + k * q.y) / fu;
@@ -310,7 +311,7 @@ void fragment() {
 	float vine_rows = 0.0;
 	vec2 furrow_dir = vec2(1.0, 0.0);
 	float cell_px = 4.4 / max(footprint, 1e-4);  // taille d'un enclos à l'écran
-	float field_vis = smoothstep(4.0, 12.0, cell_px);
+	float field_vis = smoothstep(5.0, 14.0, cell_px);
 	if (field_vis > 0.0 && (s.g + s.r) > 0.05) {
 		float rv = region_value(p);
 		int lay = rv > 0.0 ? 1 : 0;
@@ -358,10 +359,13 @@ void fragment() {
 		float tr_u = step(fract(roll_u * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, du));
 		float tr_v = step(fract(roll_v * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, dv));
 		// Limite entre les deux trames : chemin continu.
-		float rgrad = length(vec2(region_value(p + vec2(1.0, 0.0)) - rv, region_value(p + vec2(0.0, 1.0)) - rv));
-		float rd = abs(rv) / max(rgrad, 1e-4);
-		float tr_r = 1.0 - smoothstep(track_width * 1.3 - aa, track_width * 1.3 + aa, rd);
 		float tcover = clamp(2.0 * track_width / max(footprint, 1e-4), 0.0, 1.0);
+		float tr_r = 0.0;
+		if (tcover > 0.15 && abs(rv) < 0.05) {
+			float rgrad = length(vec2(region_value(p + vec2(1.0, 0.0)) - rv, region_value(p + vec2(0.0, 1.0)) - rv));
+			float rd = abs(rv) / max(rgrad, 1e-4);
+			tr_r = 1.0 - smoothstep(track_width * 1.3 - aa, track_width * 1.3 + aa, rd);
+		}
 		track = max(max(tr_u, tr_v), tr_r) * tcover * field_vis;
 		float edge = min(min(du, dv), strip_d);
 		balk = (1.0 - smoothstep(0.03, 0.03 + aa * 2.0, edge)) * smoothstep(8.0, 20.0, cell_px) * 0.5;
