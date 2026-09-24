@@ -228,6 +228,16 @@ pub fn garrison_upkeep_percent(data: &GameData, kind: data_model::SettlementKind
         .unwrap_or(GARRISON_UPKEEP_PERCENT)
 }
 
+/// Share (per cent) of the upkeep of a settlement's buildings paid by its
+/// controller, by settlement kind (lot C7a, `rules.json`
+/// `building_upkeep_percent`; 100 when absent).
+pub fn building_upkeep_percent(data: &GameData, kind: data_model::SettlementKind) -> i64 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.building_upkeep_percent.get(&kind).copied())
+        .unwrap_or(100)
+}
+
 pub fn unit_upkeep(data: &GameData, unit: &Unit) -> i64 {
     data.unit_types
         .get(&unit.unit_type)
@@ -401,7 +411,9 @@ impl CampaignState {
                     .provinces
                     .get(&s.province)
                     .map_or(0, |p| p.devastation.min(100));
-                province_building_upkeep(data, &s.buildings) * (100 - i64::from(devastation) / 2)
+                province_building_upkeep(data, &s.buildings) * building_upkeep_percent(data, s.kind)
+                    / 100
+                    * (100 - i64::from(devastation) / 2)
                     / 100
             })
             .sum();

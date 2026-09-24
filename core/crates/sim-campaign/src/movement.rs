@@ -433,7 +433,17 @@ impl CampaignState {
         let steps = (base * (1.0 + pace / 100.0) + 1e-9).floor()
             + tech.movement.flat
             + general.movement.flat;
-        (steps.max(1.0) * points_per_step(data)).round() as u32
+        // Lot C7a: the season covers `season_scale` of the v1 steps.
+        (steps.max(1.0) * points_per_step(data) * data.movement_rules().season_scale).round() as u32
+    }
+
+    /// Movement points of a fresh army at full pace this season (no
+    /// technology, general or siege train): the season's steps times
+    /// `points_per_step` and `season_scale` (lot C7a).
+    pub fn season_movement_points(&self, data: &GameData) -> u32 {
+        let rules = data.movement_rules();
+        (f64::from(self.season.movement_steps()) * rules.points_per_step * rules.season_scale)
+            .round() as u32
     }
 }
 

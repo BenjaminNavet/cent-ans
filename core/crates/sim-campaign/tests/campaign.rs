@@ -390,7 +390,9 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let mut state = france(&data, 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_points;
-    assert_eq!(allowance, 3 * 140, "3 steps of 140 points in spring");
+    // Lot C7a: 3 steps of 140 points times the season scale (0.5) in spring.
+    assert_eq!(allowance, state.season_movement_points(&data));
+    assert_eq!(allowance, 210);
     let reachable = state.reachable(&data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable

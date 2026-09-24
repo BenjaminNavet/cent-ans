@@ -157,8 +157,18 @@ impl GameData {
                 graph.add(&edge);
             }
         } else {
+            // Lot C7a: road edges carry the factor baked by C3; rescale
+            // them to the one of `rules.json`.
+            let road_scale = self.movement_rules().road_cost_factor
+                / crate::entities::settlement::BAKED_ROAD_COST_FACTOR;
             for edge in &self.settlement_graph {
-                graph.add(edge);
+                if edge.road && !edge.sea && (road_scale - 1.0).abs() > f64::EPSILON {
+                    let mut edge = edge.clone();
+                    edge.cost *= road_scale;
+                    graph.add(&edge);
+                } else {
+                    graph.add(edge);
+                }
             }
         }
         graph.sort();
