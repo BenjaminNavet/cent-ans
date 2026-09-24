@@ -174,6 +174,28 @@ lucrative) ; l'Écosse, réduite à Fife, vit à crédit (≈ 60 % des banquerou
 jamais (la Flandre reste vassale de la France sauf révolte), Bourgogne-Angleterre jamais (pas de défection
 observée).
 
+### Alignement historique G2 — sonde `century_probe` (5 graines × 464 tours)
+
+| Mesure (graines 1 à 5) | Avant G2 | Après G2 | Cible |
+|---|---|---|---|
+| Banqueroutes de l'Écosse / décennie | ≈ 35 (4 graines sur 5) | 0,1-1,6 | < 3 |
+| Banqueroutes / faction / décennie | 1,70 [0,47-2,29] | 0,52 [0,30-0,69] | < 1 |
+| Angl.-Flandre (part des tours de guerre FR-EN) | 0 % partout | 0 / 100 / 0 / 100 / 0 % (moy. 40 %) | penche vers l'Angleterre |
+| Angl.-Hainaut (idem) | 0 % sauf 62 % (graine 5, tous tours) | 0 / 97 / 22 / 0 / 69 % (moy. 38 %) | 20-60 % |
+| Angl.-Brabant (idem) | 0 % sauf 70 % (graine 5, tous tours) | 0 / 14 / 0 / 0 / 0 % (moy. 3 %) | 20-60 % |
+| Bourg.-Angl. | 0 % | 0 % (Angleterre dominante 0-8 % des tours) | une partie des graines |
+| Trésor max après 1350 (saisons, pire faction) | 13-55, médiane 24 | 9,9-14,3 hors Empire graine 5 ¹, médiane 13,7 | ≤ 12, médiane ≤ 8 |
+| Factions > 8 saisons plus de 4 tours après 1350 | 2-5 | 1-3 | 0 |
+| France-Angleterre en guerre | 70 % [67-76] | 58 % [45-76] | ≥ 55 % |
+| Ordres France refusés | 0-0,2 % | 0-0,1 % (`ai_probe` 100 tours : 0 %) | 0 % |
+
+¹ Empire assiégé partout, revenu moyen quasi nul : le rapport explose (15 974) pour un trésor à peine au-dessus
+de 10 000 livres. Écarts : Brabant rarement anglais (la marge d'attitude n'est franchie que si le Hainaut est
+déjà allié) ; la défection bourguignonne est en place et testée mais ne se déclenche jamais faute de domination
+anglaise (au plus 6 provinces du royaume tenues à la fois, seuil 8) ; trésors encore 10-14 saisons par pointes
+(royaumes réduits à une province, revenus effondrés par les sièges) ; la guerre FR-EN recule un peu (graines 1
+et 3 sous 55 %) ; Bourgogne jouée par l'IA (`playthrough 1`) toujours à 2 provinces en 1478.
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,

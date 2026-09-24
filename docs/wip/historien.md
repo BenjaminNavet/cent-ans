@@ -32,4 +32,4 @@ Méthode de fusion (depuis l'incident 50ccf58) : worktree `../gp-historien-merge
 - 2026-09-24 matin : limite (reset 10h10) → H8b, H10, H5H6 coupés ; parties commitées fusionnées (Codex : 106 fiches), agents relancés.
 - 2026-09-24 : limite hebdomadaire → H8b, H10, H5H6 coupés ; H8b et H10 finis et fusionnés (Codex : 191 fiches, smoke vert) ; seul H5H6 relancé.
 
-**État final (2026-09-24)** : tous les lots H1-H12 fusionnés dans main. Codex 218 fiches. Synthèse : `docs/histoire/README.md`. Reste (hors session) : branchements map_ui/campaign_map demandés à la session ui-tw.
+**État final (2026-09-24)** : tous les lots H1-H12 fusionnés dans main. Codex 218 fiches. Synthèse : `docs/histoire/README.md`. Branchements map_ui/campaign_map faits par ui-tw (5ad4239) ; icône hud_codex ajoutée (b7f870c).

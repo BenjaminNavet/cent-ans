@@ -191,6 +191,7 @@ ICONS: dict[str, tuple[str, str]] = {
     "hud_treasury": ("skoll/open-treasure-chest", "hud"),
     "hud_income": ("delapouite/two-coins", "hud"),
     "hud_research": ("lorc/open-book", "hud"),
+    "hud_codex": ("lorc/scroll-unfurled", "hud"),
     "hud_season_spring": ("lorc/sprout", "hud"),
     "hud_season_summer": ("lorc/sun", "hud"),
     "hud_season_autumn": ("lorc/falling-leaf", "hud"),
