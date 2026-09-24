@@ -95,6 +95,11 @@ pub struct AutoResolveRules {
     pub pike_reflect: f64,
     /// Multiplier on a charge received by defending archers with `stakes`.
     pub stakes_charge_factor: f64,
+    /// Multiplier on melee blows between pikes and cavalry: pikes strike
+    /// riders harder by this factor, riders strike pikes softer by it.
+    pub pike_vs_cavalry: f64,
+    /// Multiplier on shots received by mounted units (they close fast).
+    pub mounted_target_ranged_factor: f64,
     /// Multiplier on shots received by units with a `pavise`.
     pub pavise_factor: f64,
     /// Multiplier on the melee of cavalry after the charge (horsemen
@@ -169,8 +174,10 @@ impl Default for AutoResolveRules {
             cavalry_flank_exposure: 1.5,
             skirmish_exposure: 0.5,
             pike_charge_factor: 0.25,
-            pike_reflect: 0.5,
+            pike_reflect: 1.0,
             stakes_charge_factor: 0.6,
+            pike_vs_cavalry: 3.0,
+            mounted_target_ranged_factor: 0.5,
             pavise_factor: 0.7,
             cavalry_melee_factor: 1.0,
             morale_per_loss_percent: 1.0,

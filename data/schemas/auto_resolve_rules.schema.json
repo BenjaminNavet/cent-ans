@@ -48,6 +48,8 @@
     "pike_charge_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur d'une charge reçue par des piques." },
     "pike_reflect": { "$ref": "#/$defs/factor", "description": "Pertes rendues aux cavaliers par point de charge reçu par des piques." },
     "stakes_charge_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur d'une charge reçue par des archers en défense derrière leurs pieux." },
+    "pike_vs_cavalry": { "$ref": "#/$defs/factor", "description": "En mêlée, les piques frappent les cavaliers plus fort de ce facteur, et les cavaliers frappent les piques moins fort d'autant." },
+    "mounted_target_ranged_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur des traits reçus par les unités montées (elles abordent vite)." },
     "pavise_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur des traits reçus par une unité à pavois." },
     "cavalry_melee_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur de la mêlée de la cavalerie." },
     "morale_per_loss_percent": { "$ref": "#/$defs/factor", "description": "Points de moral perdus par % des hommes perdus dans une phase." },
@@ -88,7 +90,7 @@
     "volleys", "melee_rounds", "ranged_lethality", "melee_lethality", "charge_lethality",
     "armor_vs_ranged", "armor_vs_melee", "armor_vs_charge", "ranged_in_melee", "screened_exposure",
     "screen_share", "cavalry_flank_exposure", "skirmish_exposure", "pike_charge_factor", "pike_reflect",
-    "stakes_charge_factor", "pavise_factor", "cavalry_melee_factor", "morale_per_loss_percent",
+    "stakes_charge_factor", "pike_vs_cavalry", "mounted_target_ranged_factor", "pavise_factor", "cavalry_melee_factor", "morale_per_loss_percent",
     "break_morale", "pursuit_base", "pursuit_per_cavalry", "winner_max_losses", "loser_max_losses",
     "loser_min_losses", "jitter", "river_attacker", "walls_attacker", "walls_defender_ranged",
     "legacy_defender_bonus", "weather"

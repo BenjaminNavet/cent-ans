@@ -594,7 +594,16 @@ fn fire(field: &Field, from: &Host, to: &Host, share: f64, kills: &mut [f64]) {
             }
         },
         |f| {
+            let mounted = matches!(
+                f.profile.family,
+                UnitFamily::Cavalry | UnitFamily::HorseArchers
+            );
             armor_reduction(f.armor, rules.armor_vs_ranged)
+                * if mounted {
+                    rules.mounted_target_ranged_factor
+                } else {
+                    1.0
+                }
                 * if f.profile.pavise {
                     rules.pavise_factor
                 } else {
@@ -693,21 +702,32 @@ fn melee(field: &Field, from: &Host, to: &Host, kills: &mut [f64]) {
             .sum::<f64>()
             * base
     };
-    let foot = blows(UnitFamily::Infantry) + blows(UnitFamily::Pikes);
+    let infantry = blows(UnitFamily::Infantry);
+    let pikes = blows(UnitFamily::Pikes);
     let horse = blows(UnitFamily::Cavalry) * rules.cavalry_melee_factor;
     // Shooters fight with half their hearts: they keep shooting.
     let shooters = (blows(UnitFamily::Shooters) + blows(UnitFamily::HorseArchers)) * 0.5;
     let screened = to.screened(rules);
     let reduction = |f: &Fighter| armor_reduction(f.armor, rules.armor_vs_melee);
+    let foot_weight = |f: &Fighter| match f.profile.family {
+        UnitFamily::Shooters | UnitFamily::Siege if screened => rules.screened_exposure,
+        UnitFamily::HorseArchers => rules.skirmish_exposure,
+        _ => 1.0,
+    };
+    spread(infantry + shooters, to, foot_weight, reduction, kills);
+    // Pikes strike riders harder, riders strike pikes softer.
     spread(
-        foot + shooters,
+        pikes,
         to,
-        |f| match f.profile.family {
-            UnitFamily::Shooters | UnitFamily::Siege if screened => rules.screened_exposure,
-            UnitFamily::HorseArchers => rules.skirmish_exposure,
-            _ => 1.0,
+        foot_weight,
+        |f| {
+            reduction(f)
+                * if f.profile.family == UnitFamily::Cavalry {
+                    rules.pike_vs_cavalry
+                } else {
+                    1.0
+                }
         },
-        reduction,
         kills,
     );
     spread(
@@ -718,7 +738,14 @@ fn melee(field: &Field, from: &Host, to: &Host, kills: &mut [f64]) {
             UnitFamily::HorseArchers => rules.skirmish_exposure,
             _ => 1.0,
         },
-        reduction,
+        |f| {
+            reduction(f)
+                / if f.profile.family == UnitFamily::Pikes {
+                    rules.pike_vs_cavalry.max(0.01)
+                } else {
+                    1.0
+                }
+        },
         kills,
     );
     fire(field, from, to, rules.ranged_in_melee, kills);
@@ -1099,8 +1126,20 @@ mod tests {
 
     #[test]
     fn armoured_cavalry_rides_down_cheap_foot_but_not_pikes() {
-        let knights = side(vec![unit(60, 75, 0, 80, false); 4]);
-        let militia = side(vec![unit(120, 40, 0, 30, false); 20]);
+        let knights = side(vec![
+            BattleUnit {
+                morale: 80,
+                ..unit(60, 75, 0, 80, false)
+            };
+            4
+        ]);
+        let militia = side(vec![
+            BattleUnit {
+                morale: 40,
+                ..unit(120, 40, 0, 30, false)
+            };
+            20
+        ]);
         let pikes = side(vec![unit(120, 55, 0, 40, false); 4]);
         let horse = profile(UnitFamily::Cavalry, 90);
         let clear = FieldConditions::default();

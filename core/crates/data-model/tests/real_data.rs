@@ -8,6 +8,20 @@ fn data_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data")
 }
 
+/// Lot N1: `data/rules/auto_resolve.json` is read and the built-in fallback
+/// mirrors it.
+#[test]
+fn auto_resolve_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.auto_resolve.clone();
+    assert!(
+        from_file.description.is_some(),
+        "auto_resolve.json not read"
+    );
+    from_file.description = None;
+    assert_eq!(from_file, data_model::AutoResolveRules::default());
+}
+
 #[test]
 fn real_data_loads_without_errors() {
     let (data, warnings) = GameData::load(&data_root()).expect("data/ must load");
