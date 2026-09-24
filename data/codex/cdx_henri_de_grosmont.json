@@ -1,0 +1,12 @@
+{
+  "id": "cdx_henri_de_grosmont",
+  "title": "Henri de Grosmont, duc de Lancastre",
+  "category": "personnage",
+  "aliases": ["Henri de Grosmont", "Henry of Grosmont", "Auberoche", "bataille d'Auberoche", "Livre de seyntz medicines"],
+  "era": { "from": "v. 1310", "to": "1361" },
+  "summary": "Cousin d'[[cdx_edouard_iii|Édouard III]], comte de Derby puis premier duc de Lancastre, Henri de Grosmont est le meilleur capitaine anglais des débuts de la guerre, vainqueur à Auberoche en 1345. Il est aussi l'auteur d'un traité de dévotion, le Livre de seyntz medicines.",
+  "body": "Né vers 1310 au château de Grosmont, au pays de Galles, Henri appartient à la branche de Lancastre de la famille royale anglaise. Fait comte de Derby en 1337, il participe aux campagnes des Pays-Bas et combat à la bataille navale de l'[[cdx_ecluse|Écluse]] en 1340.\n\nEn 1345, [[cdx_edouard_iii|Édouard III]] l'envoie en Gascogne. Il prend Bergerac, puis, le 21 octobre, surprend devant Auberoche, en Périgord, une armée française bien plus nombreuse qui assiège la place : la victoire est complète. L'année suivante, il mène une [[cdx_chevauchee|chevauchée]] jusqu'à Poitiers, qu'il met à sac. Il participe au siège de [[cdx_calais|Calais]] et compte parmi les membres fondateurs de l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]].\n\nDevenu comte de Lancastre à la mort de son père, il est fait duc en 1351, un titre alors presque inédit en Angleterre. Chevalier accompli, il part combattre en Prusse avec les chevaliers Teutoniques et manque de se battre en duel à Paris contre le duc Otton de Brunswick, dont Jean II arrête la rencontre. Il négocie aussi pour le roi, notamment les traités qui aboutissent à [[cdx_bretigny|Brétigny]].\n\nEn 1354, il écrit en anglo-normand le Livre de seyntz medicines, où il compare ses péchés à des blessures et le Christ à un médecin : un rare témoignage personnel d'un grand seigneur de guerre. Il meurt de la peste le 23 mars 1361 à Leicester. Sa fille Blanche épouse [[cdx_jean_de_gand|Jean de Gand]], qui hérite du duché de Lancastre.",
+  "entity": "chr_henry_of_grosmont",
+  "see_also": ["cdx_edouard_iii", "cdx_jean_de_gand", "cdx_guyenne", "cdx_gautier_de_mauny"],
+  "sources": ["Henri de Grosmont", "Bataille d'Auberoche"]
+}

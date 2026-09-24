@@ -1,7 +1,7 @@
 {
   "id": "evt_artevelde",
   "title": "Artevelde, capitaine de Gand",
-  "text": "Le 3 janvier 1338, les Gantois, affamés par l'embargo anglais sur la laine, élisent cinq capitaines ; le premier est un riche bourgeois, [[cdx_artevelde|Jacques van Artevelde]]. Il veut rouvrir les ateliers des drapiers : la Flandre restera neutre et la laine anglaise reviendra. Le comte Louis de Nevers, fidèle à Philippe VI, voit ses villes lui échapper.",
+  "text": "Le 3 janvier 1338, les Gantois, affamés par l'embargo anglais sur la laine, élisent cinq capitaines ; le premier est un riche bourgeois, [[cdx_jacob_van_artevelde|Jacques van Artevelde]]. Il veut rouvrir les ateliers des drapiers : la Flandre restera neutre et la laine anglaise reviendra. Le comte Louis de Nevers, fidèle à Philippe VI, voit ses villes lui échapper.",
   "kind": "historical",
   "trigger": {
     "date": {

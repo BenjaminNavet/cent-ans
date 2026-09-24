@@ -69,5 +69,17 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Commandes worktree : pas de `cd … &&`, pas de variables en tête de commande ; commandes git
   simples, une par appel.
 
+## H8b (reprise, session historien 2)
+- Script de régénération de la section H8 de `_todo.md` : copie dans le scratchpad de la session
+  (`regen_todo.py <data_dir>`) ; logique décrite ci-dessus, en plus : ids des autres `_*.md` exclus.
+- Décisions : `cdx_artevelde` (liste `_event_links.md`) = fiche existante `cdx_jacob_van_artevelde`,
+  liens des événements repointés ; `cdx_succession_bretagne` fusionné dans
+  `cdx_guerre_de_succession_de_bretagne` (Knolles repointé) ; Jarretière et Étoile écrites sous les
+  ids `cdx_ordre_de_la_jarretiere` et `cdx_ordre_de_l_etoile`.
+- Lot 1 fait : les 10 fiches de `_event_links.md` (black_agnes, combat_des_trente, gallicanisme,
+  gautier_de_mauny, guerre_de_succession_de_bretagne, henri_de_grosmont, hugues_quieret,
+  ordre_de_l_etoile, ordre_de_la_jarretiere, vicariat_imperial).
+- Fiches H8b écrites : 10.
+
 ## Prochaine étape
-Écrire les 48 ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
+Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
