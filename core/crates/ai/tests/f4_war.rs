@@ -40,13 +40,13 @@ fn declares_on(state: &mut CampaignState, data: &GameData, who: &str, target: &s
 }
 
 #[test]
-fn england_presses_its_claim_on_france_though_weaker() {
+fn england_presses_its_claim_on_france_without_superiority() {
     let data = data();
     let mut state = peace_after_truce(&data);
-    assert!(
-        state.faction_power(&fac("fac_england")) < state.faction_power(&fac("fac_france")),
-        "England is the weaker realm"
-    );
+    // The pre-F4 rule (coalition ratio >= 1.5) would never declare here.
+    let ratio = state.coalition_power(&fac("fac_england"))
+        / state.coalition_power(&fac("fac_france"));
+    assert!(ratio < sim_campaign::diplomacy::OPPORTUNIST_RATIO, "ratio {ratio}");
     assert!(declares_on(&mut state, &data, "fac_england", "fac_france"));
 }
 

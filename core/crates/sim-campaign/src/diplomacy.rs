@@ -587,6 +587,20 @@ pub fn evaluate(
                     ));
                 }
             }
+            // F4: a beaten realm that gives up everything we hold of it
+            // settles the war score.
+            let conquests: Vec<&ProvinceId> = state
+                .provinces
+                .iter()
+                .filter(|(_, p)| &p.owner == proposer && &p.controller == recipient)
+                .map(|(id, _)| id)
+                .collect();
+            if !conquests.is_empty() && conquests.iter().all(|c| provinces.contains(*c)) {
+                let score = state.war_score(data, recipient, proposer);
+                if score > 0 {
+                    reasons.push(("Conquêtes reconnues".to_owned(), score));
+                }
+            }
             if *tribute > 0 {
                 reasons.push((
                     "Tribut exigé".to_owned(),
@@ -1835,7 +1849,7 @@ pub fn rivals(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId>
 }
 
 /// Can `faction` afford a new war: no regency, no debt, a season of upkeep
-/// in the chest and a free ruler (F4 tempo).
+/// in the chest, a surplus and a free ruler (F4 tempo).
 pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
     let Some(me) = state.factions.get(faction) else {
         return false;
@@ -1845,7 +1859,11 @@ pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
         .as_ref()
         .and_then(|r| state.characters.get(r))
         .is_none_or(|r| !r.captive);
-    !me.regency && ruler_free && me.treasury > 0 && me.treasury >= me.upkeep_last_turn.max(0)
+    !me.regency
+        && ruler_free
+        && me.treasury > 0
+        && me.treasury >= 2 * me.upkeep_last_turn.max(0)
+        && me.income_last_turn >= me.upkeep_last_turn
 }
 
 /// Power of the enemies `faction` already fights (rebels excluded).
@@ -1872,7 +1890,7 @@ fn alliance_count(state: &CampaignState, faction: &FactionId) -> usize {
 /// Would `ally` answer the call to arms of `defender` attacked by
 /// `aggressor` (M5 § 2.3, F4)? Vassals follow a loyal tie, overlords
 /// protect their vassals, other allies march unless they resent the
-/// defender or are crippled (regency and empty treasury).
+/// defender or are crippled (empty treasury).
 pub fn answers_call_to_arms(
     state: &CampaignState,
     data: &GameData,
@@ -1897,7 +1915,7 @@ pub fn answers_call_to_arms(
         return true;
     }
     let attitude = state.attitude(data, ally, defender).0;
-    let crippled = ally_state.regency && ally_state.treasury < 0;
+    let crippled = ally_state.treasury < 0;
     let grudge = rivals(state, ally).contains(aggressor);
     !crippled && (attitude > 0 || (grudge && attitude > -20))
 }
@@ -1998,7 +2016,7 @@ fn peace_terms(
 ) -> Option<Vec<ProvinceId>> {
     let score = state.war_score(data, faction, enemy);
     let capital = |f: &FactionId| state.factions.get(f).map(|s| s.capital.clone());
-    let held_by = |owner: &FactionId, holder: &FactionId| -> Vec<ProvinceId> {
+    let held_by = |owner: &FactionId, holder: &FactionId, most: usize| -> Vec<ProvinceId> {
         let capital = capital(owner);
         let mut list: Vec<ProvinceId> = state
             .provinces
@@ -2008,7 +2026,7 @@ fn peace_terms(
             .collect();
         // Capitals last: they are the costliest to give up.
         list.sort_by_key(|id| (Some(id) == capital.as_ref(), id.clone()));
-        list.truncate(2);
+        list.truncate(most);
         list
     };
     let answer_known = enemy != &state.player_faction;
@@ -2020,7 +2038,7 @@ fn peace_terms(
         !answer_known || evaluate(state, data, faction, enemy, &proposal).accept
     };
     if score > 40 {
-        let taken = held_by(enemy, faction);
+        let taken = held_by(enemy, faction, 2);
         return accepted(&taken).then_some(taken);
     }
     let white = Proposal::Peace {
@@ -2031,7 +2049,7 @@ fn peace_terms(
         return Some(Vec::new());
     }
     if score < -40 {
-        let lost = held_by(faction, enemy);
+        let lost = held_by(faction, enemy, usize::MAX);
         if !lost.is_empty() && accepted(&lost) {
             return Some(lost);
         }
