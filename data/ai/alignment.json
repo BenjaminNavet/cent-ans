@@ -11,8 +11,8 @@
     "crown_in_trouble_loss": 0.25
   },
   "grievance": {
-    "attitude": -20,
-    "margin": 30
+    "grudge": -30,
+    "min_attitude": -10
   },
   "dynastic": {
     "margin": 10,

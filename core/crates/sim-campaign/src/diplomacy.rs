@@ -18,6 +18,8 @@ use crate::state::CampaignState;
 
 /// Truce after a negotiated peace (5 years).
 pub const TRUCE_TURNS: u32 = 20;
+/// Attitude reason of two factions at war.
+pub const AT_WAR_REASON: &str = "En guerre";
 /// Reason of the opinion modifier a gift leaves with its recipient.
 pub const GIFT_REASON: &str = "Présents diplomatiques";
 /// Truce obtained through papal mediation (2 years).
@@ -407,7 +409,7 @@ impl CampaignState {
             self.ruler_effect_points(data, b, |e| e.diplomacy.apply(0.0) * 2.0),
         );
         match self.relation(a, b) {
-            RelationKind::War => add("En guerre", -50),
+            RelationKind::War => add(AT_WAR_REASON, -50),
             RelationKind::Truce => add("Trêve récente", -10),
             RelationKind::Alliance => add("Alliés", 30),
             RelationKind::Suzerain => add(

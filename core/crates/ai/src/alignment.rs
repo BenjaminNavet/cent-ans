@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
-    claim_stakes, evaluate, war_ready, Proposal, DESERTION_WAR_SCORE, GIFT_REASON,
+    claim_stakes, evaluate, war_ready, Proposal, AT_WAR_REASON, DESERTION_WAR_SCORE, GIFT_REASON,
 };
 use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
@@ -143,9 +143,39 @@ fn eligible_invader(
         && !claim_stakes(state, faction, invader).any()
 }
 
-/// Blood feud (G4, Montereau): the patron `faction` holds a grievance
-/// against (its suzerain, an ally, or a crown it already fights) and the
-/// enemy or pretender of that patron it now prefers by `grievance.margin`.
+/// Sum of the grudges `faction` holds against `patron`: its running
+/// negative opinion modifiers (a murder, a betrayal), whatever the bond.
+pub fn grievance(state: &CampaignState, faction: &FactionId, patron: &FactionId) -> i32 {
+    state.factions.get(faction).map_or(0, |f| {
+        f.modifiers
+            .iter()
+            .filter(|m| &m.with == patron && m.expires_turn > state.turn && m.value < 0)
+            .map(|m| m.value)
+            .sum()
+    })
+}
+
+/// Attitude of `faction` towards `other`, leaving out the war between
+/// them (a side change starts with a white peace).
+fn attitude_beyond_war(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    other: &FactionId,
+) -> i32 {
+    let (_, reasons) = state.attitude(data, faction, other);
+    let total: i32 = reasons
+        .iter()
+        .filter(|(label, _)| label != AT_WAR_REASON)
+        .map(|(_, value)| value)
+        .sum();
+    total.clamp(-100, 100)
+}
+
+/// Blood feud (G4, Montereau): the patron `faction` holds a grievance of
+/// `grievance.grudge` or worse against (its suzerain, an ally, or a crown
+/// it already fights) and the enemy or pretender of that patron it would
+/// side with (attitude of `grievance.min_attitude`, their war aside).
 pub fn grievance_change(
     state: &CampaignState,
     data: &GameData,
@@ -159,11 +189,9 @@ pub fn grievance_change(
         .chain(me.allies.iter())
         .chain(me.at_war_with.iter().filter(|e| e.as_str() != "fac_rebels"));
     for patron in patrons {
-        if !state.factions.get(patron).is_some_and(|f| f.alive) {
-            continue;
-        }
-        let towards_patron = state.attitude(data, faction, patron).0;
-        if towards_patron > rules.attitude {
+        if !state.factions.get(patron).is_some_and(|f| f.alive)
+            || grievance(state, faction, patron) > rules.grudge
+        {
             continue;
         }
         let feud_at_war = me.at_war_with.contains(patron);
@@ -182,8 +210,8 @@ pub fn grievance_change(
                     pretender || fights
                 }
             })
-            .map(|e| (state.attitude(data, faction, e).0, e))
-            .filter(|(towards, _)| *towards >= towards_patron + rules.margin)
+            .map(|e| (attitude_beyond_war(state, data, faction, e), e))
+            .filter(|(towards, _)| *towards >= rules.min_attitude)
             .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(a.1)));
         if let Some((_, invader)) = best {
             return Some((patron.clone(), invader.clone()));
@@ -218,7 +246,11 @@ pub fn side_change(
             return Some((lord, embargoer.clone()));
         }
     }
-    // One roll per decade: the Armagnac-Burgundian feud is not written.
+    // A blood feud needs no roll: the chronicle already hesitated.
+    if let Some(change) = grievance_change(state, data, faction) {
+        return Some(change);
+    }
+    // One roll per decade: the fall of a crown is not written.
     let decade = u64::from(state.turn / DECADE_TURNS);
     if campaign_roll(state, faction, DEFECTION_SALT + decade) >= rules.history_permille {
         return None;
@@ -228,7 +260,7 @@ pub fn side_change(
         Some(_) => Vec::new(),
         None => me.allies.iter().filter(|a| alive(a)).cloned().collect(),
     };
-    let dominated = patrons.into_iter().find_map(|patron| {
+    patrons.into_iter().find_map(|patron| {
         let invader = state.factions[&patron]
             .at_war_with
             .iter()
@@ -236,8 +268,7 @@ pub fn side_change(
             .find(|e| dominates_realm(state, data, e, &patron))?
             .clone();
         Some((patron, invader))
-    });
-    dominated.or_else(|| grievance_change(state, data, faction))
+    })
 }
 
 /// Orders of `faction` changing sides this turn (G2): white peace with the
@@ -295,8 +326,9 @@ pub fn borders(state: &CampaignState, data: &GameData, a: &FactionId, b: &Factio
     })
 }
 
-/// Princes on the border of an enemy of `faction`, allied neither with it
-/// nor with that enemy, whose campaign roll lets history court them: each
+/// Princes on the border of an enemy of `faction` (itself no vassal),
+/// allied neither with it nor with that enemy, no enemy or pretender of
+/// its allies, whose campaign roll lets history court them: each
 /// with its attitude towards us and its best one towards our enemies.
 fn courted_princes<'a>(
     state: &'a CampaignState,
@@ -307,10 +339,19 @@ fn courted_princes<'a>(
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
+    // A vassal's diplomacy follows its lord's.
+    if me.suzerain.is_some() {
+        return Vec::new();
+    }
+    // Wars of succession only: princes are courted for a crown (Edward
+    // III's claim on France), not for a border quarrel.
     let enemies: Vec<&FactionId> = me
         .at_war_with
         .iter()
         .filter(|e| e.as_str() != "fac_rebels")
+        .filter(|e| {
+            claim_stakes(state, faction, e).throne || claim_stakes(state, e, faction).throne
+        })
         .collect();
     if enemies.is_empty() {
         return Vec::new();
@@ -323,6 +364,13 @@ fn courted_princes<'a>(
         })
         .filter(|(id, f)| !state.is_allied(faction, id) && !f.at_war_with.contains(faction))
         .filter(|(_, f)| enemies.iter().all(|e| !f.allies.contains(*e)))
+        // Never a pretender to our allies' lands (England for Burgundy's
+        // French allies), nor a prince at war with them.
+        .filter(|(id, f)| {
+            me.allies
+                .iter()
+                .all(|a| !f.at_war_with.contains(a) && !claim_stakes(state, id, a).any())
+        })
         // Princes on our enemy's border only (no cap: the coalition of 1337
         // is a web of in-laws, not a count of treaties).
         .filter(|(id, _)| enemies.iter().any(|e| borders(state, data, id, e)))
