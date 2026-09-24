@@ -42,6 +42,7 @@ var _windmill_sails: MultiMeshInstance3D
 var _windmill_points: Array = []
 var _overlay: ShaderMaterial
 var _overlay_timer := 0.0
+var _ruin_overlays: Dictionary = {}
 ## Ruine (0-1) par indice de colonie.
 var _ruin: Dictionary = {}
 var _season_boost := 1.0
@@ -209,6 +210,19 @@ func _apply_ruins(province_states: Dictionary) -> void:
 	_update_overlays()
 
 
+## Surcouche pour un degré de ruine (paliers de 0,2 : peu de matériaux distincts).
+func _overlay_for(amount: float) -> ShaderMaterial:
+	var step := int(round(amount * 5.0))
+	if step == 0:
+		return _overlay
+	if not _ruin_overlays.has(step):
+		var material := ShaderMaterial.new()
+		material.shader = OVERLAY_SHADER
+		material.set_shader_parameter("ruin", step / 5.0)
+		_ruin_overlays[step] = material
+	return _ruin_overlays[step]
+
+
 ## Pose la surcouche (neige, suie) sur les maquettes et les hameaux, y compris ceux reconstruits
 ## depuis (appelé périodiquement). Seulement là où elle sert (hiver, ruine) : c'est une passe de
 ## rendu de plus par maquette.
@@ -221,13 +235,11 @@ func _update_overlays() -> void:
 		if holder == null:
 			continue
 		var amount: float = _ruin.get(i, 0.0)
-		var wanted: ShaderMaterial = _overlay if snowy or amount > 0.0 else null
+		var wanted: ShaderMaterial = _overlay_for(amount) if snowy or amount > 0.0 else null
 		for geometry in holder.find_children("*", "GeometryInstance3D", true, false):
 			var g := geometry as GeometryInstance3D
 			if g.material_overlay != wanted:
 				g.material_overlay = wanted
-			if wanted != null:
-				g.set_instance_shader_parameter(&"ruin", amount)
 	var hamlets := _layer.get_node_or_null("Hamlets")
 	if hamlets != null:
 		var wanted_h: ShaderMaterial = _overlay if snowy else null

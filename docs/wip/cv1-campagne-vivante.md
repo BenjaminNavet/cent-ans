@@ -32,7 +32,9 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
       (cathédrale, halle, donjon, faubourgs) + château Kenney si fortification ≥ 6 ; modèles
       Blender `bourg_a/b`, `cite_a/b`, `windmill_body/sails` ; Paris exclu (L1) ; relecture
       une fois par tour (≈ 150 ms de `settlement_detail` en debug)
-- [ ] 4. Dévastation visible
+- [x] 4. Dévastation visible : brûlis du terrain (masque B), hameaux brûlés (C6) qui fument, villages
+      et abbayes en ruine (surcouche de suie `life_overlay.gdshader`, fumée noire et braises),
+      suie et incendies des faubourgs des villes assiégées ; `--devastate=<province>:<%>`
 - [ ] 5. Vie ambiante
 - [ ] Mesures FPS avant/après, captures par saison
 
@@ -46,4 +48,4 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## Prochaine étape
 
-Lot 4 : dévastation visible (ruines des villages, fumées), moulins à vent.
+Lot 5 : vie ambiante (oiseaux, bateaux), puis mesures FPS et captures finales.
