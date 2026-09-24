@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_dumfries",
+    "province": "prov_galloway",
+    "kind": "city",
+    "name": {
+      "display": "Dumfries",
+      "local": "Dumfries",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.611,
+      55.0703
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Galloway, patrimoine des Balliol, et Annandale (Bruce) : base d'Édouard Balliol, roi d'Écosse sous protection anglaise (rattaché dans le jeu à l'Angleterre). Comté de Carrick.",
+    "sources": [
+      "Galloway",
+      "Édouard Balliol",
+      "Annandale"
+    ]
+  },
+  {
+    "id": "set_kirkcudbright",
+    "province": "prov_galloway",
+    "kind": "town",
+    "name": {
+      "display": "Kirkcudbright",
+      "local": "Kirkcudbright",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -4.057,
+      54.8336
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du Galloway sur le Dee, terre traditionnellement fidèle à la cause des Balliol.",
+    "sources": [
+      "Kirkcudbright"
+    ]
+  },
+  {
+    "id": "set_caerlaverock",
+    "province": "prov_galloway",
+    "kind": "castle",
+    "name": {
+      "display": "Caerlaverock",
+      "local": "Caerlaverock",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.5083,
+      54.9728
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Célèbre château triangulaire assiégé par Édouard Ier en 1300, verrou du Solway.",
+    "sources": [
+      "Château de Caerlaverock"
+    ]
+  }
+]

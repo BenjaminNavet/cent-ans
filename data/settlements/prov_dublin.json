@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_dublin",
+    "province": "prov_dublin",
+    "kind": "city",
+    "name": {
+      "display": "Dublin",
+      "local": "Dyvelin",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -6.2603,
+      53.3498
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Seigneurie d'Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent le Pale depuis les monts de Wicklow.",
+    "sources": [
+      "Seigneurie d'Irlande",
+      "Dublin",
+      "Pale (Irlande)"
+    ]
+  },
+  {
+    "id": "set_drogheda",
+    "province": "prov_dublin",
+    "kind": "town",
+    "name": {
+      "display": "Drogheda",
+      "local": "Drochet Atha",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -6.3478,
+      53.7189
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville close sur la Boyne, siège fréquent du parlement d'Irlande.",
+    "sources": [
+      "Drogheda"
+    ]
+  },
+  {
+    "id": "set_waterford",
+    "province": "prov_dublin",
+    "kind": "town",
+    "name": {
+      "display": "Waterford",
+      "local": "Vadrafjord",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -7.1101,
+      52.2593
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ancien port viking devenu cité royale fidèle, dite « Urbs Intacta » pour n'avoir jamais été prise.",
+    "sources": [
+      "Waterford"
+    ]
+  },
+  {
+    "id": "set_mellifont",
+    "province": "prov_dublin",
+    "kind": "abbey",
+    "name": {
+      "display": "Mellifont",
+      "local": "Mainistir Mór",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -6.4667,
+      53.7386
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Première abbaye cistercienne d'Irlande, fondée en 1142.",
+    "sources": [
+      "Abbaye de Mellifont"
+    ]
+  }
+]
