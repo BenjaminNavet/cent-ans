@@ -9,6 +9,7 @@ extends CanvasLayer
 ## Aucune règle : tout vient de `BattleSim.get_units()` et des événements.
 
 signal card_clicked(unit_id: int, additive: bool)
+signal card_double_clicked(unit_id: int)  # B3 / T6 : centrer la caméra sur ce régiment
 signal command_pressed(command: String)
 signal speed_pressed(index: int)  # -1 : pause, 0..2 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
@@ -18,12 +19,13 @@ const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
-• Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner.
+• Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
 • Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
 • F : formation · G : tir à volonté · H : halte · Z X V B N : ordres du chef · Échap : désélectionner.
 • Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
-• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller."""
+• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller.
+• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; W A S D ou glisser libèrent la caméra."""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
@@ -326,6 +328,7 @@ func _make_card(unit: Dictionary) -> UnitCard:
 	(column.get_node("Cards") as HBoxContainer).add_child(card)
 	card.setup(unit, get_node_or_null("/root/IconLibrary"), player_faction, _colors[0])
 	card.clicked.connect(func(id: int, additive: bool) -> void: card_clicked.emit(id, additive))
+	card.double_clicked.connect(func(id: int) -> void: card_double_clicked.emit(id))
 	return card
 
 
