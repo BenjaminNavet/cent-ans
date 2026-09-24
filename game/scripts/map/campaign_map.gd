@@ -74,6 +74,7 @@ var _fps_probe_cpu_ms: float = 0.0
 ## Temps cumulés (µs) : LOD du terrain, couches C6 (colonies, routes).
 var _fps_probe_map_us: Vector2 = Vector2.ZERO
 var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
+var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -114,6 +115,9 @@ func _ready() -> void:
 	armies.setup(map_data, camera)
 	path_preview.setup(map_data)
 	_connect_ui()
+	settlements_ctl = SettlementController.new()  # C5
+	add_child(settlements_ctl)
+	settlements_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -183,6 +187,8 @@ func _setup_settlements() -> void:
 
 ## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
 func _on_settlement_selected(settlement_id: String) -> void:
+	if settlements_ctl != null and settlements_ctl.available():
+		return  # C5 : le panneau de colonie s'ouvre
 	var entry := settlement_data.get_settlement(settlement_id) if settlement_data != null else {}
 	if not entry.is_empty():
 		ui.show_toast("%s (%s)" % [entry.get("name", settlement_id), province_name_of(str(entry.get("province", "")))])
@@ -271,6 +277,8 @@ func refresh_all() -> void:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
 	_refresh_construction_markers()
+	if settlements_ctl != null:  # C5
+		settlements_ctl.refresh()
 	if unrest_mode:
 		_refresh_unrest_colors()
 	if selected_army != "":
@@ -402,6 +410,8 @@ func select_army(army_id: String) -> void:
 	var is_player := faction == player_faction
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
+	if settlements_ctl != null:  # C5 : colonies atteignables
+		settlements_ctl.on_army_selected(army_id, is_player)
 	if hud != null:  # F10b : bandeau d'ost et sceau du chef
 		hud.show_army(army_id, army, is_player)
 	if sieges != null:
@@ -410,6 +420,8 @@ func select_army(army_id: String) -> void:
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
+	if settlements_ctl != null and settlements_ctl.show_current_path(army):
+		return
 	var path: Array = army.get("path_provinces", army.get("path", []))
 	if not path.is_empty():
 		var ids := PackedStringArray([str(army.get("location_province", army.get("location", "")))])
@@ -425,6 +437,8 @@ func deselect_army() -> void:
 	reachable = {}
 	armies.set_selected("")
 	terrain.set_reachable(PackedInt32Array(), PackedInt32Array())
+	if settlements_ctl != null:  # C5
+		settlements_ctl.on_army_deselected()
 	path_preview.hide_path()
 	ui.hide_army()
 
@@ -479,6 +493,8 @@ func _on_province_hovered(index: int) -> void:
 
 ## Aperçu du chemin de l'armée sélectionnée vers `target_id` : ruban, masque, coût.
 func _preview_path(target_id: String, target_name: String) -> void:
+	if settlements_ctl != null and settlements_ctl.preview_hover(target_id, target_name):
+		return  # C5 : chemin sur le graphe des colonies
 	var army: Dictionary = sim.call("get_army", selected_army)
 	# C4 : le chemin réel passe par des colonies ; l'aperçu reste par province.
 	var path: PackedStringArray = sim.call("find_path_provinces", selected_army, target_id) if sim.has_method("find_path_provinces") else sim.call("find_path", selected_army, target_id)
