@@ -1,15 +1,15 @@
-# Lot B4 — Effets et animations de bataille (branche `worktree-agent-afb31a84f3b8442f6`)
+# Lot B4 — Effets et animations de bataille (fusionné dans main, `2a485a5`)
 
 Plan : `docs/design/2026-09-24-rapprochement-total-war.md` (lot B4). Suite de B1 (`docs/wip/b1-maillages.md`).
 
-## État : interrompu à la demande du joueur (non fusionné) — tout le code est commité et fonctionne
+## État : fusionné (24/09), banc d'essai fait
 | Partie | État |
 |---|---|
 | Rythme d'engagement (IA `sim-battle`) | **fait** : contact de la démo à 70 s (au lieu de 301 s), test |
 | Animations (shader + sommets) | **fait** : archer, arbalétrier, cavalier, caparaçon, mêlée, chutes |
 | Effets (`battle_effects.gd`) | **fait** : poussière, éclaboussures, traits, bombardes, choc des charges |
 | Captures `docs/img/b4/` | **fait** (avant/après), sauf bombarde en bataille réelle (pas de bombarde dans la démo) |
-| Banc d'essai `--benchmark` A/B | **pas commencé** (arrêt demandé avant les mesures) |
+| Banc d'essai `--benchmark` A/B | **fait** (voir « Mesures ») : coût des effets non mesurable en FPS |
 | ADR | pas commencé (facultatif : aucun choix d'architecture nouveau hors ADR 0006) |
 
 ## Tests
@@ -74,8 +74,24 @@ loin). Sang : **aucun** (public large).
 (poussière), `melee`, `bombard` (éclair + fumée ; figurines hors simulation, la démo n'a pas de
 bombarde), `battle_charge` (68 s), `battle_volley` (59 s) ; `after_volley_closeup`.
 
-## Prochaine étape (reprise)
-1. Banc d'essai A/B (machine chargée : passes alternées) :
+## Mesures (24/09, après fusion, en mêlée)
+Nouvelle option `--bench-at=<s>` : avance la bataille (IA des deux camps) avant les 600 images mesurées.
+Écran plafonné à 60 Hz malgré `--disable-vsync` : les FPS ne départagent pas ; on compare primitives et appels.
+
+| Config (`--benchmark --bench-at=90`) | FPS moy. | Primitives | Appels | Projectiles |
+|---|---|---|---|---|
+| démo 14 unités | 58,8 | 1,38 M | 520 | 672 |
+| démo, `--no-effects` | 58,7 | 1,22 M | 512 | 0 |
+| `--camera=630,240,28,180` | 58,8 | 1,96 M | 751 | 804 |
+| idem `--no-effects` | 58,7 | 1,80 M | 742 | 0 |
+| `--units=20` (40 unités, 4553 soldats) | 58,6 | 2,87 M | 895 | 1995 |
+| idem `--no-effects` | 58,5 | 2,71 M | 878 | 0 |
+
+Conclusion : effets ≈ +6 % de primitives, +2 % d'appels, aucune baisse de FPS visible (sous le seuil de 15 %).
+Piège : sous zsh, `$cfg` non cité n'est pas découpé ; utiliser `${=cfg}` dans les boucles de mesure.
+
+## Suites (hors lot)
+1. ~~Banc d'essai A/B~~ fait. Ancienne consigne : banc d'essai A/B (machine chargée : passes alternées) :
    `godot --path game --disable-vsync --resolution 1600x900 res://scenes/battle/battle.tscn -- --benchmark --units=20`
    et `... -- --benchmark --camera=630,240,28,180`, avec et sans `--no-effects` ; noter ici (seuil ~15 %).
 2. Vérifier en jeu les éclaboussures (régiment en marche dans un gué ; jamais capturées en action).
