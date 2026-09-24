@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_aix",
+    "province": "prov_provence",
+    "kind": "city",
+    "name": { "display": "Aix", "local": "Ais", "local_language": "occitan" },
+    "lonlat": [5.4474, 43.5297],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Siège de la cour comtale de Robert d'Anjou, roi de Naples et comte de Provence.",
+    "sources": ["Aix-en-Provence", "Comté de Provence"]
+  },
+  {
+    "id": "set_marseille",
+    "province": "prov_provence",
+    "kind": "town",
+    "name": { "display": "Marseille", "local": "Marselha", "local_language": "occitan" },
+    "lonlat": [5.3698, 43.2965],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls", "bld_guild_hall"],
+    "port": true,
+    "description": "Grand port de Méditerranée, ancien point de départ des croisades, rival commercial de Gênes et Venise.",
+    "sources": ["Marseille"]
+  },
+  {
+    "id": "set_tarascon",
+    "province": "prov_provence",
+    "kind": "town",
+    "name": { "display": "Tarascon", "local": "Tarascon", "local_language": "occitan" },
+    "lonlat": [4.6597, 43.8058],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur le Rhône, face à Beaucaire, résidence angevine.",
+    "sources": ["Tarascon (Bouches-du-Rhône)"]
+  },
+  {
+    "id": "set_les_baux",
+    "province": "prov_provence",
+    "kind": "castle",
+    "name": { "display": "Les Baux", "local": "Lei Bauç", "local_language": "occitan" },
+    "lonlat": [4.7947, 43.7433],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Puissante forteresse des seigneurs des Baux perchée sur les Alpilles.",
+    "sources": ["Château des Baux-de-Provence"]
+  },
+  {
+    "id": "set_silvacane",
+    "province": "prov_provence",
+    "kind": "abbey",
+    "name": { "display": "Silvacane", "local": "Silvacana", "local_language": "occitan" },
+    "lonlat": [5.2569, 43.7358],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye cistercienne sur la Durance.",
+    "sources": ["Abbaye de Silvacane"]
+  }
+]

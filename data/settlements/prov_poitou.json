@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_poitiers",
+    "province": "prov_poitou",
+    "kind": "city",
+    "name": { "display": "Poitiers", "local": "Poitiers", "local_language": "ancien français" },
+    "lonlat": [0.3404, 46.5802],
+    "weight": 36,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": false,
+    "description": "Capitale du comté de Poitou, domaine royal depuis 1271, siège de la sénéchaussée.",
+    "sources": ["Poitiers", "Comté de Poitou"]
+  },
+  {
+    "id": "set_niort",
+    "province": "prov_poitou",
+    "kind": "town",
+    "name": { "display": "Niort", "local": "Niort", "local_language": "ancien français" },
+    "lonlat": [-0.4586, 46.3239],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close à l'orée du Marais poitevin, marché du sel et du cuir.",
+    "sources": ["Niort"]
+  },
+  {
+    "id": "set_les_sables_d_olonne",
+    "province": "prov_poitou",
+    "kind": "town",
+    "name": { "display": "Les Sables-d'Olonne", "local": "Les Sables", "local_language": "ancien français" },
+    "lonlat": [-1.7833, 46.5000],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Port fondé en 1218 sur le cordon dunaire, pour la pêche et le sel.",
+    "sources": ["Les Sables-d'Olonne"]
+  },
+  {
+    "id": "set_lusignan",
+    "province": "prov_poitou",
+    "kind": "castle",
+    "name": { "display": "Lusignan", "local": "Luziegnen", "local_language": "ancien français" },
+    "lonlat": [0.1167, 46.4333],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse légendaire de la fée Mélusine, ancien berceau de la maison de Lusignan.",
+    "sources": ["Château de Lusignan"]
+  },
+  {
+    "id": "set_maillezais",
+    "province": "prov_poitou",
+    "kind": "abbey",
+    "name": { "display": "Maillezais", "local": "Malliazais", "local_language": "ancien français" },
+    "lonlat": [-0.7333, 46.3667],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye bénédictine fortifiée aux confins du Marais poitevin.",
+    "sources": ["Abbaye de Maillezais"]
+  }
+]

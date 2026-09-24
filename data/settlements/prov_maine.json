@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_le_mans",
+    "province": "prov_maine",
+    "kind": "city",
+    "name": { "display": "Le Mans", "local": "Le Mans", "local_language": "ancien français" },
+    "lonlat": [0.1996, 48.0061],
+    "weight": 34,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté du Maine, domaine royal, ceinte de son enceinte gallo-romaine.",
+    "sources": ["Le Mans", "Comté du Maine"]
+  },
+  {
+    "id": "set_alencon",
+    "province": "prov_maine",
+    "kind": "town",
+    "name": { "display": "Alençon", "local": "Alençon", "local_language": "ancien français" },
+    "lonlat": [0.0925, 48.4319],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du comté d'Alençon et du Perche, tenu par Charles II d'Alençon, frère du roi.",
+    "sources": ["Alençon", "Comté d'Alençon"]
+  },
+  {
+    "id": "set_sainte_suzanne",
+    "province": "prov_maine",
+    "kind": "castle",
+    "name": { "display": "Sainte-Suzanne", "local": "Sainte Susanne", "local_language": "ancien français" },
+    "lonlat": [-0.3564, 48.0925],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse restée invaincue face à Guillaume le Conquérant, dominant l'Erve.",
+    "sources": ["Château de Sainte-Suzanne"]
+  },
+  {
+    "id": "set_epau",
+    "province": "prov_maine",
+    "kind": "abbey",
+    "name": { "display": "L'Épau", "local": "L'Espau", "local_language": "ancien français" },
+    "lonlat": [0.2333, 47.9833],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1229 par Bérengère de Navarre, près du Mans.",
+    "sources": ["Abbaye de l'Épau"]
+  }
+]

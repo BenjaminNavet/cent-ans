@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_montpellier",
+    "province": "prov_montpellier",
+    "kind": "city",
+    "name": { "display": "Montpellier", "local": "Montpelhièr", "local_language": "occitan" },
+    "lonlat": [3.8767, 43.6108],
+    "weight": 36,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_fair", "bld_guild_hall", "bld_hotel_dieu", "bld_stone_walls", "bld_muster_field", "bld_university"],
+    "port": false,
+    "description": "Seigneurie tenue par Jacques III de Majorque, grande place du commerce des épices et siège d'une université de médecine réputée dans toute l'Europe.",
+    "sources": ["Montpellier", "Université de médecine de Montpellier"]
+  },
+  {
+    "id": "set_lattes",
+    "province": "prov_montpellier",
+    "kind": "town",
+    "name": { "display": "Lattes", "local": "Lates", "local_language": "occitan" },
+    "lonlat": [3.9167, 43.5667],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_market", "bld_port", "bld_palisade"],
+    "port": true,
+    "description": "Avant-port de Montpellier sur le Lez, par lequel transitent les draps et les épices, déjà menacé par l'ensablement.",
+    "sources": ["Lattes"]
+  },
+  {
+    "id": "set_valmagne",
+    "province": "prov_montpellier",
+    "kind": "abbey",
+    "name": { "display": "Valmagne", "local": "Valmanha", "local_language": "occitan" },
+    "lonlat": [3.4894, 43.4667],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye cistercienne dite « cathédrale des vignes », à l'ouest de Montpellier.",
+    "sources": ["Abbaye de Valmagne"]
+  },
+  {
+    "id": "set_castelnau_le_lez",
+    "province": "prov_montpellier",
+    "kind": "village",
+    "name": { "display": "Castelnau-le-Lez", "local": "Castèlnòu", "local_language": "occitan" },
+    "lonlat": [3.9000, 43.6167],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Bourg agricole sur le Lez, à l'est de Montpellier.",
+    "sources": ["Castelnau-le-Lez"]
+  }
+]

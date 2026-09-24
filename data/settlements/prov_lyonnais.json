@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_lyon",
+    "province": "prov_lyonnais",
+    "kind": "city",
+    "name": { "display": "Lyon", "local": "Lion", "local_language": "franco-provençal" },
+    "lonlat": [4.8357, 45.7640],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": false,
+    "description": "Carrefour du Rhône et de la Saône, rattachée au royaume de France en 1312 par le traité de Vienne.",
+    "sources": ["Lyon", "Traité de Vienne (1312)"]
+  },
+  {
+    "id": "set_montbrison",
+    "province": "prov_lyonnais",
+    "kind": "town",
+    "name": { "display": "Montbrison", "local": "Monbrison", "local_language": "franco-provençal" },
+    "lonlat": [4.0667, 45.6167],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du comté de Forez tenu par Guy VII.",
+    "sources": ["Montbrison (Loire)", "Comté de Forez"]
+  },
+  {
+    "id": "set_beaujeu",
+    "province": "prov_lyonnais",
+    "kind": "castle",
+    "name": { "display": "Beaujeu", "local": "Biaujeu", "local_language": "franco-provençal" },
+    "lonlat": [4.5833, 46.1667],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château des sires de Beaujeu, en fief du roi.",
+    "sources": ["Beaujeu (Rhône)"]
+  },
+  {
+    "id": "set_ile_barbe",
+    "province": "prov_lyonnais",
+    "kind": "abbey",
+    "name": { "display": "Île Barbe", "local": "Ile Barbe", "local_language": "franco-provençal" },
+    "lonlat": [4.8167, 45.8167],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Ancienne abbaye bénédictine sur une île de la Saône, en amont de Lyon.",
+    "sources": ["Abbaye de l'Île-Barbe"]
+  },
+  {
+    "id": "set_oingt",
+    "province": "prov_lyonnais",
+    "kind": "village",
+    "name": { "display": "Oingt", "local": "Oingt", "local_language": "franco-provençal" },
+    "lonlat": [4.5833, 45.9333],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Village de pierres dorées du Beaujolais.",
+    "sources": ["Oingt"]
+  }
+]

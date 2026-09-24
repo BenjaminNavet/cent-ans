@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_avignon",
+    "province": "prov_comtat_venaissin",
+    "kind": "city",
+    "name": { "display": "Avignon", "local": "Avinhon", "local_language": "occitan" },
+    "lonlat": [4.8055, 43.9493],
+    "weight": 40,
+    "owner": "fac_naples",
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_fair", "bld_guild_hall", "bld_hotel_dieu", "bld_stone_walls", "bld_castle", "bld_muster_field", "bld_university"],
+    "port": false,
+    "description": "Résidence de la cour pontificale de Benoît XII, qui y bâtit le Palais des papes, mais la ville relève encore juridiquement du comte de Provence Robert de Naples jusqu'à son rachat en 1348.",
+    "sources": ["Avignon", "Papauté d'Avignon"]
+  },
+  {
+    "id": "set_carpentras",
+    "province": "prov_comtat_venaissin",
+    "kind": "town",
+    "name": { "display": "Carpentras", "local": "Carpentràs", "local_language": "occitan" },
+    "lonlat": [5.0500, 44.0550],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale administrative du Comtat Venaissin, siège du légat pontifical.",
+    "sources": ["Carpentras", "Comtat Venaissin"]
+  },
+  {
+    "id": "set_le_barroux",
+    "province": "prov_comtat_venaissin",
+    "kind": "castle",
+    "name": { "display": "Le Barroux", "local": "Lo Barron", "local_language": "occitan" },
+    "lonlat": [5.0833, 44.1667],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château féodal dominant la plaine comtadine, au pied des Dentelles de Montmirail.",
+    "sources": ["Château du Barroux"]
+  },
+  {
+    "id": "set_senanque",
+    "province": "prov_comtat_venaissin",
+    "kind": "abbey",
+    "name": { "display": "Sénanque", "local": "Senancha", "local_language": "occitan" },
+    "lonlat": [5.1875, 43.9186],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1148 près de Gordes.",
+    "sources": ["Abbaye de Sénanque"]
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_angers",
+    "province": "prov_anjou",
+    "kind": "city",
+    "name": { "display": "Angers", "local": "Angiers", "local_language": "ancien français" },
+    "lonlat": [-0.5541, 47.4784],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté d'Anjou, entré au domaine royal en 1328, réputée pour son ardoise.",
+    "sources": ["Angers", "Comté d'Anjou"]
+  },
+  {
+    "id": "set_saumur",
+    "province": "prov_anjou",
+    "kind": "castle",
+    "name": { "display": "Saumur", "local": "Saumur", "local_language": "ancien français" },
+    "lonlat": [-0.0761, 47.2597],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse dominant le confluent de la Loire et du Thouet.",
+    "sources": ["Château de Saumur"]
+  },
+  {
+    "id": "set_bauge",
+    "province": "prov_anjou",
+    "kind": "town",
+    "name": { "display": "Baugé", "local": "Baugié", "local_language": "ancien français" },
+    "lonlat": [-0.1069, 47.5439],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Petite ville close du Baugeois, à l'est d'Angers.",
+    "sources": ["Baugé-en-Anjou"]
+  },
+  {
+    "id": "set_fontevraud",
+    "province": "prov_anjou",
+    "kind": "abbey",
+    "name": { "display": "Fontevraud", "local": "Fontevrault", "local_language": "ancien français" },
+    "lonlat": [0.0500, 47.1833],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye royale double, nécropole des Plantagenêts.",
+    "sources": ["Abbaye de Fontevraud"]
+  },
+  {
+    "id": "set_behuard",
+    "province": "prov_anjou",
+    "kind": "village",
+    "name": { "display": "Béhuard", "local": "Béhuard", "local_language": "ancien français" },
+    "lonlat": [-0.6667, 47.3667],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Village de l'île de Béhuard sur la Loire, lieu de dévotion mariale.",
+    "sources": ["Béhuard"]
+  }
+]
