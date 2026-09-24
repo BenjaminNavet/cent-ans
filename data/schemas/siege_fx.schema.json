@@ -14,8 +14,8 @@
     },
     "seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
     "settle_mode": {
-      "enum": ["freeze", "free"],
-      "description": "freeze : les corps restent figés au sol ; free : ils sont libérés (queue_free)."
+      "enum": ["freeze", "free", "sink"],
+      "description": "freeze : les corps restent figés au sol ; free : ils sont libérés (queue_free) ; sink : figés puis enfoncés sous le sol en sink_seconds, puis libérés (les éboulis statiques restent)."
     }
   },
   "properties": {
@@ -27,17 +27,18 @@
       "type": "object",
       "description": "Sol local (HeightMapShape3D échantillonné sur le relief) sous chaque pan qui s'effondre.",
       "properties": {
-        "patch_size": { "type": "number", "minimum": 4, "maximum": 400 },
+        "patch_margin": { "type": "number", "minimum": 2, "maximum": 200, "description": "Marge (m) du sol local autour du pan, de chaque côté." },
         "patch_spacing": { "type": "number", "minimum": 0.25, "maximum": 10 },
         "friction": { "type": "number", "minimum": 0, "maximum": 1 }
       },
-      "required": ["patch_size", "patch_spacing", "friction"],
+      "required": ["patch_margin", "patch_spacing", "friction"],
       "additionalProperties": false
     },
     "wall": {
       "type": "object",
       "description": "Fracture procédurale d'un pan de courtine.",
       "properties": {
+        "blocks_per_meter": { "type": "number", "exclusiveMinimum": 0, "maximum": 10, "description": "Blocs par mètre de courtine, borné à [blocks_min, blocks_max]." },
         "blocks_min": { "type": "integer", "minimum": 1, "maximum": 200 },
         "blocks_max": { "type": "integer", "minimum": 1, "maximum": 200 },
         "seed_salt": { "type": "integer" },
@@ -52,9 +53,10 @@
         "merlons_as_bodies": { "type": "boolean" },
         "settle_seconds": { "$ref": "#/$defs/seconds" },
         "rubble_reveal_seconds": { "$ref": "#/$defs/seconds" },
-        "settle_mode": { "$ref": "#/$defs/settle_mode" }
+        "settle_mode": { "$ref": "#/$defs/settle_mode" },
+        "sink_seconds": { "$ref": "#/$defs/seconds" }
       },
-      "required": ["blocks_min", "blocks_max", "seed_salt", "cut_jitter", "shape_margin", "density", "outward_impulse", "downward_impulse", "lateral_impulse", "height_boost", "angular_impulse", "merlons_as_bodies", "settle_seconds", "rubble_reveal_seconds", "settle_mode"],
+      "required": ["blocks_per_meter", "blocks_min", "blocks_max", "seed_salt", "cut_jitter", "shape_margin", "density", "outward_impulse", "downward_impulse", "lateral_impulse", "height_boost", "angular_impulse", "merlons_as_bodies", "settle_seconds", "rubble_reveal_seconds", "settle_mode", "sink_seconds"],
       "additionalProperties": false
     },
     "gate": {
@@ -66,9 +68,10 @@
         "angular_impulse": { "type": "number", "minimum": 0 },
         "density": { "type": "number", "exclusiveMinimum": 0 },
         "settle_seconds": { "$ref": "#/$defs/seconds" },
-        "settle_mode": { "$ref": "#/$defs/settle_mode" }
+        "settle_mode": { "$ref": "#/$defs/settle_mode" },
+        "sink_seconds": { "$ref": "#/$defs/seconds" }
       },
-      "required": ["planks_per_leaf", "inward_impulse", "angular_impulse", "density", "settle_seconds", "settle_mode"],
+      "required": ["planks_per_leaf", "inward_impulse", "angular_impulse", "density", "settle_seconds", "settle_mode", "sink_seconds"],
       "additionalProperties": false
     },
     "parapet": {

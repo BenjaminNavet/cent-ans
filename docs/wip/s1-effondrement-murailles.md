@@ -6,11 +6,20 @@ Spéc : consigne du lot S1 (visuel seulement), contexte `docs/design/m8-sieges.m
 - [x] Données `data/fx/siege_fx.json` + schéma `data/schemas/siege_fx.schema.json` + pytest
   `tools/tests/test_siege_fx_schema.py`.
 - [x] ADR `docs/decisions/0007-physique-rendu-seulement.md`, Jolt activé dans `game/project.godot`.
-- [ ] `game/scripts/battle/wall_collapse_fx.gd` (squelette commité, implémentation en cours).
-- [ ] Appels depuis `battle_siege.gd` (diff minimal, lot B4 en parallèle).
-- [ ] Test headless `game/tests/wall_collapse_fx_test.gd`.
-- [ ] Smoke vert, capture avant/après.
+- [x] `game/scripts/battle/wall_collapse_fx.gd` : fracture procédurale (assises décalées, blocs
+  ~cubiques, `blocks_per_meter` borné à [blocks_min, blocks_max], graine = index du pan), merlons
+  en corps, planches de porte, pierres du parapet aux paliers 0,75 / 0,5 / 0,25, poussière
+  (GPUParticles3D, bouffées rondes), secousse caméra (h/v offset), sol local HeightMapShape3D,
+  couche de collision dédiée, plafonds actifs/conservés, modes free / freeze / sink.
+- [x] Appels depuis `battle_siege.gd` (7 lignes + `add_child(door, true)` pour que le second
+  vantail, auparavant nommé `@MeshInstance3D@…`, se cache aussi).
+- [x] Test headless `game/tests/wall_collapse_fx_test.gd` (vert).
+- [x] Smoke vert (avant le réglage final ; relancé en fin de lot).
+- [x] Captures `docs/img/s1/s1-avant.png`, `s1-chute.png`, `s1-apres.png`
+  (`game/tests/s1_collapse_shot.gd`).
 
 ## Prochaine étape
-Implémenter la fracture (grille décalée, graine = index du pan), les corps, la poussière, la
-secousse, les paliers du parapet, le plafond de corps actifs.
+Lot terminé, en attente de fusion. Points ouverts :
+- Pas de son d'effondrement (AudioDirector) : hors périmètre.
+- Les blocs d'un pan de 90 m restent gros (≈ 4,5 × 2,8 × 3 m à 60 blocs) ; monter `blocks_max`
+  si le budget de corps le permet.
