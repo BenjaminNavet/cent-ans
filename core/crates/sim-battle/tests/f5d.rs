@@ -45,6 +45,49 @@ fn a_ladder_escalade_wins_about_half_the_time() {
     assert!((2..=4).contains(&wins), "escalade wins {wins}/6");
 }
 
+#[test]
+fn surplus_regiments_wait_and_march_in_from_their_edge() {
+    use sim_battle::MAX_ON_FIELD;
+    let data = data();
+    let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(12);
+    let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
+    let mut sim = BattleSim::new(battle, 4).unwrap();
+    lab(&mut sim);
+    let waiting: Vec<u32> = sim
+        .units()
+        .iter()
+        .filter(|u| u.reserve)
+        .map(|u| u.id)
+        .collect();
+    assert_eq!(
+        waiting,
+        vec![20, 21, 22, 23],
+        "the last four attackers wait"
+    );
+    assert!(sim
+        .units()
+        .iter()
+        .filter(|u| u.reserve)
+        .all(|u| !u.present()));
+    assert_eq!(sim.reserves(SideId::Attacker), 4);
+    // A fielded regiment is destroyed: the first waiting one marches in.
+    sim.units_mut()[3].hp = 0.0;
+    sim.step();
+    let fresh = &sim.units()[20];
+    assert!(!fresh.reserve && fresh.present());
+    assert!(
+        fresh.z < 30.0,
+        "enters by the attacker's edge, z = {}",
+        fresh.z
+    );
+    assert_eq!(sim.reserves(SideId::Attacker), 3);
+    let fielded = sim
+        .units()
+        .iter()
+        .filter(|u| u.side == SideId::Attacker && u.present());
+    assert_eq!(fielded.count(), MAX_ON_FIELD);
+}
+
 /// The standalone demo of `battle.tscn` (France 1337, main French army
 /// against the main English one), dumped from `sim-campaign`.
 fn demo_setup() -> BattleSetup {
@@ -129,6 +172,32 @@ fn destinations_in_the_river_move_to_a_bank() {
         sim_battle::ai::dry_z(field, x, c - 100.0, 0.0, 1.0),
         c - 100.0
     );
+}
+
+#[test]
+#[ignore]
+fn trace_big() {
+    let data = data();
+    let kinds = [
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_urban_militia",
+        "unit_crossbowmen",
+    ];
+    let army: Vec<&str> = (0..30).map(|i| kinds[i % 5]).collect();
+    let mut battle = setup(units(&data, &army), units(&data, &army), None);
+    battle.river = false;
+    let mut sim = BattleSim::new(battle, 7).unwrap();
+    while sim.elapsed() < 1500.0 && !sim.is_finished() {
+        sim.step();
+    }
+    for u in sim.units().iter().filter(|u| u.present() || u.reserve) {
+        println!(
+            "{:?} #{} {} ({:.0},{:.0}) {:?} dest {:?} tgt {:?} res {} hp {:.0}",
+            u.side, u.id, u.name, u.x, u.z, u.state, u.destination, u.target, u.reserve, u.hp
+        );
+    }
 }
 
 #[test]
