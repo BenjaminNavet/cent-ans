@@ -1,0 +1,43 @@
+{
+  "id": "chr_jean_le_bel",
+  "name": {
+    "display": "Jean le Bel",
+    "local": "Jean le Bel",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Le Bel",
+  "faction": "fac_hainaut",
+  "role": "burgher",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1370",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Chanoine de Saint-Lambert de Liège"
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 2,
+    "court": 5
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_cultured"
+  ],
+  "piety": 50,
+  "starting_location": "prov_hainaut",
+  "status": "at_court",
+  "description": "Chanoine liégeois, chevalier à ses heures : il accompagne Jean de Hainaut, sire de Beaumont, dans l'ost contre les Écossais en 1327. Il entreprend ensuite ses « Vrayes Chroniques », premier récit en français de la guerre de Cent Ans, que [[cdx_froissart|Froissart]] reprendra et amplifiera après lui.",
+  "sources": [
+    "Jean le Bel",
+    "Vraies Chroniques"
+  ]
+}
