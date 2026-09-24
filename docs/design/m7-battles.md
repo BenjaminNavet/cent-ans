@@ -96,3 +96,18 @@ restent à deux.
 ## 6. Ordres du chef (F10b)
 Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::LeaderOrder`, catalogue
 `data/battle_orders/`, barre d'ordres en bataille. Spécification : `docs/design/battle-orders.md`.
+
+## F5b — HUD de bataille (audit UI § 3.2)
+- Cartes d'unités compactes (`game/scripts/battle/unit_card.gd`, 71 px au lieu de 142) : icône de classe
+  (`IconLibrary`), effectif, barres fines moral / fatigue / munitions, état ; formation et chiffres détaillés
+  dans l'infobulle. Le nom tient sur deux lignes, coupé seulement entre deux mots (police réduite jusqu'à
+  8 px, puis « … » après le dernier mot entier).
+- Cartes rangées par « bataille » (`battle_groups.gd`) : avant-garde (cavalerie), bataille (infanterie et
+  tireurs), arrière-garde (engins de siège, et unités `reserve` si la simulation l'expose un jour).
+- Raccourcis : **Ctrl+1..9** (ou Cmd+1..9) enregistre la sélection en groupe, **1..9** la rappelle (deux
+  appuis rapprochés : caméra centrée sur le groupe) ; touches physiques, donc AZERTY compris. Les vitesses
+  quittent donc 1/2/3 : boutons-icônes en bas à droite (pause, ×1, ×2, ×4 ; bouton actif cerclé d'or),
+  **Espace** pause, **+ / −** vitesse. **F1** : aide de bataille (plus de ligne d'aide permanente).
+- Minicarte cliquable (`battle_minimap.gd`) : relief, bois, boues, rivière, régiments en points aux
+  couleurs des camps, cadre de la caméra ; clic ou glisser = caméra ; retournée pour que le camp du joueur
+  soit en bas. Capture : `docs/img/godot-battle-f5.png`.
