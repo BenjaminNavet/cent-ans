@@ -15,6 +15,7 @@ signal closed
 const ERROR_COLOR := Color(0.55, 0.20, 0.15)
 const MUTED_COLOR := Color(0.42, 0.33, 0.20)
 const RUBRIC_COLOR := Color(0.45, 0.12, 0.08)
+const LINK_COLOR := Color(0.10, 0.23, 0.55)
 const PORTRAIT_SIZE := Vector2(40, 40)
 const MAX_LIST_HEIGHT := 520.0
 const TERMS_LABELS := {"money": "rançon en argent", "province": "exige une province", "hold": "refuse toute rançon", "parole": "libération sur parole"}
@@ -173,6 +174,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	link.text = name_text
 	link.tooltip_text = "Ouvrir la fiche du personnage"
 	link.add_theme_font_size_override("font_size", 15)
+	style_link(link)
 	link.pressed.connect(func() -> void: request_character(character_id))
 	name_row.add_child(link)
 	var codex_id := codex_entry_for(character_id)
@@ -332,6 +334,14 @@ func request_character(character_id: String) -> void:
 			node.emit_signal("character_selected", character_id)
 			return
 		node = node.get_parent()
+
+
+## Encre des noms cliquables (le thème parchemin éclaircit les LinkButton).
+static func style_link(link: LinkButton) -> void:
+	link.add_theme_color_override("font_color", LINK_COLOR)
+	link.add_theme_color_override("font_hover_color", RUBRIC_COLOR)
+	link.add_theme_color_override("font_pressed_color", RUBRIC_COLOR)
+	link.add_theme_color_override("font_focus_color", LINK_COLOR)
 
 
 static func codex_entry_for(entity_id: String) -> String:

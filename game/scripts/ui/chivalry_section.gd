@@ -89,6 +89,7 @@ func _show_founded(founded: Dictionary) -> void:
 		var link := LinkButton.new()
 		link.text = str(member.get("name", character_id))
 		link.add_theme_font_size_override("font_size", 13)
+		RansomPanel.style_link(link)
 		link.tooltip_text = "Ouvrir la fiche du personnage"
 		link.pressed.connect(func() -> void: _request_character(character_id))
 		flow.add_child(link)

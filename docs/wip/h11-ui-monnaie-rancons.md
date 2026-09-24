@@ -19,8 +19,21 @@ Modèle : `docs/wip/h9-ui-table-medecine.md` (`table_section.gd`).
 - [x] Encyclopédie → Codex (« ✠ Fiche historique ») et Codex → Encyclopédie (« Voir dans l'encyclopédie »,
       groupe `encyclopedia`).
 - [x] Smoke `_run_coinage_ransom` vert seul (`CENT_ANS_SMOKE_ONLY=coinage_ransom`).
-- [ ] Smoke complet ; captures `docs/img/coinage.png`, `docs/img/ransoms.png`
+- [x] Smoke complet exit 0 ; captures `docs/img/coinage.png`, `docs/img/ransoms.png`
       (`godot --path game --script res://tests/coinage_screenshot.gd`).
+- [x] Panneau de faction : contenu dans un défilement vertical (sections plus longues).
 
-## Prochaine étape
-Smoke complet, captures, lint.
+## État : terminé (à fusionner)
+
+## Limites connues
+- Pas de bouton dans le bandeau (`map_ui.gd` non touché) : accès par le panneau de faction
+  (clic sur le blason). Les alertes `ransom` n'ont pas d'action de clic dédiée (`campaign_map.gd`
+  non touché) : il faudrait ouvrir `FactionPanel.toggle_ransoms()`.
+- La fiche personnage est ouverte en émettant `character_selected` du premier ancêtre qui l'expose
+  (`MapUI`), sans modifier la carte.
+- Les captures et le smoke utilisent des rançons simulées (aucun captif au départ de 1337) ; les
+  ordres envoyés au pont avec ces données sont refusés (« ce personnage n'est pas captif »).
+- `CampaignAlerts.table_medicine_alerts` relaie désormais aussi les événements `coinage`,
+  `ransom`, `chivalry` du joueur (tous les genres de `SeasonReport.KIND_STYLES`).
+- Journal de `map_ui.gd` : genres en texte simple (glyphes dans `SeasonReport.KIND_STYLES`).
+- Dette sans faction du captif : portrait remplacé par un carré neutre si pas de portrait peint.

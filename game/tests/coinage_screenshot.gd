@@ -54,6 +54,7 @@ func _init() -> void:
 	for _i in 6:
 		await process_frame
 	panel.ransom_panel.position = Vector2(maxf(8.0, panel.global_position.x - panel.ransom_panel.size.x - 12.0), 56)
+	panel._scroll.scroll_vertical = 10000  # Ordre de chevalerie et bouton des rançons visibles
 	for _i in 3:
 		await process_frame
 	_save(out_dir.path_join("ransoms.png"))
