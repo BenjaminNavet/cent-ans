@@ -27,10 +27,18 @@ pub enum CampaignError {
          version attendue : {expected}) : elle ne peut pas être chargée"
     )]
     PreSettlementSave { found: u32, expected: u32 },
+    #[error(
+        "sauvegarde d'une version antérieure au mouvement libre des armées (version {found}, \
+         version attendue : {expected}) : elle ne peut pas être chargée"
+    )]
+    PreFreeMovementSave { found: u32, expected: u32 },
 }
 
 /// First state version with settlements (lot C4); older saves are refused.
 pub const SETTLEMENTS_STATE_VERSION: u32 = 5;
+/// First state version with free army movement (lot M2); older saves are
+/// refused.
+pub const FREE_MOVEMENT_STATE_VERSION: u32 = 6;
 
 impl CampaignState {
     /// Serialises the whole state (RNG included) as JSON.
@@ -49,6 +57,12 @@ impl CampaignState {
             serde_json::from_str(json).map_err(|e| CampaignError::Deserialize(e.to_string()))?;
         if header.state_version < SETTLEMENTS_STATE_VERSION {
             return Err(CampaignError::PreSettlementSave {
+                found: header.state_version,
+                expected: STATE_VERSION,
+            });
+        }
+        if header.state_version < FREE_MOVEMENT_STATE_VERSION {
+            return Err(CampaignError::PreFreeMovementSave {
                 found: header.state_version,
                 expected: STATE_VERSION,
             });

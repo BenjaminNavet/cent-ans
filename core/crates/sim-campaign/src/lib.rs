@@ -45,8 +45,10 @@ pub mod dynasty;
 pub mod economy;
 pub mod events;
 pub mod frontier;
+pub mod march;
 pub mod medicine;
 pub mod movement;
+pub mod navigation;
 pub mod orders;
 pub mod population;
 pub mod ransom;
@@ -91,16 +93,20 @@ pub use dynasty::{
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
 pub use frontier::GarrisonRole;
-pub use orders::{Order, OrderError, Place, RecruitOption, BASE_RECRUIT_SLOTS};
+pub use march::{MoveReport, StopReason};
+pub use navigation::{Cell, GridPath};
+pub use orders::{
+    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, BASE_RECRUIT_SLOTS,
+};
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
-pub use save::{CampaignError, SETTLEMENTS_STATE_VERSION};
+pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION};
 pub use skills::LearnSkillError;
 pub use state::{
-    Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
-    FactionSummary, ProvinceState, Season, SettlementState, SiegeState, Stance, Unit,
-    MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
+    Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
+    FactionState, FactionSummary, MoveTarget, ProvinceState, Season, SettlementState, SiegeState,
+    Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};

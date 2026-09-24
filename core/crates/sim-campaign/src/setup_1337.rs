@@ -24,7 +24,7 @@ use crate::frontier::GarrisonRole;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
 use crate::state::{
-    Army, CampaignState, CharacterState, FactionState, ProvinceState, SettlementState, Stance, Unit,
+    Army, CampaignState, CharacterState, FactionState, ProvinceState, SettlementState, Unit,
 };
 
 /// The virtual, non-playable faction provinces fall to on outright revolt
@@ -486,26 +486,21 @@ impl CampaignState {
             let army_id = state.allocate_army_id();
             state.armies.insert(
                 army_id.clone(),
-                Army {
-                    faction: id.clone(),
-                    general: None,
-                    location: capital_city,
+                Army::new(
+                    id.clone(),
+                    crate::state::ArmyPosition::Settlement(capital_city),
                     units,
-                    movement_points: 0,
-                    supply: 100,
-                    stance: Stance::Normal,
-                    path: Vec::new(),
-                },
+                ),
             );
             if let Some(general) = pick_general(&state, data, faction) {
                 state.attach_general(&army_id, &general);
             }
-            let allowance = state.army_movement_allowance(data, &state.armies[&army_id]);
+            let allowance = state.army_grid_allowance(data, &state.armies[&army_id]);
             state
                 .armies
                 .get_mut(&army_id)
                 .expect("just created")
-                .movement_points = allowance;
+                .movement_left = allowance;
         }
         crate::economy::resolve_goods(&mut state, data);
         // Vassal loyalty starts at its equilibrium (M5).

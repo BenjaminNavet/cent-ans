@@ -72,7 +72,7 @@ fn new_1337_matches_game_data() {
 
     let army_id = main_army(&state, "fac_france");
     let army = state.army(&army_id).unwrap();
-    assert_eq!(army.location, set("set_paris"));
+    assert!(army.is_at(&set("set_paris")));
     assert_eq!(army.units.len(), 8);
     assert_eq!(
         army.general.as_ref().map(|c| c.as_str()),
@@ -88,7 +88,10 @@ fn new_1337_matches_game_data() {
 
     let england = main_army(&state, "fac_england");
     assert_eq!(state.army(&england).unwrap().units.len(), 6);
-    assert_eq!(state.army(&england).unwrap().location, set("set_londres"));
+    assert_eq!(
+        state.army(&england).unwrap().settlement().cloned().unwrap(),
+        set("set_londres")
+    );
     let burgundy = main_army(&state, "fac_burgundy");
     assert_eq!(state.army(&burgundy).unwrap().units.len(), 4);
 
@@ -124,7 +127,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
             &data,
             Order::MoveArmy {
                 army: foreign,
-                path: vec![prov("prov_kent").into()]
+                target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_kent").into()])
             }
         ),
         Err(OrderError::NotYourArmy(_))
@@ -134,24 +137,25 @@ fn invalid_orders_are_rejected_without_side_effects() {
             &data,
             Order::MoveArmy {
                 army: own.clone(),
-                path: vec![]
+                target: sim_campaign::MoveOrderTarget::Path(vec![])
             }
         ),
         Err(OrderError::EmptyPath)
     ));
+    // Lot M2: over the sea, only port-to-port crossings (`embark`).
     assert!(matches!(
         state.submit_order(
             &data,
             Order::move_along(own.clone(), vec![set("set_cantorbery")])
         ),
-        Err(OrderError::NotAdjacent { .. })
+        Err(OrderError::NoPath)
     ));
     assert!(matches!(
         state.submit_order(
             &data,
             Order::MoveArmy {
                 army: ArmyId::parse("army_9999").unwrap(),
-                path: vec![prov("prov_kent").into()]
+                target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_kent").into()])
             }
         ),
         Err(OrderError::UnknownArmy(_))
@@ -342,9 +346,29 @@ fn orders_round_trip_through_snake_case_json() {
         order,
         Order::MoveArmy {
             army: ArmyId::parse("army_0001").unwrap(),
-            path: vec![prov("prov_normandie").into()]
+            target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_normandie").into()])
         }
     );
+    // Lot M2: a point or a settlement as the target.
+    let order: Order = serde_json::from_str(
+        r#"{"type":"move_army","army":"army_0001","target":{"x":1024.5,"y":2000.0}}"#,
+    )
+    .unwrap();
+    assert_eq!(
+        order,
+        Order::move_to_point(ArmyId::parse("army_0001").unwrap(), [1024.5, 2000.0])
+    );
+    let order: Order =
+        serde_json::from_str(r#"{"type":"move_army","army":"army_0001","target":"set_rouen"}"#)
+            .unwrap();
+    assert_eq!(
+        order,
+        Order::move_to(ArmyId::parse("army_0001").unwrap(), set("set_rouen"))
+    );
+    let attack: Order =
+        serde_json::from_str(r#"{"type":"attack","army":"army_0001","target_army":"army_0002"}"#)
+            .unwrap();
+    assert!(matches!(attack, Order::Attack { .. }));
     // Lot C4: settlements, and the v1 `province` field as an alias.
     let recruit: Order = serde_json::from_str(
         r#"{"type":"recruit","province":"prov_kent","unit_type":"unit_urban_militia"}"#,
@@ -389,10 +413,15 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let data = data();
     let mut state = france(&data, 1);
     let army = main_army(&state, "fac_france");
-    let allowance = state.army(&army).unwrap().movement_points;
-    // Lot C7a: 3 steps of 140 points times the season scale (0.5) in spring.
-    assert_eq!(allowance, state.season_movement_points(&data));
-    assert_eq!(allowance, 210);
+    let allowance = state.army(&army).unwrap().movement_left;
+    // Lot C7a: 3 steps of 140 km times the season scale (0.5) in spring,
+    // converted to grid costs (lot M2: 10 per plain cell of ~1.44 km).
+    assert_eq!(state.season_movement_points(&data), 210);
+    assert_eq!(
+        allowance,
+        sim_campaign::march::km_to_grid_points(&data, 210.0)
+    );
+    assert!((1400..=1500).contains(&allowance), "{allowance}");
     let reachable = state.reachable(&data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable
@@ -403,40 +432,45 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert!(provinces.contains_key(&prov("prov_normandie")));
     assert!(!provinces.contains_key(&prov("prov_ile_de_france")));
 
-    let boulogne = set("set_boulogne");
+    // Toulouse is several turns away.
+    let toulouse = city(&state, "prov_toulousain");
+    let point = data.settlement_point(&toulouse).unwrap();
     let path = state
-        .find_path(&data, &army, &boulogne)
-        .expect("path to Boulogne");
-    assert!(
-        path.len() >= 3,
-        "Paris to Boulogne needs several steps: {path:?}"
-    );
-    assert_eq!(path.last(), Some(&boulogne));
-    state
-        .submit_order(&data, Order::move_along(army.clone(), path.clone()))
+        .find_path(&data, &army, point)
+        .expect("path to Toulouse");
+    assert!(path.cost > 2 * allowance, "cost {}", path.cost);
+    assert_eq!(path.waypoints.last(), path.cells.last());
+    let outcome = state
+        .submit_order_outcome(&data, Order::move_to(army.clone(), toulouse.clone()))
         .unwrap();
-
-    state.end_turn_with(&data, idle);
+    let sim_campaign::OrderOutcome::Moved(report) = outcome else {
+        panic!("a march report");
+    };
+    assert_eq!(report.stop, sim_campaign::StopReason::OutOfMovement);
+    assert!(!report.walked.is_empty());
+    assert!(report.cost <= allowance);
     let after_one = state.army(&army).unwrap();
-    assert_ne!(after_one.location, set("set_paris"));
-    for _ in 0..3 {
-        if state.army(&army).unwrap().location == boulogne {
+    assert!(after_one.settlement().is_none(), "in the field");
+    assert!(!after_one.planned_path.is_empty(), "the rest waits");
+    assert!(after_one.movement_left < allowance);
+    for _ in 0..6 {
+        if state.army(&army).unwrap().is_at(&toulouse) {
             break;
         }
         assert!(
-            !state.army(&army).unwrap().path.is_empty(),
+            !state.army(&army).unwrap().planned_path.is_empty(),
             "leftover path continues next turn"
         );
         state.end_turn_with(&data, idle);
     }
-    assert_eq!(state.army(&army).unwrap().location, boulogne);
-    assert!(state.army(&army).unwrap().path.is_empty());
+    assert!(state.army(&army).unwrap().is_at(&toulouse));
+    assert!(state.army(&army).unwrap().planned_path.is_empty());
     assert_eq!(
         state
             .character(&data_model::CharacterId::new("chr_philippe_vi").unwrap())
             .unwrap()
             .location,
-        Some(prov("prov_boulonnais"))
+        Some(prov("prov_toulousain"))
     );
 }
 
@@ -450,18 +484,22 @@ fn v1_province_paths_head_for_the_city() {
             &data,
             Order::MoveArmy {
                 army: army.clone(),
-                path: vec![prov("prov_normandie").into()],
+                target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_normandie").into()]),
             },
         )
         .unwrap();
-    assert_eq!(
-        state.army(&army).unwrap().path.last(),
-        Some(&set("set_rouen"))
+    let rouen = set("set_rouen");
+    let army = state.army(&army).unwrap();
+    assert!(
+        army.is_at(&rouen)
+            || army.destination == Some(sim_campaign::MoveTarget::Settlement(rouen.clone())),
+        "{:?}",
+        army.position
     );
 }
 
 #[test]
-fn sea_move_kent_to_boulonnais_requires_ports() {
+fn sea_crossings_go_port_to_port_and_take_the_turn() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 2).unwrap();
     let sea_edges: Vec<_> = data
@@ -476,35 +514,48 @@ fn sea_move_kent_to_boulonnais_requires_ports() {
         assert!(data.settlements[*from].port, "{from} is a port");
         assert!(data.settlements[&edge.to].port, "{} is a port", edge.to);
     }
-
     let army = main_army(&state, "fac_england");
-    // Lot C4: an enemy settlement stops the march, so the English land on
-    // the first French port they reach in the Boulonnais.
-    let (target, path) = state
-        .settlements_of(&prov("prov_boulonnais"))
-        .filter_map(|(id, _)| Some((id.clone(), state.find_path(&data, &army, id)?)))
-        .min_by_key(|(_, path)| path.len())
-        .expect("England reaches the Boulonnais by sea");
-    let crossing = path
-        .windows(2)
-        .any(|w| sim_campaign::movement::is_sea_crossing(&data, &w[0], &w[1]))
-        || sim_campaign::movement::is_sea_crossing(&data, &set("set_londres"), &path[0]);
-    assert!(crossing, "the path crosses the Channel: {path:?}");
-    assert_eq!(path.last(), Some(&target));
-    state
-        .submit_order(&data, Order::move_along(army.clone(), path))
-        .unwrap();
-    for _ in 0..4 {
-        state.end_turn_with(&data, idle);
-        if state.army(&army).unwrap().location == target {
-            break;
-        }
-    }
-    assert_eq!(state.army(&army).unwrap().location, target);
+    // An English port with a crossing to the Boulonnais.
+    let (from, to) = sea_edges
+        .iter()
+        .find(|(from, edge)| {
+            state.is_friendly_settlement(&fac("fac_england"), from)
+                && state.settlement_province(&edge.to) == Some(&prov("prov_boulonnais"))
+        })
+        .map(|(from, edge)| ((*from).clone(), edge.to.clone()))
+        .expect("a Channel crossing to the Boulonnais");
+    // Not in a port: refused.
+    let embark = |army: &ArmyId, to: &SettlementId| Order::Embark {
+        army: army.clone(),
+        to_port: to.clone(),
+    };
+    state.armies.get_mut(&army).unwrap().position =
+        sim_campaign::ArmyPosition::field(data.settlement_point(&from).unwrap());
+    assert!(matches!(
+        state.submit_order(&data, embark(&army, &to)),
+        Err(OrderError::NotInPort)
+    ));
+    state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(from);
+    // Not a full turn of movement left: refused.
+    state.armies.get_mut(&army).unwrap().movement_left -= 1;
+    assert!(matches!(
+        state.submit_order(&data, embark(&army, &to)),
+        Err(OrderError::NoMovementLeft)
+    ));
+    state.armies.get_mut(&army).unwrap().movement_left += 1;
+    let before = state.army(&army).unwrap().total_strength();
+    state.submit_order(&data, embark(&army, &to)).unwrap();
+    let landed = state.army(&army).unwrap();
+    assert!(landed.is_at(&to), "landed in {to}: {:?}", landed.position);
+    assert_eq!(landed.movement_left, 0, "the crossing takes the turn");
+    assert!(
+        landed.total_strength() < before,
+        "landing on a hostile shore costs men"
+    );
 }
 
 #[test]
-fn entering_an_enemy_army_triggers_a_battle() {
+fn attacking_an_enemy_army_triggers_a_battle() {
     let data = data();
     let mut state = france(&data, 3);
     // Auto-resolved battle (interactive battles are covered by tests/m7.rs).
@@ -513,29 +564,52 @@ fn entering_an_enemy_army_triggers_a_battle() {
     let english = main_army(&state, "fac_england");
     // Teleport the English army next door for the test.
     let saint_denis = set("set_saint_denis");
-    state.armies.get_mut(&english).unwrap().location = saint_denis.clone();
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(saint_denis.clone());
     let strength_before: u32 = state.army(&french).unwrap().total_strength();
     state
         .submit_order(
             &data,
-            Order::move_along(french.clone(), vec![saint_denis.clone()]),
+            Order::Attack {
+                army: french.clone(),
+                target_army: english.clone(),
+            },
         )
         .unwrap();
-    let events = state.end_turn_with(&data, idle);
-    let battle = events
+    let battle = state
+        .pending_events
         .iter()
         .find(|e| e.kind == EventKind::Battle)
-        .expect("a battle happened");
+        .expect("a battle happened")
+        .clone();
     assert_eq!(battle.province, Some(prov("prov_ile_de_france")));
     assert!(battle.text_fr.contains("Bataille"));
     let french_after = state.army(&french).unwrap();
     assert!(french_after.total_strength() < strength_before);
+    assert_eq!(french_after.movement_left, 0, "no move after a battle");
     assert!(
-        french_after.path.is_empty(),
+        french_after.planned_path.is_empty(),
         "both armies stop after a battle"
     );
+    // Out of reach: refused, nothing happens.
+    let mut far = france(&data, 3);
+    far.interactive_battles = false;
+    let before = far.save_json();
+    let err = far
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: main_army(&far, "fac_france"),
+                target_army: main_army(&far, "fac_england"),
+            },
+        )
+        .unwrap_err();
+    assert!(
+        matches!(err, OrderError::OutOfRange | OrderError::NoPath),
+        "{err:?}"
+    );
+    assert_eq!(far.save_json(), before);
 }
-
 #[test]
 fn siege_captures_after_fortification_dependent_duration() {
     let data = data();
@@ -543,7 +617,8 @@ fn siege_captures_after_fortification_dependent_duration() {
     let english = main_army(&state, "fac_england");
     let boulogne = set("set_boulogne");
     let fortification = state.fortification_level(&data, &boulogne);
-    state.armies.get_mut(&english).unwrap().location = boulogne.clone();
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(boulogne.clone());
     state
         .submit_order(
             &data,
@@ -606,7 +681,8 @@ fn empty_garrison_is_captured_instantly() {
         .unwrap()
         .garrison
         .clear();
-    state.armies.get_mut(&english).unwrap().location = boulogne.clone();
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(boulogne.clone());
     state
         .submit_order(
             &data,
@@ -630,7 +706,8 @@ fn raid_devastates_and_loots() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 6).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = prov("prov_boulonnais");
-    state.armies.get_mut(&english).unwrap().location = city(&state, "prov_boulonnais");
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(city(&state, "prov_boulonnais"));
     state
         .submit_order(
             &data,
@@ -708,7 +785,8 @@ fn attrition_abroad_and_recovery_at_home() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 8).unwrap();
     let english = main_army(&state, "fac_england");
-    state.armies.get_mut(&english).unwrap().location = set("set_boulogne");
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(set("set_boulogne"));
     let strength_before = state.army(&english).unwrap().total_strength();
     let mut supplies = Vec::new();
     for _ in 0..7 {
@@ -722,7 +800,8 @@ fn attrition_abroad_and_recovery_at_home() {
         "starvation costs men"
     );
 
-    state.armies.get_mut(&english).unwrap().location = set("set_cantorbery");
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(set("set_cantorbery"));
     state.end_turn_with(&data, idle);
     assert!(state.army(&english).unwrap().supply >= 40);
 }
@@ -761,7 +840,19 @@ fn save_load_round_trip() {
         err,
         sim_campaign::CampaignError::PreSettlementSave { found: 1, .. }
     ));
+    // Lot M2: a v5 save (armies on settlements) is refused too.
+    let err = CampaignState::load_json(&json.replace(
+        &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
+        "\"state_version\":5",
+    ))
+    .unwrap_err();
+    assert!(matches!(
+        err,
+        sim_campaign::CampaignError::PreFreeMovementSave { found: 5, .. }
+    ));
+    assert!(err.to_string().contains("mouvement libre"), "{err}");
     // Lot C4: a v4 save is refused with an explicit message.
+
     let err = CampaignState::load_json(&json.replace(
         &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
         "\"state_version\":4",
@@ -793,7 +884,9 @@ fn twenty_turns_with_ai_are_deterministic() {
                 &data,
                 Order::MoveArmy {
                     army,
-                    path: vec![prov("prov_normandie").into()],
+                    target: sim_campaign::MoveOrderTarget::Path(
+                        vec![prov("prov_normandie").into()],
+                    ),
                 },
             )
             .unwrap();

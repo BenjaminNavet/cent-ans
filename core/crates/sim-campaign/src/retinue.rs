@@ -245,8 +245,9 @@ pub(crate) fn resolve_retinue(
         .values()
         .filter_map(|army| {
             let general = army.general.clone()?;
-            let settlement = state.settlements.get(&army.location)?;
-            if !state.is_friendly_settlement(&army.faction, &army.location) {
+            let place = army.settlement()?;
+            let settlement = state.settlements.get(place)?;
+            if !state.is_friendly_settlement(&army.faction, place) {
                 return None;
             }
             Some((general, state.province_buildings(&settlement.province)))
@@ -444,19 +445,14 @@ pub fn transfer_targets(
     let Some(giver) = state.characters.get(from) else {
         return Vec::new();
     };
-    let Some(place) = giver
-        .army
-        .as_ref()
-        .and_then(|a| state.armies.get(a))
-        .map(|a| &a.location)
-    else {
+    let Some(own) = giver.army.as_ref().and_then(|a| state.armies.get(a)) else {
         return Vec::new();
     };
     let cap = max_per_character(data);
     state
         .armies
         .values()
-        .filter(|a| &a.location == place && a.faction == giver.faction)
+        .filter(|a| a.faction == giver.faction && state.armies_together(data, a, own))
         .filter_map(|a| a.general.clone())
         .filter(|g| g != from)
         .filter(|g| {
@@ -502,14 +498,10 @@ pub fn transfer_companion(
     if taker.retinue.len() >= retinue.max_per_character as usize {
         return Err(RetinueError::RetinueFull(to.clone()));
     }
-    let place = |c: &crate::state::CharacterState| {
-        c.army
-            .as_ref()
-            .and_then(|a| state.armies.get(a))
-            .map(|a| a.location.clone())
-    };
-    match (place(giver), place(taker)) {
-        (Some(a), Some(b)) if a == b && from != to => {}
+    let army_of =
+        |c: &crate::state::CharacterState| c.army.as_ref().and_then(|a| state.armies.get(a));
+    match (army_of(giver), army_of(taker)) {
+        (Some(a), Some(b)) if state.armies_together(data, a, b) && from != to => {}
         _ => return Err(RetinueError::NotTogether),
     }
     state

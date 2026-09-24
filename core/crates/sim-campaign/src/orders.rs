@@ -1,8 +1,8 @@
 //! Player and AI orders: validation and immediate application.
 //!
 //! Every order is validated before anything is mutated; a rejected order
-//! leaves the state untouched. Move orders are only recorded (`Army::path`)
-//! and resolved in `end_turn`; all other orders apply immediately.
+//! leaves the state untouched. Every order applies immediately; lot M2:
+//! moves, attacks and embarkations too (see `march.rs`).
 //!
 //! Lot C4: recruitment, construction, garrisons and moves target settlements.
 //! A [`Place`] also accepts a province id, which stands for its city (the v1
@@ -18,10 +18,11 @@ use crate::buildings::CANCEL_REFUND_PERCENT;
 use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
-use crate::movement;
 use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
-use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
+use crate::state::{
+    Army, ArmyId, ArmyPosition, CampaignState, Construction, MoveTarget, Stance, Unit,
+};
 
 /// Where an order applies: a settlement, or a province standing for its
 /// city (v1 compatibility).
@@ -70,19 +71,44 @@ impl CampaignState {
     }
 }
 
+/// Destination of a `move_army` order (lot M2): a settlement (or a
+/// province, standing for its city), a map point `{x, y}` in pixels of the
+/// 4096² map, or a v1/C4 path whose last place is the destination.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MoveOrderTarget {
+    Place(Place),
+    Point { x: f32, y: f32 },
+    Path(Vec<Place>),
+}
+
 /// An order issued by a faction (player through `submit_order`, AI through the planner).
 ///
-/// Serialised as `{"type": "move_army", "army": "...", "path": [...]}`; the
+/// Serialised as `{"type": "move_army", "army": "...", "target": ...}`; the
 /// variant and field names are the contract with the Godot bridge.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Order {
-    /// Walk along `path` (adjacent settlements, the army's own location
-    /// excluded). A path naming provinces (v1) means "go to the city of the
-    /// last one" by the cheapest route.
+    /// Walks the army towards `target` at once (lot M2, `march.rs`): it
+    /// stops at the target, when its points run out (the rest of the march
+    /// resumes next turn), in an enemy zone of control, or by entering a
+    /// settlement (siege, capture or stop). `path` is accepted for `target`.
     MoveArmy {
         army: ArmyId,
-        path: Vec<Place>,
+        #[serde(alias = "path")]
+        target: MoveOrderTarget,
+    },
+    /// Closes in on an enemy army within `engage_radius_km` and fights it
+    /// at once (lot M2); the attacker cannot move afterwards.
+    Attack {
+        army: ArmyId,
+        target_army: ArmyId,
+    },
+    /// Crosses the sea from the port the army stands in to `to_port` (a
+    /// `sea` edge of the settlement graph); costs the whole turn (lot M2).
+    Embark {
+        army: ArmyId,
+        to_port: SettlementId,
     },
     /// Pay for a unit that joins the settlement's garrison at the end of the turn.
     Recruit {
@@ -322,13 +348,43 @@ pub enum Order {
 }
 
 impl Order {
-    /// `MoveArmy` along a path of settlements.
+    /// `MoveArmy` along a path of settlements (C4 planners): towards the
+    /// last one.
     pub fn move_along(army: ArmyId, path: Vec<SettlementId>) -> Order {
         Order::MoveArmy {
             army,
-            path: path.into_iter().map(Place::from).collect(),
+            target: MoveOrderTarget::Path(path.into_iter().map(Place::from).collect()),
         }
     }
+
+    /// `MoveArmy` towards a settlement (entered on arrival).
+    pub fn move_to(army: ArmyId, settlement: SettlementId) -> Order {
+        Order::MoveArmy {
+            army,
+            target: MoveOrderTarget::Place(Place::Settlement(settlement)),
+        }
+    }
+
+    /// `MoveArmy` towards map pixel `point`.
+    pub fn move_to_point(army: ArmyId, point: [f32; 2]) -> Order {
+        Order::MoveArmy {
+            army,
+            target: MoveOrderTarget::Point {
+                x: point[0],
+                y: point[1],
+            },
+        }
+    }
+}
+
+/// What an order did, for the orders whose effect the UI shows (lot M2).
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum OrderOutcome {
+    #[default]
+    Done,
+    /// A march: the points walked and why it stopped.
+    Moved(crate::march::MoveReport),
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -358,6 +414,16 @@ pub enum OrderError {
     NotAdjacent { from: String, to: String },
     #[error("destination inaccessible")]
     NoPath,
+    #[error("cette armée n'a plus de points de mouvement ce tour")]
+    NoMovementLeft,
+    #[error("l'armée ciblée est hors de portée ce tour")]
+    OutOfRange,
+    #[error("ces deux factions ne sont pas en guerre")]
+    NotAtWar,
+    #[error("l'armée doit stationner dans un port pour embarquer")]
+    NotInPort,
+    #[error("l'armée doit stationner dans cette colonie")]
+    NotInSettlement,
     #[error("recrutement impossible : {0}")]
     RecruitUnavailable(String),
     #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette colonie")]
@@ -439,10 +505,21 @@ pub struct RecruitOption {
 }
 
 impl CampaignState {
-    /// Validates and applies (or records, for moves) an order of the player faction.
+    /// Validates and applies an order of the player faction.
     pub fn submit_order(&mut self, data: &GameData, order: Order) -> Result<(), OrderError> {
         let player = self.player_faction.clone();
         self.apply_order(data, &player, order)
+    }
+
+    /// Validates and applies an order of the player faction, and says what
+    /// it did (lot M2: the march of a move order).
+    pub fn submit_order_outcome(
+        &mut self,
+        data: &GameData,
+        order: Order,
+    ) -> Result<OrderOutcome, OrderError> {
+        let player = self.player_faction.clone();
+        self.apply_order_outcome(data, &player, order)
     }
 
     /// Validates and applies an order on behalf of `faction`.
@@ -452,11 +529,64 @@ impl CampaignState {
         faction: &FactionId,
         order: Order,
     ) -> Result<(), OrderError> {
+        self.apply_order_outcome(data, faction, order).map(|_| ())
+    }
+
+    /// The settlement or point a move order heads for.
+    pub fn resolve_move_target(&self, target: &MoveOrderTarget) -> Result<MoveTarget, OrderError> {
+        match target {
+            MoveOrderTarget::Place(place) => Ok(MoveTarget::Settlement(self.resolve_place(place)?)),
+            MoveOrderTarget::Point { x, y } => Ok(MoveTarget::Point { x: *x, y: *y }),
+            MoveOrderTarget::Path(places) => {
+                let last = places.last().ok_or(OrderError::EmptyPath)?;
+                Ok(MoveTarget::Settlement(self.resolve_place(last)?))
+            }
+        }
+    }
+
+    /// Validates and applies an order on behalf of `faction`, and says what
+    /// it did. Events of immediate actions (battles, sieges, captures) open
+    /// the journal of the turn.
+    pub fn apply_order_outcome(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        order: Order,
+    ) -> Result<OrderOutcome, OrderError> {
         if !self.factions.contains_key(faction) {
             return Err(OrderError::UnknownFaction(faction.clone()));
         }
+        let mut events = Vec::new();
+        let outcome = match order {
+            Order::MoveArmy { army, target } => {
+                let target = self.resolve_move_target(&target)?;
+                self.order_move_army(data, faction, &army, target, &mut events)
+                    .map(OrderOutcome::Moved)
+            }
+            Order::Attack { army, target_army } => self
+                .order_attack(data, faction, &army, &target_army, &mut events)
+                .map(|()| OrderOutcome::Done),
+            Order::Embark { army, to_port } => self
+                .order_embark(data, faction, &army, &to_port, &mut events)
+                .map(|()| OrderOutcome::Done),
+            other => self
+                .apply_simple_order(data, faction, other)
+                .map(|()| OrderOutcome::Done),
+        };
+        self.pending_events.extend(events);
+        outcome
+    }
+
+    fn apply_simple_order(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        order: Order,
+    ) -> Result<(), OrderError> {
         match order {
-            Order::MoveArmy { army, path } => self.order_move(data, faction, &army, path),
+            Order::MoveArmy { .. } | Order::Attack { .. } | Order::Embark { .. } => {
+                unreachable!("handled by apply_order_outcome")
+            }
             Order::Recruit {
                 settlement,
                 unit_type,
@@ -472,7 +602,9 @@ impl CampaignState {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_create_army(data, faction, &settlement, &units_from_garrison, general)
             }
-            Order::MergeArmies { source, target } => self.order_merge(faction, &source, &target),
+            Order::MergeArmies { source, target } => {
+                self.order_merge(data, faction, &source, &target)
+            }
             Order::SplitArmy { army, unit_indices } => {
                 self.order_split(faction, &army, &unit_indices)
             }
@@ -494,7 +626,7 @@ impl CampaignState {
                 Ok(())
             }
             Order::AssignGeneral { army, character } => {
-                self.order_assign_general(faction, &army, &character)
+                self.order_assign_general(data, faction, &army, &character)
             }
             Order::Build {
                 settlement,
@@ -781,42 +913,6 @@ impl CampaignState {
         Ok(())
     }
 
-    fn order_move(
-        &mut self,
-        data: &GameData,
-        faction: &FactionId,
-        army_id: &ArmyId,
-        places: Vec<Place>,
-    ) -> Result<(), OrderError> {
-        let army = self.own_army(faction, army_id)?;
-        let mut path = if places.iter().any(|p| matches!(p, Place::Province(_))) {
-            // v1 path of provinces: head for the city of the last one.
-            let Some(last) = places.last() else {
-                return Err(OrderError::EmptyPath);
-            };
-            let target = self.resolve_place(last)?;
-            self.find_path(data, army_id, &target)
-                .ok_or(OrderError::NoPath)?
-        } else {
-            places
-                .into_iter()
-                .map(|p| match p {
-                    Place::Settlement(id) => id,
-                    Place::Province(_) => unreachable!("handled above"),
-                })
-                .collect()
-        };
-        if path.first() == Some(&army.location) {
-            path.remove(0);
-        }
-        if path.is_empty() {
-            return Err(OrderError::EmptyPath);
-        }
-        movement::validate_path(data, &army.location, &path)?;
-        self.armies.get_mut(army_id).expect("checked").path = path;
-        Ok(())
-    }
-
     fn order_recruit(
         &mut self,
         data: &GameData,
@@ -1048,31 +1144,27 @@ impl CampaignState {
         let id = self.allocate_army_id();
         self.armies.insert(
             id.clone(),
-            Army {
-                faction: faction.clone(),
-                general: None,
-                location: settlement.clone(),
+            Army::new(
+                faction.clone(),
+                ArmyPosition::Settlement(settlement.clone()),
                 units,
-                movement_points: 0,
-                supply: 100,
-                stance: Stance::Normal,
-                path: Vec::new(),
-            },
+            ),
         );
         if let Some(character) = general {
             self.attach_general(&id, &character);
         }
         // F1: siege trains and movement effects set the pace from the start.
-        let allowance = self.army_movement_allowance(data, &self.armies[&id]);
+        let allowance = self.army_grid_allowance(data, &self.armies[&id]);
         self.armies
             .get_mut(&id)
             .expect("just created")
-            .movement_points = allowance;
+            .movement_left = allowance;
         Ok(())
     }
 
     fn order_merge(
         &mut self,
+        data: &GameData,
         faction: &FactionId,
         source: &ArmyId,
         target: &ArmyId,
@@ -1082,14 +1174,17 @@ impl CampaignState {
         if source == target {
             return Err(OrderError::NotSameProvince);
         }
-        if source_army.location != target_army.location {
+        // Lot M2: the same settlement, or two armies within reach of an
+        // engagement.
+        if !self.armies_together(data, &source_army, target_army) {
             return Err(OrderError::NotSameProvince);
         }
         let general = source_army.general.clone();
         self.armies.remove(source);
         let target_mut = self.armies.get_mut(target).expect("checked");
         target_mut.units.extend(source_army.units);
-        target_mut.movement_points = target_mut.movement_points.min(source_army.movement_points);
+        target_mut.movement_left = target_mut.movement_left.min(source_army.movement_left);
+        target_mut.clear_plan();
         if target_mut.general.is_none() {
             if let Some(general) = general {
                 self.attach_general(target, &general);
@@ -1120,14 +1215,11 @@ impl CampaignState {
         self.armies.insert(
             id,
             Army {
-                faction: faction.clone(),
                 general: None,
-                location: template.location,
                 units,
-                movement_points: template.movement_points,
-                supply: template.supply,
-                stance: template.stance,
-                path: Vec::new(),
+                planned_path: Vec::new(),
+                destination: None,
+                ..template
             },
         );
         Ok(())
@@ -1142,7 +1234,10 @@ impl CampaignState {
         indices: &[usize],
     ) -> Result<(), OrderError> {
         let army = self.own_army(faction, army_id)?;
-        let location = army.location.clone();
+        let location = army
+            .settlement()
+            .cloned()
+            .ok_or(OrderError::NotInSettlement)?;
         let indices = unique_sorted(indices, army.units.len())?;
         self.own_settlement(faction, &location)?;
         let settlement = &self.settlements[&location];
@@ -1231,15 +1326,15 @@ impl CampaignState {
 
     fn order_assign_general(
         &mut self,
+        data: &GameData,
         faction: &FactionId,
         army_id: &ArmyId,
         character: &CharacterId,
     ) -> Result<(), OrderError> {
-        let settlement = self.own_army(faction, army_id)?.location.clone();
+        let army = self.own_army(faction, army_id)?;
         let location = self
-            .settlement_province(&settlement)
-            .cloned()
-            .ok_or_else(|| OrderError::UnknownSettlement(settlement.clone()))?;
+            .army_province(data, army)
+            .ok_or(OrderError::NotInSettlement)?;
         self.check_general(faction, character, &location)?;
         if let Some(previous) = self.armies[army_id].general.clone() {
             self.detach_general(&previous);
@@ -1270,7 +1365,8 @@ impl CampaignState {
                 .army
                 .as_ref()
                 .and_then(|a| self.armies.get(a))
-                .is_some_and(|a| self.settlement_province(&a.location) == Some(province));
+                .and_then(|a| a.settlement())
+                .is_some_and(|s| self.settlement_province(s) == Some(province));
         if !in_province {
             return Err(OrderError::CharacterElsewhere);
         }
@@ -1288,9 +1384,11 @@ impl CampaignState {
         }
         if let Some(army) = self.armies.get_mut(army_id) {
             army.general = Some(character.clone());
-            let location = self
-                .settlements
-                .get(&army.location)
+            // A field army's province is kept up to date by
+            // `movement::move_general` (it needs the province raster).
+            let location = army
+                .settlement()
+                .and_then(|id| self.settlements.get(id))
                 .map(|s| s.province.clone());
             if let Some(state) = self.characters.get_mut(character) {
                 state.army = Some(army_id.clone());
@@ -1310,7 +1408,8 @@ impl CampaignState {
             if let Some(province) = self
                 .armies
                 .get(&army_id)
-                .and_then(|army| self.settlements.get(&army.location))
+                .and_then(|army| army.settlement())
+                .and_then(|id| self.settlements.get(id))
             {
                 state.location = Some(province.province.clone());
             }

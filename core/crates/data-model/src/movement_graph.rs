@@ -113,6 +113,16 @@ impl GameData {
             .unwrap_or_default()
     }
 
+    /// Free movement rules (`data/movement/rules.json`, defaults when
+    /// absent, lot M2).
+    pub fn free_movement_rules(&self) -> &crate::entities::movement::FreeMovementRules {
+        static DEFAULT: std::sync::OnceLock<crate::entities::movement::FreeMovementRules> =
+            std::sync::OnceLock::new();
+        self.free_movement
+            .as_ref()
+            .unwrap_or_else(|| DEFAULT.get_or_init(Default::default))
+    }
+
     /// Retreat tuning (`rules.json`, defaults when absent, lot C7a).
     pub fn retreat_rules(&self) -> RetreatRules {
         self.settlement_rules

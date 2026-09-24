@@ -321,9 +321,10 @@ impl CampaignSim {
         dict
     }
 
-    /// Settlements to walk through to reach `target` — a settlement id, or a
-    /// province id standing for its city — (empty when unreachable or
-    /// already there). The result feeds a `move_army` order as is.
+    /// `[target]` when `army` can reach `target` — a settlement id, or a
+    /// province id standing for its city — on the navigation grid (lot M2:
+    /// the march itself is computed by the core), empty when unreachable or
+    /// already there. The result feeds a `move_army` order as is.
     #[func]
     fn find_path(&self, army_id: GString, target: GString) -> PackedStringArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -335,9 +336,12 @@ impl CampaignSim {
         ) else {
             return PackedStringArray::new();
         };
-        state
-            .find_path(data, &army, &target)
-            .map(|path| ids(path.iter()))
+        if state.army(&army).is_none_or(|a| a.is_at(&target)) {
+            return PackedStringArray::new();
+        }
+        data.settlement_point(&target)
+            .and_then(|point| state.find_path(data, &army, point))
+            .map(|_| ids(std::iter::once(&target)))
             .unwrap_or_default()
     }
 
@@ -354,11 +358,29 @@ impl CampaignSim {
         ) else {
             return PackedStringArray::new();
         };
-        let (Some(entry), Some(path)) = (state.army(&army), state.find_path(data, &army, &target))
+        let Some(entry) = state.army(&army) else {
+            return PackedStringArray::new();
+        };
+        let Some(path) = data
+            .settlement_point(&target)
+            .and_then(|point| state.find_path(data, &army, point))
         else {
             return PackedStringArray::new();
         };
-        provinces_of_path(state, &entry.location, &path)
+        // Lot M2: the provinces under the cells of the grid path.
+        let grid = data.navgrid();
+        let mut last = state.army_province(data, entry);
+        let mut out = PackedStringArray::new();
+        for cell in &path.cells {
+            let point = cell.center(grid);
+            if let Some(p) = data.province_at_point(point[0], point[1]) {
+                if last.as_ref() != Some(p) {
+                    out.push(p.as_str());
+                    last = Some(p.clone());
+                }
+            }
+        }
+        out
     }
 
     /// Recruitment options of a settlement (or of a province's city):
@@ -581,20 +603,28 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .general
         .as_ref()
         .map_or_else(String::new, |id| state.character_name(data, id));
-    // M10 : a pending sea crossing shows the cog model.
-    let embarked = army
-        .path
-        .first()
-        .is_some_and(|next| sim_campaign::movement::is_sea_crossing(data, &army.location, next));
-    // Lot C4: armies stand on settlements; the province is given for the
-    // v1 UI and the path is also expressed in provinces.
-    let location_province = state
-        .settlement_province(&army.location)
-        .map_or("", |p| p.as_str());
-    let path_provinces = provinces_of_path(state, &army.location, &army.path);
-    let lonlat = data
-        .settlements
-        .get(&army.location)
+    // Lot M2: crossings take the whole turn at once (no pending crossing).
+    let embarked = false;
+    // Lot M2 (compatibility until M4): "location" is the army's settlement,
+    // or the nearest one in the field; "path" the destination of a march
+    // spanning several turns.
+    let location = state.army_anchor(data, army);
+    let location_str = location.as_ref().map_or("", |s| s.as_str());
+    let location_province = state.army_province(data, army);
+    let destination: Vec<SettlementId> = match &army.destination {
+        Some(sim_campaign::MoveTarget::Settlement(id)) if !army.planned_path.is_empty() => {
+            vec![id.clone()]
+        }
+        _ => Vec::new(),
+    };
+    let path_provinces = location
+        .as_ref()
+        .map_or_else(PackedStringArray::new, |start| {
+            provinces_of_path(state, start, &destination)
+        });
+    let lonlat = location
+        .as_ref()
+        .and_then(|id| data.settlements.get(id))
         .map_or(Vector2::ZERO, |s| {
             Vector2::new(s.lonlat[0] as f32, s.lonlat[1] as f32)
         });
@@ -603,15 +633,15 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         "faction" => army.faction.as_str(),
         "general" => army.general.as_ref().map_or("", |id| id.as_str()),
         "general_name" => general_name.as_str(),
-        "location" => army.location.as_str(),
-        "location_province" => location_province,
+        "location" => location_str,
+        "location_province" => location_province.as_ref().map_or("", |p| p.as_str()),
         "location_lonlat" => lonlat,
         "path_provinces" => &path_provinces,
         "units" => &units_array(data, &army.units),
-        "movement_points" => i64::from(army.movement_points),
+        "movement_points" => i64::from(army.movement_left),
         "supply" => i64::from(army.supply),
         "stance" => stance_key(army.stance),
-        "path" => &ids(army.path.iter()),
+        "path" => &ids(destination.iter()),
     }
 }
 
@@ -882,8 +912,9 @@ fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) 
     }
     if let Some(army) = view.army.as_ref().and_then(|a| state.army(a)) {
         let place = state
-            .settlement_province(&army.location)
-            .map_or_else(String::new, |p| province_name(data, p));
+            .army_province(data, army)
+            .map_or_else(String::new, |p| province_name(data, &p));
+
         return format!("général de l'armée en {place}");
     }
     "à la cour".to_owned()
