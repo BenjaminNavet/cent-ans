@@ -43,6 +43,8 @@ pub fn setup(
         terrain: Terrain::Plains,
         river: false,
         season: BattleSeason::Summer,
+        coastal: false,
+        village: None,
         attacker: side("France", attacker),
         defender: side("Angleterre", defender),
         player_side: None,
