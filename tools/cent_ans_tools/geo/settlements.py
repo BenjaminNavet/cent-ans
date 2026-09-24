@@ -68,7 +68,9 @@ DEFAULT_TERRAIN_COST = 1.0
 ROAD_DIVISOR = 2.0
 # Embarking and landing an army: about one province crossing on land.
 SEA_FIXED_COST = 100.0
+STRAIT_WATER_FRACTION = 0.5
 ROAD_MAX_MEAN_DISTANCE_KM = 3.0
+ROAD_MAX_MEAN_DISTANCE_RATIO = 0.04
 # Snapped settlements land this far inside their province, and apart.
 SNAP_INSET_PX = 3.0
 SNAP_MIN_SEPARATION_PX = 4.0
@@ -458,8 +460,15 @@ def build_edges(
     geometry: dict[str, dict],
     km_per_px: float,
     warnings: list[str] | None = None,
+    labels: np.ndarray | None = None,
 ) -> list[Edge]:
-    """Every edge of the graph (``road`` not set yet), sorted by ``(a, b)``."""
+    """Every edge of the graph (``road`` not set yet), sorted by ``(a, b)``.
+
+    With ``labels``, a border edge whose straight line runs mostly over water
+    (more than :data:`STRAIT_WATER_FRACTION`, e.g. Messina, Øresund) becomes a
+    ``sea`` edge when both ends are ports; otherwise it stays on land and a
+    warning is reported.
+    """
     warnings = warnings if warnings is not None else []
     by_province: dict[str, list[Settlement]] = {}
     for settlement in settlements:
@@ -492,7 +501,18 @@ def build_edges(
                 + terrain_cost(provinces[other].get("terrain", ""))
             ) / 2.0
             for i, j in closest_pairs(positions[province], positions[other]):
-                add(members[i], by_province[other][j], cost, False)
+                first, second = members[i], by_province[other][j]
+                water = water_fraction(labels, first.px, second.px)
+                if water <= STRAIT_WATER_FRACTION:
+                    add(first, second, cost, False)
+                elif first.port and second.port:
+                    add(first, second, 1.0, True)
+                else:
+                    warnings.append(
+                        f"arête {first.id} – {second.id} à {water:.0%} sur l'eau "
+                        "gardée terrestre (pas de port aux deux bouts)"
+                    )
+                    add(first, second, cost, False)
         for other in props.get("sea_neighbors", []):
             if other <= province or other not in by_province:
                 continue
@@ -514,6 +534,18 @@ def build_edges(
     return [edges[key] for key in sorted(edges)]
 
 
+def water_fraction(
+    labels: np.ndarray | None, start: tuple[float, float], end: tuple[float, float]
+) -> float:
+    """Share of a straight segment outside every province (0 without ``labels``)."""
+    if labels is None:
+        return 0.0
+    samples = segment_samples(start, end)
+    cols = np.clip(samples[:, 0].astype(int), 0, labels.shape[1] - 1)
+    rows = np.clip(samples[:, 1].astype(int), 0, labels.shape[0] - 1)
+    return float((labels[rows, cols] == 0).mean())
+
+
 def segment_samples(start: tuple[float, float], end: tuple[float, float]) -> np.ndarray:
     """Points every ~0.5 px along a segment (both ends included), ``(n, 2)``."""
     length = float(np.hypot(end[0] - start[0], end[1] - start[1]))
@@ -528,15 +560,23 @@ def flag_roads(
     road_distance_px: np.ndarray,
     max_mean_px: float,
 ) -> None:
-    """Set ``road`` on land edges whose mean distance to a road is below ``max_mean_px``."""
+    """Set ``road`` on land edges that a road follows.
+
+    The straight edge must stay, on average, within ``max_mean_px`` of a road,
+    or within :data:`ROAD_MAX_MEAN_DISTANCE_RATIO` of its length for long edges
+    (a road winding 8 km off a 200 km straight line still follows it).
+    """
     height, width = road_distance_px.shape
     for edge in edges:
         if edge.sea:
             continue
-        samples = segment_samples(positions[edge.a], positions[edge.b])
+        start, end = positions[edge.a], positions[edge.b]
+        samples = segment_samples(start, end)
         cols = np.clip(samples[:, 0].astype(int), 0, width - 1)
         rows = np.clip(samples[:, 1].astype(int), 0, height - 1)
-        edge.road = float(road_distance_px[rows, cols].mean()) < max_mean_px
+        length = float(np.hypot(end[0] - start[0], end[1] - start[1]))
+        limit = max(max_mean_px, ROAD_MAX_MEAN_DISTANCE_RATIO * length)
+        edge.road = float(road_distance_px[rows, cols].mean()) < limit
 
 
 def road_distance_raster(roads_path: Path, size_px: int) -> np.ndarray | None:
@@ -657,7 +697,12 @@ def prepare(
     index_of = {pid: props["index"] for pid, props in geometry.items()}
     place_settlements(settlements, grid, labels, index_of)
     edges = build_edges(
-        settlements, provinces, geometry, grid.meters_per_px / 1000.0, warnings
+        settlements,
+        provinces,
+        geometry,
+        grid.meters_per_px / 1000.0,
+        warnings,
+        labels,
     )
     return settlements, edges, grid, labels, provinces
 
