@@ -1,16 +1,29 @@
-[gd_scene load_steps=9 format=3 uid="uid://cent_ans_army_marker"]
+[gd_scene load_steps=11 format=3 uid="uid://cent_ans_army_marker"]
 
 [ext_resource type="Script" path="res://scripts/map/army_marker.gd" id="1_marker"]
+[ext_resource type="Shader" path="res://shaders/map_banner.gdshader" id="2_banner"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_pole"]
-top_radius = 0.18
-bottom_radius = 0.25
-height = 7.0
-radial_segments = 8
+top_radius = 0.09
+bottom_radius = 0.12
+height = 8.4
+radial_segments = 6
+rings = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pole"]
-albedo_color = Color(0.30, 0.20, 0.10, 1)
-roughness = 0.8
+albedo_color = Color(0.22, 0.15, 0.09, 1)
+roughness = 0.75
+
+[sub_resource type="SphereMesh" id="SphereMesh_finial"]
+radius = 0.22
+height = 0.44
+radial_segments = 8
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_finial"]
+albedo_color = Color(0.78, 0.58, 0.2, 1)
+metallic = 0.9
+roughness = 0.35
 
 [sub_resource type="QuadMesh" id="QuadMesh_banner"]
 size = Vector2(3.2, 4.2)
@@ -18,64 +31,50 @@ size = Vector2(3.2, 4.2)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_banner"]
 shading_mode = 0
 albedo_color = Color(0.2, 0.35, 0.75, 1)
-billboard_mode = 1
+billboard_mode = 2
 cull_mode = 2
-no_depth_test = true
-render_priority = 3
 
-[sub_resource type="TorusMesh" id="TorusMesh_halo"]
-inner_radius = 2.6
-outer_radius = 3.3
-rings = 24
-ring_segments = 8
+[sub_resource type="QuadMesh" id="QuadMesh_flag"]
+size = Vector2(3.4, 2.3)
+subdivide_width = 10
+subdivide_depth = 2
+center_offset = Vector3(1.7, -1.15, 0)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_halo"]
-shading_mode = 0
-albedo_color = Color(0.98, 0.82, 0.30, 1)
-emission_enabled = true
-emission = Color(0.98, 0.82, 0.30, 1)
-emission_energy_multiplier = 1.5
-no_depth_test = true
-render_priority = 2
-
-[sub_resource type="SphereMesh" id="SphereMesh_finial"]
-radius = 0.45
-height = 0.9
-radial_segments = 8
-rings = 4
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flag"]
+render_priority = 0
+shader = ExtResource("2_banner")
 
 [node name="ArmyMarker" type="Node3D"]
 script = ExtResource("1_marker")
 
 [node name="Pole" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3, 4.2, -0.6)
+layers = 2
+cast_shadow = 0
 mesh = SubResource("CylinderMesh_pole")
 material_override = SubResource("StandardMaterial3D_pole")
 
 [node name="Finial" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3, 8.55, -0.6)
+layers = 2
+cast_shadow = 0
 mesh = SubResource("SphereMesh_finial")
-material_override = SubResource("StandardMaterial3D_pole")
+material_override = SubResource("StandardMaterial3D_finial")
 
 [node name="Banner" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+visible = false
+layers = 2
 mesh = SubResource("QuadMesh_banner")
 material_override = SubResource("StandardMaterial3D_banner")
 
-[node name="CountLabel" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.6, 0.1)
-billboard = 1
-no_depth_test = true
-fixed_size = true
-pixel_size = 0.0012
-render_priority = 4
-modulate = Color(1, 1, 1, 1)
-outline_modulate = Color(0.1, 0.08, 0.05, 1)
-outline_size = 10
-text = "0"
-font_size = 20
+[node name="Flag" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3, 8.2, -0.6)
+layers = 2
+cast_shadow = 0
+mesh = SubResource("QuadMesh_flag")
+material_override = SubResource("ShaderMaterial_flag")
 
-[node name="Halo" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.3, 0)
-mesh = SubResource("TorusMesh_halo")
-material_override = SubResource("StandardMaterial3D_halo")
+[node name="Selection" type="Decal" parent="."]
+size = Vector3(7.5, 8, 7.5)
+cull_mask = 1

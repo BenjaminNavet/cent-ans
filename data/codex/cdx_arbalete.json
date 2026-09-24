@@ -1,0 +1,12 @@
+{
+  "id": "cdx_arbalete",
+  "title": "L'arbalète et les arbalétriers génois",
+  "category": "guerre",
+  "aliases": ["arbalète", "arbalètes", "arbalétrier", "arbalétriers", "arbalétriers génois", "cranequin"],
+  "era": { "from": "v. 1100", "to": "v. 1500" },
+  "summary": "Arme de trait puissante et précise mais lente à recharger, l'arbalète est l'arme de jet des armées françaises. À [[cdx_crecy|Crécy]], les arbalétriers génois loués par Philippe VI sont balayés par l'[[cdx_arc_long|arc long]] anglais.",
+  "body": "L'arbalète est un arc court monté en travers d'un fût de bois, que l'on arme en tirant la corde jusqu'à une noix qui la retient, puis que l'on décoche avec une détente. Son trait, le carreau, perce les armures à courte distance. Surtout, elle ne demande pas des années d'entraînement : un bourgeois de milice peut apprendre à s'en servir en quelques semaines. L'Église avait tenté en 1139 d'en interdire l'usage entre chrétiens, sans succès.\n\nSon défaut est la lenteur. Un arbalétrier tire environ deux carreaux par minute, quand un archer anglais décoche une dizaine de flèches. Pour armer les arcs de plus en plus puissants, en acier au XVe siècle, on invente l'étrier où l'on glisse le pied, puis des mécanismes à manivelle : le cranequin à crémaillère et le treuil à moufles. Pendant le rechargement, l'arbalétrier s'abrite derrière un grand bouclier, le pavois, que porte souvent un valet.\n\nLes meilleurs arbalétriers d'Europe viennent de Gênes, qui les loue aux princes. Le 26 août 1346, à [[cdx_crecy|Crécy]], plusieurs milliers d'entre eux ouvrent le combat pour [[cdx_philippe_vi|Philippe VI]]. Épuisés par la marche, privés de leurs pavois restés avec les bagages, ils sont criblés de flèches par les archers d'[[cdx_edouard_iii|Édouard III]] et reculent ; la chevalerie française, les croyant traîtres, les charge et les piétine.\n\nL'arbalète ne disparaît pas pour autant. Elle reste l'arme des milices urbaines, des garnisons et des navires, et les [[cdx_hussites|hussites]] l'emploient derrière leurs chariots. En France, les villes entretiennent des confréries d'arbalétriers, et l'arme n'est remplacée que peu à peu par les armes à feu portatives à la fin du Moyen Âge.",
+  "entity": "unit_genoese_crossbowmen",
+  "see_also": ["cdx_arc_long", "cdx_crecy", "cdx_franc_archer", "cdx_bombarde"],
+  "sources": ["Arbalète", "Bataille de Crécy"]
+}

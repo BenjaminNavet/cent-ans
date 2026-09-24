@@ -1,0 +1,11 @@
+{
+  "id": "cdx_trois_ordres",
+  "title": "Les trois ordres",
+  "category": "societe",
+  "aliases": ["trois ordres", "société d'ordres", "ceux qui prient", "oratores", "tiers état", "Adalbéron de Laon"],
+  "era": { "from": "v. 1030", "to": "1789" },
+  "summary": "Selon une idée formulée vers l'an mil, la société chrétienne se divise en trois ordres : ceux qui prient, ceux qui combattent et ceux qui travaillent. Cette image, qui justifie les privilèges du clergé et de la noblesse, est ébranlée par les crises du XIVe siècle.",
+  "body": "Vers 1030, l'évêque Adalbéron de Laon écrit un poème pour le roi Robert le Pieux. Il y décrit la « maison de Dieu » comme divisée en trois : les uns prient, les autres combattent, les autres encore travaillent. Chacun a besoin des deux autres : le clergé assure le salut de tous, les guerriers les protègent, les paysans les nourrissent. Cet ordre est voulu par Dieu et ne doit pas être troublé.\n\nCe schéma, qui ne dit rien des marchands ni des artisans, reste la manière officielle de penser la société jusqu'à la fin de l'Ancien Régime. Il justifie les privilèges : le clergé, qui a ses propres tribunaux, et la noblesse, qui paie « l'impôt du sang » en combattant, sont exemptés de la [[cdx_taille|taille]]. Les [[cdx_etats_generaux|états généraux]] reprennent cette division en trois chambres ; le terme de tiers état, pour le troisième ordre, se répand au XVe siècle.\n\nLa guerre de Cent Ans met le système à rude épreuve. À [[cdx_crecy|Crécy]] et à [[cdx_poitiers|Poitiers]], la noblesse ne remplit pas sa mission de protection ; les [[cdx_grandes_compagnies|Grandes Compagnies]] pillent ceux qu'elles devraient défendre. La [[cdx_jacquerie|Jacquerie]] de 1358 est en partie une révolte contre des nobles jugés traîtres à leur fonction.\n\nPendant ce temps, les bourgeois des villes s'enrichissent et réclament une place : [[cdx_etienne_marcel|Étienne Marcel]] tente d'imposer leur contrôle au gouvernement. En Angleterre, le prêtre John Ball, lors de la [[cdx_revolte_paysans_1381|révolte de 1381]], conteste l'inégalité même : « Quand Adam bêchait et qu'Ève filait, qui donc était gentilhomme ? »",
+  "see_also": ["cdx_seigneurie", "cdx_chevalerie", "cdx_etats_generaux", "cdx_jacquerie"],
+  "sources": ["Trois ordres", "Adalbéron de Laon", "Tiers état"]
+}

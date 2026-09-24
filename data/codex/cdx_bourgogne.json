@@ -1,0 +1,12 @@
+{
+  "id": "cdx_bourgogne",
+  "title": "L'État bourguignon",
+  "category": "lieu",
+  "aliases": ["Bourgogne", "duché de Bourgogne", "ducs de Bourgogne", "État bourguignon", "Charles le Téméraire"],
+  "era": { "from": "1363", "to": "1477" },
+  "summary": "Donné en 1363 par [[cdx_jean_ii|Jean II]] à son fils [[cdx_philippe_le_hardi|Philippe le Hardi]], le duché de Bourgogne devient le cœur d'un vaste ensemble qui réunit la Flandre et les Pays-Bas. Ses ducs, princes Valois, pèsent de tout leur poids dans la guerre de Cent Ans.",
+  "body": "Au début de la guerre, le duché de Bourgogne, autour de Dijon, appartient à une branche capétienne. Son duc Eudes IV est le beau-frère de Philippe VI et un fidèle soutien du roi. Quand le jeune duc Philippe de Rouvres meurt de la peste en 1361 sans héritier, le duché revient à la couronne. En 1363, [[cdx_jean_ii|Jean II]] le donne à son fils préféré, [[cdx_philippe_le_hardi|Philippe le Hardi]], héros de [[cdx_poitiers|Poitiers]].\n\nEn 1369, Philippe épouse Marguerite, héritière de [[cdx_louis_de_male|Louis de Male]]. À la mort de celui-ci en 1384, il reçoit la Flandre, l'Artois et la Franche-Comté. Ses successeurs, [[cdx_jean_sans_peur|Jean sans Peur]] et [[cdx_philippe_le_bon|Philippe le Bon]], y ajoutent le Brabant, le Hainaut, la Hollande, Namur et le Luxembourg. La Bourgogne devient ainsi une puissance à cheval sur le royaume de France et l'Empire, enrichie par la draperie des villes flamandes.\n\nPrinces du sang, les ducs veulent d'abord gouverner la France. Leur rivalité avec les Orléans mène à la guerre civile entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]]. Après le meurtre de Jean sans Peur à Montereau en 1419, Philippe le Bon s'allie aux Anglais et soutient le [[cdx_traite_troyes|traité de Troyes]], avant de se réconcilier avec [[cdx_charles_vii|Charles VII]] à la [[cdx_paix_arras|paix d'Arras]] en 1435.\n\nLa cour de Bourgogne, à Dijon, Bruges, Lille ou Bruxelles, est la plus fastueuse d'Europe : fêtes, ordre de la [[cdx_toison_or|Toison d'or]], peintres comme Jan van Eyck, sculpteurs comme Claus Sluter. Mais le rêve bourguignon s'effondre en 1477, quand Charles le Téméraire est tué devant Nancy. Le duché revient à la France ; les Pays-Bas passent aux Habsbourg.",
+  "entity": "fac_burgundy",
+  "see_also": ["cdx_philippe_le_hardi", "cdx_jean_sans_peur", "cdx_philippe_le_bon", "cdx_armagnacs_bourguignons"],
+  "sources": ["État bourguignon", "Duché de Bourgogne"]
+}

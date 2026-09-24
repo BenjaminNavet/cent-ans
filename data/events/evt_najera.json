@@ -1,0 +1,92 @@
+{
+  "id": "evt_najera",
+  "title": "La bataille de Nájera",
+  "text": "Le prince de Galles a franchi Roncevaux pour rendre son trône à Pierre le Cruel. À [[cdx_pierre_le_cruel|Nájera]], ses archers dispersent l'armée d'Henri de Trastamare ; du Guesclin est pris une fois de plus. Mais Pierre ne paie pas, et la dysenterie ravage l'armée anglaise.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1367,
+      "season": "spring"
+    },
+    "until_year": 1368,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_castile"
+  },
+  "options": [
+    {
+      "text": "Promettre au prince la solde de son armée",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 20,
+          "reason": "Solde de Nájera promise"
+        },
+        {
+          "type": "prestige",
+          "character": "chr_edward_of_woodstock",
+          "faction": "fac_england",
+          "amount": 15
+        },
+        {
+          "type": "add_trait",
+          "character": "chr_edward_of_woodstock",
+          "faction": "fac_england",
+          "trait": "trait_sickly"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les Anglais repartir sans solde",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -25,
+          "reason": "Solde de Nájera impayée"
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_england",
+          "amount": -4000
+        },
+        {
+          "type": "add_trait",
+          "character": "chr_edward_of_woodstock",
+          "faction": "fac_england",
+          "trait": "trait_sickly"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1367-04-03"
+  },
+  "sources": [
+    "Bataille de Nájera",
+    "Pierre Ier de Castille",
+    "Henri II de Castille"
+  ]
+}

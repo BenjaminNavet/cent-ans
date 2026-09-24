@@ -1,0 +1,66 @@
+{
+  "id": "evt_ordre_de_l_etoile",
+  "title": "L'ordre de l'Étoile",
+  "text": "Le 6 novembre 1351, Jean le Bon annonce la fondation de la Compagnie de Notre-Dame de la Noble Maison, qu'on appellera [[cdx_ordre_de_l_etoile|ordre de l'Étoile]], pour répondre à la [[cdx_ordre_de_la_jarretiere|Jarretière]] anglaise. Ses chevaliers jurent de ne jamais reculer de plus de quatre arpents devant l'ennemi. Le serment coûtera cher : à Mauron, l'année suivante, quatre-vingts à quatre-vingt-dix d'entre eux se feront tuer plutôt que de fuir.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1351,
+      "season": "autumn"
+    },
+    "until_year": 1352,
+    "conditions": [
+      {
+        "type": "ruler_is",
+        "faction": "fac_france",
+        "character": "chr_jean_de_normandie"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Fonder l'ordre à Saint-Ouen",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2500
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "loyalty",
+          "amount": 10
+        },
+        {
+          "type": "add_trait",
+          "trait": "trait_chivalrous"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Épargner la noblesse et le trésor",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1351-11-06",
+    "note": "Annonce le 6 novembre 1351 ; première fête à Saint-Ouen le 6 janvier 1352."
+  },
+  "sources": [
+    "Ordre de l'Étoile (France)",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+  ]
+}

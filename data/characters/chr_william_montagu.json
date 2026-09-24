@@ -1,0 +1,45 @@
+{
+  "id": "chr_william_montagu",
+  "name": {
+    "display": "Guillaume de Montaigu",
+    "local": "William Montagu",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Montagu",
+  "faction": "fac_england",
+  "role": "commander",
+  "birth": {
+    "value": "1301",
+    "place": "Cassington (Oxfordshire)"
+  },
+  "death": {
+    "value": "1344-01-30",
+    "place": "Windsor"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Salisbury",
+      "from": {
+        "value": "1337-03-16"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 8
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_ambitious"
+  ],
+  "piety": 50,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Ami intime d'[[cdx_edouard_iii|Édouard III]] et artisan du coup de Nottingham (1330) ; échoue devant [[cdx_black_agnes|Dunbar]] (1338), pris près de Lille (1340), libéré en 1342 sous serment de ne plus combattre en France.",
+  "sources": [
+    "William Montagu, 1st Earl of Salisbury"
+  ]
+}

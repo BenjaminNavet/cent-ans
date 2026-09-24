@@ -38,6 +38,8 @@ const KIND_LABELS := {
 	"general_captured": "Chef capturé",
 	"revolt": "Révolte",
 	"plague": "Peste",
+	"table": "La Table",  # H9
+	"medicine": "Médecine",  # H9
 }
 ## Types d'événements de la simulation qui méritent une lettre (les autres restent au journal).
 const NEWS_EVENT_KINDS := [

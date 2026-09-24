@@ -1,0 +1,11 @@
+{
+  "id": "cdx_seigneurie",
+  "title": "La seigneurie et le servage",
+  "category": "societe",
+  "aliases": ["seigneurie", "seigneurie banale", "servage", "serf", "serfs", "mainmorte", "corvée", "corvées"],
+  "era": { "from": "v. 1000", "to": "1789" },
+  "summary": "La seigneurie est le cadre de la vie rurale : un seigneur y possède la terre et exerce sur les paysans des droits de justice et de commandement, le ban. Au XIVe siècle, le servage recule en France, mais les charges seigneuriales restent lourdes.",
+  "body": "Une seigneurie se compose de deux parties. La réserve est exploitée directement pour le seigneur, autrefois grâce aux corvées des paysans, de plus en plus par des salariés. Les tenures sont confiées aux familles paysannes, qui les cultivent en échange de redevances : le cens, une somme d'argent fixe, le champart, une part de la récolte, et divers droits sur les ventes ou les héritages.\n\nLe seigneur exerce aussi le ban, un pouvoir de commandement hérité de l'autorité publique. Il rend la justice, perçoit des amendes, lève des péages et impose l'usage de ses équipements, les banalités : les paysans doivent moudre leur grain à son moulin, cuire leur pain à son [[cdx_four_banal|four banal]] et presser leur raisin à son pressoir, en payant chaque fois une redevance.\n\nCertains paysans sont serfs. Attachés à la seigneurie, ils sont soumis à des charges humiliantes : la mainmorte, qui permet au seigneur de reprendre leurs biens s'ils meurent sans enfant vivant avec eux, le formariage, taxe sur le mariage hors de la seigneurie, ou le chevage, capitation symbolique. En France, le servage recule dès le XIIIe siècle ; en 1315, Louis X invite les serfs du domaine royal à acheter leur liberté.\n\nLa [[cdx_peste_noire|Peste noire]] transforme les rapports de force. La main-d'œuvre devenant rare, les paysans survivants obtiennent de meilleures conditions, et les seigneurs voient leurs revenus fondre, aggravés par les [[cdx_mutations_monetaires|mutations monétaires]] et les pillages. Leurs tentatives pour maintenir leurs droits nourrissent les révoltes, de la [[cdx_jacquerie|Jacquerie]] à la [[cdx_revolte_paysans_1381|révolte anglaise de 1381]], qui réclame la fin du servage.",
+  "see_also": ["cdx_trois_ordres", "cdx_four_banal", "cdx_ost_feodal", "cdx_jacquerie"],
+  "sources": ["Seigneurie", "Servage", "Banalité"]
+}

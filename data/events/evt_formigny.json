@@ -1,0 +1,77 @@
+{
+  "id": "evt_formigny",
+  "title": "La bataille de Formigny",
+  "text": "L'armée de secours de Thomas Kyriell a débarqué à Cherbourg. À Formigny, les couleuvrines de Jean Bureau délogent les archers de leurs retranchements, et le connétable de Richemont surgit sur leur flanc : la Normandie est perdue pour l'Angleterre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1450,
+      "season": "spring"
+    },
+    "until_year": 1451,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Abandonner la Normandie",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Envoyer de nouveaux renforts",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_france",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1450-04-15"
+  },
+  "sources": [
+    "Bataille de Formigny",
+    "Jean Bureau"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_castille",
+  "title": "Le royaume de Castille",
+  "category": "lieu",
+  "aliases": ["Castille", "royaume de Castille", "Castillans", "flotte castillane", "Alphonse XI"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Plus grand royaume de la péninsule Ibérique, la Castille entre dans la guerre de Cent Ans par sa guerre civile entre [[cdx_pierre_le_cruel|Pierre le Cruel]] et Henri de Trastamare. Sous les Trastamare, alliés de la France, sa flotte menace les côtes anglaises.",
+  "body": "Au début de la guerre, la Castille est gouvernée par Alphonse XI, un roi énergique engagé dans la Reconquista contre l'émirat de Grenade et ses alliés mérinides du Maroc. Il les écrase au Salado en 1340, prend Algésiras en 1344 et meurt de la peste en 1350 en assiégeant Gibraltar. Le royaume est riche de la laine de ses moutons mérinos, exportée vers la Flandre, et de ses ports de la côte cantabrique.\n\nSon fils [[cdx_pierre_le_cruel|Pierre Ier]] se heurte à ses demi-frères bâtards, menés par Henri de Trastamare. La guerre civile devient un épisode de la guerre de Cent Ans : [[cdx_charles_v|Charles V]] envoie [[cdx_du_guesclin|Du Guesclin]] et les [[cdx_grandes_compagnies|Grandes Compagnies]] soutenir Henri, tandis que le [[cdx_prince_noir|Prince noir]] rétablit Pierre après la victoire de Nájera en 1367. En 1369, Henri tue finalement son demi-frère à Montiel et devient roi.\n\nReconnaissant, Henri II de Trastamare devient l'allié fidèle des [[cdx_valois|Valois]]. Sa flotte de galères, unie à celle de France, écrase une escadre anglaise devant La Rochelle en juin 1372, puis pille à plusieurs reprises les côtes anglaises. La maîtrise de la mer, acquise par les Anglais à l'[[cdx_ecluse|Écluse]], est un temps renversée.\n\nL'Angleterre riposte par les armes et par les mariages. [[cdx_jean_de_gand|Jean de Gand]] épouse Constance, fille de Pierre le Cruel, et revendique la couronne de Castille ; il débarque en Galice en 1386. Faute de succès, il y renonce au traité de Bayonne en 1388 : sa fille Catherine épouse l'héritier castillan, futur Henri III, réconciliant les deux lignées. L'alliance franco-castillane reste néanmoins solide jusqu'à la fin de la guerre.",
+  "entity": "fac_castile",
+  "see_also": ["cdx_pierre_le_cruel", "cdx_du_guesclin", "cdx_jean_de_gand", "cdx_navarre"],
+  "sources": ["Couronne de Castille", "Bataille de La Rochelle (1372)", "Traité de Bayonne (1388)"]
+}

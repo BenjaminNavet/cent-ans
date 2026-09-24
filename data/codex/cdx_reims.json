@@ -1,0 +1,12 @@
+{
+  "id": "cdx_reims",
+  "title": "Reims, ville du sacre",
+  "category": "lieu",
+  "aliases": ["Reims", "sacre de Reims", "Sainte Ampoule", "cathédrale de Reims", "siège de Reims"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Depuis le Moyen Âge central, c'est dans la cathédrale de Reims que les rois de France reçoivent le sacre. [[cdx_edouard_iii|Édouard III]] tente en vain de s'en emparer en 1359-1360 ; [[cdx_jeanne_darc|Jeanne d'Arc]] y conduit [[cdx_charles_vii|Charles VII]] le 17 juillet 1429.",
+  "body": "Selon la tradition, c'est à Reims que l'évêque Remi a baptisé Clovis, le premier roi franc chrétien. Une colombe aurait apporté du ciel une fiole d'huile sainte, la Sainte Ampoule, conservée dans l'abbaye Saint-Remi. Depuis, le roi de France est oint de cette huile par l'archevêque de Reims dans la cathédrale Notre-Dame : le sacre fait de lui un personnage sacré, choisi par Dieu, capable, dit-on, de guérir les écrouelles par le toucher.\n\nC'est pourquoi Reims est un enjeu majeur de la guerre. À l'automne 1359, [[cdx_edouard_iii|Édouard III]] débarque avec une grande armée et vient assiéger la ville, dans l'espoir de s'y faire sacrer roi de France. Mais les Rémois, bien défendus par leurs murailles, résistent ; au bout de cinq semaines, en janvier 1360, le roi anglais lève le siège. Cet échec mène aux négociations de [[cdx_bretigny|Brétigny]].\n\nAu début du XVe siècle, la ville est aux mains des Anglo-Bourguignons, et le dauphin Charles, réfugié au sud de la Loire, n'a pas été sacré : ses ennemis l'appellent par dérision le « roi de Bourges ». Après la délivrance d'[[cdx_orleans|Orléans]], [[cdx_jeanne_darc|Jeanne d'Arc]] le convainc de marcher sur Reims à travers un pays ennemi. Les villes ouvrent leurs portes une à une, et le 17 juillet 1429 [[cdx_charles_vii|Charles VII]] est sacré dans la cathédrale, Jeanne à ses côtés avec son étendard.\n\nCe sacre donne à Charles une légitimité décisive face au jeune Henri VI, qui devra se contenter d'être couronné à Paris en 1431. Reims est aussi une ville de culture : le poète et musicien Guillaume de Machaut y a été chanoine de la cathédrale et y compose sa célèbre Messe de Notre-Dame.",
+  "entity": "evt_sacre_de_reims",
+  "see_also": ["cdx_jeanne_darc", "cdx_charles_vii", "cdx_edouard_iii", "cdx_orleans"],
+  "sources": ["Reims", "Sacre des rois de France", "Siège de Reims (1359-1360)"]
+}

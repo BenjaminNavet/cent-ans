@@ -1,0 +1,81 @@
+{
+  "id": "evt_patay",
+  "title": "La bataille de Patay",
+  "text": "Les Anglais se retirent de la Loire. À Patay, un cerf débusqué trahit la position des archers de Talbot avant qu'ils aient planté leurs pieux : l'avant-garde de La Hire les charge et les disperse. Talbot est pris, Fastolf s'enfuit.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1429,
+      "season": "summer"
+    },
+    "until_year": 1430,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "at_war",
+            "a": "fac_england",
+            "b": "fac_france"
+          },
+          {
+            "type": "fired",
+            "event": "evt_troyes"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Poursuivre les Anglais jusqu'en Beauce",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": -15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rançonner Talbot et les capitaines",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 5000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1429-06-18"
+  },
+  "sources": [
+    "Bataille de Patay",
+    "John Talbot (1er comte de Shrewsbury)"
+  ]
+}

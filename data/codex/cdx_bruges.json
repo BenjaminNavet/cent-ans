@@ -1,0 +1,11 @@
+{
+  "id": "cdx_bruges",
+  "title": "Bruges, marché de l'Occident",
+  "category": "lieu",
+  "aliases": ["Bruges", "Brugeois", "Zwin", "Damme", "Ter Beurze"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Reliée à la mer par le bras du Zwin, Bruges est au XIVe siècle le grand carrefour commercial de l'Europe du Nord, où se rencontrent marchands italiens, hanséates, anglais et castillans. On y a même inventé le mot « bourse ».",
+  "body": "Bruges n'est pas au bord de la mer, mais un bras de mer, le Zwin, lui permet d'atteindre ses avant-ports de Damme et de l'Écluse. C'est dans cet estuaire que la flotte française est anéantie en 1340 lors de la bataille de l'[[cdx_ecluse|Écluse]]. Par là arrivent la laine anglaise, les vins de France, les épices et la soie d'Italie, les fourrures et le bois de la Baltique.\n\nPlus qu'une ville d'industrie comme [[cdx_gand|Gand]], Bruges est une place marchande. Les marchands de la [[cdx_hanse|Hanse]] y ont leur principal comptoir d'Occident ; les Génois, les Vénitiens et les Florentins y tiennent des « nations », avec leurs maisons et leurs consuls. Chaque printemps, les galères de Venise y viennent décharger leurs marchandises. On y pratique le change, la lettre de change et l'assurance maritime.\n\nLes marchands se réunissent devant l'auberge d'une famille de courtiers, les Van der Beurse, sur une place qui prend leur nom. De là vient le mot « bourse », repris ensuite dans toute l'Europe pour désigner le lieu où se négocient marchandises et valeurs.\n\nBruges participe aux révoltes flamandes contre le comte : [[cdx_jacob_van_artevelde|Jacques van Artevelde]] la rallie à Gand en 1338. Sous les ducs de [[cdx_bourgogne|Bourgogne]], elle devient une résidence princière ; [[cdx_philippe_le_bon|Philippe le Bon]] y fonde l'ordre de la [[cdx_toison_or|Toison d'or]] en 1430, et le peintre Jan van Eyck y travaille. Mais le Zwin s'ensable peu à peu, et à la fin du XVe siècle le commerce se déplace vers Anvers.",
+  "see_also": ["cdx_gand", "cdx_hanse", "cdx_flandre_laine", "cdx_comte_de_flandre"],
+  "sources": ["Bruges", "Bourse (économie)", "Zwin"]
+}

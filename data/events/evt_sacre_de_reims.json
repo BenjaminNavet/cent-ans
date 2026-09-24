@@ -1,0 +1,72 @@
+{
+  "id": "evt_sacre_de_reims",
+  "title": "Le sacre de Reims",
+  "text": "[[cdx_orleans|Orléans]] délivrée, la Pucelle a entraîné le roi à travers une Champagne tenue par les Bourguignons. [[cdx_traite_troyes|Troyes]], Châlons et Reims ouvrent leurs portes ; dans la cathédrale, l'archevêque verse sur le front de Charles l'huile de la sainte ampoule.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Marcher sur Reims et sacrer le roi",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "ruler",
+          "amount": 25
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Marcher d'abord sur Paris",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "devastation",
+          "province": "prov_ile_de_france",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_ile_de_france",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1429-07-17"
+  },
+  "sources": [
+    "Sacre de Charles VII",
+    "Jeanne d'Arc",
+    "Colette Beaune, Jeanne d'Arc, Perrin, 2004"
+  ]
+}

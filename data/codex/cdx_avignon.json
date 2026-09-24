@@ -1,0 +1,12 @@
+{
+  "id": "cdx_avignon",
+  "title": "Avignon, la ville des papes",
+  "category": "lieu",
+  "aliases": ["Avignon", "Comtat Venaissin", "pont Saint-Bénézet", "pont d'Avignon"],
+  "era": { "from": "1309", "to": "1403" },
+  "summary": "Résidence des papes à partir de 1309, Avignon devient au XIVe siècle l'une des capitales de la chrétienté. Achetée par le pape Clément VI en 1348, elle reste terre pontificale jusqu'à la Révolution.",
+  "body": "Au début du XIVe siècle, Avignon est une ville moyenne des bords du Rhône, qui appartient aux comtes de Provence, rois de Naples. Elle a pour voisin le Comtat Venaissin, déjà terre du pape. En 1309, le pape Clément V, un Gascon qui ne peut rejoindre Rome déchirée par les factions, s'y installe provisoirement. Ses successeurs y restent près de soixante-dix ans : c'est la [[cdx_papaute_avignon|papauté d'Avignon]].\n\nLa ville se transforme. Benoît XII, puis Clément VI, font bâtir le Palais des Papes, immense forteresse gothique qui abrite la cour pontificale, ses services financiers et sa chancellerie. Cardinaux, banquiers italiens, artistes, marchands, solliciteurs et aventuriers affluent de toute l'Europe ; la population explose, et le poète Pétrarque, qui y vit, dénonce cette « Babylone » bruyante et corrompue.\n\nEn 1348, en pleine [[cdx_peste_noire|Peste noire]], Clément VI achète la ville à la reine Jeanne de Naples pour quatre-vingt mille florins. Avignon est aussi un lieu de diplomatie : les papes y reçoivent les ambassadeurs de France et d'Angleterre et tentent, souvent en vain, de négocier des trêves.\n\nEn 1377, Grégoire XI ramène la papauté à Rome. Mais l'année suivante éclate le [[cdx_grand_schisme|Grand Schisme]] : un pape rival, Clément VII, revient s'installer à Avignon. Son successeur Benoît XIII y est assiégé dans son palais par les troupes du roi de France, avant de s'enfuir en 1403. Avignon et le Comtat restent ensuite terres du pape jusqu'à leur rattachement à la France en 1791.",
+  "entity": "prov_comtat_venaissin",
+  "see_also": ["cdx_papaute_avignon", "cdx_grand_schisme", "cdx_peste_noire"],
+  "sources": ["Avignon", "Papauté d'Avignon", "Palais des papes d'Avignon"]
+}

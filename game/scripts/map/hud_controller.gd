@@ -107,6 +107,11 @@ func _on_alert_activated(alert: Dictionary) -> void:
 		"research_idle":
 			ui.tech_panel_requested.emit()
 			return
+		"herbarium":  # H9 : fiche de la plante dans le Codex
+			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")
+			if bubbles != null:
+				bubbles.call("open_entry", str(alert.get("codex", "")))
+			return
 	var character_id := str(alert.get("character_id", ""))
 	var army_id := str(alert.get("army_id", ""))
 	var province_id := str(alert.get("province_id", ""))

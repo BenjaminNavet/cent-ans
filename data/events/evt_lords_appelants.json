@@ -1,0 +1,78 @@
+{
+  "id": "evt_lords_appelants",
+  "title": "Les lords Appelants",
+  "text": "Gloucester, Arundel et Warwick accusent de trahison les favoris du roi Richard. Robert de Vere est battu à Radcot Bridge ; le Parlement « sans merci » fait pendre ou exiler les conseillers du jeune roi, qui n'oubliera rien.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1387,
+      "season": "winter"
+    },
+    "until_year": 1389,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Céder au Parlement sans merci",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        },
+        {
+          "type": "add_trait",
+          "character": "ruler",
+          "trait": "trait_vengeful"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever l'armée de Robert de Vere",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 15
+        },
+        {
+          "type": "devastation",
+          "province": "prov_oxford",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1387-11-17",
+    "note": "Appel du 17 novembre 1387 ; Radcot Bridge le 20 décembre ; Parlement impitoyable février-juin 1388."
+  },
+  "sources": [
+    "Lords Appelants",
+    "Parlement impitoyable",
+    "Richard II d'Angleterre"
+  ]
+}

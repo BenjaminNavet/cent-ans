@@ -1,0 +1,12 @@
+{
+  "id": "cdx_rouen",
+  "title": "Rouen, capitale de la Normandie",
+  "category": "lieu",
+  "aliases": ["Rouen", "siège de Rouen", "Harelle", "place du Vieux-Marché"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Capitale de la Normandie et grand port de la Seine, Rouen est l'une des premières villes du royaume. Prise par [[cdx_henri_v|Henri V]] en janvier 1419 après un terrible siège, elle devient le centre du pouvoir anglais en France ; [[cdx_jeanne_darc|Jeanne d'Arc]] y est jugée et brûlée en 1431.",
+  "body": "Au XIVe siècle, Rouen vit du trafic de la Seine, qui la relie à Paris et à la mer : vin, sel, poisson et draps passent par ses quais. Les bourgeois y jouissent de larges privilèges. En 1382, comme à Paris avec les [[cdx_maillotins|Maillotins]], ils se révoltent contre les nouveaux impôts : c'est la Harelle, durement réprimée par le jeune [[cdx_charles_vi|Charles VI]], qui retire à la ville ses libertés.\n\nEn 1417, [[cdx_henri_v|Henri V]] entreprend la conquête méthodique de la Normandie. Il met le siège devant Rouen en juillet 1418. La ville, forte peut-être de soixante-dix mille habitants avec les réfugiés, résiste pendant six mois. La famine devient atroce : les défenseurs expulsent les bouches inutiles, femmes, enfants et vieillards, que les Anglais refusent de laisser passer et qui meurent de faim dans les fossés. Rouen capitule en janvier 1419.\n\nLa ville devient alors la capitale de la Normandie anglaise. C'est là que le duc de Bedford, régent pour Henri VI, installe son administration. En 1431, [[cdx_jeanne_darc|Jeanne d'Arc]], capturée à Compiègne et vendue aux Anglais, y est jugée par un tribunal d'Église présidé par l'évêque Pierre Cauchon. Condamnée comme hérétique relapse, elle est brûlée vive le 30 mai 1431 sur la place du Vieux-Marché.\n\nEn octobre 1449, lors de la reconquête de la Normandie, les Rouennais se soulèvent et ouvrent leurs portes aux troupes de [[cdx_charles_vii|Charles VII]], qui y fait une entrée triomphale en novembre. Le roi ordonne ensuite une enquête sur le procès de Jeanne, qui aboutit à sa réhabilitation en 1456.",
+  "entity": "evt_proces_de_rouen",
+  "see_also": ["cdx_henri_v", "cdx_jeanne_darc", "cdx_traite_troyes", "cdx_charles_vii"],
+  "sources": ["Rouen", "Siège de Rouen (1418-1419)", "Procès de Jeanne d'Arc"]
+}

@@ -34,7 +34,24 @@ const EFFECT_LABELS := {
 	"garrison": "Garnison", "fertility": "Fécondité", "construction_speed": "Vitesse de construction",
 	"attrition_resistance": "Résistance à l'attrition", "supply": "Ravitaillement",
 	"army_upkeep": "Entretien des armées",
+	# H9 : médecine et table.
+	"plague_resistance": "Résistance à la peste", "wound_recovery": "Soin des blessés",
+	"diet_health": "Santé tirée des régimes", "research_military": "Recherche militaire",
 }
+## Branches de technologies (H9 : médecine) ; forme adjectivale pour les sous-titres.
+const TECH_BRANCH_LABELS := {"military": "militaire", "civil": "civile", "medicine": "médecine"}
+## H9 : terrains exigés par un régime (`requirements.terrains`).
+const TERRAIN_LABELS := {
+	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
+	"marsh": "marais", "coast": "littoral", "highlands": "hautes terres", "bocage": "bocage",
+}
+## H9 : règles de Carême et d'hiver d'un régime (`lent_rule`, `winter_rule`), texte d'affichage.
+const LENT_RULE_TEXTS := {
+	"meat": "Carême : table grasse, −3 piété du souverain et +10 de mécontentement du clergé",
+	"dairy": "Carême : laitages interdits, −3 piété du souverain et +10 de mécontentement du clergé",
+	"fish": "Carême : table maigre, +2 piété du souverain",
+}
+const WINTER_RULE_TEXTS := {"fresh": "Denrées fraîches : coût ×1,5 en hiver"}
 const STAT_LABELS := {
 	"melee": "Mêlée", "ranged": "Tir", "range": "Portée", "armor": "Armure", "morale": "Moral",
 	"speed": "Vitesse", "ammo": "Munitions", "charge": "Charge", "siege_attack": "Attaque de siège",
@@ -84,7 +101,7 @@ const HUD_TEXTS := {
 	"hud_income": ["Revenu", "Impôts et commerce de la saison moins l'entretien des armées, des bâtiments et de l'administration ; « prév. » : revenu prévisionnel du prochain tour."],
 	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
 	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
-	"hud_technologies": ["Technologies", "Arbres militaire et civil (touche T)."],
+	"hud_technologies": ["Technologies", "Arbres militaire, civil et médecine (touche T)."],
 	"hud_diplomacy": ["Diplomatie", "Relations, traités et religion (touche P)."],
 	"hud_chronicle": ["Chronique", "Événements historiques et aléatoires en attente de décision."],
 	"hud_end_turn": ["Fin du tour", "Termine la saison (Entrée)."],
@@ -386,7 +403,7 @@ static func technology(node: Dictionary) -> String:
 	var id: String = str(node.get("id", ""))
 	var state: String = str(node.get("state", ""))
 	var branch: String = str(node.get("branch", ""))
-	var subtitle := "%s, rang %d — %s" % ["militaire" if branch == "military" else "civile", int(node.get("tier", 1)), TECH_STATE_LABELS.get(state, state)]
+	var subtitle := "%s, rang %d — %s" % [TECH_BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1)), TECH_STATE_LABELS.get(state, state)]
 	var lines: Array = [_title(id, str(node.get("name", id)), subtitle, "technology")]
 	var cost := int(node.get("cost", 0))
 	var effective := int(node.get("effective_cost", cost))
@@ -413,8 +430,83 @@ static func technology(node: Dictionary) -> String:
 		prerequisites.append("%s %s" % [icon_bbcode(str(prereq), 14), GameCatalog.display_name(str(prereq))])
 	if not prerequisites.is_empty():
 		lines.append("Prérequis : " + ", ".join(prerequisites))
+	lines.append(herbs_line(node.get("herbs", [])))
 	lines.append(_description(node))
+	var note: String = str(node.get("historical_note", ""))
+	if note != "":
+		lines.append("[color=%s][i]%s[/i][/color]" % [MUTED, note])
 	return _join(lines)
+
+
+## H9 : « Plantes : sauge, rue… » en liens du Codex (nom tiré de l'id si la fiche manque).
+static func herbs_line(herbs: Variant) -> String:
+	var parts := PackedStringArray()
+	if herbs is Array or herbs is PackedStringArray:
+		for herb in herbs:
+			var id := str(herb)
+			parts.append(CodexText.link(id, "" if _codex_has(id) else herb_name(id)))
+	return "Plantes : " + ", ".join(parts) if not parts.is_empty() else ""
+
+
+## Nom lisible d'une plante sans fiche : `cdx_reine_des_pres` → « reine des pres ».
+static func herb_name(id: String) -> String:
+	return id.trim_prefix("cdx_").replace("_", " ")
+
+
+static func _codex_has(id: String) -> bool:
+	var codex := CodexText.store()
+	return codex != null and bool(codex.call("has_entry", id))
+
+
+# --- Régimes (H9, La Table) ------------------------------------------------------------------
+
+
+## `option` : entrée de `get_diet_options` (coût effectif, effets, conditions, `reasons`).
+static func diet(option: Dictionary) -> String:
+	var id: String = str(option.get("id", ""))
+	var state := "régime actuel" if bool(option.get("current", false)) else ("disponible" if bool(option.get("available", false)) else "indisponible")
+	var lines: Array = [_title(id, str(option.get("name", id)), state, "resource")]
+	var cost := int(option.get("cost", 0))
+	var cost_line := "Coût : %s %s / saison" % [thousands(cost), POUND] if cost > 0 else "Coût : aucun"
+	var per_thousand := float(option.get("cost_per_thousand", 0))
+	if per_thousand > 0.0:
+		cost_line += " [color=%s](%s %s pour 1 000 habitants)[/color]" % [MUTED, str(snappedf(per_thousand, 0.01)).replace(".", ","), POUND]
+	lines.append(cost_line)
+	lines.append(_effects_block(option.get("effects", [])))
+	lines.append(str(LENT_RULE_TEXTS.get(str(option.get("lent_rule", "none")), "")))
+	lines.append(str(WINTER_RULE_TEXTS.get(str(option.get("winter_rule", "none")), "")))
+	lines.append(_diet_requirements(option.get("requirements", {})))
+	var reasons := PackedStringArray()
+	for reason in option.get("reasons", []):
+		reasons.append(str(reason))
+	if not reasons.is_empty():
+		lines.append("[color=%s]Manque : %s[/color]" % [RED, " ; ".join(reasons)])
+	lines.append(_description(option))
+	return _join(lines)
+
+
+static func _diet_requirements(requirements: Variant) -> String:
+	if not (requirements is Dictionary):
+		return ""
+	var parts := PackedStringArray()
+	for res_id in requirements.get("resources", []):
+		parts.append("%s %s" % [icon_bbcode(str(res_id), 14), GameCatalog.display_name(str(res_id))])
+	if bool(requirements.get("coastal", false)):
+		parts.append("province côtière")
+	var technology: String = str(requirements.get("technology", ""))
+	if technology != "":
+		parts.append("%s %s" % [icon_bbcode(technology, 14), GameCatalog.display_name(technology)])
+	var buildings := PackedStringArray()
+	for building_id in requirements.get("any_building", []):
+		buildings.append("%s %s" % [icon_bbcode(str(building_id), 14), GameCatalog.display_name(str(building_id))])
+	if not buildings.is_empty():
+		parts.append(" ou ".join(buildings))
+	var terrains := PackedStringArray()
+	for terrain in requirements.get("terrains", []):
+		terrains.append(str(TERRAIN_LABELS.get(str(terrain), str(terrain))))
+	if not terrains.is_empty():
+		parts.append("terrain : " + ", ".join(terrains))
+	return "Conditions : " + " · ".join(parts) if not parts.is_empty() else ""
 
 
 # --- Ressources, classes, jauges ------------------------------------------------------------

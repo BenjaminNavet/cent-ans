@@ -1,0 +1,11 @@
+{
+  "id": "cdx_hysope",
+  "title": "L'hysope",
+  "category": "plante",
+  "aliases": ["hysope", "hyssope", "Hyssopus"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Petit arbrisseau aux fleurs bleues et au parfum camphré, l'hysope est au Moyen Âge l'herbe de la poitrine : elle purge, dit-on, la poitrine du flegme et soigne la toux.",
+  "body": "L'hysope officinale (Hyssopus officinalis) est une labiée méditerranéenne, cousine de la sauge et du romarin, aux petites fleurs bleu-violet appréciées des abeilles. Le capitulaire De Villis (vers 800) la cite parmi les plantes des domaines royaux, et elle a sa place dans les jardins de simples monastiques.\n\nSon prestige vient aussi de la Bible : « Purifie-moi avec l'hysope, et je serai pur », dit le psaume 51 (Miserere), chanté à chaque aspersion d'eau bénite. Les botanistes pensent aujourd'hui que l'hysope biblique était une autre plante, probablement une origan de Syrie (Origanum syriacum), mais le Moyen Âge les confond, et l'hysope des jardins hérite de cette aura de purification.\n\nPour les médecins, elle est chaude et sèche, et purge la poitrine du flegme, l'humeur froide et humide qui encombre les poumons : c'est l'usage que retiennent le Circa instans salernitain et les versions longues du [[cdx_regimen_sanitatis|Régime de santé de Salerne]]. On la prend en sirop, en décoction avec du miel, contre la toux, l'asthme et les rhumes ; on l'applique aussi sur les contusions. Hildegarde de Bingen, au XIIe siècle, la recommande pour le foie et les poumons.\n\nCe qu'en dit la science moderne : l'hysope a des propriétés expectorantes et antiseptiques plausibles, peu étudiées cliniquement. Mise en garde : son huile essentielle contient de la pinocamphone, qui peut provoquer des convulsions ; elle est à proscrire chez les enfants, les femmes enceintes et les épileptiques. En tisane ou en cuisine, à petites doses, la plante elle-même est sans danger reconnu.",
+  "see_also": ["cdx_regimen_sanitatis", "cdx_humeurs", "cdx_sauge", "cdx_jardin_des_simples", "cdx_hildegarde_de_bingen"],
+  "sources": ["Hysope officinale", "Regimen sanitatis Salernitanum", "Psaume 51"]
+}

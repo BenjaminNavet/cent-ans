@@ -1,0 +1,12 @@
+{
+  "id": "cdx_oxford",
+  "title": "L'université d'Oxford",
+  "category": "savoir",
+  "aliases": ["Oxford", "université d'Oxford", "Merton College", "calculateurs d'Oxford", "Guillaume d'Ockham", "rasoir d'Ockham"],
+  "era": { "from": "v. 1167", "to": "1453" },
+  "summary": "Plus ancienne université d'Angleterre, Oxford est au XIVe siècle un grand foyer de logique, de mathématiques et de théologie. C'est là qu'enseigne [[cdx_john_wyclif|John Wyclif]], dont les idées inspirent les [[cdx_lollards|lollards]] et [[cdx_jan_hus|Jan Hus]].",
+  "body": "On enseigne à Oxford dès la fin du XIe siècle, et l'université s'y développe rapidement après 1167, quand les étudiants anglais ne peuvent plus se rendre à Paris. Comme à l'[[cdx_universite_paris|université de Paris]], les étudiants commencent par les arts libéraux, puis certains poursuivent en théologie, en droit ou en médecine. Des bienfaiteurs fondent des collèges pour loger et nourrir les étudiants pauvres, comme Balliol ou Merton au XIIIe siècle.\n\nAu début du XIVe siècle, Oxford est à la pointe de la pensée. Le franciscain Guillaume d'Ockham y défend une philosophie qui refuse de multiplier les êtres sans nécessité, principe resté célèbre sous le nom de rasoir d'Ockham. À Merton College, les « calculateurs », comme Thomas Bradwardine, appliquent les mathématiques à l'étude du mouvement et de la vitesse, préparant des découvertes que [[cdx_nicole_oresme|Nicole Oresme]] prolonge à Paris.\n\nLa ville et l'université ne s'entendent pas toujours. Le 10 février 1355, jour de la Sainte-Scholastique, une rixe de taverne entre étudiants et habitants dégénère en émeute : plusieurs dizaines d'étudiants sont tués. Le roi donne raison à l'université, et la ville devra faire pénitence chaque année pendant des siècles.\n\nDans les années 1370, [[cdx_john_wyclif|John Wyclif]], maître de Balliol, attaque la richesse de l'Église, l'autorité du pape et le culte des [[cdx_reliques|reliques]]. Ses disciples oxoniens diffusent ses idées et participent à la traduction de la Bible en anglais. Condamnées, ces doctrines sont chassées de l'université au début du XVe siècle, mais elles ont déjà gagné la Bohême par des étudiants tchèques.",
+  "entity": "prov_oxford",
+  "see_also": ["cdx_john_wyclif", "cdx_universite_paris", "cdx_lollards", "cdx_nicole_oresme"],
+  "sources": ["Université d'Oxford", "Guillaume d'Ockham", "Calculateurs d'Oxford", "St Scholastica Day riot (en)"]
+}

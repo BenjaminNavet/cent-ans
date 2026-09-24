@@ -1,7 +1,7 @@
 {
   "id": "evt_jeanne_d_arc",
   "title": "La Pucelle d'Orléans",
-  "text": "Une jeune fille de Domrémy, vêtue en homme, s'est présentée au dauphin à Chinon : ses voix lui ordonnent de délivrer Orléans et de mener le roi se faire sacrer à Reims. Les capitaines rient, mais le peuple la suit.",
+  "text": "Une jeune fille de Domrémy, vêtue en homme, s'est présentée au dauphin à Chinon : ses voix lui ordonnent de délivrer [[cdx_orleans|Orléans]] et de mener le roi se faire sacrer à [[cdx_reims|Reims]]. Les capitaines rient, mais le peuple la suit.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -11,9 +11,18 @@
     "until_year": 1431,
     "conditions": [
       {
-        "type": "at_war",
-        "a": "fac_england",
-        "b": "fac_france"
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "at_war",
+            "a": "fac_england",
+            "b": "fac_france"
+          },
+          {
+            "type": "fired",
+            "event": "evt_troyes"
+          }
+        ]
       },
       {
         "type": "any_of",
@@ -36,6 +45,10 @@
             "type": "controls",
             "faction": "fac_england",
             "province": "prov_normandie"
+          },
+          {
+            "type": "fired",
+            "event": "evt_troyes"
           }
         ]
       }
@@ -71,6 +84,11 @@
         {
           "type": "piety",
           "amount": 10
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_sacre_de_reims",
+          "delay": 1
         }
       ],
       "ai_weight": 3

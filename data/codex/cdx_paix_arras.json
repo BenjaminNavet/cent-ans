@@ -1,0 +1,12 @@
+{
+  "id": "cdx_paix_arras",
+  "title": "La paix d'Arras",
+  "category": "evenement",
+  "aliases": ["paix d'Arras", "traité d'Arras", "congrès d'Arras"],
+  "era": { "from": "1435", "to": "1435" },
+  "summary": "Signée le 21 septembre 1435, la paix d'Arras réconcilie [[cdx_charles_vii|Charles VII]] et le duc de Bourgogne [[cdx_philippe_le_bon|Philippe le Bon]]. Privée de son allié bourguignon, l'Angleterre perd la guerre en France.",
+  "body": "Depuis le meurtre de Jean sans Peur à Montereau en 1419, [[cdx_philippe_le_bon|Philippe le Bon]] est l'allié des Anglais. Mais après les victoires de [[cdx_jeanne_darc|Jeanne d'Arc]] et le sacre de Charles VII à [[cdx_reims|Reims]], l'alliance s'essouffle : le duc a ses propres intérêts aux Pays-Bas, et la guerre coûte cher. Le pape et le concile de Bâle poussent à la paix.\n\nDurant l'été 1435, un grand congrès se réunit à Arras, avec des ambassades française, anglaise et bourguignonne, et deux cardinaux médiateurs. Les Anglais refusent de renoncer à la couronne de France et quittent la conférence début septembre. Français et Bourguignons négocient alors seuls. Le 14 septembre, le duc de Bedford, régent anglais en France et beau-frère de Philippe, meurt à Rouen.\n\nLe traité, conclu le 21 septembre 1435, coûte cher à [[cdx_charles_vii|Charles VII]]. Il doit désavouer le meurtre de Montereau, promettre de punir les coupables et faire fonder des messes pour l'âme de Jean sans Peur. Il cède au duc les comtés de Mâcon et d'Auxerre, ainsi que les villes de la Somme, rachetables contre quatre cent mille écus, et le dispense de lui rendre hommage sa vie durant. En échange, Philippe reconnaît Charles comme roi.\n\nLa paix d'Arras met fin à la guerre entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]] et renverse l'équilibre. Dès avril 1436, Paris ouvre ses portes aux troupes royales. Pour la [[cdx_bourgogne|Bourgogne]], c'est le début de près de trente ans d'indépendance de fait.",
+  "entity": "evt_arras",
+  "see_also": ["cdx_philippe_le_bon", "cdx_charles_vii", "cdx_armagnacs_bourguignons", "cdx_traite_troyes"],
+  "sources": ["Traité d'Arras (1435)"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cdx_philippe_le_bon",
+  "title": "Philippe le Bon, duc de Bourgogne",
+  "category": "personnage",
+  "aliases": ["Philippe le Bon", "Philippe III de Bourgogne", "grand duc d'Occident"],
+  "era": { "from": "1396", "to": "1467" },
+  "summary": "Duc de Bourgogne de 1419 à 1467, Philippe le Bon s'allie aux Anglais pour venger son père puis se réconcilie avec [[cdx_charles_vii|Charles VII]] à Arras en 1435. Maître des Pays-Bas, il fait de sa cour la plus fastueuse d'Europe.",
+  "body": "Fils de [[cdx_jean_sans_peur|Jean sans Peur]], Philippe a vingt-trois ans quand son père est assassiné sur le pont de Montereau, en 1419. Pour le venger, il s'allie à [[cdx_henri_v|Henri V]] et soutient le [[cdx_traite_troyes|traité de Troyes]]. Pendant une quinzaine d'années, l'alliance anglo-bourguignonne domine le nord de la France ; ce sont d'ailleurs des troupes à son service qui capturent [[cdx_jeanne_darc|Jeanne d'Arc]] devant Compiègne en 1430.\n\nMais Philippe poursuit avant tout ses propres intérêts. Par héritage, achat ou pression, il réunit le Namurois, le Hainaut, la Hollande, la Zélande, le Brabant et le Luxembourg aux domaines déjà tenus par sa famille : la [[cdx_bourgogne|Bourgogne]], la Franche-Comté, la [[cdx_flandre_laine|Flandre]] et l'Artois. Ses États, riches de leurs villes drapières et marchandes, forment une puissance entre France et Empire.\n\nEn 1435, las d'une alliance anglaise qui lui coûte cher, il signe la [[cdx_paix_arras|paix d'Arras]] avec Charles VII, qui désavoue le meurtre de Montereau et le dispense de tout hommage. C'est un coup très dur pour l'Angleterre.\n\nSa cour, installée surtout à Bruxelles, Lille et [[cdx_bruges|Bruges]], est un modèle de faste et de cérémonial. Il y fonde en 1430 l'ordre de la [[cdx_toison_or|Toison d'or]], protège le peintre Jan van Eyck et organise en 1454 le célèbre banquet du Faisan, où ses chevaliers font vœu de croisade contre les Turcs qui viennent de prendre Constantinople. Il meurt à Bruges en 1467 ; son fils Charles le Téméraire lui succède.",
+  "see_also": ["cdx_jean_sans_peur", "cdx_paix_arras", "cdx_toison_or", "cdx_bourgogne"],
+  "sources": ["Philippe III de Bourgogne", "Banquet du Faisan"]
+}

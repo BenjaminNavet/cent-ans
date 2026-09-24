@@ -1,0 +1,43 @@
+{
+  "id": "evt_harengs_de_scanie",
+  "title": "Les harengs de Scanie",
+  "text": "Le hareng afflue sur les côtes de Scanie. À la foire de Skanör, les marchands de Lübeck et de Dantzig salent et mettent en tonneaux ; les baillis du roi comptent les droits.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 40
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_sweden"
+  },
+  "options": [
+    {
+      "text": "Taxer la foire de Skanör",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Accorder des privilèges aux Hanséates",
+      "effects": [
+        {
+          "type": "wealth",
+          "amount": 6
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Foires de Scanie",
+    "Hanse"
+  ]
+}

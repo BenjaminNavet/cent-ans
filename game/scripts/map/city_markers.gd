@@ -59,7 +59,7 @@ func build(map_data: MapData) -> void:
 		label.pixel_size = 0.0012
 		label.no_depth_test = true
 		label.render_priority = 2
-		label.position = Vector3(0.0, (15.0 if model != null else marker_height) + 3.0, 0.0)
+		label.position = Vector3(0.0, (8.0 if model != null else marker_height) + 3.0, 0.0)
 		marker.add_child(label)
 		_labels.append(label)
 		add_child(marker)

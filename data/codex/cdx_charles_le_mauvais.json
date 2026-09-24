@@ -1,0 +1,12 @@
+{
+  "id": "cdx_charles_le_mauvais",
+  "title": "Charles le Mauvais, roi de Navarre",
+  "category": "personnage",
+  "aliases": ["Charles le Mauvais", "Charles II de Navarre", "le Navarrais"],
+  "era": { "from": "1332", "to": "1387" },
+  "summary": "Roi de Navarre de 1349 à 1387 et comte d'Évreux, petit-fils de Louis X par sa mère, Charles II dit le Mauvais est le grand perturbateur des règnes de [[cdx_jean_ii|Jean II]] et de [[cdx_charles_v|Charles V]], changeant d'alliance au gré de ses intérêts.",
+  "body": "Charles naît en 1332, fils de Philippe d'Évreux et de Jeanne II de Navarre, elle-même fille du roi Louis X le Hutin. Par sa mère, il descend donc des Capétiens directs plus directement que les [[cdx_valois|Valois]] : sa famille a été écartée du trône de France en 1316 puis en 1328, lors de la [[cdx_succession_1328|crise successorale]]. Roi de Navarre à dix-sept ans, il possède aussi en Normandie le comté d'Évreux et de nombreuses places, à deux pas de Paris.\n\nBrillant orateur, séduisant et sans scrupules, il épouse en 1352 Jeanne, fille de [[cdx_jean_ii|Jean II]], mais s'estime lésé dans ses droits. En janvier 1354, ses hommes assassinent le connétable Charles de la Cerda, favori du roi. Jean II doit lui pardonner, puis le fait arrêter lors d'un banquet à Rouen en avril 1356 et exécuter plusieurs de ses compagnons. Emprisonné, le Navarrais devient un martyr aux yeux de ses partisans.\n\nLibéré en novembre 1357, il joue un rôle trouble dans la crise parisienne : allié d'[[cdx_etienne_marcel|Étienne Marcel]], qui le fait capitaine de Paris, il écrase pourtant la [[cdx_jacquerie|Jacquerie]] à Mello en juin 1358 à la tête de la noblesse. Il négocie tour à tour avec le dauphin et avec [[cdx_edouard_iii|Édouard III]], en se posant parfois en prétendant à la couronne.\n\nSes ambitions s'effondrent en 1364 : à Cocherel, son armée commandée par le captal de Buch est battue par [[cdx_du_guesclin|Du Guesclin]]. [[cdx_charles_v|Charles V]] lui confisque peu à peu ses terres normandes. Il meurt à Pampelune le 1er janvier 1387 ; la légende, colportée par ses ennemis, veut qu'il ait péri brûlé dans des draps imbibés d'eau-de-vie.\n\nLe surnom de « Mauvais » n'est pas de son temps : il apparaît chez les historiens du XVIe siècle. Il résume une réputation forgée par les chroniqueurs des Valois, que les historiens récents ont nuancée.",
+  "entity": "chr_charles_ii_de_navarre",
+  "see_also": ["cdx_succession_1328", "cdx_etienne_marcel", "cdx_jacquerie", "cdx_navarre"],
+  "sources": ["Charles II de Navarre", "Bataille de Cocherel"]
+}

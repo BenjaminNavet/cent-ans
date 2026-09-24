@@ -1,0 +1,11 @@
+{
+  "id": "cdx_aloes",
+  "title": "L'aloès",
+  "category": "plante",
+  "aliases": ["aloès", "aloe", "aloès socotrin", "hiera picra", "bois d'aloès"],
+  "era": { "from": "100", "to": "1500" },
+  "summary": "Suc amer et noir tiré des feuilles d'une plante grasse d'Arabie et de l'île de Socotra, l'aloès est le grand purgatif des apothicaires médiévaux. Rien à voir avec le « bois d'aloès », résine parfumée d'Asie.",
+  "body": "L'aloès des apothicaires n'est pas une plante qu'on cultive en Europe : c'est un produit d'importation. On incise les feuilles charnues de certaines espèces d'Aloe (dont l'aloe vera et l'aloès de Socotra, île au large de la corne de l'Afrique) ; le suc jaune qui s'en écoule, séché, donne des masses brun-noir, brillantes et très amères. L'« aloès socotrin » est le plus estimé. Il arrive en Europe par les mêmes routes que les [[cdx_epices_medievales|épices]].\n\nDans la médecine médiévale, fidèle à Dioscoride et à Galien, l'aloès est d'abord un purgatif : il évacue la bile et les humeurs superflues, selon la théorie des [[cdx_humeurs|humeurs]]. Il entre dans de nombreux remèdes composés, dont la célèbre « hiera picra » (« la sainte amère »), électuaire d'aloès et d'épices qu'on trouve chez tous les apothicaires, et dans les « pilules » de toutes sortes. On l'applique aussi sur les plaies et les ulcères, et il entre, avec la myrrhe, dans les baumes d'embaumement.\n\nAttention à la confusion, déjà fréquente à l'époque : le « bois d'aloès » ou agalloche, cité dans la Bible et dans les inventaires princiers, est tout autre chose, le bois résineux et parfumé d'un arbre d'Asie du Sud-Est (Aquilaria), brûlé comme encens. Les deux produits partagent le nom et le prix élevé, pas l'usage.\n\nCe qu'en dit la science moderne : le suc d'aloès contient des anthraquinones (aloïne), laxatifs stimulants puissants ; leur usage prolongé irrite l'intestin et fait perdre du potassium, et l'Union européenne a restreint en 2021 leur emploi dans les aliments pour des raisons de sécurité. Le gel incolore de l'intérieur des feuilles, différent du suc, a un effet apaisant modeste sur les brûlures légères. Déconseillé aux femmes enceintes et aux enfants.",
+  "see_also": ["cdx_theriaque", "cdx_apothicaires", "cdx_epices_medievales", "cdx_humeurs", "cdx_safran"],
+  "sources": ["Aloès", "Aloe vera", "Bois d'agar"]
+}

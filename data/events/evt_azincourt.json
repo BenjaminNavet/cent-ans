@@ -1,7 +1,7 @@
 {
   "id": "evt_azincourt",
   "title": "Azincourt",
-  "text": "Harfleur prise, l'armée anglaise épuisée cherche à gagner Calais. Entre les bois d'Azincourt et de Tramecourt, dans une terre détrempée, la chevalerie de France s'enlise sous les flèches. Le roi Henri fait massacrer les prisonniers ; les princes survivants partent pour de longues années de captivité.",
+  "text": "Harfleur prise, l'armée anglaise épuisée cherche à gagner [[cdx_calais|Calais]]. Entre les bois d'Azincourt et de Tramecourt, dans une terre détrempée, la [[cdx_chevalerie|chevalerie]] de France s'enlise sous les flèches. Le roi Henri fait massacrer les prisonniers ; les princes survivants partent pour de longues années de captivité.",
   "kind": "historical",
   "trigger": {
     "date": {

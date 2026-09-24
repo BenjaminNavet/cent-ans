@@ -1,0 +1,11 @@
+{
+  "id": "cdx_jan_hus",
+  "title": "Jan Hus",
+  "category": "personnage",
+  "aliases": ["Jan Hus", "Jean Hus", "Hus"],
+  "era": { "from": "v. 1370", "to": "1415" },
+  "summary": "Prêtre et maître de l'université de Prague, Jan Hus prêche en tchèque la réforme de l'Église en s'inspirant de [[cdx_john_wyclif|Wyclif]]. Venu se défendre au [[cdx_concile_constance|concile de Constance]] muni d'un sauf-conduit, il y est condamné et brûlé le 6 juillet 1415.",
+  "body": "Né vers 1370 dans une famille modeste de Bohême méridionale, Jan Hus étudie à l'université de Prague, fondée en 1348 par l'empereur [[cdx_charles_iv|Charles IV]], et en devient recteur. À partir de 1402, il prêche en tchèque à la chapelle de Bethléem, fondée pour la prédication en langue populaire, devant des foules considérables.\n\nIl découvre les écrits de [[cdx_john_wyclif|John Wyclif]], que des étudiants tchèques ont rapportés d'[[cdx_oxford|Oxford]]. Comme lui, il dénonce la richesse et les mœurs du clergé, et soutient que l'Église est la communauté des fidèles plutôt que la hiérarchie. Il s'indigne en 1412 de la vente d'indulgences destinées à financer la guerre d'un des papes rivaux du [[cdx_grand_schisme|Grand Schisme]]. Excommunié, il doit quitter Prague.\n\nEn 1414, il accepte de se rendre au [[cdx_concile_constance|concile de Constance]] pour s'expliquer, muni d'un sauf-conduit du roi Sigismond. Il y est pourtant arrêté et jugé comme hérétique. Refusant de se rétracter sur des thèses qu'il dit ne pas avoir soutenues, il est brûlé vif le 6 juillet 1415.\n\nSa mort provoque un soulèvement en Bohême. Ses partisans, les [[cdx_hussites|hussites]], réclament notamment la communion sous les deux espèces (le pain et le vin) pour tous les fidèles et repoussent pendant plus de quinze ans les croisades lancées contre eux. Jan Hus reste un héros national tchèque et un précurseur de la Réforme protestante.",
+  "see_also": ["cdx_hussites", "cdx_john_wyclif", "cdx_concile_constance", "cdx_grand_schisme"],
+  "sources": ["Jan Hus", "Chapelle de Bethléem (Prague)"]
+}

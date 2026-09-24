@@ -1,0 +1,62 @@
+{
+  "id": "evt_razzia_frontiere",
+  "title": "Razzia sur la frontière",
+  "text": "Les cavaliers de la frontière, les almogávares chrétiens comme les ghazis de Grenade, franchissent les sierras pour enlever bétail et captifs. Le sultan peut lâcher ses zénètes ou tenir les trêves.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 40,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_granada",
+        "b": "fac_castile"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_granada"
+  },
+  "options": [
+    {
+      "text": "Lâcher les zénètes sur la Campiña",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        },
+        {
+          "type": "devastation",
+          "province": "prov_cordoba",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": -10,
+          "reason": "Razzia grenadine"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Tenir la frontière",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Royaume nasride de Grenade",
+    "Zénètes"
+  ]
+}

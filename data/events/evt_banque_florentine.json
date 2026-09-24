@@ -1,0 +1,45 @@
+{
+  "id": "evt_banque_florentine",
+  "title": "Les changeurs du Mercato Nuovo",
+  "text": "Les compagnies florentines ouvrent des comptoirs d'[[cdx_avignon|Avignon]] à Londres ; le florin d'or court dans toute la chrétienté. Les Arts majeurs demandent que la Commune ménage ceux qui l'enrichissent.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 48
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_florence"
+  },
+  "options": [
+    {
+      "text": "Lever un emprunt forcé sur les compagnies",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_firenze",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser prospérer les banques",
+      "effects": [
+        {
+          "type": "wealth",
+          "province": "prov_firenze",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Florin (monnaie)",
+    "Arte del Cambio"
+  ]
+}

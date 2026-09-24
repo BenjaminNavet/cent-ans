@@ -1,0 +1,11 @@
+{
+  "id": "cdx_robert_knolles",
+  "title": "Robert Knolles",
+  "category": "personnage",
+  "aliases": ["Robert Knolles", "Knolles", "Pontvallain"],
+  "era": { "from": "v. 1325", "to": "1407" },
+  "summary": "Parti de rien, l'Anglais Robert Knolles devient l'un des plus riches et des plus redoutés capitaines de routiers de la guerre de Cent Ans, avant de commander en 1370 une grande chevauchée royale.",
+  "body": "Robert Knolles naît vers 1325 dans le Cheshire, dans une famille modeste. Il fait ses armes en Bretagne pendant la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession]] : il est l'un des combattants du parti anglais au célèbre combat des Trente, en 1351, où trente chevaliers et écuyers de chaque camp s'affrontent en champ clos.\n\nAprès [[cdx_poitiers|Poitiers]], il se fait chef de compagnie et opère pour son propre compte. En 1358-1359, il ravage la vallée de la Loire et l'Auxerrois et amasse une fortune en rançons et en pâtis. Les pignons noircis des maisons qu'il fait brûler sont surnommés, dit-on, les « mitres de Knolles ». Il incarne le routier enrichi, à mi-chemin entre le soldat et le brigand.\n\nSa réputation lui vaut en 1370 le commandement d'une grande [[cdx_chevauchee|chevauchée]] royale partie de [[cdx_calais|Calais]]. Mais ce roturier peine à se faire obéir des seigneurs de son armée, qui se divise ; à la fin de l'année, [[cdx_du_guesclin|Du Guesclin]] surprend et écrase une partie des troupes à Pontvallain. Knolles tombe un temps en disgrâce.\n\nIl retrouve la faveur royale et participe en 1381 à la répression de la [[cdx_revolte_paysans_1381|révolte des Paysans]] à Londres. Riche propriétaire, il finance un pont à Rochester et des œuvres pieuses, et meurt en 1407 dans son manoir du Norfolk, à plus de quatre-vingts ans.",
+  "see_also": ["cdx_grandes_compagnies", "cdx_chevauchee", "cdx_du_guesclin", "cdx_guerre_de_succession_de_bretagne"],
+  "sources": ["Robert Knolles", "Combat des Trente", "Bataille de Pontvallain"]
+}

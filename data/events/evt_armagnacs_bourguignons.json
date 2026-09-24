@@ -1,7 +1,7 @@
 {
   "id": "evt_armagnacs_bourguignons",
   "title": "Le meurtre de la rue Vieille-du-Temple",
-  "text": "Louis, duc d'Orléans, frère du roi, est assassiné de nuit dans une rue de Paris par les hommes du duc de Bourgogne, qui avoue le crime et le fait justifier devant la cour par le théologien Jean Petit (mars 1408). Les partisans d'Orléans se rangent derrière le comte d'Armagnac : la guerre civile menace.",
+  "text": "Louis, [[cdx_louis_d_orleans|duc d'Orléans]], frère du roi, est assassiné de nuit dans une rue de Paris par les hommes du duc de Bourgogne, qui avoue le crime et le fait justifier devant la cour par le théologien Jean Petit (mars 1408). Les partisans d'Orléans se rangent derrière le comte d'Armagnac : la guerre civile menace.",
   "kind": "historical",
   "trigger": {
     "date": {

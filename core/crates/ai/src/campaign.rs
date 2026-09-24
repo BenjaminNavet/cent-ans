@@ -28,7 +28,7 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
 /// A debt must be repaid within this many turns, or units are dismissed.
-const DEBT_REPAYMENT_TURNS: i64 = 20;
+const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
 const MAX_DISBANDS_PER_TURN: usize = 12;
 /// Recruitment orders per turn: one per this much seasonal income (1 to 8).
@@ -37,6 +37,23 @@ pub const INCOME_PER_RECRUIT: i64 = 6000;
 pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
+
+/// Seasons of gross income kept in the treasury; above, money is spent (F4).
+pub const RESERVE_SEASONS: i64 = 3;
+/// Turns over which a hoard above the reserve is spent (army, buildings).
+pub const HOARD_SPENDING_TURNS: i64 = 8;
+/// Seasons of deficit a treasury must cover before units are dismissed
+/// ahead of bankruptcy, at war / at peace (F4).
+pub const WAR_RUNWAY_TURNS: i64 = 8;
+pub const PEACE_RUNWAY_TURNS: i64 = 3;
+/// Share of the hoard given to the Church each year while papal favour is
+/// below [`DONATION_FAVOR`].
+pub const DONATION_PERCENT: i64 = 5;
+pub const DONATION_FAVOR: u8 = 70;
+
+/// A realm down to this many free provinces is not besieged there by an
+/// enemy without a claim on them: peace decides its fate (F4).
+pub const LAST_BASTIONS: usize = 2;
 
 const REBELS: &str = "fac_rebels";
 
@@ -48,6 +65,8 @@ struct Context<'a> {
     enemies: BTreeSet<FactionId>,
     aggression: i32,
     income: i64,
+    /// Gross income of the season (the unit of « seasons of income »).
+    gross_income: i64,
     army_upkeep: i64,
     building_upkeep: i64,
     treasury: i64,
@@ -79,6 +98,7 @@ impl<'a> Context<'a> {
                 };
                 gross - state.faction_administration_upkeep(data, faction) - tribute
             },
+            gross_income: state.faction_income_effective(data, faction),
             army_upkeep: state.faction_army_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
             treasury: me.treasury,
@@ -96,6 +116,17 @@ impl<'a> Context<'a> {
     /// Treasury kept aside: two turns of upkeep.
     fn reserve(&self) -> i64 {
         2 * self.upkeep()
+    }
+
+    /// Seasonal surplus (negative: deficit) at the current upkeep.
+    fn surplus(&self) -> i64 {
+        self.income - self.upkeep()
+    }
+
+    /// Treasury above [`RESERVE_SEASONS`] of gross income: idle money the
+    /// faction spends over [`HOARD_SPENDING_TURNS`] (F4).
+    fn hoard(&self) -> i64 {
+        (self.treasury - RESERVE_SEASONS * self.gross_income.max(0)).max(0)
     }
 
     fn owns(&self, province: &ProvinceId) -> bool {
@@ -171,13 +202,12 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         0.0
     };
-    // A treasury worth ten seasons of income is idle money: spend it, and
-    // lighten taxes at peace.
-    let rich = ctx.treasury > 10 * ctx.income.max(1);
+    // Taxes: heavy in war or deficit if public order allows, light when
+    // the realm grumbles (F4: a rich treasury is spent, not untaxed).
     let in_debt = ctx.treasury < 0;
-    let rate = if unrest > 55.0 || (rich && !ctx.at_war()) {
+    let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt) && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < 30.0 {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -187,12 +217,41 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     }
 
     // Debt: dismiss the costliest unit until the surplus repays the debt
-    // within `DEBT_REPAYMENT_TURNS`.
-    let wanted_surplus = -ctx.treasury / DEBT_REPAYMENT_TURNS;
-    if ctx.treasury < 0 && ctx.income - ctx.upkeep() < wanted_surplus {
-        let savings = wanted_surplus - (ctx.income - ctx.upkeep());
+    // within `DEBT_REPAYMENT_TURNS`. F4: dismiss ahead of bankruptcy when the
+    // treasury no longer covers the deficit for a few seasons.
+    let runway = if ctx.at_war() {
+        WAR_RUNWAY_TURNS
+    } else {
+        PEACE_RUNWAY_TURNS
+    };
+    let wanted_surplus = if ctx.treasury < 0 {
+        -ctx.treasury / DEBT_REPAYMENT_TURNS
+    } else if ctx.surplus() < 0
+        && (ctx.treasury < -ctx.surplus() * runway || (!ctx.at_war() && ctx.hoard() == 0))
+    {
+        0
+    } else {
+        i64::MIN
+    };
+    if ctx.surplus() < wanted_surplus {
+        let savings = wanted_surplus - ctx.surplus();
         orders.extend(disband_for_debt(ctx, savings));
         return;
+    }
+
+    // Idle money (F4): a yearly gift to the Church while its favour is low.
+    let hoard = ctx.hoard();
+    let catholic = sim_campaign::religion::is_catholic(state, data, ctx.faction);
+    if hoard > 0
+        && catholic
+        && me.papal_favor < DONATION_FAVOR
+        && state.season == Season::Autumn
+        && ctx.faction.as_str() != sim_campaign::diplomacy::PAPACY_FACTION
+    {
+        let amount = hoard * DONATION_PERCENT / 100;
+        if amount >= 200 {
+            orders.push(Order::DonateToChurch { amount });
+        }
     }
 
     let mut budget = ctx.treasury - ctx.reserve();
@@ -201,8 +260,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         PEACE_MILITARY_SHARE
     };
-    let share = if rich { share + 0.3 } else { share };
-    let target_upkeep = (ctx.income as f64 * share) as i64;
+    // F4: armies are paid from what buildings leave of the net income, plus
+    // the hoard spent over `HOARD_SPENDING_TURNS`; small realms live within
+    // their means.
+    let target_upkeep = ((ctx.income - ctx.building_upkeep).max(0) as f64 * share) as i64
+        + hoard / HOARD_SPENDING_TURNS;
     let mut planned_upkeep = ctx.army_upkeep;
 
     // Recruitment: capital first, then threatened border provinces.
@@ -216,7 +278,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
     let mut recruits = 0;
-    let max_recruits = (ctx.income / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
+    let max_recruits =
+        ((ctx.income + hoard / HOARD_SPENDING_TURNS) / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
     'sites: for site in &sites {
         if !ctx.owns(site) {
             continue;
@@ -235,7 +298,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         };
         while recruits < max_recruits
             && planned_upkeep + i64::from(option.upkeep)
-                <= target_upkeep.max(i64::from(option.upkeep))
+                <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
+                    target_upkeep.max(i64::from(option.upkeep))
+                } else {
+                    target_upkeep
+                }
             && budget >= i64::from(option.cost)
         {
             orders.push(Order::Recruit {
@@ -274,6 +341,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Construction: best yield per livre; the richer, the more sites at once.
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
+    // F4: a new building's upkeep must fit in the surplus left by the army
+    // (or in the hoard being spent).
+    let mut spare =
+        ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
     let mut options: Vec<(f64, ProvinceId, data_model::BuildingId, i64)> = Vec::new();
     for id in state.provinces.keys().filter(|id| ctx.owns(id)) {
         let Some(city) = state.province_city(data, id) else {
@@ -303,9 +374,14 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     });
     let mut used = BTreeSet::new();
     for (_, province, building, cost) in options {
-        if used.len() >= builds || used.contains(&province) || budget < cost {
+        let upkeep = data
+            .buildings
+            .get(&building)
+            .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)));
+        if used.len() >= builds || used.contains(&province) || budget < cost || upkeep > spare {
             continue;
         }
+        spare -= upkeep;
         budget -= cost;
         used.insert(province.clone());
         orders.push(Order::Build { province, building });
@@ -561,6 +637,9 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     let Some(house) = house else {
         return;
     };
+    // F4: the ruler and the heir first (a dynasty needs sons), then the
+    // eldest of the house.
+    let heir = me.heir.clone();
     let single = state
         .characters
         .iter()
@@ -571,19 +650,21 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
                 && c.age(year) >= 16
                 && c.age(year) <= 45
         })
-        .min_by_key(|(id, c)| (c.birth_year, (*id).clone()))
+        .min_by_key(|(id, c)| {
+            let rank = if Some(*id) == ruler.as_ref() {
+                0
+            } else if Some(*id) == heir.as_ref() {
+                1
+            } else {
+                2
+            };
+            (rank, c.birth_year, (*id).clone())
+        })
         .map(|(id, _)| id.clone());
     let Some(single) = single else {
         return;
     };
-    let partner = state
-        .marriage_candidates(data, &single)
-        .into_iter()
-        .filter_map(|id| state.characters.get(&id).map(|c| (id, c)))
-        .filter(|(_, c)| &c.faction == ctx.faction || state.is_allied(ctx.faction, &c.faction))
-        .filter(|(_, c)| c.faction != ctx.state.player_faction)
-        .max_by_key(|(id, c)| (c.prestige, std::cmp::Reverse(id.clone())))
-        .map(|(id, c)| (id, c.faction.clone()));
+    let partner = marriage_partner(ctx, &single);
     match partner {
         Some((spouse, spouse_faction)) if &spouse_faction == ctx.faction => {
             orders.push(Order::ProposeMarriage {
@@ -598,6 +679,74 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         }),
         None => {}
     }
+}
+
+/// Best spouse for `single` (F4): a partner of child-bearing age close in
+/// years, preferably from a ruling house of an ally or of a friendly realm
+/// (diplomatic marriage), who would accept; the player receives an offer.
+fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId, FactionId)> {
+    let state = ctx.state;
+    let data = ctx.data;
+    let year = state.year();
+    let me = state.characters.get(single)?;
+    let ruling = |c: &sim_campaign::CharacterState| {
+        state
+            .factions
+            .get(&c.faction)
+            .and_then(|f| f.ruler.as_ref())
+            .and_then(|r| state.characters.get(r))
+            .is_some_and(|r| r.house == c.house)
+    };
+    state
+        .marriage_candidates(data, single)
+        .into_iter()
+        .filter_map(|id| state.characters.get(&id).map(|c| (id, c)))
+        .filter(|(_, c)| !c.captive && c.faction.as_str() != REBELS)
+        .filter(|(_, c)| (c.age(year) - me.age(year)).abs() <= 15)
+        .filter(|(_, c)| {
+            let wife = if c.sex == data_model::Sex::Female {
+                c
+            } else {
+                me
+            };
+            wife.age(year) <= 35
+        })
+        .filter_map(|(id, c)| {
+            let own = &c.faction == ctx.faction;
+            let attitude = if own {
+                0
+            } else {
+                state.attitude(data, ctx.faction, &c.faction).0
+            };
+            if !own && (attitude < 0 || state.is_at_war(ctx.faction, &c.faction)) {
+                return None;
+            }
+            let mut value = c.prestige + attitude;
+            if !own && ruling(c) {
+                value += 40;
+            }
+            if state.is_allied(ctx.faction, &c.faction) && !own {
+                value += 20;
+            }
+            Some((value, id, c.faction.clone()))
+        })
+        .filter(|(_, id, faction)| {
+            faction == ctx.faction
+                || faction == &state.player_faction
+                || sim_campaign::diplomacy::evaluate(
+                    state,
+                    data,
+                    ctx.faction,
+                    faction,
+                    &sim_campaign::diplomacy::Proposal::Marriage {
+                        character: single.clone(),
+                        spouse: id.clone(),
+                    },
+                )
+                .accept
+        })
+        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
+        .map(|(_, id, faction)| (id, faction))
 }
 
 // =========================================================================
@@ -666,10 +815,25 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             .sum()
     };
 
-    let claims: BTreeSet<ProvinceId> = state.factions[ctx.faction]
-        .claims
+    // F4: a throne claim makes every province of that crown a claimed target.
+    let claims = sim_campaign::diplomacy::claimed_provinces(state, ctx.faction);
+    let last_bastions: BTreeSet<ProvinceId> = ctx
+        .enemies
         .iter()
-        .filter_map(|c| c.province.clone())
+        .filter(|e| e.as_str() != REBELS)
+        .flat_map(|enemy| {
+            let held: Vec<ProvinceId> = state
+                .provinces
+                .iter()
+                .filter(|(_, p)| &p.owner == enemy && &p.controller == enemy)
+                .map(|(id, _)| id.clone())
+                .collect();
+            if held.len() <= LAST_BASTIONS {
+                held
+            } else {
+                Vec::new()
+            }
+        })
         .collect();
     let enemy_capitals: BTreeSet<ProvinceId> = ctx
         .enemies
@@ -776,6 +940,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 // Landings only for claimed provinces (England in France, not
                 // the reverse).
                 .filter(|(id, _)| claims.contains(*id) || !crosses_sea(data, &table, id))
+                // F4: the last strongholds of a realm we hold no claim on are
+                // left to the peace table (Scotland survives Edward III).
+                .filter(|(id, _)| claims.contains(*id) || !last_bastions.contains(*id))
                 .map(|(id, reach)| {
                     let mut value = ctx.province_income(id) / 100.0 + 10.0;
                     if enemy_capitals.contains(id) {
@@ -800,6 +967,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter(|(id, _)| state.is_hostile_territory(ctx.faction, id))
                 .filter(|(id, _)| {
                     state.provinces[*id].devastation < 50
+                        && (claims.contains(*id) || !last_bastions.contains(*id))
                         && state.defensive_power(data, id) < power * 2.0
                         && ctx.threat(id) < power
                         && !crosses_sea(data, &table, id)

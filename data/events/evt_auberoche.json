@@ -1,0 +1,95 @@
+{
+  "id": "evt_auberoche",
+  "title": "La surprise d'Auberoche",
+  "text": "Le 21 octobre 1345, le comte de Derby, [[cdx_henri_de_grosmont|Henri de Grosmont]], tombe à l'heure du souper sur le camp des Français qui assiègent Auberoche, en Périgord. Surpris, les assiégeants sont massacrés ou pris : Louis de [[cdx_poitiers|Poitiers]], comte de Valentinois, est tué, le comte de L'Isle-Jourdain capturé avec une foule de barons. Les rançons font la fortune de Derby, et la Guyenne anglaise respire.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1345,
+      "season": "autumn"
+    },
+    "until_year": 1346,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_henry_of_grosmont"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Payer au trésor la rançon des barons",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "loyalty",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_england",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "character": "chr_henry_of_grosmont",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser chaque seigneur se racheter lui-même",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "loyalty",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_perigord",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_england",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "character": "chr_henry_of_grosmont",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1345-10-21"
+  },
+  "sources": [
+    "Battle of Auberoche",
+    "Kenneth Fowler, The King's Lieutenant: Henry of Grosmont, 1969",
+    "Jonathan Sumption, The Hundred Years War, vol. I : Trial by Battle, 1990"
+  ]
+}

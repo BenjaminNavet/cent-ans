@@ -1,0 +1,12 @@
+{
+  "id": "cdx_charles_de_blois",
+  "title": "Charles de Blois",
+  "category": "personnage",
+  "aliases": ["Charles de Blois", "saint Charles de Blois", "La Roche-Derrien", "bataille de La Roche-Derrien"],
+  "era": { "from": "1319", "to": "1364" },
+  "summary": "Neveu de [[cdx_philippe_vi|Philippe VI]] et époux de [[cdx_jeanne_de_penthievre|Jeanne de Penthièvre]], Charles de Blois dispute le duché de Bretagne à la maison de Montfort pendant plus de vingt ans. Prisonnier des Anglais de 1347 à 1356, il est tué à Auray en 1364.",
+  "body": "Charles naît en 1319, fils du comte de Blois et de Marguerite de Valois, sœur du futur [[cdx_philippe_vi|Philippe VI]]. En 1337, il épouse Jeanne de Penthièvre, nièce et héritière présumée du duc Jean III de Bretagne. À la mort de celui-ci en 1341, la cour de France lui attribue le duché contre Jean de Montfort : c'est le début de la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]].\n\nSoutenu par l'armée royale, Charles conquiert une grande partie du duché. Mais sa guerre est aussi brutale que celle de ses adversaires : en 1344, la prise de Quimper s'accompagne du massacre de nombreux habitants. En juin 1347, il assiège La Roche-Derrien, tenue par les Anglais ; attaqué de nuit par Thomas Dagworth, il est blessé et capturé.\n\nIl passe neuf ans prisonnier en Angleterre, pendant que sa femme mène la lutte. Libéré en 1356 contre une lourde [[cdx_rancon|rançon]], il retrouve un pays dévasté. Le 29 septembre 1364, il livre bataille à Auray contre le fils de Montfort et [[cdx_john_chandos|Jean Chandos]] ; son armée, où combat [[cdx_du_guesclin|Du Guesclin]], est vaincue, et lui-même est tué.\n\nCharles de Blois était d'une piété extraordinaire : il portait un cilice et des cordes sous son armure, dormait sur la paille et se confessait chaque jour. Après sa mort, des miracles sont signalés sur sa tombe, à Guingamp, et un procès de canonisation s'ouvre dès 1371, freiné par le duc Jean IV. Il ne sera béatifié qu'en 1904.",
+  "entity": "chr_charles_de_blois",
+  "see_also": ["cdx_jeanne_de_penthievre", "cdx_jean_de_montfort", "cdx_guerre_de_succession_de_bretagne", "cdx_philippe_vi"],
+  "sources": ["Charles de Blois", "Bataille de La Roche-Derrien"]
+}
