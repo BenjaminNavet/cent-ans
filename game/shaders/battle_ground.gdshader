@@ -119,6 +119,8 @@ void fragment() {
 		float tm = texture(trample_map, suv + jitter * 0.5).r;
 		trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm) * trample_on;
 		w_snow *= 1.0 - smoothstep(0.7, 1.0, trampled) * smoothstep(0.6, 0.9, fine + macro * 0.3) * 0.25;
+		// B8 : sol détrempé (pas de neige) : les passages font apparaître la couche de boue.
+		w_mud = max(w_mud, smoothstep(0.15, 0.8, trampled) * (1.0 - snow) * mix(0.6, 0.9, fine));
 	}
 
 	// Empilement par priorité : chaque couche recouvre les précédentes.
@@ -186,7 +188,7 @@ void fragment() {
 	// B8 : boue piétinée (sol détrempé, hors neige) — traces sombres et luisantes des passages,
 	// distinctes de la neige tassée grise ci-dessus (`trampled * (1 - snowy_w)`).
 	float mud_trample = trampled * (1.0 - snowy_w);
-	albedo = mix(albedo, albedo * vec3(0.7, 0.62, 0.55), mud_trample * 0.6);
+	albedo = mix(albedo, albedo * vec3(0.62, 0.54, 0.46), mud_trample * 0.7);
 	// Berges humides et sol trempé par la pluie.
 	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.4), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
 	albedo *= mix(1.0, 0.62, wet);
@@ -195,7 +197,7 @@ void fragment() {
 	NORMAL_MAP = nrm;
 	NORMAL_MAP_DEPTH = 1.0;
 	// Boue tassée : plus luisante que le sol détrempé environnant.
-	float mud_gloss = clamp(wet + mud_trample * 0.5, 0.0, 1.0);
+	float mud_gloss = clamp(wet + mud_trample * 0.7, 0.0, 1.0);
 	ROUGHNESS = mix(0.95, 0.38, mud_gloss * (0.5 + 0.5 * w[int(L_MUD)] + 0.3 * w[int(L_DIRT)]));
 	SPECULAR = 0.35;
 }

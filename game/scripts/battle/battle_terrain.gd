@@ -96,6 +96,7 @@ var _trample_texture: ImageTexture
 var _trample_bytes := PackedByteArray()
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
+var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
 
 
 ## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
@@ -203,7 +204,8 @@ func _setup_trample() -> void:
 	trample_image = null
 	_trample_bytes = PackedByteArray()
 	_trample_last.clear()
-	if not snowy() and not muddy():
+	_trample_snow = snowy()
+	if not _trample_snow and not muddy():
 		return
 	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
 	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
@@ -235,6 +237,12 @@ func update_trample(units: Array, dt: float) -> void:
 		_trample_last[id] = pos
 		# Troupe en marche : ~0,05 par pas (trace nette après une dizaine) ; à l'arrêt, lent.
 		var add := int(clampf(3.0 + moved * 7.0, 3.0, 24.0))
+		if not _trample_snow:
+			# B8 : la boue naît du passage, pas de l'attente (sinon toute la zone de déploiement
+			# devient bourbier en une minute).
+			add = int(clampf(moved * 6.0 - 2.0, 0.0, 20.0))
+			if add == 0:
+				continue
 		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
 		var facing := float(unit["facing"])
 		var axis_x := Vector2(cos(facing), -sin(facing))
