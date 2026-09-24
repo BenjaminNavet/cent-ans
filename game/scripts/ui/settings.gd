@@ -175,3 +175,15 @@ func set_sfx_volume(linear: float) -> void:
 	var audio := _audio()
 	if audio != null:
 		audio.call("set_sfx_volume", linear, path == SETTINGS_PATH)
+
+
+## AU1 : volume d'un bus réglable (`AudioBuses.PLAYER_BUSES`).
+func bus_volume(bus_name: String) -> float:
+	var audio := _audio()
+	return float(audio.call("bus_volume", bus_name)) if audio != null else 0.0
+
+
+func set_bus_volume(bus_name: String, linear: float) -> void:
+	var audio := _audio()
+	if audio != null:
+		audio.call("set_bus_volume", bus_name, linear, path == SETTINGS_PATH)

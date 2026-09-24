@@ -112,7 +112,7 @@ func stream(relative: String, loop: bool) -> AudioStream:
 		return _streams[key]
 	var result: AudioStream = null
 	for extension in [".ogg", ".wav"]:
-		var path := AUDIO_ROOT + relative + extension
+		var path: String = AUDIO_ROOT + relative + extension
 		if ResourceLoader.exists(path):
 			result = load(path) as AudioStream
 			break

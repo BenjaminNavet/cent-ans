@@ -156,7 +156,9 @@ func current_season() -> String:
 static func seasonal_weather(season: String, date_label: String) -> String:
 	if date_label == "":
 		return "clear"
-	var roll := float(absi(hash(date_label)) % 1000) / 1000.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(date_label)
+	var roll := rng.randf()
 	if roll >= float(RAIN_CHANCE.get(season, 0.2)):
 		return "clear"
 	return "snow" if season == "winter" else "rain"
