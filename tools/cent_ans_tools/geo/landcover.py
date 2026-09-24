@@ -357,6 +357,9 @@ def compute_forest(
     hamlet_d = distance_to_points(hamlets, size)
     near_settle = np.maximum(np.exp(-((town_d / 3.0) ** 2)), 0.8 * np.exp(-((hamlet_d / 1.6) ** 2)))
     near_river = np.exp(-((river_dist / 1.3) ** 2))
+    # Essarts : terroir défriché autour des villes (≈ 3 km) et des villages.
+    target = target * (1.0 - 0.9 * np.exp(-((town_d / 4.0) ** 2)))
+    target = target * (1.0 - 0.5 * np.exp(-((hamlet_d / 1.5) ** 2)))
     preference = (
         0.2
         + 0.35 * smoothstep(0.015, 0.09, slope)

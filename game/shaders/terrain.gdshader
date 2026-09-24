@@ -270,6 +270,8 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 	rows = ts;
 }
 
+#include "res://shaders/relief_landcover.gdshaderinc"
+
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
@@ -291,6 +293,7 @@ void fragment() {
 	float h_u = height_m_lod(uv - dv, lod);
 	float h_d = height_m_lod(uv + dv, lod);
 	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
+	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 g = grad_m * height_scale * shading_relief;
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
@@ -317,6 +320,7 @@ void fragment() {
 	// --- Poids des matériaux ---
 	vec4 s = has_splat ? texture(splat, uv) : vec4(0.5, 0.3, 0.2, 0.0);
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
+	s = rl_landcover(s, p, footprint);  // lot R1 : lisières
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
 	float w_grass = s.r;
@@ -489,6 +493,7 @@ void fragment() {
 		lake = 1.0 - smoothstep(-0.7, 0.3 + 0.3 * (reeds - 0.5), coast);
 		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
+	rl_surface(p, uv, footprint, land_f, col, lake, water_col, roughness);  // lot R1
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
