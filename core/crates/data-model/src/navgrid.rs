@@ -50,6 +50,10 @@ pub struct NavGrid {
     pub min_cost: u8,
     /// `true` for the uniform grid built without `navgrid.png`.
     pub fallback: bool,
+    /// Connected component of every cell (0 = impassable), computed on
+    /// first use (4-connectivity: a diagonal step needs both orthogonal
+    /// cells passable).
+    components: OnceLock<Vec<u32>>,
 }
 
 impl fmt::Debug for NavGrid {
@@ -77,6 +81,7 @@ impl NavGrid {
             costs,
             min_cost: PLAIN_COST,
             fallback: false,
+            components: OnceLock::new(),
         };
         grid.refresh_min_cost();
         grid
@@ -93,8 +98,56 @@ impl NavGrid {
         )
     }
 
-    /// Recomputes [`NavGrid::min_cost`] after edits.
+    /// Connected component of cell `(x, y)` (0 when impassable or outside).
+    pub fn component(&self, x: i64, y: i64) -> u32 {
+        if !self.contains(x, y) {
+            return 0;
+        }
+        let labels = self.components.get_or_init(|| self.label_components());
+        labels[self.index(x as u32, y as u32)]
+    }
+
+    fn label_components(&self) -> Vec<u32> {
+        let (w, h) = (self.width as usize, self.height as usize);
+        let mut labels = vec![0u32; w * h];
+        let mut next = 0u32;
+        let mut stack = Vec::new();
+        for seed in 0..w * h {
+            if labels[seed] != 0 || self.costs[seed] == IMPASSABLE {
+                continue;
+            }
+            next += 1;
+            labels[seed] = next;
+            stack.push(seed);
+            while let Some(i) = stack.pop() {
+                let (x, y) = (i % w, i / w);
+                let mut visit = |j: usize| {
+                    if labels[j] == 0 && self.costs[j] != IMPASSABLE {
+                        labels[j] = next;
+                        stack.push(j);
+                    }
+                };
+                if x > 0 {
+                    visit(i - 1);
+                }
+                if x + 1 < w {
+                    visit(i + 1);
+                }
+                if y > 0 {
+                    visit(i - w);
+                }
+                if y + 1 < h {
+                    visit(i + w);
+                }
+            }
+        }
+        labels
+    }
+
+    /// Recomputes [`NavGrid::min_cost`] after edits (and forgets the
+    /// connected components).
     pub fn refresh_min_cost(&mut self) {
+        self.components = OnceLock::new();
         self.min_cost = self
             .costs
             .iter()

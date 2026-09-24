@@ -47,6 +47,7 @@ pub mod events;
 pub mod frontier;
 pub mod medicine;
 pub mod movement;
+pub mod navigation;
 pub mod orders;
 pub mod population;
 pub mod ransom;
