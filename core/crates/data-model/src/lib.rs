@@ -50,6 +50,9 @@ pub use entities::province::{
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
+pub use entities::retinue::{
+    Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
+};
 pub use entities::settlement::{
     FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge, SettlementGraph,
     SettlementKind, SettlementRules,
@@ -59,9 +62,9 @@ pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
-    BuildingId, CharacterId, ChivalricOrderId, CultureId, DietId, EventId, FactionId, NamesId,
-    ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId, TechnologyId, TraitId,
-    UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EventId, FactionId,
+    NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId, TechnologyId,
+    TraitId, UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

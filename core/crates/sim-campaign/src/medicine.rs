@@ -55,6 +55,27 @@ pub fn wound_recovery(state: &CampaignState, data: &GameData, faction: &FactionI
     (value.flat + value.percent).clamp(0.0, MAX_WOUND_RECOVERY) / 100.0
 }
 
+/// Wound recovery of `army` as a fraction (0 to 0.5): its faction's
+/// technologies plus its general's `WoundRecovery` (a barber-surgeon in the
+/// retinue, lot C7).
+pub fn army_wound_recovery(
+    state: &CampaignState,
+    data: &GameData,
+    army: &crate::state::ArmyId,
+) -> f64 {
+    let Some(army) = state.armies.get(army) else {
+        return 0.0;
+    };
+    let mut value =
+        crate::research::faction_tech_effects(state, data, &army.faction).wound_recovery;
+    if let Some(general) = &army.general {
+        let own = crate::skills::character_effects(state, data, general).wound_recovery;
+        value.flat += own.flat;
+        value.percent += own.percent;
+    }
+    (value.flat + value.percent).clamp(0.0, MAX_WOUND_RECOVERY) / 100.0
+}
+
 /// Wounded a surviving unit gets back out of `losses` at `recovery`
 /// (fraction), rounded down.
 pub fn recovered_wounded(losses: u32, recovery: f64) -> u32 {
