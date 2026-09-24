@@ -22,7 +22,7 @@ enum Tier { NEAR, MEDIUM, FAR }
 @export var near_fade: float = 40.0
 ## Distance en deçà de laquelle les noms des villes (`town`) s'ajoutent à ceux des cités
 ## (palier moyen rapproché) ; les autres colonies n'ont de nom qu'au palier près.
-@export var town_label_distance: float = 320.0
+@export var town_label_distance: float = 380.0
 ## Relief fin (tuiles 8192²) : seulement sous cette distance caméra.
 @export var fine_terrain_distance: float = 170.0
 ## Portée des maquettes et hameaux (distance caméra → objet, fondu `visibility_range`).
