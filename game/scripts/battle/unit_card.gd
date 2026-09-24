@@ -1,41 +1,43 @@
 class_name UnitCard
 extends RichPanel
 
-## Carte d'unité compacte du HUD de bataille (F5b, audit UI § 3.2) : icône de classe, effectif,
-## nom sur deux lignes au plus (jamais coupé au milieu d'un mot), barres fines moral / fatigue /
-## munitions, état. La formation et le détail chiffré passent dans l'infobulle.
+## Carte d'unité en vignette à la Total War (lot B2, après F5b) : illustration du type d'unité en
+## fond (`res://assets/illustrations/<type>.jpg` si elle existe ; sinon composition du blason de
+## la faction, de la couleur du camp et de l'icône de classe), effectif en gros, barres fines
+## moral / fatigue / munitions, état en pastille, étoile du général, numéros de groupe. Le nom,
+## la formation et le détail chiffré passent dans l'infobulle riche (RichTooltip).
 ## Aucune règle : la carte n'affiche que le dictionnaire de `BattleSim.get_units()`.
 
 signal clicked(unit_id: int, additive: bool)
 
-const WIDTH := 71.0
-const INNER_WIDTH := WIDTH - 8.0
-const NAME_SIZE := 10
-const NAME_MIN_SIZE := 8
-const NAME_LINES := 2
+const WIDTH := 64.0
+const HEIGHT := 94.0
+const ILLUSTRATIONS_DIR := "res://assets/illustrations/"
 const INK := Color(0.22, 0.14, 0.07)
 const BORDER := Color(0.42, 0.29, 0.16)
 const BORDER_SELECTED := Color(0.95, 0.75, 0.15)
-const CATEGORY_GLYPH := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙", "tower": "♜", "ram": "⚒"}
 const FORMATION_LABELS := {"line": "ligne", "column": "colonne", "square": "schiltron", "wedge": "coin"}
+const BAR_H := 3.0
 
 var unit_id: int = -1
 var unit_type: String = ""
 var unit_name: String = ""
+var side_color: Color = Color(0.3, 0.3, 0.6)
 var style: StyleBoxFlat
-var name_label: Label
-var count_label: Label
-var morale_bar: ProgressBar
-var fatigue_bar: ProgressBar
-var ammo_bar: ProgressBar
-var state_label: Label
-var groups_label: Label  # numéros des groupes Ctrl+1..9 de l'unité
+var art: Control  # vignette dessinée
+var illustration: Texture2D = null
+var heraldry: Texture2D = null
+var class_icon: Texture2D = null
+var is_general: bool = false
+var _unit: Dictionary = {}
+var _selected: bool = false
+var _groups: String = ""
 var _tooltip_key: String = ""
 
 
 ## Nom découpé en `max_lines` lignes de `width` px au plus, uniquement entre deux mots ; ce qui
 ## ne tient pas est remplacé par « … » après le dernier mot entier. Un mot seul trop long reste
-## entier (la carte s'élargit plutôt que de le couper).
+## entier. (Sert encore aux libellés courts ; la carte n'affiche plus le nom.)
 static func fit_name(text: String, font: Font, size: int, width: float, max_lines: int) -> String:
 	var words := text.split(" ", false)
 	var lines: Array[String] = []
@@ -65,94 +67,42 @@ static func formation_label(key: String) -> String:
 	return str(FORMATION_LABELS.get(key, "ligne"))
 
 
-static func _thin_bar(color: Color) -> ProgressBar:
-	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(INNER_WIDTH, 4)
-	bar.show_percentage = false
-	bar.max_value = 100
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = color
-	var background := StyleBoxFlat.new()
-	background.bg_color = Color(0.55, 0.47, 0.33, 0.6)
-	bar.add_theme_stylebox_override("fill", fill)
-	bar.add_theme_stylebox_override("background", background)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return bar
+## Illustration peinte du type d'unité, null si absente.
+static func illustration_for(type_id: String) -> Texture2D:
+	if type_id == "":
+		return null
+	return PortraitLoader.load_texture(ILLUSTRATIONS_DIR + type_id + ".jpg")
 
 
-func _label(size: int) -> Label:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", INK)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return label
-
-
-## Construit la carte pour `unit` (une fois, après l'ajout à l'arbre : la police du thème sert
-## à mesurer le nom).
-func setup(unit: Dictionary, icon_library: Node) -> void:
+## Construit la carte pour `unit` du camp `faction` (couleur `color`).
+func setup(unit: Dictionary, icon_library: Node, faction: String = "", color: Color = Color(0.3, 0.3, 0.6)) -> void:
 	unit_id = int(unit["id"])
 	unit_type = str(unit.get("type", ""))
-	unit_name = str(unit["name"]) + (" ★" if bool(unit["is_general"]) else "")
+	is_general = bool(unit["is_general"])
+	unit_name = str(unit["name"]) + (" ★" if is_general else "")
+	side_color = color
 	name = "UnitCard%d" % unit_id
 	style = StyleBoxFlat.new()
-	style.bg_color = Color(0.93, 0.87, 0.72)
+	style.bg_color = Color(0.2, 0.15, 0.1)
 	style.border_color = BORDER
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(3)
-	style.set_content_margin_all(3)
+	style.set_content_margin_all(2)
 	add_theme_stylebox_override("panel", style)
-	custom_minimum_size = Vector2(WIDTH, 0)
+	custom_minimum_size = Vector2(WIDTH, HEIGHT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 1)
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(box)
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 2)
-	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(head)
-	count_label = _label(12)
+	illustration = illustration_for(unit_type)
+	heraldry = PortraitLoader.heraldry_texture(faction)
 	if icon_library != null:
-		var fallback := "unit_category_" + str(unit.get("render", "infantry"))
-		var icon_id: String = unit_type if icon_library.call("has_icon", unit_type) else fallback
-		head.add_child(icon_library.call("make_rect", icon_id, 18.0, "unit"))
-	else:
-		count_label.text = str(CATEGORY_GLYPH.get(str(unit.get("render", "")), "⚔"))
-	head.add_child(count_label)
-	groups_label = _label(9)
-	groups_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	groups_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	groups_label.add_theme_color_override("font_color", Color(0.55, 0.35, 0.05))
-	head.add_child(groups_label)
-	name_label = _label(NAME_SIZE)
-	name_label.name = "Name"
-	box.add_child(name_label)
-	_fit_name_label()
-	morale_bar = _thin_bar(Color(0.25, 0.45, 0.8))
-	fatigue_bar = _thin_bar(Color(0.75, 0.45, 0.15))
-	ammo_bar = _thin_bar(Color(0.35, 0.5, 0.3))
-	for bar in [morale_bar, fatigue_bar, ammo_bar]:
-		box.add_child(bar)
-	state_label = _label(9)
-	state_label.add_theme_color_override("font_color", Color(0.45, 0.12, 0.08))
-	state_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_WORD_ELLIPSIS
-	state_label.clip_text = true
-	state_label.custom_minimum_size = Vector2(INNER_WIDTH, 0)
-	box.add_child(state_label)
+		var category := "unit_category_" + str(unit.get("render", "infantry"))
+		class_icon = icon_library.call("get_icon", category if icon_library.call("has_icon", category) else unit_type, "unit")
+	art = Control.new()
+	art.name = "Art"
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art.clip_contents = true
+	art.draw.connect(_draw_art)
+	add_child(art)
 	gui_input.connect(_on_gui_input)
-
-
-## Nom sur deux lignes au plus ; la police rétrécit (jusqu'à 8 px) avant de recourir à « … ».
-func _fit_name_label() -> void:
-	var font := name_label.get_theme_font("font")
-	var size := NAME_SIZE
-	var text := fit_name(unit_name, font, size, INNER_WIDTH, NAME_LINES)
-	while text.ends_with("…") and size > NAME_MIN_SIZE:
-		size -= 1
-		text = fit_name(unit_name, font, size, INNER_WIDTH, NAME_LINES)
-	name_label.add_theme_font_size_override("font_size", size)
-	name_label.text = text
 
 
 func _on_gui_input(event: InputEvent) -> void:
@@ -164,40 +114,121 @@ func set_groups(numbers: Array[int]) -> void:
 	var parts := PackedStringArray()
 	for number in numbers:
 		parts.append(str(number))
-	groups_label.text = "".join(parts)
+	var text := "".join(parts)
+	if text != _groups:
+		_groups = text
+		art.queue_redraw()
+
+
+func has_illustration() -> bool:
+	return illustration != null
 
 
 ## Met la carte à jour depuis le dictionnaire de l'unité.
 func refresh(unit: Dictionary, is_selected: bool) -> void:
-	var present: bool = unit["present"]
-	count_label.text = str(int(unit["soldiers"]))
-	morale_bar.value = float(unit["morale"])
-	fatigue_bar.value = float(unit["fatigue"])
-	var can_shoot := bool(unit["can_shoot"])
-	ammo_bar.visible = can_shoot
-	if can_shoot:
-		ammo_bar.value = 100.0 * float(unit["ammo"]) / maxf(float(unit["max_ammo"]), 1.0)
-	var state := str(unit["state_label"])
-	if bool(unit["left_field"]):
-		state = "hors du champ"
-	elif bool(unit.get("reserve", false)):
-		state = "en réserve"
-	elif not present:
-		state = "anéantie"
-	state_label.text = state
+	_unit = unit
+	_selected = is_selected
 	style.border_color = BORDER_SELECTED if is_selected else BORDER
-	style.bg_color = Color(0.93, 0.87, 0.72) if present else Color(0.7, 0.65, 0.55)
-	if str(unit["state"]) == "routing":
-		style.bg_color = Color(0.9, 0.7, 0.62)
+	style.set_border_width_all(3 if is_selected else 2)
+	art.queue_redraw()
 	_refresh_tooltip(unit)
 
 
-## Infobulle : fiche du type (F2) + effectif, moral, fatigue, munitions et formation courants.
+## État court de la carte (hors du champ, réserve, anéantie, sinon libellé de la simulation).
+static func state_text(unit: Dictionary) -> String:
+	if bool(unit["left_field"]):
+		return "hors du champ"
+	if bool(unit.get("reserve", false)):
+		return "en réserve"
+	if not bool(unit["present"]):
+		return "anéantie"
+	return str(unit["state_label"])
+
+
+func _draw_art() -> void:
+	if _unit.is_empty():
+		return
+	var size := art.size
+	var body := Rect2(Vector2.ZERO, size)
+	# Fond : illustration recadrée en portrait, sinon camp + blason + icône.
+	if illustration != null:
+		var tex := illustration.get_size()
+		var crop_w := minf(tex.x, tex.y * size.x / maxf(size.y, 1.0))
+		art.draw_texture_rect_region(illustration, body, Rect2((tex.x - crop_w) * 0.5, 0, crop_w, tex.y))
+	else:
+		art.draw_rect(body, side_color.darkened(0.35))
+		if heraldry != null:
+			art.draw_texture_rect(heraldry, Rect2(size.x * 0.12, size.y * 0.1, size.x * 0.76, size.x * 0.76 * 1.15), false, Color(1, 1, 1, 0.35))
+		if class_icon != null:
+			var icon_size := size.x * 0.62
+			art.draw_circle(Vector2(size.x * 0.5, size.y * 0.42), icon_size * 0.52, Color(0.95, 0.9, 0.78, 0.9))
+			art.draw_texture_rect(class_icon, Rect2(Vector2(size.x * 0.5, size.y * 0.42) - Vector2(icon_size, icon_size) * 0.5, Vector2(icon_size, icon_size)), false)
+	# Bandeau aux couleurs du camp, icône de classe, étoile, groupes.
+	art.draw_rect(Rect2(0, 0, size.x, 4), side_color)
+	if illustration != null and class_icon != null:
+		art.draw_rect(Rect2(1, 5, 17, 17), Color(0.95, 0.9, 0.78, 0.92))
+		art.draw_texture_rect(class_icon, Rect2(2, 6, 15, 15), false)
+	var font := get_theme_default_font()
+	if is_general:
+		_draw_star(Vector2(size.x - 8, 12), 6.0)
+	if _groups != "":
+		art.draw_string_outline(font, Vector2(3, 34), _groups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0.1, 0.06, 0.03))
+		art.draw_string(font, Vector2(3, 34), _groups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1, 0.82, 0.3))
+	# Bas : dégradé sombre, effectif en gros, barres fines.
+	var shade_top := size.y - 34.0
+	art.draw_polygon(PackedVector2Array([Vector2(0, shade_top), Vector2(size.x, shade_top), Vector2(size.x, size.y), Vector2(0, size.y)]),
+		PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0, 0, 0, 0.85), Color(0, 0, 0, 0.85)]))
+	var count := str(int(_unit["soldiers"]))
+	var bars: Array = [[float(_unit["morale"]) / 100.0, BattleUnitMarkers.morale_color(float(_unit["morale"]) / 100.0)], [float(_unit["fatigue"]) / 100.0, Color(0.85, 0.5, 0.15)]]
+	if bool(_unit["can_shoot"]):
+		bars.append([float(_unit["ammo"]) / maxf(float(_unit["max_ammo"]), 1.0), Color(0.55, 0.75, 0.45)])
+	var bar_y := size.y - 2.0 - bars.size() * (BAR_H + 1.0)
+	art.draw_string_outline(font, Vector2(3, bar_y - 3), count, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, 4, Color(0.08, 0.05, 0.02))
+	art.draw_string(font, Vector2(3, bar_y - 3), count, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color(1, 0.97, 0.88))
+	for bar in bars:
+		var rect := Rect2(2, bar_y, size.x - 4, BAR_H)
+		art.draw_rect(rect, Color(0.15, 0.1, 0.06, 0.9))
+		art.draw_rect(Rect2(rect.position, Vector2(rect.size.x * clampf(float(bar[0]), 0.0, 1.0), BAR_H)), bar[1])
+		bar_y += BAR_H + 1.0
+	# État : pastille en haut à droite (sous l'étoile), voile gris hors du champ, rouge en déroute.
+	var badges := BattleUnitMarkers.state_badges(_unit)
+	var blink := fmod(Time.get_ticks_msec() / 1000.0, 0.6) < 0.3
+	for i in badges.size():
+		BattleUnitMarkers.draw_badge(art, badges[i], Vector2(size.x - 15, 20 + i * 14), blink)
+	if not bool(_unit["present"]) or bool(_unit["left_field"]):
+		art.draw_rect(body, Color(0.25, 0.22, 0.2, 0.65))
+		_draw_cross(size)
+	elif str(_unit["state"]) == "routing":
+		art.draw_rect(body, Color(0.8, 0.1, 0.05, 0.3 if blink else 0.15))
+	elif bool(_unit.get("reserve", false)):
+		art.draw_rect(body, Color(0.9, 0.85, 0.7, 0.35))
+
+
+func _draw_star(center: Vector2, radius: float) -> void:
+	var points := PackedVector2Array()
+	for i in 10:
+		var angle := -PI * 0.5 + i * PI / 5.0
+		points.append(center + Vector2(cos(angle), sin(angle)) * (radius if i % 2 == 0 else radius * 0.45))
+	art.draw_colored_polygon(points, BattleUnitMarkers.GOLD)
+	art.draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
+
+
+## Croix de Saint-André discrète sur une unité anéantie ou sortie du champ.
+func _draw_cross(size: Vector2) -> void:
+	var color := Color(0.1, 0.06, 0.04, 0.8)
+	art.draw_line(Vector2(size.x * 0.25, size.y * 0.2), Vector2(size.x * 0.75, size.y * 0.6), color, 3.0)
+	art.draw_line(Vector2(size.x * 0.75, size.y * 0.2), Vector2(size.x * 0.25, size.y * 0.6), color, 3.0)
+
+
+## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
 func _refresh_tooltip(unit: Dictionary) -> void:
-	var detail := "Effectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
+	var detail := "État : %s" % state_text(unit)
+	detail += "\nEffectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
 	if bool(unit["can_shoot"]):
 		detail += "\nMunitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"]
 	detail += "\nFormation : %s" % formation_label(str(unit["formation"]))
+	if _groups != "":
+		detail += "\nGroupe(s) : %s" % _groups
 	if detail == _tooltip_key:
 		return
 	_tooltip_key = detail
