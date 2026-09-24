@@ -20,6 +20,8 @@ const DEFAULTS := {
 	"video/fullscreen": false,
 	"video/resolution": Vector2i(1440, 900),
 	"video/vsync": true,
+	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
+	"video/quality": "high",
 	"interface/ui_scale": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
@@ -49,13 +51,21 @@ var path: String = SETTINGS_PATH
 var values: Dictionary = {}
 ## Désactivé en headless et en mode test : pas de changement de fenêtre.
 var apply_display_enabled: bool = true
+## `--resolution`, `--fullscreen` ou `--windowed` passé au moteur : la fenêtre de la ligne de
+## commande l'emporte sur le réglage enregistré, jusqu'à ce que le joueur change la vidéo en jeu.
+var window_overridden_by_cmdline: bool = false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	apply_display_enabled = DisplayServer.get_name() != "headless"
+	if apply_display_enabled:
+		window_overridden_by_cmdline = window_differs_from_project(
+			DisplayServer.window_get_size(), DisplayServer.window_get_mode()
+		)
 	load_settings()
 	apply_display()
+	RenderQuality.apply_global(get_tree().root)
 
 
 ## Smoke test : valeurs par défaut, fichier dédié (le fichier du joueur n'est pas touché).
@@ -63,6 +73,25 @@ func use_test_file(test_path: String = TEST_SETTINGS_PATH) -> void:
 	path = test_path
 	values = DEFAULTS.duplicate()
 	apply_display_enabled = false
+
+
+## Vrai si la fenêtre de départ diffère de celle du projet : le moteur a reçu `--resolution`,
+## `--fullscreen` ou `--maximized` (arguments qu'il consomme et que `OS.get_cmdline_args()` ne
+## rend pas). La fenêtre est alors celle de la ligne de commande.
+static func window_differs_from_project(window_size: Vector2i, window_mode: int) -> bool:
+	if window_mode != DisplayServer.WINDOW_MODE_WINDOWED:
+		return true
+	var project_size := Vector2i(
+		int(ProjectSettings.get_setting("display/window/size/viewport_width", 1440)),
+		int(ProjectSettings.get_setting("display/window/size/viewport_height", 900))
+	)
+	var override_size := Vector2i(
+		int(ProjectSettings.get_setting("display/window/size/window_width_override", 0)),
+		int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
+	)
+	if override_size.x > 0 and override_size.y > 0:
+		project_size = override_size
+	return window_size != project_size
 
 
 func get_value(key: String) -> Variant:
@@ -74,7 +103,12 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 		push_warning("Settings: unknown key %s" % key)
 		return
 	values[key] = _coerce(key, value)
-	if key.begins_with("video/") or key == "interface/ui_scale":
+	if key == "video/resolution" or key == "video/fullscreen":
+		window_overridden_by_cmdline = false
+	if key == "video/quality":
+		if is_inside_tree():
+			RenderQuality.reapply(get_tree())
+	elif key.begins_with("video/") or key == "interface/ui_scale":
 		apply_display()
 	if persist:
 		save_settings()
@@ -92,6 +126,8 @@ func _coerce(key: String, value: Variant) -> Variant:
 			return float(value)
 		TYPE_VECTOR2I:
 			return value if value is Vector2i else default
+		TYPE_STRING:
+			return str(value)
 	return value
 
 
@@ -121,6 +157,7 @@ func save_settings(to_path: String = "") -> Error:
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
 	apply_display()
+	RenderQuality.reapply(get_tree())
 	save_settings()
 	for key in DEFAULTS:
 		changed.emit(key)
@@ -136,6 +173,8 @@ func apply_display() -> void:
 	if not apply_display_enabled:
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if get_value("video/vsync") else DisplayServer.VSYNC_DISABLED)
+	if window_overridden_by_cmdline:
+		return
 	if get_value("video/fullscreen"):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
@@ -177,3 +216,15 @@ func set_sfx_volume(linear: float) -> void:
 	var audio := _audio()
 	if audio != null:
 		audio.call("set_sfx_volume", linear, path == SETTINGS_PATH)
+
+
+## AU1 : volume d'un bus réglable (`AudioBuses.PLAYER_BUSES`).
+func bus_volume(bus_name: String) -> float:
+	var audio := _audio()
+	return float(audio.call("bus_volume", bus_name)) if audio != null else 0.0
+
+
+func set_bus_volume(bus_name: String, linear: float) -> void:
+	var audio := _audio()
+	if audio != null:
+		audio.call("set_bus_volume", bus_name, linear, path == SETTINGS_PATH)
