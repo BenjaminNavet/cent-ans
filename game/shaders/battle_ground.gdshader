@@ -31,6 +31,10 @@ uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
 // Lot B5 : altitude des neiges (sommets de l'horizon en montagne ou en hiver).
 uniform float snow_line = 10000.0;
+// Lot B7 : neige piétinée par les troupes (carte cumulée par `battle_terrain.gd`, même
+// rectangle que les splatmaps ; 0 = neige vierge), active seulement quand il neige au sol.
+uniform sampler2D trample_map : filter_linear, repeat_disable;
+uniform float trample_on = 0.0;
 uniform vec3 grass_tint : source_color = vec3(0.9, 1.0, 0.8);
 uniform float detail_scale = 1.0;
 
@@ -109,6 +113,13 @@ void fragment() {
 	}
 	float w_snow = snow * smoothstep(0.35, 0.75, world_normal.y * 0.6 + macro * 0.5 + fine * 0.2);
 	w_snow = max(w_snow, smoothstep(snow_line, snow_line + 60.0, world_pos.y + (macro - 0.5) * 50.0) * smoothstep(0.25, 0.6, world_normal.y));
+	// B7 : neige piétinée (bords brisés par le bruit) : la terre affleure par endroits.
+	float trampled = 0.0;
+	if (trample_on > 0.0 && inside) {
+		float tm = texture(trample_map, suv + jitter * 0.5).r;
+		trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm) * trample_on;
+		w_snow *= 1.0 - smoothstep(0.7, 1.0, trampled) * smoothstep(0.6, 0.9, fine + macro * 0.3) * 0.25;
+	}
 
 	// Empilement par priorité : chaque couche recouvre les précédentes.
 	float w[9];
@@ -154,6 +165,25 @@ void fragment() {
 		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / 1.3);
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
 	}
+	// Lot B7 : relief de lecture de la neige. Congères étirées par le vent (bruit anisotrope),
+	// grain fin, ombre bleutée et neige plus mince sur les pentes, crêtes plus blanches ; neige
+	// piétinée grise. (Des ondulations dans la carte de normales ont été essayées : elles
+	// donnaient au sol l'air d'une mer agitée.)
+	float snowy_w = w[int(L_SNOW)];
+	if (snowy_w > 0.01) {
+		vec2 wind = mat2(vec2(0.94, 0.34), vec2(-0.34, 0.94)) * p;
+		float drift = texture(macro_noise, wind * vec2(0.0012, 0.005)).r;
+		float drift2 = texture(macro_noise, wind * vec2(0.004, 0.013) + vec2(0.17, 0.53)).r;
+		float lee = smoothstep(0.02, 0.22, slope);
+		float crest = smoothstep(0.55, 0.8, drift * 0.7 + drift2 * 0.4);
+		vec3 snow_col = vec3(mix(0.84, 1.06, drift) * mix(0.96, 1.03, drift2));
+		snow_col = mix(snow_col, snow_col * vec3(0.8, 0.87, 1.0), lee * 0.8 + (1.0 - crest) * 0.12);
+		snow_col *= mix(0.97, 1.03, fine);
+		albedo = mix(albedo, albedo * snow_col, snowy_w);
+		// Piétinement : neige tassée grise, mêlée de boue.
+		albedo = mix(albedo, albedo * vec3(0.8, 0.79, 0.77), trampled * snowy_w);
+	}
+	albedo = mix(albedo, albedo * vec3(0.7, 0.62, 0.55), trampled * (1.0 - snowy_w) * 0.6);
 	// Berges humides et sol trempé par la pluie.
 	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.4), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
 	albedo *= mix(1.0, 0.62, wet);
