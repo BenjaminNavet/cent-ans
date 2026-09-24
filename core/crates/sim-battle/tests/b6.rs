@@ -141,17 +141,25 @@ fn demo_contact_stays_near_seventy_seconds() {
     );
 }
 
-/// Without a site (no village, no hedge), the AI plays exactly as before B6.
+/// Without a site (no village, no hedge), the AI keeps the B6 shape of the
+/// fight (winner, order of magnitude of the losses) but the digests move
+/// with B8: the two sides here are unequal in numbers (6 French units, 4
+/// English), so their centroids are never square to begin with, and the
+/// advancing line's small lean towards that off-centre enemy (`advance`,
+/// `ADVANCE_LEAN_MAX`) compounds over the whole advance; the leashed
+/// pursuit (`PURSUIT_LEASH`) also changes how a rout on either side plays
+/// out. A defender squarely in front is unaffected by the lean (`dx` ~ 0);
+/// see `advance`'s own doc comment.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "238 Some(Attacker) [27, 46, 48, 100, 100, 20, 51, 83, 84, 6]",
+            "259 Some(Attacker) [12, 49, 71, 100, 100, 14, 42, 88, 117, 9]",
         ),
         (
             11,
-            "228 Some(Attacker) [23, 47, 47, 100, 100, 25, 65, 84, 86, 4]",
+            "304 Some(Attacker) [0, 34, 49, 97, 100, 15, 49, 93, 103, 6]",
         ),
     ];
     for (seed, digest_before) in expected {
