@@ -1,0 +1,11 @@
+{
+  "id": "cdx_fenouil",
+  "title": "Le fenouil",
+  "category": "plante",
+  "aliases": ["fenouil", "graines de fenouil", "Foeniculum"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Plante à l'odeur anisée, le fenouil passe au Moyen Âge pour éclaircir la vue et chasser les vents : « Semen foeniculi pellit spiracula culi », dit sans détour le Régime de santé de Salerne.",
+  "body": "Le fenouil (Foeniculum vulgare) est une grande ombellifère aux feuilles filiformes et aux graines aromatiques, spontanée autour de la Méditerranée. Le capitulaire De Villis (vers 800) le range parmi les plantes des domaines royaux, et l'Hortulus de Walahfrid Strabon le chante vers 840.\n\nL'Antiquité lui a légué une belle légende : selon Pline l'Ancien, les serpents se frottent les yeux contre le fenouil pour retrouver la vue après la mue. D'où sa réputation, reprise par Macer Floridus et les herbiers médiévaux, de fortifier les yeux. Surtout, il chasse les vents : le [[cdx_regimen_sanitatis|Régime de santé de Salerne]] l'affirme en un vers d'une franchise toute latine, « la graine de fenouil chasse les vents du derrière ». Chaud et sec selon la théorie des [[cdx_humeurs|humeurs]], il aide à digérer et, dit-on, fait venir le lait des nourrices.\n\nLes graines de fenouil, confites dans le sucre, font partie des « épices de chambre » croquées à la fin du repas ; on en met dans les sauces, les pains et les potages de [[cdx_careme|Carême]], où elles passaient, dit-on, pour tromper la faim.\n\nCe qu'en dit la science moderne : l'anéthol et les autres composés des graines ont une action carminative (contre les ballonnements) raisonnablement étayée ; les tisanes de fenouil restent d'usage courant. Aucun effet démontré sur la vue. Par prudence, les autorités sanitaires déconseillent l'usage prolongé des préparations concentrées chez les jeunes enfants et les femmes enceintes, à cause de l'estragole qu'elles contiennent.",
+  "see_also": ["cdx_jardin_des_simples", "cdx_menthe", "cdx_epices_medievales", "cdx_regimen_sanitatis", "cdx_humeurs"],
+  "sources": ["Fenouil commun", "Regimen sanitatis Salernitanum", "Capitulaire De Villis"]
+}

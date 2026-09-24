@@ -1,0 +1,11 @@
+{
+  "id": "cdx_plantain",
+  "title": "Le plantain",
+  "category": "plante",
+  "aliases": ["plantain", "grand plantain", "Plantago", "pied de l'homme blanc"],
+  "era": { "from": "900", "to": "1500" },
+  "summary": "Herbe des chemins, piétinée partout où l'homme passe, le plantain est le pansement du pauvre : ses feuilles écrasées couvrent les plaies, les piqûres et les ulcères dans toute l'Europe médiévale.",
+  "body": "Le grand plantain (Plantago major) pousse au bord des chemins, dans les cours et les champs piétinés, en rosettes de larges feuilles à nervures parallèles. Les Anglo-Saxons l'appelaient « waybread », le « pain du chemin », et le Lacnunga, recueil de remèdes copié vers l'an mil, en fait la « mère des herbes » dans son charme des neuf herbes. Bien plus tard, les Amérindiens le surnommeront « pied de l'homme blanc », tant il suivait les colons.\n\nLes herbiers le disent froid et sec, donc astringent et cicatrisant. Macer Floridus et le Circa instans, reprenant Dioscoride, le recommandent pour arrêter le sang, nettoyer et refermer les plaies, calmer les brûlures, les morsures et les ulcères, et en décoction contre la dysenterie. C'est une plante de premier secours, à portée de main de tout soldat et de tout paysan.\n\nPour les [[cdx_barbiers_chirurgiens|barbiers et chirurgiens]] qui suivent les armées, le plantain entre dans les onguents et les emplâtres, avec la [[cdx_consoude|consoude]] et le [[cdx_millepertuis|millepertuis]]. On en fait aussi une eau distillée pour les yeux.\n\nCe qu'en dit la science moderne : les feuilles contiennent du mucilage, des tanins astringents et de l'aucuboside, aux effets anti-inflammatoires et légèrement antibactériens en laboratoire ; l'usage externe sur les petites plaies et les piqûres est plausible, sans essais cliniques solides. La plante est sans toxicité notable ; comme pour toute plaie, la propreté compte davantage que l'herbe qu'on y pose.",
+  "see_also": ["cdx_consoude", "cdx_millepertuis", "cdx_barbiers_chirurgiens", "cdx_camomille", "cdx_jardin_des_simples"],
+  "sources": ["Grand plantain", "Charme des neuf herbes", "Lacnunga"]
+}

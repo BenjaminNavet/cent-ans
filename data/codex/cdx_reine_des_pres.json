@@ -1,0 +1,12 @@
+{
+  "id": "cdx_reine_des_pres",
+  "title": "La reine-des-prés",
+  "category": "plante",
+  "aliases": ["reine-des-prés", "reine des prés", "ulmaire", "spirée", "Spiraea ulmaria"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grande plante des prairies humides aux fleurs crème parfumées, la reine-des-prés aromatise l'hydromel et la bière avant de donner, au XIXe siècle, son ancien nom latin, Spiraea, à l'aspirine.",
+  "body": "La reine-des-prés ou ulmaire (Filipendula ulmaria, autrefois Spiraea ulmaria) forme au bord des ruisseaux de hautes touffes aux panaches de petites fleurs blanc crème, au parfum de miel et d'amande. Son nom anglais, meadowsweet, viendrait moins de la prairie (meadow) que de l'hydromel (mead), qu'elle servait à parfumer.\n\nLes usages médiévaux les mieux attestés sont domestiques. On la répand sur les sols des salles pour son odeur, comme d'autres « herbes de jonchée » ; on en aromatise l'hydromel, la [[cdx_cervoise|cervoise]] et certains vins. Chaucer, dans le Conte du Chevalier (vers 1385), cite la « meadwort » parmi les herbes d'une boisson, la « save ». Les emplois médicinaux (contre les fièvres, les douleurs, la diarrhée) sont surtout documentés par les herbiers de la Renaissance et la médecine populaire plus tardive.\n\nC'est au XIXe siècle que la plante entre dans l'histoire de la pharmacie. En 1835, le chimiste allemand Karl Jacob Löwig obtient de ses fleurs un composé qu'il nomme acide spirique, identique à l'acide salicylique tiré du [[cdx_saule|saule]]. Quand la firme Bayer commercialise l'acide acétylsalicylique en 1899, elle forge le nom d'aspirine : « a » pour acétyl, « spir » pour Spiraea.\n\nCe qu'en dit la science moderne : les fleurs contiennent des dérivés salicylés, à des doses faibles ; la tisane de reine-des-prés est traditionnellement employée contre les douleurs articulaires légères et les états fébriles, avec peu de preuves cliniques. Elle est déconseillée aux personnes allergiques à l'aspirine et aux jeunes enfants.",
+  "anachronism": "Le jeu range la reine-des-prés parmi les remèdes médiévaux contre les fièvres ; cet usage est surtout attesté après le Moyen Âge, et son lien avec l'aspirine date du XIXe siècle.",
+  "see_also": ["cdx_saule", "cdx_camomille", "cdx_cervoise", "cdx_jardin_des_simples"],
+  "sources": ["Reine-des-prés", "Acide salicylique", "Acide acétylsalicylique"]
+}
