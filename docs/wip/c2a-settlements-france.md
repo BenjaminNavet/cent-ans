@@ -25,11 +25,11 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 | france_centre | prov_nivernais | fait (5) |
 | france_centre | prov_orleanais | fait (5) |
 | france_centre | prov_touraine | fait (5) |
-| france_est | prov_bar | à faire |
-| france_est | prov_bourgogne | à faire |
-| france_est | prov_champagne | à faire |
-| france_est | prov_franche_comte | à faire |
-| france_est | prov_lyonnais | à faire |
+| france_est | prov_bar | fait (4) |
+| france_est | prov_bourgogne | fait (5) |
+| france_est | prov_champagne | fait (6) |
+| france_est | prov_franche_comte | fait (5) |
+| france_est | prov_lyonnais | fait (5) |
 | france_nord | prov_artois | à faire |
 | france_nord | prov_boulonnais | à faire |
 | france_nord | prov_ile_de_france | à faire |
@@ -58,8 +58,9 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 - `set_castelnaud` (Périgord) — château anglo-gascon, owner `fac_england`.
 - `set_bergerac` (Périgord) — ville close relevant du duché anglais avant sa reprise française de 1345, owner `fac_england`.
 - `set_pons` (Saintonge) — forteresse au sud de la Charente relevant du duché d'Aquitaine anglais jusqu'à la confiscation du 24 mai 1337, owner `fac_england`.
+- `set_besancon` (Franche-Comté) — cité impériale libre, distincte du comté de Bourgogne, owner `fac_empire`.
 
 ## Prochaine étape
 
-Continuer avec `france_est` (5 provinces), puis `france_nord`, `france_ouest`, `languedoc`, `provence_alpes`.
+Continuer avec `france_nord` (7 provinces), puis `france_ouest`, `languedoc`, `provence_alpes`.
 Commit `wip:` toutes les ~8 provinces.

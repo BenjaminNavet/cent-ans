@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_bar_le_duc",
+    "province": "prov_bar",
+    "kind": "city",
+    "name": { "display": "Bar-le-Duc", "local": "Bar", "local_language": "ancien français" },
+    "lonlat": [5.1611, 48.7728],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté de Bar sur l'Ornain, siège d'Henri IV de Bar.",
+    "sources": ["Bar-le-Duc", "Comté de Bar"]
+  },
+  {
+    "id": "set_ligny_en_barrois",
+    "province": "prov_bar",
+    "kind": "town",
+    "name": { "display": "Ligny-en-Barrois", "local": "Ligny", "local_language": "ancien français" },
+    "lonlat": [5.3333, 48.6833],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close du Barrois mouvant, fief du roi de France depuis 1301.",
+    "sources": ["Ligny-en-Barrois"]
+  },
+  {
+    "id": "set_vaucouleurs",
+    "province": "prov_bar",
+    "kind": "castle",
+    "name": { "display": "Vaucouleurs", "local": "Vaucouleurs", "local_language": "ancien français" },
+    "lonlat": [5.6667, 48.6000],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse royale sur la Meuse, prévôté avancée du Barrois mouvant.",
+    "sources": ["Vaucouleurs"]
+  },
+  {
+    "id": "set_saint_mihiel",
+    "province": "prov_bar",
+    "kind": "abbey",
+    "name": { "display": "Saint-Mihiel", "local": "Saint Miguiel", "local_language": "ancien français" },
+    "lonlat": [5.5386, 48.8836],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye bénédictine sur la Meuse, réputée pour sa bibliothèque.",
+    "sources": ["Abbaye de Saint-Mihiel"]
+  }
+]
