@@ -113,7 +113,44 @@ visible (mêmes couleurs, mêmes colombages, mêmes toits, mêmes cheminées, m�
   marginal restant).
 
 ## Objectif 3 — zoom moyen de la carte (d≈300-500)
-À faire (noté si non traité par manque de temps).
+
+### Diagnostic
+Cette machine (partagée) plafonne le rendu à ~60 i/s quel que soit le nombre de primitives dans
+cet environnement précis (16,5-16,7 ms par image de façon quasi identique de 367 k à 4 M
+primitives, `--disable-vsync` malgré tout) : impossible d'y observer directement un delta d'i/s.
+Mesure indirecte par primitives/appels de dessin (fiable, indépendante du plafond d'image) : au
+zoom moyen (d=400), la végétation ajoute proportionnellement plus d'appels de dessin que de
+primitives comparé aux autres zooms (+100 appels pour +1,0 M primitives contre +57 appels pour
++3,0 M à d=150, +32 pour +1,4 M à d=40) — beaucoup de tuiles en bord de portée (`fade_end`), déjà
+très éclaircies. Un seuil « ne pas soumettre un lot avec moins de N instances visibles » a été
+essayé (testé jusqu'à N=30) : effet négligeable (843 → 842 appels), la marge basse de la fraction
+d'éclaircissement (`+0.02` dans `_apply_lod`) empêche la plupart des lots en cours d'éclaircissement
+de descendre vraiment bas — écarté.
+
+### Changement retenu (`game/scripts/map/vegetation.gd`)
+Ombres de la végétation coupées au-delà de `shadow_camera_distance` (300, nouveau paramètre) —
+zoom global de la caméra, pas la distance d'une tuile individuelle. Avant : les ombres suivaient
+seulement `detailed` (distance de la tuile à la caméra < `detail_distance` = 170), donc des tuiles
+proches du sol pouvaient garder leurs ombres même à un zoom global moyen/large (la caméra en
+plongée rapproche le sol visé). À cette échelle une ombre d'arbre individuelle ne se distingue de
+toute façon plus. Réévalué chaque image (pas seulement au changement de LOD, car le zoom global
+peut varier sans que `detailed` change).
+
+### Mesures (vérifiées avec un print de contrôle temporaire de `camera_distance`/décision d'ombre,
+retiré ensuite ; primitives/appels de dessin confirmés stables sur deux exécutions)
+| Vue | avant | après |
+|---|---|---|
+| zoom moyen (d=400) | 2 051 766 primitives, 847 appels | 1 864 566 primitives (-9 %), 841 appels |
+| proche/très proche/bocage (d≤150) | inchangé | inchangé (ombres toujours actives, seuil non atteint) |
+
+### Points ouverts
+- Impossible de confirmer un gain d'i/s directement dans cet environnement (plafond ~60 i/s
+  apparent indépendant de la charge de rendu) ; le gain est déduit de la baisse de primitives/appels
+  de dessin (charge GPU réellement soumise en moins), pas mesuré en i/s.
+- Réduire encore les instances visibles au zoom moyen demanderait de remodeler la courbe
+  `fade_start`/`fade_end` (`fade_end_factor` global à toutes les distances) plutôt qu'un simple
+  seuil ; risque de perturber les zooms proche/lointain déjà réglés en V2b (67-102 i/s par vue) —
+  non tenté, cohérent avec l'autorisation du lot à seulement noter si ce n'est pas simple.
 
 ## Points ouverts
 - `warm_start_tiles=5` fait dépendre le réglage du parallélisme réel du pool de threads bas

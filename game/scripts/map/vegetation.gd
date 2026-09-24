@@ -43,6 +43,11 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 @export var warm_start_tiles: int = 5
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
+## Au-delà de cette distance caméra (zoom global, pas la distance d'une tuile), plus aucune
+## ombre de végétation : à cette échelle les ombres portées des arbres/haies ne sont plus
+## discernables individuellement mais restent payées en pleine géométrie d'ombre côté GPU (V6,
+## perf ; zoom moyen d≈300-500).
+@export var shadow_camera_distance: float = 300.0
 
 var map_data: MapData
 var mask: VegetationMask
@@ -167,7 +172,7 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 						var part_d := _rect_distance(part["rect"], camera_xz) + lift
 						(part["node"] as Node3D).visible = part_d < fade_end
 						if part_d < fade_end:
-							_apply_lod(part, part_d, fade_start, fade_end, density)
+							_apply_lod(part, part_d, fade_start, fade_end, density, camera_distance)
 			elif in_range and not _jobs.has(index):
 				wanted.append([d, index])
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
@@ -200,18 +205,26 @@ static func _rect_distance(rect: Rect2, point: Vector2) -> float:
 
 ## Maillage selon la distance et nombre d'instances visibles : les graines (triées) inférieures
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
-func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float) -> void:
+func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float) -> void:
 	var detailed := d < detail_distance
+	var mmis: Array = entry["mmis"]
 	if entry.get("detailed", null) != detailed:
 		entry["detailed"] = detailed
-		var mmis: Array = entry["mmis"]
 		var meshes := _meshes(detailed)
 		for kind in mmis.size():
 			var mmi: MultiMeshInstance3D = mmis[kind]
 			if mmi != null:
 				mmi.multimesh.mesh = meshes[kind]
-				# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus).
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_shadows and detailed else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus) et seulement
+	# au zoom global le plus rapproché (`shadow_camera_distance`) : au zoom moyen, des ombres
+	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
+	# GPU. Réévalué chaque image (pas seulement au changement de LOD) : ne dépend pas de `detailed`
+	# seul, mais aussi du zoom global qui peut varier sans que `detailed` change.
+	var shadow_on := cast_shadows and detailed and camera_distance < shadow_camera_distance
+	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for mmi in mmis:
+		if mmi != null:
+			(mmi as MultiMeshInstance3D).cast_shadow = shadow_setting
 	var t := clampf((d - fade_start) / maxf(fade_end - fade_start, 1.0), 0.0, 1.0)
 	var fraction := clampf(minf(1.0 - t, density) + 0.02, 0.0, 1.0)
 	for mmi in entry["mmis"]:
