@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_fx.schema.json",
+  "title": "Effets visuels des sièges",
+  "description": "Fichier data/fx/siege_fx.json (lot S1) : réglages de l'effondrement physique des murailles, lus par game/scripts/battle/wall_collapse_fx.gd. Rendu seulement, aucune règle de jeu : la simulation (core/) décide des PV et des brèches.",
+  "type": "object",
+  "$defs": {
+    "range": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Intervalle [min, max] tiré au hasard (graine fixe)."
+    },
+    "seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+    "settle_mode": {
+      "enum": ["freeze", "free"],
+      "description": "freeze : les corps restent figés au sol ; free : ils sont libérés (queue_free)."
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "collision_layer": { "type": "integer", "minimum": 1, "maximum": 32, "description": "Couche de collision dédiée aux débris et au sol local (1-32)." },
+    "max_active_bodies": { "type": "integer", "minimum": 1, "maximum": 2000, "description": "Plafond de corps simulés à la fois ; les plus vieux sont gelés." },
+    "max_kept_bodies": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Plafond de corps gelés conservés en décor ; les plus vieux sont libérés." },
+    "ground": {
+      "type": "object",
+      "description": "Sol local (HeightMapShape3D échantillonné sur le relief) sous chaque pan qui s'effondre.",
+      "properties": {
+        "patch_size": { "type": "number", "minimum": 4, "maximum": 400 },
+        "patch_spacing": { "type": "number", "minimum": 0.25, "maximum": 10 },
+        "friction": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["patch_size", "patch_spacing", "friction"],
+      "additionalProperties": false
+    },
+    "wall": {
+      "type": "object",
+      "description": "Fracture procédurale d'un pan de courtine.",
+      "properties": {
+        "blocks_min": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "blocks_max": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "seed_salt": { "type": "integer" },
+        "cut_jitter": { "type": "number", "minimum": 0, "maximum": 0.45, "description": "Décalage aléatoire des coupes, en fraction de la taille d'un bloc." },
+        "shape_margin": { "type": "number", "minimum": 0.5, "maximum": 1, "description": "Échelle de la forme de collision par rapport au bloc visible." },
+        "density": { "type": "number", "exclusiveMinimum": 0, "description": "Tonnes par m³ (masse du corps)." },
+        "outward_impulse": { "$ref": "#/$defs/range" },
+        "downward_impulse": { "$ref": "#/$defs/range" },
+        "lateral_impulse": { "type": "number", "minimum": 0 },
+        "height_boost": { "type": "number", "minimum": 0, "description": "Impulsion vers l'extérieur supplémentaire pour les blocs hauts (fraction)." },
+        "angular_impulse": { "type": "number", "minimum": 0 },
+        "merlons_as_bodies": { "type": "boolean" },
+        "settle_seconds": { "$ref": "#/$defs/seconds" },
+        "rubble_reveal_seconds": { "$ref": "#/$defs/seconds" },
+        "settle_mode": { "$ref": "#/$defs/settle_mode" }
+      },
+      "required": ["blocks_min", "blocks_max", "seed_salt", "cut_jitter", "shape_margin", "density", "outward_impulse", "downward_impulse", "lateral_impulse", "height_boost", "angular_impulse", "merlons_as_bodies", "settle_seconds", "rubble_reveal_seconds", "settle_mode"],
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "description": "Vantaux de la porte enfoncée, découpés en planches.",
+      "properties": {
+        "planks_per_leaf": { "type": "integer", "minimum": 1, "maximum": 40 },
+        "inward_impulse": { "$ref": "#/$defs/range" },
+        "angular_impulse": { "type": "number", "minimum": 0 },
+        "density": { "type": "number", "exclusiveMinimum": 0 },
+        "settle_seconds": { "$ref": "#/$defs/seconds" },
+        "settle_mode": { "$ref": "#/$defs/settle_mode" }
+      },
+      "required": ["planks_per_leaf", "inward_impulse", "angular_impulse", "density", "settle_seconds", "settle_mode"],
+      "additionalProperties": false
+    },
+    "parapet": {
+      "type": "object",
+      "description": "Pierres du parapet qui tombent quand le rapport PV/PV max passe sous un palier.",
+      "properties": {
+        "thresholds": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 }, "maxItems": 10 },
+        "stones_min": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "stones_max": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "stone_size": { "$ref": "#/$defs/range" },
+        "outward_impulse": { "$ref": "#/$defs/range" },
+        "density": { "type": "number", "exclusiveMinimum": 0 },
+        "lifetime_seconds": { "$ref": "#/$defs/seconds" }
+      },
+      "required": ["thresholds", "stones_min", "stones_max", "stone_size", "outward_impulse", "density", "lifetime_seconds"],
+      "additionalProperties": false
+    },
+    "dust": {
+      "type": "object",
+      "description": "Nuage de poussière (GPUParticles3D, un seul tir).",
+      "properties": {
+        "collapse_amount": { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "parapet_amount": { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "lifetime_seconds": { "$ref": "#/$defs/seconds" },
+        "size": { "$ref": "#/$defs/range" },
+        "velocity": { "$ref": "#/$defs/range" },
+        "color": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4, "description": "RVBA." }
+      },
+      "required": ["collapse_amount", "parapet_amount", "lifetime_seconds", "size", "velocity", "color"],
+      "additionalProperties": false
+    },
+    "camera_shake": {
+      "type": "object",
+      "description": "Secousse de la caméra (décalages h/v, sans toucher à sa position) à l'effondrement d'un pan.",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "amplitude": { "type": "number", "minimum": 0, "maximum": 5 },
+        "duration_seconds": { "$ref": "#/$defs/seconds" },
+        "frequency": { "type": "number", "minimum": 0, "maximum": 120 },
+        "max_distance": { "type": "number", "minimum": 0, "description": "Au-delà, pas de secousse (atténuation linéaire)." }
+      },
+      "required": ["enabled", "amplitude", "duration_seconds", "frequency", "max_distance"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["collision_layer", "max_active_bodies", "max_kept_bodies", "ground", "wall", "gate", "parapet", "dust", "camera_shake"],
+  "additionalProperties": false
+}
