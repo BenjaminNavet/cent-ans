@@ -175,6 +175,30 @@ pub enum Order {
         province: ProvinceId,
         diet: data_model::DietId,
     },
+    /// H5: strikes the faction's money at `level`; one change per year.
+    SetCoinage {
+        level: crate::coinage::CoinageLevel,
+    },
+    /// H6: pays the ransom of one of our captives, in full (`installments`
+    /// 0 or 1) or by yearly installments (2 to 6, +10 %).
+    PayRansom {
+        character: CharacterId,
+        #[serde(default)]
+        installments: u32,
+    },
+    /// H6: the captor sets the terms of one of its prisoners.
+    SetRansomTerms {
+        character: CharacterId,
+        terms: crate::ransom::RansomTerms,
+    },
+    /// H6: the captor frees one of its prisoners on parole.
+    ReleaseOnParole {
+        character: CharacterId,
+    },
+    /// H6: founds the chivalric order `order` (one per faction).
+    FoundChivalricOrder {
+        order: data_model::ChivalricOrderId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -244,6 +268,12 @@ pub enum OrderError {
     Assault(#[from] crate::siege::AssaultError),
     #[error(transparent)]
     Diet(#[from] crate::table::DietError),
+    #[error(transparent)]
+    Coinage(#[from] crate::coinage::CoinageError),
+    #[error(transparent)]
+    Ransom(#[from] crate::ransom::RansomError),
+    #[error(transparent)]
+    Chivalry(#[from] crate::chivalry::ChivalryError),
 }
 
 /// One line of the recruitment panel.
@@ -397,6 +427,29 @@ impl CampaignState {
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
+                Ok(())
+            }
+            Order::SetCoinage { level } => {
+                crate::coinage::set_coinage(self, data, faction, level)?;
+                Ok(())
+            }
+            Order::PayRansom {
+                character,
+                installments,
+            } => {
+                crate::ransom::pay_ransom(self, data, faction, &character, installments)?;
+                Ok(())
+            }
+            Order::SetRansomTerms { character, terms } => {
+                crate::ransom::set_ransom_terms(self, data, faction, &character, terms)?;
+                Ok(())
+            }
+            Order::ReleaseOnParole { character } => {
+                crate::ransom::release_on_parole(self, data, faction, &character)?;
+                Ok(())
+            }
+            Order::FoundChivalricOrder { order } => {
+                crate::chivalry::found_order(self, data, faction, &order)?;
                 Ok(())
             }
         }
