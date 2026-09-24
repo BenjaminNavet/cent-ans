@@ -6,6 +6,7 @@ extends PanelContainer
 ## bouton). Affiche la première décision de la file ; « Plus tard » la referme sans répondre (la
 ## décision reste ouverte jusqu'à son expiration). Aucune règle ici : les décisions viennent de
 ## `CampaignSim.get_pending_decisions`, le choix est renvoyé par le signal `option_chosen`.
+## Miniature facultative en bandeau : `res://assets/events/<événement>.jpg` (OpenRouter).
 
 signal option_chosen(decision_id: int, option_index: int)
 signal closed
@@ -13,8 +14,11 @@ signal closed
 const INK := Color(0.22, 0.14, 0.07)
 const FADED_INK := Color(0.40, 0.30, 0.18)
 const RUBRIC := Color(0.55, 0.12, 0.10)
+const EVENT_ART_DIR := "res://assets/events/"
+const ART_SIZE := Vector2(580, 240)
 
 var _kind_label: Label
+var _art: TextureRect
 var _title_label: Label
 var _meta_label: Label
 var _text_label: RichTextLabel
@@ -46,6 +50,14 @@ func _ready() -> void:
 	close.pressed.connect(_close)
 	header.add_child(close)
 	root.add_child(header)
+
+	_art = TextureRect.new()
+	_art.custom_minimum_size = ART_SIZE
+	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_art.clip_contents = true
+	_art.hide()
+	root.add_child(_art)
 
 	_title_label = Label.new()
 	_title_label.add_theme_font_size_override("font_size", 26)
@@ -99,6 +111,8 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	_decision_id = int(decision.get("id", -1))
 	_kind_label.text = "✠ Chronique du temps" if decision.get("historical", false) else "✠ Nouvelles du royaume"
 	_title_label.text = str(decision.get("title", ""))
+	_art.texture = PortraitLoader.load_texture(EVENT_ART_DIR + str(decision.get("event", "")) + ".jpg")
+	_art.visible = _art.texture != null
 	var meta := PackedStringArray()
 	var province_name := str(decision.get("province_name", ""))
 	if province_name != "":
