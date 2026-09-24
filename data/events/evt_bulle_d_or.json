@@ -1,0 +1,76 @@
+{
+  "id": "evt_bulle_d_or",
+  "title": "La Bulle d'or",
+  "text": "À Nuremberg puis à Metz, l'empereur Charles IV promulgue la loi qui règle l'élection du roi des Romains : sept électeurs, la majorité suffit, et nul n'attendra plus l'approbation du pape. Les électeurs deviennent presque des rois.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1356,
+      "season": "spring"
+    },
+    "until_year": 1357,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_empire"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_empire"
+  },
+  "options": [
+    {
+      "text": "Promulguer la Bulle d'or",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        },
+        {
+          "type": "papal_favor",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_papacy",
+          "amount": -10,
+          "reason": "Bulle d'or"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Ménager le pape et les princes",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1356-01-10"
+  },
+  "sources": [
+    "Bulle d'or de 1356",
+    "Charles IV (empereur du Saint-Empire)"
+  ]
+}

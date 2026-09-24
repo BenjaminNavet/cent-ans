@@ -1,0 +1,85 @@
+{
+  "id": "evt_auld_alliance",
+  "title": "L'Auld Alliance renouvelée",
+  "text": "À Vincennes, les envoyés de Robert II, premier roi Stewart, et ceux de Charles V renouvellent l'alliance de Corbeil : nul des deux rois ne traitera avec l'Anglais sans l'autre, et l'or de France paiera les lances écossaises.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1371,
+      "season": "summer"
+    },
+    "until_year": 1372,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_scotland"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_scotland"
+  },
+  "options": [
+    {
+      "text": "Sceller le traité de Vincennes",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 25,
+          "reason": "Traité de Vincennes"
+        },
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "treasury",
+          "faction": "fac_france",
+          "amount": -3000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -15,
+          "reason": "Auld Alliance renouvelée"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder les mains libres",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 10,
+          "reason": "Neutralité écossaise"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Alliance refusée"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1371-06-30"
+  },
+  "sources": [
+    "Auld Alliance",
+    "Robert II d'Écosse"
+  ]
+}

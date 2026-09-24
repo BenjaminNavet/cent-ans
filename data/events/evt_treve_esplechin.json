@@ -1,0 +1,79 @@
+{
+  "id": "evt_treve_esplechin",
+  "title": "La trêve d'Esplechin",
+  "text": "Dans la chapelle d'Esplechin, Jeanne de Valois, sœur du roi de France et belle-mère du roi d'Angleterre, obtient des deux camps une trêve de neuf mois. Édouard rentre à Londres couvert de dettes et furieux contre ses ministres.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Signer la trêve et rentrer à Londres",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 10,
+          "reason": "Trêve d'Esplechin"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rompre les pourparlers",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Pourparlers d'Esplechin rompus"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1340-09-25"
+  },
+  "sources": [
+    "Trêve d'Esplechin",
+    "Siège de Tournai (1340)",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

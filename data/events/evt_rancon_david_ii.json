@@ -1,0 +1,65 @@
+{
+  "id": "evt_rancon_david_ii",
+  "title": "La rançon du roi David",
+  "text": "Le roi David vieillit à la Tour de Londres. Les Anglais le rendront contre cent mille marcs payables en dix ans, et vingt otages de la meilleure noblesse. Les laines d'Écosse seront taxées pour des années.",
+  "kind": "chained",
+  "trigger": {
+    "conditions": [
+      {
+        "type": "character_captive",
+        "id": "chr_david_ii"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_scotland"
+  },
+  "options": [
+    {
+      "text": "Accepter la rançon (traité de Berwick)",
+      "effects": [
+        {
+          "type": "release_character",
+          "id": "chr_david_ii",
+          "ransom": 8000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 10,
+          "reason": "Traité de Berwick"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser le roi à Londres",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 5,
+          "reason": "L'Écosse reste en guerre"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1357-10-03"
+  },
+  "sources": [
+    "Traité de Berwick (1357)",
+    "David II"
+  ]
+}

@@ -116,6 +116,18 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   Jeanne de Bourbon et Charles VI (naissance 1368, folie ciblée). Rééquilibrage : richesse de base +8 par
   classe. 25 tests (`tests/f1_effects.rs`) + 1 test `data-model`.
 
+- Chronique enrichie (F7b) : 90 événements (54 historiques, 8 chaînés, 28 aléatoires). 40 nouveaux,
+  sourcés : paix des Scaliger, Laupen, Valdemar IV, siège de Tournai → trêve d'Esplechin, Salado,
+  succession de Bretagne → Hennebont, banqueroute des Bardi, Charles IV roi des Romains, Neville's Cross
+  (capture de David II) → rançon de Berwick, Cola di Rienzo → chute du tribun, achat du Dauphiné, combat
+  des Trente, Bulle d'or, Cocherel, Auray, Nájera, appel des seigneurs gascons (reprise de la guerre, 1369),
+  Auld Alliance renouvelée, La Rochelle, lords Appelants, Nicopolis → rançon de Jean de Nevers, Harfleur
+  (1415), Montereau → alliance anglo-bourguignonne → Troyes, Verneuil, Jeanne d'Arc → sacre de Reims, Patay,
+  procès de Rouen, Fougères (1449), Formigny ; 6 aléatoires pour les factions F7 (galères vénitiennes,
+  banque florentine, piquiers suisses, argent de Kutná Hora, harengs de Scanie, razzias grenadines).
+  Campagne simulée 1337-1453 (graine fixe, IA) : les 27 nouveaux historiques et les 7 étapes chaînées se
+  déclenchent. Un aléatoire réservé à une faction ne consomme plus de tirage pour les autres. 6 tests (`tests/f7_events.rs`).
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
