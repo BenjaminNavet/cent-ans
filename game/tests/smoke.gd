@@ -223,7 +223,7 @@ func _run_campaign_loop() -> void:
 	map.select_army(army_ids[0])
 	await process_frame
 	_check(map.selected_army == army_ids[0], "army selection failed")
-	_check(map.ui.army_panel.visible, "army panel should be visible")
+	_check(map.ui.army_strip.visible and map.ui.general_seal.visible, "army strip and general seal should be visible")
 	var reachable: Dictionary = map.reachable
 	if not _check(not reachable.is_empty(), "reachable provinces should not be empty for %s" % army_ids[0]):
 		map.queue_free()
@@ -1124,7 +1124,7 @@ func _run_flow() -> void:
 	_check(not SaveSlots.latest().is_empty(), "Continue: latest save expected")
 	_check(report_lines > 0, "season report should list events after 4 turns")
 	var all_events: Array = map.sim.call("get_events")
-	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, flow.alerts.alerts.size(), all_events.size()])
+	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, map.ui.end_turn_cluster.alerts.size(), all_events.size()])
 
 	# Menu pause : ouverture (arbre en pause), dialogue de sauvegarde, fermeture.
 	flow.open_pause()

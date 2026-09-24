@@ -1,8 +1,9 @@
 class_name SiegeController
 extends Node
 
-## Sièges (M8) côté carte : ligne d'état du siège et bouton « Donner l'assaut » ajoutés au panneau
-## d'armée quand l'armée sélectionnée du joueur assiège une place. Séparé de `campaign_map.gd` ;
+## Sièges (M8) côté carte : ligne d'état du siège et bouton « Donner l'assaut » ajoutés à la
+## boîte d'actions au-dessus du bandeau d'ost (`MapUI.army_actions_box`, F10b) quand l'armée
+## sélectionnée du joueur assiège une place. Séparé de `campaign_map.gd` ;
 ## celui-ci n'appelle que `setup` et `on_army_shown`.
 
 var map: Node = null  # CampaignMap
@@ -14,8 +15,6 @@ var _army_id: String = ""
 
 func setup(campaign_map: Node) -> void:
 	map = campaign_map
-	var panel: Control = map.ui.army_panel
-	var anchor: Control = panel.stance_option
 	box = VBoxContainer.new()
 	box.name = "SiegeBox"
 	status_label = Label.new()
@@ -25,13 +24,7 @@ func setup(campaign_map: Node) -> void:
 	assault_button.text = "Donner l'assaut"
 	assault_button.pressed.connect(_on_assault)
 	box.add_child(assault_button)
-	var parent := anchor.get_parent()
-	# Sous la ligne de posture (le parent peut être une grille : on remonte au conteneur vertical).
-	while parent != null and not (parent is VBoxContainer):
-		parent = parent.get_parent()
-	if parent == null:
-		parent = panel
-	parent.add_child(box)
+	map.ui.army_actions_box.add_child(box)
 	box.hide()
 
 
@@ -39,13 +32,18 @@ func available() -> bool:
 	return map != null and map.sim != null and map.sim.has_method("get_assault_odds")
 
 
-## Appelé après chaque affichage du panneau d'armée.
+## Appelé après chaque affichage du bandeau d'ost.
 func on_army_shown(army_id: String, is_player: bool) -> void:
 	_army_id = army_id
+	_update(is_player)
+	map.ui.queue_layout()
+
+
+func _update(is_player: bool) -> void:
 	if not available() or not is_player:
 		box.hide()
 		return
-	var odds: Dictionary = map.sim.call("get_assault_odds", army_id)
+	var odds: Dictionary = map.sim.call("get_assault_odds", _army_id)
 	if not bool(odds.get("available", false)):
 		box.hide()
 		return
