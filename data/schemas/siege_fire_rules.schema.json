@@ -13,7 +13,7 @@
       "properties": {
         "initial_intensity": { "$ref": "#/$defs/chance", "description": "Intensité (0-1) à l'allumage." },
         "growth_per_s": { "type": "number", "minimum": 0, "maximum": 1, "description": "Croissance de l'intensité par seconde." },
-        "burn_duration_s": { "$ref": "#/$defs/positive", "description": "Secondes pour consumer tout le combustible à pleine intensité." },
+        "burn_duration_s": { "$ref": "#/$defs/positive", "description": "Durée de combustion, de l'allumage à la ruine (multipliée par le facteur météo duration)." },
         "decline_fuel": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Part de combustible sous laquelle le feu décline." },
         "damage_per_s": { "type": "number", "minimum": 0, "description": "Porte seulement : PV perdus par seconde à pleine intensité." }
       },
