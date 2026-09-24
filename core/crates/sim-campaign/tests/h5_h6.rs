@@ -133,7 +133,8 @@ fn prices_scale_recruitment_upkeep_and_construction() {
     let data = data();
     let mut state = france(&data, 4);
     let france_id = fac("fac_france");
-    let province = state.factions[&france_id].capital.clone();
+    let capital = state.factions[&france_id].capital.clone();
+    let province = state.province_city_id(&capital).unwrap().clone();
     let unit_type = state.recruitable(&data, &province)[0].unit_type.clone();
     let recruit = |s: &CampaignState| {
         s.recruitable(&data, &province)
@@ -173,9 +174,9 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     }
     let sum = |s: &CampaignState, gauge: fn(&data_model::PopulationClass) -> u8| -> u32 {
         s.provinces
-            .values()
-            .filter(|p| p.controller == france_id)
-            .map(|p| u32::from(gauge(&p.population.burghers)))
+            .iter()
+            .filter(|(id, _)| s.controls_province(&france_id, id))
+            .map(|(_, p)| u32::from(gauge(&p.population.burghers)))
             .sum()
     };
     assert!(sum(&state, |c| c.unrest) > sum(&calm, |c| c.unrest));
@@ -459,8 +460,8 @@ fn captor_terms_parole_hold_and_cession() {
             },
         )
         .unwrap();
-    assert_eq!(state.provinces[&province].owner, england);
-    assert_eq!(state.provinces[&province].controller, england);
+    assert_eq!(state.province_owner(&province), Some(&england));
+    assert_eq!(state.province_controller(&province), Some(&england));
     assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
 
     // Parole: prestige for the captor's ruler, goodwill from the freed side.

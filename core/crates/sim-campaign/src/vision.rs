@@ -29,8 +29,8 @@ impl CampaignState {
             let best = range.entry(province.clone()).or_insert(steps);
             *best = (*best).max(steps);
         };
-        for (id, province) in &self.provinces {
-            if lends_sight(&province.controller) {
+        for id in self.provinces.keys() {
+            if self.province_controller(id).is_some_and(lends_sight) {
                 seed(id, rules.controlled_range);
             }
         }
@@ -41,7 +41,10 @@ impl CampaignState {
                 } else {
                     0
                 };
-                seed(&army.location, rules.army_range + bonus);
+                // C4: armies stand on a settlement; sight starts from its province.
+                if let Some(province) = self.settlement_province(&army.location) {
+                    seed(province, rules.army_range + bonus);
+                }
             }
         }
         spread_sight(data, range)

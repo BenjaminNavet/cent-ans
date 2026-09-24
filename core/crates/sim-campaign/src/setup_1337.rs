@@ -1,9 +1,12 @@
 //! Spring 1337 start derived from `GameData` (spec § 1.6).
 //!
-//! Garrisons: 4 units in capitals, 3 in frontier provinces (ports and
-//! provinces next to another faction, [`crate::frontier`]), 2 elsewhere.
-//! Every faction gets one main army in its capital led by its ruler (8 units
-//! for France, 6 for England, 4 for Burgundy, 3 for the others so that
+//! Garrisons (lot C4: held by the city of the province): 4 units in
+//! capitals, 3 in frontier provinces (ports and provinces next to another
+//! faction, [`crate::frontier`]), 2 elsewhere; the other settlements
+//! receive the `starting_garrison` of their kind
+//! (`data/settlements/rules.json`). Every faction gets one main army in its
+//! capital led by its ruler (8 units for France, 6 for England, 4 for
+//! Burgundy, 3 for the others so that
 //! the AI can act). Treasuries come from `Faction::treasury`; wars, alliances
 //! and truces from `Faction::relations`; vassal/overlord ties count as
 //! alliances.
@@ -11,8 +14,8 @@
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, CharacterStatus, Faction, FactionId, GameData, ProvinceId, RelationStatus,
-    SettlementKind, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, Faction, FactionId, GameData, ProvinceId,
+    RelationStatus, UnitTypeId,
 };
 
 use crate::diplomacy::{Claim, FOREVER};
@@ -88,41 +91,61 @@ fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError>
         .collect()
 }
 
-/// Lot C1: one [`SettlementState`] per settlement of a known province.
+/// One [`SettlementState`] per settlement of a known province (lots C1, C4).
 ///
 /// Owner is the settlement's enclave owner or the province owner; the
-/// controller is the owner. Non-city settlements receive the
-/// `starting_garrison` of their kind from `data/settlements/rules.json`
-/// (none when the file is absent); the city keeps an empty garrison because
-/// the province garrison stays authoritative until lot C4.
+/// controller is the owner. The city receives the province's starting
+/// buildings (its garrison is set by the caller, P1); the other
+/// settlements the `starting_garrison` of their kind from
+/// `data/settlements/rules.json` (none when the file is absent).
 fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
     for (id, settlement) in &data.settlements {
-        let Some(province) = state.provinces.get(&settlement.province) else {
+        let Some(province) = data.provinces.get(&settlement.province) else {
             continue;
         };
+        if !state.provinces.contains_key(&settlement.province) {
+            continue;
+        }
         let owner = settlement
             .owner
             .clone()
             .unwrap_or_else(|| province.owner.clone());
-        let garrison = match (&data.settlement_rules, settlement.kind) {
-            (_, SettlementKind::City) | (None, _) => Vec::new(),
-            (Some(rules), kind) => {
+        let is_city = state.provinces[&settlement.province].city == *id;
+        let garrison = match (&data.settlement_rules, is_city) {
+            // The city garrison depends on the province's role (P1),
+            // assigned once every settlement exists.
+            (_, true) => Vec::new(),
+            (None, false) => Vec::new(),
+            (Some(rules), false) => {
                 let ids: Vec<&str> = rules
                     .starting_garrison
-                    .get(&kind)
+                    .get(&settlement.kind)
                     .map(|units| units.iter().map(|u| u.as_str()).collect())
                     .unwrap_or_default();
                 units_from(data, &ids)?
             }
         };
+        let mut buildings: Vec<BuildingId> = Vec::new();
+        let starting = if is_city {
+            province.buildings.as_slice()
+        } else {
+            &[]
+        };
+        for building in starting.iter().chain(settlement.buildings.iter()) {
+            if !buildings.contains(building) {
+                buildings.push(building.clone());
+            }
+        }
         state.settlements.insert(
             id.clone(),
             SettlementState {
+                province: settlement.province.clone(),
+                kind: settlement.kind,
                 controller: owner.clone(),
                 owner,
                 garrison,
                 siege: None,
-                buildings: settlement.buildings.clone(),
+                buildings,
                 construction: None,
                 recruit_queue: Vec::new(),
                 fortification_level: settlement.fortification_level,
@@ -144,23 +167,26 @@ impl CampaignState {
         }
         let mut state = CampaignState::empty(player, seed);
 
-        // Provinces, then their garrisons (P1: frontiers classified by
-        // `CampaignState::is_frontier`, like the AI does).
+        // Provinces, then their settlements, then the city garrisons (P1:
+        // frontiers classified by `CampaignState::is_frontier`, like the AI
+        // does; lot C4: control is derived from the cities, so the
+        // settlements must exist first).
         for (id, province) in &data.provinces {
-            let owner = &province.owner;
+            let Some(city) = data.province_city(id) else {
+                return Err(CampaignError::MissingData(format!("city of {id}")));
+            };
             state.provinces.insert(
                 id.clone(),
                 ProvinceState {
-                    owner: owner.clone(),
-                    controller: owner.clone(),
-                    garrison: Vec::new(),
-                    siege: None,
+                    city: city.id.clone(),
+                    settlements: data
+                        .settlements_by_province
+                        .get(id)
+                        .cloned()
+                        .unwrap_or_else(|| vec![city.id.clone()]),
                     unrest: province.population.classes.peasants.unrest / 4,
                     devastation: 0,
                     population: province.population.classes.clone(),
-                    recruit_queue: Vec::new(),
-                    buildings: province.buildings.clone(),
-                    construction: None,
                     revolt_seasons: 0,
                     heresy: 0,
                     heresy_religion: None,
@@ -168,6 +194,8 @@ impl CampaignState {
                 },
             );
         }
+        init_settlements(&mut state, data)?;
+        let mut city_garrisons = std::collections::BTreeMap::new();
         for (id, province) in &data.provinces {
             let owner = &province.owner;
             let role = if data.factions.get(owner).is_some_and(|f| &f.capital == id) {
@@ -178,10 +206,13 @@ impl CampaignState {
                 GarrisonRole::Interior
             };
             let garrison = units_from(data, &garrison_composition(role))?;
-            state.provinces.get_mut(id).expect("inserted").garrison = garrison;
+            city_garrisons.insert(id.clone(), garrison);
         }
-
-        init_settlements(&mut state, data)?;
+        for (id, garrison) in city_garrisons {
+            if let Some(city) = state.city_state_mut(&id) {
+                city.garrison = garrison;
+            }
+        }
 
         // Factions and diplomacy.
         for (id, faction) in &data.factions {
@@ -437,12 +468,12 @@ impl CampaignState {
             if id.as_str() == REBELS_FACTION {
                 continue;
             }
-            if !state.provinces.contains_key(&faction.capital) {
+            let Some(capital_city) = state.province_city_id(&faction.capital).cloned() else {
                 return Err(CampaignError::MissingData(format!(
                     "capital {} of {id}",
                     faction.capital
                 )));
-            }
+            };
             let units = units_from(data, &main_army_composition(faction))?;
             let army_id = state.allocate_army_id();
             state.armies.insert(
@@ -450,9 +481,9 @@ impl CampaignState {
                 Army {
                     faction: id.clone(),
                     general: None,
-                    location: faction.capital.clone(),
+                    location: capital_city,
                     units,
-                    movement_points: state.season.movement_points(),
+                    movement_points: 0,
                     supply: 100,
                     stance: Stance::Normal,
                     path: Vec::new(),
@@ -461,6 +492,12 @@ impl CampaignState {
             if let Some(general) = pick_general(&state, data, faction) {
                 state.attach_general(&army_id, &general);
             }
+            let allowance = state.army_movement_allowance(data, &state.armies[&army_id]);
+            state
+                .armies
+                .get_mut(&army_id)
+                .expect("just created")
+                .movement_points = allowance;
         }
         crate::economy::resolve_goods(&mut state, data);
         // Vassal loyalty starts at its equilibrium (M5).

@@ -26,6 +26,15 @@ fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
 }
 
+/// Mutable state of the city of a province (lot C4).
+fn city_mut<'a>(
+    state: &'a mut CampaignState,
+    province: &ProvinceId,
+) -> &'a mut sim_campaign::SettlementState {
+    let id = state.province_city_id(province).unwrap().clone();
+    state.settlements.get_mut(&id).unwrap()
+}
+
 fn diet(id: &str) -> DietId {
     DietId::new(id).unwrap()
 }
@@ -83,7 +92,7 @@ fn set_diet_is_validated() {
     let foreign = state
         .provinces
         .iter()
-        .find(|(_, p)| p.controller != fac("fac_france"))
+        .find(|(id, _)| !state.controls_province(&fac("fac_france"), id))
         .map(|(id, _)| id.to_string())
         .unwrap();
     let error = set_diet(&mut state, &data, &foreign, "diet_pulses").unwrap_err();
@@ -93,8 +102,8 @@ fn set_diet_is_validated() {
     let grazing_less = state
         .provinces
         .iter()
-        .find(|(id, p)| {
-            p.controller == fac("fac_france")
+        .find(|(id, _)| {
+            state.controls_province(&fac("fac_france"), id)
                 && matches!(
                     data.provinces[*id].terrain,
                     data_model::Terrain::Heath | data_model::Terrain::Forest
@@ -107,14 +116,18 @@ fn set_diet_is_validated() {
     }
 
     // The spiced table needs a market or a fair.
-    // (every French province has one in 1337: pull it down in Touraine).
+    // (every French province has one in 1337: pull them down in Touraine,
+    // in every settlement — lot C4).
     let touraine = prov("prov_touraine");
-    state
-        .provinces
-        .get_mut(&touraine)
-        .unwrap()
-        .buildings
-        .retain(|b| b.as_str() != "bld_market" && b.as_str() != "bld_fair");
+    for settlement in state
+        .settlements
+        .values_mut()
+        .filter(|s| s.province == touraine)
+    {
+        settlement
+            .buildings
+            .retain(|b| b.as_str() != "bld_market" && b.as_str() != "bld_fair");
+    }
     let error = set_diet(&mut state, &data, "prov_touraine", "diet_spiced_table").unwrap_err();
     assert!(
         error
@@ -248,11 +261,7 @@ fn a_new_controller_does_not_inherit_the_diet() {
     let data = data();
     let mut state = france(&data, 6);
     set_diet(&mut state, &data, "prov_normandie", "diet_pulses").unwrap();
-    state
-        .provinces
-        .get_mut(&prov("prov_normandie"))
-        .unwrap()
-        .controller = fac("fac_england");
+    city_mut(&mut state, &prov("prov_normandie")).controller = fac("fac_england");
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
@@ -351,7 +360,7 @@ fn salted_meat_raises_the_morale_of_levies() {
     set_diet(&mut state, &data, "prov_carcassonne", "diet_meat_salting").unwrap();
     let carcassonne = prov("prov_carcassonne");
     let (option, base_morale) = state
-        .recruitable(&data, &carcassonne)
+        .recruitable_in_province(&data, &carcassonne)
         .into_iter()
         .filter(|o| o.available)
         .map(|o| {
@@ -364,13 +373,15 @@ fn salted_meat_raises_the_morale_of_levies() {
         .submit_order(
             &data,
             Order::Recruit {
-                province: carcassonne.clone(),
+                settlement: carcassonne.clone().into(),
                 unit_type: option.unit_type.clone(),
             },
         )
         .unwrap();
     state.end_turn_with(&data, idle);
-    let recruit = state.provinces[&carcassonne]
+    let recruit = state
+        .city_state(&carcassonne)
+        .unwrap()
         .garrison
         .iter()
         .rev()
@@ -400,10 +411,7 @@ fn give_medicine(state: &mut CampaignState, province: &ProvinceId) {
     for id in ["tech_plague_consilia", "tech_leprosaria", "tech_quarantine"] {
         france.technologies.insert(tech(id));
     }
-    state
-        .provinces
-        .get_mut(province)
-        .unwrap()
+    city_mut(state, province)
         .buildings
         .push(BuildingId::new("bld_apothecary").unwrap());
 }
@@ -423,10 +431,7 @@ fn plague_resistance_softens_the_local_plague() {
     assert!((medicine::plague_resistance(&resistant, &data, &normandie) - 0.45).abs() < 1e-9);
     // Capped at 50 %.
     let mut capped = resistant.clone();
-    capped
-        .provinces
-        .get_mut(&normandie)
-        .unwrap()
+    city_mut(&mut capped, &normandie)
         .buildings
         .extend(["bld_apothecary", "bld_apothecary"].map(|b| BuildingId::new(b).unwrap()));
     assert_eq!(medicine::plague_resistance(&capped, &data, &normandie), 0.5);
@@ -467,7 +472,7 @@ fn plague_resistance_softens_the_black_death() {
     let france_provinces: Vec<ProvinceId> = resistant
         .provinces
         .iter()
-        .filter(|(_, p)| p.controller == fac("fac_france"))
+        .filter(|(id, _)| resistant.controls_province(&fac("fac_france"), id))
         .map(|(id, _)| id.clone())
         .collect();
     for id in &france_provinces {
@@ -606,8 +611,8 @@ fn ai_diets_are_valid_and_deterministic() {
         }
     }
     // Some AI realm has adopted a diet other than the default.
-    let chosen = a.provinces.iter().any(|(id, p)| {
-        p.controller != fac("fac_france") && a.province_diet(id).as_str() != DEFAULT_DIET
+    let chosen = a.provinces.keys().any(|id| {
+        !a.controls_province(&fac("fac_france"), id) && a.province_diet(id).as_str() != DEFAULT_DIET
     });
     assert!(chosen, "no AI diet after 8 turns");
 }

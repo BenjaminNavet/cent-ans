@@ -161,14 +161,48 @@ pub struct FullProvinceBonus {
 }
 
 /// Contents of `data/settlements/rules.json`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SettlementRules {
     /// Starting garrison of a settlement by kind (unit type ids, may repeat).
     pub starting_garrison: BTreeMap<SettlementKind, Vec<UnitTypeId>>,
     pub full_province_bonus: FullProvinceBonus,
+    /// Movement on the settlement graph (lot C4).
+    #[serde(default)]
+    pub movement: MovementRules,
+    /// Share of a garrison's unit upkeep paid by the controller, in per
+    /// cent, by settlement kind (lot C4). Kinds left out pay the campaign
+    /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
+    #[serde(default)]
+    pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Movement tuning of `rules.json` (lot C4). The unit of edge costs and
+/// movement points is the kilometre of plain: great-circle distance times
+/// the terrain cost, halved on a road.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MovementRules {
+    /// Movement points worth one v1 province step (mean distance between
+    /// the cities of neighbouring provinces).
+    pub points_per_step: f64,
+    /// Cost of a port-to-port crossing in steps (fallback graph).
+    pub sea_crossing_steps: f64,
+    /// Fallback graph: closest settlement pairs linked between two
+    /// neighbouring provinces, on top of the city-to-city link.
+    pub fallback_links_per_neighbor: u32,
+}
+
+impl Default for MovementRules {
+    fn default() -> Self {
+        MovementRules {
+            points_per_step: 140.0,
+            sea_crossing_steps: 2.0,
+            fallback_links_per_neighbor: 2,
+        }
+    }
 }
 
 /// One edge of the settlement movement graph (spec § 4.4).

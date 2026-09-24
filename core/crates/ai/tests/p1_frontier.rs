@@ -5,6 +5,7 @@
 use std::path::PathBuf;
 
 use data_model::{FactionId, GameData, ProvinceId};
+use sim_campaign::Place;
 use sim_campaign::{CampaignState, GarrisonRole, Order};
 
 fn data() -> GameData {
@@ -20,9 +21,12 @@ fn fac(id: &str) -> FactionId {
 fn starting_garrisons_follow_the_shared_classification() {
     let data = data();
     let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
-    for (id, province) in &state.provinces {
-        let role = state.garrison_role(&data, &province.owner, id);
-        assert_eq!(province.garrison.len(), role.garrison_size(), "{id}");
+    for id in state.provinces.keys() {
+        // Lot C4: the province garrison is held by its city.
+        let owner = state.province_owner(id).unwrap();
+        let role = state.garrison_role(&data, owner, id);
+        let garrison = &state.city_state(id).unwrap().garrison;
+        assert_eq!(garrison.len(), role.garrison_size(), "{id}");
     }
     let normandie_ouest = ProvinceId::new("prov_normandie_ouest").unwrap();
     assert!(state.is_frontier(&data, &fac("fac_france"), &normandie_ouest));
@@ -33,12 +37,12 @@ fn starting_garrisons_follow_the_shared_classification() {
     // The classification still leaves an interior to the realm.
     let interior = state
         .provinces
-        .iter()
-        .find(|(id, p)| {
-            state.garrison_role(&data, &p.owner, id) == GarrisonRole::Interior
-                && p.owner == fac("fac_france")
+        .keys()
+        .find(|id| {
+            state.province_owner(id) == Some(&fac("fac_france"))
+                && state.garrison_role(&data, &fac("fac_france"), id) == GarrisonRole::Interior
         })
-        .map(|(id, _)| id.clone());
+        .cloned();
     assert!(interior.is_some(), "France has interior provinces");
 }
 
@@ -48,10 +52,10 @@ fn no_leaderless_army_is_split_from_a_garrison_on_the_first_turn() {
     for player in ["fac_england", "fac_france"] {
         let state = CampaignState::new_1337(&data, fac(player), 1).unwrap();
         for faction in state.factions.keys() {
-            let splits: Vec<ProvinceId> = ai::plan_turn(&state, &data, faction)
+            let splits: Vec<Place> = ai::plan_turn(&state, &data, faction)
                 .into_iter()
                 .filter_map(|order| match order {
-                    Order::CreateArmy { province, .. } => Some(province),
+                    Order::CreateArmy { settlement, .. } => Some(settlement),
                     _ => None,
                 })
                 .collect();

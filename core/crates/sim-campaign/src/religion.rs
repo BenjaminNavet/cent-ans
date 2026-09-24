@@ -244,19 +244,22 @@ impl CampaignState {
         let Some(p) = self.provinces.get(province) else {
             return 0.0;
         };
+        let Some(controller) = self.province_controller(province) else {
+            return 0.0;
+        };
         let mut unrest = 0.0;
-        if let Some(f) = self.factions.get(&p.controller) {
+        if let Some(f) = self.factions.get(controller) {
             if f.regency {
                 unrest += f64::from(crate::dynasty::REGENCY_UNREST_PENALTY);
             }
-            if is_excommunicated(self, &p.controller) {
+            if is_excommunicated(self, controller) {
                 unrest += 10.0;
             }
         }
         let embargoed = self
             .factions
             .iter()
-            .any(|(id, f)| id != &p.controller && f.alive && f.embargoes.contains(&p.controller));
+            .any(|(id, f)| id != controller && f.alive && f.embargoes.contains(controller));
         if embargoed {
             unrest += 3.0;
         }
@@ -415,10 +418,10 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
             continue;
         }
         let buildings: u32 = state
-            .provinces
+            .settlements
             .values()
-            .filter(|p| p.controller == faction)
-            .map(|p| religious_buildings(data, &p.buildings))
+            .filter(|s| s.controller == faction)
+            .map(|s| religious_buildings(data, &s.buildings))
             .sum();
         let mut target =
             40 + i32::from(ruler_piety(state, data, &faction)) / 4 + (buildings as i32 * 2).min(20);
@@ -501,7 +504,10 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             continue;
         };
         let p = &state.provinces[id];
-        let controller = p.controller.clone();
+        let Some(controller) = state.province_controller(id).cloned() else {
+            continue;
+        };
+        let province_buildings = state.province_buildings(id);
         let clergy = &p.population.clergy;
         let governor_piety = state
             .province_governor(id)
@@ -510,7 +516,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
         let growth = f64::from(clergy.unrest) / 20.0
             + (100.0 - f64::from(clergy.goods_satisfaction)) / 40.0
             + 1.0
-            - f64::from(religious_buildings(data, &p.buildings))
+            - f64::from(religious_buildings(data, &province_buildings))
             - f64::from(piety) / 40.0;
         let value = (f64::from(p.heresy) + growth).round().clamp(0.0, 100.0) as u8;
         let p = state.provinces.get_mut(id).expect("exists");

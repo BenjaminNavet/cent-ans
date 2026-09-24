@@ -11,6 +11,11 @@
   "build_time_turns": 4,
   "upkeep": 20,
   "required_building": "bld_parish_church",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey"
+  ],
   "effects": [
     {
       "effect": "piety",

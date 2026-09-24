@@ -63,7 +63,7 @@ impl CampaignState {
         crate::chivalry::resolve_chivalry(self, data, &mut events);
         research::resolve_research(self, data, &mut events);
         economy::resolve_attrition(self, data, &mut events);
-        economy::resolve_decay(self);
+        economy::resolve_decay(self, data);
 
         // 8b. Diplomacy (vassal tribute after the economy, expiries,
         // rebellions) and religion (favour, Schism, heresy) before the

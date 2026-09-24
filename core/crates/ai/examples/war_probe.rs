@@ -25,8 +25,8 @@ fn main() {
                 state.date_label(),
                 state.war_score(&data, &france, &england),
                 state.war_score(&data, &england, &france),
-                state.provinces.values().filter(|p| p.owner == england && p.controller == france).count(),
-                state.provinces.values().filter(|p| p.owner == france && p.controller == england).count(),
+                state.provinces.keys().filter(|p| state.province_owner(p) == Some(&england) && state.controls_province(&france, p)).count(),
+                state.provinces.keys().filter(|p| state.province_owner(p) == Some(&france) && state.controls_province(&england, p)).count(),
             );
         }
         for e in events

@@ -208,10 +208,10 @@ impl CampaignState {
             .map(|u| u.strength)
             .sum();
         let garrisons: u32 = self
-            .provinces
+            .settlements
             .values()
-            .filter(|p| &p.controller == faction)
-            .map(|p| p.garrison_strength())
+            .filter(|s| &s.controller == faction)
+            .map(|s| s.garrison_strength())
             .sum();
         f64::from(armies) + f64::from(garrisons) / 2.0
     }
@@ -241,13 +241,12 @@ impl CampaignState {
 
     /// `true` when `a` and `b` control adjacent provinces.
     pub fn are_neighbors(&self, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
-        self.provinces.iter().any(|(id, p)| {
-            &p.controller == a
-                && data.provinces.get(id).is_some_and(|pd| {
-                    pd.neighbors
-                        .iter()
-                        .any(|n| self.provinces.get(n).is_some_and(|np| &np.controller == b))
-                })
+        self.provinces.keys().any(|id| {
+            self.controls_province(a, id)
+                && data
+                    .provinces
+                    .get(id)
+                    .is_some_and(|pd| pd.neighbors.iter().any(|n| self.controls_province(b, n)))
         })
     }
 
@@ -312,9 +311,11 @@ impl CampaignState {
         let occupation = |taker: &FactionId, loser: &FactionId| -> i32 {
             let capital = self.factions.get(loser).map(|f| f.capital.clone());
             self.provinces
-                .iter()
-                .filter(|(_, p)| &p.owner == loser && &p.controller == taker)
-                .map(|(id, _)| if Some(id) == capital.as_ref() { 28 } else { 8 })
+                .keys()
+                .filter(|id| {
+                    self.province_owner(id) == Some(loser) && self.controls_province(taker, id)
+                })
+                .map(|id| if Some(id) == capital.as_ref() { 28 } else { 8 })
                 .sum()
         };
         let _ = data;
@@ -331,7 +332,7 @@ impl CampaignState {
                 }
                 ClaimKind::Province => {
                     if let Some(p) = &claim.province {
-                        if self.provinces.get(p).is_some_and(|ps| &ps.owner == b) {
+                        if self.province_owner(p) == Some(b) {
                             return Some(format!("prétention sur {}", province_name(data, p)));
                         }
                     }
@@ -450,8 +451,7 @@ impl CampaignState {
                 ClaimKind::Province => c
                     .province
                     .as_ref()
-                    .and_then(|p| self.provinces.get(p))
-                    .is_some_and(|p| &p.owner == a),
+                    .is_some_and(|p| self.province_owner(p) == Some(a)),
             });
             if claims_on_us {
                 add("Prétentions sur nos terres", -25);
@@ -567,10 +567,10 @@ pub fn evaluate(
             );
             let capital = state.factions.get(recipient).map(|f| f.capital.clone());
             for province in provinces {
-                let Some(p) = state.provinces.get(province) else {
+                let Some(owner) = state.province_owner(province) else {
                     continue;
                 };
-                if &p.owner == recipient {
+                if owner == recipient {
                     let cost = if Some(province) == capital.as_ref() {
                         60
                     } else {
@@ -580,7 +580,7 @@ pub fn evaluate(
                         format!("Cession de {}", province_name(data, province)),
                         -cost,
                     ));
-                } else if &p.owner == proposer {
+                } else if owner == proposer {
                     reasons.push((
                         format!("Obtention de {}", province_name(data, province)),
                         15,
@@ -591,9 +591,11 @@ pub fn evaluate(
             // settles the war score.
             let conquests: Vec<&ProvinceId> = state
                 .provinces
-                .iter()
-                .filter(|(_, p)| &p.owner == proposer && &p.controller == recipient)
-                .map(|(id, _)| id)
+                .keys()
+                .filter(|id| {
+                    state.province_owner(id) == Some(proposer)
+                        && state.controls_province(recipient, id)
+                })
                 .collect();
             if !conquests.is_empty() && conquests.iter().all(|c| provinces.contains(*c)) {
                 let score = state.war_score(data, recipient, proposer);
@@ -773,8 +775,8 @@ fn peace_reasons(
     }
     let devastated = state
         .provinces
-        .values()
-        .filter(|p| &p.owner == recipient && p.devastation > 30)
+        .iter()
+        .filter(|(id, p)| state.province_owner(id) == Some(recipient) && p.devastation > 30)
         .count() as i32;
     reasons.push(("Provinces ravagées".to_owned(), (devastated * 3).min(20)));
     reasons.push(("Attitude".to_owned(), attitude / 5));
@@ -1019,21 +1021,18 @@ impl CampaignState {
         }
         let mut ceded_names = Vec::new();
         for province in provinces {
-            let Some(p) = self.provinces.get(province) else {
+            let Some(owner) = self.province_owner(province).cloned() else {
                 continue;
             };
-            let (from, to) = if &p.owner == a {
+            let (from, to) = if &owner == a {
                 (a.clone(), b.clone())
-            } else if &p.owner == b {
+            } else if &owner == b {
                 (b.clone(), a.clone())
             } else {
                 continue;
             };
-            let p = self.provinces.get_mut(province).expect("exists");
-            p.owner = to.clone();
-            p.controller = to.clone();
-            p.siege = None;
-            p.garrison.clear();
+            // Lot C4: every settlement `from` owns in the province is ceded.
+            self.cede_province(province, Some(&from), &to);
             for character in self.characters.values_mut() {
                 if character.governor_of.as_ref() == Some(province) {
                     character.governor_of = None;
@@ -1057,18 +1056,19 @@ impl CampaignState {
                 faction_name(data, &to)
             ));
         }
-        // Occupied provinces return to their owner.
-        for p in self.provinces.values_mut() {
+        // Occupied settlements return to their owner.
+        for s in self.settlements.values_mut() {
             let between =
-                (&p.owner == a && &p.controller == b) || (&p.owner == b && &p.controller == a);
+                (&s.owner == a && &s.controller == b) || (&s.owner == b && &s.controller == a);
             if between {
-                p.controller = p.owner.clone();
-                p.siege = None;
+                s.controller = s.owner.clone();
+                s.siege = None;
             }
-            if p.siege.as_ref().is_some_and(|s| {
-                (&s.attacker == a && &p.controller == b) || (&s.attacker == b && &p.controller == a)
+            if s.siege.as_ref().is_some_and(|siege| {
+                (&siege.attacker == a && &s.controller == b)
+                    || (&siege.attacker == b && &s.controller == a)
             }) {
-                p.siege = None;
+                s.siege = None;
             }
         }
         if tribute != 0 {
@@ -1185,7 +1185,7 @@ impl CampaignState {
                     return Err(DiplomacyError::NotAtWar);
                 }
                 for province in provinces {
-                    let owner = self.provinces.get(province).map(|p| &p.owner);
+                    let owner = self.province_owner(province);
                     if owner != Some(proposer) && owner != Some(recipient) {
                         return Err(DiplomacyError::InvalidProvince(province.clone()));
                     }
@@ -1450,8 +1450,7 @@ impl CampaignState {
                         ClaimKind::Province => c
                             .province
                             .as_ref()
-                            .and_then(|p| self.provinces.get(p))
-                            .is_some_and(|p| &p.owner == id),
+                            .is_some_and(|p| self.province_owner(p) == Some(id)),
                     })
                     .map(|c| c.text_fr.clone())
                     .collect();
@@ -1798,7 +1797,7 @@ pub fn claim_stakes(state: &CampaignState, a: &FactionId, b: &FactionId) -> Clai
             ClaimKind::Throne => stakes.throne |= claim.faction.as_ref() == Some(b),
             ClaimKind::Province => {
                 if let Some(p) = &claim.province {
-                    if state.provinces.get(p).is_some_and(|ps| &ps.owner == b) && seen.insert(p) {
+                    if state.province_owner(p) == Some(b) && seen.insert(p) {
                         stakes.provinces += 1;
                     }
                 }
@@ -1826,9 +1825,13 @@ pub fn claimed_provinces(state: &CampaignState, faction: &FactionId) -> BTreeSet
     provinces.extend(
         state
             .provinces
-            .iter()
-            .filter(|(_, p)| thrones.contains(&p.owner))
-            .map(|(id, _)| id.clone()),
+            .keys()
+            .filter(|id| {
+                state
+                    .province_owner(id)
+                    .is_some_and(|o| thrones.contains(o))
+            })
+            .cloned(),
     );
     provinces
 }
@@ -1881,10 +1884,9 @@ fn enemy_power(state: &CampaignState, data: &GameData, faction: &FactionId) -> f
             .filter(|e| !is_rebels(e))
             .filter(|e| {
                 state.are_neighbors(data, faction, e)
-                    || state
-                        .provinces
-                        .values()
-                        .any(|p| &p.owner == faction && &p.controller == *e)
+                    || state.provinces.keys().any(|id| {
+                        state.province_owner(id) == Some(faction) && state.controls_province(e, id)
+                    })
             })
             .map(|e| state.faction_power(e))
             .sum()
@@ -2034,9 +2036,11 @@ fn peace_terms(
         let capital = capital(owner);
         let mut list: Vec<ProvinceId> = state
             .provinces
-            .iter()
-            .filter(|(_, p)| &p.owner == owner && &p.controller == holder)
-            .map(|(id, _)| id.clone())
+            .keys()
+            .filter(|id| {
+                state.province_owner(id) == Some(owner) && state.controls_province(holder, id)
+            })
+            .cloned()
             .collect();
         // Capitals last: they are the costliest to give up.
         list.sort_by_key(|id| (Some(id) == capital.as_ref(), id.clone()));

@@ -12,6 +12,13 @@
   "upkeep": 5,
   "required_technology": "tech_water_mills",
   "requires_river": true,
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle",
+    "abbey",
+    "village"
+  ],
   "effects": [
     {
       "effect": "production",

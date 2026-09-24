@@ -30,9 +30,9 @@ fn rules(controlled: u32, army: u32, general: u32, share: bool) -> VisionRules {
 fn controlled(state: &CampaignState, faction: &FactionId) -> BTreeSet<ProvinceId> {
     state
         .provinces
-        .iter()
-        .filter(|(_, p)| &p.controller == faction)
-        .map(|(id, _)| id.clone())
+        .keys()
+        .filter(|id| state.province_controller(id) == Some(faction))
+        .cloned()
         .collect()
 }
 
@@ -99,7 +99,8 @@ fn an_army_reveals_its_surroundings_and_a_general_sees_further() {
         .map(|(id, _)| id.clone())
         .unwrap();
     let army = state.armies.get_mut(&army_id).unwrap();
-    army.location = hidden.clone();
+    // C4: armies stand on a settlement; put this one on the hidden province's city.
+    army.location = data.province_city(&hidden).unwrap().id.clone();
     army.general = None;
     let visible = state.visible_provinces(&data, &france);
     assert!(visible.contains(&hidden));
@@ -141,9 +142,13 @@ fn allies_share_their_sight_only_when_the_rule_says_so() {
     let state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
     let allied: BTreeSet<ProvinceId> = state
         .provinces
-        .iter()
-        .filter(|(_, p)| p.controller != france && state.is_allied(&france, &p.controller))
-        .map(|(id, _)| id.clone())
+        .keys()
+        .filter(|id| {
+            state
+                .province_controller(id)
+                .is_some_and(|c| c != &france && state.is_allied(&france, c))
+        })
+        .cloned()
         .collect();
     assert!(!allied.is_empty(), "France has allies in 1337 (Scotland)");
     data.vision_rules = Some(rules(0, 0, 0, true));

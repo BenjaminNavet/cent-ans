@@ -5,7 +5,7 @@
 use std::path::PathBuf;
 
 use data_model::{
-    BuildingId, CharacterId, EventEffect, FactionId, GameData, ProvinceId, UnitTypeId,
+    BuildingId, CharacterId, EventEffect, FactionId, GameData, ProvinceId, SettlementId, UnitTypeId,
 };
 use sim_campaign::{CampaignState, Order, OrderError};
 
@@ -21,6 +21,11 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// The city of a province (lot C4: recruitment and buildings are per settlement).
+fn city(state: &CampaignState, province: &str) -> SettlementId {
+    state.province_city_id(&prov(province)).unwrap().clone()
 }
 
 fn bld(id: &str) -> BuildingId {
@@ -45,8 +50,8 @@ fn quiet_france(data: &GameData, seed: u64) -> CampaignState {
 fn recruit_slots_cap_the_province_queue() {
     let data = data();
     let mut state = quiet_france(&data, 1);
-    let province = prov("prov_champagne");
-    let p = state.provinces.get_mut(&province).unwrap();
+    let province = city(&state, "prov_champagne");
+    let p = state.settlements.get_mut(&province).unwrap();
     p.buildings.retain(|b| {
         data.buildings[b]
             .effects
@@ -59,7 +64,7 @@ fn recruit_slots_cap_the_province_queue() {
         state.submit_order(
             &data,
             Order::Recruit {
-                province: province.clone(),
+                settlement: province.clone().into(),
                 unit_type: unit("unit_urban_militia"),
             },
         )
@@ -73,7 +78,7 @@ fn recruit_slots_cap_the_province_queue() {
     );
     // A muster field adds one slot.
     state
-        .provinces
+        .settlements
         .get_mut(&province)
         .unwrap()
         .buildings
@@ -123,7 +128,7 @@ fn religious_buildings_raise_the_ruler_piety_each_winter() {
     let data = data();
     let france = fac("fac_france");
     let mut without = quiet_france(&data, 3);
-    for p in without.provinces.values_mut() {
+    for p in without.settlements.values_mut() {
         p.buildings.retain(|b| {
             data.buildings[b]
                 .effects
@@ -135,8 +140,9 @@ fn religious_buildings_raise_the_ruler_piety_each_winter() {
         |s: &CampaignState| sim_campaign::dynasty::yearly_building_piety(s, &data, &france);
     assert_eq!(yearly(&without), 0);
     let mut with = without.clone();
-    with.provinces
-        .get_mut(&prov("prov_ile_de_france"))
+    let paris = city(&with, "prov_ile_de_france");
+    with.settlements
+        .get_mut(&paris)
         .unwrap()
         .buildings
         .push(bld("bld_cathedral"));
@@ -158,8 +164,8 @@ fn religious_buildings_raise_the_ruler_piety_each_winter() {
 fn armoury_and_butts_equip_the_units_levied_there() {
     let data = data();
     let mut state = quiet_france(&data, 4);
-    let province = prov("prov_ile_de_france");
-    let p = state.provinces.get_mut(&province).unwrap();
+    let province = city(&state, "prov_ile_de_france");
+    let p = state.settlements.get_mut(&province).unwrap();
     p.garrison.clear();
     for b in ["bld_muster_field", "bld_armoury", "bld_archery_butts"] {
         if !p.buildings.contains(&bld(b)) {
@@ -168,13 +174,13 @@ fn armoury_and_butts_equip_the_units_levied_there() {
     }
     for u in ["unit_urban_militia", "unit_crossbowmen"] {
         let order = Order::Recruit {
-            province: province.clone(),
+            settlement: province.clone().into(),
             unit_type: unit(u),
         };
         state.submit_order(&data, order).unwrap();
     }
     state.end_turn_with(&data, idle);
-    let garrison = &state.provinces[&province].garrison;
+    let garrison = &state.settlements[&province].garrison;
     let militia = garrison
         .iter()
         .find(|u| u.unit_type == unit("unit_urban_militia"));
@@ -230,9 +236,9 @@ fn transfer_province_hands_over_ownership_and_control() {
     };
     // `from` must hold it: England does not.
     apply(&mut state, &data, "fac_france", transfer("fac_england"));
-    assert_eq!(state.provinces[&dauphine].owner, fac("fac_empire"));
+    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_empire")));
     apply(&mut state, &data, "fac_france", transfer("fac_empire"));
-    let p = &state.provinces[&dauphine];
+    let p = state.city_state(&dauphine).unwrap();
     assert_eq!(
         (&p.owner, &p.controller),
         (&fac("fac_france"), &fac("fac_france"))
@@ -246,7 +252,7 @@ fn transfer_province_hands_over_ownership_and_control() {
         from: None,
     };
     apply(&mut state, &data, "fac_france", seize);
-    assert_eq!(state.provinces[&paris].owner, fac("fac_france"));
+    assert_eq!(state.province_owner(&paris), Some(&fac("fac_france")));
 }
 
 #[test]

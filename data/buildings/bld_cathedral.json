@@ -15,6 +15,9 @@
   "upkeep": 50,
   "required_building": "bld_abbey",
   "required_resource": "res_stone",
+  "settlement_kinds": [
+    "city"
+  ],
   "effects": [
     {
       "effect": "piety",

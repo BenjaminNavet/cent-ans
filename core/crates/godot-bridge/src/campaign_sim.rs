@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
     BuildingId, CharacterId, Effect, FactionId, GameData, PopulationClass, ProvinceId,
-    ResourceCategory, Role, Skill, SkillBranch,
+    ResourceCategory, Role, SettlementId, Skill, SkillBranch,
 };
 use godot::classes::RefCounted;
 use godot::prelude::*;
@@ -57,6 +57,8 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
 pub struct CampaignSim {
     pub(crate) data: Option<Arc<GameData>>,
     pub(crate) state: Option<CampaignState>,
+    /// French message of the last failed `load_from_string`.
+    pub(crate) last_load_error: String,
     base: Base<RefCounted>,
 }
 
@@ -66,6 +68,7 @@ impl IRefCounted for CampaignSim {
         CampaignSim {
             data: None,
             state: None,
+            last_load_error: String::new(),
             base,
         }
     }
@@ -119,9 +122,14 @@ impl CampaignSim {
             Ok(state) => {
                 self.data = Some(data);
                 self.state = Some(state);
+                self.last_load_error = String::new();
                 true
             }
             Err(error) => {
+                // Lot C4: saves older than the settlements are refused with
+                // a French message (« sauvegarde d'une version antérieure à
+                // la refonte des colonies »), kept for the UI.
+                self.last_load_error = error.to_string();
                 godot_error!("CampaignSim.load_from_string failed: {error}");
                 false
             }
@@ -208,22 +216,26 @@ impl CampaignSim {
         faction_economy_dict(&economy)
     }
 
-    /// `{owner, controller, garrison[], siege?, unrest, devastation, population_total}`.
+    /// `{owner, controller, garrison[], siege?, unrest, devastation,
+    /// population_total, city, settlements[]}`. Lot C4: owner, controller,
+    /// garrison and siege are those of the province's city (derived).
     #[func]
     fn get_province_state(&self, id: GString) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(province) = ProvinceId::new(id.to_string())
+        let Some((province, city)) = ProvinceId::new(id.to_string())
             .ok()
-            .and_then(|id| state.province_state(&id))
+            .and_then(|id| Some((state.province_state(&id)?, state.city_state(&id)?)))
         else {
             return VarDictionary::new();
         };
         let mut dict = vdict! {
-            "owner" => province.owner.as_str(),
-            "controller" => province.controller.as_str(),
-            "garrison" => &units_array(data, &province.garrison),
+            "owner" => city.owner.as_str(),
+            "controller" => city.controller.as_str(),
+            "garrison" => &units_array(data, &city.garrison),
+            "city" => province.city.as_str(),
+            "settlements" => &ids(province.settlements.iter()),
             "unrest" => i64::from(province.unrest),
             "devastation" => i64::from(province.devastation),
             "population_total" => province.population.total() as i64,
@@ -238,7 +250,7 @@ impl CampaignSim {
                 state.character_name(data, governor).as_str(),
             );
         }
-        if let Some(siege) = &province.siege {
+        if let Some(siege) = &city.siege {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
                 "turns_left" => i64::from(siege.turns_left),
@@ -272,7 +284,9 @@ impl CampaignSim {
         army_dict(state, data, army)
     }
 
-    /// `{province_id: cost}` for every province the army can reach this turn.
+    /// `{province_id: cost}` for every province the army can reach this turn
+    /// (lot C4: the cheapest reachable settlement of each province other
+    /// than the army's own; see `get_reachable_settlements`).
     #[func]
     fn get_reachable(&self, army_id: GString) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -285,21 +299,39 @@ impl CampaignSim {
             return VarDictionary::new();
         }
         let mut dict = VarDictionary::new();
-        for (province, cost) in state.reachable(data, &army) {
+        for (province, cost) in state.reachable_provinces(data, &army) {
             dict.set(province.as_str(), i64::from(cost));
         }
         dict
     }
 
-    /// Provinces to cross to reach `target` (empty when unreachable or already there).
+    /// `{settlement_id: cost}` for every settlement the army can reach this turn.
+    #[func]
+    fn get_reachable_settlements(&self, army_id: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(army) = ArmyId::parse(&army_id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let mut dict = VarDictionary::new();
+        for (settlement, cost) in state.reachable(data, &army) {
+            dict.set(settlement.as_str(), i64::from(cost));
+        }
+        dict
+    }
+
+    /// Settlements to walk through to reach `target` — a settlement id, or a
+    /// province id standing for its city — (empty when unreachable or
+    /// already there). The result feeds a `move_army` order as is.
     #[func]
     fn find_path(&self, army_id: GString, target: GString) -> PackedStringArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return PackedStringArray::new();
         };
-        let (Some(army), Ok(target)) = (
+        let (Some(army), Some(target)) = (
             ArmyId::parse(&army_id.to_string()),
-            ProvinceId::new(target.to_string()),
+            settlement_or_city(state, &target.to_string()),
         ) else {
             return PackedStringArray::new();
         };
@@ -309,17 +341,38 @@ impl CampaignSim {
             .unwrap_or_default()
     }
 
-    /// Recruitment options of a province: `[{unit_type, name, cost, upkeep, available, reason}]`.
+    /// Provinces crossed by `find_path` (lot C4: for the v1 map preview,
+    /// which draws province to province).
     #[func]
-    fn get_recruitable(&self, province_id: GString) -> VarArray {
+    fn find_path_provinces(&self, army_id: GString, target: GString) -> PackedStringArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return PackedStringArray::new();
+        };
+        let (Some(army), Some(target)) = (
+            ArmyId::parse(&army_id.to_string()),
+            settlement_or_city(state, &target.to_string()),
+        ) else {
+            return PackedStringArray::new();
+        };
+        let (Some(entry), Some(path)) = (state.army(&army), state.find_path(data, &army, &target))
+        else {
+            return PackedStringArray::new();
+        };
+        provinces_of_path(state, &entry.location, &path)
+    }
+
+    /// Recruitment options of a settlement (or of a province's city):
+    /// `[{unit_type, name, cost, upkeep, available, reason}]`.
+    #[func]
+    fn get_recruitable(&self, place_id: GString) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarArray::new();
         };
-        let Ok(province) = ProvinceId::new(province_id.to_string()) else {
+        let Some(settlement) = settlement_or_city(state, &place_id.to_string()) else {
             return VarArray::new();
         };
         state
-            .recruitable(data, &province)
+            .recruitable(data, &settlement)
             .iter()
             .map(|option| {
                 vdict! {
@@ -460,6 +513,35 @@ impl CampaignSim {
     }
 }
 
+/// Provinces crossed by a settlement path starting at `start`: consecutive
+/// duplicates and the starting province are dropped (lot C4, v1 UI).
+pub(crate) fn provinces_of_path(
+    state: &CampaignState,
+    start: &SettlementId,
+    path: &[SettlementId],
+) -> PackedStringArray {
+    let mut last = state.settlement_province(start).cloned();
+    let mut out = PackedStringArray::new();
+    for step in path {
+        if let Some(p) = state.settlement_province(step) {
+            if last.as_ref() != Some(p) {
+                out.push(p.as_str());
+                last = Some(p.clone());
+            }
+        }
+    }
+    out
+}
+
+/// A settlement id, or the city of a province id (lot C4 compatibility).
+pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<SettlementId> {
+    if let Ok(id) = SettlementId::new(raw) {
+        return state.settlement_state(&id).map(|_| id);
+    }
+    let province = ProvinceId::new(raw).ok()?;
+    state.province_city_id(&province).cloned()
+}
+
 pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
     match result {
         Ok(()) => vdict! { "ok" => true, "error" => "" },
@@ -478,7 +560,7 @@ fn unit_name(data: &GameData, unit: &Unit) -> String {
     )
 }
 
-fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
+pub(crate) fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
     units
         .iter()
         .map(|unit| {
@@ -499,16 +581,32 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .general
         .as_ref()
         .map_or_else(String::new, |id| state.character_name(data, id));
-    // M10 : a pending sea crossing (next step not a land neighbour) shows the cog model.
-    let embarked = army.path.first().is_some_and(|next| {
-        !sim_campaign::movement::land_neighbors(data, &army.location).contains(next)
-    });
+    // M10 : a pending sea crossing shows the cog model.
+    let embarked = army
+        .path
+        .first()
+        .is_some_and(|next| sim_campaign::movement::is_sea_crossing(data, &army.location, next));
+    // Lot C4: armies stand on settlements; the province is given for the
+    // v1 UI and the path is also expressed in provinces.
+    let location_province = state
+        .settlement_province(&army.location)
+        .map_or("", |p| p.as_str());
+    let path_provinces = provinces_of_path(state, &army.location, &army.path);
+    let lonlat = data
+        .settlements
+        .get(&army.location)
+        .map_or(Vector2::ZERO, |s| {
+            Vector2::new(s.lonlat[0] as f32, s.lonlat[1] as f32)
+        });
     vdict! {
         "embarked" => embarked,
         "faction" => army.faction.as_str(),
         "general" => army.general.as_ref().map_or("", |id| id.as_str()),
         "general_name" => general_name.as_str(),
         "location" => army.location.as_str(),
+        "location_province" => location_province,
+        "location_lonlat" => lonlat,
+        "path_provinces" => &path_provinces,
         "units" => &units_array(data, &army.units),
         "movement_points" => i64::from(army.movement_points),
         "supply" => i64::from(army.supply),
@@ -596,7 +694,7 @@ fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
         .collect()
 }
 
-fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
+pub(crate) fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
     let name = data.buildings.get(&construction.building).map_or_else(
         || construction.building.to_string(),
         |b| b.name.display.clone(),
@@ -781,10 +879,10 @@ fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) 
         return format!("gouverneur de {}", province_name(data, province));
     }
     if let Some(army) = view.army.as_ref().and_then(|a| state.army(a)) {
-        return format!(
-            "général de l'armée en {}",
-            province_name(data, &army.location)
-        );
+        let place = state
+            .settlement_province(&army.location)
+            .map_or_else(String::new, |p| province_name(data, p));
+        return format!("général de l'armée en {place}");
     }
     "à la cour".to_owned()
 }

@@ -14,6 +14,11 @@
   },
   "build_time_turns": 8,
   "upkeep": 50,
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle"
+  ],
   "effects": [
     {
       "effect": "fortification_level",

@@ -13,6 +13,7 @@ mod event_check;
 pub mod ids;
 pub mod load;
 pub mod map;
+pub mod movement_graph;
 pub mod settlement_load;
 
 pub use common::{
@@ -44,7 +45,8 @@ pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::settlement::{
-    FullProvinceBonus, Settlement, SettlementEdge, SettlementGraph, SettlementKind, SettlementRules,
+    FullProvinceBonus, MovementRules, Settlement, SettlementEdge, SettlementGraph, SettlementKind,
+    SettlementRules,
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
@@ -57,3 +59,4 @@ pub use ids::{
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
+pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};

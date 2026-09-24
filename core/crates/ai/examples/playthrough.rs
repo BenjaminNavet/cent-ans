@@ -60,11 +60,7 @@ fn play(data: &GameData, player: FactionId, seed: u64) {
             break;
         }
     }
-    let provinces = state
-        .provinces
-        .values()
-        .filter(|p| p.owner == player)
-        .count();
+    let provinces = state.owned_provinces(&player).len();
     let (kind, score) = state.outcome.as_ref().map_or(
         ("aucune".to_owned(), state.campaign_score(data, &player)),
         |o| (format!("{:?}", o.kind), o.score),

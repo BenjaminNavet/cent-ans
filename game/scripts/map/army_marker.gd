@@ -62,7 +62,7 @@ func _ready() -> void:
 
 func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 	army_id = id
-	province_id = str(army.get("location", ""))
+	province_id = str(army.get("location_province", army.get("location", "")))
 	faction_id = str(army.get("faction", ""))
 	is_player = player
 	faction_color = color

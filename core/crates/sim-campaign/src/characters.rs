@@ -258,7 +258,7 @@ pub(crate) fn resolve_faction_deaths(
         if !state.factions[&id].alive || id.as_str() == crate::diplomacy::REBELS_FACTION {
             continue;
         }
-        let has_province = state.provinces.values().any(|p| p.controller == id);
+        let has_province = state.settlements.values().any(|s| s.controller == id);
         let has_army = state.armies.values().any(|a| a.faction == id);
         if !has_province && !has_army {
             let dead = state.factions.get_mut(&id).expect("exists");
