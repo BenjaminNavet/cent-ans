@@ -1,9 +1,11 @@
 class_name MapUI
 extends CanvasLayer
 
-## Couche UI de la carte de campagne : barre supérieure (faction, trésor, revenu, date,
-## fin du tour, menu), journal des événements (bas gauche, repliable), panneau d'armée,
-## panneau de province, aperçu de chemin au survol, notifications, dialogue sauver/charger.
+## Couche UI de la carte de campagne : barre supérieure (faction, trésor, solde, date, menu),
+## HUD « à la Total War » (F10b : bandeau d'ost `ArmyStrip` et sceau du chef `GeneralSeal` pour
+## l'armée sélectionnée, cloche de fin de saison `EndTurnCluster`, lettres scellées
+## `NewsLetters`), journal des événements (bas gauche, replié par défaut), panneau de province,
+## aperçu de chemin au survol, notifications, dialogue sauver/charger.
 ## Ne connaît pas la simulation : `CampaignMap` alimente les vues et reçoit les signaux.
 
 signal end_turn_pressed
@@ -17,7 +19,14 @@ signal build_requested(province_id: String, building_id: String)
 signal cancel_build_requested(province_id: String)
 signal tax_rate_changed(faction_id: String, rate: String)
 signal stance_changed(army_id: String, stance: String)
-signal army_panel_closed
+## Bandeau d'ost : régiments à détacher de l'armée `army_id` (ordre `split_army`).
+signal army_split_requested(army_id: String, unit_indices: Array)
+## Sceau du chef : fiche du chef (`character_id`), ou `""` si l'armée n'a pas de chef.
+signal army_general_clicked(character_id: String)
+## Cloche : clic sur une pastille d'alerte (ou sur la cloche quand une décision bloque).
+signal alert_activated(alert: Dictionary)
+## Lettre scellée ouverte.
+signal news_activated(item: Dictionary)
 signal province_panel_closed
 signal faction_panel_requested
 signal court_panel_requested
@@ -43,7 +52,6 @@ const TOAST_SECONDS := 3.5
 @onready var treasury_label: Label = %TreasuryLabel
 @onready var income_label: Label = %IncomeLabel
 @onready var date_label: Label = %DateLabel
-@onready var end_turn_button: Button = %EndTurnButton
 @onready var menu_button: MenuButton = %MenuButton
 @onready var toast: Label = %Toast
 @onready var hover_label: Label = %HoverLabel
@@ -52,7 +60,11 @@ const TOAST_SECONDS := 3.5
 @onready var log_toggle: Button = %LogToggle
 @onready var log_scroll: ScrollContainer = %LogScroll
 @onready var log_text: RichTextLabel = %LogText
-@onready var army_panel: ArmyPanel = %ArmyPanel
+# F10b : HUD de campagne (noms de nœuds stables, ciblés par le tutoriel).
+@onready var army_strip: ArmyStrip = %ArmyStrip
+@onready var general_seal: GeneralSeal = %GeneralSeal
+@onready var end_turn_cluster: EndTurnCluster = %EndTurnCluster
+@onready var news_letters: NewsLetters = %NewsLetters
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
 @onready var court_button: Button = %CourtButton
@@ -71,13 +83,6 @@ var _toast_timer: SceneTreeTimer
 
 
 func _ready() -> void:
-	end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
-	var shortcut := Shortcut.new()
-	var action := InputEventAction.new()
-	action.action = "campaign_end_turn"
-	shortcut.events = [action]
-	end_turn_button.shortcut = shortcut
-	end_turn_button.tooltip_text = "Termine le tour (Entrée)"
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
 	# M10 assets : entrée « Son… » (volumes Musique / Effets) dans le menu.
 	var audio := get_node_or_null("/root/AudioDirector")
@@ -95,9 +100,6 @@ func _ready() -> void:
 	faction_panel.tax_rate_changed.connect(func(f: String, r: String) -> void: tax_rate_changed.emit(f, r))
 	faction_swatch.gui_input.connect(_on_faction_swatch_input)
 	faction_label.gui_input.connect(_on_faction_swatch_input)
-	army_panel.hide()
-	army_panel.stance_changed.connect(func(a: String, s: String) -> void: stance_changed.emit(a, s))
-	army_panel.closed.connect(func() -> void: army_panel_closed.emit())
 	faction_panel.hide()
 	court_button.pressed.connect(func() -> void: court_panel_requested.emit())
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
@@ -125,11 +127,12 @@ func _ready() -> void:
 	# --- fin M6 ---
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
 	save_load_dialog.load_confirmed.connect(func(p: String) -> void: load_requested.emit(p))
-	save_load_dialog.dialog_closed.connect(func() -> void: end_turn_button.disabled = false)
+	save_load_dialog.dialog_closed.connect(func() -> void: set_end_turn_enabled(true))
 	hover_label.text = ""
 	hover_label.hide()
 	toast.hide()
 	_decorate_top_bar()  # F2
+	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
@@ -157,8 +160,6 @@ func _decorate_top_bar() -> void:
 	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
 	_decorate_button(court_button, "hud_court", true)
 	_decorate_button(tech_button, "hud_technologies", true)
-	_decorate_button(end_turn_button, "hud_end_turn")
-	end_turn_button.tooltip_text = RichTooltip.hud("hud_end_turn")
 	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
 
@@ -232,16 +233,16 @@ func set_date(text: String) -> void:
 
 
 func set_end_turn_enabled(enabled: bool) -> void:
-	end_turn_button.disabled = not enabled
+	end_turn_cluster.set_end_turn_enabled(enabled)
 
 
 func _on_menu_item(id: int) -> void:
 	match id:
 		MENU_SAVE:
-			end_turn_button.disabled = true
+			set_end_turn_enabled(false)
 			save_load_dialog.open_save("partie_%s" % Time.get_date_string_from_system())
 		MENU_LOAD:
-			end_turn_button.disabled = true
+			set_end_turn_enabled(false)
 			save_load_dialog.open_load()
 		MENU_MAIN:
 			main_menu_requested.emit()
@@ -258,7 +259,10 @@ func is_dialog_open() -> bool:
 
 func set_hovered(province: Dictionary) -> void:
 	hover_label.text = str(province.get("display_name", province.get("name", ""))) if not province.is_empty() else ""
+	if hover_label.text == "" and army_strip.visible:
+		hover_label.text = _army_status  # F10b : position et ordre de l'armée sélectionnée
 	hover_label.visible = hover_label.text != ""
+	_fit_hover_label()
 
 
 ## Survol d'une destination avec une armée sélectionnée : nom, coût et faisabilité.
@@ -270,6 +274,7 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 	else:
 		hover_label.text = "→ %s : %d étape%s, plusieurs tours — clic droit pour partir" % [province_name, steps, "s" if steps > 1 else ""]
 	hover_label.visible = true
+	_fit_hover_label()
 
 
 func show_toast(text: String, is_error: bool = false) -> void:
@@ -324,6 +329,9 @@ func add_events(events: Array, date_text: String) -> void:
 	for event in events:
 		if not journal_keeps(event):
 			continue
+		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
+		if not news.is_empty():
+			news_letters.push_news(news)
 		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
 		if text == "":
@@ -389,6 +397,7 @@ func add_events(events: Array, date_text: String) -> void:
 
 func clear_log() -> void:
 	_log_lines = PackedStringArray()
+	news_letters.clear()
 	log_text.text = "[i]Aucun événement pour l'instant.[/i]"
 	log_title.text = "Journal"
 
@@ -399,8 +408,14 @@ func _render_log() -> void:
 
 
 func _toggle_log() -> void:
-	log_scroll.visible = not log_scroll.visible
-	log_toggle.text = "Replier" if log_scroll.visible else "Déplier"
+	set_log_expanded(not log_scroll.visible)
+
+
+## Journal déplié ou replié (replié par défaut : le sceau et le bandeau occupent le bas).
+func set_log_expanded(expanded: bool) -> void:
+	log_scroll.visible = expanded
+	log_toggle.text = "Replier" if expanded else "Déplier"
+	queue_layout()
 
 
 func log_line_count() -> int:
@@ -435,12 +450,44 @@ func _on_faction_swatch_input(event: InputEvent) -> void:
 		faction_panel_requested.emit()
 
 
-func show_army(army_id: String, army: Dictionary, faction_label: String, color: Color, is_player: bool, province_name_of: Callable, general_skills: Dictionary = {}) -> void:
-	army_panel.show_army(army_id, army, faction_label, color, is_player, province_name_of, general_skills)
+## F10b : armée sélectionnée dans le bandeau et le sceau. `army` = `get_army(id)`,
+## `character` = `get_character(army.general)` (vide = sans chef), `title` = rubrique du
+## bandeau, `status` = position et ordre en cours (étiquette au-dessus du bandeau),
+## `can_split` = la simulation accepte `split_army` et l'armée est au joueur.
+func show_army(army_id: String, army: Dictionary, character: Dictionary, faction: String, is_player: bool, title: String, status: String, can_split: bool = false) -> void:
+	if army.is_empty():
+		hide_army()
+		return
+	if _unit_catalog.is_empty():
+		_unit_catalog = ArmyStrip.load_unit_catalog(MapPaths.data_dir)
+	var keep: Array = []
+	if army_id == current_army_id and army_strip.visible:
+		var count := (army.get("units", []) as Array).size()
+		for index in army_strip.get_selection():
+			if index < count:
+				keep.append(index)
+	current_army_id = army_id
+	army_strip.can_split = can_split
+	army_strip.set_army(army, int(army.get("max_units", DEFAULT_ARMY_CAPACITY)), _unit_catalog, title)
+	if not keep.is_empty():
+		army_strip.select(keep)
+	general_seal.can_change_stance = is_player
+	general_seal.set_general(character, army, faction)
+	general_seal.show()
+	_army_status = status
+	set_hovered({})
+	queue_layout()
 
 
 func hide_army() -> void:
-	army_panel.hide()
+	current_army_id = ""
+	_army_status = ""
+	army_strip.clear()
+	army_strip.hide()
+	general_seal.hide()
+	army_actions.hide()
+	set_hovered({})
+	queue_layout()
 
 
 func show_court(rows: Array[Dictionary], faction_label: String, faction_color: Color, preset_filter: int = -1) -> void:
@@ -494,3 +541,127 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 		str(research.get("name", "")), int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
 		", %d tour(s) restant(s)" % turns if turns >= 0 else ""]
+
+
+# --- HUD de campagne (F10b) ----------------------------------------------------------
+
+
+## Capacité affichée du bandeau (`8/20`) tant que la simulation n'expose pas `max_units`.
+const DEFAULT_ARMY_CAPACITY := 20
+const HUD_MARGIN := 16.0
+const LOG_WIDTH := 420.0
+
+## Armée affichée dans le bandeau (`""` si aucune).
+var current_army_id: String = ""
+## Boîte d'actions contextuelles au-dessus du bandeau (assaut de siège, M8) : les contrôleurs
+## ajoutent leurs contrôles dans `army_actions_box` ; visible quand un de ses enfants l'est.
+var army_actions: PanelContainer
+var army_actions_box: VBoxContainer
+var _army_status: String = ""
+var _unit_catalog: Dictionary = {}
+var _layout_queued := false
+
+
+## Accesseur stable (tutoriel F8) : le bandeau d'ost de l'armée sélectionnée (nœud `ArmyStrip`).
+func selected_army_widget() -> ArmyStrip:
+	return army_strip
+
+
+## Accesseur stable (tutoriel F8) : la cloche de fin de saison (nœud `EndTurnCluster`).
+func end_turn_control() -> EndTurnCluster:
+	return end_turn_cluster
+
+
+func _setup_hud() -> void:
+	end_turn_cluster.end_turn_requested.connect(func() -> void: end_turn_pressed.emit())
+	end_turn_cluster.alert_activated.connect(func(alert: Dictionary) -> void: alert_activated.emit(alert))
+	general_seal.general_requested.connect(func(id: String) -> void: army_general_clicked.emit(id))
+	general_seal.stance_selected.connect(func(stance: String) -> void:
+		if current_army_id != "":
+			stance_changed.emit(current_army_id, stance))
+	army_strip.split_requested.connect(func(indices: PackedInt32Array) -> void:
+		if current_army_id != "":
+			army_split_requested.emit(current_army_id, Array(indices)))
+	news_letters.news_activated.connect(func(item: Dictionary) -> void: news_activated.emit(item))
+	army_actions = PanelContainer.new()
+	army_actions.name = "ArmyActions"
+	army_actions.theme = event_log.theme
+	army_actions.add_theme_stylebox_override("panel", HudStyle.panel_box(8))
+	army_actions_box = VBoxContainer.new()
+	army_actions_box.custom_minimum_size = Vector2(320, 0)
+	army_actions.add_child(army_actions_box)
+	add_child(army_actions)
+	move_child(army_actions, army_strip.get_index())
+	army_actions.hide()
+	army_strip.hide()
+	general_seal.hide()
+	# Le journal est placé par `layout_hud` (au-dessus du sceau quand une armée est choisie).
+	event_log.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	set_log_expanded(false)
+	army_strip.minimum_size_changed.connect(queue_layout)
+	news_letters.resized.connect(queue_layout)
+	event_log.minimum_size_changed.connect(queue_layout)
+	for panel in [province_panel, faction_panel, character_sheet]:
+		panel.visibility_changed.connect(queue_layout)
+	get_viewport().size_changed.connect(queue_layout)
+	queue_layout()
+
+
+## Replace le HUD au prochain cycle (plusieurs demandes → un seul placement).
+func queue_layout() -> void:
+	if _layout_queued or not is_inside_tree():
+		return
+	_layout_queued = true
+	layout_hud.call_deferred()
+
+
+## Placement du HUD (guide `docs/design/hud-campagne.md` § 3.1) : sceau en bas à gauche,
+## cloche en bas à droite, bandeau centré entre les deux, journal au-dessus du sceau, lettres
+## sous la barre à droite, panneau de province arrêté au-dessus de la cloche.
+func layout_hud() -> void:
+	_layout_queued = false
+	var view := get_viewport().get_visible_rect().size
+	var top: float = ($TopBar as Control).size.y + 8.0
+	end_turn_cluster.size = end_turn_cluster.get_combined_minimum_size()
+	end_turn_cluster.position = view - end_turn_cluster.size - Vector2(HUD_MARGIN, HUD_MARGIN) * 0.5
+	general_seal.size = general_seal.get_combined_minimum_size()
+	general_seal.position = Vector2(HUD_MARGIN, view.y - general_seal.size.y - HUD_MARGIN)
+	var left := general_seal.position.x + general_seal.size.x + 16.0
+	var right := end_turn_cluster.position.x + end_turn_cluster.fan_left_edge() - 10.0
+	var gap := right - left
+	army_strip.max_width = gap
+	army_strip.size = Vector2.ZERO
+	army_strip.position = Vector2(left + (gap - army_strip.size.x) * 0.5, view.y - army_strip.size.y - HUD_MARGIN * 0.75)
+	# Étiquette de chemin : au-dessus du bandeau, sinon en bas au centre.
+	var label_bottom := army_strip.position.y - 6.0 if army_strip.visible else view.y - HUD_MARGIN
+	hover_label.position.y = label_bottom - hover_label.size.y
+	var actions_visible := false
+	for child in army_actions_box.get_children():
+		if (child as Control).visible:
+			actions_visible = true
+	army_actions.visible = army_strip.visible and actions_visible
+	army_actions.size = Vector2.ZERO
+	army_actions.position = Vector2(army_strip.position.x, label_bottom - hover_label.size.y - army_actions.size.y - 6.0)
+	# Journal : bas gauche, au-dessus du sceau quand il est affiché.
+	var log_bottom := general_seal.position.y - 8.0 if general_seal.visible else view.y - HUD_MARGIN
+	var log_height := event_log.get_combined_minimum_size().y
+	event_log.size = Vector2(LOG_WIDTH, log_height)
+	event_log.position = Vector2(HUD_MARGIN, maxf(top, log_bottom - log_height))
+	# Panneau de province : de la barre jusqu'au-dessus de la cloche.
+	province_panel.anchor_top = 0.0
+	province_panel.anchor_bottom = 1.0
+	# Contenu plus haut que la place : le panneau déborde vers le bas (sur la cloche),
+	# jamais vers le haut (sur la barre supérieure).
+	province_panel.grow_vertical = Control.GROW_DIRECTION_END
+	province_panel.offset_top = top
+	province_panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
+	# Lettres : haut droite, masquées sous un panneau de droite.
+	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, top)
+	news_letters.visible = not (province_panel.visible or faction_panel.visible or character_sheet.visible)
+
+
+func _fit_hover_label() -> void:
+	hover_label.reset_size()
+	hover_label.size.x = maxf(hover_label.get_combined_minimum_size().x + 24.0, 400.0)
+	hover_label.position.x = (get_viewport().get_visible_rect().size.x - hover_label.size.x) * 0.5
+	queue_layout()
