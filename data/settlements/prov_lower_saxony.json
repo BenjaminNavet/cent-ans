@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_brunswick",
+    "province": "prov_lower_saxony",
+    "kind": "city",
+    "name": {
+      "display": "Brunswick",
+      "local": "Brunswik",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.5268,
+      52.2689
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Duchés de Brunswick-Lunebourg (Welfs), archevêché de Brême, évêché de Hildesheim ; Brunswick et Lunebourg (salines) sont villes hanséatiques.",
+    "sources": [
+      "Duché de Brunswick-Lunebourg",
+      "Brême",
+      "Lunebourg"
+    ]
+  },
+  {
+    "id": "set_bremen",
+    "province": "prov_lower_saxony",
+    "kind": "town",
+    "name": {
+      "display": "Brême",
+      "local": "Bremen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.8017,
+      53.0793
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Ville libre d'empire et siège archiépiscopal, grand port hanséatique de la Weser.",
+    "sources": [
+      "Brême"
+    ]
+  },
+  {
+    "id": "set_hildesheim",
+    "province": "prov_lower_saxony",
+    "kind": "town",
+    "name": {
+      "display": "Hildesheim",
+      "local": "Hildensem",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.95,
+      52.15
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne cité épiscopale saxonne réputée pour son orfèvrerie et sa cathédrale.",
+    "sources": [
+      "Hildesheim"
+    ]
+  },
+  {
+    "id": "set_loccum",
+    "province": "prov_lower_saxony",
+    "kind": "abbey",
+    "name": {
+      "display": "Loccum",
+      "local": "Lucca",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.1667,
+      52.4667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne saxonne fondée au XIIe siècle.",
+    "sources": [
+      "Loccum"
+    ]
+  }
+]

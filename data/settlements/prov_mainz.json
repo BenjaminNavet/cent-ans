@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_mayence",
+    "province": "prov_mainz",
+    "kind": "city",
+    "name": {
+      "display": "Mayence",
+      "local": "Mainz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.2711,
+      49.9929
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Électorat de Mayence (archevêque Henri de Virnebourg), Francfort (cité impériale, foires) et landgraviat de Hesse (Henri II). Chancellerie de l'Empire.",
+    "sources": [
+      "Électorat de Mayence",
+      "Landgraviat de Hesse",
+      "Francfort-sur-le-Main"
+    ]
+  },
+  {
+    "id": "set_frankfurt",
+    "province": "prov_mainz",
+    "kind": "town",
+    "name": {
+      "display": "Francfort",
+      "local": "Franckenfort",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6821,
+      50.1109
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire sur le Main, lieu traditionnel d'élection des rois des Romains et grande foire commerciale.",
+    "sources": [
+      "Francfort-sur-le-Main"
+    ]
+  },
+  {
+    "id": "set_ehrenfels",
+    "province": "prov_mainz",
+    "kind": "castle",
+    "name": {
+      "display": "Ehrenfels",
+      "local": "Ehrenfels",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.9114,
+      49.9702
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de péage de l'archevêque de Mayence surveillant le trafic sur le Rhin près de Bingen.",
+    "sources": [
+      "Château d'Ehrenfels"
+    ]
+  },
+  {
+    "id": "set_eberbach",
+    "province": "prov_mainz",
+    "kind": "abbey",
+    "name": {
+      "display": "Eberbach",
+      "local": "Eberbach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.0,
+      50.0333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Grande abbaye cistercienne du Rheingau, célèbre pour son vignoble.",
+    "sources": [
+      "Abbaye d'Eberbach"
+    ]
+  }
+]

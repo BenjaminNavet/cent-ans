@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_arras",
+    "province": "prov_artois",
+    "kind": "city",
+    "name": { "display": "Arras", "local": "Arras", "local_language": "ancien français" },
+    "lonlat": [2.7775, 50.2910],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": false,
+    "description": "Capitale du comté d'Artois, célèbre pour ses draperies et ses tapisseries.",
+    "sources": ["Arras", "Comté d'Artois"]
+  },
+  {
+    "id": "set_saint_omer",
+    "province": "prov_artois",
+    "kind": "town",
+    "name": { "display": "Saint-Omer", "local": "Saint Omer", "local_language": "ancien français" },
+    "lonlat": [2.2500, 50.7500],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_weaving_workshop", "bld_stone_walls"],
+    "port": false,
+    "description": "Grande ville drapière close, autour de l'abbaye Saint-Bertin.",
+    "sources": ["Saint-Omer"]
+  },
+  {
+    "id": "set_hesdin",
+    "province": "prov_artois",
+    "kind": "castle",
+    "name": { "display": "Hesdin", "local": "Hesdin", "local_language": "ancien français" },
+    "lonlat": [2.0500, 50.3667],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Résidence fortifiée des comtes d'Artois sur la Canche.",
+    "sources": ["Hesdin", "Vieil-Hesdin"]
+  },
+  {
+    "id": "set_mont_saint_eloi",
+    "province": "prov_artois",
+    "kind": "abbey",
+    "name": { "display": "Mont-Saint-Éloi", "local": "Mont Saint Eloy", "local_language": "ancien français" },
+    "lonlat": [2.6167, 50.3667],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye augustinienne sur une colline dominant la plaine d'Arras.",
+    "sources": ["Abbaye du Mont-Saint-Éloi"]
+  },
+  {
+    "id": "set_azincourt",
+    "province": "prov_artois",
+    "kind": "village",
+    "name": { "display": "Azincourt", "local": "Agincourt", "local_language": "ancien français" },
+    "lonlat": [2.1300, 50.4667],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Village agricole aux confins de l'Artois et du Ponthieu.",
+    "sources": ["Azincourt"]
+  }
+]

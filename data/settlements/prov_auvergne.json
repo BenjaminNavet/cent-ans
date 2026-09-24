@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_clermont",
+    "province": "prov_auvergne",
+    "kind": "city",
+    "name": { "display": "Clermont", "local": "Clarmont", "local_language": "occitan" },
+    "lonlat": [3.0870, 45.7772],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Cité épiscopale d'Auvergne, où fut prêchée la première croisade en 1095 ; siège du bailliage royal voisin.",
+    "sources": ["Clermont-Ferrand", "Concile de Clermont"]
+  },
+  {
+    "id": "set_riom",
+    "province": "prov_auvergne",
+    "kind": "town",
+    "name": { "display": "Riom", "local": "Riom", "local_language": "occitan" },
+    "lonlat": [3.1122, 45.8931],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close rivale de Clermont, siège du bailliage royal d'Auvergne.",
+    "sources": ["Riom"]
+  },
+  {
+    "id": "set_murol",
+    "province": "prov_auvergne",
+    "kind": "castle",
+    "name": { "display": "Murol", "local": "Muròl", "local_language": "occitan" },
+    "lonlat": [2.9333, 45.5667],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château de basalte dominant le pays de Besse, seigneurie du Chariol.",
+    "sources": ["Château de Murol"]
+  },
+  {
+    "id": "set_la_chaise_dieu",
+    "province": "prov_auvergne",
+    "kind": "abbey",
+    "name": { "display": "La Chaise-Dieu", "local": "La Cadeira Dieu", "local_language": "occitan" },
+    "lonlat": [3.6967, 45.3236],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye bénédictine fondée en 1043, future nécropole du pape Clément VI.",
+    "sources": ["Abbaye Saint-Robert de La Chaise-Dieu"]
+  },
+  {
+    "id": "set_orcival",
+    "province": "prov_auvergne",
+    "kind": "village",
+    "name": { "display": "Orcival", "local": "Orcivau", "local_language": "occitan" },
+    "lonlat": [2.8206, 45.5667],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Bourg de pèlerinage autour de sa basilique romane Notre-Dame, non fortifié.",
+    "sources": ["Orcival"]
+  }
+]

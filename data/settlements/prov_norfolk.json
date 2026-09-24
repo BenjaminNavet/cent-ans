@@ -1,0 +1,145 @@
+[
+  {
+    "id": "set_norwich",
+    "province": "prov_norfolk",
+    "kind": "city",
+    "name": {
+      "display": "Norwich",
+      "local": "Norwich",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.2974,
+      52.6309
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Norfolk, Suffolk, Cambridgeshire et Lincolnshire : la région la plus peuplée d'Angleterre. Norwich (worsted), Yarmouth (hareng), Boston et Lynn (laine vers la Flandre), Ely et les Fens.",
+    "sources": [
+      "Norfolk",
+      "Lincolnshire",
+      "Norwich"
+    ]
+  },
+  {
+    "id": "set_yarmouth",
+    "province": "prov_norfolk",
+    "kind": "town",
+    "name": {
+      "display": "Great Yarmouth",
+      "local": "Jernemuth",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.7297,
+      52.6083
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port du hareng d'Est-Anglie, l'un des plus actifs du royaume et rival des ports flamands.",
+    "sources": [
+      "Great Yarmouth"
+    ]
+  },
+  {
+    "id": "set_lynn",
+    "province": "prov_norfolk",
+    "kind": "town",
+    "name": {
+      "display": "Lynn",
+      "local": "Bishop's Lynn",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.4034,
+      52.7524
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Port hanséatique lié à la Hanse allemande, l'un des plus fréquentés d'Angleterre.",
+    "sources": [
+      "King's Lynn"
+    ]
+  },
+  {
+    "id": "set_boston",
+    "province": "prov_norfolk",
+    "kind": "town",
+    "name": {
+      "display": "Boston",
+      "local": "Botulfston",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.0258,
+      52.976
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port de l'étape de la laine, foire annuelle fréquentée par les marchands hanséates.",
+    "sources": [
+      "Boston (Lincolnshire)"
+    ]
+  },
+  {
+    "id": "set_bury_st_edmunds",
+    "province": "prov_norfolk",
+    "kind": "abbey",
+    "name": {
+      "display": "Bury St Edmunds",
+      "local": "Sancte Eadmundes Byrig",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.718,
+      52.2474
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Immense abbaye bénédictine, lieu de pèlerinage du roi-martyr saint Edmond.",
+    "sources": [
+      "Bury St Edmunds"
+    ]
+  }
+]

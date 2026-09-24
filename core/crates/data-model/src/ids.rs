@@ -96,6 +96,11 @@ define_id!(
     "prov_"
 );
 define_id!(
+    /// Identifier of a settlement inside a province (`set_rouen`), lot C1.
+    SettlementId,
+    "set_"
+);
+define_id!(
     /// Identifier of a unit type (`unit_longbowmen`).
     UnitTypeId,
     "unit_"

@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_berlin",
+    "province": "prov_brandenburg",
+    "kind": "city",
+    "name": {
+      "display": "Berlin",
+      "local": "Berlin",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.405,
+      52.52
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Marche de Brandebourg donnée en 1323 par Louis IV à son fils Louis le Brandebourgeois ; seigneuries de Mecklembourg et Poméranie occidentale (villes hanséatiques de Rostock, Wismar, Stralsund).",
+    "sources": [
+      "Marche de Brandebourg",
+      "Louis V de Bavière",
+      "Mecklembourg"
+    ]
+  },
+  {
+    "id": "set_frankfurt_oder",
+    "province": "prov_brandenburg",
+    "kind": "town",
+    "name": {
+      "display": "Francfort-sur-l'Oder",
+      "local": "Frankinvorde",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.5378,
+      52.3413
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville hanséatique du margraviat de Brandebourg sur l'Oder, carrefour commercial vers la Pologne.",
+    "sources": [
+      "Francfort-sur-l'Oder"
+    ]
+  },
+  {
+    "id": "set_spandau",
+    "province": "prov_brandenburg",
+    "kind": "castle",
+    "name": {
+      "display": "Spandau",
+      "local": "Spandowe",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.2033,
+      52.535
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse margraviale au confluent de la Havel et de la Sprée, gardant l'approche de Berlin.",
+    "sources": [
+      "Spandau"
+    ]
+  },
+  {
+    "id": "set_stralsund",
+    "province": "prov_brandenburg",
+    "kind": "town",
+    "name": {
+      "display": "Stralsund",
+      "local": "Stralessund",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.091,
+      54.3093
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port hanséatique de la Baltique, rival de Lübeck pour le commerce du hareng et des céréales.",
+    "sources": [
+      "Stralsund"
+    ]
+  }
+]

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_augsbourg",
+    "province": "prov_swabia",
+    "kind": "city",
+    "name": {
+      "display": "Augsbourg",
+      "local": "Augsburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.8978,
+      48.3705
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d'Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
+    "sources": [
+      "Duché de Souabe",
+      "Comté de Wurtemberg",
+      "Augsbourg"
+    ]
+  },
+  {
+    "id": "set_ulm",
+    "province": "prov_swabia",
+    "kind": "town",
+    "name": {
+      "display": "Ulm",
+      "local": "Ulme",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.9876,
+      48.4011
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire sur le Danube, grand marché de toile et de blé de Souabe.",
+    "sources": [
+      "Ulm"
+    ]
+  },
+  {
+    "id": "set_hohenzollern",
+    "province": "prov_swabia",
+    "kind": "castle",
+    "name": {
+      "display": "Hohenzollern",
+      "local": "Zolre",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.9679,
+      48.3235
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château ancestral des comtes de Hohenzollern, perché sur un éperon jurassien.",
+    "sources": [
+      "Château de Hohenzollern"
+    ]
+  },
+  {
+    "id": "set_kaisheim",
+    "province": "prov_swabia",
+    "kind": "abbey",
+    "name": {
+      "display": "Kaisheim",
+      "local": "Kaisheim",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.7967,
+      48.7461
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne d'immédiateté impériale sur le Danube souabe.",
+    "sources": [
+      "Kaisheim"
+    ]
+  }
+]

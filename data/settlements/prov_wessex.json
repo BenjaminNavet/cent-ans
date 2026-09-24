@@ -1,0 +1,143 @@
+[
+  {
+    "id": "set_winchester",
+    "province": "prov_wessex",
+    "kind": "city",
+    "name": {
+      "display": "Winchester",
+      "local": "Wynchestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.308,
+      51.0632
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Hampshire, Wiltshire, Dorset et Berkshire : Winchester (étape de la laine), Southampton (port des vins de Gascogne, brûlé par les Franco-Génois en 1338), Salisbury. Moutons des Downs, pierre de Portland.",
+    "sources": [
+      "Wessex",
+      "Southampton",
+      "Winchester"
+    ]
+  },
+  {
+    "id": "set_southampton",
+    "province": "prov_wessex",
+    "kind": "town",
+    "name": {
+      "display": "Southampton",
+      "local": "Suthhamptun",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4048,
+      50.9097
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Grand port du commerce des vins de Gascogne, bientôt ravagé par un raid franco-génois en 1338.",
+    "sources": [
+      "Southampton"
+    ]
+  },
+  {
+    "id": "set_salisbury",
+    "province": "prov_wessex",
+    "kind": "town",
+    "name": {
+      "display": "Salisbury",
+      "local": "Newe Sarisberie",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7936,
+      51.0688
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ville neuve bâtie autour de la cathédrale déplacée depuis Old Sarum au XIIIe siècle.",
+    "sources": [
+      "Salisbury"
+    ]
+  },
+  {
+    "id": "set_portsmouth",
+    "province": "prov_wessex",
+    "kind": "village",
+    "name": {
+      "display": "Portsmouth",
+      "local": "Portesmue",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.0872,
+      50.8058
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Havre naturel utilisé pour le rassemblement des flottes royales.",
+    "sources": [
+      "Portsmouth"
+    ]
+  },
+  {
+    "id": "set_beaulieu",
+    "province": "prov_wessex",
+    "kind": "abbey",
+    "name": {
+      "display": "Beaulieu",
+      "local": "Bellus Locus",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4508,
+      50.814
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne royale fondée par Jean sans Terre dans la New Forest.",
+    "sources": [
+      "Abbaye de Beaulieu"
+    ]
+  }
+]

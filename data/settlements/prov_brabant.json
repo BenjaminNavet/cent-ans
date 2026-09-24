@@ -1,0 +1,170 @@
+[
+  {
+    "id": "set_louvain",
+    "province": "prov_brabant",
+    "kind": "city",
+    "name": {
+      "display": "Louvain",
+      "local": "Leuven",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.7005,
+      50.8798
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Duché de Brabant et Limbourg tenu par Jean III, qui louvoie entre France et Angleterre ; Louvain, Bruxelles, Malines et Anvers (étape de la laine anglaise en 1338).",
+    "sources": [
+      "Duché de Brabant",
+      "Jean III de Brabant",
+      "Louvain"
+    ]
+  },
+  {
+    "id": "set_antwerp",
+    "province": "prov_brabant",
+    "kind": "town",
+    "name": {
+      "display": "Anvers",
+      "local": "Antwerpen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.4025,
+      51.2194
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Port brabançon sur l'Escaut, marché en pleine croissance qui concurrencera bientôt Bruges.",
+    "sources": [
+      "Anvers"
+    ]
+  },
+  {
+    "id": "set_brussels",
+    "province": "prov_brabant",
+    "kind": "town",
+    "name": {
+      "display": "Bruxelles",
+      "local": "Brussel",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.3517,
+      50.8503
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
+    "port": false,
+    "description": "Résidence ducale sur la Senne, l'une des quatre bonnes villes de Brabant.",
+    "sources": [
+      "Bruxelles"
+    ]
+  },
+  {
+    "id": "set_shertogenbosch",
+    "province": "prov_brabant",
+    "kind": "town",
+    "name": {
+      "display": "Bois-le-Duc",
+      "local": "'s-Hertogenbossche",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.3037,
+      51.6978
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville neuve fondée par le duc de Brabant, l'une des quatre bonnes villes du duché.",
+    "sources": [
+      "Bois-le-Duc"
+    ]
+  },
+  {
+    "id": "set_vilvoorde",
+    "province": "prov_brabant",
+    "kind": "castle",
+    "name": {
+      "display": "Vilvorde",
+      "local": "Vilvoirde",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.4247,
+      50.9275
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ducal sur la Senne, servant aussi de prison d'État.",
+    "sources": [
+      "Vilvorde"
+    ]
+  },
+  {
+    "id": "set_villers",
+    "province": "prov_brabant",
+    "kind": "abbey",
+    "name": {
+      "display": "Villers-la-Ville",
+      "local": "Villers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.5322,
+      50.6031
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye cistercienne du sud du Brabant.",
+    "sources": [
+      "Abbaye de Villers"
+    ]
+  }
+]

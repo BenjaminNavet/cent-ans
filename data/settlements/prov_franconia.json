@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_nuremberg",
+    "province": "prov_franconia",
+    "kind": "city",
+    "name": {
+      "display": "Nuremberg",
+      "local": "Nürnberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0767,
+      49.4521
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Franconie : Nuremberg, cité impériale fidèle à Louis IV ; burgraves de Nuremberg (Hohenzollern) ; évêchés de Wurtzbourg et Bamberg. Métallurgie, commerce vers l'Italie.",
+    "sources": [
+      "Franconie",
+      "Nuremberg",
+      "Évêché de Wurtzbourg"
+    ]
+  },
+  {
+    "id": "set_wurzburg",
+    "province": "prov_franconia",
+    "kind": "town",
+    "name": {
+      "display": "Wurtzbourg",
+      "local": "Wirzeburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.9333,
+      49.7913
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège de la principauté épiscopale de Wurtzbourg, résidence des évêques ducs de Franconie.",
+    "sources": [
+      "Wurtzbourg"
+    ]
+  },
+  {
+    "id": "set_rothenburg",
+    "province": "prov_franconia",
+    "kind": "town",
+    "name": {
+      "display": "Rothenburg ob der Tauber",
+      "local": "Rotenburc",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.1855,
+      49.3757
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire fortifiée dominant la vallée de la Tauber.",
+    "sources": [
+      "Rothenburg ob der Tauber"
+    ]
+  },
+  {
+    "id": "set_kronach",
+    "province": "prov_franconia",
+    "kind": "castle",
+    "name": {
+      "display": "Kronach",
+      "local": "Cronach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.3269,
+      50.2417
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse épiscopale de Bamberg gardant la frontière nord de la Franconie.",
+    "sources": [
+      "Kronach"
+    ]
+  }
+]

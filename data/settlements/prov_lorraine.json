@@ -1,0 +1,143 @@
+[
+  {
+    "id": "set_nancy",
+    "province": "prov_lorraine",
+    "kind": "city",
+    "name": {
+      "display": "Nancy",
+      "local": "Nancei",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.1844,
+      48.6921
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Duché de Lorraine tenu par Raoul de Lorraine, fief d'Empire d'expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois.",
+    "sources": [
+      "Duché de Lorraine",
+      "Raoul de Lorraine",
+      "Metz"
+    ]
+  },
+  {
+    "id": "set_metz",
+    "province": "prov_lorraine",
+    "kind": "town",
+    "name": {
+      "display": "Metz",
+      "local": "Mez",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.1758,
+      49.1193
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_cathedral",
+      "bld_counting_house"
+    ],
+    "port": false,
+    "description": "Cité-république libre d'empire, l'une des Trois-Évêchés, gouvernée par son patriciat marchand.",
+    "sources": [
+      "Metz"
+    ]
+  },
+  {
+    "id": "set_toul",
+    "province": "prov_lorraine",
+    "kind": "town",
+    "name": {
+      "display": "Toul",
+      "local": "Tou",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.8903,
+      48.6778
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Cité épiscopale libre d'empire, l'une des Trois-Évêchés lorraines.",
+    "sources": [
+      "Toul"
+    ]
+  },
+  {
+    "id": "set_vaudemont",
+    "province": "prov_lorraine",
+    "kind": "castle",
+    "name": {
+      "display": "Vaudémont",
+      "local": "Vaudemont",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.0967,
+      48.4453
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château siège des comtes de Vaudémont, puissante famille vassale du duc de Lorraine.",
+    "sources": [
+      "Vaudémont"
+    ]
+  },
+  {
+    "id": "set_gorze",
+    "province": "prov_lorraine",
+    "kind": "abbey",
+    "name": {
+      "display": "Gorze",
+      "local": "Gorze",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.0122,
+      49.1225
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Ancienne abbaye bénédictine réformatrice, foyer du mouvement de renouveau monastique du Xe siècle.",
+    "sources": [
+      "Abbaye de Gorze"
+    ]
+  }
+]

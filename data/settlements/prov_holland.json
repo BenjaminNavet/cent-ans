@@ -1,0 +1,141 @@
+[
+  {
+    "id": "set_dordrecht",
+    "province": "prov_holland",
+    "kind": "city",
+    "name": {
+      "display": "Dordrecht",
+      "local": "Dordrecht",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.6901,
+      51.8133
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Comtés de Hollande et de Zélande tenus par Guillaume Ier d'Avesnes, comte de Hainaut (mort le 7 juin 1337), puis par son fils Guillaume II. Polders, digues, harengs ; Dordrecht détient l'étape des marchandises rhénanes.",
+    "sources": [
+      "Comté de Hollande",
+      "Comté de Zélande",
+      "Dordrecht"
+    ]
+  },
+  {
+    "id": "set_middelburg",
+    "province": "prov_holland",
+    "kind": "town",
+    "name": {
+      "display": "Middelbourg",
+      "local": "Middelburch",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.6108,
+      51.4988
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Chef-lieu de la Zélande, port comtal fortifié sur l'île de Walcheren.",
+    "sources": [
+      "Middelbourg"
+    ]
+  },
+  {
+    "id": "set_amsterdam",
+    "province": "prov_holland",
+    "kind": "town",
+    "name": {
+      "display": "Amsterdam",
+      "local": "Amestelredamme",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.9041,
+      52.3676
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Jeune bourg de pêcheurs sur l'Amstel, affranchi en 1306, dont le commerce commence tout juste à croître.",
+    "sources": [
+      "Amsterdam"
+    ]
+  },
+  {
+    "id": "set_zierikzee",
+    "province": "prov_holland",
+    "kind": "town",
+    "name": {
+      "display": "Zierikzee",
+      "local": "Sirixe",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.9167,
+      51.65
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port zélandais prospérant du commerce du sel et du garance.",
+    "sources": [
+      "Zierikzee"
+    ]
+  },
+  {
+    "id": "set_teylingen",
+    "province": "prov_holland",
+    "kind": "castle",
+    "name": {
+      "display": "Teylingen",
+      "local": "Teylinghe",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.5333,
+      52.2333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal de Hollande dans les dunes près de Leyde.",
+    "sources": [
+      "Château de Teylingen"
+    ]
+  }
+]

@@ -1,0 +1,89 @@
+[
+  {
+    "id": "set_meissen",
+    "province": "prov_meissen",
+    "kind": "city",
+    "name": {
+      "display": "Meissen",
+      "local": "Meißen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.4737,
+      51.1622
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Marche de Misnie et landgraviat de Thuringe tenus par Frédéric II de Wettin ; Erfurt (Mayence), Leipzig (foires). Mines d'argent de Freiberg.",
+    "sources": [
+      "Marche de Misnie",
+      "Frédéric II de Misnie",
+      "Erfurt"
+    ]
+  },
+  {
+    "id": "set_freiberg",
+    "province": "prov_meissen",
+    "kind": "town",
+    "name": {
+      "display": "Freiberg",
+      "local": "Vriberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.3417,
+      50.9147
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": false,
+    "description": "Ville minière la plus riche du margraviat de Misnie, essor argentifère depuis le XIIe siècle.",
+    "sources": [
+      "Freiberg"
+    ]
+  },
+  {
+    "id": "set_stolpen",
+    "province": "prov_meissen",
+    "kind": "castle",
+    "name": {
+      "display": "Stolpen",
+      "local": "Stolpen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.0817,
+      51.0525
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de basalte tenue par les évêques de Misnie, verrou vers la Lusace.",
+    "sources": [
+      "Château de Stolpen"
+    ]
+  }
+]

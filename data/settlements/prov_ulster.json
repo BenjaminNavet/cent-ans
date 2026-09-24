@@ -1,0 +1,87 @@
+[
+  {
+    "id": "set_carrickfergus",
+    "province": "prov_ulster",
+    "kind": "city",
+    "name": {
+      "display": "Carrickfergus",
+      "local": "Carraig Fhearghais",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -5.806,
+      54.7147
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Comté d'Ulster en déshérence depuis le meurtre de Guillaume de Burgh (1333) ; Connacht aux Burke gaélisés et aux Ó Conchobhair ; Ó Néill de Tír Eoghain, Ó Domhnaill. Autorité anglaise réduite à Carrickfergus et Galway.",
+    "sources": [
+      "Comté d'Ulster",
+      "Connacht",
+      "Ó Néill"
+    ]
+  },
+  {
+    "id": "set_galway",
+    "province": "prov_ulster",
+    "kind": "town",
+    "name": {
+      "display": "Galway",
+      "local": "Gaillimh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -9.0568,
+      53.2707
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville close fondée par la famille de Burgh, en plein essor commercial malgré l'éloignement de Carrickfergus.",
+    "sources": [
+      "Galway"
+    ]
+  },
+  {
+    "id": "set_sligo",
+    "province": "prov_ulster",
+    "kind": "village",
+    "name": {
+      "display": "Sligo",
+      "local": "Sligeach",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.4761,
+      54.2766
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg de la frontière anglo-gaélique, disputé entre colons normands et chefs irlandais.",
+    "sources": [
+      "Sligo"
+    ]
+  }
+]

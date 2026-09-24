@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_nimes",
+    "province": "prov_beaucaire",
+    "kind": "city",
+    "name": { "display": "Nîmes", "local": "Nimes", "local_language": "occitan" },
+    "lonlat": [4.3601, 43.8367],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale de la sénéchaussée de Beaucaire-Nîmes, cité romaine dont les arènes et la Maison Carrée dominent encore la ville.",
+    "sources": ["Nîmes", "Sénéchaussée de Beaucaire-Nîmes"]
+  },
+  {
+    "id": "set_aigues_mortes",
+    "province": "prov_beaucaire",
+    "kind": "town",
+    "name": { "display": "Aigues-Mortes", "local": "Aigas Mòrtas", "local_language": "occitan" },
+    "lonlat": [4.1917, 43.5667],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Port royal fondé par Louis IX, point de départ des septième et huitième croisades, ceint d'une enceinte achevée sous Philippe III.",
+    "sources": ["Aigues-Mortes", "Croisades de Louis IX"]
+  },
+  {
+    "id": "set_beaucaire",
+    "province": "prov_beaucaire",
+    "kind": "town",
+    "name": { "display": "Beaucaire", "local": "Bèucaire", "local_language": "occitan" },
+    "lonlat": [4.6394, 43.8083],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur le Rhône, qui donne son nom à la sénéchaussée, célèbre pour sa foire annuelle.",
+    "sources": ["Beaucaire (Gard)"]
+  },
+  {
+    "id": "set_saint_gilles",
+    "province": "prov_beaucaire",
+    "kind": "abbey",
+    "name": { "display": "Saint-Gilles", "local": "Sant Gèli", "local_language": "occitan" },
+    "lonlat": [4.4292, 43.6789],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye de pèlerinage sur la route de Compostelle, à la lisière de la Camargue.",
+    "sources": ["Abbaye de Saint-Gilles"]
+  },
+  {
+    "id": "set_largentiere",
+    "province": "prov_beaucaire",
+    "kind": "village",
+    "name": { "display": "Largentière", "local": "L'Argentièra", "local_language": "occitan" },
+    "lonlat": [4.2900, 44.5500],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Bourg minier du Vivarais, connu pour ses mines d'argent depuis l'Antiquité.",
+    "sources": ["Largentière"]
+  }
+]

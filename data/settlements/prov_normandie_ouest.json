@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_caen",
+    "province": "prov_normandie_ouest",
+    "kind": "city",
+    "name": { "display": "Caen", "local": "Caem", "local_language": "ancien français" },
+    "lonlat": [-0.3707, 49.1829],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Grande ville de Basse-Normandie sur l'Orne, dotée des abbayes de Guillaume le Conquérant.",
+    "sources": ["Caen"]
+  },
+  {
+    "id": "set_mortain",
+    "province": "prov_normandie_ouest",
+    "kind": "town",
+    "name": { "display": "Mortain", "local": "Mortaign", "local_language": "ancien français" },
+    "lonlat": [-0.9333, 48.6500],
+    "weight": 14,
+    "owner": "fac_navarre",
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du comté de Mortain, cédé en 1336 à Jeanne II de Navarre et Philippe d'Évreux.",
+    "sources": ["Mortain", "Comté de Mortain"]
+  },
+  {
+    "id": "set_cherbourg",
+    "province": "prov_normandie_ouest",
+    "kind": "town",
+    "name": { "display": "Cherbourg", "local": "Cherbourg", "local_language": "ancien français" },
+    "lonlat": [-1.6178, 49.6337],
+    "weight": 13,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Port fortifié à la pointe du Cotentin, face aux îles anglo-normandes restées anglaises.",
+    "sources": ["Cherbourg-en-Cotentin"]
+  },
+  {
+    "id": "set_domfront",
+    "province": "prov_normandie_ouest",
+    "kind": "castle",
+    "name": { "display": "Domfront", "local": "Domfront", "local_language": "ancien français" },
+    "lonlat": [-0.6472, 48.5928],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse sur un éperon rocheux dominant la Varenne, aux confins du Maine.",
+    "sources": ["Château de Domfront"]
+  },
+  {
+    "id": "set_mont_saint_michel",
+    "province": "prov_normandie_ouest",
+    "kind": "abbey",
+    "name": { "display": "Mont-Saint-Michel", "local": "Mont Saint Michel", "local_language": "ancien français" },
+    "lonlat": [-1.5115, 48.6361],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye fortifiée sur son îlot rocheux, aux marches de la Bretagne, résistera aux sièges anglais du siècle à venir.",
+    "sources": ["Mont-Saint-Michel", "Abbaye du Mont-Saint-Michel"]
+  }
+]

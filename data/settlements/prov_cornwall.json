@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_launceston",
+    "province": "prov_cornwall",
+    "kind": "city",
+    "name": {
+      "display": "Launceston",
+      "local": "Lanstefan",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.36,
+      50.637
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Duché de Cornouailles créé le 17 mars 1337 pour Édouard de Woodstock, fils aîné du roi ; stannaries (étain), pêche, langue cornique encore vivante.",
+    "sources": [
+      "Duché de Cornouailles",
+      "Édouard de Woodstock",
+      "Cornouailles"
+    ]
+  },
+  {
+    "id": "set_fowey",
+    "province": "prov_cornwall",
+    "kind": "town",
+    "name": {
+      "display": "Fowey",
+      "local": "Fowey",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.635,
+      50.3353
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port cornouaillais dont les marins, les « Fowey Gallants », arment déjà des navires de guerre.",
+    "sources": [
+      "Fowey"
+    ]
+  },
+  {
+    "id": "set_restormel",
+    "province": "prov_cornwall",
+    "kind": "castle",
+    "name": {
+      "display": "Restormel",
+      "local": "Restormel",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.7561,
+      50.4106
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du comté puis, depuis mars 1337, du nouveau duché de Cornouailles créé pour le prince Édouard.",
+    "sources": [
+      "Château de Restormel"
+    ]
+  }
+]

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_mons",
+    "province": "prov_hainaut",
+    "kind": "city",
+    "name": {
+      "display": "Mons",
+      "local": "Mons",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.9522,
+      50.4542
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Comté de Hainaut tenu par Guillaume Ier d'Avesnes, beau-père d'Édouard III, qui meurt le 7 juin 1337 ; son fils Guillaume II, beau-frère du roi anglais, lui succède ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
+    "sources": [
+      "Comté de Hainaut",
+      "Guillaume II de Hainaut",
+      "Valenciennes"
+    ]
+  },
+  {
+    "id": "set_valenciennes",
+    "province": "prov_hainaut",
+    "kind": "town",
+    "name": {
+      "display": "Valenciennes",
+      "local": "Valenciennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.5233,
+      50.3572
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande de l'Escaut, l'une des principales places de Hainaut, patrie du chroniqueur Jean Froissart.",
+    "sources": [
+      "Valenciennes"
+    ]
+  },
+  {
+    "id": "set_binche",
+    "province": "prov_hainaut",
+    "kind": "village",
+    "name": {
+      "display": "Binche",
+      "local": "Binch",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.1667,
+      50.4167
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié du Hainaut, résidence secondaire des comtes.",
+    "sources": [
+      "Binche"
+    ]
+  },
+  {
+    "id": "set_aulne",
+    "province": "prov_hainaut",
+    "kind": "abbey",
+    "name": {
+      "display": "Aulne",
+      "local": "Alna",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.4333,
+      50.3833
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne sur la Sambre, l'une des plus riches du Hainaut.",
+    "sources": [
+      "Abbaye d'Aulne"
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_groningue",
+    "province": "prov_frisia",
+    "kind": "city",
+    "name": {
+      "display": "Groningue",
+      "local": "Grunnen",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      6.5665,
+      53.2194
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Frise libre : communautés paysannes sans seigneur (« liberté frisonne »), revendiquées par le comte de Hollande, qui y périra en 1345. Élevage sur terpen, pêche, tourbe.",
+    "sources": [
+      "Liberté frisonne",
+      "Frise",
+      "Groningue"
+    ]
+  },
+  {
+    "id": "set_stavoren",
+    "province": "prov_frisia",
+    "kind": "town",
+    "name": {
+      "display": "Stavoren",
+      "local": "Stavria",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      5.35,
+      52.8833
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancien port hanséatique frison sur le Zuiderzee, jadis l'une des « sept villes » frisonnes.",
+    "sources": [
+      "Stavoren"
+    ]
+  },
+  {
+    "id": "set_emden",
+    "province": "prov_frisia",
+    "kind": "town",
+    "name": {
+      "display": "Emden",
+      "local": "Embden",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      7.2061,
+      53.3667
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port frison à l'embouchure de l'Ems, marché du commerce de la mer du Nord.",
+    "sources": [
+      "Emden"
+    ]
+  }
+]
