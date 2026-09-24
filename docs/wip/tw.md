@@ -18,7 +18,7 @@ Choix du joueur au lancement :
 | 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **fusionné** (2a485a5) |
 | 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | B7 **fusionné** (7441f5c) ; B6 **fusionné** (e618e41) ; C7 **fusionné** (12a53bc) |
 | 5 | C6 agents Medieval II (espion, émissaire, prédicateur) ; C2 zone de contrôle après C7a colonies | C6 **fusionné** (12a53bc, ADR 0009) ; C2 relancé en vague 6 |
-| 6 | C2 zone de contrôle ; C5 routes commerciales + accords ; C4 édits régionaux + chaînes de bâtiments ; B8 suites B6/B7 (IA attaquant/bocage/poursuite, minicarte de site, boue, écume de gué) | **en cours** (4 agents, notes `docs/wip/c2-zone-controle.md`, `c5-commerce.md`, `c4-edits-chaines.md`, `b8-suites-bataille.md` dans leurs branches) |
+| 6 | C2 zone de contrôle (**suspendu** : remplacé par M2 mouvement libre d'une autre session, `docs/design/2026-09-24-mouvement-libre.md`, ZdC 8 km sur grille ; reprendre après M2 pour effets diplomatiques/UI non couverts) ; C5 routes commerciales + accords ; C4 édits régionaux + chaînes de bâtiments ; B8 suites B6/B7 (IA attaquant/bocage/poursuite, minicarte de site, boue, écume de gué) | **en cours** (4 agents, notes `docs/wip/c2-zone-controle.md`, `c5-commerce.md`, `c4-edits-chaines.md`, `b8-suites-bataille.md` dans leurs branches) |
 
 ## État courant (24/09)
 
@@ -29,7 +29,7 @@ Vague 6 en cours : C2, C5, C4, B8 (branches `worktree-agent-*`, `git worktree li
 ## Reprise
 1. Si la vague 4 est interrompue : lire `docs/wip/b6-*.md`, `b7-*.md`, `c7-*.md` dans les worktrees (`git worktree list`), relancer un agent de reprise par lot inachevé.
 2. Fusion de chaque lot : `../gp-tw-merge` (`integration/tw`) : supprimer d'abord les `.import`/`.uid` non suivis sous `game/` (ils bloquent `git merge main` quand main les suit), `git merge main`, `git merge --no-ff <branche>`, clippy + `cargo test`, `core/build.sh`, `--import`, smoke (compter les « smoke OK », 22 actuellement), `git merge --ff-only integration/tw` dans main (si main a bougé : recommencer `git merge main`) + push.
-3. Fusions de la vague 6 : C4 et C5 touchent tous deux `economy.rs` (conflits probables), C2 `movement.rs`. main bouge souvent (autres sessions) : fusionner main dans `integration/tw` juste avant le ff ; si seuls des docs ont changé, pas de nouvelle vérification.
+3. Mouvement libre (autre session, M2/M3, `docs/wip/mouvement-libre.md`) réécrit `movement.rs` et `end_turn`, STATE_VERSION 6 : fusionner C4/C5/B8 tôt ; C6 agents (Dijkstra sur les fonctions de `movement.rs`) sera adapté par M2. Fusions de la vague 6 : C4 et C5 touchent tous deux `economy.rs` (conflits probables), C2 `movement.rs`. main bouge souvent (autres sessions) : fusionner main dans `integration/tw` juste avant le ff ; si seuls des docs ont changé, pas de nouvelle vérification.
 4. Pistes B6/B7 : minicarte sans haies ni village ; `advance` n'infléchit pas vers un défenseur décalé ; cavalerie qui attend face à un réseau de haies ; carte de piétinement réutilisable pour la boue ; sillage d'écume au gué ; pastilles par corps de bataille.
 5. Pistes restantes : pistes musicales dédiées (B3) ; relecture de bataille (replay, L, basse priorité).
 
