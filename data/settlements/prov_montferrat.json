@@ -1,0 +1,112 @@
+[
+  {
+    "id": "set_casal",
+    "province": "prov_montferrat",
+    "kind": "city",
+    "name": {
+      "display": "Casal",
+      "local": "Casal",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      8.4548,
+      45.1339
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Casal (Casale Monferrato), capitale du marquisat des Paléologues de Montferrat.",
+    "sources": [
+      "Marquisat de Montferrat",
+      "Jean II de Montferrat"
+    ]
+  },
+  {
+    "id": "set_chivasso",
+    "province": "prov_montferrat",
+    "kind": "town",
+    "name": {
+      "display": "Chivasso",
+      "local": "Civass",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.8871,
+      45.1892
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Seconde résidence des marquis Paléologues de Montferrat.",
+    "sources": [
+      "Chivasso"
+    ]
+  },
+  {
+    "id": "set_moncalvo",
+    "province": "prov_montferrat",
+    "kind": "castle",
+    "name": {
+      "display": "Moncalvo",
+      "local": "Moncalv",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.2273,
+      44.9528
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte du marquisat de Montferrat sur les collines du Monferrato.",
+    "sources": [
+      "Moncalvo"
+    ]
+  },
+  {
+    "id": "set_lucedio",
+    "province": "prov_montferrat",
+    "kind": "abbey",
+    "name": {
+      "display": "Lucedio",
+      "local": "Lucedi",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.2988,
+      45.2308
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1123, riche propriétaire terrienne du Montferrat.",
+    "sources": [
+      "Abbaye de Lucedio"
+    ]
+  }
+]

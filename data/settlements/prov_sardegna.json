@@ -1,0 +1,91 @@
+[
+  {
+    "id": "set_cagliari",
+    "province": "prov_sardegna",
+    "kind": "city",
+    "name": {
+      "display": "Cagliari",
+      "local": "Casteddu",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      9.1217,
+      39.2238
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Cagliari, prise en 1326 par la Couronne d'Aragon au terme de la conquête de la Sardaigne.",
+    "sources": [
+      "Royaume de Sardaigne",
+      "Judicat d'Arborea",
+      "Cagliari"
+    ]
+  },
+  {
+    "id": "set_sassari",
+    "province": "prov_sardegna",
+    "kind": "town",
+    "name": {
+      "display": "Sassari",
+      "local": "Sàssari",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.559,
+      40.7259
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Commune du nord de la Sardaigne, disputée entre Gênes, Pise et la Couronne d'Aragon.",
+    "sources": [
+      "Sassari"
+    ]
+  },
+  {
+    "id": "set_alghero",
+    "province": "prov_sardegna",
+    "kind": "castle",
+    "name": {
+      "display": "Alghero",
+      "local": "L'Alguer",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.3167,
+      40.558
+    ],
+    "weight": 30,
+    "owner": "fac_genoa",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Bastide fondée vers 1102 par la famille génoise Doria, qui la tient encore en 1337 malgré la conquête aragonaise de l'île.",
+    "sources": [
+      "Alghero",
+      "Famille Doria"
+    ]
+  }
+]

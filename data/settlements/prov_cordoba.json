@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_cordoue",
+    "province": "prov_cordoba",
+    "kind": "city",
+    "name": {
+      "display": "Cordoue",
+      "local": "Córdoba",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.7794,
+      37.8882
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Cordoue, ancienne capitale du califat, ville reconquise en 1236, cathédrale insérée dans la grande mosquée.",
+    "sources": [
+      "Royaume de Cordoue",
+      "Royaume de Jaén",
+      "Cordoue"
+    ]
+  },
+  {
+    "id": "set_jaen",
+    "province": "prov_cordoba",
+    "kind": "town",
+    "name": {
+      "display": "Jaén",
+      "local": "Jaén",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7849,
+      37.7796
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de frontière face à Grenade, surmontée du château de Santa Catalina.",
+    "sources": [
+      "Jaén"
+    ]
+  },
+  {
+    "id": "set_baeza",
+    "province": "prov_cordoba",
+    "kind": "town",
+    "name": {
+      "display": "Baeza",
+      "local": "Baeza",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.4691,
+      37.9942
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville reconquise en 1227, cathédrale bâtie sur l'ancienne mosquée majeure.",
+    "sources": [
+      "Baeza"
+    ]
+  },
+  {
+    "id": "set_almodovar_del_rio",
+    "province": "prov_cordoba",
+    "kind": "castle",
+    "name": {
+      "display": "Almodóvar del Río",
+      "local": "Almodóvar del Río",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.0195,
+      37.8064
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse dominant le Guadalquivir, d'origine islamique passée à la Couronne de Castille.",
+    "sources": [
+      "Château d'Almodóvar del Río"
+    ]
+  }
+]

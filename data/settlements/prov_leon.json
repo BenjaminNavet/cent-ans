@@ -1,0 +1,120 @@
+[
+  {
+    "id": "set_leon",
+    "province": "prov_leon",
+    "kind": "city",
+    "name": {
+      "display": "León",
+      "local": "León",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.5671,
+      42.5987
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "León, ancienne capitale royale, cathédrale gothique aux célèbres vitraux.",
+    "sources": [
+      "Royaume de León",
+      "Asturies",
+      "León (Espagne)"
+    ]
+  },
+  {
+    "id": "set_oviedo",
+    "province": "prov_leon",
+    "kind": "town",
+    "name": {
+      "display": "Oviedo",
+      "local": "Oviedo",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.8448,
+      43.3619
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Capitale des Asturies, cathédrale reliquaire, terme du Camino Primitivo.",
+    "sources": [
+      "Oviedo"
+    ]
+  },
+  {
+    "id": "set_salamanca",
+    "province": "prov_leon",
+    "kind": "town",
+    "name": {
+      "display": "Salamanque",
+      "local": "Salamanca",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.6635,
+      40.9701
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_university",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège de l'une des plus anciennes universités d'Europe, fondée en 1218 et reconnue « studium generale » en 1254.",
+    "sources": [
+      "Salamanque",
+      "Université de Salamanque"
+    ]
+  },
+  {
+    "id": "set_ponferrada",
+    "province": "prov_leon",
+    "kind": "castle",
+    "name": {
+      "display": "Ponferrada",
+      "local": "Ponferrada",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.5911,
+      42.5464
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château templier du Bierzo, revenu à la Couronne après la suppression de l'ordre du Temple en 1312.",
+    "sources": [
+      "Château de Ponferrada"
+    ]
+  }
+]

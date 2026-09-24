@@ -1,0 +1,177 @@
+[
+  {
+    "id": "set_milan",
+    "province": "prov_milano",
+    "kind": "city",
+    "name": {
+      "display": "Milan",
+      "local": "Milan",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.19,
+      45.4642
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_forge",
+      "bld_armoury"
+    ],
+    "port": false,
+    "description": "Milan, capitale de la seigneurie viscontéenne, plus grande ville de Lombardie.",
+    "sources": [
+      "Azzone Visconti",
+      "Seigneurie de Milan",
+      "Milan"
+    ]
+  },
+  {
+    "id": "set_pavia",
+    "province": "prov_milano",
+    "kind": "town",
+    "name": {
+      "display": "Pavie",
+      "local": "Pavia",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.1582,
+      45.1847
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne capitale du royaume lombard, place forte viscontéenne.",
+    "sources": [
+      "Pavie"
+    ]
+  },
+  {
+    "id": "set_como",
+    "province": "prov_milano",
+    "kind": "town",
+    "name": {
+      "display": "Côme",
+      "local": "Como",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.0852,
+      45.8081
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville lacustre sous domination viscontéenne.",
+    "sources": [
+      "Côme (Italie)"
+    ]
+  },
+  {
+    "id": "set_monza",
+    "province": "prov_milano",
+    "kind": "castle",
+    "name": {
+      "display": "Monza",
+      "local": "Monza",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.2744,
+      45.5845
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville où est conservée la Couronne de fer des rois lombards, résidence viscontéenne.",
+    "sources": [
+      "Monza",
+      "Couronne de fer"
+    ]
+  },
+  {
+    "id": "set_chiaravalle",
+    "province": "prov_milano",
+    "kind": "abbey",
+    "name": {
+      "display": "Chiaravalle",
+      "local": "Ciaravall",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.2417,
+      45.4019
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1135 dans la campagne milanaise.",
+    "sources": [
+      "Abbaye de Chiaravalle"
+    ]
+  },
+  {
+    "id": "set_lodi",
+    "province": "prov_milano",
+    "kind": "town",
+    "name": {
+      "display": "Lodi",
+      "local": "Lodi",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.5034,
+      45.3142
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville refondée en 1158 après sa destruction par Frédéric Barberousse, territoire viscontéen.",
+    "sources": [
+      "Lodi"
+    ]
+  }
+]
