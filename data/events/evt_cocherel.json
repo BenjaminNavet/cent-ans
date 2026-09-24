@@ -1,7 +1,12 @@
 {
   "id": "evt_cocherel",
+<<<<<<< HEAD
   "title": "La bataille de Cocherel",
   "text": "Le captal de Buch, capitaine du roi de Navarre, barre la route de Reims à la veille du sacre. Bertrand du Guesclin feint la retraite, attire les Navarrais hors de leur colline et prend le captal : Charles V sera sacré en roi victorieux.",
+=======
+  "title": "La victoire de Cocherel",
+  "text": "Le 16 mai 1364, à Cocherel, sur l'Eure, [[cdx_du_guesclin|Bertrand du Guesclin]] attire par une fausse retraite l'armée navarraise du captal de Buch, Jean de Grailly, hors de sa colline, puis l'enveloppe. Le captal est pris. Trois jours plus tard, Charles V est sacré à Reims : la victoire est un présent de joyeux avènement et brise les ambitions de Charles le Mauvais en Normandie.",
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -11,12 +16,26 @@
     "until_year": 1365,
     "conditions": [
       {
+<<<<<<< HEAD
+=======
+        "type": "ruler_house",
+        "faction": "fac_france",
+        "house": "Valois"
+      },
+      {
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         "type": "faction_exists",
         "faction": "fac_navarre"
       },
       {
+<<<<<<< HEAD
         "type": "faction_exists",
         "faction": "fac_france"
+=======
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_normandie"
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       }
     ]
   },
@@ -26,7 +45,27 @@
   },
   "options": [
     {
+<<<<<<< HEAD
       "text": "Donner le comté de Longueville à du Guesclin",
+=======
+      "text": "Ouvrir le règne sous de bons auspices",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_navarre",
+          "amount": -15,
+          "reason": "Défaite de Cocherel"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Confisquer les terres normandes du Navarrais",
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "effects": [
         {
           "type": "prestige",
@@ -34,11 +73,16 @@
         },
         {
           "type": "treasury",
+<<<<<<< HEAD
           "amount": -2000
+=======
+          "amount": 2000
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "opinion",
           "faction": "fac_navarre",
+<<<<<<< HEAD
           "amount": -10,
           "reason": "Défaite de Cocherel"
         }
@@ -57,6 +101,15 @@
           "faction": "fac_navarre",
           "amount": 15,
           "reason": "Paix après Cocherel"
+=======
+          "amount": -30,
+          "reason": "Terres normandes confisquées"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_normandie",
+          "amount": 5
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 1
@@ -66,7 +119,12 @@
     "value": "1364-05-16"
   },
   "sources": [
+<<<<<<< HEAD
     "Bataille de Cocherel",
     "Bertrand Du Guesclin"
+=======
+    "Battle of Cocherel",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   ]
 }

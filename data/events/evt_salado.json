@@ -1,7 +1,11 @@
 {
   "id": "evt_salado",
   "title": "La bataille du Salado",
+<<<<<<< HEAD
   "text": "Le sultan mérinide et le roi de Grenade assiègent Tarifa. Alphonse de Castille et Alphonse de Portugal franchissent le rio Salado et mettent en déroute l'armée musulmane : c'est la dernière grande invasion venue d'Afrique.",
+=======
+  "text": "Le 30 octobre 1340, sur le rio Salado près de Tarifa, Alphonse XI de Castille et son beau-père Afonso IV de Portugal écrasent l'armée du sultan mérinide Abu al-Hasan et de Yusuf Ier de Grenade. Les Mérinides repassent en Afrique : c'est la dernière grande armée venue du Maroc qui ait envahi la péninsule. La voie est ouverte vers le détroit et vers Algésiras.",
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -11,6 +15,14 @@
     "until_year": 1341,
     "conditions": [
       {
+<<<<<<< HEAD
+=======
+        "type": "ruler_is",
+        "faction": "fac_castile",
+        "character": "chr_alfonso_xi"
+      },
+      {
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         "type": "faction_exists",
         "faction": "fac_granada"
       }
@@ -22,6 +34,7 @@
   },
   "options": [
     {
+<<<<<<< HEAD
       "text": "Charger avec les Portugais",
       "effects": [
         {
@@ -32,14 +45,31 @@
         {
           "type": "prestige",
           "amount": 20
+=======
+      "text": "Rendre grâce à Dieu et partager la gloire avec le Portugal",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "piety",
           "amount": 10
         },
         {
+<<<<<<< HEAD
           "type": "treasury",
           "amount": 5000
+=======
+          "type": "papal_favor",
+          "amount": 15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_portugal",
+          "amount": 10
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "prestige",
@@ -48,14 +78,21 @@
         },
         {
           "type": "opinion",
+<<<<<<< HEAD
           "faction": "fac_granada",
           "amount": -20,
           "reason": "Désastre du Salado"
+=======
+          "faction": "fac_portugal",
+          "amount": 15,
+          "reason": "Frères d'armes du Salado"
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 2
     },
     {
+<<<<<<< HEAD
       "text": "Tenir Tarifa sans risquer l'ost",
       "effects": [
         {
@@ -65,6 +102,22 @@
         {
           "type": "treasury",
           "amount": -2000
+=======
+      "text": "Garder le butin pour assiéger Algésiras",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_granada",
+          "amount": -15
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 1
@@ -74,8 +127,12 @@
     "value": "1340-10-30"
   },
   "sources": [
+<<<<<<< HEAD
     "Bataille du Río Salado",
     "Alphonse XI de Castille",
+=======
+    "Battle of Río Salado",
+>>>>>>> worktree-agent-a2d518a3bb7e2fbd8
     "Joseph F. O'Callaghan, The Gibraltar Crusade, 2011"
   ]
 }

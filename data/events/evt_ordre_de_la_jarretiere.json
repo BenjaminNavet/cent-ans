@@ -1,0 +1,71 @@
+{
+  "id": "evt_ordre_de_la_jarretiere",
+  "title": "L'ordre de la Jarretière",
+  "text": "Pour la Saint-Georges, Édouard III réunit à Windsor les chevaliers d'une compagnie nouvelle : le roi et vingt-cinq compagnons, dont le prince de Galles, liés par la jarretière bleue et la devise « Honi soit qui mal y pense ». L'[[cdx_ordre_de_la_jarretiere|ordre]] soude autour du roi les vainqueurs de Crécy et rappelle, en français, sa prétention à la couronne de France. La légende de la comtesse et de sa jarretière tombée n'apparaît qu'un siècle plus tard.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1348,
+      "season": "spring"
+    },
+    "until_year": 1349,
+    "conditions": [
+      {
+        "type": "ruler_is",
+        "faction": "fac_england",
+        "character": "chr_edward_iii"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Fonder l'ordre à Windsor",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "loyalty",
+          "amount": 5
+        },
+        {
+          "type": "add_trait",
+          "trait": "trait_chivalrous"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder l'argent pour la guerre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": 500
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1348",
+    "uncertain": true,
+    "note": "Date traditionnelle (1348) ; certains historiens proposent le 23 avril 1344, d'autres jusqu'à 1351."
+  },
+  "sources": [
+    "Order of the Garter",
+    "Juliet Vale, Edward III and Chivalry, 1982"
+  ]
+}
