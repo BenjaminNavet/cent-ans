@@ -1,0 +1,12 @@
+{
+  "id": "cdx_hommes_d_armes",
+  "title": "Les hommes d'armes",
+  "category": "guerre",
+  "aliases": ["homme d'armes", "hommes d'armes", "gens d'armes", "combat à pied"],
+  "era": { "from": "v. 1300", "to": "v. 1500" },
+  "summary": "L'homme d'armes est le combattant lourdement armé, protégé d'un [[cdx_harnois|harnois]] et monté sur un cheval de guerre, qu'il soit chevalier ou simple écuyer. Pendant la guerre de Cent Ans, il apprend à combattre à pied.",
+  "body": "Dans les textes du XIVe siècle, l'expression « homme d'armes » désigne tout combattant équipé en cavalier lourd, sans distinction de rang : chevalier adoubé, écuyer ou même roturier assez riche pour s'équiper. Il possède plusieurs chevaux, dont un destrier ou un coursier pour le combat, et se fait accompagner de valets et de pages. C'est lui qui forme le cœur des armées, et c'est lui que l'on paie le plus cher.\n\nLa charge de la cavalerie lourde, lance couchée, reste l'arme la plus redoutée d'Europe. Mais les Anglais ont appris dans les guerres d'Écosse une autre manière de combattre : leurs hommes d'armes descendent de cheval et forment un mur de fer, flanqué d'archers armés de l'[[cdx_arc_long|arc long]]. Face à eux, à [[cdx_crecy|Crécy]] en 1346, les charges françaises échouent.\n\nLes Français adoptent à leur tour le combat à pied, avec des fortunes diverses. À [[cdx_poitiers|Poitiers]] en 1356, puis à [[cdx_azincourt|Azincourt]] en 1415, leurs hommes d'armes démontés avancent lentement, alourdis par leurs armures, sous une pluie de flèches, et sont battus. À l'inverse, [[cdx_du_guesclin|Du Guesclin]] remporte Cocherel en 1364 en maniant habilement défense et feinte.\n\nÀ la fin de la guerre, les hommes d'armes deviennent des soldats professionnels et soldés. En 1445, [[cdx_charles_vii|Charles VII]] les regroupe dans les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]], organisées en « lances » où chaque homme d'armes est entouré d'archers et de valets. De là vient le mot « gendarme », tiré de « gens d'armes ».",
+  "entity": "unit_men_at_arms_foot",
+  "see_also": ["cdx_harnois", "cdx_chevalerie", "cdx_compagnies_ordonnance", "cdx_arc_long"],
+  "sources": ["Homme d'armes", "Gendarmerie (Ancien Régime)"]
+}
