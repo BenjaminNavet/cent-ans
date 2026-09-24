@@ -165,7 +165,7 @@ impl BattleSim {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
         let result = from_dict::<Command>(&command)
-            .map_err(|e| format!("ordre invalide : {e}"))
+            .map_err(|e| crate::campaign_sim::invalid_order_message(&e))
             .and_then(|command| sim.issue_command(command).map_err(|e| e.to_string()));
         result_dict(result)
     }
