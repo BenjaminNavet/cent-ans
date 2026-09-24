@@ -628,21 +628,52 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .map_or(Vector2::ZERO, |s| {
             Vector2::new(s.lonlat[0] as f32, s.lonlat[1] as f32)
         });
-    vdict! {
-        "embarked" => embarked,
-        "faction" => army.faction.as_str(),
-        "general" => army.general.as_ref().map_or("", |id| id.as_str()),
-        "general_name" => general_name.as_str(),
-        "location" => location_str,
-        "location_province" => location_province.as_ref().map_or("", |p| p.as_str()),
-        "location_lonlat" => lonlat,
-        "path_provinces" => &path_provinces,
-        "units" => &units_array(data, &army.units),
-        "movement_points" => i64::from(army.movement_left),
-        "supply" => i64::from(army.supply),
-        "stance" => stance_key(army.stance),
-        "path" => &ids(destination.iter()),
-    }
+    // Lot M4: free position on the map (map pixels), the settlement the
+    // army stands in ("" in the field), points left and allowance, and the
+    // corners of the rest of a multi-turn march.
+    let grid = data.navgrid();
+    let point = state.army_point(data, army);
+    let planned_path: PackedVector2Array = army
+        .planned_path
+        .iter()
+        .map(|cell| {
+            let p = cell.center(grid);
+            Vector2::new(p[0], p[1])
+        })
+        .collect();
+    let destination_point = army
+        .destination
+        .as_ref()
+        .filter(|_| !army.planned_path.is_empty())
+        .and_then(|target| state.target_point(data, target))
+        .map_or(Vector2::new(-1.0, -1.0), |p| Vector2::new(p[0], p[1]));
+    let mut dict = vdict! {
+        "position" => Vector2::new(point[0], point[1]),
+        "settlement" => army.settlement().map_or("", |s| s.as_str()),
+        "movement_left" => i64::from(army.movement_left),
+        "movement_max" => i64::from(state.army_grid_allowance(data, army)),
+        "planned_path" => &planned_path,
+        "destination_point" => destination_point,
+    };
+    dict.extend_dictionary(
+        &vdict! {
+            "embarked" => embarked,
+            "faction" => army.faction.as_str(),
+            "general" => army.general.as_ref().map_or("", |id| id.as_str()),
+            "general_name" => general_name.as_str(),
+            "location" => location_str,
+            "location_province" => location_province.as_ref().map_or("", |p| p.as_str()),
+            "location_lonlat" => lonlat,
+            "path_provinces" => &path_provinces,
+            "units" => &units_array(data, &army.units),
+            "movement_points" => i64::from(army.movement_left),
+            "supply" => i64::from(army.supply),
+            "stance" => stance_key(army.stance),
+            "path" => &ids(destination.iter()),
+        },
+        true,
+    );
+    dict
 }
 
 fn stance_key(stance: sim_campaign::Stance) -> &'static str {
