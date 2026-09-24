@@ -8,7 +8,7 @@ Godot uniquement (`game/`), aucune règle.
 |---|---|
 | 1. Fanions de lance couchée | **fait** (shader, sans régénérer les .glb) |
 | 2. Repères d'unité regroupés de loin | **fait** (smoke : contrôle ajouté) |
-| 3. Neige en relief | à faire |
+| 3. Neige en relief | **fait** (congères, pentes bleutées, neige piétinée) |
 | 4. Éclaboussures de gué vérifiées | à faire |
 | Mesures perf avant/après | à faire |
 
@@ -39,5 +39,17 @@ Captures : `before_markers_far.png` / `after_markers_far.png`
 | démo 14 unités | 58,8 | 1,38 M | 520 |
 | `--units=20` (40 unités, 4553 soldats) | 58,8 | 2,87 M | 895 |
 
+## 3. Neige
+`battle_ground.gdshader` : quand la couche neige domine, congères étirées par le vent (bruit
+anisotrope à deux échelles, 0,84-1,06 de blancheur), neige plus mince et bleutée sur les pentes
+(ombre de lecture), grain fin. Essayé puis retiré : ondulations dans la carte de normales (le sol
+ressemblait à une mer agitée). **Neige piétinée** : `battle_terrain.gd` tient une carte L8
+(4 m le texel, rectangle des splatmaps) où chaque régiment présent imprime son emprise orientée
+toutes les 0,5 s de bataille (plus fort en marche) ; le shader la lit (`trample_map`) : neige tassée
+grise, terre qui affleure par taches là où c'est saturé. Aucun coût hors neige au sol (pas de carte).
+Appel : `terrain.update_trample(units, dt)` au début de `_update_effects` (`battle_scene.gd`).
+Captures : `before_snow.png` / `after_snow.png` (`--season=winter --ground=snowy --terrain=hills
+--weather=clear`), `before_snow_weather.png` / `after_snow_weather.png` (`--weather=snow`).
+
 ## Prochaine étape
-Point 3 (neige : `battle_terrain.gd`, `battle_ground.gdshader`).
+Point 4 (éclaboussures de gué : `battle_effects.gd`).

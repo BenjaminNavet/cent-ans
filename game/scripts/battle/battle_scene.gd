@@ -272,6 +272,7 @@ func _build_soldier_layers() -> void:
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
+	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
 	if effects == null:
 		return
 	var camera := get_viewport().get_camera_3d()
