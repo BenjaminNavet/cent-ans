@@ -34,6 +34,8 @@ const TABS := [
 	{"id": "skills", "label": "Compétences", "dir": "skills", "prefix": "skill_", "icon": "cat_skill"},
 	{"id": "factions", "label": "Factions", "dir": "factions", "prefix": "fac_", "icon": "hud_diplomacy"},
 	{"id": "religions", "label": "Religion", "dir": "religions", "prefix": "rel_", "icon": "bld_parish_church"},
+	# C6 : agents de campagne, lus dans `data/rules/agents.json`.
+	{"id": "agents", "label": "Agents", "dir": "", "prefix": "agent_", "icon": "hud_diplomacy"},
 	{"id": "mechanics", "label": "Mécaniques", "dir": "", "prefix": "mech_", "icon": "hud_menu"},
 ]
 
@@ -248,6 +250,8 @@ static func definition_of(entry_id: String) -> Dictionary:
 	if index < 0:
 		return {}
 	var directory := str(TABS[index]["dir"])
+	if str(TABS[index]["id"]) == "agents":
+		return agent_definitions().get(entry_id, {})
 	if directory == "":
 		for mechanic in MECHANICS:
 			if mechanic["id"] == entry_id:
@@ -303,7 +307,7 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 			return library.call("get_icon", "hud_diplomacy")
 		"religions":
 			return library.call("get_icon", "bld_parish_church")
-		"mechanics":
+		"mechanics", "agents":
 			return library.call("get_icon", str(definition.get("icon", "")))
 	return library.call("get_icon", entry_id)
 
@@ -315,7 +319,9 @@ func build_entries() -> void:
 		var tab_id := str(tab["id"])
 		var rows: Array = []
 		var definitions: Dictionary = {}
-		if str(tab["dir"]) == "":
+		if tab_id == "agents":
+			definitions = agent_definitions()
+		elif str(tab["dir"]) == "":
 			for mechanic in MECHANICS:
 				definitions[mechanic["id"]] = mechanic
 		else:
@@ -562,6 +568,8 @@ static func fiche_bbcode(entry_id: String) -> String:
 			return _religion_fiche(entry_id, definition)
 		"mechanics":
 			return _mechanic_fiche(definition)
+		"agents":
+			return _agent_fiche(definition)
 	return ""
 
 
@@ -907,3 +915,76 @@ static func _mechanic_extra(kind: String) -> String:
 					parts.append("• %s en guerre contre %s" % [link(id), ", ".join(wars)])
 			return _section("Guerres en 1337", "\n".join(parts))
 	return ""
+
+
+# --- C6 : agents -------------------------------------------------------------------------
+
+## Icône de chaque type d'agent (icônes existantes de `IconLibrary`).
+const AGENT_ICONS := {"spy": "hud_army", "emissary": "hud_diplomacy", "preacher": "bld_parish_church"}
+const AGENT_KIND_ORDER := ["spy", "emissary", "preacher"]
+static var _agent_cache: Dictionary = {}
+
+
+## Fiches `agent_<type>` construites depuis `data/rules/agents.json` (vide si absent).
+static func agent_definitions() -> Dictionary:
+	if not _agent_cache.is_empty():
+		return _agent_cache
+	var path := GameCatalog.data_dir().path_join("rules/agents.json")
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	if not parsed is Dictionary:
+		return {}
+	var types: Dictionary = parsed.get("types", {})
+	var actions: Dictionary = parsed.get("actions", {})
+	var action_kinds := {
+		"spy": ["scout", "sabotage", "incite", "counter"],
+		"emissary": ["parley", "truce", "bribe", "ransom"],
+		"preacher": ["preach", "denounce", "curia"],
+	}
+	for kind in AGENT_KIND_ORDER:
+		if not types.has(kind):
+			continue
+		var entry: Dictionary = (types[kind] as Dictionary).duplicate()
+		entry["id"] = "agent_" + kind
+		entry["kind"] = kind
+		entry["icon"] = AGENT_ICONS.get(kind, "hud_menu")
+		var list: Array = []
+		for action in action_kinds.get(kind, []):
+			if actions.has(action):
+				list.append(actions[action])
+		entry["action_list"] = list
+		entry["thresholds"] = parsed.get("experience_thresholds", [])
+		_agent_cache[entry["id"]] = entry
+	return _agent_cache
+
+
+static func _agent_fiche(definition: Dictionary) -> String:
+	var kinds: Array = definition.get("settlement_kinds", [])
+	var places := PackedStringArray()
+	var kind_labels := {"city": "cité", "town": "ville", "castle": "château", "abbey": "abbaye", "village": "village"}
+	for kind in kinds:
+		places.append(str(kind_labels.get(str(kind), kind)))
+	var recruit := "Coût %d livres, entretien %d par saison, %d au plus par faction. Recrutement : %s%s." % [
+		int(definition.get("cost", 0)), int(definition.get("upkeep", 0)), int(definition.get("max_per_faction", 0)),
+		", ".join(places),
+		" (avec un bâtiment religieux, ou une abbaye)" if bool(definition.get("requires_religious_building", false)) else "",
+	]
+	var moves := "%d pas par saison (un de moins l'hiver) sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % int(definition.get("movement_steps", 3))
+	if int(definition.get("vision_range", 0)) > 0:
+		moves += " Voit à %d pas autour de lui (brouillard)." % int(definition.get("vision_range", 0))
+	var lines := PackedStringArray()
+	for action in definition.get("action_list", []):
+		var risk := int(action.get("death_risk", 0))
+		lines.append("• [b]%s[/b] — %d %% (+%d par sceau)%s : %s" % [
+			str(action.get("name", "")), int(action.get("base_chance", 0)), int(action.get("per_level", 0)),
+			", mort %d %% en cas d'échec" % risk if risk > 0 else "", str(action.get("description", "")),
+		])
+	var thresholds: Array = definition.get("thresholds", [])
+	var seals := "Sceau 1 à 5 : l'expérience (+2 par réussite, +1 par échec survécu) monte le sceau aux seuils %s." % ", ".join(PackedStringArray(thresholds.map(func(t: Variant) -> String: return str(int(t)))))
+	return _join([
+		_heading(str(definition.get("icon", "")), str(definition.get("name", "")), "Agent de campagne", "hud"),
+		_description(definition),
+		_section("Recrutement", recruit),
+		_section("Déplacement", moves),
+		_section("Actions (une par saison, sur sa colonie ou une voisine)", "\n".join(lines)),
+		_section("Sceau", seals),
+	])

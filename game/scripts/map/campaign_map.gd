@@ -20,6 +20,7 @@ extends Node3D
 ##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
+##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné.
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
@@ -77,6 +78,7 @@ var _fps_probe_cpu_ms: float = 0.0
 var _fps_probe_map_us: Vector2 = Vector2.ZERO
 var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
+var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -120,6 +122,9 @@ func _ready() -> void:
 	settlements_ctl = SettlementController.new()  # C5
 	add_child(settlements_ctl)
 	settlements_ctl.setup(self)
+	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
+	add_child(agents_ctl)
+	agents_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -281,6 +286,8 @@ func refresh_all() -> void:
 	_refresh_construction_markers()
 	if settlements_ctl != null:  # C5
 		settlements_ctl.refresh()
+	if agents_ctl != null:  # C6 agents
+		agents_ctl.refresh()
 	if unrest_mode:
 		_refresh_unrest_colors()
 	if selected_army != "":
@@ -408,6 +415,8 @@ func select_army(army_id: String) -> void:
 		return
 	selected_army = army_id
 	armies.set_selected(army_id)
+	if agents_ctl != null:  # C6 agents : une seule sélection à la fois
+		agents_ctl.deselect()
 	var faction: String = str(army.get("faction", ""))
 	var is_player := faction == player_faction
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
@@ -1045,6 +1054,8 @@ func _parse_cmdline() -> void:
 					tutorial.stage_screenshot(_screenshot_stage)
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
+				"agents":  # C6 agents
+					agents_ctl.stage_screenshot()
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
