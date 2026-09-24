@@ -22,6 +22,9 @@ const TRIM_SILVER := Color(0.85, 0.85, 0.82)
 const DETAIL_DISTANCE := 32.0
 const LOD_DISTANCE := 75.0
 const SHADOW_DISTANCE := 190.0
+## A1-01 : fondu de lisibilité à distance (teinte de camp, liseré, échelle), en mètres.
+const READABLE_NEAR := 80.0
+const READABLE_FAR := 260.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -200,6 +203,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("anim_time", anim_time)
 	mat.set_shader_parameter("anim_state", anim_state(unit))
 	mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
+	mat.set_shader_parameter("far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
 	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
