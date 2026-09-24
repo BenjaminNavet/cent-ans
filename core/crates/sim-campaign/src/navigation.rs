@@ -2,9 +2,9 @@
 //!
 //! Pure algorithms over a [`NavGrid`]: A* on 8 neighbours with the octile
 //! heuristic, a line-of-sight smoothing pass (theta*-like string pulling)
-//! and a bounded Dijkstra for the reachable area. A diagonal step is only
-//! allowed when both orthogonal cells it cuts are passable, so that a
-//! one-cell river drawn diagonally cannot be slipped through.
+//! and a bounded Dijkstra for the reachable area. Diagonal steps may cut
+//! corners: the M1 pipeline closes the great rivers diagonally (8-connected
+//! barriers), so a narrow diagonal bridge or pass stays open.
 //!
 //! Costs: entering a cell orthogonally costs its grid value (10 = plain),
 //! diagonally the value × √2 (rounded). The searches work on a window of
@@ -67,7 +67,7 @@ pub fn diagonal_cost(value: u8) -> u32 {
 }
 
 /// Cost of stepping from `from` to the adjacent `to` (8-neighbourhood), or
-/// `None` when `to` is impassable or the diagonal cuts an impassable corner.
+/// `None` when `to` is impassable.
 #[inline]
 pub fn step_cost(grid: &NavGrid, from: Cell, to: Cell) -> Option<u32> {
     let (fx, fy) = from.xy();
@@ -77,9 +77,6 @@ pub fn step_cost(grid: &NavGrid, from: Cell, to: Cell) -> Option<u32> {
         return None;
     }
     if fx != tx && fy != ty {
-        if !grid.passable(tx, fy) || !grid.passable(fx, ty) {
-            return None;
-        }
         Some(diagonal_cost(value))
     } else {
         Some(u32::from(value))
@@ -501,14 +498,16 @@ mod tests {
     }
 
     #[test]
-    fn diagonal_wall_cannot_be_slipped_through() {
+    fn a_closed_wall_cannot_be_crossed() {
         let mut g = grid(20, 20);
         for i in 0..20 {
             g.set(i, 19 - i, IMPASSABLE);
+            g.set(i, (18 - i).max(0), IMPASSABLE);
         }
         g.refresh_min_cost();
         assert!(find_path(&g, Cell::new(0, 0), Cell::new(19, 19), &nothing_blocked, None).is_none());
     }
+
 
     #[test]
     fn blocked_cells_are_avoided_but_the_goal_is_entered() {

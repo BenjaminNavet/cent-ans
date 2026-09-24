@@ -147,6 +147,15 @@ impl CampaignState {
             .collect()
     }
 
+    /// `true` when two armies stand together: in the same settlement, or
+    /// within `engage_radius_km` of each other (merges, retinue transfers).
+    pub fn armies_together(&self, data: &GameData, a: &Army, b: &Army) -> bool {
+        match (a.settlement(), b.settlement()) {
+            (Some(x), Some(y)) => x == y,
+            _ => self.army_distance_km(data, a, b) <= data.free_movement_rules().engage_radius_km,
+        }
+    }
+
     /// Distance in kilometres between two armies.
     pub fn army_distance_km(&self, data: &GameData, a: &Army, b: &Army) -> f64 {
         f64::from(distance(self.army_point(data, a), self.army_point(data, b)))
