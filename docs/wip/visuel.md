@@ -26,3 +26,4 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - V2b fusionné (parcellaire organique, haies fines, cultures variées, palette chaude, étiquettes sans chevauchement ; carte 61-102 i/s). main réintégré, dylib reconstruite, smoke 17/17 OK.
 - Points ouverts pour la suite : démarrage à chaud de la végétation 4,4 s ; siège 1 170 appels de dessin (regrouper maisons/murailles en MultiMesh) ; démo de bataille qui ne va plus au contact (simulation, autre session).
 - 4351c8e : V2b+V4b dans main (orchestrateur). V6 perf lancé (Sonnet). Sièges : maisons bientôt fournies par la simulation (get_siege().houses) ; V6 isole le regroupement MultiMesh dans un script dédié.
+- V6 fusionné (végétation : démarrage 3,4 → 1,2 s ; siège 1164 → 556 appels de dessin ; ombres de végétation coupées au zoom moyen). main réintégré (conflit battle_siege.gd : maisons de la simulation F5c + regroupement V6), smoke 20/20.
