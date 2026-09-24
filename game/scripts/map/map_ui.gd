@@ -682,7 +682,8 @@ func layout_hud() -> void:
 		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
 	else:
 		court_panel.set_max_right(INF)
-	character_sheet.fit_beside(court_panel.offset_right if court_panel.visible else 0.0, view.x)
+	# Bord droit réel (la liste peut élargir le panneau au-delà de ses marges).
+	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
 	# Minicarte (C1) puis lettres : haut droite, masquées sous un panneau de droite.
 	var right_panel_open := province_panel.visible or faction_panel.visible or character_sheet.visible
 	var letters_top := top

@@ -259,6 +259,11 @@ func _make_row(row: Dictionary) -> Control:
 	var sub_label := Label.new()
 	sub_label.text = "%s ans — %s — %s" % [int(row.get("age", 0)), str(row.get("title", "")), str(row.get("role", ""))]
 	sub_label.add_theme_font_size_override("font_size", 12)
+	# C7 : une ligne trop longue n'élargit plus le panneau (la fiche se range à sa droite).
+	sub_label.clip_text = true
+	sub_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	sub_label.tooltip_text = sub_label.text
+	sub_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	name_box.add_child(sub_label)
 	line.add_child(name_box)
 

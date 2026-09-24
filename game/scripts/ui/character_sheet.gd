@@ -247,6 +247,19 @@ func _build_tw_layout() -> void:
 	skill_tree_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	skill_tree_view.learn_requested.connect(func(skill_id: String) -> void: learn_skill_requested.emit(character_id, skill_id))
 	skill_columns.add_child(skill_tree_view)
+	# C7 : l'arbre (~700 px) défile horizontalement dans la colonne repliée au lieu d'élargir
+	# la fiche par-dessus la Cour (sans barre quand la place suffit).
+	var skill_scroll := ScrollContainer.new()
+	skill_scroll.name = "SkillScroll"
+	skill_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	skill_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	skill_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var columns_parent := skill_columns.get_parent()
+	var columns_index := skill_columns.get_index()
+	columns_parent.remove_child(skill_columns)
+	skill_scroll.add_child(skill_columns)
+	columns_parent.add_child(skill_scroll)
+	columns_parent.move_child(skill_scroll, columns_index)
 	name_label.add_theme_color_override("font_color", HudStyle.INK)
 	skill_points_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
 
