@@ -66,6 +66,8 @@ struct Report {
     battles_fr_en: u32,
     captures: u32,
     majors_1400: Vec<bool>,
+    /// Turn each major first fell (G5).
+    majors_fall: Vec<Option<u32>>,
     destroyed: u32,
     issued: u32,
     refused: u32,
@@ -157,6 +159,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         alliance_war_turns: vec![0; PAIRS.len()],
         alliance_first: vec![None; PAIRS.len()],
         majors_1400: vec![true; MAJORS.len()],
+        majors_fall: vec![None; MAJORS.len()],
         ..Report::default()
     };
     let names: Vec<String> = [&france, &england]
@@ -306,6 +309,11 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         }
         if trace && (state.turn.is_multiple_of(20) || (328..372).contains(&state.turn)) {
             trace_burgundy(&state, data, seed);
+        }
+        for (index, major) in MAJORS.iter().enumerate() {
+            if !state.factions[&id(major)].alive {
+                report.majors_fall[index].get_or_insert(state.turn);
+            }
         }
         if state.turn == TURN_1400 {
             for (index, major) in MAJORS.iter().enumerate() {
@@ -457,4 +465,98 @@ fn main() {
         })
         .collect();
     println!("Survie en 1400 : {}", survivors.join(", "));
+    print_summary(&reports, decades);
+}
+
+/// Mean, minimum and maximum of `values`.
+fn spread(values: &[f64]) -> (f64, f64, f64) {
+    let n = values.len().max(1) as f64;
+    let mean = values.iter().sum::<f64>() / n;
+    let min = values.iter().copied().fold(f64::INFINITY, f64::min);
+    let max = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    (mean, min, max)
+}
+
+/// G5 synthesis: the indicators of `docs/status.md` (G2, G4) over all seeds.
+fn print_summary(reports: &[Report], decades: f64) {
+    let pair = |label: &str| {
+        PAIRS
+            .iter()
+            .position(|(l, _, _)| *l == label)
+            .expect("pair")
+    };
+    let war_share = |r: &Report, index: usize| {
+        100.0 * f64::from(r.alliance_war_turns[index]) / f64::from(r.war_turns.max(1))
+    };
+    let war: Vec<f64> = reports
+        .iter()
+        .map(|r| 100.0 * f64::from(r.war_turns) / f64::from(r.turns))
+        .collect();
+    let (mean, min, max) = spread(&war);
+    let in_band = war.iter().filter(|w| (55.0..=75.0).contains(*w)).count();
+    println!("\nSynthèse ({} graines) :", reports.len());
+    println!(
+        "  Guerre FR-EN : moy. {mean:.0} % [{min:.0}-{max:.0}], {in_band}/{} graines dans 55-75 %",
+        reports.len()
+    );
+    for label in ["Auld Alliance", "Angl.-Brabant", "Bourg.-France"] {
+        let index = pair(label);
+        let shares: Vec<f64> = reports.iter().map(|r| war_share(r, index)).collect();
+        let (mean, min, max) = spread(&shares);
+        println!("  {label} (tours de guerre FR-EN) : moy. {mean:.0} % [{min:.0}-{max:.0}]");
+    }
+    let burgundy = pair("Bourg.-Angl.");
+    // Turn 253 is the first of 1400.
+    let fifteenth = reports
+        .iter()
+        .filter(|r| r.alliance_first[burgundy].is_some_and(|t| t > TURN_1400))
+        .count();
+    let any = reports
+        .iter()
+        .filter(|r| r.alliance_first[burgundy].is_some())
+        .count();
+    println!(
+        "  Bourg.-Angl. : {any}/{n} graines, dont {fifteenth}/{n} au XVe s.",
+        n = reports.len()
+    );
+    let bankruptcies: Vec<f64> = reports
+        .iter()
+        .map(|r| {
+            let total: u32 = r.bankruptcies.values().sum();
+            f64::from(total) / r.factions as f64 / decades
+        })
+        .collect();
+    let (mean, min, max) = spread(&bankruptcies);
+    println!("  Banqueroutes / fac. / déc. : moy. {mean:.2} [{min:.2}-{max:.2}]");
+    let calls: Vec<f64> = reports
+        .iter()
+        .map(|r| f64::from(r.calls_honoured))
+        .collect();
+    let (mean, min, max) = spread(&calls);
+    println!("  Appels aux armes honorés : moy. {mean:.0} [{min:.0}-{max:.0}]");
+    let all_alive = reports
+        .iter()
+        .filter(|r| r.majors_1400.iter().all(|a| *a))
+        .count();
+    println!(
+        "  4 majeures en vie en 1400 : {all_alive}/{}",
+        reports.len()
+    );
+    for r in reports {
+        for (index, major) in MAJORS.iter().enumerate() {
+            if let Some(turn) = r.majors_fall[index] {
+                println!(
+                    "    graine {} : {} tombe en {}{}",
+                    r.seed,
+                    major.trim_start_matches("fac_"),
+                    1337 + turn.saturating_sub(1) / 4,
+                    if r.majors_1400[index] {
+                        ""
+                    } else {
+                        " (avant 1400)"
+                    }
+                );
+            }
+        }
+    }
 }

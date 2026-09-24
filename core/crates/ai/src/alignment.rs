@@ -12,7 +12,6 @@ use sim_campaign::diplomacy::{
     claim_stakes, evaluate, rivals, war_ready, Proposal, RelationKind, AGGRESSION_REASON,
     AT_WAR_REASON, DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
 };
-use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
 
 /// Salt of the wool revolt roll.
@@ -333,18 +332,6 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
     orders
 }
 
-/// `true` when `a` and `b` control provinces adjacent on the map (land
-/// borders as armies walk them). `CampaignState::are_neighbors` reads the
-/// province files' `neighbors`, filled for six provinces only.
-pub fn borders(state: &CampaignState, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
-    state.provinces.iter().any(|(id, p)| {
-        &p.controller == a
-            && land_neighbors(data, id)
-                .iter()
-                .any(|n| state.provinces.get(n).is_some_and(|np| &np.controller == b))
-    })
-}
-
 /// Princes on the border of an enemy of `faction` (itself no vassal),
 /// allied neither with it nor with that enemy, no enemy or pretender of
 /// its allies, whose campaign roll lets history court them: each
@@ -414,7 +401,7 @@ fn courted_princes<'a>(
             me.allies.iter().any(|a| {
                 lesser(a)
                     && enemies.iter().any(|e| state.is_at_war(a, e))
-                    && borders(state, data, id, a)
+                    && state.are_neighbors(data, id, a)
             })
         })
         .filter(|(id, _)| campaign_roll(state, id, DYNASTIC_SALT) < rules.history_permille)
