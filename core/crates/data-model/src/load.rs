@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use serde::de::DeserializeOwned;
 
+use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
 use crate::entities::battle_order::BattleOrder;
@@ -72,6 +73,8 @@ pub mod folders {
     pub const VISION_RULES: &str = "vision.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
+    /// Campaign agents (lot C6), inside `rules/`; optional.
+    pub const AGENT_RULES: &str = "agents.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -202,6 +205,9 @@ pub struct GameData {
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
+    /// `data/rules/agents.json` (lot C6, campaign agents); the defaults of
+    /// [`AgentRules::default`] when absent.
+    pub agent_rules: Option<AgentRules>,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
@@ -242,6 +248,7 @@ impl GameData {
             ai_diplomacy: AiDiplomacy::default(),
             vision_rules: None,
             retinue: None,
+            agent_rules: None,
             movement_graph: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
@@ -275,6 +282,10 @@ impl GameData {
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {
             data.retinue = Some(read_json(&retinue_path)?);
+        }
+        let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
+        if agents_path.is_file() {
+            data.agent_rules = Some(read_json(&agents_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;

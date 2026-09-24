@@ -284,6 +284,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     );
     orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
     orders.extend(sim_campaign::chivalry::ai_found_order(state, data, faction));
+    // C6: spies, heralds and preachers (recruitment keeps a reserve).
+    orders.extend(sim_campaign::agents::plan_agents(state, data, faction));
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);
