@@ -1,9 +1,21 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
+Dernière mise à jour : 2026-09-24 (session 4, finalisation F1-F9 et G1-G2 ; sessions parallèles « visual »,
+« ui-tw » et « historien »).
 
 ## Où en est-on
-- **M0 à M10 terminés : la v1 est complète.** Campagne 1337-1453 jouable de bout en bout avec villes vivantes, dynasties, technologies, diplomatie et religion, chronique historique, batailles et sièges 3D temps réel avec IA tactique, objectifs historiques et écran de fin, sons, musiques, modèles 3D et écus ; application macOS autonome (`tools/export_macos.sh`). Reste : 49 portraits à générer (≈ 2,25 $) quand la clé OpenRouter le permettra.
+- **Jeu complet et finalisé** : campagne 1337-1453 (1477 pour la Bourgogne) jouable de bout en bout avec les
+  trois factions, 29 factions au total, 117 événements de chronique dont des chaînes, IA qui mène une vraie
+  guerre de Cent Ans (France-Angleterre en guerre 54-76 % du siècle, 3 à 8 phases, alliances historiques),
+  batailles et sièges 3D avec phase de déploiement, rendu semi-réaliste, icônes et infobulles partout, menu
+  illustré, réglages, sauvegardes automatiques, rapport de saison, alertes, tutoriel, encyclopédie (L), codex
+  historique (K), manuel (`docs/manuel.md`), crédits, export macOS vérifié (`tools/export_macos.sh`).
+- **Victoire** : tous les objectifs historiques tenus `hold_turns` saisons d'affilée (France 20, Angleterre et
+  Bourgogne 12). Sonde : `cargo run --release -p ai --example playthrough [graine]`.
+- **Qualité** : 310 tests Rust, 87 tests Python, smoke Godot 20 étapes, clippy propre.
+- **Reste** : 49 portraits à générer (≈ 2,25 $) quand la clé OpenRouter sera remise à zéro (1er octobre) ; écarts
+  d'équilibrage documentés plus bas (tableaux F4 et G2).
+- Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/wip/finalisation.md`.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
