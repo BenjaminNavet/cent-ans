@@ -1,0 +1,50 @@
+{
+  "id": "evt_piquiers_suisses",
+  "title": "Des piquiers à louer",
+  "text": "Des capitaines lombards et des princes d'Empire envoient leurs recruteurs dans les vallées : ils veulent les piquiers des Waldstätten, qui ne reculent jamais. Les anciens hésitent à laisser partir tant de jeunes gens.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 40
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_swiss"
+  },
+  "options": [
+    {
+      "text": "Louer les compagnies aux princes",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        },
+        {
+          "type": "population",
+          "percent": -2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder les piquiers au pays",
+      "effects": [
+        {
+          "type": "spawn_army",
+          "units": [
+            "unit_flemish_pikemen",
+            "unit_flemish_pikemen"
+          ]
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Mercenaires suisses",
+    "Ancienne Confédération suisse"
+  ]
+}

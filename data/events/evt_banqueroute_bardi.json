@@ -1,0 +1,77 @@
+{
+  "id": "evt_banqueroute_bardi",
+  "title": "La banqueroute des Bardi et des Peruzzi",
+  "text": "Le roi d'Angleterre ne rembourse plus les sommes prodigieuses que lui ont avancées les compagnies florentines. Les Peruzzi sombrent les premiers, puis les Bardi ; les déposants assiègent les comptoirs du Mercato Nuovo.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1343,
+      "season": "autumn"
+    },
+    "until_year": 1346,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_florence"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_florence"
+  },
+  "options": [
+    {
+      "text": "Soutenir les compagnies avec l'argent de la Commune",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_firenze",
+          "amount": -5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Dettes anglaises impayées"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les compagnies faillir",
+      "effects": [
+        {
+          "type": "wealth",
+          "province": "prov_firenze",
+          "amount": -15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_firenze",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -25,
+          "reason": "Banqueroute des Bardi"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1343",
+    "note": "Faillite des Peruzzi en 1343, des Bardi en 1346."
+  },
+  "sources": [
+    "Bardi (famille)",
+    "Peruzzi",
+    "Edwin S. Hunt, The Medieval Super-Companies, 1994"
+  ]
+}

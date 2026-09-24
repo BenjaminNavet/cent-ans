@@ -1,0 +1,84 @@
+{
+  "id": "evt_charles_iv_roi_des_romains",
+  "title": "Charles de Luxembourg roi des Romains",
+  "text": "À Rhens, cinq princes électeurs, pressés par le pape Clément VI, déposent Louis de Bavière et élisent Charles, fils du roi de Bohême. Les villes d'Empire raillent le « roi des prêtres », mais Louis n'a plus que son épée.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_bohemia"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_empire"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_bohemia"
+  },
+  "options": [
+    {
+      "text": "Accepter la couronne et défier le Bavarois",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "chr_charles_de_luxembourg",
+          "amount": 20
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "claim",
+          "kind": "throne",
+          "target": "fac_empire"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": -25,
+          "reason": "Élection de Rhens"
+        },
+        {
+          "type": "papal_favor",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Attendre la mort de Louis de Bavière",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "chr_charles_de_luxembourg",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": 5,
+          "reason": "Prudence de Charles"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-07-11"
+  },
+  "sources": [
+    "Charles IV (empereur du Saint-Empire)",
+    "Louis IV (empereur du Saint-Empire)",
+    "Pierre Monnet, Charles IV, Fayard, 2020"
+  ]
+}
