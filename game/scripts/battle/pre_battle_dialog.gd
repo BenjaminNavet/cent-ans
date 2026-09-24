@@ -4,7 +4,8 @@ extends PanelContainer
 ## Dialogue d'avant-bataille (fin de tour, spec M7 § 4) : forces en présence, terrain, météo
 ## prévue, « Livrer bataille » / « Résolution automatique ». Pour un assaut (M8 § 2) :
 ## « Assaut en vue », état des murailles et « Livrer l'assaut ». La météo est lue sur un
-## `BattleSim` construit avec la même graine que la bataille qui sera livrée.
+## `BattleSim` construit avec la même graine que la bataille qui sera livrée, comme le site
+## (B6 : « Site : Terre gelée · hiver · village · haies · côte ouest »).
 
 signal fight_requested(index: int, seed: int)
 signal auto_requested(index: int)
@@ -18,6 +19,7 @@ const SEASON_FR := {"spring": "printemps", "summer": "été", "autumn": "automne
 
 var battle: Dictionary = {}
 var weather_label_text: String = ""
+var site_label_text: String = ""
 var title_label: Label
 var body_label: Label
 var fight_button: Button
@@ -101,8 +103,15 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	if bool(setup.get("river", false)):
 		terrain_text += ", rivière et gués"
 	lines.append("Terrain : %s ; saison : %s." % [terrain_text, SEASON_FR.get(str(setup.get("season", "")), "")])
-	weather_label_text = _forecast(setup, int(battle.get("seed", 1)))
+	var preview := _preview(setup, int(battle.get("seed", 1)))
+	weather_label_text = "inconnue"
+	site_label_text = ""
+	if preview != null:
+		weather_label_text = str(preview.call("get_weather").get("label", "inconnue")).to_lower()
+		site_label_text = str(preview.call("get_site_label"))
 	lines.append("Météo prévue : %s." % weather_label_text)
+	if site_label_text != "":
+		lines.append("Site : %s." % site_label_text)
 	body_label.text = "\n".join(lines)
 	fight_button.disabled = setup.is_empty()
 	visible = true
@@ -124,10 +133,11 @@ func _composition(units: Array) -> String:
 	return ", ".join(parts)
 
 
-func _forecast(setup: Dictionary, seed: int) -> String:
+## Aperçu de la bataille à livrer (même graine : même météo, même site), ou `null`.
+func _preview(setup: Dictionary, seed: int) -> Object:
 	if setup.is_empty() or not ClassDB.class_exists("BattleSim"):
-		return "inconnue"
+		return null
 	var preview: Object = ClassDB.instantiate("BattleSim")
 	if not preview.call("setup", setup, seed):
-		return "inconnue"
-	return str(preview.call("get_weather").get("label", "inconnue")).to_lower()
+		return null
+	return preview

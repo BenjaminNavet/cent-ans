@@ -105,6 +105,31 @@ fn bocage_battles_still_engage() {
     assert!(covered >= 3, "cover on {covered} fields out of 8");
 }
 
+/// The site in one compact line (pre-battle dialog and HUD).
+#[test]
+fn the_site_reads_in_one_line() {
+    let mut sim = demo_sim();
+    // The demo: dry spring plains, a farm with hedges and fences, a river.
+    assert_eq!(
+        sim.field().site_label_fr(),
+        "Sol sec · printemps · ferme · haies · clôtures · rivière et gués"
+    );
+    let field = sim.field_mut();
+    field.season = sim_battle::BattleSeason::Winter;
+    field.river = None;
+    field.obstacles.retain(|o| o.kind == ObstacleKind::Hedge);
+    field.village.as_mut().unwrap().farm = false;
+    field.coast = Some(sim_battle::Coast {
+        flank: sim_battle::Flank::West,
+        shore_x: -20.0,
+        beach: 40.0,
+    });
+    assert_eq!(
+        sim.field().site_label_fr(),
+        "Terre gelée · hiver · village · haies · côte ouest"
+    );
+}
+
 /// B4 rhythm kept: the demo armies still meet after about 70 s.
 #[test]
 fn demo_contact_stays_near_seventy_seconds() {

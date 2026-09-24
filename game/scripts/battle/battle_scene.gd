@@ -209,6 +209,7 @@ func begin() -> bool:
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
+	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
