@@ -75,6 +75,8 @@ pub mod folders {
     pub const VISION_RULES: &str = "vision.json";
     /// Phased auto-resolve coefficients (lot N1), inside `rules/`; optional.
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
+    /// Public order tuning (lot E2), inside `rules/`; optional.
+    pub const POPULATION_RULES: &str = "population.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -212,6 +214,9 @@ pub struct GameData {
     /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
     /// when absent.
     pub auto_resolve: crate::entities::auto_resolve::AutoResolveRules,
+    /// `data/rules/population.json` (lot E2);
+    /// [`crate::PopulationRules::default`] when absent.
+    pub population_rules: crate::entities::population_rules::PopulationRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -259,6 +264,7 @@ impl GameData {
             ai_doctrines: None,
             vision_rules: None,
             auto_resolve: Default::default(),
+            population_rules: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -298,6 +304,10 @@ impl GameData {
         let auto_resolve_path = root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES);
         if auto_resolve_path.is_file() {
             data.auto_resolve = read_json(&auto_resolve_path)?;
+        }
+        let population_path = root.join(folders::RULES).join(folders::POPULATION_RULES);
+        if population_path.is_file() {
+            data.population_rules = read_json(&population_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {

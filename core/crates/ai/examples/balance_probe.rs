@@ -274,7 +274,7 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
     run.avg_unrest = state
         .provinces
         .values()
-        .map(|p| f64::from(p.unrest))
+        .map(|p| sim_campaign::population::weighted_unrest(&p.population))
         .sum::<f64>()
         / state.provinces.len().max(1) as f64;
     run.high_tax_share = f64::from(high_tax_samples.0) / f64::from(high_tax_samples.1.max(1));

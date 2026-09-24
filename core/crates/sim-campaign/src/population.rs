@@ -116,6 +116,7 @@ fn update_class(
     effects: &EffectTotals,
     population_total: u64,
     cap: u64,
+    rules: &data_model::PopulationRules,
 ) {
     // F1: effects aimed at this class only (`Effect::class`).
     let class_fx = effects.classes.get(class);
@@ -167,17 +168,20 @@ fn update_class(
     entry.goods_satisfaction = move_towards(entry.goods_satisfaction, goods_target, GOODS_SPEED);
 
     // ----- unrest ----------------------------------------------------------
-    let garrison_relief = f64::from(garrison_strength / 100).min(20.0);
-    let mut unrest_target = tax_burden * 40.0
+    // E2 (`data/rules/population.json`): taxes bite, garrisons and plenty
+    // soothe only so much.
+    let garrison_relief = (f64::from(garrison_strength / 100) * rules.garrison_relief_per_100_men)
+        .min(rules.garrison_relief_max);
+    let mut unrest_target = tax_burden * rules.tax_unrest_weight
         + f64::from(devastation) / 2.0
-        + (50.0 - f64::from(entry.goods_satisfaction)) / 3.0
+        + ((50.0 - f64::from(entry.goods_satisfaction)) / 3.0).max(-rules.goods_relief_max)
         + (50.0 - f64::from(entry.health)) / 4.0
         - garrison_relief;
     if occupied {
-        unrest_target += 25.0;
+        unrest_target += rules.occupation_unrest;
     }
     if foreign_religion {
-        unrest_target += 10.0;
+        unrest_target += rules.foreign_religion_unrest;
     }
     // Building `Unrest` effects: negative values are appeasement.
     unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
@@ -274,6 +278,7 @@ pub(crate) fn resolve_population(
                 class_effects,
                 population_total,
                 cap,
+                &data.population_rules,
             );
         }
 

@@ -13,6 +13,7 @@ pub mod diet;
 pub mod event;
 pub mod faction;
 pub mod names;
+pub mod population_rules;
 pub mod province;
 pub mod religion;
 pub mod resource;
