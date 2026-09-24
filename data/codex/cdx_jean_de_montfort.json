@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_de_montfort",
+  "title": "Jean de Montfort",
+  "category": "personnage",
+  "aliases": ["Jean de Montfort", "comte de Montfort", "parti de Montfort"],
+  "era": { "from": "1295", "to": "1345" },
+  "summary": "Demi-frère du duc Jean III de Bretagne, Jean de Montfort s'empare du duché à sa mort en 1341 et s'allie à [[cdx_edouard_iii|Édouard III]]. Capturé, il meurt en 1345, mais son fils Jean IV finit par l'emporter à Auray en 1364.",
+  "body": "Jean naît en 1295 du second mariage du duc Arthur II de Bretagne avec Yolande de Dreux, comtesse de Montfort-l'Amaury. Son demi-frère aîné, le duc Jean III, le déteste et ne veut pas de lui pour successeur. Mais quand Jean III meurt sans enfant, le 30 avril 1341, Montfort agit vite : il se fait reconnaître à Nantes, s'empare du trésor ducal à Limoges et prend les principales forteresses du duché.\n\nLa cour de France, réunie à Conflans en septembre 1341, attribue pourtant le duché à [[cdx_charles_de_blois|Charles de Blois]], le neveu du roi. Montfort se tourne alors vers [[cdx_edouard_iii|Édouard III]], qu'il reconnaît comme roi de France. Dès novembre, l'armée française prend Nantes, et Montfort est fait prisonnier et enfermé au Louvre. Sa femme, [[cdx_jeanne_de_flandre|Jeanne de Flandre]], poursuit la lutte.\n\nEn 1345, Montfort s'évade, gagne l'Angleterre et prête hommage à Édouard III comme duc de Bretagne. Il revient combattre, mais tombe malade et meurt à Hennebont le 26 septembre 1345. Son fils, âgé de cinq ans, est élevé à la cour d'Angleterre.\n\nDevenu adulte, ce fils, Jean IV, reprend le flambeau. Avec l'aide de [[cdx_john_chandos|Jean Chandos]] et d'[[cdx_olivier_de_clisson|Olivier de Clisson]], il remporte la bataille d'Auray en 1364, où Charles de Blois est tué, et devient duc par le traité de Guérande. La maison de Montfort gouvernera la Bretagne jusqu'à son union à la France au début du XVIe siècle.",
+  "entity": "chr_jean_de_montfort",
+  "see_also": ["cdx_jeanne_de_flandre", "cdx_charles_de_blois", "cdx_guerre_de_succession_de_bretagne", "cdx_edouard_iii"],
+  "sources": ["Jean de Montfort", "Jean IV de Bretagne"]
+}

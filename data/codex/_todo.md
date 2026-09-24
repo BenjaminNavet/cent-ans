@@ -15,5 +15,4 @@ Le validateur du Codex tolère les liens `[[cdx_x]]` et les entrées `see_also` 
 
 Ids déjà cités par des fiches H8, fiches en cours d'écriture :
 
-- `cdx_christine_de_pizan` — cité par cdx_librairie_charles_v
 - `cdx_papier` — cité par cdx_enluminure

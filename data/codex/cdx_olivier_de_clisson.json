@@ -1,0 +1,11 @@
+{
+  "id": "cdx_olivier_de_clisson",
+  "title": "Olivier de Clisson",
+  "category": "personnage",
+  "aliases": ["Olivier de Clisson", "Clisson", "connétable de Clisson", "Pierre de Craon", "Jeanne de Belleville"],
+  "era": { "from": "1336", "to": "1407" },
+  "summary": "Seigneur breton élevé en Angleterre, Olivier de Clisson passe au service de [[cdx_charles_v|Charles V]] et succède à [[cdx_du_guesclin|Du Guesclin]] comme connétable de France en 1380. La tentative d'assassinat dont il est victime en 1392 est à l'origine de la folie de [[cdx_charles_vi|Charles VI]].",
+  "body": "Olivier naît en 1336 dans une puissante famille du sud de la Bretagne. En 1343, son père est décapité à Paris sur ordre de Philippe VI, qui l'accuse de trahison au profit des Anglais. Sa mère, Jeanne de Belleville, jure vengeance : selon la tradition, elle arme des navires et attaque les bateaux français. Le jeune Olivier est élevé en Angleterre.\n\nIl combat d'abord pour le parti de Montfort : à Auray, en 1364, il perd un œil mais contribue à la victoire. Brouillé avec le nouveau duc Jean IV, il se rallie vers 1370 à [[cdx_charles_v|Charles V]] et devient le frère d'armes de [[cdx_du_guesclin|Du Guesclin]], avec qui il reprend le Poitou aux Anglais. Sa dureté envers les prisonniers lui vaut le surnom de « boucher ».\n\nÀ la mort de Du Guesclin, en 1380, il devient connétable de France. Il commande l'armée royale à [[cdx_roosebeke|Roosebeke]] en 1382 et prépare en 1386 un grand débarquement en Angleterre, qui n'aura jamais lieu. Proche des conseillers de [[cdx_charles_vi|Charles VI]], il est détesté des oncles du roi et du duc de Bretagne.\n\nDans la nuit du 13 au 14 juin 1392, à Paris, il est attaqué par les hommes de Pierre de Craon, un seigneur disgracié. Laissé pour mort, il survit. Le roi, furieux, part en expédition contre le duc de Bretagne, qui protège Craon : c'est au cours de cette chevauchée, en août, dans la forêt du Mans, qu'il sombre dans la folie. Clisson, privé de sa charge, se retire dans ses forteresses de Josselin et de Clisson, où il meurt en 1407.",
+  "see_also": ["cdx_du_guesclin", "cdx_charles_vi", "cdx_guerre_de_succession_de_bretagne", "cdx_roosebeke"],
+  "sources": ["Olivier V de Clisson", "Jeanne de Belleville"]
+}
