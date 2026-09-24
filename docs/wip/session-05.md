@@ -1,21 +1,42 @@
 # Session 5 — crédit OpenRouter (19 €) et écarts restants
 
-Démarrée le 2026-09-24. Nouvelle clé OpenRouter (≈ 19,6 $ de crédit), tout peut être consommé
-(plafond projet 50 $ inchangé, dépenses dans `docs/budget.md`).
+Démarrée le 2026-09-24, interrompue le même jour par l'utilisateur (reprise plus tard).
+Nouvelle clé OpenRouter (≈ 19,6 $ de crédit au départ, `total_usage` du compte = 80,3766 $ sur
+100 $ au démarrage) ; l'utilisateur autorise à tout consommer (plafond projet 50 $ inchangé,
+dépenses dans `docs/budget.md`).
 
-## État
-- [fait] Portraits (88/88, 3,85 $) : `cent-ans assets portraits` (87 éligibles avec 29 factions, ≈ 4 $).
-- [en cours] Miniatures d'événements : nouvel outil `cent-ans assets event-art` (117 × 768×432 JPEG,
-  ≈ 5,5 $), bandeau dans la fenêtre de chronique (fait, capture `docs/img/chronicle-miniature.png`).
-- [fait] Illustrations de l'encyclopédie (116/116, 5,27 $) : `cent-ans assets illustrations` (unités, bâtiments,
-  technologies, factions ; 116 × 640×360 JPEG, ≈ 5,3 $), en tête de fiche (fait, capture
-  `docs/img/encyclopedia-illustration.png`).
-- [fait] Agent A : bonus des technologies dans la bataille 3D (limite G1), fusionné (abdd929).
-- [fait] Agent B : Bourgogne-Angleterre (23/40 graines) et Brabant (39 %), fusionné (dbdcc69) ; 38/40 survies.
-- [en cours] Agent C (worktree) : G5, `are_neighbors` sur l'adjacence de carte + rééquilibrage (survie 40/40).
-- [à faire] Après génération : `godot --headless --path game --import`, commiter images + `.import`,
-  vérifier `docs/budget.md` contre `GET /api/v1/credits` (total_usage de départ : 80,3766 $).
+## Fait (dans main)
+- Portraits : 88/88 (`cent-ans assets portraits`, 3,85 $ + test 0,15 $).
+- Illustrations de l'encyclopédie : 116/116 unités, bâtiments, technologies, factions
+  (`cent-ans assets illustrations`, 640×360 JPEG dans `game/assets/illustrations/`), affichées en
+  tête de fiche (`encyclopedia.gd`, capture `docs/img/encyclopedia-illustration.png`).
+- Miniatures d'événements : outil `cent-ans assets event-art` (768×432 JPEG dans
+  `game/assets/events/`), bandeau de la fenêtre de chronique (`chronicle_window.gd`, capture
+  `docs/img/chronicle-miniature.png`). 117/117 générées et commitées.
+- G1 : bonus des technologies dans la bataille 3D (abdd929).
+- G4 : alliance Bourgogne-Angleterre (23/40 graines, 1419-1442), Brabant 39 % ; réglages dans
+  `data/ai/alignment.json` ; régression : 38/40 graines avec les 4 grandes factions en vie en 1400
+  (dbdcc69, détails dans `docs/wip/g4-burgundy.md` et `docs/status.md`).
 
-## Reprise
-- Les deux générations sont idempotentes : relancer la commande reprend les images manquantes.
-- Sonde non consignée automatiquement : 1 appel `image_config` 16:9 (0,04 $, ignoré par le modèle).
+## À reprendre
+1. **Budget** : toutes les lignes sont écrites (cumul 15,13 $). Ajouter la sonde `image_config`
+   16:9 (0,04 $, non consignée) et vérifier contre le compteur OpenRouter
+   (`curl -s https://openrouter.ai/api/v1/credits -H "Authorization: Bearer $OPENROUTER_API_KEY"`,
+   dépense de session = total_usage − 80,3766).
+2. **Import Godot** : `godot --headless --path game --import`, commiter les `.import` des
+   portraits, illustrations et miniatures (nécessaires à l'export macOS), smoke test.
+3. **Agent G5** (branche `worktree-agent-a8e6ab2920478f32d`, worktree
+   `.claude/worktrees/agent-a8e6ab2920478f32d`, suivi `docs/wip/g5-neighbors.md` dans ce worktree) :
+   `are_neighbors` sur l'adjacence réelle de la carte + rééquilibrage (survie 40/40). S'il a été
+   interrompu, relancer un agent sur cette branche à partir de son fichier wip. Fusion : merger
+   main dans la branche dans le worktree, tests, puis `git merge --ff-only` dans main.
+4. **docs/status.md** : mettre à jour « Reste » (portraits faits), la limite M10 assets
+   (portraits), mentionner miniatures et illustrations ; `docs/manuel.md`/crédits si besoin
+   (images générées par openai/gpt-5-image-mini via OpenRouter).
+5. Crédit restant estimé ≈ 4 $ : idées — illustrations du Codex (231 fiches ≈ 10,6 $, donc un
+   sous-ensemble : lieux et batailles), illustrations de l'écran de chargement.
+
+## Attention
+- D'autres sessions commitent dans main en parallèle (« session 6 TW », « visual »…) : commiter
+  avec chemins explicites, fusions dans un worktree puis ff-only.
+- `core/target-merge/` et `tools/cent_ans_tools/icons_catalog.py` modifiés ne sont pas à moi.
