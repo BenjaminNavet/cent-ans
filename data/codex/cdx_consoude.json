@@ -1,0 +1,11 @@
+{
+  "id": "cdx_consoude",
+  "title": "La consoude",
+  "category": "plante",
+  "aliases": ["consoude", "grande consoude", "Symphytum", "oreille d'âne"],
+  "era": { "from": "900", "to": "1500" },
+  "summary": "Son nom dit sa promesse : la consoude « consolide » les os brisés et les plaies. Les chirurgiens médiévaux en font des emplâtres pour les fractures. Mais la plante est toxique pour le foie si on l'avale.",
+  "body": "La grande consoude (Symphytum officinale) est une plante vigoureuse des lieux humides, aux grandes feuilles rêches et aux fleurs en clochettes pourpres ou crème. Son nom vient du latin consolida, de consolidare, « affermir, souder » ; son nom grec, symphyton, veut dire « qui fait se rejoindre ». Les Anglais l'appellent encore knitbone, « tricote-os ».\n\nLes herbiers médiévaux, à la suite de Dioscoride, la recommandent pour souder les os fracturés, refermer les plaies et arrêter les saignements. On râpe sa racine gluante pour en faire un emplâtre qui durcit en séchant autour d'un membre cassé, une sorte d'ancêtre du plâtre. Hildegarde de Bingen, au XIIe siècle, en parle aussi. Pour les [[cdx_barbiers_chirurgiens|barbiers et chirurgiens]] qui suivent les armées, c'est une plante précieuse, avec le [[cdx_plantain|plantain]] et le [[cdx_millepertuis|millepertuis]].\n\nOn la prend aussi en décoction contre les crachements de sang, les ulcères internes et la dysenterie, et ses jeunes feuilles se mangent parfois en beignets. Ces usages internes ont traversé les siècles jusqu'au XXe.\n\nCe qu'en dit la science moderne : la racine contient de l'allantoïne, qui favorise la régénération de la peau, et du mucilage ; appliquée en pommade, la consoude a montré une efficacité réelle sur les entorses et les contusions. Mise en garde importante : la plante contient des alcaloïdes pyrrolizidiniques qui endommagent gravement le foie ; son usage interne (tisanes, feuilles mangées) est aujourd'hui déconseillé ou interdit dans de nombreux pays. Usage externe seulement, sur peau intacte, et jamais chez l'enfant ou la femme enceinte.",
+  "see_also": ["cdx_plantain", "cdx_millepertuis", "cdx_barbiers_chirurgiens", "cdx_guy_de_chauliac"],
+  "sources": ["Consoude officinale", "Alcaloïde pyrrolizidinique", "Allantoïne"]
+}

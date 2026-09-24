@@ -1,0 +1,11 @@
+{
+  "id": "cdx_camomille",
+  "title": "La camomille",
+  "category": "plante",
+  "aliases": ["camomille", "camomille romaine", "matricaire", "Chamaemelum"],
+  "era": { "from": "900", "to": "1500" },
+  "summary": "Petites marguerites à l'odeur de pomme, la camomille calme les douleurs, les coliques et les fièvres dans les herbiers médiévaux ; elle est l'une des neuf herbes d'un célèbre charme anglo-saxon.",
+  "body": "Sous le nom de camomille, le Moyen Âge désigne surtout deux plantes proches : la matricaire ou camomille allemande (Matricaria chamomilla), herbe annuelle des champs, et la camomille romaine (Chamaemelum nobile), vivace, qu'on cultive dans les jardins. Le nom grec, chamaimêlon, signifie « pomme à terre », pour son parfum fruité.\n\nLes herbiers en font une plante chaude et sèche au premier degré, donc douce, qui relâche et apaise. Macer Floridus et le Circa instans la recommandent contre les douleurs de tête et de ventre, les coliques, les fièvres intermittentes, et pour faire venir les règles ; on l'utilise en bains, en cataplasmes, en huile et en décoction. Le Lacnunga, recueil anglo-saxon de remèdes copié vers l'an mil, cite parmi ses neuf herbes contre les poisons et les maladies une « mægþe » que l'on identifie souvent à la camomille, sans certitude.\n\nOn la répand aussi sur les sols pour son odeur. Elle a sa place dans tout [[cdx_jardin_des_simples|jardin des simples]].\n\nCe qu'en dit la science moderne : les fleurs contiennent de l'apigénine et du bisabolol, aux effets anti-inflammatoires et légèrement sédatifs ; quelques essais suggèrent un effet modeste sur l'anxiété et le sommeil, et les bains de camomille apaisent les irritations cutanées. Elle ne soigne pas la fièvre. Mise en garde : allergies possibles chez les personnes sensibles aux Astéracées (ambroisie, armoise), et prudence avec les anticoagulants.",
+  "see_also": ["cdx_saule", "cdx_reine_des_pres", "cdx_jardin_des_simples", "cdx_plantain", "cdx_humeurs"],
+  "sources": ["Camomille romaine", "Matricaire camomille", "Charme des neuf herbes"]
+}

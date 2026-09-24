@@ -1,0 +1,12 @@
+{
+  "id": "cdx_genievre",
+  "title": "Le genévrier (fumigations)",
+  "category": "plante",
+  "aliases": ["genièvre", "genévrier", "baies de genièvre", "fumigation", "fumigations"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbuste des landes au bois odorant, le genévrier brûle dans les maisons, les rues et les hôpitaux pour « purifier l'air corrompu » : pendant la Peste noire, ses fumées sont l'une des armes favorites des médecins.",
+  "body": "Le genévrier commun (Juniperus communis) est un arbuste épineux des landes et des coteaux secs, aux aiguilles piquantes et aux petites baies bleu-noir, les « genièvres », qui mettent deux ou trois ans à mûrir. Son bois, sa résine et ses baies dégagent en brûlant une fumée à l'odeur forte et agréable.\n\nPour la médecine médiévale, les maladies épidémiques viennent d'un air corrompu, gâté par des vapeurs putrides montées des marais, des cadavres ou, selon la Faculté de Paris en 1348, par une conjonction de planètes (voir le [[cdx_compendium_de_epidemia|Compendium de epidemia]]). Il faut donc corriger l'air par son contraire : les bonnes odeurs. Les conseils contre la peste recommandent de faire brûler dans les chambres et les rues des bois et des herbes aromatiques ; le genévrier y figure en bonne place, avec le laurier, le [[cdx_romarin|romarin]], l'encens ou le bois d'aloès pour les riches. On respire aussi des éponges imbibées de [[cdx_vinaigre|vinaigre]] et des pommes de senteur (pommes d'ambre).\n\nLes herbiers, de Dioscoride au Circa instans, disent les baies chaudes et sèches, bonnes pour l'estomac, les reins et les poumons, et contre les morsures de serpent. Les fumigations de genièvre resteront d'usage dans les hôpitaux jusqu'à l'époque moderne.\n\nCe qu'en dit la science moderne : les fumées aromatiques ne peuvent rien contre la peste, due à une bactérie (Yersinia pestis) transmise par les puces des rats et, pour la forme pulmonaire, par la toux des malades ; tout au plus certaines fumées gênent-elles les insectes. Les baies de genièvre, riches en huile essentielle, sont un aromate sans danger en cuisine (choucroute, gibier), mais l'huile concentrée irrite les reins ; elle est déconseillée en cas de grossesse ou de maladie rénale.",
+  "anachronism": "Le genièvre, eau-de-vie de baies de genévrier des Pays-Bas, ancêtre du gin, n'apparaît qu'aux XVIe-XVIIe siècles.",
+  "see_also": ["cdx_vinaigre", "cdx_compendium_de_epidemia", "cdx_peste_noire", "cdx_romarin", "cdx_quarantaine"],
+  "sources": ["Genévrier commun", "Peste noire", "Théorie des miasmes"]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_menthe",
+  "title": "La menthe",
+  "category": "plante",
+  "aliases": ["menthe", "menthes", "mentastre", "menthe pouliot", "pouliot"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Si nombreuses sont les menthes, écrit vers 840 l'abbé Walahfrid Strabon, qu'on compterait plus aisément les étincelles de la forge de Vulcain. Herbe de cuisine et de remède, la menthe soigne l'estomac et parfume les sauces vertes.",
+  "body": "Le Moyen Âge cultive et cueille plusieurs menthes : la menthe verte (Mentha spicata), la menthe aquatique, la menthe à feuilles rondes, le « mentastre » sauvage et la menthe pouliot (Mentha pulegium), très employée. Le capitulaire De Villis (vers 800) cite « mentam » et « mentastrum » parmi les plantes à cultiver ; dans son Hortulus, Walahfrid Strabon renonce à les dénombrer, tant elles sont nombreuses.\n\nLes herbiers (Macer Floridus, Circa instans) la disent chaude et sèche. Elle fortifie l'estomac, arrête le hoquet et les vomissements, aiguise l'appétit, chasse les vers : le [[cdx_regimen_sanitatis|Régime de Salerne]] lui prête ce dernier pouvoir. On la frotte sur les gencives, on la suspend dans les chambres pour son odeur, on la répand sur les sols. Le pouliot, lui, passe pour chasser les puces, d'où son nom latin (pulex, la puce).\n\nEn cuisine, la menthe entre avec le persil, la sauge et le gingembre dans la « sauce verte », que l'on sert avec le poisson ; elle parfume aussi les farces et certaines omelettes aux herbes du [[cdx_menagier_de_paris|Ménagier de Paris]].\n\nCe qu'en dit la science moderne : le menthol et les composés aromatiques des menthes ont une action antispasmodique digestive démontrée, notamment pour l'huile de menthe poivrée dans le syndrome de l'intestin irritable. La menthe pouliot, en revanche, contient de la pulégone, très toxique pour le foie : son huile essentielle a causé des décès, notamment chez des femmes qui l'utilisaient comme abortif. Aucun usage interne à tenter.",
+  "anachronism": "La menthe poivrée (Mentha × piperita), la plus courante aujourd'hui, n'est décrite qu'à la fin du XVIIe siècle en Angleterre : les menthes médiévales sont d'autres espèces.",
+  "see_also": ["cdx_jardin_des_simples", "cdx_sauge", "cdx_fenouil", "cdx_regimen_sanitatis"],
+  "sources": ["Menthe", "Menthe pouliot", "Hortulus (Walafrid Strabon)"]
+}

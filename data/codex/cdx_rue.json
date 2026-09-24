@@ -1,0 +1,11 @@
+{
+  "id": "cdx_rue",
+  "title": "La rue officinale",
+  "category": "plante",
+  "aliases": ["herbe de grâce", "Ruta graveolens"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Herbe amère à l'odeur puissante, la rue (Ruta graveolens) passe au Moyen Âge pour aiguiser la vue et chasser les poisons. C'est aussi une plante réellement toxique, qui brûle la peau au soleil.",
+  "body": "La rue officinale est une petite plante vivace aux feuilles bleutées, découpées, d'une odeur forte et désagréable pour beaucoup. Originaire du bassin méditerranéen, elle figure dans le capitulaire De Villis (vers 800) et dans l'Hortulus de Walahfrid Strabon, qui vante sa force contre les poisons. On la surnomme « herbe de grâce », nom dont l'origine reste discutée.\n\nLes textes médiévaux lui prêtent deux grandes vertus. Elle éclaircit la vue : « Nobilis est ruta quia lumina reddit acuta », noble est la rue, car elle rend la vue perçante, dit le [[cdx_regimen_sanitatis|Régime de santé de Salerne]]. Et elle combat les venins : avec l'[[cdx_ail|ail]] et la [[cdx_theriaque|thériaque]], elle entre dans les listes d'antidotes. Les herbiers (Macer Floridus, Circa instans) la disent chaude et sèche au troisième degré ; on lui attribue aussi le pouvoir de réfréner les désirs charnels, d'où sa présence dans certains jardins monastiques. Pendant les épidémies, elle compte parmi les herbes que l'on respire pour se garder de l'air corrompu.\n\nEn cuisine, on l'emploie à très petite dose : quelques feuilles dans une sauce ou un vin aromatisé. Son amertume la réserve aux usages médicinaux.\n\nCe qu'en dit la science moderne, et mise en garde : la rue contient des furocoumarines qui, au contact de la peau puis du soleil, provoquent de véritables brûlures (phytophotodermatite). Ingérée en quantité, elle est toxique pour le foie et les reins, et elle a été utilisée comme abortif, avec des accidents parfois mortels. Aucune vertu démontrée sur la vue. C'est une plante à admirer au jardin, avec des gants, et non à consommer.",
+  "see_also": ["cdx_jardin_des_simples", "cdx_sauge", "cdx_ail", "cdx_theriaque", "cdx_regimen_sanitatis"],
+  "sources": ["Rue officinale", "Regimen sanitatis Salernitanum", "Capitulaire De Villis"]
+}
