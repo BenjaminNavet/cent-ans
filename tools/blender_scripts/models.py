@@ -54,6 +54,7 @@ MAX_TRIANGLES = 60000
 # Lot BR1 (ADR 0021): houses and parish churches come from the realistic building kit
 # (``kit_campaign.py``), legacy parts get metric UVs and kit material names before export.
 KIT = True
+BUILDING_MODELS = {"castle", "city_cathedral", "town", "village", "cathedral"}
 FOUNDATION = 0.35  # depth of building foundations below z = 0
 
 
@@ -940,7 +941,7 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     reset_scene()
     parts = MODELS[name]()
-    if KIT:
+    if KIT and name in BUILDING_MODELS:
         import kit_campaign
 
         kit_campaign.finish_parts(parts)
@@ -952,6 +953,10 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.object.join()
     obj = bpy.context.active_object
     obj.name = name
+    if KIT and name in BUILDING_MODELS:
+        import kit_campaign
+
+        kit_campaign.atlas(obj)
     bpy.ops.object.shade_flat()
     triangles = triangle_count(obj)
     if triangles >= MAX_TRIANGLES:

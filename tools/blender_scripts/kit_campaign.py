@@ -12,6 +12,7 @@ occlusion, and the kit's material names, so that Godot textures everything the s
 import math
 import random
 
+import bpy
 import building_kit as kit
 import kit_export
 import kit_geometry as kg
@@ -39,6 +40,42 @@ ALIAS = {
     "Timber": ("Timber", (1.0, 1.0, 1.0)),
     "Thatch": ("Thatch", (1.0, 1.0, 1.0)),
 }
+
+
+# Campaign atlas: every kit material becomes a layer of one ``Building`` material (same order as
+# ``building_materials.gd`` ATLAS_LAYERS and ``build_textures.py`` LAYERS); the layer index is
+# stored in the vertex colour alpha as (index + 0.5) / 16.
+LAYERS = ["Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door", "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"]
+
+
+def atlas(obj) -> None:
+    """Merge the kit materials of a joined campaign model into one ``Building`` material."""
+    mesh = obj.data
+    colors = mesh.color_attributes.get("Color")
+    names = [slot.material.name.split(".")[0] if slot.material else "" for slot in obj.material_slots]
+    keep = [n for n in dict.fromkeys(names) if n not in LAYERS]
+    order = keep + ["Building"]
+    targets = []
+    for poly in mesh.polygons:
+        name = names[poly.material_index] if poly.material_index < len(names) else ""
+        if name in LAYERS:
+            alpha = (LAYERS.index(name) + 0.5) / 16.0
+            targets.append(order.index("Building"))
+            if colors is not None:
+                for li in poly.loop_indices:
+                    c = colors.data[li].color
+                    colors.data[li].color = (c[0], c[1], c[2], alpha)
+        else:
+            targets.append(order.index(name))
+    old = {n: next(slot.material for slot in obj.material_slots if slot.material and slot.material.name.split(".")[0] == n) for n in keep}
+    building = bpy.data.materials.get("Building") or bpy.data.materials.new("Building")
+    # Clearing the slots resets the polygon material indices: assign them afterwards.
+    mesh.materials.clear()
+    for n in keep:
+        mesh.materials.append(old[n])
+    mesh.materials.append(building)
+    mesh.polygons.foreach_set("material_index", targets)
+    mesh.update()
 
 
 def _seed(x: float, y: float, salt: int = 0) -> int:

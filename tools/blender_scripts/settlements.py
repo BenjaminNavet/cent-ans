@@ -480,6 +480,10 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.object.join()
     obj = bpy.context.active_object
     obj.name = name
+    if m.KIT:
+        import kit_campaign
+
+        kit_campaign.atlas(obj)
     bpy.ops.object.shade_flat()
     triangles = m.triangle_count(obj)
     if triangles >= MAX_TRIANGLES:

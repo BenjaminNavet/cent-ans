@@ -47,7 +47,7 @@ MATERIALS = {
 
 # Material-wide albedo multiplier (same values in building_materials.gd).
 MATERIAL_TINT = {
-    "RoofSlate": (0.64, 0.68, 0.76),
+    "RoofSlate": (0.5, 0.53, 0.61),
     "Thatch": (1.45, 1.2, 0.85),
     "RoofTile": (0.85, 0.78, 0.76),
     "Plaster": (1.05, 1.02, 0.97),
