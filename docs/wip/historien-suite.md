@@ -12,4 +12,4 @@ Hors lot : portraits des nouveaux personnages (clé OpenRouter après le 1er oct
 
 Points ouverts :
 - IA : `prov_normandie_ouest` reçoit au premier tour une armée sans général (écart entre la classification « frontière » du setup 1337 et celle du module `ai`) ; c'est pourquoi Godefroy d'Harcourt démarre en `prov_normandie`.
-- L'étain ne sert à aucun bâtiment : `required_resource` n'accepte qu'un identifiant.
+- ~~L'étain ne sert à aucun bâtiment~~ — résolu sans toucher au schéma : nouveau bâtiment `bld_tin_blowing_house` (maison de fonte d'étain, tier 1, production, exige `res_tin` + rivière ; icône delapouite/furnace). Un `required_resource` à plusieurs valeurs reste possible plus tard si un bâtiment doit accepter l'une de plusieurs ressources.
