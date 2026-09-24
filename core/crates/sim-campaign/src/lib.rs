@@ -82,11 +82,11 @@ pub use dynasty::{
 };
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
-pub use orders::{Order, OrderError, RecruitOption, BASE_RECRUIT_SLOTS};
+pub use orders::{Order, OrderError, Place, RecruitOption, BASE_RECRUIT_SLOTS};
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
-pub use save::CampaignError;
+pub use save::{CampaignError, SETTLEMENTS_STATE_VERSION};
 pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,

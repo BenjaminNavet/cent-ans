@@ -44,11 +44,6 @@ impl CampaignState {
             .and_then(|id| self.settlements.get(id))
     }
 
-    pub(crate) fn city_state_mut(&mut self, province: &ProvinceId) -> Option<&mut SettlementState> {
-        let id = self.provinces.get(province)?.city.clone();
-        self.settlements.get_mut(&id)
-    }
-
     /// De jure owner of `province`: the owner of its city.
     pub fn province_owner(&self, province: &ProvinceId) -> Option<&FactionId> {
         self.city_state(province).map(|s| &s.owner)
