@@ -16,19 +16,20 @@ Choix du joueur au lancement :
 | 1 | B1 maillages soldats/chevaux (Blender) ; B2 bannières d'unité + vignettes + écran de fin ; C1 minicarte + brouillard | **fusionné** : B2 c0b9635, B1 ff592ae, C1 ee4f2b6 |
 | 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 **fusionné** (2a485a5, banc fait 51f95be) ; C2 en attente |
 | 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **fusionné** (2a485a5) |
-| 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | B7 **fusionné** (7441f5c) ; B6 **fusionné** (e618e41) ; C7 en cours (`docs/wip/c7-suite-general.md` dans sa branche) |
-| 5 | C6 agents Medieval II (espion, émissaire, prédicateur) ; C2 zone de contrôle après C7a colonies | C6 **en cours** (agent en worktree, `docs/wip/c6-agents.md`) ; C2 en attente |
+| 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | B7 **fusionné** (7441f5c) ; B6 **fusionné** (e618e41) ; C7 **fusionné** (12a53bc) |
+| 5 | C6 agents Medieval II (espion, émissaire, prédicateur) ; C2 zone de contrôle après C7a colonies | C6 **fusionné** (12a53bc, ADR 0009) ; C2 relancé en vague 6 |
+| 6 | C2 zone de contrôle ; C5 routes commerciales + accords ; C4 édits régionaux + chaînes de bâtiments ; B8 suites B6/B7 (IA attaquant/bocage/poursuite, minicarte de site, boue, écume de gué) | **en cours** (4 agents, notes `docs/wip/c2-zone-controle.md`, `c5-commerce.md`, `c4-edits-chaines.md`, `b8-suites-bataille.md` dans leurs branches) |
 
-## État courant (24/09, reprise après arrêt)
+## État courant (24/09)
 
-main poussé (e618e41). Fusionnés : P1, P2, B1-B7, C1, C3. Banc B4 fait : effets ≈ +6 % primitives, FPS inchangés (plafond 60 Hz) ; option `--bench-at=<s>`.
-En cours : C7 (suite du général), C6 (agents) ; branches `worktree-agent-*` (`git worktree list`).
-Colonies C4 et C5 fusionnées (17aa679, b241608) : l'aire atteignable existe déjà (`reachable_markers.gd`), C2 se réduit à la zone de contrôle, qui attend C7a colonies (équilibrage de `movement.rs`). C4 TW (édits/chaînes) et C5 TW (routes commerciales) : après C7a.
+main poussé (12a53bc). Fusionnés : P1, P2, B1-B7, C1, C3, C6, C7. Refonte colonies terminée (C1-C7d fusionnés par l'autre session).
+Vague 6 en cours : C2, C5, C4, B8 (branches `worktree-agent-*`, `git worktree list`). Smoke : 23 « smoke OK » attendues (C6 ajoute « agents »).
+Échec pytest connu hors TW : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call` (échoue aussi sur main, session portraits).
 
 ## Reprise
 1. Si la vague 4 est interrompue : lire `docs/wip/b6-*.md`, `b7-*.md`, `c7-*.md` dans les worktrees (`git worktree list`), relancer un agent de reprise par lot inachevé.
 2. Fusion de chaque lot : `../gp-tw-merge` (`integration/tw`) : supprimer d'abord les `.import`/`.uid` non suivis sous `game/` (ils bloquent `git merge main` quand main les suit), `git merge main`, `git merge --no-ff <branche>`, clippy + `cargo test`, `core/build.sh`, `--import`, smoke (compter les « smoke OK », 22 actuellement), `git merge --ff-only integration/tw` dans main (si main a bougé : recommencer `git merge main`) + push.
-3. Quand C7a colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle seule), puis C5 routes commerciales, C4 édits/chaînes.
+3. Fusions de la vague 6 : C4 et C5 touchent tous deux `economy.rs` (conflits probables), C2 `movement.rs`. main bouge souvent (autres sessions) : fusionner main dans `integration/tw` juste avant le ff ; si seuls des docs ont changé, pas de nouvelle vérification.
 4. Pistes B6/B7 : minicarte sans haies ni village ; `advance` n'infléchit pas vers un défenseur décalé ; cavalerie qui attend face à un réseau de haies ; carte de piétinement réutilisable pour la boue ; sillage d'écume au gué ; pastilles par corps de bataille.
 5. Pistes restantes : pistes musicales dédiées (B3) ; relecture de bataille (replay, L, basse priorité).
 
