@@ -50,8 +50,8 @@ pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
 /// Siege value bonus of a settlement the faction owns de jure but an enemy
-/// holds (lot C7a: win back lost places first).
-pub const RECLAIM_TARGET_BONUS: f64 = 20.0;
+/// holds (lot C7a: win back lost places first, above a throne claim's 30).
+pub const RECLAIM_TARGET_BONUS: f64 = 35.0;
 /// A siege of a fortress (level [`FORTRESS_LEVEL`] or more) still far from
 /// starving the garrison after this many turns is given up (lot C7a).
 pub const SIEGE_PATIENCE_TURNS: u32 = 12;
@@ -375,7 +375,12 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // F4: armies are paid from what buildings leave of the net income, plus
     // the hoard spent over `HOARD_SPENDING_TURNS`; small realms live within
     // their means.
-    let target_upkeep = ((ctx.income - ctx.building_upkeep).max(0) as f64 * share) as i64
+    // Lot C7a: garrisons are a fixed cost of the realm like buildings (a
+    // hundred places since the settlements); the share applies to what
+    // both leave, and the garrisons are paid on top.
+    let garrisons = garrison_upkeep(ctx).min(ctx.army_upkeep);
+    let target_upkeep = garrisons
+        + ((ctx.income - ctx.building_upkeep - garrisons).max(0) as f64 * share) as i64
         + hoard / HOARD_SPENDING_TURNS;
     let mut planned_upkeep = ctx.army_upkeep;
 
@@ -531,6 +536,25 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             building,
         });
     }
+}
+
+/// Seasonal upkeep of the faction's garrisons (share paid by the crown by
+/// settlement kind; reliefs, technologies and coinage left out).
+fn garrison_upkeep(ctx: &Context) -> i64 {
+    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
+    ctx.state
+        .settlements
+        .values()
+        .filter(|s| &s.controller == ctx.faction)
+        .map(|s| {
+            s.garrison
+                .iter()
+                .map(|u| unit_upkeep(ctx.data, u))
+                .sum::<i64>()
+                * garrison_upkeep_percent(ctx.data, s.kind)
+                / 100
+        })
+        .sum()
 }
 
 /// Power per livre of a unit type.
