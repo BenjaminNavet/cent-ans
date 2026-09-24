@@ -41,6 +41,7 @@ var title_label: Label
 var scroll: ScrollContainer
 var list_box: VBoxContainer
 var groups: Array = []  # [{title, glyph, entries: [event]}]
+var _title: String = ""
 
 
 func _ready() -> void:
@@ -124,14 +125,59 @@ static func entry_count(report_groups: Array) -> int:
 ## Affiche le rapport ; renvoie faux (et reste fermé) s'il n'y a rien de notable.
 func show_report(date_label: String, report_groups: Array) -> bool:
 	groups = report_groups
-	for child in list_box.get_children():
-		list_box.remove_child(child)
-		child.queue_free()
+	_title = date_label
+	_render()
 	if report_groups.is_empty():
 		hide()
 		return false
-	title_label.text = "Rapport de saison — %s" % date_label
-	for group in report_groups:
+	show()
+	_fit_height.call_deferred()
+	return true
+
+
+## Fusionne des événements survenus après l'affichage initiale (batailles résolues via le
+## dialogue d'avant-bataille, dont le résultat n'est connu qu'après la fermeture de ce
+## dialogue) dans les rubriques déjà construites, et rouvre le rapport s'il avait été fermé.
+## `is_relevant` : voir `build_groups`.
+func add_events(new_events: Array, is_relevant: Callable) -> bool:
+	var new_groups := build_groups(new_events, is_relevant)
+	if new_groups.is_empty():
+		return false
+	groups = merge_groups(groups, new_groups)
+	_render()
+	show()
+	_fit_height.call_deferred()
+	return true
+
+
+## Fusionne deux listes de rubriques (même format que `build_groups`) par titre, en
+## conservant l'ordre de `GROUPS` et en ajoutant les nouvelles entrées à la suite.
+static func merge_groups(existing: Array, additional: Array) -> Array:
+	var by_title: Dictionary = {}
+	var order: Array = []
+	for group in existing:
+		by_title[group["title"]] = {"title": group["title"], "glyph": group["glyph"], "entries": (group["entries"] as Array).duplicate()}
+		order.append(group["title"])
+	for group in additional:
+		if by_title.has(group["title"]):
+			(by_title[group["title"]]["entries"] as Array).append_array(group["entries"])
+		else:
+			by_title[group["title"]] = {"title": group["title"], "glyph": group["glyph"], "entries": (group["entries"] as Array).duplicate()}
+			order.append(group["title"])
+	var result: Array = []
+	for title in order:
+		result.append(by_title[title])
+	return result
+
+
+func _render() -> void:
+	for child in list_box.get_children():
+		list_box.remove_child(child)
+		child.queue_free()
+	if groups.is_empty():
+		return
+	title_label.text = "Rapport de saison — %s" % _title
+	for group in groups:
 		var heading := Label.new()
 		heading.text = "%s  %s" % [group["glyph"], group["title"]]
 		heading.add_theme_font_size_override("font_size", 18)
@@ -145,9 +191,6 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 			more.text = "… et %d autres (voir le journal)" % (entries.size() - MAX_ENTRIES_PER_GROUP)
 			more.add_theme_font_size_override("font_size", 13)
 			list_box.add_child(more)
-	show()
-	_fit_height.call_deferred()
-	return true
 
 
 ## Hauteur ajustée au contenu (au plus `MAX_LIST_HEIGHT`, défilement au-delà).

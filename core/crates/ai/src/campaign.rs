@@ -197,13 +197,10 @@ impl<'a> Context<'a> {
             .sum()
     }
 
-    /// A hostile province lies next to `province`, by land or by sea.
+    /// P1: the frontier classification of the campaign (ports and
+    /// provinces next to another faction), shared with the 1337 setup.
     fn is_border(&self, province: &ProvinceId) -> bool {
-        self.data
-            .province_land_neighbors(province)
-            .iter()
-            .chain(self.data.province_sea_neighbors(province).iter())
-            .any(|n| self.state.is_hostile_territory(self.faction, n))
+        self.state.is_frontier(self.data, self.faction, province)
     }
 
     /// `settlement` is the city of its province.
@@ -434,18 +431,16 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Garrisons of cities beyond need become field armies (merged next
     // turn); the need grows with the threat around the city (lot C4). The
     // small garrisons of the other settlements stay where they are.
-    let capital_city = state.province_city_id(&me.capital).cloned();
     for (id, settlement) in &state.settlements {
         if !ctx.owns_settlement(id) || settlement.siege.is_some() || !ctx.is_city(id) {
             continue;
         }
-        let mut keep = if Some(id) == capital_city.as_ref() {
-            3
-        } else if ctx.is_border(&settlement.province) {
-            2
-        } else {
-            1
-        };
+        // P1: one unit less than the garrison of the same role at the 1337
+        // start, so the starting garrisons stay put; one more under threat.
+        let mut keep = state
+            .garrison_role(data, ctx.faction, &settlement.province)
+            .garrison_size()
+            - 1;
         if ctx.threat_at(id) > 0.0 {
             keep += 1;
         }

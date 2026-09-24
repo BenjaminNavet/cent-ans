@@ -1135,6 +1135,8 @@ func _close_battle_dialog() -> void:
 func _on_battle_auto(index: int) -> void:
 	var events: Array = sim.call("auto_resolve_battle", index)
 	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
+	if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
+		flow.report_late_events(events)
 	refresh_all()
 	_offer_pending_battles()
 
@@ -1151,7 +1153,10 @@ func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 	battle.queue_free()
 	_set_campaign_active(true)
 	if result.get("ok", false):
-		ui.add_events(result.get("events", []), "%s (bataille)" % sim.call("get_date_label"))
+		var events: Array = result.get("events", [])
+		ui.add_events(events, "%s (bataille)" % sim.call("get_date_label"))
+		if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
+			flow.report_late_events(events)
 	else:
 		ui.show_toast("Résultat de bataille refusé : %s" % result.get("error", "?"), true)
 	refresh_all()

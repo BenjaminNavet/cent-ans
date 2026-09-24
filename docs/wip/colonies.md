@@ -15,8 +15,12 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C3 pipeline géo | fait (`b79fbeb`) | graphe 1 345 arêtes (634 route, 28 mer), routes Itiner-e + 70 calculées hors limes, 2 999 hameaux, relief 8192² en 256 tuiles (50 Mo) |
 | C4 refonte cœur | en cours (vague 2) | graphe de repli si `settlement_graph.json` absent |
 | C5 pont + UI | à faire | |
-| C6 rendu paliers | en cours (vague 2b) | lit `settlements_px.json`, `hamlets.json`, `roads.geojson`, tuiles ; contrôleur via `settlements()` |
+| C6 rendu paliers | fait | paliers loin > 620 / moyen 150-620 / près < 150 ; 13 maquettes Blender ; relief fin LRU ; captures `docs/img/colonies/` ; signal `settlement_selected(id)` à brancher en C5 |
 | C7 IA, équilibrage, docs | à faire | |
+
+## Coordination
+
+La session 6 (`docs/wip/tw.md`, plan `docs/design/2026-09-24-rapprochement-total-war.md`) rapproche aussi le jeu de Total War, colonies exclues de son périmètre. Ses lots s'appellent aussi « C1 »… (minicarte, brouillard) : sans rapport avec les lots colonies. Fichier de friction probable : `game/scripts/map/campaign_map.gd`.
 
 ## Décisions prises en cours de route
 

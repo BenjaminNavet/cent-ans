@@ -1,10 +1,12 @@
 //! Spring 1337 start derived from `GameData` (spec § 1.6).
 //!
 //! Garrisons (lot C4: held by the city of the province): 4 units in
-//! capitals, 3 in ports and border provinces, 2 elsewhere; the other
-//! settlements receive the `starting_garrison` of their kind
-//! (`data/settlements/rules.json`). Every faction gets one main army in its capital led by its ruler
-//! (8 units for France, 6 for England, 4 for Burgundy, 3 for the others so that
+//! capitals, 3 in frontier provinces (ports and provinces next to another
+//! faction, [`crate::frontier`]), 2 elsewhere; the other settlements
+//! receive the `starting_garrison` of their kind
+//! (`data/settlements/rules.json`). Every faction gets one main army in its
+//! capital led by its ruler (8 units for France, 6 for England, 4 for
+//! Burgundy, 3 for the others so that
 //! the AI can act). Treasuries come from `Faction::treasury`; wars, alliances
 //! and truces from `Faction::relations`; vassal/overlord ties count as
 //! alliances.
@@ -18,6 +20,7 @@ use data_model::{
 
 use crate::diplomacy::{Claim, FOREVER};
 use crate::economy::TaxRate;
+use crate::frontier::GarrisonRole;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
 use crate::state::{
@@ -67,13 +70,12 @@ fn main_army_composition(faction: &Faction) -> Vec<&'static str> {
     }
 }
 
-fn garrison_composition(is_capital: bool, is_port: bool, is_border: bool) -> Vec<&'static str> {
-    if is_capital {
-        vec![MILITIA, MILITIA, CROSSBOWMEN, MEN_AT_ARMS]
-    } else if is_port || is_border {
-        vec![MILITIA, MILITIA, CROSSBOWMEN]
-    } else {
-        vec![MILITIA, MILITIA]
+/// Units of a starting garrison; its size is [`GarrisonRole::garrison_size`].
+fn garrison_composition(role: GarrisonRole) -> Vec<&'static str> {
+    match role {
+        GarrisonRole::Capital => vec![MILITIA, MILITIA, CROSSBOWMEN, MEN_AT_ARMS],
+        GarrisonRole::Frontier => vec![MILITIA, MILITIA, CROSSBOWMEN],
+        GarrisonRole::Interior => vec![MILITIA, MILITIA],
     }
 }
 
@@ -92,15 +94,11 @@ fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError>
 /// One [`SettlementState`] per settlement of a known province (lots C1, C4).
 ///
 /// Owner is the settlement's enclave owner or the province owner; the
-/// controller is the owner. The city receives the province garrison
-/// (`city_garrisons`) and the province's starting buildings; the other
+/// controller is the owner. The city receives the province's starting
+/// buildings (its garrison is set by the caller, P1); the other
 /// settlements the `starting_garrison` of their kind from
 /// `data/settlements/rules.json` (none when the file is absent).
-fn init_settlements(
-    state: &mut CampaignState,
-    data: &GameData,
-    mut city_garrisons: std::collections::BTreeMap<ProvinceId, Vec<Unit>>,
-) -> Result<(), CampaignError> {
+fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
     for (id, settlement) in &data.settlements {
         let Some(province) = data.provinces.get(&settlement.province) else {
             continue;
@@ -114,9 +112,9 @@ fn init_settlements(
             .unwrap_or_else(|| province.owner.clone());
         let is_city = state.provinces[&settlement.province].city == *id;
         let garrison = match (&data.settlement_rules, is_city) {
-            (_, true) => city_garrisons
-                .remove(&settlement.province)
-                .unwrap_or_default(),
+            // The city garrison depends on the province's role (P1),
+            // assigned once every settlement exists.
+            (_, true) => Vec::new(),
             (None, false) => Vec::new(),
             (Some(rules), false) => {
                 let ids: Vec<&str> = rules
@@ -169,23 +167,14 @@ impl CampaignState {
         }
         let mut state = CampaignState::empty(player, seed);
 
-        // Provinces and garrisons (held by the cities, lot C4).
-        let mut city_garrisons = std::collections::BTreeMap::new();
+        // Provinces, then their settlements, then the city garrisons (P1:
+        // frontiers classified by `CampaignState::is_frontier`, like the AI
+        // does; lot C4: control is derived from the cities, so the
+        // settlements must exist first).
         for (id, province) in &data.provinces {
             let Some(city) = data.province_city(id) else {
                 return Err(CampaignError::MissingData(format!("city of {id}")));
             };
-            let owner = &province.owner;
-            let is_capital = data.factions.get(owner).is_some_and(|f| &f.capital == id);
-            let is_border = province
-                .neighbors
-                .iter()
-                .any(|n| data.provinces.get(n).is_some_and(|p| &p.owner != owner));
-            let garrison = units_from(
-                data,
-                &garrison_composition(is_capital, province.has_port(), is_border),
-            )?;
-            city_garrisons.insert(id.clone(), garrison);
             state.provinces.insert(
                 id.clone(),
                 ProvinceState {
@@ -205,8 +194,25 @@ impl CampaignState {
                 },
             );
         }
-
-        init_settlements(&mut state, data, city_garrisons)?;
+        init_settlements(&mut state, data)?;
+        let mut city_garrisons = std::collections::BTreeMap::new();
+        for (id, province) in &data.provinces {
+            let owner = &province.owner;
+            let role = if data.factions.get(owner).is_some_and(|f| &f.capital == id) {
+                GarrisonRole::Capital
+            } else if state.is_frontier(data, owner, id) {
+                GarrisonRole::Frontier
+            } else {
+                GarrisonRole::Interior
+            };
+            let garrison = units_from(data, &garrison_composition(role))?;
+            city_garrisons.insert(id.clone(), garrison);
+        }
+        for (id, garrison) in city_garrisons {
+            if let Some(city) = state.city_state_mut(&id) {
+                city.garrison = garrison;
+            }
+        }
 
         // Factions and diplomacy.
         for (id, faction) in &data.factions {
