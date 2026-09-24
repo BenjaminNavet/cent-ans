@@ -47,6 +47,15 @@ SMOOTH_ITERATIONS = 2
 SNAP_NAMED_PX = 14.0  # search radius for the named river around a crossing
 SNAP_ANY_PX = 6.0  # fallback: any displayed river of importance >= 3
 DEFAULT_STRUCTURE = {"bridge": "stone", "ford": "ford"}
+ROAD_SNAP_PX = (
+    4.0  # a historic crossing moves onto the nearest road crossing within this radius
+)
+ROAD_AXIS_PX = (
+    2.5  # otherwise it takes the direction of a road ending within this radius
+)
+ROAD_MERGE_PX = 0.9  # overlapping roads: crossings closer than this are merged
+ROAD_BRIDGE_MIN_WIDTH = 0.2  # narrower streams crossed by a road get no bridge
+STREAM_WIDTH = 0.3  # generic road bridge: stone culvert below, timber bridge above
 
 
 @dataclass(frozen=True)
@@ -315,6 +324,147 @@ def place_crossings(
     return placed, unsnapped
 
 
+def road_crossings(rivers: list[dict], roads: list[dict]) -> list[dict]:
+    """Intersections of the displayed roads with the rivers (merged when roads overlap).
+
+    Returns dicts with ``px``, ``dir`` (river, unit), ``axis`` (road, unit), ``width`` (length to
+    span along the road, capped at twice the river width), ``river`` and ``road_type``.
+    """
+    from shapely import LineString, STRtree
+
+    lines = [LineString(r["points"]) for r in rivers]
+    tree = STRtree(lines)
+    hits: list[dict] = []
+    for road in roads:
+        points = np.asarray(road["points"], dtype=np.float64)
+        if len(points) < 2:
+            continue
+        road_line = LineString(points)
+        for index in tree.query(road_line, predicate="intersects"):
+            river = rivers[int(index)]
+            geometry = road_line.intersection(lines[int(index)])
+            for point in getattr(geometry, "geoms", [geometry]):
+                if point.geom_type != "Point":
+                    continue
+                p = np.array([point.x, point.y])
+                if any(np.hypot(*(h["p"] - p)) < ROAD_MERGE_PX for h in hits):
+                    continue
+                snapped = nearest_on_rivers(p, [river], 0.5)
+                if snapped is None:
+                    continue
+                _, _, river_dir, width = snapped
+                if width < ROAD_BRIDGE_MIN_WIDTH:
+                    continue
+                a = points[:-1]
+                ab = points[1:] - a
+                length2 = np.maximum((ab * ab).sum(axis=1), 1e-12)
+                t = np.clip(((p - a) * ab).sum(axis=1) / length2, 0.0, 1.0)
+                k = int(np.argmin(np.hypot(*(a + ab * t[:, None] - p).T)))
+                axis = ab[k] / math.sqrt(length2[k])
+                sine = abs(axis[0] * river_dir[1] - axis[1] * river_dir[0])
+                hits.append(
+                    {
+                        "p": p,
+                        "dir": river_dir,
+                        "axis": axis,
+                        "width": min(width / max(sine, 0.5), width * 2.0),
+                        "river": river["name"],
+                        "road_type": road.get("type", "secondary"),
+                    }
+                )
+    return hits
+
+
+def nearest_road_axis(
+    p: np.ndarray, roads: list[dict], radius: float
+) -> np.ndarray | None:
+    """Direction of the closest road segment within ``radius`` of ``p`` (None if none)."""
+    best, best_d = None, radius
+    for road in roads:
+        points = np.asarray(road["points"], dtype=np.float64)
+        if (
+            len(points) < 2
+            or np.any(p < points.min(axis=0) - radius)
+            or np.any(p > points.max(axis=0) + radius)
+        ):
+            continue
+        a = points[:-1]
+        ab = points[1:] - a
+        length2 = np.maximum((ab * ab).sum(axis=1), 1e-12)
+        t = np.clip(((p - a) * ab).sum(axis=1) / length2, 0.0, 1.0)
+        distance = np.hypot(*(a + ab * t[:, None] - p).T)
+        k = int(np.argmin(distance))
+        if distance[k] < best_d:
+            best, best_d = ab[k] / math.sqrt(length2[k]), float(distance[k])
+    return best
+
+
+def attach_roads(
+    placed: list[dict], hits: list[dict], roads: list[dict] | None = None
+) -> list[dict]:
+    """Move historic bridges onto the nearest road crossing; the others become generic bridges.
+
+    A historic bridge without a road crossing nearby (roads ending on both banks) still carries
+    the direction of the closest road (``ROAD_AXIS_PX``).
+    """
+    used = set()
+    for record in placed:
+        if not record["snapped"] or record["type"] != "bridge":
+            continue
+        p = np.asarray(record["px"])
+        best, best_d = None, ROAD_SNAP_PX
+        for k, hit in enumerate(hits):
+            d = float(np.hypot(*(hit["p"] - p)))
+            if d < best_d and k not in used:
+                best, best_d = k, d
+        if best is None:
+            axis = nearest_road_axis(p, roads or [], ROAD_AXIS_PX)
+            if axis is not None:
+                river_dir = np.asarray(record["dir"])
+                sine = abs(axis[0] * river_dir[1] - axis[1] * river_dir[0])
+                if sine > 0.5:
+                    record["axis"] = [
+                        round(float(axis[0]), 4),
+                        round(float(axis[1]), 4),
+                    ]
+                    record["width"] = round(
+                        min(record["width"] / sine, record["width"] * 2.0), 3
+                    )
+            continue
+        used.add(best)
+        hit = hits[best]
+        record.update(
+            px=[round(float(hit["p"][0]), 3), round(float(hit["p"][1]), 3)],
+            dir=[round(float(hit["dir"][0]), 4), round(float(hit["dir"][1]), 4)],
+            axis=[round(float(hit["axis"][0]), 4), round(float(hit["axis"][1]), 4)],
+            width=round(float(hit["width"]), 3),
+        )
+    generic = []
+    for k, hit in enumerate(hits):
+        if k in used:
+            continue
+        generic.append(
+            {
+                "id": f"road_{len(generic)}",
+                "name": "",
+                "type": "road",
+                "structure": "stone" if hit["width"] < STREAM_WIDTH else "wood",
+                "river": hit["river"],
+                "road_type": hit["road_type"],
+                "px": [round(float(hit["p"][0]), 3), round(float(hit["p"][1]), 3)],
+                "dir": [round(float(hit["dir"][0]), 4), round(float(hit["dir"][1]), 4)],
+                "axis": [
+                    round(float(hit["axis"][0]), 4),
+                    round(float(hit["axis"][1]), 4),
+                ],
+                "width": round(float(hit["width"]), 3),
+                "snapped": True,
+                "in_custom_zone": False,
+            }
+        )
+    return generic
+
+
 def load_zones(styles: dict, to_pixel) -> list[dict]:  # noqa: ANN001
     """Custom zones of ``river_styles.json`` with their centre in map px."""
     zones = []
@@ -378,6 +528,14 @@ def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
         "crossings"
     ]
     placed, unsnapped = place_crossings(entries, rivers, to_pixel, zones)
+    roads = [
+        {"type": f["properties"].get("type", "secondary"), "points": line}
+        for f in json.loads((map_dir / "roads.geojson").read_text(encoding="utf-8"))[
+            "features"
+        ]
+        for line in linestrings(f.get("geometry", {}) or {})
+    ]
+    placed += attach_roads(placed, road_crossings(rivers, roads), roads)
     crossings_path = map_dir / CROSSINGS_PX_FILE
     crossings_path.write_text(
         json.dumps(
