@@ -175,6 +175,8 @@ func begin() -> bool:
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.height_at(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
+	hud.minimap.flipped = player_side == "attacker"
+	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	add_child(LEADER_ORDERS_BAR.new(self))
 	_refresh_view(true)
@@ -414,6 +416,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if siege_view != null:
 			hud.set_siege_status(siege_status(battle.call("get_siege")))
 		hud.update_cards(units, player_side, selected)
+		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
@@ -566,6 +569,16 @@ func handle_group_key(number: int, save: bool) -> void:
 			if ids.has(int(unit["id"])):
 				center += Vector3(float(unit["x"]), 0, float(unit["z"]))
 		camera_rig.look_at_point(center / ids.size(), camera_rig.distance, camera_rig.yaw)
+
+
+## Cadre de la caméra au sol (x, z) : les quatre coins de l'écran projetés sur le terrain.
+func camera_frame() -> PackedVector2Array:
+	var frame := PackedVector2Array()
+	var screen := get_viewport().get_visible_rect().size
+	for corner in [Vector2(0, 0), Vector2(screen.x, 0), screen, Vector2(0, screen.y)]:
+		var point := ground_point(corner)
+		frame.append(Vector2(point.x, point.z))
+	return frame
 
 
 func _on_minimap_clicked(world: Vector2) -> void:
