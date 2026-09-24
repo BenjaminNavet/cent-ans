@@ -18,6 +18,12 @@ fn fac(id: &str) -> FactionId {
 fn peace_after_truce(data: &GameData) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 3).unwrap();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
+    // England's other wars of 1337 (Scotland, Burgundy) are over too.
+    for other in ["fac_scotland", "fac_burgundy"] {
+        let other = fac(other);
+        state.factions.get_mut(&other).unwrap().at_war_with.remove(&england);
+        state.factions.get_mut(&england).unwrap().at_war_with.remove(&other);
+    }
     for (a, b) in [(&france, &england), (&england, &france)] {
         let f = state.factions.get_mut(a).unwrap();
         f.at_war_with.remove(b);
@@ -44,10 +50,22 @@ fn england_presses_its_claim_on_france_without_superiority() {
     let data = data();
     let mut state = peace_after_truce(&data);
     // The pre-F4 rule (coalition ratio >= 1.5) would never declare here.
-    let ratio = state.coalition_power(&fac("fac_england"))
-        / state.coalition_power(&fac("fac_france"));
-    assert!(ratio < sim_campaign::diplomacy::OPPORTUNIST_RATIO, "ratio {ratio}");
-    assert!(declares_on(&mut state, &data, "fac_england", "fac_france"));
+    let ratio =
+        state.coalition_power(&fac("fac_england")) / state.coalition_power(&fac("fac_france"));
+    assert!(
+        ratio < sim_campaign::diplomacy::OPPORTUNIST_RATIO,
+        "ratio {ratio}"
+    );
+    let wars = state.factions[&fac("fac_england")].at_war_with.clone();
+    let pretender = state.coalition_power(&fac("fac_england"))
+        / state.faction_power(&fac("fac_france"));
+    assert!(
+        declares_on(&mut state, &data, "fac_england", "fac_france"),
+        "ratio vs crown {pretender}, ready {}, wars {:?}, attitude {}",
+        sim_campaign::diplomacy::war_ready(&state, &fac("fac_england")),
+        wars,
+        state.attitude(&data, &fac("fac_england"), &fac("fac_france")).0
+    );
 }
 
 #[test]
@@ -64,11 +82,24 @@ fn no_claim_war_during_a_truce_a_regency_or_a_bankruptcy() {
     assert!(!declares_on(&mut truce, &data, "fac_england", "fac_france"));
 
     let mut regency = peace_after_truce(&data);
-    regency.factions.get_mut(&fac("fac_england")).unwrap().regency = true;
-    assert!(!declares_on(&mut regency, &data, "fac_england", "fac_france"));
+    regency
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .regency = true;
+    assert!(!declares_on(
+        &mut regency,
+        &data,
+        "fac_england",
+        "fac_france"
+    ));
 
     let mut broke = peace_after_truce(&data);
-    broke.factions.get_mut(&fac("fac_england")).unwrap().treasury = -500;
+    broke
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .treasury = -500;
     assert!(!declares_on(&mut broke, &data, "fac_england", "fac_france"));
 }
 
@@ -79,7 +110,8 @@ fn claims_follow_the_crown() {
     let claimed = sim_campaign::diplomacy::claimed_provinces(&state, &fac("fac_england"));
     let paris = state.factions[&fac("fac_france")].capital.clone();
     assert!(claimed.contains(&paris), "the throne claim covers Paris");
-    let stakes = sim_campaign::diplomacy::claim_stakes(&state, &fac("fac_france"), &fac("fac_england"));
+    let stakes =
+        sim_campaign::diplomacy::claim_stakes(&state, &fac("fac_france"), &fac("fac_england"));
     assert!(stakes.provinces >= 2, "France claims Guyenne and Gascony");
 }
 
@@ -100,19 +132,22 @@ fn the_auld_alliance_answers_the_call_to_arms() {
 fn a_hoarding_realm_spends() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
-    let empire = fac("fac_empire");
+    let empire = fac("fac_france");
     state.factions.get_mut(&empire).unwrap().treasury = 400_000;
     state.season = Season::Autumn;
     let orders = ai::plan_turn(&state, &data, &empire);
     assert!(orders.iter().any(|o| matches!(o, Order::Recruit { .. })));
-    assert!(orders.iter().any(|o| matches!(o, Order::Build { .. })));
+    assert!(
+        orders.iter().any(|o| matches!(o, Order::Build { .. })),
+        "{orders:?}"
+    );
     assert!(orders
         .iter()
         .any(|o| matches!(o, Order::DonateToChurch { .. })));
     assert!(
-        !orders
-            .iter()
-            .any(|o| matches!(o, Order::SetTaxRate { rate } if *rate == sim_campaign::TaxRate::Low)),
+        !orders.iter().any(
+            |o| matches!(o, Order::SetTaxRate { rate } if *rate == sim_campaign::TaxRate::Low)
+        ),
         "a rich treasury is spent, not untaxed"
     );
 }
@@ -130,7 +165,12 @@ fn a_small_realm_dismisses_troops_before_bankruptcy() {
         .unwrap();
     for _ in 0..12 {
         let unit = Unit::fresh(unit_type);
-        state.provinces.get_mut(&capital).unwrap().garrison.push(unit);
+        state
+            .provinces
+            .get_mut(&capital)
+            .unwrap()
+            .garrison
+            .push(unit);
     }
     // Positive but short treasury: not bankrupt yet.
     state.factions.get_mut(&swiss).unwrap().treasury = 300;
