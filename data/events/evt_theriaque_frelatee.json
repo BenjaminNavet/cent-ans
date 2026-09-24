@@ -1,0 +1,42 @@
+{
+  "id": "evt_theriaque_frelatee",
+  "title": "Une thériaque frelatée",
+  "text": "Un apothicaire vend à prix d'or une [[cdx_theriaque|thériaque]] qu'il dit venue de Venise, le remède universel aux dizaines d'ingrédients, chair de vipère et opium compris. Les jurés du métier l'ont goûtée : ce n'est que du miel, du vin cuit et quelques herbes. À Venise, dont la thériaque est la plus réputée, les autorités font contrôler sa préparation par des médecins, justement pour déjouer ces fraudes ; les [[cdx_apothicaires|apothicaires]] honnêtes réclament un exemple.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 140
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Faire brûler les pots sur la place et fermer l'officine",
+      "effects": [
+        { "type": "health", "amount": 2 },
+        { "type": "wealth", "amount": -1 },
+        { "type": "unrest", "amount": -2 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Imposer une préparation publique, sous contrôle des médecins",
+      "effects": [
+        { "type": "treasury", "amount": -500 },
+        { "type": "health", "amount": 4 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Accepter sa « contribution » et fermer les yeux",
+      "effects": [
+        { "type": "treasury", "amount": 300 },
+        { "type": "health", "amount": -3 },
+        { "type": "piety", "amount": -1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Thériaque",
+    "Apothicaire"
+  ]
+}

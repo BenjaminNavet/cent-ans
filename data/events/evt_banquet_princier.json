@@ -1,0 +1,45 @@
+{
+  "id": "evt_banquet_princier",
+  "title": "Le banquet du prince",
+  "text": "La cour attend des ambassadeurs, et le maître queux propose un festin à la manière de [[cdx_taillevent|Taillevent]] : trois services de rôts et de potages, un [[cdx_blanc_manger|blanc-manger]] pour les délicats, de l'[[cdx_hypocras|hypocras]] en fin de repas. Entre les services viendront les entremets, spectacles mangeables : un paon rôti recousu dans ses plumes, qui crache le feu par le bec, ou un château de pâte peuplé de chanteurs. On se souviendra longtemps d'un tel festin, et de ce qu'il a coûté.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 100,
+    "conditions": [
+      { "type": "treasury_above", "amount": 4000 }
+    ]
+  },
+  "scope": { "type": "faction" },
+  "options": [
+    {
+      "text": "Un festin avec entremets et ménestrels",
+      "effects": [
+        { "type": "treasury", "amount": -2500 },
+        { "type": "prestige", "amount": 8 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Un repas honnête, selon le rang des convives",
+      "effects": [
+        { "type": "treasury", "amount": -600 },
+        { "type": "prestige", "amount": 2 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Respecter les lois somptuaires et donner le reste aux pauvres",
+      "effects": [
+        { "type": "treasury", "amount": -300 },
+        { "type": "piety", "amount": 3 },
+        { "type": "prestige", "amount": -1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Entremets",
+    "Le Viandier",
+    "Bruno Laurioux, Manger au Moyen Âge, Hachette, 2002"
+  ]
+}

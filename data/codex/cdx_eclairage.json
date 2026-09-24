@@ -1,0 +1,11 @@
+{
+  "id": "cdx_eclairage",
+  "title": "L'éclairage",
+  "category": "vie_quotidienne",
+  "aliases": ["éclairage médiéval", "chandelle", "chandelles", "chandelle de suif", "cierge", "cierges", "couvre-feu"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Chandelles de suif fumantes pour le peuple, cierges de cire d'abeille pour l'Église et les princes, lampes à huile, et surtout le feu du foyer : la nuit médiévale est profonde, et la lumière coûte cher.",
+  "body": "La plupart des gens vivent au rythme du soleil. Le soir, le foyer éclaire la pièce autant qu'il la chauffe ; on travaille à sa lueur, on file, on raconte. La chandelle de suif, faite de graisse animale fondue, est la lumière ordinaire des maisons : elle fume, sent mauvais et coule, et il faut en couper régulièrement la mèche. Les chandeliers, qui les fabriquent, forment un métier réglementé, car leurs cuves de graisse sont une menace d'incendie.\n\nLa cire d'abeille, bien plus chère, brûle proprement et parfume l'air. Elle est réservée aux églises, où les cierges symbolisent le Christ lumière du monde, et aux maisons princières, qui en consomment des quantités énormes lors des fêtes. Offrir un cierge à un saint, parfois à la taille ou au poids du malade, est un geste de dévotion courant (voir les [[cdx_reliques|reliques]]). Dans le Midi, les lampes à huile d'olive restent communes ; au nord, on brûle de l'huile de noix ou de navette.\n\nLe feu est l'ennemi des villes de bois. Au soir, la cloche du couvre-feu ordonne de couvrir les braises des foyers sous la cendre. Les rues ne sont pas éclairées ; qui sort la nuit doit porter une lanterne, faite de corne mince, et se méfier des voleurs. Les torches de poix servent aux cortèges et aux fêtes.\n\nLes accidents sont fréquents. Le plus célèbre est le [[cdx_bal_des_ardents|bal des Ardents]], en 1393 : la torche portée trop près des costumes de poix et d'étoupe de danseurs déguisés en sauvages embrase la fête ; le roi Charles VI n'échappe à la mort que grâce à la duchesse de Berry, qui l'enveloppe dans sa robe.",
+  "see_also": ["cdx_maison_mobilier", "cdx_bal_des_ardents", "cdx_heures_canoniales", "cdx_reliques"],
+  "sources": ["Chandelle", "Cierge", "Couvre-feu", "Éclairage"]
+}

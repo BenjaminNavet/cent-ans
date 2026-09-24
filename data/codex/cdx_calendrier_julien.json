@@ -1,0 +1,12 @@
+{
+  "id": "cdx_calendrier_julien",
+  "title": "Le calendrier julien",
+  "category": "savoir",
+  "aliases": ["calendrier julien", "comput", "réforme du calendrier", "nombre d'or"],
+  "era": { "from": "-45", "to": "1582" },
+  "summary": "Le calendrier de Jules César, avec une année bissextile tous les quatre ans, reste en usage pendant tout le Moyen Âge. Trop long de onze minutes par an, il a pris au XIVe siècle environ neuf jours d'avance sur le Soleil.",
+  "body": "Institué par Jules César en 45 avant notre ère, le calendrier julien compte 365 jours et un jour de plus tous les quatre ans, soit une année moyenne de 365 jours et quart. L'année solaire réelle est plus courte d'environ onze minutes : l'erreur s'accumule d'un jour tous les cent vingt-huit ans. Au temps de la guerre de Cent Ans, l'équinoxe de printemps tombe déjà vers le 12 mars au lieu du 21.\n\nLe décalage inquiète l'Église, car il fausse la date de Pâques, calculée à partir de l'équinoxe et de la lune. Le comput, science du calendrier enseignée dans les écoles et les [[cdx_universite_paris|universités]], sert à établir les tables pascales ; les clercs s'aident du « nombre d'or », rang de l'année dans le cycle lunaire de dix-neuf ans.\n\nLes savants savent que le calendrier se trompe. Roger Bacon le dénonce au XIIIe siècle ; le cardinal Pierre d'Ailly présente un projet de réforme au [[cdx_concile_constance|concile de Constance]], et Nicolas de Cues au concile de Bâle. Aucun n'aboutit : il faudra attendre le pape Grégoire XIII, qui supprime dix jours en 1582. En France, le 9 décembre 1582 est suivi du 20 décembre.\n\nToutes les dates de la guerre de Cent Ans sont donc des dates juliennes. Il ne faut pas confondre ce décalage de jours avec celui des années, dû au [[cdx_style_de_paques|style de Pâques]], qui est une affaire de convention et non d'astronomie.",
+  "anachronism": "Le jeu, compté en saisons, ignore le décalage julien : ses saisons suivent le Soleil et non le calendrier du temps.",
+  "see_also": ["cdx_style_de_paques", "cdx_fetes_chretiennes", "cdx_heures_canoniales", "cdx_concile_constance"],
+  "sources": ["Calendrier julien", "Calendrier grégorien", "Comput", "Pierre d'Ailly"]
+}

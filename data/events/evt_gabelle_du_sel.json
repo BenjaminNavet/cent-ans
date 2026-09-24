@@ -1,0 +1,52 @@
+{
+  "id": "evt_gabelle_du_sel",
+  "title": "La gabelle du sel",
+  "text": "La guerre coûte plus que ne rapporte le domaine. Les conseillers de [[cdx_philippe_vi|Philippe VI]] proposent de taxer ce dont nul ne peut se passer : le sel, qui conserve la viande et le poisson de l'hiver (voir la [[cdx_salaison|salaison]]). Tout le sel du royaume passerait par des greniers royaux, où il serait vendu avec un droit, la [[cdx_gabelle|gabelle]]. L'ordonnance est datée du 20 mars 1342 dans les registres, mais c'est mars 1343 pour nous : l'année ne commençait qu'à Pâques (voir le [[cdx_style_de_paques|style de Pâques]]).",
+  "kind": "historical",
+  "trigger": {
+    "date": { "year": 1341, "season": "winter" },
+    "until_year": 1344,
+    "conditions": [
+      { "type": "ruler_is", "faction": "fac_france", "character": "chr_philippe_vi" },
+      { "type": "at_war", "a": "fac_france", "b": "fac_england" }
+    ]
+  },
+  "scope": { "type": "faction", "faction": "fac_france" },
+  "options": [
+    {
+      "text": "Établir les greniers à sel dans tout le royaume",
+      "effects": [
+        { "type": "treasury", "amount": 4000 },
+        { "type": "unrest", "province": "all", "amount": 5 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Promettre qu'elle cessera avec la guerre",
+      "effects": [
+        { "type": "treasury", "amount": 2500 },
+        { "type": "unrest", "province": "all", "amount": 2 },
+        { "type": "prestige", "amount": -2 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Renoncer : le sel est le pain du pauvre",
+      "effects": [
+        { "type": "unrest", "province": "all", "amount": -2 },
+        { "type": "piety", "amount": 2 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1343-03-20",
+    "uncertain": true,
+    "note": "Premières mesures en 1341 ; ordonnance généralisant les greniers à sel datée du 20 mars 1342 (ancien style, soit 1343 en nouveau style selon la plupart des auteurs)."
+  },
+  "sources": [
+    "Gabelle du sel",
+    "Style de Pâques",
+    "Raymond Cazelles, La Société politique et la crise de la royauté sous Philippe de Valois, Argences, 1958"
+  ]
+}

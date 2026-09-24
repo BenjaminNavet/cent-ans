@@ -1,0 +1,42 @@
+{
+  "id": "evt_monnaie_rognee",
+  "title": "Une monnaie rognée",
+  "text": "Les changeurs, qui pèsent chaque pièce sur leur trébuchet, viennent se plaindre : on trouve partout des gros d'argent rognés sur les bords, dont on revend la limaille au fondeur. Les marchands refusent désormais la monnaie au compte et la veulent au poids ; les bonnes pièces disparaissent dans les coffres et ne circulent plus que les mauvaises. Comme l'a noté [[cdx_nicole_oresme|Nicole Oresme]], la monnaie tient sur la confiance, et le roi qui l'altère lui-même par des [[cdx_mutations_monetaires|mutations]] a peu d'autorité pour punir les rogneurs.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 130
+  },
+  "scope": { "type": "faction" },
+  "options": [
+    {
+      "text": "Faire bouillir les faux-monnayeurs, selon la coutume",
+      "effects": [
+        { "type": "prestige", "amount": 2 },
+        { "type": "unrest", "province": "all", "amount": -1 },
+        { "type": "piety", "amount": -1 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Décrier les pièces rognées et refrapper une bonne monnaie",
+      "effects": [
+        { "type": "treasury", "amount": -1500 },
+        { "type": "wealth", "province": "all", "amount": 2 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser circuler : la monnaie faible paie aussi les soldes",
+      "effects": [
+        { "type": "treasury", "amount": 500 },
+        { "type": "wealth", "province": "all", "amount": -2 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Rognage (numismatique)",
+    "Fausse monnaie",
+    "Loi de Gresham"
+  ]
+}

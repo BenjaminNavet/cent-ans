@@ -1,0 +1,11 @@
+{
+  "id": "cdx_fetes_chretiennes",
+  "title": "Les grandes fêtes de l'année",
+  "category": "religion",
+  "aliases": ["Noël", "Pâques", "feux de la Saint-Jean", "Saint-Martin d'hiver", "Chandeleur", "fêtes chômées"],
+  "era": { "from": "500", "to": "1500" },
+  "summary": "L'année médiévale se compte de fête en fête : Noël, Pâques, la Saint-Jean d'été, la Saint-Martin d'hiver. Ces dates servent de repères aux paysans, aux marchands et aux juristes bien plus que les quantièmes du mois.",
+  "body": "Un contrat du XIVe siècle ne dit guère « le 11 novembre » : il dit « à la Saint-Martin d'hiver ». Les fêtes religieuses sont les repères communs de tous. Outre les dimanches, on chôme plusieurs dizaines de fêtes par an, selon les diocèses : c'est autant de jours sans travail, mais pas sans marché ni sans taverne.\n\nNoël, le 25 décembre, ouvre la saison des banquets d'hiver jusqu'à l'Épiphanie ; la Chandeleur, le 2 février, célèbre la Purification de la Vierge avec une procession de cierges. Pâques, la plus grande fête, est mobile : elle tombe le dimanche qui suit la première pleine lune après l'équinoxe de printemps, et commande le [[cdx_careme|Carême]], l'Ascension et la Pentecôte. Dans une partie de la France, c'est même à Pâques que commence l'année (voir le [[cdx_style_de_paques|style de Pâques]]).\n\nLa Saint-Jean-Baptiste, le 24 juin, fête le solstice d'été : on allume de grands feux, autour desquels on danse, et l'on cueille les herbes réputées les plus actives, comme le [[cdx_millepertuis|millepertuis]]. La Saint-Michel, le 29 septembre, et surtout la Saint-Martin, le 11 novembre, sont les grands termes des baux, des loyers et des gages de domestiques : on paie ses redevances au seigneur, on goûte le vin nouveau, on tue l'oie grasse avant l'hiver.\n\nLes fêtes rythment aussi la guerre et la politique : on date les trêves « jusqu'à la Saint-Jean », on convoque les assemblées « à la Toussaint », et les rois se font sacrer un dimanche ou un jour de fête. Les [[cdx_travaux_des_mois|travaux des mois]] s'emboîtent dans ce calendrier sacré.",
+  "see_also": ["cdx_careme", "cdx_style_de_paques", "cdx_travaux_des_mois", "cdx_heures_canoniales"],
+  "sources": ["Fête chrétienne", "Feux de la Saint-Jean", "Saint-Martin (fête)", "Calcul de la date de Pâques"]
+}

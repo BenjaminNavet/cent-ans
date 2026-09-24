@@ -1,0 +1,11 @@
+{
+  "id": "cdx_lois_somptuaires",
+  "title": "Les lois somptuaires",
+  "category": "societe",
+  "aliases": ["lois somptuaires", "loi somptuaire", "ordonnance somptuaire", "Statute of Diet and Apparel"],
+  "era": { "from": "1294", "to": "1500" },
+  "summary": "Les rois édictent des lois somptuaires qui fixent, selon le rang, le nombre de robes, les tissus, les fourrures et même le nombre de plats autorisés. Elles veulent que chacun paraisse ce qu'il est, et elles ne sont presque jamais respectées.",
+  "body": "En 1294, Philippe le Bel publie une ordonnance qui règle la dépense de chaque état : un duc ou un comte peut avoir quatre robes par an, un chevalier deux ou trois, un bourgeois moins encore ; les bourgeois n'ont pas droit au vair, au gris ni à l'hermine, ni à l'or et aux pierres précieuses. Le texte limite aussi le nombre de mets servis au repas. L'idée est simple : l'apparence doit refléter l'ordre voulu par Dieu (voir les [[cdx_trois_ordres|trois ordres]]).\n\nL'Angleterre suit la même voie. Le « Statute of Diet and Apparel » de 1363, sous [[cdx_edouard_iii|Édouard III]], détaille pour chaque condition, du laboureur au chevalier, le prix maximal du drap et les fourrures permises ; il limite même les repas des serviteurs à un plat de viande ou de poisson par jour. Il est abrogé dès l'année suivante, tant il est inapplicable.\n\nCes lois ont plusieurs buts. Elles protègent la hiérarchie sociale contre des marchands enrichis qui s'habillent en seigneurs, défendent parfois l'industrie nationale en limitant les tissus importés, et répondent aux prédicateurs qui dénoncent le luxe. Après la [[cdx_peste_noire|Peste noire]], quand les salaires montent, elles visent aussi les petites gens qui osent s'offrir de meilleurs habits.\n\nLeur échec est constant : on les répète sans cesse, preuve qu'on ne les applique pas. Elles restent précieuses pour l'historien, car elles dressent la liste exacte de ce qui distinguait un rang d'un autre, du [[cdx_vetement_medieval|vêtement]] à la table (voir les [[cdx_epices_medievales|épices]]).",
+  "see_also": ["cdx_vetement_medieval", "cdx_trois_ordres", "cdx_peste_noire", "cdx_epices_medievales"],
+  "sources": ["Loi somptuaire", "Sumptuary law (anglais)", "Statute of Diet and Apparel 1363 (anglais)"]
+}
