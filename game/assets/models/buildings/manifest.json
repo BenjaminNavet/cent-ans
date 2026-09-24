@@ -32,20 +32,28 @@
   "triangles": 583
  },
  "church_0": {
-  "depth": 10.64,
-  "height": 29.02,
+  "depth": 8.0,
+  "height": 21.61,
   "kind": "church",
-  "length": 31.9,
+  "length": 19.0,
   "ruined": false,
-  "triangles": 1532
+  "triangles": 1130
  },
  "church_1": {
-  "depth": 10.09,
-  "height": 34.81,
+  "depth": 8.5,
+  "height": 24.87,
   "kind": "church",
-  "length": 28.06,
+  "length": 21.0,
   "ruined": false,
-  "triangles": 1376
+  "triangles": 1150
+ },
+ "church_2": {
+  "depth": 13.0,
+  "height": 34.57,
+  "kind": "church",
+  "length": 36.0,
+  "ruined": false,
+  "triangles": 1618
  },
  "cottage_0": {
   "depth": 5.61,

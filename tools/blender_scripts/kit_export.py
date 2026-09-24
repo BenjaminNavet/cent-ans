@@ -45,7 +45,7 @@ MATERIALS = {
 
 # Material-wide albedo multiplier (same values in building_materials.gd).
 MATERIAL_TINT = {
-    "RoofSlate": (0.5, 0.54, 0.62),
+    "RoofSlate": (0.64, 0.68, 0.76),
     "Thatch": (1.45, 1.2, 0.85),
     "RoofTile": (0.85, 0.78, 0.76),
     "Plaster": (1.05, 1.02, 0.97),
@@ -182,7 +182,7 @@ BATTLE_SET = {
     "townhouse": [(s, {}, False) for s in (41, 42, 43, 44, 45, 46)] + [(47, {}, True), (48, {}, True)],
     "stonehouse": [(51, {}, False), (52, {}, False), (53, {}, False), (54, {}, True)],
     "barn": [(61, {}, False), (62, {}, False), (63, {}, False), (64, {}, True)],
-    "church": [(71, {}, False), (72, {}, False)],
+    "church": [(71, {"length": 19.0, "depth": 8.0}, False), (72, {"length": 21.0, "depth": 8.5}, False), (73, {"length": 36.0, "depth": 13.0}, False)],
     "manor": [(81, {}, False)],
     "hall": [(91, {}, False)],
     "well": [(95, {}, False)],

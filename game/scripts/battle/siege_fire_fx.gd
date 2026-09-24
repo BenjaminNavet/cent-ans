@@ -24,6 +24,7 @@ const DEFAULTS := {
 var params: Dictionary = {}
 var height_at: Callable
 var houses_root: Node3D = null  # maisons regroupées de `BattleSiege` (MultiMesh)
+var siege_view: Node3D = null  # BR1 : `BattleSiege` (ruines du kit par `ruin_site`)
 var _fires: Dictionary = {}  # clé (index de maison, ou "gate") -> {node, flames, smoke, intensity, p}
 var _ruins: Dictionary = {}  # index de maison -> Node3D
 var _lights: Array[OmniLight3D] = []
@@ -40,11 +41,12 @@ var ruin_count: int = 0
 
 
 ## `siege_view` : le `BattleSiege` déjà construit (maisons en place).
-func setup(siege_view: Node3D, p_height_at: Callable) -> void:
+func setup(p_siege_view: Node3D, p_height_at: Callable) -> void:
 	name = "SiegeFire"
 	height_at = p_height_at
 	params = _load_params()
-	houses_root = siege_view.get_node_or_null("Houses")
+	houses_root = p_siege_view.get_node_or_null("Houses")
+	siege_view = p_siege_view
 	_flame_mat = _particle_material(false)  # mélange alpha : l'additif vire au crème en plein jour
 	_smoke_mat = _particle_material(false)
 	_char_mat = StandardMaterial3D.new()
@@ -225,11 +227,18 @@ static func _particle_material(additive: bool) -> StandardMaterial3D:
 func _make_ruin(index: int, p: Vector2, radius: float) -> void:
 	var ruin_params: Dictionary = params["ruin"]
 	var ground := _ground(p.x, p.y)
-	_collapse_instances(p, radius, ground, float(ruin_params["collapse_scale"]))
 	var root := Node3D.new()
 	root.name = "Ruin%d" % index
 	root.position = Vector3(p.x, ground, p.y)
 	add_child(root)
+	if siege_view != null and siege_view.has_method("ruin_site") and siege_view.ruin_site(index):
+		# BR1 : les ruines calcinées du kit remplacent la maison ; il ne reste que les braises.
+		var kit_embers := _emitter({"amount": int(ruin_params["embers"]), "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _flame_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
+		kit_embers.position.y = 1.0
+		root.add_child(kit_embers)
+		_ruins[index] = root
+		return
+	_collapse_instances(p, radius, ground, float(ruin_params["collapse_scale"]))
 	var rubble := MeshInstance3D.new()
 	var mound := BoxMesh.new()
 	var rubble_height := float(ruin_params["rubble_height_m"])
