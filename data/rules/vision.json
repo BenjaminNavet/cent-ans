@@ -1,7 +1,5 @@
 {
-  "description": "Brouillard de guerre de la carte de campagne (lot C1) : une faction voit ses provinces, celles de ses alliés et vassaux, leurs voisines à un pas terrestre, ainsi que la province de chaque armée amie et ses voisines. Un chef d'armée pousse ses coureurs un pas plus loin.",
-  "controlled_range": 1,
-  "army_range": 1,
-  "general_bonus": 1,
-  "share_allied_vision": true
+  "description": "Brouillard de guerre de la carte de campagne (lot C1, vue par rayon du lot M5a). Une case est vue à moins de vision_army_km d'une armée amie ou de vision_settlement_km d'une colonie tenue (data/movement/rules.json) ; alliés, vassaux et suzerains partagent leur vue. Une province est visible quand au moins province_seen_percent % de ses terres sont vues, qu'elle contient une colonie vue ou une armée amie, ou qu'un agent la surveille.",
+  "share_allied_vision": true,
+  "province_seen_percent": 25
 }
