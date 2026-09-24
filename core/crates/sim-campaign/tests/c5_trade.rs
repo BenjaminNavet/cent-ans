@@ -29,7 +29,7 @@ fn france(data: &GameData, seed: u64) -> CampaignState {
     state
 }
 
-fn bruges_londres<'a>(routes: &'a [trade::TradeRouteView]) -> &'a trade::TradeRouteView {
+fn bruges_londres(routes: &[trade::TradeRouteView]) -> &trade::TradeRouteView {
     routes
         .iter()
         .find(|r| r.id == "route_bruges_londres")
