@@ -545,6 +545,21 @@ void vertex() {
 		vec3 chain_v = v;
 		vec3 chain_n = n;
 		float w = right ? (weapon_abs ? weapon_total - a.x - a.z : weapon_total) : bow - a.x - a.z;
+		if (right && weapon_mode == W_LANCE) {
+			// Lot B7 : fanion de lance (en arrière de la hampe, près de la pointe). Lance droite,
+			// il flotte à l'horizontale ; lance couchée, le vent de la course le rabat le long de
+			// la hampe vers le cavalier (au lieu de se dresser à la verticale) ; il ondule.
+			float d = v.z - pivot.y;
+			float up = v.y - pivot.x;
+			if (d < -0.035 && up > 2.7) {
+				float len = -d;
+				float fold = weapon_total * 0.8 + gallop * 0.12 * sin(t * 17.0 - len * 14.0 + ph);
+				chain_v.y = v.y - len * sin(fold);
+				chain_v.z = pivot.y - len * cos(fold);
+				chain_v.x += len * (0.05 + gallop * 0.08) * sin(t * 11.0 - len * 22.0 + ph);
+				chain_n = rot_x_dir(n, -fold);
+			}
+		}
 		chain_v = rot_x(chain_v, w, pivot);
 		chain_n = rot_x_dir(chain_n, w);
 		chain_v = body_point(arm_point(chain_v, side, a, 1.0), twist, lean);
