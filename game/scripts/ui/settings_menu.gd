@@ -176,9 +176,11 @@ func _build_game(grid: GridContainer) -> void:
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 
+## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
 func _build_sound(grid: GridContainer) -> void:
-	_slider(grid, "Musique", float(settings.call("music_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_music_volume", value))
-	_slider(grid, "Effets", float(settings.call("sfx_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_sfx_volume", value))
+	for spec in AudioBuses.PLAYER_BUSES:
+		var bus_name: String = spec[0]
+		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
 
 
 func _on_reset() -> void:
