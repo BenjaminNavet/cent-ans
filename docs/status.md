@@ -66,7 +66,11 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   douce des régiments amis, formations de l'IA (schiltron, coin, colonne) et flanc coordonné, phase de
   déploiement (zones, `deploy_unit`, `start_battle`, IA par rôles ; exposée au pont), sièges avec
   maisons et rues, cheminement A*, tir des tours et sortie de la garnison. 8 tests (`f5.rs`).
-  Reste : renforts échelonnés au-delà de 20 régiments, rééquilibrage de l'échelade.
+- Correctifs de la simulation de bataille (F5d, `m7-battles.md` et `m8-sieges.md` § F5d) : la bataille
+  de démonstration arrive au contact (75 s, jamais avant) — un assaillant nettement plus fort abrège le
+  duel de tir et lance sa cavalerie, l'IA ne s'arrête ni ne se déploie plus en eau profonde ; renforts
+  échelonnés au-delà de 20 régiments par camp (`reserve` au pont) ; escalade sans brèche ramenée à 3/6
+  (tir des tours allégé) ; erreurs de déploiement au nom du régiment. 6 tests (`f5d.rs`, + 2 traces ignorées).
 - Déploiement et maisons de siège dans Godot (F5c, `m7-battles.md` § F5) : phase de déploiement avant
   chaque bataille du joueur (zone au sol, clic droit / glisser-droit, refus en message, « Commencer la
   bataille » ou Entrée), maisons de siège sur les disques de la simulation, sortie de la garnison
