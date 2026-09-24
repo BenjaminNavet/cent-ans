@@ -26,6 +26,7 @@ use crate::entities::retinue::Retinue;
 use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
+use crate::entities::trade::TradeCatalog;
 use crate::entities::unit_type::UnitType;
 use crate::entities::vision::VisionRules;
 use crate::ids::{
@@ -75,6 +76,10 @@ pub mod folders {
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
     pub const AGENT_RULES: &str = "agents.json";
+    /// Trade hubs and routes (lot C5); optional folder.
+    pub const ECONOMY: &str = "economy";
+    /// Trade catalogue, inside `economy/`; optional.
+    pub const TRADE: &str = "trade.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -211,6 +216,9 @@ pub struct GameData {
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
+    /// `data/economy/trade.json` (lot C5), absent until written: no trade
+    /// route exists.
+    pub trade: Option<TradeCatalog>,
 }
 
 impl GameData {
@@ -250,6 +258,7 @@ impl GameData {
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
+            trade: None,
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -286,6 +295,10 @@ impl GameData {
         let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
         if agents_path.is_file() {
             data.agent_rules = Some(read_json(&agents_path)?);
+        }
+        let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
+        if trade_path.is_file() {
+            data.trade = Some(read_json(&trade_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
@@ -374,6 +387,7 @@ impl GameData {
         checker.check_diets();
         checker.check_chivalric_orders();
         checker.check_retinue();
+        checker.check_trade();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -668,6 +682,50 @@ impl ReferenceChecker<'_> {
             if let Some(faction) = &order.faction {
                 self.require(id, "faction", faction, &data.factions);
             }
+        }
+    }
+
+    fn check_trade(&mut self) {
+        let data = self.data;
+        let Some(trade) = &data.trade else {
+            return;
+        };
+        let mut seen_hubs = std::collections::BTreeSet::new();
+        for hub in &trade.hubs {
+            if !seen_hubs.insert(hub.id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: hub.id.clone(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {}", hub.id),
+                });
+            }
+            self.require(&hub.id, "settlement", &hub.settlement, &data.settlements);
+            self.require_all(&hub.id, "goods", &hub.goods, &data.resources);
+        }
+        let mut seen_routes = std::collections::BTreeSet::new();
+        for route in &trade.routes {
+            if !seen_routes.insert(route.id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {}", route.id),
+                });
+            }
+            if !seen_hubs.contains(&route.from_hub) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "from_hub".to_owned(),
+                    target: route.from_hub.clone(),
+                });
+            }
+            if !seen_hubs.contains(&route.to_hub) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "to_hub".to_owned(),
+                    target: route.to_hub.clone(),
+                });
+            }
+            self.require_all(&route.id, "goods", &route.goods, &data.resources);
         }
     }
 
