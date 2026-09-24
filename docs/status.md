@@ -66,7 +66,15 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   douce des régiments amis, formations de l'IA (schiltron, coin, colonne) et flanc coordonné, phase de
   déploiement (zones, `deploy_unit`, `start_battle`, IA par rôles ; exposée au pont), sièges avec
   maisons et rues, cheminement A*, tir des tours et sortie de la garnison. 8 tests (`f5.rs`).
-  Reste : renforts échelonnés au-delà de 20 régiments, rééquilibrage de l'échelade.
+- Correctifs de la simulation de bataille (F5d, `m7-battles.md` et `m8-sieges.md` § F5d) : la bataille
+  de démonstration arrive au contact (75 s, jamais avant) — un assaillant nettement plus fort abrège le
+  duel de tir et lance sa cavalerie, l'IA ne s'arrête ni ne se déploie plus en eau profonde ; renforts
+  échelonnés au-delà de 20 régiments par camp (`reserve` au pont) ; escalade sans brèche ramenée à 3/6
+  (tir des tours allégé) ; erreurs de déploiement au nom du régiment. 6 tests (`f5d.rs`, + 2 traces ignorées).
+- Déploiement et maisons de siège dans Godot (F5c, `m7-battles.md` § F5) : phase de déploiement avant
+  chaque bataille du joueur (zone au sol, clic droit / glisser-droit, refus en message, « Commencer la
+  bataille » ou Entrée), maisons de siège sur les disques de la simulation, sortie de la garnison
+  signalée. Captures `docs/img/godot-battle-deploy.png`, `docs/img/godot-siege-f5.png`.
 
 - Objectifs et fin de partie (M10) : objectifs historiques par faction jouable dans `data/factions/*.json` (`victory`) — France : bouter les Anglais, tenir Paris et Reims, reprendre la Guyenne, soumettre la Bourgogne (1453) ; Angleterre : sacre à Reims, héritage Plantagenêt, 15 provinces du royaume, soumettre l'Écosse (1453) ; Bourgogne : indépendance, Pays-Bas, lien lorrain (1477). Victoire, défaite ou fin de campagne avec score ; panneau Objectifs (O ou Menu), écran de fin, objectifs sur les cartes du menu de départ. 5 tests.
 - Batailles (M7) : `core/crates/sim-battle` simule au pas fixe de 0,1 s un champ procédural 1200 × 800 m (collines selon le terrain de la province, forêts, boue, rivière à deux gués), la météo de saison (pluie : arcs et arbalètes −40 %, brouillard : portée −30 %, neige), des régiments en ligne/colonne/schiltron/coin avec moral, fatigue, munitions, charge, flancs (+50 %) et dos (+100 %), piques contre cavalerie, pieux des archers, déroute et ralliement, aura et mort du général, et une IA minimale. Déterministe (même graine + mêmes ordres aux mêmes ticks = même bataille), 14 tests. `sim-campaign` met les batailles du joueur en attente (`pending_battles`, réglage `interactive_battles`), fournit `battle_setup`, applique `resolve_pending_battle` (pertes, moral, captures, général tombé, XP/traits M4, retraite) ou `auto_resolve_pending` ; les restes sont auto-résolus au tour suivant ; 8 tests M7. Godot : `scenes/battle/` (terrain maillé, arbres, soldats en MultiMesh par camp et famille, bannières, caméra RTS, sélection rectangle, ordres clic droit / glisser-droit, pause, vitesses ×1/×2/×4, HUD parchemin, écran de fin). 2 × 20 régiments de 120 soldats : 60 FPS (vsync), ~140 FPS sans vsync sur M4 Pro. Captures : `docs/img/godot-battle.png`, `docs/img/godot-battle-dialog.png`. Sonde : `cargo run -p sim-battle --example probe -- ai`.
@@ -139,6 +147,14 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   trésors dormants dépensés, licenciement anticipé, choix d'événements selon les moyens, mariages de l'IA,
   derniers bastions épargnés ; Pierre Ier de Portugal et Amédée VI de Savoie (héritiers de 1337), souverain
   vaincu tué à 1 %. Tests : `ai/tests/f4_war.rs` (7), `sim-campaign/tests/f4_succession.rs` (4).
+- Dernières règles inertes (G1, `docs/wip/g1-rules.md`) : places de recrutement par province (2, +1 dans la
+  capitale, + `recruit_slots` des bâtiments et techs ; refus « file de recrutement pleine ») ; piété des traits
+  (piété effective : faveur pontificale, hérésie) et des bâtiments (+1 par an au souverain par 10 points,
+  plafond 3) ; armurerie et buttes de tir équipent les unités levées dans la province (armure/tir stockés sur
+  l'unité, auto-résolution et `battle_setup`) ; effet d'événement `transfer_province` (achat du Dauphiné,
+  traité de Guérande, Formigny) ; ordre `release_captive` (libérer contre rançon), fiche personnage « Captif
+  de … — rançon N livres » avec « Payer la rançon » / « Libérer contre rançon » ; alliés de la province dans
+  les assauts de siège. 10 tests (`sim-campaign/tests/g1_rules.rs`).
 
 ### Équilibrage F4 — sonde `century_probe` (5 graines × 464 tours, 1337-1453)
 
@@ -166,6 +182,28 @@ lucrative) ; l'Écosse, réduite à Fife, vit à crédit (≈ 60 % des banquerou
 jamais (la Flandre reste vassale de la France sauf révolte), Bourgogne-Angleterre jamais (pas de défection
 observée).
 
+### Alignement historique G2 — sonde `century_probe` (5 graines × 464 tours)
+
+| Mesure (graines 1 à 5) | Avant G2 | Après G2 | Cible |
+|---|---|---|---|
+| Banqueroutes de l'Écosse / décennie | ≈ 35 (4 graines sur 5) | 0,1-1,6 | < 3 |
+| Banqueroutes / faction / décennie | 1,70 [0,47-2,29] | 0,52 [0,30-0,69] | < 1 |
+| Angl.-Flandre (part des tours de guerre FR-EN) | 0 % partout | 0 / 100 / 0 / 100 / 0 % (moy. 40 %) | penche vers l'Angleterre |
+| Angl.-Hainaut (idem) | 0 % sauf 62 % (graine 5, tous tours) | 0 / 97 / 22 / 0 / 69 % (moy. 38 %) | 20-60 % |
+| Angl.-Brabant (idem) | 0 % sauf 70 % (graine 5, tous tours) | 0 / 14 / 0 / 0 / 0 % (moy. 3 %) | 20-60 % |
+| Bourg.-Angl. | 0 % | 0 % (Angleterre dominante 0-8 % des tours) | une partie des graines |
+| Trésor max après 1350 (saisons, pire faction) | 13-55, médiane 24 | 9,9-14,3 hors Empire graine 5 ¹, médiane 13,7 | ≤ 12, médiane ≤ 8 |
+| Factions > 8 saisons plus de 4 tours après 1350 | 2-5 | 1-3 | 0 |
+| France-Angleterre en guerre | 70 % [67-76] | 58 % [45-76] | ≥ 55 % |
+| Ordres France refusés | 0-0,2 % | 0-0,1 % (`ai_probe` 100 tours : 0 %) | 0 % |
+
+¹ Empire assiégé partout, revenu moyen quasi nul : le rapport explose (15 974) pour un trésor à peine au-dessus
+de 10 000 livres. Écarts : Brabant rarement anglais (la marge d'attitude n'est franchie que si le Hainaut est
+déjà allié) ; la défection bourguignonne est en place et testée mais ne se déclenche jamais faute de domination
+anglaise (au plus 6 provinces du royaume tenues à la fois, seuil 8) ; trésors encore 10-14 saisons par pointes
+(royaumes réduits à une province, revenus effondrés par les sièges) ; la guerre FR-EN recule un peu (graines 1
+et 3 sous 55 %) ; Bourgogne jouée par l'IA (`playthrough 1`) toujours à 2 provinces en 1478.
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
@@ -188,12 +226,13 @@ observée).
 - L'IA ne propose pas encore de mariages (M9).
 - M5 : l'IA diplomatique est volontairement prudente (peu de déclarations de guerre) ; la guerre de Cent Ans peut se conclure tôt par une paix blanche. Les noms des maisons générées viennent de la capitale ; le Portugal n'a pas de liste de prénoms dédiée.
 - M6 : le mock GDScript n'a pas de technologies.
-- F1 : restent sans effet `recruit_slots` (bâtiments), la `Piety` des bâtiments et des traits (la piété du
-  souverain ne bouge qu'avec les événements) et `army_armor`/`army_ranged` des bâtiments (buttes de tir,
-  armurerie : seuls les bonus des technologies s'appliquent en bataille). Les assauts de siège restent à
-  deux (armée assiégeante contre garnison) : les alliés ne rejoignent que les batailles rangées. L'interface
-  n'affiche pas encore le geôlier d'un captif ni la ventilation par classe des effets (exposée par le pont :
-  `effects.by_class`). Pas d'ordre de rançon pour le joueur : les captifs sont libérés par les événements.
+- F1 : l'interface n'affiche pas encore la ventilation par classe des effets (exposée par le pont :
+  `effects.by_class`).
+- G1 : la bataille 3D n'applique toujours pas les bonus des technologies (seuls ceux des bâtiments de la
+  province de levée passent dans `battle_setup`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
+  (elle paie, ou libère sur parole les simples chevaliers). Pas de faction Danemark : l'achat du Jutland
+  (`evt_valdemar_iv`) reste sans cession. Le plafond de recrutement (G1) limite l'IA à 3 levées par tour
+  dans sa capitale et 2 ailleurs (hors bâtiments) : trésors à resurveiller avec `century_probe`.
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
 - Batailles (M7) : pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée.
 - Sièges 3D (M8) : pas de vrai cheminement (les ordres contournent une seule ouverture à la fois ; un

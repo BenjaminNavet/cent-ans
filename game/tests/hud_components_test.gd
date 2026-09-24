@@ -45,7 +45,7 @@ func _test_army_strip() -> void:
 	var army: Dictionary = PREVIEW.demo_army()
 	strip.set_army(army, 20, catalog, "Ost de Philippe VI")
 	await process_frame
-	var cards := strip.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n is ArmyStrip.UnitCard)
+	var cards := strip.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n is ArmyStrip.RegimentCard)
 	_check(cards.size() == 8, "army strip should show 8 cards, got %d" % cards.size())
 	var expected_upkeep := 0
 	for unit in army["units"]:

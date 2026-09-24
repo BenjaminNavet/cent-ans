@@ -236,7 +236,10 @@ impl BattleSim {
         let facing = facing.is_finite().then_some(facing);
         let result = u32::try_from(id)
             .map_err(|_| format!("unité inconnue : {id}"))
-            .and_then(|id| sim.deploy_unit(id, x, z, facing).map_err(|e| e.to_string()));
+            .and_then(|id| {
+                sim.deploy_unit(id, x, z, facing)
+                    .map_err(|e| sim.error_text(&e))
+            });
         result_dict(result)
     }
 
@@ -284,6 +287,7 @@ impl BattleSim {
                     "depth" => depth,
                     "is_general" => unit.is_general,
                     "present" => unit.present(),
+                    "reserve" => unit.reserve,
                     "left_field" => unit.left_field,
                     "fire_at_will" => unit.fire_at_will,
                     "can_shoot" => unit.can_shoot(),

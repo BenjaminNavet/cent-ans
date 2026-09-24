@@ -1,0 +1,20 @@
+{
+  "id": "ord_court_company",
+  "name": {
+    "display": "Compagnie chevaleresque de cour",
+    "local": "Compagnie",
+    "local_language": "moyen français"
+  },
+  "description": "À l'exemple de l'ordre castillan de la Bande (1330), de la Jarretière ou du Collier de Savoie (1364), tout prince du XIVe siècle peut réunir ses meilleurs chevaliers dans une compagnie à devise et à insigne, qui les attache à sa personne. Ordre générique pour les factions sans ordre historique dans le jeu ; voir [[cdx_chevalerie]].",
+  "cost": 1500,
+  "prestige_required": 10,
+  "members": 4,
+  "historical_members": "de 12 à 50 chevaliers selon les ordres",
+  "member_loyalty": 8,
+  "member_morale": 4,
+  "founder_prestige": 6,
+  "yearly_prestige": 1,
+  "sources": [
+    "D'Arcy J. D. Boulton, The Knights of the Crown: The Monarchical Orders of Knighthood in Later Medieval Europe, 1987"
+  ]
+}

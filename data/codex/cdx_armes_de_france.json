@@ -1,0 +1,12 @@
+{
+  "id": "cdx_armes_de_france",
+  "title": "Les armes de France",
+  "category": "societe",
+  "aliases": ["armes de France", "France ancien", "France moderne", "semé de lis", "fleur de lis", "fleurs de lis d'or"],
+  "era": { "from": "1211", "to": "1500" },
+  "summary": "« D'azur semé de fleurs de lis d'or » : ce sont les armes des rois de France au début de la guerre. Vers 1376, Charles V les réduit à trois lis, en l'honneur de la Trinité ; on parle alors de « France moderne ».",
+  "body": "Les rois capétiens adoptent la fleur de lis d'or sur champ d'azur à la fin du XIIe siècle ; le sceau du prince Louis, futur Louis VIII, montre vers 1211 un écu semé de lis, c'est-à-dire parsemé de fleurs sans nombre fixe, coupées par les bords. L'azur est la couleur de la Vierge, le lis son symbole de pureté : ces armes placent la dynastie sous la protection de Marie et affirment le caractère sacré du roi très chrétien.\n\nEn 1328, les [[cdx_valois|Valois]] héritent de ces armes pleines. Tous les princes du sang les portent brisées, ce qui fait des cours d'Anjou, de Berry, d'Orléans ou de Bourgogne un jardin de lis (voir les [[cdx_brisures|brisures]]). Quand [[cdx_edouard_iii|Édouard III]] revendique la couronne, il place à son tour ce semé de lis dans ses propres [[cdx_armes_d_angleterre|armes]] en 1340 : l'écu devient un enjeu de la guerre.\n\nVers 1376, [[cdx_charles_v|Charles V]] réduit le semé à trois fleurs de lis. Raoul de Presles, dans le prologue de sa traduction de la Cité de Dieu dédiée au roi, explique que les trois fleurs figurent la Trinité ; on a aussi vu dans le changement une façon de distinguer les armes du roi de celles que portait son rival anglais. La réforme s'impose lentement : sceaux, monnaies et bannières mêlent encore longtemps les deux formes.\n\nÀ côté des armes, la monarchie arbore l'oriflamme rouge de Saint-Denis, levée pour la guerre et confiée à un porte-oriflamme, et le cri « Montjoie Saint-Denis ». Dans le jeu, l'écu de la faction France porte les armes du royaume : ce sont les « lis » que défendent [[cdx_du_guesclin|du Guesclin]] et [[cdx_jeanne_darc|Jeanne d'Arc]].",
+  "anachronism": "Le jeu affiche une seule forme des armes de France pendant toute la partie ; historiquement, le semé de lis précède les trois lis adoptés vers 1376.",
+  "see_also": ["cdx_blason", "cdx_meubles_heraldiques", "cdx_valois", "cdx_armes_d_angleterre"],
+  "sources": ["Armoiries de la France", "Fleur de lis", "Oriflamme", "Michel Pastoureau, Les Emblèmes de la France, Bonneton, 1998"]
+}

@@ -175,6 +175,38 @@ pub enum Order {
         province: ProvinceId,
         diet: data_model::DietId,
     },
+    /// H5: strikes the faction's money at `level`; one change per year.
+    SetCoinage {
+        level: crate::coinage::CoinageLevel,
+    },
+    /// H6: pays the ransom of one of our captives, in full (`installments`
+    /// 0 or 1) or by yearly installments (2 to 6, +10 %).
+    PayRansom {
+        character: CharacterId,
+        #[serde(default)]
+        installments: u32,
+    },
+    /// H6: the captor sets the terms of one of its prisoners.
+    SetRansomTerms {
+        character: CharacterId,
+        terms: crate::ransom::RansomTerms,
+    },
+    /// H6: the captor frees one of its prisoners on parole.
+    ReleaseOnParole {
+        character: CharacterId,
+    },
+    /// G1: the captor frees one of its prisoners against `ransom` livres
+    /// (default: the computed ransom), paid at once by his faction if it
+    /// accepts (a fair price it can afford).
+    ReleaseCaptive {
+        character: CharacterId,
+        #[serde(default)]
+        ransom: Option<i64>,
+    },
+    /// H6: founds the chivalric order `order` (one per faction).
+    FoundChivalricOrder {
+        order: data_model::ChivalricOrderId,
+    },
 }
 
 /// Why an order was refused (messages in French for the UI).
@@ -200,6 +232,8 @@ pub enum OrderError {
     NotAdjacent { from: ProvinceId, to: ProvinceId },
     #[error("recrutement impossible : {0}")]
     RecruitUnavailable(String),
+    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette province")]
+    RecruitQueueFull { slots: usize },
     #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("indice d'unité invalide : {0}")]
@@ -244,7 +278,16 @@ pub enum OrderError {
     Assault(#[from] crate::siege::AssaultError),
     #[error(transparent)]
     Diet(#[from] crate::table::DietError),
+    #[error(transparent)]
+    Coinage(#[from] crate::coinage::CoinageError),
+    #[error(transparent)]
+    Ransom(#[from] crate::ransom::RansomError),
+    #[error(transparent)]
+    Chivalry(#[from] crate::chivalry::ChivalryError),
 }
+
+/// G1: recruitments every province can queue per turn before buildings.
+pub const BASE_RECRUIT_SLOTS: usize = 2;
 
 /// One line of the recruitment panel.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -399,6 +442,33 @@ impl CampaignState {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
                 Ok(())
             }
+            Order::SetCoinage { level } => {
+                crate::coinage::set_coinage(self, data, faction, level)?;
+                Ok(())
+            }
+            Order::PayRansom {
+                character,
+                installments,
+            } => {
+                crate::ransom::pay_ransom(self, data, faction, &character, installments)?;
+                Ok(())
+            }
+            Order::SetRansomTerms { character, terms } => {
+                crate::ransom::set_ransom_terms(self, data, faction, &character, terms)?;
+                Ok(())
+            }
+            Order::ReleaseCaptive { character, ransom } => {
+                crate::ransom::release_for_ransom(self, data, faction, &character, ransom)?;
+                Ok(())
+            }
+            Order::ReleaseOnParole { character } => {
+                crate::ransom::release_on_parole(self, data, faction, &character)?;
+                Ok(())
+            }
+            Order::FoundChivalricOrder { order } => {
+                crate::chivalry::found_order(self, data, faction, &order)?;
+                Ok(())
+            }
         }
     }
 
@@ -529,6 +599,12 @@ impl CampaignState {
         province: &ProvinceId,
         unit_type: &UnitTypeId,
     ) -> Result<(), OrderError> {
+        if let Some(state) = self.provinces.get(province) {
+            let slots = self.recruit_slots(data, province);
+            if &state.controller == faction && state.recruit_queue.len() >= slots {
+                return Err(OrderError::RecruitQueueFull { slots });
+            }
+        }
         let option = self
             .recruit_option(data, faction, province, unit_type)
             .ok_or_else(|| OrderError::UnknownUnitType(unit_type.clone()))?;
@@ -606,6 +682,10 @@ impl CampaignState {
         if province_state.siege.is_some() {
             return Some("la province est assiégée".to_owned());
         }
+        let slots = self.recruit_slots(data, province_id);
+        if province_state.recruit_queue.len() >= slots {
+            return Some(format!("file de recrutement pleine ({slots} par tour)"));
+        }
         if let Some(building) = &unit_type.required_building {
             if !province.buildings.contains(building) {
                 let name = data
@@ -643,6 +723,36 @@ impl CampaignState {
         None
     }
 
+    /// G1 `RecruitSlots`: recruitments a province can queue per turn —
+    /// [`BASE_RECRUIT_SLOTS`], one more in the faction capital, plus the flat
+    /// `recruit_slots` of its buildings, governor and the controller's
+    /// technologies (muster field, stables, armoury…).
+    pub fn recruit_slots(&self, data: &GameData, province: &ProvinceId) -> usize {
+        let Some(state) = self.provinces.get(province) else {
+            return 0;
+        };
+        let mut effects = self.province_effects(data, province);
+        effects.merge(&research::faction_tech_effects(
+            self,
+            data,
+            &state.controller,
+        ));
+        let capital = self
+            .factions
+            .get(&state.controller)
+            .is_some_and(|f| &f.capital == province);
+        BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
+    }
+
+    /// Recruitment slots still free this turn in `province`.
+    pub fn recruit_slots_free(&self, data: &GameData, province: &ProvinceId) -> usize {
+        let queued = self
+            .provinces
+            .get(province)
+            .map_or(0, |p| p.recruit_queue.len());
+        self.recruit_slots(data, province).saturating_sub(queued)
+    }
+
     /// Money cost of recruiting `unit_type` in `province` for `faction`
     /// (F1 `RecruitCost`): the province's buildings and governor (stables:
     /// cavalry −10 %) and the faction's technologies (francs-archers:
@@ -661,10 +771,13 @@ impl CampaignState {
         let flat = effects.recruit_cost.flat + targeted.flat;
         let percent = (effects.recruit_cost.percent + targeted.percent).max(-75.0);
         let base = f64::from(unit_type.cost.money);
-        ((base + flat) * (1.0 + percent / 100.0))
+        // H5: prices follow the coinage.
+        let prices = crate::coinage::price_factor(self, faction);
+        let cost = ((base + flat) * (1.0 + percent / 100.0))
             .round()
             .max(base / 4.0)
-            .max(0.0) as u32
+            .max(0.0);
+        (cost * prices) as u32
     }
 
     fn order_create_army(

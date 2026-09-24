@@ -108,3 +108,14 @@ d'Orléans (`evt_armagnacs_bourguignons`), Troyes, Jeanne d'Arc ; le Grand Schis
 - Tirage aléatoire (`chronicle.rs`, `scope_allows`) : un événement aléatoire réservé à une autre faction ne
   consomme plus de tirage du RNG pour les autres factions (ajouter un événement vénitien ne rebat plus les
   cartes de la France ; sans cela le smoke `flow` perdait son rapport de saison, sensible à la graine).
+
+## G1 — `transfer_province`
+Effet `transfer_province { province, faction?, from? }` : la province passe (propriété et contrôle) à
+`faction` (défaut : la faction qui décide) ; siège, garnison, file de recrutement, chantier et gouverneur de
+l'ancien détenteur prennent fin (même code que la cession d'une rançon). Sans effet si `from` ne la possède
+ni ne la contrôle, si le destinataire est mort ou la tient déjà, ou si c'est la capitale de son propriétaire.
+Validation : province et factions inconnues signalées. Utilisé par l'achat du Dauphiné (1349, `from`
+Empire, remplace la prétention), le traité de Guérande (`evt_auray`, option Montfort : les deux provinces
+bretonnes rendues au duc) et Formigny (option « Abandonner la Normandie » : les provinces normandes tenues
+par l'Angleterre passent à la France). Écarts : `evt_valdemar_iv` (pas de faction Danemark), la paix de
+Venise (Trévise n'est pas une province).

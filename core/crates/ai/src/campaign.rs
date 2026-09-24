@@ -11,6 +11,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{
     CharacterId, EffectKind, FactionId, GameData, ProvinceId, SkillBranch, SkillId, UnitTypeId,
 };
+use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::{dijkstra, edges, path_to};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
@@ -41,7 +42,10 @@ pub const RETREAT_STRENGTH: f64 = 0.4;
 /// Seasons of gross income kept in the treasury; above, money is spent (F4).
 pub const RESERVE_SEASONS: i64 = 3;
 /// Turns over which a hoard above the reserve is spent (army, buildings).
-pub const HOARD_SPENDING_TURNS: i64 = 8;
+pub const HOARD_SPENDING_TURNS: i64 = 4;
+/// Hoard spent per extra recruit and turn, and the recruitment cap (G2).
+pub const HOARD_LIVRES_PER_RECRUIT: i64 = 1500;
+pub const MAX_RECRUITS_PER_TURN: i64 = 16;
 /// Seasons of deficit a treasury must cover before units are dismissed
 /// ahead of bankruptcy, at war / at peace (F4).
 pub const WAR_RUNWAY_TURNS: i64 = 8;
@@ -165,14 +169,48 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
-    let Some(ctx) = Context::new(state, data, faction) else {
+    let Some(mut ctx) = Context::new(state, data, faction) else {
         return Vec::new();
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+    // G2: historical side changes (Artevelde, Troyes).
+    orders.extend(crate::alignment::plan_side_change(state, data, faction));
+    orders.extend(crate::alignment::plan_dynastic_alliance(
+        state, data, faction,
+    ));
+    orders.extend(crate::alignment::lift_embargoes_on_cobelligerents(
+        state, data, faction,
+    ));
+    // G2: subsidies first, out of what the donor would otherwise hoard.
+    let spare = (ctx.treasury - ctx.upkeep()).max(0) / crate::support::SUBSIDY_SPARE_DIVISOR;
+    for order in crate::support::plan_subsidies(state, data, faction, spare) {
+        if let Order::SendGift { amount, .. } = &order {
+            ctx.treasury -= amount;
+        }
+        orders.push(order);
+    }
     if let Some(technology) = sim_campaign::research::ai_choose_research(state, data, faction) {
         orders.push(Order::Research { technology });
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
+    // G2: a realm whose buildings eat half its income does not debase: the
+    // inflation of their upkeep outweighs the seigniorage (Scots spiral).
+    let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;
+    orders.extend(
+        sim_campaign::coinage::ai_choose_coinage(state, data, faction)
+            .into_iter()
+            .filter(|o| {
+                !upkeep_heavy
+                    || !matches!(
+                        o,
+                        Order::SetCoinage {
+                            level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
+                        }
+                    )
+            }),
+    );
+    orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
+    orders.extend(sim_campaign::chivalry::ai_found_order(state, data, faction));
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);
@@ -278,8 +316,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
     let mut recruits = 0;
-    let max_recruits =
-        ((ctx.income + hoard / HOARD_SPENDING_TURNS) / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
+    // G2: a hoard buys troops at its own pace (a crushed realm sitting on
+    // ransoms and loot raises companies, it does not bank them).
+    let max_recruits = (ctx.income / INCOME_PER_RECRUIT
+        + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
+        .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
     'sites: for site in &sites {
         if !ctx.owns(site) {
             continue;
@@ -296,7 +337,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         let Some(option) = best else {
             continue;
         };
+        // G1: no more than the province's free recruitment slots.
+        let mut free_slots = state.recruit_slots_free(data, site);
         while recruits < max_recruits
+            && free_slots > 0
             && planned_upkeep + i64::from(option.upkeep)
                 <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
                     target_upkeep.max(i64::from(option.upkeep))
@@ -312,6 +356,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;
+            free_slots -= 1;
             if !ctx.at_war() && recruits % 2 == 0 {
                 continue 'sites;
             }

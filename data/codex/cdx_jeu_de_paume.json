@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jeu_de_paume",
+  "title": "Le jeu de paume",
+  "category": "vie_quotidienne",
+  "aliases": ["jeu de paume", "paume", "longue paume", "courte paume"],
+  "era": { "from": "1200", "to": "1600" },
+  "summary": "On se renvoie une balle de cuir bourrée, d'abord à main nue, puis avec un gant : c'est le jeu de paume, ancêtre du tennis, joué en plein air (longue paume) ou dans des salles fermées (courte paume). Le roi Louis X en serait mort en 1316.",
+  "body": "Né dans les cloîtres et les cours au XIIe siècle, le jeu de paume se répand dans toute la société. Deux joueurs ou deux équipes se renvoient une balle faite de cuir rembourré de laine, de son ou de poils, par-dessus une corde tendue ou un talus. La longue paume se joue dehors, dans les fossés ou sur les places ; la courte paume se joue dans des salles fermées, dont les murs et le toit entrent dans le jeu.\n\nLa légende rattache au jeu la mort de Louis X le Hutin : en juin 1316, après une partie acharnée au bois de Vincennes, il aurait bu du vin trop frais dans une cave et serait mort peu après, peut-être d'une pleurésie ou d'une pneumonie. Sa mort sans héritier mâle ouvre la série des crises de succession qui mène à la [[cdx_succession_1328|succession de 1328]].\n\nLe jeu passionne toutes les conditions : on y parie beaucoup, ce qui le fait ranger parmi les jeux d'argent. L'ordonnance de [[cdx_charles_v|Charles V]] du 3 avril 1369 l'interdit avec les [[cdx_des_et_hasard|dés]], au profit du tir à l'arc ; en vain. Les princes font bâtir des salles de paume dans leurs châteaux, et les ouvriers jouent dans la rue.\n\nLa raquette ne s'impose qu'à la fin du XVe siècle ; auparavant on joue à main nue ou avec un gant de cuir. Le cri « tenez ! » lancé au service aurait donné au jeu son nom anglais, tennis, et le décompte par quinze, trente et quarante-cinq remonterait à la paume, même si son origine reste discutée.",
+  "anachronism": "Les raquettes, parfois représentées dans les illustrations modernes du jeu, n'apparaissent qu'à la fin du XVe siècle.",
+  "see_also": ["cdx_des_et_hasard", "cdx_capetiens_directs", "cdx_succession_1328", "cdx_charles_v"],
+  "sources": ["Jeu de paume", "Louis X de France", "Jean-Michel Mehl, Les Jeux au royaume de France du XIIIe au début du XVIe siècle, Fayard, 1990"]
+}

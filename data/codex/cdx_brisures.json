@@ -1,0 +1,11 @@
+{
+  "id": "cdx_brisures",
+  "title": "Les brisures",
+  "category": "societe",
+  "aliases": ["brisure", "brisures", "lambel", "armes pleines"],
+  "era": { "from": "1200", "to": "1500" },
+  "summary": "Seul le chef d'un lignage porte les armes « pleines ». Ses fils et ses cadets les « brisent » en y ajoutant une marque (lambel, bordure, bande) ou en changeant un émail, ce qui permet de lire la parenté sur l'écu.",
+  "body": "Au XIVe siècle, les armes appartiennent au lignage mais ne peuvent être portées à l'identique que par son chef. Le fils aîné, du vivant de son père, ajoute un lambel, sorte de lambeau à pendants posé en haut de l'écu ; à la mort du père, il l'ôte. Les cadets fondent des branches nouvelles et conservent une brisure permanente, que leurs propres enfants brisent à leur tour.\n\nLa maison de France offre une véritable leçon de brisures. Les ducs d'Anjou portent les lis de France à la bordure de gueules ; les ducs de Berry, à la bordure engrêlée de gueules ; les ducs d'Orléans, au lambel d'argent ; les Bourbons, au bâton de gueules posé en bande ; les Valois-Bourgogne, à la bordure componée d'argent et de gueules. Un seul regard sur l'écu suffit à dire de quel fils de roi on descend.\n\nEn Angleterre, le [[cdx_prince_noir|Prince Noir]] porte les armes de son père [[cdx_edouard_iii|Édouard III]] au lambel d'argent à trois pendants ; [[cdx_jean_de_gand|Jean de Gand]] les brise d'un lambel d'hermine, et chaque fils royal reçoit un lambel chargé de petites figures différentes. Pour ses badges personnels, en revanche, le Prince Noir choisit librement ses plumes d'autruche et sa devise « Ich dien ».\n\nLes bâtards reçoivent aussi des marques propres, souvent une barre ou un filet ; la « barre de bâtardise » n'a cependant rien de systématique au Moyen Âge, et les grands bâtards, comme le Bâtard d'Orléans (Dunois), portent fièrement leurs armes brisées. Les [[cdx_herauts|hérauts]] surveillent l'usage des brisures, source de nombreux procès.",
+  "see_also": ["cdx_blason", "cdx_armes_de_france", "cdx_armes_de_bourgogne", "cdx_herauts"],
+  "sources": ["Brisure (héraldique)", "Lambel", "Armorial des Capétiens"]
+}

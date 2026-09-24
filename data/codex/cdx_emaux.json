@@ -1,0 +1,11 @@
+{
+  "id": "cdx_emaux",
+  "title": "Les émaux : métaux, couleurs et fourrures",
+  "category": "societe",
+  "aliases": ["émaux", "émail héraldique", "gueules", "sinople", "hermine", "vair"],
+  "era": { "from": "1130", "to": "1500" },
+  "summary": "Le blason n'emploie qu'une palette réduite, les émaux : deux métaux (or et argent), cinq couleurs (gueules, azur, sable, sinople, pourpre) et deux fourrures (hermine et vair). On ne pose pas en principe métal sur métal ni couleur sur couleur.",
+  "body": "Les métaux sont l'or, rendu en jaune, et l'argent, rendu en blanc. Les couleurs portent des noms anciens : gueules pour le rouge (peut-être des « gueules », fourrures de gorge teintes en rouge), azur pour le bleu (un mot venu du persan par l'arabe), sable pour le noir (la zibeline), sinople pour le vert et, plus rare, pourpre. Aucune nuance ne compte : un gueules clair ou sombre reste gueules, et le peintre choisit son ton.\n\nLes fourrures rappellent les manteaux doublés des seigneurs. L'hermine est un fond blanc semé de mouchetures noires, les queues de l'animal cousues sur la peau blanche ; les ducs de Bretagne portent depuis 1316 un écu tout d'hermine. Le vair, fait de peaux d'écureuil gris et blanc alternées, se dessine en cloches bleues et blanches ; le « menu vair », plus fin, double les manteaux des rois et des magistrats.\n\nLa règle de contrariété interdit de poser un métal sur un métal ou une couleur sur une couleur : un lion d'or sur champ d'argent serait illisible de loin. Elle est respectée dans l'immense majorité des blasons. Les exceptions sont voulues et célèbres : les armes du royaume de Jérusalem, croix d'or sur champ d'argent, se veulent uniques comme la Ville sainte.\n\nLes couleurs du blason portent aussi un sens. L'azur, couleur de la Vierge et de la royauté capétienne depuis le XIIe siècle, devient la couleur noble par excellence, alors qu'il était presque méprisé des Romains ; le gueules reste la couleur de la guerre et du pouvoir. Ces goûts, qu'a étudiés Michel Pastoureau, gouvernent aussi le [[cdx_vetement_medieval|vêtement]] des princes.",
+  "see_also": ["cdx_blason", "cdx_meubles_heraldiques", "cdx_armes_de_france"],
+  "sources": ["Émail (héraldique)", "Hermine (héraldique)", "Vair", "Michel Pastoureau, Bleu. Histoire d'une couleur, Seuil, 2000"]
+}

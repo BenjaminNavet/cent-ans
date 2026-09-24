@@ -11,7 +11,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::common::{HistoricalDate, Sources};
 use crate::entities::faction::ClaimKind;
-use crate::ids::{CharacterId, EventId, FactionId, ProvinceId, ReligionId, TraitId, UnitTypeId};
+use crate::ids::{
+    CharacterId, ChivalricOrderId, EventId, FactionId, ProvinceId, ReligionId, TraitId, UnitTypeId,
+};
 
 /// Historical (dated, fires at most once), random (per-turn chance) or
 /// chained (F1: fires only when another event schedules it with
@@ -436,6 +438,25 @@ pub enum EventEffect {
     Marry {
         a: CharacterId,
         b: CharacterId,
+    },
+    /// H6: `faction` (default: the deciding faction) founds the chivalric
+    /// order `order`, paying nothing more (the event's own `treasury`
+    /// effect is the cost); no-op if it already has an order.
+    FoundChivalricOrder {
+        order: ChivalricOrderId,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+    },
+    /// G1: `province` passes to `faction` (default: the deciding faction),
+    /// ownership and control (purchase, treaty). Sieges, garrison, queue and
+    /// governorship of the former holder end. With `from`, only when that
+    /// faction owns or controls it.
+    TransferProvince {
+        province: ProvinceId,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        from: Option<FactionId>,
     },
 }
 

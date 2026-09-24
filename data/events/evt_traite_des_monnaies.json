@@ -1,0 +1,46 @@
+{
+  "id": "evt_traite_des_monnaies",
+  "title": "Le Traité des monnaies",
+  "text": "Un maître de l'Université, [[cdx_nicole_oresme|Nicole Oresme]], soumet au dauphin Charles un petit livre latin, De moneta. Sa thèse est audacieuse : la monnaie n'appartient pas au prince mais à la communauté qui s'en sert ; le roi qui change la valeur des pièces pour son profit agit en tyran et en voleur. Les [[cdx_mutations_monetaires|mutations monétaires]], dit-il, ruinent les rentiers, trompent les marchands et font fuir le bon or à l'étranger. Le dauphin, qui a vu les [[cdx_etats_generaux|états généraux]] exiger une monnaie stable, l'écoute.",
+  "kind": "historical",
+  "trigger": {
+    "date": { "year": 1356, "season": "autumn" },
+    "until_year": 1360,
+    "conditions": [
+      { "type": "character_alive", "id": "chr_charles_v" },
+      { "type": "faction_exists", "faction": "fac_france" }
+    ]
+  },
+  "scope": { "type": "faction", "faction": "fac_france" },
+  "options": [
+    {
+      "text": "Promettre une monnaie forte et stable",
+      "effects": [
+        { "type": "treasury", "amount": -3000 },
+        { "type": "wealth", "province": "all", "amount": 2 },
+        { "type": "unrest", "province": "all", "amount": -2 },
+        { "type": "prestige", "amount": 3 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Une dernière mutation, pour payer la guerre",
+      "effects": [
+        { "type": "treasury", "amount": 3000 },
+        { "type": "wealth", "province": "all", "amount": -2 },
+        { "type": "unrest", "province": "all", "amount": 3 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1355",
+    "uncertain": true,
+    "note": "Le De moneta est rédigé vers 1355-1358 ; Oresme en donne ensuite une version française. La réforme durable vient avec le franc à cheval (décembre 1360)."
+  },
+  "sources": [
+    "Traité des monnaies (Nicole Oresme)",
+    "Nicole Oresme",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+  ]
+}

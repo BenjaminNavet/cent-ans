@@ -180,6 +180,8 @@ func refresh(unit: Dictionary, is_selected: bool) -> void:
 	var state := str(unit["state_label"])
 	if bool(unit["left_field"]):
 		state = "hors du champ"
+	elif bool(unit.get("reserve", false)):
+		state = "en réserve"
 	elif not present:
 		state = "anéantie"
 	state_label.text = state

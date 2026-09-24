@@ -28,6 +28,7 @@ var _ladder_mesh: ArrayMesh
 var wall_height: float = 8.0
 var thickness: float = 3.0
 var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
+var house_sites: Array = []  # F5c : [{p: Vector2, radius}] = obstacles de la simulation
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -304,43 +305,37 @@ func _build_square() -> void:
 	add_child(well)
 
 
-## Maisons et église dans la moitié arrière de la ville (loin du front et de la place). Les
-## maisons (statiques, sans état à mettre à jour) sont regroupées en `MultiMeshInstance3D` par
-## `BattleSiegeBatcher` une fois construites (V6, perf : ~550 appels de dessin à ~10) ; l'église
-## (unique) reste un nœud normal.
+## Maisons et église posées sur les disques de la simulation (`get_siege().houses`, F5c) : le
+## rendu coïncide avec les obstacles du cheminement. Les maisons (statiques) sont ensuite regroupées
+## en `MultiMeshInstance3D` par `BattleSiegeBatcher` (V6, perf) ; l'église (unique) reste un nœud normal.
 func _build_houses() -> void:
 	var center: Vector2 = siege.get("center", Vector2(600, 560))
-	var radius := float(siege.get("square_radius", 35.0))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1340
-	var walls: Array = siege.get("pieces", [])
+	house_sites = _house_sites()
+	# L'église prend le disque le plus proche du fond de la ville, les autres des maisons.
+	var church_index := -1
+	for i in house_sites.size():
+		var p: Vector2 = house_sites[i]["p"]
+		if church_index < 0 or p.distance_to(center + Vector2(0, 75)) < (house_sites[church_index]["p"] as Vector2).distance_to(center + Vector2(0, 75)):
+			church_index = i
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
-	var placed := 0
-	var tries := 0
-	while placed < 46 and tries < 700:
-		tries += 1
-		var p := center + Vector2(rng.randf_range(-115, 115), rng.randf_range(-40, 120))
-		if p.distance_to(center) < radius + 12.0:
-			continue
-		var near_wall := false
-		for piece in walls:
-			var q := Geometry2D.get_closest_point_to_segment(p, piece["a"], piece["b"])
-			if q.distance_to(p) < 22.0:
-				near_wall = true
-				break
-		if near_wall or not Geometry2D.is_point_in_polygon(p, _ring()):
-			continue
-		_house(houses_root, p, rng.randf_range(6.0, 11.0), rng.randf_range(5.0, 8.0), rng.randf_range(4.0, 7.0), rng.randf() * TAU)
-		placed += 1
+	for i in house_sites.size():
+		var r := float(house_sites[i]["radius"])
+		# Emprise inscrite dans le disque (demi-diagonale ≤ rayon).
+		if i != church_index:
+			_house(houses_root, house_sites[i]["p"], rng.randf_range(1.1, 1.4) * r, rng.randf_range(0.8, 1.0) * r, rng.randf_range(4.0, 7.0), rng.randf() * TAU)
 	BattleSiegeBatcher.batch_and_replace(houses_root)
-	# L'église, au fond de la ville (unique : pas de regroupement).
-	var church := center + Vector2(0, 75)
+	if church_index < 0:
+		return
+	# L'église, au fond de la ville.
+	var church: Vector2 = house_sites[church_index]["p"]
 	if Geometry2D.is_point_in_polygon(church, _ring()):
-		if _place_model("cathedral", church, 28.0):
+		if _place_model("cathedral", church, 20.0):
 			return
-		_house(self, church, 22.0, 10.0, 11.0, 0.0)
+		_house(self, church, 18.0, 10.0, 11.0, 0.0)
 		var spire := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
 		cone.top_radius = 0.0
@@ -650,3 +645,12 @@ func _make_ladder_group(width: float) -> Node3D:
 		ladder.rotation.x = 0.28
 		node.add_child(ladder)
 	return node
+
+
+## Source des maisons (F5c) : disques `{x, z, radius}` de `get_siege().houses`, obstacles de la
+## simulation (F5a). Aucune position n'est inventée ici.
+func _house_sites() -> Array:
+	var sites: Array = []
+	for house in siege.get("houses", []):
+		sites.append({"p": Vector2(float(house["x"]), float(house["z"])), "radius": float(house["radius"])})
+	return sites

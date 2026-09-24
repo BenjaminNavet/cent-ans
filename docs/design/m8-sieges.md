@@ -102,7 +102,7 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
 - **Maisons et rues** : `SiegeWorks.houses` (disques de 9 m, deux couronnes à 75 et 110 m du centre,
   rues rayonnantes de la place vers chaque pan et la porte ; génération sans tirage aléatoire).
   Exposées au pont : `get_siege().houses = [{x, z, radius}]` — **le rendu Godot doit poser ses
-  maisons sur ces disques** (aujourd'hui `battle_siege.gd` place les siennes). Les maisons arrêtent les
+  maisons sur ces disques** (fait en F5c : `battle_siege.gd` lit `houses`). Les maisons arrêtent les
   régiments (sauf en déroute).
 - **Cheminement A*** (`sim/pathing.rs`) : grille de 4 m sur tout le champ ; obstacles = bandes des
   pans intacts et maisons ; brèches, porte enfoncée (et porte ouverte d'une sortie, pour la garnison)
@@ -122,3 +122,25 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
   déterminisme. Sonde `probe -- siege 0` : 6/6 (≈ 290 s) ; `siege 60` : 6/6 (≈ 210 s) — l'échelade
   sans brèche réussit plus souvent qu'en M8 (3/6) : l'infanterie trouve maintenant la porte enfoncée
   par le bélier. À rééquilibrer si besoin (PV de la porte, tir des tours).
+
+## F5d — rééquilibrage de l'escalade (Rust)
+- Constat : la comparaison F5a ci-dessus mélangeait deux sondes. `probe -- siege 0` (avec deux
+  trébuchets et une tour) donnait déjà 6/6 en M8 : les trébuchets ouvrent deux brèches vers 120 et
+  200 s, c'est un assaut par la brèche. L'escalade proprement dite (`probe -- siege 0 ""`, échelles et
+  bélier seulement) faisait 3/6 en M8 et était tombée à 2/6 (4/20 sur 20 graines) avec le tir des
+  tours de F5a ; le bélier, lui, ne pèse pas (il n'enfonce jamais la porte avant la décision :
+  PV de la porte, dégâts et armure du bélier testés sans effet).
+- Réglage : chaque tour tire 5 carreaux par salve au lieu de 25 (`TOWER_SHOTS`, portée 180 m et
+  cadence 8 s inchangées) : les tours pèsent sans décider seules.
+- Mesures : `siege 0 ""` → 3/6 (8/20 sur 20 graines, `SEEDS=20`) ; `siege 0` → 6/6 (≈ 290 s) ;
+  `siege 60` → 6/6 (≈ 210 s). La sonde accepte désormais `SEEDS=n`. Test
+  `f5d::a_ladder_escalade_wins_about_half_the_time` (2 à 4 victoires sur 6) ; tests de siège M8 et F5a
+  verts. Garnison en réserve au-delà de 20 régiments : entre depuis la place (`m7-battles.md` § F5d).
+
+## G1 — alliés dans l'assaut
+`siege::assault_coalition(army)` : l'armée assiégeante puis les armées de sa faction ou de ses alliés dans
+la province, en guerre avec le contrôleur de la place (même règle que `movement::battle_coalition`).
+L'auto-résolution fait donner la coalition (`coalition_side`), les pertes sont réparties par régiment, le
+général commandant est le meilleur par commandement ; `battle_setup` du siège exporte l'armée combinée et
+`resolve_pending_battle` la valide dans le même ordre. L'assaut devient une bataille en attente dès que le
+joueur y a une armée, même alliée. La garnison combat seule.

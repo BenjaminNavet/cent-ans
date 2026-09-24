@@ -57,6 +57,7 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 
@@ -117,6 +118,10 @@ func _ready() -> void:
 	flow = FlowController.new()  # F3
 	add_child(flow)
 	flow.setup(self)
+	hud = HudController.new()  # F10b
+	hud.name = "HudController"
+	add_child(hud)
+	hud.setup(self)
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
@@ -175,7 +180,6 @@ func _connect_ui() -> void:
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.tech_panel_requested.connect(_on_tech_panel_requested)  # M6
 	ui.research_requested.connect(_on_research_requested)  # M6
-	ui.army_panel_closed.connect(func() -> void: deselect_army())
 	ui.province_panel_closed.connect(func() -> void:
 		selected_index = 0
 		terrain.set_highlight(hovered_index, 0))
@@ -239,6 +243,8 @@ func refresh_all() -> void:
 		_show_tech_panel()
 	if flow != null:  # F3
 		flow.refresh()
+	if hud != null:  # F10b
+		hud.refresh()
 
 
 func _city_available() -> bool:
@@ -337,11 +343,8 @@ func select_army(army_id: String) -> void:
 	var is_player := faction == player_faction
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
-	var general_skills: Dictionary = {}
-	var general_id: String = str(army.get("general", ""))
-	if general_id != "" and _characters_available():
-		general_skills = (sim.call("get_character", general_id) as Dictionary).get("skills", {})
-	ui.show_army(army_id, army, SimFacade.faction_short_name(faction), SimFacade.faction_color(faction), is_player, province_name_of, general_skills)
+	if hud != null:  # F10b : bandeau d'ost et sceau du chef
+		hud.show_army(army_id, army, is_player)
 	if sieges != null:
 		sieges.on_army_shown(army_id, is_player)
 	ui.hide_province()
@@ -763,6 +766,8 @@ func _on_end_turn() -> void:
 			break
 	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
 		flow.after_end_turn(events)
+	if hud != null:  # F10b : alertes de la cloche
+		hud.after_end_turn(events)
 	_offer_pending_battles()  # M7
 
 
