@@ -1,0 +1,127 @@
+//! F5d tests: the Godot demo battle engages, siege balance, staggered reinforcements.
+
+use sim_battle::{BattleSetup, BattleSim, SideId, UnitState};
+
+/// The standalone demo of `battle.tscn` (France 1337, main French army
+/// against the main English one), dumped from `sim-campaign`.
+fn demo_setup() -> BattleSetup {
+    serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap()
+}
+
+/// Like the scene's `--screenshot`: both sides driven by the AI.
+fn demo_sim() -> BattleSim {
+    let mut sim = BattleSim::new(demo_setup(), 1337).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    sim
+}
+
+fn first_contact(sim: &mut BattleSim, limit: f64) -> Option<f64> {
+    while sim.elapsed() < limit && !sim.is_finished() {
+        sim.step();
+        if sim.units().iter().any(|u| u.state == UnitState::Melee) {
+            return Some(sim.elapsed());
+        }
+    }
+    None
+}
+
+#[test]
+fn demo_battle_reaches_contact_quickly() {
+    let mut sim = demo_sim();
+    let contact = first_contact(&mut sim, 300.0);
+    assert!(contact.is_some_and(|t| t < 150.0), "contact at {contact:?}");
+}
+
+#[test]
+fn demo_battle_nobody_halts_in_the_river() {
+    let mut sim = demo_sim();
+    let river = sim.field().river.clone().unwrap();
+    while sim.elapsed() < 150.0 {
+        sim.step();
+        for unit in sim.units().iter().filter(|u| u.state == UnitState::Idle) {
+            let wet = river.in_water(unit.x, unit.z) && !river.in_ford(unit.x);
+            assert!(
+                !wet,
+                "{} stands in the river at {:.0} s",
+                unit.name,
+                sim.elapsed()
+            );
+        }
+    }
+}
+
+#[test]
+fn demo_battle_nobody_deploys_in_the_river() {
+    let mut sim = demo_sim();
+    assert!(sim.begin_deployment());
+    let river = sim
+        .field()
+        .river
+        .clone()
+        .expect("the demo field has a river");
+    for unit in sim.units() {
+        let wet = river.in_water(unit.x, unit.z) && !river.in_ford(unit.x);
+        assert!(!wet, "{} deployed in the river", unit.name);
+    }
+}
+
+#[test]
+fn destinations_in_the_river_move_to_a_bank() {
+    let sim = demo_sim();
+    let field = sim.field();
+    let river = field.river.clone().unwrap();
+    let x = 600.0;
+    assert!(!river.in_ford(x));
+    let c = river.center_z(x);
+    // Standing on the south bank: stay south; already wading: cross.
+    let south = sim_battle::ai::dry_z(field, x, c, c - 80.0, 1.0);
+    let wading = sim_battle::ai::dry_z(field, x, c, c + 2.0, 1.0);
+    assert!(south < c - river.width * 0.5 && !river.in_water(x, south));
+    assert!(wading > c + river.width * 0.5 && !river.in_water(x, wading));
+    // Fords and dry land are left alone.
+    let ford = river.fords[0].x;
+    let ford_c = river.center_z(ford);
+    assert_eq!(sim_battle::ai::dry_z(field, ford, ford_c, 0.0, 1.0), ford_c);
+    assert_eq!(
+        sim_battle::ai::dry_z(field, x, c - 100.0, 0.0, 1.0),
+        c - 100.0
+    );
+}
+
+#[test]
+#[ignore]
+fn trace_demo() {
+    let mut probe = demo_sim();
+    println!("contact {:?}", first_contact(&mut probe, 300.0));
+    while !probe.is_finished() {
+        probe.step();
+    }
+    println!("end {:.0} s winner {:?}", probe.elapsed(), probe.winner());
+    let mut sim = demo_sim();
+    let river = sim.field().river.clone().unwrap();
+    println!(
+        "river z0 {:.0} amp {:.0} fords {:?}",
+        river.z0, river.amplitude, river.fords
+    );
+    for step in 0..=10 {
+        while sim.elapsed() < step as f64 * 30.0 {
+            sim.step();
+        }
+        println!("t={:.0}", sim.elapsed());
+        for u in sim.units() {
+            println!(
+                "  {:?} {:24} {:6.0} {:6.0} rz {:4.0} {:?} {:?} dest {:?} tgt {:?} wet {}",
+                u.side,
+                u.name,
+                u.x,
+                u.z,
+                river.center_z(u.x),
+                u.state,
+                u.formation,
+                u.destination.map(|d| (d.0 as i32, d.1 as i32)),
+                u.target,
+                river.in_water(u.x, u.z)
+            );
+        }
+    }
+}

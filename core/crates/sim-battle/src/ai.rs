@@ -69,6 +69,14 @@ pub const ISOLATION_DISTANCE: f64 = 80.0;
 pub const CAVALRY_REACH: f64 = 450.0;
 /// Longest archery duel before the line advances regardless (seconds).
 pub const DUEL_TIME: f64 = 480.0;
+/// A clearly stronger attacker (its enemy stands on the defensive) gives up
+/// the archery duel after this long and closes in (F5d: two AI armies
+/// always end up engaging).
+pub const ATTACKER_DUEL_TIME: f64 = 60.0;
+/// AI destinations keep this far from the edge of deep water (F5d).
+pub const RIVER_MARGIN: f64 = 12.0;
+/// Closing in, the cavalry charges enemy horse this close to the line.
+pub const ASSAULT_RANGE: f64 = 250.0;
 /// A weaker attacker waits this long for the defender to come to it.
 pub const ATTACKER_PATIENCE: f64 = 240.0;
 /// A defensive side gives up waiting after this long.
@@ -123,6 +131,9 @@ struct View<'a> {
     enemies: Vec<usize>,
     /// +1 when the enemy lies towards +z (attacker), -1 otherwise.
     forward: f64,
+    /// F5d: a clearly stronger attacker closing in (no duel) with the enemy
+    /// within [`ASSAULT_RANGE`]: the horse goes for the enemy horse.
+    assault: bool,
     commands: Vec<Command>,
 }
 
@@ -143,6 +154,7 @@ impl<'a> View<'a> {
             own,
             enemies,
             forward: if side == SideId::Attacker { 1.0 } else { -1.0 },
+            assault: false,
             commands: Vec::new(),
         }
     }
@@ -218,6 +230,7 @@ impl<'a> View<'a> {
             x.clamp(10.0, field.width - 10.0),
             z.clamp(10.0, field.depth - 10.0),
         );
+        let z = dry_z(field, x, z, u.z, self.forward);
         let far = match u.destination {
             Some((dx, dz)) => (dx - x).powi(2) + (dz - z).powi(2) > 36.0,
             None => dist_to(u, x, z) > 6.0,
@@ -283,6 +296,26 @@ impl<'a> View<'a> {
             })
             .collect()
     }
+}
+
+/// F5d: a destination in deep water (fords excepted) moves to the bank on
+/// the side where the regiment stands, or across when it is already wading
+/// (`forward` = +1 towards +z).
+pub fn dry_z(field: &crate::field::Battlefield, x: f64, z: f64, from_z: f64, forward: f64) -> f64 {
+    let Some(river) = &field.river else {
+        return z;
+    };
+    let center = river.center_z(x);
+    let reach = river.width * 0.5 + RIVER_MARGIN;
+    if river.in_ford(x) || (z - center).abs() > reach {
+        return z;
+    }
+    let side = if (from_z - center).abs() <= reach {
+        forward
+    } else {
+        (from_z - center).signum()
+    };
+    (center + side * (reach + 1.0)).clamp(10.0, field.depth - 10.0)
 }
 
 /// Commands of `side` for this decision step.
@@ -445,10 +478,13 @@ fn plan_field(view: &mut View) {
         .map(|j| unit_power(&view.units[j]))
         .sum();
     // The archery duel: hold the line while our shooters are winning it.
+    // F5d: a clearly stronger attacker facing a defender that waits for it
+    // takes the initiative (short duel, the horse rides at the enemy horse).
+    let press = view.side == SideId::Attacker && ratio * 0.85 > 1.0;
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
         && contact < 320.0
-        && elapsed < DUEL_TIME
+        && elapsed < if press { ATTACKER_DUEL_TIME } else { DUEL_TIME }
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
 
     let line_center = view
@@ -460,6 +496,14 @@ fn plan_field(view: &mut View) {
     } else {
         std::f64::consts::PI
     };
+    // Only to open the fight (first minutes, nobody locked yet).
+    let melee = view.units.iter().any(|u| u.state == UnitState::Melee);
+    view.assault = press
+        && !defensive
+        && !duel
+        && !melee
+        && elapsed < ATTACKER_PATIENCE
+        && contact < ASSAULT_RANGE;
     // Where the line stands this step.
     let anchor = if defensive {
         high_ground(view, line_center)
@@ -704,6 +748,20 @@ fn plan_horse(
     if let Some(j) = threatened {
         if !bristling(&units[j]) {
             view.attack(i, j, true);
+            return;
+        }
+    }
+    // 1b. Closing in: ride at the enemy horse (not bristling) within reach.
+    if view.assault && !general_only && !unit.is_general {
+        let horse = view
+            .able_enemies()
+            .filter(|&j| is_horse(&units[j]) && !bristling(&units[j]))
+            .filter(|&j| units[j].category != UnitCategory::Siege)
+            .map(|j| (j, dist(unit, &units[j])))
+            .filter(|&(_, d)| d < CAVALRY_REACH)
+            .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+        if let Some((j, d)) = horse {
+            view.attack(i, j, d < CHARGE_DISTANCE * 3.0);
             return;
         }
     }
