@@ -38,14 +38,39 @@ Reprend l'audit `docs/audit/a5-technique.md` § 5, lots T2 et T8, plus une parti
   - Non reproduit : le « 8080 units » signalé une fois dans l'audit (aucune cause trouvée dans
     `_pad_setup`, appelé une seule fois par `begin()`) ; à surveiller, mais la sortie JSON
     systématique permet maintenant de détecter un résultat aberrant automatiquement.
-- **Dette T11 (`test_portraits.py`)** : à faire.
-- **Dette T12 (RGBFloat)** : à faire (recherche de la source).
+- **Dette T11 (`test_portraits.py`)** : fait, voir commit dédié
+  (`tools/tests/test_portraits.py`). `test_dry_run_makes_no_network_call` dépendait de l'état
+  réel de `game/assets/portraits` (le CLI `assets portraits --dry-run` appelle
+  `portraits.plan(limit=limit)`, dont `out_dir` par défaut est ce dossier) : une fois tous les
+  portraits générés, `plan()` renvoyait 0 job et le test cherchait « Style » dans une sortie
+  vide. Le test reroute maintenant `portraits.plan` (monkeypatch) vers un `tmp_path` vide, donc
+  toujours `limit` jobs, indépendamment du dépôt.
+- **Dette T12 (RGBFloat)** : à faire (recherche de la source en cours).
 
 ## Mesures avant/après (T2)
 
-Commande : `godot --headless --path game res://scenes/campaign_map.tscn -- --fps-probe
+Commande (fenêtre Metal, pas headless — le rendu a besoin d'un contexte GPU) :
+`godot --path game --disable-vsync res://scenes/campaign_map.tscn -- --fps-probe
 --focus=2213,1924,<d> [--fine-step=N]`, lib `libcent_ans.debug.dylib` (build fait dans ce
-worktree, `core/build.sh`). Voir résultats dans la section suivante une fois exécutés.
+worktree, `core/build.sh`, après le lot T1 déjà en place côté orchestrateur).
+
+**Machine très chargée pendant cette session** (plusieurs autres agents/`cargo build` en
+parallèle dans d'autres worktrees, cf. audit § 2 sur le bruit habituel ±30 % même à vide) : les
+i/s bruts ne sont pas comparables à ceux de l'audit (30 i/s ici contre 47-60 à vide). Le nombre
+de primitives dessinées, lui, ne dépend que du pas choisi et reste comparable directement à
+l'audit — c'est l'indicateur retenu pour confirmer le comportement adaptatif.
+
+| Vue | primitives (audit, fine_step fixe) | primitives (ici, adaptatif) | i/s ici (bruité) |
+|---|---|---|---|
+| d=150 (comté, palier « près » large) | 8,8-9,4 M (`fine_step=1`) / 4,6 M (`--fine-step=2`) | **4,64 M** → confirme `fine_step_far=2` choisi automatiquement | 30,7 |
+| d=45 (très proche) | 9,8 M (`fine_step=1`) | **9,79 M** → confirme `fine_step_near=1` choisi automatiquement | 29,1-32,0 |
+
+Le choix adaptatif reproduit exactement les deux points de mesure de l'audit (4,6 M à d=150,
+9,8 M à d=45) sans intervention manuelle : à d=150 (> seuil 90 avec hystérésis), le pas grossier
+divise les primitives du relief fin par ~2 par rapport au pas fin par défaut d'avant ce lot,
+pour le même gain que `--fine-step=2` mesuré dans l'audit (47-49 → 60 i/s plafond, machine à
+vide) — et le rapprochement en dessous de d=70 repasse en pas fin sans régression visible
+(maillages remplacés en place, jamais de retour au LOD proche intermédiaire, cf. § État).
 
 ## Commande du banc de bataille (T8)
 
@@ -61,9 +86,10 @@ Sortie : une ligne `BENCH_JSON {"ok":true,"units":...,"soldiers":...,"frames":..
 
 ## Prochaine étape
 
-1. Lancer les mesures avant/après T2 (`--fps-probe` à d=150 et d=45) et les consigner ici.
+1. Fait : mesures avant/après T2 (primitives, voir ci-dessus).
 2. Lancer le banc de bataille à 48/80/120 régiments avec les nouveaux garde-fous et consigner
-   les résultats (avant, ces bancs ne terminaient pas de façon fiable).
-3. Corriger `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call` (répertoire
-   temporaire au lieu de `game/assets/portraits`).
-4. Localiser la source des 35 avertissements RGBFloat→RGBAFloat au chargement de carte.
+   les résultats (avant, ces bancs ne terminaient pas de façon fiable) ; la machine partagée de
+   cette session rend les i/s peu significatifs, à refaire à vide si possible.
+3. Fait : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call`.
+4. Localiser la source des 35 avertissements RGBFloat→RGBAFloat au chargement de carte
+   (recherche en cours).

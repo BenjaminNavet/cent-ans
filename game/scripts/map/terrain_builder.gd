@@ -348,7 +348,7 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 	for index in wanted_fine:
 		if _fine_jobs.has(index) or _fine_jobs.size() >= max_fine_jobs:
 			continue
-		var stale := _fine_cache.has(index) and _fine_cache_step.get(index, -1) != _current_fine_step
+		var stale: bool = _fine_cache.has(index) and int(_fine_cache_step.get(index, -1)) != _current_fine_step
 		if not _fine_cache.has(index) or stale:
 			_start_fine_job(index)
 	_evict_fine()
