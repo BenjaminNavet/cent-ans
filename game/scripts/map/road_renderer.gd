@@ -8,9 +8,9 @@ extends Node3D
 ##   surface exacte du terrain affiché (`TerrainBuilder.surface_height_at`), un maillage par
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
-@export var main_color: Color = Color(0.36, 0.25, 0.13, 0.85)
+@export var main_color: Color = Color(0.30, 0.20, 0.10, 0.9)
 @export var main_width: float = 0.5
-@export var main_min_px: float = 1.3
+@export var main_min_px: float = 1.8
 @export var ribbon_main_width: float = 0.55
 @export var ribbon_width: float = 0.38
 ## Soulèvement au-dessus de la surface (évite le z-fighting).
