@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_nevers",
+    "province": "prov_nivernais",
+    "kind": "city",
+    "name": { "display": "Nevers", "local": "Nevers", "local_language": "ancien français" },
+    "lonlat": [3.1580, 46.9896],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté de Nevers tenu par Louis Ier, comte de Flandre, au confluent de la Loire et de la Nièvre.",
+    "sources": ["Nevers", "Comté de Nevers"]
+  },
+  {
+    "id": "set_auxerre",
+    "province": "prov_nivernais",
+    "kind": "town",
+    "name": { "display": "Auxerre", "local": "Aucerre", "local_language": "ancien français" },
+    "lonlat": [3.5661, 47.7983],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "port": false,
+    "description": "Cité épiscopale sur l'Yonne, siège du comté d'Auxerre tenu par Jean II de Chalon-Auxerre.",
+    "sources": ["Auxerre", "Comté d'Auxerre"]
+  },
+  {
+    "id": "set_la_charite_sur_loire",
+    "province": "prov_nivernais",
+    "kind": "town",
+    "name": { "display": "La Charité-sur-Loire", "local": "La Charité", "local_language": "ancien français" },
+    "lonlat": [3.0167, 47.1833],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Ville close autour d'un prieuré clunisien, sur le pont franchissant la Loire.",
+    "sources": ["La Charité-sur-Loire"]
+  },
+  {
+    "id": "set_druyes",
+    "province": "prov_nivernais",
+    "kind": "castle",
+    "name": { "display": "Druyes-les-Belles-Fontaines", "local": "Druyes", "local_language": "ancien français" },
+    "lonlat": [3.3167, 47.5833],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château comtal du XIIe siècle dominant les sources de la Druyes.",
+    "sources": ["Château de Druyes-les-Belles-Fontaines"]
+  },
+  {
+    "id": "set_vezelay",
+    "province": "prov_nivernais",
+    "kind": "abbey",
+    "name": { "display": "Vézelay", "local": "Vézelay", "local_language": "ancien français" },
+    "lonlat": [3.7469, 47.4653],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye Sainte-Marie-Madeleine, grand lieu de pèlerinage et point de départ du chemin de Saint-Jacques.",
+    "sources": ["Abbaye Sainte-Marie-Madeleine de Vézelay"]
+  }
+]

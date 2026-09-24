@@ -18,13 +18,13 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 | aquitaine | prov_perigord | fait (5) |
 | aquitaine | prov_quercy | fait (5) |
 | aquitaine | prov_saintonge | fait (5) |
-| france_centre | prov_auvergne | à faire |
-| france_centre | prov_berry | à faire |
-| france_centre | prov_bourbonnais | à faire |
-| france_centre | prov_limousin | à faire |
-| france_centre | prov_nivernais | à faire |
-| france_centre | prov_orleanais | à faire |
-| france_centre | prov_touraine | à faire |
+| france_centre | prov_auvergne | fait (5) |
+| france_centre | prov_berry | fait (4) |
+| france_centre | prov_bourbonnais | fait (4) |
+| france_centre | prov_limousin | fait (5) |
+| france_centre | prov_nivernais | fait (5) |
+| france_centre | prov_orleanais | fait (5) |
+| france_centre | prov_touraine | fait (5) |
 | france_est | prov_bar | à faire |
 | france_est | prov_bourgogne | à faire |
 | france_est | prov_champagne | à faire |
@@ -61,5 +61,5 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 
 ## Prochaine étape
 
-Continuer avec `france_centre` (7 provinces), puis `france_est`, `france_nord`, `france_ouest`, `languedoc`, `provence_alpes`.
+Continuer avec `france_est` (5 provinces), puis `france_nord`, `france_ouest`, `languedoc`, `provence_alpes`.
 Commit `wip:` toutes les ~8 provinces.

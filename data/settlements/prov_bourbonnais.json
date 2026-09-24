@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_moulins",
+    "province": "prov_bourbonnais",
+    "kind": "city",
+    "name": { "display": "Moulins", "local": "Molins", "local_language": "ancien français" },
+    "lonlat": [3.3336, 46.5657],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale montante du duché de Bourbon, érigé en 1327 pour Louis Ier, sur l'Allier.",
+    "sources": ["Moulins (Allier)", "Duché de Bourbon"]
+  },
+  {
+    "id": "set_bourbon_l_archambault",
+    "province": "prov_bourbonnais",
+    "kind": "castle",
+    "name": { "display": "Bourbon-l'Archambault", "local": "Bourbon", "local_language": "ancien français" },
+    "lonlat": [3.0333, 46.5833],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse ancestrale de la maison de Bourbon, berceau de la dynastie.",
+    "sources": ["Château de Bourbon"]
+  },
+  {
+    "id": "set_gannat",
+    "province": "prov_bourbonnais",
+    "kind": "town",
+    "name": { "display": "Gannat", "local": "Ganat", "local_language": "ancien français" },
+    "lonlat": [3.1953, 46.1000],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close aux confins du Bourbonnais et de l'Auvergne.",
+    "sources": ["Gannat"]
+  },
+  {
+    "id": "set_souvigny",
+    "province": "prov_bourbonnais",
+    "kind": "abbey",
+    "name": { "display": "Souvigny", "local": "Souvigny", "local_language": "ancien français" },
+    "lonlat": [3.1975, 46.5486],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Prieuré clunisien, nécropole traditionnelle des sires puis ducs de Bourbon.",
+    "sources": ["Prieuré de Souvigny"]
+  }
+]
