@@ -42,7 +42,7 @@
     "sources": ["Château de Chinon"]
   },
   {
-    "id": "set_marmoutier",
+    "id": "set_marmoutier_tours",
     "province": "prov_touraine",
     "kind": "abbey",
     "name": { "display": "Marmoutier", "local": "Maior Monasterium", "local_language": "ancien français" },
