@@ -13,7 +13,7 @@ use std::collections::BTreeSet;
 
 use data_model::{
     BuildingId, CharacterId, CharacterStatus, Faction, FactionId, GameData, ProvinceId,
-    RelationStatus, SettlementKind, UnitTypeId,
+    RelationStatus, UnitTypeId,
 };
 
 use crate::diplomacy::{Claim, FOREVER};

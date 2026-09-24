@@ -39,11 +39,12 @@ pub fn is_epidemic(event: &data_model::EventId) -> bool {
 /// Plague resistance of `province` as a fraction (0 to 0.5): its buildings
 /// plus its controller's technologies.
 pub fn plague_resistance(state: &CampaignState, data: &GameData, province: &ProvinceId) -> f64 {
-    let Some(p) = state.provinces.get(province) else {
+    let Some(controller) = state.province_controller(province) else {
         return 0.0;
     };
-    let buildings = crate::buildings::effects_of(data, &p.buildings).plague_resistance;
-    let techs = crate::research::faction_tech_effects(state, data, &p.controller).plague_resistance;
+    let buildings =
+        crate::buildings::effects_of(data, &state.province_buildings(province)).plague_resistance;
+    let techs = crate::research::faction_tech_effects(state, data, controller).plague_resistance;
     let total = buildings.flat + buildings.percent + techs.flat + techs.percent;
     total.clamp(0.0, MAX_PLAGUE_RESISTANCE) / 100.0
 }

@@ -1,21 +1,26 @@
 //! Minimal campaign AI (spec § 4).
 //!
-//! Per faction and per turn: recruit the cheapest available unit in the capital
-//! when affordable; fold surplus capital garrison into the army standing there;
-//! send every idle army to the nearest weakly defended hostile province in
-//! `Siege` stance, otherwise towards the most threatened friendly province.
+//! Per faction and per turn: recruit the cheapest available unit in the
+//! capital's city when affordable; fold surplus capital garrison into the
+//! army standing there; send every idle army to the best weakly defended
+//! hostile settlement in `Siege` stance (cities first, then the others by
+//! weight and fortification, lot C4), otherwise towards the most threatened
+//! friendly settlement.
 //!
 //! Lives here rather than in the `ai` crate because `ai` depends on this crate;
 //! `ai::plan_turn` re-exports [`plan_turn`].
 
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::{FactionId, GameData, SettlementId};
 
-use crate::movement::{dijkstra, edges, path_to};
+use crate::movement::{dijkstra, edges, path_to, points_per_step};
 use crate::orders::Order;
 use crate::state::{ArmyId, CampaignState, Stance};
 
-/// Maximum path cost the AI considers for an offensive.
+/// Maximum path cost the AI considers for an offensive, in province steps
+/// (times `MovementRules::points_per_step`).
 pub const OFFENSIVE_RANGE: u32 = 6;
+/// Preference (in province steps) for a hostile city over another settlement.
+pub const CITY_PREFERENCE_STEPS: f64 = 2.0;
 /// The AI attacks when its power exceeds the defence by this factor.
 pub const ATTACK_SUPERIORITY: f64 = 1.5;
 /// Garrison units kept in the capital before the surplus joins the field army.
@@ -32,6 +37,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     // Diplomacy first (M5): peace, alliances, wars change what the armies do.
     let mut orders = crate::diplomacy::plan_diplomacy(state, data, faction);
     let capital = faction_state.capital.clone();
+    let capital_city = state.province_city_id(&capital).cloned();
 
     // Research (M6): pick the cheapest available technology when idle.
     if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
@@ -54,20 +60,19 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         }
     }
 
-    // Recruit the cheapest affordable unit in the capital.
-    if state
-        .provinces
-        .get(&capital)
-        .is_some_and(|p| &p.controller == faction && &p.owner == faction)
+    // Recruit the cheapest affordable unit in the capital's city.
+    if let Some(city) = capital_city
+        .as_ref()
+        .filter(|_| state.holds_province(faction, &capital))
     {
         let cheapest = state
-            .recruitable(data, &capital)
+            .recruitable(data, city)
             .into_iter()
             .filter(|o| o.available && i64::from(o.cost) < faction_state.treasury)
             .min_by_key(|o| (o.cost, o.unit_type.clone()));
         if let Some(option) = cheapest {
             orders.push(Order::Recruit {
-                province: capital.clone(),
+                settlement: city.into(),
                 unit_type: option.unit_type,
             });
         }
@@ -81,14 +86,20 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         .collect();
 
     // Surplus capital garrison joins the army standing in the capital.
-    if let Some(garrison_len) = state.provinces.get(&capital).map(|p| p.garrison.len()) {
+    if let Some((city, garrison_len)) = capital_city.as_ref().and_then(|city| {
+        state
+            .settlements
+            .get(city)
+            .filter(|s| &s.controller == faction)
+            .map(|s| (city, s.garrison.len()))
+    }) {
         if garrison_len > CAPITAL_GARRISON_KEEP {
             if let Some(target) = own_armies
                 .iter()
-                .find(|id| state.armies[*id].location == capital)
+                .find(|id| &state.armies[*id].location == city)
             {
                 orders.push(Order::CreateArmy {
-                    province: capital.clone(),
+                    settlement: city.into(),
                     units_from_garrison: (CAPITAL_GARRISON_KEEP..garrison_len).collect(),
                     general: None,
                 });
@@ -106,15 +117,29 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             continue;
         }
         let power = state.army_power(data, &army_id);
-        let table = dijkstra(state, data, faction, &army.location, Some(OFFENSIVE_RANGE));
+        let step = points_per_step(data);
+        let range = (f64::from(OFFENSIVE_RANGE) * step).round() as u32;
+        let cap = state.army_movement_allowance(data, army);
+        let table = dijkstra(
+            state,
+            data,
+            faction,
+            &army.location,
+            Some(range),
+            Some(cap),
+        );
 
-        // Offensive: nearest weakly defended hostile province.
+        // Offensive: the best weakly defended hostile settlement, cities
+        // first, then the others by weight and fortification.
         let target = table
             .iter()
-            .filter(|(id, _)| state.is_hostile_territory(faction, id))
-            .filter(|(id, _)| state.defensive_power(data, id) * ATTACK_SUPERIORITY < power)
-            .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
-            .map(|(id, _)| id.clone());
+            .filter(|(id, _)| state.is_hostile_settlement(faction, id))
+            .filter(|(id, _)| {
+                state.settlement_defensive_power(data, id) * ATTACK_SUPERIORITY < power
+            })
+            .map(|(id, reach)| (target_score(state, data, id, reach.cost, step), id))
+            .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
+            .map(|(_, id)| id.clone());
         if let Some(target) = target {
             if target == army.location {
                 if army.stance != Stance::Siege {
@@ -130,27 +155,24 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                     army: army_id.clone(),
                     stance: Stance::Siege,
                 });
-                orders.push(Order::MoveArmy {
-                    army: army_id.clone(),
-                    path,
-                });
+                orders.push(Order::move_along(army_id.clone(), path));
                 continue;
             }
         }
 
         // Keep an ongoing siege.
         if state
-            .provinces
+            .settlements
             .get(&army.location)
-            .is_some_and(|p| p.siege.as_ref().is_some_and(|s| &s.attacker == faction))
+            .is_some_and(|s| s.siege.as_ref().is_some_and(|s| &s.attacker == faction))
         {
             continue;
         }
 
-        // Defence: the most threatened friendly province within reach.
+        // Defence: the most threatened friendly settlement within reach.
         let threatened = table
             .iter()
-            .filter(|(id, _)| state.is_friendly_territory(faction, id))
+            .filter(|(id, _)| state.is_friendly_settlement(faction, id))
             .filter(|(id, _)| threat_at(state, data, faction, id) > 0.0)
             .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
             .map(|(id, _)| id.clone());
@@ -163,15 +185,12 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                             stance: Stance::Normal,
                         });
                     }
-                    orders.push(Order::MoveArmy {
-                        army: army_id.clone(),
-                        path,
-                    });
+                    orders.push(Order::move_along(army_id.clone(), path));
                 }
             }
             _ => {
                 if army.stance != Stance::Normal
-                    && !state.is_hostile_territory(faction, &army.location)
+                    && !state.is_hostile_settlement(faction, &army.location)
                 {
                     orders.push(Order::SetStance {
                         army: army_id.clone(),
@@ -206,42 +225,63 @@ fn disband_most_expensive(
             .max_by_key(|(i, u)| (upkeep(u), std::cmp::Reverse(*i)))?;
         return Some(Order::DisbandUnit {
             army: Some(id.clone()),
-            province: None,
+            settlement: None,
             unit_index: index,
         });
     }
-    let (province_id, province) = state
-        .provinces
+    let (settlement_id, settlement) = state
+        .settlements
         .iter()
-        .filter(|(_, p)| &p.controller == faction && p.garrison.len() > 1)
-        .max_by_key(|(id, p)| (p.garrison.len(), std::cmp::Reverse((*id).clone())))?;
-    let (index, _) = province
+        .filter(|(_, s)| &s.controller == faction && s.garrison.len() > 1)
+        .max_by_key(|(id, s)| (s.garrison.len(), std::cmp::Reverse((*id).clone())))?;
+    let (index, _) = settlement
         .garrison
         .iter()
         .enumerate()
         .max_by_key(|(i, u)| (upkeep(u), std::cmp::Reverse(*i)))?;
     Some(Order::DisbandUnit {
         army: None,
-        province: Some(province_id.clone()),
+        settlement: Some(settlement_id.into()),
         unit_index: index,
     })
 }
 
-/// Strength of hostile armies inside or one edge away from `province`.
+/// Lower is better: path cost in steps, minus a bonus for a city
+/// ([`CITY_PREFERENCE_STEPS`]) and for the settlement's weight, plus half a
+/// step per fortification level.
+pub fn target_score(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    cost: u32,
+    step: f64,
+) -> f64 {
+    let is_city = state
+        .settlement_province(settlement)
+        .and_then(|p| state.province_city_id(p))
+        == Some(settlement);
+    let weight = crate::settlements::weight_share(data, settlement);
+    let fortification = f64::from(state.fortification_level(data, settlement));
+    f64::from(cost) / step.max(1.0) - if is_city { CITY_PREFERENCE_STEPS } else { 0.0 }
+        - 2.0 * weight
+        + 0.5 * fortification
+}
+
+/// Strength of hostile armies on or one edge away from `settlement`.
 fn threat_at(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
-    province: &ProvinceId,
+    settlement: &SettlementId,
 ) -> f64 {
     let inside: f64 = state
-        .hostile_armies_in(faction, province)
+        .hostile_armies_at(faction, settlement)
         .into_iter()
         .map(|id| f64::from(state.armies[&id].total_strength()))
         .sum();
-    let adjacent: f64 = edges(data, province)
+    let adjacent: f64 = edges(data, settlement)
         .into_iter()
-        .flat_map(|(neighbor, _)| state.hostile_armies_in(faction, &neighbor))
+        .flat_map(|(neighbor, _)| state.hostile_armies_at(faction, &neighbor))
         .map(|id| f64::from(state.armies[&id].total_strength()))
         .sum();
     inside + adjacent
