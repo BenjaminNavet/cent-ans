@@ -18,6 +18,8 @@ use crate::state::CampaignState;
 
 /// Truce after a negotiated peace (5 years).
 pub const TRUCE_TURNS: u32 = 20;
+/// Reason of the opinion modifier a gift leaves with its recipient.
+pub const GIFT_REASON: &str = "Présents diplomatiques";
 /// Truce obtained through papal mediation (2 years).
 pub const MEDIATION_TRUCE_TURNS: u32 = 8;
 /// Turns an offer to the player stays open.
@@ -1413,7 +1415,7 @@ impl CampaignState {
         self.factions.get_mut(faction).expect("checked").treasury -= amount;
         self.factions.get_mut(target).expect("checked").treasury += amount;
         let value = ((amount / 100) as i32).clamp(1, 30);
-        self.add_modifier(target, faction, value, "Présents diplomatiques", 20);
+        self.add_modifier(target, faction, value, GIFT_REASON, 20);
         let text = format!(
             "{} envoie {amount} livres de présents à {}.",
             faction_name(data, faction),

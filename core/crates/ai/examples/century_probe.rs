@@ -98,6 +98,25 @@ fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
         own(&burgundy),
         state.is_at_war(&france, &england),
     );
+    for low in ["fac_brabant", "fac_hainaut"] {
+        let low = id(low);
+        let Some(f) = state.factions.get(&low).filter(|f| f.alive) else {
+            continue;
+        };
+        println!(
+            "  [{seed}] {:>16}   {} suz:{:?} att(en/fr):{}/{} ally(en/fr):{}/{} war(en/fr):{}/{} allies:{:?}",
+            state.date_label(),
+            low.as_str(),
+            f.suzerain.as_ref().map(|s| s.as_str()),
+            state.attitude(data, &low, &england).0,
+            state.attitude(data, &low, &france).0,
+            state.is_allied(&low, &england),
+            state.is_allied(&low, &france),
+            state.is_at_war(&low, &england),
+            state.is_at_war(&low, &france),
+            f.allies.iter().map(|a| a.as_str()).collect::<Vec<_>>(),
+        );
+    }
 }
 
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
@@ -256,7 +275,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 }
             }
         }
-        if trace && state.turn % 20 == 0 {
+        if trace && state.turn.is_multiple_of(20) {
             trace_burgundy(&state, data, seed);
         }
         if state.turn == TURN_1400 {

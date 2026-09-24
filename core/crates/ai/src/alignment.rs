@@ -1,27 +1,27 @@
-//! Historical side changes (G2): Flanders ruined by the wool embargo turns
-//! to England (Artevelde, 1338-1340); Burgundy abandons a beaten France for
-//! the dominant invader (Troyes, 1420).
+//! Historical side changes (G2, G4): Flanders ruined by the wool embargo
+//! turns to England (Artevelde, 1338-1340); Burgundy abandons a beaten France
+//! for the dominant invader (Troyes, 1420) or out of a blood feud
+//! (Montereau, 1419); Edward III's in-laws and pensioners of the Low
+//! Countries. Every threshold comes from `data/ai/alignment.json`; without
+//! that file the AI makes no historical side change.
 
 use std::collections::BTreeMap;
 
-use data_model::{FactionId, GameData, ProvinceId};
-use sim_campaign::diplomacy::{claim_stakes, evaluate, war_ready, Proposal, DESERTION_WAR_SCORE};
+use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
+use sim_campaign::diplomacy::{
+    claim_stakes, evaluate, war_ready, Proposal, DESERTION_WAR_SCORE, GIFT_REASON,
+};
+use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
 
-/// Below this loyalty a vassal ruined by a wool embargo turns to the
-/// embargoing crown.
-pub const WOOL_REVOLT_LOYALTY: u8 = 60;
-/// Provinces of a crown's 1337 realm an invader must control to dominate it.
-pub const DOMINANCE_PROVINCES: usize = 8;
-/// Below this loyalty an opportunistic vassal or ally changes sides when
-/// the invader dominates its suzerain's realm.
-pub const DEFECTION_LOYALTY: u8 = 90;
-/// Share of its 1337 realm a crown in trouble has lost.
-pub const CROWN_IN_TROUBLE_LOSS: f64 = 0.25;
-
-/// Chance (‰) that a campaign sees the wool revolt, a dynastic alliance or
-/// a defection at all: history hesitates, so do seeds.
-pub const HISTORY_PERMILLE: u64 = 500;
+/// Salt of the wool revolt roll.
+const WOOL_SALT: u64 = 1;
+/// Salt of the defection rolls (one per decade from this one).
+const DEFECTION_SALT: u64 = 2;
+/// Salt of the dynastic alliance and money fief roll.
+const DYNASTIC_SALT: u64 = 7;
+/// Turns per decade (one defection roll each).
+const DECADE_TURNS: u32 = 40;
 
 /// Pure per-campaign roll in 0..1000 for `faction` and `salt` (splitmix64
 /// of the seed): the AI stays deterministic without touching the RNG.
@@ -43,13 +43,13 @@ fn slot(faction: &FactionId) -> u32 {
         .fold(0u32, |a, b| a.wrapping_add(u32::from(b)))
 }
 
-/// Regions where `crown` owned at least this many provinces in 1337 form
-/// its realm (the kingdom of France includes English Guyenne and Ponthieu).
-pub const REALM_REGION_PROVINCES: usize = 3;
-
 /// Provinces of `crown`'s realm: every province of the regions where it
-/// owned [`REALM_REGION_PROVINCES`] in 1337 (`data`).
+/// owned `defection.realm_region_provinces` in 1337 (the kingdom of France
+/// includes English Guyenne and Ponthieu).
 pub fn realm_provinces<'a>(data: &'a GameData, crown: &FactionId) -> Vec<&'a ProvinceId> {
+    let Some(rules) = data.ai_alignment.as_ref() else {
+        return Vec::new();
+    };
     let mut owned: BTreeMap<&str, usize> = BTreeMap::new();
     for p in data.provinces.values().filter(|p| &p.owner == crown) {
         *owned.entry(p.region.as_str()).or_default() += 1;
@@ -59,7 +59,7 @@ pub fn realm_provinces<'a>(data: &'a GameData, crown: &FactionId) -> Vec<&'a Pro
         .filter(|(_, p)| {
             owned
                 .get(p.region.as_str())
-                .is_some_and(|n| *n >= REALM_REGION_PROVINCES)
+                .is_some_and(|n| *n >= rules.defection.realm_region_provinces)
         })
         .map(|(id, _)| id)
         .collect()
@@ -84,14 +84,17 @@ pub fn realm_held_by(
 }
 
 /// Does `invader` dominate `crown`'s realm: it holds the 1337 capital or
-/// [`DOMINANCE_PROVINCES`] of its provinces, while `crown` has lost a
-/// quarter of them or is beaten.
+/// `defection.dominance_realm_share` of its provinces, while `crown` has
+/// lost `defection.crown_in_trouble_loss` of its own lands or is beaten.
 pub fn dominates_realm(
     state: &CampaignState,
     data: &GameData,
     invader: &FactionId,
     crown: &FactionId,
 ) -> bool {
+    let Some(rules) = data.ai_alignment.as_ref() else {
+        return false;
+    };
     let Some(capital) = data.factions.get(crown).map(|f| &f.capital) else {
         return false;
     };
@@ -99,7 +102,9 @@ pub fn dominates_realm(
         .provinces
         .get(capital)
         .is_some_and(|p| &p.controller == invader);
+    let realm = realm_provinces(data, crown).len();
     let held = realm_held_by(state, data, crown, invader);
+    let dominant = realm > 0 && held as f64 >= rules.defection.dominance_realm_share * realm as f64;
     // Trouble is measured on the crown's own lands of 1337.
     let own: Vec<_> = data
         .provinces
@@ -115,27 +120,95 @@ pub fn dominates_realm(
                 .is_some_and(|p| &p.controller == crown)
         })
         .count();
-    let realm = own.len();
-    let in_trouble = (kept as f64) < (1.0 - CROWN_IN_TROUBLE_LOSS) * realm as f64
+    let in_trouble = (kept as f64)
+        < (1.0 - rules.defection.crown_in_trouble_loss) * own.len() as f64
         || state.war_score(data, crown, invader) <= DESERTION_WAR_SCORE;
-    (seat || held >= DOMINANCE_PROVINCES) && in_trouble
+    (seat || dominant) && in_trouble
+}
+
+/// Can `faction` side with `invader` against `patron`: a living crown, not
+/// rebels nor `patron`'s ally, with no claim on our lands (nor we on its).
+fn eligible_invader(
+    state: &CampaignState,
+    faction: &FactionId,
+    patron: &FactionId,
+    invader: &FactionId,
+) -> bool {
+    invader != faction
+        && invader != patron
+        && invader.as_str() != "fac_rebels"
+        && state.factions.get(invader).is_some_and(|f| f.alive)
+        && !state.is_allied(invader, patron)
+        && !claim_stakes(state, invader, faction).any()
+        && !claim_stakes(state, faction, invader).any()
+}
+
+/// Blood feud (G4, Montereau): the patron `faction` holds a grievance
+/// against (its suzerain, an ally, or a crown it already fights) and the
+/// enemy or pretender of that patron it now prefers by `grievance.margin`.
+pub fn grievance_change(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<(FactionId, FactionId)> {
+    let rules = &data.ai_alignment.as_ref()?.grievance;
+    let me = state.factions.get(faction)?;
+    let patrons = me
+        .suzerain
+        .iter()
+        .chain(me.allies.iter())
+        .chain(me.at_war_with.iter().filter(|e| e.as_str() != "fac_rebels"));
+    for patron in patrons {
+        if !state.factions.get(patron).is_some_and(|f| f.alive) {
+            continue;
+        }
+        let towards_patron = state.attitude(data, faction, patron).0;
+        if towards_patron > rules.attitude {
+            continue;
+        }
+        let feud_at_war = me.at_war_with.contains(patron);
+        let best = state
+            .factions
+            .keys()
+            .filter(|e| eligible_invader(state, faction, patron, e))
+            .filter(|e| {
+                let pretender = claim_stakes(state, e, patron).throne;
+                let fights = state.is_at_war(e, patron);
+                // A feud already at war only draws in the patron's
+                // pretender (the Burgundians and the Lancastrian king).
+                if feud_at_war {
+                    pretender && fights
+                } else {
+                    pretender || fights
+                }
+            })
+            .map(|e| (state.attitude(data, faction, e).0, e))
+            .filter(|(towards, _)| *towards >= towards_patron + rules.margin)
+            .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(a.1)));
+        if let Some((_, invader)) = best {
+            return Some((patron.clone(), invader.clone()));
+        }
+    }
+    None
 }
 
 /// The patron `faction` abandons and the crown it turns to, if any: a
-/// vassal under the embargo of its lord's enemy (wool revolt), or a vassal
-/// or ally of a crown whose realm the enemy dominates (Troyes).
+/// vassal under the embargo of its lord's enemy (wool revolt), a vassal or
+/// ally of a crown whose realm the enemy dominates (Troyes), or a prince
+/// with a grievance against its patron (Montereau).
 pub fn side_change(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
 ) -> Option<(FactionId, FactionId)> {
+    let rules = data.ai_alignment.as_ref()?;
     let me = state.factions.get(faction)?;
     let alive = |f: &FactionId| state.factions.get(f).is_some_and(|s| s.alive);
     if let Some(lord) = me
         .suzerain
         .clone()
-        .filter(|_| me.loyalty < WOOL_REVOLT_LOYALTY)
-        .filter(|_| campaign_roll(state, faction, 1) < HISTORY_PERMILLE)
+        .filter(|_| me.loyalty < rules.wool_revolt.loyalty)
+        .filter(|_| campaign_roll(state, faction, WOOL_SALT) < rules.history_permille)
     {
         let embargoer = state
             .factions
@@ -145,27 +218,26 @@ pub fn side_change(
             return Some((lord, embargoer.clone()));
         }
     }
+    // One roll per decade: the Armagnac-Burgundian feud is not written.
+    let decade = u64::from(state.turn / DECADE_TURNS);
+    if campaign_roll(state, faction, DEFECTION_SALT + decade) >= rules.history_permille {
+        return None;
+    }
     let patrons: Vec<FactionId> = match &me.suzerain {
-        Some(lord) if me.loyalty < DEFECTION_LOYALTY => vec![lord.clone()],
+        Some(lord) if me.loyalty < rules.defection.loyalty => vec![lord.clone()],
         Some(_) => Vec::new(),
         None => me.allies.iter().filter(|a| alive(a)).cloned().collect(),
     };
-    // One roll per decade: the Armagnac-Burgundian feud is not written.
-    if campaign_roll(state, faction, 2 + u64::from(state.turn / 40)) >= HISTORY_PERMILLE {
-        return None;
-    }
-    patrons.into_iter().find_map(|patron| {
+    let dominated = patrons.into_iter().find_map(|patron| {
         let invader = state.factions[&patron]
             .at_war_with
             .iter()
-            .filter(|e| e.as_str() != "fac_rebels" && *e != faction && alive(e))
-            // Never towards a crown that claims our lands (or we its).
-            .filter(|e| !claim_stakes(state, e, faction).any())
-            .filter(|e| !claim_stakes(state, faction, e).any())
+            .filter(|e| eligible_invader(state, faction, &patron, e))
             .find(|e| dominates_realm(state, data, e, &patron))?
             .clone();
         Some((patron, invader))
-    })
+    });
+    dominated.or_else(|| grievance_change(state, data, faction))
 }
 
 /// Orders of `faction` changing sides this turn (G2): white peace with the
@@ -211,31 +283,37 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
     orders
 }
 
-/// Attitude margin a courted prince needs towards us over our enemy.
-pub const DYNASTIC_MARGIN: i32 = 10;
-/// Attitude towards one of our allies that makes a prince its in-law.
-pub const DYNASTIC_IN_LAW_ATTITUDE: i32 = 20;
+/// `true` when `a` and `b` control provinces adjacent on the map (land
+/// borders as armies walk them). `CampaignState::are_neighbors` reads the
+/// province files' `neighbors`, filled for six provinces only.
+pub fn borders(state: &CampaignState, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
+    state.provinces.iter().any(|(id, p)| {
+        &p.controller == a
+            && land_neighbors(data, id)
+                .iter()
+                .any(|n| state.provinces.get(n).is_some_and(|np| &np.controller == b))
+    })
+}
 
-/// Alliance `faction`, at war, offers a prince who prefers it to its enemy
-/// by [`DYNASTIC_MARGIN`] (G2: Edward III's in-laws of Hainaut, Brabant),
-/// in about half the campaigns for each prince.
-pub fn plan_dynastic_alliance(
-    state: &CampaignState,
+/// Princes on the border of an enemy of `faction`, allied neither with it
+/// nor with that enemy, whose campaign roll lets history court them: each
+/// with its attitude towards us and its best one towards our enemies.
+fn courted_princes<'a>(
+    state: &'a CampaignState,
     data: &GameData,
+    rules: &AiAlignment,
     faction: &FactionId,
-) -> Option<Order> {
-    let me = state.factions.get(faction)?;
-    // Off the turns of `plan_diplomacy`'s alliances ((turn + slot) % 4 == 1).
-    if faction == &state.player_faction || (state.turn + slot(faction)) % 4 != 3 {
-        return None;
-    }
+) -> Vec<(&'a FactionId, i32, i32)> {
+    let Some(me) = state.factions.get(faction) else {
+        return Vec::new();
+    };
     let enemies: Vec<&FactionId> = me
         .at_war_with
         .iter()
         .filter(|e| e.as_str() != "fac_rebels")
         .collect();
     if enemies.is_empty() {
-        return None;
+        return Vec::new();
     }
     state
         .factions
@@ -247,26 +325,93 @@ pub fn plan_dynastic_alliance(
         .filter(|(_, f)| enemies.iter().all(|e| !f.allies.contains(*e)))
         // Princes on our enemy's border only (no cap: the coalition of 1337
         // is a web of in-laws, not a count of treaties).
-        .filter(|(id, _)| enemies.iter().any(|e| state.are_neighbors(data, id, e)))
-        .filter(|(id, _)| campaign_roll(state, id, 7) < HISTORY_PERMILLE)
+        .filter(|(id, _)| enemies.iter().any(|e| borders(state, data, id, e)))
+        .filter(|(id, _)| campaign_roll(state, id, DYNASTIC_SALT) < rules.history_permille)
         .filter_map(|(id, _)| {
             let towards_us = state.attitude(data, id, faction).0;
             let towards_enemy = enemies
                 .iter()
                 .map(|e| state.attitude(data, id, e).0)
                 .max()?;
+            Some((id, towards_us, towards_enemy))
+        })
+        .collect()
+}
+
+/// Alliance `faction`, at war, offers a prince who prefers it to its enemy
+/// by `dynastic.margin` (G2: Edward III's in-laws of Hainaut, Brabant), in
+/// about half the campaigns for each prince.
+pub fn plan_dynastic_alliance(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<Order> {
+    let rules = data.ai_alignment.as_ref()?;
+    let me = state.factions.get(faction)?;
+    // Off the turns of `plan_diplomacy`'s alliances ((turn + slot) % 4 == 1).
+    if faction == &state.player_faction || (state.turn + slot(faction)) % 4 != 3 {
+        return None;
+    }
+    courted_princes(state, data, rules, faction)
+        .into_iter()
+        .filter(|(id, towards_us, towards_enemy)| {
             // In-laws of our allies need less (Hainaut draws Brabant).
             let in_law = me
                 .allies
                 .iter()
-                .any(|a| state.attitude(data, id, a).0 >= DYNASTIC_IN_LAW_ATTITUDE);
-            let margin = if in_law { 0 } else { DYNASTIC_MARGIN };
-            (towards_us > towards_enemy + margin && towards_us >= 20)
-                .then(|| (towards_us, id.clone()))
+                .any(|a| state.attitude(data, id, a).0 >= rules.dynastic.in_law_attitude);
+            let margin = if in_law { 0 } else { rules.dynastic.margin };
+            *towards_us > towards_enemy + margin && *towards_us >= rules.dynastic.min_attitude
         })
-        .filter(|(_, id)| evaluate(state, data, faction, id, &Proposal::Alliance).accept)
-        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
-        .map(|(_, target)| Order::ProposeAlliance { target })
+        .filter(|(id, _, _)| evaluate(state, data, faction, id, &Proposal::Alliance).accept)
+        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(a.0)))
+        .map(|(target, _, _)| Order::ProposeAlliance {
+            target: target.clone(),
+        })
+}
+
+/// Money fief (G4): `faction`, at war, pensions a courted prince who does
+/// not yet prefer it to its enemy by `dynastic.margin`; the gift's goodwill
+/// tips the balance before the next alliance offer (Edward III's pensions
+/// to Brabant and Hainaut, 1337). A pension still running is not renewed.
+pub fn plan_money_fief(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<Order> {
+    let rules = data.ai_alignment.as_ref()?;
+    let me = state.factions.get(faction)?;
+    // The turn before the offers of `plan_dynastic_alliance`.
+    if faction == &state.player_faction || (state.turn + slot(faction)) % 4 != 2 {
+        return None;
+    }
+    let fief = &rules.money_fief;
+    if me.treasury < fief.amount * fief.treasury_multiple {
+        return None;
+    }
+    courted_princes(state, data, rules, faction)
+        .into_iter()
+        .filter(|(_, towards_us, towards_enemy)| {
+            *towards_us >= fief.min_attitude && *towards_us <= towards_enemy + rules.dynastic.margin
+        })
+        .filter(|(id, _, _)| !pensioned(state, id, faction))
+        .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(a.0)))
+        .map(|(target, _, _)| Order::SendGift {
+            target: target.clone(),
+            amount: fief.amount,
+        })
+}
+
+/// Does `prince` still feel the goodwill of a gift from `donor`.
+fn pensioned(state: &CampaignState, prince: &FactionId, donor: &FactionId) -> bool {
+    state.factions.get(prince).is_some_and(|f| {
+        f.modifiers.iter().any(|m| {
+            &m.with == donor
+                && m.expires_turn > state.turn
+                && m.value > 0
+                && m.reason_fr == GIFT_REASON
+        })
+    })
 }
 
 /// Embargoes `faction` lifts on realms now fighting its enemies (the wool

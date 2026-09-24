@@ -178,6 +178,12 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     orders.extend(crate::alignment::plan_dynastic_alliance(
         state, data, faction,
     ));
+    if let Some(order) = crate::alignment::plan_money_fief(state, data, faction) {
+        if let Order::SendGift { amount, .. } = &order {
+            ctx.treasury -= amount;
+        }
+        orders.push(order);
+    }
     orders.extend(crate::alignment::lift_embargoes_on_cobelligerents(
         state, data, faction,
     ));

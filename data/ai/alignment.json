@@ -1,0 +1,27 @@
+{
+  "description": "Réglages des changements de camp historiques de l'IA (lots G2 et G4) : révolte de la laine (Artevelde), défection vers l'envahisseur dominant (Troyes), grief (Montereau), alliances dynastiques et fiefs-rentes (Hainaut, Brabant). Voir docs/design/m9-ai.md § 5.",
+  "history_permille": 500,
+  "wool_revolt": {
+    "loyalty": 60
+  },
+  "defection": {
+    "loyalty": 90,
+    "realm_region_provinces": 3,
+    "dominance_realm_share": 0.15,
+    "crown_in_trouble_loss": 0.25
+  },
+  "grievance": {
+    "attitude": -20,
+    "margin": 30
+  },
+  "dynastic": {
+    "margin": 10,
+    "min_attitude": 20,
+    "in_law_attitude": 20
+  },
+  "money_fief": {
+    "amount": 1500,
+    "treasury_multiple": 4,
+    "min_attitude": 0
+  }
+}
