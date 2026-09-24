@@ -8,7 +8,7 @@ Plan : `docs/design/v2-finalisation.md`.
 | F2 Icônes et infobulles | **fusionné** (b1405fe) | | 144 ids → 106 SVG, RichTooltip, CREDITS.md ; reste : accesseurs GameDataStore pour retirer GameCatalog |
 | F3 Écrans et flux | **fusionné** | | menu illustré, chargement, pause, réglages, emplacements + auto, rapport de saison, alertes, crédits |
 | F4 Guerre vivante | **fusionné** (374dfa4) | | FR-EN en guerre 73 % du siècle, 7 phases ; hors cible : trésors > 8 saisons par pointes, banqueroutes 0,92 (Écosse) ; Flandre/Bourgogne jamais pro-anglaises |
-| F5 Batailles | F5a + F5b + F5c **fusionnés** (b50476b) ; F5d (bug démo sans contact, sièges, renforts) en cours | worktree | déploiement, maisons de siège = obstacles, avis de sortie |
+| F5 Batailles | **fusionné** (F5a-F5d, 88a8524) | | démo : contact à 75 s ; escalade 3/6 ; renforts au-delà de 20 régiments ; messages de déploiement nommés |
 | F6 Rendu carte | **transféré** | session parallèle « visual » | refonte visuelle semi-réaliste (shaders, terrain, marqueurs, modèles, battle_meshes/terrain) : ne pas toucher ces fichiers |
 | F7 Contenu | **fusionné** : factions (3a49557) + F7b 40 événements (90 au total, 7 chaînes) | main | 13 factions, 18 personnages, 6 listes de noms, meubles héraldiques |
 | F8 Tutoriel / encyclopédie | **fusionné** (touche L ; K = codex d'une autre session) | | manuel à écrire en F9 |
