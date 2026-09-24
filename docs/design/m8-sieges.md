@@ -144,3 +144,10 @@ L'auto-résolution fait donner la coalition (`coalition_side`), les pertes sont 
 général commandant est le meilleur par commandement ; `battle_setup` du siège exporte l'armée combinée et
 `resolve_pending_battle` la valide dans le même ordre. L'assaut devient une bataille en attente dès que le
 joueur y a une armée, même alliée. La garnison combat seule.
+
+## S2 — incendies (spéc `s2-incendies.md`)
+Les maisons (`SiegeWorks.houses`, plus 4 faubourgs hors les murs) et la porte peuvent brûler : traits
+et pots à feu de l'assaillant, propagation selon la distance, le vent et la météo, chaleur et fumée,
+ruines franchissables par l'A*. Pont : `get_siege().houses[i]` gagne `fire = {state, intensity}` et
+`suburb` ; la racine gagne `gate_fire`, `wind`, `houses_burning`, `houses_burnt` ; commande
+`{type: "burn", units, house | gate: true}` ; `debug_ignite(house)`. ADR `0008-incendies-regle-coeur.md`.

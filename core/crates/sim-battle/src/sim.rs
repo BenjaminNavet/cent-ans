@@ -5,6 +5,7 @@
 #![allow(clippy::needless_range_loop)]
 
 mod deployment;
+mod fire;
 mod pathing;
 mod reinforcements;
 mod separation;
@@ -107,6 +108,8 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Siege fires (S2): rules and their own random stream.
+    fire: fire::FireSystem,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -214,12 +217,15 @@ impl BattleSim {
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
-        let mut field =
-            Battlefield::generate(setup.terrain, setup.river && !is_siege, weather, &mut rng);
-        let siege = setup
+        let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
+        let mut siege = setup
             .siege
             .as_ref()
             .map(|s| SiegeWorks::generate(s.fortification, s.breach, &mut rng));
+        let mut fire = fire::FireSystem::new(seed, is_siege);
+        if let Some(works) = siege.as_mut() {
+            fire.prepare(works);
+        }
         if is_siege {
             field.prepare_for_siege();
         }
@@ -308,6 +314,7 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            fire,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -580,6 +587,11 @@ impl BattleSim {
 
     pub fn field(&self) -> &Battlefield {
         &self.field
+    }
+
+    /// Mutable field (tests and laboratory set-ups: hedges, villages).
+    pub fn field_mut(&mut self) -> &mut Battlefield {
+        &mut self.field
     }
 
     pub fn weather(&self) -> Weather {
@@ -928,6 +940,7 @@ impl BattleSim {
                     unit.target = None;
                 }
             }
+            Command::Burn { units, house, gate } => self.command_burn(&units, house, gate)?,
             Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
@@ -1031,6 +1044,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
+        self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
@@ -1137,6 +1151,9 @@ impl BattleSim {
         if self.weather == Weather::Snow {
             speed *= 0.8;
         }
+        speed *= self
+            .field
+            .site_speed_factor(unit.x, unit.z, unit.mounted, self.weather);
         let here = self.field.height(unit.x, unit.z);
         let ahead = self
             .field
@@ -1632,6 +1649,27 @@ impl BattleSim {
             self.log(text, Some(side));
             return;
         }
+        // B5: a hedge or a ditch in front of the target, or the lanes of a
+        // village, break the impact of horsemen.
+        let (from, to) = (
+            (self.units[i].x, self.units[i].z),
+            (self.units[p].x, self.units[p].z),
+        );
+        if cavalry && (self.field.breaks_charge(from, to) || self.field.in_village(to.0, to.1)) {
+            self.units[i].charge_timer = 0.0;
+            self.units[i].morale -= 5.0;
+            let text = if self.field.in_village(to.0, to.1) {
+                format!(
+                    "La charge des {} se brise dans le village.",
+                    self.unit_label(i)
+                )
+            } else {
+                format!("La charge des {} se brise sur la haie.", self.unit_label(i))
+            };
+            let side = self.units[i].side;
+            self.log(text, Some(side));
+            return;
+        }
         self.units[i].charge_timer = CHARGE_IMPACT;
         if cavalry && self.units[p].formation != Formation::Square {
             let shock = if angle == 0 { 8.0 } else { 15.0 };
@@ -1782,6 +1820,14 @@ impl BattleSim {
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
         }
+        if self.field.in_village(target.x, target.z) {
+            kills *= crate::site::VILLAGE_COVER;
+        } else if self
+            .field
+            .hedge_between((shooter.x, shooter.z), (target.x, target.z))
+        {
+            kills *= crate::site::HEDGE_COVER;
+        }
         if let Some(factor) = target.pavise {
             kills *= factor;
         } else if target.has(Ability::Pavise) && target.state != UnitState::Marching {
@@ -1802,6 +1848,8 @@ impl BattleSim {
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;
         }
+        kills *= self.smoke_factor(shooter, target);
+        let aim = (target.x, target.z);
         let reload = if shooter.category == UnitCategory::Siege {
             12.0
         } else if shooter.has(Ability::Pavise) {
@@ -1841,6 +1889,7 @@ impl BattleSim {
         if self.units[t].hp <= 0.0 {
             self.unit_destroyed(t);
         }
+        self.incendiary_volley(i, aim);
     }
 
     /// Wall piece an engine batters this volley: its ordered piece, else
@@ -1928,6 +1977,7 @@ impl BattleSim {
                 self.unit_destroyed(j);
             }
         }
+        self.incendiary_volley(i, p.midpoint());
     }
 
     fn melee_damage(&self, attacker: &Unit, defender: &Unit) -> f64 {

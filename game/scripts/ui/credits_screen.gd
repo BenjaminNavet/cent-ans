@@ -29,7 +29,8 @@ Un jeu de grande stratégie sur la guerre de Cent Ans (1337-1453).
 
 ## Assets
 - Écus, sons, musiques, modèles et illustration du menu générés de façon procédurale
-- Portraits générés par IA (OpenRouter)
+- Portraits, miniatures de chronique et illustrations de l'encyclopédie générés par IA
+  (openai/gpt-5-image-mini via OpenRouter)
 
 ## Sources historiques
 Voir `docs/design/` et les champs `sources` des fichiers de `data/`.
