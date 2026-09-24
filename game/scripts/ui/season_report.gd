@@ -19,14 +19,20 @@ const GROUPS := [
 	{"title": "Royaume", "glyph": "⚒", "kinds": ["building_completed", "technology_researched", "revolt", "plague", "famine", "bankruptcy"]},
 	# H9 : régimes revenus au défaut, Carême ; blessés soignés, épidémies contenues.
 	{"title": "Table et santé", "glyph": "✚", "kinds": ["table", "medicine"]},
+	# H11 : mutations monétaires, rançons et échéances, ordres de chevalerie.
+	{"title": "Monnaie, rançons et chevalerie", "glyph": "¤", "kinds": ["coinage", "ransom", "chivalry"]},
 	{"title": "Chronique", "glyph": "§", "kinds": ["chronicle", "victory", "defeat", "campaign_ended"]},
 ]
 ## Genres rapportés même quand ils ne concernent pas le joueur (nouvelles du monde).
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
-## H9 : glyphe, libellé et encre par genre, pour le journal et les alertes.
+## H9 / H11 : glyphe, libellé et encre par genre, pour le journal et les alertes.
 const KIND_STYLES := {
 	"table": {"glyph": "♨", "label": "La Table", "color": "#7a4a10"},
 	"medicine": {"glyph": "✚", "label": "Médecine", "color": "#2a6a4a"},
+	# H11
+	"coinage": {"glyph": "¤", "label": "Monnaie", "color": "#8a6a10"},
+	"ransom": {"glyph": "⚖", "label": "Rançon", "color": "#7a2a1a"},
+	"chivalry": {"glyph": "⚜", "label": "Chevalerie", "color": "#2a3a7a"},
 }
 const MAX_ENTRIES_PER_GROUP := 12
 const MAX_LIST_HEIGHT := 440.0
