@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_turin",
+    "province": "prov_piemont",
+    "kind": "city",
+    "name": {
+      "display": "Turin",
+      "local": "Turin",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      7.6869,
+      45.0703
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Turin, ville piémontaise de la maison de Savoie.",
+    "sources": [
+      "Savoie-Achaïe",
+      "Marquisat de Saluces",
+      "Turin"
+    ]
+  },
+  {
+    "id": "set_pinerolo",
+    "province": "prov_piemont",
+    "kind": "town",
+    "name": {
+      "display": "Pignerol",
+      "local": "Pineiròl",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.3316,
+      44.8853
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville disputée entre la maison de Savoie et la branche d'Achaïe.",
+    "sources": [
+      "Pignerol"
+    ]
+  },
+  {
+    "id": "set_susa",
+    "province": "prov_piemont",
+    "kind": "castle",
+    "name": {
+      "display": "Suse",
+      "local": "Susa",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.0512,
+      45.1379
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Verrou alpin sur la route de France, marqué par l'arc romain d'Auguste.",
+    "sources": [
+      "Suse (Italie)"
+    ]
+  },
+  {
+    "id": "set_sant_antonio_di_ranverso",
+    "province": "prov_piemont",
+    "kind": "abbey",
+    "name": {
+      "display": "Sant'Antonio di Ranverso",
+      "local": "Sant'Antòni ëd Ranvers",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.5124,
+      45.0733
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Précepterie-hôpital de l'ordre des Antonins sur la route de la via Francigena vers la France.",
+    "sources": [
+      "Précepterie de Sant'Antonio di Ranverso"
+    ]
+  }
+]
