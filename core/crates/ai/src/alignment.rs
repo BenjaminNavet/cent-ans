@@ -9,7 +9,8 @@ use std::collections::BTreeMap;
 
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
-    claim_stakes, evaluate, war_ready, Proposal, AT_WAR_REASON, DESERTION_WAR_SCORE, GIFT_REASON,
+    claim_stakes, evaluate, war_ready, Proposal, AGGRESSION_REASON, AT_WAR_REASON,
+    DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
 };
 use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
@@ -145,11 +146,14 @@ fn eligible_invader(
 
 /// Sum of the grudges `faction` holds against `patron`: its running
 /// negative opinion modifiers (a murder, a betrayal), whatever the bond.
+/// The reputation every court holds against a perjurer or an aggressor is
+/// no personal grudge.
 pub fn grievance(state: &CampaignState, faction: &FactionId, patron: &FactionId) -> i32 {
     state.factions.get(faction).map_or(0, |f| {
         f.modifiers
             .iter()
             .filter(|m| &m.with == patron && m.expires_turn > state.turn && m.value < 0)
+            .filter(|m| m.reason_fr != PERJURY_REASON && m.reason_fr != AGGRESSION_REASON)
             .map(|m| m.value)
             .sum()
     })
@@ -339,8 +343,19 @@ fn courted_princes<'a>(
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
-    // A vassal's diplomacy follows its lord's.
-    if me.suzerain.is_some() {
+    // A vassal's diplomacy follows its lord's; a full coalition courts
+    // no more (every prince on France's border is not England's in-law).
+    let allies = me
+        .allies
+        .iter()
+        .filter(|a| {
+            state
+                .factions
+                .get(*a)
+                .is_some_and(|f| f.suzerain.as_ref() != Some(faction))
+        })
+        .count();
+    if me.suzerain.is_some() || allies >= rules.dynastic.max_allies {
         return Vec::new();
     }
     // Wars of succession only: princes are courted for a crown (Edward

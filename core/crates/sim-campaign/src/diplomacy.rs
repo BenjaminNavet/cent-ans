@@ -18,6 +18,10 @@ use crate::state::CampaignState;
 
 /// Truce after a negotiated peace (5 years).
 pub const TRUCE_TURNS: u32 = 20;
+/// Reputation modifier every faction holds against a truce breaker.
+pub const PERJURY_REASON: &str = "Parjure : trêve rompue";
+/// Reputation modifier every faction holds against an unprovoked attacker.
+pub const AGGRESSION_REASON: &str = "Agression sans motif";
 /// Attitude reason of two factions at war.
 pub const AT_WAR_REASON: &str = "En guerre";
 /// Reason of the opinion modifier a gift leaves with its recipient.
@@ -850,13 +854,13 @@ impl CampaignState {
         if truce_broken {
             motive = "rupture de trêve".to_owned();
             for other in &others {
-                self.add_modifier(other, attacker, -40, "Parjure : trêve rompue", 40);
+                self.add_modifier(other, attacker, -40, PERJURY_REASON, 40);
             }
             religion::change_favor(self, attacker, -30);
             self.change_ruler_prestige(attacker, -30);
         } else if casus_belli.is_none() {
             for other in &others {
-                self.add_modifier(other, attacker, -20, "Agression sans motif", 40);
+                self.add_modifier(other, attacker, -20, AGGRESSION_REASON, 40);
             }
             self.change_ruler_prestige(attacker, -20);
         }

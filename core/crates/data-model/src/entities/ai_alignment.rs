@@ -53,6 +53,9 @@ pub struct DynasticRules {
     /// Attitude towards one of our allies that makes a prince its in-law
     /// (no margin needed).
     pub in_law_attitude: i32,
+    /// A crown with this many allies (vassals aside) courts no more
+    /// princes, by alliance or pension.
+    pub max_allies: usize,
 }
 
 /// Money fiefs: a crown at war buys the goodwill of a hesitant prince on
