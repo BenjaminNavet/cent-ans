@@ -51,8 +51,8 @@ pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::settlement::{
-    FullProvinceBonus, MovementRules, Settlement, SettlementEdge, SettlementGraph, SettlementKind,
-    SettlementRules,
+    FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge, SettlementGraph,
+    SettlementKind, SettlementRules,
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};

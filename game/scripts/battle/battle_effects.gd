@@ -37,7 +37,7 @@ const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
 const DUST_COLOR := Color(0.74, 0.66, 0.52)
-const SPLASH_COLOR := Color(0.85, 0.9, 0.92)
+const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
 var enabled_dust: bool = true
 var time_now: float = 0.0
@@ -84,7 +84,7 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	for i in DUST_EMITTERS:
 		_dust.append(_emitter("Dust%d" % i, _dust_material(false), 72, 2.8, false))
 	for i in SPLASH_EMITTERS:
-		_splash.append(_emitter("Splash%d" % i, _splash_material(), 64, 0.9, false))
+		_splash.append(_emitter("Splash%d" % i, _splash_material(), 160, 0.8, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
@@ -147,13 +147,19 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		var moving := state == "marching" or state == "charging" or state == "routing"
 		if not moving:
 			continue
-		var in_water: bool = _water_at.is_valid() and int(_water_at.call(pos.x, pos.z)) > 0
 		var mounted := str(unit["render"]) == "cavalry"
 		var fast := state == "charging" or bool(unit.get("running", false)) or state == "routing"
 		var strength := (1.0 if fast else 0.45) * (1.0 if mounted else 0.55)
 		var d := camera_pos.distance_to(pos)
 		var entry := {"unit": unit, "pos": pos, "strength": strength, "score": strength / (1.0 + d / 120.0)}
-		if in_water:
+		# B7 : la troupe est dans l'eau dès qu'une partie de son emprise y est (pas seulement son
+		# centre : la rivière fait ~18 m, un régiment 8 à 15 m de profondeur) ; les éclaboussures
+		# ne couvrent que cette partie, à la surface de l'eau.
+		var wet_span := _wet_span(unit, pos)
+		if wet_span.y > wet_span.x:
+			entry["span"] = wet_span
+			entry["strength"] = maxf(strength, 0.6 if mounted else 0.4)
+			entry["score"] = float(entry["strength"]) / (1.0 + d / 120.0)
 			wet.append(entry)
 		elif enabled_dust and d < DUST_DISTANCE:
 			dusty.append(entry)
@@ -308,6 +314,28 @@ func _missile_kind(unit: Dictionary) -> int:
 	return ARROW
 
 
+## B7 : partie mouillée de l'emprise d'un régiment, en mètres le long de son axe avant
+## (`x` = début, `y` = fin, relatifs au centre ; `x >= y` : au sec). Cinq points échantillonnés
+## de l'arrière à l'avant.
+func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
+	if not _water_at.is_valid():
+		return Vector2(1, 0)
+	var fwd := _forward(unit)
+	var half := float(unit.get("depth", 6.0)) * 0.5 + 1.0
+	var lo := INF
+	var hi := -INF
+	for i in 5:
+		var t := lerpf(-half, half, i / 4.0)
+		var p := pos + fwd * t
+		if int(_water_at.call(p.x, p.z)) > 0:
+			lo = minf(lo, t)
+			hi = maxf(hi, t)
+	if hi < lo:
+		return Vector2(1, 0)
+	var step := half * 0.5
+	return Vector2(maxf(lo - step * 0.5, -half), minf(hi + step * 0.5, half))
+
+
 static func _forward(unit: Dictionary) -> Vector3:
 	var facing := float(unit.get("facing", 0.0))
 	return Vector3(sin(facing), 0.0, cos(facing))
@@ -324,7 +352,14 @@ func _assign(pool: Array[GPUParticles3D], entries: Array) -> void:
 		if i < entries.size():
 			var unit: Dictionary = entries[i]["unit"]
 			var size := Vector2(float(unit.get("width", 10.0)), float(unit.get("depth", 6.0)))
-			_place(emitter, entries[i]["pos"], size, float(unit.get("facing", 0.0)), float(entries[i]["strength"]))
+			var pos: Vector3 = entries[i]["pos"]
+			if entries[i].has("span"):
+				# Éclaboussures (B7) : seulement la partie de l'emprise dans l'eau, à la surface
+				# (le lit est ~0,5 m sous l'eau ; les gerbes naissaient noyées).
+				var span: Vector2 = entries[i]["span"]
+				pos += _forward(unit) * (span.x + span.y) * 0.5 + Vector3(0, 0.45, 0)
+				size.y = span.y - span.x
+			_place(emitter, pos, size, float(unit.get("facing", 0.0)), float(entries[i]["strength"]))
 		elif emitter.emitting:
 			emitter.emitting = false
 
@@ -392,15 +427,18 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(1, 1.0))
 		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.6, 0.0])
 	elif node_name.begins_with("Splash"):
-		mat.spread = 30.0
-		mat.initial_velocity_min = 2.5
-		mat.initial_velocity_max = 4.5
+		# B7 : gerbes plus nombreuses, plus grosses et plus opaques (à peine visibles avant).
+		mat.spread = 28.0
+		mat.initial_velocity_min = 2.0
+		mat.initial_velocity_max = 4.8
 		mat.gravity = Vector3(0, -9.8, 0)
-		mat.scale_min = 1.0
+		mat.damping_min = 0.5
+		mat.damping_max = 1.5
+		mat.scale_min = 0.9
 		mat.scale_max = 2.2
-		grow.add_point(Vector2(0, 0.6))
-		grow.add_point(Vector2(1, 1.2))
-		mat.color_ramp = _ramp([0.0, 0.1, 1.0], [0.0, 0.7, 0.0])
+		grow.add_point(Vector2(0, 0.5))
+		grow.add_point(Vector2(1, 1.4))
+		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 0.9, 0.5, 0.0])
 	elif node_name.begins_with("Impact"):
 		mat.emission_box_extents = Vector3(3, 0.3, 2)
 		mat.spread = 55.0
@@ -496,7 +534,7 @@ func _dust_material(heavy: bool) -> StandardMaterial3D:
 
 
 func _splash_material() -> StandardMaterial3D:
-	return _billboard(SPLASH_COLOR, false, false)
+	return _billboard(SPLASH_COLOR, true, false)
 
 
 func _smoke_material() -> StandardMaterial3D:

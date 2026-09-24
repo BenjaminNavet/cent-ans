@@ -18,9 +18,12 @@ use crate::state::{ArmyId, CampaignState, Stance};
 
 /// Maximum path cost the AI considers for an offensive, in province steps
 /// (times `MovementRules::points_per_step`).
-pub const OFFENSIVE_RANGE: u32 = 6;
+pub const OFFENSIVE_RANGE: u32 = 4;
 /// Preference (in province steps) for a hostile city over another settlement.
 pub const CITY_PREFERENCE_STEPS: f64 = 2.0;
+/// Preference (in province steps) for a place the faction owns de jure
+/// but an enemy holds (lot C7a: win back lost places).
+pub const RECLAIM_PREFERENCE_STEPS: f64 = 1.5;
 /// The AI attacks when its power exceeds the defence by this factor.
 pub const ATTACK_SUPERIORITY: f64 = 1.5;
 /// Garrison units kept in the capital before the surplus joins the field army.
@@ -130,7 +133,17 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             .filter(|(id, _)| {
                 state.settlement_defensive_power(data, id) * ATTACK_SUPERIORITY < power
             })
-            .map(|(id, reach)| (target_score(state, data, id, reach.cost, step), id))
+            .map(|(id, reach)| {
+                let mut score = target_score(state, data, id, reach.cost, step);
+                if state
+                    .settlements
+                    .get(id)
+                    .is_some_and(|s| &s.owner == faction)
+                {
+                    score -= RECLAIM_PREFERENCE_STEPS;
+                }
+                (score, id)
+            })
             .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
             .map(|(_, id)| id.clone());
         if let Some(target) = target {
@@ -178,6 +191,25 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                             stance: Stance::Normal,
                         });
                     }
+                    orders.push(Order::move_along(army_id.clone(), path));
+                }
+            }
+            // Lot C7a: an idle army outside friendly places goes home.
+            _ if !state.is_friendly_settlement(faction, &army.location)
+                && !state.is_hostile_settlement(faction, &army.location) =>
+            {
+                let home = table
+                    .iter()
+                    .filter(|(id, _)| {
+                        state
+                            .settlements
+                            .get(*id)
+                            .is_some_and(|s| &s.controller == faction)
+                            && state.hostile_armies_at(faction, id).is_empty()
+                    })
+                    .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
+                    .and_then(|(id, _)| path_to(&table, id));
+                if let Some(path) = home.filter(|p| !p.is_empty()) {
                     orders.push(Order::move_along(army_id.clone(), path));
                 }
             }

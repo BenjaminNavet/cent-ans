@@ -36,6 +36,7 @@ var root: Control
 var title_label: Label
 var clock_label: Label
 var weather_label: Label
+var site_label: Label  # B6 : « Sol sec · été · village · haies »
 var _active_speed: int = 0  # -1 : pause
 var balance_bar: Control
 var balance_label: Label
@@ -89,8 +90,15 @@ func _build_top_bar() -> void:
 	box.add_child(title_label)
 	clock_label = _label("00:00")
 	box.add_child(clock_label)
+	# Météo et, dessous, le site en une ligne compacte (B6).
+	var sky := VBoxContainer.new()
+	sky.add_theme_constant_override("separation", 0)
+	box.add_child(sky)
 	weather_label = _label("")
-	box.add_child(weather_label)
+	sky.add_child(weather_label)
+	site_label = _label("", 12)
+	site_label.visible = false
+	sky.add_child(site_label)
 	var balance := VBoxContainer.new()
 	balance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(balance)
@@ -237,6 +245,12 @@ func set_title(text: String, weather: String, colors: Array) -> void:
 	title_label.text = text
 	weather_label.text = weather
 	_colors = colors
+
+
+## B6 : le site de la bataille (sol, saison, village, haies, côte), vide pour le masquer.
+func set_site(text: String) -> void:
+	site_label.text = text
+	site_label.visible = text != ""
 
 
 func set_clock(seconds: float, speed: float, paused: bool) -> void:

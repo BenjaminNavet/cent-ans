@@ -108,6 +108,14 @@ pub enum Order {
         army: ArmyId,
         unit_indices: Vec<usize>,
     },
+    /// Lot C7a: leave `unit_indices` of `army` as the garrison of the
+    /// settlement it stands on (held by the army's faction, not besieged).
+    /// An army giving all its units disappears (its general stays in the
+    /// province).
+    GarrisonUnits {
+        army: ArmyId,
+        unit_indices: Vec<usize>,
+    },
     /// Dismiss one unit of an army (`army`) or of a garrison (`settlement`).
     DisbandUnit {
         #[serde(default)]
@@ -335,6 +343,10 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
+    #[error("la colonie est assiégée")]
+    SettlementBesieged,
+    #[error("garnison complète : {cap} unités au plus dans ce type de colonie")]
+    GarrisonFull { cap: usize },
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
     #[error(transparent)]
@@ -412,6 +424,9 @@ impl CampaignState {
             Order::MergeArmies { source, target } => self.order_merge(faction, &source, &target),
             Order::SplitArmy { army, unit_indices } => {
                 self.order_split(faction, &army, &unit_indices)
+            }
+            Order::GarrisonUnits { army, unit_indices } => {
+                self.order_garrison(data, faction, &army, &unit_indices)
             }
             Order::DisbandUnit {
                 army,
@@ -1018,6 +1033,49 @@ impl CampaignState {
                 path: Vec::new(),
             },
         );
+        Ok(())
+    }
+
+    /// Lot C7a: units of an army become the garrison of the place it holds.
+    fn order_garrison(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        army_id: &ArmyId,
+        indices: &[usize],
+    ) -> Result<(), OrderError> {
+        let army = self.own_army(faction, army_id)?;
+        let location = army.location.clone();
+        let indices = unique_sorted(indices, army.units.len())?;
+        self.own_settlement(faction, &location)?;
+        let settlement = &self.settlements[&location];
+        if settlement.siege.is_some() {
+            return Err(OrderError::SettlementBesieged);
+        }
+        if let Some(cap) = data
+            .settlement_rules
+            .as_ref()
+            .and_then(|r| r.garrison_cap.get(&settlement.kind))
+        {
+            if settlement.garrison.len() + indices.len() > *cap {
+                return Err(OrderError::GarrisonFull { cap: *cap });
+            }
+        }
+        let units = take_indices(
+            &mut self.armies.get_mut(army_id).expect("checked").units,
+            &indices,
+        );
+        self.settlements
+            .get_mut(&location)
+            .expect("checked")
+            .garrison
+            .extend(units);
+        if self.armies[army_id].units.is_empty() {
+            if let Some(general) = self.armies[army_id].general.clone() {
+                self.detach_general(&general);
+            }
+            self.armies.remove(army_id);
+        }
         Ok(())
     }
 
