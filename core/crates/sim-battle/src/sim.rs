@@ -4,6 +4,10 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod separation;
+
+pub use separation::FRIEND_GAP;
+
 use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
@@ -999,6 +1003,7 @@ impl BattleSim {
         }
         let contacts = self.contacts();
         self.resolve_movement(&contacts);
+        self.separate_friends();
         self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
