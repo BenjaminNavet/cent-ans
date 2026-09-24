@@ -25,7 +25,9 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 - [x] 1. Saisons visibles : terrain (parcelles par saison, prés, forêts lointaines, vigne, neige
       d'altitude et de plaine selon nord/est), feuillage 3D (roux/or à l'automne, nus et givrés
       l'hiver, résineux gardés), ombres de nuages ; transition 2,5 s ; `--season=`
-- [ ] 2. Terroirs autour des colonies, fumées de cheminée
+- [x] 2. Terroirs (`TerroirMask` 1024², 35 ms, reconstruit si dévastation/population/siège changent) :
+      champs, vigne (Bourgogne, Bordelais), pâtures en couronne ; fumées de cheminée
+      (`LifeEffects`, `life_smoke.gdshader`, ≈ 3 100 panaches, plus fournies l'hiver)
 - [ ] 3. Colonies qui grandissent
 - [ ] 4. Dévastation visible
 - [ ] 5. Vie ambiante
@@ -41,4 +43,4 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## Prochaine étape
 
-Lot 2 : terroirs (masque `TerroirMask`) et fumées de cheminée.
+Lot 3 : croissance des colonies (`SettlementGrowth`, modèles bourg/cité, château Kenney).

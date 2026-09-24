@@ -320,6 +320,8 @@ void fragment() {
 	// --- Poids des matériaux ---
 	vec4 s = has_splat ? texture(splat, uv) : vec4(0.5, 0.3, 0.2, 0.0);
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
+	vec4 terroir = terroir_at(uv);  // CV1 : finage des colonies, vigne, brûlis, pâtures
+	s = terroir_splat(s, terroir);
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
 	float w_grass = s.r;
@@ -339,6 +341,7 @@ void fragment() {
 
 	// --- Parcellaire (lot V2b) : enclos, lanières de cultures, prés, vignes, haies, chemins ---
 	vec3 lu = has_landuse ? texture(landuse, uv).rgb : vec3(0.0);
+	lu = terroir_landuse(lu, terroir);  // CV1
 	float dry = lu.g;
 	float open_land = clamp(s.g + 0.6 * s.r, 0.0, 1.0);
 	float grass_share = s.r / max(s.r + s.g, 1e-3);
@@ -469,6 +472,8 @@ void fragment() {
 	col = mix(col, season_vine_leaf(vine_leaf), vine_rows * open_w * 0.8);  // CV1
 	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
 	col = mix(col, hedge_color, hedge * open_w * 0.55);
+
+	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);  // CV1
 
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;

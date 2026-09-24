@@ -155,3 +155,40 @@ float cloud_shadow(vec2 p) {
 	float c = value_noise(q) * 0.62 + value_noise(q * 2.7 + vec2(3.1, 7.7)) * 0.38;
 	return 1.0 - cloud_shadow_amount * smoothstep(0.45, 0.78, c);
 }
+
+// --- Terroirs (masque terroir_mask.gd) ---
+vec4 terroir_at(vec2 uv) {
+	return (life_enabled && has_terroir) ? texture(terroir_mask, uv) : vec4(0.0);
+}
+
+// Finage : les prés et friches proches des colonies deviennent des champs (R), les pâtures
+// gagnent en couronne (A). Poids du splat (R prairie, G cultures, B forêt, A roche/lande).
+vec4 terroir_splat(vec4 s, vec4 tr) {
+	float to_farm = s.r * tr.r * 0.75 + s.a * tr.r * 0.4;
+	s.r -= s.r * tr.r * 0.75;
+	s.a -= s.a * tr.r * 0.4;
+	s.g += to_farm;
+	float to_grass = s.g * tr.a * 0.35 * (1.0 - tr.r);
+	s.g -= to_grass;
+	s.r += to_grass;
+	return s;
+}
+
+// Vigne autour des colonies des régions viticoles (occupation du sol : R vigne).
+vec3 terroir_landuse(vec3 lu, vec4 tr) {
+	lu.r = max(lu.r, tr.g * 1.6);
+	return lu;
+}
+
+// Brûlis : plaques de terre calcinée et de cendres, chaumes noircis (dévastation).
+vec3 terroir_burn(vec3 col, float burn, vec2 p, float footprint) {
+	if (burn <= 0.004) {
+		return col;
+	}
+	float fine = 1.0 - smoothstep(0.8, 2.5, footprint);
+	float n = value_noise(p * 0.35) * mix(1.0, 0.6, fine) + value_noise(p * 1.7) * 0.4 * fine;
+	float amount = smoothstep(1.0 - burn * 0.85 - 0.12, 1.0 - burn * 0.85 + 0.12, n);
+	float ash = value_noise(p * 1.1 + 11.0);
+	vec3 scorched = mix(burnt_color, ash_color, ash * ash * 0.6);
+	return mix(col, scorched, amount * 0.92);
+}
