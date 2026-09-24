@@ -450,8 +450,8 @@ func _build_registry() -> void:
 	registry.name = "AgentRegistry"
 	registry.theme = load("res://scenes/ui/parchment_theme.tres")
 	registry.add_theme_stylebox_override("panel", _panel_style())
-	registry.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-	registry.position = Vector2(20, 160)
+	registry.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	registry.position = Vector2(20, 90)
 	registry.custom_minimum_size = Vector2(360, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
@@ -485,7 +485,8 @@ func toggle_registry() -> void:
 		return
 	_fill_registry()
 	registry.show()
-	registry.reset_size()
+	registry.size = Vector2.ZERO
+	registry.call_deferred("reset_size")
 
 
 ## Colonie où recruter : celle du panneau de colonie ouvert (si elle est au joueur), sinon la
@@ -538,6 +539,7 @@ func _fill_registry() -> void:
 		var kind := str(option.get("kind", ""))
 		button.pressed.connect(func() -> void: recruit(place, kind))
 		_registry_recruit.add_child(button)
+	registry.call_deferred("reset_size")
 
 
 ## Ordre `recruit_agent` ; l'agent apparaît aussitôt (sans marche ce tour-ci).
@@ -557,7 +559,7 @@ func recruit(settlement_id: String, kind: String) -> Dictionary:
 
 
 ## Recrute un espion dans la capitale, lui donne une saison, le sélectionne et cadre la carte.
-func stage_screenshot() -> void:
+func stage_screenshot(open_registry: bool = false) -> void:
 	if not available():
 		return
 	var place := recruit_place()
@@ -575,3 +577,5 @@ func stage_screenshot() -> void:
 	var world: Vector3 = map.settlement_layer.world_position_of(str(_agents.get(spy, {}).get("location", "")))
 	map.camera_rig.look_at_point(world, 260.0)
 	map.camera_rig.snap()
+	if open_registry:
+		toggle_registry()
