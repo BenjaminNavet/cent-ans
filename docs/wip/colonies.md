@@ -43,7 +43,7 @@ La session 6 (`docs/wip/tw.md`, plan `docs/design/2026-09-24-rapprochement-total
   - `vision.rs` + `tests/c1_vision.rs` : la vision part de la province de la colonie et du contrôleur de la cité ;
   - `minimap_controller.gd` et `smoke.gd` : lisent `location_province` ;
   - `ai/src/alignment.rs`, `ai/tests/g4.rs`, `ai/examples/century_probe.rs` (lot G4 d'une autre session) : contrôle/propriété de province via `controls_province` / `province_owner` / `city_state_mut`.
-- **Non vérifié** sur `8208996` : clippy, `cargo test`, smoke Godot (le dernier smoke vert était avant la fusion de G4).
+- Sur `8208996` : clippy `-D warnings` et `cargo test` **passent**. **Smoke Godot non relancé** depuis la fusion de G4 (le précédent était vert).
 
 À faire pour finir C4 :
 1. `git worktree add <scratch>/merge-c4 merge-c4` (le worktree temporaire a pu disparaître ; la branche reste).
