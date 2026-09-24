@@ -1,5 +1,47 @@
 {
  "figures": {
+  "archer_0": {
+   "lods": [
+    "archer_0_lod0.mesh.bin",
+    "archer_0_lod1.mesh.bin",
+    "archer_0_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2094,
+    503,
+    205
+   ],
+   "variants": 3
+  },
+  "archer_1": {
+   "lods": [
+    "archer_1_lod0.mesh.bin",
+    "archer_1_lod1.mesh.bin",
+    "archer_1_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2220,
+    518,
+    222
+   ],
+   "variants": 2
+  },
+  "archer_2": {
+   "lods": [
+    "archer_2_lod0.mesh.bin",
+    "archer_2_lod1.mesh.bin",
+    "archer_2_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2360,
+    562,
+    258
+   ],
+   "variants": 2
+  },
   "infantry_0": {
    "lods": [
     "infantry_0_lod0.mesh.bin",
@@ -8,11 +50,39 @@
    ],
    "rig": "human",
    "tris": [
-    2326,
-    493,
-    239
+    2374,
+    517,
+    255
    ],
-   "variants": 1
+   "variants": 2
+  },
+  "infantry_1": {
+   "lods": [
+    "infantry_1_lod0.mesh.bin",
+    "infantry_1_lod1.mesh.bin",
+    "infantry_1_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2200,
+    505,
+    229
+   ],
+   "variants": 3
+  },
+  "infantry_2": {
+   "lods": [
+    "infantry_2_lod0.mesh.bin",
+    "infantry_2_lod1.mesh.bin",
+    "infantry_2_lod2.mesh.bin"
+   ],
+   "rig": "human",
+   "tris": [
+    2231,
+    561,
+    277
+   ],
+   "variants": 4
   }
  },
  "rigs": {
@@ -39,28 +109,46 @@
     "Foot.L",
     "UpperLeg.R",
     "LowerLeg.R",
-    "Foot.R"
+    "Foot.R",
+    "Prop",
+    "Nock",
+    "Arrow"
    ],
    "clips": {
     "bow_idle": {
      "frames": 41,
      "loop": true,
-     "start": 402
+     "start": 603
     },
     "bow_shoot": {
-     "frames": 36,
+     "frames": 60,
      "loop": false,
-     "start": 366
+     "start": 543
+    },
+    "bow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 644
     },
     "death": {
      "frames": 26,
      "loop": false,
-     "start": 220
+     "start": 195
+    },
+    "death_back": {
+     "frames": 26,
+     "loop": false,
+     "start": 277
+    },
+    "death_knees": {
+     "frames": 30,
+     "loop": false,
+     "start": 247
     },
     "death_m": {
      "frames": 26,
      "loop": false,
-     "start": 246
+     "start": 221
     },
     "guard": {
      "frames": 41,
@@ -70,27 +158,42 @@
     "hit": {
      "frames": 14,
      "loop": false,
-     "start": 206
+     "start": 181
     },
     "idle": {
      "frames": 41,
      "loop": true,
      "start": 0
     },
+    "knockdown": {
+     "frames": 64,
+     "loop": false,
+     "start": 303
+    },
     "pike_idle": {
      "frames": 41,
      "loop": true,
-     "start": 272
+     "start": 367
+    },
+    "pike_level": {
+     "frames": 41,
+     "loop": true,
+     "start": 441
+    },
+    "pike_level_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 482
     },
     "pike_thrust": {
-     "frames": 20,
+     "frames": 28,
      "loop": false,
-     "start": 346
+     "start": 515
     },
     "pike_walk": {
      "frames": 33,
      "loop": true,
-     "start": 313
+     "start": 408
     },
     "run": {
      "frames": 20,
@@ -102,15 +205,10 @@
      "loop": false,
      "start": 135
     },
-    "slash_m": {
-     "frames": 25,
-     "loop": false,
-     "start": 160
-    },
     "thrust": {
      "frames": 21,
      "loop": false,
-     "start": 185
+     "start": 160
     },
     "walk": {
      "frames": 33,
@@ -120,12 +218,17 @@
     "xbow_idle": {
      "frames": 41,
      "loop": true,
-     "start": 491
+     "start": 797
     },
     "xbow_shoot": {
-     "frames": 48,
+     "frames": 120,
      "loop": false,
-     "start": 443
+     "start": 677
+    },
+    "xbow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 838
     }
    },
    "fps": 24,

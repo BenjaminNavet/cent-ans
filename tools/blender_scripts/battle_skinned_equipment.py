@@ -25,6 +25,7 @@ C_LEATHER = 8
 C_HAIR = 9
 C_COAT = 10
 C_WOOD = 11
+C_QUILT = 12
 
 STEEL = (0.50, 0.51, 0.53)
 MAIL = (0.34, 0.34, 0.35)
@@ -231,6 +232,12 @@ def grip(ctx, side="R"):
     along = Vector((0, -1, 0))
     up = out.cross(along).normalized()
     return centre, along, up, out
+
+
+def nock_rest(ctx):
+    """Rest position of the bow string's middle (the bow is in the left fist, T-pose)."""
+    c, _along, _up, out = grip(ctx, "L")
+    return c - out * 0.16
 
 
 # --- Helmets ----------------------------------------------------------------------------

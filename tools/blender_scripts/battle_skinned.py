@@ -42,6 +42,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import battle_skinned_equipment as equip  # noqa: E402
+import battle_skinned_weapons as weapons  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 THIRD = os.path.join(ROOT, "game", "assets", "third_party")
@@ -156,13 +157,17 @@ def bone_world(arm, name, posed=False):
 
 
 class Rig:
-    """Bones of one skinning texture: [(armature, bone name, texture name)]."""
+    """Bones of one skinning texture.
+
+    Entries are real bones (armature, bone name) or virtual bones (`fn(rest) -> world
+    matrix`, e.g. a prop held by both hands or the bow string's nock point).
+    """
 
     def __init__(self, name):
         self.name = name
-        self.entries = []  # (arm, bone, key)
+        self.entries = []  # (arm or None, bone name or fn, key)
         self.index = {}  # key -> texture index
-        self.rest = {}  # armature name -> rest world matrix
+        self.rest = {}  # armature name -> rest world matrix; key -> virtual rest matrix
         self.clips = []  # (name, start row, frames, loop)
         self.rows = []  # one bytes row per frame
 
@@ -170,16 +175,27 @@ class Rig:
         self.index[key] = len(self.entries)
         self.entries.append((arm, bone, key))
 
+    def add_virtual(self, key, fn):
+        self.index[key] = len(self.entries)
+        self.entries.append((None, fn, key))
+
     def capture_rest(self):
-        for arm, _bone, _key in self.entries:
-            self.rest[arm.name] = arm.matrix_world.copy()
+        for arm, bone, key in self.entries:
+            if arm is None:
+                self.rest[key] = bone(True)
+            else:
+                self.rest[arm.name] = arm.matrix_world.copy()
 
     def frame_matrices(self):
         """Current skinning matrices (Godot space), one per entry."""
         out = []
-        for arm, bone, _key in self.entries:
-            posed = arm.matrix_world @ arm.pose.bones[bone].matrix
-            bind = self.rest[arm.name] @ arm.data.bones[bone].matrix_local
+        for arm, bone, key in self.entries:
+            if arm is None:
+                posed = bone(False)
+                bind = self.rest[key]
+            else:
+                posed = arm.matrix_world @ arm.pose.bones[bone].matrix
+                bind = self.rest[arm.name] @ arm.data.bones[bone].matrix_local
             m = TO_GODOT @ posed @ bind.inverted() @ FROM_GODOT
             out.append(m)
         return out
@@ -225,18 +241,32 @@ class Rig:
         }
 
 
-def sample_action(rig, arm, act, overrides=None, mirror=False, frames=None, extra=None):
-    """Append every frame of `act` to the rig; `overrides(arm, t)` poses bones on top."""
+def sample_action(rig, arm, act, overrides=None, mirror=False, frames=None, before=None):
+    """Append the frames of `act` to the rig; `overrides(arm, t)` poses bones on top.
+
+    `frames` sets the clip length (the source loops); `overrides.source_frame(i, n, first,
+    last)` may remap source frames (e.g. play backwards). `before(arm, t)` runs first
+    (placement of the armature, e.g. rider on the saddle).
+    """
+    import battle_skinned_poses as poses
+
     set_action(arm, act)
     first, last = (int(round(v)) for v in act.frame_range)
-    count = frames if frames else last - first + 1
+    length = last - first + 1
+    count = frames if frames else length
+    remap = getattr(overrides, "source_frame", None)
     for i in range(count):
-        f = first + (i % max(last - first + 1, 1)) if frames is None else first + min(i, last - first)
+        t = i / max(count - 1, 1)
+        f = remap(i, count, first, last) if remap else first + (i % max(length, 1))
+        # Overrides of the previous frame must not leak into channels the action leaves unkeyed.
+        for pb in arm.pose.bones:
+            pb.matrix_basis.identity()
         bpy.context.scene.frame_set(f)
+        poses.reset_state()
+        if before:
+            before(arm, t)
         if overrides:
-            overrides(arm, i / max(count - 1, 1))
-        if extra:
-            extra(i / max(count - 1, 1))
+            overrides(arm, t)
         bpy.context.view_layer.update()
         mats = rig.frame_matrices()
         rig.add_frame(rig.mirrored(mats) if mirror else mats)
@@ -252,19 +282,68 @@ def human_clip_specs():
         ("walk", "Walk", True, None, False),
         ("run", "Run", True, None, False),
         ("slash", "Sword_Slash", False, None, False),
-        ("slash_m", "Sword_Slash", False, None, True),
         ("thrust", "Punch_Right", False, None, False),
         ("hit", "HitRecieve", False, None, False),
         ("death", "Death", False, None, False),
         ("death_m", "Death", False, None, True),
+        ("death_knees", "Idle", False, poses.death_knees, False),
+        ("death_back", "Idle", False, poses.death_back, False),
+        ("knockdown", "Death", False, poses.knockdown, False),
         ("pike_idle", "Idle", True, poses.pike_hold, False),
         ("pike_walk", "Walk", True, poses.pike_hold, False),
+        ("pike_level", "Idle", True, poses.pike_level, False),
+        ("pike_level_walk", "Walk", True, poses.pike_level, False),
         ("pike_thrust", "Idle", False, poses.pike_thrust, False),
         ("bow_shoot", "Idle", False, poses.bow_shoot, False),
         ("bow_idle", "Idle", True, poses.bow_rest, False),
+        ("bow_walk", "Walk", True, poses.bow_rest, False),
         ("xbow_shoot", "Idle", False, poses.crossbow_shoot, False),
         ("xbow_idle", "Idle", True, poses.crossbow_rest, False),
+        ("xbow_walk", "Walk", True, poses.crossbow_rest, False),
     ]
+
+
+def add_human_virtuals(rig, arm, prefix="", placement=None):
+    """Virtual bones of a human rig: right-hand prop, bow nock and nocked arrow."""
+    import battle_skinned_poses as poses
+
+    ctx = equip.Context(arm, 0, material, bone_world)
+    centre, along, up, out = equip.grip(ctx, "R")
+    prop_rest = poses.prop_matrix(centre, along, up)
+    wrist_r_rest = bone_world(arm, "Wrist.R")
+    wrist_l_rest = bone_world(arm, "Wrist.L")
+    nock_rest = wrist_l_rest.copy()
+    nock_rest.translation = equip.nock_rest(ctx)
+    poses.REST["prop"] = prop_rest
+    poses.REST["Wrist.R"] = wrist_r_rest
+
+    def follow(bone, rest_bone, rest_m):
+        return bone_world(arm, bone, posed=True) @ rest_bone.inverted() @ rest_m
+
+    def prop(rest):
+        if rest:
+            return prop_rest
+        return poses.STATE["prop"] if poses.STATE["prop"] is not None else follow("Wrist.R", wrist_r_rest, prop_rest)
+
+    def nock(rest):
+        if rest:
+            return nock_rest
+        m = follow("Wrist.L", wrist_l_rest, nock_rest)
+        if poses.STATE["nock"] is not None:
+            m.translation = poses.STATE["nock"]
+        return m
+
+    def arrow(rest):
+        if rest:
+            return nock_rest
+        m = nock(False)
+        if not poses.STATE["arrow"]:
+            m = m @ Matrix.Diagonal((1e-4, 1e-4, 1e-4, 1.0))
+        return m
+
+    rig.add_virtual(prefix + "Prop", prop)
+    rig.add_virtual(prefix + "Nock", nock)
+    rig.add_virtual(prefix + "Arrow", arrow)
 
 
 def bake_human_rig():
@@ -277,13 +356,12 @@ def bake_human_rig():
     rig = Rig("human")
     for b in HUMAN_BONES:
         rig.add(arm, b, b)
+    add_human_virtuals(rig, arm)
     rig.capture_rest()
     for clip, source, loop, overrides, mirror in human_clip_specs():
         start = rig.begin_clip()
         act = find_action(source, "CharacterArmature")
-        frames = None
-        if overrides is not None and getattr(overrides, "frames", None):
-            frames = overrides.frames
+        frames = getattr(overrides, "frames", None) if overrides is not None else None
         sample_action(rig, arm, act, overrides=overrides, mirror=mirror, frames=frames)
         rig.end_clip(clip, start, loop)
     rig.write()
@@ -306,13 +384,17 @@ def material(code, rgb, name=None):
 
 
 def recolor(obj, mapping, fallback):
-    """Replace each Quaternius material by a coded material (`mapping[name] = (code, rgb)`)."""
+    """Replace each Quaternius material by a coded material.
+
+    `mapping["Part:Material"]` or `mapping["Material"]` = (code, linear rgb), else `fallback`.
+    """
+    part = clean_name(obj.name)
     for slot in obj.material_slots:
         if slot.material is None or "code" in slot.material:
             continue
         name = clean_name(slot.material.name)
-        code, rgb = mapping.get(name, fallback.get(name, (equip.C_EXACT, (0.5, 0.5, 0.5))))
-        slot.material = material(code, rgb)
+        entry = mapping.get(f"{part}:{name}") or mapping.get(name) or fallback.get(name) or (equip.C_EXACT, (0.5, 0.5, 0.5))
+        slot.material = material(*entry)
 
 
 def weld_and_decimate(obj, target_tris):
@@ -529,7 +611,8 @@ def build_human(recipe, level):
     for item in recipe.get("equipment", []):
         name, mask = item[0], item[1]
         kwargs = item[2] if len(item) > 2 else {}
-        for obj in getattr(equip, name)(ctx, **kwargs):
+        builder = getattr(weapons, name, None) or getattr(equip, name)
+        for obj in builder(ctx, **kwargs):
             set_face_mask(obj, mask)
             out.append(obj)
     for fn in recipe.get("post", []):
