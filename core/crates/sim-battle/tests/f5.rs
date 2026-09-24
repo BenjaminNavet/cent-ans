@@ -105,8 +105,76 @@ fn ai_changes_formation() {
 }
 
 #[test]
-#[ignore]
-fn deployment_phase_validates_zone() {}
+fn deployment_phase_validates_zone() {
+    use sim_battle::{CommandError, SideId};
+    let data = data();
+    let army = ["unit_men_at_arms_foot", "unit_longbowmen", "unit_knights"];
+    let mut s = setup(units(&data, &army), units(&data, &army), None);
+    s.player_side = Some(SideId::Attacker);
+    let mut sim = BattleSim::new(s, 4).unwrap();
+    assert!(sim.begin_deployment());
+    assert!(sim.is_deploying());
+    let zone = sim.deployment_zone(SideId::Attacker);
+    assert!(sim
+        .units()
+        .iter()
+        .all(|u| { !u.present() || sim.deployment_zone(u.side).contains(u.x, u.z) }));
+    // Inside the zone: accepted; beyond it or an enemy regiment: refused.
+    sim.deploy_unit(0, 300.0, zone.z1 - 10.0, Some(0.3))
+        .unwrap();
+    assert_eq!((sim.units()[0].x, sim.units()[0].facing), (300.0, 0.3));
+    let far = sim.deploy_unit(0, 300.0, zone.z1 + 50.0, None);
+    assert_eq!(far, Err(CommandError::OutsideZone(0)));
+    assert_eq!(
+        sim.deploy_unit(3, 300.0, 700.0, None),
+        Err(CommandError::NotYours(3))
+    );
+    // Time is frozen and move orders wait for the battle.
+    sim.tick(5.0);
+    assert_eq!(sim.ticks(), 0);
+    let order = Command::Halt { units: vec![0] };
+    assert_eq!(
+        sim.issue_command(order.clone()),
+        Err(CommandError::Deploying)
+    );
+    sim.start_battle().unwrap();
+    assert!(!sim.is_deploying());
+    assert_eq!(
+        sim.deploy_unit(0, 300.0, 100.0, None),
+        Err(CommandError::NotDeploying)
+    );
+    sim.issue_command(order).unwrap();
+    sim.tick(1.0);
+    assert_eq!(sim.ticks(), 10);
+}
+
+#[test]
+fn siege_besiegers_deploy_outside_the_walls() {
+    use sim_battle::{CommandError, SideId, SiegeSetup};
+    let data = data();
+    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]);
+    let defender = units(&data, &["unit_urban_militia"]);
+    let siege = SiegeSetup {
+        fortification: 1,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 4).unwrap();
+    assert!(sim.begin_deployment());
+    let (cx, cz) = sim.siege().unwrap().center;
+    assert_eq!(
+        sim.deploy_unit(0, cx, cz, None),
+        Err(CommandError::OutsideZone(0))
+    );
+    sim.deploy_unit(0, 500.0, 200.0, None).unwrap();
+    // The garrison stays inside the ring.
+    assert_eq!(
+        sim.deploy_unit(2, 500.0, 200.0, None),
+        Err(CommandError::OutsideZone(2))
+    );
+    sim.deploy_unit(2, cx + 10.0, cz, None).unwrap();
+    let zone = sim.deployment_zone(SideId::Defender);
+    assert!(zone.contains(cx, cz));
+}
 
 #[test]
 #[ignore]
