@@ -40,7 +40,7 @@
     ],
     "voronoi_weight": 0.9
   },
-  "owner": "fac_empire",
+  "owner": "fac_hainaut",
   "overlord": "fac_empire",
   "culture": "cul_french",
   "religion": "rel_catholic",
@@ -91,7 +91,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 4500,
-  "description": "Comté de Hainaut tenu par Guillaume II d'Avesnes (faction Hainaut-Hollande à créer), beau-frère d'Édouard III ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
+  "description": "Comté de Hainaut tenu par Guillaume Ier d'Avesnes, beau-père d'Édouard III, qui meurt le 7 juin 1337 ; son fils Guillaume II, beau-frère du roi anglais, lui succède ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
   "sources": [
     "Comté de Hainaut",
     "Guillaume II de Hainaut",

@@ -363,16 +363,10 @@ fn pick_name(
 
 /// "Hugues de Valois", "Jeanne d'Évreux": first name + house.
 fn generated_full_name(first_name: &str, house: &str) -> String {
-    let starts_with_vowel = house
-        .chars()
-        .next()
-        .is_some_and(|c| "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(c));
     if house.is_empty() {
         first_name.to_owned()
-    } else if starts_with_vowel {
-        format!("{first_name} d'{house}")
     } else {
-        format!("{first_name} de {house}")
+        format!("{first_name} {}", crate::events::de(house))
     }
 }
 
@@ -452,6 +446,7 @@ pub(crate) fn spawn_ruler(
             army: None,
             skills,
             captive: false,
+            captor: None,
             experience: 0,
             skill_points: 0,
             skills_learned: BTreeSet::new(),
@@ -481,8 +476,10 @@ struct NewChild {
     faction: FactionId,
     house: String,
     sex: Sex,
-    father: CharacterId,
-    mother: CharacterId,
+    /// `None` only for a historical character born outside the modelled
+    /// families (F1: a future consort such as Jeanne de Bourbon).
+    father: Option<CharacterId>,
+    mother: Option<CharacterId>,
     location: Option<ProvinceId>,
 }
 
@@ -523,14 +520,15 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             army: None,
             skills,
             captive: false,
+            captor: None,
             experience: 0,
             skill_points: 0,
             skills_learned: BTreeSet::new(),
             traits,
             spouse: None,
             children: Vec::new(),
-            father: Some(father.clone()),
-            mother: Some(mother.clone()),
+            father: father.clone(),
+            mother: mother.clone(),
             piety: 50,
             prestige: 0,
             loyalty: 100,
@@ -541,7 +539,7 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             raids_led: 0,
         },
     );
-    for parent in [&father, &mother] {
+    for parent in [&father, &mother].into_iter().flatten() {
         if let Some(p) = state.characters.get_mut(parent) {
             p.children.push(id.clone());
         }
@@ -579,6 +577,36 @@ pub(crate) fn resolve_births(
         let Some(character) = data.characters.get(&id) else {
             continue;
         };
+        // F1: a historical character with no modelled parents (a future
+        // consort from a house outside the game) is born unconditionally.
+        let parentless = character
+            .family
+            .as_ref()
+            .is_none_or(|f| f.father.is_none() && f.mother.is_none());
+        if parentless {
+            spawn_child(
+                state,
+                data,
+                NewChild {
+                    id: id.clone(),
+                    name: None,
+                    faction: character.faction.clone(),
+                    house: character.house.clone(),
+                    sex: character.sex,
+                    father: None,
+                    mother: None,
+                    location: character.starting_location.clone(),
+                },
+            );
+            events.push(
+                GameEvent::new(
+                    EventKind::Birth,
+                    format!("Naissance de {}.", state.character_name(data, &id)),
+                )
+                .faction(&character.faction),
+            );
+            continue;
+        }
         let Some(Family {
             father: Some(father),
             mother: Some(mother),
@@ -611,8 +639,8 @@ pub(crate) fn resolve_births(
                 faction: character.faction.clone(),
                 house: character.house.clone(),
                 sex: character.sex,
-                father: father.clone(),
-                mother: mother.clone(),
+                father: Some(father.clone()),
+                mother: Some(mother.clone()),
                 location,
             },
         );
@@ -682,8 +710,8 @@ pub(crate) fn resolve_births(
                 faction: faction.clone(),
                 house,
                 sex,
-                father: father_id.clone(),
-                mother: mother_id.clone(),
+                father: Some(father_id.clone()),
+                mother: Some(mother_id.clone()),
                 location,
             },
         );
@@ -767,6 +795,64 @@ pub(crate) fn resolve_regencies(
                 )
                 .faction(&faction_id),
             );
+        }
+    }
+}
+
+/// Prestige effects (buildings, technologies, the ruler's traits and skills)
+/// are yearly figures divided by this (F1): a cathedral adds 2 a year.
+pub const PRESTIGE_EFFECT_DIVISOR: f64 = 5.0;
+
+/// Yearly prestige of a faction's ruler from its `Prestige` effects (F1):
+/// buildings of the provinces it controls, its technologies (gothic
+/// flamboyant, printing press) and the ruler's own traits and skills.
+pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    let Some(ruler) = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.ruler.clone())
+        .filter(|r| state.characters.get(r).is_some_and(|c| c.alive))
+    else {
+        return 0;
+    };
+    let buildings: f64 = state
+        .provinces
+        .values()
+        .filter(|p| &p.controller == faction)
+        .map(|p| {
+            crate::buildings::effects_of(data, &p.buildings)
+                .prestige
+                .apply(0.0)
+        })
+        .sum();
+    let tech = crate::research::faction_tech_effects(state, data, faction)
+        .prestige
+        .apply(0.0);
+    let own = skills::character_effects(state, data, &ruler)
+        .prestige
+        .apply(0.0);
+    ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
+}
+
+/// Phase (winter): every ruler gains its [`yearly_court_prestige`].
+pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData) {
+    if state.season != crate::state::Season::Winter {
+        return;
+    }
+    let factions: Vec<FactionId> = state
+        .factions
+        .iter()
+        .filter(|(_, f)| f.alive)
+        .map(|(id, _)| id.clone())
+        .collect();
+    for faction in factions {
+        let gain = yearly_court_prestige(state, data, &faction);
+        if gain == 0 {
+            continue;
+        }
+        let ruler = state.factions[&faction].ruler.clone();
+        if let Some(c) = ruler.and_then(|r| state.characters.get_mut(&r)) {
+            c.prestige += gain;
         }
     }
 }

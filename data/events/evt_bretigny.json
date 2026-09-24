@@ -44,13 +44,10 @@
           "b": "fac_france"
         },
         {
-          "type": "treasury",
-          "amount": -40000
-        },
-        {
-          "type": "treasury",
-          "faction": "fac_england",
-          "amount": 40000
+          "type": "release_character",
+          "id": "chr_jean_de_normandie",
+          "faction": "fac_france",
+          "ransom": 40000
         },
         {
           "type": "prestige",

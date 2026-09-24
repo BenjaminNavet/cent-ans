@@ -1,0 +1,35 @@
+{
+  "id": "chr_cangrande_ii_della_scala",
+  "name": {
+    "display": "Cangrande della Scala",
+    "local": "Cangrande II della Scala",
+    "local_language": "vénitien"
+  },
+  "sex": "male",
+  "house": "della Scala",
+  "faction": "fac_verona",
+  "role": "heir",
+  "birth": {
+    "value": "1332-06-08"
+  },
+  "death": {
+    "value": "1359-12-14"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 1,
+    "court": 1
+  },
+  "traits": [],
+  "piety": 50,
+  "family": {
+    "father": "chr_mastino_ii_della_scala"
+  },
+  "starting_location": "prov_verona",
+  "status": "minor",
+  "description": "Fils aîné de Mastino II ; futur seigneur, assassiné par son frère Cansignorio.",
+  "sources": [
+    "Cangrande II della Scala"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "names_gd",
+  "language": "scots et gaélique",
+  "cultures": [
+    "cul_scottish",
+    "cul_irish"
+  ],
+  "male_first_names": [
+    "Robert",
+    "David",
+    "Alexander",
+    "James",
+    "William",
+    "Andrew",
+    "John",
+    "Archibald",
+    "Patrick",
+    "Thomas",
+    "Walter",
+    "Duncan",
+    "Malcolm",
+    "Donald",
+    "Niall",
+    "Brian",
+    "Aodh",
+    "Domhnall",
+    "Conchobhar",
+    "Tadhg"
+  ],
+  "female_first_names": [
+    "Marjorie",
+    "Isabel",
+    "Margaret",
+    "Christina",
+    "Euphemia",
+    "Mary",
+    "Matilda",
+    "Joan",
+    "Egidia",
+    "Annabella",
+    "Gormlaith",
+    "Sadhbh",
+    "Mór",
+    "Úna"
+  ],
+  "surnames": [
+    "Stewart",
+    "Douglas",
+    "Randolph",
+    "Murray",
+    "Dunbar",
+    "Ó Néill"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "fac_naples",
+  "name": {
+    "display": "Royaume de Naples",
+    "local": "Regno di Sicilia",
+    "local_language": "napolitain"
+  },
+  "short_name": "Naples",
+  "adjective": "napolitain",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_robert_d_anjou",
+  "capital": "prov_napoli",
+  "capital_city": "Naples",
+  "religion": "rel_catholic",
+  "culture": "cul_neapolitan",
+  "succession_law": "cognatic_primogeniture",
+  "suzerain": "fac_papacy",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+    "description": "Armes d'Anjou-Sicile : les lis de France brisés du lambel rouge des Angevins de Naples.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Roi de Sicile (Naples)",
+    "Comte de Provence et de Forcalquier"
+  ],
+  "treasury": 30000,
+  "prestige": 65,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_universities",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "vassal",
+      "note": "Le royaume est un fief du Saint-Siège : cens annuel et hommage au pape."
+    },
+    {
+      "faction": "fac_france",
+      "status": "alliance",
+      "note": "Les Angevins de Naples sont des cousins des Valois et leurs alliés constants."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 70,
+    "piety": 65
+  },
+  "description": "Royaume angevin du Mezzogiorno et comté de Provence. Robert le Sage, protecteur des guelfes et mécène de Pétrarque, vieillit sans fils : sa petite-fille Jeanne héritera d'une couronne convoitée.",
+  "sources": [
+    "Royaume de Naples",
+    "Robert Ier de Naples",
+    "Comté de Provence"
+  ]
+}

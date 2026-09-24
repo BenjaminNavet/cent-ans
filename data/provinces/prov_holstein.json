@@ -3,7 +3,7 @@
   "name": {
     "display": "Holstein et Lübeck",
     "local": "Holsten",
-    "local_language": "moyen haut-allemand"
+    "local_language": "moyen bas-allemand"
   },
   "region": "empire_nord",
   "terrain": "plains",
@@ -49,7 +49,7 @@
     ],
     "voronoi_weight": 1.2
   },
-  "owner": "fac_empire",
+  "owner": "fac_holstein",
   "overlord": "fac_empire",
   "culture": "cul_german",
   "religion": "rel_catholic",

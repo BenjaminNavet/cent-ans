@@ -101,7 +101,7 @@ fn historical_event_fires_at_its_date_for_the_player() {
     assert!(decision_for(&state, "evt_sluys").is_some());
     assert!(events
         .iter()
-        .any(|e| e.kind == EventKind::Chronicle && e.text_fr.contains("L'Écluse")));
+        .any(|e| e.kind == EventKind::Chronicle && e.text_fr.contains("l'Écluse")));
     let views = state.decision_views(&data, &fac("fac_france"));
     let view = views.iter().find(|v| v.event == evt("evt_sluys")).unwrap();
     assert_eq!(view.options.len(), 2);
@@ -138,7 +138,7 @@ fn historical_event_fires_only_once() {
         let events = state.end_turn_with(&data, idle);
         sluys += events
             .iter()
-            .filter(|e| e.text_fr.starts_with("Chronique : La bataille de L'Écluse"))
+            .filter(|e| e.text_fr.starts_with("Chronique : La bataille de l'Écluse"))
             .count();
     }
     assert_eq!(sluys, 1);
@@ -199,7 +199,7 @@ fn ai_applies_the_heaviest_option_at_once() {
     assert!(state.chronicle.fired_events.contains(&evt("evt_sluys")));
     assert!(decision_for(&state, "evt_sluys").is_none());
     assert!(events.iter().any(|e| e.kind == EventKind::Chronicle
-        && e.text_fr.contains("L'Écluse (France)")
+        && e.text_fr.contains("l'Écluse (France)")
         && e.text_fr.contains("Renoncer à la mer")));
 }
 
@@ -397,7 +397,7 @@ fn sixty_turns_bring_historical_and_random_events() {
         state.end_turn(&data);
         for decision in state.chronicle.pending_decisions.clone() {
             match data.events[&decision.event].kind {
-                EventCategory::Historical => historical += 1,
+                EventCategory::Historical | EventCategory::Chained => historical += 1,
                 EventCategory::Random => random += 1,
             }
             state

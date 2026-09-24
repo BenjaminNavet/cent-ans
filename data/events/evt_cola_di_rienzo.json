@@ -1,0 +1,74 @@
+{
+  "id": "evt_cola_di_rienzo",
+  "title": "Cola di Rienzo tribun de Rome",
+  "text": "Fils d'aubergiste et lecteur passionné de Tite-Live, Cola di Rienzo soulève Rome le jour de la Pentecôte, chasse les barons Colonna et Orsini et se proclame tribun. Il écrit aux princes d'Italie de venir recevoir leurs lois du peuple romain.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1347,
+      "season": "spring"
+    },
+    "until_year": 1348,
+    "conditions": [
+      {
+        "type": "controls",
+        "faction": "fac_papacy",
+        "province": "prov_lazio"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_lazio"
+  },
+  "options": [
+    {
+      "text": "Reconnaître le tribun par l'entremise du vicaire",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "wealth",
+          "amount": 5
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_chute_de_rienzo",
+          "delay": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Excommunier l'usurpateur",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "devastation",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1347-05-20"
+  },
+  "sources": [
+    "Cola di Rienzo",
+    "Jean-Claude Maire Vigueur, L'Autre Rome, Tallandier, 2010"
+  ]
+}

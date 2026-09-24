@@ -95,3 +95,15 @@ avec les nouveaux champs (`state_version` → 2, `load_json` refuse la version 1
 - 30 tours en France sans crash ; population de Paris évolue ; au moins 3 bâtiments construits ; une révolte
   déclenchable en imposant Haut dans une province occupée.
 - Tests Rust verts (≥ 12 nouveaux), smoke Godot vert, captures `docs/img/godot-city-panel.png`.
+
+## F1 (v2) — effets branchés
+Un effet portant `class` ne touche que cette classe (`EffectTotals::classes`) et un effet portant
+`unit_category` que cette famille d'unités (`EffectTotals::unit_categories`) ; les champs de premier niveau
+ne gardent que les effets non ciblés. `Garrison` N : la ville paie 10 % × N de l'entretien de sa garnison
+(plafond 50 %) et, tenue par son propriétaire et non assiégée, la renforce de 5 % × N de l'effectif par
+saison. `RecruitCost` : bâtiments et gouverneur de la province + techs de la faction, pourcentages
+additionnés (plancher 25 % du prix). `Supply` : ajouté à la récupération de ravitaillement des armées en
+territoire ami. `Production` : % sur la part fiscale des paysans et bourgeois, dont la moitié revient au
+fisc. `Loyalty` d'une province (château, gouverneur) : moins de mécontentement de la noblesse. Pour garder
+le calibrage des revenus, la richesse de base de chaque classe gagne +8 (les effets ciblés gonflaient
+auparavant la richesse de toutes les classes).

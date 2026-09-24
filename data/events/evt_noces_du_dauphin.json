@@ -1,0 +1,62 @@
+{
+  "id": "evt_noces_du_dauphin",
+  "title": "Les noces du dauphin",
+  "text": "À Tain-l'Hermitage, le jeune Charles, dauphin de Viennois, épouse sa cousine Jeanne de Bourbon. L'union resserre les liens entre la maison royale et les Bourbons, fidèles soutiens des Valois.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1350,
+      "season": "spring"
+    },
+    "until_year": 1352,
+    "conditions": [
+      {
+        "type": "character_alive",
+        "id": "chr_charles_v"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_jeanne_de_bourbon"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Célébrer les noces",
+      "effects": [
+        {
+          "type": "marry",
+          "a": "chr_charles_v",
+          "b": "chr_jeanne_de_bourbon"
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Chercher au dauphin une alliance plus avantageuse",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1350-04-08",
+    "place": "Tain-l'Hermitage"
+  },
+  "sources": [
+    "Jeanne de Bourbon (1338-1378)",
+    "Charles V de France"
+  ]
+}

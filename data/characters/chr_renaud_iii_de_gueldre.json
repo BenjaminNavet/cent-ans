@@ -1,0 +1,35 @@
+{
+  "id": "chr_renaud_iii_de_gueldre",
+  "name": {
+    "display": "Renaud de Gueldre",
+    "local": "Reinoud III van Gelre",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "male",
+  "house": "Wassenberg",
+  "faction": "fac_guelders",
+  "role": "heir",
+  "birth": {
+    "value": "1333-05-13"
+  },
+  "death": {
+    "value": "1371-12-04"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 1,
+    "court": 1
+  },
+  "traits": [],
+  "piety": 50,
+  "family": {
+    "father": "chr_renaud_ii_de_gueldre"
+  },
+  "starting_location": "prov_gueldre",
+  "status": "minor",
+  "description": "Fils de Renaud II et d'Éléonore d'Angleterre, neveu d'Édouard III.",
+  "sources": [
+    "Renaud III de Gueldre"
+  ]
+}

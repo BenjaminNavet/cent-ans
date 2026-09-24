@@ -1,0 +1,38 @@
+{
+  "id": "tech_soporific_sponge",
+  "name": {
+    "display": "Éponge soporifique"
+  },
+  "branch": "medicine",
+  "tier": 3,
+  "cost": 300,
+  "prerequisites": [
+    "tech_barber_surgeons"
+  ],
+  "historical_year": {
+    "value": "1266",
+    "note": "Décrite dans la Chirurgia de Théodoric Borgognoni (version définitive 1266), d'après la pratique de son père Hugues de Lucques."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "wound_recovery",
+      "value": 10
+    },
+    {
+      "effect": "army_morale",
+      "value": 2
+    }
+  ],
+  "description": "Une éponge imbibée de suc de pavot, de mandragore et de jusquiame, séchée puis humectée sous le nez du patient : l'opéré dort pendant qu'on le soigne.",
+  "sources": [
+    "Hugues de Lucques",
+    "Théodoric Borgognoni",
+    "Anesthésie"
+  ],
+  "herbs": [
+    "cdx_pavot",
+    "cdx_mandragore",
+    "cdx_jusquiame"
+  ]
+}

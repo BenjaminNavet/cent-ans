@@ -41,7 +41,7 @@
     ],
     "voronoi_weight": 1.0
   },
-  "owner": "fac_empire",
+  "owner": "fac_guelders",
   "overlord": "fac_empire",
   "culture": "cul_dutch",
   "religion": "rel_catholic",
@@ -89,7 +89,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 4000,
-  "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II (faction à créer), marié à Éléonore, sœur d'Édouard III : allié anglais. Nimègue, ville impériale engagée.",
+  "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II, marié à Éléonore, sœur d'Édouard III : allié anglais. Nimègue, ville impériale engagée.",
   "sources": [
     "Duché de Gueldre",
     "Renaud II de Gueldre",

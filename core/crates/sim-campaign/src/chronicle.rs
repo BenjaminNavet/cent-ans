@@ -79,6 +79,21 @@ pub struct ChronicleState {
     /// pending decisions still expire and the plague wave still spreads.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub disabled: bool,
+    /// F1: events scheduled by `schedule_event` effects (chains).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub scheduled: Vec<ScheduledEvent>,
+}
+
+/// An event programmed by another one (F1), fired at the end of `turn` for
+/// the same faction and province.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ScheduledEvent {
+    pub event: EventId,
+    pub turn: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub faction: Option<FactionId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub province: Option<ProvinceId>,
 }
 
 /// Why a `choose_event_option` order was refused.
@@ -307,7 +322,8 @@ impl CampaignState {
                     event: decision.event.clone(),
                     title: event.title.clone(),
                     text: event.text.clone(),
-                    historical: event.kind == EventCategory::Historical,
+                    // Chained events (F1) follow historical ones.
+                    historical: event.kind != EventCategory::Random,
                     options,
                     expires_in: (decision.expires_turn + 1).saturating_sub(self.turn),
                     province: decision.province.clone(),
@@ -531,6 +547,41 @@ impl CampaignState {
                  mécontentement)"
                     .to_owned()
             }
+            EventEffect::CaptureCharacter {
+                id,
+                faction,
+                captor,
+            } => format!(
+                "Captivité{} aux mains de {}",
+                who(id, faction),
+                faction_name(data, captor)
+            ),
+            EventEffect::ReleaseCharacter {
+                id,
+                faction,
+                ransom,
+            } => {
+                if *ransom > 0 {
+                    format!(
+                        "Libération{} contre {ransom} livres de rançon",
+                        who(id, faction)
+                    )
+                } else {
+                    format!("Libération{}", who(id, faction))
+                }
+            }
+            EventEffect::ScheduleEvent { event, delay } => {
+                let title = data
+                    .events
+                    .get(event)
+                    .map_or_else(|| event.to_string(), |e| e.title.clone());
+                format!("Suite : « {title} » dans {delay} saison(s)")
+            }
+            EventEffect::Marry { a, b } => format!(
+                "Mariage de {} et {}",
+                self.character_name(data, a),
+                self.character_name(data, b)
+            ),
         }
     }
 
@@ -845,6 +896,39 @@ pub fn apply_effect(
                 }
             }
         }
+        EventEffect::CaptureCharacter {
+            id,
+            faction,
+            captor,
+        } => {
+            let faction = target_faction(faction);
+            if let Some(id) = state.resolve_character(id, faction.as_ref()) {
+                capture_character(state, data, &id, captor, events);
+            }
+        }
+        EventEffect::ReleaseCharacter {
+            id,
+            faction,
+            ransom,
+        } => {
+            let faction = target_faction(faction);
+            if let Some(id) = state.resolve_character(id, faction.as_ref()) {
+                release_character(state, data, &id, *ransom, events);
+            }
+        }
+        EventEffect::ScheduleEvent { event, delay } => {
+            if data.events.contains_key(event) {
+                state.chronicle.scheduled.push(ScheduledEvent {
+                    event: event.clone(),
+                    turn: state.turn + (*delay).max(1),
+                    faction: ctx.faction.clone(),
+                    province: ctx.province.clone(),
+                });
+            }
+        }
+        EventEffect::Marry { a, b } => {
+            marry(state, data, a, b, events);
+        }
         EventEffect::PlagueWave { from_year, to_year } => {
             if state.chronicle.plague_wave.is_none() {
                 let years = (to_year - from_year).max(0) as u32;
@@ -855,6 +939,118 @@ pub fn apply_effect(
             }
         }
     }
+}
+
+/// F1 `capture_character`: `id` becomes the prisoner of `captor` (it
+/// leaves its army and its governorship; a ruler keeps the crown).
+pub fn capture_character(
+    state: &mut CampaignState,
+    data: &GameData,
+    id: &CharacterId,
+    captor: &FactionId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(c) = state.characters.get(id).filter(|c| c.alive && !c.captive) else {
+        return;
+    };
+    if &c.faction == captor || !state.factions.contains_key(captor) {
+        return;
+    }
+    let owner = c.faction.clone();
+    state.detach_general(id);
+    let c = state.characters.get_mut(id).expect("checked above");
+    c.captive = true;
+    c.captor = Some(captor.clone());
+    c.governor_of = None;
+    c.location = state.factions.get(captor).map(|f| f.capital.clone());
+    events.push(
+        GameEvent::new(
+            EventKind::GeneralCaptured,
+            format!(
+                "{} est retenu prisonnier par {}.",
+                state.character_name(data, id),
+                faction_name(data, captor)
+            ),
+        )
+        .faction(&owner),
+    );
+}
+
+/// F1 `release_character`: a captive is freed against `ransom` livres paid
+/// by its faction to its captor, and returns to its capital.
+pub fn release_character(
+    state: &mut CampaignState,
+    data: &GameData,
+    id: &CharacterId,
+    ransom: i64,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(c) = state.characters.get(id).filter(|c| c.alive && c.captive) else {
+        return;
+    };
+    let owner = c.faction.clone();
+    let captor = c.captor.clone();
+    let ransom = ransom.max(0);
+    if ransom > 0 {
+        if let Some(f) = state.factions.get_mut(&owner) {
+            f.treasury -= ransom;
+        }
+        if let Some(f) = captor.as_ref().and_then(|c| state.factions.get_mut(c)) {
+            f.treasury += ransom;
+        }
+    }
+    let capital = state.factions.get(&owner).map(|f| f.capital.clone());
+    let c = state.characters.get_mut(id).expect("checked above");
+    c.captive = false;
+    c.captor = None;
+    c.location = capital;
+    crate::dynasty::on_ransomed(state, data, id);
+    let text = if ransom > 0 {
+        format!(
+            "{} est libéré contre une rançon de {ransom} livres.",
+            state.character_name(data, id)
+        )
+    } else {
+        format!("{} est libéré.", state.character_name(data, id))
+    };
+    events.push(GameEvent::new(EventKind::Chronicle, text).faction(&owner));
+}
+
+/// F1 `marry`: a historical marriage between two living, unmarried
+/// characters (no-op otherwise: history diverged).
+fn marry(
+    state: &mut CampaignState,
+    data: &GameData,
+    a: &CharacterId,
+    b: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) {
+    let free = |id: &CharacterId| {
+        state
+            .characters
+            .get(id)
+            .is_some_and(|c| c.alive && c.spouse.is_none())
+    };
+    if a == b || !free(a) || !free(b) {
+        return;
+    }
+    for (x, y) in [(a, b), (b, a)] {
+        let c = state.characters.get_mut(x).expect("checked above");
+        c.spouse = Some(y.clone());
+        c.prestige += crate::dynasty::PRESTIGE_MARRIAGE;
+    }
+    let faction = state.characters[a].faction.clone();
+    events.push(
+        GameEvent::new(
+            EventKind::Chronicle,
+            format!(
+                "Mariage de {} et de {}.",
+                state.character_name(data, a),
+                state.character_name(data, b)
+            ),
+        )
+        .faction(&faction),
+    );
 }
 
 // =========================================================================
@@ -902,9 +1098,36 @@ fn apply_option(
     let Some(option) = event.options.get(option) else {
         return;
     };
+    // H4: medicine softens the harm of a local epidemic.
+    let resistance = match &ctx.province {
+        Some(province) if crate::medicine::is_epidemic(&event.id) => {
+            crate::medicine::plague_resistance(state, data, province)
+        }
+        _ => 0.0,
+    };
     for effect in &option.effects {
-        apply_effect(state, data, effect, ctx, events);
+        let effect = if resistance > 0.0 {
+            mitigate_effect(effect, resistance)
+        } else {
+            effect.clone()
+        };
+        apply_effect(state, data, &effect, ctx, events);
     }
+}
+
+/// `effect` with its health and population harm scaled by `1 - resistance`.
+fn mitigate_effect(effect: &EventEffect, resistance: f64) -> EventEffect {
+    let mut effect = effect.clone();
+    match &mut effect {
+        EventEffect::Health { amount, .. } => {
+            *amount = crate::medicine::mitigated(*amount, resistance);
+        }
+        EventEffect::Population { percent, .. } => {
+            *percent = crate::medicine::mitigated(*percent, resistance);
+        }
+        _ => {}
+    }
+    effect
 }
 
 /// Option of highest `ai_weight`, ties broken by the campaign RNG.
@@ -933,7 +1156,30 @@ fn fire(
     province: Option<ProvinceId>,
     events: &mut Vec<GameEvent>,
 ) {
-    let historical = event.kind == EventCategory::Historical;
+    // H4: a local epidemic may be contained before it spreads.
+    if let Some(p) = province
+        .as_ref()
+        .filter(|_| crate::medicine::is_epidemic(&event.id))
+    {
+        let resistance = crate::medicine::plague_resistance(state, data, p);
+        if resistance > 0.0 && state.rng.unit_f64() < resistance {
+            if decider.as_ref() == Some(&state.player_faction) {
+                events.push(
+                    GameEvent::new(
+                        EventKind::Medicine,
+                        format!(
+                            "Une fièvre s'est déclarée à {} : les médecins l'ont circonscrite.",
+                            province_name(data, p)
+                        ),
+                    )
+                    .province(p)
+                    .faction(&state.player_faction),
+                );
+            }
+            return;
+        }
+    }
+    let historical = event.kind != EventCategory::Random;
     let player_decides = decider
         .as_ref()
         .is_some_and(|f| f == &state.player_faction && state.faction_alive(f));
@@ -1101,6 +1347,17 @@ fn targets(
     }
 }
 
+/// `false` when `scope` names a faction other than `faction`.
+pub fn scope_allows(scope: &EventScope, faction: &FactionId) -> bool {
+    match scope {
+        EventScope::Faction { faction: Some(f) }
+        | EventScope::Province {
+            faction: Some(f), ..
+        } => f == faction,
+        _ => true,
+    }
+}
+
 /// Per-turn chance of a random event, in thousandths.
 pub fn random_permille(event: &Event) -> u32 {
     event.trigger.chance_permille.unwrap_or_else(|| {
@@ -1133,6 +1390,28 @@ pub(crate) fn resolve_chronicle(
         resolve_plague_wave(state, data, events);
         events.append(&mut state.pending_events);
         return;
+    }
+
+    // 1b. F1: events scheduled by earlier ones (chains).
+    let (due, later): (Vec<ScheduledEvent>, Vec<ScheduledEvent>) =
+        std::mem::take(&mut state.chronicle.scheduled)
+            .into_iter()
+            .partition(|s| s.turn <= turn);
+    state.chronicle.scheduled = later;
+    for scheduled in due {
+        let Some(event) = data.events.get(&scheduled.event) else {
+            continue;
+        };
+        let decider = scheduled.faction.filter(|f| state.faction_alive(f));
+        let ctx = EventContext {
+            faction: decider.clone(),
+            province: scheduled.province.clone(),
+        };
+        if decider.is_none() || !state.event_conditions_hold(data, event, &ctx) {
+            continue;
+        }
+        state.chronicle.fired_events.insert(event.id.clone());
+        fire(state, data, event, decider, scheduled.province, events);
     }
 
     // 2. Historical events.
@@ -1173,6 +1452,11 @@ pub(crate) fn resolve_chronicle(
         for event in random.iter().filter(|e| e.scope != EventScope::Global) {
             if !state.faction_alive(&faction) {
                 break;
+            }
+            // F7b: an event reserved to another faction costs no roll, so
+            // adding one (Venice, Bohemia…) leaves the others' luck alone.
+            if !scope_allows(&event.scope, &faction) {
+                continue;
             }
             // Roll first: the costly province scan only runs on a hit.
             if !state.rng.chance_permille(random_permille(event)) {
@@ -1237,20 +1521,54 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         state.chronicle.plague_wave = None;
         return;
     }
-    let struck = plague_slice(state, data, step, wave.duration);
+    let reached = plague_slice(state, data, step, wave.duration);
     let (low, high) = PLAGUE_POPULATION_LOSS;
-    for id in &struck {
+    let mut struck = Vec::new();
+    let mut spared = Vec::new();
+    for id in reached {
         let loss = low + state.rng.below(high - low + 1);
-        let factor = f64::from(100 - loss) / 100.0;
-        for_each_class(state, id, |c| {
-            c.health = add_clamped(c.health, -PLAGUE_HEALTH_LOSS);
-            c.unrest = add_clamped(c.unrest, PLAGUE_UNREST);
+        // H4: plague resistance may spare the province (the roll only
+        // happens with some resistance) and softens the blow.
+        let resistance = crate::medicine::plague_resistance(state, data, &id);
+        if resistance > 0.0
+            && state.rng.unit_f64()
+                < resistance * crate::medicine::BLACK_DEATH_SPARE_PERCENT / 100.0
+        {
+            spared.push(id);
+            continue;
+        }
+        let factor = 1.0 - f64::from(loss) / 100.0 * (1.0 - resistance);
+        let health = crate::medicine::mitigated(-PLAGUE_HEALTH_LOSS, resistance);
+        let unrest = -crate::medicine::mitigated(-PLAGUE_UNREST, resistance);
+        for_each_class(state, &id, |c| {
+            c.health = add_clamped(c.health, health);
+            c.unrest = add_clamped(c.unrest, unrest);
             c.count = (c.count as f64 * factor).round() as u64;
         });
+        struck.push(id);
+    }
+    let player = state.player_faction.clone();
+    for id in &spared {
+        if state
+            .provinces
+            .get(id)
+            .is_some_and(|p| p.controller == player)
+        {
+            events.push(
+                GameEvent::new(
+                    EventKind::Medicine,
+                    format!(
+                        "La Grande Mortalité épargne {} : quarantaine, fumigations et apothicaires ont tenu.",
+                        province_name(data, id)
+                    ),
+                )
+                .province(id)
+                .faction(&player),
+            );
+        }
     }
     if !struck.is_empty() {
         let names: Vec<String> = struck.iter().map(|p| province_name(data, p)).collect();
-        let player = state.player_faction.clone();
         let mut entry = GameEvent::new(
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),

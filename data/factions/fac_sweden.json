@@ -1,0 +1,54 @@
+{
+  "id": "fac_sweden",
+  "name": {
+    "display": "Royaume de Suède",
+    "local": "Svea rike",
+    "local_language": "vieux suédois"
+  },
+  "short_name": "Suède",
+  "adjective": "suédois",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_magnus_eriksson",
+  "capital": "prov_gotaland",
+  "capital_city": "Lödöse",
+  "religion": "rel_catholic",
+  "culture": "cul_swedish",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "D'azur à trois couronnes d'or.",
+    "description": "Les trois couronnes, sceau de Magnus Eriksson dès 1336.",
+    "primary_color": "#1F4E9B",
+    "secondary_color": "#E8B923"
+  },
+  "titles": [
+    "Roi de Suède",
+    "Roi de Norvège",
+    "Seigneur de Scanie"
+  ],
+  "treasury": 12000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_holstein",
+      "status": "peace",
+      "note": "Magnus a racheté la Scanie aux comtes de Holstein (1332)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Monarchie élective des Folkungar unie à la Norvège ; Magnus Eriksson, roi à trois ans, tient aussi la Scanie et prépare le code de lois du royaume (vers 1350).",
+  "sources": [
+    "Magnus IV de Suède",
+    "Royaume de Suède"
+  ]
+}

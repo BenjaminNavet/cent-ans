@@ -41,7 +41,7 @@
     ],
     "voronoi_weight": 1.0
   },
-  "owner": "fac_empire",
+  "owner": "fac_verona",
   "overlord": "fac_empire",
   "culture": "cul_lombard",
   "religion": "rel_catholic",
@@ -93,7 +93,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 5500,
-  "description": "Seigneurie de Mastino II della Scala (faction à créer), à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques) mais attaquée depuis 1336 par la ligue Venise-Florence-Visconti ; Padoue perdue en août 1337. Mantoue des Gonzague au sud.",
+  "description": "Seigneurie de Mastino II della Scala, à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques) mais attaquée depuis 1336 par la ligue Venise-Florence-Visconti ; Padoue perdue en août 1337. Mantoue des Gonzague au sud.",
   "sources": [
     "Mastino II della Scala",
     "Seigneurie de Vérone",

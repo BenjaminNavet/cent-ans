@@ -1,0 +1,37 @@
+{
+  "id": "chr_magnus_eriksson",
+  "name": {
+    "display": "Magnus Eriksson, roi de Suède",
+    "local": "Magnus Eriksson",
+    "local_language": "vieux suédois"
+  },
+  "sex": "male",
+  "house": "Folkungar",
+  "faction": "fac_sweden",
+  "role": "ruler",
+  "birth": {
+    "value": "1316-04-01",
+    "uncertain": true,
+    "note": "Né en avril ou mai 1316 ; jour inconnu."
+  },
+  "death": {
+    "value": "1374-12-01"
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_peaceful"
+  ],
+  "piety": 65,
+  "starting_location": "prov_gotaland",
+  "status": "at_court",
+  "description": "Roi de Suède et de Norvège depuis 1319, couronné en 1336, acquéreur de la Scanie.",
+  "sources": [
+    "Magnus IV de Suède"
+  ]
+}

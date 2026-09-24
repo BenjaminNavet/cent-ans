@@ -1,0 +1,42 @@
+{
+  "id": "chr_renaud_ii_de_gueldre",
+  "name": {
+    "display": "Renaud II de Gueldre",
+    "local": "Reinoud II van Gelre",
+    "local_language": "moyen néerlandais"
+  },
+  "epithet": "le Noir",
+  "sex": "male",
+  "house": "Wassenberg",
+  "faction": "fac_guelders",
+  "role": "ruler",
+  "birth": {
+    "value": "1295",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343-10-12"
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_anglophile"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_renaud_iii_de_gueldre"
+    ]
+  },
+  "starting_location": "prov_gueldre",
+  "status": "at_court",
+  "description": "Beau-frère d'Édouard III, vicaire impérial et premier duc de Gueldre (1339).",
+  "sources": [
+    "Renaud II de Gueldre"
+  ]
+}

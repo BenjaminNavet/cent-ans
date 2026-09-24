@@ -1,0 +1,23 @@
+{
+  "id": "order_pavise",
+  "kind": "pavise",
+  "rank": 4,
+  "name": "Dresser les pavois",
+  "description": "Les valets plantent les grands pavois devant les arbalétriers, qui tirent à couvert : immobiles, ils ne craignent presque plus les flèches. Les pavois sont levés au prochain ordre de mouvement. À Crécy, les Génois durent combattre sans leurs pavois restés aux bagages, et furent décimés.",
+  "icon": "pavise",
+  "scope": "selected",
+  "requires_general": false,
+  "cooldown": 10.0,
+  "eligible": {
+    "abilities": ["pavise"]
+  },
+  "effects": {
+    "missile_damage_factor": 0.35
+  },
+  "journal": "Les {unit} dressent leurs pavois.",
+  "ai": {
+    "min_units": 1,
+    "under_fire_within": 6.0
+  },
+  "sources": ["Pavois", "Arbalétriers génois"]
+}

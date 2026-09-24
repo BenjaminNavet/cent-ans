@@ -258,6 +258,10 @@ pub struct ProvinceState {
     pub heresy: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub heresy_religion: Option<ReligionId>,
+    /// H3 « La Table »: diet chosen by the controller (`None`: the default
+    /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diet: Option<crate::table::DietChoice>,
 }
 
 impl ProvinceState {
@@ -344,7 +348,8 @@ pub struct FactionState {
     /// Technology being researched, if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub research: Option<TechnologyId>,
-    /// Points accumulated towards `research`.
+    /// Points accumulated towards `research`; while no research runs, the
+    /// surplus of the last completed technology, carried over to the next (F1).
     #[serde(default)]
     pub research_progress: u32,
     /// Points produced during the last resolved turn.
@@ -353,6 +358,10 @@ pub struct FactionState {
     /// Progress kept for abandoned research (switching back resumes it).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub research_banked: BTreeMap<TechnologyId, u32>,
+    // ----- H3: La Table -------------------------------------------------------
+    /// Diets paid during the last resolved turn (budget line « Table »).
+    #[serde(default)]
+    pub table_upkeep_last_turn: i64,
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -377,6 +386,10 @@ pub struct CharacterState {
     pub army: Option<ArmyId>,
     pub skills: Skills,
     pub captive: bool,
+    /// F1: faction holding the character captive (battle or chronicle
+    /// capture); it receives the ransom.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub captor: Option<FactionId>,
 
     // ----- M4: characters & dynasties (spec § 2) ---------------------------
     /// Display name of a generated character (historical ones take theirs

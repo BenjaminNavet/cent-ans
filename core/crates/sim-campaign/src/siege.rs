@@ -69,8 +69,8 @@ pub(crate) fn resolve_sieges(
                     GameEvent::new(
                         EventKind::SiegeLifted,
                         format!(
-                            "Le siège de {} est levé.",
-                            province_name(data, &province_id)
+                            "Le siège {} est levé.",
+                            crate::events::de(&province_name(data, &province_id))
                         ),
                     )
                     .province(&province_id)
@@ -96,7 +96,10 @@ pub(crate) fn resolve_sieges(
         if sortie(state, data, &province_id, &besiegers, events) {
             continue;
         }
-        let breach_gain = breach_per_turn(state, data, &besiegers, fortification);
+        let resistance = state.siege_resistance(data, &province_id, &attacker);
+        let breach_gain = (f64::from(breach_per_turn(state, data, &besiegers, fortification))
+            * (1.0 - resistance / 100.0))
+            .round() as u8;
         let drain = supplies_drain(fortification, siege_speed_percent);
         let province = state.provinces.get_mut(&province_id).expect("exists");
         match &mut province.siege {
@@ -378,8 +381,8 @@ pub(crate) fn apply_assault_result(
     crate::movement::apply_outcome(state, data, army, &result.attacker, events);
     apply_garrison_losses(state, province, &result.defender);
     let text = format!(
-        "Assaut de {} contre {}{} : {}. Pertes : {} contre {}.",
-        faction_name(data, &faction),
+        "Assaut {} contre {}{} : {}. Pertes : {} contre {}.",
+        crate::events::de(&faction_name(data, &faction)),
         province_name(data, province),
         if walls {
             " (murailles intactes)"

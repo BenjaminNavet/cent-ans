@@ -16,6 +16,8 @@ extends Node3D
 ##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
+##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
+##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -55,6 +57,8 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
+var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -110,6 +114,12 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	flow = FlowController.new()  # F3
+	add_child(flow)
+	flow.setup(self)
+	tutorial = TutorialController.new()  # F8
+	add_child(tutorial)
+	tutorial.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -139,8 +149,16 @@ func _connect_ui() -> void:
 	ui.end_turn_pressed.connect(_on_end_turn)
 	ui.save_requested.connect(_on_save)
 	ui.load_requested.connect(_on_load)
-	ui.main_menu_requested.connect(func() -> void: get_tree().change_scene_to_file(START_MENU_SCENE))
-	ui.quit_requested.connect(func() -> void: get_tree().quit())
+	ui.main_menu_requested.connect(func() -> void:
+		if flow != null:
+			flow.request_exit("main_menu")
+		else:
+			get_tree().change_scene_to_file(START_MENU_SCENE))
+	ui.quit_requested.connect(func() -> void:
+		if flow != null:
+			flow.request_exit("quit")
+		else:
+			get_tree().quit())
 	ui.recruit_requested.connect(_on_recruit)
 	ui.create_army_requested.connect(_on_create_army)
 	ui.build_requested.connect(_on_build)
@@ -181,6 +199,8 @@ func _setup_campaign() -> void:
 		push_error("CampaignMap: campaign could not start")
 		return
 	player_faction = str(sim.call("get_player_faction"))
+	ui.journal_player_faction = player_faction
+	ui.journal_faction_name = SimFacade.faction_short_name
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (simulation %s)" % [sim.call("get_date_label"), SimFacade.engine_label()])
 	refresh_all()
@@ -217,6 +237,8 @@ func refresh_all() -> void:
 	_refresh_research()  # M6
 	if _tech_open:
 		_show_tech_panel()
+	if flow != null:  # F3
+		flow.refresh()
 
 
 func _city_available() -> bool:
@@ -236,11 +258,10 @@ func _refresh_top_bar() -> void:
 	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
 	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
-	var projected := -1
+	var economy: Dictionary = {}
 	if _economy_available():
-		var economy: Dictionary = sim.call("get_faction_economy", player_faction)
-		projected = int(economy.get("projected_income", summary.get("income", 0)))
-	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), projected)
+		economy = sim.call("get_faction_economy", player_faction)
+	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
 
 
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
@@ -721,6 +742,8 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 func _on_end_turn() -> void:
 	if sim == null or ui.is_dialog_open():
 		return
+	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
+		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
 	ui.add_events(events, str(sim.call("get_date_label")))
@@ -738,6 +761,8 @@ func _on_end_turn() -> void:
 		if str(event.get("kind", "")) == "battle":
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
+	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
+		flow.after_end_turn(events)
 	_offer_pending_battles()  # M7
 
 
@@ -759,6 +784,7 @@ func _on_load(path: String) -> void:
 		return
 	sim = SimFacade.sim
 	player_faction = str(sim.call("get_player_faction"))
+	ui.journal_player_faction = player_faction
 	deselect_army()
 	selected_index = 0
 	ui.hide_province()
@@ -861,6 +887,10 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"tooltips":  # F2
+					_stage_screenshot_tooltips()
+				"tutorial", "encyclopedia":  # F8
+					tutorial.stage_screenshot(_screenshot_stage)
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
@@ -990,6 +1020,21 @@ func _stage_screenshot_city() -> void:
 	_ensure_city_capable_sim()
 	_focus_capital()
 	ui.province_panel.show_ville_tab()
+
+
+## F2 : panneau de recrutement de la capitale et infobulles riches figées à l'écran (une
+## unité recrutable, un bâtiment constructible), une capture ne montrant pas le survol.
+func _stage_screenshot_tooltips() -> void:
+	_stage_screenshot_province()
+	var column := VBoxContainer.new()
+	column.position = Vector2(16, 60)
+	column.add_theme_constant_override("separation", 10)
+	var recruitable: Array = sim.call("get_recruitable", str(SimFacade.faction_info(player_faction).get("capital", "")))
+	if not recruitable.is_empty():
+		column.add_child(RichTooltip.make_panel(RichTooltip.unit(str(recruitable[0].get("unit_type", "")), recruitable[0])))
+	column.add_child(RichTooltip.make_panel(RichTooltip.building("bld_castle")))
+	column.add_child(RichTooltip.make_panel(RichTooltip.gauge("unrest", 12)))
+	ui.add_child(column)
 
 
 ## Mise en scène « faction » : panneau de faction ouvert sur la capitale du joueur.

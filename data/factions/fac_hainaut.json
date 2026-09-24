@@ -1,0 +1,62 @@
+{
+  "id": "fac_hainaut",
+  "name": {
+    "display": "Comtés de Hainaut et de Hollande",
+    "local": "Graafschap Holland en Henegouwen",
+    "local_language": "moyen néerlandais"
+  },
+  "short_name": "Hainaut",
+  "adjective": "hennuyer",
+  "government": "county",
+  "playable": false,
+  "ruler": "chr_guillaume_i_de_hainaut",
+  "capital": "prov_hainaut",
+  "capital_city": "Valenciennes",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4 d'or au lion de sable, aux 2 et 3 d'or au lion de gueules.",
+    "description": "Lions de Flandre et de Hollande réunis par la maison d'Avesnes.",
+    "primary_color": "#E8B923",
+    "secondary_color": "#1A1A1A"
+  },
+  "titles": [
+    "Comte de Hainaut",
+    "Comte de Hollande",
+    "Comte de Zélande"
+  ],
+  "treasury": 22000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_windmills",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "marriage_tie",
+      "note": "Philippa de Hainaut, fille du comte, est reine d'Angleterre depuis 1328."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "Jeanne de Valois, épouse du comte, est la sœur de Philippe VI."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 65,
+    "trade": 80,
+    "piety": 50
+  },
+  "description": "Principauté double à cheval sur l'Empire : le Hainaut francophone et drapier, la Hollande et la Zélande maritimes. Le vieux comte Guillaume le Bon, beau-père d'Édouard III, meurt en juin 1337.",
+  "sources": [
+    "Comté de Hainaut",
+    "Comté de Hollande",
+    "Guillaume Ier de Hainaut"
+  ]
+}

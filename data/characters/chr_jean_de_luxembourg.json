@@ -8,8 +8,8 @@
   "epithet": "l'Aveugle",
   "sex": "male",
   "house": "Luxembourg",
-  "faction": "fac_france",
-  "role": "commander",
+  "faction": "fac_bohemia",
+  "role": "ruler",
   "birth": {
     "value": "1296-08-10"
   },
@@ -48,12 +48,13 @@
   "piety": 55,
   "family": {
     "children": [
-      "chr_bonne_de_luxembourg"
+      "chr_bonne_de_luxembourg",
+      "chr_charles_de_luxembourg"
     ]
   },
-  "starting_location": "prov_ile_de_france",
+  "starting_location": "prov_luxembourg",
   "status": "at_court",
-  "description": "Prince de l'Empire, allié et beau-père du duc de Normandie, hôte assidu de la cour de France. Modélisé comme commandeur au service de la France ; sa cécité s'aggrave dès 1337 (complète vers 1340).",
+  "description": "Roi de Bohême et comte de Luxembourg, chevalier errant de l'Europe, allié et beau-père du duc de Normandie, hôte assidu de la cour de France ; sa cécité s'aggrave dès 1337 (complète vers 1340). Il mourra à Crécy aux côtés de Philippe VI.",
   "sources": [
     "Jean Ier de Bohême"
   ]

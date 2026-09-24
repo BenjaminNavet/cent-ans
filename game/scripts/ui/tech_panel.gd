@@ -1,7 +1,7 @@
 class_name TechPanel
 extends PanelContainer
 
-## Panneau « Technologies » (bouton de la barre, touche T) : onglets Militaire et Civil
+## Panneau « Technologies » (bouton de la barre, touche T) : onglets Militaire, Civil et Médecine
 ## (`TechTreeView`), recherche en cours et points par tour. Clic sur une technologie
 ## disponible = ordre `research` (soumis par `CampaignMap`). Aucune règle ici : états,
 ## coûts effectifs et refus viennent de `CampaignSim` (`get_tech_tree`, `get_research`).
@@ -9,8 +9,8 @@ extends PanelContainer
 signal research_requested(technology_id: String)
 signal closed
 
-const BRANCHES := ["military", "civil"]
-const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil"}
+const BRANCHES := ["military", "civil", "medicine"]
+const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil", "medicine": "Médecine"}
 
 @onready var title_label: Label = %TechTitle
 @onready var research_label: Label = %ResearchStatus
@@ -18,14 +18,22 @@ const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil"}
 @onready var tabs: TabContainer = %TechTabs
 @onready var military_view: TechTreeView = %MilitaryTree
 @onready var civil_view: TechTreeView = %CivilTree
+@onready var medicine_view: TechTreeView = %MedicineTree
 @onready var close_button: Button = %TechCloseButton
 
 
 func _ready() -> void:
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])
+	tabs.set_tab_title(2, BRANCH_LABELS["medicine"])
+	# F2 : icônes des familles de technologies sur les onglets.
+	tabs.add_theme_constant_override("icon_max_width", 20)
+	tabs.set_tab_icon(0, IconLibrary.get_icon("tech_branch_military"))
+	tabs.set_tab_icon(1, IconLibrary.get_icon("tech_branch_civil"))
+	tabs.set_tab_icon(2, IconLibrary.get_icon("tech_branch_medicine"))
 	military_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	civil_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
+	medicine_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
@@ -36,13 +44,14 @@ func _ready() -> void:
 func show_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color) -> void:
 	title_label.text = "Technologies — %s" % faction_label
 	title_label.add_theme_color_override("font_color", faction_color.darkened(0.3))
-	var by_branch := {"military": [], "civil": []}
+	var by_branch := {"military": [], "civil": [], "medicine": []}
 	for node in tree:
 		var branch: String = str(node.get("branch", "civil"))
 		if by_branch.has(branch):
 			(by_branch[branch] as Array).append(node)
 	military_view.show_tree(by_branch["military"])
 	civil_view.show_tree(by_branch["civil"])
+	medicine_view.show_tree(by_branch["medicine"])
 	if research.is_empty():
 		research_label.text = "Aucune recherche en cours — %d points par tour perdus : choisissez une technologie disponible." % points_per_turn
 		research_bar.value = 0
@@ -67,4 +76,6 @@ func select_branch(branch: String) -> void:
 func tech_button(technology_id: String) -> Button:
 	if military_view.buttons.has(technology_id):
 		return military_view.buttons[technology_id]
-	return civil_view.buttons.get(technology_id)
+	if civil_view.buttons.has(technology_id):
+		return civil_view.buttons[technology_id]
+	return medicine_view.buttons.get(technology_id)

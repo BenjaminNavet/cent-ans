@@ -30,6 +30,17 @@ extends SceneTree
 ## 11. bataille de siège (M8 § 2) : assaut français de la Guyenne (`debug_stage_siege`),
 ##     murailles (`get_siege`), défenseurs sur le rempart, IA des deux camps jusqu'à la fin,
 ##     `resolve_battle` ; puis battle.tscn sur un siège (murailles maillées, 40 images).
+## 12. flow (F3) : réglages écrits et relus (volumes conservés), écran de chargement jusqu'à la
+##     carte, sauvegarde automatique tournante (auto_1..3, les fichiers du joueur sont mis de
+##     côté puis restaurés), rapport de saison non vide après quelques tours, alertes, menu
+##     pause ouvert puis fermé (arbre en pause), dialogue de sauvegarde, crédits.
+## 13. codex (H2) : fiches de `data/codex`, liens `[[…]]` et auto-liens, pile de 3 bulles (dont
+##     une ouverte par survol simulé), découvertes, fermeture après la grâce, fenêtre Codex.
+## 14. tutorial/encyclopedia (F8) : tutoriel France sur la vraie simulation, chaque objectif
+##     rempli par l'interface ou un ordre fait avancer l'étape (sélection, marche, province,
+##     onglet Ville, construction, recherche, diplomatie, fin de tour, rapport, chronique,
+##     impôt, gouverneur), progression persistée ; encyclopédie : chaque onglet > 0 entrée,
+##     fiche non vide, recherche filtrée, liens internes, retour, touche L.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -54,6 +65,13 @@ func _init() -> void:
 	await process_frame
 	facade = root.get_node("/root/SimFacade")
 	paths = root.get_node("/root/MapPaths")
+	# F3 : réglages par défaut sur un fichier dédié (le fichier du joueur n'est pas touché),
+	# sans sauvegarde automatique hors de l'étape « flow ».
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("set_value", "game/autosave_interval", 0, false)
+		settings.call("set_value", "tutorial/enabled", false, false)  # F8 : seulement à l'étape 13
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -64,7 +82,11 @@ func _init() -> void:
 	await _run_battle()
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
+	await _run_icons()  # F2
+	await _run_codex()  # H2
 	await _run_siege_battle()
+	await _run_flow()  # F3
+	await _run_tutorial()  # F8
 	quit(1 if _failures > 0 else 0)
 
 
@@ -506,7 +528,7 @@ func _run_technologies() -> void:
 	root.add_child(panel)
 	await process_frame
 	panel.show_tree(tree, {}, int(sim.call("get_research_points", FACTION_ID)), "France", Color(0.2, 0.3, 0.7))
-	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size()
+	var buttons: int = panel.military_view.buttons.size() + panel.civil_view.buttons.size() + panel.medicine_view.buttons.size()
 	_check(buttons == tree.size(), "tech panel should show %d nodes, got %d" % [tree.size(), buttons])
 	panel.queue_free()
 
@@ -625,6 +647,13 @@ func _run_battle() -> void:
 	_check(soldiers.size() > 0 and soldiers.size() % 4 == 0, "battle: soldier transforms empty")
 	var refused: Dictionary = battle.call("issue_command", {"type": "halt", "units": [units.size() - 1]})
 	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
+	# F10b : ordres du chef (catalogue de data/battle_orders, cri de guerre propre à la faction).
+	var orders: Array = battle.call("get_leader_orders", "attacker")
+	_check(orders.size() == 5, "battle: expected 5 leader's orders, got %d" % orders.size())
+	if not orders.is_empty():
+		_check(str(orders[0]["label"]) == "Montjoie ! Saint-Denis !", "battle: French war cry label is %s" % orders[0]["label"])
+		var cry: Dictionary = battle.call("issue_command", {"type": "leader_order", "order": "order_war_cry", "units": []})
+		_check(bool(cry.get("ok", false)) or str(cry.get("error", "")).contains("impossible"), "battle: war cry command malformed: %s" % cry.get("error", "?"))
 	var ticks := 0
 	for _i in 12000:
 		battle.call("tick", 0.1)
@@ -830,6 +859,132 @@ func _run_assets() -> void:
 		print("smoke OK: assets, 10 sfx + 3 music, settings persisted, %d portrait(s), 7 models, siege marker dressed" % portraits)
 
 
+## F2 : icônes (`IconLibrary`, `game/assets/icons/icons.json`) et infobulles riches. Toutes
+## les entrées de la table se chargent ; chaque id de `data/` (unités, bâtiments, ressources,
+## technologies) a sa propre icône, chaque branche de compétence et catégorie de trait aussi ;
+## replis par catégorie ; BBCode d'infobulle non vide et panneau constructible.
+func _run_icons() -> void:
+	var library: Node = root.get_node_or_null("/root/IconLibrary")
+	if not _check(library != null, "IconLibrary autoload missing"):
+		return
+	var table: Dictionary = library.get("icons")
+	_check(table.size() >= 100, "icons.json too small: %d entries" % table.size())
+	var broken: Array = []
+	for id in table:
+		if library.call("get_icon", str(id)) == null:
+			broken.append(id)
+	_check(broken.is_empty(), "icons not loadable: %s" % [broken])
+	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	var missing: Array = []
+	var checked := 0
+	for directory in ["unit_types", "buildings", "resources", "technologies", "skills", "traits"]:
+		var dir := DirAccess.open(data_dir.path_join(directory))
+		if not _check(dir != null, "data/%s missing" % directory):
+			continue
+		for file_name in dir.get_files():
+			if not file_name.ends_with(".json"):
+				continue
+			var entry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join(directory).path_join(file_name)))
+			var id := str(entry.get("id", ""))
+			if directory == "skills":
+				id = "branch_" + str(entry.get("branch", ""))
+			elif directory == "traits":
+				id = "trait_category_" + str(entry.get("category", ""))
+			checked += 1
+			if not library.call("has_icon", id):
+				missing.append(id)
+	_check(missing.is_empty(), "data ids without icon: %s" % [missing])
+	for hud_id in ["hud_treasury", "hud_income", "hud_research", "hud_season_spring", "hud_season_summer", "hud_season_autumn", "hud_season_winter", "hud_diplomacy", "hud_chronicle", "hud_court", "hud_technologies", "class_peasants", "class_burghers", "class_clergy", "class_nobility", "gauge_unrest", "gauge_health", "gauge_wealth", "gauge_goods_satisfaction"]:
+		if not library.call("has_icon", hud_id):
+			missing.append(hud_id)
+	_check(missing.is_empty(), "UI ids without icon: %s" % [missing])
+	_check(str(library.call("resolve", "unit_does_not_exist")) == "cat_unit", "unit fallback expected")
+	_check(str(library.call("resolve", "bld_does_not_exist")) == "cat_building", "building fallback expected")
+	_check(library.call("get_icon", "totally_unknown") != null, "default fallback expected")
+	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
+	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
+	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
+	root.add_child(panel)
+	await process_frame
+	_check(panel.get_node_or_null("Text") is RichTextLabel, "tooltip panel text expected")
+	panel.queue_free()
+	var chip := IconChip.create("res_wine", "Vin", "x")
+	_check(chip.icon_rect != null and chip.icon_rect.texture != null, "icon chip texture expected")
+	chip.free()
+	if _failures == 0:
+		print("smoke OK: icons, %d entries loaded, %d data ids covered, fallbacks and rich tooltips" % [table.size(), checked])
+
+
+## H2 : Codex (fiches, liens, bulles imbriquées, découvertes, fenêtre).
+func _run_codex() -> void:
+	var store: Node = root.get_node_or_null("/root/CodexStore")
+	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
+	if not _check(store != null and bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
+		return
+	store.call("use_test_file")
+	store.call("reload", _project_root().path_join("data/codex"))
+	var total: int = store.call("total_count")
+	_check(total >= 20, "codex should have at least 20 entries, got %d" % total)
+	_check(bool(store.call("has_entry", "cdx_crecy")) and bool(store.call("has_entry", "cdx_poitiers")), "codex seed entries missing")
+	_check(str(store.call("entry_for_entity", "chr_charles_v")) == "cdx_charles_v", "entity index expected")
+
+	# Liens explicites, auto-liens (première occurrence, hors balises), couleur des fiches lues.
+	var linked := CodexText.format("[[cdx_crecy]] puis [[cdx_poitiers|la défaite du roi]].")
+	_check(linked.contains("[url=cdx:cdx_crecy]") and linked.contains("[u]") and linked.contains(str(store.call("title", "cdx_crecy"))), "explicit link: %s" % linked)
+	_check(linked.contains("[url=cdx:cdx_poitiers]") and linked.contains("la défaite du roi"), "labelled link: %s" % linked)
+	_check(CodexText.format("[[cdx_nothing_here|mot]]") == "mot", "unknown link should degrade to its label")
+	var alias := str(store.call("title", "cdx_peste_noire"))
+	var auto := CodexText.format("[img]res://x/%s.png[/img] En 1348, %s frappe ; %s encore." % [alias, alias, alias], true)
+	_check(auto.count("[url=cdx:cdx_peste_noire]") == 1 and auto.begins_with("[img]res://x/%s.png[/img]" % alias), "auto link once, outside tags: %s" % auto)
+	_check(not CodexText.format("%s." % alias).contains("[url"), "no auto link unless asked")
+	var tooltip := RichTooltip.make_panel("Voir [[cdx_arc_long]].")
+	_check(RichTooltip.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
+	_check(RichTooltip.visible_panel() == null, "a detached panel is not a visible tooltip")
+	tooltip.free()
+
+	# Pile de 3 bulles : deux ouvertes par l'API, la troisième par survol simulé d'un lien.
+	var first: Control = bubbles.call("open", "cdx_crecy", Vector2(120, 120))
+	var second: Control = bubbles.call("open", "cdx_edouard_iii", Vector2(260, 180), 0)
+	await process_frame
+	_check(first != null and second != null and int(bubbles.call("bubble_count")) == 2, "two bubbles expected")
+	var text := second.find_child("Text", true, false) as RichTextLabel
+	_check(text != null and text.text.contains("[url=cdx:"), "bubble summary should contain links")
+	text.meta_hover_started.emit("cdx:cdx_poitiers")
+	await create_timer(0.5).timeout
+	_check(int(bubbles.call("bubble_count")) == 3 and str(bubbles.call("top_id")) == "cdx_poitiers", "hovering a bubble link should open a third bubble (count %d)" % int(bubbles.call("bubble_count")))
+	for id in ["cdx_crecy", "cdx_edouard_iii", "cdx_poitiers"]:
+		_check(bool(store.call("is_discovered", id)), "%s should be discovered" % id)
+	_check(CodexText.link("cdx_crecy").contains(CodexText.READ_COLOR), "read entries use brown ink")
+	var reopened: Control = bubbles.call("open", "cdx_chevauchee", Vector2(300, 300), 0)
+	_check(reopened != null and int(bubbles.call("bubble_count")) == 2, "opening from bubble 0 should replace the bubbles above it")
+	bubbles.call("set_pinned", first, true)
+	text.meta_hover_ended.emit("cdx:cdx_poitiers")
+	await create_timer(0.7).timeout
+	_check(int(bubbles.call("bubble_count")) == 1, "unpinned bubbles should close after the grace delay (count %d)" % int(bubbles.call("bubble_count")))
+	bubbles.call("close_all")
+	_check(int(bubbles.call("bubble_count")) == 0, "close_all should empty the stack")
+	var pinned: Control = bubbles.call("open_text", RichTooltip.last_bbcode, Vector2(40, 40))
+	_check(pinned != null and bool(pinned.get_meta("pinned", false)), "pinned tooltip bubble expected")
+	bubbles.call("close_all")
+
+	# Fenêtre Codex sur une fiche, historique, compteur.
+	bubbles.call("open_entry", "cdx_charles_v")
+	await process_frame
+	var window: Control = bubbles.call("window")
+	_check(bool(bubbles.call("is_window_open")) and str(window.get("current_id")) == "cdx_charles_v", "codex window should show cdx_charles_v")
+	var body: RichTextLabel = window.call("body_label")
+	_check(body.text.length() > 200 and body.text.contains("[url=cdx:"), "codex body should be formatted with links")
+	window.call("navigate", "cdx_du_guesclin")
+	window.call("back")
+	_check(str(window.get("current_id")) == "cdx_charles_v", "history back expected")
+	var counter := str(window.call("counter_text"))
+	_check(counter == "%d / %d découvertes" % [int(store.call("discovered_count")), total], "counter: %s" % counter)
+	window.hide()
+	store.call("reset_discoveries")
+	if _failures == 0:
+		print("smoke OK: codex, %d entries, links, 3-bubble stack, discoveries, window (%s)" % [total, counter])
+
+
 ## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis
 ## dans la scène 3D.
 func _run_siege_battle() -> void:
@@ -904,3 +1059,333 @@ func _run_siege_battle() -> void:
 		print("smoke OK: siege battle (headless %d ticks, scene with %d wall nodes, resolved)" % [ticks, scene.siege_view.get_child_count()])
 	scene.queue_free()
 	await process_frame
+
+
+# --- F3 : écrans et flux -----------------------------------------------------------
+
+
+func _run_flow() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if not _check(settings != null, "Settings autoload missing"):
+		return
+	# Réglages : écriture, relecture, section audio conservée.
+	var test_path: String = settings.get("path")
+	_check(test_path != "user://settings.cfg", "smoke must not use the player's settings file")
+	var seeded := ConfigFile.new()
+	seeded.set_value("audio", "music_volume", 0.42)
+	seeded.save(test_path)
+	settings.call("set_value", "camera/speed", 1.7)
+	settings.call("set_value", "interface/confirm_end_turn", true)
+	settings.call("set_value", "video/resolution", Vector2i(1600, 900))
+	var config := ConfigFile.new()
+	_check(config.load(test_path) == OK, "settings file not written")
+	_check(is_equal_approx(float(config.get_value("camera", "speed", 0.0)), 1.7), "camera speed not persisted")
+	_check(is_equal_approx(float(config.get_value("audio", "music_volume", 0.0)), 0.42), "audio section lost by Settings.save_settings")
+	settings.set("values", {})
+	settings.call("load_settings")
+	_check(is_equal_approx(float(settings.call("get_value", "camera/speed")), 1.7), "camera speed not reloaded")
+	_check(bool(settings.call("get_value", "interface/confirm_end_turn")), "confirm_end_turn not reloaded")
+	_check(settings.call("get_value", "video/resolution") == Vector2i(1600, 900), "resolution not reloaded")
+	settings.call("set_value", "interface/confirm_end_turn", false, false)
+	settings.call("set_value", "interface/season_report", true, false)
+	settings.call("set_value", "game/autosave_interval", 1, false)
+	_check(SaveSlots.autosave_name_for(1, 1) == "auto_1" and SaveSlots.autosave_name_for(4, 1) == "auto_1"
+		and SaveSlots.autosave_name_for(6, 2) == "auto_3" and SaveSlots.autosave_name_for(3, 2) == "", "autosave rotation names")
+
+	# Écran de chargement jusqu'à la carte (vraies données si possible, comme la boucle de campagne).
+	var real_data := _project_root().path_join("data")
+	var use_real: bool = ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json"))
+	facade.set_data_dir(real_data if use_real else _fixtures_dir)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var backup := _backup_autosaves()
+	var screen: Node = LoadingScreen.start(self)
+	var map: Node = await screen.finished
+	if not _check(map != null and map.get("load_ok"), "loading screen did not produce a loaded campaign map"):
+		_restore_autosaves(backup)
+		return
+	_check(current_scene == map, "loading screen should make the map the current scene")
+	# Accès non typé : typer FlowController compilerait MapUI avant les autoloads.
+	var flow: Node = map.get("flow")
+	if not _check(flow != null, "campaign map has no FlowController"):
+		_restore_autosaves(backup)
+		return
+	_check(is_equal_approx(map.camera_rig.pan_speed, 1.2 * 1.7), "camera speed setting not applied")
+
+	# Tours : sauvegarde auto tournante, rapport de saison, alertes.
+	var report_lines := 0
+	for _turn in 4:
+		map._on_end_turn()
+		map.chronicle.window.hide()
+		if flow.season_report.visible:
+			report_lines = maxi(report_lines, flow.season_report.line_count())
+	await process_frame
+	var turn: int = map.sim.call("get_turn")
+	_check(turn == 4, "flow: expected turn 4, got %d" % turn)
+	for slot in ["auto_1", "auto_2", "auto_3"]:
+		_check(FileAccess.file_exists(facade.save_path(slot)) and FileAccess.file_exists(SaveSlots.meta_path(slot)), "autosave %s missing" % slot)
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(SaveSlots.meta_path("auto_1")))
+	_check(meta is Dictionary and int(meta.get("turn", -1)) == 4, "auto_1 should have rotated to turn 4, got %s" % [meta])
+	_check(flow.unsaved_turns() == 0, "autosave should reset the unsaved counter")
+	_check(not SaveSlots.latest().is_empty(), "Continue: latest save expected")
+	_check(report_lines > 0, "season report should list events after 4 turns")
+	var all_events: Array = map.sim.call("get_events")
+	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, flow.alerts.alerts.size(), all_events.size()])
+
+	# Menu pause : ouverture (arbre en pause), dialogue de sauvegarde, fermeture.
+	flow.open_pause()
+	await process_frame
+	_check(paused and flow.is_paused(), "pause menu should pause the tree")
+	flow.pause_menu.open_save()
+	_check(flow.pause_menu.save_dialog.visible and flow.pause_menu.save_dialog.save_count() >= 3, "save dialog should list the autosaves")
+	flow.pause_menu.open_settings()
+	await process_frame
+	_check(flow.pause_menu.settings_open(), "settings window should open from pause")
+	flow.close_pause()
+	await process_frame
+	_check(not paused and not flow.is_paused(), "closing the pause menu should resume")
+	map._on_end_turn()
+	_check(flow.unsaved_turns() == 0, "autosave every turn: nothing unsaved")
+
+	# Crédits (CREDITS.md ou texte intégré).
+	var credits: Node = (load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate()
+	root.add_child(credits)
+	await process_frame
+	_check(credits.text_label.text.length() > 100, "credits text should not be empty")
+	credits.queue_free()
+
+	settings.call("set_value", "game/autosave_interval", 0, false)
+	current_scene = null
+	map.queue_free()
+	await process_frame
+	_restore_autosaves(backup)
+	if _failures == 0:
+		print("smoke OK: flow (settings, loading, autosave rotation, season report, pause, credits)")
+
+
+## Met de côté les sauvegardes automatiques du joueur (`user://saves/auto_*`).
+func _backup_autosaves() -> Dictionary:
+	var kept: Dictionary = {}
+	var dir := DirAccess.open(SaveSlots.SAVES_DIR)
+	if dir == null:
+		return kept
+	for file_name in dir.get_files():
+		if file_name.begins_with(SaveSlots.AUTOSAVE_PREFIX):
+			var path := SaveSlots.SAVES_DIR.path_join(file_name)
+			kept[path] = FileAccess.get_file_as_bytes(path)
+			DirAccess.remove_absolute(path)
+	return kept
+
+
+func _restore_autosaves(kept: Dictionary) -> void:
+	var dir := DirAccess.open(SaveSlots.SAVES_DIR)
+	if dir != null:
+		for file_name in dir.get_files():
+			if file_name.begins_with(SaveSlots.AUTOSAVE_PREFIX):
+				DirAccess.remove_absolute(SaveSlots.SAVES_DIR.path_join(file_name))
+	for path in kept:
+		var file := FileAccess.open(path, FileAccess.WRITE)
+		if file != null:
+			file.store_buffer(kept[path])
+			file.close()
+
+
+## F8 : tutoriel des premiers tours (objectifs vérifiables) et encyclopédie tirée de `data/`.
+func _run_tutorial() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	var real_data := _project_root().path_join("data")
+	if not (ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json"))):
+		print("smoke tutorial: skipped, needs the real simulation and data/map")
+		return
+	if settings != null:
+		settings.call("set_value", "tutorial/enabled", true, false)
+		settings.call("set_value", "tutorial/done", false, false)
+		settings.call("set_value", "tutorial/step", 0, false)
+		settings.call("set_value", "interface/season_report", true, false)
+		settings.call("set_value", "game/interactive_battles", false, false)
+	facade.set_data_dir(real_data)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "tutorial: campaign map failed to start"):
+		return
+	var tutorial: Node = map.get("tutorial")
+	if not _check(tutorial != null and tutorial.active, "tutorial should start on a new campaign"):
+		map.queue_free()
+		return
+	var sim: Object = map.sim
+	var player: String = map.player_faction
+	var visited: PackedStringArray = PackedStringArray()
+	_check(tutorial.steps.size() >= 10 and tutorial.steps.size() <= 14, "tutorial should have 10-14 steps, got %d" % tutorial.steps.size())
+	_check(str(tutorial.steps[0]["text"]).contains("Bouter les Anglais"), "intro should list the French objectives from data")
+	_check(str(tutorial.steps[1]["advice"]).contains("Crécy"), "French advice expected")
+	_check(tutorial.current_step_id() == "intro" and not tutorial.check_now(), "intro is manual")
+	tutorial.advance()
+
+	# 1. Sélection de l'armée royale.
+	_check(tutorial.current_step_id() == "select_army" and not tutorial.check_now(), "select_army: not met before selection")
+	var royal: String = tutorial.royal_army
+	_check(royal != "" and not tutorial.resolve_target("royal_army").is_empty(), "royal army and its marker target expected")
+	map.select_army(royal)
+	_check(tutorial.check_now(), "select_army should complete after selecting the royal army")
+	visited.append("select_army")
+	# 2. Ordre de marche.
+	_check(tutorial.current_step_id() == "move_army" and not tutorial.check_now(), "move_army: not met before an order")
+	var reachable: Dictionary = map.reachable
+	if _check(not reachable.is_empty(), "tutorial: royal army has no reachable province"):
+		var result: Dictionary = map.order_move(royal, str(reachable.keys()[0]))
+		_check(result.get("ok", false), "tutorial: move refused %s" % result.get("error", "?"))
+	_check(tutorial.check_now(), "move_army should complete after a move order")
+	visited.append("move_army")
+	# 3-4. Province du joueur puis onglet Ville.
+	_check(tutorial.current_step_id() == "open_province" and not tutorial.check_now(), "open_province: not met before opening")
+	var capital: String = tutorial._capital()
+	map.picker.select_index(map.map_data.index_of_id(capital))
+	await process_frame
+	_check(tutorial.check_now(), "open_province should complete with the capital panel open")
+	_check(tutorial.current_step_id() == "city_tab" and not tutorial.check_now(), "city_tab: not met on the garrison tab")
+	_check(not tutorial.resolve_target("city_tab").is_empty(), "city tab target expected")
+	map.ui.province_panel.show_ville_tab()
+	_check(tutorial.check_now(), "city_tab should complete on the Ville tab")
+	visited.append_array(["open_province", "city_tab"])
+	# 5. Construction.
+	_check(tutorial.current_step_id() == "build" and not tutorial.check_now(), "build: not met before building")
+	var built := false
+	for province_id in tutorial._player_provinces():
+		var city: Dictionary = sim.call("get_province_city", province_id)
+		if not (city.get("construction", {}) as Dictionary).is_empty():
+			continue
+		for row in city.get("buildable", []):
+			if bool(row.get("available", false)):
+				map._on_build(province_id, str(row["building"]))
+				built = true
+				break
+		if built:
+			break
+	_check(built and tutorial.check_now(), "build should complete after a construction order")
+	visited.append("build")
+	# 6. Recherche.
+	_check(tutorial.current_step_id() == "research" and not tutorial.check_now(), "research: not met before choosing")
+	for node in sim.call("get_tech_tree", player):
+		if str(node.get("state", "")) == "available":
+			map._on_research_requested(str(node["id"]))
+			break
+	_check(tutorial.check_now(), "research should complete after choosing a technology")
+	visited.append("research")
+	# 7. Diplomatie.
+	_check(tutorial.current_step_id() == "diplomacy" and not tutorial.check_now(), "diplomacy: not met before opening")
+	_check(not tutorial.resolve_target("diplomacy").is_empty(), "diplomacy button target expected")
+	map.diplomacy.open_panel()
+	_check(tutorial.check_now(), "diplomacy should complete with the panel open")
+	map.diplomacy.panel.hide()
+	visited.append("diplomacy")
+	# 8-9. Fin du tour, rapport de saison.
+	_check(tutorial.current_step_id() == "end_turn" and not tutorial.check_now(), "end_turn: not met before ending the turn")
+	_check(tutorial.resolve_target("end_turn").has("rect"), "end turn button target expected")
+	map._on_end_turn()
+	_check(tutorial.check_now(), "end_turn should complete after end_turn")
+	visited.append("end_turn")
+	_check(tutorial.current_step_id() == "season_report", "season_report step expected")
+	var report: Control = map.flow.season_report
+	if report.visible:
+		_check(not tutorial.check_now(), "season_report: not met while the report is open")
+		report.close()
+	_check(tutorial.check_now(), "season_report should complete once the report is closed")
+	visited.append("season_report")
+	# 10. Chronique (étape passée s'il n'y a pas encore d'événement).
+	_check(tutorial.current_step_id() == "chronicle", "chronicle step expected")
+	if map.chronicle.open_window():
+		_check(tutorial.check_now(), "chronicle should complete with the window open")
+		map.chronicle.window.hide()
+		visited.append("chronicle")
+	else:
+		map.chronicle.window.hide()
+		_check(not tutorial.check_now(), "chronicle: not met without window")
+		tutorial.advance()
+		print("smoke tutorial: no chronicle decision yet, step skipped")
+	# 11. Impôt.
+	_check(tutorial.current_step_id() == "tax" and not tutorial.check_now(), "tax: not met before changing")
+	var rate := "high" if tutorial._tax_rate() != "high" else "low"
+	map._on_tax_rate_changed(player, rate)
+	_check(tutorial.check_now(), "tax should complete after changing the rate")
+	visited.append("tax")
+	# 12. Gouverneur.
+	_check(tutorial.current_step_id() == "governor" and not tutorial.check_now(), "governor: not met before appointing")
+	var appointed := false
+	var ruler := str(GameCatalog.definitions("factions").get(player, {}).get("ruler", ""))
+	for character_id in sim.call("get_faction_characters", player):
+		if str(character_id) == ruler or str((sim.call("get_character", character_id) as Dictionary).get("governor_of", "")) != "":
+			continue
+		for province_id in tutorial._player_provinces():
+			if province_id == capital:
+				continue
+			var answer: Dictionary = sim.call("submit_order", {"type": "assign_governor", "character": str(character_id), "province": province_id})
+			if answer.get("ok", false):
+				appointed = true
+				break
+		if appointed:
+			break
+	_check(appointed and tutorial.check_now(), "governor should complete after an appointment")
+	visited.append("governor")
+	# Fin : progression persistée, pas de relance.
+	_check(tutorial.current_step_id() == "outro", "outro step expected")
+	tutorial.advance()
+	_check(not tutorial.active and not tutorial.overlay.visible, "tutorial should close after the last step")
+	if settings != null:
+		_check(bool(settings.call("get_value", "tutorial/done")), "tutorial/done should be persisted")
+	_check(not tutorial.should_autostart(), "a finished tutorial must not restart")
+
+	# Encyclopédie.
+	var encyclopedia: Control = tutorial.encyclopedia
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_L
+	key.pressed = true
+	tutorial._unhandled_input(key)
+	_check(encyclopedia.visible, "K should open the encyclopedia")
+	var counts := PackedStringArray()
+	var ids: PackedStringArray = encyclopedia.tab_ids()
+	_check(ids.size() == 9, "encyclopedia should have 9 tabs")
+	for index in ids.size():
+		encyclopedia.select_tab(index)
+		_check(encyclopedia.entry_count() > 0, "encyclopedia tab %s is empty" % ids[index])
+		_check(encyclopedia.fiche.get_parsed_text().length() > 40, "encyclopedia tab %s: empty fiche for %s" % [ids[index], encyclopedia.current_entry])
+		counts.append("%s %d" % [ids[index], encyclopedia.entry_count()])
+	var broken: Array = []
+	for index in ids.size():
+		for entry in encyclopedia._entries[ids[index]]:
+			if Encyclopedia.fiche_bbcode(str(entry["id"])).length() < 40:
+				broken.append(entry["id"])
+	_check(broken.is_empty(), "encyclopedia entries without fiche: %s" % [broken])
+	encyclopedia.select_tab(0)
+	var total: int = encyclopedia.entry_count()
+	encyclopedia.set_query("arc")
+	_check(encyclopedia.entry_count() > 0 and encyclopedia.entry_count() < total and "unit_longbowmen" in encyclopedia.visible_ids(), "search 'arc' should filter the units (%d / %d)" % [encyclopedia.entry_count(), total])
+	encyclopedia.set_query("ARBALETRIER")
+	_check(encyclopedia.entry_count() > 0, "search should ignore case and accents")
+	encyclopedia.set_query("zzzzqx")
+	_check(encyclopedia.entry_count() == 0, "nonsense search should list nothing")
+	encyclopedia.set_query("")
+	_check(encyclopedia.entry_count() == total, "clearing the search should restore the list")
+	_check(encyclopedia.open_entry("unit_longbowmen"), "open unit_longbowmen")
+	_check(Encyclopedia.fiche_bbcode("unit_longbowmen").contains("[url=tech_longbow_drill]"), "unit fiche should link its technology")
+	encyclopedia.fiche.meta_clicked.emit("tech_longbow_drill")
+	_check(encyclopedia.current_entry == "tech_longbow_drill" and encyclopedia.tab_ids()[encyclopedia.current_tab] == "technologies", "internal link should open the technology")
+	encyclopedia.go_back()
+	_check(encyclopedia.current_entry == "unit_longbowmen", "back should return to the unit")
+	var france := Encyclopedia.fiche_bbcode("fac_france")
+	_check(france.contains("Philippe VI") and france.contains("Objectifs"), "faction fiche: ruler and objectives expected")
+	tutorial._unhandled_input(key)
+	_check(not encyclopedia.visible, "K should close the encyclopedia")
+
+	if settings != null:
+		settings.call("set_value", "tutorial/enabled", false, false)
+		settings.call("set_value", "game/interactive_battles", true, false)
+	map.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: tutorial (%s) and encyclopedia (%s)" % [", ".join(visited), ", ".join(counts)])

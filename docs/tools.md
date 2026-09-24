@@ -24,6 +24,7 @@ uv run pytest              # tests
 | `uv run --project tools cent-ans assets audio [--no-music]` | 10 effets (`sfx/`) et 3 musiques modales (`music/`) dans `game/assets/audio/`, OGG si ffmpeg sait encoder Vorbis, sinon WAV (gratuit, ~40 s) |
 | `uv run --project tools cent-ans assets models` | Modèles low-poly glTF `game/assets/models/*.glb` via Blender headless, tableau des triangles (< 3 000 exigé) |
 | `uv run --project tools cent-ans assets portraits [--limit N] [--dry-run] [--model M] [--envelope 10]` | Portraits 256×256 des personnages historiques manquants (payant, sauf `--dry-run` : prompts + estimation sans réseau) |
+| `uv run --project tools cent-ans assets icons [--offline]` | Icônes game-icons.net (CC BY 3.0) teintées encre sépia dans `game/assets/icons/` + `icons.json` (gratuit ; `--offline` : cache local seulement) |
 | `uv run --project tools cent-ans blender smoke` | Lance Blender en arrière-plan, crée un cube, l'exporte en glTF temporaire et attend `OK` |
 
 ## Modules
@@ -113,6 +114,28 @@ plutôt ~1056 jetons en qualité moyenne, l'estimation est donc légèrement pru
 - Coût réel observé : `openai/gpt-5-image-mini` **0,0455 $ par portrait** (l'estimation au jeton de
   l'API donne 0,0113 $ ; `KNOWN_PRICES` sert de plancher à l'estimation et au `--dry-run`). Qualité
   jugée très bonne (enluminure, écu correct, fond fleurdelisé) : modèle retenu.
+
+### `cent_ans_tools.icons` et `icons_catalog` (F2)
+
+- `icons_catalog.ICONS` : identifiant du jeu → (`<auteur>/<nom>` du dépôt
+  [game-icons/icons](https://github.com/game-icons/icons), catégorie). Identifiants : ceux de `data/`
+  (`unit_*`, `bld_*`, `res_*`, `tech_*`), familles (`tech_branch_*`, `unit_category_*`,
+  `building_category_*`), `class_*`, `gauge_*`, `hud_*`, `branch_*` (compétences),
+  `trait_category_*`, et un repli `cat_<catégorie>` par catégorie (`FALLBACKS`). `AUTHORS` : nom crédité
+  de chaque auteur. Pour ajouter une icône : une ligne dans `ICONS`, relancer la commande, compléter
+  le tableau de `CREDITS.md` (un test vérifie la concordance).
+- `build(out_dir, cache_dir, fetch, offline)` : télécharge chaque source une fois
+  (`raw.githubusercontent.com`, cache `~/.cache/cent-ans/game-icons`), `normalize_svg` (retire le carré
+  noir de fond, peint toutes les formes en `#4a3219`, `width`/`height` = 64 px, refuse DTD/entités),
+  écrit `game/assets/icons/<auteur>-<nom>.svg` et son `.import` (mipmaps activés), puis `icons.json`
+  (licence, couleur, replis, id → fichier/catégorie/source/auteur). Idempotent : fichiers inchangés non
+  réécrits.
+- `missing_icons(data_dir)` : ids de `data/` sans icône (unités, bâtiments, ressources, technologies ;
+  branches des compétences, catégories des traits) — la commande échoue s'il en manque.
+- `credits_rows()` : auteur → noms d'icônes (tableau de `CREDITS.md`).
+- Côté Godot : autoload `IconLibrary` (`game/scripts/ui/icon_library.gd`) : `get_icon(id, category)`
+  avec repli par catégorie (préfixe de l'id), `make_rect`, `decorate_button`, `bbcode` (`[img]` pour les
+  infobulles `RichTooltip`).
 
 ## Modèles d'images disponibles sur OpenRouter (relevé du 2026-09-23)
 

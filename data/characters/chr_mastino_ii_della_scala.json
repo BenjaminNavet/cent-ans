@@ -1,0 +1,42 @@
+{
+  "id": "chr_mastino_ii_della_scala",
+  "name": {
+    "display": "Mastino II della Scala",
+    "local": "Mastino II della Scala",
+    "local_language": "vénitien"
+  },
+  "sex": "male",
+  "house": "della Scala",
+  "faction": "fac_verona",
+  "role": "ruler",
+  "birth": {
+    "value": "1308",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1351-06-03"
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_proud",
+    "trait_cruel"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_cangrande_ii_della_scala"
+    ]
+  },
+  "starting_location": "prov_verona",
+  "status": "at_court",
+  "description": "Seigneur de Vérone depuis 1329, maître de sept cités ; la ligue de 1336 abat sa puissance.",
+  "sources": [
+    "Mastino II della Scala"
+  ]
+}
