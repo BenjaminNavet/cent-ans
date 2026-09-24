@@ -1,5 +1,7 @@
-"""Quick look at the battle figures exported by `battle_figures.py` (Workbench render with
-vertex colours; livery shown as a flat blue). Development aid, not part of the build:
+"""Quick look at the battle figures exported by `battle_figures.py`.
+
+Workbench render with vertex colours, livery shown as a flat blue. Development aid, not part
+of the build:
 
     blender --background --python tools/blender/preview_figures.py -- out.png [names...]
 """
@@ -17,9 +19,17 @@ LIVERY = (0.08, 0.12, 0.45)
 
 
 def main():
+    """Imports the named figures side by side and renders them to the output PNG."""
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     out = args[0] if args else os.path.join(ROOT, "preview.png")
-    names = args[1:] or ["infantry_0", "infantry_1", "archer_0", "archer_2", "cavalry_0", "cavalry_2"]
+    names = args[1:] or [
+        "infantry_0",
+        "infantry_1",
+        "archer_0",
+        "archer_2",
+        "cavalry_0",
+        "cavalry_2",
+    ]
     yaw = float(os.environ.get("PREVIEW_YAW", "35"))
     bpy.ops.wm.read_factory_settings(use_empty=True)
     x = 0.0

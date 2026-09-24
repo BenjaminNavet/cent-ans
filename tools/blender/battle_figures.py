@@ -100,15 +100,18 @@ def to_blender(p):
 
 
 def to_godot(p):
+    """Blender coordinates back to Godot's."""
     return Vector((p[0], p[2], -p[1]))
 
 
 def smoothstep(e0, e1, x):
+    """Hermite step between e0 and e1."""
     t = max(0.0, min(1.0, (x - e0) / (e1 - e0)))
     return t * t * (3.0 - 2.0 * t)
 
 
 def const(color, code=C_EXACT):
+    """Colour function returning a constant colour and material code."""
     return lambda _p: (color, code)
 
 
@@ -116,6 +119,7 @@ class Figure:
     """Collects the Blender objects of one figure, then joins and exports them."""
 
     def __init__(self, name, level):
+        """Starts an empty figure at level of detail `level`."""
         self.name = name
         # Level of detail: 0 full (subdivided), 1 medium, 2 far (also the shadow caster).
         self.level = level
@@ -130,13 +134,27 @@ class Figure:
 
     # --- Building blocks ------------------------------------------------------------------
 
-    def add(self, verts, faces, part, color_fn, *, subdiv=1, smooth=True, bend_fn=None,
-            uv_fn=None, solidify=0.0, sharp_angle=None):
+    def add(
+        self,
+        verts,
+        faces,
+        part,
+        color_fn,
+        *,
+        subdiv=1,
+        smooth=True,
+        bend_fn=None,
+        uv_fn=None,
+        solidify=0.0,
+        sharp_angle=None,
+    ):
         """Adds one piece (Godot coordinates) as a Blender object with its vertex data."""
         if self.part_override is not None and part in (P_BODY, P_HEAD, P_CLOTH):
             part = self.part_override
         mesh = bpy.data.meshes.new(f"{self.name}_piece")
-        mesh.from_pydata([to_blender(Vector(v) + self.offset) for v in verts], [], faces)
+        mesh.from_pydata(
+            [to_blender(Vector(v) + self.offset) for v in verts], [], faces
+        )
         mesh.update()
         obj = bpy.data.objects.new(mesh.name, mesh)
         bpy.context.scene.collection.objects.link(obj)
@@ -172,7 +190,11 @@ class Figure:
             import traceback
 
             frames = traceback.extract_stack()
-            caller = next(fr for fr in reversed(frames) if fr.name not in ("add", "loft", "tube", "blob", "box", "plate"))
+            caller = next(
+                fr
+                for fr in reversed(frames)
+                if fr.name not in ("add", "loft", "tube", "blob", "box", "plate")
+            )
             tris = sum(len(p.vertices) - 2 for p in mesh.polygons)
             print(f"[piece] {self.name} {caller.name}:{caller.lineno} {tris}")
         self.objects.append(obj)
@@ -186,7 +208,11 @@ class Figure:
             p = to_godot(mesh.vertices[loop.vertex_index].co) - self.offset
             rgb, code = color_fn(p)
             colors.data[loop.index].color = (
-                srgb_to_linear(rgb[0]), srgb_to_linear(rgb[1]), srgb_to_linear(rgb[2]), code / 5.0)
+                srgb_to_linear(rgb[0]),
+                srgb_to_linear(rgb[1]),
+                srgb_to_linear(rgb[2]),
+                code / 5.0,
+            )
             u, v = uv_fn(p) if uv_fn else (-1.0, -1.0)
             # glTF stores v flipped; Godot reads the stored value as is.
             uv.data[loop.index].uv = (u, 1.0 - v)
@@ -194,26 +220,48 @@ class Figure:
             meta.data[loop.index].uv = (float(part), 1.0 - bend)
 
     def pivot(self, part, y, z, knee=None):
+        """Records the pivot (and knee pivot) of limb `part`, seat offset included."""
         self.pivots[part] = [round(y + self.offset.y, 4), round(z + self.offset.z, 4)]
         if knee is not None:
-            self.knees[part] = [round(knee[0] + self.offset.y, 4), round(knee[1] + self.offset.z, 4)]
+            self.knees[part] = [
+                round(knee[0] + self.offset.y, 4),
+                round(knee[1] + self.offset.z, 4),
+            ]
 
     # --- Shapes --------------------------------------------------------------------------
 
     def ring_count(self, n):
+        """Ring vertex count for the current level of detail."""
         if self.far:
             return max(4, (n + 1) // 2)
         return max(4, n - 2) if self.lod else n
 
-    def loft(self, sections, part, color_fn, *, ring=8, caps=(True, True), side=(1.0, 0.0, 0.0),
-             power=2.0, closed=True, arc=(0.0, 2.0 * math.pi), **kw):
-        """Lofted tube. `sections` = (centre, rx, r_pos, r_neg): `rx` along `side`, `r_pos` /
+    def loft(
+        self,
+        sections,
+        part,
+        color_fn,
+        *,
+        ring=8,
+        caps=(True, True),
+        side=(1.0, 0.0, 0.0),
+        power=2.0,
+        closed=True,
+        arc=(0.0, 2.0 * math.pi),
+        **kw,
+    ):
+        """Lofted tube.
+
+        `sections` = (centre, rx, r_pos, r_neg): `rx` along `side`, `r_pos` /
         `r_neg` on either side along `T x side` (T = path tangent). `closed=False` with `arc`
-        gives an open sheet (cloth), to use with `solidify`."""
+        gives an open sheet (cloth), to use with `solidify`.
+        """
         n = self.ring_count(ring)
         if self.far and len(sections) > 4:
             keep = max(3, (len(sections) + 2) // 3)
-            picks = sorted({round(i * (len(sections) - 1) / (keep - 1)) for i in range(keep)})
+            picks = sorted(
+                {round(i * (len(sections) - 1) / (keep - 1)) for i in range(keep)}
+            )
             sections = [sections[i] for i in picks]
         centres = [Vector(s[0]) for s in sections]
         verts = []
@@ -274,7 +322,9 @@ class Figure:
             y = c.y + math.sin(a) * radii[1]
             r = math.cos(a)
             sections.append(((c.x, y, c.z), radii[0] * r, radii[2] * r))
-        return self.loft(sections, part, color_fn, ring=ring, side=(1.0, 0.0, 0.0), **kw)
+        return self.loft(
+            sections, part, color_fn, ring=ring, side=(1.0, 0.0, 0.0), **kw
+        )
 
     def box(self, centre, size, part, color_fn, rot_y=0.0, rot_x=0.0, **kw):
         """Box (flat shading), rotated about Y then X."""
@@ -284,20 +334,44 @@ class Figure:
         cy, sy = math.cos(rot_y), math.sin(rot_y)
         cx, sx = math.cos(rot_x), math.sin(rot_x)
         for i in range(8):
-            p = Vector((h.x if i & 1 else -h.x, h.y if i & 2 else -h.y, h.z if i & 4 else -h.z))
+            p = Vector(
+                (h.x if i & 1 else -h.x, h.y if i & 2 else -h.y, h.z if i & 4 else -h.z)
+            )
             p = Vector((p.x, p.y * cx - p.z * sx, p.y * sx + p.z * cx))
             p = Vector((p.x * cy + p.z * sy, p.y, -p.x * sy + p.z * cy))
             verts.append(c + p)
-        faces = [(0, 2, 3, 1), (4, 5, 7, 6), (0, 4, 6, 2), (1, 3, 7, 5), (0, 1, 5, 4), (2, 6, 7, 3)]
+        faces = [
+            (0, 2, 3, 1),
+            (4, 5, 7, 6),
+            (0, 4, 6, 2),
+            (1, 3, 7, 5),
+            (0, 1, 5, 4),
+            (2, 6, 7, 3),
+        ]
         kw.setdefault("subdiv", 0)
         kw.setdefault("smooth", False)
         return self.add(verts, faces, part, color_fn, **kw)
 
-    def plate(self, outline, origin, basis, thickness, part, front_code, back_color, *,
-              bend=0.0, cols=6, rows=6, back_code=C_EXACT):
-        """Two-sided curved board (shields, pavise, pennon): front in `front_code` with UV over
-        the outline's bounding box, back and rim in `back_color`. `outline(x) -> (y_min, y_max)`
-        over x in [-1, 1] (scaled by `basis`); `bend` curves the board backwards at its edges."""
+    def plate(
+        self,
+        outline,
+        origin,
+        basis,
+        thickness,
+        part,
+        front_code,
+        back_color,
+        *,
+        bend=0.0,
+        cols=6,
+        rows=6,
+        back_code=C_EXACT,
+    ):
+        """Two-sided curved board (shields, pavise, pennon).
+
+        Front in `front_code` with UV over the outline's bounding box, back and rim in `back_color`. `outline(x) -> (y_min, y_max)`
+        over x in [-1, 1] (scaled by `basis`); `bend` curves the board backwards at its edges.
+        """
         if self.lod:
             cols = max(3, cols // 2)
             rows = max(2, rows // 2)
@@ -330,10 +404,18 @@ class Figure:
                 faces.append((f[i][j], f[i + 1][j], f[i + 1][j + 1], f[i][j + 1]))
                 faces.append((b[i][j], b[i][j + 1], b[i + 1][j + 1], b[i + 1][j]))
         # Rim.
-        loop_f = [grid_front[i][0] for i in range(cols + 1)] + [grid_front[cols][j] for j in range(1, rows + 1)]
-        loop_f += [grid_front[i][rows] for i in range(cols - 1, -1, -1)] + [grid_front[0][j] for j in range(rows - 1, 0, -1)]
-        loop_b = [grid_back[i][0] for i in range(cols + 1)] + [grid_back[cols][j] for j in range(1, rows + 1)]
-        loop_b += [grid_back[i][rows] for i in range(cols - 1, -1, -1)] + [grid_back[0][j] for j in range(rows - 1, 0, -1)]
+        loop_f = [grid_front[i][0] for i in range(cols + 1)] + [
+            grid_front[cols][j] for j in range(1, rows + 1)
+        ]
+        loop_f += [grid_front[i][rows] for i in range(cols - 1, -1, -1)] + [
+            grid_front[0][j] for j in range(rows - 1, 0, -1)
+        ]
+        loop_b = [grid_back[i][0] for i in range(cols + 1)] + [
+            grid_back[cols][j] for j in range(1, rows + 1)
+        ]
+        loop_b += [grid_back[i][rows] for i in range(cols - 1, -1, -1)] + [
+            grid_back[0][j] for j in range(rows - 1, 0, -1)
+        ]
         for k in range(len(loop_f)):
             k2 = (k + 1) % len(loop_f)
             faces.append((loop_f[k], loop_b[k], loop_b[k2], loop_f[k2]))
@@ -354,8 +436,16 @@ class Figure:
             x, y, _z = local(p)
             return (x + 1.0) * 0.5, 1.0 - (y - y_lo) / (y_hi - y_lo)
 
-        obj = self.add(verts, faces, part, lambda p: (WHITE, front_code), subdiv=0, smooth=True,
-                       uv_fn=uv_fn, sharp_angle=50.0)
+        obj = self.add(
+            verts,
+            faces,
+            part,
+            lambda p: (WHITE, front_code),
+            subdiv=0,
+            smooth=True,
+            uv_fn=uv_fn,
+            sharp_angle=50.0,
+        )
         # Back faces: paint by face normal (front = +ez).
         mesh = obj.data
         colors = mesh.color_attributes["Col"]
@@ -374,6 +464,7 @@ class Figure:
 
 
 def knee_weight(knee_y, span=0.05):
+    """Bend weight: 1 below the knee (or hock), 0 above, smooth over `span`."""
     return lambda p: 1.0 - smoothstep(knee_y - span, knee_y + span, p.y)
 
 
@@ -401,7 +492,14 @@ def legs(f, armored, hose=HOSE):
             ((x * 1.08, 0.12, 0.0), 0.036, 0.038),
             ((x * 1.08, 0.06, 0.005), 0.042, 0.05),
         ]
-        f.loft(sections, part, colour, ring=6, side=(1.0, 0.0, 0.0), bend_fn=knee_weight(0.5))
+        f.loft(
+            sections,
+            part,
+            colour,
+            ring=6,
+            side=(1.0, 0.0, 0.0),
+            bend_fn=knee_weight(0.5),
+        )
         # Foot (shoe, pointed toe).
         foot = [
             ((x * 1.08, 0.06, -0.06), 0.035, 0.035),
@@ -410,11 +508,26 @@ def legs(f, armored, hose=HOSE):
             ((x * 1.08, 0.025, 0.2), 0.015, 0.015),
         ]
         if not f.far:
-            f.loft(foot, part, const(LEATHER), ring=6, side=(1.0, 0.0, 0.0), bend_fn=lambda _p: 1.0, subdiv=0)
+            f.loft(
+                foot,
+                part,
+                const(LEATHER),
+                ring=6,
+                side=(1.0, 0.0, 0.0),
+                bend_fn=lambda _p: 1.0,
+                subdiv=0,
+            )
         if armored and not f.lod:
             # Poleyn (knee cop).
-            f.blob((x * 1.06, 0.53, 0.055), (0.05, 0.05, 0.035), part, const(STEEL, C_METAL), ring=6,
-                   rows=3, bend_fn=knee_weight(0.5))
+            f.blob(
+                (x * 1.06, 0.53, 0.055),
+                (0.05, 0.05, 0.035),
+                part,
+                const(STEEL, C_METAL),
+                ring=6,
+                rows=3,
+                bend_fn=knee_weight(0.5),
+            )
 
 
 def torso(f, under, under_code, surcoat, skirt_to=0.55, belt=True, skirt=None):
@@ -448,14 +561,31 @@ def torso(f, under, under_code, surcoat, skirt_to=0.55, belt=True, skirt=None):
     ]
     f.loft(skirt, P_CLOTH, skirt_colour, ring=10, caps=(False, False), solidify=0.01)
     if belt and not f.far:
-        f.loft([((0.0, 0.93, 0.0), 0.178, 0.12, 0.125), ((0.0, 0.98, 0.0), 0.175, 0.12, 0.125)], P_BODY,
-               const(LEATHER), ring=12, power=2.4, caps=(False, False), subdiv=0)
+        f.loft(
+            [
+                ((0.0, 0.93, 0.0), 0.178, 0.12, 0.125),
+                ((0.0, 0.98, 0.0), 0.175, 0.12, 0.125),
+            ],
+            P_BODY,
+            const(LEATHER),
+            ring=12,
+            power=2.4,
+            caps=(False, False),
+            subdiv=0,
+        )
         if not f.lod:
-            f.box((0.0, 0.955, 0.135), (0.05, 0.045, 0.012), P_BODY, const(WHITE, C_TRIM))
+            f.box(
+                (0.0, 0.955, 0.135), (0.05, 0.045, 0.012), P_BODY, const(WHITE, C_TRIM)
+            )
     # Neck and head (face, nose, ears hidden under helmets).
     if not f.far:
-        f.tube([(0.0, 1.44, 0.0), (0.0, 1.5, 0.005), (0.0, 1.57, 0.01)], [0.056, 0.054, 0.05], P_HEAD,
-               const(SKIN), ring=6)
+        f.tube(
+            [(0.0, 1.44, 0.0), (0.0, 1.5, 0.005), (0.0, 1.57, 0.01)],
+            [0.056, 0.054, 0.05],
+            P_HEAD,
+            const(SKIN),
+            ring=6,
+        )
     head = [
         ((0.0, 1.515, 0.03), 0.045, 0.04),
         ((0.0, 1.55, 0.02), 0.07, 0.075, 0.08),
@@ -466,8 +596,17 @@ def torso(f, under, under_code, surcoat, skirt_to=0.55, belt=True, skirt=None):
     ]
     f.loft(head, P_HEAD, const(SKIN), ring=8)
     if not f.lod:
-        f.loft([((0.0, 1.66, 0.085), 0.012, 0.01), ((0.0, 1.62, 0.115), 0.018, 0.02), ((0.0, 1.6, 0.1), 0.014, 0.012)],
-               P_HEAD, const(SKIN), ring=5, subdiv=0)
+        f.loft(
+            [
+                ((0.0, 1.66, 0.085), 0.012, 0.01),
+                ((0.0, 1.62, 0.115), 0.018, 0.02),
+                ((0.0, 1.6, 0.1), 0.014, 0.012),
+            ],
+            P_HEAD,
+            const(SKIN),
+            ring=5,
+            subdiv=0,
+        )
 
 
 def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
@@ -488,8 +627,15 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
         # Fist.
         if f.far:
             continue
-        f.blob((HAND.x * s, HAND.y - 0.01, HAND.z + 0.005), (0.042, 0.05, 0.05), part,
-               const(glove, glove_code), ring=6, rows=4, subdiv=0)
+        f.blob(
+            (HAND.x * s, HAND.y - 0.01, HAND.z + 0.005),
+            (0.042, 0.05, 0.05),
+            part,
+            const(glove, glove_code),
+            ring=6,
+            rows=4,
+            subdiv=0,
+        )
 
 
 def helmet(f, style):
@@ -523,7 +669,13 @@ def helmet(f, style):
             f.loft(visor, P_HEAD, const(STEEL, C_METAL), ring=8, side=(1.0, 0.0, 0.0))
             if not f.lod:
                 for sx in (-1.0, 1.0):
-                    f.box((0.045 * sx, 1.7, 0.135), (0.05, 0.012, 0.012), P_HEAD, const(DARK), rot_y=0.5 * sx)
+                    f.box(
+                        (0.045 * sx, 1.7, 0.135),
+                        (0.05, 0.012, 0.012),
+                        P_HEAD,
+                        const(DARK),
+                        rot_y=0.5 * sx,
+                    )
     elif style == "kettle":
         dome = [
             ((0.0, 1.64, 0.0), 0.12, 0.12),
@@ -537,8 +689,15 @@ def helmet(f, style):
             ((0.0, 1.64, 0.0), 0.2, 0.2),
             ((0.0, 1.61, 0.0), 0.225, 0.225),
         ]
-        f.loft(brim, P_HEAD, const(STEEL, C_METAL), ring=12, caps=(False, False), solidify=0.008,
-               subdiv=0)
+        f.loft(
+            brim,
+            P_HEAD,
+            const(STEEL, C_METAL),
+            ring=12,
+            caps=(False, False),
+            solidify=0.008,
+            subdiv=0,
+        )
         # Mail/cloth coif under the hat.
         coif = [
             ((0.0, 1.64, -0.035), 0.108, 0.1, 0.1),
@@ -565,8 +724,18 @@ def helmet(f, style):
         ]
         f.loft(cape, P_HEAD, const(WHITE, C_LIVERY), ring=10, caps=(False, False))
         # Liripipe (tail of the hood).
-        f.tube([(0.0, 1.76, -0.1), (0.0, 1.66, -0.16), (0.0, 1.5, -0.2), (0.0, 1.38, -0.2)],
-               [0.035, 0.03, 0.022, 0.012], P_HEAD, const(WHITE, C_LIVERY), ring=5)
+        f.tube(
+            [
+                (0.0, 1.76, -0.1),
+                (0.0, 1.66, -0.16),
+                (0.0, 1.5, -0.2),
+                (0.0, 1.38, -0.2),
+            ],
+            [0.035, 0.03, 0.022, 0.012],
+            P_HEAD,
+            const(WHITE, C_LIVERY),
+            ring=5,
+        )
 
 
 def heater(f, centre, width, height, yaw, part, lean=0.0):
@@ -579,19 +748,45 @@ def heater(f, centre, width, height, yaw, part, lean=0.0):
         # Straight top, sides straight for 35 % then curving to the point.
         top = height * 0.5
         ax = abs(x)
-        bottom = -height * 0.5 + height * 0.65 * (1.0 - math.sqrt(max(0.0, 1.0 - ax * ax)))
+        bottom = -height * 0.5 + height * 0.65 * (
+            1.0 - math.sqrt(max(0.0, 1.0 - ax * ax))
+        )
         bottom = max(bottom, -height * 0.5)
         return bottom, top
 
-    f.plate(outline, centre, (ex, Vector((0.0, 1.0, 0.0)), ez), 0.025, part, C_ARMS, WOOD_DARK,
-            bend=0.04, cols=8, rows=6)
+    f.plate(
+        outline,
+        centre,
+        (ex, Vector((0.0, 1.0, 0.0)), ez),
+        0.025,
+        part,
+        C_ARMS,
+        WOOD_DARK,
+        bend=0.04,
+        cols=8,
+        rows=6,
+    )
 
 
 def sword(f, hand, part=P_WEAPON):
+    """Arming sword held upright in the right fist."""
     h = Vector(hand)
     if not f.far:
-        f.tube([h + Vector((0, -0.07, 0)), h + Vector((0, 0.07, 0))], [0.018, 0.018], part, const(LEATHER), ring=5)
-        f.blob(h + Vector((0, -0.09, 0)), (0.025, 0.022, 0.025), part, const(WHITE, C_TRIM), ring=5, rows=3)
+        f.tube(
+            [h + Vector((0, -0.07, 0)), h + Vector((0, 0.07, 0))],
+            [0.018, 0.018],
+            part,
+            const(LEATHER),
+            ring=5,
+        )
+        f.blob(
+            h + Vector((0, -0.09, 0)),
+            (0.025, 0.022, 0.025),
+            part,
+            const(WHITE, C_TRIM),
+            ring=5,
+            rows=3,
+        )
     f.box(h + Vector((0, 0.085, 0)), (0.2, 0.025, 0.03), part, const(STEEL, C_METAL))
     blade = [
         (h + Vector((0, 0.1, 0)), 0.026, 0.008),
@@ -603,10 +798,17 @@ def sword(f, hand, part=P_WEAPON):
 
 
 def polearm(f, foot, length, head_len, part=P_WEAPON, shaft_r=0.02, leaf=False):
+    """Pike or spear standing in the right fist (leaf-shaped head if `leaf`)."""
     base = Vector(foot)
     top = base + Vector((0, length, 0))
-    f.tube([base, base + Vector((0, length * 0.5, 0)), top], [shaft_r, shaft_r * 0.95, shaft_r * 0.85],
-           part, const(WOOD), ring=5, subdiv=0)
+    f.tube(
+        [base, base + Vector((0, length * 0.5, 0)), top],
+        [shaft_r, shaft_r * 0.95, shaft_r * 0.85],
+        part,
+        const(WOOD),
+        ring=5,
+        subdiv=0,
+    )
     if leaf:
         head = [
             (top, shaft_r * 1.1, shaft_r * 1.1),
@@ -615,11 +817,18 @@ def polearm(f, foot, length, head_len, part=P_WEAPON, shaft_r=0.02, leaf=False):
         ]
         f.loft(head, part, const(STEEL, C_METAL), ring=4, subdiv=0)
     else:
-        f.tube([top, top + Vector((0, head_len, 0))], [shaft_r * 1.2, 0.002], part, const(STEEL, C_METAL),
-               ring=4, subdiv=0)
+        f.tube(
+            [top, top + Vector((0, head_len, 0))],
+            [shaft_r * 1.2, 0.002],
+            part,
+            const(STEEL, C_METAL),
+            ring=4,
+            subdiv=0,
+        )
 
 
 def longbow(f, grip, half, depth, part=P_BOW, string=True):
+    """Longbow held in the left fist (limb P_BOW pivots at the grip)."""
     g = Vector(grip)
     f.pivot(part, g.y, g.z)
     points = []
@@ -631,27 +840,61 @@ def longbow(f, grip, half, depth, part=P_BOW, string=True):
         radii.append(0.02 * (1.0 - 0.6 * abs(t)))
     f.tube(points, radii, part, const(WOOD), ring=5, subdiv=0)
     if string and not f.lod:
-        f.tube([g + Vector((0, -half, 0)), g + Vector((0, half, 0))], [0.004, 0.004], part, const(STRING),
-               ring=3, subdiv=0, caps=(False, False))
+        f.tube(
+            [g + Vector((0, -half, 0)), g + Vector((0, half, 0))],
+            [0.004, 0.004],
+            part,
+            const(STRING),
+            ring=3,
+            subdiv=0,
+            caps=(False, False),
+        )
 
 
 def quiver(f, base, top, part=P_BODY):
+    """Quiver with fletched arrows, on the right hip."""
     b, t = Vector(base), Vector(top)
-    f.tube([b, (b + t) * 0.5, t], [0.055, 0.06, 0.065], part, const(LEATHER), ring=7, subdiv=0)
+    f.tube(
+        [b, (b + t) * 0.5, t],
+        [0.055, 0.06, 0.065],
+        part,
+        const(LEATHER),
+        ring=7,
+        subdiv=0,
+    )
     if not f.lod:
         for k in range(5):
             a = k * 1.3
             off = Vector((math.cos(a) * 0.03, 0.0, math.sin(a) * 0.03))
-            f.tube([t + off, t + off + Vector((0, 0.12, -0.01))], [0.006, 0.006], part, const(WOOD), ring=3,
-                   subdiv=0)
-            f.box(t + off + Vector((0, 0.1, -0.01)), (0.004, 0.07, 0.035), part, const(FLETCH), rot_y=a)
+            f.tube(
+                [t + off, t + off + Vector((0, 0.12, -0.01))],
+                [0.006, 0.006],
+                part,
+                const(WOOD),
+                ring=3,
+                subdiv=0,
+            )
+            f.box(
+                t + off + Vector((0, 0.1, -0.01)),
+                (0.004, 0.07, 0.035),
+                part,
+                const(FLETCH),
+                rot_y=a,
+            )
 
 
 def crossbow(f, hand, part=P_WEAPON):
+    """Crossbow held in the right fist, prod forwards."""
     h = Vector(hand)
     # Tiller (stock) forwards from the hand.
     f.box(h + Vector((0, 0.02, 0.2)), (0.055, 0.06, 0.62), part, const(WOOD))
-    f.box(h + Vector((0, -0.04, -0.02)), (0.05, 0.1, 0.14), part, const(WOOD_DARK), rot_x=0.3)
+    f.box(
+        h + Vector((0, -0.04, -0.02)),
+        (0.05, 0.1, 0.14),
+        part,
+        const(WOOD_DARK),
+        rot_x=0.3,
+    )
     # Prod (steel bow) across the front, bent forwards.
     prod = []
     radii = []
@@ -661,24 +904,60 @@ def crossbow(f, hand, part=P_WEAPON):
         radii.append(0.017 * (1.0 - 0.4 * abs(t)))
     f.tube(prod, radii, part, const(IRON, C_METAL), ring=4, subdiv=0)
     # Stirrup.
-    f.tube([h + Vector((-0.05, 0.035, 0.55)), h + Vector((-0.04, 0.035, 0.65)), h + Vector((0.04, 0.035, 0.65)),
-            h + Vector((0.05, 0.035, 0.55))], [0.008] * 4, part, const(IRON, C_METAL), ring=3, subdiv=0)
+    f.tube(
+        [
+            h + Vector((-0.05, 0.035, 0.55)),
+            h + Vector((-0.04, 0.035, 0.65)),
+            h + Vector((0.04, 0.035, 0.65)),
+            h + Vector((0.05, 0.035, 0.55)),
+        ],
+        [0.008] * 4,
+        part,
+        const(IRON, C_METAL),
+        ring=3,
+        subdiv=0,
+    )
     if not f.lod:
         for sx in (-1.0, 1.0):
-            f.tube([h + Vector((sx * 0.34, 0.035, 0.52)), h + Vector((0, 0.05, 0.3))], [0.004, 0.004], part,
-                   const(STRING), ring=3, subdiv=0, caps=(False, False))
+            f.tube(
+                [h + Vector((sx * 0.34, 0.035, 0.52)), h + Vector((0, 0.05, 0.3))],
+                [0.004, 0.004],
+                part,
+                const(STRING),
+                ring=3,
+                subdiv=0,
+                caps=(False, False),
+            )
 
 
 def lance(f, hand, part=P_WEAPON):
+    """Couched lance with vamplate and livery pennon."""
     h = Vector(hand)
-    shaft = [h + Vector((0, -0.6, 0)), h + Vector((0, 0.1, 0)), h + Vector((0, 1.5, 0)), h + Vector((0, 3.0, 0))]
+    shaft = [
+        h + Vector((0, -0.6, 0)),
+        h + Vector((0, 0.1, 0)),
+        h + Vector((0, 1.5, 0)),
+        h + Vector((0, 3.0, 0)),
+    ]
     f.tube(shaft, [0.028, 0.034, 0.026, 0.018], part, const(WOOD), ring=6, subdiv=0)
     # Vamplate (hand guard).
     if not f.far:
-        f.tube([h + Vector((0, 0.08, 0)), h + Vector((0, 0.2, 0))], [0.08, 0.03], part, const(STEEL, C_METAL),
-               ring=8, subdiv=0)
-    f.tube([h + Vector((0, 3.0, 0)), h + Vector((0, 3.25, 0))], [0.022, 0.002], part, const(STEEL, C_METAL),
-           ring=4, subdiv=0)
+        f.tube(
+            [h + Vector((0, 0.08, 0)), h + Vector((0, 0.2, 0))],
+            [0.08, 0.03],
+            part,
+            const(STEEL, C_METAL),
+            ring=8,
+            subdiv=0,
+        )
+    f.tube(
+        [h + Vector((0, 3.0, 0)), h + Vector((0, 3.25, 0))],
+        [0.022, 0.002],
+        part,
+        const(STEEL, C_METAL),
+        ring=4,
+        subdiv=0,
+    )
     # Pennon (livery, swallow-tailed), in the plane of the lance, pointing backwards.
     top = h + Vector((0, 2.95, 0))
 
@@ -689,8 +968,19 @@ def lance(f, hand, part=P_WEAPON):
         return y_bot, y_top
 
     ex = Vector((0.0, 0.0, -0.22))
-    f.plate(outline, top + Vector((0, -0.08, -0.22)), (ex, Vector((0, 1, 0)), Vector((1, 0, 0))), 0.008,
-            part, C_LIVERY, WHITE, bend=0.02, cols=4, rows=2, back_code=C_LIVERY)
+    f.plate(
+        outline,
+        top + Vector((0, -0.08, -0.22)),
+        (ex, Vector((0, 1, 0)), Vector((1, 0, 0))),
+        0.008,
+        part,
+        C_LIVERY,
+        WHITE,
+        bend=0.02,
+        cols=4,
+        rows=2,
+        back_code=C_LIVERY,
+    )
 
 
 def pavise(f):
@@ -699,14 +989,25 @@ def pavise(f):
     def outline(x):
         return -0.6, 0.6 - 0.05 * x * x
 
-    f.plate(outline, (0.0, 1.05, -0.24), (Vector((-0.3, 0, 0)), Vector((0, 1, 0)), Vector((0, 0.12, -1)).normalized()),
-            0.035, P_BODY, C_ARMS, WOOD_DARK, bend=0.05, cols=6, rows=6)
+    f.plate(
+        outline,
+        (0.0, 1.05, -0.24),
+        (Vector((-0.3, 0, 0)), Vector((0, 1, 0)), Vector((0, 0.12, -1)).normalized()),
+        0.035,
+        P_BODY,
+        C_ARMS,
+        WOOD_DARK,
+        bend=0.05,
+        cols=6,
+        rows=6,
+    )
 
 
 # --- Figures -----------------------------------------------------------------------------
 
 
 def infantry(f, variant):
+    """Foot soldiers: 0 men-at-arms, 1 Flemish pikemen, 2 urban militia."""
     f.pivot(P_WEAPON, 0.9, 0.12)
     f.pivot(P_CLOTH, HIP_Y, 0.0)
     if variant == 1:  # Flemish pikemen: gambeson, kettle hat, 4.5 m pike.
@@ -732,6 +1033,7 @@ def infantry(f, variant):
 
 
 def archer(f, variant):
+    """Archers: 0 longbowmen, 1 crossbowmen, 2 Genoese crossbowmen with pavise."""
     f.pivot(P_WEAPON, 0.9, 0.12)
     f.pivot(P_CLOTH, HIP_Y, 0.0)
     legs(f, False)
@@ -752,8 +1054,10 @@ def archer(f, variant):
 
 
 def horse(f, coat, caparison, dark_points):
-    """Horse: body (breast, barrel, croup), neck, head, ears, mane, tail, four legs with
-    knee/hock bend weights, saddle and bridle; livery caparison with the arms on the flanks."""
+    """Horse with saddle and bridle, optionally caparisoned.
+
+    Body (breast, barrel, croup), neck, head, ears, mane, tail, four legs with knee/hock bend weights, saddle and bridle; livery caparison with the arms on the flanks.
+    """
     f.pivot(P_HNECK, 1.5, 0.6)
 
     def coat_fn(p):
@@ -799,10 +1103,27 @@ def horse(f, coat, caparison, dark_points):
 
     f.loft(head, P_HNECK, head_fn, ring=8, side=(1.0, 0.0, 0.0))
     for sx in (-1.0, 1.0):
-        f.loft([((0.045 * sx, 2.08, 0.99), 0.025, 0.015), ((0.055 * sx, 2.15, 0.985), 0.022, 0.012),
-                ((0.06 * sx, 2.21, 0.975), 0.003, 0.003)], P_HNECK, coat_fn, ring=5, subdiv=0)
+        f.loft(
+            [
+                ((0.045 * sx, 2.08, 0.99), 0.025, 0.015),
+                ((0.055 * sx, 2.15, 0.985), 0.022, 0.012),
+                ((0.06 * sx, 2.21, 0.975), 0.003, 0.003),
+            ],
+            P_HNECK,
+            coat_fn,
+            ring=5,
+            subdiv=0,
+        )
         if not f.lod:
-            f.blob((0.075 * sx, 1.98, 1.1), (0.016, 0.016, 0.016), P_HNECK, const(DARK), ring=5, rows=3, subdiv=0)
+            f.blob(
+                (0.075 * sx, 1.98, 1.1),
+                (0.016, 0.016, 0.016),
+                P_HNECK,
+                const(DARK),
+                ring=5,
+                rows=3,
+                subdiv=0,
+            )
     # Mane along the crest, forelock.
     mane = [
         ((0.0, 2.08, 0.95), 0.02, 0.03, 0.02),
@@ -814,8 +1135,19 @@ def horse(f, coat, caparison, dark_points):
     if not f.far:
         f.loft(mane, P_HNECK, const(HORSE_DARK), ring=6, side=(1.0, 0.0, 0.0))
     # Tail.
-    f.tube([(0.0, 1.55, -0.95), (0.0, 1.46, -1.06), (0.0, 1.2, -1.14), (0.0, 0.95, -1.14), (0.0, 0.72, -1.1)],
-           [0.05, 0.07, 0.075, 0.06, 0.02], P_HORSE, const(HORSE_DARK), ring=6)
+    f.tube(
+        [
+            (0.0, 1.55, -0.95),
+            (0.0, 1.46, -1.06),
+            (0.0, 1.2, -1.14),
+            (0.0, 0.95, -1.14),
+            (0.0, 0.72, -1.1),
+        ],
+        [0.05, 0.07, 0.075, 0.06, 0.02],
+        P_HORSE,
+        const(HORSE_DARK),
+        ring=6,
+    )
     # Legs.
     for part, (x, z, front) in HORSE_LEGS.items():
         if front:
@@ -855,7 +1187,14 @@ def horse(f, coat, caparison, dark_points):
                 return HORSE_DARK, C_EXACT
             return coat, C_EXACT
 
-        f.loft(sections, part, leg_fn, ring=5, side=(1.0, 0.0, 0.0), bend_fn=knee_weight(knee[0], 0.06))
+        f.loft(
+            sections,
+            part,
+            leg_fn,
+            ring=5,
+            side=(1.0, 0.0, 0.0),
+            bend_fn=knee_weight(knee[0], 0.06),
+        )
     # Saddle: seat, high cantle and pommel, girth, stirrups.
     saddle = [
         ((0.0, 1.62, -0.36), 0.18, 0.06, 0.05),
@@ -865,36 +1204,83 @@ def horse(f, coat, caparison, dark_points):
     f.loft(saddle, P_HORSE, const(LEATHER), ring=8, side=(1.0, 0.0, 0.0), subdiv=0)
     # Cantle and pommel: arches across the saddle.
     for z, h, w in ((-0.36, 0.2, 0.17), (0.15, 0.13, 0.14)) if not f.far else ():
-        arch = [(-w, 1.64, z), (-w * 0.75, 1.64 + h * 0.8, z), (0.0, 1.64 + h, z), (w * 0.75, 1.64 + h * 0.8, z),
-                (w, 1.64, z)]
-        f.loft([(p, 0.035, 0.025) for p in arch], P_HORSE, const(WOOD_DARK), ring=6, side=(0.0, 0.0, 1.0),
-               subdiv=0)
+        arch = [
+            (-w, 1.64, z),
+            (-w * 0.75, 1.64 + h * 0.8, z),
+            (0.0, 1.64 + h, z),
+            (w * 0.75, 1.64 + h * 0.8, z),
+            (w, 1.64, z),
+        ]
+        f.loft(
+            [(p, 0.035, 0.025) for p in arch],
+            P_HORSE,
+            const(WOOD_DARK),
+            ring=6,
+            side=(0.0, 0.0, 1.0),
+            subdiv=0,
+        )
     for sx in (-1.0, 1.0) if not f.far else ():
-        f.box((0.3 * sx, 1.3, 0.1), (0.012, 0.6, 0.04), P_HORSE, const(LEATHER), rot_x=0.1)
+        f.box(
+            (0.3 * sx, 1.3, 0.1), (0.012, 0.6, 0.04), P_HORSE, const(LEATHER), rot_x=0.1
+        )
         if not f.lod:
-            f.tube([(0.31 * sx, 1.02, 0.13), (0.31 * sx, 0.97, 0.13)], [0.035, 0.035], P_HORSE, const(IRON, C_METAL),
-                   ring=5, subdiv=0)
+            f.tube(
+                [(0.31 * sx, 1.02, 0.13), (0.31 * sx, 0.97, 0.13)],
+                [0.035, 0.035],
+                P_HORSE,
+                const(IRON, C_METAL),
+                ring=5,
+                subdiv=0,
+            )
     # Bridle: headstall, noseband, reins to the withers.
     if not f.lod:
-        f.loft([((0.0, 1.71, 1.29), 0.075, 0.087), ((0.0, 1.69, 1.31), 0.073, 0.085)], P_HNECK, const(LEATHER),
-               ring=8, caps=(False, False), solidify=0.01, side=(1.0, 0.0, 0.0), subdiv=0)
-        f.loft([((0.0, 2.04, 1.0), 0.09, 0.1), ((0.0, 2.02, 1.035), 0.088, 0.098)], P_HNECK, const(LEATHER),
-               ring=8, caps=(False, False), solidify=0.01, side=(1.0, 0.0, 0.0), subdiv=0)
+        f.loft(
+            [((0.0, 1.71, 1.29), 0.075, 0.087), ((0.0, 1.69, 1.31), 0.073, 0.085)],
+            P_HNECK,
+            const(LEATHER),
+            ring=8,
+            caps=(False, False),
+            solidify=0.01,
+            side=(1.0, 0.0, 0.0),
+            subdiv=0,
+        )
+        f.loft(
+            [((0.0, 2.04, 1.0), 0.09, 0.1), ((0.0, 2.02, 1.035), 0.088, 0.098)],
+            P_HNECK,
+            const(LEATHER),
+            ring=8,
+            caps=(False, False),
+            solidify=0.01,
+            side=(1.0, 0.0, 0.0),
+            subdiv=0,
+        )
         for sx in (-1.0, 1.0):
-            f.tube([(0.065 * sx, 1.64, 1.33), (0.1 * sx, 1.62, 0.95), (0.14 * sx, 1.74, 0.3)], [0.008] * 3, P_HNECK,
-                   const(LEATHER), ring=3, subdiv=0)
+            f.tube(
+                [
+                    (0.065 * sx, 1.64, 1.33),
+                    (0.1 * sx, 1.62, 0.95),
+                    (0.14 * sx, 1.74, 0.3),
+                ],
+                [0.008] * 3,
+                P_HNECK,
+                const(LEATHER),
+                ring=3,
+                subdiv=0,
+            )
     if caparison:
         _caparison(f, body, neck)
 
 
 def _caparison(f, body, neck):
-    """Livery trapper: a cloth over the body wrapping the chest and the hindquarters, falling
-    to mid-cannon with a wavy hem, arms on the flanks; crinet over the neck."""
+    """Livery trapper and crinet.
+
+    A cloth over the body wrapping the chest and the hindquarters, falling to mid-cannon with a wavy hem, arms on the flanks; crinet over the neck.
+    """
     n = 10 if not f.lod else 6
     drop = 4 if not f.lod else 2
     rings = []
     verts = []
-    for c, rx, rp, _rn in (body[::2] + body[-1:] if f.far else body):
+    for c, rx, rp, _rn in body[::2] + body[-1:] if f.far else body:
         x_half = rx + 0.05
         top = c[1] + rp + 0.03
         z = c[2] + (0.03 if c[2] > 0.7 else -0.03 if c[2] < -0.9 else 0.0)
@@ -928,12 +1314,21 @@ def _caparison(f, body, neck):
     f.add(verts, faces, P_HORSE, const(WHITE, C_ARMS), subdiv=1, uv_fn=uv_fn)
     crinet = [(c, rx + 0.02, rp + 0.02, rn + 0.015) for c, rx, rp, rn in neck]
     # Always dyed (arms code, no arms painted): matches the trapper whatever the rider wears.
-    f.loft(crinet, P_HNECK, const(WHITE, C_ARMS), ring=8, side=(1.0, 0.0, 0.0), caps=(False, False))
+    f.loft(
+        crinet,
+        P_HNECK,
+        const(WHITE, C_ARMS),
+        ring=8,
+        side=(1.0, 0.0, 0.0),
+        caps=(False, False),
+    )
 
 
 def rider(f, under, under_code, surcoat, helmet_style, armored):
-    """Seated rider: same torso, arms and helmet as on foot, raised to the saddle; thighs
-    along the saddle, shins down the flanks, feet in the stirrups."""
+    """Seated rider.
+
+    Same torso, arms and helmet as on foot, raised to the saddle; thighs along the saddle, shins down the flanks, feet in the stirrups.
+    """
     f.offset = Vector((0.0, DY, DZ))
     f.part_override = P_RIDER
     # Skirt spread over the saddle.
@@ -947,7 +1342,13 @@ def rider(f, under, under_code, surcoat, helmet_style, armored):
     f.part_override = None
     # Arms pivot at the rider's shoulders.
     saved = f.offset
-    arms(f, under, under_code, STEEL if armored else LEATHER, C_METAL if armored else C_EXACT)
+    arms(
+        f,
+        under,
+        under_code,
+        STEEL if armored else LEATHER,
+        C_METAL if armored else C_EXACT,
+    )
     f.offset = saved
     # Legs (static relative to the horse).
     leg_colour = (MAIL, C_METAL) if armored else (HOSE, C_CLOTH)
@@ -977,6 +1378,7 @@ def rider(f, under, under_code, surcoat, helmet_style, armored):
 
 
 def cavalry(f, variant):
+    """Cavalry: 0 knights, 1 mounted sergeants, 2 mounted archers."""
     hand = Vector((-HAND.x, HAND.y + DY, HAND.z + DZ))
     f.pivot(P_WEAPON, hand.y, hand.z)
     if variant == 1:  # Mounted sergeants: bare horse, gambeson, kettle hat, lance.
@@ -1006,13 +1408,18 @@ LEVEL_SUFFIX = ["", "_lod", "_far"]
 
 
 def build(kind, variant, level):
+    """Builds, joins and exports one figure at one level of detail."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     name = f"{kind}_{variant}" + LEVEL_SUFFIX[level]
     f = Figure(name, level)
     {"infantry": infantry, "archer": archer, "cavalry": cavalry}[kind](f, variant)
     objs = f.objects
-    with bpy.context.temp_override(active_object=objs[0], object=objs[0], selected_objects=objs,
-                                   selected_editable_objects=objs):
+    with bpy.context.temp_override(
+        active_object=objs[0],
+        object=objs[0],
+        selected_objects=objs,
+        selected_editable_objects=objs,
+    ):
         bpy.ops.object.join()
     joined = objs[0]
     joined.name = name
@@ -1040,6 +1447,7 @@ def build(kind, variant, level):
 
 
 def main():
+    """Exports every figure and level of detail, then `figures.json`."""
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     meta = {"figures": {}}
