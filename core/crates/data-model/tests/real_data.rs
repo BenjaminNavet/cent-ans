@@ -190,3 +190,29 @@ fn real_data_loads_without_errors() {
         "unexpected warnings: {non_province_warnings:?}"
     );
 }
+
+/// Lot C1: every province has settlements, exactly one city first in its list.
+#[test]
+fn every_province_has_exactly_one_city() {
+    let (data, _) = GameData::load(&data_root()).expect("data/ must load");
+    assert!(data.settlement_rules.is_some(), "settlements/rules.json");
+    for id in data.provinces.keys() {
+        let settlements = data.province_settlements(id);
+        assert!(!settlements.is_empty(), "{id} has no settlement");
+        assert!(settlements.len() <= 6, "{id} has too many settlements");
+        let cities = settlements
+            .iter()
+            .filter(|s| s.kind == data_model::SettlementKind::City)
+            .count();
+        assert_eq!(cities, 1, "{id} must have exactly one city");
+        assert_eq!(settlements[0].kind, data_model::SettlementKind::City);
+        assert!(settlements.iter().all(|s| &s.province == id));
+    }
+    assert_eq!(
+        data.settlements.len(),
+        data.settlements_by_province
+            .values()
+            .map(Vec::len)
+            .sum::<usize>()
+    );
+}
