@@ -28,7 +28,7 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
 /// A debt must be repaid within this many turns, or units are dismissed.
-const DEBT_REPAYMENT_TURNS: i64 = 20;
+const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
 const MAX_DISBANDS_PER_TURN: usize = 12;
 /// Recruitment orders per turn: one per this much seasonal income (1 to 8).
@@ -225,7 +225,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     };
     let wanted_surplus = if ctx.treasury < 0 {
         -ctx.treasury / DEBT_REPAYMENT_TURNS
-    } else if ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway {
+    } else if ctx.surplus() < 0
+        && (ctx.treasury < -ctx.surplus() * runway || (!ctx.at_war() && ctx.hoard() == 0))
+    {
         0
     } else {
         i64::MIN
