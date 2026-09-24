@@ -1,0 +1,12 @@
+{
+  "id": "cdx_humbert_ii_de_viennois",
+  "title": "Humbert II, dauphin de Viennois",
+  "category": "personnage",
+  "aliases": ["Humbert II de Viennois", "dauphin de Viennois"],
+  "era": { "from": "v. 1312", "to": "1355" },
+  "summary": "Dernier dauphin de la maison de La Tour-du-Pin, Humbert II ruine son domaine par ses fondations pieuses et cédera le Dauphiné à la France en 1349.",
+  "body": "Humbert II gouverne le Dauphiné de Viennois, principauté d'Empire aux confins du royaume de France, de la Savoie et de la Provence angevine. Terre montagnarde et frontalière, elle échappe à la fois à l'autorité effective de l'empereur Louis IV de Bavière et aux ambitions françaises, ce qui en fait un enjeu diplomatique de premier ordre.\n\nÀ la mort en 1335 de son fils unique André, Humbert perd son seul héritier ; sans postérité mâle, l'avenir de la principauté devient incertain. Prince généreux jusqu'à la prodigalité, il multiplie les fondations pieuses — hôpitaux, couvents, l'université de Grenoble — et rêve un temps de croisade en Orient, entreprises qui épuisent ses finances déjà fragiles.\n\nFaute d'héritier et accablé de dettes, il négocie avec la couronne de France la cession de son domaine : le « transport du Dauphiné », conclu en 1349, cède la principauté au futur roi Charles V, alors enfant, qui en prend le titre de dauphin — donnant naissance à l'usage, désormais attaché à tous les héritiers du trône de France jusqu'à la Révolution. Humbert se retire ensuite chez les dominicains et meurt en 1355, évêque de Paris.",
+  "entity": "chr_humbert_ii_de_viennois",
+  "see_also": [],
+  "sources": ["Humbert II de Viennois", "Dauphiné de Viennois"]
+}

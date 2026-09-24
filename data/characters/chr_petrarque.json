@@ -1,0 +1,42 @@
+{
+  "id": "chr_petrarque",
+  "name": {
+    "display": "Pétrarque",
+    "local": "Francesco Petrarca",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Petrarca",
+  "faction": "fac_papacy",
+  "role": "burgher",
+  "birth": {
+    "value": "1304-07-20"
+  },
+  "death": {
+    "value": "1374-07-19"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Chanoine",
+      "note": "Bénéfices ecclésiastiques mineurs, dont un canonicat à Lombez, obtenus grâce à ses protecteurs."
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 2,
+    "court": 6
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_cultured"
+  ],
+  "piety": 55,
+  "starting_location": "prov_comtat_venaissin",
+  "status": "at_court",
+  "description": "Poète et lettré toscan, élevé à [[cdx_avignon|Avignon]] où son père fit carrière de notaire ; il se retire en 1337 dans une maison de campagne à Vaucluse, près de la Sorgue, pour composer ses vers latins et vulgaires en l'honneur de Laure. Sa passion pour les textes antiques en fait une figure fondatrice de l'humanisme naissant ; utile en jeu pour illustrer le mécénat des lettres à la cour pontificale.",
+  "sources": [
+    "Pétrarque",
+    "Vaucluse (Fontaine-de-Vaucluse)"
+  ]
+}

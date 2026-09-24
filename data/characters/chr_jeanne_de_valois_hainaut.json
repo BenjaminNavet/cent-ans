@@ -1,0 +1,50 @@
+{
+  "id": "chr_jeanne_de_valois_hainaut",
+  "name": {
+    "display": "Jeanne de Valois",
+    "local": "Jeanne de Valois",
+    "local_language": "ancien français"
+  },
+  "sex": "female",
+  "house": "Valois",
+  "faction": "fac_hainaut",
+  "role": "consort",
+  "birth": {
+    "value": "1294",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1342-03-07",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comtesse de Hainaut, de Hollande et de Zélande",
+      "note": "Par son mariage avec Guillaume Ier d'Avesnes."
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 6,
+    "court": 8
+  },
+  "traits": [
+    "trait_diplomat",
+    "trait_pious"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": ["chr_guillaume_i_de_hainaut"],
+    "children": ["chr_guillaume_ii_de_hainaut"],
+    "siblings": ["chr_philippe_vi"]
+  },
+  "starting_location": "prov_hainaut",
+  "status": "at_court",
+  "description": "Sœur de [[cdx_philippe_vi|Philippe VI]] et épouse de Guillaume Ier de Hainaut, belle-mère d'[[cdx_edouard_iii|Édouard III]] par sa fille [[cdx_philippa_de_hainaut|Philippa]]. Veuve en juin 1337, elle entre en religion à l'abbaye de Fontenelle en 1340 mais garde son crédit ; elle négocie la trêve d'Esplechin (25 septembre 1340) entre son frère et son gendre.",
+  "sources": [
+    "Jeanne de Valois (1294-1342)",
+    "Guillaume Ier de Hainaut",
+    "Trêve d'Esplechin"
+  ]
+}

@@ -9,7 +9,7 @@ Chantier de la session « historien » (23-24 septembre 2026). Conception :
 |---|---|---|
 | Partout | **Mots « découverte »** : un mot rubriqué (rouge souligné) ouvre une bulle au survol ; les liens d'une bulle en ouvrent d'autres (jusqu'à 6). Un mot déjà lu passe en brun. | survol ; clic = fiche ; clic droit = épingler ; Échap |
 | Infobulles riches | **Épingler** une infobulle pour cliquer ses mots | `T` pendant qu'elle est affichée |
-| Codex | 218 fiches : personnages, dynasties, lieux, guerre, société, religion, savoirs, héraldique, calendrier, vie quotidienne, table, plantes, médecine ; compteur de découvertes, recherche, « Voir dans l'encyclopédie » | `K` |
+| Codex | 230 fiches : personnages, dynasties, lieux, guerre, société, religion, savoirs, héraldique, calendrier, vie quotidienne, table, plantes, médecine ; compteur de découvertes, recherche, « Voir dans l'encyclopédie » | `K` |
 | Encyclopédie (F8) | règles et données ; bouton « Fiche historique » vers le Codex | `L` |
 | Panneau de province, onglet Ville | **La Table** : régime alimentaire (7), Carême au printemps, coût d'hiver | — |
 | Technologies | **Médecine** : 3e arbre (14 techs), plantes de l'herbier, notes historiques | onglet Médecine |
@@ -34,7 +34,13 @@ l'Étoile brisé par la perte de la moitié de ses membres en une saison (Mauron
 
 ## Pistes pour la suite
 
-Suggestions de l'audit non encore faites (personnages : Pétrarque, Gaston Fébus, Humbert II… ;
-données : prénoms arabes pour Grenade, ressource étain), icônes propres aux régimes, portraits
-des nouveaux personnages (clé OpenRouter après le 1er octobre), bouton Codex dans le bandeau
-(session d'interface).
+Lot S1 (24 septembre 2026) fait : les 14 personnages de l'audit § 7 sont couverts — 12 nouveaux
+(Jeanne de Valois de Hainaut, Hugues Quiéret, Nicolas Béhuchet, Godefroy d'Harcourt, Olivier IV de
+Clisson, Louis Ier de Bourbon, Gaston II de Foix-Béarn, Jean Ier d'Armagnac, Humbert II de
+Viennois, Jacques III de Majorque, Pierre Roger/futur Clément VI, Pétrarque) plus une fiche Codex
+seule pour Abu al-Hasan Ali et Valdemar IV Atterdag (aucune faction Mérinides ni Danemark dans
+`data/factions/`). Détail : `docs/wip/s1-personnages.md`.
+
+Reste des suggestions de l'audit non encore faites : données (prénoms arabes pour Grenade,
+ressource étain), icônes propres aux régimes, portraits des nouveaux personnages (clé OpenRouter
+après le 1er octobre), bouton Codex dans le bandeau (session d'interface).
