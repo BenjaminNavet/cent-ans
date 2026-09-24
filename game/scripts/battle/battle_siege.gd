@@ -27,6 +27,7 @@ var _ladders: Dictionary = {}  # unit id -> Node3D (group of ladders)
 var _ladder_mesh: ArrayMesh
 var wall_height: float = 8.0
 var thickness: float = 3.0
+var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -42,8 +43,15 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	_ladder_mesh = _make_ladder(wall_height + 1.5)
 	for piece in siege.get("pieces", []):
 		_build_piece(piece)
+	# Tours (statiques, aucun dégât suivi contrairement aux pans de courtine) : les archères,
+	# de taille fixe, sont regroupées après coup par `BattleSiegeBatcher` (le fût conique et son
+	# couronnement restent des nœuds, rayon/hauteur variables par tour).
+	var towers_root := Node3D.new()
+	towers_root.name = "Towers"
+	add_child(towers_root)
 	for tower in siege.get("towers", []):
-		_build_tower(tower)
+		_build_tower(towers_root, tower)
+	BattleSiegeBatcher.batch_and_replace(towers_root)
 	_build_square()
 	_build_houses()
 
@@ -184,14 +192,14 @@ func _build_piece(piece: Dictionary) -> void:
 	_pieces.append({"node": node, "wall": wall, "rubble": rubble, "material": mat, "gate": gate, "ratio": 1.0})
 
 
-func _build_tower(tower: Dictionary) -> void:
+func _build_tower(parent: Node3D, tower: Dictionary) -> void:
 	var x := float(tower["x"])
 	var z := float(tower["z"])
 	var r := float(tower["radius"])
 	var h := float(tower["height"])
 	var node := Node3D.new()
 	node.position = Vector3(x, _ground(x, z) - 0.5, z)
-	add_child(node)
+	parent.add_child(node)
 	var body := MeshInstance3D.new()
 	var cylinder := CylinderMesh.new()
 	cylinder.top_radius = r
@@ -253,8 +261,11 @@ func _build_tower(tower: Dictionary) -> void:
 		merlons.multimesh = mm
 		merlons.material_override = stone
 		node.add_child(merlons)
-	# Archères : fentes sombres sur le fût.
-	var slit_mat := _material(Color(0.05, 0.05, 0.05))
+	# Archères : fentes sombres sur le fût. Matière partagée entre toutes les tours (nécessaire
+	# pour que `BattleSiegeBatcher` les regroupe en un seul `MultiMeshInstance3D`).
+	if _slit_mat == null:
+		_slit_mat = _material(Color(0.05, 0.05, 0.05))
+	var slit_mat := _slit_mat
 	for k in 3:
 		var a := TAU * float(k) / 3.0 + 0.4
 		var slit := MeshInstance3D.new()
@@ -293,13 +304,19 @@ func _build_square() -> void:
 	add_child(well)
 
 
-## Maisons et église dans la moitié arrière de la ville (loin du front et de la place).
+## Maisons et église dans la moitié arrière de la ville (loin du front et de la place). Les
+## maisons (statiques, sans état à mettre à jour) sont regroupées en `MultiMeshInstance3D` par
+## `BattleSiegeBatcher` une fois construites (V6, perf : ~550 appels de dessin à ~10) ; l'église
+## (unique) reste un nœud normal.
 func _build_houses() -> void:
 	var center: Vector2 = siege.get("center", Vector2(600, 560))
 	var radius := float(siege.get("square_radius", 35.0))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1340
 	var walls: Array = siege.get("pieces", [])
+	var houses_root := Node3D.new()
+	houses_root.name = "Houses"
+	add_child(houses_root)
 	var placed := 0
 	var tries := 0
 	while placed < 46 and tries < 700:
@@ -315,14 +332,15 @@ func _build_houses() -> void:
 				break
 		if near_wall or not Geometry2D.is_point_in_polygon(p, _ring()):
 			continue
-		_house(p, rng.randf_range(6.0, 11.0), rng.randf_range(5.0, 8.0), rng.randf_range(4.0, 7.0), rng.randf() * TAU)
+		_house(houses_root, p, rng.randf_range(6.0, 11.0), rng.randf_range(5.0, 8.0), rng.randf_range(4.0, 7.0), rng.randf() * TAU)
 		placed += 1
-	# L'église, au fond de la ville.
+	BattleSiegeBatcher.batch_and_replace(houses_root)
+	# L'église, au fond de la ville (unique : pas de regroupement).
 	var church := center + Vector2(0, 75)
 	if Geometry2D.is_point_in_polygon(church, _ring()):
 		if _place_model("cathedral", church, 28.0):
 			return
-		_house(church, 22.0, 10.0, 11.0, 0.0)
+		_house(self, church, 22.0, 10.0, 11.0, 0.0)
 		var spire := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
 		cone.top_radius = 0.0
@@ -379,7 +397,7 @@ func _ring() -> PackedVector2Array:
 	return ring
 
 
-func _house(p: Vector2, w: float, d: float, h: float, angle: float) -> void:
+func _house(parent: Node3D, p: Vector2, w: float, d: float, h: float, angle: float) -> void:
 	var node := Node3D.new()
 	# Posée sur le point le plus bas de son emprise ; le soubassement comble la pente.
 	var low := INF
@@ -388,7 +406,7 @@ func _house(p: Vector2, w: float, d: float, h: float, angle: float) -> void:
 		low = minf(low, _ground(q.x, q.y))
 	node.position = Vector3(p.x, low, p.y)
 	node.rotation.y = angle
-	add_child(node)
+	parent.add_child(node)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(p.x * 31.0 + p.y * 17.0)
 	var plinth := MeshInstance3D.new()
