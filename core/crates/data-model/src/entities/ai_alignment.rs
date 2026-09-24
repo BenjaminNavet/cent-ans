@@ -34,12 +34,12 @@ pub struct DefectionRules {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GrievanceRules {
-    /// At or below this attitude (-100..100) towards its patron a prince
-    /// holds a grievance.
-    pub attitude: i32,
-    /// Attitude the prince must have towards the patron's enemy above the
-    /// one it has towards its patron.
-    pub margin: i32,
+    /// At or below this sum of running negative opinion modifiers towards
+    /// its patron (a murder, a betrayal) a prince holds a grievance.
+    pub grudge: i32,
+    /// Least attitude (their war aside) towards the patron's enemy or
+    /// pretender the aggrieved prince turns to.
+    pub min_attitude: i32,
 }
 
 /// Alliances with the in-laws and neighbours of the enemy (Hainaut, Brabant).
