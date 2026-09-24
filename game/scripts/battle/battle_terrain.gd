@@ -17,7 +17,8 @@ extends Node3D
 ## ou la boue ; haies des courtils et du bocage semées avec les buissons (et chênes têtards), fossés,
 ## cour du village, mares et plage cuits dans la splatmap ; maisons, clôtures, mares, roseaux et mer
 ## dans `BattleVillage`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
-## bocage>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`
+## bocage>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
+## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
 ## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
 ## (comparaisons de performance A/B).
 
@@ -116,6 +117,9 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	ground_key = str(terrain.get("ground", "dry"))
 	woodland = float(terrain.get("woodland", 0.5))
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--ground="):
+			ground_key = arg.trim_prefix("--ground=")  # rendu seulement, comme --weather=
 	biome = BIOMES.get(terrain_key, BIOMES["plains"]) if site_render else BIOMES["plains"]
 	_coast = terrain.get("coast", {}) if site_render else {}
 	_pools = terrain.get("pools", []) if site_render else []
@@ -165,6 +169,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 			terrain_key, season_key, ground_key,
 			"(%.0f, %.0f) r %.0f, %d houses" % [float(village["x"]), float(village["z"]), float(village["radius"]), village_view.house_count] if not village.is_empty() else "none",
 			str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), village_view.reed_count])
+		for pool in _pools:
+			print("BattleTerrain: pool (%.0f, %.0f) r %.0f" % [float(pool["x"]), float(pool["z"]), float(pool["radius"])])
 
 
 ## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?
@@ -387,7 +393,7 @@ func _build_textures() -> void:
 	for zone in terrain.get("forests", []):
 		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]) + 5.0, 0, 12.0)
 	for zone in terrain.get("mud", []):
-		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]), 2, 14.0)
+		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]), 2, 14.0, 0.5 if site_render and terrain_key == "marsh" else 1.0)
 	if site_render:
 		_stamp_site(a, b)
 	# Rivière : galets dans le lit et sur les gués, berges humides.
@@ -818,7 +824,7 @@ func _tree_tint(rng: RandomNumberGenerator) -> Color:
 				var w := rng.randf_range(0.62, 0.85)
 				if snowy():
 					w *= 1.15
-				return Color(w * 1.25, w * 0.95, w * 0.7)
+				return Color(w * 1.95, w * 0.78, w * 0.36)
 	var autumn := rng.randf() < autumn_share
 	if autumn:
 		return Color(rng.randf_range(1.05, 1.25), rng.randf_range(0.9, 1.0), rng.randf_range(0.55, 0.7))
