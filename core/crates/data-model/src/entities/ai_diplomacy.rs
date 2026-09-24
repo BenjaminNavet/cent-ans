@@ -55,6 +55,9 @@ pub struct PeaceRules {
     /// A crown never cedes (nor is asked for) its capital: the treaty of
     /// Northampton leaves a Scotland, Brétigny a France.
     pub keep_capital: bool,
+    /// A crown holding this many of its own provinces or fewer sues for
+    /// peace every season, whatever the war score (0: never).
+    pub cornered_provinces: usize,
 }
 
 /// Contents of `data/ai/diplomacy.json`.
@@ -91,6 +94,7 @@ impl Default for AiDiplomacy {
             },
             peace: PeaceRules {
                 keep_capital: false,
+                cornered_provinces: 0,
             },
             description: None,
         }

@@ -1977,7 +1977,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     // Peace: offer a white peace when we would accept one ourselves; when
     // clearly winning, ask for the occupied provinces; when losing,
     // cede what the enemy holds rather than lose everything (F4).
-    if (turn + slot).is_multiple_of(2) {
+    if (turn + slot).is_multiple_of(2) || cornered(state, data, faction) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
             if let Some(provinces) = peace_terms(state, data, faction, enemy) {
                 orders.push(Order::ProposePeace {
@@ -2040,6 +2040,20 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     orders
 }
 
+/// A crown down to `peace.cornered_provinces` provinces of its own (or
+/// fewer) sues for peace every season, whatever the war score (G5: the
+/// Scots after Halidon Hill treat rather than vanish).
+fn cornered(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
+    let most = data.ai_diplomacy.peace.cornered_provinces;
+    most > 0
+        && state
+            .provinces
+            .values()
+            .filter(|p| &p.controller == faction && &p.owner == faction)
+            .count()
+            <= most
+}
+
 /// Peace terms `faction` offers `enemy` this turn, if any would be accepted.
 fn peace_terms(
     state: &CampaignState,
@@ -2093,7 +2107,7 @@ fn peace_terms(
     if evaluate(state, data, enemy, faction, &white).accept && accepted(&[]) {
         return Some(Vec::new());
     }
-    if score < SURRENDER_WAR_SCORE {
+    if score < SURRENDER_WAR_SCORE || cornered(state, data, faction) {
         let lost = held_by(faction, enemy, usize::MAX);
         if !lost.is_empty() && accepted(&lost) {
             return Some(lost);
