@@ -90,6 +90,7 @@
       "description": "Conditions de victoire d'une faction jouable : tous les objectifs remplis avant end_year.",
       "properties": {
         "end_year": { "type": "integer" },
+        "hold_turns": { "type": "integer", "minimum": 1, "description": "Saisons consécutives pendant lesquelles tous les objectifs doivent être tenus avant la victoire (défaut : 1)." },
         "summary": { "type": "string" },
         "objectives": {
           "type": "array",

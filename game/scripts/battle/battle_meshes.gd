@@ -97,6 +97,9 @@ class Fig:
 	var code := C_EXACT
 	var part := P_BODY
 	var pivot := Vector2.ZERO
+	## Niveau de détail allégé (figurines lointaines) : moins de côtés, pas de cordes ni de
+	## tranches d'écu.
+	var lod := false
 
 	func _init() -> void:
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -136,6 +139,10 @@ class Fig:
 
 	## Tronc de cône elliptique de `a` à `b` (rayons ra → rb, aplatissement `squash` en Z local).
 	func cyl(a: Vector3, b: Vector3, ra: float, rb: float, sides: int = 6, caps: bool = true, squash: float = 1.0) -> void:
+		if lod:
+			if maxf(ra, rb) < 0.012:
+				return
+			sides = maxi(3, (sides + 1) / 2) if sides < 8 else sides / 2 + 1
 		var axis := (b - a).normalized()
 		var ref := Vector3.FORWARD if absf(axis.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT
 		var u := axis.cross(ref).normalized()
@@ -167,6 +174,11 @@ class Fig:
 
 	## Ellipsoïde low-poly (normales lisses).
 	func ellipsoid(c: Vector3, r: Vector3, rings: int = 4, segs: int = 6, y_min: float = -1.0) -> void:
+		if lod:
+			if maxf(r.x, maxf(r.y, r.z)) < 0.06:
+				return
+			rings = maxi(2, rings / 2)
+			segs = maxi(4, segs - 2 - segs / 4)
 		var pts: Array = []
 		for i in rings + 1:
 			var v := lerpf(-PI * 0.5, PI * 0.5, float(i) / float(rings))
@@ -239,6 +251,8 @@ class Fig:
 			color = back
 			code = C_EXACT
 			tri(a - off, c - off, b - off, -n, -n, -n)
+			if lod:
+				continue
 			# Tranche.
 			var e := (basis * Vector3(p1.x - p0.x, p1.y - p0.y, 0.0)).cross(n).normalized()
 			flat(b + off, c + off, c - off, e)
@@ -256,11 +270,12 @@ class Fig:
 
 ## Figurine de `kind` (infantry, archer, cavalry, siege) et de variante `variant` (cf. VARIANTS).
 ## Mise en cache : les régiments d'un même type partagent le maillage.
-static func soldier(kind: String, variant: int = 0) -> ArrayMesh:
-	var key := "%s/%d" % [kind, variant]
+static func soldier(kind: String, variant: int = 0, lod: bool = false) -> ArrayMesh:
+	var key := "%s/%d%s" % [kind, variant, "/lod" if lod else ""]
 	if _cache.has(key):
 		return _cache[key]
 	var f := Fig.new()
+	f.lod = lod
 	match kind:
 		"archer":
 			_archer(f, variant)
@@ -456,41 +471,70 @@ static func _archer(f: Fig, variant: int) -> void:
 				f.plate(pts, Vector3(0, 1.05, -0.2), Basis(Vector3.UP, PI).rotated(Vector3.RIGHT, -0.12), 0.04, WOOD_DARK, C_ARMS)
 
 
-## Cheval (robe `coat`), selle, caparaçon de livrée pour les chevaliers.
+## Cheval (robe `coat`), selle, caparaçon de livrée pour les chevaliers (lot V4b) : corps en
+## deux masses (poitrail, croupe) reliées par le ventre, encolure épaisse à la base et effilée,
+## tête allongée (ganache, chanfrein, bout du nez), oreilles ; jambes fines à articulations
+## (avant-bras, genou, canon, boulet, paturon) ; queue. Le caparaçon tombe à mi-canon.
 static func _horse(f: Fig, coat: Color, caparison: bool) -> void:
 	f.set_part(P_HORSE)
 	f.set_style(coat, C_EXACT)
-	f.ellipsoid(Vector3(0, 1.32, 0.0), Vector3(0.32, 0.38, 0.9), 5, 10)
-	f.set_part(P_HNECK, Vector2(1.45, 0.62))
-	f.cyl(Vector3(0, 1.4, 0.62), Vector3(0, 1.95, 1.0), 0.19, 0.13, 7, false, 0.8)
-	f.cyl(Vector3(0, 2.0, 0.98), Vector3(0, 1.72, 1.42), 0.12, 0.08, 6, true, 0.75)
+	# Corps : poitrail, ventre, croupe (ellipsoïdes lisses qui se chevauchent).
+	f.ellipsoid(Vector3(0, 1.36, 0.42), Vector3(0.3, 0.35, 0.42), 5, 10)
+	f.ellipsoid(Vector3(0, 1.3, -0.05), Vector3(0.29, 0.31, 0.55), 5, 10)
+	f.ellipsoid(Vector3(0, 1.36, -0.5), Vector3(0.31, 0.34, 0.4), 5, 10)
+	# Encolure : de l'épaule au garrot vers la nuque, puis la tête.
+	f.set_part(P_HNECK, Vector2(1.5, 0.6))
+	f.cyl(Vector3(0, 1.42, 0.6), Vector3(0, 1.78, 0.86), 0.2, 0.15, 8, false, 0.72)
+	f.cyl(Vector3(0, 1.78, 0.86), Vector3(0, 2.02, 0.98), 0.15, 0.1, 8, false, 0.7)
+	f.ellipsoid(Vector3(0, 2.02, 1.0), Vector3(0.09, 0.1, 0.11), 3, 7)
+	# Tête : ganache large, chanfrein qui s'affine, bout du nez arrondi.
+	f.cyl(Vector3(0, 2.0, 1.02), Vector3(0, 1.74, 1.38), 0.09, 0.055, 7, false, 1.25)
+	f.ellipsoid(Vector3(0, 1.72, 1.4), Vector3(0.06, 0.06, 0.075), 3, 7)
 	f.set_style(HORSE_DARK, C_EXACT)
-	f.cyl(Vector3(0, 2.05, 0.9), Vector3(0, 1.72, 0.66), 0.03, 0.05, 4, false)  # crinière
-	for x in [-0.06, 0.06]:
-		f.cyl(Vector3(x, 2.03, 1.0), Vector3(x * 1.4, 2.16, 0.97), 0.025, 0.0, 3, false)
-	# Jambes : cuisse puis canon, sabot sombre.
-	var legs := [[P_HLEG_FL, 0.17, 0.6], [P_HLEG_FR, -0.17, 0.6], [P_HLEG_BL, 0.17, -0.62], [P_HLEG_BR, -0.17, -0.62]]
+	for x in [-0.045, 0.045]:
+		f.cyl(Vector3(x, 2.08, 0.99), Vector3(x * 1.5, 2.2, 0.96), 0.022, 0.0, 4, false)  # oreilles
+	f.cyl(Vector3(0, 2.1, 0.96), Vector3(0, 1.84, 0.84), 0.025, 0.035, 4, false)  # crinière haute
+	f.cyl(Vector3(0, 1.84, 0.84), Vector3(0, 1.58, 0.62), 0.035, 0.04, 4, false)
+	# Jambes : avant-bras / cuisse, canon fin, boulet, sabot sombre.
+	var legs := [[P_HLEG_FL, 0.14, 0.52, true], [P_HLEG_FR, -0.14, 0.52, true], [P_HLEG_BL, 0.15, -0.58, false], [P_HLEG_BR, -0.15, -0.58, false]]
 	for leg in legs:
 		var x: float = leg[1]
 		var z: float = leg[2]
+		var front: bool = leg[3]
 		f.set_part(int(leg[0]), Vector2(1.2, z))
 		f.set_style(coat, C_EXACT)
-		f.cyl(Vector3(x, 1.25, z), Vector3(x, 0.62, z - 0.03), 0.1, 0.06, 6, false)
-		f.cyl(Vector3(x, 0.62, z - 0.03), Vector3(x, 0.1, z), 0.05, 0.045, 5, false)
+		if front:
+			f.cyl(Vector3(x, 1.2, z), Vector3(x, 0.62, z + 0.02), 0.1, 0.058, 6, false)
+			f.cyl(Vector3(x, 0.62, z + 0.02), Vector3(x, 0.16, z), 0.046, 0.04, 5, false)
+		else:
+			# Jarret : la jambe arrière part vers l'arrière puis revient.
+			f.cyl(Vector3(x, 1.22, z), Vector3(x, 0.78, z - 0.14), 0.12, 0.06, 6, false)
+			f.cyl(Vector3(x, 0.78, z - 0.14), Vector3(x, 0.16, z - 0.08), 0.048, 0.04, 5, false)
+		var hoof_z: float = z + (0.02 if front else -0.08)
+		f.ellipsoid(Vector3(x, 0.16, hoof_z), Vector3(0.045, 0.045, 0.045), 2, 5)
+		f.cyl(Vector3(x, 0.16, hoof_z), Vector3(x, 0.07, hoof_z + 0.03), 0.038, 0.045, 5, false)
 		f.set_style(HORSE_DARK, C_EXACT)
-		f.cyl(Vector3(x, 0.1, z), Vector3(x, 0.0, z + 0.02), 0.055, 0.06, 5, true)
+		f.cyl(Vector3(x, 0.07, hoof_z + 0.03), Vector3(x, 0.0, hoof_z + 0.04), 0.05, 0.055, 5, true)
+	# Queue.
 	f.set_part(P_HORSE)
 	f.set_style(HORSE_DARK, C_EXACT)
-	f.cyl(Vector3(0, 1.48, -0.82), Vector3(0, 0.85, -1.0), 0.07, 0.03, 5, false)
+	f.cyl(Vector3(0, 1.5, -0.84), Vector3(0, 1.2, -0.98), 0.05, 0.06, 5, false)
+	f.cyl(Vector3(0, 1.2, -0.98), Vector3(0, 0.72, -0.98), 0.06, 0.03, 5, false)
 	if caparison:
+		# Housse ajustée : couvre le corps et tombe à mi-jambe, sans élargir la silhouette.
 		f.set_style(Color.WHITE, C_LIVERY)
-		f.cyl(Vector3(0, 1.64, -0.02), Vector3(0, 0.78, -0.02), 0.33, 0.37, 12, false, 2.75)
-		f.set_part(P_HNECK, Vector2(1.45, 0.62))
-		f.cyl(Vector3(0, 1.45, 0.66), Vector3(0, 1.98, 1.0), 0.21, 0.14, 8, false, 0.85)
+		f.cyl(Vector3(0, 1.66, 0.0), Vector3(0, 0.62, 0.0), 0.33, 0.36, 12, false, 2.7)
+		f.set_part(P_HNECK, Vector2(1.5, 0.6))
+		f.cyl(Vector3(0, 1.42, 0.62), Vector3(0, 1.8, 0.87), 0.22, 0.165, 8, false, 0.76)
+		f.cyl(Vector3(0, 1.8, 0.87), Vector3(0, 2.05, 0.99), 0.165, 0.11, 8, false, 0.72)
 		f.set_part(P_HORSE)
 	f.set_style(LEATHER, C_EXACT)
-	f.box(Vector3(0, 1.66, -0.08), Vector3(0.42, 0.1, 0.55))
-	f.box(Vector3(0, 1.74, -0.33), Vector3(0.36, 0.14, 0.06))
+	f.box(Vector3(0, 1.68, -0.08), Vector3(0.4, 0.08, 0.52))
+	f.box(Vector3(0, 1.75, -0.32), Vector3(0.34, 0.12, 0.06))
+	# Bride.
+	f.set_part(P_HNECK, Vector2(1.5, 0.6))
+	f.set_style(LEATHER, C_EXACT)
+	f.cyl(Vector3(0, 1.81, 1.27), Vector3(0, 1.79, 1.3), 0.075, 0.073, 6, false, 1.2)  # muserolle
 
 
 ## Cavalier assis (buste, jambes pendantes le long des flancs).
@@ -513,6 +557,7 @@ static func _rider(f: Fig, under: Color, under_code: int, surcoat: bool, helmet:
 	f.ellipsoid(Vector3(0, 1.63 + dy, -0.04), Vector3(0.095, 0.115, 0.105), 4, 7)
 	# Casque : même dessin que les fantassins, décalé à l'assise.
 	var g := Fig.new()
+	g.lod = f.lod
 	g.set_part(P_RIDER)
 	var helmet_fig := g
 	_helmet(helmet_fig, helmet)
@@ -586,6 +631,7 @@ static func _lance(f: Fig, dy: float) -> void:
 ## Servant d'engin (fantassin simplifié sans arme), posé à `pos`.
 static func _crew(f: Fig, pos: Vector3, yaw: float) -> void:
 	var g := Fig.new()
+	g.lod = f.lod
 	_legs(g, false)
 	_torso(g, HOSE, C_CLOTH, true, 0.62)
 	_arms(g, HOSE, C_CLOTH, SKIN)
@@ -665,11 +711,14 @@ const FOLIAGE_SHADER := preload("res://shaders/battle_foliage.gdshader")
 
 
 ## Arbre de `kind` : oak (chêne étalé), poplar (peuplier élancé), bush (buisson), far (arbre
-## lointain simplifié). Surface 0 = écorce texturée, surface 1 = houppier (cartes alpha).
+## lointain simplifié) ; suffixe `_lod` = même silhouette allégée (moins de cartes, plus
+## grandes, sans branches) pour la distance. Surface 0 = écorce, surface 1 = houppier.
 static func tree(kind: String = "oak") -> ArrayMesh:
 	var key := "tree/" + kind
 	if _cache.has(key):
 		return _cache[key]
+	var lod := kind.ends_with("_lod")
+	kind = kind.trim_suffix("_lod")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(kind)
 	var bark := SurfaceTool.new()
@@ -700,9 +749,12 @@ static func tree(kind: String = "oak") -> ArrayMesh:
 			clusters = 5
 			card = 5.5
 			crown_radii = Vector3(3.2, 2.6, 3.2)
+	if lod:
+		clusters = maxi(clusters / 3, 4)
+		card *= 1.55
 	if trunk_h > 0.0:
-		_bark_cyl(bark, Vector3(0, -0.3, 0), Vector3(0, trunk_h, 0), trunk_r, trunk_r * 0.6, 7)
-		if kind != "far":
+		_bark_cyl(bark, Vector3(0, -0.3, 0), Vector3(0, trunk_h, 0), trunk_r, trunk_r * 0.6, 4 if lod else 7)
+		if kind != "far" and not lod:
 			for i in 4:
 				var a := TAU * float(i) / 4.0 + rng.randf() * 0.8
 				var start := Vector3(0, trunk_h * rng.randf_range(0.55, 0.85), 0)

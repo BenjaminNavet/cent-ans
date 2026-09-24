@@ -51,12 +51,18 @@ var _splat_bytes: PackedByteArray
 ## Terrain dominant par index raster de province.
 var _terrain_by_index: PackedStringArray = PackedStringArray()
 var _hedge_terrain: PackedByteArray = PackedByteArray()
+var _landuse_bytes: PackedByteArray = PackedByteArray()
+var _landuse_size: Vector2i = Vector2i.ZERO
 
 
 func setup(data: MapData) -> void:
 	map_data = data
 	_load_splat()
 	_load_province_terrains()
+	# Densité de haies partagée avec le shader de terrain (canal B, bocage flouté).
+	var landuse := VegetationFields.landuse(data)
+	_landuse_size = landuse.get_size()
+	_landuse_bytes = landuse.get_data()
 
 
 func has_splat() -> bool:
@@ -189,6 +195,25 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var north := 1.0 - clampf(y / maxf(map_data.size.y, 1.0), 0.0, 1.0)
 	var conifer := smoothstep(treeline * 0.35, treeline * 0.7, height_m) + smoothstep(0.62, 0.85, north)
 	result["conifer"] = clampf(conifer + n * 0.25, 0.0, 1.0)
-	var index := map_data.province_index_at(x, y)
-	result["hedge"] = 1.0 if index > 0 and index < _hedge_terrain.size() and _hedge_terrain[index] == 1 else 0.0
+	result["hedge"] = hedge_at(x, y)
 	return result
+
+
+## Densité de haies (0..1) : canal B de l'occupation du sol, interpolé comme dans le shader ;
+## repli sur le terrain de la province si l'image manque.
+func hedge_at(x: float, y: float) -> float:
+	if _landuse_bytes.is_empty():
+		var index := map_data.province_index_at(x, y)
+		return 1.0 if index > 0 and index < _hedge_terrain.size() and _hedge_terrain[index] == 1 else 0.0
+	var fx := clampf(x / map_data.size.x * _landuse_size.x - 0.5, 0.0, _landuse_size.x - 1.001)
+	var fy := clampf(y / map_data.size.y * _landuse_size.y - 0.5, 0.0, _landuse_size.y - 1.001)
+	var i := int(fx)
+	var j := int(fy)
+	var tx := fx - i
+	var ty := fy - j
+	var w := _landuse_size.x
+	var b00 := _landuse_bytes[(j * w + i) * 4 + 2]
+	var b10 := _landuse_bytes[(j * w + i + 1) * 4 + 2]
+	var b01 := _landuse_bytes[((j + 1) * w + i) * 4 + 2]
+	var b11 := _landuse_bytes[((j + 1) * w + i + 1) * 4 + 2]
+	return lerpf(lerpf(b00, b10, tx), lerpf(b01, b11, tx), ty) / 255.0

@@ -35,11 +35,18 @@ uniform bool corpse = false;
 uniform vec2 hip = vec2(0.93, 0.0);       // pivot (y, z) du buste
 uniform vec2 shoulder = vec2(1.4, 0.0);   // épaules (hiérarchie de l'arme)
 uniform float highlight = 0.0;            // régiment sélectionné : léger éclaircissement
+// Part des soldats portant le surcot de livrée (lot V4b) ; les autres portent un vêtement de
+// teinte naturelle (écru, brun, roux, gris…) marqué d'une croix de livrée sur la poitrine.
+uniform float livery_share = 0.55;
+uniform float torso_y = 0.0;              // décalage du buste (cavaliers : assise sur la selle)
+uniform float torso_z = 0.0;
 
 varying vec3 v_color;
 varying float v_code;
 varying vec3 v_var;
 varying float v_height;
+varying vec3 v_local;    // position au repos (avant animation), pour la croix de poitrine
+varying vec3 v_local_n;
 
 float hash1(float n) {
 	return fract(sin(n * 12.9898 + 4.1414) * 43758.5453);
@@ -74,6 +81,8 @@ void vertex() {
 	vec2 pivot = CUSTOM0.yz;
 	vec3 v = VERTEX;
 	vec3 n = NORMAL;
+	v_local = VERTEX;
+	v_local_n = NORMAL;
 
 	int state = corpse ? -1 : anim_state;
 	float t = anim_time;
@@ -300,10 +309,15 @@ void vertex() {
 		v.y += horse_bob * 0.3;
 	}
 
-	// 4. Variation de taille (±5 %), servants et engins exceptés.
-	float scale = mix(0.95, 1.05, h2);
-	if (weapon_mode == W_ENGINE) scale = 1.0;
+	// 4. Variation de taille (±7 %) et de carrure (±5 %), servants et engins exceptés.
+	float scale = mix(0.93, 1.07, h2);
+	float girth = mix(0.95, 1.06, hash1(id * 5.37 + 0.7));
+	if (weapon_mode == W_ENGINE) {
+		scale = 1.0;
+		girth = 1.0;
+	}
 	v *= scale;
+	v.x *= girth;
 
 	// 5. Cadavres : bascule au sol après l'instant de mort (INSTANCE_CUSTOM.x).
 	if (corpse) {
@@ -334,32 +348,67 @@ void vertex() {
 	v_var = vec3(h1, h2, h3);
 }
 
+// Couleurs naturelles (sRGB) des vêtements non teints aux couleurs de la livrée.
+const vec3 PLAIN[8] = vec3[](
+	vec3(0.74, 0.68, 0.55), // écru
+	vec3(0.45, 0.35, 0.25), // brun
+	vec3(0.55, 0.36, 0.25), // roux
+	vec3(0.55, 0.53, 0.49), // gris
+	vec3(0.30, 0.28, 0.25), // laine sombre
+	vec3(0.42, 0.44, 0.31), // vert passé
+	vec3(0.40, 0.44, 0.52), // bleu passé
+	vec3(0.66, 0.56, 0.34)  // ocre
+);
+
 void fragment() {
 	int code = int(v_code + 0.5);
 	vec3 albedo = v_color;
 	float metallic = 0.0;
 	float roughness = 0.85;
+	float h4 = fract(v_var.x * 7.31 + v_var.z * 3.17);
+	float h5 = fract(v_var.y * 5.13 + v_var.x * 11.7);
+	bool wears_livery = h4 < livery_share || v_local.y > 2.8; // fanions de lance toujours en livrée
+	// Livrée désaturée et assombrie (teintures végétales), lot de teinture propre au soldat.
+	float lum = dot(livery, vec3(0.3, 0.59, 0.11));
+	vec3 dyed = mix(livery, vec3(lum), 0.42) * mix(0.6, 0.88, v_var.x);
+	dyed = mix(dyed, dyed * vec3(1.0, 0.9, 0.75), v_var.z * 0.4);
 	if (code == 0) {
-		vec3 dyed = mix(livery, vec3(dot(livery, vec3(0.3, 0.59, 0.11))), 0.18);
-		albedo = dyed * mix(0.85, 1.08, v_var.x) * v_color;
+		if (wears_livery) {
+			albedo = dyed * v_color;
+		} else {
+			vec3 plain = pow(PLAIN[int(h5 * 7.99)], vec3(2.2)) * mix(0.85, 1.1, v_var.z);
+			albedo = plain * v_color;
+			// Croix de livrée sur la poitrine et le dos du buste (bande verticale et traverse).
+			vec3 q = v_local - vec3(0.0, torso_y, torso_z);
+			bool chest = q.y > 1.0 && q.y < 1.42 && abs(v_local_n.z) > 0.45 && abs(v_local_n.y) < 0.6;
+			if (chest && (abs(q.x) < 0.045 || abs(q.y - 1.25) < 0.04)) {
+				albedo = dyed;
+			}
+		}
 	} else if (code == 1) {
 		albedo = trim * v_color;
 		metallic = 0.3;
 		roughness = 0.5;
 	} else if (code == 2) {
-		albedo = v_color * mix(0.85, 1.1, v_var.z);
+		// Acier poli, terni ou bruni selon le soldat.
+		albedo = v_color * mix(0.72, 1.08, v_var.z) * mix(vec3(1.0), vec3(0.95, 0.88, 0.8), step(0.75, h5));
 		metallic = 0.8;
-		roughness = 0.38;
+		roughness = mix(0.3, 0.55, h4);
 	} else if (code == 3) {
-		// Tissu : quatre teintures (brun, gris, vert sombre, roux) autour de la couleur de base.
-		vec3 dyes[4] = vec3[](vec3(1.0), vec3(0.85, 0.88, 0.95), vec3(0.72, 0.9, 0.7), vec3(1.15, 0.85, 0.65));
-		albedo = v_color * dyes[int(v_var.y * 3.99)] * mix(0.85, 1.1, v_var.x);
+		// Tissu : six teintes naturelles autour de la couleur de base.
+		vec3 dyes[6] = vec3[](vec3(1.0), vec3(0.85, 0.88, 0.95), vec3(0.78, 0.86, 0.7), vec3(1.1, 0.85, 0.65), vec3(1.15, 1.08, 0.95), vec3(0.62, 0.58, 0.55));
+		albedo = v_color * dyes[int(v_var.y * 5.99)] * mix(0.8, 1.1, v_var.x);
 	} else if (code == 5) {
 		vec4 arms = has_heraldry ? texture(heraldry, vec2(mix(0.08, 0.92, UV.x), mix(0.06, 0.94, UV.y))) : vec4(0.0);
-		albedo = mix(livery, arms.rgb, arms.a);
+		vec3 painted = mix(arms.rgb, vec3(dot(arms.rgb, vec3(0.3, 0.59, 0.11))), 0.25) * mix(0.7, 0.9, v_var.y);
+		albedo = mix(dyed, painted, arms.a);
 		roughness = 0.7;
 	} else if (code == 4) {
 		albedo = v_color * mix(0.92, 1.06, v_var.z);
+		// Teint : du clair au hâlé (couleur SKIN de `battle_meshes.gd`, linéaire).
+		if (distance(v_color, vec3(0.604, 0.319, 0.187)) < 0.05) {
+			albedo = v_color * mix(vec3(1.08, 1.05, 1.0), vec3(0.72, 0.62, 0.52), h5);
+		}
 	}
 	float ao = mix(0.55, 1.0, smoothstep(0.0, 1.0, v_height));
 	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);

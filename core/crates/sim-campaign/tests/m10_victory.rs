@@ -48,14 +48,28 @@ fn france_starts_with_paris_and_a_vassal_burgundy() {
 fn meeting_every_objective_wins() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
-    for p in state.provinces.values_mut() {
-        if p.controller == fac("fac_england") {
-            p.controller = fac("fac_france");
+    // F9: the objectives must hold `hold_turns` (20) seasons in a row.
+    let hold = data.factions[&fac("fac_france")]
+        .victory
+        .as_ref()
+        .and_then(|v| v.hold_turns)
+        .unwrap();
+    let mut won_at = None;
+    for season in 1..=hold + 2 {
+        for p in state.provinces.values_mut() {
+            if p.controller == fac("fac_england") {
+                p.controller = fac("fac_france");
+            }
+        }
+        let events = state.end_turn_with(&data, idle);
+        if events.iter().any(|e| e.kind == EventKind::Victory) {
+            won_at = Some(season);
+            break;
         }
     }
-    let events = state.end_turn_with(&data, idle);
-    assert!(
-        events.iter().any(|e| e.kind == EventKind::Victory),
+    assert_eq!(
+        won_at,
+        Some(hold),
         "{:?}",
         state.objectives(&data, &fac("fac_france"))
     );

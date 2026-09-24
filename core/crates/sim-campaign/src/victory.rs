@@ -164,17 +164,41 @@ pub(crate) fn resolve_victory(
     let alive = state.factions.get(&player).is_some_and(|f| f.alive)
         && state.provinces.values().any(|p| p.controller == player);
     let objectives = state.objectives(data, &player);
-    let end_year = data
-        .factions
-        .get(&player)
-        .and_then(|f| f.victory.as_ref())
-        .map(|v| v.end_year);
+    let victory = data.factions.get(&player).and_then(|f| f.victory.as_ref());
+    let end_year = victory.map(|v| v.end_year);
+    let hold = victory.and_then(|v| v.hold_turns).unwrap_or(1).max(1);
+    let all_done = !objectives.is_empty() && objectives.iter().all(|o| o.done);
+    if all_done {
+        state.victory_streak += 1;
+        if state.victory_streak == 1 && hold > 1 {
+            events.push(
+                GameEvent::new(
+                    EventKind::Diplomacy,
+                    format!(
+                        "Tous les objectifs de {name} sont remplis : tenez-les {hold} saisons pour l'emporter."
+                    ),
+                )
+                .faction(&player),
+            );
+        }
+    } else {
+        if state.victory_streak > 0 && hold > 1 {
+            events.push(
+                GameEvent::new(
+                    EventKind::Diplomacy,
+                    format!("{name} ne remplit plus tous ses objectifs : la victoire s'éloigne."),
+                )
+                .faction(&player),
+            );
+        }
+        state.victory_streak = 0;
+    }
     let (kind, text) = if !alive {
         (
             OutcomeKind::Defeat,
             format!("Défaite : {name} a perdu toutes ses terres."),
         )
-    } else if !objectives.is_empty() && objectives.iter().all(|o| o.done) {
+    } else if all_done && state.victory_streak >= hold {
         (
             OutcomeKind::Victory,
             format!("Victoire ! {name} a accompli tous ses objectifs historiques."),
