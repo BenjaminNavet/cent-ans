@@ -6,7 +6,7 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
 
 ## État
 
-- [ ] 1. Arbres recalés sur le relief fin (`Vegetation`, signal `chunk_surface_changed`)
+- [x] 1. Arbres recalés sur le relief fin (`Vegetation`, signal `chunk_surface_changed`, `VegetationGroundJob`) ; test dans `settlements_render_test` (écart 0,00 contre 0,28 avant)
 - [ ] 2. Routes principales lisibles au palier moyen (`RoadRenderer`)
 - [ ] 3. Aperçu de chemin d'armée le long des routes réelles
 - [ ] 4. Panneaux de colonie / province sans recouvrir la minicarte
@@ -14,6 +14,14 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
 
 ## Décisions
 
+- Arbres : semés directement sur la grille du maillage affiché (`TerrainBuilder.surface_grid`) et
+  recalés dans une tâche `WorkerThreadPool` à chaque changement de niveau d'une tuile (fin, proche,
+  lointain), pas seulement pour le relief fin. Tampons CPU gardés par tuile (64 o par instance).
+  Tuile hors champ : recalée quand elle y revient. Coût mesuré ≈ 6 ms de fil par tuile.
+- Les candidats d'arbres qui débordaient de leur tuile (dernière colonne de la grille, gigue des
+  haies) sont écartés ou ramenés dans la tuile : leur pied était posé sur le maillage d'une autre
+  tuile (écart 0,28 mesuré) et la bande de bord était deux fois plus dense.
+
 ## Prochaine étape
 
-Tâche 1.
+Tâche 2 (routes au palier moyen). Captures « avant » déjà prises (`c7b-avant-*.png`).
