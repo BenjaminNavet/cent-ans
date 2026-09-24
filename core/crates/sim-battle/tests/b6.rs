@@ -149,13 +149,14 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// `ADVANCE_LEAN_MAX`) compounds over the whole advance; the leashed
 /// pursuit (`PURSUIT_LEASH`) also changes how a rout on either side plays
 /// out. A defender squarely in front is unaffected by the lean (`dx` ~ 0);
-/// see `advance`'s own doc comment.
+/// see `advance`'s own doc comment. BV2: men knocked down by the knights'
+/// charge stop fighting for a few seconds (one more loss, seed 3).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "259 Some(Attacker) [12, 49, 71, 100, 100, 14, 42, 88, 117, 9]",
+            "259 Some(Attacker) [12, 50, 71, 100, 100, 14, 42, 88, 117, 9]",
         ),
         (
             11,

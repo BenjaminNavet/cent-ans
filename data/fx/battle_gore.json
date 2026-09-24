@@ -1,0 +1,88 @@
+{
+  "description": "Rendu des morts, chutes, chocs de cavalerie, sang et démembrements en bataille (lot BV2). Rendu seulement : qui tombe, qui meurt et la perte de cohésion sont décidés par le cœur (sim-battle, événements d'impact et cause des pertes).",
+  "levels": {
+    "off": { "stains": 0.0, "sprays": 0.0, "corpse_blood": 0.0, "dismember": false },
+    "moderate": { "stains": 0.55, "sprays": 0.45, "corpse_blood": 0.5, "dismember": false },
+    "full": { "stains": 1.0, "sprays": 1.0, "corpse_blood": 1.0, "dismember": true }
+  },
+  "deaths": {
+    "arrow": { "foot": ["death", "death_m", "death_knees", "death_knees"], "mounted": ["c_death", "c_death_m", "c_fall"], "impulse": [0.0, 0.6], "critical": 0.0 },
+    "bolt": { "foot": ["death_back", "death", "death_m", "death_knees"], "mounted": ["c_fall", "c_death", "c_death_m"], "impulse": [0.4, 1.4], "critical": 0.0 },
+    "melee": { "foot": ["death", "death_m", "death_knees", "death_back"], "mounted": ["c_death", "c_death_m", "c_fall"], "impulse": [0.0, 0.8], "critical": 1.0 },
+    "charge": { "foot": ["death_back", "death_back", "death", "death_m"], "mounted": ["c_fall", "c_death_m"], "impulse": [3.0, 6.5], "critical": 1.0 },
+    "stakes": { "foot": ["death_back"], "mounted": ["c_death_m", "c_death", "c_fall"], "impulse": [0.0, 1.0], "critical": 0.0 },
+    "pikes": { "foot": ["death_back"], "mounted": ["c_fall", "c_death_m", "c_fall"], "impulse": [0.0, 1.0], "critical": 0.0 },
+    "ball": { "foot": ["death_back"], "mounted": ["c_death_m"], "impulse": [6.0, 11.0], "critical": 1.0 },
+    "stone": { "foot": ["death_back", "death_knees"], "mounted": ["c_death_m"], "impulse": [3.0, 7.0], "critical": 1.0 },
+    "fire": { "foot": ["death_knees", "death"], "mounted": ["c_death", "c_death_m"], "impulse": [0.0, 0.2], "critical": 0.0 },
+    "other": { "foot": ["death", "death_m", "death_back", "death_knees"], "mounted": ["c_death", "c_death_m", "c_fall"], "impulse": [0.0, 0.6], "critical": 0.0 }
+  },
+  "weapons": {
+    "unit_men_at_arms_foot": "polearm",
+    "unit_flemish_pikemen": "polearm",
+    "unit_urban_militia": "polearm",
+    "unit_knights": "two_hand",
+    "unit_mounted_sergeants": "sword",
+    "unit_mounted_archers": "sword",
+    "unit_longbowmen": "axe",
+    "unit_crossbowmen": "sword",
+    "unit_genoese_crossbowmen": "sword",
+    "unit_bombard": "ball",
+    "unit_trebuchet": "stone",
+    "unit_mangonel": "stone",
+    "unit_siege_tower": "sword"
+  },
+  "critical_chance": {
+    "axe": 0.14,
+    "polearm": 0.12,
+    "two_hand": 0.1,
+    "sword": 0.03,
+    "heavy_charge": 0.08,
+    "ball": 0.6,
+    "stone": 0.35
+  },
+  "heavy_charge_mass": 1.2,
+  "pieces": {
+    "foot": { "head": 0.4, "arm_r": 0.2, "arm_l": 0.2, "leg_r": 0.1, "leg_l": 0.1 },
+    "mounted": { "head": 0.6, "arm_r": 0.25, "arm_l": 0.15 }
+  },
+  "corpses": {
+    "max_per_layer": 3000,
+    "max_total": 14000,
+    "spawn_per_update": 60,
+    "cell_m": 80.0,
+    "near_m": 60.0,
+    "far_m": 380.0
+  },
+  "knockdown": {
+    "max_per_impact": 48,
+    "max_active": 600,
+    "impulse": [2.0, 4.5],
+    "death_share": 0.0,
+    "front_bias": 2.2
+  },
+  "horses": {
+    "slow_seconds": 2.2,
+    "slow_min": 0.35,
+    "stop_seconds": 1.2
+  },
+  "sprays": {
+    "max_droplets": 6144,
+    "droplets_per_death": 7,
+    "droplets_per_knock": 3,
+    "droplets_per_critical": 26,
+    "speed": [1.2, 4.2],
+    "lifetime": 1.4,
+    "max_distance_m": 220.0
+  },
+  "severed": {
+    "max_pieces": 256,
+    "speed": [2.0, 5.0],
+    "rest_seconds": 40.0
+  },
+  "living_stains": {
+    "per_loss_share": 1.6,
+    "melee_seconds": 60.0,
+    "max": 0.85
+  }
+}
