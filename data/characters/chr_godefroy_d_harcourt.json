@@ -34,9 +34,9 @@
     "trait_stubborn"
   ],
   "piety": 45,
-  "starting_location": "prov_normandie_ouest",
+  "starting_location": "prov_normandie",
   "status": "at_court",
-  "description": "Grand baron du Cotentin, brouillé avec [[cdx_philippe_vi|Philippe VI]] pour une querelle de succession normande ; banni en 1343, il passe à [[cdx_edouard_iii|Édouard III]] et guide le débarquement anglais de Saint-Vaast-la-Hougue en juillet 1346, ouvrant la chevauchée qui mène à Crécy.",
+  "description": "Grand baron du Cotentin, brouillé avec [[cdx_philippe_vi|Philippe VI]] pour une querelle de succession normande ; banni en 1343, il passe à [[cdx_edouard_iii|Édouard III]] et guide le débarquement anglais de Saint-Vaast-la-Hougue en juillet 1346, ouvrant la chevauchée qui mène à Crécy. Liberté du jeu : sa baronnie de Saint-Sauveur-le-Vicomte est en Basse-Normandie (`prov_normandie_ouest`), mais il est placé ici en Haute-Normandie (`prov_normandie`) pour éviter qu'il ne se retrouve seul, en 1337, à la même localisation qu'une armée fraîchement détachée de la garnison locale.",
   "sources": [
     "Godefroy d'Harcourt"
   ]
