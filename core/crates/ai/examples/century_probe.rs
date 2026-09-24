@@ -103,9 +103,14 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         // them (otherwise no peace offered to France is ever signed).
         let offers = state.factions[&france].offers.clone();
         for offer in offers {
-            let accept =
-                sim_campaign::diplomacy::evaluate(&state, data, &offer.from, &france, &offer.proposal)
-                    .accept;
+            let accept = sim_campaign::diplomacy::evaluate(
+                &state,
+                data,
+                &offer.from,
+                &france,
+                &offer.proposal,
+            )
+            .accept;
             let _ = state.submit_order(
                 data,
                 sim_campaign::Order::AnswerOffer {

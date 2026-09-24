@@ -1128,9 +1128,10 @@ pub fn ai_affordable_choice(
     event: &Event,
     decider: Option<&FactionId>,
 ) -> usize {
-    let Some(means) = decider.and_then(|f| state.factions.get(f)).map(|f| {
-        f.treasury.max(0) + 2 * f.income_last_turn.max(0)
-    }) else {
+    let Some(means) = decider
+        .and_then(|f| state.factions.get(f))
+        .map(|f| f.treasury.max(0) + 2 * f.income_last_turn.max(0))
+    else {
         return ai_choice(state, event);
     };
     let cost = |option: &data_model::EventOption| -> i64 {
