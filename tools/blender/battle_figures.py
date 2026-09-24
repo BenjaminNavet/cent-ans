@@ -47,6 +47,12 @@ P_RIDER = 12
 P_WEAPON = 13
 P_CLOTH = 16
 P_BOW = 17
+# Lot B4: rider's legs (follow the saddle, not the rider's torso), reins (front end on the
+# bit, rear end in the rider's left fist, bend weight = share of the fist) and the arrow
+# nocked on the longbow (shown while drawing).
+P_RIDER_LEG = 18
+P_REIN = 19
+P_ARROW = 20
 
 # Material codes (COLOR.a * 5).
 C_LIVERY = 0
@@ -79,6 +85,8 @@ DARK = (0.05, 0.05, 0.05)
 HIP_Y = 0.93
 SHOULDER_Y = 1.4
 HAND = Vector((0.25, 0.9, 0.12))
+# Elbow (Godot y, z): the forearm and what the fist holds bend about it (lot B4).
+ELBOW = (1.13, -0.02)
 DY = 0.78
 DZ = -0.05
 HORSE_LEGS = {
@@ -366,6 +374,7 @@ class Figure:
         cols=6,
         rows=6,
         back_code=C_EXACT,
+        bend_fn=None,
     ):
         """Two-sided curved board (shields, pavise, pennon).
 
@@ -445,6 +454,7 @@ class Figure:
             smooth=True,
             uv_fn=uv_fn,
             sharp_angle=50.0,
+            bend_fn=bend_fn,
         )
         # Back faces: paint by face normal (front = +ez).
         mesh = obj.data
@@ -466,6 +476,11 @@ class Figure:
 def knee_weight(knee_y, span=0.05):
     """Bend weight: 1 below the knee (or hock), 0 above, smooth over `span`."""
     return lambda p: 1.0 - smoothstep(knee_y - span, knee_y + span, p.y)
+
+
+def elbow_weight(p):
+    """Bend weight of the arm: 1 on the forearm and fist, 0 on the upper arm (lot B4)."""
+    return 1.0 - smoothstep(ELBOW[0] - 0.05, ELBOW[0] + 0.05, p.y)
 
 
 def legs(f, armored, hose=HOSE):
@@ -613,7 +628,7 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
     """Right (-X) and left (+X) arms from the shoulder to the fist, forearm bent forward."""
     for side in (-1.0, 1.0):
         part = P_ARM_R if side < 0.0 else P_ARM_L
-        f.pivot(part, SHOULDER_Y, 0.0)
+        f.pivot(part, SHOULDER_Y, 0.0, knee=ELBOW)
         s = side
         sections = [
             ((0.13 * s, 1.44, 0.0), 0.065, 0.065),
@@ -623,7 +638,14 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
             ((0.245 * s, 1.04, 0.03), 0.054, 0.052),
             ((0.25 * s, 0.96, 0.085), 0.038, 0.034),
         ]
-        f.loft(sections, part, const(sleeve, sleeve_code), ring=7, side=(0.0, 0.0, 1.0))
+        f.loft(
+            sections,
+            part,
+            const(sleeve, sleeve_code),
+            ring=7,
+            side=(0.0, 0.0, 1.0),
+            bend_fn=elbow_weight,
+        )
         # Fist.
         if f.far:
             continue
@@ -635,6 +657,7 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
             ring=6,
             rows=4,
             subdiv=0,
+            bend_fn=lambda _p: 1.0,
         )
 
 
@@ -765,6 +788,8 @@ def heater(f, centre, width, height, yaw, part, lean=0.0):
         bend=0.04,
         cols=8,
         rows=6,
+        # Strapped to the forearm: follows the elbow (lot B4).
+        bend_fn=(lambda _p: 1.0) if part == P_ARM_L else None,
     )
 
 
@@ -840,15 +865,34 @@ def longbow(f, grip, half, depth, part=P_BOW, string=True):
         radii.append(0.02 * (1.0 - 0.6 * abs(t)))
     f.tube(points, radii, part, const(WOOD), ring=5, subdiv=0)
     if string and not f.lod:
+        # Bend weight of the string = share of the draw (1 at the nocking point, lot B4).
         f.tube(
-            [g + Vector((0, -half, 0)), g + Vector((0, half, 0))],
-            [0.004, 0.004],
+            [g + Vector((0, -half, 0)), g, g + Vector((0, half, 0))],
+            [0.004, 0.004, 0.004],
             part,
             const(STRING),
             ring=3,
             subdiv=0,
             caps=(False, False),
+            bend_fn=lambda p: max(0.0, 1.0 - abs(p.y - g.y) / half),
         )
+        # Arrow on the string (the shader shows it while drawing, lot B4).
+        f.pivot(P_ARROW, g.y, g.z)
+        f.tube(
+            [g + Vector((0.012, 0, 0)), g + Vector((0.012, 0, 0.8))],
+            [0.006, 0.005],
+            P_ARROW,
+            const(WOOD),
+            ring=3,
+            subdiv=0,
+        )
+        f.box(
+            g + Vector((0.012, 0, 0.83)),
+            (0.012, 0.012, 0.06),
+            P_ARROW,
+            const(IRON, C_METAL),
+        )
+        f.box(g + Vector((0.012, 0, 0.06)), (0.004, 0.04, 0.1), P_ARROW, const(FLETCH))
 
 
 def quiver(f, base, top, part=P_BODY):
@@ -1254,18 +1298,28 @@ def horse(f, coat, caparison, dark_points):
             side=(1.0, 0.0, 0.0),
             subdiv=0,
         )
+        # Reins from the bit to the rider's left fist (lot B4): the shader moves their front
+        # end with the neck and their rear end with the fist (bend weight = share of the fist).
+        fist = Vector((HAND.x, HAND.y + DY + 0.02, HAND.z + DZ))
+        bit_z = 1.33
+        f.pivot(P_REIN, 1.5, 0.6, knee=(fist.y, fist.z))
         for sx in (-1.0, 1.0):
+            start = Vector((0.065 * sx, 1.64, bit_z))
+            end = fist + Vector((-0.012 * sx, 0.0, 0.0))
+            points = []
+            for i in range(6):
+                t = i / 5.0
+                p = start.lerp(end, t)
+                p.y -= 0.1 * math.sin(math.pi * t)  # slack
+                points.append(p)
             f.tube(
-                [
-                    (0.065 * sx, 1.64, 1.33),
-                    (0.1 * sx, 1.62, 0.95),
-                    (0.14 * sx, 1.74, 0.3),
-                ],
-                [0.008] * 3,
-                P_HNECK,
+                points,
+                [0.008] * 6,
+                P_REIN,
                 const(LEATHER),
                 ring=3,
                 subdiv=0,
+                bend_fn=lambda p: min(1.0, max(0.0, (bit_z - p.z) / (bit_z - fist.z))),
             )
     if caparison:
         _caparison(f, body, neck)
@@ -1367,14 +1421,14 @@ def rider(f, under, under_code, surcoat, helmet_style, armored):
                 return STEEL, C_METAL
             return leg_colour
 
-        f.loft(thigh, P_RIDER, leg_fn, ring=7, side=(0.0, 0.0, 1.0))
+        f.loft(thigh, P_RIDER_LEG, leg_fn, ring=7, side=(0.0, 0.0, 1.0))
         foot = [
             ((0.325 * sx, 1.07, 0.04), 0.04, 0.04),
             ((0.325 * sx, 1.04, 0.12), 0.045, 0.035),
             ((0.325 * sx, 1.03, 0.2), 0.015, 0.015),
         ]
         if not f.far:
-            f.loft(foot, P_RIDER, const(LEATHER), ring=6, side=(1.0, 0.0, 0.0))
+            f.loft(foot, P_RIDER_LEG, const(LEATHER), ring=6, side=(1.0, 0.0, 0.0))
 
 
 def cavalry(f, variant):

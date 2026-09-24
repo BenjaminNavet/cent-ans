@@ -23,6 +23,9 @@ pub use common::{
 pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
+pub use entities::ai_diplomacy::{
+    AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
+};
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,

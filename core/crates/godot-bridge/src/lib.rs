@@ -15,6 +15,7 @@ mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_diplomacy;
 mod campaign_sim_events;
+mod campaign_sim_family;
 mod campaign_sim_h5h6;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
@@ -130,7 +131,7 @@ impl GameDataStore {
             "holder" => province.holder.as_ref().map_or("", |id| id.as_str()),
             "population" => &population,
             "population_total" => province.population.classes.total() as i64,
-            "neighbors" => &ids_of(province.neighbors.iter()),
+            "neighbors" =>&ids_of(sim_campaign::movement::land_neighbors(data, &province.id).iter()),
         };
         if let Some(geometry) = data.province_geometry.get(&province.id) {
             dict.set("centroid", vector2(geometry.centroid));

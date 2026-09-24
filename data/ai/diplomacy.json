@@ -1,0 +1,23 @@
+{
+  "description": "Réglages des guerres, alliances et paix de l'IA autour de ses frontières (lot G5) : voisin menaçant, nouveaux fronts, cobelligérance, paix. Le voisinage est celui de la carte (graphe des provinces). Voir docs/design/m9-ai.md § 7.",
+  "menacing_neighbour": {
+    "power_ratio": 1.5,
+    "attitude": -15,
+    "counterweight": 10
+  },
+  "war": {
+    "front_share": 0.5,
+    "pretender_ratio": 0.5,
+    "pretender_ratio_alone": 0.8
+  },
+  "join_war": {
+    "ratio": 0.6,
+    "min_attitude": 10,
+    "min_ally_power_ratio": 1.0,
+    "border_only_claim_wars": true
+  },
+  "peace": {
+    "keep_capital": true,
+    "cornered_provinces": 1
+  }
+}

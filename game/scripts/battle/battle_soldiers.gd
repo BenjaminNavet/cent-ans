@@ -40,6 +40,7 @@ var _side_colors: Dictionary = {}
 var _side_heraldry: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _warned: bool = false
+var _anim_track: Dictionary = {}  # unit id -> {ammo, state, since} (lot B4 : volées, chocs)
 
 
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
@@ -97,6 +98,9 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	mat.set_shader_parameter("mounted", mounted)
 	mat.set_shader_parameter("hip", Vector2(1.68, -0.05) if mounted else Vector2(0.93, 0.0))
 	mat.set_shader_parameter("shoulder", Vector2(2.18, -0.05) if mounted else Vector2(1.4, 0.0))
+	mat.set_shader_parameter("elbow", Vector2(1.91, -0.07) if mounted else Vector2(1.13, -0.02))
+	# Rechargement de la simulation : 6 s, 9 s derrière un pavois (Génois), 12 s les engins.
+	mat.set_shader_parameter("reload_time", 12.0 if kind == "siege" else 9.0 if kind == "archer" and variant == 2 else 6.0)
 	mat.set_shader_parameter("corpse", corpse)
 	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
 	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
@@ -196,6 +200,39 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("anim_time", anim_time)
 	mat.set_shader_parameter("anim_state", anim_state(unit))
 	mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
+	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
+	var ammo := int(unit.get("ammo", 0))
+	var state := str(unit.get("state", ""))
+	var track: Dictionary = _anim_track.get(id, {})
+	if track.is_empty():
+		track = {"ammo": ammo, "state": state, "since": anim_time - 100.0}
+		_anim_track[id] = track
+	if ammo < int(track["ammo"]):
+		mat.set_shader_parameter("volley_time", anim_time)
+	if state != str(track["state"]):
+		track["since"] = anim_time
+	track["ammo"] = ammo
+	track["state"] = state
+	mat.set_shader_parameter("state_time", anim_time - float(track["since"]))
+
+
+## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
+## depuis un point tiré au hasard (départs des traits d'une volée, lot B4).
+func soldier_positions(id: int, count: int) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	if not _previous.has(id) or count <= 0:
+		return out
+	var slice: PackedFloat32Array = _previous[id]
+	var n := slice.size() / 12
+	if n == 0:
+		return out
+	var step := maxf(float(n) / float(count), 1.0)
+	var k := _rng.randf() * step
+	while k < n and out.size() < count:
+		var o := int(k) * 12
+		out.append(Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+		k += step
+	return out
 
 
 ## Ajoute `count` cadavres pris au hasard dans la tranche précédente (plutôt au premier rang).
