@@ -1,0 +1,12 @@
+{
+  "id": "cdx_louis_i_de_bourbon",
+  "title": "Louis Ier de Bourbon",
+  "category": "personnage",
+  "aliases": ["Louis Ier de Bourbon", "duc de Bourbon"],
+  "era": { "from": "v. 1279", "to": "1342" },
+  "summary": "Petit-fils de saint Louis, Louis Ier devient en 1327 le premier duc de Bourbon : grand vassal et conseiller de [[cdx_philippe_vi|Philippe VI]].",
+  "body": "Fils de Robert de Clermont, lui-même sixième fils du roi Louis IX, Louis de Bourbon hérite d'un simple comté auvergnat qu'il transforme en principauté de premier plan. En septembre 1327, le roi Charles IV, puis son successeur Philippe VI, érige le Bourbonnais en duché-pairie en sa faveur : Louis Ier devient ainsi le premier duc de Bourbon, fondant une dynastie qui régnera sur ce duché jusqu'au XVIe siècle et donnera plus tard des rois de France (la maison de Bourbon).\n\nEn tant que pair de France, il siège au conseil du roi et compte parmi les plus proches soutiens de [[cdx_philippe_vi|Philippe VI]], son cousin, au moment où celui-ci doit affirmer sa légitimité contestée face aux prétentions d'[[cdx_edouard_iii|Édouard III]]. Il possède également le comté de Clermont-en-Beauvaisis et diverses seigneuries dans le Massif central et en Île-de-France.\n\nHomme pieux, il fonde et dote plusieurs établissements religieux dans son duché. Il meurt le 29 janvier 1342, laissant le duché à son fils Pierre Ier de Bourbon, qui périra à son tour à la bataille de Poitiers en 1356.",
+  "entity": "chr_louis_i_de_bourbon",
+  "see_also": ["cdx_philippe_vi", "cdx_edouard_iii"],
+  "sources": ["Louis Ier de Bourbon", "Duché de Bourbon"]
+}

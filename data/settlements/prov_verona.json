@@ -1,0 +1,118 @@
+[
+  {
+    "id": "set_verone",
+    "province": "prov_verona",
+    "kind": "city",
+    "name": {
+      "display": "Vérone",
+      "local": "Verona",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      10.9916,
+      45.4384
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Vérone, capitale de la seigneurie des Scaligers.",
+    "sources": [
+      "Mastino II della Scala",
+      "Seigneurie de Vérone",
+      "Guerre de Vérone (1336-1339)"
+    ]
+  },
+  {
+    "id": "set_vicenza",
+    "province": "prov_verona",
+    "kind": "town",
+    "name": {
+      "display": "Vicence",
+      "local": "Vixensa",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.5469,
+      45.5455
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de la Marche véronaise sous la seigneurie des Scaligers depuis 1311.",
+    "sources": [
+      "Vicence",
+      "Scaligers"
+    ]
+  },
+  {
+    "id": "set_feltre",
+    "province": "prov_verona",
+    "kind": "castle",
+    "name": {
+      "display": "Feltre",
+      "local": "Feltre",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.9109,
+      46.0169
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte scaligère aux contreforts des Alpes, contrôlant la vallée du Piave.",
+    "sources": [
+      "Feltre"
+    ]
+  },
+  {
+    "id": "set_illasi",
+    "province": "prov_verona",
+    "kind": "village",
+    "name": {
+      "display": "Illasi",
+      "local": "Ilasi",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.1685,
+      45.4936
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole des collines véronaises.",
+    "sources": [
+      "Illasi"
+    ]
+  }
+]

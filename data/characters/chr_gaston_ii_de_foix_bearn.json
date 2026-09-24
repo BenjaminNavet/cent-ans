@@ -1,0 +1,47 @@
+{
+  "id": "chr_gaston_ii_de_foix_bearn",
+  "name": {
+    "display": "Gaston II de Foix-Béarn",
+    "local": "Gaston II de Foix-Bearn",
+    "local_language": "gascon"
+  },
+  "sex": "male",
+  "house": "Foix",
+  "faction": "fac_france",
+  "role": "noble",
+  "birth": {
+    "value": "1308",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343-08-26",
+    "note": "Mort de maladie à Séville en revenant de la croisade du Salado."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Foix"
+    },
+    {
+      "title": "Vicomte de Béarn",
+      "note": "Tenu en alleu, sans hommage, selon la maison de Foix-Béarn."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_bearn",
+  "status": "at_court",
+  "description": "Maître du Béarn et du comté de Foix, allié de [[cdx_philippe_vi|Philippe VI]] et rival des comtes d'Armagnac ([[cdx_jean_i_d_armagnac|Jean Ier]]) pour la prééminence en Gascogne. Il combat les Maures d'Espagne et meurt en 1343 au retour de la campagne du Salado ; père du futur Gaston Fébus.",
+  "sources": [
+    "Gaston II de Foix-Béarn",
+    "Vicomté de Béarn"
+  ]
+}

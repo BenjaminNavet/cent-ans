@@ -1,0 +1,92 @@
+[
+  {
+    "id": "set_grenade",
+    "province": "prov_granada",
+    "kind": "city",
+    "name": {
+      "display": "Grenade",
+      "local": "Gharnata",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -3.5986,
+      37.1773
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Grenade, capitale du dernier royaume musulman d'Espagne, sous la dynastie nasride.",
+    "sources": [
+      "Royaume de Grenade",
+      "Yusuf Ier de Grenade",
+      "Almería"
+    ]
+  },
+  {
+    "id": "set_almeria",
+    "province": "prov_granada",
+    "kind": "town",
+    "name": {
+      "display": "Almería",
+      "local": "al-Mariyya",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -2.4637,
+      36.8381
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Principal port méditerranéen du royaume nasride de Grenade, actif dans le commerce de la soie.",
+    "sources": [
+      "Almería"
+    ]
+  },
+  {
+    "id": "set_alhama_de_granada",
+    "province": "prov_granada",
+    "kind": "castle",
+    "name": {
+      "display": "Alhama de Granada",
+      "local": "al-Hama",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -3.9974,
+      36.9691
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte thermale perchée sur un ravin escarpé, verrou occidental du royaume nasride vers Málaga et le Ronda.",
+    "sources": [
+      "Alhama de Granada"
+    ]
+  }
+]

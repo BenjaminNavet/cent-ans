@@ -1,0 +1,44 @@
+{
+  "id": "chr_nicolas_behuchet",
+  "name": {
+    "display": "Nicolas Béhuchet",
+    "local": "Nicolas Béhuchet",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Béhuchet",
+  "faction": "fac_france",
+  "role": "commander",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1340-06-24"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Trésorier de France",
+      "note": "Financier promu co-amiral pour la guerre navale, à la manière d'un capitaine bourgeois."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 2
+  },
+  "traits": [
+    "trait_admiral",
+    "trait_greedy"
+  ],
+  "piety": 45,
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Trésorier bourgeois de [[cdx_philippe_vi|Philippe VI]], nommé co-amiral avec [[cdx_hugues_quieret|Hugues Quiéret]] faute de grand seigneur volontaire pour la flotte. Organisateur du raid sur Southampton (1338) ; pendu au mât de son propre navire par les Anglais après la défaite de L'Écluse (24 juin 1340).",
+  "sources": [
+    "Nicolas Béhuchet",
+    "Bataille de L'Écluse",
+    "Raid sur Southampton"
+  ]
+}

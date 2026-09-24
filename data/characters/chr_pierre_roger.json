@@ -1,0 +1,45 @@
+{
+  "id": "chr_pierre_roger",
+  "name": {
+    "display": "Pierre Roger",
+    "local": "Pierre Roger",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Roger de Beaufort",
+  "faction": "fac_france",
+  "role": "prelate",
+  "birth": {
+    "value": "1291-11-28",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1352-12-06"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque de Rouen",
+      "from": {
+        "value": "1330"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 6,
+    "court": 8
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_generous"
+  ],
+  "piety": 70,
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Moine bénédictin limousin devenu abbé de Fécamp puis archevêque de Rouen, docteur en théologie réputé, conseiller écouté de [[cdx_philippe_vi|Philippe VI]]. Élu pape sous le nom de Clément VI le 7 mai 1342, il installera la cour pontificale dans le palais neuf d'[[cdx_avignon|Avignon]] ; en 1337 il n'est encore que prélat normand au service du roi.",
+  "sources": [
+    "Clément VI",
+    "Pierre Roger de Beaufort"
+  ]
+}

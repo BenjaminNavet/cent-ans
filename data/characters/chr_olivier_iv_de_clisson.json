@@ -1,0 +1,44 @@
+{
+  "id": "chr_olivier_iv_de_clisson",
+  "name": {
+    "display": "Olivier IV de Clisson",
+    "local": "Olivier IV de Clisson",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Clisson",
+  "faction": "fac_brittany",
+  "role": "noble",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343-08-02",
+    "place": "Paris (halles)",
+    "note": "Décapité sur ordre de Philippe VI."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Seigneur de Clisson"
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_proud",
+    "trait_deceitful"
+  ],
+  "piety": 45,
+  "starting_location": "prov_bretagne",
+  "status": "at_court",
+  "description": "Grand seigneur breton, d'abord fidèle à Charles de Blois pendant la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]] ; soupçonné d'intelligence avec les Anglais après la reddition de Vannes (1342), il est arrêté, jugé sommairement et décapité à Paris le 2 août 1343, épisode qui radicalise la noblesse bretonne. Père du futur connétable Olivier V de Clisson.",
+  "sources": [
+    "Olivier IV de Clisson",
+    "Guerre de Succession de Bretagne"
+  ]
+}

@@ -1,0 +1,118 @@
+[
+  {
+    "id": "set_ancone",
+    "province": "prov_ancona",
+    "kind": "city",
+    "name": {
+      "display": "Ancône",
+      "local": "Ancona",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      13.5189,
+      43.6158
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ancône, port adriatique et cité de la Marche sous vicariat pontifical.",
+    "sources": [
+      "Marche d'Ancône",
+      "Duché de Spolète",
+      "Pérouse"
+    ]
+  },
+  {
+    "id": "set_perugia",
+    "province": "prov_ancona",
+    "kind": "town",
+    "name": {
+      "display": "Pérouse",
+      "local": "Peroscia",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.3888,
+      43.1122
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
+    "port": false,
+    "description": "Grande commune ombrienne sous suzeraineté pontificale nominale, riche de son université fondée en 1308.",
+    "sources": [
+      "Pérouse"
+    ]
+  },
+  {
+    "id": "set_urbino",
+    "province": "prov_ancona",
+    "kind": "castle",
+    "name": {
+      "display": "Urbino",
+      "local": "Urbino",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.636,
+      43.7267
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Seigneurie des Montefeltro, vicaires pontificaux depuis 1234.",
+    "sources": [
+      "Urbino",
+      "Montefeltro"
+    ]
+  },
+  {
+    "id": "set_fonte_avellana",
+    "province": "prov_ancona",
+    "kind": "abbey",
+    "name": {
+      "display": "Fonte Avellana",
+      "local": "Fonte Avellana",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.7423,
+      43.5228
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Ermitage camaldule des Marches, cité par Dante dans le Paradis.",
+    "sources": [
+      "Fonte Avellana"
+    ]
+  }
+]

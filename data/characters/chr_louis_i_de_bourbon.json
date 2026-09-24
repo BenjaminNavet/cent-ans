@@ -1,0 +1,49 @@
+{
+  "id": "chr_louis_i_de_bourbon",
+  "name": {
+    "display": "Louis Ier de Bourbon",
+    "local": "Louis Ier de Bourbon",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Bourbon",
+  "faction": "fac_france",
+  "role": "noble",
+  "birth": {
+    "value": "1279",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1342-01-29"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Bourbon",
+      "from": {
+        "value": "1327-09"
+      },
+      "note": "Comté de Bourbon érigé en duché-pairie par Charles IV pour son cousin."
+    },
+    {
+      "title": "Comte de Clermont-en-Beauvaisis"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_just"
+  ],
+  "piety": 60,
+  "starting_location": "prov_bourbonnais",
+  "status": "at_court",
+  "description": "Petit-fils de saint Louis par son père Robert de Clermont, il obtient l'érection du Bourbonnais en duché-pairie en 1327 : premier duc de Bourbon. Proche conseiller de [[cdx_philippe_vi|Philippe VI]], grand vassal du Massif central ; sa maison donnera plus tard des rois de France.",
+  "sources": [
+    "Louis Ier de Bourbon",
+    "Duché de Bourbon"
+  ]
+}

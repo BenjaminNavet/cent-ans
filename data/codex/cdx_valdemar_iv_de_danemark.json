@@ -1,0 +1,11 @@
+{
+  "id": "cdx_valdemar_iv_de_danemark",
+  "title": "Valdemar IV Atterdag",
+  "category": "personnage",
+  "aliases": ["Valdemar IV", "Valdemar Atterdag", "Valdemar IV de Danemark"],
+  "era": { "from": "v. 1320", "to": "1375" },
+  "summary": "Prince danois en exil au début de la guerre de Cent Ans, Valdemar IV restaure en 1340 une monarchie danoise démembrée depuis la mort de son père.",
+  "body": "Fils cadet du roi Christophe II de Danemark, Valdemar grandit dans un royaume en pleine décomposition : à la mort de son père en 1332, la couronne danoise est à ce point ruinée et endettée auprès des princes du Holstein que le pays reste plusieurs années sans roi, ses provinces mises en gage aux créanciers allemands. Le jeune Valdemar passe alors une partie de sa jeunesse à la cour impériale, où il sert comme otage puis protégé de l'empereur Louis IV de Bavière, dont il épouse une parente.\n\nProfitant de la mort de son principal rival tenant le Jutland, il négocie habilement son retour et se fait élire roi le 21 juin 1340, moyennant d'importantes concessions financières aux comtes de Holstein qui contrôlent encore une bonne partie du royaume. Son surnom, « Atterdag » (« nouveau jour » ou « demain encore »), traduit sa réputation de souverain qui répétait cette formule pour promettre, sans jamais se décourager, la restauration complète de son domaine.\n\nPar une politique patiente de rachats, de mariages et de guerres ciblées, il parvient en une génération à reconstituer l'essentiel du royaume danois et à réaffirmer sa puissance en mer Baltique, jusqu'à s'opposer victorieusement à la ligue hanséatique. Il meurt en 1375, laissant le trône à sa fille Marguerite, qui unira bientôt Danemark, Norvège et Suède dans l'Union de Kalmar. Faute d'une faction Danemark distincte dans le jeu (le royaume, démembré en 1337, n'a pas de territoire jouable stable à cette date), ce personnage n'est représenté que par cette fiche, sans entité de jeu associée.",
+  "see_also": [],
+  "sources": ["Valdemar IV de Danemark", "Histoire du Danemark au Moyen Âge"]
+}

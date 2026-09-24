@@ -1,0 +1,123 @@
+[
+  {
+    "id": "set_bologne",
+    "province": "prov_bologna",
+    "kind": "city",
+    "name": {
+      "display": "Bologne",
+      "local": "Bulåggna",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      11.3426,
+      44.4949
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_university"
+    ],
+    "port": false,
+    "description": "Bologne, grande commune d'Émilie sous domination des Pepoli, dotée de la plus ancienne université d'Europe (1088).",
+    "sources": [
+      "Taddeo Pepoli",
+      "Bologne",
+      "Romagne"
+    ]
+  },
+  {
+    "id": "set_ravenna",
+    "province": "prov_bologna",
+    "kind": "town",
+    "name": {
+      "display": "Ravenne",
+      "local": "Ravena",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.2035,
+      44.4184
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville de Romagne tenue par la seigneurie des Polenta ; Dante y est mort et enterré en 1321.",
+    "sources": [
+      "Ravenne",
+      "Da Polenta"
+    ]
+  },
+  {
+    "id": "set_rimini",
+    "province": "prov_bologna",
+    "kind": "town",
+    "name": {
+      "display": "Rimini",
+      "local": "Arimino",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.5736,
+      44.0678
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port adriatique de Romagne sous la seigneurie des Malatesta.",
+    "sources": [
+      "Rimini",
+      "Malatesta"
+    ]
+  },
+  {
+    "id": "set_forli",
+    "province": "prov_bologna",
+    "kind": "castle",
+    "name": {
+      "display": "Forlì",
+      "local": "Forlì",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.0407,
+      44.2226
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte de Romagne sous la seigneurie des Ordelaffi, vicaires pontificaux contestés.",
+    "sources": [
+      "Forlì",
+      "Ordelaffi"
+    ]
+  }
+]
