@@ -864,7 +864,32 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
     ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
 }
 
-/// Phase (winter): every ruler gains its [`yearly_court_prestige`].
+/// G1: `Piety` of buildings is a yearly figure divided by this (a cathedral,
+/// +10, adds 1 piety a year to the ruler).
+pub const PIETY_EFFECT_DIVISOR: f64 = 10.0;
+/// G1: most piety a ruler gains from buildings in one year.
+pub const MAX_YEARLY_BUILDING_PIETY: i32 = 3;
+
+/// Yearly piety of a faction's ruler from the `Piety` effects of the
+/// buildings of the provinces it controls (G1), capped at
+/// [`MAX_YEARLY_BUILDING_PIETY`]. Trait and skill piety is read through
+/// `religion::effective_piety` instead.
+pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    let buildings: f64 = state
+        .provinces
+        .values()
+        .filter(|p| &p.controller == faction)
+        .map(|p| {
+            crate::buildings::effects_of(data, &p.buildings)
+                .piety
+                .apply(0.0)
+        })
+        .sum();
+    ((buildings / PIETY_EFFECT_DIVISOR).round() as i32).clamp(0, MAX_YEARLY_BUILDING_PIETY)
+}
+
+/// Phase (winter): every ruler gains its [`yearly_court_prestige`] and its
+/// [`yearly_building_piety`].
 pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData) {
     if state.season != crate::state::Season::Winter {
         return;
@@ -877,12 +902,16 @@ pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData)
         .collect();
     for faction in factions {
         let gain = yearly_court_prestige(state, data, &faction);
-        if gain == 0 {
+        let piety = yearly_building_piety(state, data, &faction);
+        if gain == 0 && piety == 0 {
             continue;
         }
         let ruler = state.factions[&faction].ruler.clone();
         if let Some(c) = ruler.and_then(|r| state.characters.get_mut(&r)) {
-            c.prestige += gain;
+            if c.alive {
+                c.prestige += gain;
+                c.piety = (i32::from(c.piety) + piety).clamp(0, 100) as u8;
+            }
         }
     }
 }
