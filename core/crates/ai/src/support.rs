@@ -1,13 +1,17 @@
 //! Subsidies between allies (G2): a rich ally at war against the same enemy
 //! pays the debts of an indebted one (French gold for the Scots).
 
-use data_model::FactionId;
+use data_model::{FactionId, GameData};
+use sim_campaign::diplomacy::rivals;
 use sim_campaign::{CampaignState, Order};
 
 /// Seasons of the ally's deficit the subsidy covers ahead.
 pub const SUBSIDY_DEFICIT_SEASONS: i64 = 2;
-/// Seasons of gross income the donor keeps before paying anyone.
-pub const SUBSIDY_DONOR_RESERVE_SEASONS: i64 = 2;
+/// The donor keeps a season of upkeep and gives at most this fraction
+/// (1/n) of the rest per turn.
+pub const SUBSIDY_SPARE_DIVISOR: i64 = 3;
+/// Only a realm this many times richer (gross income) pays subsidies.
+pub const SUBSIDY_WEALTH_RATIO: i64 = 3;
 /// Smallest subsidy worth a courier.
 pub const SUBSIDY_MIN: i64 = 100;
 
@@ -20,22 +24,27 @@ pub fn subsidy_need(state: &CampaignState, ally: &FactionId) -> i64 {
 }
 
 /// Subsidies `faction` pays this turn out of `spare` (money beyond its own
-/// reserve): allies (not rebels) at war against one of our enemies, neediest
-/// first, each gift capped by what is left.
-pub fn plan_subsidies(state: &CampaignState, faction: &FactionId, spare: i64) -> Vec<Order> {
+/// reserve): allies sharing one of our rivals, neediest first, each gift capped by what is left.
+pub fn plan_subsidies(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    spare: i64,
+) -> Vec<Order> {
+    let wealth = |f: &FactionId| state.faction_income_effective(data, f).max(0);
+    let my_wealth = wealth(faction);
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
+    // Our enemies and pretenders (or the realms we claim): the Scots and the
+    // French share England, in war as in truce.
+    let my_rivals = rivals(state, faction);
     let mut needy: Vec<(i64, FactionId)> = me
         .allies
         .iter()
         .filter(|a| state.factions.get(*a).is_some_and(|f| f.alive))
-        .filter(|a| {
-            state.factions[*a]
-                .at_war_with
-                .iter()
-                .any(|e| e.as_str() != "fac_rebels" && me.at_war_with.contains(e))
-        })
+        .filter(|a| my_wealth >= SUBSIDY_WEALTH_RATIO * wealth(a))
+        .filter(|a| !rivals(state, a).is_disjoint(&my_rivals))
         .map(|a| (subsidy_need(state, a), a.clone()))
         .filter(|(need, _)| *need >= SUBSIDY_MIN)
         .collect();
