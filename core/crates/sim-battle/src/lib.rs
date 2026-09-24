@@ -11,7 +11,10 @@
 //!
 //! - Field of [`FIELD_WIDTH`] × [`FIELD_DEPTH`] metres with procedural hills,
 //!   forests, mud and an optional river with two fords ([`Battlefield`]);
-//!   weather drawn from the season ([`Weather`]).
+//!   weather drawn from the season ([`Weather`]). Lot B5 ([`site`]): the
+//!   campaign site adds the ground of the season (mud, snow), a coast on a
+//!   flank, marsh pools, a village or farm (cover, broken charges) with its
+//!   hedges, fences and ditches, bocage hedgerows.
 //! - Each regiment ([`Unit`]) is an oriented rectangle whose size follows its
 //!   formation; soldiers are laid out in a grid for rendering.
 //! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
@@ -22,6 +25,8 @@
 //! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
 //!   walls with towers and a gate, ladders, siege towers, ram, engines that
 //!   breach the walls, victory by holding the central square.
+//! - Siege fires ([`fire`], spec `docs/design/s2-incendies.md`): incendiary
+//!   volleys, spread from house to house, heat, smoke, burnt ruins.
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 //! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
@@ -31,6 +36,7 @@
 pub mod ai;
 pub mod command;
 pub mod field;
+pub mod fire;
 pub mod formation_ai;
 pub mod orders;
 pub mod outcome;
@@ -38,6 +44,7 @@ pub mod rng;
 pub mod setup;
 pub mod siege;
 pub mod sim;
+pub mod site;
 pub mod unit;
 
 pub use command::{Command, CommandError};
@@ -45,6 +52,7 @@ pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
+pub use fire::{Blaze, FireRules, FireState};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;
@@ -55,5 +63,8 @@ pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use sim::{
     BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
     SIEGE_STANDOFF, ZONE_DEPTH,
+};
+pub use site::{
+    Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
 pub use unit::{Formation, Unit, UnitState};

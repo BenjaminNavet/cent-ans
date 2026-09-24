@@ -63,7 +63,7 @@ fn main() {
         .iter()
         .map(|k| unit(&data, k))
         .collect();
-        let (mut total, mut wins) = (0.0, 0);
+        let (mut total, mut wins, mut fires) = (0.0, 0, 0);
         let seeds: u64 = std::env::var("SEEDS")
             .ok()
             .and_then(|s| s.parse().ok())
@@ -75,6 +75,8 @@ fn main() {
                 terrain: Terrain::Plains,
                 river: false,
                 season: BattleSeason::Summer,
+                coastal: false,
+                village: None,
                 attacker: side(attackers.clone()),
                 defender: side(defenders.clone()),
                 player_side: None,
@@ -85,6 +87,18 @@ fn main() {
                 orders: Vec::new(),
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
+            // S2: `FIRE=off` disables the siege fires, `WEATHER=clear|rain|fog|snow`
+            // forces the weather.
+            if std::env::var("FIRE").is_ok_and(|v| v == "off") {
+                sim.set_fire_rules(None);
+            }
+            match std::env::var("WEATHER").as_deref() {
+                Ok("clear") => sim.set_weather(Weather::Clear),
+                Ok("rain") => sim.set_weather(Weather::Rain),
+                Ok("fog") => sim.set_weather(Weather::Fog),
+                Ok("snow") => sim.set_weather(Weather::Snow),
+                _ => {}
+            }
             while !sim.is_finished() {
                 sim.step();
                 if std::env::var("TRACE").is_ok()
@@ -119,18 +133,25 @@ fn main() {
             if outcome.winner == SideId::Attacker {
                 wins += 1;
             }
+            let works = sim.siege().unwrap();
+            let fire = works.burning_houses() + works.burnt_houses();
+            fires += fire;
             println!(
-                "seed {seed}: {:.0} s, winner {:?}, losses {} / {}, walls {:.0} %",
+                "seed {seed}: {:.0} s, winner {:?}, losses {} / {}, walls {:.0} %, weather {:?}, houses on fire or burnt {fire}/{}, gate fire {:?}",
                 sim.elapsed(),
                 outcome.winner,
                 outcome.attacker.total_losses,
                 outcome.defender.total_losses,
-                sim.siege().unwrap().integrity() * 100.0
+                works.integrity() * 100.0,
+                sim.weather(),
+                works.houses.len(),
+                works.gate_fire.state,
             );
         }
         println!(
-            "mean {:.0} s, attacker wins {wins}/{seeds}",
-            total / seeds as f64
+            "mean {:.0} s, attacker wins {wins}/{seeds}, houses reached by fire {:.1} per battle",
+            total / seeds as f64,
+            fires as f64 / seeds as f64
         );
         return;
     }
@@ -159,6 +180,8 @@ fn main() {
                 terrain: Terrain::Plains,
                 river: seed % 2 == 0,
                 season: BattleSeason::Summer,
+                coastal: false,
+                village: None,
                 attacker: side(army(size)),
                 defender: side(army(size)),
                 player_side: None,
@@ -206,6 +229,8 @@ fn main() {
         terrain: Terrain::Plains,
         river: false,
         season: BattleSeason::Summer,
+        coastal: false,
+        village: None,
         attacker: side(vec![unit(&data, a)]),
         defender: side(vec![unit(&data, d)]),
         player_side: None,
