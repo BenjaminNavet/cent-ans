@@ -1,11 +1,17 @@
 //! Battlefield (height, forests, mud, river) and weather, generated from the
-//! seed, the province terrain and the season (spec § 1).
+//! seed, the province terrain and the season (spec § 1), plus the features of
+//! the campaign site (coast, marsh pools, village, hedges, ground of the
+//! season: lot B5, [`crate::site`]).
 
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
 use crate::rng::BattleRng;
 use crate::setup::BattleSeason;
+use crate::site::{
+    self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, Village, HEDGE_COVER_REACH,
+    OBSTACLE_REACH,
+};
 
 /// Width of the field along x, in metres.
 pub const FIELD_WIDTH: f64 = 1200.0;
@@ -160,7 +166,38 @@ pub struct Battlefield {
     pub forests: Vec<Zone>,
     pub mud: Vec<Zone>,
     pub river: Option<River>,
+    /// Province terrain the field was drawn from (B5).
+    #[serde(default = "default_terrain")]
+    pub terrain: Terrain,
+    #[serde(default)]
+    pub season: BattleSeason,
+    #[serde(default)]
+    pub ground: Ground,
+    /// Tree density of the woods, 0-1 (rendering; B5).
+    #[serde(default = "default_woodland")]
+    pub woodland: f64,
+    /// Standing water of a marsh: shallow water, like a ford (B5).
+    #[serde(default)]
+    pub pools: Vec<Zone>,
+    #[serde(default)]
+    pub coast: Option<Coast>,
+    /// Hedges, fences and ditches (B5).
+    #[serde(default)]
+    pub obstacles: Vec<Obstacle>,
+    #[serde(default)]
+    pub village: Option<Village>,
 }
+
+fn default_terrain() -> Terrain {
+    Terrain::Plains
+}
+
+fn default_woodland() -> f64 {
+    0.5
+}
+
+/// Salt of the derived stream of the site features (B5).
+const SITE_STREAM: u64 = 0xB5;
 
 struct Hill {
     x: f64,
@@ -175,8 +212,66 @@ pub const DEFENDER_LINE_Z: f64 = 550.0;
 
 impl Battlefield {
     /// Builds the field for `terrain`, adding a river when `river` is set and
-    /// extra mud in the rain or snow.
+    /// extra mud in the rain or snow (no coast, no village: pre-B5 field).
     pub fn generate(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
+        Self::generate_base(terrain, river, weather, rng)
+    }
+
+    /// Builds the field of a campaign site (B5): the pre-B5 field (same
+    /// draws from `rng`), then ground, coast, pools, village and hedges from
+    /// a derived stream that leaves `rng` where the pre-B5 field left it.
+    pub fn generate_site(site: &FieldSite, weather: Weather, rng: &mut BattleRng) -> Self {
+        let mut field = Self::generate_base(site.terrain, site.river, weather, rng);
+        field.season = site.season;
+        let mut stream = rng.derive(SITE_STREAM);
+        let river = field.river.clone();
+        let river_z = move |x: f64| river.as_ref().map_or(f64::NAN, |r| r.center_z(x));
+        let river_fn: &dyn Fn(f64) -> f64 = &river_z;
+        let occupied = Occupied {
+            forests: &field.forests,
+            mud: &field.mud,
+            river_z: field.river.is_some().then_some(river_fn),
+        };
+        let features = SiteFeatures::draw(site, weather, &occupied, &mut stream);
+        field.ground = features.ground;
+        field.mud.extend(features.extra_mud);
+        field.pools = features.pools;
+        field.obstacles = features.obstacles;
+        field.village = features.village;
+        field.coast = features.coast;
+        if let Some(coast) = field.coast {
+            field.shape_coast(coast);
+        }
+        field
+    }
+
+    /// Lowers the coastal flank towards the beach (dunes on the sand).
+    fn shape_coast(&mut self, coast: Coast) {
+        for iz in 0..self.nz {
+            for ix in 0..self.nx {
+                let x = ix as f64 * self.resolution;
+                let z = iz as f64 * self.resolution;
+                let d = coast.from_edge(x);
+                let band = coast.beach + 120.0;
+                if d >= band {
+                    continue;
+                }
+                let t = (d / band).clamp(0.0, 1.0);
+                let blend = t * t * (3.0 - 2.0 * t);
+                let dune = if d < coast.beach {
+                    let s = d / coast.beach;
+                    1.2 * (s * std::f64::consts::PI).sin()
+                        * (0.6 + 0.4 * (z * 0.031 + x * 0.017).sin())
+                } else {
+                    0.0
+                };
+                let h = &mut self.heights[iz * self.nx + ix];
+                *h = *h * blend + (1.0 + dune) * (1.0 - blend);
+            }
+        }
+    }
+
+    fn generate_base(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
         let (hill_count, hill_height, forest_count, mud_count) = match terrain {
             Terrain::Plains => (4, 5.0, 2, 1),
             Terrain::Heath => (5, 7.0, 1, 1),
@@ -274,6 +369,14 @@ impl Battlefield {
             forests,
             mud,
             river: river_def,
+            terrain,
+            season: BattleSeason::Spring,
+            ground: Ground::Dry,
+            woodland: site::woodland(terrain),
+            pools: Vec::new(),
+            coast: None,
+            obstacles: Vec::new(),
+            village: None,
         }
     }
 
@@ -308,7 +411,67 @@ impl Battlefield {
         };
         self.forests.retain(keep);
         self.mud.retain(keep);
+        self.pools.retain(keep);
+        if self.village.as_ref().is_some_and(|v| !keep(&v.zone)) {
+            self.village = None;
+        }
+        self.obstacles.retain(|o| {
+            [o.a, o.b]
+                .iter()
+                .all(|&(x, z)| keep(&Zone { x, z, radius: 0.0 }))
+        });
         self.river = None;
+    }
+
+    /// Speed multiplier of the site features at (x, z) (B5): hedges, fences
+    /// and ditches being crossed, village lanes, beach sand, snow on the
+    /// ground. Marsh pools count as shallow water ([`Self::water_at`]).
+    pub fn site_speed_factor(&self, x: f64, z: f64, mounted: bool, weather: Weather) -> f64 {
+        let mut factor = self.ground.speed_factor(weather);
+        if let Some(obstacle) = self
+            .obstacles
+            .iter()
+            .filter(|o| o.distance(x, z) <= OBSTACLE_REACH)
+            .min_by(|a, b| {
+                a.kind
+                    .crossing_factor(mounted)
+                    .total_cmp(&b.kind.crossing_factor(mounted))
+            })
+        {
+            factor *= obstacle.kind.crossing_factor(mounted);
+        }
+        if self.in_village(x, z) {
+            factor *= Village::speed_factor(mounted);
+        }
+        if self.coast.is_some_and(|c| c.on_beach(x)) {
+            factor *= Coast::SAND_FACTOR;
+        }
+        factor
+    }
+
+    pub fn in_village(&self, x: f64, z: f64) -> bool {
+        self.village.as_ref().is_some_and(|v| v.zone.contains(x, z))
+    }
+
+    /// `true` when a hedge stands between `from` and a target at `to`, close
+    /// in front of the target (B5: archers behind a hedge).
+    pub fn hedge_between(&self, from: (f64, f64), to: (f64, f64)) -> bool {
+        self.obstacles.iter().any(|o| {
+            o.kind.gives_cover()
+                && o.distance(to.0, to.1) <= HEDGE_COVER_REACH
+                && o.crosses(from, to)
+        })
+    }
+
+    /// `true` when a charge from `from` against a unit at `to` crosses a
+    /// hedge or a ditch close in front of the target, or meets the target while
+    /// the horsemen are still in the hedge (B5).
+    pub fn breaks_charge(&self, from: (f64, f64), to: (f64, f64)) -> bool {
+        self.obstacles.iter().any(|o| {
+            o.kind.breaks_charge()
+                && o.distance(to.0, to.1) <= HEDGE_COVER_REACH
+                && (o.crosses(from, to) || o.distance(from.0, from.1) <= 2.0 * OBSTACLE_REACH)
+        })
     }
 
     /// Bilinear height at (x, z), clamped to the field.
@@ -333,9 +496,14 @@ impl Battlefield {
     }
 
     /// `Some(true)` in a ford, `Some(false)` in deep water, `None` on land.
+    /// Marsh pools count as shallow water (B5).
     pub fn water_at(&self, x: f64, z: f64) -> Option<bool> {
-        let river = self.river.as_ref()?;
-        river.in_water(x, z).then(|| river.in_ford(x))
+        if let Some(river) = &self.river {
+            if river.in_water(x, z) {
+                return Some(river.in_ford(x));
+            }
+        }
+        self.pools.iter().any(|p| p.contains(x, z)).then_some(true)
     }
 
     pub fn inside(&self, x: f64, z: f64) -> bool {
