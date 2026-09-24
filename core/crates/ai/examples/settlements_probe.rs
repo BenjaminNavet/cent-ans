@@ -167,7 +167,11 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
                 EventKind::Battle if event.text_fr.contains("Vainqueur") => report.battles += 1,
                 EventKind::Attrition if event.text_fr.starts_with("Débarquement") => {
                     report.landings += 1;
-                    if event.faction.as_ref().is_some_and(|f| f.as_str() == "fac_england") {
+                    if event
+                        .faction
+                        .as_ref()
+                        .is_some_and(|f| f.as_str() == "fac_england")
+                    {
                         report.landings_england += 1;
                     }
                 }

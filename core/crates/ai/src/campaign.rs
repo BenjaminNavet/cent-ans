@@ -1349,6 +1349,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 stance,
             });
         }
-        orders.extend(ctx.grid.march_orders(army_id, army, &anchor, &target, &table));
+        orders.extend(
+            ctx.grid
+                .march_orders(army_id, army, &anchor, &target, &table),
+        );
     }
 }
