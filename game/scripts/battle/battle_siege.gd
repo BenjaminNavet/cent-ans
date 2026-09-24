@@ -29,6 +29,7 @@ var wall_height: float = 8.0
 var thickness: float = 3.0
 var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
 var house_sites: Array = []  # F5c : [{p: Vector2, radius}] = obstacles de la simulation
+var fire_fx: Node3D = null  # S2 : incendies des maisons (`siege_fire_fx.gd`)
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -55,6 +56,9 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	BattleSiegeBatcher.batch_and_replace(towers_root)
 	_build_square()
 	_build_houses()
+	fire_fx = preload("res://scripts/battle/siege_fire_fx.gd").new()
+	add_child(fire_fx)
+	fire_fx.setup(self, height_at)
 
 
 static func _material(color: Color, roughness: float = 0.95) -> StandardMaterial3D:
@@ -510,6 +514,8 @@ func update(p_siege: Dictionary, units: Array) -> void:
 			wall.scale = Vector3(1, 0.8 + 0.2 * ratio, 1)
 		var mat: StandardMaterial3D = view["material"]
 		mat.albedo_color = STONE_DARK.lerp(STONE, ratio)
+	if fire_fx != null:
+		fire_fx.update(p_siege)
 	_update_machines(units)
 
 
