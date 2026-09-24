@@ -105,9 +105,13 @@
       "properties": {
         "slow_seconds": { "type": "number", "minimum": 0, "maximum": 10 },
         "slow_min": { "$ref": "#/$defs/share" },
-        "stop_seconds": { "type": "number", "minimum": 0, "maximum": 10 }
+        "stop_seconds": { "type": "number", "minimum": 0, "maximum": 10 },
+        "drive_extra_m": { "type": "number", "minimum": 0, "maximum": 10, "description": "Mètres ajoutés à la pénétration du cœur (`depth`) : les chevaux comblent l'écart de contact des rectangles simulés." },
+        "drive_in_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "drive_hold_seconds": { "type": "number", "minimum": 0, "maximum": 30 },
+        "drive_out_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 }
       },
-      "required": ["slow_seconds", "slow_min", "stop_seconds"],
+      "required": ["slow_seconds", "slow_min", "stop_seconds", "drive_extra_m", "drive_in_seconds", "drive_hold_seconds", "drive_out_seconds"],
       "additionalProperties": false
     },
     "sprays": {

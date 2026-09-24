@@ -64,7 +64,11 @@
   "horses": {
     "slow_seconds": 2.2,
     "slow_min": 0.35,
-    "stop_seconds": 1.2
+    "stop_seconds": 1.2,
+    "drive_extra_m": 2.5,
+    "drive_in_seconds": 0.7,
+    "drive_hold_seconds": 2.5,
+    "drive_out_seconds": 3.0
   },
   "sprays": {
     "max_droplets": 6144,

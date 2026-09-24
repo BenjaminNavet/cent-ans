@@ -72,6 +72,7 @@ var _tumble_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, next, m
 var _hidden: Dictionary = {}  # unit id -> {rang: instant de retour}
 var _lag: Dictionary = {}  # unit id -> retard d'horloge d'animation (chevaux ralentis)
 var _slow: Dictionary = {}  # unit id -> {since, kind}
+var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entrent dans la masse
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _audio: Script = null
@@ -251,6 +252,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	# Renversés (lot BV2) : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
 	if _hidden.has(id):
 		slice = _hide_knocked(id, slice, n)
+	if _drive.has(id):
+		slice = _drive_in(id, slice, n)
 	var lod: MultiMeshInstance3D = _lod_layers[id]
 	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
@@ -502,6 +505,10 @@ func apply_impacts(impacts: Array) -> void:
 		var kind := str(hit["kind"])
 		_charge_mass[attacker] = float(hit.get("mass", 0.0))
 		_slow[attacker] = {"since": anim_time, "kind": kind}
+		if kind == "shock":
+			var horses: Dictionary = _gore.get("horses", {})
+			var h := float(hit.get("heading", 0.0))
+			_drive[attacker] = {"since": anim_time, "depth": float(hit.get("depth", 0.0)) + float(horses.get("drive_extra_m", 2.5)), "dir": Vector2(sin(h), cos(h))}
 		var point: Vector2 = hit["point"]
 		var ground := _unit_pos.get(defender, Vector3(point.x, 0.0, point.y)) as Vector3
 		var at := Vector3(point.x, ground.y, point.y)
@@ -616,6 +623,28 @@ func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32A
 				out[o + q] = 0.0
 	if hidden.is_empty():
 		_hidden.erase(id)
+	return out
+
+
+## Cavaliers qui entrent dans la masse après un choc (lot BV2) : la formation rendue avance de
+## la pénétration du cœur (`depth`) plus l'écart de contact, s'y tient, puis se replie.
+func _drive_in(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
+	var entry: Dictionary = _drive[id]
+	var horses: Dictionary = _gore.get("horses", {})
+	var t := anim_time - float(entry["since"])
+	var t_in := float(horses.get("drive_in_seconds", 0.7))
+	var hold := float(horses.get("drive_hold_seconds", 2.5))
+	var t_out := float(horses.get("drive_out_seconds", 3.0))
+	if t > t_in + hold + t_out:
+		_drive.erase(id)
+		return slice
+	var f := smoothstep(0.0, t_in, t) * (1.0 - smoothstep(t_in + hold, t_in + hold + t_out, t))
+	var dir: Vector2 = entry["dir"]
+	var d := float(entry["depth"]) * f
+	var out := slice
+	for i in n:
+		out[i * 12 + 3] += dir.x * d
+		out[i * 12 + 11] += dir.y * d
 	return out
 
 
