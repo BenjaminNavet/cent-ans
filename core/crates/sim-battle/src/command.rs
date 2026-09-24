@@ -112,6 +112,14 @@ pub enum CommandError {
     NoSide,
     /// A leader's order for the other side.
     WrongSide,
+    /// Deployment phase (F5a): only formation and fire-at-will orders, and
+    /// `deploy_unit`, until `start_battle`.
+    Deploying,
+    /// `deploy_unit` / `start_battle` outside the deployment phase.
+    NotDeploying,
+    /// The position is outside the side's deployment zone (or, in a siege,
+    /// on the wrong side of the walls).
+    OutsideZone(u32),
 }
 
 impl std::fmt::Display for CommandError {
@@ -144,6 +152,19 @@ impl std::fmt::Display for CommandError {
             }
             CommandError::NoSide => write!(f, "impossible de savoir quel camp donne cet ordre"),
             CommandError::WrongSide => write!(f, "cet ordre ne concerne pas votre armée"),
+            CommandError::Deploying => {
+                write!(
+                    f,
+                    "déploiement en cours : placez vos troupes puis lancez la bataille"
+                )
+            }
+            CommandError::NotDeploying => write!(f, "le déploiement est terminé"),
+            CommandError::OutsideZone(id) => {
+                write!(
+                    f,
+                    "l'unité {id} doit être placée dans votre zone de déploiement"
+                )
+            }
         }
     }
 }

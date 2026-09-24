@@ -353,6 +353,8 @@ impl Unit {
         let (_, files) = self.ranks_files(self.soldiers());
         let front = match self.formation {
             Formation::Square => f64::from(files) * 4.0,
+            // The wedge drives in: riders fight along both slanted faces.
+            Formation::Wedge => f64::from(files) * 3.0,
             _ => f64::from(files) * 2.0,
         };
         front.min(self.hp.max(0.0))
@@ -387,7 +389,7 @@ impl Unit {
                 // Row k (0 = tip) holds 2k + 1 riders.
                 let mut k = 0u32;
                 let mut first = 0u32;
-                while first + 2 * k < i + 1 {
+                while first + 2 * k < i {
                     first += 2 * k + 1;
                     k += 1;
                 }
