@@ -10,7 +10,7 @@ Branche : `worktree-agent-a64ab636a1a413848`. Conception : `docs/design/2026-09-
 - [x] (d) IA restreinte (mineures : un espion en guerre ; prédicateur contre hérésie/Schisme ; ambassades vers cours hostiles), sonde `agents_balance_probe` (design § 13), captures `docs/img/c6/agents-bar.png`, `agents-registry.png` (`--stage=agents|agents_registry`)
 
 ## Prochaine étape
-Relancer le smoke complet (23 « smoke OK » attendus) puis rapport final. Pistes : pions 3D, aperçu de chemin des agents, journal filtré, recrutement depuis le panneau de colonie.
+Lot terminé, prêt à fusionner : cargo fmt/clippy/test verts, pytest schéma vert, smoke 23 « smoke OK » sans SCRIPT ERROR (nouvelle ligne « agents »). Pistes : pions 3D, aperçu de chemin des agents, journal filtré, recrutement depuis le panneau de colonie.
 
 ## Notes
 - Ne pas toucher `movement.rs`, `ProvinceState`, `SettlementState`, `characters.rs`.
