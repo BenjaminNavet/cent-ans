@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_bristol",
+    "province": "prov_gloucester",
+    "kind": "city",
+    "name": {
+      "display": "Bristol",
+      "local": "Bristowe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.5879,
+      51.4545
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Gloucestershire, Worcestershire, Herefordshire, Shropshire : Bristol (deuxième port du royaume, vins de Gascogne), marches galloises des Mortimer et des Bohun, forêt de Dean (fer).",
+    "sources": [
+      "Bristol",
+      "Marches galloises",
+      "Forêt de Dean"
+    ]
+  },
+  {
+    "id": "set_gloucester",
+    "province": "prov_gloucester",
+    "kind": "town",
+    "name": {
+      "display": "Gloucester",
+      "local": "Gleauceastre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.2374,
+      51.8642
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_abbey",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité cathédrale sur la Severn où repose le roi Édouard II, but de pèlerinage.",
+    "sources": [
+      "Gloucester"
+    ]
+  },
+  {
+    "id": "set_tewkesbury",
+    "province": "prov_gloucester",
+    "kind": "abbey",
+    "name": {
+      "display": "Tewkesbury",
+      "local": "Teodekesberie",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.1573,
+      51.9877
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye normande sur la Severn, nécropole des comtes de Gloucester.",
+    "sources": [
+      "Abbaye de Tewkesbury"
+    ]
+  },
+  {
+    "id": "set_berkeley",
+    "province": "prov_gloucester",
+    "kind": "castle",
+    "name": {
+      "display": "Berkeley",
+      "local": "Berkelai",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.459,
+      51.69
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château tristement célèbre pour le meurtre d'Édouard II en 1327, tenu par la famille Berkeley.",
+    "sources": [
+      "Château de Berkeley"
+    ]
+  }
+]

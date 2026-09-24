@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_perigueux",
+    "province": "prov_perigord",
+    "kind": "city",
+    "name": { "display": "Périgueux", "local": "Peireguers", "local_language": "occitan" },
+    "lonlat": [0.7185, 45.1846],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté de Périgord, née de la réunion de la cité épiscopale et du bourg marchand du Puy-Saint-Front.",
+    "sources": ["Périgueux"]
+  },
+  {
+    "id": "set_beynac",
+    "province": "prov_perigord",
+    "kind": "castle",
+    "name": { "display": "Beynac", "local": "Beinac", "local_language": "occitan" },
+    "lonlat": [1.1500, 44.8375],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse française perchée sur une falaise dominant la Dordogne, face au château anglais de Castelnaud.",
+    "sources": ["Château de Beynac"]
+  },
+  {
+    "id": "set_castelnaud",
+    "province": "prov_perigord",
+    "kind": "castle",
+    "name": { "display": "Castelnaud", "local": "Castelnau", "local_language": "occitan" },
+    "lonlat": [1.1439, 44.8083],
+    "weight": 12,
+    "owner": "fac_england",
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château tenu pour le parti anglo-gascon sur la rive opposée à Beynac, verrou du Périgord noir.",
+    "sources": ["Château de Castelnaud"]
+  },
+  {
+    "id": "set_bergerac",
+    "province": "prov_perigord",
+    "kind": "town",
+    "name": { "display": "Bergerac", "local": "Brageirac", "local_language": "occitan" },
+    "lonlat": [0.4814, 44.8500],
+    "weight": 14,
+    "owner": "fac_england",
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur la Dordogne, enclave du duché d'Aquitaine anglais en Périgord français, prise par les Français en 1345.",
+    "sources": ["Bergerac (Dordogne)"]
+  },
+  {
+    "id": "set_brantome",
+    "province": "prov_perigord",
+    "kind": "abbey",
+    "name": { "display": "Brantôme", "local": "Brantòsme", "local_language": "occitan" },
+    "lonlat": [0.6564, 45.3625],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye bénédictine troglodytique fondée par Charlemagne selon la tradition, sur la Dronne.",
+    "sources": ["Abbaye de Brantôme"]
+  }
+]

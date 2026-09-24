@@ -108,7 +108,20 @@ voisines. Chaque arête du graphe (§ 4.4) porte `road: bool`.
 - `GameData.settlements: BTreeMap<SettlementId, Settlement>` et index
   `settlements_by_province`.
 - `GameData.settlement_graph` : arêtes `(from, to, cost, road, sea)` chargées depuis
-  `data/map/settlement_graph.json` (produit par `tools/geo`, § 5).
+  `data/map/settlement_graph.json` (produit par `tools/geo`, § 5). Format (lot C1) :
+  `{"edges": [{"from": "set_rouen", "to": "set_caen", "cost": 3.2, "road": true, "sea": false}]}`.
+  `road` et `sea` valent `false` par défaut ; une arête est **non orientée** (une seule entrée par
+  paire) ; `cost` est un réel ≥ 0 dans l'unité des points de mouvement. Une arête vers une colonie
+  inconnue est ignorée avec un avertissement. Fichier optionnel : absent, le graphe est vide.
+- `GameData.settlement_rules` : `data/settlements/rules.json` (schéma
+  `settlement_rules.schema.json`) : `starting_garrison` par type de colonie, `full_province_bonus`
+  (`income_percent`, `unrest_per_season`).
+- **Repli (lot C1)** : toute province sans fichier, ou dont le fichier n'a pas de `city`, reçoit au
+  chargement une cité générée depuis `capital_city` : id `set_<slug ASCII du nom affiché>`
+  (`set_<slug>_<province>` en cas de collision), `weight` 100, fortification et bâtiments de la
+  province, `port` si la province est côtière avec ports. Les incohérences des fichiers (province ou
+  faction inconnue, bâtiment inconnu, id en double, nombre de colonies hors 1-6, plusieurs cités)
+  produisent des avertissements, jamais un échec ; seul un JSON invalide est fatal.
 
 ### 4.2 État (`sim-campaign/state.rs`)
 

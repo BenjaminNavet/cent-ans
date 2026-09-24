@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_innsbruck",
+    "province": "prov_tirol",
+    "kind": "city",
+    "name": {
+      "display": "Innsbruck",
+      "local": "Innsbruck",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.4041,
+      47.2692
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté de Tyrol tenu par Marguerite Maultasch et Jean-Henri de Luxembourg (répudié en 1341) ; évêchés de Brixen et de Trente. Col du Brenner, sel de Hall, argent de Schwaz.",
+    "sources": [
+      "Comté de Tyrol",
+      "Marguerite de Tyrol",
+      "Principauté épiscopale de Trente"
+    ]
+  },
+  {
+    "id": "set_schloss_tirol",
+    "province": "prov_tirol",
+    "kind": "castle",
+    "name": {
+      "display": "Schloss Tirol",
+      "local": "Tirol",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.15,
+      46.6753
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château éponyme des comtes de Tyrol près de Merano, berceau du comté.",
+    "sources": [
+      "Château de Tyrol"
+    ]
+  },
+  {
+    "id": "set_bolzano",
+    "province": "prov_tirol",
+    "kind": "town",
+    "name": {
+      "display": "Bolzano",
+      "local": "Bozen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.3548,
+      46.4983
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourgade marchande au carrefour des routes alpines vers le Brenner.",
+    "sources": [
+      "Bolzano"
+    ]
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_saintes",
+    "province": "prov_saintonge",
+    "kind": "city",
+    "name": { "display": "Saintes", "local": "Xaintes", "local_language": "ancien français" },
+    "lonlat": [-0.6326, 45.7448],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Ancienne capitale romaine de l'Aquitaine, siège épiscopal sur la Charente, aval jusqu'à l'océan.",
+    "sources": ["Saintes"]
+  },
+  {
+    "id": "set_la_rochelle",
+    "province": "prov_saintonge",
+    "kind": "town",
+    "name": { "display": "La Rochelle", "local": "La Rochele", "local_language": "ancien français" },
+    "lonlat": [-1.1520, 46.1591],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls", "bld_guild_hall"],
+    "port": true,
+    "description": "Grand port atlantique du sel et du vin, commune privilégiée passée sous domination royale française en 1224.",
+    "sources": ["La Rochelle"]
+  },
+  {
+    "id": "set_pons",
+    "province": "prov_saintonge",
+    "kind": "castle",
+    "name": { "display": "Pons", "local": "Pons", "local_language": "ancien français" },
+    "lonlat": [-0.5567, 45.5814],
+    "weight": 12,
+    "owner": "fac_england",
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse au sud de la Charente relevant encore du duché d'Aquitaine anglais avant la confiscation de mai 1337.",
+    "sources": ["Pons (Charente-Maritime)"]
+  },
+  {
+    "id": "set_royan",
+    "province": "prov_saintonge",
+    "kind": "village",
+    "name": { "display": "Royan", "local": "Royan", "local_language": "ancien français" },
+    "lonlat": [-1.0281, 45.6280],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": true,
+    "description": "Bourg de pêcheurs à l'embouchure de la Gironde, point de mouillage pour la navigation côtière.",
+    "sources": ["Royan"]
+  },
+  {
+    "id": "set_fontdouce",
+    "province": "prov_saintonge",
+    "kind": "abbey",
+    "name": { "display": "Fontdouce", "local": "Fontdouce", "local_language": "ancien français" },
+    "lonlat": [-0.5219, 45.7742],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1111 près de Saintes.",
+    "sources": ["Abbaye de Fontdouce"]
+  }
+]

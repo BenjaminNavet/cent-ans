@@ -1,0 +1,142 @@
+[
+  {
+    "id": "set_carmarthen",
+    "province": "prov_deheubarth",
+    "kind": "city",
+    "name": {
+      "display": "Carmarthen",
+      "local": "Caerfyrddin",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.306,
+      51.858
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Carmarthen et Cardigan (principauté) et seigneuries des Marches : Glamorgan (Despenser), Pembroke (Hastings), Brecon (Bohun). Archers du sud du pays de Galles au service du roi.",
+    "sources": [
+      "Deheubarth",
+      "Marches galloises",
+      "Glamorgan"
+    ]
+  },
+  {
+    "id": "set_cardiff",
+    "province": "prov_deheubarth",
+    "kind": "town",
+    "name": {
+      "display": "Cardiff",
+      "local": "Caerdyf",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -3.1791,
+      51.4816
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Chef-lieu de la seigneurie marchère de Glamorgan, tenue par les Despenser, avec son grand château.",
+    "sources": [
+      "Cardiff"
+    ]
+  },
+  {
+    "id": "set_pembroke",
+    "province": "prov_deheubarth",
+    "kind": "castle",
+    "name": {
+      "display": "Pembroke",
+      "local": "Penfro",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.9142,
+      51.6767
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Puissant château de l'Earldom de Pembroke, verrou du sud-ouest gallois.",
+    "sources": [
+      "Château de Pembroke"
+    ]
+  },
+  {
+    "id": "set_haverfordwest",
+    "province": "prov_deheubarth",
+    "kind": "town",
+    "name": {
+      "display": "Haverfordwest",
+      "local": "Hwlffordd",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.97,
+      51.8022
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg peuplé de colons flamands et anglais, centre de la « petite Angleterre au-delà du Galles ».",
+    "sources": [
+      "Haverfordwest"
+    ]
+  },
+  {
+    "id": "set_whitland",
+    "province": "prov_deheubarth",
+    "kind": "abbey",
+    "name": {
+      "display": "Whitland",
+      "local": "Ty Gwyn",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.6067,
+      51.8347
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne mère de toutes les maisons cisterciennes galloises.",
+    "sources": [
+      "Abbaye de Whitland"
+    ]
+  }
+]

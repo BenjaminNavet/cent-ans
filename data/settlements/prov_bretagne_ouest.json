@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_quimper",
+    "province": "prov_bretagne_ouest",
+    "kind": "city",
+    "name": { "display": "Quimper", "local": "Kemper", "local_language": "breton" },
+    "lonlat": [-4.0970, 47.9960],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_abbey", "bld_cathedral", "bld_palisade", "bld_muster_field"],
+    "port": true,
+    "description": "Cité épiscopale de Cornouaille au confluent de l'Odet et du Steir.",
+    "sources": ["Quimper"]
+  },
+  {
+    "id": "set_brest",
+    "province": "prov_bretagne_ouest",
+    "kind": "town",
+    "name": { "display": "Brest", "local": "Brest", "local_language": "breton" },
+    "lonlat": [-4.4860, 48.3904],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Château et port au fond de la rade, place forte qui deviendra un bastion montfortiste pendant la guerre de Succession de Bretagne.",
+    "sources": ["Brest", "Guerre de Succession de Bretagne"]
+  },
+  {
+    "id": "set_hennebont",
+    "province": "prov_bretagne_ouest",
+    "kind": "town",
+    "name": { "display": "Hennebont", "local": "Henbont", "local_language": "breton" },
+    "lonlat": [-3.2833, 47.8083],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur le Blavet, future place forte de Jeanne de Montfort.",
+    "sources": ["Hennebont"]
+  },
+  {
+    "id": "set_suscinio",
+    "province": "prov_bretagne_ouest",
+    "kind": "castle",
+    "name": { "display": "Suscinio", "local": "Susinioù", "local_language": "breton" },
+    "lonlat": [-2.7500, 47.5167],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château ducal de chasse sur la presqu'île de Rhuys.",
+    "sources": ["Château de Suscinio"]
+  },
+  {
+    "id": "set_locronan",
+    "province": "prov_bretagne_ouest",
+    "kind": "village",
+    "name": { "display": "Locronan", "local": "Lokorn", "local_language": "breton" },
+    "lonlat": [-4.2000, 48.1000],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Village de tisserands autour du culte de saint Ronan.",
+    "sources": ["Locronan"]
+  }
+]

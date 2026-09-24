@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_lille",
+    "province": "prov_flandre_wallonne",
+    "kind": "city",
+    "name": {
+      "display": "Lille",
+      "local": "Lille",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0573,
+      50.6292
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Lille, Douai et Orchies, détachées du comté de Flandre et rattachées au domaine royal par le traité d'Athis (1305) et le transport de Flandre (1312).",
+    "sources": [
+      "Transport de Flandre",
+      "Lille",
+      "Douai"
+    ]
+  },
+  {
+    "id": "set_douai",
+    "province": "prov_flandre_wallonne",
+    "kind": "town",
+    "name": {
+      "display": "Douai",
+      "local": "Douai",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0793,
+      50.3714
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville drapière de la Flandre gallicante, administrée directement pour le compte du comte.",
+    "sources": [
+      "Douai"
+    ]
+  },
+  {
+    "id": "set_orchies",
+    "province": "prov_flandre_wallonne",
+    "kind": "village",
+    "name": {
+      "display": "Orchies",
+      "local": "Orchies",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.2461,
+      50.4667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petit bourg drapier de la châtellenie de Lille-Douai-Orchies.",
+    "sources": [
+      "Orchies"
+    ]
+  },
+  {
+    "id": "set_marchiennes",
+    "province": "prov_flandre_wallonne",
+    "kind": "abbey",
+    "name": {
+      "display": "Marchiennes",
+      "local": "Marchiennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.2667,
+      50.4333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine sur la Scarpe, l'une des plus anciennes de la région.",
+    "sources": [
+      "Abbaye de Marchiennes"
+    ]
+  }
+]

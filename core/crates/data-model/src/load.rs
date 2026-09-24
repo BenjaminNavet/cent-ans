@@ -19,12 +19,13 @@ use crate::entities::province::Province;
 use crate::entities::r#trait::Trait;
 use crate::entities::religion::Religion;
 use crate::entities::resource::Resource;
+use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
     BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
-    ReligionId, ResourceId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -49,6 +50,12 @@ pub mod folders {
     pub const DIETS: &str = "diets";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
+    /// Settlements, one file per province (lot C1); optional folder.
+    pub const SETTLEMENTS: &str = "settlements";
+    /// Tuning of the settlement rules, inside `settlements/`; optional.
+    pub const SETTLEMENT_RULES: &str = "rules.json";
+    /// Settlement movement graph, inside `map/`; optional.
+    pub const SETTLEMENT_GRAPH: &str = "settlement_graph.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -158,6 +165,16 @@ pub struct GameData {
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
     pub province_geometry: BTreeMap<ProvinceId, ProvinceGeometry>,
+    /// Every settlement (lot C1): read from `data/settlements/<province>.json`,
+    /// plus one city generated from `capital_city` for each province without
+    /// a file (or without a `city` entry).
+    pub settlements: BTreeMap<SettlementId, Settlement>,
+    /// Settlement ids of each province, the `city` first then file order.
+    pub settlements_by_province: BTreeMap<ProvinceId, Vec<SettlementId>>,
+    /// `data/settlements/rules.json`, absent until written.
+    pub settlement_rules: Option<SettlementRules>,
+    /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
+    pub settlement_graph: Vec<SettlementEdge>,
 }
 
 impl GameData {
@@ -187,6 +204,10 @@ impl GameData {
             chivalric_orders: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
+            settlements: BTreeMap::new(),
+            settlements_by_province: BTreeMap::new(),
+            settlement_rules: None,
+            settlement_graph: Vec::new(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -205,6 +226,7 @@ impl GameData {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
+        data.load_settlements(root, &mut warnings)?;
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))
@@ -567,7 +589,7 @@ impl ReferenceChecker<'_> {
 }
 
 /// Reads and deserializes one JSON file.
-fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
+pub(crate) fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
     let text = fs::read_to_string(path).map_err(|source| DataError::Io {
         path: path.to_path_buf(),
         source,
@@ -579,7 +601,7 @@ fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
 }
 
 /// Lists `*.json` files directly under `dir`, sorted by path for determinism.
-fn list_json_files(dir: &Path) -> Result<Vec<PathBuf>, DataError> {
+pub(crate) fn list_json_files(dir: &Path) -> Result<Vec<PathBuf>, DataError> {
     let entries = fs::read_dir(dir).map_err(|source| DataError::Io {
         path: dir.to_path_buf(),
         source,
@@ -738,6 +760,55 @@ mod tests {
                 message: "unknown province prov_ile_de_france (map still partial)".into(),
             }]
         );
+    }
+
+    #[test]
+    fn province_without_settlement_file_gets_a_city() {
+        let fixture = Fixture::new("fallback-city");
+        let (data, _) = fixture.load().unwrap();
+        let normandie = ProvinceId::new("prov_normandie").unwrap();
+        let city = data.province_city(&normandie).expect("generated city");
+        assert_eq!(city.id.as_str(), "set_rouen");
+        assert_eq!(city.lonlat, [1.1, 49.44]);
+        assert_eq!(city.weight, 100);
+        assert!(city.port);
+        assert_eq!(city.buildings, data.provinces[&normandie].buildings);
+        assert_eq!(data.settlements.len(), 1);
+    }
+
+    #[test]
+    fn settlement_file_problems_are_warnings() {
+        let fixture = Fixture::new("settlement-warnings");
+        fs::create_dir_all(fixture.root.join(folders::SETTLEMENTS)).unwrap();
+        fixture.write(
+            folders::SETTLEMENTS,
+            "prov_normandie",
+            r#"[{"id":"set_caen","province":"prov_normandie","kind":"town","name":{"display":"Caen"},"lonlat":[-0.37,49.18],"weight":30,"owner":"fac_atlantis","fortification_level":2,"buildings":["bld_market","bld_unknown"]},
+               {"id":"set_caen","province":"prov_normandie","kind":"village","name":{"display":"Caen bis"},"lonlat":[-0.3,49.1],"weight":5,"fortification_level":0},
+               {"id":"set_x","province":"prov_atlantis","kind":"village","name":{"display":"X"},"lonlat":[0.0,49.0],"weight":5,"fortification_level":0}]"#,
+        );
+        let (data, warnings) = fixture.load().unwrap();
+        let normandie = ProvinceId::new("prov_normandie").unwrap();
+        let ids: Vec<_> = data
+            .province_settlements(&normandie)
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect();
+        assert_eq!(ids, ["set_rouen", "set_caen"], "generated city first");
+        let caen = &data.settlements["set_caen"];
+        assert_eq!(caen.owner, None);
+        assert_eq!(caen.buildings, [BuildingId::new("bld_market").unwrap()]);
+        let fields: Vec<_> = warnings
+            .iter()
+            .filter(|w| w.entity.starts_with("settlements/") || w.entity == "prov_normandie")
+            .map(|w| w.field.as_str())
+            .collect();
+        for expected in ["owner", "buildings", "id", "province", "settlements"] {
+            assert!(
+                fields.contains(&expected),
+                "missing {expected} warning in {fields:?}"
+            );
+        }
     }
 
     #[test]

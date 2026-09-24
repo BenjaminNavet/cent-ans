@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_orleans",
+    "province": "prov_orleanais",
+    "kind": "city",
+    "name": { "display": "Orléans", "local": "Orliens", "local_language": "ancien français" },
+    "lonlat": [1.9039, 47.9029],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Grande ville de la Loire, domaine royal, carrefour commercial entre le Nord et le Midi.",
+    "sources": ["Orléans"]
+  },
+  {
+    "id": "set_blois",
+    "province": "prov_orleanais",
+    "kind": "town",
+    "name": { "display": "Blois", "local": "Bloys", "local_language": "ancien français" },
+    "lonlat": [1.3358, 47.5861],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du comté de Blois tenu par Guy Ier de Châtillon, père de Charles de Blois.",
+    "sources": ["Blois", "Comté de Blois"]
+  },
+  {
+    "id": "set_sully_sur_loire",
+    "province": "prov_orleanais",
+    "kind": "castle",
+    "name": { "display": "Sully-sur-Loire", "local": "Sully", "local_language": "ancien français" },
+    "lonlat": [2.3733, 47.7658],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château fort sur la Loire, verrouillant un passage vers la Sologne.",
+    "sources": ["Château de Sully-sur-Loire"]
+  },
+  {
+    "id": "set_fleury",
+    "province": "prov_orleanais",
+    "kind": "abbey",
+    "name": { "display": "Saint-Benoît-sur-Loire", "local": "Fleury", "local_language": "ancien français" },
+    "lonlat": [2.3097, 47.7967],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye de Fleury, dépositaire des reliques de saint Benoît, l'un des grands foyers intellectuels du royaume.",
+    "sources": ["Abbaye de Fleury"]
+  },
+  {
+    "id": "set_clery_saint_andre",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": { "display": "Cléry-Saint-André", "local": "Clery", "local_language": "ancien français" },
+    "lonlat": [1.7500, 47.8167],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Bourg de pèlerinage marial en Sologne, non fortifié.",
+    "sources": ["Cléry-Saint-André"]
+  }
+]

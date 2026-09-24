@@ -1,0 +1,140 @@
+[
+  {
+    "id": "set_chichester",
+    "province": "prov_sussex",
+    "kind": "city",
+    "name": {
+      "display": "Chichester",
+      "local": "Chichestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.7792,
+      50.8365
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Sussex (rapes de Lewes, Arundel, Pevensey) et Surrey : forêt du Weald, forges, Cinque Ports de Hastings, Rye et Winchelsea. Comte d'Arundel Richard FitzAlan.",
+    "sources": [
+      "Sussex",
+      "Weald",
+      "Cinque Ports"
+    ]
+  },
+  {
+    "id": "set_hastings",
+    "province": "prov_sussex",
+    "kind": "town",
+    "name": {
+      "display": "Hastings",
+      "local": "Hastinges",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.5734,
+      50.8552
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port des Cinque Ports, célèbre depuis la bataille de 1066, dont le havre commence à s'ensabler.",
+    "sources": [
+      "Hastings"
+    ]
+  },
+  {
+    "id": "set_winchelsea",
+    "province": "prov_sussex",
+    "kind": "town",
+    "name": {
+      "display": "Winchelsea",
+      "local": "Wynchelse",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.7061,
+      50.928
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville neuve des Cinque Ports reconstruite sur un plan en damier après la submersion de l'ancienne cité en 1287.",
+    "sources": [
+      "Winchelsea"
+    ]
+  },
+  {
+    "id": "set_rye",
+    "province": "prov_sussex",
+    "kind": "village",
+    "name": {
+      "display": "Rye",
+      "local": "La Rye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.7297,
+      50.949
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port des « Antient Towns » rattaché aux Cinque Ports.",
+    "sources": [
+      "Rye (East Sussex)"
+    ]
+  },
+  {
+    "id": "set_lewes",
+    "province": "prov_sussex",
+    "kind": "castle",
+    "name": {
+      "display": "Lewes",
+      "local": "Lewes",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.0117,
+      50.8721
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Château normand à motte double, siège des comtes de Warenne.",
+    "sources": [
+      "Château de Lewes"
+    ]
+  }
+]

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_oxford",
+    "province": "prov_oxford",
+    "kind": "city",
+    "name": {
+      "display": "Oxford",
+      "local": "Oxenford",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.2577,
+      51.752
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts",
+      "bld_university"
+    ],
+    "port": false,
+    "description": "Oxfordshire, Buckinghamshire, Bedfordshire, Northamptonshire : université d'Oxford, laine des Cotswolds, château de Windsor. Ancienne Mercie méridionale.",
+    "sources": [
+      "Oxford",
+      "Université d'Oxford",
+      "Cotswolds"
+    ]
+  },
+  {
+    "id": "set_banbury",
+    "province": "prov_oxford",
+    "kind": "town",
+    "name": {
+      "display": "Banbury",
+      "local": "Banesberie",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.34,
+      52.0629
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bourg marchand tenu par l'évêque de Lincoln.",
+    "sources": [
+      "Banbury"
+    ]
+  },
+  {
+    "id": "set_wallingford",
+    "province": "prov_oxford",
+    "kind": "castle",
+    "name": {
+      "display": "Wallingford",
+      "local": "Waelingaford",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.1258,
+      51.5992
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "L'un des plus grands châteaux royaux d'Angleterre, gardant un gué stratégique de la Tamise.",
+    "sources": [
+      "Château de Wallingford"
+    ]
+  },
+  {
+    "id": "set_abingdon",
+    "province": "prov_oxford",
+    "kind": "abbey",
+    "name": {
+      "display": "Abingdon",
+      "local": "Abbandune",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.2778,
+      51.6708
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Riche abbaye bénédictine sur la Tamise.",
+    "sources": [
+      "Abbaye d'Abingdon"
+    ]
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_chambery",
+    "province": "prov_savoie",
+    "kind": "city",
+    "name": { "display": "Chambéry", "local": "Chambèri", "local_language": "franco-provençal" },
+    "lonlat": [5.9178, 45.5646],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté de Savoie, résidence d'Aymon le Pacifique, en guerre contre le Dauphin.",
+    "sources": ["Chambéry", "Comté de Savoie"]
+  },
+  {
+    "id": "set_annecy",
+    "province": "prov_savoie",
+    "kind": "town",
+    "name": { "display": "Annecy", "local": "Anci", "local_language": "franco-provençal" },
+    "lonlat": [6.1294, 45.8992],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du Genevois, sur son lac, dépendante des comtes de Genève puis de Savoie.",
+    "sources": ["Annecy", "Comté de Genève"]
+  },
+  {
+    "id": "set_montmelian",
+    "province": "prov_savoie",
+    "kind": "castle",
+    "name": { "display": "Montmélian", "local": "Montmelian", "local_language": "franco-provençal" },
+    "lonlat": [6.0500, 45.5000],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Rocher fortifié verrouillant la vallée de l'Isère, clé militaire de la Savoie.",
+    "sources": ["Montmélian"]
+  },
+  {
+    "id": "set_hautecombe",
+    "province": "prov_savoie",
+    "kind": "abbey",
+    "name": { "display": "Hautecombe", "local": "Autacomba", "local_language": "franco-provençal" },
+    "lonlat": [5.8167, 45.7167],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye cistercienne au bord du lac du Bourget, nécropole de la maison de Savoie.",
+    "sources": ["Abbaye de Hautecombe"]
+  },
+  {
+    "id": "set_beaufort",
+    "province": "prov_savoie",
+    "kind": "village",
+    "name": { "display": "Beaufort", "local": "Biôfôrt", "local_language": "franco-provençal" },
+    "lonlat": [6.5667, 45.7167],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Village d'estive du Beaufortain, aux confins de la Tarentaise.",
+    "sources": ["Beaufort (Savoie)"]
+  }
+]
