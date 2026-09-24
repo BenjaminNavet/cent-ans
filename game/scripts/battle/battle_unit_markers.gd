@@ -411,23 +411,45 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 	canvas.draw_set_transform(Vector2.ZERO)
 
 
+## B7 : nom d'une troupe seule ; B8 : infobulle détaillée d'un groupe (une ligne par régiment :
+## nom, effectif, moral) au lieu du seul décompte global.
 func _draw_name(entry: Dictionary) -> void:
 	var unit: Dictionary = entry["unit"]
 	var rect: Rect2 = entry["rect"]
 	var font := get_theme_default_font()
 	var size := 13
-	var text := "%s — %d" % [str(unit["name"]), int(unit["soldiers"])]
 	var members: Array = entry["units"]
-	if members.size() > 1:
-		var total := 0
-		for member in members:
-			total += int(member["soldiers"])
-		text = "%d régiments — %d hommes" % [members.size(), total]
-	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-	var box := Rect2(rect.get_center().x - width * 0.5 - 5.0, rect.position.y - 22.0, width + 10.0, 18.0)
+	if members.size() <= 1:
+		var text := "%s — %d" % [str(unit["name"]), int(unit["soldiers"])]
+		var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		var box := Rect2(rect.get_center().x - width * 0.5 - 5.0, rect.position.y - 22.0, width + 10.0, 18.0)
+		draw_rect(box, Color(PARCHMENT, 0.95))
+		draw_rect(box, INK, false, 1.0)
+		draw_string(font, box.position + Vector2(5, 14), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, INK)
+		return
+	# Groupe : en-tête (total) puis une ligne par régiment, plafonné pour rester lisible.
+	const MAX_LINES := 8
+	var total := 0
+	for member in members:
+		total += int(member["soldiers"])
+	var lines: Array[String] = ["%d régiments — %d hommes" % [members.size(), total]]
+	for i in mini(members.size(), MAX_LINES):
+		var member: Dictionary = members[i]
+		lines.append("%s — %d (moral %d%%)" % [str(member["name"]), int(member["soldiers"]), int(roundf(float(member["morale"])))])
+	if members.size() > MAX_LINES:
+		lines.append("… %d autres" % (members.size() - MAX_LINES))
+	var width := 0.0
+	for line in lines:
+		width = maxf(width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
+	var line_h := size + 5.0
+	var box := Rect2(rect.get_center().x - width * 0.5 - 5.0, rect.position.y - 8.0 - line_h * lines.size(), width + 10.0, line_h * lines.size() + 6.0)
 	draw_rect(box, Color(PARCHMENT, 0.95))
 	draw_rect(box, INK, false, 1.0)
-	draw_string(font, box.position + Vector2(5, 14), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, INK)
+	for i in lines.size():
+		var y := box.position.y + 14.0 + i * line_h
+		draw_string(font, Vector2(box.position.x + 5.0, y), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size, INK)
+		if i == 0 and lines.size() > 1:
+			draw_line(Vector2(box.position.x + 3.0, y + 4.0), Vector2(box.end.x - 3.0, y + 4.0), Color(INK, 0.4), 1.0)
 
 
 func _icon_for(unit: Dictionary) -> Texture2D:
