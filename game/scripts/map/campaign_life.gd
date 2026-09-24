@@ -20,6 +20,7 @@ var terroir: TerroirMask = null
 ## Niveau visuel appliqué par colonie (id → niveau), lot CV1 § 3.
 var levels: Dictionary = {}
 var effects: LifeEffects = null
+var ambient: LifeAmbient = null
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
 var forced_devastation: Dictionary = {}
@@ -59,6 +60,11 @@ func setup(map: Node) -> void:
 	effects.name = "Effects"
 	add_child(effects)
 	effects.setup(_settlements, _terrain)
+	ambient = LifeAmbient.new()
+	ambient.name = "Ambient"
+	add_child(ambient)
+	ambient.setup(_map_data, _terrain, _settlements.data if _settlements != null else null)
+	stats.merge(ambient.stats, true)
 
 
 func _parse_cmdline() -> void:
@@ -210,3 +216,7 @@ func update_view(camera_distance: float) -> void:
 	if effects != null:
 		effects.set_season(seasons.weights)
 		effects.update_view(_camera_distance, _tiers)
+	if ambient != null and _tiers != null:
+		var rig := _map.get("camera_rig") as Node3D if _map != null else null
+		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
+		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance), _tiers.medium_weight(_camera_distance))

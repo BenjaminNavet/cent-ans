@@ -35,7 +35,9 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 - [x] 4. Dévastation visible : brûlis du terrain (masque B), hameaux brûlés (C6) qui fument, villages
       et abbayes en ruine (surcouche de suie `life_overlay.gdshader`, fumée noire et braises),
       suie et incendies des faubourgs des villes assiégées ; `--devastate=<province>:<%>`
-- [ ] 5. Vie ambiante
+- [x] 5. Vie ambiante (`LifeAmbient`) : ombres de nuages (terrain), 8 vols d'oiseaux autour du point
+      visé, ≈ 90 bateaux sur les grands fleuves (Strahler ≥ 5), navires entre ports voisins (trajet
+      en mer), moulins à vent (lot 4)
 - [ ] Mesures FPS avant/après, captures par saison
 
 ## Mesures de référence (avant, `main` `93d466c`, machine chargée, charge ≈ 22)
@@ -48,4 +50,4 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## Prochaine étape
 
-Lot 5 : vie ambiante (oiseaux, bateaux), puis mesures FPS et captures finales.
+Mesures FPS avant/après, captures finales par saison, smoke.
