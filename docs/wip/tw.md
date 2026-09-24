@@ -14,19 +14,19 @@ Choix du joueur au lancement :
 |---|---|---|
 | 0 | P1 petits points cœur (no_quarter, étain, IA Normandie ouest) ; P2 rapport de saison + smoke ; R exploration TW | **fusionné** (P2 f48b557, P1 ae4ec92) |
 | 1 | B1 maillages soldats/chevaux (Blender) ; B2 bannières d'unité + vignettes + écran de fin ; C1 minicarte + brouillard | **fusionné** : B2 c0b9635, B1 ff592ae, C1 ee4f2b6 |
-| 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 en cours ; C2 en attente |
+| 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 terminé, non fusionné ; C2 en attente |
 | 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **terminé, NON fusionné** |
 
 ## État à l'arrêt de session (24/09 soir, arrêt demandé par le joueur)
 
 main poussé (40d748c). Fusionnés : P1, P2, B1, B2, B3, B5, C1.
 - **C3** (arbre familial dans la Cour + fiche TW avec arbre de compétences) : terminé, branche `worktree-agent-ab0ae4e048aaae5da` (5d75030), smoke vert dans sa branche (22 « smoke OK »). À fusionner.
-- **B4** (animations archer/cavalier/caparaçon/mêlée, poussière, flèches, fumée, rythme d'engagement) : **interrompu**, branche `worktree-agent-a3ef51586ad653fc2` (5 commits wip, d6ac581), worktree `.claude/worktrees/agent-a3ef51586ad653fc2` ; son état est dans `docs/wip/b4-effets-animations.md` de la branche.
+- **B4** (animations, effets, rythme d'engagement) : **terminé sauf mesure de perf, NON fusionné**. Branche `worktree-agent-a3ef51586ad653fc2` (7b70c6a), worktree `.claude/worktrees/agent-a3ef51586ad653fc2`. Contact de la démo à 70 s au lieu de 301 s (IA `sim-battle/src/ai.rs` : duel d'archers perdu → marche au contact) ; archer/arbalétrier/cavalier/caparaçon/mêlée/chutes animés ; `battle_effects.gd` (poussière, flèches fichées, bombardes, choc de charge, pas de sang) ; captures `docs/img/b4/` ; cargo et smoke verts. Reste : banc de perf avec/sans `--no-effects` (commandes dans `docs/wip/b4-effets-animations.md` de la branche), éclaboussures de gué non vérifiées, fanions de lance restés verticaux quand la lance est couchée. Après fusion : `core/build.sh` puis `godot --headless --path game --import` (nouvelle classe `BattleEffects`).
 - **C2** : attend la fusion de C4 colonies.
 
 ## Reprise
 1. Fusionner C3 : dans `../gp-tw-merge` (`integration/tw`) : `git merge main`, `git merge --no-ff worktree-agent-ab0ae4e048aaae5da`, clippy + `cargo test`, `core/build.sh`, `godot --headless --path game --import`, smoke (compter 22 « smoke OK ») ; puis dans main `git merge --ff-only integration/tw` + push.
-2. Relancer un agent `cent-ans-dev` sur la branche B4 avec son wip pour finir, puis fusionner de même.
+2. Fusionner B4 de même (conflits possibles avec C3/B5 dans `battle_scene.gd` et `smoke.gd`), puis mesurer la perf (banc avec/sans `--no-effects`).
 3. Si C4 colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle + aire atteignable colorée).
 4. Suite du plan : C4 édits/chaînes de bâtiments (après colonies), C5 routes commerciales, C6 agents Medieval II.
 5. Pistes relevées par les lots :
