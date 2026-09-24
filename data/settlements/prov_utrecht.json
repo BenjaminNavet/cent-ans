@@ -1,0 +1,87 @@
+[
+  {
+    "id": "set_utrecht",
+    "province": "prov_utrecht",
+    "kind": "city",
+    "name": {
+      "display": "Utrecht",
+      "local": "Utrecht",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.1214,
+      52.0907
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Principauté épiscopale d'Utrecht (Nedersticht et Oversticht : Deventer, Zwolle, Kampen), évêque Jean III de Diest (1322-1340). Villes de l'IJssel liées à la Hanse.",
+    "sources": [
+      "Principauté épiscopale d'Utrecht",
+      "Utrecht"
+    ]
+  },
+  {
+    "id": "set_amersfoort",
+    "province": "prov_utrecht",
+    "kind": "town",
+    "name": {
+      "display": "Amersfoort",
+      "local": "Amersfoert",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.3878,
+      52.1561
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande sur l'Eem, l'une des principales villes de la principauté épiscopale d'Utrecht.",
+    "sources": [
+      "Amersfoort"
+    ]
+  },
+  {
+    "id": "set_marienweerd",
+    "province": "prov_utrecht",
+    "kind": "abbey",
+    "name": {
+      "display": "Mariënweerd",
+      "local": "Marienweerde",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.2833,
+      51.9
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne sur un îlot du Linge, riche propriétaire terrienne des Pays-Bas centraux.",
+    "sources": [
+      "Mariënweerd"
+    ]
+  }
+]

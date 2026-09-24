@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_exeter",
+    "province": "prov_devon",
+    "kind": "city",
+    "name": {
+      "display": "Exeter",
+      "local": "Excestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.5339,
+      50.7184
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d'embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset.",
+    "sources": [
+      "Devon",
+      "Somerset",
+      "Exeter"
+    ]
+  },
+  {
+    "id": "set_plymouth",
+    "province": "prov_devon",
+    "kind": "town",
+    "name": {
+      "display": "Plymouth",
+      "local": "Plymmouth",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -4.1427,
+      50.3755
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port en plein essor sur la côte sud du Devon, point de rassemblement des flottes vers la Gascogne.",
+    "sources": [
+      "Plymouth"
+    ]
+  },
+  {
+    "id": "set_dartmouth",
+    "province": "prov_devon",
+    "kind": "town",
+    "name": {
+      "display": "Dartmouth",
+      "local": "Dertemuthe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.5773,
+      50.351
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port abrité à l'embouchure de la Dart, base de corsaires et d'armateurs.",
+    "sources": [
+      "Dartmouth (Devon)"
+    ]
+  },
+  {
+    "id": "set_buckfast",
+    "province": "prov_devon",
+    "kind": "abbey",
+    "name": {
+      "display": "Buckfast",
+      "local": "Buckfestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.7797,
+      50.49
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne du Dartmoor.",
+    "sources": [
+      "Abbaye de Buckfast"
+    ]
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "set_liege",
+    "province": "prov_liege",
+    "kind": "city",
+    "name": {
+      "display": "Liège",
+      "local": "Liège",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.5797,
+      50.6326
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Principauté épiscopale de Liège, évêque Adolphe de La Marck, allié de la France. Houillères et forges de la Meuse, Huy, Dinant (dinanderie).",
+    "sources": [
+      "Principauté de Liège",
+      "Adolphe de La Marck",
+      "Liège"
+    ]
+  },
+  {
+    "id": "set_huy",
+    "province": "prov_liege",
+    "kind": "town",
+    "name": {
+      "display": "Huy",
+      "local": "Huy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.2378,
+      50.5186
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne cité mosane, l'une des « bonnes villes » de la principauté épiscopale de Liège.",
+    "sources": [
+      "Huy"
+    ]
+  },
+  {
+    "id": "set_stavelot",
+    "province": "prov_liege",
+    "kind": "abbey",
+    "name": {
+      "display": "Stavelot",
+      "local": "Stavelot",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.9319,
+      50.3969
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye-principauté bénédictine quasi indépendante des Ardennes.",
+    "sources": [
+      "Abbaye de Stavelot-Malmedy"
+    ]
+  },
+  {
+    "id": "set_franchimont",
+    "province": "prov_liege",
+    "kind": "castle",
+    "name": {
+      "display": "Franchimont",
+      "local": "Franchimont",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.8167,
+      50.5333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse épiscopale liégeoise gardant l'approche des Ardennes.",
+    "sources": [
+      "Château de Franchimont"
+    ]
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_namur",
+    "province": "prov_namur",
+    "kind": "city",
+    "name": {
+      "display": "Namur",
+      "local": "Namur",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.8673,
+      50.4669
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté de Namur tenu par Philippe III, de la maison de Dampierre, cousin du comte de Flandre ; il périt à Famagouste en 1337 et son frère Guillaume Ier le Riche lui succède. Carrières de pierre bleue.",
+    "sources": [
+      "Comté de Namur",
+      "Namur"
+    ]
+  },
+  {
+    "id": "set_dinant",
+    "province": "prov_namur",
+    "kind": "town",
+    "name": {
+      "display": "Dinant",
+      "local": "Dinant",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.9114,
+      50.2603
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Cité mosane réputée pour son travail du cuivre et du laiton (la dinanderie).",
+    "sources": [
+      "Dinant"
+    ]
+  },
+  {
+    "id": "set_floreffe",
+    "province": "prov_namur",
+    "kind": "abbey",
+    "name": {
+      "display": "Floreffe",
+      "local": "Floreffe",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.7514,
+      50.4344
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye de chanoines prémontrés sur la Sambre.",
+    "sources": [
+      "Abbaye de Floreffe"
+    ]
+  }
+]
