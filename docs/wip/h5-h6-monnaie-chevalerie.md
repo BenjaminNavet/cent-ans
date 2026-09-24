@@ -14,10 +14,10 @@ Branche : `worktree-agent-a5c437f998e41d92b`.
 4. [x] H6 ordres : `data/chivalric_orders/*.json` + schéma, fondation, membres, effets, effet
    d'événement `found_chivalric_order` (event_check), Jarretière/Étoile, malus d'effondrement.
 5. [x] Pont Godot (`campaign_sim_coinage.rs` ou équivalent) + `docs/design/h5-h6-api.md`.
-6. [ ] Tests `sim-campaign/tests/h5_h6.rs`, fmt/clippy/test, pytest, build, import, smoke.
+6. [x] Tests `sim-campaign/tests/h5_h6.rs`, fmt/clippy/test, pytest, build, import, smoke.
 
 ## État
-Règles, données, pont, doc API et tests h5_h6.rs (18 tests) faits. Reste : batterie complète (fmt, clippy, test, pytest, build, import, smoke).
+Terminé : fmt, clippy, cargo test (30 suites), pytest (87), build, import et smoke Godot OK.
 
 ## Prochaine étape
-Batterie complète, correctifs, commit final.
+Vague UI : panneaux Monnaie, Captifs, Ordre de chevalerie ; genres coinage/ransom/chivalry dans season_report.gd ; fiches codex cdx_mutations_monetaires, cdx_franc_a_cheval, cdx_rancon, cdx_toison_or, cdx_chevalerie, cdx_ordre_de_la_jarretiere, cdx_ordre_de_l_etoile.
