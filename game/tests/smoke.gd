@@ -729,6 +729,7 @@ func _run_battle() -> void:
 	_check(drawn > 0, "battle scene: no soldier instances")
 	await _check_battle_deployment_f5c(scene)  # F5c
 	_check_battle_hud_f5b(scene)
+	_check_battle_markers_b2(scene)
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
 	for unit in scene.units:
@@ -744,8 +745,20 @@ func _run_battle() -> void:
 			break
 	await process_frame
 	await process_frame
-	_check(scene.finished_shown and scene.hud.end_panel.visible, "battle scene: end screen should be visible")
-	scene._on_return()
+	_check(scene.finished_shown and scene.result_screen != null and scene.result_screen.visible, "battle scene: end screen should be visible")
+	if scene.result_screen != null:
+		var screen: BattleResultScreen = scene.result_screen
+		_check(screen.title_label.text.begins_with("Victoire") or screen.title_label.text.begins_with("Défaite"), "battle result: verdict title is %s" % screen.title_label.text)
+		var regiments := 0
+		for unit in scene.units:
+			if not bool(unit.get("synthetic", false)):
+				regiments += 1
+		_check(screen.row_count() == regiments, "battle result: %d loss rows for %d regiments" % [screen.row_count(), regiments])
+		_check(screen.mentions_box.get_child_count() > 0, "battle result: no notable mentions")
+		_check(BattleResultScreen.verdict(true, 0.1, 0.7) == "Victoire décisive" and BattleResultScreen.verdict(false, 0.8, 0.1) == "Défaite écrasante", "battle result: verdict thresholds")
+		screen.return_button.emit_signal("pressed")  # « Retour à la campagne »
+	else:
+		scene._on_return()
 	await process_frame
 	_check(map.visible and map.process_mode == Node.PROCESS_MODE_INHERIT, "battle: campaign map should be back after the battle")
 	_check((map.sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be resolved after « Retour à la campagne »")
@@ -787,6 +800,49 @@ func _check_battle_hud_f5b(scene: BattleScene) -> void:
 	_check(hud.active_speed() == 1 and not scene.paused, "battle HUD: ×2 speed button not active")
 	scene._on_speed_pressed(0)
 	_check(hud.help_panel != null and not hud.help_panel.visible, "battle HUD: F1 help should start hidden")
+
+
+## B2 : bannières flottantes (un repère par régiment présent à l'écran, clic = sélection, touche
+## de masquage) et cartes-vignettes (effectif, infobulle riche).
+func _check_battle_markers_b2(scene: BattleScene) -> void:
+	var markers: BattleUnitMarkers = scene.markers
+	if not _check(markers != null and markers.is_inside_tree(), "battle markers: missing"):
+		return
+	scene._refresh_view(true)
+	_check(markers.marker_count() > 0, "battle markers: no floating banner drawn")
+	var own := -1
+	for unit in scene.units:
+		var id := int(unit["id"])
+		if str(unit["side"]) == scene.player_side and markers.marker_rect(id).size.x > 0.0 and markers.marker_at(markers.marker_rect(id).get_center()) == id:
+			own = id
+			break
+	if _check(own >= 0, "battle markers: no clickable banner for the player's regiments"):
+		var rect := markers.marker_rect(own)
+		_check(markers._has_point(rect.get_center()) and not markers._has_point(Vector2(-50, -50)), "battle markers: hit test")
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		click.position = rect.get_center()
+		scene.selected.clear()
+		markers._gui_input(click)
+		_check(scene.selected.size() == 1 and scene.selected[0] == own, "battle markers: clicking a banner should select its regiment (got %s)" % [scene.selected])
+	# Pas de chevauchement entre repères.
+	var ids := markers._placed.keys()
+	var overlaps := 0
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			if markers.marker_rect(ids[i]).intersects(markers.marker_rect(ids[j])):
+				overlaps += 1
+	_check(overlaps <= ids.size() / 4, "battle markers: %d overlapping banners out of %d" % [overlaps, ids.size()])
+	markers.toggle()
+	scene._refresh_view(true)
+	_check(not markers.visible and markers.marker_count() == 0, "battle markers: toggle should hide the banners")
+	markers.toggle()
+	scene._refresh_view(true)
+	_check(markers.marker_count() > 0, "battle markers: toggle should show the banners again")
+	var card: UnitCard = scene.hud._cards.values()[0]
+	_check(card.custom_minimum_size.y >= 80.0 and card.art != null, "battle cards: thumbnail card expected")
+	_check(card.tooltip_text.contains("État"), "battle cards: rich tooltip should carry the state")
 
 
 func _run_chronicle() -> void:

@@ -21,6 +21,7 @@ const TIP := 7.0  # pointe vers la troupe
 const HEIGHT := PLAQUE + 2.0 + BAR_H + 1.0 + MORALE_H + TIP
 const GAP := 2.0
 ## Décalages essayés, en largeurs / hauteurs de repère, quand un repère en chevauche un autre.
+const MAX_STACK := 16
 const NUDGES := [Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0), Vector2(1, -1), Vector2(-1, -1), Vector2(0, -2), Vector2(2, 0), Vector2(-2, 0)]
 const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.78)
@@ -73,11 +74,19 @@ func update(units: Array, anchors: Dictionary, selected: Array) -> void:
 		var base := Rect2(anchor.x - WIDTH * 0.5, anchor.y - HEIGHT, WIDTH, HEIGHT)
 		var rect := base
 		if _overlaps(base, rects):
+			var placed := false
 			for nudge in NUDGES:
 				var candidate := Rect2(base.position + Vector2(nudge.x * (WIDTH + 14.0 + GAP), nudge.y * (HEIGHT + GAP)), base.size)
 				if not _overlaps(candidate, rects):
 					rect = candidate
+					placed = true
 					break
+			# Foule (vue très éloignée) : on empile au-dessus jusqu'à une place libre.
+			var level := 3
+			while not placed and level < MAX_STACK:
+				rect = Rect2(base.position - Vector2(0, level * (HEIGHT + GAP)), base.size)
+				placed = not _overlaps(rect, rects)
+				level += 1
 		rects.append(rect)
 		_placed[entry[0]] = {"rect": rect, "anchor": anchor, "unit": entry[2]}
 		_order.append(entry[0])
@@ -147,6 +156,14 @@ func toggle() -> void:
 
 func _draw() -> void:
 	var blink := fmod(Time.get_ticks_msec() / 1000.0, 0.6) < 0.3
+	# Traits de rappel des repères décalés d'abord, sous toutes les plaques.
+	for id in _order:
+		var rect: Rect2 = _placed[id]["rect"]
+		var anchor: Vector2 = _placed[id]["anchor"]
+		var tip_point := Vector2(rect.get_center().x, rect.end.y)
+		if tip_point.distance_to(anchor) > 1.0:
+			draw_line(tip_point, anchor, Color(INK, 0.7), 1.0)
+			draw_circle(anchor, 2.0, Color(INK, 0.7))
 	for id in _order:
 		_draw_marker(id, _placed[id], blink)
 	var focus := hovered if hovered >= 0 else world_hover
@@ -157,7 +174,6 @@ func _draw() -> void:
 func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var unit: Dictionary = entry["unit"]
 	var rect: Rect2 = entry["rect"]
-	var anchor: Vector2 = entry["anchor"]
 	var side := str(unit["side"])
 	var color: Color = side_colors.get(side, Color.GRAY)
 	var state := str(unit["state"])
@@ -170,10 +186,6 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var plaque := Rect2(rect.position, Vector2(WIDTH, PLAQUE))
 	# Trait de rappel quand le repère a été dépilé.
 	var tip_y := rect.end.y
-	var tip_point := Vector2(rect.get_center().x, tip_y)
-	if tip_point.distance_to(anchor) > 1.0:
-		draw_line(tip_point, anchor, Color(INK, 0.7), 1.0)
-		draw_circle(anchor, 2.0, Color(INK, 0.7))
 	# Pointe vers la troupe.
 	var tip := PackedVector2Array([
 		Vector2(rect.position.x + WIDTH * 0.5 - 6.0, tip_y - TIP),
