@@ -1,0 +1,53 @@
+{
+  "id": "fac_holstein",
+  "name": {
+    "display": "Comtés de Holstein",
+    "local": "Grafschaft Holstein",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Holstein",
+  "adjective": "holsteinois",
+  "government": "county",
+  "playable": false,
+  "ruler": "chr_gerhard_iii_de_holstein",
+  "capital": "prov_holstein",
+  "capital_city": "Rendsbourg",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules à la feuille d'ortie d'argent.",
+    "description": "Feuille d'ortie des Schauenbourg, comtes de Holstein.",
+    "primary_color": "#B22222",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Comte de Holstein-Rendsbourg",
+    "Duc de Jutland (gagiste)"
+  ],
+  "treasury": 15000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_sweden",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 40,
+    "trade": 60,
+    "piety": 40
+  },
+  "description": "Le Danemark n'a plus de roi depuis 1332 : ses provinces sont engagées aux comtes de Holstein. Gérard le Grand tient le Jutland jusqu'à son assassinat en 1340, qui ouvre la voie à Valdemar IV.",
+  "sources": [
+    "Gérard III de Holstein-Rendsbourg",
+    "Interrègne danois (1332-1340)"
+  ]
+}

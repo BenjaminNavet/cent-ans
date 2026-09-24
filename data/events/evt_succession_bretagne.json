@@ -1,0 +1,105 @@
+{
+  "id": "evt_succession_bretagne",
+  "title": "La succession de Bretagne",
+  "text": "Le duc Jean III est mort sans fils. Sa nièce Jeanne de Penthièvre, épouse de Charles de Blois, neveu du roi de France, réclame le duché ; son demi-frère Jean de Montfort s'empare de Nantes et du trésor ducal, et fait hommage au roi d'Angleterre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341,
+      "season": "spring"
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_charles_de_blois"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_brittany"
+  },
+  "options": [
+    {
+      "text": "Reconnaître Charles de Blois (arrêt de Conflans)",
+      "effects": [
+        {
+          "type": "capture_character",
+          "id": "chr_jean_de_montfort",
+          "captor": "fac_france"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 15,
+          "reason": "Arrêt de Conflans"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_bretagne_ouest",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Montfort livré au roi de France"
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_hennebont",
+          "delay": 4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Suivre Jean de Montfort et l'Angleterre",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 20,
+          "reason": "Hommage de Montfort"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -25,
+          "reason": "Montfort rebelle"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_bretagne",
+          "amount": 10
+        },
+        {
+          "type": "claim",
+          "faction": "fac_england",
+          "kind": "throne",
+          "target": "fac_brittany"
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_hennebont",
+          "delay": 4
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1341-04-30"
+  },
+  "sources": [
+    "Guerre de Succession de Bretagne",
+    "Jean de Montfort",
+    "Charles de Blois",
+    "Michael Jones, Ducal Brittany 1364-1399, 1970"
+  ]
+}

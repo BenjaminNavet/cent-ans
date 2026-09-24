@@ -24,6 +24,8 @@ const DOUBLE_CLICK_MS := 350
 const PICK_RADIUS_PX := 26.0
 const BANNER_HEIGHT := 7.0
 const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
+## Barre des ordres du chef (F10b).
+const LEADER_ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
 
 var campaign_sim: Object = null
 var battle_index: int = -1
@@ -174,12 +176,13 @@ func begin() -> bool:
 	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
-	var title := ("Assaut de %s" if siege_view != null else "Bataille de %s") % str(setup.get("province_name", ""))
+	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
 	hud.add_events(battle.call("get_events"))
+	add_child(LEADER_ORDERS_BAR.new(self))
 	_refresh_view(true)
 	return true
 
@@ -833,3 +836,11 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("BattleScene: screenshot %s (%s)" % [path, error_string(err)])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
+
+
+## « de » élidé devant voyelle (« d'Île-de-France », « de Guyenne ») ; même règle que
+## `events::de` côté Rust.
+static func de(name: String) -> String:
+	if name != "" and "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(name[0]):
+		return "d'" + name
+	return "de " + name

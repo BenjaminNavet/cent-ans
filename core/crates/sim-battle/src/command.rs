@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::setup::SideId;
 use crate::unit::Formation;
 
 /// An order to one or more regiments. Serialised as
@@ -49,6 +50,17 @@ pub enum Command {
         units: Vec<u32>,
         piece: usize,
     },
+    /// A leader's order from `data/battle_orders/` (war cry, no quarter,
+    /// dismount, pavise, rally). `units` names the regiments of a
+    /// `selected`-scope order (every eligible one when empty); `side`
+    /// defaults to the issuing side, then to the side of the first unit.
+    LeaderOrder {
+        #[serde(default)]
+        side: Option<SideId>,
+        order: String,
+        #[serde(default)]
+        units: Vec<u32>,
+    },
 }
 
 fn default_true() -> bool {
@@ -64,7 +76,8 @@ impl Command {
             | Command::Formation { units, .. }
             | Command::FireAtWill { units, .. }
             | Command::Withdraw { units }
-            | Command::TargetWall { units, .. } => units,
+            | Command::TargetWall { units, .. }
+            | Command::LeaderOrder { units, .. } => units,
         }
     }
 }
@@ -78,13 +91,27 @@ pub enum CommandError {
     Unavailable(u32),
     UnknownTarget(u32),
     FriendlyTarget(u32),
-    InvalidFormation { unit: u32, formation: Formation },
+    InvalidFormation {
+        unit: u32,
+        formation: Formation,
+    },
     NoMissile(u32),
     OutsideField,
     Finished,
     NotASiege,
     UnknownPiece(usize),
     NotAnEngine(u32),
+    /// No such order in the battle's catalogue.
+    UnknownOrder(String),
+    /// The order cannot be given now (French reason: cooldown, no general...).
+    OrderUnavailable {
+        order: String,
+        reason: String,
+    },
+    /// The side giving a leader's order cannot be determined.
+    NoSide,
+    /// A leader's order for the other side.
+    WrongSide,
 }
 
 impl std::fmt::Display for CommandError {
@@ -111,6 +138,12 @@ impl std::fmt::Display for CommandError {
             CommandError::NotAnEngine(id) => {
                 write!(f, "l'unité {id} ne peut pas battre les murailles")
             }
+            CommandError::UnknownOrder(id) => write!(f, "ordre inconnu : {id}"),
+            CommandError::OrderUnavailable { order, reason } => {
+                write!(f, "« {order} » impossible : {reason}")
+            }
+            CommandError::NoSide => write!(f, "impossible de savoir quel camp donne cet ordre"),
+            CommandError::WrongSide => write!(f, "cet ordre ne concerne pas votre armée"),
         }
     }
 }

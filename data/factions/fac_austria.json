@@ -1,0 +1,60 @@
+{
+  "id": "fac_austria",
+  "name": {
+    "display": "Duché d'Autriche",
+    "local": "Herzogtum Österreich",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Autriche",
+  "adjective": "autrichien",
+  "government": "duchy",
+  "playable": false,
+  "ruler": "chr_albert_ii_d_autriche",
+  "capital": "prov_austria",
+  "capital_city": "Vienne",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules à la fasce d'argent.",
+    "description": "Armes des Babenberg reprises par les Habsbourg.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Duc d'Autriche",
+    "Duc de Styrie",
+    "Duc de Carinthie"
+  ],
+  "treasury": 22000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "peace",
+      "note": "Réconciliés avec Louis IV qui leur a donné la Carinthie (1335)."
+    },
+    {
+      "faction": "fac_swiss",
+      "status": "peace",
+      "note": "Les Habsbourg n'ont pas renoncé aux cantons perdus à Morgarten (1315)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 60
+  },
+  "description": "Puissance des Habsbourg sur le Danube : Autriche, Styrie, Carinthie. Albert II, paralysé, gouverne en sage avec son frère Otton.",
+  "sources": [
+    "Albert II d'Autriche",
+    "Maison de Habsbourg"
+  ]
+}

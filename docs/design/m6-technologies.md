@@ -55,3 +55,13 @@ buildings}`, `effects`, `historical_year`) ; `FactionState::technologies` contie
 ## 5. Critères de fin
 Tests Rust verts, smoke vert, capture relue, `docs/status.md`, `docs/roadmap.md`, `docs/godot-map.md`,
 `docs/design/data-model.md` à jour.
+
+## F1 (v2) — effets branchés
+`army_upkeep` (% sur l'entretien), `army_experience` (expérience initiale des recrues, avec les bâtiments),
+`recruit_cost` (global ou par famille), `movement` (allure de la famille la plus lente ; les engins de
+siège vont 20 % moins vite, l'artillerie de campagne compense), `production`, `siege_resistance` (positif :
+villes de la faction, négatif : villes qu'elle assiège ; réduit la brèche par tour, 0-80 %),
+`fortification_level` (+1 aux villes déjà fortifiées), `wealth` et effets par classe, `prestige` (le
+souverain gagne chaque hiver la somme des effets de prestige / 5, bâtiments et traits compris). Le surplus
+de points à l'achèvement reste dans `research_progress` et passe à la recherche suivante. Les traits et
+compétences `research_civil`/`research_military` du souverain s'appliquent à la branche en cours.

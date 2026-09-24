@@ -1,0 +1,68 @@
+{
+  "id": "fac_florence",
+  "name": {
+    "display": "République de Florence",
+    "local": "Repubblica fiorentina",
+    "local_language": "toscan"
+  },
+  "short_name": "Florence",
+  "adjective": "florentin",
+  "government": "republic",
+  "playable": false,
+  "capital": "prov_firenze",
+  "capital_city": "Florence",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "D'argent au lis florencé de gueules.",
+    "description": "Le giglio rouge des guelfes sur champ d'argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B22222"
+  },
+  "titles": [
+    "Seigneurie de Florence"
+  ],
+  "treasury": 40000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_double_entry",
+    "tech_letters_of_credit",
+    "tech_universities"
+  ],
+  "relations": [
+    {
+      "faction": "fac_verona",
+      "status": "war",
+      "since": {
+        "value": "1336-06-01"
+      },
+      "note": "Guerre pour Lucques contre Mastino II (1336-1339)."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "alliance",
+      "note": "Ligue contre les Scaliger (1336)."
+    },
+    {
+      "faction": "fac_england",
+      "status": "peace",
+      "note": "Les Bardi et les Peruzzi financent Édouard III ; sa banqueroute les ruinera (1343-1346)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 95,
+    "piety": 45
+  },
+  "description": "Commune guelfe gouvernée par la Seigneurie et les arts majeurs : laine de Calimala, florin d'or, compagnies bancaires des Bardi et des Peruzzi. Giotto élève le campanile en 1334.",
+  "sources": [
+    "République de Florence",
+    "Compagnie des Bardi"
+  ]
+}

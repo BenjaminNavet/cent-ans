@@ -1,0 +1,42 @@
+{
+  "id": "chr_jean_iii_de_brabant",
+  "name": {
+    "display": "Jean III de Brabant",
+    "local": "Jan III van Brabant",
+    "local_language": "moyen néerlandais"
+  },
+  "epithet": "le Triomphant",
+  "sex": "male",
+  "house": "Louvain",
+  "faction": "fac_brabant",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1355-12-05"
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 7
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_greedy"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_jeanne_de_brabant"
+    ]
+  },
+  "starting_location": "prov_brabant",
+  "status": "at_court",
+  "description": "Duc depuis 1312 ; vend son alliance à Édouard III (1337-1339) tout en ménageant Philippe VI.",
+  "sources": [
+    "Jean III de Brabant"
+  ]
+}

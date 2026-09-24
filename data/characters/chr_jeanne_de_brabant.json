@@ -1,0 +1,35 @@
+{
+  "id": "chr_jeanne_de_brabant",
+  "name": {
+    "display": "Jeanne de Brabant",
+    "local": "Johanna van Brabant",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "female",
+  "house": "Louvain",
+  "faction": "fac_brabant",
+  "role": "prince",
+  "birth": {
+    "value": "1322-06-24"
+  },
+  "death": {
+    "value": "1406-12-01"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [],
+  "piety": 50,
+  "family": {
+    "father": "chr_jean_iii_de_brabant"
+  },
+  "starting_location": "prov_brabant",
+  "status": "at_court",
+  "description": "Fille de Jean III ; héritière du duché après la mort de ses frères, elle le léguera aux Valois de Bourgogne.",
+  "sources": [
+    "Jeanne de Brabant"
+  ]
+}

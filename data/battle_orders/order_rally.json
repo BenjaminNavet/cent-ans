@@ -1,0 +1,23 @@
+{
+  "id": "order_rally",
+  "kind": "rally",
+  "rank": 2,
+  "name": "Rallier",
+  "description": "Le chef galope vers les fuyards, bannière haute, et tente de les ramener au combat ; la réussite dépend de son commandement. Ainsi Du Guesclin reformant ses hommes à Cocherel (1364).",
+  "icon": "rally",
+  "scope": "radius",
+  "requires_general": true,
+  "cooldown": 90.0,
+  "radius": 200.0,
+  "effects": {
+    "rally_chance": 0.25,
+    "rally_chance_per_command": 0.06,
+    "rally_morale": 45.0
+  },
+  "journal": "{general} rallie les {unit} !",
+  "journal_failure": "Les {unit} n'entendent pas l'appel de {general}.",
+  "ai": {
+    "min_units": 1
+  },
+  "sources": ["Bataille de Cocherel"]
+}

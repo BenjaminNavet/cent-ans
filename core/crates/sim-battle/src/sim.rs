@@ -9,6 +9,7 @@ use data_model::{Ability, UnitCategory, UnitStats};
 use crate::ai;
 use crate::command::{Command, CommandError};
 use crate::field::{Battlefield, Weather, ATTACKER_LINE_Z, DEFENDER_LINE_Z};
+use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
@@ -38,6 +39,11 @@ pub const RALLY_SAFE_DISTANCE: f64 = 150.0;
 pub const CHARGE_IMPACT: f64 = 4.0;
 /// Seconds an archer unit must stand still before its stakes are planted.
 pub const STAKES_DELAY: f64 = 15.0;
+/// Seconds a rallied regiment stays in the `Rallied` state.
+pub const RALLY_PAUSE: f64 = 5.0;
+/// Speed ceiling of knights dismounted for a siege assault when the order
+/// catalogue has no `dismount` order.
+const ASSAULT_DISMOUNT_SPEED: u8 = 35;
 
 const MELEE_RATE: f64 = 0.035;
 const RANGED_RATE: f64 = 0.3;
@@ -66,7 +72,7 @@ pub struct BattleSim {
     field: Battlefield,
     weather: Weather,
     units: Vec<Unit>,
-    rng: BattleRng,
+    pub(crate) rng: BattleRng,
     elapsed: f64,
     ticks: u64,
     accumulator: f64,
@@ -83,6 +89,10 @@ pub struct BattleSim {
     /// Siege battles: the town walls (M8 § 2).
     siege: Option<SiegeWorks>,
     square_announced: bool,
+    /// Leader's orders: uses and cooldowns per side (F10b).
+    pub(crate) order_uses: OrderUses,
+    /// The side gave the "no quarter" order.
+    pub(crate) no_quarter: [bool; 2],
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -216,19 +226,24 @@ impl BattleSim {
                 units.push(unit);
             }
         }
+        let dismount_order = setup
+            .orders
+            .iter()
+            .find(|o| o.kind == data_model::BattleOrderKind::Dismount)
+            .cloned();
         if is_siege {
             // Men-at-arms who can fight on foot (`dismount`) leave their
-            // horses for the assault, as at every medieval escalade.
+            // horses for the assault, as at every medieval escalade (same
+            // rule as the "pied à terre" order, without its armour bonus).
+            let speed = dismount_order
+                .as_ref()
+                .and_then(|o| o.effects.speed_max)
+                .unwrap_or(ASSAULT_DISMOUNT_SPEED);
             for unit in units
                 .iter_mut()
                 .filter(|u| u.side == SideId::Attacker && u.mounted && u.has(Ability::Dismount))
             {
-                unit.mounted = false;
-                if unit.category == UnitCategory::Cavalry {
-                    unit.category = UnitCategory::Infantry;
-                }
-                unit.stats.speed = unit.stats.speed.min(35);
-                unit.stats.charge = None;
+                unit.dismount(speed, 0);
             }
             let mut ram = Unit::from_setup(
                 units.len() as u32,
@@ -275,6 +290,8 @@ impl BattleSim {
             charge_announced: vec![false; count],
             siege,
             square_announced: false,
+            order_uses: Default::default(),
+            no_quarter: [false; 2],
         };
         if sim.siege.is_some() {
             sim.deploy_siege();
@@ -297,21 +314,16 @@ impl BattleSim {
                     .to_owned()
             };
             sim.log(text, None);
-            let dismounted = sim.units.iter().any(|u| {
-                u.side == SideId::Attacker
-                    && u.has(Ability::Dismount)
-                    && sim
-                        .setup
-                        .attacker
-                        .units
-                        .get(u.setup_index)
-                        .is_some_and(|s| s.mounted)
-            });
+            let dismounted = sim
+                .units
+                .iter()
+                .any(|u| u.side == SideId::Attacker && u.dismounted);
             if dismounted {
-                let text = format!(
-                    "Les chevaliers {} mettent pied à terre pour l'assaut.",
-                    of_faction(&sim.setup.attacker.faction_name)
-                );
+                let of = of_faction(&sim.setup.attacker.faction_name);
+                let text = match dismount_order.and_then(|o| o.journal_assault) {
+                    Some(template) => template.replace("{of_faction}", &of),
+                    None => format!("Les chevaliers {of} mettent pied à terre pour l'assaut."),
+                };
                 sim.log(text, Some(SideId::Attacker));
             }
         }
@@ -658,7 +670,7 @@ impl BattleSim {
         f64::from(unit.stats.range) * self.weather.range_factor() * (1.0 + height_gain / 100.0)
     }
 
-    fn log(&mut self, text_fr: String, side: Option<SideId>) {
+    pub(crate) fn log(&mut self, text_fr: String, side: Option<SideId>) {
         self.events.push(BattleEvent {
             time: self.elapsed,
             text_fr,
@@ -666,7 +678,7 @@ impl BattleSim {
         });
     }
 
-    fn unit_label(&self, index: usize) -> String {
+    pub(crate) fn unit_label(&self, index: usize) -> String {
         let unit = &self.units[index];
         let faction = &self.setup.side(unit.side).faction_name;
         format!("{} {}", unit.name, of_faction(faction))
@@ -688,6 +700,26 @@ impl BattleSim {
     ) -> Result<(), CommandError> {
         if self.finished {
             return Err(CommandError::Finished);
+        }
+        if let Command::LeaderOrder {
+            side: order_side,
+            order,
+            units,
+        } = &command
+        {
+            let giver = match (side, *order_side) {
+                (Some(owner), Some(named)) if owner != named => {
+                    return Err(CommandError::WrongSide)
+                }
+                (Some(owner), _) => owner,
+                (None, Some(named)) => named,
+                (None, None) => units
+                    .first()
+                    .and_then(|&id| self.units.get(id as usize))
+                    .map(|u| u.side)
+                    .ok_or(CommandError::NoSide)?,
+            };
+            return self.give_order(giver, order, units);
         }
         let ids = command.units();
         if ids.is_empty() {
@@ -727,6 +759,7 @@ impl BattleSim {
                     unit.target = None;
                     unit.running = run;
                     unit.withdrawing = false;
+                    unit.pavise = None;
                     stop_climbing(unit);
                     unit.disengaging = unit.state == UnitState::Melee;
                     if unit.state != UnitState::Melee {
@@ -748,8 +781,18 @@ impl BattleSim {
                         return Err(CommandError::FriendlyTarget(target));
                     }
                 }
+                let (tx, tz) = (self.units[target as usize].x, self.units[target as usize].z);
                 for &id in &units {
+                    // Pavises stay up while the target is within bowshot.
+                    let unit = &self.units[id as usize];
+                    let in_range = unit.can_shoot()
+                        && unit.ammo > 0
+                        && ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt()
+                            <= self.effective_range(unit, tx, tz);
                     let unit = &mut self.units[id as usize];
+                    if !in_range {
+                        unit.pavise = None;
+                    }
                     unit.target = Some(target);
                     unit.destination = None;
                     unit.destination_facing = None;
@@ -815,6 +858,7 @@ impl BattleSim {
                         SideId::Defender => depth + 50.0,
                     };
                     unit.withdrawing = true;
+                    unit.pavise = None;
                     stop_climbing(unit);
                     unit.target = None;
                     unit.destination = Some((unit.x, edge_z));
@@ -858,6 +902,7 @@ impl BattleSim {
                     unit.target = None;
                 }
             }
+            Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
     }
@@ -959,6 +1004,7 @@ impl BattleSim {
         self.resolve_shooting(&contacts);
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
+        self.tick_orders(DT);
         self.elapsed += DT;
         self.ticks += 1;
         self.check_end();
@@ -1427,6 +1473,13 @@ impl BattleSim {
                     );
                     continue;
                 }
+                if unit.pavise.is_some() {
+                    // Behind the pavises: wait for the target to come in range.
+                    if self.units[i].state != UnitState::Shooting {
+                        self.units[i].state = UnitState::Idle;
+                    }
+                    continue;
+                }
                 let charge_distance = if unit.is_cavalry() { 120.0 } else { 40.0 };
                 let charging = unit.running && dist < charge_distance && !unit.can_shoot();
                 if charging && self.units[i].state != UnitState::Charging {
@@ -1694,7 +1747,9 @@ impl BattleSim {
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
         }
-        if target.has(Ability::Pavise) && target.state != UnitState::Marching {
+        if let Some(factor) = target.pavise {
+            kills *= factor;
+        } else if target.has(Ability::Pavise) && target.state != UnitState::Marching {
             kills *= 0.6;
         }
         if target.formation == Formation::Square {
@@ -1723,6 +1778,9 @@ impl BattleSim {
         let kills = kills.min(self.units[t].hp);
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
+        if kills > 0.0 {
+            self.units[t].missile_timer = 0.0;
+        }
         let shooter = &mut self.units[i];
         shooter.reload = reload;
         shooter.ammo -= 1;
@@ -2087,6 +2145,7 @@ impl BattleSim {
                 unit.target = None;
                 unit.destination = None;
                 unit.stakes_planted = false;
+                unit.pavise = None;
                 unit.charge_timer = 0.0;
                 unit.climbing = None;
                 unit.climb_progress = 0.0;
@@ -2100,7 +2159,7 @@ impl BattleSim {
                 && unit.hp >= f64::from(unit.max_soldiers) * 0.2
             {
                 unit.state = UnitState::Rallied;
-                unit.rally_timer = 5.0;
+                unit.rally_timer = RALLY_PAUSE;
                 new_events.push((format!("Les {label} se rallient."), unit.side));
             }
         }
@@ -2143,7 +2202,11 @@ impl BattleSim {
                     unit.state == UnitState::Routing
                 };
                 let chance = if unit.left_field { 0.2 } else { 0.35 };
-                if caught && self.rng.unit() < chance {
+                let taken = caught && self.rng.unit() < chance;
+                if taken && self.no_quarter[winner.index()] {
+                    // No quarter: the victors take no prisoner, not even for ransom.
+                    self.kill_general(loser);
+                } else if taken {
                     self.general_captured[loser.index()] = true;
                     let name = self
                         .setup
@@ -2193,6 +2256,7 @@ impl BattleSim {
                 routed: !won,
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
+                no_quarter: self.no_quarter[side.index()],
             }
         };
         Some(BattleOutcome {

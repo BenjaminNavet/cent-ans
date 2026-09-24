@@ -127,6 +127,7 @@ impl CampaignState {
                     revolt_seasons: 0,
                     heresy: 0,
                     heresy_religion: None,
+                    diet: None,
                 },
             );
         }
@@ -150,6 +151,7 @@ impl CampaignState {
                 army_upkeep_last_turn: 0,
                 building_upkeep_last_turn: 0,
                 projected_income: 0,
+                table_upkeep_last_turn: 0,
                 regency: false,
                 embargoes: BTreeSet::new(),
                 suzerain: faction.suzerain.clone(),
@@ -307,6 +309,7 @@ impl CampaignState {
                     army: None,
                     skills: character.skills,
                     captive: character.status == Some(CharacterStatus::Captive),
+                    captor: None,
                     experience: 0,
                     skill_points: 0,
                     skills_learned: BTreeSet::new(),
@@ -337,6 +340,18 @@ impl CampaignState {
             );
         }
         link_families(&mut state, data);
+        // Republics whose data names no ruler (Florence, the Confederates)
+        // start with an elected head, like a realm whose dynasty died out.
+        let rulerless: Vec<FactionId> = state
+            .factions
+            .iter()
+            .filter(|(id, f)| id.as_str() != REBELS_FACTION && f.ruler.is_none())
+            .map(|(id, _)| id.clone())
+            .collect();
+        for id in rulerless {
+            let ruler = crate::dynasty::spawn_ruler(&mut state, data, &id);
+            state.factions.get_mut(&id).expect("exists").ruler = Some(ruler);
+        }
         // Factions whose data names no heir get the one their succession law
         // designates (spec M4 § 1: "héritier calculable").
         let ids: Vec<FactionId> = state.factions.keys().cloned().collect();

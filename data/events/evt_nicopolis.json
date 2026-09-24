@@ -22,16 +22,21 @@
   },
   "options": [
     {
-      "text": "Payer la rançon de l'héritier",
+      "text": "Négocier la rançon de l'héritier",
       "effects": [
         {
           "type": "treasury",
-          "amount": -15000
+          "amount": -2000
         },
         {
           "type": "prestige",
           "character": "heir",
-          "amount": 15
+          "amount": 5
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_rancon_de_nevers",
+          "delay": 3
         }
       ],
       "ai_weight": 2

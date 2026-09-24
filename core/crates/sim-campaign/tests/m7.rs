@@ -151,11 +151,11 @@ fn external_battle_result_is_applied() {
     assert!(state.pending_battles.is_empty());
     assert!(events
         .iter()
-        .any(|e| e.kind == EventKind::Battle && e.text_fr.contains("Bataille de")));
+        .any(|e| e.kind == EventKind::Battle && e.text_fr.starts_with("Bataille ")));
     assert!(state
         .events()
         .iter()
-        .any(|e| e.text_fr.contains("Bataille de")));
+        .any(|e| e.text_fr.starts_with("Bataille ")));
     let after = |id: &ArmyId| state.army(id).map_or(0, |a| a.total_strength());
     // Losses applied (units under 5 % are disbanded on top).
     assert!(outcome.attacker.total_losses + outcome.defender.total_losses > 0);

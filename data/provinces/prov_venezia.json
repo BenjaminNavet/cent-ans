@@ -49,7 +49,7 @@
     ],
     "voronoi_weight": 1.1
   },
-  "owner": "fac_empire",
+  "owner": "fac_venice",
   "culture": "cul_venetian",
   "religion": "rel_catholic",
   "population": {
@@ -104,7 +104,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 5000,
-  "description": "République de Venise (doge Francesco Dandolo ; faction à créer, indépendante de l'Empire malgré le substitut fac_empire), qui s'empare de Trévise et Padoue (1337) ; patriarcat d'Aquilée (Udine) au nord-est. Sel, verre de Murano, arsenal, commerce d'Orient.",
+  "description": "République de Venise (doge Francesco Dandolo), alliée des Carrare qui reprennent Padoue (août 1337) ; elle obtiendra Trévise en 1339 ; patriarcat d'Aquilée (Udine) au nord-est. Sel, verre de Murano, arsenal, commerce d'Orient.",
   "sources": [
     "République de Venise",
     "Francesco Dandolo",

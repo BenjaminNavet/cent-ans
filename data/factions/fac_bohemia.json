@@ -1,0 +1,62 @@
+{
+  "id": "fac_bohemia",
+  "name": {
+    "display": "Royaume de Bohême",
+    "local": "České království",
+    "local_language": "tchèque"
+  },
+  "short_name": "Bohême",
+  "adjective": "bohémien",
+  "government": "kingdom",
+  "playable": false,
+  "ruler": "chr_jean_de_luxembourg",
+  "capital": "prov_bohemia",
+  "capital_city": "Prague",
+  "religion": "rel_catholic",
+  "culture": "cul_czech",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "De gueules au lion d'argent à la queue fourchée, couronné d'or.",
+    "description": "Lion à double queue de Bohême.",
+    "primary_color": "#B22222",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Roi de Bohême",
+    "Comte de Luxembourg",
+    "Margrave de Moravie"
+  ],
+  "treasury": 30000,
+  "prestige": 70,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "alliance",
+      "note": "Jean l'Aveugle, beau-père du duc de Normandie, combat pour Philippe VI jusqu'à Crécy (1346)."
+    },
+    {
+      "faction": "fac_empire",
+      "status": "peace",
+      "note": "Rivalité Luxembourg-Wittelsbach : Charles sera élu roi des Romains contre Louis IV en 1346."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 60,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Royaume des Luxembourg, riche de l'argent de Kutná Hora, uni au comté de Luxembourg. Le roi Jean vit surtout en France ; son fils Charles, margrave de Moravie, gouverne à Prague.",
+  "sources": [
+    "Jean Ier de Bohême",
+    "Charles IV (empereur du Saint-Empire)",
+    "Royaume de Bohême"
+  ]
+}

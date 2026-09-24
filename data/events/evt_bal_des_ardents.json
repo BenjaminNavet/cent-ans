@@ -5,7 +5,7 @@
   "kind": "historical",
   "trigger": {
     "date": {
-      "year": 1393,
+      "year": 1392,
       "season": "winter"
     },
     "until_year": 1394,

@@ -1,0 +1,35 @@
+{
+  "id": "tech_willow_bark",
+  "name": {
+    "display": "Remèdes contre les fièvres"
+  },
+  "branch": "medicine",
+  "tier": 2,
+  "cost": 180,
+  "prerequisites": [
+    "tech_herb_garden"
+  ],
+  "historical_year": {
+    "value": "1150",
+    "uncertain": true,
+    "note": "Écorce de saule déjà recommandée par Dioscoride (De materia medica, Ier s.) ; les herbiers salernitains comme le Circa instans (v. 1150) transmettent ces remèdes. La reine-des-prés ne donnera son nom à l'aspirine qu'en 1899."
+  },
+  "unlocks": {},
+  "effects": [
+    {
+      "effect": "health",
+      "value": 3
+    }
+  ],
+  "description": "Décoctions d'écorce de saule, de reine-des-prés et de camomille contre les fièvres et les douleurs : moins de morts pendant les hivers rigoureux.",
+  "sources": [
+    "Saule blanc",
+    "Reine-des-prés",
+    "De materia medica"
+  ],
+  "herbs": [
+    "cdx_saule",
+    "cdx_reine_des_pres",
+    "cdx_camomille"
+  ]
+}

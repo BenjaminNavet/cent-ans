@@ -1,11 +1,11 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://cent_ans_parchment_theme"]
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://cent_ans_parchment_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 16.0
 content_margin_top = 12.0
 content_margin_right = 16.0
 content_margin_bottom = 14.0
-bg_color = Color(0.93, 0.87, 0.72, 0.96)
+bg_color = Color(0.93, 0.87, 0.72, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -94,6 +94,22 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.42, 0.29, 0.16, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+bg_color = Color(0.96, 0.91, 0.78, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.29, 0.16, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="SystemFont" id="SystemFont_serif"]
 font_names = PackedStringArray("Georgia", "Palatino", "Times New Roman", "serif")
 
@@ -130,3 +146,5 @@ TabContainer/styles/panel = SubResource("StyleBoxFlat_lineedit")
 TabContainer/styles/tab_selected = SubResource("StyleBoxFlat_button_pressed")
 TabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_button")
 TabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_lineedit")
+TooltipLabel/colors/font_color = Color(0.22, 0.14, 0.07, 1)
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")

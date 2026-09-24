@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://cent_ans_hud_end_turn_cluster"]
+
+[ext_resource type="Script" path="res://scripts/ui/end_turn_cluster.gd" id="1_script"]
+[ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
+
+[node name="EndTurnCluster" type="Control"]
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")

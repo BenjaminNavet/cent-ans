@@ -7,7 +7,7 @@ use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
     ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
-    movement, population, religion, research, siege,
+    movement, population, religion, research, siege, table,
 };
 
 impl CampaignState {
@@ -50,6 +50,8 @@ impl CampaignState {
         // 5. Buildings and goods, ahead of the economy that reads them (M3).
         buildings::resolve_construction(self, data, &mut events);
         economy::resolve_goods(self, data);
+        // H3: diets whose requirements no longer hold fall back to the default.
+        table::resolve_requirements(self, data, &mut events);
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
@@ -66,6 +68,9 @@ impl CampaignState {
         // 8c. Chronicle: historical and random events (M10).
         chronicle::resolve_chronicle(self, data, &mut events);
 
+        // 8d. The table: ruler piety/prestige and Lent in spring (H3).
+        table::resolve_lent(self, data, &mut events);
+
         // 9. Population dynamics: growth, health, wealth, goods
         // satisfaction, unrest, revolt, plague, famine (M3).
         population::resolve_population(self, data, &mut events);
@@ -73,6 +78,7 @@ impl CampaignState {
         // 10. Characters: governance XP, deaths, winter births, regencies
         // (M4), then dead factions.
         dynasty::resolve_governance(self);
+        dynasty::resolve_court_prestige(self, data);
         characters::resolve_characters(self, data, &mut events);
         dynasty::resolve_births(self, data, &mut events);
         dynasty::resolve_regencies(self, data, &mut events);
@@ -80,9 +86,15 @@ impl CampaignState {
 
         // 11. New season.
         self.advance_date();
-        let movement_points = self.season.movement_points();
-        for army in self.armies.values_mut() {
-            army.movement_points = movement_points;
+        let allowances: Vec<(crate::state::ArmyId, u32)> = self
+            .armies
+            .iter()
+            .map(|(id, army)| (id.clone(), self.army_movement_allowance(data, army)))
+            .collect();
+        for (id, points) in allowances {
+            if let Some(army) = self.armies.get_mut(&id) {
+                army.movement_points = points;
+            }
         }
         let turn = self.turn;
         for faction in self.factions.values_mut() {

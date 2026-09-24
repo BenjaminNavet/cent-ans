@@ -126,8 +126,9 @@ func _draw() -> void:
 func _make_button(node: Dictionary) -> Button:
 	var id: String = str(node["id"])
 	var state: String = str(node.get("state", "locked"))
-	var button := Button.new()
+	var button := RichButton.new()
 	button.set_meta("state", state)
+	IconLibrary.decorate_button(button, id, 30, "technology")  # F2
 	button.size = NODE_SIZE
 	button.custom_minimum_size = NODE_SIZE
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -139,7 +140,7 @@ func _make_button(node: Dictionary) -> Button:
 	else:
 		second_line = "%d pts — %s" % [cost, STATE_LABELS.get(state, state)]
 	button.text = "%s\n%s" % [str(node.get("name", id)), second_line]
-	button.tooltip_text = tooltip_for(node)
+	button.tooltip_text = RichTooltip.technology(node)  # F2 : infobulle riche (tooltip_for : texte brut)
 	var style := StyleBoxFlat.new()
 	style.bg_color = STATE_COLORS.get(state, Color(0.8, 0.8, 0.8))
 	style.set_border_width_all(2 if state != "researching" else 3)

@@ -1,0 +1,32 @@
+{
+  "id": "order_no_quarter",
+  "kind": "no_quarter",
+  "rank": 5,
+  "name": "Pas de quartier",
+  "label": "Déployer la bannière rouge",
+  "labels_by_faction": {
+    "fac_france": "Déployer l'oriflamme",
+    "fac_england": "Lever la bannière au dragon"
+  },
+  "description": "Le chef fait déployer la bannière de guerre à outrance : on ne fera pas de prisonniers. Toute l'armée gagne un grand courage pour la bataille, mais les rançons sont perdues. L'oriflamme de Saint-Denis, déployée à Crécy et à Poitiers, et la bannière au dragon d'Édouard III à Crécy (1346) annonçaient qu'il ne serait fait aucun quartier. Une seule fois par bataille.",
+  "icon": "no_quarter",
+  "scope": "army",
+  "requires_general": true,
+  "cooldown": 0.0,
+  "duration": 0.0,
+  "uses_per_battle": 1,
+  "effects": {
+    "morale": 20.0
+  },
+  "journal": "{general} fait « {label} » : l'ost {of_faction} ne fera pas de quartier !",
+  "ai": {
+    "enemy_within": 150.0,
+    "min_units": 1,
+    "max_strength_ratio": 0.75,
+    "rivals": [
+      ["fac_france", "fac_england"],
+      ["fac_scotland", "fac_england"]
+    ]
+  },
+  "sources": ["Oriflamme", "Bataille de Crécy"]
+}

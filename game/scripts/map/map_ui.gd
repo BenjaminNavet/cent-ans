@@ -129,6 +129,65 @@ func _ready() -> void:
 	hover_label.text = ""
 	hover_label.hide()
 	toast.hide()
+	_decorate_top_bar()  # F2
+
+
+# --- Icônes et infobulles de la barre (F2) -------------------------------------------
+
+
+const TOP_ICON_SIZE := 20.0
+var _season_icon: TextureRect
+var _treasury_icon: TextureRect
+var _income_icon: TextureRect
+var _research_icon: TextureRect
+
+
+func _decorate_top_bar() -> void:
+	var bar := treasury_label.get_parent()
+	bar.add_theme_constant_override("separation", 5)
+	_treasury_icon = _insert_icon_before(treasury_label, "hud_treasury")
+	_income_icon = _insert_icon_before(income_label, "hud_income")
+	_season_icon = _insert_icon_before(date_label, "hud_season_spring")
+	_research_icon = _insert_icon_before(research_box, "hud_research")
+	for label in [treasury_label, income_label, date_label]:
+		label.set_script(RichLabel)
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
+	income_label.tooltip_text = RichTooltip.hud("hud_income")
+	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
+	_decorate_button(court_button, "hud_court", true)
+	_decorate_button(tech_button, "hud_technologies", true)
+	_decorate_button(end_turn_button, "hud_end_turn")
+	end_turn_button.tooltip_text = RichTooltip.hud("hud_end_turn")
+	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
+	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
+
+
+func _insert_icon_before(control: Control, icon_id: String) -> TextureRect:
+	var rect: TextureRect = IconLibrary.make_rect(icon_id, TOP_ICON_SIZE)
+	var parent := control.get_parent()
+	parent.add_child(rect)
+	parent.move_child(rect, control.get_index())
+	return rect
+
+
+func _decorate_button(button: Button, icon_id: String, icon_only: bool = false) -> void:
+	IconLibrary.decorate_button(button, icon_id, int(TOP_ICON_SIZE) + (6 if icon_only else 0))
+	if icon_only:
+		button.text = ""
+	if not (button is RichButton):
+		button.set_script(RichButton)
+	button.tooltip_text = RichTooltip.hud(icon_id)
+
+
+func _decorate_late_button(node: Node) -> void:
+	if not (node is Button) or not is_instance_valid(node) or (node as Button).icon != null:
+		return
+	var button := node as Button
+	if button.text.begins_with("Diplomatie"):
+		_decorate_button(button, "hud_diplomacy", true)
+	elif button.text.begins_with("Chronique"):
+		_decorate_button(button, "hud_chronicle")
 
 
 # --- Barre supérieure ------------------------------------------------------------
@@ -139,18 +198,37 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-## `projected` : revenu prévisionnel (`get_faction_economy`), -1 si indisponible (repli
-## sans le second nombre).
-func set_treasury(treasury: int, income: int, projected: int = -1) -> void:
+## `economy` : `get_faction_economy` (vide si indisponible). Affiche le revenu **net** prévu
+## (recettes - entretien des armées, des bâtiments et de la cour) ; détail en infobulle.
+## Sans économie, repli sur `income` (revenu brut du dernier tour).
+func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
-	var text := "Revenu : %s%s" % ["+" if income >= 0 else "", ProvincePanel._thousands(income)]
-	if projected != -1:
-		text += " (prév. %s%s)" % ["+" if projected >= 0 else "", ProvincePanel._thousands(projected)]
-	income_label.text = text + " ℔"
+	if economy.is_empty():
+		income_label.text = "Revenu : %s ℔" % _signed(income)
+		income_label.tooltip_text = "Revenu brut du dernier tour."
+		return
+	var gross := int(economy.get("projected_income", income))
+	var armies := int(economy.get("army_upkeep", 0))
+	var buildings := int(economy.get("building_upkeep", 0))
+	var court := int(economy.get("administration_upkeep", 0))
+	var net := gross - armies - buildings - court
+	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
+	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
+	income_label.tooltip_text = "Prévision pour la prochaine saison\nRecettes : %s ℔\nArmées : -%s ℔\nBâtiments : -%s ℔\nCour et administration : -%s ℔\nSolde : %s ℔" % [
+		ProvincePanel._thousands(gross), ProvincePanel._thousands(armies),
+		ProvincePanel._thousands(buildings), ProvincePanel._thousands(court), _signed(net)]
+
+
+static func _signed(value: int) -> String:
+	return ("+" if value >= 0 else "-") + ProvincePanel._thousands(absi(value))
 
 
 func set_date(text: String) -> void:
 	date_label.text = text
+	var season := RichTooltip.season_of(text)
+	if _season_icon != null and season != "":
+		_season_icon.texture = IconLibrary.get_icon("hud_season_" + season)
+		date_label.tooltip_text = RichTooltip.hud("hud_season_" + season, "Un tour = une saison.")
 
 
 func set_end_turn_enabled(enabled: bool) -> void:
@@ -208,12 +286,46 @@ func show_toast(text: String, is_error: bool = false) -> void:
 # --- Journal des événements ------------------------------------------------------------
 
 
+## Faction du joueur et nom court d'une faction (`Callable(id) -> String`) : le journal
+## masque les événements courants des autres factions et nomme la faction des autres.
+var journal_player_faction: String = ""
+var journal_faction_name: Callable = Callable()
+
+## Événements d'une autre faction sans intérêt pour le joueur (gestion interne).
+const FOREIGN_MINOR_KINDS := [
+	"income", "bankruptcy", "attrition", "recruited", "building_completed", "trait_acquired",
+	"skill_learned", "appointment", "technology_researched", "regency", "birth", "raid",
+]
+
+
+## Vrai si l'événement doit figurer au journal du joueur.
+func journal_keeps(event: Dictionary) -> bool:
+	var faction := str(event.get("faction", ""))
+	if faction == "" or journal_player_faction == "" or faction == journal_player_faction:
+		return true
+	return not FOREIGN_MINOR_KINDS.has(str(event.get("kind", "")))
+
+
+## Texte de l'événement, préfixé du nom de sa faction s'il ne la nomme pas déjà.
+func journal_text(event: Dictionary) -> String:
+	var text := str(event.get("text_fr", event.get("text", "")))
+	var faction := str(event.get("faction", ""))
+	if text == "" or faction == "" or faction == journal_player_faction or not journal_faction_name.is_valid():
+		return text
+	var name := str(journal_faction_name.call(faction))
+	if name == "" or text.contains(name):
+		return text
+	return "%s — %s" % [name, text]
+
+
 ## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
 func add_events(events: Array, date_text: String) -> void:
 	var new_lines := PackedStringArray()
 	for event in events:
+		if not journal_keeps(event):
+			continue
 		var kind: String = str(event.get("kind", ""))
-		var text: String = str(event.get("text_fr", event.get("text", "")))
+		var text: String = journal_text(event)
 		if text == "":
 			continue
 		var line: String

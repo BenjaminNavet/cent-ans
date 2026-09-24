@@ -1,0 +1,42 @@
+{
+  "id": "chr_guillaume_i_de_hainaut",
+  "name": {
+    "display": "Guillaume d'Avesnes, comte de Hainaut",
+    "local": "Willem van Henegouwen",
+    "local_language": "moyen néerlandais"
+  },
+  "epithet": "le Bon",
+  "sex": "male",
+  "house": "Avesnes",
+  "faction": "fac_hainaut",
+  "role": "ruler",
+  "birth": {
+    "value": "1286",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1337-06-07"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 7
+  },
+  "traits": [
+    "trait_just",
+    "trait_diplomat"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_guillaume_ii_de_hainaut"
+    ]
+  },
+  "starting_location": "prov_hainaut",
+  "status": "at_court",
+  "description": "Comte de Hainaut, de Hollande et de Zélande depuis 1304, beau-père d'Édouard III et beau-frère de Philippe VI ; il meurt à Valenciennes au début de l'été 1337.",
+  "sources": [
+    "Guillaume Ier de Hainaut"
+  ]
+}

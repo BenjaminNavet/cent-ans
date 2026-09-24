@@ -50,7 +50,7 @@
     ],
     "voronoi_weight": 1.2
   },
-  "owner": "fac_empire",
+  "owner": "fac_hainaut",
   "overlord": "fac_empire",
   "culture": "cul_dutch",
   "religion": "rel_catholic",
@@ -101,7 +101,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 4000,
-  "description": "Comtés de Hollande et de Zélande tenus par Guillaume II d'Avesnes, comte de Hainaut (faction à créer). Polders, digues, harengs ; Dordrecht détient l'étape des marchandises rhénanes.",
+  "description": "Comtés de Hollande et de Zélande tenus par Guillaume Ier d'Avesnes, comte de Hainaut (mort le 7 juin 1337), puis par son fils Guillaume II. Polders, digues, harengs ; Dordrecht détient l'étape des marchandises rhénanes.",
   "sources": [
     "Comté de Hollande",
     "Comté de Zélande",

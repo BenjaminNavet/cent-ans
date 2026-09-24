@@ -1,0 +1,74 @@
+{
+  "id": "evt_siege_tournai",
+  "title": "Le siège de Tournai",
+  "text": "Fort de sa victoire de L'Écluse, le roi Édouard met le siège devant Tournai avec les milices flamandes d'Artevelde. Mais la ville tient, les soldes ne sont plus payées et les banquiers de Florence refusent de nouvelles avances.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "summer"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Presser le siège jusqu'au bout",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -6000
+        },
+        {
+          "type": "devastation",
+          "province": "prov_flandre_wallonne",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_treve_esplechin",
+          "delay": 2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Écouter la médiation de Jeanne de Valois",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "schedule_event",
+          "event": "evt_treve_esplechin",
+          "delay": 1
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1340-07-23"
+  },
+  "sources": [
+    "Siège de Tournai (1340)",
+    "Jean Froissart, Chroniques, livre I",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

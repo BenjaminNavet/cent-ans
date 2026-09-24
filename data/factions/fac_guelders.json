@@ -1,0 +1,54 @@
+{
+  "id": "fac_guelders",
+  "name": {
+    "display": "Comté de Gueldre",
+    "local": "Graafschap Gelre",
+    "local_language": "moyen néerlandais"
+  },
+  "short_name": "Gueldre",
+  "adjective": "gueldrois",
+  "government": "county",
+  "playable": false,
+  "ruler": "chr_renaud_ii_de_gueldre",
+  "capital": "prov_gueldre",
+  "capital_city": "Arnhem",
+  "religion": "rel_catholic",
+  "culture": "cul_dutch",
+  "succession_law": "male_preference_primogeniture",
+  "heraldry": {
+    "blazon": "D'azur au lion d'or couronné, armé et lampassé de gueules.",
+    "description": "Lion couronné de Gueldre.",
+    "primary_color": "#2B4C9B",
+    "secondary_color": "#E8B923"
+  },
+  "titles": [
+    "Comte de Gueldre",
+    "Comte de Zutphen"
+  ],
+  "treasury": 12000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_windmills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "alliance",
+      "note": "Renaud II a épousé Éléonore, sœur d'Édouard III (1332) ; il devient vicaire impérial et duc en 1339."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 45
+  },
+  "description": "Comté du Rhin inférieur (Arnhem, Nimègue, Zutphen), érigé en duché en 1339. Renaud II, beau-frère d'Édouard III, est un pilier de la coalition anglaise des Pays-Bas.",
+  "sources": [
+    "Duché de Gueldre",
+    "Renaud II de Gueldre"
+  ]
+}

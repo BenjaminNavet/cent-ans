@@ -9,7 +9,9 @@
   "role": "prince",
   "birth": {
     "value": "1346-11-24",
-    "place": "Rouvres"
+    "place": "Rouvres",
+    "uncertain": true,
+    "note": "Né en 1346 à Rouvres ; jour et mois inconnus, date retenue pour le jeu."
   },
   "historical": true,
   "skills": {
@@ -24,7 +26,7 @@
   },
   "starting_location": "prov_bourgogne",
   "status": "unborn",
-  "description": "Fils posthume de Philippe de Bourgogne dit Monsieur, né plus de trois mois après sa mort ; dernier duc capétien de Bourgogne (1349-1361).",
+  "description": "Fils posthume de Philippe de Bourgogne dit Monsieur ; dernier duc capétien de Bourgogne (1349-1361).",
   "sources": [
     "Philippe Ier de Rouvres"
   ]

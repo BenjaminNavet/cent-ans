@@ -100,7 +100,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 7000,
-  "description": "Royaume de Trinacrie (Sicile) tenu par Frédéric III puis Pierre II d'Aragon-Sicile (branche cadette ; faction à créer, fac_aragon n'est qu'un substitut), en guerre intermittente contre Naples depuis les Vêpres siciliennes. Grenier à blé.",
+  "description": "Royaume de Trinacrie (Sicile) tenu par Frédéric III puis Pierre II d'Aragon-Sicile (branche cadette de la maison de Barcelone, rattachée à l'Aragon dans le jeu), en guerre intermittente contre Naples depuis les Vêpres siciliennes. Grenier à blé.",
   "sources": [
     "Royaume de Sicile",
     "Frédéric III de Sicile",

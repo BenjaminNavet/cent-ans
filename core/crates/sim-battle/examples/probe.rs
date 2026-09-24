@@ -78,6 +78,7 @@ fn main() {
                     fortification: 2,
                     breach,
                 }),
+                orders: Vec::new(),
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             while !sim.is_finished() {
@@ -155,6 +156,7 @@ fn main() {
                 defender: side(army(size)),
                 player_side: None,
                 siege: None,
+                orders: Vec::new(),
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
@@ -201,6 +203,7 @@ fn main() {
         defender: side(vec![unit(&data, d)]),
         player_side: None,
         siege: None,
+        orders: Vec::new(),
     };
     let mut sim = BattleSim::new(setup, 7).unwrap();
     sim.set_ai(SideId::Attacker, false);

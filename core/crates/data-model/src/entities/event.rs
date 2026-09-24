@@ -13,12 +13,15 @@ use crate::common::{HistoricalDate, Sources};
 use crate::entities::faction::ClaimKind;
 use crate::ids::{CharacterId, EventId, FactionId, ProvinceId, ReligionId, TraitId, UnitTypeId};
 
-/// Historical (dated, fires at most once) or random (per-turn chance).
+/// Historical (dated, fires at most once), random (per-turn chance) or
+/// chained (F1: fires only when another event schedules it with
+/// [`EventEffect::ScheduleEvent`]).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EventCategory {
     Historical,
     Random,
+    Chained,
 }
 
 /// Season of a trigger date or of a `season` condition.
@@ -405,6 +408,34 @@ pub enum EventEffect {
     PlagueWave {
         from_year: i32,
         to_year: i32,
+    },
+    /// F1: the character (of `faction`, default: the deciding faction) is
+    /// taken prisoner by `captor`.
+    CaptureCharacter {
+        id: CharacterRef,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        captor: FactionId,
+    },
+    /// F1: a captive is freed; its faction pays `ransom` livres to the
+    /// captor (in full, even into debt).
+    ReleaseCharacter {
+        id: CharacterRef,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        #[serde(default)]
+        ransom: i64,
+    },
+    /// F1: `event` fires `delay` turns later for the same faction and
+    /// province (event chains); its conditions are checked then.
+    ScheduleEvent {
+        event: EventId,
+        delay: u32,
+    },
+    /// F1: a historical marriage between two living, unmarried characters.
+    Marry {
+        a: CharacterId,
+        b: CharacterId,
     },
 }
 

@@ -64,3 +64,47 @@ déclenchent qu'une fois.
 ## 4. Critères de fin
 Tests verts, smoke vert, capture relue, `docs/status.md`, `docs/godot-map.md`, `docs/design/data-model.md`
 à jour.
+
+## F1 (v2) — capture, chaînes, Charles VI
+Nouveaux effets : `capture_character { id, faction?, captor }`, `release_character { id, faction?,
+ransom }` (rançon versée au geôlier), `schedule_event { event, delay }` (≥ 1 tour) et `marry { a, b }`.
+Nouvelle catégorie `chained` : l'événement ne part que programmé, au tour N + k, pour la même faction et la
+même province, conditions vérifiées alors (`ChronicleState::scheduled`). Validation : délai nul ou
+auto-programmation refusés, cible inconnue ou événement chaîné jamais programmé signalés. Poitiers capture
+Jean II ; les États programment « La rançon du roi Jean » ; Brétigny (captivité de Jean ou, en repli,
+Poitiers) le libère contre 40 000 livres s'il est encore captif. « Les noces du dauphin » (1350) marient
+Charles et Jeanne de Bourbon ; Charles VI naît en 1368 et sa folie le vise (il règne, 18-40 ans).
+
+## F7b — chronique enrichie
+40 nouveaux événements (total 90 : 54 historiques, 8 chaînés, 28 aléatoires). Déjà présents, donc non
+dupliqués : L'Écluse, Nicopolis, du Guesclin connétable, Cabochiens, mort du Prince Noir, assassinat de Louis
+d'Orléans (`evt_armagnacs_bourguignons`), Troyes, Jeanne d'Arc ; le Grand Schisme relève de la religion (M5).
+- Historiques (27) : `evt_paix_de_venise` (1339), `evt_laupen` (1339), `evt_valdemar_iv` (1340),
+  `evt_siege_tournai` (1340), `evt_salado` (1340), `evt_succession_bretagne` (1341), `evt_banqueroute_bardi`
+  (1343-1346), `evt_charles_iv_roi_des_romains` (1346), `evt_neville_cross` (1346), `evt_cola_di_rienzo` (1347),
+  `evt_achat_dauphine` (1349), `evt_combat_des_trente` (1351), `evt_bulle_d_or` (1356), `evt_cocherel` (1364),
+  `evt_auray` (1364), `evt_najera` (1367), `evt_appel_gascon` (1369), `evt_auld_alliance` (1371),
+  `evt_la_rochelle` (1372), `evt_lords_appelants` (1387), `evt_harfleur` (1415), `evt_montereau` (1419),
+  `evt_verneuil` (1424), `evt_patay` (1429), `evt_proces_de_rouen` (1431), `evt_fougeres` (1449),
+  `evt_formigny` (1450).
+- Chaînes (`schedule_event`, 7 étapes) : Tournai → `evt_treve_esplechin` ; succession de Bretagne →
+  `evt_hennebont` ; Neville's Cross (capture de David II) → `evt_rancon_david_ii` (libération contre rançon) ;
+  Rienzo → `evt_chute_de_rienzo` ; Nicopolis (option « Négocier ») → `evt_rancon_de_nevers` ; Montereau →
+  `evt_alliance_anglo_bourguignonne` → Troyes (condition élargie) ; Jeanne d'Arc → `evt_sacre_de_reims`.
+- Aléatoires des factions F7 (6) : `evt_galeres_de_flandre` (Venise), `evt_banque_florentine`,
+  `evt_piquiers_suisses`, `evt_argent_de_kutna_hora` (Bohême), `evt_harengs_de_scanie` (Suède),
+  `evt_razzia_frontiere` (Grenade, en guerre avec la Castille).
+- Reprises de guerre : dans une campagne simulée à l'IA minimale, la guerre franco-anglaise s'éteint vers
+  1355. `evt_appel_gascon` (1369), `evt_harfleur` (1415) et `evt_fougeres` (1449) la redéclarent (option IA),
+  ce qui rouvre La Rochelle, Azincourt, Troyes, Jeanne d'Arc, Formigny, Castillon. Les conditions des
+  événements tardifs reposent sur l'existence des factions et « ruler »/« heir » (les personnages après 1400
+  sont générés par la dynastie).
+- Modifications légères : `evt_nicopolis` (première option programmée), `evt_troyes` (alliance
+  anglo-bourguignonne comme alternative à Azincourt + Normandie), `evt_jeanne_d_arc` (possible après Troyes
+  même en paix ; programme le sacre).
+- Test `core/crates/sim-campaign/tests/f7_events.rs` : campagne 1337-1453 (graine 1337, France jouée par
+  l'IA) où ≥ 20 nouveaux historiques et ≥ 4 étapes chaînées doivent se déclencher (27/27 et 7/7 obtenus ;
+  mêmes résultats pour Angleterre/7 et Bourgogne/42 via le test ignoré `print_campaign_chronicle`).
+- Tirage aléatoire (`chronicle.rs`, `scope_allows`) : un événement aléatoire réservé à une autre faction ne
+  consomme plus de tirage du RNG pour les autres factions (ajouter un événement vénitien ne rebat plus les
+  cartes de la France ; sans cela le smoke `flow` perdait son rapport de saison, sensible à la graine).

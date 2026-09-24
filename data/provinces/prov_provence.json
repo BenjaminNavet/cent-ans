@@ -49,7 +49,7 @@
     ],
     "voronoi_weight": 1.4
   },
-  "owner": "fac_empire",
+  "owner": "fac_naples",
   "overlord": "fac_empire",
   "culture": "cul_occitan",
   "religion": "rel_catholic",
@@ -100,7 +100,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 5500,
-  "description": "Comté de Provence et de Forcalquier, terre d'Empire tenue par Robert d'Anjou, roi de Naples (faction angevine à créer ; fac_empire n'est ici que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale.",
+  "description": "Comté de Provence et de Forcalquier, terre d'Empire tenue par Robert d'Anjou, roi de Naples (l'Empire n'en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale.",
   "sources": [
     "Comté de Provence",
     "Robert Ier de Naples",

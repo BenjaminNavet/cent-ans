@@ -339,6 +339,89 @@ def _draw_cross(draw: ImageDraw.ImageDraw, color: Color, arm: float = 0.16) -> N
     draw.rectangle(_px([(0.0, 0.42 - arm / 2), (1.0, 0.42 + arm / 2)]), fill=color)
 
 
+def _draw_fess(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    draw.rectangle(_px([(0.0, 0.34), (1.0, 0.56)]), fill=color)
+
+
+def _draw_single_bend(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    draw.polygon(
+        _px(
+            [
+                (0.0, -0.08),
+                (0.2, -0.08),
+                (1.0, 0.86),
+                (1.0, 1.08),
+                (0.8, 1.08),
+                (0.0, 0.14),
+            ]
+        ),
+        fill=color,
+    )
+
+
+def _draw_ladder(draw: ImageDraw.ImageDraw, color: Color, rungs: int = 4) -> None:
+    for x0 in (0.34, 0.6):
+        draw.rectangle(_px([(x0, 0.1), (x0 + 0.06, 0.86)]), fill=color)
+    for index in range(rungs):
+        y0 = 0.2 + index * 0.17
+        draw.rectangle(_px([(0.34, y0), (0.66, y0 + 0.05)]), fill=color)
+
+
+def _draw_label(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    draw.rectangle(_px([(0.12, 0.1), (0.88, 0.16)]), fill=color)
+    for cx in (0.26, 0.5, 0.74):
+        draw.polygon(
+            _px(
+                [
+                    (cx - 0.05, 0.16),
+                    (cx + 0.05, 0.16),
+                    (cx + 0.07, 0.28),
+                    (cx - 0.07, 0.28),
+                ]
+            ),
+            fill=color,
+        )
+
+
+def _draw_crown(
+    draw: ImageDraw.ImageDraw, color: Color, cx: float, cy: float, size: float
+) -> None:
+    half = size / 2
+    points = [
+        (cx - half, cy + half * 0.6),
+        (cx - half, cy - half * 0.3),
+        (cx - half * 0.5, cy + half * 0.05),
+        (cx, cy - half * 0.6),
+        (cx + half * 0.5, cy + half * 0.05),
+        (cx + half, cy - half * 0.3),
+        (cx + half, cy + half * 0.6),
+    ]
+    draw.polygon(_px(points), fill=color)
+
+
+def _draw_crowns(draw: ImageDraw.ImageDraw, color: Color, count: int) -> None:
+    spots = [(0.3, 0.26), (0.7, 0.26), (0.5, 0.6)] if count == 3 else [(0.5, 0.42)]
+    for cx, cy in spots:
+        _draw_crown(draw, color, cx, cy, 0.26)
+
+
+def _draw_nettle(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """Holstein nettle leaf: a serrated escutcheon-shaped leaf."""
+    outline = []
+    teeth = 9
+    for index in range(teeth + 1):
+        t = index / teeth
+        y = 0.14 + t * 0.62
+        width = 0.34 * (1 - (t - 0.35) ** 2 * 1.4)
+        tooth = 0.05 if index % 2 else 0.0
+        outline.append((0.5 + width + tooth, y))
+    outline.append((0.5, 0.86))
+    for x, y in reversed(outline[:-1]):
+        outline.append((1.0 - x, y))
+    draw.polygon(_px(outline), fill=color)
+    draw.rectangle(_px([(0.44, 0.38), (0.56, 0.56)]), fill=TINCTURES["gueules"])
+
+
 def _draw_chains(draw: ImageDraw.ImageDraw, color: Color) -> None:
     width = int(0.035 * CANVAS)
     lines = [
@@ -485,8 +568,22 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_ermine(draw, TINCTURES["sable"])
     elif blazon.has("seme"):
         _draw_semé(draw, charge)
+        if blazon.has("lambel"):
+            _draw_label(draw, blazon.tincture_after("lambel") or TINCTURES["gueules"])
+    elif blazon.has("a la bande"):
+        _draw_single_bend(draw, charge)
     elif blazon.has("bande"):
         _draw_bends(draw, charge, blazon.count(6))
+    elif blazon.has("fasce"):
+        _draw_fess(draw, charge)
+    elif blazon.has("echelle"):
+        _draw_ladder(draw, charge)
+    elif blazon.has("couronnes"):
+        _draw_crowns(draw, charge, blazon.count(1))
+    elif blazon.has("ortie"):
+        _draw_nettle(draw, charge)
+    elif blazon.has("lis florence"):
+        draw.polygon(_transform(FLEUR_DE_LIS, 0.5, 0.44, 0.62), fill=charge)
     elif blazon.has("pals", "pal "):
         _draw_pals(draw, charge, blazon.count(1))
     elif blazon.has("chaines"):
@@ -508,6 +605,9 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
             )
     elif blazon.has("lion"):
         draw.polygon(_transform(LION_RAMPANT, 0.5, 0.46, 0.62), fill=charge)
+    elif blazon.has("croix alesee"):
+        draw.rectangle(_px([(0.42, 0.18), (0.58, 0.7)]), fill=charge)
+        draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
     elif blazon.has("croix"):
         _draw_cross(draw, charge)
 
