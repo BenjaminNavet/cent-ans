@@ -32,7 +32,7 @@ Branche : `m3-turn-ai` (worktree `agent-a2eb8f7f4bd84c3dd`), depuis `main` 93d46
   déterminisme, performance, 50 tours × 8 graines en `--ignored`).
 - [x] Sondes : `examples/turn_perf.rs` (meilleur de n par faction et par tour), `settlements_probe` compte
   batailles et débarquements.
-- [ ] Fusion de main (C4/C5 : garder `resolve_trade` et `ai_choose_edicts`), fmt/clippy/test, build.sh, smoke.
+- [x] Fusion de main (M4 659cc70 ; C4/C5 pas encore dans main), fmt/clippy/test, build.sh, smoke, `m4_free_movement_ui_test`, `c5_settlements_ui_test` verts.
 
 ## Mesures (`settlements_probe 50 1..8`, release)
 
@@ -66,4 +66,4 @@ p95 7,7 ms, p99 14,6 ms, max 30 ms par faction et par tour (28 IA) ; la planific
 
 ## Prochaine étape
 
-Fusion de main juste avant de rendre, puis build.sh et smoke Godot.
+Terminé, en attente de fusion par l'orchestrateur. Si C4/C5 arrivent dans main avant : garder `resolve_trade` (après `resolve_economy` dans `resolve_end_of_turn`) et `ai_choose_edicts` dans `plan_turn`.
