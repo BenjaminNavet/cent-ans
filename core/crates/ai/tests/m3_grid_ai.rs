@@ -101,7 +101,9 @@ fn the_ai_does_not_attack_a_stronger_army() {
         ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
     let orders = ai::plan_turn(&state, &data, &fac("fac_england"));
     assert!(
-        !orders.iter().any(|o| matches!(o, Order::Attack { army, .. } if army == &english)),
+        !orders
+            .iter()
+            .any(|o| matches!(o, Order::Attack { army, .. } if army == &english)),
         "a single company does not charge the French host: {orders:?}"
     );
 }
@@ -130,10 +132,7 @@ fn routes_avoid_the_zone_of_control_of_stronger_armies() {
         "a weaker army never marches through Meaux"
     );
     let strong = planner.table(&start, 5000, 1000, power * 4.0);
-    assert!(
-        through_meaux(&strong),
-        "a stronger army goes through Meaux"
-    );
+    assert!(through_meaux(&strong), "a stronger army goes through Meaux");
 }
 
 #[test]
@@ -233,4 +232,146 @@ fn an_ai_faction_plays_its_turn_quickly() {
         }
         state.resolve_end_of_turn(&data, &mut events);
     }
+}
+
+/// What one 50-turn game measured (the C7a indicators).
+struct Game {
+    treasury: [i64; 2],
+    provinces_delta: [i64; 2],
+    bankruptcies: [u32; 2],
+    siege_turns: u32,
+    battles: u32,
+    english_landings: u32,
+    stuck_turns: u32,
+    majors_alive: bool,
+}
+
+fn fifty_turns(data: &GameData, seed: u64) -> Game {
+    const TURNS: u32 = 50;
+    let majors = [fac("fac_france"), fac("fac_england")];
+    let mut state = CampaignState::new_1337(data, majors[0].clone(), seed).unwrap();
+    state.interactive_battles = false;
+    let provinces_start = majors
+        .clone()
+        .map(|f| state.controlled_provinces(&f).len() as i64);
+    let mut game = Game {
+        treasury: [0; 2],
+        provinces_delta: [0; 2],
+        bankruptcies: [0; 2],
+        siege_turns: 0,
+        battles: 0,
+        english_landings: 0,
+        stuck_turns: 0,
+        majors_alive: true,
+    };
+    // Armies standing still outside friendly places, not besieging.
+    let mut still: std::collections::BTreeMap<ArmyId, ([f32; 2], u32)> = Default::default();
+    for _ in 0..TURNS {
+        for order in ai::plan_turn(&state, data, &majors[0]) {
+            let _ = state.submit_order(data, order);
+        }
+        for event in state.end_turn_with(data, ai::plan_turn) {
+            let faction = majors
+                .iter()
+                .position(|m| event.faction.as_ref() == Some(m));
+            match event.kind {
+                EventKind::Bankruptcy => {
+                    if let Some(i) = faction {
+                        game.bankruptcies[i] += 1;
+                    }
+                }
+                EventKind::Battle if event.text_fr.contains("Vainqueur") => game.battles += 1,
+                EventKind::Attrition
+                    if event.text_fr.starts_with("Débarquement") && faction == Some(1) =>
+                {
+                    game.english_landings += 1
+                }
+                _ => {}
+            }
+        }
+        game.siege_turns += state
+            .settlements
+            .values()
+            .filter(|s| s.siege.is_some())
+            .count() as u32;
+        let mut now = std::collections::BTreeMap::new();
+        for (id, army) in &state.armies {
+            let point = state.army_point(data, army);
+            let besieging = army
+                .settlement()
+                .and_then(|s| state.settlements.get(s))
+                .is_some_and(|s| s.siege.is_some());
+            let home = army
+                .settlement()
+                .is_some_and(|s| state.is_friendly_settlement(&army.faction, s));
+            if besieging || home {
+                continue;
+            }
+            let turns = match still.get(id) {
+                Some((p, n)) if *p == point => n + 1,
+                _ => 0,
+            };
+            if turns >= 4 {
+                game.stuck_turns += 1;
+            }
+            now.insert(id.clone(), (point, turns));
+        }
+        still = now;
+    }
+    for (i, major) in majors.iter().enumerate() {
+        let f = &state.factions[major];
+        game.treasury[i] = f.treasury;
+        game.provinces_delta[i] =
+            state.controlled_provinces(major).len() as i64 - provinces_start[i];
+        game.majors_alive &= f.alive;
+    }
+    game
+}
+
+/// Spec § 7: 50 turns of AI against AI on 8 seeds stay in the band measured
+/// after C7a (`docs/wip/c7a-settlements-balance.md`, `docs/wip/m3-tour-ia.md`).
+/// About a minute in release; run with
+/// `cargo test --release -p ai --test m3_grid_ai -- --ignored`.
+#[test]
+#[ignore = "50 turns x 8 seeds: run in release with --ignored"]
+fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
+    let data = data();
+    let games: Vec<Game> = (1..=8).map(|seed| fifty_turns(&data, seed)).collect();
+    let n = games.len() as f64;
+    let mean = |f: &dyn Fn(&Game) -> f64| games.iter().map(f).sum::<f64>() / n;
+    for (i, g) in games.iter().enumerate() {
+        let seed = i + 1;
+        assert!(g.majors_alive, "seed {seed}: France and England survive");
+        assert_eq!(g.bankruptcies, [0, 0], "seed {seed}: no bankruptcy");
+        for (m, delta) in g.provinces_delta.iter().enumerate() {
+            assert!(
+                delta.abs() <= 5,
+                "seed {seed}: major {m} Δ provinces {delta} (no collapse, no blitz)"
+            );
+        }
+        assert!(g.battles > 0, "seed {seed}: armies meet in the field");
+    }
+    let france = mean(&|g| g.treasury[0] as f64);
+    let england = mean(&|g| g.treasury[1] as f64);
+    assert!(
+        (40_000.0..=160_000.0).contains(&france),
+        "France's treasury {france}"
+    );
+    assert!(
+        (5_000.0..=40_000.0).contains(&england),
+        "England's treasury {england}"
+    );
+    let sieges = mean(&|g| f64::from(g.siege_turns) / 50.0);
+    assert!((1.5..=8.0).contains(&sieges), "sieges per turn {sieges}");
+    let stuck = mean(&|g| f64::from(g.stuck_turns) / 50.0);
+    assert!(stuck <= 1.0, "stuck armies per turn {stuck}");
+    let landings = mean(&|g| f64::from(g.english_landings));
+    assert!(
+        landings >= 1.0,
+        "England lands on the continent ({landings} per game)"
+    );
+    println!(
+        "France {france:.0}, England {england:.0}, sieges/turn {sieges:.1}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
+        mean(&|g| f64::from(g.battles))
+    );
 }

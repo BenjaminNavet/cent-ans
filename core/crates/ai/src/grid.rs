@@ -183,8 +183,7 @@ impl<'a> GridPlanner<'a> {
         let grid = self.data.navgrid();
         let reach_km = f64::from(army.movement_left) / f64::from(PLAIN_COST) * grid.cell_km;
         let reach_px = (reach_km * self.rules.attack_reach_share) as f32 * self.px_per_km;
-        let engage_px =
-            self.data.free_movement_rules().engage_radius_km as f32 * self.px_per_km;
+        let engage_px = self.data.free_movement_rules().engage_radius_km as f32 * self.px_per_km;
         let here = state.army_point(self.data, army);
         self.enemies
             .iter()
@@ -202,7 +201,8 @@ impl<'a> GridPlanner<'a> {
                 // army of its side there; ours and our allies' there.
                 let (mut ours, mut theirs) = (power, 0.0);
                 for (id, other) in &state.armies {
-                    if id == army_id || distance(state.army_point(self.data, other), e.point) > engage_px
+                    if id == army_id
+                        || distance(state.army_point(self.data, other), e.point) > engage_px
                     {
                         continue;
                     }

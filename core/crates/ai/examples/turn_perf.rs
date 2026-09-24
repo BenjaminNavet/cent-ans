@@ -90,7 +90,7 @@ fn main() {
         );
     }
     let mut slowest: Vec<_> = by_faction.into_iter().collect();
-    slowest.sort_by(|a, b| b.1 .1.cmp(&a.1 .1));
+    slowest.sort_by_key(|a| std::cmp::Reverse(a.1 .1));
     for (faction, (total, max, count)) in slowest.iter().take(8) {
         println!(
             "  {faction}: mean {:.2} ms, max {:.2} ms",

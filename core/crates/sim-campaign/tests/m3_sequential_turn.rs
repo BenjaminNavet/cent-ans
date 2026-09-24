@@ -49,14 +49,20 @@ fn ai_factions_play_one_after_the_other_in_id_order() {
         .filter(|(id, f)| f.alive && id.as_str() != "fac_france")
         .map(|(id, _)| id.clone())
         .collect();
-    assert_eq!(played, expected, "every living AI faction, by id, not the player");
+    assert_eq!(
+        played, expected,
+        "every living AI faction, by id, not the player"
+    );
 }
 
 #[test]
 fn an_ai_attack_on_the_player_is_auto_resolved_and_reported() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
-    assert!(state.interactive_battles, "3D battles are on for the player");
+    assert!(
+        state.interactive_battles,
+        "3D battles are on for the player"
+    );
     for (a, b) in [("fac_england", "fac_france"), ("fac_france", "fac_england")] {
         state
             .factions
@@ -142,9 +148,9 @@ fn the_player_march_resumes_after_the_new_season() {
             &data,
             Order::MoveArmy {
                 army: french.clone(),
-                target: sim_campaign::MoveOrderTarget::Place(sim_campaign::Place::Settlement(
-                    set("set_bayonne"),
-                )),
+                target: sim_campaign::MoveOrderTarget::Place(sim_campaign::Place::Settlement(set(
+                    "set_bayonne",
+                ))),
             },
         )
         .unwrap();
