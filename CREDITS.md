@@ -24,6 +24,48 @@ correspondance identifiant → fichier → auteur est versionnée dans
 | Lorc | 59 | anvil, archery-target, armor-vest, arrows-shield, bandage-roll, boot-prints, bowman, breastplate, cannon, cannon-shot, castle, cauldron, cheese-wedge, crossed-swords, crown, crown-coin, drama-masks, drop, falling-leaf, fist, flying-flag, galleon, gears, gothic-cross, grapes, gunshot, halberd, hospital-cross, hot-spices, hourglass, laurels, leeching-worm, metal-bar, muscle-up, open-book, papers, potion-ball, powder, prayer, quill-ink, round-bottom-flask, scales, scalpel, scalpel-strike, scroll-unfurled, sleepy, snowflake-2, spears, sprout, stone-block, stone-tower, sun, swap-bag, target-arrows, tied-scroll, visored-helm, wax-seal, wheat, wine-glass |
 | Skoll | 4 | mounted-knight, musket, open-treasure-chest, siege-ram |
 
+## Assets tiers (`game/assets/third_party/`)
+
+Chaque dossier contient un `SOURCE.md` (URL, licence, auteur, modifications). Les assets CC0
+n'exigent aucune attribution ; ils sont crédités par courtoisie.
+
+### Musique — CC BY 4.0 (attribution obligatoire)
+
+- « Lord of the Land » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Village Consort » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+
+### Polices — SIL Open Font License 1.1
+
+- **EB Garamond** — Georg Duffner, Octavio Pardo (The EB Garamond Project Authors),
+  [fonts.google.com/specimen/EB+Garamond](https://fonts.google.com/specimen/EB+Garamond).
+- **IM FELL English** — Igino Marini ([iginomarini.com](http://www.iginomarini.com)), nom
+  réservé « IM FELL ».
+
+Le texte de la licence (`OFL.txt`) accompagne chaque police.
+
+### Modèles 3D — CC0 1.0
+
+- **Quaternius** ([quaternius.com](https://quaternius.com)) : personnages riggés de l'Ultimate
+  Modular Characters Pack (King, Adventurer, Hooded Adventurer, Farmer), chevaux et âne de
+  l'Ultimate Animated Animal Pack, Medieval Village Pack (39 bâtiments et props) — fichiers
+  obtenus via [Poly Pizza](https://poly.pizza).
+- **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
+  Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
+  seulement, décimation, matériaux simplifiés.
+
+### Ciels HDRI — CC0 1.0
+
+- **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
+- **Autumn Field Pure Sky** — Sergej Majboroda, Jarod Guest (Poly Haven).
+
+### Interface — CC0 1.0
+
+- **Fantasy UI Borders** — Kenney ([kenney.nl](https://kenney.nl)).
+- **Parchment GUI** — zwonky ([OpenGameArt](https://opengameart.org/content/parchment-gui)).
+
 ## Données géographiques
 
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
