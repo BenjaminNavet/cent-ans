@@ -141,17 +141,25 @@ fn demo_contact_stays_near_seventy_seconds() {
     );
 }
 
-/// Without a site (no village, no hedge), the AI plays exactly as before B6.
+/// Without a site (no village, no hedge), the AI keeps the B6 shape of the
+/// fight (winner, order of magnitude of the losses) but the digests move
+/// with B8: the two sides here are unequal in numbers (6 French units, 4
+/// English), so their centroids are never square to begin with, and the
+/// advancing line's small lean towards that off-centre enemy (`advance`,
+/// `ADVANCE_LEAN_MAX`) compounds over the whole advance; the leashed
+/// pursuit (`PURSUIT_LEASH`) also changes how a rout on either side plays
+/// out. A defender squarely in front is unaffected by the lean (`dx` ~ 0);
+/// see `advance`'s own doc comment.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "238 Some(Attacker) [27, 46, 48, 100, 100, 20, 51, 83, 84, 6]",
+            "259 Some(Attacker) [12, 49, 71, 100, 100, 14, 42, 88, 117, 9]",
         ),
         (
             11,
-            "228 Some(Attacker) [23, 47, 47, 100, 100, 25, 65, 84, 86, 4]",
+            "304 Some(Attacker) [0, 34, 49, 97, 100, 15, 49, 93, 103, 6]",
         ),
     ];
     for (seed, digest_before) in expected {
@@ -414,6 +422,82 @@ fn cavalry_rides_round_a_hedge() {
     }
     assert!(contact, "the knights reach the archers");
     assert!(!has_event(&sim, "se brise sur la haie"));
+}
+
+/// B8: bocage + village, seed 5 — used to be the worst case (French knights
+/// chasing the English mounted archers past the hedge line delayed contact
+/// to 152 s); the leashed pursuit (`PURSUIT_LEASH`) and the hedge-network
+/// detour bring it back near the demo's usual rhythm.
+#[test]
+fn bocage_village_seed_5_engages_near_seventy_seconds() {
+    let mut battle = demo_setup();
+    battle.terrain = data_model::Terrain::Bocage;
+    battle.village = Some(true);
+    let mut sim = BattleSim::new(battle, 5).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    let contact = first_contact(&mut sim, 300.0);
+    assert!(contact.is_some_and(|t| t < 90.0), "contact at {contact:?}");
+}
+
+/// B8: a horse that has already chased a rout far beyond its own battle
+/// line leaves it be, instead of straying even further.
+#[test]
+fn horse_leaves_a_rout_too_far_from_the_line() {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        // A second, able defender keeps the AI engaged with the field (the
+        // sole-routing-unit case makes `ai::plan` bail out early); it stays
+        // out of everyone's reach.
+        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        None,
+    );
+    battle.village = Some(false);
+    let mut sim = BattleSim::new(battle, 4).unwrap();
+    lab(&mut sim);
+    sim.set_ai(SideId::Attacker, true);
+    // The line stays near the deployment line; the knight has already
+    // chased far ahead of it, close enough to the routing target to catch
+    // it (< 350 m) but past the leash from the line (`PURSUIT_LEASH`, 280 m).
+    place(&mut sim, 0, 600.0, ATTACKER_LINE_Z, 0.0);
+    place(&mut sim, 1, 600.0, ATTACKER_LINE_Z + 300.0, 0.0);
+    place(&mut sim, 2, 600.0, ATTACKER_LINE_Z + 400.0, 0.0);
+    place(&mut sim, 3, 1100.0, DEFENDER_LINE_Z, std::f64::consts::PI);
+    sim.units_mut()[2].state = UnitState::Routing;
+    let routed_id = sim.units()[2].id;
+    sim.step();
+    assert_ne!(
+        sim.units()[1].target,
+        Some(routed_id),
+        "the knight should not chase a rout this far from the line"
+    );
+}
+
+/// B8: within the leash, the horse still runs a rout down as before.
+#[test]
+fn horse_still_chases_a_rout_within_the_leash() {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        None,
+    );
+    battle.village = Some(false);
+    let mut sim = BattleSim::new(battle, 4).unwrap();
+    lab(&mut sim);
+    sim.set_ai(SideId::Attacker, true);
+    place(&mut sim, 0, 600.0, ATTACKER_LINE_Z, 0.0);
+    place(&mut sim, 1, 600.0, ATTACKER_LINE_Z + 100.0, 0.0);
+    place(&mut sim, 2, 600.0, ATTACKER_LINE_Z + 200.0, 0.0);
+    place(&mut sim, 3, 1100.0, DEFENDER_LINE_Z, std::f64::consts::PI);
+    sim.units_mut()[2].state = UnitState::Routing;
+    let routed_id = sim.units()[2].id;
+    sim.step();
+    assert_eq!(
+        sim.units()[1].target,
+        Some(routed_id),
+        "the knight should still chase a rout close to the line"
+    );
 }
 
 /// With no way round (a ditch across the whole field), the knights wait.
