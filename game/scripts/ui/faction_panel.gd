@@ -41,6 +41,8 @@ var coinage_section: CoinageSection
 var chivalry_section: ChivalrySection
 var ransom_button: Button
 var ransom_panel: RansomPanel
+## Audit A3 E1 : « Solde prévu » (le chiffre de la barre du haut, calculé par `core/`).
+var net_value: Label
 var _tax_buttons: Dictionary = {}
 var _updating := false
 
@@ -55,16 +57,18 @@ func _ready() -> void:
 		closed.emit())
 	_add_table_row()
 	_add_h11_sections()
+	_arrange_budget()
 	_wrap_in_scroll()
 	visibility_changed.connect(func() -> void:
 		if not visible and ransom_panel != null:
 			ransom_panel.hide())
 	# F2 : infobulles du trésor et du revenu.
-	for pair in [[treasury_value, "hud_treasury"], [income_value, "hud_income"], [projected_value, "hud_income"]]:
+	for pair in [[treasury_value, "hud_treasury"], [income_value, ""], [projected_value, ""]]:
 		var label: Label = pair[0]
+		var tooltip := label.tooltip_text
 		label.set_script(RichLabel)
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
-		label.tooltip_text = RichTooltip.hud(pair[1])
+		label.tooltip_text = RichTooltip.hud(pair[1]) if pair[1] != "" else tooltip
 
 
 ## `label` / `color` : identité de la faction (`SimFacade.faction_short_name` / `faction_color`).
@@ -76,6 +80,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	if economy.is_empty():
 		treasury_value.text = "—"
 		income_value.text = "—"
+		net_value.text = "—"
 		projected_value.text = "—"
 		army_upkeep_value.text = "—"
 		building_upkeep_value.text = "—"
@@ -90,11 +95,16 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		show()
 		return
 	treasury_value.text = "%s ℔" % _thousands(int(economy.get("treasury", 0)))
-	income_value.text = _signed(int(economy.get("income", 0)))
+	# Budget signé : recettes (+), charges (−), solde = barre du haut (tout vient de `core/`).
+	var last_turn := int(economy.get("net_income_last_turn", 0))
+	income_value.text = _signed(last_turn) if int(economy.get("income", 0)) != 0 or last_turn != 0 else "—"
 	projected_value.text = _signed(int(economy.get("projected_income", 0)))
-	army_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("army_upkeep", 0)))
-	building_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("building_upkeep", 0)))
-	administration_value.text = "%s ℔" % _thousands(int(economy.get("administration_upkeep", 0)))
+	army_upkeep_value.text = _charge(int(economy.get("army_upkeep", 0)))
+	building_upkeep_value.text = _charge(int(economy.get("building_upkeep", 0)))
+	administration_value.text = _charge(int(economy.get("administration_upkeep", 0)))
+	var net := int(economy.get("net_income", 0))
+	net_value.text = _signed(net)
+	net_value.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
 	_show_table_upkeep(economy)
 	_show_h11(economy)
 	_set_tax_buttons_disabled(false)
@@ -124,7 +134,7 @@ func _add_table_row() -> void:
 
 ## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
 func _show_table_upkeep(economy: Dictionary) -> void:
-	table_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("table_upkeep", 0)))
+	table_upkeep_value.text = _charge(int(economy.get("table_upkeep", 0)))
 	var lines := PackedStringArray(["[b]La Table[/b]", "Régimes alimentaires payés chaque saison (inclus dans l'entretien).",
 		"Saison passée : %s ℔" % _thousands(int(economy.get("table_upkeep_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
@@ -164,6 +174,42 @@ func _add_h11_sections() -> void:
 		goods_list.get_parent().add_child(node)
 
 
+## Audit A3 E1 : ordre du budget — recettes (dont seigneuriage), charges signées (dont
+## refonte sous l'administration), puis le solde prévu et celui de la saison passée.
+func _arrange_budget() -> void:
+	var grid := income_value.get_parent()
+	var net_key := Label.new()
+	net_key.text = "Solde prévu de la saison"
+	net_key.add_theme_font_size_override("font_size", 17)
+	net_value = RichLabel.new()
+	net_value.text = "—"
+	net_value.add_theme_font_size_override("font_size", 17)
+	net_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	net_value.tooltip_text = "Recettes moins toutes les charges : le « Solde » de la barre du haut, ajouté au trésor en fin de tour."
+	grid.add_child(net_key)
+	grid.add_child(net_value)
+	(grid.get_node("ProjectedKey") as Label).text = "Recettes prévues"
+	projected_value.tooltip_text = "Impôts, commerce et seigneuriage attendus à la prochaine fin de tour, avant les charges."
+	(grid.get_node("IncomeKey") as Label).text = "Solde de la saison passée"
+	income_value.tooltip_text = "Ce qui a réellement été ajouté au trésor (ou retiré) à la dernière fin de tour."
+	var order: Array[Control] = []
+	for value: Control in [treasury_value, projected_value, seigniorage_value, army_upkeep_value,
+			building_upkeep_value, table_upkeep_value, administration_value, recoinage_value,
+			net_value, income_value]:
+		order.append(grid.get_child(value.get_index() - 1))
+		order.append(value)
+	for index in order.size():
+		grid.move_child(order[index], index)
+	var seign_key: Label = grid.get_child(seigniorage_value.get_index() - 1)
+	seign_key.text = "   dont seigneuriage"
+	var recoin_key: Label = grid.get_child(recoinage_value.get_index() - 1)
+	recoin_key.text = "   dont refonte des monnaies"
+
+
+static func _charge(value: int) -> String:
+	return "−%s ℔" % _thousands(absi(value)) if value != 0 else "0 ℔"
+
+
 ## H11 : le contenu (scène `VBox`) passe dans un défilement vertical borné à la hauteur de
 ## l'écran, les sections Monnaie et Ordre allongeant le panneau.
 var _scroll: ScrollContainer
@@ -196,7 +242,7 @@ func _show_h11(economy: Dictionary = {}) -> void:
 		var seigniorage := int(economy.get("seigniorage", 0))
 		seigniorage_value.text = "%s%s ℔" % ["+" if seigniorage > 0 else "", _thousands(seigniorage)]
 		seigniorage_value.tooltip_text = "[b]Seigneuriage[/b]\nProfit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s ℔" % _thousands(int(economy.get("seigniorage_last_turn", 0)))
-		recoinage_value.text = "%s ℔" % _thousands(int(economy.get("recoinage", 0)))
+		recoinage_value.text = _charge(int(economy.get("recoinage", 0)))
 		recoinage_value.tooltip_text = "[b]Refonte des espèces[/b]\nCoût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s ℔" % _thousands(int(economy.get("recoinage_last_turn", 0)))
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
@@ -253,7 +299,7 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 		return
 	for category in categories:
 		var line := Label.new()
-		line.text = "• %s" % str(CATEGORY_LABELS.get(category, category)).capitalize()
+		line.text = "• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize()))
 		goods_list.add_child(line)
 	# F2 : une puce (icône + nom + quantité) par ressource, infobulle riche.
 	var flow := HFlowContainer.new()
@@ -266,7 +312,7 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 
 
 static func _signed(value: int) -> String:
-	return "%s%s ℔" % ["+" if value >= 0 else "", _thousands(value)]
+	return "%s%s ℔" % ["+" if value >= 0 else "−", _thousands(absi(value))]
 
 
 static func _thousands(value: int) -> String:
