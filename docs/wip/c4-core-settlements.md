@@ -16,7 +16,7 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 2, 4.2-4.6. ADR 0005. Sui
   antérieure à la refonte des colonies »).
 - [x] IA (`ai_minimal`, `crates/ai`) : cibles = colonies, la cité d'abord.
 - [x] Pont Godot, adaptations minimales de `game/` (`location_province`, `path_provinces`,
-  position de l'armée prise dans `settlements_px.json`).
+  position de l'armée = `SettlementLayer.world_position_of` de C6, sinon `settlements_px.json`).
 - [x] Tests § 7 (`tests/c4_settlements.rs`, refus v4 dans `tests/campaign.rs`) ; fmt, clippy,
   test, `build.sh`, smoke vert (y compris l'ancien échec `projected_income`).
 
@@ -50,4 +50,4 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 2, 4.2-4.6. ADR 0005. Sui
 
 ## Prochaine étape
 
-Fusion par l'orchestrateur.
+Fusion par l'orchestrateur (main c0b9635 déjà fusionné : P1 frontières conservées, garnison de cité posée après `init_settlements` car le contrôle est dérivé).
