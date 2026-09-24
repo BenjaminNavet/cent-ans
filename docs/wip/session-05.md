@@ -10,7 +10,7 @@ Démarrée le 2026-09-24. Nouvelle clé OpenRouter (≈ 19,6 $ de crédit), tout
 - [en cours] Illustrations de l'encyclopédie : `cent-ans assets illustrations` (unités, bâtiments,
   technologies, factions ; 116 × 640×360 JPEG, ≈ 5,3 $), en tête de fiche (fait, capture
   `docs/img/encyclopedia-illustration.png`).
-- [en cours] Agent A (worktree, Sonnet) : bonus des technologies dans la bataille 3D (limite G1).
+- [fait] Agent A : bonus des technologies dans la bataille 3D (limite G1), fusionné (abdd929).
 - [en cours] Agent B (worktree) : Bourgogne-Angleterre et Brabant (équilibrage G2).
 - [à faire] Après génération : `godot --headless --path game --import`, commiter images + `.import`,
   vérifier `docs/budget.md` contre `GET /api/v1/credits` (total_usage de départ : 80,3766 $).
