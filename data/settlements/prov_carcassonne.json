@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_carcassonne",
+    "province": "prov_carcassonne",
+    "kind": "city",
+    "name": { "display": "Carcassonne", "local": "Carcassona", "local_language": "occitan" },
+    "lonlat": [2.3508, 43.2130],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_castle", "bld_muster_field"],
+    "port": false,
+    "description": "Double enceinte de la Cité surplombant la ville basse, siège de la sénéchaussée royale de Carcassonne-Béziers.",
+    "sources": ["Cité de Carcassonne", "Sénéchaussée de Carcassonne"]
+  },
+  {
+    "id": "set_narbonne",
+    "province": "prov_carcassonne",
+    "kind": "town",
+    "name": { "display": "Narbonne", "local": "Narbona", "local_language": "occitan" },
+    "lonlat": [3.0042, 43.1839],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_cathedral", "bld_stone_walls"],
+    "port": true,
+    "description": "Archevêché et ancien grand port romain, dont l'accès à la mer s'ensable peu à peu.",
+    "sources": ["Narbonne"]
+  },
+  {
+    "id": "set_beziers",
+    "province": "prov_carcassonne",
+    "kind": "town",
+    "name": { "display": "Béziers", "local": "Besièrs", "local_language": "occitan" },
+    "lonlat": [3.2150, 43.3442],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_weaving_workshop", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur l'Orb, marquée par le sac de 1209 lors de la croisade des Albigeois.",
+    "sources": ["Béziers", "Massacre de Béziers"]
+  },
+  {
+    "id": "set_peyrepertuse",
+    "province": "prov_carcassonne",
+    "kind": "castle",
+    "name": { "display": "Peyrepertuse", "local": "Pèirapertusa", "local_language": "occitan" },
+    "lonlat": [2.6167, 42.8667],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château royal perché des Corbières, l'un des « cinq fils de Carcassonne » gardant la frontière d'Aragon.",
+    "sources": ["Château de Peyrepertuse"]
+  },
+  {
+    "id": "set_fontfroide",
+    "province": "prov_carcassonne",
+    "kind": "abbey",
+    "name": { "display": "Fontfroide", "local": "Fontfreda", "local_language": "occitan" },
+    "lonlat": [2.9500, 43.1167],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Grande abbaye cistercienne près de Narbonne.",
+    "sources": ["Abbaye de Fontfroide"]
+  }
+]
