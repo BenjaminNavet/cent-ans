@@ -1,0 +1,12 @@
+{
+  "id": "cdx_isabelle_de_france",
+  "title": "Isabelle de France, reine d'Angleterre",
+  "category": "personnage",
+  "aliases": ["Isabelle de France", "reine Isabelle", "Louve de France", "Roger Mortimer"],
+  "era": { "from": "v. 1295", "to": "1358" },
+  "summary": "Fille de Philippe le Bel et épouse d'Édouard II, Isabelle renverse son mari en 1326-1327 avec son amant Roger Mortimer. C'est par elle que son fils [[cdx_edouard_iii|Édouard III]] revendique la couronne de France.",
+  "body": "Isabelle est la fille du roi de France Philippe IV le Bel et la sœur des trois derniers [[cdx_capetiens_directs|Capétiens directs]], Louis X, Philippe V et Charles IV. Mariée en 1308 au roi d'Angleterre Édouard II, elle souffre de l'influence de favoris détestés, en particulier Hugues le Despenser.\n\nEnvoyée en France en 1325 pour négocier avec son frère Charles IV, elle refuse de rentrer. Avec son amant Roger Mortimer, un baron exilé, et l'appui de soldats du Hainaut obtenus en fiançant son fils à [[cdx_philippa_de_hainaut|Philippa]], elle débarque en Angleterre en 1326. Édouard II est abandonné de tous, déposé en janvier 1327 au profit de son fils de quatorze ans, puis meurt en captivité, probablement assassiné. Les Anglais surnommeront plus tard Isabelle la « Louve de France ».\n\nEn 1328, à la mort de Charles IV, Isabelle fait valoir les droits de son fils à la couronne de France : il est le petit-fils de Philippe le Bel, plus proche que Philippe de Valois. Les grands du royaume écartent cette prétention transmise par une femme, lors de la [[cdx_succession_1328|crise successorale de 1328]].\n\nEn octobre 1330, le jeune [[cdx_edouard_iii|Édouard III]] prend le pouvoir par un coup de force au château de Nottingham : Mortimer est pendu, Isabelle écartée. Elle vit ensuite dans une retraite honorable et fastueuse, notamment à Castle Rising, et meurt en 1358. La revendication qu'elle a transmise sert de fondement juridique à toute la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]].",
+  "entity": "chr_isabelle_de_france",
+  "see_also": ["cdx_succession_1328", "cdx_edouard_iii", "cdx_capetiens_directs", "cdx_plantagenets"],
+  "sources": ["Isabelle de France (1295-1358)", "Roger Mortimer (1er comte de March)"]
+}
