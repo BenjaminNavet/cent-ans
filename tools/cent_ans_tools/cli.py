@@ -105,7 +105,7 @@ def geo_build(
         False, "--force", help="Retélécharge les données brutes"
     ),
 ) -> None:
-    """Construit data/map/ (terrain, provinces, relief 8192², routes, colonies, hameaux) et les aperçus."""
+    """Construit data/map/ (terrain, provinces, relief 8192², routes, colonies, hameaux, grille de navigation) et les aperçus."""
     from cent_ans_tools.geo import build as geo_builder
 
     result = geo_builder.build(force=force)
@@ -134,6 +134,8 @@ def geo_build(
         _report_settlements(result.settlements)
     if result.hamlets:
         console.print(f"Hameaux : {result.hamlets.count}")
+    if result.navgrid:
+        _report_navgrid(result.navgrid)
 
 
 @geo_app.command("provinces")
@@ -225,6 +227,34 @@ def geo_splat() -> None:
         "Rasters du shader de terrain",
         [result.splat, result.border_dist, result.coast_dist],
     )
+
+
+@geo_app.command("navgrid")
+def geo_navgrid(
+    lenient: bool = typer.Option(
+        False, "--lenient", help="Écrit la grille même si des colonies sont isolées"
+    ),
+) -> None:
+    """Génère navgrid.png (grille de navigation 2048²), son aperçu et map.json.navgrid."""
+    from cent_ans_tools.geo import navgrid as geo_navgrid_step
+
+    _report_navgrid(geo_navgrid_step.build(strict=not lenient))
+
+
+def _report_navgrid(result) -> None:  # noqa: ANN001
+    _print_sizes("Grille de navigation", [result.path, result.preview])
+    console.print(
+        f"{result.passable_fraction:.1%} des cases de terre franchissables ; "
+        f"passages : {result.crossings_used} ponts et gués, "
+        f"{result.road_crossings} croisements route/fleuve, {result.passes} cols "
+        f"({result.seconds:.0f} s)"
+    )
+    if result.off_river:
+        console.print(
+            f"Passages hors du tracé des fleuves : {', '.join(result.off_river)}"
+        )
+    for warning in result.warnings:
+        console.print(f"[yellow]{warning}[/yellow]")
 
 
 @geo_app.command("textures")
