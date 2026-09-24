@@ -20,7 +20,8 @@
 //! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
 //!   range, line of sight, weather and armour; melee on contact with charge,
 //!   flank (+50 %) and rear (+100 %) bonuses, pikes/schiltron against
-//!   cavalry, archers' stakes; morale, rout and rally; a general whose aura
+//!   cavalry, archers' stakes; charge impacts that knock men down
+//!   ([`impact`], lot BV2); morale, rout and rally; a general whose aura
 //!   steadies nearby regiments.
 //! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
 //!   walls with towers and a gate, ladders, siege towers, ram, engines that
@@ -38,6 +39,7 @@ pub mod command;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod impact;
 pub mod orders;
 pub mod outcome;
 pub mod rng;
@@ -53,6 +55,7 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use rng::BattleRng;

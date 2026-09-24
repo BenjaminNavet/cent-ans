@@ -328,6 +328,10 @@ impl BattleSim {
             let loss = (unit.hp * rules.heat.loss_per_s * intensity * DT).min(unit.hp);
             unit.hp -= loss;
             unit.tick_losses += loss;
+            if loss > 0.0 {
+                unit.loss_cause = crate::impact::LossCause::Fire;
+                unit.loss_by = None;
+            }
             unit.morale = (unit.morale - rules.heat.morale_per_s * intensity * DT).max(0.0);
             if unit.hp <= 0.0 {
                 self.unit_destroyed(i);
