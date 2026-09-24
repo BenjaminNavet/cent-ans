@@ -31,7 +31,33 @@ de la refonte colonies (`docs/wip/colonies.md`, ADR 0005).
   empilées d'avant C4) ; `edicts.rs` (10 tests unitaires : défaut, délai,
   refus doublon/inconnu/province partielle, effets fusionnés, IA
   déterministe, sauvegarde). `cargo test` plein vert (voir historique wip).
-- [ ] Smoke Godot (import en cours) + captures `docs/img/c4-edits/`.
+- [x] Smoke Godot : 24 « smoke OK » (23 + nouvelle ligne `_run_edicts` : options,
+  `set_edict` en attente puis actif, second changement refusé, section UI), 0
+  « SCRIPT ERROR ». `cargo test --workspace` : 448 passés, 0 échec.
+- [x] Captures `docs/img/c4-edits/edicts.png` (sélecteur, édit en attente,
+  infobulle d'effets) et `chains.png` (constructions d'Agen triées par
+  catégorie/rang, prérequis grisés) ; script `game/tests/c4_screenshot.gd`
+  (avec affichage, pas en headless).
+
+## Terminé (2026-09-25)
+
+Lot prêt à fusionner. ADR renuméroté 0011 (0010 pris sur main par le mouvement
+libre).
+
+## Pistes ouvertes
+
+- Données de colonies d'avant C4 : plusieurs paliers d'une même chaîne restent
+  empilés (Paris : marché + maison des métiers + foire ; paroissiale + abbaye +
+  cathédrale). Aucune erreur, mais un nettoyage (garder le palier le plus haut)
+  équilibrerait mieux ; 568 fichiers, non fait.
+- Pas de condition de taille de colonie au-delà de `settlement_kinds` et des
+  technologies.
+- L'arbre de construction reste une liste triée (rang affiché, prérequis en
+  rouge) et non un graphe à nœuds.
+- Les édits n'ont pas d'icônes propres (repli sur l'icône de catégorie
+  « bâtiment ») ni de fiche d'encyclopédie.
+- IA des édits : score simple (somme des effets, marge 2) ; à équilibrer sur une
+  longue partie (l'Aide féodale peut être préférée trop souvent).
 - [x] ADR 0011 (`docs/decisions/0011-edicts-and-building-chains.md`).
 
 ## Décisions
