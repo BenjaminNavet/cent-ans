@@ -85,6 +85,7 @@ func _init() -> void:
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
+	await _run_minimap_fog()  # C1
 	_run_city_economy()
 	await _run_characters()
 	await _run_technologies()
@@ -286,6 +287,69 @@ func _run_campaign_loop() -> void:
 
 	if _failures == 0:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
+	map.queue_free()
+	await process_frame
+
+
+## C1 : minicarte présente dans le HUD (haut droite, lettres dessous, sans chevaucher la cloche),
+## clic = caméra recentrée ; brouillard (vraie simulation) : au moins une province voilée, aucune
+## armée étrangère marquée hors de vue, réglage désactivable.
+func _run_minimap_fog() -> void:
+	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
+	var map: Node3D = scene.instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "minimap: campaign scene failed to start"):
+		map.queue_free()
+		return
+	var ctl: Node = map.minimap_ctl  # non typé : compilé après les autoloads
+	if not _check(ctl != null and ctl.minimap != null and ctl.minimap.is_inside_tree(), "minimap: controller or minimap missing"):
+		map.queue_free()
+		return
+	var minimap: Control = ctl.minimap
+	map.ui.layout_hud()
+	await process_frame
+	_check(minimap.visible and minimap.size.x > 100.0 and minimap.size.y > 80.0, "minimap should be visible with a sensible size, got %s" % minimap.size)
+	var mini_rect := Rect2(minimap.position, minimap.size)
+	var bell_rect := Rect2(map.ui.end_turn_cluster.position, map.ui.end_turn_cluster.size)
+	_check(not mini_rect.intersects(bell_rect), "minimap %s overlaps the end-turn cluster %s" % [mini_rect, bell_rect])
+	_check(map.ui.news_letters.position.y >= mini_rect.end.y, "news letters should sit below the minimap")
+	_check(minimap.army_dot_count() > 0, "minimap should show the player's armies")
+	# Clic : la caméra vise le point cliqué (coordonnées carte).
+	var local: Vector2 = minimap.map_rect().size * Vector2(0.25, 0.7)
+	var expected: Vector2 = minimap.view_to_map(local)
+	minimap.click_at(local)
+	var focus: Vector3 = map.camera_rig.target_focus
+	_check(Vector2(focus.x, focus.z).distance_to(expected) < 1.0, "minimap click should recenter the camera on %s, got %s" % [expected, focus])
+	await process_frame
+	_check(ctl.view_frame().size() == 4, "camera frame should have 4 corners")
+	if map.sim.has_method("get_visible_provinces"):
+		_check(ctl.fog_active, "fog of war should be active by default with the real simulation")
+		var hidden := ""
+		for index in range(1, map.map_data.province_count + 1):
+			var id := str(map.map_data.get_province(index).get("id", ""))
+			if id != "" and not ctl.is_province_visible(id):
+				hidden = id
+				break
+		_check(hidden != "", "at least one province should be hidden by the fog")
+		_check(minimap.visible_province_count() > 0 and minimap.visible_province_count() < map.map_data.province_count,
+			"minimap fog mask should cover part of the map (%d visible)" % minimap.visible_province_count())
+		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
+		for army_id in map.sim.call("get_army_ids"):
+			var army: Dictionary = map.sim.call("get_army", army_id)
+			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location", ""))):
+				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
+		var settings: Node = root.get_node_or_null("/root/Settings")
+		if settings != null:
+			settings.call("set_value", "map/fog_of_war", false, false)
+			_check(not ctl.fog_active and ctl.is_province_visible(hidden), "fog setting off should reveal %s" % hidden)
+			settings.call("set_value", "map/fog_of_war", true, false)
+			_check(ctl.fog_active, "fog setting back on")
+	else:
+		print("smoke minimap: mock simulation, fog of war inactive")
+	if _failures == 0:
+		print("smoke OK: minimap (%d dots, %d visible provinces), fog %s" % [minimap.army_dot_count(), minimap.visible_province_count(), "on" if ctl.fog_active else "off"])
 	map.queue_free()
 	await process_frame
 
