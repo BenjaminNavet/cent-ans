@@ -17,6 +17,14 @@
 //!   (Crécy, Agincourt), the line waits and counter-charges at close range.
 //!   Otherwise the side advances: shooters lead and duel at range, then the
 //!   line closes and each regiment engages the enemy regiment opposite.
+//! - **Site (B6)**: a defensive side with a hedge, a ditch, a fence or a
+//!   village within reach of its deployment line leans on it instead of
+//!   the high ground: shooters just behind the obstacle (inside the edge of
+//!   the village), the line behind them (or right behind the obstacle when
+//!   it has no shooters); behind a hedge, a ditch or houses the shooters
+//!   ignore horsemen, whose charge would break. Cavalry never charges
+//!   through a hedge or a ditch, nor into a village: it rides round the end
+//!   of the obstacle, or waits on its wing.
 //! - **Shooters** fall back behind the line as soon as enemy foot or horse
 //!   come close, and disengage from a melee.
 //! - **Cavalry** charges isolated shooters, the flanks or rear of enemy
@@ -54,6 +62,7 @@ use crate::command::Command;
 use crate::setup::SideId;
 use crate::siege::SiegeWorks;
 use crate::sim::{attack_angle, BattleSim};
+use crate::site::OBSTACLE_REACH;
 use crate::unit::{Formation, Unit, UnitState};
 
 /// Distance at which the line closes in at the run.
@@ -443,6 +452,258 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
     }
 }
 
+/// B6: a defensive side looks for cover this far on either side of the
+/// centre of its deployment line.
+pub const COVER_LATERAL: f64 = 260.0;
+/// ... this far ahead of its deployment line (towards the enemy) ...
+pub const COVER_AHEAD: f64 = 110.0;
+/// ... and this far behind it.
+pub const COVER_BEHIND: f64 = 90.0;
+/// Shooters stand this far behind a hedge, a fence or a ditch (well within
+/// [`crate::site::HEDGE_COVER_REACH`]).
+pub const COVER_SETBACK: f64 = 7.0;
+/// Shooters stand this far inside the edge of a village.
+pub const VILLAGE_SETBACK: f64 = 16.0;
+/// Shooters stand this far in front of the line (the usual defensive order).
+const SHOOTERS_AHEAD: f64 = 30.0;
+
+/// What a defensive side leans on (B6).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum CoverKind {
+    Obstacle(crate::site::ObstacleKind),
+    Village,
+}
+
+/// A defensive position drawn from the site (B6): the front the shooters
+/// hold, just behind a hedge, a ditch, a fence, or inside the edge of a
+/// village facing the enemy.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Cover {
+    pub kind: CoverKind,
+    /// Centre of the shooters' front (x, z), behind the obstacle.
+    pub center: (f64, f64),
+    /// Unit vector along the front.
+    pub along: (f64, f64),
+    /// Length of the covered front, in metres.
+    pub width: f64,
+    /// The obstacle (or the village) breaks cavalry charges.
+    pub breaks_charge: bool,
+}
+
+impl Cover {
+    /// z of the front at `x` (the front follows the obstacle's slope).
+    fn z_at(&self, x: f64) -> f64 {
+        if self.along.0.abs() < 1e-6 {
+            return self.center.1;
+        }
+        self.center.1 + (x - self.center.0) * self.along.1 / self.along.0
+    }
+}
+
+/// Best cover for `side` within reach of its deployment line, if any
+/// (deterministic: obstacles in index order, strict improvements only).
+pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Option<Cover> {
+    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
+    use crate::site::ObstacleKind;
+    let (line_z, forward) = match side {
+        SideId::Attacker => (ATTACKER_LINE_Z, 1.0),
+        SideId::Defender => (DEFENDER_LINE_Z, -1.0),
+    };
+    let reference = (FIELD_WIDTH * 0.5, line_z);
+    let within = |x: f64, z: f64| {
+        let ahead = (z - reference.1) * forward;
+        (x - reference.0).abs() <= COVER_LATERAL && (-COVER_BEHIND..=COVER_AHEAD).contains(&ahead)
+    };
+    let standable = |x: f64, z: f64| {
+        field.inside(x, z)
+            && !field.in_forest(x, z)
+            && !field.in_mud(x, z)
+            && field.water_at(x, z).is_none()
+    };
+    let penalty =
+        |x: f64, z: f64| 0.25 * (x - reference.0).abs() + 0.3 * ((z - reference.1) * forward).abs();
+    let mut best: Option<(Cover, f64)> = None;
+    for obstacle in &field.obstacles {
+        let len = obstacle.length();
+        if len < 30.0 {
+            continue;
+        }
+        let along = (
+            (obstacle.b.0 - obstacle.a.0) / len,
+            (obstacle.b.1 - obstacle.a.1) / len,
+        );
+        // The front must face the enemy (roughly across the field).
+        if along.0.abs() < 0.7 {
+            continue;
+        }
+        let along = if along.0 < 0.0 {
+            (-along.0, -along.1)
+        } else {
+            along
+        };
+        let weight = match obstacle.kind {
+            ObstacleKind::Hedge => 1.0,
+            ObstacleKind::Ditch => 0.8,
+            ObstacleKind::Fence => 0.45,
+        };
+        let mid = (
+            (obstacle.a.0 + obstacle.b.0) * 0.5,
+            (obstacle.a.1 + obstacle.b.1) * 0.5,
+        );
+        let center = (mid.0, mid.1 - forward * COVER_SETBACK);
+        if !within(mid.0, mid.1) || !standable(center.0, center.1) {
+            continue;
+        }
+        // A croft hedge with the houses in front of it would mask the
+        // shooting.
+        let masked = field.village.as_ref().is_some_and(|v| {
+            (v.zone.z - mid.1) * forward > 0.0 && (v.zone.x - mid.0).abs() < v.zone.radius
+        });
+        if masked {
+            continue;
+        }
+        let score = weight * len.min(120.0) - penalty(mid.0, mid.1);
+        if best.is_none_or(|(_, s)| score > s) {
+            best = Some((
+                Cover {
+                    kind: CoverKind::Obstacle(obstacle.kind),
+                    center,
+                    along,
+                    width: len,
+                    breaks_charge: obstacle.kind.breaks_charge(),
+                },
+                score,
+            ));
+        }
+    }
+    if let Some(village) = &field.village {
+        let zone = village.zone;
+        let edge = (
+            zone.x,
+            zone.z + forward * (zone.radius - VILLAGE_SETBACK).max(0.0),
+        );
+        if within(edge.0, edge.1) && standable(edge.0, edge.1) {
+            let width = (zone.radius * 1.4).max(30.0);
+            let score = width.min(120.0) - penalty(edge.0, edge.1);
+            if best.is_none_or(|(_, s)| score > s) {
+                best = Some((
+                    Cover {
+                        kind: CoverKind::Village,
+                        center: edge,
+                        along: (1.0, 0.0),
+                        width,
+                        breaks_charge: true,
+                    },
+                    score,
+                ));
+            }
+        }
+    }
+    best.filter(|&(_, score)| score > 15.0)
+        .map(|(cover, _)| cover)
+}
+
+/// Slots of the shooters along the cover front, in lateral order (B6).
+fn cover_slots(view: &View, shooters: &[usize], cover: &Cover) -> Vec<(usize, f64, f64)> {
+    let mut order: Vec<usize> = shooters.to_vec();
+    order.sort_by(|&a, &b| view.units[a].x.total_cmp(&view.units[b].x).then(a.cmp(&b)));
+    let widths: Vec<f64> = order
+        .iter()
+        .map(|&i| view.units[i].extent().0 + 6.0)
+        .collect();
+    let total: f64 = widths.iter().sum();
+    let mut offset = -total * 0.5;
+    order
+        .iter()
+        .zip(widths)
+        .map(|(&i, w)| {
+            let lateral = offset + w * 0.5;
+            offset += w;
+            let x = cover.center.0 + cover.along.0 * lateral;
+            (i, x, cover.z_at(x))
+        })
+        .collect()
+}
+
+/// B6: does a charge of `i` at `j` break on the site (a hedge or a ditch in
+/// front of the target, the lanes of a village)?
+fn charge_breaks(view: &View, i: usize, j: usize) -> bool {
+    let (u, e) = (&view.units[i], &view.units[j]);
+    let field = view.sim.field();
+    field.breaks_charge((u.x, u.z), (e.x, e.z)) || field.in_village(e.x, e.z)
+}
+
+/// B6: a point beyond the nearer end of the hedge or ditch that breaks the
+/// charge of `i` at `j`, from which the charge is clear; `None` when there
+/// is none (a village, or no clear way round): the horse waits.
+fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
+    let (u, e) = (&view.units[i], &view.units[j]);
+    let field = view.sim.field();
+    if field.in_village(e.x, e.z) {
+        return None;
+    }
+    let (from, to) = ((u.x, u.z), (e.x, e.z));
+    let blocking = field.obstacles.iter().find(|o| {
+        o.kind.breaks_charge()
+            && o.distance(to.0, to.1) <= crate::site::HEDGE_COVER_REACH
+            && (o.crosses(from, to) || o.distance(from.0, from.1) <= 2.0 * OBSTACLE_REACH)
+    })?;
+    let len = blocking.length().max(1e-6);
+    let side_of = |p: (f64, f64)| {
+        (blocking.b.0 - blocking.a.0) * (p.1 - blocking.a.1)
+            - (blocking.b.1 - blocking.a.1) * (p.0 - blocking.a.0)
+    };
+    // Normal pointing to the target's side of the obstacle.
+    let mut normal = (
+        -(blocking.b.1 - blocking.a.1) / len,
+        (blocking.b.0 - blocking.a.0) / len,
+    );
+    if side_of(to) < 0.0 {
+        normal = (-normal.0, -normal.1);
+    }
+    [(blocking.a, blocking.b), (blocking.b, blocking.a)]
+        .into_iter()
+        .map(|(end, other)| {
+            let out = ((end.0 - other.0) / len, (end.1 - other.1) / len);
+            (
+                end.0 + out.0 * DETOUR_CLEARANCE + normal.0 * 10.0,
+                end.1 + out.1 * DETOUR_CLEARANCE + normal.1 * 10.0,
+            )
+        })
+        .filter(|&(x, z)| {
+            field.inside(x, z)
+                && !field.in_forest(x, z)
+                && field.water_at(x, z).is_none()
+                && !field.breaks_charge((x, z), to)
+        })
+        .map(|w| {
+            let path = (w.0 - from.0).hypot(w.1 - from.1) + (to.0 - w.0).hypot(to.1 - w.1);
+            (w, path)
+        })
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .map(|(w, _)| w)
+}
+
+/// B6: horsemen ride this far past the end of a hedge before charging.
+const DETOUR_CLEARANCE: f64 = 35.0;
+
+/// B6: charge `j` when the charge is clear; otherwise ride round the
+/// obstacle in the way. `false` when neither is possible (the caller moves
+/// on to its next choice, or waits).
+fn charge_or_detour(view: &mut View, i: usize, j: usize, run: bool) -> bool {
+    if !charge_breaks(view, i, j) {
+        view.attack(i, j, run);
+        return true;
+    }
+    match detour(view, i, j) {
+        Some((x, z)) => {
+            view.move_to(i, x, z, true, None);
+            true
+        }
+        None => false,
+    }
+}
+
 fn plan_field(view: &mut View) {
     let roles = roles(view);
     let elapsed = view.sim.elapsed();
@@ -520,8 +781,23 @@ fn plan_field(view: &mut View) {
         && !melee
         && elapsed < ATTACKER_PATIENCE
         && contact < ASSAULT_RANGE;
+    // B6: a defensive side leans on a hedge, a ditch or a village when
+    // there is one within reach (shooters just behind it, the line behind
+    // them), otherwise on the high ground.
+    let cover = if defensive {
+        defensive_cover(view.sim.field(), view.side)
+    } else {
+        None
+    };
     // Where the line stands this step.
-    let anchor = if defensive {
+    let anchor = if let Some(c) = cover {
+        let back = if roles.shooters.is_empty() {
+            5.0
+        } else {
+            SHOOTERS_AHEAD
+        };
+        (c.center.0, c.z_at(c.center.0) - view.forward * back)
+    } else if defensive {
         high_ground(view, line_center)
     } else if duel && contact < 260.0 {
         line_center
@@ -547,8 +823,16 @@ fn plan_field(view: &mut View) {
     }
 
     // Shooters: in front of the line, halt in range, fall back when threatened.
+    let slots = cover
+        .map(|c| cover_slots(view, &roles.shooters, &c))
+        .unwrap_or_default();
     for &i in &roles.shooters {
-        plan_shooter(view, i, anchor, line_center.1, facing, defensive);
+        let slot = slots
+            .iter()
+            .find(|s| s.0 == i)
+            .map(|&(_, x, z)| (x, z))
+            .zip(cover);
+        plan_shooter(view, i, anchor, line_center.1, facing, defensive, slot);
     }
 
     // Reserve.
@@ -630,6 +914,7 @@ fn opposite(view: &View, i: usize) -> Option<usize> {
         .map(|(j, _)| j)
 }
 
+/// `cover`: the slot of the shooter behind the site's cover (B6).
 fn plan_shooter(
     view: &mut View,
     i: usize,
@@ -637,9 +922,17 @@ fn plan_shooter(
     line_z: f64,
     facing: f64,
     defensive: bool,
+    cover: Option<((f64, f64), Cover)>,
 ) {
     let unit = &view.units[i];
-    let threat = view.nearest_enemy(i, is_melee_troop);
+    // B6: behind a hedge, a ditch or in a village, horsemen are no threat
+    // (their charge breaks on it).
+    let threat = match cover {
+        Some((_, c)) if c.breaks_charge => {
+            view.nearest_enemy(i, |e| is_melee_troop(e) && !is_horse(e))
+        }
+        _ => view.nearest_enemy(i, is_melee_troop),
+    };
     // Engaged or about to be: fall back behind the line.
     if let Some((_, d)) = threat {
         if d < SHOOTER_SAFETY || view.engaged(i) {
@@ -660,10 +953,20 @@ fn plan_shooter(
     if !view.free(i) {
         return;
     }
-    let front_z = anchor.1 + view.forward * 30.0;
+    let front_z = anchor.1 + view.forward * SHOOTERS_AHEAD;
     if let Some((j, d)) = view.nearest_enemy(i, |_| true) {
         let e = &view.units[j];
         let range = view.sim.effective_range(unit, e.x, e.z);
+        if let Some(((x, z), _)) = cover {
+            // B6: reach the cover first (the threat above sends them back
+            // when the enemy closes in).
+            if dist_to(unit, x, z) > 6.0 {
+                view.move_to(i, x, z, false, Some(facing));
+            } else {
+                view.halt(i);
+            }
+            return;
+        }
         if d <= range * 0.95 {
             view.halt(i);
             return;
@@ -806,6 +1109,7 @@ fn plan_horse(
             .able_enemies()
             .filter(|&j| is_horse(&units[j]) && !bristling(&units[j]))
             .filter(|&j| units[j].category != UnitCategory::Siege)
+            .filter(|&j| !charge_breaks(view, i, j))
             .map(|j| (j, dist(unit, &units[j])))
             .filter(|&(_, d)| d < CAVALRY_REACH)
             .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
@@ -815,7 +1119,7 @@ fn plan_horse(
         }
     }
     // 2. Isolated shooters (not behind stakes facing us).
-    let isolated = view
+    let mut isolated: Vec<(usize, f64)> = view
         .able_enemies()
         .filter(|&j| is_shooter(&units[j]) && units[j].state != UnitState::Melee)
         .filter(|&j| {
@@ -827,10 +1131,15 @@ fn plan_horse(
         })
         .map(|j| (j, dist(unit, &units[j])))
         .filter(|&(_, d)| d < CAVALRY_REACH)
-        .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
-    if let (Some((j, _)), false) = (isolated, general_only) {
-        view.attack(i, j, true);
-        return;
+        .collect();
+    isolated.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+    if !general_only {
+        // B6: shooters behind a hedge are ridden round, or left alone.
+        for (j, _) in isolated {
+            if charge_or_detour(view, i, j, true) {
+                return;
+            }
+        }
     }
     // 3. Exposed flank: an enemy regiment locked in melee with our troops.
     let exposed = view
@@ -840,6 +1149,7 @@ fn plan_horse(
             e.state == UnitState::Melee
                 && e.formation != Formation::Square
                 && !e.has(Ability::PikeSquare)
+                && !charge_breaks(view, i, j)
         })
         .map(|j| (j, dist(unit, &units[j])))
         .filter(|&(_, d)| d < CAVALRY_REACH)
@@ -887,7 +1197,7 @@ fn plan_horse(
     let shaken =
         |e: &Unit| !bristling(e) && (e.morale < 40.0 || e.hp < f64::from(e.initial_soldiers) * 0.5);
     if let Some((j, d)) = view.nearest_enemy(i, shaken) {
-        if d < 110.0 && !defensive && !general_only {
+        if d < 110.0 && !defensive && !general_only && !charge_breaks(view, i, j) {
             view.attack(i, j, true);
             return;
         }
