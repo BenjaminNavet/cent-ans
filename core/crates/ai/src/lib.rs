@@ -6,6 +6,7 @@
 //! (`sim_campaign::ai_minimal`), which `CampaignState::end_turn` defaults to.
 
 pub mod campaign;
+pub mod support;
 
 pub use campaign::plan_turn;
 pub use sim_campaign::ai_minimal::plan_turn as plan_turn_minimal;

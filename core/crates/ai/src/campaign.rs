@@ -165,10 +165,20 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
-    let Some(ctx) = Context::new(state, data, faction) else {
+    let Some(mut ctx) = Context::new(state, data, faction) else {
         return Vec::new();
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+    // G2: subsidies first, out of what the donor would otherwise hoard.
+    let spare = ctx.treasury
+        - ctx.reserve()
+        - crate::support::SUBSIDY_DONOR_RESERVE_SEASONS * ctx.gross_income.max(0);
+    for order in crate::support::plan_subsidies(state, faction, spare) {
+        if let Order::SendGift { amount, .. } = &order {
+            ctx.treasury -= amount;
+        }
+        orders.push(order);
+    }
     if let Some(technology) = sim_campaign::research::ai_choose_research(state, data, faction) {
         orders.push(Order::Research { technology });
     }
