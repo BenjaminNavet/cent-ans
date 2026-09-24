@@ -408,6 +408,8 @@ func _collect_fine_jobs() -> void:
 		var job: FineTerrainJob = item["job"]
 		if not job.ok:
 			continue
+		if _fine_indices.size() != (job.side - 1) * (job.side - 1) * 6 + 4 * (job.side - 1) * 12:
+			_fine_indices = FineTerrainJob.build_indices(job.side)
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
 		arrays[Mesh.ARRAY_VERTEX] = job.vertices
