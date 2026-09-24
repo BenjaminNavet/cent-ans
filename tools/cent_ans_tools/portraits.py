@@ -69,6 +69,7 @@ ROLE_LABELS = {
     "regent": "regent",
     "commander": "military commander",
     "noble": "high noble",
+    "prelate": "high prelate",
     "claimant": "claimant to a throne",
     "burgher": "rich burgher and town leader",
     "exile": "exiled lord",
