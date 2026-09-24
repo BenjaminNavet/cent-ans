@@ -89,8 +89,9 @@ impl CampaignState {
     /// Steps 3 and 4 of the sequential turn (spec § 3.4): the end-of-turn
     /// phases of spec § 1.3 (without a movement phase: marches and battles
     /// are immediate), then the new season, whose movement points are
-    /// refilled before the player's marches resume.
-    fn resolve_end_of_turn(&mut self, data: &GameData, events: &mut Vec<GameEvent>) {
+    /// refilled before the player's marches resume. Public for probes that
+    /// play each AI faction themselves ([`CampaignState::play_ai_turn`]).
+    pub fn resolve_end_of_turn(&mut self, data: &GameData, events: &mut Vec<GameEvent>) {
         // Numbers below: the phases of spec § 1.3 (1, movement, is gone).
         // 2-4. Sieges, chevauchées.
         siege::resolve_sieges(self, data, events);
