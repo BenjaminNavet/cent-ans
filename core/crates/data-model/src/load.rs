@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 use serde::de::DeserializeOwned;
 
 use crate::entities::ai_alignment::AiAlignment;
+use crate::entities::ai_diplomacy::AiDiplomacy;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -62,6 +63,8 @@ pub mod folders {
     pub const AI: &str = "ai";
     /// Side-change tuning of the AI, inside `ai/`; optional.
     pub const AI_ALIGNMENT: &str = "alignment.json";
+    /// Inside `AI`: wars, alliances and peaces around borders (G5).
+    pub const AI_DIPLOMACY: &str = "diplomacy.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
@@ -188,6 +191,9 @@ pub struct GameData {
     /// `data/ai/alignment.json` (G4), absent until written: the AI then
     /// makes no historical side change.
     pub ai_alignment: Option<AiAlignment>,
+    /// `data/ai/diplomacy.json` (G5); the F4 constants
+    /// ([`AiDiplomacy::default`]) when absent.
+    pub ai_diplomacy: AiDiplomacy,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
 }
@@ -224,6 +230,7 @@ impl GameData {
             settlement_rules: None,
             settlement_graph: Vec::new(),
             ai_alignment: None,
+            ai_diplomacy: AiDiplomacy::default(),
             vision_rules: None,
         };
         let events_dir = root.join(folders::EVENTS);
@@ -245,6 +252,10 @@ impl GameData {
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
             data.ai_alignment = Some(read_json(&alignment_path)?);
+        }
+        let diplomacy_path = root.join(folders::AI).join(folders::AI_DIPLOMACY);
+        if diplomacy_path.is_file() {
+            data.ai_diplomacy = read_json(&diplomacy_path)?;
         }
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {

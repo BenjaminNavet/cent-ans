@@ -446,11 +446,12 @@ impl CampaignState {
         if common_enemy {
             add("Ennemi commun", 20);
         }
+        let menace = &data.ai_diplomacy.menacing_neighbour;
         if !self.is_allied(a, b)
-            && self.faction_power(b) > 1.5 * self.faction_power(a).max(1.0)
+            && self.faction_power(b) > menace.power_ratio * self.faction_power(a).max(1.0)
             && self.are_neighbors(data, a, b)
         {
-            add("Voisin menaçant", -15);
+            add("Voisin menaçant", menace.attitude);
         }
         if let Some(fb) = self.factions.get(b) {
             let claims_on_us = fb.claims.iter().any(|c| match c.kind {
@@ -680,12 +681,17 @@ pub fn evaluate(
             if !proposer_rivals.is_disjoint(&recipient_rivals) {
                 reasons.push(("Rival commun".to_owned(), 15));
             }
+            let menace = &data.ai_diplomacy.menacing_neighbour;
             let menaced = proposer_rivals.iter().any(|r| {
-                state.faction_power(r) > 1.5 * state.faction_power(recipient).max(1.0)
+                state.faction_power(r)
+                    > menace.power_ratio * state.faction_power(recipient).max(1.0)
                     && state.are_neighbors(data, recipient, r)
             });
             if menaced {
-                reasons.push(("Contrepoids à un voisin menaçant".to_owned(), 10));
+                reasons.push((
+                    "Contrepoids à un voisin menaçant".to_owned(),
+                    menace.counterweight,
+                ));
             }
             let friend_of_rival = state
                 .factions
@@ -1756,15 +1762,11 @@ pub(crate) fn on_line_extinct(
 // Diplomatic AI (pure; M5 § 2.3, F4 « guerre de Cent Ans vivante »)
 // =========================================================================
 
-/// A pretender may attack a stronger crown down to this power ratio when it
-/// has allies or a bridgehead on the target's borders (F4).
-pub const PRETENDER_RATIO: f64 = 0.5;
 /// Score bonus making a claim war preferred to any opportunistic war.
 const CLAIM_WAR_PRIORITY: f64 = 1000.0;
-/// Peace reluctance of a pretender towards the crown it claims.
+/// Peace reluctance of a pretender towards the crown it claims. (Power
+/// ratios of pretenders and co-belligerents: `data/ai/diplomacy.json`.)
 pub const PRETENDER_PEACE_RELUCTANCE: i32 = 10;
-/// Same, without allies nor bridgehead.
-pub const PRETENDER_RATIO_ALONE: f64 = 0.8;
 /// Power ratio of an opportunistic war without claim.
 pub const OPPORTUNIST_RATIO: f64 = 1.5;
 /// Minimum aggression to press a claim / to wage an opportunistic war.
@@ -1774,8 +1776,6 @@ pub const OPPORTUNIST_AGGRESSION: i32 = 60;
 pub const WAR_REST_TURNS: u32 = 12;
 /// Alliances (vassal ties excluded) an AI seeks at most.
 pub const MAX_ALLIANCES: usize = 4;
-/// Ratio (own coalition / enemy coalition) needed to join an ally's war.
-pub const JOIN_WAR_RATIO: f64 = 0.6;
 /// War score below which a beaten realm offers what the enemy holds of it.
 pub const SURRENDER_WAR_SCORE: i32 = -25;
 /// War score below which a vassal deserts its losing suzerain.
@@ -2038,6 +2038,7 @@ fn peace_terms(
 ) -> Option<Vec<ProvinceId>> {
     let score = state.war_score(data, faction, enemy);
     let capital = |f: &FactionId| state.factions.get(f).map(|s| s.capital.clone());
+    let keep_capital = data.ai_diplomacy.peace.keep_capital;
     let held_by = |owner: &FactionId, holder: &FactionId, most: usize| -> Vec<ProvinceId> {
         let capital = capital(owner);
         let mut list: Vec<ProvinceId> = state
@@ -2045,10 +2046,21 @@ fn peace_terms(
             .iter()
             .filter(|(_, p)| &p.owner == owner && &p.controller == holder)
             .map(|(id, _)| id.clone())
+            // A crown survives its defeats: its capital is never ceded.
+            .filter(|id| !keep_capital || Some(id) != capital.as_ref())
             .collect();
         // Capitals last: they are the costliest to give up.
         list.sort_by_key(|id| (Some(id) == capital.as_ref(), id.clone()));
         list.truncate(most);
+        if keep_capital {
+            // Nor its last land (Scotland's capital may lie in English hands).
+            let owned = state
+                .provinces
+                .values()
+                .filter(|p| &p.owner == owner)
+                .count();
+            list.truncate(owned.saturating_sub(1));
+        }
         list
     };
     let answer_known = enemy != &state.player_faction;
@@ -2089,8 +2101,9 @@ fn war_target(
     aggression: i32,
 ) -> Option<FactionId> {
     let my_power = state.coalition_power(faction);
+    let rules = &data.ai_diplomacy.war;
     // Never a new front while the current wars weigh.
-    if enemy_power(state, data, faction) > 0.5 * state.faction_power(faction) {
+    if enemy_power(state, data, faction) > rules.front_share * state.faction_power(faction) {
         return None;
     }
     let has_allies = state.factions[faction]
@@ -2115,9 +2128,9 @@ fn war_target(
                 let ratio = my_power / state.faction_power(id).max(1.0);
                 let supported = has_allies || state.are_neighbors(data, faction, id);
                 let needed = if supported {
-                    PRETENDER_RATIO
+                    rules.pretender_ratio
                 } else {
-                    PRETENDER_RATIO_ALONE
+                    rules.pretender_ratio_alone
                 };
                 let weight = if stakes.throne { 3.0 } else { 0.0 } + stakes.provinces as f64;
                 return (ratio >= needed && state.attitude(data, faction, id).0 < 20)
@@ -2145,14 +2158,20 @@ fn ally_war_to_join(
     faction: &FactionId,
 ) -> Option<FactionId> {
     let me = state.factions.get(faction)?;
-    if enemy_power(state, data, faction) > 0.5 * state.faction_power(faction) {
+    let front_share = data.ai_diplomacy.war.front_share;
+    let rules = &data.ai_diplomacy.join_war;
+    if enemy_power(state, data, faction) > front_share * state.faction_power(faction) {
         return None;
     }
+    let my_power = state.faction_power(faction);
     for ally in &me.allies {
         let Some(ally_state) = state.factions.get(ally) else {
             continue;
         };
-        if !ally_state.alive || state.attitude(data, faction, ally).0 <= 10 {
+        if !ally_state.alive
+            || state.attitude(data, faction, ally).0 <= rules.min_attitude
+            || state.faction_power(ally) < rules.min_ally_power_ratio * my_power
+        {
             continue;
         }
         for enemy in ally_state.at_war_with.iter().filter(|e| !is_rebels(e)) {
@@ -2164,10 +2183,16 @@ fn ally_war_to_join(
             {
                 continue;
             }
-            let reachable = state.are_neighbors(data, faction, enemy)
-                || claim_stakes(state, faction, enemy).any();
+            // A border suffices for a war of claims (Scotland falls on the
+            // English border while Edward III claims France); a border
+            // quarrel of our ally's does not spread along every border.
+            let claim_war =
+                claim_stakes(state, ally, enemy).any() || claim_stakes(state, enemy, ally).any();
+            let border = state.are_neighbors(data, faction, enemy)
+                && (claim_war || !rules.border_only_claim_wars);
+            let reachable = border || claim_stakes(state, faction, enemy).any();
             let ratio = state.coalition_power(faction) / state.coalition_power(enemy).max(1.0);
-            if reachable && ratio >= JOIN_WAR_RATIO {
+            if reachable && ratio >= rules.ratio {
                 return Some(enemy.clone());
             }
         }
