@@ -303,11 +303,11 @@ func _run_minimap_fog() -> void:
 	if not _check(map.load_ok and map.sim != null, "minimap: campaign scene failed to start"):
 		map.queue_free()
 		return
-	var ctl: MinimapController = map.minimap_ctl
+	var ctl: Node = map.minimap_ctl  # non typé : compilé après les autoloads
 	if not _check(ctl != null and ctl.minimap != null and ctl.minimap.is_inside_tree(), "minimap: controller or minimap missing"):
 		map.queue_free()
 		return
-	var minimap: CampaignMinimap = ctl.minimap
+	var minimap: Control = ctl.minimap
 	map.ui.layout_hud()
 	await process_frame
 	_check(minimap.visible and minimap.size.x > 100.0 and minimap.size.y > 80.0, "minimap should be visible with a sensible size, got %s" % minimap.size)
@@ -317,8 +317,8 @@ func _run_minimap_fog() -> void:
 	_check(map.ui.news_letters.position.y >= mini_rect.end.y, "news letters should sit below the minimap")
 	_check(minimap.army_dot_count() > 0, "minimap should show the player's armies")
 	# Clic : la caméra vise le point cliqué (coordonnées carte).
-	var local := minimap.map_rect().size * Vector2(0.25, 0.7)
-	var expected := minimap.view_to_map(local)
+	var local: Vector2 = minimap.map_rect().size * Vector2(0.25, 0.7)
+	var expected: Vector2 = minimap.view_to_map(local)
 	minimap.click_at(local)
 	var focus: Vector3 = map.camera_rig.target_focus
 	_check(Vector2(focus.x, focus.z).distance_to(expected) < 1.0, "minimap click should recenter the camera on %s, got %s" % [expected, focus])

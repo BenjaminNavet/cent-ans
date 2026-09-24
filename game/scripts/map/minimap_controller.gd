@@ -96,6 +96,8 @@ func refresh() -> void:
 	var map_data: MapData = map.get("map_data")
 	var player := str(map.get("player_faction"))
 	var dots: Array = []
+	# Autoload résolu à l'exécution : le smoke test compile ce script avant les autoloads.
+	var facade: Node = get_node_or_null("/root/SimFacade")
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
 		var faction := str(army.get("faction", ""))
@@ -105,7 +107,7 @@ func refresh() -> void:
 		var centroid := map_data.centroid_of_id(location)
 		if centroid.x < 0.0:
 			continue
-		dots.append({"pos": centroid, "color": SimFacade.faction_color(faction), "player": faction == player})
+		dots.append({"pos": centroid, "color": facade.call("faction_color", faction) if facade != null else Color.WHITE, "player": faction == player})
 	minimap.set_armies(dots)
 
 

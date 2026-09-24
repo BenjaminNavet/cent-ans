@@ -7,9 +7,10 @@ Spéc : lot T1 de `docs/design/2026-09-24-analyse-total-war.md` ; plan `2026-09-
   données `data/rules/vision.json` (schéma `vision_rules.schema.json`, chargé dans `GameData.vision_rules`),
   tests `core/crates/sim-campaign/tests/c1_vision.rs`, pytest `tools/tests/test_vision_rules_schema.py`.
 - [x] Pont : `CampaignSim.get_visible_provinces(faction) -> PackedStringArray` (`campaign_sim_vision.rs`).
-- [ ] Minicarte `game/scripts/map/campaign_minimap.gd` + contrôleur.
-- [ ] Brouillard : voile shader terrain, armées masquées (carte + minicarte), réglage `map/fog_of_war`.
-- [ ] Smoke étendu, captures `docs/img/c1/`.
+- [x] Minicarte `game/scripts/map/campaign_minimap.gd` + `minimap_controller.gd` + shader `campaign_minimap.gdshader`.
+- [x] Brouillard : voile shader terrain, armées masquées (carte + minicarte), réglage `map/fog_of_war`.
+- [x] Smoke étendu (`_run_minimap_fog`), vert.
+- [ ] Captures `docs/img/c1/`.
 
 ## Prochaine étape
-Minicarte GDScript + accroches minimales dans `campaign_map.gd`.
+Captures : `godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/c1/... --stage=map --focus=...`.
