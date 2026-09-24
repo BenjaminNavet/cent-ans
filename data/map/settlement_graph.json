@@ -156,6 +156,13 @@
   },
   {
    "from": "set_agen",
+   "to": "set_auch",
+   "cost": 30.81,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_agen",
    "to": "set_clairac",
    "cost": 9.44,
    "road": true,
@@ -166,13 +173,6 @@
    "to": "set_layrac",
    "cost": 3.87,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_agen",
-   "to": "set_montauban",
-   "cost": 62.83,
-   "road": false,
    "sea": false
   },
   {
@@ -730,16 +730,16 @@
   },
   {
    "from": "set_ancone",
-   "to": "set_fonte_avellana",
-   "cost": 63.73,
-   "road": false,
+   "to": "set_capua",
+   "cost": 142.76,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_ancone",
-   "to": "set_naples",
-   "cost": 156.03,
-   "road": true,
+   "to": "set_fonte_avellana",
+   "cost": 63.73,
+   "road": false,
    "sea": false
   },
   {
@@ -1087,22 +1087,36 @@
   },
   {
    "from": "set_auch",
-   "to": "set_layrac",
-   "cost": 35.01,
+   "to": "set_auterive",
+   "cost": 79.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
-   "to": "set_montauban",
-   "cost": 20.74,
+   "to": "set_grandselve",
+   "cost": 43.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
-   "to": "set_najac",
-   "cost": 70.14,
+   "to": "set_lleida",
+   "cost": 112.65,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_auch",
+   "to": "set_morlaas",
+   "cost": 92.02,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_auch",
+   "to": "set_muret",
+   "cost": 63.86,
    "road": false,
    "sea": false
   },
@@ -1202,13 +1216,6 @@
    "to": "set_muret",
    "cost": 8.38,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_auterive",
-   "to": "set_pau",
-   "cost": 224.06,
-   "road": false,
    "sea": false
   },
   {
@@ -1923,6 +1930,13 @@
    "to": "set_segur_le_chateau",
    "cost": 155.08,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_belcastel",
+   "to": "set_villeneuve_sur_lot",
+   "cost": 64.21,
+   "road": true,
    "sea": false
   },
   {
@@ -3251,7 +3265,7 @@
   {
    "from": "set_capua",
    "to": "set_montecassino",
-   "cost": 47.19,
+   "cost": 27.8,
    "road": true,
    "sea": false
   },
@@ -3271,8 +3285,8 @@
   },
   {
    "from": "set_capua",
-   "to": "set_perugia",
-   "cost": 134.97,
+   "to": "set_ostia",
+   "cost": 88.29,
    "road": true,
    "sea": false
   },
@@ -4118,6 +4132,13 @@
   },
   {
    "from": "set_clairac",
+   "to": "set_conques",
+   "cost": 138.01,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_clairac",
    "to": "set_layrac",
    "cost": 11.52,
    "road": true,
@@ -4489,17 +4510,10 @@
   },
   {
    "from": "set_copenhagen",
-   "to": "set_lodose",
-   "cost": 362.8,
+   "to": "set_lund",
+   "cost": 141.13,
    "road": false,
    "sea": true
-  },
-  {
-   "from": "set_copenhagen",
-   "to": "set_lund",
-   "cost": 5.39,
-   "road": true,
-   "sea": false
   },
   {
    "from": "set_copenhagen",
@@ -4510,9 +4524,9 @@
   },
   {
    "from": "set_copenhagen",
-   "to": "set_skanor",
-   "cost": 5.81,
-   "road": true,
+   "to": "set_vordingborg",
+   "cost": 83.6,
+   "road": false,
    "sea": false
   },
   {
@@ -5735,8 +5749,8 @@
   },
   {
    "from": "set_fonte_avellana",
-   "to": "set_montevergine",
-   "cost": 165.15,
+   "to": "set_naples",
+   "cost": 160.61,
    "road": true,
    "sea": false
   },
@@ -6290,13 +6304,6 @@
    "from": "set_grandselve",
    "to": "set_muret",
    "cost": 51.08,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_grandselve",
-   "to": "set_tarbes",
-   "cost": 156.51,
    "road": false,
    "sea": false
   },
@@ -6953,17 +6960,17 @@
   },
   {
    "from": "set_kiel",
-   "to": "set_roskilde",
-   "cost": 192.91,
+   "to": "set_segeberg",
+   "cost": 43.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kiel",
-   "to": "set_segeberg",
-   "cost": 43.48,
+   "to": "set_vordingborg",
+   "cost": 239.42,
    "road": false,
-   "sea": false
+   "sea": true
   },
   {
    "from": "set_kingston",
@@ -7352,6 +7359,13 @@
   },
   {
    "from": "set_layrac",
+   "to": "set_najac",
+   "cost": 102.39,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_layrac",
    "to": "set_villeneuve_sur_lot",
    "cost": 13.79,
    "road": true,
@@ -7603,13 +7617,6 @@
    "sea": false
   },
   {
-   "from": "set_lleida",
-   "to": "set_toulouse",
-   "cost": 114.95,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_loccum",
    "to": "set_mayence",
    "cost": 282.23,
@@ -7681,6 +7688,13 @@
   },
   {
    "from": "set_lodose",
+   "to": "set_lund",
+   "cost": 267.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lodose",
    "to": "set_oslo",
    "cost": 223.4,
    "road": false,
@@ -7688,10 +7702,10 @@
   },
   {
    "from": "set_lodose",
-   "to": "set_stralsund",
-   "cost": 519.21,
+   "to": "set_skanor",
+   "cost": 296.11,
    "road": false,
-   "sea": true
+   "sea": false
   },
   {
    "from": "set_lodose",
@@ -7765,13 +7779,6 @@
   },
   {
    "from": "set_lubeck",
-   "to": "set_skanor",
-   "cost": 227.95,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_lubeck",
    "to": "set_stralsund",
    "cost": 164.87,
    "road": false,
@@ -7835,16 +7842,9 @@
   },
   {
    "from": "set_lund",
-   "to": "set_segeberg",
-   "cost": 237.26,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_lund",
    "to": "set_skanor",
-   "cost": 1.53,
-   "road": true,
+   "cost": 34.27,
+   "road": false,
    "sea": false
   },
   {
@@ -8311,6 +8311,13 @@
   },
   {
    "from": "set_montauban",
+   "to": "set_najac",
+   "cost": 53.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_montauban",
    "to": "set_toulouse",
    "cost": 23.21,
    "road": true,
@@ -8325,22 +8332,22 @@
   },
   {
    "from": "set_montecassino",
-   "to": "set_orvieto",
-   "cost": 78.21,
+   "to": "set_naples",
+   "cost": 40.12,
    "road": true,
    "sea": false
   },
   {
    "from": "set_montecassino",
-   "to": "set_ostia",
-   "cost": 47.85,
+   "to": "set_perugia",
+   "cost": 107.24,
    "road": true,
    "sea": false
   },
   {
    "from": "set_montecassino",
    "to": "set_rome",
-   "cost": 40.62,
+   "cost": 59.52,
    "road": true,
    "sea": false
   },
@@ -8398,13 +8405,6 @@
    "to": "set_schwyz",
    "cost": 124.87,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_morlaas",
-   "to": "set_muret",
-   "cost": 168.13,
-   "road": false,
    "sea": false
   },
   {
@@ -9108,6 +9108,13 @@
    "sea": false
   },
   {
+   "from": "set_roskilde",
+   "to": "set_vordingborg",
+   "cost": 69.29,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_rothenburg",
    "to": "set_speyer",
    "cost": 127.44,
@@ -9341,9 +9348,16 @@
   {
    "from": "set_skanor",
    "to": "set_stralsund",
-   "cost": 245.88,
+   "cost": 223.67,
    "road": false,
    "sea": true
+  },
+  {
+   "from": "set_skanor",
+   "to": "set_tonsberg",
+   "cost": 455.47,
+   "road": false,
+   "sea": false
   },
   {
    "from": "set_sluis",
@@ -9449,6 +9463,13 @@
    "cost": 10.42,
    "road": false,
    "sea": false
+  },
+  {
+   "from": "set_stralsund",
+   "to": "set_vordingborg",
+   "cost": 210.28,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_susa",
