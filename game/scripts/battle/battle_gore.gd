@@ -212,6 +212,7 @@ func sever(pos: Vector3, dir: Vector3, part: String, height: float) -> void:
 	data[o + 13] = v.y
 	data[o + 14] = v.z
 	data[o + 15] = anim_time
+	layer["data"] = data
 	layer["next"] = (slot + 1) % mm.instance_count
 	layer["dirty"] = true
 	pieces_emitted += 1

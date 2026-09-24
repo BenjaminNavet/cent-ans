@@ -158,7 +158,7 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 ## texture d'os et table des clips du rig ; cadavres en mode CUSTOM (clips de mort).
 func _make_skinned_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = BattleSkinned.SHADER
+	mat.shader = BattleSkinned.corpse_shader() if corpse else BattleSkinned.SHADER
 	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
 	mat.set_shader_parameter("livery", color)
 	mat.set_shader_parameter("trim", TRIM_SILVER if color.get_luminance() > 0.55 or (color.r > 0.6 and color.g > 0.5) else TRIM_GOLD)
@@ -566,6 +566,7 @@ func _knock_down(id: int, at: Vector3, heading: float, mass: float, knocked: int
 		if gore != null:
 			gore.spray(Vector3(slice[o + 3], slice[o + 7], slice[o + 11]), push, int(sprays.get("droplets_per_knock", 3)), 1.3)
 	_hidden[id] = hidden
+	layer["data"] = data
 	mm.buffer = data
 
 

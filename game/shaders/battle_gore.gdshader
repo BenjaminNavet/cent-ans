@@ -35,10 +35,15 @@ void vertex() {
 		float size = MODEL_MATRIX[2].z;
 		bool alive = t >= 0.0 && t < land + ground_seconds;
 		v_fade = 1.0 - smoothstep(land + ground_seconds * 0.4, land + ground_seconds, t);
-		// En vol : goutte étirée le long de la vitesse ; au sol : tache aplatie.
-		vec3 view_pos = (VIEW_MATRIX * vec4(p + vec3(0.0, 0.02, 0.0), 1.0)).xyz;
-		float grown = t > land ? mix(1.0, 3.0, smoothstep(land, land + 0.4, t)) : 1.0;
-		vec2 corner = VERTEX.xy * size * grown;
+		// En vol : quad tourné vers la caméra ; au sol : tache à plat qui s'étale.
+		vec3 wp = p + vec3(0.0, 0.015, 0.0);
+		vec3 view_pos = (VIEW_MATRIX * vec4(wp, 1.0)).xyz;
+		vec2 corner = VERTEX.xy * size;
+		if (t > land) {
+			float grown = mix(1.0, 2.2, smoothstep(land, land + 0.4, t));
+			view_pos = (VIEW_MATRIX * vec4(wp + vec3(VERTEX.x, 0.0, VERTEX.y) * size * grown, 1.0)).xyz;
+			corner = vec2(0.0);
+		}
 		if (!alive) {
 			corner = vec2(0.0);
 			view_pos = vec3(0.0, 0.0, 10.0);
@@ -64,6 +69,8 @@ void vertex() {
 		v_cut = 1.0 - smoothstep(-0.12, -0.02, VERTEX.y);
 		VERTEX = world - origin;
 		NORMAL = normalize(n);
+		// POSITION est écrit par la branche des gouttes : il faut l'écrire ici aussi.
+		POSITION = PROJECTION_MATRIX * (VIEW_MATRIX * vec4(world, 1.0));
 	}
 }
 

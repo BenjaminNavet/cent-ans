@@ -23,6 +23,22 @@ static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 
 
+## Lot BV2 : variante « cadavres » du shader (`BV2_CORPSE` : coupe des parties tranchées par
+## `discard`, réservée aux cadavres pour ne pas pénaliser les soldats vivants).
+static var _corpse_shader: Shader = null
+
+
+static func corpse_shader() -> Shader:
+	if _corpse_shader == null:
+		var code := SHADER.code
+		var cut := code.find("
+", code.find("shader_type"))
+		_corpse_shader = Shader.new()
+		_corpse_shader.code = code.substr(0, cut + 1) + "#define BV2_CORPSE
+" + code.substr(cut + 1)
+	return _corpse_shader
+
+
 static func manifest() -> Dictionary:
 	if not _loaded:
 		_loaded = true

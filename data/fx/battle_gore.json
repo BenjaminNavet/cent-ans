@@ -70,7 +70,7 @@
     "max_droplets": 6144,
     "droplets_per_death": 7,
     "droplets_per_knock": 3,
-    "droplets_per_critical": 26,
+    "droplets_per_critical": 18,
     "speed": [1.2, 4.2],
     "lifetime": 1.4,
     "max_distance_m": 220.0
