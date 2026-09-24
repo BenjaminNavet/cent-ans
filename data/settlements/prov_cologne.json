@@ -1,0 +1,144 @@
+[
+  {
+    "id": "set_cologne",
+    "province": "prov_cologne",
+    "kind": "city",
+    "name": {
+      "display": "Cologne",
+      "local": "Köln",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.9603,
+      50.9375
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Électorat de Cologne (archevêque Walram de Juliers) et ville libre de Cologne, la plus grande cité d'Allemagne ; comtés de Juliers (Guillaume, allié d'Édouard III, marquis en 1336), de Berg et de Clèves.",
+    "sources": [
+      "Électorat de Cologne",
+      "Cologne",
+      "Duché de Juliers"
+    ]
+  },
+  {
+    "id": "set_bonn",
+    "province": "prov_cologne",
+    "kind": "town",
+    "name": {
+      "display": "Bonn",
+      "local": "Bunna",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.0982,
+      50.7374
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence de l'archevêque-électeur de Cologne depuis que la ville de Cologne a conquis son autonomie communale en 1288.",
+    "sources": [
+      "Bonn"
+    ]
+  },
+  {
+    "id": "set_andernach",
+    "province": "prov_cologne",
+    "kind": "town",
+    "name": {
+      "display": "Andernach",
+      "local": "Andernach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4009,
+      50.436
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville impériale rhénane, port fluvial et centre du commerce de la pierre de tuf volcanique.",
+    "sources": [
+      "Andernach"
+    ]
+  },
+  {
+    "id": "set_godesburg",
+    "province": "prov_cologne",
+    "kind": "castle",
+    "name": {
+      "display": "Godesberg",
+      "local": "Godesburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.1587,
+      50.6875
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de l'archevêché de Cologne dominant la vallée du Rhin près de Bonn.",
+    "sources": [
+      "Godesburg"
+    ]
+  },
+  {
+    "id": "set_brauweiler",
+    "province": "prov_cologne",
+    "kind": "abbey",
+    "name": {
+      "display": "Brauweiler",
+      "local": "Brouwilre",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.8534,
+      50.9723
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée en 1024 près de Cologne, sous la protection des comtes palatins.",
+    "sources": [
+      "Abbaye de Brauweiler"
+    ]
+  }
+]

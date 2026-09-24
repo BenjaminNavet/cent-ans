@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_newcastle",
+    "province": "prov_northumberland",
+    "kind": "city",
+    "name": {
+      "display": "Newcastle",
+      "local": "Newcastel",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6178,
+      54.9783
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Marches d'Écosse : Northumberland (Percy), palatinat de Durham, Cumberland et Westmorland (Carlisle). Berwick reprise en 1333. Charbon de Newcastle, raids écossais.",
+    "sources": [
+      "Northumberland",
+      "Marches anglo-écossaises",
+      "Berwick-upon-Tweed"
+    ]
+  },
+  {
+    "id": "set_carlisle",
+    "province": "prov_northumberland",
+    "kind": "town",
+    "name": {
+      "display": "Carlisle",
+      "local": "Cardoile",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.9319,
+      54.8951
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité-forteresse frontalière de l'ouest, siège du gardien des Marches occidentales.",
+    "sources": [
+      "Carlisle (Angleterre)"
+    ]
+  },
+  {
+    "id": "set_alnwick",
+    "province": "prov_northumberland",
+    "kind": "castle",
+    "name": {
+      "display": "Alnwick",
+      "local": "Alnewik",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7058,
+      55.4144
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Puissant château baronnial des Percy, gardant la route nord vers l'Écosse.",
+    "sources": [
+      "Château d'Alnwick"
+    ]
+  },
+  {
+    "id": "set_bamburgh",
+    "province": "prov_northumberland",
+    "kind": "castle",
+    "name": {
+      "display": "Bamburgh",
+      "local": "Bebbanburh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7086,
+      55.6083
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne forteresse royale sur un piton basaltique dominant la mer du Nord.",
+    "sources": [
+      "Château de Bamburgh"
+    ]
+  }
+]

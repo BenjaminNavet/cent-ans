@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_heidelberg",
+    "province": "prov_palatinate",
+    "kind": "city",
+    "name": {
+      "display": "Heidelberg",
+      "local": "Heidelberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6724,
+      49.3988
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté palatin du Rhin, tenu par les Wittelsbach palatins (Rodolphe II et Robert Ier), neveux rivaux de l'empereur Louis IV (traité de Pavie, 1329). Worms et Spire, cités impériales.",
+    "sources": [
+      "Palatinat du Rhin",
+      "Traité de Pavie (1329)",
+      "Heidelberg"
+    ]
+  },
+  {
+    "id": "set_speyer",
+    "province": "prov_palatinate",
+    "kind": "town",
+    "name": {
+      "display": "Spire",
+      "local": "Spira",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.4344,
+      49.3169
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire, siège de la cathédrale impériale et nécropole des empereurs saliens.",
+    "sources": [
+      "Spire"
+    ]
+  },
+  {
+    "id": "set_worms",
+    "province": "prov_palatinate",
+    "kind": "town",
+    "name": {
+      "display": "Worms",
+      "local": "Wormatia",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.3648,
+      49.6326
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire sur le Rhin, siège fréquent des diètes impériales.",
+    "sources": [
+      "Worms"
+    ]
+  },
+  {
+    "id": "set_trifels",
+    "province": "prov_palatinate",
+    "kind": "castle",
+    "name": {
+      "display": "Trifels",
+      "local": "Trifels",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.0264,
+      49.2011
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château impérial ayant abrité les insignes du Saint-Empire, dominant la forêt palatine.",
+    "sources": [
+      "Château de Trifels"
+    ]
+  }
+]

@@ -1,0 +1,141 @@
+[
+  {
+    "id": "set_caernarfon",
+    "province": "prov_gwynedd",
+    "kind": "city",
+    "name": {
+      "display": "Caernarfon",
+      "local": "Caernarfon",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.2733,
+      53.1399
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d'Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343).",
+    "sources": [
+      "Principauté de Galles",
+      "Gwynedd",
+      "Caernarfon"
+    ]
+  },
+  {
+    "id": "set_conwy",
+    "province": "prov_gwynedd",
+    "kind": "town",
+    "name": {
+      "display": "Conwy",
+      "local": "Conwy",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -3.8285,
+      53.2799
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville close édifiée par Édouard Ier autour de son château, l'un des maillons du « cercle de fer ».",
+    "sources": [
+      "Château de Conwy"
+    ]
+  },
+  {
+    "id": "set_beaumaris",
+    "province": "prov_gwynedd",
+    "kind": "castle",
+    "name": {
+      "display": "Beaumaris",
+      "local": "Biwmares",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.0914,
+      53.2635
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Dernier et plus grand des châteaux édouardiens, à la géométrie concentrique parfaite, jamais achevé.",
+    "sources": [
+      "Château de Beaumaris"
+    ]
+  },
+  {
+    "id": "set_harlech",
+    "province": "prov_gwynedd",
+    "kind": "castle",
+    "name": {
+      "display": "Harlech",
+      "local": "Harlech",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.1085,
+      52.8608
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse édouardienne perchée sur une falaise dominant la baie de Cardigan.",
+    "sources": [
+      "Château de Harlech"
+    ]
+  },
+  {
+    "id": "set_cymer",
+    "province": "prov_gwynedd",
+    "kind": "abbey",
+    "name": {
+      "display": "Cymer",
+      "local": "Cymer",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -3.9667,
+      52.75
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne près de Dolgellau, protégée jadis par les princes de Gwynedd.",
+    "sources": [
+      "Abbaye de Cymer"
+    ]
+  }
+]

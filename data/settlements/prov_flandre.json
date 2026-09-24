@@ -1,0 +1,173 @@
+[
+  {
+    "id": "set_gand",
+    "province": "prov_flandre",
+    "kind": "city",
+    "name": {
+      "display": "Gand",
+      "local": "Gent",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.7174,
+      51.0543
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s'oppose à ses bourgeois qui dépendent de la laine anglaise.",
+    "sources": [
+      "Comté de Flandre",
+      "Gand",
+      "Bruges"
+    ]
+  },
+  {
+    "id": "set_bruges",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Bruges",
+      "local": "Brugge",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.2247,
+      51.2093
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_counting_house",
+      "bld_weaving_workshop",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Place financière et marchande de premier plan en Europe du Nord-Ouest, comptoir de la Hanse relié à la mer par le Zwin.",
+    "sources": [
+      "Bruges"
+    ]
+  },
+  {
+    "id": "set_ypres",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Ypres",
+      "local": "Ieper",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      2.885,
+      50.85
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_weaving_workshop",
+      "bld_guild_hall",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Grande ville drapière flamande, dotée de sa halle aux draps achevée en 1304.",
+    "sources": [
+      "Ypres"
+    ]
+  },
+  {
+    "id": "set_sluis",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "L'Écluse",
+      "local": "Sluis",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.3839,
+      51.3081
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Avant-port de Bruges sur le Zwin, où mouillent les grandes flottes marchandes.",
+    "sources": [
+      "L'Écluse (Pays-Bas)"
+    ]
+  },
+  {
+    "id": "set_kortrijk",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Courtrai",
+      "local": "Cortrike",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.2649,
+      50.8279
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville drapière de la Lys, tristement célèbre côté français depuis la bataille des Éperons d'or de 1302.",
+    "sources": [
+      "Courtrai"
+    ]
+  },
+  {
+    "id": "set_ter_duinen",
+    "province": "prov_flandre",
+    "kind": "abbey",
+    "name": {
+      "display": "Ter Duinen",
+      "local": "Ten Duinen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      2.6394,
+      51.1167
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne des dunes côtières près de Coxyde, riche propriétaire terrienne.",
+    "sources": [
+      "Abbaye des Dunes"
+    ]
+  }
+]

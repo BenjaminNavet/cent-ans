@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_treves",
+    "province": "prov_trier",
+    "kind": "city",
+    "name": {
+      "display": "Trèves",
+      "local": "Trier",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.6414,
+      49.7566
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Électorat de Trèves, archevêque Baudouin de Luxembourg, frère de l'empereur Henri VII et oncle de Jean de Bohême ; Coblence, confluent du Rhin et de la Moselle. Vignobles de la Moselle.",
+    "sources": [
+      "Électorat de Trèves",
+      "Baudouin de Luxembourg",
+      "Trèves"
+    ]
+  },
+  {
+    "id": "set_koblenz",
+    "province": "prov_trier",
+    "kind": "town",
+    "name": {
+      "display": "Coblence",
+      "local": "Confluentes",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.589,
+      50.3569
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville au confluent du Rhin et de la Moselle, résidence secondaire des archevêques de Trèves.",
+    "sources": [
+      "Coblence"
+    ]
+  },
+  {
+    "id": "set_ehrenbreitstein",
+    "province": "prov_trier",
+    "kind": "castle",
+    "name": {
+      "display": "Ehrenbreitstein",
+      "local": "Ehrenbreitstein",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.6172,
+      50.3606
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse électorale de Trèves dominant Coblence depuis la rive droite du Rhin.",
+    "sources": [
+      "Forteresse d'Ehrenbreitstein"
+    ]
+  },
+  {
+    "id": "set_st_maximin_trier",
+    "province": "prov_trier",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Maximin de Trèves",
+      "local": "Sankt Maximin",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.6353,
+      49.7602
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Ancienne et puissante abbaye bénédictine d'immédiateté impériale, proche de Trèves.",
+    "sources": [
+      "Abbaye Saint-Maximin de Trèves"
+    ]
+  }
+]
