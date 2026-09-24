@@ -19,6 +19,8 @@ const KIND_COUNT := 3
 const PARTS_SIDE := 2
 const PARTS := PARTS_SIDE * PARTS_SIDE
 const FLOATS_PER_INSTANCE := 16
+## Enfoncement du pied (part de la hauteur) : le tronc ne flotte pas sur une pente.
+const GROUND_SINK := 0.08
 
 var mask: VegetationMask
 var tile_index: int = 0
@@ -29,6 +31,10 @@ var coarse_step: int = 4
 var tree_scale: float = 1.0
 ## Cercles d'exclusion (villes) : Vector3(x, y, rayon) en pixels de carte.
 var exclusions: PackedVector3Array = PackedVector3Array()
+## Lot C7b : grille de hauteurs du maillage de terrain affiché (`TerrainBuilder.surface_grid`)
+## au lancement du semis ; les arbres y sont posés (vide : heightmap 4096 bilinéaire). Le tri
+## terre / mer reste fait sur la heightmap : même semis quel que soit le niveau de relief.
+var ground_grid: Dictionary = {}
 
 ## Résultats : un tampon et un nombre d'instances par emplacement `part * KIND_COUNT + kind`.
 var buffers: Array[PackedFloat32Array] = []
@@ -158,9 +164,15 @@ func _scatter(raw: Array) -> void:
 						scale_factor = 0.9
 			if kind < 0 or (not exclusions.is_empty() and _excluded(x, y)):
 				continue
+			# La dernière colonne de la grille déborde (jusqu'à `spacing`) sur la tuile voisine : ces
+			# candidats appartiennent à la voisine (sinon bande deux fois plus dense, et pied posé
+			# sur le maillage d'une autre tuile, lot C7b).
+			if not rect.has_point(Vector2(x, y)):
+				continue
 			var ground := data.height_world_at(x, y)
 			if ground <= 0.0:
 				continue
+			ground = _display_ground(x, y, ground)
 			raw[_slot(kind, x, y)].append(_make_instance(rng, kind, x, ground, y, yaw, scale_factor))
 	_scatter_hedges(raw, rng)
 
@@ -289,10 +301,12 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 		return
 	if not exclusions.is_empty() and _excluded(pos.x, pos.y):
 		return
-	var p := pos + jitter
+	# Reste dans la tuile : le pied est posé sur le maillage de cette tuile (lot C7b).
+	var p := (pos + jitter).clamp(rect.position, rect.end - Vector2(0.001, 0.001))
 	var ground := mask.map_data.height_world_at(p.x, p.y)
 	if ground <= 0.0:
 		return
+	ground = _display_ground(p.x, p.y, ground)
 	var dir := next - pos
 	# Basis(UP, a) envoie X sur (cos a, 0, −sin a) : aligne le buisson sur le bord.
 	var yaw := atan2(-dir.y, dir.x) + rng.randf_range(-0.15, 0.15)
@@ -300,6 +314,30 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 		raw[_slot(Kind.DECIDUOUS, p.x, p.y)].append(_make_instance(rng, Kind.DECIDUOUS, p.x, ground, p.y, rng.randf() * TAU, 0.78))
 	else:
 		raw[_slot(Kind.HEDGE, p.x, p.y)].append(_make_instance(rng, Kind.HEDGE, p.x, ground, p.y, yaw, 1.0))
+
+
+## Hauteur de la surface affichée (grille du maillage) ou, à défaut, `fallback`.
+func _display_ground(x: float, y: float, fallback: float) -> float:
+	if ground_grid.is_empty():
+		return fallback
+	return maxf(TerrainBuilder.grid_height(ground_grid, x - origin_px.x, y - origin_px.y), 0.0)
+
+
+## Lot C7b : repose les instances d'un tampon (`_pack`) sur la grille `grid` d'une tuile dont le
+## coin est en `origin` (px carte) : même enfoncement que `_make_instance` (8 % de la hauteur,
+## longueur de la colonne Y de la base). Rend un nouveau tampon ; sûr hors du fil principal.
+static func reground(buffer: PackedFloat32Array, grid: Dictionary, origin: Vector2) -> PackedFloat32Array:
+	var result := buffer.duplicate()
+	if grid.is_empty():
+		return result
+	var k := 0
+	var size := result.size()
+	while k < size:
+		var height := Vector3(result[k + 1], result[k + 5], result[k + 9]).length()
+		var ground := maxf(TerrainBuilder.grid_height(grid, result[k + 3] - origin.x, result[k + 11] - origin.y), 0.0)
+		result[k + 7] = ground - GROUND_SINK * height
+		k += FLOATS_PER_INSTANCE
+	return result
 
 
 func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: float, y: float, yaw: float, scale_factor: float) -> Array:
@@ -337,7 +375,7 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 	var basis := Basis(Vector3.UP, yaw) * Basis(Vector3(1, 0, 0), rng.randf_range(-0.06, 0.06))
 	basis = basis.scaled_local(Vector3(width, height, width if kind != Kind.HEDGE else width * 0.62))
 	# Enfoncé un peu : le maillage du terrain (LOD) ne suit pas exactement l'interpolation bilinéaire.
-	var origin := Vector3(x, ground - 0.08 * height, y)
+	var origin := Vector3(x, ground - GROUND_SINK * height, y)
 	return [rng.randf(), Transform3D(basis, origin), tint]
 
 

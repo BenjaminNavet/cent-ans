@@ -201,10 +201,14 @@ def geo_relief(
 
 
 def _report_settlements(result) -> None:  # noqa: ANN001
-    _print_sizes("Colonies", [result.graph, result.positions, result.preview])
+    files = [result.graph, result.positions, result.preview]
+    if result.edge_paths is not None:
+        files.append(result.edge_paths)
+    _print_sizes("Colonies", files)
     console.print(
         f"{result.settlements} colonies ({len(result.fallback_cities)} cités de repli) ; "
-        f"arêtes : {result.land_edges} terrestres dont {result.road_edges} sur route, "
+        f"arêtes : {result.land_edges} terrestres dont {result.road_edges} sur route "
+        f"({result.traced_edges} tracées le long des routes), "
         f"{result.sea_edges} maritimes ; {result.components} composante(s) connexe(s)"
     )
     for warning in result.warnings:

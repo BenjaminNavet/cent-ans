@@ -220,6 +220,7 @@ def info(map_dir: Path = MAP_DIR) -> dict:
         "provinces.geojson",
         "province_ids.png",
         "settlement_graph.json",
+        "settlement_edge_paths.json",
         "settlements_px.json",
         "roads.geojson",
         "hamlets.json",

@@ -10,8 +10,12 @@ extends Node3D
 ## - Distance : deux maillages par essence (détaillé de près, ≈ 20 triangles au loin),
 ##   éclaircissement progressif (`foliage.gdshader`) et, au-delà de `max_camera_distance`, plus
 ##   aucun arbre (le terrain texturé suffit au dézoom).
-## - Autonome : se branche seul sur la scène parente (`map_data`, `load_ok`) et sur le rig de
-##   caméra ; `build(map_data)` peut aussi être appelé directement.
+## - Autonome : se branche seul sur la scène parente (`map_data`, `load_ok`, `terrain`) et sur le
+##   rig de caméra ; `build(map_data)` peut aussi être appelé directement.
+## - Lot C7b : les arbres sont posés sur la surface du maillage de terrain affiché
+##   (`TerrainBuilder.surface_grid`) et recalés quand une tuile change de niveau (relief fin
+##   8192², LOD proche ou lointain, signal `chunk_surface_changed`) : nouveaux tampons calculés
+##   dans une tâche `VegetationGroundJob`, installés en une fois (pas d'à-coup).
 ## Purement visuel : aucune règle de jeu.
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
@@ -48,19 +52,27 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 ## discernables individuellement mais restent payées en pleine géométrie d'ombre côté GPU (V6,
 ## perf ; zoom moyen d≈300-500).
 @export var shadow_camera_distance: float = 300.0
+## Recalages (lot C7b) simultanés au plus.
+@export var max_ground_jobs: int = 2
 
 var map_data: MapData
 var mask: VegetationMask
+## Terrain affiché (lot C7b) : null → arbres sur la heightmap 4096 bilinéaire, sans recalage.
+var terrain: TerrainBuilder
 ## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
 var extra_exclusions: PackedVector3Array = PackedVector3Array()
 var chunk_px: int = 0
 var enabled: bool = true
 ## Statistiques : tuiles construites, instances, temps de semis (ms, somme et max).
-var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": ""}
+var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": "", "regrounds": 0, "reground_ms_max": 0.0}
 
 var _material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
-var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob}
+var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int}
+## Lot C7b : recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
+var _ground_jobs: Dictionary = {}
+var _ground_dirty: Dictionary = {}
+var _generation: int = 0
 var _exclusions := PackedVector3Array()
 var _rig: Node3D
 var _frame: int = 0
@@ -137,7 +149,48 @@ func _try_autobind() -> void:
 		return
 	var data: Variant = parent.get("map_data")
 	if data is MapData:
+		var parent_terrain: Variant = parent.get("terrain")
+		if parent_terrain is TerrainBuilder:
+			bind_terrain(parent_terrain)
 		build(data)
+
+
+## Lot C7b : pose les arbres sur la surface affichée de `terrain_builder` et les recale quand une
+## tuile change de niveau. À appeler avant `build`.
+func bind_terrain(terrain_builder: TerrainBuilder) -> void:
+	if terrain != null and terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
+		terrain.chunk_surface_changed.disconnect(_on_chunk_surface_changed)
+	terrain = terrain_builder
+	if terrain != null:
+		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
+
+
+func _on_chunk_surface_changed(index: int) -> void:
+	if _tiles.has(index):
+		_ground_dirty[index] = true
+
+
+## Tuiles en attente de recalage ou en cours (tests).
+func pending_regrounds() -> int:
+	return _ground_dirty.size() + _ground_jobs.size()
+
+
+## Écart maximal (unités monde) entre le pied des arbres des tuiles construites et la surface
+## affichée (tests) ; ne regarde qu'une instance sur `stride`.
+func max_ground_error(stride: int = 7) -> float:
+	var worst := 0.0
+	if terrain == null:
+		return worst
+	for index in _tiles:
+		var entry: Dictionary = _tiles[index]
+		for buffer: PackedFloat32Array in entry["buffers"]:
+			var k := 0
+			while k < buffer.size():
+				var height := Vector3(buffer[k + 1], buffer[k + 5], buffer[k + 9]).length()
+				var foot := buffer[k + 7] + VegetationTileJob.GROUND_SINK * height
+				worst = maxf(worst, absf(foot - terrain.surface_height_at(buffer[k + 3], buffer[k + 11])))
+				k += VegetationTileJob.FLOATS_PER_INSTANCE * stride
+	return worst
 
 
 ## Met à jour tuiles, LOD et éclaircissement pour une caméra en `camera_position`, à
@@ -145,6 +198,7 @@ func _try_autobind() -> void:
 func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_frame += 1
 	_collect_jobs()
+	_collect_ground_jobs()
 	var active := enabled and camera_distance < max_camera_distance
 	visible = active
 	if not active or _material == null:
@@ -179,6 +233,7 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 							_apply_lod(part, part_d, fade_start, fade_end, density, camera_distance)
 			elif in_range and not _jobs.has(index):
 				wanted.append([d, index])
+	_start_ground_jobs()
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	# Premier affichage : les tuiles les plus proches sont semées en parallèle et attendues
 	# (pas d'apparition progressive au lancement ni dans les captures).
@@ -195,7 +250,7 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 		var ready_jobs := _jobs.duplicate()
 		_jobs.clear()
 		for index in ready_jobs:
-			_install_tile(index, ready_jobs[index]["job"])
+			_install_tile(index, ready_jobs[index]["job"], ready_jobs[index]["level"])
 		stats["warm_start_ms"] = Time.get_ticks_msec() - t0
 		if _log_bursts:
 			print("Vegetation (warm start): %s" % JSON.stringify(stats))
@@ -252,8 +307,12 @@ func _start_job(index: int) -> void:
 	job.spacing = spacing * float(chunk_px) / 256.0 if chunk_px < 256 else spacing
 	job.tree_scale = tree_scale
 	job.exclusions = _exclusions_for(Rect2(Vector2(job.origin_px), Vector2(chunk_px, chunk_px)))
+	var level := -1
+	if terrain != null:
+		level = terrain.chunk_level(index)
+		job.ground_grid = terrain.surface_grid(index)
 	var task := WorkerThreadPool.add_task(job.run, false, "vegetation tile %d" % index)
-	_jobs[index] = {"task": task, "job": job}
+	_jobs[index] = {"task": task, "job": job, "level": level}
 
 
 ## Exclusions qui touchent une tuile (le semis teste chaque candidat contre toute la liste).
@@ -272,7 +331,7 @@ func _collect_jobs() -> void:
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
 		_jobs.erase(index)
-		_install_tile(index, item["job"])
+		_install_tile(index, item["job"], item["level"])
 		if _jobs.is_empty() and _log_bursts:
 			print("Vegetation: %s" % JSON.stringify(stats))
 
@@ -281,14 +340,87 @@ func _wait_all_jobs() -> void:
 	for item in _jobs.values():
 		WorkerThreadPool.wait_for_task_completion(item["task"])
 	_jobs.clear()
+	for item in _ground_jobs.values():
+		WorkerThreadPool.wait_for_task_completion(item["task"])
+	_ground_jobs.clear()
+	_ground_dirty.clear()
 
 
-func _install_tile(index: int, job: VegetationTileJob) -> void:
+## Lance le recalage des tuiles visibles dont la surface a changé (au plus `max_ground_jobs`).
+func _start_ground_jobs() -> void:
+	if terrain == null or _ground_dirty.is_empty():
+		return
+	for index in _ground_dirty.keys():
+		if _ground_jobs.size() >= max_ground_jobs:
+			return
+		if _ground_jobs.has(index):
+			continue
+		var entry: Dictionary = _tiles.get(index, {})
+		if entry.is_empty():
+			_ground_dirty.erase(index)
+			continue
+		if not (entry["node"] as Node3D).visible:
+			continue  # recalée quand elle reviendra dans le champ
+		_ground_dirty.erase(index)
+		var job := VegetationGroundJob.new()
+		job.tile_index = index
+		job.generation = entry["generation"]
+		job.level = terrain.chunk_level(index)
+		job.grid = terrain.surface_grid(index)
+		job.origin = Vector2((index % TerrainBuilder.CHUNKS) * chunk_px, (index / TerrainBuilder.CHUNKS) * chunk_px)
+		job.buffers = entry["buffers"]
+		var task := WorkerThreadPool.add_task(job.run, false, "vegetation ground %d" % index)
+		_ground_jobs[index] = {"task": task, "job": job}
+
+
+func _collect_ground_jobs(block: bool = false) -> void:
+	for index in _ground_jobs.keys():
+		var item: Dictionary = _ground_jobs[index]
+		if not block and not WorkerThreadPool.is_task_completed(item["task"]):
+			continue
+		WorkerThreadPool.wait_for_task_completion(item["task"])
+		_ground_jobs.erase(index)
+		var job: VegetationGroundJob = item["job"]
+		var entry: Dictionary = _tiles.get(index, {})
+		if entry.is_empty() or int(entry["generation"]) != job.generation:
+			continue
+		var slots: Array = entry["slots"]
+		for slot in slots.size():
+			var mmi: MultiMeshInstance3D = slots[slot]
+			if mmi != null:
+				mmi.multimesh.buffer = job.results[slot]
+		entry["buffers"] = job.results
+		entry["level"] = job.level
+		# Le niveau a encore changé pendant le calcul : un nouveau recalage suivra.
+		if terrain.chunk_level(index) != job.level:
+			_ground_dirty[index] = true
+		stats["regrounds"] = int(stats["regrounds"]) + 1
+		stats["reground_ms_max"] = maxf(float(stats["reground_ms_max"]), job.build_ms)
+
+
+## Recale tout de suite les tuiles en attente, visibles ou non (tests, captures).
+func flush_ground() -> void:
+	for _i in 8:
+		var saved := max_ground_jobs
+		max_ground_jobs = 1 << 20
+		for index in _ground_dirty.keys():
+			var entry: Dictionary = _tiles.get(index, {})
+			if not entry.is_empty():
+				(entry["node"] as Node3D).visible = true
+		_start_ground_jobs()
+		max_ground_jobs = saved
+		_collect_ground_jobs(true)
+		if _ground_dirty.is_empty():
+			return
+
+
+func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 	var node := Node3D.new()
 	node.name = "Tile_%d" % index
 	var parts: Array = []
 	var meshes := _meshes(false)
 	var part_px := float(chunk_px) / VegetationTileJob.PARTS_SIDE
+	var slots: Array = []
 	for part_index in VegetationTileJob.PARTS:
 		var part_node := Node3D.new()
 		part_node.name = "Part_%d" % part_index
@@ -298,6 +430,7 @@ func _install_tile(index: int, job: VegetationTileJob) -> void:
 			var count: int = job.counts[slot]
 			if count == 0:
 				mmis.append(null)
+				slots.append(null)
 				continue
 			var multimesh := MultiMesh.new()
 			multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -312,11 +445,16 @@ func _install_tile(index: int, job: VegetationTileJob) -> void:
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			part_node.add_child(mmi)
 			mmis.append(mmi)
+			slots.append(mmi)
 		node.add_child(part_node)
 		var cell := Vector2(part_index % VegetationTileJob.PARTS_SIDE, part_index / VegetationTileJob.PARTS_SIDE)
 		parts.append({"node": part_node, "mmis": mmis, "rect": Rect2(Vector2(job.origin_px) + cell * part_px, Vector2(part_px, part_px))})
 	add_child(node)
-	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame}
+	_generation += 1
+	# Tampons CPU gardés pour le recalage (lot C7b) : 64 octets par instance.
+	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame, "buffers": job.buffers, "slots": slots, "generation": _generation, "level": level}
+	if terrain != null and terrain.chunk_level(index) != level:
+		_ground_dirty[index] = true
 	stats["tiles"] = _tiles.size()
 	stats["instances"] = int(stats["instances"]) + job.instance_total()
 	stats["build_ms_total"] = float(stats["build_ms_total"]) + job.build_ms
@@ -343,4 +481,5 @@ func _evict() -> void:
 		stats["instances"] = int(stats["instances"]) - total
 		(entry["node"] as Node).queue_free()
 		_tiles.erase(index)
+		_ground_dirty.erase(index)
 	stats["tiles"] = _tiles.size()

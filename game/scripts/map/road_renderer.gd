@@ -2,15 +2,25 @@ class_name RoadRenderer
 extends Node3D
 
 ## Routes de la carte (lot C6), purement visuelles :
-## - palier moyen : routes principales (`type` = `main`) en traits fins à largeur minimale écran
-##   (`terrain_line.gdshader`, comme les fleuves), en fondu selon le poids du palier ;
+## - palier moyen : routes principales (`type` = `main`) en traits deux tons (liseré sombre, cœur
+##   clair) dont la largeur à l'écran suit la distance (`road_line.gdshader`, lot C7b), routes
+##   secondaires et calculées en traits fins et pâles qui s'effacent avant le haut du palier ;
+##   le tout en fondu selon le poids du palier ;
 ## - palier près : toutes les routes en rubans de chemin de terre (`road.gdshader`) drapés sur la
 ##   surface exacte du terrain affiché (`TerrainBuilder.surface_height_at`), un maillage par
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
-@export var main_color: Color = Color(0.30, 0.20, 0.10, 0.9)
+## Palier moyen (lot C7b) : cœur et liseré des routes principales, largeur écran selon la distance.
+@export var main_fill: Color = Color(0.95, 0.84, 0.58, 1.0)
+@export var main_casing: Color = Color(0.27, 0.16, 0.07, 1.0)
 @export var main_width: float = 0.5
-@export var main_min_px: float = 1.8
+@export var main_near_px: float = 4.2
+@export var main_far_px: float = 2.2
+## Routes secondaires et calculées au palier moyen : discrètes, effacées au-delà de `minor_fade_distance`.
+@export var minor_color: Color = Color(0.36, 0.25, 0.13, 0.55)
+@export var minor_near_px: float = 1.5
+@export var minor_far_px: float = 0.9
+@export var minor_fade_distance: float = 420.0
 @export var ribbon_main_width: float = 0.55
 @export var ribbon_width: float = 0.38
 ## Soulèvement au-dessus de la surface (évite le z-fighting).
@@ -19,12 +29,16 @@ extends Node3D
 @export var sample_step: float = 0.5
 @export var max_ribbon_builds_per_frame: int = 3
 
+const ROAD_LINE_SHADER := preload("res://shaders/road_line.gdshader")
+
 var map_data: MapData
 var terrain: TerrainBuilder
 var stats: Dictionary = {"roads": 0, "main_roads": 0, "runs": 0, "ribbon_chunks": 0}
 
 var _main_lines: MeshInstance3D
 var _main_material: ShaderMaterial
+var _minor_lines: MeshInstance3D
+var _minor_material: ShaderMaterial
 var _ribbon_material: ShaderMaterial
 ## index de tuile → Array de {points: PackedVector2Array, width: float}
 var _runs_by_chunk: Dictionary = {}
@@ -45,24 +59,52 @@ func build(data: MapData, settlement_data: SettlementData, terrain_builder: Terr
 	terrain = terrain_builder
 	var main_lines := []
 	var main_widths := []
+	var minor_lines := []
+	var minor_widths := []
 	for road in settlement_data.roads:
 		if road["main"]:
 			main_lines.append(road["points"])
 			main_widths.append(main_width)
+		else:
+			minor_lines.append(road["points"])
+			minor_widths.append(0.0)
 		_split_by_chunk(road["points"], ribbon_main_width if road["main"] else ribbon_width)
 	stats["roads"] = settlement_data.roads.size()
 	stats["main_roads"] = main_lines.size()
-	_main_lines = MeshInstance3D.new()
-	_main_lines.name = "MainRoads"
-	_main_lines.mesh = PolylineMesh.build_screen_lines(main_lines, main_widths, data, 0.1)
-	_main_material = PolylineMesh.line_material(main_color, main_min_px, 1)
-	_main_lines.material_override = _main_material
-	_main_lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(_main_lines)
+	# Ordre (sans test de profondeur matériel) : routes secondaires (0) < principales et côte (1) < fleuves (2) ;
+	# icônes et étiquettes au-dessus (`SettlementLayer`).
+	_minor_material = _line_material(minor_color, minor_color, minor_near_px, minor_far_px, 0.0, 0)
+	_minor_material.set_shader_parameter("far_distance", minor_fade_distance)
+	_minor_material.set_shader_parameter("far_alpha", 0.0)
+	_minor_lines = _lines_instance("MinorRoads", minor_lines, minor_widths, _minor_material)
+	_main_material = _line_material(main_fill, main_casing, main_near_px, main_far_px, 0.8, 1)
+	_main_lines = _lines_instance("MainRoads", main_lines, main_widths, _main_material)
 	_ribbon_material = ShaderMaterial.new()
 	_ribbon_material.shader = preload("res://shaders/road.gdshader")
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
+
+
+static func _line_material(fill: Color, casing: Color, near_px: float, far_px: float, casing_px: float, priority: int) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = ROAD_LINE_SHADER
+	material.set_shader_parameter("fill_color", fill)
+	material.set_shader_parameter("casing_color", casing)
+	material.set_shader_parameter("near_px", near_px)
+	material.set_shader_parameter("far_px", far_px)
+	material.set_shader_parameter("casing_px", casing_px)
+	material.render_priority = priority
+	return material
+
+
+func _lines_instance(node_name: String, lines: Array, widths: Array, material: ShaderMaterial) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = PolylineMesh.build_screen_lines(lines, widths, map_data, 0.1)
+	instance.material_override = material
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(instance)
+	return instance
 
 
 ## Découpe une polyligne en tronçons par tuile de terrain (tuile du milieu de chaque segment).
@@ -105,10 +147,10 @@ func update_view(medium: float, near: float) -> void:
 		return
 	if not is_equal_approx(medium, _medium_alpha):
 		_medium_alpha = medium
-		var color := main_color
-		color.a *= medium
-		_main_material.set_shader_parameter("color", color)
+		_main_material.set_shader_parameter("alpha", medium)
+		_minor_material.set_shader_parameter("alpha", medium)
 		_main_lines.visible = medium > 0.01
+		_minor_lines.visible = medium > 0.01
 	if not is_equal_approx(near, _near_alpha):
 		_near_alpha = near
 		_ribbon_material.set_shader_parameter("alpha", near)

@@ -67,6 +67,11 @@ const TOAST_SECONDS := 3.5
 @onready var news_letters: NewsLetters = %NewsLetters
 ## Minicarte (lot C1), ajoutée par `MinimapController` ; placée en haut à droite, lettres dessous.
 var minimap: Control = null
+## Lot C7b : panneaux ancrés comme le panneau de province, à gauche de la minicarte (panneau de
+## colonie) ; voir `dock_right_panel`.
+var docked_panels: Array[Control] = []
+## Abscisse écran du bord droit de ces panneaux (dernier `layout_hud`).
+var docked_right_x: float = 0.0
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
 @onready var court_button: Button = %CourtButton
@@ -668,14 +673,6 @@ func layout_hud() -> void:
 	var log_height := event_log.get_combined_minimum_size().y
 	event_log.size = Vector2(LOG_WIDTH, log_height)
 	event_log.position = Vector2(HUD_MARGIN, maxf(top, log_bottom - log_height))
-	# Panneau de province : de la barre jusqu'au-dessus de la cloche.
-	province_panel.anchor_top = 0.0
-	province_panel.anchor_bottom = 1.0
-	# Contenu plus haut que la place : le panneau déborde vers le bas (sur la cloche),
-	# jamais vers le haut (sur la barre supérieure).
-	province_panel.grow_vertical = Control.GROW_DIRECTION_END
-	province_panel.offset_top = top
-	province_panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
 	# C7 : la fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
 	# l'arbre de la Cour se rétrécit pour lui laisser au moins sa largeur repliée.
 	if court_panel.visible and character_sheet.visible:
@@ -684,16 +681,57 @@ func layout_hud() -> void:
 		court_panel.set_max_right(INF)
 	# Bord droit réel (la liste peut élargir le panneau au-delà de ses marges).
 	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
-	# Minicarte (C1) puis lettres : haut droite, masquées sous un panneau de droite.
-	var right_panel_open := province_panel.visible or faction_panel.visible or character_sheet.visible
+	# Minicarte (C1) puis lettres : haut droite. La minicarte reste visible sous les panneaux de
+	# province et de colonie (placés à sa gauche, lot C7b) ; les grands panneaux de droite
+	# (faction, fiche de personnage) la masquent, les lettres sont masquées par tout panneau.
+	var docked_open := province_panel.visible
+	for panel in docked_panels:
+		docked_open = docked_open or panel.visible
+	var wide_panel_open := faction_panel.visible or character_sheet.visible
 	var letters_top := top
+	# Bord droit (distance au bord de l'écran) des panneaux de province et de colonie.
+	var dock_right := HUD_MARGIN
 	if minimap != null:
 		minimap.size = minimap.get_combined_minimum_size()
 		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
-		minimap.visible = not right_panel_open
+		minimap.visible = not wide_panel_open
 		letters_top = minimap.position.y + minimap.size.y + 10.0
+		if minimap.visible:
+			dock_right = view.x - minimap.position.x + 8.0
+	docked_right_x = view.x - dock_right
 	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, letters_top)
-	news_letters.visible = not right_panel_open
+	news_letters.visible = not (docked_open or wide_panel_open)
+	# Panneaux de province et de colonie : de la barre jusqu'au-dessus de la cloche, à gauche de
+	# la minicarte.
+	for panel: Control in [province_panel] + docked_panels:
+		_dock_panel(panel, top, dock_right)
+
+
+## Lot C7b : ancre `panel` (panneau de colonie) comme le panneau de province, à gauche de la
+## minicarte ; replacé à chaque `layout_hud`.
+func dock_right_panel(panel: Control) -> void:
+	if docked_panels.has(panel):
+		return
+	docked_panels.append(panel)
+	panel.visibility_changed.connect(queue_layout)
+	queue_layout()
+
+
+func _dock_panel(panel: Control, top: float, right: float) -> void:
+	var width := maxf(panel.offset_right - panel.offset_left, panel.custom_minimum_size.x)
+	panel.anchor_left = 1.0
+	panel.anchor_right = 1.0
+	panel.anchor_top = 0.0
+	panel.anchor_bottom = 1.0
+	# Contenu plus large que prévu : le panneau s'étend vers la gauche, jamais sur la minicarte.
+	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	# Contenu plus haut que la place : le panneau déborde vers le bas (sur la cloche),
+	# jamais vers le haut (sur la barre supérieure).
+	panel.grow_vertical = Control.GROW_DIRECTION_END
+	panel.offset_right = -right
+	panel.offset_left = -right - width
+	panel.offset_top = top
+	panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
 
 
 func _fit_hover_label() -> void:
