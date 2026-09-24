@@ -1185,3 +1185,77 @@ impl CampaignState {
         marriage_candidates(self, data, id)
     }
 }
+
+#[cfg(test)]
+mod culture_names_tests {
+    use std::path::PathBuf;
+
+    use data_model::{CharacterId, FactionId, GameData, Sex};
+
+    use super::pick_name;
+    use crate::rng::CampaignRng;
+
+    fn data() -> GameData {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        GameData::load(&root).expect("game data loads").0
+    }
+
+    /// S2: `fac_granada` (culture `cul_andalusi`) must draw its generated
+    /// characters' first names from `names_ar`, never from the Castilian
+    /// `names_es` list it used to share with Castile/Navarre/the Basques.
+    #[test]
+    fn granada_generates_andalusi_arabic_names_not_castilian() {
+        let data = data();
+        let names_ar = &data.names["names_ar"];
+        let names_es = &data.names["names_es"];
+        assert!(names_ar
+            .cultures
+            .iter()
+            .any(|c| c.as_str() == "cul_andalusi"));
+        assert!(
+            !names_es
+                .cultures
+                .iter()
+                .any(|c| c.as_str() == "cul_andalusi"),
+            "names_es must no longer serve cul_andalusi"
+        );
+
+        let faction = FactionId::new("fac_granada").expect("well-formed id");
+        let mut rng = CampaignRng::from_seed(1);
+        for _ in 0..40 {
+            let male = pick_name(&data, &faction, Sex::Male, &mut rng);
+            assert!(
+                names_ar.male_first_names.contains(&male),
+                "{male} was not drawn from names_ar"
+            );
+            assert!(
+                !names_es.male_first_names.contains(&male),
+                "{male} is a Castilian name, not Andalusi-Arabic"
+            );
+            let female = pick_name(&data, &faction, Sex::Female, &mut rng);
+            assert!(
+                names_ar.female_first_names.contains(&female),
+                "{female} was not drawn from names_ar"
+            );
+            assert!(
+                !names_es.female_first_names.contains(&female),
+                "{female} is a Castilian name, not Andalusi-Arabic"
+            );
+        }
+    }
+
+    /// S2: the historical Nasrid ruler's house is the dynasty name, never a
+    /// Castilian house (the succession logic in this module reuses that same
+    /// `house` field for every generated descendant, see `house_members`).
+    #[test]
+    fn granada_ruler_house_is_not_castilian() {
+        let data = data();
+        let yusuf = data
+            .characters
+            .get(&CharacterId::new("chr_yusuf_i").expect("well-formed id"))
+            .expect("chr_yusuf_i exists");
+        assert_eq!(yusuf.house, "Nasrides");
+        let castilian_houses = ["Trastamare", "Castille", "de Castilla", "de Castille"];
+        assert!(!castilian_houses.contains(&yusuf.house.as_str()));
+    }
+}
