@@ -16,20 +16,14 @@ Le validateur du Codex tolère les liens `[[cdx_x]]` et les entrées `see_also` 
 Ids déjà cités par des fiches H8, fiches en cours d'écriture :
 
 - `cdx_aides` — cité par cdx_bretigny, cdx_gabelle, cdx_maillotins, cdx_rancon
-- `cdx_armagnacs_bourguignons` — cité par cdx_azincourt, cdx_bal_des_ardents, cdx_bourgogne, cdx_cabochiens
-- `cdx_ciompi` — cité par cdx_maillotins
-- `cdx_concile_constance` — cité par cdx_gallicanisme, cdx_grand_schisme, cdx_hussites, cdx_jan_hus
 - `cdx_enluminure` — cité par cdx_jean_de_berry
 - `cdx_etats_generaux` — cité par cdx_etienne_marcel
 - `cdx_franc_a_cheval` — cité par cdx_bretigny, cdx_nicole_oresme, cdx_rancon
 - `cdx_librairie_charles_v` — cité par cdx_nicole_oresme, cdx_paris
-- `cdx_louis_d_orleans` — cité par cdx_bal_des_ardents
 - `cdx_mutations_monetaires` — cité par cdx_etienne_marcel, cdx_nicole_oresme
 - `cdx_oxford` — cité par cdx_jan_hus, cdx_john_wyclif, cdx_lollards, cdx_philippa_de_hainaut
-- `cdx_paix_arras` — cité par cdx_bourgogne, cdx_charles_vii, cdx_isabeau_de_baviere, cdx_philippe_le_bon
 - `cdx_pelerinage` — cité par cdx_john_wyclif, cdx_lollards
 - `cdx_reliques` — cité par cdx_lollards
-- `cdx_revolte_paysans_1381` — cité par cdx_jean_de_gand, cdx_lollards, cdx_maillotins, cdx_robert_knolles
 - `cdx_seigneurie` — cité par cdx_assolement_triennal, cdx_four_banal, cdx_ost_feodal
 - `cdx_taille` — cité par cdx_charles_vii, cdx_compagnies_ordonnance, cdx_franc_archer, cdx_gabelle
 - `cdx_tres_riches_heures` — cité par cdx_jean_de_berry

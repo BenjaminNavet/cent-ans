@@ -1,0 +1,11 @@
+{
+  "id": "cdx_louis_d_orleans",
+  "title": "Louis d'Orléans",
+  "category": "personnage",
+  "aliases": ["Louis d'Orléans", "duc d'Orléans", "Louis de Touraine", "Valentine Visconti"],
+  "era": { "from": "1372", "to": "1407" },
+  "summary": "Frère cadet de [[cdx_charles_vi|Charles VI]], Louis, duc d'Orléans, dispute le gouvernement du royaume aux ducs de Bourgogne pendant la folie du roi. Son assassinat en 1407, commandité par [[cdx_jean_sans_peur|Jean sans Peur]], déclenche la guerre civile.",
+  "body": "Né en 1372, second fils de [[cdx_charles_v|Charles V]], Louis reçoit d'abord le duché de Touraine, puis en 1392 celui d'Orléans. En 1389, il épouse Valentine Visconti, fille du seigneur de Milan, qui lui apporte une riche dot et des droits sur l'Italie. Brillant, cultivé, amateur de fêtes et de beaux châteaux, comme Pierrefonds qu'il fait rebâtir, il est aussi dépensier et ambitieux.\n\nQuand [[cdx_charles_vi|Charles VI]] sombre dans la folie en 1392, Louis veut gouverner à sa place. Il se heurte à son oncle [[cdx_philippe_le_hardi|Philippe le Hardi]], puis, après 1404, à son cousin [[cdx_jean_sans_peur|Jean sans Peur]]. On l'accuse de piller le trésor royal, de lever des tailles impopulaires et même d'être l'amant de la reine [[cdx_isabeau_de_baviere|Isabeau]]. Les emblèmes s'opposent : le porc-épic d'Orléans contre le rabot de Bourgogne, qui promet de l'aplanir.\n\nC'est son arrivée avec des porteurs de torches qui déclenche l'incendie du [[cdx_bal_des_ardents|bal des Ardents]], en 1393. Sa politique ambitieuse, en Italie et face à l'Angleterre, lui vaut de nombreux ennemis. Le soir du 23 novembre 1407, alors qu'il sort de chez la reine, il est assassiné rue Vieille-du-Temple par une quinzaine d'hommes de main à la solde du duc de Bourgogne.\n\nCe meurtre ouvre la guerre entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]]. Son fils Charles d'Orléans, capturé à [[cdx_azincourt|Azincourt]], passera vingt-cinq ans prisonnier en Angleterre et deviendra l'un des plus grands poètes de la langue française. Son petit-fils montera sur le trône en 1498 sous le nom de Louis XII.",
+  "see_also": ["cdx_armagnacs_bourguignons", "cdx_jean_sans_peur", "cdx_charles_vi", "cdx_bal_des_ardents"],
+  "sources": ["Louis Ier d'Orléans", "Assassinat de Louis Ier d'Orléans"]
+}

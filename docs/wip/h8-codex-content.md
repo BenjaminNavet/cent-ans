@@ -88,7 +88,9 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
   Luxembourg », homonyme du capitaine bourguignon), david_ii, paris, gand.
 - main fusionné (H10 : hanse et bataille_des_harengs écrites par H10, ne pas refaire).
 - Lot 5 fait : bruges, reims, rouen, avignon, maillotins, cabochiens, bal_des_ardents.
-- Fiches H8b écrites : 41.
+- Lot 6 fait : armagnacs_bourguignons, louis_d_orleans, paix_arras, concile_constance,
+  revolte_paysans_1381 (alias Wat Tyler, John Ball : pas de fiche wat_tyler séparée), ciompi.
+- Fiches H8b écrites : 47.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
