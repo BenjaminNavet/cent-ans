@@ -711,6 +711,7 @@ func _run_battle() -> void:
 	for key in scene._mm:
 		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
 	_check(drawn > 0, "battle scene: no soldier instances")
+	await _check_battle_deployment_f5c(scene)  # F5c
 	_check_battle_hud_f5b(scene)
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
@@ -1182,6 +1183,7 @@ func _run_siege_battle() -> void:
 		scene.queue_free()
 		return
 	_check(scene.hud.siege_panel.visible, "siege scene: siege status should be shown")
+	await _check_siege_f5c(scene)  # F5c
 	scene.battle.call("set_ai", scene.player_side, true)
 	for _i in 36000:
 		scene.battle.call("tick", 0.1)
@@ -1527,3 +1529,55 @@ func _run_tutorial() -> void:
 	await process_frame
 	if _failures == 0:
 		print("smoke OK: tutorial (%s) and encyclopedia (%s)" % [", ".join(visited), ", ".join(counts)])
+
+
+# --- F5c : déploiement et maisons de siège dans la scène ------------------------------
+
+
+## Phase de déploiement ouverte par une bataille du joueur : temps gelé, zone dessinée, un
+## placement valide et un refusé (toast), « Commencer la bataille », puis le temps avance.
+func _check_battle_deployment_f5c(scene: BattleScene) -> void:
+	var controller: DeploymentController = scene.deployment
+	if not _check(controller != null and controller.active and bool(scene.battle.call("is_deploying")), "deployment: phase should be open for a player battle"):
+		return
+	_check(controller.zone_view != null and controller.zone_view.get_child_count() == 2, "deployment: zone not drawn")
+	_check(controller.banner != null and controller.banner.is_visible_in_tree(), "deployment: banner missing")
+	_check(float(scene.battle.call("get_elapsed")) == 0.0, "deployment: time should be frozen")
+	var zone: Dictionary = controller.zone
+	var own := -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]):
+			own = int(unit["id"])
+			break
+	var inside := Vector3((float(zone["x0"]) + float(zone["x1"])) * 0.5, 0, (float(zone["z0"]) + float(zone["z1"])) * 0.5)
+	var cam := inside + Vector3(0, 200, -300)
+	_check(controller.place([own], inside, inside, cam) == 1, "deployment: placement inside the zone refused")
+	scene._refresh_view(true)
+	var moved: Dictionary = controller._unit(own)
+	_check(Vector2(float(moved["x"]), float(moved["z"])).distance_to(Vector2(inside.x, inside.z)) < 1.0, "deployment: unit not moved to the zone centre")
+	var outside := Vector3(inside.x, 0, float(zone["z1"]) + 200.0 if scene.player_side == "attacker" else float(zone["z0"]) - 200.0)
+	_check(controller.place([own], outside, outside, cam) == 0, "deployment: placement outside the zone accepted")
+	_check(scene.hud.toast_label != null and scene.hud.toast_label.text.contains("zone de déploiement"), "deployment: refusal toast missing")
+	_check(controller.finish() and not controller.active, "deployment: start_battle failed")
+	_check(not bool(scene.battle.call("is_deploying")), "deployment: still deploying after start_battle")
+	for _i in 10:
+		await process_frame
+	scene.battle.call("tick", 0.5)
+	_check(float(scene.battle.call("get_elapsed")) > 0.0, "deployment: battle does not progress after start")
+	if _failures == 0:
+		print("smoke OK: deployment (zone %s, placement valid + refused, battle started)" % [zone])
+
+
+## Siège (F5c) : les maisons rendues sont exactement les disques de la simulation, puis le
+## déploiement est validé comme en bataille rangée.
+func _check_siege_f5c(scene: BattleScene) -> void:
+	var houses: Array = (scene.battle.call("get_siege") as Dictionary).get("houses", [])
+	var sites: Array = scene.siege_view.house_sites
+	var same := houses.size() == sites.size() and not houses.is_empty()
+	for i in mini(houses.size(), sites.size()):
+		var p: Vector2 = sites[i]["p"]
+		same = same and p.distance_to(Vector2(float(houses[i]["x"]), float(houses[i]["z"]))) < 0.01
+	_check(same, "siege scene: %d houses rendered for %d simulation houses" % [sites.size(), houses.size()])
+	await _check_battle_deployment_f5c(scene)
+	_check(not scene.hud.siege_label.text.contains("sortie"), "siege scene: no sortie at the start")
+	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")

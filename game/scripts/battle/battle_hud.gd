@@ -372,3 +372,36 @@ func show_end(title: String, body: String) -> void:
 	end_title.text = title
 	end_body.text = body
 	end_panel.visible = true
+
+
+# --- F5c : message éphémère (refus de déploiement, sortie de la garnison) ---------------
+
+const TOAST_SECONDS := 4.0
+var toast_label: Label = null
+var _toast_serial: int = 0
+
+
+func show_toast(text: String, is_error: bool = true) -> void:
+	if toast_label == null:
+		var panel := PanelContainer.new()
+		panel.name = "Toast"
+		panel.anchor_left = 0.5
+		panel.anchor_right = 0.5
+		panel.anchor_top = 0.3
+		panel.anchor_bottom = 0.3
+		panel.offset_left = -300
+		panel.offset_right = 300
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(panel)
+		toast_label = _label("", 16)
+		toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		panel.add_child(toast_label)
+	toast_label.text = text
+	toast_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else INK)
+	toast_label.get_parent().visible = true
+	_toast_serial += 1
+	var serial := _toast_serial
+	get_tree().create_timer(TOAST_SECONDS).timeout.connect(func() -> void:
+		if serial == _toast_serial and toast_label != null:
+			toast_label.get_parent().visible = false)
