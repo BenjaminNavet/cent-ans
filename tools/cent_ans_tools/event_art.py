@@ -3,7 +3,7 @@
 One wide illumination per event of ``data/events`` (historical, random and chained),
 shown as a banner at the top of the chronicle window. The prompt is built from the
 event data only (title, period text, date, place); images are centre-cropped to a
-2:1 band and saved as ``game/assets/events/<event id>.jpg`` (768x384, JPEG).
+16:9 band and saved as ``game/assets/events/<event id>.jpg`` (768x432, JPEG).
 
 The paid batch reuses :func:`cent_ans_tools.portraits.generate` (idempotence, task
 envelope, global cap of ``docs/budget.md``, one budget row per batch).
@@ -21,14 +21,18 @@ from cent_ans_tools.portraits import DATA_DIR, REPO_DIR, PortraitJob
 
 EVENTS_ART_DIR = REPO_DIR / "game" / "assets" / "events"
 ART_WIDTH = 768
-ART_HEIGHT = 384
+ART_HEIGHT = 432
+# Share of the cropped height taken above the band (heads sit high in miniatures).
+TOP_BIAS = 0.35
 JPEG_QUALITY = 85
 
 STYLE = (
     "Style: 14th-15th-century French Gothic manuscript miniature (enluminure de "
     "chronique, in the manner of Froissart's Chronicles and the Grandes Chroniques "
-    "de France). Wide landscape scene, all important figures and action inside the "
-    "central horizontal band (the top and bottom quarters will be cropped). Flat "
+    "de France). Wide landscape scene: every figure, head and important action fits "
+    "inside the middle 55 % of the image height, with patterned sky above and ground "
+    "below (the top and bottom will be cropped); figures shown whole and not too "
+    "large. Flat "
     "gilded or diapered azure background sky, egg tempera colours, fine black ink "
     "outlines, gold leaf highlights, period-accurate clothing, armour and buildings. "
     "No text, no letters, no captions, no frame, no modern elements."
@@ -89,7 +93,7 @@ def plan(
 def to_miniature_jpg(
     image_bytes: bytes, width: int = ART_WIDTH, height: int = ART_HEIGHT
 ) -> bytes:
-    """Centre-crop to the ``width``:``height`` ratio and resize, as JPEG."""
+    """Crop to the ``width``:``height`` ratio (biased upwards) and resize, as JPEG."""
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     source_width, source_height = image.size
     target_ratio = width / height
@@ -98,7 +102,7 @@ def to_miniature_jpg(
     else:
         crop_width, crop_height = source_width, round(source_width / target_ratio)
     left = (source_width - crop_width) // 2
-    top = (source_height - crop_height) // 2
+    top = round((source_height - crop_height) * TOP_BIAS)
     band = image.crop((left, top, left + crop_width, top + crop_height))
     buffer = io.BytesIO()
     band.resize((width, height), Image.Resampling.LANCZOS).save(
