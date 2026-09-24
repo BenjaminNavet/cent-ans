@@ -8,7 +8,7 @@ Branche : `worktree-agent-a41f0303182b63dd5`. Source : `docs/audit/a2-mecaniques
 |---|---|
 | O1 sonde | **fait** : `core/crates/ai/examples/balance_probe.rs`, fixture de calibration `core/crates/ai/tests/fixtures/auto_resolve_scenarios.json` (20 scénarios, références 3D sur 6 graines) |
 | N1 auto-résolution | **fait** : `battle_auto.rs` par phases, `data/rules/auto_resolve.json` + schéma, test `ai/tests/auto_resolve_calibration.rs` (20/20), ADR 0013 ; `movement.rs` : seul l'appel `resolve_field` (et l'import) change |
-| E1 doctrines IA | à faire |
+| E1 doctrines IA | **fait** : `data/ai/doctrines.json` + `ai_doctrine.schema.json`, `ai/src/doctrine.rs` (`pick_recruit`, `field_composition`), boucle de recrutement de `plan_economy` modifiée localement, tests `ai/tests/e1_doctrines.rs` |
 | E8 / E2 | si le temps le permet |
 
 ## Sonde (O1)
@@ -47,9 +47,15 @@ Sonde `rt 6` (20 scénarios) : accord auto / 3D sur le vainqueur **12 / 20 (60 %
 - `campaign 200 1..8` : milice 99,9 % (l'IA ne change pas encore de recrutement : E1), guerre FR-EN 44 %, 14,4 changements de propriétaire, 316 batailles (l'attaquant gagne 40 %).
 - `century_probe 464 1..5` : guerre FR-EN 40, 47, 39, 39, 40 % (moyenne 41 %, avant 40 %) ; majeures en 1400 : 5/5. Pas de régression.
 
+### Après E1
+
+- `campaign 200 1..8` : milice **37,4 %** des recrutements (avant 99,8 %), archers longs **50 %** des recrutements anglais (avant 0 %), **8 types** recrutés par partie au minimum (avant 1) : les trois cibles E1 sont tenues.
+- Effets de bord : les unités recrutées sont plus chères, donc les armées plus petites (France 3 000 à 12 000 hommes en campagne en 1387 au lieu de 13 000 à 34 000) : 136 batailles par partie (avant 334), 5,4 changements de propriétaire (avant 12). Guerre FR-EN sur 200 tours : 40 %.
+- `century_probe 464 1..5` (doctrine milice 30) : guerre FR-EN 56, 36, 28, 47, 54 % (moyenne 44 %, avant 40 %) ; majeures en 1400 : 5/5. Pas de régression.
+
 ## Prochaine étape
 
-E1 : `data/ai/doctrines.json` + schéma, module `ai/src/doctrine.rs`, appel localisé dans `plan_economy`.
+E8 : recalibrer les coûts d'unités sur la matrice N1 (arcs longs trop rentables, génois et archers montés trop peu), puis vérifier la taille des armées.
 
 ## Contraintes
 

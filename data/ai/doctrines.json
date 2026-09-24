@@ -3,7 +3,7 @@
   "default": {
     "description": "Ost féodal ordinaire : milices et arbalétriers des villes, gens d'armes à pied et à cheval.",
     "mix": {
-      "unit_urban_militia": 30,
+      "unit_urban_militia": 25,
       "unit_crossbowmen": 20,
       "unit_men_at_arms_foot": 20,
       "unit_mounted_sergeants": 15,
