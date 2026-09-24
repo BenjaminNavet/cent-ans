@@ -17,6 +17,7 @@
     "border_only_claim_wars": true
   },
   "peace": {
-    "keep_capital": true
+    "keep_capital": true,
+    "cornered_provinces": 1
   }
 }
