@@ -13,7 +13,7 @@ use crate::setup::SideId;
 use crate::siege::{PieceKind, SiegeWorks};
 
 /// Grid cell size, in metres.
-pub const CELL: f64 = 8.0;
+pub const CELL: f64 = 4.0;
 /// Clearance kept around houses (metres).
 const HOUSE_MARGIN: f64 = 3.0;
 
@@ -47,12 +47,16 @@ impl Grid<'_> {
     fn free(&self, c: usize) -> bool {
         let (x, z) = self.centre(c);
         let w = self.works;
-        let wall = w.pieces.iter().any(|p| {
-            let open_gate = p.kind == PieceKind::Gate && w.sortie && self.side == SideId::Defender;
-            // Wide enough that no diagonal step straddles a wall.
-            let clearance = (w.band() + 2.0).max(CELL * 0.8);
-            p.intact() && !open_gate && p.distance(x, z) < clearance
-        });
+        let open = |p: &crate::siege::WallPiece| {
+            !p.intact() || (p.kind == PieceKind::Gate && w.sortie && self.side == SideId::Defender)
+        };
+        // Just out of the blocking band (so that a gate stays passable), and
+        // wide enough that no diagonal step straddles a wall.
+        let clearance = (w.band() + 0.75).max(CELL * 0.75);
+        let wall = w
+            .pieces
+            .iter()
+            .any(|p| !open(p) && p.distance(x, z) < clearance);
         !wall && w.house_at(x, z, HOUSE_MARGIN).is_none()
     }
 

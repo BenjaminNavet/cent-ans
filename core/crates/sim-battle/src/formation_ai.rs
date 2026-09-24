@@ -113,6 +113,38 @@ pub fn plan_formations(sim: &BattleSim, side: SideId) -> Vec<Command> {
         .collect()
 }
 
+/// Sortie of the garrison (F5a § 4): once `SiegeWorks::sortie` is set, the
+/// regiments off the wall walk fall on the nearest besieger.
+pub fn plan_sortie(sim: &BattleSim, side: SideId) -> Vec<Command> {
+    let sortie = side == SideId::Defender && sim.siege().is_some_and(|w| w.sortie);
+    if !sortie {
+        return Vec::new();
+    }
+    let units = sim.units();
+    let foes: Vec<&Unit> = units
+        .iter()
+        .filter(|u| u.side != side && u.able() && !u.synthetic)
+        .collect();
+    units
+        .iter()
+        .filter(|u| u.side == side && u.able() && u.state != UnitState::Melee)
+        // Shooters keep the wall walk; the foot and horse sally.
+        .filter(|u| !(u.on_wall && u.can_shoot()))
+        .filter_map(|u| {
+            let foe = foes.iter().min_by(|a, b| {
+                dist(u, a.x, a.z)
+                    .total_cmp(&dist(u, b.x, b.z))
+                    .then(a.id.cmp(&b.id))
+            })?;
+            (u.target != Some(foe.id)).then(|| Command::Attack {
+                units: vec![u.id],
+                target: foe.id,
+                run: true,
+            })
+        })
+        .collect()
+}
+
 /// The enemy regiment in melee whose flank the horse move `(x, z)` rides
 /// round to, with the signed lateral offset of the waypoint.
 fn flank_goal(sim: &BattleSim, side: SideId, x: f64, z: f64) -> Option<(usize, f64)> {
