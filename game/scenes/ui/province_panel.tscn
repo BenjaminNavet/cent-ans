@@ -154,12 +154,12 @@ layout_mode = 2
 
 [node name="Tabs" type="TabContainer" parent="VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Garnison" type="ScrollContainer" parent="VBox/Tabs"]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
@@ -218,7 +218,7 @@ layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="Ville" type="ScrollContainer" parent="VBox/Tabs"]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0

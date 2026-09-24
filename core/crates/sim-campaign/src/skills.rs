@@ -147,6 +147,8 @@ pub fn character_effects(state: &CampaignState, data: &GameData, id: &CharacterI
             }
         }
     }
+    // H6: companions of a chivalric order lead with more fire.
+    totals.army_morale.flat += crate::chivalry::member_morale(state, data, id);
     totals
 }
 
