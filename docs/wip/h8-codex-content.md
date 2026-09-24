@@ -86,7 +86,9 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
   Pas de fiches séparées royaume_de_france / angleterre : les dynasties portent les factions.
 - Lot 4 fait : louis_de_baviere, jean_de_luxembourg (alias « Jean l'Aveugle », pas « Jean de
   Luxembourg », homonyme du capitaine bourguignon), david_ii, paris, gand.
-- Fiches H8b écrites : 34.
+- main fusionné (H10 : hanse et bataille_des_harengs écrites par H10, ne pas refaire).
+- Lot 5 fait : bruges, reims, rouen, avignon, maillotins, cabochiens, bal_des_ardents.
+- Fiches H8b écrites : 41.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
