@@ -18,7 +18,7 @@ Le joueur a validé la spec et autorise toutes les décisions sans demander (202
 | C6 rendu paliers | fait | paliers loin > 620 / moyen 150-620 / près < 150 ; 13 maquettes Blender ; relief fin LRU ; captures `docs/img/colonies/` ; signal `settlement_selected(id)` à brancher en C5 |
 | C7a IA, équilibrage | fait (fusionné `4bcd31f`) | repli du perdant, ordre `garrison_units`, portée ÷ 3,7, sonde 50 tours ; détail `docs/wip/c7a-settlements-balance.md` |
 | C7b rendu | en cours | arbres sur relief fin, routes au palier moyen, aperçu le long des routes, panneau et minicarte |
-| C7c docs + bouton garnison | en cours | `manuel.md`, codex ; bouton `garrison_units` après C7b |
+| C7c docs | fait (le bouton `garrison_units` reste ouvert, hors périmètre de ce lot) | `manuel.md` § 5 réécrite (colonies), passages corrigés ailleurs ; codex `cdx_places_fortes`, `cdx_deroute_debandade` ; texte des fiches Mécaniques (encyclopédie) mis à jour ; détail `docs/wip/c7c-settlements-docs.md` |
 | C7 (reste) | — | + perdant sans colonie amie voisine reste sur place ; arbres sur relief fin ; routes principales peu visibles au palier moyen |
 
 ## Coordination

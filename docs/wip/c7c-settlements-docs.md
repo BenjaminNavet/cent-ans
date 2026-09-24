@@ -26,12 +26,32 @@ Périmètre : `docs/manuel.md`, `data/codex/`, `game/scripts/ui/encyclopedia.gd`
   mises à jour (sièges et revenu par colonie, plus par province). Pas de compteur de mécaniques
   dans `game/tests/smoke.gd` à mettre à jour (vérifié : aucune assertion sur `MECHANICS` ou
   `mech_`).
-- [ ] Vérifications : pytest, cargo test, build.sh, import Godot, smoke Godot.
+- [x] Vérifications : `uv run --project tools pytest` (251 passed, 1 failed = l'échec connu et hors
+  périmètre `test_portraits.py::test_dry_run_makes_no_network_call` ; `test_codex.py` valide les
+  deux nouvelles fiches) ; `cd core && cargo test` (tout vert, aucun avertissement) ;
+  `core/build.sh` ; `godot --headless --path game --import` ; `godot --headless --path game
+  --script res://tests/smoke.gd` (exit 0, « codex, 233 entries » avec les deux nouvelles fiches,
+  « mechanics 11 » inchangé).
 
 ## Points ouverts / écarts constatés
 
-- (à compléter après vérification)
+- Le compteur de mécaniques (`MECHANICS` dans `encyclopedia.gd`, `mechanics 11` dans le smoke) n'a
+  pas bougé : je n'ai édité que le texte de `mech_economy` et `mech_sieges` (province -> colonie),
+  sans ajouter d'entrée « Colonies » séparée, puisque le sujet est déjà couvert par les fiches
+  Économie et Sièges existantes et que le manuel porte la documentation complète.
+- Le manuel décrivait encore un modèle « une ville par province » dans toute la section 5 ; réécrite
+  intégralement. D'autres passages corrigés : clic droit/anneaux (§4), recrutement par colonie (§6),
+  armées alliées sur la même colonie (§6), sièges par colonie et village pris sans siège (§8).
+- Deux entrées de Codex ajoutées, historiques et sourcées (pas de règle de jeu dans le corps, la
+  simplification est notée dans `anachronism`) : `cdx_places_fortes` (hiérarchie réelle
+  cité/ville close/bastide/château/abbaye/village, grounding des 5 types de colonie) et
+  `cdx_deroute_debandade` (déroute et débandade après Crécy/Poitiers, grounding de la règle de
+  repli C7a).
+- Aucun écart trouvé entre la spec et le code pour les points documentés (repli, plafond de
+  garnison, entretien par type, revenu par poids, bonus de province complète, prise immédiate d'un
+  village, sièges des places secondaires) : tout est vérifié dans `rules.json` et
+  `settlements.rs`/`movement.rs`/`economy.rs`/`orders.rs`/`siege.rs`.
 
 ## Prochaine étape
 
-Lancer les vérifications (§ 3 de la tâche), corriger si besoin, puis rapport final.
+Terminé : fusion par l'orchestrateur (après C7b, qui touche `game/scripts/map`).
