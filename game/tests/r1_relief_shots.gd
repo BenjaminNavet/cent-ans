@@ -13,6 +13,12 @@ const VIEWS := [
 	["dombes_alpes", Vector2(2530, 2400), 380.0],
 	["fens", Vector2(2056, 1337), 260.0],
 ]
+## Vues rapprochées (après seulement, `--near`) : étangs de la Dombes, marais des Fens, Seine normande.
+const NEAR_VIEWS := [
+	["dombes_near", Vector2(2459, 2390), 70.0],
+	["fens_near", Vector2(2050, 1345), 70.0],
+	["seine_near", Vector2(2120, 1880), 90.0],
+]
 
 
 func _init() -> void:
@@ -38,7 +44,10 @@ func _init() -> void:
 	var data: MapData = map.map_data
 	var terrain: TerrainBuilder = map.get("terrain")
 	print("R1 height file: %s" % data.height_file)
-	for view in VIEWS:
+	var views: Array = VIEWS.duplicate()
+	if OS.get_cmdline_user_args().has("--near"):
+		views.append_array(NEAR_VIEWS)
+	for view in views:
 		var point: Vector2 = view[1]
 		rig.look_at_point(Vector3(point.x, data.surface_world_at(point.x, point.y), point.y), view[2])
 		rig.snap()

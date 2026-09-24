@@ -136,13 +136,17 @@ def resample_to_grid(
         if lon + 1 < lon_min or lon > lon_max or lat + 1 < lat_min or lat > lat_max:
             continue
         with rasterio.open(path) as source:
-            win = from_bounds(
-                max(lon, lon_min - 0.05),
-                max(lat, lat_min - 0.05),
-                min(lon + 1, lon_max + 0.05),
-                min(lat + 1, lat_max + 0.05),
-                source.transform,
-            ).round_offsets().round_lengths()
+            win = (
+                from_bounds(
+                    max(lon, lon_min - 0.05),
+                    max(lat, lat_min - 0.05),
+                    min(lon + 1, lon_max + 0.05),
+                    min(lat + 1, lat_max + 0.05),
+                    source.transform,
+                )
+                .round_offsets()
+                .round_lengths()
+            )
             data = source.read(1, window=win, boundless=False).astype(np.float32)
             if data.size == 0:
                 continue
@@ -176,7 +180,12 @@ def _window_lonlat(
     gx, gy = np.meshgrid(xs, ys)
     px, py = grid.transform * (gx.ravel(), gy.ravel())
     lon, lat = Transformer.from_crs(CRS_MAP, CRS_GEO, always_xy=True).transform(px, py)
-    return float(np.min(lon)), float(np.max(lon)), float(np.min(lat)), float(np.max(lat))
+    return (
+        float(np.min(lon)),
+        float(np.max(lon)),
+        float(np.min(lat)),
+        float(np.max(lat)),
+    )
 
 
 def merge_with_etopo(copernicus_m: np.ndarray, etopo_m: np.ndarray) -> np.ndarray:
