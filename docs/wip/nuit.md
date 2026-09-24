@@ -24,3 +24,4 @@ Mandat : autonomie complète toute la nuit. Inspiration principale Total War. To
 - Chemin critique visuel : A1-18 (soldats squelettiques + animations cuites en texture, VAT) après D0 (soldats et chevaux riggés Quaternius CC0).
 - A2 : milice = 99,8 % des recrutements IA ; auto-résolution contredit la 3D ; carte figée puis boule de neige ; aucune tension (ordre public). Priorités O1, N1, E1 puis E2, E4, E3, N2, N3, E8.
 - A3 : après G1/U1, vague UI U1 fenêtres + U3 économie + U4 échelle ensemble (tous dans map_ui.gd).
+- 24/09 après le crash : l'orchestrateur TW (session 6, relancé) finit et fusionne C4, C5 et B8b via ../gp-tw-merge ; la session du mouvement libre garde M2-M5. La nuit garde D0, V1, G1, U1 et A5, et fusionne via ../gp-night-merge (integration/night). On se prévient mutuellement à chaque push de main.
