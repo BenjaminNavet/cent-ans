@@ -98,6 +98,11 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	mat.set_shader_parameter("hip", Vector2(1.68, -0.05) if mounted else Vector2(0.93, 0.0))
 	mat.set_shader_parameter("shoulder", Vector2(2.18, -0.05) if mounted else Vector2(1.4, 0.0))
 	mat.set_shader_parameter("corpse", corpse)
+	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
+	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
+	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
+	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
 	return mat
 
 

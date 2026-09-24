@@ -5,10 +5,10 @@
 - [x] Arbres par tuiles de 160 m (culling) + maillage allégé au-delà de 260 m, sans ombre
 - [x] Figurines : maillage allégé (≈ 50 % des triangles) au-delà de 75 m, ombre portée par le maillage allégé, plus d'ombre au-delà de 190 m ; cadavres en maillage allégé
 - [x] Herbe : grilles allégées (0,5 m / 40 m ; 1,1 m / 95 m), touffes absentes rejetées avant les lectures de textures, maillage indexé
-- [ ] Livrées variées (gambisons, teintes naturelles, désaturation)
-- [ ] Chevaux redessinés
-- [ ] Rivière vue de loin (berges, reflets, eau claire peu profonde)
-- [ ] Sol vu de haut (variations)
+- [x] Livrées variées : 40 % de la troupe / 70 % des nobles en livrée, les autres en vêtement de teinte naturelle (8 teintes) avec croix de livrée sur la poitrine ; livrée désaturée et assombrie, écus désaturés ; teint, acier, taille (±7 %) et carrure variés par soldat
+- [x] Chevaux redessinés (poitrail/ventre/croupe, encolure effilée, tête allongée, oreilles, jambes fines avec jarret, boulets, queue) ; caparaçon ajusté à mi-jambe
+- [x] Rivière : reflet de Fresnel du ciel (couleur du préréglage météo), hauts-fonds plus clairs aux bords, berges de galets élargies, berges humides moins sombres
+- [x] Sol vu de haut : taches de prairie (sèche, grasse, roussâtre) à deux échelles, reprises par l'herbe
 - [ ] Captures `docs/img/visuel/v4b_*.png`
 - [ ] Retirer les interrupteurs d'expérience `BATTLE_EXP` (marqués `#EXP`)
 
