@@ -73,12 +73,20 @@ pub const DUEL_TIME: f64 = 480.0;
 /// the archery duel after this long and closes in (F5d: two AI armies
 /// always end up engaging).
 pub const ATTACKER_DUEL_TIME: f64 = 60.0;
+/// A side whose losses exceed the enemy's by more than this share is
+/// losing the archery duel and closes in (B4).
+pub const DUEL_LOSS_MARGIN: f64 = 0.04;
 /// AI destinations keep this far from the edge of deep water (F5d).
 pub const RIVER_MARGIN: f64 = 12.0;
 /// Closing in, the cavalry charges enemy horse this close to the line.
 pub const ASSAULT_RANGE: f64 = 250.0;
-/// A weaker attacker waits this long for the defender to come to it.
+/// Window in which a clearly stronger attacker rides at the enemy horse
+/// to open the fight (F5d).
 pub const ATTACKER_PATIENCE: f64 = 240.0;
+/// A weaker attacker waits this long for the defender to come to it, then
+/// engages anyway (B4: it is the side that sought the battle; armies meet
+/// within one to three minutes, as in Total War).
+pub const ATTACKER_WAIT: f64 = 90.0;
 /// A defensive side gives up waiting after this long.
 pub const DEFENDER_PATIENCE: f64 = 480.0;
 /// Besiegers wait for their engines at most this long before escalading.
@@ -457,7 +465,7 @@ fn plan_field(view: &mut View) {
         .fold(f64::INFINITY, f64::min);
     let defensive = match view.side {
         SideId::Defender => ratio < 0.85 && elapsed < DEFENDER_PATIENCE,
-        SideId::Attacker => ratio < 0.8 && elapsed < ATTACKER_PATIENCE,
+        SideId::Attacker => ratio < 0.8 && elapsed < ATTACKER_WAIT,
     };
     let shooters_have_ammo = roles
         .shooters
@@ -480,11 +488,16 @@ fn plan_field(view: &mut View) {
     // The archery duel: hold the line while our shooters are winning it.
     // F5d: a clearly stronger attacker facing a defender that waits for it
     // takes the initiative (short duel, the horse rides at the enemy horse).
+    // B4: a side bleeding faster than its enemy under the arrows stops
+    // trading volleys and closes in.
     let press = view.side == SideId::Attacker && ratio * 0.85 > 1.0;
+    let losing = side_losses(view.units, view.side)
+        > side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN;
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
         && contact < 320.0
         && elapsed < if press { ATTACKER_DUEL_TIME } else { DUEL_TIME }
+        && !losing
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
 
     let line_center = view
@@ -498,7 +511,10 @@ fn plan_field(view: &mut View) {
     };
     // Only to open the fight (first minutes, nobody locked yet).
     let melee = view.units.iter().any(|u| u.state == UnitState::Melee);
-    view.assault = press
+    // B4: an attacker bleeding under the enemy arrows (and not waiting as
+    // the weaker side) also sends its horse at the enemy horse.
+    let opens = press || (view.side == SideId::Attacker && losing);
+    view.assault = opens
         && !defensive
         && !duel
         && !melee
@@ -565,6 +581,21 @@ fn plan_field(view: &mut View) {
 
     react(view, &roles);
     plan_orders(view, defensive);
+}
+
+/// Share of its initial soldiers a side has lost (B4, archery duel).
+fn side_losses(units: &[Unit], side: SideId) -> f64 {
+    let (hp, initial) = units
+        .iter()
+        .filter(|u| u.side == side && !u.synthetic)
+        .fold((0.0, 0.0), |(hp, initial), u| {
+            (hp + u.hp.max(0.0), initial + f64::from(u.initial_soldiers))
+        });
+    if initial > 0.0 {
+        1.0 - hp / initial
+    } else {
+        0.0
+    }
 }
 
 /// Next step of an advancing line: 45 m towards the enemy's centroid (F5d:
