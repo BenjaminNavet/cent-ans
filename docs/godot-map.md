@@ -17,7 +17,9 @@ Contrats : `docs/design/m1-campaign-map.md` (données carte), `docs/design/m2-ca
 | `scenes/campaign_map.tscn` | Carte 3D + HUD de campagne. |
 | `scenes/ui/province_panel.tscn` | Panneau parchemin de province (identité, état) avec deux onglets : « Garnison » (garnison, recrutement, formation d'armée) et « Ville » (population par classe, bâtiments, construction, constructible, ressources — M3). |
 | `scenes/ui/faction_panel.tscn` | Panneau de faction (clic sur le blason/nom de la barre) : trésor, revenu, revenu prévisionnel, entretien armées/bâtiments, sélecteur d'impôt, biens par catégorie (M3). |
-| `scenes/ui/army_panel.tscn` | Panneau d'armée (général, position, mouvement, ravitaillement, ordre, posture, unités). |
+| `scenes/ui/army_strip.tscn`, `general_seal.tscn` | HUD F10b : bandeau d'ost (régiments en cartes) et sceau du chef (portrait/écu, compétences, posture, ravitaillement, mouvement) de l'armée sélectionnée. |
+| `scenes/ui/end_turn_cluster.tscn` | HUD F10b : cloche de fin de saison (Entrée) et éventail d'alertes. |
+| `scenes/ui/news_letters.tscn` | HUD F10b : lettres scellées (nouvelles marquantes du tour). |
 | `scenes/ui/save_load_dialog.tscn` | Dialogue sauver / charger (`user://saves/*.json`). |
 | `scenes/map/army_marker.tscn` | Marqueur d'armée : hampe + bannière billboard (couleur de faction), nombre d'unités, halo de sélection. |
 | `scenes/ui/parchment_theme.tres` | Thème commun (police serif système, panneaux, boutons, champs, onglets). |
@@ -39,12 +41,17 @@ CampaignMap (Node3D, scripts/map/campaign_map.gd)   assemble tout, relie UI ↔ 
 ├── Picker      (ProvincePicker)   rayon → terrain → `province_ids.png` → signaux (clic gauche / droit)
 └── UI          (MapUI, CanvasLayer)
     ├── TopBar         couleur + nom de faction (clic → panneau de faction), trésor,
-    │                  « Revenu : +X (prév. Y) », date, « Fin du tour ⏎ », Menu
+    │                  solde net par saison, date, Cour, Technologies, Chronique, Diplomatie, Menu
     ├── Toast          notification (ordre refusé, sauvegarde, bataille), 3,5 s
     ├── HoverLabel     province survolée, ou « → cible : n étapes, coût c » avec une armée sélectionnée
-    ├── EventLog       journal du tour (bas gauche, repliable, plus récent en haut ; couleurs dédiées
-    │                  batailles, révolte, peste, famine, bâtiment achevé)
-    ├── ArmyPanel      scenes/ui/army_panel.tscn
+    │                  (au-dessus du bandeau ; sinon position et ordre en cours de l'armée)
+    ├── EventLog       journal du tour (bas gauche, replié par défaut, plus récent en haut ; remonte
+    │                  au-dessus du sceau quand une armée est sélectionnée)
+    ├── ArmyActions    boîte au-dessus du bandeau (assaut de siège, M8), créée par `MapUI`
+    ├── ArmyStrip      bandeau d'ost (bas centre, armée sélectionnée ; F10b)
+    ├── GeneralSeal    sceau du chef (bas gauche ; clic → fiche, posture → `set_stance`)
+    ├── NewsLetters    lettres scellées (haut droite ; masquées sous un panneau de droite)
+    ├── EndTurnCluster cloche de fin de saison + alertes (bas droite ; seul porteur de `campaign_end_turn`)
     ├── ProvincePanel  scenes/ui/province_panel.tscn (onglets Garnison / Ville)
     ├── FactionPanel   scenes/ui/faction_panel.tscn (M3)
     └── SaveLoadDialog scenes/ui/save_load_dialog.tscn
@@ -148,7 +155,7 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Panneau de faction → sélecteur d'impôt | `submit_order({"type": "set_tax_rate", "rate": "low"\|"normal"\|"high"})` | panneau de faction rafraîchi (M3) |
 | Clic sur le blason/nom de faction (barre) | `get_faction_economy(faction)` (si disponible) | ouvre le panneau de faction (M3) |
 | Touche M | `get_province_city` sur chaque province (si disponible) | bascule la teinte des provinces (faction ↔ mécontentement, M3) |
-| « Fin du tour » / Entrée | `end_turn()` → événements | journal (plus récent en haut), notification de bataille, tout rafraîchi |
+| Cloche / Entrée | `end_turn()` → événements | journal (plus récent en haut), lettres scellées, alertes, notification de bataille, tout rafraîchi ; si une décision de chronique attend, la cloche ouvre la chronique au lieu de finir la saison |
 | Menu → Sauvegarder / Charger | `SimFacade.save_game` / `load_game` | carte, HUD et journal restaurés |
 
 ## Contrôles
@@ -161,7 +168,7 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Inclinaison | automatique : 35° en vue rapprochée → 70° à `pitch_far_distance` |
 | Sélection | clic gauche : armée (prioritaire) ou province ; survol = surbrillance + nom ; Échap désélectionne l'armée |
 | Ordre de déplacement | clic droit sur une province avec une armée sélectionnée |
-| Fin du tour | bouton ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue) |
+| Fin de saison | cloche en bas à droite ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue ; bloquée par une décision de chronique) |
 | Mode mécontentement (M3) | M (action `map_toggle_unrest`) ; ignoré avec un message si `get_province_city` est indisponible |
 | Cour (M4) | C |
 | Diplomatie (M5) | P ; modes de carte N (diplomatie) et R (religion) |
@@ -493,9 +500,10 @@ Enveloppe du jeu autour de la carte ; aucune règle de jeu (lecture de l'état, 
   - Rapport de saison (`SeasonReport`) : événements du tour groupés (batailles et sièges, diplomatie
     et Église, cour, royaume, chronique), ceux qui concernent le joueur plus les nouvelles du monde ;
     clic → caméra et sélection (province ou armée) ; « Ne plus afficher ».
-  - Alertes (`AlertsPanel.collect`) à droite, masquées quand un panneau occupe la colonne : armée
-    ennemie dans ou au contact d'une province du joueur, province assiégée, trésor négatif, aucune
-    recherche, bâtiment terminé ce tour, décision de chronique ; clic → caméra ou panneau.
+  - Alertes (`CampaignAlerts.collect`, `scripts/ui/alerts.gd`) affichées par la cloche du HUD (F10b,
+    pastilles groupées par type) : armée ennemie dans ou au contact d'une province du joueur, province
+    assiégée, trésor négatif, aucune recherche, bâtiment terminé ce tour, décision de chronique
+    (bloquante) ; clic → caméra, panneau ou chronique (`HudController`).
   - Captures : `--flow-stage=pause|save|settings|report|alerts|confirm --flow-shot=<png>`.
 - **Crédits** (`credits_screen.gd`) : `CREDITS.md` à la racine (ou à côté de `data/` dans le jeu
   exporté), sinon texte intégré ; Markdown simple → BBCode, défilement automatique.
@@ -540,3 +548,23 @@ Captures : `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-credits.
   résolues ensuite via le dialogue) ; les alertes d'armée ennemie ne regardent que les voisins
   terrestres (`neighbors`), pas les débarquements possibles. La confirmation « partie non
   sauvegardée » compte les tours, pas les ordres donnés dans le tour.
+
+## HUD de campagne « à la Total War » (F10b)
+
+Composants F10a (`docs/design/hud-campagne.md`) branchés par `HudController`
+(`scripts/map/hud_controller.gd`) ; placement par `MapUI.layout_hud()` (redimensionnement de la
+fenêtre, bandeau, journal, panneaux de droite).
+
+- **Armée sélectionnée** : `ArmyStrip` (bas centre) + `GeneralSeal` (bas gauche) remplacent l'ancien
+  panneau d'armée. Armée étrangère : lecture seule (pas de posture, pas de « Séparer »). « Séparer »
+  n'apparaît que si la simulation déclare `supports_order("split_army")` (aucune ne le fait encore).
+  Clic sur le sceau → fiche du chef ; armée sans chef → cour filtrée sur les chefs. Capacité affichée :
+  `army.max_units` si la simulation l'expose, sinon 20.
+- **Cloche** (bas droite) : date, fin de saison, alertes ; une décision de chronique est bloquante.
+- **Lettres scellées** (haut droite) : `NewsLetters.news_from_event` sur les événements gardés par
+  `journal_keeps` ; le journal et le rapport de saison restent.
+- **Accesseurs stables** (tutoriel) : `MapUI.selected_army_widget()` (bandeau), `MapUI.end_turn_control()`
+  (cloche), `MapUI.province_panel` ; nœuds `UI/ArmyStrip`, `UI/GeneralSeal`, `UI/EndTurnCluster`,
+  `UI/NewsLetters`.
+- Captures : `--stage=army` (défaut), `--stage=province`, `--stage=chronicle` →
+  `docs/img/hud-campaign*.png` (1440×900 et 1920×1080).
