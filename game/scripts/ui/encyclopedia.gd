@@ -18,6 +18,10 @@ signal closed
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const MUTED := "#6b5a40"
 const LINK := "#1a3a8b"
+## Miniatures facultatives des unités, bâtiments et technologies (OpenRouter,
+## `cent-ans assets illustrations`) : `<dossier><identifiant>.jpg`, en tête de fiche.
+const ILLUSTRATIONS_DIR := "res://assets/illustrations/"
+const ILLUSTRATION_WIDTH := 660
 
 ## Onglets : identifiant, libellé, dossier de `data/` (vide : entrées construites ici),
 ## préfixe des identifiants, icône de l'onglet.
@@ -424,6 +428,10 @@ func go_back() -> void:
 
 func _render_fiche(entry_id: String) -> void:
 	fiche.clear()
+	var illustration := PortraitLoader.load_texture(ILLUSTRATIONS_DIR + entry_id + ".jpg")
+	if illustration != null:
+		fiche.add_image(illustration, ILLUSTRATION_WIDTH, 0)
+		fiche.append_text("\n")
 	if entry_id.begins_with("fac_"):
 		var heraldry := PortraitLoader.heraldry_texture(entry_id)
 		if heraldry != null:
