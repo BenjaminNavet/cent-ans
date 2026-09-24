@@ -29,6 +29,8 @@ const DEFAULTS := {
 	"map/fog_of_war": true,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,
+	# BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements).
+	"battle/blood": 1,
 	# F8 : tutoriel des premiers tours (désactivable, progression persistée).
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
