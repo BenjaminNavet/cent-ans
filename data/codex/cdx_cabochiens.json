@@ -1,0 +1,12 @@
+{
+  "id": "cdx_cabochiens",
+  "title": "La révolte cabochienne",
+  "category": "evenement",
+  "aliases": ["Cabochiens", "révolte cabochienne", "Simon Caboche", "Caboche", "ordonnance cabochienne"],
+  "era": { "from": "1413", "to": "1413" },
+  "summary": "Au printemps 1413, les bouchers de Paris, menés par l'écorcheur Simon Caboche et soutenus par [[cdx_jean_sans_peur|Jean sans Peur]], imposent par la terreur une grande réforme du gouvernement royal. Leurs violences provoquent un retournement, et les Armagnacs reprennent Paris en août.",
+  "body": "En 1413, Paris est acquise au duc de Bourgogne [[cdx_jean_sans_peur|Jean sans Peur]], qui promet de baisser les impôts et de réformer le royaume. Les puissants bouchers de la Grande Boucherie, riches et organisés, sont ses plus fermes soutiens. Parmi eux se distingue Simon Caboche, un écorcheur, qui donne son nom au mouvement.\n\nDes états généraux réunis au début de l'année ont dénoncé les abus des officiers royaux. Fin avril, les émeutiers prennent la Bastille, puis envahissent l'hôtel du dauphin Louis de Guyenne et celui du roi, l'hôtel Saint-Pol. Ils arrêtent les conseillers qu'ils jugent corrompus, dont certains sont tués ou exécutés, et imposent leur loi au roi malade [[cdx_charles_vi|Charles VI]], contraint de porter leur chaperon blanc.\n\nLe 26 mai 1413 est publiée une longue ordonnance de réforme, dite ordonnance cabochienne, préparée par des universitaires et des officiers : elle réorganise l'administration, les finances et la justice. Mais la violence des bouchers, les arrestations arbitraires et les exécutions effraient les bourgeois modérés.\n\nEn août 1413, la population se retourne. Les partisans d'Orléans, les Armagnacs, entrent dans Paris ; Jean sans Peur s'enfuit en Flandre, Caboche aussi, et l'ordonnance est abolie dès septembre. La guerre civile entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]] reprend de plus belle, deux ans avant le débarquement d'[[cdx_henri_v|Henri V]].",
+  "entity": "evt_cabochiens",
+  "see_also": ["cdx_armagnacs_bourguignons", "cdx_jean_sans_peur", "cdx_paris", "cdx_maillotins"],
+  "sources": ["Révolte des Cabochiens", "Ordonnance cabochienne"]
+}

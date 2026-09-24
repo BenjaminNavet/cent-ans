@@ -1,0 +1,12 @@
+{
+  "id": "cdx_bal_des_ardents",
+  "title": "Le bal des Ardents",
+  "category": "evenement",
+  "aliases": ["bal des Ardents", "bal des sauvages", "Huguet de Guisay"],
+  "era": { "from": "1393", "to": "1393" },
+  "summary": "Le 28 janvier 1393, lors d'une fête à Paris, [[cdx_charles_vi|Charles VI]] et cinq seigneurs déguisés en hommes sauvages prennent feu à cause d'une torche. Quatre meurent brûlés ; le roi, sauvé de justesse, en sort plus fragile encore.",
+  "body": "Quelques mois plus tôt, en août 1392, [[cdx_charles_vi|Charles VI]] a connu sa première crise de folie dans la forêt du Mans, tuant plusieurs hommes de son escorte. Pour le distraire, la cour multiplie les fêtes. En janvier 1393, la reine [[cdx_isabeau_de_baviere|Isabeau]] donne un bal pour le remariage d'une de ses dames d'honneur, à l'hôtel de la reine Blanche, dans le faubourg Saint-Marcel.\n\nL'écuyer Huguet de Guisay imagine une farce : le roi et cinq compagnons se déguisent en hommes sauvages, velus, vêtus de toile enduite de poix et couverte d'étoupe, et enchaînés les uns aux autres. Par précaution, on interdit les torches dans la salle. Mais le frère du roi, [[cdx_louis_d_orleans|Louis d'Orléans]], arrive en retard avec des porteurs de flambeaux et s'approche pour identifier les masques : une étincelle enflamme un costume, et le feu gagne les autres.\n\nLe roi, qui s'était écarté pour parler aux dames, est sauvé par la jeune duchesse de Berry, qui le couvre de sa robe. Un autre danseur se jette dans une cuve d'eau. Quatre seigneurs meurent brûlés vifs dans d'atroces souffrances, dont Huguet de Guisay lui-même.\n\nL'affaire fait scandale : on reproche à la cour ses divertissements indignes, et Louis d'Orléans doit faire pénitence en fondant une chapelle. Racontée par [[cdx_froissart|Froissart]] et par le Religieux de Saint-Denis, elle symbolise le désordre d'un royaume livré à un roi fou et aux rivalités de ses proches, qui mèneront à la guerre entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]].",
+  "entity": "evt_bal_des_ardents",
+  "see_also": ["cdx_charles_vi", "cdx_isabeau_de_baviere", "cdx_louis_d_orleans"],
+  "sources": ["Bal des Ardents"]
+}
