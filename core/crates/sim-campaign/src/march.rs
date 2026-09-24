@@ -23,7 +23,7 @@ use data_model::{FactionId, GameData, NavGrid, ProvinceId, SettlementId, Settlem
 use serde::{Deserialize, Serialize};
 
 use crate::events::GameEvent;
-use crate::navigation::{self, line_cells, step_cost, Cell, GridPath};
+use crate::navigation::{self, line_cells, step_cost, Cell, CellSet, GridPath};
 use crate::orders::OrderError;
 use crate::state::{Army, ArmyId, ArmyPosition, CampaignState, MoveTarget, Stance};
 
@@ -191,14 +191,21 @@ impl CampaignState {
         cells
     }
 
+    /// The cells of [`CampaignState::hostile_settlement_cells`] as a
+    /// search blocker.
+    pub(crate) fn hostile_blocker(&self, data: &GameData, faction: &FactionId) -> CellSet {
+        self.hostile_settlement_cells(data, faction)
+            .into_keys()
+            .collect()
+    }
+
     /// Cheapest path of `army` to map pixel `target` on the grid (may span
     /// several turns), avoiding hostile settlements other than the one at
     /// the target. `None` when unreachable.
     pub fn find_path(&self, data: &GameData, army: &ArmyId, target: [f32; 2]) -> Option<GridPath> {
         let army = self.armies.get(army)?;
         let grid = data.navgrid();
-        let hostile = self.hostile_settlement_cells(data, &army.faction);
-        let blocker = |cell: Cell| hostile.contains_key(&cell);
+        let blocker = self.hostile_blocker(data, &army.faction);
         navigation::find_path(
             grid,
             self.army_cell(data, army),
@@ -214,8 +221,7 @@ impl CampaignState {
         let Some(army) = self.armies.get(army) else {
             return Vec::new();
         };
-        let hostile = self.hostile_settlement_cells(data, &army.faction);
-        let blocker = |cell: Cell| hostile.contains_key(&cell);
+        let blocker = self.hostile_blocker(data, &army.faction);
         navigation::reachable_area(
             data.navgrid(),
             self.army_cell(data, army),

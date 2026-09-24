@@ -759,13 +759,26 @@ pub fn retreat_target(
         .map(|(_, a)| state.army_point(data, a))
         .filter(|p| dist(*p, start_point) > zoc_px && dist(*p, battlefield) > zoc_px)
         .collect();
-    let hostile = state.hostile_settlement_cells(data, &army.faction);
-    let blocker = |cell: Cell| {
-        hostile.contains_key(&cell) || {
-            let p = cell.center(grid);
-            enemies.iter().any(|e| dist(*e, p) <= zoc_px)
+    // Hostile places and the zones of control of the enemies away from the
+    // battlefield, as a set of blocked cells.
+    let mut blocker = state.hostile_blocker(data, &army.faction);
+    let zoc_cells = (zoc_px / grid.scale as f32).ceil() as i64 + 1;
+    for enemy in &enemies {
+        let centre = Cell::of_point(grid, *enemy);
+        for dy in -zoc_cells..=zoc_cells {
+            for dx in -zoc_cells..=zoc_cells {
+                let (x, y) = (i64::from(centre.x) + dx, i64::from(centre.y) + dy);
+                if !grid.contains(x, y) {
+                    continue;
+                }
+                let cell = Cell::new(x as u32, y as u32);
+                if dist(cell.center(grid), *enemy) <= zoc_px {
+                    blocker.insert(cell);
+                }
+            }
         }
-    };
+    }
+    let blocker = &blocker;
     let friendly: std::collections::BTreeMap<Cell, SettlementId> = state
         .settlements
         .keys()
@@ -782,7 +795,7 @@ pub fn retreat_target(
         .collect();
     let budget = km_to_grid_points(data, rules.friendly_radius_steps * points_per_step(data));
     if let Some((cell, _)) =
-        navigation::bounded_dijkstra(grid, start, budget, &blocker, |cell, _| {
+        navigation::bounded_dijkstra(grid, start, budget, blocker, |cell, _| {
             friendly.contains_key(&cell)
         })
     {
@@ -806,10 +819,10 @@ pub fn retreat_target(
         let (vx, vy) = (ux * cos - uy * sin, ux * sin + uy * cos);
         let target = [start_point[0] + vx * reach, start_point[1] + vy * reach];
         let cell = Cell::of_point(grid, target);
-        if blocker(cell) {
+        if blocker.contains(cell) {
             continue;
         }
-        if navigation::find_path(grid, start, cell, &blocker, Some(fallback_budget)).is_some() {
+        if navigation::find_path(grid, start, cell, blocker, Some(fallback_budget)).is_some() {
             return Some(Retreat::Fallback(cell.center(grid)));
         }
     }
