@@ -276,13 +276,31 @@ fn religious_buildings(data: &GameData, buildings: &[data_model::BuildingId]) ->
         .count() as u32
 }
 
-fn ruler_piety(state: &CampaignState, faction: &FactionId) -> u8 {
+/// G1: a character's piety as the rules read it — the stored value plus the
+/// `Piety` effects of its traits and skills (pious +10, lustful −5,
+/// excommunicated −20…), clamped to 0-100. The stored value only moves with
+/// events, the table and the court's religious buildings.
+pub fn effective_piety(
+    state: &CampaignState,
+    data: &GameData,
+    character: &data_model::CharacterId,
+) -> u8 {
+    let Some(c) = state.characters.get(character) else {
+        return 50;
+    };
+    let bonus = crate::skills::character_effects(state, data, character)
+        .piety
+        .apply(0.0);
+    (f64::from(c.piety) + bonus).round().clamp(0.0, 100.0) as u8
+}
+
+fn ruler_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> u8 {
     state
         .factions
         .get(faction)
         .and_then(|f| f.ruler.as_ref())
-        .and_then(|r| state.characters.get(r))
-        .map_or(50, |c| c.piety)
+        .filter(|r| state.characters.contains_key(*r))
+        .map_or(50, |r| effective_piety(state, data, r))
 }
 
 /// Phase: papal favour, excommunications, the Schism, heresies.
@@ -403,7 +421,7 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
             .map(|p| religious_buildings(data, &p.buildings))
             .sum();
         let mut target =
-            40 + i32::from(ruler_piety(state, &faction)) / 4 + (buildings as i32 * 2).min(20);
+            40 + i32::from(ruler_piety(state, data, &faction)) / 4 + (buildings as i32 * 2).min(20);
         if papacy
             .as_ref()
             .is_some_and(|p| state.is_at_war(&faction, p))
@@ -487,9 +505,8 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
         let clergy = &p.population.clergy;
         let governor_piety = state
             .province_governor(id)
-            .and_then(|g| state.characters.get(g))
-            .map(|c| c.piety);
-        let piety = governor_piety.unwrap_or_else(|| ruler_piety(state, &controller));
+            .map(|g| effective_piety(state, data, g));
+        let piety = governor_piety.unwrap_or_else(|| ruler_piety(state, data, &controller));
         let growth = f64::from(clergy.unrest) / 20.0
             + (100.0 - f64::from(clergy.goods_satisfaction)) / 40.0
             + 1.0

@@ -80,3 +80,72 @@ fn recruit_slots_cap_the_province_queue() {
     recruit(&mut state).unwrap();
     assert!(recruit(&mut state).is_err());
 }
+
+// 2. Piety -----------------------------------------------------------------
+
+fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
+    Vec::new()
+}
+
+#[test]
+fn trait_piety_raises_the_effective_piety_and_papal_favour() {
+    let data = data();
+    let base = quiet_france(&data, 2);
+    let ruler = base.factions[&fac("fac_france")].ruler.clone().unwrap();
+    let run = |pious: bool| {
+        let mut state = base.clone();
+        let c = state.characters.get_mut(&ruler).unwrap();
+        c.piety = 50;
+        c.traits.retain(|t| t.as_str() != "trait_pious");
+        if pious {
+            c.traits
+                .insert(data_model::TraitId::new("trait_pious").unwrap());
+        }
+        let piety = sim_campaign::religion::effective_piety(&state, &data, &ruler);
+        state
+            .factions
+            .get_mut(&fac("fac_france"))
+            .unwrap()
+            .papal_favor = 0;
+        state.end_turn_with(&data, idle);
+        (piety, state.factions[&fac("fac_france")].papal_favor)
+    };
+    let (plain, plain_favor) = run(false);
+    let (pious, pious_favor) = run(true);
+    assert_eq!(pious, plain + 10);
+    assert!(pious_favor >= plain_favor, "{plain_favor} -> {pious_favor}");
+}
+
+#[test]
+fn religious_buildings_raise_the_ruler_piety_each_winter() {
+    let data = data();
+    let france = fac("fac_france");
+    let mut without = quiet_france(&data, 3);
+    for p in without.provinces.values_mut() {
+        p.buildings.retain(|b| {
+            data.buildings[b]
+                .effects
+                .iter()
+                .all(|e| e.effect != data_model::EffectKind::Piety)
+        });
+    }
+    let yearly =
+        |s: &CampaignState| sim_campaign::dynasty::yearly_building_piety(s, &data, &france);
+    assert_eq!(yearly(&without), 0);
+    let mut with = without.clone();
+    with.provinces
+        .get_mut(&prov("prov_ile_de_france"))
+        .unwrap()
+        .buildings
+        .push(bld("bld_cathedral"));
+    assert_eq!(yearly(&with), 1);
+    let ruler = without.factions[&france].ruler.clone().unwrap();
+    let piety_after_year = |mut state: CampaignState| {
+        state.characters.get_mut(&ruler).unwrap().piety = 50;
+        for _ in 0..4 {
+            state.end_turn_with(&data, idle);
+        }
+        state.characters[&ruler].piety
+    };
+    assert_eq!(piety_after_year(with), piety_after_year(without) + 1);
+}
