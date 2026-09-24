@@ -310,6 +310,25 @@ fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
 
 #[test]
 #[ignore]
+fn probe_shots() {
+    for terrain in [data_model::Terrain::Bocage, data_model::Terrain::Plains] {
+        let mut battle = demo_setup();
+        battle.terrain = terrain;
+        battle.river = false;
+        battle.village = Some(true);
+        let mut sim = BattleSim::new(battle, 1337).unwrap();
+        sim.set_ai(SideId::Attacker, true);
+        println!(
+            "{terrain:?}: {:?} / {}",
+            defensive_cover(sim.field(), SideId::Defender),
+            sim.field().site_label_fr()
+        );
+        println!("  contact {:?}", first_contact(&mut sim, 300.0));
+    }
+}
+
+#[test]
+#[ignore]
 fn trace_bocage() {
     let seed: u64 = std::env::var("SEED").map_or(7, |s| s.parse().unwrap());
     let mut battle = demo_setup();
