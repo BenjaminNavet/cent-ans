@@ -54,8 +54,11 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
 
 - **Caméra** : W A S D (Z Q S D en AZERTY) ou flèches, bords de l'écran (F2 active ou coupe ce défilement),
   molette pour le zoom, Q / E pour la rotation.
-- **Clic gauche** : sélectionner une armée ou une province. **Clic droit** (armée sélectionnée) : ordre de
-  marche ; le chemin s'affiche en orange avec son coût, les provinces hors d'atteinte ce tour sont assombries.
+- **Clic gauche** : sélectionner une armée, une province ou une colonie (une colonie sous le curseur est
+  prioritaire sur sa province). **Clic droit** (armée sélectionnée) : ordre de marche sur le graphe des
+  colonies ; un clic droit sur une colonie la désigne comme cible. Le chemin s'affiche en orange le long des
+  colonies traversées, avec son coût ; des **anneaux verts** au sol marquent les colonies atteignables cette
+  saison, un **anneau orange** la colonie visée.
 - **Entrée** ou bouton **Fin du tour** : la saison s'écoule, toutes les factions agissent en même temps.
 - **Échap** : désélectionner, puis menu pause (sauvegarder, charger, réglages, aide, menu principal).
 - **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.
@@ -70,24 +73,105 @@ Un tour est une saison : l'hiver ralentit les marches et affame les armées en p
 traversent la mer entre deux ports (une cogue marque la traversée) ; débarquer en terre hostile épuise le
 mouvement et coûte des hommes.
 
-## 5. Provinces, villes et économie
+## 5. Provinces et colonies
 
-Cliquez une province : propriétaire, contrôleur, terrain, population, mécontentement, dévastation, siège.
+Une province n'est pas réduite à sa ville principale : elle contient de 3 à 6 **colonies** prenables
+séparément — une cité et, selon les lieux, des villes, châteaux, abbayes et villages —, chacune avec son
+propriétaire, son contrôleur, sa garnison, ses bâtiments et, le cas échéant, son siège. Cliquez une province :
+terrain, population, mécontentement, dévastation, et l'**onglet Colonies** (liste des colonies avec
+contrôleur, garnison, siège). Cliquez une colonie pour ouvrir son propre panneau.
 
-- **Onglet Ville** : ressources (blé, vin, laine, sel, fer, bois, pierre…), population par classe (paysans,
-  bourgeois, clergé, noblesse) avec quatre jauges chacune — mécontentement, santé, richesse, biens —,
-  bâtiments et chantiers. Construire coûte des livres, parfois des matériaux, et plusieurs saisons.
-- **Onglet Garnison** : troupes de la place, recrutement (coût, entretien, raison d'un refus : bâtiment,
-  technologie, culture), formation d'une armée.
+### Les cinq types de colonie
+
+| Type | Rôle |
+|---|---|
+| **Cité** | chef-lieu de la province (une seule par province) : la plus forte garnison, tous les bâtiments, port si la province est côtière |
+| **Ville** | ville murée ou bastide : commerce, guildes, garnison moyenne |
+| **Château** | forteresse d'un châtelain : garnison réduite mais aguerrie (hommes d'armes, arbalétriers), résiste longtemps |
+| **Abbaye** | abbaye ou commanderie fortifiée : recherche (scriptorium), garnison légère |
+| **Village** | bourg ouvert, sans fortification ni garnison de départ : pris dès qu'une armée ennemie y entre |
+
+Chaque colonie a un poids qui fixe sa part de l'impôt et du recrutement de la province.
+
+### Contrôle, revenu et bonus de province complète
+
+Le propriétaire et le contrôleur d'une province sont ceux de sa **cité** : prendre la cité prend la
+province, même si une enclave (château ou ville d'un tiers) y subsiste. L'impôt de la province (population,
+richesse, taux d'imposition) est réparti entre les contrôleurs de ses colonies au prorata de leur poids ;
+une colonie assiégée ne rapporte rien ce tour. Tenir **toutes** les colonies d'une province donne un bonus de
+province complète : +10 % de revenu et −5 de mécontentement par saison.
+
+### Garnisons
+
+Chaque colonie entretient sa propre garnison. La cité en paie 50 %, comme une capitale ; les autres colonies
+moins, car milices urbaines, châtelains et gardes d'abbaye étaient soldés sur place : ville 15 %, château
+25 %, abbaye 10 %, village sans garnison de départ. Une armée peut **laisser des unités en garnison** dans la
+colonie où elle stationne, si elle la contrôle et qu'elle n'est pas assiégée ; chaque type plafonne le nombre
+d'unités qu'on peut y loger — 8 dans une cité, 4 dans un château, 3 dans une ville, 2 dans une abbaye, 1 dans
+un village — pour empêcher d'y cacher une armée entière à moindre coût.
+
+### Bâtiments et économie
+
+Chaque type de colonie n'accepte que certains bâtiments : marché et halle des guildes en cité et en ville,
+fortifications en cité, ville et château, scriptorium en cité et en abbaye ; les villages n'ont ni
+fortification ni bâtiment d'institution. La couronne ne paie qu'une part de l'entretien des bâtiments hors de
+la cité (droit de murage, châtellenie, temporel du monastère) : cité 100 %, château 50 %, village 50 %, ville
+40 %, abbaye 25 %. Ressources (blé, vin, laine, sel, fer, bois, pierre…) et population par classe (paysans,
+bourgeois, clergé, noblesse), avec leurs quatre jauges — mécontentement, santé, richesse, biens — restent
+attachées à la province, pas à chaque colonie. Construire coûte des livres, parfois des matériaux, et
+plusieurs saisons ; une seule construction à la fois par colonie.
+
 - **Panneau de faction** (clic sur l'écu de la barre) : revenus et dépenses, entretien de l'armée et des
   bâtiments, frais de cour, biens, **impôt** Bas / Normal / Haut (plus d'argent contre plus de colère).
 - **Gouverneurs** : un personnage nommé à la tête d'une province y applique ses compétences (impôts,
-  ordre public, population).
+  ordre public, population) ; elles s'appliquent à toute la province, colonies comprises.
 
 Le mécontentement monte avec l'impôt, la dévastation, le manque de biens et de santé, l'occupation
 étrangère et une religion différente ; au-delà de 75 pendant deux saisons la province se soulève, au-delà
 de 90 elle passe aux rebelles. La **peste** (Peste noire à partir de 1347) et la **famine** frappent les
 populations ; hôtels-Dieu et adductions d'eau les protègent.
+
+### Déplacement sur le graphe des colonies
+
+Les armées ne se déplacent plus en continu : elles vont de colonie en colonie sur un graphe de routes,
+de liaisons entre colonies voisines d'une même province ou de provinces voisines, et de traversées
+maritimes entre colonies portuaires. Une route coûte deux fois moins qu'un terrain nu. Une saison couvre
+environ 1,5 pas de province en plaine (2 sur route) ; l'hiver ralentit encore la marche. Entrer sur une
+colonie ennemie arrête l'armée : siège si elle a une garnison, prise immédiate pour un village qui n'en a
+pas ; deux armées ennemies sur la même colonie se combattent.
+
+### Repli après une défaite
+
+Une armée battue se replie automatiquement, dans cet ordre :
+
+1. vers la colonie amie (à soi ou à un allié) la plus proche, libre de toute armée ennemie, à deux pas au
+   plus sur le graphe, par un chemin qui ne traverse aucune place ennemie ;
+2. sinon vers une colonie neutre (que nul ennemi ne tient) à un pas au plus, en perdant 10 % de traînards ;
+3. sinon c'est la **débandade** : 50 % de pertes, puis les survivants rejoignent la place amie la plus
+   proche à toute distance s'ils gardent au moins 30 % de leurs effectifs, sinon l'armée se disperse et son
+   général s'échappe seul.
+
+Une armée attaquante battue revient d'où elle venait, sauf si un ennemi s'y est entre-temps installé.
+
+### Sièges des places secondaires
+
+Villes, châteaux et abbayes s'assiègent comme une cité (vivres, brèche, assaut ou résolution automatique),
+mais avec une garnison et une fortification propres, en général plus faibles que celles d'une cité — les
+places secondaires changent donc de main plus souvent. Un village sans garnison ne se siège pas : il est
+pris dès l'arrivée d'une armée ennemie.
+
+### Interface des colonies
+
+- **Panneau de colonie** : garnison, bâtiments, recrutement, construction (comme l'ancien panneau de ville,
+  mais par colonie).
+- **Onglet Colonies** du panneau de province : liste des colonies avec contrôleur, garnison et siège.
+- **Clic droit sur une colonie** : la désigne comme cible de marche pour l'armée sélectionnée.
+- **Anneaux verts** autour des colonies atteignables cette saison par l'armée sélectionnée ; **anneau
+  orange** sur la colonie visée par l'ordre de marche en cours.
+- **Paliers de zoom** : de loin, provinces coloriées par contrôleur (hachurées si partagées) ; à moyenne
+  distance, icônes des colonies (type et couleur du contrôleur), noms des cités, routes principales ; en vue
+  rapprochée (échelle du comté), maquettes de colonies par type, hameaux, routes, champs et forêts, et
+  armées en figurines.
 
 La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort : un trésor
 supérieur à six saisons de revenu est rongé par les frais de cour. En dette, les troupes perdent du moral :
@@ -101,16 +185,17 @@ résistance à la peste et la guérison des blessés.
 
 ## 6. Armées, ravitaillement, chevauchées
 
-- **Recruter** dans l'onglet Garnison d'une province, puis **former une armée** ; la levée prend une ou
-  plusieurs saisons. Chaque type d'unité puise dans une classe : archers chez les paysans, hommes d'armes
-  et chevaliers dans la noblesse, milices chez les bourgeois.
+- **Recruter** dans le panneau d'une colonie que vous contrôlez, puis **former une armée** ; la levée prend
+  une ou plusieurs saisons, plafonnée par le poids de la colonie et bornée par ses bâtiments. Chaque type
+  d'unité puise dans une classe de la province : archers chez les paysans, hommes d'armes et chevaliers dans
+  la noblesse, milices chez les bourgeois.
 - **Général** : nommez un personnage depuis sa fiche ; ses compétences (Commandement) et ses traits pèsent
   sur les batailles, le moral et le ravitaillement. Une armée sans général se débande plus vite.
 - **Ravitaillement** : les armées vivent sur le pays ; en territoire ennemi, ravagé ou l'hiver, elles
   perdent des hommes (attrition). Certains bâtiments et technologies améliorent l'approvisionnement.
 - **Postures** (panneau d'armée) : Normale, **Siège** (investir la place ennemie), **Chevauchée** (piller :
   butin, dévastation et mécontentement chez l'ennemi).
-- Les armées alliées présentes dans la même province combattent ensemble, sous le meilleur général.
+- Les armées alliées présentes sur la même colonie combattent ensemble, sous le meilleur général.
 
 ## 7. Batailles
 
@@ -139,16 +224,19 @@ est en déroute ou quitte le champ ; « Retraite générale » sauve ce qui peut
 
 ## 8. Sièges
 
-Une armée en posture **Siège** investit la place : chaque saison, les **vivres** de la garnison baissent
-(famine puis capitulation) et les **engins** (trébuchets, mangonneaux, bombardes) ouvrent une **brèche**.
-Le panneau d'armée donne l'état du siège et une estimation des chances ; **Donner l'assaut** mène à une
-bataille de siège 3D (ou à la résolution automatique). La garnison peut tenter une **sortie**.
+Une armée en posture **Siège** investit une colonie ennemie (cité, ville, château ou abbaye) : chaque
+saison, les **vivres** de la garnison baissent (famine puis capitulation) et les **engins** (trébuchets,
+mangonneaux, bombardes) ouvrent une **brèche**. Le panneau d'armée donne l'état du siège et une estimation
+des chances ; **Donner l'assaut** mène à une bataille de siège 3D (ou à la résolution automatique). La
+garnison peut tenter une **sortie**. Un village, sans fortification ni garnison de départ, ne se siège pas :
+il est pris dès l'arrivée d'une armée ennemie.
 
-Dans la bataille de siège, l'enceinte suit les fortifications de la ville : courtines, tours, porte, place
-centrale. Les défenseurs tirent depuis le chemin de ronde ; l'assaillant dispose d'échelles (lentes et
-vulnérables), de tours de siège qui déposent l'infanterie sur le rempart, d'un bélier contre la porte et de
-ses engins qui abattent des pans de mur. Les chevaliers mettent pied à terre. La place tombe quand la
-garnison est en déroute ou que la place centrale est tenue 60 secondes.
+Dans la bataille de siège, l'enceinte suit les fortifications de la colonie assiégée (le niveau et le type
+choisissent la maquette) : courtines, tours, porte, place centrale. Les défenseurs tirent depuis le chemin de
+ronde ; l'assaillant dispose d'échelles (lentes et vulnérables), de tours de siège qui déposent l'infanterie
+sur le rempart, d'un bélier contre la porte et de ses engins qui abattent des pans de mur. Les chevaliers
+mettent pied à terre. La place tombe quand la garnison est en déroute ou que la place centrale est tenue
+60 secondes.
 
 ## 9. Personnages et dynasties
 
