@@ -10,6 +10,7 @@ use serde::de::DeserializeOwned;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
+use crate::entities::chivalric_order::ChivalricOrder;
 use crate::entities::diet::Diet;
 use crate::entities::event::Event;
 use crate::entities::faction::Faction;
@@ -22,7 +23,7 @@ use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
-    BuildingId, CharacterId, DietId, EventId, FactionId, NamesId, ProvinceId, ReligionId,
+    BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId, ReligionId,
     ResourceId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
@@ -46,6 +47,8 @@ pub mod folders {
     pub const BATTLE_ORDERS: &str = "battle_orders";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
+    /// Chivalric orders (H6); optional folder.
+    pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -149,6 +152,8 @@ pub struct GameData {
     pub battle_orders: BTreeMap<String, BattleOrder>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
+    /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
+    pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -179,6 +184,7 @@ impl GameData {
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
             diets: BTreeMap::new(),
+            chivalric_orders: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
         };
@@ -193,6 +199,10 @@ impl GameData {
         let diets_dir = root.join(folders::DIETS);
         if diets_dir.is_dir() {
             data.diets = load_entities(&diets_dir, |d: &Diet| &d.id)?;
+        }
+        let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
+        if chivalric_dir.is_dir() {
+            data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.validate_references(&mut warnings)?;
@@ -277,6 +287,7 @@ impl GameData {
         checker.check_traits();
         checker.check_skills();
         checker.check_diets();
+        checker.check_chivalric_orders();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -520,6 +531,15 @@ impl ReferenceChecker<'_> {
         let data = self.data;
         for (id, skill) in &data.skills {
             self.require_all(id, "prerequisites", &skill.prerequisites, &data.skills);
+        }
+    }
+
+    fn check_chivalric_orders(&mut self) {
+        let data = self.data;
+        for (id, order) in &data.chivalric_orders {
+            if let Some(faction) = &order.faction {
+                self.require(id, "faction", faction, &data.factions);
+            }
         }
     }
 
