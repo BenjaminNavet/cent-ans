@@ -1,0 +1,71 @@
+{
+  "id": "evt_traite_de_berwick",
+  "title": "Le traité de Berwick",
+  "text": "Le 3 octobre 1357, par le traité de Berwick, l'Angleterre rend aux Écossais leur roi David II, captif depuis onze ans, contre 100 000 marcs payables en dix ans. La somme est écrasante pour un royaume pauvre, mais une longue trêve s'ouvre sur la frontière.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1357,
+      "season": "autumn"
+    },
+    "until_year": 1360,
+    "conditions": [
+      {
+        "type": "character_captive",
+        "id": "chr_david_ii"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_scotland"
+  },
+  "options": [
+    {
+      "text": "Promettre la rançon et faire la paix",
+      "effects": [
+        {
+          "type": "release_character",
+          "id": "chr_david_ii",
+          "ransom": 15000
+        },
+        {
+          "type": "peace",
+          "a": "fac_scotland",
+          "b": "fac_england"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser le roi à Londres",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Rançon de David II refusée"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1357-10-03",
+    "note": "Rançon de 100 000 marcs en dix annuités, payables à la Saint-Jean."
+  },
+  "sources": [
+    "Battle of Neville's Cross",
+    "David II",
+    "Ranald Nicholson, Scotland: The Later Middle Ages, 1974"
+  ]
+}

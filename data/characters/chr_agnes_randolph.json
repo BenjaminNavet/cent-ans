@@ -1,0 +1,44 @@
+{
+  "id": "chr_agnes_randolph",
+  "name": {
+    "display": "Agnès Randolph",
+    "local": "Agnes Randolph",
+    "local_language": "scots"
+  },
+  "epithet": "Black Agnes",
+  "sex": "female",
+  "house": "Randolph",
+  "faction": "fac_scotland",
+  "role": "noble",
+  "birth": {
+    "value": "1312",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1369",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comtesse de Dunbar et de March",
+      "note": "Par son mariage avec Patrick, 9e comte de Dunbar."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_resolute",
+    "trait_brave"
+  ],
+  "piety": 50,
+  "starting_location": "prov_lothian",
+  "status": "at_court",
+  "description": "Fille de Thomas Randolph, comte de Moray ; défend le château de Dunbar contre le comte de Salisbury du 13 janvier au 10 juin 1338.",
+  "sources": [
+    "Agnes, Countess of Dunbar"
+  ]
+}

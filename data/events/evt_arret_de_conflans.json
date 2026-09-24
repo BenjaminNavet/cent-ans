@@ -1,0 +1,111 @@
+{
+  "id": "evt_arret_de_conflans",
+  "title": "L'arrêt de Conflans",
+  "text": "Le 7 septembre 1341, au château de Conflans, la cour des pairs adjuge le duché de Bretagne à Charles de Blois, époux de Jeanne de Penthièvre et neveu de Philippe VI. Jean de Montfort, qui tient déjà les places fortes du duché et a cherché l'appui d'Édouard III, refuse le jugement. Le roi doit choisir : imposer son neveu par les armes, ou acheter la paix bretonne.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341,
+      "season": "autumn"
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "fired",
+            "event": "evt_mort_jean_iii"
+          },
+          {
+            "type": "ruler_is",
+            "faction": "fac_brittany",
+            "character": "chr_jeanne_de_penthievre"
+          }
+        ]
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_charles_de_blois"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_jean_de_montfort"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Envoyer l'ost imposer Charles de Blois",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "spawn_army",
+          "province": "prov_bretagne",
+          "units": [
+            "unit_knights",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen"
+          ]
+        },
+        {
+          "type": "claim",
+          "faction": "fac_england",
+          "kind": "province",
+          "target": "prov_bretagne_ouest"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Arrêt de Conflans"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Recevoir l'hommage de Montfort pour garder la paix",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_brittany",
+          "amount": 10,
+          "reason": "Paix bretonne"
+        },
+        {
+          "type": "prestige",
+          "character": "chr_charles_de_blois",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1341-09-07"
+  },
+  "sources": [
+    "Guerre de Succession de Bretagne",
+    "Charles de Blois",
+    "Jean-Christophe Cassard, La Guerre de Succession de Bretagne, 2006"
+  ]
+}

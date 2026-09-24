@@ -1,0 +1,94 @@
+{
+  "id": "evt_cadzand",
+  "title": "Le raid de Cadzand",
+  "text": "Le 9 novembre 1337, les nefs anglaises de [[cdx_gautier_de_mauny|Gautier de Mauny]] et du comte de Derby abordent l'île de Cadzand, à l'entrée du Zwin. La garnison flamande de Guy, bâtard de Flandre, est taillée en pièces par les archers ; Guy lui-même est pris. C'est le premier vrai combat de la guerre : Édouard montre aux villes de Flandre ce qu'il en coûte de servir Philippe.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1337,
+      "season": "autumn"
+    },
+    "until_year": 1338,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_flanders"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_flanders",
+        "province": "prov_flandre"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_gautier_de_mauny"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Bien traiter le bâtard de Flandre pour le rallier",
+      "effects": [
+        {
+          "type": "prestige",
+          "character": "chr_gautier_de_mauny",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_flanders",
+          "amount": 5,
+          "reason": "Clémence envers le bâtard de Flandre"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Piller l'île et rembarquer",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "devastation",
+          "province": "prov_flandre",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_flanders",
+          "amount": -15,
+          "reason": "Pillage de Cadzand"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1337-11-09",
+    "note": "Débarquement du 9 novembre ; combats les 9 et 10 novembre 1337."
+  },
+  "sources": [
+    "Battle of Cadzand",
+    "Jean Froissart, Chroniques, livre I",
+    "Jonathan Sumption, The Hundred Years War, vol. I : Trial by Battle, 1990"
+  ]
+}
