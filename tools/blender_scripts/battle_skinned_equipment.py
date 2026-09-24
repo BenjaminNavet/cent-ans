@@ -227,7 +227,8 @@ def grip(ctx, side="R"):
     Returns (centre, along: the weapon's forward direction through the fist, up, out).
     """
     wrist = ctx.head(f"Wrist.{side}")
-    out = (ctx.tail(f"Wrist.{side}") - wrist).normalized()
+    # The hand extends the forearm at rest (bone axes of the imported rig are not reliable).
+    out = (wrist - ctx.head(f"LowerArm.{side}")).normalized()
     centre = wrist + out * 0.075 + Vector((0, 0, -0.01))
     along = Vector((0, -1, 0))
     up = out.cross(along).normalized()

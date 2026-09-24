@@ -13,6 +13,7 @@ const LIVERIES := [Color(0.16, 0.25, 0.62), Color(0.72, 0.12, 0.12)]
 const FACTIONS := ["fac_france", "fac_england"]
 
 var _time := 3.37
+var _since := 4.4  # secondes depuis la dernière volée
 var _state := "idle"
 var _cols := 5
 var _rows := 2
@@ -32,6 +33,8 @@ func _init() -> void:
 			_state = arg.trim_prefix("--state=")
 		elif arg.begins_with("--time="):
 			_time = float(arg.trim_prefix("--time="))
+		elif arg.begins_with("--since="):
+			_since = float(arg.trim_prefix("--since="))
 		elif arg.begins_with("--cols="):
 			_cols = int(arg.trim_prefix("--cols="))
 		elif arg.begins_with("--rows="):
@@ -142,7 +145,7 @@ func _rank(world: Node3D, kind: String, variant: int, side: int, origin: Vector3
 		var config := BattleSkinned.death_config(kind, variant) if corpse else BattleSkinned.state_config(kind, variant, _state, _state == "running")
 		BattleSkinned.apply_config(mat, config, 0.0)
 		mat.set_shader_parameter("blend_since", -100.0)
-		mat.set_shader_parameter("volley_time", _time - 4.4)
+		mat.set_shader_parameter("volley_time", _time - _since)
 		mat.set_shader_parameter("livery_share", 0.9)
 	else:
 		mat.shader = RIGID_SHADER
@@ -155,7 +158,7 @@ func _rank(world: Node3D, kind: String, variant: int, side: int, origin: Vector3
 		mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
 		mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
 		mat.set_shader_parameter("anim_state", BattleSoldiers.anim_state({"state": _state}))
-		mat.set_shader_parameter("volley_time", _time - 4.4)
+		mat.set_shader_parameter("volley_time", _time - _since)
 		mat.set_shader_parameter("state_time", 3.0)
 	mat.set_shader_parameter("anim_time", _time)
 	mat.set_shader_parameter("livery", LIVERIES[side])

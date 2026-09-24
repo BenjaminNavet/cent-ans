@@ -55,11 +55,33 @@ def pos(arm, bone):
     return world(arm, bone).to_translation()
 
 
+# Child whose head gives the direction of a limb (the imported bones' own axes are not
+# reliably along the limbs).
+LIMB_CHILD = {
+    "UpperArm.L": "LowerArm.L", "LowerArm.L": "Wrist.L",
+    "UpperArm.R": "LowerArm.R", "LowerArm.R": "Wrist.R",
+    "UpperLeg.L": "LowerLeg.L", "UpperLeg.R": "LowerLeg.R",
+}
+
+
+def limb_dir(arm, bone):
+    """Current direction of a limb: towards its child's head, else the forearm's for a
+    wrist (the hand extends the forearm at rest), else the bone's own axis."""
+    child = LIMB_CHILD.get(bone)
+    if child:
+        return (pos(arm, child) - pos(arm, bone)).normalized()
+    if bone.startswith("Wrist."):
+        rest_rot = REST[bone].to_3x3().normalized()
+        local = rest_rot.inverted() @ REST["forearm." + bone[-1]]
+        return (world(arm, bone).to_3x3().normalized() @ local).normalized()
+    return (world(arm, bone).to_3x3().normalized() @ Vector((0, 1, 0))).normalized()
+
+
 def aim(arm, bone, direction):
-    """Rotate `bone` (minimal rotation) so that its axis points along `direction`."""
+    """Rotate `bone` (minimal rotation) so that its limb points along `direction`."""
     m = world(arm, bone)
     loc, rot, scale = m.decompose()
-    y = (rot.to_matrix() @ Vector((0, 1, 0))).normalized()
+    y = limb_dir(arm, bone)
     q = y.rotation_difference(direction.normalized())
     set_world(arm, bone, Matrix.LocRotScale(loc, q @ rot, scale))
 
@@ -102,6 +124,26 @@ def orient_like(arm, bone, rotation_world):
     set_world(arm, bone, Matrix.LocRotScale(loc, rotation_world, scale))
 
 
+def _frame(a, b):
+    a = a.normalized()
+    b = (b - a * b.dot(a)).normalized()
+    return Matrix((a, b, a.cross(b))).transposed()
+
+
+def orient_rest_axes(arm, bone, rest_a, target_a, rest_b, target_b):
+    """World rotation of `bone` mapping two world directions of its rest pose (`rest_a`,
+    `rest_b`) onto `target_a` (exact) and `target_b` (as close as possible)."""
+    r = _frame(target_a, target_b) @ _frame(rest_a, rest_b).inverted()
+    rest_rot = REST[bone].to_3x3().normalized()
+    orient_like(arm, bone, (r @ rest_rot).to_quaternion())
+
+
+def bow_upright(arm, forward):
+    """Left fist turned so that the bow limbs stand vertical, the arrow along `forward`."""
+    arm_dir = REST["forearm.L"]
+    orient_rest_axes(arm, "Wrist.L", arm_dir, forward, Vector((0, -1, 0)), Vector((0, 0, 1)))
+
+
 def hand_to_prop(arm, side, prop, along, pole):
     """IK the arm so that the fist sits on the prop at `along` metres on its axis."""
     target = prop @ Vector((0, along, 0))
@@ -114,7 +156,7 @@ def fist_on_prop(arm, prop):
     rest_prop = REST["prop"]
     rest_wrist = REST["Wrist.R"]
     m = prop @ rest_prop.inverted() @ rest_wrist
-    orient_like(arm, "Wrist.R", m.to_quaternion())
+    orient_like(arm, "Wrist.R", m.to_3x3().normalized().to_quaternion())
 
 
 def prop_matrix(origin, axis, up):
@@ -189,9 +231,10 @@ def _bow_arm(arm, raise_t):
     rest_target = shoulder + Vector((0.08, -0.38, -0.42))
     target = rest_target.lerp(shoulder + aim_v * 0.6, raise_t)
     ik2(arm, "UpperArm.L", "LowerArm.L", "Wrist.L", target, shoulder + Vector((0.4, 0.2, -0.6)))
-    # Bow vertical: wrist rolled so that the hand axis follows the forearm.
+    # Bow vertical, arrow along the forearm (canted 10 degrees like English archers).
     fore = (pos(arm, "Wrist.L") - pos(arm, "LowerArm.L")).normalized()
-    aim(arm, "Wrist.L", fore)
+    bow_upright(arm, fore)
+    rotate_about(arm, "Wrist.L", fore, math.radians(-10))
     return aim_v
 
 
