@@ -12,22 +12,31 @@
     "flicker_amount": 0.35
   },
   "flames": {
-    "amount": 72,
-    "lifetime_s": 1.2,
-    "size_m": [2.0, 4.2],
-    "velocity_m_s": [2.5, 5.0],
-    "spread_m": 5.0,
-    "color_start": [1.0, 0.62, 0.12, 0.95],
-    "color_end": [0.7, 0.1, 0.0, 0.0]
+    "amount": 26,
+    "lifetime_s": 1.5,
+    "size_m": [3.5, 7.0],
+    "velocity_m_s": [1.2, 2.8],
+    "spread_m": 4.5,
+    "color_start": [1.0, 0.72, 0.28, 1.0],
+    "color_end": [0.35, 0.03, 0.0, 1.0],
+    "anim_loops": 1.5,
+    "emission": 3.2
   },
   "smoke": {
-    "amount": 48,
-    "lifetime_s": 10.0,
-    "size_m": [5.0, 14.0],
-    "velocity_m_s": [2.0, 4.0],
-    "spread_m": 4.0,
-    "color": [0.13, 0.12, 0.11, 0.7],
+    "amount": 56,
+    "lifetime_s": 14.0,
+    "size_m": [7.0, 18.0],
+    "velocity_m_s": [3.0, 5.0],
+    "spread_m": 3.0,
+    "color": [0.26, 0.25, 0.235, 0.9],
     "wind_drift_m_s": 3.5
+  },
+  "embers": {
+    "amount": 36,
+    "lifetime_s": 3.0,
+    "size_m": [0.12, 0.3],
+    "velocity_m_s": [3.0, 7.0],
+    "energy": 6.0
   },
   "ruin": {
     "char_color": [0.07, 0.06, 0.05],
