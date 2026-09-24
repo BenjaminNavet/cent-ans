@@ -18,12 +18,21 @@ Ne pas toucher : `battle_meshes.gd`, `battle_soldiers.gd`, `battle_soldier.gdsha
        écrasante / honorable…), écus, bilan engagés/pertes, tableau par régiment, mentions
        (anéantis, général tombé/capturé → rançon, pas de quartier, déroute), retour campagne.
        L'ancien `end_panel` du HUD est supprimé. Option `--result-shot` pour la capture.
-4. [ ] Smoke étendu (`_check_battle_markers_b2`, écran de fin) : en cours de validation.
+4. [x] Smoke étendu (`_check_battle_markers_b2` : repères présents, clic = sélection, touche de
+       masquage, chevauchements ; écran de fin : verdict, lignes de pertes, mentions, bouton retour).
 5. [x] Captures `docs/img/b2/` : `bannieres_vue_ensemble.png`, `bannieres_rapprochees.png`,
        `bannieres_detail.png`, `cartes_vignettes.png`, `ecran_fin.png`.
 
 ## État / prochaine étape
-Smoke à repasser après la correction du dépilement (vue lointaine du smoke : 14 repères se
-chevauchaient). Les illustrations `game/assets/illustrations/unit_*.jpg` n'existent que dans la copie
-principale (non suivies) : copiées localement pour les captures, non commitées ; sans elles la carte
-retombe sur la composition blason + icône.
+Terminé : smoke complet vert (exit 0), captures relues. Un premier passage avait échoué sur les
+sauvegardes automatiques (`auto_2 missing`) : `user://` partagé avec d'autres agents lançant le smoke
+en parallèle ; vert au passage suivant.
+
+Points ouverts :
+- Les illustrations `game/assets/illustrations/unit_*.jpg` n'existent que dans la copie principale
+  (non suivies) : copiées localement pour les captures, non commitées. Sans elles, la carte retombe
+  sur la composition couleur du camp + blason + icône.
+- Vue très éloignée (smoke, caméra de déploiement à 420 m) : les repères s'empilent en colonnes,
+  sans chevauchement mais hauts ; un regroupement par « bataille » serait l'étape suivante.
+- Le verdict (« décisive », « chèrement acquise », « écrasante », « honorable ») est un libellé
+  d'affichage calculé dans `battle_result_screen.gd` (seuils 50 % / 25 % de pertes), pas une règle.

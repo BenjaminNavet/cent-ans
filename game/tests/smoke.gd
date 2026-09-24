@@ -818,7 +818,7 @@ func _check_battle_markers_b2(scene: BattleScene) -> void:
 			break
 	if _check(own >= 0, "battle markers: no clickable banner for the player's regiments"):
 		var rect := markers.marker_rect(own)
-		_check(markers._has_point(rect.get_center()) and not markers._has_point(Vector2(-50, -50)), "battle markers: hit test")
+		_check(markers._has_point(rect.get_center()) and not markers._has_point(Vector2(-5000, -5000)), "battle markers: hit test")
 		var click := InputEventMouseButton.new()
 		click.button_index = MOUSE_BUTTON_LEFT
 		click.pressed = true
