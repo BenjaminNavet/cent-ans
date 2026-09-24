@@ -84,5 +84,58 @@
     "sources": [
       "Tønsberg"
     ]
+  },
+  {
+    "id": "set_lund",
+    "province": "prov_gotaland",
+    "kind": "town",
+    "name": {
+      "display": "Lund",
+      "local": "Lund",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      13.191,
+      55.7047
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Siège de l'archevêché de toute la Scandinavie, en Scanie, engagée à Magnus Eriksson de Suède depuis 1332.",
+    "sources": [
+      "Lund"
+    ]
+  },
+  {
+    "id": "set_skanor",
+    "province": "prov_gotaland",
+    "kind": "village",
+    "name": {
+      "display": "Skanör",
+      "local": "Skanör",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      12.8333,
+      55.4167
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_fair"
+    ],
+    "port": true,
+    "description": "Bourg de pêcheurs de Scanie (suédoise depuis 1332), site de l'immense foire saisonnière au hareng fréquentée par les marchands hanséates.",
+    "sources": [
+      "Skanör med Falsterbo"
+    ]
   }
 ]
