@@ -618,7 +618,7 @@ pub(crate) fn auto_fight(
 /// Splits a coalition's outcome into one outcome per army (F1): each army
 /// takes the losses of its own regiments; only the commander's general can
 /// be captured.
-fn split_outcome(
+pub(crate) fn split_outcome(
     state: &CampaignState,
     ids: &[ArmyId],
     outcome: &crate::battle_auto::SideOutcome,

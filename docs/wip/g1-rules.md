@@ -8,8 +8,8 @@ Branche : `worktree-agent-aae49b73351b126ff`.
 3. [x] `army_armor`/`army_ranged` : `buildings::levy_bonus`, stocké sur l unité (`Unit::levy_armor`/`levy_ranged`, plafond 10), auto-résolution (`side_from_army`) + `battle_setup` (stats).
 4. [x] `transfer_province { province, faction?, from? }` (jamais une capitale) : Dauphiné (from Empire), Auray/Guérande (Bretagne rendue à Montfort), Formigny (Normandie anglaise → France). Valdemar IV sans objet (pas de faction Danemark), Trévise pas une province.
 5. [x] Rançons : `PayRansom` (H6) existait ; ajout `ReleaseCaptive { character, ransom? }` (≤ rançon calculée, payée comptant par la faction du captif, +3 prestige au geôlier) ; IA : H6 paie déjà (souverains/héritiers par échéances) ; pont `get_character` : captor, captor_name, ransom, ransom_terms, ransom_action ; fiche : ligne + bouton.
-6. [ ] Alliés dans les assauts de siège.
+6. [x] Assauts : `siege::assault_coalition` (= `battle_coalition` contre le contrôleur de la place) en auto-résolution, `battle_setup` du siège (armée combinée) et résolution 3D ; pertes réparties, commandant = meilleur général ; différé si le joueur n y envoie qu un allié.
 7. [ ] `docs/status.md`, specs, smoke.
 
 ## Prochaine étape
-Point 6 (alliés dans les assauts).
+Point 7 (docs, smoke).
