@@ -258,10 +258,13 @@ func _run_campaign_loop() -> void:
 	var target_index: int = map.map_data.index_of_id(target)
 	map._on_province_hovered(target_index)
 	_check(map.path_preview.visible, "path preview should be visible when hovering a reachable province")
+	var army_before: Dictionary = map.sim.call("get_army", army_ids[0])
 	var result: Dictionary = map.order_move(army_ids[0], target)
 	_check(result.get("ok", false), "move order refused: %s" % result.get("error", "?"))
+	# Mouvement libre (M2) : l'armée marche aussitôt ; elle a bougé ou garde la suite de son trajet.
 	var army: Dictionary = map.sim.call("get_army", army_ids[0])
-	_check(not army.get("path", []).is_empty(), "army path should be set after the order")
+	_check(not army.get("path", []).is_empty() or int(army.get("movement_points", 0)) < int(army_before.get("movement_points", 0)),
+		"army should march (or keep a path) after the order")
 
 	var date_before: String = map.sim.call("get_date_label")
 	for _i in 4:
