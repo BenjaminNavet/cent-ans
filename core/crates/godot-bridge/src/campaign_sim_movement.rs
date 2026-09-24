@@ -180,6 +180,23 @@ impl CampaignSim {
         self.run_order_json(order)
     }
 
+    /// Test and capture hook (not a game rule): puts `army_id` in the field
+    /// at map pixel `(x, y)`. `false` when the army is unknown.
+    #[func]
+    fn debug_place_army(&mut self, army_id: GString, x: f64, y: f64) -> bool {
+        let Some(state) = &mut self.state else {
+            return false;
+        };
+        let Some(army) =
+            ArmyId::parse(&army_id.to_string()).and_then(|id| state.armies.get_mut(&id))
+        else {
+            return false;
+        };
+        army.position = sim_campaign::ArmyPosition::field([x as f32, y as f32]);
+        army.clear_plan();
+        true
+    }
+
     /// Like `submit_order`, with what the order did: `{ok, error, army,
     /// walked, cost, stop, stop_settlement, stop_army, planned_path,
     /// position, settlement, events}`. `walked` is the polyline walked in

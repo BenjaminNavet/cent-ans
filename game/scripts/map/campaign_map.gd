@@ -426,7 +426,7 @@ func select_army(army_id: String) -> void:
 	var is_player := faction == player_faction
 	# M4 : la bulle du mouvement libre remplace le masque de provinces et les anneaux C5.
 	var free_movement := movement_ctl != null and movement_ctl.available()
-	reachable = sim.call("get_reachable", army_id) if is_player and not free_movement else {}
+	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
 	if free_movement:
 		movement_ctl.on_army_selected(army_id, army, is_player)
@@ -469,6 +469,9 @@ func deselect_army() -> void:
 
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
+	if movement_ctl != null and movement_ctl.available():
+		terrain.set_reachable(PackedInt32Array(), PackedInt32Array())  # M4 : la bulle suffit
+		return
 	var indices := PackedInt32Array()
 	if selected_army != "" and sim != null:
 		# La province de départ compte comme atteignable (pas assombrie).
