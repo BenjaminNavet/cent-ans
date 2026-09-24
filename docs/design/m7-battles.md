@@ -96,3 +96,33 @@ restent à deux.
 ## 6. Ordres du chef (F10b)
 Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::LeaderOrder`, catalogue
 `data/battle_orders/`, barre d'ordres en bataille. Spécification : `docs/design/battle-orders.md`.
+
+## F5 — finition de la simulation (F5a, Rust)
+- **Collisions amies** (`sim/separation.rs`) : deux régiments du même camp à l'arrêt dont les
+  rectangles se chevauchent s'écartent (jeu de 1 m, `FRIEND_GAP`), 3 m/s au plus, déterministe. Un
+  régiment qui marche, charge ou poursuit une cible traverse ses amis (passage des lignes) : les
+  charges ne sont jamais freinées ni déviées.
+- **Formations de l'IA** (`formation_ai.rs`, après `ai::plan`) : piquiers (`pike_square`) en schiltron
+  quand de la cavalerie ennemie est à 120 m (retour en ligne au-delà de 220 m) ; lances
+  (`charge_lance`) en coin pour une charge « propre » à moins de 250 m (pas de pieux ni de piques à
+  100 m de la cible), gardé pendant la mêlée ; colonne pour une marche de plus de 250 m sans ennemi à
+  300 m, redéploiement en ligne à 220 m. Coin : front de combat = 3 × files (au lieu de 2) ; correctif
+  du placement des cavaliers dans le coin (débordement). **Flanc coordonné** : deux régiments montés qui
+  contournent le même ennemi prennent chacun un flanc.
+- **Déploiement** (`sim/deployment.rs`) — API pour le HUD :
+  - `BattleSim.begin_deployment() -> bool` juste après `setup` (avant tout `tick`) : le temps est gelé
+    (`tick` sans effet), seuls les ordres `formation` et `fire_at_will` passent, le camp IA est placé
+    par rôles (ligne au centre, tireurs devant, ailes montées, engins derrière, général derrière le
+    centre ; un camp nettement plus faible recule sur la meilleure hauteur de sa zone).
+  - `is_deploying() -> bool`.
+  - `get_deployment_zone(side) -> {x0, z0, x1, z1}` (mètres du champ). Bataille rangée : bande de
+    300 m de profondeur le long de son bord (assaillant z ∈ [20, 300], défenseur z ∈ [500, 780]).
+  - `deploy_unit(id, x, z, facing) -> {ok, error}` : `facing` en radians, `NAN` garde l'orientation ;
+    refusé hors zone (« l'unité … doit être placée dans votre zone de déploiement »), pour une unité
+    de l'autre camp, ou hors de la phase.
+  - `start_battle() -> {ok, error}` : fin de la phase, la bataille commence au tick suivant.
+  - Pendant la phase, `issue_command` renvoie « déploiement en cours… » pour les autres ordres.
+- **Point 5 (renforts au-delà de 20 régiments par camp) : non fait**, reste à faire : réserve hors
+  champ, entrée échelonnée par le bord du camp quand un régiment quitte le champ ou toutes les N s.
+- Tests : `sim-battle/tests/f5.rs` (8 + 1 ignoré). Sonde `probe -- ai` : 2 × 20 régiments, assaillant
+  4/10 (471 s en moyenne) ; 2 × 10, 6/10.

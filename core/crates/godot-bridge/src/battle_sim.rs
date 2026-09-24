@@ -441,6 +441,12 @@ impl BattleSim {
                     .to_variant()
             })
             .collect();
+        // F5a: house blocks (obstacles of the siege pathing), `{x, z, radius}`.
+        let houses: VarArray = works
+            .houses
+            .iter()
+            .map(|h| vdict! { "x" => h.x, "z" => h.z, "radius" => h.radius }.to_variant())
+            .collect();
         vdict! {
             "fortification" => i64::from(works.fortification),
             "center" => v2(works.center),
@@ -453,6 +459,8 @@ impl BattleSim {
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
+            "houses" => &houses,
+            "sortie" => works.sortie,
         }
     }
 
