@@ -43,6 +43,7 @@ pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
 pub mod events;
+pub mod frontier;
 pub mod medicine;
 pub mod movement;
 pub mod orders;
@@ -81,6 +82,7 @@ pub use dynasty::{
 };
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
+pub use frontier::GarrisonRole;
 pub use orders::{Order, OrderError, RecruitOption, BASE_RECRUIT_SLOTS};
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};

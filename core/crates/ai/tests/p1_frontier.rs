@@ -1,0 +1,64 @@
+//! P1 regression: the 1337 setup and the AI share one frontier
+//! classification, so no starting garrison is split into a leaderless army
+//! on the first turn (`prov_normandie_ouest` did).
+
+use std::path::PathBuf;
+
+use data_model::{FactionId, GameData, ProvinceId};
+use sim_campaign::{CampaignState, GarrisonRole, Order};
+
+fn data() -> GameData {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    GameData::load(&root).expect("game data loads").0
+}
+
+fn fac(id: &str) -> FactionId {
+    FactionId::new(id).unwrap()
+}
+
+#[test]
+fn starting_garrisons_follow_the_shared_classification() {
+    let data = data();
+    let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
+    for (id, province) in &state.provinces {
+        let role = state.garrison_role(&data, &province.owner, id);
+        assert_eq!(province.garrison.len(), role.garrison_size(), "{id}");
+    }
+    let normandie_ouest = ProvinceId::new("prov_normandie_ouest").unwrap();
+    assert!(state.is_frontier(&data, &fac("fac_france"), &normandie_ouest));
+    assert_eq!(
+        state.garrison_role(&data, &fac("fac_france"), &normandie_ouest),
+        GarrisonRole::Frontier
+    );
+    // The classification still leaves an interior to the realm.
+    let interior = state
+        .provinces
+        .iter()
+        .find(|(id, p)| {
+            state.garrison_role(&data, &p.owner, id) == GarrisonRole::Interior
+                && p.owner == fac("fac_france")
+        })
+        .map(|(id, _)| id.clone());
+    assert!(interior.is_some(), "France has interior provinces");
+}
+
+#[test]
+fn no_leaderless_army_is_split_from_a_garrison_on_the_first_turn() {
+    let data = data();
+    for player in ["fac_england", "fac_france"] {
+        let state = CampaignState::new_1337(&data, fac(player), 1).unwrap();
+        for faction in state.factions.keys() {
+            let splits: Vec<ProvinceId> = ai::plan_turn(&state, &data, faction)
+                .into_iter()
+                .filter_map(|order| match order {
+                    Order::CreateArmy { province, .. } => Some(province),
+                    _ => None,
+                })
+                .collect();
+            assert!(
+                splits.is_empty(),
+                "{faction} splits starting garrisons: {splits:?}"
+            );
+        }
+    }
+}
