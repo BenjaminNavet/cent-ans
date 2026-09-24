@@ -72,6 +72,7 @@ class Context:
     """Rest-pose armature, level of detail and material factory for the builders."""
 
     def __init__(self, arm, level, material, bone_world):
+        """Store the rest-pose armature, level of detail and the material/bone helpers."""
         self.arm = arm
         self.level = level
         self.material = material
@@ -87,6 +88,7 @@ class Context:
         return self._bone_world(self.arm, bone).to_translation()
 
     def tail(self, bone):
+        """World position of a bone's tail (rest)."""
         return self.arm.matrix_world @ self.arm.data.bones[bone].tail_local
 
     def frame(self, bone):
@@ -149,6 +151,7 @@ def bind_by(obj, weigh):
 
 
 def smoothstep(a, b, x):
+    """Smooth Hermite interpolation of `x` between `a` and `b`, clamped to [0, 1]."""
     t = min(max((x - a) / (b - a), 0.0), 1.0)
     return t * t * (3 - 2 * t)
 
@@ -178,6 +181,7 @@ def bridge(bm, a, b, mat=0, closed=True, flip=False):
 
 
 def cap(bm, loop, mat=0, flip=False):
+    """Close a vertex loop with a single n-gon face."""
     f = bm.faces.new(list(reversed(loop)) if flip else loop)
     f.material_index = mat
     return f
@@ -189,8 +193,22 @@ def tube(bm, a, b, ra, rb, n, mat=0, caps=True):
     helper = Vector((0, 0, 1)) if abs(axis.z) < 0.9 else Vector((1, 0, 0))
     u = axis.cross(helper).normalized()
     v = axis.cross(u).normalized()
-    ring_a = [bm.verts.new(a + (u * math.cos(2 * math.pi * i / n) + v * math.sin(2 * math.pi * i / n)) * ra) for i in range(n)]
-    ring_b = [bm.verts.new(b + (u * math.cos(2 * math.pi * i / n) + v * math.sin(2 * math.pi * i / n)) * rb) for i in range(n)]
+    ring_a = [
+        bm.verts.new(
+            a
+            + (u * math.cos(2 * math.pi * i / n) + v * math.sin(2 * math.pi * i / n))
+            * ra
+        )
+        for i in range(n)
+    ]
+    ring_b = [
+        bm.verts.new(
+            b
+            + (u * math.cos(2 * math.pi * i / n) + v * math.sin(2 * math.pi * i / n))
+            * rb
+        )
+        for i in range(n)
+    ]
     bridge(bm, ring_a, ring_b, mat)
     if caps:
         cap(bm, ring_a, mat, flip=False)
@@ -205,9 +223,23 @@ def box(bm, center, size, axes=None, mat=0):
     for sx in (-1, 1):
         for sy in (-1, 1):
             for sz in (-1, 1):
-                corners.append(bm.verts.new(center + ax[0] * size[0] * sx + ax[1] * size[1] * sy + ax[2] * size[2] * sz))
+                corners.append(
+                    bm.verts.new(
+                        center
+                        + ax[0] * size[0] * sx
+                        + ax[1] * size[1] * sy
+                        + ax[2] * size[2] * sz
+                    )
+                )
     c = corners
-    faces = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]
+    faces = [
+        (0, 1, 3, 2),
+        (4, 6, 7, 5),
+        (0, 4, 5, 1),
+        (2, 3, 7, 6),
+        (0, 2, 6, 4),
+        (1, 5, 7, 3),
+    ]
     for f in faces:
         face = bm.faces.new([c[i] for i in f])
         face.material_index = mat
@@ -215,6 +247,7 @@ def box(bm, center, size, axes=None, mat=0):
 
 
 def finish(bm):
+    """Recalculate face normals of a bmesh so they point outward."""
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 
 
@@ -257,7 +290,7 @@ def bassinet(ctx, aventail=True, visor=False):
     bm = bmesh.new()
     n = ctx.seg(16, 8, 6)
     rows = ctx.seg(8, 4, 3)
-    rx, ry, rz = half.x * 1.13, half.y * 1.12, half.z * 0.62
+    rx, ry, _rz = half.x * 1.13, half.y * 1.12, half.z * 0.62
     base_z = mn.z + (mx.z - mn.z) * 0.42
     top = Vector((centre.x, centre.y + half.y * 0.25, mx.z + 0.07))
     rings = []
@@ -266,15 +299,24 @@ def bassinet(ctx, aventail=True, visor=False):
         ang = t * math.pi / 2
         rr = math.cos(ang)
         z = base_z + math.sin(ang) * (mx.z - base_z + 0.01)
+
         # Face opening: the front of the rim rises to the brow.
         def z_of(p, a, z=z, t=t):
             front = max(0.0, -math.sin(a))  # -Y is the face
             lift = (1 - t) * 0.09 * smoothstep(0.35, 0.8, front)
             return z + lift
-        ring_verts = ring(bm, Vector((centre.x, centre.y + half.y * 0.08 * t, z)), rx * rr + 0.004, ry * rr + 0.004, n, z_of)
+
+        ring_verts = ring(
+            bm,
+            Vector((centre.x, centre.y + half.y * 0.08 * t, z)),
+            rx * rr + 0.004,
+            ry * rr + 0.004,
+            n,
+            z_of,
+        )
         rings.append(ring_verts)
     apex = bm.verts.new(top)
-    for a, b in zip(rings, rings[1:]):
+    for a, b in zip(rings, rings[1:], strict=False):
         bridge(bm, a, b, 0)
     for i in range(n):
         f = bm.faces.new((rings[-1][i], rings[-1][(i + 1) % n], apex))
@@ -308,7 +350,7 @@ def _aventail(ctx, centre, half, mn, base_z, n):
             return z - (0.05 * (1 - t) + 0.02) * front + (1 - t) * 0.0
 
         rings.append(ring(bm, Vector((centre.x, cy, z)), rx, ry, n, z_of))
-    for a, b in zip(rings, rings[1:]):
+    for a, b in zip(rings, rings[1:], strict=False):
         bridge(bm, a, b, 0)
     finish(bm)
     obj = to_object("aventail", bm, [ctx.material(C_MAIL, MAIL)])
@@ -335,13 +377,23 @@ def kettle_hat(ctx):
     for r in range(rows):
         ang = r / rows * math.pi / 2
         z = base_z + math.sin(ang) * (mx.z - base_z + 0.03)
-        rings.append(ring(bm, Vector((centre.x, centre.y, z)), rx * math.cos(ang), ry * math.cos(ang), n))
+        rings.append(
+            ring(
+                bm,
+                Vector((centre.x, centre.y, z)),
+                rx * math.cos(ang),
+                ry * math.cos(ang),
+                n,
+            )
+        )
     apex = bm.verts.new(Vector((centre.x, centre.y, mx.z + 0.03)))
-    for a, b in zip(rings, rings[1:]):
+    for a, b in zip(rings, rings[1:], strict=False):
         bridge(bm, a, b, 0)
     for i in range(n):
         bm.faces.new((rings[-1][i], rings[-1][(i + 1) % n], apex))
-    brim = ring(bm, Vector((centre.x, centre.y, base_z - 0.05)), rx + 0.085, ry + 0.085, n)
+    brim = ring(
+        bm, Vector((centre.x, centre.y, base_z - 0.05)), rx + 0.085, ry + 0.085, n
+    )
     bridge(bm, brim, rings[0], 0)
     finish(bm)
     obj = to_object("kettle_hat", bm, [ctx.material(C_PLATE, (0.40, 0.40, 0.41))])
@@ -357,13 +409,31 @@ def great_helm(ctx):
     bottom = mn.z - 0.02
     top = mx.z + 0.03
     rx, ry = half.x * 1.15, half.y * 1.1
-    levels = [bottom, bottom + (top - bottom) * 0.55, bottom + (top - bottom) * 0.62, top]
-    rings = [ring(bm, Vector((centre.x, centre.y, z)), rx * (0.92 if z == top else 1.0), ry * (0.92 if z == top else 1.0), n) for z in levels]
-    for k, (a, b) in enumerate(zip(rings, rings[1:])):
+    levels = [
+        bottom,
+        bottom + (top - bottom) * 0.55,
+        bottom + (top - bottom) * 0.62,
+        top,
+    ]
+    rings = [
+        ring(
+            bm,
+            Vector((centre.x, centre.y, z)),
+            rx * (0.92 if z == top else 1.0),
+            ry * (0.92 if z == top else 1.0),
+            n,
+        )
+        for z in levels
+    ]
+    for k, (a, b) in enumerate(zip(rings, rings[1:], strict=False)):
         bridge(bm, a, b, 1 if k == 1 else 0)
     cap(bm, rings[-1], 0, flip=False)
     finish(bm)
-    obj = to_object("great_helm", bm, [ctx.material(C_PLATE, STEEL), ctx.material(C_EXACT, (0.01, 0.01, 0.01))])
+    obj = to_object(
+        "great_helm",
+        bm,
+        [ctx.material(C_PLATE, STEEL), ctx.material(C_EXACT, (0.01, 0.01, 0.01))],
+    )
     bind_rigid(obj, "Head")
     return [obj]
 
@@ -376,9 +446,13 @@ def cloth_cap(ctx, colour=(0.25, 0.10, 0.05)):
     base_z = mn.z + (mx.z - mn.z) * 0.66
     rx, ry = half.x * 1.08, half.y * 1.06
     r0 = ring(bm, Vector((centre.x, centre.y, base_z)), rx, ry, n)
-    r1 = ring(bm, Vector((centre.x, centre.y + 0.01, mx.z + 0.02)), rx * 0.85, ry * 0.8, n)
+    r1 = ring(
+        bm, Vector((centre.x, centre.y + 0.01, mx.z + 0.02)), rx * 0.85, ry * 0.8, n
+    )
     tip = bm.verts.new(Vector((centre.x, centre.y + 0.04, mx.z + 0.08)))
-    brim = ring(bm, Vector((centre.x, centre.y, base_z - 0.01)), rx + 0.05, ry + 0.05, n)
+    brim = ring(
+        bm, Vector((centre.x, centre.y, base_z - 0.01)), rx + 0.05, ry + 0.05, n
+    )
     bridge(bm, r0, r1, 0)
     bridge(bm, brim, r0, 0)
     for i in range(n):
@@ -404,13 +478,24 @@ def sword(ctx, length=0.95):
     w = 0.025
     th = 0.005
     # Blade: flat diamond section, tapering to the tip.
-    vb = [bm.verts.new(blade_base + up * w), bm.verts.new(blade_base + out * th), bm.verts.new(blade_base - up * w), bm.verts.new(blade_base - out * th)]
+    vb = [
+        bm.verts.new(blade_base + up * w),
+        bm.verts.new(blade_base + out * th),
+        bm.verts.new(blade_base - up * w),
+        bm.verts.new(blade_base - out * th),
+    ]
     vt = bm.verts.new(tip)
     for i in range(4):
         bm.faces.new((vb[i], vb[(i + 1) % 4], vt))
     bm.faces.new(list(reversed(vb)))
-    box(bm, c + along * 0.085, (0.012, 0.012, 0.012), (along, up * 7.0, out), 0)  # cross-guard
+    box(
+        bm, c + along * 0.085, (0.012, 0.012, 0.012), (along, up * 7.0, out), 0
+    )  # cross-guard
     finish(bm)
-    obj = to_object("sword", bm, [ctx.material(C_PLATE, (0.62, 0.63, 0.65)), ctx.material(C_LEATHER, LEATHER)])
+    obj = to_object(
+        "sword",
+        bm,
+        [ctx.material(C_PLATE, (0.62, 0.63, 0.65)), ctx.material(C_LEATHER, LEATHER)],
+    )
     bind_rigid(obj, "Wrist.R")
     return [obj]

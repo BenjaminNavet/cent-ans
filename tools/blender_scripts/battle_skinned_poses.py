@@ -25,17 +25,20 @@ REST = {}  # filled by the baker: rest world matrices ("prop", bone names), grip
 
 
 def reset_state():
+    """Clear the virtual prop/nock/arrow state before baking a new frame."""
     STATE["prop"] = None
     STATE["nock"] = None
     STATE["arrow"] = False
 
 
 def smooth(a, b, t):
+    """Smoothstep of `t` between `a` and `b`, clamped to [0, 1]."""
     x = min(max((t - a) / (b - a), 0.0), 1.0) if b != a else float(t >= a)
     return x * x * (3 - 2 * x)
 
 
 def lerp(a, b, t):
+    """Linear interpolation between `a` and `b` by `t`."""
     return a + (b - a) * t
 
 
@@ -43,30 +46,39 @@ def lerp(a, b, t):
 
 
 def world(arm, bone):
+    """Current world matrix of a pose bone."""
     return arm.matrix_world @ arm.pose.bones[bone].matrix
 
 
 def set_world(arm, bone, m):
+    """Set a pose bone's world matrix and refresh the dependency graph."""
     arm.pose.bones[bone].matrix = arm.matrix_world.inverted() @ m
     bpy.context.view_layer.update()
 
 
 def pos(arm, bone):
+    """Current world position of a pose bone."""
     return world(arm, bone).to_translation()
 
 
 # Child whose head gives the direction of a limb (the imported bones' own axes are not
 # reliably along the limbs).
 LIMB_CHILD = {
-    "UpperArm.L": "LowerArm.L", "LowerArm.L": "Wrist.L",
-    "UpperArm.R": "LowerArm.R", "LowerArm.R": "Wrist.R",
-    "UpperLeg.L": "LowerLeg.L", "UpperLeg.R": "LowerLeg.R",
+    "UpperArm.L": "LowerArm.L",
+    "LowerArm.L": "Wrist.L",
+    "UpperArm.R": "LowerArm.R",
+    "LowerArm.R": "Wrist.R",
+    "UpperLeg.L": "LowerLeg.L",
+    "UpperLeg.R": "LowerLeg.R",
 }
 
 
 def limb_dir(arm, bone):
-    """Current direction of a limb: towards its child's head, else the forearm's for a
-    wrist (the hand extends the forearm at rest), else the bone's own axis."""
+    """Current direction of a limb.
+
+    Towards its child's head, else the forearm's for a wrist (the hand extends the forearm
+    at rest), else the bone's own axis.
+    """
     child = LIMB_CHILD.get(bone)
     if child:
         return (pos(arm, child) - pos(arm, bone)).normalized()
@@ -95,6 +107,7 @@ def rotate_about(arm, bone, axis, angle, pivot=None):
 
 
 def translate(arm, bone, offset):
+    """Translate `bone` by `offset` in world space."""
     m = world(arm, bone)
     set_world(arm, bone, Matrix.Translation(offset) @ m)
 
@@ -131,8 +144,11 @@ def _frame(a, b):
 
 
 def orient_rest_axes(arm, bone, rest_a, target_a, rest_b, target_b):
-    """World rotation of `bone` mapping two world directions of its rest pose (`rest_a`,
-    `rest_b`) onto `target_a` (exact) and `target_b` (as close as possible)."""
+    """World rotation of `bone` mapping two rest-pose directions onto two targets.
+
+    Maps `rest_a`/`rest_b` (world directions of its rest pose) onto `target_a` (exact) and
+    `target_b` (as close as possible).
+    """
     r = _frame(target_a, target_b) @ _frame(rest_a, rest_b).inverted()
     rest_rot = REST[bone].to_3x3().normalized()
     orient_like(arm, bone, (r @ rest_rot).to_quaternion())
@@ -141,14 +157,20 @@ def orient_rest_axes(arm, bone, rest_a, target_a, rest_b, target_b):
 def bow_upright(arm, forward):
     """Left fist turned so that the bow limbs stand vertical, the arrow along `forward`."""
     arm_dir = REST["forearm.L"]
-    orient_rest_axes(arm, "Wrist.L", arm_dir, forward, Vector((0, -1, 0)), Vector((0, 0, 1)))
+    orient_rest_axes(
+        arm, "Wrist.L", arm_dir, forward, Vector((0, -1, 0)), Vector((0, 0, 1))
+    )
 
 
 def hand_to_prop(arm, side, prop, along, pole):
     """IK the arm so that the fist sits on the prop at `along` metres on its axis."""
     target = prop @ Vector((0, along, 0))
-    wrist_target = target - (prop.to_3x3() @ Vector((1, 0, 0))).normalized() * 0.075 * (1 if side == "R" else -1)
-    ik2(arm, f"UpperArm.{side}", f"LowerArm.{side}", f"Wrist.{side}", wrist_target, pole)
+    wrist_target = target - (prop.to_3x3() @ Vector((1, 0, 0))).normalized() * 0.075 * (
+        1 if side == "R" else -1
+    )
+    ik2(
+        arm, f"UpperArm.{side}", f"LowerArm.{side}", f"Wrist.{side}", wrist_target, pole
+    )
 
 
 def fist_on_prop(arm, prop):
@@ -183,16 +205,22 @@ def _pike_upright(arm):
     """Pike held upright, butt on the ground by the right foot."""
     foot = pos(arm, "Foot.R")
     butt = Vector((foot.x - 0.12, foot.y - 0.18, 0.0))
-    prop = prop_matrix(butt + Vector((0, 0, 1.25)), Vector((0.03, -0.05, 1.0)), Vector((0, -1, 0)))
+    prop = prop_matrix(
+        butt + Vector((0, 0, 1.25)), Vector((0.03, -0.05, 1.0)), Vector((0, -1, 0))
+    )
     STATE["prop"] = prop
-    hand_to_prop(arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.4, 0.3, -0.4)))
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.4, 0.3, -0.4))
+    )
     fist_on_prop(arm, prop)
 
 
 def _pike_level(arm, thrust=0.0):
     """Pike levelled forwards at the waist, both hands, pushed forwards by `thrust` m."""
     chest = pos(arm, "Chest")
-    grip = Vector((chest.x - 0.16, chest.y + 0.12 - thrust, chest.z - 0.28 + 0.04 * thrust))
+    grip = Vector(
+        (chest.x - 0.16, chest.y + 0.12 - thrust, chest.z - 0.28 + 0.04 * thrust)
+    )
     prop = prop_matrix(grip, Vector((0.08, -1.0, 0.06)), Vector((0, 0, 1)))
     STATE["prop"] = prop
     hand_to_prop(arm, "R", prop, 0.0, grip + Vector((-0.5, 0.4, -0.3)))
@@ -201,14 +229,17 @@ def _pike_level(arm, thrust=0.0):
 
 
 def pike_hold(arm, t):
+    """Pose: pike held upright, butt on the ground."""
     _pike_upright(arm)
 
 
 def pike_level(arm, t):
+    """Pose: pike levelled forwards at the waist."""
     _pike_level(arm)
 
 
 def pike_thrust(arm, t):
+    """Pose: pike thrust forwards, torso pitching with the push."""
     push = smooth(0.15, 0.4, t) * (1 - smooth(0.55, 0.95, t))
     rotate_about(arm, "Torso", Vector((1, 0, 0)), 0.18 * push)
     _pike_level(arm, thrust=0.35 * push)
@@ -230,7 +261,14 @@ def _bow_arm(arm, raise_t):
     aim_v = aim_dir(BOW_ELEVATION * raise_t + 0.0 * (1 - raise_t), -8.0)
     rest_target = shoulder + Vector((0.08, -0.38, -0.42))
     target = rest_target.lerp(shoulder + aim_v * 0.6, raise_t)
-    ik2(arm, "UpperArm.L", "LowerArm.L", "Wrist.L", target, shoulder + Vector((0.4, 0.2, -0.6)))
+    ik2(
+        arm,
+        "UpperArm.L",
+        "LowerArm.L",
+        "Wrist.L",
+        target,
+        shoulder + Vector((0.4, 0.2, -0.6)),
+    )
     # Bow vertical, arrow along the forearm (canted 10 degrees like English archers).
     fore = (pos(arm, "Wrist.L") - pos(arm, "LowerArm.L")).normalized()
     bow_upright(arm, fore)
@@ -239,11 +277,21 @@ def _bow_arm(arm, raise_t):
 
 
 def _draw_hand(arm, draw, aim_v):
-    grip = pos(arm, "Wrist.L") + (pos(arm, "Wrist.L") - pos(arm, "LowerArm.L")).normalized() * 0.075
+    grip = (
+        pos(arm, "Wrist.L")
+        + (pos(arm, "Wrist.L") - pos(arm, "LowerArm.L")).normalized() * 0.075
+    )
     nock = grip - aim_v * (0.16 + (DRAW_LENGTH - 0.16) * draw)
     right = Vector((-1, 0, 0))
     hand = nock + right * 0.02
-    ik2(arm, "UpperArm.R", "LowerArm.R", "Wrist.R", hand - aim_v * 0.02, pos(arm, "UpperArm.R") + Vector((-0.5, 0.5, 0.1)))
+    ik2(
+        arm,
+        "UpperArm.R",
+        "LowerArm.R",
+        "Wrist.R",
+        hand - aim_v * 0.02,
+        pos(arm, "UpperArm.R") + Vector((-0.5, 0.5, 0.1)),
+    )
     aim(arm, "Wrist.R", aim_v)
     return nock
 
@@ -264,8 +312,19 @@ def bow_shoot(arm, t):
     else:
         # After the loose the right hand flies back, then drops.
         back = smooth(0.63, 0.7, t) * (1 - smooth(0.75, 0.95, t))
-        hand = pos(arm, "UpperArm.R") + Vector((-0.12, 0.25, -0.1)) * back + Vector((0.0, -0.1, -0.45)) * (1 - back)
-        ik2(arm, "UpperArm.R", "LowerArm.R", "Wrist.R", hand, pos(arm, "UpperArm.R") + Vector((-0.5, 0.5, -0.2)))
+        hand = (
+            pos(arm, "UpperArm.R")
+            + Vector((-0.12, 0.25, -0.1)) * back
+            + Vector((0.0, -0.1, -0.45)) * (1 - back)
+        )
+        ik2(
+            arm,
+            "UpperArm.R",
+            "LowerArm.R",
+            "Wrist.R",
+            hand,
+            pos(arm, "UpperArm.R") + Vector((-0.5, 0.5, -0.2)),
+        )
 
 
 bow_shoot.frames = 60  # release at 0.62 * 60 / 24 = 1.55 s
@@ -286,10 +345,13 @@ def _crossbow_aim(arm, raise_t, elevation=6.0):
     STATE["prop"] = prop
     hand_to_prop(arm, "R", prop, 0.0, shoulder + Vector((-0.4, 0.3, -0.5)))
     fist_on_prop(arm, prop)
-    hand_to_prop(arm, "L", prop, 0.32, pos(arm, "UpperArm.L") + Vector((0.4, 0.1, -0.6)))
+    hand_to_prop(
+        arm, "L", prop, 0.32, pos(arm, "UpperArm.L") + Vector((0.4, 0.1, -0.6))
+    )
 
 
 def crossbow_rest(arm, t):
+    """Pose: crossbow held low in front, at rest."""
     _crossbow_aim(arm, 0.0)
 
 
@@ -307,14 +369,24 @@ def crossbow_shoot(arm, t):
     nose = Vector((feet.x, feet.y - 0.42, 0.05))
     up = Vector((0.0, 0.25, 1.0)).normalized()
     upright = nose + up * 0.7
-    aimed_grip = Vector((pos(arm, "UpperArm.R").x + 0.06, pos(arm, "Head").y - 0.22, pos(arm, "Head").z - 0.06))
+    aimed_grip = Vector(
+        (
+            pos(arm, "UpperArm.R").x + 0.06,
+            pos(arm, "Head").y - 0.22,
+            pos(arm, "Head").z - 0.06,
+        )
+    )
     grip = upright.lerp(aimed_grip, 1 - lower)
     axis = (-up).lerp(aim_dir(6.0, -4.0), 1 - lower)
     prop = prop_matrix(grip, axis, Vector((0, -1, 0)))
     STATE["prop"] = prop
     along = lerp(0.3, 0.05, pull * bend) if bend > 0 else 0.0
-    hand_to_prop(arm, "R", prop, along - 0.05, pos(arm, "UpperArm.R") + Vector((-0.5, -0.2, 0.0)))
-    hand_to_prop(arm, "L", prop, along + 0.02, pos(arm, "UpperArm.L") + Vector((0.5, -0.2, 0.0)))
+    hand_to_prop(
+        arm, "R", prop, along - 0.05, pos(arm, "UpperArm.R") + Vector((-0.5, -0.2, 0.0))
+    )
+    hand_to_prop(
+        arm, "L", prop, along + 0.02, pos(arm, "UpperArm.L") + Vector((0.5, -0.2, 0.0))
+    )
 
 
 crossbow_shoot.frames = 120  # 5 s: release at 0.35 s, spanning, back on aim at 4.4 s
@@ -331,14 +403,31 @@ def death_knees(arm, t):
     translate(arm, "Body", Vector((0, 0.05 * sink, -0.42 * sink)))
     for side in ("L", "R"):
         foot = pos(arm, f"Foot.{side}")
-        ik2(arm, f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}", foot, hips + Vector((0, -1.0, -0.3)))
+        ik2(
+            arm,
+            f"UpperLeg.{side}",
+            f"LowerLeg.{side}",
+            f"Foot.{side}",
+            foot,
+            hips + Vector((0, -1.0, -0.3)),
+        )
     rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.4 * sink)
     arms_down = Vector((0, -0.2, -1.0))
     for side in ("L", "R"):
-        aim(arm, f"UpperArm.{side}", arms_down + Vector((0.3 if side == "L" else -0.3, 0, 0)))
+        aim(
+            arm,
+            f"UpperArm.{side}",
+            arms_down + Vector((0.3 if side == "L" else -0.3, 0, 0)),
+        )
     if fall > 0:
         knees = (pos(arm, "LowerLeg.L") + pos(arm, "LowerLeg.R")) / 2
-        rotate_about(arm, "Root", Vector((1, 0, 0)), 1.45 * fall, Vector((knees.x, knees.y, 0.08)))
+        rotate_about(
+            arm,
+            "Root",
+            Vector((1, 0, 0)),
+            1.45 * fall,
+            Vector((knees.x, knees.y, 0.08)),
+        )
 
 
 death_knees.frames = 30
@@ -349,7 +438,9 @@ def death_back(arm, t):
     fly = smooth(0.0, 0.55, t)
     hop = math.sin(min(t / 0.55, 1.0) * math.pi) * 0.35
     translate(arm, "Root", Vector((0, 1.8 * fly, hop)))
-    rotate_about(arm, "Root", Vector((1, 0, 0)), -1.5 * smooth(0.05, 0.6, t), pos(arm, "Root"))
+    rotate_about(
+        arm, "Root", Vector((1, 0, 0)), -1.5 * smooth(0.05, 0.6, t), pos(arm, "Root")
+    )
     for side, sx in (("L", 1), ("R", -1)):
         aim(arm, f"UpperArm.{side}", Vector((0.7 * sx, 0.3, 0.6)))
 
@@ -401,7 +492,11 @@ def _ride_legs(arm):
         pole = pos(arm, f"UpperLeg.{side}") + _hv(Vector((0.5 * sx, -1.0, 0.1)))
         ik2(arm, f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}", foot, pole)
         # The foot bones hang from the root, not the shins: move them to the ankle.
-        ankle = pos(arm, f"LowerLeg.{side}") + limb_dir(arm, f"LowerLeg.{side}") * (foot - pos(arm, f"LowerLeg.{side}")).length
+        ankle = (
+            pos(arm, f"LowerLeg.{side}")
+            + limb_dir(arm, f"LowerLeg.{side}")
+            * (foot - pos(arm, f"LowerLeg.{side}")).length
+        )
         fm = world(arm, f"Foot.{side}")
         fm.translation = ankle
         set_world(arm, f"Foot.{side}", fm)
@@ -410,7 +505,15 @@ def _ride_legs(arm):
 def _reins(arm, side="L"):
     m = _mount()
     target = _hp(m.pommel + Vector((0.06 if side == "L" else -0.06, -0.12, 0.12)))
-    ik2(arm, f"UpperArm.{side}", f"LowerArm.{side}", f"Wrist.{side}", target, pos(arm, f"UpperArm.{side}") + _hv(Vector((0.6 if side == "L" else -0.6, 0.2, -0.6))))
+    ik2(
+        arm,
+        f"UpperArm.{side}",
+        f"LowerArm.{side}",
+        f"Wrist.{side}",
+        target,
+        pos(arm, f"UpperArm.{side}")
+        + _hv(Vector((0.6 if side == "L" else -0.6, 0.2, -0.6))),
+    )
 
 
 def _lean(arm, amount):
@@ -420,7 +523,9 @@ def _lean(arm, amount):
 def _lance_at(arm, grip, axis, up=None):
     prop = prop_matrix(grip, axis, up if up is not None else _hv(Vector((0, 0, 1))))
     STATE["prop"] = prop
-    hand_to_prop(arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + _hv(Vector((-0.6, 0.3, -0.5))))
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + _hv(Vector((-0.6, 0.3, -0.5)))
+    )
     fist_on_prop(arm, prop)
 
 
@@ -458,7 +563,9 @@ def ride_lance_thrust(arm, t):
     push = smooth(0.1, 0.35, t) * (1 - smooth(0.5, 0.9, t))
     _lean(arm, 0.1 + 0.2 * push)
     _reins(arm)
-    grip = pos(arm, "Chest") + _hv(Vector((-0.28, -0.05 - 0.4 * push, 0.05 - 0.1 * push)))
+    grip = pos(arm, "Chest") + _hv(
+        Vector((-0.28, -0.05 - 0.4 * push, 0.05 - 0.1 * push))
+    )
     _lance_at(arm, grip, _hv(Vector((0.05, -1.0, -0.35))))
 
 
@@ -466,12 +573,14 @@ ride_lance_thrust.frames = 28
 
 
 def ride_bow_rest(arm, t):
+    """Pose: mounted, longbow held low in front at rest."""
     _ride_legs(arm)
     _bow_arm(arm, 0.0)
     _reins(arm, "R")
 
 
 def ride_bow_shoot(arm, t):
+    """Pose: mounted, playing the longbow shoot pose while seated in the saddle."""
     _ride_legs(arm)
     bow_shoot(arm, t)
 

@@ -16,27 +16,51 @@ import battle_skinned_equipment as eq
 HUMAN_BUDGET = [
     {
         "*": 450,
-        "King_Body": 750, "King_Legs": 380, "King_Feet": 120,
-        "Adventurer_Body": 650, "Adventurer_Legs": 300, "Adventurer_Feet": 100, "Adventurer_Head": 650,
-        "Farmer_Body": 650, "Farmer_Pants": 300, "Farmer_Feet": 100, "Farmer_Head": 420,
+        "King_Body": 750,
+        "King_Legs": 380,
+        "King_Feet": 120,
+        "Adventurer_Body": 650,
+        "Adventurer_Legs": 300,
+        "Adventurer_Feet": 100,
+        "Adventurer_Head": 650,
+        "Farmer_Body": 650,
+        "Farmer_Pants": 300,
+        "Farmer_Feet": 100,
+        "Farmer_Head": 420,
     },
     {
         "*": 90,
-        "King_Body": 150, "King_Legs": 80, "King_Feet": 24,
-        "Adventurer_Body": 140, "Adventurer_Legs": 70, "Adventurer_Feet": 20, "Adventurer_Head": 110,
-        "Farmer_Body": 140, "Farmer_Pants": 70, "Farmer_Feet": 20, "Farmer_Head": 80,
+        "King_Body": 150,
+        "King_Legs": 80,
+        "King_Feet": 24,
+        "Adventurer_Body": 140,
+        "Adventurer_Legs": 70,
+        "Adventurer_Feet": 20,
+        "Adventurer_Head": 110,
+        "Farmer_Body": 140,
+        "Farmer_Pants": 70,
+        "Farmer_Feet": 20,
+        "Farmer_Head": 80,
     },
     {
         "*": 35,
-        "King_Body": 60, "King_Legs": 30, "King_Feet": 10,
-        "Adventurer_Body": 55, "Adventurer_Legs": 28, "Adventurer_Feet": 8, "Adventurer_Head": 40,
-        "Farmer_Body": 55, "Farmer_Pants": 28, "Farmer_Feet": 8, "Farmer_Head": 30,
+        "King_Body": 60,
+        "King_Legs": 30,
+        "King_Feet": 10,
+        "Adventurer_Body": 55,
+        "Adventurer_Legs": 28,
+        "Adventurer_Feet": 8,
+        "Adventurer_Head": 40,
+        "Farmer_Body": 55,
+        "Farmer_Pants": 28,
+        "Farmer_Feet": 8,
+        "Farmer_Head": 30,
     },
 ]
 
 
 def budget(**parts):
-    """HUMAN_BUDGET with some parts scaled: budget(Adventurer_Head=0.7)."""
+    """Return a copy of HUMAN_BUDGET with some parts scaled, e.g. `Adventurer_Head=0.7`."""
     out = copy.deepcopy(HUMAN_BUDGET)
     for level in out:
         for name, factor in parts.items():
@@ -57,10 +81,28 @@ COMMONER_COLORS = {
     "Adventurer_Legs:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
     "Gold": (eq.C_LEATHER, (0.12, 0.08, 0.04)),
 }
-RIDER_BUDGET = budget(**{k: 0.6 for k in ("King_Body", "King_Legs", "King_Feet", "Adventurer_Body", "Adventurer_Legs", "Adventurer_Feet", "Adventurer_Head")})
+RIDER_BUDGET = budget(
+    **{
+        k: 0.6
+        for k in (
+            "King_Body",
+            "King_Legs",
+            "King_Feet",
+            "Adventurer_Body",
+            "Adventurer_Legs",
+            "Adventurer_Feet",
+            "Adventurer_Head",
+        )
+    }
+)
 HORSE_BUDGET = [1100, 280, 110]
 
-COMMONER_PARTS = [("adventurer.glb", ["Adventurer_Body", "Adventurer_Legs", "Adventurer_Feet", "Adventurer_Head"])]
+COMMONER_PARTS = [
+    (
+        "adventurer.glb",
+        ["Adventurer_Body", "Adventurer_Legs", "Adventurer_Feet", "Adventurer_Head"],
+    )
+]
 
 FIGURES = {
     # Man-at-arms on foot: mail, coat of plates under a livery jupon, bassinet and aventail,
@@ -91,7 +133,12 @@ FIGURES = {
         "parts": COMMONER_PARTS,
         "colors": COMMONER_COLORS,
         "budget": HUMAN_BUDGET,
-        "equipment": [("kettle_hat", 1), ("bassinet", 2, {"aventail": False}), ("cloth_cap", 4), ("pike", 0)],
+        "equipment": [
+            ("kettle_hat", 1),
+            ("bassinet", 2, {"aventail": False}),
+            ("cloth_cap", 4),
+            ("pike", 0),
+        ],
         "variants": 3,
     },
     # Urban militia and peasants: tunic and livery tabard, cap or kettle hat, spear or bill;
@@ -99,7 +146,10 @@ FIGURES = {
     "infantry_2": {
         "rig": "human",
         "parts": [
-            ("farmer.glb", ["Farmer_Body", "Farmer_Pants", "Farmer_Feet", "Farmer_Head"]),
+            (
+                "farmer.glb",
+                ["Farmer_Body", "Farmer_Pants", "Farmer_Feet", "Farmer_Head"],
+            ),
             ("adventurer.glb", ["Adventurer_Head"]),
         ],
         "colors": {
@@ -130,7 +180,12 @@ FIGURES = {
         "parts": COMMONER_PARTS,
         "colors": {**COMMONER_COLORS, "Green": (eq.C_CLOTH, (0.30, 0.25, 0.16))},
         "budget": HUMAN_BUDGET,
-        "equipment": [("kettle_hat", 1), ("cloth_cap", 2), ("longbow", 0), ("quiver", 0)],
+        "equipment": [
+            ("kettle_hat", 1),
+            ("cloth_cap", 2),
+            ("longbow", 0),
+            ("quiver", 0),
+        ],
         "variants": 3,
     },
     # Crossbowmen: gambeson, kettle hat or bassinet, crossbow, bolt case.
@@ -139,7 +194,12 @@ FIGURES = {
         "parts": COMMONER_PARTS,
         "colors": COMMONER_COLORS,
         "budget": HUMAN_BUDGET,
-        "equipment": [("kettle_hat", 1), ("bassinet", 2, {"aventail": False}), ("crossbow", 0), ("quiver", 0, {"arrows": False})],
+        "equipment": [
+            ("kettle_hat", 1),
+            ("bassinet", 2, {"aventail": False}),
+            ("crossbow", 0),
+            ("quiver", 0, {"arrows": False}),
+        ],
         "variants": 2,
     },
     # Knights: as the men-at-arms, great helm or bassinet, shield and lance, horse in a
@@ -154,7 +214,12 @@ FIGURES = {
         "budget": RIDER_BUDGET,
         "horse_budget": HORSE_BUDGET,
         "horse_equipment": [("caparison", 0), ("saddle", 0)],
-        "equipment": [("great_helm", 1), ("bassinet", 2), ("heater_shield", 0), ("lance", 0)],
+        "equipment": [
+            ("great_helm", 1),
+            ("bassinet", 2),
+            ("heater_shield", 0),
+            ("lance", 0),
+        ],
         "variants": 2,
     },
     # Mounted sergeants: gambeson and mail, kettle hat or bassinet, lance without pennon.
@@ -165,7 +230,11 @@ FIGURES = {
         "budget": RIDER_BUDGET,
         "horse_budget": HORSE_BUDGET,
         "horse_equipment": [("saddle", 0)],
-        "equipment": [("kettle_hat", 1), ("bassinet", 2), ("lance", 0, {"pennon": False})],
+        "equipment": [
+            ("kettle_hat", 1),
+            ("bassinet", 2),
+            ("lance", 0, {"pennon": False}),
+        ],
         "variants": 2,
     },
     # Mounted archers: archer's kit on a riding horse.
@@ -176,7 +245,12 @@ FIGURES = {
         "budget": RIDER_BUDGET,
         "horse_budget": HORSE_BUDGET,
         "horse_equipment": [("saddle", 0)],
-        "equipment": [("kettle_hat", 1), ("cloth_cap", 2), ("longbow", 0), ("quiver", 0)],
+        "equipment": [
+            ("kettle_hat", 1),
+            ("cloth_cap", 2),
+            ("longbow", 0),
+            ("quiver", 0),
+        ],
         "variants": 2,
     },
     # Genoese crossbowmen: as above with bassinet and aventail, pavise on the back.
@@ -185,7 +259,13 @@ FIGURES = {
         "parts": COMMONER_PARTS,
         "colors": {**COMMONER_COLORS, "Green": (eq.C_QUILT, (0.55, 0.52, 0.45))},
         "budget": HUMAN_BUDGET,
-        "equipment": [("bassinet", 1), ("kettle_hat", 2), ("crossbow", 0), ("quiver", 0, {"arrows": False}), ("pavise", 0)],
+        "equipment": [
+            ("bassinet", 1),
+            ("kettle_hat", 2),
+            ("crossbow", 0),
+            ("quiver", 0, {"arrows": False}),
+            ("pavise", 0),
+        ],
         "variants": 2,
     },
 }
