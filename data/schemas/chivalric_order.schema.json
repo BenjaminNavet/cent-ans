@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/chivalric_order.schema.json",
+  "title": "Ordre de chevalerie",
+  "description": "Ordre de chevalerie qu'une faction peut fonder une fois (H6) : coût, prestige requis, effectif réduit nommé automatiquement, effets sur les membres et le souverain. Les règles vivent dans `sim-campaign::chivalry`.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/chivalric_order_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "description": {
+      "type": "string",
+      "description": "Texte français ; peut contenir des liens codex `[[cdx_id]]` ou `[[cdx_id|libellé]]`."
+    },
+    "faction": {
+      "$ref": "common.schema.json#/$defs/faction_id",
+      "description": "Faction de l'ordre historique ; absent : ordre générique ouvert aux factions sans ordre historique."
+    },
+    "min_year": { "type": "integer", "description": "Année de fondation au plus tôt." },
+    "cost": { "type": "integer", "minimum": 0, "description": "Coût de fondation en livres tournois (× niveau des prix, H5)." },
+    "prestige_required": { "type": "integer", "description": "Prestige du souverain requis." },
+    "members": { "type": "integer", "minimum": 1, "description": "Effectif du jeu (réduit), nommé automatiquement parmi les meilleurs personnages." },
+    "historical_members": { "type": "string", "description": "Effectif historique, pour le codex et l'interface." },
+    "member_loyalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Loyauté gagnée une fois par chaque membre nommé." },
+    "member_morale": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Bonus de moral des troupes menées par un général membre." },
+    "founder_prestige": { "type": "integer", "description": "Prestige du souverain à la fondation (ordre de faction ; l'événement porte son propre prestige)." },
+    "yearly_prestige": { "type": "integer", "description": "Prestige du souverain chaque hiver tant que l'ordre tient." },
+    "historical_date": { "$ref": "common.schema.json#/$defs/historical_date" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "description", "cost", "prestige_required", "members", "historical_members", "member_loyalty", "member_morale", "founder_prestige", "yearly_prestige"],
+  "additionalProperties": false
+}

@@ -1,0 +1,27 @@
+{
+  "id": "ord_star",
+  "name": {
+    "display": "Ordre de l'Étoile",
+    "local": "Compagnie de Notre-Dame de la Noble Maison",
+    "local_language": "moyen français"
+  },
+  "description": "Réponse de Jean le Bon à la Jarretière, l'[[cdx_ordre_de_l_etoile|ordre de l'Étoile]] devait compter cinq cents chevaliers, réunis chaque année à la Noble Maison de Saint-Ouen. Leur serment de ne jamais reculer de plus de quatre arpents leur coûta cher : à Mauron, en 1352, quatre-vingts à quatre-vingt-dix d'entre eux se firent tuer, et l'ordre ne s'en releva pas.",
+  "faction": "fac_france",
+  "min_year": 1351,
+  "cost": 2500,
+  "prestige_required": 10,
+  "members": 10,
+  "historical_members": "environ 500 chevaliers prévus",
+  "member_loyalty": 8,
+  "member_morale": 5,
+  "founder_prestige": 8,
+  "yearly_prestige": 2,
+  "historical_date": {
+    "value": "1351-11-06",
+    "note": "Annonce le 6 novembre 1351 ; première fête à Saint-Ouen le 6 janvier 1352 ; déclin après Mauron (14 août 1352), disparition sous Charles V."
+  },
+  "sources": [
+    "Ordre de l'Étoile (France)",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+  ]
+}

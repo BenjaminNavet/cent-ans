@@ -1,0 +1,28 @@
+{
+  "id": "ord_golden_fleece",
+  "name": {
+    "display": "Ordre de la Toison d'or",
+    "local": "Ordre de la Toison d'or",
+    "local_language": "moyen français"
+  },
+  "description": "Philippe le Bon fonde à Bruges, pour ses noces avec Isabelle de Portugal, l'[[cdx_toison_or|ordre de la Toison d'or]] : vingt-quatre chevaliers et le duc, liés par un collier d'or au bélier de Jason et de Gédéon. L'ordre fait de la cour de Bourgogne le premier foyer de la [[cdx_chevalerie|chevalerie]] du XVe siècle.",
+  "faction": "fac_burgundy",
+  "min_year": 1430,
+  "cost": 3000,
+  "prestige_required": 15,
+  "members": 6,
+  "historical_members": "24 chevaliers et le duc (1430), 30 chevaliers et le duc à partir de 1433",
+  "member_loyalty": 12,
+  "member_morale": 6,
+  "founder_prestige": 12,
+  "yearly_prestige": 3,
+  "historical_date": {
+    "value": "1430-01-10",
+    "place": "Bruges",
+    "note": "Fondation annoncée lors du mariage de Philippe le Bon et d'Isabelle de Portugal ; effectif porté à 30 chevaliers en 1433."
+  },
+  "sources": [
+    "Order of the Golden Fleece",
+    "Bertrand Schnerb, L'État bourguignon, Perrin, 1999"
+  ]
+}

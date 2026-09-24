@@ -40,6 +40,10 @@
         {
           "type": "add_trait",
           "trait": "trait_chivalrous"
+        },
+        {
+          "type": "found_chivalric_order",
+          "order": "ord_garter"
         }
       ],
       "ai_weight": 2
