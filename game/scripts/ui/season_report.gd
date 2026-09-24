@@ -17,10 +17,17 @@ const GROUPS := [
 	{"title": "Diplomatie et Église", "glyph": "✉", "kinds": ["war_declared", "peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion", "embargo", "diplomatic_offer", "diplomacy", "excommunication", "schism", "heresy"]},
 	{"title": "Cour et dynasties", "glyph": "♔", "kinds": ["death", "succession", "no_heir", "birth", "marriage", "regency", "faction_destroyed"]},
 	{"title": "Royaume", "glyph": "⚒", "kinds": ["building_completed", "technology_researched", "revolt", "plague", "famine", "bankruptcy"]},
+	# H9 : régimes revenus au défaut, Carême ; blessés soignés, épidémies contenues.
+	{"title": "Table et santé", "glyph": "✚", "kinds": ["table", "medicine"]},
 	{"title": "Chronique", "glyph": "§", "kinds": ["chronicle", "victory", "defeat", "campaign_ended"]},
 ]
 ## Genres rapportés même quand ils ne concernent pas le joueur (nouvelles du monde).
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
+## H9 : glyphe, libellé et encre par genre, pour le journal et les alertes.
+const KIND_STYLES := {
+	"table": {"glyph": "♨", "label": "La Table", "color": "#7a4a10"},
+	"medicine": {"glyph": "✚", "label": "Médecine", "color": "#2a6a4a"},
+}
 const MAX_ENTRIES_PER_GROUP := 12
 const MAX_LIST_HEIGHT := 440.0
 
