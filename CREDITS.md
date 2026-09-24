@@ -62,6 +62,10 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 
 - **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
 - **Autumn Field Pure Sky** — Sergej Majboroda, Jarod Guest (Poly Haven).
+- **Kloofendal 48d Partly Cloudy, Kloofendal Misty Morning, Kloofendal Overcast** (Pure Sky) — Greg Zaal,
+  Jarod Guest (Poly Haven).
+- **Overcast Soil, Snow Field** (Pure Sky) — Sergej Majboroda, Jarod Guest (Poly Haven).
+- **Syferfontein 18d Clear, Kloppenheim 06** (Pure Sky) — Greg Zaal, Jarod Guest (Poly Haven).
 
 ### Interface — CC0 1.0
 
