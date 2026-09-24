@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_grenoble",
+    "province": "prov_dauphine",
+    "kind": "city",
+    "name": { "display": "Grenoble", "local": "Grenoblo", "local_language": "franco-provençal" },
+    "lonlat": [5.7245, 45.1885],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l'Isère.",
+    "sources": ["Grenoble", "Dauphiné de Viennois"]
+  },
+  {
+    "id": "set_vienne",
+    "province": "prov_dauphine",
+    "kind": "town",
+    "name": { "display": "Vienne", "local": "Viena", "local_language": "franco-provençal" },
+    "lonlat": [4.8763, 45.5254],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "port": false,
+    "description": "Grande cité archiépiscopale sur le Rhône, ancienne capitale du royaume de Bourgogne-Provence.",
+    "sources": ["Vienne (Isère)"]
+  },
+  {
+    "id": "set_beauvoir_en_royans",
+    "province": "prov_dauphine",
+    "kind": "castle",
+    "name": { "display": "Beauvoir-en-Royans", "local": "Bèuvoir", "local_language": "franco-provençal" },
+    "lonlat": [5.3833, 45.1000],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Résidence favorite des dauphins de Viennois dans le Vercors.",
+    "sources": ["Beauvoir-en-Royans"]
+  },
+  {
+    "id": "set_grande_chartreuse",
+    "province": "prov_dauphine",
+    "kind": "abbey",
+    "name": { "display": "Grande Chartreuse", "local": "Charterosa", "local_language": "franco-provençal" },
+    "lonlat": [5.7975, 45.3608],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l'ordre des Chartreux dans le massif éponyme.",
+    "sources": ["Grande Chartreuse"]
+  }
+]

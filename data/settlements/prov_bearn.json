@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_orthez",
+    "province": "prov_bearn",
+    "kind": "city",
+    "name": { "display": "Orthez", "local": "Ortès", "local_language": "gascon" },
+    "lonlat": [-0.7712, 43.4884],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale de la vicomté de Béarn sur le gave de Pau, siège du château de Moncade des vicomtes de Foix-Béarn.",
+    "sources": ["Orthez", "Château de Moncade"]
+  },
+  {
+    "id": "set_pau",
+    "province": "prov_bearn",
+    "kind": "castle",
+    "name": { "display": "Pau", "local": "Pau", "local_language": "gascon" },
+    "lonlat": [-0.3708, 43.2951],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château vicomtal sur le gave de Pau, attesté dès le XIe siècle, résidence secondaire des vicomtes de Béarn.",
+    "sources": ["Pau", "Château de Pau"]
+  },
+  {
+    "id": "set_tarbes",
+    "province": "prov_bearn",
+    "kind": "town",
+    "name": { "display": "Tarbes", "local": "Tarba", "local_language": "gascon" },
+    "lonlat": [0.0736, 43.2325],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Siège épiscopal et capitale du comté de Bigorre, sur l'Adour, terre disputée entre France et Angleterre.",
+    "sources": ["Tarbes", "Comté de Bigorre"]
+  },
+  {
+    "id": "set_morlaas",
+    "province": "prov_bearn",
+    "kind": "village",
+    "name": { "display": "Morlaàs", "local": "Morlaas", "local_language": "gascon" },
+    "lonlat": [-0.0464, 43.3389],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_windmill"],
+    "port": false,
+    "description": "Ancienne capitale du Béarn, conservant son atelier monétaire (le morlaàs) et son marché.",
+    "sources": ["Morlaàs"]
+  }
+]

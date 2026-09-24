@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_bourges",
+    "province": "prov_berry",
+    "kind": "city",
+    "name": { "display": "Bourges", "local": "Bourges", "local_language": "ancien français" },
+    "lonlat": [2.3988, 47.0810],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": false,
+    "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
+    "sources": ["Bourges"]
+  },
+  {
+    "id": "set_issoudun",
+    "province": "prov_berry",
+    "kind": "town",
+    "name": { "display": "Issoudun", "local": "Ysoudun", "local_language": "ancien français" },
+    "lonlat": [2.0000, 46.9500],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close et forteresse, ancienne pomme de discorde entre Capétiens et Plantagenêts.",
+    "sources": ["Issoudun"]
+  },
+  {
+    "id": "set_culan",
+    "province": "prov_berry",
+    "kind": "castle",
+    "name": { "display": "Culan", "local": "Culant", "local_language": "ancien français" },
+    "lonlat": [2.3500, 46.5500],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château féodal des XIIe-XIIIe siècles aux confins du Berry et du Bourbonnais.",
+    "sources": ["Château de Culan"]
+  },
+  {
+    "id": "set_noirlac",
+    "province": "prov_berry",
+    "kind": "abbey",
+    "name": { "display": "Noirlac", "local": "Noirlac", "local_language": "ancien français" },
+    "lonlat": [2.4919, 46.6489],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1136 sur le Cher.",
+    "sources": ["Abbaye de Noirlac"]
+  }
+]

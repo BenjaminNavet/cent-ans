@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_abbeville",
+    "province": "prov_ponthieu",
+    "kind": "city",
+    "name": { "display": "Abbeville", "local": "Abbeville", "local_language": "ancien français" },
+    "lonlat": [1.8365, 50.1054],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Capitale du comté de Ponthieu, hérité par Édouard III d'Angleterre de sa grand-mère Éléonore de Castille.",
+    "sources": ["Abbeville", "Comté de Ponthieu"]
+  },
+  {
+    "id": "set_le_crotoy",
+    "province": "prov_ponthieu",
+    "kind": "town",
+    "name": { "display": "Le Crotoy", "local": "Le Crotoy", "local_language": "ancien français" },
+    "lonlat": [1.6167, 50.2167],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Port fortifié sur la baie de Somme, face à Saint-Valery.",
+    "sources": ["Le Crotoy"]
+  },
+  {
+    "id": "set_rue",
+    "province": "prov_ponthieu",
+    "kind": "town",
+    "name": { "display": "Rue", "local": "Rue", "local_language": "ancien français" },
+    "lonlat": [1.6667, 50.2667],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Petite ville chartée proche de la baie de Somme, étape de pèlerinage.",
+    "sources": ["Rue (Somme)"]
+  },
+  {
+    "id": "set_crecy_en_ponthieu",
+    "province": "prov_ponthieu",
+    "kind": "village",
+    "name": { "display": "Crécy-en-Ponthieu", "local": "Crécy", "local_language": "ancien français" },
+    "lonlat": [1.8867, 50.2500],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_windmill"],
+    "port": false,
+    "description": "Bourg agricole en lisière de la forêt de Crécy, sur le plateau du Ponthieu.",
+    "sources": ["Crécy-en-Ponthieu"]
+  }
+]
