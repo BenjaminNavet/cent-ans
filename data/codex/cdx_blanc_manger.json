@@ -1,0 +1,12 @@
+{
+  "id": "cdx_blanc_manger",
+  "title": "Le blanc-manger",
+  "category": "recette",
+  "aliases": ["blanc-manger", "blanc mengier", "blank maunger", "blanc manger"],
+  "era": { "from": "1200", "to": "1500" },
+  "summary": "Plat blanc de chapon ou de poisson, de lait d'amande et parfois de riz, doux et peu épicé, le blanc-manger est le mets des malades et des tables raffinées. Rien à voir avec le dessert moderne qui porte son nom.",
+  "body": "Le blanc-manger est présent dans presque tous les livres de cuisine de l'Europe médiévale, du [[cdx_viandier|Viandier]] à [[cdx_forme_of_cury|The Forme of Cury]], sous des formes variées mais fidèles à un principe : un plat blanc, d'aspect pur, fait d'ingrédients réputés légers et tempérés. La blancheur a une valeur symbolique et médicale : c'est la couleur de la pureté et des aliments faciles à digérer.\n\nLe Viandier en donne une version pour les malades : « Blanc mengier d'un chappon pour un malade : cuisez en eaue, broyez amandes et du bouillon, coulez, faites bouillir et soit liant ; mettez pommes de grenade au-dessus. » Le chapon cuit à l'eau, les amandes broyées avec le bouillon et passées, le mélange épaissi à feu doux, et des grains de grenade pour la couleur. The Forme of Cury (vers 1390), le livre des cuisiniers de Richard II, y met du riz, du sucre et de la chair de chapon effilochée.\n\nLes jours maigres, le chapon cède la place au poisson. Selon la théorie des [[cdx_humeurs|humeurs]], le lait d'amande et la volaille sont tempérés et humides, adaptés aux convalescents ; le sucre, considéré alors comme une [[cdx_epices_medievales|épice]] et un remède, adoucit. On retrouve donc le blanc-manger à la fois à la table des princes et au chevet des malades.\n\nAu XXIe siècle : pour quatre personnes, pocher deux blancs de poulet dans un bouillon, les effilocher ; délayer 150 g de poudre d'amande dans le bouillon chaud, filtrer pour obtenir un lait d'amande épais ; cuire 100 g de riz rond dans ce lait, ajouter le poulet, un peu de sucre et de sel ; servir tiède, parsemé de grains de grenade. Le blanc-manger moderne, dessert gélifié au lait d'amande, est un lointain descendant apparu bien plus tard.",
+  "anachronism": "Le blanc-manger médiéval est un plat salé-doux de volaille ou de poisson ; le dessert gélifié qui porte aujourd'hui ce nom n'a qu'un lien lointain avec lui.",
+  "see_also": ["cdx_viandier", "cdx_forme_of_cury", "cdx_humeurs", "cdx_cuisine_humorale", "cdx_epices_medievales"],
+  "sources": ["Blanc-manger", "Le Viandier", "The Forme of Cury"]
+}
