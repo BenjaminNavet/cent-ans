@@ -16,7 +16,7 @@ Branche de worktree `agent-a75fccf335fda0e44` (depuis `integration/night`). ADR 
   `terrain.gdshader`), `game/scripts/map/relief_landcover.gd` (1 ligne dans `terrain_builder.gd`),
   `MapData.height_file` (lit `heightmap_render.png` si `map.json.render_heightmap`).
 - Crédits (`CREDITS.md`, écran des crédits), ADR 0019, `docs/geo.md`.
-- Captures `docs/img/r1/before_*.png` / `after_*.png` (+ vues rapprochées `after_*_near.png`) :
+- Captures `docs/img/r1/before_*.jpg` / `after_*.jpg` (+ vues rapprochées `after_*_near.jpg`) :
   `godot --path game --script res://tests/r1_relief_shots.gd -- --out=<dossier> --prefix=after --near`.
 
 ## Contrat pour V4 (rendu des forêts)
@@ -25,9 +25,24 @@ Branche de worktree `agent-a75fccf335fda0e44` (depuis `integration/night`). ADR 
 - `forest_kind.png` : L8 2048², même emprise, 0 = feuillus, 255 = résineux (part de résineux dans la forêt).
 - `wetlands.png` : RGB8 4096² (R marais, G étangs, B prés humides) si V4 veut éviter d'y planter des arbres.
 
-## Performance
-Voir la section « Mesures » ci-dessous (banc `vegetation_bench.gd`, avant = données de la base
-`650bb94` via `CENT_ANS_DATA_DIR`, même code : shader R1 inactif faute de rasters).
+## Mesures
+Banc `vegetation_bench.gd` (M4 Pro, vsync coupée, ~10 agents actifs : bruit de ±50 %), avant =
+données de la base `650bb94` via `CENT_ANS_DATA_DIR` (même code, crochets R1 inactifs faute de
+rasters). Temps de trame médians sur 3 passes avec végétation (avant → après, ms) : France
+13,8 → 9,9 ; zoom moyen 20,3 → 17,4 ; proche 27,3 → 38,8 (moyennes 30,5 → 35,4, +11 % d'arbres
+visibles : plus de forêt) ; forêt d'Orléans 38,8 → 24,5 ; très proche 17,9 → 17,5 ; bocage
+22,7 → 23,7. Sans végétation (2 passes chacune) : écarts dans le bruit, aucune tendance.
+Aucune régression > 10 % démontrable ; la vue « proche » est à surveiller sur machine calme.
+Chargement : `relief_shade.png` décodé en tâche de fond (≈ 0,9 s, n'allonge plus le démarrage) ;
+splat 4096² : + ≈ 150 ms sur `masks_ms`. Smoke : OK (sortie 0).
 
-## Prochaine étape
-- Captures finales, banc, smoke ; rapport.
+Taille ajoutée (fichiers courants) : ≈ + 66 Mo (relief_shade 42,9, heightmap_render 14,9, splat
+8,4 au lieu de 3,8, tuiles 53,0 au lieu de 50,5, wetlands 0,3, forest_kind 0,4, captures 4,3).
+L'historique wip contient en plus une version intermédiaire de splat.png (8 Mo) et les captures
+« avant » en PNG (10 Mo).
+
+## Points ouverts
+- 16384² sur terre écarté (taille, construction GDScript des maillages) : voir ADR 0019.
+- Réglages en uniforms (`rl_*`) : occlusion, étangs, roselières.
+- Tracés des massifs et marais : ellipses approchées ; un tracé polygonal plus fin (Sherwood,
+  Fens...) améliorerait la fidélité.
