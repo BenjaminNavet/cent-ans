@@ -188,6 +188,7 @@ func _setup_settlements() -> void:
 	settlement_layer.setup(map_data, terrain, settlement_data, zoom_tiers)
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
+	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())

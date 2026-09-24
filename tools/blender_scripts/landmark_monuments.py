@@ -323,7 +323,7 @@ def palais_cite():
         parts.append((slate, g.cone(72.0 + dx, 28.0 + dy, 38.0, 1.4, 8.0, 6)))
     parts.append(("Gold", g.panel(72.0, 22.4, 30.0, 4.0, 4.0, -math.pi / 2, 0.1, pointed=False)))
     # Precinct wall with its courtyard (the Sainte-Chapelle stands in the south-east part).
-    wall = [(-68.0, -52.0), (88.0, -52.0), (88.0, 36.0), (-68.0, 36.0)]
+    wall = [(-68.0, -78.0), (92.0, -78.0), (92.0, 36.0), (-68.0, 36.0)]
     for i in range(4):
         (ax, ay), (bx, by) = wall[i], wall[(i + 1) % 4]
         if i == 2:
