@@ -405,7 +405,7 @@ impl CampaignSim {
             .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
         let order = match parsed {
             Ok(order) => order,
-            Err(error) => return order_result(Err(format!("ordre invalide : {error}"))),
+            Err(error) => return order_result(Err(invalid_order_message(&error))),
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
@@ -546,6 +546,16 @@ pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<Set
     }
     let province = ProvinceId::new(raw).ok()?;
     state.province_city_id(&province).cloned()
+}
+
+/// Player-facing message for an order the simulation cannot parse (UI
+/// audit A3: no raw serde error on screen). The technical detail goes to
+/// the Godot log for developers.
+pub(crate) fn invalid_order_message(error: &str) -> String {
+    godot_warn!("order rejected by the bridge: {error}");
+    "Cet ordre n'est pas reconnu par la simulation : la bibliothèque du jeu n'est sans doute \
+     pas à jour. Relancez le jeu après l'avoir réinstallé."
+        .to_owned()
 }
 
 pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
