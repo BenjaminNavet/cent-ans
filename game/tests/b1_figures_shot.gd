@@ -35,7 +35,7 @@ func _init() -> void:
 			# Archers anglais au tir, arbalétriers génois en face, de trois quarts.
 			_rank(world, "archer", 0, ENGLAND, "fac_england", 4, Vector3(-1.5, 0, 0), 5, 2, 1.3)
 			_rank(world, "archer", 2, FRANCE, "fac_france", 4, Vector3(5.5, 0, 4.0), 4, 2, 1.3, PI)
-			camera.look_at_from_position(Vector3(3.5, 2.6, -7.5), Vector3(2.0, 1.0, 2.0))
+			camera.look_at_from_position(Vector3(-4.5, 2.1, 4.0), Vector3(2.0, 1.2, 0.3))
 		"infantry":
 			_rank(world, "infantry", 0, FRANCE, "fac_france", 0, Vector3(-2.0, 0, 0), 5, 2, 1.1)
 			_rank(world, "infantry", 1, FRANCE, "fac_flanders", 0, Vector3(4.5, 0, 0), 4, 2, 1.1)
