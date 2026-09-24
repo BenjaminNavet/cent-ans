@@ -289,10 +289,46 @@ fn towers_shoot_and_the_garrison_sallies() {
     assert!(out, "out through the gate");
 }
 
+/// F5a § 5 (staggered reinforcements beyond 20 regiments) is not done yet.
 #[test]
-#[ignore]
+#[ignore = "F5a point 5 not implemented (see docs/wip/f5a-battle-sim.md)"]
 fn reinforcements_enter_from_edge() {}
 
+/// Same setup, seed and deployment: same battle, field and siege alike.
 #[test]
-#[ignore]
-fn f5_is_deterministic() {}
+fn f5_is_deterministic() {
+    use sim_battle::SiegeSetup;
+    let data = data();
+    let army = [
+        "unit_men_at_arms_foot",
+        "unit_flemish_pikemen",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_knights",
+        "unit_urban_militia",
+    ];
+    for siege in [
+        None,
+        Some(SiegeSetup {
+            fortification: 1,
+            breach: 60,
+        }),
+    ] {
+        let run_once = || {
+            let s = setup(units(&data, &army), units(&data, &army), siege.clone());
+            let mut sim = BattleSim::new(s, 21).unwrap();
+            assert!(sim.begin_deployment());
+            let (x, z) = (sim.units()[0].x + 20.0, sim.units()[0].z - 10.0);
+            sim.deploy_unit(0, x, z, None).unwrap();
+            sim.start_battle().unwrap();
+            run_to_end(&mut sim);
+            let units: Vec<(u64, u64)> = sim
+                .units()
+                .iter()
+                .map(|u| (u.x.to_bits(), u.hp.to_bits()))
+                .collect();
+            (sim.outcome(), sim.ticks(), units)
+        };
+        assert_eq!(run_once(), run_once());
+    }
+}
