@@ -15,7 +15,9 @@ Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustra
 - **Qualité** : 310 tests Rust, 87 tests Python, smoke Godot 20 étapes, clippy propre.
 - **Art** : 88/88 portraits, 117/117 miniatures de chronique (bandeau de la fenêtre de chronique,
   `cent-ans assets event-art`), 116 illustrations de l'encyclopédie (unités, bâtiments, technologies,
-  factions, `cent-ans assets illustrations`) ; 15,17 $ dépensés sur 50 $ (`docs/budget.md`).
+  factions, `cent-ans assets illustrations`), miniature en tête des 231 fiches du Codex (84 générées par
+  `cent-ans assets codex-art`, les autres reprennent l'image de leur `entity` ; capture
+  `docs/img/codex-window.png`) ; 19,20 $ dépensés sur 50 $ (`docs/budget.md`).
 - **Reste** : écarts d'équilibrage documentés plus bas (tableaux F4, G2, G4, G5) ; G5 : voisinage réel
   (graphe de la carte), 4 grandes factions en vie en 1400 sur 40/40 graines.
 - Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/wip/finalisation.md`.

@@ -449,6 +449,53 @@ impl Battlefield {
         factor
     }
 
+    /// Parts of the one-line description of the site (B6), in French:
+    /// ground (« Terre gelée » for dry winter ground), season, village or
+    /// farm, hedges, ditches, fences, pools, river, coast.
+    pub fn site_parts_fr(&self) -> Vec<String> {
+        use crate::site::{Flank, ObstacleKind};
+        let ground = if self.ground == Ground::Dry && self.season == BattleSeason::Winter {
+            "Terre gelée"
+        } else {
+            self.ground.label_fr()
+        };
+        let mut parts = vec![ground.to_owned(), self.season.label_fr().to_owned()];
+        if let Some(village) = &self.village {
+            parts.push(if village.farm { "ferme" } else { "village" }.to_owned());
+        }
+        for (kind, label) in [
+            (ObstacleKind::Hedge, "haies"),
+            (ObstacleKind::Ditch, "fossés"),
+            (ObstacleKind::Fence, "clôtures"),
+        ] {
+            if self.obstacles.iter().any(|o| o.kind == kind) {
+                parts.push(label.to_owned());
+            }
+        }
+        if !self.pools.is_empty() {
+            parts.push("mares".to_owned());
+        }
+        if self.river.is_some() {
+            parts.push("rivière et gués".to_owned());
+        }
+        if let Some(coast) = &self.coast {
+            parts.push(
+                match coast.flank {
+                    Flank::West => "côte ouest",
+                    Flank::East => "côte est",
+                }
+                .to_owned(),
+            );
+        }
+        parts
+    }
+
+    /// The site in one compact line (B6): « Terre gelée · hiver · village ·
+    /// haies · côte ouest ».
+    pub fn site_label_fr(&self) -> String {
+        self.site_parts_fr().join(" · ")
+    }
+
     pub fn in_village(&self, x: f64, z: f64) -> bool {
         self.village.as_ref().is_some_and(|v| v.zone.contains(x, z))
     }
