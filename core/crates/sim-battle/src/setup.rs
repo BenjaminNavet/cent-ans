@@ -59,6 +59,17 @@ pub enum BattleSeason {
     Winter,
 }
 
+impl BattleSeason {
+    pub fn label_fr(self) -> &'static str {
+        match self {
+            BattleSeason::Spring => "printemps",
+            BattleSeason::Summer => "été",
+            BattleSeason::Autumn => "automne",
+            BattleSeason::Winter => "hiver",
+        }
+    }
+}
+
 /// A regiment as recruited in the campaign.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UnitSetup {

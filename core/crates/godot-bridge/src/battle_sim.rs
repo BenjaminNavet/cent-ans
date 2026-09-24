@@ -359,7 +359,7 @@ impl BattleSim {
     /// mud[..], river?{points: PackedVector2Array, width, fords[{x, z, half_width}]},
     /// siege?{...}}` (siege geometry: see [`Self::get_siege`]). B5 (campaign site):
     /// `terrain` (province terrain key), `season`, `ground` (`dry|muddy|snowy`),
-    /// `ground_label`, `woodland` (0-1), `pools[{x, z, radius}]`,
+    /// `ground_label`, `site_label` (B6), `woodland` (0-1), `pools[{x, z, radius}]`,
     /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch}]`,
     /// `coast?{flank: west|east, shore_x, beach}`,
     /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}]}`.
@@ -390,6 +390,8 @@ impl BattleSim {
             "season" => season_key(field.season),
             "ground" => field.ground.key(),
             "ground_label" => field.ground.label_fr(),
+            // B6: the site in one compact line (pre-battle dialog, HUD).
+            "site_label" => field.site_label_fr(),
             "woodland" => field.woodland,
             "pools" => &zones(&field.pools),
             "obstacles" => &field
@@ -562,6 +564,16 @@ impl BattleSim {
     #[func]
     fn get_height(&self, x: f64, z: f64) -> f64 {
         self.sim.as_ref().map_or(0.0, |s| s.field().height(x, z))
+    }
+
+    /// B6: the battle site in one compact French line, e.g. « Terre gelée ·
+    /// hiver · village · haies · côte ouest » (empty without a battle).
+    #[func]
+    fn get_site_label(&self) -> GString {
+        self.sim
+            .as_ref()
+            .map(|sim| GString::from(sim.field().site_label_fr().as_str()))
+            .unwrap_or_default()
     }
 
     /// `{key: "clear"|"rain"|"fog"|"snow", label}`.

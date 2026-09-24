@@ -835,6 +835,7 @@ func _run_battle() -> void:
 		map.queue_free()
 		return
 	_check(str(dialog.body_label.text).contains("Météo prévue"), "battle: dialog should show the weather forecast")
+	_check(str(dialog.body_label.text).contains("Site : ") and dialog.site_label_text != "", "battle: dialog should show the battle site (B6)")
 	dialog.fight_button.emit_signal("pressed")
 	await process_frame
 	var scene: Node = null
@@ -849,6 +850,10 @@ func _run_battle() -> void:
 		await process_frame
 	_check(scene.units.size() > 0, "battle scene: no units")
 	_check(scene.terrain.get_child_count() > 0, "battle scene: no terrain")
+	# B6 : même site dans le dialogue d'avant-bataille et dans le HUD.
+	var site_text := str(scene.battle.call("get_site_label"))
+	_check(site_text != "" and scene.hud.site_label.text == site_text and scene.hud.site_label.visible, "battle HUD: site line « %s » vs « %s »" % [scene.hud.site_label.text, site_text])
+	_check(site_text == dialog.site_label_text, "battle: dialog site « %s » differs from the battle « %s »" % [dialog.site_label_text, site_text])
 	var drawn := 0
 	for key in scene._mm:
 		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
