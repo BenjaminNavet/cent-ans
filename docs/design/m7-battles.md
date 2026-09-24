@@ -133,12 +133,11 @@ Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::Le
   - `get_deployment_zone(side) -> {x0, z0, x1, z1}` (mètres du champ). Bataille rangée : bande de
     300 m de profondeur le long de son bord (assaillant z ∈ [20, 300], défenseur z ∈ [500, 780]).
   - `deploy_unit(id, x, z, facing) -> {ok, error}` : `facing` en radians, `NAN` garde l'orientation ;
-    refusé hors zone (« l'unité … doit être placée dans votre zone de déploiement »), pour une unité
+    refusé hors zone (« Les Chevaliers doivent être placés dans votre zone de déploiement » depuis F5d), pour une unité
     de l'autre camp, ou hors de la phase.
   - `start_battle() -> {ok, error}` : fin de la phase, la bataille commence au tick suivant.
   - Pendant la phase, `issue_command` renvoie « déploiement en cours… » pour les autres ordres.
-- **Point 5 (renforts au-delà de 20 régiments par camp) : non fait**, reste à faire : réserve hors
-  champ, entrée échelonnée par le bord du camp quand un régiment quitte le champ ou toutes les N s.
+- Point 5 (renforts au-delà de 20 régiments par camp) : fait en F5d (ci-dessous).
 - Tests : `sim-battle/tests/f5.rs` (8 + 1 ignoré). Sonde `probe -- ai` : 2 × 20 régiments, assaillant
   4/10 (471 s en moyenne) ; 2 × 10, 6/10.
 - **F5c — déploiement dans Godot** (`deployment_controller.gd`, `deployment_zone.gd`) : toute bataille du
@@ -153,3 +152,32 @@ Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::Le
   dans chaque disque, l'église sur le disque le plus au fond), sortie de la garnison en message éphémère
   et dans la ligne de siège ; capture `docs/img/godot-siege-f5.png`. Smoke : phase ouverte, un placement
   valide et un refusé, `start_battle`, le temps avance ; maisons rendues = maisons de la simulation.
+
+## F5d — correctifs de la simulation (Rust)
+- **Bataille de démonstration** (`battle.tscn -- --screenshot=…`, France 1337, graine 1337, fixture
+  `sim-battle/tests/fixtures/demo_battle_1337.json`) : plus de contact en 300 s. Cause : l'Angleterre,
+  plus faible, reste sur la défensive (patience 480 s) ; la France, dont les arbalétriers « gagnaient »
+  le duel de tir, gardait sa ligne là où elle se trouvait jusqu'à `DUEL_TIME` (480 s) — c'est-à-dire en
+  pleine rivière, où elle s'était arrêtée à mi-traversée. Le défaut existait déjà avant F5a.
+- Correctifs (`ai.rs`) :
+  - un assaillant nettement plus fort (rapport ≥ 1/0,85, l'ennemi l'attend) abrège le duel à
+    `ATTACKER_DUEL_TIME` = 60 s et, pour ouvrir le combat (personne encore au contact, avant 240 s,
+    ennemi à moins de `ASSAULT_RANGE` = 250 m), lance sa cavalerie sur la cavalerie adverse ;
+  - toute destination IA en eau profonde (hors gués) glisse sur la rive (`dry_z`, marge 12 m) : celle
+    où se tient le régiment, ou l'autre s'il est déjà dans l'eau ; le déploiement IA
+    (`begin_deployment`) applique la même règle ;
+  - une ligne qui avance marche vers le barycentre ennemi quand celui-ci n'est plus devant elle (des
+    armées qui se croisent ne filent plus vers le bord opposé).
+- Mesures : démo — contact à 75 s (jamais avant), victoire française à 406 s ; `probe -- ai`
+  (2 × 20) : assaillant 4/10, 468 s (avant : 4/10, 471 s) ; `probe -- ai 30` : 3/10, 690 s.
+- **Renforts échelonnés** (`sim/reinforcements.rs`) : au-delà de `MAX_ON_FIELD` = 20 régiments par camp,
+  les derniers (ordre des ids, jamais celui du général) attendent hors du champ (`Unit::reserve`, non
+  `present`). Dès qu'un camp compte moins de 20 régiments combattants (détruit, en déroute, retiré), le
+  premier en attente entre (déterministe) : bataille rangée par le bord du camp (z = 15 m ou
+  profondeur − 15 m, cinq couloirs de 110 m), marche vers sa ligne ; garnison de siège depuis la place.
+  Journal « Renforts : les … entrent sur le champ de bataille. » ; `strength` compte les réserves.
+  Pont : `get_units()[].reserve` (`present` faux tant qu'il attend).
+- `deploy_unit` : erreurs au nom du régiment (`BattleSim::error_text`), p. ex. « Les Chevaliers
+  doivent être placés dans votre zone de déploiement ».
+- Tests `sim-battle/tests/f5d.rs` : contact avant 150 s, personne déployé ni arrêté dans la rivière,
+  rive choisie par `dry_z`, réserves et entrée par le bord, escalade ≈ 3/6 (voir `m8-sieges.md`).
