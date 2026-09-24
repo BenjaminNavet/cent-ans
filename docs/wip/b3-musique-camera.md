@@ -3,31 +3,35 @@
 Plan : `docs/design/2026-09-24-rapprochement-total-war.md` (lot B3), spéc T4/T6 dans
 `docs/design/2026-09-24-analyse-total-war.md`.
 
-## État
+## État — terminé
 
 - [x] Squelette + exploration (`AudioDirector`, `BattleScene`, `BattleCamera`, `get_units()`,
       pistes disponibles sous `game/assets/audio/`).
 - [x] `battle_camera.gd` : `follow_unit(id, position_of)` / `stop_follow()` / `is_following()`,
       lissage exponentiel, orbite bouton du milieu pendant le suivi, WASD/bords d'écran et
       `look_at_point` (minicarte, rappel de groupe) annulent le suivi.
-- [ ] `game/scripts/battle/battle_music.gd` (nouveau) : direction musicale de bataille par
+- [x] `game/scripts/battle/battle_music.gd` (nouveau) : direction musicale de bataille par
       intensité (approche/engagement/critique/victoire-défaite), hystérésis, transforme
-      `music/war.ogg` (volume, filtre passe-bas) + couches `sfx/sword_clash.ogg` (ambiance) et
-      `sfx/march_drum.ogg` (percussion critique) + stinger fanfare/chœur.
-- [ ] Câblage `battle_scene.gd` : touche `C` (verrouille/libère le suivi sur la sélection ou le
+      `music/war.ogg` (volume, filtre passe-bas sur un bus dédié `BatailleMusique`) + couches
+      `sfx/sword_clash.ogg` (ambiance de mêlée) et `sfx/march_drum.ogg` (percussion critique) +
+      stinger fanfare/chœur (`compute_state` : fonction statique pure, testable seule).
+- [x] Câblage `battle_scene.gd` : touche `C` (verrouille/libère le suivi sur la sélection ou le
       général), double-clic sur une carte d'unité = centrer la caméra ; `BattleMusicDirector`
       instancié dans `begin()`, `update()` par tick ; mise en veille d'`AudioDirector`
       (`stop_all()`) à l'entrée en bataille, `refresh_context()` au retour.
-- [ ] Aide F1 (`battle_hud.gd`) : documenter `C` et le double-clic.
-- [ ] Tests `smoke.gd` : changement d'état musical déclenché par un contact simulé (fonction pure
-      `BattleMusicDirector.compute_state`) ; la caméra suit la position d'un régiment sur
-      plusieurs ticks.
-- [ ] `cargo` : aucun changement Rust prévu pour ce lot.
+- [x] Aide F1 (`battle_hud.gd`) : documente `C` et le double-clic.
+- [x] Tests `smoke.gd` (`_check_battle_music_camera_b3`) : `compute_state` sur des dictionnaires
+      d'unités simulant calme / contact / camp proche de la déroute / bataille finie ; hystérésis
+      (montée immédiate, descente après ≥ 2,5 s stables) ; caméra qui referme la distance sur un
+      régiment suivi (ticks `_process` déterministes), libération au clavier (touche `C`),
+      double-clic carte → centrage exact (comparaison au sol, `target.y` suit le terrain).
+- [x] `cargo` : aucun changement Rust pour ce lot (uniquement GDScript).
+- [x] Smoke complet : `godot --headless --path game --script res://tests/smoke.gd` → exit 0,
+      aucune fuite (`--verbose` sans « leak »/« orphan »).
 
 ## Prochaine étape
 
-Écrire `battle_music.gd`, câbler `battle_scene.gd` (touche C, double-clic carte, AudioDirector
-stop/refresh), étendre `smoke.gd`, lancer le smoke test complet.
+Aucune pour ce lot ; B3 est terminé. Suite possible : B4 (effets visuels de charge/tir).
 
 ## Touches / interactions ajoutées
 
