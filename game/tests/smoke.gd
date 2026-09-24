@@ -961,6 +961,33 @@ func _check_battle_markers_b2(scene: BattleScene) -> void:
 			if markers.marker_rect(ids[i]).intersects(markers.marker_rect(ids[j])):
 				overlaps += 1
 	_check(overlaps <= ids.size() / 4, "battle markers: %d overlapping banners out of %d" % [overlaps, ids.size()])
+	# B7 : vue très lointaine, toutes les troupes au même point écran → une pastille par camp ;
+	# un clic sur celle du joueur sélectionne tout le groupe.
+	var saved_selection: Array = scene.selected.duplicate()
+	var same := {}
+	var own_count := 0
+	for unit in scene.units:
+		if bool(unit["present"]):
+			same[int(unit["id"])] = Vector2(400, 300)
+			own_count += 1 if str(unit["side"]) == scene.player_side else 0
+	markers.update(scene.units, same, [], 800.0)
+	_check(markers.clustered and markers.marker_count() == 2, "battle markers: far view should cluster into one pastille per side (got %d)" % markers.marker_count())
+	var own_key := -1
+	for key in markers._placed.keys():
+		if str(markers._placed[key]["unit"]["side"]) == scene.player_side:
+			own_key = key
+	if _check(own_key >= 0, "battle markers: no cluster for the player's side"):
+		var group_click := InputEventMouseButton.new()
+		group_click.button_index = MOUSE_BUTTON_LEFT
+		group_click.pressed = true
+		group_click.position = markers.marker_rect(own_key).get_center()
+		scene.selected.clear()
+		markers._gui_input(group_click)
+		_check(scene.selected.size() == own_count, "battle markers: clicking a cluster should select its %d regiments (got %d)" % [own_count, scene.selected.size()])
+	markers.update(scene.units, same, [], 100.0)
+	_check(not markers.clustered, "battle markers: near view should not cluster")
+	scene.selected.clear()
+	scene.selected.append_array(saved_selection)
 	markers.toggle()
 	scene._refresh_view(true)
 	_check(not markers.visible and markers.marker_count() == 0, "battle markers: toggle should hide the banners")
