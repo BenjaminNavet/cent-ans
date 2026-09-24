@@ -56,7 +56,7 @@ fn meeting_every_objective_wins() {
         .unwrap();
     let mut won_at = None;
     for season in 1..=hold + 2 {
-        for p in state.provinces.values_mut() {
+        for p in state.settlements.values_mut() {
             if p.controller == fac("fac_england") {
                 p.controller = fac("fac_france");
             }
@@ -85,7 +85,7 @@ fn meeting_every_objective_wins() {
 fn losing_every_province_is_a_defeat() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_navarre"), 4).unwrap();
-    for p in state.provinces.values_mut() {
+    for p in state.settlements.values_mut() {
         if p.controller == fac("fac_navarre") {
             p.controller = fac("fac_castile");
         }

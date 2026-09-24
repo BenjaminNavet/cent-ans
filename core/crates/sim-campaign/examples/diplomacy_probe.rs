@@ -64,8 +64,8 @@ fn main() {
                 f.papal_favor,
                 state
                     .provinces
-                    .values()
-                    .filter(|p| &p.controller == id)
+                    .keys()
+                    .filter(|p| state.controls_province(id, p))
                     .count()
             );
         }

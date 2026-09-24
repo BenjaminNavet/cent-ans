@@ -11,6 +11,13 @@
   "build_time_turns": 1,
   "upkeep": 5,
   "required_building": "bld_muster_field",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle",
+    "abbey",
+    "village"
+  ],
   "effects": [
     {
       "effect": "army_ranged",

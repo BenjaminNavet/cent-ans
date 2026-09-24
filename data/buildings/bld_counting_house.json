@@ -12,6 +12,10 @@
   "upkeep": 30,
   "required_technology": "tech_bookkeeping",
   "required_building": "bld_fair",
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
   "effects": [
     {
       "effect": "trade_income",

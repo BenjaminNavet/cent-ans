@@ -22,7 +22,15 @@ pub enum CampaignError {
          cette partie a été créée avec une version différente du jeu"
     )]
     VersionMismatch { found: u32, expected: u32 },
+    #[error(
+        "sauvegarde d'une version antérieure à la refonte des colonies (version {found}, \
+         version attendue : {expected}) : elle ne peut pas être chargée"
+    )]
+    PreSettlementSave { found: u32, expected: u32 },
 }
+
+/// First state version with settlements (lot C4); older saves are refused.
+pub const SETTLEMENTS_STATE_VERSION: u32 = 5;
 
 impl CampaignState {
     /// Serialises the whole state (RNG included) as JSON.
@@ -39,6 +47,12 @@ impl CampaignState {
         }
         let header: Header =
             serde_json::from_str(json).map_err(|e| CampaignError::Deserialize(e.to_string()))?;
+        if header.state_version < SETTLEMENTS_STATE_VERSION {
+            return Err(CampaignError::PreSettlementSave {
+                found: header.state_version,
+                expected: STATE_VERSION,
+            });
+        }
         if header.state_version != STATE_VERSION {
             return Err(CampaignError::VersionMismatch {
                 found: header.state_version,

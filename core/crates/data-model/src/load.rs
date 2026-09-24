@@ -182,6 +182,9 @@ pub struct GameData {
     pub settlement_graph: Vec<SettlementEdge>,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// Movement graph over the settlements (lot C4): `settlement_graph`, or
+    /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
+    pub movement_graph: crate::movement_graph::MovementGraph,
 }
 
 impl GameData {
@@ -216,6 +219,7 @@ impl GameData {
             settlement_rules: None,
             settlement_graph: Vec::new(),
             vision_rules: None,
+            movement_graph: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -239,6 +243,7 @@ impl GameData {
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
+        data.build_movement_graph();
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))

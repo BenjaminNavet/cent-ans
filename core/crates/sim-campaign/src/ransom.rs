@@ -318,11 +318,12 @@ fn check_ceded_province(
     captor: &FactionId,
     province: &ProvinceId,
 ) -> Result<(), RansomError> {
-    let p = state
-        .provinces
-        .get(province)
-        .ok_or_else(|| RansomError::BadProvince(format!("province inconnue : {province}")))?;
-    if &p.owner != payer || &p.controller != payer {
+    if !state.provinces.contains_key(province) {
+        return Err(RansomError::BadProvince(format!(
+            "province inconnue : {province}"
+        )));
+    }
+    if !state.holds_province(payer, province) {
         return Err(RansomError::BadProvince(
             "la province doit être possédée et tenue par la faction du captif".to_owned(),
         ));
@@ -338,12 +339,7 @@ fn check_ceded_province(
     }
     let borders = crate::movement::land_neighbors(data, province)
         .iter()
-        .any(|n| {
-            state
-                .provinces
-                .get(n)
-                .is_some_and(|q| &q.controller == captor)
-        });
+        .any(|n| state.controls_province(captor, n));
     if !borders {
         return Err(RansomError::BadProvince(
             "la province doit toucher une province du geôlier".to_owned(),
@@ -368,20 +364,22 @@ pub fn cedable_provinces(
 }
 
 /// The province passes to the captor (as in a peace treaty, without claim);
-/// also used by the `transfer_province` event effect (G1).
+/// also used by the `transfer_province` event effect (G1). Lot C4: every
+/// settlement the payer owns there changes hands (enclaves of third parties
+/// stay).
 pub(crate) fn cede_province(
     state: &mut CampaignState,
-    _payer: &FactionId,
+    payer: &FactionId,
     captor: &FactionId,
     province: &ProvinceId,
 ) {
-    if let Some(p) = state.provinces.get_mut(province) {
-        p.owner = captor.clone();
-        p.controller = captor.clone();
-        p.siege = None;
-        p.garrison.clear();
-        p.construction = None;
-        p.recruit_queue.clear();
+    state.cede_province(province, Some(payer), captor);
+    // The city always follows (province control is the city's).
+    let city_owner = state.province_owner(province).cloned();
+    if city_owner.as_ref() != Some(captor) {
+        if let Some(owner) = city_owner {
+            state.cede_province(province, Some(&owner), captor);
+        }
     }
     for character in state.characters.values_mut() {
         if character.governor_of.as_ref() == Some(province) {

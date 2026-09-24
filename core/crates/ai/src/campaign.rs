@@ -5,19 +5,30 @@
 //! `sim-campaign`), economy (taxes, debt, recruitment, construction),
 //! characters (governors, generals, skills, marriages) and one military
 //! objective per army (defend, besiege, raid, regroup, retreat).
+//!
+//! Lot C4: objectives are settlements. Taking a city gives the province, so
+//! hostile cities come first, then the other settlements by weight and
+//! fortification; garrisons are kept according to the threat around each
+//! settlement. Balancing is left to lot C7.
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{
-    CharacterId, EffectKind, FactionId, GameData, ProvinceId, SkillBranch, SkillId, UnitTypeId,
+    CharacterId, EffectKind, FactionId, GameData, ProvinceId, SettlementId, SettlementKind,
+    SkillBranch, SkillId, UnitTypeId,
 };
 use sim_campaign::coinage::CoinageLevel;
-use sim_campaign::movement::{dijkstra, edges, path_to};
+use sim_campaign::movement::{dijkstra, edges, path_to, points_per_step};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
-/// Maximum path cost considered for an objective.
+/// Maximum path cost considered for an objective, in province steps (times
+/// `MovementRules::points_per_step`).
 pub const PLANNING_RANGE: u32 = 8;
+/// Siege value bonus of a city (it hands over the province, lot C4).
+pub const CITY_TARGET_BONUS: f64 = 25.0;
+/// Siege value lost per fortification level of the target.
+pub const FORTIFICATION_TARGET_PENALTY: f64 = 3.0;
 /// An army besieges when its power exceeds the defence by this factor.
 pub const SIEGE_SUPERIORITY: f64 = 1.5;
 /// Value kept by a claimed target reached through a sea crossing (landings
@@ -134,25 +145,54 @@ impl<'a> Context<'a> {
     }
 
     fn owns(&self, province: &ProvinceId) -> bool {
+        self.state.holds_province(self.faction, province)
+    }
+
+    /// `settlement` is owned and held by the faction.
+    fn owns_settlement(&self, settlement: &SettlementId) -> bool {
         self.state
-            .provinces
-            .get(province)
-            .is_some_and(|p| &p.controller == self.faction && &p.owner == self.faction)
+            .settlements
+            .get(settlement)
+            .is_some_and(|s| &s.owner == self.faction && &s.controller == self.faction)
     }
 
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
-            sim_campaign::economy::province_income_effective(self.data, p, TaxRate::Normal)
+            sim_campaign::economy::province_income_effective(
+                self.data,
+                p,
+                &self.state.province_buildings(province),
+                TaxRate::Normal,
+            )
         })
+    }
+
+    /// Tax share of a settlement (its province's income times its weight).
+    fn settlement_income(&self, settlement: &SettlementId) -> f64 {
+        self.state
+            .settlement_province(settlement)
+            .map_or(0.0, |p| self.province_income(p))
+            * sim_campaign::settlements::weight_share(self.data, settlement)
     }
 
     /// Hostile army power inside or next to `province`.
     fn threat(&self, province: &ProvinceId) -> f64 {
         let mut provinces = vec![province.clone()];
-        provinces.extend(edges(self.data, province).into_iter().map(|(p, _)| p));
+        provinces.extend(self.data.province_land_neighbors(province).iter().cloned());
         provinces
             .iter()
             .flat_map(|p| self.state.hostile_armies_in(self.faction, p))
+            .map(|id| self.state.army_power(self.data, &id))
+            .sum()
+    }
+
+    /// Hostile army power on `settlement` or one edge away.
+    fn threat_at(&self, settlement: &SettlementId) -> f64 {
+        let mut nodes = vec![settlement.clone()];
+        nodes.extend(edges(self.data, settlement).into_iter().map(|(s, _)| s));
+        nodes
+            .iter()
+            .flat_map(|s| self.state.hostile_armies_at(self.faction, s))
             .map(|id| self.state.army_power(self.data, &id))
             .sum()
     }
@@ -161,6 +201,15 @@ impl<'a> Context<'a> {
     /// provinces next to another faction), shared with the 1337 setup.
     fn is_border(&self, province: &ProvinceId) -> bool {
         self.state.is_frontier(self.data, self.faction, province)
+    }
+
+    /// `settlement` is the city of its province.
+    fn is_city(&self, settlement: &SettlementId) -> bool {
+        self.state.settlement_kind(settlement) == SettlementKind::City
+    }
+
+    fn province_of(&self, settlement: &SettlementId) -> Option<&ProvinceId> {
+        self.state.settlement_province(settlement)
     }
 }
 
@@ -229,8 +278,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Taxes follow war needs and public order.
     let (weighted, population) = state
         .provinces
-        .values()
-        .filter(|p| &p.controller == ctx.faction)
+        .iter()
+        .filter(|(id, _)| state.controls_province(ctx.faction, id))
+        .map(|(_, p)| p)
         .fold((0.0, 0.0), |(w, n), p| {
             let size = p.population.total() as f64;
             (w + weighted_unrest(&p.population) * size, n + size)
@@ -305,13 +355,28 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         + hoard / HOARD_SPENDING_TURNS;
     let mut planned_upkeep = ctx.army_upkeep;
 
-    // Recruitment: capital first, then threatened border provinces.
-    let mut sites: Vec<ProvinceId> = vec![me.capital.clone()];
-    let mut borders: Vec<(ProvinceId, i64)> = state
+    // Recruitment: the capital's city first, then the cities (and castles)
+    // of threatened border provinces.
+    let mut sites: Vec<SettlementId> = state
+        .province_city_id(&me.capital)
+        .cloned()
+        .into_iter()
+        .collect();
+    let mut borders: Vec<(SettlementId, i64)> = state
         .provinces
         .keys()
         .filter(|id| ctx.owns(id) && **id != me.capital && ctx.is_border(id))
-        .map(|id| (id.clone(), -(ctx.threat(id) as i64)))
+        .flat_map(|id| {
+            let threat = -(ctx.threat(id) as i64);
+            state
+                .settlements_of(id)
+                .filter(|(sid, s)| {
+                    ctx.owns_settlement(sid)
+                        && matches!(s.kind, SettlementKind::City | SettlementKind::Castle)
+                })
+                .map(move |(sid, _)| (sid.clone(), threat))
+                .collect::<Vec<_>>()
+        })
         .collect();
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
@@ -322,7 +387,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
         .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
     'sites: for site in &sites {
-        if !ctx.owns(site) {
+        if !ctx.owns_settlement(site) {
             continue;
         }
         let best = state
@@ -337,7 +402,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         let Some(option) = best else {
             continue;
         };
-        // G1: no more than the province's free recruitment slots.
+        // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
         while recruits < max_recruits
             && free_slots > 0
@@ -350,7 +415,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             && budget >= i64::from(option.cost)
         {
             orders.push(Order::Recruit {
-                province: site.clone(),
+                settlement: site.into(),
                 unit_type: option.unit_type.clone(),
             });
             budget -= i64::from(option.cost);
@@ -363,18 +428,26 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         }
     }
 
-    // Garrisons beyond need become field armies (merged next turn).
-    for (id, province) in &state.provinces {
-        if !ctx.owns(id) {
+    // Garrisons of cities beyond need become field armies (merged next
+    // turn); the need grows with the threat around the city (lot C4). The
+    // small garrisons of the other settlements stay where they are.
+    for (id, settlement) in &state.settlements {
+        if !ctx.owns_settlement(id) || settlement.siege.is_some() || !ctx.is_city(id) {
             continue;
         }
-        // P1: one unit less than the garrison of the same role at the
-        // 1337 start, so the starting garrisons stay put.
-        let keep = state.garrison_role(data, ctx.faction, id).garrison_size() - 1;
-        if province.garrison.len() > keep + 1 && province.siege.is_none() {
+        // P1: one unit less than the garrison of the same role at the 1337
+        // start, so the starting garrisons stay put; one more under threat.
+        let mut keep = state
+            .garrison_role(data, ctx.faction, &settlement.province)
+            .garrison_size()
+            - 1;
+        if ctx.threat_at(id) > 0.0 {
+            keep += 1;
+        }
+        if settlement.garrison.len() > keep + 1 {
             orders.push(Order::CreateArmy {
-                province: id.clone(),
-                units_from_garrison: (keep..province.garrison.len()).collect(),
+                settlement: id.into(),
+                units_from_garrison: (keep..settlement.garrison.len()).collect(),
                 general: None,
             });
         }
@@ -386,17 +459,21 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // (or in the hoard being spent).
     let mut spare =
         ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
-    let mut options: Vec<(f64, ProvinceId, data_model::BuildingId, i64)> = Vec::new();
-    for id in state.provinces.keys().filter(|id| ctx.owns(id)) {
-        let Some(city) = state.province_city(data, id) else {
-            continue;
-        };
-        if city.construction.is_some() {
+    let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
+    for (id, settlement) in state
+        .settlements
+        .iter()
+        .filter(|(id, _)| ctx.owns_settlement(id))
+    {
+        if settlement.construction.is_some() {
             continue;
         }
-        let unrest = weighted_unrest(&city.classes);
-        let health = f64::from(city.classes.peasants.health);
-        for option in city.buildable.iter().filter(|o| o.available) {
+        let Some(province) = state.provinces.get(&settlement.province) else {
+            continue;
+        };
+        let unrest = weighted_unrest(&province.population);
+        let health = f64::from(province.population.peasants.health);
+        for option in state.buildable(data, id).iter().filter(|o| o.available) {
             let value = building_value(ctx, id, &option.building, unrest, health);
             if value > 0.0 {
                 options.push((
@@ -414,18 +491,21 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             .then_with(|| a.2.cmp(&b.2))
     });
     let mut used = BTreeSet::new();
-    for (_, province, building, cost) in options {
+    for (_, settlement, building, cost) in options {
         let upkeep = data
             .buildings
             .get(&building)
             .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)));
-        if used.len() >= builds || used.contains(&province) || budget < cost || upkeep > spare {
+        if used.len() >= builds || used.contains(&settlement) || budget < cost || upkeep > spare {
             continue;
         }
         spare -= upkeep;
         budget -= cost;
-        used.insert(province.clone());
-        orders.push(Order::Build { province, building });
+        used.insert(settlement.clone());
+        orders.push(Order::Build {
+            settlement: settlement.into(),
+            building,
+        });
     }
 }
 
@@ -438,15 +518,18 @@ fn unit_value(data: &GameData, unit_type: &UnitTypeId, cost: u32) -> f64 {
     })
 }
 
-/// Seasonal value (livres-equivalent) of building `building` in `province`.
+/// Seasonal value (livres-equivalent) of building `building` in `settlement`.
 fn building_value(
     ctx: &Context,
-    province: &ProvinceId,
+    settlement: &SettlementId,
     building: &data_model::BuildingId,
     unrest: f64,
     health: f64,
 ) -> f64 {
     let Some(def) = ctx.data.buildings.get(building) else {
+        return 0.0;
+    };
+    let Some(province) = ctx.province_of(settlement) else {
         return 0.0;
     };
     let income = ctx.province_income(province);
@@ -479,13 +562,13 @@ fn building_value(
 /// garrisons. The capital keeps its last unit and besieged places keep theirs;
 /// an army losing its last unit is disbanded.
 fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
-    use sim_campaign::economy::{unit_upkeep, GARRISON_UPKEEP_PERCENT};
+    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
     enum Holder {
         Army(ArmyId),
-        Garrison(ProvinceId),
+        Garrison(SettlementId),
     }
     let state = ctx.state;
-    let capital = &state.factions[ctx.faction].capital;
+    let capital = state.province_city_id(&state.factions[ctx.faction].capital);
     // (upkeep, is_garrison, holder index, unit index)
     let mut holders: Vec<Holder> = Vec::new();
     let mut candidates: Vec<(i64, bool, usize, usize)> = Vec::new();
@@ -500,31 +583,33 @@ fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
             candidates.push((unit_upkeep(ctx.data, unit), false, holder, index));
         }
     }
-    for (id, province) in state
-        .provinces
+    for (id, settlement) in state
+        .settlements
         .iter()
-        .filter(|(_, p)| &p.controller == ctx.faction && p.siege.is_none())
+        .filter(|(_, s)| &s.controller == ctx.faction && s.siege.is_none())
     {
-        let keep = usize::from(id == capital);
-        if province.garrison.len() <= keep {
+        let keep = usize::from(Some(id) == capital);
+        if settlement.garrison.len() <= keep {
             continue;
         }
         let holder = holders.len();
         holders.push(Holder::Garrison(id.clone()));
-        let mut units: Vec<(i64, usize)> = province
+        let mut units: Vec<(i64, usize)> = settlement
             .garrison
             .iter()
             .enumerate()
             .map(|(index, unit)| {
                 (
-                    unit_upkeep(ctx.data, unit) * GARRISON_UPKEEP_PERCENT / 100,
+                    unit_upkeep(ctx.data, unit)
+                        * garrison_upkeep_percent(ctx.data, settlement.kind)
+                        / 100,
                     index,
                 )
             })
             .collect();
         // The cheapest `keep` units stay.
         units.sort_by_key(|(upkeep, index)| (std::cmp::Reverse(*upkeep), *index));
-        units.truncate(province.garrison.len() - keep);
+        units.truncate(settlement.garrison.len() - keep);
         for (upkeep, index) in units {
             candidates.push((upkeep, true, holder, index));
         }
@@ -549,12 +634,12 @@ fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
         .map(|(holder, unit_index)| match &holders[holder] {
             Holder::Army(army) => Order::DisbandUnit {
                 army: Some(army.clone()),
-                province: None,
+                settlement: None,
                 unit_index,
             },
-            Holder::Garrison(province) => Order::DisbandUnit {
+            Holder::Garrison(settlement) => Order::DisbandUnit {
                 army: None,
-                province: Some(province.clone()),
+                settlement: Some(settlement.into()),
                 unit_index,
             },
         })
@@ -593,11 +678,12 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         if army.general.is_some() {
             continue;
         }
+        let army_province = state.settlement_province(&army.location);
         let best = state
             .characters
             .iter()
             .filter(|(id, c)| {
-                available(id) && !busy.contains(*id) && c.location.as_ref() == Some(&army.location)
+                available(id) && !busy.contains(*id) && c.location.as_ref() == army_province
             })
             .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
             .map(|(id, _)| id.clone());
@@ -806,8 +892,8 @@ enum Objective {
 /// True when the planned path to `target` includes a sea crossing.
 fn crosses_sea(
     data: &GameData,
-    table: &BTreeMap<ProvinceId, sim_campaign::movement::Reach>,
-    target: &ProvinceId,
+    table: &BTreeMap<SettlementId, sim_campaign::movement::Reach>,
+    target: &SettlementId,
 ) -> bool {
     let mut current = target.clone();
     while let Some(previous) = table.get(&current).and_then(|r| r.previous.clone()) {
@@ -832,7 +918,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Merge armies standing together into the strongest one.
     let mut merged: BTreeSet<ArmyId> = BTreeSet::new();
-    let mut by_location: BTreeMap<ProvinceId, ArmyId> = BTreeMap::new();
+    let mut by_location: BTreeMap<SettlementId, ArmyId> = BTreeMap::new();
     for (id, _) in &armies {
         let location = state.armies[id].location.clone();
         match by_location.get(&location) {
@@ -848,13 +934,17 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             }
         }
     }
-    let power_at = |province: &ProvinceId| -> f64 {
+    let power_at = |settlement: &SettlementId| -> f64 {
         armies
             .iter()
-            .filter(|(id, _)| &state.armies[id].location == province)
+            .filter(|(id, _)| &state.armies[id].location == settlement)
             .map(|(_, p)| p)
             .sum()
     };
+    let step = points_per_step(data).max(1.0);
+    let range = (f64::from(PLANNING_RANGE) * step).round() as u32;
+    // Province of a node of the Dijkstra table.
+    let province = |s: &SettlementId| state.settlement_province(s).cloned();
 
     // F4: a throne claim makes every province of that crown a claimed target.
     let claims = sim_campaign::diplomacy::claimed_provinces(state, ctx.faction);
@@ -865,9 +955,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .flat_map(|enemy| {
             let held: Vec<ProvinceId> = state
                 .provinces
-                .iter()
-                .filter(|(_, p)| &p.owner == enemy && &p.controller == enemy)
-                .map(|(id, _)| id.clone())
+                .keys()
+                .filter(|id| state.holds_province(enemy, id))
+                .cloned()
                 .collect();
             if held.len() <= LAST_BASTIONS {
                 held
@@ -876,45 +966,57 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             }
         })
         .collect();
-    let enemy_capitals: BTreeSet<ProvinceId> = ctx
+    let enemy_capitals: BTreeSet<SettlementId> = ctx
         .enemies
         .iter()
-        .filter_map(|e| state.factions.get(e).map(|f| f.capital.clone()))
+        .filter_map(|e| state.factions.get(e))
+        .filter_map(|f| state.province_city_id(&f.capital).cloned())
         .collect();
+    let my_capital = state
+        .factions
+        .get(ctx.faction)
+        .and_then(|f| state.province_city_id(&f.capital))
+        .cloned();
     let largest = armies.first().map(|(id, p)| (id.clone(), *p));
-    let mut defended: BTreeSet<ProvinceId> = BTreeSet::new();
-    let mut targeted: BTreeSet<ProvinceId> = BTreeSet::new();
+    let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
+    let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
 
     for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
         let army = &state.armies[army_id];
         let power = power_at(&army.location);
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
+        let cap = state.army_movement_allowance(data, army);
         let table = dijkstra(
             state,
             data,
             ctx.faction,
             &army.location,
-            Some(PLANNING_RANGE),
+            Some(range),
+            Some(cap),
         );
+        let steps = |cost: u32| f64::from(cost) / step;
         let besieging = state
-            .provinces
+            .settlements
             .get(&army.location)
-            .and_then(|p| p.siege.as_ref())
+            .and_then(|s| s.siege.as_ref())
             .is_some_and(|s| &s.attacker == ctx.faction);
+        let here = province(&army.location);
 
-        let mut choice: Option<(Objective, ProvinceId)> = None;
+        let mut choice: Option<(Objective, SettlementId)> = None;
 
         // 5. Retreat when broken or starving in winter.
         let broken =
             max_strength > 0 && f64::from(strength) < RETREAT_STRENGTH * f64::from(max_strength);
         let starving = state.season == Season::Winter
             && army.supply < 30
-            && state.is_hostile_territory(ctx.faction, &army.location);
+            && here
+                .as_ref()
+                .is_some_and(|p| state.is_hostile_territory(ctx.faction, p));
         if (broken || starving) && !besieging {
             let home = table
                 .iter()
-                .filter(|(id, _)| ctx.owns(id) && ctx.threat(id) < power)
+                .filter(|(id, _)| ctx.owns_settlement(id) && ctx.threat_at(id) < power)
                 .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
                 .map(|(id, _)| id.clone());
             if let Some(home) = home {
@@ -923,7 +1025,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         }
 
         // Keep a siege that is going our way.
-        if choice.is_none() && besieging && ctx.threat(&army.location) < power * 1.2 {
+        if choice.is_none() && besieging && ctx.threat_at(&army.location) < power * 1.2 {
             targeted.insert(army.location.clone());
             // Storm the walls when the odds are good (M8).
             if state
@@ -944,25 +1046,26 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             continue;
         }
 
-        // 1. Defend a threatened friendly province.
+        // 1. Defend a threatened friendly settlement.
         if choice.is_none() {
             choice = table
                 .iter()
                 .filter(|(id, _)| {
-                    state.is_friendly_territory(ctx.faction, id) && !defended.contains(*id)
+                    state.is_friendly_settlement(ctx.faction, id) && !defended.contains(*id)
                 })
                 .filter_map(|(id, reach)| {
-                    let threat = ctx.threat(id);
-                    let local = state.defensive_power(data, id);
+                    let threat = ctx.threat_at(id);
+                    let local = state.settlement_defensive_power(data, id);
                     (threat > local * 0.8 && power >= DEFENCE_RATIO * threat).then(|| {
-                        let weight =
-                            if Some(id) == state.factions.get(ctx.faction).map(|f| &f.capital) {
-                                3.0
-                            } else {
-                                1.0
-                            };
-                        let value = weight * (ctx.province_income(id) + threat)
-                            / (1.0 + f64::from(reach.cost));
+                        let weight = if Some(id) == my_capital.as_ref() {
+                            3.0
+                        } else if ctx.is_city(id) {
+                            2.0
+                        } else {
+                            1.0
+                        };
+                        let value = weight * (ctx.settlement_income(id) + threat)
+                            / (1.0 + steps(reach.cost));
                         (value, id.clone())
                     })
                 })
@@ -970,32 +1073,42 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .map(|(_, id)| (Objective::Defend, id));
         }
 
-        // 2. Besiege the most valuable weak enemy province.
+        // 2. Besiege the most valuable weak enemy settlement: cities first
+        // (they hand over the province), then the others by weight and
+        // fortification (lot C4).
         if choice.is_none() {
             choice = table
                 .iter()
                 .filter(|(id, _)| {
-                    state.is_hostile_territory(ctx.faction, id) && !targeted.contains(*id)
+                    state.is_hostile_settlement(ctx.faction, id) && !targeted.contains(*id)
                 })
-                .filter(|(id, _)| state.defensive_power(data, id) * SIEGE_SUPERIORITY < power)
+                .filter(|(id, _)| {
+                    state.settlement_defensive_power(data, id) * SIEGE_SUPERIORITY < power
+                })
+                .filter_map(|(id, reach)| province(id).map(|p| (id, reach, p)))
                 // Landings only for claimed provinces (England in France, not
                 // the reverse).
-                .filter(|(id, _)| claims.contains(*id) || !crosses_sea(data, &table, id))
+                .filter(|(id, _, p)| claims.contains(p) || !crosses_sea(data, &table, id))
                 // F4: the last strongholds of a realm we hold no claim on are
                 // left to the peace table (Scotland survives Edward III).
-                .filter(|(id, _)| claims.contains(*id) || !last_bastions.contains(*id))
-                .map(|(id, reach)| {
-                    let mut value = ctx.province_income(id) / 100.0 + 10.0;
+                .filter(|(_, _, p)| claims.contains(p) || !last_bastions.contains(p))
+                .map(|(id, reach, p)| {
+                    let mut value = ctx.settlement_income(id) / 100.0 + 10.0;
+                    if ctx.is_city(id) {
+                        value += CITY_TARGET_BONUS;
+                    }
+                    value -= FORTIFICATION_TARGET_PENALTY
+                        * f64::from(state.fortification_level(data, id));
                     if enemy_capitals.contains(id) {
                         value += 50.0;
                     }
-                    if claims.contains(id) {
+                    if claims.contains(&p) {
                         value += 30.0;
                     }
                     if crosses_sea(data, &table, id) {
                         value *= SEA_INVASION_FACTOR;
                     }
-                    (value / (1.0 + f64::from(reach.cost) / 2.0), id.clone())
+                    (value.max(1.0) / (1.0 + steps(reach.cost) / 2.0), id.clone())
                 })
                 .max_by(|a, b| a.0.total_cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
                 .map(|(_, id)| (Objective::Siege, id));
@@ -1005,14 +1118,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         if choice.is_none() && ctx.aggression >= 65 && ctx.at_war() {
             choice = table
                 .iter()
-                .filter(|(id, _)| state.is_hostile_territory(ctx.faction, id))
-                .filter(|(id, _)| {
-                    state.provinces[*id].devastation < 50
-                        && (claims.contains(*id) || !last_bastions.contains(*id))
-                        && state.defensive_power(data, id) < power * 2.0
-                        && ctx.threat(id) < power
+                .filter_map(|(id, reach)| province(id).map(|p| (id, reach, p)))
+                .filter(|(_, _, p)| state.is_hostile_territory(ctx.faction, p))
+                .filter(|(id, _, p)| {
+                    state.provinces[p].devastation < 50
+                        && (claims.contains(p) || !last_bastions.contains(p))
+                        && state.defensive_power(data, p) < power * 2.0
+                        && ctx.threat(p) < power
                         && !crosses_sea(data, &table, id)
                 })
+                .map(|(id, reach, _)| (id, reach))
                 .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
                 .map(|(id, _)| (Objective::Raid, id.clone()));
         }
@@ -1032,7 +1147,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         let Some((objective, target)) = choice else {
             // Idle: normal stance at home.
             if army.stance != Stance::Normal
-                && !state.is_hostile_territory(ctx.faction, &army.location)
+                && !here
+                    .as_ref()
+                    .is_some_and(|p| state.is_hostile_territory(ctx.faction, p))
             {
                 orders.push(Order::SetStance {
                     army: army_id.clone(),
@@ -1063,10 +1180,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         }
         if target != army.location {
             if let Some(path) = path_to(&table, &target) {
-                orders.push(Order::MoveArmy {
-                    army: army_id.clone(),
-                    path,
-                });
+                orders.push(Order::move_along(army_id.clone(), path));
             }
         }
     }

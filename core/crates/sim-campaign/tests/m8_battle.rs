@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 use sim_battle::{BattleSim, SideId};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
@@ -19,6 +19,14 @@ fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
 }
 
+/// The city of Guyenne (lot C4: sieges target settlements).
+fn guyenne(state: &CampaignState) -> SettlementId {
+    state
+        .province_city_id(&prov("prov_guyenne"))
+        .unwrap()
+        .clone()
+}
+
 fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
 }
@@ -32,23 +40,27 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
         .find(|(_, a)| a.faction == fac("fac_france"))
         .map(|(id, _)| id.clone())
         .unwrap();
-    let guyenne = prov("prov_guyenne");
+    let city = guyenne(&state);
+    let kent = state.province_city_id(&prov("prov_kent")).unwrap().clone();
     let english: Vec<ArmyId> = state
         .armies
         .iter()
-        .filter(|(_, a)| a.location == guyenne && a.faction != fac("fac_france"))
+        .filter(|(_, a)| {
+            state.settlement_province(&a.location) == Some(&prov("prov_guyenne"))
+                && a.faction != fac("fac_france")
+        })
         .map(|(id, _)| id.clone())
         .collect();
     for id in english {
-        state.armies.get_mut(&id).unwrap().location = prov("prov_kent");
+        state.armies.get_mut(&id).unwrap().location = kent.clone();
     }
     let a = state.armies.get_mut(&army).unwrap();
-    a.location = guyenne;
+    a.location = city;
     a.stance = Stance::Siege;
     a.path.clear();
     state.end_turn_with(data, idle);
     assert!(state
-        .province_state(&prov("prov_guyenne"))
+        .settlement_state(&guyenne(&state))
         .unwrap()
         .siege
         .is_some());
@@ -60,7 +72,7 @@ fn player_assault_waits_as_a_pending_siege_battle() {
     let data = data();
     let (mut state, army) = besiege_guyenne(&data, 4);
     let garrison = state
-        .province_state(&prov("prov_guyenne"))
+        .settlement_state(&guyenne(&state))
         .unwrap()
         .garrison
         .len();
@@ -81,17 +93,14 @@ fn player_assault_waits_as_a_pending_siege_battle() {
     let siege = setup.siege.as_ref().expect("siege battle");
     assert_eq!(
         siege.fortification,
-        state.fortification_level(&data, &prov("prov_guyenne"))
+        state.fortification_level(&data, &guyenne(&state))
     );
     assert_eq!(setup.defender.units.len(), garrison);
     assert_eq!(setup.player_side, Some(SideId::Attacker));
     assert!(!setup.river);
     // The town is not taken yet.
     assert_eq!(
-        state
-            .province_state(&prov("prov_guyenne"))
-            .unwrap()
-            .controller,
+        state.settlement_state(&guyenne(&state)).unwrap().controller,
         fac("fac_england")
     );
 }
@@ -123,7 +132,7 @@ fn a_3d_siege_victory_takes_the_town() {
     assert_eq!(outcome.defender.losses.len(), setup.defender.units.len());
     let events = state.resolve_pending_battle(&data, 0, &outcome).unwrap();
     assert!(state.pending_battles.is_empty());
-    let province = state.province_state(&prov("prov_guyenne")).unwrap();
+    let province = state.settlement_state(&guyenne(&state)).unwrap();
     assert_eq!(province.controller, fac("fac_france"));
     assert!(province.siege.is_none());
     assert!(events.iter().any(|e| e.text_fr.contains("Assaut")));
@@ -143,11 +152,7 @@ fn pending_assaults_are_auto_resolved_and_saved() {
     assert!(json.contains("\"siege\":true"));
     let events = state.auto_resolve_pending(&data, 0).unwrap();
     assert!(events.iter().any(|e| e.text_fr.contains("Assaut")));
-    let taken = state
-        .province_state(&prov("prov_guyenne"))
-        .unwrap()
-        .controller
-        == fac("fac_france");
+    let taken = state.settlement_state(&guyenne(&state)).unwrap().controller == fac("fac_france");
     let after: u32 = state
         .armies
         .get(&army)

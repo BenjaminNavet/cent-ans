@@ -197,11 +197,9 @@ impl CampaignState {
                         .is_some_and(|f| f.at_war_with.iter().any(|enemy| !is_rebels(enemy))),
                 }
             }
-            Condition::Controls { faction, province } => scope_faction(faction).is_some_and(|f| {
-                self.provinces
-                    .get(province)
-                    .is_some_and(|p| p.controller == f)
-            }),
+            Condition::Controls { faction, province } => {
+                scope_faction(faction).is_some_and(|f| self.controls_province(&f, province))
+            }
             Condition::CharacterAlive { id } => self.characters.get(id).is_some_and(|c| c.alive),
             Condition::CharacterCaptive { id } => self
                 .characters
@@ -227,8 +225,8 @@ impl CampaignState {
                 .and_then(|p| self.provinces.get(&p))
                 .is_some_and(|p| weighted_unrest(&p.population) > f64::from(*amount)),
             Condition::ProvinceBesieged { province, by } => scope_province(province)
-                .and_then(|p| self.provinces.get(&p))
-                .and_then(|p| p.siege.as_ref())
+                .and_then(|p| self.city_state(&p))
+                .and_then(|city| city.siege.as_ref())
                 .is_some_and(|siege| by.as_ref().is_none_or(|by| &siege.attacker == by)),
             Condition::ProvinceCoastal { province } => scope_province(province)
                 .and_then(|p| data.provinces.get(&p))
@@ -238,11 +236,7 @@ impl CampaignState {
                 .is_some_and(|f| f.treasury > *amount),
             Condition::ProvincesBelow { faction, count } => {
                 scope_faction(faction).is_some_and(|f| {
-                    let controlled = self
-                        .provinces
-                        .values()
-                        .filter(|p| p.controller == f)
-                        .count();
+                    let controlled = self.controlled_provinces(&f).len();
                     controlled < *count as usize
                 })
             }
@@ -622,12 +616,7 @@ impl CampaignState {
         ctx: &EventContext,
     ) -> Vec<ProvinceId> {
         let all = || match &ctx.faction {
-            Some(faction) => self
-                .provinces
-                .iter()
-                .filter(|(_, p)| &p.controller == faction)
-                .map(|(id, _)| id.clone())
-                .collect(),
+            Some(faction) => self.controlled_provinces(faction),
             None => Vec::new(),
         };
         match (target, &ctx.province) {
@@ -831,14 +820,19 @@ pub fn apply_effect(
             if units.is_empty() {
                 return;
             }
+            let Some(city) = state.province_city_id(&location).cloned() else {
+                return;
+            };
             let id = state.allocate_army_id();
-            let movement_points = state.season.movement_points();
+            let movement_points = (f64::from(state.season.movement_steps())
+                * crate::movement::points_per_step(data))
+            .round() as u32;
             state.armies.insert(
                 id.clone(),
                 Army {
                     faction: faction.clone(),
                     general: None,
-                    location: location.clone(),
+                    location: city,
                     units,
                     movement_points,
                     supply: 100,
@@ -952,9 +946,8 @@ pub fn apply_effect(
             from,
         } => {
             let holder = state
-                .provinces
-                .get(province)
-                .map(|p| (&p.owner, &p.controller));
+                .province_owner(province)
+                .zip(state.province_controller(province));
             let from_ok = from
                 .as_ref()
                 .is_none_or(|f| holder.is_some_and(|(o, c)| o == f || c == f));
@@ -990,19 +983,19 @@ pub fn transfer_province(
     faction: &FactionId,
     events: &mut Vec<GameEvent>,
 ) -> bool {
-    let Some(p) = state.provinces.get(province) else {
+    let Some(owner) = state.province_owner(province).cloned() else {
         return false;
     };
     let alive = state.factions.get(faction).is_some_and(|f| f.alive);
-    let held = &p.owner == faction && &p.controller == faction;
+    let held = state.holds_province(faction, province);
     let capital = state
         .factions
-        .get(&p.owner)
+        .get(&owner)
         .is_some_and(|f| &f.capital == province);
     if !alive || held || capital {
         return false;
     }
-    let previous = p.owner.clone();
+    let previous = owner;
     crate::ransom::cede_province(state, &previous, faction, province);
     events.push(
         GameEvent::new(
@@ -1384,11 +1377,14 @@ fn matching_provinces(
 ) -> Vec<ProvinceId> {
     state
         .provinces
-        .iter()
-        .filter(|(_, p)| faction.is_none_or(|f| &p.controller == f) && !is_rebels(&p.controller))
-        .filter(|(id, p)| {
+        .keys()
+        .filter_map(|id| state.province_controller(id).map(|c| (id, c)))
+        .filter(|(_, controller)| {
+            faction.is_none_or(|f| *controller == f) && !is_rebels(controller)
+        })
+        .filter(|(id, controller)| {
             let ctx = EventContext {
-                faction: Some(p.controller.clone()),
+                faction: Some((*controller).clone()),
                 province: Some((*id).clone()),
             };
             state.event_conditions_hold(data, event, &ctx)
@@ -1447,8 +1443,7 @@ fn targets(
             };
             let chosen = match province {
                 Some(p) => {
-                    let Some(controller) = state.provinces.get(p).map(|s| s.controller.clone())
-                    else {
+                    let Some(controller) = state.province_controller(p).cloned() else {
                         return Vec::new();
                     };
                     let allowed = restrict.as_ref().is_none_or(|r| r == &controller)
@@ -1471,8 +1466,8 @@ fn targets(
             };
             chosen
                 .map(|p| {
-                    let controller = state.provinces[&p].controller.clone();
-                    vec![(Some(controller), Some(p))]
+                    let controller = state.province_controller(&p).cloned();
+                    vec![(controller, Some(p))]
                 })
                 .unwrap_or_default()
         }
@@ -1681,11 +1676,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
     }
     let player = state.player_faction.clone();
     for id in &spared {
-        if state
-            .provinces
-            .get(id)
-            .is_some_and(|p| p.controller == player)
-        {
+        if state.controls_province(&player, id) {
             events.push(
                 GameEvent::new(
                     EventKind::Medicine,
@@ -1705,12 +1696,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),
         );
-        if let Some(own) = struck.iter().find(|p| {
-            state
-                .provinces
-                .get(*p)
-                .is_some_and(|s| s.controller == player)
-        }) {
+        if let Some(own) = struck.iter().find(|p| state.controls_province(&player, p)) {
             entry = entry.province(own).faction(&player);
         }
         events.push(entry);

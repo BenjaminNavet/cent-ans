@@ -24,10 +24,10 @@ fn main() {
             for id in ["fac_england", "fac_france"] {
                 let f = &state.factions[&data_model::FactionId::new(id).unwrap()];
                 let garrison: usize = state
-                    .provinces
+                    .settlements
                     .values()
-                    .filter(|p| p.controller.as_str() == id)
-                    .map(|p| p.garrison.len())
+                    .filter(|s| s.controller.as_str() == id)
+                    .map(|s| s.garrison.len())
                     .sum();
                 let field: usize = state
                     .armies
@@ -82,11 +82,7 @@ fn main() {
     }
     for (id, f) in &state.factions {
         if f.alive {
-            let provinces = state
-                .provinces
-                .values()
-                .filter(|p| &p.controller == id)
-                .count();
+            let provinces = state.controlled_provinces(id).len();
             let armies = state.armies.values().filter(|a| &a.faction == id).count();
             println!(
                 "{id:14} treasury {:>8} income {:>6} upkeep {:>6} (army {:>6}, build {:>5}) provinces {provinces:3} armies {armies:2} power {:>6.0} war {:?}",

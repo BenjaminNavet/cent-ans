@@ -10,7 +10,8 @@
 //! the next turn starts is auto-resolved first.
 
 use data_model::{
-    Ability, CharacterId, FactionId, GameData, ProvinceId, Terrain, UnitCategory, UnitStats,
+    Ability, CharacterId, FactionId, GameData, ProvinceId, SettlementId, Terrain, UnitCategory,
+    UnitStats,
 };
 use serde::{Deserialize, Serialize};
 use sim_battle::{
@@ -35,6 +36,8 @@ pub struct PendingBattle {
     pub index: usize,
     pub attacker: ArmyId,
     pub defender: ArmyId,
+    /// Settlement where the battle takes place (lot C4).
+    pub location: SettlementId,
     pub province: ProvinceId,
     pub attacker_name: String,
     pub defender_name: String,
@@ -69,7 +72,7 @@ pub(crate) fn defer_player_battle(
     data: &GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
-    attacker_origin: &ProvinceId,
+    attacker_origin: &SettlementId,
     events: &mut Vec<GameEvent>,
 ) -> bool {
     if !state.interactive_battles {
@@ -90,13 +93,16 @@ pub(crate) fn defer_player_battle(
     if !involved(attacker_id, &defender.faction) && !involved(defender_id, &attacker.faction) {
         return false;
     }
-    let province = attacker.location.clone();
+    let location = attacker.location.clone();
+    let Some(province) = state.settlement_province(&location).cloned() else {
+        return false;
+    };
     events.push(
         GameEvent::new(
             EventKind::Battle,
             format!(
                 "Bataille en vue à {} : {} contre {}.",
-                province_name(data, &province),
+                crate::siege::settlement_name(data, &location),
                 faction_name(data, &attacker.faction),
                 faction_name(data, &defender.faction)
             ),
@@ -108,6 +114,7 @@ pub(crate) fn defer_player_battle(
     state.pending_battles.push(BattleRequest {
         attacker: attacker_id.clone(),
         defender: defender_id.clone(),
+        location,
         province,
         attacker_origin: Some(attacker_origin.clone()),
         siege: false,
@@ -133,7 +140,7 @@ pub(crate) fn auto_resolve_all_pending(
             let origin = request
                 .attacker_origin
                 .clone()
-                .unwrap_or_else(|| request.province.clone());
+                .unwrap_or_else(|| request.location.clone());
             movement::auto_fight(
                 state,
                 data,
@@ -146,31 +153,31 @@ pub(crate) fn auto_resolve_all_pending(
     }
 }
 
-/// Both armies still exist, stand in the battle's province and are at war
-/// (siege: the besiegers still besiege a garrisoned town).
+/// Both armies still exist, stand on the battle's settlement and are at war
+/// (siege: the besiegers still besiege a garrisoned settlement).
 fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
     if request.siege {
-        let (Some(army), Some(province)) = (
+        let (Some(army), Some(settlement)) = (
             state.armies.get(&request.attacker),
-            state.provinces.get(&request.province),
+            state.settlements.get(&request.location),
         ) else {
             return false;
         };
-        return army.location == request.province
-            && !province.garrison.is_empty()
-            && province
+        return army.location == request.location
+            && !settlement.garrison.is_empty()
+            && settlement
                 .siege
                 .as_ref()
                 .is_some_and(|s| s.attacker == army.faction)
-            && state.is_at_war(&army.faction, &province.controller);
+            && state.is_at_war(&army.faction, &settlement.controller);
     }
     match (
         state.armies.get(&request.attacker),
         state.armies.get(&request.defender),
     ) {
         (Some(a), Some(d)) => {
-            a.location == request.province
-                && d.location == request.province
+            a.location == request.location
+                && d.location == request.location
                 && state.is_at_war(&a.faction, &d.faction)
         }
         _ => false,
@@ -362,9 +369,9 @@ impl CampaignState {
                 let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
                 let attacker_faction = faction(&request.attacker);
                 let defender_faction = if request.siege {
-                    self.provinces
-                        .get(&request.province)
-                        .map(|p| p.controller.clone())
+                    self.settlements
+                        .get(&request.location)
+                        .map(|s| s.controller.clone())
                 } else {
                     faction(&request.defender)
                 };
@@ -385,6 +392,7 @@ impl CampaignState {
                     index,
                     attacker: request.attacker.clone(),
                     defender: request.defender.clone(),
+                    location: request.location.clone(),
                     province: request.province.clone(),
                     attacker_name: name(attacker_faction),
                     defender_name: name(defender_faction),
@@ -452,7 +460,7 @@ impl CampaignState {
         }
         let garrison = request
             .siege
-            .then(|| crate::siege::garrison_army(self, &request.province))
+            .then(|| crate::siege::garrison_army(self, &request.location))
             .flatten();
         // F1: field battles include the allied armies of the province, in
         // the same order as `battle_setup`.
@@ -539,12 +547,12 @@ impl CampaignState {
             defender: defender_outcome,
         };
         if request.siege {
-            let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.province);
+            let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.location);
             crate::siege::apply_assault_result(
                 self,
                 data,
                 &attackers,
-                &request.province,
+                &request.location,
                 &result,
                 walls,
                 &mut events,
@@ -564,7 +572,7 @@ impl CampaignState {
         let origin = request
             .attacker_origin
             .clone()
-            .unwrap_or_else(|| request.province.clone());
+            .unwrap_or_else(|| request.location.clone());
         movement::apply_battle_result(
             self,
             data,
@@ -634,7 +642,7 @@ impl CampaignState {
         // G1: the allied armies of the province storm alongside.
         let attackers = crate::siege::assault_coalition(self, &request.attacker);
         let attacker = &movement::coalition_army(self, &attackers).expect("live siege");
-        let garrison = crate::siege::garrison_army(self, &request.province).expect("live siege");
+        let garrison = crate::siege::garrison_army(self, &request.location).expect("live siege");
         let province = data.provinces.get(&request.province);
         let player_attacks = attackers.iter().any(|id| {
             self.armies
@@ -649,9 +657,9 @@ impl CampaignState {
             None
         };
         let breach = self
-            .provinces
-            .get(&request.province)
-            .and_then(|p| p.siege.as_ref())
+            .settlements
+            .get(&request.location)
+            .and_then(|s| s.siege.as_ref())
             .map_or(0, |s| s.breach);
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
@@ -665,7 +673,7 @@ impl CampaignState {
             defender,
             player_side,
             siege: Some(SiegeSetup {
-                fortification: self.fortification_level(data, &request.province),
+                fortification: self.fortification_level(data, &request.location),
                 breach,
             }),
             orders: data.battle_orders.values().cloned().collect(),
@@ -673,9 +681,9 @@ impl CampaignState {
     }
 
     /// Debug helper for headless tests and screenshots: puts `army` in
-    /// siege of the enemy province `province` (moving it there, giving the
-    /// town a garrison if it has none) and records a pending siege battle.
-    /// Returns the battle index.
+    /// siege of the city of the enemy province `province` (moving it there,
+    /// giving the town a garrison if it has none) and records a pending
+    /// siege battle. Returns the battle index.
     pub fn debug_stage_siege(
         &mut self,
         data: &GameData,
@@ -687,14 +695,15 @@ impl CampaignState {
             return Err(BattleRequestError::Stale(index));
         };
         let faction = a.faction.clone();
-        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+        let Some(city) = self.province_city_id(province).cloned() else {
             return Err(BattleRequestError::Stale(index));
         };
+        let controller = self.settlements[&city].controller.clone();
         if !self.is_at_war(&faction, &controller) {
             return Err(BattleRequestError::Stale(index));
         }
         let army_state = self.armies.get_mut(army).expect("exists");
-        army_state.location = province.clone();
+        army_state.location = city.clone();
         army_state.path.clear();
         army_state.stance = crate::state::Stance::Siege;
         if let Some(general) = army_state.general.clone() {
@@ -702,7 +711,7 @@ impl CampaignState {
                 c.location = Some(province.clone());
             }
         }
-        let p = self.provinces.get_mut(province).expect("exists");
+        let p = self.settlements.get_mut(&city).expect("exists");
         if p.garrison.is_empty() {
             if let Some(unit_type) = data
                 .unit_types
@@ -734,6 +743,7 @@ impl CampaignState {
         self.pending_battles.push(BattleRequest {
             attacker: army.clone(),
             defender: army.clone(),
+            location: city,
             province: province.clone(),
             attacker_origin: None,
             siege: true,
@@ -756,9 +766,12 @@ impl CampaignState {
         if !self.is_at_war(&a.faction, &d.faction) {
             return Err(BattleRequestError::Stale(index));
         }
-        let province = a.location.clone();
+        let location = a.location.clone();
+        let Some(province) = self.settlement_province(&location).cloned() else {
+            return Err(BattleRequestError::Stale(index));
+        };
         let army = self.armies.get_mut(defender).expect("exists");
-        army.location = province.clone();
+        army.location = location.clone();
         army.path.clear();
         if let Some(general) = army.general.clone() {
             if let Some(c) = self.characters.get_mut(&general) {
@@ -768,8 +781,9 @@ impl CampaignState {
         self.pending_battles.push(BattleRequest {
             attacker: attacker.clone(),
             defender: defender.clone(),
-            province: province.clone(),
-            attacker_origin: Some(province),
+            location: location.clone(),
+            province,
+            attacker_origin: Some(location),
             siege: false,
         });
         Ok(index)
@@ -798,7 +812,7 @@ impl CampaignState {
         let origin = request
             .attacker_origin
             .clone()
-            .unwrap_or_else(|| request.province.clone());
+            .unwrap_or_else(|| request.location.clone());
         let mut events = Vec::new();
         movement::auto_fight(
             self,

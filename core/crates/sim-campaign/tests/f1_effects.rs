@@ -7,9 +7,9 @@ use std::path::PathBuf;
 
 use data_model::{
     BuildingId, CharacterId, CharacterRef, Condition, EventEffect, EventId, FactionId, GameData,
-    ProvinceId, TechnologyId, TraitId, UnitTypeId,
+    ProvinceId, SettlementId, TechnologyId, TraitId, UnitTypeId,
 };
-use sim_campaign::{ArmyId, CampaignState, EventContext, Order, Season, Unit};
+use sim_campaign::{ArmyId, CampaignState, EventContext, Order, Season, SettlementState, Unit};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
@@ -23,6 +23,28 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// The city of a province (lot C4: buildings, garrisons and recruitment
+/// belong to settlements).
+fn city(state: &CampaignState, province: &ProvinceId) -> SettlementId {
+    state.province_city_id(province).unwrap().clone()
+}
+
+fn city_mut<'a>(state: &'a mut CampaignState, province: &ProvinceId) -> &'a mut SettlementState {
+    let id = city(state, province);
+    state.settlements.get_mut(&id).unwrap()
+}
+
+/// Removes `buildings` from every settlement of `province`.
+fn strip(state: &mut CampaignState, province: &ProvinceId, buildings: &[BuildingId]) {
+    for settlement in state
+        .settlements
+        .values_mut()
+        .filter(|s| &s.province == province)
+    {
+        settlement.buildings.retain(|b| !buildings.contains(b));
+    }
 }
 
 fn bld(id: &str) -> BuildingId {
@@ -97,17 +119,10 @@ fn class_targeted_building_effects_reach_only_their_class() {
     let province = prov("prov_ile_de_france");
     let mut with = quiet_france(&data, 7);
     let mut without = with.clone();
-    with.provinces
-        .get_mut(&province)
-        .unwrap()
+    city_mut(&mut with, &province)
         .buildings
         .push(bld("bld_guild_hall"));
-    without
-        .provinces
-        .get_mut(&province)
-        .unwrap()
-        .buildings
-        .retain(|b| b != &bld("bld_guild_hall"));
+    strip(&mut without, &province, &[bld("bld_guild_hall")]);
     for _ in 0..4 {
         with.end_turn_with(&data, idle);
         without.end_turn_with(&data, idle);
@@ -131,15 +146,11 @@ fn garrison_effect_lowers_garrison_upkeep() {
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
     let walls = ["bld_palisade", "bld_stone_walls", "bld_castle"].map(bld);
-    let p = state.provinces.get_mut(&province).unwrap();
-    assert!(!p.garrison.is_empty());
-    p.buildings.retain(|b| !walls.contains(b));
+    assert!(!city_mut(&mut state, &province).garrison.is_empty());
+    strip(&mut state, &province, &walls);
     assert_eq!(state.province_effects(&data, &province).garrison.flat, 0.0);
     let before = state.faction_upkeep(&data, &france_id);
-    state
-        .provinces
-        .get_mut(&province)
-        .unwrap()
+    city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_palisade"));
     let after = state.faction_upkeep(&data, &france_id);
@@ -154,7 +165,7 @@ fn garrison_effect_reinforces_a_depleted_garrison() {
     let data = data();
     let mut state = quiet_france(&data, 4);
     let province = prov("prov_ile_de_france");
-    let p = state.provinces.get_mut(&province).unwrap();
+    let p = city_mut(&mut state, &province);
     assert!(!p.garrison.is_empty());
     p.buildings.push(bld("bld_castle"));
     for unit in &mut p.garrison {
@@ -162,7 +173,9 @@ fn garrison_effect_reinforces_a_depleted_garrison() {
     }
     let before: u32 = p.garrison.iter().map(|u| u.strength).sum();
     state.end_turn_with(&data, idle);
-    let after: u32 = state.provinces[&province]
+    let after: u32 = state
+        .city_state(&province)
+        .unwrap()
         .garrison
         .iter()
         .map(|u| u.strength)
@@ -175,7 +188,7 @@ fn recruit_cost_effects_target_their_unit_family() {
     let data = data();
     let mut state = quiet_france(&data, 5);
     let france_id = fac("fac_france");
-    let province = prov("prov_ile_de_france");
+    let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
             .recruit_option(&data, &france_id, &province, &unit(id))
@@ -185,7 +198,7 @@ fn recruit_cost_effects_target_their_unit_family() {
     let knights = cost(&state, "unit_knights");
     let militia = cost(&state, "unit_urban_militia");
     state
-        .provinces
+        .settlements
         .get_mut(&province)
         .unwrap()
         .buildings
@@ -200,7 +213,7 @@ fn recruit_cost_effects_target_their_unit_family() {
         .submit_order(
             &data,
             Order::Recruit {
-                province: province.clone(),
+                settlement: province.clone().into(),
                 unit_type: unit("unit_knights"),
             },
         )
@@ -220,9 +233,11 @@ fn supply_buildings_speed_up_recovery_in_the_province() {
     let run = |port: bool| {
         let mut state = base.clone();
         state.armies.get_mut(&army).unwrap().supply = 10;
-        let p = state.provinces.get_mut(&location).unwrap();
-        p.buildings.retain(|b| b != &bld("bld_port"));
+        // Lot C4: the port may stand in any settlement of the province.
+        let province = state.settlement_province(&location).unwrap().clone();
+        strip(&mut state, &province, &[bld("bld_port")]);
         if port {
+            let p = state.settlements.get_mut(&location).unwrap();
             p.buildings.push(bld("bld_port"));
         }
         state.end_turn_with(&data, idle);
@@ -257,18 +272,18 @@ fn army_experience_technology_trains_recruits() {
     grant_tech(&mut state, "fac_france", "tech_standing_companies");
     let province = prov("prov_ile_de_france");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 100_000;
-    let garrison_before = state.provinces[&province].garrison.len();
+    let garrison_before = state.city_state(&province).unwrap().garrison.len();
     state
         .submit_order(
             &data,
             Order::Recruit {
-                province: province.clone(),
+                settlement: province.clone().into(),
                 unit_type: unit("unit_urban_militia"),
             },
         )
         .unwrap();
     state.end_turn_with(&data, idle);
-    let recruit = &state.provinces[&province].garrison[garrison_before];
+    let recruit = &state.city_state(&province).unwrap().garrison[garrison_before];
     assert_eq!(recruit.unit_type, unit("unit_urban_militia"));
     assert!(recruit.experience >= 2, "experience {}", recruit.experience);
 }
@@ -278,7 +293,7 @@ fn recruit_cost_technology_targets_its_family() {
     let data = data();
     let mut state = quiet_france(&data, 13);
     let france_id = fac("fac_france");
-    let province = prov("prov_ile_de_france");
+    let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
             .recruit_option(&data, &france_id, &province, &unit(id))
@@ -302,9 +317,15 @@ fn siege_trains_slow_armies_until_field_artillery() {
     let mut army = state.armies[&army_id].clone();
     army.general = None;
     let plain = state.army_movement_allowance(&data, &army);
-    assert_eq!(plain, state.season().movement_points());
+    // Lot C4: season steps times the points of one step.
+    let per_step = sim_campaign::movement::points_per_step(&data);
+    let steps = state.season().movement_steps();
+    assert_eq!(plain, (f64::from(steps) * per_step).round() as u32);
+    // A siege train marches at -20 % pace: one step less (3 -> 2).
     army.units.push(trebuchet);
-    assert_eq!(state.army_movement_allowance(&data, &army), plain - 1);
+    let slowed = ((f64::from(steps) * 0.8 + 1e-9).floor().max(1.0) * per_step).round() as u32;
+    assert!(slowed < plain);
+    assert_eq!(state.army_movement_allowance(&data, &army), slowed);
     grant_tech(&mut state, "fac_france", "tech_field_artillery");
     assert_eq!(state.army_movement_allowance(&data, &army), plain);
 }
@@ -315,17 +336,9 @@ fn production_buildings_raise_income() {
     let mut state = quiet_france(&data, 15);
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
-    state
-        .provinces
-        .get_mut(&province)
-        .unwrap()
-        .buildings
-        .retain(|b| b != &bld("bld_weaving_workshop"));
+    strip(&mut state, &province, &[bld("bld_weaving_workshop")]);
     let before = state.faction_income_effective(&data, &france_id);
-    state
-        .provinces
-        .get_mut(&province)
-        .unwrap()
+    city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_weaving_workshop"));
     let after = state.faction_income_effective(&data, &france_id);
@@ -339,7 +352,7 @@ fn production_buildings_raise_income() {
 fn siege_resistance_and_masonry_harden_walled_towns() {
     let data = data();
     let mut state = quiet_france(&data, 16);
-    let province = prov("prov_ile_de_france");
+    let province = city(&state, &prov("prov_ile_de_france"));
     let england = fac("fac_england");
     state
         .factions
@@ -347,7 +360,7 @@ fn siege_resistance_and_masonry_harden_walled_towns() {
         .unwrap()
         .technologies
         .remove(&tech("tech_masonry"));
-    let p = state.provinces.get_mut(&province).unwrap();
+    let p = state.settlements.get_mut(&province).unwrap();
     p.buildings.retain(|b| {
         !["bld_palisade", "bld_stone_walls", "bld_castle"]
             .map(bld)
@@ -356,7 +369,7 @@ fn siege_resistance_and_masonry_harden_walled_towns() {
     let open_level = state.fortification_level(&data, &province);
     let open_resistance = state.siege_resistance(&data, &province, &england);
     state
-        .provinces
+        .settlements
         .get_mut(&province)
         .unwrap()
         .buildings
@@ -371,7 +384,7 @@ fn siege_resistance_and_masonry_harden_walled_towns() {
     grant_tech(&mut state, "fac_france", "tech_masonry");
     assert_eq!(state.fortification_level(&data, &province), walled + 1);
     if open_level == 0 {
-        let p = state.provinces.get_mut(&province).unwrap();
+        let p = state.settlements.get_mut(&province).unwrap();
         p.buildings.retain(|b| b != &bld("bld_stone_walls"));
         assert_eq!(state.fortification_level(&data, &province), 0);
     }
@@ -602,11 +615,7 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
     // A castle's `Loyalty` calms the local nobility only.
     let province = prov("prov_ile_de_france");
     let mut with = quiet_france(&data, 24);
-    with.provinces
-        .get_mut(&province)
-        .unwrap()
-        .buildings
-        .retain(|b| b != &bld("bld_castle"));
+    strip(&mut with, &province, &[bld("bld_castle")]);
     // A ravaged province: the nobility's unrest target is well above zero.
     with.provinces.get_mut(&province).unwrap().devastation = 100;
     let mut without = with.clone();
@@ -620,9 +629,7 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
             class.unrest = 50;
         }
     }
-    with.provinces
-        .get_mut(&province)
-        .unwrap()
+    city_mut(&mut with, &province)
         .buildings
         .push(bld("bld_castle"));
     for _ in 0..3 {

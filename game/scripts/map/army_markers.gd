@@ -35,6 +35,9 @@ var selected_army: String = ""
 ## Brouillard (lot C1) : provinces hors de vue (id → true) ; les armées étrangères qui s'y
 ## trouvent ne reçoivent pas de marqueur. Rempli par `MinimapController.refresh_fog`.
 var hidden_provinces: Dictionary = {}
+## C4/C6 : position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
+## la carte ; à défaut, `MapData.settlement_px`.
+var settlement_position: Callable = Callable()
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
 var _plates: Dictionary = {}  # army_id → PanelContainer
@@ -67,10 +70,14 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
 			continue
-		var location: String = str(army.get("location", ""))
+		# C4 : l'armée se tient sur une colonie ; sa position est celle de la colonie
+		# (couche C6, sinon `settlements_px.json`), à défaut le centroïde de sa province.
+		var location: String = str(army.get("location_province", army.get("location", "")))
 		if hidden_provinces.has(location) and str(army.get("faction", "")) != player_faction:
 			continue
-		var centroid := map_data.centroid_of_id(location)
+		var centroid := _settlement_px(str(army.get("location", "")))
+		if centroid.x < 0.0:
+			centroid = map_data.centroid_of_id(location)
 		if centroid.x < 0.0:
 			continue
 		centroid = _clear_of_city(location, centroid)
@@ -100,10 +107,21 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 func _heading(army: Dictionary, from: Vector2) -> Vector2:
 	var path: Array = army.get("path", [])
 	if not path.is_empty():
-		var next := map_data.centroid_of_id(str(path[0]))
+		var next := _settlement_px(str(path[0]))
+		if next.x < 0.0:
+			next = map_data.centroid_of_id(str(path[0]))
 		if next.x >= 0.0 and next.distance_to(from) > 0.5:
 			return (next - from).normalized()
 	return Vector2(1.0, 0.45).normalized()
+
+
+## Position carte d'une colonie ; Vector2(-1, -1) si inconnue.
+func _settlement_px(id: String) -> Vector2:
+	if settlement_position.is_valid():
+		var world: Vector3 = settlement_position.call(id)
+		if world != Vector3.ZERO:
+			return Vector2(world.x, world.z)
+	return map_data.settlement_px(id)
 
 
 ## Écarte l'armée du modèle de ville quand le centroïde tombe sur la capitale de la province.

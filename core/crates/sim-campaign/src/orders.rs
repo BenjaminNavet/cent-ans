@@ -3,10 +3,14 @@
 //! Every order is validated before anything is mutated; a rejected order
 //! leaves the state untouched. Move orders are only recorded (`Army::path`)
 //! and resolved in `end_turn`; all other orders apply immediately.
+//!
+//! Lot C4: recruitment, construction, garrisons and moves target settlements.
+//! A [`Place`] also accepts a province id, which stands for its city (the v1
+//! JSON field name `province` is still read as an alias).
 
 use data_model::{
-    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SkillId,
-    TechnologyId, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SettlementId,
+    SkillId, TechnologyId, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +23,53 @@ use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
 use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 
+/// Where an order applies: a settlement, or a province standing for its
+/// city (v1 compatibility).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Place {
+    Settlement(SettlementId),
+    Province(ProvinceId),
+}
+
+impl From<SettlementId> for Place {
+    fn from(id: SettlementId) -> Self {
+        Place::Settlement(id)
+    }
+}
+
+impl From<&SettlementId> for Place {
+    fn from(id: &SettlementId) -> Self {
+        Place::Settlement(id.clone())
+    }
+}
+
+impl From<ProvinceId> for Place {
+    fn from(id: ProvinceId) -> Self {
+        Place::Province(id)
+    }
+}
+
+impl From<&ProvinceId> for Place {
+    fn from(id: &ProvinceId) -> Self {
+        Place::Province(id.clone())
+    }
+}
+
+impl CampaignState {
+    /// The settlement a [`Place`] designates (a province: its city).
+    pub fn resolve_place(&self, place: &Place) -> Result<SettlementId, OrderError> {
+        match place {
+            Place::Settlement(id) if self.settlements.contains_key(id) => Ok(id.clone()),
+            Place::Settlement(id) => Err(OrderError::UnknownSettlement(id.clone())),
+            Place::Province(id) => self
+                .province_city_id(id)
+                .cloned()
+                .ok_or_else(|| OrderError::UnknownProvince(id.clone())),
+        }
+    }
+}
+
 /// An order issued by a faction (player through `submit_order`, AI through the planner).
 ///
 /// Serialised as `{"type": "move_army", "army": "...", "path": [...]}`; the
@@ -26,39 +77,43 @@ use crate::state::{Army, ArmyId, CampaignState, Construction, Stance, Unit};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Order {
-    /// Walk along `path` (adjacent provinces, the army's own location excluded).
+    /// Walk along `path` (adjacent settlements, the army's own location
+    /// excluded). A path naming provinces (v1) means "go to the city of the
+    /// last one" by the cheapest route.
     MoveArmy {
         army: ArmyId,
-        path: Vec<ProvinceId>,
+        path: Vec<Place>,
     },
-    /// Pay for a unit that joins the province garrison at the end of the turn.
+    /// Pay for a unit that joins the settlement's garrison at the end of the turn.
     Recruit {
-        province: ProvinceId,
+        #[serde(alias = "province")]
+        settlement: Place,
         unit_type: UnitTypeId,
     },
     /// Form a new army from garrison units (indices into the garrison).
     CreateArmy {
-        province: ProvinceId,
+        #[serde(alias = "province")]
+        settlement: Place,
         units_from_garrison: Vec<usize>,
         #[serde(default)]
         general: Option<CharacterId>,
     },
-    /// Move every unit of `source` into `target` (same province); `source` disappears.
+    /// Move every unit of `source` into `target` (same settlement); `source` disappears.
     MergeArmies {
         source: ArmyId,
         target: ArmyId,
     },
-    /// Detach `unit_indices` of `army` into a new army in the same province.
+    /// Detach `unit_indices` of `army` into a new army on the same settlement.
     SplitArmy {
         army: ArmyId,
         unit_indices: Vec<usize>,
     },
-    /// Dismiss one unit of an army (`army`) or of a garrison (`province`).
+    /// Dismiss one unit of an army (`army`) or of a garrison (`settlement`).
     DisbandUnit {
         #[serde(default)]
         army: Option<ArmyId>,
-        #[serde(default)]
-        province: Option<ProvinceId>,
+        #[serde(default, alias = "province")]
+        settlement: Option<Place>,
         unit_index: usize,
     },
     SetStance {
@@ -69,14 +124,16 @@ pub enum Order {
         army: ArmyId,
         character: CharacterId,
     },
-    /// Starts constructing `building` in `province` (spec § 1.2).
+    /// Starts constructing `building` in `settlement` (spec § 1.2).
     Build {
-        province: ProvinceId,
+        #[serde(alias = "province")]
+        settlement: Place,
         building: BuildingId,
     },
-    /// Cancels the ongoing construction of `province`, refunding half its cost.
+    /// Cancels the ongoing construction of `settlement`, refunding half its cost.
     CancelBuild {
-        province: ProvinceId,
+        #[serde(alias = "province")]
+        settlement: Place,
     },
     /// Sets the faction's tax bracket (spec § 1.4).
     SetTaxRate {
@@ -209,6 +266,16 @@ pub enum Order {
     },
 }
 
+impl Order {
+    /// `MoveArmy` along a path of settlements.
+    pub fn move_along(army: ArmyId, path: Vec<SettlementId>) -> Order {
+        Order::MoveArmy {
+            army,
+            path: path.into_iter().map(Place::from).collect(),
+        }
+    }
+}
+
 /// Why an order was refused (messages in French for the UI).
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum OrderError {
@@ -216,6 +283,8 @@ pub enum OrderError {
     UnknownArmy(ArmyId),
     #[error("province inconnue : {0}")]
     UnknownProvince(ProvinceId),
+    #[error("colonie inconnue : {0}")]
+    UnknownSettlement(SettlementId),
     #[error("type d'unité inconnu : {0}")]
     UnknownUnitType(UnitTypeId),
     #[error("personnage inconnu : {0}")]
@@ -226,13 +295,17 @@ pub enum OrderError {
     NotYourCharacter(FactionId),
     #[error("cette province n'est pas contrôlée par la faction {0}")]
     NotYourProvince(FactionId),
+    #[error("cette colonie n'est pas contrôlée par la faction {0}")]
+    NotYourSettlement(FactionId),
     #[error("chemin vide")]
     EmptyPath,
-    #[error("chemin invalide : {from} et {to} ne sont pas reliées (terre ou mer avec ports)")]
-    NotAdjacent { from: ProvinceId, to: ProvinceId },
+    #[error("chemin invalide : {from} et {to} ne sont pas reliées (route ou mer entre ports)")]
+    NotAdjacent { from: String, to: String },
+    #[error("destination inaccessible")]
+    NoPath,
     #[error("recrutement impossible : {0}")]
     RecruitUnavailable(String),
-    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette province")]
+    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette colonie")]
     RecruitQueueFull { slots: usize },
     #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
     InsufficientFunds { needed: i64, available: i64 },
@@ -242,7 +315,7 @@ pub enum OrderError {
     NoUnitsSelected,
     #[error("une armée doit garder au moins une unité")]
     WouldEmptyArmy,
-    #[error("les deux armées doivent être dans la même province")]
+    #[error("les deux armées doivent être au même endroit")]
     NotSameProvince,
     #[error("les deux armées doivent appartenir à la même faction")]
     NotSameFaction,
@@ -260,7 +333,7 @@ pub enum OrderError {
     UnknownBuilding(BuildingId),
     #[error("construction impossible : {0}")]
     BuildUnavailable(String),
-    #[error("aucune construction en cours dans cette province")]
+    #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
@@ -286,7 +359,7 @@ pub enum OrderError {
     Chivalry(#[from] crate::chivalry::ChivalryError),
 }
 
-/// G1: recruitments every province can queue per turn before buildings.
+/// G1: recruitments every settlement can queue per turn before buildings.
 pub const BASE_RECRUIT_SLOTS: usize = 2;
 
 /// One line of the recruitment panel.
@@ -322,23 +395,34 @@ impl CampaignState {
         match order {
             Order::MoveArmy { army, path } => self.order_move(data, faction, &army, path),
             Order::Recruit {
-                province,
+                settlement,
                 unit_type,
-            } => self.order_recruit(data, faction, &province, &unit_type),
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_recruit(data, faction, &settlement, &unit_type)
+            }
             Order::CreateArmy {
-                province,
+                settlement,
                 units_from_garrison,
                 general,
-            } => self.order_create_army(data, faction, &province, &units_from_garrison, general),
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_create_army(data, faction, &settlement, &units_from_garrison, general)
+            }
             Order::MergeArmies { source, target } => self.order_merge(faction, &source, &target),
             Order::SplitArmy { army, unit_indices } => {
                 self.order_split(faction, &army, &unit_indices)
             }
             Order::DisbandUnit {
                 army,
-                province,
+                settlement,
                 unit_index,
-            } => self.order_disband(faction, army.as_ref(), province.as_ref(), unit_index),
+            } => {
+                let settlement = settlement
+                    .map(|place| self.resolve_place(&place))
+                    .transpose()?;
+                self.order_disband(faction, army.as_ref(), settlement.as_ref(), unit_index)
+            }
             Order::SetStance { army, stance } => {
                 self.own_army_mut(faction, &army)?.stance = stance;
                 Ok(())
@@ -346,10 +430,17 @@ impl CampaignState {
             Order::AssignGeneral { army, character } => {
                 self.order_assign_general(faction, &army, &character)
             }
-            Order::Build { province, building } => {
-                self.order_build(data, faction, &province, &building)
+            Order::Build {
+                settlement,
+                building,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_build(data, faction, &settlement, &building)
             }
-            Order::CancelBuild { province } => self.order_cancel_build(data, faction, &province),
+            Order::CancelBuild { settlement } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_cancel_build(data, faction, &settlement)
+            }
             Order::SetTaxRate { rate } => {
                 self.factions
                     .get_mut(faction)
@@ -493,15 +584,20 @@ impl CampaignState {
         &mut self,
         data: &GameData,
         faction: &FactionId,
-        province: &ProvinceId,
+        settlement: &SettlementId,
         building: &BuildingId,
     ) -> Result<(), OrderError> {
-        self.own_province_index(faction, province)?;
-        if !data.buildings.contains_key(building) {
+        self.own_settlement(faction, settlement)?;
+        let Some(definition) = data.buildings.get(building) else {
             return Err(OrderError::UnknownBuilding(building.clone()));
+        };
+        if !definition.allowed_in(self.settlement_kind(settlement)) {
+            return Err(OrderError::BuildUnavailable(
+                "impossible dans ce type de colonie".to_owned(),
+            ));
         }
         let option = self
-            .buildable(data, province)
+            .buildable(data, settlement)
             .into_iter()
             .find(|o| &o.building == building)
             .ok_or_else(|| OrderError::UnknownBuilding(building.clone()))?;
@@ -514,8 +610,8 @@ impl CampaignState {
             .get_mut(faction)
             .expect("checked above")
             .treasury -= i64::from(option.cost);
-        self.provinces
-            .get_mut(province)
+        self.settlements
+            .get_mut(settlement)
             .expect("checked above")
             .construction = Some(Construction {
             building: building.clone(),
@@ -528,11 +624,11 @@ impl CampaignState {
         &mut self,
         data: &GameData,
         faction: &FactionId,
-        province: &ProvinceId,
+        settlement: &SettlementId,
     ) -> Result<(), OrderError> {
-        self.own_province_index(faction, province)?;
-        let province_state = self.provinces.get_mut(province).expect("checked above");
-        let Some(construction) = province_state.construction.take() else {
+        self.own_settlement(faction, settlement)?;
+        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
+        let Some(construction) = settlement_state.construction.take() else {
             return Err(OrderError::NoConstruction);
         };
         let refund = data
@@ -562,13 +658,13 @@ impl CampaignState {
         Ok(self.armies.get_mut(id).expect("checked above"))
     }
 
-    fn own_province_index(&self, faction: &FactionId, id: &ProvinceId) -> Result<(), OrderError> {
-        let province = self
-            .provinces
+    fn own_settlement(&self, faction: &FactionId, id: &SettlementId) -> Result<(), OrderError> {
+        let settlement = self
+            .settlements
             .get(id)
-            .ok_or_else(|| OrderError::UnknownProvince(id.clone()))?;
-        if &province.controller != faction {
-            return Err(OrderError::NotYourProvince(faction.clone()));
+            .ok_or_else(|| OrderError::UnknownSettlement(id.clone()))?;
+        if &settlement.controller != faction {
+            return Err(OrderError::NotYourSettlement(faction.clone()));
         }
         Ok(())
     }
@@ -578,9 +674,26 @@ impl CampaignState {
         data: &GameData,
         faction: &FactionId,
         army_id: &ArmyId,
-        mut path: Vec<ProvinceId>,
+        places: Vec<Place>,
     ) -> Result<(), OrderError> {
         let army = self.own_army(faction, army_id)?;
+        let mut path = if places.iter().any(|p| matches!(p, Place::Province(_))) {
+            // v1 path of provinces: head for the city of the last one.
+            let Some(last) = places.last() else {
+                return Err(OrderError::EmptyPath);
+            };
+            let target = self.resolve_place(last)?;
+            self.find_path(data, army_id, &target)
+                .ok_or(OrderError::NoPath)?
+        } else {
+            places
+                .into_iter()
+                .map(|p| match p {
+                    Place::Settlement(id) => id,
+                    Place::Province(_) => unreachable!("handled above"),
+                })
+                .collect()
+        };
         if path.first() == Some(&army.location) {
             path.remove(0);
         }
@@ -596,17 +709,17 @@ impl CampaignState {
         &mut self,
         data: &GameData,
         faction: &FactionId,
-        province: &ProvinceId,
+        settlement: &SettlementId,
         unit_type: &UnitTypeId,
     ) -> Result<(), OrderError> {
-        if let Some(state) = self.provinces.get(province) {
-            let slots = self.recruit_slots(data, province);
+        if let Some(state) = self.settlements.get(settlement) {
+            let slots = self.recruit_slots(data, settlement);
             if &state.controller == faction && state.recruit_queue.len() >= slots {
                 return Err(OrderError::RecruitQueueFull { slots });
             }
         }
         let option = self
-            .recruit_option(data, faction, province, unit_type)
+            .recruit_option(data, faction, settlement, unit_type)
             .ok_or_else(|| OrderError::UnknownUnitType(unit_type.clone()))?;
         if !option.available {
             let reason = option.reason.unwrap_or_default();
@@ -622,43 +735,58 @@ impl CampaignState {
         }
         let faction_state = self.factions.get_mut(faction).expect("checked");
         faction_state.treasury -= i64::from(option.cost);
-        self.provinces
-            .get_mut(province)
+        self.settlements
+            .get_mut(settlement)
             .expect("checked")
             .recruit_queue
             .push(unit_type.clone());
         Ok(())
     }
 
-    /// Recruitment options of `province` for its controller (the player's view).
-    pub fn recruitable(&self, data: &GameData, province: &ProvinceId) -> Vec<RecruitOption> {
-        let Some(controller) = self.provinces.get(province).map(|p| p.controller.clone()) else {
+    /// Recruitment options of `settlement` for its controller (the player's view).
+    pub fn recruitable(&self, data: &GameData, settlement: &SettlementId) -> Vec<RecruitOption> {
+        let Some(controller) = self
+            .settlements
+            .get(settlement)
+            .map(|s| s.controller.clone())
+        else {
             return Vec::new();
         };
         data.unit_types
             .keys()
-            .filter_map(|unit_type| self.recruit_option(data, &controller, province, unit_type))
+            .filter_map(|unit_type| self.recruit_option(data, &controller, settlement, unit_type))
             .collect()
     }
 
-    /// Availability of one unit type in one province for `faction`.
+    /// Recruitment options of the city of `province` (v1 signature).
+    pub fn recruitable_in_province(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+    ) -> Vec<RecruitOption> {
+        self.province_city_id(province)
+            .map(|city| self.recruitable(data, city))
+            .unwrap_or_default()
+    }
+
+    /// Availability of one unit type in one settlement for `faction`.
     pub fn recruit_option(
         &self,
         data: &GameData,
         faction: &FactionId,
-        province_id: &ProvinceId,
+        settlement: &SettlementId,
         unit_type_id: &UnitTypeId,
     ) -> Option<RecruitOption> {
         let unit_type = data.unit_types.get(unit_type_id)?;
         let mut option = RecruitOption {
             unit_type: unit_type_id.clone(),
             name: unit_type.name.display.clone(),
-            cost: self.recruit_cost(data, faction, province_id, unit_type),
+            cost: self.recruit_cost(data, faction, settlement, unit_type),
             upkeep: unit_type.upkeep,
             available: true,
             reason: None,
         };
-        let reason = self.recruit_blocker(data, faction, province_id, unit_type);
+        let reason = self.recruit_blocker(data, faction, settlement, unit_type);
         if let Some(reason) = reason {
             option.available = false;
             option.reason = Some(reason);
@@ -670,24 +798,25 @@ impl CampaignState {
         &self,
         data: &GameData,
         faction: &FactionId,
-        province_id: &ProvinceId,
+        settlement_id: &SettlementId,
         unit_type: &data_model::UnitType,
     ) -> Option<String> {
-        let province_state = self.provinces.get(province_id)?;
-        let province = data.provinces.get(province_id)?;
+        let settlement = self.settlements.get(settlement_id)?;
+        let province_state = self.provinces.get(&settlement.province)?;
+        let province = data.provinces.get(&settlement.province)?;
         let faction_state = self.factions.get(faction)?;
-        if &province_state.owner != faction || &province_state.controller != faction {
-            return Some("la province doit être possédée et contrôlée".to_owned());
+        if &settlement.owner != faction || &settlement.controller != faction {
+            return Some("la colonie doit être possédée et contrôlée".to_owned());
         }
-        if province_state.siege.is_some() {
-            return Some("la province est assiégée".to_owned());
+        if settlement.siege.is_some() {
+            return Some("la colonie est assiégée".to_owned());
         }
-        let slots = self.recruit_slots(data, province_id);
-        if province_state.recruit_queue.len() >= slots {
+        let slots = self.recruit_slots(data, settlement_id);
+        if settlement.recruit_queue.len() >= slots {
             return Some(format!("file de recrutement pleine ({slots} par tour)"));
         }
         if let Some(building) = &unit_type.required_building {
-            if !province.buildings.contains(building) {
+            if !settlement.buildings.contains(building) {
                 let name = data
                     .buildings
                     .get(building)
@@ -712,60 +841,61 @@ impl CampaignState {
         {
             return Some("culture locale inadaptée".to_owned());
         }
+        // Lot C4: the province provides the men, capped by the settlement's share.
         let class = province_state.population.get(unit_type.source_class);
-        if class.count < u64::from(unit_type.soldiers) * 10 {
+        let share = crate::settlements::weight_share(data, settlement_id);
+        if (class.count as f64 * share) < f64::from(unit_type.soldiers) * 10.0 {
             return Some("classe sociale trop peu nombreuse".to_owned());
         }
-        let cost = self.recruit_cost(data, faction, province_id, unit_type);
+        let cost = self.recruit_cost(data, faction, settlement_id, unit_type);
         if faction_state.treasury < i64::from(cost) {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }
         None
     }
 
-    /// G1 `RecruitSlots`: recruitments a province can queue per turn —
-    /// [`BASE_RECRUIT_SLOTS`], one more in the faction capital, plus the flat
-    /// `recruit_slots` of its buildings, governor and the controller's
-    /// technologies (muster field, stables, armoury…).
-    pub fn recruit_slots(&self, data: &GameData, province: &ProvinceId) -> usize {
-        let Some(state) = self.provinces.get(province) else {
+    /// G1 `RecruitSlots`: recruitments a settlement can queue per turn —
+    /// [`BASE_RECRUIT_SLOTS`], one more in the city of the faction capital,
+    /// plus the flat `recruit_slots` of its buildings, governor and the
+    /// controller's technologies (muster field, stables, armoury…).
+    pub fn recruit_slots(&self, data: &GameData, settlement: &SettlementId) -> usize {
+        let Some(state) = self.settlements.get(settlement) else {
             return 0;
         };
-        let mut effects = self.province_effects(data, province);
+        let mut effects = self.settlement_effects(data, settlement);
         effects.merge(&research::faction_tech_effects(
             self,
             data,
             &state.controller,
         ));
-        let capital = self
-            .factions
-            .get(&state.controller)
-            .is_some_and(|f| &f.capital == province);
+        let capital = self.factions.get(&state.controller).is_some_and(|f| {
+            f.capital == state.province && self.province_city_id(&f.capital) == Some(settlement)
+        });
         BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
     }
 
-    /// Recruitment slots still free this turn in `province`.
-    pub fn recruit_slots_free(&self, data: &GameData, province: &ProvinceId) -> usize {
+    /// Recruitment slots still free this turn in `settlement`.
+    pub fn recruit_slots_free(&self, data: &GameData, settlement: &SettlementId) -> usize {
         let queued = self
-            .provinces
-            .get(province)
-            .map_or(0, |p| p.recruit_queue.len());
-        self.recruit_slots(data, province).saturating_sub(queued)
+            .settlements
+            .get(settlement)
+            .map_or(0, |s| s.recruit_queue.len());
+        self.recruit_slots(data, settlement).saturating_sub(queued)
     }
 
-    /// Money cost of recruiting `unit_type` in `province` for `faction`
-    /// (F1 `RecruitCost`): the province's buildings and governor (stables:
-    /// cavalry −10 %) and the faction's technologies (francs-archers:
-    /// ranged −10 %), global or per unit family. Never below a quarter of
-    /// the base cost.
+    /// Money cost of recruiting `unit_type` in `settlement` for `faction`
+    /// (F1 `RecruitCost`): the settlement's buildings and the governor
+    /// (stables: cavalry −10 %) and the faction's technologies
+    /// (francs-archers: ranged −10 %), global or per unit family. Never
+    /// below a quarter of the base cost.
     pub fn recruit_cost(
         &self,
         data: &GameData,
         faction: &FactionId,
-        province: &ProvinceId,
+        settlement: &SettlementId,
         unit_type: &data_model::UnitType,
     ) -> u32 {
-        let mut effects = self.province_effects(data, province);
+        let mut effects = self.settlement_effects(data, settlement);
         effects.merge(&research::faction_tech_effects(self, data, faction));
         let targeted = effects.unit_categories.get(unit_type.category).recruit_cost;
         let flat = effects.recruit_cost.flat + targeted.flat;
@@ -784,30 +914,34 @@ impl CampaignState {
         &mut self,
         data: &GameData,
         faction: &FactionId,
-        province: &ProvinceId,
+        settlement: &SettlementId,
         indices: &[usize],
         general: Option<CharacterId>,
     ) -> Result<(), OrderError> {
-        self.own_province_index(faction, province)?;
-        let garrison_len = self.provinces[province].garrison.len();
+        self.own_settlement(faction, settlement)?;
+        let garrison_len = self.settlements[settlement].garrison.len();
         let indices = unique_sorted(indices, garrison_len)?;
+        let province = self.settlements[settlement].province.clone();
         if let Some(character) = &general {
-            self.check_general(faction, character, province)?;
+            self.check_general(faction, character, &province)?;
         }
         let units = take_indices(
-            &mut self.provinces.get_mut(province).expect("checked").garrison,
+            &mut self
+                .settlements
+                .get_mut(settlement)
+                .expect("checked")
+                .garrison,
             &indices,
         );
         let id = self.allocate_army_id();
-        let movement_points = self.season.movement_points();
         self.armies.insert(
             id.clone(),
             Army {
                 faction: faction.clone(),
                 general: None,
-                location: province.clone(),
+                location: settlement.clone(),
                 units,
-                movement_points,
+                movement_points: 0,
                 supply: 100,
                 stance: Stance::Normal,
                 path: Vec::new(),
@@ -891,10 +1025,10 @@ impl CampaignState {
         &mut self,
         faction: &FactionId,
         army: Option<&ArmyId>,
-        province: Option<&ProvinceId>,
+        settlement: Option<&SettlementId>,
         unit_index: usize,
     ) -> Result<(), OrderError> {
-        match (army, province) {
+        match (army, settlement) {
             (Some(army_id), None) => {
                 let army = self.own_army(faction, army_id)?;
                 if unit_index >= army.units.len() {
@@ -923,11 +1057,11 @@ impl CampaignState {
                     .remove(unit_index);
                 Ok(())
             }
-            (None, Some(province_id)) => {
-                self.own_province_index(faction, province_id)?;
+            (None, Some(settlement_id)) => {
+                self.own_settlement(faction, settlement_id)?;
                 let garrison = &mut self
-                    .provinces
-                    .get_mut(province_id)
+                    .settlements
+                    .get_mut(settlement_id)
                     .expect("checked")
                     .garrison;
                 if unit_index >= garrison.len() {
@@ -946,7 +1080,11 @@ impl CampaignState {
         army_id: &ArmyId,
         character: &CharacterId,
     ) -> Result<(), OrderError> {
-        let location = self.own_army(faction, army_id)?.location.clone();
+        let settlement = self.own_army(faction, army_id)?.location.clone();
+        let location = self
+            .settlement_province(&settlement)
+            .cloned()
+            .ok_or_else(|| OrderError::UnknownSettlement(settlement.clone()))?;
         self.check_general(faction, character, &location)?;
         if let Some(previous) = self.armies[army_id].general.clone() {
             self.detach_general(&previous);
@@ -977,7 +1115,7 @@ impl CampaignState {
                 .army
                 .as_ref()
                 .and_then(|a| self.armies.get(a))
-                .is_some_and(|a| &a.location == province);
+                .is_some_and(|a| self.settlement_province(&a.location) == Some(province));
         if !in_province {
             return Err(OrderError::CharacterElsewhere);
         }
@@ -995,10 +1133,15 @@ impl CampaignState {
         }
         if let Some(army) = self.armies.get_mut(army_id) {
             army.general = Some(character.clone());
-            let location = army.location.clone();
+            let location = self
+                .settlements
+                .get(&army.location)
+                .map(|s| s.province.clone());
             if let Some(state) = self.characters.get_mut(character) {
                 state.army = Some(army_id.clone());
-                state.location = Some(location);
+                if location.is_some() {
+                    state.location = location;
+                }
             }
         }
     }
@@ -1009,8 +1152,12 @@ impl CampaignState {
             return;
         };
         if let Some(army_id) = state.army.take() {
-            if let Some(army) = self.armies.get(&army_id) {
-                state.location = Some(army.location.clone());
+            if let Some(province) = self
+                .armies
+                .get(&army_id)
+                .and_then(|army| self.settlements.get(&army.location))
+            {
+                state.location = Some(province.province.clone());
             }
             if let Some(army) = self.armies.get_mut(&army_id) {
                 if army.general.as_ref() == Some(character) {

@@ -156,11 +156,12 @@ pub fn diet_blockers(
         }
     }
     if !requirements.any_building.is_empty()
-        && !province_state.is_some_and(|p| {
+        && !province_state.is_some_and(|_| {
+            let buildings = state.province_buildings(province);
             requirements
                 .any_building
                 .iter()
-                .any(|b| p.buildings.contains(b))
+                .any(|b| buildings.contains(b))
         })
     {
         let names: Vec<String> = requirements
@@ -209,7 +210,7 @@ impl CampaignState {
             .and_then(|p| {
                 p.diet
                     .as_ref()
-                    .filter(|choice| choice.faction == p.controller)
+                    .filter(|choice| self.province_controller(province) == Some(&choice.faction))
                     .map(|choice| choice.diet.clone())
             })
             .unwrap_or_else(default_diet)
@@ -235,23 +236,22 @@ impl CampaignState {
     /// Table budget of `faction` this season: the diets of every province it
     /// controls.
     pub fn faction_table_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
-        self.provinces
+        self.controlled_provinces(faction)
             .iter()
-            .filter(|(_, p)| &p.controller == faction)
-            .map(|(id, _)| self.diet_cost(data, id, &self.province_diet(id)))
+            .map(|id| self.diet_cost(data, id, &self.province_diet(id)))
             .sum()
     }
 
     /// Every diet for `province` as its controller sees it, in id order.
     pub fn diet_options(&self, data: &GameData, province: &ProvinceId) -> Vec<DietOption> {
-        let Some(p) = self.provinces.get(province) else {
+        let Some(controller) = self.province_controller(province) else {
             return Vec::new();
         };
         let current = self.province_diet(province);
         data.diets
             .values()
             .map(|diet| {
-                let reasons = diet_blockers(self, data, &p.controller, province, diet);
+                let reasons = diet_blockers(self, data, controller, province, diet);
                 DietOption {
                     diet: diet.id.clone(),
                     name: diet.name.display.clone(),
@@ -281,7 +281,7 @@ pub fn set_diet(
     let Some(p) = state.provinces.get(province) else {
         return Err(DietError::NotControlled(name));
     };
-    if &p.controller != faction {
+    if !state.controls_province(faction, province) {
         return Err(DietError::NotControlled(name));
     }
     if p.diet
@@ -348,7 +348,9 @@ pub(crate) fn resolve_requirements(
         if diet_id.as_str() == DEFAULT_DIET {
             continue;
         }
-        let controller = state.provinces[&id].controller.clone();
+        let Some(controller) = state.province_controller(&id).cloned() else {
+            continue;
+        };
         let reasons = match data.diets.get(&diet_id) {
             Some(diet) => diet_blockers(state, data, &controller, &id, diet),
             None => vec!["régime disparu des données".to_owned()],
@@ -379,12 +381,7 @@ pub(crate) fn pay_table(
     available: i64,
     events: &mut Vec<GameEvent>,
 ) -> i64 {
-    let provinces: Vec<ProvinceId> = state
-        .provinces
-        .iter()
-        .filter(|(_, p)| &p.controller == faction)
-        .map(|(id, _)| id.clone())
-        .collect();
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
     let mut paid = 0;
     for id in provinces {
         let diet = state.province_diet(&id);
@@ -431,13 +428,13 @@ pub fn diet_class_effects(
     class: SocialClass,
 ) -> EffectTotals {
     let mut totals = EffectTotals::default();
-    let Some(p) = state.provinces.get(province) else {
+    let Some(controller) = state.province_controller(province) else {
         return totals;
     };
     let Some(diet) = data.diets.get(&state.province_diet(province)) else {
         return totals;
     };
-    let health_factor = 1.0 + diet_health_percent(state, data, &p.controller) / 100.0;
+    let health_factor = 1.0 + diet_health_percent(state, data, controller) / 100.0;
     for effect in diet
         .effects
         .iter()
@@ -504,10 +501,9 @@ pub(crate) fn resolve_lent(
     let lent = state.is_lent();
     for faction in factions {
         let diets: Vec<(ProvinceId, &Diet)> = state
-            .provinces
+            .controlled_provinces(&faction)
             .iter()
-            .filter(|(_, p)| p.controller == faction)
-            .filter_map(|(id, _)| {
+            .filter_map(|id| {
                 data.diets
                     .get(&state.province_diet(id))
                     .map(|d| (id.clone(), d))
@@ -593,12 +589,7 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
         return Vec::new();
     }
     let default = default_diet();
-    let provinces: Vec<ProvinceId> = state
-        .provinces
-        .iter()
-        .filter(|(_, p)| &p.controller == faction)
-        .map(|(id, _)| id.clone())
-        .collect();
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
     let mut orders = Vec::new();
     if f.treasury < 0 {
         for id in provinces {

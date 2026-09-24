@@ -10,7 +10,8 @@ use std::fmt;
 
 use data_model::{
     BuildingId, CharacterId, FactionId, GameData, PopulationClasses, ProvinceId, ReligionId,
-    ResourceId, SettlementId, Sex, SkillId, Skills, TechnologyId, TraitId, UnitType, UnitTypeId,
+    ResourceId, SettlementId, SettlementKind, Sex, SkillId, Skills, TechnologyId, TraitId,
+    UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -22,9 +23,10 @@ use crate::rng::CampaignRng;
 pub const START_YEAR: i32 = 1337;
 /// Number of turns per year (one turn per season).
 pub const TURNS_PER_YEAR: u32 = 4;
-/// Movement points an army receives at the start of a spring/summer/autumn turn.
+/// Province steps (v1 unit) an army covers in a spring/summer/autumn turn;
+/// movement points are these steps times `MovementRules::points_per_step`.
 pub const MAX_MOVEMENT_POINTS: u32 = 3;
-/// Movement points in winter (roads impassable, short days).
+/// Province steps in winter (roads impassable, short days).
 pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// Version of the serialised state; bump when the JSON layout changes.
 ///
@@ -36,9 +38,11 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// technologies (research in progress, progress, banked progress), M7
 /// battles (`interactive_battles`, pending battles kept across `end_turn`,
 /// `BattleRequest::attacker_origin`), M8 siege supplies and breach, M10
-/// outcome.
+/// outcome. `5`: lot C4 settlements (garrison, siege, buildings,
+/// construction and recruitment move from provinces to settlements; armies
+/// stand on settlements).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 4;
+pub const STATE_VERSION: u32 = 5;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -79,8 +83,9 @@ impl Season {
         }
     }
 
-    /// Movement points granted to every army at the start of a turn.
-    pub fn movement_points(self) -> u32 {
+    /// Province steps granted to every army at the start of a turn (times
+    /// `MovementRules::points_per_step` for movement points).
+    pub fn movement_steps(self) -> u32 {
         match self {
             Season::Winter => WINTER_MOVEMENT_POINTS,
             _ => MAX_MOVEMENT_POINTS,
@@ -134,7 +139,7 @@ impl AsRef<str> for ArmyId {
     }
 }
 
-/// How an army behaves in the province it stands in.
+/// How an army behaves where it stands.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Stance {
@@ -143,7 +148,7 @@ pub enum Stance {
     Normal,
     /// Chevauchée: devastate enemy provinces for loot.
     Raid,
-    /// Besiege enemy provinces without a field army.
+    /// Besiege the enemy settlement the army stands on.
     Siege,
 }
 
@@ -191,15 +196,17 @@ pub struct Army {
     pub faction: FactionId,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub general: Option<CharacterId>,
-    pub location: ProvinceId,
+    /// Settlement (node of the movement graph) the army stands on.
+    pub location: SettlementId,
     pub units: Vec<Unit>,
+    /// In kilometres of plain (see `MovementRules`).
     pub movement_points: u32,
     /// 0-100.
     pub supply: u8,
     pub stance: Stance,
-    /// Remaining provinces to cross, resolved in `end_turn`.
+    /// Remaining settlements to walk through, resolved in `end_turn`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub path: Vec<ProvinceId>,
+    pub path: Vec<SettlementId>,
 }
 
 impl Army {
@@ -208,7 +215,7 @@ impl Army {
     }
 }
 
-/// An ongoing siege of a province.
+/// An ongoing siege of a settlement.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SiegeState {
     pub attacker: FactionId,
@@ -230,7 +237,7 @@ fn full_supplies() -> u8 {
     100
 }
 
-/// A building under construction in a province (spec § 1.2); one at a time.
+/// A building under construction in a settlement (spec § 1.2); one at a time.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Construction {
     pub building: BuildingId,
@@ -238,29 +245,23 @@ pub struct Construction {
 }
 
 /// Dynamic state of a province (static data stays in [`GameData`]).
+///
+/// Lot C4: the land and the people stay here; owner, controller, garrison,
+/// siege, buildings, construction and recruitment belong to the settlements
+/// ([`SettlementState`]). The province's owner and controller are those of
+/// its city ([`CampaignState::province_owner`],
+/// [`CampaignState::province_controller`]).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProvinceState {
-    /// De jure owner.
-    pub owner: FactionId,
-    /// Faction occupying the province (collects taxes, recruits).
-    pub controller: FactionId,
-    pub garrison: Vec<Unit>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub siege: Option<SiegeState>,
+    /// The province's city (capital settlement).
+    pub city: SettlementId,
+    /// Every settlement of the province, the city first.
+    pub settlements: Vec<SettlementId>,
     /// 0-100.
     pub unrest: u8,
     /// 0-100, raised by chevauchées.
     pub devastation: u8,
     pub population: PopulationClasses,
-    /// Units paid for this turn that join the garrison at the end of the turn.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub recruit_queue: Vec<UnitTypeId>,
-    /// Completed buildings (spec § 1.2).
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub buildings: Vec<BuildingId>,
-    /// One building under construction at a time.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub construction: Option<Construction>,
     /// Consecutive seasons the weighted-average unrest of the province stayed
     /// above the revolt threshold (spec § 1.1); resets to 0 below it.
     #[serde(default)]
@@ -276,15 +277,13 @@ pub struct ProvinceState {
     pub diet: Option<crate::table::DietChoice>,
 }
 
-/// Dynamic state of a settlement (lot C1 skeleton, spec § 4.2).
-///
-/// Until lot C4 the province keeps authority over garrison, siege, buildings,
-/// construction and recruitment: this state is initialised at setup but not
-/// yet driven by the rules. The city's garrison stays empty here (the
-/// province garrison is the live one); other settlements receive the
-/// `starting_garrison` of `data/settlements/rules.json`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Dynamic state of a settlement (spec § 4.2).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettlementState {
+    /// Province the settlement belongs to (copied from the data so that the
+    /// state answers province queries on its own).
+    pub province: ProvinceId,
+    pub kind: SettlementKind,
     /// De jure holder.
     pub owner: FactionId,
     /// Faction occupying the settlement.
@@ -295,8 +294,10 @@ pub struct SettlementState {
     pub siege: Option<SiegeState>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub buildings: Vec<BuildingId>,
+    /// One building under construction at a time.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub construction: Option<Construction>,
+    /// Units paid for this turn that join the garrison at the end of the turn.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub recruit_queue: Vec<UnitTypeId>,
     /// Base fortification level from the data (0 village, 1-4 otherwise).
@@ -304,7 +305,7 @@ pub struct SettlementState {
     pub fortification_level: u8,
 }
 
-impl ProvinceState {
+impl SettlementState {
     pub fn garrison_strength(&self) -> u32 {
         self.garrison.iter().map(|u| u.strength).sum()
     }
@@ -546,11 +547,14 @@ impl CharacterState {
 pub struct BattleRequest {
     pub attacker: ArmyId,
     pub defender: ArmyId,
+    /// Settlement where the battle takes place.
+    pub location: SettlementId,
+    /// Its province (terrain, names).
     pub province: ProvinceId,
-    /// Province the attacker came from (where it retreats when beaten).
+    /// Settlement the attacker came from (where it retreats when beaten).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub attacker_origin: Option<ProvinceId>,
-    /// M8: an assault on the town of `province`; the defender is its
+    pub attacker_origin: Option<SettlementId>,
+    /// M8: an assault on the settlement `location`; the defender is its
     /// garrison (`defender` then repeats the attacker's id).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub siege: bool,
@@ -588,8 +592,8 @@ pub struct CampaignState {
     pub rng: CampaignRng,
     pub player_faction: FactionId,
     pub provinces: BTreeMap<ProvinceId, ProvinceState>,
-    /// Settlements inside provinces (lot C1; driven by the rules from C4).
-    #[serde(default)]
+    /// Settlements inside provinces (lot C4: they hold garrisons, sieges,
+    /// buildings, construction and recruitment).
     pub settlements: BTreeMap<SettlementId, SettlementState>,
     pub factions: BTreeMap<FactionId, FactionState>,
     pub armies: BTreeMap<ArmyId, Army>,
@@ -744,11 +748,7 @@ impl CampaignState {
             upkeep: faction.upkeep_last_turn,
             at_war_with: faction.at_war_with.iter().cloned().collect(),
             allies: faction.allies.iter().cloned().collect(),
-            provinces_count: self
-                .provinces
-                .values()
-                .filter(|p| &p.controller == id)
-                .count(),
+            provinces_count: self.controlled_provinces(id).len(),
             armies_count: self.armies.values().filter(|a| &a.faction == id).count(),
             alive: faction.alive,
             ruler: faction.ruler.clone(),
@@ -759,11 +759,21 @@ impl CampaignState {
         })
     }
 
-    /// Ids of the armies standing in `province`, in id order.
+    /// Ids of the armies standing in `province` (on any of its
+    /// settlements), in id order.
     pub fn armies_in(&self, province: &ProvinceId) -> Vec<ArmyId> {
         self.armies
             .iter()
-            .filter(|(_, army)| &army.location == province)
+            .filter(|(_, army)| self.settlement_province(&army.location) == Some(province))
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// Ids of the armies standing on `settlement`, in id order.
+    pub fn armies_at(&self, settlement: &SettlementId) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| &army.location == settlement)
             .map(|(id, _)| id.clone())
             .collect()
     }
@@ -796,16 +806,54 @@ impl CampaignState {
 
     /// `true` when `province` is controlled by `faction` or one of its allies.
     pub fn is_friendly_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
-        self.provinces
-            .get(province)
-            .is_some_and(|p| self.is_allied(faction, &p.controller))
+        self.province_controller(province)
+            .is_some_and(|c| self.is_allied(faction, c))
     }
 
     /// `true` when `province` is controlled by a faction `faction` is at war with.
     pub fn is_hostile_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
-        self.provinces
-            .get(province)
-            .is_some_and(|p| self.is_at_war(faction, &p.controller))
+        self.province_controller(province)
+            .is_some_and(|c| self.is_at_war(faction, c))
+    }
+
+    /// `true` when `settlement` is held by `faction` or one of its allies.
+    pub fn is_friendly_settlement(&self, faction: &FactionId, settlement: &SettlementId) -> bool {
+        self.settlements
+            .get(settlement)
+            .is_some_and(|s| self.is_allied(faction, &s.controller))
+    }
+
+    /// `true` when `settlement` is held by a faction `faction` is at war with.
+    pub fn is_hostile_settlement(&self, faction: &FactionId, settlement: &SettlementId) -> bool {
+        self.settlements
+            .get(settlement)
+            .is_some_and(|s| self.is_at_war(faction, &s.controller))
+    }
+
+    /// Ids of the armies on `settlement` whose faction is at war with `faction`.
+    pub fn hostile_armies_at(&self, faction: &FactionId, settlement: &SettlementId) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| {
+                &army.location == settlement && self.is_at_war(faction, &army.faction)
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// Ids of the armies on `settlement` allied with (or belonging to) `faction`.
+    pub fn friendly_armies_at(
+        &self,
+        faction: &FactionId,
+        settlement: &SettlementId,
+    ) -> Vec<ArmyId> {
+        self.armies
+            .iter()
+            .filter(|(_, army)| {
+                &army.location == settlement && self.is_allied(faction, &army.faction)
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
     }
 
     /// Ids of the armies in `province` whose faction is at war with `faction`.
@@ -813,7 +861,8 @@ impl CampaignState {
         self.armies
             .iter()
             .filter(|(_, army)| {
-                &army.location == province && self.is_at_war(faction, &army.faction)
+                self.settlement_province(&army.location) == Some(province)
+                    && self.is_at_war(faction, &army.faction)
             })
             .map(|(id, _)| id.clone())
             .collect()
@@ -824,26 +873,50 @@ impl CampaignState {
         self.armies
             .iter()
             .filter(|(_, army)| {
-                &army.location == province && self.is_allied(faction, &army.faction)
+                self.settlement_province(&army.location) == Some(province)
+                    && self.is_allied(faction, &army.faction)
             })
             .map(|(id, _)| id.clone())
             .collect()
     }
 
-    /// Sum of `strength × melee` over the garrison and the friendly armies of a
-    /// province: a cheap defensive-power estimate used by planners.
+    /// Sum of `strength × melee` over the garrisons of the settlements held
+    /// by the province's controller and its friendly armies there: a cheap
+    /// defensive-power estimate used by planners.
     pub fn defensive_power(&self, data: &GameData, province: &ProvinceId) -> f64 {
-        let Some(p) = self.provinces.get(province) else {
+        let Some(controller) = self.province_controller(province) else {
             return 0.0;
         };
-        let garrison = unit_power(data, &p.garrison);
+        let garrisons: f64 = self
+            .settlements_of(province)
+            .filter(|(_, s)| &s.controller == controller)
+            .map(|(_, s)| unit_power(data, &s.garrison))
+            .sum();
         let field: f64 = self
             .armies
             .values()
-            .filter(|a| &a.location == province && self.is_allied(&p.controller, &a.faction))
+            .filter(|a| {
+                self.settlement_province(&a.location) == Some(province)
+                    && self.is_allied(controller, &a.faction)
+            })
             .map(|a| unit_power(data, &a.units))
             .sum();
-        garrison + field
+        garrisons + field
+    }
+
+    /// Defensive power of one settlement: its garrison plus the armies
+    /// allied with its controller standing on it.
+    pub fn settlement_defensive_power(&self, data: &GameData, settlement: &SettlementId) -> f64 {
+        let Some(s) = self.settlements.get(settlement) else {
+            return 0.0;
+        };
+        let field: f64 = self
+            .armies
+            .values()
+            .filter(|a| &a.location == settlement && self.is_allied(&s.controller, &a.faction))
+            .map(|a| unit_power(data, &a.units))
+            .sum();
+        unit_power(data, &s.garrison) + field
     }
 
     /// Rough offensive-power estimate of an army (`strength × melee`).

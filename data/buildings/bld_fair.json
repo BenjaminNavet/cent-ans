@@ -11,6 +11,10 @@
   },
   "build_time_turns": 3,
   "upkeep": 20,
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
   "effects": [
     {
       "effect": "trade_income",

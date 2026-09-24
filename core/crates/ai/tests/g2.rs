@@ -99,7 +99,7 @@ fn english_france(data: &GameData, seed: u64) -> CampaignState {
         .collect();
     taken.sort_by_key(|id| id.as_str() != "prov_ile_de_france");
     for id in taken.into_iter().take(8) {
-        state.provinces.get_mut(&id).unwrap().controller = england.clone();
+        state.city_state_mut(&id).unwrap().controller = england.clone();
     }
     state
 }

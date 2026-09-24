@@ -201,12 +201,15 @@ pub(crate) fn resolve_population(
     for id in ids {
         let (controller, owner, devastation, buildings, garrison_strength) = {
             let p = &state.provinces[&id];
+            let Some(city) = state.settlements.get(&p.city) else {
+                continue;
+            };
             (
-                p.controller.clone(),
-                p.owner.clone(),
+                city.controller.clone(),
+                city.owner.clone(),
                 p.devastation,
-                p.buildings.clone(),
-                p.garrison_strength(),
+                state.province_buildings(&id),
+                state.province_garrison_strength(&id),
             )
         };
         let Some(province_data) = data.provinces.get(&id) else {
@@ -283,9 +286,14 @@ pub(crate) fn resolve_population(
         }
         if province.revolt_seasons >= REVOLT_SEASONS {
             let province_name = province_data.name.display.clone();
-            let lost = province.garrison_strength() * REVOLT_GARRISON_LOSS_PERCENT / 100;
+            // Lot C4: the rebels rise at the city.
+            let city_id = province.city.clone();
+            let Some(city) = state.settlements.get_mut(&city_id) else {
+                continue;
+            };
+            let lost = city.garrison_strength() * REVOLT_GARRISON_LOSS_PERCENT / 100;
             let mut removed = 0u32;
-            province.garrison.retain_mut(|unit| {
+            city.garrison.retain_mut(|unit| {
                 if removed >= lost {
                     return true;
                 }
@@ -310,9 +318,10 @@ pub(crate) fn resolve_population(
                 if let Ok(rebels) = FactionId::new("fac_rebels") {
                     if state.factions.contains_key(&rebels) {
                         let province = state.provinces.get_mut(&id).expect("exists");
-                        province.controller = rebels.clone();
-                        province.siege = None;
                         province.revolt_seasons = 0;
+                        let city = state.settlements.get_mut(&city_id).expect("exists");
+                        city.controller = rebels.clone();
+                        city.siege = None;
                         events.push(
                             GameEvent::new(
                                 EventKind::Revolt,

@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, ProvinceId, UnitTypeId};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance, Unit};
 
 fn data() -> GameData {
@@ -16,6 +16,11 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// The city of a province (lot C4: sieges target settlements).
+fn city(state: &CampaignState, province: &str) -> SettlementId {
+    state.province_city_id(&prov(province)).unwrap().clone()
 }
 
 fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
@@ -35,7 +40,7 @@ fn unit(data: &GameData, id: &str) -> Unit {
     }
 }
 
-/// France's main army moved to English Guyenne in siege stance.
+/// France's main army moved to the city of English Guyenne in siege stance.
 fn besiege_guyenne(data: &GameData, seed: u64, extra: &[&str]) -> (CampaignState, ArmyId) {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).unwrap();
     let army = state
@@ -44,16 +49,20 @@ fn besiege_guyenne(data: &GameData, seed: u64, extra: &[&str]) -> (CampaignState
         .find(|(_, a)| a.faction == fac("fac_france"))
         .map(|(id, _)| id.clone())
         .unwrap();
-    let guyenne = prov("prov_guyenne");
+    let guyenne = city(&state, "prov_guyenne");
+    let kent = city(&state, "prov_kent");
     // Clear English field armies from Guyenne so the siege can start.
     let english: Vec<ArmyId> = state
         .armies
         .iter()
-        .filter(|(_, a)| a.location == guyenne && a.faction != fac("fac_france"))
+        .filter(|(_, a)| {
+            state.settlement_province(&a.location) == Some(&prov("prov_guyenne"))
+                && a.faction != fac("fac_france")
+        })
         .map(|(id, _)| id.clone())
         .collect();
     for id in english {
-        state.armies.get_mut(&id).unwrap().location = prov("prov_kent");
+        state.armies.get_mut(&id).unwrap().location = kent.clone();
     }
     let a = state.armies.get_mut(&army).unwrap();
     a.location = guyenne;
@@ -69,10 +78,10 @@ fn besiege_guyenne(data: &GameData, seed: u64, extra: &[&str]) -> (CampaignState
 fn a_starved_town_capitulates() {
     let data = data();
     let (mut state, _) = besiege_guyenne(&data, 1, &[]);
-    let guyenne = prov("prov_guyenne");
+    let guyenne = city(&state, "prov_guyenne");
     state.end_turn_with(&data, idle);
     let siege = state
-        .province_state(&guyenne)
+        .settlement_state(&guyenne)
         .unwrap()
         .siege
         .clone()
@@ -82,11 +91,11 @@ fn a_starved_town_capitulates() {
     let mut taken = false;
     for _ in 0..12 {
         state.end_turn_with(&data, idle);
-        if state.province_state(&guyenne).unwrap().controller == fac("fac_france") {
+        if state.settlement_state(&guyenne).unwrap().controller == fac("fac_france") {
             taken = true;
             break;
         }
-        let s = state.province_state(&guyenne).unwrap().siege.clone();
+        let s = state.settlement_state(&guyenne).unwrap().siege.clone();
         if let Some(s) = s {
             assert!(s.supplies < siege.supplies || s.turns_elapsed > 0);
         }
@@ -98,11 +107,11 @@ fn a_starved_town_capitulates() {
 fn siege_engines_open_a_breach() {
     let data = data();
     let (mut state, _) = besiege_guyenne(&data, 2, &["unit_trebuchet", "unit_trebuchet"]);
-    let guyenne = prov("prov_guyenne");
+    let guyenne = city(&state, "prov_guyenne");
     state.end_turn_with(&data, idle);
     state.end_turn_with(&data, idle);
     let breach = state
-        .province_state(&guyenne)
+        .settlement_state(&guyenne)
         .unwrap()
         .siege
         .as_ref()
@@ -117,9 +126,10 @@ fn a_breach_makes_assaults_easier() {
     state.end_turn_with(&data, idle);
     let (odds_walls, walls) = state.assault_odds(&data, &army).expect("besieging");
     assert!(walls);
+    let guyenne = city(&state, "prov_guyenne");
     state
-        .provinces
-        .get_mut(&prov("prov_guyenne"))
+        .settlements
+        .get_mut(&guyenne)
         .unwrap()
         .siege
         .as_mut()
@@ -140,8 +150,8 @@ fn assault_takes_the_town_or_bloodies_the_attacker() {
     state
         .submit_order(&data, Order::Assault { army: army.clone() })
         .unwrap();
-    let guyenne = prov("prov_guyenne");
-    let taken = state.province_state(&guyenne).unwrap().controller == fac("fac_france");
+    let guyenne = city(&state, "prov_guyenne");
+    let taken = state.settlement_state(&guyenne).unwrap().controller == fac("fac_france");
     let after: u32 = state
         .armies
         .get(&army)
@@ -170,9 +180,9 @@ fn a_strong_garrison_sallies_out() {
     let (mut state, army) = besiege_guyenne(&data, 6, &[]);
     // Weak besiegers, huge garrison.
     state.armies.get_mut(&army).unwrap().units.truncate(1);
-    let guyenne = prov("prov_guyenne");
+    let guyenne = city(&state, "prov_guyenne");
     let knights = unit(&data, "unit_knights");
-    let garrison = &mut state.provinces.get_mut(&guyenne).unwrap().garrison;
+    let garrison = &mut state.settlements.get_mut(&guyenne).unwrap().garrison;
     for _ in 0..8 {
         garrison.push(knights.clone());
     }

@@ -11,6 +11,12 @@
   "build_time_turns": 2,
   "upkeep": 5,
   "required_technology": "tech_herb_garden",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey",
+    "village"
+  ],
   "effects": [
     {
       "effect": "health",

@@ -13,7 +13,7 @@ fn data() -> GameData {
 fn option(state: &CampaignState, data: &GameData, province: &str) -> sim_campaign::BuildOption {
     let blowing_house = BuildingId::new("bld_tin_blowing_house").unwrap();
     state
-        .buildable(data, &ProvinceId::new(province).unwrap())
+        .buildable_in_province(data, &ProvinceId::new(province).unwrap())
         .into_iter()
         .find(|o| o.building == blowing_house)
         .expect("the blowing house is listed")
