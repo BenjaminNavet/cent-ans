@@ -9,7 +9,9 @@
 //! Lot C4: the tax of a province is shared between the controllers of its
 //! settlements in proportion to their normalised `weight` (a besieged
 //! settlement yields nothing that turn); holding every settlement of a
-//! province adds `full_province_bonus.income_percent` (`rules.json`).
+//! province adds `full_province_bonus.income_percent` (`rules.json`). The
+//! share of a settlement is taxed with the buildings of the city (they serve
+//! the whole province) plus its own ([`CampaignState::settlement_tax`]).
 //! Garrisons, recruits and building upkeep are counted per settlement.
 
 use std::collections::BTreeMap;
@@ -121,7 +123,11 @@ pub fn tax_per_head(class: SocialClass) -> f64 {
 }
 
 /// Share of the theoretical tax base the crown actually collects.
-pub const TAX_EFFICIENCY: f64 = 0.09;
+///
+/// Lot C4: 0.09 / 1.1 — in 1337 almost every province is held whole, so the
+/// full-province bonus (+10 %, `rules.json`) would otherwise inflate every
+/// treasury; the base is lowered to keep the v1 economy at the start.
+pub const TAX_EFFICIENCY: f64 = 0.082;
 /// Months of upkeep billed per season turn.
 pub const UPKEEP_MONTHS_PER_SEASON: i64 = 4;
 /// Garrison units are part-time local levies: they cost this share of field upkeep.
@@ -255,6 +261,37 @@ impl CampaignState {
             .sum()
     }
 
+    /// Seasonal tax a settlement's share of its province yields (lot C4):
+    /// the province's tax under the buildings of its city and of the
+    /// settlement itself, the governor (M4) and `tech` (M6), times the
+    /// settlement's normalised weight.
+    pub fn settlement_tax(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        tax_rate: TaxRate,
+        tech: &EffectTotals,
+    ) -> f64 {
+        let Some(state) = self.settlements.get(settlement) else {
+            return 0.0;
+        };
+        let Some(province) = self.provinces.get(&state.province) else {
+            return 0.0;
+        };
+        let mut buildings: Vec<BuildingId> = self
+            .settlements
+            .get(&province.city)
+            .map(|city| city.buildings.clone())
+            .unwrap_or_default();
+        if settlement != &province.city {
+            buildings.extend(state.buildings.iter().cloned());
+        }
+        let mut extra = self.governor_effects(data, &state.province);
+        extra.merge(tech);
+        province_income_with(data, province, &buildings, tax_rate, &extra)
+            * crate::settlements::weight_share(data, settlement)
+    }
+
     /// Income multiplier of the full-province bonus (spec § 4.3).
     pub fn full_province_income_factor(
         &self,
@@ -366,17 +403,14 @@ impl CampaignState {
         let tech = crate::research::faction_province_tech_effects(self, data, faction);
         let gross: i64 = self
             .provinces
-            .iter()
-            .map(|(id, p)| {
-                let share = self.province_tax_share(data, id, faction);
-                if share <= 0.0 {
-                    return 0;
-                }
-                // Buildings of every settlement + governor (M4) + technologies (M6).
-                let mut extra = self.governor_effects(data, id);
-                extra.merge(&tech);
-                let tax = province_income_with(data, p, &self.province_buildings(id), tax_rate, &extra);
-                (tax * share * self.full_province_income_factor(data, id, faction)).round() as i64
+            .keys()
+            .map(|id| {
+                let tax: f64 = self
+                    .settlements_of(id)
+                    .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
+                    .map(|(sid, _)| self.settlement_tax(data, sid, tax_rate, &tech))
+                    .sum();
+                (tax * self.full_province_income_factor(data, id, faction)).round() as i64
             })
             .sum();
         // Embargoes (M5) cut trade.

@@ -347,9 +347,9 @@ fn chronicle_state_survives_save_and_old_saves_load() {
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded.chronicle, state.chronicle);
     assert_eq!(loaded.state_version, STATE_VERSION);
-    assert_eq!(STATE_VERSION, 4);
+    assert_eq!(STATE_VERSION, 5);
 
-    // A version-4 save written before M10 has no `chronicle` key.
+    // A save without the `chronicle` key (written before M10) still loads.
     let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
     value.as_object_mut().unwrap().remove("chronicle");
     let old = CampaignState::load_json(&value.to_string()).expect("old save loads");

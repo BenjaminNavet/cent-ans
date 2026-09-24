@@ -23,6 +23,7 @@ fn every_province_has_one_city_after_setup() {
     let state = france(&data);
     assert!(!state.provinces.is_empty());
     for (province_id, province) in &state.provinces {
+        assert_eq!(&province.settlements[0], &province.city);
         let settlements = state.province_settlements(&data, province_id);
         assert!(!settlements.is_empty(), "{province_id} has no settlement");
         let cities: Vec<_> = settlements
@@ -35,11 +36,15 @@ fn every_province_has_one_city_after_setup() {
         // In 1337 the city follows its province; enclaves only elsewhere.
         assert_eq!(city.controller, city.owner);
         if data.settlements[*city_id].owner.is_none() {
-            assert_eq!(city.owner, province.owner, "{city_id} owner");
+            assert_eq!(
+                city.owner, data.provinces[province_id].owner,
+                "{city_id} owner"
+            );
         }
+        assert_eq!(state.province_owner(province_id), Some(&city.owner));
         assert!(
-            city.garrison.is_empty(),
-            "province garrison stays live in C1"
+            !city.garrison.is_empty(),
+            "lot C4: the province garrison is held by the city"
         );
         assert_eq!(
             state.settlement_state(city_id),
@@ -61,11 +66,10 @@ fn settlements_survive_a_save_round_trip() {
 }
 
 #[test]
-fn saves_without_settlements_still_load() {
+fn saves_without_settlements_are_refused() {
     let data = data();
     let state = france(&data);
     let mut value: serde_json::Value = serde_json::from_str(&state.save_json()).unwrap();
     value.as_object_mut().unwrap().remove("settlements");
-    let loaded = CampaignState::load_json(&value.to_string()).expect("older v4 save loads");
-    assert!(loaded.settlements.is_empty());
+    assert!(CampaignState::load_json(&value.to_string()).is_err());
 }
