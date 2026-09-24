@@ -55,6 +55,12 @@ uniform vec2 hip = vec2(0.93, 0.0);       // pivot (y, z) du buste
 uniform vec2 shoulder = vec2(1.4, 0.0);   // épaules (hiérarchie de l'arme)
 uniform vec2 elbow = vec2(1.13, -0.02);   // coudes (lot B4)
 uniform float highlight = 0.0;            // régiment sélectionné : léger éclaircissement
+// A1-01 : lisibilité à distance (0 de près, 1 au loin ; fixé par `battle_soldiers.gd` selon la
+// distance caméra → régiment). Teinte de camp renforcée, liseré lumineux (rim) de la livrée,
+// figurines un peu grossies, sélection soulignée d'or : comme les unités « colorées » de TW.
+uniform float far_blend = 0.0;
+uniform float far_scale = 0.18;
+uniform vec3 select_glow : source_color = vec3(1.0, 0.85, 0.35);
 // Part des soldats portant le surcot de livrée (lot V4b) ; les autres portent un vêtement de
 // teinte naturelle (écru, brun, roux, gris…) marqué d'une croix de livrée sur la poitrine.
 uniform float livery_share = 0.55;
@@ -648,7 +654,7 @@ void vertex() {
 		scale = 1.0;
 		girth = 1.0;
 	}
-	v *= scale;
+	v *= scale * (1.0 + far_scale * far_blend);
 	v.x *= girth;
 
 	// 5. Cadavres : chute variée après l'instant de mort (INSTANCE_CUSTOM.x) — en arrière, en
@@ -764,6 +770,16 @@ void fragment() {
 		}
 	}
 	float ao = mix(0.55, 1.0, smoothstep(0.0, 1.0, v_height));
+	// A1-01 : au loin, vêtements et caparaçons virent à la couleur franche du camp (la peau et
+	// l'acier restent lisibles de près seulement), liseré de livrée et halo doré si sélectionné.
+	vec3 side_col = livery * 1.15;
+	float tint = far_blend * (code == 2 ? 0.35 : code == 4 ? 0.2 : 0.7);
+	albedo = mix(albedo, side_col, tint);
+	ao = mix(ao, 1.0, far_blend * 0.6);
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.0);
+	vec3 glow = livery * (0.18 + 0.55 * rim) * far_blend;
+	glow += select_glow * highlight * (0.08 + 0.5 * rim) * (0.3 + 0.7 * far_blend);
+	EMISSION = glow;
 	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
