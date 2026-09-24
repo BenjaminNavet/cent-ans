@@ -101,13 +101,14 @@ func _ready() -> void:
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
 	rivers.minor_max_distance = map_extent * 0.35
-	rivers.build(map_data)
 	coast.build(map_data)
 	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
 	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
 	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
 	cities.build(map_data)
 	_setup_settlements()
+	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
+	rivers.build(map_data, terrain, settlement_layer)
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))

@@ -45,6 +45,18 @@ static func materials() -> Array[StandardMaterial3D]:
 ## Maillage d'un franchissement. `structure` : stone, wood, boats, ferry, ford, gate ; `width` :
 ## largeur du fleuve (unités monde) ; `seed_value` : variations déterministes.
 static func build(structure: String, width: float, seed_value: int) -> ArrayMesh:
+	# Cache : largeur arrondie à 0,05, trois variantes par ouvrage (quelques centaines de ponts).
+	var width_q := maxf(snappedf(width, 0.05), 0.1)
+	var key := "%s_%d_%d" % [structure, int(width_q * 20.0), seed_value % 3]
+	if not _cache.has(key):
+		_cache[key] = _build(structure, width_q, seed_value % 3)
+	return _cache[key]
+
+
+static var _cache: Dictionary = {}
+
+
+static func _build(structure: String, width: float, seed_value: int) -> ArrayMesh:
 	var tools: Array[SurfaceTool] = [SurfaceTool.new(), SurfaceTool.new()]
 	for st in tools:
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -67,8 +79,7 @@ static func build(structure: String, width: float, seed_value: int) -> ArrayMesh
 	var mats := materials()
 	for kind in 2:
 		var arrays := tools[kind].commit_to_arrays()
-		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		if vertices.is_empty():
+		if arrays[Mesh.ARRAY_VERTEX] == null or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
 			continue
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		mesh.surface_set_material(mesh.get_surface_count() - 1, mats[kind])

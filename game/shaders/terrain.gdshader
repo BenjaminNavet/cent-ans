@@ -53,11 +53,11 @@ uniform bool has_coast_dist = false;
 uniform float coast_dist_scale = 2.0;
 // Lot V4 (A1-11) : lit creusé et berges des fleuves (river_bed.gdshaderinc).
 #include "res://shaders/river_bed.gdshaderinc"
-uniform vec3 river_mud_color = vec3(0.060, 0.050, 0.032);
-uniform vec3 river_bed_color = vec3(0.045, 0.050, 0.035);
-uniform vec3 river_grass_color = vec3(0.050, 0.090, 0.028);
+uniform vec3 river_mud_color = vec3(0.085, 0.072, 0.048);
+uniform vec3 river_bed_color = vec3(0.075, 0.080, 0.060);
+uniform vec3 river_grass_color = vec3(0.070, 0.115, 0.035);
 // Inclinaison des berges dans l'ombrage (lisible même là où le maillage n'est pas creusé).
-uniform float river_bank_slope = 0.9;
+uniform float river_bank_slope = 0.4;
 
 uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_rough_array : filter_linear_mipmap_anisotropic, repeat_enable;
@@ -492,7 +492,7 @@ void fragment() {
 			float in_bed = 1.0 - smoothstep(-0.15, 0.05, rsd);
 			float mud = (1.0 - smoothstep(0.0, 0.18 + 0.25 * reeds, rsd)) * (1.0 - in_bed);
 			float lush = 1.0 - smoothstep(0.1, river_bank_px * (0.8 + 0.5 * reeds), rsd);
-			col = mix(col, river_grass_color * (0.75 + 0.5 * reeds), lush * 0.55 * vis);
+			col = mix(col, river_grass_color * (0.8 + 0.4 * reeds), lush * 0.35 * vis);
 			col = mix(col, river_mud_color * (0.8 + 0.4 * reeds), mud * 0.85 * vis);
 			col = mix(col, river_bed_color, in_bed * vis);
 			roughness = mix(roughness, 0.5, mud * vis);
