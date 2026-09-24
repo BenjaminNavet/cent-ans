@@ -71,6 +71,8 @@ pub mod folders {
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
+    /// Phased auto-resolve coefficients (lot N1), inside `rules/`; optional.
+    pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -202,6 +204,9 @@ pub struct GameData {
     pub ai_diplomacy: AiDiplomacy,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
+    /// when absent.
+    pub auto_resolve: crate::entities::auto_resolve::AutoResolveRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -247,6 +252,7 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             vision_rules: None,
+            auto_resolve: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -278,6 +284,10 @@ impl GameData {
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
             data.vision_rules = Some(read_json(&vision_path)?);
+        }
+        let auto_resolve_path = root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES);
+        if auto_resolve_path.is_file() {
+            data.auto_resolve = read_json(&auto_resolve_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {

@@ -28,7 +28,7 @@ use data_model::{FactionId, GameData, Terrain, UnitCategory, UnitTypeId};
 use serde_json::{json, Value};
 use sim_battle::{BattleSeason, BattleSetup, BattleSim, SideId, SideSetup, UnitSetup};
 use sim_campaign::{
-    resolve_auto, BattleContext, BattleUnit, CampaignRng, CampaignState, EventKind, Order, Side,
+    resolve_with, BattleContext, BattleUnit, CampaignRng, FieldConditions, Season, UnitProfile, CampaignState, EventKind, Order, Side,
     TaxRate, Winner,
 };
 
@@ -589,14 +589,24 @@ fn battle_unit(data: &GameData, id: &str) -> BattleUnit {
     }
 }
 
-fn auto_side(data: &GameData, comp: &[(String, usize)]) -> Side {
-    Side {
-        units: comp
-            .iter()
-            .flat_map(|(id, n)| std::iter::repeat_n(battle_unit(data, id), *n))
-            .collect(),
-        ..Default::default()
+/// A side of the auto-resolve and the profiles of its units.
+struct AutoArmy {
+    side: Side,
+    profiles: Vec<UnitProfile>,
+}
+
+fn auto_side(data: &GameData, comp: &[(String, usize)]) -> AutoArmy {
+    let mut army = AutoArmy {
+        side: Side::default(),
+        profiles: Vec::new(),
+    };
+    for (id, n) in comp {
+        for _ in 0..*n {
+            army.side.units.push(battle_unit(data, id));
+            army.profiles.push(UnitProfile::of(unit_type(data, id)));
+        }
     }
+    army
 }
 
 fn scenario_context(scenario: &Scenario) -> BattleContext {
@@ -610,14 +620,37 @@ fn scenario_context(scenario: &Scenario) -> BattleContext {
     }
 }
 
+fn scenario_conditions(scenario: &Scenario) -> FieldConditions {
+    FieldConditions {
+        terrain: Some(scenario.terrain),
+        season: Some(match scenario.season {
+            BattleSeason::Spring => Season::Spring,
+            BattleSeason::Summer => Season::Summer,
+            BattleSeason::Autumn => Season::Autumn,
+            BattleSeason::Winter => Season::Winter,
+        }),
+        weather: None,
+    }
+}
+
 /// Attacker win share (%) and mean losses over [`AUTO_DRAWS`] draws.
-fn auto_duel(attacker: &Side, defender: &Side, context: &BattleContext) -> (f64, f64, f64) {
+fn auto_duel(
+    data: &GameData,
+    attacker: &AutoArmy,
+    defender: &AutoArmy,
+    context: &BattleContext,
+    conditions: &FieldConditions,
+) -> (f64, f64, f64) {
     let (mut wins, mut la, mut ld) = (0u32, 0.0, 0.0);
     for seed in 0..AUTO_DRAWS {
-        let result = resolve_auto(
-            attacker,
-            defender,
+        let result = resolve_with(
+            &attacker.side,
+            &attacker.profiles,
+            &defender.side,
+            &defender.profiles,
             context,
+            conditions,
+            &data.auto_resolve,
             &mut CampaignRng::from_seed(seed),
         );
         if result.winner == Winner::Attacker {
@@ -678,7 +711,13 @@ fn matrix_mode(data: &GameData) {
             for d in &types {
                 let sa = auto_side(data, &[(a.id.as_str().to_owned(), count(a))]);
                 let sd = auto_side(data, &[(d.id.as_str().to_owned(), count(d))]);
-                let (wins, _, _) = auto_duel(&sa, &sd, &BattleContext::default());
+                let (wins, _, _) = auto_duel(
+                    data,
+                    &sa,
+                    &sd,
+                    &BattleContext::default(),
+                    &FieldConditions::default(),
+                );
                 let _ = write!(md, " {wins:.0} |");
                 row_wins.push(wins);
                 json_rows.push(json!({"table": title, "attacker": a.id.as_str(), "defender": d.id.as_str(), "attacker_win_pct": wins}));
@@ -704,9 +743,11 @@ fn matrix_mode(data: &GameData) {
     );
     for s in &fixture.scenarios {
         let (w, la, ld) = auto_duel(
+            data,
             &auto_side(data, &s.attacker),
             &auto_side(data, &s.defender),
             &scenario_context(s),
+            &scenario_conditions(s),
         );
         let _ = writeln!(md, "| {} | {w:.0} % | {la:.0} / {ld:.0} |", s.name);
     }
@@ -775,10 +816,8 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
     reference
 }
 
-fn rt_mode(data: &GameData, args: &[String]) {
-    let runs: u32 = args.first().and_then(|s| s.parse().ok()).unwrap_or(6);
-    let mut fixture = load_fixture();
-    let references: Vec<Reference3d> = std::thread::scope(|scope| {
+fn run_all_3d(data: &GameData, fixture: &Fixture, runs: u32) -> Vec<Reference3d> {
+    std::thread::scope(|scope| {
         let handles: Vec<_> = fixture
             .scenarios
             .iter()
@@ -788,7 +827,23 @@ fn rt_mode(data: &GameData, args: &[String]) {
             .into_iter()
             .map(|h| h.join().expect("3D thread"))
             .collect()
-    });
+    })
+}
+
+fn rt_mode(data: &GameData, args: &[String]) {
+    let runs: u32 = args.first().and_then(|s| s.parse().ok()).unwrap_or(6);
+    let mut fixture = load_fixture();
+    // `rt 0`: reuse the fixture's 3D references (fast calibration loop).
+    let references: Vec<Reference3d> = if runs == 0 {
+        fixture
+            .scenarios
+            .iter()
+            .map(|s| s.reference_3d.clone().expect("fixture without reference_3d"))
+            .collect()
+    } else {
+        run_all_3d(data, &fixture, runs)
+    };
+    let runs = references.first().map_or(runs, |r| r.runs);
     let mut md = format!(
         "# Sonde d'équilibrage — auto-résolution contre bataille 3D ({runs} graines)\n\n| Scénario | 3D : A gagne | 3D pertes A / D | Auto : A gagne | Auto pertes A / D | Accord |\n|---|---|---|---|---|---|\n"
     );
@@ -796,9 +851,11 @@ fn rt_mode(data: &GameData, args: &[String]) {
     let mut agree = 0;
     for (scenario, reference) in fixture.scenarios.iter().zip(&references) {
         let (w, la, ld) = auto_duel(
+            data,
             &auto_side(data, &scenario.attacker),
             &auto_side(data, &scenario.defender),
             &scenario_context(scenario),
+            &scenario_conditions(scenario),
         );
         let rt_attacker = 2 * reference.attacker_wins > reference.runs;
         let auto_attacker = w > 50.0;
