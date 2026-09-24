@@ -68,6 +68,7 @@ var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
 ## H9 : section « La Table » (onglet Ville, sous les classes), construite en code.
 var table_section: TableSection
+var edict_section: EdictSection  # lot C4
 ## Lot C5 : onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
 ## renvoie les lignes `[{id, name, kind, controller, owner, garrison_units, garrison_strength,
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
@@ -100,6 +101,8 @@ func _ready() -> void:
 		tabs.set_tab_icon(1, IconLibrary.get_icon("cat_class"))
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
+	edict_section = EdictSection.new()  # lot C4
+	table_section.add_sibling(edict_section)
 	_build_settlements_tab()  # C5
 
 
@@ -144,6 +147,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 		recruit_panel.hide()
 	_fill_city(city, is_player_owner)
 	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
+	edict_section.show_for(province_id, is_player_owner and not state.is_empty())  # lot C4
 	_label_of = label_of
 	_fill_settlements()  # C5
 	show()

@@ -8,6 +8,7 @@ pub mod building;
 pub mod character;
 pub mod chivalric_order;
 pub mod diet;
+pub mod edict;
 pub mod event;
 pub mod faction;
 pub mod movement;

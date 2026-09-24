@@ -191,6 +191,7 @@ impl CampaignState {
                     heresy: 0,
                     heresy_religion: None,
                     diet: None,
+                    edict: None,
                 },
             );
         }
