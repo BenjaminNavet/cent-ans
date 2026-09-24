@@ -498,7 +498,8 @@ pub fn transfer_companion(
     if taker.retinue.len() >= retinue.max_per_character as usize {
         return Err(RetinueError::RetinueFull(to.clone()));
     }
-    let army_of = |c: &crate::state::CharacterState| c.army.as_ref().and_then(|a| state.armies.get(a));
+    let army_of =
+        |c: &crate::state::CharacterState| c.army.as_ref().and_then(|a| state.armies.get(a));
     match (army_of(giver), army_of(taker)) {
         (Some(a), Some(b)) if state.armies_together(data, a, b) && from != to => {}
         _ => return Err(RetinueError::NotTogether),

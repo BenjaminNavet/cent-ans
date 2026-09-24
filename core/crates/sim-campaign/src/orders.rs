@@ -1395,7 +1395,6 @@ impl CampaignState {
                 .and_then(|army| army.settlement())
                 .and_then(|id| self.settlements.get(id))
             {
-
                 state.location = Some(province.province.clone());
             }
             if let Some(army) = self.armies.get_mut(&army_id) {

@@ -766,7 +766,6 @@ pub(crate) fn resolve_raids(
             continue;
         };
         if !state.is_hostile_territory(&faction, &province_id) {
-
             continue;
         }
         let general = state.armies[&army_id].general.clone();

@@ -45,13 +45,14 @@ fn french_victory(data: &GameData) -> (CampaignState, ArmyId, ArmyId, BattleOutc
     // Lot C4: armies stand on settlements; the province path heads for
     // the city of Normandy.
     let rouen = state.provinces[&prov("prov_normandie")].city.clone();
-    state.armies.get_mut(&english).unwrap().location = rouen;
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(rouen);
     state
         .submit_order(
             data,
             Order::MoveArmy {
                 army: french.clone(),
-                path: vec![prov("prov_normandie").into()],
+                target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_normandie").into()]),
             },
         )
         .unwrap();

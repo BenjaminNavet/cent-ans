@@ -341,9 +341,7 @@ fn simulate(
         .armies
         .iter()
         .filter(|(id, a)| {
-            *id != army_id
-                && Some(*id) != ignore_zoc
-                && state.is_at_war(&army.faction, &a.faction)
+            *id != army_id && Some(*id) != ignore_zoc && state.is_at_war(&army.faction, &a.faction)
         })
         .map(|(id, a)| (id.clone(), state.army_point(data, a)))
         // An army already inside a zone of control may walk out of it.
@@ -589,10 +587,10 @@ impl CampaignState {
         if entry.movement_left == 0 {
             return Err(OrderError::NoMovementLeft);
         }
-        let point = self
-            .target_point(data, &target)
+        let point = self.target_point(data, &target).ok_or(OrderError::NoPath)?;
+        let path = self
+            .find_path(data, army, point)
             .ok_or(OrderError::NoPath)?;
-        let path = self.find_path(data, army, point).ok_or(OrderError::NoPath)?;
         march(self, data, army, &path.waypoints, &target, events).ok_or(OrderError::NoPath)
     }
 
@@ -637,10 +635,10 @@ impl CampaignState {
         )
         .ok_or(OrderError::NoPath)?;
         let grid = data.navgrid();
-        let end = walk
-            .cells
-            .last()
-            .map_or_else(|| self.army_point(data, &self.armies[army]), |c| c.center(grid));
+        let end = walk.cells.last().map_or_else(
+            || self.army_point(data, &self.armies[army]),
+            |c| c.center(grid),
+        );
         if distance(end, approach.point) > approach.radius {
             return Err(OrderError::OutOfRange);
         }
@@ -696,12 +694,13 @@ impl CampaignState {
         {
             crate::movement::land_on_hostile_shore(self, army, province.as_ref(), events);
         }
-        if let Some(defender) = crate::movement::strongest(
-            self,
-            &self.hostile_armies_at(&army_faction, to_port),
-        ) {
+        if let Some(defender) =
+            crate::movement::strongest(self, &self.hostile_armies_at(&army_faction, to_port))
+        {
             // Land beside the port and fight the army holding it.
-            if let (Some(point), Some(a)) = (data.settlement_point(to_port), self.armies.get_mut(army)) {
+            if let (Some(point), Some(a)) =
+                (data.settlement_point(to_port), self.armies.get_mut(army))
+            {
                 a.position = ArmyPosition::field(point);
             }
             crate::movement::fight(self, data, army, &defender, events);
@@ -774,7 +773,11 @@ pub(crate) fn continue_marches(
 
 /// Settlements whose cells lie within `radius_km` of `point` (vision,
 /// contact), in id order.
-pub fn settlements_near(data: &GameData, point: [f32; 2], radius_km: f64) -> BTreeSet<SettlementId> {
+pub fn settlements_near(
+    data: &GameData,
+    point: [f32; 2],
+    radius_km: f64,
+) -> BTreeSet<SettlementId> {
     let radius = radius_km as f32 * px_per_km(data);
     data.settlements
         .keys()

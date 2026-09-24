@@ -311,8 +311,9 @@ impl GameData {
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
         data.build_movement_graph();
-        data.settlement_px =
-            crate::navgrid::read_settlement_px(&root.join(folders::MAP).join(folders::SETTLEMENT_PX));
+        data.settlement_px = crate::navgrid::read_settlement_px(
+            &root.join(folders::MAP).join(folders::SETTLEMENT_PX),
+        );
         data.prepare_rasters(&root.join(folders::MAP));
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;

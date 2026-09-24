@@ -125,8 +125,8 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         .unwrap();
     {
         let army = state.armies.get_mut(&army_id).unwrap();
-        army.location = from.clone();
-        army.path.clear();
+        army.position = sim_campaign::ArmyPosition::Settlement(from.clone());
+        army.clear_plan();
     }
     let before: u32 = state.armies[&army_id]
         .units
@@ -137,7 +137,7 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         .submit_order(&data, Order::move_along(army_id.clone(), vec![to.clone()]))
         .unwrap();
     let events = state.end_turn_with(&data, idle);
-    assert_eq!(state.armies[&army_id].location, to);
+    assert_eq!(state.armies[&army_id].settlement().cloned().unwrap(), to);
     let after: u32 = state.armies[&army_id]
         .units
         .iter()

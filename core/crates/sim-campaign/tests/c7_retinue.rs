@@ -251,10 +251,10 @@ fn companions_move_between_generals_standing_together() {
     let away = state
         .settlements
         .keys()
-        .find(|s| **s != copy.location)
+        .find(|s| !copy.is_at(s))
         .unwrap()
         .clone();
-    copy.location = away;
+    copy.position = sim_campaign::ArmyPosition::Settlement(away);
     state.armies.insert(second.clone(), copy);
     let armies = [first, second];
     let edward = chr("chr_edward_iii");
@@ -276,13 +276,14 @@ fn companions_move_between_generals_standing_together() {
         companion: ret("ret_ecuyer"),
     };
     // Apart: refused.
-    let far = state.armies[&armies[0]].location.clone();
+    let far = state.armies[&armies[0]].settlement().cloned().unwrap();
     assert!(matches!(
         state.submit_order(&data, order()),
         Err(OrderError::Retinue(retinue::RetinueError::NotTogether))
     ));
     // Together: accepted.
-    state.armies.get_mut(&armies[1]).unwrap().location = far;
+    state.armies.get_mut(&armies[1]).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(far);
     state.submit_order(&data, order()).expect("transfer");
     assert!(state.characters[&edward].retinue.is_empty());
     assert_eq!(state.characters[&henry].retinue, vec![ret("ret_ecuyer")]);

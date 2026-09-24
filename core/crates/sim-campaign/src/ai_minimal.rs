@@ -207,7 +207,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             // Lot C7a: an idle army outside friendly places goes home (lot
             // M2: an army in the field too).
             _ if place.is_none_or(|p| {
-                !state.is_friendly_settlement(faction, p) && !state.is_hostile_settlement(faction, p)
+                !state.is_friendly_settlement(faction, p)
+                    && !state.is_hostile_settlement(faction, p)
             }) =>
             {
                 let home = table
@@ -325,4 +326,3 @@ fn threat_at(
         .map(|a| f64::from(a.total_strength()))
         .sum()
 }
-

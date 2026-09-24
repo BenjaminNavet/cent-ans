@@ -139,7 +139,6 @@ impl NavGrid {
                         }
                     }
                 }
-
             }
         }
         labels
@@ -160,7 +159,10 @@ impl NavGrid {
 
     #[inline]
     pub fn contains(&self, x: i64, y: i64) -> bool {
-        x >= 0 && y >= 0 && (x as u64) < u64::from(self.width) && (y as u64) < u64::from(self.height)
+        x >= 0
+            && y >= 0
+            && (x as u64) < u64::from(self.width)
+            && (y as u64) < u64::from(self.height)
     }
 
     #[inline]
@@ -343,7 +345,9 @@ fn load_rasters(source: &RasterSource) -> MapRasters {
             width,
             height,
             indices: rgb
-                .chunks_exact(3)
+                .as_chunks::<3>()
+                .0
+                .iter()
                 .map(|p| u16::from(p[0]) | (u16::from(p[1]) << 8))
                 .collect(),
             ids: source.province_ids.clone(),
@@ -418,8 +422,8 @@ pub fn open_settlement_cells(grid: &mut NavGrid, settlements: &[[f32; 2]]) {
         if let Some((_, dx, dy)) = best {
             let steps = dx.abs().max(dy.abs());
             for step in 1..steps {
-                let cx = x + (dx * step as i64 + steps / 2 * dx.signum()) / steps;
-                let cy = y + (dy * step as i64 + steps / 2 * dy.signum()) / steps;
+                let cx = x + (dx * step + steps / 2 * dx.signum()) / steps;
+                let cy = y + (dy * step + steps / 2 * dy.signum()) / steps;
                 if !grid.passable(cx, cy) {
                     grid.set(cx, cy, PLAIN_COST);
                 }
@@ -482,10 +486,9 @@ impl GameData {
             .get("size_px")
             .and_then(|v| v.as_u64())
             .map_or(DEFAULT_GRID_SIZE, |v| v.max(1) as u32);
-        let cell_km = self
-            .map
-            .as_ref()
-            .map_or(DEFAULT_CELL_KM, |m| m.meters_per_px * f64::from(scale) / 1000.0);
+        let cell_km = self.map.as_ref().map_or(DEFAULT_CELL_KM, |m| {
+            m.meters_per_px * f64::from(scale) / 1000.0
+        });
         let mut province_ids: Vec<Option<ProvinceId>> = Vec::new();
         for (id, geometry) in &self.province_geometry {
             if let Some(index) = geometry.extra.get("index").and_then(|v| v.as_u64()) {
@@ -548,7 +551,8 @@ impl GameData {
             .and_then(|m| {
                 let extent = m.extra.get("extent_lonlat")?.as_array()?;
                 let values: Vec<f64> = extent.iter().filter_map(|v| v.as_f64()).collect();
-                (values.len() == 4).then(|| ([values[0], values[1], values[2], values[3]], m.size_px))
+                (values.len() == 4)
+                    .then(|| ([values[0], values[1], values[2], values[3]], m.size_px))
             })
             .unwrap_or(([-11.0, 35.0, 16.0, 60.0], [4096, 4096]));
         let [lon, lat] = settlement.lonlat;
