@@ -52,6 +52,7 @@ var _battle_columns: Dictionary = {}  # "vanguard"/"main"/"rear" -> VBoxContaine
 var _cards: Dictionary = {}  # unit id -> UnitCard
 var _balance: Array = [1, 1]
 var _colors: Array = [Color.RED, Color.BLUE]
+var player_faction: String = ""  # B2 : blason des vignettes
 var _log_lines: Array[String] = []
 
 
@@ -353,7 +354,7 @@ func _make_card(unit: Dictionary) -> UnitCard:
 	column.visible = true
 	var card: UnitCard = UNIT_CARD.new()
 	(column.get_node("Cards") as HBoxContainer).add_child(card)
-	card.setup(unit, get_node_or_null("/root/IconLibrary"))
+	card.setup(unit, get_node_or_null("/root/IconLibrary"), player_faction, _colors[0])
 	card.clicked.connect(func(id: int, additive: bool) -> void: card_clicked.emit(id, additive))
 	return card
 

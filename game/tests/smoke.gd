@@ -771,7 +771,7 @@ func _check_battle_hud_f5b(scene: BattleScene) -> void:
 	_check(BattleGroups.ORDER.has(hud.card_battle(first)), "battle HUD: card not in a battle column")
 	var card: UnitCard = hud._cards[first]
 	_check(card.custom_minimum_size.x <= 72.0 and card.tooltip_text.contains("Formation"), "battle HUD: card should be compact with formation in its tooltip")
-	var font := card.name_label.get_theme_font("font")
+	var font := card.get_theme_default_font()
 	var fitted := UnitCard.fit_name("Arbalétriers génois de la compagnie Grimaldi", font, 10, 63.0, 2)
 	_check(fitted.split("\n").size() <= 2 and not fitted.contains("Grimaldi"), "battle HUD: name fitting should stop on a whole word: %s" % fitted)
 	scene.selected.clear()

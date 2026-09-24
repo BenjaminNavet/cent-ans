@@ -199,19 +199,9 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var morale := clampf(float(unit["morale"]) / 100.0, 0.0, 1.0)
 	_draw_bar(Rect2(rect.position.x, y + BAR_H + 1.0, WIDTH, MORALE_H), morale, morale_color(morale))
 	# Pastilles d'état (colonne à droite de la plaque).
-	var badges: Array[String] = []
-	if routing:
-		badges.append("rout")
-	elif state == "shooting":
-		badges.append("shoot")
-	elif state == "charging" or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0):
-		badges.append("charge")
-	elif state == "melee":
-		badges.append("melee")
-	if float(unit["fatigue"]) >= EXHAUSTED_FATIGUE:
-		badges.append("tired")
+	var badges := state_badges(unit)
 	for i in badges.size():
-		_draw_badge(badges[i], Vector2(plaque.end.x + 1.0, plaque.position.y + 1.0 + i * 13.0), blink)
+		draw_badge(self, badges[i], Vector2(plaque.end.x + 1.0, plaque.position.y + 1.0 + i * 13.0), blink)
 
 
 func _draw_bar(rect: Rect2, ratio: float, color: Color) -> void:
@@ -237,31 +227,50 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## Pastille ronde de 12 px, pictogramme vectoriel (pas de glyphe de police).
-func _draw_badge(kind: String, top_left: Vector2, blink: bool) -> void:
-	var c := top_left + Vector2(6, 6)
+## Pastilles d'état d'une unité : déroute, tir, charge ou mêlée (une seule), puis épuisement.
+static func state_badges(unit: Dictionary) -> Array[String]:
+	var badges: Array[String] = []
+	var state := str(unit["state"])
+	if state == "routing":
+		badges.append("rout")
+	elif state == "shooting":
+		badges.append("shoot")
+	elif state == "charging" or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0):
+		badges.append("charge")
+	elif state == "melee":
+		badges.append("melee")
+	if float(unit["fatigue"]) >= EXHAUSTED_FATIGUE:
+		badges.append("tired")
+	return badges
+
+
+## Pastille ronde de 12 px (× `scale`) sur `canvas`, pictogramme vectoriel (pas de glyphe).
+static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blink: bool, scale: float = 1.0) -> void:
+	canvas.draw_set_transform(top_left + Vector2(6, 6) * scale, 0.0, Vector2(scale, scale))
+	var c := Vector2.ZERO
 	var bg := PARCHMENT
 	if kind == "rout":
 		bg = ROUT_RED if blink else Color(0.55, 0.08, 0.05)
-	draw_circle(c, 6.5, bg)
-	draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
+	canvas.draw_circle(c, 6.5, bg)
+	canvas.draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
 	var ink := INK if kind != "rout" else Color.WHITE
 	match kind:
 		"shoot":  # flèche en diagonale
-			draw_line(c + Vector2(-3.5, 3.5), c + Vector2(3.5, -3.5), ink, 1.5)
-			draw_colored_polygon(PackedVector2Array([c + Vector2(3.8, -3.8), c + Vector2(0.2, -3.2), c + Vector2(3.2, -0.2)]), ink)
+			canvas.draw_line(c + Vector2(-3.5, 3.5), c + Vector2(3.5, -3.5), ink, 1.5)
+			canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(3.8, -3.8), c + Vector2(0.2, -3.2), c + Vector2(3.2, -0.2)]), ink)
 		"charge":  # double chevron
 			for dx in [-2.5, 1.0]:
-				draw_polyline(PackedVector2Array([c + Vector2(dx, -3.5), c + Vector2(dx + 3, 0), c + Vector2(dx, 3.5)]), ink, 1.5)
+				canvas.draw_polyline(PackedVector2Array([c + Vector2(dx, -3.5), c + Vector2(dx + 3, 0), c + Vector2(dx, 3.5)]), ink, 1.5)
 		"melee":  # épées croisées
-			draw_line(c + Vector2(-3.5, -3.5), c + Vector2(3.5, 3.5), ink, 1.5)
-			draw_line(c + Vector2(3.5, -3.5), c + Vector2(-3.5, 3.5), ink, 1.5)
+			canvas.draw_line(c + Vector2(-3.5, -3.5), c + Vector2(3.5, 3.5), ink, 1.5)
+			canvas.draw_line(c + Vector2(3.5, -3.5), c + Vector2(-3.5, 3.5), ink, 1.5)
 		"tired":  # goutte
-			draw_circle(c + Vector2(0, 1.2), 2.6, Color(0.2, 0.4, 0.75))
-			draw_colored_polygon(PackedVector2Array([c + Vector2(-2.3, 0.2), c + Vector2(0, -4.0), c + Vector2(2.3, 0.2)]), Color(0.2, 0.4, 0.75))
+			canvas.draw_circle(c + Vector2(0, 1.2), 2.6, Color(0.2, 0.4, 0.75))
+			canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-2.3, 0.2), c + Vector2(0, -4.0), c + Vector2(2.3, 0.2)]), Color(0.2, 0.4, 0.75))
 		"rout":  # drapeau blanc
-			draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
-			draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)
+			canvas.draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
+			canvas.draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)
+	canvas.draw_set_transform(Vector2.ZERO)
 
 
 func _draw_name(entry: Dictionary) -> void:
