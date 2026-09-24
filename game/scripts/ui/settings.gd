@@ -25,6 +25,8 @@ const DEFAULTS := {
 	"interface/confirm_end_turn": false,
 	"camera/edge_pan": true,
 	"camera/speed": 1.0,
+	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
+	"map/fog_of_war": true,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,
 	# F8 : tutoriel des premiers tours (désactivable, progression persistée).

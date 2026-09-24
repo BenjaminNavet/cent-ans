@@ -30,6 +30,10 @@ uniform sampler2D province_mask : filter_nearest, repeat_disable, hint_default_b
 uniform bool mask_enabled = false;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
+// Brouillard de guerre (lot C1) : 1 = province vue, 0 = voilée (désaturée, assombrie).
+uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
+uniform bool fog_enabled = false;
+uniform vec3 fog_veil : source_color = vec3(0.42, 0.40, 0.37);
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -515,6 +519,14 @@ void fragment() {
 		}
 		vec3 bcol = realm ? mix(border_color, fc_lin * 0.2, 0.4) : border_color;
 		col = mix(col, bcol, line * alpha * land_f);
+	}
+
+	if (fog_enabled && id > 0) {
+		float seen = texelFetch(fog_mask, ivec2(clamp(id, 0, textureSize(fog_mask, 0).x - 1), 0), 0).r;
+		if (seen < 0.5) {
+			float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+			col = mix(vec3(lum), pow(fog_veil, vec3(2.2)) * max(lum * 2.0, 0.05), 0.35) * 0.6;
+		}
 	}
 
 	ALBEDO = col;

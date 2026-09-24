@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/vision_rules.schema.json",
+  "title": "Règles de vue (brouillard de guerre)",
+  "description": "Fichier data/rules/vision.json : portée de vue d'une faction sur la carte de campagne, en pas terrestres sur le graphe des provinces (lot C1). Les provinces hors de vue sont voilées et leurs armées étrangères masquées.",
+  "type": "object",
+  "properties": {
+    "controlled_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Pas vus autour de chaque province contrôlée (0 = la province seule)." },
+    "army_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Pas vus autour de la province de chaque armée." },
+    "general_bonus": { "type": "integer", "minimum": 0, "maximum": 3, "description": "Pas supplémentaires pour une armée menée par un chef (coureurs, éclaireurs)." },
+    "share_allied_vision": { "type": "boolean", "description": "Les alliés, vassaux et suzerains partagent provinces et armées." },
+    "description": { "type": "string" }
+  },
+  "required": ["controlled_range", "army_range", "share_allied_vision"],
+  "additionalProperties": false
+}

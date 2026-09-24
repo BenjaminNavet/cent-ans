@@ -60,6 +60,7 @@ var chronicle: ChronicleController = null  # M10
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
+var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -98,6 +99,10 @@ func _ready() -> void:
 	armies.setup(map_data, camera)
 	path_preview.setup(map_data)
 	_connect_ui()
+	minimap_ctl = MinimapController.new()  # C1
+	minimap_ctl.name = "MinimapController"
+	add_child(minimap_ctl)
+	minimap_ctl.setup(self)
 	diplomacy = DiplomacyController.new()
 	add_child(diplomacy)
 	diplomacy.setup(self)
@@ -216,7 +221,11 @@ func refresh_all() -> void:
 	if sim == null:
 		return
 	_refresh_owner_colors()
+	if minimap_ctl != null:  # C1 : brouillard avant les marqueurs d'armée
+		minimap_ctl.refresh_fog()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
+	if minimap_ctl != null:
+		minimap_ctl.refresh()
 	_refresh_top_bar()
 	_refresh_construction_markers()
 	if unrest_mode:
@@ -297,6 +306,8 @@ func _refresh_owner_colors() -> void:
 			colors[i] = fallback_by_owner[owner]
 		colors[i].a = 1.0 if owner != "" else 0.0
 	terrain.set_province_colors(colors)
+	if minimap_ctl != null:  # C1
+		minimap_ctl.set_province_colors(colors)
 
 
 func _focus_first_player_army() -> void:
