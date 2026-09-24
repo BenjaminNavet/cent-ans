@@ -496,7 +496,7 @@ def assets_illustrations(
     category: str | None = typer.Option(
         None,
         "--category",
-        help="unit_types, buildings, technologies, séparées par des virgules (défaut : toutes)",
+        help="unit_types, buildings, technologies, factions, séparées par des virgules (défaut : toutes)",
     ),
     limit: int | None = typer.Option(
         None, "--limit", help="Nombre maximal d'illustrations"

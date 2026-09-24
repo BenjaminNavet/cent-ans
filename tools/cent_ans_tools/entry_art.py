@@ -1,7 +1,7 @@
-"""Encyclopedia miniatures (units, buildings, technologies) generated through OpenRouter.
+"""Encyclopedia miniatures (units, buildings, technologies, factions) through OpenRouter.
 
-One wide illumination per entry of ``data/unit_types``, ``data/buildings`` and
-``data/technologies``, shown at the top of its encyclopedia fiche. Prompts are built
+One wide illumination per entry of ``data/unit_types``, ``data/buildings``,
+``data/technologies`` and ``data/factions``, shown at the top of its encyclopedia fiche. Prompts are built
 from the entry data only (name, equipment, description, historical year); images are
 saved as ``game/assets/illustrations/<entry id>.jpg`` (640x360 JPEG, same upward-biased
 crop as the event miniatures).
@@ -21,7 +21,7 @@ from cent_ans_tools.portraits import DATA_DIR, REPO_DIR, PortraitJob
 ILLUSTRATIONS_DIR = REPO_DIR / "game" / "assets" / "illustrations"
 ART_WIDTH = 640
 ART_HEIGHT = 360
-CATEGORIES = ("unit_types", "buildings", "technologies")
+CATEGORIES = ("unit_types", "buildings", "technologies", "factions")
 
 STYLE = (
     "Style: 14th-century French Gothic manuscript miniature (enluminure). Wide "
@@ -62,6 +62,16 @@ def build_prompt(category: str, entry: dict) -> str:
             "with people at work around it.",
             f"What it is: {description}",
         ]
+    elif category == "factions":
+        blazon = (entry.get("heraldry") or {}).get("blazon", "")
+        city = entry.get("capital_city", "")
+        lines = [
+            f"The realm {label} in 1337: "
+            + (f"a view of its capital {city} with " if city else "")
+            + "its people, soldiers and banners.",
+            f"Arms on the banners: {blazon}" if blazon else "",
+            f"Context: {description}",
+        ]
     else:
         year = _year(entry)
         lines = [
@@ -71,7 +81,7 @@ def build_prompt(category: str, entry: dict) -> str:
             f"What it is: {description}",
         ]
     lines.append(STYLE)
-    return "\n".join(lines)
+    return "\n".join(line for line in lines if line)
 
 
 def plan(
