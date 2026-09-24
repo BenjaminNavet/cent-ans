@@ -1,0 +1,11 @@
+{
+  "id": "cdx_aides",
+  "title": "Les aides, impôts sur les ventes",
+  "category": "economie",
+  "aliases": ["aides", "Cour des aides", "douze deniers pour livre"],
+  "era": { "from": "1360", "to": "1790" },
+  "summary": "Les aides sont des taxes royales sur la vente des marchandises, en particulier du vin. Établies en décembre 1360 pour payer la [[cdx_rancon|rançon]] de [[cdx_jean_ii|Jean II]], elles deviennent l'un des piliers des finances royales, malgré les révoltes qu'elles provoquent.",
+  "body": "Au Moyen Âge, le roi est censé « vivre du sien », c'est-à-dire des revenus de son domaine. Lever un impôt sur tout le royaume est une mesure exceptionnelle, justifiée par la défense du pays et consentie par les sujets : c'est une « aide » que ceux-ci accordent au roi. Le mot finit par désigner des impôts précis, les taxes sur la circulation et la vente des marchandises.\n\nEn 1355 et 1356, les [[cdx_etats_generaux|états généraux]] votent déjà des taxes de ce genre pour financer la guerre, en exigeant de contrôler leur emploi. Mais c'est en décembre 1360, pour payer la rançon de [[cdx_jean_ii|Jean II]] fixée à [[cdx_bretigny|Brétigny]], que le roi établit durablement les aides : douze deniers par livre, soit un vingtième, sur la plupart des ventes, une taxe plus lourde sur le vin vendu au détail, et la [[cdx_gabelle|gabelle]] sur le sel.\n\nCes taxes frappent tout le monde, et d'abord les pauvres, qui dépensent tout leur revenu en achats. Elles sont très impopulaires. À la mort de [[cdx_charles_v|Charles V]], en 1380, les princes doivent les abolir sous la pression des villes ; leur rétablissement en 1382 déclenche la révolte des [[cdx_maillotins|Maillotins]] à Paris et de la Harelle à Rouen.\n\nLes aides sont pourtant maintenues. Leur perception est confiée à des officiers appelés élus, et une juridiction spéciale, la Cour des aides, juge à partir de 1390 les litiges fiscaux. Avec la [[cdx_taille|taille]] et la gabelle, elles forment jusqu'à la Révolution le socle de la fiscalité royale.",
+  "see_also": ["cdx_taille", "cdx_gabelle", "cdx_etats_generaux", "cdx_maillotins"],
+  "sources": ["Aides (impôt)", "Cour des aides"]
+}

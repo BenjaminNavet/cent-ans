@@ -1,0 +1,12 @@
+{
+  "id": "cdx_paris",
+  "title": "Paris au temps de la guerre de Cent Ans",
+  "category": "lieu",
+  "aliases": ["Paris", "Hôtel Saint-Pol", "Bastille", "enceinte de Charles V", "Journal d'un bourgeois de Paris"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Avec peut-être deux cent mille habitants au début du XIVe siècle, Paris est la plus grande ville d'Occident et la capitale du royaume. Pendant la guerre, elle se soulève plusieurs fois, et reste anglaise de 1420 à 1436.",
+  "body": "Paris s'organise en trois parties. Au centre, l'île de la Cité abrite le palais royal, siège du Parlement, et la cathédrale Notre-Dame. Sur la rive droite se trouvent le port, la place de Grève, les Halles et le monde des marchands, dirigé par le prévôt des marchands. Sur la rive gauche s'étend le quartier des écoles, autour de l'[[cdx_universite_paris|université]], où l'on parle latin.\n\nLa capitale est au cœur des crises. En 1358, [[cdx_etienne_marcel|Étienne Marcel]], prévôt des marchands, tente d'imposer un contrôle sur le gouvernement royal et fait massacrer deux maréchaux sous les yeux du dauphin. Devenu roi, [[cdx_charles_v|Charles V]] se méfie de la ville : il fait bâtir une nouvelle enceinte sur la rive droite, la Bastille pour la défendre, et réside à l'hôtel Saint-Pol plutôt qu'au palais de la Cité. Il installe aussi au Louvre sa célèbre [[cdx_librairie_charles_v|librairie]].\n\nSous [[cdx_charles_vi|Charles VI]], la ville se soulève encore : révolte des [[cdx_maillotins|Maillotins]] en 1382, puis des [[cdx_cabochiens|Cabochiens]] en 1413, dans le cadre de la guerre entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]]. En 1418, les Bourguignons prennent Paris et massacrent les Armagnacs. Après le [[cdx_traite_troyes|traité de Troyes]], les Anglais s'y installent ; le petit Henri VI y est couronné roi de France à Notre-Dame en décembre 1431.\n\nJeanne d'Arc échoue devant ses murs en septembre 1429. Il faut attendre avril 1436 pour que le connétable de Richemont reprenne la ville au nom de [[cdx_charles_vii|Charles VII]], qui n'y fait son entrée qu'en 1437 et préfère ensuite résider sur la Loire. Un témoin anonyme, l'auteur du Journal d'un bourgeois de Paris, a raconté la faim, les loups et les misères de ces années.",
+  "entity": "prov_ile_de_france",
+  "see_also": ["cdx_etienne_marcel", "cdx_universite_paris", "cdx_maillotins", "cdx_cabochiens"],
+  "sources": ["Paris au Moyen Âge", "Journal d'un bourgeois de Paris", "Enceinte de Charles V"]
+}

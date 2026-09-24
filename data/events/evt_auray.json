@@ -1,0 +1,84 @@
+{
+  "id": "evt_auray",
+  "title": "La bataille d'Auray",
+  "text": "Devant Auray, [[cdx_jean_de_montfort|Jean de Montfort]], Olivier de Clisson et les archers de John Chandos écrasent l'armée de [[cdx_charles_de_blois|Charles de Blois]]. Le prétendant est tué, du Guesclin pris ; vingt-trois ans de guerre de succession s'achèvent dans les marais du Loch.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1364,
+      "season": "autumn"
+    },
+    "until_year": 1365,
+    "conditions": [
+      {
+        "type": "fired",
+        "event": "evt_succession_bretagne"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_brittany"
+  },
+  "options": [
+    {
+      "text": "Reconnaître Montfort (traité de Guérande)",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_charles_de_blois"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 10,
+          "reason": "Traité de Guérande"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -5,
+          "reason": "Montfort duc"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Poursuivre la lutte pour Jeanne de Penthièvre",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_charles_de_blois"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "devastation",
+          "province": "prov_bretagne",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1364-09-29"
+  },
+  "sources": [
+    "Bataille d'Auray",
+    "Traité de Guérande (1365)",
+    "Charles de Blois"
+  ]
+}

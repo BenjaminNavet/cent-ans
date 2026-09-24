@@ -16,13 +16,31 @@
         "b": "fac_france"
       },
       {
-        "type": "fired",
-        "event": "evt_azincourt"
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "fired",
+            "event": "evt_azincourt"
+          },
+          {
+            "type": "fired",
+            "event": "evt_alliance_anglo_bourguignonne"
+          }
+        ]
       },
       {
-        "type": "controls",
-        "faction": "fac_england",
-        "province": "prov_normandie"
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "controls",
+            "faction": "fac_england",
+            "province": "prov_normandie"
+          },
+          {
+            "type": "fired",
+            "event": "evt_alliance_anglo_bourguignonne"
+          }
+        ]
       }
     ]
   },

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_combat_des_trente",
+  "title": "Le combat des Trente",
+  "category": "bataille",
+  "aliases": ["combat des Trente", "Jean de Beaumanoir", "Beaumanoir", "chêne de Mi-Voie"],
+  "era": { "from": "1351", "to": "1351" },
+  "summary": "Le 26 mars 1351, entre Josselin et Ploërmel, trente combattants du parti de Blois menés par Jean de Beaumanoir affrontent trente du parti de Montfort menés par Robert Bemborough. Ce duel collectif, gagné par Beaumanoir, devient un modèle de la prouesse chevaleresque.",
+  "body": "Au milieu de la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]], les garnisons ennemies se font face à quelques lieues de distance. Jean de Beaumanoir, maréchal de Bretagne et capitaine de Josselin pour Charles de Blois, reproche à Robert Bemborough, capitaine anglais de Ploërmel pour le parti de Montfort, les pillages que ses hommes infligent aux paysans. Plutôt qu'une bataille, les deux chefs conviennent d'un combat réglé à trente contre trente.\n\nLa rencontre a lieu le 26 mars 1351 près du chêne de Mi-Voie, à mi-chemin des deux forteresses. Le camp de Beaumanoir aligne des Bretons ; celui de Bemborough mêle Anglais, Bretons et quelques Allemands, dont les futurs grands capitaines [[cdx_robert_knolles|Robert Knolles]] et Hugh Calveley. On se bat à pied, à l'épée, à la dague, à la hache et au marteau, avec des pauses convenues pour souffler et boire.\n\nLa tradition a retenu un mot célèbre : Beaumanoir, blessé et assoiffé, réclame à boire, et Geoffroy du Bois lui aurait répondu « Bois ton sang, Beaumanoir, la soif te passera ». Bemborough est tué ; l'écuyer Guillaume de Montauban, remonté à cheval, renverse plusieurs adversaires et décide de la victoire. Les survivants anglais sont faits prisonniers et libérés contre [[cdx_rancon|rançon]].\n\nLe combat ne change rien à la guerre, mais il frappe les imaginations. [[cdx_froissart|Froissart]] dit avoir vu, à la table de Charles V, un survivant couvert de cicatrices, et un long poème en français célèbre les Trente. Il incarne l'idéal de la [[cdx_chevalerie|chevalerie]] : une guerre d'honneur entre pairs, loin des sièges et des pillages qui en sont pourtant l'ordinaire.",
+  "entity": "evt_combat_des_trente",
+  "see_also": ["cdx_guerre_de_succession_de_bretagne", "cdx_chevalerie", "cdx_robert_knolles", "cdx_froissart"],
+  "sources": ["Combat des Trente"]
+}

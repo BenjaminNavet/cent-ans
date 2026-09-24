@@ -1,0 +1,12 @@
+{
+  "id": "cdx_legumineuses",
+  "title": "Fèves, pois et lentilles",
+  "category": "ingredient",
+  "aliases": ["légumineuses", "fèves", "lentilles", "pois chiches", "pois secs"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Les légumineuses du Vieux Monde (fèves, pois, lentilles, pois chiches, vesces) nourrissent le paysan les jours maigres, se conservent sèches tout l'hiver et reposent la terre dans l'assolement triennal.",
+  "body": "Avant 1492, l'Europe ne connaît pas le haricot commun, venu d'Amérique. Ses légumes secs sont la fève, reine des potagers médiévaux, le pois, la lentille, le pois chiche dans le Midi et la vesce, surtout pour les bêtes. Semées au printemps dans la deuxième sole de l'[[cdx_assolement_triennal|assolement triennal]], séchées puis entreposées, elles traversent l'hiver sans se gâter.\n\nPour le paysan, ce sont des protéines bon marché, qui complètent le [[cdx_pain_bis|pain]]. Elles entrent dans le [[cdx_potage|potage]] ou se mangent en purée. Le [[cdx_menagier_de_paris|Ménagier de Paris]] donne plusieurs manières d'accommoder fèves et pois, en purée, au lard les jours gras ou à l'huile les jours maigres. Maigres par nature, elles sont précieuses pendant le [[cdx_careme|Carême]] et les [[cdx_jours_maigres|jours maigres]].\n\nLes médecins s'en méfient un peu. Selon la théorie des [[cdx_humeurs|humeurs]], la fève est venteuse et pesante, bonne pour les estomacs de travailleurs plus que pour ceux des lettrés ; on la corrige par la cuisson, le sel et les herbes « chaudes ». Les régimes de santé réservent les légumineuses aux corps robustes.\n\nLa science moderne leur donne raison sur l'essentiel : riches en protéines et en fibres, les légumineuses associées aux céréales forment une ration équilibrée ; leurs racines abritent des bactéries qui fixent l'azote, d'où l'effet « reposant » pour le sol. Une mise en garde réelle : chez les personnes atteintes d'un déficit héréditaire en G6PD, fréquent autour de la Méditerranée, la fève peut déclencher une anémie grave, le favisme.\n\nAu XXIe siècle : une purée de pois ou de fèves au lard, relevée d'oignon et d'herbes, est une recette parfaitement médiévale. Attention seulement au haricot blanc et au haricot vert, américains, qui n'ont rien à faire dans la marmite de 1340.",
+  "entity": "diet_pulses",
+  "see_also": ["cdx_assolement_triennal", "cdx_potage", "cdx_careme", "cdx_jours_maigres", "cdx_menagier_de_paris"],
+  "sources": ["Légumineuse", "Fève", "Favisme"]
+}

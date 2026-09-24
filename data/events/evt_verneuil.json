@@ -1,0 +1,92 @@
+{
+  "id": "evt_verneuil",
+  "title": "La bataille de Verneuil",
+  "text": "L'armée du dauphin, renforcée de six mille Écossais du comte de Douglas, rencontre le duc de Bedford devant Verneuil. Les Lombards pillent le camp au lieu de charger ; les Écossais, qui avaient juré de ne pas faire de quartier, meurent presque tous.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1424,
+      "season": "summer"
+    },
+    "until_year": 1425,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "at_war",
+            "a": "fac_england",
+            "b": "fac_france"
+          },
+          {
+            "type": "fired",
+            "event": "evt_troyes"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Pleurer l'armée d'Écosse",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_scotland",
+          "amount": 10,
+          "reason": "Sang écossais versé à Verneuil"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever une taille pour une nouvelle armée",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "treasury",
+          "amount": 5000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1424-08-17"
+  },
+  "sources": [
+    "Bataille de Verneuil (1424)",
+    "Archibald Douglas (4e comte de Douglas)"
+  ]
+}

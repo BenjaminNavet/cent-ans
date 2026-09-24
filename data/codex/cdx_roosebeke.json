@@ -1,0 +1,12 @@
+{
+  "id": "cdx_roosebeke",
+  "title": "Bataille de Roosebeke",
+  "category": "bataille",
+  "aliases": ["Roosebeke", "bataille de Roosebeke", "Westrozebeke", "Rosebecque"],
+  "era": { "from": "1382", "to": "1382" },
+  "summary": "Le 27 novembre 1382, à Roosebeke, en Flandre, l'armée du jeune [[cdx_charles_vi|Charles VI]] écrase les milices flamandes révoltées de Philippe van Artevelde. La victoire rétablit le comte [[cdx_louis_de_male|Louis de Male]] et prépare l'héritage bourguignon.",
+  "body": "En 1379, [[cdx_gand|Gand]] se soulève contre son comte, [[cdx_louis_de_male|Louis de Male]]. En 1382, les Gantois, affamés par le blocus, choisissent pour chef Philippe van Artevelde, fils du célèbre [[cdx_jacob_van_artevelde|Jacques van Artevelde]]. Au printemps, ils écrasent le comte près de [[cdx_bruges|Bruges]] et se rendent maîtres de presque toute la Flandre. Louis de Male appelle à l'aide son suzerain, le roi de France.\n\nLe jeune [[cdx_charles_vi|Charles VI]], quatorze ans, est poussé à intervenir par son oncle [[cdx_philippe_le_hardi|Philippe le Hardi]], gendre et héritier de Louis de Male. Pour la noblesse française, il s'agit aussi de venger Courtrai, où les Flamands avaient vaincu la chevalerie en 1302, et d'étouffer une révolte urbaine qui fait écho aux troubles de [[cdx_paris|Paris]] et de Rouen.\n\nLe 27 novembre 1382, près de Roosebeke, les milices flamandes s'avancent en une masse compacte, armées de piques et de goedendags. Les hommes d'armes français, combattant à pied au centre, les arrêtent, tandis que les ailes les enveloppent. Pris en tenaille, les Flamands sont si serrés que beaucoup meurent étouffés. Philippe van Artevelde est tué, et des milliers de Gantois périssent.\n\nL'armée royale met ensuite Courtrai à sac et en emporte les éperons dorés pris en 1302. De retour à Paris, le roi réprime durement la révolte des [[cdx_maillotins|Maillotins]]. Gand résiste pourtant jusqu'en 1385, et à la mort de Louis de Male en 1384, la Flandre passe à Philippe le Hardi, fondant la puissance de la [[cdx_bourgogne|Bourgogne]].",
+  "entity": "evt_roosebeke",
+  "see_also": ["cdx_louis_de_male", "cdx_charles_vi", "cdx_gand", "cdx_maillotins"],
+  "sources": ["Bataille de Roosebeke", "Philippe van Artevelde"]
+}

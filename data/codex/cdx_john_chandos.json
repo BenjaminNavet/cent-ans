@@ -1,0 +1,11 @@
+{
+  "id": "cdx_john_chandos",
+  "title": "Jean Chandos",
+  "category": "personnage",
+  "aliases": ["Jean Chandos", "John Chandos", "Chandos", "héraut Chandos", "Lussac-les-Châteaux"],
+  "era": { "from": "v. 1320", "to": "1370" },
+  "summary": "Compagnon du [[cdx_prince_noir|Prince noir]] et membre fondateur de l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]], Jean Chandos est l'un des plus grands capitaines anglais. Vainqueur à Auray en 1364, il meurt au combat du pont de Lussac, le 1er janvier 1370.",
+  "body": "Issu d'une famille de chevaliers du Derbyshire, Jean Chandos combat à [[cdx_crecy|Crécy]] en 1346 aux côtés du jeune prince Édouard, le futur [[cdx_prince_noir|Prince noir]], dont il devient l'ami et le conseiller. Il compte parmi les vingt-six chevaliers fondateurs de l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]].\n\nÀ [[cdx_poitiers|Poitiers]], en 1356, il se tient près du prince et le conseille pendant toute la bataille. En Bretagne, en 1364, il commande l'armée anglo-bretonne du jeune Jean de Montfort à Auray : la victoire met fin à la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]], et [[cdx_du_guesclin|Du Guesclin]] doit lui rendre son épée. En 1367, il combat encore en Castille à Nájera.\n\nNommé connétable d'Aquitaine, puis sénéchal du Poitou, il tente de défendre la [[cdx_guyenne|Guyenne]] anglaise lorsque [[cdx_charles_v|Charles V]] reprend la guerre en 1369. Le 31 décembre 1369, près du pont de Lussac, sur la Vienne, il affronte une troupe française. Il glisse sur le sol gelé, et un écuyer le frappe au visage, du côté de l'œil qu'il avait perdu à la chasse des années plus tôt. Il meurt le lendemain ; ses ennemis eux-mêmes le regrettent.\n\nCourtois, loyal et habile, Chandos est pour [[cdx_froissart|Froissart]] un modèle de chevalier. Son héraut, qu'on appelle simplement le héraut Chandos, a écrit en vers français une Vie du Prince noir, précieux témoignage sur les campagnes de son maître.",
+  "see_also": ["cdx_prince_noir", "cdx_du_guesclin", "cdx_guerre_de_succession_de_bretagne", "cdx_ordre_de_la_jarretiere"],
+  "sources": ["Jean Chandos", "Combat du pont de Lussac"]
+}

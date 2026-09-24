@@ -1,0 +1,76 @@
+{
+  "id": "evt_harfleur",
+  "title": "Le siège d'Harfleur",
+  "text": "Le roi Henri V, qui se dit roi de France par Isabelle, sa trisaïeule, débarque à l'embouchure de la Seine avec dix mille hommes et des [[cdx_bombarde|bombardes]]. Harfleur, clef de la Normandie, résiste cinq semaines puis se rend à merci.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1415,
+      "season": "summer"
+    },
+    "until_year": 1416,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Revendiquer la couronne et passer la mer",
+      "effects": [
+        {
+          "type": "declare_war",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "claim",
+          "kind": "throne",
+          "target": "fac_france"
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Prolonger les trêves",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 10,
+          "reason": "Trêves prolongées"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1415-08-13"
+  },
+  "sources": [
+    "Siège d'Harfleur (1415)",
+    "Henri V (roi d'Angleterre)"
+  ]
+}

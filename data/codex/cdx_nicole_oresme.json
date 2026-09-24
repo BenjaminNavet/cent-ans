@@ -1,0 +1,11 @@
+{
+  "id": "cdx_nicole_oresme",
+  "title": "Nicole Oresme",
+  "category": "personnage",
+  "aliases": ["Nicole Oresme", "Oresme", "Traité des monnaies", "De moneta"],
+  "era": { "from": "v. 1320", "to": "1382" },
+  "summary": "Maître de l'[[cdx_universite_paris|université de Paris]], conseiller de [[cdx_charles_v|Charles V]], Nicole Oresme est l'un des plus grands savants du XIVe siècle : économiste de la monnaie, traducteur d'Aristote en français, mathématicien et astronome.",
+  "body": "Né en Normandie vers 1320, Nicole Oresme étudie à Paris et devient en 1356 grand maître du collège de Navarre, l'un des collèges de l'[[cdx_universite_paris|université de Paris]]. Il se lie avec le dauphin Charles, futur [[cdx_charles_v|Charles V]], dont il devient le conseiller. Il finit sa vie évêque de Lisieux, où il meurt en 1382.\n\nVers 1355, il écrit en latin un Traité des monnaies (De moneta), l'un des premiers ouvrages d'économie. Il y soutient que la monnaie n'appartient pas au prince, mais à la communauté qui l'utilise : le roi n'a pas le droit de la modifier à sa guise pour s'enrichir. Les [[cdx_mutations_monetaires|mutations monétaires]], qui ruinent créanciers et rentiers, sont pour lui une forme de vol. Ces idées inspirent la monnaie forte de Charles V, avec le [[cdx_franc_a_cheval|franc]] et la stabilisation de la [[cdx_livre_tournois|livre tournois]].\n\nÀ la demande du roi, il traduit en français l'Éthique, la Politique, l'Économique et le Traité du ciel d'Aristote, pour que les conseillers qui ne lisent pas le latin puissent s'en instruire. Il doit pour cela inventer des mots : on lui attribue l'entrée en français de termes comme démocratie, doctrine, tolérer ou usurper. Ces manuscrits enrichissent la [[cdx_librairie_charles_v|librairie du Louvre]].\n\nSavant audacieux, il examine dans le Livre du ciel et du monde l'hypothèse que la Terre tourne sur elle-même, et montre qu'aucune observation ne permet de l'exclure, avant de s'en remettre à l'opinion commune. Il invente aussi une manière de représenter des grandeurs variables par des figures, ancêtre lointain des graphiques, et combat l'astrologie divinatoire.",
+  "see_also": ["cdx_charles_v", "cdx_mutations_monetaires", "cdx_librairie_charles_v", "cdx_universite_paris"],
+  "sources": ["Nicole Oresme", "Traité des monnaies"]
+}

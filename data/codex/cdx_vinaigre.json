@@ -1,0 +1,12 @@
+{
+  "id": "cdx_vinaigre",
+  "title": "Le vinaigre",
+  "category": "medecine",
+  "aliases": ["vinaigre", "vin aigre", "oxymel", "vinaigre des quatre voleurs"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Condiment de toutes les sauces et remède de tous les régimes, le vinaigre « froid et sec » tempère les humeurs échauffées : pendant la Peste noire, on en arrose ses mets, on en respire des éponges et on en lave ses mains.",
+  "body": "Le vinaigre, littéralement « vin aigre », naît tout seul de n'importe quel vin laissé à l'air : au Moyen Âge, où le vin se conserve mal, il ne manque jamais. On en fabrique aussi de cidre et de bière. Les vinaigriers d'Orléans, ville de vin et de port fluvial, deviendront célèbres ; ils forment une corporation à la fin du XIVe siècle.\n\nEn cuisine, il est partout : avec le [[cdx_verjus|verjus]], il donne leur acidité aux sauces froides comme la [[cdx_cameline|cameline]], sert à conserver les légumes et le poisson, et à mariner les viandes. Mêlé d'eau, c'est la boisson des pauvres et des soldats depuis l'Antiquité romaine. Mêlé de miel, c'est l'oxymel des médecins, remède contre la toux et les fièvres.\n\nPour la théorie des [[cdx_humeurs|humeurs]], le vinaigre est froid et sec : il tempère le sang et la bile échauffés, coupe l'appétit, « pénètre » et nettoie. D'où son rôle dans les régimes de peste : les médecins de 1348 recommandent de mettre du vinaigre dans les aliments, de se laver les mains et le visage à l'eau vinaigrée, de respirer une éponge imbibée de vinaigre et d'herbes aromatiques en sortant dans les rues, au milieu des [[cdx_genievre|fumigations]] qui purifient l'air. Les chirurgiens en usent pour laver les plaies, et l'on en fait respirer à l'opéré endormi par l'éponge soporifique pour le réveiller.\n\nCe qu'en dit la science moderne : l'acide acétique a une action antimicrobienne réelle mais faible ; il ne désinfecte pas comme l'alcool ou l'eau de Javel, et il ne protège pas de la peste, transmise surtout par les puces. Il reste un excellent conservateur alimentaire, sans danger aux doses culinaires ; pur, il abîme l'émail des dents et l'estomac.",
+  "anachronism": "Le célèbre « vinaigre des quatre voleurs », qui aurait protégé des pilleurs de pestiférés, est une légende de l'époque moderne (XVIIe-XVIIIe siècles), non du temps de la Peste noire.",
+  "see_also": ["cdx_genievre", "cdx_compendium_de_epidemia", "cdx_peste_noire", "cdx_verjus", "cdx_humeurs"],
+  "sources": ["Vinaigre", "Vinaigre des quatre voleurs", "Oxymel"]
+}

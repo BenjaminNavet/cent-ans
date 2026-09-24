@@ -1,7 +1,7 @@
 {
   "id": "evt_miracle_local",
   "title": "Un miracle",
-  "text": "Une statue de la Vierge aurait pleuré, un aveugle recouvré la vue devant les reliques d'un saint. Les pèlerins affluent de toute la contrée.",
+  "text": "Une statue de la Vierge aurait pleuré, un aveugle recouvré la vue devant les reliques d'un saint. Les [[cdx_pelerinage|pèlerins]] affluent de toute la contrée.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80

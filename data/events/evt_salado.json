@@ -1,0 +1,81 @@
+{
+  "id": "evt_salado",
+  "title": "La bataille du Salado",
+  "text": "Le sultan mérinide et le roi de Grenade assiègent Tarifa. Alphonse de Castille et Alphonse de Portugal franchissent le rio Salado et mettent en déroute l'armée musulmane : c'est la dernière grande invasion venue d'Afrique.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "autumn"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_granada"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_castile"
+  },
+  "options": [
+    {
+      "text": "Charger avec les Portugais",
+      "effects": [
+        {
+          "type": "declare_war",
+          "a": "fac_castile",
+          "b": "fac_granada"
+        },
+        {
+          "type": "prestige",
+          "amount": 20
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": 5000
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_granada",
+          "amount": -15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_granada",
+          "amount": -20,
+          "reason": "Désastre du Salado"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Tenir Tarifa sans risquer l'ost",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1340-10-30"
+  },
+  "sources": [
+    "Bataille du Río Salado",
+    "Alphonse XI de Castille",
+    "Joseph F. O'Callaghan, The Gibraltar Crusade, 2011"
+  ]
+}

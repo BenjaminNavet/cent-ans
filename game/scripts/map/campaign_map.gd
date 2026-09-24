@@ -8,6 +8,7 @@ extends Node3D
 ## Options de ligne de commande (après `--`) :
 ##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte
 ##                              (sélectionne la première armée du joueur + aperçu de chemin).
+##   --stage=map                avec --screenshot : carte seule (aucune sélection, aucun panneau).
 ##   --stage=province           avec --screenshot : sélectionne plutôt la capitale du joueur
 ##                              et ouvre le panneau de recrutement.
 ##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
@@ -16,6 +17,7 @@ extends Node3D
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
 ##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
+##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -55,8 +57,9 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
-var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
+var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
+var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -119,6 +122,9 @@ func _ready() -> void:
 	hud.name = "HudController"
 	add_child(hud)
 	hud.setup(self)
+	tutorial = TutorialController.new()  # F8
+	add_child(tutorial)
+	tutorial.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -863,6 +869,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_skills()
 				"siege":
 					_stage_screenshot_siege()  # M8
+				"map":
+					pass  # V2 : carte seule, sans sélection ni panneau (captures du terrain)
 				"help":
 					help.toggle()  # M10
 				"objectives":
@@ -886,6 +894,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_battle()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
+				"tutorial", "encyclopedia":  # F8
+					tutorial.stage_screenshot(_screenshot_stage)
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):

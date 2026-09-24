@@ -1,0 +1,12 @@
+{
+  "id": "cdx_concile_constance",
+  "title": "Le concile de Constance",
+  "category": "religion",
+  "aliases": ["concile de Constance", "Martin V", "Haec Sancta", "Jean Gerson", "Gerson"],
+  "era": { "from": "1414", "to": "1418" },
+  "summary": "Réuni de 1414 à 1418 dans la ville impériale de Constance, ce grand concile met fin au [[cdx_grand_schisme|Grand Schisme]] en déposant ou en obtenant l'abdication de trois papes rivaux et en élisant Martin V. Il fait aussi brûler [[cdx_jan_hus|Jan Hus]].",
+  "body": "En 1414, la chrétienté compte trois papes : celui de Rome, Grégoire XII, celui d'Avignon, Benoît XIII, réfugié en Espagne, et celui issu du concile de Pise, Jean XXIII. Poussé par le roi des Romains Sigismond, fils de l'empereur [[cdx_charles_iv|Charles IV]], ce dernier convoque un concile général à Constance, au bord du lac du même nom. Des milliers de prélats, de docteurs, d'ambassadeurs et de marchands affluent.\n\nPour éviter que les nombreux prélats italiens ne dominent, on vote par nations : italienne, allemande, anglaise, française, puis espagnole. Quand Jean XXIII, sentant le vent tourner, s'enfuit, le concile proclame le 6 avril 1415, par le décret Haec Sancta, qu'il tient son pouvoir directement du Christ et que le pape lui-même doit lui obéir. Les docteurs de l'[[cdx_universite_paris|université de Paris]], comme Jean Gerson et Pierre d'Ailly, défendent cette supériorité du concile.\n\nJean XXIII est déposé, Grégoire XII abdique, Benoît XIII est déclaré déchu, bien qu'il refuse de s'incliner jusqu'à sa mort. Le 11 novembre 1417, le concile élit un pape unique, Martin V, un Romain de la famille Colonna. Le schisme ouvert en 1378 est terminé.\n\nLe concile juge aussi les idées jugées hérétiques. Il condamne les doctrines de [[cdx_john_wyclif|John Wyclif]] et fait comparaître le réformateur tchèque [[cdx_jan_hus|Jan Hus]], venu avec un sauf-conduit de Sigismond. Condamné, Hus est brûlé le 6 juillet 1415, ce qui déclenche en Bohême la révolte des [[cdx_hussites|hussites]]. Les idées conciliaires, elles, inspireront le [[cdx_gallicanisme|gallicanisme]].",
+  "entity": "evt_constance",
+  "see_also": ["cdx_grand_schisme", "cdx_jan_hus", "cdx_hussites", "cdx_gallicanisme"],
+  "sources": ["Concile de Constance", "Haec Sancta"]
+}

@@ -31,6 +31,9 @@ const KIND_LABELS := {
 	"idle_character": "Personnage sans affectation",
 	"construction_done": "Construction achevée",
 	"research_done": "Recherche achevée",
+	"table": "Table et vivres",
+	"medicine": "Médecine",
+	"herbarium": "Herbier",
 }
 ## Types dessinés sur cire rouge (danger) ; les autres sur parchemin.
 const DANGER_KINDS := ["chronicle_decision", "enemy_army", "siege", "debt"]

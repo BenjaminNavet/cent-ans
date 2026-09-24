@@ -1,0 +1,45 @@
+{
+  "id": "evt_galeres_de_flandre",
+  "title": "Les galères de Flandre",
+  "text": "Les galères marchandes de la Sérénissime rentrent de [[cdx_bruges|Bruges]] et de Southampton, chargées de laines et de draps. Le Sénat met aux enchères la prochaine muda ; les patriciens se disputent les places.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 48
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_venice"
+  },
+  "options": [
+    {
+      "text": "Adjuger les galères au plus offrant",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3500
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réserver les places aux petites maisons",
+      "effects": [
+        {
+          "type": "wealth",
+          "province": "prov_venezia",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "prov_venezia",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Mude",
+    "Frederic C. Lane, Venice: A Maritime Republic, 1973"
+  ]
+}

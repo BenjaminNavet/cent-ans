@@ -1,0 +1,71 @@
+{
+  "id": "evt_combat_des_trente",
+  "title": "Le combat des Trente",
+  "text": "À mi-chemin de Josselin et de Ploërmel, au chêne de Mi-Voie, trente chevaliers de Blois menés par Beaumanoir affrontent trente Anglais de Bamborough. « Bois ton sang, Beaumanoir, la soif te passera ! » ; au soir, les Anglais sont morts ou pris.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1351,
+      "season": "spring"
+    },
+    "until_year": 1352,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_brittany"
+  },
+  "options": [
+    {
+      "text": "Célébrer les champions de Beaumanoir",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rançonner les captifs anglais",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -10,
+          "reason": "Captifs du combat des Trente"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1351-03-26"
+  },
+  "sources": [
+    "Combat des Trente",
+    "Jean Froissart, Chroniques, livre I"
+  ]
+}

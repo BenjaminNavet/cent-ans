@@ -1,0 +1,11 @@
+{
+  "id": "cdx_toison_or",
+  "title": "L'ordre de la Toison d'or",
+  "category": "institution",
+  "aliases": ["Toison d'or", "ordre de la Toison d'or", "chevaliers de la Toison d'or"],
+  "era": { "from": "1430", "to": "1453" },
+  "summary": "Fondé à [[cdx_bruges|Bruges]] le 10 janvier 1430 par [[cdx_philippe_le_bon|Philippe le Bon]], à l'occasion de son mariage avec Isabelle de Portugal, l'ordre de la Toison d'or est le plus prestigieux ordre de chevalerie de la fin du Moyen Âge.",
+  "body": "En 1430, [[cdx_philippe_le_bon|Philippe le Bon]], duc de [[cdx_bourgogne|Bourgogne]], est l'un des princes les plus riches d'Europe. Allié des Anglais depuis le meurtre de son père à Montereau, il a pourtant refusé d'entrer dans l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]], qui l'aurait lié au roi d'Angleterre. Il fonde son propre ordre le 10 janvier 1430 à [[cdx_bruges|Bruges]], lors des fêtes de son mariage avec Isabelle de Portugal.\n\nL'ordre est placé sous la protection de saint André, patron de la Bourgogne. Son nom évoque la Toison d'or que Jason alla conquérir dans la mythologie grecque, mais aussi la toison de Gédéon dans la Bible, plus convenable pour des chevaliers chrétiens. Il rappelle enfin la laine, source de la richesse des villes flamandes du duc.\n\nLes membres, peu nombreux et choisis parmi les plus grands seigneurs, portent un collier d'or fait de briquets, les pièces d'acier qui servaient à faire jaillir le feu, et de pierres à feu d'où jaillissent des étincelles, auquel pend une toison de bélier. Ils se réunissent en chapitres solennels, où la conduite de chacun est examinée et parfois blâmée, même celle du duc. Un héraut, le roi d'armes Toison d'or, veille au cérémonial.\n\nL'ordre sert la politique ducale : il lie à Philippe la noblesse de ses domaines dispersés, de la Bourgogne aux Pays-Bas. Après la mort de Charles le Téméraire en 1477, il passe aux Habsbourg, héritiers de la Bourgogne, et existe encore aujourd'hui, en deux branches, espagnole et autrichienne.",
+  "see_also": ["cdx_philippe_le_bon", "cdx_ordre_de_la_jarretiere", "cdx_ordre_de_l_etoile", "cdx_chevalerie"],
+  "sources": ["Ordre de la Toison d'or"]
+}

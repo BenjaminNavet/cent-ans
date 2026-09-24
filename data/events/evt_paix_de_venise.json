@@ -1,0 +1,87 @@
+{
+  "id": "evt_paix_de_venise",
+  "title": "La paix des Scaliger",
+  "text": "Padoue perdue, Trévise menacée, Mastino della Scala doit traiter. À Venise, la Ligue lui dicte ses conditions : la Sérénissime garde Trévise et sa marche, les Carrara reprennent Padoue, Florence n'obtient guère que des promesses sur Lucques.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1339,
+      "season": "spring"
+    },
+    "until_year": 1340,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_verona",
+        "b": "fac_venice"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_verona"
+  },
+  "options": [
+    {
+      "text": "Signer la paix et céder Trévise",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_verona",
+          "b": "fac_venice"
+        },
+        {
+          "type": "peace",
+          "a": "fac_verona",
+          "b": "fac_florence"
+        },
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "wealth",
+          "province": "prov_venezia",
+          "amount": 8
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Continuer la guerre contre la Ligue",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "devastation",
+          "province": "prov_verona",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1339-01-24"
+  },
+  "sources": [
+    "Mastino II della Scala",
+    "Guerra tra Venezia e gli Scaligeri (1336-1339)",
+    "Frederic C. Lane, Venice: A Maritime Republic, 1973"
+  ]
+}

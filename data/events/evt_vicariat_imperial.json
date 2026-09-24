@@ -1,0 +1,92 @@
+{
+  "id": "evt_vicariat_imperial",
+  "title": "Le vicariat impérial de Coblence",
+  "text": "Le 5 septembre 1338, à Coblence, l'empereur [[cdx_louis_de_baviere|Louis de Bavière]], siégeant en majesté devant les princes d'Empire, fait d'Édouard III son [[cdx_vicariat_imperial|vicaire général]]. Le roi d'Angleterre peut désormais commander aux seigneurs des Pays-Bas au nom de l'empereur. Mais l'alliance se paie : l'empereur et les princes attendent les subsides promis.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1338,
+      "season": "autumn"
+    },
+    "until_year": 1339,
+    "conditions": [
+      {
+        "type": "ruler_is",
+        "faction": "fac_empire",
+        "character": "chr_ludwig_iv"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_england",
+        "character": "chr_edward_iii"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Accepter le vicariat et verser les subsides",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": 25,
+          "reason": "Vicariat impérial de Coblence"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_brabant",
+          "amount": 10,
+          "reason": "Vicariat impérial de Coblence"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Prendre le titre, différer les paiements",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": -10,
+          "reason": "Subsides impayés"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_brabant",
+          "amount": -5,
+          "reason": "Subsides impayés"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1338-09-05"
+  },
+  "sources": [
+    "Louis IV, Holy Roman Emperor",
+    "Édouard III",
+    "Jonathan Sumption, The Hundred Years War, vol. I : Trial by Battle, 1990"
+  ]
+}

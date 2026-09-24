@@ -1,0 +1,12 @@
+{
+  "id": "cdx_traite_troyes",
+  "title": "Traité de Troyes",
+  "category": "institution",
+  "aliases": ["traité de Troyes", "double monarchie", "Montereau", "pont de Montereau"],
+  "era": { "from": "1420", "to": "1435" },
+  "summary": "Signé le 21 mai 1420, le traité de Troyes fait d'[[cdx_henri_v|Henri V]] d'Angleterre le régent et l'héritier de [[cdx_charles_vi|Charles VI]], au détriment du dauphin Charles. Il fonde une « double monarchie » franco-anglaise qui ne survivra pas à [[cdx_jeanne_darc|Jeanne d'Arc]].",
+  "body": "Après [[cdx_azincourt|Azincourt]], [[cdx_henri_v|Henri V]] conquiert méthodiquement la Normandie, prenant [[cdx_rouen|Rouen]] en janvier 1419 après un long siège. Le royaume de France est paralysé par la folie de [[cdx_charles_vi|Charles VI]] et la guerre civile des [[cdx_armagnacs_bourguignons|Armagnacs et des Bourguignons]]. Une réconciliation est tentée entre le dauphin Charles et [[cdx_jean_sans_peur|Jean sans Peur]], duc de Bourgogne.\n\nLe 10 septembre 1419, lors d'une entrevue sur le pont de Montereau, Jean sans Peur est tué à coups de hache par des hommes de l'entourage du dauphin, vengeance du meurtre de Louis d'Orléans douze ans plus tôt. Son fils [[cdx_philippe_le_bon|Philippe le Bon]] se jette dans l'alliance anglaise.\n\nLe 21 mai 1420, à Troyes, le roi fou, la reine [[cdx_isabeau_de_baviere|Isabeau]] et le duc de Bourgogne acceptent les conditions anglaises. Henri V épouse Catherine de France, fille de Charles VI, gouverne le royaume comme régent et deviendra roi à la mort de son beau-père. Le dauphin, déclaré indigne pour le crime de Montereau, est déshérité. Les deux couronnes resteront distinctes mais portées par le même roi.\n\nLe destin se joue autrement : Henri V meurt le 31 août 1422, Charles VI le 21 octobre suivant. Le roi de la double monarchie est un bébé de neuf mois, Henri VI, et son oncle le duc de Bedford gouverne la France anglaise depuis Paris. Au sud de la Loire, le dauphin se proclame roi sous le nom de [[cdx_charles_vii|Charles VII]].\n\nL'épopée de [[cdx_jeanne_darc|Jeanne d'Arc]], le sacre de [[cdx_reims|Reims]] en 1429, puis la [[cdx_paix_arras|paix d'Arras]] de 1435, qui réconcilie Bourgogne et France, vident le traité de sa substance.",
+  "entity": "evt_troyes",
+  "see_also": ["cdx_henri_v", "cdx_charles_vi", "cdx_jean_sans_peur", "cdx_charles_vii"],
+  "sources": ["Traité de Troyes", "Assassinat de Jean sans Peur"]
+}

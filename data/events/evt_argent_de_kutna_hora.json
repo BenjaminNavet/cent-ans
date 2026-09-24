@@ -1,0 +1,45 @@
+{
+  "id": "evt_argent_de_kutna_hora",
+  "title": "Un filon à Kutná Hora",
+  "text": "Les mineurs de Kutná Hora ont percé un nouveau filon d'argent. À la Cour italienne, les maîtres monnayeurs frappent des gros de Prague par milliers ; tout le royaume s'enrichit.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 40
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_bohemia"
+  },
+  "options": [
+    {
+      "text": "Frapper des gros de Prague",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 4000
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réinvestir dans les puits et les fonderies",
+      "effects": [
+        {
+          "type": "wealth",
+          "province": "prov_bohemia",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "prov_bohemia",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Kutná Hora",
+    "Gros de Prague"
+  ]
+}

@@ -11,7 +11,10 @@ extends Node3D
 ## Options (après `--`) : `--screenshot=<png>` (joue la bataille jusqu'au contact, capture, quitte),
 ## `--units=<n>` (complète chaque camp à n régiments, banc d'essai sans retour campagne),
 ## `--benchmark` (mesure les FPS sur 600 images puis quitte), `--autoplay` (IA des deux camps),
-## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8).
+## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
+## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
+## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
+## `--camera=x,z,distance,lacet` (capture : position de caméra imposée).
 
 signal returned(result: Dictionary)
 
@@ -20,6 +23,7 @@ const SPEEDS := [1.0, 2.0, 4.0]
 const DOUBLE_CLICK_MS := 350
 const PICK_RADIUS_PX := 26.0
 const BANNER_HEIGHT := 7.0
+const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
 ## Barre des ordres du chef (F10b).
 const LEADER_ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
 
@@ -44,7 +48,8 @@ var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var siege_demo: bool = false
 
-var _mm: Dictionary = {}  # "side/kind" -> MultiMeshInstance3D
+var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
+var soldiers: BattleSoldiers = null
 var _banners: Dictionary = {}  # id -> {node, flag_mat, label, count}
 var _rings: Dictionary = {}  # id -> MeshInstance3D
 var _left_press: Vector2 = Vector2(-1, -1)
@@ -58,6 +63,10 @@ var _benchmark: bool = false
 var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _pad_units: int = 0
+var _closeup: bool = false
+var _weather_override: String = ""
+var _camera_override: String = ""
+var _last_group_ms: int = -10000
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -78,6 +87,8 @@ func _ready() -> void:
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.command_pressed.connect(_on_command)
 	hud.return_pressed.connect(_on_return)
+	hud.speed_pressed.connect(_on_speed_pressed)
+	hud.minimap_clicked.connect(_on_minimap_clicked)
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -155,23 +166,26 @@ func begin() -> bool:
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
 	var weather: Dictionary = battle.call("get_weather")
+	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	var terrain_data: Dictionary = battle.call("get_terrain")
-	terrain.build(terrain_data, str(weather.get("key", "clear")))
+	terrain.build(terrain_data, weather_key)
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-	_apply_weather(str(weather.get("key", "clear")))
-	_build_soldier_layers()
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
 	units = battle.call("get_units")
+	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
-	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.height_at(x, z)
+	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
+	hud.minimap.flipped = player_side == "attacker"
+	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	add_child(LEADER_ORDERS_BAR.new(self))
 	_refresh_view(true)
@@ -204,71 +218,20 @@ func _pad_setup(count: int) -> void:
 		setup[side]["units"] = list
 
 
-func _apply_weather(key: String) -> void:
-	var env: Environment = world_env.environment
-	match key:
-		"fog":
-			env.fog_enabled = true
-			env.fog_light_color = Color(0.78, 0.8, 0.82)
-			env.fog_density = 0.004
-			sun.light_energy = 0.6
-		"rain":
-			env.fog_enabled = true
-			env.fog_light_color = Color(0.55, 0.58, 0.62)
-			env.fog_density = 0.0015
-			sun.light_energy = 0.55
-			_add_precipitation(Color(0.7, 0.75, 0.85, 0.5), 30.0, Vector3(0.05, 0.9, 0.05))
-		"snow":
-			env.fog_enabled = true
-			env.fog_light_color = Color(0.88, 0.9, 0.93)
-			env.fog_density = 0.002
-			sun.light_energy = 0.75
-			_add_precipitation(Color(1, 1, 1, 0.9), 3.0, Vector3(0.25, 0.25, 0.25))
-		_:
-			env.fog_enabled = false
-
-
-func _add_precipitation(color: Color, fall_speed: float, drop_size: Vector3) -> void:
-	var particles := CPUParticles3D.new()
-	particles.name = "Precipitation"
-	particles.amount = 1500
-	particles.lifetime = 2.0
-	particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	particles.emission_box_extents = Vector3(160, 1, 160)
-	particles.direction = Vector3(0.1, -1, 0)
-	particles.spread = 5.0
-	particles.gravity = Vector3(0, -fall_speed, 0)
-	particles.initial_velocity_min = fall_speed * 0.6
-	particles.initial_velocity_max = fall_speed
-	var mesh := BoxMesh.new()
-	mesh.size = drop_size
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh.material = mat
-	particles.mesh = mesh
-	particles.position = Vector3(0, 60, 0)
-	camera_rig.add_child(particles)
-
-
 func _build_soldier_layers() -> void:
+	soldiers = BattleSoldiers.new()
+	soldiers.name = "Soldiers"
+	add_child(soldiers)
+	var factions := {}
 	for side in ["attacker", "defender"]:
-		for kind in KINDS:
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = BattleMeshes.soldier(kind, side_colors[side])
-			mm.instance_count = 0
-			var instance := MultiMeshInstance3D.new()
-			instance.name = "%s_%s" % [side, kind]
-			instance.multimesh = mm
-			instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			add_child(instance)
-			_mm["%s/%s" % [side, kind]] = instance
+		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
+	soldiers.setup(units, side_colors, factions)
+	_mm = soldiers.layers
 
 
 func _make_banner(unit: Dictionary) -> void:
 	var id := int(unit["id"])
+	var side := str(unit["side"])
 	var node := Node3D.new()
 	node.name = "Banner%d" % id
 	add_child(node)
@@ -278,17 +241,20 @@ func _make_banner(unit: Dictionary) -> void:
 	pole.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	node.add_child(pole)
 	var flag := MeshInstance3D.new()
-	var quad := QuadMesh.new()
-	quad.size = Vector2(2.6, 1.7)
-	var flag_mat := StandardMaterial3D.new()
-	flag_mat.albedo_color = side_colors[str(unit["side"])]
-	flag_mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
-	flag_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flag_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	quad.material = flag_mat
-	flag.mesh = quad
+	var flag_mat := ShaderMaterial.new()
+	flag_mat.shader = BANNER_SHADER
+	flag_mat.set_shader_parameter("livery", side_colors[side])
+	flag_mat.set_shader_parameter("phase", float(id) * 1.7)
+	var cloth := _banner_cloth(unit, str((setup[side] as Dictionary).get("faction", "")))
+	var flag_size: Vector2 = cloth["size"]
+	flag.mesh = BattleMeshes.flag(flag_size.x, flag_size.y)
+	flag_mat.set_shader_parameter("heraldry", cloth["texture"])
+	flag_mat.set_shader_parameter("has_heraldry", cloth["texture"] != null)
+	flag_mat.set_shader_parameter("full_texture", cloth["full"])
+	flag_mat.set_shader_parameter("flag_length", flag_size.x)
+	flag.material_override = flag_mat
 	flag.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	flag.position = Vector3(1.3, BANNER_HEIGHT - 0.9, 0)
+	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
 	var label := Label3D.new()
 	label.text = BattleHud.CATEGORY_ICON.get(str(unit["render"]), "⚔") + ("★" if bool(unit["is_general"]) else "")
@@ -298,7 +264,7 @@ func _make_banner(unit: Dictionary) -> void:
 	label.pixel_size = 0.02
 	label.outline_size = 10
 	label.modulate = Color(1, 0.97, 0.88)
-	label.position = Vector3(1.3, BANNER_HEIGHT - 0.9, 0.05)
+	label.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - minf(flag_size.y, 1.7) * 0.5, 0.05)
 	node.add_child(label)
 	var count := Label3D.new()
 	count.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -306,9 +272,9 @@ func _make_banner(unit: Dictionary) -> void:
 	count.font_size = 40
 	count.pixel_size = 0.02
 	count.outline_size = 8
-	count.position = Vector3(1.3, BANNER_HEIGHT - 2.3, 0)
+	count.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - flag_size.y - 0.6, 0)
 	node.add_child(count)
-	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count}
+	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count, "routing": false}
 	var ring := MeshInstance3D.new()
 	var ring_mat := StandardMaterial3D.new()
 	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
@@ -319,6 +285,35 @@ func _make_banner(unit: Dictionary) -> void:
 	ring.visible = false
 	add_child(ring)
 	_rings[id] = ring
+
+
+## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
+## 256×512, tissu dans le haut, bas transparent) pour la noblesse, fanion à queue d'aronde (4:1)
+## pour les autres, étendards royaux pour le général de France / d'Angleterre ; à défaut, centre
+## de l'écu de la faction (repli).
+func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
+	var dir := "res://assets/heraldry/banners/"
+	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
+	var candidates: Array = []
+	if bool(unit.get("is_general", false)) and faction in ["fac_france", "fac_england"]:
+		# Pas de quartier : oriflamme (France) / dragon (Angleterre) ; sinon Saint-Georges pour
+		# l'armée royale anglaise, bannière de la faction pour la française.
+		var side := str(unit.get("side", ""))
+		var no_quarter: bool = battle != null and battle.has_method("get_no_quarter") and bool(battle.call("get_no_quarter", side))
+		if no_quarter:
+			candidates.append([dir + ("oriflamme.png" if faction == "fac_france" else "dragon.png"), Vector2(1.3, 2.6)])
+		elif faction == "fac_england":
+			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	if noble or str(unit.get("render", "")) == "siege":
+		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
+	else:
+		candidates.append([dir + "%s_pennon.png" % faction, Vector2(3.0, 0.75)])
+		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
+	for candidate in candidates:
+		var texture := PortraitLoader.load_texture(candidate[0])
+		if texture != null:
+			return {"texture": texture, "size": candidate[1], "full": true}
+	return {"texture": PortraitLoader.heraldry_texture(faction), "size": Vector2(2.6, 1.7), "full": false}
 
 
 func _frame_camera() -> void:
@@ -362,21 +357,13 @@ func _process(delta: float) -> void:
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
-	for side in ["attacker", "defender"]:
-		for kind in KINDS:
-			var mm: MultiMesh = (_mm["%s/%s" % [side, kind]] as MultiMeshInstance3D).multimesh
-			var buffer: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
-			var count := buffer.size() / 12
-			if count > mm.instance_count:
-				mm.instance_count = count
-			if mm.instance_count == 0:
-				continue
-			buffer.resize(mm.instance_count * 12)
-			mm.buffer = buffer
-			mm.visible_instance_count = count
+	var running: bool = not paused and not battle.call("is_finished")
+	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
 	if siege_view != null:
 		siege_view.update(battle.call("get_siege"), units)
 	var banner_scale := _banner_scale()
+	# Les drapeaux se présentent de trois quarts à la caméra (lisibles sans être des panneaux).
+	var cam_yaw := camera_rig.yaw + PI * 0.5 + 0.35
 	for unit in units:
 		var id := int(unit["id"])
 		var banner: Dictionary = _banners[id]
@@ -390,9 +377,11 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var pos := Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"]))
 		node.position = pos + Vector3(0, 0, 0)
 		node.scale = Vector3.ONE * banner_scale
+		node.rotation.y = cam_yaw
 		var routing := str(unit["state"]) == "routing"
-		var flag_mat: StandardMaterial3D = banner["flag_mat"]
-		flag_mat.albedo_color = Color(0.92, 0.92, 0.9) if routing else side_colors[str(unit["side"])]
+		if routing != bool(banner["routing"]):
+			banner["routing"] = routing
+			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
 		var count: Label3D = banner["count"]
 		count.text = str(int(unit["soldiers"]))
 		count.modulate = Color(1, 0.85, 0.3) if selected.has(id) else Color(1, 1, 1)
@@ -411,6 +400,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if siege_view != null:
 			hud.set_siege_status(siege_status(battle.call("get_siege")))
 		hud.update_cards(units, player_side, selected)
+		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
@@ -438,7 +428,7 @@ static func siege_status(siege: Dictionary) -> String:
 
 
 func _banner_scale() -> float:
-	return clampf(camera_rig.distance * 0.014, 2.0, 9.0)
+	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
 
 
 func _show_end() -> void:
@@ -486,15 +476,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	if battle == null:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
+		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
+			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
+			return
 		match event.keycode:
 			KEY_SPACE:
 				_toggle_pause()
-			KEY_1:
-				speed = SPEEDS[0]
-			KEY_2:
-				speed = SPEEDS[1]
-			KEY_3:
-				speed = SPEEDS[2]
+			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
+				_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
+			KEY_MINUS, KEY_KP_SUBTRACT:
+				_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
+			KEY_F1:
+				hud.toggle_help()
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
@@ -528,6 +523,50 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _toggle_pause() -> void:
 	paused = not paused
+
+
+## Boutons de vitesse du HUD (F5b) : -1 = pause (bascule), 0..2 = SPEEDS[index] et reprise.
+func _on_speed_pressed(index: int) -> void:
+	if index < 0:
+		_toggle_pause()
+	else:
+		speed = SPEEDS[index]
+		paused = false
+	hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
+
+
+## Ctrl+n (Cmd+n sous macOS) : enregistre la sélection ; n : la rappelle, et un second appui
+## rapide centre la caméra sur le groupe.
+func handle_group_key(number: int, save: bool) -> void:
+	if save:
+		hud.groups.save(number, selected)
+		return
+	var ids := hud.groups.recall(number, units)
+	if ids.is_empty():
+		return
+	var again := selected == ids and Time.get_ticks_msec() - _last_group_ms < 600
+	_last_group_ms = Time.get_ticks_msec()
+	selected = ids
+	if again:
+		var center := Vector3.ZERO
+		for unit in units:
+			if ids.has(int(unit["id"])):
+				center += Vector3(float(unit["x"]), 0, float(unit["z"]))
+		camera_rig.look_at_point(center / ids.size(), camera_rig.distance, camera_rig.yaw)
+
+
+## Cadre de la caméra au sol (x, z) : les quatre coins de l'écran projetés sur le terrain.
+func camera_frame() -> PackedVector2Array:
+	var frame := PackedVector2Array()
+	var screen := get_viewport().get_visible_rect().size
+	for corner in [Vector2(0, 0), Vector2(screen.x, 0), screen, Vector2(0, screen.y)]:
+		var point := ground_point(corner)
+		frame.append(Vector2(point.x, point.z))
+	return frame
+
+
+func _on_minimap_clicked(world: Vector2) -> void:
+	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
 
 
 func _finish_left(position: Vector2, additive: bool) -> void:
@@ -727,6 +766,12 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--camera="):
+			_camera_override = arg.trim_prefix("--camera=")
+		elif arg == "--closeup":
+			_closeup = true
+		elif arg.begins_with("--weather="):
+			_weather_override = arg.trim_prefix("--weather=")
 	if _screenshot_path != "":
 		call_deferred("_stage_screenshot")
 
@@ -744,14 +789,17 @@ func _stage_screenshot() -> void:
 	var contact_time := -1.0
 	for _i in 3000:
 		battle.call("tick", 0.1)
+		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
+		soldiers.update(battle, battle.call("get_units"), 0.1, [])
 		if contact_time < 0.0:
 			for unit in battle.call("get_units"):
 				if str(unit["state"]) == "melee":
 					contact_time = float(battle.call("get_elapsed"))
 					break
-		elif float(battle.call("get_elapsed")) > contact_time + 12.0 or battle.call("is_finished"):
+		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
 			break
 	paused = true
+	print("BattleScene: capture at %.0f s, %d corpses" % [float(battle.call("get_elapsed")), soldiers.corpse_count])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0
@@ -759,13 +807,34 @@ func _stage_screenshot() -> void:
 		if str(unit["state"]) == "melee":
 			focus += Vector3(float(unit["x"]), 0, float(unit["z"]))
 			n += 1
-	if n > 0:
+	if _closeup:
+		# Gros plan : le couple de régiments ennemis les plus proches (de préférence en mêlée),
+		# vu de trois quarts depuis le camp du joueur.
+		var best := INF
+		var yaw := 0.0
+		for unit in units:
+			if str(unit["side"]) != player_side or not bool(unit["present"]):
+				continue
+			for other in units:
+				if str(other["side"]) == player_side or not bool(other["present"]):
+					continue
+				var a := Vector2(float(unit["x"]), float(unit["z"]))
+				var b := Vector2(float(other["x"]), float(other["z"]))
+				var d := a.distance_to(b) - (100.0 if str(unit["state"]) == "melee" else 0.0)
+				if d < best:
+					best = d
+					var mid := a.lerp(b, 0.1)
+					focus = Vector3(mid.x, 0, mid.y)
+					yaw = atan2(a.x - b.x, a.y - b.y) + 0.55
+		camera_rig.look_at_point(focus, 24.0, yaw)
+	elif n > 0:
 		focus /= n
 		camera_rig.look_at_point(focus + Vector3(0, 0, -25 if player_side == "attacker" else 25), 120.0, (PI if player_side == "attacker" else 0.0) + 0.5)
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
 	_refresh_view(true)
+	_apply_camera_override()
 	for _i in 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
@@ -777,6 +846,7 @@ func _stage_siege_screenshot() -> void:
 	var climb_time := -1.0
 	for _i in 2400:
 		battle.call("tick", 0.1)
+		soldiers.update(battle, battle.call("get_units"), 0.1, [])
 		var elapsed := float(battle.call("get_elapsed"))
 		if climb_time < 0.0:
 			for unit in battle.call("get_units"):
@@ -797,9 +867,20 @@ func _stage_siege_screenshot() -> void:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2 and int(unit.get("climbing", -1)) >= 0:
 			selected.append(int(unit["id"]))
 	_refresh_view(true)
+	_apply_camera_override()
 	for _i in 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
+func _apply_camera_override() -> void:
+	if _camera_override == "":
+		return
+	var parts := _camera_override.split(",")
+	if parts.size() < 4:
+		return
+	camera_rig.look_at_point(Vector3(float(parts[0]), 0, float(parts[1])), float(parts[2]), deg_to_rad(float(parts[3])))
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
