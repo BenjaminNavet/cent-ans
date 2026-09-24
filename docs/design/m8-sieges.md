@@ -92,3 +92,33 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
   résolution auto et sauvegarde) ; smoke § 11. Sonde : `cargo run --release -p sim-battle --example
   probe -- siege <brèche> [engins,…]` (garnison de 5 contre 8 régiments + engins : échelles seules
   ≈ 3/6 victoires, brèche ouverte 6/6, 3-6 min).
+
+## F5 — finition des sièges (F5a, Rust)
+- **Déploiement** : même API que la bataille rangée (`m7-battles.md` § F5). Zone de l'assaillant :
+  tout le champ au sud de l'enceinte, jusqu'à 60 m de sa face la plus avancée (`SIEGE_STANDOFF`),
+  jamais dans l'enceinte ni sur la bande d'un pan intact ; zone de la garnison : rectangle englobant
+  l'enceinte, point exigé **dans** l'anneau (un défenseur posé près d'un pan monte sur le chemin de
+  ronde au premier tick). Tours de siège et bélier gardent leur place par défaut (plus près).
+- **Maisons et rues** : `SiegeWorks.houses` (disques de 9 m, deux couronnes à 75 et 110 m du centre,
+  rues rayonnantes de la place vers chaque pan et la porte ; génération sans tirage aléatoire).
+  Exposées au pont : `get_siege().houses = [{x, z, radius}]` — **le rendu Godot doit poser ses
+  maisons sur ces disques** (aujourd'hui `battle_siege.gd` place les siennes). Les maisons arrêtent les
+  régiments (sauf en déroute).
+- **Cheminement A*** (`sim/pathing.rs`) : grille de 4 m sur tout le champ ; obstacles = bandes des
+  pans intacts et maisons ; brèches, porte enfoncée (et porte ouverte d'une sortie, pour la garnison)
+  libres. Chemin mis en cache par régiment, recalculé quand la cellule but ou les ouvertures changent ;
+  lissage à vue ; un régiment collé à un jambage recule d'abord. Les grimpeurs gardent la règle M8
+  (échelles si le détour dépasse 1,6 × + 40 m). La règle d'arrêt contre un pan compte désormais la
+  distance au pan lui-même : on contourne librement le jambage d'une brèche.
+- **Tours de l'enceinte** (`sim/siege_extra.rs`) : chaque tour encore reliée à un pan intact tire toutes
+  les 8 s (décalées) sur l'assiégeant le plus proche hors des murs à 180 m (25 tireurs, précision
+  0,3 → 0,15 avec la distance, météo), tant que la garnison a un régiment apte ; jamais sur le bélier
+  ni les tours de siège.
+- **Sortie** : garnison IA, après 2 min, quand la valeur des assiégeants tombe sous la moitié de la
+  sienne → `SiegeWorks.sortie` (`get_siege().sortie`), « La garnison ouvre ses portes et fait une
+  sortie ! » ; la porte laisse passer la garnison, fantassins et cavaliers (hors tireurs du rempart)
+  chargent l'assiégeant le plus proche.
+- Tests `f5.rs` : zones de siège, cheminement par la brèche en évitant les maisons, tours et sortie,
+  déterminisme. Sonde `probe -- siege 0` : 6/6 (≈ 290 s) ; `siege 60` : 6/6 (≈ 210 s) — l'échelade
+  sans brèche réussit plus souvent qu'en M8 (3/6) : l'infanterie trouve maintenant la porte enfoncée
+  par le bélier. À rééquilibrer si besoin (PV de la porte, tir des tours).
