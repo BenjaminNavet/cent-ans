@@ -21,6 +21,8 @@ const PARTS := PARTS_SIDE * PARTS_SIDE
 const FLOATS_PER_INSTANCE := 16
 ## Enfoncement du pied (part de la hauteur) : le tronc ne flotte pas sur une pente.
 const GROUND_SINK := 0.08
+## Lot V4 : distance minimale (px carte) à la berge d'un fleuve pour planter.
+const RIVER_CLEARANCE := 0.3
 
 var mask: VegetationMask
 var tile_index: int = 0
@@ -169,6 +171,9 @@ func _scatter(raw: Array) -> void:
 			# sur le maillage d'une autre tuile, lot C7b).
 			if not rect.has_point(Vector2(x, y)):
 				continue
+			# Lot V4 : pas d'arbre dans le lit ni sur la berge immédiate des fleuves.
+			if data.river_sd_at(x, y) < RIVER_CLEARANCE:
+				continue
 			var ground := data.height_world_at(x, y)
 			if ground <= 0.0:
 				continue
@@ -300,6 +305,8 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 	if gap < HEDGE_GAP:
 		return
 	if not exclusions.is_empty() and _excluded(pos.x, pos.y):
+		return
+	if mask.map_data.river_sd_at(pos.x, pos.y) < RIVER_CLEARANCE:
 		return
 	# Reste dans la tuile : le pied est posé sur le maillage de cette tuile (lot C7b).
 	var p := (pos + jitter).clamp(rect.position, rect.end - Vector2(0.001, 0.001))

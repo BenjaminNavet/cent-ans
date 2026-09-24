@@ -14,8 +14,11 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 #include "res://shaders/river_bed.gdshaderinc"
 
 uniform vec2 map_size = vec2(4096.0, 4096.0);
-uniform vec3 shallow_color : source_color = vec3(0.23, 0.33, 0.28);
-uniform vec3 deep_color : source_color = vec3(0.07, 0.17, 0.20);
+uniform vec3 shallow_color : source_color = vec3(0.30, 0.40, 0.36);
+uniform vec3 deep_color : source_color = vec3(0.13, 0.26, 0.31);
+// Reflet du ciel (fresnel), accordé à la brume chaude de la carte.
+uniform vec3 sky_color : source_color = vec3(0.66, 0.72, 0.76);
+uniform float sky_reflect = 0.55;
 uniform vec3 foam_color : source_color = vec3(0.80, 0.82, 0.78);
 uniform float min_px = 1.6;
 uniform float thin_fade = 0.7;
@@ -26,7 +29,7 @@ uniform float lift_per_distance = 0.0009;
 uniform float carved_overlap = 1.35;
 uniform float flow_speed = 0.35;
 uniform float ripple_scale = 3.2;
-uniform float ripple_strength = 0.35;
+uniform float ripple_strength = 0.08;
 uniform float roughness_value = 0.06;
 // Épaisseur d'eau (unités monde) à partir de laquelle la couleur est « profonde ».
 uniform float depth_full = 0.05;
@@ -128,11 +131,15 @@ void fragment() {
 	ROUGHNESS = mix(roughness_value, 0.35, foam);
 	METALLIC = 0.0;
 	SPECULAR = 0.5;
-	vec3 n = normalize(vec3(-nx * ripple_strength * 10.0, 1.0, -ny * ripple_strength * 10.0));
+	// Rides atténuées quand elles deviennent plus fines que le pixel (pas de scintillement).
+	float ripple_fade = 1.0 - smoothstep(0.3, 1.2, fwidth(q.x));
+	vec3 n = normalize(vec3(-nx * ripple_strength * 10.0 * ripple_fade, 1.0, -ny * ripple_strength * 10.0 * ripple_fade));
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
+	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
+	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));
 	// Bord : fondu (ruban) ou contact avec la berge (lit creusé : l'eau finit sur la pente).
 	float soft = 1.0 - smoothstep(0.7, 1.0, edge) * (1.0 - v_carved);
-	float carved_alpha = mix(0.55, 0.96, smoothstep(0.0, 0.35, depth_t));
+	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
 }
