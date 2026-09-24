@@ -90,6 +90,10 @@ var docked_right_x: float = 0.0
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
+## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
+var panels := PanelStack.new()
+## Province affichée par le panneau de province (une autre province = nouvelle sélection).
+var _province_panel_id: String = ""
 
 
 func _ready() -> void:
@@ -143,6 +147,7 @@ func _ready() -> void:
 	toast.hide()
 	_decorate_top_bar()  # F2
 	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
+	_setup_panel_stack()  # U1
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
@@ -459,10 +464,18 @@ func log_line_count() -> int:
 
 
 func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable(), city: Dictionary = {}) -> void:
+	# U1 : une autre province choisie sur la carte referme les grands panneaux ; la même
+	# province (rafraîchissement de fin de tour) reste de côté sous le panneau central.
+	var id := str(province.get("id", ""))
+	if id != _province_panel_id:
+		panels.reveal(province_panel)
+	_province_panel_id = id
 	province_panel.show_province(province, state, recruitable, is_player_owner, label_of, city)
 
 
 func hide_province() -> void:
+	_province_panel_id = ""
+	panels.forget_suspended(province_panel)
 	province_panel.hide()
 
 
@@ -649,6 +662,55 @@ func _setup_hud() -> void:
 	queue_layout()
 
 
+# --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
+
+
+func _setup_panel_stack() -> void:
+	panels.register(province_panel, PanelStack.Kind.DOCKED)
+	panels.register(faction_panel, PanelStack.Kind.CENTRAL)
+	panels.register(court_panel, PanelStack.Kind.CENTRAL)
+	panels.register(tech_panel, PanelStack.Kind.CENTRAL)
+	panels.register(character_sheet, PanelStack.Kind.COMPANION, [court_panel])
+	panels.register(save_load_dialog, PanelStack.Kind.MODAL)
+	for panel in docked_panels:
+		panels.register(panel, PanelStack.Kind.DOCKED)
+	for child in get_children():
+		_auto_register(child)
+	child_entered_tree.connect(_auto_register)
+	panels.changed.connect(queue_layout)
+
+
+## Enregistre un panneau de la carte : `kind` = `PanelStack.Kind` ; `companion_of` : panneaux
+## centraux qu'il accompagne (fiche à côté de la Cour…).
+func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array = []) -> void:
+	panels.register(panel, kind, companion_of)
+	if not panel.resized.is_connected(queue_layout):
+		panel.resized.connect(queue_layout)
+
+
+## Panneaux ajoutés par les contrôleurs (diplomatie, chronique, agents, rançons, flow).
+func _auto_register(node: Node) -> void:
+	if not (node is Control) or panels.is_registered(node):
+		return
+	if node is DiplomacyPanel or node is ChronicleWindow or node.name == &"AgentRegistry":
+		register_panel(node, PanelStack.Kind.CENTRAL)
+	elif node is RansomPanel:
+		register_panel(node, PanelStack.Kind.COMPANION, [faction_panel])
+	elif node is PauseMenu or node is SettingsMenu or node is SeasonReport:
+		register_panel(node, PanelStack.Kind.MODAL)
+
+
+## Échap ferme le panneau du dessus avant que la carte (désélection) ou le menu pause ne la
+## reçoivent (`_shortcut_input` passe avant `_unhandled_input`).
+func _shortcut_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("ui_cancel") or event.is_echo():
+		return
+	if get_tree().paused or not visible:
+		return
+	if panels.close_top():
+		get_viewport().set_input_as_handled()
+
+
 ## Replace le HUD au prochain cycle (plusieurs demandes → un seul placement).
 func queue_layout() -> void:
 	if _layout_queued or not is_inside_tree():
@@ -706,14 +768,21 @@ func layout_hud() -> void:
 	var docked_open := province_panel.visible
 	for panel in docked_panels:
 		docked_open = docked_open or panel.visible
-	var wide_panel_open := faction_panel.visible or character_sheet.visible
+	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
+	# dès qu'un grand panneau la recouvrirait (elle ne passe plus jamais par-dessus).
+	var wide_panel_open := false
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION:
+			_keep_on_screen(panel, top, view)
+			wide_panel_open = true
 	var letters_top := top
 	# Bord droit (distance au bord de l'écran) des panneaux de province et de colonie.
 	var dock_right := HUD_MARGIN
 	if minimap != null:
 		minimap.size = minimap.get_combined_minimum_size()
 		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
-		minimap.visible = not wide_panel_open
+		minimap.visible = not _covers(minimap.get_global_rect())
 		letters_top = minimap.position.y + minimap.size.y + 10.0
 		if minimap.visible:
 			dock_right = view.x - minimap.position.x + 8.0
@@ -726,12 +795,42 @@ func layout_hud() -> void:
 		_dock_panel(panel, top, dock_right)
 
 
+## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
+func _covers(rect: Rect2) -> bool:
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and panel.get_global_rect().intersects(rect):
+			return true
+	return false
+
+
+## U1 : le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
+func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
+	if panel.get_parent() != self:
+		return
+	# Trop grand pour l'écran : rétréci (dans la limite de sa taille minimale).
+	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
+	if panel.size.x > room.x or panel.size.y > room.y:
+		panel.size = Vector2(minf(panel.size.x, room.x), minf(panel.size.y, room.y))
+	var rect := panel.get_global_rect()
+	var shift := Vector2.ZERO
+	if rect.end.x > view.x - 4.0:
+		shift.x = view.x - 4.0 - rect.end.x
+	if rect.position.x + shift.x < 4.0:
+		shift.x = 4.0 - rect.position.x
+	if rect.position.y < top:
+		shift.y = top - rect.position.y
+	if shift != Vector2.ZERO:
+		panel.position += shift
+
+
 ## Lot C7b : ancre `panel` (panneau de colonie) comme le panneau de province, à gauche de la
 ## minicarte ; replacé à chaque `layout_hud`.
 func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
 		return
 	docked_panels.append(panel)
+	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()
 
