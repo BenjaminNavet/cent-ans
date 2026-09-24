@@ -14,12 +14,15 @@ Spéc : consigne du lot S1 (visuel seulement), contexte `docs/design/m8-sieges.m
 - [x] Appels depuis `battle_siege.gd` (7 lignes + `add_child(door, true)` pour que le second
   vantail, auparavant nommé `@MeshInstance3D@…`, se cache aussi).
 - [x] Test headless `game/tests/wall_collapse_fx_test.gd` (vert).
-- [x] Smoke vert (avant le réglage final ; relancé en fin de lot).
+- [x] Smoke vert sur l'état final (exit 0).
 - [x] Captures `docs/img/s1/s1-avant.png`, `s1-chute.png`, `s1-apres.png`
-  (`game/tests/s1_collapse_shot.gd`).
+  (`game/tests/s1_collapse_shot.gd`, option `--gate` pour la porte).
 
 ## Prochaine étape
 Lot terminé, en attente de fusion. Points ouverts :
+- Porte de la Guyenne invisible dans le rendu existant : le pan « gate » (14 m) est noyé entre
+  les deux tours qui le flanquent, donc les planches tombent dans les tours (pas de capture).
+  Problème antérieur de géométrie des tours de porte (`BattleSiege._build_tower`), hors lot.
 - Pas de son d'effondrement (AudioDirector) : hors périmètre.
 - Les blocs d'un pan de 90 m restent gros (≈ 4,5 × 2,8 × 3 m à 60 blocs) ; monter `blocks_max`
   si le budget de corps le permet.
