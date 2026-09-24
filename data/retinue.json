@@ -44,7 +44,7 @@
       ],
       "acquisition": [
         { "trigger": "battle_won", "chance_permille": 120 },
-        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_castle" }
+        { "trigger": "season_in_settlement", "chance_permille": 15, "building": "bld_castle" }
       ],
       "inheritable": true,
       "description": "Connaisseur des armoiries, il reconnaît les morts sur le champ de bataille, porte les défis et les messages entre les camps, et proclame les hauts faits. Après Crécy, les hérauts anglais comptèrent les chevaliers tombés.",
@@ -60,9 +60,9 @@
         { "effect": "army_morale", "value": 2, "mode": "add" }
       ],
       "acquisition": [
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_abbey" },
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_cathedral" },
-        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_parish_church" }
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_abbey" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_cathedral" },
+        { "trigger": "season_in_settlement", "chance_permille": 15, "building": "bld_parish_church" }
       ],
       "conditions": { "excludes_traits": ["trait_excommunicated"] },
       "description": "Religieux, souvent dominicain ou franciscain, qui entend la confession du seigneur, célèbre la messe avant la bataille et absout les mourants.",
@@ -78,8 +78,8 @@
       ],
       "acquisition": [
         { "trigger": "battle_fought", "chance_permille": 100 },
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_hotel_dieu" },
-        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_apothecary" }
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_hotel_dieu" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_apothecary" }
       ],
       "description": "Il extrait les flèches, recoud les plaies, réduit les fractures et cautérise au fer rouge. Suit l'armée et rend aux compagnies une part de leurs blessés après la bataille (s'ajoute aux savoirs médicaux de la faction).",
       "sources": ["Barbier-chirurgien", "Henri de Mondeville", "Chirurgie au Moyen Âge"]
@@ -93,8 +93,8 @@
         { "effect": "attrition_resistance", "value": 10, "mode": "percent" }
       ],
       "acquisition": [
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_university" },
-        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_herb_garden" }
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_university" },
+        { "trigger": "season_in_settlement", "chance_permille": 20, "building": "bld_herb_garden" }
       ],
       "description": "Médecin gradué de Montpellier ou de Paris, lecteur de Galien et d'Avicenne. Il règle le régime de l'armée, fait choisir les camps et l'eau : moins de flux de ventre et de fièvres en campagne.",
       "sources": ["Guy de Chauliac", "Faculté de médecine de Montpellier"]
@@ -109,7 +109,7 @@
       ],
       "acquisition": [
         { "trigger": "battle_won", "chance_permille": 80 },
-        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_scriptorium" }
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_scriptorium" }
       ],
       "conditions": { "min_battles": 3 },
       "inheritable": true,
@@ -125,7 +125,7 @@
         { "effect": "battle_ranged", "value": 10, "mode": "percent" }
       ],
       "acquisition": [
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_armoury" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_armoury" },
         { "trigger": "battle_won", "chance_permille": 60 }
       ],
       "conditions": { "excludes_traits": ["trait_archer_captain"] },
@@ -143,7 +143,7 @@
       ],
       "acquisition": [
         { "trigger": "battle_won", "chance_permille": 150 },
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_archery_butts" }
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_archery_butts" }
       ],
       "conditions": { "factions": ["fac_england"] },
       "description": "Sous-officier à la tête de vingt archers, recruté par contrat d'endenture. Les compagnies d'archers anglais et gallois faisaient la force des armées d'Édouard III et d'Henri V.",
@@ -159,7 +159,7 @@
       ],
       "acquisition": [
         { "trigger": "siege_won", "chance_permille": 250 },
-        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_siege_workshop" }
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_siege_workshop" }
       ],
       "description": "Ingénieur des trébuchets, des mines et bientôt des bombardes, comme les frères Bureau au service de Charles VII. Il abrège les sièges.",
       "sources": ["Jean Bureau", "Trébuchet", "Bombarde"]
@@ -174,8 +174,8 @@
         { "effect": "attrition_resistance", "value": 10, "mode": "percent" }
       ],
       "acquisition": [
-        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_market" },
-        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_fair" },
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_market" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_fair" },
         { "trigger": "raid_led", "chance_permille": 100 }
       ],
       "description": "Officier chargé des vivres de l'armée : blé, avoine, vin et salaisons achetés, réquisitionnés ou pillés. Une armée mal pourvue fondait plus vite que sous les coups de l'ennemi.",
@@ -191,8 +191,8 @@
         { "effect": "prestige", "value": 1, "mode": "add" }
       ],
       "acquisition": [
-        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_fair" },
-        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_castle" }
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_fair" },
+        { "trigger": "season_in_settlement", "chance_permille": 20, "building": "bld_castle" }
       ],
       "inheritable": true,
       "description": "Héritier des trouvères, il chante les gestes, joue de la vielle et des trompettes, égaie les veillées d'armes. Les grands entretenaient des ménestrels à gages.",
@@ -208,7 +208,7 @@
       ],
       "acquisition": [
         { "trigger": "ransom_received", "chance_permille": 400 },
-        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_counting_house" }
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_counting_house" }
       ],
       "inheritable": true,
       "description": "Marchand-banquier italien (Bardi, Peruzzi, puis Médicis) qui avance les soldes et négocie les rançons. La faillite des Bardi et des Peruzzi, créanciers d'Édouard III, fit trembler Florence en 1343-1346.",
@@ -224,7 +224,7 @@
       ],
       "acquisition": [
         { "trigger": "raid_led", "chance_permille": 150 },
-        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_guild_hall" }
+        { "trigger": "season_in_settlement", "chance_permille": 15, "building": "bld_guild_hall" }
       ],
       "description": "Chevaucheur ou marchand qui rapporte les mouvements de l'ennemi et l'état des places. Un général bien renseigné se laisse moins prendre au piège et échappe plus souvent à la capture.",
       "sources": ["Renseignement au Moyen Âge"]

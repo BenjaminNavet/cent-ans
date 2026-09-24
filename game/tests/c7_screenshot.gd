@@ -44,10 +44,10 @@ func _init() -> void:
 		print("c7 grant %s: %s" % [companion, england.call("submit_order", {"type": "debug_grant_companion", "character": edward, "companion": companion})])
 	court.show_court(_rows(england, "fac_england"), "Angleterre", facade.call("faction_color", "fac_england"))
 	_show_sheet(sheet, england, edward)
-	_layout(court, sheet)
+	await _layout(court, sheet)
 	for _i in 8:
 		await process_frame
-	print("c7 sheet: compact=%s width=%.0f court_right=%.0f" % [sheet.compact, sheet.size.x, court.offset_right])
+	print("c7 sheet: compact=%s width=%.0f court_right=%.0f" % [sheet.compact, sheet.size.x, court.get_global_rect().end.x])
 	_save(out_dir.path_join("fiche-suite-edouard-iii.png"))
 
 	# 2. France vers 1351 : arbre des Valois (dates des défunts) et fiche de Philippe VI.
@@ -62,7 +62,7 @@ func _init() -> void:
 	court.show_tab(1)  # CourtPanel.TAB_TREE
 	court.recenter_tree("chr_philippe_vi")
 	_show_sheet(sheet, france, "chr_philippe_vi")
-	_layout(court, sheet)
+	await _layout(court, sheet)
 	for _i in 8:
 		await process_frame
 	var philippe: Dictionary = france.call("get_character", "chr_philippe_vi")
@@ -88,7 +88,13 @@ func _show_sheet(sheet: Node, sim: Object, id: String) -> void:
 func _layout(court: Node, sheet: Node) -> void:
 	var width := float(VIEW.x)
 	court.set_max_right(width - 600.0 - 32.0)  # CharacterSheet.COMPACT_WIDTH + marges (pas de référence de classe : script compilé avant les autoloads)
-	sheet.fit_beside(court.offset_right, width)
+	for _i in 3:
+		await process_frame
+	sheet.fit_beside(court.get_global_rect().end.x, width)
+	for _i in 6:
+		await process_frame
+	# Suite visible en haut de la colonne repliée.
+	(sheet.get_node("VBox/Body/Scroll") as ScrollContainer).ensure_control_visible(sheet.retinue_row)
 
 
 func _save(path: String) -> void:

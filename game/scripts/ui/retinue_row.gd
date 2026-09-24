@@ -94,7 +94,7 @@ static func make_vignette(companion: Dictionary) -> PanelContainer:
 
 
 static func _short_name(name: String) -> String:
-	var first := name.split(" ", false)
+	var first := name.replace("-", " ").split(" ", false)
 	return first[0] if not first.is_empty() else name
 
 
