@@ -319,12 +319,13 @@ const STYLES := {
 		"routing": {"set": ["run"], "speed": 1.1},
 		"climbing": {"set": ["run"]},
 	},
+	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
 	"militia": {
-		"idle": {"set": ["idle", "guard"]},
-		"marching": {"set": ["walk"]},
+		"idle": {"set": ["pike_idle"]},
+		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
-		"charging": {"set": ["run"]},
-		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
+		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
 		"routing": {"set": ["run"], "speed": 1.15},
 	},
 	"pike": {
