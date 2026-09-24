@@ -74,12 +74,7 @@ pub fn realm_held_by(
 ) -> usize {
     realm_provinces(data, crown)
         .into_iter()
-        .filter(|id| {
-            state
-                .provinces
-                .get(*id)
-                .is_some_and(|p| &p.controller == holder)
-        })
+        .filter(|id| state.controls_province(holder, id))
         .count()
 }
 
@@ -95,10 +90,7 @@ pub fn dominates_realm(
     let Some(capital) = data.factions.get(crown).map(|f| &f.capital) else {
         return false;
     };
-    let seat = state
-        .provinces
-        .get(capital)
-        .is_some_and(|p| &p.controller == invader);
+    let seat = state.controls_province(invader, capital);
     let held = realm_held_by(state, data, crown, invader);
     // Trouble is measured on the crown's own lands of 1337.
     let own: Vec<_> = data
@@ -108,12 +100,7 @@ pub fn dominates_realm(
         .collect();
     let kept = own
         .iter()
-        .filter(|(id, _)| {
-            state
-                .provinces
-                .get(*id)
-                .is_some_and(|p| &p.controller == crown)
-        })
+        .filter(|(id, _)| state.controls_province(crown, id))
         .count();
     let realm = own.len();
     let in_trouble = (kept as f64) < (1.0 - CROWN_IN_TROUBLE_LOSS) * realm as f64
