@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_angouleme",
+    "province": "prov_angoumois",
+    "kind": "city",
+    "name": { "display": "Angoulême", "local": "Engolesme", "local_language": "ancien français" },
+    "lonlat": [0.1596, 45.6484],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté d'Angoulême, cédée en 1336 par Philippe VI à Jeanne II de Navarre et Philippe d'Évreux en compensation de leurs droits sur la Champagne.",
+    "sources": ["Angoulême", "Comté d'Angoulême"]
+  },
+  {
+    "id": "set_la_rochefoucauld",
+    "province": "prov_angoumois",
+    "kind": "castle",
+    "name": { "display": "La Rochefoucauld", "local": "La Rochefoucaut", "local_language": "ancien français" },
+    "lonlat": [0.3833, 45.7333],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château seigneurial de la maison de La Rochefoucauld, sur la Tardoire.",
+    "sources": ["La Rochefoucauld (Charente)", "Maison de La Rochefoucauld"]
+  },
+  {
+    "id": "set_cognac",
+    "province": "prov_angoumois",
+    "kind": "town",
+    "name": { "display": "Cognac", "local": "Compniac", "local_language": "ancien français" },
+    "lonlat": [-0.3286, 45.6961],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur la Charente, port fluvial pour le vin et le sel remontant vers l'intérieur.",
+    "sources": ["Cognac (Charente)"]
+  },
+  {
+    "id": "set_abbaye_la_couronne",
+    "province": "prov_angoumois",
+    "kind": "abbey",
+    "name": { "display": "La Couronne", "local": "La Corona", "local_language": "ancien français" },
+    "lonlat": [0.0833, 45.6167],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye augustinienne fondée au XIIe siècle près d'Angoulême.",
+    "sources": ["Abbaye de La Couronne"]
+  },
+  {
+    "id": "set_aubeterre",
+    "province": "prov_angoumois",
+    "kind": "village",
+    "name": { "display": "Aubeterre-sur-Dronne", "local": "Aubeterre", "local_language": "ancien français" },
+    "lonlat": [0.1667, 45.2667],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "port": false,
+    "description": "Bourg sur la Dronne, connu pour son église monolithe creusée dans la falaise calcaire.",
+    "sources": ["Aubeterre-sur-Dronne"]
+  }
+]

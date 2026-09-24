@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_cahors",
+    "province": "prov_quercy",
+    "kind": "city",
+    "name": { "display": "Cahors", "local": "Caors", "local_language": "occitan" },
+    "lonlat": [1.4416, 44.4475],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du Quercy dans une boucle du Lot, ville des banquiers cahorsins et de son célèbre vin noir.",
+    "sources": ["Cahors"]
+  },
+  {
+    "id": "set_figeac",
+    "province": "prov_quercy",
+    "kind": "town",
+    "name": { "display": "Figeac", "local": "Fijac", "local_language": "occitan" },
+    "lonlat": [2.0333, 44.6083],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville consulaire née d'une abbaye bénédictine, sur le Célé, prospère du commerce et du cuir.",
+    "sources": ["Figeac"]
+  },
+  {
+    "id": "set_castelnau_bretenoux",
+    "province": "prov_quercy",
+    "kind": "castle",
+    "name": { "display": "Castelnau-Bretenoux", "local": "Castèlnòu", "local_language": "occitan" },
+    "lonlat": [1.8917, 44.8961],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château des barons de Castelnau, l'une des plus puissantes baronnies du Quercy, dominant la Dordogne.",
+    "sources": ["Château de Castelnau-Bretenoux"]
+  },
+  {
+    "id": "set_marcilhac",
+    "province": "prov_quercy",
+    "kind": "abbey",
+    "name": { "display": "Marcilhac-sur-Célé", "local": "Marcilhac", "local_language": "occitan" },
+    "lonlat": [1.7692, 44.5647],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye bénédictine sur le Célé, en rivalité ancienne avec celle de Rocamadour voisine.",
+    "sources": ["Abbaye de Marcilhac-sur-Célé"]
+  },
+  {
+    "id": "set_saint_cirq_lapopie",
+    "province": "prov_quercy",
+    "kind": "village",
+    "name": { "display": "Saint-Cirq-Lapopie", "local": "Sant Circ", "local_language": "occitan" },
+    "lonlat": [1.6797, 44.4592],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "port": false,
+    "description": "Village perché sur une falaise dominant le Lot, dépendant de plusieurs coseigneuries.",
+    "sources": ["Saint-Cirq-Lapopie"]
+  }
+]

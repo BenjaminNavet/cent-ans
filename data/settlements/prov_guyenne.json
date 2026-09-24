@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_bordeaux",
+    "province": "prov_guyenne",
+    "kind": "city",
+    "name": { "display": "Bordeaux", "local": "Bordèu", "local_language": "gascon" },
+    "lonlat": [-0.5792, 44.8378],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Capitale du duché d'Aquitaine anglais sur la Garonne, premier port d'exportation du vin de Guyenne vers l'Angleterre.",
+    "sources": ["Bordeaux", "Duché d'Aquitaine"]
+  },
+  {
+    "id": "set_la_reole",
+    "province": "prov_guyenne",
+    "kind": "town",
+    "name": { "display": "La Réole", "local": "La Riola", "local_language": "gascon" },
+    "lonlat": [0.0333, 44.5833],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Place forte sur la Garonne, frontière du duché d'Aquitaine, assiégée durant la guerre de Saint-Sardos (1324).",
+    "sources": ["La Réole", "Guerre de Saint-Sardos"]
+  },
+  {
+    "id": "set_blaye",
+    "province": "prov_guyenne",
+    "kind": "castle",
+    "name": { "display": "Blaye", "local": "Blaia", "local_language": "gascon" },
+    "lonlat": [-0.6667, 45.1333],
+    "weight": 13,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle", "bld_port"],
+    "port": true,
+    "description": "Citadelle verrouillant l'estuaire de la Gironde en amont de Bordeaux.",
+    "sources": ["Blaye"]
+  },
+  {
+    "id": "set_libourne",
+    "province": "prov_guyenne",
+    "kind": "town",
+    "name": { "display": "Libourne", "local": "Libourna", "local_language": "gascon" },
+    "lonlat": [-0.2422, 44.9158],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Bastide anglaise fondée en 1270 au confluent de l'Isle et de la Dordogne, port du vin du Libournais.",
+    "sources": ["Libourne"]
+  },
+  {
+    "id": "set_la_sauve_majeure",
+    "province": "prov_guyenne",
+    "kind": "abbey",
+    "name": { "display": "La Sauve-Majeure", "local": "La Sauva Major", "local_language": "gascon" },
+    "lonlat": [-0.3006, 44.7647],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye bénédictine fondée en 1079 dans l'Entre-deux-Mers.",
+    "sources": ["Abbaye de La Sauve-Majeure"]
+  }
+]

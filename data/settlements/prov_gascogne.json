@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_bayonne",
+    "province": "prov_gascogne",
+    "kind": "city",
+    "name": { "display": "Bayonne", "local": "Baiona", "local_language": "gascon" },
+    "lonlat": [-1.4748, 43.4929],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Port de l'Adour, principal arsenal naval du duché anglais d'Aquitaine, arme des navires pour le roi d'Angleterre.",
+    "sources": ["Bayonne", "Histoire de Bayonne"]
+  },
+  {
+    "id": "set_dax",
+    "province": "prov_gascogne",
+    "kind": "town",
+    "name": { "display": "Dax", "local": "Acqs", "local_language": "gascon" },
+    "lonlat": [-1.0500, 43.7167],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville thermale et épiscopale sur l'Adour, close de remparts gallo-romains encore debout.",
+    "sources": ["Dax"]
+  },
+  {
+    "id": "set_mont_de_marsan",
+    "province": "prov_gascogne",
+    "kind": "town",
+    "name": { "display": "Mont-de-Marsan", "local": "Mont de Marsan", "local_language": "gascon" },
+    "lonlat": [-0.4981, 43.8897],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close fondée en 1141 au confluent de la Midouze, capitale du pays des Landes.",
+    "sources": ["Mont-de-Marsan"]
+  },
+  {
+    "id": "set_saint_sever",
+    "province": "prov_gascogne",
+    "kind": "abbey",
+    "name": { "display": "Saint-Sever", "local": "Sent Sever", "local_language": "gascon" },
+    "lonlat": [-0.5747, 43.7614],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye bénédictine fondée au Xe siècle sur l'Adour, étape du chemin de Saint-Jacques.",
+    "sources": ["Saint-Sever (Landes)", "Abbaye de Saint-Sever"]
+  }
+]
