@@ -81,6 +81,12 @@ uniform vec3 hedge_color = vec3(0.035, 0.05, 0.02);
 uniform sampler2D landuse : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_landuse = false;
 uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
+// A1-04 : berge de lac (vase, roseaux) à la place du sable et de l'écume marins.
+uniform vec3 lake_bank_color = vec3(0.055, 0.058, 0.030);
+uniform vec3 lake_shallow_color = vec3(0.05, 0.085, 0.06);
+uniform float lake_bank_px = 1.6;
+uniform float pond_max_px = 3.0;
+uniform float pond_probe_px = 6.0;
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
 // Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
 uniform vec3 sea_shallow_color = vec3(0.045, 0.14, 0.14);
@@ -291,6 +297,22 @@ void fragment() {
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
 	float land_f = smoothstep(-0.4, 0.6, coast);
+	// A1-04 : côté eau de la côte la plus proche au-dessus du niveau de la mer = lac/étang (berge
+	// fondue, pas de sable) ; sinon mer. Sonde le long du gradient de distance à la côte.
+	float lake_shore = 0.0;
+	// Étang sous le niveau de la mer (marais côtiers) : à `pond_probe_px` plus loin vers l'eau,
+	// on reste à moins de `pond_max_px` d'une rive (même test que water.gdshader).
+	if (has_coast_dist && coast < lake_bank_px + 1.5 && coast > -pond_max_px - 1.0) {
+		vec2 ex = vec2(1.0 / map_size.x, 0.0);
+		vec2 ey = vec2(0.0, 1.0 / map_size.y);
+		vec2 cg = vec2(texture(coast_dist, uv + ex).r - texture(coast_dist, uv - ex).r,
+			texture(coast_dist, uv + ey).r - texture(coast_dist, uv - ey).r);
+		vec2 to_water = -cg / max(length(cg), 1e-5);
+		vec2 probe = uv + to_water * (max(coast, 0.0) + 1.5) / map_size;
+		vec2 far_probe = uv + to_water * (max(coast, 0.0) + pond_probe_px) / map_size;
+		float far_coast = (texture(coast_dist, far_probe).r * 255.0 - 128.0) / coast_dist_scale;
+		lake_shore = max(step(0.5, height_m_lod(probe, 0.0)), step(-pond_max_px, far_coast));
+	}
 
 	// --- Poids des matériaux ---
 	vec4 s = has_splat ? texture(splat, uv) : vec4(0.5, 0.3, 0.2, 0.0);
@@ -304,7 +326,7 @@ void fragment() {
 	float w_heath = s.a * (1.0 - rock_frac);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
-	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f;
+	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
 
@@ -457,6 +479,15 @@ void fragment() {
 		float depth = -hc;
 		vec3 wc = mix(sea_shallow_color, sea_deep_color, 1.0 - exp(-depth / 70.0));
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
+	}
+	if (lake_shore > 0.5) {
+		// Berge de lac : vase et roseaux sur la rive, eau peu profonde teintée près du bord,
+		// transition large et bruitée (pas de liseré net).
+		float reeds = value_noise(p * 3.1) * 0.6 + value_noise(p * 7.3) * 0.4;
+		float bank = (1.0 - smoothstep(0.0, lake_bank_px * (0.7 + 0.6 * reeds), coast)) * land_f;
+		col = mix(col, lake_bank_color * (0.8 + 0.4 * reeds), bank * 0.85);
+		lake = 1.0 - smoothstep(-0.7, 0.3 + 0.3 * (reeds - 0.5), coast);
+		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
