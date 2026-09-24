@@ -149,6 +149,50 @@ static func collect(map: Node, last_events: Array) -> Array:
 			"id": "building:%s:%d" % [province_id, result.size()], "kind": "building", "glyph": "⚒", "severity": "info",
 			"province": province_id, "text": str(event.get("text_fr", "Bâtiment terminé")),
 		})
+	result.append_array(table_medicine_alerts(sim, player, last_events))
+	return result
+
+
+## H9 : retours au défaut de la Table, Carême, blessés soignés, épidémies contenues (genres
+## `table` / `medicine` du dernier tour), et plantes entrées dans l'herbier. L'herbier n'est
+## synchronisé qu'une fois par lot d'événements (les rafraîchissements suivants réutilisent
+## le message, qui reste affiché jusqu'au tour suivant).
+static var _herb_events_key: int = 0
+static var _herb_alert: Dictionary = {}
+
+
+static func table_medicine_alerts(sim: Object, player: String, last_events: Array) -> Array:
+	var result: Array = []
+	var researched := false
+	for event in last_events:
+		if not (event is Dictionary):
+			continue
+		var kind := str(event.get("kind", ""))
+		var faction := str(event.get("faction", ""))
+		if kind == "technology_researched" and faction == player:
+			researched = true
+		if not SeasonReport.KIND_STYLES.has(kind) or (faction != "" and faction != player):
+			continue
+		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
+		result.append({
+			"id": "%s:%d" % [kind, result.size()], "kind": kind, "glyph": style["glyph"],
+			"severity": "warning" if kind == "table" else "info",
+			"province": str(event.get("province", "")), "text": str(event.get("text_fr", style["label"])),
+		})
+	var key := last_events.hash()
+	if key != _herb_events_key:
+		_herb_events_key = key
+		_herb_alert = {}
+		if researched:
+			var herbs := Herbarium.sync(sim, player)
+			if not herbs.is_empty():
+				_herb_alert = {
+					"id": "herbarium", "kind": "herbarium", "glyph": "❦", "severity": "info",
+					"text": Herbarium.message(herbs), "codex": str(herbs[0]),
+					"tooltip": "Fiches ajoutées au Codex (touche K, onglet Médecine et herbier).",
+				}
+	if not _herb_alert.is_empty():
+		result.append(_herb_alert)
 	return result
 
 
