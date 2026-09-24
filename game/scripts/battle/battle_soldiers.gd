@@ -76,8 +76,11 @@ var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entr
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
+var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
 var _frame_dt: float = 0.0
 var _audio: Script = null
+## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
+var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
 
@@ -218,6 +221,8 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 		if str(unit.get("state", "")) == "melee":
 			_melee_time[uid] = float(_melee_time.get(uid, 0.0)) + anim_dt
 	_advance_lags(anim_dt)
+	if bv2_enabled:
+		_find_braced(units)
 	if gore != null:
 		gore.update(anim_dt, _camera_pos)
 	for side in ["attacker", "defender"]:
@@ -242,7 +247,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
 				_update_unit(unit, id, kind, slice, n, selected.has(id))
 	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
-	if battle.has_method("get_impacts"):
+	if bv2_enabled and battle.has_method("get_impacts"):
 		var impacts: Array = battle.call("get_impacts")
 		if not impacts.is_empty():
 			apply_impacts(impacts)
@@ -300,10 +305,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var state := str(unit.get("state", ""))
 	var config: Dictionary = {}
 	if skinned:
-		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
+		var shown_state := "brace" if _braced.has(id) and ["idle", "marching", "rallied"].has(state) else state
+		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), shown_state, bool(unit.get("running", false)))
 		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
 		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
-		var cadence := _cadence(id, config)
+		var cadence := _cadence(id, config) if bv2_enabled else 1.0
 		if cadence != 1.0:
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt * (1.0 - cadence)
 	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
@@ -358,7 +364,7 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var mounted := kind == "cavalry"
 	var limits: Dictionary = _gore.get("corpses", {})
 	var level := _level
-	var cause := str(unit.get("loss_cause", "other"))
+	var cause := str(unit.get("loss_cause", "other")) if bv2_enabled else "other"
 	var deaths: Dictionary = _gore.get("deaths", {})
 	var death: Dictionary = deaths.get(cause, deaths.get("other", {}))
 	var names: Array = death.get(("mounted" if mounted else "foot"), [])
@@ -643,6 +649,22 @@ func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32A
 	if hidden.is_empty():
 		_hidden.erase(id)
 	return out
+
+
+## Piquiers et miliciens qui abaissent leurs armes d'hast devant une charge de cavalerie
+## ennemie à moins de 90 m (rendu seulement, lot BV2).
+func _find_braced(units: Array) -> void:
+	_braced.clear()
+	for unit in units:
+		if str(unit.get("render", "")) != "cavalry" or str(unit.get("state", "")) != "charging" or not bool(unit.get("present", true)):
+			continue
+		var at := Vector2(float(unit["x"]), float(unit["z"]))
+		for other in units:
+			var info: Dictionary = _unit_info.get(int(other["id"]), {})
+			if info.is_empty() or str(other["side"]) == str(unit["side"]) or str(info["kind"]) != "infantry" or int(info["variant"]) == 0:
+				continue
+			if at.distance_to(Vector2(float(other["x"]), float(other["z"]))) < 90.0:
+				_braced[int(other["id"])] = true
 
 
 ## Facteur de cadence d'un régiment en marche : vitesse lissée / vitesse nominale du clip de
