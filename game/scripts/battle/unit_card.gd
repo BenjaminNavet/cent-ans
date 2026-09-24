@@ -9,6 +9,8 @@ extends RichPanel
 ## Aucune règle : la carte n'affiche que le dictionnaire de `BattleSim.get_units()`.
 
 signal clicked(unit_id: int, additive: bool)
+## B3 / T6 : double-clic = centrer la caméra sur ce régiment (comme TW).
+signal double_clicked(unit_id: int)
 
 const WIDTH := 64.0
 const HEIGHT := 94.0
@@ -107,7 +109,11 @@ func setup(unit: Dictionary, icon_library: Node, faction: String = "", color: Co
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		clicked.emit(unit_id, (event as InputEventMouseButton).shift_pressed)
+		var button := event as InputEventMouseButton
+		if button.double_click:
+			double_clicked.emit(unit_id)
+		else:
+			clicked.emit(unit_id, button.shift_pressed)
 
 
 func set_groups(numbers: Array[int]) -> void:
