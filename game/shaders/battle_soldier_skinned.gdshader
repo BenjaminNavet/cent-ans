@@ -6,9 +6,11 @@
 //
 // Choix du clip : l'état du régiment fixe un jeu de clips (`clip_set`, jusqu'à 4) et un mode
 // (`clip_mode`) ; chaque soldat en tire un au sort (hachage de INSTANCE_ID, stable tant que
-// son rang dans la formation l'est) avec sa phase propre. Mode 3 (cadavres et poses figées) :
-// INSTANCE_CUSTOM = (instant de mort, clip de mort, sens, sang). Changement d'état : fondu de
-// `blend_time` secondes depuis le jeu précédent (`prev_*`).
+// son rang dans la formation l'est) avec sa phase propre. Mode 3 (cadavres, renversés, poses
+// figées) : INSTANCE_CUSTOM = (instant de la chute, clip dans le jeu, vitesse de projection en
+// arrière m/s, partie tranchée + sang) — lot BV2 : w = code entier (0 aucune, 1 tête, 2 avant-bras
+// droit, 3 gauche, 4 jambe droite, 5 gauche, 6 cheval qui s'enfuit) + sang 0-0,99 en fraction.
+// Changement d'état : fondu de `blend_time` secondes depuis le jeu précédent (`prev_*`).
 // Matières selon COLOR.a × 16 (code) : livrée, bordure, plates, mailles, tissu, couleur exacte,
 // armoiries (UV), peau, cuir, cheveux, robe du cheval, bois, gambison matelassé.
 shader_type spatial;
@@ -68,9 +70,15 @@ uniform sampler2D heraldry : source_color, filter_linear_mipmap, repeat_disable;
 uniform bool has_heraldry = false;
 uniform float livery_share = 0.7;
 uniform float highlight = 0.0;
-// Point d'extension (lot suivant) : sang du régiment 0-1 ; par soldat, INSTANCE_CUSTOM.w
-// (cadavres). Sans effet à 0.
+// Sang du régiment 0-1 (taches progressives, lot BV2) ; par soldat, fraction de
+// INSTANCE_CUSTOM.w (mode 3). Sans effet à 0.
 uniform float blood = 0.0;
+// Lot BV2 : os des parties tranchées (x..y, plus z et w si >= 0), indice = code de
+// INSTANCE_CUSTOM.w ; entrée 0 = os du cheval (code 6 : il s'enfuit sans son cavalier).
+uniform ivec4 sever_bones[6];
+// Couche des renversés : la projection s'annule à la fin du clip (le soldat regagne sa place).
+uniform bool tumble = false;
+uniform float gravity = 9.8;
 // Lisibilité lointaine (A1-01) : la livrée s'éclaire au-delà de `far_start` mètres.
 uniform float far_start = 70.0;
 uniform float far_boost = 0.35;
@@ -81,6 +89,7 @@ varying vec4 v_var;
 varying vec3 v_rest;
 varying vec3 v_rest_n;
 varying float v_blood;
+varying float v_stump;
 
 float hash1(float n) {
 	return fract(sin(n * 12.9898 + 4.1414) * 43758.5453);
@@ -108,6 +117,19 @@ void skin_rows(int row, ivec4 idx, vec4 w, out vec4 a, out vec4 b, out vec4 c) {
 			c += texelFetch(bone_tex, ivec2(x + 2, row), 0) * wk;
 		}
 	}
+}
+
+// Poids des os de la partie `part` (sever_bones) portés par un sommet.
+float part_weight(int part, ivec4 idx, vec4 w) {
+	ivec4 r = sever_bones[part];
+	float total = 0.0;
+	for (int k = 0; k < 4; k++) {
+		int b = pick(idx, k);
+		if ((b >= r.x && b <= r.y) || b == r.z || b == r.w) {
+			total += pickf(w, k);
+		}
+	}
+	return total;
 }
 
 // Clip et temps local d'un soldat pour un jeu de clips et un mode.
@@ -207,12 +229,45 @@ void vertex() {
 	vec3 v = vec3(dot(a, p), dot(b, p), dot(c, p));
 	vec3 n = vec3(dot(a.xyz, NORMAL), dot(b.xyz, NORMAL), dot(c.xyz, NORMAL));
 	v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
+	float own_blood = 0.0;
+	v_stump = 0.0;
+	if (clip_mode == M_CUSTOM) {
+		// Lot BV2 : projection balistique en arrière (-Z du modèle), partie tranchée masquée.
+		float part = floor(custom.w + 0.001);
+		own_blood = clamp((custom.w - part) / 0.99, 0.0, 1.0);
+		float imp = custom.z;
+		if (abs(imp) > 0.05) {
+			float vy = 0.35 * abs(imp) + 0.6;
+			float fly = 2.0 * vy / gravity;
+			float tt = clamp(t, 0.0, fly);
+			vec3 offset = vec3(0.0, vy * tt - 0.5 * gravity * tt * tt, -imp * tt);
+			if (tumble) {
+				float len = clips[clip].y / bone_fps;
+				offset *= 1.0 - smoothstep(len - 0.9, len, t);
+			}
+			v += offset;
+		}
+		int code = int(part + 0.5);
+		if (code >= 1 && code <= 5) {
+			float cut = part_weight(code, idx, w);
+			shown = shown && cut < 0.5;
+			v_stump = cut > 0.02 ? 1.0 : 0.0;
+		} else if (code == 6) {
+			// Cavalier désarçonné : le cheval détale puis disparaît.
+			float horse = part_weight(0, idx, w);
+			if (horse > 0.5) {
+				float run = max(t - 0.4, 0.0);
+				v.z += run * run * 1.5 + run * 4.0;
+				shown = shown && t < 4.5;
+			}
+		}
+	}
 	VERTEX = shown ? v : vec3(0.0);
 	NORMAL = normalize(n);
 	v_color = COLOR.rgb;
 	v_code = COLOR.a;
 	v_var = h;
-	v_blood = clip_mode == M_CUSTOM ? max(custom.w, blood) : blood;
+	v_blood = max(own_blood, blood);
 }
 
 // Couleurs naturelles (linéaires) des vêtements non teints aux couleurs de la livrée.
@@ -344,6 +399,12 @@ void fragment() {
 		float amount = smoothstep(1.0 - v_blood * 0.6, 1.0, spots);
 		albedo = mix(albedo, vec3(0.09, 0.005, 0.004), amount);
 		roughness = mix(roughness, 0.3, amount);
+	}
+	if (v_stump > 0.0) {
+		// Moignon : chair et sang autour de la coupure.
+		albedo = mix(albedo, vec3(0.16, 0.012, 0.01), v_stump);
+		roughness = mix(roughness, 0.35, v_stump);
+		metallic = mix(metallic, 0.0, v_stump);
 	}
 	float ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, v_rest.y));
 	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);
