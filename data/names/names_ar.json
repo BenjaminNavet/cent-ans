@@ -1,0 +1,73 @@
+{
+  "id": "names_ar",
+  "language": "arabe andalou",
+  "cultures": [
+    "cul_andalusi"
+  ],
+  "male_first_names": [
+    "Muhammad",
+    "Yusuf",
+    "Ismail",
+    "Nasr",
+    "Saad",
+    "Ali",
+    "Abu l-Hasan",
+    "Faraj",
+    "Ahmad",
+    "Ibrahim",
+    "Ridwan",
+    "Yahya",
+    "Idris",
+    "Hasan",
+    "Husayn",
+    "Qasim",
+    "Hamid",
+    "Abdallah",
+    "Uthman",
+    "Umar",
+    "Sulayman",
+    "Yaqub",
+    "Zakariya",
+    "Ayyub",
+    "Dawud",
+    "Hisham",
+    "Abd al-Rahman",
+    "Hakam",
+    "Nasir",
+    "Abu Said"
+  ],
+  "female_first_names": [
+    "Fatima",
+    "Maryam",
+    "Aisha",
+    "Umm al-Fath",
+    "Zahra",
+    "Khadija",
+    "Zaynab",
+    "Hafsa",
+    "Sawda",
+    "Ruqayya",
+    "Salma",
+    "Amina",
+    "Hind",
+    "Nur",
+    "Budur",
+    "Itimad",
+    "Wallada",
+    "Buthayna",
+    "Asma",
+    "Shams"
+  ],
+  "surnames": [
+    "al-Ghalib billah",
+    "al-Nasir",
+    "al-Mustansir",
+    "al-Faqih",
+    "al-Ahnaf"
+  ],
+  "sources": [
+    "Royaume de Grenade",
+    "Nasrides",
+    "Onomastique arabe"
+  ]
+}
