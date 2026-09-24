@@ -138,3 +138,12 @@ Sauvegardes : tous les nouveaux champs (`FactionState.coinage`, `price_level`,
 À faire par la vague UI : panneau Monnaie (trésor), panneau Captifs (les deux camps, termes,
 échéances), panneau Ordre de chevalerie, genres `coinage`/`ransom`/`chivalry` dans
 `season_report.gd`, libellés dans `rich_tooltip.gd`.
+
+## G1 — libérer contre rançon, fiche personnage
+- Ordre `release_captive { character, ransom? }` : le geôlier libère son prisonnier contre `ransom` livres
+  (défaut : la rançon calculée ; 0 = parole), payées comptant par la faction du captif si la somme ne dépasse
+  pas la rançon calculée (`RansomTooHigh`) et que son trésor la couvre (`PayerCannotPay`) ; +3 prestige au
+  souverain du geôlier.
+- `get_character` expose `captor`, `captor_name`, `ransom`, `ransom_terms` et `ransom_action` (`pay` pour un
+  captif du joueur, `release` pour un prisonnier du joueur). La fiche personnage affiche « Captif de … —
+  rançon N livres » et le bouton « Payer la rançon » (`pay_ransom`, comptant) ou « Libérer contre rançon ».
