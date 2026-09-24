@@ -121,6 +121,56 @@ pub struct Tower {
     pub height: f64,
 }
 
+/// A house block inside the walls (F5a): an obstacle for movement and
+/// pathing, a disc of `radius` metres. Streets run between them from the
+/// square to every wall piece.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct House {
+    pub x: f64,
+    pub z: f64,
+    pub radius: f64,
+}
+
+/// Radii (from the town centre) of the two rings of houses.
+pub const HOUSE_RINGS: [f64; 2] = [75.0, 110.0];
+/// Radius of a house block.
+pub const HOUSE_RADIUS: f64 = 9.0;
+/// Street width kept free between two blocks.
+pub const STREET_WIDTH: f64 = 12.0;
+
+/// Houses between the radial streets (deterministic, no random draw).
+fn build_houses(center: (f64, f64), pieces: &[WallPiece]) -> Vec<House> {
+    let mut streets: Vec<f64> = pieces
+        .iter()
+        .map(|p| {
+            let (mx, mz) = p.midpoint();
+            (mx - center.0).atan2(mz - center.1)
+        })
+        .collect();
+    streets.sort_by(f64::total_cmp);
+    let tau = std::f64::consts::TAU;
+    let mut houses = Vec::new();
+    for (k, &a) in streets.iter().enumerate() {
+        let next = streets.get(k + 1).copied().unwrap_or(streets[0] + tau);
+        let gap = next - a;
+        for r in HOUSE_RINGS {
+            // Blocks spread evenly in the gap, streets on both ends.
+            let usable = gap * r - STREET_WIDTH;
+            let count = (usable / (2.0 * HOUSE_RADIUS + STREET_WIDTH)).floor() as i32;
+            for j in 0..count.max(0) {
+                let t = (f64::from(j) + 0.5) / f64::from(count);
+                let angle = a + gap * t;
+                houses.push(House {
+                    x: center.0 + angle.sin() * r,
+                    z: center.1 + angle.cos() * r,
+                    radius: HOUSE_RADIUS,
+                });
+            }
+        }
+    }
+    houses
+}
+
 /// The town walls during a siege battle (mutable: pieces lose HP).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SiegeWorks {
@@ -139,6 +189,12 @@ pub struct SiegeWorks {
     pub gate: usize,
     /// Seconds the attacker has held the central square.
     pub hold_time: f64,
+    /// House blocks inside the walls (F5a).
+    #[serde(default)]
+    pub houses: Vec<House>,
+    /// The garrison sallies out: the gate lets its regiments through (F5a).
+    #[serde(default)]
+    pub sortie: bool,
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -236,7 +292,10 @@ impl SiegeWorks {
                 height: wall_height + 3.0,
             });
         }
+        let houses = build_houses(TOWN_CENTER, &pieces);
         let mut works = SiegeWorks {
+            houses,
+            sortie: false,
             fortification,
             center: TOWN_CENTER,
             vertices,
@@ -393,6 +452,13 @@ impl SiegeWorks {
         } else {
             (mx - nx * side * 20.0, mz - nz * side * 20.0)
         }
+    }
+
+    /// The house whose disc (plus `margin`) contains (x, z).
+    pub fn house_at(&self, x: f64, z: f64, margin: f64) -> Option<usize> {
+        self.houses
+            .iter()
+            .position(|h| (x - h.x).powi(2) + (z - h.z).powi(2) < (h.radius + margin).powi(2))
     }
 
     /// Share of the wall ring still standing (HUD).
