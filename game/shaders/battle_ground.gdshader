@@ -120,7 +120,7 @@ void fragment() {
 		trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm) * trample_on;
 		w_snow *= 1.0 - smoothstep(0.7, 1.0, trampled) * smoothstep(0.6, 0.9, fine + macro * 0.3) * 0.25;
 		// B8 : sol détrempé (pas de neige) : les passages font apparaître la couche de boue.
-		w_mud = max(w_mud, smoothstep(0.15, 0.8, trampled) * (1.0 - snow) * mix(0.6, 0.9, fine));
+		w_mud = max(w_mud, smoothstep(0.3, 0.9, trampled) * (1.0 - snow) * mix(0.45, 0.8, fine));
 	}
 
 	// Empilement par priorité : chaque couche recouvre les précédentes.
