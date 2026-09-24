@@ -184,10 +184,11 @@ fichiers de colonies arrivent.
 | `data/map/settlements_px.json` | `{"set_…": [x, y]}` : position de jeu en pixels carte 4096 (1 décimale), pour Godot. |
 | `docs/img/settlements-preview.png` | 2048² : provinces, colonies par type (cité rouge, ville orange, château gris, abbaye violette, village vert ; contour blanc = position ramenée), arêtes grises, routes brunes, liaisons maritimes en tirets bleus. |
 
-Relevé du 2026-09-24 (98 fichiers de colonies, 35 cités de repli en Ibérie, Italie, etc.) :
-458 colonies, 1 075 arêtes terrestres dont 521 sur route, 26 maritimes, graphe connexe ;
-50 colonies ramenées dans leur province (côtes et frontières du Voronoï : Saint-Malo,
-La Rochelle, Plymouth, Coblence, Venise…).
+Relevé du 2026-09-24 (132 fichiers de colonies, aucune cité de repli) : 568 colonies,
+1 345 arêtes terrestres dont 634 sur route, 28 maritimes, graphe connexe ; 71 colonies ramenées
+dans leur province (côtes et frontières du Voronoï : Saint-Malo, La Rochelle, Plymouth, Venise,
+Alicante… ; certaines sont peut-être rattachées à la mauvaise province dans les données, par ex.
+Galway en Ulster, Lund en Sjælland, Auch en Rouergue, Mantoue et Modène à Ferrare).
 
 ## Routes (`cent_ans_tools/geo/roads.py`)
 
@@ -224,7 +225,7 @@ Décor sans état de jeu (spec § 3.3). Source : GeoNames `cities500` (CC BY 4.0
 
 `data/map/hamlets.json` : `[{"name", "px": [x, y], "province"}]`, nom GeoNames `name` (forme
 locale, pas `asciiname`), une entrée par ligne. Relevé du 2026-09-24 : 2 999 hameaux dans les 132
-provinces (71 471 candidats), 0,2 Mo.
+provinces (71 306 candidats), 0,2 Mo.
 
 ## Relief en tuiles (`cent_ans_tools/geo/relief.py`)
 

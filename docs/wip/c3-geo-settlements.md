@@ -13,7 +13,7 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 3.3, 3.4, 4.1, 4.4, 5. Do
 
 ## Prochaine étape
 
-Quand le lot C2c (Ibérie, Italie) arrive : `uv run --project tools cent-ans geo roads`
+Données complètes (568 colonies) intégrées. Si des fichiers de colonies changent : `uv run --project tools cent-ans geo roads`
 (routes + graphe) puis `cent-ans geo hamlets`, commiter `data/map/{roads.geojson,
 settlement_graph.json,settlements_px.json,hamlets.json}` et `docs/img/settlements-preview.png`.
 
