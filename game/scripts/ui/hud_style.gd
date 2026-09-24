@@ -94,10 +94,14 @@ static func icon_library() -> Node:
 	return null
 
 
-## Texture d'icône fournie par `IconLibrary`, ou null (le composant dessine alors `draw_glyph`).
+## Texture d'icône fournie par `IconLibrary` pour `id` exactement, ou null (le composant essaie
+## alors son propre repli, puis dessine `draw_glyph`) : le repli générique de catégorie
+## d'`IconLibrary` donnerait la même icône à la posture, au ravitaillement et au mouvement.
 static func icon(id: String, category: String = "") -> Texture2D:
 	var library := icon_library()
 	if library == null or not library.has_method("get_icon"):
+		return null
+	if library.has_method("has_icon") and not bool(library.call("has_icon", id)):
 		return null
 	var result: Variant = library.call("get_icon", id, category)
 	return result as Texture2D if result is Texture2D else null
