@@ -18,6 +18,14 @@ use crate::state::CampaignState;
 
 /// Truce after a negotiated peace (5 years).
 pub const TRUCE_TURNS: u32 = 20;
+/// Reputation modifier every faction holds against a truce breaker.
+pub const PERJURY_REASON: &str = "Parjure : trêve rompue";
+/// Reputation modifier every faction holds against an unprovoked attacker.
+pub const AGGRESSION_REASON: &str = "Agression sans motif";
+/// Attitude reason of two factions at war.
+pub const AT_WAR_REASON: &str = "En guerre";
+/// Reason of the opinion modifier a gift leaves with its recipient.
+pub const GIFT_REASON: &str = "Présents diplomatiques";
 /// Truce obtained through papal mediation (2 years).
 pub const MEDIATION_TRUCE_TURNS: u32 = 8;
 /// Turns an offer to the player stays open.
@@ -406,7 +414,7 @@ impl CampaignState {
             self.ruler_effect_points(data, b, |e| e.diplomacy.apply(0.0) * 2.0),
         );
         match self.relation(a, b) {
-            RelationKind::War => add("En guerre", -50),
+            RelationKind::War => add(AT_WAR_REASON, -50),
             RelationKind::Truce => add("Trêve récente", -10),
             RelationKind::Alliance => add("Alliés", 30),
             RelationKind::Suzerain => add(
@@ -848,13 +856,13 @@ impl CampaignState {
         if truce_broken {
             motive = "rupture de trêve".to_owned();
             for other in &others {
-                self.add_modifier(other, attacker, -40, "Parjure : trêve rompue", 40);
+                self.add_modifier(other, attacker, -40, PERJURY_REASON, 40);
             }
             religion::change_favor(self, attacker, -30);
             self.change_ruler_prestige(attacker, -30);
         } else if casus_belli.is_none() {
             for other in &others {
-                self.add_modifier(other, attacker, -20, "Agression sans motif", 40);
+                self.add_modifier(other, attacker, -20, AGGRESSION_REASON, 40);
             }
             self.change_ruler_prestige(attacker, -20);
         }
@@ -1413,7 +1421,7 @@ impl CampaignState {
         self.factions.get_mut(faction).expect("checked").treasury -= amount;
         self.factions.get_mut(target).expect("checked").treasury += amount;
         let value = ((amount / 100) as i32).clamp(1, 30);
-        self.add_modifier(target, faction, value, "Présents diplomatiques", 20);
+        self.add_modifier(target, faction, value, GIFT_REASON, 20);
         let text = format!(
             "{} envoie {amount} livres de présents à {}.",
             faction_name(data, faction),

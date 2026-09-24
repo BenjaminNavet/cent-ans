@@ -61,7 +61,7 @@ fn seeds_where(data: &GameData, faction: &str, salt: u64, passes: bool) -> Vec<u
         .filter(|seed| {
             let state = CampaignState::new_1337(data, fac("fac_papacy"), *seed).unwrap();
             let roll = ai::alignment::campaign_roll(&state, &fac(faction), salt);
-            (roll < ai::alignment::HISTORY_PERMILLE) == passes
+            (roll < data.ai_alignment.as_ref().unwrap().history_permille) == passes
         })
         .collect()
 }

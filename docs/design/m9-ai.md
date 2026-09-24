@@ -157,3 +157,35 @@ tours où l'Angleterre domine le royaume et les banqueroutes de l'Écosse). Code
   terres (l'Écosse ne passe pas à l'Angleterre).
 - *Trésors dormants* : le trésor au-delà de 3 saisons de revenu est dépensé en 4 tours (au lieu de 8) et
   achète des recrues à son rythme (1 recrue par 1 500 livres dépensées par tour, 16 au plus).
+
+## 6. G4 — Bourgogne et Brabant
+
+Réglages : `data/ai/alignment.json` (schéma `ai_alignment.schema.json`, struct `data_model::AiAlignment`) ;
+tous les seuils de § 5 (révolte de la laine, défection, tirage, alliances dynastiques) y ont migré. Sans ce
+fichier, l'IA ne change jamais de camp. Code : `ai/src/alignment.rs`. Tests : `ai/tests/g4.rs`.
+Mesure : `century_probe` (année de première alliance par couple ; `TRACE=1` suit la Bourgogne, le Brabant
+et le Hainaut tous les 5 ans ; `TRACE=<mot>` filtre les événements).
+
+- *Domination relative* : l'envahisseur domine s'il tient la capitale de 1337 ou `dominance_realm_share`
+  (15 %) des provinces du royaume, au lieu de 8 provinces.
+- *Grief (Montereau)* : un prince dont les modificateurs d'opinion négatifs en cours envers son suzerain, un
+  allié ou un ennemi qu'il combat atteignent `grievance.grudge` (−40 : le meurtre de Montereau, le roi rangé
+  derrière les Armagnacs) — hors réputation de parjure ou d'agresseur, que toutes les cours partagent — passe
+  au prétendant (ou à l'ennemi) de ce patron qu'il ne déteste pas (attitude hors guerre ≥ −10). Pas de
+  tirage : la chronique a déjà hésité par ses choix pondérés. Les griefs expirent (20 tours) ; l'attitude
+  globale ne sert pas de mesure, la maison de Valois et la loyauté la gardent positive.
+- *Changement de camp* : avant l'offre d'alliance, le prince rompt avec ses alliés que le nouveau patron
+  compte pour rivaux (la Bourgogne quitte les Écossais), sans quoi l'offre est refusée (« Allié de nos
+  rivaux », −40).
+- *Courtisans* : seules les guerres de succession (prétention au trône d'un côté ou de l'autre) font
+  courtiser des princes ; un vassal ne courtise pas ; jamais un ennemi ou prétendant de nos alliés. Le
+  prince courtisé est un « moindre » prince (puissance ≤ `max_power_ratio` = 0,5 de la nôtre) voisin — sur
+  la carte — d'un allié moindre qui combat déjà à nos côtés (la toile des Pays-Bas : Gueldre, Flandre,
+  Hainaut, Brabant) ; une couronne à `max_allies` (5) alliés ne courtise plus.
+- *Fiefs-rentes* : le tour précédant les offres dynastiques, une couronne en guerre qui garde 4 fois le
+  montant en trésor offre 1 500 livres (+15 d'attitude pendant 20 tours) au courtisan qui ne la préfère pas
+  encore de `dynastic.margin` ; une pension en cours n'est pas renouvelée.
+- *Voisinage* : `CampaignState::are_neighbors` lit les `neighbors` des fichiers de province, renseignés pour
+  6 provinces sur 132 ; l'alignement utilise `alignment::borders` (frontières de la carte,
+  `movement::land_neighbors`). Corriger `are_neighbors` lui-même est un chantier d'équilibrage à part
+  (essai : appels aux armes ×5, Auld Alliance rompue sur 2 graines sur 5).

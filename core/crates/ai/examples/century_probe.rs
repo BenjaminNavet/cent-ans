@@ -50,6 +50,8 @@ struct Report {
     alliance_turns: Vec<u32>,
     /// Alliance turns while France and England are at war (G2).
     alliance_war_turns: Vec<u32>,
+    /// Turn each alliance was first seen (G4).
+    alliance_first: Vec<Option<u32>>,
     calls_honoured: u32,
     calls_refused: u32,
     /// Worst treasury / income ratio after 1350 and its faction.
@@ -70,7 +72,86 @@ struct Report {
     seconds: f64,
 }
 
+/// `TRACE=1`: Burgundy's standing every 5 years (G4).
+fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
+    let (france, england, burgundy) = (id("fac_france"), id("fac_england"), id("fac_burgundy"));
+    let b = &state.factions[&burgundy];
+    let own = |f: &FactionId| {
+        state
+            .provinces
+            .keys()
+            .filter(|id| state.province_owner(id) == Some(f))
+            .count()
+    };
+    let score = if state.is_at_war(&france, &england) {
+        state.war_score(data, &france, &england)
+    } else {
+        0
+    };
+    println!(
+        "  [{seed}] {:>16} alive:{} suz:{:?} loy:{} att(fr):{} att(en):{} war(fr/en):{}/{} ally(fr/en):{}/{} en-held:{} prov fr/en/bu:{}/{}/{} fr-en:{} ws(fr,en):{score} claims(en>bu):{:?} grief:{:?}",
+        state.date_label(),
+        b.alive,
+        b.suzerain.as_ref().map(|s| s.as_str()),
+        b.loyalty,
+        state.attitude(data, &burgundy, &france).0,
+        state.attitude(data, &burgundy, &england).0,
+        state.is_at_war(&burgundy, &france),
+        state.is_at_war(&burgundy, &england),
+        state.is_allied(&burgundy, &france),
+        state.is_allied(&burgundy, &england),
+        ai::alignment::realm_held_by(state, data, &france, &england),
+        own(&france),
+        own(&england),
+        own(&burgundy),
+        state.is_at_war(&france, &england),
+        sim_campaign::diplomacy::claim_stakes(state, &england, &burgundy).provinces,
+        ai::alignment::grievance_change(state, data, &burgundy),
+    );
+    if std::env::var("TRACE_EVAL").is_ok() {
+        let e = sim_campaign::diplomacy::evaluate(
+            state,
+            data,
+            &burgundy,
+            &england,
+            &sim_campaign::diplomacy::Proposal::Alliance,
+        );
+        println!(
+            "  [{seed}]     side_change {:?} grudge {} alliance en {} {:?}",
+            ai::alignment::side_change(state, data, &burgundy),
+            ai::alignment::grievance(state, &burgundy, &france),
+            e.accept,
+            e.reasons
+        );
+    }
+    for low in ["fac_brabant", "fac_hainaut"] {
+        let low = id(low);
+        let Some(f) = state.factions.get(&low).filter(|f| f.alive) else {
+            continue;
+        };
+        println!(
+            "  [{seed}] {:>16}   {} suz:{:?} att(en/fr):{}/{} ally(en/fr):{}/{} war(en/fr):{}/{} allies:{:?}",
+            state.date_label(),
+            low.as_str(),
+            f.suzerain.as_ref().map(|s| s.as_str()),
+            state.attitude(data, &low, &england).0,
+            state.attitude(data, &low, &france).0,
+            state.is_allied(&low, &england),
+            state.is_allied(&low, &france),
+            state.is_at_war(&low, &england),
+            state.is_at_war(&low, &france),
+            f.allies.iter().map(|a| a.as_str()).collect::<Vec<_>>(),
+        );
+    }
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
+    // `TRACE=1` follows Burgundy; any other value filters events by that word.
+    let trace_word =
+        std::env::var("TRACE")
+            .ok()
+            .map(|w| if w == "1" { "Bourgogne".to_owned() } else { w });
+    let trace = trace_word.is_some();
     let started = Instant::now();
     let france = id("fac_france");
     let england = id("fac_england");
@@ -80,6 +161,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         turns,
         alliance_turns: vec![0; PAIRS.len()],
         alliance_war_turns: vec![0; PAIRS.len()],
+        alliance_first: vec![None; PAIRS.len()],
         majors_1400: vec![true; MAJORS.len()],
         ..Report::default()
     };
@@ -157,6 +239,14 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 }
                 _ => {}
             }
+            if trace
+                && trace_word
+                    .as_ref()
+                    .is_some_and(|w| event.text_fr.contains(w.as_str()))
+                && !matches!(event.kind, EventKind::Battle | EventKind::Marriage)
+            {
+                println!("  [{seed}] {:>16} * {}", state.date_label(), event.text_fr);
+            }
             if verbose
                 && matches!(event.kind, EventKind::WarDeclared | EventKind::PeaceSigned)
                 && names.iter().all(|n| event.text_fr.contains(n.as_str()))
@@ -181,6 +271,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         for (index, (_, a, b)) in PAIRS.iter().enumerate() {
             if state.is_allied(&id(a), &id(b)) {
                 report.alliance_turns[index] += 1;
+                report.alliance_first[index].get_or_insert(state.turn);
                 if at_war {
                     report.alliance_war_turns[index] += 1;
                 }
@@ -218,6 +309,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                     report.idle_faction = fid.to_string();
                 }
             }
+        }
+        if trace && (state.turn.is_multiple_of(20) || (328..372).contains(&state.turn)) {
+            trace_burgundy(&state, data, seed);
         }
         if state.turn == TURN_1400 {
             for (index, major) in MAJORS.iter().enumerate() {
@@ -322,10 +416,19 @@ fn main() {
                 )
             })
             .collect();
+        let first: Vec<String> = reports
+            .iter()
+            .map(|r| {
+                r.alliance_first[index].map_or("-".to_owned(), |turn| {
+                    format!("{}", 1337 + (turn.saturating_sub(1)) / 4)
+                })
+            })
+            .collect();
         println!(
-            "  {label:14} {}   (en guerre FR-EN : {})",
+            "  {label:14} {}   (en guerre FR-EN : {} ; dès {})",
             shares.join(" | "),
-            war_shares.join(" | ")
+            war_shares.join(" | "),
+            first.join(" | ")
         );
     }
     let scots: Vec<String> = reports
