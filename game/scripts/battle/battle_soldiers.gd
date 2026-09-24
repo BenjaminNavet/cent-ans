@@ -20,6 +20,8 @@ const TRIM_SILVER := Color(0.85, 0.85, 0.82)
 ## de `DETAIL_DISTANCE`, moyen jusqu'à `LOD_DISTANCE` (leur ombre est portée par le maillage
 ## lointain), maillage lointain au-delà, sans ombre portée après `SHADOW_DISTANCE`.
 const DETAIL_DISTANCE := 32.0
+## Figurines skinnées (lot V2) : maillage complet plus tôt relayé (skinning plus coûteux).
+const SKINNED_DETAIL_DISTANCE := 24.0
 const LOD_DISTANCE := 75.0
 const SHADOW_DISTANCE := 190.0
 ## A1-01 : fondu de lisibilité à distance (teinte de camp, liseré, échelle), en mètres.
@@ -44,6 +46,7 @@ var _side_heraldry: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _warned: bool = false
 var _anim_track: Dictionary = {}  # unit id -> {ammo, state, since} (lot B4 : volées, chocs)
+var _skinned: Dictionary = {}  # unit id -> true : figurine skinnée (lot V2, `BattleSkinned`)
 
 
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
@@ -59,10 +62,11 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		var id := int(unit["id"])
 		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
 		var side := str(unit["side"])
-		var mat := _make_material(side, kind, variant, false)
+		var skinned := BattleSkinned.has_figure(kind, variant)
+		var mat := _make_skinned_material(side, kind, variant, false) if skinned else _make_material(side, kind, variant, false)
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = BattleMeshes.soldier(kind, variant)
+		mm.mesh = BattleSkinned.mesh(kind, variant, 0) if skinned else BattleMeshes.soldier(kind, variant)
 		# BV1 (ADR 0016) : `figures` = figurines dessinées (soldats × taille d'unité).
 		var scale := float(unit.get("figures", unit["soldiers"])) / maxf(float(unit["soldiers"]), 1.0)
 		mm.instance_count = maxi(int(ceil(int(unit.get("initial_soldiers", 0)) * scale)), int(unit.get("figures", unit["soldiers"])))
@@ -76,7 +80,7 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		layers[id] = instance
 		var lod_mm := MultiMesh.new()
 		lod_mm.transform_format = MultiMesh.TRANSFORM_3D
-		lod_mm.mesh = BattleMeshes.soldier_level(kind, variant, BattleMeshes.LEVEL_FAR)
+		lod_mm.mesh = BattleSkinned.mesh(kind, variant, 2) if skinned else BattleMeshes.soldier_level(kind, variant, BattleMeshes.LEVEL_FAR)
 		lod_mm.instance_count = mm.instance_count
 		lod_mm.visible_instance_count = 0
 		var lod := MultiMeshInstance3D.new()
@@ -87,6 +91,8 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		_lod_layers[id] = lod
 		_materials[id] = mat
 		_unit_kind[id] = kind
+		if skinned:
+			_skinned[id] = true
 
 
 func _make_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
@@ -112,6 +118,28 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
 	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
 	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
+	return mat
+
+
+## Matériau des figurines skinnées (lot V2) : même livrée et blason que `_make_material`,
+## texture d'os et table des clips du rig ; cadavres en mode CUSTOM (clips de mort).
+func _make_skinned_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = BattleSkinned.SHADER
+	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
+	mat.set_shader_parameter("livery", color)
+	mat.set_shader_parameter("trim", TRIM_SILVER if color.get_luminance() > 0.55 or (color.r > 0.6 and color.g > 0.5) else TRIM_GOLD)
+	var arms: Texture2D = _side_heraldry.get(side)
+	mat.set_shader_parameter("heraldry", arms)
+	mat.set_shader_parameter("has_heraldry", arms != null)
+	BattleSkinned.setup_material(mat, kind, variant)
+	mat.set_shader_parameter("reload_time", 9.0 if kind == "archer" and variant == 2 else 6.0)
+	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	mat.set_shader_parameter("livery_share", 0.92 if noble else 0.6)
+	if corpse:
+		BattleSkinned.apply_config(mat, BattleSkinned.death_config(kind, variant), anim_time)
+	else:
+		BattleSkinned.apply_config(mat, BattleSkinned.state_config(kind, variant, "idle", false), anim_time)
 	return mat
 
 
@@ -180,10 +208,12 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	var near := distance < LOD_DISTANCE
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE
-	var level := BattleMeshes.LEVEL_FULL if distance < DETAIL_DISTANCE else BattleMeshes.LEVEL_MEDIUM
+	var skinned := _skinned.has(id)
+	var level := BattleMeshes.LEVEL_FULL if distance < (SKINNED_DETAIL_DISTANCE if skinned else DETAIL_DISTANCE) else BattleMeshes.LEVEL_MEDIUM
 	if near and int(_near_level.get(id, -1)) != level:
 		_near_level[id] = level
-		mm.mesh = BattleMeshes.soldier_level(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), level)
+		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
+		mm.mesh = BattleSkinned.mesh(kind, variant, level) if skinned else BattleMeshes.soldier_level(kind, variant, level)
 	instance.visible = n > 0 and near
 	lod.visible = n > 0 and (not near or shadow)
 	if near:
@@ -220,6 +250,9 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	track["ammo"] = ammo
 	track["state"] = state
 	mat.set_shader_parameter("state_time", anim_time - float(track["since"]))
+	if skinned:
+		var config := BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
+		BattleSkinned.apply_config(mat, config, anim_time)
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
@@ -244,16 +277,18 @@ func soldier_positions(id: int, count: int) -> PackedVector3Array:
 ## Ajoute `count` cadavres pris au hasard dans la tranche précédente (plutôt au premier rang).
 func _spawn_corpses(side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int) -> void:
 	var key := "%s/%s/%d" % [side, kind, variant]
+	var skinned := BattleSkinned.has_figure(kind, variant)
+	var deaths: int = (BattleSkinned.death_config(kind, variant)["set"] as Array).size() if skinned else 1
 	if not _corpse_layers.has(key):
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true
-		mm.mesh = BattleMeshes.soldier(kind, variant, true)
+		mm.mesh = BattleSkinned.mesh(kind, variant, 1) if skinned else BattleMeshes.soldier(kind, variant, true)
 		mm.instance_count = 0
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "Corpses_%s_%s_%d" % [side, kind, variant]
 		instance.multimesh = mm
-		instance.material_override = _make_material(side, kind, variant, true)
+		instance.material_override = _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(instance)
 		_corpse_layers[key] = {"mm": mm, "data": PackedFloat32Array(), "count": 0, "next": 0, "material": instance.material_override}
@@ -268,7 +303,8 @@ func _spawn_corpses(side: String, kind: String, variant: int, prev: PackedFloat3
 		for j in 12:
 			record[j] = prev[o + j]
 		record[12] = anim_time
-		record[13] = 0.0
+		# Figurines skinnées : clip de mort tiré au sort (INSTANCE_CUSTOM.y) ; w = sang (0).
+		record[13] = float(_rng.randi_range(0, deaths - 1))
 		record[14] = 1.0 if _rng.randf() < 0.5 else -1.0
 		record[15] = 0.0
 		var count_now: int = layer["count"]

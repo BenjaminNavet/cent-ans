@@ -43,6 +43,7 @@ pub mod coinage;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
+pub mod economy_balance;
 pub mod events;
 pub mod frontier;
 pub mod march;
@@ -50,6 +51,7 @@ pub mod medicine;
 pub mod movement;
 pub mod navigation;
 pub mod orders;
+pub mod path_plan;
 pub mod population;
 pub mod ransom;
 pub mod religion;
@@ -97,6 +99,7 @@ pub use navigation::{Cell, GridPath};
 pub use orders::{
     MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, BASE_RECRUIT_SLOTS,
 };
+pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;

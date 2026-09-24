@@ -126,8 +126,8 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	hbox.add_child(text)
 	var lines := [
 		[str(save["label"]), 18, Color(0.22, 0.14, 0.07)],
-		["%s — %s, tour %d" % [faction, save.get("date", "?"), int(save.get("turn", 0))], 15, Color(0.35, 0.22, 0.10)],
-		["Sauvegardée le %s" % str(save.get("timestamp", "")).replace("T", " à "), 13, Color(0.45, 0.36, 0.26)],
+		["%s — %s, tour %d" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1], 15, Color(0.35, 0.22, 0.10)],
+		["Sauvegardée le %s" % french_timestamp(str(save.get("timestamp", ""))), 13, Color(0.45, 0.36, 0.26)],
 	]
 	var usable := mode != Mode.LOAD or SaveSlots.loadable(save)
 	if not usable:
@@ -202,3 +202,23 @@ func _on_confirm() -> void:
 		load_confirmed.emit(_saves[_selected]["path"])
 	hide()
 	dialog_closed.emit()
+
+
+const MONTHS_SHORT := ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+
+
+## « 2026-09-24T23:19:05 » → « 24 sept. 2026, 23 h 19 » (audit A3 T4) ; tel quel si illisible.
+static func french_timestamp(iso: String) -> String:
+	var parts := iso.split("T")
+	var date := parts[0].split("-")
+	if date.size() != 3 or not date[1].is_valid_int():
+		return iso
+	var month := int(date[1])
+	if month < 1 or month > 12:
+		return iso
+	var text := "%d %s %s" % [int(date[2]), MONTHS_SHORT[month - 1], date[0]]
+	if parts.size() > 1:
+		var time := parts[1].split(":")
+		if time.size() >= 2:
+			text += ", %d h %s" % [int(time[0]), time[1]]
+	return text

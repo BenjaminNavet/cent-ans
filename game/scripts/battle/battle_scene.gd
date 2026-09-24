@@ -92,6 +92,8 @@ var deployment: DeploymentController = null  # F5c : phase de déploiement du jo
 var _deploy_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
+var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
 @onready var terrain: BattleTerrain = $Terrain
@@ -238,6 +240,9 @@ func begin() -> bool:
 	music.name = "Music"
 	add_child(music)
 	music.setup(self)
+	battle_audio = BattleAudio.new()
+	add_child(battle_audio)
+	battle_audio.setup(_weather_key, camera_rig.camera)
 	_refresh_view(true)
 	return true
 
@@ -439,6 +444,7 @@ func _process(delta: float) -> void:
 	if music != null:
 		music.update(delta)
 	_refresh_view(false, delta)
+	_update_audio(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
@@ -472,6 +478,21 @@ func _process(delta: float) -> void:
 			if effects != null and effects.volleys != null:
 				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
+
+
+## AU1 : sons spatialisés d'après les régiments (et le siège, 4 fois par seconde).
+func _update_audio(delta: float) -> void:
+	if battle_audio == null:
+		return
+	var running: bool = not paused and not battle.call("is_finished")
+	var elapsed := float(battle.call("get_elapsed"))
+	var height := camera_rig.camera.global_position.y - camera_rig.target.y
+	battle_audio.update(units, camera_rig.target, height, delta * speed if running else 0.0, delta, elapsed)
+	if siege_view != null and running:
+		_siege_audio_timer -= delta
+		if _siege_audio_timer <= 0.0:
+			_siege_audio_timer = 0.25
+			battle_audio.update_siege(battle.call("get_siege"), elapsed)
 
 
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
