@@ -67,6 +67,8 @@ var entry_list: ItemList
 var fiche: RichTextLabel
 var title_label: Label
 var count_label: Label
+## H11 : « Fiche historique » (Codex) de l'entité affichée, masqué si elle n'en a pas.
+var codex_button: Button
 
 var current_tab: int = 0
 var current_entry: String = ""
@@ -79,6 +81,7 @@ var _history: PackedStringArray = PackedStringArray()
 
 func _ready() -> void:
 	name = "Encyclopedia"
+	add_to_group("encyclopedia")  # H11 : retrouvée par la fenêtre Codex
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ResourceLoader.exists(THEME_PATH):
@@ -105,6 +108,13 @@ func _ready() -> void:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
+	codex_button = Button.new()
+	codex_button.name = "CodexButton"
+	codex_button.text = "✠ Fiche historique"
+	codex_button.tooltip_text = "Ouvrir la fiche du Codex (K)"
+	codex_button.hide()
+	codex_button.pressed.connect(open_codex_entry)
+	header.add_child(codex_button)
 	var back := Button.new()
 	back.name = "BackButton"
 	back.text = "← Retour"
@@ -421,6 +431,21 @@ func _render_fiche(entry_id: String) -> void:
 			fiche.append_text("  ")
 	fiche.append_text(fiche_bbcode(entry_id))
 	fiche.scroll_to_line(0)
+	codex_button.visible = codex_entry_of(entry_id) != ""
+
+
+## H11 : fiche Codex liée à une entité (`CodexStore.entry_for_entity`), vide sinon.
+static func codex_entry_of(entity_id: String) -> String:
+	var loop := Engine.get_main_loop() as SceneTree
+	var store: Node = loop.root.get_node_or_null("/root/CodexStore") if loop != null else null
+	return str(store.call("entry_for_entity", entity_id)) if store != null and entity_id != "" else ""
+
+
+func open_codex_entry() -> void:
+	var codex_id := codex_entry_of(current_entry)
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if codex_id != "" and bubbles != null:
+		bubbles.call("open_entry", codex_id)
 
 
 # --- Fiches ---------------------------------------------------------------------------

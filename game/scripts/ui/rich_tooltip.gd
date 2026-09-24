@@ -604,3 +604,55 @@ static func skill(node: Dictionary, state: String = "") -> String:
 static func branch(branch_id: String, value: int = -1) -> String:
 	var head := _title("branch_" + branch_id, str(BRANCH_LABELS.get(branch_id, branch_id)), "niveau %d" % value if value >= 0 else "", "branch")
 	return _join([head, str(BRANCH_TEXTS.get(branch_id, ""))])
+
+
+# --- Monnaie, rançons, chevalerie (H11) -------------------------------------------------------
+
+
+static func _signed_pounds(value: int) -> String:
+	return "%s%s %s" % ["+" if value > 0 else "", thousands(value), POUND]
+
+
+## `option` : entrée de `get_coinage().options` ; `changed_this_year` : déjà changée cette année.
+static func coinage(option: Dictionary, changed_this_year: bool = false) -> String:
+	var current := bool(option.get("current", false))
+	var lines: Array = [_title("hud_treasury", str(option.get("label", option.get("level", ""))), "monnaie actuelle" if current else "", "hud")]
+	var seigniorage := int(option.get("seigniorage", 0))
+	var recoinage := int(option.get("recoinage", 0))
+	lines.append("Seigneuriage : [color=%s]%s / saison[/color]" % [GREEN if seigniorage > 0 else MUTED, _signed_pounds(seigniorage)])
+	if recoinage > 0:
+		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, thousands(recoinage), POUND])
+	var inflation := int(option.get("inflation", 0))
+	var deflation := int(option.get("deflation", 0))
+	if inflation > 0:
+		lines.append("Prix : [color=%s]+%d / saison[/color] (recrutement, entretien et constructions renchérissent)" % [RED, inflation])
+	elif deflation > 0:
+		lines.append("Prix : [color=%s]−%d / saison[/color] (jusqu'aux prix de 1337)" % [GREEN, deflation])
+	else:
+		lines.append("Prix : stables")
+	var unrest := float(option.get("burgher_unrest", 0.0))
+	if not is_zero_approx(unrest):
+		lines.append("Mécontentement des bourgeois : [color=%s]%s%s[/color] (cible)" % [RED if unrest > 0 else GREEN, "+" if unrest > 0 else "", _number(unrest)])
+	var prestige := int(option.get("prestige", 0))
+	if prestige != 0:
+		lines.append("Prestige du souverain : [color=%s]%s%d / saison[/color]" % [GREEN if prestige > 0 else RED, "+" if prestige > 0 else "", prestige])
+	lines.append("[color=%s][i]Un seul changement de monnaie par année civile.[/i][/color]" % MUTED)
+	if changed_this_year and not current:
+		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; prochain changement possible l'an prochain.[/color]" % RED)
+	return _join(lines)
+
+
+## `option` : entrée de `get_chivalric_orders().options`.
+static func chivalric_order(option: Dictionary) -> String:
+	var lines: Array = [_title("hud_court", str(option.get("name", option.get("id", ""))), "disponible" if bool(option.get("available", false)) else "indisponible", "hud")]
+	lines.append("Coût : %s %s · prestige requis : %d" % [thousands(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
+	lines.append("Membres : %d (historiquement : %s)" % [int(option.get("members", 0)), str(option.get("historical_members", "—"))])
+	lines.append("Membres : loyauté +%d, moral des armées qu'ils mènent +%d" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0))])
+	lines.append("Souverain : prestige +%d à la fondation, +%d par an" % [int(option.get("founder_prestige", 0)), int(option.get("yearly_prestige", 0))])
+	if int(option.get("min_year", 0)) > 0:
+		lines.append("Fondation possible dès %d" % int(option.get("min_year", 0)))
+	var reason := str(option.get("reason", ""))
+	if reason != "" and not bool(option.get("available", false)):
+		lines.append("[color=%s]Refus : %s[/color]" % [RED, reason])
+	lines.append(_description(option))
+	return _join(lines)
