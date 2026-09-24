@@ -90,6 +90,65 @@
         "fallback_links_per_neighbor"
       ],
       "additionalProperties": false
+    },
+    "retreat": {
+      "type": "object",
+      "description": "Repli du perdant d'une bataille (lot C7a). Rayons en pas de province (× movement.points_per_step).",
+      "properties": {
+        "friendly_radius_steps": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Rayon de recherche d'une colonie amie (à soi ou à un allié) sans armée ennemie, par un chemin qui ne traverse aucune place ennemie."
+        },
+        "neutral_radius_steps": {
+          "type": "number",
+          "minimum": 0,
+          "description": "À défaut, rayon de recherche d'une colonie non tenue par un ennemi et sans armée ennemie."
+        },
+        "neutral_loss_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Pertes (traînards) d'un repli vers une colonie neutre, en pour cent de chaque unité."
+        },
+        "rout_loss_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Pertes supplémentaires d'une armée sans repli (débandade), en pour cent de chaque unité."
+        },
+        "rout_dissolve_below_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Après la débandade, l'armée se disperse si ses effectifs tombent sous ce pourcentage de son maximum ; sinon les survivants rejoignent la place amie la plus proche à toute distance (ou se dispersent s'il n'y en a aucune)."
+        }
+      },
+      "required": [
+        "friendly_radius_steps",
+        "neutral_radius_steps",
+        "neutral_loss_percent",
+        "rout_loss_percent",
+        "rout_dissolve_below_percent"
+      ],
+      "additionalProperties": false
+    },
+    "garrison_cap": {
+      "type": "object",
+      "description": "Nombre maximal d'unités de garnison qu'une armée peut laisser dans une colonie, selon son type (ordre GarrisonUnits, lot C7a). Un type absent n'a pas de plafond.",
+      "propertyNames": {
+        "enum": [
+          "city",
+          "town",
+          "castle",
+          "abbey",
+          "village"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
     }
   },
   "required": [

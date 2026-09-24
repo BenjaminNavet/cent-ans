@@ -18,7 +18,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::entities::province::Terrain;
-use crate::entities::settlement::{MovementRules, SettlementEdge};
+use crate::entities::settlement::{MovementRules, RetreatRules, SettlementEdge};
 use crate::ids::{ProvinceId, SettlementId};
 use crate::load::GameData;
 
@@ -110,6 +110,14 @@ impl GameData {
         self.settlement_rules
             .as_ref()
             .map(|r| r.movement.clone())
+            .unwrap_or_default()
+    }
+
+    /// Retreat tuning (`rules.json`, defaults when absent, lot C7a).
+    pub fn retreat_rules(&self) -> RetreatRules {
+        self.settlement_rules
+            .as_ref()
+            .map(|r| r.retreat.clone())
             .unwrap_or_default()
     }
 
