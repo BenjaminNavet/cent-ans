@@ -53,6 +53,16 @@ func _run() -> void:
 	if not _check(not paris.is_empty(), "set_paris missing"):
 		return
 	var paris_px: Vector2 = paris["px"]
+	# Lot C7b : tracés routiers des arêtes du graphe, orientés dans les deux sens.
+	_check(data.edge_paths.size() >= 400, "expected >= 400 traced graph edges, got %d" % data.edge_paths.size())
+	var some_key: String = data.edge_paths.keys()[0] if not data.edge_paths.is_empty() else "|"
+	var ends := some_key.split("|")
+	var forward := data.edge_path(ends[0], ends[1])
+	var backward := data.edge_path(ends[1], ends[0])
+	_check(forward.size() >= 2 and forward.size() == backward.size() and forward[0] == backward[backward.size() - 1], "edge_path orientation")
+	var from_entry := data.get_settlement(ends[0])
+	_check(not from_entry.is_empty() and forward.size() >= 2 and forward[0].distance_to(from_entry["px"]) < 0.1, "edge path should start on its settlement")
+	_check(data.edge_path("set_paris", "set_nowhere").is_empty(), "unknown edge should have no path")
 
 	# 2. Terrain + relief fin.
 	var world := Node3D.new()
