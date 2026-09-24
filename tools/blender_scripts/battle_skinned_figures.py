@@ -57,6 +57,9 @@ COMMONER_COLORS = {
     "Adventurer_Legs:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
     "Gold": (eq.C_LEATHER, (0.12, 0.08, 0.04)),
 }
+RIDER_BUDGET = budget(**{k: 0.6 for k in ("King_Body", "King_Legs", "King_Feet", "Adventurer_Body", "Adventurer_Legs", "Adventurer_Feet", "Adventurer_Head")})
+HORSE_BUDGET = [1100, 280, 110]
+
 COMMONER_PARTS = [("adventurer.glb", ["Adventurer_Body", "Adventurer_Legs", "Adventurer_Feet", "Adventurer_Head"])]
 
 FIGURES = {
@@ -139,6 +142,43 @@ FIGURES = {
         "equipment": [("kettle_hat", 1), ("bassinet", 2, {"aventail": False}), ("crossbow", 0), ("quiver", 0, {"arrows": False})],
         "variants": 2,
     },
+    # Knights: as the men-at-arms, great helm or bassinet, shield and lance, horse in a
+    # caparison of the side's livery and arms.
+    "cavalry_0": {
+        "rig": "cavalry",
+        "parts": [
+            ("king.glb", ["King_Body", "King_Legs", "King_Feet"]),
+            ("adventurer.glb", ["Adventurer_Head"]),
+        ],
+        "colors": {},  # filled below from infantry_0
+        "budget": RIDER_BUDGET,
+        "horse_budget": HORSE_BUDGET,
+        "horse_equipment": [("caparison", 0), ("saddle", 0)],
+        "equipment": [("great_helm", 1), ("bassinet", 2), ("heater_shield", 0), ("lance", 0)],
+        "variants": 2,
+    },
+    # Mounted sergeants: gambeson and mail, kettle hat or bassinet, lance without pennon.
+    "cavalry_1": {
+        "rig": "cavalry",
+        "parts": COMMONER_PARTS,
+        "colors": COMMONER_COLORS,
+        "budget": RIDER_BUDGET,
+        "horse_budget": HORSE_BUDGET,
+        "horse_equipment": [("saddle", 0)],
+        "equipment": [("kettle_hat", 1), ("bassinet", 2), ("lance", 0, {"pennon": False})],
+        "variants": 2,
+    },
+    # Mounted archers: archer's kit on a riding horse.
+    "cavalry_2": {
+        "rig": "cavalry",
+        "parts": COMMONER_PARTS,
+        "colors": {**COMMONER_COLORS, "Green": (eq.C_CLOTH, (0.30, 0.25, 0.16))},
+        "budget": RIDER_BUDGET,
+        "horse_budget": HORSE_BUDGET,
+        "horse_equipment": [("saddle", 0)],
+        "equipment": [("kettle_hat", 1), ("cloth_cap", 2), ("longbow", 0), ("quiver", 0)],
+        "variants": 2,
+    },
     # Genoese crossbowmen: as above with bassinet and aventail, pavise on the back.
     "archer_2": {
         "rig": "human",
@@ -149,3 +189,5 @@ FIGURES = {
         "variants": 2,
     },
 }
+
+FIGURES["cavalry_0"]["colors"] = FIGURES["infantry_0"]["colors"]
