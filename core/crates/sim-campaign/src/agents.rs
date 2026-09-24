@@ -33,6 +33,8 @@ pub const PARLEY_REASON: &str = "Ambassade d'un héraut";
 pub const BRIBE_REASON: &str = "Tentative de corruption";
 /// Treasury an AI faction keeps before recruiting an agent.
 pub const AI_RECRUIT_RESERVE: i64 = 1_500;
+/// An AI herald only courts factions whose attitude is below this.
+pub const AI_PARLEY_ATTITUDE: i32 = 10;
 /// Highest seal.
 pub const MAX_LEVEL: u8 = 5;
 
@@ -1533,7 +1535,11 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
             if state.count_agents(faction, kind) > 0 {
                 continue;
             }
-            if kind == AgentKind::Preacher && !province_heresy_or_war(state, faction) {
+            // Minor powers keep a single spy, and only while at war.
+            if !playable && (kind != AgentKind::Spy || f.at_war_with.is_empty()) {
+                continue;
+            }
+            if kind == AgentKind::Preacher && !heresy_or_schism(state, faction) {
                 continue;
             }
             let t = &rules(data).types[&kind];
@@ -1565,15 +1571,13 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
     orders
 }
 
-fn province_heresy_or_war(state: &CampaignState, faction: &FactionId) -> bool {
-    state
-        .controlled_provinces(faction)
-        .iter()
-        .any(|p| state.provinces.get(p).is_some_and(|p| p.heresy > 0))
+/// A preacher is worth his upkeep against a heresy at home or during the Schism.
+fn heresy_or_schism(state: &CampaignState, faction: &FactionId) -> bool {
+    state.schism
         || state
-            .factions
-            .get(faction)
-            .is_some_and(|f| !f.at_war_with.is_empty())
+            .controlled_provinces(faction)
+            .iter()
+            .any(|p| state.provinces.get(p).is_some_and(|p| p.heresy > 0))
 }
 
 fn ai_recruit_place(
@@ -1785,8 +1789,11 @@ fn ai_emissary(
                         && m.expires_turn > state.turn
                 })
         })
-        .map(|(other, _)| other.clone())
-        .min_by_key(|other| state.attitude(data, other, faction).0);
+        .map(|(other, _)| (state.attitude(data, other, faction).0, other.clone()))
+        // Only courts that need winning over (C6 balance: no opinion inflation).
+        .filter(|(attitude, _)| *attitude < AI_PARLEY_ATTITUDE)
+        .min()
+        .map(|(_, other)| other);
     if let Some(other) = neighbour {
         if let Some(goal) = faction_city(state, data, agent, &other) {
             return act_or_walk(

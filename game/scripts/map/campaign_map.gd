@@ -20,7 +20,8 @@ extends Node3D
 ##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
-##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné.
+##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné ;
+##   --stage=agents_registry    idem, registre des agents (G) ouvert.
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
@@ -1054,8 +1055,8 @@ func _parse_cmdline() -> void:
 					tutorial.stage_screenshot(_screenshot_stage)
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
-				"agents":  # C6 agents
-					agents_ctl.stage_screenshot()
+				"agents", "agents_registry":  # C6 agents
+					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
