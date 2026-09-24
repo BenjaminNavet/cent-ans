@@ -165,9 +165,15 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
         state.end_turn_with(&data, idle);
         calm.end_turn_with(&data, idle);
     }
-    let capital = state.factions[&france_id].capital.clone();
-    let unrest = |s: &CampaignState| s.provinces[&capital].population.burghers.unrest;
-    assert!(unrest(&state) > unrest(&calm));
+    let sum = |s: &CampaignState, gauge: fn(&data_model::PopulationClass) -> u8| -> u32 {
+        s.provinces
+            .values()
+            .filter(|p| p.controller == france_id)
+            .map(|p| u32::from(gauge(&p.population.burghers)))
+            .sum()
+    };
+    assert!(sum(&state, |c| c.unrest) > sum(&calm, |c| c.unrest));
+    assert!(sum(&state, |c| c.wealth) < sum(&calm, |c| c.wealth));
 
     // Strong money: prices fall 2 points a season, recoinage is paid,
     // burghers are pleased and the ruler gains prestige.
@@ -322,9 +328,9 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     assert_eq!(debt.remaining, total - installment);
     assert_eq!(debt.creditor, england);
     assert_eq!(ransom::ransom_debt_total(&state, &france_id), total - installment);
-    // Year one: the installment is paid.
+    // Year one: the installment is paid (due at turn 4).
     state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
-    for _ in 0..4 {
+    for _ in 0..5 {
         state.end_turn_with(&data, idle);
     }
     let debt = state.factions[&france_id].ransom_debts[0].clone();
@@ -340,7 +346,13 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     let after = state.factions[&france_id].ransom_debts[0].clone();
     assert_eq!(after.missed, 1);
     assert!(after.remaining > debt.remaining);
-    assert!(state.characters[&ruler].prestige < prestige);
+    // −5 prestige (court prestige may add its yearly gain the same winter).
+    let court = sim_campaign::dynasty::yearly_court_prestige(&state, &data, &france_id);
+    assert!(state.characters[&ruler].prestige <= prestige + court - ransom::DEFAULT_PRESTIGE);
+    assert!(state
+        .events()
+        .iter()
+        .any(|e| e.kind == EventKind::Ransom && e.text_fr.contains("impayée")));
     assert!(state.factions[&england]
         .modifiers
         .iter()
