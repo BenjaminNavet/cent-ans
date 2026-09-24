@@ -116,6 +116,39 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   Jeanne de Bourbon et Charles VI (naissance 1368, folie ciblée). Rééquilibrage : richesse de base +8 par
   classe. 25 tests (`tests/f1_effects.rs`) + 1 test `data-model`.
 
+- Guerre de Cent Ans vivante (F4, `docs/design/m9-ai.md` § 4) : guerres de prétention (l'Angleterre presse
+  sa prétention à la couronne, la France ses provinces revendiquées, dès la fin des trêves), cobelligérance
+  et alliances contre les rivaux, appel aux armes (`answers_call_to_arms`), vassal opportuniste, redditions,
+  trésors dormants dépensés, licenciement anticipé, choix d'événements selon les moyens, mariages de l'IA,
+  derniers bastions épargnés ; Pierre Ier de Portugal et Amédée VI de Savoie (héritiers de 1337), souverain
+  vaincu tué à 1 %. Tests : `ai/tests/f4_war.rs` (7), `sim-campaign/tests/f4_succession.rs` (4).
+
+### Équilibrage F4 — sonde `century_probe` (5 graines × 464 tours, 1337-1453)
+
+| Mesure (moyenne des 5 graines, [min-max]) | Avant F4 | Après F4 | Cible |
+|---|---|---|---|
+| France-Angleterre en guerre | 19 % [6-61] | 72 % [55-78] | ≥ 55 % |
+| Phases de guerre distinctes | 1,4 [1-3] | 6,6 [4-8] | ≥ 3 |
+| Batailles impliquant FR ou EN / décennie | 1,9 [0,8-4,4] | 29,6 [19-44] | ≥ 3 |
+| Provinces prises (siècle) | 50 | 383 | la carte bouge |
+| Majeures (EN, FR, BOU, ÉCO) vivantes en 1400 | 3/4 partout (Écosse détruite 5/5) | 4/4 partout | majorité des graines |
+| Banqueroutes / faction / décennie | 1,07 [0,91-1,51] | 0,93 [0,67-1,28] | < 1 |
+| Pire faction (banqueroutes / décennie) | Suède, Suisse 7-11 | Écosse 5-16 | — |
+| Trésor max après 1350 (saisons de revenu, pire faction) | 25 à 37 779 | 14 à 25 | ≤ 8 |
+| Factions > 8 saisons plus de 4 tours après 1350 | 21-23 | 4-9 | 0 |
+| Mariages entre factions (siècle) | 57-88 ¹ | 117-147 | > 0 |
+| Appels aux armes honorés / refusés | 0-2 / 0 | 114-182 / 5-12 | la plupart |
+| Ordres France refusés | 0-2 % | 0-0,3 % | 0 % |
+| Durée d'une campagne (release, 5 en parallèle) | ≈ 4,5 s | ≈ 13 s | ≲ 15 s |
+
+¹ Avant F4, les « mariages » de l'IA épousaient surtout des veuves hors d'âge (Isabelle de France et Renaud II de
+Gueldre, 1337) ; F4 cherche l'âge fécond, ±15 ans, les maisons régnantes amies. Le trésor est rapporté au revenu
+moyen des 8 dernières saisons ; dans la sonde la France (joueur) répond aux offres comme l'IA.
+Écarts : trésors dormants encore au-dessus de 8 saisons par pointes (France, Castille, Empire après une paix
+lucrative) ; l'Écosse, réduite à Fife, vit à crédit (≈ 60 % des banqueroutes) ; Flandre-Angleterre ne se noue
+jamais (la Flandre reste vassale de la France sauf révolte), Bourgogne-Angleterre jamais (pas de défection
+observée).
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
@@ -129,7 +162,7 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
 - M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
-- Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
+- Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu (F4 : 20 % au-delà de six saisons) ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
 - L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
 - La population ne varie pas encore (M3).
 - Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
