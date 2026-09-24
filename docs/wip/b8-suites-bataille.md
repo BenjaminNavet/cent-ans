@@ -5,13 +5,17 @@ Plan : `docs/design/2026-09-24-rapprochement-total-war.md`, suivi `docs/wip/tw.m
 ## État
 | Point | État |
 |---|---|
-| 1a. `advance` incline vers un défenseur décalé | **fait** |
-| 1b. Cavalerie vs réseau de haies (bocage dense) | **fait** |
-| 1c. Poursuite bornée (bocage + village, chevaliers vs archers montés) | **fait** |
-| 2. Minicarte : haies/fossés/village/côte | à faire |
-| 3. Boue (carte de piétinement réutilisée) + sillage/gerbes de gué | à faire |
-| 4. Infobulle des pastilles regroupées (liste des régiments) | à faire |
-| Captures avant/après, banc perf | à faire |
+| 1a. `advance` incline vers un défenseur décalé | **fait**, testé |
+| 1b. Cavalerie vs réseau de haies (bocage dense) | **fait** (régression) |
+| 1c. Poursuite bornée (bocage + village, chevaliers vs archers montés) | **fait**, testé |
+| 2. Minicarte : haies/fossés/village/côte | **non fait** |
+| 3. Boue (carte de piétinement réutilisée) + sillage/gerbes de gué | **non fait** |
+| 4. Infobulle des pastilles regroupées (liste des régiments) | **non fait** |
+| Captures avant/après, banc perf | **non fait** |
+
+Point 1 (IA Rust, `sim-battle`) terminé et testé ; points 2-4 (Godot : minicarte, boue/gué,
+infobulle) et les captures/mesures n'ont pas été traités dans cette session — voir « Points
+ouverts ».
 
 ## 1. IA (`core/crates/sim-battle/src/ai.rs`)
 
@@ -69,8 +73,20 @@ bocage + village (contact retardé à 152 s).
   du contact bocage + village (graine 5 notamment), qui combine haie-réseau et poursuite.
 - Rythme d'engagement démo : `demo_contact_stays_near_seventy_seconds` toujours vert (55-95 s).
 
-## Prochaine étape
-1. Minicarte (haies/fossés/village/côte).
-2. Boue (piétinement B7 réutilisé), sillage/gerbes de gué.
-3. Infobulle des pastilles regroupées.
-4. Captures `docs/img/b8/`, banc `--benchmark --bench-at=90` avant/après (`--units=20`).
+## Prochaine étape (reprise)
+1. Minicarte de bataille (`game/scripts/battle/` ou équivalent, à localiser — chercher le script
+   qui dessine la minicarte à partir de `get_terrain()`/`site_label` du pont) : ajouter haies,
+   fossés, village, côte, en s'appuyant sur les données déjà exposées côté Rust (B6, `site_label`
+   dans `get_terrain()`, `get_site_label()`).
+2. Boue : `game/scripts/battle/battle_terrain.gd` et `battle_ground.gdshader` (B7) — réutiliser la
+   carte de piétinement (`trample_map`) pour un sol détrempé/pluie (teinte brune au lieu de neige
+   tassée grise, cf. piste notée en fin de `docs/wip/b7-finitions-bataille.md`).
+3. Gué : `battle_effects.gd` (B7, `_wet_span`) — sillage d'écume derrière les chevaux, gerbes plus
+   fortes quand une charge entre dans l'eau (renforcer l'émetteur existant, pas le refaire).
+4. Infobulle des pastilles : `battle_unit_markers.gd` (B7) — au survol d'une pastille regroupée,
+   lister les régiments (déjà dénombrés pour l'affichage groupé) au lieu du texte actuel
+   « N régiments — M hommes » seul.
+5. Après 1-4 : `core/build.sh`, `godot --headless --path game --import` (si nouveau `class_name`),
+   smoke test (compter « smoke OK », actuellement 23 sans régression B8 attendue côté Godot),
+   captures `docs/img/b8/` avant/après pour chaque point visuel, banc
+   `--benchmark --bench-at=90` (et `--units=20`) avant/après (primitives et appels, écran à 60 Hz).
