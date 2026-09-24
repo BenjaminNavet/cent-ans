@@ -5,7 +5,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0010-f
 | Lot | État | Notes |
 |---|---|---|
 | M1 grille de navigation | **fusionné** | 79 ponts, 17 gués/bacs, 12 cols ; 97,9 % de la terre franchissable ; notes `docs/wip/m1-navgrid.md` |
-| M2 cœur | en cours (agent worktree) | grille uniforme de repli tant que M1 n'est pas fusionné |
+| M2 cœur | en cours (worktree `agent-acbe5c6448250fa88`, branche `m2-core-movement`, relancé après plantage le 24/09 à 23 h 55) | grille uniforme de repli tant que M1 n'est pas fusionné |
 | M3 tour séquentiel + IA | à faire | |
 | M4 pont + UI | à faire | |
 | M5 vision, équilibrage, docs | à faire | |
