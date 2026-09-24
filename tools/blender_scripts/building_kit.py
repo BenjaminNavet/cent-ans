@@ -814,12 +814,13 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
     tint = pick(rng, STONE_TINTS)
     roof = pick(rng, ["RoofSlate", "RoofSlate", "RoofFlat"])
     st = Style(wall="Ashlar", roof=roof, pitch=54, stone_tint=tint, roof_tint=pick(rng, ROOF_TINTS[roof]))
-    tower = 5.8
-    nave_l = L * 0.55
+    tower = min(max(L * 0.21, 4.4), 6.8)
+    nave_l = L * 0.52
     choir_l = L - nave_l - tower
-    h = 8.5
+    h = min(max(W * 0.82, 6.5), 11.0)
     nx0 = -L / 2 + tower
-    k.box(g, (0.0, 0.0, -FOUNDATION_DEPTH / 2 + 0.2), (L, W + 0.4, FOUNDATION_DEPTH + 0.4), "Ashlar", color=tint)
+    k.box(g, (tower / 2, 0.0, -FOUNDATION_DEPTH / 2 + 0.2), (L - tower, W + 0.2, FOUNDATION_DEPTH + 0.4), "Ashlar", color=tint)
+    k.box(g, (-L / 2 + tower / 2, 0.0, -FOUNDATION_DEPTH / 2), (tower + 0.2, tower + 0.2, FOUNDATION_DEPTH), "Ashlar", color=tint)
     # Nave.
     with frame(g, (nx0 + nave_l / 2, 0.0, 0.0)):
         _stone_hall(g, rng, nave_l, W, 0.4, h, st, detail, lancets=True, buttresses=True, door_side=True)
@@ -840,7 +841,7 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
     ch = h * 0.85
     cx0 = nx0 + nave_l
     with frame(g, (cx0 + choir_l / 2 - cw * 0.25, 0.0, 0.0)):
-        cl = choir_l - cw * 0.5
+        cl = max(choir_l - cw * 0.5, 1.5)
         _stone_hall(g, rng, cl, cw, 0.4, ch, st, detail, lancets=True, buttresses=True, ends=False)
         g.eave_z = ch + 0.4
         roof_gable(g, cl, cw, ch + 0.4, st, detail, overhang=0.3, gable_over=0.0)
@@ -848,10 +849,10 @@ def church(g, rng, detail="high", length=None, depth=None, ruined=False):
         g.eave_z = None
     # West tower with belfry and octagonal spire.
     tx = -L / 2 + tower / 2
-    th = rng.uniform(17.0, 21.0)
+    th = h * rng.uniform(1.9, 2.3)
     with frame(g, (tx, 0.0, 0.0)):
         _tower(g, rng, tower, th, st, detail)
-        spire = rng.uniform(11.0, 15.0)
+        spire = th * rng.uniform(0.6, 0.8)
         with tinted(g, st.roof_tint):
             k.cone(g, (0.0, 0.0, th + 0.4), tower * 0.58, spire, "RoofSlate", sides=8, phase=math.pi / 8)
             if detail == "high":
