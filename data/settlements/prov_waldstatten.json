@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_lucerne",
+    "province": "prov_waldstatten",
+    "kind": "city",
+    "name": {
+      "display": "Lucerne",
+      "local": "Luzern",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.3093,
+      47.0505
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Confédération d'Uri, Schwyz, Unterwald et Lucerne (1332), en conflit avec les Habsbourg (Morgarten, 1315) ; évêché et cité de Bâle, évêché de Coire (Grisons). Col du Saint-Gothard.",
+    "sources": [
+      "Ancienne Confédération suisse",
+      "Bataille de Morgarten",
+      "Bâle"
+    ]
+  },
+  {
+    "id": "set_schwyz",
+    "province": "prov_waldstatten",
+    "kind": "town",
+    "name": {
+      "display": "Schwytz",
+      "local": "Swiz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6547,
+      47.0207
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg du canton fondateur qui donnera son nom à la Confédération suisse.",
+    "sources": [
+      "Schwytz"
+    ]
+  },
+  {
+    "id": "set_altdorf_uri",
+    "province": "prov_waldstatten",
+    "kind": "village",
+    "name": {
+      "display": "Altdorf",
+      "local": "Altdorf",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6427,
+      46.8823
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Chef-lieu du canton d'Uri, associé par la légende à Guillaume Tell.",
+    "sources": [
+      "Altdorf (Uri)"
+    ]
+  }
+]

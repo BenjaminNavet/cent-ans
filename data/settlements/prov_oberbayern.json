@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_munich",
+    "province": "prov_oberbayern",
+    "kind": "city",
+    "name": {
+      "display": "Munich",
+      "local": "München",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.582,
+      48.1351
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Duché de Haute-Bavière, domaine propre de l'empereur Louis IV de Wittelsbach, qui sera réuni à la Basse-Bavière en 1340. Munich, résidence impériale ; Ratisbonne, cité libre ; sel de Reichenhall.",
+    "sources": [
+      "Duché de Bavière",
+      "Louis IV du Saint-Empire",
+      "Munich"
+    ]
+  },
+  {
+    "id": "set_landshut",
+    "province": "prov_oberbayern",
+    "kind": "town",
+    "name": {
+      "display": "Landshut",
+      "local": "Landshut",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      12.1508,
+      48.5372
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence ducale des Wittelsbach de Basse-Bavière, dominée par le burg de Trausnitz.",
+    "sources": [
+      "Landshut"
+    ]
+  },
+  {
+    "id": "set_freising",
+    "province": "prov_oberbayern",
+    "kind": "town",
+    "name": {
+      "display": "Freising",
+      "local": "Vreising",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.7489,
+      48.4009
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne cité épiscopale sur l'Isar, l'un des plus vieux évêchés de Bavière.",
+    "sources": [
+      "Freising"
+    ]
+  },
+  {
+    "id": "set_andechs",
+    "province": "prov_oberbayern",
+    "kind": "abbey",
+    "name": {
+      "display": "Andechs",
+      "local": "Andechs",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.1889,
+      47.9767
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Prieuré bénédictin sur la « montagne sainte » des Wittelsbach, lieu de pèlerinage.",
+    "sources": [
+      "Andechs"
+    ]
+  }
+]
