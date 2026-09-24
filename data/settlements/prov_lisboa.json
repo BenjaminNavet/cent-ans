@@ -1,0 +1,118 @@
+[
+  {
+    "id": "set_lisbonne",
+    "province": "prov_lisboa",
+    "kind": "city",
+    "name": {
+      "display": "Lisbonne",
+      "local": "Lixboa",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -9.1393,
+      38.7223
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_university"
+    ],
+    "port": true,
+    "description": "Lisbonne, capitale du royaume de Portugal sur l'estuaire du Tage.",
+    "sources": [
+      "Alphonse IV de Portugal",
+      "Lisbonne",
+      "Coimbra"
+    ]
+  },
+  {
+    "id": "set_santarem",
+    "province": "prov_lisboa",
+    "kind": "town",
+    "name": {
+      "display": "Santarém",
+      "local": "Santarem",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.6864,
+      39.2362
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville royale du Tage, siège fréquent des Cortes portugaises.",
+    "sources": [
+      "Santarém"
+    ]
+  },
+  {
+    "id": "set_leiria",
+    "province": "prov_lisboa",
+    "kind": "castle",
+    "name": {
+      "display": "Leiria",
+      "local": "Leiria",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.807,
+      39.7436
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal reconstruit sous Dinis Ier, résidence royale occasionnelle.",
+    "sources": [
+      "Leiria"
+    ]
+  },
+  {
+    "id": "set_alcobaca",
+    "province": "prov_lisboa",
+    "kind": "abbey",
+    "name": {
+      "display": "Alcobaça",
+      "local": "Alcobaça",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.9773,
+      39.5478
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye cistercienne fondée en 1153, nécropole des rois portugais.",
+    "sources": [
+      "Monastère d'Alcobaça"
+    ]
+  }
+]
