@@ -35,8 +35,12 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 @export var density_full_distance: float = 200.0
 @export var density_min: float = 0.3
 @export var max_concurrent_jobs: int = 5
-## Tuiles semées d'un coup (et attendues) au premier affichage.
-@export var warm_start_tiles: int = 12
+## Tuiles semées d'un coup (et attendues) au premier affichage. `WorkerThreadPool` ne sert les
+## tâches basse priorité que sur ~4 fils quel que soit le nombre de cœurs (mesuré) : demander
+## plus que `max_concurrent_jobs` d'un coup ne fait qu'ajouter des salves d'attente bloquante en
+## série sans plus de parallélisme réel. Les tuiles restantes arrivent ensuite normalement (même
+## budget que le chargement en tâche de fond), en général en une poignée de frames.
+@export var warm_start_tiles: int = 5
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 
