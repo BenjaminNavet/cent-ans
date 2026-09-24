@@ -51,13 +51,8 @@ uniform float border_dist_scale = 6.0;    // niveaux 8 bits par pixel carte (too
 uniform sampler2D coast_dist : filter_linear, repeat_disable, hint_default_white;
 uniform bool has_coast_dist = false;
 uniform float coast_dist_scale = 2.0;
-// Lot V4 (A1-11) : lit creusé et berges des fleuves (river_bed.gdshaderinc).
-#include "res://shaders/river_bed.gdshaderinc"
-uniform vec3 river_mud_color = vec3(0.085, 0.072, 0.048);
-uniform vec3 river_bed_color = vec3(0.075, 0.080, 0.060);
-uniform vec3 river_grass_color = vec3(0.070, 0.115, 0.035);
-// Inclinaison des berges dans l'ombrage (lisible même là où le maillage n'est pas creusé).
-uniform float river_bank_slope = 0.4;
+// Lot V4 (A1-11) : lit creusé et berges des fleuves.
+#include "res://shaders/river_banks.gdshaderinc"
 
 uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_rough_array : filter_linear_mipmap_anisotropic, repeat_enable;
@@ -279,15 +274,9 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	// Lot V4 : lit creusé dans les tuiles de relief fin seulement.
-	if (has_river_bed && carved_rect_count > 0) {
-		float cw = carve_weight(world_pos.xz);
-		if (cw > 0.0) {
-			float carve = river_carve_depth * river_profile(river_sd_at(world_pos.xz, map_size)) * cw;
-			VERTEX.y -= carve;
-			world_pos.y -= carve;
-		}
-	}
+	float carve = river_carve(world_pos.xz, map_size);  // lot V4
+	VERTEX.y -= carve;
+	world_pos.y -= carve;
 }
 
 void fragment() {
@@ -482,28 +471,8 @@ void fragment() {
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 
-	// Lot V4 : fleuves. Fond vaseux dans le lit (vu sous l'eau peu profonde), bande de vase et
-	// de roseaux au bord, herbe grasse sur la berge ; berges inclinées vers l'eau dans l'ombrage.
-	if (has_river_bed && hc > 0.0) {
-		float rsd = river_sd_at(p, map_size);
-		if (rsd < river_bank_px + 0.6) {
-			float vis = 1.0 - smoothstep(river_bank_px * 0.6, river_bank_px * 2.5, footprint);
-			float reeds = value_noise(p * 5.3) * 0.6 + value_noise(p * 13.1) * 0.4;
-			float in_bed = 1.0 - smoothstep(-0.15, 0.05, rsd);
-			float mud = (1.0 - smoothstep(0.0, 0.18 + 0.25 * reeds, rsd)) * (1.0 - in_bed);
-			float lush = 1.0 - smoothstep(0.1, river_bank_px * (0.8 + 0.5 * reeds), rsd);
-			col = mix(col, river_grass_color * (0.8 + 0.4 * reeds), lush * 0.35 * vis);
-			col = mix(col, river_mud_color * (0.8 + 0.4 * reeds), mud * 0.85 * vis);
-			col = mix(col, river_bed_color, in_bed * vis);
-			roughness = mix(roughness, 0.5, mud * vis);
-			// Pente de la berge : gradient de la distance (vers l'extérieur du lit).
-			vec2 e = vec2(0.35, 0.0);
-			vec2 gsd = vec2(river_sd_at(p + e.xy, map_size) - river_sd_at(p - e.xy, map_size),
-				river_sd_at(p + e.yx, map_size) - river_sd_at(p - e.yx, map_size)) / 0.7;
-			float slope_w = smoothstep(-0.3, 0.2, rsd) * (1.0 - smoothstep(0.2, river_bank_px, rsd));
-			vec2 outward = gsd / max(length(gsd), 1e-4);
-			n = normalize(n + vec3(-outward.x, 0.0, -outward.y) * river_bank_slope * slope_w * vis);
-		}
+	if (hc > 0.0) {
+		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.

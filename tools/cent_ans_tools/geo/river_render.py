@@ -53,7 +53,8 @@ ROAD_SNAP_PX = (
 ROAD_AXIS_PX = (
     2.5  # otherwise it takes the direction of a road ending within this radius
 )
-ROAD_MERGE_PX = 0.9  # overlapping roads: crossings closer than this are merged
+ROAD_MERGE_PX = 0.9
+ROAD_MIN_SINE = 0.55  # a road crossing a river at less than ~33° is following its bank  # overlapping roads: crossings closer than this are merged
 ROAD_BRIDGE_MIN_WIDTH = 0.2  # narrower streams crossed by a road get no bridge
 STREAM_WIDTH = 0.3  # generic road bridge: stone culvert below, timber bridge above
 
@@ -362,6 +363,8 @@ def road_crossings(rivers: list[dict], roads: list[dict]) -> list[dict]:
                 k = int(np.argmin(np.hypot(*(a + ab * t[:, None] - p).T)))
                 axis = ab[k] / math.sqrt(length2[k])
                 sine = abs(axis[0] * river_dir[1] - axis[1] * river_dir[0])
+                if sine < ROAD_MIN_SINE:
+                    continue  # road running along the river, crossing its line back and forth
                 hits.append(
                     {
                         "p": p,
