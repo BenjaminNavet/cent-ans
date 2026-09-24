@@ -393,6 +393,41 @@ pub(crate) fn on_death(
     );
 }
 
+/// Generals `from` may hand a companion to: living, free characters of his
+/// faction commanding an army in the same settlement as his own, with room
+/// left in their retinue.
+pub fn transfer_targets(
+    state: &CampaignState,
+    data: &GameData,
+    from: &CharacterId,
+) -> Vec<CharacterId> {
+    let Some(giver) = state.characters.get(from) else {
+        return Vec::new();
+    };
+    let Some(place) = giver
+        .army
+        .as_ref()
+        .and_then(|a| state.armies.get(a))
+        .map(|a| &a.location)
+    else {
+        return Vec::new();
+    };
+    let cap = max_per_character(data);
+    state
+        .armies
+        .values()
+        .filter(|a| &a.location == place && a.faction == giver.faction)
+        .filter_map(|a| a.general.clone())
+        .filter(|g| g != from)
+        .filter(|g| {
+            state
+                .characters
+                .get(g)
+                .is_some_and(|c| c.alive && !c.captive && c.retinue.len() < cap)
+        })
+        .collect()
+}
+
 /// `transfer_companion`: `companion` leaves `from` for `to`, two living,
 /// free characters of `faction` commanding armies in the same settlement.
 pub fn transfer_companion(

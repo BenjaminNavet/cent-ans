@@ -17,6 +17,7 @@ mod campaign_sim_diplomacy;
 mod campaign_sim_events;
 mod campaign_sim_family;
 mod campaign_sim_h5h6;
+mod campaign_sim_retinue;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
 mod campaign_sim_table;

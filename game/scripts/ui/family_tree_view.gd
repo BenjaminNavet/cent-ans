@@ -58,6 +58,18 @@ func show_tree(tree: Dictionary) -> void:
 	center_on.call_deferred(root_id)
 
 
+## Dates de vie d'un nœud ou d'une fiche (`birth_year`, `death_year`, `alive`, `age`) :
+## « ° 1312 · 25 ans » (vivant), « 1310–1346 » (défunt), « 1310–† » (année de décès inconnue).
+static func life_dates(entry: Dictionary) -> String:
+	var birth := int(entry.get("birth_year", 0))
+	if bool(entry.get("alive", true)):
+		return "° %d · %d ans" % [birth, int(entry.get("age", 0))]
+	var death := int(entry.get("death_year", 0))
+	if death > 0:
+		return "%d–%d" % [birth, death]
+	return "%d–†" % birth
+
+
 func node_count() -> int:
 	return medallions.size()
 
@@ -414,8 +426,9 @@ class FamilyTreeNode:
 		var disc := Control.new()
 		disc.name = "Disc"
 		disc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		disc.set_anchors_preset(Control.PRESET_FULL_RECT)
-		disc.size = node.size
+		# Taille fixée par les ancres (plein cadre, marges nulles) : pas d'affectation de
+		# `size`, qui déclenchait l'avertissement « non-equal opposite anchors ».
+		disc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		disc.draw.connect(func() -> void: node._draw_disc(disc))
 		if not bool(data.get("alive", true)):
 			disc.material = _grey()
@@ -438,11 +451,10 @@ class FamilyTreeNode:
 			_grey_material.set_shader_parameter("amount", 1.0)
 		return _grey_material
 
+	## « ° 1312 · 25 ans » pour un vivant, « 1310–1346 » pour un défunt (C7 : année de décès
+	## tenue par la simulation ; « 1310–† » si elle manque, sauvegarde antérieure).
 	func dates_text() -> String:
-		var birth := int(entry.get("birth_year", 0))
-		if bool(entry.get("alive", true)):
-			return "° %d · %d ans" % [birth, int(entry.get("age", 0))]
-		return "° %d · †" % birth
+		return FamilyTreeView.life_dates(entry)
 
 	func _tooltip() -> String:
 		var lines: Array = ["[b]%s[/b]" % str(entry.get("name", "?"))]

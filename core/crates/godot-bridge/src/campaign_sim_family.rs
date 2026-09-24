@@ -20,7 +20,7 @@ impl CampaignSim {
     /// to `down` generations, and the spouse of every blood relative.
     ///
     /// Returns `{root, ruler, heir, nodes}` where `nodes` is
-    /// `[{id, name, epithet, sex, alive, birth_year, age, house, faction,
+    /// `[{id, name, epithet, sex, alive, birth_year, death_year, age, house, faction,
     /// title, generation, blood, father, mother, spouse, children}]`
     /// (`generation` is relative to the root: negative above, positive
     /// below; `blood` is false for a spouse joined by marriage). Dead
@@ -164,6 +164,7 @@ fn node_dict(
         "sex" => match c.sex { data_model::Sex::Male => "male", data_model::Sex::Female => "female" },
         "alive" => c.alive,
         "birth_year" => i64::from(c.birth_year),
+        "death_year" => i64::from(c.death_year.unwrap_or(0)),
         "age" => i64::from(c.age(state.year())),
         "house" => c.house.as_str(),
         "faction" => c.faction.as_str(),
