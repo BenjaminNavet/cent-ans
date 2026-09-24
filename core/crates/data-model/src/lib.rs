@@ -13,6 +13,7 @@ mod event_check;
 pub mod ids;
 pub mod load;
 pub mod map;
+pub mod settlement_load;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -42,12 +43,16 @@ pub use entities::province::{
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
+pub use entities::settlement::{
+    FullProvinceBonus, Settlement, SettlementEdge, SettlementGraph, SettlementKind, SettlementRules,
+};
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CultureId, DietId, EventId, FactionId, NamesId,
-    ProvinceId, ReligionId, ResourceId, SeaZoneId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId, TechnologyId, TraitId,
+    UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

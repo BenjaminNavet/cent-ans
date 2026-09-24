@@ -1,0 +1,14 @@
+{
+  "description": "Réglages des colonies (lot C1). La garnison de départ de la cité ne s'applique qu'à partir du lot C4 : jusque-là, la garnison de la province reste celle de setup_1337.",
+  "starting_garrison": {
+    "city": ["unit_urban_militia", "unit_urban_militia", "unit_crossbowmen"],
+    "town": ["unit_urban_militia", "unit_crossbowmen"],
+    "castle": ["unit_men_at_arms_foot", "unit_crossbowmen"],
+    "abbey": ["unit_urban_militia"],
+    "village": []
+  },
+  "full_province_bonus": {
+    "income_percent": 10,
+    "unrest_per_season": -5
+  }
+}
