@@ -318,7 +318,9 @@ fn siege_trains_slow_armies_until_field_artillery() {
     army.general = None;
     let plain = state.army_movement_allowance(&data, &army);
     // Lot C4: season steps times the points of one step.
-    let per_step = sim_campaign::movement::points_per_step(&data);
+    // Lot C7a: times the season scale of `rules.json`.
+    let per_step =
+        sim_campaign::movement::points_per_step(&data) * data.movement_rules().season_scale;
     let steps = state.season().movement_steps();
     assert_eq!(plain, (f64::from(steps) * per_step).round() as u32);
     // A siege train marches at -20 % pace: one step less (3 -> 2).

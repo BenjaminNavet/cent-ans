@@ -292,10 +292,11 @@ fn armies_prefer_the_road_on_a_fixture_graph() {
         road,
         sea: false,
     };
-    // The road detour A-B-D (40) beats the direct track A-D (60).
+    // The road detour A-B-D (2 x 15 baked at 0.5, rescaled by C7a to
+    // `road_cost_factor`) beats the direct track A-D (60).
     data.settlement_graph = vec![
-        edge(&a, &b, 20.0, true),
-        edge(&b, &d, 20.0, true),
+        edge(&a, &b, 15.0, true),
+        edge(&b, &d, 15.0, true),
         edge(&a, &d, 60.0, false),
     ];
     data.build_movement_graph();

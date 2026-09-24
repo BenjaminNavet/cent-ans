@@ -1,9 +1,8 @@
 {
-  "description": "Réglages des colonies : garnison de départ par type hors cité (la cité reçoit la garnison de province de setup_1337 : 4 unités dans une capitale, 3 dans un port ou une province frontalière, 2 ailleurs), bonus de province complète, déplacement sur le graphe des colonies (points_per_step = 140 : coût moyen du plus court chemin terrestre entre les cités de deux provinces voisines sur data/map/settlement_graph.json, 137 sur 299 paires, médiane 113 ; une saison vaut 3 pas, 2 en hiver, comme en v1). Entretien des garnisons (garrison_upkeep_percent) : la cité paie 50 % comme en v1 ; milices urbaines, châtelains et gardes d'abbaye étaient surtout soldés sur place (ville, seigneur, abbaye), la couronne n'en paie qu'une part.",
+  "description": "Réglages des colonies : garnison de départ par type hors cité (la cité reçoit la garnison de province de setup_1337 : 4 unités dans une capitale, 3 dans un port ou une province frontalière, 2 ailleurs), bonus de province complète, déplacement sur le graphe des colonies (points_per_step = 140 : coût moyen du plus court chemin terrestre entre les cités de deux provinces voisines sur data/map/settlement_graph.json, 137 sur 299 paires, médiane 113 ; une saison vaut 3 pas, 2 en hiver, comme en v1). Entretien des garnisons (garrison_upkeep_percent) : la cité paie 50 % comme en v1 ; milices urbaines, châtelains et gardes d'abbaye étaient surtout soldés sur place (ville, seigneur, abbaye), la couronne n'en paie qu'une part. Repli du perdant (retreat, lot C7a) : vers la colonie amie (à soi ou à un allié) la plus proche sur le graphe, sans armée ennemie, dans un rayon de friendly_radius_steps pas et sans traverser de place ennemie ; sinon vers une colonie non tenue par un ennemi dans un rayon de neutral_radius_steps pas (traînards : neutral_loss_percent) ; sinon débandade : rout_loss_percent de pertes, puis les survivants rejoignent la place amie la plus proche à toute distance, ou l'armée se disperse si elle tombe sous rout_dissolve_below_percent de ses effectifs ou si aucune place amie n'est atteignable. Garnison laissée par une armée (garrison_cap, lot C7a) : au plus 8 unités dans une cité, 4 dans un château, 3 dans une ville, 2 dans une abbaye, 1 dans un village ; ce plafond empêche de loger une armée entière dans une petite place pour payer l'entretien réduit des garnisons. Lot C7a, équilibrage : la garnison de départ d'une ville se réduit au guet bourgeois (unit_urban_militia ; les compagnies d'arbalétriers soldées restent aux cités) ; l'entretien des bâtiments hors cité n'est payé qu'en partie par la couronne (building_upkeep_percent : murailles des villes financées par le droit de murage, 40 % ; châteaux entretenus par le châtelain sur les revenus de la châtellenie, 50 % ; abbayes par leur temporel, 25 %) : sans cela les ~110 places secondaires doublaient l'entretien des bâtiments et des garnisons et l'Angleterre ne levait plus d'armée. Portée (movement.season_scale = 0,5, road_cost_factor = 0,75) : une saison couvre environ 1,5 pas de province (210 km de plaine), 2 sur route, au lieu de 3 pas et 6 sur route, pour une campagne à l'échelle des colonies.",
   "starting_garrison": {
     "town": [
-      "unit_urban_militia",
-      "unit_crossbowmen"
+      "unit_urban_militia"
     ],
     "castle": [
       "unit_men_at_arms_foot",
@@ -28,6 +27,29 @@
   "movement": {
     "points_per_step": 140,
     "sea_crossing_steps": 2,
-    "fallback_links_per_neighbor": 2
+    "fallback_links_per_neighbor": 2,
+    "season_scale": 0.5,
+    "road_cost_factor": 0.75
+  },
+  "retreat": {
+    "friendly_radius_steps": 2,
+    "neutral_radius_steps": 1,
+    "neutral_loss_percent": 10,
+    "rout_loss_percent": 50,
+    "rout_dissolve_below_percent": 30
+  },
+  "garrison_cap": {
+    "city": 8,
+    "town": 3,
+    "castle": 4,
+    "abbey": 2,
+    "village": 1
+  },
+  "building_upkeep_percent": {
+    "city": 100,
+    "town": 40,
+    "castle": 50,
+    "abbey": 25,
+    "village": 50
   }
 }

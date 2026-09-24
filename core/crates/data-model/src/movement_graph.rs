@@ -18,7 +18,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::entities::province::Terrain;
-use crate::entities::settlement::{MovementRules, SettlementEdge};
+use crate::entities::settlement::{MovementRules, RetreatRules, SettlementEdge};
 use crate::ids::{ProvinceId, SettlementId};
 use crate::load::GameData;
 
@@ -113,6 +113,14 @@ impl GameData {
             .unwrap_or_default()
     }
 
+    /// Retreat tuning (`rules.json`, defaults when absent, lot C7a).
+    pub fn retreat_rules(&self) -> RetreatRules {
+        self.settlement_rules
+            .as_ref()
+            .map(|r| r.retreat.clone())
+            .unwrap_or_default()
+    }
+
     /// Land neighbours of a province (geometry graph first, entity data otherwise).
     pub fn province_land_neighbors(&self, id: &ProvinceId) -> &[ProvinceId] {
         if let Some(geometry) = self.province_geometry.get(id) {
@@ -149,8 +157,18 @@ impl GameData {
                 graph.add(&edge);
             }
         } else {
+            // Lot C7a: road edges carry the factor baked by C3; rescale
+            // them to the one of `rules.json`.
+            let road_scale = self.movement_rules().road_cost_factor
+                / crate::entities::settlement::BAKED_ROAD_COST_FACTOR;
             for edge in &self.settlement_graph {
-                graph.add(edge);
+                if edge.road && !edge.sea && (road_scale - 1.0).abs() > f64::EPSILON {
+                    let mut edge = edge.clone();
+                    edge.cost *= road_scale;
+                    graph.add(&edge);
+                } else {
+                    graph.add(edge);
+                }
             }
         }
         graph.sort();

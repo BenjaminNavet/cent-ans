@@ -24,7 +24,7 @@ use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
 /// Maximum path cost considered for an objective, in province steps (times
 /// `MovementRules::points_per_step`).
-pub const PLANNING_RANGE: u32 = 8;
+pub const PLANNING_RANGE: u32 = 5;
 /// Siege value bonus of a city (it hands over the province, lot C4).
 pub const CITY_TARGET_BONUS: f64 = 25.0;
 /// Siege value lost per fortification level of the target.
@@ -49,6 +49,16 @@ pub const INCOME_PER_RECRUIT: i64 = 6000;
 pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
+/// Siege value bonus of a settlement the faction owns de jure but an enemy
+/// holds (lot C7a: win back lost places first, above a throne claim's 30).
+pub const RECLAIM_TARGET_BONUS: f64 = 35.0;
+/// A siege of a fortress (level [`FORTRESS_LEVEL`] or more) still far from
+/// starving the garrison after this many turns is given up (lot C7a).
+pub const SIEGE_PATIENCE_TURNS: u32 = 12;
+pub const FORTRESS_LEVEL: u32 = 4;
+/// An army leaves one unit as the garrison of an empty place it holds on a
+/// border or took from an enemy, when it has at least this many (lot C7a).
+pub const GARRISON_MIN_ARMY_UNITS: usize = 3;
 
 /// Seasons of gross income kept in the treasury; above, money is spent (F4).
 pub const RESERVE_SEASONS: i64 = 3;
@@ -154,6 +164,14 @@ impl<'a> Context<'a> {
             .settlements
             .get(settlement)
             .is_some_and(|s| &s.owner == self.faction && &s.controller == self.faction)
+    }
+
+    /// `settlement` is owned de jure by the faction (held or lost).
+    fn owned_de_jure(&self, settlement: &SettlementId) -> bool {
+        self.state
+            .settlements
+            .get(settlement)
+            .is_some_and(|s| &s.owner == self.faction)
     }
 
     fn province_income(&self, province: &ProvinceId) -> f64 {
@@ -357,7 +375,12 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // F4: armies are paid from what buildings leave of the net income, plus
     // the hoard spent over `HOARD_SPENDING_TURNS`; small realms live within
     // their means.
-    let target_upkeep = ((ctx.income - ctx.building_upkeep).max(0) as f64 * share) as i64
+    // Lot C7a: garrisons are a fixed cost of the realm like buildings (a
+    // hundred places since the settlements); the share applies to what
+    // both leave, and the garrisons are paid on top.
+    let garrisons = garrison_upkeep(ctx).min(ctx.army_upkeep);
+    let target_upkeep = garrisons
+        + ((ctx.income - ctx.building_upkeep - garrisons).max(0) as f64 * share) as i64
         + hoard / HOARD_SPENDING_TURNS;
     let mut planned_upkeep = ctx.army_upkeep;
 
@@ -513,6 +536,25 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             building,
         });
     }
+}
+
+/// Seasonal upkeep of the faction's garrisons (share paid by the crown by
+/// settlement kind; reliefs, technologies and coinage left out).
+fn garrison_upkeep(ctx: &Context) -> i64 {
+    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
+    ctx.state
+        .settlements
+        .values()
+        .filter(|s| &s.controller == ctx.faction)
+        .map(|s| {
+            s.garrison
+                .iter()
+                .map(|u| unit_upkeep(ctx.data, u))
+                .sum::<i64>()
+                * garrison_upkeep_percent(ctx.data, s.kind)
+                / 100
+        })
+        .sum()
 }
 
 /// Power per livre of a unit type.
@@ -895,6 +937,40 @@ enum Objective {
     Retreat,
 }
 
+/// Lot C7a: one unit (the cheapest to keep) left as the garrison of an
+/// empty, unbesieged place the army holds, when the place was taken from
+/// an enemy or lies on a threatened border, and the army can spare it.
+fn garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
+    let state = ctx.state;
+    let army = state.armies.get(army_id)?;
+    if army.units.len() < GARRISON_MIN_ARMY_UNITS {
+        return None;
+    }
+    let place = state.settlements.get(&army.location)?;
+    if &place.controller != ctx.faction
+        || place.siege.is_some()
+        || !place.garrison.is_empty()
+        || place.kind == SettlementKind::Village
+    {
+        return None;
+    }
+    let conquered = &place.owner != ctx.faction;
+    let exposed = ctx.is_border(&place.province) && ctx.threat(&place.province) > 0.0;
+    if !conquered && !exposed {
+        return None;
+    }
+    let index = army
+        .units
+        .iter()
+        .enumerate()
+        .min_by_key(|(i, u)| (sim_campaign::economy::unit_upkeep(ctx.data, u), *i))
+        .map(|(i, _)| i)?;
+    Some(Order::GarrisonUnits {
+        army: army_id.clone(),
+        unit_indices: vec![index],
+    })
+}
+
 /// True when the planned path to `target` includes a sea crossing.
 fn crosses_sea(
     data: &GameData,
@@ -987,8 +1063,25 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
 
+    // Armies whose units are already being dismissed this turn keep their
+    // unit indices untouched.
+    let disbanding: BTreeSet<ArmyId> = orders
+        .iter()
+        .filter_map(|o| match o {
+            Order::DisbandUnit {
+                army: Some(army), ..
+            } => Some(army.clone()),
+            _ => None,
+        })
+        .collect();
+
     for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
         let army = &state.armies[army_id];
+        if !disbanding.contains(army_id) {
+            if let Some(order) = garrison_order(ctx, army_id) {
+                orders.push(order);
+            }
+        }
         let power = power_at(&army.location);
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
@@ -1030,8 +1123,24 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             }
         }
 
+        // Lot C7a: give up a fortress that holds out far beyond patience.
+        let hopeless = besieging
+            && state.fortification_level(data, &army.location) >= FORTRESS_LEVEL
+            && state
+                .settlements
+                .get(&army.location)
+                .and_then(|s| s.siege.as_ref())
+                .is_some_and(|s| s.turns_elapsed >= SIEGE_PATIENCE_TURNS && s.turns_left > 2)
+            && !state
+                .assault_odds(data, army_id)
+                .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS);
+        if hopeless {
+            targeted.insert(army.location.clone());
+        }
+
         // Keep a siege that is going our way.
-        if choice.is_none() && besieging && ctx.threat_at(&army.location) < power * 1.2 {
+        if choice.is_none() && besieging && !hopeless && ctx.threat_at(&army.location) < power * 1.2
+        {
             targeted.insert(army.location.clone());
             // Storm the walls when the odds are good (M8).
             if state
@@ -1094,14 +1203,21 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter_map(|(id, reach)| province(id).map(|p| (id, reach, p)))
                 // Landings only for claimed provinces (England in France, not
                 // the reverse).
-                .filter(|(id, _, p)| claims.contains(p) || !crosses_sea(data, &table, id))
+                .filter(|(id, _, p)| {
+                    claims.contains(p) || ctx.owned_de_jure(id) || !crosses_sea(data, &table, id)
+                })
                 // F4: the last strongholds of a realm we hold no claim on are
                 // left to the peace table (Scotland survives Edward III).
-                .filter(|(_, _, p)| claims.contains(p) || !last_bastions.contains(p))
+                .filter(|(id, _, p)| {
+                    claims.contains(p) || ctx.owned_de_jure(id) || !last_bastions.contains(p)
+                })
                 .map(|(id, reach, p)| {
                     let mut value = ctx.settlement_income(id) / 100.0 + 10.0;
                     if ctx.is_city(id) {
                         value += CITY_TARGET_BONUS;
+                    }
+                    if ctx.owned_de_jure(id) {
+                        value += RECLAIM_TARGET_BONUS;
                     }
                     value -= FORTIFICATION_TARGET_PENALTY
                         * f64::from(state.fortification_level(data, id));
@@ -1148,6 +1264,21 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                     }
                 }
             }
+        }
+
+        // Lot C7a: an idle army outside friendly places (after a peace, a
+        // lost siege...) goes back to the nearest place of its own.
+        if choice.is_none()
+            && !besieging
+            && !state.is_friendly_settlement(ctx.faction, &army.location)
+        {
+            choice = table
+                .iter()
+                .filter(|(id, _)| {
+                    ctx.owns_settlement(id) && state.hostile_armies_at(ctx.faction, id).is_empty()
+                })
+                .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
+                .map(|(id, _)| (Objective::Regroup, id.clone()));
         }
 
         let Some((objective, target)) = choice else {
