@@ -50,7 +50,9 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 - **Quaternius** ([quaternius.com](https://quaternius.com)) : personnages riggés de l'Ultimate
   Modular Characters Pack (King, Adventurer, Hooded Adventurer, Farmer), chevaux et âne de
   l'Ultimate Animated Animal Pack, Medieval Village Pack (39 bâtiments et props) — fichiers
-  obtenus via [Poly Pizza](https://poly.pizza).
+  obtenus via [Poly Pizza](https://poly.pizza). Les figurines de bataille skinnées
+  (`game/assets/models/battle_skinned/`, lot V2) en dérivent : pièces recolorées, habillées
+  d'équipement procédural, décimées, animations rééchantillonnées et complétées.
 - **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
