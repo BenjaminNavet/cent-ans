@@ -138,6 +138,8 @@ pub enum RansomError {
     NotCaptive,
     #[error("ce captif n'appartient pas à votre faction")]
     NotYourCaptive,
+    #[error("personne ne détient ce captif contre rançon")]
+    NoCaptor,
     #[error("ce captif n'est pas détenu par votre faction")]
     NotYourPrisoner,
     #[error("son geôlier refuse toute rançon")]
@@ -152,34 +154,469 @@ pub enum RansomError {
     BadProvince(String),
 }
 
-/// `pay_ransom` (skeleton).
+/// Rank of `character` in his own faction.
+pub fn captive_rank(state: &CampaignState, character: &CharacterId) -> CaptiveRank {
+    let Some(c) = state.characters.get(character) else {
+        return CaptiveRank::Knight;
+    };
+    let faction = state.factions.get(&c.faction);
+    if faction.is_some_and(|f| f.ruler.as_ref() == Some(character)) {
+        CaptiveRank::Sovereign
+    } else if faction.is_some_and(|f| f.heir.as_ref() == Some(character)) {
+        CaptiveRank::Heir
+    } else if c.title.is_some() || c.prestige >= GREAT_NOBLE_PRESTIGE {
+        CaptiveRank::GreatNoble
+    } else {
+        CaptiveRank::Knight
+    }
+}
+
+/// Wealth factor of a faction: its seasonal tax income / 10 000, between
+/// 0.5 and 2 (a rich kingdom pays more for the same knight).
+pub fn wealth_factor(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
+    let income = state.faction_income_effective(data, faction).max(0);
+    (income as f64 / 10_000.0).clamp(0.5, 2.0)
+}
+
+/// Ransom of `character`: `base(rank) × (1 + prestige/100) × wealth`,
+/// prestige clamped to 0-200, rounded to 50 livres.
+pub fn ransom_amount(state: &CampaignState, data: &GameData, character: &CharacterId) -> i64 {
+    let Some(c) = state.characters.get(character) else {
+        return 0;
+    };
+    let base = captive_rank(state, character).base_ransom() as f64;
+    let prestige = 1.0 + f64::from(c.prestige.clamp(0, 200)) / 100.0;
+    let raw = base * prestige * wealth_factor(state, data, &c.faction);
+    ((raw / 50.0).round() as i64 * 50).max(50)
+}
+
+/// `(total, installment)` of a ransom of `amount` paid in `installments`
+/// yearly payments (surcharge from two installments on).
+pub fn installment_plan(amount: i64, installments: u32) -> (i64, i64) {
+    let n = i64::from(installments.max(1));
+    let total = if n >= 2 {
+        amount * (100 + INSTALLMENT_SURCHARGE_PERCENT) / 100
+    } else {
+        amount
+    };
+    (total, (total + n - 1) / n)
+}
+
+/// The captive `character` of `faction` (checked), and his captor.
+fn own_captive(
+    state: &CampaignState,
+    faction: &FactionId,
+    character: &CharacterId,
+) -> Result<FactionId, RansomError> {
+    let c = state
+        .characters
+        .get(character)
+        .filter(|c| c.alive && c.captive)
+        .ok_or(RansomError::NotCaptive)?;
+    if &c.faction != faction {
+        return Err(RansomError::NotYourCaptive);
+    }
+    c.captor.clone().ok_or(RansomError::NoCaptor)
+}
+
+/// `pay_ransom`: pays for one of our captives under his captor's terms:
+/// money in full (`installments` 0 or 1) or by yearly installments (the
+/// first now, he comes home), or the province his captor demands.
 pub fn pay_ransom(
-    _state: &mut CampaignState,
-    _data: &GameData,
-    _faction: &FactionId,
-    _character: &CharacterId,
-    _installments: u32,
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
+    installments: u32,
 ) -> Result<(), RansomError> {
+    let captor = own_captive(state, faction, character)?;
+    let terms = state.characters[character]
+        .ransom_terms
+        .clone()
+        .unwrap_or_default();
+    let name = state.character_name(data, character);
+    match terms {
+        RansomTerms::Hold => Err(RansomError::Held),
+        RansomTerms::Parole => {
+            release_on_parole(state, data, &captor, character)?;
+            Ok(())
+        }
+        RansomTerms::Province { province } => {
+            check_ceded_province(state, data, faction, &captor, &province)?;
+            cede_province(state, faction, &captor, &province);
+            let province_name = data
+                .provinces
+                .get(&province)
+                .map_or_else(|| province.to_string(), |p| p.name.display.clone());
+            crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
+            let text = format!(
+                "{name} est libéré contre la cession de la province {}.",
+                crate::events::de(&province_name)
+            );
+            push_news(state, faction, &captor, text);
+            Ok(())
+        }
+        RansomTerms::Money => {
+            if installments > MAX_INSTALLMENTS {
+                return Err(RansomError::BadInstallments);
+            }
+            let amount = ransom_amount(state, data, character);
+            let (total, first) = installment_plan(amount, installments);
+            let available = state.factions[faction].treasury;
+            if available < first {
+                return Err(RansomError::InsufficientFunds {
+                    needed: first,
+                    available,
+                });
+            }
+            crate::chronicle::release_character(state, data, character, first, &mut Vec::new());
+            let text = if installments >= 2 {
+                let turn = state.turn;
+                state
+                    .factions
+                    .get_mut(faction)
+                    .expect("checked by apply_order")
+                    .ransom_debts
+                    .push(RansomDebt {
+                        character: character.clone(),
+                        creditor: captor.clone(),
+                        remaining: total - first,
+                        installment: first,
+                        next_due_turn: turn + crate::state::TURNS_PER_YEAR,
+                        missed: 0,
+                    });
+                format!(
+                    "{name} est libéré : rançon de {total} livres en {installments} échéances annuelles de {first} livres."
+                )
+            } else {
+                format!("{name} est libéré contre une rançon de {total} livres.")
+            };
+            push_news(state, faction, &captor, text);
+            Ok(())
+        }
+    }
+}
+
+/// A ransom message (one journal entry, tagged with the captive's faction;
+/// it opens the next turn's journal).
+fn push_news(state: &mut CampaignState, payer: &FactionId, _captor: &FactionId, text: String) {
+    state
+        .pending_events
+        .push(GameEvent::new(EventKind::Ransom, text).faction(payer));
+}
+
+/// A province `payer` may cede to `captor`: owned and controlled by the
+/// payer, not its capital, bordering a province the captor controls.
+fn check_ceded_province(
+    state: &CampaignState,
+    data: &GameData,
+    payer: &FactionId,
+    captor: &FactionId,
+    province: &ProvinceId,
+) -> Result<(), RansomError> {
+    let p = state
+        .provinces
+        .get(province)
+        .ok_or_else(|| RansomError::BadProvince(format!("province inconnue : {province}")))?;
+    if &p.owner != payer || &p.controller != payer {
+        return Err(RansomError::BadProvince(
+            "la province doit être possédée et tenue par la faction du captif".to_owned(),
+        ));
+    }
+    if state.factions.get(payer).is_some_and(|f| &f.capital == province) {
+        return Err(RansomError::BadProvince("on ne cède pas sa capitale".to_owned()));
+    }
+    let borders = data.provinces.get(province).is_some_and(|d| {
+        d.neighbors.iter().any(|n| {
+            state
+                .provinces
+                .get(n)
+                .is_some_and(|q| &q.controller == captor)
+        })
+    });
+    if !borders {
+        return Err(RansomError::BadProvince(
+            "la province doit toucher une province du geôlier".to_owned(),
+        ));
+    }
     Ok(())
 }
 
-/// `set_ransom_terms` (skeleton).
+/// Border provinces `payer` could cede to `captor` (id order).
+pub fn cedable_provinces(
+    state: &CampaignState,
+    data: &GameData,
+    payer: &FactionId,
+    captor: &FactionId,
+) -> Vec<ProvinceId> {
+    state
+        .provinces
+        .keys()
+        .filter(|id| check_ceded_province(state, data, payer, captor, id).is_ok())
+        .cloned()
+        .collect()
+}
+
+/// The province passes to the captor (as in a peace treaty, without claim).
+fn cede_province(
+    state: &mut CampaignState,
+    _payer: &FactionId,
+    captor: &FactionId,
+    province: &ProvinceId,
+) {
+    if let Some(p) = state.provinces.get_mut(province) {
+        p.owner = captor.clone();
+        p.controller = captor.clone();
+        p.siege = None;
+        p.garrison.clear();
+        p.construction = None;
+        p.recruit_queue.clear();
+    }
+    for character in state.characters.values_mut() {
+        if character.governor_of.as_ref() == Some(province) {
+            character.governor_of = None;
+        }
+    }
+}
+
+/// `set_ransom_terms`: the captor states what it wants for a prisoner
+/// (`parole` frees him at once).
 pub fn set_ransom_terms(
-    _state: &mut CampaignState,
-    _data: &GameData,
-    _faction: &FactionId,
-    _character: &CharacterId,
-    _terms: RansomTerms,
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
+    terms: RansomTerms,
 ) -> Result<(), RansomError> {
+    let owner = own_prisoner(state, faction, character)?;
+    if let RansomTerms::Province { province } = &terms {
+        check_ceded_province(state, data, &owner, faction, province)?;
+    }
+    if terms == RansomTerms::Parole {
+        return release_on_parole(state, data, faction, character);
+    }
+    let name = state.character_name(data, character);
+    let text = match &terms {
+        RansomTerms::Money => format!(
+            "{name} peut être racheté pour {} livres.",
+            ransom_amount(state, data, character)
+        ),
+        RansomTerms::Province { province } => format!(
+            "Pour libérer {name}, son geôlier exige la province {}.",
+            crate::events::de(
+                &data
+                    .provinces
+                    .get(province)
+                    .map_or_else(|| province.to_string(), |p| p.name.display.clone())
+            )
+        ),
+        RansomTerms::Hold => format!("{name} restera captif : son geôlier refuse toute rançon."),
+        RansomTerms::Parole => unreachable!("handled above"),
+    };
+    state
+        .characters
+        .get_mut(character)
+        .expect("checked above")
+        .ransom_terms = Some(terms);
+    push_news(state, &owner, faction, text);
     Ok(())
 }
 
-/// `release_on_parole` (skeleton).
+/// The prisoner `character` held by `faction` (checked), and his faction.
+fn own_prisoner(
+    state: &CampaignState,
+    faction: &FactionId,
+    character: &CharacterId,
+) -> Result<FactionId, RansomError> {
+    let c = state
+        .characters
+        .get(character)
+        .filter(|c| c.alive && c.captive)
+        .ok_or(RansomError::NotCaptive)?;
+    if c.captor.as_ref() != Some(faction) {
+        return Err(RansomError::NotYourPrisoner);
+    }
+    Ok(c.faction.clone())
+}
+
+/// `release_on_parole`: the captor frees a prisoner on his word; its ruler
+/// gains prestige, the freed man's faction goodwill towards the captor.
 pub fn release_on_parole(
-    _state: &mut CampaignState,
-    _data: &GameData,
-    _faction: &FactionId,
-    _character: &CharacterId,
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
 ) -> Result<(), RansomError> {
+    let owner = own_prisoner(state, faction, character)?;
+    crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
+    if let Some(ruler) = state.factions.get(faction).and_then(|f| f.ruler.clone()) {
+        if let Some(r) = state.characters.get_mut(&ruler) {
+            r.prestige += PAROLE_PRESTIGE;
+        }
+    }
+    state.add_modifier(
+        &owner,
+        faction,
+        PAROLE_OPINION,
+        "Captif libéré sur parole",
+        20,
+    );
+    let text = format!(
+        "{} est libéré sur parole par {}.",
+        state.character_name(data, character),
+        data.factions
+            .get(faction)
+            .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+    );
+    push_news(state, &owner, faction, text);
     Ok(())
+}
+
+/// Seasonal phase: installments falling due are paid (or missed, with
+/// penalties), and a captive ruler costs his own prestige every season
+/// (the regency itself is opened by `dynasty::resolve_regencies`).
+pub(crate) fn resolve_ransoms(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+) {
+    let turn = state.turn;
+    let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for id in &ids {
+        let debts = std::mem::take(&mut state.factions.get_mut(id).expect("listed").ransom_debts);
+        let mut kept = Vec::new();
+        for mut debt in debts {
+            if debt.next_due_turn > turn || !state.factions[id].alive {
+                kept.push(debt);
+                continue;
+            }
+            let due = debt.installment.min(debt.remaining);
+            let name = state.character_name(data, &debt.character);
+            if state.factions[id].treasury >= due {
+                state.factions.get_mut(id).expect("listed").treasury -= due;
+                if let Some(creditor) = state.factions.get_mut(&debt.creditor) {
+                    creditor.treasury += due;
+                }
+                debt.remaining -= due;
+                let text = if debt.remaining > 0 {
+                    format!(
+                        "Échéance de la rançon de {name} versée : {due} livres (reste {}).",
+                        debt.remaining
+                    )
+                } else {
+                    format!("Dernière échéance de la rançon de {name} versée : la dette est soldée.")
+                };
+                events.push(GameEvent::new(EventKind::Ransom, text).faction(id));
+            } else {
+                debt.missed += 1;
+                debt.remaining += debt.remaining * DEFAULT_SURCHARGE_PERCENT / 100;
+                if let Some(ruler) = state.factions[id].ruler.clone() {
+                    if let Some(r) = state.characters.get_mut(&ruler) {
+                        r.prestige -= DEFAULT_PRESTIGE;
+                    }
+                }
+                state.add_modifier(
+                    &debt.creditor,
+                    id,
+                    DEFAULT_OPINION,
+                    "Rançon impayée",
+                    20,
+                );
+                events.push(
+                    GameEvent::new(
+                        EventKind::Ransom,
+                        format!(
+                            "Échéance de la rançon de {name} impayée : la dette monte à {} livres, le prestige du souverain en souffre.",
+                            debt.remaining
+                        ),
+                    )
+                    .faction(id),
+                );
+            }
+            debt.next_due_turn = turn + crate::state::TURNS_PER_YEAR;
+            if debt.remaining > 0 {
+                kept.push(debt);
+            }
+        }
+        state.factions.get_mut(id).expect("listed").ransom_debts = kept;
+    }
+    // A king in chains: his prestige wanes season after season.
+    for id in &ids {
+        let Some(ruler) = state.factions[id].ruler.clone() else {
+            continue;
+        };
+        if let Some(r) = state.characters.get_mut(&ruler).filter(|r| r.alive && r.captive) {
+            r.prestige -= CAPTIVE_RULER_PRESTIGE;
+        }
+    }
+}
+
+/// Livres a faction still owes in ransoms.
+pub fn ransom_debt_total(state: &CampaignState, faction: &FactionId) -> i64 {
+    state
+        .factions
+        .get(faction)
+        .map_or(0, |f| f.ransom_debts.iter().map(|d| d.remaining).sum())
+}
+
+/// Ransom policy of the AI factions (deterministic, character id order).
+///
+/// Payer: under money terms, pays in full with twice the sum in the
+/// treasury, by four installments for a ruler or heir when the first one
+/// leaves half a season of income; cedes a province only for its ruler.
+/// Captor: frees plain knights on parole once at peace with their faction.
+pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let mut orders = Vec::new();
+    let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
+        return orders;
+    };
+    let mut treasury = f.treasury;
+    let income = state.faction_income_effective(data, faction).max(0);
+    for (id, c) in &state.characters {
+        if !c.alive || !c.captive {
+            continue;
+        }
+        let Some(captor) = &c.captor else {
+            continue;
+        };
+        if &c.faction == faction {
+            let rank = captive_rank(state, id);
+            match c.ransom_terms.clone().unwrap_or_default() {
+                RansomTerms::Money => {
+                    let amount = ransom_amount(state, data, id);
+                    let (_, first) = installment_plan(amount, 4);
+                    if treasury >= 2 * amount {
+                        treasury -= amount;
+                        orders.push(Order::PayRansom {
+                            character: id.clone(),
+                            installments: 1,
+                        });
+                    } else if matches!(rank, CaptiveRank::Sovereign | CaptiveRank::Heir)
+                        && treasury - first >= income / 2
+                    {
+                        treasury -= first;
+                        orders.push(Order::PayRansom {
+                            character: id.clone(),
+                            installments: 4,
+                        });
+                    }
+                }
+                RansomTerms::Province { .. } if rank == CaptiveRank::Sovereign => {
+                    orders.push(Order::PayRansom {
+                        character: id.clone(),
+                        installments: 0,
+                    });
+                }
+                _ => {}
+            }
+        } else if captor == faction
+            && !state.is_at_war(faction, &c.faction)
+            && captive_rank(state, id) == CaptiveRank::Knight
+        {
+            orders.push(Order::ReleaseOnParole {
+                character: id.clone(),
+            });
+        }
+    }
+    orders
 }

@@ -716,9 +716,11 @@ impl CampaignState {
         let base = f64::from(unit_type.cost.money);
         // H5: prices follow the coinage.
         let prices = crate::coinage::price_factor(self, faction);
-        (((base + flat) * (1.0 + percent / 100.0)).max(base / 4.0) * prices)
+        let cost = ((base + flat) * (1.0 + percent / 100.0))
             .round()
-            .max(0.0) as u32
+            .max(base / 4.0)
+            .max(0.0);
+        (cost * prices) as u32
     }
 
     fn order_create_army(

@@ -143,6 +143,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
     orders.extend(sim_campaign::coinage::ai_choose_coinage(state, data, faction));
+    orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);

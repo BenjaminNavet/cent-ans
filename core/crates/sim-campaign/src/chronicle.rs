@@ -1015,6 +1015,7 @@ pub fn release_character(
     let c = state.characters.get_mut(id).expect("checked above");
     c.captive = false;
     c.captor = None;
+    c.ransom_terms = None;
     c.location = capital;
     crate::dynasty::on_ransomed(state, data, id);
     let text = if ransom > 0 {
