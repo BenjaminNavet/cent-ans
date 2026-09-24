@@ -47,11 +47,30 @@ après la fin du tour ») + vérification/robustesse du smoke Godot.
     événement de bataille avec un texte de résultat (« Vainqueur »), pas
     seulement l'annonce « en vue ».
 
-## Prochaine étape
+## État final
 
-- `cd core && cargo fmt --all && cargo clippy --all-targets -- -D warnings && cargo test` (aucun
-  changement Rust prévu, mais à lancer si `core/` est touché entre-temps par
-  d'autres sessions avant de committer ici — pas nécessaire pour ce lot qui ne
-  touche que `game/`).
-- Relancer le smoke complet après l'extension de `_run_flow` pour confirmer
-  qu'il reste vert.
+- `core/build.sh` : OK (aucun changement Rust, ce lot ne touche que `game/`).
+- `godot --headless --path game --import` : OK.
+- `godot --headless --path game --script res://tests/smoke.gd` : **vert** (exit 0,
+  aucun `FAIL`), y compris la nouvelle vérification P2 dans `_run_flow`
+  (smoke.gd ~l.1293-1309) : bataille mise en scène (`debug_stage_battle`),
+  résolue automatiquement après affichage du rapport de saison
+  (`map._on_battle_auto`), rapport vérifié contenant le texte de résultat
+  (« Vainqueur »), pas seulement l'annonce « en vue ».
+- Régression vérifiée manuellement : en retirant temporairement l'appel
+  `flow.report_late_events(events)` dans `_on_battle_auto`, ce nouveau check
+  échoue bien (`smoke FAIL: flow: season report should include the resolved
+  battle...`) — confirme qu'il couvre effectivement le défaut. Remis en place
+  ensuite (`git checkout --`, aucun résidu).
+
+## Points ouverts
+
+- Le même correctif ne couvre que `_on_battle_auto` et `_on_battle_returned`
+  (résolution auto et bataille jouée) ; c'est la totalité des chemins de
+  résolution différée identifiés dans `campaign_map.gd`. Rien côté siège :
+  `_on_battle_auto`/`_on_battle_returned` sont partagés bataille/siège (mêmes
+  signaux `PreBattleDialog`), donc couvert aussi.
+- Pas de test unitaire Rust ajouté : le bug était uniquement côté Godot
+  (les événements `core/` existent déjà et sont corrects) — voir
+  `movement.rs:702` (texte de résultat) vs `battle_request.rs:91` (« en
+  vue »).

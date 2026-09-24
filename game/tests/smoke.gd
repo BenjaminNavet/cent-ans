@@ -1289,6 +1289,23 @@ func _run_flow() -> void:
 	var all_events: Array = map.sim.call("get_events")
 	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, map.ui.end_turn_cluster.alerts.size(), all_events.size()])
 
+	# P2 : bataille résolue après la fin du tour (dialogue d'avant-bataille) — son résultat
+	# doit rejoindre le rapport de saison déjà affiché, pas seulement la chronique
+	# (docs/wip/finalisation.md § « Défauts relevés », docs/wip/p2-rapport-smoke.md).
+	var battle_armies: Array = BattleScene.main_armies(map.sim, "fac_france", "fac_england")
+	if _check(battle_armies.size() == 2, "flow: no French or English army for the late-battle check"):
+		var battle_index: int = map.sim.call("debug_stage_battle", battle_armies[0], battle_armies[1])
+		_check(battle_index >= 0, "flow: debug_stage_battle failed")
+		map._on_battle_auto(battle_index)
+		await process_frame
+		_check(flow.season_report.visible, "flow: season report should (re)open after a late battle result")
+		var found_result := false
+		for group in flow.season_report.groups:
+			for entry in (group["entries"] as Array):
+				if str((entry as Dictionary).get("text_fr", "")).contains("Vainqueur"):
+					found_result = true
+		_check(found_result, "flow: season report should include the resolved battle (result), not just 'en vue'")
+
 	# Menu pause : ouverture (arbre en pause), dialogue de sauvegarde, fermeture.
 	flow.open_pause()
 	await process_frame
