@@ -154,7 +154,9 @@ impl BattleSim {
     }
 
     /// `{type: "move"|"attack"|"halt"|"formation"|"fire_at_will"|"withdraw"
-    /// |"target_wall"|"leader_order", units: [ids], ...}` → `{ok, error}`.
+    /// |"target_wall"|"burn"|"leader_order", units: [ids], ...}` → `{ok, error}`.
+    /// Siege fire (S2): `{type: "burn", units: [ids], house: i}` or
+    /// `{type: "burn", units: [ids], gate: true}`.
     /// A leader's order: `{type: "leader_order", order: "order_war_cry",
     /// units: [ids] (selected-scope orders; empty = every eligible one)}`.
     #[func]
@@ -408,8 +410,11 @@ impl BattleSim {
     /// `{fortification, center: Vector2, square_radius, thickness, wall_height,
     /// gate, hold_time, hold_to_win, integrity, pieces[{index, kind: "wall"|"gate",
     /// a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower}],
-    /// towers[{x, z, radius, height}]}`. Pieces lose HP during the battle:
-    /// call it again to show the damage.
+    /// towers[{x, z, radius, height}], houses[{x, z, radius, suburb, fire: {state:
+    /// "intact"|"burning"|"burnt", intensity}}], gate_fire: {state, intensity},
+    /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
+    /// sortie}`. Pieces lose HP and houses burn during the battle (S2): call it
+    /// again to show the damage.
     #[func]
     fn get_siege(&self) -> VarDictionary {
         let Some(works) = self.sim.as_ref().and_then(|s| s.siege()) else {
@@ -445,11 +450,24 @@ impl BattleSim {
                     .to_variant()
             })
             .collect();
-        // F5a: house blocks (obstacles of the siege pathing), `{x, z, radius}`.
+        // F5a: house blocks (obstacles of the siege pathing), `{x, z, radius}`;
+        // S2: their fire (a burnt house no longer blocks) and the suburbs.
+        let blaze = |b: &sim_battle::Blaze| {
+            vdict! { "state" => b.state.key(), "intensity" => b.intensity }
+        };
         let houses: VarArray = works
             .houses
             .iter()
-            .map(|h| vdict! { "x" => h.x, "z" => h.z, "radius" => h.radius }.to_variant())
+            .map(|h| {
+                vdict! {
+                    "x" => h.x,
+                    "z" => h.z,
+                    "radius" => h.radius,
+                    "suburb" => h.suburb,
+                    "fire" => &blaze(&h.fire),
+                }
+                .to_variant()
+            })
             .collect();
         vdict! {
             "fortification" => i64::from(works.fortification),
@@ -465,6 +483,10 @@ impl BattleSim {
             "towers" => &towers,
             "houses" => &houses,
             "sortie" => works.sortie,
+            "gate_fire" => &blaze(&works.gate_fire),
+            "wind" => v2(works.wind),
+            "houses_burning" => works.burning_houses() as i64,
+            "houses_burnt" => works.burnt_houses() as i64,
         }
     }
 
