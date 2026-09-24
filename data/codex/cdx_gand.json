@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gand",
+  "title": "Gand, la ville rebelle",
+  "category": "lieu",
+  "aliases": ["Gand", "Gantois", "Ghent", "Gavere", "bataille de Gavere"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Au confluent de l'Escaut et de la Lys, Gand est l'une des plus grandes villes d'Europe du Nord, vivant du tissage de la laine anglaise. Ses tisserands se soulèvent à plusieurs reprises contre leurs comtes, et la ville s'allie à l'Angleterre.",
+  "body": "Au XIVe siècle, Gand compte sans doute plus de cinquante mille habitants, ce qui en fait, après Paris, l'une des plus grandes villes au nord des Alpes. Des milliers de tisserands et de foulons y fabriquent des draps de luxe à partir de la laine anglaise. Les métiers, organisés et armés, pèsent lourd dans le gouvernement de la ville, dominé par les grands marchands.\n\nQuand [[cdx_edouard_iii|Édouard III]] suspend les exportations de laine en 1336, Gand est menacée de famine. Le 3 janvier 1338, les Gantois choisissent pour capitaine [[cdx_jacob_van_artevelde|Jacques van Artevelde]], qui négocie la reprise du commerce avec l'Angleterre et rallie les autres villes flamandes. En 1340, Édouard III est reconnu roi de France sur le marché de Gand ; son fils [[cdx_jean_de_gand|Jean]], né dans la ville, en gardera le nom. Mais Artevelde est tué par la foule en 1345.\n\nEn 1379, une nouvelle révolte éclate contre le comte [[cdx_louis_de_male|Louis de Male]]. Philippe van Artevelde, fils de Jacques, prend la tête de la ville et écrase le comte près de [[cdx_bruges|Bruges]] en 1382, avant d'être vaincu et tué à [[cdx_roosebeke|Roosebeke]]. Gand tient pourtant jusqu'à la paix de Tournai en 1385, qui lui laisse ses privilèges.\n\nSous les ducs de [[cdx_bourgogne|Bourgogne]], la ville reste frondeuse. Révoltée contre les impôts de [[cdx_philippe_le_bon|Philippe le Bon]], elle est vaincue à Gavere le 23 juillet 1453, quelques jours après [[cdx_castillon|Castillon]]. Le beffroi, la halle aux draps et le château des comtes rappellent encore aujourd'hui cette puissance.",
+  "entity": "prov_flandre",
+  "see_also": ["cdx_jacob_van_artevelde", "cdx_flandre_laine", "cdx_comte_de_flandre", "cdx_bruges"],
+  "sources": ["Gand", "Bataille de Gavere", "Philippe van Artevelde"]
+}

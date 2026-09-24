@@ -1,7 +1,7 @@
 {
   "id": "evt_revolte_fiscale",
   "title": "L'émeute contre l'impôt",
-  "text": "Les collecteurs de la taille ont été chassés à coups de pierres. Les bourgeois ferment les portes et jurent de ne plus rien payer tant que les abus ne cesseront.",
+  "text": "Les collecteurs de la [[cdx_taille|taille]] ont été chassés à coups de pierres. Les bourgeois ferment les portes et jurent de ne plus rien payer tant que les abus ne cesseront.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 40,

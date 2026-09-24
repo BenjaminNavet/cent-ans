@@ -1,7 +1,7 @@
 {
   "id": "evt_rancon_de_nevers",
   "title": "La rançon de Jean de Nevers",
-  "text": "Le sultan Bayezid a fixé la rançon du comte de Nevers et des derniers barons captifs à deux cent mille florins. Les marchands génois de Péra et le roi de Chypre avancent l'argent ; la Bourgogne remboursera, avec les intérêts.",
+  "text": "Le sultan Bayezid a fixé la [[cdx_rancon|rançon]] du comte de Nevers et des derniers barons captifs à deux cent mille florins. Les marchands génois de Péra et le roi de Chypre avancent l'argent ; la Bourgogne remboursera, avec les intérêts.",
   "kind": "chained",
   "trigger": {
     "conditions": [

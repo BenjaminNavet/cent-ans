@@ -1,7 +1,7 @@
 {
   "id": "evt_defection_capitaine",
   "title": "La défection d'un capitaine",
-  "text": "Un capitaine de routiers, mal payé depuis des mois, menace de passer à l'ennemi avec sa compagnie. Il réclame ses arriérés et une place forte.",
+  "text": "Un capitaine de [[cdx_grandes_compagnies|routiers]], mal payé depuis des mois, menace de passer à l'ennemi avec sa compagnie. Il réclame ses arriérés et une place forte.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60,

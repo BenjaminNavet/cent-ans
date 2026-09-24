@@ -1,7 +1,7 @@
 {
   "id": "evt_banque_florentine",
   "title": "Les changeurs du Mercato Nuovo",
-  "text": "Les compagnies florentines ouvrent des comptoirs d'Avignon à Londres ; le florin d'or court dans toute la chrétienté. Les Arts majeurs demandent que la Commune ménage ceux qui l'enrichissent.",
+  "text": "Les compagnies florentines ouvrent des comptoirs d'[[cdx_avignon|Avignon]] à Londres ; le florin d'or court dans toute la chrétienté. Les Arts majeurs demandent que la Commune ménage ceux qui l'enrichissent.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 48

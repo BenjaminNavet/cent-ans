@@ -1,7 +1,7 @@
 {
   "id": "evt_hennebont",
   "title": "Jeanne la Flamme à Hennebont",
-  "text": "Jeanne de Flandre, épouse de Jean de Montfort, tient Hennebont contre l'armée de Charles de Blois. On la dit en armure, brûlant le camp des assiégeants à la tête de ses cavaliers, en attendant les voiles anglaises de Walter Mauny.",
+  "text": "Jeanne de Flandre, épouse de [[cdx_jean_de_montfort|Jean de Montfort]], tient Hennebont contre l'armée de [[cdx_charles_de_blois|Charles de Blois]]. On la dit en armure, brûlant le camp des assiégeants à la tête de ses cavaliers, en attendant les voiles anglaises de Walter Mauny.",
   "kind": "chained",
   "trigger": {
     "conditions": [

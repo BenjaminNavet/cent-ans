@@ -1,7 +1,7 @@
 {
   "id": "evt_laupen",
   "title": "La bataille de Laupen",
-  "text": "Fribourg et la noblesse de Bourgogne transjurane assiègent Laupen pour briser Berne. Les Bernois, renforcés par les gens des Waldstätten, descendent de la colline et taillent en pièces la chevalerie. Berne entre dans l'amitié des Confédérés.",
+  "text": "Fribourg et la noblesse de Bourgogne transjurane assiègent Laupen pour briser Berne. Les Bernois, renforcés par les gens des Waldstätten, descendent de la colline et taillent en pièces la [[cdx_chevalerie|chevalerie]]. Berne entre dans l'amitié des Confédérés.",
   "kind": "historical",
   "trigger": {
     "date": {

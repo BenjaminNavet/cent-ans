@@ -84,7 +84,28 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 3 fait (dynasties, États) : capetiens_directs, valois (entity fac_france), plantagenets
   (entity fac_england), bourgogne, navarre, castille, saint_empire, comte_de_flandre, ecosse.
   Pas de fiches séparées royaume_de_france / angleterre : les dynasties portent les factions.
-- Fiches H8b écrites : 29.
+- Lot 4 fait : louis_de_baviere, jean_de_luxembourg (alias « Jean l'Aveugle », pas « Jean de
+  Luxembourg », homonyme du capitaine bourguignon), david_ii, paris, gand.
+- main fusionné (H10 : hanse et bataille_des_harengs écrites par H10, ne pas refaire).
+- Lot 5 fait : bruges, reims, rouen, avignon, maillotins, cabochiens, bal_des_ardents.
+- Lot 6 fait : armagnacs_bourguignons, louis_d_orleans, paix_arras, concile_constance,
+  revolte_paysans_1381 (alias Wat Tyler, John Ball : pas de fiche wat_tyler séparée), ciompi.
+- Lot 7 fait (société, fiscalité) : aides, taille (entity tech_royal_taxation), etats_generaux,
+  franc_a_cheval, mutations_monetaires, trois_ordres, seigneurie (servage inclus).
+- Lot 8 fait (religion, savoirs) : tres_riches_heures, enluminure (entity bld_scriptorium),
+  librairie_charles_v, oxford, pelerinage, reliques. Toute la liste H8 initiale + `_event_links.md`
+  est écrite.
+- Lot 9 fait (personnages) : christine_de_pizan, guillaume_de_machaut (Ars nova inclus, pas de
+  fiche ars_nova séparée), john_chandos, olivier_de_clisson, charles_de_blois,
+  jeanne_de_penthievre, jean_de_montfort, jeanne_de_flandre.
+- Lot 10 fait : papier (entity tech_paper_mills), robert_d_artois, benoit_xii, louis_d_anjou,
+  jeanne_de_bourgogne. Section H8 de `_todo.md` vide (aucun lien en attente).
+- Fiches H8b écrites : 73.
+- Onglets : libellé court en 3e élément de `CodexStore.FAMILIES`, nom complet en infobulle,
+  `clip_tabs = false`.
+- Liens posés (script scratchpad `link_texts.py`, liste de formes choisies, 2 liens max par texte,
+  jamais vers la fiche dont le texte est l'entité) : 37 personnages, 38 événements, 9 technologies.
+- Prochaine étape H8b : tests complets (pytest, cargo test, import + smoke Godot).
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

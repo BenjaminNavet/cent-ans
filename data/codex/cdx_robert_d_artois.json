@@ -1,0 +1,12 @@
+{
+  "id": "cdx_robert_d_artois",
+  "title": "Robert d'Artois",
+  "category": "personnage",
+  "aliases": ["Robert d'Artois", "Robert III d'Artois", "Vœu du héron", "Mahaut d'Artois"],
+  "era": { "from": "1287", "to": "1342" },
+  "summary": "Beau-frère de [[cdx_philippe_vi|Philippe VI]], Robert d'Artois perd sa cause pour le comté d'Artois après avoir produit de faux documents. Banni, il se réfugie auprès d'[[cdx_edouard_iii|Édouard III]], qu'il pousse à revendiquer la couronne de France.",
+  "body": "Petit-fils du comte Robert II d'Artois, Robert est écarté de l'héritage du comté au profit de sa tante Mahaut, par des jugements de 1309 et 1318. Il ne s'y résigne jamais. Il aide son beau-frère Philippe de Valois à monter sur le trône en 1328, espérant obtenir en retour une décision favorable.\n\nPour appuyer ses droits, il produit des actes anciens prouvant, selon lui, que son grand-père lui destinait l'Artois. Entre-temps, Mahaut puis sa fille sont mortes, en 1329 et 1330, et le bruit court que Robert les a fait empoisonner. Mais ses actes sont des faux, fabriqués par une femme de son entourage, Jeanne de Divion, qui est brûlée en 1331. Condamné et banni en 1332, il est déchu de tous ses biens.\n\nRéfugié en Brabant, puis en Angleterre en 1334, il devient un proche conseiller d'[[cdx_edouard_iii|Édouard III]]. Un poème satirique, le Vœu du héron, raconte qu'il servit au roi un héron, oiseau réputé le plus lâche, pour lui reprocher de ne pas oser réclamer le royaume de France. Quand Philippe VI exige son extradition fin 1336, le refus anglais figure parmi les griefs qui mènent à la confiscation de la [[cdx_guyenne|Guyenne]] en 1337.\n\nRobert combat pour Édouard III en Flandre, puis en Bretagne pendant la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession]]. Grièvement blessé lors du siège de Vannes, en 1342, il meurt à Londres et est enterré dans la cathédrale Saint-Paul. Son histoire a inspiré le romancier Maurice Druon, dont il est l'un des héros des Rois maudits.",
+  "entity": "chr_robert_d_artois",
+  "see_also": ["cdx_edouard_iii", "cdx_philippe_vi", "cdx_succession_1328", "cdx_capetiens_directs"],
+  "sources": ["Robert III d'Artois", "Le Vœu du héron"]
+}

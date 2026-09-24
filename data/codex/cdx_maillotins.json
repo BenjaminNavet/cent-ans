@@ -1,0 +1,12 @@
+{
+  "id": "cdx_maillotins",
+  "title": "La révolte des Maillotins",
+  "category": "evenement",
+  "aliases": ["Maillotins", "révolte des Maillotins", "maillets de plomb"],
+  "era": { "from": "1382", "to": "1383" },
+  "summary": "Le 1er mars 1382, les Parisiens se soulèvent contre le rétablissement des impôts indirects, armés de maillets de plomb pris à l'Hôtel de Ville. Après la victoire de [[cdx_roosebeke|Roosebeke]], le jeune [[cdx_charles_vi|Charles VI]] fait durement payer la ville.",
+  "body": "Sur son lit de mort, en 1380, [[cdx_charles_v|Charles V]] a aboli le fouage, un impôt direct, peut-être pour apaiser sa conscience. Ses frères, qui gouvernent au nom du jeune [[cdx_charles_vi|Charles VI]], doivent pourtant financer la guerre et leurs propres ambitions. Ils rétablissent les [[cdx_aides|aides]], taxes sur la vente des marchandises, qui frappent tout le monde, et surtout le petit peuple.\n\nLe 1er mars 1382, aux Halles, un collecteur réclame la taxe à une marchande de cresson. L'émeute éclate aussitôt. La foule pille l'arsenal de l'Hôtel de Ville et s'empare de milliers de maillets de plomb, préparés pour la défense de la ville ; d'où le nom de Maillotins donné aux insurgés. Les percepteurs sont massacrés, les prisons ouvertes, les maisons de riches bourgeois et de Juifs pillées.\n\nLe mouvement s'inscrit dans une vague de révoltes qui secoue alors l'Europe : la Harelle à [[cdx_rouen|Rouen]], la révolte de [[cdx_gand|Gand]], la [[cdx_revolte_paysans_1381|révolte des paysans anglais]] de 1381 ou celle des [[cdx_ciompi|Ciompi]] de Florence. Le gouvernement royal temporise, négocie et accorde un pardon partiel.\n\nMais au retour de la campagne victorieuse de [[cdx_roosebeke|Roosebeke]], en janvier 1383, le roi entre dans Paris en vainqueur. Les chaînes qui barraient les rues sont enlevées, des meneurs sont exécutés, de lourdes amendes imposées, et la prévôté des marchands est supprimée pour près de trente ans. Les aides, elles, sont maintenues.",
+  "entity": "evt_maillotins",
+  "see_also": ["cdx_aides", "cdx_paris", "cdx_roosebeke", "cdx_charles_vi"],
+  "sources": ["Révolte des Maillotins"]
+}
