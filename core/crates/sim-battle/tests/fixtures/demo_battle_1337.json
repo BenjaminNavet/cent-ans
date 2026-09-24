@@ -1,0 +1,564 @@
+{
+  "province": "prov_ile_de_france",
+  "province_name": "Île-de-France",
+  "terrain": "plains",
+  "river": true,
+  "season": "spring",
+  "attacker": {
+    "faction": "fac_france",
+    "faction_name": "France",
+    "army": "army_0012",
+    "units": [
+      {
+        "unit_type": "unit_knights",
+        "name": "Chevaliers",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 60,
+        "max_soldiers": 60,
+        "morale": 80,
+        "experience": 0,
+        "stats": {
+          "melee": 75,
+          "ranged": 0,
+          "range": 0,
+          "armor": 80,
+          "morale": 80,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 90
+        },
+        "abilities": [
+          "charge_lance",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_knights",
+        "name": "Chevaliers",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 60,
+        "max_soldiers": 60,
+        "morale": 80,
+        "experience": 0,
+        "stats": {
+          "melee": 75,
+          "ranged": 0,
+          "range": 0,
+          "armor": 80,
+          "morale": 80,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 90
+        },
+        "abilities": [
+          "charge_lance",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_knights",
+        "name": "Chevaliers",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 60,
+        "max_soldiers": 60,
+        "morale": 80,
+        "experience": 0,
+        "stats": {
+          "melee": 75,
+          "ranged": 0,
+          "range": 0,
+          "armor": 80,
+          "morale": 80,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 90
+        },
+        "abilities": [
+          "charge_lance",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_men_at_arms_foot",
+        "name": "Hommes d'armes à pied",
+        "category": "infantry",
+        "mounted": false,
+        "soldiers": 80,
+        "max_soldiers": 80,
+        "morale": 75,
+        "experience": 0,
+        "stats": {
+          "melee": 70,
+          "ranged": 0,
+          "range": 0,
+          "armor": 75,
+          "morale": 75,
+          "speed": 35,
+          "ammo": 0
+        },
+        "abilities": [
+          "shield_wall",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_men_at_arms_foot",
+        "name": "Hommes d'armes à pied",
+        "category": "infantry",
+        "mounted": false,
+        "soldiers": 80,
+        "max_soldiers": 80,
+        "morale": 75,
+        "experience": 0,
+        "stats": {
+          "melee": 70,
+          "ranged": 0,
+          "range": 0,
+          "armor": 75,
+          "morale": 75,
+          "speed": 35,
+          "ammo": 0
+        },
+        "abilities": [
+          "shield_wall",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_crossbowmen",
+        "name": "Arbalétriers",
+        "category": "ranged",
+        "mounted": false,
+        "soldiers": 100,
+        "max_soldiers": 100,
+        "morale": 45,
+        "experience": 0,
+        "stats": {
+          "melee": 35,
+          "ranged": 55,
+          "range": 180,
+          "armor": 35,
+          "morale": 45,
+          "speed": 40,
+          "ammo": 30
+        },
+        "abilities": [
+          "pavise",
+          "rain_penalty"
+        ]
+      },
+      {
+        "unit_type": "unit_crossbowmen",
+        "name": "Arbalétriers",
+        "category": "ranged",
+        "mounted": false,
+        "soldiers": 100,
+        "max_soldiers": 100,
+        "morale": 45,
+        "experience": 0,
+        "stats": {
+          "melee": 35,
+          "ranged": 55,
+          "range": 180,
+          "armor": 35,
+          "morale": 45,
+          "speed": 40,
+          "ammo": 30
+        },
+        "abilities": [
+          "pavise",
+          "rain_penalty"
+        ]
+      },
+      {
+        "unit_type": "unit_mounted_sergeants",
+        "name": "Sergents montés",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 80,
+        "max_soldiers": 80,
+        "morale": 55,
+        "experience": 0,
+        "stats": {
+          "melee": 55,
+          "ranged": 0,
+          "range": 0,
+          "armor": 55,
+          "morale": 55,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 60
+        },
+        "abilities": [
+          "charge_lance"
+        ]
+      }
+    ],
+    "general": {
+      "character": "chr_philippe_vi",
+      "name": "Philippe VI de Valois",
+      "command": 5,
+      "unit_index": 0,
+      "morale_bonus": 1.0,
+      "charge_percent": 0.0,
+      "ranged_percent": 0.0,
+      "defense_percent": 0.0
+    }
+  },
+  "defender": {
+    "faction": "fac_england",
+    "faction_name": "Angleterre",
+    "army": "army_0009",
+    "units": [
+      {
+        "unit_type": "unit_knights",
+        "name": "Chevaliers",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 60,
+        "max_soldiers": 60,
+        "morale": 80,
+        "experience": 0,
+        "stats": {
+          "melee": 75,
+          "ranged": 0,
+          "range": 0,
+          "armor": 80,
+          "morale": 80,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 90
+        },
+        "abilities": [
+          "charge_lance",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_knights",
+        "name": "Chevaliers",
+        "category": "cavalry",
+        "mounted": true,
+        "soldiers": 60,
+        "max_soldiers": 60,
+        "morale": 80,
+        "experience": 0,
+        "stats": {
+          "melee": 75,
+          "ranged": 0,
+          "range": 0,
+          "armor": 80,
+          "morale": 80,
+          "speed": 70,
+          "ammo": 0,
+          "charge": 90
+        },
+        "abilities": [
+          "charge_lance",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_men_at_arms_foot",
+        "name": "Hommes d'armes à pied",
+        "category": "infantry",
+        "mounted": false,
+        "soldiers": 80,
+        "max_soldiers": 80,
+        "morale": 75,
+        "experience": 0,
+        "stats": {
+          "melee": 70,
+          "ranged": 0,
+          "range": 0,
+          "armor": 75,
+          "morale": 75,
+          "speed": 35,
+          "ammo": 0
+        },
+        "abilities": [
+          "shield_wall",
+          "dismount"
+        ]
+      },
+      {
+        "unit_type": "unit_longbowmen",
+        "name": "Archers à l'arc long",
+        "category": "ranged",
+        "mounted": false,
+        "soldiers": 120,
+        "max_soldiers": 120,
+        "morale": 55,
+        "experience": 0,
+        "stats": {
+          "melee": 30,
+          "ranged": 70,
+          "range": 220,
+          "armor": 20,
+          "morale": 55,
+          "speed": 50,
+          "ammo": 48
+        },
+        "abilities": [
+          "volley",
+          "stakes",
+          "rain_penalty"
+        ]
+      },
+      {
+        "unit_type": "unit_longbowmen",
+        "name": "Archers à l'arc long",
+        "category": "ranged",
+        "mounted": false,
+        "soldiers": 120,
+        "max_soldiers": 120,
+        "morale": 55,
+        "experience": 0,
+        "stats": {
+          "melee": 30,
+          "ranged": 70,
+          "range": 220,
+          "armor": 20,
+          "morale": 55,
+          "speed": 50,
+          "ammo": 48
+        },
+        "abilities": [
+          "volley",
+          "stakes",
+          "rain_penalty"
+        ]
+      },
+      {
+        "unit_type": "unit_mounted_archers",
+        "name": "Archers montés",
+        "category": "ranged",
+        "mounted": true,
+        "soldiers": 100,
+        "max_soldiers": 100,
+        "morale": 50,
+        "experience": 0,
+        "stats": {
+          "melee": 30,
+          "ranged": 65,
+          "range": 220,
+          "armor": 20,
+          "morale": 50,
+          "speed": 75,
+          "ammo": 40
+        },
+        "abilities": [
+          "volley",
+          "skirmish",
+          "dismount",
+          "rain_penalty"
+        ]
+      }
+    ],
+    "general": {
+      "character": "chr_edward_iii",
+      "name": "Édouard III",
+      "command": 8,
+      "unit_index": 0,
+      "morale_bonus": 3.0,
+      "charge_percent": 0.0,
+      "ranged_percent": 0.0,
+      "defense_percent": 0.0
+    }
+  },
+  "player_side": "attacker",
+  "orders": [
+    {
+      "id": "order_dismount",
+      "kind": "dismount",
+      "rank": 3,
+      "name": "Pied à terre",
+      "description": "Les hommes d'armes renvoient leurs chevaux à l'arrière et combattent à pied, lance raccourcie : plus lents, sans charge, mais bien plus solides. Irréversible pour la bataille. Pratique anglaise (Crécy, 1346), reprise par les Français à Poitiers (1356).",
+      "icon": "dismount",
+      "scope": "selected",
+      "requires_general": false,
+      "cooldown": 5.0,
+      "duration": 0.0,
+      "eligible": {
+        "categories": [
+          "cavalry"
+        ],
+        "mounted": true,
+        "abilities": [
+          "dismount"
+        ]
+      },
+      "effects": {
+        "morale": 0.0,
+        "speed_max": 35,
+        "armor": 8,
+        "rally_chance": 0.0,
+        "rally_chance_per_command": 0.0,
+        "rally_morale": 0.0
+      },
+      "journal": "Les {unit} mettent pied à terre.",
+      "journal_assault": "Les chevaliers {of_faction} mettent pied à terre pour l'assaut.",
+      "ai": {
+        "min_units": 1,
+        "when_defensive": true
+      },
+      "sources": [
+        "Bataille de Crécy",
+        "Bataille de Poitiers (1356)"
+      ]
+    },
+    {
+      "id": "order_no_quarter",
+      "kind": "no_quarter",
+      "rank": 5,
+      "name": "Pas de quartier",
+      "label": "Déployer la bannière rouge",
+      "labels_by_faction": {
+        "fac_england": "Lever la bannière au dragon",
+        "fac_france": "Déployer l'oriflamme"
+      },
+      "description": "Le chef fait déployer la bannière de guerre à outrance : on ne fera pas de prisonniers. Toute l'armée gagne un grand courage pour la bataille, mais les rançons sont perdues. L'oriflamme de Saint-Denis, déployée à Crécy et à Poitiers, et la bannière au dragon d'Édouard III à Crécy (1346) annonçaient qu'il ne serait fait aucun quartier. Une seule fois par bataille.",
+      "icon": "no_quarter",
+      "scope": "army",
+      "requires_general": true,
+      "cooldown": 0.0,
+      "duration": 0.0,
+      "uses_per_battle": 1,
+      "eligible": {},
+      "effects": {
+        "morale": 20.0,
+        "armor": 0,
+        "rally_chance": 0.0,
+        "rally_chance_per_command": 0.0,
+        "rally_morale": 0.0
+      },
+      "journal": "{general} fait « {label} » : l'ost {of_faction} ne fera pas de quartier !",
+      "ai": {
+        "enemy_within": 150.0,
+        "min_units": 1,
+        "max_strength_ratio": 0.75,
+        "rivals": [
+          [
+            "fac_france",
+            "fac_england"
+          ],
+          [
+            "fac_scotland",
+            "fac_england"
+          ]
+        ],
+        "when_defensive": false
+      },
+      "sources": [
+        "Oriflamme",
+        "Bataille de Crécy"
+      ]
+    },
+    {
+      "id": "order_pavise",
+      "kind": "pavise",
+      "rank": 4,
+      "name": "Dresser les pavois",
+      "description": "Les valets plantent les grands pavois devant les arbalétriers, qui tirent à couvert : immobiles, ils ne craignent presque plus les flèches. Les pavois sont levés au prochain ordre de mouvement. À Crécy, les Génois durent combattre sans leurs pavois restés aux bagages, et furent décimés.",
+      "icon": "pavise",
+      "scope": "selected",
+      "requires_general": false,
+      "cooldown": 10.0,
+      "duration": 0.0,
+      "eligible": {
+        "abilities": [
+          "pavise"
+        ]
+      },
+      "effects": {
+        "morale": 0.0,
+        "armor": 0,
+        "missile_damage_factor": 0.35,
+        "rally_chance": 0.0,
+        "rally_chance_per_command": 0.0,
+        "rally_morale": 0.0
+      },
+      "journal": "Les {unit} dressent leurs pavois.",
+      "ai": {
+        "min_units": 1,
+        "under_fire_within": 6.0,
+        "when_defensive": false
+      },
+      "sources": [
+        "Pavois",
+        "Arbalétriers génois"
+      ]
+    },
+    {
+      "id": "order_rally",
+      "kind": "rally",
+      "rank": 2,
+      "name": "Rallier",
+      "description": "Le chef galope vers les fuyards, bannière haute, et tente de les ramener au combat ; la réussite dépend de son commandement. Ainsi Du Guesclin reformant ses hommes à Cocherel (1364).",
+      "icon": "rally",
+      "scope": "radius",
+      "requires_general": true,
+      "cooldown": 90.0,
+      "duration": 0.0,
+      "radius": 200.0,
+      "eligible": {},
+      "effects": {
+        "morale": 0.0,
+        "armor": 0,
+        "rally_chance": 0.25,
+        "rally_chance_per_command": 0.06,
+        "rally_morale": 45.0
+      },
+      "journal": "{general} rallie les {unit} !",
+      "journal_failure": "Les {unit} n'entendent pas l'appel de {general}.",
+      "ai": {
+        "min_units": 1,
+        "when_defensive": false
+      },
+      "sources": [
+        "Bataille de Cocherel"
+      ]
+    },
+    {
+      "id": "order_war_cry",
+      "kind": "war_cry",
+      "rank": 1,
+      "name": "Cri de guerre",
+      "labels_by_faction": {
+        "fac_burgundy": "Montjoie Saint-Andrieu !",
+        "fac_castile": "¡Santiago!",
+        "fac_england": "Saint George !",
+        "fac_france": "Montjoie ! Saint-Denis !",
+        "fac_scotland": "Saint Andrew !"
+      },
+      "description": "Le chef lance le cri d'armes de sa maison, repris par les régiments qui l'entourent : le moral remonte pour un temps. Chaque ost avait le sien : « Montjoie ! Saint-Denis ! » pour le roi de France, « Saint George ! » pour les Anglais d'Édouard III, « Montjoie Saint-Andrieu ! » pour les Bourguignons.",
+      "icon": "war_cry",
+      "scope": "radius",
+      "requires_general": true,
+      "cooldown": 120.0,
+      "duration": 30.0,
+      "radius": 150.0,
+      "eligible": {},
+      "effects": {
+        "morale": 12.0,
+        "armor": 0,
+        "rally_chance": 0.0,
+        "rally_chance_per_command": 0.0,
+        "rally_morale": 0.0
+      },
+      "journal": "« {label} » : l'ost {of_faction} pousse son cri de guerre autour de {general}.",
+      "ai": {
+        "enemy_within": 90.0,
+        "min_units": 2,
+        "when_defensive": false
+      },
+      "sources": [
+        "Cri de guerre",
+        "Montjoie Saint-Denis"
+      ]
+    }
+  ]
+}
