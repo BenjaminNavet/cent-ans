@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw
 from cent_ans_tools.geo import (
     download,
     hamlets,
+    navgrid,
     provinces,
     relief,
     roads,
@@ -53,6 +54,7 @@ class BuildResult:
     roads: roads.RoadResult | None = None
     settlements: settlements.SettlementResult | None = None
     hamlets: hamlets.HamletResult | None = None
+    navgrid: navgrid.NavgridResult | None = None
 
 
 def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
@@ -193,6 +195,8 @@ def build(
     road_result = roads.build(force=force, map_dir=map_dir)
     settlement_result = settlements.build(map_dir=map_dir)
     hamlet_result = hamlets.build(force=force, map_dir=map_dir)
+    # Lot M1: navigation grid (reads splat.png from `cent-ans geo splat` when present).
+    navgrid_result = navgrid.build(map_dir=map_dir)
     return BuildResult(
         map_json_path,
         heightmap_path,
@@ -205,6 +209,7 @@ def build(
         road_result,
         settlement_result,
         hamlet_result,
+        navgrid_result,
     )
 
 
@@ -224,6 +229,8 @@ def info(map_dir: Path = MAP_DIR) -> dict:
         "settlements_px.json",
         "roads.geojson",
         "hamlets.json",
+        "navgrid.png",
+        "crossings.json",
     ):
         path = map_dir / name
         files[name] = path.stat().st_size if path.exists() else None

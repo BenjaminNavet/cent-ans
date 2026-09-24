@@ -191,7 +191,9 @@ def to_cell(px: float, py: float, scale: int, size: int) -> tuple[int, int]:
     )
 
 
-def rasterize_lines(lines: list, size: int, scale: int, all_touched: bool) -> np.ndarray:
+def rasterize_lines(
+    lines: list, size: int, scale: int, all_touched: bool
+) -> np.ndarray:
     """Boolean raster of map-pixel ``lines`` (shapely geometries) on the grid."""
     if not lines:
         return np.zeros((size, size), dtype=bool)
@@ -657,7 +659,11 @@ def update_map_json(map_dir: Path, scale: int) -> None:
     """Add (or refresh) ``navgrid`` in ``map.json``, keeping every other key."""
     path = map_dir / "map.json"
     metadata = json.loads(path.read_text(encoding="utf-8"))
-    metadata["navgrid"] = {"size_px": NAVGRID_SIZE, "file": NAVGRID_FILE, "scale": scale}
+    metadata["navgrid"] = {
+        "size_px": NAVGRID_SIZE,
+        "file": NAVGRID_FILE,
+        "scale": scale,
+    }
     path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
 
