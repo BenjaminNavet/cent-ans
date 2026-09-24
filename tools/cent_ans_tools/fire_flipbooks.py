@@ -23,7 +23,9 @@ from PIL import Image
 FRAME = 128
 GRID = 8
 FRAMES = GRID * GRID
-DEFAULT_OUT = Path(__file__).resolve().parents[2] / "game" / "assets" / "textures" / "fx"
+DEFAULT_OUT = (
+    Path(__file__).resolve().parents[2] / "game" / "assets" / "textures" / "fx"
+)
 
 
 class ValueNoise3D:
@@ -100,7 +102,9 @@ def flame_frame(noise: ValueNoise3D, phase: float) -> tuple[np.ndarray, np.ndarr
         rise = time * 6.0
         warp = noise.fbm(x * 3.0, y * 2.5 - rise, np.full_like(x, 1.3), octaves=3)
         sway = (warp - 0.5) * (0.12 + 0.35 * y)
-        detail = noise.fbm(x * 8.0 + sway * 4.0, y * 4.0 - rise * 1.6, np.full_like(x, 7.7), octaves=4)
+        detail = noise.fbm(
+            x * 8.0 + sway * 4.0, y * 4.0 - rise * 1.6, np.full_like(x, 7.7), octaves=4
+        )
         return sway, detail
 
     # Seamless loop: cross-fade the field at t and t - 1.
@@ -109,7 +113,11 @@ def flame_frame(noise: ValueNoise3D, phase: float) -> tuple[np.ndarray, np.ndarr
     blend = phase
     sway = sway_a * (1.0 - blend) + sway_b * blend
     detail = detail_a * (1.0 - blend) + detail_b * blend
-    half_width = 0.3 * np.power(np.clip(1.0 - y, 0.0, 1.0), 0.75) * _smoothstep(0.0, 0.12, y + 0.02)
+    half_width = (
+        0.3
+        * np.power(np.clip(1.0 - y, 0.0, 1.0), 0.75)
+        * _smoothstep(0.0, 0.12, y + 0.02)
+    )
     distance = np.abs(x - 0.5 + sway)
     body = _smoothstep(half_width + 0.02, half_width * 0.25, distance)
     # Erosion by noise, stronger towards the tip: tongues detach and break up.
@@ -132,7 +140,12 @@ def smoke_frame(noise: ValueNoise3D, age: float) -> tuple[np.ndarray, np.ndarray
     dx = cx + warp_x * 0.22
     dy = cy + warp_y * 0.22
     distance = np.sqrt(dx * dx + dy * dy)
-    billow = noise.fbm(x * 5.0 + warp_x, y * 5.0 + warp_y, np.full_like(x, 3.0 + swirl * 0.7), octaves=5)
+    billow = noise.fbm(
+        x * 5.0 + warp_x,
+        y * 5.0 + warp_y,
+        np.full_like(x, 3.0 + swirl * 0.7),
+        octaves=5,
+    )
     shape = _smoothstep(radius, radius * 0.35, distance) * (0.55 + 0.9 * billow)
     fade = (1.0 - age) ** 1.3
     density = np.clip(shape * (0.3 + 0.7 * fade), 0.0, 1.0)
@@ -150,7 +163,9 @@ def _sheet(frames: list[np.ndarray]) -> np.ndarray:
     sheet = np.zeros((FRAME * GRID, FRAME * GRID, channels), dtype=np.float32)
     for index, frame in enumerate(frames):
         row, column = divmod(index, GRID)
-        sheet[row * FRAME : (row + 1) * FRAME, column * FRAME : (column + 1) * FRAME] = frame
+        sheet[
+            row * FRAME : (row + 1) * FRAME, column * FRAME : (column + 1) * FRAME
+        ] = frame
     return sheet
 
 
@@ -167,7 +182,10 @@ def build(out_dir: Path) -> list[Path]:
         density, lighting = smoke_frame(smoke_noise, index / (FRAMES - 1))
         smokes.append(np.stack([density, lighting, lighting, density], axis=-1))
     paths = []
-    for name, frames in (("flame_flipbook.png", flames), ("smoke_flipbook.png", smokes)):
+    for name, frames in (
+        ("flame_flipbook.png", flames),
+        ("smoke_flipbook.png", smokes),
+    ):
         sheet = (np.clip(_sheet(frames), 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
         path = out_dir / name
         Image.fromarray(sheet, "RGBA").save(path, optimize=True)
