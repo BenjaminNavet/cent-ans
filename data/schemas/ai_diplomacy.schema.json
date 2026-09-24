@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_diplomacy.schema.json",
+  "title": "Réglages des guerres et alliances frontalières de l'IA",
+  "description": "Fichier data/ai/diplomacy.json (lot G5) : voisin menaçant, ouverture d'un nouveau front, cobelligérance aux côtés d'un allié, conditions de paix. Le voisinage est celui de la carte (graphe des provinces). Sans ce fichier, les constantes F4 s'appliquent. Voir docs/design/m9-ai.md § 7.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "menacing_neighbour": {
+      "type": "object",
+      "description": "Un voisin bien plus puissant est une menace.",
+      "properties": {
+        "power_ratio": { "type": "number", "minimum": 1, "description": "Un voisin (non allié) ce nombre de fois plus puissant nous menace." },
+        "attitude": { "type": "integer", "maximum": 0, "description": "Attitude envers un voisin menaçant (« Voisin menaçant »)." },
+        "counterweight": { "type": "integer", "minimum": 0, "description": "Bonus d'alliance avec le rival d'un voisin qui nous menace." }
+      },
+      "required": ["power_ratio", "attitude", "counterweight"],
+      "additionalProperties": false
+    },
+    "war": {
+      "type": "object",
+      "description": "Ouverture d'un nouveau front par une couronne.",
+      "properties": {
+        "front_share": { "type": "number", "minimum": 0, "description": "Pas de nouvelle guerre tant que les ennemis qui pèsent sur nous (frontaliers ou tenant nos terres) dépassent cette part de notre puissance." },
+        "pretender_ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition qu'un prétendant allié ou frontalier de sa cible doit atteindre." },
+        "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." }
+      },
+      "required": ["front_share", "pretender_ratio", "pretender_ratio_alone"],
+      "additionalProperties": false
+    },
+    "join_war": {
+      "type": "object",
+      "description": "Entrée dans la guerre d'un allié (cobelligérance).",
+      "properties": {
+        "ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition exigé contre l'ennemi de l'allié." },
+        "min_attitude": { "type": "integer", "description": "Attitude envers l'allié au-dessus de laquelle on le suit." },
+        "min_ally_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance minimale de l'allié, en multiple de la nôtre : un prince moindre suit une grande couronne, pas l'inverse." },
+        "border_only_claim_wars": { "type": "boolean", "description": "Une frontière avec l'ennemi ne suffit que si la guerre de l'allié est une guerre de prétentions ; sinon il faut une prétention propre." }
+      },
+      "required": ["ratio", "min_attitude", "min_ally_power_ratio", "border_only_claim_wars"],
+      "additionalProperties": false
+    },
+    "peace": {
+      "type": "object",
+      "description": "Conditions de paix demandées ou offertes par l'IA.",
+      "properties": {
+        "keep_capital": { "type": "boolean", "description": "Une couronne ne cède jamais sa capitale ni sa dernière province par traité." }
+      },
+      "required": ["keep_capital"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["menacing_neighbour", "war", "join_war", "peace"],
+  "additionalProperties": false
+}
