@@ -207,13 +207,19 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(economy) = FactionId::new(id.to_string())
-            .ok()
-            .and_then(|id| state.faction_economy(data, &id))
-        else {
+        let Ok(faction) = FactionId::new(id.to_string()) else {
             return VarDictionary::new();
         };
-        faction_economy_dict(&economy)
+        let Some(economy) = state.faction_economy(data, &faction) else {
+            return VarDictionary::new();
+        };
+        let mut dict = faction_economy_dict(&economy);
+        // UI audit A3 E1: the booked balance of the last season, from core.
+        dict.set(
+            "net_income_last_turn",
+            state.faction_net_last_turn(&faction).unwrap_or(0),
+        );
+        dict
     }
 
     /// `{owner, controller, garrison[], siege?, unrest, devastation,
@@ -421,7 +427,7 @@ impl CampaignSim {
             .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
         let order = match parsed {
             Ok(order) => order,
-            Err(error) => return order_result(Err(format!("ordre invalide : {error}"))),
+            Err(error) => return order_result(Err(invalid_order_message(&error))),
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
@@ -562,6 +568,16 @@ pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<Set
     }
     let province = ProvinceId::new(raw).ok()?;
     state.province_city_id(&province).cloned()
+}
+
+/// Player-facing message for an order the simulation cannot parse (UI
+/// audit A3: no raw serde error on screen). The technical detail goes to
+/// the Godot log for developers.
+pub(crate) fn invalid_order_message(error: &str) -> String {
+    godot_warn!("order rejected by the bridge: {error}");
+    "Cet ordre n'est pas reconnu par la simulation : la bibliothèque du jeu n'est sans doute \
+     pas à jour. Relancez le jeu après l'avoir réinstallé."
+        .to_owned()
 }
 
 pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
@@ -863,6 +879,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "treasury" => economy.treasury,
         "income" => economy.income,
         "projected_income" => economy.projected_income,
+        "net_income" => economy.net_income(),
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
         "administration_upkeep" => economy.administration_upkeep,

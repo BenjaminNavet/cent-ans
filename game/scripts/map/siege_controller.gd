@@ -48,8 +48,9 @@ func _update(is_player: bool) -> void:
 		box.hide()
 		return
 	var walls_text := "murailles intactes" if bool(odds["walls"]) else "brèche ouverte"
-	status_label.text = "Siège : vivres %d %% (reddition dans ~%d tour(s)), brèche %d %% — %s." % [
-		int(odds["supplies"]), int(odds["turns_left"]), int(odds["breach"]), walls_text]
+	var turns := int(odds["turns_left"])
+	status_label.text = "Siège : vivres %d %% (reddition dans ~%d %s), brèche %d %% — %s." % [
+		int(odds["supplies"]), turns, "tour" if turns <= 1 else "tours", int(odds["breach"]), walls_text]
 	assault_button.text = "Donner l'assaut (chances ≈ %d %%)" % int(odds["odds"])
 	box.show()
 

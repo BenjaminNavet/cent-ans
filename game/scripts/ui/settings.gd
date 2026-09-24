@@ -47,11 +47,18 @@ var path: String = SETTINGS_PATH
 var values: Dictionary = {}
 ## Désactivé en headless et en mode test : pas de changement de fenêtre.
 var apply_display_enabled: bool = true
+## `--resolution`, `--fullscreen` ou `--windowed` passé au moteur : la fenêtre de la ligne de
+## commande l'emporte sur le réglage enregistré, jusqu'à ce que le joueur change la vidéo en jeu.
+var window_overridden_by_cmdline: bool = false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	apply_display_enabled = DisplayServer.get_name() != "headless"
+	if apply_display_enabled:
+		window_overridden_by_cmdline = window_differs_from_project(
+			DisplayServer.window_get_size(), DisplayServer.window_get_mode()
+		)
 	load_settings()
 	apply_display()
 
@@ -63,6 +70,25 @@ func use_test_file(test_path: String = TEST_SETTINGS_PATH) -> void:
 	apply_display_enabled = false
 
 
+## Vrai si la fenêtre de départ diffère de celle du projet : le moteur a reçu `--resolution`,
+## `--fullscreen` ou `--maximized` (arguments qu'il consomme et que `OS.get_cmdline_args()` ne
+## rend pas). La fenêtre est alors celle de la ligne de commande.
+static func window_differs_from_project(window_size: Vector2i, window_mode: int) -> bool:
+	if window_mode != DisplayServer.WINDOW_MODE_WINDOWED:
+		return true
+	var project_size := Vector2i(
+		int(ProjectSettings.get_setting("display/window/size/viewport_width", 1440)),
+		int(ProjectSettings.get_setting("display/window/size/viewport_height", 900))
+	)
+	var override_size := Vector2i(
+		int(ProjectSettings.get_setting("display/window/size/window_width_override", 0)),
+		int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
+	)
+	if override_size.x > 0 and override_size.y > 0:
+		project_size = override_size
+	return window_size != project_size
+
+
 func get_value(key: String) -> Variant:
 	return values.get(key, DEFAULTS.get(key))
 
@@ -72,6 +98,8 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 		push_warning("Settings: unknown key %s" % key)
 		return
 	values[key] = _coerce(key, value)
+	if key == "video/resolution" or key == "video/fullscreen":
+		window_overridden_by_cmdline = false
 	if key.begins_with("video/") or key == "interface/ui_scale":
 		apply_display()
 	if persist:
@@ -134,6 +162,8 @@ func apply_display() -> void:
 	if not apply_display_enabled:
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if get_value("video/vsync") else DisplayServer.VSYNC_DISABLED)
+	if window_overridden_by_cmdline:
+		return
 	if get_value("video/fullscreen"):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
