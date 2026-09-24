@@ -19,13 +19,10 @@ dépenses dans `docs/budget.md`).
   (dbdcc69, détails dans `docs/wip/g4-burgundy.md` et `docs/status.md`).
 
 ## À reprendre
-1. **Miniatures** : terminées (ligne de budget écrite). Reste à ajouter la sonde `image_config` (0,04 $).
-   (idempotent, ne génère que les manquantes), vérifier une planche, commiter
-   `game/assets/events/` + `docs/budget.md`. Si le lot a été tué en cours, sa ligne de budget
-   n'a peut-être pas été écrite : comparer `docs/budget.md` au compteur
+1. **Budget** : toutes les lignes sont écrites (cumul 15,13 $). Ajouter la sonde `image_config`
+   16:9 (0,04 $, non consignée) et vérifier contre le compteur OpenRouter
    (`curl -s https://openrouter.ai/api/v1/credits -H "Authorization: Bearer $OPENROUTER_API_KEY"`,
-   dépense de session = total_usage − 80,3766) et ajouter une ligne de régularisation.
-   Ajouter aussi la sonde `image_config` 16:9 (0,04 $, non consignée).
+   dépense de session = total_usage − 80,3766).
 2. **Import Godot** : `godot --headless --path game --import`, commiter les `.import` des
    portraits, illustrations et miniatures (nécessaires à l'export macOS), smoke test.
 3. **Agent G5** (branche `worktree-agent-a8e6ab2920478f32d`, worktree
