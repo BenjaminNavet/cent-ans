@@ -32,6 +32,8 @@ const CATEGORY_LABELS := {
 @onready var close_button: Button = %CloseButton
 
 var faction_id: String = ""
+## H9 : ligne « Table » (régimes des provinces) ajoutée en code après l'entretien des bâtiments.
+var table_upkeep_value: Label
 var _tax_buttons: Dictionary = {}
 var _updating := false
 
@@ -44,6 +46,7 @@ func _ready() -> void:
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
+	_add_table_row()
 	# F2 : infobulles du trésor et du revenu.
 	for pair in [[treasury_value, "hud_treasury"], [income_value, "hud_income"], [projected_value, "hud_income"]]:
 		var label: Label = pair[0]
@@ -65,6 +68,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		army_upkeep_value.text = "—"
 		building_upkeep_value.text = "—"
 		administration_value.text = "—"
+		table_upkeep_value.text = "—"
 		tax_note.text = "Non disponible avec cette simulation."
 		_set_tax_buttons_disabled(true)
 		_fill_goods({}, [])
@@ -76,6 +80,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	army_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("army_upkeep", 0)))
 	building_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("building_upkeep", 0)))
 	administration_value.text = "%s ℔" % _thousands(int(economy.get("administration_upkeep", 0)))
+	_show_table_upkeep(economy)
 	_set_tax_buttons_disabled(false)
 	var rate: String = str(economy.get("tax_rate", "normal"))
 	_updating = true
@@ -89,6 +94,34 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	}.get(rate, "")
 	_fill_goods(economy.get("goods", {}), economy.get("goods_categories", []))
 	show()
+
+
+func _add_table_row() -> void:
+	var key := Label.new()
+	key.text = "Table des provinces"
+	table_upkeep_value = RichLabel.new()
+	table_upkeep_value.text = "—"
+	table_upkeep_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	building_upkeep_value.add_sibling(key)
+	key.add_sibling(table_upkeep_value)
+
+
+## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
+func _show_table_upkeep(economy: Dictionary) -> void:
+	table_upkeep_value.text = "%s ℔" % _thousands(int(economy.get("table_upkeep", 0)))
+	var lines := PackedStringArray(["[b]La Table[/b]", "Régimes alimentaires payés chaque saison (inclus dans l'entretien).",
+		"Saison passée : %s ℔" % _thousands(int(economy.get("table_upkeep_last_turn", 0)))])
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null and sim.has_method("get_table_budget"):
+		var budget: Dictionary = sim.call("get_table_budget", faction_id)
+		var store: Object = facade.get("store")
+		for row in budget.get("provinces", []):
+			var province := str(row.get("province", ""))
+			var info: Dictionary = store.call("get_province", province) if store != null else {}
+			var diet: Dictionary = sim.call("get_province_diet", province)
+			lines.append("• %s : %s — %s ℔" % [str(info.get("display_name", province)), str(diet.get("name", row.get("diet", ""))), _thousands(int(row.get("cost", 0)))])
+	table_upkeep_value.tooltip_text = "\n".join(lines)
 
 
 func _set_tax_buttons_disabled(disabled: bool) -> void:

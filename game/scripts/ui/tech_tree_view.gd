@@ -33,6 +33,8 @@ const EFFECT_LABELS := {
 	"recruit_cost": "Coût de recrutement", "movement": "Mouvement",
 	"siege_resistance": "Résistance aux sièges", "fortification_level": "Fortifications",
 	"research_points": "Points de recherche", "prestige": "Prestige", "piety": "Piété",
+	"plague_resistance": "Résistance à la peste", "wound_recovery": "Soin des blessés",
+	"diet_health": "Santé tirée des régimes",
 }
 const CATEGORY_LABELS := {"infantry": "infanterie", "ranged": "tireurs", "cavalry": "cavalerie", "siege": "siège"}
 
