@@ -9,7 +9,7 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
 - [x] 1. Arbres recalés sur le relief fin (`Vegetation`, signal `chunk_surface_changed`, `VegetationGroundJob`) ; test dans `settlements_render_test` (écart 0,00 contre 0,28 avant)
 - [x] 2. Routes principales lisibles au palier moyen (`RoadRenderer`, `shaders/road_line.gdshader`) ; capture `c7b-apres-routes.png`
 - [x] 3. Aperçu de chemin d'armée le long des routes réelles (`geo/edge_paths.py` → `data/map/settlement_edge_paths.json`, `SettlementData.edge_path`, `SettlementController._draw_path`) ; tests pytest + `settlements_render_test` ; `docs/geo.md`
-- [ ] 4. Panneaux de colonie / province sans recouvrir la minicarte
+- [x] 4. Panneaux de colonie / province sans recouvrir la minicarte (`MapUI.dock_right_panel`, `_dock_panel`) ; captures `c7b-apres-panneau*.png`
 - [ ] 5. Captures avant / après `docs/img/colonies/c7b-*.png`
 
 ## Décisions
@@ -35,6 +35,13 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
   533 arêtes sur 633 tracées ; les autres gardent le segment droit. Pas de schéma : comme les autres
   sorties dérivées de `data/map/`, le format est vérifié par `tools/tests/test_settlement_graph.py`.
 
+- Panneaux : province et colonie ancrés à gauche de la minicarte (bord droit = minicarte − 8 px),
+  de la barre jusqu'au-dessus de la cloche ; la minicarte reste visible avec eux (elle n'est plus
+  masquée que par les panneaux de faction et de personnage), les lettres restent masquées. Le
+  panneau de colonie est enregistré par `SettlementController` via `MapUI.dock_right_panel`.
+- Centrage sur une colonie (onglet Colonies, captures) : le point visé est décalé pour que la
+  colonie tombe au milieu de la zone libre à gauche du panneau (`SettlementController._panel_shift`).
+
 ## Prochaine étape
 
-Tâche 4 (panneaux et minicarte). Captures « avant » déjà prises (`c7b-avant-*.png`).
+Tâche 5 : captures après (arbres), mesures `--fps-probe`, doc `docs/godot-map.md`, rapport. Captures « avant » déjà prises (`c7b-avant-*.png`).
