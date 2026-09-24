@@ -27,14 +27,24 @@ dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
   embargo, revenu dans `get_faction_economy`, panneaux réels) ; stage
   `--stage=trade` pour la capture d'écran.
 
-## Prochaine étape
-- Vérifier après `core/build.sh` + `--import` + smoke : compter les
-  « smoke OK » (24 attendues, 23 + trade) et l'absence de « SCRIPT ERROR ».
-- Capture `docs/img/c5-commerce/` via
-  `--screenshot=docs/img/c5-commerce/trade.png --stage=trade`.
-- Piste non faite (budget) : petites icônes de marchandise / navires-charrettes
-  animés sur les routes (juste le ruban parchemin pour l'instant) ; entrée
-  encyclopédie dédiée.
+## État (25/09, reprise après crash)
+- ADR renuméroté `docs/decisions/0012-trade-routes.md` (0010 = mouvement
+  libre sur main, 0011 réservé à C4).
+- Corrigés : boucle infinie bouton « Commerce » ↔ bascule
+  (`set_pressed_no_signal`), appel `get_trade_routes` sur le mock (garde
+  `has_method`), smoke du panneau de faction (instancier la scène).
+- Capture : `docs/img/c5-commerce/routes.png` (`--stage=trade`).
+- Smoke : 24 « smoke OK » dont « trade ».
+
+## Pistes
+- Icônes de marchandise et navires/charrettes animés sur les routes (seul le
+  ruban est fait) ; entrée d'encyclopédie dédiée.
+- Accord actif non distingué visuellement (un matériau par maillage) :
+  troisième instance ou shader à couleur par sommet.
+- L'infobulle de route ne s'efface pas d'elle-même : le survol de province
+  la remplace.
+- `trade.rs::shortest_path` fait un Dijkstra sur `movement_graph` : à adapter
+  si M2 (grille A*, réécriture de `movement.rs`) retire `movement::edges`.
 
 ## Décisions
 - Un seul fichier `data/economy/trade.json` (hubs + routes) plutôt que deux
