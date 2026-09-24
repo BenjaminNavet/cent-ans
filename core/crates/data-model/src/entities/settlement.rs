@@ -175,6 +175,11 @@ pub struct SettlementRules {
     /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
     #[serde(default)]
     pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
+    /// Share of the upkeep of a settlement's buildings paid by its
+    /// controller, in per cent, by settlement kind (lot C7a); kinds left out
+    /// pay in full.
+    #[serde(default)]
+    pub building_upkeep_percent: BTreeMap<SettlementKind, i64>,
     /// Most units an army can leave as a settlement's garrison, by kind
     /// (lot C7a, `Order::GarrisonUnits`); kinds left out have no cap.
     #[serde(default)]
@@ -234,6 +239,27 @@ pub struct MovementRules {
     /// Fallback graph: closest settlement pairs linked between two
     /// neighbouring provinces, on top of the city-to-city link.
     pub fallback_links_per_neighbor: u32,
+    /// Share of the v1 seasonal steps (3, 2 in winter) an army marches on
+    /// the settlement graph (lot C7a); flat and percent `Movement` effects
+    /// are scaled with it.
+    #[serde(default = "one")]
+    pub season_scale: f64,
+    /// Cost of a road edge relative to the same distance off-road (lot
+    /// C7a). The C3 graph bakes a factor of 0.5 into its road edges; the
+    /// loader rescales them to this factor.
+    #[serde(default = "baked_road_factor")]
+    pub road_cost_factor: f64,
+}
+
+fn one() -> f64 {
+    1.0
+}
+
+/// Road factor baked into the costs of `settlement_graph.json` (lot C3).
+pub const BAKED_ROAD_COST_FACTOR: f64 = 0.5;
+
+fn baked_road_factor() -> f64 {
+    BAKED_ROAD_COST_FACTOR
 }
 
 impl Default for MovementRules {
@@ -242,6 +268,8 @@ impl Default for MovementRules {
             points_per_step: 140.0,
             sea_crossing_steps: 2.0,
             fallback_links_per_neighbor: 2,
+            season_scale: 1.0,
+            road_cost_factor: BAKED_ROAD_COST_FACTOR,
         }
     }
 }

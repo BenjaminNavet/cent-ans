@@ -18,7 +18,7 @@ use crate::state::{ArmyId, CampaignState, Stance};
 
 /// Maximum path cost the AI considers for an offensive, in province steps
 /// (times `MovementRules::points_per_step`).
-pub const OFFENSIVE_RANGE: u32 = 6;
+pub const OFFENSIVE_RANGE: u32 = 4;
 /// Preference (in province steps) for a hostile city over another settlement.
 pub const CITY_PREFERENCE_STEPS: f64 = 2.0;
 /// The AI attacks when its power exceeds the defence by this factor.

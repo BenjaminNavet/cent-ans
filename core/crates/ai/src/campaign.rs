@@ -24,7 +24,7 @@ use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
 /// Maximum path cost considered for an objective, in province steps (times
 /// `MovementRules::points_per_step`).
-pub const PLANNING_RANGE: u32 = 8;
+pub const PLANNING_RANGE: u32 = 5;
 /// Siege value bonus of a city (it hands over the province, lot C4).
 pub const CITY_TARGET_BONUS: f64 = 25.0;
 /// Siege value lost per fortification level of the target.

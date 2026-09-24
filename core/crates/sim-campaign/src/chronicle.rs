@@ -824,9 +824,7 @@ pub fn apply_effect(
                 return;
             };
             let id = state.allocate_army_id();
-            let movement_points = (f64::from(state.season.movement_steps())
-                * crate::movement::points_per_step(data))
-            .round() as u32;
+            let movement_points = state.season_movement_points(data);
             state.armies.insert(
                 id.clone(),
                 Army {

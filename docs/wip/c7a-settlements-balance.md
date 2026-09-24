@@ -29,6 +29,23 @@ Justification : une armée battue loin de ses places et cernée se dispersait (f
 après Crécy, débandade après Poitiers, compagnies dispersées) ; une armée proche de ses places s'y
 réfugiait ; le passage en terre neutre (Empire, Bretagne neutre) était courant mais coûtait des traînards.
 
+## Portée d'une saison (demande C5 / orchestrateur)
+
+Sonde : `cargo run --release -p ai --example reach_probe` (armée principale, départ 1337 ; les places
+ennemies arrêtent la marche). Réglages `movement.season_scale` = 0,5 et `movement.road_cost_factor` = 0,75
+(les arêtes routières du graphe C3, cuites à 0,5, sont remises à 0,75 au chargement).
+
+| départ | saison | avant : points / colonies / provinces / étapes méd.-max | après |
+|---|---|---|---|
+| Paris (France) | été | 420 / 233 / 57 / 9-16 (Villeneuve-sur-Lot, 14 étapes) | 210 / 62 / 16 / 5-8 (Vaucouleurs) |
+| Paris | hiver | 280 / 162 / 37 / 7-14 | 140 / 24 / 4 / 3-5 |
+| Londres (Angl.) | été | 420 / 65 / 15 / 5-10 | 210 / 34 / 7 / 3-6 |
+| Bordeaux (Angl.) | été | 420 / 48 / 14 / 3-6 (Lleida) | 210 / 34 / 9 / 3-5 (Lusignan) |
+| Bordeaux, sans ennemis | été | 420 / 219 / 50 / 8-18 (Hesdin) | 210 / 48 / 11 / 3-5 |
+
+Une saison couvre ~1,5 pas de province (210 km de plaine), ~2 sur route. `PLANNING_RANGE` de l'IA passe de
+8 à 5 pas et `OFFENSIVE_RANGE` d'`ai_minimal` de 6 à 4 (objectifs à 3 saisons au plus).
+
 ## Mesures
 
 Sonde : `cargo run --release -p ai --example settlements_probe -- 50 1 2 3 4 5 6 7 8`.
@@ -37,4 +54,5 @@ Sonde : `cargo run --release -p ai --example settlements_probe -- 50 1 2 3 4 5 6
 
 ## Prochaine étape
 
-Mesure « avant » (main cda86a9 sans le repli), puis audit de l'IA sur les colonies.
+Équilibrage économique (entretien des bâtiments hors cité, garnisons de départ), mesures après, fusion de
+main (C5) et test Godot `c5_settlements_ui_test.gd`.

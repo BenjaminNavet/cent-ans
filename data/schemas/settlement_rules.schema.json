@@ -82,6 +82,16 @@
           "type": "integer",
           "minimum": 0,
           "description": "Graphe de repli : paires de colonies les plus proches reliées entre deux provinces voisines, en plus de la liaison cité-cité."
+        },
+        "season_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Part des pas de saison de la v1 (3, 2 en hiver) parcourue sur le graphe des colonies (lot C7a) ; les effets de mouvement (techniques, généraux) sont mis à la même échelle. Défaut 1."
+        },
+        "road_cost_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Coût d'une arête sur route rapporté à la même distance hors route (lot C7a). Le graphe C3 applique 0,5 ; le chargement remet ses arêtes routières à ce facteur. Défaut 0,5."
         }
       },
       "required": [
@@ -148,6 +158,24 @@
       "additionalProperties": {
         "type": "integer",
         "minimum": 0
+      }
+    },
+    "building_upkeep_percent": {
+      "type": "object",
+      "description": "Part de l'entretien des bâtiments d'une colonie payée par son contrôleur, en pour cent, selon le type de colonie (lot C7a). Un type absent paie 100 %.",
+      "propertyNames": {
+        "enum": [
+          "city",
+          "town",
+          "castle",
+          "abbey",
+          "village"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
       }
     }
   },
