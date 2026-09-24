@@ -5,6 +5,8 @@ extends Node
 ## rasante venue du nord-ouest, convention cartographique qui fait « sortir » le relief)
 ## et adapte à la distance de la caméra le brouillard de profondeur, la portée des ombres
 ## et le flou de profondeur (effet maquette de près, brume de l'horizon de loin).
+## Lot V3 (A1-05, A1-14) : ciel HDRI et étalonnage de la saison courante (`AtmosphereLibrary`,
+## `data/fx/atmosphere.json`), suivis au fil des tours ; effets réglés par `RenderQuality`.
 ## Purement visuel : aucune règle de jeu ici.
 
 @export var environment_path: NodePath = ^"../WorldEnvironment"
@@ -35,6 +37,9 @@ var _attributes: CameraAttributesPractical
 var _sun: DirectionalLight3D
 var _rig: CampaignCamera
 var _last_distance: float = -1.0
+var _world_env: WorldEnvironment
+var _season: String = ""
+var _season_check_s: float = 0.0
 
 
 func _ready() -> void:
@@ -42,12 +47,52 @@ func _ready() -> void:
 	if world_env != null:
 		_environment = world_env.environment
 		_attributes = world_env.camera_attributes as CameraAttributesPractical
+	_world_env = world_env
 	_sun = get_node_or_null(sun_path) as DirectionalLight3D
 	_rig = get_node_or_null(camera_rig_path) as CampaignCamera
 	_orient_sun()
+	if _world_env != null:
+		RenderQuality.register(_world_env, _sun, "campaign")
+	_update_season()
 
 
-func _process(_delta: float) -> void:
+## Saison de la simulation (libellé de date) ; ciel et étalonnage changent avec elle.
+func current_season() -> String:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--season="):  # captures : saison forcée (rendu seulement)
+			return AtmosphereLibrary.normalize_season(arg.trim_prefix("--season="))
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null and sim.has_method("get_date_label"):
+		var season := AtmosphereLibrary.season_of_date(str(sim.call("get_date_label")))
+		if season != "":
+			return season
+	return "spring"
+
+
+func _update_season() -> void:
+	var season := current_season()
+	if season != _season:
+		apply_season(season)
+
+
+func apply_season(season: String) -> void:
+	_season = season
+	if _environment == null:
+		return
+	var look := AtmosphereLibrary.campaign_look(season)
+	if look.is_empty():
+		return
+	var fog := AtmosphereLibrary._rgb((look["look"] as Dictionary).get("fog_color", []), _environment.fog_light_color)
+	_environment.fog_light_color = fog
+	AtmosphereLibrary.apply_to_environment(_environment, look, fog, fog.darkened(0.5))
+
+
+func _process(delta: float) -> void:
+	_season_check_s -= delta
+	if _season_check_s <= 0.0:
+		_season_check_s = 1.0
+		_update_season()
 	if _rig == null:
 		return
 	var distance := _rig.distance
