@@ -133,10 +133,17 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         .iter()
         .map(|u| u.strength)
         .sum();
+    // Lot M2: a crossing is an `embark` order, resolved at once.
     state
-        .submit_order(&data, Order::move_along(army_id.clone(), vec![to.clone()]))
+        .submit_order(
+            &data,
+            Order::Embark {
+                army: army_id.clone(),
+                to_port: to.clone(),
+            },
+        )
         .unwrap();
-    let events = state.end_turn_with(&data, idle);
+    let events = std::mem::take(&mut state.pending_events);
     assert_eq!(state.armies[&army_id].settlement().cloned().unwrap(), to);
     let after: u32 = state.armies[&army_id]
         .units
