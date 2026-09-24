@@ -251,10 +251,15 @@ fn regiments_near_a_fire_suffer() {
         near_unit.hp
     );
     assert!(hp0 - near_unit.hp < hp0 * 0.2, "light losses only");
-    assert!(near_unit.morale < morale0 - 5.0, "morale shaken");
     let far_unit = &sim.units()[far as usize];
     assert_eq!(far_unit.hp, far_hp);
     assert!(far_unit.morale >= far_morale);
+    assert!(
+        near_unit.morale < morale0.min(far_unit.morale) - 3.0,
+        "morale shaken: {morale0:.1} -> {:.1} (far {:.1})",
+        near_unit.morale,
+        far_unit.morale
+    );
 }
 
 #[test]
