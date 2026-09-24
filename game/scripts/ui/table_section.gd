@@ -175,7 +175,9 @@ func _fill_options(changed: bool) -> void:
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		button.clip_text = true
 		button.custom_minimum_size = Vector2(0, 26)
-		IconLibrary.decorate_button(button, id, int(ROW_ICON), "resource")
+		var library := RichTooltip.icons()  # autoload par /root (le smoke est compilé avant)
+		if library != null:
+			library.call("decorate_button", button, id, int(ROW_ICON), "resource")
 		button.tooltip_text = RichTooltip.diet(option)
 		var current := bool(option.get("current", false))
 		var available := bool(option.get("available", false))
