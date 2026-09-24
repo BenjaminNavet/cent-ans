@@ -84,7 +84,9 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 3 fait (dynasties, États) : capetiens_directs, valois (entity fac_france), plantagenets
   (entity fac_england), bourgogne, navarre, castille, saint_empire, comte_de_flandre, ecosse.
   Pas de fiches séparées royaume_de_france / angleterre : les dynasties portent les factions.
-- Fiches H8b écrites : 29.
+- Lot 4 fait : louis_de_baviere, jean_de_luxembourg (alias « Jean l'Aveugle », pas « Jean de
+  Luxembourg », homonyme du capitaine bourguignon), david_ii, paris, gand.
+- Fiches H8b écrites : 34.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
