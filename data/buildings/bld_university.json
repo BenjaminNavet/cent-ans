@@ -12,6 +12,10 @@
   "upkeep": 60,
   "required_technology": "tech_universities",
   "required_building": "bld_cathedral",
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
   "effects": [
     {
       "effect": "prestige",

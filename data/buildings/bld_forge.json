@@ -11,6 +11,12 @@
   "build_time_turns": 2,
   "upkeep": 10,
   "required_resource": "res_iron",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle",
+    "village"
+  ],
   "effects": [
     {
       "effect": "production",

@@ -1,14 +1,31 @@
 {
-  "description": "Réglages des colonies (lot C1). La garnison de départ de la cité ne s'applique qu'à partir du lot C4 : jusque-là, la garnison de la province reste celle de setup_1337.",
+  "description": "Réglages des colonies : garnison de départ par type (la cité reçoit en plus la garnison de province de setup_1337), bonus de province complète, déplacement sur le graphe des colonies (points_per_step = 150 : distance moyenne de 157 km, médiane 144 km, entre cités de provinces voisines en 1337).",
   "starting_garrison": {
-    "city": ["unit_urban_militia", "unit_urban_militia", "unit_crossbowmen"],
-    "town": ["unit_urban_militia", "unit_crossbowmen"],
-    "castle": ["unit_men_at_arms_foot", "unit_crossbowmen"],
-    "abbey": ["unit_urban_militia"],
+    "city": [
+      "unit_urban_militia",
+      "unit_urban_militia",
+      "unit_crossbowmen"
+    ],
+    "town": [
+      "unit_urban_militia",
+      "unit_crossbowmen"
+    ],
+    "castle": [
+      "unit_men_at_arms_foot",
+      "unit_crossbowmen"
+    ],
+    "abbey": [
+      "unit_urban_militia"
+    ],
     "village": []
   },
   "full_province_bonus": {
     "income_percent": 10,
     "unrest_per_season": -5
+  },
+  "movement": {
+    "points_per_step": 150,
+    "sea_crossing_steps": 2,
+    "fallback_links_per_neighbor": 2
   }
 }

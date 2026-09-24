@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Cost, Effect, LocalizedName, Sources};
+use crate::entities::settlement::SettlementKind;
 use crate::ids::{BuildingId, ResourceId, TechnologyId, UnitTypeId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -43,6 +44,10 @@ pub struct Building {
     pub requires_river: bool,
     #[serde(default)]
     pub unique_per_faction: bool,
+    /// Settlement kinds where it can be built (lot C4); `None`: every kind
+    /// but `village`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub settlement_kinds: Option<Vec<SettlementKind>>,
     pub effects: Vec<Effect>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub enables_units: Vec<UnitTypeId>,
@@ -50,4 +55,15 @@ pub struct Building {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+}
+
+impl Building {
+    /// `true` when the building may stand in a settlement of `kind`
+    /// (`settlement_kinds`, default: anything but a village).
+    pub fn allowed_in(&self, kind: SettlementKind) -> bool {
+        match &self.settlement_kinds {
+            Some(kinds) => kinds.contains(&kind),
+            None => kind != SettlementKind::Village,
+        }
+    }
 }

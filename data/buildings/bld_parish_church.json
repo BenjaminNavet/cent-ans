@@ -10,6 +10,13 @@
   },
   "build_time_turns": 2,
   "upkeep": 5,
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle",
+    "abbey",
+    "village"
+  ],
   "effects": [
     {
       "effect": "piety",
