@@ -684,6 +684,9 @@ func layout_hud() -> void:
 	var log_height := event_log.get_combined_minimum_size().y
 	event_log.size = Vector2(LOG_WIDTH, log_height)
 	event_log.position = Vector2(HUD_MARGIN, maxf(top, log_bottom - log_height))
+	# Actions d'armée (siège) : jamais sur le journal ni sur son bouton « Déplier » (audit U1).
+	if army_actions.visible and event_log.visible and event_log.get_rect().intersects(army_actions.get_rect()):
+		army_actions.position.x = event_log.position.x + event_log.size.x + 8.0
 	# C7 : la fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
 	# l'arbre de la Cour se rétrécit pour lui laisser au moins sa largeur repliée.
 	if court_panel.visible and character_sheet.visible:
