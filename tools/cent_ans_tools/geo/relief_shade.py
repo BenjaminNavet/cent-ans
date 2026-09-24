@@ -50,7 +50,7 @@ BOOST_SIGMA_M = 5000.0
 BOOST_GAIN = 0.8
 BOOST_LIMIT_M = 120.0
 BOOST_FADE_M = (600.0, 1600.0)
-DETAIL_SCALE_M = 3.0  # metres per level of the detail channel (±381 m)
+DETAIL_SCALE_M = 1.5  # metres per level of the detail channel (±190 m)
 #: Curvature scales (metres) and normalisation (metres of local relief) of the occlusion channel.
 OCCLUSION_SCALES = ((500.0, 12.0, 0.3), (1500.0, 35.0, 0.4), (4500.0, 90.0, 0.3))
 MIN_LAND_M = 0.5
