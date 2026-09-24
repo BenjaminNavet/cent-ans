@@ -61,6 +61,8 @@ func _init() -> void:
 				busy = true
 			if terrain != null and not terrain.fine_ready():
 				busy = true
+			if ReliefLandcover.pending():
+				busy = true
 			if not busy:
 				break
 			await process_frame

@@ -10,30 +10,73 @@ extends RefCounted
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides.
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
 ##   des forêts (lot V4), comme `splat.png`.
+##
+## Le décodage (≈ 1 s pour le PNG 8192² et ses mipmaps) se fait dans `WorkerThreadPool` : le
+## terrain s'affiche aussitôt, les textures sont posées sur le matériau à la frame suivante la
+## fin du chargement (`pending()` faux ensuite).
 
 const SHADE_FILE := "relief_shade.png"
 const WETLANDS_FILE := "wetlands.png"
 
+## Chargements en cours (garde les chargeurs en vie jusqu'à leur fin).
+static var _loaders: Array = []
 
-## Pose les textures et réglages sur le matériau du terrain ; durée consignée dans
-## `map_data.timings["relief_landcover_ms"]`.
+var _material: ShaderMaterial
+var _map_data: MapData
+var _map_dir: String
+var _detail_scale: float = 1.5
+var _shade: Image
+var _wet: Image
+var _t0: int = 0
+var _task: int = -1
+
+
+## Lance le chargement des textures du matériau du terrain ; durée consignée dans
+## `map_data.timings["relief_landcover_ms"]` à la fin.
 static func apply(material: ShaderMaterial, map_data: MapData) -> void:
-	var t0 := Time.get_ticks_msec()
-	var shade := _load(map_data, SHADE_FILE, Image.FORMAT_LA8)
-	if shade != null:
-		shade.generate_mipmaps()
-		material.set_shader_parameter("relief_shade", ImageTexture.create_from_image(shade))
-		material.set_shader_parameter("rl_detail_scale_m", _detail_scale(map_data))
-	material.set_shader_parameter("has_relief_shade", shade != null)
-	var wet := _load(map_data, WETLANDS_FILE, Image.FORMAT_RGB8)
-	if wet != null:
-		material.set_shader_parameter("wetlands", ImageTexture.create_from_image(wet))
-	material.set_shader_parameter("has_wetlands", wet != null)
-	map_data.timings["relief_landcover_ms"] = Time.get_ticks_msec() - t0
+	material.set_shader_parameter("has_relief_shade", false)
+	material.set_shader_parameter("has_wetlands", false)
+	var loader := ReliefLandcover.new()
+	loader._material = material
+	loader._map_data = map_data
+	loader._map_dir = map_data.map_dir
+	loader._detail_scale = _detail_scale_of(map_data.map_dir)
+	loader._t0 = Time.get_ticks_msec()
+	_loaders.append(loader)
+	loader._task = WorkerThreadPool.add_task(loader._load, false, "relief landcover")
 
 
-static func _load(map_data: MapData, file_name: String, format: int) -> Image:
-	var path := map_data.map_dir.path_join(file_name)
+## Vrai tant qu'un chargement n'a pas posé ses textures (captures, mesures).
+static func pending() -> bool:
+	return not _loaders.is_empty()
+
+
+func _load() -> void:
+	_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
+	if _shade != null:
+		_shade.generate_mipmaps()
+	_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
+	_finish.call_deferred()
+
+
+func _finish() -> void:
+	if _task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_task)
+	if _shade != null:
+		_material.set_shader_parameter("relief_shade", ImageTexture.create_from_image(_shade))
+		_material.set_shader_parameter("rl_detail_scale_m", _detail_scale)
+	_material.set_shader_parameter("has_relief_shade", _shade != null)
+	if _wet != null:
+		_material.set_shader_parameter("wetlands", ImageTexture.create_from_image(_wet))
+	_material.set_shader_parameter("has_wetlands", _wet != null)
+	_map_data.timings["relief_landcover_ms"] = Time.get_ticks_msec() - _t0
+	_shade = null
+	_wet = null
+	_loaders.erase(self)
+
+
+static func _load_image(map_dir: String, file_name: String, format: int) -> Image:
+	var path := map_dir.path_join(file_name)
 	if not FileAccess.file_exists(path):
 		return null
 	var image := Image.load_from_file(path)
@@ -45,8 +88,8 @@ static func _load(map_data: MapData, file_name: String, format: int) -> Image:
 	return image
 
 
-static func _detail_scale(map_data: MapData) -> float:
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_data.map_dir.path_join("map.json")))
+static func _detail_scale_of(map_dir: String) -> float:
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
 	if meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary:
 		return float(meta["relief_shade"].get("detail_scale_m", 1.5))
 	return 1.5
