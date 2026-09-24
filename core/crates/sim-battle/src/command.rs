@@ -50,6 +50,17 @@ pub enum Command {
         units: Vec<u32>,
         piece: usize,
     },
+    /// Siege battles (S2): put a torch to house `house` (index in
+    /// `siege.houses`) or, with `gate`, to the town gate. One of the
+    /// regiments must stand close enough (the garrison reaches its suburbs
+    /// from anywhere).
+    Burn {
+        units: Vec<u32>,
+        #[serde(default)]
+        house: Option<usize>,
+        #[serde(default)]
+        gate: bool,
+    },
     /// A leader's order from `data/battle_orders/` (war cry, no quarter,
     /// dismount, pavise, rally). `units` names the regiments of a
     /// `selected`-scope order (every eligible one when empty); `side`
@@ -77,6 +88,7 @@ impl Command {
             | Command::FireAtWill { units, .. }
             | Command::Withdraw { units }
             | Command::TargetWall { units, .. }
+            | Command::Burn { units, .. }
             | Command::LeaderOrder { units, .. } => units,
         }
     }
@@ -120,6 +132,14 @@ pub enum CommandError {
     /// The position is outside the side's deployment zone (or, in a siege,
     /// on the wrong side of the walls).
     OutsideZone(u32),
+    /// `burn` (S2): no such house.
+    UnknownHouse(usize),
+    /// `burn`: the house or the gate already burns (or is a ruin).
+    AlreadyBurning,
+    /// `burn`: neither a house nor the gate named (or both).
+    NothingToBurn,
+    /// `burn`: no regiment of the order stands close enough.
+    TooFarToBurn(u32),
 }
 
 impl std::fmt::Display for CommandError {
@@ -159,6 +179,14 @@ impl std::fmt::Display for CommandError {
                 )
             }
             CommandError::NotDeploying => write!(f, "le déploiement est terminé"),
+            CommandError::UnknownHouse(i) => write!(f, "maison inconnue : {i}"),
+            CommandError::AlreadyBurning => write!(f, "le feu y a déjà pris"),
+            CommandError::NothingToBurn => {
+                write!(f, "désignez une maison ou la porte à incendier")
+            }
+            CommandError::TooFarToBurn(id) => {
+                write!(f, "l'unité {id} est trop loin pour y mettre le feu")
+            }
             CommandError::OutsideZone(id) => {
                 write!(
                     f,
