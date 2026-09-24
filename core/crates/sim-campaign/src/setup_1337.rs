@@ -1,8 +1,9 @@
 //! Spring 1337 start derived from `GameData` (spec § 1.6).
 //!
-//! Garrisons: 4 units in capitals, 3 in ports and border provinces, 2
-//! elsewhere. Every faction gets one main army in its capital led by its ruler
-//! (8 units for France, 6 for England, 4 for Burgundy, 3 for the others so that
+//! Garrisons: 4 units in capitals, 3 in frontier provinces (ports and
+//! provinces next to another faction, [`crate::frontier`]), 2 elsewhere.
+//! Every faction gets one main army in its capital led by its ruler (8 units
+//! for France, 6 for England, 4 for Burgundy, 3 for the others so that
 //! the AI can act). Treasuries come from `Faction::treasury`; wars, alliances
 //! and truces from `Faction::relations`; vassal/overlord ties count as
 //! alliances.
@@ -16,6 +17,7 @@ use data_model::{
 
 use crate::diplomacy::{Claim, FOREVER};
 use crate::economy::TaxRate;
+use crate::frontier::GarrisonRole;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
 use crate::state::{
@@ -65,13 +67,12 @@ fn main_army_composition(faction: &Faction) -> Vec<&'static str> {
     }
 }
 
-fn garrison_composition(is_capital: bool, is_port: bool, is_border: bool) -> Vec<&'static str> {
-    if is_capital {
-        vec![MILITIA, MILITIA, CROSSBOWMEN, MEN_AT_ARMS]
-    } else if is_port || is_border {
-        vec![MILITIA, MILITIA, CROSSBOWMEN]
-    } else {
-        vec![MILITIA, MILITIA]
+/// Units of a starting garrison; its size is [`GarrisonRole::garrison_size`].
+fn garrison_composition(role: GarrisonRole) -> Vec<&'static str> {
+    match role {
+        GarrisonRole::Capital => vec![MILITIA, MILITIA, CROSSBOWMEN, MEN_AT_ARMS],
+        GarrisonRole::Frontier => vec![MILITIA, MILITIA, CROSSBOWMEN],
+        GarrisonRole::Interior => vec![MILITIA, MILITIA],
     }
 }
 
@@ -143,24 +144,16 @@ impl CampaignState {
         }
         let mut state = CampaignState::empty(player, seed);
 
-        // Provinces and garrisons.
+        // Provinces, then their garrisons (P1: frontiers classified by
+        // `CampaignState::is_frontier`, like the AI does).
         for (id, province) in &data.provinces {
             let owner = &province.owner;
-            let is_capital = data.factions.get(owner).is_some_and(|f| &f.capital == id);
-            let is_border = province
-                .neighbors
-                .iter()
-                .any(|n| data.provinces.get(n).is_some_and(|p| &p.owner != owner));
-            let garrison = units_from(
-                data,
-                &garrison_composition(is_capital, province.has_port(), is_border),
-            )?;
             state.provinces.insert(
                 id.clone(),
                 ProvinceState {
                     owner: owner.clone(),
                     controller: owner.clone(),
-                    garrison,
+                    garrison: Vec::new(),
                     siege: None,
                     unrest: province.population.classes.peasants.unrest / 4,
                     devastation: 0,
@@ -174,6 +167,18 @@ impl CampaignState {
                     diet: None,
                 },
             );
+        }
+        for (id, province) in &data.provinces {
+            let owner = &province.owner;
+            let role = if data.factions.get(owner).is_some_and(|f| &f.capital == id) {
+                GarrisonRole::Capital
+            } else if state.is_frontier(data, owner, id) {
+                GarrisonRole::Frontier
+            } else {
+                GarrisonRole::Interior
+            };
+            let garrison = units_from(data, &garrison_composition(role))?;
+            state.provinces.get_mut(id).expect("inserted").garrison = garrison;
         }
 
         init_settlements(&mut state, data)?;
