@@ -82,3 +82,23 @@ func _run() -> void:
 		if _check(model != null, "model for level %d" % level):
 			_check(level != 3 or model.find_child("KenneyCastle", true, false) != null, "cité with Kenney castle")
 			model.free()
+
+	# 4. Vie ambiante : bateaux en va-et-vient, navires en mer, oiseaux.
+	var route := LifeAmbient._route(PackedVector2Array([Vector2(0, 0), Vector2(10, 0), Vector2(10, 10)]), 0.0, 1.0)
+	_check(is_equal_approx(float(route["length"]), 20.0), "route length")
+	var pose: Array = LifeAmbient.route_pose(route, 15.0)
+	_check((pose[0] as Vector2).is_equal_approx(Vector2(10, 5)) and (pose[1] as Vector2).is_equal_approx(Vector2(0, 1)), "boat going down the river: %s" % [pose])
+	pose = LifeAmbient.route_pose(route, 25.0)
+	_check((pose[0] as Vector2).is_equal_approx(Vector2(10, 5)) and (pose[1] as Vector2).is_equal_approx(Vector2(0, -1)), "boat coming back: %s" % [pose])
+	var world := Node3D.new()
+	root.add_child(world)
+	var terrain := TerrainBuilder.new()
+	world.add_child(terrain)
+	terrain.build(map_data)
+	var ambient := LifeAmbient.new()
+	world.add_child(ambient)
+	ambient.setup(map_data, terrain, data)
+	_check(int(ambient.stats["river_boats"]) > 20, "boats on the great rivers: %s" % ambient.stats)
+	_check(int(ambient.stats["sea_ships"]) > 3, "ships between ports: %s" % ambient.stats)
+	world.queue_free()
+	await process_frame
