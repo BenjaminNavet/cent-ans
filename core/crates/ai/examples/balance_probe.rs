@@ -35,6 +35,8 @@ use sim_campaign::{
 /// First turn of 1400 (survival of the majors).
 const TURN_1400: u32 = 63 * 4;
 const MAJORS: &[&str] = &["fac_england", "fac_france", "fac_burgundy", "fac_scotland"];
+/// Regiments of a unit type in one matrix cell.
+type CountFn = dyn Fn(&data_model::UnitType) -> usize;
 /// Draws per auto-resolve matchup.
 const AUTO_DRAWS: u64 = 200;
 /// Step cap of a 3D battle (10 minutes at 60 Hz).
@@ -135,7 +137,11 @@ fn campaign_mode(data: &GameData, args: &[String]) {
             .collect()
     });
     let json_value = Value::Array(runs.iter().map(run_json).collect());
-    write_outputs("campaign", &json_value, &campaign_markdown(data, &runs, turns));
+    write_outputs(
+        "campaign",
+        &json_value,
+        &campaign_markdown(data, &runs, turns),
+    );
 }
 
 fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
@@ -223,9 +229,10 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                 // "... A attaque B. Vainqueur : W. ..." : the attacker won
                 // when its name follows "Vainqueur".
                 let text = &event.text_fr;
-                if let (Some((head, _)), Some((_, tail))) =
-                    (text.split_once(" attaque "), text.split_once("Vainqueur : "))
-                {
+                if let (Some((head, _)), Some((_, tail))) = (
+                    text.split_once(" attaque "),
+                    text.split_once("Vainqueur : "),
+                ) {
                     let attacker = head.rsplit(" : ").next().unwrap_or("");
                     let attacker = attacker.split(" (+").next().unwrap_or(attacker);
                     if !attacker.is_empty() && tail.starts_with(attacker) {
@@ -418,8 +425,14 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
     }
     let unrest: f64 = runs.iter().map(|r| r.avg_unrest).sum::<f64>() / n;
     let high: f64 = runs.iter().map(|r| r.high_tax_share).sum::<f64>() / n * 100.0;
-    let _ = writeln!(md, "| Mécontentement moyen final | {unrest:.1} | 15-35 (E2) |");
-    let _ = writeln!(md, "| Impôt « Haut » (échantillons) | {high:.0} % | < 40 % (E2) |");
+    let _ = writeln!(
+        md,
+        "| Mécontentement moyen final | {unrest:.1} | 15-35 (E2) |"
+    );
+    let _ = writeln!(
+        md,
+        "| Impôt « Haut » (échantillons) | {high:.0} % | < 40 % (E2) |"
+    );
     let revolts: f64 = runs
         .iter()
         .map(|r| f64::from(r.event_kinds.get("Revolt").copied().unwrap_or(0)))
@@ -439,7 +452,10 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
     );
 
     let _ = writeln!(md, "\n## Recrutements (ordres par partie)\n");
-    let _ = writeln!(md, "| Unité | Toutes factions | Part | Angleterre | France |\n|---|---|---|---|---|");
+    let _ = writeln!(
+        md,
+        "| Unité | Toutes factions | Part | Angleterre | France |\n|---|---|---|---|---|"
+    );
     let mut france = BTreeMap::<String, u32>::new();
     for run in runs {
         for (unit, count) in run.recruits.get("fac_france").into_iter().flatten() {
@@ -638,14 +654,19 @@ fn matrix_mode(data: &GameData) {
         }
         md.push('\n');
     };
-    let tables: [(&str, &dyn Fn(&data_model::UnitType) -> usize); 3] = [
-        ("Budget égal (9 000 livres) : % de victoires de l'attaquant", &|t| {
-            (9000 / t.cost.money.max(1)).max(1) as usize
-        }),
-        ("Entretien égal (600 livres par saison) : % de victoires de l'attaquant", &|t| {
-            (600 / t.upkeep.max(1)).max(1) as usize
-        }),
-        ("Effectif égal (8 contre 8) : % de victoires de l'attaquant", &|_| 8),
+    let tables: [(&str, &CountFn); 3] = [
+        (
+            "Budget égal (9 000 livres) : % de victoires de l'attaquant",
+            &|t| (9000 / t.cost.money.max(1)).max(1) as usize,
+        ),
+        (
+            "Entretien égal (600 livres par saison) : % de victoires de l'attaquant",
+            &|t| (600 / t.upkeep.max(1)).max(1) as usize,
+        ),
+        (
+            "Effectif égal (8 contre 8) : % de victoires de l'attaquant",
+            &|_| 8,
+        ),
     ];
     let mut extremes = Vec::new();
     for (title, count) in tables {

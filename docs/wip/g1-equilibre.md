@@ -6,7 +6,7 @@ Branche : `worktree-agent-a41f0303182b63dd5`. Source : `docs/audit/a2-mecaniques
 
 | Lot | État |
 |---|---|
-| O1 sonde | en cours : `core/crates/ai/examples/balance_probe.rs` écrit, fixture de calibration `core/crates/ai/tests/fixtures/auto_resolve_scenarios.json` (20 scénarios) |
+| O1 sonde | **fait** : `core/crates/ai/examples/balance_probe.rs`, fixture de calibration `core/crates/ai/tests/fixtures/auto_resolve_scenarios.json` (20 scénarios, références 3D sur 6 graines) |
 | N1 auto-résolution | à faire |
 | E1 doctrines IA | à faire |
 | E8 / E2 | si le temps le permet |
@@ -22,11 +22,27 @@ Depuis `core/` (release conseillé) :
 
 ## Chiffres
 
-(à remplir : avant / après chaque lot)
+### Avant (main à 15363eb + M1, auto-résolution d'origine)
+
+Sonde `campaign 200 1..8` :
+
+| Mesure | Avant |
+|---|---|
+| Milice / recrutements | 99,8 % |
+| Archers longs / recrutements anglais | 0 % (0 / 842) |
+| Types d'unités recrutés par partie (min) | 1 (max 3) |
+| Guerre France-Angleterre (200 tours) | 42 % |
+| Changements de propriétaire | 12 |
+| Batailles par partie (attaquant gagne) | 334 (43 %) |
+| Bâtiments jamais construits | 10 / 29 |
+
+Sonde `rt 6` (20 scénarios) : accord auto / 3D sur le vainqueur **12 / 20 (60 %)**. Désaccords : chevaliers contre milice (dans les deux sens), hommes d'armes contre milice (dans les deux sens), sergents contre arbalétriers, chevaliers contre hommes d'armes, piquiers contre hommes d'armes, cavalerie contre milice en forêt.
+
+`century_probe 464 1..5` : guerre France-Angleterre 43, 34, 48, 34, 39 % (moyenne 40 %, **déjà sous la cible 55-75 % avant G1** : régression antérieure, cf. audit § 6) ; 4 majeures vivantes en 1400 : 5/5.
 
 ## Prochaine étape
 
-Lancer `rt` (références 3D) et `campaign` (état initial), commit O1.
+N1 : `battle_auto.rs` par phases (tir, charge, mêlée), profils d'unité, `data/rules/auto_resolve.json`.
 
 ## Contraintes
 
