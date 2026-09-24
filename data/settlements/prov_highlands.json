@@ -1,0 +1,88 @@
+[
+  {
+    "id": "set_inverness",
+    "province": "prov_highlands",
+    "kind": "city",
+    "name": {
+      "display": "Inverness",
+      "local": "Inbhir Nis",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -4.2247,
+      57.4778
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Moray, Ross, Argyll, Badenoch, Aberdeen et Angus : pays gaélique des clans, refuge du parti de David II sous le Gardien Andrew Murray (Bothwell, Avoch). Seigneurie des Îles (MacDonald) à l'ouest.",
+    "sources": [
+      "Highlands",
+      "Andrew Murray (1298-1338)",
+      "Seigneurie des Îles"
+    ]
+  },
+  {
+    "id": "set_aberdeen",
+    "province": "prov_highlands",
+    "kind": "town",
+    "name": {
+      "display": "Aberdeen",
+      "local": "Aberdene",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -2.0943,
+      57.1497
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand burgh royal du nord-est, brûlé par Édouard III en 1336 puis reconstruit par ses habitants.",
+    "sources": [
+      "Aberdeen"
+    ]
+  },
+  {
+    "id": "set_elgin",
+    "province": "prov_highlands",
+    "kind": "town",
+    "name": {
+      "display": "Elgin",
+      "local": "Elgyn",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -3.308,
+      57.6494
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Burgh royal du Moray, siège de la cathédrale dite « lanterne du Nord ».",
+    "sources": [
+      "Elgin (Écosse)"
+    ]
+  }
+]
