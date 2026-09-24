@@ -393,3 +393,18 @@ func is_land_px(px: int, py: int) -> bool:
 	if px < 0 or py < 0 or px >= size.x or py >= size.y:
 		return false
 	return land_mask.get_pixel(px, py).r > 0.5
+
+
+## Position (coordonnées carte) d'une colonie (lot C4, `settlements_px.json`) ;
+## Vector2(-1, -1) si inconnue ou si le fichier manque.
+func settlement_px(id: String) -> Vector2:
+	if _settlements_px == null:
+		var parsed: Variant = _read_json("settlements_px.json")
+		_settlements_px = parsed if parsed is Dictionary else {}
+	var entry: Variant = (_settlements_px as Dictionary).get(id)
+	if entry is Array and (entry as Array).size() >= 2:
+		return Vector2(float(entry[0]), float(entry[1]))
+	return Vector2(-1, -1)
+
+
+var _settlements_px: Variant = null

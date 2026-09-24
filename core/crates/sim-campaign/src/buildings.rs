@@ -539,7 +539,10 @@ impl CampaignState {
         settlement: &SettlementId,
         attacker: &data_model::FactionId,
     ) -> f64 {
-        let Some(controller) = self.settlements.get(settlement).map(|s| s.controller.clone())
+        let Some(controller) = self
+            .settlements
+            .get(settlement)
+            .map(|s| s.controller.clone())
         else {
             return 0.0;
         };
@@ -580,14 +583,9 @@ impl CampaignState {
                     available: true,
                     reason: None,
                 };
-                if let Some(reason) = self.build_blocker(
-                    data,
-                    settlement,
-                    state,
-                    province_data,
-                    faction,
-                    building,
-                ) {
+                if let Some(reason) =
+                    self.build_blocker(data, settlement, state, province_data, faction, building)
+                {
                     option.available = false;
                     option.reason = Some(reason);
                 }
@@ -597,7 +595,11 @@ impl CampaignState {
     }
 
     /// Build options of the city of `province` (v1 signature).
-    pub fn buildable_in_province(&self, data: &GameData, province: &ProvinceId) -> Vec<BuildOption> {
+    pub fn buildable_in_province(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+    ) -> Vec<BuildOption> {
         self.province_city_id(province)
             .map(|city| self.buildable(data, city))
             .unwrap_or_default()
@@ -719,8 +721,7 @@ pub(crate) fn resolve_construction(
         if construction.turns_left > 0 {
             continue;
         }
-        let Construction { building, .. } =
-            settlement.construction.take().expect("checked above");
+        let Construction { building, .. } = settlement.construction.take().expect("checked above");
         if let Some(from) = data
             .buildings
             .get(&building)

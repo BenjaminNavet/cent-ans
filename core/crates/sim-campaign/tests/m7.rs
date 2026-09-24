@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 use sim_battle::{BattleSim, SideId};
 use sim_campaign::{ArmyId, BattleRequestError, CampaignState, EventKind, Order};
 
@@ -18,6 +18,11 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// Lot C4: the battlefield, Saint-Denis next to Paris (the French start).
+fn battlefield() -> SettlementId {
+    SettlementId::new("set_saint_denis").unwrap()
 }
 
 fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
@@ -35,21 +40,15 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
 }
 
-/// France marches on an English army teleported to Normandy: returns the
+/// France marches on an English army teleported to Saint-Denis: returns the
 /// state after the turn, and both army ids.
 fn pending_battle(data: &GameData, seed: u64) -> (CampaignState, ArmyId, ArmyId) {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).unwrap();
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
-    state.armies.get_mut(&english).unwrap().location = prov("prov_normandie");
+    state.armies.get_mut(&english).unwrap().location = battlefield();
     state
-        .submit_order(
-            data,
-            Order::MoveArmy {
-                army: french.clone(),
-                path: vec![prov("prov_normandie")],
-            },
-        )
+        .submit_order(data, Order::move_along(french.clone(), vec![battlefield()]))
         .unwrap();
     state.end_turn_with(data, idle);
     (state, french, english)
@@ -65,10 +64,11 @@ fn player_battle_waits_in_pending_battles() {
     let request = &state.pending_battles[0];
     assert_eq!(request.attacker, french);
     assert_eq!(request.defender, english);
-    assert_eq!(request.province, prov("prov_normandie"));
-    // Nobody fought yet: both armies stand in Normandy at full strength.
+    assert_eq!(request.province, prov("prov_ile_de_france"));
+    assert_eq!(request.location, battlefield());
+    // Nobody fought yet: both armies stand at Saint-Denis at full strength.
     let french_army = state.army(&french).unwrap();
-    assert_eq!(french_army.location, prov("prov_normandie"));
+    assert_eq!(french_army.location, battlefield());
     assert!(french_army.path.is_empty());
     reference.end_turn_with(&data, idle);
     assert_eq!(
@@ -93,7 +93,7 @@ fn battle_setup_describes_both_armies() {
     let (state, french, english) = pending_battle(&data, 3);
     let setup = state.battle_setup(&data, 0).unwrap();
     assert_eq!(setup.player_side, Some(SideId::Attacker));
-    assert_eq!(setup.province, "prov_normandie");
+    assert_eq!(setup.province, "prov_ile_de_france");
     assert_eq!(
         setup.attacker.units.len(),
         state.army(&french).unwrap().units.len()
@@ -161,13 +161,21 @@ fn external_battle_result_is_applied() {
     assert!(outcome.attacker.total_losses + outcome.defender.total_losses > 0);
     assert!(after(&french) <= before_french - outcome.attacker.total_losses);
     assert!(after(&english) <= before_english - outcome.defender.total_losses);
-    // The loser left Normandy.
+    // The loser left the battlefield.
     let (loser, _) = match outcome.winner {
         SideId::Attacker => (&english, &french),
         SideId::Defender => (&french, &english),
     };
     if let Some(army) = state.army(loser) {
-        assert_ne!(army.location, prov("prov_normandie"), "the loser retreats");
+        // Lot C4: a beaten attacker falls back to its origin; a beaten
+        // defender to a neighbouring friendly settlement, if there is one.
+        let can_retreat = loser == &french
+            || sim_campaign::movement::edges(&data, &battlefield())
+                .iter()
+                .any(|(n, _)| state.is_friendly_settlement(&army.faction, n));
+        if can_retreat {
+            assert_ne!(army.location, battlefield(), "the loser retreats");
+        }
     }
 }
 
@@ -251,15 +259,9 @@ fn interactive_battles_can_be_turned_off() {
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
-    state.armies.get_mut(&english).unwrap().location = prov("prov_normandie");
+    state.armies.get_mut(&english).unwrap().location = battlefield();
     state
-        .submit_order(
-            &data,
-            Order::MoveArmy {
-                army: french,
-                path: vec![prov("prov_normandie")],
-            },
-        )
+        .submit_order(&data, Order::move_along(french, vec![battlefield()]))
         .unwrap();
     let events = state.end_turn_with(&data, idle);
     assert!(state.pending_battles.is_empty());

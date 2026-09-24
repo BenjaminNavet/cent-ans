@@ -842,7 +842,11 @@ impl CampaignState {
     }
 
     /// Ids of the armies on `settlement` allied with (or belonging to) `faction`.
-    pub fn friendly_armies_at(&self, faction: &FactionId, settlement: &SettlementId) -> Vec<ArmyId> {
+    pub fn friendly_armies_at(
+        &self,
+        faction: &FactionId,
+        settlement: &SettlementId,
+    ) -> Vec<ArmyId> {
         self.armies
             .iter()
             .filter(|(_, army)| {

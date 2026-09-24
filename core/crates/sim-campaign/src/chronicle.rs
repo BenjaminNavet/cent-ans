@@ -1379,7 +1379,9 @@ fn matching_provinces(
         .provinces
         .keys()
         .filter_map(|id| state.province_controller(id).map(|c| (id, c)))
-        .filter(|(_, controller)| faction.is_none_or(|f| *controller == f) && !is_rebels(controller))
+        .filter(|(_, controller)| {
+            faction.is_none_or(|f| *controller == f) && !is_rebels(controller)
+        })
         .filter(|(id, controller)| {
             let ctx = EventContext {
                 faction: Some((*controller).clone()),

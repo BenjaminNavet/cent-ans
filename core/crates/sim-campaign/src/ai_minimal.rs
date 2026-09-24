@@ -120,14 +120,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         let step = points_per_step(data);
         let range = (f64::from(OFFENSIVE_RANGE) * step).round() as u32;
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(
-            state,
-            data,
-            faction,
-            &army.location,
-            Some(range),
-            Some(cap),
-        );
+        let table = dijkstra(state, data, faction, &army.location, Some(range), Some(cap));
 
         // Offensive: the best weakly defended hostile settlement, cities
         // first, then the others by weight and fortification.
@@ -262,7 +255,8 @@ pub fn target_score(
         == Some(settlement);
     let weight = crate::settlements::weight_share(data, settlement);
     let fortification = f64::from(state.fortification_level(data, settlement));
-    f64::from(cost) / step.max(1.0) - if is_city { CITY_PREFERENCE_STEPS } else { 0.0 }
+    f64::from(cost) / step.max(1.0)
+        - if is_city { CITY_PREFERENCE_STEPS } else { 0.0 }
         - 2.0 * weight
         + 0.5 * fortification
 }

@@ -46,6 +46,24 @@
     "description": {
       "type": "string"
     },
+    "garrison_upkeep_percent": {
+      "type": "object",
+      "description": "Part de l'entretien des unités de garnison payée par le contrôleur, en pour cent, selon le type de colonie (lot C4). Un type absent paie le taux par défaut de la simulation (50 %).",
+      "propertyNames": {
+        "enum": [
+          "city",
+          "town",
+          "castle",
+          "abbey",
+          "village"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      }
+    },
     "movement": {
       "type": "object",
       "description": "Déplacement sur le graphe des colonies (lot C4). Unité des coûts d'arête et des points de mouvement : le kilomètre en plaine (distance orthodromique × coût du terrain, divisé par 2 sur route).",

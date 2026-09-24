@@ -46,7 +46,9 @@ pub struct MovementGraph {
 impl MovementGraph {
     /// Edges leaving `from` (empty for an unknown or isolated settlement).
     pub fn edges(&self, from: &SettlementId) -> &[GraphEdge] {
-        self.adjacency.get(from).map_or(&[], |edges| edges.as_slice())
+        self.adjacency
+            .get(from)
+            .map_or(&[], |edges| edges.as_slice())
     }
 
     /// The edge `from` → `to`, if any.
@@ -191,8 +193,7 @@ impl GameData {
                 } else {
                     (other.clone(), province.clone())
                 };
-                if !self.settlements_by_province.contains_key(other) || !seen.insert(pair.clone())
-                {
+                if !self.settlements_by_province.contains_key(other) || !seen.insert(pair.clone()) {
                     continue;
                 }
                 let factor = (terrain(&pair.0) + terrain(&pair.1)) / 2.0;

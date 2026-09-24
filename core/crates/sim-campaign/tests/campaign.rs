@@ -88,10 +88,7 @@ fn new_1337_matches_game_data() {
 
     let england = main_army(&state, "fac_england");
     assert_eq!(state.army(&england).unwrap().units.len(), 6);
-    assert_eq!(
-        state.army(&england).unwrap().location,
-        set("set_londres")
-    );
+    assert_eq!(state.army(&england).unwrap().location, set("set_londres"));
     let burgundy = main_army(&state, "fac_burgundy");
     assert_eq!(state.army(&burgundy).unwrap().units.len(), 4);
 
@@ -355,14 +352,21 @@ fn orders_round_trip_through_snake_case_json() {
     .unwrap();
     assert!(matches!(
         recruit,
-        Order::Recruit { settlement: sim_campaign::Place::Province(_), .. }
+        Order::Recruit {
+            settlement: sim_campaign::Place::Province(_),
+            ..
+        }
     ));
-    let build: Order =
-        serde_json::from_str(r#"{"type":"build","settlement":"set_dover","building":"bld_market"}"#)
-            .unwrap();
+    let build: Order = serde_json::from_str(
+        r#"{"type":"build","settlement":"set_dover","building":"bld_market"}"#,
+    )
+    .unwrap();
     assert!(matches!(
         build,
-        Order::Build { settlement: sim_campaign::Place::Settlement(_), .. }
+        Order::Build {
+            settlement: sim_campaign::Place::Settlement(_),
+            ..
+        }
     ));
     let json = serde_json::to_string(&Order::SetStance {
         army: ArmyId::parse("army_0002").unwrap(),
@@ -389,7 +393,9 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert_eq!(allowance, 3 * 140, "3 steps of 140 points in spring");
     let reachable = state.reachable(&data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
-    assert!(reachable.values().all(|&cost| cost >= 1 && cost <= allowance));
+    assert!(reachable
+        .values()
+        .all(|&cost| cost >= 1 && cost <= allowance));
     assert!(!reachable.contains_key(&set("set_paris")));
     let provinces = state.reachable_provinces(&data, &army);
     assert!(provinces.contains_key(&prov("prov_normandie")));
@@ -592,7 +598,12 @@ fn empty_garrison_is_captured_instantly() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 5).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = set("set_boulogne");
-    state.settlements.get_mut(&boulogne).unwrap().garrison.clear();
+    state
+        .settlements
+        .get_mut(&boulogne)
+        .unwrap()
+        .garrison
+        .clear();
     state.armies.get_mut(&english).unwrap().location = boulogne.clone();
     state
         .submit_order(

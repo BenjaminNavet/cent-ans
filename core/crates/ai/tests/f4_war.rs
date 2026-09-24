@@ -180,11 +180,7 @@ fn a_small_realm_dismisses_troops_before_bankruptcy() {
         .unwrap();
     for _ in 0..12 {
         let unit = Unit::fresh(unit_type);
-        state
-            .city_state_mut(&capital)
-            .unwrap()
-            .garrison
-            .push(unit);
+        state.city_state_mut(&capital).unwrap().garrison.push(unit);
     }
     // Positive but short treasury: not bankrupt yet.
     state.factions.get_mut(&swiss).unwrap().treasury = 300;

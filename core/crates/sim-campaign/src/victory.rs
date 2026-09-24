@@ -150,7 +150,10 @@ pub(crate) fn resolve_victory(
     let player = state.player_faction.clone();
     let name = crate::diplomacy::faction_name(data, &player);
     let alive = state.factions.get(&player).is_some_and(|f| f.alive)
-        && state.provinces.keys().any(|p| state.controls_province(&player, p));
+        && state
+            .provinces
+            .keys()
+            .any(|p| state.controls_province(&player, p));
     let objectives = state.objectives(data, &player);
     let victory = data.factions.get(&player).and_then(|f| f.victory.as_ref());
     let end_year = victory.map(|v| v.end_year);

@@ -59,9 +59,9 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 
 ## Position et ordre en cours de l'armée (étiquette au-dessus du bandeau).
 func army_status(army: Dictionary, is_player: bool) -> String:
-	var where := str(map.call("province_name_of", str(army.get("location", ""))))
+	var where := str(map.call("province_name_of", str(army.get("location_province", army.get("location", "")))))
 	var text := "Ost à %s" % where
-	var path: Array = army.get("path", [])
+	var path: Array = army.get("path_provinces", army.get("path", []))
 	if not path.is_empty():
 		text += " — en marche vers %s" % map.call("province_name_of", str(path[-1]))
 		if path.size() > 1:

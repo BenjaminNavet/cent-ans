@@ -49,7 +49,6 @@ pub use entities::settlement::{
     SettlementRules,
 };
 pub use entities::skill::{Skill, SkillBranch};
-pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use ids::{
@@ -59,3 +58,4 @@ pub use ids::{
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
+pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
