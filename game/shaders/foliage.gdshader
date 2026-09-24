@@ -20,11 +20,11 @@ uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
 // Lot V4 (A1-10) : saison de la carte (réglée par vegetation.gd depuis la date de la simulation).
 uniform int season : hint_range(0, 3) = 0;
-uniform vec3 spring_tint = vec3(1.10, 1.22, 0.78);
+uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);
 uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
 uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
 uniform vec3 autumn_hedge = vec3(0.20, 0.07, 0.03);
-uniform vec3 winter_bare = vec3(0.075, 0.062, 0.050);
+uniform vec3 winter_bare = vec3(0.105, 0.090, 0.082);
 // Altitude monde (unités) au-dessus de laquelle les conifères sont poudrés de neige en hiver.
 uniform float winter_snow_y = 4.0;
 
@@ -101,7 +101,11 @@ void fragment() {
 			albedo = mix(albedo, target * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
 		} else if (season == 3) {
 			if (broadleaf) {
-				albedo = winter_bare * mix(0.8, 1.2, leaves);
+				// Ramure nue : houppier ajouré (on voit le sol à travers), gris-brun violacé.
+				if (value_noise(v_local * 2.4) < 0.5) {
+					discard;
+				}
+				albedo = winter_bare * mix(0.8, 1.25, leaves);
 			} else if (hedge) {
 				albedo = mix(albedo, winter_bare, 0.7);
 			} else {

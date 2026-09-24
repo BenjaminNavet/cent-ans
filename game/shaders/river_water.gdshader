@@ -133,11 +133,13 @@ void fragment() {
 	col = mix(col, foam_color, foam * 0.7);
 
 	ALBEDO = col;
-	ROUGHNESS = mix(roughness_value, 0.35, foam);
+	// Rides trop fines pour l'écran : surface plus mate (pas de scintillement du soleil).
+	float fine_ripples = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
+	ROUGHNESS = mix(mix(0.42, roughness_value, fine_ripples), 0.35, foam);
 	METALLIC = 0.0;
-	SPECULAR = 0.5;
+	SPECULAR = mix(0.22, 0.5, fine_ripples);
 	// Rides atténuées quand elles deviennent plus fines que le pixel (pas de scintillement).
-	float ripple_fade = 1.0 - smoothstep(0.3, 1.2, fwidth(q.x));
+	float ripple_fade = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
 	vec3 n = normalize(vec3(-nx * ripple_strength * 10.0 * ripple_fade, 1.0, -ny * ripple_strength * 10.0 * ripple_fade));
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
