@@ -86,7 +86,7 @@ func place(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> int:
 		if bool(result.get("ok", false)):
 			placed += 1
 		else:
-			scene.hud.show_toast(str(result.get("error", "?")))
+			scene.hud.show_toast("%s : %s" % [str(_unit(int(ids[i])).get("name", "")), str(result.get("error", "?"))])
 	return placed
 
 
