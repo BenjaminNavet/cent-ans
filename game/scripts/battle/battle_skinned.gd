@@ -203,7 +203,7 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 	var ids: Array[int] = []
 	for c in entry["set"]:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "names": entry["set"], "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
 
