@@ -1,6 +1,46 @@
 {
   "voices": {"max_voices": 28, "near_distance_m": 70},
-  "events": {},
-  "beds": {},
-  "ambience": {}
+  "events": {
+    "sword_clash": {"description": "Choc d'épées (mêlée, contact)", "files": ["battle/sword_clash_1", "battle/sword_clash_2", "battle/sword_clash_3", "battle/sword_clash_4"], "priority": 3, "volume_db": -4, "pitch": [0.9, 1.1], "max_instances": 5, "cooldown_s": 0.08, "unit_size_m": 10, "max_distance_m": 260},
+    "shield_bash": {"description": "Choc de boucliers au contact", "files": ["battle/shield_bash_1", "battle/shield_bash_2", "battle/shield_bash_3"], "priority": 3, "volume_db": -3, "pitch": [0.88, 1.08], "max_instances": 4, "cooldown_s": 0.1, "unit_size_m": 10, "max_distance_m": 260},
+    "contact": {"description": "Contact de deux régiments : boucliers puis épées", "layers": ["shield_bash", "sword_clash"]},
+    "arrow_impact": {"description": "Impact de flèches (sol, boucliers)", "files": ["battle/arrow_impact_1", "battle/arrow_impact_2", "battle/arrow_impact_3", "battle/arrow_impact_4"], "priority": 2, "volume_db": -8, "pitch": [0.85, 1.15], "max_instances": 5, "cooldown_s": 0.05, "unit_size_m": 6, "max_distance_m": 200},
+    "arrow_whistle": {"description": "Sifflement d'une volée en vol", "files": ["battle/arrow_whistle_1", "battle/arrow_whistle_2", "battle/arrow_whistle_3"], "priority": 4, "volume_db": -2, "max_instances": 3, "cooldown_s": 0.25, "unit_size_m": 25, "max_distance_m": 400},
+    "bow_release": {"description": "Décoche des arcs", "files": ["battle/bow_release_1", "battle/bow_release_2", "battle/bow_release_3"], "priority": 2, "volume_db": -6, "max_instances": 3, "cooldown_s": 0.2, "unit_size_m": 8, "max_distance_m": 220},
+    "crossbow_release": {"description": "Détente des arbalètes", "files": ["battle/crossbow_release_1"], "priority": 2, "volume_db": -4, "pitch": [0.9, 1.1], "max_instances": 3, "cooldown_s": 0.2, "unit_size_m": 8, "max_distance_m": 220},
+    "charge_cry": {"description": "Cri de charge d'un régiment", "files": ["battle/charge_cry_1", "battle/charge_cry_2", "battle/charge_cry_3"], "priority": 5, "volume_db": -2, "max_instances": 3, "cooldown_s": 1.0, "unit_size_m": 25, "max_distance_m": 450},
+    "war_cry": {"description": "Cri de guerre d'une armée (premier engagement d'un camp)", "files": ["battle/war_cry_1", "battle/war_cry_2"], "bus": "Voix", "priority": 8, "volume_db": 0, "pitch": [0.95, 1.03], "max_instances": 2, "cooldown_s": 8.0, "unit_size_m": 60, "max_distance_m": 900, "duck_music_db": -6, "duck_seconds": 4},
+    "death_groan": {"description": "Râles des mourants en mêlée", "files": ["battle/death_groan_1", "battle/death_groan_2", "battle/death_groan_3", "battle/death_groan_4", "battle/death_groan_5", "battle/death_groan_6", "battle/death_groan_7"], "priority": 1, "volume_db": -8, "pitch": [0.9, 1.08], "max_instances": 3, "cooldown_s": 0.4, "unit_size_m": 6, "max_distance_m": 150},
+    "rout_cry": {"description": "Clameur d'un régiment en déroute", "files": ["battle/rout_cry_1", "battle/rout_cry_2"], "priority": 6, "volume_db": -2, "max_instances": 2, "cooldown_s": 2.0, "unit_size_m": 30, "max_distance_m": 600},
+    "horse_neigh": {"description": "Hennissement (charge de cavalerie)", "files": ["battle/horse_neigh_1", "battle/horse_neigh_2", "battle/horse_neigh_3", "battle/horse_neigh_4"], "priority": 3, "volume_db": -5, "max_instances": 2, "cooldown_s": 1.2, "unit_size_m": 15, "max_distance_m": 350},
+    "horn": {"description": "Cor de guerre", "files": ["battle/horn_1", "battle/horn_2", "battle/horn_3"], "priority": 7, "volume_db": 0, "pitch": [0.97, 1.03], "max_instances": 2, "cooldown_s": 3.0, "unit_size_m": 80, "max_distance_m": 1500},
+    "drum": {"description": "Roulement de tambour de guerre", "files": ["battle/drum_1"], "priority": 6, "volume_db": -2, "pitch": [0.98, 1.02], "max_instances": 1, "cooldown_s": 5.0, "unit_size_m": 60, "max_distance_m": 1000},
+    "bell_toll": {"description": "Cloche d'alarme de la ville assiégée", "files": ["battle/bell_toll_1", "battle/bell_toll_2"], "priority": 5, "volume_db": -4, "pitch": [0.98, 1.02], "max_instances": 1, "cooldown_s": 6.0, "unit_size_m": 120, "max_distance_m": 2000},
+    "ram_hit": {"description": "Coup de bélier sur la porte", "files": ["battle/ram_hit_1", "battle/ram_hit_2", "battle/ram_hit_3"], "priority": 5, "volume_db": 0, "max_instances": 2, "cooldown_s": 1.2, "unit_size_m": 30, "max_distance_m": 700},
+    "trebuchet_release": {"description": "Tir de trébuchet ou de mangonneau", "files": ["battle/trebuchet_release_1"], "priority": 5, "volume_db": -1, "pitch": [0.9, 1.05], "max_instances": 2, "cooldown_s": 1.5, "unit_size_m": 30, "max_distance_m": 800},
+    "stone_impact": {"description": "Impact de pierre (muraille, sol)", "files": ["battle/stone_impact_1", "battle/stone_impact_2", "battle/stone_impact_3"], "priority": 4, "volume_db": -2, "max_instances": 3, "cooldown_s": 0.6, "unit_size_m": 25, "max_distance_m": 700},
+    "bombard": {"description": "Tir de bombarde", "files": ["battle/bombard_1", "battle/bombard_2"], "priority": 7, "volume_db": 0, "pitch": [0.92, 1.05], "max_instances": 2, "cooldown_s": 1.0, "unit_size_m": 60, "max_distance_m": 1500, "duck_music_db": -4, "duck_seconds": 2},
+    "wall_collapse": {"description": "Effondrement d'un pan de muraille", "files": ["battle/wall_collapse_1", "battle/wall_collapse_2"], "priority": 9, "volume_db": 2, "pitch": [0.92, 1.02], "max_instances": 2, "cooldown_s": 2.0, "unit_size_m": 80, "max_distance_m": 1500, "duck_music_db": -8, "duck_seconds": 4},
+    "thunder": {"description": "Tonnerre (pluie)", "files": ["battle/thunder_1", "battle/thunder_2"], "bus": "Ambiance", "priority": 6, "volume_db": -2, "pitch": [0.9, 1.05], "max_instances": 1, "cooldown_s": 10.0, "unit_size_m": 400, "max_distance_m": 3000},
+    "general_death": {"description": "Mort d'un général : cor et clameur, musique atténuée", "layers": ["horn", "rout_cry"], "duck_music_db": -10, "duck_seconds": 5}
+  },
+  "beds": {
+    "melee_bed_1": {"description": "Nappe de mêlée (fer, boucliers, cris)", "file": "battle/melee_bed_1", "volume_db": 0, "unit_size_m": 45, "max_distance_m": 700},
+    "melee_bed_2": {"description": "Nappe de mêlée dense (s'ajoute quand la mêlée grossit)", "file": "battle/melee_bed_2", "volume_db": -3, "unit_size_m": 40, "max_distance_m": 600},
+    "clamor_bed": {"description": "Clameur des combattants", "file": "battle/clamor_bed", "volume_db": -4, "unit_size_m": 60, "max_distance_m": 900},
+    "march_bed": {"description": "Piétinement des troupes en marche", "file": "battle/march_bed", "volume_db": -6, "unit_size_m": 30, "max_distance_m": 400},
+    "cavalry_bed": {"description": "Galop de la cavalerie", "file": "battle/cavalry_bed", "volume_db": -2, "unit_size_m": 40, "max_distance_m": 600},
+    "fire_bed": {"description": "Incendie (siège)", "file": "battle/fire_bed", "volume_db": -3, "unit_size_m": 25, "max_distance_m": 400}
+  },
+  "ambience": {
+    "battle_distant": {"description": "Bataille entendue de loin (vue haute)", "file": "ambience/battle_distant", "bus": "Bataille", "volume_db": -6},
+    "wind": {"description": "Vent", "file": "ambience/wind", "bus": "Ambiance", "volume_db": -8},
+    "wind_strong": {"description": "Vent hurlant (hiver, neige)", "file": "ambience/wind_strong", "bus": "Ambiance", "volume_db": -6},
+    "rain": {"description": "Pluie", "file": "ambience/rain", "bus": "Ambiance", "volume_db": -4},
+    "sea": {"description": "Vagues (côtes, mer)", "file": "ambience/sea", "bus": "Ambiance", "volume_db": -6},
+    "countryside": {"description": "Campagne (oiseaux, printemps et été)", "file": "ambience/countryside", "bus": "Ambiance", "volume_db": -8},
+    "crickets": {"description": "Grillons (été)", "file": "ambience/crickets", "bus": "Ambiance", "volume_db": -12},
+    "forest": {"description": "Forêt (oiseaux, feuillage)", "file": "ambience/forest", "bus": "Ambiance", "volume_db": -8},
+    "town": {"description": "Ville (marché, foule)", "file": "ambience/town", "bus": "Ambiance", "volume_db": -8}
+  }
 }
