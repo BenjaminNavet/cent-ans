@@ -6,8 +6,8 @@ Plan : `docs/design/visuel-semi-realiste.md`. Branche `visual` (worktree `.claud
 |---|---|---|---|
 | V1 Lumière | carte faite (bataille : V4) | orchestrateur | AgX, SSAO, ombres adaptatives, brouillard de profondeur, flou maquette, MSAA 4× + FXAA |
 | V2 Terrain | fait, fusionné (563da5a) | agent | splat, SDF frontières, PBR Poly Haven, eau, fleuves, relief ×4,3 |
-| V3 Végétation | en cours | agent (branche visual-v3) | forêts MultiMesh, villes, marqueurs ; lit splat.png (contrat V2) avec repli procédural |
-| V4 Batailles | en cours | agent (branche visual-v4) | inclut Environment de battle.tscn |
+| V3 Végétation | fait, fusionné | agent | forêts/haies MultiMesh, villes Blender PBR, marqueurs à étendard + plaque d'effectif |
+| V4 Batailles | fait, fusionné | agent + orchestrateur | ciel, sol PBR, herbe, figurines animées, bannières, siège en pierre ; coût GPU ×2,5 (V4b) |
 | V5 Modèles/UI | à faire | | |
 
 Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
@@ -18,3 +18,5 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - Prochaine étape : fusionner visual-v2, puis v3 et v4 dans `visual` (tests + captures), rebase sur `main`, fusion dans `main`.
 - V2 fusionné dans visual (smoke OK). V3 prévenu de fusionner visual.
 - 23 h 30 → 0 h 10 : quota épuisé, V3 et V4 interrompus (commits wip intacts). 0 h 15 : repris.
+- 5 h 30 : V3 et V4 fusionnés dans visual, main fusionné dans visual (conflit trivial battle_scene.gd), smoke 16/16 OK, pytest 65 OK.
+- Prochaine étape : fusion de visual dans main (orchestrateur de main), puis V4b (finitions batailles) et V2b (finitions carte).
