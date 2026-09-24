@@ -1,11 +1,7 @@
 {
   "id": "evt_auray",
   "title": "La bataille d'Auray",
-<<<<<<< HEAD
   "text": "Devant Auray, Jean de Montfort, Olivier de Clisson et les archers de John Chandos écrasent l'armée de Charles de Blois. Le prétendant est tué, du Guesclin pris ; vingt-trois ans de guerre de succession s'achèvent dans les marais du Loch.",
-=======
-  "text": "Le 29 septembre 1364, devant Auray, le jeune Jean de Montfort, fils du prétendant, et le capitaine anglais John Chandos écrasent l'armée de Charles de Blois. Blois tombe, achevé sur l'ordre de ne point faire de quartier ; Du Guesclin, ses armes brisées, se rend à Chandos. Charles V en tire la leçon : au traité de Guérande, le 12 avril 1365, il reconnaît Montfort duc de Bretagne, pourvu qu'il lui prête hommage.",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -15,42 +11,24 @@
     "until_year": 1365,
     "conditions": [
       {
-<<<<<<< HEAD
         "type": "fired",
         "event": "evt_succession_bretagne"
-=======
-        "type": "character_alive",
-        "id": "chr_charles_de_blois"
-      },
-      {
-        "type": "faction_exists",
-        "faction": "fac_brittany"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       }
     ]
   },
   "scope": {
     "type": "faction",
-<<<<<<< HEAD
     "faction": "fac_brittany"
   },
   "options": [
     {
       "text": "Reconnaître Montfort (traité de Guérande)",
-=======
-    "faction": "fac_france"
-  },
-  "options": [
-    {
-      "text": "Reconnaître Montfort contre son hommage",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "effects": [
         {
           "type": "kill_character",
           "id": "chr_charles_de_blois"
         },
         {
-<<<<<<< HEAD
           "type": "unrest",
           "province": "all",
           "amount": -10
@@ -83,82 +61,24 @@
           "amount": 10
         },
         {
-=======
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
           "type": "prestige",
           "amount": -5
         },
         {
-<<<<<<< HEAD
           "type": "devastation",
           "province": "prov_bretagne",
           "amount": 10
         }
       ],
-=======
-          "type": "treasury",
-          "amount": -2000
-        },
-        {
-          "type": "opinion",
-          "faction": "fac_brittany",
-          "amount": 20,
-          "reason": "Traité de Guérande"
-        },
-        {
-          "type": "loyalty",
-          "vassal": "fac_brittany",
-          "amount": 10
-        }
-      ],
-      "ai_weight": 2
-    },
-    {
-      "text": "Racheter Du Guesclin et poursuivre la guerre",
-      "effects": [
-        {
-          "type": "kill_character",
-          "id": "chr_charles_de_blois"
-        },
-        {
-          "type": "prestige",
-          "amount": 5
-        },
-        {
-          "type": "treasury",
-          "amount": -4000
-        },
-        {
-          "type": "unrest",
-          "province": "prov_bretagne",
-          "amount": 15
-        },
-        {
-          "type": "opinion",
-          "faction": "fac_brittany",
-          "amount": -10,
-          "reason": "Guerre de Bretagne prolongée"
-        }
-      ],
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "ai_weight": 1
     }
   ],
   "historical_date": {
-<<<<<<< HEAD
     "value": "1364-09-29"
   },
   "sources": [
     "Bataille d'Auray",
     "Traité de Guérande (1365)",
     "Charles de Blois"
-=======
-    "value": "1364-09-29",
-    "note": "Traité de Guérande le 12 avril 1365."
-  },
-  "sources": [
-    "Battle of Auray",
-    "Jean-Christophe Cassard, La Guerre de Succession de Bretagne, 2006"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   ]
 }

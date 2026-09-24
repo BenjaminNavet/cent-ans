@@ -1,11 +1,7 @@
 {
   "id": "evt_verneuil",
   "title": "La bataille de Verneuil",
-<<<<<<< HEAD
   "text": "L'armée du dauphin, renforcée de six mille Écossais du comte de Douglas, rencontre le duc de Bedford devant Verneuil. Les Lombards pillent le camp au lieu de charger ; les Écossais, qui avaient juré de ne pas faire de quartier, meurent presque tous.",
-=======
-  "text": "Le 17 août 1424, devant Verneuil, le duc de Bedford affronte l'armée franco-écossaise de Charles VII. Les archers tiennent, la mêlée est atroce : les comtes de Douglas et de Buchan, le comte d'Aumale et le vicomte de Narbonne périssent, le duc d'Alençon est pris. On parle d'un second Azincourt : l'armée d'Écosse, grand espoir du « roi de Bourges », a cessé d'exister.",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -15,7 +11,6 @@
     "until_year": 1425,
     "conditions": [
       {
-<<<<<<< HEAD
         "type": "any_of",
         "conditions": [
           {
@@ -28,16 +23,6 @@
             "event": "evt_troyes"
           }
         ]
-=======
-        "type": "at_war",
-        "a": "fac_england",
-        "b": "fac_france"
-      },
-      {
-        "type": "controls",
-        "faction": "fac_england",
-        "province": "prov_normandie"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       }
     ]
   },
@@ -47,7 +32,6 @@
   },
   "options": [
     {
-<<<<<<< HEAD
       "text": "Pleurer l'armée d'Écosse",
       "effects": [
         {
@@ -75,16 +59,12 @@
     },
     {
       "text": "Lever une taille pour une nouvelle armée",
-=======
-      "text": "Ménager les forces et tenir la Loire",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "effects": [
         {
           "type": "prestige",
           "amount": -15
         },
         {
-<<<<<<< HEAD
           "type": "treasury",
           "amount": 5000
         },
@@ -92,62 +72,11 @@
           "type": "unrest",
           "province": "all",
           "amount": 12
-=======
-          "type": "prestige",
-          "faction": "fac_england",
-          "amount": 15
-        },
-        {
-          "type": "prestige",
-          "faction": "fac_scotland",
-          "amount": -10
-        },
-        {
-          "type": "opinion",
-          "faction": "fac_scotland",
-          "amount": 10,
-          "reason": "Deuil commun de Verneuil"
-        }
-      ],
-      "ai_weight": 2
-    },
-    {
-      "text": "Lever sans attendre une nouvelle armée",
-      "effects": [
-        {
-          "type": "prestige",
-          "amount": -10
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "prestige",
           "faction": "fac_england",
           "amount": 15
-<<<<<<< HEAD
-=======
-        },
-        {
-          "type": "prestige",
-          "faction": "fac_scotland",
-          "amount": -10
-        },
-        {
-          "type": "treasury",
-          "amount": -5000
-        },
-        {
-          "type": "spawn_army",
-          "units": [
-            "unit_men_at_arms_foot",
-            "unit_crossbowmen",
-            "unit_mounted_sergeants"
-          ]
-        },
-        {
-          "type": "unrest",
-          "province": "all",
-          "amount": 10
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 1
@@ -157,12 +86,7 @@
     "value": "1424-08-17"
   },
   "sources": [
-<<<<<<< HEAD
     "Bataille de Verneuil (1424)",
     "Archibald Douglas (4e comte de Douglas)"
-=======
-    "Battle of Verneuil",
-    "Jonathan Sumption, The Hundred Years War, vol. V : Triumph and Illusion, 2023"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   ]
 }

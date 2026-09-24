@@ -24,17 +24,8 @@
         "id": "chr_charles_de_blois"
       },
       {
-        "type": "any_of",
-        "conditions": [
-          {
-            "type": "fired",
-            "event": "evt_arret_de_conflans"
-          },
-          {
-            "type": "fired",
-            "event": "evt_mort_jean_iii"
-          }
-        ]
+        "type": "fired",
+        "event": "evt_succession_bretagne"
       }
     ]
   },

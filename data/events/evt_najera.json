@@ -1,11 +1,7 @@
 {
   "id": "evt_najera",
   "title": "La bataille de Nájera",
-<<<<<<< HEAD
   "text": "Le prince de Galles a franchi Roncevaux pour rendre son trône à Pierre le Cruel. À Nájera, ses archers dispersent l'armée d'Henri de Trastamare ; du Guesclin est pris une fois de plus. Mais Pierre ne paie pas, et la dysenterie ravage l'armée anglaise.",
-=======
-  "text": "Le 3 avril 1367, à Nájera, le Prince noir, venu rendre son trône à Pierre de Castille, taille en pièces l'armée d'Henri de Trastamare ; Du Guesclin est de nouveau prisonnier. Mais Henri s'est échappé, et Pierre ne paie pas les soldes promises. L'armée anglaise fond sous la dysenterie, et le prince en rapporte le mal qui le tuera.",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -15,31 +11,17 @@
     "until_year": 1368,
     "conditions": [
       {
-<<<<<<< HEAD
         "type": "faction_exists",
         "faction": "fac_castile"
       },
       {
         "type": "faction_exists",
         "faction": "fac_england"
-=======
-        "type": "character_alive",
-        "id": "chr_edward_of_woodstock"
-      },
-      {
-        "type": "character_alive",
-        "id": "chr_pedro_i_de_castille"
-      },
-      {
-        "type": "faction_exists",
-        "faction": "fac_castile"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       }
     ]
   },
   "scope": {
     "type": "faction",
-<<<<<<< HEAD
     "faction": "fac_castile"
   },
   "options": [
@@ -60,44 +42,18 @@
           "type": "prestige",
           "character": "chr_edward_of_woodstock",
           "faction": "fac_england",
-=======
-    "faction": "fac_england"
-  },
-  "options": [
-    {
-      "text": "Attendre en Castille le paiement promis",
-      "effects": [
-        {
-          "type": "prestige",
-          "character": "chr_edward_of_woodstock",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
           "amount": 15
         },
         {
           "type": "add_trait",
           "character": "chr_edward_of_woodstock",
-<<<<<<< HEAD
           "faction": "fac_england",
           "trait": "trait_sickly"
-=======
-          "trait": "trait_sickly"
-        },
-        {
-          "type": "treasury",
-          "amount": -2000
-        },
-        {
-          "type": "opinion",
-          "faction": "fac_castile",
-          "amount": -20,
-          "reason": "Soldes impayées de Nájera"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 1
     },
     {
-<<<<<<< HEAD
       "text": "Laisser les Anglais repartir sans solde",
       "effects": [
         {
@@ -114,33 +70,12 @@
           "type": "treasury",
           "faction": "fac_england",
           "amount": -4000
-=======
-      "text": "Rentrer en Aquitaine et lever un fouage",
-      "effects": [
-        {
-          "type": "prestige",
-          "character": "chr_edward_of_woodstock",
-          "amount": 15
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "add_trait",
           "character": "chr_edward_of_woodstock",
-<<<<<<< HEAD
           "faction": "fac_england",
           "trait": "trait_sickly"
-=======
-          "trait": "trait_sickly"
-        },
-        {
-          "type": "treasury",
-          "amount": 3000
-        },
-        {
-          "type": "unrest",
-          "province": "prov_guyenne",
-          "amount": 15
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 2
@@ -150,14 +85,8 @@
     "value": "1367-04-03"
   },
   "sources": [
-<<<<<<< HEAD
     "Bataille de Nájera",
     "Pierre Ier de Castille",
     "Henri II de Castille"
-=======
-    "Battle of Nájera",
-    "Richard Barber, Edward, Prince of Wales and Aquitaine, 1978",
-    "Peter Russell, The English Intervention in Spain and Portugal, 1955"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   ]
 }

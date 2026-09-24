@@ -1,11 +1,7 @@
 {
   "id": "evt_formigny",
   "title": "La bataille de Formigny",
-<<<<<<< HEAD
   "text": "L'armée de secours de Thomas Kyriell a débarqué à Cherbourg. À Formigny, les couleuvrines de Jean Bureau délogent les archers de leurs retranchements, et le connétable de Richemont surgit sur leur flanc : la Normandie est perdue pour l'Angleterre.",
-=======
-  "text": "Le 15 avril 1450, près de Formigny, l'armée de secours de Thomas Kyriell, débarquée à Cherbourg, est prise sous le feu de deux couleuvrines du comte de Clermont. Les archers quittent leurs pieux pour s'emparer des pièces ; le connétable de Richemont, accouru avec ses Bretons, les prend de flanc. Caen tombe le 12 juin, Cherbourg le 12 août : la Normandie est perdue pour l'Angleterre.",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   "kind": "historical",
   "trigger": {
     "date": {
@@ -18,14 +14,6 @@
         "type": "at_war",
         "a": "fac_england",
         "b": "fac_france"
-<<<<<<< HEAD
-=======
-      },
-      {
-        "type": "controls",
-        "faction": "fac_england",
-        "province": "prov_normandie_ouest"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       }
     ]
   },
@@ -35,11 +23,7 @@
   },
   "options": [
     {
-<<<<<<< HEAD
       "text": "Abandonner la Normandie",
-=======
-      "text": "Se résigner à perdre la Normandie",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "effects": [
         {
           "type": "prestige",
@@ -48,31 +32,18 @@
         {
           "type": "prestige",
           "faction": "fac_france",
-<<<<<<< HEAD
           "amount": 15
         },
         {
           "type": "unrest",
           "province": "all",
           "amount": 10
-=======
-          "amount": 20
-        },
-        {
-          "type": "unrest",
-          "province": "prov_normandie_ouest",
-          "amount": 20
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 2
     },
     {
-<<<<<<< HEAD
       "text": "Envoyer de nouveaux renforts",
-=======
-      "text": "Envoyer une nouvelle armée",
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
       "effects": [
         {
           "type": "prestige",
@@ -80,30 +51,17 @@
         },
         {
           "type": "treasury",
-<<<<<<< HEAD
           "amount": -6000
-=======
-          "amount": -8000
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         },
         {
           "type": "prestige",
           "faction": "fac_france",
-<<<<<<< HEAD
           "amount": 15
         },
         {
           "type": "unrest",
           "province": "all",
           "amount": 5
-=======
-          "amount": 20
-        },
-        {
-          "type": "devastation",
-          "province": "prov_normandie_ouest",
-          "amount": 15
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
         }
       ],
       "ai_weight": 1
@@ -113,12 +71,7 @@
     "value": "1450-04-15"
   },
   "sources": [
-<<<<<<< HEAD
     "Bataille de Formigny",
     "Jean Bureau"
-=======
-    "Battle of Formigny",
-    "Philippe Contamine, Charles VII, Perrin, 2017"
->>>>>>> worktree-agent-a2d518a3bb7e2fbd8
   ]
 }
