@@ -12,9 +12,11 @@ Choix du joueur au lancement :
 
 | Vague | Lots | État |
 |---|---|---|
-| 0 | P1 petits points cœur (no_quarter, étain, IA Normandie ouest) ; P2 rapport de saison + smoke ; R exploration TW | en cours |
+| 0 | P1 petits points cœur (no_quarter, étain, IA Normandie ouest) ; P2 rapport de saison + smoke ; R exploration TW | R fait ; P1, P2 en cours |
+| 1 | B1 maillages soldats/chevaux (Blender) ; B2 bannières d'unité + vignettes + écran de fin ; C1 minicarte + brouillard | B1 lancé |
 
 ## Décisions
+- Plan : `docs/design/2026-09-24-rapprochement-total-war.md` (lots B1-B4, C1-C6). Thème parchemin conservé, densité TW visée.
 
 ## Prochaine étape
 Attendre la vague 0, fusionner (worktree séparé, ff-only), écrire le plan `docs/design/2026-09-24-rapprochement-total-war.md`.
