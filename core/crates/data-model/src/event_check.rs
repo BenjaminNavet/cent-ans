@@ -311,6 +311,15 @@ impl EventRefs<'_> {
                 self.check("effects.order", Some(order), &data.chivalric_orders);
                 self.faction("effects.faction", faction.as_ref());
             }
+            EventEffect::TransferProvince {
+                province,
+                faction,
+                from,
+            } => {
+                self.province("effects.province", Some(province));
+                self.faction("effects.faction", faction.as_ref());
+                self.faction("effects.from", from.as_ref());
+            }
         }
     }
 }

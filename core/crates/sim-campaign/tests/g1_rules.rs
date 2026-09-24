@@ -4,7 +4,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{BuildingId, FactionId, GameData, ProvinceId, UnitTypeId};
+use data_model::{BuildingId, EventEffect, FactionId, GameData, ProvinceId, UnitTypeId};
 use sim_campaign::{CampaignState, Order, OrderError};
 
 fn data() -> GameData {
@@ -206,4 +206,55 @@ fn levy_bonuses_reach_the_auto_resolver_and_the_battle_setup() {
         setup.attacker.units[0].stats.armor,
         unit_type.stats.armor + 5
     );
+}
+
+// 4. transfer_province -------------------------------------------------------
+
+fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: EventEffect) {
+    let ctx = sim_campaign::EventContext {
+        faction: Some(fac(faction)),
+        province: None,
+    };
+    sim_campaign::chronicle::apply_effect(state, data, &effect, &ctx, &mut Vec::new());
+}
+
+#[test]
+fn transfer_province_hands_over_ownership_and_control() {
+    let data = data();
+    let mut state = quiet_france(&data, 6);
+    let dauphine = prov("prov_dauphine");
+    let transfer = |from: &str| EventEffect::TransferProvince {
+        province: dauphine.clone(),
+        faction: None,
+        from: Some(fac(from)),
+    };
+    // `from` must hold it: England does not.
+    apply(&mut state, &data, "fac_france", transfer("fac_england"));
+    assert_eq!(state.provinces[&dauphine].owner, fac("fac_empire"));
+    apply(&mut state, &data, "fac_france", transfer("fac_empire"));
+    let p = &state.provinces[&dauphine];
+    assert_eq!(
+        (&p.owner, &p.controller),
+        (&fac("fac_france"), &fac("fac_france"))
+    );
+    assert!(p.garrison.is_empty() && p.siege.is_none());
+    // Never a faction's capital.
+    let paris = state.factions[&fac("fac_france")].capital.clone();
+    let seize = EventEffect::TransferProvince {
+        province: paris.clone(),
+        faction: Some(fac("fac_england")),
+        from: None,
+    };
+    apply(&mut state, &data, "fac_france", seize);
+    assert_eq!(state.provinces[&paris].owner, fac("fac_france"));
+}
+
+#[test]
+fn the_dauphine_purchase_transfers_the_province() {
+    let data = data();
+    let event = &data.events[&data_model::EventId::new("evt_achat_dauphine").unwrap()];
+    let has_transfer = event.options[0].effects.iter().any(|e| {
+        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_dauphine"))
+    });
+    assert!(has_transfer);
 }
