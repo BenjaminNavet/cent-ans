@@ -6,12 +6,12 @@ shader_type spatial;
 // ombre d'encre à l'extérieur, voile léger qui se renforce vers le bord de portée.
 render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabled, fog_disabled;
 
-uniform sampler2D mask : filter_linear, repeat_disable;
+uniform sampler2D mask : filter_linear_mipmap, repeat_disable;
 uniform vec2 origin = vec2(0.0);
 uniform vec2 extent = vec2(1.0);
 uniform vec2 texel = vec2(0.01);
-uniform vec4 fill_color : source_color = vec4(0.98, 0.86, 0.52, 0.10);
-uniform vec4 rim_fill_color : source_color = vec4(0.98, 0.80, 0.38, 0.26);
+uniform vec4 fill_color : source_color = vec4(0.98, 0.88, 0.58, 0.05);
+uniform vec4 rim_fill_color : source_color = vec4(1.0, 0.82, 0.40, 0.20);
 uniform vec4 edge_color : source_color = vec4(1.0, 0.86, 0.42, 1.0);
 uniform vec4 shadow_color : source_color = vec4(0.16, 0.09, 0.03, 0.55);
 uniform float edge_px = 1.6;
