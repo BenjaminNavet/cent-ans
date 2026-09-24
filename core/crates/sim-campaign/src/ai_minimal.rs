@@ -39,6 +39,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     }
     // The table (H3).
     orders.extend(crate::table::ai_choose_diets(state, data, faction));
+    // Coinage (H5).
+    orders.extend(crate::coinage::ai_choose_coinage(state, data, faction));
 
     // In debt and still losing money: dismiss the most expensive field unit.
     if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn

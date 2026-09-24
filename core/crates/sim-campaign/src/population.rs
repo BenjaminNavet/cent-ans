@@ -241,6 +241,8 @@ pub(crate) fn resolve_population(
             .map(|class| {
                 let mut merged = effects;
                 merged.merge(&crate::table::diet_class_effects(state, data, &id, *class));
+                // H5: inflation and the coinage itself.
+                merged.merge(&crate::coinage::class_effects(state, &controller, *class));
                 merged
             })
             .collect();

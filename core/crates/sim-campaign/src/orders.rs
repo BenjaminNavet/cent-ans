@@ -714,9 +714,10 @@ impl CampaignState {
         let flat = effects.recruit_cost.flat + targeted.flat;
         let percent = (effects.recruit_cost.percent + targeted.percent).max(-75.0);
         let base = f64::from(unit_type.cost.money);
-        ((base + flat) * (1.0 + percent / 100.0))
+        // H5: prices follow the coinage.
+        let prices = crate::coinage::price_factor(self, faction);
+        (((base + flat) * (1.0 + percent / 100.0)).max(base / 4.0) * prices)
             .round()
-            .max(base / 4.0)
             .max(0.0) as u32
     }
 
