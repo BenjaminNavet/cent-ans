@@ -13,6 +13,8 @@ const RUBRIC := Color(0.55, 0.12, 0.10)
 const UNREAD := Color(0.52, 0.46, 0.38)
 const SIZE := Vector2(980, 640)
 const ALL_TAB := "Toutes"
+const HERB_CATEGORY := "plante"
+const HERB_HEADER := "__herbier__"
 
 var current_id: String = ""
 var _history: Array = []
@@ -64,7 +66,9 @@ func _ready() -> void:
 	_list = ItemList.new()
 	_list.custom_minimum_size = Vector2(270, 0)
 	_list.add_theme_font_size_override("font_size", 15)
-	_list.item_selected.connect(func(index: int) -> void: navigate.call_deferred(str(_list.get_item_metadata(index))))
+	_list.item_selected.connect(func(index: int) -> void:
+		if str(_list.get_item_metadata(index)) != "":
+			navigate.call_deferred(str(_list.get_item_metadata(index))))
 	split.add_child(_list)
 	split.add_child(VSeparator.new())
 	_scroll = ScrollContainer.new()
@@ -251,7 +255,18 @@ func _refresh_list() -> void:
 	var query := _search.text.strip_edges().to_lower()
 	_visible_ids.clear()
 	_list.clear()
+	# H9 : dans un onglet mêlant fiches et plantes (Médecine et herbier), les plantes forment
+	# une sous-section « Herbier » en fin de liste.
+	var plants: Array = ids.filter(func(id: String) -> bool: return str(codex.call("entry", id).get("category", "")) == HERB_CATEGORY)
+	var herb_header := _tabs.current_tab > 0 and not plants.is_empty() and plants.size() < ids.size()
+	if herb_header:
+		ids = ids.filter(func(id: String) -> bool: return not plants.has(id)) + [HERB_HEADER] + plants
 	for id in ids:
+		if id == HERB_HEADER:
+			var header := _list.add_item("— Herbier —", null, false)
+			_list.set_item_custom_fg_color(header, RUBRIC)
+			_list.set_item_metadata(header, "")
+			continue
 		if query != "" and not _matches(codex.call("entry", id), query):
 			continue
 		_visible_ids.append(id)
