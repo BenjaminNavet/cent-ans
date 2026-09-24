@@ -160,6 +160,7 @@ func _decorate_top_bar() -> void:
 	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
 	_decorate_button(court_button, "hud_court", true)
 	_decorate_button(tech_button, "hud_technologies", true)
+	_add_codex_button()
 	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
 
@@ -212,12 +213,26 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	var armies := int(economy.get("army_upkeep", 0))
 	var buildings := int(economy.get("building_upkeep", 0))
 	var court := int(economy.get("administration_upkeep", 0))
-	var net := gross - armies - buildings - court
+	var table := int(economy.get("table_upkeep", 0))  # H3 : la Table (diètes des provinces)
+	# H5 : le seigneuriage est déjà dans les recettes, la refonte dans l'administration.
+	var seigniorage := int(economy.get("seigniorage", 0))
+	var recoinage := int(economy.get("recoinage", 0))
+	var net := gross - armies - buildings - court - table
 	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
 	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
-	income_label.tooltip_text = "Prévision pour la prochaine saison\nRecettes : %s ℔\nArmées : -%s ℔\nBâtiments : -%s ℔\nCour et administration : -%s ℔\nSolde : %s ℔" % [
-		ProvincePanel._thousands(gross), ProvincePanel._thousands(armies),
-		ProvincePanel._thousands(buildings), ProvincePanel._thousands(court), _signed(net)]
+	var lines := PackedStringArray(["Prévision pour la prochaine saison"])
+	lines.append("Recettes : %s ℔" % ProvincePanel._thousands(gross))
+	if seigniorage != 0:
+		lines.append("    dont seigneuriage : %s ℔" % _signed(seigniorage))
+	lines.append("Armées : -%s ℔" % ProvincePanel._thousands(armies))
+	lines.append("Bâtiments : -%s ℔" % ProvincePanel._thousands(buildings))
+	lines.append("Cour et administration : -%s ℔" % ProvincePanel._thousands(court))
+	if recoinage != 0:
+		lines.append("    dont refonte des monnaies : -%s ℔" % ProvincePanel._thousands(recoinage))
+	if table != 0:
+		lines.append("La Table : -%s ℔" % ProvincePanel._thousands(table))
+	lines.append("Solde : %s ℔" % _signed(net))
+	income_label.tooltip_text = "\n".join(lines)
 
 
 static func _signed(value: int) -> String:
@@ -381,6 +396,9 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
 		elif kind == "income":
 			line = "[color=#4a3a10]%s[/color]" % text
+		elif SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
+			var style: Dictionary = SeasonReport.KIND_STYLES[kind]
+			line = "[color=%s]%s %s[/color]" % [style["color"], style["glyph"], text]
 		else:
 			line = text
 		new_lines.append(line)
@@ -665,3 +683,21 @@ func _fit_hover_label() -> void:
 	hover_label.size.x = maxf(hover_label.get_combined_minimum_size().x + 24.0, 400.0)
 	hover_label.position.x = (get_viewport().get_visible_rect().size.x - hover_label.size.x) * 0.5
 	queue_layout()
+
+
+## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; la touche K reste active.
+func _add_codex_button() -> void:
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles == null or tech_button.get_parent().has_node("CodexButton"):
+		return
+	var button := Button.new()
+	button.name = "CodexButton"
+	button.tooltip_text = "Codex : l'histoire et le savoir du temps (K)"
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(func() -> void: bubbles.call("toggle_window"))
+	tech_button.get_parent().add_child(button)
+	tech_button.get_parent().move_child(button, tech_button.get_index() + 1)
+	if IconLibrary.has_icon("hud_codex"):
+		_decorate_button(button, "hud_codex", true)
+	else:
+		button.text = "Codex"
