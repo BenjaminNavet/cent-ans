@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_roskilde",
+    "province": "prov_sjaelland",
+    "kind": "city",
+    "name": {
+      "display": "Roskilde",
+      "local": "Roskilde",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      12.0803,
+      55.6415
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s'est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu'à Valdemar IV (1340).",
+    "sources": [
+      "Interrègne danois (1332-1340)",
+      "Scanie",
+      "Roskilde"
+    ]
+  },
+  {
+    "id": "set_copenhagen",
+    "province": "prov_sjaelland",
+    "kind": "town",
+    "name": {
+      "display": "Copenhague",
+      "local": "Køpmannæhafn",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      12.5683,
+      55.6761
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Ville marchande fortifiée de l'évêque de Roskilde, en plein essor sur le Sund.",
+    "sources": [
+      "Copenhague"
+    ]
+  },
+  {
+    "id": "set_lund",
+    "province": "prov_sjaelland",
+    "kind": "town",
+    "name": {
+      "display": "Lund",
+      "local": "Lund",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      13.191,
+      55.7047
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancien siège de l'archevêché de toute la Scandinavie, en Scanie danoise.",
+    "sources": [
+      "Lund"
+    ]
+  },
+  {
+    "id": "set_skanor",
+    "province": "prov_sjaelland",
+    "kind": "village",
+    "name": {
+      "display": "Skanör",
+      "local": "Skanör",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      12.8333,
+      55.4167
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_fair"
+    ],
+    "port": true,
+    "description": "Bourg de pêcheurs de Scanie, site de l'immense foire saisonnière au hareng fréquentée par les marchands hanséates.",
+    "sources": [
+      "Skanör med Falsterbo"
+    ]
+  }
+]
