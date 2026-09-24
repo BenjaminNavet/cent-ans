@@ -22,4 +22,4 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Commiter tôt et souvent : un commit `wip:` dès qu'un état compile ou qu'un fichier est complet, au plus tard toutes les 15 minutes de travail. Une interruption ne doit jamais perdre plus de 15 minutes.
 - Commencer chaque tâche par le squelette (API publique, fichiers vides, tests désactivés) et le commiter avant d'implémenter.
 - Écrire un fichier `docs/wip/<tâche>.md` (état, prochaine étape) mis à jour à chaque commit `wip:` pour qu'un agent de reprise sache où continuer.
-- Pas plus de 3 agents en parallèle par vague ; les agents d'implémentation bien spécifiés tournent sur un modèle plus léger (Sonnet) quand la tâche est mécanique.
+- Pas plus de 6 agents en parallèle par vague ; les agents d'implémentation bien spécifiés tournent sur un modèle plus léger (Sonnet) quand la tâche est mécanique.
