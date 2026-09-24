@@ -3,70 +3,108 @@
     "id": "set_rodez",
     "province": "prov_rouergue",
     "kind": "city",
-    "name": { "display": "Rodez", "local": "Rodés", "local_language": "occitan" },
-    "lonlat": [2.5726, 44.3506],
+    "name": {
+      "display": "Rodez",
+      "local": "Rodés",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.5726,
+      44.3506
+    ],
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du comté de Rouergue, cité épiscopale partagée entre pouvoir comtal et pouvoir religieux.",
-    "sources": ["Rodez", "Comté de Rouergue"]
-  },
-  {
-    "id": "set_auch",
-    "province": "prov_rouergue",
-    "kind": "town",
-    "name": { "display": "Auch", "local": "Aush", "local_language": "occitan" },
-    "lonlat": [0.5833, 43.6500],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Capitale du comté d'Armagnac tenu par Jean Ier d'Armagnac, lieutenant du roi en Languedoc.",
-    "sources": ["Auch", "Comté d'Armagnac"]
+    "sources": [
+      "Rodez",
+      "Comté de Rouergue"
+    ]
   },
   {
     "id": "set_najac",
     "province": "prov_rouergue",
     "kind": "castle",
-    "name": { "display": "Najac", "local": "Nàjac", "local_language": "occitan" },
-    "lonlat": [1.9667, 44.2167],
+    "name": {
+      "display": "Najac",
+      "local": "Nàjac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.9667,
+      44.2167
+    ],
     "weight": 11,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse royale dominant l'Aveyron, verrou du Rouergue.",
-    "sources": ["Château de Najac"]
+    "sources": [
+      "Château de Najac"
+    ]
   },
   {
     "id": "set_conques",
     "province": "prov_rouergue",
     "kind": "abbey",
-    "name": { "display": "Conques", "local": "Concas", "local_language": "occitan" },
-    "lonlat": [2.3986, 44.5822],
+    "name": {
+      "display": "Conques",
+      "local": "Concas",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.3986,
+      44.5822
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Grande abbaye de pèlerinage abritant les reliques de sainte Foy, étape du chemin de Compostelle.",
-    "sources": ["Abbaye de Conques"]
+    "sources": [
+      "Abbaye de Conques"
+    ]
   },
   {
     "id": "set_belcastel",
     "province": "prov_rouergue",
     "kind": "village",
-    "name": { "display": "Belcastel", "local": "Belcastèl", "local_language": "occitan" },
-    "lonlat": [2.3167, 44.3833],
+    "name": {
+      "display": "Belcastel",
+      "local": "Belcastèl",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.3167,
+      44.3833
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Village blotti au pied de son château, sur l'Aveyron.",
-    "sources": ["Belcastel"]
+    "sources": [
+      "Belcastel"
+    ]
   }
 ]

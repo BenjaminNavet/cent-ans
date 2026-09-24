@@ -9,7 +9,7 @@ Chantier de la session « historien » (23-24 septembre 2026). Conception :
 |---|---|---|
 | Partout | **Mots « découverte »** : un mot rubriqué (rouge souligné) ouvre une bulle au survol ; les liens d'une bulle en ouvrent d'autres (jusqu'à 6). Un mot déjà lu passe en brun. | survol ; clic = fiche ; clic droit = épingler ; Échap |
 | Infobulles riches | **Épingler** une infobulle pour cliquer ses mots | `T` pendant qu'elle est affichée |
-| Codex | 218 fiches : personnages, dynasties, lieux, guerre, société, religion, savoirs, héraldique, calendrier, vie quotidienne, table, plantes, médecine ; compteur de découvertes, recherche, « Voir dans l'encyclopédie » | `K` |
+| Codex | 231 fiches : personnages, dynasties, lieux, guerre, société, religion, savoirs, héraldique, calendrier, vie quotidienne, table, plantes, médecine ; compteur de découvertes, recherche, « Voir dans l'encyclopédie » | `K` |
 | Encyclopédie (F8) | règles et données ; bouton « Fiche historique » vers le Codex | `L` |
 | Panneau de province, onglet Ville | **La Table** : régime alimentaire (7), Carême au printemps, coût d'hiver | — |
 | Technologies | **Médecine** : 3e arbre (14 techs), plantes de l'herbier, notes historiques | onglet Médecine |
@@ -34,7 +34,16 @@ l'Étoile brisé par la perte de la moitié de ses membres en une saison (Mauron
 
 ## Pistes pour la suite
 
-Suggestions de l'audit non encore faites (personnages : Pétrarque, Gaston Fébus, Humbert II… ;
-données : prénoms arabes pour Grenade, ressource étain), icônes propres aux régimes, portraits
-des nouveaux personnages (clé OpenRouter après le 1er octobre), bouton Codex dans le bandeau
-(session d'interface).
+Suite faite le 24 septembre 2026 (`docs/wip/historien-suite.md`) :
+- **S1** : 12 nouveaux personnages de 1337 (Jeanne de Valois de Hainaut, Hugues Quiéret, Nicolas
+  Béhuchet, Godefroy d'Harcourt, Olivier IV de Clisson, Louis Ier de Bourbon, Gaston II de
+  Foix-Béarn, Jean Ier d'Armagnac, Humbert II de Viennois, Jacques III de Majorque, Pierre Roger,
+  Pétrarque) ; Abu al-Hasan Ali et Valdemar IV ont une fiche Codex seule (pas de faction mérinide
+  ni danoise).
+- **S2** : Grenade a ses prénoms arabes andalous (`names_ar`) ; l'étain (`res_tin`) remplace le fer
+  en Cornouailles et en Devon, avec la fiche des stannaries.
+- **S3** : chaque régime de la Table a son icône, l'étain aussi.
+
+Reste : portraits des nouveaux personnages (clé OpenRouter après le 1er octobre) ; un débouché
+pour l'étain (un bâtiment n'accepte qu'une ressource requise) ; faction mérinide ou danoise si la
+carte s'étend.

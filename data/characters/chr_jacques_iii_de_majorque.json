@@ -1,0 +1,46 @@
+{
+  "id": "chr_jacques_iii_de_majorque",
+  "name": {
+    "display": "Jacques III de Majorque",
+    "local": "Jaume III de Mallorca",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Barcelone",
+  "faction": "fac_aragon",
+  "role": "noble",
+  "birth": {
+    "value": "1315-01-05"
+  },
+  "death": {
+    "value": "1349-10-25",
+    "place": "Llucmajor",
+    "note": "Tué en tentant de reprendre son royaume."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Majorque"
+    },
+    {
+      "title": "Seigneur de Montpellier"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_stubborn",
+    "trait_unpopular"
+  ],
+  "piety": 45,
+  "starting_location": "prov_mallorca",
+  "status": "at_court",
+  "description": "Roi de Majorque, de Minorque et d'Ibiza, seigneur de Montpellier, vassal contesté de son cousin Pierre IV d'Aragon : liberté du jeu, la branche cadette de Majorque est rattachée à la faction aragonaise plutôt que traitée comme royaume indépendant hors carte. Accusé de forfaiture, il perd son royaume en 1343 et vend Montpellier à la France en 1349 pour financer sa reconquête, où il meurt à Llucmajor.",
+  "sources": [
+    "Jacques III de Majorque",
+    "Royaume de Majorque"
+  ]
+}

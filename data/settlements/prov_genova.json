@@ -1,0 +1,150 @@
+[
+  {
+    "id": "set_genes",
+    "province": "prov_genova",
+    "kind": "city",
+    "name": {
+      "display": "Gênes",
+      "local": "Zena",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.9463,
+      44.4056
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Gênes, grande république maritime rivale de Venise et Pise.",
+    "sources": [
+      "République de Gênes",
+      "Simone Boccanegra",
+      "Gênes"
+    ]
+  },
+  {
+    "id": "set_savona",
+    "province": "prov_genova",
+    "kind": "town",
+    "name": {
+      "display": "Savone",
+      "local": "Sann-a",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.4791,
+      44.3082
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Commune maritime rivale de Gênes, soumise à son autorité après des siècles de rivalité.",
+    "sources": [
+      "Savone"
+    ]
+  },
+  {
+    "id": "set_portovenere",
+    "province": "prov_genova",
+    "kind": "castle",
+    "name": {
+      "display": "Portovenere",
+      "local": "Portovenere",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.8399,
+      44.0505
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Avant-poste fortifié génois verrouillant le golfe de La Spezia.",
+    "sources": [
+      "Portovenere"
+    ]
+  },
+  {
+    "id": "set_chiavari",
+    "province": "prov_genova",
+    "kind": "town",
+    "name": {
+      "display": "Chiavari",
+      "local": "Ciavai",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.3193,
+      44.3164
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg marchand de la riviera du Levant.",
+    "sources": [
+      "Chiavari"
+    ]
+  },
+  {
+    "id": "set_san_fruttuoso",
+    "province": "prov_genova",
+    "kind": "abbey",
+    "name": {
+      "display": "San Fruttuoso",
+      "local": "San Fruttuoso",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.1789,
+      44.3086
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine nichée dans une crique du promontoire de Portofino, liée à la famille Doria.",
+    "sources": [
+      "Abbaye de San Fruttuoso"
+    ]
+  }
+]

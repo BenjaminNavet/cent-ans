@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_bilbao",
+    "province": "prov_biscay",
+    "kind": "city",
+    "name": {
+      "display": "Bilbao",
+      "local": "Bilbo",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -2.935,
+      43.263
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field",
+      "bld_forge"
+    ],
+    "port": true,
+    "description": "Bilbao, jeune port fondé en 1300, en plein essor sur le commerce du fer et de la laine.",
+    "sources": [
+      "Seigneurie de Biscaye",
+      "Juan Núñez III de Lara",
+      "Bilbao"
+    ]
+  },
+  {
+    "id": "set_san_sebastian",
+    "province": "prov_biscay",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Sébastien",
+      "local": "Sant Sabastian",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.9812,
+      43.3183
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port basque fondé sous fuero navarrais en 1180, passé à la Castille en 1200 ; actif dans le commerce de la laine avec l'Angleterre et la Flandre.",
+    "sources": [
+      "Saint-Sébastien",
+      "Histoire de Saint-Sébastien"
+    ]
+  },
+  {
+    "id": "set_vitoria",
+    "province": "prov_biscay",
+    "kind": "town",
+    "name": {
+      "display": "Vitoria",
+      "local": "Vitoria",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -2.6722,
+      42.8467
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville fondée par Sanche VI de Navarre en 1181, principal centre de l'Alava.",
+    "sources": [
+      "Vitoria-Gasteiz"
+    ]
+  },
+  {
+    "id": "set_orduna",
+    "province": "prov_biscay",
+    "kind": "castle",
+    "name": {
+      "display": "Orduña",
+      "local": "Urduña",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -2.9648,
+      43.0034
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la Vieille-Castille, verrou du col vers la Biscaye.",
+    "sources": [
+      "Orduña"
+    ]
+  }
+]

@@ -1,0 +1,121 @@
+[
+  {
+    "id": "set_palerme",
+    "province": "prov_sicilia",
+    "kind": "city",
+    "name": {
+      "display": "Palerme",
+      "local": "Palermu",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      13.3615,
+      38.1157
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Palerme, capitale du royaume de Sicile (Trinacria) de la maison aragonaise cadette.",
+    "sources": [
+      "Royaume de Sicile",
+      "Frédéric III de Sicile",
+      "Palerme"
+    ]
+  },
+  {
+    "id": "set_messina",
+    "province": "prov_sicilia",
+    "kind": "town",
+    "name": {
+      "display": "Messine",
+      "local": "Messina",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      15.554,
+      38.1938
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port du détroit, porte d'entrée de la Sicile aragonaise face au royaume de Naples angevin.",
+    "sources": [
+      "Messine"
+    ]
+  },
+  {
+    "id": "set_catania",
+    "province": "prov_sicilia",
+    "kind": "town",
+    "name": {
+      "display": "Catane",
+      "local": "Catania",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      15.0873,
+      37.5079
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville portuaire au pied de l'Etna, résidence royale favorite de Frédéric III de Sicile.",
+    "sources": [
+      "Catane"
+    ]
+  },
+  {
+    "id": "set_siracusa",
+    "province": "prov_sicilia",
+    "kind": "castle",
+    "name": {
+      "display": "Syracuse",
+      "local": "Sarausa",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      15.2866,
+      37.0755
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ancienne cité grecque, verrouillée par le château Maniace sur l'îlot d'Ortygie.",
+    "sources": [
+      "Syracuse"
+    ]
+  }
+]

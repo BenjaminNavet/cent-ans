@@ -18,6 +18,7 @@ AUTHORS: dict[str, str] = {
     "carl-olsen": "Carl Olsen",
     "cathelineau": "Cathelineau",
     "delapouite": "Delapouite",
+    "faithtoken": "Faithtoken",
     "heavenly-dog": "HeavenlyDog",
     "lorc": "Lorc",
     "skoll": "Skoll",
@@ -95,6 +96,7 @@ ICONS: dict[str, tuple[str, str]] = {
     "bld_siege_workshop": ("delapouite/hand-saw", "building"),
     "bld_stables": ("delapouite/stable", "building"),
     "bld_stone_walls": ("delapouite/stone-wall", "building"),
+    "bld_tin_blowing_house": ("delapouite/furnace", "building"),
     "bld_university": ("delapouite/graduate-cap", "building"),
     "bld_vineyard_press": ("delapouite/barrel", "building"),
     "bld_water_mill": ("caro-asercion/water-mill", "building"),
@@ -114,10 +116,19 @@ ICONS: dict[str, tuple[str, str]] = {
     "res_iron": ("lorc/metal-bar", "resource"),
     "res_salt": ("lorc/powder", "resource"),
     "res_stone": ("delapouite/stone-pile", "resource"),
+    "res_tin": ("faithtoken/ore", "resource"),
     "res_wheat": ("lorc/wheat", "resource"),
     "res_wine": ("lorc/grapes", "resource"),
     "res_wood": ("delapouite/wood-pile", "resource"),
     "res_wool": ("delapouite/wool", "resource"),
+    # --- Régimes alimentaires (data/diets, S3) ---
+    "diet_bread_pottage": ("lorc/cauldron", "resource"),
+    "diet_dairy": ("lorc/cheese-wedge", "resource"),
+    "diet_lenten_fish": ("delapouite/fish-smoking", "resource"),
+    "diet_meat_salting": ("delapouite/bacon", "resource"),
+    "diet_pulses": ("delapouite/peas", "resource"),
+    "diet_spiced_table": ("lorc/hot-spices", "resource"),
+    "diet_wine_bread": ("lorc/wine-glass", "resource"),
     # --- Technologies (data/technologies) ---
     "tech_artillery_fortification": ("heavenly-dog/defensive-wall", "technology"),
     "tech_bombards": ("lorc/cannon", "technology"),
@@ -222,6 +233,7 @@ EXPLICIT_DATA_DIRS: dict[str, str] = {
     "buildings": "building",
     "resources": "resource",
     "technologies": "technology",
+    "diets": "resource",
 }
 
 # data/ directories covered by a category field: dir -> (field, id prefix).
