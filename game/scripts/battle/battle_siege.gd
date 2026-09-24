@@ -29,6 +29,7 @@ var wall_height: float = 8.0
 var thickness: float = 3.0
 var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
 var house_sites: Array = []  # F5c : [{p: Vector2, radius}] = obstacles de la simulation
+var _fx: WallCollapseFx  # S1 : effondrement physique (rendu seulement)
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -44,6 +45,10 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	_ladder_mesh = _make_ladder(wall_height + 1.5)
 	for piece in siege.get("pieces", []):
 		_build_piece(piece)
+	_fx = WallCollapseFx.new()
+	_fx.name = "CollapseFx"
+	add_child(_fx)
+	_fx.setup(height_at)
 	# Tours (statiques, aucun dégât suivi contrairement aux pans de courtine) : les archères,
 	# de taille fixe, sont regroupées après coup par `BattleSiegeBatcher` (le fût conique et son
 	# couronnement restent des nœuds, rayon/hauteur variables par tour).
@@ -140,7 +145,7 @@ func _build_piece(piece: Dictionary) -> void:
 			door.material_override = _textured("wood", Color(0.55, 0.45, 0.38))
 			door.position = Vector3(side * length * 0.25, 2.5, thickness * 0.5 - 0.2)
 			door.name = "Door"
-			wall.add_child(door)
+			wall.add_child(door, true)  # nom lisible (« Door2 ») : les deux vantaux se cachent
 	else:
 		var body := MeshInstance3D.new()
 		var box := BoxMesh.new()
@@ -510,6 +515,8 @@ func update(p_siege: Dictionary, units: Array) -> void:
 			wall.scale = Vector3(1, 0.8 + 0.2 * ratio, 1)
 		var mat: StandardMaterial3D = view["material"]
 		mat.albedo_color = STONE_DARK.lerp(STONE, ratio)
+		_fx.sync_piece(i, view, ratio, intact)
+	_fx.prime()
 	_update_machines(units)
 
 
