@@ -75,12 +75,14 @@ var _slow: Dictionary = {}  # unit id -> {since, kind}
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _audio: Script = null
+var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
 
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
 func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> void:
 	_rng.seed = 4242
 	_gore = BattleGore.settings()
+	_level = BattleGore.level_settings()
 	gore = BattleGore.new()
 	gore.name = "Gore"
 	add_child(gore)
@@ -333,7 +335,7 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var skinned := BattleSkinned.has_figure(kind, variant)
 	var mounted := kind == "cavalry"
 	var limits: Dictionary = _gore.get("corpses", {})
-	var level := BattleGore.level_settings()
+	var level := _level
 	var cause := str(unit.get("loss_cause", "other"))
 	var deaths: Dictionary = _gore.get("deaths", {})
 	var death: Dictionary = deaths.get(cause, deaths.get("other", {}))
@@ -541,7 +543,7 @@ func _knock_down(id: int, at: Vector3, heading: float, mass: float, knocked: int
 	var impulse: Array = knock.get("impulse", [2.0, 4.5])
 	var hidden: Dictionary = _hidden.get(id, {})
 	var clip_len := BattleSkinned.clip_seconds(kind, variant, "knockdown")
-	var level := BattleGore.level_settings()
+	var level := _level
 	var sprays: Dictionary = _gore.get("sprays", {})
 	var picks: Array = order.slice(0, pool)
 	picks.shuffle()
@@ -639,7 +641,7 @@ func _advance_lags(dt: float) -> void:
 ## Taches progressives d'un régiment vivant (pertes subies, durée de mêlée) × réglage « Sang ».
 func _living_blood(unit: Dictionary, id: int) -> float:
 	var stains: Dictionary = _gore.get("living_stains", {})
-	var level := float(BattleGore.level_settings().get("stains", 0.0))
+	var level := float(_level.get("stains", 0.0))
 	if level <= 0.0:
 		return 0.0
 	var initial := maxf(float(unit.get("initial_soldiers", unit["soldiers"])), 1.0)
