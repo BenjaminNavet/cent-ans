@@ -6,10 +6,12 @@
 
 mod deployment;
 mod pathing;
+mod reinforcements;
 mod separation;
 mod siege_extra;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
+pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
 
 use data_model::{Ability, UnitCategory, UnitStats};
@@ -307,6 +309,7 @@ impl BattleSim {
             deploying: false,
             path_cache: Default::default(),
         };
+        sim.hold_reserves();
         if sim.siege.is_some() {
             sim.deploy_siege();
         } else {
@@ -351,7 +354,7 @@ impl BattleSim {
                 SideId::Defender => (DEFENDER_LINE_Z, std::f64::consts::PI, 1.0),
             };
             let ids: Vec<usize> = (0..self.units.len())
-                .filter(|&i| self.units[i].side == side)
+                .filter(|&i| self.units[i].side == side && !self.units[i].reserve)
                 .collect();
             let of = |cat: &dyn Fn(&Unit) -> bool| -> Vec<usize> {
                 ids.iter()
@@ -409,7 +412,9 @@ impl BattleSim {
 
     fn side_units(&self, side: SideId, keep: impl Fn(&Unit) -> bool) -> Vec<usize> {
         (0..self.units.len())
-            .filter(|&i| self.units[i].side == side && keep(&self.units[i]))
+            .filter(|&i| {
+                self.units[i].side == side && !self.units[i].reserve && keep(&self.units[i])
+            })
             .collect()
     }
 
@@ -1031,6 +1036,7 @@ impl BattleSim {
         self.tick_orders(DT);
         self.elapsed += DT;
         self.ticks += 1;
+        self.release_reserves();
         self.check_end();
     }
 
@@ -2300,7 +2306,7 @@ impl BattleSim {
     pub fn strength(&self, side: SideId) -> u32 {
         self.units
             .iter()
-            .filter(|u| u.side == side && u.able() && !u.synthetic)
+            .filter(|u| u.side == side && (u.able() || u.reserve) && !u.synthetic)
             .map(Unit::soldiers)
             .sum()
     }

@@ -125,6 +125,12 @@ fn deployment_phase_validates_zone() {
     assert_eq!((sim.units()[0].x, sim.units()[0].facing), (300.0, 0.3));
     let far = sim.deploy_unit(0, 300.0, zone.z1 + 50.0, None);
     assert_eq!(far, Err(CommandError::OutsideZone(0)));
+    let text = sim.error_text(&far.unwrap_err());
+    let name = &sim.units()[0].name;
+    assert_eq!(
+        text,
+        format!("Les {name} doivent être placés dans votre zone de déploiement")
+    );
     assert_eq!(
         sim.deploy_unit(3, 300.0, 700.0, None),
         Err(CommandError::NotYours(3))
@@ -289,10 +295,7 @@ fn towers_shoot_and_the_garrison_sallies() {
     assert!(out, "out through the gate");
 }
 
-/// F5a § 5 (staggered reinforcements beyond 20 regiments) is not done yet.
-#[test]
-#[ignore = "F5a point 5 not implemented (see docs/wip/f5a-battle-sim.md)"]
-fn reinforcements_enter_from_edge() {}
+// F5a § 5 (staggered reinforcements beyond 20 regiments): see `tests/f5d.rs`.
 
 /// Same setup, seed and deployment: same battle, field and siege alike.
 #[test]
