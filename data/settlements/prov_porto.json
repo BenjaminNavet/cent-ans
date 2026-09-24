@@ -1,0 +1,119 @@
+[
+  {
+    "id": "set_porto",
+    "province": "prov_porto",
+    "kind": "city",
+    "name": {
+      "display": "Porto",
+      "local": "Porto",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.6291,
+      41.1579
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Porto, port du Douro donnant son nom au royaume.",
+    "sources": [
+      "Royaume de Portugal",
+      "Porto",
+      "Braga"
+    ]
+  },
+  {
+    "id": "set_braga",
+    "province": "prov_porto",
+    "kind": "town",
+    "name": {
+      "display": "Braga",
+      "local": "Braga",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.4265,
+      41.5454
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Siège archiépiscopal primatial du Portugal, ville romaine christianisée de longue date.",
+    "sources": [
+      "Braga"
+    ]
+  },
+  {
+    "id": "set_guimaraes",
+    "province": "prov_porto",
+    "kind": "castle",
+    "name": {
+      "display": "Guimarães",
+      "local": "Guimarães",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.2918,
+      41.4425
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château berceau du Portugal, où serait né Afonso Henriques, premier roi.",
+    "sources": [
+      "Guimarães",
+      "Château de Guimarães"
+    ]
+  },
+  {
+    "id": "set_viana",
+    "province": "prov_porto",
+    "kind": "village",
+    "name": {
+      "display": "Viana",
+      "local": "Viana de Foz de Lima",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.8323,
+      41.6932
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg de pêcheurs à l'embouchure du Lima, chartré en 1258 par Afonso III.",
+    "sources": [
+      "Viana do Castelo"
+    ]
+  }
+]
