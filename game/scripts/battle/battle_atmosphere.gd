@@ -44,8 +44,12 @@ const PRESETS := {
 }
 
 
+## Soleil plafonné (ombres longues lisibles, faces éclairées vues depuis la caméra par défaut).
+const MAX_SUN_ELEVATION := 36.0
+const HDRI_AMBIENT_BOOST := 1.35
+
 ## Densité du brouillard volumétrique par temps (actif selon le niveau de `RenderQuality`).
-const VOLUMETRIC_DENSITY := {"clear": 0.0015, "fog": 0.012, "rain": 0.006, "snow": 0.007}
+const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.004, "rain": 0.0035, "snow": 0.004}
 
 
 ## Applique le préréglage `key` ; `camera` reçoit les précipitations éventuelles ; `season`
@@ -108,7 +112,13 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 		if (env.sky.sky_material as ShaderMaterial).shader != SKY_SHADER:
 			env.adjustment_contrast = 1.0
 			env.adjustment_saturation = 1.0
-			p["elevation"] = AtmosphereLibrary.sun_elevation(look, float(p["elevation"]))
+			p["elevation"] = minf(AtmosphereLibrary.sun_elevation(look, float(p["elevation"])), MAX_SUN_ELEVATION)
+			# Le ciel HDRI est plus sombre et plus bleu côté opposé au soleil que le ciel
+			# procédural : une part d'ambiance neutre (couleur du brouillard) éclaire les faces à
+			# l'ombre sans les bleuir.
+			env.ambient_light_sky_contribution = 0.7
+			env.ambient_light_color = (p["fog_color"] as Color).lightened(0.15)
+			env.ambient_light_energy = float(p["ambient"]) * HDRI_AMBIENT_BOOST
 	_setup_volumetric_fog(env, key, p)
 	_setup_sun(sun, p)
 	RenderQuality.register(world_env, sun, "battle", key)
@@ -142,12 +152,12 @@ static func add_ground_mist(parent: Node3D, key: String, center: Vector3, size: 
 	var volume := FogVolume.new()
 	volume.name = "GroundMist"
 	volume.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	volume.size = Vector3(size.x, 16.0, size.y)
-	volume.position = center + Vector3(0, 4.0, 0)
+	volume.size = Vector3(size.x, 12.0, size.y)
+	volume.position = center + Vector3(0, 1.0, 0)
 	var material := FogMaterial.new()
-	material.density = 0.05
+	material.density = 0.014
 	material.albedo = (PRESETS["fog"]["fog_color"] as Color).lightened(0.1)
-	material.height_falloff = 0.25
+	material.height_falloff = 0.35
 	material.edge_fade = 0.3
 	volume.material = material
 	parent.add_child(volume)

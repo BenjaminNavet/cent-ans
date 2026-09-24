@@ -18,6 +18,10 @@ uniform vec3 haze_color : source_color = vec3(0.75, 0.78, 0.82);
 uniform float haze_amount : hint_range(0.0, 1.0) = 0.35;
 // Disque solaire ajouté (le soleil des HDRI est souvent écrêté) ; 0 par temps couvert.
 uniform float sun_disc = 0.0;
+// Plafond de luminance (après exposition) : le soleil peint dans le panorama (des dizaines de
+// milliers de fois la moyenne) ne doit pas entrer dans la lumière ambiante ni dans les reflets,
+// la lumière directionnelle joue déjà ce rôle (sinon les ombres portées disparaissent).
+uniform float max_luminance = 2.5;
 
 
 vec3 sample_panorama(vec3 dir, float yaw) {
@@ -38,6 +42,10 @@ void sky() {
 	// Au-dessus d'un léger seuil : le panorama ; en dessous, sa ligne d'horizon étirée puis le sol.
 	vec3 sky_dir = normalize(vec3(dir.x, max(h, 0.015), dir.z));
 	vec3 col = sample_panorama(sky_dir, yaw);
+	float peak = max(col.r, max(col.g, col.b)) * exposure;
+	if (peak > max_luminance) {
+		col *= max_luminance / peak;
+	}
 	float grey = dot(col, vec3(0.2126, 0.7152, 0.0722));
 	col = mix(vec3(grey), col, saturation) * tint;
 	// Voile d'horizon (perspective aérienne vers le brouillard de la scène).
