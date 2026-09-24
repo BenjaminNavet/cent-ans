@@ -98,10 +98,31 @@ static func deck_width(width: float) -> float:
 # --- Formes de base -------------------------------------------------------------------------
 
 
-static func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
-	var n := (b - a).cross(c - a).normalized()
-	st.set_normal(n)
+## Quadrilatère plan ; `inner` : point intérieur du volume (la face est tournée vers
+## l'extérieur). Face avant de Godot = sens trigonométrique vu de la face, normale par la règle
+## de la main droite.
+static func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, inner: Vector3) -> void:
+	var n := (b - a).cross(c - a)
+	if n.dot((a + c) * 0.5 - inner) < 0.0:
+		var tmp := b
+		b = d
+		d = tmp
+		n = -n
+	st.set_normal(n.normalized())
 	for v in [a, b, c, a, c, d]:
+		st.add_vertex(v)
+
+
+## Triangle tourné vers l'extérieur de `inner`.
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, inner: Vector3) -> void:
+	var n := (b - a).cross(c - a)
+	if n.dot((a + b + c) / 3.0 - inner) < 0.0:
+		var tmp := b
+		b = c
+		c = tmp
+		n = -n
+	st.set_normal(n.normalized())
+	for v in [a, b, c]:
 		st.add_vertex(v)
 
 
@@ -118,12 +139,12 @@ static func _box(st: SurfaceTool, center: Vector3, half: Vector3, yaw: float = 0
 	var p101: Vector3 = c.call(1, -1, 1)
 	var p011: Vector3 = c.call(-1, 1, 1)
 	var p111: Vector3 = c.call(1, 1, 1)
-	_quad(st, p010, p110, p111, p011)  # dessus
-	_quad(st, p001, p101, p100, p000)  # dessous
-	_quad(st, p001, p011, p111, p101)  # +Z
-	_quad(st, p100, p110, p010, p000)  # −Z
-	_quad(st, p101, p111, p110, p100)  # +X
-	_quad(st, p000, p010, p011, p001)  # −X
+	_quad(st, p010, p110, p111, p011, center)  # dessus
+	_quad(st, p001, p101, p100, p000, center)  # dessous
+	_quad(st, p001, p011, p111, p101, center)  # +Z
+	_quad(st, p100, p110, p010, p000, center)  # −Z
+	_quad(st, p101, p111, p110, p100, center)  # +X
+	_quad(st, p000, p010, p011, p001, center)  # −X
 
 
 ## Extrusion le long de Z (de −half_z à +half_z) d'un contour simple dans le plan XY.
@@ -225,11 +246,10 @@ static func _stone_bridge(tools: Array[SurfaceTool], width: float, rng: RandomNu
 			var a := Vector3(cx - pier * 0.5, 0.0, side * half_w)
 			var b := Vector3(cx + pier * 0.5, 0.0, side * half_w)
 			var top := spring + 0.03
-			_quad(st, Vector3(a.x, FOOT, a.z), Vector3(a.x, top, a.z), Vector3(tip.x, top, tip.z), Vector3(tip.x, FOOT, tip.z))
-			_quad(st, Vector3(tip.x, FOOT, tip.z), Vector3(tip.x, top, tip.z), Vector3(b.x, top, b.z), Vector3(b.x, FOOT, b.z))
-			st.set_normal(Vector3.UP)
-			for v in [Vector3(a.x, top, a.z), Vector3(b.x, top, b.z), Vector3(tip.x, top, tip.z)]:
-				st.add_vertex(v)
+			var inner := Vector3(cx, (top + FOOT) * 0.5, side * half_w)
+			_quad(st, Vector3(a.x, FOOT, a.z), Vector3(a.x, top, a.z), Vector3(tip.x, top, tip.z), Vector3(tip.x, FOOT, tip.z), inner)
+			_quad(st, Vector3(tip.x, FOOT, tip.z), Vector3(tip.x, top, tip.z), Vector3(b.x, top, b.z), Vector3(b.x, FOOT, b.z), inner)
+			_tri(st, Vector3(a.x, top, a.z), Vector3(b.x, top, b.z), Vector3(tip.x, top, tip.z), Vector3(cx, FOOT, side * half_w))
 		x -= opening + pier
 	# Parapets.
 	var parapet_h := 0.05 if gate else 0.022
@@ -306,11 +326,9 @@ static func _hull(st: SurfaceTool, center: Vector3, half_x: float, half_z: float
 		var b: Vector3 = ring_top[(i + 1) % 6] + offset
 		var c: Vector3 = ring_bottom[(i + 1) % 6] + offset
 		var d: Vector3 = ring_bottom[i] + offset
-		_quad(st, a, d, c, b)
-	st.set_normal(Vector3.UP)
+		_quad(st, a, d, c, b, center)
 	for i in range(1, 5):
-		for v in [ring_top[0] + offset, ring_top[i + 1] + offset, ring_top[i] + offset]:
-			st.add_vertex(v)
+		_tri(st, ring_top[0] + offset, ring_top[i + 1] + offset, ring_top[i] + offset, Vector3(center.x, bottom - 1.0, center.z))
 
 
 ## Bac : barge à fond plat au bord d'une rive, câble tendu, pontons sur pilotis des deux côtés.

@@ -44,6 +44,8 @@ var bank_px: float = 1.1
 ## Par emprise (même ordre que `covers`) : segments proches, PackedInt32Array de
 ## (index de tronçon << 16) | index du premier point.
 var cover_segments: Array[PackedInt32Array] = []
+## Grille des segments : Vector2i(case) → Array de codes (tronçon << 16) | premier point.
+var segment_cells: Dictionary = {}
 var stats: Dictionary = {}
 
 var _minor: MeshInstance3D
@@ -61,6 +63,7 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	terrain = terrain_builder
 	_load_rivers()
 	covers = _settlement_covers(settlements)
+	_cover_cells.clear()
 	var touched := _index_cover_segments()
 	_clear_river_bed_under_covers()
 	var major_lines := []
@@ -215,6 +218,27 @@ func _covered(p: Vector2) -> bool:
 	return false
 
 
+## Index (dans `covers`) de l'emprise de colonie qui contient `p`, -1 sinon (grille de cases).
+func cover_at(p: Vector2) -> int:
+	if _cover_cells.is_empty() and not covers.is_empty():
+		for k in covers.size():
+			var c := covers[k]
+			for cy in range(floori((c.y - c.z) / CELL_PX), floori((c.y + c.z) / CELL_PX) + 1):
+				for cx in range(floori((c.x - c.z) / CELL_PX), floori((c.x + c.z) / CELL_PX) + 1):
+					var key := Vector2i(cx, cy)
+					if not _cover_cells.has(key):
+						_cover_cells[key] = []
+					(_cover_cells[key] as Array).append(k)
+	for k: int in _cover_cells.get(Vector2i(floori(p.x / CELL_PX), floori(p.y / CELL_PX)), []):
+		var c := covers[k]
+		if Vector2(c.x, c.y).distance_squared_to(p) < c.z * c.z:
+			return k
+	return -1
+
+
+var _cover_cells: Dictionary = {}
+
+
 ## Grille des segments (cases de `CELL_PX`) : pour chaque emprise, les segments proches
 ## (`cover_segments`) ; rend tronçon → emprises touchées (Array[Vector4]).
 const CELL_PX := 16.0
@@ -222,7 +246,8 @@ const CELL_PX := 16.0
 
 func _index_cover_segments() -> Dictionary:
 	cover_segments.clear()
-	var cells: Dictionary = {}
+	segment_cells.clear()
+	var cells := segment_cells
 	for ri in rivers.size():
 		var points: PackedVector2Array = rivers[ri]["points"]
 		for pi in points.size() - 1:

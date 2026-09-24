@@ -3,9 +3,11 @@ extends Node3D
 
 ## Ponts, gués et bacs de la carte de campagne (lot V4, A1-11), rendu seulement.
 ##
-## - Franchissements historiques : `data/map/crossings_px.json` (sortie de `cent-ans geo
-##   rivers-render` depuis `crossings.json`, recalés sur le fleuve affiché) ; ouvrage selon
-##   `structure` (pierre, bois, bateaux, bac, gué ; `BridgeMeshes`).
+## - Franchissements : `data/map/crossings_px.json` (sortie de `cent-ans geo rivers-render`) :
+##   passages historiques de `crossings.json` recalés sur le fleuve affiché (et sur la route qui
+##   le franchit), plus un pont générique à chaque croisement route/cours d'eau (ponceau de
+##   pierre sur les ruisseaux, pont de bois ailleurs) ; ouvrage selon `structure` (pierre, bois,
+##   bateaux, bac, gué ; `BridgeMeshes`), axe selon la route portée (`axis`).
 ## - Ponts-portes : là où un fleuve passe sous une colonie (`RiversRenderer.covers`), un pont de
 ##   pierre crénelé à tours (cité, ville, château) ou un pont de bois (village, abbaye) sur le
 ##   bord de l'emprise ; un franchissement historique situé dans l'emprise lui donne son nom et,
@@ -17,6 +19,9 @@ const CROSSINGS_FILE := "crossings_px.json"
 ## Portée de visibilité (distance caméra → pont), comme les hameaux.
 const VISIBILITY_RANGE := 280.0
 const WALLED := ["city", "town", "castle"]
+## Exagération verticale et en largeur des ouvrages (lisibles au zoom le plus proche).
+const HEIGHT_SCALE := 2.0
+const DECK_SCALE := 2.0
 ## Largeur (px carte) sous laquelle un pont-porte n'a pas de tours (simple pont de pierre).
 const GATE_MIN_WIDTH := 0.3
 
@@ -36,11 +41,12 @@ func build(rivers_renderer: RiversRenderer, settlements: SettlementLayer) -> voi
 	var in_cover: Dictionary = {}  # index de colonie → franchissement historique
 	for entry in _load_crossings():
 		var p: Vector2 = entry["px"]
-		if bool(entry.get("in_custom_zone", false)) or renderer.in_custom_zone(p):
+		if bool(entry.get("in_custom_zone", false)) or renderer.in_custom_zone(p, 0.5):
 			continue
 		var cover := _cover_at(p)
 		if cover >= 0:
-			in_cover[cover] = entry
+			if str(entry["type"]) != "road":
+				in_cover[cover] = entry
 			continue
 		_add(entry)
 	_add_gate_bridges(settlements, in_cover)
@@ -78,23 +84,27 @@ func _load_crossings() -> Array[Dictionary]:
 			continue
 		var px: Array = raw.get("px", [0, 0])
 		var dir: Array = raw.get("dir", [1, 0])
-		result.append({
+		var entry := {
 			"id": str(raw.get("id", "")),
 			"name": str(raw.get("name", "")),
 			"structure": str(raw.get("structure", "stone")),
 			"px": Vector2(float(px[0]), float(px[1])),
 			"dir": Vector2(float(dir[0]), float(dir[1])).normalized(),
 			"width": float(raw.get("width", 0.5)),
+			"type": str(raw.get("type", "bridge")),
 			"in_custom_zone": bool(raw.get("in_custom_zone", false)),
-		})
+		}
+		var axis: Variant = raw.get("axis")
+		if axis is Array:
+			entry["axis"] = Vector2(float(axis[0]), float(axis[1])).normalized()
+		result.append(entry)
 	return result
 
 
+## Index de la colonie dont l'emprise contient `p`, -1 sinon.
 func _cover_at(p: Vector2) -> int:
-	for c in renderer.covers:
-		if Vector2(c.x, c.y).distance_squared_to(p) < c.z * c.z:
-			return int(c.w)
-	return -1
+	var k := renderer.cover_at(p)
+	return int(renderer.covers[k].w) if k >= 0 else -1
 
 
 ## Ponts-portes sur le bord des emprises des colonies traversées par un fleuve.
@@ -159,45 +169,74 @@ static func _circle_point(a: Vector2, b: Vector2, center: Vector2, radius: float
 	return (lo + hi) * 0.5
 
 
+## Enregistre un ouvrage ; son maillage n'est construit que lorsque sa tuile de terrain passe au
+## niveau proche ou fin (`_on_chunk_surface_changed`) : pas de coût au démarrage pour les
+## centaines de ponts lointains.
 func _add(entry: Dictionary) -> void:
-	var dir: Vector2 = entry["dir"]
-	if dir == Vector2.ZERO:
-		dir = Vector2.DOWN
-	var width := maxf(float(entry["width"]), 0.15)
+	var item := entry.duplicate()
+	if (item["dir"] as Vector2) == Vector2.ZERO:
+		item["dir"] = Vector2.DOWN
+	item["width"] = maxf(float(entry["width"]), 0.15)
+	item["node"] = null
+	items.append(item)
+	var p: Vector2 = entry["px"]
+	var chunk := renderer.terrain.chunk_index_at(p.x, p.y) if renderer.terrain != null else -1
+	if not _by_chunk.has(chunk):
+		_by_chunk[chunk] = []
+	(_by_chunk[chunk] as Array).append(items.size() - 1)
+	if renderer.terrain == null or renderer.terrain.chunk_level(chunk) >= 1:
+		_instantiate(item)
+
+
+func _instantiate(item: Dictionary) -> void:
+	var dir: Vector2 = item["dir"]
 	var instance := MeshInstance3D.new()
-	instance.name = str(entry["id"])
-	instance.mesh = BridgeMeshes.build(str(entry["structure"]), width, absi(str(entry["id"]).hash()))
-	# X local en travers du fleuve, Z dans le sens du courant (repère direct).
+	instance.name = str(item["id"])
+	instance.mesh = BridgeMeshes.build(str(item["structure"]), float(item["width"]), absi(str(item["id"]).hash()))
+	# X local en travers du fleuve (ou selon la route portée), Z = X × Y (repère direct).
 	var across := Vector3(-dir.y, 0.0, dir.x)
-	var along := Vector3(-dir.x, 0.0, -dir.y)
-	instance.transform = Transform3D(Basis(across, Vector3.UP, along), Vector3.ZERO)
+	if item.has("axis"):
+		var axis: Vector2 = item["axis"]
+		across = Vector3(axis.x, 0.0, axis.y)
+	var along := across.cross(Vector3.UP)
+	# Exagération (comme les maquettes de colonies) : hauteur et largeur du tablier ; la longueur
+	# reste celle du fleuve à franchir.
+	instance.transform = Transform3D(Basis(across, Vector3.UP * HEIGHT_SCALE, along * DECK_SCALE), Vector3.ZERO)
 	instance.visibility_range_end = VISIBILITY_RANGE
 	instance.visibility_range_end_margin = VISIBILITY_RANGE * 0.15
 	instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	add_child(instance)
-	var item := entry.duplicate()
 	item["node"] = instance
-	item["width"] = width
-	items.append(item)
 	_ground(item)
-	var p: Vector2 = entry["px"]
-	if renderer.terrain != null:
-		var chunk := renderer.terrain.chunk_index_at(p.x, p.y)
-		if not _by_chunk.has(chunk):
-			_by_chunk[chunk] = []
-		(_by_chunk[chunk] as Array).append(items.size() - 1)
+
+
+## Nombre d'ouvrages dont le maillage est construit (tests).
+func instantiated_count() -> int:
+	var count := 0
+	for item in items:
+		if item["node"] != null:
+			count += 1
+	return count
 
 
 ## Niveau de l'eau sous le pont : relief non creusé au milieu du fleuve (surface affichée).
 func _ground(item: Dictionary) -> void:
+	var node: MeshInstance3D = item["node"]
+	if node == null:
+		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)
 	if renderer.terrain != null:
 		y = maxf(y, renderer.terrain.surface_height_at(p.x, p.y))
-	var node: MeshInstance3D = item["node"]
 	node.position = Vector3(p.x, y, p.y)
 
 
 func _on_chunk_surface_changed(index: int) -> void:
+	var near := renderer.terrain.chunk_level(index) >= 1
 	for i in _by_chunk.get(index, []):
-		_ground(items[i])
+		var item: Dictionary = items[i]
+		if item["node"] == null:
+			if near:
+				_instantiate(item)
+		else:
+			_ground(item)
