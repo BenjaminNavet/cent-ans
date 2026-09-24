@@ -204,6 +204,51 @@ impl BattleSim {
         }
     }
 
+    /// F5a: opens the deployment phase (call right after `setup`, before
+    /// any `tick`). `false` once the battle has started.
+    #[func]
+    fn begin_deployment(&mut self) -> bool {
+        self.sim.as_mut().is_some_and(|sim| sim.begin_deployment())
+    }
+
+    /// `true` during the deployment phase (ticks do nothing).
+    #[func]
+    fn is_deploying(&self) -> bool {
+        self.sim.as_ref().is_some_and(|sim| sim.is_deploying())
+    }
+
+    /// `{x0, z0, x1, z1}` rectangle of `side` (field metres); empty if unknown.
+    #[func]
+    fn get_deployment_zone(&self, side: GString) -> VarDictionary {
+        match (&self.sim, parse_side(&side)) {
+            (Some(sim), Some(side)) => to_dict(&sim.deployment_zone(side)),
+            _ => VarDictionary::new(),
+        }
+    }
+
+    /// Places regiment `id` at (x, z); `facing` in radians, NaN keeps the
+    /// current facing. → `{ok, error}` (French error).
+    #[func]
+    fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+        let Some(sim) = &mut self.sim else {
+            return result_dict(Err("aucune bataille en cours".to_owned()));
+        };
+        let facing = facing.is_finite().then_some(facing);
+        let result = u32::try_from(id)
+            .map_err(|_| format!("unité inconnue : {id}"))
+            .and_then(|id| sim.deploy_unit(id, x, z, facing).map_err(|e| e.to_string()));
+        result_dict(result)
+    }
+
+    /// Ends the deployment phase → `{ok, error}`.
+    #[func]
+    fn start_battle(&mut self) -> VarDictionary {
+        let Some(sim) = &mut self.sim else {
+            return result_dict(Err("aucune bataille en cours".to_owned()));
+        };
+        result_dict(sim.start_battle().map_err(|e| e.to_string()))
+    }
+
     /// One dictionary per regiment (spec § 3), plus rendering helpers.
     #[func]
     fn get_units(&self) -> VarArray {

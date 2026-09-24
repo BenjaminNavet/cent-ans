@@ -52,5 +52,8 @@ pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
-pub use sim::{BattleSim, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION};
+pub use sim::{
+    BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, SIEGE_STANDOFF,
+    ZONE_DEPTH,
+};
 pub use unit::{Formation, Unit, UnitState};

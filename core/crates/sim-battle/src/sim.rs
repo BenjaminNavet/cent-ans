@@ -4,8 +4,10 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod deployment;
 mod separation;
 
+pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use separation::FRIEND_GAP;
 
 use data_model::{Ability, UnitCategory, UnitStats};
@@ -97,6 +99,8 @@ pub struct BattleSim {
     pub(crate) order_uses: OrderUses,
     /// The side gave the "no quarter" order.
     pub(crate) no_quarter: [bool; 2],
+    /// Deployment phase (F5a): time frozen until `start_battle`.
+    deploying: bool,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -296,6 +300,7 @@ impl BattleSim {
             square_announced: false,
             order_uses: Default::default(),
             no_quarter: [false; 2],
+            deploying: false,
         };
         if sim.siege.is_some() {
             sim.deploy_siege();
@@ -705,6 +710,13 @@ impl BattleSim {
         if self.finished {
             return Err(CommandError::Finished);
         }
+        let setup_order = matches!(
+            command,
+            Command::Formation { .. } | Command::FireAtWill { .. }
+        );
+        if self.deploying && !setup_order {
+            return Err(CommandError::Deploying);
+        }
         if let Command::LeaderOrder {
             side: order_side,
             order,
@@ -967,7 +979,7 @@ impl BattleSim {
     /// Advances the battle by `dt` seconds, running as many fixed steps as
     /// needed (at most a few hundred per call).
     pub fn tick(&mut self, dt: f64) {
-        if self.finished || !dt.is_finite() || dt <= 0.0 {
+        if self.finished || self.deploying || !dt.is_finite() || dt <= 0.0 {
             return;
         }
         self.accumulator += dt;
@@ -984,7 +996,7 @@ impl BattleSim {
 
     /// Runs one fixed step of [`DT`] seconds.
     pub fn step(&mut self) {
-        if self.finished {
+        if self.finished || self.deploying {
             return;
         }
         for unit in &mut self.units {
