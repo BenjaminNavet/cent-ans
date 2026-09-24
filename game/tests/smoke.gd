@@ -708,6 +708,7 @@ func _run_battle() -> void:
 	for key in scene._mm:
 		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
 	_check(drawn > 0, "battle scene: no soldier instances")
+	_check_battle_hud_f5b(scene)
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
 	for unit in scene.units:
@@ -733,6 +734,39 @@ func _run_battle() -> void:
 		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
 	map.queue_free()
 	await process_frame
+
+
+## F5b : cartes compactes rangées par « bataille », groupe Ctrl+1 enregistré puis rappelé,
+## minicarte présente et peuplée, boutons de vitesse, noms coupés entre deux mots.
+func _check_battle_hud_f5b(scene: BattleScene) -> void:
+	var hud: BattleHud = scene.hud
+	var own := 0
+	var first := -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side:
+			own += 1
+			if first < 0:
+				first = int(unit["id"])
+	_check(hud.card_count() == own and own > 0, "battle HUD: %d cards for %d own units" % [hud.card_count(), own])
+	_check(BattleGroups.ORDER.has(hud.card_battle(first)), "battle HUD: card not in a battle column")
+	var card: UnitCard = hud._cards[first]
+	_check(card.custom_minimum_size.x <= 72.0 and card.tooltip_text.contains("Formation"), "battle HUD: card should be compact with formation in its tooltip")
+	var font := card.name_label.get_theme_font("font")
+	var fitted := UnitCard.fit_name("Arbalétriers génois de la compagnie Grimaldi", font, 10, 63.0, 2)
+	_check(fitted.split("\n").size() <= 2 and not fitted.contains("Grimaldi"), "battle HUD: name fitting should stop on a whole word: %s" % fitted)
+	scene.selected.clear()
+	scene.selected.append(first)
+	scene.handle_group_key(1, true)
+	scene.selected.clear()
+	scene.handle_group_key(1, false)
+	_check(scene.selected.size() == 1 and scene.selected[0] == first, "battle HUD: group 1 should be recalled (got %s)" % [scene.selected])
+	_check(hud.minimap != null and hud.minimap.is_visible_in_tree(), "battle HUD: minimap missing")
+	scene._refresh_view(true)
+	_check(hud.minimap.dot_count() > own, "battle HUD: minimap should show both sides")
+	scene._on_speed_pressed(1)
+	_check(hud.active_speed() == 1 and not scene.paused, "battle HUD: ×2 speed button not active")
+	scene._on_speed_pressed(0)
+	_check(hud.help_panel != null and not hud.help_panel.visible, "battle HUD: F1 help should start hidden")
 
 
 func _run_chronicle() -> void:
