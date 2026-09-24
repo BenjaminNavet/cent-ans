@@ -59,6 +59,8 @@ pub enum EventKind {
     Chronicle,
     /// H3 « La Table »: diet fallback, Lent.
     Table,
+    /// Regional edict change or lapse (lot C4).
+    Edict,
     /// H4: tended wounded, epidemic contained.
     Medicine,
     /// H5: coinage changed, seigniorage, recoinage, inflation.

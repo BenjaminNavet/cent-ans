@@ -37,6 +37,7 @@ pub use entities::building::{Building, BuildingCategory};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
+pub use entities::edict::Edict;
 pub use entities::event::{
     CharacterRef, Condition, Event, EventCategory, EventDate, EventEffect, EventOption, EventScope,
     EventSeason, EventTrigger, ProvinceRef,
@@ -65,9 +66,9 @@ pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
-    BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EventId, FactionId,
-    NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId, TechnologyId,
-    TraitId, UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId, EventId,
+    FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId,
+    TechnologyId, TraitId, UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

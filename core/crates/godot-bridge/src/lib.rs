@@ -15,6 +15,7 @@ mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_diplomacy;
+mod campaign_sim_edicts;
 mod campaign_sim_events;
 mod campaign_sim_family;
 mod campaign_sim_h5h6;

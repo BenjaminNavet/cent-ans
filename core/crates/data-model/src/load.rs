@@ -15,6 +15,7 @@ use crate::entities::building::Building;
 use crate::entities::character::Character;
 use crate::entities::chivalric_order::ChivalricOrder;
 use crate::entities::diet::Diet;
+use crate::entities::edict::Edict;
 use crate::entities::event::Event;
 use crate::entities::faction::Faction;
 use crate::entities::names::NameList;
@@ -29,8 +30,8 @@ use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::entities::vision::VisionRules;
 use crate::ids::{
-    BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
-    ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, DietId, EdictId, EventId, FactionId, NamesId,
+    ProvinceId, ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -53,6 +54,8 @@ pub mod folders {
     pub const BATTLE_ORDERS: &str = "battle_orders";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
+    /// Regional edicts (lot C4); optional folder.
+    pub const EDICTS: &str = "edicts";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
     /// Settlements, one file per province (lot C1); optional folder.
@@ -178,6 +181,8 @@ pub struct GameData {
     pub battle_orders: BTreeMap<String, BattleOrder>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
+    /// Regional edicts (lot C4), empty when `data/edicts/` is absent.
+    pub edicts: BTreeMap<EdictId, Edict>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
@@ -237,6 +242,7 @@ impl GameData {
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
             diets: BTreeMap::new(),
+            edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
@@ -262,6 +268,10 @@ impl GameData {
         let diets_dir = root.join(folders::DIETS);
         if diets_dir.is_dir() {
             data.diets = load_entities(&diets_dir, |d: &Diet| &d.id)?;
+        }
+        let edicts_dir = root.join(folders::EDICTS);
+        if edicts_dir.is_dir() {
+            data.edicts = load_entities(&edicts_dir, |e: &Edict| &e.id)?;
         }
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
