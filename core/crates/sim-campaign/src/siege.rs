@@ -59,7 +59,7 @@ fn besiegers(
         .armies
         .iter()
         .filter(|(_, army)| {
-            &army.location == settlement
+            army.is_at(settlement)
                 && (village || army.stance == Stance::Siege)
                 && state.is_at_war(&army.faction, controller)
         })
@@ -130,12 +130,12 @@ pub(crate) fn resolve_sieges(
             * (1.0 - resistance / 100.0))
             .round() as u8;
         let drain = supplies_drain(fortification, siege_speed_percent);
-        let devastation = state
-            .provinces
-            .get(&province_id)
-            .map_or(0, |p| p.devastation);
+        let turn = state.turn;
         let settlement = state.settlements.get_mut(&settlement_id).expect("exists");
         match &mut settlement.siege {
+            // Lot M2: a siege begun during this turn (an army entered the
+            // place) only starts counting at the next one.
+            Some(siege) if siege.attacker == attacker && siege.started_turn == turn => {}
             Some(siege) if siege.attacker == attacker => {
                 siege.turns_elapsed += 1;
                 siege.breach = siege.breach.saturating_add(breach_gain).min(100);
@@ -169,31 +169,74 @@ pub(crate) fn resolve_sieges(
                 }
             }
             _ => {
-                let supplies = 100u8.saturating_sub(devastation / 2).max(10);
-                let turns_left = turns_to_starve(supplies, drain);
-                settlement.siege = Some(SiegeState {
-                    attacker: attacker.clone(),
-                    turns_left,
-                    turns_elapsed: 0,
-                    supplies,
-                    breach: 0,
-                });
-                events.push(
-                    GameEvent::new(
-                        EventKind::SiegeStarted,
-                        format!(
-                            "{} met le siège devant {}.",
-                            faction_name(data, &attacker),
-                            settlement_name(data, &settlement_id)
-                        ),
-                    )
-                    .province(&province_id)
-                    .army(&besiegers[0])
-                    .faction(&attacker),
-                );
+                let besieger = besiegers[0].clone();
+                begin_siege(state, data, &settlement_id, &attacker, &besieger, events);
             }
         }
     }
+}
+
+/// Lays siege to `settlement_id` for `attacker` (its army `army` in the
+/// lead): supplies from the province's devastation, an event. A siege of
+/// the same attacker already in place is kept.
+pub(crate) fn begin_siege(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement_id: &SettlementId,
+    attacker: &FactionId,
+    army: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) {
+    let province_id = province_of(state, settlement_id);
+    let fortification = state.fortification_level(data, settlement_id);
+    let siege_speed_percent = state
+        .armies
+        .get(army)
+        .and_then(|a| a.general.clone())
+        .map_or(0.0, |g| {
+            skills::character_effects(state, data, &g)
+                .siege_speed
+                .apply(0.0)
+        });
+    let drain = supplies_drain(fortification, siege_speed_percent);
+    let devastation = state
+        .provinces
+        .get(&province_id)
+        .map_or(0, |p| p.devastation);
+    let turn = state.turn;
+    let Some(settlement) = state.settlements.get_mut(settlement_id) else {
+        return;
+    };
+    if settlement
+        .siege
+        .as_ref()
+        .is_some_and(|s| &s.attacker == attacker)
+    {
+        return;
+    }
+    let supplies = 100u8.saturating_sub(devastation / 2).max(10);
+    let turns_left = turns_to_starve(supplies, drain);
+    settlement.siege = Some(SiegeState {
+        attacker: attacker.clone(),
+        turns_left,
+        turns_elapsed: 0,
+        supplies,
+        breach: 0,
+        started_turn: turn,
+    });
+    events.push(
+        GameEvent::new(
+            EventKind::SiegeStarted,
+            format!(
+                "{} met le siège devant {}.",
+                faction_name(data, attacker),
+                settlement_name(data, settlement_id)
+            ),
+        )
+        .province(&province_id)
+        .army(army)
+        .faction(attacker),
+    );
 }
 
 /// Food lost per turn of siege: a town lasts `SIEGE_BASE_TURNS +
@@ -251,16 +294,13 @@ pub(crate) fn garrison_army(
     } else {
         None
     };
-    Some(crate::state::Army {
-        faction: s.controller.clone(),
-        general,
-        location: settlement.clone(),
-        units: s.garrison.clone(),
-        movement_points: 0,
-        supply: 100,
-        stance: Stance::Normal,
-        path: Vec::new(),
-    })
+    let mut army = crate::state::Army::new(
+        s.controller.clone(),
+        crate::state::ArmyPosition::Settlement(settlement.clone()),
+        s.garrison.clone(),
+    );
+    army.general = general;
+    Some(army)
 }
 
 fn apply_garrison_losses(
@@ -304,15 +344,16 @@ impl CampaignState {
     /// resolution).
     pub fn assault_odds(&self, data: &GameData, army: &ArmyId) -> Option<(u32, bool)> {
         let a = self.armies.get(army)?;
-        let settlement = self.settlements.get(&a.location)?;
+        let place = a.settlement()?;
+        let settlement = self.settlements.get(place)?;
         let siege = settlement.siege.as_ref()?;
         if siege.attacker != a.faction {
             return None;
         }
-        let walls = walls_stand(self, data, army, &a.location);
+        let walls = walls_stand(self, data, army, place);
         let attack = self.army_power(data, army) * if walls { 0.7 } else { 1.0 };
         let defence = crate::state::unit_power(data, &settlement.garrison)
-            * (1.0 + f64::from(self.fortification_level(data, &a.location)) * 0.1);
+            * (1.0 + f64::from(self.fortification_level(data, place)) * 0.1);
         let odds = (100.0 * attack / (attack + defence).max(1.0)).round() as u32;
         Some((odds, walls))
     }
@@ -331,7 +372,9 @@ impl CampaignState {
         if &a.faction != faction {
             return Err(AssaultError::UnknownArmy);
         }
-        let settlement = a.location.clone();
+        let Some(settlement) = a.settlement().cloned() else {
+            return Err(AssaultError::NotBesieging);
+        };
         let besieging = self
             .settlements
             .get(&settlement)
@@ -355,7 +398,9 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
         return;
     };
     let faction = a.faction.clone();
-    let settlement = a.location.clone();
+    let Some(settlement) = a.settlement().cloned() else {
+        return;
+    };
     let Some(controller) = state
         .settlements
         .get(&settlement)
@@ -383,7 +428,6 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
                 defender: army.clone(),
                 location: settlement.clone(),
                 province: province.clone(),
-                attacker_origin: None,
                 siege: true,
             });
             events.push(
@@ -417,7 +461,9 @@ pub(crate) fn enter_village(
         return;
     };
     let faction = a.faction.clone();
-    let settlement = a.location.clone();
+    let Some(settlement) = a.settlement().cloned() else {
+        return;
+    };
     let Some(village) = state.settlements.get(&settlement) else {
         return;
     };
@@ -434,6 +480,7 @@ pub(crate) fn enter_village(
         capture(state, data, &settlement, &faction, events);
         return;
     }
+    let turn = state.turn;
     let village = state.settlements.get_mut(&settlement).expect("exists");
     if village.siege.as_ref().is_none_or(|s| s.attacker != faction) {
         village.siege = Some(SiegeState {
@@ -442,6 +489,7 @@ pub(crate) fn enter_village(
             turns_elapsed: 0,
             supplies: 100,
             breach: 100,
+            started_turn: turn,
         });
     }
     storm(state, data, army, events);
@@ -473,12 +521,13 @@ pub fn assault_coalition(state: &CampaignState, army: &ArmyId) -> Vec<ArmyId> {
     let Some(controller) = state
         .armies
         .get(army)
-        .and_then(|a| state.settlements.get(&a.location))
+        .and_then(|a| a.settlement())
+        .and_then(|id| state.settlements.get(id))
         .map(|s| s.controller.clone())
     else {
         return Vec::new();
     };
-    crate::movement::battle_coalition(state, army, &controller)
+    crate::movement::settlement_coalition(state, army, &controller)
 }
 
 /// Auto-resolved assault of `army` (and its allies, G1) on the settlement
@@ -489,7 +538,7 @@ pub(crate) fn auto_assault(
     army: &ArmyId,
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(settlement) = state.armies.get(army).map(|a| a.location.clone()) else {
+    let Some(settlement) = state.armies.get(army).and_then(|a| a.settlement().cloned()) else {
         return;
     };
     let walls = walls_stand(state, data, army, &settlement);
@@ -713,7 +762,9 @@ pub(crate) fn resolve_raids(
             continue;
         }
         let faction = army.faction.clone();
-        let province_id = province_of(state, &army.location);
+        let Some(province_id) = state.army_province(data, army) else {
+            continue;
+        };
         if !state.is_hostile_territory(&faction, &province_id) {
             continue;
         }

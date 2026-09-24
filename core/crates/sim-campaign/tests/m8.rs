@@ -56,18 +56,19 @@ fn besiege_guyenne(data: &GameData, seed: u64, extra: &[&str]) -> (CampaignState
         .armies
         .iter()
         .filter(|(_, a)| {
-            state.settlement_province(&a.location) == Some(&prov("prov_guyenne"))
+            a.settlement().and_then(|s| state.settlement_province(s)) == Some(&prov("prov_guyenne"))
                 && a.faction != fac("fac_france")
         })
         .map(|(id, _)| id.clone())
         .collect();
     for id in english {
-        state.armies.get_mut(&id).unwrap().location = kent.clone();
+        state.armies.get_mut(&id).unwrap().position =
+            sim_campaign::ArmyPosition::Settlement(kent.clone());
     }
     let a = state.armies.get_mut(&army).unwrap();
-    a.location = guyenne;
+    a.position = sim_campaign::ArmyPosition::Settlement(guyenne);
     a.stance = Stance::Siege;
-    a.path.clear();
+    a.clear_plan();
     for id in extra {
         a.units.push(unit(data, id));
     }

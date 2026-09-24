@@ -49,7 +49,8 @@ impl CampaignSim {
         let siege = state
             .armies
             .get(&id)
-            .and_then(|a| state.settlement_state(&a.location))
+            .and_then(|a| a.settlement())
+            .and_then(|s| state.settlement_state(s))
             .and_then(|s| s.siege.clone());
         vdict! {
             "available" => true,

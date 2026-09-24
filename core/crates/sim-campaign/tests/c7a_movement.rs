@@ -38,14 +38,14 @@ fn a_season_covers_one_or_two_provinces_from_paris() {
         .map(|(id, _)| id.clone())
         .unwrap();
     let a = state.armies.get_mut(&army).unwrap();
-    a.location = paris.clone();
+    a.position = sim_campaign::ArmyPosition::Settlement(paris.clone());
     a.general = None;
     a.units.truncate(1);
     let allowance = state.army_movement_allowance(&data, &state.armies[&army]);
     assert_eq!(allowance, state.season_movement_points(&data));
     // 1.5 v1 province steps at most outside winter.
     assert!(f64::from(allowance) <= 1.5 * data.movement_rules().points_per_step + 1.0);
-    state.armies.get_mut(&army).unwrap().movement_points = allowance;
+    state.armies.get_mut(&army).unwrap().movement_left = allowance;
     let reach = state.reachable(&data, &army);
     assert!(
         reach.len() < 100,

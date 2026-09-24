@@ -40,24 +40,31 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
 }
 
-/// France marches on an English army teleported to Saint-Denis: returns the
-/// state after the turn, and both army ids.
+/// France attacks an English army teleported to Saint-Denis (lot M2: the
+/// battle is set at once): returns the state after the order, and both
+/// army ids.
 fn pending_battle(data: &GameData, seed: u64) -> (CampaignState, ArmyId, ArmyId) {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).unwrap();
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
-    state.armies.get_mut(&english).unwrap().location = battlefield();
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(battlefield());
     state
-        .submit_order(data, Order::move_along(french.clone(), vec![battlefield()]))
+        .submit_order(
+            data,
+            Order::Attack {
+                army: french.clone(),
+                target_army: english.clone(),
+            },
+        )
         .unwrap();
-    state.end_turn_with(data, idle);
     (state, french, english)
 }
 
 #[test]
 fn player_battle_waits_in_pending_battles() {
     let data = data();
-    let mut reference = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let reference = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     assert!(reference.interactive_battles, "on by default");
     let (state, french, english) = pending_battle(&data, 3);
     assert_eq!(state.pending_battles.len(), 1);
@@ -66,18 +73,19 @@ fn player_battle_waits_in_pending_battles() {
     assert_eq!(request.defender, english);
     assert_eq!(request.province, prov("prov_ile_de_france"));
     assert_eq!(request.location, battlefield());
-    // Nobody fought yet: both armies stand at Saint-Denis at full strength.
+    // Nobody fought yet: the French closed in on Saint-Denis, spent, at
+    // full strength.
     let french_army = state.army(&french).unwrap();
-    assert_eq!(french_army.location, battlefield());
-    assert!(french_army.path.is_empty());
-    reference.end_turn_with(&data, idle);
+    assert!(state.army_distance_km(&data, french_army, state.army(&english).unwrap()) <= 5.0);
+    assert!(french_army.planned_path.is_empty());
+    assert_eq!(french_army.movement_left, 0);
     assert_eq!(
         french_army.total_strength(),
         reference.army(&french).unwrap().total_strength(),
         "no casualties before the battle"
     );
     assert!(state
-        .events()
+        .pending_events
         .iter()
         .any(|e| e.kind == EventKind::Battle && e.text_fr.contains("Bataille en vue")));
     let views = state.pending_battle_views(&data);
@@ -170,7 +178,11 @@ fn external_battle_result_is_applied() {
         // Lot C7a: a beaten attacker falls back to its origin; a beaten
         // defender to a friendly or neutral settlement, or it routs (and
         // rallies far away or disperses): it never stays on the field.
-        assert_ne!(army.location, battlefield(), "the loser retreats");
+        assert_ne!(
+            army.settlement(),
+            Some(&battlefield()),
+            "the loser retreats"
+        );
     }
 }
 
@@ -254,11 +266,20 @@ fn interactive_battles_can_be_turned_off() {
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
-    state.armies.get_mut(&english).unwrap().location = battlefield();
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(battlefield());
     state
-        .submit_order(&data, Order::move_along(french, vec![battlefield()]))
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: french,
+                target_army: english,
+            },
+        )
         .unwrap();
-    let events = state.end_turn_with(&data, idle);
     assert!(state.pending_battles.is_empty());
-    assert!(events.iter().any(|e| e.text_fr.contains("Vainqueur")));
+    assert!(state
+        .pending_events
+        .iter()
+        .any(|e| e.text_fr.contains("Vainqueur")));
 }

@@ -81,6 +81,12 @@ pub mod folders {
     /// Trade catalogue, inside `economy/`; optional.
     pub const TRADE: &str = "trade.json";
     pub const MAP: &str = "map";
+    /// Free movement rules folder (lot M2); optional.
+    pub const MOVEMENT: &str = "movement";
+    /// Inside `MOVEMENT`: zone of control, engagement, retreat, grid costs.
+    pub const MOVEMENT_RULES: &str = "rules.json";
+    /// Inside `MAP`: map-pixel position of each settlement (lot C3).
+    pub const SETTLEMENT_PX: &str = "settlements_px.json";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
 }
@@ -219,6 +225,14 @@ pub struct GameData {
     /// `data/economy/trade.json` (lot C5), absent until written: no trade
     /// route exists.
     pub trade: Option<TradeCatalog>,
+    /// `data/movement/rules.json` (lot M2, free movement), absent until
+    /// written: [`FreeMovementRules::default`] then applies.
+    pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
+    /// `data/map/settlements_px.json`: map-pixel position of each
+    /// settlement (see [`GameData::settlement_point`]).
+    pub settlement_px: BTreeMap<SettlementId, [f32; 2]>,
+    /// Navigation grid and province raster, decoded on first use (lot M2).
+    pub rasters: crate::navgrid::RasterHandle,
 }
 
 impl GameData {
@@ -259,6 +273,9 @@ impl GameData {
             agent_rules: None,
             movement_graph: Default::default(),
             trade: None,
+            free_movement: None,
+            settlement_px: BTreeMap::new(),
+            rasters: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -300,9 +317,17 @@ impl GameData {
         if trade_path.is_file() {
             data.trade = Some(read_json(&trade_path)?);
         }
+        let free_movement_path = root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES);
+        if free_movement_path.is_file() {
+            data.free_movement = Some(read_json(&free_movement_path)?);
+        }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
         data.build_movement_graph();
+        data.settlement_px = crate::navgrid::read_settlement_px(
+            &root.join(folders::MAP).join(folders::SETTLEMENT_PX),
+        );
+        data.prepare_rasters(&root.join(folders::MAP));
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))

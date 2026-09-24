@@ -715,20 +715,23 @@ pub(crate) fn resolve_attrition(
     let ids: Vec<ArmyId> = state.armies.keys().cloned().collect();
     let winter = state.season == Season::Winter;
     for army_id in ids {
-        let (faction, settlement, general) = {
+        let (faction, settlement, general, province) = {
             let army = &state.armies[&army_id];
             (
                 army.faction.clone(),
-                army.location.clone(),
+                army.settlement().cloned(),
                 army.general.clone(),
+                state.army_province(data, army),
             )
         };
-        let Some(location) = state.settlement_province(&settlement).cloned() else {
+        let Some(location) = province else {
             continue;
         };
         // Lot C4: supplied in friendly territory or on a friendly settlement.
         let friendly = state.is_friendly_territory(&faction, &location)
-            || state.is_friendly_settlement(&faction, &settlement);
+            || settlement
+                .as_ref()
+                .is_some_and(|s| state.is_friendly_settlement(&faction, s));
         let (recovery_bonus, loss_relief) =
             supply_modifiers(state, data, &location, friendly, general.as_ref());
         let army = state.armies.get_mut(&army_id).expect("exists");
