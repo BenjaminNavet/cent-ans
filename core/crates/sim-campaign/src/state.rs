@@ -624,6 +624,10 @@ pub struct CampaignState {
     /// Consecutive seasons the player has met all objectives (F9).
     #[serde(default)]
     pub victory_streak: u32,
+    /// Lot C6: spies, heralds and preachers (absent from older saves; no
+    /// change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub agents: crate::agents::AgentsState,
 }
 
 impl CampaignState {
@@ -659,6 +663,7 @@ impl CampaignState {
             chronicle: crate::chronicle::ChronicleState::default(),
             outcome: None,
             victory_streak: 0,
+            agents: crate::agents::AgentsState::default(),
         }
     }
 

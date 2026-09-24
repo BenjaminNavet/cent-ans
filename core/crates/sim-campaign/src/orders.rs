@@ -264,6 +264,30 @@ pub enum Order {
     FoundChivalricOrder {
         order: data_model::ChivalricOrderId,
     },
+    // ----- C6: agents (`agents.rs`) -----------------------------------------
+    /// Recruits a spy, herald or preacher on a settlement of ours.
+    RecruitAgent {
+        settlement: Place,
+        kind: data_model::AgentKind,
+    },
+    /// Walks an agent towards `target` (resumes each season until reached).
+    MoveAgent {
+        agent: crate::agents::AgentId,
+        target: SettlementId,
+    },
+    /// One action per season; `target` defaults to the agent's settlement
+    /// (a neighbour is allowed); `character` names the captive of a ransom.
+    AgentAction {
+        agent: crate::agents::AgentId,
+        action: data_model::AgentActionKind,
+        #[serde(default)]
+        target: Option<SettlementId>,
+        #[serde(default)]
+        character: Option<CharacterId>,
+    },
+    DismissAgent {
+        agent: crate::agents::AgentId,
+    },
 }
 
 impl Order {
@@ -357,6 +381,8 @@ pub enum OrderError {
     Ransom(#[from] crate::ransom::RansomError),
     #[error(transparent)]
     Chivalry(#[from] crate::chivalry::ChivalryError),
+    #[error(transparent)]
+    Agent(#[from] crate::agents::AgentError),
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -560,6 +586,31 @@ impl CampaignState {
                 crate::chivalry::found_order(self, data, faction, &order)?;
                 Ok(())
             }
+            Order::RecruitAgent { settlement, kind } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.recruit_agent(data, faction, &settlement, kind)?;
+                Ok(())
+            }
+            Order::MoveAgent { agent, target } => {
+                Ok(self.move_agent(data, faction, &agent, &target)?)
+            }
+            Order::AgentAction {
+                agent,
+                action,
+                target,
+                character,
+            } => {
+                self.agent_act(
+                    data,
+                    faction,
+                    &agent,
+                    action,
+                    target.as_ref(),
+                    character.as_ref(),
+                )?;
+                Ok(())
+            }
+            Order::DismissAgent { agent } => Ok(self.dismiss_agent(faction, &agent)?),
         }
     }
 

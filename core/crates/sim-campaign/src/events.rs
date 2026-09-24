@@ -67,6 +67,8 @@ pub enum EventKind {
     Ransom,
     /// H6: chivalric order founded, members named, order broken.
     Chivalry,
+    /// C6: spies, heralds and preachers (actions, captures).
+    Agent,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

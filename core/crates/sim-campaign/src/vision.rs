@@ -47,6 +47,10 @@ impl CampaignState {
                 }
             }
         }
+        // C6: spies see around them; scouting keeps a province in sight.
+        for (province, steps) in self.agent_sight(data, &lends_sight, faction) {
+            seed(&province, steps);
+        }
         spread_sight(data, range)
     }
 }
