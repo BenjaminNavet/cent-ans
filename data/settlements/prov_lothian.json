@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_edimbourg",
+    "province": "prov_lothian",
+    "kind": "city",
+    "name": {
+      "display": "Édimbourg",
+      "local": "Edinburgh",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.1883,
+      55.9533
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d'Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard.",
+    "sources": [
+      "Seconde guerre d'indépendance écossaise",
+      "Édouard Balliol",
+      "Édimbourg"
+    ]
+  },
+  {
+    "id": "set_berwick",
+    "province": "prov_lothian",
+    "kind": "town",
+    "name": {
+      "display": "Berwick-upon-Tweed",
+      "local": "Berewic",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.0059,
+      55.7711
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Place forte et port disputés à l'embouchure de la Tweed, repris par Édouard III après Halidon Hill en 1333.",
+    "sources": [
+      "Berwick-upon-Tweed"
+    ]
+  },
+  {
+    "id": "set_roxburgh",
+    "province": "prov_lothian",
+    "kind": "castle",
+    "name": {
+      "display": "Roxburgh",
+      "local": "Roxburgh",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.4372,
+      55.5747
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château des Marches écossaises tenu par l'Angleterre, un des piliers de son autorité au sud de l'Écosse.",
+    "sources": [
+      "Château de Roxburgh"
+    ]
+  },
+  {
+    "id": "set_dunbar",
+    "province": "prov_lothian",
+    "kind": "castle",
+    "name": {
+      "display": "Dunbar",
+      "local": "Dunbar",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.5164,
+      56.0011
+    ],
+    "weight": 12,
+    "owner": "fac_scotland",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château tenu pour la cause de Bruce par le comte de March, îlot de résistance écossaise en pays occupé.",
+    "sources": [
+      "Château de Dunbar"
+    ]
+  }
+]

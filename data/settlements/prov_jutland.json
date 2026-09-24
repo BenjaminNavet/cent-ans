@@ -1,0 +1,88 @@
+[
+  {
+    "id": "set_ribe",
+    "province": "prov_jutland",
+    "kind": "city",
+    "name": {
+      "display": "Ribe",
+      "local": "Ripæ",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      8.7628,
+      55.33
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Danemark sans roi (interrègne 1332-1340) : le Jutland est engagé au comte Gérard III de Holstein. Révolte paysanne en gestation.",
+    "sources": [
+      "Interrègne danois (1332-1340)",
+      "Gérard III de Holstein",
+      "Ribe"
+    ]
+  },
+  {
+    "id": "set_aarhus",
+    "province": "prov_jutland",
+    "kind": "town",
+    "name": {
+      "display": "Aarhus",
+      "local": "Arhus",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      10.2039,
+      56.1629
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne cité épiscopale et port viking du Jutland oriental.",
+    "sources": [
+      "Aarhus"
+    ]
+  },
+  {
+    "id": "set_aalborg",
+    "province": "prov_jutland",
+    "kind": "town",
+    "name": {
+      "display": "Aalborg",
+      "local": "Alaborg",
+      "local_language": "vieux danois"
+    },
+    "lonlat": [
+      9.9217,
+      57.0488
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville marchande sur le Limfjord, plaque tournante du commerce du hareng.",
+    "sources": [
+      "Aalborg"
+    ]
+  }
+]

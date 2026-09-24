@@ -1,0 +1,145 @@
+[
+  {
+    "id": "set_york",
+    "province": "prov_yorkshire",
+    "kind": "city",
+    "name": {
+      "display": "York",
+      "local": "Everwyk",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.0873,
+      53.96
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d'Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux.",
+    "sources": [
+      "Yorkshire",
+      "York",
+      "Kingston upon Hull"
+    ]
+  },
+  {
+    "id": "set_hull",
+    "province": "prov_yorkshire",
+    "kind": "town",
+    "name": {
+      "display": "Kingston upon Hull",
+      "local": "Kyngeston upon Hulle",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.3367,
+      53.7457
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port royal fondé par Édouard Ier, étape de la laine du Yorkshire vers la Flandre.",
+    "sources": [
+      "Kingston upon Hull"
+    ]
+  },
+  {
+    "id": "set_scarborough",
+    "province": "prov_yorkshire",
+    "kind": "town",
+    "name": {
+      "display": "Scarborough",
+      "local": "Scardeburgh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.3945,
+      54.2828
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_fair",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port fortifié réputé pour sa grande foire annuelle et son château royal.",
+    "sources": [
+      "Scarborough"
+    ]
+  },
+  {
+    "id": "set_whitby",
+    "province": "prov_yorkshire",
+    "kind": "abbey",
+    "name": {
+      "display": "Whitby",
+      "local": "Streoneshalh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.6132,
+      54.4863
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": true,
+    "description": "Ancienne abbaye anglo-saxonne dominant la côte du Yorkshire.",
+    "sources": [
+      "Abbaye de Whitby"
+    ]
+  },
+  {
+    "id": "set_pontefract",
+    "province": "prov_yorkshire",
+    "kind": "castle",
+    "name": {
+      "display": "Pontefract",
+      "local": "Pontfreit",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.2979,
+      53.6926
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Puissante forteresse lancastrienne, « clé du Nord », où Thomas de Lancastre fut exécuté en 1322.",
+    "sources": [
+      "Château de Pontefract"
+    ]
+  }
+]

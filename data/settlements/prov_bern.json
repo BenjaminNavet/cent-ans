@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_berne",
+    "province": "prov_bern",
+    "kind": "city",
+    "name": {
+      "display": "Berne",
+      "local": "Bern",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4474,
+      46.948
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Cité impériale de Berne, en expansion contre la noblesse locale (Laupen, 1339) ; Fribourg (Habsbourg), pays de Vaud savoyard. Alliée des Waldstätten depuis 1323.",
+    "sources": [
+      "Berne",
+      "Bataille de Laupen",
+      "Ancienne Confédération suisse"
+    ]
+  },
+  {
+    "id": "set_thun",
+    "province": "prov_bern",
+    "kind": "town",
+    "name": {
+      "display": "Thoune",
+      "local": "Thun",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.628,
+      46.758
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville fondée par les ducs de Zähringen au bord de l'Aar, alliée de Berne.",
+    "sources": [
+      "Thoune"
+    ]
+  },
+  {
+    "id": "set_burgdorf",
+    "province": "prov_bern",
+    "kind": "castle",
+    "name": {
+      "display": "Berthoud",
+      "local": "Burgdorf",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.628,
+      47.0587
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château zähringien surplombant l'Emme, ancienne résidence seigneuriale.",
+    "sources": [
+      "Berthoud"
+    ]
+  },
+  {
+    "id": "set_interlaken",
+    "province": "prov_bern",
+    "kind": "abbey",
+    "name": {
+      "display": "Interlaken",
+      "local": "Interlaken",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.8632,
+      46.6863
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Prieuré de chanoines augustins entre les lacs de Thoune et de Brienz.",
+    "sources": [
+      "Interlaken"
+    ]
+  }
+]

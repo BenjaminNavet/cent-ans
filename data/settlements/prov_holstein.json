@@ -1,0 +1,112 @@
+[
+  {
+    "id": "set_lubeck",
+    "province": "prov_holstein",
+    "kind": "city",
+    "name": {
+      "display": "Lübeck",
+      "local": "Lübeck",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.6866,
+      53.8655
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Comtés de Holstein (Gérard III de Rendsbourg, maître du Danemark) et villes libres de Lübeck (tête de la Hanse) et Hambourg. Hareng de Scanie, sel de Lunebourg.",
+    "sources": [
+      "Comté de Holstein",
+      "Gérard III de Holstein",
+      "Lübeck"
+    ]
+  },
+  {
+    "id": "set_hamburg",
+    "province": "prov_holstein",
+    "kind": "town",
+    "name": {
+      "display": "Hambourg",
+      "local": "Hammaburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.9937,
+      53.5511
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Grande ville hanséatique de l'Elbe, alliée de Lübeck pour la sécurité des routes du hareng.",
+    "sources": [
+      "Hambourg"
+    ]
+  },
+  {
+    "id": "set_kiel",
+    "province": "prov_holstein",
+    "kind": "town",
+    "name": {
+      "display": "Kiel",
+      "local": "Kiel",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.1228,
+      54.3233
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville portuaire ducale du Holstein sur la Baltique.",
+    "sources": [
+      "Kiel"
+    ]
+  },
+  {
+    "id": "set_segeberg",
+    "province": "prov_holstein",
+    "kind": "castle",
+    "name": {
+      "display": "Segeberg",
+      "local": "Segeberch",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.3167,
+      53.95
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse comtale du Holstein bâtie sur une colline de gypse.",
+    "sources": [
+      "Bad Segeberg"
+    ]
+  }
+]

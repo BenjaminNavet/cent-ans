@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_saint_andrews",
+    "province": "prov_fife",
+    "kind": "city",
+    "name": {
+      "display": "Saint Andrews",
+      "local": "Sanct Andrewis",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.7967,
+      56.3398
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d'Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu'en 1339, Stirling jusqu'en 1342).",
+    "sources": [
+      "Fife",
+      "Perth (Écosse)",
+      "Seconde guerre d'indépendance écossaise"
+    ]
+  },
+  {
+    "id": "set_dundee",
+    "province": "prov_fife",
+    "kind": "town",
+    "name": {
+      "display": "Dundee",
+      "local": "Dunde",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.9707,
+      56.462
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand burgh royal du Tay, plusieurs fois assiégé pendant les guerres d'indépendance.",
+    "sources": [
+      "Dundee"
+    ]
+  },
+  {
+    "id": "set_stirling",
+    "province": "prov_fife",
+    "kind": "castle",
+    "name": {
+      "display": "Stirling",
+      "local": "Strivelin",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.9368,
+      56.1165
+    ],
+    "weight": 15,
+    "owner": "fac_england",
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "« Clé de l'Écosse » commandant le passage du Forth : forteresse reprise par les Anglais lors de la campagne d'Édouard III de 1336.",
+    "sources": [
+      "Château de Stirling"
+    ]
+  },
+  {
+    "id": "set_dunfermline",
+    "province": "prov_fife",
+    "kind": "abbey",
+    "name": {
+      "display": "Dunfermline",
+      "local": "Dunfermelyne",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.4633,
+      56.0719
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye royale, nécropole des rois d'Écosse dont Robert Bruce.",
+    "sources": [
+      "Abbaye de Dunfermline"
+    ]
+  }
+]

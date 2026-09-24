@@ -1,0 +1,145 @@
+[
+  {
+    "id": "set_cantorbery",
+    "province": "prov_kent",
+    "kind": "city",
+    "name": {
+      "display": "Cantorbéry",
+      "local": "Canterbury",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.0789,
+      51.2802
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Porte de l'Angleterre face au continent : les Cinque Ports (Douvres, Sandwich, Hythe, Romney) fournissent la flotte royale ; Cantorbéry est le siège du primat. Fer du Weald.",
+    "sources": [
+      "Kent",
+      "Cinque Ports",
+      "Cantorbéry"
+    ]
+  },
+  {
+    "id": "set_dover",
+    "province": "prov_kent",
+    "kind": "town",
+    "name": {
+      "display": "Douvres",
+      "local": "Dovorra",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.3134,
+      51.1279
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_market"
+    ],
+    "port": true,
+    "description": "« Clé de l'Angleterre » : port des Cinque Ports et immense château royal contrôlant le passage du Pas-de-Calais.",
+    "sources": [
+      "Douvres",
+      "Château de Douvres"
+    ]
+  },
+  {
+    "id": "set_sandwich",
+    "province": "prov_kent",
+    "kind": "town",
+    "name": {
+      "display": "Sandwich",
+      "local": "Sandwyce",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.3403,
+      51.2778
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port des Cinque Ports, base de rassemblement des flottes royales vers le continent.",
+    "sources": [
+      "Sandwich (Kent)"
+    ]
+  },
+  {
+    "id": "set_rochester",
+    "province": "prov_kent",
+    "kind": "town",
+    "name": {
+      "display": "Rochester",
+      "local": "Rovecestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.5033,
+      51.389
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville-château sur la Medway gardant la route de Londres à Douvres.",
+    "sources": [
+      "Rochester (Kent)"
+    ]
+  },
+  {
+    "id": "set_faversham",
+    "province": "prov_kent",
+    "kind": "abbey",
+    "name": {
+      "display": "Faversham",
+      "local": "Feversham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.8912,
+      51.313
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye royale fondée par le roi Étienne, nécropole de sa famille.",
+    "sources": [
+      "Abbaye de Faversham"
+    ]
+  }
+]

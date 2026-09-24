@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_arnhem",
+    "province": "prov_gueldre",
+    "kind": "city",
+    "name": {
+      "display": "Arnhem",
+      "local": "Arnhem",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.8987,
+      51.9851
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II, marié à Éléonore, sœur d'Édouard III : allié anglais. Nimègue, ville impériale engagée.",
+    "sources": [
+      "Duché de Gueldre",
+      "Renaud II de Gueldre",
+      "Nimègue"
+    ]
+  },
+  {
+    "id": "set_nijmegen",
+    "province": "prov_gueldre",
+    "kind": "town",
+    "name": {
+      "display": "Nimègue",
+      "local": "Nijmegen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.8525,
+      51.8425
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire d'origine romaine et carolingienne, enclavée dans le comté de Gueldre.",
+    "sources": [
+      "Nimègue"
+    ]
+  },
+  {
+    "id": "set_zutphen",
+    "province": "prov_gueldre",
+    "kind": "town",
+    "name": {
+      "display": "Zutphen",
+      "local": "Zutphen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.1997,
+      52.14
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville hanséatique de l'Yssel, l'une des principales villes du comté de Gueldre.",
+    "sources": [
+      "Zutphen"
+    ]
+  },
+  {
+    "id": "set_doornenburg",
+    "province": "prov_gueldre",
+    "kind": "castle",
+    "name": {
+      "display": "Doornenburg",
+      "local": "Doornenburg",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.9689,
+      51.8933
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château à douves des seigneurs de Doornenburg près de Nimègue.",
+    "sources": [
+      "Doornenburg"
+    ]
+  }
+]

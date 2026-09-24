@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_munster",
+    "province": "prov_westphalia",
+    "kind": "city",
+    "name": {
+      "display": "Münster",
+      "local": "Münster",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.6261,
+      51.9607
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Duché de Westphalie (archevêque de Cologne), évêchés de Münster, Paderborn et Osnabrück, comté de La Marck (Adolphe II). Villes hanséatiques de Dortmund et Soest.",
+    "sources": [
+      "Westphalie",
+      "Principauté épiscopale de Münster",
+      "Dortmund"
+    ]
+  },
+  {
+    "id": "set_dortmund",
+    "province": "prov_westphalia",
+    "kind": "town",
+    "name": {
+      "display": "Dortmund",
+      "local": "Throtmanni",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4653,
+      51.5136
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire, membre actif de la Hanse en Westphalie.",
+    "sources": [
+      "Dortmund"
+    ]
+  },
+  {
+    "id": "set_soest",
+    "province": "prov_westphalia",
+    "kind": "town",
+    "name": {
+      "display": "Soest",
+      "local": "Susat",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.1064,
+      51.5714
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Grande ville marchande westphalienne dont le droit urbain (Soester Recht) a essaimé dans toute la Baltique.",
+    "sources": [
+      "Soest (Rhénanie-du-Nord-Westphalie)"
+    ]
+  },
+  {
+    "id": "set_corvey",
+    "province": "prov_westphalia",
+    "kind": "abbey",
+    "name": {
+      "display": "Corvey",
+      "local": "Corbeia Nova",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.4083,
+      51.7767
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine d'immédiateté impériale sur la Weser, fondée depuis Corbie.",
+    "sources": [
+      "Abbaye de Corvey"
+    ]
+  }
+]
