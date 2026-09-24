@@ -23,80 +23,127 @@ impl CampaignState {
     where
         P: Fn(&CampaignState, &GameData, &FactionId) -> Vec<Order>,
     {
+        self.end_turn_profiled(data, planner).0
+    }
+
+    /// [`CampaignState::end_turn_with`], also returning the time each AI
+    /// faction took to play its turn (marches, planning, orders), in the
+    /// order they played (lot M3 performance probe).
+    pub fn end_turn_profiled<P>(
+        &mut self,
+        data: &GameData,
+        planner: P,
+    ) -> (Vec<GameEvent>, Vec<(FactionId, std::time::Duration)>)
+    where
+        P: Fn(&CampaignState, &GameData, &FactionId) -> Vec<Order>,
+    {
         let mut events = Vec::new();
 
-        // 0. Player battles left pending from the previous turn are
+        // 1. The player's turn is over. His battles still pending are
         // auto-resolved first (M7).
         battle_request::auto_resolve_all_pending(self, data, &mut events);
 
-        // 1. Each AI faction in id order (lot M2, minimal sequential turn):
-        // its multi-turn marches resume, then its orders apply at once
-        // (moves, attacks and sieges included). Invalid orders are silently
-        // dropped: the planner is advisory.
+        // 2. Each AI faction plays in id order (spec § 3.4).
         let ai_factions: Vec<FactionId> = self
             .factions
             .iter()
             .filter(|(id, f)| f.alive && **id != self.player_faction)
             .map(|(id, _)| id.clone())
             .collect();
+        let mut timings = Vec::with_capacity(ai_factions.len());
         for faction in ai_factions {
-            march::continue_marches(self, data, Some(&faction), &mut events);
-            for order in planner(self, data, &faction) {
-                let _ = self.apply_order(data, &faction, order);
-            }
+            let started = std::time::Instant::now();
+            self.play_ai_turn(data, &faction, &planner, &mut events);
+            timings.push((faction, started.elapsed()));
         }
 
-        // 2-4. Sieges, chevauchées (movement and battles are immediate).
-        siege::resolve_sieges(self, data, &mut events);
-        siege::resolve_raids(self, data, &mut events);
+        self.resolve_end_of_turn(data, &mut events);
+        (events, timings)
+    }
+
+    /// The turn of AI faction `faction` (spec § 3.4, step 2): its multi-turn
+    /// marches resume, then `planner`'s orders are executed at once, one by
+    /// one (moves, attacks, embarkations and sieges included). Invalid orders
+    /// are dropped: the planner is advisory. Battles against the player are
+    /// auto-resolved, with a notice in the season report.
+    pub fn play_ai_turn<P>(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        planner: &P,
+        events: &mut Vec<GameEvent>,
+    ) where
+        P: Fn(&CampaignState, &GameData, &FactionId) -> Vec<Order>,
+    {
+        if !self.factions.get(faction).is_some_and(|f| f.alive) {
+            return;
+        }
+        self.ai_turn = Some(faction.clone());
+        march::continue_marches(self, data, Some(faction), events);
+        for order in planner(self, data, faction) {
+            let _ = self.apply_order(data, faction, order);
+        }
+        self.ai_turn = None;
+    }
+
+    /// Steps 3 and 4 of the sequential turn (spec § 3.4): the end-of-turn
+    /// phases of spec § 1.3 (without a movement phase: marches and battles
+    /// are immediate), then the new season, whose movement points are
+    /// refilled before the player's marches resume.
+    fn resolve_end_of_turn(&mut self, data: &GameData, events: &mut Vec<GameEvent>) {
+        // Numbers below: the phases of spec § 1.3 (1, movement, is gone).
+        // 2-4. Sieges, chevauchées.
+        siege::resolve_sieges(self, data, events);
+        siege::resolve_raids(self, data, events);
 
         // 5. Buildings and goods, ahead of the economy that reads them (M3).
-        buildings::resolve_construction(self, data, &mut events);
+        buildings::resolve_construction(self, data, events);
         economy::resolve_goods(self, data);
         // H3: diets whose requirements no longer hold fall back to the default.
-        table::resolve_requirements(self, data, &mut events);
+        table::resolve_requirements(self, data, events);
 
         // 6-8. Economy, attrition, recovery.
-        economy::resolve_economy(self, data, &mut events);
+        economy::resolve_economy(self, data, events);
         // H5: prices follow the coinage.
-        crate::coinage::resolve_coinage(self, &mut events);
+        crate::coinage::resolve_coinage(self, events);
         // H6: ransom installments, captive rulers.
-        crate::ransom::resolve_ransoms(self, data, &mut events);
+        crate::ransom::resolve_ransoms(self, data, events);
         // H6: chivalric orders (collapse, new members, yearly prestige).
-        crate::chivalry::resolve_chivalry(self, data, &mut events);
-        research::resolve_research(self, data, &mut events);
-        economy::resolve_attrition(self, data, &mut events);
+        crate::chivalry::resolve_chivalry(self, data, events);
+        research::resolve_research(self, data, events);
+        economy::resolve_attrition(self, data, events);
         economy::resolve_decay(self, data);
 
         // 8b. Diplomacy (vassal tribute after the economy, expiries,
         // rebellions) and religion (favour, Schism, heresy) before the
         // population reads their unrest (M5).
-        diplomacy::resolve_diplomacy(self, data, &mut events);
-        religion::resolve_religion(self, data, &mut events);
+        diplomacy::resolve_diplomacy(self, data, events);
+        religion::resolve_religion(self, data, events);
         // 8b'. Agents: upkeep, counter-espionage, stale intelligence (C6).
-        crate::agents::resolve_agents(self, data, &mut events);
+        crate::agents::resolve_agents(self, data, events);
 
         // 8c. Chronicle: historical and random events (M10).
-        chronicle::resolve_chronicle(self, data, &mut events);
+        chronicle::resolve_chronicle(self, data, events);
 
         // 8d. The table: ruler piety/prestige and Lent in spring (H3).
-        table::resolve_lent(self, data, &mut events);
+        table::resolve_lent(self, data, events);
 
         // 9. Population dynamics: growth, health, wealth, goods
         // satisfaction, unrest, revolt, plague, famine (M3).
-        population::resolve_population(self, data, &mut events);
+        population::resolve_population(self, data, events);
 
         // 10. Characters: governance XP, deaths, winter births, regencies
         // (M4), then dead factions.
         dynasty::resolve_governance(self);
         dynasty::resolve_court_prestige(self, data);
-        crate::retinue::resolve_retinue(self, data, &mut events);
-        characters::resolve_characters(self, data, &mut events);
-        dynasty::resolve_births(self, data, &mut events);
-        dynasty::resolve_regencies(self, data, &mut events);
-        characters::resolve_faction_deaths(self, data, &mut events);
+        crate::retinue::resolve_retinue(self, data, events);
+        characters::resolve_characters(self, data, events);
+        dynasty::resolve_births(self, data, events);
+        dynasty::resolve_regencies(self, data, events);
+        characters::resolve_faction_deaths(self, data, events);
 
-        // 11. New season.
+        // 11. New season (step 4 of § 3.4): movement points are refilled,
+        // then the player plays.
         self.advance_date();
         let allowances: Vec<(crate::state::ArmyId, u32)> = self
             .armies
@@ -108,10 +155,10 @@ impl CampaignState {
                 army.movement_left = points;
             }
         }
-        // Lot M2: the player's multi-turn marches resume at the start of
+        // The player's multi-turn marches resume at the start of
         // his turn.
         let player = self.player_faction.clone();
-        march::continue_marches(self, data, Some(&player), &mut events);
+        march::continue_marches(self, data, Some(&player), events);
         // C6: agents get their points back and resume their march.
         crate::agents::start_season(self, data);
         let turn = self.turn;
@@ -119,8 +166,7 @@ impl CampaignState {
             faction.truces.retain(|_, until| *until > turn);
         }
         // M10: victory, defeat or end of the campaign for the player.
-        crate::victory::resolve_victory(self, data, &mut events);
+        crate::victory::resolve_victory(self, data, events);
         self.events = events.clone();
-        events
     }
 }
