@@ -76,6 +76,12 @@ var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
+var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
+var _bench_cpu_ms: float = 0.0
+## V3 : `--bench-ab=<niveau>,<niveau>` alterne deux niveaux de `RenderQuality` toutes les 30 images
+## pendant la mesure (même charge machine pour les deux), temps GPU médian par niveau.
+var _bench_ab: PackedStringArray = []
+var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -86,6 +92,8 @@ var deployment: DeploymentController = null  # F5c : phase de déploiement du jo
 var _deploy_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
+var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
 @onready var terrain: BattleTerrain = $Terrain
@@ -200,7 +208,8 @@ func begin() -> bool:
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -208,7 +217,14 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
-	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
+	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
+	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
+	# plutôt que d'afficher une météo que les règles n'appliquent pas.
+	var weather_label := str(weather.get("label", ""))
+	if weather_key != str(weather.get("key", "clear")):
+		weather_label += " (rendu forcé : %s)" % weather_key
+		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
+	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
@@ -222,6 +238,9 @@ func begin() -> bool:
 	music.name = "Music"
 	add_child(music)
 	music.setup(self)
+	battle_audio = BattleAudio.new()
+	add_child(battle_audio)
+	battle_audio.setup(_weather_key, camera_rig.camera)
 	_refresh_view(true)
 	return true
 
@@ -363,7 +382,8 @@ func _frame_camera() -> void:
 	var yaw := PI if player_side == "attacker" else 0.0
 	# Regarder un peu devant sa propre ligne, vers l'ennemi.
 	center.z += 70.0 if player_side == "attacker" else -70.0
-	camera_rig.look_at_point(center, 260.0, yaw)
+	# A1-06 : vue d'ouverture plus basse et plus proche (on voit des hommes, pas des points).
+	camera_rig.look_at_point(center, 170.0, yaw)
 
 
 # --- Boucle ---------------------------------------------------------------------------
@@ -377,6 +397,7 @@ func _process(delta: float) -> void:
 	if music != null:
 		music.update(delta)
 	_refresh_view(false, delta)
+	_update_audio(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
@@ -386,8 +407,16 @@ func _process(delta: float) -> void:
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
 			soldiers.start_timing()
 			_apply_camera_override()  # banc d'essai rapproché (lot B1)
+			# V3 : temps GPU/CPU de rendu mesurés (l'écran plafonne souvent les FPS à 60).
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 		_bench_frames += 1
 		_bench_time += delta
+		if _bench_frames > 10:
+			var viewport_rid := get_viewport().get_viewport_rid()
+			var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+			_bench_gpu_ms += gpu_ms
+			_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+			_bench_ab_step(gpu_ms)
 		if _bench_frames == 600:
 			var fps := _bench_frames / maxf(_bench_time, 0.001)
 			var soldiers := 0
@@ -395,7 +424,45 @@ func _process(delta: float) -> void:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+			print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [_bench_gpu_ms / (_bench_frames - 10), _bench_cpu_ms / (_bench_frames - 10), RenderQuality.current()])
+			for level in _bench_ab_ms:
+				var samples: Array = _bench_ab_ms[level]
+				samples.sort()
+				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
 			get_tree().quit(0)
+
+
+## AU1 : sons spatialisés d'après les régiments (et le siège, 4 fois par seconde).
+func _update_audio(delta: float) -> void:
+	if battle_audio == null:
+		return
+	var running: bool = not paused and not battle.call("is_finished")
+	var elapsed := float(battle.call("get_elapsed"))
+	var height := camera_rig.camera.global_position.y - camera_rig.target.y
+	battle_audio.update(units, camera_rig.target, height, delta * speed if running else 0.0, delta, elapsed)
+	if siege_view != null and running:
+		_siege_audio_timer -= delta
+		if _siege_audio_timer <= 0.0:
+			_siege_audio_timer = 0.25
+			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+
+
+## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
+## 30 images (les 4 premières après un changement sont ignorées : mesure en retard d'une image,
+## ressources réallouées).
+func _bench_ab_step(gpu_ms: float) -> void:
+	if _bench_ab.size() < 2:
+		return
+	var slot := (_bench_frames - 11) / 30
+	var phase := (_bench_frames - 11) % 30
+	var level := _bench_ab[slot % _bench_ab.size()]
+	if phase == 0:
+		RenderQuality.override_level = level
+		RenderQuality.reapply(get_tree())
+	elif phase >= 4:
+		if not _bench_ab_ms.has(level):
+			_bench_ab_ms[level] = []
+		(_bench_ab_ms[level] as Array).append(gpu_ms)
 
 
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
@@ -904,6 +971,8 @@ func _parse_cmdline() -> void:
 			_pad_units = int(arg.trim_prefix("--units="))
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
+		elif arg.begins_with("--bench-ab="):
+			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
@@ -961,7 +1030,15 @@ func _stage_screenshot() -> void:
 				if str(unit["state"]) == "melee":
 					contact_time = float(battle.call("get_elapsed"))
 					break
-		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
+		elif battle.call("is_finished"):
+			break
+		elif _closeup:
+			# A1-06 : cliché au choc (1 s après le contact), ou dès que la mêlée cesse (une charge
+			# met souvent l'adversaire en déroute en quelques secondes).
+			var since := float(battle.call("get_elapsed")) - contact_time
+			if since >= 1.0 or not _melee_ongoing(units):
+				break
+		elif float(battle.call("get_elapsed")) > contact_time + 12.0:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
@@ -973,25 +1050,8 @@ func _stage_screenshot() -> void:
 			focus += Vector3(float(unit["x"]), 0, float(unit["z"]))
 			n += 1
 	if _closeup:
-		# Gros plan : le couple de régiments ennemis les plus proches (de préférence en mêlée),
-		# vu de trois quarts depuis le camp du joueur.
-		var best := INF
-		var yaw := 0.0
-		for unit in units:
-			if str(unit["side"]) != player_side or not bool(unit["present"]):
-				continue
-			for other in units:
-				if str(other["side"]) == player_side or not bool(other["present"]):
-					continue
-				var a := Vector2(float(unit["x"]), float(unit["z"]))
-				var b := Vector2(float(other["x"]), float(other["z"]))
-				var d := a.distance_to(b) - (100.0 if str(unit["state"]) == "melee" else 0.0)
-				if d < best:
-					best = d
-					var mid := a.lerp(b, 0.1)
-					focus = Vector3(mid.x, 0, mid.y)
-					yaw = atan2(a.x - b.x, a.y - b.y) + 0.55
-		camera_rig.look_at_point(focus, 24.0, yaw)
+		var shot := _closeup_shot(units)
+		camera_rig.look_at_point(shot["focus"], 26.0, float(shot["yaw"]))
 	elif n > 0:
 		focus /= n
 		camera_rig.look_at_point(focus + Vector3(0, 0, -25 if player_side == "attacker" else 25), 120.0, (PI if player_side == "attacker" else 0.0) + 0.5)
@@ -1006,6 +1066,57 @@ func _stage_screenshot() -> void:
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Un régiment au moins est au corps à corps (capture `--closeup`).
+func _melee_ongoing(p_units: Array) -> bool:
+	for unit in p_units:
+		if bool(unit["present"]) and str(unit["state"]) == "melee":
+			return true
+	return false
+
+
+## Gros plan `--closeup` (A1-06) : cadre le point de contact réel de la mêlée — les deux soldats
+## ennemis les plus proches parmi les couples de régiments au corps à corps (à défaut, les plus
+## proches tout court) —, vu de trois quarts, perpendiculairement à la ligne de front, depuis le
+## camp du joueur. Avant : milieu décalé vers le régiment du joueur (souvent la cavalerie restée
+## en arrière), sans ennemi dans le cadre.
+func _closeup_shot(p_units: Array) -> Dictionary:
+	var best := INF
+	var focus := Vector3.ZERO
+	var yaw := 0.0
+	for unit in p_units:
+		if str(unit["side"]) != player_side or not bool(unit["present"]):
+			continue
+		for other in p_units:
+			if str(other["side"]) == player_side or not bool(other["present"]):
+				continue
+			var a := Vector2(float(unit["x"]), float(unit["z"]))
+			var b := Vector2(float(other["x"]), float(other["z"]))
+			if a.distance_to(b) > 150.0:
+				continue
+			var in_melee := ["melee", "charging"].has(str(unit["state"])) or str(other["state"]) == "melee"
+			var ours := soldiers.soldier_positions(int(unit["id"]), 48)
+			var theirs := soldiers.soldier_positions(int(other["id"]), 48)
+			var pa := Vector3(a.x, 0, a.y)
+			var pb := Vector3(b.x, 0, b.y)
+			var gap := a.distance_to(b)
+			for s1 in ours:
+				for s2 in theirs:
+					var d := Vector2(s1.x, s1.z).distance_to(Vector2(s2.x, s2.z))
+					if d < gap:
+						gap = d
+						pa = s1
+						pb = s2
+			var score := gap - (1000.0 if in_melee else 0.0)
+			if score < best:
+				best = score
+				focus = (pa + pb) * 0.5
+				# Axe du front : de l'ennemi vers le joueur (centres des régiments) ; caméra du
+				# côté du joueur, décalée de ~60° pour voir les deux lignes de profil.
+				yaw = atan2(a.x - b.x, a.y - b.y) + 1.05
+	focus.y = 0.0
+	return {"focus": focus, "yaw": yaw}
 
 
 ## Capture de siège : l'assaut jusqu'aux premières échelles (+ 10 s) ou 4 min, vue sur le front
@@ -1128,6 +1239,7 @@ func _stage_deploy_screenshot() -> void:
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
+	print("BattleScene: deployment zone %s, player side %s" % [zone, player_side])
 	var ahead := 1.0 if player_side == "attacker" else -1.0
 	var cam := center + Vector3(0, 300, -400 * ahead)
 	deployment.place(selected.duplicate(), center + Vector3(-60, 0, 0), center + Vector3(60, 0, 0), cam)

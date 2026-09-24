@@ -209,38 +209,42 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
         let mut stuck: u32 = 0;
         let mut next_still = BTreeMap::new();
         for (army_id, army) in &state.armies {
+            // Lot M2: the army's settlement, or the nearest one in the field.
+            let Some(location) = state.army_anchor(data, army) else {
+                continue;
+            };
             let count = match still.get(army_id) {
-                Some((loc, n)) if loc == &army.location => n + 1,
+                Some((loc, n)) if loc == &location => n + 1,
                 _ => 1,
             };
-            next_still.insert(army_id.clone(), (army.location.clone(), count));
+            next_still.insert(army_id.clone(), (location.clone(), count));
             let besieging = state
                 .settlements
-                .get(&army.location)
+                .get(&location)
                 .and_then(|s| s.siege.as_ref())
                 .is_some_and(|s| s.attacker == army.faction);
             if count >= STUCK_TURNS
                 && !besieging
-                && !state.is_friendly_settlement(&army.faction, &army.location)
+                && !state.is_friendly_settlement(&army.faction, &location)
             {
                 stuck += 1;
                 if std::env::var("STUCK").is_ok() && turn % 10 == 0 {
-                    let place = state.settlements.get(&army.location);
+                    let place = state.settlements.get(&location);
                     println!(
                         "  [{seed}] t{turn} bloquée {army_id} {} à {} ({:?}, tenue par {}, fort. {}, posture {:?}, {} h., chemin {})",
                         army.faction.as_str(),
-                        army.location.as_str(),
+                        location.as_str(),
                         place.map(|p| p.kind),
                         place.map_or("?", |p| p.controller.as_str()),
-                        state.fortification_level(data, &army.location),
+                        state.fortification_level(data, &location),
                         army.stance,
                         army.total_strength(),
-                        army.path.len()
+                        army.planned_path.len()
                     );
                 }
-                let near_l4 = std::iter::once(army.location.clone())
+                let near_l4 = std::iter::once(location.clone())
                     .chain(
-                        sim_campaign::movement::edges(data, &army.location)
+                        sim_campaign::movement::edges(data, &location)
                             .into_iter()
                             .map(|(s, _)| s),
                     )

@@ -22,6 +22,20 @@ fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
 }
 
+/// Cheapest path of `army` to `target` on the settlement graph (the
+/// skeleton of the AI's planning since lot M2).
+fn graph_path(
+    state: &CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    target: &SettlementId,
+) -> Option<Vec<SettlementId>> {
+    let entry = &state.armies[army];
+    let from = entry.settlement()?;
+    let table = sim_campaign::movement::dijkstra(state, data, &entry.faction, from, None, None);
+    sim_campaign::movement::path_to(&table, target)
+}
+
 fn start(data: &GameData, player: &str) -> CampaignState {
     CampaignState::new_1337(data, fac(player), 7).expect("1337 start")
 }
@@ -185,7 +199,7 @@ fn an_ungarrisoned_village_falls_on_arrival() {
     let england = fac("fac_england");
     let (village, staging) = staging_target(&state, &data, SettlementKind::Village, false);
     let army = first_army(&state, &england);
-    state.armies.get_mut(&army).unwrap().location = staging;
+    state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state
         .submit_order(
             &data,
@@ -193,7 +207,7 @@ fn an_ungarrisoned_village_falls_on_arrival() {
         )
         .expect("move order accepted");
     quiet_turn(&mut state, &data);
-    assert_eq!(state.armies[&army].location, village);
+    assert_eq!(state.armies[&army].settlement().cloned().unwrap(), village);
     assert_eq!(
         state.settlements[&village].controller, england,
         "{village} is taken without a siege"
@@ -208,7 +222,7 @@ fn a_garrisoned_castle_is_besieged() {
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (castle, staging) = staging_target(&state, &data, SettlementKind::Castle, true);
     let army = first_army(&state, &england);
-    state.armies.get_mut(&army).unwrap().location = staging;
+    state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state
         .submit_order(
             &data,
@@ -222,7 +236,7 @@ fn a_garrisoned_castle_is_besieged() {
         .submit_order(&data, Order::move_along(army.clone(), vec![castle.clone()]))
         .expect("move order accepted");
     quiet_turn(&mut state, &data);
-    assert_eq!(state.armies[&army].location, castle);
+    assert_eq!(state.armies[&army].settlement().cloned().unwrap(), castle);
     let settlement = &state.settlements[&castle];
     assert_eq!(
         settlement.controller, france,
@@ -248,20 +262,16 @@ fn the_loaded_graph_and_the_fallback_graph_both_route_armies() {
     let france = fac("fac_france");
     let army = first_army(&state, &france);
     let target = state.provinces[&prov("prov_normandie")].city.clone();
-    let real = state
-        .find_path(&data, &army, &target)
-        .expect("a path on the real graph");
+    let real = graph_path(&state, &data, &army, &target).expect("a path on the real graph");
     assert_eq!(real.last(), Some(&target));
 
     data.settlement_graph.clear();
     data.build_movement_graph();
     assert!(data.movement_graph.fallback);
-    let fallback = state
-        .find_path(&data, &army, &target)
-        .expect("a path on the fallback graph");
+    let fallback = graph_path(&state, &data, &army, &target).expect("a path on the fallback graph");
     assert_eq!(fallback.last(), Some(&target));
     // Every step is an edge of the graph.
-    let mut from = state.armies[&army].location.clone();
+    let mut from = state.armies[&army].settlement().cloned().unwrap();
     for step in &fallback {
         assert!(data.movement_graph.edge(&from, step).is_some());
         from = step.clone();
@@ -274,7 +284,7 @@ fn armies_prefer_the_road_on_a_fixture_graph() {
     let state = start(&data, "fac_france");
     let france = fac("fac_france");
     let army = first_army(&state, &france);
-    let a = state.armies[&army].location.clone();
+    let a = state.armies[&army].settlement().cloned().unwrap();
     let province = state.settlements[&a].province.clone();
     let others: Vec<SettlementId> = state.provinces[&province]
         .settlements
@@ -301,7 +311,7 @@ fn armies_prefer_the_road_on_a_fixture_graph() {
     ];
     data.build_movement_graph();
     assert!(!data.movement_graph.fallback);
-    assert_eq!(state.find_path(&data, &army, &d), Some(vec![b, d]));
+    assert_eq!(graph_path(&state, &data, &army, &d), Some(vec![b, d]));
 }
 
 #[test]

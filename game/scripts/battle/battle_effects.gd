@@ -28,6 +28,8 @@ const MAX_PROJECTILES := 3072
 const MAX_BALLS := 64
 const DUST_EMITTERS := 10
 const SPLASH_EMITTERS := 6
+## B8 : sillage d'écume derrière les chevaux au gué (distinct des gerbes `SPLASH_EMITTERS`).
+const WAKE_EMITTERS := 6
 const BURST_EMITTERS := 8
 ## Distance caméra au-delà de laquelle ni poussière ni traits ne sont produits (m).
 const EFFECT_DISTANCE := 700.0
@@ -57,6 +59,7 @@ var _ball_next: int = 0
 var _materials: Array[ShaderMaterial] = []
 var _dust: Array[GPUParticles3D] = []
 var _splash: Array[GPUParticles3D] = []
+var _wake: Array[GPUParticles3D] = []  # B8 : sillage d'écume (chevaux au gué)
 var _bursts: Dictionary = {}  # sorte -> Array[GPUParticles3D]
 var _burst_next: Dictionary = {}
 var _flash: OmniLight3D
@@ -85,10 +88,14 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 		_dust.append(_emitter("Dust%d" % i, _dust_material(false), 72, 2.8, false))
 	for i in SPLASH_EMITTERS:
 		_splash.append(_emitter("Splash%d" % i, _splash_material(), 160, 0.8, false))
+	for i in WAKE_EMITTERS:
+		_wake.append(_emitter("Wake%d" % i, _splash_material(), 90, 1.6, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
 		"flash": _burst_pool("Flash", _flash_material(), 24, 0.25),
+		# B8 : gerbe renforcée à l'entrée d'une charge dans l'eau (écume, pas la poussière brune).
+		"ford": _burst_pool("Ford", _splash_material(), 64, 1.0),
 	}
 	for key in _bursts:
 		_burst_next[key] = 0
@@ -127,6 +134,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		by_id[int(unit["id"])] = unit
 	var dusty: Array = []
 	var wet: Array = []
+	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
 	for unit in units:
 		var id := int(unit["id"])
 		var present := bool(unit["present"])
@@ -141,7 +149,8 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 			if str(prev["state"]) == "charging" and state == "melee":
 				var fwd := _forward(unit)
 				burst(pos + fwd * float(unit.get("depth", 6.0)) * 0.5, "impact", 1.6 if str(unit["render"]) == "cavalry" else 1.0)
-		_track[id] = {"ammo": ammo, "state": state}
+		var was_wet := bool(prev.get("wet", false))
+		_track[id] = {"ammo": ammo, "state": state, "wet": false}
 		if not present or not near:
 			continue
 		var moving := state == "marching" or state == "charging" or state == "routing"
@@ -161,11 +170,23 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 			entry["strength"] = maxf(strength, 0.6 if mounted else 0.4)
 			entry["score"] = float(entry["strength"]) / (1.0 + d / 120.0)
 			wet.append(entry)
+			_track[id]["wet"] = true
+			if mounted:
+				# B8 : sillage d'écume derrière les chevaux au gué (émetteur dédié, trace le long
+				# de l'axe de marche plutôt qu'une gerbe verticale).
+				wakes.append(entry)
+				# B8 : gerbe renforcée à l'instant où une charge entre dans l'eau (une fois, pas à
+				# chaque image tant qu'elle y reste : `was_wet` mémorisé image par image).
+				if fast and not was_wet:
+					var fwd := _forward(unit)
+					var mid := (wet_span.x + wet_span.y) * 0.5
+					burst(pos + fwd * mid + Vector3(0, 0.45, 0), "ford", 2.2 if state == "charging" else 1.4)
 		elif enabled_dust and d < DUST_DISTANCE:
 			dusty.append(entry)
 	if _dust_spots.is_empty():
 		_assign(_dust, dusty)
 	_assign(_splash, wet)
+	_assign_wake(_wake, wakes)
 
 
 ## Poussière imposée à un endroit (captures hors simulation).
@@ -364,6 +385,23 @@ func _assign(pool: Array[GPUParticles3D], entries: Array) -> void:
 			emitter.emitting = false
 
 
+## B8 : sillage d'écume, réaffecté comme les gerbes mais posé au bord arrière (dans le sens de la
+## marche) de la partie mouillée du régiment, avec une emprise plus étroite qu'une gerbe.
+func _assign_wake(pool: Array[GPUParticles3D], entries: Array) -> void:
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["score"]) > float(b["score"]))
+	for i in pool.size():
+		var emitter := pool[i]
+		if i < entries.size():
+			var unit: Dictionary = entries[i]["unit"]
+			var span: Vector2 = entries[i]["span"]
+			var fwd := _forward(unit)
+			var pos: Vector3 = entries[i]["pos"] + fwd * span.x + Vector3(0, 0.35, 0)
+			var size := Vector2(maxf(float(unit.get("width", 10.0)) * 0.5, 3.0), 3.5)
+			_place(emitter, pos, size, float(unit.get("facing", 0.0)), float(entries[i]["strength"]))
+		elif emitter.emitting:
+			emitter.emitting = false
+
+
 func _place(emitter: GPUParticles3D, pos: Vector3, size: Vector2, facing: float, strength: float) -> void:
 	emitter.position = pos
 	emitter.rotation = Vector3(0, facing, 0)
@@ -439,6 +477,36 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(0, 0.5))
 		grow.add_point(Vector2(1, 1.4))
 		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 0.9, 0.5, 0.0])
+	elif node_name.begins_with("Wake"):
+		# B8 : sillage d'écume, entraîné vers l'arrière (pas projeté vers le haut comme une gerbe)
+		# et étalé sur les côtés, plus longue durée de vie pour laisser une traîne visible.
+		mat.direction = Vector3(0, 0.3, -1)
+		mat.spread = 45.0
+		mat.initial_velocity_min = 0.6
+		mat.initial_velocity_max = 1.8
+		mat.gravity = Vector3(0, -0.4, 0)
+		mat.damping_min = 0.6
+		mat.damping_max = 1.4
+		mat.scale_min = 0.7
+		mat.scale_max = 1.6
+		grow.add_point(Vector2(0, 0.4))
+		grow.add_point(Vector2(1, 1.1))
+		mat.color_ramp = _ramp([0.0, 0.15, 0.7, 1.0], [0.0, 0.65, 0.35, 0.0])
+	elif node_name.begins_with("Ford"):
+		# B8 : gerbe renforcée à l'entrée d'une charge dans l'eau (plus large et plus vive
+		# qu'une gerbe de gué ordinaire, ponctuelle comme les autres tampons de rafale).
+		mat.emission_box_extents = Vector3(3.5, 0.3, 2.5)
+		mat.spread = 40.0
+		mat.initial_velocity_min = 3.5
+		mat.initial_velocity_max = 7.5
+		mat.gravity = Vector3(0, -9.8, 0)
+		mat.damping_min = 0.6
+		mat.damping_max = 1.6
+		mat.scale_min = 1.2
+		mat.scale_max = 2.8
+		grow.add_point(Vector2(0, 0.55))
+		grow.add_point(Vector2(1, 1.5))
+		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 1.0, 0.55, 0.0])
 	elif node_name.begins_with("Impact"):
 		mat.emission_box_extents = Vector3(3, 0.3, 2)
 		mat.spread = 55.0
@@ -537,8 +605,20 @@ func _splash_material() -> StandardMaterial3D:
 	return _billboard(SPLASH_COLOR, true, false)
 
 
-func _smoke_material() -> StandardMaterial3D:
-	return _billboard(Color(0.86, 0.85, 0.82), false, false)
+## Fumée de bombarde : planche de fumée animée du lot V3 (A1-13, `fire_smoke.gdshader`), blanche
+## (poudre noire), sans lueur de feu ; disque flou (B4) si la planche n'est pas importée.
+func _smoke_material() -> Material:
+	var flipbook := "res://assets/textures/fx/smoke_flipbook.png"
+	if not ResourceLoader.exists(flipbook):
+		return _billboard(Color(0.86, 0.85, 0.82), false, false)
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/fire_smoke.gdshader")
+	mat.set_shader_parameter("flipbook", load(flipbook))
+	mat.set_shader_parameter("smoke_color", Color(0.8, 0.79, 0.76))
+	mat.set_shader_parameter("ember_glow_energy", 0.0)
+	mat.set_shader_parameter("density", 1.4)
+	mat.set_shader_parameter("soft_distance", 1.5)
+	return mat
 
 
 func _flash_material() -> StandardMaterial3D:

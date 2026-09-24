@@ -22,6 +22,20 @@ thiserror = "2"
 
 # PNG decoding (4096x4096 16-bit heightmap) must stay well under 500 ms even in
 # debug builds: optimise only the decoding crates, never our own code.
+# Lot M2: the data crate walks 4096² rasters (province ids, land mask) once
+# per process; optimise it too so that tests stay fast.
+# Hot simulation crates are optimised even in dev: the debug dylib loaded by
+# `godot --path game` was ~50x slower at end of turn than release (audit A5, T1).
+[profile.dev.package.sim-campaign]
+opt-level = 2
+[profile.dev.package.sim-battle]
+opt-level = 2
+[profile.dev.package.ai]
+opt-level = 2
+[profile.dev.package."*"]
+opt-level = 3
+[profile.dev.package.data-model]
+opt-level = 3
 [profile.dev.package.png]
 opt-level = 3
 [profile.dev.package.fdeflate]

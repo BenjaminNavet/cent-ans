@@ -229,7 +229,7 @@ fn supply_buildings_speed_up_recovery_in_the_province() {
     let data = data();
     let base = quiet_france(&data, 6);
     let army = first_army_of(&base, "fac_france");
-    let location = base.armies[&army].location.clone();
+    let location = base.armies[&army].settlement().cloned().unwrap();
     let run = |port: bool| {
         let mut state = base.clone();
         state.armies.get_mut(&army).unwrap().supply = 10;
@@ -675,8 +675,9 @@ fn allied_armies_in_the_province_join_the_battle() {
         .unwrap();
     // ...and a Breton ally at war with England.
     let breton = first_army_of(&state, "fac_brittany");
-    let location = state.armies[&lead].location.clone();
-    state.armies.get_mut(&breton).unwrap().location = location.clone();
+    let location = state.armies[&lead].settlement().cloned().unwrap();
+    state.armies.get_mut(&breton).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(location.clone());
     state
         .factions
         .get_mut(&brittany)
@@ -690,7 +691,7 @@ fn allied_armies_in_the_province_join_the_battle() {
         .at_war_with
         .insert(brittany.clone());
     let breton_units = state.armies[&breton].units.len();
-    let coalition = sim_campaign::movement::battle_coalition(&state, &lead, &england);
+    let coalition = sim_campaign::movement::battle_coalition(&state, &data, &lead, &england);
     assert_eq!(coalition[0], lead, "the army of the encounter leads");
     let mut allies = coalition[1..].to_vec();
     allies.sort();

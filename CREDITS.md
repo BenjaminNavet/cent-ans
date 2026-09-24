@@ -24,6 +24,68 @@ correspondance identifiant → fichier → auteur est versionnée dans
 | Lorc | 59 | anvil, archery-target, armor-vest, arrows-shield, bandage-roll, boot-prints, bowman, breastplate, cannon, cannon-shot, castle, cauldron, cheese-wedge, crossed-swords, crown, crown-coin, drama-masks, drop, falling-leaf, fist, flying-flag, galleon, gears, gothic-cross, grapes, gunshot, halberd, hospital-cross, hot-spices, hourglass, laurels, leeching-worm, metal-bar, muscle-up, open-book, papers, potion-ball, powder, prayer, quill-ink, round-bottom-flask, scales, scalpel, scalpel-strike, scroll-unfurled, sleepy, snowflake-2, spears, sprout, stone-block, stone-tower, sun, swap-bag, target-arrows, tied-scroll, visored-helm, wax-seal, wheat, wine-glass |
 | Skoll | 4 | mounted-knight, musket, open-treasure-chest, siege-ram |
 
+## Assets tiers (`game/assets/third_party/`)
+
+Chaque dossier contient un `SOURCE.md` (URL, licence, auteur, modifications). Les assets CC0
+n'exigent aucune attribution ; ils sont crédités par courtoisie.
+
+### Musique — CC BY 4.0 (attribution obligatoire)
+
+- « Lord of the Land » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Village Consort » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+
+### Polices — SIL Open Font License 1.1
+
+- **EB Garamond** — Georg Duffner, Octavio Pardo (The EB Garamond Project Authors),
+  [fonts.google.com/specimen/EB+Garamond](https://fonts.google.com/specimen/EB+Garamond).
+- **IM FELL English** — Igino Marini ([iginomarini.com](http://www.iginomarini.com)), nom
+  réservé « IM FELL ».
+
+Le texte de la licence (`OFL.txt`) accompagne chaque police.
+
+### Modèles 3D — CC0 1.0
+
+- **Quaternius** ([quaternius.com](https://quaternius.com)) : personnages riggés de l'Ultimate
+  Modular Characters Pack (King, Adventurer, Hooded Adventurer, Farmer), chevaux et âne de
+  l'Ultimate Animated Animal Pack, Medieval Village Pack (39 bâtiments et props) — fichiers
+  obtenus via [Poly Pizza](https://poly.pizza). Les figurines de bataille skinnées
+  (`game/assets/models/battle_skinned/`, lot V2) en dérivent : pièces recolorées, habillées
+  d'équipement procédural, décimées, animations rééchantillonnées et complétées.
+- **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
+  Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
+  seulement, décimation, matériaux simplifiés.
+
+### Ciels HDRI — CC0 1.0
+
+- **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
+- **Autumn Field Pure Sky** — Sergej Majboroda, Jarod Guest (Poly Haven).
+- **Kloofendal 48d Partly Cloudy, Kloofendal Misty Morning, Kloofendal Overcast** (Pure Sky) — Greg Zaal,
+  Jarod Guest (Poly Haven).
+- **Overcast Soil, Snow Field** (Pure Sky) — Sergej Majboroda, Jarod Guest (Poly Haven).
+- **Syferfontein 18d Clear, Kloppenheim 06** (Pure Sky) — Greg Zaal, Jarod Guest (Poly Haven).
+
+### Interface — CC0 1.0
+
+- **Fantasy UI Borders** — Kenney ([kenney.nl](https://kenney.nl)).
+- **Parchment GUI** — zwonky ([OpenGameArt](https://opengameart.org/content/parchment-gui)).
+
+### Sons de bataille et ambiances — Freesound, CC0 1.0
+
+Banque AU1 (`game/assets/audio/battle/`, `game/assets/audio/ambience/`) : enregistrements
+[Freesound](https://freesound.org) sous licence CC0 (vérifiée page par page), découpés, mélangés
+et bouclés par `tools/cent_ans_tools/audio_bank.py`. Détail fichier par fichier (numéro, titre,
+lien, traitement) dans `game/assets/audio/SOURCE.md`. Merci aux auteurs : 6polnic, adharca,
+AlanCat, Ali_6868, Archeos, AyaDrevis, bajko, Blankened, bolkmar, bruno.auzet, Christopherderp,
+craigsmith, DeadVDI, Defelozedd94, DeVern, DigestContent, DigPro120, DRFX, ethanchase7744,
+FillMat, florianreichelt, foxen10, freefire66, greyfeather, Ittaisha, iwanPlays, jackstraton,
+jamesdrake89, JoeDinesSound, JohnBuhr, joseppujol, juryduty, kasparsj, Kinoton, Kubuzz,
+loopbasedmusic, Lucas_Schacht, modusmogulus, Mythmazter, nekoninja, omerbhatti34, pborel,
+PixelsphereStudios, PorkMuncher, qubodup, Quickmusik, SamuelGremaud, saturdaysoundguy,
+shadoWisp, Simonus18, spycrah, Twisted_Euphoria, unfa, waxsocks, WelvynZPorterSamples, xkeril.
+
 ## Données géographiques
 
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
@@ -47,8 +109,9 @@ Wikipédia ne sont pas recopiés.
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
   de `data/factions/`.
 - **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`).
-- **Sons et musiques** (`game/assets/audio/`) : synthèse procédurale (numpy/scipy), sans
-  échantillon externe.
+- **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
+  procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances
+  (`battle/`, `ambience/`) viennent de Freesound (CC0, voir plus haut).
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
 

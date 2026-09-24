@@ -46,7 +46,8 @@ fn main() {
                 .max_by_key(|(_, a)| a.units.len())
                 .map(|(id, _)| id.clone())
                 .expect("an army");
-            state.armies.get_mut(&army_id).unwrap().location = city.clone();
+            state.armies.get_mut(&army_id).unwrap().position =
+                sim_campaign::ArmyPosition::Settlement(city.clone());
             let allowance = state.army_movement_allowance(&data, &state.armies[&army_id]);
             let table = dijkstra(
                 &state,
