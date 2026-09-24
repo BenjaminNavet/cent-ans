@@ -18,7 +18,7 @@ use std::collections::{BTreeMap, BinaryHeap};
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, SettlementKind, Terrain};
 
-use crate::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
+use crate::battle_auto::{resolve_field, BattleContext, BattleUnit, Side, Winner};
 use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::OrderError;
@@ -670,7 +670,17 @@ pub(crate) fn auto_fight(
     let defenders = battle_coalition(state, defender_id, &attacker.faction);
     let attacker_side = coalition_side(state, data, &attackers);
     let defender_side = coalition_side(state, data, &defenders);
-    let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
+    // N1: phased auto-resolve on the province's terrain, season and weather.
+    let result = resolve_field(
+        state,
+        data,
+        &attackers,
+        &defenders,
+        &attacker_side,
+        &defender_side,
+        &context,
+        province,
+    );
     apply_battle_result(
         state,
         data,

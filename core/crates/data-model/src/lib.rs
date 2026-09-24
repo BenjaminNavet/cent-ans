@@ -29,6 +29,9 @@ pub use entities::ai_alignment::{
 pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
 };
+pub use entities::auto_resolve::{
+    AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
+};
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
