@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/settlement_rules.schema.json",
+  "title": "Règles des colonies",
+  "description": "Fichier data/settlements/rules.json : valeurs de réglage des colonies (garnison de départ par type, bonus de province complète). Voir docs/design/2026-09-24-echelle-colonies.md § 4.3.",
+  "type": "object",
+  "properties": {
+    "starting_garrison": {
+      "type": "object",
+      "description": "Garnison de départ (1337) d'une colonie selon son type : liste d'identifiants de types d'unité, répétables.",
+      "propertyNames": { "enum": ["city", "town", "castle", "abbey", "village"] },
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "common.schema.json#/$defs/unit_type_id" }
+      }
+    },
+    "full_province_bonus": {
+      "type": "object",
+      "description": "Bonus accordé au contrôleur de toutes les colonies d'une province.",
+      "properties": {
+        "income_percent": { "type": "integer", "description": "Revenu de la province en plus, en pour cent." },
+        "unrest_per_season": { "type": "integer", "description": "Variation de la révolte par saison (négatif = baisse)." }
+      },
+      "required": ["income_percent", "unrest_per_season"],
+      "additionalProperties": false
+    },
+    "description": { "type": "string" }
+  },
+  "required": ["starting_garrison", "full_province_bonus"],
+  "additionalProperties": false
+}
