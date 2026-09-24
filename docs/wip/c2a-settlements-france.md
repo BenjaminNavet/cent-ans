@@ -47,10 +47,10 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 | languedoc | prov_montpellier | fait (4) |
 | languedoc | prov_rouergue | fait (5) |
 | languedoc | prov_toulousain | fait (5) |
-| provence_alpes | prov_comtat_venaissin | à faire |
-| provence_alpes | prov_dauphine | à faire |
-| provence_alpes | prov_provence | à faire |
-| provence_alpes | prov_savoie | à faire |
+| provence_alpes | prov_comtat_venaissin | fait (4) |
+| provence_alpes | prov_dauphine | fait (4) |
+| provence_alpes | prov_provence | fait (5) |
+| provence_alpes | prov_savoie | fait (5) |
 
 ## Enclaves posées jusqu'ici
 
@@ -61,8 +61,16 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 - `set_besancon` (Franche-Comté) — cité impériale libre, distincte du comté de Bourgogne, owner `fac_empire`.
 - `set_evreux` (Normandie/Rouen) — comté navarrais de Philippe d'Évreux, owner `fac_navarre`.
 - `set_mortain` (Normandie/Caen) — comté cédé à Jeanne II de Navarre en 1336, owner `fac_navarre`.
+- `set_avignon` (Comtat Venaissin) — la ville même relève du comte de Provence (Naples) jusqu'à son rachat en 1348 par la papauté, owner `fac_naples` (contraste avec `owner` de la province, `fac_papacy`, qui tient le reste du Comtat).
+
+## Tâche C2a terminée
+
+41 provinces, 196 colonies. Répartition : 41 city, 58 town, 38 castle, 37 abbey, 22 village.
+Validation OK (schéma + règles métier : une city par province avec nom/coordonnées/bâtiments/fortification
+identiques à `capital_city`/province, 3-6 colonies, ids uniques globalement, buildings et factions
+existants, province == nom de fichier, port pour chaque province côtière).
 
 ## Prochaine étape
 
-Continuer avec `provence_alpes` (4 provinces, dernière vague) puis terminer la tâche C2a.
-Commit `wip:` toutes les ~8 provinces.
+C2a fait. Prochaine étape pour l'orchestrateur : fusionner avec C2b (Nord) et lancer C2c (Sud),
+puis C3 (pipeline géo, graphe des colonies).
