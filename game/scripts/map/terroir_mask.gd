@@ -14,7 +14,7 @@ const RADIUS := {"city": 13.0, "town": 9.0, "castle": 6.0, "abbey": 7.0, "villag
 const INTENSITY := {"city": 1.0, "town": 0.9, "castle": 0.6, "abbey": 0.8, "village": 0.75}
 const HAMLET_RADIUS := 3.2
 ## Population de province de référence (échelle 1 du rayon).
-const REFERENCE_POPULATION := 60000.0
+const REFERENCE_POPULATION := 300000.0
 ## Dévastation (%) à partir de laquelle les terres brûlent.
 const BURN_THRESHOLD := 8.0
 

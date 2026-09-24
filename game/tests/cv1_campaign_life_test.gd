@@ -65,3 +65,20 @@ func _run() -> void:
 	_check(at_beaune.b > 0.4, "burnt land in devastated Burgundy: %s" % at_beaune)
 	_check(mask.sample(Vector2(10, 10)).r == 0.0, "no fields in the map corner")
 	print("cv1_campaign_life_test: terroir mask %d ms" % mask.build_ms)
+
+	# 3. Croissance : village → bourg → ville → cité ; Paris exclu.
+	var village := {"id": "set_x", "kind": "village"}
+	_check(SettlementGrowth.level_of(village, {}, 100000.0) == 0, "small village stays a village")
+	_check(SettlementGrowth.level_of(village, {"buildings": ["bld_market"]}, 100000.0) == 1, "village with a market becomes a bourg")
+	var town := {"id": "set_y", "kind": "town"}
+	_check(SettlementGrowth.level_of(town, {"fortification_level": 0, "buildings": []}, 1.0) == 1, "open town is a bourg")
+	_check(SettlementGrowth.level_of(town, {"fortification_level": 0, "buildings": ["bld_stone_walls"]}, 1.0) == 2, "walled town is a ville")
+	var city := {"id": "set_z", "kind": "city"}
+	_check(SettlementGrowth.level_of(city, {"fortification_level": 5, "buildings": ["bld_cathedral"]}, 1.0) == 3, "cathedral city is a cité")
+	_check(SettlementGrowth.level_of({"id": "set_paris", "kind": "city"}, {"buildings": ["bld_cathedral"]}, 1.0) == -1, "Paris excluded (landmark L1)")
+	_check(SettlementGrowth.level_of({"id": "set_c", "kind": "castle"}, {}, 1.0) == -1, "castles keep their model")
+	for level in 4:
+		var model := SettlementGrowth.build_model(level, 3, level == 3)
+		if _check(model != null, "model for level %d" % level):
+			_check(level != 3 or model.find_child("KenneyCastle", true, false) != null, "cité with Kenney castle")
+			model.free()

@@ -28,7 +28,10 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 - [x] 2. Terroirs (`TerroirMask` 1024², 35 ms, reconstruit si dévastation/population/siège changent) :
       champs, vigne (Bourgogne, Bordelais), pâtures en couronne ; fumées de cheminée
       (`LifeEffects`, `life_smoke.gdshader`, ≈ 3 100 panaches, plus fournies l'hiver)
-- [ ] 3. Colonies qui grandissent
+- [x] 3. Colonies qui grandissent (`SettlementGrowth`) : bourgs ouverts à halle, villes murées, cités
+      (cathédrale, halle, donjon, faubourgs) + château Kenney si fortification ≥ 6 ; modèles
+      Blender `bourg_a/b`, `cite_a/b`, `windmill_body/sails` ; Paris exclu (L1) ; relecture
+      une fois par tour (≈ 150 ms de `settlement_detail` en debug)
 - [ ] 4. Dévastation visible
 - [ ] 5. Vie ambiante
 - [ ] Mesures FPS avant/après, captures par saison
@@ -43,4 +46,4 @@ aucune règle, l'information vient du pont (`get_date_label`, `get_province_stat
 
 ## Prochaine étape
 
-Lot 3 : croissance des colonies (`SettlementGrowth`, modèles bourg/cité, château Kenney).
+Lot 4 : dévastation visible (ruines des villages, fumées), moulins à vent.
