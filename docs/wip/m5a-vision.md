@@ -5,7 +5,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md` § 5. Branche : `m5a-vision` 
 ## État
 
 - [x] Cœur : `vision.rs` réécrit (`CampaignState::vision` → `Vision { mask: VisionMask, provinces, lenders }`, `visible_provinces`, `visible_armies`) ; `GameData::province_raster` ; `VisionRules.province_seen_percent` (+ schéma, `data/rules/vision.json`).
-- [ ] Tests Rust (`c1_vision.rs` réécrit, rayon armée, colonie, allié, armée cachée) + mesure du temps.
+- [x] Tests Rust (`c1_vision.rs` réécrit : rayon armée, colonie, allié, armée cachée, temps ≈ 1 ms par faction en release).
 - [ ] Pont : `get_vision`, `get_vision_mask`, `get_visible_army_ids`, `is_point_visible` ; `get_visible_provinces` inchangé.
 - [ ] Godot : terrain + minicarte sur la texture 512², marqueurs d'armée filtrés par armée.
 - [ ] Tests Godot, captures `docs/img/m5a/`.
