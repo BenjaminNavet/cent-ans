@@ -1,0 +1,11 @@
+{
+  "id": "cdx_des_et_hasard",
+  "title": "Les dés et les jeux de hasard",
+  "category": "vie_quotidienne",
+  "aliases": ["jeu de dés", "jeux de dés", "jeu de hasard", "jeux de hasard", "jeu de tables", "brelan", "tripot"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Dans les tavernes comme dans les camps, on joue aux dés et aux « tables », ancêtre du trictrac. Rois et évêques ont beau interdire ces jeux d'argent, dont le plus célèbre s'appelle le hasard, ils restent la passion de tous.",
+  "body": "Le mot « hasard » vient de l'arabe az-zahr, le dé, par l'espagnol ; c'est le nom d'un jeu de dés très populaire, joué avec trois puis deux dés. « Chance » vient de l'ancien français « chéance », la façon dont tombent les dés. Les jeux de tables, qui combinent dés et pions sur un plateau, sont les ancêtres du trictrac et du backgammon ; les rois et les dames y jouent volontiers.\n\nLes dés se jouent partout : à la taverne, au coin de la rue, dans le camp militaire où les soldats misent leur solde, leurs armes, parfois leurs vêtements. Les fabricants de dés, les « déciers », forment un métier à Paris, et leurs statuts interdisent les dés pipés, lestés de plomb ou mal taillés ; les tricheurs sont nombreux, et les fabliaux en rient.\n\nL'Église et les rois condamnent ces jeux qui mènent au blasphème, aux rixes et à la ruine. Saint Louis les interdit en 1254 ; le 3 avril 1369, [[cdx_charles_v|Charles V]] prohibe dés, tables, [[cdx_jeu_de_paume|paume]], quilles et soule, et ordonne à ses sujets de s'exercer plutôt au tir à l'arc et à l'arbalète, pour répondre à l'[[cdx_arc_long|archerie anglaise]]. L'amende est de quarante sous ; la répétition des interdits montre qu'on ne les respecte guère.\n\nLes villes finissent par composer : certaines affermeront les maisons de jeu, les brelans ou tripots, et en tirent un revenu. Le jeu d'argent devient ainsi, comme le vin, une source de taxes. Au jeu de dés s'ajoutent bientôt, à partir des années 1370, les [[cdx_cartes_a_jouer|cartes à jouer]].",
+  "see_also": ["cdx_jeu_de_paume", "cdx_cartes_a_jouer", "cdx_echecs", "cdx_fabliaux"],
+  "sources": ["Jeu de hasard", "Hasard (jeu)", "Jeux de table", "Jean-Michel Mehl, Les Jeux au royaume de France du XIIIe au début du XVIe siècle, Fayard, 1990"]
+}
