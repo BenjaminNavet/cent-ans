@@ -100,11 +100,11 @@ pub use orders::{
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
-pub use save::{CampaignError, SETTLEMENTS_STATE_VERSION};
+pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION};
 pub use skills::LearnSkillError;
 pub use state::{
-    Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
-    FactionSummary, MoveTarget, ProvinceState, Season, SettlementState, SiegeState, Stance, Unit,
-    MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
+    Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
+    FactionState, FactionSummary, MoveTarget, ProvinceState, Season, SettlementState, SiegeState,
+    Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};

@@ -18,7 +18,8 @@ fn real_rasters_load() {
     let (x, y) = grid.cell_of(point[0], point[1]);
     assert!(grid.passable(i64::from(x), i64::from(y)));
     assert_eq!(
-        data.province_at_point(point[0], point[1]).map(|p| p.as_str()),
+        data.province_at_point(point[0], point[1])
+            .map(|p| p.as_str()),
         Some(data.settlements[&paris].province.as_str())
     );
     // Open sea west of Brittany.

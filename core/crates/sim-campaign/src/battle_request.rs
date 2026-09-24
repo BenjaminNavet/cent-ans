@@ -93,9 +93,11 @@ pub(crate) fn defer_player_battle(
     if !involved(attacker_id, &defender.faction) && !involved(defender_id, &attacker.faction) {
         return false;
     }
-    let Some(location) = defender.settlement().cloned().or_else(|| {
-        crate::march::nearest_settlement(data, state.army_point(data, defender))
-    }) else {
+    let Some(location) = defender
+        .settlement()
+        .cloned()
+        .or_else(|| crate::march::nearest_settlement(data, state.army_point(data, defender)))
+    else {
         return false;
     };
     let Some(province) = state.army_province(data, defender) else {

@@ -392,7 +392,11 @@ pub fn battle_coalition(
 /// Armies of `lead`'s side stationed in its settlement (sieges, G1):
 /// `lead` first, then the armies of its faction or allies there at war with
 /// `enemy`, in id order.
-pub fn settlement_coalition(state: &CampaignState, lead: &ArmyId, enemy: &FactionId) -> Vec<ArmyId> {
+pub fn settlement_coalition(
+    state: &CampaignState,
+    lead: &ArmyId,
+    enemy: &FactionId,
+) -> Vec<ArmyId> {
     let Some(lead_army) = state.armies.get(lead) else {
         return Vec::new();
     };
@@ -785,7 +789,10 @@ pub fn retreat_target(
         return Some(Retreat::Friendly(friendly[&cell].clone()));
     }
     // Away from the victor.
-    let (dx, dy) = (start_point[0] - battlefield[0], start_point[1] - battlefield[1]);
+    let (dx, dy) = (
+        start_point[0] - battlefield[0],
+        start_point[1] - battlefield[1],
+    );
     let length = (dx * dx + dy * dy).sqrt();
     let (ux, uy) = if length > 1e-3 {
         (dx / length, dy / length)

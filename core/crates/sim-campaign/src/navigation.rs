@@ -379,12 +379,8 @@ fn smooth(
                 _ => break,
             }
         }
-        let (line, c) = best_line.unwrap_or_else(|| {
-            (
-                vec![point(best)],
-                prefix[best] - prefix[anchor],
-            )
-        });
+        let (line, c) =
+            best_line.unwrap_or_else(|| (vec![point(best)], prefix[best] - prefix[anchor]));
         cells.extend(line);
         cost += c;
         waypoints.push(point(best));
@@ -480,8 +476,14 @@ mod tests {
     #[test]
     fn straight_line_on_a_plain() {
         let g = grid(50, 50);
-        let path = find_path(&g, Cell::new(5, 5), Cell::new(25, 5), &nothing_blocked, None)
-            .expect("path");
+        let path = find_path(
+            &g,
+            Cell::new(5, 5),
+            Cell::new(25, 5),
+            &nothing_blocked,
+            None,
+        )
+        .expect("path");
         assert_eq!(path.cost, 200);
         assert_eq!(path.cells.len(), 20);
         assert_eq!(path.waypoints, vec![Cell::new(25, 5)]);
@@ -490,8 +492,14 @@ mod tests {
     #[test]
     fn smoothing_straightens_diagonals() {
         let g = grid(60, 60);
-        let path = find_path(&g, Cell::new(0, 0), Cell::new(40, 13), &nothing_blocked, None)
-            .expect("path");
+        let path = find_path(
+            &g,
+            Cell::new(0, 0),
+            Cell::new(40, 13),
+            &nothing_blocked,
+            None,
+        )
+        .expect("path");
         // Octile: 27 orthogonal + 13 diagonal steps.
         assert_eq!(path.cost, 27 * 10 + 13 * 14);
         assert_eq!(path.waypoints, vec![Cell::new(40, 13)]);
@@ -505,9 +513,15 @@ mod tests {
             g.set(i, (18 - i).max(0), IMPASSABLE);
         }
         g.refresh_min_cost();
-        assert!(find_path(&g, Cell::new(0, 0), Cell::new(19, 19), &nothing_blocked, None).is_none());
+        assert!(find_path(
+            &g,
+            Cell::new(0, 0),
+            Cell::new(19, 19),
+            &nothing_blocked,
+            None
+        )
+        .is_none());
     }
-
 
     #[test]
     fn blocked_cells_are_avoided_but_the_goal_is_entered() {
@@ -515,7 +529,8 @@ mod tests {
         let blocked = |c: Cell| c.x == 10 && c.y < 20;
         let path = find_path(&g, Cell::new(5, 5), Cell::new(10, 5), &blocked, None).expect("goal");
         assert_eq!(path.cells.last(), Some(&Cell::new(10, 5)));
-        let path = find_path(&g, Cell::new(5, 5), Cell::new(15, 5), &blocked, None).expect("around");
+        let path =
+            find_path(&g, Cell::new(5, 5), Cell::new(15, 5), &blocked, None).expect("around");
         assert!(path.cells.iter().all(|c| !blocked(*c)));
         assert!(path.cells.iter().any(|c| c.y >= 20));
     }
@@ -533,8 +548,22 @@ mod tests {
     #[test]
     fn max_cost_bounds_find_path() {
         let g = grid(100, 100);
-        assert!(find_path(&g, Cell::new(0, 0), Cell::new(50, 0), &nothing_blocked, Some(400)).is_none());
-        assert!(find_path(&g, Cell::new(0, 0), Cell::new(40, 0), &nothing_blocked, Some(400)).is_some());
+        assert!(find_path(
+            &g,
+            Cell::new(0, 0),
+            Cell::new(50, 0),
+            &nothing_blocked,
+            Some(400)
+        )
+        .is_none());
+        assert!(find_path(
+            &g,
+            Cell::new(0, 0),
+            Cell::new(40, 0),
+            &nothing_blocked,
+            Some(400)
+        )
+        .is_some());
     }
 
     #[test]

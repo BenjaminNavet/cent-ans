@@ -1338,6 +1338,5 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         if !army.is_at(&target) && table.contains_key(&target) {
             orders.push(Order::move_to(army_id.clone(), target));
         }
-
     }
 }

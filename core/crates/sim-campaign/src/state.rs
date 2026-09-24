@@ -1006,7 +1006,6 @@ impl CampaignState {
             .armies
             .values()
             .filter(|a| a.is_at(settlement) && self.is_allied(&s.controller, &a.faction))
-
             .map(|a| unit_power(data, &a.units))
             .sum();
         unit_power(data, &s.garrison) + field
