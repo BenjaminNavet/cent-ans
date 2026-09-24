@@ -1,0 +1,11 @@
+{
+  "id": "cdx_jean_sans_peur",
+  "title": "Jean sans Peur, duc de Bourgogne",
+  "category": "personnage",
+  "aliases": ["Jean sans Peur", "Jean de Nevers"],
+  "era": { "from": "1371", "to": "1419" },
+  "summary": "Duc de Bourgogne de 1404 à 1419, Jean sans Peur fait assassiner son cousin Louis d'Orléans en 1407 et déclenche la guerre civile entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]]. Il est tué à son tour sur le pont de Montereau en 1419.",
+  "body": "Fils aîné de [[cdx_philippe_le_hardi|Philippe le Hardi]], Jean naît à Dijon en 1371 et porte d'abord le titre de comte de Nevers. En 1396, il commande la croisade contre les Turcs qui s'achève par le désastre de [[cdx_nicopolis|Nicopolis]] ; fait prisonnier, il est libéré contre une énorme [[cdx_rancon|rançon]]. C'est son courage au combat qui lui vaut, dit-on, son surnom.\n\nDevenu duc en 1404, il dispute le contrôle du gouvernement, pendant les absences de [[cdx_charles_vi|Charles VI]], au frère du roi, Louis d'Orléans. Le 23 novembre 1407, Louis est assassiné rue Vieille-du-Temple, à Paris, par des hommes de main du duc. Jean assume le crime et le fait justifier par le théologien Jean Petit comme le meurtre légitime d'un tyran.\n\nLe royaume se déchire. Jean s'appuie sur Paris, où il est populaire, et sur l'[[cdx_universite_paris|université]] ; il soutient en 1413 la révolte des [[cdx_cabochiens|Cabochiens]]. Ses adversaires, groupés autour du jeune duc d'Orléans et de son beau-père le comte d'Armagnac, le chassent de Paris. Il n'intervient pas à [[cdx_azincourt|Azincourt]], où combattent pourtant ses deux frères, qui y trouvent la mort. En 1418, ses partisans reprennent Paris et massacrent les Armagnacs.\n\nFace aux progrès d'[[cdx_henri_v|Henri V]], il accepte de rencontrer le dauphin Charles. Le 10 septembre 1419, sur le pont de Montereau, il est abattu par des hommes du dauphin. Le crime jette son fils [[cdx_philippe_le_bon|Philippe le Bon]] dans l'alliance anglaise et conduit au [[cdx_traite_troyes|traité de Troyes]]. À Paris, la tour Jean-sans-Peur, qu'il fit élever après le meurtre de 1407, subsiste encore.",
+  "see_also": ["cdx_armagnacs_bourguignons", "cdx_philippe_le_hardi", "cdx_philippe_le_bon", "cdx_traite_troyes"],
+  "sources": ["Jean sans Peur", "Assassinat de Louis d'Orléans"]
+}

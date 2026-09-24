@@ -1,0 +1,12 @@
+{
+  "id": "cdx_philippa_de_hainaut",
+  "title": "Philippa de Hainaut, reine d'Angleterre",
+  "category": "personnage",
+  "aliases": ["Philippa de Hainaut", "reine Philippa", "Philippa"],
+  "era": { "from": "v. 1314", "to": "1369" },
+  "summary": "Fille du comte de Hainaut, épouse d'[[cdx_edouard_iii|Édouard III]] en 1328, Philippa est une reine respectée, mère d'une nombreuse lignée et protectrice de [[cdx_froissart|Froissart]]. La tradition lui prête la grâce des bourgeois de [[cdx_calais|Calais]].",
+  "body": "Philippa est la fille de Guillaume Ier, comte de Hainaut, de Hollande et de Zélande, et de Jeanne de Valois, sœur de [[cdx_philippe_vi|Philippe VI]]. Son mariage avec le jeune [[cdx_edouard_iii|Édouard III]] est arrangé en 1326 par la reine [[cdx_isabelle_de_france|Isabelle]], qui a besoin des soldats hennuyers pour renverser son époux Édouard II. Les noces sont célébrées à York en janvier 1328.\n\nPar ses parentés, Philippa est un atout diplomatique : sa famille domine une partie des Pays-Bas, où Édouard III cherche des alliés contre la France au début de la guerre. Elle accompagne souvent son époux sur le continent ; deux de ses fils naissent ainsi à Anvers et à [[cdx_gand|Gand]] : Lionel et [[cdx_jean_de_gand|Jean]].\n\nElle donne au roi une douzaine d'enfants, dont le [[cdx_prince_noir|Prince noir]]. Sa réputation de bonté est entretenue par les chroniqueurs de son pays natal. Selon [[cdx_jean_le_bel|Jean le Bel]] et [[cdx_froissart|Froissart]], c'est elle qui, enceinte, obtient à genoux la grâce des six bourgeois de [[cdx_calais|Calais]] en 1347. On lui attribue aussi l'installation en Angleterre de tisserands flamands.\n\nFroissart, son compatriote, entre à son service vers 1361 et commence sous sa protection sa carrière de chroniqueur. Son chapelain fonde à [[cdx_oxford|Oxford]], en 1341, le Queen's College, qui porte son nom. Philippa meurt à Windsor en 1369 ; son gisant se trouve à l'abbaye de Westminster.",
+  "entity": "chr_philippa_of_hainault",
+  "see_also": ["cdx_edouard_iii", "cdx_calais", "cdx_froissart", "cdx_prince_noir"],
+  "sources": ["Philippa de Hainaut"]
+}

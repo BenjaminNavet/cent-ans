@@ -1,0 +1,11 @@
+{
+  "id": "cdx_bordeaux",
+  "title": "Bordeaux, capitale de la Guyenne anglaise",
+  "category": "lieu",
+  "aliases": ["Bordeaux", "Bordelais"],
+  "era": { "from": "1154", "to": "1453" },
+  "summary": "Port de la Garonne, capitale de la [[cdx_guyenne|Guyenne]], Bordeaux reste trois siècles sous la couronne d'Angleterre. Son vin, expédié chaque année par des flottes entières vers Londres, fait sa fortune et sa fidélité.",
+  "body": "Bordeaux passe sous l'autorité des rois d'Angleterre en 1154, quand Henri Plantagenêt, époux d'Aliénor d'Aquitaine, monte sur le trône anglais. Le duché d'Aquitaine, réduit au XIVe siècle à la [[cdx_guyenne|Guyenne]] et à la Gascogne, est tenu par les rois [[cdx_plantagenets|Plantagenêts]] comme fief du roi de France : c'est ce lien de vassalité, source de conflits constants, qui déclenche la [[cdx_guerre_de_cent_ans|guerre de Cent Ans]] en 1337.\n\nLa richesse de la ville, c'est le vin. Chaque automne, des flottes de dizaines de navires chargent les tonneaux du Bordelais et du Haut-Pays pour l'Angleterre, où l'on boit un vin léger et clair. Au début du XIVe siècle, les exportations dépassent certaines années 80 000 tonneaux. Les bourgeois bordelais jouissent de privilèges commerciaux qui les rendent très attachés au roi d'Angleterre, leur meilleur client.\n\nAprès [[cdx_poitiers|Poitiers]], le [[cdx_prince_noir|Prince noir]] y ramène son prisonnier, le roi [[cdx_jean_ii|Jean II]], avant de l'emmener à Londres. Devenu prince d'Aquitaine après [[cdx_bretigny|Brétigny]], il tient à Bordeaux une cour brillante ; son fils, le futur Richard II, y naît en 1367.\n\nLa ville est la dernière grande place anglaise du Sud-Ouest. Soumise une première fois en 1451, elle se révolte et rappelle les Anglais ; la défaite de Talbot à [[cdx_castillon|Castillon]] en juillet 1453 scelle son sort, et elle capitule le 19 octobre 1453. [[cdx_charles_vii|Charles VII]] y fait construire deux forteresses, le château Trompette et le fort du Hâ, pour tenir en respect une population restée longtemps nostalgique du temps anglais.",
+  "see_also": ["cdx_guyenne", "cdx_castillon", "cdx_prince_noir", "cdx_plantagenets"],
+  "sources": ["Histoire de Bordeaux", "Vignoble de Bordeaux", "Bataille de Castillon"]
+}
