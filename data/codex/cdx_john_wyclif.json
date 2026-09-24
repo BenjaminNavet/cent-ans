@@ -1,0 +1,11 @@
+{
+  "id": "cdx_john_wyclif",
+  "title": "John Wyclif",
+  "category": "personnage",
+  "aliases": ["John Wyclif", "Wyclif", "Wycliffe", "John Wycliffe"],
+  "era": { "from": "v. 1328", "to": "1384" },
+  "summary": "Théologien d'[[cdx_oxford|Oxford]], John Wyclif conteste dans les années 1370 la richesse et le pouvoir de l'Église, puis l'autorité du pape et certains dogmes. Ses idées inspirent les [[cdx_lollards|lollards]] en Angleterre et [[cdx_jan_hus|Jan Hus]] en Bohême.",
+  "body": "Né dans le Yorkshire vers 1328, John Wyclif fait toute sa carrière à l'université d'[[cdx_oxford|Oxford]], dont il est l'un des maîtres les plus réputés en philosophie et en théologie. Dans les années 1370, il met sa science au service de la couronne anglaise, qui cherche à limiter les impôts payés à la papauté, alors installée à Avignon et jugée trop proche de la France.\n\nSa pensée se radicalise. Il soutient que le pouvoir, y compris celui de l'Église, n'est légitime que chez ceux qui vivent en état de grâce, et que le clergé devrait renoncer à ses biens temporels. Il attaque les ordres religieux, le culte des saints et les [[cdx_pelerinage|pèlerinages]], et affirme que la Bible est la seule autorité en matière de foi. Le [[cdx_grand_schisme|Grand Schisme]], qui oppose deux papes à partir de 1378, conforte sa critique de la papauté.\n\nEn niant vers 1379-1380 la transsubstantiation, c'est-à-dire la transformation réelle du pain et du vin en corps et sang du Christ pendant la messe, il franchit une limite : il perd ses soutiens à Oxford et se retire dans sa cure de Lutterworth. Il y est à l'origine d'une traduction complète de la Bible en anglais, réalisée par ses disciples.\n\nProtégé un temps par [[cdx_jean_de_gand|Jean de Gand]], il n'est jamais inquiété de son vivant et meurt en 1384. Mais le [[cdx_concile_constance|concile de Constance]] le condamne en 1415 comme hérétique ; en 1428, ses restes sont exhumés, brûlés et jetés dans une rivière.",
+  "see_also": ["cdx_lollards", "cdx_jan_hus", "cdx_oxford", "cdx_grand_schisme"],
+  "sources": ["John Wyclif", "Bible de Wyclif"]
+}
