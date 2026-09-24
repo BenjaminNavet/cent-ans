@@ -323,8 +323,14 @@ fn check_ceded_province(
             "la province doit être possédée et tenue par la faction du captif".to_owned(),
         ));
     }
-    if state.factions.get(payer).is_some_and(|f| &f.capital == province) {
-        return Err(RansomError::BadProvince("on ne cède pas sa capitale".to_owned()));
+    if state
+        .factions
+        .get(payer)
+        .is_some_and(|f| &f.capital == province)
+    {
+        return Err(RansomError::BadProvince(
+            "on ne cède pas sa capitale".to_owned(),
+        ));
     }
     let borders = crate::movement::land_neighbors(data, province)
         .iter()
@@ -504,7 +510,9 @@ pub(crate) fn resolve_ransoms(
                         debt.remaining
                     )
                 } else {
-                    format!("Dernière échéance de la rançon de {name} versée : la dette est soldée.")
+                    format!(
+                        "Dernière échéance de la rançon de {name} versée : la dette est soldée."
+                    )
                 };
                 events.push(GameEvent::new(EventKind::Ransom, text).faction(id));
             } else {
@@ -515,13 +523,7 @@ pub(crate) fn resolve_ransoms(
                         r.prestige -= DEFAULT_PRESTIGE;
                     }
                 }
-                state.add_modifier(
-                    &debt.creditor,
-                    id,
-                    DEFAULT_OPINION,
-                    "Rançon impayée",
-                    20,
-                );
+                state.add_modifier(&debt.creditor, id, DEFAULT_OPINION, "Rançon impayée", 20);
                 events.push(
                     GameEvent::new(
                         EventKind::Ransom,
@@ -545,7 +547,11 @@ pub(crate) fn resolve_ransoms(
         let Some(ruler) = state.factions[id].ruler.clone() else {
             continue;
         };
-        if let Some(r) = state.characters.get_mut(&ruler).filter(|r| r.alive && r.captive) {
+        if let Some(r) = state
+            .characters
+            .get_mut(&ruler)
+            .filter(|r| r.alive && r.captive)
+        {
             r.prestige -= CAPTIVE_RULER_PRESTIGE;
         }
     }

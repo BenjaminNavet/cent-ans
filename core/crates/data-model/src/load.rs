@@ -23,8 +23,8 @@ use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
 use crate::ids::{
-    BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId, ReligionId,
-    ResourceId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
+    ReligionId, ResourceId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
