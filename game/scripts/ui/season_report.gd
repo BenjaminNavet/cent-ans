@@ -15,6 +15,8 @@ signal disable_requested
 const GROUPS := [
 	{"title": "Batailles et sièges", "glyph": "⚔", "kinds": ["battle", "siege_started", "siege_lifted", "province_captured", "raid", "army_destroyed", "general_captured"]},
 	{"title": "Diplomatie et Église", "glyph": "✉", "kinds": ["war_declared", "peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion", "embargo", "diplomatic_offer", "diplomacy", "excommunication", "schism", "heresy"]},
+	# C5 : accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
+	{"title": "Commerce", "glyph": "⚓", "kinds": ["trade"]},
 	{"title": "Cour et dynasties", "glyph": "♔", "kinds": ["death", "succession", "no_heir", "birth", "marriage", "regency", "faction_destroyed"]},
 	{"title": "Royaume", "glyph": "⚒", "kinds": ["building_completed", "technology_researched", "revolt", "plague", "famine", "bankruptcy"]},
 	# H9 : régimes revenus au défaut, Carême ; blessés soignés, épidémies contenues.
