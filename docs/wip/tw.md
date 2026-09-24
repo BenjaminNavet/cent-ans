@@ -16,19 +16,21 @@ Choix du joueur au lancement :
 | 1 | B1 maillages soldats/chevaux (Blender) ; B2 bannières d'unité + vignettes + écran de fin ; C1 minicarte + brouillard | **fusionné** : B2 c0b9635, B1 ff592ae, C1 ee4f2b6 |
 | 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 **fusionné** (2a485a5, banc fait 51f95be) ; C2 en attente |
 | 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **fusionné** (2a485a5) |
-| 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | **en cours** (24/09, 3 agents cent-ans-dev en worktree) ; notes `docs/wip/b6-ia-terrain.md`, `b7-finitions-bataille.md`, `c7-suite-general.md` dans leurs branches |
+| 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | B7 **fusionné** (7441f5c) ; B6 **fusionné** (e618e41) ; C7 en cours (`docs/wip/c7-suite-general.md` dans sa branche) |
+| 5 | C6 agents Medieval II (espion, émissaire, prédicateur) ; C2 zone de contrôle après C7a colonies | C6 **en cours** (agent en worktree, `docs/wip/c6-agents.md`) ; C2 en attente |
 
 ## État courant (24/09, reprise après arrêt)
 
-main poussé (51f95be). Fusionnés : P1, P2, B1, B2, B3, B4, B5, C1, C3. Banc B4 fait : effets ≈ +6 % primitives, FPS inchangés (plafond 60 Hz) ; option `--bench-at=<s>`.
-Vague 4 en cours : B6, B7, C7 (branches `worktree-agent-*` créées au lancement ; retrouver via `git worktree list` et les notes wip ci-dessus).
-C2, C4 (édits/chaînes), C5 (routes commerciales), C6 (agents) : bloqués par la fusion de C4 colonies (`merge-c4`), qui refond déplacement, revenus et sauvegarde v5.
+main poussé (e618e41). Fusionnés : P1, P2, B1-B7, C1, C3. Banc B4 fait : effets ≈ +6 % primitives, FPS inchangés (plafond 60 Hz) ; option `--bench-at=<s>`.
+En cours : C7 (suite du général), C6 (agents) ; branches `worktree-agent-*` (`git worktree list`).
+Colonies C4 et C5 fusionnées (17aa679, b241608) : l'aire atteignable existe déjà (`reachable_markers.gd`), C2 se réduit à la zone de contrôle, qui attend C7a colonies (équilibrage de `movement.rs`). C4 TW (édits/chaînes) et C5 TW (routes commerciales) : après C7a.
 
 ## Reprise
 1. Si la vague 4 est interrompue : lire `docs/wip/b6-*.md`, `b7-*.md`, `c7-*.md` dans les worktrees (`git worktree list`), relancer un agent de reprise par lot inachevé.
 2. Fusion de chaque lot : `../gp-tw-merge` (`integration/tw`) : supprimer d'abord les `.import`/`.uid` non suivis sous `game/` (ils bloquent `git merge main` quand main les suit), `git merge main`, `git merge --no-ff <branche>`, clippy + `cargo test`, `core/build.sh`, `--import`, smoke (compter les « smoke OK », 22 actuellement), `git merge --ff-only integration/tw` dans main (si main a bougé : recommencer `git merge main`) + push.
-3. Si C4 colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle + aire atteignable), puis C5/C6.
-4. Pistes restantes : pistes musicales dédiées (B3) ; relecture de bataille (replay, L, basse priorité).
+3. Quand C7a colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle seule), puis C5 routes commerciales, C4 édits/chaînes.
+4. Pistes B6/B7 : minicarte sans haies ni village ; `advance` n'infléchit pas vers un défenseur décalé ; cavalerie qui attend face à un réseau de haies ; carte de piétinement réutilisable pour la boue ; sillage d'écume au gué ; pastilles par corps de bataille.
+5. Pistes restantes : pistes musicales dédiées (B3) ; relecture de bataille (replay, L, basse priorité).
 
 ## Décisions
 - Vague 4 (24/09) : campagne bloquée par colonies → lots sans `ProvinceState` : suite du général (C7, champs `serde(default)`, pas de changement de version de sauvegarde) ; bataille : B6/B7.
