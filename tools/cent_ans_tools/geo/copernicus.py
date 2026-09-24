@@ -18,6 +18,7 @@ the map extent keeps ETOPO 2022 (see :func:`merge_with_etopo`).
 from __future__ import annotations
 
 import re
+import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -36,7 +37,8 @@ TILE_LIST_URL = f"{BUCKET_URL}/tileList.txt"
 RAW_DIR = download.RAW_DIR / "copernicus"
 #: ``(lon_min, lat_min, lon_max, lat_max)`` of the area rebuilt from Copernicus.
 FINE_BBOX = (-11.0, 41.0, 12.0, 60.0)
-DOWNLOAD_WORKERS = 8
+DOWNLOAD_WORKERS = 6
+FETCH_ATTEMPTS = 5
 
 _TILE_RE = re.compile(r"Copernicus_DSM_COG_30_([NS])(\d{2})_00_([EW])(\d{3})_00_DEM")
 
@@ -89,9 +91,15 @@ def fetch_tiles(names: list[str], force: bool = False) -> list[Path]:
     """Download ``names`` in parallel (already cached tiles are skipped)."""
 
     def fetch(name: str) -> Path:
-        return download.download_file(
-            f"{BUCKET_URL}/{name}/{name}.tif", tile_path(name), force
-        )
+        url = f"{BUCKET_URL}/{name}/{name}.tif"
+        for attempt in range(FETCH_ATTEMPTS):
+            try:
+                return download.download_file(url, tile_path(name), force)
+            except download.DownloadError:
+                if attempt == FETCH_ATTEMPTS - 1:
+                    raise
+                time.sleep(2.0 * (attempt + 1))
+        return tile_path(name)
 
     with ThreadPoolExecutor(DOWNLOAD_WORKERS) as pool:
         return list(pool.map(fetch, names))
