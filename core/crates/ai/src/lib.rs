@@ -7,6 +7,7 @@
 
 pub mod alignment;
 pub mod campaign;
+pub mod doctrine;
 pub mod support;
 
 pub use campaign::plan_turn;

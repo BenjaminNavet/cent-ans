@@ -1,0 +1,114 @@
+{
+  "description": "Doctrines de recrutement de l'IA (lot E1) : poids relatif de chaque type d'unité parmi les régiments de campagne. L'IA recrute ce qui manque le plus à ce mélange, parmi les unités levables sur place ; la valeur de l'unité ne sert qu'à départager. Les types qu'une faction ne peut pas lever (culture, bâtiment, technologie) sont ignorés et les poids renormalisés.",
+  "default": {
+    "description": "Ost féodal ordinaire : milices et arbalétriers des villes, gens d'armes à pied et à cheval.",
+    "mix": {
+      "unit_urban_militia": 30,
+      "unit_crossbowmen": 20,
+      "unit_men_at_arms_foot": 20,
+      "unit_mounted_sergeants": 15,
+      "unit_knights": 10,
+      "unit_flemish_pikemen": 5
+    }
+  },
+  "factions": {
+    "fac_england": {
+      "description": "Armée des indentures : archers longs et hommes d'armes démontés, hobelars (archers montés) pour les chevauchées.",
+      "mix": {
+        "unit_longbowmen": 40,
+        "unit_men_at_arms_foot": 20,
+        "unit_mounted_archers": 10,
+        "unit_knights": 10,
+        "unit_urban_militia": 10,
+        "unit_mounted_sergeants": 5,
+        "unit_crossbowmen": 5
+      }
+    },
+    "fac_france": {
+      "description": "Ost de France : chevalerie et gens d'armes, arbalétriers génois et des villes, milices communales.",
+      "mix": {
+        "unit_knights": 20,
+        "unit_men_at_arms_foot": 20,
+        "unit_crossbowmen": 15,
+        "unit_genoese_crossbowmen": 10,
+        "unit_urban_militia": 20,
+        "unit_mounted_sergeants": 15
+      }
+    },
+    "fac_burgundy": {
+      "description": "Gens d'armes bourguignons et arbalétriers des villes.",
+      "mix": {
+        "unit_men_at_arms_foot": 25,
+        "unit_knights": 20,
+        "unit_crossbowmen": 20,
+        "unit_urban_militia": 20,
+        "unit_mounted_sergeants": 15
+      }
+    },
+    "fac_flanders": {
+      "description": "Milices des villes drapières : piquiers (goedendag) et arbalétriers.",
+      "mix": {
+        "unit_flemish_pikemen": 45,
+        "unit_crossbowmen": 20,
+        "unit_urban_militia": 20,
+        "unit_men_at_arms_foot": 15
+      }
+    },
+    "fac_scotland": {
+      "description": "Schiltrons de lances à pied, peu de chevaliers.",
+      "mix": {
+        "unit_urban_militia": 35,
+        "unit_men_at_arms_foot": 25,
+        "unit_mounted_sergeants": 15,
+        "unit_knights": 10,
+        "unit_crossbowmen": 15
+      }
+    },
+    "fac_genoa": {
+      "description": "Arbalétriers génois, la meilleure infanterie de trait à louer.",
+      "mix": {
+        "unit_genoese_crossbowmen": 45,
+        "unit_urban_militia": 25,
+        "unit_men_at_arms_foot": 20,
+        "unit_mounted_sergeants": 10
+      }
+    },
+    "fac_swiss": {
+      "description": "Cantons : infanterie de choc à pied, hallebardes et piques.",
+      "mix": {
+        "unit_urban_militia": 45,
+        "unit_men_at_arms_foot": 30,
+        "unit_crossbowmen": 25
+      }
+    },
+    "fac_castile": {
+      "description": "Cavalerie légère (jinetes) et arbalétriers de la frontière de Grenade.",
+      "mix": {
+        "unit_mounted_sergeants": 25,
+        "unit_crossbowmen": 25,
+        "unit_urban_militia": 20,
+        "unit_knights": 15,
+        "unit_men_at_arms_foot": 15
+      }
+    },
+    "fac_aragon": {
+      "description": "Almogavares, arbalétriers catalans et chevalerie.",
+      "mix": {
+        "unit_crossbowmen": 30,
+        "unit_urban_militia": 25,
+        "unit_mounted_sergeants": 20,
+        "unit_knights": 15,
+        "unit_men_at_arms_foot": 10
+      }
+    },
+    "fac_granada": {
+      "description": "Jinetes nasrides et arbalétriers.",
+      "mix": {
+        "unit_mounted_sergeants": 35,
+        "unit_crossbowmen": 30,
+        "unit_urban_militia": 25,
+        "unit_men_at_arms_foot": 10
+      }
+    }
+  }
+}

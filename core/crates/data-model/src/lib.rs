@@ -29,6 +29,7 @@ pub use entities::ai_alignment::{
 pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
 };
+pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
 };
