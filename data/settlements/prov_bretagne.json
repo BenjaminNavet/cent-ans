@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_nantes",
+    "province": "prov_bretagne",
+    "kind": "city",
+    "name": { "display": "Nantes", "local": "Naoned", "local_language": "breton" },
+    "lonlat": [-1.5536, 47.2184],
+    "weight": 34,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_hotel_dieu", "bld_stone_walls", "bld_muster_field"],
+    "port": true,
+    "description": "Capitale ducale sur la Loire, résidence de Jean III de Bretagne.",
+    "sources": ["Nantes", "Duché de Bretagne"]
+  },
+  {
+    "id": "set_rennes",
+    "province": "prov_bretagne",
+    "kind": "town",
+    "name": { "display": "Rennes", "local": "Roazhon", "local_language": "breton" },
+    "lonlat": [-1.6778, 48.1147],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "port": false,
+    "description": "Autre capitale ducale, siège d'un évêché, porte orientale de la Bretagne.",
+    "sources": ["Rennes"]
+  },
+  {
+    "id": "set_saint_malo",
+    "province": "prov_bretagne",
+    "kind": "town",
+    "name": { "display": "Saint-Malo", "local": "Sant-Maloù", "local_language": "breton" },
+    "lonlat": [-2.0261, 48.6493],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Cité épiscopale fortifiée sur son rocher, port de la Manche.",
+    "sources": ["Saint-Malo"]
+  },
+  {
+    "id": "set_josselin",
+    "province": "prov_bretagne",
+    "kind": "castle",
+    "name": { "display": "Josselin", "local": "Josselin", "local_language": "breton" },
+    "lonlat": [-2.5500, 47.9597],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château des seigneurs de Rohan sur l'Oust.",
+    "sources": ["Château de Josselin"]
+  },
+  {
+    "id": "set_redon",
+    "province": "prov_bretagne",
+    "kind": "abbey",
+    "name": { "display": "Redon", "local": "Redon", "local_language": "breton" },
+    "lonlat": [-2.0833, 47.6500],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye bénédictine fondée en 832, foyer des chartes bretonnes anciennes.",
+    "sources": ["Abbaye Saint-Sauveur de Redon"]
+  }
+]
