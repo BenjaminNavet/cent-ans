@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use serde::de::DeserializeOwned;
 
+use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -57,6 +58,10 @@ pub mod folders {
     pub const SETTLEMENT_RULES: &str = "rules.json";
     /// Settlement movement graph, inside `map/`; optional.
     pub const SETTLEMENT_GRAPH: &str = "settlement_graph.json";
+    /// AI tuning files (G4); optional folder.
+    pub const AI: &str = "ai";
+    /// Side-change tuning of the AI, inside `ai/`; optional.
+    pub const AI_ALIGNMENT: &str = "alignment.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
@@ -180,6 +185,9 @@ pub struct GameData {
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
     pub settlement_graph: Vec<SettlementEdge>,
+    /// `data/ai/alignment.json` (G4), absent until written: the AI then
+    /// makes no historical side change.
+    pub ai_alignment: Option<AiAlignment>,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
@@ -218,6 +226,7 @@ impl GameData {
             settlements_by_province: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
+            ai_alignment: None,
             vision_rules: None,
             movement_graph: Default::default(),
         };
@@ -236,6 +245,10 @@ impl GameData {
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
+        if alignment_path.is_file() {
+            data.ai_alignment = Some(read_json(&alignment_path)?);
         }
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {

@@ -216,6 +216,39 @@ anglaise (au plus 6 provinces du royaume tenues à la fois, seuil 8) ; trésors 
 (royaumes réduits à une province, revenus effondrés par les sièges) ; la guerre FR-EN recule un peu (graines 1
 et 3 sous 55 %) ; Bourgogne jouée par l'IA (`playthrough 1`) toujours à 2 provinces en 1478.
 
+### Bourgogne et Brabant G4 — sonde `century_probe` (464 tours)
+
+Avant = `main` ac6b7c2 (G2 + colonies C1) ; après = lot G4 (`docs/design/m9-ai.md` § 6, réglages
+`data/ai/alignment.json`). Graines 1 à 5, puis 40 graines (1-40) pour lisser le chaos des campagnes.
+
+| Mesure | Avant (1-5) | Après (1-5) | Avant (40 gr.) | Après (40 gr.) | Cible |
+|---|---|---|---|---|---|
+| Bourg.-Angl. (graines avec alliance) | 0/5 | 5/5, dès 1419-1422 | 4/40 | 23/40, dès 1419-1442 | ≥ 2/5, XVe s. |
+| Bourg.-Angl. (part des tours de guerre FR-EN) | 0 % | 16/17/3/12/39 % | 2 % | 11 % | — |
+| Angl.-Brabant (part des tours de guerre FR-EN) | 0 % partout | 0/100/28/20/0 % (moy. 30 %) | 10 % | 39 % | 20-60 % |
+| Angl.-Hainaut (idem) | 0/0/0/0/16 % | 0/0/79/0/0 % | 30 % | 37 % | — |
+| Angl.-Flandre (idem) | 0/100/0/91/0 % | 0/100/0/72/0 % | 51 % | 46 % | — |
+| France-Angleterre en guerre | 53/75/58/55/25 % (moy. 53 %) | 61/61/76/55/19 % (moy. 54 %) | 57 % | 62 % | ≥ 55 % |
+| Majeures en vie en 1400 | 4/4 partout | 4/4 sauf Écosse graine 3 | 40/40 | 38/40 | 4/4 |
+| Banqueroutes / faction / décennie | 0,44 [0,35-0,58] | 0,49 [0,38-0,62] | 0,47 | 0,49 | < 1 |
+| Trésor max (médiane) | 9,9 ¹ | 11,1 ¹ | 10,9 | 12,8 | ≤ 12 |
+| Auld Alliance (part des tours de guerre FR-EN) | 81-97 % | 3-100 % (moy. 78 %) | 93 % | 83 % | — |
+| Bourg.-France (idem) | 92-100 % | 57-83 % | 94 % | 74 % | — |
+
+¹ Médianes ; une graine par colonne a un rapport explosé (avant : Flandre graine 5, 10 790 ; après : Bourgogne graine 3, 11 133) par un revenu quasi nul.
+`playthrough` 1-5 : aucune panique, 0-7 ordres refusés ; France jouée par l'IA battue en 1449 (graine 1).
+
+Mécanismes : grief de Montereau mesuré sur les modificateurs d'opinion (le choix pondéré de l'événement
+fait l'hésitation, pas un tirage) ; rupture avec les alliés que le nouveau patron tient pour rivaux (sans
+quoi l'Angleterre refusait « l'allié des Écossais ») ; fiefs-rentes et toile des Pays-Bas (princes moindres
+voisins d'un allié moindre déjà en guerre) ; domination relative (15 % du royaume). Écarts : deux
+disparitions de majeures avant 1400 sur 40 graines (Écosse graine 3, attaque seule l'Angleterre en 1357 ;
+France graine 6, écrasée en 1387 par une coalition anglaise gonflée d'alliances génériques) ; l'Auld
+Alliance et la fidélité bourguignonne reculent (moins de tours alliés, par les défections et les
+destructions) ; trésors un peu plus hauts. Bogue signalé : `CampaignState::are_neighbors` ne lit que les
+`neighbors` des fichiers de province (6 provinces sur 132 renseignées) ; l'IA d'alignement utilise les
+frontières de la carte, le correctif global reste à équilibrer.
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
