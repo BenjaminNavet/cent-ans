@@ -10,7 +10,7 @@ Branche : `worktree-agent-a41f0303182b63dd5`. Source : `docs/audit/a2-mecaniques
 | N1 auto-résolution | **fait** : `battle_auto.rs` par phases, `data/rules/auto_resolve.json` + schéma, test `ai/tests/auto_resolve_calibration.rs` (20/20), ADR 0013 ; `movement.rs` : seul l'appel `resolve_field` (et l'import) change |
 | E1 doctrines IA | **fait** : `data/ai/doctrines.json` + `ai_doctrine.schema.json`, `ai/src/doctrine.rs` (`pick_recruit`, `field_composition`), boucle de recrutement de `plan_economy` modifiée localement, tests `ai/tests/e1_doctrines.rs` |
 | E8 coûts d'unités | **fait** : coûts et entretiens de 8 types dans `data/unit_types/` |
-| E2 ordre public | en cours |
+| E2 ordre public | **fait (partiel)** : `data/rules/population.json` + `population_rules.schema.json` ; `population.rs` lit ces termes (poids de l'impôt 40 → 100, soulagement par la garnison plafonné à 10, biens plafonnés à −10, occupation 25 → 35) ; ni fatigue de guerre ni changement des seuils d'impôt de l'IA |
 
 ## Sonde (O1)
 
@@ -72,9 +72,16 @@ Sonde `rt 6` (20 scénarios) : accord auto / 3D sur le vainqueur **12 / 20 (60 %
 - `campaign 200 1..8` : milice 36 %, archers longs 44,5 % des recrutements anglais, 8 types au minimum ; guerre FR-EN 41 % ; 139 batailles ; 6,1 changements de propriétaire.
 - `century_probe 464 1..5` : guerre FR-EN 54, 49, 33, 51, 43 % (moyenne 46 %, avant G1 40 %) ; majeures en 1400 : 5/5.
 
+### Après E2 (ordre public)
+
+- Mesure corrigée dans la sonde : le mécontentement moyen est désormais celui des classes (`weighted_unrest`), et non le champ `ProvinceState::unrest` (toujours proche de 0). Avant E2 : 3,4.
+- Poids de l'impôt 70 : mécontentement moyen 3,4, 5,1 révoltes par partie. Poids 100 (retenu) : mécontentement moyen **8,0** (cible 15-35 non atteinte), **15,5 révoltes** par partie de 200 tours (avant 1), impôt « Haut » dans 47 % des échantillons (cible < 40 % non atteinte : l'IA garde son seuil de 30).
+- `campaign 200 1..8` : milice 36 %, 9 types, guerre FR-EN 44 %.
+- `century_probe 464 1..5` : guerre FR-EN 57, 41, 56, 46, 37 % (moyenne 47 %) ; majeures en 1400 : 5/5.
+
 ## Prochaine étape
 
-E2 : poids de l'impôt, soulagement par la garnison, terme des biens et occupation en données (`data/rules/population.json`), sans toucher `economy.rs`.
+Hors G1 : baisser le seuil « impôt Haut » de l'IA (30 → 15 ou 20) pour que l'impôt redevienne un arbitrage ; fatigue de guerre (N2) ; recalibrer la cible de mécontentement (termes santé et bâtiments d'apaisement) ; passer les assauts (`siege.rs`) par `resolve_field` après la fusion de M2.
 
 ## Contraintes
 
