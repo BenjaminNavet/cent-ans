@@ -19,3 +19,7 @@ Ne stager que ses propres chemins. F8 (encyclopédie) doit s'appuyer sur le Code
 Vague 1 lancée (3 agents worktree : H1, H2, H3+H4). Prochaine étape : fusionner leurs branches, puis vague 2.
 
 Reste après H2 : bouton Codex dans le bandeau (`map_ui.gd`, session ui-tw) ; T = épingler seulement si une infobulle est visible (sinon arbre des techs).
+
+## Journal des coupures
+- 2026-09-23 ~23h : limite de quota (reset 0h10) → H7, H8 coupés ; relancés.
+- 2026-09-24 : H8 bloqué (watchdog), puis limite (reset 5h10) → H7, H8, H9 coupés ; relancés tous trois avec leur contexte.
