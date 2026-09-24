@@ -1,0 +1,11 @@
+{
+  "id": "cdx_capetiens_directs",
+  "title": "Les Capétiens directs",
+  "category": "dynastie",
+  "aliases": ["Capétiens directs", "Capétiens", "Philippe le Bel", "Philippe IV le Bel", "rois maudits", "miracle capétien"],
+  "era": { "from": "987", "to": "1328" },
+  "summary": "De Hugues Capet en 987 à Charles IV en 1328, les Capétiens directs se succèdent de père en fils pendant plus de trois siècles. L'extinction de leur lignée masculine ouvre la [[cdx_succession_1328|crise successorale de 1328]] et, à terme, la guerre de Cent Ans.",
+  "body": "En 987, les grands du royaume élisent roi Hugues Capet. Ses descendants ont une chance exceptionnelle, que les historiens ont appelée le « miracle capétien » : pendant plus de trois siècles, chaque roi laisse un fils pour lui succéder. Ils associent souvent cet héritier au trône de leur vivant, ce qui rend peu à peu la couronne héréditaire.\n\nAu fil des règnes, ces rois agrandissent et renforcent le domaine royal. Philippe Auguste enlève la Normandie aux [[cdx_plantagenets|Plantagenêts]] en 1204 ; Saint Louis impose le prestige moral de la couronne ; Philippe IV le Bel, roi de 1285 à 1314, affronte le pape Boniface VIII, détruit l'ordre du Temple et développe une administration de juristes et de financiers.\n\nPourtant, à la mort de Philippe le Bel, la chance tourne. Ses trois fils règnent successivement : Louis X le Hutin, Philippe V le Long et Charles IV le Bel. Aucun ne laisse de fils vivant. Le scandale de la tour de Nesle, en 1314, où les belles-filles du roi sont accusées d'adultère, jette en outre le doute sur la légitimité des enfants royaux. La légende d'une malédiction lancée par le grand maître des Templiers sur son bûcher a inspiré au XXe siècle le cycle romanesque des Rois maudits.\n\nEn 1316 puis en 1322, les filles des rois sont écartées de la succession. Quand Charles IV meurt en 1328, le plus proche parent mâle est [[cdx_edouard_iii|Édouard III]], fils d'[[cdx_isabelle_de_france|Isabelle de France]], la fille de Philippe le Bel. Mais les barons lui préfèrent le cousin des derniers rois, [[cdx_philippe_vi|Philippe de Valois]] : la dynastie des [[cdx_valois|Valois]] commence.",
+  "see_also": ["cdx_succession_1328", "cdx_valois", "cdx_isabelle_de_france", "cdx_plantagenets"],
+  "sources": ["Capétiens directs", "Philippe IV le Bel", "Affaire de la tour de Nesle"]
+}
