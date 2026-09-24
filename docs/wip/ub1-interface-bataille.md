@@ -15,13 +15,18 @@ Sources : `docs/audit/a3-ui.md` (U9, U13, défauts B1-B7), `docs/audit/backlog-t
 - Pas touché : `map_ui.gd`, thème global (UI2).
 
 ## État
-- [ ] Lot 1 — écran d'avant-bataille
+- [x] Lot 1 — écran d'avant-bataille : `pre_battle_dialog.gd` réécrit (plein écran, bannière
+  `evt_crecy`/`evt_sluys`, barre d'équilibre et verdict, médaillons des généraux, cartes
+  `RosterCard`, renforts, conditions, Combattre / Résolution automatique / Retraite ou Maintenir le
+  siège). Cœur : `battle_forecast.rs` (`battle_forecast`, `withdraw_pending_battle`, test
+  `tests/ub1_forecast.rs`) ; pont `get_battle_forecast`, `withdraw_pending_battle`. Mise en scène
+  `--stage=assault`. Captures 10, 11, 12.
 - [ ] Lot 2 — HUD de bataille compact (U9)
 - [ ] Lot 3 — écran de fin détaillé
 - [ ] Lot 4 — sons d'interface (U13)
 
 ## Prochaine étape
-Lot 1 : prévision dans le cœur, pont, puis écran.
+Lot 2 : HUD de bataille compact (`battle_hud.gd`, `unit_card.gd`).
 
 ## Reprise
 `core/build.sh`, `godot --headless --path game --import`. Captures :
