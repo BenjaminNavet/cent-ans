@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/crossings.schema.json",
+  "title": "Passages de la grille de navigation",
+  "description": "Fichier data/map/crossings.json (lot M1) : ponts et gués des grands fleuves, cols alpins et pyrénéens, en 1337. Un pont ou un gué ouvre le grand fleuve le plus proche ; un col force franchissable le chemin de moindre coût entre les points de sa route.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "crossings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/crossing" }
+    }
+  },
+  "required": ["crossings"],
+  "additionalProperties": false,
+  "$defs": {
+    "lonlat": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "minimum": -11, "maximum": 16 },
+        { "type": "number", "minimum": 35, "maximum": 60 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "crossing": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^(bridge|ford|pass)_[a-z0-9_]+$" },
+        "name": { "type": "string", "minLength": 1, "description": "Nom affiché, en français." },
+        "type": { "enum": ["bridge", "ford", "pass"], "description": "Pont, gué (ou bac) ou col." },
+        "river": { "type": "string", "description": "Cours d'eau franchi (pont, gué), tel que nommé dans rivers.geojson ou en français." },
+        "lonlat": { "$ref": "#/$defs/lonlat" },
+        "route": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/lonlat" },
+          "description": "Col : points de la route, d'un versant à l'autre (le col lui-même compris)."
+        },
+        "source": { "type": "string", "minLength": 3, "description": "Ouvrage ou article de référence." },
+        "note": { "type": "string" }
+      },
+      "required": ["id", "name", "type", "lonlat", "source"],
+      "additionalProperties": false,
+      "if": { "properties": { "type": { "const": "pass" } } },
+      "then": { "required": ["route"] },
+      "else": { "required": ["river"] }
+    }
+  }
+}

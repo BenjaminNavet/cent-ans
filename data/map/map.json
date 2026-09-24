@@ -55,5 +55,10 @@
     "tile_px": 512,
     "dir": "height",
     "pattern": "h_{col}_{row}.png"
+  },
+  "navgrid": {
+    "size_px": 2048,
+    "file": "navgrid.png",
+    "scale": 2
   }
 }
