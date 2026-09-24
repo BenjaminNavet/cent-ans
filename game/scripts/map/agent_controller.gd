@@ -387,7 +387,7 @@ func _action_button(option: Dictionary) -> Button:
 		tip.append("Cible : %s" % option.get("target_name", ""))
 		tip.append("Réussite : %d %%" % int(option.get("chance", 0)))
 		if int(option.get("cost", 0)) > 0:
-			tip.append("Coût : %d livres" % int(option.get("cost", 0)))
+			tip.append("Coût : %s" % Money.amount(int(option.get("cost", 0))))
 		if int(option.get("death_risk", 0)) > 0:
 			tip.append("Risque de perdre l'agent en cas d'échec : %d %%" % int(option.get("death_risk", 0)))
 	else:
@@ -533,7 +533,7 @@ func _fill_registry() -> void:
 	for option in map.sim.call("get_agent_recruit_options", place):
 		var button := Button.new()
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.text = "%s — %d livres (entretien %d) · %d/%d" % [option.get("name", ""), int(option.get("cost", 0)), int(option.get("upkeep", 0)), int(option.get("count", 0)), int(option.get("max", 0))]
+		button.text = "%s — %s (entretien %s) · %d/%d" % [option.get("name", ""), Money.amount(int(option.get("cost", 0))), Money.amount(int(option.get("upkeep", 0))), int(option.get("count", 0)), int(option.get("max", 0))]
 		button.disabled = not bool(option.get("available", false))
 		button.tooltip_text = str(option.get("reason", "")) if button.disabled else "Recruter un %s à %s." % [str(option.get("name", "")).to_lower(), place_name]
 		var kind := str(option.get("kind", ""))

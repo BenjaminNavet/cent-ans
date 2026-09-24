@@ -14,10 +14,15 @@ Propriétaire exclusif de `game/scripts/map/map_ui.gd` pendant le lot. Ne pas to
   `_shortcut_input` pour Échap, `_keep_on_screen`, minicarte masquée si un panneau la couvre) ;
   `campaign_map.gd` : objectifs et aide enregistrés, la Cour / la fiche / les technologies ne se
   rouvrent plus au rafraîchissement après fermeture. Test : `tests/ui_panel_stack_test.gd`.
-- [ ] U3 économie lisible
+- [x] U3 économie lisible : `economy_balance.rs` (`BudgetRecord`, `budget_lines`, historique de
+  12 saisons dans `FactionState.budget_history`, enregistré en fin de `end_turn`, `signed_livres`),
+  pont (`budget_lines`, `net_change`, `budget_history`), `money.gd` (format unique ₶),
+  `budget_table.gd`, `treasury_chart.gd`, panneau de faction élargi (500 px), infobulles du solde
+  et du trésor dans `map_ui.gd`, ℔ remplacé partout. Étape de capture `--stage=budget`.
+  Test Rust : `tests/u3_budget.rs`.
 - [ ] U4 échelle et responsivité
 - [ ] U5 fin de tour utile (optionnel)
 - [ ] U7 barre du haut et raccourcis (optionnel)
 
 ## Prochaine étape
-U3 : historique budgétaire dans `economy_balance.rs` (+ champ `budget_history` de `FactionState`), pont, panneau de faction en tableau.
+U4 : échelle automatique (hauteur / 900, bornée 0,9–1,6), réglages « Taille de l'interface » / « Taille du texte », test 4 résolutions, polices EB Garamond.
