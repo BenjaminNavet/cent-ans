@@ -763,6 +763,55 @@ mod tests {
     }
 
     #[test]
+    fn province_without_settlement_file_gets_a_city() {
+        let fixture = Fixture::new("fallback-city");
+        let (data, _) = fixture.load().unwrap();
+        let normandie = ProvinceId::new("prov_normandie").unwrap();
+        let city = data.province_city(&normandie).expect("generated city");
+        assert_eq!(city.id.as_str(), "set_rouen");
+        assert_eq!(city.lonlat, [1.1, 49.44]);
+        assert_eq!(city.weight, 100);
+        assert!(city.port);
+        assert_eq!(city.buildings, data.provinces[&normandie].buildings);
+        assert_eq!(data.settlements.len(), 1);
+    }
+
+    #[test]
+    fn settlement_file_problems_are_warnings() {
+        let fixture = Fixture::new("settlement-warnings");
+        fs::create_dir_all(fixture.root.join(folders::SETTLEMENTS)).unwrap();
+        fixture.write(
+            folders::SETTLEMENTS,
+            "prov_normandie",
+            r#"[{"id":"set_caen","province":"prov_normandie","kind":"town","name":{"display":"Caen"},"lonlat":[-0.37,49.18],"weight":30,"owner":"fac_atlantis","fortification_level":2,"buildings":["bld_market","bld_unknown"]},
+               {"id":"set_caen","province":"prov_normandie","kind":"village","name":{"display":"Caen bis"},"lonlat":[-0.3,49.1],"weight":5,"fortification_level":0},
+               {"id":"set_x","province":"prov_atlantis","kind":"village","name":{"display":"X"},"lonlat":[0.0,49.0],"weight":5,"fortification_level":0}]"#,
+        );
+        let (data, warnings) = fixture.load().unwrap();
+        let normandie = ProvinceId::new("prov_normandie").unwrap();
+        let ids: Vec<_> = data
+            .province_settlements(&normandie)
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect();
+        assert_eq!(ids, ["set_rouen", "set_caen"], "generated city first");
+        let caen = &data.settlements["set_caen"];
+        assert_eq!(caen.owner, None);
+        assert_eq!(caen.buildings, [BuildingId::new("bld_market").unwrap()]);
+        let fields: Vec<_> = warnings
+            .iter()
+            .filter(|w| w.entity.starts_with("settlements/") || w.entity == "prov_normandie")
+            .map(|w| w.field.as_str())
+            .collect();
+        for expected in ["owner", "buildings", "id", "province", "settlements"] {
+            assert!(
+                fields.contains(&expected),
+                "missing {expected} warning in {fields:?}"
+            );
+        }
+    }
+
+    #[test]
     fn unknown_faction_owner_is_an_error() {
         let fixture = Fixture::new("owner");
         fixture.write(
