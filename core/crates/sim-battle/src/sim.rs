@@ -5,6 +5,7 @@
 #![allow(clippy::needless_range_loop)]
 
 mod deployment;
+mod fire;
 mod pathing;
 mod reinforcements;
 mod separation;
@@ -107,6 +108,8 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Siege fires (S2): rules and their own random stream.
+    fire: fire::FireSystem,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -215,10 +218,14 @@ impl BattleSim {
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
         let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
-        let siege = setup
+        let mut siege = setup
             .siege
             .as_ref()
             .map(|s| SiegeWorks::generate(s.fortification, s.breach, &mut rng));
+        let mut fire = fire::FireSystem::new(seed, is_siege);
+        if let Some(works) = siege.as_mut() {
+            fire.prepare(works);
+        }
         if is_siege {
             field.prepare_for_siege();
         }
@@ -307,6 +314,7 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            fire,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -932,6 +940,7 @@ impl BattleSim {
                     unit.target = None;
                 }
             }
+            Command::Burn { units, house, gate } => self.command_burn(&units, house, gate)?,
             Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
@@ -1035,6 +1044,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
+        self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
@@ -1838,6 +1848,8 @@ impl BattleSim {
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;
         }
+        kills *= self.smoke_factor(shooter, target);
+        let aim = (target.x, target.z);
         let reload = if shooter.category == UnitCategory::Siege {
             12.0
         } else if shooter.has(Ability::Pavise) {
@@ -1877,6 +1889,7 @@ impl BattleSim {
         if self.units[t].hp <= 0.0 {
             self.unit_destroyed(t);
         }
+        self.incendiary_volley(i, aim);
     }
 
     /// Wall piece an engine batters this volley: its ordered piece, else
@@ -1964,6 +1977,7 @@ impl BattleSim {
                 self.unit_destroyed(j);
             }
         }
+        self.incendiary_volley(i, p.midpoint());
     }
 
     fn melee_damage(&self, attacker: &Unit, defender: &Unit) -> f64 {

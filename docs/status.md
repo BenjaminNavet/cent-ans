@@ -1,6 +1,6 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-24 (session 4, finalisation F1-F9 et G1-G2 ; sessions parallèles « visual »,
+Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustrations, G4 ; session 4, finalisation F1-F9 et G1-G2 ; sessions parallèles « visual »,
 « ui-tw » et « historien »).
 
 ## Où en est-on
@@ -13,8 +13,11 @@ Dernière mise à jour : 2026-09-24 (session 4, finalisation F1-F9 et G1-G2 ; se
 - **Victoire** : tous les objectifs historiques tenus `hold_turns` saisons d'affilée (France 20, Angleterre et
   Bourgogne 12). Sonde : `cargo run --release -p ai --example playthrough [graine]`.
 - **Qualité** : 310 tests Rust, 87 tests Python, smoke Godot 20 étapes, clippy propre.
-- **Reste** : 49 portraits à générer (≈ 2,25 $) quand la clé OpenRouter sera remise à zéro (1er octobre) ; écarts
-  d'équilibrage documentés plus bas (tableaux F4 et G2).
+- **Art** : 88/88 portraits, 117/117 miniatures de chronique (bandeau de la fenêtre de chronique,
+  `cent-ans assets event-art`), 116 illustrations de l'encyclopédie (unités, bâtiments, technologies,
+  factions, `cent-ans assets illustrations`) ; 15,17 $ dépensés sur 50 $ (`docs/budget.md`).
+- **Reste** : écarts d'équilibrage documentés plus bas (tableaux F4, G2, G4, G5) ; G5 : voisinage réel
+  (graphe de la carte), 4 grandes factions en vie en 1400 sur 40/40 graines.
 - Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/wip/finalisation.md`.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
@@ -249,6 +252,47 @@ destructions) ; trésors un peu plus hauts. Bogue signalé : `CampaignState::are
 `neighbors` des fichiers de province (6 provinces sur 132 renseignées) ; l'IA d'alignement utilise les
 frontières de la carte, le correctif global reste à équilibrer.
 
+### Voisinage réel G5 — sonde `century_probe` (464 tours)
+
+`CampaignState::are_neighbors` suit désormais le graphe de la carte (`movement::land_neighbors`,
+`data/map/provinces.geojson`) au lieu des `neighbors` des fichiers de province (6 sur 132) ; `ai::alignment::borders`
+est supprimé (une seule source), la propagation de l'hérésie et `get_province().neighbors` du pont suivent le même
+graphe. Réglages : `data/ai/diplomacy.json` (schéma `ai_diplomacy.schema.json`, `docs/design/m9-ai.md` § 7).
+Avant = `main` f52fd92 (G4) ; « correctif seul » = adjacence réelle sans rééquilibrage ; après = lot G5.
+
+| Mesure (40 graines) | Avant | Correctif seul | Après | Cible |
+|---|---|---|---|---|
+| France-Angleterre en guerre | 66 % [41-83], 22/40 dans la bande | 69 % [53-88], 24/40 | 65 % [42-85], 29/40 | 55-75 % |
+| Auld Alliance (part des tours de guerre FR-EN) | 81 % [6-100] | 81 % [5-100] | 90 % [40-100] | ≥ 80 % |
+| Angl.-Brabant (idem) | 35 % | 31 % | 25 % | 20-60 % |
+| Bourg.-France (idem) | 78 % | 74 % | 74 % | — |
+| Bourg.-Angl. (graines, XVe s.) | 22/40 | 20/40 | 21/40 (22 en tout) | ≥ 2/5 |
+| Banqueroutes / faction / décennie | 0,47 [0,27-1,59] | 0,52 [0,30-1,14] | 0,43 [0,25-0,70] | < 1 |
+| Appels aux armes honorés (moy. / campagne) | 170 | 736 | 350 | — |
+| 4 majeures en vie en 1400 | 37/40 ¹ | 39/40 | **40/40** | 40/40 |
+
+| Mesure (graines 1 à 5) | Avant (G4) | Après | Cible |
+|---|---|---|---|
+| France-Angleterre en guerre | 61/61/76/55/19 % | 62/61/56/64/64 % | 55-75 % |
+| Auld Alliance (tours de guerre FR-EN) | moy. 78 % | 100/99/100/76/97 % | ≥ 80 % |
+| Angl.-Brabant (idem) | 0/100/28/20/0 % | 0/100/41/0/3 % (moy. 29 %) | 20-60 % |
+| Bourg.-Angl. | 5/5 | 2/5 (1421, 1422) | ≥ 2/5, XVe s. |
+| Banqueroutes / faction / décennie | 0,49 | 0,51 [0,42-0,70] | < 1 |
+| Majeures en vie en 1400 | 4/5 | 5/5 | 5/5 |
+
+¹ La mesure G4 (38/40) a été refaite sur `main` f52fd92 : 37/40 (Écosse graines 26, 27, 35).
+`playthrough` 1-5 (France, Angleterre, Bourgogne jouées par l'IA) : aucune panique, 0-5 ordres refusés.
+
+Mécanismes : cobelligérance réservée aux alliés au moins aussi puissants que nous (`min_ally_power_ratio` 1 : le
+prince moindre suit la grande couronne, pas l'inverse) et, sur simple frontière, aux guerres de prétentions
+(`border_only_claim_wars`) — c'est ce qui ramène les appels aux armes de ×4 à ×2 ; une couronne ne cède par
+traité ni sa capitale ni sa dernière province (`keep_capital`), et la paix qui lui laisse cette terre solde
+quand même la guerre ; une couronne réduite à une province à elle (`cornered_provinces`) demande la paix à
+chaque saison, quel que soit le score (l'Écosse traite au lieu de disparaître en 1340-1341). Écarts : les
+appels aux armes restent deux fois plus nombreux qu'avant (plus de voisins, donc plus de guerres de défense
+possibles) ; France-Angleterre sous 55 % sur 5 graines sur 40 (au-dessus de 75 % sur 6) ; Bourg.-Angl.
+2/5 sur les graines 1-5 (5/5 en G4), 21/40 sur 40 ; l'Écosse tombe encore en 1420 sur une graine (après 1400).
+
 ## Limites connues
 - F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
   les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
@@ -256,10 +300,8 @@ frontières de la carte, le correctif global reste à équilibrer.
   (`get_unit_type`, `get_building`, `get_resource`). Forces/faiblesses d'unité : statistiques à
   ±30 % de la moyenne des types d'unités (heuristique d'affichage). Les infobulles des traits
   n'ont qu'une icône par catégorie, celles des compétences une par branche.
-- M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
-  mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
-  0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro
-  mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
+- M10 assets : les images générées sont des JPEG/PNG chargés à la volée (`PortraitLoader.load_texture`) ;
+  tout le jeu fonctionne sans elles (écu de faction ou bandeau masqué en repli).
 - M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu (F4 : 20 % au-delà de six saisons) ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
