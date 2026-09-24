@@ -1,10 +1,14 @@
 class_name CharacterSheet
 extends PanelContainer
 
-## Fiche personnage : compétences/XP/points, traits (info-bulle), famille, actions
-## (gouverneur/commandement/mariage) et arbre de compétences à trois colonnes (tiers en
-## lignes, verrouillé/disponible/appris). Aucune règle ici : les listes de candidats et les
-## refus viennent de `CampaignSim` (`get_learnable`, `get_marriage_candidates`, ordres).
+## Fiche personnage à la Total War (lot C3) : colonne de gauche = grand portrait encadré
+## d'or avec l'écu de la faction, titres, pastilles d'âge/piété/prestige, niveaux des
+## domaines, famille, actions (gouverneur/commandement/mariage) ; à droite = description
+## (Codex), traits en pastilles illustrées (infobulles riches) et arbre de compétences
+## visuel (`SkillTreeView` : bandes par domaine, nœuds appris/disponibles/verrouillés, clic =
+## `learn_skill_requested`). Pas de « suite » : le cœur n'a pas de concept d'entourage.
+## Aucune règle ici : les listes de candidats et les refus viennent de `CampaignSim`
+## (`get_learnable`, `get_marriage_candidates`, ordres).
 
 signal closed
 signal character_requested(character_id: String)
@@ -16,6 +20,13 @@ signal learn_skill_requested(character_id: String, skill_id: String)
 const BRANCH_LABELS := {"command": "Commandement", "governance": "Gouvernance", "court": "Cour"}
 const BRANCH_ORDER := ["command", "governance", "court"]
 const SEX_LABELS := {"male": "Homme", "female": "Femme"}
+const PORTRAIT_SIZE := Vector2(256, 256)
+## Couleur de fond des pastilles de trait, par catégorie.
+const TRAIT_COLORS := {
+	"martial": Color(0.62, 0.13, 0.08), "governance": Color(0.24, 0.34, 0.18),
+	"personality": Color(0.42, 0.29, 0.16), "physical": Color(0.55, 0.40, 0.12),
+	"acquired": Color(0.20, 0.25, 0.45),
+}
 
 @onready var swatch: ColorRect = %Swatch
 @onready var name_label: Label = %NameLabel
@@ -36,6 +47,10 @@ const SEX_LABELS := {"male": "Homme", "female": "Femme"}
 @onready var picker_list: VBoxContainer = %PickerList
 @onready var picker_close: Button = %PickerClose
 @onready var skill_columns: HBoxContainer = %SkillColumns
+@onready var portrait_frame: PanelContainer = %PortraitFrame
+@onready var titles_label: Label = %TitlesLabel
+@onready var stats_row: HFlowContainer = %StatsRow
+@onready var skill_points_label: Label = %SkillPointsLabel
 @onready var close_button: Button = %CloseButton
 
 var character_id: String = ""
@@ -43,6 +58,10 @@ var _description: RichTextLabel  # H2 : description avec mots du Codex
 var _skill_tree: Array = []
 var _learnable: Array = []
 var _skills_learned: Array = []
+## C3 : arbre de compétences visuel (dans `%SkillColumns`) et écu posé sur le portrait.
+var skill_tree_view: SkillTreeView
+var _heraldry: TextureRect
+var _branch_values: Dictionary = {}
 
 
 func _ready() -> void:
@@ -55,6 +74,7 @@ func _ready() -> void:
 	picker_close.pressed.connect(func() -> void: picker_panel.hide())
 	_decorate()  # F2
 	_add_description()  # H2
+	_build_tw_layout()  # C3
 
 
 # --- F2 : icônes des branches et des actions ---------------------------------------------
@@ -93,7 +113,7 @@ func _add_description() -> void:
 	_description.add_theme_font_size_override("normal_font_size", 14)
 	_description.add_theme_font_size_override("italics_font_size", 14)
 	_description.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
-	var content := get_node_or_null("VBox/Scroll/Content")
+	var content := get_node_or_null("VBox/Body/Scroll/Content")
 	if content == null:
 		return
 	content.add_child(_description)
@@ -139,22 +159,33 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	marriage_candidates = candidates
 	picker_panel.hide()
 
-	swatch.color = SimFacade.faction_color(str(character.get("faction", "")))
+	var faction: String = str(character.get("faction", ""))
+	swatch.color = SimFacade.faction_color(faction)
 	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
-	if PortraitLoader.overlay_portrait(swatch, character_id, str(character.get("faction", "")), Vector2(96, 96)):
+	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE):
 		swatch.color = Color(0, 0, 0, 0)
+	# C3 : écu de la faction en bas à droite du portrait (s'il y a un portrait peint).
+	_heraldry.texture = PortraitLoader.heraldry_texture(faction) if PortraitLoader.has_portrait(character_id) else null
+	_heraldry.tooltip_text = "Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else ""
+	swatch.move_child(_heraldry, -1)
+	var alive_now: bool = bool(character.get("alive", true))
+	swatch.modulate = Color.WHITE if alive_now else Color(0.75, 0.75, 0.75)
 	var epithet: String = str(character.get("epithet", ""))
 	name_label.text = "%s%s" % [str(character.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
-	subtitle_label.text = "%s — %s ans — %s — Maison %s" % [
-		str(character.get("title", "")), int(character.get("age", 0)),
-		str(SEX_LABELS.get(character.get("sex", ""), "")), str(character.get("house", "")),
+	subtitle_label.text = "%s — %s — Maison %s%s" % [
+		str(character.get("title", "")), _age_text(int(character.get("age", 0))),
+		str(character.get("house", "")), "" if alive_now else " — défunt(e)",
 	]
+	_fill_titles(character)
+	_fill_stats(character)
 	role_label.text = "Statut actuel : %s" % str(character.get("role", "à la cour"))
 	command_value.text = str(int((character.get("skills", {}) as Dictionary).get("command", 0)))
 	governance_value.text = str(int((character.get("skills", {}) as Dictionary).get("governance", 0)))
 	court_value.text = str(int((character.get("skills", {}) as Dictionary).get("court", 0)))
 	xp_value.text = str(int(character.get("experience", 0)))
 	points_value.text = str(int(character.get("skill_points", 0)))
+	_branch_values = character.get("skills", {})
+	skill_points_label.text = "Points disponibles : %d" % int(character.get("skill_points", 0))
 	for branch in _branch_chips:
 		(_branch_chips[branch] as Control).tooltip_text = RichTooltip.branch(branch, int((character.get("skills", {}) as Dictionary).get(branch, 0)))
 
@@ -173,6 +204,123 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	_fill_ransom(character)  # G1
 	_fill_skill_tree()
 	show()
+
+
+# --- C3 : présentation à la Total War ------------------------------------------------------
+
+
+func _build_tw_layout() -> void:
+	var frame_style := StyleBoxFlat.new()
+	frame_style.bg_color = HudStyle.INK
+	frame_style.border_color = HudStyle.GOLD
+	frame_style.set_border_width_all(4)
+	frame_style.set_corner_radius_all(3)
+	frame_style.set_content_margin_all(4)
+	frame_style.shadow_color = HudStyle.SHADOW
+	frame_style.shadow_size = 4
+	portrait_frame.add_theme_stylebox_override("panel", frame_style)
+	_heraldry = TextureRect.new()
+	_heraldry.name = "Heraldry"
+	_heraldry.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_heraldry.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_heraldry.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_heraldry.offset_left = -58
+	_heraldry.offset_top = -66
+	_heraldry.offset_right = -6
+	_heraldry.offset_bottom = -6
+	swatch.add_child(_heraldry)
+	skill_tree_view = SkillTreeView.new()
+	skill_tree_view.name = "SkillTreeView"
+	skill_tree_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	skill_tree_view.learn_requested.connect(func(skill_id: String) -> void: learn_skill_requested.emit(character_id, skill_id))
+	skill_columns.add_child(skill_tree_view)
+	name_label.add_theme_color_override("font_color", HudStyle.INK)
+	skill_points_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
+
+
+static func _age_text(age: int) -> String:
+	return "%d an%s" % [age, "s" if age > 1 else ""]
+
+
+## Titres en cours (fiche historique : titres sans date de fin), sinon le titre principal.
+func _fill_titles(character: Dictionary) -> void:
+	var titles := PackedStringArray()
+	var main_title := str(character.get("title", ""))
+	if main_title != "":
+		titles.append(main_title)
+	var definition: Dictionary = GameCatalog.definitions("characters").get(character_id, {})
+	for entry in definition.get("titles", []):
+		var title := str((entry as Dictionary).get("title", ""))
+		if title != "" and not (entry as Dictionary).has("to") and not titles.has(title):
+			titles.append(title)
+	titles_label.text = " · ".join(titles)
+	titles_label.visible = not titles.is_empty()
+
+
+## Pastilles d'âge, de sexe, de piété et de prestige sous le portrait.
+func _fill_stats(character: Dictionary) -> void:
+	for child in stats_row.get_children():
+		stats_row.remove_child(child)
+		child.queue_free()
+	var age := int(character.get("age", 0))
+	var entries := [
+		["hud_chronicle", _age_text(age), "Âge : %s (né vers %d)" % [_age_text(age), _birth_year(character)]],
+		["class_clergy", "Piété %d" % int(character.get("piety", 0)), "Piété : %d / 100" % int(character.get("piety", 0))],
+		["class_nobility", "Prestige %d" % int(character.get("prestige", 0)), "Prestige personnel : %d" % int(character.get("prestige", 0))],
+	]
+	var sex_label := str(SEX_LABELS.get(character.get("sex", ""), ""))
+	if sex_label != "":
+		entries.insert(1, ["gauge_population", sex_label, sex_label])
+	for entry in entries:
+		stats_row.add_child(_pill(IconChip.create(entry[0], entry[1], entry[2], 16.0, 12), HudStyle.PARCHMENT_DARK))
+
+
+func _birth_year(character: Dictionary) -> int:
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null and sim.has_method("get_family_tree"):
+		var tree: Dictionary = sim.call("get_family_tree", character_id, 0, 0)
+		for node in tree.get("nodes", []):
+			if str(node.get("id", "")) == character_id:
+				return int(node.get("birth_year", 0))
+	return 0
+
+
+## Enveloppe `content` dans une pastille arrondie (fond `color`).
+static func _pill(content: Control, color: Color, text_color: Color = HudStyle.INK) -> PanelContainer:
+	var pill := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.border_color = color.darkened(0.35)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 6
+	style.content_margin_right = 9
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
+	pill.add_theme_stylebox_override("panel", style)
+	pill.mouse_filter = Control.MOUSE_FILTER_PASS
+	if content is IconChip:
+		(content as IconChip).label.add_theme_color_override("font_color", text_color)
+	pill.add_child(content)
+	return pill
+
+
+## Nom affichable d'un personnage (fiche historique, sinon simulation, sinon id).
+func _name_of(id: String, fallback: String = "") -> String:
+	if fallback != "" and fallback != id:
+		return fallback
+	var definition: Dictionary = GameCatalog.definitions("characters").get(id, {})
+	var display := str((definition.get("name", {}) as Dictionary).get("display", "")) if definition.get("name") is Dictionary else ""
+	if display != "":
+		return display
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null:
+		var other: Dictionary = sim.call("get_character", id)
+		if not other.is_empty():
+			return str(other.get("name", id))
+	return id
 
 
 # --- G1 : captivité et rançon (ordres `pay_ransom` / `release_captive` soumis à la simulation) ---
@@ -231,8 +379,12 @@ func _fill_traits(traits: Array) -> void:
 		return
 	for trait_entry in traits:
 		var category: String = str(trait_entry.get("category", ""))
-		var chip := IconChip.create("trait_category_" + category, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 18.0, 13, "trait")
-		traits_list.add_child(chip)
+		var chip := IconChip.create("trait_category_" + category, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
+		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
+		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
+		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color
+		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).set_border_width_all(2)
+		traits_list.add_child(pill)
 
 
 func _fill_family(character: Dictionary) -> void:
@@ -240,15 +392,15 @@ func _fill_family(character: Dictionary) -> void:
 		child.queue_free()
 	var spouse_id: String = str(character.get("spouse", ""))
 	if spouse_id != "":
-		family_list.add_child(_family_row("Conjoint(e)", spouse_id, str(character.get("spouse_name", spouse_id))))
+		family_list.add_child(_family_row("Conjoint(e)", spouse_id, _name_of(spouse_id, str(character.get("spouse_name", "")))))
 	for child_entry in character.get("children", []):
 		family_list.add_child(_family_row("Enfant", str(child_entry.get("id", "")), "%s (%d ans)" % [str(child_entry.get("name", "?")), int(child_entry.get("age", 0))]))
 	var father_id: String = str(character.get("father", ""))
 	if father_id != "":
-		family_list.add_child(_family_row("Père", father_id, father_id))
+		family_list.add_child(_family_row("Père", father_id, _name_of(father_id)))
 	var mother_id: String = str(character.get("mother", ""))
 	if mother_id != "":
-		family_list.add_child(_family_row("Mère", mother_id, mother_id))
+		family_list.add_child(_family_row("Mère", mother_id, _name_of(mother_id)))
 	if family_list.get_child_count() == 0:
 		var label := Label.new()
 		label.text = "Famille inconnue."
@@ -300,54 +452,4 @@ func _on_picker_entry_pressed(kind: String, target_id: String) -> void:
 
 
 func _fill_skill_tree() -> void:
-	for child in skill_columns.get_children():
-		child.queue_free()
-	for branch in BRANCH_ORDER:
-		var column := VBoxContainer.new()
-		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		column.add_theme_constant_override("separation", 6)
-		var header := IconChip.create("branch_" + branch, str(BRANCH_LABELS.get(branch, branch)), RichTooltip.branch(branch), 22.0, 15)
-		header.alignment = BoxContainer.ALIGNMENT_CENTER
-		column.add_child(header)
-		var nodes: Array = []
-		for node in _skill_tree:
-			if str(node.get("branch", "")) == branch:
-				nodes.append(node)
-		nodes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["tier"]) < int(b["tier"]))
-		var by_tier: Dictionary = {}
-		for node in nodes:
-			var tier := int(node["tier"])
-			if not by_tier.has(tier):
-				by_tier[tier] = []
-			(by_tier[tier] as Array).append(node)
-		var tiers: Array = by_tier.keys()
-		tiers.sort()
-		for tier in tiers:
-			var tier_label := Label.new()
-			tier_label.text = "Rang %d" % tier
-			tier_label.add_theme_font_size_override("font_size", 11)
-			tier_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			column.add_child(tier_label)
-			for node in by_tier[tier]:
-				column.add_child(_make_skill_button(node))
-		skill_columns.add_child(column)
-
-
-func _make_skill_button(node: Dictionary) -> Control:
-	var id: String = str(node["id"])
-	var button := RichButton.new()
-	var learned: bool = _skills_learned.has(id)
-	var available: bool = _learnable.has(id)
-	var state_text := "Appris" if learned else ("Disponible" if available else "Verrouillé")
-	button.text = "%s (%d)\n%s" % [str(node["name"]), int(node["cost"]), state_text]
-	button.autowrap_mode = TextServer.AUTOWRAP_WORD
-	button.custom_minimum_size = Vector2(0, 48)
-	button.disabled = not available
-	IconLibrary.decorate_button(button, "branch_" + str(node.get("branch", "")), 18, "branch")
-	button.tooltip_text = RichTooltip.skill(node, state_text)  # F2
-	if learned:
-		button.add_theme_color_override("font_color", Color(0.15, 0.45, 0.15))
-	elif not available:
-		button.add_theme_color_override("font_color", Color(0.45, 0.42, 0.38))
-	button.pressed.connect(func() -> void: learn_skill_requested.emit(character_id, id))
-	return button
+	skill_tree_view.show_tree(_skill_tree, _skills_learned, _learnable, _branch_values)
