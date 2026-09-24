@@ -17,7 +17,8 @@ extends Node3D
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
 var terroir: TerroirMask = null
-var growth: SettlementGrowth = null
+## Niveau visuel appliqué par colonie (id → niveau), lot CV1 § 3.
+var levels: Dictionary = {}
 var effects: LifeEffects = null
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
@@ -35,6 +36,9 @@ var _camera_distance := 0.0
 var _refreshed_once := false
 ## Empreinte des états utilisés par le masque (reconstruit seulement s'il change).
 var _terroir_key: String = ""
+## Facteur de réduction `_fit_models` d'origine par colonie (gardé au remplacement).
+var _fit: Dictionary = {}
+var _turn_key: String = ""
 
 
 func setup(map: Node) -> void:
@@ -79,9 +83,22 @@ func refresh(sim: Object) -> void:
 		# Premier affichage (nouvelle partie, chargement) : sans transition.
 		seasons.set_season(season, not _refreshed_once)
 	_refreshed_once = true
+	# Population, dévastation, sièges et bâtiments ne changent qu'en fin de tour : relecture une
+	# fois par tour (refresh_all est aussi appelé après chaque ordre du joueur).
+	var turn_key := "%s|%s" % [sim.call("get_turn") if sim.has_method("get_turn") else 0, sim.call("get_date_label") if sim.has_method("get_date_label") else ""]
+	if turn_key == _turn_key:
+		return
+	_turn_key = turn_key
 	_read_provinces(sim)
 	if not forced_devastation.is_empty() and _settlements != null:
 		_settlements.override_devastation(forced_devastation)
+	var first_growth := levels.is_empty()
+	_refresh_growth(sim)
+	if first_growth and _map != null:
+		# Emprises agrandies (cités, faubourgs) : clairières de la végétation avant sa construction.
+		var vegetation := _map.get_node_or_null("Vegetation")
+		if vegetation != null and _settlements != null:
+			vegetation.set("extra_exclusions", _settlements.vegetation_exclusions())
 	_refresh_terroir()
 
 
@@ -108,6 +125,53 @@ func _read_provinces(sim: Object) -> void:
 		}
 
 
+## Croissance des colonies : remplace la maquette quand le niveau visuel change. La maquette
+## par défaut de chaque type (village → village, ville → ville murée) n'est pas remplacée tant
+## que le niveau lui correspond.
+func _refresh_growth(sim: Object) -> void:
+	if _settlements == null or _settlements.data == null:
+		return
+	var t0 := Time.get_ticks_msec()
+	var can_detail := sim.has_method("settlement_detail")
+	var replaced := 0
+	var counts := [0, 0, 0, 0]
+	for i in _settlements.data.settlements.size():
+		var entry: Dictionary = _settlements.data.settlements[i]
+		var kind := str(entry["kind"])
+		if kind != "village" and kind != "town" and kind != "city":
+			continue
+		var id := str(entry["id"])
+		var detail: Dictionary = sim.call("settlement_detail", id) if can_detail else {}
+		var population := float(province_states.get(str(entry["province"]), {}).get("population", 0.0))
+		var level := SettlementGrowth.level_of(entry, detail, population)
+		if level < 0:
+			continue
+		counts[level] += 1
+		var castle := level == 3 and SettlementGrowth.has_castle(detail)
+		var key := level * 2 + (1 if castle else 0)
+		var default_key := {"village": 0, "town": 4, "city": -1}[kind] as int
+		var current: int = levels.get(id, default_key)
+		if key == current:
+			continue
+		levels[id] = key
+		var holder := _settlements.model_holder(i)
+		if holder == null:
+			continue
+		if not _fit.has(id):
+			var old := holder.get_child(0) as Node3D if holder.get_child_count() > 0 else null
+			var base_scale: float = ModelLibrary.SETTLEMENT_SCALE.get(kind, 1.0)
+			_fit[id] = clampf(old.scale.x / base_scale, 0.3, 1.0) if old != null else 1.0
+		var model := SettlementGrowth.build_model(level, absi(id.hash()) / 7, castle)
+		if model == null:
+			continue
+		model.scale = Vector3.ONE * float(_fit[id])
+		_settlements.replace_model(i, model)
+		replaced += 1
+	stats["growth_ms"] = Time.get_ticks_msec() - t0
+	stats["growth_replaced"] = replaced
+	stats["levels"] = counts
+
+
 func _refresh_terroir() -> void:
 	if _terrain == null or _terrain.material == null or _settlements == null or _settlements.data == null:
 		return
@@ -131,6 +195,11 @@ func _refresh_terroir() -> void:
 		effects.rebuild(province_states)
 		stats.merge(effects.stats, true)
 	print("CampaignLife: %s" % JSON.stringify(stats))
+
+
+## Force une relecture complète au prochain `refresh` (chargement d'une partie).
+func invalidate() -> void:
+	_turn_key = ""
 
 
 func update_view(camera_distance: float) -> void:

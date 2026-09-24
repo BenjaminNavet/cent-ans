@@ -891,6 +891,8 @@ func _on_load(path: String) -> void:
 	ui.hide_province()
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (partie chargée)" % sim.call("get_date_label"))
+	if life != null:  # CV1 : relire saison, dévastation et croissance de la partie chargée
+		life.invalidate()
 	refresh_all()
 	ui.show_toast("Partie chargée.")
 
