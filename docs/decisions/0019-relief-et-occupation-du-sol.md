@@ -40,6 +40,12 @@ pixel existaient.
   `navgrid.png` sont inchangés ; `core/crates/data-model` ne lit que des métadonnées de
   `map.json` (les nouvelles clés sont ignorées par serde). Aucune règle de jeu ne voit le relief
   de rendu.
+- **Forêts des règles figées** : `tools/cent_ans_tools/geo/navgrid.py` lisait le canal forêt de
+  `splat.png` pour le coût de déplacement. La splat V2 est conservée telle quelle sous
+  `data/map/navgrid_splat.png` et lue en priorité : `navgrid.png` reste identique (test
+  `test_committed_navgrid_is_up_to_date`). Aligner les coûts sur les forêts historiques
+  (régénérer la grille depuis la nouvelle `splat.png`) est une décision de règle laissée à
+  l'orchestrateur.
 - **Lecture du relief** : `relief_shade.png` (LA8, 8192²) cuit hors ligne depuis le relief fin :
   L = détail d'altitude par rapport à la heightmap de rendu filtrée bilinéairement (normales
   d'ombrage sous le pixel 4096), A = courbure multi-échelle (0,5 / 1,5 / 4,5 km) : creux et fonds
@@ -79,7 +85,7 @@ pixel existaient.
 
 - Dépôt : + ≈ 66 Mo (relief_shade 43 Mo, heightmap_render 15 Mo, splat 8,4 Mo au lieu de 3,8,
   tuiles fines 53 Mo au lieu de 50,5, wetlands et forest_kind < 1 Mo).
-- Chargement : + ≈ 1 s (décodage de `relief_shade.png` et mipmaps, splat 4096²) ; mémoire vidéo
+- Chargement : `relief_shade.png` (≈ 0,9 s avec mipmaps) décodé en tâche de fond, splat 4096² + ≈ 150 ms ; mémoire vidéo
   + ≈ 190 Mo. Performance mesurée dans `docs/wip/r1-relief-campagne.md`.
 - Licences : Copernicus DEM (attribution obligatoire), KK10 CC BY 3.0, Natural Earth domaine
   public ; crédits dans `CREDITS.md` et l'écran des crédits.

@@ -42,6 +42,9 @@ L'historique wip contient en plus une version intermédiaire de splat.png (8 Mo)
 « avant » en PNG (10 Mo).
 
 ## Points ouverts
+- `navgrid.py` lit désormais `data/map/navgrid_splat.png` (splat V2 figée) : les coûts de forêt du
+  cœur ne changent pas. Régénérer la grille sur les forêts historiques = décision de règle.
+- `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call` échoue (hors périmètre R1).
 - 16384² sur terre écarté (taille, construction GDScript des maillages) : voir ADR 0019.
 - Réglages en uniforms (`rl_*`) : occlusion, étangs, roselières.
 - Tracés des massifs et marais : ellipses approchées ; un tracé polygonal plus fin (Sherwood,
