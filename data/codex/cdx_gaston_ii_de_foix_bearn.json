@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gaston_ii_de_foix_bearn",
+  "title": "Gaston II de Foix-Béarn",
+  "category": "personnage",
+  "aliases": ["Gaston II de Foix-Béarn", "Gaston II"],
+  "era": { "from": "v. 1308", "to": "1343" },
+  "summary": "Maître du Béarn et du comté de Foix, allié de [[cdx_philippe_vi|Philippe VI]] et rival des Armagnac ([[cdx_jean_i_d_armagnac|Jean Ier]]), Gaston II meurt en 1343 au retour de la campagne du Salado.",
+  "body": "Comte de Foix et vicomte de Béarn, Gaston II hérite d'une position stratégique aux confins de la Gascogne anglaise, du royaume de France et du royaume d'Aragon. Sa maison tient le Béarn en alleu, c'est-à-dire sans devoir d'hommage à quiconque, particularité juridique dont ses successeurs, à commencer par son fils Gaston Fébus, tireront une politique d'indépendance affirmée.\n\nFidèle allié de [[cdx_philippe_vi|Philippe VI]], il s'oppose de longue date au comte [[cdx_jean_i_d_armagnac|Jean Ier d'Armagnac]] pour la prééminence sur le Midi et la Gascogne : la rivalité Foix-Armagnac, née de conflits de frontières et d'héritages, traversera tout le siècle et se prolongera dans la guerre civile française (Armagnacs contre Bourguignons).\n\nGuerrier réputé, il participe à la croisade contre les musulmans d'Espagne aux côtés du roi de Castille, notamment lors de la victoire chrétienne de la bataille du Salado (30 octobre 1340). Il meurt de maladie en 1343 à Séville, en revenant d'une nouvelle expédition ibérique, laissant le comté à son fils encore enfant, Gaston III, dit Gaston Fébus, qui deviendra l'un des plus grands princes du Midi médiéval.",
+  "entity": "chr_gaston_ii_de_foix_bearn",
+  "see_also": ["cdx_jean_i_d_armagnac", "cdx_philippe_vi"],
+  "sources": ["Gaston II de Foix-Béarn", "Vicomté de Béarn", "Bataille du Salado"]
+}

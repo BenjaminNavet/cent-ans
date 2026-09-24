@@ -1,0 +1,12 @@
+{
+  "id": "cdx_godefroy_d_harcourt",
+  "title": "Godefroy d'Harcourt",
+  "category": "personnage",
+  "aliases": ["Godefroy d'Harcourt", "le Boiteux de Normandie"],
+  "era": { "from": "v. 1300", "to": "1356" },
+  "summary": "Grand baron du Cotentin brouillé avec [[cdx_philippe_vi|Philippe VI]], Godefroy d'Harcourt passe à [[cdx_edouard_iii|Édouard III]] en 1343 et guide la chevauchée normande qui mène à Crécy.",
+  "body": "Issu de l'une des plus puissantes familles de Normandie, Godefroy d'Harcourt tient de vastes terres autour de Saint-Sauveur-le-Vicomte, dans le Cotentin. En 1337, il est encore un fidèle sujet de [[cdx_philippe_vi|Philippe VI]], mais une querelle de succession et d'héritage l'oppose bientôt à la couronne.\n\nÀ la suite d'un différend jugé en sa défaveur, il se révolte contre le roi de France en 1343 ; ses terres sont confisquées et il doit fuir en Brabant, puis passer au service d'[[cdx_edouard_iii|Édouard III]], qui voit dans ce grand seigneur normand en rupture de ban un atout précieux : Harcourt connaît intimement les côtes, les places et les rivalités locales de sa province natale.\n\nSon rôle culmine en juillet 1346 : c'est lui qui conseille à Édouard III de débarquer à Saint-Vaast-la-Hougue, dans son propre Cotentin, plutôt qu'en Gascogne ou en Flandre comme prévu. La chevauchée qui s'ensuit, à travers la Normandie puis la Picardie, mène à la victoire anglaise de Crécy le 26 août 1346. Godefroy d'Harcourt se réconcilie partiellement avec la couronne de France dans les années suivantes, sans jamais renoncer entièrement à ses prétentions, et meurt vers 1356.",
+  "entity": "chr_godefroy_d_harcourt",
+  "see_also": ["cdx_philippe_vi", "cdx_edouard_iii"],
+  "sources": ["Godefroy d'Harcourt"]
+}
