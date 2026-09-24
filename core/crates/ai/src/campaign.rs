@@ -39,9 +39,9 @@ pub const ASSAULT_ODDS: u32 = 65;
 pub const RETREAT_STRENGTH: f64 = 0.4;
 
 /// Seasons of gross income kept in the treasury; above, money is spent (F4).
-pub const RESERVE_SEASONS: i64 = 4;
+pub const RESERVE_SEASONS: i64 = 3;
 /// Turns over which a hoard above the reserve is spent (army, buildings).
-pub const HOARD_SPENDING_TURNS: i64 = 12;
+pub const HOARD_SPENDING_TURNS: i64 = 8;
 /// Seasons of deficit a treasury must cover before units are dismissed
 /// ahead of bankruptcy, at war / at peace (F4).
 pub const WAR_RUNWAY_TURNS: i64 = 8;
@@ -50,6 +50,10 @@ pub const PEACE_RUNWAY_TURNS: i64 = 3;
 /// below [`DONATION_FAVOR`].
 pub const DONATION_PERCENT: i64 = 5;
 pub const DONATION_FAVOR: u8 = 70;
+
+/// A realm down to this many free provinces is not besieged there by an
+/// enemy without a claim on them: peace decides its fate (F4).
+pub const LAST_BASTIONS: usize = 2;
 
 const REBELS: &str = "fac_rebels";
 
@@ -805,6 +809,24 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
 
     // F4: a throne claim makes every province of that crown a claimed target.
     let claims = sim_campaign::diplomacy::claimed_provinces(state, ctx.faction);
+    let last_bastions: BTreeSet<ProvinceId> = ctx
+        .enemies
+        .iter()
+        .filter(|e| e.as_str() != REBELS)
+        .flat_map(|enemy| {
+            let held: Vec<ProvinceId> = state
+                .provinces
+                .iter()
+                .filter(|(_, p)| &p.owner == enemy && &p.controller == enemy)
+                .map(|(id, _)| id.clone())
+                .collect();
+            if held.len() <= LAST_BASTIONS {
+                held
+            } else {
+                Vec::new()
+            }
+        })
+        .collect();
     let enemy_capitals: BTreeSet<ProvinceId> = ctx
         .enemies
         .iter()
@@ -910,6 +932,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 // Landings only for claimed provinces (England in France, not
                 // the reverse).
                 .filter(|(id, _)| claims.contains(*id) || !crosses_sea(data, &table, id))
+                // F4: the last strongholds of a realm we hold no claim on are
+                // left to the peace table (Scotland survives Edward III).
+                .filter(|(id, _)| claims.contains(*id) || !last_bastions.contains(*id))
                 .map(|(id, reach)| {
                     let mut value = ctx.province_income(id) / 100.0 + 10.0;
                     if enemy_capitals.contains(id) {
