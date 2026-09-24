@@ -42,7 +42,10 @@ pub const RETREAT_STRENGTH: f64 = 0.4;
 /// Seasons of gross income kept in the treasury; above, money is spent (F4).
 pub const RESERVE_SEASONS: i64 = 3;
 /// Turns over which a hoard above the reserve is spent (army, buildings).
-pub const HOARD_SPENDING_TURNS: i64 = 8;
+pub const HOARD_SPENDING_TURNS: i64 = 4;
+/// Hoard spent per extra recruit and turn, and the recruitment cap (G2).
+pub const HOARD_LIVRES_PER_RECRUIT: i64 = 1500;
+pub const MAX_RECRUITS_PER_TURN: i64 = 16;
 /// Seasons of deficit a treasury must cover before units are dismissed
 /// ahead of bankruptcy, at war / at peace (F4).
 pub const WAR_RUNWAY_TURNS: i64 = 8;
@@ -313,8 +316,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
     let mut recruits = 0;
-    let max_recruits =
-        ((ctx.income + hoard / HOARD_SPENDING_TURNS) / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
+    // G2: a hoard buys troops at its own pace (a crushed realm sitting on
+    // ransoms and loot raises companies, it does not bank them).
+    let max_recruits = (ctx.income / INCOME_PER_RECRUIT
+        + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
+        .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
     'sites: for site in &sites {
         if !ctx.owns(site) {
             continue;

@@ -45,6 +45,8 @@ struct Report {
     war_phases: u32,
     /// Turns England dominates the French realm (G2).
     dominance_turns: u32,
+    /// Most French provinces (of 1337) England held at once.
+    max_held: usize,
     alliance_turns: Vec<u32>,
     /// Alliance turns while France and England are at war (G2).
     alliance_war_turns: Vec<u32>,
@@ -170,6 +172,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
         was_at_war = at_war;
+        report.max_held = report.max_held.max(ai::alignment::realm_held_by(
+            &state, data, &france, &england,
+        ));
         if ai::alignment::dominates_realm(&state, data, &england, &france) {
             report.dominance_turns += 1;
         }
@@ -338,8 +343,9 @@ fn main() {
         .iter()
         .map(|r| {
             format!(
-                "{:.0} %",
-                100.0 * f64::from(r.dominance_turns) / f64::from(r.turns)
+                "{:.0} % (max {} prov.)",
+                100.0 * f64::from(r.dominance_turns) / f64::from(r.turns),
+                r.max_held
             )
         })
         .collect();
