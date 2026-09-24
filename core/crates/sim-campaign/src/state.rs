@@ -158,6 +158,16 @@ pub struct Unit {
     pub experience: u8,
     /// 0-100.
     pub morale: u8,
+    /// G1: flat armour bonus of the buildings of the levying province.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub levy_armor: u8,
+    /// G1: flat ranged bonus of the buildings of the levying province.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub levy_ranged: u8,
+}
+
+fn is_zero_u8(value: &u8) -> bool {
+    *value == 0
 }
 
 impl Unit {
@@ -169,6 +179,8 @@ impl Unit {
             max_strength: unit_type.soldiers,
             experience: 0,
             morale: unit_type.stats.morale,
+            levy_armor: 0,
+            levy_ranged: 0,
         }
     }
 }

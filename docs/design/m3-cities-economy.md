@@ -107,3 +107,17 @@ territoire ami. `Production` : % sur la part fiscale des paysans et bourgeois, d
 fisc. `Loyalty` d'une province (château, gouverneur) : moins de mécontentement de la noblesse. Pour garder
 le calibrage des revenus, la richesse de base de chaque classe gagne +8 (les effets ciblés gonflaient
 auparavant la richesse de toutes les classes).
+
+## G1 — places de recrutement, piété, équipement des levées
+- `recruit_slots` : une province met en file `BASE_RECRUIT_SLOTS` (2) recrutements par tour, +1 dans la
+  capitale, + `recruit_slots` fixes de ses bâtiments, de son gouverneur et des techs du contrôleur (champ de
+  montre, écuries, armurerie, atelier de siège, tissage). Au-delà : `OrderError::RecruitQueueFull`, et
+  l'option de recrutement est indisponible (« file de recrutement pleine »). L'IA stratégique ne dépasse pas
+  les places libres (`recruit_slots_free`).
+- `Piety` : les traits et compétences s'ajoutent à la piété stockée (`religion::effective_piety`, 0-100),
+  lue par la faveur pontificale et la résistance à l'hérésie ; les bâtiments religieux donnent chaque hiver
+  au souverain `Piety / 10` points (cathédrale +1, plafond 3 par an, `dynasty::yearly_building_piety`).
+- `army_armor` / `army_ranged` : `buildings::levy_bonus` (bonus fixes, ciblage par famille, plafond 10)
+  est stocké sur l'unité à sa levée (`Unit::levy_armor`, `levy_ranged`, serde par défaut) : il suit le
+  régiment (auto-résolution `side_from_army`, `battle_setup` : `stats.armor`/`stats.ranged`). Choix : la
+  province de levée plutôt que la faction entière (une armurerie équipe ceux qu'elle arme).

@@ -81,7 +81,7 @@ pub use dynasty::{
 };
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
-pub use orders::{Order, OrderError, RecruitOption};
+pub use orders::{Order, OrderError, RecruitOption, BASE_RECRUIT_SLOTS};
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
