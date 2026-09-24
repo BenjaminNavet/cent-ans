@@ -12,7 +12,7 @@ uniform bool fog_enabled = false;
 uniform bool political = true;
 uniform vec3 parchment : source_color = vec3(0.90, 0.84, 0.68);
 uniform vec3 ink : source_color = vec3(0.22, 0.14, 0.07);
-uniform vec3 veil : source_color = vec3(0.55, 0.50, 0.42);
+uniform vec3 veil : source_color = vec3(0.86, 0.83, 0.76);
 
 int id_at(vec2 uv) {
 	vec4 c = texture(province_ids, uv);
@@ -64,12 +64,13 @@ void fragment() {
 		}
 		col = mix(col, ink, political ? 0.22 * province_edge : 0.12 * province_edge);
 		col = mix(col, ink, 0.75 * realm_edge);
-		// Brouillard : province hors de vue désaturée, voilée, hachurée.
+		// Brouillard (A1-03) : province hors de vue désaturée et voilée de brume claire
+		// (parchemin), légèrement hachurée ; jamais noircie.
 		if (seen(id) < 0.5) {
 			float lum = dot(col, vec3(0.299, 0.587, 0.114));
-			col = mix(vec3(lum), veil, 0.6) * 0.62;
+			col = mix(mix(col, vec3(lum), 0.8), veil, 0.55);
 			float hatch = step(3.0, mod(FRAGCOORD.x + FRAGCOORD.y, 5.0));
-			col = mix(col, ink, 0.18 * hatch);
+			col = mix(col, ink, 0.08 * hatch);
 		}
 	}
 	COLOR = vec4(col, 1.0);

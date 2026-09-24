@@ -92,6 +92,31 @@ func _draw() -> void:
 		draw_circle(to_map(Vector2(float(zone["x"]), float(zone["z"]))), float(zone["radius"]) * scale_x, Color(0.3, 0.42, 0.2, 0.75))
 	for zone in _terrain.get("mud", []):
 		draw_circle(to_map(Vector2(float(zone["x"]), float(zone["z"]))), float(zone["radius"]) * scale_x, Color(0.45, 0.33, 0.2, 0.55))
+	# B8 : haies, fossés et clôtures (site de bataille B5/B6).
+	for obstacle in _terrain.get("obstacles", []):
+		var kind: String = str(obstacle.get("kind", "hedge"))
+		var color := Color(0.28, 0.4, 0.18, 0.9)  # haie
+		var width := 2.0
+		if kind == "ditch":
+			color = Color(0.35, 0.3, 0.22, 0.9)
+			width = 1.5
+		elif kind == "fence":
+			color = Color(0.5, 0.4, 0.28, 0.9)
+			width = 1.0
+		draw_line(to_map(obstacle["a"]), to_map(obstacle["b"]), color, width)
+	# B8 : village (emprise + maisons).
+	var village: Dictionary = _terrain.get("village", {})
+	if village.has("x"):
+		draw_circle(to_map(Vector2(float(village["x"]), float(village["z"]))), float(village.get("radius", 0.0)) * scale_x, Color(0.55, 0.42, 0.3, 0.45))
+		for house in village.get("houses", []):
+			draw_circle(to_map(Vector2(float(house["x"]), float(house["z"]))), maxf(float(house.get("length", 6.0)) * 0.25 * scale_x, 1.0), Color(0.42, 0.28, 0.18, 0.85))
+	# B8 : côte (trait le long du rivage).
+	var coast: Dictionary = _terrain.get("coast", {})
+	if coast.has("shore_x"):
+		var shore_x := float(coast["shore_x"])
+		var top := to_map(Vector2(shore_x, 0.0))
+		var bottom := to_map(Vector2(shore_x, field_size.y))
+		draw_line(top, bottom, Color(0.3, 0.45, 0.65), 2.0)
 	var river: Dictionary = _terrain.get("river", {})
 	if river.has("points"):
 		var line := PackedVector2Array()
