@@ -25,7 +25,7 @@
     "sea_atlantic"
   ],
   "resources": [
-    "res_iron",
+    "res_tin",
     "res_fish",
     "res_wool"
   ],
@@ -55,7 +55,7 @@
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Aucune ville ne dépasse 3 000 habitants ; l'étain figure ici sous res_iron faute de ressource dédiée.",
+    "note": "Aucune ville ne dépasse 3 000 habitants.",
     "classes": {
       "peasants": {
         "count": 75311,
