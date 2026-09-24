@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jeanne_de_bourgogne",
+  "title": "Jeanne de Bourgogne, reine de France",
+  "category": "personnage",
+  "aliases": ["Jeanne de Bourgogne", "la male royne boiteuse", "reine Jeanne de Bourgogne", "Jean de Vignay"],
+  "era": { "from": "v. 1293", "to": "1349" },
+  "summary": "Épouse de [[cdx_philippe_vi|Philippe VI]], Jeanne de Bourgogne exerce la régence pendant les campagnes du roi. Intelligente et influente, lettrée, elle est détestée d'une partie de la noblesse, qui la surnomme « la male royne boiteuse ».",
+  "body": "Jeanne est la fille du duc Robert II de Bourgogne et la sœur du duc Eudes IV. En 1313, elle épouse Philippe de Valois, cousin du roi, qui devient roi de France en 1328. Elle lui donne de nombreux enfants, dont le futur [[cdx_jean_ii|Jean II]] et Philippe, duc d'Orléans.\n\nJeanne joue un rôle politique de premier plan. Lorsque [[cdx_philippe_vi|Philippe VI]] part en campagne, en Flandre en 1340 ou à [[cdx_crecy|Crécy]] en 1346, il lui confie la régence du royaume. Les chroniqueurs l'accusent de gouverner à la place de son mari, de favoriser les Bourguignons et d'écarter ses ennemis. Elle est boiteuse, et ses adversaires la surnomment « la male royne boiteuse », la mauvaise reine boiteuse.\n\nC'est aussi une femme cultivée, qui aime les livres. Elle commande au traducteur Jean de Vignay des versions françaises de grandes œuvres latines : le Miroir historial, vaste histoire universelle, ou la Légende dorée, recueil de vies de saints ; son fils Jean reçoit du même traducteur le Jeu des échecs moralisé, qui compare la société aux pièces de l'échiquier. Elle prépare ainsi le goût des [[cdx_valois|Valois]] pour les traductions, que développera son petit-fils [[cdx_charles_v|Charles V]] dans sa [[cdx_librairie_charles_v|librairie]].\n\nElle meurt le 12 septembre 1349, emportée par la [[cdx_peste_noire|Peste noire]], comme sa belle-fille Bonne de Luxembourg quelques semaines plus tôt. Philippe VI se remarie dès janvier 1350 avec la jeune Blanche de Navarre, avant de mourir quelques mois plus tard.",
+  "entity": "chr_jeanne_de_bourgogne",
+  "see_also": ["cdx_philippe_vi", "cdx_jean_ii", "cdx_peste_noire", "cdx_valois"],
+  "sources": ["Jeanne de Bourgogne (1293-1349)", "Jean de Vignay"]
+}
