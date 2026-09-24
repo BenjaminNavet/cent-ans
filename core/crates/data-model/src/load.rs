@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use serde::de::DeserializeOwned;
 
+use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -56,6 +57,10 @@ pub mod folders {
     pub const SETTLEMENT_RULES: &str = "rules.json";
     /// Settlement movement graph, inside `map/`; optional.
     pub const SETTLEMENT_GRAPH: &str = "settlement_graph.json";
+    /// AI tuning files (G4); optional folder.
+    pub const AI: &str = "ai";
+    /// Side-change tuning of the AI, inside `ai/`; optional.
+    pub const AI_ALIGNMENT: &str = "alignment.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -175,6 +180,9 @@ pub struct GameData {
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
     pub settlement_graph: Vec<SettlementEdge>,
+    /// `data/ai/alignment.json` (G4), absent until written: the AI then
+    /// makes no historical side change.
+    pub ai_alignment: Option<AiAlignment>,
 }
 
 impl GameData {
@@ -208,6 +216,7 @@ impl GameData {
             settlements_by_province: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
+            ai_alignment: None,
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -224,6 +233,10 @@ impl GameData {
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
+        if alignment_path.is_file() {
+            data.ai_alignment = Some(read_json(&alignment_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
