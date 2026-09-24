@@ -1,0 +1,11 @@
+{
+  "id": "cdx_hussites",
+  "title": "Les hussites",
+  "category": "religion",
+  "aliases": ["hussites", "hussite", "guerres hussites", "taborites", "Jan Žižka"],
+  "era": { "from": "1415", "to": "1436" },
+  "summary": "Après le supplice de [[cdx_jan_hus|Jan Hus]] en 1415, la Bohême se soulève. Les hussites exigent la communion au calice pour tous et repoussent pendant quinze ans cinq croisades grâce aux chariots de guerre de Jan Žižka.",
+  "body": "La nouvelle de la mort de [[cdx_jan_hus|Jan Hus]], brûlé au [[cdx_concile_constance|concile de Constance]] en 1415, soulève l'indignation en Bohême. Des centaines de nobles protestent auprès du concile. Le calice devient le symbole du mouvement : les hussites exigent que tous les fidèles communient sous les deux espèces, le pain et le vin, alors que le vin est réservé aux prêtres.\n\nLe 30 juillet 1419, à Prague, une foule menée par un prédicateur jette par les fenêtres de l'hôtel de ville des conseillers hostiles : c'est la première défenestration de Prague. La mort du roi Venceslas quelques semaines plus tard ouvre la succession à son frère Sigismond, que les hussites rejettent, lui imputant la mort de Hus.\n\nLe pape lance contre eux plusieurs croisades, qui échouent toutes. Leur chef militaire, Jan Žižka, un petit noble borgne puis aveugle, invente une tactique redoutable : des chariots enchaînés en forteresses mobiles, garnis d'arbalétriers et de premières armes à feu portatives, contre lesquels la chevalerie allemande se brise. Les hussites portent même la guerre hors de Bohême.\n\nLe mouvement est divisé entre modérés, les utraquistes (du latin sub utraque specie, « sous les deux espèces »), et radicaux, les taborites, qui rêvent d'une société égalitaire. Les modérés finissent par écraser les radicaux à Lipany en 1434 et négocient avec le concile de Bâle des accords, les Compactata (1436), qui leur accordent le calice. La Bohême restera longtemps un pays à part dans la chrétienté latine.",
+  "see_also": ["cdx_jan_hus", "cdx_lollards", "cdx_concile_constance", "cdx_arbalete"],
+  "sources": ["Hussites", "Croisades contre les hussites", "Jan Žižka"]
+}

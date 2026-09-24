@@ -1,0 +1,13 @@
+{
+  "id": "cdx_froissart",
+  "title": "Jean Froissart",
+  "category": "personnage",
+  "aliases": ["Froissart", "Jean Froissart", "Chroniques de Froissart"],
+  "era": { "from": "v. 1337", "to": "v. 1404" },
+  "summary": "Né à Valenciennes vers 1337, Jean Froissart est le grand chroniqueur de la guerre de Cent Ans. Ses Chroniques, écrites pour la noblesse, racontent en français les prouesses des chevaliers de 1325 à 1400.",
+  "body": "Jean Froissart naît à Valenciennes, dans le comté de Hainaut, vers 1337, l'année même où commence la guerre. Clerc lettré, il entre vers 1361 au service de la reine d'Angleterre [[cdx_philippa_de_hainaut|Philippa de Hainaut]], sa compatriote, à qui il offre une première chronique en vers. À la cour anglaise, il rencontre les héros de la guerre, dont le [[cdx_prince_noir|Prince noir]], qu'il accompagne à Bordeaux.\n\nAprès la mort de Philippa en 1369, il trouve d'autres protecteurs dans les Pays-Bas, comme Guy de Châtillon, comte de Blois, et devient chanoine de Chimay. Il consacre le reste de sa vie à ses Chroniques, qu'il ne cesse de réécrire. Pour le début de la guerre, il suit de près, parfois mot pour mot, le récit de [[cdx_jean_le_bel|Jean le Bel]].\n\nFroissart est un enquêteur infatigable. Il voyage pour interroger les témoins : en 1388, il se rend à Orthez, à la cour de Gaston Fébus, comte de Foix, et chevauche en chemin avec un chevalier qui lui raconte les combats de la région. Il en tire des récits vivants, pleins de dialogues, de faits d'armes et de détails pittoresques.\n\nSon regard est celui de la noblesse : il célèbre la prouesse, la largesse et la courtoisie, et méprise les révoltes populaires comme la [[cdx_jacquerie|Jacquerie]]. Ses chiffres sont souvent exagérés et ses scènes parfois arrangées, comme celle des bourgeois de [[cdx_calais|Calais]]. Mais sans lui, la guerre de Cent Ans aurait perdu une grande part de ses couleurs. Il est aussi poète, auteur du long roman arthurien Méliador.",
+  "entity": "evt_chroniqueur",
+  "anachronism": "L'événement « Le chroniqueur » peut survenir à toute date et cite Froissart comme modèle, alors que celui-ci naît vers 1337 et n'écrit qu'à partir des années 1360.",
+  "see_also": ["cdx_jean_le_bel", "cdx_philippa_de_hainaut", "cdx_chevalerie", "cdx_calais"],
+  "sources": ["Jean Froissart", "Chroniques de Froissart"]
+}

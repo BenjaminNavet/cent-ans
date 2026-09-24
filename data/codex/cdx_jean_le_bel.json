@@ -1,0 +1,11 @@
+{
+  "id": "cdx_jean_le_bel",
+  "title": "Jean le Bel",
+  "category": "personnage",
+  "aliases": ["Jean le Bel", "Vraies Chroniques"],
+  "era": { "from": "v. 1290", "to": "1370" },
+  "summary": "Chanoine de Liège et ancien homme d'armes, Jean le Bel écrit vers 1350-1360 des Vraies Chroniques des débuts de la guerre de Cent Ans. [[cdx_froissart|Froissart]] les recopie largement : c'est la source première de nombreux récits célèbres.",
+  "body": "Jean le Bel naît vers 1290 dans une riche famille de Liège. Clerc, chanoine de la cathédrale Saint-Lambert, il mène pourtant une vie de grand seigneur, entouré d'une suite nombreuse. Jeune, il suit en 1327 Jean de Hainaut, oncle de la future reine [[cdx_philippa_de_hainaut|Philippa]], dans une campagne anglaise contre les Écossais : il en rapporte le goût des faits d'armes et des récits de témoins.\n\nÀ la demande de Jean de Hainaut, il entreprend vers 1352 d'écrire ce qu'il appelle de « vraies chroniques », par opposition aux romans en vers qui mélangent faits et inventions. Il couvre les années 1326 à 1361 : la chute d'Édouard II, les débuts d'[[cdx_edouard_iii|Édouard III]], [[cdx_crecy|Crécy]], le siège de [[cdx_calais|Calais]], [[cdx_poitiers|Poitiers]].\n\nSon texte, écrit en français, est sobre et soucieux de vérité : il dit s'appuyer sur ce qu'il a vu ou sur ce que lui ont rapporté des témoins dignes de foi. C'est chez lui qu'on trouve le récit des six bourgeois de Calais et de l'intercession de la reine Philippa, ou encore la description de l'armée écossaise vivant sur le pays.\n\nOublié pendant des siècles, son manuscrit n'a été retrouvé qu'au XIXe siècle. On s'est alors aperçu que [[cdx_froissart|Froissart]], qui le cite avec respect, en avait repris des pages entières dans le premier livre de ses Chroniques. Jean le Bel meurt en 1370.",
+  "see_also": ["cdx_froissart", "cdx_calais", "cdx_edouard_iii", "cdx_crecy"],
+  "sources": ["Jean le Bel"]
+}
