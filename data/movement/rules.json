@@ -1,0 +1,19 @@
+{
+  "description": "Règles du mouvement libre des armées (spec 2026-09-24-mouvement-libre, ADR 0006). Coûts de la grille de navigation : 10 = une case de plaine (1,44 km).",
+  "zoc_radius_km": 8,
+  "engage_radius_km": 5,
+  "retreat_fallback_km": 15,
+  "vision_army_km": 30,
+  "vision_settlement_km": 20,
+  "terrain_costs": {
+    "plains": 10,
+    "hills": 15,
+    "forest": 18,
+    "marsh": 25,
+    "mountains": 30
+  },
+  "road_cost_factor": 0.75,
+  "minor_river_extra": 10,
+  "slope_impassable_threshold": 0.3,
+  "embark_cost": "all"
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/movement_rules.schema.json",
+  "title": "Règles du mouvement libre",
+  "description": "Fichier data/movement/rules.json : zone de contrôle, contact, repli, vision et coûts de la grille de navigation (lots M1 et M2, spec 2026-09-24-mouvement-libre). Les coûts de terrain sont lus par le pipeline géo (navgrid.py) et par le cœur.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "zoc_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon de la zone de contrôle d'une armée : une armée ennemie qui y entre s'arrête." },
+    "engage_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Distance maximale pour attaquer une armée après déplacement." },
+    "retreat_fallback_km": { "type": "number", "exclusiveMinimum": 0, "description": "Recul du perdant à l'opposé du vainqueur quand aucune place amie n'est à portée." },
+    "vision_army_km": { "type": "number", "minimum": 0, "description": "Rayon de vue autour d'une armée alliée." },
+    "vision_settlement_km": { "type": "number", "minimum": 0, "description": "Rayon de vue autour d'une colonie contrôlée par soi ou un allié." },
+    "terrain_costs": {
+      "type": "object",
+      "description": "Coût d'une case de grille par terrain (10 = plaine, 255 réservé à l'infranchissable).",
+      "properties": {
+        "plains": { "$ref": "#/$defs/cost", "description": "Plaine et champs." },
+        "hills": { "$ref": "#/$defs/cost" },
+        "forest": { "$ref": "#/$defs/cost" },
+        "marsh": { "$ref": "#/$defs/cost" },
+        "mountains": { "$ref": "#/$defs/cost" }
+      },
+      "required": ["plains", "hills", "forest", "marsh", "mountains"],
+      "additionalProperties": false
+    },
+    "road_cost_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplicateur du coût d'une case de route." },
+    "minor_river_extra": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Surcoût d'une case traversée par un cours d'eau secondaire." },
+    "slope_impassable_threshold": { "type": "number", "exclusiveMinimum": 0, "description": "Pente (dénivelé / distance, moyenne sur une case de 1,44 km) au-delà de laquelle une case est infranchissable, sauf le long d'un col." },
+    "embark_cost": { "const": "all", "description": "Coût d'un embarquement de port à port : tout le mouvement du tour." }
+  },
+  "required": [
+    "zoc_radius_km",
+    "engage_radius_km",
+    "retreat_fallback_km",
+    "vision_army_km",
+    "vision_settlement_km",
+    "terrain_costs",
+    "road_cost_factor",
+    "minor_river_extra",
+    "slope_impassable_threshold",
+    "embark_cost"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "cost": { "type": "integer", "minimum": 1, "maximum": 200 }
+  }
+}
