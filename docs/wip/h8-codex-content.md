@@ -81,7 +81,10 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
   ordre_de_l_etoile, ordre_de_la_jarretiere, vicariat_imperial).
 - Lot 2 fait (guerre) : arbalete, bombarde, castillon, chevalerie, harnois, hommes_d_armes,
   nicopolis, roosebeke, rancon, toison_or.
-- Fiches H8b écrites : 20.
+- Lot 3 fait (dynasties, États) : capetiens_directs, valois (entity fac_france), plantagenets
+  (entity fac_england), bourgogne, navarre, castille, saint_empire, comte_de_flandre, ecosse.
+  Pas de fiches séparées royaume_de_france / angleterre : les dynasties portent les factions.
+- Fiches H8b écrites : 29.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.
