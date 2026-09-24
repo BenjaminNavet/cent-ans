@@ -89,7 +89,7 @@ pub use save::CampaignError;
 pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, BattleRequest, CampaignState, CharacterState, Construction, FactionState,
-    FactionSummary, ProvinceState, Season, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS,
-    START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
+    FactionSummary, ProvinceState, Season, SettlementState, SiegeState, Stance, Unit,
+    MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};

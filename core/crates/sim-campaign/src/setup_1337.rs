@@ -11,7 +11,7 @@ use std::collections::BTreeSet;
 
 use data_model::{
     CharacterId, CharacterStatus, Faction, FactionId, GameData, ProvinceId, RelationStatus,
-    UnitTypeId,
+    SettlementKind, UnitTypeId,
 };
 
 use crate::diplomacy::{Claim, FOREVER};
@@ -19,7 +19,7 @@ use crate::economy::TaxRate;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
 use crate::state::{
-    Army, CampaignState, CharacterState, FactionState, ProvinceState, Stance, Unit,
+    Army, CampaignState, CharacterState, FactionState, ProvinceState, SettlementState, Stance, Unit,
 };
 
 /// The virtual, non-playable faction provinces fall to on outright revolt
@@ -87,6 +87,50 @@ fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError>
         .collect()
 }
 
+/// Lot C1: one [`SettlementState`] per settlement of a known province.
+///
+/// Owner is the settlement's enclave owner or the province owner; the
+/// controller is the owner. Non-city settlements receive the
+/// `starting_garrison` of their kind from `data/settlements/rules.json`
+/// (none when the file is absent); the city keeps an empty garrison because
+/// the province garrison stays authoritative until lot C4.
+fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
+    for (id, settlement) in &data.settlements {
+        let Some(province) = state.provinces.get(&settlement.province) else {
+            continue;
+        };
+        let owner = settlement
+            .owner
+            .clone()
+            .unwrap_or_else(|| province.owner.clone());
+        let garrison = match (&data.settlement_rules, settlement.kind) {
+            (_, SettlementKind::City) | (None, _) => Vec::new(),
+            (Some(rules), kind) => {
+                let ids: Vec<&str> = rules
+                    .starting_garrison
+                    .get(&kind)
+                    .map(|units| units.iter().map(|u| u.as_str()).collect())
+                    .unwrap_or_default();
+                units_from(data, &ids)?
+            }
+        };
+        state.settlements.insert(
+            id.clone(),
+            SettlementState {
+                controller: owner.clone(),
+                owner,
+                garrison,
+                siege: None,
+                buildings: settlement.buildings.clone(),
+                construction: None,
+                recruit_queue: Vec::new(),
+                fortification_level: settlement.fortification_level,
+            },
+        );
+    }
+    Ok(())
+}
+
 impl CampaignState {
     /// Builds the spring 1337 campaign for `player` from the game data.
     pub fn new_1337(
@@ -131,6 +175,8 @@ impl CampaignState {
                 },
             );
         }
+
+        init_settlements(&mut state, data)?;
 
         // Factions and diplomacy.
         for (id, faction) in &data.factions {
