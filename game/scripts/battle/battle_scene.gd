@@ -208,7 +208,14 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
-	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
+	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
+	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
+	# plutôt que d'afficher une météo que les règles n'appliquent pas.
+	var weather_label := str(weather.get("label", ""))
+	if weather_key != str(weather.get("key", "clear")):
+		weather_label += " (rendu forcé : %s)" % weather_key
+		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
+	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
@@ -363,7 +370,8 @@ func _frame_camera() -> void:
 	var yaw := PI if player_side == "attacker" else 0.0
 	# Regarder un peu devant sa propre ligne, vers l'ennemi.
 	center.z += 70.0 if player_side == "attacker" else -70.0
-	camera_rig.look_at_point(center, 260.0, yaw)
+	# A1-06 : vue d'ouverture plus basse et plus proche (on voit des hommes, pas des points).
+	camera_rig.look_at_point(center, 170.0, yaw)
 
 
 # --- Boucle ---------------------------------------------------------------------------
@@ -961,7 +969,15 @@ func _stage_screenshot() -> void:
 				if str(unit["state"]) == "melee":
 					contact_time = float(battle.call("get_elapsed"))
 					break
-		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
+		elif battle.call("is_finished"):
+			break
+		elif _closeup:
+			# A1-06 : cliché au choc (1 s après le contact), ou dès que la mêlée cesse (une charge
+			# met souvent l'adversaire en déroute en quelques secondes).
+			var since := float(battle.call("get_elapsed")) - contact_time
+			if since >= 1.0 or not _melee_ongoing(units):
+				break
+		elif float(battle.call("get_elapsed")) > contact_time + 12.0:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
@@ -973,25 +989,8 @@ func _stage_screenshot() -> void:
 			focus += Vector3(float(unit["x"]), 0, float(unit["z"]))
 			n += 1
 	if _closeup:
-		# Gros plan : le couple de régiments ennemis les plus proches (de préférence en mêlée),
-		# vu de trois quarts depuis le camp du joueur.
-		var best := INF
-		var yaw := 0.0
-		for unit in units:
-			if str(unit["side"]) != player_side or not bool(unit["present"]):
-				continue
-			for other in units:
-				if str(other["side"]) == player_side or not bool(other["present"]):
-					continue
-				var a := Vector2(float(unit["x"]), float(unit["z"]))
-				var b := Vector2(float(other["x"]), float(other["z"]))
-				var d := a.distance_to(b) - (100.0 if str(unit["state"]) == "melee" else 0.0)
-				if d < best:
-					best = d
-					var mid := a.lerp(b, 0.1)
-					focus = Vector3(mid.x, 0, mid.y)
-					yaw = atan2(a.x - b.x, a.y - b.y) + 0.55
-		camera_rig.look_at_point(focus, 24.0, yaw)
+		var shot := _closeup_shot(units)
+		camera_rig.look_at_point(shot["focus"], 26.0, float(shot["yaw"]))
 	elif n > 0:
 		focus /= n
 		camera_rig.look_at_point(focus + Vector3(0, 0, -25 if player_side == "attacker" else 25), 120.0, (PI if player_side == "attacker" else 0.0) + 0.5)
@@ -1006,6 +1005,57 @@ func _stage_screenshot() -> void:
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Un régiment au moins est au corps à corps (capture `--closeup`).
+func _melee_ongoing(p_units: Array) -> bool:
+	for unit in p_units:
+		if bool(unit["present"]) and str(unit["state"]) == "melee":
+			return true
+	return false
+
+
+## Gros plan `--closeup` (A1-06) : cadre le point de contact réel de la mêlée — les deux soldats
+## ennemis les plus proches parmi les couples de régiments au corps à corps (à défaut, les plus
+## proches tout court) —, vu de trois quarts, perpendiculairement à la ligne de front, depuis le
+## camp du joueur. Avant : milieu décalé vers le régiment du joueur (souvent la cavalerie restée
+## en arrière), sans ennemi dans le cadre.
+func _closeup_shot(p_units: Array) -> Dictionary:
+	var best := INF
+	var focus := Vector3.ZERO
+	var yaw := 0.0
+	for unit in p_units:
+		if str(unit["side"]) != player_side or not bool(unit["present"]):
+			continue
+		for other in p_units:
+			if str(other["side"]) == player_side or not bool(other["present"]):
+				continue
+			var a := Vector2(float(unit["x"]), float(unit["z"]))
+			var b := Vector2(float(other["x"]), float(other["z"]))
+			if a.distance_to(b) > 150.0:
+				continue
+			var in_melee := ["melee", "charging"].has(str(unit["state"])) or str(other["state"]) == "melee"
+			var ours := soldiers.soldier_positions(int(unit["id"]), 48)
+			var theirs := soldiers.soldier_positions(int(other["id"]), 48)
+			var pa := Vector3(a.x, 0, a.y)
+			var pb := Vector3(b.x, 0, b.y)
+			var gap := a.distance_to(b)
+			for s1 in ours:
+				for s2 in theirs:
+					var d := Vector2(s1.x, s1.z).distance_to(Vector2(s2.x, s2.z))
+					if d < gap:
+						gap = d
+						pa = s1
+						pb = s2
+			var score := gap - (1000.0 if in_melee else 0.0)
+			if score < best:
+				best = score
+				focus = (pa + pb) * 0.5
+				# Axe du front : de l'ennemi vers le joueur (centres des régiments) ; caméra du
+				# côté du joueur, décalée de ~60° pour voir les deux lignes de profil.
+				yaw = atan2(a.x - b.x, a.y - b.y) + 1.05
+	focus.y = 0.0
+	return {"focus": focus, "yaw": yaw}
 
 
 ## Capture de siège : l'assaut jusqu'aux premières échelles (+ 10 s) ou 4 min, vue sur le front
@@ -1128,6 +1178,7 @@ func _stage_deploy_screenshot() -> void:
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
+	print("BattleScene: deployment zone %s, player side %s" % [zone, player_side])
 	var ahead := 1.0 if player_side == "attacker" else -1.0
 	var cam := center + Vector3(0, 300, -400 * ahead)
 	deployment.place(selected.duplicate(), center + Vector3(-60, 0, 0), center + Vector3(60, 0, 0), cam)
