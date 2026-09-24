@@ -9,14 +9,15 @@ extends MeshInstance3D
 
 const MIN_WIDTH := 0.5
 const MAX_WIDTH := 3.2
-## Teinte encre sépia, plus marquée si l'accord commercial est actif.
+## Teinte encre sépia des routes actives (accord ou non : `PolylineMesh` n'a qu'un matériau
+## par maillage, la ligne coupée passe par un second `MeshInstance3D` grisé).
 const COLOR := Color(0.42, 0.30, 0.14, 0.85)
-const COLOR_AGREEMENT := Color(0.55, 0.14, 0.10, 0.9)
-const COLOR_CUT := Color(0.35, 0.35, 0.35, 0.4)
+const COLOR_CUT := Color(0.4, 0.4, 0.4, 0.35)
 
 var map_data: MapData
 var settlement_layer: SettlementLayer
 var settlement_data: SettlementData
+var _cut_mesh: MeshInstance3D
 
 ## Routes affichées ce tour : id -> {points: PackedVector2Array (carte), route: Dictionary}.
 var _routes_screen: Dictionary = {}
@@ -26,6 +27,9 @@ func setup(data: MapData, layer: SettlementLayer, settlements: SettlementData) -
 	map_data = data
 	settlement_layer = layer
 	settlement_data = settlements
+	_cut_mesh = MeshInstance3D.new()
+	_cut_mesh.name = "CutRoutes"
+	add_child(_cut_mesh)
 	visible = false
 
 
@@ -35,9 +39,10 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 	_routes_screen.clear()
 	if map_data == null or settlement_layer == null:
 		return
-	var lines: Array = []
-	var widths: Array = []
-	var colors: Array = []
+	var active_lines: Array = []
+	var active_widths: Array = []
+	var cut_lines: Array = []
+	var cut_widths: Array = []
 	var fog_on := not visible_provinces.is_empty()
 	for route_variant in routes:
 		var route: Dictionary = route_variant
@@ -59,20 +64,29 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 			continue
 		var value: float = float(route.get("total_value", 0))
 		var width := clampf(MIN_WIDTH + value / 90.0, MIN_WIDTH, MAX_WIDTH)
-		var cut := bool(route.get("cut", false))
-		var color := COLOR_CUT if cut else (COLOR_AGREEMENT if bool(route.get("agreement", false)) else COLOR)
-		lines.append(points)
-		widths.append(width if not cut else MIN_WIDTH * 0.6)
-		colors.append(color)
+		if bool(route.get("cut", false)):
+			cut_lines.append(points)
+			cut_widths.append(MIN_WIDTH * 0.6)
+		else:
+			active_lines.append(points)
+			active_widths.append(width)
 		_routes_screen[str(route.get("id", ""))] = {"points": points, "route": route}
-	if lines.is_empty():
+	if active_lines.is_empty() and cut_lines.is_empty():
 		mesh = null
+		_cut_mesh.mesh = null
 		return
-	# `PolylineMesh.build` colore tout le maillage d'un seul matériau : les routes coupées
-	# (grisées, fines) restent lisibles à côté des routes actives sans nouveau shader.
-	mesh = PolylineMesh.build(lines, widths, map_data, 0.55)
-	material_override = PolylineMesh.flat_material(COLOR)
-	material_override.render_priority = 1
+	if active_lines.is_empty():
+		mesh = null
+	else:
+		mesh = PolylineMesh.build(active_lines, active_widths, map_data, 0.55)
+		material_override = PolylineMesh.flat_material(COLOR)
+		material_override.render_priority = 1
+	if cut_lines.is_empty():
+		_cut_mesh.mesh = null
+	else:
+		_cut_mesh.mesh = PolylineMesh.build(cut_lines, cut_widths, map_data, 0.5)
+		_cut_mesh.material_override = PolylineMesh.flat_material(COLOR_CUT)
+		_cut_mesh.material_override.render_priority = 1
 	visible = true
 
 
