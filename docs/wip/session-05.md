@@ -12,14 +12,14 @@ dépenses dans `docs/budget.md`).
   tête de fiche (`encyclopedia.gd`, capture `docs/img/encyclopedia-illustration.png`).
 - Miniatures d'événements : outil `cent-ans assets event-art` (768×432 JPEG dans
   `game/assets/events/`), bandeau de la fenêtre de chronique (`chronicle_window.gd`, capture
-  `docs/img/chronicle-miniature.png`). Environ 109/117 générées et commitées à l'arrêt.
+  `docs/img/chronicle-miniature.png`). 117/117 générées et commitées.
 - G1 : bonus des technologies dans la bataille 3D (abdd929).
 - G4 : alliance Bourgogne-Angleterre (23/40 graines, 1419-1442), Brabant 39 % ; réglages dans
   `data/ai/alignment.json` ; régression : 38/40 graines avec les 4 grandes factions en vie en 1400
   (dbdcc69, détails dans `docs/wip/g4-burgundy.md` et `docs/status.md`).
 
 ## À reprendre
-1. **Miniatures manquantes** : `uv run --project tools cent-ans assets event-art --envelope 2`
+1. **Miniatures** : terminées (ligne de budget écrite). Reste à ajouter la sonde `image_config` (0,04 $).
    (idempotent, ne génère que les manquantes), vérifier une planche, commiter
    `game/assets/events/` + `docs/budget.md`. Si le lot a été tué en cours, sa ligne de budget
    n'a peut-être pas été écrite : comparer `docs/budget.md` au compteur
