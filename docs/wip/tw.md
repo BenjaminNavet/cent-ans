@@ -14,34 +14,28 @@ Choix du joueur au lancement :
 |---|---|---|
 | 0 | P1 petits points cœur (no_quarter, étain, IA Normandie ouest) ; P2 rapport de saison + smoke ; R exploration TW | **fusionné** (P2 f48b557, P1 ae4ec92) |
 | 1 | B1 maillages soldats/chevaux (Blender) ; B2 bannières d'unité + vignettes + écran de fin ; C1 minicarte + brouillard | **fusionné** : B2 c0b9635, B1 ff592ae, C1 ee4f2b6 |
-| 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 terminé, non fusionné ; C2 en attente |
-| 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **terminé, NON fusionné** |
+| 2 | B3 musique dynamique + caméra de suivi ; B4 effets + animations (suites B1) + rythme d'engagement ; C2 zone de contrôle **après C4 colonies** (refonte du déplacement) | B3 fusionné (953a758) ; B4 **fusionné** (2a485a5, banc fait 51f95be) ; C2 en attente |
+| 3 | C3 arbre familial + fiche de général (arbre de compétences) ; B5 champs de bataille tirés de la campagne (biome, village, saison) | B5 **fusionné** (be47ae9) ; C3 **fusionné** (2a485a5) |
+| 4 | B6 IA tactique qui exploite le site (haies, village) + libellé du terrain avant-bataille ; B7 finitions visuelles (fanions de lance, repères regroupés au loin, neige, éclaboussures de gué) ; C7 suite du général à la Medieval II + année de décès + mise en page fiche < 1500 px | **en cours** (24/09, 3 agents cent-ans-dev en worktree) ; notes `docs/wip/b6-ia-terrain.md`, `b7-finitions-bataille.md`, `c7-suite-general.md` dans leurs branches |
 
-## État à l'arrêt de session (24/09 soir, arrêt demandé par le joueur)
+## État courant (24/09, reprise après arrêt)
 
-main poussé (40d748c). Fusionnés : P1, P2, B1, B2, B3, B5, C1.
-- **C3** (arbre familial dans la Cour + fiche TW avec arbre de compétences) : terminé, branche `worktree-agent-ab0ae4e048aaae5da` (5d75030), smoke vert dans sa branche (22 « smoke OK »). À fusionner.
-- **B4** (animations, effets, rythme d'engagement) : **terminé sauf mesure de perf, NON fusionné**. Branche `worktree-agent-a3ef51586ad653fc2` (7b70c6a), worktree `.claude/worktrees/agent-a3ef51586ad653fc2`. Contact de la démo à 70 s au lieu de 301 s (IA `sim-battle/src/ai.rs` : duel d'archers perdu → marche au contact) ; archer/arbalétrier/cavalier/caparaçon/mêlée/chutes animés ; `battle_effects.gd` (poussière, flèches fichées, bombardes, choc de charge, pas de sang) ; captures `docs/img/b4/` ; cargo et smoke verts. Reste : banc de perf avec/sans `--no-effects` (commandes dans `docs/wip/b4-effets-animations.md` de la branche), éclaboussures de gué non vérifiées, fanions de lance restés verticaux quand la lance est couchée. Après fusion : `core/build.sh` puis `godot --headless --path game --import` (nouvelle classe `BattleEffects`).
-- **C2** : attend la fusion de C4 colonies.
+main poussé (51f95be). Fusionnés : P1, P2, B1, B2, B3, B4, B5, C1, C3. Banc B4 fait : effets ≈ +6 % primitives, FPS inchangés (plafond 60 Hz) ; option `--bench-at=<s>`.
+Vague 4 en cours : B6, B7, C7 (branches `worktree-agent-*` créées au lancement ; retrouver via `git worktree list` et les notes wip ci-dessus).
+C2, C4 (édits/chaînes), C5 (routes commerciales), C6 (agents) : bloqués par la fusion de C4 colonies (`merge-c4`), qui refond déplacement, revenus et sauvegarde v5.
 
 ## Reprise
-1. Fusionner C3 : dans `../gp-tw-merge` (`integration/tw`) : `git merge main`, `git merge --no-ff worktree-agent-ab0ae4e048aaae5da`, clippy + `cargo test`, `core/build.sh`, `godot --headless --path game --import`, smoke (compter 22 « smoke OK ») ; puis dans main `git merge --ff-only integration/tw` + push.
-2. Fusionner B4 de même (conflits possibles avec C3/B5 dans `battle_scene.gd` et `smoke.gd`), puis mesurer la perf (banc avec/sans `--no-effects`).
-3. Si C4 colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle + aire atteignable colorée).
-4. Suite du plan : C4 édits/chaînes de bâtiments (après colonies), C5 routes commerciales, C6 agents Medieval II.
-5. Pistes relevées par les lots :
-   - IA tactique qui cherche haies et village (archers anglais), `sim-battle` (B5) ;
-   - dialogue d'avant-bataille et minicarte : afficher village/côte/sol (`ground_label`) (B5) ;
-   - neige un peu plate (B5) ; repères d'unité regroupés en vue très lointaine (B2) ;
-   - suite/compagnons du général et année de décès absents du cœur (C3) ; fiche qui recouvre la Cour sous 1500 px (C3) ;
-   - pistes musicales dédiées (B3) ; mesures de perf B1/B5 à refaire machine au repos (écran plafonné à 60 Hz).
-6. Supprimer les worktrees fusionnés encore verrouillés (C1 `agent-ad1dcecdc0ab3b8f5`, B5 `agent-ab6ae0addbf27dfdd`).
+1. Si la vague 4 est interrompue : lire `docs/wip/b6-*.md`, `b7-*.md`, `c7-*.md` dans les worktrees (`git worktree list`), relancer un agent de reprise par lot inachevé.
+2. Fusion de chaque lot : `../gp-tw-merge` (`integration/tw`) : supprimer d'abord les `.import`/`.uid` non suivis sous `game/` (ils bloquent `git merge main` quand main les suit), `git merge main`, `git merge --no-ff <branche>`, clippy + `cargo test`, `core/build.sh`, `--import`, smoke (compter les « smoke OK », 22 actuellement), `git merge --ff-only integration/tw` dans main (si main a bougé : recommencer `git merge main`) + push.
+3. Si C4 colonies est fusionné (`docs/wip/colonies.md`) : lancer C2 (zone de contrôle + aire atteignable), puis C5/C6.
+4. Pistes restantes : pistes musicales dédiées (B3) ; relecture de bataille (replay, L, basse priorité).
 
 ## Décisions
+- Vague 4 (24/09) : campagne bloquée par colonies → lots sans `ProvinceState` : suite du général (C7, champs `serde(default)`, pas de changement de version de sauvegarde) ; bataille : B6/B7.
 - B5 : éléments de site tirés d'un flux dérivé de la graine (batailles existantes inchangées) ; options `--terrain= --season= --village --coast --no-site`.
 - C1 : règle de vue `vision.rs` + `data/rules/vision.json` ; brouillard désactivable (Réglages > Carte).
 - B3 : musique de bataille = `war.ogg` transformé (filtre, couches sfx), pas de nouvelle piste.
-- Piège : le smoke Godot sort en 0 même sur erreur d'analyse ; compter les lignes « smoke OK » (21 attendues) et `--import` après un nouveau `class_name`.
+- Piège : le smoke Godot sort en 0 même sur erreur d'analyse ; compter les lignes « smoke OK » (22 attendues depuis C3) et `--import` après un nouveau `class_name`.
 - B1 : figures modélisées en Blender scripté (`tools/blender/battle_figures.py`), ADR 0006 ; `--legacy-figures` pour comparer.
 - B2 : illustrations d'unités générées par une autre session (non suivies) ; les cartes s'en servent dès qu'elles existent, sinon composition de repli.
 - C2 reporté : C4 colonies refond le déplacement.
