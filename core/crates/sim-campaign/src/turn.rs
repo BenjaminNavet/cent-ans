@@ -7,7 +7,7 @@ use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
     ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
-    march, population, religion, research, siege, table,
+    edicts, march, population, religion, research, siege, table,
 };
 
 impl CampaignState {
@@ -55,6 +55,9 @@ impl CampaignState {
         economy::resolve_goods(self, data);
         // H3: diets whose requirements no longer hold fall back to the default.
         table::resolve_requirements(self, data, &mut events);
+        // Lot C4: edicts of a province no longer fully held fall back to the
+        // default, and a change becomes active once its delay has elapsed.
+        edicts::resolve_requirements(self, data, &mut events);
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);

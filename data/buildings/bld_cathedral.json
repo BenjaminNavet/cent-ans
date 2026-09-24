@@ -5,6 +5,7 @@
   },
   "category": "religious",
   "tier": 3,
+  "upgrades_from": "bld_collegiate_church",
   "cost": {
     "money": 5000,
     "resources": {
@@ -13,7 +14,6 @@
   },
   "build_time_turns": 8,
   "upkeep": 50,
-  "required_building": "bld_abbey",
   "required_resource": "res_stone",
   "settlement_kinds": [
     "city"

@@ -348,6 +348,10 @@ pub struct ProvinceState {
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diet: Option<crate::table::DietChoice>,
+    /// Lot C4: regional edict chosen by the controller (`None`: the default
+    /// `edict_none`); see [`CampaignState::province_edict`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edict: Option<crate::edicts::EdictChoice>,
 }
 
 /// Dynamic state of a settlement (spec § 4.2).

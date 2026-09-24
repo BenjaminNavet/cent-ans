@@ -82,6 +82,7 @@ ICONS: dict[str, tuple[str, str]] = {
     "bld_artillery_bastion": ("delapouite/military-fort", "building"),
     "bld_castle": ("lorc/castle", "building"),
     "bld_cathedral": ("lorc/gothic-cross", "building"),
+    "bld_collegiate_church": ("delapouite/church", "building"),
     "bld_counting_house": ("delapouite/abacus", "building"),
     "bld_fair": ("delapouite/medieval-pavilion", "building"),
     "bld_forge": ("lorc/anvil", "building"),
