@@ -21,6 +21,9 @@ signal unit_selected(index: int)
 signal selection_changed(indices: PackedInt32Array)
 ## Bouton « Séparer » : les régiments choisis formeraient une nouvelle armée.
 signal split_requested(indices: PackedInt32Array)
+## Bouton « Garnison » (lot C7d) : les régiments choisis rejoindraient la garnison de la
+## colonie où l'armée se trouve (ordre `garrison_units`).
+signal garrison_requested(indices: PackedInt32Array)
 
 const CARD_WIDTH := 84.0
 const CARD_MIN_WIDTH := 52.0
@@ -44,6 +47,12 @@ const CLASS_LABELS := {
 		_refresh()
 ## Faux pour une armée étrangère : pas de multisélection ni de bouton « Séparer ».
 @export var can_split: bool = true
+## Lot C7d : vrai quand l'armée est sur une colonie que le joueur contrôle (bouton
+## « Garnison » affiché, désactivé si `garrison_disabled_reason` n'est pas vide).
+@export var can_garrison: bool = false
+## Raison en français si le bouton « Garnison » doit rester désactivé (colonie assiégée ou
+## pleine) ; vide = bouton actif dès qu'au moins un régiment est choisi.
+@export var garrison_disabled_reason: String = ""
 
 var army: Dictionary = {}
 var capacity: int = 20
@@ -56,6 +65,7 @@ var _men_label: Label
 var _upkeep_label: Label
 var _title_label: Label
 var _split_button: Button
+var _garrison_button: Button
 var _grid: GridContainer
 
 
@@ -92,6 +102,11 @@ func _ready() -> void:
 	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
+	_garrison_button = Button.new()
+	_garrison_button.text = "Garnison"
+	_garrison_button.add_theme_font_size_override("font_size", 13)
+	_garrison_button.pressed.connect(_on_garrison_pressed)
+	header.add_child(_garrison_button)
 
 	var rule := ColorRect.new()
 	rule.color = HudStyle.GOLD
@@ -304,6 +319,11 @@ func _update_selection(emit := true) -> void:
 		_split_button.text = "Séparer (%d)" % count
 	else:
 		_split_button.text = "Séparer"
+	_garrison_button.visible = can_garrison
+	_garrison_button.disabled = count == 0 or garrison_disabled_reason != ""
+	_garrison_button.text = "Garnison (%d)" % count if count > 0 else "Garnison"
+	_garrison_button.tooltip_text = garrison_disabled_reason if garrison_disabled_reason != "" \
+		else "Maj ou Ctrl + clic pour choisir les régiments à laisser en garnison"
 	if emit:
 		selection_changed.emit(get_selection())
 
@@ -313,6 +333,13 @@ func _on_split_pressed() -> void:
 	if indices.is_empty() or indices.size() >= _units().size():
 		return
 	split_requested.emit(indices)
+
+
+func _on_garrison_pressed() -> void:
+	var indices := get_selection()
+	if indices.is_empty() or not can_garrison or garrison_disabled_reason != "":
+		return
+	garrison_requested.emit(indices)
 
 
 ## Texte d'infobulle d'un régiment (aussi utilisé comme repli texte et par les tests).
