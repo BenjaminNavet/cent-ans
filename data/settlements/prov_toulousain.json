@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_toulouse",
+    "province": "prov_toulousain",
+    "kind": "city",
+    "name": { "display": "Toulouse", "local": "Tolosa", "local_language": "occitan" },
+    "lonlat": [1.4442, 43.6047],
+    "weight": 42,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_castle", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du Languedoc, sénéchaussée royale depuis 1271, grande ville du pastel et du blé du Lauragais.",
+    "sources": ["Toulouse", "Sénéchaussée de Toulouse"]
+  },
+  {
+    "id": "set_montauban",
+    "province": "prov_toulousain",
+    "kind": "town",
+    "name": { "display": "Montauban", "local": "Montauban", "local_language": "occitan" },
+    "lonlat": [1.3550, 44.0181],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Bastide fondée en 1144 sur le Tarn, ville de foires et de commerce fluvial.",
+    "sources": ["Montauban"]
+  },
+  {
+    "id": "set_muret",
+    "province": "prov_toulousain",
+    "kind": "town",
+    "name": { "display": "Muret", "local": "Murèth", "local_language": "occitan" },
+    "lonlat": [1.3264, 43.4600],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close sur la Garonne, mémoire de la bataille décisive de 1213 contre le roi d'Aragon.",
+    "sources": ["Muret", "Bataille de Muret"]
+  },
+  {
+    "id": "set_grandselve",
+    "province": "prov_toulousain",
+    "kind": "abbey",
+    "name": { "display": "Grandselve", "local": "Granselva", "local_language": "occitan" },
+    "lonlat": [1.0333, 43.8667],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye cistercienne, l'une des plus riches du Languedoc médiéval.",
+    "sources": ["Abbaye de Grandselve"]
+  },
+  {
+    "id": "set_auterive",
+    "province": "prov_toulousain",
+    "kind": "village",
+    "name": { "display": "Auterive", "local": "Auteriva", "local_language": "occitan" },
+    "lonlat": [1.4667, 43.3500],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_windmill"],
+    "port": false,
+    "description": "Bourg agricole sur la Garonne, en amont de Toulouse.",
+    "sources": ["Auterive"]
+  }
+]
