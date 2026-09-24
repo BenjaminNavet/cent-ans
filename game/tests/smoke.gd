@@ -575,10 +575,72 @@ func _run_characters() -> void:
 			if kind == "birth" or kind == "death":
 				found_birth_or_death = true
 	_check(found_birth_or_death, "no birth or death event in 40 end_turn() calls")
+	await _check_family_tree_c3(sim, FACTION_ID)
 
 	if _failures == 0:
 		print("smoke OK: characters (%s), court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
 			"real" if real_capable else "mock", rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
+
+
+## C3 : onglet « Arbre familial » du panneau Cour (Valois, ≥ 3 générations après 40 tours) et
+## apprentissage d'une compétence depuis l'arbre visuel de la fiche. Vraie simulation seulement.
+func _check_family_tree_c3(sim: Object, faction_id: String) -> void:
+	if not sim.has_method("get_family_tree"):
+		print("smoke characters: family tree skipped (mock without get_family_tree)")
+		return
+	var failures_before := _failures
+	var ids: Array = sim.call("get_faction_characters", faction_id)
+	var rows: Array[Dictionary] = []
+	for id in ids:
+		rows.append(sim.call("get_character", id))
+	var court: Node = (load("res://scenes/ui/court_panel.tscn") as PackedScene).instantiate()
+	court.set("sim_source", sim)
+	root.add_child(court)
+	await process_frame
+	court.show_court(rows, "France", Color(0.2, 0.3, 0.7))
+	court.show_tab(1)  # CourtPanel.TAB_TREE
+	await process_frame
+	var tree: Dictionary = sim.call("get_family_tree", str(ids[0]), 2, 3)
+	var shown: int = court.family_tree.node_count()
+	var generations: int = court.family_tree.generation_count()
+	_check(court.tree_box.visible and not (court.get_node("VBox/Scroll") as Control).visible, "C3: tree tab should replace the list")
+	_check(shown == (tree.get("nodes", []) as Array).size() and shown >= 5, "C3: family tree shows %d nodes, expected %d (>= 5)" % [shown, (tree.get("nodes", []) as Array).size()])
+	_check(generations >= 3, "C3: Valois family tree should span >= 3 generations, got %d" % generations)
+	_check(court.family_tree.medallions.has(str(tree.get("heir", ""))), "C3: heir %s missing from the tree" % tree.get("heir", ""))
+	var opened: Array = []
+	court.character_selected.connect(func(id: String) -> void: opened.append(id))
+	court.family_tree.medallions.values()[0].pressed.emit()
+	_check(opened.size() == 1, "C3: clicking a medallion should open the character sheet")
+	court.queue_free()
+
+	# Fiche : arbre de compétences visuel, clic sur un nœud disponible = ordre `learn_skill`.
+	var ruler := str(ids[0])
+	sim.call("submit_order", {"type": "debug_grant_xp", "character": ruler, "amount": 300})
+	var sheet: Node = (load("res://scenes/ui/character_sheet.tscn") as PackedScene).instantiate()
+	root.add_child(sheet)
+	await process_frame
+	var learned_result: Array = []
+	sheet.learn_skill_requested.connect(func(character: String, skill: String) -> void:
+		learned_result.append(sim.call("submit_order", {"type": "learn_skill", "character": character, "skill": skill}))
+		learned_result.append(skill))
+	sheet.show_character(sim.call("get_character", ruler), sim.call("get_skill_tree"), sim.call("get_learnable", ruler), [], [], [])
+	await process_frame
+	var view: Node = sheet.skill_tree_view
+	var skill_nodes: int = view.nodes.size()
+	_check(skill_nodes == (sim.call("get_skill_tree") as Array).size(), "C3: skill tree view shows %d nodes" % skill_nodes)
+	var available: Array = view.available_ids()
+	var learned_skill := ""
+	if _check(not available.is_empty(), "C3: no available skill in the tree view"):
+		learned_skill = str(available[0])
+		_check(view.press(learned_skill), "C3: pressing %s should be accepted" % learned_skill)
+		_check(learned_result.size() == 2 and bool((learned_result[0] as Dictionary).get("ok", false)), "C3: learn_skill from the tree refused: %s" % str(learned_result))
+		var after: Dictionary = sim.call("get_character", ruler)
+		_check((after.get("skills_learned", []) as Array).has(learned_skill), "C3: %s not learned after the click" % learned_skill)
+		sheet.show_character(after, sim.call("get_skill_tree"), sim.call("get_learnable", ruler), [], [], [])
+		_check(view.state_of(learned_skill) == "learned", "C3: %s should be drawn as learned" % learned_skill)
+	sheet.queue_free()
+	if _failures == failures_before:
+		print("smoke OK: family tree (%d nodes, %d generations) and skill tree (%d nodes, learned %s by click)" % [shown, generations, skill_nodes, learned_skill])
 
 
 ## M6 : technologies (docs/design/m6-technologies.md § 4). Vraie simulation uniquement (le mock
