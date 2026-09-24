@@ -6,10 +6,11 @@ extends Node3D
 ## pavée, maisons, et les machines des assiégeants (tours de siège, bélier, échelles des
 ## régiments qui escaladent). `update()` montre les dégâts : pans assombris puis effondrés
 ## (éboulis), porte enfoncée, tour de siège accostée. Rendu seulement : tout vient de la
-## simulation. Maillages procéduraux low-poly (pas encore de modèles Blender).
+## simulation. Maillages procéduraux ; matières PBR Poly Haven (CC0) projetées en triplanaire
+## monde (lot V4) : pierre des murailles, ardoise, tuiles, chaume, enduit, pavés, bois.
 
-const STONE := Color(0.62, 0.58, 0.50)
-const STONE_DARK := Color(0.45, 0.42, 0.37)
+const STONE := Color(0.95, 0.9, 0.8)
+const STONE_DARK := Color(0.55, 0.52, 0.47)
 const ROOF := Color(0.52, 0.22, 0.16)
 const SLATE := Color(0.28, 0.30, 0.36)
 const WOOD := Color(0.42, 0.29, 0.17)
@@ -54,6 +55,38 @@ static func _material(color: Color, roughness: float = 0.95) -> StandardMaterial
 	return mat
 
 
+const TEXTURES := {
+	"stone": ["castle_wall_varriation", 0.22],
+	"slate": ["roof_slates_02", 0.45],
+	"tiles": ["clay_roof_tiles_02", 0.4],
+	"thatch": ["thatch_roof_angled", 0.3],
+	"plaster": ["plastered_wall_02", 0.25],
+	"paving": ["cobblestone_floor_01", 0.3],
+	"wood": ["wood_planks", 0.35],
+}
+
+
+## Matière texturée (albédo + normale Poly Haven) en projection triplanaire monde : les
+## BoxMesh et CylinderMesh n'ont pas à porter d'UV cohérentes. `scale` = répétitions par mètre.
+static func _textured(kind: String, tint: Color = Color.WHITE, roughness: float = 0.92) -> StandardMaterial3D:
+	var entry: Array = TEXTURES[kind]
+	var base := "res://assets/textures/battle/%s" % entry[0]
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load(base + "_diff.jpg")
+	mat.albedo_color = tint
+	mat.normal_enabled = true
+	mat.normal_texture = load(base + "_nor.jpg")
+	mat.normal_scale = 0.8
+	mat.roughness = roughness
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	mat.uv1_triplanar_sharpness = 4.0
+	var scale: float = entry[1]
+	mat.uv1_scale = Vector3(scale, scale, scale)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	return mat
+
+
 func _ground(x: float, z: float) -> float:
 	return height_at.call(x, z) if height_at.is_valid() else 0.0
 
@@ -76,7 +109,7 @@ func _build_piece(piece: Dictionary) -> void:
 	# Axe local X le long du pan, Z vers l'extérieur.
 	node.basis = Basis(Vector3(dir.x, 0, dir.y), Vector3.UP, Vector3(outward.x, 0, outward.y))
 	add_child(node)
-	var mat := _material(STONE)
+	var mat := _textured("stone", STONE)
 	var wall := Node3D.new()
 	node.add_child(wall)
 	var gate := str(piece["kind"]) == "gate"
@@ -95,7 +128,7 @@ func _build_piece(piece: Dictionary) -> void:
 			var door_box := BoxMesh.new()
 			door_box.size = Vector3(length * 0.5 - 0.1, 5.0, 0.5)
 			door.mesh = door_box
-			door.material_override = _material(WOOD_DARK)
+			door.material_override = _textured("wood", Color(0.55, 0.45, 0.38))
 			door.position = Vector3(side * length * 0.25, 2.5, thickness * 0.5 - 0.2)
 			door.name = "Door"
 			wall.add_child(door)
@@ -128,7 +161,7 @@ func _build_piece(piece: Dictionary) -> void:
 	node.add_child(rubble)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(piece["index"]) * 7919 + 17
-	var rubble_mat := _material(STONE_DARK)
+	var rubble_mat := _textured("stone", STONE_DARK)
 	for i in int(length / 3.0) + 3:
 		var block := MeshInstance3D.new()
 		var block_box := BoxMesh.new()
@@ -166,19 +199,72 @@ func _build_tower(tower: Dictionary) -> void:
 	cylinder.height = h
 	cylinder.radial_segments = 12
 	body.mesh = cylinder
-	body.material_override = _material(STONE)
+	body.material_override = _textured("stone", STONE)
 	body.position = Vector3(0, h * 0.5, 0)
 	node.add_child(body)
-	var roof := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.0
-	cone.bottom_radius = r * 1.25
-	cone.height = r * 1.6
-	cone.radial_segments = 12
-	roof.mesh = cone
-	roof.material_override = _material(SLATE, 0.8)
-	roof.position = Vector3(0, h + r * 0.8, 0)
-	node.add_child(roof)
+	# Couronnement : corbeaux (anneau en encorbellement) puis, une tour sur deux, un toit
+	# d'ardoise proportionné ; sinon une plate-forme crénelée.
+	var stone := _textured("stone", STONE)
+	var corbel := MeshInstance3D.new()
+	var ring := CylinderMesh.new()
+	ring.top_radius = r * 1.14
+	ring.bottom_radius = r * 1.02
+	ring.height = 1.4
+	ring.radial_segments = 14
+	corbel.mesh = ring
+	corbel.material_override = stone
+	corbel.position = Vector3(0, h - 0.2, 0)
+	node.add_child(corbel)
+	var roofed := int(absf(x * 7.0 + z * 13.0)) % 2 == 0
+	if roofed:
+		var parapet := MeshInstance3D.new()
+		var wall_ring := CylinderMesh.new()
+		wall_ring.top_radius = r * 1.14
+		wall_ring.bottom_radius = r * 1.14
+		wall_ring.height = 1.0
+		wall_ring.radial_segments = 14
+		parapet.mesh = wall_ring
+		parapet.material_override = stone
+		parapet.position = Vector3(0, h + 1.0, 0)
+		node.add_child(parapet)
+		var roof := MeshInstance3D.new()
+		var cone := CylinderMesh.new()
+		cone.top_radius = 0.0
+		cone.bottom_radius = r * 1.12
+		cone.height = r * 1.55
+		cone.radial_segments = 14
+		roof.mesh = cone
+		roof.material_override = _textured("slate", Color(0.55, 0.56, 0.6), 0.75)
+		roof.position = Vector3(0, h + 1.5 + r * 0.775, 0)
+		node.add_child(roof)
+	else:
+		var merlon := BoxMesh.new()
+		merlon.size = Vector3(0.9, 1.3, 0.7)
+		var count := maxi(int(TAU * r * 1.1 / 2.0), 6)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = merlon
+		mm.instance_count = count
+		for i in count:
+			var a := TAU * float(i) / float(count)
+			var basis := Basis(Vector3.UP, -a)
+			mm.set_instance_transform(i, Transform3D(basis, Vector3(cos(a) * r * 1.08, h + 1.1, sin(a) * r * 1.08)))
+		var merlons := MultiMeshInstance3D.new()
+		merlons.multimesh = mm
+		merlons.material_override = stone
+		node.add_child(merlons)
+	# Archères : fentes sombres sur le fût.
+	var slit_mat := _material(Color(0.05, 0.05, 0.05))
+	for k in 3:
+		var a := TAU * float(k) / 3.0 + 0.4
+		var slit := MeshInstance3D.new()
+		var slit_box := BoxMesh.new()
+		slit_box.size = Vector3(0.25, 1.6, 0.3)
+		slit.mesh = slit_box
+		slit.material_override = slit_mat
+		slit.position = Vector3(cos(a) * r * 1.01, h * 0.55, sin(a) * r * 1.01)
+		slit.rotation.y = -a + PI * 0.5
+		node.add_child(slit)
 
 
 func _build_square() -> void:
@@ -191,7 +277,7 @@ func _build_square() -> void:
 	cylinder.height = 0.3
 	cylinder.radial_segments = 32
 	disc.mesh = cylinder
-	disc.material_override = _material(PAVING)
+	disc.material_override = _textured("paving", Color(0.85, 0.82, 0.78))
 	disc.position = Vector3(center.x, _ground(center.x, center.y) + 0.05, center.y)
 	disc.name = "Square"
 	add_child(disc)
@@ -202,7 +288,7 @@ func _build_square() -> void:
 	ring.bottom_radius = 1.4
 	ring.height = 1.0
 	well.mesh = ring
-	well.material_override = _material(STONE_DARK)
+	well.material_override = _textured("stone", STONE_DARK)
 	well.position = disc.position + Vector3(0, 0.5, 0)
 	add_child(well)
 
@@ -216,7 +302,7 @@ func _build_houses() -> void:
 	var walls: Array = siege.get("pieces", [])
 	var placed := 0
 	var tries := 0
-	while placed < 28 and tries < 400:
+	while placed < 46 and tries < 700:
 		tries += 1
 		var p := center + Vector2(rng.randf_range(-115, 115), rng.randf_range(-40, 120))
 		if p.distance_to(center) < radius + 12.0:
@@ -244,7 +330,7 @@ func _build_houses() -> void:
 		cone.height = 14.0
 		cone.radial_segments = 8
 		spire.mesh = cone
-		spire.material_override = _material(SLATE, 0.8)
+		spire.material_override = _textured("slate", Color(0.62, 0.64, 0.7), 0.7)
 		spire.position = Vector3(church.x - 8.0, _ground(church.x, church.y) + 11.0 + 7.0 + 4.0, church.y)
 		add_child(spire)
 
@@ -295,24 +381,93 @@ func _ring() -> PackedVector2Array:
 
 func _house(p: Vector2, w: float, d: float, h: float, angle: float) -> void:
 	var node := Node3D.new()
-	node.position = Vector3(p.x, _ground(p.x, p.y) - 0.2, p.y)
+	# Posée sur le point le plus bas de son emprise ; le soubassement comble la pente.
+	var low := INF
+	for corner in [Vector2(-w, -d), Vector2(w, -d), Vector2(w, d), Vector2(-w, d)]:
+		var q: Vector2 = p + (corner * 0.5).rotated(-angle)
+		low = minf(low, _ground(q.x, q.y))
+	node.position = Vector3(p.x, low, p.y)
 	node.rotation.y = angle
 	add_child(node)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(p.x * 31.0 + p.y * 17.0)
+	var plinth := MeshInstance3D.new()
+	var plinth_box := BoxMesh.new()
+	plinth_box.size = Vector3(w + 0.3, 3.2, d + 0.3)
+	plinth.mesh = plinth_box
+	plinth.material_override = _house_mats()["stone"]
+	plinth.position = Vector3(0, -0.9, 0)
+	node.add_child(plinth)
 	var body := MeshInstance3D.new()
 	var box := BoxMesh.new()
 	box.size = Vector3(w, h, d)
 	body.mesh = box
-	body.material_override = _material(PLASTER)
-	body.position = Vector3(0, h * 0.5, 0)
+	body.material_override = _house_mats()["plaster%d" % rng.randi_range(0, 2)]
+	body.position = Vector3(0, 0.7 + h * 0.5, 0)
 	node.add_child(body)
+	# Colombages : poutres sombres sur les pignons et les longs pans.
+	var beam_mat: StandardMaterial3D = _house_mats()["beam"]
+	for side in [-1.0, 1.0]:
+		for k in 3:
+			var post := MeshInstance3D.new()
+			var post_box := BoxMesh.new()
+			post_box.size = Vector3(0.22, h, 0.12)
+			post.mesh = post_box
+			post.material_override = beam_mat
+			post.position = Vector3((float(k) - 1.0) * w * 0.45, 0.7 + h * 0.5, side * (d * 0.5 + 0.04))
+			node.add_child(post)
+		var rail := MeshInstance3D.new()
+		var rail_box := BoxMesh.new()
+		rail_box.size = Vector3(w, 0.22, 0.12)
+		rail.mesh = rail_box
+		rail.material_override = beam_mat
+		rail.position = Vector3(0, 0.7 + h * 0.55, side * (d * 0.5 + 0.04))
+		node.add_child(rail)
+	var door := MeshInstance3D.new()
+	var door_box := BoxMesh.new()
+	door_box.size = Vector3(1.1, 2.0, 0.15)
+	door.mesh = door_box
+	door.material_override = _house_mats()["door"]
+	door.position = Vector3(rng.randf_range(-w * 0.25, w * 0.25), 0.7 + 1.0, d * 0.5 + 0.06)
+	node.add_child(door)
 	var roof := MeshInstance3D.new()
 	var prism := PrismMesh.new()
-	prism.size = Vector3(d + 0.8, h * 0.6, w + 0.6)
+	var pitch := h * rng.randf_range(0.75, 0.95)
+	prism.size = Vector3(d + 0.9, pitch, w + 0.7)
 	roof.mesh = prism
-	roof.material_override = _material(ROOF, 0.85)
-	roof.position = Vector3(0, h + h * 0.3, 0)
+	var roof_kind: String = ["tiles", "tiles", "slate", "thatch"][rng.randi_range(0, 3)]
+	roof.material_override = _house_mats()[roof_kind]
+	roof.position = Vector3(0, 0.7 + h + pitch * 0.5, 0)
 	roof.rotation.y = PI * 0.5
 	node.add_child(roof)
+	if rng.randf() < 0.6:
+		var chimney := MeshInstance3D.new()
+		var chimney_box := BoxMesh.new()
+		chimney_box.size = Vector3(0.7, pitch + 1.2, 0.7)
+		chimney.mesh = chimney_box
+		chimney.material_override = _house_mats()["stone"]
+		chimney.position = Vector3(w * 0.3, 0.7 + h + pitch * 0.5 + 0.4, d * 0.15)
+		node.add_child(chimney)
+
+
+var _house_cache: Dictionary = {}
+
+
+## Matières partagées des maisons (créées une fois par ville).
+func _house_mats() -> Dictionary:
+	if _house_cache.is_empty():
+		_house_cache = {
+			"stone": _textured("stone", Color(0.85, 0.8, 0.72)),
+			"plaster0": _textured("plaster", Color(0.93, 0.88, 0.78)),
+			"plaster1": _textured("plaster", Color(0.88, 0.82, 0.7)),
+			"plaster2": _textured("plaster", Color(0.95, 0.93, 0.88)),
+			"beam": _textured("wood", Color(0.38, 0.28, 0.2)),
+			"door": _textured("wood", Color(0.45, 0.33, 0.24)),
+			"tiles": _textured("tiles", Color(0.62, 0.45, 0.38), 0.85),
+			"slate": _textured("slate", Color(0.55, 0.56, 0.6), 0.75),
+			"thatch": _textured("thatch", Color(0.85, 0.75, 0.6), 1.0),
+		}
+	return _house_cache
 
 
 ## Dégâts des pans et machines/échelles des assiégeants (chaque image).
@@ -386,7 +541,7 @@ func _make_tower() -> Node3D:
 	var box := BoxMesh.new()
 	box.size = Vector3(5.0, h, 5.0)
 	body.mesh = box
-	body.material_override = _material(WOOD)
+	body.material_override = _textured("wood")
 	body.position = Vector3(0, h * 0.5 + 0.8, 0)
 	node.add_child(body)
 	var hides := MeshInstance3D.new()
@@ -400,7 +555,7 @@ func _make_tower() -> Node3D:
 	var bridge_box := BoxMesh.new()
 	bridge_box.size = Vector3(3.2, 0.3, 4.0)
 	bridge.mesh = bridge_box
-	bridge.material_override = _material(WOOD_DARK)
+	bridge.material_override = _textured("wood", Color(0.6, 0.5, 0.42))
 	bridge.position = Vector3(0, wall_height + 0.8, 4.2)
 	node.add_child(bridge)
 	for x in [-2.2, 2.2]:
@@ -425,7 +580,7 @@ func _make_ram() -> Node3D:
 	var prism := PrismMesh.new()
 	prism.size = Vector3(3.6, 2.2, 8.0)
 	roof.mesh = prism
-	roof.material_override = _material(Color(0.5, 0.4, 0.28))
+	roof.material_override = _textured("thatch", Color(0.8, 0.72, 0.6))
 	roof.position = Vector3(0, 2.3, 0)
 	node.add_child(roof)
 	var beam := MeshInstance3D.new()
@@ -434,7 +589,7 @@ func _make_ram() -> Node3D:
 	cylinder.bottom_radius = 0.35
 	cylinder.height = 9.0
 	beam.mesh = cylinder
-	beam.material_override = _material(WOOD_DARK)
+	beam.material_override = _textured("wood", Color(0.6, 0.5, 0.42))
 	beam.position = Vector3(0, 1.2, 0.8)
 	beam.rotation.x = PI * 0.5
 	node.add_child(beam)

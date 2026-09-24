@@ -1,13 +1,15 @@
 class_name Sea
 extends MeshInstance3D
 
-## Plan d'eau à Y = 0 couvrant la carte (avec marge) et shader d'eau animé.
+## Plan d'eau à Y = 0 couvrant la carte (avec marge) et shader d'eau animé (profondeur,
+## vagues, écume). La heightmap et la distance à la côte sont reprises du nœud frère
+## `Terrain` (TerrainBuilder, construit avant `setup`) pour ne pas les charger deux fois.
 
 const WATER_SHADER := preload("res://shaders/water.gdshader")
 
 @export var margin_factor: float = 0.5
 ## Couleur = fond marin du shader terrain (deep_sea mélangé au parchemin).
-@export var abyss_color: Color = Color(0.166, 0.288, 0.321)
+@export var abyss_color: Color = Color(0.03, 0.10, 0.15)
 @export var abyss_depth: float = -4.5
 
 
@@ -19,6 +21,18 @@ func setup(map_size: Vector2i) -> void:
 	position = Vector3(map_size.x * 0.5, 0.0, map_size.y * 0.5)
 	var material := ShaderMaterial.new()
 	material.shader = WATER_SHADER
+	material.set_shader_parameter("map_size", Vector2(map_size))
+	var terrain := get_parent().get_node_or_null("Terrain") as TerrainBuilder if get_parent() != null else null
+	if terrain != null and terrain.map_data != null and terrain.height_texture() != null:
+		material.set_shader_parameter("heightmap", terrain.height_texture())
+		material.set_shader_parameter("has_heightmap", true)
+		material.set_shader_parameter("height_bpp", terrain.height_texture_mode())
+		material.set_shader_parameter("height_little_endian", terrain.map_data.height_little_endian)
+		material.set_shader_parameter("height_min_m", terrain.map_data.height_min_m)
+		material.set_shader_parameter("height_max_m", terrain.map_data.height_max_m)
+		if terrain.coast_texture() != null:
+			material.set_shader_parameter("coast_dist", terrain.coast_texture())
+			material.set_shader_parameter("has_coast_dist", true)
 	material_override = material
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
