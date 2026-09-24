@@ -64,4 +64,14 @@ squelette Godot par soldat.
 - Toute retouche de figurine passe par les scripts Blender (≈ 1 min 30 pour tout régénérer),
   puis rien à importer côté Godot (binaires lus à l’exécution, 29 fichiers, ≈ 2,3 Mo).
 - Les « figures » B1 (`assets/models/battle/*.glb`) restent pour le repli et les engins.
-- Performance : voir `docs/wip/v2-soldats-animes.md` (banc `--units=20`, 4 550 soldats).
+- Performance (banc `--benchmark --bench-at=90`, A/B `--rigid-figures` sur le même binaire,
+  machine partagée, écran plafonné à 60 Hz) : `--units=20` (4 580 soldats) 56,3 → 54,7 i/s en
+  vue lointaine, 47,4 → 52,0 en gros plan (dans le bruit) ; primitives −18 % / −16 % ;
+  `--units=50` (11 800 soldats) 48,1 → 55,5 et 37,5 → 38,0. Pour tenir ce budget : 4 os par
+  sommet au LOD0, 2 au LOD1, 1 au LOD2 ; pas d'interpolation entre images au-delà de 45 m ;
+  LOD0 relayé dès 24 m (32 m pour les figurines rigides) ; configurations de clips en cache.
+  Détail : `docs/wip/v2-soldats-animes.md`.
+- Écart : le choix du clip et la phase des soldats vivants viennent du hachage de INSTANCE_ID
+  (pas d'INSTANCE_CUSTOM) : le tampon de la simulation (12 flottants par soldat) est copié tel
+  quel dans le `MultiMesh`, sans reconditionnement par GDScript à chaque image ;
+  INSTANCE_CUSTOM sert aux cadavres et aux futurs états par soldat (sang, chute).
