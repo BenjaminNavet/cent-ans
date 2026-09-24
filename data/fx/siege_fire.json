@@ -23,12 +23,12 @@
     "emission": 3.2
   },
   "smoke": {
-    "amount": 40,
-    "lifetime_s": 12.0,
-    "size_m": [6.0, 16.0],
+    "amount": 56,
+    "lifetime_s": 14.0,
+    "size_m": [7.0, 18.0],
     "velocity_m_s": [3.0, 5.0],
     "spread_m": 3.0,
-    "color": [0.17, 0.16, 0.15, 1.0],
+    "color": [0.26, 0.25, 0.235, 0.9],
     "wind_drift_m_s": 3.5
   },
   "embers": {
