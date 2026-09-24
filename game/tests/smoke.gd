@@ -1111,7 +1111,7 @@ func _run_table_medicine() -> void:
 	var groups := SeasonReport.build_groups(events, func(_event: Dictionary) -> bool: return true)
 	_check(groups.size() == 1 and (groups[0]["entries"] as Array).size() == 2, "season report should group table/medicine events: %s" % [groups])
 	_check(NewsLetters.KIND_LABELS.has("table") and NewsLetters.KIND_LABELS.has("medicine"), "news letters labels for table/medicine")
-	var alerts := AlertsPanel.table_medicine_alerts(sim, FACTION_ID, events)
+	var alerts := CampaignAlerts.table_medicine_alerts(sim, FACTION_ID, events)
 	_check(alerts.size() == 2 and str(alerts[0]["kind"]) == "table", "alerts for table/medicine: %s" % [alerts])
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
