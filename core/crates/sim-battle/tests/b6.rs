@@ -84,6 +84,27 @@ fn probe() {
     }
 }
 
+/// The demo armies on a bocage field with a village: cover is found and
+/// the armies still meet within B4's one to three minutes.
+#[test]
+fn bocage_battles_still_engage() {
+    let mut covered = 0;
+    for seed in 0..8 {
+        let mut battle = demo_setup();
+        battle.terrain = data_model::Terrain::Bocage;
+        battle.village = Some(true);
+        let mut sim = BattleSim::new(battle, seed).unwrap();
+        sim.set_ai(SideId::Attacker, true);
+        covered += usize::from(defensive_cover(sim.field(), SideId::Defender).is_some());
+        let contact = first_contact(&mut sim, 300.0);
+        assert!(
+            contact.is_some_and(|t| t < 180.0),
+            "seed {seed}: contact at {contact:?}"
+        );
+    }
+    assert!(covered >= 3, "cover on {covered} fields out of 8");
+}
+
 /// B4 rhythm kept: the demo armies still meet after about 70 s.
 #[test]
 fn demo_contact_stays_near_seventy_seconds() {
@@ -260,6 +281,37 @@ fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
         .retain(|a| *a != data_model::Ability::Stakes);
     hold_fire(&mut sim, SideId::Defender);
     sim
+}
+
+#[test]
+#[ignore]
+fn trace_bocage() {
+    let seed: u64 = std::env::var("SEED").map_or(7, |s| s.parse().unwrap());
+    let mut battle = demo_setup();
+    battle.terrain = data_model::Terrain::Bocage;
+    battle.village = Some(true);
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    println!("{:?}", defensive_cover(sim.field(), SideId::Defender));
+    println!("{:?}", defensive_cover(sim.field(), SideId::Attacker));
+    for step in 0..=10 {
+        while sim.elapsed() < f64::from(step) * 20.0 {
+            sim.step();
+        }
+        println!("t={:.0}", sim.elapsed());
+        for u in sim.units() {
+            println!(
+                "  {:?} {:22} {:5.0} {:5.0} {:?} dest {:?} tgt {:?}",
+                u.side,
+                u.name,
+                u.x,
+                u.z,
+                u.state,
+                u.destination.map(|d| (d.0 as i32, d.1 as i32)),
+                u.target
+            );
+        }
+    }
 }
 
 #[test]

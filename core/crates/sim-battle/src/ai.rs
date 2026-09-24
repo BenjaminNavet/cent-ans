@@ -454,7 +454,7 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
 
 /// B6: a defensive side looks for cover this far on either side of the
 /// centre of its deployment line.
-pub const COVER_LATERAL: f64 = 260.0;
+pub const COVER_LATERAL: f64 = 110.0;
 /// ... this far ahead of its deployment line (towards the enemy) ...
 pub const COVER_AHEAD: f64 = 110.0;
 /// ... and this far behind it.
@@ -1105,17 +1105,19 @@ fn plan_horse(
     }
     // 1b. Closing in: ride at the enemy horse (not bristling) within reach.
     if view.assault && !general_only && !unit.is_general {
-        let horse = view
+        let mut horse: Vec<(usize, f64)> = view
             .able_enemies()
             .filter(|&j| is_horse(&units[j]) && !bristling(&units[j]))
             .filter(|&j| units[j].category != UnitCategory::Siege)
-            .filter(|&j| !charge_breaks(view, i, j))
             .map(|j| (j, dist(unit, &units[j])))
             .filter(|&(_, d)| d < CAVALRY_REACH)
-            .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
-        if let Some((j, d)) = horse {
-            view.attack(i, j, d < CHARGE_DISTANCE * 3.0);
-            return;
+            .collect();
+        horse.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+        // B6: horsemen behind a hedge are ridden round, or left alone.
+        for (j, d) in horse {
+            if charge_or_detour(view, i, j, d < CHARGE_DISTANCE * 3.0) {
+                return;
+            }
         }
     }
     // 2. Isolated shooters (not behind stakes facing us).
