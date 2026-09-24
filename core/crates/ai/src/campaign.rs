@@ -142,6 +142,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         orders.push(Order::Research { technology });
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
+    orders.extend(sim_campaign::coinage::ai_choose_coinage(state, data, faction));
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);
