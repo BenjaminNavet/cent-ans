@@ -113,6 +113,14 @@ pub struct EffectTotals {
     pub wound_recovery: EffectValue,
     #[serde(default)]
     pub diet_health: EffectValue,
+    /// G1: extra simultaneous recruitments per province (`RecruitSlots`).
+    #[serde(default)]
+    pub recruit_slots: EffectValue,
+    /// G1: armour / ranged bonus of the units levied in the province.
+    #[serde(default)]
+    pub army_armor: EffectValue,
+    #[serde(default)]
+    pub army_ranged: EffectValue,
     /// Effects restricted to one social class (`Effect::class`).
     #[serde(default)]
     pub classes: ClassEffectTotals,
@@ -269,6 +277,9 @@ impl EffectTotals {
             plague_resistance,
             wound_recovery,
             diet_health,
+            recruit_slots,
+            army_armor,
+            army_ranged,
         );
         for class in SocialClass::ALL {
             self.classes.get_mut(class).merge(other.classes.get(class));
@@ -358,6 +369,9 @@ impl EffectTotals {
             EffectKind::PlagueResistance => &mut self.plague_resistance,
             EffectKind::WoundRecovery => &mut self.wound_recovery,
             EffectKind::DietHealth => &mut self.diet_health,
+            EffectKind::RecruitSlots => &mut self.recruit_slots,
+            EffectKind::ArmyArmor => &mut self.army_armor,
+            EffectKind::ArmyRanged => &mut self.army_ranged,
             _ => return,
         };
         slot.add(mode, value);
