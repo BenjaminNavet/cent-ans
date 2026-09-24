@@ -50,7 +50,7 @@ void vertex() {
 	if (UV.x > 0.5) {
 		// Flamme d'une flèche enflammée : panneau face caméra à la pointe.
 		bool burning = a.fire && age >= 0.0 && age < a.flight + burn_after;
-		float s = (burning && i < a.count) ? 0.32 * clamp(d / 40.0, 1.0, 5.0) : 0.0;
+		float s = (burning && i < a.count) ? 0.2 * clamp(d / 40.0, 1.0, 4.0) : 0.0;
 		vec3 right = INV_VIEW_MATRIX[0].xyz;
 		vec3 up = INV_VIEW_MATRIX[1].xyz;
 		world = pos + (right * VERTEX.x + up * (VERTEX.y + 0.35) * 1.5) * s;
@@ -79,9 +79,9 @@ void fragment() {
 		float w = mix(0.55, 0.08, clamp(q.y + 0.5, 0.0, 1.0)) * flick;
 		float shape = 1.0 - smoothstep(w * 0.7, w, abs(q.x));
 		shape *= step(-0.5, q.y) * step(q.y, 0.5 * flick);
-		vec3 hot = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.85, 0.35), clamp(0.5 - q.y - abs(q.x), 0.0, 1.0));
-		ALBEDO = hot;
-		EMISSION = hot * 5.0;
+		vec3 hot = mix(vec3(1.0, 0.22, 0.02), vec3(1.0, 0.62, 0.12), clamp(0.4 - q.y - abs(q.x) * 1.5, 0.0, 1.0));
+		ALBEDO = hot * 0.3;
+		EMISSION = hot * 1.3;
 		ALPHA = shape;
 		ALPHA_SCISSOR_THRESHOLD = 0.5;
 	} else {

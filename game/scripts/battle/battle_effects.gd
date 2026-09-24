@@ -41,6 +41,12 @@ const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
 const DUST_COLOR := Color(0.74, 0.66, 0.52)
+## BV1 : mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
+const CLOD_EMITTERS := 6
+const CLOD_DISTANCE := 260.0
+## Couleur de la poussière et des mottes selon le sol (`get_terrain().ground`).
+const GROUND_DUST := {"dry": Color(0.74, 0.66, 0.52), "muddy": Color(0.52, 0.45, 0.36), "snowy": Color(0.9, 0.92, 0.96)}
+const GROUND_CLODS := {"dry": Color(0.34, 0.26, 0.17), "muddy": Color(0.2, 0.15, 0.1), "snowy": Color(0.88, 0.9, 0.95)}
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
 signal hit_landed(pos: Vector3, time: float)
@@ -66,6 +72,8 @@ var _materials: Array[ShaderMaterial] = []
 var _dust: Array[GPUParticles3D] = []
 var _splash: Array[GPUParticles3D] = []
 var _wake: Array[GPUParticles3D] = []  # B8 : sillage d'écume (chevaux au gué)
+var _clods: Array[GPUParticles3D] = []  # BV1 : mottes sous les sabots
+var _ground: String = "dry"
 var _bursts: Dictionary = {}  # sorte -> Array[GPUParticles3D]
 var _burst_next: Dictionary = {}
 var _flash: OmniLight3D
@@ -96,6 +104,8 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 		_splash.append(_emitter("Splash%d" % i, _splash_material(), 160, 0.8, false))
 	for i in WAKE_EMITTERS:
 		_wake.append(_emitter("Wake%d" % i, _splash_material(), 90, 1.6, false))
+	for i in CLOD_EMITTERS:
+		_clods.append(_emitter("Clods%d" % i, _clod_material(), 220, 1.0, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
@@ -154,6 +164,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 	var dusty: Array = []
 	var wet: Array = []
 	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
+	var clodsy: Array = []  # BV1 : cavalerie lancée hors de l'eau (mottes)
 	for unit in units:
 		var id := int(unit["id"])
 		var present := bool(unit["present"])
@@ -200,12 +211,36 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 					var fwd := _forward(unit)
 					var mid := (wet_span.x + wet_span.y) * 0.5
 					burst(pos + fwd * mid + Vector3(0, 0.45, 0), "ford", 2.2 if state == "charging" else 1.4)
-		elif enabled_dust and d < DUST_DISTANCE:
-			dusty.append(entry)
+		else:
+			if enabled_dust and d < DUST_DISTANCE:
+				dusty.append(entry)
+			# BV1 : mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
+			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty():
+				clodsy.append(entry)
 	if _dust_spots.is_empty():
 		_assign(_dust, dusty)
+		_assign(_clods, clodsy)
 	_assign(_splash, wet)
 	_assign_wake(_wake, wakes)
+
+
+## BV1 : sol du champ (`dry`, `muddy`, `snowy`) et météo du rendu. Pas de poussière sous la
+## pluie ou la neige, ni sur un sol boueux ou enneigé ; teinte de la poussière (sèche, pâle) et
+## des mottes (terre, boue, neige) selon le sol.
+func configure_ground(ground: String, weather: String) -> void:
+	_ground = ground if GROUND_CLODS.has(ground) else "dry"
+	enabled_dust = weather != "rain" and weather != "snow" and _ground == "dry"
+	var dust_color: Color = GROUND_DUST[_ground]
+	for emitter in _dust:
+		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+		mat.albedo_color = dust_color * Color(0.9, 0.9, 0.9)
+	for emitter in _clods:
+		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+		mat.albedo_color = GROUND_CLODS[_ground]
+		# Neige : des gerbes plus fines et plus nombreuses ; boue : des paquets lourds.
+		var process := emitter.process_material as ParticleProcessMaterial
+		process.scale_min = 0.08 if _ground == "snowy" else 0.12
+		process.scale_max = 0.18 if _ground == "snowy" else (0.32 if _ground == "muddy" else 0.24)
 
 
 ## Poussière imposée à un endroit (captures hors simulation).
@@ -646,6 +681,31 @@ func _dust_material(heavy: bool) -> StandardMaterial3D:
 
 func _splash_material() -> StandardMaterial3D:
 	return _billboard(SPLASH_COLOR, true, false)
+
+
+## Motte : petit éclat opaque, éclairé (terre ou boue), non flou.
+func _clod_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = GROUND_CLODS["dry"]
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 0.7])
+	gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(0.8, 0.8, 0.8, 1), Color(1, 1, 1, 0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_SQUARE
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 16
+	texture.height = 16
+	mat.albedo_texture = texture
+	mat.vertex_color_use_as_albedo = true
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.5
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.billboard_keep_scale = true
+	mat.roughness = 1.0
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return mat
 
 
 func _smoke_material() -> StandardMaterial3D:

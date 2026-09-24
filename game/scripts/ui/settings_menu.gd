@@ -46,6 +46,7 @@ func _ready() -> void:
 		_build_display(_tab(tabs, "Affichage"))
 		_build_map(_tab(tabs, "Carte"))
 		_build_game(_tab(tabs, "Partie"))
+		_build_battle(_tab(tabs, "Bataille"))
 		_build_sound(_tab(tabs, "Son"))
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_END
@@ -174,6 +175,14 @@ func _build_game(grid: GridContainer) -> void:
 	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
+
+
+## BV1 : sang et taille des unités (appliqués à la bataille suivante).
+func _build_battle(grid: GridContainer) -> void:
+	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
+		"Gerbes à l'impact et flaques au sol. Modéré : plus discret, sans éclaboussures ni traînées.")
+	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)"],
+		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra est exigeant pour la carte graphique.")
 
 
 func _build_sound(grid: GridContainer) -> void:
