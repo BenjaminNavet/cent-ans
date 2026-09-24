@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_burgos",
+    "province": "prov_castilla_vieja",
+    "kind": "city",
+    "name": {
+      "display": "Burgos",
+      "local": "Burgos",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7004,
+      42.3439
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Burgos, ancienne capitale du royaume de Castille, cathédrale gothique en chantier.",
+    "sources": [
+      "Couronne de Castille",
+      "Burgos",
+      "Mesta"
+    ]
+  },
+  {
+    "id": "set_valladolid",
+    "province": "prov_castilla_vieja",
+    "kind": "town",
+    "name": {
+      "display": "Valladolid",
+      "local": "Valladolid",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.7245,
+      41.6523
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence royale fréquente et lieu de réunion des Cortes de Castille.",
+    "sources": [
+      "Valladolid"
+    ]
+  },
+  {
+    "id": "set_soria",
+    "province": "prov_castilla_vieja",
+    "kind": "town",
+    "name": {
+      "display": "Soria",
+      "local": "Soria",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -2.4637,
+      41.7665
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de frontière du haut Douro, près des ruines de l'antique Numance.",
+    "sources": [
+      "Soria"
+    ]
+  },
+  {
+    "id": "set_santo_domingo_de_silos",
+    "province": "prov_castilla_vieja",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Dominique-de-Silos",
+      "local": "Santo Domingo de Silos",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.4126,
+      41.9601
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine réputée pour son cloître roman.",
+    "sources": [
+      "Abbaye de Silos"
+    ]
+  }
+]
