@@ -386,6 +386,10 @@ fn courted_princes<'a>(
     if enemies.is_empty() {
         return Vec::new();
     }
+    // A great crown is no pensioner.
+    let lesser = |id: &FactionId| {
+        state.faction_power(id) <= rules.dynastic.max_power_ratio * state.faction_power(faction)
+    };
     state
         .factions
         .iter()
@@ -401,17 +405,17 @@ fn courted_princes<'a>(
                 .iter()
                 .all(|a| !f.at_war_with.contains(a) && !claim_stakes(state, id, a).any())
         })
-        // Princes on the border of an ally fighting at our side: the
-        // coalition of 1337 grows as a web of neighbours and in-laws around
-        // the front (Guelders, Hainaut, Brabant), not across Christendom.
+        // Lesser princes on the border of a lesser ally fighting at our
+        // side: the coalition of 1337 grows as a web of neighbours and
+        // in-laws around the Low Countries front (Guelders, Hainaut,
+        // Brabant), not across Christendom from the Emperor's lands.
+        .filter(|(id, _)| lesser(id))
         .filter(|(id, _)| {
             me.allies.iter().any(|a| {
-                enemies.iter().any(|e| state.is_at_war(a, e)) && borders(state, data, id, a)
+                lesser(a)
+                    && enemies.iter().any(|e| state.is_at_war(a, e))
+                    && borders(state, data, id, a)
             })
-        })
-        // Lesser princes only: a great crown is no pensioner.
-        .filter(|(id, _)| {
-            state.faction_power(id) <= rules.dynastic.max_power_ratio * state.faction_power(faction)
         })
         .filter(|(id, _)| campaign_roll(state, id, DYNASTIC_SALT) < rules.history_permille)
         .filter_map(|(id, _)| {
