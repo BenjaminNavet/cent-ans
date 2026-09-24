@@ -50,6 +50,8 @@ const GROUND_CLODS := {"dry": Color(0.34, 0.26, 0.17), "muddy": Color(0.2, 0.15,
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
 signal hit_landed(pos: Vector3, time: float)
+## BV1 : sons des engins (bombarde, trébuchet) tirés par le cœur ; `delay` en temps de bataille.
+signal sound_event(event: StringName, position: Vector3, delay: float)
 
 var enabled_dust: bool = true
 ## BV1 : volées massives et traits fichés.
@@ -343,6 +345,9 @@ func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers
 	var target: Dictionary = by_id.get(int(shot.get("target", -1)), {})
 	if target.is_empty():
 		target = {"x": aim.x, "z": aim.y, "y": _height_at.call(aim.x, aim.y) if _height_at.is_valid() else 0.0, "width": 12.0}
+	var aim3 := Vector3(aim.x, float(target.get("y", 0.0)), aim.y)
+	sound_event.emit(&"bombard" if kind == "ball" else &"trebuchet_release", pos, 0.0)
+	sound_event.emit(&"stone_impact", aim3, pos.distance_to(aim3) / float(SPEED[BALL if kind == "ball" else STONE]))
 	_on_volley(shooter, {-999: target}, soldiers, camera_pos, target)
 
 

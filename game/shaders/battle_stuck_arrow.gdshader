@@ -23,6 +23,6 @@ void vertex() {
 
 void fragment() {
 	// Plus sombres que les traits en vol (A1-16 : « confettis blancs trop clairs »).
-	ALBEDO = COLOR.rgb * 0.6;
+	ALBEDO = COLOR.rgb * 0.8;
 	ROUGHNESS = 0.85;
 }

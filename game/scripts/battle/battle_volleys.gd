@@ -14,11 +14,11 @@ extends Node3D
 ##   régiments, qui restent sur le champ ;
 ## - carreaux d'arbalète (plus courts, plus épais, plus tendus) ; flèches enflammées quand le cœur
 ##   marque la volée `incendiary` (assiégeant capable d'allumer un feu) ;
-## - sifflement : événement sonore nommé (`sound_event`, « arrow_volley » / « bolt_volley »)
-##   relayé par la scène à l'API audio (lot AU1) ; aucun lecteur ni bus créé ici.
+## - sons : événements nommés de la banque d'AU1 (`sound_event` : lâcher, sifflement au tiers du
+##   vol, impact à l'arrivée) relayés par la scène à `BattleAudio` ; aucun lecteur ni bus ici.
 ## Les touches (`kills` de la volée) renvoient des points d'impact pour le sang (`BattleBlood`).
 
-signal sound_event(event: StringName, position: Vector3)
+signal sound_event(event: StringName, position: Vector3, delay: float)
 
 const VOLLEY_SHADER := preload("res://shaders/battle_volley.gdshader")
 const STUCK_SHADER := preload("res://shaders/battle_stuck_arrow.gdshader")
@@ -196,7 +196,10 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 				hits.append({"pos": arrow["pos"], "time": arrow["time"]})
 		_write_chunk(chunk, time_now + flight_max + STAGGER[kind] + STICK_HOLD + 1.0)
 		launched += count
-	sound_event.emit(&"bolt_volley" if kind == 1 else &"arrow_volley", mid + Vector3(0, 12, 0))
+	var flight := from.distance_to(aim) / float(SPEED[kind]) * (1.0 + float(ARC[kind]))
+	sound_event.emit(&"crossbow_release" if kind == 1 else &"bow_release", from + Vector3(0, 1.5, 0), 0.0)
+	sound_event.emit(&"arrow_whistle", from.lerp(aim, 0.55) + Vector3(0, 12, 0), minf(flight * 0.35, 1.5))
+	sound_event.emit(&"arrow_impact", aim, flight + STAGGER[kind] * 0.5)
 	return hits
 
 
@@ -386,9 +389,9 @@ func _fieldwork_layer(node_name: String, mesh: Mesh, count: int) -> MultiMesh:
 	return mm
 
 
-const IRON := Color(0.16, 0.16, 0.17)
-const WOOD := Color(0.24, 0.17, 0.1)
-const FLETCH := Color(0.32, 0.29, 0.25)
+const IRON := Color(0.11, 0.11, 0.12)
+const WOOD := Color(0.17, 0.12, 0.07)
+const FLETCH := Color(0.22, 0.2, 0.17)
 
 
 ## 256 traits en rubans (le shader les oriente vers la caméra) : pointe, fût, empennage (8
