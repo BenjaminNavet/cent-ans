@@ -177,8 +177,60 @@ fn siege_besiegers_deploy_outside_the_walls() {
 }
 
 #[test]
-#[ignore]
-fn siege_pathing_uses_breach() {}
+fn siege_pathing_uses_breach() {
+    use sim_battle::SiegeSetup;
+    let data = data();
+    let attacker = units(&data, &["unit_mounted_sergeants", "unit_men_at_arms_foot"]);
+    let defender = units(&data, &["unit_urban_militia"]);
+    let siege = SiegeSetup {
+        fortification: 2,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
+    lab(&mut sim);
+    let works = sim.siege().unwrap().clone();
+    assert!(
+        works.houses.len() >= 12,
+        "streets and houses: {}",
+        works.houses.len()
+    );
+    // Open the last front wall, start far on the other side of the gate.
+    let front = works.front_walls();
+    let breach = *front.last().unwrap();
+    sim.siege_mut().unwrap().pieces[breach].hp = 0.0;
+    let (bx, _) = works.pieces[breach].midpoint();
+    let (gx, gz) = works.pieces[works.gate].midpoint();
+    place(&mut sim, 0, gx + (gx - bx) * 1.5, gz - 60.0, 0.0);
+    place(&mut sim, 2, 1100.0, 780.0, 0.0);
+    let (cx, cz) = works.center;
+    let order = Command::Move {
+        units: vec![0],
+        x: cx,
+        z: cz,
+        run: true,
+        facing: None,
+    };
+    sim.issue_command(order).unwrap();
+    let mut arrived = false;
+    for _ in 0..3000 {
+        sim.step();
+        let u = &sim.units()[0];
+        assert!(
+            works.house_at(u.x, u.z, -1.0).is_none(),
+            "never through a house"
+        );
+        if (u.x - cx).powi(2) + (u.z - cz).powi(2) < 20.0 * 20.0 {
+            arrived = true;
+            break;
+        }
+    }
+    let u = &sim.units()[0];
+    assert!(
+        arrived,
+        "rides round to the breach, then up the street: ({:.0}, {:.0}) {:?}",
+        u.x, u.z, u.state
+    );
+}
 
 #[test]
 #[ignore]
