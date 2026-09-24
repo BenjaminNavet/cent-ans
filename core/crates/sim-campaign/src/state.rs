@@ -427,6 +427,14 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
+    // ----- C5: trade (`trade.rs`) --------------------------------------------
+    /// Factions this faction has a formal trade agreement with (mirrored on
+    /// both sides); see [`CampaignState::has_trade_agreement`].
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub trade_agreements: BTreeSet<FactionId>,
+    /// Trade income collected during the last resolved turn.
+    #[serde(default)]
+    pub trade_income_last_turn: i64,
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -816,6 +824,19 @@ impl CampaignState {
 
     pub fn is_allied(&self, a: &FactionId, b: &FactionId) -> bool {
         a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
+    }
+
+    /// Lot C5: a formal trade agreement is active between `a` and `b` (also
+    /// `true` for a faction and itself, its own trade always flows). It is
+    /// never stored as broken: war or an embargo between the two just makes
+    /// [`crate::trade::trade_routes`] ignore it for the season, so it comes
+    /// back on its own the moment peace and embargoes are lifted.
+    pub fn has_trade_agreement(&self, a: &FactionId, b: &FactionId) -> bool {
+        a == b
+            || self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.trade_agreements.contains(b))
     }
 
     /// `true` when `province` is controlled by `faction` or one of its allies.

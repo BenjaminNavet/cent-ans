@@ -309,6 +309,16 @@ pub enum Order {
     DismissAgent {
         agent: crate::agents::AgentId,
     },
+    // ----- C5: trade (`trade.rs`) --------------------------------------------
+    /// Proposes a formal trade agreement to `target` (diplomacy flow, like
+    /// `ProposeAlliance`).
+    ProposeTradeAgreement {
+        target: FactionId,
+    },
+    /// Ends an existing trade agreement with `target`.
+    BreakTradeAgreement {
+        target: FactionId,
+    },
 }
 
 impl Order {
@@ -556,6 +566,12 @@ impl CampaignState {
                 Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
             }
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
+            Order::ProposeTradeAgreement { target } => {
+                Ok(self.propose(data, faction, &target, Proposal::TradeAgreement)?)
+            }
+            Order::BreakTradeAgreement { target } => {
+                Ok(self.break_trade_agreement(data, faction, &target)?)
+            }
             Order::SetEmbargo { target, active } => {
                 Ok(self.set_embargo(data, faction, &target, active)?)
             }

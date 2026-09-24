@@ -55,6 +55,8 @@ impl CampaignState {
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, &mut events);
+        // C5: trade routes and agreements, after the treasury's tax income.
+        crate::trade::resolve_trade(self, data, &mut events);
         // H5: prices follow the coinage.
         crate::coinage::resolve_coinage(self, &mut events);
         // H6: ransom installments, captive rulers.

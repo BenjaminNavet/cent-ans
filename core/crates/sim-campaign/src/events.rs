@@ -69,6 +69,8 @@ pub enum EventKind {
     Chivalry,
     /// C6: spies, heralds and preachers (actions, captures).
     Agent,
+    /// C5: trade agreements, routes cut by war/siege/blockade.
+    Trade,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.
