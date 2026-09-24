@@ -1,0 +1,173 @@
+[
+  {
+    "id": "set_londres",
+    "province": "prov_middlesex",
+    "kind": "city",
+    "name": {
+      "display": "Londres",
+      "local": "London",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.1276,
+      51.5074
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_abbey",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts",
+      "bld_counting_house",
+      "bld_armoury"
+    ],
+    "port": true,
+    "description": "Cité de Londres (capitale de jeu de l'Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street.",
+    "sources": [
+      "Londres au Moyen Âge",
+      "Westminster",
+      "Essex"
+    ]
+  },
+  {
+    "id": "set_colchester",
+    "province": "prov_middlesex",
+    "kind": "town",
+    "name": {
+      "display": "Colchester",
+      "local": "Colecestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.9027,
+      51.8959
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Plus ancienne ville romaine de Bretagne, dotée d'un donjon normand et d'un commerce drapier actif.",
+    "sources": [
+      "Colchester"
+    ]
+  },
+  {
+    "id": "set_windsor",
+    "province": "prov_middlesex",
+    "kind": "castle",
+    "name": {
+      "display": "Windsor",
+      "local": "Windlesora",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.61,
+      51.4839
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Grand château royal sur la Tamise, résidence favorite d'Édouard III.",
+    "sources": [
+      "Château de Windsor"
+    ]
+  },
+  {
+    "id": "set_st_albans",
+    "province": "prov_middlesex",
+    "kind": "abbey",
+    "name": {
+      "display": "St Albans",
+      "local": "Sainte-Aubone",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.3367,
+      51.752
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine sur la voie Watling, l'une des plus riches d'Angleterre.",
+    "sources": [
+      "Abbaye de St Albans"
+    ]
+  },
+  {
+    "id": "set_maldon",
+    "province": "prov_middlesex",
+    "kind": "village",
+    "name": {
+      "display": "Maldon",
+      "local": "Maeldune",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.6752,
+      51.7306
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port producteur de sel sur l'estuaire de la Blackwater.",
+    "sources": [
+      "Maldon (Essex)"
+    ]
+  },
+  {
+    "id": "set_kingston",
+    "province": "prov_middlesex",
+    "kind": "town",
+    "name": {
+      "display": "Kingston upon Thames",
+      "local": "Kyningestun",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.287,
+      51.4085
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg au passage de la Tamise, lieu traditionnel du sacre de plusieurs rois anglo-saxons.",
+    "sources": [
+      "Kingston upon Thames"
+    ]
+  }
+]

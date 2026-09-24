@@ -5,12 +5,13 @@ Tâche : `docs/design/2026-09-24-echelle-colonies.md` § 3.1. 56 provinces (rég
 
 ## État
 
-En cours. Fait : tout `empire_*`, `scandinavie`, tout `pays_bas` (10 provinces), et
-`angleterre_sud` : cornwall, devon, kent — 36/56 provinces, 147 colonies.
+En cours. Fait : tout `empire_*`, `scandinavie`, tout `pays_bas`, tout `angleterre_sud`,
+tout `galles`, et `angleterre_centre` : gloucester, oxford, warwick — 44/56 provinces,
+185 colonies.
 
 ## Prochaine étape
 
-Continuer `angleterre_sud` (middlesex, sussex, wessex) + `galles` (deheubarth, gwynedd) ;
-puis `angleterre_centre/est/nord` + `ecosse` + `irlande`. Valider avec le script de
-validation temporaire (schéma `settlement.schema.json` + `common.schema.json` via
-`referencing`), commit `wip:` toutes les ~8 provinces.
+Continuer `angleterre_est` (norfolk), `angleterre_nord` (lancashire, northumberland,
+yorkshire), puis `ecosse` (5) et `irlande` (3). Valider avec le script de validation
+temporaire (schéma `settlement.schema.json` + `common.schema.json` via `referencing`),
+commit `wip:` toutes les ~8 provinces.
