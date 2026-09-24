@@ -1,0 +1,63 @@
+{
+  "description": "Effets visuels des sièges (lot S1) : effondrement physique des pans de courtine, vantaux de porte qui tombent en planches, pierres du parapet qui se détachent aux paliers de dégâts, poussière et secousse de caméra. Rendu seulement : la physique Godot ne remonte jamais au cœur (ADR 0007).",
+  "collision_layer": 20,
+  "max_active_bodies": 150,
+  "max_kept_bodies": 300,
+  "ground": {
+    "patch_margin": 16.0,
+    "patch_spacing": 1.5,
+    "friction": 0.9
+  },
+  "wall": {
+    "blocks_per_meter": 0.7,
+    "blocks_min": 20,
+    "blocks_max": 60,
+    "seed_salt": 7717,
+    "cut_jitter": 0.3,
+    "shape_margin": 0.92,
+    "density": 2.2,
+    "outward_impulse": [2.5, 6.0],
+    "downward_impulse": [0.5, 2.0],
+    "lateral_impulse": 0.8,
+    "height_boost": 1.0,
+    "angular_impulse": 1.5,
+    "merlons_as_bodies": true,
+    "settle_seconds": 4.5,
+    "rubble_reveal_seconds": 3.2,
+    "settle_mode": "sink",
+    "sink_seconds": 3.0
+  },
+  "gate": {
+    "planks_per_leaf": 6,
+    "inward_impulse": [1.0, 3.0],
+    "angular_impulse": 1.2,
+    "density": 0.7,
+    "settle_seconds": 4.0,
+    "settle_mode": "freeze",
+    "sink_seconds": 3.0
+  },
+  "parapet": {
+    "thresholds": [0.75, 0.5, 0.25],
+    "stones_min": 3,
+    "stones_max": 6,
+    "stone_size": [0.35, 0.8],
+    "outward_impulse": [0.6, 1.8],
+    "density": 2.2,
+    "lifetime_seconds": 3.5
+  },
+  "dust": {
+    "collapse_amount": 600,
+    "parapet_amount": 60,
+    "lifetime_seconds": 4.0,
+    "size": [3.0, 8.0],
+    "velocity": [1.5, 5.0],
+    "color": [0.62, 0.57, 0.5, 0.55]
+  },
+  "camera_shake": {
+    "enabled": true,
+    "amplitude": 0.35,
+    "duration_seconds": 0.6,
+    "frequency": 28.0,
+    "max_distance": 260.0
+  }
+}
