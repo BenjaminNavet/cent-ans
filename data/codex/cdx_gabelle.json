@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gabelle",
+  "title": "La gabelle du sel",
+  "category": "economie",
+  "aliases": ["gabelle", "gabelles", "grenier à sel", "greniers à sel"],
+  "era": { "from": "1341", "to": "1790" },
+  "summary": "La gabelle est l'impôt royal sur le sel. Instituée par [[cdx_philippe_vi|Philippe VI]] en 1341 pour financer la guerre, rétablie en 1360 pour payer la [[cdx_rancon|rançon]] de [[cdx_jean_ii|Jean II]], elle deviendra l'impôt le plus détesté de l'Ancien Régime.",
+  "body": "Au Moyen Âge, le sel est indispensable : c'est lui qui conserve la viande et le poisson pour l'hiver et le Carême. Tout le monde en achète, riches comme pauvres. Le mot gabelle désigne d'abord n'importe quelle taxe sur une marchandise, puis se spécialise dans l'impôt sur le sel.\n\nEn 1341, pour financer la guerre contre l'Angleterre, [[cdx_philippe_vi|Philippe VI]] organise un monopole royal : le sel doit être déposé dans des greniers royaux et vendu avec une taxe. [[cdx_edouard_iii|Édouard III]] se serait moqué de lui en l'appelant « l'auteur de la loi salique », jeu de mots sur le sel (en latin, sal) et sur la [[cdx_succession_1328|loi salique]] invoquée contre ses propres droits.\n\nLa gabelle n'est d'abord qu'un impôt temporaire, voté pour une campagne. Tout change en décembre 1360 : pour payer les trois millions d'écus de la rançon de [[cdx_jean_ii|Jean II]] fixée à [[cdx_bretigny|Brétigny]], le roi établit des [[cdx_aides|aides]] sur les ventes et une gabelle qui ne seront plus jamais vraiment supprimées. Sous [[cdx_charles_v|Charles V]], elles financent aussi la reconquête.\n\nL'impôt est géré par un réseau de greniers à sel où chaque foyer doit acheter son sel, parfois une quantité minimale imposée. Les tarifs varient beaucoup d'une région à l'autre, ce qui encourage une contrebande intense, les faux-sauniers. Haïe pendant quatre siècles, la gabelle est abolie par la Révolution en 1790.",
+  "entity": "res_salt",
+  "see_also": ["cdx_aides", "cdx_taille", "cdx_bretigny", "cdx_livre_tournois"],
+  "sources": ["Gabelle", "Impôt sur le sel"]
+}

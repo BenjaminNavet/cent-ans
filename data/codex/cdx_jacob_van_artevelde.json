@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jacob_van_artevelde",
+  "title": "Jacob van Artevelde",
+  "category": "personnage",
+  "aliases": ["Jacob van Artevelde", "Jacques van Artevelde", "Artevelde", "Philippe van Artevelde"],
+  "era": { "from": "v. 1290", "to": "1345" },
+  "summary": "Riche bourgeois de Gand, Jacob van Artevelde prend en 1338 la tête des villes flamandes. Pour sauver l'industrie du drap, privée de laine anglaise, il rompt avec le comte fidèle au roi de France et range la Flandre aux côtés d'[[cdx_edouard_iii|Édouard III]].",
+  "body": "Au début de la guerre, la [[cdx_flandre_laine|Flandre]] est prise entre deux fidélités. Son comte, [[cdx_louis_de_nevers|Louis de Nevers]], doit tout au roi de France, qui l'a rétabli par les armes après la révolte écrasée à Cassel en 1328. Mais les grandes villes drapières, [[cdx_gand|Gand]], [[cdx_bruges|Bruges]] et Ypres, vivent de la laine anglaise : quand Édouard III en interdit l'exportation en 1336, les métiers s'arrêtent et le chômage menace.\n\nLe 3 janvier 1338, les Gantois choisissent Jacob van Artevelde pour capitaine. Membre d'une riche famille de marchands, et non brasseur comme le voudra une tradition douteuse, il est un orateur habile et un organisateur énergique. Il obtient d'abord la neutralité de la Flandre et le retour de la laine, puis, face à l'hostilité du comte, qui s'enfuit en France, il choisit l'alliance anglaise.\n\nSon coup politique a lieu à [[cdx_gand|Gand]] en janvier 1340 : il pousse Édouard III à prendre publiquement le titre de roi de France. Les Flamands peuvent ainsi le reconnaître comme leur suzerain légitime sans se rendre coupables de rébellion envers le roi de France. Les milices flamandes combattent ensuite aux côtés des Anglais, notamment au siège de Tournai.\n\nSon autorité, appuyée sur les tisserands de Gand, s'use dans les luttes entre métiers et entre villes. En juillet 1345, soupçonné de vouloir livrer la Flandre au fils d'Édouard III, il est massacré par une foule gantoise. Son fils Philippe van Artevelde reprendra le flambeau de la révolte gantoise en 1381 et mourra à la bataille de [[cdx_roosebeke|Roosebeke]] en 1382.",
+  "entity": "chr_jacob_van_artevelde",
+  "see_also": ["cdx_flandre_laine", "cdx_edouard_iii", "cdx_gand", "cdx_roosebeke"],
+  "sources": ["Jacob van Artevelde", "Philippe van Artevelde"]
+}

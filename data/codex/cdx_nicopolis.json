@@ -1,0 +1,12 @@
+{
+  "id": "cdx_nicopolis",
+  "title": "La croisade de Nicopolis",
+  "category": "bataille",
+  "aliases": ["Nicopolis", "bataille de Nicopolis", "croisade de Nicopolis", "Bayezid", "Bajazet"],
+  "era": { "from": "1396", "to": "1396" },
+  "summary": "Le 25 septembre 1396, à Nicopolis, sur le Danube, l'armée des croisés franco-bourguignons et hongrois est écrasée par le sultan ottoman Bayezid Ier. Le jeune [[cdx_jean_sans_peur|Jean de Nevers]], futur Jean sans Peur, y est capturé.",
+  "body": "À la fin du XIVe siècle, les Ottomans ont conquis une grande partie des Balkans et menacent la Hongrie. Son roi, Sigismond de Luxembourg, appelle l'Occident à l'aide. Profitant d'une trêve dans la guerre de Cent Ans, la noblesse française et bourguignonne répond avec enthousiasme : [[cdx_philippe_le_hardi|Philippe le Hardi]] finance l'expédition et en confie le commandement nominal à son fils Jean, comte de Nevers, âgé de vingt-quatre ans.\n\nL'armée croisée, forte de chevaliers français, bourguignons, allemands et hongrois, descend le Danube au cours de l'été 1396 et assiège la forteresse de Nicopolis, en Bulgarie. Le sultan Bayezid Ier, surnommé l'Éclair, arrive à marche forcée pour la secourir.\n\nLe 25 septembre, les chevaliers français refusent de laisser l'honneur de la première charge aux Hongrois, qui connaissent pourtant mieux l'ennemi. Leur charge balaie l'infanterie légère turque, mais, épuisés et dispersés, ils se heurtent en haut d'une colline aux troupes d'élite du sultan. La déroute est totale. Bayezid, furieux de ses propres pertes, fait exécuter une grande partie des prisonniers.\n\nSeuls les plus grands seigneurs sont épargnés contre [[cdx_rancon|rançon]]. Jean de Nevers est libéré en 1397 contre deux cent mille ducats, une somme énorme payée par la Bourgogne ; le maréchal Boucicaut est aussi racheté, tandis qu'Enguerrand de Coucy meurt en captivité. Jean y gagne son surnom de « sans Peur ». Nicopolis est l'un des derniers grands élans de croisade et révèle, comme [[cdx_crecy|Crécy]], l'imprudence de la [[cdx_chevalerie|chevalerie]] française.",
+  "entity": "evt_nicopolis",
+  "see_also": ["cdx_jean_sans_peur", "cdx_philippe_le_hardi", "cdx_chevalerie", "cdx_rancon"],
+  "sources": ["Bataille de Nicopolis", "Croisade de Nicopolis"]
+}

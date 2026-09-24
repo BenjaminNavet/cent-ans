@@ -1,0 +1,11 @@
+{
+  "id": "cdx_commerce_de_bordeaux",
+  "title": "Le commerce du vin de Bordeaux",
+  "category": "economie",
+  "aliases": ["commerce de Bordeaux", "commerce du vin de Bordeaux", "flotte des vins", "grande coutume"],
+  "era": { "from": "1152", "to": "1453" },
+  "summary": "Pendant trois siècles, Bordeaux vit d'un échange avec l'Angleterre : du vin contre de la laine, du drap, du grain et du poisson. Record en 1308-1309 avec plus de 100 000 tonneaux exportés, un volume qui ne sera retrouvé qu'au XXe siècle.",
+  "body": "Depuis le mariage d'Aliénor d'Aquitaine et d'Henri Plantagenêt en 1152, [[cdx_bordeaux|Bordeaux]] est une ville du roi d'Angleterre. Son port devient le grand fournisseur de vin des îles Britanniques, qui ne produisent presque rien. En retour arrivent le grain, le poisson salé, la laine, le drap et l'étain.\n\nChaque année, deux grandes flottes font la navette. Celle d'automne emporte le vin nouveau, juste après les vendanges ; celle du printemps, les vins soutirés au cours de l'hiver. Au début du XIVe siècle, les registres de la coutume enregistrent en moyenne plus de 80 000 tonneaux exportés par an par la Gironde ; l'exercice 1308-1309 atteint un record de quelque 102 000 tonneaux, soit environ 850 000 hectolitres, niveau qui ne sera plus égalé avant les années 1950.\n\nLa guerre de Cent Ans bouleverse ce commerce. Les chevauchées ravagent le vignoble, les navires doivent naviguer en convois armés, les droits de douane changent au gré des besoins de la couronne, et le haut pays, souvent occupé par les Français, ne peut plus toujours descendre ses vins. Les exportations s'effondrent dans les années les plus dures et remontent dans les trêves.\n\nLe [[cdx_vin_de_gascogne|vin de Gascogne]] est aussi un lien politique : les Bordelais tiennent à leur roi anglais, client et protecteur, et la ville reste fidèle à l'Angleterre presque jusqu'au bout. Après la victoire française de [[cdx_castillon|Castillon]] et la reddition de Bordeaux en octobre 1453, le trafic s'effondre ; il reprendra plus tard, sous d'autres pavillons, mais le « [[cdx_clairet|claret]] » restera dans la langue anglaise.",
+  "see_also": ["cdx_bordeaux", "cdx_vin_de_gascogne", "cdx_clairet", "cdx_guyenne", "cdx_castillon", "cdx_plantagenets"],
+  "sources": ["Histoire du vignoble de Bordeaux", "Vignoble de Bordeaux", "Guyenne"]
+}

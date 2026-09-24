@@ -375,8 +375,13 @@ func _on_alert_pressed(alert: Dictionary) -> void:
 	match str(alert.get("kind", "")):
 		"enemy_army":
 			focus_army(str(alert.get("army", "")))
-		"siege", "building":
-			focus_province(str(alert.get("province", "")))
+		"siege", "building", "table", "medicine":  # H9 : table / medicine
+			if str(alert.get("province", "")) != "":
+				focus_province(str(alert.get("province", "")))
+		"herbarium":  # H9 : ouvre la fiche de la plante dans le Codex
+			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")
+			if bubbles != null:
+				bubbles.call("open_entry", str(alert.get("codex", "")))
 		"debt":
 			ui.faction_panel_requested.emit()
 		"research":

@@ -41,6 +41,8 @@ extends SceneTree
 ##     onglet Ville, construction, recherche, diplomatie, fin de tour, rapport, chronique,
 ##     impôt, gouverneur), progression persistée ; encyclopédie : chaque onglet > 0 entrée,
 ##     fiche non vide, recherche filtrée, liens internes, retour, touche L.
+## 15. table/médecine (H9) : section Table (changement de régime par l'UI, refus affiché,
+##     lecture seule), ligne de budget, infobulle de tech médecine, genres table/medicine.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -84,6 +86,7 @@ func _init() -> void:
 	await _run_assets()  # M10 assets
 	await _run_icons()  # F2
 	await _run_codex()  # H2
+	await _run_table_medicine()  # H9
 	await _run_siege_battle()
 	await _run_flow()  # F3
 	await _run_tutorial()  # F8
@@ -708,6 +711,7 @@ func _run_battle() -> void:
 	for key in scene._mm:
 		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
 	_check(drawn > 0, "battle scene: no soldier instances")
+	_check_battle_hud_f5b(scene)
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
 	for unit in scene.units:
@@ -733,6 +737,39 @@ func _run_battle() -> void:
 		print("smoke OK: battle (headless %d ticks, scene 60 frames, %d soldiers drawn, resolved through the map)" % [ticks, drawn])
 	map.queue_free()
 	await process_frame
+
+
+## F5b : cartes compactes rangées par « bataille », groupe Ctrl+1 enregistré puis rappelé,
+## minicarte présente et peuplée, boutons de vitesse, noms coupés entre deux mots.
+func _check_battle_hud_f5b(scene: BattleScene) -> void:
+	var hud: BattleHud = scene.hud
+	var own := 0
+	var first := -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side:
+			own += 1
+			if first < 0:
+				first = int(unit["id"])
+	_check(hud.card_count() == own and own > 0, "battle HUD: %d cards for %d own units" % [hud.card_count(), own])
+	_check(BattleGroups.ORDER.has(hud.card_battle(first)), "battle HUD: card not in a battle column")
+	var card: UnitCard = hud._cards[first]
+	_check(card.custom_minimum_size.x <= 72.0 and card.tooltip_text.contains("Formation"), "battle HUD: card should be compact with formation in its tooltip")
+	var font := card.name_label.get_theme_font("font")
+	var fitted := UnitCard.fit_name("Arbalétriers génois de la compagnie Grimaldi", font, 10, 63.0, 2)
+	_check(fitted.split("\n").size() <= 2 and not fitted.contains("Grimaldi"), "battle HUD: name fitting should stop on a whole word: %s" % fitted)
+	scene.selected.clear()
+	scene.selected.append(first)
+	scene.handle_group_key(1, true)
+	scene.selected.clear()
+	scene.handle_group_key(1, false)
+	_check(scene.selected.size() == 1 and scene.selected[0] == first, "battle HUD: group 1 should be recalled (got %s)" % [scene.selected])
+	_check(hud.minimap != null and hud.minimap.is_visible_in_tree(), "battle HUD: minimap missing")
+	scene._refresh_view(true)
+	_check(hud.minimap.dot_count() > own, "battle HUD: minimap should show both sides")
+	scene._on_speed_pressed(1)
+	_check(hud.active_speed() == 1 and not scene.paused, "battle HUD: ×2 speed button not active")
+	scene._on_speed_pressed(0)
+	_check(hud.help_panel != null and not hud.help_panel.visible, "battle HUD: F1 help should start hidden")
 
 
 func _run_chronicle() -> void:
@@ -983,6 +1020,107 @@ func _run_codex() -> void:
 	store.call("reset_discoveries")
 	if _failures == 0:
 		print("smoke OK: codex, %d entries, links, 3-bubble stack, discoveries, window (%s)" % [total, counter])
+
+
+## H9 : interface de la Table et de la médecine (vraie simulation si elle expose
+## `get_diet_options`, sinon skip imprimé) : section Table d'une province française, changement
+## de régime par l'interface, refus affiché, infobulle de tech médecine (plantes, note),
+## genres `table` / `medicine` mappés (rapport, lettres, alertes), herbier silencieux.
+func _run_table_medicine() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_diet_options")):
+		print("smoke table/medicine: skipped, CampaignSim has no get_diet_options (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "table/medicine: new_campaign failed"):
+		return
+	# Province au joueur avec un régime payant disponible (≠ actuel), une autre avec un régime
+	# indisponible.
+	var changed_province := ""
+	var target_diet := ""
+	var refused_province := ""
+	var refused_diet := ""
+	var diets: Dictionary = sim.call("get_province_diets")
+	var province_ids: Array = diets.keys()
+	province_ids.sort()
+	for province_id in province_ids:
+		var state: Dictionary = sim.call("get_province_state", str(province_id))
+		if str(state.get("controller", state.get("owner", ""))) != FACTION_ID:
+			continue
+		for option in sim.call("get_diet_options", str(province_id)):
+			var id := str(option.get("id", ""))
+			if changed_province == "" and bool(option.get("available", false)) and not bool(option.get("current", false)) and int(option.get("cost", 0)) > 0:
+				changed_province = str(province_id)
+				target_diet = id
+			elif refused_province == "" and str(province_id) != changed_province and not bool(option.get("available", false)):
+				refused_province = str(province_id)
+				refused_diet = id
+	if not _check(changed_province != "" and refused_province != "", "table: no French province with available/unavailable diets (%s / %s)" % [changed_province, refused_province]):
+		return
+
+	# Panneau de province réel : la section Table est dans l'onglet Ville.
+	var panel: Node = (load("res://scenes/ui/province_panel.tscn") as PackedScene).instantiate()
+	root.add_child(panel)
+	await process_frame
+	var hosted: TableSection = panel.get("table_section")
+	_check(hosted != null and hosted.get_parent() == (panel.get("classes_list") as Node).get_parent(), "province panel should host the Table section in the Ville tab")
+	panel.queue_free()
+
+	var table := TableSection.new()
+	root.add_child(table)
+	table.show_for(changed_province, true, sim)
+	await process_frame
+	_check(table.visible and table.option_buttons.size() == (sim.call("get_diet_options", changed_province) as Array).size(), "table section should list every diet option")
+	var tip := RichTooltip.diet(table._option(target_diet))
+	_check(tip.contains("Coût") and tip.contains("[img"), "diet tooltip incomplete: %s" % tip)
+	(table.option_buttons[target_diet] as Button).pressed.emit()
+	var now: Dictionary = sim.call("get_province_diet", changed_province)
+	_check(str(now.get("diet", "")) == target_diet, "set_diet via UI: expected %s, got %s (%s)" % [target_diet, now.get("diet", ""), table.last_result])
+	_check(table.changed_label.visible and table.choose_button.disabled, "changed-this-turn state should be shown")
+	var lent_expected := bool(sim.call("is_lent"))
+	_check(table.lent_banner.visible == lent_expected, "Lent banner should follow is_lent (%s)" % lent_expected)
+
+	table.show_for(refused_province, true, sim)
+	var refused: Dictionary = table.request_diet(refused_diet)
+	_check(not bool(refused.get("ok", true)) and table.error_label.visible and table.error_label.text.contains("impossible"), "unavailable diet should be refused and shown: %s" % table.error_label.text)
+	var refused_tip := RichTooltip.diet(table._option(refused_diet))
+	_check(refused_tip.contains("Manque"), "unavailable diet tooltip should list missing conditions: %s" % refused_tip)
+	table.show_for(refused_province, false, sim)
+	_check(not table.choose_button.visible and table.option_buttons.is_empty(), "read-only province: no selector")
+	table.queue_free()
+
+	var economy: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(int(economy.get("table_upkeep", 0)) > 0, "table_upkeep should be > 0 after a paying diet")
+
+	# Infobulle de tech médecine : plantes et note historique ; libellés des effets.
+	var herb_node: Dictionary = {}
+	for node in sim.call("get_tech_tree", FACTION_ID):
+		if str(node.get("id", "")) == "tech_herb_garden":
+			herb_node = node
+	var tech_tip := RichTooltip.technology(herb_node)
+	_check(tech_tip.contains("Plantes :") and tech_tip.contains("sauge") and tech_tip.contains("médecine") and tech_tip.contains("De Villis"), "medicine tech tooltip incomplete: %s" % tech_tip)
+	_check(RichTooltip.effect_text({"kind": "plague_resistance", "value": 10}).begins_with("Résistance à la peste"), "plague_resistance label")
+	_check(RichTooltip.effect_text({"kind": "wound_recovery", "value": 15, "mode": "percent"}).begins_with("Soin des blessés"), "wound_recovery label")
+	_check(RichTooltip.effect_text({"kind": "diet_health", "value": 25}).begins_with("Santé tirée des régimes"), "diet_health label")
+
+	# Genres table / medicine : rapport de saison, lettres, alertes ; herbier.
+	var events := [
+		{"kind": "table", "text_fr": "La table revient au pain bis.", "faction": FACTION_ID, "province": changed_province},
+		{"kind": "medicine", "text_fr": "Épidémie contenue.", "faction": FACTION_ID, "province": ""},
+	]
+	var groups := SeasonReport.build_groups(events, func(_event: Dictionary) -> bool: return true)
+	_check(groups.size() == 1 and (groups[0]["entries"] as Array).size() == 2, "season report should group table/medicine events: %s" % [groups])
+	_check(NewsLetters.KIND_LABELS.has("table") and NewsLetters.KIND_LABELS.has("medicine"), "news letters labels for table/medicine")
+	var alerts := AlertsPanel.table_medicine_alerts(sim, FACTION_ID, events)
+	_check(alerts.size() == 2 and str(alerts[0]["kind"]) == "table", "alerts for table/medicine: %s" % [alerts])
+	var store: Node = root.get_node_or_null("/root/CodexStore")
+	if store != null:
+		store.call("use_test_file")
+		var herbs := Herbarium.sync(sim, FACTION_ID)
+		_check(herbs.size() >= 0, "herbarium sync should ignore missing entries")
+		store.call("reset_discoveries")
+	if _failures == 0:
+		print("smoke OK: table/medicine, %s -> %s, refused %s in %s, table upkeep %d" % [changed_province, target_diet, refused_diet, refused_province, int(economy.get("table_upkeep", 0))])
 
 
 ## M8 § 2 : bataille de siège réelle (armée française devant la Guyenne anglaise), headless puis

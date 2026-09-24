@@ -66,6 +66,7 @@ var _pad_units: int = 0
 var _closeup: bool = false
 var _weather_override: String = ""
 var _camera_override: String = ""
+var _last_group_ms: int = -10000
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -86,6 +87,8 @@ func _ready() -> void:
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.command_pressed.connect(_on_command)
 	hud.return_pressed.connect(_on_return)
+	hud.speed_pressed.connect(_on_speed_pressed)
+	hud.minimap_clicked.connect(_on_minimap_clicked)
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -181,6 +184,8 @@ func begin() -> bool:
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
+	hud.minimap.flipped = player_side == "attacker"
+	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	add_child(LEADER_ORDERS_BAR.new(self))
 	_refresh_view(true)
@@ -397,6 +402,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if siege_view != null:
 			hud.set_siege_status(siege_status(battle.call("get_siege")))
 		hud.update_cards(units, player_side, selected)
+		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
@@ -472,15 +478,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	if battle == null:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
+		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
+			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
+			return
 		match event.keycode:
 			KEY_SPACE:
 				_toggle_pause()
-			KEY_1:
-				speed = SPEEDS[0]
-			KEY_2:
-				speed = SPEEDS[1]
-			KEY_3:
-				speed = SPEEDS[2]
+			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
+				_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
+			KEY_MINUS, KEY_KP_SUBTRACT:
+				_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
+			KEY_F1:
+				hud.toggle_help()
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
@@ -514,6 +525,50 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _toggle_pause() -> void:
 	paused = not paused
+
+
+## Boutons de vitesse du HUD (F5b) : -1 = pause (bascule), 0..2 = SPEEDS[index] et reprise.
+func _on_speed_pressed(index: int) -> void:
+	if index < 0:
+		_toggle_pause()
+	else:
+		speed = SPEEDS[index]
+		paused = false
+	hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
+
+
+## Ctrl+n (Cmd+n sous macOS) : enregistre la sélection ; n : la rappelle, et un second appui
+## rapide centre la caméra sur le groupe.
+func handle_group_key(number: int, save: bool) -> void:
+	if save:
+		hud.groups.save(number, selected)
+		return
+	var ids := hud.groups.recall(number, units)
+	if ids.is_empty():
+		return
+	var again := selected == ids and Time.get_ticks_msec() - _last_group_ms < 600
+	_last_group_ms = Time.get_ticks_msec()
+	selected = ids
+	if again:
+		var center := Vector3.ZERO
+		for unit in units:
+			if ids.has(int(unit["id"])):
+				center += Vector3(float(unit["x"]), 0, float(unit["z"]))
+		camera_rig.look_at_point(center / ids.size(), camera_rig.distance, camera_rig.yaw)
+
+
+## Cadre de la caméra au sol (x, z) : les quatre coins de l'écran projetés sur le terrain.
+func camera_frame() -> PackedVector2Array:
+	var frame := PackedVector2Array()
+	var screen := get_viewport().get_visible_rect().size
+	for corner in [Vector2(0, 0), Vector2(screen.x, 0), screen, Vector2(0, screen.y)]:
+		var point := ground_point(corner)
+		frame.append(Vector2(point.x, point.z))
+	return frame
+
+
+func _on_minimap_clicked(world: Vector2) -> void:
+	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
 
 
 func _finish_left(position: Vector2, additive: bool) -> void:

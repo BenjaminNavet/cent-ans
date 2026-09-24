@@ -1,0 +1,11 @@
+{
+  "id": "cdx_clairet",
+  "title": "Le clairet (« claret »)",
+  "category": "ingredient",
+  "aliases": ["clairet", "claret", "vin clairet"],
+  "era": { "from": "1200", "to": "1500" },
+  "summary": "Vin rouge léger, à peine coloré, obtenu par une courte macération : c'est le vin de Bordeaux que les Anglais baptisent « claret », nom qu'ils donnent encore aujourd'hui à tous les rouges bordelais.",
+  "body": "Le mot vient de « clair » : un vin d'un rouge pâle, entre le rosé et le rouge d'aujourd'hui. On l'obtient en laissant peu de temps le jus au contact des peaux des raisins noirs, parfois en mêlant raisins noirs et blancs. Le clairet se boit dans l'année : il est fruité, désaltérant, et ne vieillit pas.\n\nDès le XIIIe siècle, c'est le vin préféré des Anglais. Les flottes qui remontent chaque automne vers Londres, Bristol ou Southampton en chargent des milliers de tonneaux ; les comptes de la maison royale d'Angleterre en consignent l'achat pour les tables du roi. En anglais, « claret » devient au fil des siècles le nom générique du vin de Bordeaux, et le reste.\n\nLe tonneau bordelais, d'environ neuf cents litres, sert d'unité aux marchands et aux marins : la capacité des navires se compte en tonneaux de vin, origine de notre « tonnage ». Voir le [[cdx_commerce_de_bordeaux|commerce de Bordeaux]].\n\nPour les médecins médiévaux, les vins clairs et légers sont plus sains que les vins épais et noirs, trop chauds ; le [[cdx_regimen_sanitatis|Régime de santé de Salerne]] veut le bon vin « fort, beau, parfumé, frais et vif » (fortia, formosa, fragrantia, frigida, frisca). On y fait aussi macérer des épices pour préparer l'[[cdx_hypocras|hypocras]].\n\nAu XXIe siècle, l'appellation Bordeaux clairet existe toujours : un vin rouge léger issu d'une macération courte, plus foncé qu'un rosé. C'est une bonne approximation, sans plus : les cépages ont changé (le cabernet sauvignon et le merlot ne sont pas attestés au Moyen Âge), et le vin moderne est vinifié et conservé tout autrement.",
+  "see_also": ["cdx_vin_de_gascogne", "cdx_commerce_de_bordeaux", "cdx_bordeaux", "cdx_hypocras"],
+  "sources": ["Clairet", "Vignoble de Bordeaux", "Regimen sanitatis Salernitanum"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cdx_isabeau_de_baviere",
+  "title": "Isabeau de Bavière",
+  "category": "personnage",
+  "aliases": ["Isabeau de Bavière", "reine Isabeau", "Isabeau"],
+  "era": { "from": "v. 1370", "to": "1435" },
+  "summary": "Princesse bavaroise devenue reine de France en 1385, épouse de [[cdx_charles_vi|Charles VI]], Isabeau doit gouverner aux côtés d'un roi fou. Sa signature au [[cdx_traite_troyes|traité de Troyes]] lui a valu une réputation noire, largement forgée après sa mort.",
+  "body": "Fille du duc Étienne III de Bavière, Isabeau épouse le jeune [[cdx_charles_vi|Charles VI]] à Amiens en juillet 1385, à quinze ans environ. Le mariage, voulu par les oncles du roi pour s'allier aux Wittelsbach contre l'Angleterre, est aussi un mariage d'inclination : le roi aurait été séduit en la voyant. Elle lui donne douze enfants, dont beaucoup meurent jeunes.\n\nQuand le roi sombre dans la folie en 1392, Isabeau devient une pièce centrale du pouvoir. Les ordonnances lui confient la garde des enfants royaux et un rôle de médiatrice entre les princes pendant les « absences » de son époux. Elle se rapproche d'abord de Louis d'Orléans, frère du roi, puis, après son assassinat, oscille entre les partis de la guerre civile des [[cdx_armagnacs_bourguignons|Armagnacs et des Bourguignons]].\n\nEn 1420, alliée à la Bourgogne, elle est associée au [[cdx_traite_troyes|traité de Troyes]] qui déshérite son fils, le dauphin Charles, au profit d'[[cdx_henri_v|Henri V]], qui épouse sa fille Catherine. Elle finit ses jours à Paris, sous la domination anglaise, et meurt en 1435, quelques jours après la [[cdx_paix_arras|paix d'Arras]].\n\nLa légende d'une reine débauchée, dépensière et traîtresse, qui aurait laissé entendre que son fils était illégitime, s'est surtout construite après sa mort, chez des chroniqueurs hostiles puis chez les historiens romantiques. Les travaux récents décrivent plutôt une reine placée dans une situation impossible, qui tente de préserver la couronne de ses enfants.",
+  "see_also": ["cdx_charles_vi", "cdx_traite_troyes", "cdx_armagnacs_bourguignons", "cdx_bal_des_ardents"],
+  "sources": ["Isabeau de Bavière"]
+}

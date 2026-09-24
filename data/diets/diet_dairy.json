@@ -3,12 +3,14 @@
   "name": {
     "display": "Laitages, fromages et œufs"
   },
-  "description": "Beurre, fromages, lait caillé et œufs des campagnes herbagères. Les laitages étant interdits en [[cdx_careme|Carême]], on achète des dispenses : le [[cdx_beurre_de_careme|beurre de Carême]] financera la « [[cdx_tour_de_beurre|tour de beurre]] » de la cathédrale de Rouen, élevée à partir de 1485. Denrées fraîches, chères en hiver.",
+  "description": "Beurre, fromages, lait caillé et œufs des pays d'herbage : bocages, estives de montagne (fourme et cantal d'Auvergne, alpages suisses) et marais d'élevage de Flandre et de Hollande ; landes et forêts, pays de moutons et de porcs, n'y suffisent pas. Les laitages étant interdits en [[cdx_careme|Carême]], on achète des dispenses : le [[cdx_beurre_de_careme|beurre de Carême]] financera la « [[cdx_tour_de_beurre|tour de beurre]] » de la cathédrale de Rouen, élevée à partir de 1485. Denrées fraîches, chères en hiver.",
   "requirements": {
     "terrains": [
       "plains",
       "hills",
-      "bocage"
+      "bocage",
+      "mountains",
+      "marsh"
     ]
   },
   "cost_per_thousand": 0.12,

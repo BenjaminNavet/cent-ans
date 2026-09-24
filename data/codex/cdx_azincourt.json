@@ -1,0 +1,12 @@
+{
+  "id": "cdx_azincourt",
+  "title": "Bataille d'Azincourt",
+  "category": "bataille",
+  "aliases": ["Azincourt", "Agincourt"],
+  "era": { "from": "1415", "to": "1415" },
+  "summary": "Le 25 octobre 1415, en Artois, la petite armée épuisée d'[[cdx_henri_v|Henri V]] écrase la chevalerie française, embourbée dans un champ détrempé sous les flèches des archers anglais. Des milliers de nobles français y meurent ou y sont pris.",
+  "body": "Profitant de la folie de [[cdx_charles_vi|Charles VI]] et de la guerre civile entre [[cdx_armagnacs_bourguignons|Armagnacs et Bourguignons]], [[cdx_henri_v|Henri V]] débarque en Normandie en août 1415 et assiège Harfleur, qui capitule le 22 septembre. Le siège a coûté cher : la dysenterie a décimé son armée. Il décide de rejoindre [[cdx_calais|Calais]] par la terre, à la manière d'une [[cdx_chevauchee|chevauchée]], mais une armée française bien plus nombreuse lui barre la route près du village d'Azincourt.\n\nLe 25 octobre, jour de la Saint-Crépin, le terrain choisi joue contre les Français : un champ labouré, étranglé entre deux bois et détrempé par la pluie. Les Anglais, environ 6 000 à 9 000 hommes dont une grande majorité d'archers, se retranchent derrière des pieux plantés en terre. Les Français, commandés par le connétable Charles d'Albret et le maréchal Boucicaut, sont trop nombreux pour l'espace disponible.\n\nLa cavalerie française, criblée de flèches, se brise sur les pieux ; les [[cdx_hommes_d_armes|hommes d'armes]] qui avancent à pied, alourdis par leur [[cdx_harnois|harnois]], s'enlisent dans la boue et s'entassent au contact des lignes anglaises, où archers et hommes d'armes les achèvent. Craignant une nouvelle attaque, Henri V fait massacrer une partie des prisonniers, geste qui choqua les contemporains.\n\nLe bilan est terrible : le connétable, les ducs d'Alençon, de Bar et de Brabant et des milliers de nobles sont tués. Le duc Charles d'Orléans, prisonnier, restera vingt-cinq ans captif en Angleterre, où il écrit une grande partie de ses poèmes. Azincourt ouvre la voie à la conquête de la Normandie et au [[cdx_traite_troyes|traité de Troyes]] ; Shakespeare en fera l'apothéose de son Henry V.",
+  "entity": "evt_azincourt",
+  "see_also": ["cdx_henri_v", "cdx_arc_long", "cdx_crecy", "cdx_traite_troyes"],
+  "sources": ["Bataille d'Azincourt", "Charles d'Orléans"]
+}

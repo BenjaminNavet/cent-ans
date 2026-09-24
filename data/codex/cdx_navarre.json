@@ -1,0 +1,12 @@
+{
+  "id": "cdx_navarre",
+  "title": "Le royaume de Navarre",
+  "category": "lieu",
+  "aliases": ["Navarre", "royaume de Navarre", "Pampelune", "Jeanne II de Navarre", "maison d'Évreux"],
+  "era": { "from": "1328", "to": "1425" },
+  "summary": "Petit royaume pyrénéen autour de Pampelune, la Navarre revient en 1328 à Jeanne II, fille du roi Louis X écartée du trône de France. Ses rois de la maison d'Évreux, dont [[cdx_charles_le_mauvais|Charles le Mauvais]], possèdent aussi de vastes terres en Normandie.",
+  "body": "Le royaume de Navarre s'étend de part et d'autre des Pyrénées occidentales, autour de sa capitale Pampelune. Uni à la couronne de France depuis le mariage de Philippe le Bel avec l'héritière navarraise en 1284, il en est séparé en 1328 : les barons navarrais reconnaissent pour reine Jeanne II, fille de Louis X le Hutin, que les [[cdx_capetiens_directs|Capétiens]] avaient écartée du trône de France.\n\nJeanne règne avec son mari Philippe d'Évreux, cousin de [[cdx_philippe_vi|Philippe VI]]. Le couple possède aussi en France le comté d'Évreux et de nombreuses seigneuries normandes, qui donnent aux rois de Navarre des places fortes à quelques jours de marche de Paris.\n\nLeur fils, [[cdx_charles_le_mauvais|Charles II]], dit plus tard le Mauvais, roi de 1349 à 1387, estime que sa mère aurait dû être reine de France et que lui-même a des droits sur la couronne. Il s'allie tour à tour aux Anglais et au roi de France, fait assassiner le connétable Charles d'Espagne en 1354 et intrigue à Paris pendant les troubles de 1358. La défaite de ses troupes à Cocherel, en 1364, contre [[cdx_du_guesclin|Du Guesclin]], ruine ses ambitions.\n\nSon fils Charles III le Noble, roi de 1387 à 1425, abandonne les terres normandes contre le duché de Nemours et se consacre à son royaume, où il fait bâtir le palais d'Olite. La Navarre se tourne alors vers l'Espagne ; sa partie méridionale sera conquise par Ferdinand d'Aragon en 1512.",
+  "entity": "fac_navarre",
+  "see_also": ["cdx_charles_le_mauvais", "cdx_succession_1328", "cdx_castille"],
+  "sources": ["Royaume de Navarre", "Jeanne II de Navarre", "Charles III de Navarre"]
+}

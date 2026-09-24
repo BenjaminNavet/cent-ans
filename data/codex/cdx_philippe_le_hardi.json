@@ -1,0 +1,12 @@
+{
+  "id": "cdx_philippe_le_hardi",
+  "title": "Philippe le Hardi, duc de Bourgogne",
+  "category": "personnage",
+  "aliases": ["Philippe le Hardi", "Philippe II de Bourgogne", "Champmol"],
+  "era": { "from": "1342", "to": "1404" },
+  "summary": "Plus jeune fils de [[cdx_jean_ii|Jean II]], Philippe le Hardi reçoit le duché de Bourgogne en 1363 et, par son mariage avec l'héritière de Flandre, fonde la puissance des ducs Valois de Bourgogne.",
+  "body": "Né en 1342, Philippe est le quatrième fils de [[cdx_jean_ii|Jean le Bon]]. À quatorze ans, il combat aux côtés de son père à [[cdx_poitiers|Poitiers]] ; la tradition lui prête le cri « Père, gardez-vous à droite ! Père, gardez-vous à gauche ! ». Capturé avec le roi, il partage sa captivité en Angleterre, et c'est de cette fidélité que viendrait son surnom de Hardi.\n\nEn 1361, la mort du jeune duc Philippe de Rouvres éteint la lignée capétienne des ducs de [[cdx_bourgogne|Bourgogne]]. Jean II reprend le duché et le donne en 1363 à son fils préféré, en apanage. En 1369, [[cdx_charles_v|Charles V]] lui fait épouser Marguerite de Male, héritière du comte de Flandre : l'enjeu est d'empêcher qu'elle n'épouse un fils d'[[cdx_edouard_iii|Édouard III]]. À la mort de son beau-père [[cdx_louis_de_male|Louis de Male]], en 1384, Philippe hérite de la Flandre, de l'Artois, de Nevers et de la Franche-Comté.\n\nPendant la minorité puis la folie de [[cdx_charles_vi|Charles VI]], il est l'un des oncles qui gouvernent le royaume, et le plus puissant. Il n'oublie pas ses intérêts : il mène l'ost royal à [[cdx_roosebeke|Roosebeke]] en 1382 contre les Gantois révoltés, puis négocie avec eux et ménage l'Angleterre, dont dépend l'industrie drapière flamande.\n\nGrand mécène, il fonde près de Dijon la chartreuse de Champmol, nécropole de sa dynastie, où travaille le sculpteur Claus Sluter. Il meurt en 1404, si endetté que sa veuve renonce à ses biens meubles pour ne pas payer ses dettes. Son fils [[cdx_jean_sans_peur|Jean sans Peur]] lui succède.",
+  "entity": "chr_philippe_le_hardi",
+  "see_also": ["cdx_bourgogne", "cdx_jean_sans_peur", "cdx_louis_de_male", "cdx_valois"],
+  "sources": ["Philippe II de Bourgogne", "Chartreuse de Champmol"]
+}

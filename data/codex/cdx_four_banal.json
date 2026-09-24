@@ -1,0 +1,11 @@
+{
+  "id": "cdx_four_banal",
+  "title": "Le four banal",
+  "category": "institution",
+  "aliases": ["four banal", "fours banaux", "banalité", "banalités", "fournage"],
+  "era": { "from": "1000", "to": "1789" },
+  "summary": "Four appartenant au seigneur, que les habitants de la seigneurie sont tenus d'utiliser pour cuire leur pain contre une redevance, le fournage : l'une des « banalités » qui pèsent sur la vie paysanne.",
+  "body": "Le mot vient du « ban », le pouvoir de commander et de contraindre que le seigneur exerce sur les habitants de sa terre. À partir du XIe siècle, ce pouvoir se traduit par des monopoles : le four, le moulin, le pressoir appartiennent au seigneur, et les paysans doivent s'en servir, à l'exclusion de tout autre. Ce sont les banalités.\n\nLe four banal est souvent un bâtiment de pierre au cœur du village, confié à un fournier. On y porte sa pâte, pétrie à la maison ; le fournier cuit les pains et prélève une part de la fournée ou quelques deniers : c'est le fournage. Le taux varie selon les coutumes locales ; on cite souvent un pain sur vingt ou sur trente, mais il n'y a pas de règle générale. Cuire chez soi, quand on a les moyens de bâtir un four, expose à une amende.\n\nL'institution a sa logique : un grand four, chauffé longtemps, économise le bois, rare et protégé, et limite les incendies dans des villages aux toits de chaume. Mais elle est aussi une source de revenus et de rancœur. Attendre son tour, se méfier du fournier, payer pour un pain qu'on a pétri soi-même : les banalités figurent parmi les griefs paysans jusqu'à leur abolition, dans la nuit du 4 août 1789.\n\nLe four banal est aussi un lieu de sociabilité, où l'on échange les nouvelles en attendant la fournée. Il nourrit le [[cdx_pain_bis|pain bis]] quotidien, que l'on mange trempé dans le [[cdx_potage|potage]] ; son cousin, le moulin banal, a son propre droit, la mouture. Ces redevances s'inscrivent dans l'ensemble des droits de la [[cdx_seigneurie|seigneurie]].",
+  "see_also": ["cdx_pain_bis", "cdx_potage", "cdx_seigneurie"],
+  "sources": ["Banalité (droit féodal)", "Four banal"]
+}

@@ -33,6 +33,10 @@ pub const SIEGE_MASTER_SIEGES: u32 = 3;
 pub const CRUEL_RAIDS: u32 = 3;
 /// Chance (per mille) that a defeated general dies on the field (spec § 2).
 pub const GENERAL_DEATH_PERMILLE: u32 = 50;
+/// Same for a reigning sovereign, better protected and more often ransomed
+/// than killed (F4: kings seldom fell in battle; Jean l'Aveugle at Crécy is
+/// the exception).
+pub const RULER_DEATH_PERMILLE: u32 = 10;
 /// Unrest penalty applied to every province of a faction under regency
 /// (spec § 2).
 pub const REGENCY_UNREST_PENALTY: u8 = 5;
@@ -288,7 +292,17 @@ pub fn on_battle_resolved(
                 );
             }
         }
-        if state.rng.chance_permille(GENERAL_DEATH_PERMILLE) {
+        let faction = &state.characters[general].faction;
+        let ruler = state
+            .factions
+            .get(faction)
+            .is_some_and(|f| f.ruler.as_ref() == Some(general));
+        let permille = if ruler {
+            RULER_DEATH_PERMILLE
+        } else {
+            GENERAL_DEATH_PERMILLE
+        };
+        if state.rng.chance_permille(permille) {
             crate::characters::kill(state, data, general, events);
         }
     }
