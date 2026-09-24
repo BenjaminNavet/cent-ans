@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_atmosphere.schema.json",
+  "title": "Ciels et étalonnage",
+  "description": "Fichier data/fx/atmosphere.json (lot V3, A1-05) : ciels HDRI et étalonnage par météo et par saison, lus par game/scripts/visual/atmosphere_library.gd. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 2 }, "minItems": 3, "maxItems": 3 },
+    "offset": { "type": "array", "items": { "type": "number", "minimum": -0.5, "maximum": 0.5 }, "minItems": 3, "maxItems": 3 },
+    "season_map": {
+      "type": "object",
+      "properties": {
+        "spring": { "type": "string" }, "summer": { "type": "string" },
+        "autumn": { "type": "string" }, "winter": { "type": "string" }
+      },
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false
+    },
+    "grade": {
+      "type": "object",
+      "description": "Étalonnage (espace sRGB) : balance des blancs, lift/gamma/gain, contraste, saturation, virage.",
+      "properties": {
+        "temperature": { "type": "number", "minimum": -1, "maximum": 1, "description": "Froid (-) / chaud (+)." },
+        "tint": { "type": "number", "minimum": -1, "maximum": 1, "description": "Vert (-) / magenta (+)." },
+        "lift": { "$ref": "#/$defs/offset" },
+        "gamma": { "$ref": "#/$defs/rgb" },
+        "gain": { "$ref": "#/$defs/rgb" },
+        "contrast": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
+        "saturation": { "type": "number", "minimum": 0, "maximum": 2 },
+        "shadows": { "$ref": "#/$defs/rgb", "description": "Multiplicateur des tons sombres." },
+        "highlights": { "$ref": "#/$defs/rgb", "description": "Multiplicateur des tons clairs." }
+      },
+      "additionalProperties": false
+    },
+    "sky_look": {
+      "type": "object",
+      "properties": {
+        "sky_luminance": { "type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Luminance moyenne visée du ciel (le panorama est normalisé par sa moyenne)." },
+        "sky_saturation": { "type": "number", "minimum": 0, "maximum": 2 },
+        "sky_tint": { "$ref": "#/$defs/rgb" },
+        "sun_disc": { "type": "number", "minimum": 0, "maximum": 2 },
+        "haze": { "type": "number", "minimum": 0, "maximum": 1, "description": "Voile d'horizon vers la couleur du brouillard." }
+      }
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "lut_size": { "type": "integer", "minimum": 8, "maximum": 64 },
+    "skies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "pattern": "^res://.+\\.(hdr|exr)$" },
+          "sun_azimuth_deg": { "type": "number", "minimum": 0, "maximum": 360 },
+          "sun_elevation_deg": { "type": "number", "minimum": -10, "maximum": 90 },
+          "mean": { "type": "number", "exclusiveMinimum": 0 },
+          "sunny": { "type": "boolean" }
+        },
+        "required": ["path", "sun_azimuth_deg", "sun_elevation_deg", "mean", "sunny"],
+        "additionalProperties": false
+      }
+    },
+    "seasons": {
+      "type": "object",
+      "properties": {
+        "spring": { "$ref": "#/$defs/grade" }, "summer": { "$ref": "#/$defs/grade" },
+        "autumn": { "$ref": "#/$defs/grade" }, "winter": { "$ref": "#/$defs/grade" }
+      },
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false
+    },
+    "battle": {
+      "type": "object",
+      "propertyNames": { "enum": ["clear", "fog", "rain", "snow"] },
+      "additionalProperties": {
+        "allOf": [{ "$ref": "#/$defs/sky_look" }],
+        "type": "object",
+        "properties": {
+          "sky": { "$ref": "#/$defs/season_map" },
+          "grade": { "$ref": "#/$defs/grade" }
+        },
+        "required": ["sky", "sky_luminance", "grade"]
+      }
+    },
+    "campaign": {
+      "type": "object",
+      "properties": {
+        "grade_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "seasons": {
+          "type": "object",
+          "propertyNames": { "enum": ["spring", "summer", "autumn", "winter"] },
+          "additionalProperties": {
+            "allOf": [{ "$ref": "#/$defs/sky_look" }],
+            "type": "object",
+            "properties": {
+              "sky": { "type": "string" },
+              "fog_color": { "$ref": "#/$defs/rgb" }
+            },
+            "required": ["sky", "sky_luminance"]
+          }
+        }
+      },
+      "required": ["grade_strength", "seasons"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["lut_size", "skies", "seasons", "battle", "campaign"],
+  "additionalProperties": false
+}
