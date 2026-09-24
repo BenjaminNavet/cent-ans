@@ -11,7 +11,8 @@ Mandat : autonomie complète toute la nuit. Inspiration principale Total War. To
 | Vague | Lots | État |
 |---|---|---|
 | 0 | A1 audit visuel/3D/animation ; A2 audit mécaniques/équilibre (simulations IA) ; A3 audit UI/UX ; A4 recherche d'assets libres ; A5 audit technique (rendu, perf, audio) | A1, A2, A3, A4 **faits** (`docs/audit/`) ; A5 en cours |
-| 1 | D0 téléchargement du top 15 d'assets libres (`game/assets/third_party/`, wip `d0-assets.md`) ; V1 correctifs visuels rapides A1-01/02/03/04/06 (wip `v1-correctifs-visuels.md`) | en cours (worktrees) |
+| 1 | D0 (**fusionné** 40a39c9 : 13/15 assets, Knight Pack Quaternius en échec, quota Google Drive) téléchargement du top 15 d'assets libres (`game/assets/third_party/`, wip `d0-assets.md`) ; V1 correctifs visuels rapides A1-01/02/03/04/06 (wip `v1-correctifs-visuels.md`) | en cours (worktrees) |
+| 3 | V2 soldats et chevaux animés (A1-18, VAT sur base Quaternius, ADR 0014, wip `v2-soldats-animes.md`) | en cours |
 | 2 | G1 sonde O1 + auto-résolution N1 + doctrines IA E1 (wip `g1-equilibre.md`) ; U1 bogues UI U0/U2 (wip `u1-bogues-ui.md`) | en cours (worktrees) |
 
 ## Reprise
