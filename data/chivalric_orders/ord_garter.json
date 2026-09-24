@@ -1,0 +1,28 @@
+{
+  "id": "ord_garter",
+  "name": {
+    "display": "Ordre de la Jarretière",
+    "local": "Most Noble Order of the Garter",
+    "local_language": "anglais moderne"
+  },
+  "description": "Fondé par Édouard III à Windsor pour la Saint-Georges, l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]] réunit le roi, le prince de Galles et vingt-quatre compagnons, pour la plupart vainqueurs de Crécy, sous la devise française « Honi soit qui mal y pense ». Ses membres, liés au roi par un serment de [[cdx_chevalerie|chevalerie]], sont les meilleurs capitaines du royaume.",
+  "faction": "fac_england",
+  "min_year": 1344,
+  "cost": 2000,
+  "prestige_required": 10,
+  "members": 6,
+  "historical_members": "26 : le souverain, le prince de Galles et 24 chevaliers",
+  "member_loyalty": 10,
+  "member_morale": 8,
+  "founder_prestige": 10,
+  "yearly_prestige": 2,
+  "historical_date": {
+    "value": "1348",
+    "uncertain": true,
+    "note": "Date traditionnelle ; certains historiens proposent le 23 avril 1344 (Table ronde de Windsor), d'autres jusqu'à 1351."
+  },
+  "sources": [
+    "Order of the Garter",
+    "Juliet Vale, Edward III and Chivalry, 1982"
+  ]
+}
