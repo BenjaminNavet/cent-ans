@@ -81,8 +81,27 @@ static func build_model(level: int, variant_seed: int, castle: bool) -> Node3D:
 
 
 ## Château de Kenney Castle Kit : donjon carré coiffé, deux tours hexagonales, courtine ;
-## teinté pierre (texture d'origine conservée pour les toits bleus → ardoise).
+## pièces fusionnées en un seul maillage (un appel de rendu par château, mis en cache), teinté
+## pierre (la texture commune du kit est conservée : toits bleus → ardoise).
+static var _castle_mesh: ArrayMesh = null
+static var _castle_loaded := false
+
+
 static func kenney_castle() -> Node3D:
+	var mesh := _kenney_castle_mesh()
+	if mesh == null:
+		return null
+	var instance := MeshInstance3D.new()
+	instance.name = "KenneyCastle"
+	instance.mesh = mesh
+	instance.scale = Vector3.ONE * 0.85
+	return instance
+
+
+static func _kenney_castle_mesh() -> ArrayMesh:
+	if _castle_loaded:
+		return _castle_mesh
+	_castle_loaded = true
 	var pieces := [
 		["tower-square", Vector3(0, 0, 0)],
 		["tower-square-top-roof-high", Vector3(0, 1, 0)],
@@ -92,23 +111,37 @@ static func kenney_castle() -> Node3D:
 		["tower-hexagon-roof", Vector3(-1.3, 1, 1.0)],
 		["wall", Vector3(0.05, 0, 1.1)],
 	]
-	var root := Node3D.new()
-	root.name = "KenneyCastle"
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var material: StandardMaterial3D = null
 	for piece in pieces:
 		var path := KENNEY_DIR + str(piece[0]) + ".glb"
 		if not ResourceLoader.exists(path):
 			return null
-		var node := (load(path) as PackedScene).instantiate() as Node3D
-		node.position = piece[1]
-		root.add_child(node)
-	for child in root.find_children("*", "MeshInstance3D", true, false):
-		var mesh_instance := child as MeshInstance3D
-		# Une seule matière (texture commune du kit) : surcharge d'instance, pas de surface.
-		var base := mesh_instance.mesh.surface_get_material(0) as StandardMaterial3D if mesh_instance.mesh != null else null
-		if base == null:
-			continue
-		var tinted := base.duplicate() as StandardMaterial3D
-		tinted.albedo_color = KENNEY_TINT
-		mesh_instance.material_override = tinted
-	root.scale = Vector3.ONE * 0.85
-	return root
+		var root := (load(path) as PackedScene).instantiate() as Node3D
+		for child in root.find_children("*", "MeshInstance3D", true, false):
+			var mesh_instance := child as MeshInstance3D
+			if mesh_instance.mesh == null:
+				continue
+			var xform := Transform3D(Basis.IDENTITY, piece[1]) * _relative(root, mesh_instance)
+			for surface in mesh_instance.mesh.get_surface_count():
+				tool.append_from(mesh_instance.mesh, surface, xform)
+				if material == null:
+					material = mesh_instance.mesh.surface_get_material(surface) as StandardMaterial3D
+		root.free()
+	if material != null:
+		material = material.duplicate() as StandardMaterial3D
+		material.albedo_color = KENNEY_TINT
+		tool.set_material(material)
+	_castle_mesh = tool.commit()
+	return _castle_mesh
+
+
+static func _relative(root: Node, node: Node3D) -> Transform3D:
+	var xform := Transform3D.IDENTITY
+	var current: Node = node
+	while current != null and current != root:
+		if current is Node3D:
+			xform = (current as Node3D).transform * xform
+		current = current.get_parent()
+	return xform

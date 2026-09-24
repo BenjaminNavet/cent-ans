@@ -12,7 +12,8 @@ extends Node3D
 ## Options (ligne de commande, après `--`) :
 ##   --season=spring|summer|autumn|winter   force la saison affichée (captures) ;
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
-##   --no-life                               désactive la couche (mesures A/B).
+##   --no-life                               désactive la couche (mesures A/B) ;
+##   --life-off=terrain,smoke,mills,ambient  désactive une partie (mesures de coût).
 
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
@@ -40,6 +41,7 @@ var _terroir_key: String = ""
 ## Facteur de réduction `_fit_models` d'origine par colonie (gardé au remplacement).
 var _fit: Dictionary = {}
 var _turn_key: String = ""
+var _off: Dictionary = {}
 
 
 func setup(map: Node) -> void:
@@ -49,7 +51,7 @@ func setup(map: Node) -> void:
 	_settlements = map.get("settlement_layer") as SettlementLayer
 	_parse_cmdline()
 	if _terrain != null and _terrain.material != null:
-		_terrain.material.set_shader_parameter("life_enabled", enabled)
+		_terrain.material.set_shader_parameter("life_enabled", enabled and not _off.has("terrain"))
 	if not enabled:
 		seasons.set_season("summer", true)
 		return
@@ -71,6 +73,9 @@ func _parse_cmdline() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--no-life":
 			enabled = false
+		elif arg.begins_with("--life-off="):
+			for part in arg.trim_prefix("--life-off=").split(",", false):
+				_off[part] = true
 		elif arg.begins_with("--season="):
 			forced_season = arg.trim_prefix("--season=")
 		elif arg.begins_with("--devastate="):
@@ -216,7 +221,16 @@ func update_view(camera_distance: float) -> void:
 	if effects != null:
 		effects.set_season(seasons.weights)
 		effects.update_view(_camera_distance, _tiers)
-	if ambient != null and _tiers != null:
+		if _off.has("smoke"):
+			effects.get_node("Chimneys").visible = false
+			effects.get_node("Fires").visible = false
+		if _off.has("mills"):
+			effects.get_node("WindmillBodies").visible = false
+			effects.get_node("WindmillSails").visible = false
+	if _off.has("ambient"):
+		if ambient != null:
+			ambient.visible = false
+	elif ambient != null and _tiers != null:
 		var rig := _map.get("camera_rig") as Node3D if _map != null else null
 		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
 		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance), _tiers.medium_weight(_camera_distance))

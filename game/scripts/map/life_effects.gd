@@ -11,7 +11,7 @@ const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
 ## Moulins à vent par type de colonie, échelle monde, position du moyeu (repère du corps).
 const WINDMILLS := {"city": 2, "town": 1, "village": 1}
-const WINDMILL_SCALE := 6.0
+const WINDMILL_SCALE := 4.6
 const WINDMILL_HUB := Vector3(0.0, 0.3, 0.08)
 ## Dévastation (%) à partir de laquelle villages et bourgs sont en ruine, et ruine maximale.
 const RUIN_MIN_DEVASTATION := 45.0
