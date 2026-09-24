@@ -126,7 +126,7 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	hbox.add_child(text)
 	var lines := [
 		[str(save["label"]), 18, Color(0.22, 0.14, 0.07)],
-		["%s — %s, tour %d" % [faction, save.get("date", "?"), int(save.get("turn", 0))], 15, Color(0.35, 0.22, 0.10)],
+		["%s — %s, tour %d" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1], 15, Color(0.35, 0.22, 0.10)],
 		["Sauvegardée le %s" % str(save.get("timestamp", "")).replace("T", " à "), 13, Color(0.45, 0.36, 0.26)],
 	]
 	var usable := mode != Mode.LOAD or SaveSlots.loadable(save)

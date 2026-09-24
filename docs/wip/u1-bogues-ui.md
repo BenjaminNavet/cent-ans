@@ -10,14 +10,18 @@ Captures de vérification : `docs/audit/captures/u1/`.
 ## État
 - [x] U0 : `.uid` non suivis commités ; `--resolution` / `-f` l'emportent sur le réglage enregistré
   (`settings.gd` : fenêtre de départ différente de celle du projet = ligne de commande).
-- [ ] C1 minicarte au-dessus des panneaux
-- [ ] B1 conflit AZERTY en bataille
-- [ ] C12 assaut de siège + aide F1
-- [ ] C2 tour 0
-- [ ] E1 revenu incohérent
+- [x] C1 minicarte sous les panneaux (`minimap_controller.gd`, `move_child` après la barre du haut)
+- [x] B1 ordres du chef en touches physiques + libellés selon la disposition ; B5 recharge en coin ;
+  `map_toggle_unrest` (M) en keycode (en AZERTY, M n'est pas à la place physique de M)
+- [x] C12 : le bloc de siège fonctionne en jeu ; c'est la mise en scène qui s'arrêtait trop tôt
+  (corrigée) ; encart décalé s'il couvre le journal ; aide F1, encyclopédie, tutoriel sans « panneau d'armée »
+- [x] C2 tour affiché = tour moteur + 1 (barre, sauvegardes, rançons)
+- [x] E1 : `FactionEconomy::net_income` et `CampaignState::faction_net_last_turn` (core,
+  `economy_balance.rs`), exposés `net_income`, `net_income_last_turn` ; barre et panneau affichent
+  le même solde, charges signées
 - [ ] M4 crédits Markdown
 - [ ] erreurs brutes (agents)
 - [ ] C13, B5, autres petits défauts
 
 ## Prochaine étape
-C1.
+M4 crédits, erreurs brutes (agents), C13.

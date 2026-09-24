@@ -43,6 +43,7 @@ pub mod coinage;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
+pub mod economy_balance;
 pub mod events;
 pub mod frontier;
 pub mod medicine;
