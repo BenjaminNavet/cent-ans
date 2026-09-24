@@ -118,6 +118,15 @@ impl CampaignState {
         }
     }
 
+    /// Chosen edict still waiting for its delay, with the turns left before
+    /// it takes effect (`None` when nothing is pending).
+    pub fn pending_edict(&self, data: &GameData, province: &ProvinceId) -> Option<(EdictId, u32)> {
+        let choice = self.edict_choice(province)?;
+        let delay = data.edicts.get(&choice.edict).map_or(0, |e| e.delay_turns);
+        let elapsed = self.turn.saturating_sub(choice.turn);
+        (elapsed < delay).then(|| (choice.edict.clone(), delay - elapsed))
+    }
+
     /// `true` while a chosen edict has not taken effect yet.
     pub fn edict_pending(&self, data: &GameData, province: &ProvinceId) -> bool {
         let Some(choice) = self.edict_choice(province) else {
@@ -372,6 +381,10 @@ mod tests {
         set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
         // delay_turns: 1 for edict_peace_of_god -> not active on the same turn.
         assert!(state.edict_pending(&data, &province));
+        assert_eq!(
+            state.pending_edict(&data, &province),
+            Some((edict.clone(), 1))
+        );
         assert_eq!(
             state.province_edict(&data, &province).as_str(),
             DEFAULT_EDICT

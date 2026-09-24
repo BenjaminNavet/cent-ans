@@ -122,7 +122,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 	var pending := bool(edict.get("pending", false))
 	pending_label.visible = pending and player_owned
 	if pending:
-		pending_label.text = "En vigueur dans %d tour(s) ; l'ancien édit s'applique en attendant." % int(edict.get("delay_turns", 0))
+		pending_label.text = "« %s » entre en vigueur dans %d tour(s) ; l'édit actuel s'applique en attendant." % [str(edict.get("pending_name", "")), int(edict.get("turns_left", 0))]
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
 	description_label.visible = description_label.text != ""
 	choose_button.visible = player_owned

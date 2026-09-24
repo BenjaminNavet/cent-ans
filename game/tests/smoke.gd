@@ -101,6 +101,7 @@ func _init() -> void:
 	await _run_icons()  # F2
 	await _run_codex()  # H2
 	await _run_table_medicine()  # H9
+	_run_edicts()  # C4 (TW)
 	await _run_coinage_ransom()  # H11
 	await _run_siege_battle()
 	await _run_flow()  # F3
@@ -1449,6 +1450,37 @@ func _run_codex() -> void:
 ## `get_diet_options`, sinon skip imprimé) : section Table d'une province française, changement
 ## de régime par l'interface, refus affiché, infobulle de tech médecine (plantes, note),
 ## genres `table` / `medicine` mappés (rapport, lettres, alertes), herbier silencieux.
+## C4 (TW) : édits régionaux par le pont réel (options, ordre `set_edict`, délai) et section UI.
+func _run_edicts() -> void:
+	const FACTION_ID := "fac_france"
+	const PROVINCE_ID := "prov_berry"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_edict_options")):
+		print("smoke edicts: skipped, CampaignSim has no get_edict_options (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "edicts: new_campaign failed"):
+		return
+	var failures_before := _failures
+	var options: Array = sim.call("get_edict_options", PROVINCE_ID)
+	_check(options.size() >= 6, "edicts: expected at least 6 options, got %d" % options.size())
+	var result: Dictionary = sim.call("submit_order", {"type": "set_edict", "province": PROVINCE_ID, "edict": "edict_militia_levy"})
+	_check(bool(result.get("ok", false)), "edicts: set_edict refused: %s" % str(result.get("error", "")))
+	var edict: Dictionary = sim.call("get_province_edict", PROVINCE_ID)
+	_check(bool(edict.get("pending", false)) and str(edict.get("edict", "")) == "edict_none", "edicts: militia levy should be pending, got %s" % [edict])
+	var again: Dictionary = sim.call("submit_order", {"type": "set_edict", "province": PROVINCE_ID, "edict": "edict_feudal_aid"})
+	_check(not bool(again.get("ok", true)), "edicts: second change in the same turn should be refused")
+	sim.call("end_turn")
+	edict = sim.call("get_province_edict", PROVINCE_ID)
+	_check(str(edict.get("edict", "")) == "edict_militia_levy", "edicts: militia levy should be active after one turn, got %s" % [edict])
+	var section := EdictSection.new()
+	root.add_child(section)
+	section.show_for(PROVINCE_ID, true, sim)
+	_check(section.visible and section.option_buttons.size() == options.size(), "edicts: section should list every edict")
+	section.queue_free()
+	if _failures == failures_before:
+		print("smoke OK: edicts (real), %d options, militia levy pending then active, second change refused" % options.size())
+
+
 func _run_table_medicine() -> void:
 	const FACTION_ID := "fac_france"
 	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_diet_options")):
