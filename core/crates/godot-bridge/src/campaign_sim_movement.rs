@@ -64,6 +64,7 @@ impl CampaignSim {
             bytes[index] = 255;
             bytes[index + 1] = ((u64::from(*cost) * 255) / u64::from(budget)).min(255) as u8;
         }
+        close_thin_gaps(&mut bytes, width as usize, height as usize);
         let packed = PackedByteArray::from(bytes.as_slice());
         let Some(image) =
             Image::create_from_data(width as i32, height as i32, false, Format::RG8, &packed)
@@ -244,6 +245,54 @@ impl CampaignSim {
         };
         dict.set("events", &new_events);
         dict
+    }
+}
+
+/// Display only: fills the gaps of at most `THIN_GAP` cells between two
+/// reachable cells of a row or a column (rivers crossed by a bridge further
+/// on), so that the bubble reads as one area instead of being striped by
+/// every river. `bytes` is the RG8 mask of `get_reachable_area`.
+fn close_thin_gaps(bytes: &mut [u8], width: usize, height: usize) {
+    const THIN_GAP: usize = 2;
+    let inside = |bytes: &[u8], x: usize, y: usize| bytes[(y * width + x) * 2] == 255;
+    let mut fills: Vec<(usize, u8)> = Vec::new();
+    for y in 0..height {
+        for x in 0..width {
+            if inside(bytes, x, y) {
+                continue;
+            }
+            let mut best: Option<u8> = None;
+            for (dx, dy) in [(1usize, 0usize), (0, 1)] {
+                for before in 1..=THIN_GAP {
+                    for after in 1..=THIN_GAP {
+                        if before + after > THIN_GAP + 1 {
+                            continue;
+                        }
+                        let (Some(bx), Some(by)) =
+                            (x.checked_sub(before * dx), y.checked_sub(before * dy))
+                        else {
+                            continue;
+                        };
+                        let (ax, ay) = (x + after * dx, y + after * dy);
+                        if ax >= width || ay >= height {
+                            continue;
+                        }
+                        if inside(bytes, bx, by) && inside(bytes, ax, ay) {
+                            let cost = bytes[(by * width + bx) * 2 + 1]
+                                .max(bytes[(ay * width + ax) * 2 + 1]);
+                            best = Some(best.map_or(cost, |b| b.min(cost)));
+                        }
+                    }
+                }
+            }
+            if let Some(cost) = best {
+                fills.push(((y * width + x) * 2, cost));
+            }
+        }
+    }
+    for (index, cost) in fills {
+        bytes[index] = 255;
+        bytes[index + 1] = cost;
     }
 }
 

@@ -1073,8 +1073,8 @@ func _parse_cmdline() -> void:
 					tutorial.stage_screenshot(_screenshot_stage)
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
-				"movement":  # M4
-					movement_ctl.stage_screenshot()
+				"movement", "movement_near":  # M4 : bulle et chemin (vue d'ensemble, gros plan)
+					movement_ctl.stage_screenshot(_screenshot_stage == "movement_near")
 				"agents", "agents_registry":  # C6 agents
 					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
 				_:

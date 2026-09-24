@@ -203,7 +203,16 @@ func order_target(army_id: String, target: Dictionary) -> Dictionary:
 				return order_attack(army_id, str(target["id"]))
 			return order_move_point(army_id, target["point"])
 		"settlement":
-			return order_move_settlement(army_id, str(target["id"]))
+			var report := order_move_settlement(army_id, str(target["id"]))
+			if report.get("ok", false):
+				return report
+			# Port d'outre-mer : traversée si l'armée se tient dans un port relié (le cœur valide).
+			var army: Dictionary = map.sim.call("get_army", army_id)
+			if str(army.get("settlement", "")) != "" and map.sim.has_method("embark_army"):
+				var crossing := order_embark(army_id, str(target["id"]))
+				if crossing.get("ok", false):
+					return crossing
+			return report
 		"ground":
 			return order_move_point(army_id, target["point"])
 	return {"ok": false, "error": "Aucune cible."}
@@ -440,7 +449,7 @@ func _update_zoc_ring() -> void:
 
 ## Première armée du joueur sélectionnée, bulle, chemin sur deux tours vers un point au-delà
 ## de la bulle, caméra cadrée sur l'ensemble.
-func stage_screenshot() -> void:
+func stage_screenshot(close_up: bool = false) -> void:
 	if not available():
 		return
 	var ids: PackedStringArray = map.player_army_ids()
@@ -460,7 +469,13 @@ func stage_screenshot() -> void:
 			chosen = point
 			break
 	var focus := start if chosen.x < 0.0 else start.lerp(chosen, 0.4)
-	map.camera_rig.look_at_point(Vector3(focus.x, map.map_data.surface_world_at(focus.x, focus.y), focus.y), maxf(radius * 2.3, 120.0))
-	map.camera_rig.snap()
+	var distance := maxf(radius * 2.3, 120.0)
 	if chosen.x >= 0.0:
 		preview_target({"kind": "ground", "id": "", "point": chosen})
+	if close_up and not preview.is_empty():
+		# Gros plan sur la fin de l'étape de ce tour, au bord de la bulle.
+		var points: PackedVector2Array = preview["points"]
+		focus = points[int(preview["stop_index"])]
+		distance = maxf(radius * 0.7, 80.0)
+	map.camera_rig.look_at_point(Vector3(focus.x, map.map_data.surface_world_at(focus.x, focus.y), focus.y), distance)
+	map.camera_rig.snap()

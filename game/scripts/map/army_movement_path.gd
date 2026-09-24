@@ -10,8 +10,8 @@ extends Node3D
 const SUBDIVISION_PX := 6.0
 const LIFT := 0.5
 
-@export var now_color: Color = Color(1.0, 0.80, 0.30, 0.95)
-@export var later_color: Color = Color(0.78, 0.22, 0.16, 0.85)
+@export var now_color: Color = Color(0.40, 0.88, 0.32, 1.0)
+@export var later_color: Color = Color(0.92, 0.36, 0.20, 0.95)
 @export var marker_color: Color = Color(1.0, 0.90, 0.60, 1.0)
 
 var map_data: MapData
@@ -26,8 +26,8 @@ var _turn_ends := PackedInt32Array()
 func setup(data: MapData) -> void:
 	map_data = data
 	name = "ArmyMovementPath"
-	_now = _line_instance("ThisTurn", now_color, 3.2, 3)
-	_later = _line_instance("LaterTurns", later_color, 2.6, 2)
+	_now = _line_instance("ThisTurn", now_color, 4.0, 3)
+	_later = _line_instance("LaterTurns", later_color, 3.2, 2)
 	_markers = MultiMeshInstance3D.new()
 	_markers.name = "TurnEnds"
 	_markers.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -56,7 +56,10 @@ func _line_instance(node_name: String, color: Color, min_px: float, priority: in
 	var instance := MeshInstance3D.new()
 	instance.name = node_name
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.material_override = PolylineMesh.line_material(color, min_px, priority)
+	var material := PolylineMesh.line_material(color, min_px, priority)
+	material.set_shader_parameter("thin_fade", 0.0)
+	material.set_shader_parameter("center_highlight", 0.25)
+	instance.material_override = material
 	add_child(instance)
 	return instance
 

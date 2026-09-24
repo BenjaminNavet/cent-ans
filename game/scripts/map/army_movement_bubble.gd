@@ -39,7 +39,9 @@ func show_area(area: Dictionary) -> void:
 	var origin: Vector2 = area.get("origin", Vector2.ZERO)
 	var extent: Vector2 = area.get("size", Vector2.ONE)
 	_rect = Rect2(origin, extent)
-	_material.set_shader_parameter("mask", ImageTexture.create_from_image(image))
+	var mask := image.duplicate() as Image
+	mask.generate_mipmaps()  # contour stable au dézoom (une case < un pixel écran)
+	_material.set_shader_parameter("mask", ImageTexture.create_from_image(mask))
 	_material.set_shader_parameter("origin", origin)
 	_material.set_shader_parameter("extent", extent)
 	_material.set_shader_parameter("texel", Vector2(1.0 / image.get_width(), 1.0 / image.get_height()))
