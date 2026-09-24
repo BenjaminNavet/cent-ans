@@ -1,0 +1,6 @@
+Crecy (FR 8 kn+4 gen+4 MAA attack EN 8 lb+4 MAA, hills): 3D attacker wins 6/6, mean losses 522 / 461
+10 knights attack 10 longbow (plains): 3D attacker wins 6/6, mean losses 117 / 246
+4 knights attack 20 militia (equal cost 6000): 3D attacker wins 6/6, mean losses 20 / 1057
+20 militia attack 4 knights (equal cost 6000): 3D attacker wins 1/6, mean losses 1498 / 17
+10 knights attack 10 flemish pikes: 3D attacker wins 0/6, mean losses 288 / 66
+12 militia attack 12 longbow: 3D attacker wins 0/6, mean losses 781 / 0

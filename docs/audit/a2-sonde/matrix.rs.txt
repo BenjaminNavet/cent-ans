@@ -1,0 +1,167 @@
+//! Auto-resolve matchups: equal-cost and equal-count armies.
+use std::path::Path;
+
+use data_model::{GameData, UnitCategory};
+use sim_campaign::{resolve_auto, BattleContext, BattleUnit, CampaignRng, Side, Winner};
+
+fn unit(data: &GameData, id: &str) -> BattleUnit {
+    let t = data
+        .unit_types
+        .iter()
+        .find(|(k, _)| k.as_str() == id)
+        .unwrap()
+        .1;
+    BattleUnit {
+        strength: t.soldiers,
+        max_strength: t.soldiers,
+        experience: 0,
+        morale: t.stats.morale,
+        melee: t.stats.melee,
+        ranged: t.stats.ranged,
+        armor: t.stats.armor,
+        is_ranged: t.category == UnitCategory::Ranged,
+    }
+}
+
+fn side(data: &GameData, comp: &[(&str, usize)]) -> Side {
+    let mut units = Vec::new();
+    for (id, n) in comp {
+        for _ in 0..*n {
+            units.push(unit(data, id));
+        }
+    }
+    Side {
+        units,
+        ..Default::default()
+    }
+}
+
+fn duel(a: &Side, b: &Side, ctx: BattleContext) -> (f64, f64, f64, f64) {
+    let mut wins = 0;
+    let (mut la, mut lb) = (0.0, 0.0);
+    let n = 400;
+    for seed in 0..n {
+        let r = resolve_auto(a, b, &ctx, &mut CampaignRng::from_seed(seed));
+        if r.winner == Winner::Attacker {
+            wins += 1;
+        }
+        la += f64::from(r.attacker.total_losses);
+        lb += f64::from(r.defender.total_losses);
+    }
+    let r = resolve_auto(a, b, &ctx, &mut CampaignRng::from_seed(0));
+    (
+        f64::from(wins) / n as f64 * 100.0,
+        r.attacker.power / r.defender.power,
+        la / n as f64,
+        lb / n as f64,
+    )
+}
+
+fn main() {
+    let (data, _) = GameData::load(Path::new("/Users/jean_hubert/dev/game_project/data")).unwrap();
+    let types: Vec<(String, u32, u32)> = data
+        .unit_types
+        .values()
+        .filter(|t| t.category != UnitCategory::Siege)
+        .map(|t| (t.id.as_str().to_owned(), t.cost.money, t.upkeep))
+        .collect();
+    println!("## equal budget 9000 livres, attacker row vs defender column: attacker win %");
+    print!("{:26}", "");
+    for (b, _, _) in &types {
+        print!("{:>9}", &b[5..b.len().min(14)]);
+    }
+    println!();
+    for (a, ca, _) in &types {
+        print!("{:26}", a);
+        for (b, cb, _) in &types {
+            let sa = side(&data, &[(a.as_str(), (9000 / ca) as usize)]);
+            let sb = side(&data, &[(b.as_str(), (9000 / cb) as usize)]);
+            let (w, _, _, _) = duel(&sa, &sb, BattleContext::default());
+            print!("{:>9.0}", w);
+        }
+        println!();
+    }
+    println!("## equal upkeep 600 livres/season: attacker win %");
+    for (a, _, ua) in &types {
+        print!("{:26}", a);
+        for (b, _, ub) in &types {
+            let sa = side(&data, &[(a.as_str(), (600 / ua).max(1) as usize)]);
+            let sb = side(&data, &[(b.as_str(), (600 / ub).max(1) as usize)]);
+            let (w, _, _, _) = duel(&sa, &sb, BattleContext::default());
+            print!("{:>9.0}", w);
+        }
+        println!();
+    }
+    println!("## equal count 8 v 8: power ratio attacker/defender");
+    for (a, _, _) in &types {
+        print!("{:26}", a);
+        for (b, _, _) in &types {
+            let sa = side(&data, &[(a.as_str(), 8)]);
+            let sb = side(&data, &[(b.as_str(), 8)]);
+            let (_, p, _, _) = duel(&sa, &sb, BattleContext::default());
+            print!("{:>9.2}", p);
+        }
+        println!();
+    }
+    println!("## historical set pieces (win %, power ratio, losses a/b)");
+    let scenarios: Vec<(&str, Vec<(&str, usize)>, Vec<(&str, usize)>, BattleContext)> = vec![
+        (
+            "Crecy: FR 8 knights+4 genoese+4 MAA attack EN 8 longbow+4 MAA on hill",
+            vec![("unit_knights", 8), ("unit_genoese_crossbowmen", 4), ("unit_men_at_arms_foot", 4)],
+            vec![("unit_longbowmen", 8), ("unit_men_at_arms_foot", 4)],
+            BattleContext { defender_terrain_bonus: true, ..Default::default() },
+        ),
+        (
+            "same, no hill",
+            vec![("unit_knights", 8), ("unit_genoese_crossbowmen", 4), ("unit_men_at_arms_foot", 4)],
+            vec![("unit_longbowmen", 8), ("unit_men_at_arms_foot", 4)],
+            BattleContext::default(),
+        ),
+        (
+            "10 knights attack 10 longbow",
+            vec![("unit_knights", 10)],
+            vec![("unit_longbowmen", 10)],
+            BattleContext::default(),
+        ),
+        (
+            "10 knights attack 10 militia",
+            vec![("unit_knights", 10)],
+            vec![("unit_urban_militia", 10)],
+            BattleContext::default(),
+        ),
+        (
+            "Courtrai: 10 knights attack 10 flemish pikes",
+            vec![("unit_knights", 10)],
+            vec![("unit_flemish_pikemen", 10)],
+            BattleContext { river_crossing: true, ..Default::default() },
+        ),
+        (
+            "15000 livres militia (50) attack 15000 livres knights (10)",
+            vec![("unit_urban_militia", 50)],
+            vec![("unit_knights", 10)],
+            BattleContext::default(),
+        ),
+        (
+            "12 militia attack 12 militia behind walls",
+            vec![("unit_urban_militia", 12)],
+            vec![("unit_urban_militia", 12)],
+            BattleContext { walls: true, ..Default::default() },
+        ),
+    ];
+    for (name, a, b, ctx) in scenarios {
+        let (w, p, la, lb) = duel(&side(&data, &a), &side(&data, &b), ctx);
+        println!("{name}: attacker wins {w:.0} %, power ratio {p:.2}, losses {la:.0} / {lb:.0}");
+    }
+    println!("## cost efficiency (power per 1000 livres and per 100 upkeep vs armour 50 enemy)");
+    for t in data.unit_types.values().filter(|t| t.category != UnitCategory::Siege) {
+        let u = unit(&data, t.id.as_str());
+        let s = Side { units: vec![u], ..Default::default() };
+        let p = sim_campaign::battle_auto::side_power(&s, 50.0, 1.0);
+        println!(
+            "{:28} cost {:5} upkeep {:4} soldiers {:4} power {:6.1} per1000 {:6.1} per100upkeep {:6.1} ai_value {:5.1}",
+            t.id.as_str(), t.cost.money, t.upkeep, t.soldiers, p,
+            p * 1000.0 / f64::from(t.cost.money), p * 100.0 / f64::from(t.upkeep),
+            f64::from(t.soldiers) * (f64::from(t.stats.melee.max(t.stats.ranged)) + f64::from(t.stats.armor) / 2.0 + f64::from(t.stats.morale) / 4.0) / f64::from(t.cost.money)
+        );
+    }
+}
