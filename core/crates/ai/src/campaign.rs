@@ -342,7 +342,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
     // F4: a new building's upkeep must fit in the surplus left by the army
     // (or in the hoard being spent).
-    let mut spare = ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
+    let mut spare =
+        ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
     let mut options: Vec<(f64, ProvinceId, data_model::BuildingId, i64)> = Vec::new();
     for id in state.provinces.keys().filter(|id| ctx.owns(id)) {
         let Some(city) = state.province_city(data, id) else {
@@ -702,7 +703,11 @@ fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId,
         .filter(|(_, c)| !c.captive && c.faction.as_str() != REBELS)
         .filter(|(_, c)| (c.age(year) - me.age(year)).abs() <= 15)
         .filter(|(_, c)| {
-            let wife = if c.sex == data_model::Sex::Female { c } else { me };
+            let wife = if c.sex == data_model::Sex::Female {
+                c
+            } else {
+                me
+            };
             wife.age(year) <= 35
         })
         .filter_map(|(id, c)| {

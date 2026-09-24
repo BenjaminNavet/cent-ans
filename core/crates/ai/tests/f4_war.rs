@@ -21,8 +21,18 @@ fn peace_after_truce(data: &GameData) -> CampaignState {
     // England's other wars of 1337 (Scotland, Burgundy) are over too.
     for other in ["fac_scotland", "fac_burgundy"] {
         let other = fac(other);
-        state.factions.get_mut(&other).unwrap().at_war_with.remove(&england);
-        state.factions.get_mut(&england).unwrap().at_war_with.remove(&other);
+        state
+            .factions
+            .get_mut(&other)
+            .unwrap()
+            .at_war_with
+            .remove(&england);
+        state
+            .factions
+            .get_mut(&england)
+            .unwrap()
+            .at_war_with
+            .remove(&other);
     }
     for (a, b) in [(&france, &england), (&england, &france)] {
         let f = state.factions.get_mut(a).unwrap();
@@ -57,14 +67,16 @@ fn england_presses_its_claim_on_france_without_superiority() {
         "ratio {ratio}"
     );
     let wars = state.factions[&fac("fac_england")].at_war_with.clone();
-    let pretender = state.coalition_power(&fac("fac_england"))
-        / state.faction_power(&fac("fac_france"));
+    let pretender =
+        state.coalition_power(&fac("fac_england")) / state.faction_power(&fac("fac_france"));
     assert!(
         declares_on(&mut state, &data, "fac_england", "fac_france"),
         "ratio vs crown {pretender}, ready {}, wars {:?}, attitude {}",
         sim_campaign::diplomacy::war_ready(&state, &fac("fac_england")),
         wars,
-        state.attitude(&data, &fac("fac_england"), &fac("fac_france")).0
+        state
+            .attitude(&data, &fac("fac_england"), &fac("fac_france"))
+            .0
     );
 }
 

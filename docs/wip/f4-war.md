@@ -6,7 +6,7 @@ Tests : `core/crates/ai/tests/f4_war.rs` (7), `core/crates/sim-campaign/tests/f4
 Réglages : `docs/design/m9-ai.md` § 4 ; tableau avant/après : `docs/status.md` (« Équilibrage F4 »).
 
 ## Points
-1. [x] Guerre de prétention France-Angleterre : 72 % des tours [55-78], 4 à 8 phases.
+1. [x] Guerre de prétention France-Angleterre : 73 % des tours [55-83], 5 à 8 phases.
 2. [x] Alliances et appel aux armes : Auld Alliance 98-100 %, Bohême et Naples 100 %, Gueldre 81-100 %,
    Hainaut et Brabant selon les graines ; appels honorés 114-182, refusés 5-12. Flandre et Bourgogne ne
    passent jamais à l'Angleterre (écart).

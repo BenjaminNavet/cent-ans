@@ -127,19 +127,19 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
 
 | Mesure (moyenne des 5 graines, [min-max]) | Avant F4 | Après F4 | Cible |
 |---|---|---|---|
-| France-Angleterre en guerre | 19 % [6-61] | 72 % [55-78] | ≥ 55 % |
-| Phases de guerre distinctes | 1,4 [1-3] | 6,6 [4-8] | ≥ 3 |
-| Batailles impliquant FR ou EN / décennie | 1,9 [0,8-4,4] | 29,6 [19-44] | ≥ 3 |
-| Provinces prises (siècle) | 50 | 383 | la carte bouge |
+| France-Angleterre en guerre | 19 % [6-61] | 73 % [55-83] | ≥ 55 % |
+| Phases de guerre distinctes | 1,4 [1-3] | 7,0 [5-8] | ≥ 3 |
+| Batailles impliquant FR ou EN / décennie | 1,9 [0,8-4,4] | 30,2 [19-43] | ≥ 3 |
+| Provinces prises (siècle) | 50 | 375 | la carte bouge |
 | Majeures (EN, FR, BOU, ÉCO) vivantes en 1400 | 3/4 partout (Écosse détruite 5/5) | 4/4 partout | majorité des graines |
-| Banqueroutes / faction / décennie | 1,07 [0,91-1,51] | 0,93 [0,67-1,28] | < 1 |
-| Pire faction (banqueroutes / décennie) | Suède, Suisse 7-11 | Écosse 5-16 | — |
-| Trésor max après 1350 (saisons de revenu, pire faction) | 25 à 37 779 | 14 à 25 | ≤ 8 |
-| Factions > 8 saisons plus de 4 tours après 1350 | 21-23 | 4-9 | 0 |
-| Mariages entre factions (siècle) | 57-88 ¹ | 117-147 | > 0 |
-| Appels aux armes honorés / refusés | 0-2 / 0 | 114-182 / 5-12 | la plupart |
-| Ordres France refusés | 0-2 % | 0-0,3 % | 0 % |
-| Durée d'une campagne (release, 5 en parallèle) | ≈ 4,5 s | ≈ 13 s | ≲ 15 s |
+| Banqueroutes / faction / décennie | 1,07 [0,91-1,51] | 0,92 [0,67-1,27] | < 1 |
+| Pire faction (banqueroutes / décennie) | Suède, Suisse 7-11 | Écosse 5-16 (réduite à Fife) | — |
+| Trésor max après 1350 (saisons de revenu, pire faction) | 25 à 37 779 | 13 à 25 | ≤ 8 |
+| Factions > 8 saisons plus de 4 tours après 1350 | 21-23 | 5-8 | 0 |
+| Mariages entre factions (siècle) | 57-88 ¹ | 121-147 | > 0 |
+| Appels aux armes honorés / refusés | 0-2 / 0 | 112-191 / 5-12 | la plupart |
+| Ordres France refusés | 0-2 % | 0-0,1 % (`ai_probe` 100 tours : 0 %) | 0 % |
+| Durée d'une campagne (release, 5 en parallèle) | ≈ 4,5 s | ≈ 13 s (≈ 30 s sur machine chargée) | ≲ 15 s |
 
 ¹ Avant F4, les « mariages » de l'IA épousaient surtout des veuves hors d'âge (Isabelle de France et Renaud II de
 Gueldre, 1337) ; F4 cherche l'âge fécond, ±15 ans, les maisons régnantes amies. Le trésor est rapporté au revenu
