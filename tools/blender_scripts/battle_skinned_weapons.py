@@ -118,8 +118,10 @@ def crossbow(ctx):
 def longbow(ctx, height=1.8):
     """Yew longbow in the left fist, its string (ends on the bow, middle on `Nock`) and the
     nocked arrow (`Arrow`, shown while drawing)."""
-    c, _along, _up, out = grip(ctx, "L")
-    vert = Vector((0, 0, 1))
+    # Rest pose: arms hanging. The arrow lies along the forearm (it points at the target
+    # once the arm is raised), the limbs across it, front to back.
+    c, along, _up, out = grip(ctx, "L")
+    vert = along.normalized()
     half = height / 2
     brace = 0.16
     segs = ctx.seg(8, 4, 2)

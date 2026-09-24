@@ -316,6 +316,10 @@ def add_human_virtuals(rig, arm, prefix="", placement=None):
     nock_rest.translation = equip.nock_rest(ctx)
     poses.REST["prop"] = prop_rest
     poses.REST["Wrist.R"] = wrist_r_rest
+    poses.REST["Wrist.L"] = wrist_l_rest
+    for side in ("L", "R"):
+        forearm = bone_world(arm, f"Wrist.{side}").to_translation() - bone_world(arm, f"LowerArm.{side}").to_translation()
+        poses.REST["forearm." + side] = forearm.normalized()
 
     def follow(bone, rest_bone, rest_m):
         return bone_world(arm, bone, posed=True) @ rest_bone.inverted() @ rest_m
