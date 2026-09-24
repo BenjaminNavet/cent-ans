@@ -19,9 +19,12 @@ fn fac(id: &str) -> FactionId {
 fn france(data: &GameData, seed: u64) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start");
     state.chronicle.disabled = true;
-    // Test scenarios control war/peace explicitly; start every pair at peace.
+    // Test scenarios control war/peace/embargo explicitly; the 1337 data has
+    // its own historical embargo (England on Flanders' wool), which would
+    // otherwise cut the very route these tests probe.
     for faction in state.factions.values_mut() {
         faction.at_war_with.clear();
+        faction.embargoes.clear();
     }
     state
 }
