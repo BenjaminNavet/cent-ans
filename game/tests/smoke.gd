@@ -644,9 +644,17 @@ func _check_family_tree_c3(sim: Object, faction_id: String) -> void:
 	if sim.has_method("get_retinue_catalog"):
 		var catalog: Dictionary = sim.call("get_retinue_catalog")
 		_check((catalog.get("companions", []) as Array).size() >= 12 and int(catalog.get("max", 0)) == 8, "C7: retinue catalogue %s" % str(catalog.keys()))
-		for companion in ["ret_heraut", "ret_barbier_chirurgien"]:
+		# Deux compagnons que le souverain n'a pas encore (il a pu en gagner en 40 tours).
+		var held: Array = []
+		for entry in (sim.call("get_character", ruler).get("retinue", []) as Array):
+			held.append(str(entry.get("id", "")))
+		var granted_count := 0
+		for companion in ["ret_heraut", "ret_barbier_chirurgien", "ret_ecuyer", "ret_menestrel", "ret_espion"]:
+			if granted_count >= 2 or held.has(companion) or held.size() + granted_count >= 7:
+				continue
 			var granted: Dictionary = sim.call("submit_order", {"type": "debug_grant_companion", "character": ruler, "companion": companion})
-			_check(bool(granted.get("ok", false)), "C7: grant %s refused: %s" % [companion, str(granted)])
+			if _check(bool(granted.get("ok", false)), "C7: grant %s refused: %s" % [companion, str(granted)]):
+				granted_count += 1
 		var with_retinue: Dictionary = sim.call("get_character", ruler)
 		retinue_count = (with_retinue.get("retinue", []) as Array).size()
 		_check(retinue_count >= 2 and int(with_retinue.get("retinue_max", 0)) == 8, "C7: retinue of %s: %d" % [ruler, retinue_count])
