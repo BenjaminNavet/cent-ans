@@ -1,6 +1,7 @@
-[gd_scene load_steps=24 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=25 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/visual/campaign_atmosphere.gd" id="v1_atmosphere"]
 [ext_resource type="Script" path="res://scripts/map/terrain_builder.gd" id="2_terrain"]
 [ext_resource type="Script" path="res://scripts/map/sea.gd" id="3_sea"]
 [ext_resource type="Script" path="res://scripts/map/rivers_renderer.gd" id="4_rivers"]
@@ -20,13 +21,57 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/court_panel.tscn" id="18_court_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/character_sheet.tscn" id="19_character_sheet"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tech_panel.tscn" id="20_tech_panel"]
+[ext_resource type="Script" path="res://scripts/map/vegetation.gd" id="v3_vegetation"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_map_material"]
+sky_top_color = Color(0.36, 0.5, 0.66, 1)
+sky_horizon_color = Color(0.74, 0.76, 0.76, 1)
+sky_curve = 0.12
+ground_bottom_color = Color(0.42, 0.44, 0.42, 1)
+ground_horizon_color = Color(0.74, 0.76, 0.76, 1)
+sun_angle_max = 20.0
+
+[sub_resource type="Sky" id="Sky_map"]
+sky_material = SubResource("Sky_map_material")
 
 [sub_resource type="Environment" id="Environment_map"]
-background_mode = 1
-background_color = Color(0.72, 0.66, 0.52, 1)
-ambient_light_source = 1
-ambient_light_color = Color(0.85, 0.82, 0.75, 1)
-ambient_light_energy = 0.5
+background_mode = 2
+sky = SubResource("Sky_map")
+ambient_light_source = 3
+ambient_light_color = Color(0.85, 0.84, 0.8, 1)
+ambient_light_sky_contribution = 0.75
+ambient_light_energy = 0.55
+reflected_light_source = 2
+tonemap_mode = 4
+tonemap_exposure = 0.9
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 3.0
+ssao_intensity = 1.6
+ssao_power = 1.4
+ssao_detail = 0.6
+ssao_light_affect = 0.15
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.72, 0.77, 0.84, 1)
+fog_light_energy = 1.0
+fog_sun_scatter = 0.0
+fog_density = 0.85
+fog_aerial_perspective = 0.35
+fog_sky_affect = 0.4
+fog_depth_curve = 1.6
+fog_depth_begin = 800.0
+fog_depth_end = 4000.0
+adjustment_enabled = true
+adjustment_brightness = 1.0
+adjustment_contrast = 1.06
+adjustment_saturation = 1.08
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributes_map"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 600.0
+dof_blur_far_transition = 800.0
+dof_blur_amount = 0.06
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 content_margin_left = 16.0
@@ -54,11 +99,22 @@ script = ExtResource("1_map")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_map")
+camera_attributes = SubResource("CameraAttributes_map")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 200, 0)
-light_color = Color(1, 0.96, 0.88, 1)
-light_energy = 1.0
+light_color = Color(1, 0.95, 0.86, 1)
+light_energy = 1.1
+light_angular_distance = 0.8
+shadow_enabled = true
+shadow_bias = 0.04
+shadow_normal_bias = 1.5
+shadow_blur = 1.5
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 1500.0
+
+[node name="Atmosphere" type="Node" parent="."]
+script = ExtResource("v1_atmosphere")
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("2_terrain")
@@ -71,6 +127,9 @@ script = ExtResource("4_rivers")
 
 [node name="Coast" type="MeshInstance3D" parent="."]
 script = ExtResource("5_coast")
+
+[node name="Vegetation" type="Node3D" parent="."]
+script = ExtResource("v3_vegetation")
 
 [node name="Cities" type="Node3D" parent="."]
 script = ExtResource("6_cities")
