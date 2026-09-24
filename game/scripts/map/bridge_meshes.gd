@@ -81,9 +81,27 @@ static func _build(structure: String, width: float, seed_value: int) -> ArrayMes
 		var arrays := tools[kind].commit_to_arrays()
 		if arrays[Mesh.ARRAY_VERTEX] == null or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
 			continue
+		_to_godot_winding(arrays)
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		mesh.surface_set_material(mesh.get_surface_count() - 1, mats[kind])
 	return mesh
+
+
+## Les aides ci-dessous construisent des triangles dans le sens trigonométrique vu de
+## l'extérieur (normale par la règle de la main droite) ; Godot tient pour faces avant les
+## triangles dans le sens horaire : on inverse l'ordre de chaque triangle à la fin.
+static func _to_godot_winding(arrays: Array) -> void:
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	for k in range(0, vertices.size() - 2, 3):
+		var v := vertices[k + 1]
+		vertices[k + 1] = vertices[k + 2]
+		vertices[k + 2] = v
+		var n := normals[k + 1]
+		normals[k + 1] = normals[k + 2]
+		normals[k + 2] = n
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
 
 
 ## Longueur totale (culées comprises) pour une largeur de fleuve.
@@ -152,7 +170,11 @@ static func _extrude(st: SurfaceTool, outline: PackedVector2Array, half_z: float
 	var triangles := Geometry2D.triangulate_polygon(outline)
 	if triangles.is_empty():
 		return
-	var clockwise := Geometry2D.is_polygon_clockwise(outline)
+	# Aire signée en repère Y vers le haut (Geometry2D.is_polygon_clockwise suppose Y vers le bas).
+	var area := 0.0
+	for i in outline.size():
+		area += outline[i].cross(outline[(i + 1) % outline.size()])
+	var clockwise := area < 0.0
 	for side in [1.0, -1.0]:
 		st.set_normal(Vector3(0, 0, side))
 		for k in range(0, triangles.size(), 3):
