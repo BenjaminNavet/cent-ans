@@ -179,6 +179,8 @@ void sample_layer(int layer, vec2 uv_a, vec2 uv_b, float mix_b, vec3 tint, float
 	vec3 nb = texture(normal_rough_array, vec3(uv_b, float(layer))).rgb;
 	vec3 n = mix(na, nb, mix_b);
 	vec3 ratio = t / max(layer_mean[layer], vec3(0.01));
+	// Détail surtout en luminance : pas de reflets colorés (bleutés) des photos.
+	ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
 	albedo += w * tint * mix(vec3(1.0), ratio, detail);
 	nrm += w * vec3(n.rg * 2.0 - 1.0, n.b);
 }
@@ -321,7 +323,7 @@ void fragment() {
 		// Prés plus fréquents dans les zones herbagères, vigne selon l'occupation du sol.
 		float p_meadow = mix(0.15, 0.85, grass_share);
 		vec3 crop;
-		bool vine = h_b < lu.r * 0.55 && grass_share < 0.8;
+		bool vine = h_b < lu.r * 0.32 && grass_share < 0.8;
 		if (vine) {
 			crop = vine_soil;
 		} else if (h < p_meadow) {
@@ -334,8 +336,10 @@ void fragment() {
 			crop *= 0.9 + 0.2 * h_b;
 			crop = mix(crop, crop * vec3(1.08, 0.96, 0.82), dry);
 		}
-		grass_tint = mix(grass_base, crop, field_vis * 0.8);
-		farm_tint = mix(farm_base, crop, field_vis * 0.85);
+		// Couleurs des parcelles plus tard que leur tracé : pas de damier bruité au zoom moyen.
+		float crop_fade = smoothstep(6.0, 24.0, cell_px);
+		grass_tint = mix(grass_base, crop, crop_fade * 0.8);
+		farm_tint = mix(farm_base, crop, crop_fade * 0.85);
 		// Rangs de vigne (de près seulement ; au-delà, teinte moyenne des rangs).
 		if (vine) {
 			float rw = fwidth(rows * 5.0);
@@ -389,6 +393,7 @@ void fragment() {
 			vec3 tf = textureGrad(albedo_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
 			vec3 nf = textureGrad(normal_rough_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
 			vec3 ratio = tf / max(layer_mean[1], vec3(0.01));
+			ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
 			albedo += w_farm * farm_tint * mix(vec3(1.0), ratio, det * field_vis * 0.7);
 			vec2 nxy = transpose(rot) * (nf.rg * 2.0 - 1.0);
 			dn += w_farm * vec3(nxy, nf.b);
