@@ -138,6 +138,41 @@ cosmétique (avertissement de log seulement, aucun coût de performance mesuré 
 lieu une fois par émetteur à la création, pas par image). Laissé en l'état ; à reconsidérer
 seulement si Godot 4.8+ change ce comportement ou si les logs deviennent gênants en pratique.
 
+## Smoke test flaky en parallèle (lot prioritaire, demandé en cours de session)
+
+**Cause** : `user://` Godot est dérivé du nom du projet (`application/config/name`, « Cent Ans »),
+pas du chemin sur disque — tous les worktrees d'agents (chacun une copie isolée du dépôt)
+pointent donc vers le **même** dossier réel (`~/Library/Application Support/Godot/app_userdata/
+Cent Ans/` sur macOS). Deux `smoke.gd` lancés en même temps depuis deux worktreesécrivent/lisent
+les mêmes `user://saves/`, `user://settings_smoke.cfg`, `user://codex_test.json` : rotation des
+sauvegardes automatiques faussée (« save dialog should list the autosaves »), sauvegarde/
+rechargement d'un autre process entrelacés (« date after load ... != saved ... »). Godot 4.7
+n'expose pas de `--user-dir` en ligne de commande (vérifié : `godot --help`, rien dans
+« Run options » ni ailleurs) : la seule prise possible est notre propre code.
+
+**Fix** : `game/tests/smoke.gd` calcule maintenant un dossier `user://smoke_<pid>_<ticks>`
+unique par exécution (`_test_root`, dans `_init()`, avant tout usage) et redirige :
+- `Settings.use_test_file(path)` (existait déjà, prenait un chemin optionnel — juste câblé) ;
+- `CodexStore.use_test_file(path)` (nouveau paramètre optionnel, défaut = ancien comportement
+  pour les autres appelants éventuels) ;
+- `SimFacade.SAVES_DIR` (était `const`, devient `var` + `use_test_saves_dir(dir)`) et
+  `SaveSlots.SAVES_DIR` (idem, `static var` + `SaveSlots.use_test_dir(dir)`, `class_name`
+  statique donc pas besoin d'autoload).
+
+Le comportement normal du jeu est inchangé : ces deux `SAVES_DIR` restent `"user://saves"` par
+défaut tant que rien n'appelle les nouvelles méthodes `use_test_*` (seul `smoke.gd` le fait).
+`_cleanup_test_dir()` supprime récursivement `_test_root` juste avant chaque `quit()` (les deux
+points de sortie : `CENT_ANS_SMOKE_ONLY=coinage_ransom` et la fin normale) ; best-effort, ne fait
+pas échouer le smoke test si le nettoyage rate.
+
+Vérifié : `godot --headless --path game --script res://tests/smoke.gd` toujours code 0, aucune
+`smoke_*` restante dans `app_userdata/Cent Ans/` après coup (les anciens `codex_test.json` /
+`settings_smoke.cfg` / `saves/` y restent — artefacts d'exécutions antérieures à ce fix, dans
+d'autres worktrees qui n'ont pas encore ce correctif ; inoffensifs, pas nettoyés ici).
+
+Non traité (hors demande) : les bancs de perf (`--benchmark`, `--fps-probe`) n'écrivent pas dans
+`user://` (pas de sauvegarde), donc pas concernés par cette collision.
+
 ## Prochaine étape
 
 1. Fait : mesures avant/après T2 (primitives, voir ci-dessus).
@@ -147,3 +182,6 @@ seulement si Godot 4.8+ change ce comportement ou si les logs deviennent gênant
 3. Fait : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call`.
 4. Fait : source des avertissements RGBFloat localisée (`battle_effects.gd` → `GPUParticles3D` /
    `CurveTexture` internes à Godot) ; non corrigée, pas simple (voir ci-dessus).
+5. Fait : smoke test isolé par exécution (`user://smoke_<pid>_<ticks>`), nettoyé en fin de
+   script (voir ci-dessus). Les autres worktrees doivent fusionner ce commit pour bénéficier de
+   l'isolation ; jusque-là, leurs smoke tests peuvent encore se percuter avec ceux qui l'ont.
