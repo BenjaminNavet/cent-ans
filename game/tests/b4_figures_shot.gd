@@ -13,6 +13,7 @@ const FRANCE := Color(0.16, 0.25, 0.62)
 const ENGLAND := Color(0.72, 0.12, 0.12)
 
 var _time := 3.37
+var _since := 4.4  # secondes depuis la dernière volée (4,4 s : arcs bandés)
 var _effects: Node3D = null
 var _cam := PackedFloat64Array()  # --cam=x,y,z,cible_x,cible_y,cible_z
 
@@ -27,6 +28,8 @@ func _init() -> void:
 			shot = arg.trim_prefix("--shot=")
 		elif arg.begins_with("--time="):
 			_time = float(arg.trim_prefix("--time="))
+		elif arg.begins_with("--since="):
+			_since = float(arg.trim_prefix("--since="))
 		elif arg.begins_with("--cam="):
 			_cam = arg.trim_prefix("--cam=").split_floats(",")
 	if out == "":
@@ -71,17 +74,19 @@ func _init() -> void:
 				frames = 60
 		"volley":
 			_rank(world, "archer", 0, ENGLAND, "fac_england", 4, Vector3(0, 0, 0), 8, 3, 1.3)
-			camera.look_at_from_position(Vector3(-14.0, 6.0, -8.0), Vector3(0.0, 8.0, 40.0))
+			camera.look_at_from_position(Vector3(-7.0, 2.4, -9.0), Vector3(4.0, 12.0, 45.0))
 	if _cam.size() == 6:
 		camera.look_at_from_position(Vector3(_cam[0], _cam[1], _cam[2]), Vector3(_cam[3], _cam[4], _cam[5]))
 	for i in frames:
 		if _effects != null and shot == "bombard" and i == frames - 14:
 			_effects.call("cannon_fire", Vector3(0, 0.85, 1.3), Vector3(0, 0.05, 1).normalized(), 0.0)
 		if _effects != null and shot == "volley" and i == 2:
-			var starts := PackedVector3Array()
-			for k in 40:
-				starts.append(Vector3(float(k % 8) * 1.3, 1.5, -float(k / 8) * 1.2))
-			_effects.call("volley", starts, Vector3(5, 0, 150), 12.0, 0, _time - 1.2)
+			# Trois volées successives, à divers moments de leur vol.
+			for v in 3:
+				var starts := PackedVector3Array()
+				for k in 24:
+					starts.append(Vector3(float(k % 8) * 1.3, 1.55, -float(k / 8) * 1.2))
+				_effects.call("volley", starts, Vector3(5, 0, 150), 12.0, 0, _time - 0.4 - v * 1.3)
 		if _effects != null:
 			_effects.call("tick_time", _time, 1.0 / 60.0)
 		await process_frame
@@ -163,8 +168,7 @@ func _rank(world: Node3D, kind: String, variant: int, livery: Color, faction: St
 	mat.set_shader_parameter("livery_share", 0.7 if variant == 0 and kind != "archer" else 0.4)
 	mat.set_shader_parameter("anim_state", state)
 	mat.set_shader_parameter("anim_time", _time)
-	# Volée 2 s plus tôt : la plupart des archers bandent leur arc.
-	mat.set_shader_parameter("volley_time", _time - 4.4)
+	mat.set_shader_parameter("volley_time", _time - _since)
 	mat.set_shader_parameter("reload_time", 6.0)
 	mat.set_shader_parameter("state_time", 20.0)
 	var instance := MultiMeshInstance3D.new()
