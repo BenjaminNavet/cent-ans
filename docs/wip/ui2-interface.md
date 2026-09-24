@@ -9,11 +9,15 @@ Propriétaire exclusif de `game/scripts/map/map_ui.gd` pendant le lot. Ne pas to
 2. Captures : `godot --resolution 1280x720 --path game res://scenes/campaign_map.tscn -- --stage=<étape> --screenshot=<png>`.
 
 ## État
-- [ ] U1 empilement des fenêtres
+- [x] U1 empilement des fenêtres : `game/scripts/ui/panel_stack.gd` (genres DOCKED / CENTRAL /
+  COMPANION / MODAL), branché dans `map_ui.gd` (`_setup_panel_stack`, `register_panel`,
+  `_shortcut_input` pour Échap, `_keep_on_screen`, minicarte masquée si un panneau la couvre) ;
+  `campaign_map.gd` : objectifs et aide enregistrés, la Cour / la fiche / les technologies ne se
+  rouvrent plus au rafraîchissement après fermeture. Test : `tests/ui_panel_stack_test.gd`.
 - [ ] U3 économie lisible
 - [ ] U4 échelle et responsivité
 - [ ] U5 fin de tour utile (optionnel)
 - [ ] U7 barre du haut et raccourcis (optionnel)
 
 ## Prochaine étape
-Lire `map_ui.gd` et `campaign_map.gd`, faire les captures « avant ».
+U3 : historique budgétaire dans `economy_balance.rs` (+ champ `budget_history` de `FactionState`), pont, panneau de faction en tableau.
