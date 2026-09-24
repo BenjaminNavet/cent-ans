@@ -1,0 +1,11 @@
+{
+  "id": "cdx_tres_riches_heures",
+  "title": "Les Très Riches Heures du duc de Berry",
+  "category": "savoir",
+  "aliases": ["Très Riches Heures", "Très Riches Heures du duc de Berry", "frères de Limbourg", "Jean Colombe"],
+  "era": { "from": "v. 1411", "to": "1489" },
+  "summary": "Commandé vers 1411 par [[cdx_jean_de_berry|Jean de Berry]] aux frères de Limbourg, ce livre d'heures est le plus célèbre manuscrit enluminé du Moyen Âge. Son calendrier montre, mois par mois, les travaux des champs et les fêtes de la cour devant les châteaux du duc.",
+  "body": "Un livre d'heures est un livre de prières destiné aux laïcs, organisé selon les heures de la journée. Les grands seigneurs en commandent de somptueux exemplaires, véritables objets de luxe. Le duc [[cdx_jean_de_berry|Jean de Berry]], frère de [[cdx_charles_v|Charles V]] et collectionneur passionné, en possède plusieurs. Vers 1411, il confie le plus ambitieux, les « très riches heures », à trois frères venus de Nimègue, Paul, Jean et Herman de Limbourg.\n\nLe manuscrit s'ouvre sur un calendrier de douze pages en pleine page. Chaque mois y a son image : en janvier, le duc festoie parmi sa cour ; en février, des paysans se chauffent au coin du feu sous la neige ; en mars, on laboure devant le château de Lusignan ; en octobre, on sème devant le Louvre de Charles V. Au-dessus, un demi-cercle montre le soleil sur son char et les signes du zodiaque. Ces images offrent un témoignage exceptionnel sur les travaux des mois, les costumes et l'architecture du temps.\n\nL'œuvre reste inachevée : en 1416, les trois frères et le duc meurent, peut-être d'une épidémie. Le livre est complété vers 1440 par un peintre anonyme, puis entre 1485 et 1489 par Jean Colombe pour le duc Charles Ier de Savoie. On y distingue ainsi trois mains et trois époques.\n\nRedécouvert au XIXe siècle et acheté en 1856 par le duc d'Aumale, le manuscrit est aujourd'hui conservé au musée Condé de Chantilly. Trop fragile pour être exposé en permanence, il est surtout connu par ses reproductions, qui ont façonné l'image que nous nous faisons du Moyen Âge. C'est un sommet de l'[[cdx_enluminure|enluminure]] gothique internationale.",
+  "see_also": ["cdx_jean_de_berry", "cdx_enluminure", "cdx_librairie_charles_v"],
+  "sources": ["Très Riches Heures du duc de Berry", "Frères de Limbourg"]
+}

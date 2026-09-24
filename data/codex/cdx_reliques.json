@@ -1,0 +1,12 @@
+{
+  "id": "cdx_reliques",
+  "title": "Les reliques et leur culte",
+  "category": "religion",
+  "aliases": ["reliques", "relique", "reliquaire", "reliquaires", "Sainte-Chapelle", "couronne d'épines"],
+  "era": { "from": "v. 400", "to": "v. 1500" },
+  "summary": "Les reliques sont les restes des saints ou des objets qui les ont touchés. Au Moyen Âge, on les croit porteuses de la puissance du saint : elles guérissent, protègent, garantissent les serments et attirent les pèlerins.",
+  "body": "Pour les chrétiens du Moyen Âge, un saint est à la fois au ciel, auprès de Dieu, et présent sur terre à travers son corps. Un os, un cheveu, un fragment de vêtement conservent sa puissance, sa « vertu ». Toucher la relique, prier devant elle, c'est demander au saint d'intercéder pour soi. Chaque église possède ses reliques, déposées dans l'autel lors de sa consécration.\n\nLes plus précieuses sont enfermées dans des reliquaires d'or, d'argent et d'émail, en forme de coffret, de buste ou de bras. Les rois en font collection. Saint Louis a acheté à l'empereur de Constantinople la couronne d'épines du Christ et fait bâtir à Paris, pour l'abriter, la Sainte-Chapelle, consacrée en 1248. [[cdx_jean_de_berry|Jean de Berry]] et [[cdx_charles_v|Charles V]] rassemblent aussi de véritables trésors.\n\nLes reliques jouent un rôle dans la vie publique. On jure sur elles pour garantir un traité ou un témoignage. On les porte en procession pour arrêter une épidémie, une sécheresse ou un siège ; pendant la [[cdx_peste_noire|Peste noire]], les processions se multiplient. Elles attirent les [[cdx_pelerinage|pèlerins]], donc des offrandes, et les sanctuaires se disputent les corps saints, parfois au prix de vols.\n\nCe commerce suscite des abus : fausses reliques, vendeurs d'indulgences, miracles douteux. Chaucer se moque d'un vendeur d'indulgences qui fait passer des os de cochon pour des os de saint. Au XIVe siècle, [[cdx_john_wyclif|John Wyclif]] et les [[cdx_lollards|lollards]] condamnent ce culte comme une idolâtrie, critique que reprendra la Réforme protestante au XVIe siècle.",
+  "entity": "evt_miracle_local",
+  "see_also": ["cdx_pelerinage", "cdx_lollards", "cdx_john_wyclif"],
+  "sources": ["Relique", "Reliquaire", "Sainte-Chapelle"]
+}
