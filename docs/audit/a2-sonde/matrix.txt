@@ -1,0 +1,49 @@
+## equal budget 9000 livres, attacker row vs defender column: attacker win %
+                          crossbowmflemish_pgenoese_c  knightslongbowmemen_at_armounted_amounted_surban_mil
+unit_crossbowmen                 52        0      100      100        0        0       99      100        0
+unit_flemish_pikemen            100       52      100      100       93      100      100      100       71
+unit_genoese_crossbowmen          0        0       52      100        0        0       25       28        0
+unit_knights                      0        0        0       52        0        0        0        0        0
+unit_longbowmen                 100        9      100      100       52      100      100      100       45
+unit_men_at_arms_foot           100        0      100      100        0       52      100      100        0
+unit_mounted_archers              1        0       76      100        0        0       52       94        0
+unit_mounted_sergeants            0        0       75      100        0        0        9       52        0
+unit_urban_militia              100       33      100      100       57      100      100      100       52
+## equal upkeep 600 livres/season: attacker win %
+unit_crossbowmen                 52        0      100      100        0       59       76      100        0
+unit_flemish_pikemen            100       52      100      100       98      100      100      100       43
+unit_genoese_crossbowmen          0        0       52       80        0        0        0        9        0
+unit_knights                      0        0       21       52        0        0        0        0        0
+unit_longbowmen                 100        4      100      100       52      100      100      100       10
+unit_men_at_arms_foot            43        0      100      100        0       52       37      100        0
+unit_mounted_archers             24        0      100      100        0       66       52      100        0
+unit_mounted_sergeants            0        0       93      100        0        0        0       52        0
+unit_urban_militia              100       60      100      100       92      100      100      100       52
+## equal count 8 v 8: power ratio attacker/defender
+unit_crossbowmen               1.00     0.60     0.79     0.59     0.67     0.51     0.89     0.85     1.01
+unit_flemish_pikemen           1.66     1.00     1.35     1.30     1.01     1.08     1.35     1.55     1.57
+unit_genoese_crossbowmen       1.26     0.74     1.00     0.72     0.84     0.62     1.12     1.04     1.23
+unit_knights                   1.69     0.77     1.38     1.00     1.04     0.83     1.38     1.19     1.21
+unit_longbowmen                1.50     0.99     1.19     0.96     1.00     0.83     1.34     1.38     1.65
+unit_men_at_arms_foot          1.97     0.93     1.61     1.21     1.20     1.00     1.61     1.44     1.46
+unit_mounted_archers           1.12     0.74     0.89     0.72     0.75     0.62     1.00     1.04     1.23
+unit_mounted_sergeants         1.18     0.65     0.96     0.84     0.72     0.70     0.96     1.00     1.01
+unit_urban_militia             0.99     0.64     0.81     0.83     0.61     0.69     0.81     0.99     1.00
+## historical set pieces (win %, power ratio, losses a/b)
+Crecy: FR 8 knights+4 genoese+4 MAA attack EN 8 longbow+4 MAA on hill: attacker wins 82 %, power ratio 1.09, losses 170 / 224
+same, no hill: attacker wins 100 %, power ratio 1.25, losses 149 / 276
+10 knights attack 10 longbow: attacker wins 67 %, power ratio 1.04, losses 89 / 196
+10 knights attack 10 militia: attacker wins 100 %, power ratio 1.21, losses 77 / 244
+Courtrai: 10 knights attack 10 flemish pikes: attacker wins 0 %, power ratio 0.61, losses 184 / 104
+15000 livres militia (50) attack 15000 livres knights (10): attacker wins 100 %, power ratio 4.15, losses 300 / 240
+12 militia attack 12 militia behind walls: attacker wins 0 %, power ratio 0.70, losses 370 / 154
+## cost efficiency (power per 1000 livres and per 100 upkeep vs armour 50 enemy)
+unit_crossbowmen             cost   550 upkeep   50 soldiers  100 power   29.9 per1000   54.4 per100upkeep   59.8 ai_value  15.2
+unit_flemish_pikemen         cost   450 upkeep   40 soldiers  120 power   52.8 per1000  117.3 per100upkeep  132.0 ai_value  24.0
+unit_genoese_crossbowmen     cost   900 upkeep  100 soldiers  100 power   36.6 per1000   40.6 per100upkeep   36.6 ai_value  10.8
+unit_knights                 cost  1500 upkeep  140 soldiers   60 power   40.5 per1000   27.0 per100upkeep   28.9 ai_value   5.4
+unit_longbowmen              cost   500 upkeep   45 soldiers  120 power   48.8 per1000   97.7 per100upkeep  108.5 ai_value  22.5
+unit_men_at_arms_foot        cost   900 upkeep   90 soldiers   80 power   49.0 per1000   54.4 per100upkeep   54.4 ai_value  11.2
+unit_mounted_archers         cost   700 upkeep   60 soldiers  100 power   36.6 per1000   52.2 per100upkeep   60.9 ai_value  12.5
+unit_mounted_sergeants       cost   800 upkeep   80 soldiers   80 power   34.1 per1000   42.6 per100upkeep   42.6 ai_value   9.6
+unit_urban_militia           cost   300 upkeep   25 soldiers  120 power   33.6 per1000  112.0 per100upkeep  134.4 ai_value  26.0
