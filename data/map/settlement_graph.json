@@ -3,28 +3,28 @@
   {
    "from": "set_aalborg",
    "to": "set_aarhus",
-   "cost": 50.04,
+   "cost": 50.02,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aalborg",
    "to": "set_ribe",
-   "cost": 204.35,
+   "cost": 204.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aarhus",
    "to": "set_ribe",
-   "cost": 129.58,
+   "cost": 129.59,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aarhus",
    "to": "set_roskilde",
-   "cost": 131.01,
+   "cost": 130.99,
    "road": false,
    "sea": false
   },
@@ -38,14 +38,14 @@
   {
    "from": "set_abbaye_la_couronne",
    "to": "set_aubeterre",
-   "cost": 17.31,
+   "cost": 17.33,
    "road": true,
    "sea": false
   },
   {
    "from": "set_abbaye_la_couronne",
    "to": "set_cognac",
-   "cost": 23.7,
+   "cost": 23.64,
    "road": false,
    "sea": false
   },
@@ -59,28 +59,28 @@
   {
    "from": "set_abbeville",
    "to": "set_le_crotoy",
-   "cost": 20.18,
+   "cost": 20.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aberdeen",
    "to": "set_dumfries",
-   "cost": 350.72,
+   "cost": 350.68,
    "road": false,
    "sea": true
   },
   {
    "from": "set_aberdeen",
    "to": "set_dundee",
-   "cost": 70.28,
+   "cost": 70.27,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aberdeen",
    "to": "set_elgin",
-   "cost": 91.47,
+   "cost": 91.51,
    "road": true,
    "sea": false
   },
@@ -94,14 +94,14 @@
   {
    "from": "set_aberdeen",
    "to": "set_inverness",
-   "cost": 266.15,
+   "cost": 266.17,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abingdon",
    "to": "set_banbury",
-   "cost": 43.92,
+   "cost": 43.93,
    "road": false,
    "sea": false
   },
@@ -115,21 +115,21 @@
   {
    "from": "set_abingdon",
    "to": "set_oxford",
-   "cost": 9.16,
+   "cost": 9.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abingdon",
    "to": "set_salisbury",
-   "cost": 76.05,
+   "cost": 76.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abingdon",
    "to": "set_wallingford",
-   "cost": 13.2,
+   "cost": 13.22,
    "road": false,
    "sea": false
   },
@@ -143,63 +143,63 @@
   {
    "from": "set_agen",
    "to": "set_clairac",
-   "cost": 9.43,
+   "cost": 9.44,
    "road": true,
    "sea": false
   },
   {
    "from": "set_agen",
    "to": "set_layrac",
-   "cost": 3.86,
+   "cost": 3.87,
    "road": true,
    "sea": false
   },
   {
    "from": "set_agen",
    "to": "set_montauban",
-   "cost": 62.87,
+   "cost": 62.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_agen",
    "to": "set_saint_sever",
-   "cost": 107.24,
+   "cost": 107.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_agen",
    "to": "set_tarbes",
-   "cost": 174.2,
+   "cost": 174.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aigues_mortes",
    "to": "set_beziers",
-   "cost": 82.85,
+   "cost": 82.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aigues_mortes",
    "to": "set_conques",
-   "cost": 183.16,
+   "cost": 183.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aigues_mortes",
    "to": "set_lattes",
-   "cost": 22.26,
+   "cost": 22.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aigues_mortes",
    "to": "set_nimes",
-   "cost": 32.83,
+   "cost": 32.85,
    "road": false,
    "sea": false
   },
@@ -213,63 +213,63 @@
   {
    "from": "set_aiguillon",
    "to": "set_clairac",
-   "cost": 28.74,
+   "cost": 28.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_la_reole",
-   "cost": 19.84,
+   "cost": 19.83,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_layrac",
-   "cost": 16.11,
+   "cost": 16.12,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_mont_de_marsan",
-   "cost": 81.14,
+   "cost": 81.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_pau",
-   "cost": 188.01,
+   "cost": 188.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_villeneuve_sur_lot",
-   "cost": 15.7,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_aix",
-   "to": "set_les_baux",
-   "cost": 23.83,
+   "cost": 15.69,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aix",
    "to": "set_marseille",
-   "cost": 13.29,
+   "cost": 13.27,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aix",
    "to": "set_silvacane",
-   "cost": 13.8,
+   "cost": 13.81,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_aix",
+   "to": "set_tarascon",
+   "cost": 23.81,
    "road": true,
    "sea": false
   },
@@ -283,21 +283,21 @@
   {
    "from": "set_alencon",
    "to": "set_epau",
-   "cost": 25.52,
+   "cost": 25.53,
    "road": true,
    "sea": false
   },
   {
    "from": "set_alencon",
    "to": "set_evreux",
-   "cost": 101.95,
+   "cost": 101.96,
    "road": false,
    "sea": false
   },
   {
    "from": "set_alencon",
    "to": "set_le_mans",
-   "cost": 24.04,
+   "cost": 24.03,
    "road": true,
    "sea": false
   },
@@ -311,98 +311,98 @@
   {
    "from": "set_alnwick",
    "to": "set_bamburgh",
-   "cost": 21.62,
+   "cost": 21.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_alnwick",
    "to": "set_carlisle",
-   "cost": 97.31,
+   "cost": 97.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_alnwick",
    "to": "set_newcastle",
-   "cost": 48.93,
+   "cost": 48.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_annecy",
-   "cost": 444.07,
+   "cost": 444.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_interlaken",
-   "cost": 131.98,
+   "cost": 131.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_lucerne",
-   "cost": 63.07,
+   "cost": 63.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_milan",
-   "cost": 244.58,
+   "cost": 244.57,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_schloss_tirol",
-   "cost": 386.05,
+   "cost": 386.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_schwyz",
-   "cost": 30.8,
+   "cost": 30.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_altdorf_uri",
    "to": "set_strasbourg",
-   "cost": 299.24,
+   "cost": 299.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amersfoort",
    "to": "set_arnhem",
-   "cost": 59.79,
+   "cost": 59.82,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amersfoort",
    "to": "set_marienweerd",
-   "cost": 46.63,
+   "cost": 46.67,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amersfoort",
    "to": "set_stavoren",
-   "cost": 162.46,
+   "cost": 162.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amersfoort",
    "to": "set_utrecht",
-   "cost": 39.28,
+   "cost": 39.29,
    "road": false,
    "sea": false
   },
@@ -416,63 +416,63 @@
   {
    "from": "set_amiens",
    "to": "set_coucy",
-   "cost": 42.92,
+   "cost": 42.91,
    "road": true,
    "sea": false
   },
   {
    "from": "set_amiens",
    "to": "set_gonesse",
-   "cost": 50.88,
+   "cost": 50.87,
    "road": true,
    "sea": false
   },
   {
    "from": "set_amiens",
    "to": "set_hesdin",
-   "cost": 55.47,
+   "cost": 55.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amiens",
    "to": "set_saint_valery_sur_somme",
-   "cost": 31.38,
+   "cost": 31.36,
    "road": true,
    "sea": false
   },
   {
    "from": "set_amsterdam",
    "to": "set_arnhem",
-   "cost": 120.35,
+   "cost": 120.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amsterdam",
    "to": "set_dordrecht",
-   "cost": 126.84,
+   "cost": 126.79,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amsterdam",
    "to": "set_stavoren",
-   "cost": 133.79,
+   "cost": 133.81,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amsterdam",
    "to": "set_teylingen",
-   "cost": 58.75,
+   "cost": 58.71,
    "road": false,
    "sea": false
   },
   {
    "from": "set_amsterdam",
    "to": "set_utrecht",
-   "cost": 68.41,
+   "cost": 68.28,
    "road": false,
    "sea": false
   },
@@ -486,63 +486,63 @@
   {
    "from": "set_ancone",
    "to": "set_florence",
-   "cost": 183.64,
+   "cost": 183.61,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ancone",
    "to": "set_naples",
-   "cost": 312.02,
+   "cost": 312.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ancone",
    "to": "set_rome",
-   "cost": 207.66,
+   "cost": 207.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_andechs",
    "to": "set_augsbourg",
-   "cost": 24.41,
+   "cost": 24.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_andechs",
    "to": "set_freising",
-   "cost": 31.46,
+   "cost": 31.47,
    "road": true,
    "sea": false
   },
   {
    "from": "set_andechs",
    "to": "set_innsbruck",
-   "cost": 120.38,
+   "cost": 120.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_andechs",
    "to": "set_munich",
-   "cost": 17.1,
+   "cost": 17.14,
    "road": true,
    "sea": false
   },
   {
    "from": "set_andernach",
    "to": "set_bonn",
-   "cost": 19.9,
+   "cost": 19.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_andernach",
    "to": "set_brauweiler",
-   "cost": 35.56,
+   "cost": 35.54,
    "road": true,
    "sea": false
   },
@@ -556,42 +556,42 @@
   {
    "from": "set_andernach",
    "to": "set_eberbach",
-   "cost": 61.92,
+   "cost": 61.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_andernach",
    "to": "set_godesburg",
-   "cost": 16.41,
+   "cost": 16.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_andernach",
    "to": "set_koblenz",
-   "cost": 12.22,
+   "cost": 12.24,
    "road": false,
    "sea": false
   },
   {
    "from": "set_angers",
    "to": "set_bauge",
-   "cost": 34.41,
+   "cost": 34.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_angers",
    "to": "set_behuard",
-   "cost": 7.51,
+   "cost": 7.53,
    "road": true,
    "sea": false
   },
   {
    "from": "set_angers",
    "to": "set_sainte_suzanne",
-   "cost": 69.86,
+   "cost": 69.83,
    "road": false,
    "sea": false
   },
@@ -605,56 +605,56 @@
   {
    "from": "set_angouleme",
    "to": "set_aubeterre",
-   "cost": 19.13,
+   "cost": 19.15,
    "road": true,
    "sea": false
   },
   {
    "from": "set_angouleme",
    "to": "set_cognac",
-   "cost": 28.3,
+   "cost": 28.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_angouleme",
    "to": "set_la_rochefoucauld",
-   "cost": 19.77,
+   "cost": 19.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_angouleme",
    "to": "set_limoges",
-   "cost": 88.07,
+   "cost": 88.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_angouleme",
    "to": "set_poitiers",
-   "cost": 52.22,
+   "cost": 52.2,
    "road": true,
    "sea": false
   },
   {
    "from": "set_annecy",
    "to": "set_baume_les_messieurs",
-   "cost": 146.42,
+   "cost": 146.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_annecy",
    "to": "set_beaufort",
-   "cost": 79.28,
+   "cost": 79.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_annecy",
    "to": "set_berne",
-   "cost": 308.61,
+   "cost": 308.6,
    "road": false,
    "sea": false
   },
@@ -668,22 +668,22 @@
   {
    "from": "set_annecy",
    "to": "set_hautecombe",
-   "cost": 31.63,
+   "cost": 31.59,
    "road": true,
    "sea": false
   },
   {
    "from": "set_annecy",
    "to": "set_montmelian",
-   "cost": 89.47,
+   "cost": 89.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_antwerp",
    "to": "set_brussels",
-   "cost": 20.62,
-   "road": true,
+   "cost": 41.24,
+   "road": false,
    "sea": false
   },
   {
@@ -696,14 +696,14 @@
   {
    "from": "set_antwerp",
    "to": "set_shertogenbosch",
-   "cost": 67.89,
+   "cost": 67.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_antwerp",
    "to": "set_sluis",
-   "cost": 71.75,
+   "cost": 71.78,
    "road": false,
    "sea": false
   },
@@ -724,84 +724,84 @@
   {
    "from": "set_arnhem",
    "to": "set_bonn",
-   "cost": 81.02,
+   "cost": 81.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arnhem",
    "to": "set_doornenburg",
-   "cost": 11.3,
+   "cost": 11.32,
    "road": false,
    "sea": false
   },
   {
    "from": "set_arnhem",
    "to": "set_groningue",
-   "cost": 108.48,
+   "cost": 108.44,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arnhem",
    "to": "set_nijmegen",
-   "cost": 8.09,
+   "cost": 8.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arnhem",
    "to": "set_zutphen",
-   "cost": 13.45,
+   "cost": 13.43,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_corbie",
-   "cost": 45.62,
+   "cost": 45.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_douai",
-   "cost": 14.02,
+   "cost": 14.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_hesdin",
-   "cost": 52.46,
+   "cost": 52.45,
    "road": false,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_mont_saint_eloi",
-   "cost": 7.11,
+   "cost": 7.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_saint_omer",
-   "cost": 31.67,
+   "cost": 31.66,
    "road": true,
    "sea": false
   },
   {
    "from": "set_arras",
    "to": "set_valenciennes",
-   "cost": 26.79,
+   "cost": 26.81,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aubeterre",
    "to": "set_brantome",
-   "cost": 43.32,
+   "cost": 43.29,
    "road": false,
    "sea": false
   },
@@ -822,161 +822,161 @@
   {
    "from": "set_aubeterre",
    "to": "set_libourne",
-   "cost": 25.63,
+   "cost": 25.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auch",
    "to": "set_layrac",
-   "cost": 34.99,
+   "cost": 35.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
    "to": "set_montauban",
-   "cost": 20.81,
+   "cost": 20.74,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
    "to": "set_najac",
-   "cost": 70.21,
+   "cost": 70.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_augsbourg",
    "to": "set_hohenzollern",
-   "cost": 143.2,
+   "cost": 143.24,
    "road": false,
    "sea": false
   },
   {
    "from": "set_augsbourg",
    "to": "set_innsbruck",
-   "cost": 96.08,
+   "cost": 96.09,
    "road": true,
    "sea": false
   },
   {
    "from": "set_augsbourg",
    "to": "set_kaisheim",
-   "cost": 21.21,
+   "cost": 21.19,
    "road": true,
    "sea": false
   },
   {
    "from": "set_augsbourg",
    "to": "set_ulm",
-   "cost": 33.76,
+   "cost": 33.79,
    "road": true,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_binche",
-   "cost": 19.31,
+   "cost": 19.33,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_chalons_en_champagne",
-   "cost": 158.9,
+   "cost": 158.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_floreffe",
-   "cost": 23.3,
+   "cost": 23.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_huy",
-   "cost": 59.06,
+   "cost": 59.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_mons",
-   "cost": 35.08,
+   "cost": 35.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_valenciennes",
-   "cost": 64.77,
+   "cost": 64.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aulne",
    "to": "set_villers",
-   "cost": 25.44,
+   "cost": 25.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auterive",
    "to": "set_barcelone",
-   "cost": 225.81,
+   "cost": 225.77,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auterive",
    "to": "set_carcassonne",
-   "cost": 73.59,
+   "cost": 73.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auterive",
    "to": "set_muret",
-   "cost": 8.37,
+   "cost": 8.38,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auterive",
    "to": "set_pau",
-   "cost": 224.04,
+   "cost": 224.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auterive",
    "to": "set_toulouse",
-   "cost": 14.16,
+   "cost": 14.18,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auxerre",
    "to": "set_druyes",
-   "cost": 10.41,
+   "cost": 10.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auxerre",
    "to": "set_troyes",
-   "cost": 38.42,
+   "cost": 38.41,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auxerre",
    "to": "set_vezelay",
-   "cost": 33.57,
+   "cost": 33.51,
    "road": false,
    "sea": false
   },
@@ -990,49 +990,49 @@
   {
    "from": "set_avignon",
    "to": "set_carpentras",
-   "cost": 22.84,
+   "cost": 22.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_avignon",
    "to": "set_le_barroux",
-   "cost": 32.78,
+   "cost": 32.8,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_avignon",
+   "to": "set_les_baux",
+   "cost": 12.97,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_avignon",
    "to": "set_senanque",
-   "cost": 30.88,
+   "cost": 30.22,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_avignon",
-   "to": "set_tarascon",
-   "cost": 12.94,
-   "road": true,
    "sea": false
   },
   {
    "from": "set_ayr",
    "to": "set_carrickfergus",
-   "cost": 211.98,
+   "cost": 211.94,
    "road": false,
    "sea": true
   },
   {
    "from": "set_ayr",
    "to": "set_dumbarton",
-   "cost": 54.84,
+   "cost": 54.88,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ayr",
    "to": "set_dumfries",
-   "cost": 77.71,
+   "cost": 77.68,
    "road": false,
    "sea": false
   },
@@ -1046,7 +1046,7 @@
   {
    "from": "set_ayr",
    "to": "set_renfrew",
-   "cost": 24.39,
+   "cost": 24.38,
    "road": true,
    "sea": false
   },
@@ -1060,35 +1060,35 @@
   {
    "from": "set_azincourt",
    "to": "set_hesdin",
-   "cost": 12.49,
+   "cost": 12.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_azincourt",
    "to": "set_mont_saint_eloi",
-   "cost": 36.33,
+   "cost": 36.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_azincourt",
    "to": "set_saint_omer",
-   "cost": 16.33,
+   "cost": 16.34,
    "road": true,
    "sea": false
   },
   {
    "from": "set_azincourt",
    "to": "set_saint_valery_sur_somme",
-   "cost": 68.21,
+   "cost": 68.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_badajoz",
    "to": "set_cordoue",
-   "cost": 223.33,
+   "cost": 223.29,
    "road": false,
    "sea": false
   },
@@ -1102,77 +1102,77 @@
   {
    "from": "set_badajoz",
    "to": "set_leon",
-   "cost": 426.99,
+   "cost": 427.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_badajoz",
    "to": "set_lisbonne",
-   "cost": 189.34,
+   "cost": 189.33,
    "road": false,
    "sea": false
   },
   {
    "from": "set_badajoz",
    "to": "set_porto",
-   "cost": 292.34,
+   "cost": 292.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_badajoz",
    "to": "set_seville",
-   "cost": 187.97,
+   "cost": 187.96,
    "road": false,
    "sea": false
   },
   {
    "from": "set_badajoz",
    "to": "set_tolede",
-   "cost": 274.78,
+   "cost": 274.8,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bamburgh",
    "to": "set_berwick",
-   "cost": 25.99,
+   "cost": 25.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bamburgh",
    "to": "set_carlisle",
-   "cost": 111.34,
+   "cost": 111.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bamburgh",
    "to": "set_newcastle",
-   "cost": 70.47,
+   "cost": 70.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_banbury",
    "to": "set_boston",
-   "cost": 202.88,
+   "cost": 202.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_banbury",
    "to": "set_oxford",
-   "cost": 35.12,
+   "cost": 35.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_banbury",
    "to": "set_tewkesbury",
-   "cost": 28.3,
+   "cost": 28.33,
    "road": true,
    "sea": false
   },
@@ -1186,7 +1186,7 @@
   {
    "from": "set_banbury",
    "to": "set_warwick",
-   "cost": 14.82,
+   "cost": 14.84,
    "road": true,
    "sea": false
   },
@@ -1200,70 +1200,70 @@
   {
    "from": "set_bar_le_duc",
    "to": "set_ligny_en_barrois",
-   "cost": 8.06,
+   "cost": 8.07,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bar_le_duc",
    "to": "set_saint_mihiel",
-   "cost": 30.32,
+   "cost": 30.28,
    "road": false,
    "sea": false
   },
   {
    "from": "set_barcelone",
    "to": "set_perpignan",
-   "cost": 155.94,
+   "cost": 155.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_barcelone",
    "to": "set_peyrepertuse",
-   "cost": 172.32,
+   "cost": 172.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_barcelone",
    "to": "set_saragosse",
-   "cost": 258.31,
+   "cost": 258.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_barcelone",
    "to": "set_tarbes",
-   "cost": 404.15,
+   "cost": 404.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_barcelone",
    "to": "set_valence",
-   "cost": 301.85,
+   "cost": 301.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bauge",
    "to": "set_epau",
-   "cost": 55.04,
+   "cost": 55.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bauge",
    "to": "set_fontevraud",
-   "cost": 37.8,
+   "cost": 37.87,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bauge",
    "to": "set_saumur",
-   "cost": 31.71,
+   "cost": 31.76,
    "road": false,
    "sea": false
   },
@@ -1277,7 +1277,7 @@
   {
    "from": "set_baume_les_messieurs",
    "to": "set_dole",
-   "cost": 43.85,
+   "cost": 43.82,
    "road": false,
    "sea": false
   },
@@ -1291,36 +1291,43 @@
   {
    "from": "set_baume_les_messieurs",
    "to": "set_salins_les_bains",
-   "cost": 29.49,
+   "cost": 29.52,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bayonne",
    "to": "set_bilbao",
-   "cost": 181.35,
+   "cost": 181.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bayonne",
    "to": "set_dax",
-   "cost": 42.19,
+   "cost": 42.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bayonne",
    "to": "set_pampelune",
-   "cost": 57.45,
+   "cost": 57.47,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bayonne",
    "to": "set_saint_sever",
-   "cost": 78.34,
+   "cost": 78.3,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beaucaire",
+   "to": "set_les_baux",
+   "cost": 12.2,
+   "road": true,
    "sea": false
   },
   {
@@ -1338,51 +1345,44 @@
    "sea": false
   },
   {
-   "from": "set_beaucaire",
-   "to": "set_tarascon",
-   "cost": 12.16,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_beaufort",
    "to": "set_joux",
-   "cost": 199.98,
+   "cost": 199.96,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaufort",
    "to": "set_lucerne",
-   "cost": 399.43,
+   "cost": 399.44,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaufort",
    "to": "set_milan",
-   "cost": 310.37,
+   "cost": 310.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaufort",
    "to": "set_montmelian",
-   "cost": 46.94,
+   "cost": 46.96,
    "road": true,
    "sea": false
   },
   {
    "from": "set_beaufort",
    "to": "set_thun",
-   "cost": 283.23,
+   "cost": 283.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaufort",
    "to": "set_turin",
-   "cost": 170.26,
+   "cost": 170.24,
    "road": false,
    "sea": false
   },
@@ -1396,14 +1396,14 @@
   {
    "from": "set_beaujeu",
    "to": "set_ile_barbe",
-   "cost": 42.92,
+   "cost": 42.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaujeu",
    "to": "set_montbrison",
-   "cost": 72.97,
+   "cost": 73.01,
    "road": false,
    "sea": false
   },
@@ -1417,56 +1417,56 @@
   {
    "from": "set_beaujeu",
    "to": "set_oingt",
-   "cost": 25.92,
+   "cost": 25.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaulieu",
    "to": "set_dartmouth",
-   "cost": 158.79,
+   "cost": 158.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaulieu",
    "to": "set_portsmouth",
-   "cost": 25.6,
+   "cost": 25.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaulieu",
    "to": "set_salisbury",
-   "cost": 37.24,
+   "cost": 37.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaulieu",
    "to": "set_southampton",
-   "cost": 11.14,
+   "cost": 11.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaumaris",
    "to": "set_caernarfon",
-   "cost": 18.37,
+   "cost": 18.36,
    "road": true,
    "sea": false
   },
   {
    "from": "set_beaumaris",
    "to": "set_chester",
-   "cost": 80.22,
+   "cost": 80.24,
    "road": true,
    "sea": false
   },
   {
    "from": "set_beaumaris",
    "to": "set_conwy",
-   "cost": 35.18,
+   "cost": 35.23,
    "road": false,
    "sea": false
   },
@@ -1487,63 +1487,63 @@
   {
    "from": "set_beaune",
    "to": "set_dijon",
-   "cost": 18.4,
+   "cost": 18.38,
    "road": true,
    "sea": false
   },
   {
    "from": "set_beaune",
    "to": "set_souvigny",
-   "cost": 135.84,
+   "cost": 135.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_grande_chartreuse",
-   "cost": 87.03,
+   "cost": 87.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_grenoble",
-   "cost": 57.17,
+   "cost": 57.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_largentiere",
-   "cost": 158.65,
+   "cost": 158.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_le_barroux",
-   "cost": 159.26,
+   "cost": 159.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_silvacane",
-   "cost": 227.44,
+   "cost": 227.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beauvoir_en_royans",
    "to": "set_vienne",
-   "cost": 84.6,
+   "cost": 84.47,
    "road": false,
    "sea": false
   },
   {
    "from": "set_behuard",
    "to": "set_fontevraud",
-   "cost": 53.84,
+   "cost": 53.89,
    "road": false,
    "sea": false
   },
@@ -1564,42 +1564,42 @@
   {
    "from": "set_behuard",
    "to": "set_saumur",
-   "cost": 46.24,
+   "cost": 46.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_belcastel",
    "to": "set_conques",
-   "cost": 22.98,
+   "cost": 23.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_belcastel",
    "to": "set_la_chaise_dieu",
-   "cost": 226.06,
+   "cost": 226.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_belcastel",
    "to": "set_najac",
-   "cost": 33.44,
+   "cost": 33.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_belcastel",
    "to": "set_narbonne",
-   "cost": 144.41,
+   "cost": 144.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_belcastel",
    "to": "set_nimes",
-   "cost": 175.0,
+   "cost": 174.95,
    "road": false,
    "sea": false
   },
@@ -1613,14 +1613,14 @@
   {
    "from": "set_belcastel",
    "to": "set_segur_le_chateau",
-   "cost": 155.02,
+   "cost": 155.08,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bergerac",
    "to": "set_beynac",
-   "cost": 26.46,
+   "cost": 26.47,
    "road": true,
    "sea": false
   },
@@ -1641,14 +1641,14 @@
   {
    "from": "set_bergerac",
    "to": "set_la_reole",
-   "cost": 46.1,
+   "cost": 46.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bergerac",
    "to": "set_perigueux",
-   "cost": 20.75,
+   "cost": 20.74,
    "road": true,
    "sea": false
   },
@@ -1662,28 +1662,28 @@
   {
    "from": "set_berkeley",
    "to": "set_bristol",
-   "cost": 13.86,
+   "cost": 13.87,
    "road": true,
    "sea": false
   },
   {
    "from": "set_berkeley",
    "to": "set_conwy",
-   "cost": 300.24,
+   "cost": 300.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_berkeley",
    "to": "set_gloucester",
-   "cost": 12.35,
+   "cost": 12.37,
    "road": true,
    "sea": false
   },
   {
    "from": "set_berkeley",
    "to": "set_tewkesbury",
-   "cost": 19.57,
+   "cost": 19.58,
    "road": true,
    "sea": false
   },
@@ -1704,21 +1704,21 @@
   {
    "from": "set_berlin",
    "to": "set_krivoklat",
-   "cost": 278.54,
+   "cost": 278.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_berlin",
    "to": "set_meissen",
-   "cost": 151.17,
+   "cost": 151.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_berlin",
    "to": "set_spandau",
-   "cost": 6.89,
+   "cost": 6.92,
    "road": true,
    "sea": false
   },
@@ -1732,7 +1732,7 @@
   {
    "from": "set_berne",
    "to": "set_burgdorf",
-   "cost": 36.87,
+   "cost": 36.84,
    "road": false,
    "sea": false
   },
@@ -1746,56 +1746,56 @@
   {
    "from": "set_berne",
    "to": "set_thun",
-   "cost": 25.22,
+   "cost": 25.17,
    "road": true,
    "sea": false
   },
   {
    "from": "set_berwick",
    "to": "set_dunbar",
-   "cost": 40.85,
+   "cost": 40.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_berwick",
    "to": "set_roxburgh",
-   "cost": 34.9,
+   "cost": 34.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_besancon",
    "to": "set_burgdorf",
-   "cost": 185.04,
+   "cost": 185.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_besancon",
    "to": "set_colmar",
-   "cost": 137.01,
+   "cost": 137.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_besancon",
    "to": "set_dole",
-   "cost": 21.78,
+   "cost": 21.77,
    "road": true,
    "sea": false
   },
   {
    "from": "set_besancon",
    "to": "set_joux",
-   "cost": 22.31,
+   "cost": 22.33,
    "road": true,
    "sea": false
   },
   {
    "from": "set_besancon",
    "to": "set_salins_les_bains",
-   "cost": 34.96,
+   "cost": 34.93,
    "road": false,
    "sea": false
   },
@@ -1809,7 +1809,7 @@
   {
    "from": "set_beynac",
    "to": "set_brantome",
-   "cost": 35.14,
+   "cost": 35.16,
    "road": true,
    "sea": false
   },
@@ -1823,7 +1823,7 @@
   {
    "from": "set_beynac",
    "to": "set_marcilhac",
-   "cost": 57.86,
+   "cost": 57.82,
    "road": false,
    "sea": false
   },
@@ -1837,7 +1837,7 @@
   {
    "from": "set_beziers",
    "to": "set_carcassonne",
-   "cost": 71.7,
+   "cost": 71.67,
    "road": false,
    "sea": false
   },
@@ -1851,70 +1851,70 @@
   {
    "from": "set_beziers",
    "to": "set_narbonne",
-   "cost": 12.31,
+   "cost": 12.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_beziers",
    "to": "set_rodez",
-   "cost": 123.29,
+   "cost": 123.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bilbao",
    "to": "set_burgos",
-   "cost": 178.61,
+   "cost": 178.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bilbao",
    "to": "set_pampelune",
-   "cost": 234.26,
+   "cost": 234.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_binche",
    "to": "set_mons",
-   "cost": 7.9,
+   "cost": 7.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_binche",
    "to": "set_valenciennes",
-   "cost": 23.1,
+   "cost": 23.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_blaye",
    "to": "set_bordeaux",
-   "cost": 33.6,
+   "cost": 33.59,
    "road": false,
    "sea": false
   },
   {
    "from": "set_blaye",
    "to": "set_cognac",
-   "cost": 36.42,
+   "cost": 36.41,
    "road": true,
    "sea": false
   },
   {
    "from": "set_blaye",
    "to": "set_libourne",
-   "cost": 20.71,
+   "cost": 20.7,
    "road": true,
    "sea": false
   },
   {
    "from": "set_blaye",
    "to": "set_pons",
-   "cost": 25.24,
+   "cost": 25.23,
    "road": true,
    "sea": false
   },
@@ -1928,42 +1928,42 @@
   {
    "from": "set_blois",
    "to": "set_epau",
-   "cost": 93.8,
+   "cost": 93.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_blois",
    "to": "set_issoudun",
-   "cost": 86.92,
+   "cost": 86.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_blois",
    "to": "set_orleans",
-   "cost": 27.59,
+   "cost": 27.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_blois",
    "to": "set_sully_sur_loire",
-   "cost": 80.35,
+   "cost": 80.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_blois",
    "to": "set_vouvray",
-   "cost": 22.23,
+   "cost": 22.2,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bologne",
    "to": "set_ferrare",
-   "cost": 33.0,
+   "cost": 33.04,
    "road": true,
    "sea": false
   },
@@ -1977,63 +1977,63 @@
   {
    "from": "set_bologne",
    "to": "set_milan",
-   "cost": 201.19,
+   "cost": 201.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bologne",
    "to": "set_venise",
-   "cost": 230.15,
+   "cost": 230.16,
    "road": false,
    "sea": true
   },
   {
    "from": "set_bolzano",
    "to": "set_innsbruck",
-   "cost": 171.42,
+   "cost": 171.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bolzano",
    "to": "set_lucerne",
-   "cost": 481.49,
+   "cost": 481.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bolzano",
    "to": "set_schloss_tirol",
-   "cost": 25.16,
+   "cost": 25.18,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bolzano",
    "to": "set_venise",
-   "cost": 266.5,
+   "cost": 266.56,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bolzano",
    "to": "set_verone",
-   "cost": 181.51,
+   "cost": 181.45,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bonifacio",
    "to": "set_cagliari",
-   "cost": 341.11,
+   "cost": 341.07,
    "road": false,
    "sea": true
   },
   {
    "from": "set_bonifacio",
    "to": "set_florence",
-   "cost": 470.18,
+   "cost": 470.19,
    "road": false,
    "sea": false
   },
@@ -2047,14 +2047,14 @@
   {
    "from": "set_bonn",
    "to": "set_cologne",
-   "cost": 12.15,
+   "cost": 12.16,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bonn",
    "to": "set_godesburg",
-   "cost": 3.5,
+   "cost": 3.48,
    "road": true,
    "sea": false
   },
@@ -2068,21 +2068,21 @@
   {
    "from": "set_bordeaux",
    "to": "set_dax",
-   "cost": 129.75,
+   "cost": 129.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bordeaux",
    "to": "set_la_reole",
-   "cost": 56.37,
+   "cost": 56.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bordeaux",
    "to": "set_la_sauve_majeure",
-   "cost": 23.56,
+   "cost": 23.58,
    "road": false,
    "sea": false
   },
@@ -2096,105 +2096,105 @@
   {
    "from": "set_boston",
    "to": "set_bury_st_edmunds",
-   "cost": 190.99,
+   "cost": 190.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boston",
    "to": "set_coventry",
-   "cost": 178.74,
+   "cost": 178.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boston",
    "to": "set_hull",
-   "cost": 132.33,
+   "cost": 132.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boston",
    "to": "set_lynn",
-   "cost": 76.24,
+   "cost": 76.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boston",
    "to": "set_norwich",
-   "cost": 194.09,
+   "cost": 194.08,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boston",
    "to": "set_yarmouth",
-   "cost": 250.3,
+   "cost": 250.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boulogne",
    "to": "set_calais",
-   "cost": 30.39,
+   "cost": 30.42,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boulogne",
    "to": "set_hardelot",
-   "cost": 6.11,
+   "cost": 6.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_boulogne",
    "to": "set_hesdin",
-   "cost": 50.61,
+   "cost": 50.59,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boulogne",
    "to": "set_le_crotoy",
-   "cost": 54.33,
+   "cost": 54.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_boulogne",
    "to": "set_wissant",
-   "cost": 17.86,
+   "cost": 17.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_flavigny_sur_ozerain",
-   "cost": 153.71,
+   "cost": 153.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_gannat",
-   "cost": 24.91,
+   "cost": 24.94,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_limoges",
-   "cost": 159.87,
+   "cost": 159.84,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_moulins",
-   "cost": 11.56,
+   "cost": 11.58,
    "road": true,
    "sea": false
   },
@@ -2208,21 +2208,21 @@
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_noirlac",
-   "cost": 22.15,
+   "cost": 22.11,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bourbon_l_archambault",
    "to": "set_souvigny",
-   "cost": 6.59,
+   "cost": 6.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bourges",
    "to": "set_issoudun",
-   "cost": 16.8,
+   "cost": 16.79,
    "road": true,
    "sea": false
   },
@@ -2236,126 +2236,126 @@
   {
    "from": "set_bourges",
    "to": "set_noirlac",
-   "cost": 23.28,
+   "cost": 23.3,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bourges",
    "to": "set_sully_sur_loire",
-   "cost": 76.17,
+   "cost": 76.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brantome",
    "to": "set_perigueux",
-   "cost": 10.19,
+   "cost": 10.22,
    "road": true,
    "sea": false
   },
   {
    "from": "set_brantome",
    "to": "set_segur_le_chateau",
-   "cost": 38.39,
+   "cost": 38.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brauweiler",
    "to": "set_cologne",
-   "cost": 4.23,
+   "cost": 4.22,
    "road": true,
    "sea": false
   },
   {
    "from": "set_brauweiler",
    "to": "set_franchimont",
-   "cost": 87.94,
+   "cost": 87.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brauweiler",
    "to": "set_nijmegen",
-   "cost": 119.27,
+   "cost": 119.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brauweiler",
    "to": "set_shertogenbosch",
-   "cost": 115.58,
+   "cost": 115.53,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bremen",
    "to": "set_brunswick",
-   "cost": 73.73,
+   "cost": 73.72,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bremen",
    "to": "set_emden",
-   "cost": 166.89,
+   "cost": 166.87,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bremen",
    "to": "set_hamburg",
-   "cost": 47.62,
+   "cost": 47.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bremen",
    "to": "set_loccum",
-   "cost": 72.48,
+   "cost": 72.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brest",
    "to": "set_hennebont",
-   "cost": 110.75,
+   "cost": 110.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brest",
    "to": "set_locronan",
-   "cost": 38.79,
+   "cost": 38.76,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brest",
    "to": "set_suscinio",
-   "cost": 145.45,
+   "cost": 145.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bristol",
    "to": "set_cardiff",
-   "cost": 41.1,
+   "cost": 41.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bristol",
    "to": "set_exeter",
-   "cost": 105.32,
+   "cost": 105.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bristol",
    "to": "set_gloucester",
-   "cost": 25.84,
+   "cost": 25.86,
    "road": true,
    "sea": false
   },
@@ -2369,70 +2369,70 @@
   {
    "from": "set_bruges",
    "to": "set_calais",
-   "cost": 199.85,
+   "cost": 199.86,
    "road": false,
    "sea": true
   },
   {
    "from": "set_bruges",
    "to": "set_gand",
-   "cost": 19.28,
+   "cost": 19.27,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bruges",
    "to": "set_kortrijk",
-   "cost": 21.28,
+   "cost": 21.29,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bruges",
    "to": "set_sluis",
-   "cost": 7.81,
+   "cost": 7.79,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bruges",
    "to": "set_ter_duinen",
-   "cost": 42.19,
+   "cost": 42.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bruges",
    "to": "set_ypres",
-   "cost": 46.54,
+   "cost": 46.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brunswick",
    "to": "set_eberbach",
-   "cost": 305.09,
+   "cost": 305.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brunswick",
    "to": "set_hildesheim",
-   "cost": 20.79,
+   "cost": 20.77,
    "road": true,
    "sea": false
   },
   {
    "from": "set_brunswick",
    "to": "set_loccum",
-   "cost": 95.22,
+   "cost": 95.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brunswick",
    "to": "set_meissen",
-   "cost": 118.98,
+   "cost": 118.99,
    "road": true,
    "sea": false
   },
@@ -2446,21 +2446,21 @@
   {
    "from": "set_brussels",
    "to": "set_gand",
-   "cost": 25.01,
+   "cost": 25.0,
    "road": true,
    "sea": false
   },
   {
    "from": "set_brussels",
    "to": "set_louvain",
-   "cost": 24.76,
+   "cost": 24.77,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brussels",
    "to": "set_villers",
-   "cost": 30.32,
+   "cost": 30.33,
    "road": false,
    "sea": false
   },
@@ -2474,35 +2474,35 @@
   {
    "from": "set_buckfast",
    "to": "set_dartmouth",
-   "cost": 21.15,
+   "cost": 21.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_buckfast",
    "to": "set_exeter",
-   "cost": 30.79,
+   "cost": 30.81,
    "road": false,
    "sea": false
   },
   {
    "from": "set_buckfast",
    "to": "set_plymouth",
-   "cost": 24.88,
+   "cost": 24.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_buckfast",
    "to": "set_southampton",
-   "cost": 173.73,
+   "cost": 173.72,
    "road": false,
    "sea": false
   },
   {
    "from": "set_burgdorf",
    "to": "set_interlaken",
-   "cost": 94.25,
+   "cost": 94.35,
    "road": false,
    "sea": false
   },
@@ -2516,7 +2516,7 @@
   {
    "from": "set_burgdorf",
    "to": "set_thun",
-   "cost": 66.8,
+   "cost": 66.75,
    "road": false,
    "sea": false
   },
@@ -2530,14 +2530,14 @@
   {
    "from": "set_burgos",
    "to": "set_pampelune",
-   "cost": 264.5,
+   "cost": 264.53,
    "road": false,
    "sea": false
   },
   {
    "from": "set_burgos",
    "to": "set_saragosse",
-   "cost": 246.63,
+   "cost": 246.66,
    "road": false,
    "sea": false
   },
@@ -2551,21 +2551,21 @@
   {
    "from": "set_bury_st_edmunds",
    "to": "set_colchester",
-   "cost": 37.06,
+   "cost": 37.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bury_st_edmunds",
    "to": "set_lynn",
-   "cost": 120.34,
+   "cost": 120.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bury_st_edmunds",
    "to": "set_norwich",
-   "cost": 58.1,
+   "cost": 58.11,
    "road": true,
    "sea": false
   },
@@ -2579,126 +2579,126 @@
   {
    "from": "set_bury_st_edmunds",
    "to": "set_warwick",
-   "cost": 235.54,
+   "cost": 235.52,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bury_st_edmunds",
    "to": "set_yarmouth",
-   "cost": 159.29,
+   "cost": 159.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caen",
    "to": "set_cherbourg",
-   "cost": 103.51,
+   "cost": 103.56,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caen",
    "to": "set_domfront",
-   "cost": 34.34,
+   "cost": 34.32,
    "road": true,
    "sea": false
   },
   {
    "from": "set_caen",
    "to": "set_jumieges",
-   "cost": 80.28,
+   "cost": 80.25,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caen",
    "to": "set_mortain",
-   "cost": 72.12,
+   "cost": 72.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caerlaverock",
    "to": "set_carlisle",
-   "cost": 39.18,
+   "cost": 39.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caerlaverock",
    "to": "set_dumfries",
-   "cost": 9.45,
+   "cost": 9.2,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_caerlaverock",
+   "to": "set_edimbourg",
+   "cost": 108.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caerlaverock",
    "to": "set_glasgow",
-   "cost": 106.35,
+   "cost": 106.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caerlaverock",
    "to": "set_kirkcudbright",
-   "cost": 39.75,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_caerlaverock",
-   "to": "set_roxburgh",
-   "cost": 93.35,
+   "cost": 39.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_caernarfon",
    "to": "set_conwy",
-   "cost": 33.51,
+   "cost": 33.53,
    "road": true,
    "sea": false
   },
   {
    "from": "set_caernarfon",
    "to": "set_harlech",
-   "cost": 66.08,
+   "cost": 66.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cahors",
    "to": "set_castelnau_bretenoux",
-   "cost": 61.12,
+   "cost": 61.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cahors",
    "to": "set_castelnaud",
-   "cost": 46.64,
+   "cost": 46.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cahors",
    "to": "set_marcilhac",
-   "cost": 29.08,
+   "cost": 29.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cahors",
    "to": "set_saint_cirq_lapopie",
-   "cost": 19.01,
+   "cost": 19.0,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cahors",
    "to": "set_villeneuve_sur_lot",
-   "cost": 58.66,
+   "cost": 58.65,
    "road": false,
    "sea": false
   },
@@ -2712,35 +2712,35 @@
   {
    "from": "set_calais",
    "to": "set_saint_omer",
-   "cost": 35.52,
+   "cost": 35.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_calais",
    "to": "set_wissant",
-   "cost": 15.46,
+   "cost": 15.44,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cantorbery",
    "to": "set_dover",
-   "cost": 11.79,
+   "cost": 11.81,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cantorbery",
    "to": "set_faversham",
-   "cost": 6.79,
+   "cost": 6.78,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cantorbery",
    "to": "set_hastings",
-   "cost": 35.51,
+   "cost": 35.5,
    "road": true,
    "sea": false
   },
@@ -2754,28 +2754,28 @@
   {
    "from": "set_carcassonne",
    "to": "set_fontfroide",
-   "cost": 25.03,
+   "cost": 25.01,
    "road": true,
    "sea": false
   },
   {
    "from": "set_carcassonne",
    "to": "set_najac",
-   "cost": 115.75,
+   "cost": 115.76,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carcassonne",
    "to": "set_narbonne",
-   "cost": 26.67,
+   "cost": 26.68,
    "road": true,
    "sea": false
   },
   {
    "from": "set_carcassonne",
    "to": "set_peyrepertuse",
-   "cost": 40.14,
+   "cost": 40.16,
    "road": false,
    "sea": false
   },
@@ -2789,21 +2789,21 @@
   {
    "from": "set_cardiff",
    "to": "set_exeter",
-   "cost": 188.61,
+   "cost": 188.58,
    "road": false,
    "sea": true
   },
   {
    "from": "set_carlisle",
    "to": "set_furness",
-   "cost": 131.27,
+   "cost": 131.28,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carlisle",
    "to": "set_newcastle",
-   "cost": 84.6,
+   "cost": 84.64,
    "road": false,
    "sea": false
   },
@@ -2817,42 +2817,42 @@
   {
    "from": "set_carmarthen",
    "to": "set_pembroke",
-   "cost": 46.47,
+   "cost": 46.44,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carmarthen",
    "to": "set_whitland",
-   "cost": 20.82,
+   "cost": 20.84,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carpentras",
    "to": "set_grenoble",
-   "cost": 204.82,
+   "cost": 204.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carpentras",
    "to": "set_le_barroux",
-   "cost": 12.66,
+   "cost": 12.7,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carpentras",
    "to": "set_senanque",
-   "cost": 16.49,
+   "cost": 16.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carrickfergus",
    "to": "set_drogheda",
-   "cost": 116.75,
+   "cost": 116.8,
    "road": false,
    "sea": false
   },
@@ -2866,70 +2866,70 @@
   {
    "from": "set_carrickfergus",
    "to": "set_inverness",
-   "cost": 486.26,
+   "cost": 486.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carrickfergus",
    "to": "set_kirkcudbright",
-   "cost": 113.03,
+   "cost": 113.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_carrickfergus",
    "to": "set_sligo",
-   "cost": 179.12,
+   "cost": 179.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_casal",
    "to": "set_genes",
-   "cost": 67.3,
+   "cost": 67.29,
    "road": true,
    "sea": false
   },
   {
    "from": "set_casal",
    "to": "set_milan",
-   "cost": 68.38,
+   "cost": 68.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_casal",
    "to": "set_turin",
-   "cost": 60.94,
+   "cost": 60.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_castelnau_bretenoux",
    "to": "set_figeac",
-   "cost": 31.82,
+   "cost": 31.88,
    "road": false,
    "sea": false
   },
   {
    "from": "set_castelnau_bretenoux",
    "to": "set_marcilhac",
-   "cost": 38.0,
+   "cost": 37.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_castelnau_bretenoux",
    "to": "set_uzerche",
-   "cost": 63.34,
+   "cost": 63.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_castelnau_le_lez",
    "to": "set_lattes",
-   "cost": 5.71,
+   "cost": 5.76,
    "road": false,
    "sea": false
   },
@@ -2943,21 +2943,21 @@
   {
    "from": "set_castelnaud",
    "to": "set_clairac",
-   "cost": 60.67,
+   "cost": 60.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chalons_en_champagne",
    "to": "set_chateau_thierry",
-   "cost": 35.73,
+   "cost": 35.74,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chalons_en_champagne",
    "to": "set_clairvaux",
-   "cost": 47.58,
+   "cost": 47.57,
    "road": true,
    "sea": false
   },
@@ -2978,7 +2978,7 @@
   {
    "from": "set_chalons_en_champagne",
    "to": "set_provins",
-   "cost": 45.0,
+   "cost": 45.01,
    "road": true,
    "sea": false
   },
@@ -2992,21 +2992,21 @@
   {
    "from": "set_chalons_en_champagne",
    "to": "set_troyes",
-   "cost": 38.13,
+   "cost": 38.14,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chalusset",
    "to": "set_grandmont",
-   "cost": 14.28,
+   "cost": 14.3,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chalusset",
    "to": "set_issoudun",
-   "cost": 145.27,
+   "cost": 145.32,
    "road": false,
    "sea": false
   },
@@ -3020,147 +3020,147 @@
   {
    "from": "set_chalusset",
    "to": "set_murol",
-   "cost": 185.13,
+   "cost": 185.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chalusset",
    "to": "set_segur_le_chateau",
-   "cost": 32.37,
+   "cost": 32.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chalusset",
    "to": "set_souvigny",
-   "cost": 168.71,
+   "cost": 168.72,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chalusset",
    "to": "set_uzerche",
-   "cost": 18.44,
+   "cost": 18.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chambery",
    "to": "set_grande_chartreuse",
-   "cost": 48.97,
+   "cost": 49.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chambery",
    "to": "set_hautecombe",
-   "cost": 18.66,
+   "cost": 18.68,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chambery",
    "to": "set_ile_barbe",
-   "cost": 67.79,
+   "cost": 67.8,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chambery",
    "to": "set_montmelian",
-   "cost": 12.6,
+   "cost": 12.55,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateau_gaillard",
    "to": "set_clery_saint_andre",
-   "cost": 159.59,
+   "cost": 159.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_gaillard",
    "to": "set_dieppe",
-   "cost": 80.55,
+   "cost": 80.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_gaillard",
    "to": "set_evreux",
-   "cost": 30.08,
+   "cost": 30.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_gaillard",
    "to": "set_rouen",
-   "cost": 32.86,
+   "cost": 32.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_gaillard",
    "to": "set_saint_denis",
-   "cost": 38.23,
+   "cost": 38.24,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateau_thierry",
    "to": "set_coucy",
-   "cost": 26.08,
+   "cost": 26.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateau_thierry",
    "to": "set_meaux",
-   "cost": 39.42,
+   "cost": 39.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_thierry",
    "to": "set_mons",
-   "cost": 161.18,
+   "cost": 161.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chateau_thierry",
    "to": "set_provins",
-   "cost": 27.62,
+   "cost": 27.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateau_thierry",
    "to": "set_reims",
-   "cost": 25.77,
+   "cost": 25.79,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateauneuf_en_auxois",
    "to": "set_dijon",
-   "cost": 20.06,
+   "cost": 20.04,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateauneuf_en_auxois",
    "to": "set_flavigny_sur_ozerain",
-   "cost": 22.3,
+   "cost": 22.29,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chateauneuf_en_auxois",
    "to": "set_moulins",
-   "cost": 114.57,
+   "cost": 114.61,
    "road": false,
    "sea": false
   },
@@ -3174,7 +3174,7 @@
   {
    "from": "set_cherbourg",
    "to": "set_mortain",
-   "cost": 120.53,
+   "cost": 120.54,
    "road": false,
    "sea": false
   },
@@ -3188,147 +3188,154 @@
   {
    "from": "set_chester",
    "to": "set_lancastre",
-   "cost": 191.39,
+   "cost": 191.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chester",
    "to": "set_liverpool",
-   "cost": 50.32,
+   "cost": 50.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chichester",
    "to": "set_lewes",
-   "cost": 27.05,
+   "cost": 27.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chichester",
    "to": "set_portsmouth",
-   "cost": 10.97,
+   "cost": 10.96,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chichester",
    "to": "set_windsor",
-   "cost": 73.09,
+   "cost": 73.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chinon",
    "to": "set_fontevraud",
-   "cost": 11.07,
+   "cost": 9.81,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chinon",
    "to": "set_loches",
-   "cost": 27.32,
-   "road": true,
+   "cost": 57.28,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_chinon",
    "to": "set_marmoutier_tours",
-   "cost": 38.19,
+   "cost": 39.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chinon",
    "to": "set_poitiers",
-   "cost": 68.39,
+   "cost": 70.39,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chinon",
+   "to": "set_sainte_suzanne",
+   "cost": 108.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chinon",
    "to": "set_tours",
-   "cost": 36.6,
+   "cost": 37.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_citeaux",
    "to": "set_dijon",
-   "cost": 13.86,
+   "cost": 13.84,
    "road": true,
    "sea": false
   },
   {
    "from": "set_citeaux",
    "to": "set_dole",
-   "cost": 15.87,
+   "cost": 15.89,
    "road": true,
    "sea": false
   },
   {
    "from": "set_citeaux",
    "to": "set_nancy",
-   "cost": 99.02,
+   "cost": 99.01,
    "road": true,
    "sea": false
   },
   {
    "from": "set_citeaux",
    "to": "set_oingt",
-   "cost": 132.05,
+   "cost": 132.08,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clairac",
    "to": "set_layrac",
-   "cost": 11.5,
+   "cost": 11.52,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clairac",
    "to": "set_saint_cirq_lapopie",
-   "cost": 79.49,
+   "cost": 79.45,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clairac",
    "to": "set_villeneuve_sur_lot",
-   "cost": 2.36,
+   "cost": 2.35,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clairvaux",
    "to": "set_echternach",
-   "cost": 216.44,
+   "cost": 217.0,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clairvaux",
    "to": "set_flavigny_sur_ozerain",
-   "cost": 36.04,
+   "cost": 36.05,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clairvaux",
    "to": "set_ligny_en_barrois",
-   "cost": 72.12,
+   "cost": 72.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clairvaux",
    "to": "set_toul",
-   "cost": 100.86,
+   "cost": 100.87,
    "road": false,
    "sea": false
   },
@@ -3342,49 +3349,49 @@
   {
    "from": "set_clairvaux",
    "to": "set_vezelay",
-   "cost": 108.43,
+   "cost": 108.47,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clermont",
    "to": "set_grandmont",
-   "cost": 212.67,
+   "cost": 212.61,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clermont",
    "to": "set_la_chaise_dieu",
-   "cost": 138.95,
+   "cost": 138.99,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clermont",
    "to": "set_murol",
-   "cost": 26.23,
+   "cost": 26.21,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clermont",
    "to": "set_orcival",
-   "cost": 31.21,
+   "cost": 31.23,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clermont",
    "to": "set_riom",
-   "cost": 13.01,
+   "cost": 13.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clery_saint_andre",
    "to": "set_fleury",
-   "cost": 41.98,
+   "cost": 42.02,
    "road": false,
    "sea": false
   },
@@ -3398,98 +3405,98 @@
   {
    "from": "set_clery_saint_andre",
    "to": "set_orleans",
-   "cost": 7.48,
+   "cost": 7.5,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clery_saint_andre",
    "to": "set_sully_sur_loire",
-   "cost": 47.05,
+   "cost": 47.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cognac",
    "to": "set_fontdouce",
-   "cost": 13.37,
+   "cost": 13.38,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cognac",
    "to": "set_la_rochefoucauld",
-   "cost": 45.19,
+   "cost": 45.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cognac",
    "to": "set_niort",
-   "cost": 72.33,
+   "cost": 72.38,
    "road": false,
    "sea": false
   },
   {
    "from": "set_colchester",
    "to": "set_faversham",
-   "cost": 55.39,
+   "cost": 55.33,
    "road": false,
    "sea": false
   },
   {
    "from": "set_colchester",
    "to": "set_maldon",
-   "cost": 13.2,
+   "cost": 13.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_colchester",
    "to": "set_st_albans",
-   "cost": 39.97,
+   "cost": 40.0,
    "road": true,
    "sea": false
   },
   {
    "from": "set_colmar",
    "to": "set_haut_koenigsbourg",
-   "cost": 18.96,
+   "cost": 18.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_colmar",
    "to": "set_lucerne",
-   "cost": 202.43,
+   "cost": 202.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_colmar",
    "to": "set_strasbourg",
-   "cost": 31.09,
+   "cost": 31.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cologne",
    "to": "set_doornenburg",
-   "cost": 63.38,
+   "cost": 63.37,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cologne",
    "to": "set_dortmund",
-   "cost": 36.58,
+   "cost": 36.57,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cologne",
    "to": "set_godesburg",
-   "cost": 15.57,
+   "cost": 15.56,
    "road": true,
    "sea": false
   },
@@ -3503,56 +3510,56 @@
   {
    "from": "set_cologne",
    "to": "set_louvain",
-   "cost": 159.03,
+   "cost": 158.99,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conques",
    "to": "set_figeac",
-   "cost": 32.05,
+   "cost": 32.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conques",
    "to": "set_najac",
-   "cost": 53.07,
+   "cost": 53.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conques",
    "to": "set_orcival",
-   "cost": 171.14,
+   "cost": 171.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conques",
    "to": "set_rodez",
-   "cost": 29.27,
+   "cost": 29.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conques",
    "to": "set_uzerche",
-   "cost": 113.84,
+   "cost": 113.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_conwy",
    "to": "set_cymer",
-   "cost": 59.86,
+   "cost": 59.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_conwy",
    "to": "set_harlech",
-   "cost": 100.78,
+   "cost": 100.75,
    "road": false,
    "sea": false
   },
@@ -3566,14 +3573,14 @@
   {
    "from": "set_conwy",
    "to": "set_warwick",
-   "cost": 281.31,
+   "cost": 281.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_copenhagen",
    "to": "set_lodose",
-   "cost": 362.79,
+   "cost": 362.8,
    "road": false,
    "sea": true
   },
@@ -3587,7 +3594,7 @@
   {
    "from": "set_copenhagen",
    "to": "set_roskilde",
-   "cost": 14.61,
+   "cost": 14.62,
    "road": true,
    "sea": false
   },
@@ -3601,63 +3608,63 @@
   {
    "from": "set_corbie",
    "to": "set_coucy",
-   "cost": 73.85,
+   "cost": 73.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_corbie",
    "to": "set_saint_quentin",
-   "cost": 27.98,
+   "cost": 27.99,
    "road": true,
    "sea": false
   },
   {
    "from": "set_corbie",
    "to": "set_saint_valery_sur_somme",
-   "cost": 38.85,
+   "cost": 38.83,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cordoue",
    "to": "set_grenade",
-   "cost": 99.23,
+   "cost": 99.27,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cordoue",
    "to": "set_malaga",
-   "cost": 100.0,
+   "cost": 100.02,
    "road": true,
    "sea": false
   },
   {
    "from": "set_cordoue",
    "to": "set_murcie",
-   "cost": 322.48,
+   "cost": 322.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cordoue",
    "to": "set_seville",
-   "cost": 119.21,
+   "cost": 119.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cordoue",
    "to": "set_tolede",
-   "cost": 226.78,
+   "cost": 226.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cork",
    "to": "set_kinsale",
-   "cost": 20.17,
+   "cost": 20.2,
    "road": false,
    "sea": false
   },
@@ -3671,14 +3678,14 @@
   {
    "from": "set_cork",
    "to": "set_youghal",
-   "cost": 20.55,
+   "cost": 20.57,
    "road": true,
    "sea": false
   },
   {
    "from": "set_corvey",
    "to": "set_hildesheim",
-   "cost": 63.06,
+   "cost": 63.09,
    "road": false,
    "sea": false
   },
@@ -3692,14 +3699,14 @@
   {
    "from": "set_corvey",
    "to": "set_munster",
-   "cost": 114.44,
+   "cost": 114.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_corvey",
    "to": "set_soest",
-   "cost": 83.03,
+   "cost": 83.08,
    "road": false,
    "sea": false
   },
@@ -3720,70 +3727,70 @@
   {
    "from": "set_coucy",
    "to": "set_saint_valery_sur_somme",
-   "cost": 147.52,
+   "cost": 147.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_coventry",
    "to": "set_harlech",
-   "cost": 273.03,
+   "cost": 273.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_coventry",
    "to": "set_kenilworth",
-   "cost": 7.87,
+   "cost": 7.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_coventry",
    "to": "set_pontefract",
-   "cost": 144.14,
+   "cost": 144.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_coventry",
    "to": "set_stoneleigh",
-   "cost": 8.48,
+   "cost": 8.53,
    "road": false,
    "sea": false
   },
   {
    "from": "set_crecy_en_ponthieu",
    "to": "set_hesdin",
-   "cost": 17.42,
+   "cost": 17.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_crecy_en_ponthieu",
    "to": "set_le_crotoy",
-   "cost": 17.23,
+   "cost": 17.2,
    "road": false,
    "sea": false
   },
   {
    "from": "set_crecy_en_ponthieu",
    "to": "set_rue",
-   "cost": 15.79,
+   "cost": 15.8,
    "road": false,
    "sea": false
   },
   {
    "from": "set_culan",
    "to": "set_grandmont",
-   "cost": 104.17,
+   "cost": 104.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_culan",
    "to": "set_issoudun",
-   "cost": 24.46,
+   "cost": 24.49,
    "road": true,
    "sea": false
   },
@@ -3804,35 +3811,35 @@
   {
    "from": "set_cymer",
    "to": "set_harlech",
-   "cost": 31.23,
+   "cost": 31.32,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cymer",
    "to": "set_kenilworth",
-   "cost": 250.88,
+   "cost": 250.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cymer",
    "to": "set_tewkesbury",
-   "cost": 224.22,
+   "cost": 224.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dartmouth",
    "to": "set_exeter",
-   "cost": 41.08,
+   "cost": 41.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dartmouth",
    "to": "set_plymouth",
-   "cost": 36.55,
+   "cost": 36.48,
    "road": false,
    "sea": false
   },
@@ -3846,7 +3853,7 @@
   {
    "from": "set_dax",
    "to": "set_orthez",
-   "cost": 25.54,
+   "cost": 25.51,
    "road": true,
    "sea": false
   },
@@ -3867,21 +3874,21 @@
   {
    "from": "set_dieppe",
    "to": "set_le_crotoy",
-   "cost": 153.83,
+   "cost": 153.84,
    "road": false,
    "sea": true
   },
   {
    "from": "set_dieppe",
    "to": "set_rouen",
-   "cost": 26.66,
+   "cost": 26.67,
    "road": true,
    "sea": false
   },
   {
    "from": "set_dieppe",
    "to": "set_saint_valery_sur_somme",
-   "cost": 14.76,
+   "cost": 14.78,
    "road": true,
    "sea": false
   },
@@ -3902,7 +3909,7 @@
   {
    "from": "set_dinant",
    "to": "set_floreffe",
-   "cost": 22.48,
+   "cost": 22.51,
    "road": false,
    "sea": false
   },
@@ -3916,7 +3923,7 @@
   {
    "from": "set_dinant",
    "to": "set_vianden",
-   "cost": 49.74,
+   "cost": 49.75,
    "road": true,
    "sea": false
   },
@@ -3930,63 +3937,63 @@
   {
    "from": "set_dole",
    "to": "set_salins_les_bains",
-   "cost": 34.06,
+   "cost": 34.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dole",
    "to": "set_toul",
-   "cost": 89.36,
+   "cost": 89.39,
    "road": true,
    "sea": false
   },
   {
    "from": "set_domfront",
    "to": "set_mont_saint_michel",
-   "cost": 63.85,
+   "cost": 63.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_domfront",
    "to": "set_mortain",
-   "cost": 22.03,
+   "cost": 22.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_doornenburg",
    "to": "set_dortmund",
-   "cost": 111.73,
+   "cost": 111.69,
    "road": false,
    "sea": false
   },
   {
    "from": "set_doornenburg",
    "to": "set_nijmegen",
-   "cost": 9.81,
+   "cost": 9.82,
    "road": false,
    "sea": false
   },
   {
    "from": "set_doornenburg",
    "to": "set_teylingen",
-   "cost": 158.16,
+   "cost": 158.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_doornenburg",
    "to": "set_zutphen",
-   "cost": 31.7,
+   "cost": 31.71,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dordrecht",
    "to": "set_marienweerd",
-   "cost": 92.23,
+   "cost": 92.31,
    "road": false,
    "sea": false
   },
@@ -4000,49 +4007,49 @@
   {
    "from": "set_dordrecht",
    "to": "set_nijmegen",
-   "cost": 120.26,
+   "cost": 120.28,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dordrecht",
    "to": "set_shertogenbosch",
-   "cost": 97.88,
+   "cost": 97.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dordrecht",
    "to": "set_teylingen",
-   "cost": 95.95,
+   "cost": 96.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dordrecht",
    "to": "set_zierikzee",
-   "cost": 112.83,
+   "cost": 112.79,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dortmund",
    "to": "set_eberbach",
-   "cost": 168.95,
+   "cost": 168.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dortmund",
    "to": "set_emden",
-   "cost": 310.45,
+   "cost": 310.53,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dortmund",
    "to": "set_munster",
-   "cost": 25.49,
+   "cost": 25.51,
    "road": true,
    "sea": false
   },
@@ -4056,42 +4063,42 @@
   {
    "from": "set_douai",
    "to": "set_lille",
-   "cost": 24.23,
+   "cost": 24.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_douai",
    "to": "set_marchiennes",
-   "cost": 10.56,
+   "cost": 10.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_douai",
    "to": "set_orchies",
-   "cost": 10.58,
+   "cost": 10.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dover",
    "to": "set_faversham",
-   "cost": 17.99,
+   "cost": 18.0,
    "road": true,
    "sea": false
   },
   {
    "from": "set_dover",
    "to": "set_rochester",
-   "cost": 31.77,
+   "cost": 31.76,
    "road": true,
    "sea": false
   },
   {
    "from": "set_dover",
    "to": "set_sandwich",
-   "cost": 8.4,
+   "cost": 8.41,
    "road": true,
    "sea": false
   },
@@ -4112,98 +4119,98 @@
   {
    "from": "set_drogheda",
    "to": "set_mellifont",
-   "cost": 8.12,
+   "cost": 8.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_druyes",
    "to": "set_la_charite_sur_loire",
-   "cost": 24.92,
+   "cost": 24.93,
    "road": true,
    "sea": false
   },
   {
    "from": "set_druyes",
    "to": "set_provins",
-   "cost": 108.38,
+   "cost": 108.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_druyes",
    "to": "set_sully_sur_loire",
-   "cost": 73.74,
+   "cost": 73.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_druyes",
    "to": "set_vezelay",
-   "cost": 34.99,
+   "cost": 34.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dublin",
    "to": "set_galway",
-   "cost": 174.59,
+   "cost": 174.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dublin",
    "to": "set_mellifont",
-   "cost": 22.76,
+   "cost": 22.75,
    "road": true,
    "sea": false
   },
   {
    "from": "set_dublin",
    "to": "set_waterford",
-   "cost": 114.91,
+   "cost": 114.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dumbarton",
    "to": "set_glasgow",
-   "cost": 21.64,
+   "cost": 21.7,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dumbarton",
    "to": "set_inverness",
-   "cost": 258.14,
+   "cost": 258.07,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dumbarton",
    "to": "set_renfrew",
-   "cost": 13.74,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_dumfries",
-   "to": "set_edimbourg",
-   "cost": 102.16,
+   "cost": 13.76,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dumfries",
    "to": "set_kirkcudbright",
-   "cost": 38.92,
+   "cost": 38.91,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dumfries",
+   "to": "set_roxburgh",
+   "cost": 93.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dunbar",
    "to": "set_edimbourg",
-   "cost": 42.23,
+   "cost": 42.19,
    "road": false,
    "sea": false
   },
@@ -4217,7 +4224,7 @@
   {
    "from": "set_dundee",
    "to": "set_dunfermline",
-   "cost": 49.41,
+   "cost": 49.42,
    "road": false,
    "sea": false
   },
@@ -4231,21 +4238,21 @@
   {
    "from": "set_dundee",
    "to": "set_stirling",
-   "cost": 68.4,
+   "cost": 68.38,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dunfermline",
    "to": "set_edimbourg",
-   "cost": 21.83,
+   "cost": 21.81,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dunfermline",
    "to": "set_saint_andrews",
-   "cost": 47.38,
+   "cost": 47.37,
    "road": false,
    "sea": false
   },
@@ -4266,70 +4273,70 @@
   {
    "from": "set_eberbach",
    "to": "set_frankfurt",
-   "cost": 49.59,
+   "cost": 49.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_eberbach",
    "to": "set_gorze",
-   "cost": 175.81,
+   "cost": 175.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_eberbach",
    "to": "set_koblenz",
-   "cost": 54.74,
+   "cost": 54.66,
    "road": false,
    "sea": false
   },
   {
    "from": "set_eberbach",
    "to": "set_mayence",
-   "cost": 19.95,
+   "cost": 19.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_eberbach",
    "to": "set_stolpen",
-   "cost": 445.62,
+   "cost": 445.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_echternach",
    "to": "set_gorze",
-   "cost": 39.74,
+   "cost": 40.05,
    "road": true,
    "sea": false
   },
   {
    "from": "set_echternach",
    "to": "set_luxembourg",
-   "cost": 13.07,
+   "cost": 13.34,
    "road": true,
    "sea": false
   },
   {
    "from": "set_echternach",
    "to": "set_namur",
-   "cost": 64.03,
+   "cost": 63.84,
    "road": true,
    "sea": false
   },
   {
    "from": "set_echternach",
    "to": "set_st_maximin_trier",
-   "cost": 11.16,
+   "cost": 11.24,
    "road": true,
    "sea": false
   },
   {
    "from": "set_echternach",
    "to": "set_vianden",
-   "cost": 17.02,
+   "cost": 16.41,
    "road": false,
    "sea": false
   },
@@ -4343,14 +4350,14 @@
   {
    "from": "set_edimbourg",
    "to": "set_roxburgh",
-   "cost": 63.11,
+   "cost": 63.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ehrenbreitstein",
    "to": "set_ehrenfels",
-   "cost": 25.53,
+   "cost": 25.48,
    "road": true,
    "sea": false
   },
@@ -4364,77 +4371,77 @@
   {
    "from": "set_ehrenbreitstein",
    "to": "set_st_maximin_trier",
-   "cost": 81.17,
+   "cost": 81.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ehrenbreitstein",
    "to": "set_treves",
-   "cost": 81.17,
+   "cost": 81.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ehrenbreitstein",
    "to": "set_worms",
-   "cost": 50.38,
+   "cost": 50.36,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ehrenfels",
    "to": "set_mayence",
-   "cost": 12.96,
+   "cost": 12.97,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ehrenfels",
    "to": "set_metz",
-   "cost": 78.61,
+   "cost": 78.59,
    "road": true,
    "sea": false
   },
   {
    "from": "set_elgin",
    "to": "set_inverness",
-   "cost": 58.13,
+   "cost": 58.11,
    "road": true,
    "sea": false
   },
   {
    "from": "set_elgin",
    "to": "set_renfrew",
-   "cost": 313.84,
+   "cost": 313.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_emden",
    "to": "set_groningue",
-   "cost": 91.39,
+   "cost": 91.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_emden",
    "to": "set_hamburg",
-   "cost": 286.3,
+   "cost": 286.26,
    "road": false,
    "sea": true
   },
   {
    "from": "set_emden",
    "to": "set_stavoren",
-   "cost": 263.93,
+   "cost": 263.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_epau",
    "to": "set_le_mans",
-   "cost": 1.79,
+   "cost": 1.8,
    "road": true,
    "sea": false
   },
@@ -4455,7 +4462,7 @@
   {
    "from": "set_etampes",
    "to": "set_orleans",
-   "cost": 31.06,
+   "cost": 31.08,
    "road": true,
    "sea": false
   },
@@ -4469,7 +4476,7 @@
   {
    "from": "set_etampes",
    "to": "set_saint_denis",
-   "cost": 28.79,
+   "cost": 28.76,
    "road": true,
    "sea": false
   },
@@ -4490,70 +4497,70 @@
   {
    "from": "set_evora",
    "to": "set_seville",
-   "cost": 216.73,
+   "cost": 216.74,
    "road": false,
    "sea": false
   },
   {
    "from": "set_evreux",
    "to": "set_jumieges",
-   "cost": 57.39,
+   "cost": 57.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_evreux",
    "to": "set_orleans",
-   "cost": 68.52,
+   "cost": 68.51,
    "road": true,
    "sea": false
   },
   {
    "from": "set_evreux",
    "to": "set_paris",
-   "cost": 45.04,
+   "cost": 45.01,
    "road": true,
    "sea": false
   },
   {
    "from": "set_evreux",
    "to": "set_rouen",
-   "cost": 23.26,
+   "cost": 23.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_exeter",
    "to": "set_plymouth",
-   "cost": 54.06,
+   "cost": 54.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_exeter",
    "to": "set_salisbury",
-   "cost": 128.19,
+   "cost": 128.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_faversham",
    "to": "set_rochester",
-   "cost": 14.15,
+   "cost": 14.12,
    "road": true,
    "sea": false
   },
   {
    "from": "set_faversham",
    "to": "set_sandwich",
-   "cost": 15.77,
+   "cost": 15.76,
    "road": true,
    "sea": false
   },
   {
    "from": "set_faversham",
    "to": "set_winchelsea",
-   "cost": 61.18,
+   "cost": 61.2,
    "road": false,
    "sea": false
   },
@@ -4567,7 +4574,7 @@
   {
    "from": "set_ferrare",
    "to": "set_venise",
-   "cost": 172.5,
+   "cost": 172.41,
    "road": false,
    "sea": false
   },
@@ -4581,42 +4588,42 @@
   {
    "from": "set_figeac",
    "to": "set_marcilhac",
-   "cost": 19.27,
+   "cost": 19.28,
    "road": false,
    "sea": false
   },
   {
    "from": "set_figeac",
    "to": "set_saint_cirq_lapopie",
-   "cost": 31.01,
+   "cost": 31.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_flavigny_sur_ozerain",
    "to": "set_toul",
-   "cost": 81.92,
+   "cost": 81.93,
    "road": true,
    "sea": false
   },
   {
    "from": "set_flavigny_sur_ozerain",
    "to": "set_vezelay",
-   "cost": 58.74,
+   "cost": 58.77,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fleury",
    "to": "set_la_charite_sur_loire",
-   "cost": 86.67,
+   "cost": 86.68,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fleury",
    "to": "set_orleans",
-   "cost": 16.31,
+   "cost": 16.3,
    "road": true,
    "sea": false
   },
@@ -4630,42 +4637,42 @@
   {
    "from": "set_fleury",
    "to": "set_sully_sur_loire",
-   "cost": 5.88,
+   "cost": 5.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fleury",
    "to": "set_troyes",
-   "cost": 142.72,
+   "cost": 142.68,
    "road": false,
    "sea": false
   },
   {
    "from": "set_floreffe",
    "to": "set_luxembourg",
-   "cost": 134.69,
+   "cost": 134.71,
    "road": false,
    "sea": false
   },
   {
    "from": "set_floreffe",
    "to": "set_namur",
-   "cost": 8.99,
+   "cost": 9.01,
    "road": false,
    "sea": false
   },
   {
    "from": "set_floreffe",
    "to": "set_villers",
-   "cost": 24.38,
+   "cost": 24.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_florence",
    "to": "set_genes",
-   "cost": 297.48,
+   "cost": 297.53,
    "road": false,
    "sea": false
   },
@@ -4679,21 +4686,21 @@
   {
    "from": "set_florence",
    "to": "set_rome",
-   "cost": 230.28,
+   "cost": 230.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fontdouce",
    "to": "set_la_rochelle",
-   "cost": 60.99,
+   "cost": 60.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fontdouce",
    "to": "set_pons",
-   "cost": 10.79,
+   "cost": 10.8,
    "road": true,
    "sea": false
   },
@@ -4707,28 +4714,28 @@
   {
    "from": "set_fontevraud",
    "to": "set_poitiers",
-   "cost": 37.48,
+   "cost": 37.47,
    "road": true,
    "sea": false
   },
   {
    "from": "set_fontevraud",
    "to": "set_saumur",
-   "cost": 4.09,
+   "cost": 4.12,
    "road": true,
    "sea": false
   },
   {
    "from": "set_fontfroide",
    "to": "set_narbonne",
-   "cost": 4.32,
+   "cost": 4.35,
    "road": true,
    "sea": false
   },
   {
    "from": "set_fontfroide",
    "to": "set_peyrepertuse",
-   "cost": 35.84,
+   "cost": 35.8,
    "road": false,
    "sea": false
   },
@@ -4742,21 +4749,21 @@
   {
    "from": "set_fowey",
    "to": "set_restormel",
-   "cost": 12.03,
+   "cost": 12.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_franchimont",
    "to": "set_huy",
-   "cost": 41.07,
+   "cost": 41.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_franchimont",
    "to": "set_liege",
-   "cost": 10.05,
+   "cost": 10.04,
    "road": true,
    "sea": false
   },
@@ -4770,21 +4777,21 @@
   {
    "from": "set_franchimont",
    "to": "set_treves",
-   "cost": 104.62,
+   "cost": 104.68,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt",
    "to": "set_freiberg",
-   "cost": 342.33,
+   "cost": 342.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt",
    "to": "set_hildesheim",
-   "cost": 243.58,
+   "cost": 243.63,
    "road": false,
    "sea": false
   },
@@ -4798,42 +4805,42 @@
   {
    "from": "set_frankfurt",
    "to": "set_soest",
-   "cost": 167.46,
+   "cost": 167.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt",
    "to": "set_wurzburg",
-   "cost": 96.59,
+   "cost": 96.56,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt_oder",
    "to": "set_prague",
-   "cost": 252.24,
+   "cost": 252.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt_oder",
    "to": "set_spandau",
-   "cost": 46.63,
+   "cost": 46.66,
    "road": true,
    "sea": false
   },
   {
    "from": "set_frankfurt_oder",
    "to": "set_stolpen",
-   "cost": 146.86,
+   "cost": 146.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_frankfurt_oder",
    "to": "set_stralsund",
-   "cost": 239.35,
+   "cost": 239.39,
    "road": false,
    "sea": false
   },
@@ -4847,84 +4854,84 @@
   {
    "from": "set_freiberg",
    "to": "set_krivoklat",
-   "cost": 104.96,
+   "cost": 104.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_freiberg",
    "to": "set_kronach",
-   "cost": 161.16,
+   "cost": 161.17,
    "road": false,
    "sea": false
   },
   {
    "from": "set_freiberg",
    "to": "set_meissen",
-   "cost": 14.53,
+   "cost": 14.5,
    "road": true,
    "sea": false
   },
   {
    "from": "set_freiberg",
    "to": "set_spandau",
-   "cost": 180.56,
+   "cost": 180.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_freiberg",
    "to": "set_stolpen",
-   "cost": 54.17,
+   "cost": 54.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_freising",
    "to": "set_landshut",
-   "cost": 16.69,
+   "cost": 16.7,
    "road": true,
    "sea": false
   },
   {
    "from": "set_freising",
    "to": "set_munich",
-   "cost": 16.02,
+   "cost": 15.99,
    "road": true,
    "sea": false
   },
   {
    "from": "set_freising",
    "to": "set_nuremberg",
-   "cost": 126.81,
+   "cost": 126.88,
    "road": false,
    "sea": false
   },
   {
    "from": "set_freising",
    "to": "set_zbraslav",
-   "cost": 260.83,
+   "cost": 260.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_furness",
    "to": "set_lancastre",
-   "cost": 56.65,
+   "cost": 56.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_furness",
    "to": "set_liverpool",
-   "cost": 163.14,
+   "cost": 163.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_galway",
    "to": "set_limerick",
-   "cost": 87.39,
+   "cost": 87.35,
    "road": false,
    "sea": false
   },
@@ -4938,7 +4945,7 @@
   {
    "from": "set_gand",
    "to": "set_kortrijk",
-   "cost": 20.28,
+   "cost": 20.27,
    "road": true,
    "sea": false
   },
@@ -4952,112 +4959,112 @@
   {
    "from": "set_gand",
    "to": "set_sluis",
-   "cost": 18.32,
+   "cost": 18.33,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gannat",
    "to": "set_grandmont",
-   "cost": 148.53,
+   "cost": 148.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gannat",
    "to": "set_montbrison",
-   "cost": 90.54,
+   "cost": 90.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gannat",
    "to": "set_moulins",
-   "cost": 23.89,
+   "cost": 23.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gannat",
    "to": "set_riom",
-   "cost": 21.62,
+   "cost": 21.6,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gannat",
    "to": "set_souvigny",
-   "cost": 22.27,
+   "cost": 22.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_genes",
    "to": "set_marseille",
-   "cost": 413.07,
+   "cost": 413.01,
    "road": false,
    "sea": true
   },
   {
    "from": "set_genes",
    "to": "set_milan",
-   "cost": 178.49,
+   "cost": 178.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_genes",
    "to": "set_turin",
-   "cost": 186.38,
+   "cost": 186.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_glasgow",
    "to": "set_renfrew",
-   "cost": 4.33,
+   "cost": 4.35,
    "road": true,
    "sea": false
   },
   {
    "from": "set_glasgow",
    "to": "set_stirling",
-   "cost": 18.43,
+   "cost": 18.44,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gloucester",
    "to": "set_harlech",
-   "cost": 253.34,
+   "cost": 253.32,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gloucester",
    "to": "set_kenilworth",
-   "cost": 70.03,
+   "cost": 69.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gloucester",
    "to": "set_oxford",
-   "cost": 68.59,
+   "cost": 68.61,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gloucester",
    "to": "set_tewkesbury",
-   "cost": 7.41,
+   "cost": 7.4,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gonesse",
    "to": "set_meaux",
-   "cost": 15.69,
+   "cost": 15.67,
    "road": true,
    "sea": false
   },
@@ -5071,28 +5078,28 @@
   {
    "from": "set_gonesse",
    "to": "set_saint_denis",
-   "cost": 4.35,
+   "cost": 4.38,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gonesse",
    "to": "set_vincennes",
-   "cost": 7.99,
+   "cost": 7.98,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gorze",
    "to": "set_metz",
-   "cost": 5.97,
+   "cost": 5.99,
    "road": true,
    "sea": false
   },
   {
    "from": "set_gorze",
    "to": "set_nancy",
-   "cost": 24.75,
+   "cost": 24.79,
    "road": true,
    "sea": false
   },
@@ -5106,7 +5113,7 @@
   {
    "from": "set_gorze",
    "to": "set_st_maximin_trier",
-   "cost": 42.03,
+   "cost": 42.0,
    "road": true,
    "sea": false
   },
@@ -5120,56 +5127,56 @@
   {
    "from": "set_grande_chartreuse",
    "to": "set_grenoble",
-   "cost": 39.9,
+   "cost": 39.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grande_chartreuse",
    "to": "set_turin",
-   "cost": 228.22,
+   "cost": 228.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grande_chartreuse",
    "to": "set_vienne",
-   "cost": 58.48,
+   "cost": 58.43,
    "road": true,
    "sea": false
   },
   {
    "from": "set_grandmont",
    "to": "set_limoges",
-   "cost": 7.44,
+   "cost": 7.46,
    "road": true,
    "sea": false
   },
   {
    "from": "set_grandmont",
    "to": "set_poitiers",
-   "cost": 49.96,
+   "cost": 49.94,
    "road": true,
    "sea": false
   },
   {
    "from": "set_grandmont",
    "to": "set_segur_le_chateau",
-   "cost": 55.19,
+   "cost": 55.2,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grandmont",
    "to": "set_uzerche",
-   "cost": 32.54,
+   "cost": 32.53,
    "road": true,
    "sea": false
   },
   {
    "from": "set_grandselve",
    "to": "set_layrac",
-   "cost": 42.8,
+   "cost": 42.79,
    "road": false,
    "sea": false
   },
@@ -5183,21 +5190,21 @@
   {
    "from": "set_grandselve",
    "to": "set_muret",
-   "cost": 51.1,
+   "cost": 51.08,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grandselve",
    "to": "set_tarbes",
-   "cost": 156.6,
+   "cost": 156.51,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grandselve",
    "to": "set_toulouse",
-   "cost": 44.24,
+   "cost": 44.23,
    "road": false,
    "sea": false
   },
@@ -5211,70 +5218,70 @@
   {
    "from": "set_grenade",
    "to": "set_murcie",
-   "cost": 353.34,
+   "cost": 353.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grenoble",
-   "to": "set_tarascon",
-   "cost": 260.37,
+   "to": "set_les_baux",
+   "cost": 260.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_groningue",
    "to": "set_munster",
-   "cost": 118.04,
+   "cost": 118.02,
    "road": true,
    "sea": false
   },
   {
    "from": "set_groningue",
    "to": "set_stavoren",
-   "cost": 172.66,
+   "cost": 172.56,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haguenau",
    "to": "set_marmoutier",
-   "cost": 16.12,
+   "cost": 16.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_haguenau",
    "to": "set_metz",
-   "cost": 123.02,
+   "cost": 122.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haguenau",
    "to": "set_strasbourg",
-   "cost": 13.54,
+   "cost": 13.53,
    "road": true,
    "sea": false
   },
   {
    "from": "set_haguenau",
    "to": "set_trifels",
-   "cost": 23.1,
+   "cost": 23.09,
    "road": true,
    "sea": false
   },
   {
    "from": "set_hamburg",
    "to": "set_kiel",
-   "cost": 86.35,
+   "cost": 86.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hamburg",
    "to": "set_lubeck",
-   "cost": 28.8,
+   "cost": 28.83,
    "road": true,
    "sea": false
   },
@@ -5295,21 +5302,21 @@
   {
    "from": "set_hardelot",
    "to": "set_rue",
-   "cost": 39.13,
+   "cost": 39.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_harlech",
    "to": "set_whitland",
-   "cost": 179.1,
+   "cost": 179.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hastings",
    "to": "set_lewes",
-   "cost": 13.06,
+   "cost": 13.1,
    "road": true,
    "sea": false
   },
@@ -5330,49 +5337,49 @@
   {
    "from": "set_haut_koenigsbourg",
    "to": "set_joux",
-   "cost": 166.4,
+   "cost": 166.43,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haut_koenigsbourg",
    "to": "set_marmoutier",
-   "cost": 51.59,
+   "cost": 51.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haut_koenigsbourg",
    "to": "set_schwyz",
-   "cost": 252.68,
+   "cost": 252.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haut_koenigsbourg",
    "to": "set_strasbourg",
-   "cost": 46.95,
+   "cost": 46.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haut_koenigsbourg",
    "to": "set_vaudemont",
-   "cost": 95.05,
+   "cost": 95.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hautecombe",
    "to": "set_interlaken",
-   "cost": 376.37,
+   "cost": 376.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hautecombe",
    "to": "set_lyon",
-   "cost": 57.47,
+   "cost": 57.49,
    "road": true,
    "sea": false
   },
@@ -5386,21 +5393,21 @@
   {
    "from": "set_hautecombe",
    "to": "set_schwyz",
-   "cost": 524.01,
+   "cost": 523.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haverfordwest",
    "to": "set_pembroke",
-   "cost": 14.53,
+   "cost": 14.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_haverfordwest",
    "to": "set_whitland",
-   "cost": 25.23,
+   "cost": 25.21,
    "road": false,
    "sea": false
   },
@@ -5414,49 +5421,49 @@
   {
    "from": "set_heidelberg",
    "to": "set_ulm",
-   "cost": 147.0,
+   "cost": 146.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_heidelberg",
    "to": "set_worms",
-   "cost": 34.24,
+   "cost": 34.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_heidelberg",
    "to": "set_wurzburg",
-   "cost": 101.07,
+   "cost": 101.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hennebont",
    "to": "set_locronan",
-   "cost": 37.92,
+   "cost": 37.95,
    "road": true,
    "sea": false
   },
   {
    "from": "set_hennebont",
    "to": "set_quimper",
-   "cost": 32.17,
+   "cost": 32.18,
    "road": true,
    "sea": false
   },
   {
    "from": "set_hennebont",
    "to": "set_suscinio",
-   "cost": 34.7,
+   "cost": 34.74,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hesdin",
    "to": "set_mont_saint_eloi",
-   "cost": 40.29,
+   "cost": 40.27,
    "road": false,
    "sea": false
   },
@@ -5470,77 +5477,77 @@
   {
    "from": "set_hildesheim",
    "to": "set_loccum",
-   "cost": 64.0,
+   "cost": 63.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hohenzollern",
    "to": "set_kaisheim",
-   "cost": 71.52,
+   "cost": 71.51,
    "road": true,
    "sea": false
   },
   {
    "from": "set_hohenzollern",
    "to": "set_schwyz",
-   "cost": 219.98,
+   "cost": 219.99,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hohenzollern",
    "to": "set_speyer",
-   "cost": 58.6,
+   "cost": 58.58,
    "road": true,
    "sea": false
   },
   {
    "from": "set_hohenzollern",
    "to": "set_strasbourg",
-   "cost": 94.18,
+   "cost": 94.2,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hohenzollern",
    "to": "set_ulm",
-   "cost": 76.08,
+   "cost": 76.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hull",
    "to": "set_pontefract",
-   "cost": 63.64,
+   "cost": 63.66,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hull",
    "to": "set_scarborough",
-   "cost": 59.98,
+   "cost": 60.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hull",
    "to": "set_stoneleigh",
-   "cost": 174.08,
+   "cost": 174.07,
    "road": false,
    "sea": false
   },
   {
    "from": "set_hull",
    "to": "set_york",
-   "cost": 54.76,
+   "cost": 54.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_huy",
    "to": "set_liege",
-   "cost": 27.33,
+   "cost": 27.32,
    "road": false,
    "sea": false
   },
@@ -5561,35 +5568,35 @@
   {
    "from": "set_huy",
    "to": "set_villers",
-   "cost": 50.86,
+   "cost": 50.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ile_barbe",
    "to": "set_lyon",
-   "cost": 3.02,
+   "cost": 3.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ile_barbe",
    "to": "set_oingt",
-   "cost": 22.32,
+   "cost": 22.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ile_barbe",
    "to": "set_salins_les_bains",
-   "cost": 148.9,
+   "cost": 148.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_innsbruck",
    "to": "set_linz",
-   "cost": 367.45,
+   "cost": 367.42,
    "road": false,
    "sea": false
   },
@@ -5603,28 +5610,28 @@
   {
    "from": "set_innsbruck",
    "to": "set_schwyz",
-   "cost": 421.03,
+   "cost": 421.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_interlaken",
    "to": "set_thun",
-   "cost": 19.59,
+   "cost": 19.65,
    "road": true,
    "sea": false
   },
   {
    "from": "set_issoudun",
    "to": "set_loches",
-   "cost": 77.66,
+   "cost": 77.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_issoudun",
    "to": "set_noirlac",
-   "cost": 23.91,
+   "cost": 23.94,
    "road": true,
    "sea": false
   },
@@ -5638,161 +5645,161 @@
   {
    "from": "set_josselin",
    "to": "set_nantes",
-   "cost": 111.71,
+   "cost": 111.7,
    "road": false,
    "sea": false
   },
   {
    "from": "set_josselin",
    "to": "set_redon",
-   "cost": 49.2,
+   "cost": 49.17,
    "road": false,
    "sea": false
   },
   {
    "from": "set_josselin",
    "to": "set_rennes",
-   "cost": 67.12,
+   "cost": 67.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_josselin",
    "to": "set_saint_malo",
-   "cost": 86.27,
+   "cost": 86.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_josselin",
    "to": "set_suscinio",
-   "cost": 23.07,
+   "cost": 23.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_joux",
    "to": "set_salins_les_bains",
-   "cost": 36.83,
+   "cost": 36.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_jumieges",
    "to": "set_rouen",
-   "cost": 31.36,
+   "cost": 31.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kaisheim",
    "to": "set_nuremberg",
-   "cost": 81.12,
+   "cost": 81.17,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kaisheim",
    "to": "set_ulm",
-   "cost": 35.49,
+   "cost": 35.5,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kenilworth",
    "to": "set_liverpool",
-   "cost": 226.9,
+   "cost": 226.87,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kenilworth",
    "to": "set_stoneleigh",
-   "cost": 8.34,
+   "cost": 8.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kenilworth",
    "to": "set_warwick",
-   "cost": 7.39,
+   "cost": 7.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kenilworth",
    "to": "set_york",
-   "cost": 182.74,
+   "cost": 182.76,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kiel",
    "to": "set_lubeck",
-   "cost": 31.45,
+   "cost": 31.48,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kiel",
    "to": "set_ribe",
-   "cost": 142.09,
+   "cost": 142.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kiel",
    "to": "set_roskilde",
-   "cost": 192.92,
+   "cost": 192.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kiel",
    "to": "set_segeberg",
-   "cost": 43.43,
+   "cost": 43.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kingston",
    "to": "set_lewes",
-   "cost": 62.8,
+   "cost": 62.77,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kingston",
    "to": "set_londres",
-   "cost": 15.61,
+   "cost": 15.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kingston",
    "to": "set_maldon",
-   "cost": 37.83,
+   "cost": 37.84,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kingston",
    "to": "set_portsmouth",
-   "cost": 87.36,
+   "cost": 87.32,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kingston",
    "to": "set_windsor",
-   "cost": 23.95,
+   "cost": 23.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kinsale",
    "to": "set_limerick",
-   "cost": 105.39,
+   "cost": 105.43,
    "road": false,
    "sea": false
   },
@@ -5806,119 +5813,119 @@
   {
    "from": "set_klosterneuburg",
    "to": "set_kutna_hora",
-   "cost": 197.92,
+   "cost": 197.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_klosterneuburg",
    "to": "set_linz",
-   "cost": 151.44,
+   "cost": 151.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_klosterneuburg",
    "to": "set_vienna",
-   "cost": 5.83,
+   "cost": 5.82,
    "road": true,
    "sea": false
   },
   {
    "from": "set_koblenz",
    "to": "set_speyer",
-   "cost": 67.68,
+   "cost": 67.67,
    "road": true,
    "sea": false
   },
   {
    "from": "set_koblenz",
    "to": "set_st_maximin_trier",
-   "cost": 82.76,
+   "cost": 82.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kortrijk",
    "to": "set_lille",
-   "cost": 13.26,
+   "cost": 13.27,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kortrijk",
    "to": "set_mont_saint_eloi",
-   "cost": 34.4,
+   "cost": 34.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kortrijk",
    "to": "set_valenciennes",
-   "cost": 27.75,
+   "cost": 27.73,
    "road": true,
    "sea": false
   },
   {
    "from": "set_kortrijk",
    "to": "set_ypres",
-   "cost": 26.86,
+   "cost": 26.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_krivoklat",
    "to": "set_kronach",
-   "cost": 183.41,
+   "cost": 183.38,
    "road": false,
    "sea": false
   },
   {
    "from": "set_krivoklat",
    "to": "set_landshut",
-   "cost": 208.36,
+   "cost": 208.33,
    "road": false,
    "sea": false
   },
   {
    "from": "set_krivoklat",
    "to": "set_prague",
-   "cost": 40.77,
+   "cost": 40.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_krivoklat",
    "to": "set_zbraslav",
-   "cost": 38.26,
+   "cost": 38.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kronach",
    "to": "set_nuremberg",
-   "cost": 89.64,
+   "cost": 89.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kronach",
    "to": "set_wurzburg",
-   "cost": 111.75,
+   "cost": 111.8,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kutna_hora",
    "to": "set_prague",
-   "cost": 61.2,
+   "cost": 61.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kutna_hora",
    "to": "set_zbraslav",
-   "cost": 62.5,
+   "cost": 62.49,
    "road": false,
    "sea": false
   },
@@ -5932,28 +5939,28 @@
   {
    "from": "set_la_chaise_dieu",
    "to": "set_montbrison",
-   "cost": 65.23,
+   "cost": 65.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_chaise_dieu",
    "to": "set_murol",
-   "cost": 131.38,
+   "cost": 131.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_chaise_dieu",
    "to": "set_orcival",
-   "cost": 147.66,
+   "cost": 147.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_chaise_dieu",
    "to": "set_riom",
-   "cost": 156.26,
+   "cost": 156.32,
    "road": false,
    "sea": false
   },
@@ -5967,7 +5974,7 @@
   {
    "from": "set_la_charite_sur_loire",
    "to": "set_vezelay",
-   "cost": 63.41,
+   "cost": 63.38,
    "road": false,
    "sea": false
   },
@@ -5981,7 +5988,7 @@
   {
    "from": "set_la_reole",
    "to": "set_libourne",
-   "cost": 43.03,
+   "cost": 43.07,
    "road": false,
    "sea": false
   },
@@ -5995,14 +6002,14 @@
   {
    "from": "set_la_rochefoucauld",
    "to": "set_lusignan",
-   "cost": 80.6,
+   "cost": 80.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_rochefoucauld",
    "to": "set_segur_le_chateau",
-   "cost": 63.76,
+   "cost": 63.74,
    "road": false,
    "sea": false
   },
@@ -6016,35 +6023,35 @@
   {
    "from": "set_la_rochelle",
    "to": "set_royan",
-   "cost": 57.79,
+   "cost": 57.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_rochelle",
    "to": "set_saintes",
-   "cost": 57.49,
+   "cost": 57.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_sauve_majeure",
    "to": "set_libourne",
-   "cost": 17.38,
+   "cost": 17.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_la_sauve_majeure",
    "to": "set_saint_sever",
-   "cost": 113.36,
+   "cost": 113.34,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lancastre",
    "to": "set_liverpool",
-   "cost": 144.64,
+   "cost": 144.72,
    "road": false,
    "sea": false
   },
@@ -6058,21 +6065,21 @@
   {
    "from": "set_lancastre",
    "to": "set_pontefract",
-   "cost": 79.65,
+   "cost": 79.67,
    "road": true,
    "sea": false
   },
   {
    "from": "set_landshut",
    "to": "set_linz",
-   "cost": 160.09,
+   "cost": 160.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_landshut",
    "to": "set_munich",
-   "cost": 30.74,
+   "cost": 30.73,
    "road": true,
    "sea": false
   },
@@ -6086,77 +6093,77 @@
   {
    "from": "set_largentiere",
    "to": "set_montbrison",
-   "cost": 119.76,
+   "cost": 119.74,
    "road": false,
    "sea": false
   },
   {
    "from": "set_largentiere",
    "to": "set_nimes",
-   "cost": 79.34,
+   "cost": 79.3,
    "road": false,
    "sea": false
   },
   {
    "from": "set_largentiere",
    "to": "set_rodez",
-   "cost": 138.58,
+   "cost": 138.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lattes",
    "to": "set_montpellier",
-   "cost": 5.88,
+   "cost": 5.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lattes",
    "to": "set_narbonne",
-   "cost": 185.21,
+   "cost": 185.18,
    "road": false,
    "sea": true
   },
   {
    "from": "set_launceston",
    "to": "set_plymouth",
-   "cost": 17.05,
+   "cost": 17.09,
    "road": true,
    "sea": false
   },
   {
    "from": "set_launceston",
    "to": "set_restormel",
-   "cost": 37.66,
+   "cost": 37.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_layrac",
    "to": "set_morlaas",
-   "cost": 162.41,
+   "cost": 162.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_layrac",
    "to": "set_villeneuve_sur_lot",
-   "cost": 13.78,
+   "cost": 13.79,
    "road": true,
    "sea": false
   },
   {
    "from": "set_le_barroux",
    "to": "set_senanque",
-   "cost": 25.91,
+   "cost": 25.81,
    "road": false,
    "sea": false
   },
   {
    "from": "set_le_crotoy",
    "to": "set_rue",
-   "cost": 3.44,
+   "cost": 3.45,
    "road": false,
    "sea": false
   },
@@ -6198,21 +6205,14 @@
   {
    "from": "set_leon",
    "to": "set_tolede",
-   "cost": 331.61,
+   "cost": 331.67,
    "road": false,
    "sea": false
   },
   {
    "from": "set_les_baux",
-   "to": "set_marseille",
-   "cost": 29.2,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_les_baux",
    "to": "set_silvacane",
-   "cost": 14.28,
+   "cost": 13.53,
    "road": true,
    "sea": false
   },
@@ -6224,93 +6224,86 @@
    "sea": false
   },
   {
-   "from": "set_les_baux",
-   "to": "set_vienne",
-   "cost": 283.72,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_les_sables_d_olonne",
    "to": "set_maillezais",
-   "cost": 55.95,
+   "cost": 55.94,
    "road": false,
    "sea": false
   },
   {
    "from": "set_les_sables_d_olonne",
    "to": "set_nantes",
-   "cost": 89.82,
+   "cost": 89.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_les_sables_d_olonne",
    "to": "set_niort",
-   "cost": 77.54,
+   "cost": 77.52,
    "road": false,
    "sea": false
   },
   {
    "from": "set_les_sables_d_olonne",
    "to": "set_poitiers",
-   "cost": 139.08,
+   "cost": 139.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lewes",
    "to": "set_rye",
-   "cost": 12.15,
+   "cost": 12.18,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lewes",
    "to": "set_winchelsea",
-   "cost": 12.14,
+   "cost": 12.17,
    "road": true,
    "sea": false
   },
   {
    "from": "set_liege",
    "to": "set_louvain",
-   "cost": 33.93,
+   "cost": 33.91,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ligny_en_barrois",
    "to": "set_saint_mihiel",
-   "cost": 13.44,
+   "cost": 13.43,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ligny_en_barrois",
    "to": "set_vaucouleurs",
-   "cost": 12.36,
+   "cost": 12.22,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lille",
    "to": "set_orchies",
-   "cost": 22.5,
+   "cost": 22.52,
    "road": false,
    "sea": false
   },
   {
    "from": "set_limerick",
    "to": "set_youghal",
-   "cost": 93.59,
+   "cost": 93.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_limoges",
    "to": "set_lusignan",
-   "cost": 111.02,
+   "cost": 111.0,
    "road": false,
    "sea": false
   },
@@ -6324,7 +6317,7 @@
   {
    "from": "set_limoges",
    "to": "set_segur_le_chateau",
-   "cost": 40.46,
+   "cost": 40.45,
    "road": false,
    "sea": false
   },
@@ -6338,28 +6331,28 @@
   {
    "from": "set_linz",
    "to": "set_vienna",
-   "cost": 155.42,
+   "cost": 155.44,
    "road": false,
    "sea": false
   },
   {
    "from": "set_linz",
    "to": "set_zbraslav",
-   "cost": 185.84,
+   "cost": 185.87,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lisbonne",
    "to": "set_porto",
-   "cost": 272.58,
+   "cost": 272.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_liverpool",
    "to": "set_york",
-   "cost": 209.85,
+   "cost": 209.82,
    "road": false,
    "sea": false
   },
@@ -6372,22 +6365,29 @@
   },
   {
    "from": "set_loches",
+   "to": "set_lusignan",
+   "cost": 102.76,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_loches",
    "to": "set_tours",
-   "cost": 19.4,
+   "cost": 19.42,
    "road": true,
    "sea": false
   },
   {
    "from": "set_loches",
    "to": "set_vouvray",
-   "cost": 18.06,
+   "cost": 18.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_locronan",
    "to": "set_quimper",
-   "cost": 13.93,
+   "cost": 13.95,
    "road": false,
    "sea": false
   },
@@ -6401,49 +6401,49 @@
   {
    "from": "set_lodose",
    "to": "set_stralsund",
-   "cost": 419.27,
+   "cost": 419.21,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lodose",
    "to": "set_tonsberg",
-   "cost": 170.02,
+   "cost": 170.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_londres",
    "to": "set_maldon",
-   "cost": 30.41,
+   "cost": 30.44,
    "road": true,
    "sea": false
   },
   {
    "from": "set_londres",
    "to": "set_rye",
-   "cost": 73.18,
+   "cost": 73.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_londres",
    "to": "set_st_albans",
-   "cost": 15.43,
+   "cost": 15.41,
    "road": true,
    "sea": false
   },
   {
    "from": "set_londres",
    "to": "set_windsor",
-   "cost": 16.78,
+   "cost": 16.75,
    "road": true,
    "sea": false
   },
   {
    "from": "set_louvain",
    "to": "set_shertogenbosch",
-   "cost": 72.04,
+   "cost": 72.02,
    "road": false,
    "sea": false
   },
@@ -6457,49 +6457,49 @@
   {
    "from": "set_louvain",
    "to": "set_vilvoorde",
-   "cost": 10.05,
+   "cost": 10.07,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lubeck",
    "to": "set_segeberg",
-   "cost": 26.07,
+   "cost": 26.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lubeck",
    "to": "set_skanor",
-   "cost": 227.99,
+   "cost": 227.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lubeck",
    "to": "set_stralsund",
-   "cost": 164.9,
+   "cost": 164.87,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lucerne",
    "to": "set_schwyz",
-   "cost": 52.97,
+   "cost": 52.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lucerne",
    "to": "set_ulm",
-   "cost": 293.85,
+   "cost": 293.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lund",
    "to": "set_segeberg",
-   "cost": 237.24,
+   "cost": 237.26,
    "road": false,
    "sea": false
   },
@@ -6513,7 +6513,7 @@
   {
    "from": "set_lusignan",
    "to": "set_maillezais",
-   "cost": 65.73,
+   "cost": 65.74,
    "road": false,
    "sea": false
   },
@@ -6527,14 +6527,14 @@
   {
    "from": "set_lusignan",
    "to": "set_poitiers",
-   "cost": 23.63,
+   "cost": 23.61,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lusignan",
    "to": "set_saumur",
-   "cost": 93.14,
+   "cost": 93.15,
    "road": false,
    "sea": false
   },
@@ -6548,119 +6548,119 @@
   {
    "from": "set_luxembourg",
    "to": "set_vianden",
-   "cost": 36.39,
+   "cost": 36.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lynn",
    "to": "set_norwich",
-   "cost": 123.73,
+   "cost": 123.68,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lynn",
    "to": "set_oxford",
-   "cost": 238.38,
+   "cost": 238.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lynn",
    "to": "set_stoneleigh",
-   "cost": 201.9,
+   "cost": 201.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lyon",
    "to": "set_montbrison",
-   "cost": 31.05,
+   "cost": 31.06,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lyon",
    "to": "set_oingt",
-   "cost": 27.22,
+   "cost": 27.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lyon",
    "to": "set_vienne",
-   "cost": 32.87,
+   "cost": 32.9,
    "road": true,
    "sea": false
   },
   {
    "from": "set_maillezais",
    "to": "set_niort",
-   "cost": 21.7,
+   "cost": 21.69,
    "road": false,
    "sea": false
   },
   {
    "from": "set_maillezais",
    "to": "set_poitiers",
-   "cost": 85.66,
+   "cost": 85.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_malaga",
    "to": "set_seville",
-   "cost": 239.31,
+   "cost": 239.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_maldon",
    "to": "set_rochester",
-   "cost": 39.87,
+   "cost": 39.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_maldon",
    "to": "set_st_albans",
-   "cost": 34.92,
+   "cost": 34.93,
    "road": true,
    "sea": false
   },
   {
    "from": "set_marchiennes",
    "to": "set_orchies",
-   "cost": 4.0,
+   "cost": 3.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marchiennes",
    "to": "set_valenciennes",
-   "cost": 20.11,
+   "cost": 20.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marcilhac",
    "to": "set_saint_cirq_lapopie",
-   "cost": 13.67,
+   "cost": 13.69,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marienweerd",
    "to": "set_nijmegen",
-   "cost": 57.63,
+   "cost": 57.56,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marienweerd",
    "to": "set_utrecht",
-   "cost": 20.81,
+   "cost": 20.91,
    "road": true,
    "sea": false
   },
@@ -6674,140 +6674,147 @@
   {
    "from": "set_marmoutier",
    "to": "set_strasbourg",
-   "cost": 15.75,
+   "cost": 15.73,
    "road": true,
    "sea": false
   },
   {
    "from": "set_marmoutier_tours",
    "to": "set_tours",
-   "cost": 0.83,
+   "cost": 0.84,
    "road": true,
    "sea": false
   },
   {
    "from": "set_marmoutier_tours",
    "to": "set_vouvray",
-   "cost": 3.91,
+   "cost": 3.92,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_marseille",
+   "to": "set_tarascon",
+   "cost": 29.17,
    "road": true,
    "sea": false
   },
   {
    "from": "set_mayence",
    "to": "set_meissen",
-   "cost": 390.7,
+   "cost": 390.66,
    "road": false,
    "sea": false
   },
   {
    "from": "set_mayence",
    "to": "set_nancy",
-   "cost": 209.5,
+   "cost": 209.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_mayence",
    "to": "set_worms",
-   "cost": 20.32,
+   "cost": 20.31,
    "road": true,
    "sea": false
   },
   {
    "from": "set_meaux",
    "to": "set_vincennes",
-   "cost": 34.87,
+   "cost": 34.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_meissen",
    "to": "set_stolpen",
-   "cost": 44.29,
+   "cost": 44.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_meissen",
    "to": "set_zbraslav",
-   "cost": 147.29,
+   "cost": 147.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_mellifont",
    "to": "set_sligo",
-   "cost": 142.88,
+   "cost": 142.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_metz",
    "to": "set_nancy",
-   "cost": 23.75,
+   "cost": 23.78,
    "road": true,
    "sea": false
   },
   {
    "from": "set_metz",
    "to": "set_treves",
-   "cost": 39.24,
+   "cost": 39.21,
    "road": true,
    "sea": false
   },
   {
    "from": "set_metz",
    "to": "set_trifels",
-   "cost": 135.29,
+   "cost": 135.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_middelburg",
    "to": "set_sluis",
-   "cost": 126.45,
+   "cost": 126.48,
    "road": false,
    "sea": true
   },
   {
    "from": "set_middelburg",
    "to": "set_teylingen",
-   "cost": 207.06,
+   "cost": 207.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_middelburg",
    "to": "set_vilvoorde",
-   "cost": 127.96,
+   "cost": 127.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_middelburg",
    "to": "set_zierikzee",
-   "cost": 54.13,
+   "cost": 54.16,
    "road": false,
    "sea": false
   },
   {
    "from": "set_milan",
    "to": "set_schloss_tirol",
-   "cost": 304.19,
+   "cost": 304.18,
    "road": false,
    "sea": false
   },
   {
    "from": "set_milan",
    "to": "set_turin",
-   "cost": 125.93,
+   "cost": 125.92,
    "road": false,
    "sea": false
   },
   {
    "from": "set_milan",
    "to": "set_verone",
-   "cost": 141.17,
+   "cost": 141.16,
    "road": false,
    "sea": false
   },
@@ -6821,7 +6828,7 @@
   {
    "from": "set_mont_de_marsan",
    "to": "set_saint_sever",
-   "cost": 15.47,
+   "cost": 15.45,
    "road": false,
    "sea": false
   },
@@ -6835,63 +6842,63 @@
   {
    "from": "set_mont_saint_michel",
    "to": "set_mortain",
-   "cost": 21.29,
+   "cost": 21.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_mont_saint_michel",
    "to": "set_saint_malo",
-   "cost": 35.81,
+   "cost": 35.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_montauban",
    "to": "set_toulouse",
-   "cost": 23.24,
+   "cost": 23.21,
    "road": true,
    "sea": false
   },
   {
    "from": "set_montbrison",
    "to": "set_oingt",
-   "cost": 53.33,
+   "cost": 53.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_montpellier",
    "to": "set_valmagne",
-   "cost": 11.63,
+   "cost": 11.62,
    "road": true,
    "sea": false
   },
   {
    "from": "set_morlaas",
    "to": "set_muret",
-   "cost": 168.14,
+   "cost": 168.13,
    "road": false,
    "sea": false
   },
   {
    "from": "set_morlaas",
    "to": "set_orthez",
-   "cost": 122.43,
+   "cost": 122.47,
    "road": false,
    "sea": false
   },
   {
    "from": "set_morlaas",
    "to": "set_pau",
-   "cost": 53.52,
+   "cost": 53.55,
    "road": false,
    "sea": false
   },
   {
    "from": "set_morlaas",
    "to": "set_tarbes",
-   "cost": 30.75,
+   "cost": 30.76,
    "road": false,
    "sea": false
   },
@@ -6905,28 +6912,28 @@
   {
    "from": "set_moulins",
    "to": "set_souvigny",
-   "cost": 5.3,
+   "cost": 5.31,
    "road": true,
    "sea": false
   },
   {
    "from": "set_munich",
    "to": "set_prague",
-   "cost": 300.14,
+   "cost": 300.09,
    "road": false,
    "sea": false
   },
   {
    "from": "set_munster",
    "to": "set_soest",
-   "cost": 27.27,
+   "cost": 27.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_munster",
    "to": "set_zutphen",
-   "cost": 99.85,
+   "cost": 99.87,
    "road": false,
    "sea": false
   },
@@ -6940,14 +6947,14 @@
   {
    "from": "set_murcie",
    "to": "set_valence",
-   "cost": 175.17,
+   "cost": 175.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_muret",
    "to": "set_toulouse",
-   "cost": 9.31,
+   "cost": 9.32,
    "road": true,
    "sea": false
   },
@@ -6961,28 +6968,28 @@
   {
    "from": "set_murol",
    "to": "set_rodez",
-   "cost": 206.76,
+   "cost": 206.72,
    "road": false,
    "sea": false
   },
   {
    "from": "set_najac",
    "to": "set_rodez",
-   "cost": 50.58,
+   "cost": 50.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_najac",
    "to": "set_saint_cirq_lapopie",
-   "cost": 35.45,
+   "cost": 35.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nancy",
    "to": "set_salins_les_bains",
-   "cost": 196.14,
+   "cost": 196.07,
    "road": false,
    "sea": false
   },
@@ -6996,77 +7003,77 @@
   {
    "from": "set_nancy",
    "to": "set_vaudemont",
-   "cost": 14.09,
+   "cost": 14.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_nancy",
    "to": "set_worms",
-   "cost": 190.28,
+   "cost": 190.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nantes",
    "to": "set_redon",
-   "cost": 31.31,
+   "cost": 31.32,
    "road": true,
    "sea": false
   },
   {
    "from": "set_nantes",
    "to": "set_rennes",
-   "cost": 100.25,
+   "cost": 100.26,
    "road": false,
    "sea": false
   },
   {
    "from": "set_naples",
    "to": "set_palerme",
-   "cost": 312.43,
+   "cost": 312.38,
    "road": false,
    "sea": false
   },
   {
    "from": "set_naples",
    "to": "set_rome",
-   "cost": 188.52,
+   "cost": 188.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nevers",
    "to": "set_noirlac",
-   "cost": 31.87,
+   "cost": 31.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_nevers",
    "to": "set_vezelay",
-   "cost": 69.08,
+   "cost": 69.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_newcastle",
    "to": "set_whitby",
-   "cost": 84.65,
+   "cost": 84.68,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nijmegen",
    "to": "set_shertogenbosch",
-   "cost": 61.84,
+   "cost": 61.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nimes",
    "to": "set_saint_gilles",
-   "cost": 18.39,
+   "cost": 18.41,
    "road": false,
    "sea": false
   },
@@ -7080,35 +7087,35 @@
   {
    "from": "set_nuremberg",
    "to": "set_rothenburg",
-   "cost": 65.24,
+   "cost": 65.2,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nuremberg",
    "to": "set_wurzburg",
-   "cost": 90.83,
+   "cost": 90.82,
    "road": false,
    "sea": false
   },
   {
    "from": "set_nuremberg",
    "to": "set_zbraslav",
-   "cost": 246.57,
+   "cost": 246.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_oingt",
    "to": "set_souvigny",
-   "cost": 127.11,
+   "cost": 127.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_orcival",
    "to": "set_riom",
-   "cost": 42.7,
+   "cost": 42.74,
    "road": true,
    "sea": false
   },
@@ -7129,50 +7136,50 @@
   {
    "from": "set_orthez",
    "to": "set_pau",
-   "cost": 39.08,
+   "cost": 39.12,
    "road": true,
    "sea": false
   },
   {
    "from": "set_oslo",
    "to": "set_tonsberg",
-   "cost": 74.46,
+   "cost": 74.41,
    "road": false,
    "sea": false
   },
   {
    "from": "set_oxford",
    "to": "set_wallingford",
-   "cost": 9.66,
+   "cost": 9.68,
    "road": true,
    "sea": false
   },
   {
    "from": "set_palma",
    "to": "set_valence",
-   "cost": 261.61,
+   "cost": 261.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_pampelune",
    "to": "set_saragosse",
-   "cost": 215.84,
+   "cost": 215.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_paris",
    "to": "set_saint_denis",
-   "cost": 4.4,
+   "cost": 4.37,
    "road": true,
    "sea": false
   },
   {
    "from": "set_paris",
    "to": "set_vincennes",
-   "cost": 6.44,
-   "road": false,
+   "cost": 3.22,
+   "road": true,
    "sea": false
   },
   {
@@ -7192,14 +7199,14 @@
   {
    "from": "set_pembroke",
    "to": "set_whitland",
-   "cost": 27.53,
+   "cost": 27.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_perpignan",
    "to": "set_peyrepertuse",
-   "cost": 33.66,
+   "cost": 33.59,
    "road": false,
    "sea": false
   },
@@ -7220,21 +7227,21 @@
   {
    "from": "set_pontefract",
    "to": "set_york",
-   "cost": 32.89,
+   "cost": 32.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_porto",
    "to": "set_saint_jacques",
-   "cost": 191.41,
+   "cost": 191.4,
    "road": false,
    "sea": false
   },
   {
    "from": "set_portsmouth",
    "to": "set_southampton",
-   "cost": 25.16,
+   "cost": 25.21,
    "road": false,
    "sea": false
   },
@@ -7248,42 +7255,42 @@
   {
    "from": "set_prague",
    "to": "set_stolpen",
-   "cost": 111.58,
+   "cost": 111.57,
    "road": false,
    "sea": false
   },
   {
    "from": "set_prague",
    "to": "set_vienna",
-   "cost": 250.98,
+   "cost": 250.94,
    "road": false,
    "sea": false
   },
   {
    "from": "set_prague",
    "to": "set_zbraslav",
-   "cost": 5.7,
+   "cost": 5.68,
    "road": true,
    "sea": false
   },
   {
    "from": "set_provins",
    "to": "set_sully_sur_loire",
-   "cost": 111.65,
+   "cost": 111.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_provins",
    "to": "set_troyes",
-   "cost": 32.17,
+   "cost": 32.18,
    "road": true,
    "sea": false
   },
   {
    "from": "set_quimper",
    "to": "set_suscinio",
-   "cost": 98.05,
+   "cost": 98.12,
    "road": false,
    "sea": false
   },
@@ -7297,7 +7304,7 @@
   {
    "from": "set_reims",
    "to": "set_valenciennes",
-   "cost": 127.67,
+   "cost": 127.68,
    "road": false,
    "sea": false
   },
@@ -7311,7 +7318,7 @@
   {
    "from": "set_rennes",
    "to": "set_saint_malo",
-   "cost": 31.78,
+   "cost": 31.75,
    "road": true,
    "sea": false
   },
@@ -7325,42 +7332,42 @@
   {
    "from": "set_rochester",
    "to": "set_rye",
-   "cost": 54.13,
+   "cost": 54.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rochester",
    "to": "set_sandwich",
-   "cost": 29.79,
+   "cost": 29.75,
    "road": true,
    "sea": false
   },
   {
    "from": "set_rothenburg",
    "to": "set_speyer",
-   "cost": 127.43,
+   "cost": 127.44,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rothenburg",
    "to": "set_ulm",
-   "cost": 109.32,
+   "cost": 109.38,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rothenburg",
    "to": "set_wurzburg",
-   "cost": 49.68,
+   "cost": 49.67,
    "road": false,
    "sea": false
   },
   {
    "from": "set_royan",
    "to": "set_saintes",
-   "cost": 16.68,
+   "cost": 16.67,
    "road": true,
    "sea": false
   },
@@ -7374,49 +7381,49 @@
   {
    "from": "set_saint_denis",
    "to": "set_vincennes",
-   "cost": 5.93,
+   "cost": 5.9,
    "road": true,
    "sea": false
   },
   {
    "from": "set_saint_mihiel",
    "to": "set_vaucouleurs",
-   "cost": 16.42,
+   "cost": 16.08,
    "road": true,
    "sea": false
   },
   {
    "from": "set_saint_omer",
    "to": "set_ypres",
-   "cost": 23.04,
+   "cost": 23.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_saint_quentin",
    "to": "set_saint_valery_sur_somme",
-   "cost": 66.81,
+   "cost": 66.8,
    "road": true,
    "sea": false
   },
   {
    "from": "set_saint_quentin",
    "to": "set_valenciennes",
-   "cost": 29.62,
+   "cost": 29.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_salisbury",
    "to": "set_southampton",
-   "cost": 32.53,
+   "cost": 32.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_salisbury",
    "to": "set_winchester",
-   "cost": 16.99,
+   "cost": 16.98,
    "road": true,
    "sea": false
   },
@@ -7430,21 +7437,21 @@
   {
    "from": "set_saragosse",
    "to": "set_tolede",
-   "cost": 329.06,
+   "cost": 329.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_saragosse",
    "to": "set_valence",
-   "cost": 245.53,
+   "cost": 245.47,
    "road": false,
    "sea": false
   },
   {
    "from": "set_scarborough",
    "to": "set_whitby",
-   "cost": 26.73,
+   "cost": 26.66,
    "road": false,
    "sea": false
   },
@@ -7465,126 +7472,133 @@
   {
    "from": "set_senanque",
    "to": "set_silvacane",
-   "cost": 23.98,
+   "cost": 24.06,
    "road": false,
    "sea": false
   },
   {
    "from": "set_silvacane",
    "to": "set_tarascon",
-   "cost": 13.54,
+   "cost": 14.28,
    "road": true,
    "sea": false
   },
   {
    "from": "set_silvacane",
    "to": "set_turin",
-   "cost": 243.65,
+   "cost": 243.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_skanor",
    "to": "set_stralsund",
-   "cost": 145.95,
+   "cost": 145.88,
    "road": false,
    "sea": false
   },
   {
    "from": "set_sluis",
    "to": "set_ter_duinen",
-   "cost": 56.17,
+   "cost": 56.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_soest",
    "to": "set_stavoren",
-   "cost": 353.23,
+   "cost": 353.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_southampton",
    "to": "set_winchester",
-   "cost": 9.2,
+   "cost": 9.19,
    "road": true,
    "sea": false
   },
   {
    "from": "set_spandau",
    "to": "set_stralsund",
-   "cost": 197.62,
+   "cost": 197.66,
    "road": false,
    "sea": false
   },
   {
    "from": "set_spandau",
    "to": "set_zbraslav",
-   "cost": 296.67,
+   "cost": 296.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_speyer",
    "to": "set_trifels",
-   "cost": 16.19,
+   "cost": 16.21,
    "road": true,
    "sea": false
   },
   {
    "from": "set_speyer",
    "to": "set_worms",
-   "cost": 17.73,
+   "cost": 17.75,
    "road": true,
    "sea": false
   },
   {
    "from": "set_st_albans",
    "to": "set_windsor",
-   "cost": 17.67,
+   "cost": 17.64,
    "road": true,
    "sea": false
   },
   {
    "from": "set_st_maximin_trier",
    "to": "set_stavelot",
-   "cost": 86.92,
+   "cost": 86.96,
    "road": false,
    "sea": false
   },
   {
    "from": "set_st_maximin_trier",
    "to": "set_treves",
-   "cost": 0.3,
+   "cost": 0.31,
    "road": true,
    "sea": false
   },
   {
    "from": "set_stavelot",
    "to": "set_vianden",
-   "cost": 55.01,
+   "cost": 55.07,
    "road": false,
    "sea": false
   },
   {
    "from": "set_stavoren",
    "to": "set_zutphen",
-   "cost": 148.51,
+   "cost": 148.39,
    "road": false,
    "sea": false
   },
   {
    "from": "set_stoneleigh",
    "to": "set_warwick",
-   "cost": 10.4,
+   "cost": 10.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_tarascon",
+   "to": "set_vienne",
+   "cost": 283.72,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ter_duinen",
    "to": "set_ypres",
-   "cost": 34.34,
+   "cost": 34.27,
    "road": false,
    "sea": false
   },
@@ -7598,63 +7612,63 @@
   {
    "from": "set_teylingen",
    "to": "set_zierikzee",
-   "cost": 155.08,
+   "cost": 155.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_tolede",
    "to": "set_valence",
-   "cost": 318.11,
+   "cost": 318.05,
    "road": false,
    "sea": false
   },
   {
    "from": "set_toul",
    "to": "set_vaucouleurs",
-   "cost": 10.2,
+   "cost": 10.07,
    "road": true,
    "sea": false
   },
   {
    "from": "set_toul",
    "to": "set_vaudemont",
-   "cost": 30.02,
+   "cost": 30.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_tours",
    "to": "set_vouvray",
-   "cost": 4.52,
+   "cost": 4.55,
    "road": true,
    "sea": false
   },
   {
    "from": "set_treves",
    "to": "set_trifels",
-   "cost": 117.89,
+   "cost": 117.85,
    "road": false,
    "sea": false
   },
   {
    "from": "set_trifels",
    "to": "set_worms",
-   "cost": 26.95,
+   "cost": 26.96,
    "road": true,
    "sea": false
   },
   {
    "from": "set_troyes",
    "to": "set_vaudemont",
-   "cost": 150.71,
+   "cost": 150.69,
    "road": false,
    "sea": false
   },
   {
    "from": "set_venise",
    "to": "set_verone",
-   "cost": 73.99,
+   "cost": 74.01,
    "road": true,
    "sea": false
   },
@@ -7668,7 +7682,7 @@
   {
    "from": "set_wallingford",
    "to": "set_windsor",
-   "cost": 37.97,
+   "cost": 37.96,
    "road": false,
    "sea": false
   },
@@ -7689,7 +7703,7 @@
   {
    "from": "set_winchester",
    "to": "set_windsor",
-   "cost": 67.51,
+   "cost": 67.55,
    "road": false,
    "sea": false
   }
