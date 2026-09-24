@@ -36,7 +36,9 @@ pub mod battle_auto;
 pub mod battle_request;
 pub mod buildings;
 pub mod characters;
+pub mod chivalry;
 pub mod chronicle;
+pub mod coinage;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
@@ -45,6 +47,7 @@ pub mod medicine;
 pub mod movement;
 pub mod orders;
 pub mod population;
+pub mod ransom;
 pub mod religion;
 pub mod research;
 pub mod rng;
@@ -62,10 +65,12 @@ pub use battle_auto::{
 };
 pub use battle_request::{BattleRequestError, PendingBattle};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use chivalry::{ChivalryError, OrderState};
 pub use chronicle::{
     ChronicleError, ChronicleState, Decision, DecisionOptionView, DecisionView, EventContext,
     PlagueWave,
 };
+pub use coinage::{CoinageError, CoinageLevel, CoinageParams};
 pub use diplomacy::{
     Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
     RelationKind,
@@ -77,6 +82,7 @@ pub use dynasty::{
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
 pub use orders::{Order, OrderError, RecruitOption};
+pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::CampaignError;

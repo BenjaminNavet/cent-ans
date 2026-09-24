@@ -461,6 +461,7 @@ pub(crate) fn spawn_ruler(
             skills,
             captive: false,
             captor: None,
+            ransom_terms: None,
             experience: 0,
             skill_points: 0,
             skills_learned: BTreeSet::new(),
@@ -535,6 +536,7 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
             skills,
             captive: false,
             captor: None,
+            ransom_terms: None,
             experience: 0,
             skill_points: 0,
             skills_learned: BTreeSet::new(),
@@ -770,6 +772,13 @@ pub(crate) fn resolve_regencies(
             .and_then(|r| state.characters.get(r))
             .filter(|r| r.alive && !r.is_major(year))
             .is_some();
+        // H6: a captive ruler (Jean II after Poitiers) also leaves the realm
+        // to a regency.
+        let captive_ruler = ruler
+            .as_ref()
+            .and_then(|r| state.characters.get(r))
+            .is_some_and(|r| r.alive && r.captive);
+        let minor_ruler = minor_ruler || captive_ruler;
         state.factions.get_mut(&faction_id).expect("exists").regency = minor_ruler;
         let ruler_name = ruler
             .as_ref()
@@ -790,10 +799,17 @@ pub(crate) fn resolve_regencies(
                 events.push(
                     GameEvent::new(
                         EventKind::Regency,
-                        format!(
-                            "{ruler_name} est mineur : une régence gouverne {}.",
-                            faction_name(data, &faction_id)
-                        ),
+                        if captive_ruler {
+                            format!(
+                                "{ruler_name} est captif : une régence gouverne {}.",
+                                faction_name(data, &faction_id)
+                            )
+                        } else {
+                            format!(
+                                "{ruler_name} est mineur : une régence gouverne {}.",
+                                faction_name(data, &faction_id)
+                            )
+                        },
                     )
                     .faction(&faction_id),
                 );
@@ -803,7 +819,7 @@ pub(crate) fn resolve_regencies(
                 GameEvent::new(
                     EventKind::Regency,
                     format!(
-                        "{ruler_name} atteint sa majorité : fin de la régence en {}.",
+                        "{ruler_name} gouverne de nouveau : fin de la régence en {}.",
                         faction_name(data, &faction_id)
                     ),
                 )

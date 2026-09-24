@@ -34,6 +34,34 @@ pub fn death_permille_for(state: &CampaignState, id: &CharacterId) -> u32 {
     permille.round().min(1000.0) as u32
 }
 
+/// Seasons of grace before a historical character's recorded death year
+/// (F9): natural death is spared until two years before it, then doubled
+/// once past it, so the realms of 1337 keep their historical rulers unless
+/// war or the chronicle decide otherwise.
+pub const HISTORICAL_GRACE_YEARS: i32 = 2;
+
+/// `death_permille_for` shaped by the recorded death year of historical
+/// characters (F9).
+pub fn natural_death_permille(state: &CampaignState, data: &GameData, id: &CharacterId) -> u32 {
+    let base = death_permille_for(state, id);
+    let Some(death_year) = data
+        .characters
+        .get(id)
+        .filter(|c| c.historical)
+        .and_then(|c| c.death.as_ref())
+        .and_then(|d| d.year())
+    else {
+        return base;
+    };
+    if state.year < death_year - HISTORICAL_GRACE_YEARS {
+        0
+    } else if state.year > death_year {
+        (base.max(5) * 2).min(1000)
+    } else {
+        base
+    }
+}
+
 fn faction_name(data: &GameData, id: &FactionId) -> String {
     data.factions
         .get(id)
@@ -53,7 +81,7 @@ pub(crate) fn resolve_characters(
         .map(|(id, _)| id.clone())
         .collect();
     for id in ids {
-        let permille = death_permille_for(state, &id);
+        let permille = natural_death_permille(state, data, &id);
         if permille == 0 || !state.rng.chance_permille(permille) {
             continue;
         }

@@ -522,7 +522,11 @@ impl CampaignState {
                 let mut option = BuildOption {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
-                    cost: building.cost.money,
+                    cost: crate::coinage::priced(
+                        self,
+                        &state.controller,
+                        i64::from(building.cost.money),
+                    ) as u32,
                     turns: building.build_time_turns,
                     available: true,
                     reason: None,
@@ -602,11 +606,9 @@ impl CampaignState {
         {
             return Some("unique pour la faction (déjà construit ailleurs)".to_owned());
         }
-        if faction.treasury < i64::from(building.cost.money) {
-            return Some(format!(
-                "trésor insuffisant ({} livres nécessaires)",
-                building.cost.money
-            ));
+        let cost = crate::coinage::priced(self, &state.controller, i64::from(building.cost.money));
+        if faction.treasury < cost {
+            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }
         None
     }
