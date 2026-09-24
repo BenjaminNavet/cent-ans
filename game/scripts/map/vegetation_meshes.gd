@@ -21,8 +21,8 @@ const TREES_GLB := "res://assets/models/vegetation/campaign_trees.glb"
 const ESSENCE_ID := {"oak": 0.0, "beech": 1.0, "fir": 2.0, "hedge": 3.0}
 ## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
 const PALETTES := {
-	"oak": [Color(0.048, 0.080, 0.028), Color(0.150, 0.190, 0.066), Color(0.20, 0.15, 0.10)],
-	"beech": [Color(0.070, 0.115, 0.034), Color(0.230, 0.285, 0.085), Color(0.30, 0.29, 0.26)],
+	"oak": [Color(0.040, 0.068, 0.026), Color(0.118, 0.155, 0.056), Color(0.20, 0.15, 0.10)],
+	"beech": [Color(0.052, 0.090, 0.030), Color(0.150, 0.200, 0.064), Color(0.30, 0.29, 0.26)],
 	"fir": [Color(0.022, 0.058, 0.046), Color(0.065, 0.120, 0.075), Color(0.22, 0.14, 0.09)],
 }
 
@@ -94,7 +94,7 @@ static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, pale
 				var color: Color = (palette[0] as Color).lerp(palette[1], light * 0.8 + 0.2 * _hash01(v * 13.0))
 				color.a = clampf(v.y, 0.0, 1.0)
 				st.set_color(color)
-				st.set_normal((dir * 0.7 + n * 0.3 + Vector3.UP * 0.15).normalized())
+				st.set_normal((dir * 0.88 + n * 0.12 + Vector3.UP * 0.12).normalized())
 				st.set_uv(Vector2(essence_id, 1.0))
 			else:
 				var bark: Color = palette[2]
