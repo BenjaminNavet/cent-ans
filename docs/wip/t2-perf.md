@@ -45,7 +45,7 @@ Reprend l'audit `docs/audit/a5-technique.md` § 5, lots T2 et T8, plus une parti
   portraits générés, `plan()` renvoyait 0 job et le test cherchait « Style » dans une sortie
   vide. Le test reroute maintenant `portraits.plan` (monkeypatch) vers un `tmp_path` vide, donc
   toujours `limit` jobs, indépendamment du dépôt.
-- **Dette T12 (RGBFloat)** : à faire (recherche de la source en cours).
+- **Dette T12 (RGBFloat)** : source localisée, non corrigée (pas simple — voir ci-dessous).
 
 ## Mesures avant/après (T2)
 
@@ -102,6 +102,42 @@ Fumée, machine partagée (chiffres non comparables à l'audit, seule la fiabili
   `dev` optimisé du lot T1 et des garde-fous T8 ; l'ancien bug racine — `_ready()` ne quittait
   jamais le process en cas d'échec de mise en scène — est corrigé dans tous les cas).
 
+## RGBFloat → RGBAFloat (T12)
+
+Source localisée avec `--verbose` (traces de pile Godot capturées lors d'une bataille, dans les
+logs d'un autre agent de cette session partagée — même avertissement, même cause) :
+
+```
+WARNING: Image format RGBFloat not supported by hardware, converting to RGBAFloat.
+     at: ... (GPUParticles3D internals)
+  Stack:
+         [1] _emitter (res://scripts/battle/battle_effects.gd:434)
+         [2] setup (res://scripts/battle/battle_effects.gd:88)
+         [3] _build_soldier_layers (res://scripts/battle/battle_scene.gd:283)
+         [4] begin (res://scripts/battle/battle_scene.gd:208)
+```
+
+Chaque appel à `BattleEffects._emitter()` (`game/scripts/battle/battle_effects.gd:415`) crée un
+`GPUParticles3D` dont le `process_material` (`_process_for`, ligne 447) utilise entre autres un
+`CurveTexture` (`mat.scale_curve`, ligne 550-552, courbe de croissance des particules dans le
+temps). C'est Godot lui-même qui, en interne, bake ce type de courbe (et plus généralement les
+textures de paramètres du système de particules) dans un format flottant 3 canaux
+(`FORMAT_RGBF`) avant de l'uploader sur le GPU ; sur ce backend (Metal, RGB32F non supporté), le
+moteur la convertit silencieusement en RGBAF et émet l'avertissement. Rien dans notre code ne
+crée d'image `RGBF`/`RGBAF` explicitement (vérifié : aucune occurrence dans `game/` en dehors du
+`FORMAT_RF` — 1 canal, sans rapport — de `battle_terrain.gd:533`) ; le nombre d'émetteurs
+particules créés par bataille (poussière, sang, traits, fumée…) correspond à l'ordre de grandeur
+des ~35 avertissements observés dans l'audit.
+
+**Pas corrigé** : ce n'est pas une source « simple » au sens de la consigne (T2 : « supprime-les
+si c'est simple ») — c'est un détail d'implémentation interne du moteur (baking des courbes de
+`ParticleProcessMaterial`/`GPUParticles3D`) déclenché par du code Godot que nous n'appelons pas
+directement avec un format flottant ; l'éviter demanderait de renoncer aux courbes de
+`ParticleProcessMaterial` (régression visuelle sur les effets de particules) pour un gain
+cosmétique (avertissement de log seulement, aucun coût de performance mesuré : la conversion a
+lieu une fois par émetteur à la création, pas par image). Laissé en l'état ; à reconsidérer
+seulement si Godot 4.8+ change ce comportement ou si les logs deviennent gênants en pratique.
+
 ## Prochaine étape
 
 1. Fait : mesures avant/après T2 (primitives, voir ci-dessus).
@@ -109,5 +145,5 @@ Fumée, machine partagée (chiffres non comparables à l'audit, seule la fiabili
    à 48/80 régiments et à vide (machine non partagée) pour des i/s comparables à l'audit si
    besoin d'un chiffre de référence propre.
 3. Fait : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call`.
-4. Localiser la source des 35 avertissements RGBFloat→RGBAFloat au chargement de carte
-   (recherche en cours).
+4. Fait : source des avertissements RGBFloat localisée (`battle_effects.gd` → `GPUParticles3D` /
+   `CurveTexture` internes à Godot) ; non corrigée, pas simple (voir ci-dessus).
