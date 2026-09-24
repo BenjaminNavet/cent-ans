@@ -11,13 +11,13 @@ Branche : `worktree-agent-a5c437f998e41d92b`.
    paramètres en données (`data/rules/coinage.json` ou pratique du dépôt), IA.
 3. [x] H6 rançons : calcul, paiement intégral / échéances, défaut, termes (argent, province, parole),
    souverain captif (mécontentement, régence), cohérence avec événements de rançon.
-4. [ ] H6 ordres : `data/chivalric_orders/*.json` + schéma, fondation, membres, effets, effet
+4. [x] H6 ordres : `data/chivalric_orders/*.json` + schéma, fondation, membres, effets, effet
    d'événement `found_chivalric_order` (event_check), Jarretière/Étoile, malus d'effondrement.
-5. [ ] Pont Godot (`campaign_sim_coinage.rs` ou équivalent) + `docs/design/h5-h6-api.md`.
+5. [x] Pont Godot (`campaign_sim_coinage.rs` ou équivalent) + `docs/design/h5-h6-api.md`.
 6. [ ] Tests `sim-campaign/tests/h5_h6.rs`, fmt/clippy/test, pytest, build, import, smoke.
 
 ## État
-Règles H5 (coinage.rs), H6 rançons (ransom.rs) et ordres (chivalry.rs) écrites et branchées (tour, IA, coûts, population, régence du souverain captif, effet d’événement). Paramètres en constantes Rust (pratique du dépôt). Reste : données `data/chivalric_orders`, schémas, événements Jarretière/Étoile, pont, doc API, tests.
+Règles, données, pont, doc API et tests h5_h6.rs (18 tests) faits. Reste : batterie complète (fmt, clippy, test, pytest, build, import, smoke).
 
 ## Prochaine étape
-Données + schémas (chivalric_order.schema.json, common, event), puis pont, puis tests h5_h6.rs.
+Batterie complète, correctifs, commit final.

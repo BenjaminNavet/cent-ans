@@ -326,14 +326,14 @@ fn check_ceded_province(
     if state.factions.get(payer).is_some_and(|f| &f.capital == province) {
         return Err(RansomError::BadProvince("on ne cède pas sa capitale".to_owned()));
     }
-    let borders = data.provinces.get(province).is_some_and(|d| {
-        d.neighbors.iter().any(|n| {
+    let borders = crate::movement::land_neighbors(data, province)
+        .iter()
+        .any(|n| {
             state
                 .provinces
                 .get(n)
                 .is_some_and(|q| &q.controller == captor)
-        })
-    });
+        });
     if !borders {
         return Err(RansomError::BadProvince(
             "la province doit toucher une province du geôlier".to_owned(),
