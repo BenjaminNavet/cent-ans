@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ordre_de_l_etoile",
+  "title": "L'ordre de l'Étoile",
+  "category": "institution",
+  "aliases": ["ordre de l'Étoile", "chevaliers de l'Étoile", "Noble Maison", "Mauron", "bataille de Mauron"],
+  "era": { "from": "1351", "to": "v. 1360" },
+  "summary": "Fondé par [[cdx_jean_ii|Jean II le Bon]] en 1351 pour répondre à l'[[cdx_ordre_de_la_jarretiere|ordre de la Jarretière]], l'ordre de l'Étoile réunit l'élite de la chevalerie française. Le serment de ne jamais fuir coûte la vie à nombre de ses membres à Mauron, en 1352.",
+  "body": "Après les désastres de [[cdx_crecy|Crécy]] et de [[cdx_calais|Calais]], [[cdx_jean_ii|Jean II]] veut restaurer la discipline et le prestige de sa noblesse. Il imite son rival [[cdx_edouard_iii|Édouard III]], qui vient de fonder la Jarretière, et crée à l'automne 1351 la Compagnie de Notre-Dame de la Noble Maison, vite appelée ordre de l'Étoile d'après l'insigne que portent ses membres.\n\nL'ordre doit compter jusqu'à cinq cents chevaliers, bien plus que les vingt-six membres de la Jarretière. Ils se réunissent chaque année à la Noble Maison de Saint-Ouen, près de Paris, où la première fête se tient en janvier 1352. Chacun doit raconter ses aventures, consignées par des clercs, et porter une étoile sur son manteau ou son chaperon. La devise proclame que les astres montrent la voie aux rois.\n\nLe serment le plus célèbre interdit aux chevaliers de fuir au combat. Le 14 août 1352, à Mauron, en Bretagne, une armée franco-bretonne attaque une troupe anglo-bretonne en position défensive, soutenue par des archers. La défaite est lourde : selon les chroniques, quelque quatre-vingts chevaliers de l'Étoile y meurent, fidèles à leur serment.\n\nLe désastre de [[cdx_poitiers|Poitiers]] en 1356 et la captivité du roi achèvent l'ordre, qui disparaît sans avoir été formellement aboli. Il reste le symbole d'une [[cdx_chevalerie|chevalerie]] qui confond encore honneur personnel et efficacité militaire, à l'heure où la guerre change de visage.",
+  "entity": "evt_ordre_de_l_etoile",
+  "see_also": ["cdx_ordre_de_la_jarretiere", "cdx_toison_or", "cdx_chevalerie", "cdx_jean_ii"],
+  "sources": ["Ordre de l'Étoile", "Bataille de Mauron"]
+}
