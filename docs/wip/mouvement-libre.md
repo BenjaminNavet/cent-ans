@@ -1,6 +1,6 @@
 # Orchestration : mouvement libre des armées
 
-Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0006-free-army-movement.md`. Conception validée par le joueur le 2026-09-24.
+Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0010-free-army-movement.md`. Conception validée par le joueur le 2026-09-24.
 
 | Lot | État | Notes |
 |---|---|---|
@@ -13,7 +13,9 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0006-f
 ## Décisions prises en cours de route
 
 - 2026-09-24 : le joueur valide la spec telle quelle (« fais le »).
-- 2026-09-24 : la session 6 (TW) est prévenue que son lot C2 « zone de contrôle » (vague 6) recoupe M2 ; proposition de le suspendre jusqu'à la fusion de M2.
+- 2026-09-24 : la session 6 (TW) est prévenue que son lot C2 « zone de contrôle » (vague 6) recoupe M2 ; proposition de le suspendre jusqu'à la fusion de M2. C2 est suspendu.
+- 2026-09-24 : l'ADR est renumérotée en 0010 (0006 à 0009 déjà pris).
+- À la fusion de M2, vérifier : `agents.rs` (C6, Dijkstra sur le graphe des colonies, s'appuie sur `movement.rs` ; les agents ne sont pas arrêtés par la zone de contrôle) et la ligne C7 dans `apply_outcome`.
 
 ## Prochaine étape
 
