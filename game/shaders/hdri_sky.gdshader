@@ -5,7 +5,7 @@
 // n'est calculée qu'une fois.
 shader_type sky;
 
-uniform sampler2D panorama : source_color, filter_linear, repeat_enable, hint_default_black;
+uniform sampler2D panorama : filter_linear, repeat_enable, hint_default_black;
 // Azimut (degrés, 0 = -Z, vers +X) du soleil dans le panorama ; aligné sur LIGHT0 si align_sun.
 uniform float panorama_sun_azimuth = 0.0;
 uniform bool align_sun = true;
@@ -19,7 +19,6 @@ uniform float haze_amount : hint_range(0.0, 1.0) = 0.35;
 // Disque solaire ajouté (le soleil des HDRI est souvent écrêté) ; 0 par temps couvert.
 uniform float sun_disc = 0.0;
 
-const float PI = 3.14159265;
 
 vec3 sample_panorama(vec3 dir, float yaw) {
 	float azimuth = atan(dir.x, -dir.z) - yaw;

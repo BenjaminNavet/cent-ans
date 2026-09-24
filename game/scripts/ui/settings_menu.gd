@@ -152,6 +152,8 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
+	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
+		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
 	var scales: Array = _constant("UI_SCALES")
 	_options(grid, "interface/ui_scale", "Échelle de l'interface", scales, scales.map(func(value: float) -> String: return "%d %%" % roundi(value * 100.0)))
 

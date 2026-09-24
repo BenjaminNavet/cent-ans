@@ -76,6 +76,8 @@ var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
+var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
+var _bench_cpu_ms: float = 0.0
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -200,7 +202,8 @@ func begin() -> bool:
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -394,8 +397,14 @@ func _process(delta: float) -> void:
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
 			soldiers.start_timing()
 			_apply_camera_override()  # banc d'essai rapproché (lot B1)
+			# V3 : temps GPU/CPU de rendu mesurés (l'écran plafonne souvent les FPS à 60).
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 		_bench_frames += 1
 		_bench_time += delta
+		if _bench_frames > 10:
+			var viewport_rid := get_viewport().get_viewport_rid()
+			_bench_gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+			_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
 		if _bench_frames == 600:
 			var fps := _bench_frames / maxf(_bench_time, 0.001)
 			var soldiers := 0
@@ -403,6 +412,7 @@ func _process(delta: float) -> void:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+			print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [_bench_gpu_ms / (_bench_frames - 10), _bench_cpu_ms / (_bench_frames - 10), RenderQuality.current()])
 			get_tree().quit(0)
 
 

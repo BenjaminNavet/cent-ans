@@ -20,6 +20,8 @@ const DEFAULTS := {
 	"video/fullscreen": false,
 	"video/resolution": Vector2i(1440, 900),
 	"video/vsync": true,
+	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
+	"video/quality": "high",
 	"interface/ui_scale": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
@@ -54,6 +56,7 @@ func _ready() -> void:
 	apply_display_enabled = DisplayServer.get_name() != "headless"
 	load_settings()
 	apply_display()
+	RenderQuality.apply_global(get_tree().root)
 
 
 ## Smoke test : valeurs par défaut, fichier dédié (le fichier du joueur n'est pas touché).
@@ -72,7 +75,10 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 		push_warning("Settings: unknown key %s" % key)
 		return
 	values[key] = _coerce(key, value)
-	if key.begins_with("video/") or key == "interface/ui_scale":
+	if key == "video/quality":
+		if is_inside_tree():
+			RenderQuality.reapply(get_tree())
+	elif key.begins_with("video/") or key == "interface/ui_scale":
 		apply_display()
 	if persist:
 		save_settings()
@@ -90,6 +96,8 @@ func _coerce(key: String, value: Variant) -> Variant:
 			return float(value)
 		TYPE_VECTOR2I:
 			return value if value is Vector2i else default
+		TYPE_STRING:
+			return str(value)
 	return value
 
 
@@ -119,6 +127,7 @@ func save_settings(to_path: String = "") -> Error:
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
 	apply_display()
+	RenderQuality.reapply(get_tree())
 	save_settings()
 	for key in DEFAULTS:
 		changed.emit(key)
