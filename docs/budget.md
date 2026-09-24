@@ -6,6 +6,10 @@ Note (2026-09-23, M10) : la clé OpenRouter a en plus sa propre limite mensuelle
 hors projet) ; elle bloquait les portraits après le premier (402). Les lots M10 sont consignés
 ligne par ligne ci-dessous (estimation au jeton, coût réel `usage.cost`).
 
+Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé, `total_usage`
+99,4390 $ − 80,3766 $ au départ = 19,06 $ dépensés, contre 19,15 $ consignés pour la même période
+(lignes du 2026-09-24) : le registre est légèrement prudent. Crédit restant ≈ 0,56 $.
+
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul |
 |---|---|---|---|---|---|
 | 2026-09-23 | OpenRouter | Sonde gpt-5-image-mini (16 jetons, test de la limite de clé) | 0,01 $ | 0,00 $ | 0,00 $ |
@@ -19,7 +23,4 @@ ligne par ligne ci-dessous (estimation au jeton, coût réel `usage.cost`).
 | 2026-09-24 | OpenRouter | Illustrations de l'encyclopédie (85 × openai/gpt-5-image-mini) | 3,87 $ | 3,92 $ | 9,72 $ |
 | 2026-09-24 | OpenRouter | Miniatures d'événements (114 × openai/gpt-5-image-mini) | 5,19 $ | 5,41 $ | 15,13 $ |
 | 2026-09-24 | OpenRouter | Sonde `image_config` 16:9 (1 × openai/gpt-5-image-mini, ignorée par le modèle) | 0,04 $ | 0,04 $ | 15,17 $ |
-
-Rapprochement (2026-09-24) : compteur OpenRouter de la nouvelle clé, `total_usage` 95,4603 $ −
-80,3766 $ au départ = 15,08 $ dépensés pendant la session 5, contre 15,12 $ consignés ici pour la
-même période : le registre est légèrement prudent. Crédit restant ≈ 4,5 $.
+| 2026-09-24 | OpenRouter | Illustrations du Codex (84 × openai/gpt-5-image-mini) | 3,83 $ | 4,03 $ | 19,20 $ |
