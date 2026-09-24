@@ -21,6 +21,7 @@ use sim_battle::{
 use crate::battle_auto::{BattleResult, SideOutcome, Winner};
 use crate::events::{EventKind, GameEvent};
 use crate::movement;
+use crate::research;
 use crate::skills;
 use crate::state::{Army, ArmyId, BattleRequest, CampaignState, Season};
 
@@ -220,10 +221,24 @@ fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) 
                     unit.experience,
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
-                // G1: armour / ranged of the levying province's buildings.
-                setup.stats.armor = setup.stats.armor.saturating_add(unit.levy_armor).min(100);
+                // G1: technology bonuses of the army's faction, per category
+                // (same source as the auto-resolver's `side_from_army`), plus
+                // the levying province's buildings (armoury, butts).
+                let tech =
+                    research::tech_unit_bonus(state, data, &army.faction, unit_type.category);
+                setup.morale = research::boosted(setup.morale, tech.morale, 100);
+                setup.stats.melee = research::boosted(setup.stats.melee, tech.melee, 255);
+                setup.stats.armor = research::boosted(
+                    setup.stats.armor,
+                    tech.armor + f64::from(unit.levy_armor),
+                    100,
+                );
                 if setup.stats.ranged > 0 {
-                    setup.stats.ranged = setup.stats.ranged.saturating_add(unit.levy_ranged);
+                    setup.stats.ranged = research::boosted(
+                        setup.stats.ranged,
+                        tech.ranged + f64::from(unit.levy_ranged),
+                        255,
+                    );
                 }
                 setup
             }

@@ -203,11 +203,9 @@ fn levy_bonuses_reach_the_auto_resolver_and_the_battle_setup() {
     assert_eq!(side.units[0].armor, plain.units[0].armor + 5);
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
     let setup = state.battle_setup(&data, index).unwrap();
-    let unit_type = &data.unit_types[&state.armies[&lead].units[0].unit_type];
-    assert_eq!(
-        setup.attacker.units[0].stats.armor,
-        unit_type.stats.armor + 5
-    );
+    // G1: the battle setup now carries the same technology bonuses as the
+    // auto-resolver (`side_from_army`/`plain`/`side`), on top of the levy.
+    assert_eq!(setup.attacker.units[0].stats.armor, side.units[0].armor);
 }
 
 // 4. transfer_province -------------------------------------------------------
@@ -343,4 +341,52 @@ fn allied_armies_in_the_province_join_the_assault() {
     let after = state.armies.get(&ally).map_or(0, |a| a.total_strength());
     assert!(after < before, "the ally bleeds too: {before} -> {after}");
     assert!(events.iter().any(|e| e.text_fr.contains("alliée")));
+}
+
+/// G1: the battle setup passed to the 3D battle carries the faction's
+/// technology bonuses (armour, melee, ranged, morale, per unit category), on
+/// top of the levying province's buildings, without double-counting either.
+#[test]
+fn technology_bonuses_reach_the_battle_setup_without_double_counting() {
+    let data = data();
+    let mut state = quiet_france(&data, 5);
+    let france_id = fac("fac_france");
+    let lead = first_army_of(&state, "fac_france");
+    let enemy = first_army_of(&state, "fac_england");
+    let unit_type = data.unit_types[&state.armies[&lead].units[0].unit_type].clone();
+    assert_eq!(unit_type.category, data_model::UnitCategory::Cavalry);
+
+    // Baseline: no technology at all, no building bonus (the 1337 start
+    // already grants some techs, so start from a clean slate to isolate
+    // what this test is checking).
+    state
+        .factions
+        .get_mut(&france_id)
+        .unwrap()
+        .technologies
+        .clear();
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(&data, index).unwrap();
+    assert_eq!(setup.attacker.units[0].stats.armor, unit_type.stats.armor);
+
+    // tech_coat_of_plates: +5 armour for infantry and cavalry (data-driven).
+    state
+        .factions
+        .get_mut(&france_id)
+        .unwrap()
+        .technologies
+        .insert(data_model::TechnologyId::new("tech_coat_of_plates").unwrap());
+    // Also give the unit a building-derived levy bonus, to check the two
+    // sources add up instead of one shadowing or duplicating the other.
+    state.armies.get_mut(&lead).unwrap().units[0].levy_armor = 3;
+
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(&data, index).unwrap();
+    let expected = unit_type.stats.armor.saturating_add(5).saturating_add(3);
+    assert_eq!(setup.attacker.units[0].stats.armor, expected);
+
+    // The auto-resolver (`side_from_army`) computes the very same total: the
+    // two code paths do not double-apply the technology on top of each other.
+    let side = sim_campaign::movement::side_from_army(&state, &data, &state.armies[&lead]);
+    assert_eq!(side.units[0].armor, expected);
 }
