@@ -189,15 +189,21 @@ func snowy() -> bool:
 	return weather_key == "snow" or (site_render and ground_key == "snowy")
 
 
-## B7 : neige piétinée. Carte L8 sur le rectangle des splatmaps (`TRAMPLE_TEXEL` m le texel)
-## où chaque régiment présent imprime son emprise (rectangle orienté) ; la trace s'accumule au
-## fil des passages, plus vite pour une troupe en mouvement. Rendu seulement, neige au sol
-## seulement (sinon aucun coût).
+## B8 : le sol est-il détrempé (pluie ou sol de saison boueux), pour le piétinement en boue ?
+func muddy() -> bool:
+	return weather_key == "rain" or (site_render and ground_key == "muddy")
+
+
+## B7/B8 : piétinement (neige ou boue). Carte L8 sur le rectangle des splatmaps
+## (`TRAMPLE_TEXEL` m le texel) où chaque régiment présent imprime son emprise (rectangle
+## orienté) ; la trace s'accumule au fil des passages, plus vite pour une troupe en mouvement.
+## Rendu seulement, sol enneigé ou détrempé seulement (sinon aucun coût : sol sec, pas de
+## texture créée, `trample_on` reste à 0 dans le shader).
 func _setup_trample() -> void:
 	trample_image = null
 	_trample_bytes = PackedByteArray()
 	_trample_last.clear()
-	if not snowy():
+	if not snowy() and not muddy():
 		return
 	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
 	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
