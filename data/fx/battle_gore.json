@@ -70,6 +70,18 @@
     "drive_hold_seconds": 2.5,
     "drive_out_seconds": 3.0
   },
+  "cadence": {
+    "walk": 1.35,
+    "run": 3.3,
+    "pike_walk": 1.3,
+    "pike_level_walk": 1.25,
+    "bow_walk": 1.35,
+    "xbow_walk": 1.35,
+    "c_walk": 1.8,
+    "c_bow_walk": 1.8,
+    "c_gallop": 7.0,
+    "c_charge": 8.5
+  },
   "sprays": {
     "max_droplets": 6144,
     "droplets_per_death": 7,

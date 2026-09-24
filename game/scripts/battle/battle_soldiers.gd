@@ -75,6 +75,8 @@ var _slow: Dictionary = {}  # unit id -> {since, kind}
 var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entrent dans la masse
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
+var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
+var _frame_dt: float = 0.0
 var _audio: Script = null
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
@@ -203,9 +205,16 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	var camera := get_viewport().get_camera_3d()
 	if camera != null:
 		_camera_pos = camera.global_position
+	_frame_dt = anim_dt
+	var smooth := 1.0 - exp(-anim_dt / 0.6)
 	for unit in units:
 		var uid := int(unit["id"])
-		_unit_pos[uid] = Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
+		var pos := Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
+		if anim_dt > 0.0 and _unit_pos.has(uid):
+			var step := Vector2(pos.x - (_unit_pos[uid] as Vector3).x, pos.z - (_unit_pos[uid] as Vector3).z).length()
+			var v := minf(step / anim_dt, 30.0)
+			_speed[uid] = float(_speed.get(uid, v)) + (v - float(_speed.get(uid, v))) * smooth
+		_unit_pos[uid] = pos
 		if str(unit.get("state", "")) == "melee":
 			_melee_time[uid] = float(_melee_time.get(uid, 0.0)) + anim_dt
 	_advance_lags(anim_dt)
@@ -287,27 +296,37 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	var mat: ShaderMaterial = _materials[id]
-	mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
+	var ammo := int(unit.get("ammo", 0))
+	var state := str(unit.get("state", ""))
+	var config: Dictionary = {}
+	if skinned:
+		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
+		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
+		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
+		var cadence := _cadence(id, config)
+		if cadence != 1.0:
+			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt * (1.0 - cadence)
+	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
+	# du matériau (fondus, volées, état) sont pris sur elle.
+	var local := anim_time - float(_lag.get(id, 0.0))
+	mat.set_shader_parameter("anim_time", local)
 	mat.set_shader_parameter("anim_state", anim_state(unit))
 	mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
 	mat.set_shader_parameter("far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
 	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
-	var ammo := int(unit.get("ammo", 0))
-	var state := str(unit.get("state", ""))
 	var track: Dictionary = _anim_track.get(id, {})
 	if track.is_empty():
-		track = {"ammo": ammo, "state": state, "since": anim_time - 100.0}
+		track = {"ammo": ammo, "state": state, "since": local - 100.0}
 		_anim_track[id] = track
 	if ammo < int(track["ammo"]):
-		mat.set_shader_parameter("volley_time", anim_time)
+		mat.set_shader_parameter("volley_time", local)
 	if state != str(track["state"]):
-		track["since"] = anim_time
+		track["since"] = local
 	track["ammo"] = ammo
 	track["state"] = state
-	mat.set_shader_parameter("state_time", anim_time - float(track["since"]))
+	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
-		var config := BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
-		BattleSkinned.apply_config(mat, config, anim_time)
+		BattleSkinned.apply_config(mat, config, local)
 		mat.set_shader_parameter("blood", _living_blood(unit, id))
 
 
@@ -624,6 +643,19 @@ func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32A
 	if hidden.is_empty():
 		_hidden.erase(id)
 	return out
+
+
+## Facteur de cadence d'un régiment en marche : vitesse lissée / vitesse nominale du clip de
+## locomotion (`cadence` de battle_gore.json, m/s à la vitesse 1) ; 1 hors locomotion.
+func _cadence(id: int, config: Dictionary) -> float:
+	if int(config.get("mode", 0)) != BattleSkinned.M_LOOP:
+		return 1.0
+	var names: Array = config.get("names", [])
+	var table: Dictionary = _gore.get("cadence", {})
+	if names.is_empty() or not table.has(str(names[0])):
+		return 1.0
+	var nominal := float(table[str(names[0])]) * float(config.get("speed", 1.0))
+	return clampf(float(_speed.get(id, nominal)) / maxf(nominal, 0.1), 0.35, 1.8)
 
 
 ## Cavaliers qui entrent dans la masse après un choc (lot BV2) : la formation rendue avance de

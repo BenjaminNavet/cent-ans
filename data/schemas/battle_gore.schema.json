@@ -114,6 +114,12 @@
       "required": ["slow_seconds", "slow_min", "stop_seconds", "drive_extra_m", "drive_in_seconds", "drive_hold_seconds", "drive_out_seconds"],
       "additionalProperties": false
     },
+    "cadence": {
+      "type": "object",
+      "description": "Vitesse au sol (m/s) couverte par chaque clip de locomotion joué à la vitesse 1 : la cadence du régiment suit sa vitesse réelle (pieds qui ne glissent pas).",
+      "propertyNames": { "pattern": "^[a-z_]+$" },
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 }
+    },
     "sprays": {
       "type": "object",
       "properties": {
@@ -150,6 +156,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["levels", "deaths", "weapons", "critical_chance", "heavy_charge_mass", "pieces", "corpses", "knockdown", "horses", "sprays", "severed", "living_stains"],
+  "required": ["levels", "deaths", "weapons", "critical_chance", "heavy_charge_mass", "pieces", "corpses", "knockdown", "horses", "cadence", "sprays", "severed", "living_stains"],
   "additionalProperties": false
 }
