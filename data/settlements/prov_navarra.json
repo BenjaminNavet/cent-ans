@@ -1,0 +1,114 @@
+[
+  {
+    "id": "set_pampelune",
+    "province": "prov_navarra",
+    "kind": "city",
+    "name": {
+      "display": "Pampelune",
+      "local": "Iruñea",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.6432,
+      42.8125
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Pampelune, capitale du royaume de Navarre.",
+    "sources": [
+      "Royaume de Navarre",
+      "Jeanne II de Navarre",
+      "Pampelune"
+    ]
+  },
+  {
+    "id": "set_tudela",
+    "province": "prov_navarra",
+    "kind": "town",
+    "name": {
+      "display": "Tudèle",
+      "local": "Tudela",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.6062,
+      42.0631
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de la Ribera navarraise à forte population mêlée, patrie du voyageur Benjamin de Tudèle.",
+    "sources": [
+      "Tudèle"
+    ]
+  },
+  {
+    "id": "set_estella",
+    "province": "prov_navarra",
+    "kind": "town",
+    "name": {
+      "display": "Estella",
+      "local": "Lizarra",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -2.0322,
+      42.6725
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Étape majeure du chemin de Saint-Jacques en Navarre.",
+    "sources": [
+      "Estella-Lizarra"
+    ]
+  },
+  {
+    "id": "set_olite",
+    "province": "prov_navarra",
+    "kind": "castle",
+    "name": {
+      "display": "Olite",
+      "local": "Olit",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.656,
+      42.4814
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal des rois de Navarre, futur palais agrandi par Charles III à la fin du siècle.",
+    "sources": [
+      "Palais royal d'Olite"
+    ]
+  }
+]

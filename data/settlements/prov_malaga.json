@@ -1,0 +1,116 @@
+[
+  {
+    "id": "set_malaga",
+    "province": "prov_malaga",
+    "kind": "city",
+    "name": {
+      "display": "Málaga",
+      "local": "Malaqa",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.4214,
+      36.7213
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Málaga, grand port nasride de la Méditerranée occidentale.",
+    "sources": [
+      "Royaume de Grenade",
+      "Siège de Gibraltar (1333)",
+      "Málaga"
+    ]
+  },
+  {
+    "id": "set_ronda",
+    "province": "prov_malaga",
+    "kind": "castle",
+    "name": {
+      "display": "Ronda",
+      "local": "Runda",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -5.1662,
+      36.7461
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville-forteresse perchée sur les gorges du Tajo, verrou nasride vers l'ouest.",
+    "sources": [
+      "Ronda"
+    ]
+  },
+  {
+    "id": "set_velez_malaga",
+    "province": "prov_malaga",
+    "kind": "town",
+    "name": {
+      "display": "Vélez-Málaga",
+      "local": "Balyish",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.1003,
+      36.7811
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville close de la vega côtière, riche en cultures fruitières.",
+    "sources": [
+      "Vélez-Málaga"
+    ]
+  },
+  {
+    "id": "set_comares",
+    "province": "prov_malaga",
+    "kind": "village",
+    "name": {
+      "display": "Comares",
+      "local": "Qumaris",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.3623,
+      36.8321
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Petit bourg agricole perché de l'arrière-pays de Málaga.",
+    "sources": [
+      "Comares"
+    ]
+  }
+]
