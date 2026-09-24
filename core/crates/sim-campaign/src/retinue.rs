@@ -393,6 +393,44 @@ pub(crate) fn on_death(
     );
 }
 
+/// `companion` joins `id`'s retinue directly (debug order, tests), within
+/// the cap and the companion's conditions.
+pub fn grant_companion(
+    state: &mut CampaignState,
+    data: &GameData,
+    id: &CharacterId,
+    companion: &CompanionId,
+) -> Result<(), RetinueError> {
+    if data
+        .retinue
+        .as_ref()
+        .and_then(|r| r.companion(companion))
+        .is_none()
+    {
+        return Err(RetinueError::UnknownCompanion(companion.clone()));
+    }
+    let character = state
+        .characters
+        .get(id)
+        .ok_or_else(|| RetinueError::UnknownCharacter(id.clone()))?;
+    if character.retinue.contains(companion) {
+        return Err(RetinueError::AlreadyInRetinue(id.clone()));
+    }
+    if character.retinue.len() >= max_per_character(data) {
+        return Err(RetinueError::RetinueFull(id.clone()));
+    }
+    if !can_gain(state, data, id, companion) {
+        return Err(RetinueError::UnknownCharacter(id.clone()));
+    }
+    state
+        .characters
+        .get_mut(id)
+        .expect("checked above")
+        .retinue
+        .push(companion.clone());
+    Ok(())
+}
+
 /// Generals `from` may hand a companion to: living, free characters of his
 /// faction commanding an army in the same settlement as his own, with room
 /// left in their retinue.

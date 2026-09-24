@@ -45,6 +45,8 @@ var tree_root_id: String = ""
 var sim_source: Object = null
 var _tree_hint: Label
 var _current_tab: int = TAB_LIST
+## C7 : bord droit à ne pas dépasser (fiche de personnage ouverte à droite) ; INF = libre.
+var max_right: float = INF
 
 
 func _ready() -> void:
@@ -161,7 +163,17 @@ func show_tab(tab: int) -> void:
 
 func _tree_width() -> float:
 	var viewport_width := get_viewport_rect().size.x if is_inside_tree() else TREE_WIDTH
-	return clampf(viewport_width - offset_left - 16.0, LIST_WIDTH, TREE_WIDTH)
+	var room := minf(viewport_width - offset_left - 16.0, max_right - offset_left)
+	return clampf(room, LIST_WIDTH, TREE_WIDTH)
+
+
+## C7 : limite le bord droit du panneau (l'arbre se rétrécit quand la fiche est ouverte).
+func set_max_right(value: float) -> void:
+	if is_equal_approx(value, max_right) or (is_inf(value) and is_inf(max_right)):
+		return
+	max_right = value
+	if _current_tab == TAB_TREE:
+		offset_right = offset_left + _tree_width()
 
 
 ## Recentre l'arbre sur `character_id` (vide = premier personnage de la cour, le souverain).

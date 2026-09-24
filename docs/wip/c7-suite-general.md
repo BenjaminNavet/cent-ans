@@ -10,10 +10,10 @@ Branche : `worktree-agent-a29adc13935454195`.
 - [x] Règles `sim-campaign/src/retinue.rs` : acquisition déterministe (hachage graine/tour/personnage/compagnon, sans consommer le flux aléatoire), effets via `character_effects`, prestige annuel, héritage à la mort, transfert (`Order::TransferCompanion`).
 - [x] Branchements : bataille (`dynasty::on_battle_resolved`), siège et chevauchée (`siege.rs`), rançon (`chronicle::release_character`), saison en colonie amie (`turn.rs`), mort (`characters::kill`), soins (`medicine::army_wound_recovery`), solde (`economy::faction_upkeep`).
 - [x] Tests Rust `core/crates/sim-campaign/tests/c7_retinue.rs` (11) + `tools/tests/test_retinue_schema.py`.
-- [ ] Pont godot-bridge (suite dans `get_character`, `death_year` dans fiche et arbre, catalogue).
-- [ ] UI : vignettes dans la fiche, dates « 1310–1346 », encyclopédie.
-- [ ] Mise en page fiche < 1500 px, avertissements d'ancres `family_tree_view.gd:418`.
+- [x] Pont `campaign_sim_retinue.rs` : `get_retinue_catalog`, `get_retinue_transfer_targets` ; `get_character` : `retinue`, `retinue_max`, `birth_year`, `death_year` ; `get_family_tree` : `death_year`. Ordre de débogage `debug_grant_companion` (smoke).
+- [x] UI : `retinue_row.gd` (vignettes, infobulles, clic = confier), dates « 1310–1346 » (fiche + arbre), onglet « Suite » de l'encyclopédie (10 onglets).
+- [x] Mise en page : `CharacterSheet.fit_beside` (repli en une colonne), `CourtPanel.set_max_right`, placement dans `map_ui.layout_hud` ; avertissement d'ancres corrigé.
 - [ ] Smoke, capture `docs/img/c7/`.
 
 ## Prochaine étape
-Pont godot-bridge puis UI.
+Smoke (22 « smoke OK »), capture `docs/img/c7/`.
