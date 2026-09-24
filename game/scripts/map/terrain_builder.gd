@@ -35,6 +35,7 @@ var _height_texture: ImageTexture
 var _splat_texture: ImageTexture
 var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
+var _landuse_texture: ImageTexture
 var _albedo_array: Texture2DArray
 var _normal_array: Texture2DArray
 var _layer_means: PackedVector3Array = PackedVector3Array()
@@ -317,6 +318,10 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_border_dist", _border_texture != null)
 	material.set_shader_parameter("coast_dist", _coast_texture)
 	material.set_shader_parameter("has_coast_dist", _coast_texture != null)
+	# Occupation du sol (vigne, sécheresse, bocage) partagée avec la végétation (lot V2b).
+	_landuse_texture = ImageTexture.create_from_image(VegetationFields.landuse(map_data))
+	material.set_shader_parameter("landuse", _landuse_texture)
+	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
