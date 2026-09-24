@@ -21,12 +21,10 @@ import math
 import sys
 from pathlib import Path
 
-import bpy
 from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import models  # noqa: E402
-
 from models import box, cone, cylinder, mesh_object  # noqa: E402
 
 models.PALETTE["Sail"] = ((0.66, 0.61, 0.49), 0.9, 0.0)
@@ -81,7 +79,8 @@ def clinker_strakes(sections, count, mat="Wood"):
                 verts.append((x, y, z))
                 verts.append((x, y, z - 0.025))
             faces = [
-                (2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2) for i in range(len(sections) - 1)
+                (2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2)
+                for i in range(len(sections) - 1)
             ]
             if side > 0:
                 faces = [tuple(reversed(face)) for face in faces]
@@ -115,12 +114,23 @@ def sail(width, top, bottom, x, rows=6, cols=6):
 
 def rigging(parts, mast_x, deck, beam, stays_to):
     """Mast, yard, top, shrouds and fore/back stays."""
-    parts.append(cylinder(0.035, MAST_TOP - deck + 0.1, (mast_x, 0, (MAST_TOP + deck) / 2), "Wood", 6))
+    parts.append(
+        cylinder(
+            0.035, MAST_TOP - deck + 0.1, (mast_x, 0, (MAST_TOP + deck) / 2), "Wood", 6
+        )
+    )
     parts.append(cylinder(0.09, 0.1, (mast_x, 0, MAST_TOP - 0.18), "Wood", 8))  # hune
     parts.append(box((0.02, 1.0, 0.035), (mast_x + 0.04, 0, 1.72), "Wood"))  # vergue
     for side in (-1, 1):
         for dx in (-0.12, 0.0, 0.12):
-            parts.append(rod((mast_x, 0, MAST_TOP - 0.22), (mast_x + dx - 0.08, side * beam, deck + 0.05), 0.006, "Rope"))
+            parts.append(
+                rod(
+                    (mast_x, 0, MAST_TOP - 0.22),
+                    (mast_x + dx - 0.08, side * beam, deck + 0.05),
+                    0.006,
+                    "Rope",
+                )
+            )
     for x_end, z_end in stays_to:
         parts.append(rod((mast_x, 0, MAST_TOP - 0.2), (x_end, 0, z_end), 0.006, "Rope"))
 
@@ -128,11 +138,25 @@ def rigging(parts, mast_x, deck, beam, stays_to):
 def castle(parts, x, length, width, deck, height, mat="Wood"):
     """Castle platform with a crenellated parapet (merlons on the rail)."""
     parts.append(box((length, width, height), (x, 0, deck + height / 2), mat))
-    parts.append(box((length + 0.04, width + 0.04, 0.03), (x, 0, deck + height + 0.015), "Wood"))
+    parts.append(
+        box((length + 0.04, width + 0.04, 0.03), (x, 0, deck + height + 0.015), "Wood")
+    )
     for side in (-1, 1):
-        parts.append(box((length + 0.02, 0.02, 0.07), (x, side * (width / 2 + 0.01), deck + height + 0.06), "Banner"))
+        parts.append(
+            box(
+                (length + 0.02, 0.02, 0.07),
+                (x, side * (width / 2 + 0.01), deck + height + 0.06),
+                "Banner",
+            )
+        )
     for end in (-1, 1):
-        parts.append(box((0.02, width, 0.07), (x + end * (length / 2 + 0.01), 0, deck + height + 0.06), "Banner"))
+        parts.append(
+            box(
+                (0.02, width, 0.07),
+                (x + end * (length / 2 + 0.01), 0, deck + height + 0.06),
+                "Banner",
+            )
+        )
 
 
 def build_cog():
@@ -152,10 +176,19 @@ def build_cog():
     parts.append(box((1.6, 0.62, 0.03), (0.0, 0, 0.5), "Wood"))  # pont
     castle(parts, -0.72, 0.42, 0.52, 0.62, 0.2)
     castle(parts, 0.8, 0.3, 0.36, 0.64, 0.14)
-    parts.append(box((0.2, 0.025, 0.36), (-1.02, 0, 0.36), "Wood", rotation=(0, math.radians(8), 0)))  # gouvernail
+    parts.append(
+        box(
+            (0.2, 0.025, 0.36),
+            (-1.02, 0, 0.36),
+            "Wood",
+            rotation=(0, math.radians(8), 0),
+        )
+    )  # gouvernail
     rigging(parts, 0.0, 0.5, 0.36, [(1.04, 0.8), (-0.9, 0.95)])
     parts.append(sail(0.92, 1.7, 0.78, 0.07))
-    parts.append(cylinder(0.012, 0.5, (STERN_STAFF[0], 0, STERN_STAFF[2] + 0.25), "Wood", 4))
+    parts.append(
+        cylinder(0.012, 0.5, (STERN_STAFF[0], 0, STERN_STAFF[2] + 0.25), "Wood", 4)
+    )
     return parts
 
 
@@ -177,16 +210,27 @@ def build_nef():
     castle(parts, -0.84, 0.46, 0.5, 0.62, 0.26)
     castle(parts, 0.92, 0.34, 0.34, 0.66, 0.2)
     parts.append(rod((1.0, 0, 0.8), (1.45, 0, 1.0), 0.02, "Wood", 6))  # beaupré
-    parts.append(box((0.22, 0.025, 0.4), (-1.15, 0, 0.42), "Wood", rotation=(0, math.radians(10), 0)))
+    parts.append(
+        box(
+            (0.22, 0.025, 0.4),
+            (-1.15, 0, 0.42),
+            "Wood",
+            rotation=(0, math.radians(10), 0),
+        )
+    )
     rigging(parts, 0.08, 0.47, 0.37, [(1.45, 1.0), (-1.0, 1.0)])
     parts.append(sail(0.98, 1.72, 0.74, 0.15))
-    parts.append(cylinder(0.012, 0.5, (STERN_STAFF[0], 0, STERN_STAFF[2] + 0.25), "Wood", 4))
+    parts.append(
+        cylinder(0.012, 0.5, (STERN_STAFF[0], 0, STERN_STAFF[2] + 0.25), "Wood", 4)
+    )
     return parts
 
 
 def ridge_tent(x, y, angle, length, width, height, mat):
     """Ridge tent (triangular prism) resting on the ground."""
-    return models.gable_roof(length, width, height, (x, y, 0.0), mat, angle=angle, overhang=0.0)
+    return models.gable_roof(
+        length, width, height, (x, y, 0.0), mat, angle=angle, overhang=0.0
+    )
 
 
 def build_bivouac():
@@ -197,7 +241,14 @@ def build_bivouac():
     parts.append(cone(0.62, 0.6, (-0.55, 0.45, 1.0), "Banner", 12))
     for index in range(6):
         angle = index * math.tau / 6
-        parts.append(box((0.03, 0.2, 0.68), (-0.55 + 0.56 * math.cos(angle), 0.45 + 0.56 * math.sin(angle), 0.35), "Banner", rotation=(0, 0, angle)))
+        parts.append(
+            box(
+                (0.03, 0.2, 0.68),
+                (-0.55 + 0.56 * math.cos(angle), 0.45 + 0.56 * math.sin(angle), 0.35),
+                "Banner",
+                rotation=(0, 0, angle),
+            )
+        )
     parts.append(cylinder(0.015, 0.4, (-0.55, 0.45, 1.45), "Wood", 4))
     parts.append(box((0.02, 0.22, 0.1), (-0.55, 0.56, 1.58), "Banner"))
     parts.append(ridge_tent(0.55, 0.65, 0.4, 0.9, 0.62, 0.6, "Canvas"))
@@ -205,10 +256,18 @@ def build_bivouac():
     # Feu de camp.
     parts.append(cone(0.1, 0.2, (0.2, -0.05, 0.1), "Fire", 5))
     for angle in (0.0, 1.05, 2.1):
-        parts.append(box((0.3, 0.045, 0.045), (0.2, -0.05, 0.03), "Wood", rotation=(0, 0, angle)))
+        parts.append(
+            box((0.3, 0.045, 0.045), (0.2, -0.05, 0.03), "Wood", rotation=(0, 0, angle))
+        )
     for index in range(7):
         angle = index * math.tau / 7
-        parts.append(box((0.06, 0.06, 0.05), (0.2 + 0.19 * math.cos(angle), -0.05 + 0.19 * math.sin(angle), 0.025), "DarkStone"))
+        parts.append(
+            box(
+                (0.06, 0.06, 0.05),
+                (0.2 + 0.19 * math.cos(angle), -0.05 + 0.19 * math.sin(angle), 0.025),
+                "DarkStone",
+            )
+        )
     # Faisceau de lances et tonneaux.
     for dx in (-0.05, 0.05):
         parts.append(rod((0.8 + dx, -0.3, 0.0), (0.8, -0.3, 0.8), 0.012, "Wood"))
