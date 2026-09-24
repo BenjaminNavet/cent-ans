@@ -110,6 +110,11 @@ pub enum Proposal {
     Obedience {
         religion: data_model::ReligionId,
     },
+    /// Lot C5: a formal trade agreement, raising the value of the trade
+    /// routes between the two factions ([`crate::trade::AGREEMENT_BONUS_PERCENT`]).
+    /// Broken automatically the moment either side is at war with or
+    /// embargoes the other (no state to keep in sync).
+    TradeAgreement,
 }
 
 /// A proposal waiting for the player's answer.
@@ -181,6 +186,10 @@ pub enum DiplomacyError {
     NoSchism,
     #[error("obédience invalide")]
     InvalidObedience,
+    #[error("accord commercial déjà en vigueur")]
+    AlreadyTradeAgreement,
+    #[error("pas d'accord commercial à rompre")]
+    NoTradeAgreement,
     #[error("la faction virtuelle des rebelles ne négocie pas")]
     Rebels,
 }
@@ -764,6 +773,22 @@ pub fn evaluate(
         Proposal::Obedience { .. } => {
             reasons.push(("Choix d'obédience".to_owned(), 0));
         }
+        Proposal::TradeAgreement => {
+            if state.is_at_war(proposer, recipient) {
+                reasons.push(("En guerre".to_owned(), -100));
+                hard_no = true;
+            }
+            if state.has_trade_agreement(proposer, recipient) {
+                reasons.push(("Déjà en vigueur".to_owned(), -100));
+                hard_no = true;
+            }
+            // A low-commitment offer: attitude alone usually decides it.
+            reasons.push(("Attitude".to_owned(), attitude / 3));
+            reasons.push(("Intérêt commercial".to_owned(), 15));
+            if crate::trade::have_common_route(state, data, proposer, recipient) {
+                reasons.push(("Route commerciale existante".to_owned(), 20));
+            }
+        }
     }
     reasons.retain(|(_, v)| *v != 0 || hard_no);
     let score: i32 = reasons.iter().map(|(_, v)| v).sum();
@@ -1196,6 +1221,7 @@ impl CampaignState {
             Proposal::Obedience { religion: target } => {
                 religion::set_obedience(self, data, recipient, target)?;
             }
+            Proposal::TradeAgreement => self.form_trade_agreement(data, proposer, recipient),
         }
         Ok(())
     }
@@ -1234,6 +1260,14 @@ impl CampaignState {
                 }
                 if self.is_at_war(proposer, recipient) {
                     return Err(DiplomacyError::AlreadyAtWar);
+                }
+            }
+            Proposal::TradeAgreement => {
+                if self.is_at_war(proposer, recipient) {
+                    return Err(DiplomacyError::AlreadyAtWar);
+                }
+                if self.has_trade_agreement(proposer, recipient) {
+                    return Err(DiplomacyError::AlreadyTradeAgreement);
                 }
             }
             Proposal::Vassalage | Proposal::Marriage { .. } | Proposal::Obedience { .. } => {}
@@ -1404,6 +1438,58 @@ impl CampaignState {
         Ok(())
     }
 
+    /// Lot C5: a formal trade agreement, raising the value of the routes
+    /// between the two factions ([`crate::trade`]).
+    fn form_trade_agreement(&mut self, data: &GameData, a: &FactionId, b: &FactionId) {
+        self.factions
+            .get_mut(a)
+            .expect("exists")
+            .trade_agreements
+            .insert(b.clone());
+        self.factions
+            .get_mut(b)
+            .expect("exists")
+            .trade_agreements
+            .insert(a.clone());
+        let text = format!(
+            "Accord commercial entre {} et {}.",
+            faction_name(data, a),
+            faction_name(data, b)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(a));
+    }
+
+    /// Lot C5: ends a trade agreement (the player's call; the AI never asks
+    /// to break one on its own — it just stops proposing new ones).
+    pub fn break_trade_agreement(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        target: &FactionId,
+    ) -> Result<(), DiplomacyError> {
+        self.check_pair(faction, target)?;
+        if !self.has_trade_agreement(faction, target) {
+            return Err(DiplomacyError::NoTradeAgreement);
+        }
+        self.factions
+            .get_mut(faction)
+            .expect("checked")
+            .trade_agreements
+            .remove(target);
+        self.factions
+            .get_mut(target)
+            .expect("checked")
+            .trade_agreements
+            .remove(faction);
+        let text = format!(
+            "{} rompt son accord commercial avec {}.",
+            faction_name(data, faction),
+            faction_name(data, target)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(faction));
+        Ok(())
+    }
+
     pub fn release_vassal(
         &mut self,
         data: &GameData,
@@ -1506,6 +1592,7 @@ impl CampaignState {
                     } else {
                         None
                     },
+                    trade_agreement: self.has_trade_agreement(faction, id),
                 }
             })
             .collect()
@@ -1526,6 +1613,10 @@ pub struct DiplomacyEntry {
     pub casus_belli: Option<String>,
     pub claims: Vec<String>,
     pub loyalty: Option<u8>,
+    /// Lot C5: a formal trade agreement is in force (dormant, not erased,
+    /// while at war or embargoed — see [`CampaignState::has_trade_agreement`]).
+    #[serde(default)]
+    pub trade_agreement: bool,
 }
 
 fn offer_text(
@@ -1569,6 +1660,7 @@ fn offer_text(
                 .get(religion)
                 .map_or_else(|| religion.to_string(), |r| r.name.display.clone())
         ),
+        Proposal::TradeAgreement => format!("{name} propose un accord commercial."),
     }
 }
 
@@ -1997,6 +2089,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     }
 
     plan_alliances(state, data, faction, slot, &mut orders);
+    plan_trade_agreements(state, data, faction, slot, &mut orders);
 
     let rested = me
         .last_war_declared
@@ -2183,6 +2276,51 @@ fn war_target(
         })
         .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(&a.0)))
         .map(|(id, _)| id)
+}
+
+/// Lot C5: proposes a trade agreement to a faction at peace with us, not
+/// already agreed, with a decent attitude — a low-stakes offer, so the AI
+/// tries it more readily and more often than an alliance.
+const MAX_TRADE_AGREEMENTS: usize = 4;
+
+fn plan_trade_agreements(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    slot: u32,
+    orders: &mut Vec<Order>,
+) {
+    if !(state.turn + slot).is_multiple_of(2) {
+        return;
+    }
+    let Some(me) = state.factions.get(faction) else {
+        return;
+    };
+    if me.trade_agreements.len() >= MAX_TRADE_AGREEMENTS {
+        return;
+    }
+    let candidate = state
+        .factions
+        .iter()
+        .filter(|(id, f)| {
+            *id != faction
+                && f.alive
+                && !is_rebels(id)
+                && id.as_str() != PAPACY_FACTION
+                && !state.has_trade_agreement(faction, id)
+                && !state.is_at_war(faction, id)
+        })
+        .filter(|(id, _)| state.attitude(data, faction, id).0 > 10)
+        .filter(|(id, _)| {
+            *id == &state.player_faction
+                || evaluate(state, data, faction, id, &Proposal::TradeAgreement).accept
+        })
+        .max_by_key(|(id, _)| state.attitude(data, faction, id).0);
+    if let Some((target, _)) = candidate {
+        orders.push(Order::ProposeTradeAgreement {
+            target: target.clone(),
+        });
+    }
 }
 
 /// An ally's war `faction` joins (co-belligerence, F4): the Low Countries

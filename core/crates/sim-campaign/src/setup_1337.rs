@@ -241,6 +241,8 @@ impl CampaignState {
                 recoinage_last_turn: 0,
                 ransom_debts: Vec::new(),
                 chivalric_order: None,
+                trade_agreements: BTreeSet::new(),
+                trade_income_last_turn: 0,
                 regency: false,
                 embargoes: BTreeSet::new(),
                 suzerain: faction.suzerain.clone(),

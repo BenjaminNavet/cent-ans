@@ -95,6 +95,7 @@ func _init() -> void:
 	await _run_characters()
 	await _run_technologies()
 	await _run_diplomacy()
+	await _run_trade()  # C5
 	await _run_battle()
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
@@ -888,6 +889,79 @@ func _run_diplomacy() -> void:
 	if _failures == 0:
 		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
 			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
+## C5 (docs/design/2026-09-24-rapprochement-total-war.md) : routes commerciales et accords.
+## Vraie simulation uniquement (le mock n'a pas de commerce).
+func _run_trade() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_trade_routes")):
+		print("smoke trade: skipped, CampaignSim has no get_trade_routes (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "trade: new_campaign failed"):
+		return
+	var routes: Array = sim.call("get_trade_routes")
+	_check(routes.size() >= 8, "get_trade_routes should list >= 8 routes, got %d" % routes.size())
+	var bruges_londres: Dictionary = {}
+	for route_variant in routes:
+		var route: Dictionary = route_variant
+		if str(route.get("id", "")) == "route_bruges_londres":
+			bruges_londres = route
+	_check(not bruges_londres.is_empty(), "route_bruges_londres should be in the catalogue")
+	_check(bruges_londres.get("path", PackedStringArray()).size() >= 2, "route path should have >= 2 settlements")
+	_check(bruges_londres.has("total_value") and bruges_londres.has("security") and bruges_londres.has("cut"), "route fields expected")
+
+	# Accord commercial : proposition, présence dans get_diplomacy, rupture.
+	var propose: Dictionary = sim.call("submit_order", {"type": "propose_trade_agreement", "target": "fac_flanders"})
+	_check(propose.get("ok", false), "propose_trade_agreement refused: %s" % propose.get("error", "?"))
+	var diplomacy_entries: Array = sim.call("get_diplomacy", FACTION_ID)
+	var flanders: Dictionary = {}
+	for entry in diplomacy_entries:
+		if str(entry["id"]) == "fac_flanders":
+			flanders = entry
+	_check(bool(flanders.get("trade_agreement", false)), "trade_agreement should be true after propose_trade_agreement")
+	var duplicate: Dictionary = sim.call("submit_order", {"type": "propose_trade_agreement", "target": "fac_flanders"})
+	_check(not duplicate.get("ok", true), "a second trade agreement with the same faction should be refused")
+	var broken: Dictionary = sim.call("submit_order", {"type": "break_trade_agreement", "target": "fac_flanders"})
+	_check(broken.get("ok", false), "break_trade_agreement refused: %s" % broken.get("error", "?"))
+
+	# Embargo : coupe la route entre les deux mêmes comptoirs.
+	var embargo: Dictionary = sim.call("submit_order", {"type": "set_embargo", "target": "fac_flanders", "active": true})
+	_check(embargo.get("ok", false), "set_embargo refused: %s" % embargo.get("error", "?"))
+	var after_embargo: Array = sim.call("get_trade_routes")
+	var cut_by_embargo := false
+	for route_variant in after_embargo:
+		var route: Dictionary = route_variant
+		if str(route.get("id", "")) == "route_bruges_londres" and bool(route.get("cut", false)):
+			cut_by_embargo = true
+	_check(cut_by_embargo, "route_bruges_londres should be cut by the England-Flanders embargo")
+	sim.call("submit_order", {"type": "set_embargo", "target": "fac_flanders", "active": false})
+
+	# Économie : le revenu commercial apparaît dans get_faction_economy.
+	sim.call("end_turn")
+	var economy: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(economy.has("trade_income") and economy.has("trade_income_last_turn"), "faction economy should report trade income")
+
+	# Panneaux réels : diplomatie (section Commerce) et faction (ligne Commerce).
+	var diplomacy_panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
+	root.add_child(diplomacy_panel)
+	await process_frame
+	diplomacy_panel.sim = sim
+	diplomacy_panel.player_faction = FACTION_ID
+	diplomacy_panel.refresh()
+	diplomacy_panel.select_faction("fac_flanders")
+	await process_frame
+	diplomacy_panel.queue_free()
+	var faction_panel: Node = (load("res://scenes/ui/faction_panel.tscn") as PackedScene).instantiate()
+	root.add_child(faction_panel)
+	await process_frame
+	faction_panel.show_faction(FACTION_ID, "France", Color.WHITE, economy)
+	await process_frame
+	faction_panel.queue_free()
+
+	if _failures == 0:
+		print("smoke OK: trade (real), %d routes, agreement proposed/broken, embargo cuts a route, economy + panels" % routes.size())
+
+
 ## M7 (docs/design/m7-battles.md § 4) : bataille réelle France–Angleterre mise en scène par
 ## `debug_stage_battle`, ≤ 12 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
 ## `resolve_battle` accepté ; puis la boucle complète par la carte : dialogue d'avant-bataille,
