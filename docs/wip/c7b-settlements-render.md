@@ -8,7 +8,7 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
 
 - [x] 1. Arbres recalés sur le relief fin (`Vegetation`, signal `chunk_surface_changed`, `VegetationGroundJob`) ; test dans `settlements_render_test` (écart 0,00 contre 0,28 avant)
 - [x] 2. Routes principales lisibles au palier moyen (`RoadRenderer`, `shaders/road_line.gdshader`) ; capture `c7b-apres-routes.png`
-- [ ] 3. Aperçu de chemin d'armée le long des routes réelles
+- [x] 3. Aperçu de chemin d'armée le long des routes réelles (`geo/edge_paths.py` → `data/map/settlement_edge_paths.json`, `SettlementData.edge_path`, `SettlementController._draw_path`) ; tests pytest + `settlements_render_test` ; `docs/geo.md`
 - [ ] 4. Panneaux de colonie / province sans recouvrir la minicarte
 - [ ] 5. Captures avant / après `docs/img/colonies/c7b-*.png`
 
@@ -30,6 +30,11 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
   objet plus proche de 2,5 unités + 0,6 % de la distance : crêtes, maquettes, figurines d'armée),
   pas par le relief sous la route ni par les arbres.
 
+- Tracé routier précalculé dans le pipeline géo, fichier voisin `settlement_edge_paths.json` (le
+  format de `settlement_graph.json` reste celui du chargeur Rust, que C7a modifie en parallèle).
+  533 arêtes sur 633 tracées ; les autres gardent le segment droit. Pas de schéma : comme les autres
+  sorties dérivées de `data/map/`, le format est vérifié par `tools/tests/test_settlement_graph.py`.
+
 ## Prochaine étape
 
-Tâche 3 (polylignes par arête dans le pipeline géo). Captures « avant » déjà prises (`c7b-avant-*.png`).
+Tâche 4 (panneaux et minicarte). Captures « avant » déjà prises (`c7b-avant-*.png`).

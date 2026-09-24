@@ -258,13 +258,21 @@ func preview_hover(target_id: String, target_name: String) -> bool:
 	return preview_to(target_id, target_name)
 
 
+## Lot C7b : chaque arête suit son tracé routier (`SettlementData.edge_path`) quand il existe,
+## sinon un segment droit entre les deux colonies.
 func _draw_path(ids: PackedStringArray) -> void:
 	var points := PackedVector2Array()
+	var previous := ""
 	for id in ids:
 		var world: Vector3 = map.settlement_layer.world_position_of(id)
 		if world == Vector3.ZERO:
 			continue
+		var road: PackedVector2Array = map.settlement_data.edge_path(previous, id) if previous != "" else PackedVector2Array()
+		if road.size() > 2:
+			# Extrémités exclues : les positions des colonies font foi.
+			points.append_array(road.slice(1, road.size() - 1))
 		points.append(Vector2(world.x, world.z))
+		previous = id
 	map.path_preview.show_points(points, map.camera_rig.distance, ids)
 
 
