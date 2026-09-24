@@ -2,13 +2,27 @@ class_name BattleHud
 extends CanvasLayer
 
 ## HUD parchemin de la bataille (construit en code sur `parchment_theme.tres`) : barre du haut
-## (nom, horloge, météo, vitesse, rapport de forces), journal, cartes d'unité du joueur en bas
-## (effectif, moral, fatigue, munitions, état), boutons d'ordres, aide, écran de fin.
+## (nom, horloge, météo, rapport de forces), journal, en bas les cartes compactes du joueur
+## (`UnitCard`) rangées par « bataille » (`BattleGroups`), boutons d'ordres, minicarte
+## (`BattleMinimap`) et boutons de vitesse ; aide F1, écran de fin (F5b, audit UI § 3.2).
 ## Aucune règle : tout vient de `BattleSim.get_units()` et des événements.
 
 signal card_clicked(unit_id: int, additive: bool)
 signal command_pressed(command: String)
 signal return_pressed
+signal speed_pressed(index: int)  # -1 : pause, 0..2 : index dans BattleScene.SPEEDS
+signal minimap_clicked(world: Vector2)
+
+const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
+const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
+const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
+const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
+• Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
+• Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner.
+• Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
+• Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
+• F : formation · G : tir à volonté · H : halte · Z X V B N : ordres du chef · Échap : désélectionner.
+• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller."""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
@@ -19,7 +33,7 @@ var root: Control
 var title_label: Label
 var clock_label: Label
 var weather_label: Label
-var speed_label: Label
+var _active_speed: int = 0  # -1 : pause
 var balance_bar: Control
 var balance_label: Label
 var log_box: VBoxContainer
@@ -73,8 +87,6 @@ func _build_top_bar() -> void:
 	box.add_child(clock_label)
 	weather_label = _label("")
 	box.add_child(weather_label)
-	speed_label = _label("×1")
-	box.add_child(speed_label)
 	var balance := VBoxContainer.new()
 	balance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(balance)
@@ -203,8 +215,7 @@ func set_title(text: String, weather: String, colors: Array) -> void:
 func set_clock(seconds: float, speed: float, paused: bool) -> void:
 	var total := int(seconds)
 	clock_label.text = "%02d:%02d" % [total / 60, total % 60]
-	speed_label.text = "Pause" if paused else "×%d" % int(speed)
-	speed_label.add_theme_color_override("font_color", Color(0.6, 0.1, 0.08) if paused else INK)
+	_active_speed = -1 if paused else maxi(BattleScene.SPEEDS.find(speed), 0)
 
 
 func set_siege_status(text: String) -> void:
