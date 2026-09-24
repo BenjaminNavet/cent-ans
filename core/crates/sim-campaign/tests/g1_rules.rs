@@ -4,7 +4,9 @@
 
 use std::path::PathBuf;
 
-use data_model::{BuildingId, EventEffect, FactionId, GameData, ProvinceId, UnitTypeId};
+use data_model::{
+    BuildingId, CharacterId, EventEffect, FactionId, GameData, ProvinceId, UnitTypeId,
+};
 use sim_campaign::{CampaignState, Order, OrderError};
 
 fn data() -> GameData {
@@ -257,4 +259,57 @@ fn the_dauphine_purchase_transfers_the_province() {
         matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_dauphine"))
     });
     assert!(has_transfer);
+}
+
+// 5. Player ransoms ----------------------------------------------------------
+
+fn capture(state: &mut CampaignState, data: &GameData, faction: &str, captor: &str) -> CharacterId {
+    let heir = state.factions[&fac(faction)].heir.clone().expect("an heir");
+    let effect = EventEffect::CaptureCharacter {
+        id: data_model::CharacterRef::Id(heir.clone()),
+        faction: None,
+        captor: fac(captor),
+    };
+    apply(state, data, faction, effect);
+    assert!(state.characters[&heir].captive);
+    heir
+}
+
+#[test]
+fn the_player_frees_a_prisoner_against_a_fair_ransom() {
+    let data = data();
+    let mut state = quiet_france(&data, 7);
+    let prince = capture(&mut state, &data, "fac_england", "fac_france");
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .treasury = 1_000_000;
+    let fair = sim_campaign::ransom::ransom_amount(&state, &data, &prince);
+    let release = |ransom| Order::ReleaseCaptive {
+        character: prince.clone(),
+        ransom,
+    };
+    let too_high = state.submit_order(&data, release(Some(fair + 1)));
+    assert!(matches!(too_high, Err(OrderError::Ransom(_))));
+    let before = state.factions[&fac("fac_france")].treasury;
+    state.submit_order(&data, release(None)).unwrap();
+    assert!(!state.characters[&prince].captive);
+    assert_eq!(state.factions[&fac("fac_france")].treasury, before + fair);
+}
+
+#[test]
+fn the_player_pays_the_ransom_of_his_captive_heir() {
+    let data = data();
+    let mut state = quiet_france(&data, 8);
+    let dauphin = capture(&mut state, &data, "fac_france", "fac_england");
+    let fair = sim_campaign::ransom::ransom_amount(&state, &data, &dauphin);
+    let before = state.factions[&fac("fac_france")].treasury;
+    let pay = Order::PayRansom {
+        character: dauphin.clone(),
+        installments: 1,
+    };
+    state.submit_order(&data, pay).unwrap();
+    assert!(!state.characters[&dauphin].captive);
+    assert_eq!(state.factions[&fac("fac_france")].treasury, before - fair);
 }

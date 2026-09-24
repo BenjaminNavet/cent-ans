@@ -195,6 +195,14 @@ pub enum Order {
     ReleaseOnParole {
         character: CharacterId,
     },
+    /// G1: the captor frees one of its prisoners against `ransom` livres
+    /// (default: the computed ransom), paid at once by his faction if it
+    /// accepts (a fair price it can afford).
+    ReleaseCaptive {
+        character: CharacterId,
+        #[serde(default)]
+        ransom: Option<i64>,
+    },
     /// H6: founds the chivalric order `order` (one per faction).
     FoundChivalricOrder {
         order: data_model::ChivalricOrderId,
@@ -447,6 +455,10 @@ impl CampaignState {
             }
             Order::SetRansomTerms { character, terms } => {
                 crate::ransom::set_ransom_terms(self, data, faction, &character, terms)?;
+                Ok(())
+            }
+            Order::ReleaseCaptive { character, ransom } => {
+                crate::ransom::release_for_ransom(self, data, faction, &character, ransom)?;
                 Ok(())
             }
             Order::ReleaseOnParole { character } => {
