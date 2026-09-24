@@ -512,4 +512,46 @@ mod tests {
             serde_json::from_str(json).expect("old save without `edict` must still deserialize");
         assert!(province.edict.is_none());
     }
+
+    #[test]
+    fn edicts_survive_a_save_round_trip() {
+        let (mut state, data) = setup();
+        let faction = state.player_faction.clone();
+        let province = state
+            .controlled_provinces(&faction)
+            .into_iter()
+            .find(|p| state.holds_whole_province(&faction, p))
+            .expect("player holds at least one whole province");
+        let edict = EdictId::new("edict_militia_levy").expect("well-formed id");
+        set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
+        let json = state.save_json();
+        let loaded = CampaignState::load_json(&json).expect("round trip");
+        assert_eq!(
+            loaded.provinces[&province]
+                .edict
+                .as_ref()
+                .map(|c| c.edict.clone()),
+            Some(edict)
+        );
+    }
+
+    /// Deterministic (ADR 0003): two clones fed the same AI orders over
+    /// several turns must reach the exact same state, and every order the
+    /// AI proposes must be accepted.
+    #[test]
+    fn ai_edicts_are_valid_and_deterministic() {
+        let (mut a, data) = setup();
+        let mut b = a.clone();
+        for _ in 0..8 {
+            a.end_turn(&data);
+            b.end_turn(&data);
+        }
+        assert_eq!(a.save_json(), b.save_json());
+        for faction in a.factions.keys().cloned().collect::<Vec<_>>() {
+            let mut probe = a.clone();
+            for order in ai_choose_edicts(&a, &data, &faction) {
+                probe.apply_order(&data, &faction, order).unwrap();
+            }
+        }
+    }
 }
