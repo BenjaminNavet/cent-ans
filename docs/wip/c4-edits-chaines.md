@@ -12,16 +12,27 @@ de la refonte colonies (`docs/wip/colonies.md`, ADR 0005).
   bastion, muster field→armurerie, marché→foire). Le travail C4 étend les
   chaînes de données et ajoute les édits régionaux (mécanique neuve, calquée
   sur `table.rs`/H3 « La Table »).
-- [ ] Chaînes de données étendues (marché→halle→foire, chapelle→église→
-  abbaye/cathédrale, moulin→moulin à eau).
-- [ ] Module `edicts.rs` (édits régionaux) + données `data/edicts/*.json` +
-  schéma.
-- [ ] `ProvinceState::edict`, `Order::SetEdict`, IA `ai_choose_edicts`.
-- [ ] Pont Godot (`campaign_sim_edicts.rs`) + UI (panneau construction : arbre ;
-  panneau province : sélecteur d'édit).
-- [ ] Tests (montée niveau, remplacement, prérequis, édits, IA, ancienne
-  sauvegarde) + smoke.
-- [ ] ADR 0010.
+- [x] Chaînes de données étendues : marché→maison des métiers→foire ;
+  paroissiale→collégiale→{abbaye|cathédrale} (embranchement) ;
+  moulin à vent→moulin à eau. Fortification et muster field→armurerie
+  inchangées (déjà conformes).
+- [x] Module `edicts.rs` (édits régionaux) + données `data/edicts/*.json`
+  (6 édits dont `edict_none`) + schéma `edict.schema.json`.
+- [x] `ProvinceState::edict`, `Order::SetEdict`/`OrderError::Edict`, IA
+  `ai_choose_edicts` (câblée dans `ai_minimal.rs` et `ai::campaign`).
+- [x] Pont Godot (`campaign_sim_edicts.rs` : `get_province_edict`,
+  `get_edict_options`) + UI (`game/scripts/ui/edict_section.gd`, câblée dans
+  `province_panel.gd` à côté de `TableSection` ; tri par catégorie/rang de
+  `panel_widgets.gd::fill_buildable` pour lire les chaînes de bâtiments dans
+  l'ordre de leurs paliers — le reste (rang, prérequis grisés, coût/durée)
+  était déjà rendu par `RichTooltip.building`, sans changement).
+- [x] Tests Rust : `core/crates/sim-campaign/tests/c4_chains.rs` (montée de
+  niveau/remplacement/prérequis/embranchement/chaîne préexistante/données
+  empilées d'avant C4) ; `edicts.rs` (10 tests unitaires : défaut, délai,
+  refus doublon/inconnu/province partielle, effets fusionnés, IA
+  déterministe, sauvegarde). `cargo test` plein vert (voir historique wip).
+- [ ] Smoke Godot (import en cours) + captures `docs/img/c4-edits/`.
+- [x] ADR 0010 (`docs/decisions/0010-edicts-and-building-chains.md`).
 
 ## Décisions
 
