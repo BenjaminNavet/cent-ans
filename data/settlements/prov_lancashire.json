@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_lancastre",
+    "province": "prov_lancashire",
+    "kind": "city",
+    "name": {
+      "display": "Lancastre",
+      "local": "Lancastre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.8007,
+      54.0466
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Comté de Lancastre (Henri de Lancastre, père d'Henri de Grosmont ; palatinat en 1351) et comté palatin de Chester (domaine du prince). Sel de Cheshire, archers du Cheshire, Chester, port vers l'Irlande.",
+    "sources": [
+      "Comté de Lancastre",
+      "Cheshire",
+      "Henri de Lancastre (1281-1345)"
+    ]
+  },
+  {
+    "id": "set_chester",
+    "province": "prov_lancashire",
+    "kind": "town",
+    "name": {
+      "display": "Chester",
+      "local": "Cestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.8931,
+      53.1906
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Cité murée siège du comté palatin de Chester, base des campagnes royales contre le Galles.",
+    "sources": [
+      "Chester"
+    ]
+  },
+  {
+    "id": "set_liverpool",
+    "province": "prov_lancashire",
+    "kind": "village",
+    "name": {
+      "display": "Liverpool",
+      "local": "Liuerpul",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.9916,
+      53.4084
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port franc sur la Mersey, encore modeste au XIVe siècle.",
+    "sources": [
+      "Liverpool"
+    ]
+  },
+  {
+    "id": "set_furness",
+    "province": "prov_lancashire",
+    "kind": "abbey",
+    "name": {
+      "display": "Furness",
+      "local": "Fournais",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.2119,
+      54.1281
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye cistercienne du Lancashire, proche de la frontière écossaise.",
+    "sources": [
+      "Abbaye de Furness"
+    ]
+  }
+]
