@@ -39,6 +39,9 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
+/// Weighted unrest above which the AI no longer raises taxes to « Haut »
+/// (lot G1/E2: heavy taxes now bite, 30 before).
+pub const HIGH_TAX_MAX_UNREST: f64 = 18.0;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -336,7 +339,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let in_debt = ctx.treasury < 0;
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < HIGH_TAX_MAX_UNREST {
         TaxRate::High
     } else {
         TaxRate::Normal

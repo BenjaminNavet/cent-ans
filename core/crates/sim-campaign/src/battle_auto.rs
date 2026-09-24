@@ -363,6 +363,51 @@ pub fn resolve_field(
     };
     let attacker_profiles = profiles(state, attackers, attacker_side);
     let defender_profiles = profiles(state, defenders, defender_side);
+    resolve_profiled(
+        state,
+        data,
+        (attacker_side, &attacker_profiles),
+        (defender_side, &defender_profiles),
+        context,
+        province,
+    )
+}
+
+/// Profiles of the regiments of one army (same order as its units), for
+/// armies that are not in `state.armies` (a settlement's garrison).
+pub fn army_profiles(data: &GameData, army: &crate::state::Army) -> Vec<UnitProfile> {
+    army.units
+        .iter()
+        .map(|unit| {
+            data.unit_types
+                .get(&unit.unit_type)
+                .map(UnitProfile::of)
+                .unwrap_or_default()
+        })
+        .collect()
+}
+
+/// [`resolve_field`] with the profiles given (sieges: the garrison is not an
+/// army of the state). A profile list of the wrong length is replaced by
+/// guessed profiles.
+pub fn resolve_profiled(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker: (&Side, &[UnitProfile]),
+    defender: (&Side, &[UnitProfile]),
+    context: &BattleContext,
+    province: Option<&Province>,
+) -> BattleResult {
+    let checked = |side: &Side, profiles: &[UnitProfile]| -> Vec<UnitProfile> {
+        if profiles.len() == side.units.len() {
+            profiles.to_vec()
+        } else {
+            side.units.iter().map(UnitProfile::infer).collect()
+        }
+    };
+    let (attacker_side, defender_side) = (attacker.0, defender.0);
+    let attacker_profiles = checked(attacker_side, attacker.1);
+    let defender_profiles = checked(defender_side, defender.1);
     let conditions = FieldConditions {
         terrain: province.map(|p| p.terrain),
         season: Some(state.season),
