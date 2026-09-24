@@ -14,14 +14,17 @@ import pytest
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
+from cent_ans_tools.geo.project import default_grid
+
 DATA = Path(__file__).resolve().parents[2] / "data"
 SETTLEMENTS = DATA / "settlements"
 RULES_FILE = "rules.json"
 
 MIN_PER_FILE = 3
 MAX_PER_FILE = 6
-LON_RANGE = (-11.0, 16.0)
-LAT_RANGE = (35.0, 60.0)
+# The map square is wider than the requested lon/lat extent (docs/geo.md),
+# so bounds are checked in map pixels, not degrees.
+GRID = default_grid()
 
 
 def _validator(schema_name: str) -> Draft202012Validator:
@@ -94,8 +97,10 @@ def test_settlement_file_is_valid(path: Path) -> None:
         owner = settlement.get("owner")
         assert owner is None or owner in factions, f"{label}: unknown owner {owner}"
         lon, lat = settlement["lonlat"]
-        assert LON_RANGE[0] <= lon <= LON_RANGE[1], f"{label}: lon {lon}"
-        assert LAT_RANGE[0] <= lat <= LAT_RANGE[1], f"{label}: lat {lat}"
+        column, row = GRID.lonlat_to_pixel(lon, lat)
+        assert 0 <= column < GRID.size_px and 0 <= row < GRID.size_px, (
+            f"{label}: {lon}, {lat} off the map"
+        )
 
 
 def test_settlement_ids_are_globally_unique() -> None:
