@@ -1,0 +1,11 @@
+{
+  "id": "cdx_maniguette",
+  "title": "La maniguette (graine de paradis)",
+  "category": "ingredient",
+  "aliases": ["maniguette", "graine de paradis", "graines de paradis", "malaguette"],
+  "era": { "from": "1200", "to": "1600" },
+  "summary": "Petite graine brune et piquante d'Afrique de l'Ouest, venue par les caravanes du Sahara, la maniguette ou « graine de paradis » est l'une des épices favorites de la cuisine française des XIVe et XVe siècles.",
+  "body": "La maniguette est la graine d'une plante de la famille du gingembre, Aframomum melegueta, qui pousse dans les forêts humides du golfe de Guinée. Contrairement aux autres épices, elle ne vient pas d'Asie : elle traverse le Sahara à dos de chameau jusqu'aux ports du Maghreb, où les marchands italiens et catalans l'achètent. Son nom poétique de « graine de paradis » entretenait sans doute le mystère sur son origine.\n\nSa saveur rappelle le poivre, avec des notes citronnées et florales. Les cuisiniers français l'adorent : le [[cdx_viandier|Viandier]] l'emploie dans de nombreuses sauces, comme la sauce du sanglier, et le [[cdx_menagier_de_paris|Ménagier de Paris]] la met dans sa poudre d'[[cdx_hypocras|hypocras]]. Les livres anglais semblent l'utiliser moins que les français.\n\nAu XVe siècle, les navigateurs portugais qui descendent la côte africaine atteignent la région qui la produit et la baptisent « côte de la Malaguette » (l'actuel Liberia). La maniguette devient alors plus abondante, avant d'être peu à peu délaissée à l'époque moderne au profit du [[cdx_poivre|poivre]], devenu bon marché.\n\nPour les médecins, elle est chaude et sèche comme le poivre et passe pour réchauffer l'estomac. La science moderne attribue son piquant à des composés voisins de ceux du gingembre (paradols, shogaols) ; elle ne présente pas de toxicité particulière aux doses culinaires.\n\nAu XXIe siècle : on trouve la maniguette dans les épiceries fines, et certains brasseurs ou distillateurs l'utilisent pour aromatiser bières et gins. Elle se moud comme le poivre, en fin de cuisson, et donne aussitôt à une [[cdx_cameline|cameline]] un parfum authentiquement médiéval.",
+  "see_also": ["cdx_poivre", "cdx_epices_medievales", "cdx_cameline", "cdx_hypocras", "cdx_viandier"],
+  "sources": ["Maniguette", "Aframomum melegueta", "Côte du Poivre"]
+}
