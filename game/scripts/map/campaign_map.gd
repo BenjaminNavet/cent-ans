@@ -69,6 +69,10 @@ var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
+var _fps_probe_gpu_ms: float = 0.0
+var _fps_probe_cpu_ms: float = 0.0
+## Temps cumulés (µs) : LOD du terrain, couches C6 (colonies, routes).
+var _fps_probe_map_us: Vector2 = Vector2.ZERO
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -850,12 +854,16 @@ func _process(_delta: float) -> void:
 		return
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
+	var t0 := Time.get_ticks_usec()
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	cities.update_visibility(distance)
+	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+	if _fps_probe_frames > 0:
+		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
 	armies.update_scale(camera_rig.distance)
@@ -880,11 +888,22 @@ func _update_fps_probe() -> void:
 		if not terrain.fine_ready() or Engine.get_process_frames() < 120:
 			return
 		_fps_probe_start = Time.get_ticks_usec()
+		_fps_probe_gpu_ms = 0.0
+		_fps_probe_cpu_ms = 0.0
 	_fps_probe_frames += 1
+	# Temps de rendu mesurés (indépendants de la synchronisation verticale).
+	var viewport_rid := get_viewport().get_viewport_rid()
+	_fps_probe_gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+	_fps_probe_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid) + RenderingServer.get_frame_setup_time_cpu()
 	if _fps_probe_frames == 241:
 		var seconds := (Time.get_ticks_usec() - _fps_probe_start) / 1000000.0
 		print("CampaignMap: fps_probe %s" % JSON.stringify({
 			"fps": snappedf(240.0 / seconds, 0.1),
+			"gpu_ms": snappedf(_fps_probe_gpu_ms / 240.0, 0.01),
+			"render_cpu_ms": snappedf(_fps_probe_cpu_ms / 240.0, 0.01),
+			"process_ms": snappedf(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, 0.01),
+			"terrain_lod_ms": snappedf(_fps_probe_map_us.x / 240000.0, 0.01),
+			"c6_layers_ms": snappedf(_fps_probe_map_us.y / 240000.0, 0.01),
 			"distance": snappedf(camera_rig.distance, 0.1),
 			"fine_chunks": terrain.fine_chunk_count(),
 			"near_chunks": terrain.near_chunk_count(),
@@ -937,6 +956,14 @@ func _parse_cmdline() -> void:
 	for arg in args:
 		if arg == "--fps-probe":
 			_fps_probe_frames = 0
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+		elif arg == "--no-fine-terrain":
+			terrain.fine_enabled = false
+		elif arg.begins_with("--fine-step="):
+			terrain.fine_step = int(arg.trim_prefix("--fine-step="))
+			terrain.fine_enabled = terrain.fine_step > 0
 		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
 			settlement_layer.select(arg.trim_prefix("--select-settlement="))
 	for arg in args:
