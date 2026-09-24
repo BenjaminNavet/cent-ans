@@ -1,0 +1,11 @@
+{
+  "id": "cdx_armoriaux",
+  "title": "Les armoriaux",
+  "category": "savoir",
+  "aliases": ["armorial", "armoriaux", "armorial Gelre", "armorial de Gelre", "armorial Bellenville", "armorial de Berry"],
+  "era": { "from": "1250", "to": "1500" },
+  "summary": "Recueils de blasons peints ou décrits, les armoriaux sont les annuaires de la noblesse médiévale. Les plus beaux de l'époque, Gelre et Bellenville, montrent en couleurs les chevaliers de toute l'Europe de la guerre de Cent Ans.",
+  "body": "Un armorial rassemble des armoiries, soit peintes, soit décrites en termes de [[cdx_blason|blason]]. Les premiers apparaissent en Angleterre et en France vers 1250 ; ce sont des rôles de parchemin ou des cahiers tenus par les [[cdx_herauts|hérauts]], qui y notent les participants d'un tournoi, les chevaliers d'une campagne ou les vassaux d'un prince.\n\nL'armorial Bellenville, peint en France vers 1360-1380, réunit plus de mille écus, classés par régions et par grands seigneurs. L'armorial Gelre, œuvre d'un héraut du duc de Gueldre, Claes Heinen, dans les années 1370-1390, est l'un des chefs-d'œuvre du genre : il montre les chevaliers en pied avec heaume, cimier et lambrequins, et offre les armes de la plupart des princes d'Europe, du roi de France au roi d'Écosse.\n\nAu milieu du XVe siècle, Gilles le Bouvier, héraut Berry, compose pour Charles VII un grand armorial de France, organisé par provinces : c'est un tableau du royaume reconquis. En Bourgogne, l'armorial de la [[cdx_toison_or|Toison d'or]] peint les chevaliers de l'ordre avec leurs colliers.\n\nLes armoriaux ont une valeur de preuve. On les produit dans les procès d'armes, comme l'affaire [[cdx_scrope_grosvenor|Scrope contre Grosvenor]], pour montrer depuis quand une famille porte tel écu. Pour l'historien, ils sont une source précieuse : ils révèlent les alliances, les ralliements et même, par les écus effacés ou repeints, les changements de camp.",
+  "see_also": ["cdx_blason", "cdx_herauts", "cdx_enluminure", "cdx_scrope_grosvenor"],
+  "sources": ["Armorial", "Armorial Gelre", "Armorial Bellenville", "Armorial de Gilles le Bouvier"]
+}
