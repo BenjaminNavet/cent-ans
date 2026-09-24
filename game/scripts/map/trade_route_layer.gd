@@ -7,11 +7,11 @@ extends MeshInstance3D
 ## brouillard (C1) : une route dont aucun bout n'est dans une province visible de la faction
 ## joueuse est masquée.
 
-const MIN_WIDTH := 0.5
-const MAX_WIDTH := 3.2
+const MIN_WIDTH := 1.2
+const MAX_WIDTH := 5.0
 ## Teinte encre sépia des routes actives (accord ou non : `PolylineMesh` n'a qu'un matériau
 ## par maillage, la ligne coupée passe par un second `MeshInstance3D` grisé).
-const COLOR := Color(0.42, 0.30, 0.14, 0.85)
+const COLOR := Color(0.45, 0.18, 0.08, 0.9)
 const COLOR_CUT := Color(0.4, 0.4, 0.4, 0.35)
 
 var map_data: MapData
@@ -63,7 +63,7 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 		if points.size() < 2:
 			continue
 		var value: float = float(route.get("total_value", 0))
-		var width := clampf(MIN_WIDTH + value / 90.0, MIN_WIDTH, MAX_WIDTH)
+		var width := clampf(MIN_WIDTH + value / 40.0, MIN_WIDTH, MAX_WIDTH)
 		if bool(route.get("cut", false)):
 			cut_lines.append(points)
 			cut_widths.append(MIN_WIDTH * 0.6)
