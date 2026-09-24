@@ -176,7 +176,11 @@ func _on_chunk_surface_changed(index: int) -> void:
 
 
 ## Affiche les éléments datés de l'année (enceinte de Charles V, Bastille, Louvre de Charles V…).
+## Option de capture `--landmark-year=<année>` : force l'année affichée.
 func set_year(new_year: int) -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--landmark-year="):
+			new_year = int(arg.trim_prefix("--landmark-year="))
 	if new_year == year:
 		return
 	year = new_year
