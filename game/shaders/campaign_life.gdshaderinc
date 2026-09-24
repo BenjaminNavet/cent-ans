@@ -1,10 +1,157 @@
 // Lot CV1 : campagne vivante, fonctions incluses par terrain.gdshader (crochets localisés).
 // - Saisons : poids globaux `campaign_season` (printemps, été, automne, hiver ; somme 1),
-//   publiés par season_visuals.gd, glissant d'un tour à l'autre.
+//   publiés par season_visuals.gd, glissant d'un tour à l'autre. La palette d'origine du
+//   terrain (lot V2b) est celle de l'été ; les autres saisons la transforment.
 // - Terroirs : masque terroir_mask.gd (R cultures, G vigne, B brûlis, A pâtures).
 // - Ombres de nuages qui passent.
+// Inclus après les fonctions utilitaires de terrain.gdshader (value_noise, fbm).
 
 global uniform vec4 campaign_season;
 uniform sampler2D terroir_mask : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_terroir = false;
 uniform bool life_enabled = true;
+// Neige : altitude (m) de la limite par saison (printemps, été, automne, hiver).
+uniform vec4 season_snow_line = vec4(1500.0, 2750.0, 1900.0, 520.0);
+// Couverture neigeuse de plaine en hiver : base, nord, est (0-1).
+uniform vec3 winter_cover = vec3(0.10, 0.42, 0.22);
+uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);
+// Brûlis (dévastation) : cendres et chaume noirci.
+uniform vec3 burnt_color = vec3(0.035, 0.030, 0.026);
+uniform vec3 ash_color = vec3(0.16, 0.15, 0.14);
+// Ombres de nuages : force, échelle (par pixel carte), vent.
+uniform float cloud_shadow_amount = 0.18;
+uniform float cloud_shadow_scale = 0.010;
+uniform vec2 cloud_shadow_wind = vec2(0.012, 0.005);
+
+vec4 life_season() {
+	return life_enabled ? campaign_season : vec4(0.0, 1.0, 0.0, 0.0);
+}
+
+// Parcelle selon la saison. cls : 0 blé, 1 culture verte, 2 labour, 3 jachère, 4 pré, 5 foin,
+// 6 sol de vigne. h : tirage [0, 1] de la parcelle (variété d'une parcelle à l'autre).
+vec3 season_field(vec3 summer, int cls, float h) {
+	vec4 w = life_season();
+	vec3 young = vec3(0.10, 0.19, 0.045);    // blé en herbe, pousses de printemps
+	vec3 plough = vec3(0.13, 0.085, 0.048);  // labour frais
+	vec3 wet_plough = vec3(0.085, 0.058, 0.036);
+	vec3 stubble = vec3(0.25, 0.20, 0.105);  // chaume
+	vec3 meadow_spring = vec3(0.085, 0.19, 0.035);
+	vec3 meadow_autumn = vec3(0.11, 0.12, 0.045);
+	vec3 meadow_winter = vec3(0.075, 0.085, 0.048);
+	vec3 spring = summer;
+	vec3 autumn = summer;
+	vec3 winter = summer;
+	vec3 ripe = summer;
+	if (cls == 0) {
+		// Blé mûr doré l'été : en herbe au printemps (quelques labours tardifs), chaume puis labours à l'automne,
+		// semis d'hiver clairsemés sur la terre nue en hiver.
+		ripe = summer * vec3(1.15, 1.06, 0.78);
+		spring = h < 0.8 ? young : plough;
+		autumn = h < 0.45 ? stubble : plough;
+		winter = mix(wet_plough, young, 0.3);
+	} else if (cls == 1) {
+		spring = mix(young, summer, 0.25);
+		autumn = h < 0.5 ? plough : mix(stubble, plough, 0.5);
+		winter = wet_plough;
+	} else if (cls == 2) {
+		// Labours : printemps = labours et semis (terre fraîche), été = chaume.
+		spring = plough;
+		autumn = plough * 0.9;
+		winter = wet_plough;
+	} else if (cls == 3) {
+		spring = h < 0.5 ? plough : mix(summer, young, 0.5);
+		autumn = mix(summer, stubble, 0.4);
+		winter = mix(wet_plough, meadow_winter, 0.5);
+	} else if (cls == 4) {
+		spring = meadow_spring;
+		autumn = meadow_autumn;
+		winter = meadow_winter;
+	} else if (cls == 5) {
+		spring = meadow_spring * 1.05;
+		autumn = mix(meadow_autumn, stubble, 0.35);
+		winter = mix(meadow_winter, stubble * 0.6, 0.4);
+	} else {
+		spring = summer;
+		autumn = summer * vec3(1.05, 0.95, 0.9);
+		winter = summer * 0.85;
+	}
+	return spring * w.x + ripe * w.y + autumn * w.z + winter * w.w;
+}
+
+// Teinte de fond des prés et des cultures (lointain) : même moyenne que les parcelles.
+vec3 season_grass(vec3 summer) {
+	vec4 w = life_season();
+	vec3 spring = summer * vec3(0.9, 1.18, 0.85);
+	vec3 autumn = mix(summer, vec3(0.13, 0.12, 0.05), 0.5);
+	vec3 winter = mix(summer, vec3(0.08, 0.085, 0.055), 0.65);
+	return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+vec3 season_farm(vec3 summer) {
+	vec4 w = life_season();
+	vec3 spring = mix(summer, vec3(0.11, 0.15, 0.05), 0.6);
+	vec3 autumn = mix(summer, vec3(0.15, 0.11, 0.06), 0.6);
+	vec3 winter = mix(summer, vec3(0.095, 0.075, 0.05), 0.7);
+	return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// Feuilles de vigne : vert tendre, puis rousses et pourpres à l'automne, taille nue l'hiver.
+vec3 season_vine_leaf(vec3 summer) {
+	vec4 w = life_season();
+	vec3 autumn = vec3(0.24, 0.085, 0.02);
+	vec3 winter = vec3(0.10, 0.07, 0.045);
+	return summer * 1.15 * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// Forêts vues comme terrain (lointain) : roux, or et verts persistants à l'automne ;
+// bois nus gris-brun l'hiver, résineux gardés (tirage par bosquet).
+vec3 season_forest(vec3 summer, float grove) {
+	vec4 w = life_season();
+	if (w.y > 0.999) {
+		return summer;
+	}
+	vec3 spring = summer * vec3(1.05, 1.3, 0.9);
+	vec3 russet = grove < 0.35 ? vec3(0.115, 0.042, 0.010) : (grove < 0.7 ? vec3(0.12, 0.08, 0.015) : summer);
+	vec3 autumn = russet;
+	vec3 bare = vec3(0.050, 0.043, 0.036);
+	vec3 winter = grove < 0.72 ? bare : summer * 0.85;
+	return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// Neige selon la saison : limite d'altitude qui descend en hiver (plus bas au nord et à l'est),
+// et couverture de plaine en plaques l'hiver. `base` : neige d'altitude d'origine.
+float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macro, float footprint) {
+	if (!life_enabled) {
+		return base;
+	}
+	vec4 w = campaign_season;
+	float line = dot(w, season_snow_line);
+	float north = smoothstep(0.62, 0.36, uv.y);
+	float east = smoothstep(0.50, 0.66, uv.x);
+	line -= (north * 0.6 + east * 0.4) * (w.w * 420.0 + w.z * 300.0 + w.x * 300.0);
+	float mountain = smoothstep(line - 150.0, line + 250.0, hc + (macro - 0.5) * 500.0);
+	float low = 0.0;
+	if (w.w > 0.01) {
+		float cover = w.w * clamp(winter_cover.x + winter_cover.y * north + winter_cover.z * east + hc / 900.0, 0.0, 1.0);
+		// Plaques : grandes nappes (échelle régionale) + détail des champs, bords fondus d'autant
+		// plus larges que le pixel couvre de terrain (pas de camouflage au zoom moyen).
+		float fine = 1.0 - smoothstep(0.6, 2.0, footprint);
+		float patches = fbm(p * 0.018) * 0.7 + value_noise(p * 0.23) * 0.3 * fine + 0.15 * (1.0 - fine);
+		float soft = mix(0.30, 0.10, fine);
+		low = smoothstep(1.0 - cover - soft, 1.0 - cover + soft, patches);
+		// Poudrage : la neige mince laisse deviner sillons et chaumes.
+		low *= mix(0.72, 0.95, smoothstep(0.3, 0.9, cover));
+		low *= step(1.0, hc);
+	}
+	return max(max(base * w.y, mountain), low) * (1.0 - smoothstep(0.55, 0.9, slope));
+}
+
+// Ombres de nuages qui passent (facteur multiplicatif de l'albédo, 1 = pas d'ombre).
+float cloud_shadow(vec2 p) {
+	if (!life_enabled || cloud_shadow_amount <= 0.0) {
+		return 1.0;
+	}
+	vec2 q = p * cloud_shadow_scale + TIME * cloud_shadow_wind;
+	float c = value_noise(q) * 0.62 + value_noise(q * 2.7 + vec2(3.1, 7.7)) * 0.38;
+	return 1.0 - cloud_shadow_amount * smoothstep(0.45, 0.78, c);
+}

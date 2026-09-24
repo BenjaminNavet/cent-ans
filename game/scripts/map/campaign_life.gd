@@ -16,25 +16,32 @@ extends Node3D
 
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
-var terroir: TerroirMask
-var growth: SettlementGrowth
-var effects: LifeEffects
+var terroir: TerroirMask = null
+var growth: SettlementGrowth = null
+var effects: LifeEffects = null
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
 var forced_devastation: Dictionary = {}
 ## province_id → {devastation, population} lus au dernier `refresh`.
 var province_states: Dictionary = {}
+var stats: Dictionary = {}
 
 var _map: Node = null
 var _terrain: TerrainBuilder = null
+var _refreshed_once := false
 
 
 func setup(map: Node) -> void:
 	_map = map
 	_terrain = map.get("terrain") as TerrainBuilder
 	_parse_cmdline()
+	if _terrain != null and _terrain.material != null:
+		_terrain.material.set_shader_parameter("life_enabled", enabled)
 	if not enabled:
+		seasons.set_season("summer", true)
 		return
+	if forced_season != "":
+		seasons.set_season(forced_season, true)
 
 
 func _parse_cmdline() -> void:
@@ -52,10 +59,16 @@ func _parse_cmdline() -> void:
 
 ## Relit la saison, la dévastation et la population depuis la simulation.
 func refresh(sim: Object) -> void:
-	if not enabled:
+	if not enabled or sim == null:
 		return
+	if forced_season == "" and sim.has_method("get_date_label"):
+		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
+		# Premier affichage (nouvelle partie, chargement) : sans transition.
+		seasons.set_season(season, not _refreshed_once)
+	_refreshed_once = true
 
 
-func update_view(camera_distance: float) -> void:
+func update_view(_camera_distance: float) -> void:
 	if not enabled:
 		return
+	seasons.update(get_process_delta_time())
