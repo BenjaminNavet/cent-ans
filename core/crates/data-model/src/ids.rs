@@ -166,6 +166,11 @@ define_id!(
     "ord_"
 );
 define_id!(
+    /// Identifier of a general's companion (`ret_heraut`), lot C7.
+    CompanionId,
+    "ret_"
+);
+define_id!(
     /// Abstract sea zone (`sea_channel`); free vocabulary.
     SeaZoneId,
     "sea_"

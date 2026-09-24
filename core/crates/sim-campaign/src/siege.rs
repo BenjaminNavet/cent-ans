@@ -157,6 +157,14 @@ pub(crate) fn resolve_sieges(
                     capture(state, data, &settlement_id, &attacker, events);
                     if let Some(general) = besieging_general {
                         dynasty::on_siege_won(state, data, &general);
+                        crate::retinue::try_acquire(
+                            state,
+                            data,
+                            &general,
+                            data_model::AcquisitionTrigger::SiegeWon,
+                            &[],
+                            events,
+                        );
                     }
                 }
             }
@@ -570,6 +578,14 @@ pub(crate) fn apply_assault_result(
         capture(state, data, settlement, &faction, events);
         if let Some(general) = general {
             dynasty::on_siege_won(state, data, &general);
+            crate::retinue::try_acquire(
+                state,
+                data,
+                &general,
+                data_model::AcquisitionTrigger::SiegeWon,
+                &[],
+                events,
+            );
         }
     } else {
         state.record_battle(&defender_faction, &faction, false);
@@ -714,6 +730,14 @@ pub(crate) fn resolve_raids(
         }
         if let Some(general) = general {
             dynasty::on_raid_led(state, data, &general);
+            crate::retinue::try_acquire(
+                state,
+                data,
+                &general,
+                data_model::AcquisitionTrigger::RaidLed,
+                &[],
+                events,
+            );
         }
         events.push(
             GameEvent::new(

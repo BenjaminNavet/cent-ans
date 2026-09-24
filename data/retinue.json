@@ -1,0 +1,248 @@
+{
+  "max_per_character": 8,
+  "description": "Suite des généraux (lot C7) : compagnons gagnés en campagne, à la manière de Medieval II. Chaque occasion (victoire, siège, chevauchée, saison passée dans une ville bien dotée, rançon touchée) donne au plus un compagnon, tiré de façon déterministe.",
+  "companions": [
+    {
+      "id": "ret_ecuyer",
+      "name": { "display": "Écuyer", "local": "escuier", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "É",
+      "effects": [
+        { "effect": "battle_charge", "value": 5, "mode": "percent" },
+        { "effect": "army_morale", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_fought", "chance_permille": 200 }
+      ],
+      "inheritable": true,
+      "description": "Jeune noble qui porte le heaume et la lance du chevalier, lui amène le destrier frais et le relève s'il tombe. Beaucoup d'écuyers restaient au service de la maison à la mort de leur seigneur.",
+      "sources": ["Écuyer", "Chevalerie"]
+    },
+    {
+      "id": "ret_porte_banniere",
+      "name": { "display": "Porte-bannière", "local": "porte-baniere", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "B",
+      "effects": [
+        { "effect": "army_morale", "value": 5, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_won", "chance_permille": 150 }
+      ],
+      "conditions": { "min_battles": 2 },
+      "description": "Chevalier d'élite chargé de tenir haut la bannière du seigneur : tant qu'elle flotte, la troupe sait où se rallier. Sa chute annonçait souvent la déroute.",
+      "sources": ["Bannière", "Chevalier banneret"]
+    },
+    {
+      "id": "ret_heraut",
+      "name": { "display": "Héraut d'armes", "local": "hiraut", "local_language": "ancien français" },
+      "category": "court",
+      "glyph": "H",
+      "effects": [
+        { "effect": "prestige", "value": 2, "mode": "add" },
+        { "effect": "diplomacy", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_won", "chance_permille": 120 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_castle" }
+      ],
+      "inheritable": true,
+      "description": "Connaisseur des armoiries, il reconnaît les morts sur le champ de bataille, porte les défis et les messages entre les camps, et proclame les hauts faits. Après Crécy, les hérauts anglais comptèrent les chevaliers tombés.",
+      "sources": ["Héraut d'armes", "Bataille de Crécy"]
+    },
+    {
+      "id": "ret_confesseur",
+      "name": { "display": "Confesseur", "local": "confessor", "local_language": "latin" },
+      "category": "faith",
+      "glyph": "✝",
+      "effects": [
+        { "effect": "piety", "value": 3, "mode": "add" },
+        { "effect": "army_morale", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_abbey" },
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_cathedral" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_parish_church" }
+      ],
+      "conditions": { "excludes_traits": ["trait_excommunicated"] },
+      "description": "Religieux, souvent dominicain ou franciscain, qui entend la confession du seigneur, célèbre la messe avant la bataille et absout les mourants.",
+      "sources": ["Confesseur du roi", "Ordre des Prêcheurs"]
+    },
+    {
+      "id": "ret_barbier_chirurgien",
+      "name": { "display": "Barbier-chirurgien", "local": "barbier", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "✚",
+      "effects": [
+        { "effect": "wound_recovery", "value": 10, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_fought", "chance_permille": 100 },
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_hotel_dieu" },
+        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_apothecary" }
+      ],
+      "description": "Il extrait les flèches, recoud les plaies, réduit les fractures et cautérise au fer rouge. Suit l'armée et rend aux compagnies une part de leurs blessés après la bataille (s'ajoute aux savoirs médicaux de la faction).",
+      "sources": ["Barbier-chirurgien", "Henri de Mondeville", "Chirurgie au Moyen Âge"]
+    },
+    {
+      "id": "ret_physicien",
+      "name": { "display": "Physicien", "local": "phisicien", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "Φ",
+      "effects": [
+        { "effect": "attrition_resistance", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_university" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_herb_garden" }
+      ],
+      "description": "Médecin gradué de Montpellier ou de Paris, lecteur de Galien et d'Avicenne. Il règle le régime de l'armée, fait choisir les camps et l'eau : moins de flux de ventre et de fièvres en campagne.",
+      "sources": ["Guy de Chauliac", "Faculté de médecine de Montpellier"]
+    },
+    {
+      "id": "ret_chroniqueur",
+      "name": { "display": "Chroniqueur", "local": "chroniqueur", "local_language": "moyen français" },
+      "category": "learning",
+      "glyph": "C",
+      "effects": [
+        { "effect": "prestige", "value": 3, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_won", "chance_permille": 80 },
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_scriptorium" }
+      ],
+      "conditions": { "min_battles": 3 },
+      "inheritable": true,
+      "description": "Clerc qui met par écrit les prouesses de son maître. Froissart passa de la reine Philippa au comte de Blois et à bien d'autres patrons : la renommée d'un lignage tenait aussi à ses chroniques.",
+      "sources": ["Jean Froissart", "Chroniques de Froissart", "Jean le Bel"]
+    },
+    {
+      "id": "ret_maitre_arbaletriers",
+      "name": { "display": "Maître des arbalétriers", "local": "maistre des arbalestriers", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "A",
+      "effects": [
+        { "effect": "battle_ranged", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_armoury" },
+        { "trigger": "battle_won", "chance_permille": 60 }
+      ],
+      "conditions": { "excludes_traits": ["trait_archer_captain"] },
+      "description": "Capitaine des arbalétriers, souvent génois ou issu des milices urbaines. En France, le grand maître des arbalétriers était l'un des grands officiers de la Couronne.",
+      "sources": ["Grand maître des arbalétriers de France", "Arbalétriers génois"]
+    },
+    {
+      "id": "ret_vintenier",
+      "name": { "display": "Vintenier des archers", "local": "vintener", "local_language": "moyen anglais" },
+      "category": "military",
+      "glyph": "V",
+      "effects": [
+        { "effect": "battle_ranged", "value": 10, "mode": "percent" },
+        { "effect": "army_morale", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_won", "chance_permille": 150 },
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_archery_butts" }
+      ],
+      "conditions": { "factions": ["fac_england"] },
+      "description": "Sous-officier à la tête de vingt archers, recruté par contrat d'endenture. Les compagnies d'archers anglais et gallois faisaient la force des armées d'Édouard III et d'Henri V.",
+      "sources": ["Archer anglais", "Endenture"]
+    },
+    {
+      "id": "ret_maitre_engins",
+      "name": { "display": "Maître des engins", "local": "maistre des engins", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "E",
+      "effects": [
+        { "effect": "siege_speed", "value": 15, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "siege_won", "chance_permille": 250 },
+        { "trigger": "season_in_settlement", "chance_permille": 80, "building": "bld_siege_workshop" }
+      ],
+      "description": "Ingénieur des trébuchets, des mines et bientôt des bombardes, comme les frères Bureau au service de Charles VII. Il abrège les sièges.",
+      "sources": ["Jean Bureau", "Trébuchet", "Bombarde"]
+    },
+    {
+      "id": "ret_pourvoyeur",
+      "name": { "display": "Pourvoyeur", "local": "pourveeur", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "P",
+      "effects": [
+        { "effect": "supply", "value": 1, "mode": "add" },
+        { "effect": "attrition_resistance", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_market" },
+        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_fair" },
+        { "trigger": "raid_led", "chance_permille": 100 }
+      ],
+      "description": "Officier chargé des vivres de l'armée : blé, avoine, vin et salaisons achetés, réquisitionnés ou pillés. Une armée mal pourvue fondait plus vite que sous les coups de l'ennemi.",
+      "sources": ["Pourvoierie", "Chevauchée"]
+    },
+    {
+      "id": "ret_menestrel",
+      "name": { "display": "Ménestrel", "local": "menestrel", "local_language": "ancien français" },
+      "category": "court",
+      "glyph": "♪",
+      "effects": [
+        { "effect": "army_morale", "value": 3, "mode": "add" },
+        { "effect": "prestige", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_fair" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_castle" }
+      ],
+      "inheritable": true,
+      "description": "Héritier des trouvères, il chante les gestes, joue de la vielle et des trompettes, égaie les veillées d'armes. Les grands entretenaient des ménestrels à gages.",
+      "sources": ["Ménestrel", "Trouvère"]
+    },
+    {
+      "id": "ret_banquier_lombard",
+      "name": { "display": "Banquier lombard", "local": "lombart", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "L",
+      "effects": [
+        { "effect": "army_upkeep", "value": -10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "ransom_received", "chance_permille": 400 },
+        { "trigger": "season_in_settlement", "chance_permille": 60, "building": "bld_counting_house" }
+      ],
+      "inheritable": true,
+      "description": "Marchand-banquier italien (Bardi, Peruzzi, puis Médicis) qui avance les soldes et négocie les rançons. La faillite des Bardi et des Peruzzi, créanciers d'Édouard III, fit trembler Florence en 1343-1346.",
+      "sources": ["Lombard (banquier)", "Compagnie des Bardi", "Compagnie des Peruzzi"]
+    },
+    {
+      "id": "ret_espion",
+      "name": { "display": "Espion", "local": "espie", "local_language": "ancien français" },
+      "category": "intrigue",
+      "glyph": "◐",
+      "effects": [
+        { "effect": "intrigue", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "raid_led", "chance_permille": 150 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_guild_hall" }
+      ],
+      "description": "Chevaucheur ou marchand qui rapporte les mouvements de l'ennemi et l'état des places. Un général bien renseigné se laisse moins prendre au piège et échappe plus souvent à la capture.",
+      "sources": ["Renseignement au Moyen Âge"]
+    },
+    {
+      "id": "ret_guide",
+      "name": { "display": "Guide du pays", "local": "guide", "local_language": "ancien français" },
+      "category": "intrigue",
+      "glyph": "G",
+      "effects": [
+        { "effect": "movement", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "raid_led", "chance_permille": 150 },
+        { "trigger": "battle_won", "chance_permille": 40 }
+      ],
+      "description": "Homme du cru qui connaît les gués et les chemins. Avant Crécy, un valet du pays aurait indiqué à Édouard III le gué de Blanquetaque sur la Somme.",
+      "sources": ["Bataille de Blanquetaque"]
+    }
+  ]
+}

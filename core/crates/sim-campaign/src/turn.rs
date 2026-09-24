@@ -85,6 +85,7 @@ impl CampaignState {
         // (M4), then dead factions.
         dynasty::resolve_governance(self);
         dynasty::resolve_court_prestige(self, data);
+        crate::retinue::resolve_retinue(self, data, &mut events);
         characters::resolve_characters(self, data, &mut events);
         dynasty::resolve_births(self, data, &mut events);
         dynasty::resolve_regencies(self, data, &mut events);

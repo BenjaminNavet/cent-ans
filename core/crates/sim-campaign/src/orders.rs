@@ -154,6 +154,13 @@ pub enum Order {
         character: CharacterId,
         spouse: CharacterId,
     },
+    /// C7: `companion` leaves the retinue of `from` for that of `to`, two
+    /// generals whose armies stand in the same settlement.
+    TransferCompanion {
+        from: CharacterId,
+        to: CharacterId,
+        companion: data_model::CompanionId,
+    },
     /// Headless-only debug order: grants `amount` XP to `character`, always
     /// accepted (spec § 3, "smoke test"). Never issued by the Godot bridge
     /// UI in a released build.
@@ -340,6 +347,8 @@ pub enum OrderError {
     #[error(transparent)]
     Governor(#[from] GovernorError),
     #[error(transparent)]
+    Retinue(#[from] crate::retinue::RetinueError),
+    #[error(transparent)]
     Marriage(#[from] MarriageError),
     #[error(transparent)]
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
@@ -459,6 +468,14 @@ impl CampaignState {
             } => {
                 self.check_owned_character(faction, &character)?;
                 dynasty::assign_governor(self, &province, &character)?;
+                Ok(())
+            }
+            Order::TransferCompanion {
+                from,
+                to,
+                companion,
+            } => {
+                crate::retinue::transfer_companion(self, data, faction, &from, &to, &companion)?;
                 Ok(())
             }
             Order::ProposeMarriage { character, spouse } => {

@@ -426,6 +426,12 @@ impl CampaignState {
                     battles_fought: 0,
                     sieges_won: 0,
                     raids_led: 0,
+                    death_year: character
+                        .death
+                        .as_ref()
+                        .and_then(|d| d.year())
+                        .filter(|y| *y <= 1337),
+                    retinue: Vec::new(),
                 },
             );
         }

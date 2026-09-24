@@ -101,6 +101,7 @@ pub fn kill(
         return;
     };
     character.alive = false;
+    character.death_year = Some(state.year);
     character.governor_of = None;
     let widowed = character.spouse.clone();
     let faction = character.faction.clone();
@@ -141,6 +142,8 @@ pub fn kill(
             .and_then(|ruler| dynasty::pick_heir_by_law(state, data, &faction, &ruler));
         state.factions.get_mut(&faction).expect("exists").heir = heir;
     }
+    // C7: the retinue passes to the heir (after the succession) or leaves.
+    crate::retinue::on_death(state, data, id, ruled, events);
 }
 
 /// Replaces the dead ruler of `faction` by its designated heir if still

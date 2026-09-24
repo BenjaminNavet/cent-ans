@@ -1070,6 +1070,10 @@ pub fn release_character(
         if let Some(f) = captor.as_ref().and_then(|c| state.factions.get_mut(c)) {
             f.treasury += ransom;
         }
+        // C7: a Lombard banker may follow the money to the captor's ruler.
+        if let Some(captor) = &captor {
+            crate::retinue::on_ransom_received(state, data, captor, events);
+        }
     }
     let capital = state.factions.get(&owner).map(|f| f.capital.clone());
     let c = state.characters.get_mut(id).expect("checked above");

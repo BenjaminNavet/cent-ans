@@ -360,12 +360,24 @@ impl CampaignState {
             let raw = unit_upkeep(data, unit) as f64 * (1.0 + percent.max(-90.0) / 100.0);
             raw.round() as i64
         };
+        // C7: a Lombard banker in the general's retinue eases his army's pay.
         let armies: i64 = self
             .armies
             .values()
             .filter(|a| &a.faction == faction)
-            .flat_map(|a| a.units.iter())
-            .map(unit_cost)
+            .map(|a| {
+                let raw: i64 = a.units.iter().map(unit_cost).sum();
+                let relief = a.general.as_ref().map_or(0.0, |g| {
+                    crate::skills::character_effects(self, data, g)
+                        .army_upkeep
+                        .percent
+                });
+                if relief == 0.0 {
+                    raw
+                } else {
+                    (raw as f64 * (1.0 + relief.max(-50.0) / 100.0)).round() as i64
+                }
+            })
             .sum();
         let garrisons: i64 = self
             .settlements
