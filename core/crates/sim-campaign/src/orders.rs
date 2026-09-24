@@ -18,10 +18,11 @@ use crate::buildings::CANCEL_REFUND_PERCENT;
 use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
-use crate::movement;
 use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
-use crate::state::{Army, ArmyId, ArmyPosition, CampaignState, Construction, MoveTarget, Unit};
+use crate::state::{
+    Army, ArmyId, ArmyPosition, CampaignState, Construction, MoveTarget, Stance, Unit,
+};
 
 /// Where an order applies: a settlement, or a province standing for its
 /// city (v1 compatibility).
@@ -1159,14 +1160,7 @@ impl CampaignState {
         }
         // Lot M2: the same settlement, or two armies within reach of an
         // engagement.
-        let together = match (source_army.settlement(), target_army.settlement()) {
-            (Some(a), Some(b)) => a == b,
-            _ => {
-                self.army_distance_km(data, &source_army, target_army)
-                    <= data.free_movement_rules().engage_radius_km
-            }
-        };
-        if !together {
+        if !self.armies_together(data, &source_army, target_army) {
             return Err(OrderError::NotSameProvince);
         }
         let general = source_army.general.clone();

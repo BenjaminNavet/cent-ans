@@ -7,7 +7,7 @@ use crate::orders::Order;
 use crate::state::CampaignState;
 use crate::{
     ai_minimal, battle_request, buildings, characters, chronicle, diplomacy, dynasty, economy,
-    movement, population, religion, research, siege, table,
+    march, population, religion, research, siege, table,
 };
 
 impl CampaignState {
@@ -29,7 +29,10 @@ impl CampaignState {
         // auto-resolved first (M7).
         battle_request::auto_resolve_all_pending(self, data, &mut events);
 
-        // 1. AI orders (invalid ones are silently dropped: the planner is advisory).
+        // 1. Each AI faction in id order (lot M2, minimal sequential turn):
+        // its multi-turn marches resume, then its orders apply at once
+        // (moves, attacks and sieges included). Invalid orders are silently
+        // dropped: the planner is advisory.
         let ai_factions: Vec<FactionId> = self
             .factions
             .iter()
@@ -37,13 +40,13 @@ impl CampaignState {
             .map(|(id, _)| id.clone())
             .collect();
         for faction in ai_factions {
+            march::continue_marches(self, data, Some(&faction), &mut events);
             for order in planner(self, data, &faction) {
                 let _ = self.apply_order(data, &faction, order);
             }
         }
 
-        // 2-4. Movement and battles, sieges, chevauchées.
-        movement::resolve_movement(self, data, &mut events);
+        // 2-4. Sieges, chevauchées (movement and battles are immediate).
         siege::resolve_sieges(self, data, &mut events);
         siege::resolve_raids(self, data, &mut events);
 
@@ -98,13 +101,17 @@ impl CampaignState {
         let allowances: Vec<(crate::state::ArmyId, u32)> = self
             .armies
             .iter()
-            .map(|(id, army)| (id.clone(), self.army_movement_allowance(data, army)))
+            .map(|(id, army)| (id.clone(), self.army_grid_allowance(data, army)))
             .collect();
         for (id, points) in allowances {
             if let Some(army) = self.armies.get_mut(&id) {
-                army.movement_points = points;
+                army.movement_left = points;
             }
         }
+        // Lot M2: the player's multi-turn marches resume at the start of
+        // his turn.
+        let player = self.player_faction.clone();
+        march::continue_marches(self, data, Some(&player), &mut events);
         // C6: agents get their points back and resume their march.
         crate::agents::start_season(self, data);
         let turn = self.turn;

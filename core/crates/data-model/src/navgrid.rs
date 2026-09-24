@@ -51,8 +51,7 @@ pub struct NavGrid {
     /// `true` for the uniform grid built without `navgrid.png`.
     pub fallback: bool,
     /// Connected component of every cell (0 = impassable), computed on
-    /// first use (4-connectivity: a diagonal step needs both orthogonal
-    /// cells passable).
+    /// first use (8-connectivity, like the steps of the path finding).
     components: OnceLock<Vec<u32>>,
 }
 
@@ -127,18 +126,20 @@ impl NavGrid {
                         stack.push(j);
                     }
                 };
-                if x > 0 {
-                    visit(i - 1);
+                for dy in -1i64..=1 {
+                    for dx in -1i64..=1 {
+                        let (nx, ny) = (x as i64 + dx, y as i64 + dy);
+                        if (dx, dy) != (0, 0)
+                            && nx >= 0
+                            && ny >= 0
+                            && (nx as usize) < w
+                            && (ny as usize) < h
+                        {
+                            visit(ny as usize * w + nx as usize);
+                        }
+                    }
                 }
-                if x + 1 < w {
-                    visit(i + 1);
-                }
-                if y > 0 {
-                    visit(i - w);
-                }
-                if y + 1 < h {
-                    visit(i + w);
-                }
+
             }
         }
         labels

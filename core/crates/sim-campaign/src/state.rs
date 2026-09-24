@@ -300,6 +300,10 @@ pub struct SiegeState {
     /// no longer suffers the wall penalty.
     #[serde(default)]
     pub breach: u8,
+    /// Lot M2: turn the siege began (an army entering the place starts it
+    /// at once; it progresses from the next end of turn).
+    #[serde(default)]
+    pub started_turn: u32,
 }
 
 fn full_supplies() -> u8 {
@@ -625,13 +629,11 @@ impl CharacterState {
 pub struct BattleRequest {
     pub attacker: ArmyId,
     pub defender: ArmyId,
-    /// Settlement where the battle takes place.
+    /// Settlement where the battle takes place (the nearest one to a field
+    /// battle, lot M2).
     pub location: SettlementId,
     /// Its province (terrain, names).
     pub province: ProvinceId,
-    /// Settlement the attacker came from (where it retreats when beaten).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub attacker_origin: Option<SettlementId>,
     /// M8: an assault on the settlement `location`; the defender is its
     /// garrison (`defender` then repeats the attacker's id).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -842,21 +844,21 @@ impl CampaignState {
         })
     }
 
-    /// Ids of the armies standing in `province` (on any of its
-    /// settlements), in id order.
-    pub fn armies_in(&self, province: &ProvinceId) -> Vec<ArmyId> {
+    /// Ids of the armies standing in `province` (in one of its settlements
+    /// or in the field inside it), in id order.
+    pub fn armies_in(&self, data: &GameData, province: &ProvinceId) -> Vec<ArmyId> {
         self.armies
             .iter()
-            .filter(|(_, army)| self.settlement_province(&army.location) == Some(province))
+            .filter(|(_, army)| self.army_province(data, army).as_ref() == Some(province))
             .map(|(id, _)| id.clone())
             .collect()
     }
 
-    /// Ids of the armies standing on `settlement`, in id order.
+    /// Ids of the armies stationed in `settlement`, in id order.
     pub fn armies_at(&self, settlement: &SettlementId) -> Vec<ArmyId> {
         self.armies
             .iter()
-            .filter(|(_, army)| &army.location == settlement)
+            .filter(|(_, army)| army.is_at(settlement))
             .map(|(id, _)| id.clone())
             .collect()
     }
@@ -913,13 +915,12 @@ impl CampaignState {
             .is_some_and(|s| self.is_at_war(faction, &s.controller))
     }
 
-    /// Ids of the armies on `settlement` whose faction is at war with `faction`.
+    /// Ids of the armies stationed in `settlement` whose faction is at war
+    /// with `faction`.
     pub fn hostile_armies_at(&self, faction: &FactionId, settlement: &SettlementId) -> Vec<ArmyId> {
         self.armies
             .iter()
-            .filter(|(_, army)| {
-                &army.location == settlement && self.is_at_war(faction, &army.faction)
-            })
+            .filter(|(_, army)| army.is_at(settlement) && self.is_at_war(faction, &army.faction))
             .map(|(id, _)| id.clone())
             .collect()
     }
@@ -932,32 +933,40 @@ impl CampaignState {
     ) -> Vec<ArmyId> {
         self.armies
             .iter()
-            .filter(|(_, army)| {
-                &army.location == settlement && self.is_allied(faction, &army.faction)
-            })
+            .filter(|(_, army)| army.is_at(settlement) && self.is_allied(faction, &army.faction))
             .map(|(id, _)| id.clone())
             .collect()
     }
 
     /// Ids of the armies in `province` whose faction is at war with `faction`.
-    pub fn hostile_armies_in(&self, faction: &FactionId, province: &ProvinceId) -> Vec<ArmyId> {
+    pub fn hostile_armies_in(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+    ) -> Vec<ArmyId> {
         self.armies
             .iter()
             .filter(|(_, army)| {
-                self.settlement_province(&army.location) == Some(province)
-                    && self.is_at_war(faction, &army.faction)
+                self.is_at_war(faction, &army.faction)
+                    && self.army_province(data, army).as_ref() == Some(province)
             })
             .map(|(id, _)| id.clone())
             .collect()
     }
 
     /// Ids of the armies in `province` allied with (or belonging to) `faction`.
-    pub fn friendly_armies_in(&self, faction: &FactionId, province: &ProvinceId) -> Vec<ArmyId> {
+    pub fn friendly_armies_in(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+    ) -> Vec<ArmyId> {
         self.armies
             .iter()
             .filter(|(_, army)| {
-                self.settlement_province(&army.location) == Some(province)
-                    && self.is_allied(faction, &army.faction)
+                self.is_allied(faction, &army.faction)
+                    && self.army_province(data, army).as_ref() == Some(province)
             })
             .map(|(id, _)| id.clone())
             .collect()
@@ -979,8 +988,8 @@ impl CampaignState {
             .armies
             .values()
             .filter(|a| {
-                self.settlement_province(&a.location) == Some(province)
-                    && self.is_allied(controller, &a.faction)
+                self.is_allied(controller, &a.faction)
+                    && self.army_province(data, a).as_ref() == Some(province)
             })
             .map(|a| unit_power(data, &a.units))
             .sum();
@@ -996,7 +1005,8 @@ impl CampaignState {
         let field: f64 = self
             .armies
             .values()
-            .filter(|a| &a.location == settlement && self.is_allied(&s.controller, &a.faction))
+            .filter(|a| a.is_at(settlement) && self.is_allied(&s.controller, &a.faction))
+
             .map(|a| unit_power(data, &a.units))
             .sum();
         unit_power(data, &s.garrison) + field
