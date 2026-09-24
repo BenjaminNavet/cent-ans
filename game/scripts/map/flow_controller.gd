@@ -3,9 +3,9 @@ extends Node
 
 ## F3 — « enveloppe » de la carte de campagne : menu pause (Échap), réglages appliqués à la
 ## carte (caméra, pan par bords, batailles interactives), sauvegardes avec fiche et vignette,
-## sauvegarde automatique tournante, confirmation de fin de tour, rapport de saison et
-## alertes persistantes. `campaign_map.gd` n'appelle que `setup`, `refresh`,
-## `before_end_turn` et `after_end_turn` ; tout le reste passe par les signaux de `MapUI`.
+## sauvegarde automatique tournante, confirmation de fin de tour et rapport de saison (les
+## alertes persistantes passent par la cloche du HUD, `HudController`, F10b).
+## `campaign_map.gd` n'appelle que `setup`, `refresh`, `before_end_turn` et `after_end_turn` ; tout le reste passe par les signaux de `MapUI`.
 ## Aucune règle de jeu : lecture de l'état et envoi des demandes existantes.
 ##
 ## Captures (après `--`) : `--flow-stage=pause|save|settings|report|alerts|confirm`
@@ -15,7 +15,6 @@ extends Node
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 const PAUSE_MENU_SCENE := "res://scenes/ui/pause_menu.tscn"
 const SEASON_REPORT_SCENE := "res://scenes/ui/season_report.tscn"
-const ALERTS_SCENE := "res://scenes/ui/alerts.tscn"
 const MENU_SETTINGS_ID := 910
 const MENU_PAUSE_ID := 911
 const BASE_PAN_SPEED := 1.2
@@ -24,7 +23,6 @@ var map: Node = null  # CampaignMap
 var settings: Node = null
 var pause_menu: PauseMenu = null
 var season_report: SeasonReport = null
-var alerts: AlertsPanel = null
 var last_events: Array = []
 var last_autosave: String = ""
 var _last_saved_turn: int = 0
@@ -51,15 +49,6 @@ func setup(campaign_map: Node) -> void:
 	season_report.disable_requested.connect(func() -> void:
 		if settings != null:
 			settings.call("set_value", "interface/season_report", false))
-	alerts = (load(ALERTS_SCENE) as PackedScene).instantiate()
-	alerts.name = "Alerts"
-	ui.add_child(alerts)
-	ui.move_child(alerts, season_report.get_index())
-	alerts.alert_pressed.connect(_on_alert_pressed)
-	for panel_name in ["army_panel", "province_panel", "faction_panel"]:
-		var panel: Control = ui.get(panel_name)
-		if panel != null:
-			panel.visibility_changed.connect(_update_alerts_visibility)
 	ui.save_requested.connect(_on_save_requested)
 	ui.load_requested.connect(_on_load_requested)
 	var popup: PopupMenu = ui.menu_button.get_popup()
@@ -348,43 +337,11 @@ func _concerns_player(event: Dictionary) -> bool:
 	return false
 
 
-# --- Alertes et navigation --------------------------------------------------------
+# --- Navigation --------------------------------------------------------
 
 
 func refresh() -> void:
-	if alerts == null or map.get("sim") == null:
-		return
-	alerts.set_alerts(AlertsPanel.collect(map, last_events))
-	_update_alerts_visibility()
-
-
-func _update_alerts_visibility() -> void:
-	if alerts == null:
-		return
-	var ui: Node = map.get("ui")
-	var covered := false
-	for panel_name in ["army_panel", "province_panel", "faction_panel"]:
-		var panel: Control = ui.get(panel_name)
-		if panel != null and panel.visible:
-			covered = true
-	alerts.visible = not covered
-
-
-func _on_alert_pressed(alert: Dictionary) -> void:
-	var ui: Node = map.get("ui")
-	match str(alert.get("kind", "")):
-		"enemy_army":
-			focus_army(str(alert.get("army", "")))
-		"siege", "building":
-			focus_province(str(alert.get("province", "")))
-		"debt":
-			ui.faction_panel_requested.emit()
-		"research":
-			ui.tech_panel_requested.emit()
-		"chronicle":
-			var chronicle: Node = map.get("chronicle")
-			if chronicle != null:
-				chronicle.call("open_window")
+	pass  # F10b : les alertes sont rafraîchies par `HudController.refresh`.
 
 
 func _on_report_entry(event: Dictionary) -> void:

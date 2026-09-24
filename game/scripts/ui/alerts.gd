@@ -1,67 +1,18 @@
-class_name AlertsPanel
-extends VBoxContainer
+class_name CampaignAlerts
+extends RefCounted
 
-## F3 — alertes persistantes de la carte (colonne à droite, sous la barre) : armée ennemie
-## aux frontières, province assiégée, dette, recherche inactive, bâtiment terminé, décision de
-## chronique en attente. Chaque alerte reste tant que sa condition tient (recalculée à chaque
-## rafraîchissement de la carte) ; un clic émet `alert_pressed` (la carte centre la caméra
-## ou ouvre le panneau). Les conditions ne font que lire l'état exposé par la simulation.
-
-signal alert_pressed(alert: Dictionary)
-
-const MAX_ALERTS := 8
-const SEVERITY_COLORS := {
-	"danger": Color(0.55, 0.10, 0.08),
-	"warning": Color(0.50, 0.32, 0.05),
-	"info": Color(0.18, 0.28, 0.42),
-}
-
-var alerts: Array = []
-
-
-func _ready() -> void:
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	offset_left = -330
-	offset_right = -12
-	offset_top = 64
-	grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	add_theme_constant_override("separation", 4)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-
-func set_alerts(new_alerts: Array) -> void:
-	alerts = new_alerts
-	for child in get_children():
-		remove_child(child)
-		child.queue_free()
-	for index in mini(new_alerts.size(), MAX_ALERTS):
-		add_child(_alert_button(new_alerts[index]))
-	if new_alerts.size() > MAX_ALERTS:
-		var more := Label.new()
-		more.text = "… %d autres alertes" % (new_alerts.size() - MAX_ALERTS)
-		more.add_theme_font_size_override("font_size", 13)
-		more.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		add_child(more)
-
-
-func _alert_button(alert: Dictionary) -> Button:
-	var button := Button.new()
-	button.text = "%s  %s" % [alert.get("glyph", "!"), alert.get("text", "")]
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	button.tooltip_text = str(alert.get("tooltip", alert.get("text", "")))
-	button.custom_minimum_size = Vector2(318, 0)
-	button.add_theme_font_size_override("font_size", 14)
-	var color: Color = SEVERITY_COLORS.get(str(alert.get("severity", "info")), SEVERITY_COLORS["info"])
-	button.add_theme_color_override("font_color", color)
-	button.add_theme_color_override("font_hover_color", color.darkened(0.3))
-	button.pressed.connect(func() -> void: alert_pressed.emit(alert))
-	return button
+## F3 / F10b — alertes persistantes de la carte, affichées par la cloche de fin de saison
+## (`EndTurnCluster`, bas droite) : armée ennemie aux frontières, province assiégée, dette,
+## recherche inactive, bâtiment terminé, décision de chronique en attente (bloquante). Chaque
+## alerte reste tant que sa condition tient (recalculée à chaque rafraîchissement de la carte).
+## Les conditions ne font que lire l'état exposé par la simulation. (L'ancienne colonne
+## d'alertes à droite de F3 a été retirée : une seule présentation, la cloche.)
 
 
 ## Alertes du joueur d'après l'état de la carte (`CampaignMap`) et les événements du dernier
-## tour. Chaque alerte : `{id, kind, glyph, text, severity, province?, army?}`.
+## tour. Chaque alerte, au format de `EndTurnCluster.set_alerts` : `{id, kind, text, tooltip,
+## severity, province_id?, army_id?, blocking?}` ; types `siege`, `enemy_army`, `debt`,
+## `research_idle`, `chronicle_decision` (bloquante), `construction_done`.
 static func collect(map: Node, last_events: Array) -> Array:
 	var result: Array = []
 	var sim: Object = map.get("sim")
@@ -81,8 +32,8 @@ static func collect(map: Node, last_events: Array) -> Array:
 		var siege: Dictionary = state.get("siege", {})
 		if not siege.is_empty() and str(siege.get("attacker", "")) != player:
 			result.append({
-				"id": "siege:" + province_id, "kind": "siege", "glyph": "⚑", "severity": "danger",
-				"province": province_id,
+				"id": "siege:" + province_id, "kind": "siege", "severity": "danger",
+				"province_id": province_id,
 				"text": "%s assiégée (vivres : %d)" % [map.call("province_name_of", province_id), int(siege.get("supplies", 0))],
 				"tooltip": "Siège mené par %s depuis %d tour(s)." % [_faction_name(str(siege.get("attacker", ""))), int(siege.get("turns_elapsed", 0))],
 			})
@@ -107,14 +58,14 @@ static func collect(map: Node, last_events: Array) -> Array:
 				strength += int(unit.get("strength", 0))
 		var where := "en %s" % map.call("province_name_of", location) if threatened == location else "aux portes de %s" % map.call("province_name_of", threatened)
 		result.append({
-			"id": "army:" + str(army_id), "kind": "enemy_army", "glyph": "⚔", "severity": "danger",
-			"army": str(army_id), "province": location,
+			"id": "army:" + str(army_id), "kind": "enemy_army", "severity": "danger",
+			"army_id": str(army_id), "province_id": location,
 			"text": "Armée ennemie %s (%s)" % [where, _thousands(strength)],
 			"tooltip": "Armée de %s, %s hommes." % [_faction_name(faction), _thousands(strength)],
 		})
 	if int(summary.get("treasury", 0)) < 0:
 		result.append({
-			"id": "debt", "kind": "debt", "glyph": "℔", "severity": "danger",
+			"id": "debt", "kind": "debt", "severity": "danger",
 			"text": "Trésor endetté : %s ℔" % _thousands(int(summary.get("treasury", 0))),
 			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l'impôt.",
 		})
@@ -128,16 +79,17 @@ static func collect(map: Node, last_events: Array) -> Array:
 					break
 			if available:
 				result.append({
-					"id": "research", "kind": "research", "glyph": "⚙", "severity": "warning",
+					"id": "research", "kind": "research_idle", "severity": "warning",
 					"text": "Aucune recherche en cours",
 					"tooltip": "Ouvrir les technologies (T).",
 				})
 	if sim.has_method("get_pending_decisions"):
-		var decisions: Array = sim.call("get_pending_decisions")
-		if not decisions.is_empty():
+		for decision in sim.call("get_pending_decisions"):
 			result.append({
-				"id": "chronicle", "kind": "chronicle", "glyph": "§", "severity": "warning",
-				"text": "Chronique : %d décision%s en attente" % [decisions.size(), "s" if decisions.size() > 1 else ""],
+				"id": "chronicle:%s" % str(decision.get("id", "")), "kind": "chronicle_decision", "severity": "warning",
+				"blocking": true, "decision_id": decision.get("id", -1),
+				"province_id": str(decision.get("province", "")),
+				"text": "Chronique : %s" % str(decision.get("title", "décision en attente")),
 			})
 	for event in last_events:
 		if not (event is Dictionary) or str(event.get("kind", "")) != "building_completed":
@@ -146,8 +98,8 @@ static func collect(map: Node, last_events: Array) -> Array:
 		if province_id == "" or not owned.has(province_id):
 			continue
 		result.append({
-			"id": "building:%s:%d" % [province_id, result.size()], "kind": "building", "glyph": "⚒", "severity": "info",
-			"province": province_id, "text": str(event.get("text_fr", "Bâtiment terminé")),
+			"id": "building:%s:%d" % [province_id, result.size()], "kind": "construction_done", "severity": "info",
+			"province_id": province_id, "text": str(event.get("text_fr", "Bâtiment terminé")),
 		})
 	return result
 
