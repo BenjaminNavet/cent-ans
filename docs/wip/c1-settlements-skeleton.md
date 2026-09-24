@@ -10,10 +10,10 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 8 (lot C1). ADR 0005.
   `settlement_graph`.
 - [x] `data/settlements/rules.json` + `data/schemas/settlement_rules.schema.json`.
 - [x] `sim-campaign` : `SettlementState`, `CampaignState.settlements` (serde default), `init_settlements` dans setup 1337, accesseurs `settlement_state`, `province_settlements`, test `tests/c1_settlements.rs`.
-- [ ] Test Python `tools/tests/test_settlements_schema.py`.
+- [x] Test Python `tools/tests/test_settlements_schema.py` (vérifié avec un fichier Normandie temporaire, supprimé).
 - [ ] Pont Godot : `settlements()`.
 - [ ] fmt/clippy/test, pytest, build.sh, smoke Godot.
 
 ## Prochaine étape
 
-Test Python `tools/tests/test_settlements_schema.py`, puis pont Godot.
+Pont Godot `settlements()` dans `godot-bridge`.
