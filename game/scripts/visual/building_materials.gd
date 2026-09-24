@@ -21,7 +21,7 @@ const SPECS := {
 	"Door": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "", 1.6, Color(0.7, 0.62, 0.55), 0.9],
 	"RoofTile": ["buildings/clay_roof_tiles_03_diff", "buildings/clay_roof_tiles_03_nor", "buildings/clay_roof_tiles_03_rough", 2.4, Color(0.85, 0.78, 0.76), 0.85],
 	"RoofFlat": ["buildings/roof_tiles_14_diff", "buildings/roof_tiles_14_nor", "buildings/roof_tiles_14_rough", 2.2, Color(1.0, 1.0, 1.0), 0.88],
-	"RoofSlate": ["battle/roof_slates_02_diff", "battle/roof_slates_02_nor", "", 2.4, Color(0.64, 0.68, 0.76), 0.6],
+	"RoofSlate": ["battle/roof_slates_02_diff", "battle/roof_slates_02_nor", "", 2.4, Color(0.5, 0.53, 0.61), 0.6],
 	"Thatch": ["battle/thatch_roof_angled_diff", "battle/thatch_roof_angled_nor", "", 2.2, Color(1.45, 1.2, 0.85), 1.0],
 }
 ## Matériaux unis (sans texture) : couleur sRGB, rugosité.
@@ -31,6 +31,11 @@ const PLAIN := {
 	"Canvas": [Color(0.78, 0.74, 0.66), 0.95],
 }
 const ROOFS := ["RoofTile", "RoofFlat", "RoofSlate", "Thatch"]
+## Maquettes de campagne : toutes les matières du kit fusionnées en un matériau `Building`
+## (`building_atlas.gdshader`), couche = alpha de la couleur de sommet. Même ordre que
+## `kit_campaign.LAYERS` et que les tranches de `building_albedo_array.jpg`.
+const ATLAS_LAYERS := ["Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door", "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"]
+const ATLAS_SHADER := preload("res://shaders/building_atlas.gdshader")
 
 static var _materials: Dictionary = {}  # "variante|nom" → Material
 static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh
@@ -46,6 +51,10 @@ static func material(name: String, variant: String = "") -> Material:
 	var key := variant + "|" + name
 	if _materials.has(key):
 		return _materials[key]
+	if name == "Building":
+		var atlas := _atlas(variant)
+		_materials[key] = atlas
+		return atlas
 	var mat: StandardMaterial3D = null
 	if SPECS.has(name):
 		mat = _textured(name, variant)
@@ -59,6 +68,36 @@ static func material(name: String, variant: String = "") -> Material:
 	if mat != null:
 		mat.resource_name = name
 	_materials[key] = mat
+	return mat
+
+
+static func _atlas(variant: String) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = ATLAS_SHADER
+	mat.resource_name = "Building"
+	mat.set_shader_parameter("albedo_array", load(TEX + "buildings/building_albedo_array.jpg"))
+	var tints := PackedVector4Array()
+	var tiles := PackedFloat32Array()
+	for i in 16:
+		var layer_name: String = ATLAS_LAYERS[i] if i < ATLAS_LAYERS.size() else ""
+		if SPECS.has(layer_name):
+			var spec: Array = SPECS[layer_name]
+			var tint: Color = spec[4]
+			tints.append(Vector4(tint.r, tint.g, tint.b, float(spec[5])))
+			tiles.append(1.0 / float(spec[3]))
+		elif PLAIN.has(layer_name):
+			var color: Color = (PLAIN[layer_name][0] as Color).srgb_to_linear()
+			tints.append(Vector4(color.r, color.g, color.b, float(PLAIN[layer_name][1])))
+			tiles.append(1.0)
+		else:
+			tints.append(Vector4(1, 1, 1, 0.9))
+			tiles.append(1.0)
+	mat.set_shader_parameter("layer_tint", tints)
+	mat.set_shader_parameter("layer_tile", tiles)
+	mat.set_shader_parameter("first_plain", ATLAS_LAYERS.find("Window"))
+	mat.set_shader_parameter("roof_first", ATLAS_LAYERS.find("RoofTile"))
+	mat.set_shader_parameter("roof_last", ATLAS_LAYERS.find("Thatch"))
+	mat.set_shader_parameter("snow", 1.0 if variant == "snow" else 0.0)
 	return mat
 
 
