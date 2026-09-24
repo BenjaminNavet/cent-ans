@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_siege_fire.schema.json",
+  "title": "Rendu des incendies de siège",
+  "description": "Fichier data/fx/siege_fire.json (lot S2) : paramètres visuels de game/scripts/battle/siege_fire_fx.gd. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "rgba": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
+    "range": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "update_period_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Secondes entre deux lectures de l'état du feu." },
+    "flame_height_m": { "type": "number", "minimum": 0, "maximum": 20, "description": "Hauteur des flammes au-dessus du sol." },
+    "max_lights": { "type": "integer", "minimum": 0, "maximum": 32, "description": "Lumières actives au plus (les foyers les plus intenses)." },
+    "light": {
+      "type": "object",
+      "properties": {
+        "color": { "$ref": "#/$defs/rgb" },
+        "energy": { "type": "number", "minimum": 0 },
+        "range_m": { "type": "number", "exclusiveMinimum": 0 },
+        "height_m": { "type": "number", "minimum": 0 },
+        "flicker_speed": { "type": "number", "minimum": 0 },
+        "flicker_amount": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["color", "energy", "range_m", "height_m", "flicker_speed", "flicker_amount"],
+      "additionalProperties": false
+    },
+    "flames": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 1, "maximum": 512 },
+        "lifetime_s": { "type": "number", "exclusiveMinimum": 0 },
+        "size_m": { "$ref": "#/$defs/range" },
+        "velocity_m_s": { "$ref": "#/$defs/range" },
+        "spread_m": { "type": "number", "minimum": 0 },
+        "color_start": { "$ref": "#/$defs/rgba" },
+        "color_end": { "$ref": "#/$defs/rgba" }
+      },
+      "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "spread_m", "color_start", "color_end"],
+      "additionalProperties": false
+    },
+    "smoke": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 1, "maximum": 512 },
+        "lifetime_s": { "type": "number", "exclusiveMinimum": 0 },
+        "size_m": { "$ref": "#/$defs/range" },
+        "velocity_m_s": { "$ref": "#/$defs/range" },
+        "spread_m": { "type": "number", "minimum": 0 },
+        "color": { "$ref": "#/$defs/rgba" },
+        "wind_drift_m_s": { "type": "number", "minimum": 0, "description": "Dérive de la fumée par unité de force du vent." }
+      },
+      "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "spread_m", "color", "wind_drift_m_s"],
+      "additionalProperties": false
+    },
+    "ruin": {
+      "type": "object",
+      "properties": {
+        "char_color": { "$ref": "#/$defs/rgb" },
+        "rubble_height_m": { "type": "number", "minimum": 0 },
+        "collapse_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Hauteur restante de la maison effondrée." },
+        "beams": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "embers": { "type": "integer", "minimum": 0, "maximum": 128 }
+      },
+      "required": ["char_color", "rubble_height_m", "collapse_scale", "beams", "embers"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["update_period_s", "flame_height_m", "max_lights", "light", "flames", "smoke", "ruin"],
+  "additionalProperties": false
+}

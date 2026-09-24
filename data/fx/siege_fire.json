@@ -1,0 +1,39 @@
+{
+  "description": "Rendu des incendies de siège (lot S2) : flammes et fumée par maison en feu, lumières vacillantes plafonnées, maisons brûlées effondrées et noircies. Purement visuel : les règles du feu sont dans data/rules/siege_fire.json (cœur Rust).",
+  "update_period_s": 0.2,
+  "flame_height_m": 4.5,
+  "max_lights": 8,
+  "light": {
+    "color": [1.0, 0.52, 0.18],
+    "energy": 5.0,
+    "range_m": 30.0,
+    "height_m": 7.0,
+    "flicker_speed": 9.0,
+    "flicker_amount": 0.35
+  },
+  "flames": {
+    "amount": 48,
+    "lifetime_s": 1.1,
+    "size_m": [1.4, 3.0],
+    "velocity_m_s": [2.5, 5.5],
+    "spread_m": 5.0,
+    "color_start": [1.0, 0.82, 0.35, 1.0],
+    "color_end": [0.75, 0.12, 0.02, 0.0]
+  },
+  "smoke": {
+    "amount": 28,
+    "lifetime_s": 8.0,
+    "size_m": [4.0, 11.0],
+    "velocity_m_s": [2.0, 4.0],
+    "spread_m": 4.0,
+    "color": [0.16, 0.15, 0.14, 0.55],
+    "wind_drift_m_s": 3.5
+  },
+  "ruin": {
+    "char_color": [0.07, 0.06, 0.05],
+    "rubble_height_m": 1.3,
+    "collapse_scale": 0.25,
+    "beams": 5,
+    "embers": 10
+  }
+}

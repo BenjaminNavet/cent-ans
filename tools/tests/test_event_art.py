@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from cent_ans_tools import event_art
+from cent_ans_tools import codex_art, event_art
 
 
 def _write(directory: Path, name: str, payload: dict) -> None:
@@ -104,3 +104,30 @@ def test_entry_art_prompts_and_plan(tmp_path: Path) -> None:
     out_dir.mkdir()
     (out_dir / "unit_x.jpg").write_bytes(b"x")
     assert [job.character_id for job in entry_art.plan(data_dir, out_dir)] == ["tech_x"]
+
+
+def test_codex_plan_skips_entities_with_art_and_orders_by_category(tmp_path):
+    """Codex entries reuse entity art; others are planned by category priority."""
+    data_dir = tmp_path / "data"
+    entries = {
+        "cdx_recette": {"category": "recette", "summary": "Un plat."},
+        "cdx_paris": {
+            "category": "lieu",
+            "era": {"from": "1337", "to": "1453"},
+            "summary": "Capitale de [[cdx_charles_v|Charles V]] et du [[cdx_parlement]].",
+        },
+        "cdx_crecy": {"category": "bataille", "entity": "evt_crecy", "summary": "."},
+        "cdx_roi": {"category": "personnage", "summary": "Un roi."},
+    }
+    for entry_id, entry in entries.items():
+        _write(
+            data_dir / "codex", entry_id, {"id": entry_id, "title": entry_id, **entry}
+        )
+    assets_dir = tmp_path / "assets"
+    (assets_dir / "events").mkdir(parents=True)
+    (assets_dir / "events" / "evt_crecy.jpg").write_bytes(b"x")
+    jobs = codex_art.plan(data_dir, assets_dir)
+    assert [job.character_id for job in jobs] == ["cdx_paris", "cdx_recette"]
+    assert "period 1337-1453" in jobs[0].prompt
+    assert "Capitale de Charles V et du cdx_parlement." in jobs[0].prompt
+    assert jobs[0].out_path == assets_dir / "illustrations" / "cdx_paris.jpg"
