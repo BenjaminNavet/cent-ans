@@ -220,6 +220,11 @@ fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) 
                     unit.experience,
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
+                // G1: armour / ranged of the levying province's buildings.
+                setup.stats.armor = setup.stats.armor.saturating_add(unit.levy_armor).min(100);
+                if setup.stats.ranged > 0 {
+                    setup.stats.ranged = setup.stats.ranged.saturating_add(unit.levy_ranged);
+                }
                 setup
             }
             None => UnitSetup {
@@ -597,6 +602,8 @@ impl CampaignState {
                         max_strength: unit_type.soldiers,
                         morale: unit_type.stats.morale,
                         experience: 0,
+                        levy_armor: 0,
+                        levy_ranged: 0,
                     });
                 }
             }

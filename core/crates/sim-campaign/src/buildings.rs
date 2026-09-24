@@ -116,11 +116,6 @@ pub struct EffectTotals {
     /// G1: extra simultaneous recruitments per province (`RecruitSlots`).
     #[serde(default)]
     pub recruit_slots: EffectValue,
-    /// G1: armour / ranged bonus of the units levied in the province.
-    #[serde(default)]
-    pub army_armor: EffectValue,
-    #[serde(default)]
-    pub army_ranged: EffectValue,
     /// Effects restricted to one social class (`Effect::class`).
     #[serde(default)]
     pub classes: ClassEffectTotals,
@@ -278,8 +273,6 @@ impl EffectTotals {
             wound_recovery,
             diet_health,
             recruit_slots,
-            army_armor,
-            army_ranged,
         );
         for class in SocialClass::ALL {
             self.classes.get_mut(class).merge(other.classes.get(class));
@@ -370,8 +363,6 @@ impl EffectTotals {
             EffectKind::WoundRecovery => &mut self.wound_recovery,
             EffectKind::DietHealth => &mut self.diet_health,
             EffectKind::RecruitSlots => &mut self.recruit_slots,
-            EffectKind::ArmyArmor => &mut self.army_armor,
-            EffectKind::ArmyRanged => &mut self.army_ranged,
             _ => return,
         };
         slot.add(mode, value);
@@ -400,6 +391,30 @@ pub fn effects_of(data: &GameData, buildings: &[BuildingId]) -> EffectTotals {
         }
     }
     totals
+}
+
+/// G1: flat `(armor, ranged)` bonus the buildings of a province grant the
+/// units of `category` levied there (armoury +3 armour, archery butts +3
+/// ranged for archers); an effect without `unit_category` applies to every
+/// family. Stored on the unit at recruitment (`Unit::levy_armor`), so it
+/// follows the regiment wherever it fights. Capped at 10 each.
+pub fn levy_bonus(data: &GameData, buildings: &[BuildingId], category: UnitCategory) -> (u8, u8) {
+    let (mut armor, mut ranged) = (0.0, 0.0);
+    for building in buildings.iter().filter_map(|id| data.buildings.get(id)) {
+        for effect in &building.effects {
+            if effect.mode != EffectMode::Add || effect.unit_category.is_some_and(|c| c != category)
+            {
+                continue;
+            }
+            match effect.effect {
+                EffectKind::ArmyArmor => armor += effect.value,
+                EffectKind::ArmyRanged => ranged += effect.value,
+                _ => {}
+            }
+        }
+    }
+    let cap = |v: f64| v.round().clamp(0.0, 10.0) as u8;
+    (cap(armor), cap(ranged))
 }
 
 /// Population capacity of a province: [`BASE_CAPACITY`] times one plus the
