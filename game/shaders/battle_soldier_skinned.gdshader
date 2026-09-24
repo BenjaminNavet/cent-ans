@@ -59,6 +59,8 @@ uniform float release_at = 1.0;
 // Variantes (casques, armes...) : bit v de UV2.x = pièce visible pour la variante v.
 uniform int variant_count = 1;
 uniform float size_jitter = 0.05;
+// Distance (m) au-delà de laquelle les images ne sont plus interpolées.
+uniform float interp_distance = 45.0;
 
 uniform vec3 livery : source_color = vec3(0.2, 0.3, 0.75);
 uniform vec3 trim : source_color = vec3(0.85, 0.7, 0.25);
@@ -149,14 +151,14 @@ void clip_rows(int clip, float t, out int r0, out int r1, out float f) {
 	r1 = int(c.x + f1);
 }
 
-void pose_rows(int clip, float t, ivec4 idx, vec4 w, out vec4 a, out vec4 b, out vec4 c) {
+void pose_rows(int clip, float t, ivec4 idx, vec4 w, bool smooth_frames, out vec4 a, out vec4 b, out vec4 c) {
 	int r0;
 	int r1;
 	float f;
 	clip_rows(clip, t, r0, r1, f);
 	vec4 a0; vec4 b0; vec4 c0;
 	skin_rows(r0, idx, w, a0, b0, c0);
-	if (f > 0.01 && r1 != r0) {
+	if (smooth_frames && f > 0.01 && r1 != r0) {
 		vec4 a1; vec4 b1; vec4 c1;
 		skin_rows(r1, idx, w, a1, b1, c1);
 		a0 = mix(a0, a1, f);
@@ -186,14 +188,16 @@ void vertex() {
 	float t;
 	choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, clip, t);
 	vec4 a; vec4 b; vec4 c;
-	pose_rows(clip, t, idx, w, a, b, c);
+	// Au loin, image la plus proche sans interpolation (moitié moins de lectures).
+	bool smooth_frames = length((MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz) < interp_distance;
+	pose_rows(clip, t, idx, w, smooth_frames, a, b, c);
 	float blend = clamp((anim_time - blend_since) / max(blend_time, 0.01), 0.0, 1.0);
 	if (blend < 1.0 && clip_mode != M_CUSTOM) {
 		int pclip;
 		float pt;
 		choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, pclip, pt);
 		vec4 pa; vec4 pb; vec4 pc;
-		pose_rows(pclip, pt, idx, w, pa, pb, pc);
+		pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
 		float s = smoothstep(0.0, 1.0, blend);
 		a = mix(pa, a, s);
 		b = mix(pb, b, s);

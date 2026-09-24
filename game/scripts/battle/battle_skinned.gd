@@ -20,6 +20,7 @@ static var _manifest: Dictionary = {}
 static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
+static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 
 
 static func manifest() -> Dictionary:
@@ -171,11 +172,13 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 ## `state` (clé de la simulation : idle, marching, charging, melee, shooting, routing,
 ## climbing ; `running` = marche au pas de course).
 static func state_config(kind: String, variant: int, state: String, running: bool) -> Dictionary:
-	var style := _style(kind, variant)
-	var sets: Dictionary = STYLES.get(style, STYLES["sword"])
 	var key := state
 	if state == "marching" and running:
 		key = "running"
+	var cache_key := "%s/%d/%s" % [kind, variant, key]
+	if _configs.has(cache_key):
+		return _configs[cache_key]
+	var sets: Dictionary = STYLES.get(_style(kind, variant), STYLES["sword"])
 	if not sets.has(key):
 		key = "idle"
 	var entry: Dictionary = sets[key]
@@ -183,7 +186,9 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 	var ids: Array[int] = []
 	for c in entry["set"]:
 		ids.append(clip_index(rig_entry, str(c)))
-	return {"set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	_configs[cache_key] = config
+	return config
 
 
 ## Clips de mort (mode CUSTOM des cadavres, INSTANCE_CUSTOM.y = indice dans ce jeu).
@@ -196,7 +201,7 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 			ids.append(clip_index(rig_entry, str(c)))
 	if ids.is_empty():
 		ids.append(0)
-	return {"set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 
 
 static func _style(kind: String, variant: int) -> String:
@@ -220,7 +225,7 @@ const STYLES := {
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
-		"melee": {"set": ["slash", "slash_m", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.3},
+		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
 		"routing": {"set": ["run"], "speed": 1.1},
 		"climbing": {"set": ["run"]},
 	},
@@ -229,7 +234,7 @@ const STYLES := {
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
-		"melee": {"set": ["slash", "thrust", "slash_m", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.5},
 		"routing": {"set": ["run"], "speed": 1.15},
 	},
 	"pike": {
@@ -282,7 +287,7 @@ const STYLES := {
 ## configuration devient la source du fondu.
 static func apply_config(mat: ShaderMaterial, config: Dictionary, anim_time: float) -> void:
 	var previous: Dictionary = mat.get_meta("v2_config", {})
-	if previous.hash() == config.hash():
+	if str(previous.get("key", "")) == str(config["key"]):
 		return
 	if not previous.is_empty():
 		mat.set_shader_parameter("prev_set", _ivec(previous["set"]))

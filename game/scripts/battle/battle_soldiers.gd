@@ -20,6 +20,8 @@ const TRIM_SILVER := Color(0.85, 0.85, 0.82)
 ## de `DETAIL_DISTANCE`, moyen jusqu'à `LOD_DISTANCE` (leur ombre est portée par le maillage
 ## lointain), maillage lointain au-delà, sans ombre portée après `SHADOW_DISTANCE`.
 const DETAIL_DISTANCE := 32.0
+## Figurines skinnées (lot V2) : maillage complet plus tôt relayé (skinning plus coûteux).
+const SKINNED_DETAIL_DISTANCE := 24.0
 const LOD_DISTANCE := 75.0
 const SHADOW_DISTANCE := 190.0
 
@@ -201,8 +203,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	var near := distance < LOD_DISTANCE
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE
-	var level := BattleMeshes.LEVEL_FULL if distance < DETAIL_DISTANCE else BattleMeshes.LEVEL_MEDIUM
 	var skinned := _skinned.has(id)
+	var level := BattleMeshes.LEVEL_FULL if distance < (SKINNED_DETAIL_DISTANCE if skinned else DETAIL_DISTANCE) else BattleMeshes.LEVEL_MEDIUM
 	if near and int(_near_level.get(id, -1)) != level:
 		_near_level[id] = level
 		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))

@@ -308,7 +308,7 @@ def export_cavalry(fig_name, recipe, rig):
     for level in range(3):
         objs = build_cavalry(recipe, level)
         name = f"{fig_name}_lod{level}.mesh.bin"
-        tris.append(bs.export_mesh(objs, rig, cavalry_alias, os.path.join(bs.OUT_DIR, name)))
+        tris.append(bs.export_mesh(objs, rig, cavalry_alias, os.path.join(bs.OUT_DIR, name), influences=bs.INFLUENCES[level]))
         files.append(name)
     return {"rig": "cavalry", "lods": files, "tris": tris, "variants": recipe.get("variants", 1)}
 
