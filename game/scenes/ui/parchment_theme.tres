@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=9 format=3 uid="uid://cent_ans_parchment_theme"]
+[gd_resource type="Theme" load_steps=10 format=3 uid="uid://cent_ans_parchment_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 16.0
@@ -110,6 +110,22 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.12, 0.1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
 [sub_resource type="SystemFont" id="SystemFont_serif"]
 font_names = PackedStringArray("Georgia", "Palatino", "Times New Roman", "serif")
 
@@ -118,9 +134,11 @@ default_font = SubResource("SystemFont_serif")
 default_font_size = 16
 Button/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 Button/colors/font_disabled_color = Color(0.50, 0.44, 0.36, 1)
+Button/colors/font_focus_color = Color(0.15, 0.09, 0.04, 1)
 Button/colors/font_hover_color = Color(0.15, 0.09, 0.04, 1)
 Button/colors/font_pressed_color = Color(0.98, 0.94, 0.85, 1)
 Button/styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+Button/styles/focus = SubResource("StyleBoxFlat_focus")
 Button/styles/hover = SubResource("StyleBoxFlat_button_hover")
 Button/styles/normal = SubResource("StyleBoxFlat_button")
 Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")

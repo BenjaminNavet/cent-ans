@@ -332,7 +332,8 @@ func _characters_available() -> bool:
 func _refresh_top_bar() -> void:
 	ui.set_faction(SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
 	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
-	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
+	# Le moteur compte les tours à partir de 0 ; le joueur commence au tour 1 (audit A3 C2).
+	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), int(sim.call("get_turn")) + 1])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
 	var economy: Dictionary = {}
 	if _economy_available():
@@ -1229,14 +1230,17 @@ func _stage_screenshot_siege() -> void:
 	if ids.is_empty():
 		return
 	var army_id := str(ids[0])
-	for _turn in 6:
+	# Le siège vit sur la colonie (lot C) : on attend que `get_assault_odds` le voie ; la cible
+	# n'est choisie qu'une fois, sans quoi l'armée change de route à chaque tour (audit A3 C12).
+	for _turn in 14:
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
 			return
-		var state: Dictionary = sim.call("get_province_state", str(army.get("location_province", army.get("location", ""))))
-		var siege: Dictionary = state.get("siege", {})
-		if str(siege.get("attacker", "")) == player_faction:
+		if bool((sim.call("get_assault_odds", army_id) as Dictionary).get("available", false)):
 			break
+		if not Array(army.get("path", [])).is_empty():
+			sim.call("end_turn")
+			continue
 		var target := ""
 		var best := 1 << 30
 		for id in SimFacade.store.call("get_province_ids"):

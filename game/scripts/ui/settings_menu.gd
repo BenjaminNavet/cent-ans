@@ -160,7 +160,7 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "camera/edge_pan", "Défilement par les bords de l'écran", "Aussi basculé par F2 sur la carte.")
 	_slider(grid, "Vitesse de la caméra", float(settings.call("get_value", "camera/speed")), 0.4, 2.5, 0.1,
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
-	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées. Portée : data/rules/vision.json.")
+	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
 
