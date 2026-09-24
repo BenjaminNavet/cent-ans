@@ -4,7 +4,7 @@
 
 use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{CampaignState, EventKind, Order, Season, TaxRate};
 
@@ -20,6 +20,11 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// The city of a province (lot C4: buildings stand in settlements).
+fn city(state: &CampaignState, province: &str) -> SettlementId {
+    state.province_city_id(&prov(province)).unwrap().clone()
 }
 
 fn building(id: &str) -> data_model::BuildingId {
@@ -153,9 +158,10 @@ fn sustained_high_unrest_triggers_a_revolt() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 105).unwrap();
     let boulogne = prov("prov_boulonnais");
     {
-        let p = state.provinces.get_mut(&boulogne).unwrap();
-        p.controller = fac("fac_england"); // occupied by a foreign faction
-        p.devastation = 90;
+        let city = city(&state, "prov_boulonnais");
+        // occupied by a foreign faction
+        state.settlements.get_mut(&city).unwrap().controller = fac("fac_england");
+        state.provinces.get_mut(&boulogne).unwrap().devastation = 90;
     }
     set_all_unrest(&mut state, &boulogne, 99);
     let mut revolted = false;
@@ -176,16 +182,16 @@ fn extreme_unrest_hands_the_province_to_the_rebels() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 106).unwrap();
     let boulogne = prov("prov_boulonnais");
     {
-        let p = state.provinces.get_mut(&boulogne).unwrap();
-        p.controller = fac("fac_england");
-        p.devastation = 95;
+        let city = city(&state, "prov_boulonnais");
+        state.settlements.get_mut(&city).unwrap().controller = fac("fac_england");
+        state.provinces.get_mut(&boulogne).unwrap().devastation = 95;
     }
     let rebels = fac("fac_rebels");
     let mut taken_by_rebels = false;
     for _ in 0..6 {
         set_all_unrest(&mut state, &boulogne, 100);
         state.end_turn_with(&data, idle);
-        if state.province_state(&boulogne).unwrap().controller == rebels {
+        if state.province_controller(&boulogne) == Some(&rebels) {
             taken_by_rebels = true;
             break;
         }
@@ -193,7 +199,7 @@ fn extreme_unrest_hands_the_province_to_the_rebels() {
     assert!(
         taken_by_rebels,
         "unrest > 90 must hand the province to fac_rebels; controller = {:?}",
-        state.province_state(&boulogne).unwrap().controller
+        state.province_controller(&boulogne)
     );
 }
 
@@ -237,8 +243,8 @@ fn more_goods_categories_raise_satisfaction() {
 fn buildable_reports_the_missing_prerequisite() {
     let data = data();
     let mut state = france(&data, 108);
-    let paris = prov("prov_ile_de_france");
-    state.provinces.get_mut(&paris).unwrap().buildings.clear();
+    let paris = city(&state, "prov_ile_de_france");
+    state.settlements.get_mut(&paris).unwrap().buildings.clear();
     let options = state.buildable(&data, &paris);
     let guild_hall = options
         .iter()
@@ -252,7 +258,7 @@ fn buildable_reports_the_missing_prerequisite() {
     );
 
     state
-        .provinces
+        .settlements
         .get_mut(&paris)
         .unwrap()
         .buildings
@@ -269,7 +275,7 @@ fn buildable_reports_the_missing_prerequisite() {
 fn build_order_charges_cost_and_completes_after_its_duration() {
     let data = data();
     let mut state = france(&data, 109);
-    let paris = prov("prov_ile_de_france");
+    let paris = city(&state, "prov_ile_de_france");
     let france_id = fac("fac_france");
     let armoury = building("bld_armoury"); // upgrades_from bld_muster_field, already present
     let cost = data.buildings[&armoury].cost.money;
@@ -280,7 +286,7 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
         .submit_order(
             &data,
             Order::Build {
-                province: paris.clone(),
+                settlement: paris.clone().into(),
                 building: armoury.clone(),
             },
         )
@@ -290,7 +296,7 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
         treasury_before - i64::from(cost)
     );
     let construction = state
-        .province_state(&paris)
+        .settlement_state(&paris)
         .unwrap()
         .construction
         .clone()
@@ -302,7 +308,12 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
     let mut events = Vec::new();
     for _ in 0..turns {
         events = state.end_turn_with(&data, idle);
-        if state.province_state(&paris).unwrap().construction.is_none() {
+        if state
+            .settlement_state(&paris)
+            .unwrap()
+            .construction
+            .is_none()
+        {
             completed = true;
             break;
         }
@@ -311,7 +322,7 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
     assert!(events
         .iter()
         .any(|e| e.kind == EventKind::BuildingCompleted));
-    let buildings = &state.province_state(&paris).unwrap().buildings;
+    let buildings = &state.settlement_state(&paris).unwrap().buildings;
     assert!(buildings.contains(&armoury));
     assert!(
         !buildings.contains(&building("bld_muster_field")),
@@ -333,7 +344,7 @@ fn completed_building_effects_apply_to_the_province() {
         .submit_order(
             &data,
             Order::Build {
-                province: province.clone(),
+                settlement: province.clone().into(),
                 building: guild_hall.clone(),
             },
         )
@@ -341,7 +352,7 @@ fn completed_building_effects_apply_to_the_province() {
     for _ in 0..turns {
         state.end_turn_with(&data, idle);
     }
-    let buildings = &state.province_state(&province).unwrap().buildings;
+    let buildings = &state.province_buildings(&province);
     assert!(buildings.contains(&guild_hall));
     let effects_after = state.province_effects(&data, &province);
     let (before, after) = (
@@ -372,7 +383,7 @@ fn completed_building_effects_apply_to_the_province() {
 fn cancel_build_refunds_half_the_cost() {
     let data = data();
     let mut state = france(&data, 111);
-    let paris = prov("prov_ile_de_france");
+    let paris = city(&state, "prov_ile_de_france");
     let france_id = fac("fac_france");
     let armoury = building("bld_armoury");
     let cost = data.buildings[&armoury].cost.money;
@@ -381,7 +392,7 @@ fn cancel_build_refunds_half_the_cost() {
         .submit_order(
             &data,
             Order::Build {
-                province: paris.clone(),
+                settlement: paris.clone().into(),
                 building: armoury,
             },
         )
@@ -391,7 +402,7 @@ fn cancel_build_refunds_half_the_cost() {
         .submit_order(
             &data,
             Order::CancelBuild {
-                province: paris.clone(),
+                settlement: paris.clone().into(),
             },
         )
         .unwrap();
@@ -400,7 +411,11 @@ fn cancel_build_refunds_half_the_cost() {
         treasury_after_cancel,
         treasury_after_build + i64::from(cost / 2)
     );
-    assert!(state.province_state(&paris).unwrap().construction.is_none());
+    assert!(state
+        .settlement_state(&paris)
+        .unwrap()
+        .construction
+        .is_none());
 }
 
 // ----- taxes (spec § 1.4) ---------------------------------------------------
@@ -460,9 +475,9 @@ fn low_tax_lowers_income_versus_normal() {
 fn average_unrest(state: &CampaignState, faction: &FactionId) -> f64 {
     let values: Vec<f64> = state
         .provinces
-        .values()
-        .filter(|p| &p.controller == faction)
-        .map(|p| weighted_unrest(&p.population))
+        .iter()
+        .filter(|(id, _)| state.controls_province(faction, id))
+        .map(|(_, p)| weighted_unrest(&p.population))
         .collect();
     values.iter().sum::<f64>() / values.len() as f64
 }
@@ -473,12 +488,12 @@ fn average_unrest(state: &CampaignState, faction: &FactionId) -> f64 {
 fn save_json_round_trips_the_new_m3_fields() {
     let data = data();
     let mut state = france(&data, 114);
-    let paris = prov("prov_ile_de_france");
+    let paris = city(&state, "prov_ile_de_france");
     state
         .submit_order(
             &data,
             Order::Build {
-                province: paris.clone(),
+                settlement: paris.clone().into(),
                 building: building("bld_armoury"),
             },
         )
@@ -497,8 +512,8 @@ fn save_json_round_trips_the_new_m3_fields() {
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
     assert_eq!(
-        loaded.province_state(&paris).unwrap().construction,
-        state.province_state(&paris).unwrap().construction
+        loaded.settlement_state(&paris).unwrap().construction,
+        state.settlement_state(&paris).unwrap().construction
     );
     assert_eq!(
         loaded.faction_state(&fac("fac_france")).unwrap().tax_rate,
@@ -515,16 +530,17 @@ fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
         "\"state_version\":1",
     );
     let err = CampaignState::load_json(&json).unwrap_err();
+    // Lot C4: any save older than v5 predates the settlements.
     assert!(matches!(
         err,
-        sim_campaign::CampaignError::VersionMismatch {
+        sim_campaign::CampaignError::PreSettlementSave {
             found: 1,
             expected: sim_campaign::STATE_VERSION
         }
     ));
     let message = err.to_string();
     assert!(
-        message.contains("version") && message.contains("prise en charge"),
+        message.contains("version") && message.contains("refonte des colonies"),
         "message should be a clear French explanation: {message}"
     );
 }

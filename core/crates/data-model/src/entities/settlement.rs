@@ -170,6 +170,11 @@ pub struct SettlementRules {
     /// Movement on the settlement graph (lot C4).
     #[serde(default)]
     pub movement: MovementRules,
+    /// Share of a garrison's unit upkeep paid by the controller, in per
+    /// cent, by settlement kind (lot C4). Kinds left out pay the campaign
+    /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
+    #[serde(default)]
+    pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }

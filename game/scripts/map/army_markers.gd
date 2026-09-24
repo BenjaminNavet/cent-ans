@@ -64,8 +64,12 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
 			continue
-		var location: String = str(army.get("location", ""))
-		var centroid := map_data.centroid_of_id(location)
+		# C4 : l'armée se tient sur une colonie ; sa position est celle de la colonie
+		# (`settlements_px.json`), à défaut le centroïde de sa province.
+		var location: String = str(army.get("location_province", army.get("location", "")))
+		var centroid := map_data.settlement_px(str(army.get("location", "")))
+		if centroid.x < 0.0:
+			centroid = map_data.centroid_of_id(location)
 		if centroid.x < 0.0:
 			continue
 		centroid = _clear_of_city(location, centroid)
@@ -95,7 +99,9 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 func _heading(army: Dictionary, from: Vector2) -> Vector2:
 	var path: Array = army.get("path", [])
 	if not path.is_empty():
-		var next := map_data.centroid_of_id(str(path[0]))
+		var next := map_data.settlement_px(str(path[0]))
+		if next.x < 0.0:
+			next = map_data.centroid_of_id(str(path[0]))
 		if next.x >= 0.0 and next.distance_to(from) > 0.5:
 			return (next - from).normalized()
 	return Vector2(1.0, 0.45).normalized()

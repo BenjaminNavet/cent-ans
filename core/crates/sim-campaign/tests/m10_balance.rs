@@ -37,7 +37,7 @@ fn dismissing_the_last_unit_disbands_the_army() {
                 &data,
                 Order::DisbandUnit {
                     army: Some(army_id.clone()),
-                    province: None,
+                    settlement: None,
                     unit_index: 0,
                 },
             )
@@ -77,10 +77,10 @@ fn a_vanished_faction_leaves_no_war_or_alliance() {
         .unwrap();
     assert!(state.factions[&france].at_war_with.contains(&navarre));
     // Navarre loses everything to France.
-    for province in state.provinces.values_mut() {
-        if province.controller == navarre {
-            province.controller = france.clone();
-            province.owner = france.clone();
+    for settlement in state.settlements.values_mut() {
+        if settlement.controller == navarre {
+            settlement.controller = france.clone();
+            settlement.owner = france.clone();
         }
     }
     state.armies.retain(|_, a| a.faction != navarre);
@@ -94,25 +94,27 @@ fn a_vanished_faction_leaves_no_war_or_alliance() {
 
 #[test]
 fn landing_on_a_hostile_shore_costs_men_and_movement() {
-    use sim_campaign::movement::{edge_cost, is_sea_crossing, sea_neighbors};
+    use sim_campaign::movement::{edge_cost, edges, is_sea_crossing};
     let data = data();
     let england = fac("fac_england");
     let mut state = CampaignState::new_1337(&data, england.clone(), 1).unwrap();
     // An English port facing a hostile (French) port across the sea.
     let (from, to) = state
-        .provinces
+        .settlements
         .iter()
-        .filter(|(_, p)| p.controller == england)
+        .filter(|(_, s)| s.controller == england)
         .flat_map(|(id, _)| {
-            sea_neighbors(&data, id)
+            edges(&data, id)
                 .into_iter()
-                .map(move |n| (id.clone(), n))
+                .map(move |(n, _)| (id.clone(), n))
         })
         .find(|(from, to)| {
             is_sea_crossing(&data, from, to)
                 && edge_cost(&data, from, to).is_some()
-                && state.is_hostile_territory(&england, to)
-                && state.hostile_armies_in(&england, to).is_empty()
+                && state
+                    .settlement_province(to)
+                    .is_some_and(|p| state.is_hostile_territory(&england, p))
+                && state.hostile_armies_at(&england, to).is_empty()
         })
         .expect("an English port faces a hostile one");
     let army_id = state
@@ -132,13 +134,7 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
         .map(|u| u.strength)
         .sum();
     state
-        .submit_order(
-            &data,
-            Order::MoveArmy {
-                army: army_id.clone(),
-                path: vec![to.clone()],
-            },
-        )
+        .submit_order(&data, Order::move_along(army_id.clone(), vec![to.clone()]))
         .unwrap();
     let events = state.end_turn_with(&data, idle);
     assert_eq!(state.armies[&army_id].location, to);

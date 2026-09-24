@@ -43,7 +43,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 		var faction := str(army.get("faction", ""))
 		if not (faction in enemies):
 			continue
-		var location := str(army.get("location", ""))
+		var location := str(army.get("location_province", army.get("location", "")))
 		var threatened := location if owned.has(location) else ""
 		if threatened == "":
 			for neighbor in map_data.get_province(map_data.index_of_id(location)).get("neighbors", []):

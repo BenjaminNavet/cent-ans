@@ -437,7 +437,6 @@ impl CampaignState {
     }
 }
 
-
 /// Builds the pure battle description of an army.
 pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Side {
     let general_command = army
@@ -908,7 +907,7 @@ pub(crate) fn apply_outcome(
     let location = state
         .settlements
         .get(&settlement)
-        .map_or_else(|| province_placeholder(), |s| s.province.clone());
+        .map_or_else(province_placeholder, |s| s.province.clone());
     let Some(army) = state.armies.get(army_id) else {
         return;
     };

@@ -926,7 +926,11 @@ impl CampaignState {
             self.check_general(faction, character, &province)?;
         }
         let units = take_indices(
-            &mut self.settlements.get_mut(settlement).expect("checked").garrison,
+            &mut self
+                .settlements
+                .get_mut(settlement)
+                .expect("checked")
+                .garrison,
             &indices,
         );
         let id = self.allocate_army_id();

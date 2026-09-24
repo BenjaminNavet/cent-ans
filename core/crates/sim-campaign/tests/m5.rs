@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use data_model::{FactionId, GameData, ProvinceId, ReligionId};
 use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
-use sim_campaign::{CampaignState, EventKind, Order, OrderError, Season};
+use sim_campaign::{CampaignState, EventKind, Order, OrderError, Season, SettlementState};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
@@ -19,6 +19,12 @@ fn fac(id: &str) -> FactionId {
 
 fn prov(id: &str) -> ProvinceId {
     ProvinceId::new(id).unwrap()
+}
+
+/// Mutable state of the city of a province (lot C4: it carries control).
+fn city_mut<'a>(state: &'a mut CampaignState, province: &str) -> &'a mut SettlementState {
+    let id = state.province_city_id(&prov(province)).unwrap().clone();
+    state.settlements.get_mut(&id).unwrap()
 }
 
 fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
@@ -155,7 +161,7 @@ fn peace_depends_on_war_score() {
         "prov_ponthieu",
         "prov_kent",
     ] {
-        state.provinces.get_mut(&prov(province)).unwrap().controller = fac("fac_france");
+        city_mut(&mut state, province).controller = fac("fac_france");
     }
     for _ in 0..6 {
         state
@@ -186,11 +192,7 @@ fn peace_depends_on_war_score() {
 fn peace_cedes_provinces_and_starts_a_truce() {
     let data = data();
     let mut state = start(&data, "fac_france", 7);
-    state
-        .provinces
-        .get_mut(&prov("prov_guyenne"))
-        .unwrap()
-        .controller = fac("fac_france");
+    city_mut(&mut state, "prov_guyenne").controller = fac("fac_france");
     state
         .factions
         .get_mut(&fac("fac_france"))
@@ -215,8 +217,8 @@ fn peace_cedes_provinces_and_starts_a_truce() {
         .unwrap();
     assert!(!state.is_at_war(&fac("fac_france"), &fac("fac_england")));
     assert_eq!(
-        state.province_state(&prov("prov_guyenne")).unwrap().owner,
-        fac("fac_france")
+        state.province_owner(&prov("prov_guyenne")),
+        Some(&fac("fac_france"))
     );
     assert_eq!(
         state.relation(&fac("fac_france"), &fac("fac_england")),

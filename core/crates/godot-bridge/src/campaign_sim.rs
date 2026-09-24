@@ -341,6 +341,26 @@ impl CampaignSim {
             .unwrap_or_default()
     }
 
+    /// Provinces crossed by `find_path` (lot C4: for the v1 map preview,
+    /// which draws province to province).
+    #[func]
+    fn find_path_provinces(&self, army_id: GString, target: GString) -> PackedStringArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return PackedStringArray::new();
+        };
+        let (Some(army), Some(target)) = (
+            ArmyId::parse(&army_id.to_string()),
+            settlement_or_city(state, &target.to_string()),
+        ) else {
+            return PackedStringArray::new();
+        };
+        let (Some(entry), Some(path)) = (state.army(&army), state.find_path(data, &army, &target))
+        else {
+            return PackedStringArray::new();
+        };
+        provinces_of_path(state, &entry.location, &path)
+    }
+
     /// Recruitment options of a settlement (or of a province's city):
     /// `[{unit_type, name, cost, upkeep, available, reason}]`.
     #[func]
@@ -493,6 +513,26 @@ impl CampaignSim {
     }
 }
 
+/// Provinces crossed by a settlement path starting at `start`: consecutive
+/// duplicates and the starting province are dropped (lot C4, v1 UI).
+pub(crate) fn provinces_of_path(
+    state: &CampaignState,
+    start: &SettlementId,
+    path: &[SettlementId],
+) -> PackedStringArray {
+    let mut last = state.settlement_province(start).cloned();
+    let mut out = PackedStringArray::new();
+    for step in path {
+        if let Some(p) = state.settlement_province(step) {
+            if last.as_ref() != Some(p) {
+                out.push(p.as_str());
+                last = Some(p.clone());
+            }
+        }
+    }
+    out
+}
+
 /// A settlement id, or the city of a province id (lot C4 compatibility).
 pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<SettlementId> {
     if let Ok(id) = SettlementId::new(raw) {
@@ -520,7 +560,7 @@ fn unit_name(data: &GameData, unit: &Unit) -> String {
     )
 }
 
-fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
+pub(crate) fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
     units
         .iter()
         .map(|unit| {
@@ -551,15 +591,7 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
     let location_province = state
         .settlement_province(&army.location)
         .map_or("", |p| p.as_str());
-    let mut path_provinces: Vec<&str> = Vec::new();
-    for step in &army.path {
-        if let Some(p) = state.settlement_province(step) {
-            if path_provinces.last() != Some(&p.as_str()) && p.as_str() != location_province {
-                path_provinces.push(p.as_str());
-            }
-        }
-    }
-    let path_provinces: PackedStringArray = path_provinces.into_iter().map(GString::from).collect();
+    let path_provinces = provinces_of_path(state, &army.location, &army.path);
     let lonlat = data
         .settlements
         .get(&army.location)
@@ -662,7 +694,7 @@ fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
         .collect()
 }
 
-fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
+pub(crate) fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
     let name = data.buildings.get(&construction.building).map_or_else(
         || construction.building.to_string(),
         |b| b.name.display.clone(),

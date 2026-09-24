@@ -243,11 +243,10 @@ impl CampaignState {
     pub fn are_neighbors(&self, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
         self.provinces.keys().any(|id| {
             self.controls_province(a, id)
-                && data.provinces.get(id).is_some_and(|pd| {
-                    pd.neighbors
-                        .iter()
-                        .any(|n| self.controls_province(b, n))
-                })
+                && data
+                    .provinces
+                    .get(id)
+                    .is_some_and(|pd| pd.neighbors.iter().any(|n| self.controls_province(b, n)))
         })
     }
 
@@ -1827,7 +1826,11 @@ pub fn claimed_provinces(state: &CampaignState, faction: &FactionId) -> BTreeSet
         state
             .provinces
             .keys()
-            .filter(|id| state.province_owner(id).is_some_and(|o| thrones.contains(o)))
+            .filter(|id| {
+                state
+                    .province_owner(id)
+                    .is_some_and(|o| thrones.contains(o))
+            })
             .cloned(),
     );
     provinces
@@ -2034,7 +2037,9 @@ fn peace_terms(
         let mut list: Vec<ProvinceId> = state
             .provinces
             .keys()
-            .filter(|id| state.province_owner(id) == Some(owner) && state.controls_province(holder, id))
+            .filter(|id| {
+                state.province_owner(id) == Some(owner) && state.controls_province(holder, id)
+            })
             .cloned()
             .collect();
         // Capitals last: they are the costliest to give up.

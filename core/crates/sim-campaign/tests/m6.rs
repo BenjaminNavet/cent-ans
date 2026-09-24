@@ -50,10 +50,10 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     let state = france(&data, 1);
     let france_id = fac("fac_france");
     let buildings: f64 = state
-        .provinces
+        .settlements
         .values()
-        .filter(|p| p.owner == france_id)
-        .flat_map(|p| p.buildings.iter())
+        .filter(|s| s.owner == france_id)
+        .flat_map(|s| s.buildings.iter())
         .filter_map(|b| data.buildings.get(b))
         .flat_map(|b| b.effects.iter())
         .filter(|e| e.effect == EffectKind::ResearchPoints)
@@ -80,15 +80,20 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     // A new research building raises the rate.
     let mut state = state;
     let before = state.research_points_per_turn(&data, &france_id);
-    let province = state
-        .provinces
+    let settlement = state
+        .settlements
         .iter()
-        .find(|(_, p)| p.owner == france_id)
+        .find(|(_, s)| {
+            s.owner == france_id
+                && !s
+                    .buildings
+                    .contains(&data_model::BuildingId::new("bld_scriptorium").unwrap())
+        })
         .map(|(id, _)| id.clone())
         .unwrap();
     state
-        .provinces
-        .get_mut(&province)
+        .settlements
+        .get_mut(&settlement)
         .unwrap()
         .buildings
         .push(data_model::BuildingId::new("bld_scriptorium").unwrap());
@@ -162,7 +167,9 @@ fn research_completes_with_an_event_and_clears_the_slot() {
     let faction = &state.factions[&france_id];
     assert!(faction.technologies.contains(&tech("tech_longbow_drill")));
     assert!(faction.research.is_none());
-    assert_eq!(faction.research_progress, 0);
+    // F1: the surplus of the completed technology is carried over (lot C4:
+    // the rate now counts every settlement's buildings, so it is not 0).
+    assert!(faction.research_progress < faction.research_points_last_turn);
     assert!(faction.research_points_last_turn > 0);
     let text = &state
         .events
@@ -232,7 +239,7 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
     let longbow = UnitTypeId::new("unit_longbowmen").unwrap();
     let capital: ProvinceId = state.factions[&france_id].capital.clone();
     let option = state
-        .recruitable(&data, &capital)
+        .recruitable_in_province(&data, &capital)
         .into_iter()
         .find(|o| o.unit_type == longbow)
         .expect("longbowmen listed");
@@ -246,7 +253,7 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
         .technologies
         .insert(tech("tech_longbow_drill"));
     let option = state
-        .recruitable(&data, &capital)
+        .recruitable_in_province(&data, &capital)
         .into_iter()
         .find(|o| o.unit_type == longbow)
         .unwrap();
@@ -340,7 +347,7 @@ fn research_state_survives_a_save_round_trip() {
     state.end_turn_with(&data, idle);
     let json = state.save_json();
     assert!(json.contains(&format!("\"state_version\":{STATE_VERSION}")));
-    assert_eq!(STATE_VERSION, 4);
+    assert_eq!(STATE_VERSION, 5);
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded, state);
     let faction = &loaded.factions[&fac("fac_france")];

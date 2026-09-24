@@ -567,7 +567,7 @@ fn building_value(
 /// garrisons. The capital keeps its last unit and besieged places keep theirs;
 /// an army losing its last unit is disbanded.
 fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
-    use sim_campaign::economy::{unit_upkeep, GARRISON_UPKEEP_PERCENT};
+    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
     enum Holder {
         Army(ArmyId),
         Garrison(SettlementId),
@@ -605,7 +605,9 @@ fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
             .enumerate()
             .map(|(index, unit)| {
                 (
-                    unit_upkeep(ctx.data, unit) * GARRISON_UPKEEP_PERCENT / 100,
+                    unit_upkeep(ctx.data, unit)
+                        * garrison_upkeep_percent(ctx.data, settlement.kind)
+                        / 100,
                     index,
                 )
             })

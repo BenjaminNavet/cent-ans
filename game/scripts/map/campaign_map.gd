@@ -351,9 +351,9 @@ func select_army(army_id: String) -> void:
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
-	var path: Array = army.get("path", [])
+	var path: Array = army.get("path_provinces", army.get("path", []))
 	if not path.is_empty():
-		var ids := PackedStringArray([str(army.get("location", ""))])
+		var ids := PackedStringArray([str(army.get("location_province", army.get("location", "")))])
 		for step in path:
 			ids.append(str(step))
 		path_preview.show_path(ids, camera_rig.distance)
@@ -374,7 +374,8 @@ func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
 	var indices := PackedInt32Array()
 	if selected_army != "" and sim != null:
 		# La province de départ compte comme atteignable (pas assombrie).
-		indices.append(map_data.index_of_id(str(sim.call("get_army", selected_army).get("location", ""))))
+		var selected: Dictionary = sim.call("get_army", selected_army)
+		indices.append(map_data.index_of_id(str(selected.get("location_province", selected.get("location", "")))))
 	for province_id in reachable:
 		var index := map_data.index_of_id(str(province_id))
 		if index > 0:
@@ -420,7 +421,8 @@ func _on_province_hovered(index: int) -> void:
 ## Aperçu du chemin de l'armée sélectionnée vers `target_id` : ruban, masque, coût.
 func _preview_path(target_id: String, target_name: String) -> void:
 	var army: Dictionary = sim.call("get_army", selected_army)
-	var path: PackedStringArray = sim.call("find_path", selected_army, target_id)
+	# C4 : le chemin réel passe par des colonies ; l'aperçu reste par province.
+	var path: PackedStringArray = sim.call("find_path_provinces", selected_army, target_id) if sim.has_method("find_path_provinces") else sim.call("find_path", selected_army, target_id)
 	var path_indices := PackedInt32Array()
 	for step in path:
 		path_indices.append(map_data.index_of_id(step))
@@ -429,7 +431,7 @@ func _preview_path(target_id: String, target_name: String) -> void:
 		path_preview.hide_path()
 		ui.set_hover_path(target_name, 0, 0, false)
 		return
-	var ids := PackedStringArray([str(army.get("location", ""))])
+	var ids := PackedStringArray([str(army.get("location_province", army.get("location", "")))])
 	ids.append_array(path)
 	path_preview.show_path(ids, camera_rig.distance)
 	ui.set_hover_path(target_name, path.size(), int(reachable.get(target_id, 0)), reachable.has(target_id))
@@ -586,7 +588,7 @@ func _commandable_armies(character: Dictionary) -> Array:
 	var location: String = str(character.get("location", ""))
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
-		if str(army.get("faction", "")) == faction_id and str(army.get("location", "")) == location:
+		if str(army.get("faction", "")) == faction_id and str(army.get("location_province", army.get("location", ""))) == location:
 			var general_name: String = str(army.get("general_name", ""))
 			result.append({"id": army_id, "name": "Armée%s" % (" (général : %s)" % general_name if general_name != "" else "")})
 	return result
@@ -939,7 +941,8 @@ func _stage_screenshot_province() -> void:
 	if index == 0:
 		var ids := player_army_ids()
 		if not ids.is_empty():
-			index = map_data.index_of_id(str(sim.call("get_army", ids[0]).get("location", "")))
+			var first: Dictionary = sim.call("get_army", ids[0])
+			index = map_data.index_of_id(str(first.get("location_province", first.get("location", ""))))
 	if index == 0:
 		index = mini(3, map_data.province_count)
 	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
@@ -1071,7 +1074,7 @@ func _stage_screenshot_siege() -> void:
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
 			return
-		var state: Dictionary = sim.call("get_province_state", str(army["location"]))
+		var state: Dictionary = sim.call("get_province_state", str(army.get("location_province", army.get("location", ""))))
 		var siege: Dictionary = state.get("siege", {})
 		if str(siege.get("attacker", "")) == player_faction:
 			break
@@ -1092,7 +1095,7 @@ func _stage_screenshot_siege() -> void:
 	refresh_all()
 	select_army(army_id)
 	var army_now: Dictionary = sim.call("get_army", army_id)
-	var centroid := map_data.centroid_of_id(str(army_now.get("location", "")))
+	var centroid := map_data.centroid_of_id(str(army_now.get("location_province", army_now.get("location", ""))))
 	camera_rig.look_at_point(Vector3(centroid.x, 0.0, centroid.y), 260.0)
 # --- Batailles (M7) --------------------------------------------------------------------
 # Dialogue d'avant-bataille en fin de tour, lancement de la scène 3D (la carte est mise en

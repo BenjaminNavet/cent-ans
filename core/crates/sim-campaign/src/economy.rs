@@ -169,7 +169,13 @@ pub fn province_income_effective(
     buildings: &[BuildingId],
     tax_rate: TaxRate,
 ) -> f64 {
-    province_income_with(data, province, buildings, tax_rate, &EffectTotals::default())
+    province_income_with(
+        data,
+        province,
+        buildings,
+        tax_rate,
+        &EffectTotals::default(),
+    )
 }
 
 /// [`province_income_effective`] with `extra` effects (the controller's
@@ -211,6 +217,17 @@ pub fn province_income_with(
 pub const PRODUCTION_TAX_SHARE: f64 = 0.5;
 
 /// Seasonal upkeep of one unit (livres).
+/// Share of a garrison's upkeep paid by its controller, in per cent (lot C4:
+/// `garrison_upkeep_percent` of `rules.json` by settlement kind — town
+/// militias and castellans were mostly paid locally —, otherwise
+/// [`GARRISON_UPKEEP_PERCENT`]).
+pub fn garrison_upkeep_percent(data: &GameData, kind: data_model::SettlementKind) -> i64 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.garrison_upkeep_percent.get(&kind).copied())
+        .unwrap_or(GARRISON_UPKEEP_PERCENT)
+}
+
 pub fn unit_upkeep(data: &GameData, unit: &Unit) -> i64 {
     data.unit_types
         .get(&unit.unit_type)
@@ -357,7 +374,7 @@ impl CampaignState {
             .map(|(id, s)| {
                 let relief = garrison_relief_percent(&self.settlement_effects(data, id));
                 let raw: i64 = s.garrison.iter().map(unit_cost).sum();
-                raw * GARRISON_UPKEEP_PERCENT / 100 * (100 - relief) / 100
+                raw * garrison_upkeep_percent(data, s.kind) / 100 * (100 - relief) / 100
             })
             .sum();
         // H5: prices follow the coinage.
