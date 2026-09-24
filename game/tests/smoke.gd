@@ -794,6 +794,7 @@ func _run_battle() -> void:
 	await _check_battle_deployment_f5c(scene)  # F5c
 	_check_battle_hud_f5b(scene)
 	_check_battle_markers_b2(scene)
+	await _check_battle_music_camera_b3(scene)  # B3
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
 	for unit in scene.units:
@@ -907,6 +908,69 @@ func _check_battle_markers_b2(scene: BattleScene) -> void:
 	var card: UnitCard = scene.hud._cards.values()[0]
 	_check(card.custom_minimum_size.y >= 80.0 and card.art != null, "battle cards: thumbnail card expected")
 	_check(card.tooltip_text.contains("État"), "battle cards: rich tooltip should carry the state")
+
+
+## B3 (T4 musique dynamique, T6 caméra de suivi) : changement d'état musical déclenché par un
+## contact simulé (fonction pure `BattleMusicDirector.compute_state`) et son hystérésis ; la
+## caméra suit la position d'un régiment sur plusieurs ticks, s'oriente vers lui, se libère au
+## clavier, et le double-clic sur une carte recentre la caméra dessus.
+func _check_battle_music_camera_b3(scene: BattleScene) -> void:
+	const MUSIC := preload("res://scripts/battle/battle_music.gd")
+	if not _check(scene.music != null, "battle music: BattleMusicDirector missing on the scene"):
+		return
+	_check(scene.music.current_state == "approach", "battle music: should start calm (approach), got %s" % scene.music.current_state)
+
+	# Contact simulé : la fonction pure d'intensité doit distinguer les quatre états.
+	var calm := [{"side": "attacker", "state": "marching", "morale": 0.9, "present": true}, {"side": "defender", "state": "idle", "morale": 0.9, "present": true}]
+	_check(MUSIC.compute_state(calm, false, false) == "approach", "battle music: no contact should stay calm")
+	var contact := [{"side": "attacker", "state": "melee", "morale": 0.8, "present": true}, {"side": "defender", "state": "melee", "morale": 0.8, "present": true}]
+	_check(MUSIC.compute_state(contact, false, false) == "engagement", "battle music: melee contact should be an engagement")
+	var breaking := [{"side": "attacker", "state": "melee", "morale": 0.8, "present": true}, {"side": "defender", "state": "routing", "morale": 0.1, "present": true}, {"side": "defender", "state": "routing", "morale": 0.1, "present": false}]
+	_check(MUSIC.compute_state(breaking, false, false) == "critical", "battle music: a side close to routing should be critical")
+	_check(MUSIC.compute_state([], true, true) == "victory" and MUSIC.compute_state([], true, false) == "defeat", "battle music: a finished battle should give victory / defeat")
+
+	# Hystérésis : monter en intensité est immédiat, redescendre exige une intensité stable.
+	scene.music.current_state = "approach"
+	scene.music._pending_state = "approach"
+	scene.music._pending_elapsed = 0.0
+	scene.music._advance("critical", 10.0)
+	_check(scene.music.current_state == "critical", "battle music: escalation should be immediate")
+	scene.music._advance("engagement", 1.0)
+	_check(scene.music.current_state == "critical", "battle music: de-escalation should wait out the hysteresis")
+	scene.music._advance("engagement", 3.0)
+	_check(scene.music.current_state == "engagement", "battle music: de-escalation should commit once the new state is stable")
+
+	# Caméra de suivi (T6) : verrouillage sur la sélection, suivi doux, libération manuelle.
+	var own := -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]):
+			own = int(unit["id"])
+			break
+	if not _check(own >= 0, "battle camera: no player regiment to follow"):
+		return
+	scene.selected = [own]
+	scene.camera_rig.target = Vector3(0, 0, 0)
+	var start_distance := scene.camera_rig.target.distance_to(scene._unit_world_position(own))
+	scene._toggle_camera_follow()
+	_check(scene.camera_rig.is_following() and scene.camera_rig.follow_id == own, "battle camera: C should lock onto the selected regiment")
+	# Ticks manuels (delta fixe) plutôt que des images réelles : la convergence du lissage ne doit
+	# pas dépendre du débit d'images de l'exécution headless.
+	for _i in 20:
+		scene.camera_rig._process(0.3)
+	var followed_distance := scene.camera_rig.target.distance_to(scene._unit_world_position(own))
+	_check(followed_distance < start_distance * 0.5, "battle camera: target should have closed in on the followed regiment (%.1f -> %.1f)" % [start_distance, followed_distance])
+	scene._toggle_camera_follow()
+	_check(not scene.camera_rig.is_following(), "battle camera: C again should release the follow")
+
+	# Double-clic sur une carte d'unité : centre la caméra sur ce régiment (jump, sans suivi).
+	# Comparaison au sol (x, z) : `look_at_point` / `_apply()` replaquent `target.y` sur le terrain.
+	scene.camera_rig.target = Vector3(0, 0, 0)
+	scene._on_card_double_clicked(own)
+	var after_pos: Vector3 = scene._unit_world_position(own)
+	var ground_gap := Vector2(scene.camera_rig.target.x, scene.camera_rig.target.z).distance_to(Vector2(after_pos.x, after_pos.z))
+	_check(ground_gap < 1.0, "battle camera: double-click on a card should center the camera on the regiment (gap %.2f)" % ground_gap)
+	_check(not scene.camera_rig.is_following(), "battle camera: double-click should not itself start a follow")
+	await process_frame
 
 
 func _run_chronicle() -> void:
