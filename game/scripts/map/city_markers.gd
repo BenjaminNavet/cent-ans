@@ -11,8 +11,15 @@ extends Node3D
 ## Distance caméra au-delà de laquelle les étiquettes sont masquées (réglée par la scène).
 @export var label_max_distance: float = 1500.0
 
+## Anti-chevauchement (lot V2b) : période de mise à jour (s) et marge entre étiquettes (px).
+@export var declutter_interval: float = 0.2
+@export var declutter_margin: float = 4.0
+
 var _labels: Array[Label3D] = []
 var _labels_visible := true
+## Étiquettes triées par priorité (plus grande province d'abord).
+var _priority: Array[Label3D] = []
+var _declutter_timer := 0.0
 
 var _marker_material: StandardMaterial3D
 var _cylinder: CylinderMesh
@@ -61,8 +68,11 @@ func build(map_data: MapData) -> void:
 		label.render_priority = 2
 		label.position = Vector3(0.0, (8.0 if model != null else marker_height) + 3.0, 0.0)
 		marker.add_child(label)
+		label.set_meta("area", float(province.get("area_px", 0.0)))
 		_labels.append(label)
 		add_child(marker)
+	_priority = _labels.duplicate()
+	_priority.sort_custom(func(a: Label3D, b: Label3D) -> bool: return float(a.get_meta("area")) > float(b.get_meta("area")))
 
 
 ## Masque les étiquettes quand la caméra est trop loin (lisibilité à 120 provinces).
@@ -73,3 +83,45 @@ func update_visibility(camera_distance: float) -> void:
 	_labels_visible = should_show
 	for label in _labels:
 		label.visible = should_show
+	_declutter_timer = 0.0
+	if should_show:
+		declutter()
+
+
+func _process(delta: float) -> void:
+	if not _labels_visible or _priority.is_empty():
+		return
+	_declutter_timer -= delta
+	if _declutter_timer <= 0.0:
+		_declutter_timer = declutter_interval
+		declutter()
+
+
+## Masque les étiquettes qui en chevauchent une plus prioritaire (rectangles écran estimés
+## d'après la taille de police et la longueur du texte).
+func declutter() -> void:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if camera == null:
+		return
+	var screen := get_viewport().get_visible_rect()
+	var placed: Array[Rect2] = []
+	for label in _priority:
+		var world := label.global_position
+		if camera.is_position_behind(world):
+			label.visible = false
+			continue
+		var center := camera.unproject_position(world)
+		var width := label.text.length() * font_size * 0.52 + declutter_margin * 2.0
+		var height := font_size * 1.1 + declutter_margin * 2.0
+		var rect := Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
+		if not screen.intersects(rect):
+			label.visible = false
+			continue
+		var free := true
+		for other in placed:
+			if other.intersects(rect):
+				free = false
+				break
+		label.visible = free
+		if free:
+			placed.append(rect)

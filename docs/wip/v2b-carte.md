@@ -21,5 +21,11 @@ Depuis `visual` (V1-V4 fusionnés). Captures de travail dans le scratchpad, fina
   `vegetation_mask.gd` (`hedge_at` lit le canal B de l'occupation du sol). Capture `n1` : bien plus
   naturel ; la Normandie orientale (plaine) a trop peu de haies, le bocage est trop vert/bleu.
 
+- Occupation du sol 128² dilatée sur la mer, probabilité de haie relevée (0,1 → 0,75 en bocage).
+- Atmosphère réchauffée (`campaign_map.tscn` : brouillard ocre clair, lumière ambiante chaude, ciel
+  moins contributif). Capture `n3` : bocage lisible, haies fines interrompues.
+- Étiquettes : anti-chevauchement dans `city_markers.gd` (priorité à la plus grande province,
+  rectangles projetés, mise à jour toutes les 0,2 s), `area_px` ajouté aux entrées de `MapData`.
+
 ## Prochaine étape
-- Vérifier le bocage (canal B dilaté), la palette (atmosphère moins bleue), les fondus, les étiquettes.
+- Captures mi-distance / France / Alpes / Midi, réglage de la palette, fondus, banc de performance.

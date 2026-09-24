@@ -20,7 +20,7 @@ extends RefCounted
 
 ## Paramètres des deux trames : [k (biais), fu, fv (taille d'enclos, px carte), phase de déformation].
 const LAYOUTS: Array = [[0.35, 5.0, 4.2, 0.0], [-0.8, 4.6, 3.8, 2.1]]
-const LANDUSE_SIZE := 64
+const LANDUSE_SIZE := 128
 const LANDUSE_SAMPLES := 192
 
 
@@ -83,7 +83,7 @@ static func roll_v_edge(layout: int, row: int, column: int) -> float:
 
 ## Probabilité qu'un bord d'enclos porte une haie (même formule dans le shader).
 static func hedge_probability(open_land: float, bocage: float) -> float:
-	return open_land * lerpf(0.05, 0.6, bocage)
+	return open_land * lerpf(0.1, 0.75, bocage)
 
 
 # --- Occupation du sol ---

@@ -246,6 +246,7 @@ func _load_provinces() -> bool:
 			"centroid": centroid,
 			"capital_px": _to_vec2(props.get("capital_px", [centroid.x, centroid.y])),
 			"neighbors": props.get("neighbors", []),
+			"area_px": float(props.get("area_px", 0.0)),
 			"rings": _outer_rings(feature.get("geometry", {})),
 		}
 		provinces[index] = entry
