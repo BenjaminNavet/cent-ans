@@ -224,6 +224,8 @@ pub enum OrderError {
     NotAdjacent { from: ProvinceId, to: ProvinceId },
     #[error("recrutement impossible : {0}")]
     RecruitUnavailable(String),
+    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette province")]
+    RecruitQueueFull { slots: usize },
     #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("indice d'unité invalide : {0}")]
@@ -275,6 +277,9 @@ pub enum OrderError {
     #[error(transparent)]
     Chivalry(#[from] crate::chivalry::ChivalryError),
 }
+
+/// G1: recruitments every province can queue per turn before buildings.
+pub const BASE_RECRUIT_SLOTS: usize = 2;
 
 /// One line of the recruitment panel.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -582,6 +587,12 @@ impl CampaignState {
         province: &ProvinceId,
         unit_type: &UnitTypeId,
     ) -> Result<(), OrderError> {
+        if let Some(state) = self.provinces.get(province) {
+            let slots = self.recruit_slots(data, province);
+            if &state.controller == faction && state.recruit_queue.len() >= slots {
+                return Err(OrderError::RecruitQueueFull { slots });
+            }
+        }
         let option = self
             .recruit_option(data, faction, province, unit_type)
             .ok_or_else(|| OrderError::UnknownUnitType(unit_type.clone()))?;
@@ -659,6 +670,10 @@ impl CampaignState {
         if province_state.siege.is_some() {
             return Some("la province est assiégée".to_owned());
         }
+        let slots = self.recruit_slots(data, province_id);
+        if province_state.recruit_queue.len() >= slots {
+            return Some(format!("file de recrutement pleine ({slots} par tour)"));
+        }
         if let Some(building) = &unit_type.required_building {
             if !province.buildings.contains(building) {
                 let name = data
@@ -694,6 +709,36 @@ impl CampaignState {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }
         None
+    }
+
+    /// G1 `RecruitSlots`: recruitments a province can queue per turn —
+    /// [`BASE_RECRUIT_SLOTS`], one more in the faction capital, plus the flat
+    /// `recruit_slots` of its buildings, governor and the controller's
+    /// technologies (muster field, stables, armoury…).
+    pub fn recruit_slots(&self, data: &GameData, province: &ProvinceId) -> usize {
+        let Some(state) = self.provinces.get(province) else {
+            return 0;
+        };
+        let mut effects = self.province_effects(data, province);
+        effects.merge(&research::faction_tech_effects(
+            self,
+            data,
+            &state.controller,
+        ));
+        let capital = self
+            .factions
+            .get(&state.controller)
+            .is_some_and(|f| &f.capital == province);
+        BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
+    }
+
+    /// Recruitment slots still free this turn in `province`.
+    pub fn recruit_slots_free(&self, data: &GameData, province: &ProvinceId) -> usize {
+        let queued = self
+            .provinces
+            .get(province)
+            .map_or(0, |p| p.recruit_queue.len());
+        self.recruit_slots(data, province).saturating_sub(queued)
     }
 
     /// Money cost of recruiting `unit_type` in `province` for `faction`
