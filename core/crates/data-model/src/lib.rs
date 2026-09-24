@@ -20,6 +20,9 @@ pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
     Sources, UncertainInteger, UnitCategory,
 };
+pub use entities::agent::{
+    AgentActionKind, AgentActionRules, AgentEffects, AgentKind, AgentRules, AgentTypeRules,
+};
 pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
