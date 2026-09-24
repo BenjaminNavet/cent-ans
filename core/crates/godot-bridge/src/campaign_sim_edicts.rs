@@ -9,7 +9,8 @@ use crate::campaign_sim::{effects_array, CampaignSim};
 
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Edict in effect in `province`: `{edict, name, pending, delay_turns}`
+    /// Edict in effect in `province`: `{edict, name, pending, pending_edict,
+    /// pending_name, turns_left}`
     /// (`pending`: a delayed change has not taken hold yet); empty for an
     /// unknown province.
     #[func]
@@ -25,11 +26,18 @@ impl CampaignSim {
         }
         let edict = state.province_edict(data, &id);
         let definition = data.edicts.get(&edict);
+        let pending = state.pending_edict(data, &id);
+        let pending_name = pending
+            .as_ref()
+            .and_then(|(p, _)| data.edicts.get(p))
+            .map_or("", |e| e.name.display.as_str());
         vdict! {
             "edict" => edict.as_str(),
             "name" => definition.map_or(edict.as_str(), |e| e.name.display.as_str()),
-            "pending" => state.edict_pending(data, &id),
-            "delay_turns" => definition.map_or(0, |e| e.delay_turns),
+            "pending" => pending.is_some(),
+            "pending_edict" => pending.as_ref().map_or("", |(p, _)| p.as_str()),
+            "pending_name" => pending_name,
+            "turns_left" => pending.as_ref().map_or(0, |(_, t)| *t),
         }
     }
 
