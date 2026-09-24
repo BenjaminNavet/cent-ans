@@ -13,11 +13,11 @@ const FX_PATH := "fx/siege_fire.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const DEFAULTS := {
 	"update_period_s": 0.2,
-	"flame_height_m": 4.5,
+	"flame_height_m": 7.5,
 	"max_lights": 8,
 	"light": {"color": [1.0, 0.52, 0.18], "energy": 5.0, "range_m": 30.0, "height_m": 7.0, "flicker_speed": 9.0, "flicker_amount": 0.35},
-	"flames": {"amount": 48, "lifetime_s": 1.1, "size_m": [1.4, 3.0], "velocity_m_s": [2.5, 5.5], "spread_m": 5.0, "color_start": [1.0, 0.82, 0.35, 1.0], "color_end": [0.75, 0.12, 0.02, 0.0]},
-	"smoke": {"amount": 28, "lifetime_s": 8.0, "size_m": [4.0, 11.0], "velocity_m_s": [2.0, 4.0], "spread_m": 4.0, "color": [0.16, 0.15, 0.14, 0.55], "wind_drift_m_s": 3.5},
+	"flames": {"amount": 72, "lifetime_s": 1.2, "size_m": [2.0, 4.2], "velocity_m_s": [2.5, 5.0], "spread_m": 5.0, "color_start": [1.0, 0.62, 0.12, 0.95], "color_end": [0.7, 0.1, 0.0, 0.0]},
+	"smoke": {"amount": 48, "lifetime_s": 10.0, "size_m": [5.0, 14.0], "velocity_m_s": [2.0, 4.0], "spread_m": 4.0, "color": [0.13, 0.12, 0.11, 0.7], "wind_drift_m_s": 3.5},
 	"ruin": {"char_color": [0.07, 0.06, 0.05], "rubble_height_m": 1.3, "collapse_scale": 0.25, "beams": 5, "embers": 10},
 }
 
@@ -45,7 +45,7 @@ func setup(siege_view: Node3D, p_height_at: Callable) -> void:
 	height_at = p_height_at
 	params = _load_params()
 	houses_root = siege_view.get_node_or_null("Houses")
-	_flame_mat = _particle_material(true)
+	_flame_mat = _particle_material(false)  # mélange alpha : l'additif vire au crème en plein jour
 	_smoke_mat = _particle_material(false)
 	_char_mat = StandardMaterial3D.new()
 	_char_mat.albedo_color = _color(params["ruin"]["char_color"])
@@ -201,6 +201,7 @@ static func _particle_material(additive: bool) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	material.billboard_keep_scale = true  # sinon l'échelle des particules (`size_m`) est perdue
 	material.vertex_color_use_as_albedo = true
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	if additive:
