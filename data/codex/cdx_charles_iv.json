@@ -1,0 +1,12 @@
+{
+  "id": "cdx_charles_iv",
+  "title": "Charles IV, empereur",
+  "category": "personnage",
+  "aliases": ["Charles IV de Luxembourg", "empereur Charles IV", "Charles de Luxembourg", "Bulle d'or"],
+  "era": { "from": "1316", "to": "1378" },
+  "summary": "Fils de [[cdx_jean_de_luxembourg|Jean l'Aveugle]], élevé à la cour de France, Charles de Luxembourg devient roi de Bohême, roi des Romains en 1346 et empereur en 1355. Il fait de Prague une grande capitale et fixe par la Bulle d'or les règles de l'élection impériale.",
+  "body": "Baptisé Venceslas en 1316, le fils aîné de [[cdx_jean_de_luxembourg|Jean de Luxembourg]], roi de Bohême, est envoyé enfant à la cour de France, où il reçoit à sa confirmation le nom de Charles, celui de son parrain le roi Charles IV le Bel. Il y a pour maître Pierre Roger, le futur pape Clément VI, et épouse Blanche de Valois, demi-sœur de [[cdx_philippe_vi|Philippe VI]]. Sa sœur Bonne épouse le futur [[cdx_jean_ii|Jean II]] : Charles est l'oncle de [[cdx_charles_v|Charles V]].\n\nEn juillet 1346, avec l'appui du pape, les princes électeurs l'élisent roi des Romains contre l'empereur [[cdx_louis_de_baviere|Louis de Bavière]]. Un mois plus tard, il combat à [[cdx_crecy|Crécy]] aux côtés de son père aveugle, qui y trouve la mort ; blessé, il échappe au désastre. La mort de Louis de Bavière en 1347 lui laisse le champ libre, et il est couronné empereur à Rome en 1355.\n\nEn 1356, la Bulle d'or fixe les règles de l'élection du roi des Romains par sept princes électeurs, sans intervention du pape : elle restera la loi fondamentale du Saint-Empire jusqu'en 1806. Charles gouverne en diplomate plus qu'en guerrier, agrandissant les domaines de sa maison par achats et mariages.\n\nIl fait de Prague sa capitale : il y fonde en 1348 la première université d'Europe centrale, lance le pont qui porte aujourd'hui son nom, la cathédrale Saint-Guy et la Nouvelle Ville, et fait bâtir le château de Karlštejn pour abriter les joyaux de la couronne. En 1378, peu avant sa mort, il fait un voyage triomphal à Paris auprès de son neveu Charles V, qui en fait immortaliser le récit dans les Grandes Chroniques de France.",
+  "entity": "chr_charles_de_luxembourg",
+  "see_also": ["cdx_jean_de_luxembourg", "cdx_saint_empire", "cdx_charles_v", "cdx_jan_hus"],
+  "sources": ["Charles IV (empereur du Saint-Empire)", "Bulle d'or de 1356"]
+}

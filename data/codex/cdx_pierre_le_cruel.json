@@ -1,0 +1,12 @@
+{
+  "id": "cdx_pierre_le_cruel",
+  "title": "Pierre le Cruel, roi de Castille",
+  "category": "personnage",
+  "aliases": ["Pierre le Cruel", "Pierre Ier de Castille", "Henri de Trastamare", "Nájera", "bataille de Nájera", "Montiel"],
+  "era": { "from": "1334", "to": "1369" },
+  "summary": "Roi de Castille de 1350 à 1369, Pierre Ier affronte son demi-frère Henri de Trastamare dans une guerre civile où s'engagent la France et l'Angleterre. Vainqueur à Nájera en 1367 grâce au [[cdx_prince_noir|Prince noir]], il est tué par Henri à Montiel en 1369.",
+  "body": "Fils légitime d'Alphonse XI, Pierre devient roi à quinze ans en 1350. Son père a eu de sa maîtresse Leonor de Guzmán de nombreux fils, dont Henri, comte de Trastamare, qui disputent au jeune roi le pouvoir. Pierre gouverne avec brutalité : il fait exécuter plusieurs de ses demi-frères et de grands nobles, d'où son surnom de Cruel, tandis que ses partisans l'appellent le Justicier.\n\nSon mariage en 1353 avec Blanche de Bourbon, belle-sœur du futur [[cdx_charles_v|Charles V]], tourne au scandale : il l'abandonne quelques jours après les noces pour sa maîtresse María de Padilla et la fait enfermer ; elle meurt en captivité en 1361, peut-être assassinée. La France a désormais une raison de soutenir ses ennemis.\n\nEn 1365-1366, [[cdx_du_guesclin|Du Guesclin]] conduit en Castille les [[cdx_grandes_compagnies|Grandes Compagnies]] au service d'Henri de Trastamare, qui se fait couronner. Pierre s'enfuit à Bordeaux et obtient l'aide du [[cdx_prince_noir|Prince noir]]. Le 3 avril 1367, à Nájera, les archers anglais écrasent l'armée d'Henri ; Du Guesclin est fait prisonnier.\n\nMais Pierre ne paie pas les soldes promises, et le Prince noir rentre en Aquitaine, malade et ruiné. Henri revient avec Du Guesclin, libéré contre rançon. Après la défaite de Montiel, Pierre est attiré dans la tente de Du Guesclin, en mars 1369 ; il s'y bat corps à corps avec Henri, qui le tue. Henri II fonde la dynastie des Trastamare, alliée fidèle de la France, dont la flotte menacera désormais les côtes anglaises.",
+  "entity": "chr_pedro_i_de_castille",
+  "see_also": ["cdx_du_guesclin", "cdx_prince_noir", "cdx_castille", "cdx_grandes_compagnies"],
+  "sources": ["Pierre Ier de Castille", "Bataille de Nájera", "Première guerre civile de Castille"]
+}

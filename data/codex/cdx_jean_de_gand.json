@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_de_gand",
+  "title": "Jean de Gand, duc de Lancastre",
+  "category": "personnage",
+  "aliases": ["Jean de Gand", "John of Gaunt", "duc de Lancastre"],
+  "era": { "from": "1340", "to": "1399" },
+  "summary": "Fils d'[[cdx_edouard_iii|Édouard III]] né à [[cdx_gand|Gand]] en 1340, Jean devient par mariage duc de Lancastre et le plus riche seigneur d'Angleterre. Prétendant au trône de Castille, protecteur de [[cdx_john_wyclif|Wyclif]], il est le père du roi Henri IV et l'ancêtre des Lancastre.",
+  "body": "Jean naît à [[cdx_gand|Gand]] en mars 1340, pendant le séjour d'[[cdx_edouard_iii|Édouard III]] et de la reine [[cdx_philippa_de_hainaut|Philippa]] en Flandre : d'où son nom, que les Anglais prononcent Gaunt. Quatrième fils du roi, il épouse en 1359 Blanche, fille d'[[cdx_henri_de_grosmont|Henri de Grosmont]], et hérite ainsi de l'immense duché de Lancastre. Le poète Geoffrey Chaucer, qu'il protège, compose à la mort de Blanche le Livre de la Duchesse.\n\nIl combat aux côtés du [[cdx_prince_noir|Prince noir]] en Castille, à Nájera, et épouse en secondes noces Constance, fille de [[cdx_pierre_le_cruel|Pierre le Cruel]]. Il revendique dès lors la couronne de Castille et mène en 1386 une expédition dans la péninsule, qui s'achève par un accord : sa fille Catherine épouse l'héritier castillan, tandis qu'une autre fille, Philippa, devient reine de Portugal.\n\nPendant la vieillesse d'Édouard III puis la minorité de Richard II, il est l'homme le plus puissant du royaume, et le plus impopulaire. Il protège [[cdx_john_wyclif|John Wyclif]] contre les évêques. En 1381, les insurgés de la [[cdx_revolte_paysans_1381|révolte des Paysans]] incendient son palais londonien du Savoy.\n\nIl meurt en février 1399. Richard II confisque aussitôt l'héritage de son fils Henri Bolingbroke, qui revient d'exil, renverse le roi et monte sur le trône sous le nom d'Henri IV. La maison de Lancastre, qui donnera [[cdx_henri_v|Henri V]], est née.",
+  "entity": "chr_jean_de_gand",
+  "see_also": ["cdx_henri_v", "cdx_pierre_le_cruel", "cdx_john_wyclif", "cdx_plantagenets"],
+  "sources": ["Jean de Gand", "Geoffrey Chaucer"]
+}

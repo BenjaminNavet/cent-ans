@@ -1,0 +1,12 @@
+{
+  "id": "cdx_compagnies_ordonnance",
+  "title": "Les compagnies d'ordonnance",
+  "category": "guerre",
+  "aliases": ["compagnies d'ordonnance", "compagnie d'ordonnance", "lance fournie", "lances fournies", "gendarmes"],
+  "era": { "from": "1445", "to": "XVIe siècle" },
+  "summary": "Créées par [[cdx_charles_vii|Charles VII]] en 1445, les compagnies d'ordonnance sont la première armée permanente d'Europe occidentale : quinze compagnies de cavalerie soldées toute l'année par l'impôt, qui achèvent la reconquête.",
+  "body": "Pendant la trêve de Tours (1444), le royaume est de nouveau infesté de soldats sans solde, les Écorcheurs, héritiers des [[cdx_grandes_compagnies|Grandes Compagnies]]. [[cdx_charles_vii|Charles VII]] et ses conseillers décident de garder les meilleurs et de licencier les autres. L'ordonnance prise en 1445 à Louppy-le-Château crée quinze compagnies de cent « lances fournies ».\n\nLa lance fournie est une petite équipe de six hommes à cheval autour d'un [[cdx_hommes_d_armes|homme d'armes]] en armure complète : un coutilier armé d'une longue dague ou d'une lance légère, deux archers, un page et un valet. Chaque compagnie est commandée par un capitaine nommé par le roi, et répartie en garnison dans les villes, qui la logent.\n\nLa grande nouveauté est la régularité : les soldats sont payés chaque mois, en paix comme en guerre, grâce à la [[cdx_taille|taille]] devenue permanente depuis 1439. En échange, ils doivent respecter une discipline stricte et ne plus vivre sur le pays. Le roi dispose ainsi d'une armée toujours prête et fidèle, et les nobles trouvent dans ces compagnies une carrière.\n\nAvec l'artillerie des frères Bureau et les [[cdx_franc_archer|francs-archers]] créés en 1448, les compagnies d'ordonnance reprennent la Normandie en 1449-1450 (victoire de Formigny) puis la [[cdx_guyenne|Guyenne]] en 1451-1453. Elles donneront naissance à la gendarmerie, la cavalerie lourde des rois de France jusqu'au XVIe siècle.",
+  "entity": "tech_compagnies_d_ordonnance",
+  "see_also": ["cdx_charles_vii", "cdx_franc_archer", "cdx_taille", "cdx_castillon"],
+  "sources": ["Compagnie d'ordonnance", "Lance fournie"]
+}

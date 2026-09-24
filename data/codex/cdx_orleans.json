@@ -1,0 +1,11 @@
+{
+  "id": "cdx_orleans",
+  "title": "Orléans et son siège",
+  "category": "bataille",
+  "aliases": ["Orléans", "siège d'Orléans", "Tourelles"],
+  "era": { "from": "1428", "to": "1429" },
+  "summary": "Cité du pont sur la Loire, Orléans est assiégée par les Anglais d'octobre 1428 à mai 1429. Sa délivrance, le 8 mai 1429, avec [[cdx_jeanne_darc|Jeanne d'Arc]], marque le tournant de la reconquête française.",
+  "body": "Orléans commande l'un des rares ponts sur la Loire moyenne : qui la tient ouvre la route du Berry, dernier refuge du dauphin [[cdx_charles_vii|Charles]]. La ville est aussi le chef-lieu d'un duché d'apanage, celui de Louis d'Orléans, frère de [[cdx_charles_vi|Charles VI]], puis de son fils Charles, prisonnier en Angleterre depuis [[cdx_azincourt|Azincourt]]. L'attaquer viole la coutume qui épargne les terres d'un seigneur captif.\n\nLe siège commence le 12 octobre 1428. Le commandant anglais, le comte de Salisbury, est mortellement blessé quelques jours plus tard par un boulet tiré depuis la ville alors qu'il observait les remparts depuis le fort des Tourelles, à l'entrée du pont. Les Anglais, trop peu nombreux pour encercler la ville, l'entourent d'un réseau de bastilles, petits forts de bois et de terre.\n\nLe 12 février 1429, près de Rouvray, une armée franco-écossaise tente d'intercepter un convoi de ravitaillement anglais chargé de harengs pour le Carême : c'est la [[cdx_bataille_des_harengs|bataille des Harengs]], un désastre pour les Français. La ville, défendue par le bâtard d'Orléans (le futur Dunois), semble perdue.\n\n[[cdx_jeanne_darc|Jeanne d'Arc]] entre dans Orléans le 29 avril 1429 avec un convoi de vivres. En quelques jours, les assauts qu'elle encourage emportent les bastilles de Saint-Loup et des Augustins, puis les Tourelles le 7 mai, où elle est blessée d'une flèche. Le 8 mai, l'armée anglaise se retire. La ville célèbre encore chaque année cette délivrance lors des fêtes johanniques.",
+  "see_also": ["cdx_jeanne_darc", "cdx_charles_vii", "cdx_traite_troyes", "cdx_bombarde"],
+  "sources": ["Siège d'Orléans", "Journée des Harengs"]
+}
