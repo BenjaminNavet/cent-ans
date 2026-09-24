@@ -182,7 +182,7 @@ func _tooltip(option: Dictionary) -> String:
 	var delay := int(option.get("delay_turns", 0))
 	if delay > 0:
 		lines.append("Délai avant effet : %d tour(s)" % delay)
-	var effects_block: String = RichTooltip.call("_effects_block", option.get("effects", [])) if RichTooltip.has_method("_effects_block") else ""
+	var effects_block: String = RichTooltip._effects_block(option.get("effects", []))
 	if effects_block != "":
 		lines.append(effects_block)
 	return "\n".join(lines)
