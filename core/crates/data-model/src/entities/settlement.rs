@@ -175,8 +175,49 @@ pub struct SettlementRules {
     /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
     #[serde(default)]
     pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
+    /// Most units an army can leave as a settlement's garrison, by kind
+    /// (lot C7a, `Order::GarrisonUnits`); kinds left out have no cap.
+    #[serde(default)]
+    pub garrison_cap: BTreeMap<SettlementKind, usize>,
+    /// Where the loser of a battle falls back (lot C7a).
+    #[serde(default)]
+    pub retreat: RetreatRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Retreat of a beaten army (lot C7a, `rules.json` § `retreat`). Radii are
+/// in v1 province steps (times `MovementRules::points_per_step`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RetreatRules {
+    /// Radius searched for a friendly settlement free of enemy armies,
+    /// along a path that crosses no enemy place.
+    pub friendly_radius_steps: f64,
+    /// Failing that, radius searched for a settlement no enemy holds.
+    pub neutral_radius_steps: f64,
+    /// Stragglers lost on a retreat to a neutral settlement, per cent of
+    /// each unit.
+    pub neutral_loss_percent: u32,
+    /// Extra losses of an army with nowhere to go (rout), per cent of each
+    /// unit.
+    pub rout_loss_percent: u32,
+    /// After a rout, the army disperses below this share (per cent) of its
+    /// maximum strength; otherwise the survivors rally at the nearest
+    /// reachable friendly settlement (or disperse if there is none).
+    pub rout_dissolve_below_percent: u32,
+}
+
+impl Default for RetreatRules {
+    fn default() -> Self {
+        RetreatRules {
+            friendly_radius_steps: 2.0,
+            neutral_radius_steps: 1.0,
+            neutral_loss_percent: 10,
+            rout_loss_percent: 50,
+            rout_dissolve_below_percent: 30,
+        }
+    }
 }
 
 /// Movement tuning of `rules.json` (lot C4). The unit of edge costs and

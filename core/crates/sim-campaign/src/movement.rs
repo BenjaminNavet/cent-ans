@@ -842,33 +842,197 @@ pub(crate) fn apply_battle_result(
         Winner::Defender => attackers,
     };
     for loser_id in losers {
-        let retreat_to = if result.winner == Winner::Defender && loser_id == attacker_id {
-            Some(attacker_origin.clone())
-        } else {
-            retreat_settlement(state, data, loser_id)
-        };
-        if let (Some(army), Some(target)) = (state.armies.get_mut(loser_id), retreat_to) {
-            army.location = target;
-            army.movement_points = 0;
-            army.path.clear();
-            move_general(state, loser_id);
+        // A beaten attacker falls back where it came from, unless an enemy
+        // army now stands there; everyone else follows the C7a rule.
+        let origin = (result.winner == Winner::Defender && loser_id == attacker_id)
+            .then(|| attacker_origin.clone())
+            .filter(|origin| {
+                state.armies.get(loser_id).is_some_and(|army| {
+                    origin != &army.location
+                        && state.hostile_armies_at(&army.faction, origin).is_empty()
+                })
+            });
+        match origin {
+            Some(target) => move_beaten_army(state, loser_id, target),
+            None => retreat_beaten_army(state, data, loser_id, events),
         }
     }
 }
 
-/// Where a beaten army falls back: the first neighbouring settlement held
-/// by a friend and free of enemy armies.
-fn retreat_settlement(
-    state: &CampaignState,
+/// How a beaten army leaves the battlefield (lot C7a, `rules.json` § `retreat`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Retreat {
+    /// To a friendly settlement (own or allied) within the friendly radius.
+    Friendly(SettlementId),
+    /// To a settlement no enemy holds within the neutral radius, losing
+    /// stragglers.
+    Neutral(SettlementId),
+    /// Nowhere to go: a rout. The survivors rally at the given friendly
+    /// settlement (any distance) or disperse (`None`).
+    Rout(Option<SettlementId>),
+}
+
+/// Where `army_id`, just beaten where it stands, falls back (pure, lot C7a).
+///
+/// 1. The nearest settlement held by the army's faction or an ally, free
+///    of enemy armies, within `friendly_radius_steps`, along a path that
+///    crosses no enemy place (the Dijkstra of the movement phase);
+/// 2. otherwise the nearest settlement no enemy holds, free of enemy
+///    armies, within `neutral_radius_steps` (neutral land);
+/// 3. otherwise a rout: the survivors rally at the nearest friendly
+///    settlement at any distance, if one can be reached.
+///
+/// Ties are broken by settlement id: the result is deterministic.
+pub fn retreat_target(state: &CampaignState, data: &GameData, army_id: &ArmyId) -> Option<Retreat> {
+    let army = state.armies.get(army_id)?;
+    let rules = data.retreat_rules();
+    let step = points_per_step(data);
+    let table = dijkstra(state, data, &army.faction, &army.location, None, None);
+    let nearest = |accept: &dyn Fn(&SettlementId) -> bool| {
+        table
+            .iter()
+            .filter(|(id, _)| {
+                *id != &army.location
+                    && state.hostile_armies_at(&army.faction, id).is_empty()
+                    && accept(id)
+            })
+            .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
+            .map(|(id, reach)| (id.clone(), f64::from(reach.cost)))
+    };
+    let friendly = nearest(&|id| state.is_friendly_settlement(&army.faction, id));
+    if let Some((id, cost)) = &friendly {
+        if *cost <= rules.friendly_radius_steps * step {
+            return Some(Retreat::Friendly(id.clone()));
+        }
+    }
+    if let Some((id, cost)) = nearest(&|id| !state.is_hostile_settlement(&army.faction, id)) {
+        if cost <= rules.neutral_radius_steps * step {
+            return Some(Retreat::Neutral(id));
+        }
+    }
+    Some(Retreat::Rout(friendly.map(|(id, _)| id)))
+}
+
+/// Applies the C7a retreat rule to a beaten army (see [`retreat_target`]).
+fn retreat_beaten_army(
+    state: &mut CampaignState,
     data: &GameData,
     army_id: &ArmyId,
-) -> Option<SettlementId> {
-    let army = state.armies.get(army_id)?;
-    edges(data, &army.location)
-        .into_iter()
-        .map(|(id, _)| id)
-        .filter(|id| state.hostile_armies_at(&army.faction, id).is_empty())
-        .find(|id| state.is_friendly_settlement(&army.faction, id))
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(retreat) = retreat_target(state, data, army_id) else {
+        return;
+    };
+    let rules = data.retreat_rules();
+    match retreat {
+        Retreat::Friendly(target) => move_beaten_army(state, army_id, target),
+        Retreat::Neutral(target) => {
+            let lost = decimate(state, army_id, rules.neutral_loss_percent);
+            push_retreat_event(
+                state,
+                army_id,
+                format!(
+                    "L'armée {army_id}, coupée de ses places, se replie en terre neutre et perd {lost} traînards."
+                ),
+                events,
+            );
+            move_beaten_army(state, army_id, target);
+        }
+        Retreat::Rout(rally) => {
+            let lost = decimate(state, army_id, rules.rout_loss_percent);
+            let (strength, max) = state.armies.get(army_id).map_or((0, 0), |a| {
+                (
+                    a.total_strength(),
+                    a.units.iter().map(|u| u.max_strength).sum::<u32>(),
+                )
+            });
+            let broken = strength == 0
+                || u64::from(strength) * 100
+                    < u64::from(rules.rout_dissolve_below_percent) * u64::from(max);
+            match rally.filter(|_| !broken) {
+                Some(target) => {
+                    push_retreat_event(
+                        state,
+                        army_id,
+                        format!(
+                            "Débandade : l'armée {army_id}, coupée de ses places, perd {lost} hommes avant de se rallier."
+                        ),
+                        events,
+                    );
+                    move_beaten_army(state, army_id, target);
+                }
+                None => disperse_army(state, army_id, events),
+            }
+        }
+    }
+}
+
+/// Moves a beaten army to `target`, spent for the turn.
+fn move_beaten_army(state: &mut CampaignState, army_id: &ArmyId, target: SettlementId) {
+    if let Some(army) = state.armies.get_mut(army_id) {
+        army.location = target;
+        army.movement_points = 0;
+        army.path.clear();
+        move_general(state, army_id);
+    }
+}
+
+/// Removes `percent` of every unit of `army_id` (rounded up); units under
+/// 5 % of their maximum are disbanded, as after a battle. Returns the men lost.
+fn decimate(state: &mut CampaignState, army_id: &ArmyId, percent: u32) -> u32 {
+    let Some(army) = state.armies.get_mut(army_id) else {
+        return 0;
+    };
+    let mut lost = 0;
+    for unit in &mut army.units {
+        let casualties = (unit.strength * percent).div_ceil(100).min(unit.strength);
+        unit.strength -= casualties;
+        lost += casualties;
+    }
+    army.units
+        .retain(|unit| unit.strength > 0 && unit.strength * 20 >= unit.max_strength);
+    lost
+}
+
+fn push_retreat_event(
+    state: &CampaignState,
+    army_id: &ArmyId,
+    text: String,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(army) = state.armies.get(army_id) else {
+        return;
+    };
+    let mut event = GameEvent::new(EventKind::Attrition, text)
+        .army(army_id)
+        .faction(&army.faction);
+    if let Some(province) = state.settlement_province(&army.location) {
+        event = event.province(province);
+    }
+    events.push(event);
+}
+
+/// A routed army with nowhere to rally melts away; its general escapes.
+fn disperse_army(state: &mut CampaignState, army_id: &ArmyId, events: &mut Vec<GameEvent>) {
+    let Some(army) = state.armies.get(army_id) else {
+        return;
+    };
+    let faction = army.faction.clone();
+    let province = state.settlement_province(&army.location).cloned();
+    if let Some(general) = army.general.clone() {
+        state.detach_general(&general);
+    }
+    state.armies.remove(army_id);
+    let mut event = GameEvent::new(
+        EventKind::ArmyDestroyed,
+        format!("Débandade : l'armée {army_id}, coupée de ses places, se disperse."),
+    )
+    .army(army_id)
+    .faction(&faction);
+    if let Some(province) = province {
+        event = event.province(&province);
+    }
+    events.push(event);
 }
 
 pub(crate) fn apply_outcome(

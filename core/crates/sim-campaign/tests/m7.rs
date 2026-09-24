@@ -167,15 +167,10 @@ fn external_battle_result_is_applied() {
         SideId::Defender => (&french, &english),
     };
     if let Some(army) = state.army(loser) {
-        // Lot C4: a beaten attacker falls back to its origin; a beaten
-        // defender to a neighbouring friendly settlement, if there is one.
-        let can_retreat = loser == &french
-            || sim_campaign::movement::edges(&data, &battlefield())
-                .iter()
-                .any(|(n, _)| state.is_friendly_settlement(&army.faction, n));
-        if can_retreat {
-            assert_ne!(army.location, battlefield(), "the loser retreats");
-        }
+        // Lot C7a: a beaten attacker falls back to its origin; a beaten
+        // defender to a friendly or neutral settlement, or it routs (and
+        // rallies far away or disperses): it never stays on the field.
+        assert_ne!(army.location, battlefield(), "the loser retreats");
     }
 }
 
