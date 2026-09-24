@@ -629,6 +629,9 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     let Some(house) = house else {
         return;
     };
+    // F4: the ruler and the heir first (a dynasty needs sons), then the
+    // eldest of the house.
+    let heir = me.heir.clone();
     let single = state
         .characters
         .iter()
@@ -639,19 +642,21 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
                 && c.age(year) >= 16
                 && c.age(year) <= 45
         })
-        .min_by_key(|(id, c)| (c.birth_year, (*id).clone()))
+        .min_by_key(|(id, c)| {
+            let rank = if Some(*id) == ruler.as_ref() {
+                0
+            } else if Some(*id) == heir.as_ref() {
+                1
+            } else {
+                2
+            };
+            (rank, c.birth_year, (*id).clone())
+        })
         .map(|(id, _)| id.clone());
     let Some(single) = single else {
         return;
     };
-    let partner = state
-        .marriage_candidates(data, &single)
-        .into_iter()
-        .filter_map(|id| state.characters.get(&id).map(|c| (id, c)))
-        .filter(|(_, c)| &c.faction == ctx.faction || state.is_allied(ctx.faction, &c.faction))
-        .filter(|(_, c)| c.faction != ctx.state.player_faction)
-        .max_by_key(|(id, c)| (c.prestige, std::cmp::Reverse(id.clone())))
-        .map(|(id, c)| (id, c.faction.clone()));
+    let partner = marriage_partner(ctx, &single);
     match partner {
         Some((spouse, spouse_faction)) if &spouse_faction == ctx.faction => {
             orders.push(Order::ProposeMarriage {
@@ -666,6 +671,70 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         }),
         None => {}
     }
+}
+
+/// Best spouse for `single` (F4): a partner of child-bearing age close in
+/// years, preferably from a ruling house of an ally or of a friendly realm
+/// (diplomatic marriage), who would accept; the player receives an offer.
+fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId, FactionId)> {
+    let state = ctx.state;
+    let data = ctx.data;
+    let year = state.year();
+    let me = state.characters.get(single)?;
+    let ruling = |c: &sim_campaign::CharacterState| {
+        state
+            .factions
+            .get(&c.faction)
+            .and_then(|f| f.ruler.as_ref())
+            .and_then(|r| state.characters.get(r))
+            .is_some_and(|r| r.house == c.house)
+    };
+    state
+        .marriage_candidates(data, single)
+        .into_iter()
+        .filter_map(|id| state.characters.get(&id).map(|c| (id, c)))
+        .filter(|(_, c)| !c.captive && c.faction.as_str() != REBELS)
+        .filter(|(_, c)| (c.age(year) - me.age(year)).abs() <= 15)
+        .filter(|(_, c)| {
+            let wife = if c.sex == data_model::Sex::Female { c } else { me };
+            wife.age(year) <= 35
+        })
+        .filter_map(|(id, c)| {
+            let own = &c.faction == ctx.faction;
+            let attitude = if own {
+                0
+            } else {
+                state.attitude(data, ctx.faction, &c.faction).0
+            };
+            if !own && (attitude < 0 || state.is_at_war(ctx.faction, &c.faction)) {
+                return None;
+            }
+            let mut value = c.prestige + attitude;
+            if !own && ruling(c) {
+                value += 40;
+            }
+            if state.is_allied(ctx.faction, &c.faction) && !own {
+                value += 20;
+            }
+            Some((value, id, c.faction.clone()))
+        })
+        .filter(|(_, id, faction)| {
+            faction == ctx.faction
+                || faction == &state.player_faction
+                || sim_campaign::diplomacy::evaluate(
+                    state,
+                    data,
+                    ctx.faction,
+                    faction,
+                    &sim_campaign::diplomacy::Proposal::Marriage {
+                        character: single.clone(),
+                        spouse: id.clone(),
+                    },
+                )
+                .accept
+        })
+        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
+        .map(|(_, id, faction)| (id, faction))
 }
 
 // =========================================================================
