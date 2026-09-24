@@ -27,6 +27,7 @@ pub use entities::agent::{
 pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
+pub use entities::ai_grid::AiGrid;
 pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
 };
