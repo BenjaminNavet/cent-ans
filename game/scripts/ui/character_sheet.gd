@@ -170,8 +170,55 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	general_button.disabled = not commandable_ok
 	marry_button.disabled = not (alive and not captive and str(character.get("spouse", "")) == "" and not candidates.is_empty())
 
+	_fill_ransom(character)  # G1
 	_fill_skill_tree()
 	show()
+
+
+# --- G1 : captivité et rançon (ordres `pay_ransom` / `release_captive` soumis à la simulation) ---
+
+var _ransom_row: HBoxContainer
+var _ransom_label: Label
+var _ransom_button: Button
+var _ransom_action: String = ""
+
+
+func _fill_ransom(character: Dictionary) -> void:
+	if _ransom_row == null:
+		_ransom_row = HBoxContainer.new()
+		_ransom_label = Label.new()
+		_ransom_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_ransom_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_ransom_button = Button.new()
+		_ransom_button.pressed.connect(_on_ransom_pressed)
+		_ransom_row.add_child(_ransom_label)
+		_ransom_row.add_child(_ransom_button)
+		role_label.add_sibling(_ransom_row)
+	var captor_name: String = str(character.get("captor_name", ""))
+	_ransom_action = str(character.get("ransom_action", ""))
+	_ransom_row.visible = bool(character.get("captive", false)) and captor_name != ""
+	_ransom_label.text = "Captif de %s — rançon %d livres" % [captor_name, int(character.get("ransom", 0))]
+	_ransom_button.text = {"pay": "Payer la rançon", "release": "Libérer contre rançon"}.get(_ransom_action, "")
+	_ransom_button.visible = _ransom_action != ""
+	_ransom_button.tooltip_text = ""
+
+
+## Soumet l'ordre de rançon ; le refus éventuel (trésor, conditions du geôlier) vient de la
+## simulation et s'affiche en info-bulle ; en cas de succès, la fiche est relue.
+func _on_ransom_pressed() -> void:
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim == null or character_id == "":
+		return
+	var order := {"type": "pay_ransom", "character": character_id, "installments": 1}
+	if _ransom_action == "release":
+		order = {"type": "release_captive", "character": character_id}
+	var result: Dictionary = sim.call("submit_order", order)
+	if not bool(result.get("ok", false)):
+		_ransom_button.tooltip_text = "Refusé : %s" % str(result.get("error", "?"))
+		_ransom_label.text += "\nRefusé : %s" % str(result.get("error", "?"))
+		return
+	_fill_ransom(sim.call("get_character", character_id))
 
 
 func _fill_traits(traits: Array) -> void:

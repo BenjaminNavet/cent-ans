@@ -6,6 +6,7 @@
   "$defs": {
     "faction_id": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
     "province_id": { "type": "string", "pattern": "^prov_[a-z0-9_]+$" },
+    "settlement_id": { "type": "string", "pattern": "^set_[a-z0-9_]+$" },
     "unit_type_id": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
     "building_id": { "type": "string", "pattern": "^bld_[a-z0-9_]+$" },
     "technology_id": { "type": "string", "pattern": "^tech_[a-z0-9_]+$" },
@@ -19,6 +20,7 @@
     "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
     "codex_id": { "type": "string", "pattern": "^cdx_[a-z0-9_]+$" },
     "diet_id": { "type": "string", "pattern": "^diet_[a-z0-9_]+$" },
+    "chivalric_order_id": { "type": "string", "pattern": "^ord_[a-z0-9_]+$" },
     "date_string": {
       "type": "string",
       "description": "Date ISO partielle : AAAA, AAAA-MM ou AAAA-MM-JJ (calendrier julien pour l'époque).",

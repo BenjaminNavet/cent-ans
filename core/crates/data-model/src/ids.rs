@@ -156,6 +156,11 @@ define_id!(
     "diet_"
 );
 define_id!(
+    /// Identifier of a chivalric order (`ord_garter`), H6.
+    ChivalricOrderId,
+    "ord_"
+);
+define_id!(
     /// Abstract sea zone (`sea_channel`); free vocabulary.
     SeaZoneId,
     "sea_"

@@ -38,6 +38,18 @@
           "type": "unrest",
           "province": "all",
           "amount": 10
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_normandie",
+          "faction": "fac_france",
+          "from": "fac_england"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_normandie_ouest",
+          "faction": "fac_france",
+          "from": "fac_england"
         }
       ],
       "ai_weight": 2

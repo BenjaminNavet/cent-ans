@@ -29,6 +29,8 @@ var _tabs: TabBar
 var _list: ItemList
 var _title_label: Label
 var _meta_label: Label
+## H11 : « Voir dans l'encyclopédie » quand la fiche a une `entity` connue de l'Encyclopédie.
+var encyclopedia_button: Button
 var _body: RichTextLabel
 var _anachronism_box: PanelContainer
 var _anachronism: RichTextLabel
@@ -127,6 +129,13 @@ func _build_page() -> Control:
 	_meta_label.add_theme_font_size_override("font_size", 14)
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	page.add_child(_meta_label)
+	encyclopedia_button = Button.new()
+	encyclopedia_button.text = "Voir dans l'encyclopédie"
+	encyclopedia_button.tooltip_text = "Fiche de jeu (touche L)"
+	encyclopedia_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	encyclopedia_button.hide()
+	encyclopedia_button.pressed.connect(open_in_encyclopedia)
+	page.add_child(encyclopedia_button)
 	page.add_child(HSeparator.new())
 	_body = _rich_text(16)
 	page.add_child(_body)
@@ -237,6 +246,7 @@ func _show_entry(id: String) -> void:
 	if era != "":
 		meta.append(era)
 	_meta_label.text = " · ".join(meta)
+	encyclopedia_button.visible = _encyclopedia() != null and not Encyclopedia.definition_of(str(entry.get("entity", ""))).is_empty()
 	_body.text = CodexText.format(str(entry.get("body", entry.get("summary", ""))))
 	var anachronism := str(entry.get("anachronism", ""))
 	_anachronism_box.visible = anachronism != ""
@@ -299,6 +309,22 @@ func _update_history_buttons() -> void:
 func _families() -> Array:
 	var codex := _store()
 	return codex.call("families") if codex != null else []
+
+
+## H11 : ferme le Codex et ouvre l'Encyclopédie sur l'entité de la fiche courante.
+func open_in_encyclopedia() -> bool:
+	var codex := _store()
+	var entity := str((codex.call("entry", current_id) as Dictionary).get("entity", "")) if codex != null else ""
+	var encyclopedia := _encyclopedia()
+	if encyclopedia == null or entity == "":
+		return false
+	hide()
+	encyclopedia.call("open_window", entity)
+	return true
+
+
+func _encyclopedia() -> Node:
+	return get_tree().get_first_node_in_group("encyclopedia") if is_inside_tree() else null
 
 
 func _store() -> Node:

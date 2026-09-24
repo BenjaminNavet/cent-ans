@@ -50,7 +50,7 @@ var capacity: int = 20
 var unit_catalog: Dictionary = {}
 
 var _selection: Array[int] = []
-var _cards: Array[UnitCard] = []
+var _cards: Array[RegimentCard] = []
 var _count_label: Label
 var _men_label: Label
 var _upkeep_label: Label
@@ -243,7 +243,7 @@ func _refresh() -> void:
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])
 	for index in units.size():
-		var card := UnitCard.new()
+		var card := RegimentCard.new()
 		card.strip = self
 		card.index = index
 		card.unit = units[index]
@@ -369,7 +369,7 @@ static func abbreviate(word: String, font: Font, width: float, font_size: int) -
 
 
 ## Carte de régiment : dessin au trait + étiquette de nom (retour à la ligne aux mots).
-class UnitCard:
+class RegimentCard:
 	extends Control
 
 	var strip: ArmyStrip

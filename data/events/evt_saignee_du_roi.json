@@ -1,0 +1,43 @@
+{
+  "id": "evt_saignee_du_roi",
+  "title": "La saignée du prince",
+  "text": "Le prince se plaint de lourdeurs et de fièvres : trop de sang, disent ses médecins, qui veulent rétablir l'équilibre des [[cdx_humeurs|humeurs]] par une [[cdx_saignee|saignée]]. Avant de prendre la lancette, ils consultent l'almanach : l'« homme zodiacal » montre quel signe gouverne chaque partie du corps, et l'on ne saigne pas un membre quand la lune passe dans son signe. Le jour favorable est dans trois jours ; d'autres conseillent plutôt un [[cdx_regimen_sanitatis|régime de santé]].",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 150,
+    "conditions": [
+      { "type": "ruler_age_between", "min": 40, "max": 90 }
+    ]
+  },
+  "scope": { "type": "faction" },
+  "options": [
+    {
+      "text": "Saigner au jour fixé par les astres",
+      "effects": [
+        { "type": "treasury", "amount": -100 },
+        { "type": "prestige", "amount": 1 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Refuser la lancette : diète, bains et repos",
+      "effects": [
+        { "type": "treasury", "amount": -300 },
+        { "type": "piety", "amount": 1 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Saigner encore, jusqu'à ce que la fièvre cède",
+      "effects": [
+        { "type": "add_trait", "character": "ruler", "trait": "trait_sickly" }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Saignée (médecine)",
+    "Homme zodiacal",
+    "Danielle Jacquart, La Médecine médiévale dans le cadre parisien, Fayard, 1998"
+  ]
+}

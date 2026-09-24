@@ -127,3 +127,32 @@ exclus d'avance (`evaluate`), offre au joueur possible.
 
 **Dynastie** : Pierre Ier de Portugal et Amédée VI de Savoie ajoutés (héritiers de 1337) ; un souverain vaincu
 meurt au combat à 1 % (général : 5 %). Tests : `ai/tests/f4_war.rs`, `sim-campaign/tests/f4_succession.rs`.
+
+## 5. G2 — alignement historique
+
+Mesure : `century_probe` (qui imprime aussi les alliances pendant les guerres France-Angleterre, la part des
+tours où l'Angleterre domine le royaume et les banqueroutes de l'Écosse). Code : `ai/src/support.rs`
+(subsides), `ai/src/alignment.rs` (changements de camp), `ai/src/campaign.rs` (économie). Tests :
+`ai/tests/g2.rs`. `sim-campaign` n'est pas modifié : l'ordre `SendGift` existant sert aux subsides.
+
+- *Subsides* : chaque tour, avant l'économie, un allié au moins 3 fois plus riche (revenu brut) qui partage
+  un rival (`rivals`) paie à un allié endetté de quoi couvrir sa dette et 2 saisons de déficit, pris sur le
+  tiers de son trésor au-delà d'une saison d'entretien (l'or français de l'Auld Alliance).
+- *Pas de monnaie affaiblie* pour un royaume dont les bâtiments mangent la moitié du revenu : l'inflation de
+  leur entretien dépasse le seigneuriage (spirale de l'Écosse réduite à Fife).
+- *Tirage par campagne* (`campaign_roll`, splitmix64 de la graine, sans toucher au RNG) : l'histoire hésite,
+  environ une campagne sur deux (`HISTORY_PERMILLE` = 500) voit chaque bascule.
+- *Révolte de la laine* : un vassal (loyauté < 60) frappé par l'embargo d'un ennemi de son suzerain
+  (Flandre, embargo anglais de 1337) déclare son indépendance et propose l'alliance à l'embargo ; celui-ci
+  lève l'embargo sur un royaume qui combat ses ennemis. L'événement `evt_artevelde` reste en place.
+- *Alliances dynastiques* : un royaume en guerre propose l'alliance à un prince indépendant voisin de son
+  ennemi qui le préfère (attitude ≥ 20 et > attitude envers l'ennemi + 10 ; marge 0 pour un parent de nos
+  alliés — attitude ≥ 20 envers l'un d'eux), sans plafond d'alliances (Hainaut, Brabant, Gueldre).
+- *Défection bourguignonne (Troyes)* : un vassal (loyauté < 90) ou un allié change de camp quand
+  l'envahisseur domine le royaume de son suzerain — capitale de 1337 ou ≥ 8 provinces du royaume (régions
+  où la couronne possédait ≥ 3 provinces en 1337, Guyenne et Ponthieu compris) — et que la couronne a perdu
+  un quart de ses terres ou un score ≤ −25 : paix blanche avec l'envahisseur, guerre d'indépendance (ou
+  rupture d'alliance), offre d'alliance. Un tirage par décennie ; jamais vers une couronne qui revendique nos
+  terres (l'Écosse ne passe pas à l'Angleterre).
+- *Trésors dormants* : le trésor au-delà de 3 saisons de revenu est dépensé en 4 tours (au lieu de 8) et
+  achète des recrues à son rythme (1 recrue par 1 500 livres dépensées par tour, 16 au plus).

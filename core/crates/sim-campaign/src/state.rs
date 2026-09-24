@@ -158,6 +158,16 @@ pub struct Unit {
     pub experience: u8,
     /// 0-100.
     pub morale: u8,
+    /// G1: flat armour bonus of the buildings of the levying province.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub levy_armor: u8,
+    /// G1: flat ranged bonus of the buildings of the levying province.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub levy_ranged: u8,
+}
+
+fn is_zero_u8(value: &u8) -> bool {
+    *value == 0
 }
 
 impl Unit {
@@ -169,6 +179,8 @@ impl Unit {
             max_strength: unit_type.soldiers,
             experience: 0,
             morale: unit_type.stats.morale,
+            levy_armor: 0,
+            levy_ranged: 0,
         }
     }
 }
@@ -362,6 +374,30 @@ pub struct FactionState {
     /// Diets paid during the last resolved turn (budget line « Table »).
     #[serde(default)]
     pub table_upkeep_last_turn: i64,
+    // ----- H5: coinage (`coinage.rs`) ---------------------------------------
+    /// Silver content of the faction's coins.
+    #[serde(default)]
+    pub coinage: crate::coinage::CoinageLevel,
+    /// Price level in per cent of the 1337 prices (100 = base); scales
+    /// recruitment, upkeep and construction.
+    #[serde(default = "crate::coinage::default_price_level")]
+    pub price_level: u32,
+    /// Year of the last `set_coinage` (one change per year).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub coinage_changed_year: Option<i32>,
+    /// Seigniorage collected during the last resolved turn.
+    #[serde(default)]
+    pub seigniorage_last_turn: i64,
+    /// Recoinage (strong money) paid during the last resolved turn.
+    #[serde(default)]
+    pub recoinage_last_turn: i64,
+    // ----- H6: ransoms and chivalric orders -----------------------------------
+    /// Ransoms being paid by installments (this faction owes them).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ransom_debts: Vec<crate::ransom::RansomDebt>,
+    /// The chivalric order founded by the faction (at most one).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chivalric_order: Option<crate::chivalry::OrderState>,
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -440,6 +476,9 @@ pub struct CharacterState {
     /// Chevauchées led, for `trait_cruel` (after 3).
     #[serde(default)]
     pub raids_led: u32,
+    /// H6: terms set by the captor while the character is captive.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ransom_terms: Option<crate::ransom::RansomTerms>,
 }
 
 fn default_loyalty() -> u8 {

@@ -402,6 +402,12 @@
       "source": "lorc/scroll-unfurled",
       "author": "Lorc"
     },
+    "hud_codex": {
+      "file": "lorc-scroll-unfurled.svg",
+      "category": "hud",
+      "source": "lorc/scroll-unfurled",
+      "author": "Lorc"
+    },
     "hud_court": {
       "file": "delapouite-throne-king.svg",
       "category": "hud",

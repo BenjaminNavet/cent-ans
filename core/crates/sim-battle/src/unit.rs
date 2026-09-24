@@ -136,6 +136,10 @@ pub struct Unit {
     /// Battle-only regiment (the ram): not a campaign unit, no losses reported.
     #[serde(default)]
     pub synthetic: bool,
+    /// F5d: waiting off the field (beyond the regiments a side may field at
+    /// once); not [`Unit::present`] until it marches in.
+    #[serde(default)]
+    pub reserve: bool,
     /// The battering ram.
     #[serde(default)]
     pub ram: bool,
@@ -206,6 +210,7 @@ impl Unit {
             withdrawing: false,
             disengaging: false,
             left_field: false,
+            reserve: false,
             charge_timer: 0.0,
             reload: 0.0,
             still_time: 0.0,
@@ -268,7 +273,7 @@ impl Unit {
 
     /// On the field with soldiers left.
     pub fn present(&self) -> bool {
-        !self.left_field && self.hp > 0.0
+        !self.left_field && !self.reserve && self.hp > 0.0
     }
 
     /// Present and not routing: counts for the end of the battle.
