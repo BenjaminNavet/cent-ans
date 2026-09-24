@@ -1766,6 +1766,8 @@ pub const WAR_REST_TURNS: u32 = 12;
 pub const MAX_ALLIANCES: usize = 4;
 /// Ratio (own coalition / enemy coalition) needed to join an ally's war.
 pub const JOIN_WAR_RATIO: f64 = 0.6;
+/// War score below which a beaten realm offers what the enemy holds of it.
+pub const SURRENDER_WAR_SCORE: i32 = -25;
 /// War score below which a vassal deserts its losing suzerain.
 pub const DESERTION_WAR_SCORE: i32 = -25;
 
@@ -1952,7 +1954,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         .map_or(50, i32::from);
 
     // Peace: offer a white peace when we would accept one ourselves; when
-    // clearly winning, ask for the occupied provinces; when clearly losing,
+    // clearly winning, ask for the occupied provinces; when losing,
     // cede what the enemy holds rather than lose everything (F4).
     if (turn + slot).is_multiple_of(2) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
@@ -2058,7 +2060,7 @@ fn peace_terms(
     if evaluate(state, data, enemy, faction, &white).accept && accepted(&[]) {
         return Some(Vec::new());
     }
-    if score < -40 {
+    if score < SURRENDER_WAR_SCORE {
         let lost = held_by(faction, enemy, usize::MAX);
         if !lost.is_empty() && accepted(&lost) {
             return Some(lost);
