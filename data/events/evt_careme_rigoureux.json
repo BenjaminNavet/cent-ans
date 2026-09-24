@@ -1,0 +1,46 @@
+{
+  "id": "evt_careme_rigoureux",
+  "title": "Un Carême trop rigoureux",
+  "text": "Quarante jours sans viande, sans œufs, sans lait ni beurre : le [[cdx_careme|Carême]] pèse lourd cette année, car le [[cdx_hareng|hareng]] salé manque et l'huile d'olive, qui vient du Midi, coûte trop cher. Au nord, où l'on cuisine au beurre, les évêques songent à demander une dispense ; les fidèles qui en profitent verseront une aumône pour ce [[cdx_beurre_de_careme|beurre de Carême]] ; à Rouen, ces aumônes paieront un jour toute une tour de la cathédrale.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 100,
+    "conditions": [
+      { "type": "season", "season": "spring" },
+      { "type": "any_of", "conditions": [{ "type": "religion_is", "religion": "rel_catholic" }, { "type": "religion_is", "religion": "rel_catholic_rome" }] }
+    ]
+  },
+  "scope": { "type": "faction" },
+  "options": [
+    {
+      "text": "Solliciter du pape la dispense du beurre",
+      "effects": [
+        { "type": "treasury", "amount": -800 },
+        { "type": "papal_favor", "amount": 2 },
+        { "type": "health", "province": "all", "amount": 2 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Maintenir le jeûne dans toute sa rigueur",
+      "effects": [
+        { "type": "piety", "amount": 4 },
+        { "type": "health", "province": "all", "amount": -2 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Fermer les yeux sur les tables de la cour",
+      "effects": [
+        { "type": "piety", "amount": -3 },
+        { "type": "prestige", "amount": 1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Carême",
+    "Tour de Beurre (Rouen)",
+    "Bruno Laurioux, Manger au Moyen Âge, Hachette, 2002"
+  ]
+}
