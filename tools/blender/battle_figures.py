@@ -212,7 +212,9 @@ class Figure:
         gives an open sheet (cloth), to use with `solidify`."""
         n = self.ring_count(ring)
         if self.far and len(sections) > 4:
-            sections = [sections[0]] + list(sections[2:-1:2]) + [sections[-1]]
+            keep = max(3, (len(sections) + 2) // 3)
+            picks = sorted({round(i * (len(sections) - 1) / (keep - 1)) for i in range(keep)})
+            sections = [sections[i] for i in picks]
         centres = [Vector(s[0]) for s in sections]
         verts = []
         faces = []
@@ -484,6 +486,8 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
         ]
         f.loft(sections, part, const(sleeve, sleeve_code), ring=7, side=(0.0, 0.0, 1.0))
         # Fist.
+        if f.far:
+            continue
         f.blob((HAND.x * s, HAND.y - 0.01, HAND.z + 0.005), (0.042, 0.05, 0.05), part,
                const(glove, glove_code), ring=6, rows=4, subdiv=0)
 
@@ -585,8 +589,9 @@ def heater(f, centre, width, height, yaw, part, lean=0.0):
 
 def sword(f, hand, part=P_WEAPON):
     h = Vector(hand)
-    f.tube([h + Vector((0, -0.07, 0)), h + Vector((0, 0.07, 0))], [0.018, 0.018], part, const(LEATHER), ring=5)
-    f.blob(h + Vector((0, -0.09, 0)), (0.025, 0.022, 0.025), part, const(WHITE, C_TRIM), ring=5, rows=3)
+    if not f.far:
+        f.tube([h + Vector((0, -0.07, 0)), h + Vector((0, 0.07, 0))], [0.018, 0.018], part, const(LEATHER), ring=5)
+        f.blob(h + Vector((0, -0.09, 0)), (0.025, 0.022, 0.025), part, const(WHITE, C_TRIM), ring=5, rows=3)
     f.box(h + Vector((0, 0.085, 0)), (0.2, 0.025, 0.03), part, const(STEEL, C_METAL))
     blade = [
         (h + Vector((0, 0.1, 0)), 0.026, 0.008),
@@ -669,8 +674,9 @@ def lance(f, hand, part=P_WEAPON):
     shaft = [h + Vector((0, -0.6, 0)), h + Vector((0, 0.1, 0)), h + Vector((0, 1.5, 0)), h + Vector((0, 3.0, 0))]
     f.tube(shaft, [0.028, 0.034, 0.026, 0.018], part, const(WOOD), ring=6, subdiv=0)
     # Vamplate (hand guard).
-    f.tube([h + Vector((0, 0.08, 0)), h + Vector((0, 0.2, 0))], [0.08, 0.03], part, const(STEEL, C_METAL),
-           ring=8, subdiv=0)
+    if not f.far:
+        f.tube([h + Vector((0, 0.08, 0)), h + Vector((0, 0.2, 0))], [0.08, 0.03], part, const(STEEL, C_METAL),
+               ring=8, subdiv=0)
     f.tube([h + Vector((0, 3.0, 0)), h + Vector((0, 3.25, 0))], [0.022, 0.002], part, const(STEEL, C_METAL),
            ring=4, subdiv=0)
     # Pennon (livery, swallow-tailed), in the plane of the lance, pointing backwards.
@@ -858,12 +864,12 @@ def horse(f, coat, caparison, dark_points):
     ]
     f.loft(saddle, P_HORSE, const(LEATHER), ring=8, side=(1.0, 0.0, 0.0), subdiv=0)
     # Cantle and pommel: arches across the saddle.
-    for z, h, w in ((-0.36, 0.2, 0.17), (0.15, 0.13, 0.14)):
+    for z, h, w in ((-0.36, 0.2, 0.17), (0.15, 0.13, 0.14)) if not f.far else ():
         arch = [(-w, 1.64, z), (-w * 0.75, 1.64 + h * 0.8, z), (0.0, 1.64 + h, z), (w * 0.75, 1.64 + h * 0.8, z),
                 (w, 1.64, z)]
         f.loft([(p, 0.035, 0.025) for p in arch], P_HORSE, const(WOOD_DARK), ring=6, side=(0.0, 0.0, 1.0),
                subdiv=0)
-    for sx in (-1.0, 1.0):
+    for sx in (-1.0, 1.0) if not f.far else ():
         f.box((0.3 * sx, 1.3, 0.1), (0.012, 0.6, 0.04), P_HORSE, const(LEATHER), rot_x=0.1)
         if not f.lod:
             f.tube([(0.31 * sx, 1.02, 0.13), (0.31 * sx, 0.97, 0.13)], [0.035, 0.035], P_HORSE, const(IRON, C_METAL),
@@ -965,7 +971,8 @@ def rider(f, under, under_code, surcoat, helmet_style, armored):
             ((0.325 * sx, 1.04, 0.12), 0.045, 0.035),
             ((0.325 * sx, 1.03, 0.2), 0.015, 0.015),
         ]
-        f.loft(foot, P_RIDER, const(LEATHER), ring=6, side=(1.0, 0.0, 0.0))
+        if not f.far:
+            f.loft(foot, P_RIDER, const(LEATHER), ring=6, side=(1.0, 0.0, 0.0))
 
 
 def cavalry(f, variant):

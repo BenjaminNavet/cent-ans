@@ -351,6 +351,7 @@ func _process(delta: float) -> void:
 	if _benchmark:
 		if _bench_frames == 0:
 			soldiers.start_timing()
+			_apply_camera_override()  # banc d'essai rapproché (lot B1)
 		_bench_frames += 1
 		_bench_time += delta
 		if _bench_frames == 600:
