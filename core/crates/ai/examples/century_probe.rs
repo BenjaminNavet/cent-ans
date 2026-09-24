@@ -70,7 +70,38 @@ struct Report {
     seconds: f64,
 }
 
+/// `TRACE=1`: Burgundy's standing every 5 years (G4).
+fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
+    let (france, england, burgundy) = (id("fac_france"), id("fac_england"), id("fac_burgundy"));
+    let b = &state.factions[&burgundy];
+    let own = |f: &FactionId| state.provinces.values().filter(|p| &p.owner == f).count();
+    let score = if state.is_at_war(&france, &england) {
+        state.war_score(data, &france, &england)
+    } else {
+        0
+    };
+    println!(
+        "  [{seed}] {:>16} alive:{} suz:{:?} loy:{} att(fr):{} att(en):{} war(fr/en):{}/{} ally(fr/en):{}/{} en-held:{} prov fr/en/bu:{}/{}/{} fr-en:{} ws(fr,en):{score}",
+        state.date_label(),
+        b.alive,
+        b.suzerain.as_ref().map(|s| s.as_str()),
+        b.loyalty,
+        state.attitude(data, &burgundy, &france).0,
+        state.attitude(data, &burgundy, &england).0,
+        state.is_at_war(&burgundy, &france),
+        state.is_at_war(&burgundy, &england),
+        state.is_allied(&burgundy, &france),
+        state.is_allied(&burgundy, &england),
+        ai::alignment::realm_held_by(state, data, &france, &england),
+        own(&france),
+        own(&england),
+        own(&burgundy),
+        state.is_at_war(&france, &england),
+    );
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
+    let trace = std::env::var("TRACE").is_ok();
     let started = Instant::now();
     let france = id("fac_france");
     let england = id("fac_england");
@@ -157,6 +188,12 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 }
                 _ => {}
             }
+            if trace
+                && event.text_fr.contains("Bourgogne")
+                && !matches!(event.kind, EventKind::Battle | EventKind::Marriage)
+            {
+                println!("  [{seed}] {:>16} * {}", state.date_label(), event.text_fr);
+            }
             if verbose
                 && matches!(event.kind, EventKind::WarDeclared | EventKind::PeaceSigned)
                 && names.iter().all(|n| event.text_fr.contains(n.as_str()))
@@ -218,6 +255,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                     report.idle_faction = fid.to_string();
                 }
             }
+        }
+        if trace && state.turn % 20 == 0 {
+            trace_burgundy(&state, data, seed);
         }
         if state.turn == TURN_1400 {
             for (index, major) in MAJORS.iter().enumerate() {
