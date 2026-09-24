@@ -34,7 +34,7 @@ const EFFECT_DISTANCE := 700.0
 const DUST_DISTANCE := 420.0
 ## Vitesse (m/s), flèche relative de l'arc et durée au sol (s) par sorte de trait.
 const SPEED := [48.0, 62.0, 110.0, 34.0]
-const ARC := [0.24, 0.07, 0.02, 0.3]
+const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
 const DUST_COLOR := Color(0.74, 0.66, 0.52)
 const SPLASH_COLOR := Color(0.85, 0.9, 0.92)
@@ -84,7 +84,7 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	for i in DUST_EMITTERS:
 		_dust.append(_emitter("Dust%d" % i, _dust_material(false), 72, 2.8, false))
 	for i in SPLASH_EMITTERS:
-		_splash.append(_emitter("Splash%d" % i, _splash_material(), 40, 0.9, false))
+		_splash.append(_emitter("Splash%d" % i, _splash_material(), 64, 0.9, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
@@ -265,7 +265,7 @@ func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, c
 				end.y = float(_height_at.call(end.x, end.z))
 			launch(muzzle if kind == BALL else engine + Vector3(0, 3.5, 0), end, kind, time_now)
 		return
-	var count := int(mini(int(unit["soldiers"]), 60) * 0.6 * lod)
+	var count := int(mini(int(unit["soldiers"]), 64) * 0.85 * lod)
 	var starts := soldiers.soldier_positions(int(unit["id"]), count) if soldiers != null else PackedVector3Array()
 	if starts.is_empty():
 		for _i in count:
@@ -392,12 +392,12 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(1, 1.0))
 		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.6, 0.0])
 	elif node_name.begins_with("Splash"):
-		mat.spread = 25.0
-		mat.initial_velocity_min = 2.0
-		mat.initial_velocity_max = 4.0
+		mat.spread = 30.0
+		mat.initial_velocity_min = 2.5
+		mat.initial_velocity_max = 4.5
 		mat.gravity = Vector3(0, -9.8, 0)
-		mat.scale_min = 0.5
-		mat.scale_max = 1.2
+		mat.scale_min = 1.0
+		mat.scale_max = 2.2
 		grow.add_point(Vector2(0, 0.6))
 		grow.add_point(Vector2(1, 1.2))
 		mat.color_ramp = _ramp([0.0, 0.1, 1.0], [0.0, 0.7, 0.0])

@@ -884,7 +884,7 @@ func _stage_screenshot() -> void:
 		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
 			break
 	paused = true
-	print("BattleScene: capture at %.0f s, %d corpses" % [float(battle.call("get_elapsed")), soldiers.corpse_count])
+	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0
