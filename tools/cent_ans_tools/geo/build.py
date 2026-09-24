@@ -12,7 +12,16 @@ import numpy as np
 import pandas as pd
 from PIL import Image, ImageDraw
 
-from cent_ans_tools.geo import download, provinces, terrain, vectors
+from cent_ans_tools.geo import (
+    download,
+    hamlets,
+    provinces,
+    relief,
+    roads,
+    settlements,
+    terrain,
+    vectors,
+)
 from cent_ans_tools.geo.project import (
     CRS_MAP,
     LAT_MAX,
@@ -40,6 +49,10 @@ class BuildResult:
     coastline: Path
     preview: Path
     provinces: provinces.ProvinceResult
+    relief: relief.ReliefResult | None = None
+    roads: roads.RoadResult | None = None
+    settlements: settlements.SettlementResult | None = None
+    hamlets: hamlets.HamletResult | None = None
 
 
 def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
@@ -52,6 +65,7 @@ def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
         "height_min_m": terrain.HEIGHT_MIN_M,
         "height_max_m": terrain.HEIGHT_MAX_M,
         "extent_lonlat": [LON_MIN, LAT_MIN, LON_MAX, LAT_MAX],
+        "height_tiles": dict(relief.HEIGHT_TILES),
         "sources": {
             "dem": {"name": "ETOPO 2022 v1 15s surface", "tiles": etopo_tiles},
             "vectors": {
@@ -174,6 +188,11 @@ def build(
 
     render_preview(height_m, land_mask, rivers, coast, grid, preview_path)
     province_result = provinces.build(map_dir=map_dir)
+    # Lot C3: relief tiles, roads, settlement graph (uses roads), hamlets.
+    relief_result = relief.build(force=force, map_dir=map_dir)
+    road_result = roads.build(force=force, map_dir=map_dir)
+    settlement_result = settlements.build(map_dir=map_dir)
+    hamlet_result = hamlets.build(force=force, map_dir=map_dir)
     return BuildResult(
         map_json_path,
         heightmap_path,
@@ -182,6 +201,10 @@ def build(
         coast_path,
         preview_path,
         province_result,
+        relief_result,
+        road_result,
+        settlement_result,
+        hamlet_result,
     )
 
 
@@ -196,6 +219,10 @@ def info(map_dir: Path = MAP_DIR) -> dict:
         "coastline.geojson",
         "provinces.geojson",
         "province_ids.png",
+        "settlement_graph.json",
+        "settlements_px.json",
+        "roads.geojson",
+        "hamlets.json",
     ):
         path = map_dir / name
         files[name] = path.stat().st_size if path.exists() else None

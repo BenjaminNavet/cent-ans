@@ -105,7 +105,7 @@ def geo_build(
         False, "--force", help="Retélécharge les données brutes"
     ),
 ) -> None:
-    """Construit data/map/ (terrain puis provinces) et les aperçus docs/img."""
+    """Construit data/map/ (terrain, provinces, relief 8192², routes, colonies, hameaux) et les aperçus."""
     from cent_ans_tools.geo import build as geo_builder
 
     result = geo_builder.build(force=force)
@@ -121,6 +121,19 @@ def geo_build(
         ],
     )
     _report_provinces(result.provinces)
+    if result.relief:
+        console.print(
+            f"Relief 8192² : {result.relief.tiles} tuiles, "
+            f"{result.relief.total_bytes / 1e6:.1f} Mo"
+        )
+    if result.roads:
+        console.print(
+            f"Routes : {result.roads.source}, {result.roads.features} tronçons"
+        )
+    if result.settlements:
+        _report_settlements(result.settlements)
+    if result.hamlets:
+        console.print(f"Hameaux : {result.hamlets.count}")
 
 
 @geo_app.command("provinces")

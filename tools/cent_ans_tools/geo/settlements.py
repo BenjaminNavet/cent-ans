@@ -346,7 +346,8 @@ def place_settlements(
     height, width = labels.shape
     outside = []
     for settlement, x, y in zip(settlements, xs, ys, strict=True):
-        settlement.px = (float(x), float(y))
+        # Truncated to 0.1 px (the output precision) so the pixel never changes.
+        settlement.px = (float(np.floor(x * 10) / 10), float(np.floor(y * 10) / 10))
         row, col = int(y), int(x)
         inside = 0 <= row < height and 0 <= col < width
         settlement.snapped = not (
