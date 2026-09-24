@@ -1,4 +1,4 @@
-# Lot B7 — Finitions visuelles de bataille
+# Lot B7 — Finitions visuelles de bataille (terminé, non fusionné)
 
 Plan : `docs/design/2026-09-24-rapprochement-total-war.md`, suivi `docs/wip/tw.md`. Suites de B1/B2/B4/B5.
 Godot uniquement (`game/`), aucune règle.
@@ -10,7 +10,7 @@ Godot uniquement (`game/`), aucune règle.
 | 2. Repères d'unité regroupés de loin | **fait** (smoke : contrôle ajouté) |
 | 3. Neige en relief | **fait** (congères, pentes bleutées, neige piétinée) |
 | 4. Éclaboussures de gué vérifiées | **fait** (quasi invisibles avant : corrigé) |
-| Mesures perf avant/après | à faire |
+| Mesures perf avant/après | **faites** |
 
 ## 1. Fanions
 Cause : le fanion est modélisé perpendiculaire à la hampe (flottant vers l'arrière, lance droite) et
@@ -32,12 +32,6 @@ Un régiment isolé garde sa bannière. De près : inchangé. `battle_scene.gd` 
 Smoke : vue lointaine simulée (toutes les ancres au même point) → 2 pastilles, clic = tout le camp.
 Captures : `before_markers_far.png` / `after_markers_far.png`
 (`res://scenes/battle/battle.tscn -- --screenshot=<png> --shot-at=60 --camera=630,300,750,180 --units=12`).
-
-## Mesures « avant » (HEAD 51f95be + fanions, `--disable-vsync --resolution 1600x900`)
-| Config (`--benchmark --bench-at=90`) | FPS moy. | Primitives | Appels |
-|---|---|---|---|
-| démo 14 unités | 58,8 | 1,38 M | 520 |
-| `--units=20` (40 unités, 4553 soldats) | 58,8 | 2,87 M | 895 |
 
 ## 3. Neige
 `battle_ground.gdshader` : quand la couche neige domine, congères étirées par le vent (bruit
@@ -66,5 +60,31 @@ surface ; 160 particules, plus opaques, couleur pleine (non assombrie) ; force m
 (cavaliers) / 0,4 (piétons) dans l'eau. Captures : `after_ford_splash.png` (charge), 
 `after_ford_infantry.png` (`--shot-at=106 --camera=598,366,70,165`).
 
-## Prochaine étape
-Mesures « après » (`--benchmark --bench-at=90`, démo et `--units=20`), smoke, rapport.
+## Mesures (24/09, `--disable-vsync --resolution 1600x900 -- --benchmark --bench-at=90`)
+« Avant » = fichiers de `51f95be` remis en place le temps de la mesure. Écran plafonné à 60 Hz :
+les FPS ne départagent pas (58,7-58,8 partout) ; on compare primitives et appels de dessin.
+
+| Config | Avant : primitives / appels | Après : primitives / appels |
+|---|---|---|
+| démo 14 unités | 1,38 M / 520 | 1,38 M / 520 |
+| `--units=20` (40 unités) | 2,87 M / 895 | 2,87 M / 892 |
+| `--units=20 --camera=630,300,750,180` (vue lointaine) | 2,77 M / 831 | 2,77 M / **617** |
+| neige (`--season=winter --ground=snowy --terrain=hills --weather=clear`) | 1,46 M / 549 | 1,46 M / 549 |
+
+Lecture : aucun coût GPU mesurable ; les pastilles de groupe **retirent** ~210 appels de dessin 2D
+en vue lointaine (moins de repères). Coût CPU du piétinement : une impression toutes les 0,5 s
+de bataille (≈ 40 régiments × quelques centaines de texels) et un envoi de texture 500 × 400 L8 ;
+non mesurable en FPS. Fanions : quelques instructions du shader de sommets (lances seulement).
+
+## Tests
+- Smoke `godot --headless --path game --script res://tests/smoke.gd` : 22 « smoke OK », aucune
+  `SCRIPT ERROR` (contrôle B7 des pastilles ajouté dans `_check_battle_markers_b2`).
+- `--legacy-figures` : capture OK (fanion ancien vers l'avant, non touché).
+- Pas de Rust modifié (cargo non relancé).
+
+## Pistes
+- Neige piétinée étendable à la boue (sol détrempé, pluie) : même carte, teinte brune.
+- Éclaboussures : gerbes ponctuelles au choc d'une charge dans l'eau ; sillage (écume) derrière
+  les chevaux ; les unités traversent souvent la rivière hors des gués (règle de la sim, à voir).
+- Pastilles : regroupement par ligne de bataille (avant-garde/bataille) plutôt que par proximité
+  écran ; infobulle listant les régiments du groupe.
