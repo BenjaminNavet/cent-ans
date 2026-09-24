@@ -170,6 +170,7 @@ func _setup_settlements() -> void:
 	add_child(settlement_layer)
 	settlement_layer.setup(map_data, terrain, settlement_data, zoom_tiers)
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
+	armies.settlement_position = settlement_layer.world_position_of  # C4
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
