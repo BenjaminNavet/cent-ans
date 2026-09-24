@@ -257,6 +257,21 @@ func set_reachable(reachable: PackedInt32Array, path: PackedInt32Array = PackedI
 	material.set_shader_parameter("mask_enabled", not reachable.is_empty() or not path.is_empty())
 
 
+## Brouillard de guerre (lot C1) : `visible` = index raster des provinces vues ; les autres
+## sont voilées par le shader. `enabled` faux efface le voile.
+func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
+	if map_data == null or material == null:
+		return
+	var width := maxi(map_data.province_count + 1, 1)
+	var image := Image.create(width, 1, false, Image.FORMAT_R8)
+	image.fill(Color(0, 0, 0, 0))
+	for index in visible:
+		if index > 0 and index < width:
+			image.set_pixel(index, 0, Color(1.0, 0, 0))
+	material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
+	material.set_shader_parameter("fog_enabled", enabled)
+
+
 func set_highlight(hovered_index: int, selected_index: int) -> void:
 	if material == null:
 		return

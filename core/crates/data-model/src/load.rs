@@ -23,6 +23,7 @@ use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
+use crate::entities::vision::VisionRules;
 use crate::ids::{
     BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
     ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
@@ -56,6 +57,10 @@ pub mod folders {
     pub const SETTLEMENT_RULES: &str = "rules.json";
     /// Settlement movement graph, inside `map/`; optional.
     pub const SETTLEMENT_GRAPH: &str = "settlement_graph.json";
+    /// Global rule tuning (lot C1: `vision.json`); optional folder.
+    pub const RULES: &str = "rules";
+    /// Line of sight of the campaign map, inside `rules/`; optional.
+    pub const VISION_RULES: &str = "vision.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -175,6 +180,8 @@ pub struct GameData {
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
     pub settlement_graph: Vec<SettlementEdge>,
+    /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
+    pub vision_rules: Option<VisionRules>,
 }
 
 impl GameData {
@@ -208,6 +215,7 @@ impl GameData {
             settlements_by_province: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
+            vision_rules: None,
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -224,6 +232,10 @@ impl GameData {
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
+        if vision_path.is_file() {
+            data.vision_rules = Some(read_json(&vision_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;

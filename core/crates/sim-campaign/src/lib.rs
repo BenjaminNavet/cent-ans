@@ -60,6 +60,7 @@ pub mod state;
 pub mod table;
 pub mod turn;
 pub mod victory;
+pub mod vision;
 
 pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,

@@ -32,6 +32,9 @@ const STATUS_TEXT := {"moving": "»", "siege": "siège", "embarked": "à bord"}
 var map_data: MapData
 var camera: Camera3D
 var selected_army: String = ""
+## Brouillard (lot C1) : provinces hors de vue (id → true) ; les armées étrangères qui s'y
+## trouvent ne reçoivent pas de marqueur. Rempli par `MinimapController.refresh_fog`.
+var hidden_provinces: Dictionary = {}
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
 var _plates: Dictionary = {}  # army_id → PanelContainer
@@ -65,6 +68,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		if army.is_empty():
 			continue
 		var location: String = str(army.get("location", ""))
+		if hidden_provinces.has(location) and str(army.get("faction", "")) != player_faction:
+			continue
 		var centroid := map_data.centroid_of_id(location)
 		if centroid.x < 0.0:
 			continue
