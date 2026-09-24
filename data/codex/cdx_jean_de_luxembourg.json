@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_de_luxembourg",
+  "title": "Jean l'Aveugle, roi de Bohême",
+  "category": "personnage",
+  "aliases": ["Jean l'Aveugle", "roi de Bohême", "Jean de Bohême", "Ich dien"],
+  "era": { "from": "1296", "to": "1346" },
+  "summary": "Comte de Luxembourg et roi de Bohême, Jean l'Aveugle est le chevalier errant de l'Europe du XIVe siècle et un fidèle allié de la France. Aveugle, il se fait conduire au combat à [[cdx_crecy|Crécy]], où il meurt le 26 août 1346.",
+  "body": "Fils de l'empereur Henri VII, Jean de Luxembourg devient roi de Bohême en 1310, à quatorze ans, en épousant l'héritière de la dynastie des Přemyslides. Mais le royaume, à Prague, l'intéresse moins que les aventures : on le voit en Italie, en Lituanie avec les chevaliers Teutoniques, en Pologne, et surtout à la cour de France, où il a été élevé et où il passe une bonne partie de sa vie.\n\nIl lie étroitement sa maison aux [[cdx_valois|Valois]]. Sa fille Bonne épouse en 1332 le futur [[cdx_jean_ii|Jean II]] ; elle sera la mère de [[cdx_charles_v|Charles V]]. Son fils Charles, élevé à Paris, deviendra l'empereur [[cdx_charles_iv|Charles IV]]. Jean combat pour [[cdx_philippe_vi|Philippe VI]] dès les premières campagnes de la guerre.\n\nAtteint d'une maladie des yeux, il perd la vue vers 1340, sans renoncer à la guerre. À [[cdx_crecy|Crécy]], apprenant que la bataille tourne mal, il demande à ses chevaliers de le mener assez avant pour frapper un coup d'épée. Ils attachent leurs chevaux au sien et chargent ensemble ; on les retrouve le lendemain, tous tués, les chevaux toujours liés. [[cdx_froissart|Froissart]] a immortalisé la scène.\n\nUne tradition, tardive et douteuse, veut que le [[cdx_prince_noir|Prince noir]] ait repris à cette occasion l'emblème de Jean, des plumes d'autruche, et sa devise allemande « Ich dien », « je sers », toujours portées par les princes de Galles. À ne pas confondre avec son homonyme du XVe siècle, Jean de Luxembourg-Ligny, le capitaine bourguignon qui livra [[cdx_jeanne_darc|Jeanne d'Arc]] aux Anglais.",
+  "entity": "chr_jean_de_luxembourg",
+  "see_also": ["cdx_crecy", "cdx_charles_iv", "cdx_saint_empire", "cdx_philippe_vi"],
+  "sources": ["Jean Ier de Bohême", "Bataille de Crécy"]
+}

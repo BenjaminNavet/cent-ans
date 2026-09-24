@@ -14,16 +14,16 @@ signal loaded
 const SAVE_PATH := "user://codex.json"
 const TEST_SAVE_PATH := "user://codex_test.json"
 
-## Grandes familles de la fenêtre Codex (§1.4) : [libellé, catégories].
+## Grandes familles de la fenêtre Codex (§1.4) : [libellé, catégories, libellé court d'onglet].
 const FAMILIES := [
-	["Personnages et dynasties", ["personnage", "dynastie"]],
-	["Lieux", ["lieu"]],
-	["Guerre et batailles", ["guerre", "bataille"]],
-	["Société et institutions", ["institution", "societe", "economie", "evenement", "vie_quotidienne"]],
-	["Religion", ["religion"]],
-	["Table", ["cuisine", "ingredient", "recette"]],
-	["Médecine et herbier", ["medecine", "plante"]],
-	["Savoirs", ["savoir"]],
+	["Personnages et dynasties", ["personnage", "dynastie"], "Personnages"],
+	["Lieux", ["lieu"], "Lieux"],
+	["Guerre et batailles", ["guerre", "bataille"], "Guerre"],
+	["Société et institutions", ["institution", "societe", "economie", "evenement", "vie_quotidienne"], "Société"],
+	["Religion", ["religion"], "Religion"],
+	["Table", ["cuisine", "ingredient", "recette"], "Table"],
+	["Médecine et herbier", ["medecine", "plante"], "Médecine"],
+	["Savoirs", ["savoir"], "Savoirs"],
 ]
 const CATEGORY_LABELS := {
 	"personnage": "Personnage", "dynastie": "Dynastie", "lieu": "Lieu", "bataille": "Bataille",

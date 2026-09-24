@@ -28,7 +28,7 @@
       "mode": "percent"
     }
   ],
-  "description": "Milice d'archers et d'arbalétriers levée par paroisse, exemptée de taille en échange de l'entraînement.",
+  "description": "Milice d'archers et d'[[cdx_arbalete|arbalétriers]] levée par paroisse, exemptée de [[cdx_taille|taille]] en échange de l'entraînement.",
   "sources": [
     "Francs-archers",
     "Charles VII (roi de France)"

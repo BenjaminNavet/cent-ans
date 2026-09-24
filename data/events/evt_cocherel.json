@@ -1,7 +1,7 @@
 {
   "id": "evt_cocherel",
   "title": "La bataille de Cocherel",
-  "text": "Le captal de Buch, capitaine du roi de Navarre, barre la route de Reims à la veille du sacre. Bertrand du Guesclin feint la retraite, attire les Navarrais hors de leur colline et prend le captal : Charles V sera sacré en roi victorieux.",
+  "text": "Le captal de Buch, capitaine du roi de Navarre, barre la route de [[cdx_reims|Reims]] à la veille du sacre. Bertrand du Guesclin feint la retraite, attire les Navarrais hors de leur colline et prend le captal : Charles V sera sacré en roi victorieux.",
   "kind": "historical",
   "trigger": {
     "date": {

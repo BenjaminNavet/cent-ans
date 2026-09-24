@@ -1,0 +1,12 @@
+{
+  "id": "cdx_enluminure",
+  "title": "L'enluminure et les manuscrits",
+  "category": "savoir",
+  "aliases": ["enluminure", "enluminures", "enlumineur", "enlumineurs", "livre d'heures", "livres d'heures", "Jean Pucelle", "Jean Fouquet"],
+  "era": { "from": "v. 700", "to": "v. 1500" },
+  "summary": "L'enluminure est l'art de décorer les manuscrits de lettres ornées, de bordures et de miniatures peintes. Au XIVe et au XVe siècle, les ateliers parisiens, puis flamands, en font un art de cour d'un raffinement extrême.",
+  "body": "Avant l'imprimerie, chaque livre est copié à la main sur du parchemin, une peau de veau, de mouton ou de chèvre soigneusement préparée. Longtemps réalisé dans les scriptoriums des monastères, ce travail passe au XIIIe siècle dans les villes, en particulier à Paris, où libraires, copistes, relieurs et enlumineurs laïcs travaillent autour de l'[[cdx_universite_paris|université]] et de la cour.\n\nL'enlumineur dessine d'abord à la mine de plomb, puis pose l'or en feuille, bruni pour briller, et enfin les couleurs, préparées à partir de minéraux, de plantes ou d'insectes et liées au blanc d'œuf ou à la gomme. Le bleu le plus précieux, l'outremer, est tiré du lapis-lazuli importé d'Afghanistan et coûte plus cher que l'or. Le mot miniature vient du minium, le rouge qui servait aux premières lettres ornées.\n\nVers 1325, Jean Pucelle peint pour la reine Jeanne d'Évreux un minuscule livre d'heures en grisaille, d'une finesse inouïe. Les princes de la fin du siècle, [[cdx_charles_v|Charles V]] et sa [[cdx_librairie_charles_v|librairie]], [[cdx_jean_de_berry|Jean de Berry]] et [[cdx_philippe_le_hardi|Philippe le Hardi]], font travailler les meilleurs artistes. Le livre d'heures, recueil de prières pour les laïcs, devient le livre le plus répandu et le plus richement orné.\n\nLe XVe siècle voit s'épanouir les [[cdx_tres_riches_heures|Très Riches Heures]] des frères de Limbourg, puis Jean Fouquet, peintre de [[cdx_charles_vii|Charles VII]], qui introduit la perspective italienne, et les ateliers flamands de la cour de [[cdx_bourgogne|Bourgogne]]. Ces images sont une source essentielle pour connaître la vie, les armes et les costumes de l'époque.",
+  "entity": "bld_scriptorium",
+  "see_also": ["cdx_tres_riches_heures", "cdx_librairie_charles_v", "cdx_jean_de_berry", "cdx_papier"],
+  "sources": ["Enluminure", "Livre d'heures", "Jean Pucelle"]
+}

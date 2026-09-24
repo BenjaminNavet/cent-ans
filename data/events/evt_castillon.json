@@ -1,7 +1,7 @@
 {
   "id": "evt_castillon",
   "title": "La bataille de Castillon",
-  "text": "Le vieux Talbot, rappelé pour sauver la Guyenne, se jette sur le camp retranché des Français devant Castillon. L'artillerie des frères Bureau fauche ses rangs ; Talbot tombe, son cheval abattu par un boulet. Bordeaux ne peut plus tenir.",
+  "text": "Le vieux Talbot, rappelé pour sauver la [[cdx_guyenne|Guyenne]], se jette sur le camp retranché des Français devant Castillon. L'artillerie des frères Bureau fauche ses rangs ; Talbot tombe, son cheval abattu par un boulet. [[cdx_bordeaux|Bordeaux]] ne peut plus tenir.",
   "kind": "historical",
   "trigger": {
     "date": {

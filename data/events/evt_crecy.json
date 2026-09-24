@@ -1,7 +1,7 @@
 {
   "id": "evt_crecy",
   "title": "Le désastre de Crécy",
-  "text": "Près de Crécy-en-Ponthieu, la chevalerie de France charge sans ordre contre les archers anglais retranchés. Le duc d'Alençon, le roi de Bohême et la fleur de la noblesse restent sur le champ. Le roi s'enfuit de nuit vers le château de La Broye.",
+  "text": "Près de Crécy-en-Ponthieu, la [[cdx_chevalerie|chevalerie]] de France charge sans ordre contre les archers anglais retranchés. Le duc d'Alençon, le roi de Bohême et la fleur de la noblesse restent sur le champ. Le roi s'enfuit de nuit vers le château de La Broye.",
   "kind": "historical",
   "trigger": {
     "date": {

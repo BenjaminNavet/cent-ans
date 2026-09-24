@@ -1,7 +1,7 @@
 {
   "id": "evt_ordre_de_l_etoile",
   "title": "L'ordre de l'Étoile",
-  "text": "Le 6 novembre 1351, Jean le Bon annonce la fondation de la Compagnie de Notre-Dame de la Noble Maison, qu'on appellera [[cdx_ordre_de_l_etoile|ordre de l'Étoile]], pour répondre à la Jarretière anglaise. Ses chevaliers jurent de ne jamais reculer de plus de quatre arpents devant l'ennemi. Le serment coûtera cher : à Mauron, l'année suivante, quatre-vingts à quatre-vingt-dix d'entre eux se feront tuer plutôt que de fuir.",
+  "text": "Le 6 novembre 1351, Jean le Bon annonce la fondation de la Compagnie de Notre-Dame de la Noble Maison, qu'on appellera [[cdx_ordre_de_l_etoile|ordre de l'Étoile]], pour répondre à la [[cdx_ordre_de_la_jarretiere|Jarretière]] anglaise. Ses chevaliers jurent de ne jamais reculer de plus de quatre arpents devant l'ennemi. Le serment coûtera cher : à Mauron, l'année suivante, quatre-vingts à quatre-vingt-dix d'entre eux se feront tuer plutôt que de fuir.",
   "kind": "historical",
   "trigger": {
     "date": {

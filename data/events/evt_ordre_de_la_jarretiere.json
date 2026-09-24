@@ -1,7 +1,7 @@
 {
   "id": "evt_ordre_de_la_jarretiere",
   "title": "L'ordre de la Jarretière",
-  "text": "Pour la Saint-Georges, Édouard III réunit à Windsor les chevaliers d'une compagnie nouvelle : le roi et vingt-cinq compagnons, dont le prince de Galles, liés par la jarretière bleue et la devise « Honi soit qui mal y pense ». L'[[cdx_ordre_de_la_jarretiere|ordre]] soude autour du roi les vainqueurs de Crécy et rappelle, en français, sa prétention à la couronne de France. La légende de la comtesse et de sa jarretière tombée n'apparaît qu'un siècle plus tard.",
+  "text": "Pour la Saint-Georges, [[cdx_edouard_iii|Édouard III]] réunit à Windsor les chevaliers d'une compagnie nouvelle : le roi et vingt-cinq compagnons, dont le prince de Galles, liés par la jarretière bleue et la devise « Honi soit qui mal y pense ». L'[[cdx_ordre_de_la_jarretiere|ordre]] soude autour du roi les vainqueurs de Crécy et rappelle, en français, sa prétention à la couronne de France. La légende de la comtesse et de sa jarretière tombée n'apparaît qu'un siècle plus tard.",
   "kind": "historical",
   "trigger": {
     "date": {

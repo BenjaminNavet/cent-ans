@@ -1,0 +1,12 @@
+{
+  "id": "cdx_louis_d_anjou",
+  "title": "Louis Ier d'Anjou",
+  "category": "personnage",
+  "aliases": ["Louis d'Anjou", "Louis Ier d'Anjou", "duc d'Anjou", "tenture de l'Apocalypse"],
+  "era": { "from": "1339", "to": "1384" },
+  "summary": "Deuxième fils de [[cdx_jean_ii|Jean II]], Louis d'Anjou est un prince ambitieux : otage évadé en 1363, conquérant de l'Aquitaine aux côtés de [[cdx_du_guesclin|Du Guesclin]], régent en 1380, il meurt en 1384 en tentant de conquérir le royaume de Naples.",
+  "body": "Né en 1339, Louis combat à [[cdx_poitiers|Poitiers]] en 1356 et quitte le champ de bataille avant la capture de son père. Fait duc d'Anjou en 1360, il part pour l'Angleterre comme otage, garantie du traité de [[cdx_bretigny|Brétigny]]. En 1363, profitant d'un séjour à Calais, il s'enfuit en rompant sa parole. Déshonoré par cette fuite, [[cdx_jean_ii|Jean II]] retourne se constituer prisonnier à Londres, où il meurt en 1364.\n\nSon frère [[cdx_charles_v|Charles V]] lui confie ensuite le gouvernement du Languedoc. Lorsque la guerre reprend en 1369, Louis mène depuis le sud la reconquête de l'Aquitaine anglaise avec [[cdx_du_guesclin|Du Guesclin]], tandis que ses armées reprennent l'Agenais, le Rouergue et le Périgord. Son gouvernement, très coûteux, provoque aussi des révoltes fiscales dans les villes du Midi.\n\nÀ la mort de Charles V, en 1380, il devient régent pour son neveu [[cdx_charles_vi|Charles VI]], âgé de onze ans, et s'empare, dit-on, d'une partie du trésor royal. Car il a un grand projet : la reine Jeanne Ire de Naples, sans enfant, vient de l'adopter comme héritier. En 1382, il part pour l'Italie avec une grande armée afin de conquérir son royaume, dans le contexte du [[cdx_grand_schisme|Grand Schisme]], les papes rivaux soutenant chacun un prétendant.\n\nL'expédition tourne au désastre : l'armée fond sous l'effet des maladies et de l'enlisement, et Louis meurt près de Bari en septembre 1384. Grand mécène, il avait commandé la tenture de l'Apocalypse, immense tapisserie tissée à Paris dans les années 1370-1380 et conservée au château d'Angers.",
+  "entity": "chr_louis_d_anjou",
+  "see_also": ["cdx_jean_ii", "cdx_charles_v", "cdx_du_guesclin", "cdx_grand_schisme"],
+  "sources": ["Louis Ier d'Anjou", "Tenture de l'Apocalypse"]
+}

@@ -1,7 +1,7 @@
 {
   "id": "evt_najera",
   "title": "La bataille de Nájera",
-  "text": "Le prince de Galles a franchi Roncevaux pour rendre son trône à Pierre le Cruel. À Nájera, ses archers dispersent l'armée d'Henri de Trastamare ; du Guesclin est pris une fois de plus. Mais Pierre ne paie pas, et la dysenterie ravage l'armée anglaise.",
+  "text": "Le prince de Galles a franchi Roncevaux pour rendre son trône à Pierre le Cruel. À [[cdx_pierre_le_cruel|Nájera]], ses archers dispersent l'armée d'Henri de Trastamare ; du Guesclin est pris une fois de plus. Mais Pierre ne paie pas, et la dysenterie ravage l'armée anglaise.",
   "kind": "historical",
   "trigger": {
     "date": {

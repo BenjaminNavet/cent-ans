@@ -1,0 +1,12 @@
+{
+  "id": "cdx_pelerinage",
+  "title": "Le pèlerinage",
+  "category": "religion",
+  "aliases": ["pèlerinage", "pèlerinages", "pèlerin", "pèlerins", "Saint-Jacques-de-Compostelle", "Compostelle", "jubilé", "Contes de Canterbury"],
+  "era": { "from": "v. 1000", "to": "v. 1500" },
+  "summary": "Partir en pèlerinage vers un sanctuaire, proche ou lointain, est l'une des grandes pratiques de dévotion du Moyen Âge. Rome, Jérusalem et Saint-Jacques-de-Compostelle attirent les foules, mais aussi une multitude de sanctuaires régionaux.",
+  "body": "Le pèlerin quitte sa maison pour aller prier sur le tombeau d'un saint ou devant une relique, afin d'obtenir une guérison, de remercier pour une grâce ou d'expier ses péchés. Avant de partir, il reçoit la bénédiction de son curé, avec son bâton, le bourdon, et sa besace. Son statut lui vaut en principe protection sur les routes, et des hospices l'accueillent le long des chemins.\n\nLes trois grands pèlerinages sont Jérusalem, lointain et coûteux, Rome, tombeau des apôtres Pierre et Paul, et Saint-Jacques-de-Compostelle en Galice, dont les pèlerins rapportent une coquille. En 1300, le pape Boniface VIII proclame le premier jubilé, qui promet le pardon des péchés à ceux qui visitent Rome ; Clément VI en proclame un nouveau en 1350, juste après la [[cdx_peste_noire|Peste noire]]. On va aussi à Canterbury, sur le tombeau de Thomas Becket, à Rocamadour, au Mont-Saint-Michel, ou simplement à la chapelle voisine.\n\nÀ leur retour, les pèlerins arborent des insignes de plomb ou d'étain, les enseignes, qui prouvent leur voyage. Le pèlerinage peut aussi être imposé par la justice comme peine ou pénitence : un meurtrier est parfois condamné à aller à Compostelle. Chaucer, dans ses Contes de Canterbury, écrits vers 1390, fait voyager ensemble un chevalier, un meunier, une bourgeoise ou un vendeur d'indulgences, qui se racontent des histoires pour passer le temps.\n\nLes critiques ne manquent pas. [[cdx_john_wyclif|John Wyclif]] et les [[cdx_lollards|lollards]] jugent ces voyages inutiles au salut, et dénoncent le commerce des [[cdx_reliques|reliques]] et des indulgences. La guerre rend aussi les routes dangereuses. Mais la ferveur persiste jusqu'à la fin du Moyen Âge.",
+  "entity": "evt_pelerinage",
+  "see_also": ["cdx_reliques", "cdx_lollards", "cdx_papaute_avignon"],
+  "sources": ["Pèlerinage chrétien", "Pèlerinage de Saint-Jacques-de-Compostelle", "Les Contes de Canterbury"]
+}

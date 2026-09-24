@@ -1,7 +1,7 @@
 {
   "id": "evt_montereau",
   "title": "Le meurtre de Montereau",
-  "text": "Sur le pont de Montereau, une barrière a été dressée pour l'entrevue du duc de Bourgogne et du dauphin Charles. Le duc met genou en terre ; Tanguy du Chastel lui fend le crâne d'un coup de hache. Les Bourguignons crient vengeance.",
+  "text": "Sur le pont de [[cdx_traite_troyes|Montereau]], une barrière a été dressée pour l'entrevue du duc de Bourgogne et du dauphin Charles. Le duc met genou en terre ; Tanguy du Chastel lui fend le crâne d'un coup de hache. Les Bourguignons crient vengeance.",
   "kind": "historical",
   "trigger": {
     "date": {

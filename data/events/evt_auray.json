@@ -1,7 +1,7 @@
 {
   "id": "evt_auray",
   "title": "La bataille d'Auray",
-  "text": "Devant Auray, Jean de Montfort, Olivier de Clisson et les archers de John Chandos écrasent l'armée de Charles de Blois. Le prétendant est tué, du Guesclin pris ; vingt-trois ans de guerre de succession s'achèvent dans les marais du Loch.",
+  "text": "Devant Auray, [[cdx_jean_de_montfort|Jean de Montfort]], Olivier de Clisson et les archers de John Chandos écrasent l'armée de [[cdx_charles_de_blois|Charles de Blois]]. Le prétendant est tué, du Guesclin pris ; vingt-trois ans de guerre de succession s'achèvent dans les marais du Loch.",
   "kind": "historical",
   "trigger": {
     "date": {

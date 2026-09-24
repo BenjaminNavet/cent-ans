@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jeanne_de_penthievre",
+  "title": "Jeanne de Penthièvre",
+  "category": "personnage",
+  "aliases": ["Jeanne de Penthièvre", "Jeanne la Boiteuse", "comtesse de Penthièvre"],
+  "era": { "from": "v. 1319", "to": "1384" },
+  "summary": "Nièce du duc Jean III de Bretagne et épouse de [[cdx_charles_de_blois|Charles de Blois]], Jeanne de Penthièvre revendique le duché contre la maison de Montfort. Elle mène seule son parti pendant la captivité de son mari et garde, à la paix de Guérande, le titre de duchesse.",
+  "body": "Jeanne est la fille de Guy de Bretagne, comte de Penthièvre et frère cadet du duc Jean III. Celui-ci, sans enfant, la considère comme son héritière et la marie en 1337 à [[cdx_charles_de_blois|Charles de Blois]], neveu du roi de France. Mais à la mort du duc, en 1341, son demi-frère [[cdx_jean_de_montfort|Jean de Montfort]] revendique le duché, estimant qu'un homme doit passer avant une femme.\n\nLa guerre qui s'ouvre, la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]], oppose bientôt deux femmes. Jean de Montfort est capturé en 1341 et sa femme, [[cdx_jeanne_de_flandre|Jeanne de Flandre]], prend sa place ; Charles de Blois est à son tour capturé en 1347, et Jeanne de Penthièvre dirige le parti de Blois pendant ses neuf années de captivité. On parle alors de la « guerre des deux Jeanne ».\n\nFemme de tête, elle négocie, lève des troupes, réunit l'argent de la rançon de son mari. Selon la tradition, c'est elle qui aurait poussé Charles à refuser tout partage du duché, préférant la guerre. En 1364, à Auray, Charles est tué et son parti vaincu.\n\nPar le traité de Guérande, le 12 avril 1365, Jeanne renonce au duché en faveur de Jean IV de Montfort, mais conserve le comté de Penthièvre, la vicomté de Limoges et le titre de duchesse. Le traité prévoit que ses descendants hériteront si les Montfort viennent à manquer d'héritiers mâles. Elle meurt en 1384, et ses fils continueront à rêver de la couronne ducale.",
+  "entity": "chr_jeanne_de_penthievre",
+  "see_also": ["cdx_charles_de_blois", "cdx_jeanne_de_flandre", "cdx_guerre_de_succession_de_bretagne"],
+  "sources": ["Jeanne de Penthièvre", "Traité de Guérande"]
+}

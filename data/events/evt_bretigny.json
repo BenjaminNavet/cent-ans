@@ -1,7 +1,7 @@
 {
   "id": "evt_bretigny",
   "title": "Le traité de Brétigny",
-  "text": "Le roi Jean est toujours captif à Londres. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d'écus de rançon et l'Aquitaine en pleine souveraineté contre la renonciation d'Édouard à la couronne de France.",
+  "text": "Le roi Jean est toujours captif à Londres. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d'écus de [[cdx_rancon|rançon]] et l'Aquitaine en pleine souveraineté contre la renonciation d'Édouard à la couronne de France.",
   "kind": "historical",
   "trigger": {
     "date": {

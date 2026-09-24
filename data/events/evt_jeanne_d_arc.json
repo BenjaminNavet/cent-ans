@@ -1,7 +1,7 @@
 {
   "id": "evt_jeanne_d_arc",
   "title": "La Pucelle d'Orléans",
-  "text": "Une jeune fille de Domrémy, vêtue en homme, s'est présentée au dauphin à Chinon : ses voix lui ordonnent de délivrer Orléans et de mener le roi se faire sacrer à Reims. Les capitaines rient, mais le peuple la suit.",
+  "text": "Une jeune fille de Domrémy, vêtue en homme, s'est présentée au dauphin à Chinon : ses voix lui ordonnent de délivrer [[cdx_orleans|Orléans]] et de mener le roi se faire sacrer à [[cdx_reims|Reims]]. Les capitaines rient, mais le peuple la suit.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -1,0 +1,11 @@
+{
+  "id": "cdx_guillaume_de_machaut",
+  "title": "Guillaume de Machaut et l'Ars nova",
+  "category": "savoir",
+  "aliases": ["Guillaume de Machaut", "Machaut", "Messe de Notre-Dame", "Ars nova", "Philippe de Vitry", "Voir Dit"],
+  "era": { "from": "v. 1300", "to": "1377" },
+  "summary": "Poète et musicien, chanoine de [[cdx_reims|Reims]], Guillaume de Machaut est le plus grand compositeur du XIVe siècle. Sa Messe de Notre-Dame et ses chansons illustrent l'Ars nova, la « nouvelle manière » de noter et d'écrire la musique.",
+  "body": "Né vers 1300 en Champagne, Guillaume de Machaut entre vers 1323 au service de [[cdx_jean_de_luxembourg|Jean l'Aveugle]], roi de Bohême, comme secrétaire. Il le suit dans ses voyages à travers l'Europe, jusqu'en Lituanie. En récompense, il obtient plusieurs bénéfices ecclésiastiques, dont un canonicat à la cathédrale de [[cdx_reims|Reims]], où il s'installe durablement et meurt en 1377.\n\nIl sert ensuite les plus grands princes : Bonne de Luxembourg, épouse du futur Jean II, [[cdx_charles_le_mauvais|Charles de Navarre]], [[cdx_jean_de_berry|Jean de Berry]] et [[cdx_charles_v|Charles V]]. Il leur dédie des dits, longs poèmes narratifs, comme le Jugement du roi de Navarre, et surveille lui-même la copie de ses œuvres complètes, rassemblées dans de beaux manuscrits. Dans le Voir Dit, il raconte, vrai ou arrangé, son amour pour une jeune admiratrice.\n\nMachaut est l'héritier de l'Ars nova, nom tiré d'un traité attribué vers 1322 au compositeur Philippe de Vitry. Cette « nouvelle manière » invente des notations capables d'exprimer des rythmes plus fins et plus variés. Le pape Jean XXII la juge trop profane et la condamne vers 1324, sans l'arrêter. Machaut en tire des motets savants, fondés sur des rythmes répétés, et fixe les formes de la chanson polyphonique : ballade, rondeau et virelai.\n\nSa Messe de Notre-Dame, composée vers 1360 pour la cathédrale de Reims, est la plus ancienne messe polyphonique complète écrite par un seul compositeur connu. Son influence est immense : [[cdx_froissart|Froissart]] et [[cdx_christine_de_pizan|Christine de Pizan]] sont ses disciples en poésie, et le poète anglais Chaucer l'imite.",
+  "see_also": ["cdx_reims", "cdx_jean_de_luxembourg", "cdx_christine_de_pizan", "cdx_froissart"],
+  "sources": ["Guillaume de Machaut", "Ars nova", "Messe de Notre-Dame (Machaut)"]
+}
