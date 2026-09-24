@@ -53,6 +53,16 @@ func _run() -> void:
 	if not _check(not paris.is_empty(), "set_paris missing"):
 		return
 	var paris_px: Vector2 = paris["px"]
+	# Lot C7b : tracés routiers des arêtes du graphe, orientés dans les deux sens.
+	_check(data.edge_paths.size() >= 400, "expected >= 400 traced graph edges, got %d" % data.edge_paths.size())
+	var some_key: String = data.edge_paths.keys()[0] if not data.edge_paths.is_empty() else "|"
+	var ends := some_key.split("|")
+	var forward := data.edge_path(ends[0], ends[1])
+	var backward := data.edge_path(ends[1], ends[0])
+	_check(forward.size() >= 2 and forward.size() == backward.size() and forward[0] == backward[backward.size() - 1], "edge_path orientation")
+	var from_entry := data.get_settlement(ends[0])
+	_check(not from_entry.is_empty() and forward.size() >= 2 and forward[0].distance_to(from_entry["px"]) < 0.1, "edge path should start on its settlement")
+	_check(data.edge_path("set_paris", "set_nowhere").is_empty(), "unknown edge should have no path")
 
 	# 2. Terrain + relief fin.
 	var world := Node3D.new()
@@ -114,6 +124,36 @@ func _run() -> void:
 	layer.declutter()
 	_check(layer.visible_label_count() > 0, "no settlement label visible in county view")
 
+	# 4 bis. Lot C7b : arbres posés sur la surface affichée (relief fin compris) et recalés quand
+	# une tuile change de niveau.
+	var vegetation := Vegetation.new()
+	world.add_child(vegetation)
+	vegetation.bind_terrain(terrain)
+	vegetation.build(map_data)
+	vegetation.update_view(camera.global_position, 55.0)
+	for _i in 30:
+		if vegetation.pending_jobs() == 0:
+			break
+		await process_frame
+		vegetation.update_view(camera.global_position, 55.0)
+	vegetation.flush_ground()
+	_check(vegetation.instance_count() > 0, "no tree near Paris")
+	var fine_tree_tiles := 0
+	for index in vegetation._tiles:
+		if terrain.chunk_level(index) == 2:
+			fine_tree_tiles += 1
+	_check(fine_tree_tiles > 0, "no tree tile on fine relief near Paris")
+	var tree_error := vegetation.max_ground_error()
+	_check(tree_error < 0.05, "trees off the displayed surface by %.2f" % tree_error)
+	# Relief fin désactivé : les tuiles repassent au LOD proche, les arbres suivent.
+	terrain.fine_enabled = false
+	terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)
+	_check(vegetation.pending_regrounds() > 0, "no reground queued after a chunk level change")
+	vegetation.flush_ground()
+	var tree_error_near := vegetation.max_ground_error()
+	_check(tree_error_near < 0.05, "trees off the near LOD surface by %.2f" % tree_error_near)
+	terrain.fine_enabled = true
+
 	# 5. Paliers.
 	for distance in [40.0, 330.0, 1400.0]:
 		var sum: float = tiers.near_weight(distance) + tiers.medium_weight(distance) + tiers.far_weight(distance)
@@ -123,6 +163,7 @@ func _run() -> void:
 		"settlements": data.settlements.size(), "hamlets": data.hamlets.size(), "roads": data.roads.size(),
 		"fine_chunks": terrain.fine_chunk_count(), "fine_worst_delta": snappedf(worst, 0.01),
 		"hamlet_instances": layer.hamlet_instance_count(), "ribbons": roads.ribbon_count(),
+		"tree_error": snappedf(tree_error, 0.001), "regrounds": vegetation.stats["regrounds"], "reground_ms_max": vegetation.stats["reground_ms_max"], "tree_instances": vegetation.instance_count(),
 		"load_ms": data.load_ms, "fine_build_ms_max": terrain.build_stats.get("fine_build_ms_max", 0.0),
 	}))
 	world.queue_free()

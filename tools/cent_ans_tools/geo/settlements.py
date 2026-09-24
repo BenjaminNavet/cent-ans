@@ -12,6 +12,8 @@ Outputs:
     * ``data/map/settlement_graph.json``: ``{"edges": [{from, to, cost, road,
       sea}]}``, undirected (one entry per pair, ``from < to``), exactly the
       format read by ``core/crates/data-model/src/settlement_load.rs``.
+    * ``data/map/settlement_edge_paths.json``: road polyline of every ``road``
+      edge, for display (see :mod:`cent_ans_tools.geo.edge_paths`, lot C7b).
     * ``docs/img/settlements-preview.png``.
 
 Graph (§ 4.4):
@@ -44,6 +46,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components, minimum_spanning_tree
 from scipy.spatial import Delaunay, QhullError
 
+from cent_ans_tools.geo import edge_paths as edge_paths_step
 from cent_ans_tools.geo import provinces as provinces_step
 from cent_ans_tools.geo.project import MapGrid
 
@@ -168,6 +171,8 @@ class SettlementResult:
     positions: Path
     preview: Path
     seconds: float
+    edge_paths: Path | None = None
+    traced_edges: int = 0
     settlements: int = 0
     fallback_cities: list[str] = field(default_factory=list)
     snapped: list[str] = field(default_factory=list)
@@ -745,6 +750,9 @@ def build(
         json.dumps({"edges": [e.to_json() for e in edges]}, indent=1) + "\n",
         encoding="utf-8",
     )
+    edge_paths_path, traced = edge_paths_step.write(
+        map_dir, [e.to_json() for e in edges], positions, ROADS_FILE
+    )
     render_preview(labels, settlements, edges, preview_path)
 
     snapped = [s for s in settlements if s.snapped]
@@ -758,6 +766,8 @@ def build(
         positions=positions_path,
         preview=preview_path,
         seconds=time.perf_counter() - started,
+        edge_paths=edge_paths_path,
+        traced_edges=traced,
         settlements=len(settlements),
         fallback_cities=[s.id for s in settlements if s.fallback],
         snapped=[s.id for s in snapped],

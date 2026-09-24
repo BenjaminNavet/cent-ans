@@ -188,6 +188,15 @@ func surface_height_at(x: float, y: float) -> float:
 	return maxf(grid_height(grid, x - (index % CHUNKS) * chunk_px, y - (index / CHUNKS) * chunk_px), 0.0)
 
 
+## Grille de hauteurs du maillage affiché pour la tuile `index` ({"heights", "side", "unit"},
+## origine au coin de la tuile ; vide si inconnue). Jamais modifiée après construction : lisible
+## depuis un fil de travail (recalage de la végétation, lot C7b) avec `grid_height`.
+func surface_grid(index: int) -> Dictionary:
+	if index < 0 or index >= _is_near.size():
+		return {}
+	return _grid_for(index)
+
+
 func _grid_for(index: int) -> Dictionary:
 	match int(_is_near[index]):
 		2:
