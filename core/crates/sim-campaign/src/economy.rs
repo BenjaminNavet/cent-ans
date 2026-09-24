@@ -496,6 +496,8 @@ pub(crate) fn resolve_economy(
             };
             let mut unit = Unit::fresh(unit_type);
             unit.experience = recruit_experience(effects, unit_type.category);
+            (unit.levy_armor, unit.levy_ranged) =
+                crate::buildings::levy_bonus(data, &province.buildings, unit_type.category);
             unit.morale = crate::research::boosted(unit.morale, bonus, 100);
             province.garrison.push(unit);
             if province.controller == player {

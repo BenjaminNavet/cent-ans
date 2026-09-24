@@ -149,3 +149,61 @@ fn religious_buildings_raise_the_ruler_piety_each_winter() {
     };
     assert_eq!(piety_after_year(with), piety_after_year(without) + 1);
 }
+
+// 3. army_armor / army_ranged ------------------------------------------------
+
+#[test]
+fn armoury_and_butts_equip_the_units_levied_there() {
+    let data = data();
+    let mut state = quiet_france(&data, 4);
+    let province = prov("prov_ile_de_france");
+    let p = state.provinces.get_mut(&province).unwrap();
+    p.garrison.clear();
+    for b in ["bld_muster_field", "bld_armoury", "bld_archery_butts"] {
+        if !p.buildings.contains(&bld(b)) {
+            p.buildings.push(bld(b));
+        }
+    }
+    for u in ["unit_urban_militia", "unit_crossbowmen"] {
+        let order = Order::Recruit {
+            province: province.clone(),
+            unit_type: unit(u),
+        };
+        state.submit_order(&data, order).unwrap();
+    }
+    state.end_turn_with(&data, idle);
+    let garrison = &state.provinces[&province].garrison;
+    let militia = garrison
+        .iter()
+        .find(|u| u.unit_type == unit("unit_urban_militia"));
+    let crossbows = garrison
+        .iter()
+        .find(|u| u.unit_type == unit("unit_crossbowmen"));
+    let (militia, crossbows) = (militia.unwrap(), crossbows.unwrap());
+    assert_eq!((militia.levy_armor, militia.levy_ranged), (3, 0));
+    assert_eq!((crossbows.levy_armor, crossbows.levy_ranged), (3, 3));
+}
+
+fn first_army_of(state: &CampaignState, faction: &str) -> sim_campaign::ArmyId {
+    let found = state.armies.iter().find(|(_, a)| a.faction == fac(faction));
+    found.map(|(id, _)| id.clone()).expect("an army")
+}
+
+#[test]
+fn levy_bonuses_reach_the_auto_resolver_and_the_battle_setup() {
+    let data = data();
+    let mut state = quiet_france(&data, 5);
+    let lead = first_army_of(&state, "fac_france");
+    let enemy = first_army_of(&state, "fac_england");
+    let plain = sim_campaign::movement::side_from_army(&state, &data, &state.armies[&lead]);
+    state.armies.get_mut(&lead).unwrap().units[0].levy_armor = 5;
+    let side = sim_campaign::movement::side_from_army(&state, &data, &state.armies[&lead]);
+    assert_eq!(side.units[0].armor, plain.units[0].armor + 5);
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(&data, index).unwrap();
+    let unit_type = &data.unit_types[&state.armies[&lead].units[0].unit_type];
+    assert_eq!(
+        setup.attacker.units[0].stats.armor,
+        unit_type.stats.armor + 5
+    );
+}
