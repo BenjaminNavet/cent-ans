@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use serde::de::DeserializeOwned;
 
+use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
 use crate::entities::battle_order::BattleOrder;
@@ -69,6 +70,8 @@ pub mod folders {
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
+    /// Campaign agents (lot C6), inside `rules/`; optional.
+    pub const AGENT_RULES: &str = "agents.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -196,6 +199,9 @@ pub struct GameData {
     pub ai_diplomacy: AiDiplomacy,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// `data/rules/agents.json` (lot C6, campaign agents); the defaults of
+    /// [`AgentRules::default`] when absent.
+    pub agent_rules: Option<AgentRules>,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
@@ -235,6 +241,7 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             vision_rules: None,
+            agent_rules: None,
             movement_graph: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
@@ -264,6 +271,10 @@ impl GameData {
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
             data.vision_rules = Some(read_json(&vision_path)?);
+        }
+        let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
+        if agents_path.is_file() {
+            data.agent_rules = Some(read_json(&agents_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
