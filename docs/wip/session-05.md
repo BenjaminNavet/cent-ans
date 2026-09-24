@@ -18,23 +18,21 @@ dépenses dans `docs/budget.md`).
   `data/ai/alignment.json` ; régression : 38/40 graines avec les 4 grandes factions en vie en 1400
   (dbdcc69, détails dans `docs/wip/g4-burgundy.md` et `docs/status.md`).
 
-## À reprendre
-1. **Budget** : toutes les lignes sont écrites (cumul 15,13 $). Ajouter la sonde `image_config`
-   16:9 (0,04 $, non consignée) et vérifier contre le compteur OpenRouter
-   (`curl -s https://openrouter.ai/api/v1/credits -H "Authorization: Bearer $OPENROUTER_API_KEY"`,
-   dépense de session = total_usage − 80,3766).
-2. **Import Godot** : `godot --headless --path game --import`, commiter les `.import` des
-   portraits, illustrations et miniatures (nécessaires à l'export macOS), smoke test.
-3. **Agent G5** (branche `worktree-agent-a8e6ab2920478f32d`, worktree
-   `.claude/worktrees/agent-a8e6ab2920478f32d`, suivi `docs/wip/g5-neighbors.md` dans ce worktree) :
-   `are_neighbors` sur l'adjacence réelle de la carte + rééquilibrage (survie 40/40). S'il a été
-   interrompu, relancer un agent sur cette branche à partir de son fichier wip. Fusion : merger
-   main dans la branche dans le worktree, tests, puis `git merge --ff-only` dans main.
-4. **docs/status.md** : mettre à jour « Reste » (portraits faits), la limite M10 assets
-   (portraits), mentionner miniatures et illustrations ; `docs/manuel.md`/crédits si besoin
-   (images générées par openai/gpt-5-image-mini via OpenRouter).
-5. Crédit restant estimé ≈ 4 $ : idées — illustrations du Codex (231 fiches ≈ 10,6 $, donc un
-   sous-ensemble : lieux et batailles), illustrations de l'écran de chargement.
+## Reprise du 2026-09-24 (même jour) — tout est fait
+- Budget : sonde consignée, rapprochement avec le compteur OpenRouter en tête de `docs/budget.md`.
+- Import Godot : `.import` des portraits, illustrations, miniatures et Codex commités ; smoke OK.
+- G5 fusionné (d188f5c) : `are_neighbors` sur le graphe de la carte, réglages `data/ai/diplomacy.json`,
+  40/40 graines avec les 4 grandes factions en vie en 1400.
+- Codex : miniature en tête de fiche (`codex_window.gd`, `art_path_of`) ; 84 générées
+  (`cent-ans assets codex-art`, 4,03 $), 113 fiches reprennent l'image de leur `entity`. Hors lot :
+  personnages sans entité (17) et plantes (17), faute de crédit.
+- `docs/status.md` et crédits à jour. Cumul 19,20 $ / 50 $.
+
+## Suite possible
+- Crédit OpenRouter restant ≈ 0,56 $ (clé presque épuisée) : les 34 fiches du Codex sans image
+  (personnages, plantes : `cent-ans assets codex-art --category personnage,plante`, ≈ 1,6 $) quand
+  une clé sera rechargée.
+- Appels aux armes ×2 depuis G5 (voir `docs/wip/g5-neighbors.md`) : à surveiller.
 
 ## Attention
 - D'autres sessions commitent dans main en parallèle (« session 6 TW », « visual »…) : commiter
