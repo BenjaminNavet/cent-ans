@@ -64,6 +64,8 @@ const ROW_ICON := 20.0
 
 var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
+## H9 : section « La Table » (onglet Ville, sous les classes), construite en code.
+var table_section: TableSection
 
 
 func _ready() -> void:
@@ -88,6 +90,8 @@ func _ready() -> void:
 	tabs.set_tab_icon(0, IconLibrary.get_icon("hud_army"))
 	if tabs.get_tab_count() > 1:
 		tabs.set_tab_icon(1, IconLibrary.get_icon("cat_class"))
+	table_section = TableSection.new()  # H9
+	classes_list.add_sibling(table_section)
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -130,6 +134,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	if not actions.visible:
 		recruit_panel.hide()
 	_fill_city(city, is_player_owner)
+	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
 	show()
 
 
