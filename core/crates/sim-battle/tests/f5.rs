@@ -233,6 +233,63 @@ fn siege_pathing_uses_breach() {
 }
 
 #[test]
+fn towers_shoot_and_the_garrison_sallies() {
+    use sim_battle::{SideId, SiegeSetup};
+    let data = data();
+    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
+    let defender = units(&data, &["unit_men_at_arms_foot", "unit_urban_militia"]);
+    let siege = SiegeSetup {
+        fortification: 1,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 3).unwrap();
+    lab(&mut sim);
+    for id in [2, 3] {
+        let halt = Command::FireAtWill {
+            units: vec![id],
+            enabled: false,
+        };
+        let _ = sim.issue_command(halt);
+    }
+    // A regiment 60 m in front of a tower, out of reach of the garrison.
+    let tower = sim.siege().unwrap().towers[3];
+    place(&mut sim, 0, tower.x, tower.z - 60.0, 0.0);
+    place(&mut sim, 1, 100.0, 40.0, 0.0);
+    let before = sim.units()[0].hp;
+    run(&mut sim, 60.0);
+    assert!(sim.units()[0].hp < before - 1.0, "the towers shoot");
+    assert!(
+        sim.units()[1].hp >= f64::from(sim.units()[1].initial_soldiers),
+        "out of range"
+    );
+    // The besiegers bled white: the AI garrison opens its gate.
+    sim.set_ai(SideId::Defender, true);
+    place(&mut sim, 0, 300.0, 40.0, 0.0);
+    for id in [0, 1] {
+        sim.units_mut()[id].hp = 20.0;
+    }
+    run(&mut sim, 90.0);
+    assert!(sim.siege().unwrap().sortie, "sortie");
+    let sallied = sim
+        .units()
+        .iter()
+        .any(|u| u.side == SideId::Defender && u.target.is_some_and(|t| t <= 1));
+    let state: Vec<_> = sim
+        .units()
+        .iter()
+        .map(|u| (u.id, u.side, u.state, u.on_wall, u.target, u.hp.round()))
+        .collect();
+    assert!(sallied, "the garrison falls on the besiegers: {state:?}");
+    run(&mut sim, 120.0);
+    let works = sim.siege().unwrap().clone();
+    let out = sim
+        .units()
+        .iter()
+        .any(|u| u.side == SideId::Defender && u.present() && !works.inside(u.x, u.z));
+    assert!(out, "out through the gate");
+}
+
+#[test]
 #[ignore]
 fn reinforcements_enter_from_edge() {}
 

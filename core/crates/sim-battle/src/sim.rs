@@ -7,6 +7,7 @@
 mod deployment;
 mod pathing;
 mod separation;
+mod siege_extra;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use separation::FRIEND_GAP;
@@ -1009,6 +1010,7 @@ impl BattleSim {
         }
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
+            self.check_sortie();
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
@@ -1023,6 +1025,7 @@ impl BattleSim {
         self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
+        self.tower_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
@@ -1241,7 +1244,8 @@ impl BattleSim {
             return (tx, tz);
         };
         let unit = &self.units[index];
-        if unit.on_wall || unit.state == UnitState::Routing {
+        let sallying = works.sortie && unit.side == SideId::Defender;
+        if (unit.on_wall && !sallying) || unit.state == UnitState::Routing {
             return (tx, tz);
         }
         let from = (unit.x, unit.z);

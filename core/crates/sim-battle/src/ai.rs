@@ -293,7 +293,11 @@ pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
     }
     match (sim.siege(), side) {
         (Some(works), SideId::Attacker) => plan_siege_attack(&mut view, works),
-        (Some(works), SideId::Defender) => plan_siege_defence(&mut view, works),
+        (Some(works), SideId::Defender) => {
+            plan_siege_defence(&mut view, works);
+            let sortie = crate::formation_ai::plan_sortie(sim, side);
+            view.commands.extend(sortie);
+        }
         (None, _) => {
             plan_field(&mut view);
             crate::formation_ai::coordinate_flanks(sim, side, &mut view.commands);
