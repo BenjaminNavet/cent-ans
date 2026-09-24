@@ -42,6 +42,8 @@ signal learn_skill_requested(character_id: String, skill_id: String)
 # M6 : technologies.
 signal tech_panel_requested
 signal research_requested(technology_id: String)
+# C5 : couche des routes commerciales.
+signal trade_layer_toggle_requested
 
 const MENU_SAVE := 0
 const MENU_LOAD := 1
@@ -87,6 +89,8 @@ var docked_right_x: float = 0.0
 @onready var research_label: Label = %ResearchLabel
 @onready var research_bar: ProgressBar = %ResearchBar
 @onready var tech_panel: TechPanel = %TechPanel
+# C5 : commerce.
+@onready var trade_button: Button = %TradeButton
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
@@ -133,6 +137,8 @@ func _ready() -> void:
 	tech_panel.closed.connect(func() -> void: tech_panel.hide())
 	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
 	tech_panel.visibility_changed.connect(func() -> void: event_log.visible = not tech_panel.visible and not court_panel.visible)
+	# --- C5 : routes commerciales ---
+	trade_button.toggled.connect(func(_pressed: bool) -> void: trade_layer_toggle_requested.emit())
 	tech_panel.hide()
 	# --- fin M6 ---
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
@@ -302,6 +308,22 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 	_fit_hover_label()
 
 
+## C5 : synchronise le bouton « Commerce » de la barre supérieure avec la couche.
+func set_trade_mode(active: bool) -> void:
+	if trade_button.button_pressed != active:
+		trade_button.button_pressed = active
+
+
+## C5 : infobulle de la route commerciale survolée (texte vide = pas de route sous la souris,
+## le survol de province reprend la main).
+func set_hover_trade(text: String) -> void:
+	if text == "":
+		return
+	hover_label.text = text
+	hover_label.visible = true
+	_fit_hover_label()
+
+
 func show_toast(text: String, is_error: bool = false) -> void:
 	toast.text = text
 	toast.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else Color(0.22, 0.14, 0.07))
@@ -398,6 +420,8 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
 		elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
 			line = "[color=#4a3a10]✉ %s[/color]" % text
+		elif kind == "trade":  # C5
+			line = "[color=#4a3a10]⚓ %s[/color]" % text
 		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
 			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
 		elif kind == "chronicle":  # M10

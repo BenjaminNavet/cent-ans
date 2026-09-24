@@ -255,6 +255,9 @@ func _render_detail() -> void:
 		facts.append("Nous lui imposons un embargo")
 	if bool(entry["embargo_on_us"]):
 		facts.append("Elle nous impose un embargo")
+	if bool(entry.get("trade_agreement", false)):
+		var suspended := status == "war" or bool(entry["embargo_by_us"]) or bool(entry["embargo_on_us"])
+		facts.append("Accord commercial en vigueur" + (" (suspendu)" if suspended else ""))
 	if str(entry["casus_belli"]) != "":
 		facts.append("Casus belli : %s" % entry["casus_belli"])
 	for claim in entry["claims"]:
@@ -306,7 +309,47 @@ func _render_actions(entry: Dictionary) -> void:
 		{"type": "set_embargo", "target": id, "active": not embargo},
 		"Embargo levé." if embargo else "Embargo imposé.", true)
 	_add_action(actions, "Envoyer des présents (%d)" % GIFT_AMOUNT, {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
+	# C5 : accord commercial.
+	if bool(entry.get("trade_agreement", false)):
+		_add_action(actions, "Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
+	elif status != "war":
+		_add_action(actions, "Proposer un accord commercial", {"type": "propose_trade_agreement", "target": id}, "Accord commercial conclu.")
 	actions.add_child(_verdict_label)
+	_render_trade_section(actions, id)
+
+
+## Lot C5 : routes commerciales entre nous et cette faction (revenu, biens, menace).
+func _render_trade_section(parent: Control, id: String) -> void:
+	if sim == null or not sim.has_method("get_trade_routes"):
+		return
+	var routes: Array = sim.call("get_trade_routes")
+	var ours: Array = []
+	for route_variant in routes:
+		var route: Dictionary = route_variant
+		var from_f := str(route.get("from_faction", ""))
+		var to_f := str(route.get("to_faction", ""))
+		if (from_f == player_faction and to_f == id) or (from_f == id and to_f == player_faction):
+			ours.append(route)
+	if ours.is_empty():
+		return
+	parent.add_child(HSeparator.new())
+	var title := Label.new()
+	title.text = "Commerce"
+	title.add_theme_font_size_override("font_size", 16)
+	parent.add_child(title)
+	for route_variant in ours:
+		var route: Dictionary = route_variant
+		var line := Label.new()
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if bool(route.get("cut", false)):
+			line.text = "%s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]]
+			line.add_theme_color_override("font_color", Color(0.55, 0.15, 0.1))
+		else:
+			var goods: PackedStringArray = route.get("goods", PackedStringArray())
+			line.text = "%s ↔ %s : %d livres/saison (%s)" % [
+				route["from_hub_name"], route["to_hub_name"], int(route["total_value"]), ", ".join(goods)
+			]
+		parent.add_child(line)
 
 
 ## Un bouton d'action : survol = verdict de la simulation, clic = envoi. `unilateral` : pas de
