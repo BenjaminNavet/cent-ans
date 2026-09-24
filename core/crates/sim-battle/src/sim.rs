@@ -24,6 +24,7 @@ use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
+use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitState};
 
@@ -96,6 +97,8 @@ pub struct BattleSim {
     general_captured: [bool; 2],
     events: Vec<BattleEvent>,
     events_read: usize,
+    /// Volleys resolved since the renderer last read them (BV1).
+    shots: std::collections::VecDeque<ShotEvent>,
     charge_announced: Vec<bool>,
     /// Siege battles: the town walls (M8 § 2).
     siege: Option<SiegeWorks>,
@@ -307,6 +310,7 @@ impl BattleSim {
             general_captured: [false; 2],
             events: Vec::new(),
             events_read: 0,
+            shots: std::collections::VecDeque::new(),
             charge_announced: vec![false; count],
             siege,
             square_announced: false,
@@ -684,6 +688,43 @@ impl BattleSim {
     /// Every journal entry since the start.
     pub fn events(&self) -> &[BattleEvent] {
         &self.events
+    }
+
+    /// Volleys resolved since the previous call (BV1: arrows, stuck arrows
+    /// and blood are drawn from them; at most [`MAX_PENDING_SHOTS`] kept).
+    pub fn take_shots(&mut self) -> Vec<ShotEvent> {
+        self.shots.drain(..).collect()
+    }
+
+    fn record_shot(&mut self, shot: ShotEvent) {
+        if self.shots.len() >= MAX_PENDING_SHOTS {
+            self.shots.pop_front();
+        }
+        self.shots.push_back(shot);
+    }
+
+    /// Missile kind of a shooting regiment (engines: bombard ball or stone).
+    pub fn missile_kind(unit: &Unit) -> MissileKind {
+        if unit.category == UnitCategory::Siege {
+            if unit.unit_type == "unit_bombard" {
+                MissileKind::Ball
+            } else {
+                MissileKind::Stone
+            }
+        } else if unit.unit_type.contains("crossbow") || unit.has(Ability::Pavise) {
+            MissileKind::Bolt
+        } else {
+            MissileKind::Arrow
+        }
+    }
+
+    /// Missiles one volley of `unit` looses (one per man, one per engine).
+    fn missiles(unit: &Unit) -> u32 {
+        if unit.category == UnitCategory::Siege {
+            unit.soldiers().clamp(1, 4)
+        } else {
+            unit.soldiers()
+        }
     }
 
     /// Journal entries added since the previous call.
@@ -1859,6 +1900,30 @@ impl BattleSim {
         };
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
+        let cover = if target.on_wall {
+            ShotCover::Wall
+        } else if target.pavise.is_some()
+            || (target.has(Ability::Pavise) && target.state != UnitState::Marching)
+        {
+            ShotCover::Pavise
+        } else if target.stakes_planted {
+            ShotCover::Stakes
+        } else {
+            ShotCover::None
+        };
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: shooter.id,
+            target: Some(target.id),
+            from: (shooter.x, shooter.z),
+            aim: (target.x, target.z),
+            missiles: Self::missiles(shooter),
+            kills,
+            kind: Self::missile_kind(shooter),
+            incendiary: self.shoots_fire(i),
+            cover,
+        };
+        self.record_shot(shot);
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         if kills > 0.0 {
@@ -1934,6 +1999,20 @@ impl BattleSim {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)
         };
+        let aim = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: unit.id,
+            target: None,
+            from: (unit.x, unit.z),
+            aim,
+            missiles: Self::missiles(unit),
+            kills: 0.0,
+            kind: Self::missile_kind(unit),
+            incendiary: self.shoots_fire(i),
+            cover: ShotCover::Wall,
+        };
+        self.record_shot(shot);
         let shooter = &mut self.units[i];
         shooter.reload = 12.0;
         shooter.ammo = shooter.ammo.saturating_sub(1);

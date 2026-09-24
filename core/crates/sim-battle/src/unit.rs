@@ -413,6 +413,99 @@ impl Unit {
         }
     }
 
+    /// Figures drawn for this regiment at the visual unit-size multiplier
+    /// `scale` (BV1, ADR 0016): `round(soldiers × scale)`, at least one while
+    /// a soldier stands. Rendering only: the rules count [`Self::soldiers`].
+    pub fn figure_count(&self, scale: f64) -> u32 {
+        let n = self.soldiers();
+        if n == 0 || !self.present() {
+            return 0;
+        }
+        if (scale - 1.0).abs() < 1e-9 {
+            return n;
+        }
+        ((f64::from(n) * scale).round() as u32).max(1)
+    }
+
+    /// World (x, z, angle) of the figures drawn at unit-size multiplier
+    /// `scale` (BV1, ADR 0016). The figures fill the regiment's simulated
+    /// rectangle ([`Self::extent`]): more figures stand closer together
+    /// rather than widening the formation, so what the player sees still
+    /// matches the footprint the rules use for contact and collisions. At
+    /// `scale` = 1 this is exactly [`Self::soldier_positions`].
+    pub fn figure_positions(&self, scale: f64) -> Vec<(f64, f64, f64)> {
+        if (scale - 1.0).abs() < 1e-9 {
+            return self.soldier_positions();
+        }
+        let m = self.figure_count(scale);
+        if m == 0 {
+            return Vec::new();
+        }
+        let n = self.soldiers();
+        let (width, depth) = self.extent();
+        let (sx, sz) = self.spacing();
+        // Figure layout: the formation's own shape for m figures, squeezed
+        // back into the simulated rectangle. Lines and columns gain ranks as
+        // well as files (√scale each way) so that a large regiment does not
+        // turn into a single file of shoulder-to-shoulder men; riders keep
+        // at least a horse length between ranks.
+        let (ranks, files) = match self.formation {
+            Formation::Line | Formation::Column => {
+                let (r, _) = self.ranks_files(n);
+                let min_depth = if self.mounted { 2.7 } else { 0.8 };
+                let most = ((depth / min_depth).floor() as u32).max(1);
+                let r = ((f64::from(r) * scale.sqrt()).round() as u32).clamp(1, most.max(r));
+                let r = r.min(m);
+                (r, m.div_ceil(r))
+            }
+            _ => self.ranks_files(m),
+        };
+        let (fw, fd) = match self.formation {
+            Formation::Line | Formation::Column => (f64::from(files) * sx, f64::from(ranks) * sz),
+            _ => {
+                let (r, f) = self.ranks_files(m);
+                (f64::from(f) * sx, f64::from(r) * sz)
+            }
+        };
+        let kx = width / fw.max(1e-6);
+        let kz = depth / fd.max(1e-6);
+        let (fx, fz) = self.forward();
+        let (rx, rz) = self.right();
+        let spread = match self.state {
+            UnitState::Routing => 5.0,
+            UnitState::Melee => 1.2,
+            _ => 0.35,
+        } * kx.min(kz).min(1.0);
+        (0..m)
+            .map(|i| {
+                let (lx, lz) = match self.formation {
+                    Formation::Line | Formation::Column => {
+                        let rank = i / files;
+                        let file = i % files;
+                        (
+                            (f64::from(file) - (f64::from(files) - 1.0) * 0.5) * sx,
+                            ((f64::from(ranks) - 1.0) * 0.5 - f64::from(rank)) * sz,
+                        )
+                    }
+                    _ => self.slot(i, m),
+                };
+                let jx = jitter(u64::from(self.id), u64::from(i) * 2) * spread;
+                let jz = jitter(u64::from(self.id), u64::from(i) * 2 + 1) * spread;
+                let (lx, lz) = (lx * kx + jx, lz * kz + jz);
+                let angle = if self.state == UnitState::Routing {
+                    self.facing + jitter(u64::from(self.id) + 7, u64::from(i)) * 1.5
+                } else {
+                    self.facing
+                };
+                (
+                    self.x + rx * lx + fx * lz,
+                    self.z + rz * lx + fz * lz,
+                    angle,
+                )
+            })
+            .collect()
+    }
+
     /// World (x, z, angle) of every living soldier, with a small stable jitter
     /// (larger when routing or in melee).
     pub fn soldier_positions(&self) -> Vec<(f64, f64, f64)> {
