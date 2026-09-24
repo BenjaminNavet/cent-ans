@@ -1,0 +1,13 @@
+{
+  "id": "cdx_jean_i_d_armagnac",
+  "title": "Jean Ier d'Armagnac",
+  "category": "personnage",
+  "aliases": ["Jean Ier d'Armagnac", "comte d'Armagnac"],
+  "era": { "from": "v. 1311", "to": "1373" },
+  "summary": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne.",
+  "body": "Comte d'Armagnac et de Rodez, Jean Ier hérite d'un vaste domaine gascon dont l'ambition constante est d'étendre l'influence sur les terres voisines, tenues par la vicomté de Béarn ou par le duché anglais de Guyenne. Sa rivalité avec [[cdx_gaston_ii_de_foix_bearn|Gaston II de Foix-Béarn]], née de contestations de frontières et d'héritages, structure la vie politique du Midi pendant des décennies et annonce, bien plus tard, l'opposition entre Armagnacs et Bourguignons dans la guerre civile française du XVe siècle.\n\nFidèle soutien de [[cdx_philippe_vi|Philippe VI]], il reçoit à plusieurs reprises la lieutenance royale en Languedoc, chargée de défendre les frontières du Midi contre les incursions anglo-gasconnes venues de Guyenne. Cette charge lui donne une autorité considérable sur les sénéchaussées royales de la région, où il lève troupes et impôts au nom du roi.\n\nAucune province distincte du comté d'Armagnac n'existant dans la carte du jeu, ce dernier — limitrophe du Toulousain royal et de la Gascogne anglaise — est rattaché par convention au Toulousain. Jean Ier meurt en 1373, après avoir vu son fils Jean II poursuivre la lutte contre les Foix.",
+  "entity": "chr_jean_i_d_armagnac",
+  "anachronism": "Le comté d'Armagnac n'a pas de province dédiée ; le personnage est placé à Toulouse par convention de jeu, en attendant un possible redécoupage des provinces du Midi.",
+  "see_also": ["cdx_gaston_ii_de_foix_bearn", "cdx_philippe_vi"],
+  "sources": ["Jean Ier d'Armagnac", "Comté d'Armagnac"]
+}

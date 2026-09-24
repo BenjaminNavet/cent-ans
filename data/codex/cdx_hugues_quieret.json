@@ -1,12 +1,12 @@
 {
   "id": "cdx_hugues_quieret",
-  "title": "Hugues Quiéret, amiral de France",
+  "title": "Hugues Quiéret",
   "category": "personnage",
-  "aliases": ["Hugues Quiéret", "Quiéret", "Nicolas Béhuchet", "Béhuchet", "sac de Southampton"],
-  "era": { "from": "1336", "to": "1340" },
-  "summary": "Amiral de France, Hugues Quiéret ravage avec Nicolas Béhuchet les côtes anglaises, dont Southampton en octobre 1338. Il est tué lors de la défaite navale de l'[[cdx_ecluse|Écluse]], le 24 juin 1340.",
-  "body": "Seigneur picard de Tours-en-Vimeu, Hugues Quiéret a servi comme sénéchal de Beaucaire avant d'être nommé amiral de France en 1336. Il partage le commandement de la flotte avec Nicolas Béhuchet, un administrateur des finances royales devenu marin. Leur flotte rassemble des navires normands et picards, des galères louées à Gênes et des bateaux marchands réquisitionnés.\n\nAu début de la guerre, ce sont eux qui prennent l'initiative. En 1338, ils attaquent Portsmouth puis, le 4 octobre, débarquent à Southampton : la ville est pillée et incendiée, et nombre d'habitants sont tués. D'autres raids frappent les îles anglo-normandes et les côtes du sud de l'Angleterre, semant la panique outre-Manche.\n\nEn juin 1340, Philippe VI rassemble une grande flotte dans l'estuaire du Zwin, devant l'Écluse, pour empêcher [[cdx_edouard_iii|Édouard III]] de débarquer en Flandre. Contre l'avis du capitaine génois Barbavera, qui conseille de gagner la haute mer, Quiéret et Béhuchet disposent leurs navires en lignes serrées, parfois enchaînés entre eux. Le 24 juin, la flotte anglaise attaque avec le vent et le soleil dans le dos ; les archers anglais balaient les ponts français.\n\nLa bataille de l'[[cdx_ecluse|Écluse]] est un désastre. Quiéret est tué, peut-être achevé après sa capture ; Béhuchet est pendu au mât de son navire. La maîtrise de la Manche passe pour longtemps aux Anglais, qui peuvent désormais débarquer en France presque à leur guise.",
-  "entity": "evt_sac_de_southampton",
-  "see_also": ["cdx_ecluse", "cdx_philippe_vi", "cdx_edouard_iii"],
-  "sources": ["Hugues Quiéret", "Bataille de L'Écluse", "Raid on Southampton (en)"]
+  "aliases": ["Hugues Quiéret", "amiral Quiéret"],
+  "era": { "from": "v. 1290", "to": "1340" },
+  "summary": "Amiral de [[cdx_philippe_vi|Philippe VI]], Hugues Quiéret mène avec [[cdx_nicolas_behuchet|Nicolas Béhuchet]] les raids sur les côtes anglaises avant de périr à la bataille de L'Écluse en 1340.",
+  "body": "Chevalier picard, Hugues Quiéret est nommé amiral de France par [[cdx_philippe_vi|Philippe VI]] au début de la guerre, à un moment où le royaume ne dispose pas d'une flotte de guerre permanente : les navires sont réquisitionnés au coup par coup parmi les marchands normands, picards et génois.\n\nAvec le trésorier [[cdx_nicolas_behuchet|Nicolas Béhuchet]], associé inhabituel qui apporte le sens de l'organisation financière quand Quiéret apporte l'expérience du commandement, il organise dès 1338 des raids sur le littoral anglais : Portsmouth, Jersey, et surtout le sac de Southampton (4-5 octobre 1338), qui répand la terreur et pousse Édouard III à fortifier ses côtes.\n\nCes succès sont cependant sans lendemain stratégique : la flotte franco-génoise, mal préparée, se laisse enfermer dans l'estuaire de l'Écluse, sur la côte flamande, où elle est détruite le 24 juin 1340 par la flotte anglaise fraîchement rassemblée. Quiéret y est capturé, blessé, et exécuté sur le pont de son navire, comme Béhuchet ; les deux amiraux paient de leur vie l'ambition d'une guerre navale que la France n'avait pas les moyens de soutenir durablement.",
+  "entity": "chr_hugues_quieret",
+  "see_also": ["cdx_nicolas_behuchet", "cdx_philippe_vi"],
+  "sources": ["Hugues Quiéret", "Bataille de L'Écluse", "Raid sur Southampton"]
 }
