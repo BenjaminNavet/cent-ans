@@ -32,7 +32,7 @@ de la refonte colonies (`docs/wip/colonies.md`, ADR 0005).
   refus doublon/inconnu/province partielle, effets fusionnés, IA
   déterministe, sauvegarde). `cargo test` plein vert (voir historique wip).
 - [ ] Smoke Godot (import en cours) + captures `docs/img/c4-edits/`.
-- [x] ADR 0010 (`docs/decisions/0010-edicts-and-building-chains.md`).
+- [x] ADR 0011 (`docs/decisions/0011-edicts-and-building-chains.md`).
 
 ## Décisions
 

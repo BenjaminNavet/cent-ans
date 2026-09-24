@@ -1,4 +1,4 @@
-# ADR 0010 — Édits régionaux et chaînes de bâtiments (lot C4 « Total War »)
+# ADR 0011 — Édits régionaux et chaînes de bâtiments (lot C4 « Total War »)
 
 Date : 2026-09-24. Statut : accepté. Complète `docs/design/2026-09-24-analyse-total-war.md` § 2.1
 (« Bâtiments en chaînes/arbres », « Édits régionaux »).
