@@ -490,6 +490,20 @@ impl BattleSim {
         }
     }
 
+    /// Debug (tests, captures, S2): sets house `house` on fire, or the gate
+    /// when `house` < 0; `false` when it already burns or is not a siege.
+    #[func]
+    fn debug_ignite(&mut self, house: i64) -> bool {
+        let Some(sim) = &mut self.sim else {
+            return false;
+        };
+        if house < 0 {
+            sim.ignite_gate()
+        } else {
+            sim.ignite_house(house as usize)
+        }
+    }
+
     /// Ground height at (x, z).
     #[func]
     fn get_height(&self, x: f64, z: f64) -> f64 {

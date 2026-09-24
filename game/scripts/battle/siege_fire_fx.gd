@@ -10,6 +10,7 @@ extends Node3D
 ## Paramètres : `data/fx/siege_fire.json` (schéma `data/schemas/fx_siege_fire.schema.json`).
 
 const FX_PATH := "fx/siege_fire.json"
+const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const DEFAULTS := {
 	"update_period_s": 0.2,
 	"flame_height_m": 4.5,
@@ -63,7 +64,7 @@ func setup(siege_view: Node3D, p_height_at: Callable) -> void:
 
 static func _load_params() -> Dictionary:
 	var merged: Dictionary = DEFAULTS.duplicate(true)
-	var path: String = MapPaths.data_dir.path_join(FX_PATH)
+	var path: String = _data_dir().path_join(FX_PATH)
 	if not FileAccess.file_exists(path):
 		return merged
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -75,6 +76,16 @@ static func _load_params() -> Dictionary:
 		else:
 			merged[key] = parsed[key]
 	return merged
+
+
+## Dossier `data/` (autoload `MapPaths` s'il existe : le smoke test tourne sans autoloads nommés).
+static func _data_dir() -> String:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		var map_paths := tree.root.get_node_or_null("MapPaths")
+		if map_paths != null:
+			return str(map_paths.get("data_dir"))
+	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 static func _color(values: Array) -> Color:

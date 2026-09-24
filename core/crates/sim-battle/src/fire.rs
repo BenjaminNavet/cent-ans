@@ -75,7 +75,7 @@ impl Blaze {
         }
         self.intensity = self.intensity.min(self.fuel / decline).max(0.0);
         let duration = (law.burn_duration_s * weather.duration).max(1e-6);
-        self.fuel -= self.intensity.max(0.05) * dt / duration;
+        self.fuel -= dt / duration;
         if self.fuel <= 0.0 {
             self.state = FireState::Burnt;
             self.fuel = 0.0;
