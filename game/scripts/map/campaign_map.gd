@@ -79,6 +79,7 @@ var _fps_probe_cpu_ms: float = 0.0
 var _fps_probe_map_us: Vector2 = Vector2.ZERO
 var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
+var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
 
 var _screenshot_path: String = ""
@@ -123,6 +124,9 @@ func _ready() -> void:
 	settlements_ctl = SettlementController.new()  # C5
 	add_child(settlements_ctl)
 	settlements_ctl.setup(self)
+	movement_ctl = ArmyMovementController.new()  # M4 (après C5 : prioritaire au clic droit)
+	add_child(movement_ctl)
+	movement_ctl.setup(self)
 	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
 	add_child(agents_ctl)
 	agents_ctl.setup(self)
@@ -421,9 +425,13 @@ func select_army(army_id: String) -> void:
 		agents_ctl.deselect()
 	var faction: String = str(army.get("faction", ""))
 	var is_player := faction == player_faction
+	# M4 : la bulle du mouvement libre remplace le masque de provinces et les anneaux C5.
+	var free_movement := movement_ctl != null and movement_ctl.available()
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
-	if settlements_ctl != null:  # C5 : colonies atteignables
+	if free_movement:
+		movement_ctl.on_army_selected(army_id, army, is_player)
+	elif settlements_ctl != null:  # C5 : colonies atteignables
 		settlements_ctl.on_army_selected(army_id, is_player)
 	if hud != null:  # F10b : bandeau d'ost et sceau du chef
 		hud.show_army(army_id, army, is_player)
@@ -433,6 +441,9 @@ func select_army(army_id: String) -> void:
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
+	if free_movement:
+		path_preview.hide_path()
+		return
 	if settlements_ctl != null and settlements_ctl.show_current_path(army):
 		return
 	var path: Array = army.get("path_provinces", army.get("path", []))
@@ -452,11 +463,16 @@ func deselect_army() -> void:
 	terrain.set_reachable(PackedInt32Array(), PackedInt32Array())
 	if settlements_ctl != null:  # C5
 		settlements_ctl.on_army_deselected()
+	if movement_ctl != null:  # M4
+		movement_ctl.on_army_deselected()
 	path_preview.hide_path()
 	ui.hide_army()
 
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
+	if movement_ctl != null and movement_ctl.available():
+		terrain.set_reachable(PackedInt32Array(), PackedInt32Array())  # M4 : la bulle suffit
+		return
 	var indices := PackedInt32Array()
 	if selected_army != "" and sim != null:
 		# La province de départ compte comme atteignable (pas assombrie).
@@ -495,6 +511,8 @@ func _on_province_hovered(index: int) -> void:
 	hovered_index = index
 	terrain.set_highlight(hovered_index, selected_index)
 	var province := province_info(index)
+	if movement_ctl != null and movement_ctl.active():
+		return  # M4 : l'aperçu suit le curseur (ArmyMovementController)
 	if selected_army == "" or index == 0 or sim == null:
 		ui.set_hovered(province)
 		if selected_army != "":
@@ -1056,6 +1074,8 @@ func _parse_cmdline() -> void:
 					tutorial.stage_screenshot(_screenshot_stage)
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
+				"movement", "movement_near":  # M4 : bulle et chemin (vue d'ensemble, gros plan)
+					movement_ctl.stage_screenshot(_screenshot_stage == "movement_near")
 				"agents", "agents_registry":  # C6 agents
 					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
 				_:

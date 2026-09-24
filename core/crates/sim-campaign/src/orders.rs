@@ -555,7 +555,7 @@ impl CampaignState {
             }
             Order::Attack { army, target_army } => self
                 .order_attack(data, faction, &army, &target_army, &mut events)
-                .map(|()| OrderOutcome::Done),
+                .map(OrderOutcome::Moved),
             Order::Embark { army, to_port } => self
                 .order_embark(data, faction, &army, &to_port, &mut events)
                 .map(|()| OrderOutcome::Done),
