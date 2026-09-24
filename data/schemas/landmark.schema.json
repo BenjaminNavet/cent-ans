@@ -9,6 +9,23 @@
     "name": { "type": "string", "minLength": 1 },
     "settlement": { "type": "string", "pattern": "^set_[a-z0-9_]+$", "description": "Colonie dont la maquette est remplacée." },
     "period": { "type": "string", "description": "État représenté, en français (ex. « vers 1340-1380 »)." },
+    "province": { "type": "string", "pattern": "^prov_[a-z0-9_]+$", "description": "Province de la colonie (bataille de siège : la toile de fond s'affiche quand le siège a lieu dans cette province)." },
+    "siege": {
+      "type": "object",
+      "description": "Toile de fond des batailles de siège (échelle réelle, en mètres) : la ville assiégée de la simulation reste générique, le plan est posé derrière elle, fleuve et rive opposée compris.",
+      "properties": {
+        "rotate_deg": { "type": "number", "description": "Rotation antihoraire du plan pour que le fleuve longe le fond du champ de bataille." },
+        "radius_m": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon du plan retenu autour de l'origine." },
+        "bank_offset_m": { "type": "number", "description": "Distance de l'origine (après rotation) à la berge proche : la berge est posée au fond du champ." },
+        "areas": { "type": "array", "items": { "type": "string" } },
+        "monuments": { "type": "array", "items": { "type": "string" } },
+        "bridges": { "type": "array", "items": { "type": "string" } },
+        "streets": { "type": "array", "items": { "type": "string" } },
+        "walls": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["rotate_deg", "radius_m", "bank_offset_m", "areas", "monuments"],
+      "additionalProperties": false
+    },
     "sources": {
       "type": "array",
       "minItems": 1,

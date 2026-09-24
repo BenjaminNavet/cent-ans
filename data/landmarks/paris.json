@@ -3,6 +3,45 @@
   "name": "Paris",
   "settlement": "set_paris",
   "period": "vers 1340-1380 (enceinte de Charles V et Bastille selon l'année)",
+  "province": "prov_ile_de_france",
+  "siege": {
+    "rotate_deg": 27,
+    "radius_m": 1400,
+    "bank_offset_m": 106,
+    "areas": [
+      "cite",
+      "ville",
+      "outre_enceinte_droite"
+    ],
+    "monuments": [
+      "notre_dame",
+      "sainte_chapelle",
+      "palais_cite",
+      "grand_chatelet",
+      "louvre",
+      "halles",
+      "saint_germain_auxerrois",
+      "saint_jacques_boucherie",
+      "saint_gervais"
+    ],
+    "bridges": [
+      "grand_pont",
+      "planche_mibray"
+    ],
+    "streets": [
+      "rue_saint_denis",
+      "rue_saint_martin",
+      "rue_juiverie",
+      "rue_barillerie",
+      "rue_saint_antoine",
+      "rue_saint_honore",
+      "rue_du_temple",
+      "rue_montmartre"
+    ],
+    "walls": [
+      "philippe_auguste_droite"
+    ]
+  },
   "sources": [
     {
       "title": "Plan de Paris, dit plan de Bâle",
