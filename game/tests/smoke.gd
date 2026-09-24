@@ -46,6 +46,10 @@ extends SceneTree
 ## 16. monnaie/rançons (H11) : changement de monnaie par l'UI et refus du second dans l'année,
 ##     budget, ordre de chevalerie (refus affiché), panneau des rançons (données simulées), genres
 ##     coinage/ransom/chivalry, liens Encyclopédie ↔ Codex. Seule : CENT_ANS_SMOKE_ONLY=coinage_ransom.
+## 17. agents (C6, vraie simulation si elle expose `get_agents`, sinon skip imprimé) : recrutement
+##     d'un espion par le registre (G), jeton sur la carte, sélection → anneaux et barre d'actions
+##     (4 actions avec pourcentage), déplacement par ordre, contre-espionnage dans une colonie amie
+##     → rapport, ligne « agent » au journal de la saison suivante, onglet Agents de l'encyclopédie.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -86,6 +90,7 @@ func _init() -> void:
 	await _run_start_menu()
 	await _run_campaign_loop()
 	await _run_minimap_fog()  # C1
+	await _run_agents()  # C6 agents
 	_run_city_economy()
 	await _run_characters()
 	await _run_technologies()
@@ -289,6 +294,93 @@ func _run_campaign_loop() -> void:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
 	map.queue_free()
 	await process_frame
+
+
+## C6 : agents de campagne sur la vraie simulation (voir l'en-tête, étape 17).
+func _run_agents() -> void:
+	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
+	var map: Node3D = scene.instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "agents: campaign scene failed to start"):
+		map.queue_free()
+		return
+	var ctl: Node = map.agents_ctl  # non typé : compilé après les autoloads
+	if not _check(ctl != null, "agents: controller missing"):
+		map.queue_free()
+		return
+	if not ctl.available():
+		print("smoke agents: mock simulation, agents inactive")
+		map.queue_free()
+		await process_frame
+		return
+	var sim: Object = map.sim
+	# Registre (touche G) et recrutement dans la cité de la capitale.
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_G
+	key.pressed = true
+	ctl._unhandled_input(key)
+	_check(ctl.registry.visible, "G should open the agent registry")
+	var place: String = ctl.recruit_place()
+	_check(place != "", "agents: a recruitment place (capital city) expected")
+	var options: Array = sim.call("get_agent_recruit_options", place)
+	_check(options.size() == 3, "3 agent types expected, got %d" % options.size())
+	var result: Dictionary = ctl.recruit(place, "spy")
+	_check(result.get("ok", false), "spy recruitment refused: %s" % result.get("error", ""))
+	var spy := ""
+	for entry in sim.call("get_agents"):
+		if str(entry.get("faction", "")) == map.player_faction:
+			spy = str(entry.get("id", ""))
+	if not _check(spy != "", "the recruited spy should be listed by get_agents"):
+		map.queue_free()
+		return
+	_check(ctl.has_token(spy), "the spy should have a token on the map")
+	# Une saison : points de marche rendus.
+	sim.call("end_turn")
+	map.refresh_all()
+	_check(ctl.has_token(spy), "the spy token should survive a refresh")
+	ctl.select_agent(spy)
+	_check(ctl.selected_agent == spy and ctl.bar.visible, "selecting the spy should show the action bar")
+	_check(ctl.action_button_count() == 4, "a spy has 4 actions, got %d" % ctl.action_button_count())
+	_check(ctl.markers.marker_count() > 0, "reachable rings expected for the spy")
+	var percent_shown := false
+	for option in sim.call("get_agent_actions", spy):
+		if bool(option.get("available", false)) and int(option.get("chance", 0)) > 0:
+			percent_shown = true
+	_check(percent_shown, "at least one action should be available with a chance")
+	# Marche vers une colonie amie atteignable (l'action consomme ensuite la marche restante).
+	var target := ""
+	for id in ctl.reachable:
+		var detail: Dictionary = sim.call("settlement_detail", str(id))
+		if str(detail.get("controller", "")) == map.player_faction:
+			target = str(id)
+			break
+	var moved := false
+	if target != "":
+		var move: Dictionary = ctl.order_move(spy, target)
+		moved = move.get("ok", false)
+		_check(moved, "move_agent refused: %s" % move.get("error", ""))
+		_check(str(sim.call("get_agent", spy).get("location", "")) == target, "the spy should stand on %s" % target)
+	# Contre-espionnage en colonie amie : un rapport.
+	ctl.select_agent(spy)
+	var report: Dictionary = ctl.perform_action("counter")
+	_check(str(report.get("text", "")) != "", "counter-espionage should produce a report: %s" % report)
+	# La ligne du rapport arrive au journal de la saison suivante.
+	var events: Array = sim.call("end_turn")
+	var agent_lines := 0
+	for event in events:
+		if str(event.get("kind", "")) == "agent":
+			agent_lines += 1
+	_check(agent_lines > 0, "an 'agent' event should open the next journal")
+	_check(SeasonReport.KIND_STYLES.has("agent"), "season report should style agent events")
+	# Encyclopédie : onglet Agents.
+	_check(Encyclopedia.tab_index_of("agents") >= 0, "encyclopedia should have an Agents tab")
+	_check(Encyclopedia.fiche_bbcode("agent_spy").contains("Renseigner"), "spy fiche should list its actions")
+	map.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: agents (spy recruited, token, bar of %d actions, report, move %s, %d journal line(s), encyclopedia)" % [4, "ok" if moved else "skipped", agent_lines])
 
 
 ## C1 : minicarte présente dans le HUD (haut droite, lettres dessous, sans chevaucher la cloche),
@@ -1800,7 +1892,7 @@ func _run_tutorial() -> void:
 	_check(encyclopedia.visible, "K should open the encyclopedia")
 	var counts := PackedStringArray()
 	var ids: PackedStringArray = encyclopedia.tab_ids()
-	_check(ids.size() == 9, "encyclopedia should have 9 tabs")
+	_check(ids.size() == 10, "encyclopedia should have 10 tabs (C6: Agents)")
 	for index in ids.size():
 		encyclopedia.select_tab(index)
 		_check(encyclopedia.entry_count() > 0, "encyclopedia tab %s is empty" % ids[index])

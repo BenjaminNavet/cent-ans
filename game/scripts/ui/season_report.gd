@@ -21,6 +21,8 @@ const GROUPS := [
 	{"title": "Table et santé", "glyph": "✚", "kinds": ["table", "medicine"]},
 	# H11 : mutations monétaires, rançons et échéances, ordres de chevalerie.
 	{"title": "Monnaie, rançons et chevalerie", "glyph": "¤", "kinds": ["coinage", "ransom", "chivalry"]},
+	# C6 : espions, hérauts et prédicateurs.
+	{"title": "Agents", "glyph": "✦", "kinds": ["agent"]},
 	{"title": "Chronique", "glyph": "§", "kinds": ["chronicle", "victory", "defeat", "campaign_ended"]},
 ]
 ## Genres rapportés même quand ils ne concernent pas le joueur (nouvelles du monde).
@@ -33,6 +35,8 @@ const KIND_STYLES := {
 	"coinage": {"glyph": "¤", "label": "Monnaie", "color": "#8a6a10"},
 	"ransom": {"glyph": "⚖", "label": "Rançon", "color": "#7a2a1a"},
 	"chivalry": {"glyph": "⚜", "label": "Chevalerie", "color": "#2a3a7a"},
+	# C6
+	"agent": {"glyph": "✦", "label": "Agents", "color": "#4a2a6a"},
 }
 const MAX_ENTRIES_PER_GROUP := 12
 const MAX_LIST_HEIGHT := 440.0
