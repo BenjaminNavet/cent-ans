@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/river_styles.schema.json",
+  "title": "Rendu des cours d'eau de la carte",
+  "description": "Fichier data/map/river_styles.json (lot V4) : largeurs affichées des fleuves et rivières, lues par `cent-ans geo rivers-render`. Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "width_by_importance": {
+      "type": "array",
+      "description": "Largeur (px carte) à l'embouchure selon l'importance 0..6 (MapData : Strahler ou 12 − scalerank), pour les cours d'eau absents de `rivers`.",
+      "items": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
+      "minItems": 7,
+      "maxItems": 7
+    },
+    "taper_min": { "type": "number", "minimum": 0.1, "maximum": 1, "description": "Part de la largeur gardée en altitude (amont)." },
+    "taper_low_m": { "type": "number", "description": "Altitude (m) sous laquelle la largeur est pleine." },
+    "taper_high_m": { "type": "number", "description": "Altitude (m) au-delà de laquelle la largeur vaut taper_min × largeur." },
+    "bank_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Largeur (px carte) des berges peintes et creusées de part et d'autre du lit." },
+    "custom_zones": {
+      "type": "array",
+      "description": "Zones où le rendu générique des fleuves se retire (eau, lit, berges, ponts) pour laisser place à un modèle dédié (ville emblématique).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "name": { "type": "string" },
+          "lonlat": {
+            "type": "array",
+            "prefixItems": [
+              { "type": "number", "minimum": -11, "maximum": 16 },
+              { "type": "number", "minimum": 35, "maximum": 60 }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "radius_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+          "note": { "type": "string" }
+        },
+        "required": ["id", "lonlat", "radius_px"],
+        "additionalProperties": false
+      }
+    },
+    "rivers": {
+      "type": "object",
+      "description": "Nom (tel que dans rivers.geojson) → largeur (px carte) à l'embouchure.",
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 }
+    }
+  },
+  "required": ["width_by_importance", "taper_min", "taper_low_m", "taper_high_m", "bank_px", "rivers"],
+  "additionalProperties": false
+}
