@@ -50,6 +50,7 @@ pub use entities::faction::{
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
 pub use entities::names::NameList;
+pub use entities::population_rules::PopulationRules;
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,

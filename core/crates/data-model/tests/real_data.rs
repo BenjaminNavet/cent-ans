@@ -22,6 +22,16 @@ fn auto_resolve_rules_match_their_default() {
     assert_eq!(from_file, data_model::AutoResolveRules::default());
 }
 
+/// Lot E2: `data/rules/population.json` is read and mirrored by the default.
+#[test]
+fn population_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.population_rules.clone();
+    assert!(from_file.description.is_some(), "population.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::PopulationRules::default());
+}
+
 #[test]
 fn real_data_loads_without_errors() {
     let (data, warnings) = GameData::load(&data_root()).expect("data/ must load");
