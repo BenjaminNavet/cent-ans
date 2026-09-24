@@ -28,8 +28,8 @@ use data_model::{FactionId, GameData, Terrain, UnitCategory, UnitTypeId};
 use serde_json::{json, Value};
 use sim_battle::{BattleSeason, BattleSetup, BattleSim, SideId, SideSetup, UnitSetup};
 use sim_campaign::{
-    resolve_with, BattleContext, BattleUnit, CampaignRng, FieldConditions, Season, UnitProfile, CampaignState, EventKind, Order, Side,
-    TaxRate, Winner,
+    resolve_with, BattleContext, BattleUnit, CampaignRng, CampaignState, EventKind,
+    FieldConditions, Order, Season, Side, TaxRate, UnitProfile, Winner,
 };
 
 /// First turn of 1400 (survival of the majors).
@@ -838,7 +838,11 @@ fn rt_mode(data: &GameData, args: &[String]) {
         fixture
             .scenarios
             .iter()
-            .map(|s| s.reference_3d.clone().expect("fixture without reference_3d"))
+            .map(|s| {
+                s.reference_3d
+                    .clone()
+                    .expect("fixture without reference_3d")
+            })
             .collect()
     } else {
         run_all_3d(data, &fixture, runs)
