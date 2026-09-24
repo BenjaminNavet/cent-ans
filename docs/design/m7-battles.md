@@ -141,3 +141,15 @@ Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::Le
   champ, entrée échelonnée par le bord du camp quand un régiment quitte le champ ou toutes les N s.
 - Tests : `sim-battle/tests/f5.rs` (8 + 1 ignoré). Sonde `probe -- ai` : 2 × 20 régiments, assaillant
   4/10 (471 s en moyenne) ; 2 × 10, 6/10.
+- **F5c — déploiement dans Godot** (`deployment_controller.gd`, `deployment_zone.gd`) : toute bataille du
+  joueur (champ et siège) ouvre la phase après `setup` (`begin_deployment`). Zone du joueur au sol
+  (remplissage doré translucide qui épouse le relief, liseré sur le contour, matériau non éclairé),
+  bandeau « Déploiement — placez vos troupes » avec « Commencer la bataille » (ou **Entrée**) →
+  `start_battle`. Clic droit : la sélection se range autour du point, orientation gardée ; glisser-droit :
+  répartie sur la ligne, front tourné à l'opposé de la caméra (`deploy_unit` par régiment). Un refus
+  s'affiche en message éphémère (« Chevaliers : l'unité 0 doit être placée… »). `--autoplay`,
+  `--screenshot` et `--benchmark` sautent la phase ; `--deploy-shot` (avec `--screenshot=`) la capture :
+  `docs/img/godot-battle-deploy.png`. Sièges : maisons posées sur `get_siege().houses` (emprise inscrite
+  dans chaque disque, l'église sur le disque le plus au fond), sortie de la garnison en message éphémère
+  et dans la ligne de siège ; capture `docs/img/godot-siege-f5.png`. Smoke : phase ouverte, un placement
+  valide et un refusé, `start_battle`, le temps avance ; maisons rendues = maisons de la simulation.

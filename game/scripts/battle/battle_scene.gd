@@ -14,7 +14,8 @@ extends Node3D
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
-## `--camera=x,z,distance,lacet` (capture : position de caméra imposée).
+## `--camera=x,z,distance,lacet` (capture : position de caméra imposée), `--deploy-shot` (avec
+## `--screenshot=` : capture de la phase de déploiement, F5c).
 
 signal returned(result: Dictionary)
 

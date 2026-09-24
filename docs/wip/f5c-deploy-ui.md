@@ -1,11 +1,12 @@
 # F5c — Déploiement et maisons de siège dans Godot
 
-État : démarré.
+État : terminé (points 1 à 4).
 
-Plan :
-1. Phase de déploiement (deployment_controller.gd, deployment_zone.gd, ajouts battle_scene/battle_hud).
-2. Maisons de siège depuis `get_siege().houses` (battle_siege.gd).
-3. Indication de sortie de garnison (journal/HUD).
-4. Smoke + captures `godot-battle-deploy.png`, `godot-siege-f5.png`, docs m7 F5 + status.
+- `game/scripts/battle/deployment_controller.gd`, `deployment_zone.gd` : phase de déploiement.
+- `battle_scene.gd` : section « F5c » en fin de fichier, `--deploy-shot`, Entrée, clic droit routé.
+- `battle_hud.gd` : `show_toast` (fin de fichier).
+- `battle_siege.gd` : `_house_sites()` (source = `get_siege().houses`), `_build_houses` réécrit.
+- Smoke : `_check_battle_deployment_f5c`, `_check_siege_f5c`.
+- Captures : `docs/img/godot-battle-deploy.png`, `docs/img/godot-siege-f5.png`.
 
-Prochaine étape : lire l'API et battle_scene.gd.
+Prochaine étape : aucune (fusion).
