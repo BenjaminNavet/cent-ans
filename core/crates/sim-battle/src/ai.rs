@@ -62,7 +62,7 @@ use crate::command::Command;
 use crate::setup::SideId;
 use crate::siege::SiegeWorks;
 use crate::sim::{attack_angle, BattleSim};
-use crate::site::OBSTACLE_REACH;
+use crate::site::{Obstacle, OBSTACLE_REACH};
 use crate::unit::{Formation, Unit, UnitState};
 
 /// Distance at which the line closes in at the run.
@@ -100,6 +100,10 @@ pub const ATTACKER_WAIT: f64 = 90.0;
 pub const DEFENDER_PATIENCE: f64 = 480.0;
 /// Besiegers wait for their engines at most this long before escalading.
 pub const ENGINE_PATIENCE: f64 = 420.0;
+
+/// B8: horsemen give up a pursuit once the routing target has fled this far
+/// from the battle line's anchor, and fall back to it instead.
+pub const PURSUIT_LEASH: f64 = 280.0;
 
 fn dist(a: &Unit, b: &Unit) -> f64 {
     ((a.x - b.x).powi(2) + (a.z - b.z).powi(2)).sqrt()
@@ -633,21 +637,13 @@ fn charge_breaks(view: &View, i: usize, j: usize) -> bool {
     field.breaks_charge((u.x, u.z), (e.x, e.z)) || field.in_village(e.x, e.z)
 }
 
-/// B6: a point beyond the nearer end of the hedge or ditch that breaks the
-/// charge of `i` at `j`, from which the charge is clear; `None` when there
-/// is none (a village, or no clear way round): the horse waits.
-fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
-    let (u, e) = (&view.units[i], &view.units[j]);
-    let field = view.sim.field();
-    if field.in_village(e.x, e.z) {
-        return None;
-    }
-    let (from, to) = ((u.x, u.z), (e.x, e.z));
-    let blocking = field.obstacles.iter().find(|o| {
-        o.kind.breaks_charge()
-            && o.distance(to.0, to.1) <= crate::site::HEDGE_COVER_REACH
-            && (o.crosses(from, to) || o.distance(from.0, from.1) <= 2.0 * OBSTACLE_REACH)
-    })?;
+/// B8: dense bocage can chain several hedges between a horse and its target;
+/// this many are tried in turn before giving up and waiting.
+const DETOUR_HOPS: u32 = 4;
+
+/// The point beyond the nearer end of `blocking`, on the target's side, from
+/// which `probe` can ride on towards `to` clear of that one obstacle.
+fn detour_past(probe: (f64, f64), to: (f64, f64), blocking: &Obstacle) -> Option<(f64, f64)> {
     let len = blocking.length().max(1e-6);
     let side_of = |p: (f64, f64)| {
         (blocking.b.0 - blocking.a.0) * (p.1 - blocking.a.1)
@@ -670,18 +666,45 @@ fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
                 end.1 + out.1 * DETOUR_CLEARANCE + normal.1 * 10.0,
             )
         })
-        .filter(|&(x, z)| {
-            field.inside(x, z)
-                && !field.in_forest(x, z)
-                && field.water_at(x, z).is_none()
-                && !field.breaks_charge((x, z), to)
-        })
         .map(|w| {
-            let path = (w.0 - from.0).hypot(w.1 - from.1) + (to.0 - w.0).hypot(to.1 - w.1);
+            let path = (w.0 - probe.0).hypot(w.1 - probe.1) + (to.0 - w.0).hypot(to.1 - w.1);
             (w, path)
         })
         .min_by(|a, b| a.1.total_cmp(&b.1))
         .map(|(w, _)| w)
+}
+
+/// B6/B8: a point beyond the hedges or ditches that break the charge of `i`
+/// at `j`, from which the charge is clear; `None` when there is none (a
+/// village, or no clear way round after [`DETOUR_HOPS`] tries): the horse
+/// waits. B8: a dense network of hedges (bocage) is walked hedge by hedge
+/// instead of only trying the ends of the first one in the way, which left
+/// the horse waiting in front of the next hedge over.
+fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
+    let (u, e) = (&view.units[i], &view.units[j]);
+    let field = view.sim.field();
+    if field.in_village(e.x, e.z) {
+        return None;
+    }
+    let to = (e.x, e.z);
+    let mut probe = (u.x, u.z);
+    let mut moved = false;
+    for _ in 0..DETOUR_HOPS {
+        let blocking = field.obstacles.iter().find(|o| {
+            o.kind.breaks_charge()
+                && o.distance(to.0, to.1) <= crate::site::HEDGE_COVER_REACH
+                && (o.crosses(probe, to) || o.distance(probe.0, probe.1) <= 2.0 * OBSTACLE_REACH)
+        });
+        let Some(blocking) = blocking else {
+            return moved.then_some(probe);
+        };
+        probe = detour_past(probe, to, blocking).filter(|&(x, z)| {
+            field.inside(x, z) && !field.in_forest(x, z) && field.water_at(x, z).is_none()
+        })?;
+        moved = true;
+    }
+    // Still blocked after DETOUR_HOPS: a network too dense to clear.
+    None
 }
 
 /// B6: horsemen ride this far past the end of a hedge before charging.
@@ -882,6 +905,11 @@ fn side_losses(units: &[Unit], side: SideId) -> f64 {
     }
 }
 
+/// B8: within the forward arc, the line leans this many metres (at most)
+/// towards a defender offset sideways from dead ahead, instead of marching
+/// straight past it. A defender squarely in front (`dx` ~ 0) is unaffected.
+const ADVANCE_LEAN_MAX: f64 = 20.0;
+
 /// Next step of an advancing line: 45 m towards the enemy's centroid (F5d:
 /// armies that slipped past each other turn back instead of marching on to
 /// the far edge).
@@ -893,8 +921,10 @@ fn advance(view: &View, from: (f64, f64)) -> (f64, f64) {
     let (dx, dz) = (ex - from.0, ez - from.1);
     let d = dx.hypot(dz);
     if dz * view.forward > 0.5 * d {
-        // Ahead: the usual straight advance.
-        return (from.0, from.1 + view.forward * 45.0);
+        // Ahead: march forward, leaning towards a defender offset
+        // sideways (B8).
+        let lean = dx.clamp(-ADVANCE_LEAN_MAX, ADVANCE_LEAN_MAX);
+        return (from.0 + lean, from.1 + view.forward * 45.0);
     }
     let step = d.min(45.0) / d.max(1e-6);
     (from.0 + dx * step, from.1 + dz * step)
@@ -1176,7 +1206,9 @@ fn plan_horse(
         }
         return;
     }
-    // 4. Pursuit of routing regiments.
+    // 4. Pursuit of routing regiments (B8: leashed — a rout that has
+    // already fled too far from the battle line is left to run; chasing it
+    // down would strand the horse and delay the main fight).
     let routing = view
         .enemies
         .iter()
@@ -1186,14 +1218,17 @@ fn plan_horse(
         .filter(|&(_, d)| d < 350.0)
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if let Some((j, _)) = routing {
-        if unit.target != Some(units[j].id) {
-            view.commands.push(Command::Attack {
-                units: vec![unit.id],
-                target: units[j].id,
-                run: true,
-            });
+        let e = &units[j];
+        if (e.x - anchor.0).hypot(e.z - anchor.1) < PURSUIT_LEASH {
+            if unit.target != Some(e.id) {
+                view.commands.push(Command::Attack {
+                    units: vec![unit.id],
+                    target: e.id,
+                    run: true,
+                });
+            }
+            return;
         }
-        return;
     }
     // 5. A shaken or bled regiment right in front (not bristling): ride it down.
     let shaken =

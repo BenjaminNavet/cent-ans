@@ -1,0 +1,72 @@
+//! 3D real-time battle sim vs auto-resolve on the same matchups.
+use std::path::Path;
+
+use data_model::{GameData, Terrain, UnitTypeId};
+use sim_battle::*;
+
+fn unit(data: &GameData, id: &str) -> UnitSetup {
+    let t = &data.unit_types[&UnitTypeId::new(id).unwrap()];
+    UnitSetup::from_unit_type(t, t.soldiers, t.stats.morale, 0)
+}
+
+fn side(data: &GameData, name: &str, comp: &[(&str, usize)]) -> SideSetup {
+    let mut units = Vec::new();
+    for (id, n) in comp {
+        for _ in 0..*n {
+            units.push(unit(data, id));
+        }
+    }
+    SideSetup {
+        faction: name.into(),
+        faction_name: name.into(),
+        army: String::new(),
+        units,
+        general: None,
+    }
+}
+
+fn main() {
+    let (data, _) = GameData::load(Path::new("/Users/jean_hubert/dev/game_project/data")).unwrap();
+    let scenarios: Vec<(&str, Vec<(&str, usize)>, Vec<(&str, usize)>, Terrain)> = vec![
+        ("Crecy (FR 8 kn+4 gen+4 MAA attack EN 8 lb+4 MAA, hills)", vec![("unit_knights", 8), ("unit_genoese_crossbowmen", 4), ("unit_men_at_arms_foot", 4)], vec![("unit_longbowmen", 8), ("unit_men_at_arms_foot", 4)], Terrain::Hills),
+        ("10 knights attack 10 longbow (plains)", vec![("unit_knights", 10)], vec![("unit_longbowmen", 10)], Terrain::Plains),
+        ("4 knights attack 20 militia (equal cost 6000)", vec![("unit_knights", 4)], vec![("unit_urban_militia", 20)], Terrain::Plains),
+        ("20 militia attack 4 knights (equal cost 6000)", vec![("unit_urban_militia", 20)], vec![("unit_knights", 4)], Terrain::Plains),
+        ("10 knights attack 10 flemish pikes", vec![("unit_knights", 10)], vec![("unit_flemish_pikemen", 10)], Terrain::Plains),
+        ("12 militia attack 12 longbow", vec![("unit_urban_militia", 12)], vec![("unit_longbowmen", 12)], Terrain::Plains),
+    ];
+    for (name, a, d, terrain) in scenarios {
+        let mut wins = 0;
+        let (mut la, mut ld) = (0u32, 0u32);
+        let n = 6;
+        for seed in 0..n {
+            let setup = BattleSetup {
+                province: String::new(),
+                province_name: String::new(),
+                terrain,
+                river: false,
+                season: BattleSeason::Summer,
+                coastal: false,
+                village: None,
+                attacker: side(&data, "A", &a),
+                defender: side(&data, "D", &d),
+                player_side: None,
+                siege: None,
+                orders: Vec::new(),
+            };
+            let mut sim = BattleSim::new(setup, seed).unwrap();
+            let mut steps = 0;
+            while !sim.is_finished() && steps < 36_100 {
+                sim.step();
+                steps += 1;
+            }
+            let o = sim.outcome().unwrap();
+            if o.winner == SideId::Attacker {
+                wins += 1;
+            }
+            la += o.attacker.total_losses;
+            ld += o.defender.total_losses;
+        }
+        println!("{name}: 3D attacker wins {wins}/{n}, mean losses {} / {}", la / n as u32, ld / n as u32);
+    }
+}

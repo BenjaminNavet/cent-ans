@@ -1,0 +1,18 @@
+"""Write the id lists read by agg.py (run from the scratch directory)."""
+
+import glob
+import json
+
+DATA = "/Users/jean_hubert/dev/game_project/data"
+json.dump(sorted(json.load(open(f))["id"] for f in glob.glob(DATA + "/buildings/*.json")), open("buildings.json", "w"))
+json.dump(sorted(json.load(open(f))["id"] for f in glob.glob(DATA + "/technologies/*.json")), open("techs.json", "w"))
+kinds, titles, years = {}, {}, {}
+for f in glob.glob(DATA + "/events/*.json"):
+    d = json.load(open(f))
+    kinds[d["id"]] = d["kind"]
+    titles[d["id"]] = d["title"]
+    date = (d.get("trigger") or {}).get("date")
+    years[d["id"]] = date.get("year", 0) if isinstance(date, dict) else 0
+json.dump(kinds, open("events.json", "w"))
+json.dump(titles, open("event_titles.json", "w"))
+json.dump(years, open("event_years.json", "w"))
