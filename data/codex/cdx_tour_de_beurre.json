@@ -1,0 +1,12 @@
+{
+  "id": "cdx_tour_de_beurre",
+  "title": "La tour de Beurre de Rouen (1485-1506)",
+  "category": "lieu",
+  "aliases": ["tour de Beurre", "tour de beurre de Rouen"],
+  "era": { "from": "1485", "to": "1506" },
+  "summary": "Tour sud de la façade de la cathédrale de Rouen, de style gothique flamboyant, haute d'environ 75 mètres, élevée de 1485 à 1506 grâce aux aumônes des fidèles autorisés à manger du beurre pendant le Carême.",
+  "body": "La cathédrale Notre-Dame de [[cdx_rouen|Rouen]] possède deux tours de façade dissemblables. Au nord, la tour Saint-Romain, commencée au XIIe siècle ; au sud, la tour de Beurre, entreprise à la fin de 1485, sous l'archevêque Robert de Croismare, par le maître d'œuvre Guillaume Pontifs, et achevée en 1506 par Jacques Le Roux. Son couronnement octogonal est resté sans la flèche prévue.\n\nSon nom vient de son financement : une partie des fonds provient des offrandes versées par les fidèles qui obtenaient la dispense de consommer du beurre et des laitages pendant le [[cdx_careme|Carême]], le [[cdx_beurre_de_careme|beurre de Carême]]. En Normandie, pays d'herbages et de laiterie où l'huile d'olive est rare et chère, ces dispenses étaient très recherchées.\n\nConstruite en calcaire de l'Oise, d'un ton plus jaune que la craie du reste de l'édifice, la tour est un chef-d'œuvre du gothique flamboyant normand, avec ses gâbles, ses pinacles et sa haute lanterne. Elle abrite longtemps le gros bourdon de la cathédrale, la « Georges d'Amboise », fondue en 1501 et brisée en 1786.\n\nDans le jeu, la description du régime des laitages évoque la tour de Beurre pour illustrer l'importance économique des dispenses. C'est un clin d'œil : l'édifice est postérieur d'une génération à la fin de la guerre de Cent Ans, mais la pratique des dispenses qu'il matérialise existe déjà au temps de Charles V et de Charles VII.",
+  "anachronism": "La tour de Beurre est construite de 1485 à 1506, après la fin de la guerre de Cent Ans (1453) : le régime des laitages y fait allusion comme à l'aboutissement d'une pratique, les dispenses de beurre de Carême, déjà en usage pendant la période jouée.",
+  "see_also": ["cdx_beurre_de_careme", "cdx_careme", "cdx_rouen"],
+  "sources": ["Cathédrale Notre-Dame de Rouen", "Tour de Beurre"]
+}

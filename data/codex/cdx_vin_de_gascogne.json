@@ -1,0 +1,12 @@
+{
+  "id": "cdx_vin_de_gascogne",
+  "title": "Le vin de Gascogne",
+  "category": "ingredient",
+  "aliases": ["vin de Gascogne", "vins de Gascogne", "vins du haut pays", "privilège des vins de Bordeaux", "vin gascon"],
+  "era": { "from": "1150", "to": "1453" },
+  "summary": "Des coteaux du Bordelais à ceux de Gaillac, de Cahors et de Bergerac, le vignoble du Sud-Ouest descend la Garonne et la Dordogne jusqu'à Bordeaux, d'où il part pour l'Angleterre : c'est le vin du roi d'Angleterre et de ses sujets.",
+  "body": "Sous la domination anglaise, qui commence avec le mariage d'Aliénor d'Aquitaine et d'Henri Plantagenêt (1152), « vin de Gascogne » désigne pour les Anglais tout le vin du Sud-Ouest embarqué à [[cdx_bordeaux|Bordeaux]] ou à Libourne. Il vient du Bordelais proprement dit (Graves, Entre-deux-Mers, Saint-Émilion), mais aussi du « haut pays » : vins de Gaillac, de Cahors, de Bergerac, de l'Agenais, descendus par la Garonne, le Lot, le Tarn et la Dordogne dans des gabares.\n\nLes Bordelais défendent jalousement leur place. Le roi Jean sans Terre exempte de taxes les vins du diocèse de Bordeaux dès 1214 ; à partir du milieu du XIIIe siècle, les bourgeois de la ville interdisent aux vins produits en amont de Saint-Macaire de descendre avant la Saint-Martin (11 novembre), et en 1373, Édouard III repousse cette date à Noël. Ainsi les vins bordelais, vendus les premiers, prennent les meilleurs marchés de la flotte d'automne. Ce « privilège des vins de Bordeaux » survivra à la conquête française.\n\nLe vin médiéval se boit jeune. Mal protégé de l'air dans ses tonneaux de chêne, il tourne souvent avant l'été suivant ; le vin nouveau de la vendange se vend plus cher que le vieux. Le plus apprécié en Angleterre est le [[cdx_clairet|clairet]], léger et peu coloré ; les blancs de Graves et de l'Entre-deux-Mers circulent aussi.\n\nPour les médecins, le vin est un aliment et un remède : chaud et humide, il fortifie la chaleur naturelle, et on le coupe d'eau pour les enfants et les malades. Pour la couronne anglaise, c'est un revenu fiscal (la « grande coutume » perçue à Bordeaux) et un lien politique entre la [[cdx_guyenne|Guyenne]] et l'Angleterre, que la guerre de Cent Ans met à rude épreuve : voir le [[cdx_commerce_de_bordeaux|commerce de Bordeaux]].",
+  "entity": "diet_wine_bread",
+  "see_also": ["cdx_clairet", "cdx_commerce_de_bordeaux", "cdx_bordeaux", "cdx_guyenne", "cdx_plantagenets"],
+  "sources": ["Vignoble de Bordeaux", "Histoire du vignoble de Bordeaux", "Vignoble du Sud-Ouest"]
+}
