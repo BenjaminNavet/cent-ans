@@ -65,6 +65,8 @@ const TOAST_SECONDS := 3.5
 @onready var general_seal: GeneralSeal = %GeneralSeal
 @onready var end_turn_cluster: EndTurnCluster = %EndTurnCluster
 @onready var news_letters: NewsLetters = %NewsLetters
+## Minicarte (lot C1), ajoutée par `MinimapController` ; placée en haut à droite, lettres dessous.
+var minimap: Control = null
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
 @onready var court_button: Button = %CourtButton
@@ -673,9 +675,16 @@ func layout_hud() -> void:
 	province_panel.grow_vertical = Control.GROW_DIRECTION_END
 	province_panel.offset_top = top
 	province_panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
-	# Lettres : haut droite, masquées sous un panneau de droite.
-	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, top)
-	news_letters.visible = not (province_panel.visible or faction_panel.visible or character_sheet.visible)
+	# Minicarte (C1) puis lettres : haut droite, masquées sous un panneau de droite.
+	var right_panel_open := province_panel.visible or faction_panel.visible or character_sheet.visible
+	var letters_top := top
+	if minimap != null:
+		minimap.size = minimap.get_combined_minimum_size()
+		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
+		minimap.visible = not right_panel_open
+		letters_top = minimap.position.y + minimap.size.y + 10.0
+	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, letters_top)
+	news_letters.visible = not right_panel_open
 
 
 func _fit_hover_label() -> void:

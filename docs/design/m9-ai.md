@@ -22,7 +22,8 @@ de la simulation.
      hiver avec un ravitaillement < 30.
 - **Économie** : budget d'entretien militaire ciblé (60 % du revenu en guerre, 30 % en paix), recrutement de
   la meilleure unité disponible (puissance/coût) dans les provinces qui peuvent recruter (capitale en
-  priorité, puis provinces frontalières menacées), garnisons minimales dans les provinces frontalières ;
+  priorité, puis provinces frontalières menacées), garnisons minimales dans les provinces frontalières (P1 : « frontière » = port ou voisine d'une
+  province tenue par une autre faction, `CampaignState::is_frontier`, même classification que le setup 1337) ;
   construction du bâtiment de meilleur rendement (revenu, santé, ordre public si mécontentement élevé)
   quand le trésor dépasse une réserve de 2 tours d'entretien ; impôts : haut en guerre si mécontentement
   < 30, bas si mécontentement > 55 ; désarmement en cas de dette.

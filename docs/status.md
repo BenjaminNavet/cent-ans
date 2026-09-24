@@ -273,8 +273,9 @@ frontières de la carte, le correctif global reste à équilibrer.
 - M6 : le mock GDScript n'a pas de technologies.
 - F1 : l'interface n'affiche pas encore la ventilation par classe des effets (exposée par le pont :
   `effects.by_class`).
-- G1 : la bataille 3D n'applique toujours pas les bonus des technologies (seuls ceux des bâtiments de la
-  province de levée passent dans `battle_setup`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
+- G1 : la bataille 3D applique désormais les bonus des technologies de chaque camp (moral, mêlée, tir,
+  armure, par catégorie d'unité) en plus de ceux des bâtiments de la province de levée dans `battle_setup`
+  (`docs/wip/g3-battle-techs.md`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
   (elle paie, ou libère sur parole les simples chevaliers). Pas de faction Danemark : l'achat du Jutland
   (`evt_valdemar_iv`) reste sans cession. Le plafond de recrutement (G1) limite l'IA à 3 levées par tour
   dans sa capitale et 2 ailleurs (hors bâtiments) : trésors à resurveiller avec `century_probe`.

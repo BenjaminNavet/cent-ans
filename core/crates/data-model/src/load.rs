@@ -24,6 +24,7 @@ use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
 use crate::entities::unit_type::UnitType;
+use crate::entities::vision::VisionRules;
 use crate::ids::{
     BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
     ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
@@ -61,6 +62,10 @@ pub mod folders {
     pub const AI: &str = "ai";
     /// Side-change tuning of the AI, inside `ai/`; optional.
     pub const AI_ALIGNMENT: &str = "alignment.json";
+    /// Global rule tuning (lot C1: `vision.json`); optional folder.
+    pub const RULES: &str = "rules";
+    /// Line of sight of the campaign map, inside `rules/`; optional.
+    pub const VISION_RULES: &str = "vision.json";
     pub const MAP: &str = "map";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -183,6 +188,8 @@ pub struct GameData {
     /// `data/ai/alignment.json` (G4), absent until written: the AI then
     /// makes no historical side change.
     pub ai_alignment: Option<AiAlignment>,
+    /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
+    pub vision_rules: Option<VisionRules>,
 }
 
 impl GameData {
@@ -217,6 +224,7 @@ impl GameData {
             settlement_rules: None,
             settlement_graph: Vec::new(),
             ai_alignment: None,
+            vision_rules: None,
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -237,6 +245,10 @@ impl GameData {
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
             data.ai_alignment = Some(read_json(&alignment_path)?);
+        }
+        let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
+        if vision_path.is_file() {
+            data.vision_rules = Some(read_json(&vision_path)?);
         }
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;

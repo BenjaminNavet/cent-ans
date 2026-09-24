@@ -43,6 +43,7 @@ pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
 pub mod events;
+pub mod frontier;
 pub mod medicine;
 pub mod movement;
 pub mod orders;
@@ -59,11 +60,12 @@ pub mod state;
 pub mod table;
 pub mod turn;
 pub mod victory;
+pub mod vision;
 
 pub use battle_auto::{
     resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
 };
-pub use battle_request::{BattleRequestError, PendingBattle};
+pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
 pub use chivalry::{ChivalryError, OrderState};
 pub use chronicle::{
@@ -81,6 +83,7 @@ pub use dynasty::{
 };
 pub use economy::{FactionEconomy, TaxRate};
 pub use events::{EventKind, GameEvent};
+pub use frontier::GarrisonRole;
 pub use orders::{Order, OrderError, RecruitOption, BASE_RECRUIT_SLOTS};
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};

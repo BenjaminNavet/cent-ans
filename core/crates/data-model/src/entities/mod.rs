@@ -18,3 +18,4 @@ pub mod technology;
 #[path = "trait_.rs"]
 pub mod r#trait;
 pub mod unit_type;
+pub mod vision;

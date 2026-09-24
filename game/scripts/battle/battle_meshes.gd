@@ -9,11 +9,19 @@ extends RefCounted
 ##   montés, archers montés ; engins (mangonneau, trébuchet, bombarde) avec leurs servants ;
 ## - arbres (tronc texturé + houppier en cartes alpha), buissons, rochers, hampe, drapeau.
 ##
+## Lot B1 : les fantassins, archers et cavaliers viennent de maillages modelés sous Blender
+## (`tools/blender/battle_figures.py` → `assets/models/battle/<famille>_<variante>[_lod|_far].glb`,
+## pivots dans `figures.json`), convertis au chargement vers le format ci-dessous et mis en
+## cache ; les engins de siège et le repli (modèle absent) restent procéduraux (SurfaceTool).
+##
 ## Format des sommets des figurines (lu par `battle_soldier.gdshader`) :
 ## - COLOR.rgb = couleur (linéaire), COLOR.a = code matière / 5 : 0 livrée, 1 bordure (or),
-##   2 métal, 3 tissu (teinte variée par soldat), 4 couleur exacte, 5 armoiries (UV → blason) ;
-## - CUSTOM0 = (membre, pivot y, pivot z, 0) : le shader fait pivoter chaque membre autour de
-##   l'axe X passant par son pivot (jambes aux hanches, bras aux épaules, arme à la main…).
+##   2 métal, 3 tissu (teinte variée par soldat), 4 couleur exacte, 5 armoiries (UV → blason ;
+##   UV hors de [0, 1] : livrée unie) ;
+## - CUSTOM0 = (membre, pivot y, pivot z, poids de flexion) : le shader fait pivoter chaque
+##   membre autour de l'axe X passant par son pivot (jambes aux hanches, bras aux épaules, arme
+##   à la main…) ; les sommets pondérés des jambes (homme, cheval) plient d'abord au genou ou au
+##   jarret, dont le pivot (y, z) est dans UV2.
 ## La figurine regarde +Z ; sa main droite est en -X.
 
 ## Membres (CUSTOM0.x), partagés avec le shader.
@@ -65,7 +73,15 @@ const VARIANTS := {
 	"unit_mangonel": 0, "unit_trebuchet": 1, "unit_bombard": 2,
 }
 
+const MODELS_DIR := "res://assets/models/battle/"
+const LEVEL_SUFFIX := ["", "_lod", "_far"]
+## Niveaux de détail des figurines modelées.
+const LEVEL_FULL := 0
+const LEVEL_MEDIUM := 1
+const LEVEL_FAR := 2
+
 static var _cache: Dictionary = {}
+static var _figures_meta: Dictionary = {}
 
 
 static func variant_of(unit_type: String) -> int:
@@ -268,12 +284,101 @@ class Fig:
 # --- Figurines -----------------------------------------------------------------------------
 
 
-## Figurine de `kind` (infantry, archer, cavalry, siege) et de variante `variant` (cf. VARIANTS).
-## Mise en cache : les régiments d'un même type partagent le maillage.
+## Figurine de `kind` (infantry, archer, cavalry, siege) et de variante `variant` (cf. VARIANTS) ;
+## `lod` = niveau lointain (cadavres, ombres). Mise en cache : les régiments d'un même type
+## partagent le maillage.
 static func soldier(kind: String, variant: int = 0, lod: bool = false) -> ArrayMesh:
-	var key := "%s/%d%s" % [kind, variant, "/lod" if lod else ""]
+	return soldier_level(kind, variant, LEVEL_FAR if lod else LEVEL_FULL)
+
+
+## Figurine au niveau de détail `level` (LEVEL_FULL, LEVEL_MEDIUM, LEVEL_FAR).
+static func soldier_level(kind: String, variant: int, level: int) -> ArrayMesh:
+	var key := "%s/%d/%d" % [kind, variant, level]
 	if _cache.has(key):
 		return _cache[key]
+	var mesh: ArrayMesh = null
+	# `--legacy-figures` (après `--`) : figurines procédurales V4, pour les comparaisons avant/après.
+	if kind != "siege" and not OS.get_cmdline_user_args().has("--legacy-figures"):
+		mesh = _load_figure(kind, variant, level)
+	if mesh == null:
+		mesh = _procedural_soldier(kind, variant, level != LEVEL_FULL)
+	_cache[key] = mesh
+	return mesh
+
+
+## Maillage Blender converti au format du shader : membre (UV2.x du glb) → CUSTOM0 avec le pivot
+## du membre, poids de flexion (UV2.y du glb) → CUSTOM0.w, pivot du genou → UV2. Null si absent.
+static func _load_figure(kind: String, variant: int, level: int) -> ArrayMesh:
+	var figure := "%s_%d" % [kind, variant]
+	var path: String = MODELS_DIR + figure + LEVEL_SUFFIX[level] + ".glb"
+	var meta := _figure_meta(figure)
+	if meta.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	var source := _first_mesh(root)
+	root.free()
+	if source == null or source.get_surface_count() == 0:
+		return null
+	var pivots: Dictionary = meta.get("pivots", {})
+	var knees: Dictionary = meta.get("knees", {})
+	var mesh := ArrayMesh.new()
+	for s in source.get_surface_count():
+		var arrays := source.surface_get_arrays(s)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var parts: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV2]
+		var n := verts.size()
+		var custom := PackedFloat32Array()
+		custom.resize(n * 4)
+		var knee_uv := PackedVector2Array()
+		knee_uv.resize(n)
+		for i in n:
+			var part := roundi(parts[i].x)
+			var key := str(part)
+			var pivot: Array = pivots.get(key, [0.0, 0.0])
+			custom[i * 4] = float(part)
+			custom[i * 4 + 1] = float(pivot[0])
+			custom[i * 4 + 2] = float(pivot[1])
+			custom[i * 4 + 3] = clampf(parts[i].y, 0.0, 1.0)
+			if knees.has(key):
+				var knee: Array = knees[key]
+				knee_uv[i] = Vector2(float(knee[0]), float(knee[1]))
+		var out := []
+		out.resize(Mesh.ARRAY_MAX)
+		out[Mesh.ARRAY_VERTEX] = verts
+		out[Mesh.ARRAY_NORMAL] = arrays[Mesh.ARRAY_NORMAL]
+		out[Mesh.ARRAY_COLOR] = arrays[Mesh.ARRAY_COLOR]
+		out[Mesh.ARRAY_TEX_UV] = arrays[Mesh.ARRAY_TEX_UV]
+		out[Mesh.ARRAY_TEX_UV2] = knee_uv
+		out[Mesh.ARRAY_CUSTOM0] = custom
+		out[Mesh.ARRAY_INDEX] = arrays[Mesh.ARRAY_INDEX]
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out, [], {}, Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
+	return mesh
+
+
+## Pivots des membres d'une figurine (`figures.json`, écrit par le script Blender).
+static func _figure_meta(figure: String) -> Dictionary:
+	if _figures_meta.is_empty():
+		var text := FileAccess.get_file_as_string(MODELS_DIR + "figures.json")
+		var parsed = JSON.parse_string(text) if text != "" else null
+		_figures_meta = parsed.get("figures", {}) if parsed is Dictionary else {"": {}}
+	return _figures_meta.get(figure, {})
+
+
+static func _first_mesh(node: Node) -> Mesh:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return (node as MeshInstance3D).mesh
+	for child in node.get_children():
+		var found := _first_mesh(child)
+		if found != null:
+			return found
+	return null
+
+
+## Figurine procédurale (lot V4) : engins de siège, et repli si le modèle Blender manque.
+static func _procedural_soldier(kind: String, variant: int, lod: bool) -> ArrayMesh:
 	var f := Fig.new()
 	f.lod = lod
 	match kind:
@@ -285,9 +390,7 @@ static func soldier(kind: String, variant: int = 0, lod: bool = false) -> ArrayM
 			_engine(f, variant)
 		_:
 			_infantry(f, variant)
-	var mesh := f.commit()
-	_cache[key] = mesh
-	return mesh
+	return f.commit()
 
 
 ## Jambes, pieds, bassin : chausses (tissu varié) et souliers ; `armored` = grèves d'acier.
