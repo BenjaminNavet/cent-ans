@@ -795,7 +795,7 @@ func _toggle_trade_layer() -> void:
 
 
 func _refresh_trade_layer() -> void:
-	if sim == null or trade_layer == null:
+	if sim == null or trade_layer == null or not sim.has_method("get_trade_routes"):
 		return
 	var routes: Array = sim.call("get_trade_routes")
 	var visible_provinces := PackedStringArray()

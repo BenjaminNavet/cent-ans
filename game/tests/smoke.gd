@@ -951,7 +951,7 @@ func _run_trade() -> void:
 	diplomacy_panel.select_faction("fac_flanders")
 	await process_frame
 	diplomacy_panel.queue_free()
-	var faction_panel: Node = (load("res://scripts/ui/faction_panel.gd") as GDScript).new()
+	var faction_panel: Node = (load("res://scenes/ui/faction_panel.tscn") as PackedScene).instantiate()
 	root.add_child(faction_panel)
 	await process_frame
 	faction_panel.show_faction(FACTION_ID, "France", Color.WHITE, economy)

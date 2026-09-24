@@ -310,8 +310,8 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 
 ## C5 : synchronise le bouton « Commerce » de la barre supérieure avec la couche.
 func set_trade_mode(active: bool) -> void:
-	if trade_button.button_pressed != active:
-		trade_button.button_pressed = active
+	# Sans signal : `toggled` redemanderait la bascule (boucle infinie).
+	trade_button.set_pressed_no_signal(active)
 
 
 ## C5 : infobulle de la route commerciale survolée (texte vide = pas de route sous la souris,
