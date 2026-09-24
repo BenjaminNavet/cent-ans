@@ -1751,6 +1751,8 @@ pub(crate) fn on_line_extinct(
 /// A pretender may attack a stronger crown down to this power ratio when it
 /// has allies or a bridgehead on the target's borders (F4).
 pub const PRETENDER_RATIO: f64 = 0.5;
+/// Score bonus making a claim war preferred to any opportunistic war.
+const CLAIM_WAR_PRIORITY: f64 = 1000.0;
 /// Peace reluctance of a pretender towards the crown it claims.
 pub const PRETENDER_PEACE_RELUCTANCE: i32 = 10;
 /// Same, without allies nor bridgehead.
@@ -2111,7 +2113,8 @@ fn war_target(
                 };
                 let weight = if stakes.throne { 3.0 } else { 0.0 } + stakes.provinces as f64;
                 return (ratio >= needed && state.attitude(data, faction, id).0 < 20)
-                    .then(|| (id.clone(), weight + ratio));
+                    // A claim outranks any opportunistic war.
+                    .then(|| (id.clone(), CLAIM_WAR_PRIORITY + weight + ratio));
             }
             if aggression >= OPPORTUNIST_AGGRESSION
                 && state.casus_belli(data, faction, id).is_some()
