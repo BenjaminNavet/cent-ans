@@ -959,6 +959,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter(|(id, _)| state.is_hostile_territory(ctx.faction, id))
                 .filter(|(id, _)| {
                     state.provinces[*id].devastation < 50
+                        && (claims.contains(*id) || !last_bastions.contains(*id))
                         && state.defensive_power(data, id) < power * 2.0
                         && ctx.threat(id) < power
                         && !crosses_sea(data, &table, id)

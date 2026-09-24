@@ -99,6 +99,21 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     let mut incomes: BTreeMap<FactionId, Vec<i64>> = BTreeMap::new();
     let mut was_at_war = false;
     for _ in 0..turns {
+        // France is the "player": it answers offers as the AI would judge
+        // them (otherwise no peace offered to France is ever signed).
+        let offers = state.factions[&france].offers.clone();
+        for offer in offers {
+            let accept =
+                sim_campaign::diplomacy::evaluate(&state, data, &offer.from, &france, &offer.proposal)
+                    .accept;
+            let _ = state.submit_order(
+                data,
+                sim_campaign::Order::AnswerOffer {
+                    offer: offer.id,
+                    accept,
+                },
+            );
+        }
         for order in ai::plan_turn(&state, data, &france) {
             report.issued += 1;
             if state.submit_order(data, order).is_err() {
