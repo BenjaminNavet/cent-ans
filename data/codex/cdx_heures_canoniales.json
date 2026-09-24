@@ -1,0 +1,11 @@
+{
+  "id": "cdx_heures_canoniales",
+  "title": "Les heures canoniales",
+  "category": "religion",
+  "aliases": ["heures canoniales", "office divin", "matines", "laudes", "vêpres", "complies", "heures inégales"],
+  "era": { "from": "500", "to": "1500" },
+  "summary": "Les cloches des églises découpent la journée en huit offices de prière, de matines à complies. Ce sont elles, et non les horloges, qui donnent l'heure à la plupart des gens du XIVe siècle.",
+  "body": "Depuis la règle de saint Benoît, les moines chantent l'office divin à heures fixes : matines au cœur de la nuit, laudes à l'aube, puis prime, tierce, sexte et none, espacées d'environ trois heures, vêpres au coucher du soleil et complies avant le coucher. Chaque office est annoncé par la cloche du monastère ou de l'église, que tout le voisinage entend.\n\nCes heures sont « inégales » : le jour, du lever au coucher du soleil, est divisé en douze heures, la nuit aussi. Une heure d'été dure donc bien plus qu'une heure d'hiver. Tierce tombe vers le milieu de la matinée, sexte à midi, none au milieu de l'après-midi. Le mot anglais « noon », midi, vient de none, dont l'heure a glissé vers le milieu du jour au cours du Moyen Âge.\n\nLes cloches règlent la vie civile. Dans les villes drapières, une cloche du travail annonce le début et la fin de la journée des ouvriers, source de conflits : les tisserands accusent les patrons de la sonner trop tôt. Le soir, le couvre-feu ordonne de couvrir les foyers pour éviter les incendies. L'apparition des [[cdx_horloges_mecaniques|horloges mécaniques]], à heures égales, commence à changer ce temps au XIVe siècle.\n\nLes laïcs pieux imitent l'office des moines grâce aux livres d'heures, recueils de prières à dire aux mêmes moments de la journée. Les plus riches, comme ceux du duc de Berry (voir [[cdx_tres_riches_heures|Très Riches Heures]]), sont des chefs-d'œuvre de l'[[cdx_enluminure|enluminure]].",
+  "see_also": ["cdx_horloges_mecaniques", "cdx_tres_riches_heures", "cdx_fetes_chretiennes", "cdx_calendrier_julien"],
+  "sources": ["Heures canoniales", "Liturgie des Heures", "Jacques Le Goff, « Au Moyen Âge : temps de l'Église et temps du marchand », Annales, 1960"]
+}

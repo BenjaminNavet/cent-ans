@@ -1,0 +1,11 @@
+{
+  "id": "cdx_meubles_heraldiques",
+  "title": "Les meubles et les pièces du blason",
+  "category": "societe",
+  "aliases": ["meubles héraldiques", "meuble héraldique", "pièces honorables", "léopard héraldique"],
+  "era": { "from": "1130", "to": "1500" },
+  "summary": "Sur le champ de l'écu, on pose des pièces géométriques (fasce, pal, bande, chevron, croix) ou des meubles, figures libres : lion, léopard, aigle, fleur de lis, château, coquille, étoile, objets de tous les jours.",
+  "body": "Les pièces dites honorables découpent l'écu en grandes figures simples, héritées sans doute des renforts de bois et de métal des boucliers : la fasce, bande horizontale ; le pal, verticale ; la bande, en diagonale ; le chevron, en forme de toit ; la croix et le sautoir, croix en X. Les armes de l'ancienne Bourgogne, « bandé d'or et d'azur », sont faites de six bandes alternées.\n\nLes meubles sont des figures posées librement. Le lion est de loin le plus fréquent : on le trouve dans près d'un blason sur six en Europe. Dressé de profil, il est « rampant » ; marchant la tête de face, il devient un « léopard », d'où les trois léopards d'[[cdx_armes_d_angleterre|Angleterre]], que les Anglais appellent pourtant lions. Viennent ensuite l'aigle, emblème de l'Empire, la fleur de lis, les étoiles, les coquilles de pèlerin, les tours et les châteaux (Castille), les croissants.\n\nBeaucoup de meubles sont des armes « parlantes » qui jouent sur le nom de leur porteur : les Créquy portent un créquier (prunellier), les comtes de Bar deux bars (poissons), le royaume de Léon un lion, la Castille un château. Des objets du quotidien apparaissent aussi : marteaux, clés, fers de cheval, peignes, tourteaux (disques de gueules) et besants (disques d'or, souvenir des pièces byzantines).\n\nUn meuble se dessine toujours de façon stylisée, pour être lu de loin : peu importe l'espèce, un lion héraldique a une crinière en flammes, une queue fourchue et des griffes démesurées. La fleur de lis de [[cdx_armes_de_france|France]] n'a guère de rapport avec le lis des jardins ; c'est un emblème marial et royal, dont l'origine exacte (lis, iris ou fer de lance) reste discutée.",
+  "see_also": ["cdx_blason", "cdx_emaux", "cdx_armes_de_france", "cdx_armes_d_angleterre"],
+  "sources": ["Meuble (héraldique)", "Pièce honorable", "Armes parlantes", "Lion (héraldique)"]
+}

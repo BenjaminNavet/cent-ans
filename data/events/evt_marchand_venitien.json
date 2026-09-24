@@ -1,0 +1,42 @@
+{
+  "id": "evt_marchand_venitien",
+  "title": "Une galée de Venise",
+  "text": "Une galée vénitienne en route pour Bruges fait escale au port. Son marchand déballe des sacs de [[cdx_poivre|poivre]] noir, de gingembre et de clou de girofle, et une petite boîte de [[cdx_safran|safran]] qu'il pèse comme de l'or. Tout vient d'Alexandrie, où Venise achète aux marchands d'Orient ; chaque intermédiaire a pris sa part, et le prix a décuplé en chemin. À la table d'un prince, ces [[cdx_epices_medievales|épices]] disent la richesse et, croit-on, réchauffent les humeurs.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 120,
+    "conditions": [
+      { "type": "province_coastal" },
+      { "type": "any_of", "conditions": [{ "type": "season", "season": "spring" }, { "type": "season", "season": "summer" }] }
+    ]
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Acheter toute la cargaison pour la cour",
+      "effects": [
+        { "type": "treasury", "amount": -1500 },
+        { "type": "prestige", "amount": 4 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Taxer la vente sur le marché",
+      "effects": [
+        { "type": "treasury", "amount": 600 },
+        { "type": "wealth", "amount": 2 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Le renvoyer : le cumin du pays suffira",
+      "effects": [],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Mude (Venise)",
+    "Épice",
+    "Paul Freedman, Out of the East. Spices and the Medieval Imagination, Yale UP, 2008"
+  ]
+}

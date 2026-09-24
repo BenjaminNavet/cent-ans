@@ -1,0 +1,11 @@
+{
+  "id": "cdx_etuves",
+  "title": "Les étuves et l'hygiène",
+  "category": "vie_quotidienne",
+  "aliases": ["étuves", "étuve", "étuveurs", "bains publics", "hygiène médiévale"],
+  "era": { "from": "1200", "to": "1550" },
+  "summary": "Contrairement à une idée reçue, on se lave beaucoup au Moyen Âge. Les villes comptent des bains publics, les étuves, où l'on prend bains chauds et bains de vapeur ; ils ne déclinent qu'au XVIe siècle, par peur de la contagion.",
+  "body": "À Paris, à la fin du XIIIe siècle, une trentaine d'étuves sont en activité ; le Livre des métiers d'Étienne Boileau donne leurs statuts. Au petit matin, des crieurs parcourent les rues : « Seigneurs, qu'on aille se baigner et étuver sans plus attendre ; les bains sont chauds, c'est sans mentir ! » Les règlements interdisent d'ouvrir le dimanche et les jours de fête, et de chauffer avant le jour, par crainte des incendies.\n\nOn y prend des bains dans de grands cuveaux de bois, seul ou à plusieurs, ou des bains de vapeur dans des salles chauffées. On y mange, on y boit, on y fait des affaires ; les étuves mixtes ont mauvaise réputation, et bien des étuveuses passent pour des prostituées, ce que les autorités tentent de réprimer en séparant hommes et femmes selon les jours.\n\nChez soi, on se lave les mains avant et après le repas, avec une aiguière et un bassin, car on mange avec les doigts. Les riches ont un cuveau garni d'un drap pour le bain ; les manuels comme le Ménagier de Paris enseignent à tenir propre le linge. Les médecins recommandent le bain avec mesure, selon la théorie des [[cdx_humeurs|humeurs]] : l'eau chaude ouvre les pores, ce qui détend, mais expose aussi aux « airs » corrompus.\n\nC'est précisément cette crainte qui ruine les étuves. Pendant la [[cdx_peste_noire|Peste noire]] et les épidémies suivantes, les médecins conseillent d'éviter les bains chauds, et au XVIe siècle la peur de la syphilis achève de les faire fermer. L'image d'un Moyen Âge sale est donc en grande partie celle des siècles suivants.",
+  "see_also": ["cdx_humeurs", "cdx_peste_noire", "cdx_medecine_medievale", "cdx_vetement_medieval"],
+  "sources": ["Étuve (bain)", "Hygiène au Moyen Âge", "Livre des métiers"]
+}

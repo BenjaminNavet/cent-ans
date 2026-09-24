@@ -1,0 +1,11 @@
+{
+  "id": "cdx_echecs",
+  "title": "Le jeu d'échecs",
+  "category": "vie_quotidienne",
+  "aliases": ["échecs", "jeu d'échecs", "échiquier", "échec et mat", "Jacques de Cessoles"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Venus de Perse par le monde arabe, les échecs sont au XIVe siècle le jeu noble par excellence. Mais la partie est lente : la « fierce », ancêtre de la dame, ne se déplace que d'une case en diagonale.",
+  "body": "Né en Inde, passé en Perse puis dans le monde musulman, le jeu atteint l'Europe chrétienne vers l'an mil par l'Espagne et l'Italie. Son vocabulaire garde la trace de ce voyage : « échec et mat » vient du persan shah mat, « le roi est pris » ou « le roi est sans issue ». L'échiquier donne même son nom à l'administration des finances anglaises, l'Exchequer, dont les comptes se faisaient sur une table à carreaux.\n\nLes règles diffèrent des nôtres. La fierce, ou vierge, qui deviendra la dame, n'avance que d'une case en diagonale ; l'aufin, notre fou, saute de deux cases en diagonale. Le jeu est donc lent et positionnel, et les joueurs s'exercent sur des problèmes, les « partis ». La dame puissante et le fou à longue portée n'apparaissent que vers 1475, en Espagne, et donnent les échecs modernes.\n\nLes échecs sont un jeu d'éducation princière, qui enseigne la stratégie. Vers 1300, le dominicain Jacques de Cessoles en fait un traité de morale : chaque pièce représente un état de la société, du roi aux artisans figurés par les pions, et chacun doit tenir sa place. Le livre, traduit en français par Jean de Vignay pour le futur Jean le Bon, est l'un des plus lus du temps (voir la [[cdx_librairie_charles_v|librairie de Charles V]]).\n\nL'Église se méfie d'abord du jeu, surtout quand on le joue avec des dés pour aller plus vite (voir les [[cdx_des_et_hasard|dés]]). Mais les échecs sans hasard, jeu de l'esprit, échappent aux interdictions qui frappent les jeux d'argent. Les princes collectionnent des échiquiers de cristal, d'ivoire ou de jaspe, et les romans de chevalerie font des parties d'échecs le cadre de déclarations d'amour.",
+  "see_also": ["cdx_des_et_hasard", "cdx_librairie_charles_v", "cdx_chevalerie", "cdx_trois_ordres"],
+  "sources": ["Histoire des échecs", "Jacques de Cessoles", "Liber de moribus hominum et officiis nobilium ac popularium super ludo scacchorum"]
+}

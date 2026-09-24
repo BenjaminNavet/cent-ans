@@ -1,0 +1,42 @@
+{
+  "id": "evt_fondation_leproserie",
+  "title": "Une léproserie à fonder",
+  "text": "On a reconnu la lèpre chez un tisserand : un jury de médecins et de lépreux l'a examiné, puis le prêtre l'a séparé des vivants par une cérémonie qui rappelle l'office des morts. Il devra porter une cliquette pour annoncer sa venue et ne toucher à rien sur le marché. La [[cdx_leproserie|léproserie]] la plus proche est pleine ; un bourgeois pieux offre un terrain hors les murs pour en fonder une, sous le patronage de saint Lazare, si le seigneur y ajoute des rentes.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 150
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Doter la maladrerie de rentes et d'une chapelle",
+      "effects": [
+        { "type": "treasury", "amount": -1200 },
+        { "type": "health", "amount": 4 },
+        { "type": "piety", "amount": 4 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Accepter le terrain, laisser la charité faire le reste",
+      "effects": [
+        { "type": "health", "amount": 2 },
+        { "type": "piety", "amount": 1 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Chasser le malade hors de la seigneurie",
+      "effects": [
+        { "type": "piety", "amount": -3 },
+        { "type": "unrest", "amount": 1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Léproserie",
+    "Lèpre",
+    "François-Olivier Touati, Maladie, société et civilisation au Moyen Âge, Paris, 1998"
+  ]
+}
