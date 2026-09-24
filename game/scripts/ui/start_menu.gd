@@ -60,6 +60,10 @@ func _ready() -> void:
 	_build_cards()
 	# Le cartouche de l'illustration porte le titre : le libellé ne sert que sans image.
 	title_label.visible = not background.has_art()
+	# Bandeau parchemin sous les textes posés sur l'illustration (les noms de villes de la carte
+	# ne doivent pas se lire à travers).
+	for label: Label in [subtitle_label, status_label]:
+		_give_backing(label)
 	background.layout_changed.connect(_layout)
 	_layout.call_deferred()
 	start_button.pressed.connect(_on_start)
@@ -301,3 +305,15 @@ func _leave() -> void:
 	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS * 0.6)
 	await tween.finished
 	LoadingScreen.start(get_tree(), CAMPAIGN_SCENE)
+
+
+func _give_backing(label: Label) -> void:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.93, 0.87, 0.74, 0.88)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 14
+	box.content_margin_right = 14
+	box.content_margin_top = 3
+	box.content_margin_bottom = 3
+	label.add_theme_stylebox_override("normal", box)
+	label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
