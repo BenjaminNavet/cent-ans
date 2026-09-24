@@ -522,7 +522,7 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 6. Rendu seulement : posi
 | Palier | Distance du rig (unités = px carte 4096) | Visible |
 |---|---|---|
 | **Loin** | > 620 (fondu 550-690) | provinces colorées, noms de provinces en capitales (`CityMarkers.labels_only`, parenthèses retirées) |
-| **Moyen** | 150-620 | icônes de colonies (forme par type, couleur du contrôleur, cité plus grande), noms des cités, puis des villes sous 380, routes principales en traits |
+| **Moyen** | 150-620 | icônes de colonies (forme par type, couleur du contrôleur, cité plus grande), noms des cités, puis des villes sous 380, routes principales en traits deux tons, secondaires en traits pâles sous 420 (lot C7b) |
 | **Près** (vue comté) | < 150 (fondu 130-170) ; min 22 | maquettes 3D, hameaux, toutes les routes en rubans drapés, noms de toutes les colonies, relief fin sous 170 |
 
 Réglages : `game/resources/zoom_tiers.tres` (`ZoomTiers` : seuils, largeurs de fondu, distance des noms
@@ -540,7 +540,7 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 | `scripts/map/zoom_tiers.gd` | Ressource des paliers : `tier_at`, `near_weight` / `medium_weight` / `far_weight` (somme 1, fondus en `smoothstep`). |
 | `scripts/map/settlement_data.gd` | Lecture de `data/settlements/*.json`, `data/map/settlements_px.json`, `hamlets.json`, `roads.geojson` ; tri par priorité d'étiquette ; `apply_live(sim)`. |
 | `scripts/map/settlement_layer.gd` (`CampaignMap/Settlements`, créé par le code) | Icônes (`MultiMesh`, `shaders/settlement_icon.gdshader`, taille constante à l'écran, sans test de profondeur), étiquettes `Label3D` dé-chevauchées (cité > ville > château > abbaye > village), maquettes, hameaux, picking, sélection. |
-| `scripts/map/road_renderer.gd` (`CampaignMap/Roads`) | Routes principales (`type` = `main`) en traits `terrain_line` au palier moyen ; rubans de chemin de terre (`shaders/road.gdshader`) par tuile de terrain au palier près. |
+| `scripts/map/road_renderer.gd` (`CampaignMap/Roads`) | Palier moyen : routes principales (`type` = `main`) et secondaires / calculées en traits `shaders/road_line.gdshader` (lot C7b, ci-dessous) ; palier près : rubans de chemin de terre (`shaders/road.gdshader`) par tuile de terrain. |
 | `scripts/map/fine_terrain_job.gd` | Maillage de relief fin d'une tuile, construit dans `WorkerThreadPool`. |
 | `tools/blender_scripts/settlements.py` | Générateur Blender headless des maquettes (voir ci-dessous). |
 
@@ -579,6 +579,24 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 - Végétation : cercles d'exclusion autour des colonies (rayon de la maquette) et des hameaux
   (`Vegetation.extra_exclusions`, filtrés par tuile avant le semis).
 
+### Routes au palier moyen (lot C7b)
+
+![Routes principales au palier moyen (lot C7b)](img/colonies/c7b-apres-routes.png)
+
+Avant : `docs/img/colonies/c7b-avant-routes.png` (traits bruns de 1,8 px, presque invisibles).
+
+- `shaders/road_line.gdshader` : même maillage que les fleuves (`PolylineMesh.build_screen_lines`),
+  largeur à l'écran selon la distance caméra → sommet (`near_px` à 150, `far_px` à 620, jamais
+  moins que la largeur monde), liseré sombre et cœur ocre clair, opacité réduite au loin
+  (`far_alpha`), le tout multiplié par le poids du palier moyen.
+- Routes principales : 4,2 → 2,2 px, opacité 70 % au loin. Secondaires et calculées (seules routes
+  des régions hors Itiner-e) : trait brun pâle 1,5 → 0,9 px, effacé au-delà de 420.
+- Ordre : secondaires (`render_priority` 0) < principales et côte (1) < fleuves et icônes (2) <
+  étiquettes (3). Pas de test de profondeur matériel (la ligne est posée sur la heightmap
+  bilinéaire, le maillage lointain la hacherait) mais un **test souple** contre la texture de
+  profondeur : un fragment n'est masqué que par un objet plus proche de 2,5 unités + 0,6 % de la
+  distance (crête, maquette, figurine d'armée), pas par le relief sous la route ni par les arbres.
+
 ### Picking et sélection
 
 `CampaignMap._try_select_army` (intercepteur du picker) essaie les armées, puis
@@ -601,14 +619,26 @@ révèle pas de goulot. Les couches C6 coûtent ≈ 0,3 ms de CPU par image (LOD
 colonies + routes 0,14 ms). Le gros des primitives vient des passes d'ombre du relief fin
 (2,1 M triangles pour 4 tuiles) ; `--fine-step=2` divise ce coût par 4 si besoin.
 
+Lot C7b, mesure A/B (`main` `ff21e60` puis C7b, même machine chargée par d'autres sessions, 1440 × 900,
+`--fps-probe`) : comté Île-de-France (d = 55) 32,2 → 32,8 FPS, 9,78 → 9,77 M primitives ; Chartreuse
+(d = 30) 36,3 → 37,7 FPS ; palier moyen Île-de-France (d = 400) 48,2 → 45,6 FPS, 1,84 → 1,89 M
+primitives (traits des routes secondaires, copie de la profondeur). Écarts dans le bruit de mesure ;
+couches C6 + C7b 1,37 → 1,42 ms de CPU au palier moyen.
+
 `godot --headless --path game --script res://tests/settlements_render_test.gd` : charge colonies,
 hameaux et routes réels, construit le relief fin près de Paris, vérifie qu'aucune maquette ne flotte,
-les hameaux, les rubans, le picking de Paris et les poids des paliers.
+les hameaux, les rubans, le picking de Paris et les poids des paliers ; lot C7b : tracés routiers des
+arêtes (orientation), arbres posés sur la surface affichée (écart < 0,05, relief fin puis LOD proche
+après changement de niveau).
 
 ### Limites (C6)
 
-- Les arbres restent posés sur la heightmap 4096 bilinéaire ; sur le relief fin ils peuvent s'enfoncer
-  ou dépasser de quelques dixièmes d'unité en montagne (peu visible).
+- Arbres (corrigé au lot C7b) : semés sur la grille du maillage affiché
+  (`TerrainBuilder.surface_grid`) et recalés à chaque changement de niveau d'une tuile (relief fin,
+  LOD proche ou lointain) par une tâche `VegetationGroundJob` ; nouveaux tampons `MultiMesh`
+  installés en une fois, tuiles hors champ recalées à leur retour. ≈ 6 ms de fil par tuile ;
+  tampons CPU gardés (64 o par instance, ≈ 1 Mo par tuile). Les candidats qui débordaient de leur
+  tuile (écart de 0,28 unité mesuré, bande de bord deux fois plus dense) sont écartés.
 - Les marqueurs d'armée (lot C4) utilisent encore `MapData.surface_world_at`, pas `surface_height_at`.
 - Icônes, étiquettes et routes principales sont dessinées sans test de profondeur (comme les fleuves).
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
@@ -630,16 +660,24 @@ Aucune règle en GDScript : options, disponibilités et refus viennent de `Campa
   (`get_reachable_settlements`), orange sur la cible survolée ; le survol d'une colonie a priorité sur
   celui de la province ; clic droit sur une colonie = ordre `move_army` vers elle (`find_path`), clic
   droit ailleurs = cité de la province (v1).
-- **Aperçu de chemin** : segments entre colonies successives du chemin (arêtes du graphe), posés sur le
-  relief ; il ne suit pas le tracé exact des routes.
+- **Aperçu de chemin** : le long des arêtes du graphe ; une arête qui suit une route prend son tracé
+  réel (`data/map/settlement_edge_paths.json`, calculé par le pipeline géo, voir `docs/geo.md`,
+  lu par `SettlementData.edge_path`, lot C7b), les autres restent des segments droits ; posé sur le
+  relief.
+- **Panneaux** (lot C7b) : les panneaux de province et de colonie sont ancrés à gauche de la
+  minicarte (`MapUI.dock_right_panel`), qui reste visible ; seuls les panneaux de faction et de
+  personnage la masquent. Centrer la caméra sur une colonie (onglet Colonies) la place au milieu de
+  la zone libre à gauche du panneau.
 - Getters du pont : `settlement_detail(id)` (avec `buildings_info`, `recruit_slots`,
   `recruit_slots_free`, `garrison_strength`, `port`, `province_name`), `settlement_buildable(id)`,
   `get_recruitable(id)`, `province_settlements(province)`.
 - Test : `godot --headless --path game --script res://tests/c5_settlements_ui_test.gd`. Captures :
   `--stage=settlement` et `--stage=settlement_orders`.
 
-![Panneau de colonie](img/colonies/c5-panneau-colonie.png)
-![Colonies atteignables et chemin sur le graphe](img/colonies/c5-ordres-armee.png)
+![Panneau de colonie à gauche de la minicarte](img/colonies/c7b-apres-panneau.png)
+![Colonies atteignables et chemin le long des routes](img/colonies/c7b-apres-chemin.png)
+
+Avant C7b : `c5-panneau-colonie.png` (panneau sur la minicarte), `c7b-avant-chemin.png`.
 
 ## Performances mesurées (M4 Pro)
 

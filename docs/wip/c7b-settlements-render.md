@@ -4,13 +4,13 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 6. Suit C5 (`docs/wip/c5-
 et C6 (`docs/wip/c6-zoom-tiers.md`). Branche : `worktree-agent-aa38756fc56f579e1` (partie de `main` `ff21e60`).
 Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en parallèle.
 
-## État
+## État : terminé (à fusionner par l'orchestrateur)
 
 - [x] 1. Arbres recalés sur le relief fin (`Vegetation`, signal `chunk_surface_changed`, `VegetationGroundJob`) ; test dans `settlements_render_test` (écart 0,00 contre 0,28 avant)
 - [x] 2. Routes principales lisibles au palier moyen (`RoadRenderer`, `shaders/road_line.gdshader`) ; capture `c7b-apres-routes.png`
 - [x] 3. Aperçu de chemin d'armée le long des routes réelles (`geo/edge_paths.py` → `data/map/settlement_edge_paths.json`, `SettlementData.edge_path`, `SettlementController._draw_path`) ; tests pytest + `settlements_render_test` ; `docs/geo.md`
 - [x] 4. Panneaux de colonie / province sans recouvrir la minicarte (`MapUI.dock_right_panel`, `_dock_panel`) ; captures `c7b-apres-panneau*.png`
-- [ ] 5. Captures avant / après `docs/img/colonies/c7b-*.png`
+- [x] 5. Captures avant / après `docs/img/colonies/c7b-{avant,apres}-{arbres,routes,chemin,panneau}.png` (+ `c7b-apres-panneau-province.png`) ; mesures A/B `--fps-probe` dans `docs/godot-map.md`
 
 ## Décisions
 
@@ -42,6 +42,17 @@ Périmètre : rendu Godot (et pipeline géo si besoin) ; C7a touche `core/` en p
 - Centrage sur une colonie (onglet Colonies, captures) : le point visé est décalé pour que la
   colonie tombe au milieu de la zone libre à gauche du panneau (`SettlementController._panel_shift`).
 
+## Points ouverts
+
+- `docs/wip/colonies.md` (fichier de l'orchestrateur) n'est pas mis à jour : ligne C7b à cocher.
+- Recalage des arbres : tampons CPU gardés (≈ 1 Mo par tuile, 64 tuiles au plus).
+- Routes au palier moyen sans test de profondeur matériel (test souple) : une route derrière une
+  crête de moins de 2,5 unités + 0,6 % de la distance reste visible.
+- 100 arêtes `road` sur 633 gardent un segment droit dans l'aperçu (colonie loin d'une route,
+  détour > 1,6 ×).
+- Capture « province » : `_stage_screenshot_province` (`campaign_map.gd`, autre session) centre la
+  caméra sur la capitale, désormais sous le panneau ; non modifié (fichier partagé).
+
 ## Prochaine étape
 
-Tâche 5 : captures après (arbres), mesures `--fps-probe`, doc `docs/godot-map.md`, rapport. Captures « avant » déjà prises (`c7b-avant-*.png`).
+Rien : fusion par l'orchestrateur.
