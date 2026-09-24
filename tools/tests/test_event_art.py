@@ -68,3 +68,39 @@ def test_miniature_crop_is_wide_jpeg() -> None:
     image = Image.open(io.BytesIO(event_art.to_miniature_jpg(buffer.getvalue())))
     assert image.format == "JPEG"
     assert image.size == (event_art.ART_WIDTH, event_art.ART_HEIGHT)
+
+
+def test_entry_art_prompts_and_plan(tmp_path: Path) -> None:
+    """Unit, building and technology prompts come from the data; plan is idempotent."""
+    from cent_ans_tools import entry_art
+
+    data_dir = tmp_path / "data"
+    _write(
+        data_dir / "unit_types",
+        "unit_x",
+        {
+            "id": "unit_x",
+            "name": {"display": "Archers", "local": "archiers"},
+            "equipment": "Arc long.",
+            "description": "Tireurs.",
+        },
+    )
+    _write(
+        data_dir / "technologies",
+        "tech_x",
+        {
+            "id": "tech_x",
+            "name": {"display": "Alambic"},
+            "historical_year": {"value": "1351"},
+            "description": "Distillation.",
+        },
+    )
+    out_dir = tmp_path / "out"
+    jobs = entry_art.plan(data_dir, out_dir)
+    assert [job.character_id for job in jobs] == ["unit_x", "tech_x"]
+    assert "« Archers » (archiers)" in jobs[0].prompt
+    assert "Arc long." in jobs[0].prompt
+    assert "around 1351" in jobs[1].prompt
+    out_dir.mkdir()
+    (out_dir / "unit_x.jpg").write_bytes(b"x")
+    assert [job.character_id for job in entry_art.plan(data_dir, out_dir)] == ["tech_x"]

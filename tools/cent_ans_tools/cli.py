@@ -426,6 +426,42 @@ def assets_portraits(
     )
 
 
+def _run_art_batch(jobs, model, envelope, dry_run, noun, subject, convert) -> None:
+    """Dry-run listing or paid batch for an image job list (event art, illustrations)."""
+    from decimal import Decimal
+
+    from cent_ans_tools import portraits
+
+    if dry_run:
+        for job in jobs:
+            console.rule(job.character_id)
+            console.print(job.prompt)
+        unit = portraits.KNOWN_PRICES.get(model)
+        cost = (
+            f"≈ {unit * len(jobs):.2f} $"
+            if unit is not None
+            else "tarif inconnu hors ligne"
+        )
+        console.print(f"{len(jobs)} {noun} avec {model} : {cost} (aucun appel réseau)")
+        return
+    if not jobs:
+        console.print(f"[green]OK[/green] : aucune {noun} manquante")
+        return
+    result = portraits.generate(
+        jobs,
+        model,
+        envelope=Decimal(str(envelope)),
+        subject=f"{subject} ({len(jobs)} × {model})",
+        convert=convert,
+        on_progress=lambda job, spent: console.print(
+            f"{job.character_id} ({spent:.4f} $)"
+        ),
+    )
+    console.print(
+        f"[green]OK[/green] : {len(result.written)} {noun}, estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
+    )
+
+
 @assets_app.command("event-art")
 def assets_event_art(
     limit: int | None = typer.Option(
@@ -441,42 +477,56 @@ def assets_event_art(
         10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
 ) -> None:
-    """Génère les miniatures d'événements manquantes (768×384) dans game/assets/events/."""
-    from decimal import Decimal
-
+    """Génère les miniatures d'événements manquantes (768×432) dans game/assets/events/."""
     from cent_ans_tools import event_art, portraits
 
-    model = model or portraits.DEFAULT_MODEL
-    jobs = event_art.plan(limit=limit)
-    if dry_run:
-        for job in jobs:
-            console.rule(job.character_id)
-            console.print(job.prompt)
-        unit = portraits.KNOWN_PRICES.get(model)
-        cost = (
-            f"≈ {unit * len(jobs):.2f} $"
-            if unit is not None
-            else "tarif inconnu hors ligne"
-        )
-        console.print(
-            f"{len(jobs)} miniature(s) avec {model} : {cost} (aucun appel réseau)"
-        )
-        return
-    if not jobs:
-        console.print("[green]OK[/green] : toutes les miniatures existent déjà")
-        return
-    result = portraits.generate(
-        jobs,
-        model,
-        envelope=Decimal(str(envelope)),
-        subject=f"Miniatures d'événements ({len(jobs)} × {model})",
-        convert=event_art.to_miniature_jpg,
-        on_progress=lambda job, spent: console.print(
-            f"{job.character_id} ({spent:.4f} $)"
-        ),
+    _run_art_batch(
+        event_art.plan(limit=limit),
+        model or portraits.DEFAULT_MODEL,
+        envelope,
+        dry_run,
+        "miniature(s)",
+        "Miniatures d'événements",
+        event_art.to_miniature_jpg,
     )
-    console.print(
-        f"[green]OK[/green] : {len(result.written)} miniature(s), estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
+
+
+@assets_app.command("illustrations")
+def assets_illustrations(
+    category: str | None = typer.Option(
+        None,
+        "--category",
+        help="unit_types, buildings, technologies, séparées par des virgules (défaut : toutes)",
+    ),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal d'illustrations"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """Génère les miniatures de l'encyclopédie (640×360) dans game/assets/illustrations/."""
+    from cent_ans_tools import entry_art, portraits
+
+    categories = (
+        tuple(part.strip() for part in category.split(","))
+        if category
+        else entry_art.CATEGORIES
+    )
+    _run_art_batch(
+        entry_art.plan(categories=categories, limit=limit),
+        model or portraits.DEFAULT_MODEL,
+        envelope,
+        dry_run,
+        "illustration(s)",
+        "Illustrations de l'encyclopédie",
+        entry_art.convert,
     )
 
 
