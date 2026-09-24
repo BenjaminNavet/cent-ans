@@ -32,7 +32,7 @@ use crate::field::{
 use crate::rng::BattleRng;
 
 /// Salt of the derived stream of the relief (lot R2).
-pub(crate) const RELIEF_STREAM: u64 = 0x52_32;
+pub(crate) const RELIEF_STREAM: u64 = 0x5232;
 
 /// Style of the relief of a province terrain.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -76,7 +76,7 @@ impl ReliefStyle {
             macro_wavelength: 700.0,
             ridged: 0.0,
             warp: 0.35,
-            micro_amp: 0.9,
+            micro_amp: 1.2,
             micro_wavelength: 110.0,
             valleys: (1, 1),
             valley_depth: 4.0,
@@ -190,22 +190,24 @@ impl ReliefStyle {
 // --- Noise --------------------------------------------------------------------------------
 
 /// Sixteen unit gradients (every 22.5°), without trigonometry at run time.
+const D: f64 = std::f64::consts::FRAC_1_SQRT_2;
+
 const GRADIENTS: [(f64, f64); 16] = [
     (1.0, 0.0),
     (0.923_879_532_5, 0.382_683_432_4),
-    (0.707_106_781_2, 0.707_106_781_2),
+    (D, D),
     (0.382_683_432_4, 0.923_879_532_5),
     (0.0, 1.0),
     (-0.382_683_432_4, 0.923_879_532_5),
-    (-0.707_106_781_2, 0.707_106_781_2),
+    (-D, D),
     (-0.923_879_532_5, 0.382_683_432_4),
     (-1.0, 0.0),
     (-0.923_879_532_5, -0.382_683_432_4),
-    (-0.707_106_781_2, -0.707_106_781_2),
+    (-D, -D),
     (-0.382_683_432_4, -0.923_879_532_5),
     (0.0, -1.0),
     (0.382_683_432_4, -0.923_879_532_5),
-    (0.707_106_781_2, -0.707_106_781_2),
+    (D, -D),
     (0.923_879_532_5, -0.382_683_432_4),
 ];
 
@@ -344,7 +346,8 @@ impl Scarp {
             return 0.0;
         }
         let normal = (-self.tangent.1, self.tangent.0);
-        let across = dx * normal.0 + dz * normal.1
+        let across = dx * normal.0
+            + dz * normal.1
             + self.wobble * gradient_noise(self.seed, along / 140.0, 0.37);
         let fade = 1.0 - smoothstep(half * 0.6, half, along.abs());
         self.height * (smoothstep(-self.half_width, self.half_width, across) - 0.5) * fade
@@ -417,7 +420,8 @@ fn draw_valley(style: &ReliefStyle, river: Option<&River>, stream: &mut BattleRn
         .map(|i| {
             let t = f64::from(i) / f64::from(count);
             // No meander at the ends: the valley reaches the river where drawn.
-            let off = meander * gradient_noise(seed, t * 3.2, 0.61) * (t * (1.0 - t) * 4.0).min(1.0);
+            let off =
+                meander * gradient_noise(seed, t * 3.2, 0.61) * (t * (1.0 - t) * 4.0).min(1.0);
             (
                 start.0 + dx * t + normal.0 * off,
                 start.1 + dz * t + normal.1 * off,
@@ -451,7 +455,11 @@ fn draw_scarps(style: &ReliefStyle, terrain: Terrain, stream: &mut BattleRng) ->
         let cx = stream.range(200.0, FIELD_WIDTH - 200.0);
         let cz = stream.range(120.0, FIELD_DEPTH - 120.0);
         let length = stream.range(300.0, 700.0);
-        let flight = if style.flights { 1 + stream.below(3) } else { 1 };
+        let flight = if style.flights {
+            1 + stream.below(3)
+        } else {
+            1
+        };
         let spacing = stream.range(40.0, 75.0);
         for k in 0..flight {
             let shift = f64::from(k) * spacing;
@@ -470,25 +478,6 @@ fn draw_scarps(style: &ReliefStyle, terrain: Terrain, stream: &mut BattleRng) ->
     scarps
 }
 
-/// Weight (0-1) of the centre of the deployment lines, where slopes are
-/// bounded.
-pub(crate) fn line_weight(x: f64, z: f64) -> f64 {
-    [ATTACKER_LINE_Z, DEFENDER_LINE_Z]
-        .iter()
-        .map(|line| {
-            (1.0 - smoothstep(45.0, 120.0, (z - line).abs()))
-                * (1.0 - smoothstep(380.0, 470.0, (x - FIELD_WIDTH * 0.5).abs()))
-        })
-        .fold(0.0, f64::max)
-}
-
-/// `true` inside the checked core of a deployment line.
-pub(crate) fn on_line_core(x: f64, z: f64) -> bool {
-    [ATTACKER_LINE_Z, DEFENDER_LINE_Z]
-        .iter()
-        .any(|line| (z - line).abs() <= 40.0 && (x - FIELD_WIDTH * 0.5).abs() <= 360.0)
-}
-
 fn grid_dims(heights: &[f64]) -> (usize, usize) {
     let nx = (FIELD_WIDTH / GRID_RESOLUTION) as usize + 1;
     (nx, heights.len() / nx)
@@ -504,28 +493,6 @@ fn line_mean(heights: &[f64], line: f64) -> f64 {
     );
     let row = &heights[iz * nx + x0..=iz * nx + x1];
     row.iter().sum::<f64>() / row.len() as f64
-}
-
-/// Steepest grid slope (rise over run) inside the core of the lines.
-pub(crate) fn max_line_slope(heights: &[f64]) -> f64 {
-    let (nx, nz) = grid_dims(heights);
-    let mut steepest: f64 = 0.0;
-    for iz in 0..nz {
-        for ix in 0..nx {
-            let (x, z) = (ix as f64 * GRID_RESOLUTION, iz as f64 * GRID_RESOLUTION);
-            if !on_line_core(x, z) {
-                continue;
-            }
-            let h = heights[iz * nx + ix];
-            if ix + 1 < nx {
-                steepest = steepest.max((heights[iz * nx + ix + 1] - h).abs() / GRID_RESOLUTION);
-            }
-            if iz + 1 < nz {
-                steepest = steepest.max((heights[(iz + 1) * nx + ix] - h).abs() / GRID_RESOLUTION);
-            }
-        }
-    }
-    steepest
 }
 
 /// Adds the relief detail of `terrain` to the pre-R2 heights (row-major grid
@@ -573,11 +540,13 @@ pub(crate) fn shape_relief(
             heights[iz * nx + ix] += detail;
         }
     }
+    soften_lines(heights, style.line_slope);
     if style.defender_rise > 0.0 {
         let rise = line_mean(heights, DEFENDER_LINE_Z) - line_mean(heights, ATTACKER_LINE_Z);
         if rise < style.defender_rise {
             let (low, high) = (ATTACKER_LINE_Z - 60.0, DEFENDER_LINE_Z + 60.0);
-            let span = smoothstep(low, high, DEFENDER_LINE_Z) - smoothstep(low, high, ATTACKER_LINE_Z);
+            let span =
+                smoothstep(low, high, DEFENDER_LINE_Z) - smoothstep(low, high, ATTACKER_LINE_Z);
             let lift = (style.defender_rise - rise) / span;
             for iz in 0..nz {
                 let ramp = lift * smoothstep(low, high, iz as f64 * GRID_RESOLUTION);
@@ -587,33 +556,72 @@ pub(crate) fn shape_relief(
             }
         }
     }
-    soften_lines(heights, style.line_slope);
 }
 
-/// Smooths the centre of the deployment lines until no grid slope there
-/// exceeds `max_slope` (weighted relaxation: the mean height, hence the
-/// high ground, is kept).
+/// Half-depth (m) of the shelf of a deployment line (full weight), and of
+/// its blend into the surrounding relief.
+const SHELF_HALF: f64 = 55.0;
+const SHELF_BLEND: f64 = 135.0;
+
+/// Lays each deployment line on a gentle shelf: across the line, the ground
+/// keeps its mean height and a bounded grade; along the line, the profile is
+/// smoothed until its slope is bounded. The shelf blends into the relief
+/// beyond (a terrace on a hillside), so the high ground is kept.
 fn soften_lines(heights: &mut [f64], max_slope: f64) {
     let (nx, nz) = grid_dims(heights);
-    let weights: Vec<f64> = (0..nz)
-        .flat_map(|iz| {
-            (0..nx).map(move |ix| line_weight(ix as f64 * GRID_RESOLUTION, iz as f64 * GRID_RESOLUTION))
-        })
-        .collect();
-    for _ in 0..400 {
-        if max_line_slope(heights) <= max_slope {
-            break;
+    for line in [ATTACKER_LINE_Z, DEFENDER_LINE_Z] {
+        let rows: Vec<usize> = (0..nz)
+            .filter(|&iz| (iz as f64 * GRID_RESOLUTION - line).abs() <= SHELF_HALF)
+            .collect();
+        // Per column: mean height and grade across the line (least squares).
+        let mut level = vec![0.0; nx];
+        let mut grade = vec![0.0; nx];
+        for ix in 0..nx {
+            let n = rows.len() as f64;
+            let mean_h = rows.iter().map(|&iz| heights[iz * nx + ix]).sum::<f64>() / n;
+            let (mut cov, mut var) = (0.0, 0.0);
+            for &iz in &rows {
+                let dz = iz as f64 * GRID_RESOLUTION - line;
+                cov += dz * (heights[iz * nx + ix] - mean_h);
+                var += dz * dz;
+            }
+            level[ix] = mean_h;
+            grade[ix] = (cov / var).clamp(-0.5 * max_slope, 0.5 * max_slope);
         }
-        let before = heights.to_vec();
-        for iz in 1..nz - 1 {
-            for ix in 1..nx - 1 {
-                let i = iz * nx + ix;
-                let w = weights[i];
-                if w <= 0.0 {
-                    continue;
-                }
-                let avg = (before[i - 1] + before[i + 1] + before[i - nx] + before[i + nx]) * 0.25;
-                heights[i] = before[i] + (avg - before[i]) * 0.8 * w;
+        let steepest = |p: &[f64]| {
+            p.windows(2)
+                .map(|w| (w[1] - w[0]).abs() / GRID_RESOLUTION)
+                .fold(0.0, f64::max)
+        };
+        let relax = |p: &mut Vec<f64>| {
+            let before = p.clone();
+            for i in 0..before.len() {
+                let left = before[i.saturating_sub(1)];
+                let right = before[(i + 1).min(before.len() - 1)];
+                p[i] = before[i] + ((left + right) * 0.5 - before[i]) * 0.5;
+            }
+        };
+        for _ in 0..40 {
+            relax(&mut grade);
+        }
+        for _ in 0..4000 {
+            if steepest(&level) <= 0.6 * max_slope {
+                break;
+            }
+            relax(&mut level);
+        }
+        for iz in 0..nz {
+            let dz = iz as f64 * GRID_RESOLUTION - line;
+            let wz = 1.0 - smoothstep(SHELF_HALF, SHELF_BLEND, dz.abs());
+            if wz <= 0.0 {
+                continue;
+            }
+            for ix in 0..nx {
+                let dx = (ix as f64 * GRID_RESOLUTION - FIELD_WIDTH * 0.5).abs();
+                let w = wz * (1.0 - smoothstep(380.0, 470.0, dx));
+                let shelf = level[ix] + grade[ix] * dz;
+                let h = &mut heights[iz * nx + ix];
+                *h = lerp(*h, shelf, w);
             }
         }
     }
