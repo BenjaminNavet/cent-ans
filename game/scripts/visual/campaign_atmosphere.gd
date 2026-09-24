@@ -58,6 +58,9 @@ func _ready() -> void:
 
 ## Saison de la simulation (libellé de date) ; ciel et étalonnage changent avec elle.
 func current_season() -> String:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--season="):  # captures : saison forcée (rendu seulement)
+			return AtmosphereLibrary.normalize_season(arg.trim_prefix("--season="))
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_date_label"):
