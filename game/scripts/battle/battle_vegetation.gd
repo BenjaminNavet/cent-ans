@@ -20,7 +20,6 @@ var _ground_y: float = 0.0
 
 func build(terrain: BattleTerrain, weather: String) -> void:
 	_ground_y = terrain.height_at(600.0, 400.0)
-	if OS.get_environment("BATTLE_EXP").split(",").has("nograss"): return #EXP
 	var mesh := _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
