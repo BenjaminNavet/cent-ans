@@ -1,6 +1,49 @@
 //! F5d tests: the Godot demo battle engages, siege balance, staggered reinforcements.
 
-use sim_battle::{BattleSetup, BattleSim, SideId, UnitState};
+mod common;
+
+use common::*;
+use sim_battle::{BattleSetup, BattleSim, SideId, SiegeSetup, UnitState};
+
+/// Escalade without breach nor engines (probe `siege 0 ""`): about half
+/// the assaults succeed, as in M8 (the F5a tower fire had cut it to 20 %).
+#[test]
+fn a_ladder_escalade_wins_about_half_the_time() {
+    let data = data();
+    let besiegers = [
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_urban_militia",
+        "unit_urban_militia",
+        "unit_urban_militia",
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_knights",
+    ];
+    let garrison = [
+        "unit_urban_militia",
+        "unit_urban_militia",
+        "unit_crossbowmen",
+        "unit_crossbowmen",
+        "unit_men_at_arms_foot",
+    ];
+    let mut wins = 0;
+    for seed in 0..6 {
+        let siege = SiegeSetup {
+            fortification: 2,
+            breach: 0,
+        };
+        let battle = setup(
+            units(&data, &besiegers),
+            units(&data, &garrison),
+            Some(siege),
+        );
+        let mut sim = BattleSim::new(battle, seed).unwrap();
+        run_to_end(&mut sim);
+        wins += u32::from(sim.winner() == Some(SideId::Attacker));
+    }
+    assert!((2..=4).contains(&wins), "escalade wins {wins}/6");
+}
 
 /// The standalone demo of `battle.tscn` (France 1337, main French army
 /// against the main English one), dumped from `sim-campaign`.

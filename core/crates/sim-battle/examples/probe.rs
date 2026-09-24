@@ -64,7 +64,11 @@ fn main() {
         .map(|k| unit(&data, k))
         .collect();
         let (mut total, mut wins) = (0.0, 0);
-        for seed in 0..6 {
+        let seeds: u64 = std::env::var("SEEDS")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(6);
+        for seed in 0..seeds {
             let setup = BattleSetup {
                 province: String::new(),
                 province_name: String::new(),
@@ -124,7 +128,10 @@ fn main() {
                 sim.siege().unwrap().integrity() * 100.0
             );
         }
-        println!("mean {:.0} s, attacker wins {wins}/6", total / 6.0);
+        println!(
+            "mean {:.0} s, attacker wins {wins}/{seeds}",
+            total / seeds as f64
+        );
         return;
     }
     if scen == "ai" {
