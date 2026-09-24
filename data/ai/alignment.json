@@ -11,13 +11,14 @@
     "crown_in_trouble_loss": 0.25
   },
   "grievance": {
-    "grudge": -30,
+    "grudge": -40,
     "min_attitude": -10
   },
   "dynastic": {
     "margin": 10,
     "min_attitude": 20,
-    "in_law_attitude": 20
+    "in_law_attitude": 20,
+    "max_allies": 5
   },
   "money_fief": {
     "amount": 1500,

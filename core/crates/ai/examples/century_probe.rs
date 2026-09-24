@@ -124,7 +124,12 @@ fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
 }
 
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
-    let trace = std::env::var("TRACE").is_ok();
+    // `TRACE=1` follows Burgundy; any other value filters events by that word.
+    let trace_word =
+        std::env::var("TRACE")
+            .ok()
+            .map(|w| if w == "1" { "Bourgogne".to_owned() } else { w });
+    let trace = trace_word.is_some();
     let started = Instant::now();
     let france = id("fac_france");
     let england = id("fac_england");
@@ -213,7 +218,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 _ => {}
             }
             if trace
-                && event.text_fr.contains("Bourgogne")
+                && trace_word
+                    .as_ref()
+                    .is_some_and(|w| event.text_fr.contains(w.as_str()))
                 && !matches!(event.kind, EventKind::Battle | EventKind::Marriage)
             {
                 println!("  [{seed}] {:>16} * {}", state.date_label(), event.text_fr);
