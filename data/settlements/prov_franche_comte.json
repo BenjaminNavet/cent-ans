@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_dole",
+    "province": "prov_franche_comte",
+    "kind": "city",
+    "name": { "display": "Dole", "local": "Dole", "local_language": "ancien français" },
+    "lonlat": [5.4906, 47.0922],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "port": false,
+    "description": "Capitale du comté palatin de Bourgogne, sur le Doubs.",
+    "sources": ["Dole (Jura)", "Comté de Bourgogne (Franche-Comté)"]
+  },
+  {
+    "id": "set_besancon",
+    "province": "prov_franche_comte",
+    "kind": "town",
+    "name": { "display": "Besançon", "local": "Besençon", "local_language": "ancien français" },
+    "lonlat": [6.0242, 47.2378],
+    "weight": 20,
+    "owner": "fac_empire",
+    "fortification_level": 3,
+    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "port": false,
+    "description": "Cité impériale libre dans une boucle du Doubs, distincte du comté de Bourgogne bien qu'enclavée en son sein, directement rattachée à l'Empire.",
+    "sources": ["Besançon", "Ville libre d'Empire"]
+  },
+  {
+    "id": "set_salins_les_bains",
+    "province": "prov_franche_comte",
+    "kind": "town",
+    "name": { "display": "Salins-les-Bains", "local": "Salins", "local_language": "ancien français" },
+    "lonlat": [5.8781, 46.9392],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close aux salines réputées, principale source de richesse du comté.",
+    "sources": ["Salins-les-Bains"]
+  },
+  {
+    "id": "set_joux",
+    "province": "prov_franche_comte",
+    "kind": "castle",
+    "name": { "display": "Château de Joux", "local": "Joux", "local_language": "ancien français" },
+    "lonlat": [6.3592, 46.9083],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse verrouillant un passage du Jura vers le Pays de Vaud.",
+    "sources": ["Château de Joux"]
+  },
+  {
+    "id": "set_baume_les_messieurs",
+    "province": "prov_franche_comte",
+    "kind": "abbey",
+    "name": { "display": "Baume-les-Messieurs", "local": "Baume", "local_language": "ancien français" },
+    "lonlat": [5.6667, 46.7167],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey"],
+    "port": false,
+    "description": "Abbaye bénédictine dans une reculée du Jura, foyer monastique ancien.",
+    "sources": ["Abbaye de Baume-les-Messieurs"]
+  }
+]

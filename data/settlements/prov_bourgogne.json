@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_dijon",
+    "province": "prov_bourgogne",
+    "kind": "city",
+    "name": { "display": "Dijon", "local": "Digion", "local_language": "ancien français" },
+    "lonlat": [5.0415, 47.3220],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": false,
+    "description": "Capitale du duché de Bourgogne tenu par Eudes IV, pairie de France.",
+    "sources": ["Dijon", "Duché de Bourgogne"]
+  },
+  {
+    "id": "set_beaune",
+    "province": "prov_bourgogne",
+    "kind": "town",
+    "name": { "display": "Beaune", "local": "Biaune", "local_language": "ancien français" },
+    "lonlat": [4.8397, 47.0206],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_vineyard_press", "bld_stone_walls"],
+    "port": false,
+    "description": "Ville close au cœur des vignobles de la Côte, résidence secondaire des ducs.",
+    "sources": ["Beaune"]
+  },
+  {
+    "id": "set_citeaux",
+    "province": "prov_bourgogne",
+    "kind": "abbey",
+    "name": { "display": "Cîteaux", "local": "Cistels", "local_language": "ancien français" },
+    "lonlat": [5.0736, 47.0736],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Abbaye fondée en 1098, maison mère de l'ordre cistercien.",
+    "sources": ["Abbaye de Cîteaux"]
+  },
+  {
+    "id": "set_chateauneuf_en_auxois",
+    "province": "prov_bourgogne",
+    "kind": "castle",
+    "name": { "display": "Châteauneuf-en-Auxois", "local": "Chastelneuf", "local_language": "ancien français" },
+    "lonlat": [4.5975, 47.1247],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Château féodal dominant la plaine de l'Auxois.",
+    "sources": ["Château de Châteauneuf (Côte-d'Or)"]
+  },
+  {
+    "id": "set_flavigny_sur_ozerain",
+    "province": "prov_bourgogne",
+    "kind": "village",
+    "name": { "display": "Flavigny-sur-Ozerain", "local": "Flavigny", "local_language": "ancien français" },
+    "lonlat": [4.5219, 47.5225],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church"],
+    "port": false,
+    "description": "Bourg perché autour d'une ancienne abbaye bénédictine, en Auxois.",
+    "sources": ["Flavigny-sur-Ozerain"]
+  }
+]
