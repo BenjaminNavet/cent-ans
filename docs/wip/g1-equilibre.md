@@ -9,7 +9,8 @@ Branche : `worktree-agent-a41f0303182b63dd5`. Source : `docs/audit/a2-mecaniques
 | O1 sonde | **fait** : `core/crates/ai/examples/balance_probe.rs`, fixture de calibration `core/crates/ai/tests/fixtures/auto_resolve_scenarios.json` (20 scénarios, références 3D sur 6 graines) |
 | N1 auto-résolution | **fait** : `battle_auto.rs` par phases, `data/rules/auto_resolve.json` + schéma, test `ai/tests/auto_resolve_calibration.rs` (20/20), ADR 0013 ; `movement.rs` : seul l'appel `resolve_field` (et l'import) change |
 | E1 doctrines IA | **fait** : `data/ai/doctrines.json` + `ai_doctrine.schema.json`, `ai/src/doctrine.rs` (`pick_recruit`, `field_composition`), boucle de recrutement de `plan_economy` modifiée localement, tests `ai/tests/e1_doctrines.rs` |
-| E8 / E2 | si le temps le permet |
+| E8 coûts d'unités | **fait** : coûts et entretiens de 8 types dans `data/unit_types/` |
+| E2 ordre public | en cours |
 
 ## Sonde (O1)
 
@@ -53,9 +54,27 @@ Sonde `rt 6` (20 scénarios) : accord auto / 3D sur le vainqueur **12 / 20 (60 %
 - Effets de bord : les unités recrutées sont plus chères, donc les armées plus petites (France 3 000 à 12 000 hommes en campagne en 1387 au lieu de 13 000 à 34 000) : 136 batailles par partie (avant 334), 5,4 changements de propriétaire (avant 12). Guerre FR-EN sur 200 tours : 40 %.
 - `century_probe 464 1..5` (doctrine milice 30) : guerre FR-EN 56, 36, 28, 47, 54 % (moyenne 44 %, avant 40 %) ; majeures en 1400 : 5/5. Pas de régression.
 
+### Après E8 (coûts d'unités)
+
+| Unité | Coût / entretien avant | Après |
+|---|---|---|
+| Arbalétriers | 550 / 50 | 450 / 40 |
+| Piquiers flamands | 450 / 40 | 600 / 55 |
+| Arbalétriers génois | 900 / 100 | 600 / 55 |
+| Chevaliers | 1 500 / 140 | 1 400 / 130 |
+| Archers longs | 500 / 45 | 650 / 60 |
+| Hommes d'armes à pied | 900 / 90 | 950 / 90 |
+| Archers montés | 700 / 60 | 600 / 55 |
+| Sergents à cheval | 800 / 80 | 750 / 70 |
+| Milice urbaine | 300 / 25 | inchangé |
+
+- Matrice à budget égal (victoires moyennes) : arbalétriers 53 %, piquiers 75 %, génois 39 %, chevaliers 76 %, archers longs 50 %, hommes d'armes 75 %, archers montés 26 %, sergents 31 %, milice 28 % : toutes entre 20 et 80 % (cible E8 ; avant : de 6 à 95 %).
+- `campaign 200 1..8` : milice 36 %, archers longs 44,5 % des recrutements anglais, 8 types au minimum ; guerre FR-EN 41 % ; 139 batailles ; 6,1 changements de propriétaire.
+- `century_probe 464 1..5` : guerre FR-EN 54, 49, 33, 51, 43 % (moyenne 46 %, avant G1 40 %) ; majeures en 1400 : 5/5.
+
 ## Prochaine étape
 
-E8 : recalibrer les coûts d'unités sur la matrice N1 (arcs longs trop rentables, génois et archers montés trop peu), puis vérifier la taille des armées.
+E2 : poids de l'impôt, soulagement par la garnison, terme des biens et occupation en données (`data/rules/population.json`), sans toucher `economy.rs`.
 
 ## Contraintes
 
