@@ -9,10 +9,10 @@ Le moteur tourne vite et proprement : 0,2 % d'ordres refusés, 29 factions vivan
 
 1. **Une seule unité.** La milice urbaine représente 99,8 % des recrutements de l'IA (2 440 par partie, contre 3,5 arbalétriers et 1,4 sergent à cheval). Aucun chevalier, archer long, homme d'armes ni engin de siège n'est recruté en 50 ans. Deux causes se cumulent : l'auto-résolution n'a ni contres ni armure en mêlée, et l'IA classe les unités par « puissance par livre ».
 2. **L'auto-résolution contredit la bataille 3D.** À coût égal, 20 milices battent 4 chevaliers dans 100 % des auto-résolutions, mais perdent 5 fois sur 6 en 3D (1 498 morts contre 17). Crécy rejouée tourne à la victoire française dans 82 % des cas, et même dans 100 % sur terrain plat.
-3. **Une carte figée.** Il y a 213 prises de places par partie, mais seulement 12 changements de propriétaire de province en 50 ans, et aucune faction ne disparaît. Les guerres sont nombreuses et courtes : 117 guerres par partie, pour une durée médiane de 13 tours. Elles se soldent presque toujours par un retour au statu quo.
+3. **Une carte figée, puis une boule de neige.** Il y a 213 prises de places par partie, mais seulement 12 changements de propriétaire de province en 50 ans, et aucune faction ne disparaît. Les guerres sont nombreuses et courtes : 117 guerres par partie, pour une durée médiane de 13 tours. Elles se soldent presque toujours par un retour au statu quo. Sur le siècle complet, la carte ne bouge qu'après 1400, et dans 2 graines sur 4 la France s'effondre de 29 à 11 puis à 2 provinces, sans mécanisme de rebond.
 4. **Une gestion sans tension.** Le mécontentement moyen est de 0,5 sur 100, avec 1 révolte par partie et une dévastation moyenne de 0. L'impôt « Haut » est un choix gratuit : il est en vigueur dans 63 % des royaumes en 1387. La chevauchée, mécanique signature, n'est lancée que 0,9 fois par partie.
-5. **Une recherche trop rapide.** La France possède les 45 technologies dès 1383-1387, imprimerie comprise (1450 historiquement). Côté bâtiments, 10 des 29 ne sont jamais construits : tous les bâtiments militaires, plus la cathédrale, le pressoir et la maison de fonte d'étain.
-6. **Des asymétries non voulues.** L'Angleterre aligne environ 1 000 hommes en campagne pendant des décennies, et la France finit 2 à 3,7 fois plus puissante. La Bourgogne jouable plafonne à 3 provinces et 3 000 à 4 000 livres de revenu : elle reste vassale dans 8 parties sur 8 et ne remplit jamais un objectif. Parmi les événements historiques datés avant 1387, 8 ne se déclenchent jamais, dont Poitiers, Brétigny et Étienne Marcel.
+5. **Une recherche trop rapide.** La France possède 44 technologies sur 45 en 1382 et les 45 en 1387, imprimerie comprise (1450 historiquement). Côté bâtiments, 10 des 29 ne sont jamais construits : tous les bâtiments militaires, plus la cathédrale, le pressoir et la maison de fonte d'étain.
+6. **Des asymétries non voulues.** L'Angleterre aligne environ 1 000 hommes en campagne pendant des décennies, et la France finit 2 à 3,7 fois plus puissante. La Bourgogne jouable plafonne à 3 provinces et 3 000 à 4 000 livres de revenu jusqu'en 1387 : elle reste vassale dans 8 parties sur 8. Elle devient indépendante au XVe siècle, mais n'a toujours que 4 provinces en 1453. Parmi les événements historiques datés avant 1387, 8 ne se déclenchent jamais, dont Poitiers, Brétigny et Étienne Marcel.
 
 Priorités proposées (§ 5) : refondre l'auto-résolution et la calibrer sur la 3D (N1), donner à l'IA des doctrines de recrutement (E1), rendre l'ordre public et l'impôt coûteux (E3), ralentir la recherche (E4), faire bouger la carte par des buts de guerre et des cessions (N2), puis recrutement sur réserve d'hommes et renforts (N3).
 
@@ -60,7 +60,7 @@ Priorités proposées (§ 5) : refondre l'auto-résolution et la calibrer sur la
 | Événement | Par partie | Par tour | Commentaire |
 |---|---|---|---|
 | Bâtiment achevé | 716 | 3,6 | dominés par palissade, jardin de simples, moulins, foire, marché |
-| Technologie | 579 | 2,9 | arbre épuisé vers 1383-1387 par la France |
+| Technologie | 579 | 2,9 | arbre épuisé par la France : 44/45 en 1382, 45/45 en 1387 |
 | Agent (C6) | 447 | 2,2 | environ 2 340 actions d'agents par partie |
 | Recrutement (événement) | 453 | 2,3 | environ 2 445 ordres `Recruit`, dont 99,8 % de milice |
 | Bataille | 334 | 1,7 | environ 0,5 par tour en 1350-1362 (creux de la peste et des trêves), 2,5 à 2,7 en fin de période |
@@ -141,7 +141,34 @@ Cause : `building_value` (IA) ne valorise ni `production`, ni `recruit_slots`, n
 
 ### 2.7 Siècle complet (4 graines × 464 tours, 1337-1453)
 
-_(à compléter à la fin des simulations)_
+| Mesure (graines 11-14) | Valeur | Commentaire |
+|---|---|---|
+| Durée d'une partie | 464 tours, environ 100 à 220 s (machine chargée) | aucune panique ; France : 0,2 à 0,5 % d'ordres refusés |
+| Guerre France-Angleterre | 54, 46, 49, 35 % (moyenne 46 %) | sous la cible de 55-75 % (G5, 40 graines) : **régression possible depuis C4/C7a**, à confirmer avec `century_probe` sur 40 graines |
+| Batailles | 1 576 par partie ; 1,5 par tour en 1337-1380, **4 à 6 par tour après 1400** | armées de masse : France 58 000 hommes en campagne en 1397 ; 438 morts par bataille en moyenne |
+| Changements de propriétaire | 54 par siècle | la carte bouge surtout après 1400 |
+| Factions détruites | 2 sur 4 parties (Portugal ; **Saint-Empire**) | l'Empire rayé de la carte est anachronique |
+| Recrutement | 12 843 milices, 1,2 arbalétrier et 1,2 sergent par partie | la monoculture tient tout le siècle |
+| Bâtiments jamais construits | 8 sur 29 (tous les militaires, pressoir) ; cathédrale 0,8 par partie, maison de fonte d'étain 7 | |
+| Technologies | France, Angleterre : 45/45 ; Bourgogne 39/45 | l'arbre ne sert plus après 1385 |
+| Mécontentement / dévastation moyens en 1453 | 1,2 / 0,1 | 2,5 révoltes par siècle |
+| Chevauchées | 3 par siècle (9,5 ordres) | |
+| Bourgogne | indépendante dans 4 graines sur 4 entre 1387 et 1437 ; 4 provinces en 1453 ; revenu 15 900 | 1 objectif sur 3 (indépendance) |
+| Victoire de la France (joueur IA) | 2 graines sur 4, au tour 127 (1368) | la partie « gagnée » à 30 ans de la date historique de reconquête (1375) : maintien de 20 tours court |
+
+**Boule de neige du XVe siècle** : provinces de la France aux tours 100, 200, 300, 400 et 464.
+
+| Graine | 1362 | 1387 | 1412 | 1437 | 1453 | Angleterre en 1453 |
+|---|---|---|---|---|---|---|
+| 11 | 31 | 27 | 28 | 28 | 23 | 26 |
+| 12 | 28 | 37 | 36 | 37 | 34 | 24 |
+| 13 | 29 | 29 | 20 | 16 | **11** | 30 |
+| 14 | 27 | 30 | 29 | 10 | **2** | 31 |
+
+- Après 1400, le revenu anglais est multiplié par 7 (de 27 600 à 200 000 livres, médiane), contre ×1,1 pour la France.
+- Dans 2 graines sur 4, la France perd 60 à 93 % de ses provinces entre 1412 et 1453, sans rebond. `evt_jeanne_d_arc` se déclenche mais ne renverse rien.
+- La phase de domination anglaise est voulue (G2), mais un royaume réduit à 2 provinces n'a plus de mécanisme de retour : pas de coalition contre le dominant, pas de levée en masse, pas de révolte de l'occupé (le mécontentement reste à 0, même sous occupation).
+- **Événements jamais déclenchés sur le siècle** (10 sur 77) : Poitiers, Brétigny, Étienne Marcel, rançon du roi Jean (chaîne de Poitiers) ; `evt_folie_charles_vi` et `evt_bal_des_ardents` (1392, qui exigent Charles VI roi et d'âge adéquat) ; `evt_ordre_de_l_etoile` (1351) ; `evt_rancon_david_ii` (Neville's Cross ne tombe jamais : Écosse sans armée) ; `evt_treve_de_tours` (1444) ; `evt_castillon` (1453, qui exige l'Angleterre en Guyenne).
 
 ## 3. Auto-résolution et unités
 
@@ -225,7 +252,7 @@ Ce qui manque le plus au regard de TW :
 2. **Bassins de recrutement et renforts** (Medieval II, Attila). Ils donnent un vrai choix de quoi et où recruter.
 3. **Ordre public qui mord.** C'est l'arbitrage impôt contre révolte, pivot des TW.
 4. **Conséquences territoriales des guerres** : buts de guerre, cessions, fatigue de guerre.
-5. **Plafond d'unités par armée et général obligatoire.** Aujourd'hui, 11 armées françaises sans chef coexistent au tour 20.
+5. **Plafond d'unités par armée et général qui compte.** Au tour 20, la France aligne 11 armées d'environ 500 hommes. Après 1400, elle a 58 000 hommes en campagne, sans plafond.
 
 Les mécaniques propres à Cent Ans (régimes, monnaie, rançons, chevalerie, papauté, chronique) sont riches et doivent rester (voir `2026-09-24-analyse-total-war.md` § 4).
 
