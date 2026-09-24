@@ -107,6 +107,11 @@ func _on_alert_activated(alert: Dictionary) -> void:
 		"research_idle":
 			ui.tech_panel_requested.emit()
 			return
+		"ransom":  # H11 : panneau de faction puis fenêtre des captifs et rançons
+			ui.faction_panel_requested.emit()
+			if not (ui.faction_panel.ransom_panel != null and ui.faction_panel.ransom_panel.visible):
+				ui.faction_panel.toggle_ransoms()
+			return
 		"herbarium":  # H9 : fiche de la plante dans le Codex
 			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")
 			if bubbles != null:
