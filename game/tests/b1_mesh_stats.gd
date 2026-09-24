@@ -7,9 +7,20 @@ extends SceneTree
 func _init() -> void:
 	for kind in ["infantry", "archer", "cavalry"]:
 		for variant in 3:
-			var full := BattleMeshes.soldier(kind, variant)
-			var lod := BattleMeshes.soldier(kind, variant, true)
-			print("%s/%d: %d triangles, lod %d" % [kind, variant, _triangles(full), _triangles(lod)])
+			var counts := []
+			for level in 3:
+				counts.append(_triangles(BattleMeshes.soldier_level(kind, variant, level)))
+			print("%s/%d: %d / %d / %d triangles (complet / moyen / lointain)" % [kind, variant, counts[0], counts[1], counts[2]])
+	# Contrôle du format : teint (SKIN, linéaire ≈ 0.604, 0.319, 0.187), membres et pivots.
+	var arrays := BattleMeshes.soldier_level("archer", 0, 0).surface_get_arrays(0)
+	var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var custom: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM0]
+	var seen := {}
+	for i in colors.size():
+		var key := "%d/%d" % [int(custom[i * 4]), roundi(colors[i].a * 5.0)]
+		if not seen.has(key):
+			seen[key] = true
+			print("part %d code %d color %s pivot (%.2f, %.2f) bend %.2f" % [int(custom[i * 4]), roundi(colors[i].a * 5.0), colors[i], custom[i * 4 + 1], custom[i * 4 + 2], custom[i * 4 + 3]])
 	quit(0)
 
 
