@@ -13,7 +13,8 @@ Branche : `m2-core-movement` (worktree `agent-acbe5c6448250fa88`).
 - [x] IA (`ai_minimal`, `ai::campaign`) adaptée mécaniquement : planification sur le graphe depuis l'« ancre » (colonie de l'armée ou la plus proche), ordres `MoveArmy` vers une colonie.
 - [x] Pont : compile, getters dérivés (voir plus bas).
 - [x] Tests § 7 cœur : `tests/m2_free_movement.rs` + adaptations (`campaign.rs`, `c7a_retreat.rs`, `m7.rs`…).
-- [ ] Fusion finale de main, `cargo test` complet, `build.sh`, smoke Godot.
+- [x] Fusion de main (d84a7bf), fmt, clippy -D warnings, `cargo test` complet vert, `build.sh`, smoke Godot vert (une assertion de `smoke.gd` adaptée : l'armée marche aussitôt).
+- [ ] `c5_settlements_ui_test.gd` : 2 échecs attendus (chemin vers Wissant vide car la marche est immédiate ; l'armée a quitté Paris avant l'ordre de garnison) — à adapter en M4 (spec § 7).
 
 ## API pour M3 / M4
 
