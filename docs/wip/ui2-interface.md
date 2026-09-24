@@ -20,9 +20,13 @@ Propriétaire exclusif de `game/scripts/map/map_ui.gd` pendant le lot. Ne pas to
   `budget_table.gd`, `treasury_chart.gd`, panneau de faction élargi (500 px), infobulles du solde
   et du trésor dans `map_ui.gd`, ℔ remplacé partout. Étape de capture `--stage=budget`.
   Test Rust : `tests/u3_budget.rs`.
-- [ ] U4 échelle et responsivité
+- [x] U4 échelle et responsivité : `settings.gd` (échelle auto hauteur / 900 bornée 0,9–1,6,
+  × « Taille de l'interface » `interface/ui_size` ; « Taille du texte » `interface/text_size` sur
+  les thèmes et les surcharges de police), `settings_menu.gd`, thème parchemin en EB Garamond
+  (Georgia / Palatino retirées). Smoke : étape `_run_ui_layout` (4 résolutions, seule avec
+  `CENT_ANS_SMOKE_ONLY=ui_layout`) ; captures : `game/tests/ui_resolutions.sh`.
 - [ ] U5 fin de tour utile (optionnel)
 - [ ] U7 barre du haut et raccourcis (optionnel)
 
 ## Prochaine étape
-U4 : échelle automatique (hauteur / 900, bornée 0,9–1,6), réglages « Taille de l'interface » / « Taille du texte », test 4 résolutions, polices EB Garamond.
+Vérifications finales (cargo, build, import, smoke) puis U5 / U7 si le temps le permet.
