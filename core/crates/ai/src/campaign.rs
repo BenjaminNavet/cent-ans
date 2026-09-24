@@ -11,6 +11,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{
     CharacterId, EffectKind, FactionId, GameData, ProvinceId, SkillBranch, SkillId, UnitTypeId,
 };
+use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::{dijkstra, edges, path_to};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
@@ -170,10 +171,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
     // G2: subsidies first, out of what the donor would otherwise hoard.
-    let spare = ctx.treasury
-        - ctx.reserve()
-        - crate::support::SUBSIDY_DONOR_RESERVE_SEASONS * ctx.gross_income.max(0);
-    for order in crate::support::plan_subsidies(state, faction, spare) {
+    let spare = (ctx.treasury - ctx.upkeep()).max(0) / crate::support::SUBSIDY_SPARE_DIVISOR;
+    for order in crate::support::plan_subsidies(state, data, faction, spare) {
         if let Order::SendGift { amount, .. } = &order {
             ctx.treasury -= amount;
         }
@@ -183,9 +182,22 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         orders.push(Order::Research { technology });
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
-    orders.extend(sim_campaign::coinage::ai_choose_coinage(
-        state, data, faction,
-    ));
+    // G2: a realm whose buildings eat half its income does not debase: the
+    // inflation of their upkeep outweighs the seigniorage (Scots spiral).
+    let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;
+    orders.extend(
+        sim_campaign::coinage::ai_choose_coinage(state, data, faction)
+            .into_iter()
+            .filter(|o| {
+                !upkeep_heavy
+                    || !matches!(
+                        o,
+                        Order::SetCoinage {
+                            level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
+                        }
+                    )
+            }),
+    );
     orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
     orders.extend(sim_campaign::chivalry::ai_found_order(state, data, faction));
     plan_economy(&ctx, &mut orders);

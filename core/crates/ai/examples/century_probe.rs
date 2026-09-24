@@ -321,7 +321,11 @@ fn main() {
     let scots: Vec<String> = reports
         .iter()
         .map(|r| {
-            let n = r.bankruptcies.get(&id("fac_scotland")).copied().unwrap_or(0);
+            let n = r
+                .bankruptcies
+                .get(&id("fac_scotland"))
+                .copied()
+                .unwrap_or(0);
             format!("{:.1}", f64::from(n) / decades)
         })
         .collect();
