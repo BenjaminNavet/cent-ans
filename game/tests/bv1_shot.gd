@@ -110,7 +110,7 @@ func _init() -> void:
 			knights["render"] = "cavalry"
 			knights["state"] = "charging"
 			units.append(knights)
-			_camera.look_at_from_position(Vector3(14, 2.2, 58), Vector3(0, 1.0, 70))
+			_camera.look_at_from_position(Vector3(4, 3.5, 92), Vector3(0, 0.8, 68))
 			# Les particules vivent en temps réel : la charge avance image par image.
 			for step in 100:
 				knights["z"] = float(knights["z"]) + 0.3
