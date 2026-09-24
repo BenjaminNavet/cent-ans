@@ -1,0 +1,129 @@
+extends SceneTree
+
+## Test headless du lot C6 (rendu par paliers) sur les vraies données `data/` :
+##  1. `SettlementData` : colonies (positions + types), hameaux, routes (principales comprises) ;
+##  2. terrain + relief fin : au moins une tuile 8192² construite près de Paris, surface exacte
+##     cohérente avec la heightmap 4096 (écart < 3 unités) ;
+##  3. `SettlementLayer` : une maquette par colonie posée sous la surface affichée (rien ne
+##     flotte), hameaux en `MultiMesh`, étiquettes, picking écran de Paris → `set_paris` et
+##     signal `settlement_selected` ;
+##  4. `RoadRenderer` : routes principales et rubans drapés construits autour de Paris ;
+##  5. paliers : poids cohérents (somme 1) aux trois distances de référence.
+## Usage : godot --headless --path game --script res://tests/settlements_render_test.gd
+
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+
+var _failures := 0
+var _selected := ""
+
+
+func _init() -> void:
+	await process_frame
+	await _run()
+	ModelLibrary.clear_cache()
+	print("settlements_render_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
+	quit(1 if _failures > 0 else 0)
+
+
+func _check(condition: bool, message: String) -> bool:
+	if not condition:
+		_failures += 1
+		push_error("settlements_render_test: " + message)
+	return condition
+
+
+func _run() -> void:
+	var data_dir := MAP_PATHS.default_data_dir()
+	var map_dir := data_dir.path_join("map")
+	var map_data := MapData.load_from_dir(map_dir)
+	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+		return
+	# 1. Données.
+	var data := SettlementData.load_from(data_dir, map_dir)
+	_check(data.settlements.size() >= 500, "expected >= 500 settlements, got %d" % data.settlements.size())
+	_check(data.hamlets.size() >= 2000, "expected >= 2000 hamlets, got %d" % data.hamlets.size())
+	_check(data.roads.size() > 100, "expected roads, got %d" % data.roads.size())
+	var kinds := {}
+	for entry in data.settlements:
+		kinds[entry["kind"]] = true
+	for kind in SettlementData.KINDS:
+		_check(kinds.has(kind), "no settlement of kind %s" % kind)
+	_check(str(data.settlements[0]["kind"]) == "city", "settlements should be sorted by label priority (city first)")
+	var paris := data.get_settlement("set_paris")
+	if not _check(not paris.is_empty(), "set_paris missing"):
+		return
+	var paris_px: Vector2 = paris["px"]
+
+	# 2. Terrain + relief fin.
+	var world := Node3D.new()
+	root.add_child(world)
+	var terrain := TerrainBuilder.new()
+	world.add_child(terrain)
+	terrain.build(map_data)
+	var camera := Camera3D.new()
+	world.add_child(camera)
+	var focus := Vector3(paris_px.x, map_data.surface_world_at(paris_px.x, paris_px.y), paris_px.y + 10.0)
+	camera.position = focus + Vector3(0.0, 30.0, 45.0)
+	camera.look_at_from_position(camera.position, focus, Vector3.UP)
+	camera.current = true
+	var tiers := ZoomTiers.load_default()
+	for _i in 60:
+		terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)
+		if terrain.fine_ready() and terrain.fine_chunk_count() > 0:
+			break
+		terrain.wait_fine_jobs()
+		await process_frame
+	_check(terrain.fine_chunk_count() > 0, "no fine relief chunk near Paris (tiles in %s)" % map_dir.path_join("height"))
+	var worst := 0.0
+	for k in 20:
+		var p := paris_px + Vector2(cos(k) * 30.0, sin(k * 1.7) * 30.0)
+		worst = maxf(worst, absf(terrain.surface_height_at(p.x, p.y) - map_data.surface_world_at(p.x, p.y)))
+	_check(worst < 3.0, "fine surface too far from the 4096 heightmap near Paris: %.2f" % worst)
+
+	# 3. Colonies.
+	var roads := RoadRenderer.new()
+	world.add_child(roads)
+	roads.build(map_data, data, terrain)
+	var layer := SettlementLayer.new()
+	world.add_child(layer)
+	layer.setup(map_data, terrain, data, tiers)
+	layer.settlement_selected.connect(func(id: String) -> void: _selected = id)
+	layer.update_view(55.0)
+	layer.flush()
+	roads.update_view(0.0, 1.0)
+	roads.flush(1.0)
+	await process_frame
+	_check(int(layer.stats.get("models", 0)) == data.settlements.size(), "expected one model per settlement, got %s" % layer.stats)
+	var floating := 0
+	for i in data.settlements.size():
+		var holder: Node3D = layer._models[i]
+		if holder == null:
+			continue
+		var px: Vector2 = data.settlements[i]["px"]
+		if holder.position.y > terrain.surface_height_at(px.x, px.y) + 0.01:
+			floating += 1
+	_check(floating == 0, "%d settlement models float above the displayed surface" % floating)
+	_check(layer.hamlet_instance_count() > 0, "no hamlet instances near Paris")
+	_check(roads.ribbon_count() > 0, "no road ribbon near Paris")
+	_check(int(roads.stats.get("main_roads", 0)) > 0, "no main road")
+	var screen := camera.unproject_position(layer.world_position_of("set_paris") + Vector3(0.0, 1.0, 0.0))
+	var picked := layer.pick_screen(screen)
+	_check(picked == "set_paris", "picking at Paris returned '%s'" % picked)
+	layer.select(picked)
+	_check(_selected == "set_paris", "settlement_selected not emitted")
+	layer.declutter()
+	_check(layer.visible_label_count() > 0, "no settlement label visible in county view")
+
+	# 5. Paliers.
+	for distance in [40.0, 330.0, 1400.0]:
+		var sum: float = tiers.near_weight(distance) + tiers.medium_weight(distance) + tiers.far_weight(distance)
+		_check(absf(sum - 1.0) < 0.001, "tier weights at %.0f sum to %.3f" % [distance, sum])
+	_check(tiers.tier_at(40.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(330.0) == ZoomTiers.Tier.MEDIUM and tiers.tier_at(1400.0) == ZoomTiers.Tier.FAR, "tier_at thresholds")
+	print("settlements_render_test: %s" % JSON.stringify({
+		"settlements": data.settlements.size(), "hamlets": data.hamlets.size(), "roads": data.roads.size(),
+		"fine_chunks": terrain.fine_chunk_count(), "fine_worst_delta": snappedf(worst, 0.01),
+		"hamlet_instances": layer.hamlet_instance_count(), "ribbons": roads.ribbon_count(),
+		"load_ms": data.load_ms, "fine_build_ms_max": terrain.build_stats.get("fine_build_ms_max", 0.0),
+	}))
+	world.queue_free()
+	await process_frame

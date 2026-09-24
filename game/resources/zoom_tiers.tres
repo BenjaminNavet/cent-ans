@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ZoomTiers" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/map/zoom_tiers.gd" id="1_tiers"]
+
+[resource]
+script = ExtResource("1_tiers")
+far_threshold = 620.0
+far_fade = 140.0
+near_threshold = 150.0
+near_fade = 40.0
+town_label_distance = 380.0
+fine_terrain_distance = 170.0
+model_range = 420.0
+hamlet_range = 260.0
