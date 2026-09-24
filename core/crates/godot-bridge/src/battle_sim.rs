@@ -565,17 +565,21 @@ impl CampaignSim {
                 let strength = |id: &sim_campaign::ArmyId| {
                     state.army(id).map_or(0, |a| i64::from(a.total_strength()))
                 };
-                let province_state = state.province_state(&view.province);
+                let settlement_state = state.settlement_state(&view.location);
                 let defender_strength = if view.siege {
-                    province_state.map_or(0, |p| {
-                        p.garrison.iter().map(|u| i64::from(u.strength)).sum()
+                    settlement_state.map_or(0, |s| {
+                        s.garrison.iter().map(|u| i64::from(u.strength)).sum()
                     })
                 } else {
                     strength(&view.defender)
                 };
-                let breach = province_state
-                    .and_then(|p| p.siege.as_ref())
+                let breach = settlement_state
+                    .and_then(|s| s.siege.as_ref())
                     .map_or(0, |s| i64::from(s.breach));
+                let settlement_name = data
+                    .settlements
+                    .get(&view.location)
+                    .map_or_else(|| view.location.to_string(), |s| s.name.display.clone());
                 let province_name = data
                     .provinces
                     .get(&view.province)
@@ -596,7 +600,10 @@ impl CampaignSim {
                     "attacker_strength" => strength(&view.attacker),
                     "defender_strength" => defender_strength,
                     "siege" => view.siege,
-                    "fortification" => i64::from(state.fortification_level(data, &view.province)),
+                    "fortification" => i64::from(state.fortification_level(data, &view.location)),
+                    "location" => view.location.as_str(),
+                    "settlement_name" => settlement_name.as_str(),
+                    "settlement_kind" => state.settlement_kind(&view.location).key(),
                     "breach" => breach,
                     "seed" => (seed & 0x7FFF_FFFF_FFFF) as i64,
                 }
