@@ -50,15 +50,19 @@ func _init() -> void:
 	var sheet: Node = (load("res://scenes/ui/character_sheet.tscn") as PackedScene).instantiate()
 	layer.add_child(sheet)
 	await process_frame
+	# Fiche d'Édouard III : campagne jouée par l'Angleterre (l'ordre `learn_skill` n'est permis
+	# que sur un personnage de sa faction) ; deux compétences apprises.
+	var england: Object = ClassDB.instantiate("CampaignSim")
+	england.call("new_campaign", data_dir, "fac_england", 1337)
+	facade.set("sim", england)
 	var edward := "chr_edward_iii"
-	sim.call("submit_order", {"type": "debug_grant_xp", "character": edward, "amount": 600})
-	var character: Dictionary = sim.call("get_character", edward)
-	var skill_tree: Array = sim.call("get_skill_tree")
-	var learnable: Array = sim.call("get_learnable", edward)
-	if not learnable.is_empty():
-		sim.call("submit_order", {"type": "learn_skill", "character": edward, "skill": str(learnable[0])})
-		character = sim.call("get_character", edward)
-		learnable = sim.call("get_learnable", edward)
+	england.call("submit_order", {"type": "debug_grant_xp", "character": edward, "amount": 600})
+	for skill in ["skill_archerie", "skill_tir_a_volonte"]:
+		var result: Dictionary = england.call("submit_order", {"type": "learn_skill", "character": edward, "skill": skill})
+		print("c3 learn %s: %s" % [skill, result])
+	var character: Dictionary = england.call("get_character", edward)
+	var skill_tree: Array = england.call("get_skill_tree")
+	var learnable: Array = england.call("get_learnable", edward)
 	sheet.show_character(character, skill_tree, learnable, [], [], [])
 	for _i in 8:
 		await process_frame
