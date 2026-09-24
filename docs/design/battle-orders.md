@@ -54,9 +54,11 @@ catalogue dans `BattleSetup::orders` (`#[serde(default)]`, rétrocompatible : sa
   chevaliers avant un assaut de siège (M8), dont la ligne de journal vient de `journal_assault`
   (« Les chevaliers de France mettent pied à terre pour l'assaut. »), sans le bonus d'armure.
 - Pas de quartier : si le camp vainqueur l'a déployé, un chef vaincu rattrapé en déroute est tué au lieu
-  d'être pris. Le drapeau `SideResult::no_quarter` est transmis à la campagne ; **sim-campaign ne
-  l'exploite pas encore** (idée : pas de prisonniers ni de rançons, relations dégradées, pertes du
-  vaincu majorées).
+  d'être pris. Le drapeau `SideResult::no_quarter` est transmis à la campagne, qui l'exploite (P1,
+  `resolve_pending_battle`) : si le **vainqueur** a donné l'ordre, le chef vaincu signalé pris est
+  tué (aucun prisonnier, donc aucune rançon H6), et le chef vainqueur perd `NO_QUARTER_PIETY` (5)
+  de piété ; une ligne « Pas de quartier : … » paraît au journal. L'ordre du vaincu n'a pas d'effet
+  en campagne.
 
 ## 4. IA tactique (`ai.rs`, `plan_orders`)
 

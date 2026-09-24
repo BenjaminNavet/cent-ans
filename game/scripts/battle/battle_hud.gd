@@ -4,12 +4,13 @@ extends CanvasLayer
 ## HUD parchemin de la bataille (construit en code sur `parchment_theme.tres`) : barre du haut
 ## (nom, horloge, météo, rapport de forces), journal, en bas les cartes compactes du joueur
 ## (`UnitCard`) rangées par « bataille » (`BattleGroups`), boutons d'ordres, minicarte
-## (`BattleMinimap`) et boutons de vitesse ; aide F1, écran de fin (F5b, audit UI § 3.2).
+## (`BattleMinimap`) et boutons de vitesse ; aide F1 (F5b, audit UI § 3.2). L'écran de fin est
+## `BattleResultScreen` (B2), posé par la scène sur `root`.
 ## Aucune règle : tout vient de `BattleSim.get_units()` et des événements.
 
 signal card_clicked(unit_id: int, additive: bool)
+signal card_double_clicked(unit_id: int)  # B3 / T6 : centrer la caméra sur ce régiment
 signal command_pressed(command: String)
-signal return_pressed
 signal speed_pressed(index: int)  # -1 : pause, 0..2 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
 
@@ -18,11 +19,13 @@ const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
-• Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner.
+• Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
 • Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
 • F : formation · G : tir à volonté · H : halte · Z X V B N : ordres du chef · Échap : désélectionner.
-• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller."""
+• Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
+• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller.
+• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; W A S D ou glisser libèrent la caméra."""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
@@ -38,9 +41,6 @@ var balance_bar: Control
 var balance_label: Label
 var log_box: VBoxContainer
 var cards_box: HBoxContainer
-var end_panel: PanelContainer
-var end_title: Label
-var end_body: Label
 var help_panel: PanelContainer  # aide F1 (remplace la ligne d'aide permanente)
 var siege_panel: PanelContainer
 var siege_label: Label
@@ -51,6 +51,7 @@ var _battle_columns: Dictionary = {}  # "vanguard"/"main"/"rear" -> VBoxContaine
 var _cards: Dictionary = {}  # unit id -> UnitCard
 var _balance: Array = [1, 1]
 var _colors: Array = [Color.RED, Color.BLUE]
+var player_faction: String = ""  # B2 : blason des vignettes
 var _log_lines: Array[String] = []
 
 
@@ -63,7 +64,6 @@ func _ready() -> void:
 	_build_top_bar()
 	_build_log()
 	_build_bottom()
-	_build_end_panel()
 
 
 func _label(text: String, size: int = 16) -> Label:
@@ -230,32 +230,6 @@ func _draw_speed_icon(button: Button, index: int) -> void:
 		button.draw_colored_polygon(PackedVector2Array([Vector2(x, center.y - 6), Vector2(x + 9, center.y), Vector2(x, center.y + 6)]), color)
 
 
-func _build_end_panel() -> void:
-	end_panel = PanelContainer.new()
-	end_panel.anchor_left = 0.5
-	end_panel.anchor_right = 0.5
-	end_panel.anchor_top = 0.5
-	end_panel.anchor_bottom = 0.5
-	end_panel.offset_left = -290
-	end_panel.offset_right = 290
-	end_panel.offset_top = -190
-	end_panel.visible = false
-	root.add_child(end_panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
-	end_panel.add_child(box)
-	end_title = _label("Victoire", 30)
-	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(end_title)
-	end_body = _label("", 16)
-	end_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(end_body)
-	var button := Button.new()
-	button.text = "Retour à la campagne"
-	button.pressed.connect(func() -> void: return_pressed.emit())
-	box.add_child(button)
-
-
 # --- Mises à jour ---------------------------------------------------------------------
 
 
@@ -352,8 +326,9 @@ func _make_card(unit: Dictionary) -> UnitCard:
 	column.visible = true
 	var card: UnitCard = UNIT_CARD.new()
 	(column.get_node("Cards") as HBoxContainer).add_child(card)
-	card.setup(unit, get_node_or_null("/root/IconLibrary"))
+	card.setup(unit, get_node_or_null("/root/IconLibrary"), player_faction, _colors[0])
 	card.clicked.connect(func(id: int, additive: bool) -> void: card_clicked.emit(id, additive))
+	card.double_clicked.connect(func(id: int) -> void: card_double_clicked.emit(id))
 	return card
 
 
@@ -366,12 +341,6 @@ func card_battle(unit_id: int) -> String:
 	if not _cards.has(unit_id):
 		return ""
 	return str((_cards[unit_id] as Node).get_parent().get_parent().get_meta("battle", ""))
-
-
-func show_end(title: String, body: String) -> void:
-	end_title.text = title
-	end_body.text = body
-	end_panel.visible = true
 
 
 # --- F5c : message éphémère (refus de déploiement, sortie de la garnison) ---------------

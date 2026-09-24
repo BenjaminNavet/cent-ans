@@ -2,6 +2,10 @@ class_name CityMarkers
 extends Node3D
 
 ## Marqueurs de capitales : cylindre placeholder + Label3D (nom de province) à `capital_px`.
+##
+## Lot C6 : avec `labels_only`, plus de maquette (les colonies sont rendues par
+## `SettlementLayer`) ; seuls restent les noms de provinces au centroïde, en fondu selon le
+## poids du palier « loin » (`set_tier_alpha`).
 
 @export var marker_color: Color = Color(0.55, 0.12, 0.10)
 @export var label_color: Color = Color(0.16, 0.10, 0.05)
@@ -14,6 +18,8 @@ extends Node3D
 ## Anti-chevauchement (lot V2b) : période de mise à jour (s) et marge entre étiquettes (px).
 @export var declutter_interval: float = 0.2
 @export var declutter_margin: float = 4.0
+## Lot C6 : noms de provinces seuls (au centroïde), sans maquette ni cylindre.
+@export var labels_only: bool = false
 
 var _labels: Array[Label3D] = []
 var _labels_visible := true
@@ -22,6 +28,7 @@ var _priority: Array[Label3D] = []
 var _declutter_timer := 0.0
 
 var _marker_material: StandardMaterial3D
+var _tier_alpha := 1.0
 var _cylinder: CylinderMesh
 
 
@@ -39,16 +46,16 @@ func build(map_data: MapData) -> void:
 	_cylinder.radial_segments = 12
 	for index in map_data.provinces:
 		var province: Dictionary = map_data.provinces[index]
-		var capital: Vector2 = province["capital_px"]
+		var capital: Vector2 = province["centroid"] if labels_only else province["capital_px"]
 		var y := map_data.surface_world_at(capital.x, capital.y)
 		var marker := Node3D.new()
 		marker.name = "City_%d" % index
 		marker.position = Vector3(capital.x, y, capital.y)
 		# M10 assets : modèle 3D (château / ville / village / cathédrale), sinon cylindre.
-		var model := ModelLibrary.city_model(str(province.get("id", "")))
+		var model: Node3D = null if labels_only else ModelLibrary.city_model(str(province.get("id", "")))
 		if model != null:
 			marker.add_child(model)
-		else:
+		elif not labels_only:
 			var body := MeshInstance3D.new()
 			body.mesh = _cylinder
 			body.material_override = _marker_material
@@ -56,7 +63,10 @@ func build(map_data: MapData) -> void:
 			marker.add_child(body)
 		var label := Label3D.new()
 		var capital_name: String = province.get("capital_name", "")
-		label.text = capital_name if capital_name != "" else province["name"]
+		label.text = capital_name if capital_name != "" and not labels_only else province["name"]
+		if labels_only:
+			var paren := label.text.find(" (")
+			label.text = (label.text.substr(0, paren) if paren > 0 else label.text).to_upper()
 		label.font_size = font_size
 		label.outline_size = 8
 		label.modulate = label_color
@@ -75,8 +85,28 @@ func build(map_data: MapData) -> void:
 	_priority.sort_custom(func(a: Label3D, b: Label3D) -> bool: return float(a.get_meta("area")) > float(b.get_meta("area")))
 
 
+## Lot C6 : opacité des noms de provinces (poids du palier « loin »).
+func set_tier_alpha(alpha: float) -> void:
+	if is_equal_approx(alpha, _tier_alpha):
+		return
+	_tier_alpha = alpha
+	for label in _labels:
+		var color := label_color
+		color.a = alpha
+		label.modulate = color
+		label.outline_modulate = Color(0.95, 0.90, 0.78, alpha)
+	var should_show := alpha > 0.02
+	if should_show != _labels_visible:
+		_labels_visible = should_show
+		for label in _labels:
+			label.visible = should_show
+		_declutter_timer = 0.0
+
+
 ## Masque les étiquettes quand la caméra est trop loin (lisibilité à 120 provinces).
 func update_visibility(camera_distance: float) -> void:
+	if labels_only:
+		return
 	var should_show := camera_distance < label_max_distance
 	if should_show == _labels_visible:
 		return
@@ -111,7 +141,7 @@ func declutter() -> void:
 			label.visible = false
 			continue
 		var center := camera.unproject_position(world)
-		var width := label.text.length() * font_size * 0.52 + declutter_margin * 2.0
+		var width := label.text.length() * font_size * (0.66 if labels_only else 0.52) + declutter_margin * 2.0
 		var height := font_size * 1.1 + declutter_margin * 2.0
 		var rect := Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
 		if not screen.intersects(rect):

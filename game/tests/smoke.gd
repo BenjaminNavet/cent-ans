@@ -85,6 +85,7 @@ func _init() -> void:
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
+	await _run_minimap_fog()  # C1
 	_run_city_economy()
 	await _run_characters()
 	await _run_technologies()
@@ -286,6 +287,69 @@ func _run_campaign_loop() -> void:
 
 	if _failures == 0:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
+	map.queue_free()
+	await process_frame
+
+
+## C1 : minicarte présente dans le HUD (haut droite, lettres dessous, sans chevaucher la cloche),
+## clic = caméra recentrée ; brouillard (vraie simulation) : au moins une province voilée, aucune
+## armée étrangère marquée hors de vue, réglage désactivable.
+func _run_minimap_fog() -> void:
+	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
+	var map: Node3D = scene.instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "minimap: campaign scene failed to start"):
+		map.queue_free()
+		return
+	var ctl: Node = map.minimap_ctl  # non typé : compilé après les autoloads
+	if not _check(ctl != null and ctl.minimap != null and ctl.minimap.is_inside_tree(), "minimap: controller or minimap missing"):
+		map.queue_free()
+		return
+	var minimap: Control = ctl.minimap
+	map.ui.layout_hud()
+	await process_frame
+	_check(minimap.visible and minimap.size.x > 100.0 and minimap.size.y > 80.0, "minimap should be visible with a sensible size, got %s" % minimap.size)
+	var mini_rect := Rect2(minimap.position, minimap.size)
+	var bell_rect := Rect2(map.ui.end_turn_cluster.position, map.ui.end_turn_cluster.size)
+	_check(not mini_rect.intersects(bell_rect), "minimap %s overlaps the end-turn cluster %s" % [mini_rect, bell_rect])
+	_check(map.ui.news_letters.position.y >= mini_rect.end.y, "news letters should sit below the minimap")
+	_check(minimap.army_dot_count() > 0, "minimap should show the player's armies")
+	# Clic : la caméra vise le point cliqué (coordonnées carte).
+	var local: Vector2 = minimap.map_rect().size * Vector2(0.25, 0.7)
+	var expected: Vector2 = minimap.view_to_map(local)
+	minimap.click_at(local)
+	var focus: Vector3 = map.camera_rig.target_focus
+	_check(Vector2(focus.x, focus.z).distance_to(expected) < 1.0, "minimap click should recenter the camera on %s, got %s" % [expected, focus])
+	await process_frame
+	_check(ctl.view_frame().size() == 4, "camera frame should have 4 corners")
+	if map.sim.has_method("get_visible_provinces"):
+		_check(ctl.fog_active, "fog of war should be active by default with the real simulation")
+		var hidden := ""
+		for index in range(1, map.map_data.province_count + 1):
+			var id := str(map.map_data.get_province(index).get("id", ""))
+			if id != "" and not ctl.is_province_visible(id):
+				hidden = id
+				break
+		_check(hidden != "", "at least one province should be hidden by the fog")
+		_check(minimap.visible_province_count() > 0 and minimap.visible_province_count() < map.map_data.province_count,
+			"minimap fog mask should cover part of the map (%d visible)" % minimap.visible_province_count())
+		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
+		for army_id in map.sim.call("get_army_ids"):
+			var army: Dictionary = map.sim.call("get_army", army_id)
+			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location", ""))):
+				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
+		var settings: Node = root.get_node_or_null("/root/Settings")
+		if settings != null:
+			settings.call("set_value", "map/fog_of_war", false, false)
+			_check(not ctl.fog_active and ctl.is_province_visible(hidden), "fog setting off should reveal %s" % hidden)
+			settings.call("set_value", "map/fog_of_war", true, false)
+			_check(ctl.fog_active, "fog setting back on")
+	else:
+		print("smoke minimap: mock simulation, fog of war inactive")
+	if _failures == 0:
+		print("smoke OK: minimap (%d dots, %d visible provinces), fog %s" % [minimap.army_dot_count(), minimap.visible_province_count(), "on" if ctl.fog_active else "off"])
 	map.queue_free()
 	await process_frame
 
@@ -729,6 +793,8 @@ func _run_battle() -> void:
 	_check(drawn > 0, "battle scene: no soldier instances")
 	await _check_battle_deployment_f5c(scene)  # F5c
 	_check_battle_hud_f5b(scene)
+	_check_battle_markers_b2(scene)
+	await _check_battle_music_camera_b3(scene)  # B3
 	# Un ordre du joueur via l'API de la scène, puis fin de bataille accélérée.
 	var own: int = -1
 	for unit in scene.units:
@@ -744,8 +810,20 @@ func _run_battle() -> void:
 			break
 	await process_frame
 	await process_frame
-	_check(scene.finished_shown and scene.hud.end_panel.visible, "battle scene: end screen should be visible")
-	scene._on_return()
+	_check(scene.finished_shown and scene.result_screen != null and scene.result_screen.visible, "battle scene: end screen should be visible")
+	if scene.result_screen != null:
+		var screen: BattleResultScreen = scene.result_screen
+		_check(screen.title_label.text.begins_with("Victoire") or screen.title_label.text.begins_with("Défaite"), "battle result: verdict title is %s" % screen.title_label.text)
+		var regiments := 0
+		for unit in scene.units:
+			if not bool(unit.get("synthetic", false)):
+				regiments += 1
+		_check(screen.row_count() == regiments, "battle result: %d loss rows for %d regiments" % [screen.row_count(), regiments])
+		_check(screen.mentions_box.get_child_count() > 0, "battle result: no notable mentions")
+		_check(BattleResultScreen.verdict(true, 0.1, 0.7) == "Victoire décisive" and BattleResultScreen.verdict(false, 0.8, 0.1) == "Défaite écrasante", "battle result: verdict thresholds")
+		screen.return_button.emit_signal("pressed")  # « Retour à la campagne »
+	else:
+		scene._on_return()
 	await process_frame
 	_check(map.visible and map.process_mode == Node.PROCESS_MODE_INHERIT, "battle: campaign map should be back after the battle")
 	_check((map.sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be resolved after « Retour à la campagne »")
@@ -771,7 +849,7 @@ func _check_battle_hud_f5b(scene: BattleScene) -> void:
 	_check(BattleGroups.ORDER.has(hud.card_battle(first)), "battle HUD: card not in a battle column")
 	var card: UnitCard = hud._cards[first]
 	_check(card.custom_minimum_size.x <= 72.0 and card.tooltip_text.contains("Formation"), "battle HUD: card should be compact with formation in its tooltip")
-	var font := card.name_label.get_theme_font("font")
+	var font := card.get_theme_default_font()
 	var fitted := UnitCard.fit_name("Arbalétriers génois de la compagnie Grimaldi", font, 10, 63.0, 2)
 	_check(fitted.split("\n").size() <= 2 and not fitted.contains("Grimaldi"), "battle HUD: name fitting should stop on a whole word: %s" % fitted)
 	scene.selected.clear()
@@ -787,6 +865,112 @@ func _check_battle_hud_f5b(scene: BattleScene) -> void:
 	_check(hud.active_speed() == 1 and not scene.paused, "battle HUD: ×2 speed button not active")
 	scene._on_speed_pressed(0)
 	_check(hud.help_panel != null and not hud.help_panel.visible, "battle HUD: F1 help should start hidden")
+
+
+## B2 : bannières flottantes (un repère par régiment présent à l'écran, clic = sélection, touche
+## de masquage) et cartes-vignettes (effectif, infobulle riche).
+func _check_battle_markers_b2(scene: BattleScene) -> void:
+	var markers: BattleUnitMarkers = scene.markers
+	if not _check(markers != null and markers.is_inside_tree(), "battle markers: missing"):
+		return
+	scene._refresh_view(true)
+	_check(markers.marker_count() > 0, "battle markers: no floating banner drawn")
+	var own := -1
+	for unit in scene.units:
+		var id := int(unit["id"])
+		if str(unit["side"]) == scene.player_side and markers.marker_rect(id).size.x > 0.0 and markers.marker_at(markers.marker_rect(id).get_center()) == id:
+			own = id
+			break
+	if _check(own >= 0, "battle markers: no clickable banner for the player's regiments"):
+		var rect := markers.marker_rect(own)
+		_check(markers._has_point(rect.get_center()) and not markers._has_point(Vector2(-5000, -5000)), "battle markers: hit test")
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		click.position = rect.get_center()
+		scene.selected.clear()
+		markers._gui_input(click)
+		_check(scene.selected.size() == 1 and scene.selected[0] == own, "battle markers: clicking a banner should select its regiment (got %s)" % [scene.selected])
+	# Pas de chevauchement entre repères.
+	var ids := markers._placed.keys()
+	var overlaps := 0
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			if markers.marker_rect(ids[i]).intersects(markers.marker_rect(ids[j])):
+				overlaps += 1
+	_check(overlaps <= ids.size() / 4, "battle markers: %d overlapping banners out of %d" % [overlaps, ids.size()])
+	markers.toggle()
+	scene._refresh_view(true)
+	_check(not markers.visible and markers.marker_count() == 0, "battle markers: toggle should hide the banners")
+	markers.toggle()
+	scene._refresh_view(true)
+	_check(markers.marker_count() > 0, "battle markers: toggle should show the banners again")
+	var card: UnitCard = scene.hud._cards.values()[0]
+	_check(card.custom_minimum_size.y >= 80.0 and card.art != null, "battle cards: thumbnail card expected")
+	_check(card.tooltip_text.contains("État"), "battle cards: rich tooltip should carry the state")
+
+
+## B3 (T4 musique dynamique, T6 caméra de suivi) : changement d'état musical déclenché par un
+## contact simulé (fonction pure `BattleMusicDirector.compute_state`) et son hystérésis ; la
+## caméra suit la position d'un régiment sur plusieurs ticks, s'oriente vers lui, se libère au
+## clavier, et le double-clic sur une carte recentre la caméra dessus.
+func _check_battle_music_camera_b3(scene: BattleScene) -> void:
+	const MUSIC := preload("res://scripts/battle/battle_music.gd")
+	if not _check(scene.music != null, "battle music: BattleMusicDirector missing on the scene"):
+		return
+	_check(scene.music.current_state == "approach", "battle music: should start calm (approach), got %s" % scene.music.current_state)
+
+	# Contact simulé : la fonction pure d'intensité doit distinguer les quatre états.
+	var calm := [{"side": "attacker", "state": "marching", "morale": 0.9, "present": true}, {"side": "defender", "state": "idle", "morale": 0.9, "present": true}]
+	_check(MUSIC.compute_state(calm, false, false) == "approach", "battle music: no contact should stay calm")
+	var contact := [{"side": "attacker", "state": "melee", "morale": 0.8, "present": true}, {"side": "defender", "state": "melee", "morale": 0.8, "present": true}]
+	_check(MUSIC.compute_state(contact, false, false) == "engagement", "battle music: melee contact should be an engagement")
+	var breaking := [{"side": "attacker", "state": "melee", "morale": 0.8, "present": true}, {"side": "defender", "state": "routing", "morale": 0.1, "present": true}, {"side": "defender", "state": "routing", "morale": 0.1, "present": false}]
+	_check(MUSIC.compute_state(breaking, false, false) == "critical", "battle music: a side close to routing should be critical")
+	_check(MUSIC.compute_state([], true, true) == "victory" and MUSIC.compute_state([], true, false) == "defeat", "battle music: a finished battle should give victory / defeat")
+
+	# Hystérésis : monter en intensité est immédiat, redescendre exige une intensité stable.
+	scene.music.current_state = "approach"
+	scene.music._pending_state = "approach"
+	scene.music._pending_elapsed = 0.0
+	scene.music._advance("critical", 10.0)
+	_check(scene.music.current_state == "critical", "battle music: escalation should be immediate")
+	scene.music._advance("engagement", 1.0)
+	_check(scene.music.current_state == "critical", "battle music: de-escalation should wait out the hysteresis")
+	scene.music._advance("engagement", 3.0)
+	_check(scene.music.current_state == "engagement", "battle music: de-escalation should commit once the new state is stable")
+
+	# Caméra de suivi (T6) : verrouillage sur la sélection, suivi doux, libération manuelle.
+	var own := -1
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]):
+			own = int(unit["id"])
+			break
+	if not _check(own >= 0, "battle camera: no player regiment to follow"):
+		return
+	scene.selected = [own]
+	scene.camera_rig.target = Vector3(0, 0, 0)
+	var start_distance := scene.camera_rig.target.distance_to(scene._unit_world_position(own))
+	scene._toggle_camera_follow()
+	_check(scene.camera_rig.is_following() and scene.camera_rig.follow_id == own, "battle camera: C should lock onto the selected regiment")
+	# Ticks manuels (delta fixe) plutôt que des images réelles : la convergence du lissage ne doit
+	# pas dépendre du débit d'images de l'exécution headless.
+	for _i in 20:
+		scene.camera_rig._process(0.3)
+	var followed_distance := scene.camera_rig.target.distance_to(scene._unit_world_position(own))
+	_check(followed_distance < start_distance * 0.5, "battle camera: target should have closed in on the followed regiment (%.1f -> %.1f)" % [start_distance, followed_distance])
+	scene._toggle_camera_follow()
+	_check(not scene.camera_rig.is_following(), "battle camera: C again should release the follow")
+
+	# Double-clic sur une carte d'unité : centre la caméra sur ce régiment (jump, sans suivi).
+	# Comparaison au sol (x, z) : `look_at_point` / `_apply()` replaquent `target.y` sur le terrain.
+	scene.camera_rig.target = Vector3(0, 0, 0)
+	scene._on_card_double_clicked(own)
+	var after_pos: Vector3 = scene._unit_world_position(own)
+	var ground_gap := Vector2(scene.camera_rig.target.x, scene.camera_rig.target.z).distance_to(Vector2(after_pos.x, after_pos.z))
+	_check(ground_gap < 1.0, "battle camera: double-click on a card should center the camera on the regiment (gap %.2f)" % ground_gap)
+	_check(not scene.camera_rig.is_following(), "battle camera: double-click should not itself start a follow")
+	await process_frame
 
 
 func _run_chronicle() -> void:
@@ -1288,6 +1472,23 @@ func _run_flow() -> void:
 	_check(report_lines > 0, "season report should list events after 4 turns")
 	var all_events: Array = map.sim.call("get_events")
 	print("smoke flow: %d report lines, %d alerts, %d journal events" % [report_lines, map.ui.end_turn_cluster.alerts.size(), all_events.size()])
+
+	# P2 : bataille résolue après la fin du tour (dialogue d'avant-bataille) — son résultat
+	# doit rejoindre le rapport de saison déjà affiché, pas seulement la chronique
+	# (docs/wip/finalisation.md § « Défauts relevés », docs/wip/p2-rapport-smoke.md).
+	var battle_armies: Array = BattleScene.main_armies(map.sim, "fac_france", "fac_england")
+	if _check(battle_armies.size() == 2, "flow: no French or English army for the late-battle check"):
+		var battle_index: int = map.sim.call("debug_stage_battle", battle_armies[0], battle_armies[1])
+		_check(battle_index >= 0, "flow: debug_stage_battle failed")
+		map._on_battle_auto(battle_index)
+		await process_frame
+		_check(flow.season_report.visible, "flow: season report should (re)open after a late battle result")
+		var found_result := false
+		for group in flow.season_report.groups:
+			for entry in (group["entries"] as Array):
+				if str((entry as Dictionary).get("text_fr", "")).contains("Vainqueur"):
+					found_result = true
+		_check(found_result, "flow: season report should include the resolved battle (result), not just 'en vue'")
 
 	# Menu pause : ouverture (arbre en pause), dialogue de sauvegarde, fermeture.
 	flow.open_pause()

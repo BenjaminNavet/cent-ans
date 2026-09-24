@@ -1,0 +1,7 @@
+{
+  "description": "Brouillard de guerre de la carte de campagne (lot C1) : une faction voit ses provinces, celles de ses alliés et vassaux, leurs voisines à un pas terrestre, ainsi que la province de chaque armée amie et ses voisines. Un chef d'armée pousse ses coureurs un pas plus loin.",
+  "controlled_range": 1,
+  "army_range": 1,
+  "general_bonus": 1,
+  "share_allied_vision": true
+}

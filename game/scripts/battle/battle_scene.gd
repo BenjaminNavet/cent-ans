@@ -15,7 +15,8 @@ extends Node3D
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
 ## `--camera=x,z,distance,lacet` (capture : position de caméra imposée), `--deploy-shot` (avec
-## `--screenshot=` : capture de la phase de déploiement, F5c).
+## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
+## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2).
 
 signal returned(result: Dictionary)
 
@@ -27,6 +28,8 @@ const BANNER_HEIGHT := 7.0
 const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
 ## Barre des ordres du chef (F10b).
 const LEADER_ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
+## Musique dynamique par intensité (B3 / T4).
+const BATTLE_MUSIC := preload("res://scripts/battle/battle_music.gd")
 
 var campaign_sim: Object = null
 var battle_index: int = -1
@@ -51,7 +54,10 @@ var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
-var _banners: Dictionary = {}  # id -> {node, flag_mat, label, count}
+var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
+var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
+var result_screen: BattleResultScreen = null  # B2 : écran de fin
+var _result_shot: bool = false
 var _rings: Dictionary = {}  # id -> MeshInstance3D
 var _left_press: Vector2 = Vector2(-1, -1)
 var _right_press: Vector2 = Vector2(-1, -1)
@@ -71,6 +77,8 @@ var _last_group_ms: int = -10000
 var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
 var _deploy_shot: bool = false
 var _sortie_shown: bool = false
+var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
+var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -89,8 +97,8 @@ func configure(p_campaign_sim: Object, index: int, seed: int) -> void:
 func _ready() -> void:
 	_parse_cmdline()
 	hud.card_clicked.connect(_on_card_clicked)
+	hud.card_double_clicked.connect(_on_card_double_clicked)
 	hud.command_pressed.connect(_on_command)
-	hud.return_pressed.connect(_on_return)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	_drag_rect = ColorRect.new()
@@ -153,6 +161,10 @@ func begin() -> bool:
 	setup = campaign_sim.call("get_battle_setup", battle_index)
 	if setup.is_empty():
 		return false
+	# B3 : la musique de campagne cède la place à la musique de bataille (réveillée au retour).
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
 	if _pad_units > 0:
 		_pad_setup(_pad_units)
 	battle = ClassDB.instantiate("BattleSim")
@@ -184,8 +196,10 @@ func begin() -> bool:
 	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
+	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
+	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -193,6 +207,10 @@ func begin() -> bool:
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	add_child(LEADER_ORDERS_BAR.new(self))
+	music = BATTLE_MUSIC.new()
+	music.name = "Music"
+	add_child(music)
+	music.setup(self)
 	_refresh_view(true)
 	return true
 
@@ -261,25 +279,7 @@ func _make_banner(unit: Dictionary) -> void:
 	flag.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
-	var label := Label3D.new()
-	label.text = BattleHud.CATEGORY_ICON.get(str(unit["render"]), "⚔") + ("★" if bool(unit["is_general"]) else "")
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.font_size = 64
-	label.pixel_size = 0.02
-	label.outline_size = 10
-	label.modulate = Color(1, 0.97, 0.88)
-	label.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - minf(flag_size.y, 1.7) * 0.5, 0.05)
-	node.add_child(label)
-	var count := Label3D.new()
-	count.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	count.no_depth_test = true
-	count.font_size = 40
-	count.pixel_size = 0.02
-	count.outline_size = 8
-	count.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - flag_size.y - 0.6, 0)
-	node.add_child(count)
-	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count, "routing": false}
+	_banners[id] = {"node": node, "flag_mat": flag_mat, "routing": false}
 	var ring := MeshInstance3D.new()
 	var ring_mat := StandardMaterial3D.new()
 	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
@@ -345,12 +345,15 @@ func _process(delta: float) -> void:
 		return
 	if not paused and not battle.call("is_finished"):
 		battle.call("tick", delta * speed)
+	if music != null:
+		music.update(delta)
 	_refresh_view(false, delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
 		if _bench_frames == 0:
 			soldiers.start_timing()
+			_apply_camera_override()  # banc d'essai rapproché (lot B1)
 		_bench_frames += 1
 		_bench_time += delta
 		if _bench_frames == 600:
@@ -389,9 +392,6 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
-		var count: Label3D = banner["count"]
-		count.text = str(int(unit["soldiers"]))
-		count.modulate = Color(1, 0.85, 0.3) if selected.has(id) else Color(1, 1, 1)
 		if ring.visible:
 			ring.position = pos + Vector3(0, 0.6, 0)
 			ring.rotation = Vector3(0, float(unit["facing"]), 0)
@@ -399,6 +399,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
 				ring.set_meta("size", size)
 				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	_update_markers(banner_scale)
 	_hud_timer -= delta
 	if force or _hud_timer <= 0.0:
 		_hud_timer = 0.1
@@ -437,31 +438,61 @@ static func siege_status(siege: Dictionary) -> String:
 	return text
 
 
+## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
+func _build_markers() -> void:
+	markers = BattleUnitMarkers.new()
+	hud.root.add_child(markers)
+	hud.root.move_child(markers, 0)
+	markers.setup(side_colors, player_side)
+	markers.marker_clicked.connect(_on_card_clicked)
+	markers.marker_right_clicked.connect(_on_marker_right_clicked)
+
+
+## Ancre écran de chaque repère : au-dessus du drapeau 3D du régiment.
+func _update_markers(banner_scale: float) -> void:
+	if markers == null:
+		return
+	var anchors := {}
+	if markers.visible:
+		var camera := camera_rig.camera
+		var screen := get_viewport().get_visible_rect().grow(60.0)
+		for unit in units:
+			if not bool(unit["present"]):
+				continue
+			var top := Vector3(float(unit["x"]), float(unit["y"]) + (BANNER_HEIGHT + 0.6) * banner_scale, float(unit["z"]))
+			if camera.is_position_behind(top):
+				continue
+			var point := camera.unproject_position(top)
+			if screen.has_point(point):
+				anchors[int(unit["id"])] = point
+	markers.update(units, anchors, selected)
+
+
+## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
+func _on_marker_right_clicked(unit_id: int) -> void:
+	if selected.is_empty() or deployment != null and deployment.active:
+		return
+	for unit in units:
+		if int(unit["id"]) == unit_id and str(unit["side"]) == enemy_side:
+			issue({"type": "attack", "units": selected.duplicate(), "target": unit_id, "run": true})
+			return
+
+
 func _banner_scale() -> float:
 	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
 
 
+## B2 / T2 : écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
-	var winner := str(outcome.get("winner", "defender"))
-	var won := winner == player_side
-	var lines: Array[String] = []
-	lines.append("Vainqueur : %s (%s)." % [side_names[winner], "attaquant" if winner == "attacker" else "défenseur"])
-	for side in [player_side, enemy_side]:
-		var result: Dictionary = outcome.get(side, {})
-		var start := 0
-		for unit in units:
-			if str(unit["side"]) == side:
-				start += int(unit["initial_soldiers"])
-		var general := ""
-		if bool(result.get("general_killed", false)):
-			general = " Le général est tombé."
-		elif bool(result.get("general_captured", false)):
-			general = " Le général est capturé."
-		lines.append("%s : %d hommes engagés, %d pertes.%s" % [side_names[side], start, int(result.get("total_losses", 0)), general])
-	lines.append("Durée : %d min %02d s." % [int(outcome.get("duration", 0.0)) / 60, int(outcome.get("duration", 0.0)) % 60])
-	hud.show_end("Victoire !" if won else "Défaite…", "\n".join(lines))
+	var sides := {}
+	for side in ["attacker", "defender"]:
+		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	result_screen = BattleResultScreen.new()
+	hud.root.add_child(result_screen)
+	result_screen.return_pressed.connect(_on_return)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
 
 
 ## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
@@ -474,6 +505,8 @@ func _on_return() -> void:
 		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
 		if not result.get("ok", false):
 			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
+		_audio_director.call("refresh_context")
 	returned.emit(result)
 	if standalone:
 		get_tree().change_scene_to_file("res://scenes/start_menu.tscn")
@@ -503,12 +536,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
 			KEY_F1:
 				hud.toggle_help()
+			KEY_U:
+				if markers != null:
+					markers.toggle()
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
 				_on_command("fire_at_will")
 			KEY_H:
 				_on_command("halt")
+			KEY_C:
+				_toggle_camera_follow()
 			KEY_ESCAPE:
 				selected.clear()
 			KEY_F12:
@@ -526,6 +564,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				_right_press_ground = ground_point(button.position)
 			else:
 				_finish_right(button.position)
+	elif event is InputEventMouseMotion and _left_press.x < 0.0 and markers != null:
+		# B2 : survol d'une troupe sur le terrain = repère mis en évidence.
+		var hover_at := (event as InputEventMouseMotion).position
+		var hover := pick_unit(hover_at, player_side)
+		markers.world_hover = hover if hover >= 0 else pick_unit(hover_at, enemy_side)
 	elif event is InputEventMouseMotion and _left_press.x >= 0.0:
 		var motion := event as InputEventMouseMotion
 		var rect := Rect2(_left_press, motion.position - _left_press).abs()
@@ -650,6 +693,44 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
+func _on_card_double_clicked(unit_id: int) -> void:
+	for unit in units:
+		if int(unit["id"]) == unit_id and bool(unit["present"]):
+			camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)
+			return
+
+
+## Touche `C` : verrouille la caméra sur la sélection (premier régiment présent) ou, à défaut, le
+## général du joueur ; un second appui pendant un suivi le libère.
+func _toggle_camera_follow() -> void:
+	if camera_rig.is_following():
+		camera_rig.stop_follow()
+		return
+	var id := _follow_candidate()
+	if id >= 0:
+		camera_rig.follow_unit(id, _unit_world_position)
+
+
+func _follow_candidate() -> int:
+	for unit in units:
+		if selected.has(int(unit["id"])) and bool(unit["present"]):
+			return int(unit["id"])
+	for unit in units:
+		if str(unit["side"]) == player_side and bool(unit.get("is_general", false)) and bool(unit["present"]):
+			return int(unit["id"])
+	return -1
+
+
+## Callable passée à `BattleCamera.follow_unit` : position au sol du régiment, `null` s'il a
+## quitté le champ (le suivi se libère alors de lui-même).
+func _unit_world_position(id: int) -> Variant:
+	for unit in units:
+		if int(unit["id"]) == id and bool(unit["present"]):
+			return Vector3(float(unit["x"]), 0.0, float(unit["z"]))
+	return null
 
 
 func _on_command(command: String) -> void:
@@ -786,6 +867,8 @@ func _parse_cmdline() -> void:
 			siege_demo = true
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
+		elif arg == "--result-shot":
+			_result_shot = true
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -806,6 +889,9 @@ func _stage_screenshot() -> void:
 		return
 	if siege_view != null:
 		await _stage_siege_screenshot()
+		return
+	if _result_shot:
+		await _stage_result_screenshot()
 		return
 	var contact_time := -1.0
 	for _i in 3000:
@@ -854,6 +940,8 @@ func _stage_screenshot() -> void:
 	for unit in units:
 		if str(unit["side"]) == player_side and bool(unit["present"]) and selected.size() < 2:
 			selected.append(int(unit["id"]))
+	if markers != null and not selected.is_empty() and not _closeup:
+		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
 	for _i in 40:
@@ -890,6 +978,21 @@ func _stage_siege_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	for _i in 40:
+		await get_tree().process_frame
+	_take_screenshot(_screenshot_path, true)
+
+
+## Capture `--result-shot` : bataille jouée par l'IA jusqu'au bout, écran de fin affiché.
+func _stage_result_screenshot() -> void:
+	for _i in 36000:
+		battle.call("tick", 0.1)
+		if battle.call("is_finished"):
+			break
+	soldiers.update(battle, battle.call("get_units"), 0.1, [])
+	_refresh_view(true)
+	if not finished_shown:
+		_show_end()
+	for _i in 30:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
 

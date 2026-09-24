@@ -51,6 +51,8 @@ const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 
 var map_data: MapData
 var mask: VegetationMask
+## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
+var extra_exclusions: PackedVector3Array = PackedVector3Array()
 var chunk_px: int = 0
 var enabled: bool = true
 ## Statistiques : tuiles construites, instances, temps de semis (ms, somme et max).
@@ -87,10 +89,12 @@ func build(data: MapData) -> void:
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
 	_exclusions.clear()
-	for index in data.provinces:
+	# Sans colonies (C6), clairière autour de chaque capitale de province.
+	for index in data.provinces if extra_exclusions.is_empty() else {}:
 		var capital: Vector2 = data.provinces[index].get("capital_px", Vector2(-1, -1))
 		if capital.x >= 0.0:
 			_exclusions.append(Vector3(capital.x, capital.y, 11.0))
+	_exclusions.append_array(extra_exclusions)
 
 
 func clear() -> void:
@@ -247,9 +251,18 @@ func _start_job(index: int) -> void:
 	job.size_px = chunk_px
 	job.spacing = spacing * float(chunk_px) / 256.0 if chunk_px < 256 else spacing
 	job.tree_scale = tree_scale
-	job.exclusions = _exclusions
+	job.exclusions = _exclusions_for(Rect2(Vector2(job.origin_px), Vector2(chunk_px, chunk_px)))
 	var task := WorkerThreadPool.add_task(job.run, false, "vegetation tile %d" % index)
 	_jobs[index] = {"task": task, "job": job}
+
+
+## Exclusions qui touchent une tuile (le semis teste chaque candidat contre toute la liste).
+func _exclusions_for(rect: Rect2) -> PackedVector3Array:
+	var result := PackedVector3Array()
+	for e in _exclusions:
+		if rect.grow(e.z).has_point(Vector2(e.x, e.y)):
+			result.append(e)
+	return result
 
 
 func _collect_jobs() -> void:

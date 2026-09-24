@@ -52,6 +52,7 @@ pub use entities::settlement::{
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::unit_type::{Ability, UnitStats, UnitType};
+pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CultureId, DietId, EventId, FactionId, NamesId,
     ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId, TechnologyId, TraitId,
