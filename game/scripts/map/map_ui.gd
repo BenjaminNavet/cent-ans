@@ -227,7 +227,9 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	# H5 : le seigneuriage est déjà dans les recettes, la refonte dans l'administration.
 	var seigniorage := int(economy.get("seigniorage", 0))
 	var recoinage := int(economy.get("recoinage", 0))
-	var net := gross - armies - buildings - court - table
+	# Solde calculé par `core/` (`FactionEconomy::net_income`, audit A3 E1/E4) : l'interface
+	# n'additionne rien, le panneau de faction affiche le même chiffre.
+	var net := int(economy.get("net_income", 0))
 	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
 	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
 	var lines := PackedStringArray(["Prévision pour la prochaine saison"])
@@ -241,7 +243,10 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 		lines.append("    dont refonte des monnaies : -%s ℔" % ProvincePanel._thousands(recoinage))
 	if table != 0:
 		lines.append("La Table : -%s ℔" % ProvincePanel._thousands(table))
-	lines.append("Solde : %s ℔" % _signed(net))
+	lines.append("Solde prévu : %s ℔" % _signed(net))
+	if economy.has("net_income_last_turn"):
+		lines.append("Saison passée : %s ℔" % _signed(int(economy["net_income_last_turn"])))
+	lines.append("Détail : panneau de faction (clic sur le blason).")
 	income_label.tooltip_text = "\n".join(lines)
 
 

@@ -332,7 +332,8 @@ func _characters_available() -> bool:
 func _refresh_top_bar() -> void:
 	ui.set_faction(SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
 	PortraitLoader.overlay_heraldry(ui.faction_swatch, player_faction, Vector2(22, 26))  # M10 assets
-	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), sim.call("get_turn")])
+	# Le moteur compte les tours à partir de 0 ; le joueur commence au tour 1 (audit A3 C2).
+	ui.set_date("%s — tour %d" % [sim.call("get_date_label"), int(sim.call("get_turn")) + 1])
 	var summary: Dictionary = sim.call("get_faction_summary", player_faction)
 	var economy: Dictionary = {}
 	if _economy_available():

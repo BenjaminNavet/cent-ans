@@ -207,13 +207,19 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(economy) = FactionId::new(id.to_string())
-            .ok()
-            .and_then(|id| state.faction_economy(data, &id))
-        else {
+        let Ok(faction) = FactionId::new(id.to_string()) else {
             return VarDictionary::new();
         };
-        faction_economy_dict(&economy)
+        let Some(economy) = state.faction_economy(data, &faction) else {
+            return VarDictionary::new();
+        };
+        let mut dict = faction_economy_dict(&economy);
+        // UI audit A3 E1: the booked balance of the last season, from core.
+        dict.set(
+            "net_income_last_turn",
+            state.faction_net_last_turn(&faction).unwrap_or(0),
+        );
+        dict
     }
 
     /// `{owner, controller, garrison[], siege?, unrest, devastation,
@@ -802,6 +808,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "treasury" => economy.treasury,
         "income" => economy.income,
         "projected_income" => economy.projected_income,
+        "net_income" => economy.net_income(),
         "army_upkeep" => economy.army_upkeep,
         "building_upkeep" => economy.building_upkeep,
         "administration_upkeep" => economy.administration_upkeep,

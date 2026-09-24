@@ -98,7 +98,7 @@ const GAUGE_TEXTS := {
 }
 const HUD_TEXTS := {
 	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, les troupes se débandent."],
-	"hud_income": ["Revenu", "Impôts et commerce de la saison moins l'entretien des armées, des bâtiments et de l'administration ; « prév. » : revenu prévisionnel du prochain tour."],
+	"hud_income": ["Solde", "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."],
 	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
 	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
 	"hud_technologies": ["Technologies", "Arbres militaire, civil et médecine (touche T)."],
