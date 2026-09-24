@@ -33,3 +33,7 @@ Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas d
 HUD de bataille (`battle_hud.gd`) : cartes d'unités moitié moins larges (icône de classe, effectif, barres fines moral/fatigue/munitions, plus de ligne « Formation »), noms jamais coupés au milieu d'un mot ; cartes groupées par « bataille » (avant-garde / corps / arrière-garde) avec Ctrl+1..9 ; plus de ligne d'aide permanente (F1) ; vitesses en icônes (pause, ×1, ×2, ×3) en bas à droite ; minicarte ; `leader_orders_bar` reste au-dessus des cartes (marge 216 px à ajuster par une constante).
 
 - Autre flux découvert : lots H (session « historien » ? : régimes et médecine H3/H4, codex historique H2/H8 dans `data/codex`, touche K). L'encyclopédie F8 (données de jeu) et le codex (récit historique) coexistent.
+
+## 24/09 matin
+- 5 h 40 : branche `visual` (V1-V4 : éclairage, terrain splat/SDF/PBR/eau, végétation, villes, marqueurs, rendu de bataille) fusionnée dans main (d7336b5), smoke 16/16.
+- Session « historien » (game-project-41) : lots H (régimes, médecine, codex, H7 : 20 événements). **Règle : commiter uniquement avec `git commit -- <chemins>`** (l'index est partagé ; un `-am` a embarqué sa fusion H7, corrigé en 44c48b0).
