@@ -18,7 +18,7 @@ use data_model::{
     SkillBranch, SkillId, UnitTypeId,
 };
 use sim_campaign::coinage::CoinageLevel;
-use sim_campaign::movement::{dijkstra, edges, path_to, points_per_step};
+use sim_campaign::movement::{dijkstra, edges, points_per_step};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
@@ -95,6 +95,9 @@ struct Context<'a> {
     army_upkeep: i64,
     building_upkeep: i64,
     treasury: i64,
+    /// Lot M2: the settlement standing for every army on the settlement
+    /// graph (its own, or the nearest one in the field).
+    anchors: BTreeMap<ArmyId, SettlementId>,
 }
 
 impl<'a> Context<'a> {
@@ -107,6 +110,11 @@ impl<'a> Context<'a> {
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
         Some(Context {
+            anchors: state
+                .armies
+                .iter()
+                .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
+                .collect(),
             state,
             data,
             faction,
@@ -199,19 +207,26 @@ impl<'a> Context<'a> {
         provinces.extend(self.data.province_land_neighbors(province).iter().cloned());
         provinces
             .iter()
-            .flat_map(|p| self.state.hostile_armies_in(self.faction, p))
+            .flat_map(|p| self.state.hostile_armies_in(self.data, self.faction, p))
             .map(|id| self.state.army_power(self.data, &id))
             .sum()
     }
 
-    /// Hostile army power on `settlement` or one edge away.
+    /// Hostile army power anchored on `settlement` or one edge away (lot
+    /// M2: an army in the field counts at its nearest settlement).
     fn threat_at(&self, settlement: &SettlementId) -> f64 {
         let mut nodes = vec![settlement.clone()];
         nodes.extend(edges(self.data, settlement).into_iter().map(|(s, _)| s));
-        nodes
+        self.anchors
             .iter()
-            .flat_map(|s| self.state.hostile_armies_at(self.faction, s))
-            .map(|id| self.state.army_power(self.data, &id))
+            .filter(|(_, anchor)| nodes.contains(anchor))
+            .filter(|(id, _)| {
+                self.state
+                    .armies
+                    .get(*id)
+                    .is_some_and(|a| self.state.is_at_war(self.faction, &a.faction))
+            })
+            .map(|(id, _)| self.state.army_power(self.data, id))
             .sum()
     }
 
@@ -739,12 +754,15 @@ fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         if army.general.is_some() {
             continue;
         }
-        let army_province = state.settlement_province(&army.location);
+        let army_province = state.army_province(ctx.data, army);
         let best = state
             .characters
             .iter()
             .filter(|(id, c)| {
-                available(id) && !busy.contains(*id) && c.location.as_ref() == army_province
+                available(id)
+                    && !busy.contains(*id)
+                    && c.location.is_some()
+                    && c.location == army_province
             })
             .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
             .map(|(id, _)| id.clone());
@@ -959,7 +977,7 @@ fn garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
     if army.units.len() < GARRISON_MIN_ARMY_UNITS {
         return None;
     }
-    let place = state.settlements.get(&army.location)?;
+    let place = state.settlements.get(army.settlement()?)?;
     if &place.controller != ctx.faction
         || place.siege.is_some()
         || !place.garrison.is_empty()
@@ -1011,11 +1029,13 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     armies.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
 
-    // Merge armies standing together into the strongest one.
+    // Merge armies stationed together into the strongest one.
     let mut merged: BTreeSet<ArmyId> = BTreeSet::new();
     let mut by_location: BTreeMap<SettlementId, ArmyId> = BTreeMap::new();
     for (id, _) in &armies {
-        let location = state.armies[id].location.clone();
+        let Some(location) = state.armies[id].settlement().cloned() else {
+            continue;
+        };
         match by_location.get(&location) {
             Some(target) => {
                 orders.push(Order::MergeArmies {
@@ -1032,7 +1052,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let power_at = |settlement: &SettlementId| -> f64 {
         armies
             .iter()
-            .filter(|(id, _)| &state.armies[id].location == settlement)
+            .filter(|(id, _)| ctx.anchors.get(id) == Some(settlement))
             .map(|(_, p)| p)
             .sum()
     };
@@ -1095,25 +1115,21 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 orders.push(order);
             }
         }
-        let power = power_at(&army.location);
+        let Some(anchor) = ctx.anchors.get(army_id).cloned() else {
+            continue;
+        };
+        let power = power_at(&anchor);
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(
-            state,
-            data,
-            ctx.faction,
-            &army.location,
-            Some(range),
-            Some(cap),
-        );
+        let table = dijkstra(state, data, ctx.faction, &anchor, Some(range), Some(cap));
         let steps = |cost: u32| f64::from(cost) / step;
-        let besieging = state
-            .settlements
-            .get(&army.location)
+        let besieging = army
+            .settlement()
+            .and_then(|s| state.settlements.get(s))
             .and_then(|s| s.siege.as_ref())
             .is_some_and(|s| &s.attacker == ctx.faction);
-        let here = province(&army.location);
+        let here = state.army_province(data, army);
 
         let mut choice: Option<(Objective, SettlementId)> = None;
 
@@ -1138,23 +1154,22 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
 
         // Lot C7a: give up a fortress that holds out far beyond patience.
         let hopeless = besieging
-            && state.fortification_level(data, &army.location) >= FORTRESS_LEVEL
+            && state.fortification_level(data, &anchor) >= FORTRESS_LEVEL
             && state
                 .settlements
-                .get(&army.location)
+                .get(&anchor)
                 .and_then(|s| s.siege.as_ref())
                 .is_some_and(|s| s.turns_elapsed >= SIEGE_PATIENCE_TURNS && s.turns_left > 2)
             && !state
                 .assault_odds(data, army_id)
                 .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS);
         if hopeless {
-            targeted.insert(army.location.clone());
+            targeted.insert(anchor.clone());
         }
 
         // Keep a siege that is going our way.
-        if choice.is_none() && besieging && !hopeless && ctx.threat_at(&army.location) < power * 1.2
-        {
-            targeted.insert(army.location.clone());
+        if choice.is_none() && besieging && !hopeless && ctx.threat_at(&anchor) < power * 1.2 {
+            targeted.insert(anchor.clone());
             // Storm the walls when the odds are good (M8).
             if state
                 .assault_odds(data, army_id)
@@ -1271,9 +1286,10 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         if choice.is_none() {
             if let Some((main, main_power)) = &largest {
                 if main != army_id && power < 0.5 * main_power {
-                    let location = state.armies[main].location.clone();
-                    if table.contains_key(&location) {
-                        choice = Some((Objective::Regroup, location));
+                    if let Some(location) = ctx.anchors.get(main).cloned() {
+                        if table.contains_key(&location) {
+                            choice = Some((Objective::Regroup, location));
+                        }
                     }
                 }
             }
@@ -1283,7 +1299,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         // lost siege...) goes back to the nearest place of its own.
         if choice.is_none()
             && !besieging
-            && !state.is_friendly_settlement(ctx.faction, &army.location)
+            && army
+                .settlement()
+                .is_none_or(|s| !state.is_friendly_settlement(ctx.faction, s))
         {
             choice = table
                 .iter()
@@ -1328,10 +1346,8 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 stance,
             });
         }
-        if target != army.location {
-            if let Some(path) = path_to(&table, &target) {
-                orders.push(Order::move_along(army_id.clone(), path));
-            }
+        if !army.is_at(&target) && table.contains_key(&target) {
+            orders.push(Order::move_to(army_id.clone(), target));
         }
     }
 }

@@ -16,16 +16,17 @@ signal minimap_clicked(world: Vector2)
 
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
 const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
+const ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
 • Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
-• F : formation · G : tir à volonté · H : halte · Z X V B N : ordres du chef · Échap : désélectionner.
+• F : formation · G : tir à volonté · H : halte · {orders} : ordres du chef · Échap : désélectionner.
 • Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
-• Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller.
-• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; W A S D ou glisser libèrent la caméra."""
+• Caméra : {camera}, molette, {rotate}, bouton du milieu ; clic sur la minicarte : y aller.
+• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; {camera} ou glisser libèrent la caméra."""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
@@ -283,7 +284,13 @@ func _build_help() -> void:
 	text.bbcode_enabled = true
 	text.fit_content = true
 	text.add_theme_color_override("default_color", INK)
-	text.text = HELP_TEXT
+	# Touches physiques affichées selon la disposition du clavier (AZERTY : Z Q S D, A / E).
+	var label := func(keycode: Key) -> String: return ORDERS_BAR.physical_label(keycode)
+	text.text = HELP_TEXT.format({
+		"orders": ORDERS_BAR.hotkey_labels(),
+		"camera": " ".join([label.call(KEY_W), label.call(KEY_A), label.call(KEY_S), label.call(KEY_D)]),
+		"rotate": "%s / %s" % [label.call(KEY_Q), label.call(KEY_E)],
+	})
 	help_panel.add_child(text)
 
 

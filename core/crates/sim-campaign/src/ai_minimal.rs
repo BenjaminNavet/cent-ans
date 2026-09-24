@@ -9,10 +9,17 @@
 //!
 //! Lives here rather than in the `ai` crate because `ai` depends on this crate;
 //! `ai::plan_turn` re-exports [`plan_turn`].
+//!
+//! Lot M2 (mechanical adaptation, the real grid AI is lot M3): the plans
+//! are still made on the settlement graph from each army's anchor (its
+//! settlement, or the nearest one in the field); the orders are `MoveArmy`
+//! towards the chosen settlement, walked on the navigation grid.
+
+use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, SettlementId};
 
-use crate::movement::{dijkstra, edges, path_to, points_per_step};
+use crate::movement::{dijkstra, edges, points_per_step};
 use crate::orders::Order;
 use crate::state::{ArmyId, CampaignState, Stance};
 
@@ -97,10 +104,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             .map(|s| (city, s.garrison.len()))
     }) {
         if garrison_len > CAPITAL_GARRISON_KEEP {
-            if let Some(target) = own_armies
-                .iter()
-                .find(|id| &state.armies[*id].location == city)
-            {
+            if let Some(target) = own_armies.iter().find(|id| state.armies[*id].is_at(city)) {
                 orders.push(Order::CreateArmy {
                     settlement: city.into(),
                     units_from_garrison: (CAPITAL_GARRISON_KEEP..garrison_len).collect(),
@@ -114,16 +118,25 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         }
     }
 
+    // Lot M2: where every army stands on the settlement graph.
+    let anchors: BTreeMap<ArmyId, SettlementId> = state
+        .armies
+        .iter()
+        .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
+        .collect();
     for army_id in own_armies {
         let army = &state.armies[&army_id];
-        if !army.path.is_empty() {
+        if !army.planned_path.is_empty() {
             continue;
         }
+        let Some(anchor) = anchors.get(&army_id).cloned() else {
+            continue;
+        };
         let power = state.army_power(data, &army_id);
         let step = points_per_step(data);
         let range = (f64::from(OFFENSIVE_RANGE) * step).round() as u32;
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(state, data, faction, &army.location, Some(range), Some(cap));
+        let table = dijkstra(state, data, faction, &anchor, Some(range), Some(cap));
 
         // Offensive: the best weakly defended hostile settlement, cities
         // first, then the others by weight and fortification.
@@ -147,7 +160,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
             .map(|(_, id)| id.clone());
         if let Some(target) = target {
-            if target == army.location {
+            if army.is_at(&target) {
                 if army.stance != Stance::Siege {
                     orders.push(Order::SetStance {
                         army: army_id.clone(),
@@ -156,20 +169,18 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                 }
                 continue;
             }
-            if let Some(path) = path_to(&table, &target) {
-                orders.push(Order::SetStance {
-                    army: army_id.clone(),
-                    stance: Stance::Siege,
-                });
-                orders.push(Order::move_along(army_id.clone(), path));
-                continue;
-            }
+            orders.push(Order::SetStance {
+                army: army_id.clone(),
+                stance: Stance::Siege,
+            });
+            orders.push(Order::move_to(army_id.clone(), target));
+            continue;
         }
 
         // Keep an ongoing siege.
-        if state
-            .settlements
-            .get(&army.location)
+        if army
+            .settlement()
+            .and_then(|s| state.settlements.get(s))
             .is_some_and(|s| s.siege.as_ref().is_some_and(|s| &s.attacker == faction))
         {
             continue;
@@ -179,24 +190,26 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         let threatened = table
             .iter()
             .filter(|(id, _)| state.is_friendly_settlement(faction, id))
-            .filter(|(id, _)| threat_at(state, data, faction, id) > 0.0)
+            .filter(|(id, _)| threat_at(state, data, &anchors, faction, id) > 0.0)
             .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
             .map(|(id, _)| id.clone());
+        let place = army.settlement();
         match threatened {
-            Some(target) if target != army.location => {
-                if let Some(path) = path_to(&table, &target) {
-                    if army.stance != Stance::Normal {
-                        orders.push(Order::SetStance {
-                            army: army_id.clone(),
-                            stance: Stance::Normal,
-                        });
-                    }
-                    orders.push(Order::move_along(army_id.clone(), path));
+            Some(target) if !army.is_at(&target) => {
+                if army.stance != Stance::Normal {
+                    orders.push(Order::SetStance {
+                        army: army_id.clone(),
+                        stance: Stance::Normal,
+                    });
                 }
+                orders.push(Order::move_to(army_id.clone(), target));
             }
-            // Lot C7a: an idle army outside friendly places goes home.
-            _ if !state.is_friendly_settlement(faction, &army.location)
-                && !state.is_hostile_settlement(faction, &army.location) =>
+            // Lot C7a: an idle army outside friendly places goes home (lot
+            // M2: an army in the field too).
+            _ if place.is_none_or(|p| {
+                !state.is_friendly_settlement(faction, p)
+                    && !state.is_hostile_settlement(faction, p)
+            }) =>
             {
                 let home = table
                     .iter()
@@ -208,14 +221,14 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                             && state.hostile_armies_at(faction, id).is_empty()
                     })
                     .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
-                    .and_then(|(id, _)| path_to(&table, id));
-                if let Some(path) = home.filter(|p| !p.is_empty()) {
-                    orders.push(Order::move_along(army_id.clone(), path));
+                    .map(|(id, _)| id.clone());
+                if let Some(home) = home.filter(|h| !army.is_at(h)) {
+                    orders.push(Order::move_to(army_id.clone(), home));
                 }
             }
             _ => {
                 if army.stance != Stance::Normal
-                    && !state.is_hostile_settlement(faction, &army.location)
+                    && !place.is_some_and(|p| state.is_hostile_settlement(faction, p))
                 {
                     orders.push(Order::SetStance {
                         army: army_id.clone(),
@@ -293,22 +306,23 @@ pub fn target_score(
         + 0.5 * fortification
 }
 
-/// Strength of hostile armies on or one edge away from `settlement`.
+/// Strength of hostile armies anchored on or one edge away from
+/// `settlement` (lot M2: an army in the field is anchored on the nearest
+/// settlement).
 fn threat_at(
     state: &CampaignState,
     data: &GameData,
+    anchors: &BTreeMap<ArmyId, SettlementId>,
     faction: &FactionId,
     settlement: &SettlementId,
 ) -> f64 {
-    let inside: f64 = state
-        .hostile_armies_at(faction, settlement)
-        .into_iter()
-        .map(|id| f64::from(state.armies[&id].total_strength()))
-        .sum();
-    let adjacent: f64 = edges(data, settlement)
-        .into_iter()
-        .flat_map(|(neighbor, _)| state.hostile_armies_at(faction, &neighbor))
-        .map(|id| f64::from(state.armies[&id].total_strength()))
-        .sum();
-    inside + adjacent
+    let mut places = vec![settlement.clone()];
+    places.extend(edges(data, settlement).into_iter().map(|(n, _)| n));
+    anchors
+        .iter()
+        .filter(|(_, anchor)| places.contains(anchor))
+        .filter_map(|(id, _)| state.armies.get(id))
+        .filter(|a| state.is_at_war(faction, &a.faction))
+        .map(|a| f64::from(a.total_strength()))
+        .sum()
 }

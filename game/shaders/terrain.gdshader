@@ -30,10 +30,18 @@ uniform sampler2D province_mask : filter_nearest, repeat_disable, hint_default_b
 uniform bool mask_enabled = false;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
-// Brouillard de guerre (lot C1) : 1 = province vue, 0 = voilée (désaturée, assombrie).
+// Brouillard de guerre (lot C1, A1-03) : 1 = province vue, 0 = voilée. Le voile ne noircit
+// pas : désaturation + brume claire couleur parchemin, nuages bas qui dérivent lentement, bord
+// fondu sur la frontière entre province vue et province voilée.
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
-uniform vec3 fog_veil : source_color = vec3(0.42, 0.40, 0.37);
+uniform vec3 fog_veil : source_color = vec3(0.80, 0.78, 0.72);
+uniform float fog_desaturation = 0.85;
+uniform float fog_veil_amount = 0.42;
+uniform float fog_cloud_amount = 0.40;
+uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
+uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
+uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -73,6 +81,12 @@ uniform vec3 hedge_color = vec3(0.035, 0.05, 0.02);
 uniform sampler2D landuse : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_landuse = false;
 uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
+// A1-04 : berge de lac (vase, roseaux) à la place du sable et de l'écume marins.
+uniform vec3 lake_bank_color = vec3(0.055, 0.058, 0.030);
+uniform vec3 lake_shallow_color = vec3(0.05, 0.085, 0.06);
+uniform float lake_bank_px = 1.6;
+uniform float pond_max_px = 3.0;
+uniform float pond_probe_px = 6.0;
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
 // Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
 uniform vec3 sea_shallow_color = vec3(0.045, 0.14, 0.14);
@@ -165,6 +179,10 @@ float fbm(vec2 p) {
 		a *= 0.5;
 	}
 	return v;
+}
+
+float fog_seen(int id) {
+	return texelFetch(fog_mask, ivec2(clamp(id, 0, textureSize(fog_mask, 0).x - 1), 0), 0).r;
 }
 
 // Distance (pixels carte) au trait de frontière le plus proche : min des |canaux signés|.
@@ -279,6 +297,22 @@ void fragment() {
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
 	float land_f = smoothstep(-0.4, 0.6, coast);
+	// A1-04 : côté eau de la côte la plus proche au-dessus du niveau de la mer = lac/étang (berge
+	// fondue, pas de sable) ; sinon mer. Sonde le long du gradient de distance à la côte.
+	float lake_shore = 0.0;
+	// Étang sous le niveau de la mer (marais côtiers) : à `pond_probe_px` plus loin vers l'eau,
+	// on reste à moins de `pond_max_px` d'une rive (même test que water.gdshader).
+	if (has_coast_dist && coast < lake_bank_px + 1.5 && coast > -pond_max_px - 1.0) {
+		vec2 ex = vec2(1.0 / map_size.x, 0.0);
+		vec2 ey = vec2(0.0, 1.0 / map_size.y);
+		vec2 cg = vec2(texture(coast_dist, uv + ex).r - texture(coast_dist, uv - ex).r,
+			texture(coast_dist, uv + ey).r - texture(coast_dist, uv - ey).r);
+		vec2 to_water = -cg / max(length(cg), 1e-5);
+		vec2 probe = uv + to_water * (max(coast, 0.0) + 1.5) / map_size;
+		vec2 far_probe = uv + to_water * (max(coast, 0.0) + pond_probe_px) / map_size;
+		float far_coast = (texture(coast_dist, far_probe).r * 255.0 - 128.0) / coast_dist_scale;
+		lake_shore = max(step(0.5, height_m_lod(probe, 0.0)), step(-pond_max_px, far_coast));
+	}
 
 	// --- Poids des matériaux ---
 	vec4 s = has_splat ? texture(splat, uv) : vec4(0.5, 0.3, 0.2, 0.0);
@@ -292,7 +326,7 @@ void fragment() {
 	float w_heath = s.a * (1.0 - rock_frac);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
-	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f;
+	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
 
@@ -446,6 +480,15 @@ void fragment() {
 		vec3 wc = mix(sea_shallow_color, sea_deep_color, 1.0 - exp(-depth / 70.0));
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
 	}
+	if (lake_shore > 0.5) {
+		// Berge de lac : vase et roseaux sur la rive, eau peu profonde teintée près du bord,
+		// transition large et bruitée (pas de liseré net).
+		float reeds = value_noise(p * 3.1) * 0.6 + value_noise(p * 7.3) * 0.4;
+		float bank = (1.0 - smoothstep(0.0, lake_bank_px * (0.7 + 0.6 * reeds), coast)) * land_f;
+		col = mix(col, lake_bank_color * (0.8 + 0.4 * reeds), bank * 0.85);
+		lake = 1.0 - smoothstep(-0.7, 0.3 + 0.3 * (reeds - 0.5), coast);
+		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
+	}
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
@@ -522,10 +565,23 @@ void fragment() {
 	}
 
 	if (fog_enabled && id > 0) {
-		float seen = texelFetch(fog_mask, ivec2(clamp(id, 0, textureSize(fog_mask, 0).x - 1), 0), 0).r;
-		if (seen < 0.5) {
-			float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
-			col = mix(vec3(lum), pow(fog_veil, vec3(2.2)) * max(lum * 2.0, 0.05), 0.35) * 0.6;
+		float fog = 1.0 - step(0.5, fog_seen(id));
+		if (other_id != id && other_id > 0) {
+			float fog_other = 1.0 - step(0.5, fog_seen(other_id));
+			if (fog_other != fog) {
+				fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+			}
+		}
+		if (fog > 0.0) {
+			float lum_f = dot(col, vec3(0.2126, 0.7152, 0.0722));
+			vec3 desat = mix(col, vec3(lum_f) * vec3(1.02, 1.0, 0.96), fog_desaturation);
+			// Nuages bas : deux couches de bruit qui dérivent à des vitesses différentes.
+			vec2 q = p * fog_cloud_scale;
+			float cloud = fbm(q + TIME * fog_cloud_wind) * 0.65 + fbm(q * 2.3 - TIME * fog_cloud_wind * 1.7) * 0.35;
+			cloud = smoothstep(0.38, 0.72, cloud);
+			vec3 mist = pow(fog_veil, vec3(2.2));
+			vec3 fogged = mix(desat * 1.15 + mist * 0.04, mist * 0.68, fog_veil_amount + cloud * fog_cloud_amount);
+			col = mix(col, fogged, fog);
 		}
 	}
 

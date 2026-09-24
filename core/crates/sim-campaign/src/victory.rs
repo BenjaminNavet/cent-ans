@@ -86,7 +86,12 @@ impl CampaignState {
                     .iter()
                     .filter(|p| self.controls_province(foreign, p))
                     .count();
-                (held == 0, format!("{held} province(s) encore occupée(s)"))
+                let progress = match held {
+                    0 => "aucune province occupée".to_owned(),
+                    1 => "1 province encore occupée".to_owned(),
+                    n => format!("{n} provinces encore occupées"),
+                };
+                (held == 0, progress)
             }
             ObjectiveCondition::Independent => {
                 let free = self
@@ -110,9 +115,9 @@ impl CampaignState {
                 (
                     done,
                     if done {
-                        "soumis".to_owned()
+                        "soumission obtenue".to_owned()
                     } else {
-                        "insoumis".to_owned()
+                        "soumission à obtenir".to_owned()
                     },
                 )
             }
@@ -199,7 +204,8 @@ pub(crate) fn resolve_victory(
         (
             OutcomeKind::Ended,
             format!(
-                "Fin de la campagne : {done} objectif(s) sur {} accompli(s) par {name}.",
+                "Fin de la campagne : {name} a accompli {done} {} sur {}.",
+                if done <= 1 { "objectif" } else { "objectifs" },
                 objectives.len()
             ),
         )

@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 use crate::diplomacy::{faction_name, Claim, REBELS_FACTION};
 use crate::events::{EventKind, GameEvent};
 use crate::population::weighted_unrest;
-use crate::state::{Army, CampaignState, Season, Stance, Unit, TURNS_PER_YEAR};
+use crate::state::{Army, CampaignState, Season, Unit, TURNS_PER_YEAR};
 use crate::{characters, religion, skills};
 
 /// Turns a player decision stays open before its first option applies.
@@ -824,20 +824,16 @@ pub fn apply_effect(
                 return;
             };
             let id = state.allocate_army_id();
-            let movement_points = state.season_movement_points(data);
-            state.armies.insert(
-                id.clone(),
-                Army {
-                    faction: faction.clone(),
-                    general: None,
-                    location: city,
-                    units,
-                    movement_points,
-                    supply: 100,
-                    stance: Stance::Normal,
-                    path: Vec::new(),
-                },
+            let mut army = Army::new(
+                faction.clone(),
+                crate::state::ArmyPosition::Settlement(city),
+                units,
             );
+            army.movement_left = crate::march::km_to_grid_points(
+                data,
+                f64::from(state.season_movement_points(data)),
+            );
+            state.armies.insert(id.clone(), army);
             events.push(
                 GameEvent::new(
                     EventKind::Chronicle,

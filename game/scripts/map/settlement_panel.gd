@@ -110,7 +110,7 @@ func _build() -> void:
 	province_button.pressed.connect(func() -> void: province_requested.emit(province_id))
 	grid.add_child(province_button)
 	owner_value = _grid_row(grid, "Propriétaire")
-	controller_value = _grid_row(grid, "Contrôleur")
+	controller_value = _grid_row(grid, "Aux mains de")
 	fortification_value = _grid_row(grid, "Fortification")
 	siege_value = _grid_row(grid, "Siège")
 	income_value = _grid_row(grid, "Revenu")

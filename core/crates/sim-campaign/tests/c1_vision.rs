@@ -100,7 +100,8 @@ fn an_army_reveals_its_surroundings_and_a_general_sees_further() {
         .unwrap();
     let army = state.armies.get_mut(&army_id).unwrap();
     // C4: armies stand on a settlement; put this one on the hidden province's city.
-    army.location = data.province_city(&hidden).unwrap().id.clone();
+    army.position =
+        sim_campaign::ArmyPosition::Settlement(data.province_city(&hidden).unwrap().id.clone());
     army.general = None;
     let visible = state.visible_provinces(&data, &france);
     assert!(visible.contains(&hidden));

@@ -4,6 +4,37 @@ use std::path::PathBuf;
 
 use data_model::{GameData, SocialClass};
 
+/// Lot M2: the navigation grid (or its land-mask fallback) and the province
+/// raster decode, and the settlements stand on passable cells.
+#[test]
+fn real_rasters_load() {
+    let (data, _) = GameData::load(&data_root()).expect("data/ must load");
+    let start = std::time::Instant::now();
+    let grid = data.navgrid();
+    println!("rasters decoded in {:?} ({grid:?})", start.elapsed());
+    assert_eq!((grid.width, grid.height), (2048, 2048));
+    let paris = data_model::SettlementId::new("set_paris").unwrap();
+    let point = data.settlement_point(&paris).expect("Paris has a position");
+    let (x, y) = grid.cell_of(point[0], point[1]);
+    assert!(grid.passable(i64::from(x), i64::from(y)));
+    assert_eq!(
+        data.province_at_point(point[0], point[1])
+            .map(|p| p.as_str()),
+        Some(data.settlements[&paris].province.as_str())
+    );
+    // Open sea west of Brittany.
+    assert!(!grid.passable(300, 1000));
+    let mismatched = data
+        .settlements
+        .iter()
+        .filter(|(id, s)| {
+            let p = data.settlement_point(id).unwrap();
+            data.province_at_point(p[0], p[1]) != Some(&s.province)
+        })
+        .count();
+    println!("{mismatched} settlements outside their province raster");
+}
+
 fn data_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data")
 }
