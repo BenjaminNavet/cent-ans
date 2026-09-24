@@ -1,0 +1,12 @@
+{
+  "id": "cdx_cartes_a_jouer",
+  "title": "Les cartes à jouer",
+  "category": "vie_quotidienne",
+  "aliases": ["cartes à jouer", "jeu de cartes", "jeux de cartes", "naibi"],
+  "era": { "from": "1370", "to": "1500" },
+  "summary": "Les cartes à jouer, venues du monde mamelouk, apparaissent en Europe dans les années 1370 : Catalogne en 1371, Florence et la vallée du Rhin en 1377. Vingt ans plus tard, le prévôt de Paris doit déjà les interdire aux travailleurs.",
+  "body": "Les cartes naissent en Chine et gagnent l'Égypte mamelouke, où l'on joue avec des jeux à quatre couleurs : coupes, pièces, épées et bâtons de polo. Elles passent en Europe par les ports méditerranéens. Un dictionnaire catalan les mentionne en 1371 ; en 1377, Florence interdit un jeu « nouvellement introduit », les naibi, et un moine allemand, Jean de Rheinfelden, décrit en détail ce jeu qu'il a découvert.\n\nLa diffusion est foudroyante : les cartes sont attestées en Provence en 1381, en Castille, en Brabant, en Suisse dans les mêmes années. En France, un compte royal de 1392 mentionne le paiement de jeux de cartes peints à l'or pour distraire le roi [[cdx_charles_vi|Charles VI]], alors frappé de folie. Les premières cartes, peintes à la main, sont des objets de luxe ; la gravure sur bois, au XVe siècle, les rend bon marché.\n\nLes couleurs varient selon les pays. L'Italie et l'Espagne gardent coupes, deniers, épées et bâtons ; l'Allemagne invente cœurs, grelots, feuilles et glands ; les couleurs françaises, cœur, carreau, trèfle et pique, n'apparaissent que vers 1480. Le tarot, jeu de cartes à atouts, naît dans les cours d'Italie du Nord vers 1440.\n\nLes autorités traitent aussitôt les cartes comme les [[cdx_des_et_hasard|dés]]. Le 22 janvier 1397, une ordonnance du prévôt de Paris défend aux gens de métier de jouer aux dés, aux cartes, à la [[cdx_jeu_de_paume|paume]] et aux quilles les jours ouvrables. Comme toujours, l'interdiction est aussi le premier témoignage de la vogue.",
+  "anachronism": "Les cartes à jouer n'existent pas en Occident au début de la partie (1337) ; toute mention avant les années 1370 serait anachronique.",
+  "see_also": ["cdx_des_et_hasard", "cdx_charles_vi", "cdx_papier", "cdx_jeu_de_paume"],
+  "sources": ["Carte à jouer", "Histoire des cartes à jouer", "Playing card (anglais)"]
+}
