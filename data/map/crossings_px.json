@@ -1,0 +1,1733 @@
+{
+ "description": "Généré par `cent-ans geo rivers-render` (lot V4) depuis crossings.json : ponts, gués et bacs en pixels carte, recalés sur le fleuve affiché. Rendu seulement.",
+ "crossings": [
+  {
+   "id": "bridge_pont_des_tourelles_orleans",
+   "name": "Pont des Tourelles (Orléans)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2152.401,
+    2065.673
+   ],
+   "dir": [
+    -0.9894,
+    -0.1451
+   ],
+   "width": 1.17,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_beaugency",
+   "name": "Pont de Beaugency",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2122.066,
+    2082.476
+   ],
+   "dir": [
+    -0.5105,
+    0.8599
+   ],
+   "width": 1.183,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_meung_sur_loire",
+   "name": "Pont de Meung-sur-Loire",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Loire",
+   "px": [
+    2129.881,
+    2075.621
+   ],
+   "dir": [
+    -0.6276,
+    0.7785
+   ],
+   "width": 1.183,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_jargeau",
+   "name": "Pont de Jargeau",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Loire",
+   "px": [
+    2174.414,
+    2073.507
+   ],
+   "dir": [
+    -0.8944,
+    -0.4472
+   ],
+   "width": 1.172,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_blois",
+   "name": "Pont de Blois",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2087.6,
+    2107.672
+   ],
+   "dir": [
+    -0.8022,
+    0.597
+   ],
+   "width": 1.188,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_amboise",
+   "name": "Pont d'Amboise",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2047.602,
+    2128.328
+   ],
+   "dir": [
+    -0.9658,
+    0.2593
+   ],
+   "width": 1.195,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_eudes_tours",
+   "name": "Pont d'Eudes (Tours)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2016.964,
+    2127.528
+   ],
+   "dir": [
+    -0.9994,
+    0.0351
+   ],
+   "width": 1.192,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_saumur",
+   "name": "Pont de Saumur",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    1935.277,
+    2138.521
+   ],
+   "dir": [
+    -0.7498,
+    -0.6616
+   ],
+   "width": 1.2,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_les_ponts_de_ce",
+   "name": "Les Ponts-de-Cé",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    1891.199,
+    2107.512
+   ],
+   "dir": [
+    -0.9994,
+    -0.0342
+   ],
+   "width": 1.2,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_ponts_de_nantes",
+   "name": "Ponts de Nantes",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    1779.508,
+    2123.916
+   ],
+   "dir": [
+    -0.8872,
+    0.4614
+   ],
+   "width": 1.2,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_la_charite_sur_loire",
+   "name": "Pont de La Charité-sur-Loire",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2256.102,
+    2189.365
+   ],
+   "dir": [
+    -0.2917,
+    -0.9565
+   ],
+   "width": 1.125,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_nevers",
+   "name": "Pont de Nevers",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2269.017,
+    2220.124
+   ],
+   "dir": [
+    -0.9932,
+    0.1163
+   ],
+   "width": 1.11,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_ponts_de_decize",
+   "name": "Ponts de Decize",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Loire",
+   "px": [
+    2299.419,
+    2246.57
+   ],
+   "dir": [
+    -0.8127,
+    -0.5827
+   ],
+   "width": 1.096,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_grand_pont_et_petit_pont_paris",
+   "name": "Grand-Pont et Petit-Pont (Paris)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2208.213,
+    1922.287
+   ],
+   "dir": [
+    -0.9595,
+    0.2818
+   ],
+   "width": 0.949,
+   "snapped": true,
+   "in_custom_zone": true
+  },
+  {
+   "id": "bridge_pont_de_rouen",
+   "name": "Pont de Rouen",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2096.045,
+    1820.397
+   ],
+   "dir": [
+    -0.6189,
+    -0.7855
+   ],
+   "width": 0.95,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_l_arche",
+   "name": "Pont-de-l'Arche",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2100.282,
+    1840.445
+   ],
+   "dir": [
+    -0.9804,
+    -0.1973
+   ],
+   "width": 0.95,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_vernon",
+   "name": "Pont de Vernon",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2130.093,
+    1876.941
+   ],
+   "dir": [
+    -0.9261,
+    -0.3773
+   ],
+   "width": 0.947,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_mantes",
+   "name": "Pont de Mantes",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2152.124,
+    1895.717
+   ],
+   "dir": [
+    -0.6075,
+    -0.7944
+   ],
+   "width": 0.95,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_meulan",
+   "name": "Pont de Meulan",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Seine",
+   "px": [
+    2170.376,
+    1896.416
+   ],
+   "dir": [
+    -0.9708,
+    0.2398
+   ],
+   "width": 0.949,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_poissy",
+   "name": "Pont de Poissy",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Seine",
+   "px": [
+    2182.113,
+    1906.75
+   ],
+   "dir": [
+    -0.8455,
+    0.534
+   ],
+   "width": 0.95,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_corbeil",
+   "name": "Pont de Corbeil",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2222.89,
+    1962.848
+   ],
+   "dir": [
+    -0.159,
+    -0.9873
+   ],
+   "width": 0.947,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_melun",
+   "name": "Pont de Melun",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2239.309,
+    1976.023
+   ],
+   "dir": [
+    -0.9701,
+    0.2425
+   ],
+   "width": 0.947,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_montereau",
+   "name": "Pont de Montereau",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Seine",
+   "px": [
+    2267.386,
+    2001.222
+   ],
+   "dir": [
+    -0.9919,
+    0.1272
+   ],
+   "width": 0.936,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_ponts_de_troyes",
+   "name": "Ponts de Troyes",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Seine",
+   "px": [
+    2383.818,
+    2025.855
+   ],
+   "dir": [
+    -0.2683,
+    -0.9633
+   ],
+   "width": 0.927,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_geneve",
+   "name": "Pont de Genève",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Rhône",
+   "px": [
+    2577.409,
+    2362.951
+   ],
+   "dir": [
+    0.4903,
+    -0.8716
+   ],
+   "width": 0.763,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_la_guillotiere_lyon",
+   "name": "Pont de la Guillotière (Lyon)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Rhône",
+   "px": [
+    2434.03,
+    2424.11
+   ],
+   "dir": [
+    -0.8805,
+    -0.4741
+   ],
+   "width": 1.026,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_vienne",
+   "name": "Pont de Vienne",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Rhône",
+   "px": [
+    2433.785,
+    2459.359
+   ],
+   "dir": [
+    -0.359,
+    0.9333
+   ],
+   "width": 1.008,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_pont_saint_esprit",
+   "name": "Pont de Pont-Saint-Esprit",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Rhône",
+   "px": [
+    2398.867,
+    2652.732
+   ],
+   "dir": [
+    0.3748,
+    0.9271
+   ],
+   "width": 1.098,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_saint_benezet_avignon",
+   "name": "Pont Saint-Bénézet (Avignon)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Rhône",
+   "px": [
+    2411.105,
+    2700.799
+   ],
+   "dir": [
+    -0.7502,
+    0.6612
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_bateaux_d_arles",
+   "name": "Pont de bateaux d'Arles",
+   "type": "bridge",
+   "structure": "boats",
+   "river": "Rhône",
+   "px": [
+    2387.371,
+    2742.04
+   ],
+   "dir": [
+    -0.0977,
+    0.9952
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_saone_lyon",
+   "name": "Pont de Saône (Lyon)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Saône",
+   "px": [
+    2433.315,
+    2422.881
+   ],
+   "dir": [
+    -0.2561,
+    0.9666
+   ],
+   "width": 0.335,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_macon",
+   "name": "Pont de Mâcon",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Saône",
+   "px": [
+    2440.019,
+    2339.91
+   ],
+   "dir": [
+    -0.5682,
+    0.8229
+   ],
+   "width": 0.335,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_tournus",
+   "name": "Pont de Tournus",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Saône",
+   "px": [
+    2452.37,
+    2300.65
+   ],
+   "dir": [
+    -0.1758,
+    0.9844
+   ],
+   "width": 0.327,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_chalon_sur_saone",
+   "name": "Pont de Chalon-sur-Saône",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Saône",
+   "px": [
+    2446.844,
+    2266.231
+   ],
+   "dir": [
+    -0.2715,
+    0.9624
+   ],
+   "width": 0.334,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_auxonne",
+   "name": "Pont d'Auxonne",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Saône",
+   "px": [
+    2504.664,
+    2205.764
+   ],
+   "dir": [
+    -0.4903,
+    0.8716
+   ],
+   "width": 0.691,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_gray",
+   "name": "Pont de Gray",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Saône",
+   "px": [
+    2529.19,
+    2166.716
+   ],
+   "dir": [
+    -0.9209,
+    0.3899
+   ],
+   "width": 0.678,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_ponts_de_toulouse",
+   "name": "Ponts de Toulouse",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Garonne",
+   "px": [
+    2028.682,
+    2721.516
+   ],
+   "dir": [
+    -0.1527,
+    -0.9883
+   ],
+   "width": 1.051,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_agen",
+   "name": "Pont d'Agen",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Garonne",
+   "px": [
+    1948.195,
+    2618.55
+   ],
+   "dir": [
+    -0.3764,
+    -0.9265
+   ],
+   "width": 1.097,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_la_reole",
+   "name": "Bac de La Réole",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Garonne",
+   "px": [
+    1885.448,
+    2550.252
+   ],
+   "dir": [
+    -0.3078,
+    -0.9514
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_saint_macaire_et_langon",
+   "name": "Bac de Saint-Macaire et Langon",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Garonne",
+   "px": [
+    1864.208,
+    2549.247
+   ],
+   "dir": [
+    -0.9975,
+    -0.0712
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_bordeaux",
+   "name": "Bac de Bordeaux",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Garonne",
+   "px": [
+    1832.604,
+    2502.578
+   ],
+   "dir": [
+    -0.6097,
+    -0.7926
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_bergerac",
+   "name": "Pont de Bergerac",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Dordogne",
+   "px": [
+    1947.571,
+    2515.715
+   ],
+   "dir": [
+    -0.9818,
+    -0.1901
+   ],
+   "width": 0.799,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_sainte_foy",
+   "name": "Bac de Sainte-Foy",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Dordogne",
+   "px": [
+    1917.527,
+    2513.391
+   ],
+   "dir": [
+    -0.7442,
+    0.6679
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_castillon",
+   "name": "Bac de Castillon",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Dordogne",
+   "px": [
+    1890.13,
+    2508.514
+   ],
+   "dir": [
+    -0.9921,
+    0.1253
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_libourne",
+   "name": "Bac de Libourne",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Dordogne",
+   "px": [
+    1867.562,
+    2496.125
+   ],
+   "dir": [
+    0.1644,
+    -0.9864
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_london_bridge",
+   "name": "London Bridge",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tamise",
+   "px": [
+    2021.906,
+    1486.682
+   ],
+   "dir": [
+    0.9996,
+    0.0298
+   ],
+   "width": 0.85,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_kingston_bridge",
+   "name": "Kingston Bridge",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Tamise",
+   "px": [
+    1998.363,
+    1498.815
+   ],
+   "dir": [
+    0.4679,
+    -0.8838
+   ],
+   "width": 0.85,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_staines_bridge",
+   "name": "Staines Bridge",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Tamise",
+   "px": [
+    1978.452,
+    1493.637
+   ],
+   "dir": [
+    0.6611,
+    0.7503
+   ],
+   "width": 0.85,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_windsor_bridge",
+   "name": "Windsor Bridge",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Tamise",
+   "px": [
+    1972.266,
+    1482.257
+   ],
+   "dir": [
+    0.8603,
+    0.5098
+   ],
+   "width": 0.85,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_henley_bridge",
+   "name": "Henley Bridge",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Tamise",
+   "px": [
+    1946.507,
+    1471.344
+   ],
+   "dir": [
+    0.0644,
+    -0.9979
+   ],
+   "width": 0.836,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_caversham_bridge_reading",
+   "name": "Caversham Bridge (Reading)",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Tamise",
+   "px": [
+    1936.697,
+    1482.986
+   ],
+   "dir": [
+    0.9894,
+    -0.1455
+   ],
+   "width": 0.848,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_wallingford_bridge",
+   "name": "Wallingford Bridge",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tamise",
+   "px": [
+    1925.101,
+    1458.538
+   ],
+   "dir": [
+    -0.0744,
+    0.9972
+   ],
+   "width": 0.848,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_folly_bridge_oxford",
+   "name": "Folly Bridge (Oxford)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tamise",
+   "px": [
+    1915.811,
+    1434.504
+   ],
+   "dir": [
+    0.4091,
+    0.9125
+   ],
+   "width": 0.846,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_verdun",
+   "name": "Pont de Verdun",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2524.409,
+    1902.843
+   ],
+   "dir": [
+    0.3511,
+    -0.9363
+   ],
+   "width": 0.768,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_mezieres",
+   "name": "Pont de Mézières",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2464.018,
+    1806.106
+   ],
+   "dir": [
+    -0.9832,
+    -0.1823
+   ],
+   "width": 0.804,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_dinant",
+   "name": "Pont de Dinant",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2489.133,
+    1729.607
+   ],
+   "dir": [
+    -0.1843,
+    -0.9829
+   ],
+   "width": 0.783,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_jambes_namur",
+   "name": "Pont de Jambes (Namur)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2486.793,
+    1698.768
+   ],
+   "dir": [
+    0.5264,
+    -0.8503
+   ],
+   "width": 0.838,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_huy",
+   "name": "Pont de Huy",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2523.054,
+    1691.215
+   ],
+   "dir": [
+    0.9884,
+    -0.1521
+   ],
+   "width": 0.839,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_des_arches_liege",
+   "name": "Pont des Arches (Liège)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2558.406,
+    1675.068
+   ],
+   "dir": [
+    0.4415,
+    -0.8973
+   ],
+   "width": 0.845,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_saint_servais_maastricht",
+   "name": "Pont Saint-Servais (Maastricht)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Meuse",
+   "px": [
+    2571.675,
+    1643.57
+   ],
+   "dir": [
+    -0.0785,
+    -0.9969
+   ],
+   "width": 0.848,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_cambrai",
+   "name": "Pont de Cambrai",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Escaut",
+   "px": [
+    2320.337,
+    1728.458
+   ],
+   "dir": [
+    0.689,
+    -0.7248
+   ],
+   "width": 0.798,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_valenciennes",
+   "name": "Pont de Valenciennes",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Escaut",
+   "px": [
+    2351.564,
+    1703.569
+   ],
+   "dir": [
+    0.4592,
+    -0.8883
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_des_trous_tournai",
+   "name": "Pont des Trous (Tournai)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Escaut",
+   "px": [
+    2342.61,
+    1663.527
+   ],
+   "dir": [
+    -0.4844,
+    -0.8748
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_audenarde",
+   "name": "Pont d'Audenarde",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Escaut",
+   "px": [
+    2367.199,
+    1629.61
+   ],
+   "dir": [
+    0.5961,
+    -0.8029
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_ponts_de_gand",
+   "name": "Ponts de Gand",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Escaut",
+   "px": [
+    2384.062,
+    1600.731
+   ],
+   "dir": [
+    0.4961,
+    -0.8682
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_d_anvers",
+   "name": "Bac d'Anvers",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Escaut",
+   "px": [
+    2447.994,
+    1577.194
+   ],
+   "dir": [
+    0.6652,
+    -0.7467
+   ],
+   "width": 0.8,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_constance",
+   "name": "Pont de Constance",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Rhin",
+   "px": [
+    2906.547,
+    2147.3
+   ],
+   "dir": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.909,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_schaffhouse",
+   "name": "Pont de Schaffhouse",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Rhin",
+   "px": [
+    2850.121,
+    2142.894
+   ],
+   "dir": [
+    -0.9944,
+    0.1053
+   ],
+   "width": 0.867,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_rheinfelden",
+   "name": "Pont de Rheinfelden",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Rhin",
+   "px": [
+    2760.357,
+    2160.893
+   ],
+   "dir": [
+    -0.7849,
+    0.6196
+   ],
+   "width": 1.105,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_mittlere_brucke_bale",
+   "name": "Mittlere Brücke (Bâle)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Rhin",
+   "px": [
+    2740.373,
+    2159.647
+   ],
+   "dir": [
+    -0.9473,
+    -0.3204
+   ],
+   "width": 1.141,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_brisach",
+   "name": "Bac de Brisach",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2742.543,
+    2087.423
+   ],
+   "dir": [
+    -0.3881,
+    -0.9216
+   ],
+   "width": 1.233,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_strasbourg_a_kehl",
+   "name": "Bac de Strasbourg à Kehl",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2766.73,
+    2005.454
+   ],
+   "dir": [
+    0.0753,
+    -0.9972
+   ],
+   "width": 1.291,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_spire",
+   "name": "Bac de Spire",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2836.802,
+    1891.338
+   ],
+   "dir": [
+    0.1521,
+    -0.9884
+   ],
+   "width": 1.325,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_worms",
+   "name": "Bac de Worms",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2829.642,
+    1842.236
+   ],
+   "dir": [
+    -0.4292,
+    -0.9032
+   ],
+   "width": 1.329,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_mayence",
+   "name": "Bac de Mayence",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2820.808,
+    1785.451
+   ],
+   "dir": [
+    -0.6426,
+    -0.7662
+   ],
+   "width": 1.327,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_coblence",
+   "name": "Bac de Coblence",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2755.335,
+    1728.038
+   ],
+   "dir": [
+    0.3432,
+    -0.9393
+   ],
+   "width": 1.338,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_bonn",
+   "name": "Bac de Bonn",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2708.57,
+    1667.711
+   ],
+   "dir": [
+    -0.5333,
+    -0.8459
+   ],
+   "width": 1.346,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_cologne",
+   "name": "Bac de Cologne",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Rhin",
+   "px": [
+    2695.713,
+    1636.394
+   ],
+   "dir": [
+    -0.1414,
+    -0.9899
+   ],
+   "width": 1.347,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_turin",
+   "name": "Pont de Turin",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Pô",
+   "px": [
+    2736.583,
+    2546.36
+   ],
+   "dir": [
+    0.0797,
+    -0.9968
+   ],
+   "width": 0.9,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_bateaux_de_plaisance",
+   "name": "Pont de bateaux de Plaisance",
+   "type": "bridge",
+   "structure": "boats",
+   "river": "Pô",
+   "px": [
+    2959.342,
+    2548.805
+   ],
+   "dir": [
+    0.9939,
+    0.1104
+   ],
+   "width": 1.047,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_bateaux_de_cremone",
+   "name": "Pont de bateaux de Crémone",
+   "type": "bridge",
+   "structure": "boats",
+   "river": "Pô",
+   "px": [
+    2993.596,
+    2542.44
+   ],
+   "dir": [
+    0.8137,
+    0.5812
+   ],
+   "width": 1.049,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_alcantara_tolede",
+   "name": "Pont d'Alcántara (Tolède)",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tage",
+   "px": [
+    1324.856,
+    3195.653
+   ],
+   "dir": [
+    -0.9297,
+    0.3684
+   ],
+   "width": 0.566,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_talavera",
+   "name": "Pont de Talavera",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tage",
+   "px": [
+    1232.586,
+    3163.17
+   ],
+   "dir": [
+    -0.9757,
+    0.2193
+   ],
+   "width": 0.678,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_alcantara",
+   "name": "Pont d'Alcántara",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Tage",
+   "px": [
+    984.368,
+    3146.035
+   ],
+   "dir": [
+    -0.8561,
+    0.5168
+   ],
+   "width": 0.807,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_bac_de_santarem",
+   "name": "Bac de Santarém",
+   "type": "ford",
+   "structure": "ferry",
+   "river": "Tage",
+   "px": [
+    760.376,
+    3172.278
+   ],
+   "dir": [
+    -0.4594,
+    0.8882
+   ],
+   "width": 1.085,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_frias",
+   "name": "Pont de Frías",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Èbre",
+   "px": [
+    1485.0,
+    2767.15
+   ],
+   "dir": [
+    0.9153,
+    0.4027
+   ],
+   "width": 0.426,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_logrono",
+   "name": "Pont de Logroño",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Èbre",
+   "px": [
+    1573.852,
+    2828.006
+   ],
+   "dir": [
+    0.9171,
+    0.3987
+   ],
+   "width": 0.553,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_tudela",
+   "name": "Pont de Tudela",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Èbre",
+   "px": [
+    1661.8,
+    2907.408
+   ],
+   "dir": [
+    0.4819,
+    0.8762
+   ],
+   "width": 0.701,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_pierre_de_saragosse",
+   "name": "Pont de pierre de Saragosse",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Èbre",
+   "px": [
+    1733.143,
+    2983.343
+   ],
+   "dir": [
+    0.7452,
+    0.6668
+   ],
+   "width": 0.772,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_bateaux_de_tortosa",
+   "name": "Pont de bateaux de Tortosa",
+   "type": "bridge",
+   "structure": "boats",
+   "river": "Èbre",
+   "px": [
+    1879.346,
+    3135.437
+   ],
+   "dir": [
+    0.006,
+    1.0
+   ],
+   "width": 0.847,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_ulm",
+   "name": "Pont d'Ulm",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Danube",
+   "px": [
+    2992.016,
+    2035.74
+   ],
+   "dir": [
+    0.5824,
+    -0.8129
+   ],
+   "width": 0.771,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_donauworth",
+   "name": "Pont de Donauwörth",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Danube",
+   "px": [
+    3072.802,
+    1987.032
+   ],
+   "dir": [
+    0.8906,
+    -0.4547
+   ],
+   "width": 0.878,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_d_ingolstadt",
+   "name": "Pont d'Ingolstadt",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Danube",
+   "px": [
+    3137.708,
+    1977.373
+   ],
+   "dir": [
+    0.6814,
+    -0.7319
+   ],
+   "width": 0.923,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_pierre_de_ratisbonne",
+   "name": "Pont de pierre de Ratisbonne",
+   "type": "bridge",
+   "structure": "stone",
+   "river": "Danube",
+   "px": [
+    3205.822,
+    1935.159
+   ],
+   "dir": [
+    0.9999,
+    0.017
+   ],
+   "width": 0.98,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "bridge_pont_de_passau",
+   "name": "Pont de Passau",
+   "type": "bridge",
+   "structure": "wood",
+   "river": "Danube",
+   "px": [
+    3348.013,
+    1998.601
+   ],
+   "dir": [
+    0.9978,
+    -0.0668
+   ],
+   "width": 0.95,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "ford_gue_de_blanchetaque",
+   "name": "Gué de Blanchetaque",
+   "type": "ford",
+   "structure": "ford",
+   "river": "Somme",
+   "px": [
+    2174.192,
+    1719.407
+   ],
+   "dir": [
+    -0.7401,
+    -0.6725
+   ],
+   "width": 0.42,
+   "snapped": true,
+   "in_custom_zone": false
+  }
+ ]
+}
