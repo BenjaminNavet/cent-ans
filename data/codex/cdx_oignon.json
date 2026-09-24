@@ -1,0 +1,11 @@
+{
+  "id": "cdx_oignon",
+  "title": "L'oignon",
+  "category": "plante",
+  "aliases": ["oignon", "oignons", "ciboule", "échalote"],
+  "era": { "from": "800", "to": "1500" },
+  "summary": "Légume de tous les potages et remède de bonne femme, l'oignon est jugé chaud et humide : bon pour les tempéraments froids, déconseillé aux colériques, selon le Régime de santé de Salerne.",
+  "body": "L'oignon (Allium cepa) est cultivé partout en Europe médiévale, avec ses cousins le poireau, la ciboule, la cive et l'échalote, dont le nom rappelle Ascalon, en Palestine, d'où les croisés l'auraient rapportée, selon une tradition ancienne mais douteuse. Le capitulaire De Villis (vers 800) les mentionne parmi les plantes des domaines royaux.\n\nLes médecins en débattent. Le [[cdx_regimen_sanitatis|Régime de santé de Salerne]] rapporte que les maîtres ne s'accordent pas : l'oignon ne convient guère aux colériques, mais il est bon pour les flegmatiques, dont il réchauffe l'estomac ; appliqué avec du miel, il ferait repousser les cheveux ; pilé, il soigne les morsures de chien. Le Tacuinum sanitatis, traduit de l'arabe d'Ibn Butlân et illustré en Lombardie à la fin du XIVe siècle, le range parmi les aliments chauds, propres à ouvrir l'appétit, mais nuisibles à la tête pris en excès.\n\nEn cuisine, l'oignon est partout : dans le [[cdx_potage|potage]] du paysan, frit dans le lard ou l'huile au début de mille recettes, dans les civets (le mot vient de la cive, l'oignon vert) et les sauces. Avec le pain et le hareng, c'est l'ordinaire des jours maigres des pauvres.\n\nCe qu'en dit la science moderne : l'oignon contient des composés soufrés et des flavonoïdes (quercétine) aux effets antioxydants étudiés, sans vertu thérapeutique spectaculaire démontrée ; c'est surtout un légume sain et bon marché. Sans toxicité pour l'homme, il est en revanche dangereux pour les chiens et les chats.",
+  "see_also": ["cdx_ail", "cdx_potage", "cdx_regimen_sanitatis", "cdx_humeurs", "cdx_hareng"],
+  "sources": ["Oignon", "Tacuinum sanitatis", "Civet"]
+}
