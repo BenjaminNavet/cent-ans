@@ -38,6 +38,7 @@ pub mod rng;
 pub mod setup;
 pub mod siege;
 pub mod sim;
+pub mod site;
 pub mod unit;
 
 pub use command::{Command, CommandError};
@@ -55,5 +56,8 @@ pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use sim::{
     BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
     SIEGE_STANDOFF, ZONE_DEPTH,
+};
+pub use site::{
+    Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
 pub use unit::{Formation, Unit, UnitState};
