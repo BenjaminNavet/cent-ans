@@ -11,6 +11,10 @@
   "build_time_turns": 2,
   "upkeep": 8,
   "required_building": "bld_parish_church",
+  "settlement_kinds": [
+    "city",
+    "abbey"
+  ],
   "effects": [
     {
       "effect": "research_points",

@@ -11,6 +11,11 @@
   },
   "build_time_turns": 3,
   "upkeep": 25,
+  "settlement_kinds": [
+    "city",
+    "town",
+    "castle"
+  ],
   "effects": [
     {
       "effect": "recruit_slots",

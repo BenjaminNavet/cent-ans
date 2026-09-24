@@ -12,6 +12,11 @@
   "upkeep": 20,
   "required_technology": "tech_hospital_reform",
   "required_building": "bld_parish_church",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey"
+  ],
   "effects": [
     {
       "effect": "health",

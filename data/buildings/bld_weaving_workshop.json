@@ -12,6 +12,10 @@
   "upkeep": 15,
   "required_building": "bld_market",
   "required_resource": "res_wool",
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
   "effects": [
     {
       "effect": "production",

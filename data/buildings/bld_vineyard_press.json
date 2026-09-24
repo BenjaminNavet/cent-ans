@@ -11,6 +11,12 @@
   "build_time_turns": 2,
   "upkeep": 5,
   "required_resource": "res_wine",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey",
+    "village"
+  ],
   "effects": [
     {
       "effect": "production",

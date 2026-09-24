@@ -12,6 +12,11 @@
   "upkeep": 15,
   "required_technology": "tech_theriac",
   "required_building": "bld_market",
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey"
+  ],
   "effects": [
     {
       "effect": "health",
