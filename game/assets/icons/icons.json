@@ -60,6 +60,12 @@
       "source": "lorc/gothic-cross",
       "author": "Lorc"
     },
+    "bld_collegiate_church": {
+      "file": "delapouite-church.svg",
+      "category": "building",
+      "source": "delapouite/church",
+      "author": "Delapouite"
+    },
     "bld_counting_house": {
       "file": "delapouite-abacus.svg",
       "category": "building",
