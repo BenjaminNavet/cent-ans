@@ -1030,6 +1030,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_city()
 				"faction":
 					_stage_screenshot_faction()
+				"budget":  # U3 : budget et courbe du trésor après quelques saisons
+					_stage_screenshot_budget()
 				"court":
 					_stage_screenshot_court()
 				"skills":
@@ -1219,6 +1221,19 @@ func _stage_screenshot_faction() -> void:
 	_ensure_city_capable_sim()
 	_focus_capital()
 	ui.hide_province()
+	_show_faction_panel(player_faction)
+
+
+## Mise en scène « budget » (lot U3) : six saisons jouées, puis le panneau de faction (tableau
+## du budget avec la saison passée et l'écart, courbe du trésor).
+func _stage_screenshot_budget() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.hide_province()
+	selected_index = 0
+	for _i in 6:
+		sim.call("end_turn")
+	refresh_all()
 	_show_faction_panel(player_faction)
 
 

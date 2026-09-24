@@ -240,7 +240,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		siege_value.text = "Aucun"
 	else:
 		siege_value.text = "%s, %d tour(s), brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), int(siege.get("turns_left", 0)), int(siege.get("breach", 0))]
-	income_value.text = "%s ℔ / saison (%d %% de la province)" % [PanelWidgets.thousands(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
+	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
 	# Garnison et recrutement.
 	var garrison: Array = detail.get("garrison", [])
 	garrison_header.text = "Garnison (%d unité%s, %s hommes)" % [garrison.size(), "s" if garrison.size() > 1 else "", PanelWidgets.thousands(int(detail.get("garrison_strength", 0)))]

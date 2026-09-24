@@ -147,6 +147,25 @@ impl FactionEconomy {
     }
 }
 
+/// Sign of the livre tournois (design § economy), used by every amount shown
+/// to the player.
+pub const LIVRE_SIGN: &str = "₶";
+
+/// `-6000` → « −6 000 ₶ », `1250` → « +1 250 ₶ »: explicit sign (true minus
+/// sign), digits grouped by three with no-break spaces.
+pub fn signed_livres(value: i64) -> String {
+    let digits = value.unsigned_abs().to_string();
+    let mut grouped = String::new();
+    for (index, digit) in digits.chars().enumerate() {
+        if index > 0 && (digits.len() - index) % 3 == 0 {
+            grouped.push('\u{a0}');
+        }
+        grouped.push(digit);
+    }
+    let sign = if value < 0 { '\u{2212}' } else { '+' };
+    format!("{sign}{grouped}\u{a0}{LIVRE_SIGN}")
+}
+
 impl CampaignState {
     /// Net balance actually booked by the last resolved turn (receipts minus
     /// every upkeep, the Table included); `None` for an unknown faction.
@@ -233,6 +252,14 @@ mod tests {
         };
         assert_eq!(record.net(), 200);
         assert_eq!(record.change(), 80);
+    }
+
+    #[test]
+    fn livres_are_signed_and_grouped() {
+        assert_eq!(signed_livres(-6000), "\u{2212}6\u{a0}000\u{a0}₶");
+        assert_eq!(signed_livres(1_250_000), "+1\u{a0}250\u{a0}000\u{a0}₶");
+        assert_eq!(signed_livres(0), "+0\u{a0}₶");
+        assert_eq!(signed_livres(999), "+999\u{a0}₶");
     }
 
     #[test]

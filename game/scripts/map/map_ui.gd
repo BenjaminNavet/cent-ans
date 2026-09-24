@@ -215,48 +215,71 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-## `economy` : `get_faction_economy` (vide si indisponible). Affiche le revenu **net** prévu
-## (recettes - entretien des armées, des bâtiments et de la cour) ; détail en infobulle.
-## Sans économie, repli sur `income` (revenu brut du dernier tour).
+## `economy` : `get_faction_economy` (vide si indisponible). Affiche le solde **net** prévu
+## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
+## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
-	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
+	treasury_label.text = "Trésor : %s" % Money.amount(treasury)
 	if economy.is_empty():
-		income_label.text = "Revenu : %s ℔" % _signed(income)
+		income_label.text = "Revenu : %s" % Money.signed(income)
 		income_label.tooltip_text = "Revenu brut du dernier tour."
 		return
-	var gross := int(economy.get("projected_income", income))
-	var armies := int(economy.get("army_upkeep", 0))
-	var buildings := int(economy.get("building_upkeep", 0))
-	var court := int(economy.get("administration_upkeep", 0))
-	var table := int(economy.get("table_upkeep", 0))  # H3 : la Table (diètes des provinces)
-	# H5 : le seigneuriage est déjà dans les recettes, la refonte dans l'administration.
-	var seigniorage := int(economy.get("seigniorage", 0))
-	var recoinage := int(economy.get("recoinage", 0))
-	# Solde calculé par `core/` (`FactionEconomy::net_income`, audit A3 E1/E4) : l'interface
-	# n'additionne rien, le panneau de faction affiche le même chiffre.
 	var net := int(economy.get("net_income", 0))
-	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
-	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
-	var lines := PackedStringArray(["Prévision pour la prochaine saison"])
-	lines.append("Recettes : %s ℔" % ProvincePanel._thousands(gross))
-	if seigniorage != 0:
-		lines.append("    dont seigneuriage : %s ℔" % _signed(seigniorage))
-	lines.append("Armées : -%s ℔" % ProvincePanel._thousands(armies))
-	lines.append("Bâtiments : -%s ℔" % ProvincePanel._thousands(buildings))
-	lines.append("Cour et administration : -%s ℔" % ProvincePanel._thousands(court))
-	if recoinage != 0:
-		lines.append("    dont refonte des monnaies : -%s ℔" % ProvincePanel._thousands(recoinage))
-	if table != 0:
-		lines.append("La Table : -%s ℔" % ProvincePanel._thousands(table))
-	lines.append("Solde prévu : %s ℔" % _signed(net))
-	if economy.has("net_income_last_turn"):
-		lines.append("Saison passée : %s ℔" % _signed(int(economy["net_income_last_turn"])))
+	income_label.text = "Solde : %s / saison" % Money.signed(net)
+	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
+	income_label.tooltip_text = budget_tooltip(economy)
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
+
+
+## Infobulle du solde : rubriques signées (prévu, et saison passée entre parenthèses), solde,
+## puis l'écart par rapport à la saison passée et sa principale cause.
+static func budget_tooltip(economy: Dictionary) -> String:
+	var lines := PackedStringArray(["[b]Solde prévu pour la prochaine saison[/b]"])
+	var has_past := economy.has("net_change")
+	var biggest_key := ""
+	var biggest := 0
+	for line in economy.get("budget_lines", []):
+		var key := str(line.get("key", ""))
+		if key == "other":
+			continue
+		var projected := int(line.get("projected", 0))
+		var text := "%s : [color=#%s]%s[/color]" % [BudgetTable.RUBRICS.get(key, key), Money.color_of(projected).to_html(false), Money.signed(projected)]
+		if has_past and line.has("last"):
+			text += " (saison passée %s)" % Money.signed(int(line["last"]))
+		lines.append(text)
+		var delta := int(line.get("delta", 0))
+		if has_past and absi(delta) > absi(biggest):
+			biggest = delta
+			biggest_key = key
+	var net := int(economy.get("net_income", 0))
+	lines.append("[b]Solde : [color=#%s]%s[/color][/b]" % [Money.color_of(net).to_html(false), Money.signed(net)])
+	if has_past:
+		var change := int(economy.get("net_change", 0))
+		var sentence := "%s par rapport à la saison passée" % Money.signed(change)
+		if change != 0 and biggest_key != "" and biggest != 0:
+			sentence += ", dont %s sur « %s »" % [Money.signed(biggest), str(BudgetTable.RUBRICS.get(biggest_key, biggest_key)).to_lower()]
+		lines.append("[color=#%s]%s.[/color]" % [Money.color_of(change).to_html(false), sentence])
+	else:
+		lines.append("Premier tour : pas encore de saison passée.")
 	lines.append("Détail : panneau de faction (clic sur le blason).")
-	income_label.tooltip_text = "\n".join(lines)
+	return "\n".join(lines)
+
+
+## Infobulle du trésor : variation de la dernière saison, hors budget compris.
+static func treasury_tooltip(economy: Dictionary) -> String:
+	var history: Array = economy.get("budget_history", [])
+	if history.is_empty():
+		return "Aucune saison résolue pour l'instant."
+	var last: Dictionary = history.back()
+	var text := "Saison passée : %s au trésor" % Money.signed(int(last.get("change", 0)))
+	var other := int(last.get("other", 0))
+	if other != 0:
+		text += " (dont %s hors budget : rançons, tributs, agents, chronique)" % Money.signed(other)
+	return text + "."
 
 
 static func _signed(value: int) -> String:
-	return ("+" if value >= 0 else "-") + ProvincePanel._thousands(absi(value))
+	return Money.signed(value)
 
 
 func set_date(text: String) -> void:
