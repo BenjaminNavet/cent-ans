@@ -46,13 +46,13 @@ func _init() -> void:
 	header_label.add_theme_font_size_override("font_size", 16)
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(header_label)
-	current_label = _small_label(14)
+	current_label = _small_label(14, false)
 	head.add_child(current_label)
 
 	var price_row := HBoxContainer.new()
 	price_row.add_theme_constant_override("separation", 8)
 	add_child(price_row)
-	price_label = _small_label(13)
+	price_label = _small_label(13, false)
 	price_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	price_row.add_child(price_label)
 	price_bar = ProgressBar.new()
@@ -106,9 +106,11 @@ func _ready() -> void:
 		bubbles.call("attach", explanation_label)
 
 
-func _small_label(font_size: int) -> Label:
+func _small_label(font_size: int, wrap := true) -> Label:
 	var label := Label.new()
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if wrap:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size = Vector2(300, 0)
 	label.add_theme_font_size_override("font_size", font_size)
 	return label
 

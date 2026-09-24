@@ -40,6 +40,7 @@ func _init() -> void:
 	add_child(body)
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	error_label.custom_minimum_size = Vector2(300, 0)
 	error_label.add_theme_font_size_override("font_size", 12)
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
@@ -151,6 +152,7 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(300, 0)
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
 	return label

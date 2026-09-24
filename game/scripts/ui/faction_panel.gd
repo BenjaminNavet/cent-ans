@@ -55,6 +55,7 @@ func _ready() -> void:
 		closed.emit())
 	_add_table_row()
 	_add_h11_sections()
+	_wrap_in_scroll()
 	visibility_changed.connect(func() -> void:
 		if not visible and ransom_panel != null:
 			ransom_panel.hide())
@@ -163,6 +164,31 @@ func _add_h11_sections() -> void:
 		goods_list.get_parent().add_child(node)
 
 
+## H11 : le contenu (scène `VBox`) passe dans un défilement vertical borné à la hauteur de
+## l'écran, les sections Monnaie et Ordre allongeant le panneau.
+var _scroll: ScrollContainer
+
+
+func _wrap_in_scroll() -> void:
+	var body: Control = get_node("VBox")
+	remove_child(body)
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(_scroll)
+	_scroll.add_child(body)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	visibility_changed.connect(_fit_height)
+
+
+func _fit_height() -> void:
+	if _scroll == null or not visible:
+		return
+	var body: Control = _scroll.get_child(0)
+	var limit := get_viewport_rect().size.y - position.y - 24.0
+	_scroll.custom_minimum_size = Vector2(body.get_combined_minimum_size().x, minf(body.get_combined_minimum_size().y, limit))
+	reset_size()
+
+
 func _show_h11(economy: Dictionary = {}) -> void:
 	var player := _player_faction()
 	var is_player := faction_id == player or player == ""
@@ -180,6 +206,7 @@ func _show_h11(economy: Dictionary = {}) -> void:
 		var ransoms: Dictionary = sim.call("get_ransoms")
 		var count: int = (ransoms.get("ours", []) as Array).size() + (ransoms.get("held", []) as Array).size()
 		ransom_button.text = "Captifs et rançons (%d)" % count if count > 0 else "Captifs et rançons"
+	_fit_height.call_deferred()
 
 
 ## Ouvre ou ferme la fenêtre des rançons, posée à gauche du panneau (même calque).
