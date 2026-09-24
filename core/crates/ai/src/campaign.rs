@@ -38,6 +38,19 @@ pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
 
+/// Seasons of gross income kept in the treasury; above, money is spent (F4).
+pub const RESERVE_SEASONS: i64 = 4;
+/// Turns over which a hoard above the reserve is spent (army, buildings).
+pub const HOARD_SPENDING_TURNS: i64 = 12;
+/// Seasons of deficit a treasury must cover before units are dismissed
+/// ahead of bankruptcy, at war / at peace (F4).
+pub const WAR_RUNWAY_TURNS: i64 = 8;
+pub const PEACE_RUNWAY_TURNS: i64 = 3;
+/// Share of the hoard given to the Church each year while papal favour is
+/// below [`DONATION_FAVOR`].
+pub const DONATION_PERCENT: i64 = 5;
+pub const DONATION_FAVOR: u8 = 70;
+
 const REBELS: &str = "fac_rebels";
 
 /// Everything the planner derives once per faction and turn.
@@ -48,6 +61,8 @@ struct Context<'a> {
     enemies: BTreeSet<FactionId>,
     aggression: i32,
     income: i64,
+    /// Gross income of the season (the unit of « seasons of income »).
+    gross_income: i64,
     army_upkeep: i64,
     building_upkeep: i64,
     treasury: i64,
@@ -79,6 +94,7 @@ impl<'a> Context<'a> {
                 };
                 gross - state.faction_administration_upkeep(data, faction) - tribute
             },
+            gross_income: state.faction_income_effective(data, faction),
             army_upkeep: state.faction_army_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
             treasury: me.treasury,
@@ -96,6 +112,17 @@ impl<'a> Context<'a> {
     /// Treasury kept aside: two turns of upkeep.
     fn reserve(&self) -> i64 {
         2 * self.upkeep()
+    }
+
+    /// Seasonal surplus (negative: deficit) at the current upkeep.
+    fn surplus(&self) -> i64 {
+        self.income - self.upkeep()
+    }
+
+    /// Treasury above [`RESERVE_SEASONS`] of gross income: idle money the
+    /// faction spends over [`HOARD_SPENDING_TURNS`] (F4).
+    fn hoard(&self) -> i64 {
+        (self.treasury - RESERVE_SEASONS * self.gross_income.max(0)).max(0)
     }
 
     fn owns(&self, province: &ProvinceId) -> bool {
@@ -170,13 +197,12 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         0.0
     };
-    // A treasury worth ten seasons of income is idle money: spend it, and
-    // lighten taxes at peace.
-    let rich = ctx.treasury > 10 * ctx.income.max(1);
+    // Taxes: heavy in war or deficit if public order allows, light when
+    // the realm grumbles (F4: a rich treasury is spent, not untaxed).
     let in_debt = ctx.treasury < 0;
-    let rate = if unrest > 55.0 || (rich && !ctx.at_war()) {
+    let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt) && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < 30.0 {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -186,12 +212,39 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     }
 
     // Debt: dismiss the costliest unit until the surplus repays the debt
-    // within `DEBT_REPAYMENT_TURNS`.
-    let wanted_surplus = -ctx.treasury / DEBT_REPAYMENT_TURNS;
-    if ctx.treasury < 0 && ctx.income - ctx.upkeep() < wanted_surplus {
-        let savings = wanted_surplus - (ctx.income - ctx.upkeep());
+    // within `DEBT_REPAYMENT_TURNS`. F4: dismiss ahead of bankruptcy when the
+    // treasury no longer covers the deficit for a few seasons.
+    let runway = if ctx.at_war() {
+        WAR_RUNWAY_TURNS
+    } else {
+        PEACE_RUNWAY_TURNS
+    };
+    let wanted_surplus = if ctx.treasury < 0 {
+        -ctx.treasury / DEBT_REPAYMENT_TURNS
+    } else if ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway {
+        0
+    } else {
+        i64::MIN
+    };
+    if ctx.surplus() < wanted_surplus {
+        let savings = wanted_surplus - ctx.surplus();
         orders.extend(disband_for_debt(ctx, savings));
         return;
+    }
+
+    // Idle money (F4): a yearly gift to the Church while its favour is low.
+    let hoard = ctx.hoard();
+    let catholic = sim_campaign::religion::is_catholic(state, data, ctx.faction);
+    if hoard > 0
+        && catholic
+        && me.papal_favor < DONATION_FAVOR
+        && state.season == Season::Autumn
+        && ctx.faction.as_str() != sim_campaign::diplomacy::PAPACY_FACTION
+    {
+        let amount = hoard * DONATION_PERCENT / 100;
+        if amount >= 200 {
+            orders.push(Order::DonateToChurch { amount });
+        }
     }
 
     let mut budget = ctx.treasury - ctx.reserve();
@@ -200,8 +253,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     } else {
         PEACE_MILITARY_SHARE
     };
-    let share = if rich { share + 0.3 } else { share };
-    let target_upkeep = (ctx.income as f64 * share) as i64;
+    // F4: armies are paid from what buildings leave of the net income, plus
+    // the hoard spent over `HOARD_SPENDING_TURNS`; small realms live within
+    // their means.
+    let target_upkeep = ((ctx.income - ctx.building_upkeep).max(0) as f64 * share) as i64
+        + hoard / HOARD_SPENDING_TURNS;
     let mut planned_upkeep = ctx.army_upkeep;
 
     // Recruitment: capital first, then threatened border provinces.
@@ -215,7 +271,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
     let mut recruits = 0;
-    let max_recruits = (ctx.income / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
+    let max_recruits =
+        ((ctx.income + hoard / HOARD_SPENDING_TURNS) / INCOME_PER_RECRUIT).clamp(1, 8) as usize;
     'sites: for site in &sites {
         if !ctx.owns(site) {
             continue;
@@ -234,7 +291,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         };
         while recruits < max_recruits
             && planned_upkeep + i64::from(option.upkeep)
-                <= target_upkeep.max(i64::from(option.upkeep))
+                <= if planned_upkeep == 0 {
+                    target_upkeep.max(i64::from(option.upkeep))
+                } else {
+                    target_upkeep
+                }
             && budget >= i64::from(option.cost)
         {
             orders.push(Order::Recruit {
@@ -273,6 +334,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Construction: best yield per livre; the richer, the more sites at once.
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
+    // F4: a new building's upkeep must fit in the surplus left by the army
+    // (or in the hoard being spent).
+    let mut spare = ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
     let mut options: Vec<(f64, ProvinceId, data_model::BuildingId, i64)> = Vec::new();
     for id in state.provinces.keys().filter(|id| ctx.owns(id)) {
         let Some(city) = state.province_city(data, id) else {
@@ -302,9 +366,14 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     });
     let mut used = BTreeSet::new();
     for (_, province, building, cost) in options {
-        if used.len() >= builds || used.contains(&province) || budget < cost {
+        let upkeep = data
+            .buildings
+            .get(&building)
+            .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)));
+        if used.len() >= builds || used.contains(&province) || budget < cost || upkeep > spare {
             continue;
         }
+        spare -= upkeep;
         budget -= cost;
         used.insert(province.clone());
         orders.push(Order::Build { province, building });
