@@ -101,7 +101,7 @@ func refresh() -> void:
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
 		var faction := str(army.get("faction", ""))
-		var location := str(army.get("location", ""))
+		var location := str(army.get("location_province", army.get("location", "")))
 		if faction != player and not is_province_visible(location):
 			continue
 		var centroid := map_data.centroid_of_id(location)
