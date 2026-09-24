@@ -12,6 +12,7 @@ GLB files carry named materials, metric UVs and vertex colours only; Godot swaps
 (``game/scripts/visual/building_materials.gd``).
 """
 
+import contextlib
 import json
 import math
 import sys
@@ -30,6 +31,7 @@ MATERIALS = {
     "Plaster": ("lime_plaster", 2.2, (0.62, 0.58, 0.5), 0.95),
     "Rubble": ("stone_wall", 2.4, (0.36, 0.33, 0.28), 0.95),
     "Ashlar": ("rustic_stone_wall", 2.1, (0.42, 0.39, 0.33), 0.9),
+    "Masonry": ("battle/castle_wall_varriation", 3.0, (0.45, 0.43, 0.4), 0.9),
     "Timber": ("rough_wood", 1.6, (0.2, 0.15, 0.11), 0.9),
     "Planks": ("weathered_brown_planks", 2.2, (0.24, 0.19, 0.14), 0.92),
     "Door": ("weathered_brown_planks", 1.6, (0.14, 0.1, 0.07), 0.9),
@@ -103,14 +105,21 @@ def material(name: str, textured: bool) -> bpy.types.Material:
         mapping.inputs["Scale"].default_value = (1.0 / tile, 1.0 / tile, 1.0)
         links.new(uv.outputs["UV"], mapping.inputs["Vector"])
         img = nodes.new("ShaderNodeTexImage")
-        img.image = bpy.data.images.load(str(_tex_path(tex, "diff")), check_existing=True)
+        img.image = bpy.data.images.load(
+            str(_tex_path(tex, "diff")), check_existing=True
+        )
         links.new(mapping.outputs["Vector"], img.inputs["Vector"])
         tint = _mix_rgb(nodes)
-        _sock(tint.inputs, "B").default_value = (*MATERIAL_TINT.get(name, (1.0, 1.0, 1.0)), 1.0)
+        _sock(tint.inputs, "B").default_value = (
+            *MATERIAL_TINT.get(name, (1.0, 1.0, 1.0)),
+            1.0,
+        )
         links.new(img.outputs["Color"], _sock(tint.inputs, "A"))
         links.new(_sock(tint.outputs, "Result"), _sock(mix.inputs, "A"))
         nor = nodes.new("ShaderNodeTexImage")
-        nor.image = bpy.data.images.load(str(_tex_path(tex, "nor")), check_existing=True)
+        nor.image = bpy.data.images.load(
+            str(_tex_path(tex, "nor")), check_existing=True
+        )
         nor.image.colorspace_settings.name = "Non-Color"
         links.new(mapping.outputs["Vector"], nor.inputs["Vector"])
         nmap = nodes.new("ShaderNodeNormalMap")
@@ -138,7 +147,9 @@ def to_object(g: kit.Geometry, name: str, textured: bool = False) -> bpy.types.O
     mesh.from_pydata(verts, [], faces)
     mesh.update()
     uv_layer = mesh.uv_layers.new(name="UVMap")
-    colors = mesh.color_attributes.new(name="Color", type="FLOAT_COLOR", domain="CORNER")
+    colors = mesh.color_attributes.new(
+        name="Color", type="FLOAT_COLOR", domain="CORNER"
+    )
     for poly in mesh.polygons:
         poly.material_index = mat_index[poly.index]
         for li in poly.loop_indices:
@@ -176,13 +187,20 @@ def export_glb(obj: bpy.types.Object, path: Path) -> None:
 
 # Battle set: kind -> list of (seed, dims or {}, ruined)
 BATTLE_SET = {
-    "cottage": [(s, {}, False) for s in (11, 12, 13, 14, 15, 16)] + [(17, {}, True), (18, {}, True)],
+    "cottage": [(s, {}, False) for s in (11, 12, 13, 14, 15, 16)]
+    + [(17, {}, True), (18, {}, True)],
     "longere": [(21, {}, False), (22, {}, False), (23, {}, False), (24, {}, True)],
-    "timber": [(s, {}, False) for s in (31, 32, 33, 34, 35, 36)] + [(37, {}, True), (38, {}, True)],
-    "townhouse": [(s, {}, False) for s in (41, 42, 43, 44, 45, 46)] + [(47, {}, True), (48, {}, True)],
+    "timber": [(s, {}, False) for s in (31, 32, 33, 34, 35, 36)]
+    + [(37, {}, True), (38, {}, True)],
+    "townhouse": [(s, {}, False) for s in (41, 42, 43, 44, 45, 46)]
+    + [(47, {}, True), (48, {}, True)],
     "stonehouse": [(51, {}, False), (52, {}, False), (53, {}, False), (54, {}, True)],
     "barn": [(61, {}, False), (62, {}, False), (63, {}, False), (64, {}, True)],
-    "church": [(71, {"length": 19.0, "depth": 8.0}, False), (72, {"length": 21.0, "depth": 8.5}, False), (73, {"length": 36.0, "depth": 13.0}, False)],
+    "church": [
+        (71, {"length": 19.0, "depth": 8.0}, False),
+        (72, {"length": 21.0, "depth": 8.5}, False),
+        (73, {"length": 36.0, "depth": 13.0}, False),
+    ],
     "manor": [(81, {}, False)],
     "hall": [(91, {}, False)],
     "well": [(95, {}, False)],
@@ -213,7 +231,9 @@ def export_battle(out_dir: Path) -> None:
                 "triangles": info["triangles"],
             }
             print("MODEL", name, info["triangles"])
-    (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
+    (out_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=1, sort_keys=True) + "\n"
+    )
     print("OK")
 
 
@@ -240,13 +260,13 @@ def _setup_stage(scene) -> None:
     bg.inputs["Strength"].default_value = 0.9
     scene.world = world
     scene.render.engine = "BLENDER_EEVEE"
-    try:
+    with contextlib.suppress(TypeError):
         scene.view_settings.view_transform = "AgX"
-    except TypeError:
-        pass
 
 
-def preview(prefix: Path, kinds: list[str], detail: str = "high", size=(900, 640)) -> None:
+def preview(
+    prefix: Path, kinds: list[str], detail: str = "high", size=(900, 640)
+) -> None:
     """Render each building alone (auto-framed 3/4 view) to ``<prefix>_<i>.png``."""
     import mathutils
 
@@ -268,12 +288,78 @@ def preview(prefix: Path, kinds: list[str], detail: str = "high", size=(900, 640
         elev, yaw = math.radians(22), math.radians(-35)
         target = mathutils.Vector((0.0, 0.0, top * 0.38))
         dist = span * 1.45
-        cam.location = target + mathutils.Vector((math.sin(yaw) * math.cos(elev), -math.cos(yaw) * math.cos(elev), math.sin(elev))) * dist
+        cam.location = (
+            target
+            + mathutils.Vector(
+                (
+                    math.sin(yaw) * math.cos(elev),
+                    -math.cos(yaw) * math.cos(elev),
+                    math.sin(elev),
+                )
+            )
+            * dist
+        )
         cam.rotation_euler = (target - cam.location).to_track_quat("-Z", "Y").to_euler()
         scene.render.resolution_x, scene.render.resolution_y = size
         scene.render.filepath = f"{prefix}_{i:02d}.png"
         bpy.ops.render.render(write_still=True)
         print("PREVIEW", scene.render.filepath, info["triangles"])
+
+
+def preview_glb(png_prefix: Path, glbs: list[str]) -> None:
+    """Render existing GLB models with the textured preview materials (campaign settlements)."""
+    import mathutils
+
+    for i, path in enumerate(glbs):
+        reset_scene()
+        scene = bpy.context.scene
+        _setup_stage(scene)
+        bpy.ops.import_scene.gltf(filepath=path)
+        objs = [o for o in scene.objects if o.type == "MESH" and o.name != "Plane"]
+        lo = mathutils.Vector((1e9, 1e9, 1e9))
+        hi = mathutils.Vector((-1e9, -1e9, -1e9))
+        for obj in objs:
+            for slot in obj.material_slots:
+                if slot.material is not None:
+                    base = slot.material.name.split(".")[0]
+                    if base in MATERIALS:
+                        slot.material = material(base, True)
+            for corner in obj.bound_box:
+                w = obj.matrix_world @ mathutils.Vector(corner)
+                lo = mathutils.Vector(map(min, lo, w))
+                hi = mathutils.Vector(map(max, hi, w))
+        ground = next(o for o in scene.objects if o.name == "Plane")
+        ground.location.z = -0.002
+        ground.scale = (0.02, 0.02, 1)
+        cam_data = bpy.data.cameras.new("Cam")
+        cam_data.lens = 40
+        cam_data.clip_start = 0.01
+        cam = bpy.data.objects.new("Cam", cam_data)
+        scene.collection.objects.link(cam)
+        scene.camera = cam
+        target = (lo + hi) / 2
+        target.z = 0.0
+        span = max(hi.x - lo.x, hi.y - lo.y)
+        elev, yaw = math.radians(38), math.radians(-30)
+        cam.location = (
+            target
+            + mathutils.Vector(
+                (
+                    math.sin(yaw) * math.cos(elev),
+                    -math.cos(yaw) * math.cos(elev),
+                    math.sin(elev),
+                )
+            )
+            * span
+            * 1.15
+        )
+        cam.rotation_euler = (target - cam.location).to_track_quat("-Z", "Y").to_euler()
+        for light in [o for o in scene.objects if o.type == "LIGHT"]:
+            light.data.energy = 4.2
+        scene.render.resolution_x, scene.render.resolution_y = 1200, 800
+        scene.render.filepath = f"{png_prefix}_{i:02d}.png"
+        bpy.ops.render.render(write_still=True)
+        print("PREVIEW", scene.render.filepath)
 
 
 def main() -> None:
@@ -288,6 +374,8 @@ def main() -> None:
         args = argv[2:]
         detail = "low" if "--low" in args else "high"
         preview(Path(argv[1]), [a for a in args if not a.startswith("--")], detail)
+    elif command == "preview-glb":
+        preview_glb(Path(argv[1]), argv[2:])
     else:
         raise SystemExit(f"unknown command {command}")
 

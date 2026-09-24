@@ -15,6 +15,7 @@ const SPECS := {
 	"Plaster": ["buildings/lime_plaster_diff", "buildings/medieval_wall_01_nor", "buildings/medieval_wall_01_rough", 2.2, Color(1.05, 1.02, 0.97), 0.95],
 	"Rubble": ["buildings/stone_wall_diff", "buildings/stone_wall_nor", "buildings/stone_wall_rough", 2.4, Color(1.0, 1.0, 1.0), 0.95],
 	"Ashlar": ["buildings/rustic_stone_wall_diff", "buildings/rustic_stone_wall_nor", "buildings/rustic_stone_wall_rough", 2.1, Color(1.0, 1.0, 1.0), 0.9],
+	"Masonry": ["battle/castle_wall_varriation_diff", "battle/castle_wall_varriation_nor", "", 3.0, Color(1.05, 1.03, 0.98), 0.9],
 	"Timber": ["buildings/rough_wood_diff", "buildings/rough_wood_nor", "buildings/rough_wood_rough", 1.6, Color(1.0, 1.0, 1.0), 0.9],
 	"Planks": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "buildings/weathered_brown_planks_rough", 2.2, Color(1.0, 1.0, 1.0), 0.92],
 	"Door": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "", 1.6, Color(0.7, 0.62, 0.55), 0.9],
@@ -28,7 +29,6 @@ const PLAIN := {
 	"Window": [Color(0.035, 0.032, 0.03), 0.35],
 	"Iron": [Color(0.09, 0.09, 0.1), 0.5],
 	"Canvas": [Color(0.78, 0.74, 0.66), 0.95],
-	"Banner": [Color(0.7, 0.1, 0.1), 0.8],
 }
 const ROOFS := ["RoofTile", "RoofFlat", "RoofSlate", "Thatch"]
 
