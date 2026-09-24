@@ -40,6 +40,7 @@ var hidden_provinces: Dictionary = {}
 var settlement_position: Callable = Callable()
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
+var _homes: Dictionary = {}  # army_id → position de base issue de la simulation (M4)
 var _plates: Dictionary = {}  # army_id → PanelContainer
 var _plate_layer: CanvasLayer
 var _current_scale: float = 1.0
@@ -60,6 +61,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 	for marker in _markers.values():
 		marker.queue_free()
 	_markers.clear()
+	_homes.clear()
 	for plate in _plates.values():
 		plate.queue_free()
 	_plates.clear()
@@ -75,24 +77,36 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var location: String = str(army.get("location_province", army.get("location", "")))
 		if hidden_provinces.has(location) and str(army.get("faction", "")) != player_faction:
 			continue
-		var centroid := _settlement_px(str(army.get("location", "")))
-		if centroid.x < 0.0:
-			centroid = map_data.centroid_of_id(location)
-		if centroid.x < 0.0:
-			continue
-		centroid = _clear_of_city(location, centroid)
+		# Lot M4 : une armée en campagne se tient à sa position libre ; seules les armées
+		# stationnées dans une colonie s'empilent sur celle-ci.
+		var in_field := army.has("position") and str(army.get("settlement", "")) == ""
+		var centroid := Vector2(-1.0, -1.0)
+		var stack_key := location
+		if in_field:
+			centroid = army["position"]
+			stack_key = "field:%d:%d" % [int(centroid.x), int(centroid.y)]
+		else:
+			centroid = _settlement_px(str(army.get("settlement", army.get("location", ""))))
+			if centroid.x < 0.0:
+				centroid = map_data.centroid_of_id(location)
+			if centroid.x < 0.0:
+				continue
+			if not army.has("position"):
+				centroid = _clear_of_city(location, centroid)
+			stack_key = "settlement:" + str(army.get("settlement", army.get("location", "")))
 		var marker: ArmyMarker = MARKER_SCENE.instantiate()
 		add_child(marker)
 		var faction: String = str(army.get("faction", ""))
 		marker.setup(army_id, army, color_of.call(faction), faction == player_faction)
 		marker.base_position = Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y)
-		var stack: int = per_province.get(location, 0)
-		per_province[location] = stack + 1
+		var stack: int = per_province.get(stack_key, 0)
+		per_province[stack_key] = stack + 1
 		marker.offset_dir = Vector2.ZERO if stack == 0 else Vector2.RIGHT.rotated(stack * TAU / 6.0)
 		marker.face(_heading(army, centroid))
 		marker.set_selected(army_id == selected_army)
 		marker.apply_scale(_current_scale)
 		_markers[army_id] = marker
+		_homes[army_id] = marker.base_position
 		if _plate_layer != null:
 			var plate := _make_plate(marker)
 			_plate_layer.add_child(plate)
@@ -105,6 +119,10 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 ## Direction d'avance (coordonnées carte) : vers la prochaine étape du chemin, sinon un
 ## trois-quarts vers le sud-est (lisible avec la caméra par défaut).
 func _heading(army: Dictionary, from: Vector2) -> Vector2:
+	# Lot M4 : prochain coin du trajet libre en cours.
+	var planned: PackedVector2Array = army.get("planned_path", PackedVector2Array())
+	if not planned.is_empty() and planned[0].distance_to(from) > 0.5:
+		return (planned[0] - from).normalized()
 	var path: Array = army.get("path", [])
 	if not path.is_empty():
 		var next := _settlement_px(str(path[0]))
@@ -188,6 +206,21 @@ func pick_screen(screen_position: Vector2) -> String:
 		if plate != null and plate.visible and plate.get_global_rect().has_point(screen_position):
 			return id
 	return best
+
+
+## Lot M4 (animation) : pose le marqueur de `army_id` au point carte `point`, tourné vers
+## `heading` ; `point.x < 0` le remet à sa position issue de la simulation.
+func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZERO) -> void:
+	var marker: ArmyMarker = _markers.get(army_id)
+	if marker == null:
+		return
+	if point.x < 0.0:
+		marker.base_position = _homes.get(army_id, marker.base_position)
+	else:
+		marker.base_position = Vector3(point.x, map_data.surface_world_at(point.x, point.y), point.y)
+	marker.apply_scale(_current_scale)
+	if heading.length() > 0.01:
+		marker.face(heading.normalized())
 
 
 ## Position monde d'une armée (pour cadrer la caméra), Vector3.ZERO si absente.
