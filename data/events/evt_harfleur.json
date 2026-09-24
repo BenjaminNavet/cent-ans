@@ -1,7 +1,7 @@
 {
   "id": "evt_harfleur",
   "title": "Le siège d'Harfleur",
-  "text": "Le roi Henri V, qui se dit roi de France par Isabelle, sa trisaïeule, débarque à l'embouchure de la Seine avec dix mille hommes et des bombardes. Harfleur, clef de la Normandie, résiste cinq semaines puis se rend à merci.",
+  "text": "Le roi Henri V, qui se dit roi de France par Isabelle, sa trisaïeule, débarque à l'embouchure de la Seine avec dix mille hommes et des [[cdx_bombarde|bombardes]]. Harfleur, clef de la Normandie, résiste cinq semaines puis se rend à merci.",
   "kind": "historical",
   "trigger": {
     "date": {

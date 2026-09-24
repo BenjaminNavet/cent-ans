@@ -1,7 +1,7 @@
 {
   "id": "evt_noces_du_dauphin",
   "title": "Les noces du dauphin",
-  "text": "À Tain-l'Hermitage, le jeune Charles, dauphin de Viennois, épouse sa cousine Jeanne de Bourbon. L'union resserre les liens entre la maison royale et les Bourbons, fidèles soutiens des Valois.",
+  "text": "À Tain-l'Hermitage, le jeune Charles, dauphin de Viennois, épouse sa cousine Jeanne de Bourbon. L'union resserre les liens entre la maison royale et les Bourbons, fidèles soutiens des [[cdx_valois|Valois]].",
   "kind": "historical",
   "trigger": {
     "date": {

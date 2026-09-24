@@ -101,7 +101,11 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 10 fait : papier (entity tech_paper_mills), robert_d_artois, benoit_xii, louis_d_anjou,
   jeanne_de_bourgogne. Section H8 de `_todo.md` vide (aucun lien en attente).
 - Fiches H8b écrites : 73.
-- Prochaines étapes H8b : liens dans characters/events/technologies, onglets codex_window, tests.
+- Onglets : libellé court en 3e élément de `CodexStore.FAMILIES`, nom complet en infobulle,
+  `clip_tabs = false`.
+- Liens posés (script scratchpad `link_texts.py`, liste de formes choisies, 2 liens max par texte,
+  jamais vers la fiche dont le texte est l'entité) : 37 personnages, 38 événements, 9 technologies.
+- Prochaine étape H8b : tests complets (pytest, cargo test, import + smoke Godot).
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

@@ -1,7 +1,7 @@
 {
   "id": "evt_sacre_de_reims",
   "title": "Le sacre de Reims",
-  "text": "Orléans délivrée, la Pucelle a entraîné le roi à travers une Champagne tenue par les Bourguignons. Troyes, Châlons et Reims ouvrent leurs portes ; dans la cathédrale, l'archevêque verse sur le front de Charles l'huile de la sainte ampoule.",
+  "text": "[[cdx_orleans|Orléans]] délivrée, la Pucelle a entraîné le roi à travers une Champagne tenue par les Bourguignons. [[cdx_traite_troyes|Troyes]], Châlons et Reims ouvrent leurs portes ; dans la cathédrale, l'archevêque verse sur le front de Charles l'huile de la sainte ampoule.",
   "kind": "chained",
   "trigger": {
     "conditions": [

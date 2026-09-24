@@ -1,7 +1,7 @@
 {
   "id": "evt_morlaix",
   "title": "La bataille de Morlaix",
-  "text": "Le 30 septembre 1342, près de Morlaix, Charles de Blois lance sa chevalerie contre la petite armée du comte de Northampton, retranchée derrière des fossés dissimulés sous les branchages. Les charges se brisent dans les fosses et sous les flèches ; les Anglais se replient dans un bois et y tiennent. Des archers et des hommes d'armes à pied ont vaincu une armée bien plus nombreuse : la leçon vaut pour toute la guerre.",
+  "text": "Le 30 septembre 1342, près de Morlaix, [[cdx_charles_de_blois|Charles de Blois]] lance sa chevalerie contre la petite armée du comte de Northampton, retranchée derrière des fossés dissimulés sous les branchages. Les charges se brisent dans les fosses et sous les flèches ; les Anglais se replient dans un bois et y tiennent. Des archers et des [[cdx_hommes_d_armes|hommes d'armes]] à pied ont vaincu une armée bien plus nombreuse : la leçon vaut pour toute la guerre.",
   "kind": "historical",
   "trigger": {
     "date": {

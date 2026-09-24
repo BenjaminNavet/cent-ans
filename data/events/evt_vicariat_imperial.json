@@ -1,7 +1,7 @@
 {
   "id": "evt_vicariat_imperial",
   "title": "Le vicariat impérial de Coblence",
-  "text": "Le 5 septembre 1338, à Coblence, l'empereur Louis de Bavière, siégeant en majesté devant les princes d'Empire, fait d'Édouard III son [[cdx_vicariat_imperial|vicaire général]]. Le roi d'Angleterre peut désormais commander aux seigneurs des Pays-Bas au nom de l'empereur. Mais l'alliance se paie : l'empereur et les princes attendent les subsides promis.",
+  "text": "Le 5 septembre 1338, à Coblence, l'empereur [[cdx_louis_de_baviere|Louis de Bavière]], siégeant en majesté devant les princes d'Empire, fait d'Édouard III son [[cdx_vicariat_imperial|vicaire général]]. Le roi d'Angleterre peut désormais commander aux seigneurs des Pays-Bas au nom de l'empereur. Mais l'alliance se paie : l'empereur et les princes attendent les subsides promis.",
   "kind": "historical",
   "trigger": {
     "date": {

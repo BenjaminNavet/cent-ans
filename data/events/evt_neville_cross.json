@@ -1,7 +1,7 @@
 {
   "id": "evt_neville_cross",
   "title": "La bataille de Neville's Cross",
-  "text": "Pour secourir son allié de France après Crécy, le roi David a envahi le Northumberland. Devant Durham, les archers de l'archevêque d'York brisent les schiltrons ; blessé de deux flèches au visage, le roi est pris sous un pont par John Coupland.",
+  "text": "Pour secourir son allié de France après [[cdx_crecy|Crécy]], le roi David a envahi le Northumberland. Devant Durham, les archers de l'archevêque d'York brisent les schiltrons ; blessé de deux flèches au visage, le roi est pris sous un pont par John Coupland.",
   "kind": "historical",
   "trigger": {
     "date": {

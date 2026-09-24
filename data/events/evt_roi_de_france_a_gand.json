@@ -1,7 +1,7 @@
 {
   "id": "evt_roi_de_france_a_gand",
   "title": "Édouard, roi de France à Gand",
-  "text": "Le 26 janvier 1340, à Gand, Édouard III se proclame roi de France et écartèle ses armes des lis de France et des léopards d'Angleterre. Le geste rassure les Flamands d'[[cdx_jacob_van_artevelde|Artevelde]] : en servant Édouard, ils obéissent à leur roi légitime et ne trahissent pas leur suzerain. Pour Philippe VI, ce n'est qu'une usurpation.",
+  "text": "Le 26 janvier 1340, à Gand, [[cdx_edouard_iii|Édouard III]] se proclame roi de France et écartèle ses armes des lis de France et des léopards d'Angleterre. Le geste rassure les Flamands d'[[cdx_jacob_van_artevelde|Artevelde]] : en servant Édouard, ils obéissent à leur roi légitime et ne trahissent pas leur suzerain. Pour Philippe VI, ce n'est qu'une usurpation.",
   "kind": "historical",
   "trigger": {
     "date": {

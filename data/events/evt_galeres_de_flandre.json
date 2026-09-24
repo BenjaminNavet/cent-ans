@@ -1,7 +1,7 @@
 {
   "id": "evt_galeres_de_flandre",
   "title": "Les galères de Flandre",
-  "text": "Les galères marchandes de la Sérénissime rentrent de Bruges et de Southampton, chargées de laines et de draps. Le Sénat met aux enchères la prochaine muda ; les patriciens se disputent les places.",
+  "text": "Les galères marchandes de la Sérénissime rentrent de [[cdx_bruges|Bruges]] et de Southampton, chargées de laines et de draps. Le Sénat met aux enchères la prochaine muda ; les patriciens se disputent les places.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 48
