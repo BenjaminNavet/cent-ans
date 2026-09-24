@@ -105,7 +105,7 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	for i in WAKE_EMITTERS:
 		_wake.append(_emitter("Wake%d" % i, _splash_material(), 90, 1.6, false))
 	for i in CLOD_EMITTERS:
-		_clods.append(_emitter("Clods%d" % i, _clod_material(), 220, 1.0, false))
+		_clods.append(_emitter("Clods%d" % i, _clod_material(), 320, 1.0, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
@@ -555,6 +555,22 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(0, 0.5))
 		grow.add_point(Vector2(1, 1.4))
 		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 0.9, 0.5, 0.0])
+	elif node_name.begins_with("Clods"):
+		# BV1 : mottes arrachées par les sabots, lancées vers l'arrière et vers le haut, qui
+		# retombent vite (pas de nuage : de petits paquets opaques).
+		mat.emission_shape_offset = Vector3(0, 0.45, 0)  # à hauteur de sabot, pas sous le sol
+		mat.direction = Vector3(0, 0.8, -0.6)
+		mat.spread = 28.0
+		mat.initial_velocity_min = 2.5
+		mat.initial_velocity_max = 6.5
+		mat.gravity = Vector3(0, -9.8, 0)
+		mat.scale_min = 0.12
+		mat.scale_max = 0.24
+		mat.angular_velocity_min = -360.0
+		mat.angular_velocity_max = 360.0
+		grow.add_point(Vector2(0, 1.0))
+		grow.add_point(Vector2(1, 0.8))
+		mat.color_ramp = _ramp([0.0, 0.05, 0.85, 1.0], [0.0, 1.0, 1.0, 0.0])
 	elif node_name.begins_with("Wake"):
 		# B8 : sillage d'écume, entraîné vers l'arrière (pas projeté vers le haut comme une gerbe)
 		# et étalé sur les côtés, plus longue durée de vie pour laisser une traîne visible.
