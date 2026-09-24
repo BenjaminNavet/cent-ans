@@ -42,6 +42,7 @@ pub mod orders;
 pub mod outcome;
 pub mod rng;
 pub mod setup;
+pub mod shot;
 pub mod siege;
 pub mod sim;
 pub mod site;
@@ -59,6 +60,7 @@ pub use rng::BattleRng;
 pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
+pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use sim::{
     BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
