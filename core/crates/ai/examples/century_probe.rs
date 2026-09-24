@@ -43,7 +43,13 @@ struct Report {
     turns: u32,
     war_turns: u32,
     war_phases: u32,
+    /// Turns England dominates the French realm (G2).
+    dominance_turns: u32,
+    /// Most French provinces (of 1337) England held at once.
+    max_held: usize,
     alliance_turns: Vec<u32>,
+    /// Alliance turns while France and England are at war (G2).
+    alliance_war_turns: Vec<u32>,
     calls_honoured: u32,
     calls_refused: u32,
     /// Worst treasury / income ratio after 1350 and its faction.
@@ -73,6 +79,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         seed,
         turns,
         alliance_turns: vec![0; PAIRS.len()],
+        alliance_war_turns: vec![0; PAIRS.len()],
         majors_1400: vec![true; MAJORS.len()],
         ..Report::default()
     };
@@ -165,9 +172,18 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
         was_at_war = at_war;
+        report.max_held = report.max_held.max(ai::alignment::realm_held_by(
+            &state, data, &france, &england,
+        ));
+        if ai::alignment::dominates_realm(&state, data, &england, &france) {
+            report.dominance_turns += 1;
+        }
         for (index, (_, a, b)) in PAIRS.iter().enumerate() {
             if state.is_allied(&id(a), &id(b)) {
                 report.alliance_turns[index] += 1;
+                if at_war {
+                    report.alliance_war_turns[index] += 1;
+                }
             }
         }
         let now = married(&state);
@@ -297,8 +313,44 @@ fn main() {
                 )
             })
             .collect();
-        println!("  {label:14} {}", shares.join(" | "));
+        let war_shares: Vec<String> = reports
+            .iter()
+            .map(|r| {
+                format!(
+                    "{:.0} %",
+                    100.0 * f64::from(r.alliance_war_turns[index]) / f64::from(r.war_turns.max(1))
+                )
+            })
+            .collect();
+        println!(
+            "  {label:14} {}   (en guerre FR-EN : {})",
+            shares.join(" | "),
+            war_shares.join(" | ")
+        );
     }
+    let scots: Vec<String> = reports
+        .iter()
+        .map(|r| {
+            let n = r
+                .bankruptcies
+                .get(&id("fac_scotland"))
+                .copied()
+                .unwrap_or(0);
+            format!("{:.1}", f64::from(n) / decades)
+        })
+        .collect();
+    let dominance: Vec<String> = reports
+        .iter()
+        .map(|r| {
+            format!(
+                "{:.0} % (max {} prov.)",
+                100.0 * f64::from(r.dominance_turns) / f64::from(r.turns),
+                r.max_held
+            )
+        })
+        .collect();
+    println!("Angleterre dominant le royaume : {}", dominance.join(" | "));
+    println!("Banqueroutes de l'Écosse / déc. : {}", scots.join(" | "));
     let survivors: Vec<String> = MAJORS
         .iter()
         .enumerate()
