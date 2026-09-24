@@ -124,6 +124,8 @@ uniform float realm_band_alpha = 0.55;
 
 varying vec3 world_pos;
 
+#include "res://shaders/campaign_life.gdshaderinc"
+
 float height01_lod(vec2 uv, float lod) {
 	if (height_bpp == 2) {
 		vec4 t = texture(heightmap, uv);
