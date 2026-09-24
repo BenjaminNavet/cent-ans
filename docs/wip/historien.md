@@ -12,14 +12,15 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md`.
 | H8 Rédaction codex partie 1 | **fusionné** (41 fiches, af53cdf) | — | |
 | H8b Codex partie 2 | **fusionné** (73 fiches, 84 textes liés, onglets courts) | — | reste : héraldique, calendrier, vie quotidienne (petit lot) |
 | H10 Codex Table, plantes, médecine | **fusionné** (≈ 50 fiches) | — | |
-| H5 Monnaie + H6 Chevalerie et rançons (core + données + pont) | en cours (2e tentative) | worktree agent | 1re tentative perdue (worktree disparu) |
+| H5 Monnaie + H6 Chevalerie et rançons (core + données + pont) | **fusionné** (d5327bf, main 354eaa5) | — | API `docs/design/h5-h6-api.md` ; Mauron simplifié (moitié des membres perdus en une saison) |
 | UI monnaie, rançons, ordres ; événements éducatifs ; relecture | vague 3 | — | |
 | Liaison Encyclopédie F8 (touche L) ↔ Codex (K) via `entity` | vague 3 | — | boutons croisés « Fiche historique » / « Voir dans l'encyclopédie » |
 
 Coordination : sessions parallèles orchestrateur (2b, F1-F9), ui-tw (e3), visual (76).
 Ne stager que ses propres chemins. F8 (encyclopédie) doit s'appuyer sur le Codex.
 
-Vague 1 lancée (3 agents worktree : H1, H2, H3+H4). Prochaine étape : fusionner leurs branches, puis vague 2.
+Vague 1 lancée (3 agents worktree : H1, H2, H3+H4). Prochaine étape (vague 3) : H11 UI monnaie/captifs/ordres + genres coinage/ransom/chivalry ; H12 fiches restantes (héraldique, calendrier, vie quotidienne, ids _todo) + liaison Encyclopédie↔Codex + événements pédagogiques.
+Ancienne note : fusionner leurs branches, puis vague 2.
 
 Reste après H2 : bouton Codex dans le bandeau (`map_ui.gd`, session ui-tw) ; T = épingler seulement si une infobulle est visible (sinon arbre des techs).
 
