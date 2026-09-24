@@ -42,6 +42,48 @@
    ],
    "variants": 2
   },
+  "cavalry_0": {
+   "lods": [
+    "cavalry_0_lod0.mesh.bin",
+    "cavalry_0_lod1.mesh.bin",
+    "cavalry_0_lod2.mesh.bin"
+   ],
+   "rig": "cavalry",
+   "tris": [
+    3052,
+    800,
+    426
+   ],
+   "variants": 2
+  },
+  "cavalry_1": {
+   "lods": [
+    "cavalry_1_lod0.mesh.bin",
+    "cavalry_1_lod1.mesh.bin",
+    "cavalry_1_lod2.mesh.bin"
+   ],
+   "rig": "cavalry",
+   "tris": [
+    2747,
+    693,
+    341
+   ],
+   "variants": 2
+  },
+  "cavalry_2": {
+   "lods": [
+    "cavalry_2_lod0.mesh.bin",
+    "cavalry_2_lod1.mesh.bin",
+    "cavalry_2_lod2.mesh.bin"
+   ],
+   "rig": "cavalry",
+   "tris": [
+    2549,
+    682,
+    310
+   ],
+   "variants": 2
+  },
   "infantry_0": {
    "lods": [
     "infantry_0_lod0.mesh.bin",
@@ -86,6 +128,139 @@
   }
  },
  "rigs": {
+  "cavalry": {
+   "bones": [
+    "Back",
+    "Torso",
+    "Torso2",
+    "Torso3",
+    "Neck1",
+    "Neck2",
+    "Neck3",
+    "Head",
+    "Ear1.L",
+    "Ear2.L",
+    "Ear3.L",
+    "Ear4.L",
+    "Ear1.R",
+    "Ear2.R",
+    "Ear3.R",
+    "Ear4.R",
+    "FrontShoulder.L",
+    "FrontUpperLeg.L",
+    "FrontLowerLeg.L",
+    "FrontShoulder.R",
+    "FrontUpperLeg.R",
+    "FrontLowerLeg.R",
+    "BackShoulder.L",
+    "BackLeg.L",
+    "BackUpperLeg.L",
+    "BackLowerLeg.L",
+    "BackShoulder.R",
+    "BackLeg.R",
+    "BackUpperLeg.R",
+    "BackLowerLeg.R",
+    "Tail1",
+    "Tail2",
+    "Tail3",
+    "Tail4",
+    "Tail5",
+    "Tail6",
+    "Tail7",
+    "IKBackLeg.L",
+    "FFB.L",
+    "IKFrontLeg.L",
+    "FF.L",
+    "IKBackLeg.R",
+    "FFB.R",
+    "IKFrontLeg.R",
+    "FF.R",
+    "R:Root",
+    "R:Body",
+    "R:Hips",
+    "R:Abdomen",
+    "R:Torso",
+    "R:Chest",
+    "R:Neck",
+    "R:Head",
+    "R:Shoulder.L",
+    "R:UpperArm.L",
+    "R:LowerArm.L",
+    "R:Wrist.L",
+    "R:Shoulder.R",
+    "R:UpperArm.R",
+    "R:LowerArm.R",
+    "R:Wrist.R",
+    "R:UpperLeg.L",
+    "R:LowerLeg.L",
+    "R:Foot.L",
+    "R:UpperLeg.R",
+    "R:LowerLeg.R",
+    "R:Foot.R",
+    "R:Prop",
+    "R:Nock",
+    "R:Arrow"
+   ],
+   "clips": {
+    "c_bow_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 168
+    },
+    "c_bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 278
+    },
+    "c_bow_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 249
+    },
+    "c_charge": {
+     "frames": 15,
+     "loop": true,
+     "start": 125
+    },
+    "c_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 338
+    },
+    "c_death_m": {
+     "frames": 30,
+     "loop": false,
+     "start": 368
+    },
+    "c_fall": {
+     "frames": 30,
+     "loop": false,
+     "start": 398
+    },
+    "c_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 110
+    },
+    "c_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 0
+    },
+    "c_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 140
+    },
+    "c_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 81
+    }
+   },
+   "fps": 24,
+   "texture": "cavalry.bones.bin"
+  },
   "human": {
    "bones": [
     "Root",

@@ -129,11 +129,11 @@ def rest_pose(arm):
 
 
 def find_action(name, prefix):
-    """First imported action called `prefix|name` (or `name`)."""
-    for act in bpy.data.actions:
-        cleaned = clean_name(act.name)
-        if cleaned == f"{prefix}|{name}" or cleaned == name:
-            return act
+    """Imported action called `prefix|name` (else `name`)."""
+    for wanted in (f"{prefix}|{name}", name):
+        for act in bpy.data.actions:
+            if clean_name(act.name) == wanted:
+                return act
     raise KeyError(name)
 
 
@@ -582,8 +582,11 @@ def create_part(name, data, arm):
     if data["parent_bone"] and not ws:
         g = obj.vertex_groups.new(name=data["parent_bone"])
         g.add(range(len(me.vertices)), 1.0, "REPLACE")
+    # Extracted vertices are in the space of the armature's (unscaled) import: follow the
+    # armature's root empty (scale, placement on a saddle).
+    base = arm.parent.matrix_world if arm.parent is not None else Matrix.Identity(4)
     obj.parent = arm
-    obj.matrix_parent_inverse = arm.matrix_world.inverted()
+    obj.matrix_parent_inverse = arm.matrix_world.inverted() @ base
     return obj
 
 
@@ -724,15 +727,25 @@ def main():
         for name, entry in manifest["rigs"].items():
             rigs[name] = rig_stub(name, entry["bones"])
     else:
+        import battle_skinned_cavalry as cavalry
+
         human = bake_human_rig()
         rigs["human"] = human
         manifest["rigs"]["human"] = human.manifest()
+        mounted = cavalry.bake_cavalry_rig()
+        rigs["cavalry"] = mounted
+        manifest["rigs"]["cavalry"] = mounted.manifest()
     for fig_name, recipe in figures.FIGURES.items():
         if only and fig_name not in only:
             continue
         if recipe["rig"] not in rigs:
             continue
-        manifest["figures"][fig_name] = export_figure(fig_name, recipe, rigs)
+        if recipe["rig"] == "cavalry":
+            import battle_skinned_cavalry as cavalry
+
+            manifest["figures"][fig_name] = cavalry.export_cavalry(fig_name, recipe, rigs["cavalry"])
+        else:
+            manifest["figures"][fig_name] = export_figure(fig_name, recipe, rigs)
     manifest["source"] = "tools/blender_scripts/battle_skinned.py (Quaternius CC0, see SOURCE.md)"
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=1, sort_keys=True)

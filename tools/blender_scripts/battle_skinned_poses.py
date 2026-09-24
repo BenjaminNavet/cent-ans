@@ -210,7 +210,7 @@ def pike_level(arm, t):
 
 def pike_thrust(arm, t):
     push = smooth(0.15, 0.4, t) * (1 - smooth(0.55, 0.95, t))
-    rotate_about(arm, "Torso", Vector((1, 0, 0)), -0.18 * push)
+    rotate_about(arm, "Torso", Vector((1, 0, 0)), 0.18 * push)
     _pike_level(arm, thrust=0.35 * push)
 
 
@@ -302,7 +302,7 @@ def crossbow_shoot(arm, t):
     # Spanning: bend forwards, crossbow nose down in front of the feet, hands on the string.
     bend = smooth(0.18, 0.3, t) * (1 - smooth(0.62, 0.74, t))
     pull = smooth(0.32, 0.6, t)
-    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), -0.75 * bend)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.75 * bend)
     feet = (pos(arm, "Foot.L") + pos(arm, "Foot.R")) / 2
     nose = Vector((feet.x, feet.y - 0.42, 0.05))
     up = Vector((0.0, 0.25, 1.0)).normalized()
@@ -332,13 +332,13 @@ def death_knees(arm, t):
     for side in ("L", "R"):
         foot = pos(arm, f"Foot.{side}")
         ik2(arm, f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}", foot, hips + Vector((0, -1.0, -0.3)))
-    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), -0.4 * sink)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.4 * sink)
     arms_down = Vector((0, -0.2, -1.0))
     for side in ("L", "R"):
         aim(arm, f"UpperArm.{side}", arms_down + Vector((0.3 if side == "L" else -0.3, 0, 0)))
     if fall > 0:
         knees = (pos(arm, "LowerLeg.L") + pos(arm, "LowerLeg.R")) / 2
-        rotate_about(arm, "Root", Vector((1, 0, 0)), -1.45 * fall, Vector((knees.x, knees.y, 0.08)))
+        rotate_about(arm, "Root", Vector((1, 0, 0)), 1.45 * fall, Vector((knees.x, knees.y, 0.08)))
 
 
 death_knees.frames = 30
@@ -349,7 +349,7 @@ def death_back(arm, t):
     fly = smooth(0.0, 0.55, t)
     hop = math.sin(min(t / 0.55, 1.0) * math.pi) * 0.35
     translate(arm, "Root", Vector((0, 1.8 * fly, hop)))
-    rotate_about(arm, "Root", Vector((1, 0, 0)), 1.5 * smooth(0.05, 0.6, t), pos(arm, "Root"))
+    rotate_about(arm, "Root", Vector((1, 0, 0)), -1.5 * smooth(0.05, 0.6, t), pos(arm, "Root"))
     for side, sx in (("L", 1), ("R", -1)):
         aim(arm, f"UpperArm.{side}", Vector((0.7 * sx, 0.3, 0.6)))
 
@@ -372,3 +372,125 @@ def _knockdown_frame(i, count, first, last):
 
 knockdown.frames = 26 + 12 + 26
 knockdown.source_frame = _knockdown_frame
+
+
+# --- Riders (the cavalry baker puts the rider on the saddle before these run) ------------
+
+RIDE = {}
+
+
+def _mount():
+    return RIDE["mount"]
+
+
+def _hv(v):
+    """Horse-relative direction to world (follows the saddle's pitch and roll)."""
+    return (_mount().delta().to_3x3().normalized() @ v).normalized()
+
+
+def _hp(p):
+    """Rest-pose world point carried by the saddle."""
+    return _mount().delta() @ p
+
+
+def _ride_legs(arm):
+    """Thighs astride the barrel, feet in the stirrups."""
+    m = _mount()
+    for side, sx in (("L", 1), ("R", -1)):
+        foot = _hp(m.stirrups[side])
+        pole = pos(arm, f"UpperLeg.{side}") + _hv(Vector((0.5 * sx, -1.0, 0.1)))
+        ik2(arm, f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}", foot, pole)
+        # The foot bones hang from the root, not the shins: move them to the ankle.
+        ankle = pos(arm, f"LowerLeg.{side}") + limb_dir(arm, f"LowerLeg.{side}") * (foot - pos(arm, f"LowerLeg.{side}")).length
+        fm = world(arm, f"Foot.{side}")
+        fm.translation = ankle
+        set_world(arm, f"Foot.{side}", fm)
+
+
+def _reins(arm, side="L"):
+    m = _mount()
+    target = _hp(m.pommel + Vector((0.06 if side == "L" else -0.06, -0.12, 0.12)))
+    ik2(arm, f"UpperArm.{side}", f"LowerArm.{side}", f"Wrist.{side}", target, pos(arm, f"UpperArm.{side}") + _hv(Vector((0.6 if side == "L" else -0.6, 0.2, -0.6))))
+
+
+def _lean(arm, amount):
+    rotate_about(arm, "Abdomen", _hv(Vector((1, 0, 0))), amount)
+
+
+def _lance_at(arm, grip, axis, up=None):
+    prop = prop_matrix(grip, axis, up if up is not None else _hv(Vector((0, 0, 1))))
+    STATE["prop"] = prop
+    hand_to_prop(arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + _hv(Vector((-0.6, 0.3, -0.5))))
+    fist_on_prop(arm, prop)
+
+
+def ride_lance_up(arm, t):
+    """At a halt or walking: lance upright, butt by the right stirrup."""
+    m = _mount()
+    _ride_legs(arm)
+    _reins(arm)
+    butt = _hp(m.stirrups["R"] + Vector((-0.08, -0.05, 0.2)))
+    axis = _hv(Vector((-0.05, -0.18, 1.0)))
+    _lance_at(arm, butt + axis * 1.1, axis, _hv(Vector((0, -1, 0))))
+
+
+def ride_lance_raised(arm, t):
+    """Gallop: leaning forwards, lance slanted up and forwards."""
+    _ride_legs(arm)
+    _lean(arm, 0.2)
+    _reins(arm)
+    grip = pos(arm, "Chest") + _hv(Vector((-0.24, -0.12, -0.2)))
+    _lance_at(arm, grip, _hv(Vector((-0.05, -0.7, 0.7))))
+
+
+def ride_lance_couched(arm, t):
+    """Charge: lance couched under the right arm, aimed forwards across the neck."""
+    _ride_legs(arm)
+    _lean(arm, 0.35)
+    _reins(arm)
+    grip = pos(arm, "Chest") + _hv(Vector((-0.2, -0.18, -0.2)))
+    _lance_at(arm, grip, _hv(Vector((0.22, -1.0, -0.04))))
+
+
+def ride_lance_thrust(arm, t):
+    """Melee: short thrusts of the lance, held overhand, downwards and forwards."""
+    _ride_legs(arm)
+    push = smooth(0.1, 0.35, t) * (1 - smooth(0.5, 0.9, t))
+    _lean(arm, 0.1 + 0.2 * push)
+    _reins(arm)
+    grip = pos(arm, "Chest") + _hv(Vector((-0.28, -0.05 - 0.4 * push, 0.05 - 0.1 * push)))
+    _lance_at(arm, grip, _hv(Vector((0.05, -1.0, -0.35))))
+
+
+ride_lance_thrust.frames = 28
+
+
+def ride_bow_rest(arm, t):
+    _ride_legs(arm)
+    _bow_arm(arm, 0.0)
+    _reins(arm, "R")
+
+
+def ride_bow_shoot(arm, t):
+    _ride_legs(arm)
+    bow_shoot(arm, t)
+
+
+def ride_death(arm, t):
+    """Horse and rider down: the rider slides off to the left and falls on his back."""
+    m = _mount()
+    s = smooth(0.15, 0.7, t)
+    if s < 1e-3:
+        _ride_legs(arm)
+        return
+    ground = Matrix.Translation(Vector((0.95, 0.15, -0.6)))
+    m.seat_rider(m.delta().lerp(ground, s))
+
+
+def ride_fall(arm, t):
+    """Unhorsed: the rider is thrown backwards over the croup (the horse stays up)."""
+    m = _mount()
+    s = smooth(0.0, 0.55, t)
+    hop = math.sin(min(t / 0.55, 1.0) * math.pi) * 0.35
+    ground = Matrix.Translation(Vector((0.15, 1.5, -0.6 + hop)))
+    m.seat_rider(m.delta().lerp(ground, s))
