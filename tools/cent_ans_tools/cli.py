@@ -131,6 +131,73 @@ def geo_provinces() -> None:
     _report_provinces(geo_provinces_step.build())
 
 
+@geo_app.command("settlements")
+def geo_settlements() -> None:
+    """Projette les colonies et génère settlement_graph.json, settlements_px.json et l'aperçu."""
+    from cent_ans_tools.geo import settlements as geo_settlements_step
+
+    _report_settlements(geo_settlements_step.build())
+
+
+@geo_app.command("roads")
+def geo_roads(
+    force: bool = typer.Option(False, "--force", help="Retélécharge Itiner-e"),
+    computed: bool = typer.Option(
+        False, "--computed", help="Force le repli (routes calculées par coût)"
+    ),
+) -> None:
+    """Génère roads.geojson (Itiner-e ou repli) puis remet à jour le graphe des colonies."""
+    from cent_ans_tools.geo import roads as geo_roads_step
+    from cent_ans_tools.geo import settlements as geo_settlements_step
+
+    result = geo_roads_step.build(force=force, computed=computed)
+    _print_sizes("Routes", [result.path])
+    console.print(
+        f"Source : {result.source} ; {result.features} tronçons, {result.km:.0f} km"
+    )
+    _report_settlements(geo_settlements_step.build())
+
+
+@geo_app.command("hamlets")
+def geo_hamlets(
+    force: bool = typer.Option(False, "--force", help="Retélécharge GeoNames"),
+) -> None:
+    """Génère hamlets.json (lieux habités GeoNames répartis selon la densité)."""
+    from cent_ans_tools.geo import hamlets as geo_hamlets_step
+
+    result = geo_hamlets_step.build(force=force)
+    _print_sizes("Hameaux", [result.path])
+    console.print(
+        f"{result.count} hameaux ({result.candidates} candidats GeoNames), "
+        f"{result.provinces} provinces"
+    )
+
+
+@geo_app.command("relief")
+def geo_relief(
+    force: bool = typer.Option(False, "--force", help="Retélécharge ETOPO"),
+) -> None:
+    """Génère le relief 8192² en 16 × 16 tuiles (data/map/height/) et height_tiles de map.json."""
+    from cent_ans_tools.geo import relief as geo_relief_step
+
+    result = geo_relief_step.build(force=force)
+    console.print(
+        f"{result.tiles} tuiles, {result.total_bytes / 1e6:.1f} Mo au total "
+        f"({result.seconds:.0f} s) dans {result.directory}"
+    )
+
+
+def _report_settlements(result) -> None:  # noqa: ANN001
+    _print_sizes("Colonies", [result.graph, result.positions, result.preview])
+    console.print(
+        f"{result.settlements} colonies ({len(result.fallback_cities)} cités de repli) ; "
+        f"arêtes : {result.land_edges} terrestres dont {result.road_edges} sur route, "
+        f"{result.sea_edges} maritimes ; {result.components} composante(s) connexe(s)"
+    )
+    for warning in result.warnings:
+        console.print(f"[yellow]{warning}[/yellow]")
+
+
 @geo_app.command("splat")
 def geo_splat() -> None:
     """Génère splat.png, province_border_dist.png et coast_dist.png (shader du terrain)."""
