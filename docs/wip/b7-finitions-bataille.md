@@ -9,7 +9,7 @@ Godot uniquement (`game/`), aucune règle.
 | 1. Fanions de lance couchée | **fait** (shader, sans régénérer les .glb) |
 | 2. Repères d'unité regroupés de loin | **fait** (smoke : contrôle ajouté) |
 | 3. Neige en relief | **fait** (congères, pentes bleutées, neige piétinée) |
-| 4. Éclaboussures de gué vérifiées | à faire |
+| 4. Éclaboussures de gué vérifiées | **fait** (quasi invisibles avant : corrigé) |
 | Mesures perf avant/après | à faire |
 
 ## 1. Fanions
@@ -51,5 +51,20 @@ Appel : `terrain.update_trample(units, dt)` au début de `_update_effects` (`bat
 Captures : `before_snow.png` / `after_snow.png` (`--season=winter --ground=snowy --terrain=hills
 --weather=clear`), `before_snow_weather.png` / `after_snow_weather.png` (`--weather=snow`).
 
+## 4. Éclaboussures
+Cas fabriqué : `game/tests/b7_ford_probe.gd` (bataille de démo sans rendu, même graine que la scène
+autonome) liste les régiments en mouvement dont l'emprise touche la rivière. Dans la démo, les
+chevaliers français la passent au galop vers 50-60 s en (726, 390) (hors des deux gués, x 338 et
+868 : ils traversent à gué-rivière), l'infanterie vers 100-160 s en (577, 390) et (617, 390).
+Constat (`before_ford_splash.png`, `--shot-at=56 --camera=718,372,60,165`) : quelques bouffées
+pâles à peine visibles. Causes : (1) l'émetteur naissait au lit de la rivière, ~0,5 m **sous**
+la surface de l'eau ; (2) seul le centre du régiment comptait (mouillé 1 à 2 s sur une rivière
+de 18 m) et la boîte d'émission couvrait toute l'emprise, rives comprises ; (3) 64 particules
+pâles pour 60 cavaliers. Corrections (`battle_effects.gd`) : partie mouillée de l'emprise
+(5 points de l'arrière à l'avant, `_wet_span`), émetteur limité à cette partie et posé à la
+surface ; 160 particules, plus opaques, couleur pleine (non assombrie) ; force minimale 0,6
+(cavaliers) / 0,4 (piétons) dans l'eau. Captures : `after_ford_splash.png` (charge), 
+`after_ford_infantry.png` (`--shot-at=106 --camera=598,366,70,165`).
+
 ## Prochaine étape
-Point 4 (éclaboussures de gué : `battle_effects.gd`).
+Mesures « après » (`--benchmark --bench-at=90`, démo et `--units=20`), smoke, rapport.
