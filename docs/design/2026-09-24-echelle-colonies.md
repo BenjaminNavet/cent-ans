@@ -199,6 +199,18 @@ dérivée.
 - `hamlets` : GeoNames → `hamlets.json`.
 - `roads` : Itiner-e (ou repli) → `roads.geojson`.
 - Tout reste reproductible en une commande (`cent-ans geo build`), téléchargements en cache.
+- Formats précisés par le lot C3 (détail dans `docs/geo.md`) :
+  - `data/map/settlements_px.json` : `{"set_…": [x, y]}`, position de jeu en pixels carte 4096
+    (ramenée dans la province si le `lonlat` tombe dehors) ;
+  - `settlement_graph.json` : coût sans unité = km × terrain (2 montagnes/marais, 1 sinon ;
+    moyenne des deux provinces à une frontière) ÷ 2 sur route ; arête `sea` = 100 + km ; une
+    arête frontalière à plus de 50 % sur l'eau entre deux ports devient `sea` ;
+  - `roads.geojson` : `LineString` en pixels carte, propriétés `name`, `type`
+    (`main`/`secondary`/`computed`), `certainty`, `source` (`itiner-e`/`computed`) ; Itiner-e
+    complété par des routes calculées hors de l'Empire romain ;
+  - `hamlets.json` : `[{"name", "px": [x, y], "province"}]` ;
+  - `map.json` : `"height_tiles": {"size_px": 8192, "tile_px": 512, "dir": "height",
+    "pattern": "h_{col}_{row}.png"}`, tuiles sans recouvrement.
 
 ## 6. Rendu Godot
 
