@@ -43,6 +43,9 @@ extends SceneTree
 ##     fiche non vide, recherche filtrée, liens internes, retour, touche L.
 ## 15. table/médecine (H9) : section Table (changement de régime par l'UI, refus affiché,
 ##     lecture seule), ligne de budget, infobulle de tech médecine, genres table/medicine.
+## 16. monnaie/rançons (H11) : changement de monnaie par l'UI et refus du second dans l'année,
+##     budget, ordre de chevalerie (refus affiché), panneau des rançons (données simulées), genres
+##     coinage/ransom/chivalry, liens Encyclopédie ↔ Codex. Seule : CENT_ANS_SMOKE_ONLY=coinage_ransom.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -74,6 +77,11 @@ func _init() -> void:
 		settings.call("use_test_file")
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)  # F8 : seulement à l'étape 13
+	# Exécution ciblée d'une étape : CENT_ANS_SMOKE_ONLY=coinage_ransom.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "coinage_ransom":
+		await _run_coinage_ransom()
+		quit(1 if _failures > 0 else 0)
+		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -87,6 +95,7 @@ func _init() -> void:
 	await _run_icons()  # F2
 	await _run_codex()  # H2
 	await _run_table_medicine()  # H9
+	await _run_coinage_ransom()  # H11
 	await _run_siege_battle()
 	await _run_flow()  # F3
 	await _run_tutorial()  # F8
@@ -1527,3 +1536,119 @@ func _run_tutorial() -> void:
 	await process_frame
 	if _failures == 0:
 		print("smoke OK: tutorial (%s) and encyclopedia (%s)" % [", ".join(visited), ", ".join(counts)])
+
+
+## H11 : monnaie (changement par l'UI, refus du 2e changement dans l'année), panneau des
+## rançons (données simulées : la sim de 1337 n'a pas de captif), section de l'ordre de
+## chevalerie, genres coinage/ransom/chivalry, liens Encyclopédie ↔ Codex.
+func _run_coinage_ransom() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_coinage")):
+		print("smoke coinage/ransom: skipped, CampaignSim has no get_coinage (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "coinage: new_campaign failed"):
+		return
+	var store: Node = root.get_node_or_null("/root/CodexStore")
+	if store != null:
+		store.call("use_test_file")
+		store.call("reload", _project_root().path_join("data/codex"))
+
+	# Vraies données (noms de provinces, encyclopédie) ; dossier précédent restauré à la fin.
+	var previous_dir := str(paths.get("data_dir"))
+	facade.set_data_dir(_project_root().path_join("data"))
+	# Panneau de faction réel : sections et lignes de budget ajoutées en code (sim de l'étape).
+	var previous_sim: Object = facade.get("sim")
+	facade.set("sim", sim)
+	var panel: FactionPanel = (load("res://scenes/ui/faction_panel.tscn") as PackedScene).instantiate()
+	root.add_child(panel)
+	await process_frame
+	panel.show_faction(FACTION_ID, "France", Color.BLUE, sim.call("get_faction_economy", FACTION_ID))
+	var coinage := panel.coinage_section
+	_check(coinage != null and coinage.visible and coinage.level_buttons.size() == 4, "coinage section with 4 levels expected")
+	_check(panel.chivalry_section.visible and panel.ransom_button.visible, "chivalry section and ransom button expected")
+	_check(coinage.explanation_label.text.contains("[url=cdx:cdx_nicole_oresme]"), "coinage explanation should link Oresme: %s" % coinage.explanation_label.text)
+	var tip := RichTooltip.coinage((sim.call("get_coinage", "") as Dictionary)["options"][2])
+	_check(tip.contains("Seigneuriage") and tip.contains("Un seul changement"), "coinage tooltip incomplete: %s" % tip)
+
+	# Changement par l'UI, reflété par get_coinage ; le second de l'année est refusé et affiché.
+	(coinage.level_buttons["debased"] as Button).pressed.emit()
+	var now: Dictionary = sim.call("get_coinage", "")
+	_check(str(now.get("level", "")) == "debased" and bool(now.get("changed_this_year", false)), "set_coinage via UI: %s (%s)" % [now.get("level", ""), coinage.last_result])
+	_check(coinage.changed_label.visible and not coinage.error_label.visible, "changed-this-year note expected")
+	(coinage.level_buttons["strong"] as Button).pressed.emit()
+	_check(str((sim.call("get_coinage", "") as Dictionary).get("level", "")) == "debased", "second change in the year must be refused")
+	_check(coinage.error_label.visible and coinage.error_label.text.contains("déjà été changée"), "refusal should be shown: %s" % coinage.error_label.text)
+	panel.show_faction(FACTION_ID, "France", Color.BLUE, sim.call("get_faction_economy", FACTION_ID))
+	_check(panel.seigniorage_value.text.begins_with("+") and int((sim.call("get_faction_economy", FACTION_ID) as Dictionary).get("seigniorage", 0)) > 0, "seigniorage budget line: %s" % panel.seigniorage_value.text)
+
+	# Ordre de chevalerie : options de fondation (Étoile, refusée avant 1351), lien Codex.
+	var chivalry := panel.chivalry_section
+	_check(chivalry.found_buttons.has("ord_star"), "Star order option expected: %s" % [chivalry.found_buttons.keys()])
+	_check(ChivalrySection.codex_entry("ord_star") == "cdx_ordre_de_l_etoile", "order codex link")
+	var refused: Dictionary = chivalry.request_found("ord_star")
+	_check(not bool(refused.get("ok", true)) and chivalry.error_label.visible and chivalry.error_label.text.contains("1351"), "early founding refused and shown: %s" % chivalry.error_label.text)
+
+	# Rançons : panneau réel ouvert depuis le panneau de faction, puis données simulées.
+	panel.toggle_ransoms()
+	var ransoms := panel.ransom_panel
+	_check(ransoms != null and ransoms.visible and ransoms.rows.is_empty(), "ransom panel should open (no captive in 1337)")
+	ransoms.show_data(_mock_ransoms())
+	_check(ransoms.rows.has("chr_jean_de_normandie") and (ransoms.rows["chr_jean_de_normandie"] as Dictionary).has("plan"), "our captive row with payment plans")
+	var plan: OptionButton = ransoms.rows["chr_jean_de_normandie"]["plan"]
+	_check(plan.item_count == 5 and plan.get_item_text(0).contains("2 échéances"), "installment plans 2-6: %d" % plan.item_count)
+	var terms: OptionButton = ransoms.rows["chr_mock_knight"]["terms"]
+	_check(terms.item_count == 3 and terms.get_item_text(1).begins_with("Exiger"), "held prisoner terms: money, province, hold")
+	var pay: Dictionary = ransoms.pay_ransom("chr_jean_de_normandie", 1)
+	_check(not bool(pay.get("ok", true)) and ransoms.error_label.visible and ransoms.error_label.text.begins_with("Refusé"), "bridge refusal shown in red: %s" % ransoms.error_label.text)
+	var alerts := CampaignAlerts.ransom_alerts(sim)
+	_check(alerts.is_empty(), "no ransom alert without captive")
+	panel.queue_free()
+	facade.set("sim", previous_sim)
+
+	# Genres coinage / ransom / chivalry.
+	var events := [
+		{"kind": "coinage", "text_fr": "La monnaie est affaiblie.", "faction": FACTION_ID},
+		{"kind": "ransom", "text_fr": "Rançon payée.", "faction": FACTION_ID},
+		{"kind": "chivalry", "text_fr": "Ordre fondé.", "faction": FACTION_ID},
+	]
+	var groups := SeasonReport.build_groups(events, func(_event: Dictionary) -> bool: return true)
+	_check(groups.size() == 1 and (groups[0]["entries"] as Array).size() == 3, "season report group for coinage/ransom/chivalry: %s" % [groups])
+	_check(SeasonReport.KIND_STYLES.has("ransom") and NewsLetters.KIND_LABELS.has("chivalry") and not NewsLetters.news_from_event(events[0]).is_empty(), "styles and letters for H11 kinds")
+
+	# Encyclopédie → Codex et Codex → Encyclopédie.
+	var encyclopedia: Encyclopedia = (load("res://scenes/ui/encyclopedia.tscn") as PackedScene).instantiate()
+	root.add_child(encyclopedia)
+	await process_frame
+	encyclopedia.open_window("unit_longbowmen")
+	_check(encyclopedia.codex_button.visible, "encyclopedia should offer the Codex entry of unit_longbowmen")
+	encyclopedia.open_codex_entry()
+	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
+	var window: CodexWindow = bubbles.call("window")
+	_check(bool(bubbles.call("is_window_open")) and window.current_id == "cdx_arc_long", "codex window on cdx_arc_long, got %s" % window.current_id)
+	_check(window.encyclopedia_button.visible, "codex entry with entity should offer the encyclopedia")
+	encyclopedia.open_entry("bld_apothecary")
+	window.navigate("cdx_arc_long")
+	_check(window.open_in_encyclopedia() and encyclopedia.current_entry == "unit_longbowmen" and not window.visible, "codex -> encyclopedia")
+	encyclopedia.queue_free()
+	facade.set_data_dir(previous_dir)
+	if store != null:
+		store.call("reset_discoveries")
+	if _failures == 0:
+		print("smoke OK: coinage/ransom, debased then refused, ransom panel, order refused, encyclopedia/codex links")
+
+
+## Rançons simulées au format de `get_ransoms` (captures et smoke).
+static func _mock_ransoms() -> Dictionary:
+	return {
+		"ours": [{"character": "chr_jean_de_normandie", "name": "Jean, duc de Normandie", "faction": "fac_france", "captor": "fac_england",
+			"rank": "sovereign", "rank_label": "Souverain", "prestige": 40, "ransom": 21000,
+			"terms": {"kind": "money", "province": ""},
+			"plans": [2, 3, 4, 5, 6].map(func(n: int) -> Dictionary: return {"installments": n, "total": 23100, "installment": 23100 / n}),
+			"cedable_provinces": []}],
+		"held": [{"character": "chr_mock_knight", "name": "Thomas Holland", "faction": "fac_england", "captor": "fac_france",
+			"rank": "knight", "rank_label": "Chevalier", "prestige": 12, "ransom": 450,
+			"terms": {"kind": "money", "province": ""}, "plans": [], "cedable_provinces": ["prov_guyenne"]}],
+		"debts": [{"character": "chr_charles_de_blois", "name": "Charles de Blois", "creditor": "fac_england",
+			"remaining": 9000, "installment": 3000, "next_due_turn": 4, "missed": 0}],
+	}
