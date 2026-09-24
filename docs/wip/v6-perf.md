@@ -64,7 +64,53 @@ ajoutait un flux aléatoire dédié par trame pour rien).
 Cible < 1,5 s atteinte avec marge (mesures répétées 2-3 fois, cohérentes à ±10 %).
 
 ## Objectif 2 — sièges (MultiMesh)
-À faire.
+
+### Changements
+- `game/scripts/battle/battle_siege_batcher.gd` (nouveau, isolé comme demandé par l'orchestrateur
+  pour la coordination avec la session qui branchera `battle_siege.gd` sur
+  `BattleSim.get_siege().houses`) : `BattleSiegeBatcher.batch_and_replace(root)` parcourt un nœud
+  déjà construit, regroupe les `MeshInstance3D` de type `BoxMesh`/`PrismMesh` par (matière, type de
+  maillage) en `MultiMeshInstance3D` (maillage unitaire + mise à l'échelle par transform
+  d'instance — `size` d'une `BoxMesh`/`PrismMesh` est un facteur d'échelle pur, la mise à l'échelle
+  anisotrope via l'instance donne un résultat identique), et libère individuellement les nœuds
+  récupérés. Ne connaît rien aux maisons/tours : prend n'importe quel nœud déjà construit par
+  n'importe quelle logique de positionnement.
+- `battle_siege.gd` : `_build_houses()` construit toujours ses 46 maisons exactement comme avant
+  (position, tirage aléatoire, dimensions, choix de plâtre/toit/cheminée inchangés), mais sous un
+  sous-groupe `Houses` passé en paramètre à `_house()` (nouveau premier argument), puis appelle
+  `BattleSiegeBatcher.batch_and_replace(houses_root)` juste après. Les maisons sont statiques (pas
+  de dégât suivi) : aucun risque de casser une mise à jour.
+- Même traitement pour les tours (`_build_tower()`, sous-groupe `Towers`) : le fût conique
+  (`CylinderMesh`, rayon/hauteur variables par tour) n'est pas regroupable par ce batcher générique
+  et reste donc des nœuds normaux, mais les 3 archères par tour (`BoxMesh` de taille fixe) le sont
+  — matière des archères mise en cache (`_slit_mat`, partagée entre tours, nécessaire pour que le
+  regroupement par matière fonctionne). Le batcher gère nativement ce mélange (seuls les nœuds
+  effectivement récupérés sont libérés, jamais leurs voisins non regroupables).
+- Murailles (`_build_piece`) volontairement inchangées : dégâts par pan (brèche, effondrement,
+  porte ouverte/fermée, teinte continue selon les PV) incompatibles avec un lot figé sans reprendre
+  aussi la mise à jour par instance (hors budget de ce lot).
+
+### Mesures (`godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --benchmark --siege`)
+| | appels de dessin |
+|---|---|
+| avant | 1164 |
+| + maisons regroupées | 596 |
+| + archères des tours regroupées | 556 |
+
+FPS médian inchangé (60, plafonné par l'écran/le moteur dans cet environnement — 972 soldats, la
+médiane n'était de toute façon pas limitée par le rendu du siège).
+
+### Vérification visuelle
+Capture `--siege --screenshot=` avant/après comparée par diff de pixels (maisons : diff moyenne
+0,012/255 ; tours : 0,009/255, 232-275 px/1,3 M au-delà d'un seuil de 10 — bruit de rendu résiduel,
+pas de tuile déplacée) et à l'œil (agrandissement des maisons et des tours) : aucun changement
+visible (mêmes couleurs, mêmes colombages, mêmes toits, mêmes cheminées, mêmes archères).
+
+### Points ouverts
+- Fût des tours (corps, corbeau, parapet/toit) : ~40 appels de dessin restants, non regroupés
+  (rayon/hauteur variables par tour, `CylinderMesh` non réductible à une simple échelle sans
+  hypothèse par pièce sur le ratio rayon haut/bas — faisable mais pas fait faute de temps, gain
+  marginal restant).
 
 ## Objectif 3 — zoom moyen de la carte (d≈300-500)
 À faire (noté si non traité par manque de temps).
