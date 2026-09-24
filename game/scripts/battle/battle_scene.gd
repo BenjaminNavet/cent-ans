@@ -15,7 +15,8 @@ extends Node3D
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
 ## `--camera=x,z,distance,lacet` (capture : position de caméra imposée), `--deploy-shot` (avec
-## `--screenshot=` : capture de la phase de déploiement, F5c).
+## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
+## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2).
 
 signal returned(result: Dictionary)
 
@@ -53,6 +54,8 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
+var result_screen: BattleResultScreen = null  # B2 : écran de fin
+var _result_shot: bool = false
 var _rings: Dictionary = {}  # id -> MeshInstance3D
 var _left_press: Vector2 = Vector2(-1, -1)
 var _right_press: Vector2 = Vector2(-1, -1)
@@ -91,7 +94,6 @@ func _ready() -> void:
 	_parse_cmdline()
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.command_pressed.connect(_on_command)
-	hud.return_pressed.connect(_on_return)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	_drag_rect = ColorRect.new()
@@ -464,27 +466,17 @@ func _banner_scale() -> float:
 	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
 
 
+## B2 / T2 : écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
-	var winner := str(outcome.get("winner", "defender"))
-	var won := winner == player_side
-	var lines: Array[String] = []
-	lines.append("Vainqueur : %s (%s)." % [side_names[winner], "attaquant" if winner == "attacker" else "défenseur"])
-	for side in [player_side, enemy_side]:
-		var result: Dictionary = outcome.get(side, {})
-		var start := 0
-		for unit in units:
-			if str(unit["side"]) == side:
-				start += int(unit["initial_soldiers"])
-		var general := ""
-		if bool(result.get("general_killed", false)):
-			general = " Le général est tombé."
-		elif bool(result.get("general_captured", false)):
-			general = " Le général est capturé."
-		lines.append("%s : %d hommes engagés, %d pertes.%s" % [side_names[side], start, int(result.get("total_losses", 0)), general])
-	lines.append("Durée : %d min %02d s." % [int(outcome.get("duration", 0.0)) / 60, int(outcome.get("duration", 0.0)) % 60])
-	hud.show_end("Victoire !" if won else "Défaite…", "\n".join(lines))
+	var sides := {}
+	for side in ["attacker", "defender"]:
+		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	result_screen = BattleResultScreen.new()
+	hud.root.add_child(result_screen)
+	result_screen.return_pressed.connect(_on_return)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
 
 
 ## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
@@ -817,6 +809,8 @@ func _parse_cmdline() -> void:
 			siege_demo = true
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
+		elif arg == "--result-shot":
+			_result_shot = true
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -837,6 +831,9 @@ func _stage_screenshot() -> void:
 		return
 	if siege_view != null:
 		await _stage_siege_screenshot()
+		return
+	if _result_shot:
+		await _stage_result_screenshot()
 		return
 	var contact_time := -1.0
 	for _i in 3000:
@@ -921,6 +918,21 @@ func _stage_siege_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	for _i in 40:
+		await get_tree().process_frame
+	_take_screenshot(_screenshot_path, true)
+
+
+## Capture `--result-shot` : bataille jouée par l'IA jusqu'au bout, écran de fin affiché.
+func _stage_result_screenshot() -> void:
+	for _i in 36000:
+		battle.call("tick", 0.1)
+		if battle.call("is_finished"):
+			break
+	soldiers.update(battle, battle.call("get_units"), 0.1, [])
+	_refresh_view(true)
+	if not finished_shown:
+		_show_end()
+	for _i in 30:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
 

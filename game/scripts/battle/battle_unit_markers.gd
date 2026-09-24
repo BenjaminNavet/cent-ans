@@ -20,7 +20,8 @@ const MORALE_H := 3.0
 const TIP := 7.0  # pointe vers la troupe
 const HEIGHT := PLAQUE + 2.0 + BAR_H + 1.0 + MORALE_H + TIP
 const GAP := 2.0
-const MAX_STACK := 8
+## Décalages essayés, en largeurs / hauteurs de repère, quand un repère en chevauche un autre.
+const NUDGES := [Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0), Vector2(1, -1), Vector2(-1, -1), Vector2(0, -2), Vector2(2, 0), Vector2(-2, 0)]
 const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.78)
 const GOLD := Color(1.0, 0.82, 0.22)
@@ -41,7 +42,7 @@ var _icons: Dictionary = {}  # id -> Texture2D
 
 func _ready() -> void:
 	name = "UnitMarkers"
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	icon_library = get_node_or_null("/root/IconLibrary")
 
@@ -69,12 +70,14 @@ func update(units: Array, anchors: Dictionary, selected: Array) -> void:
 	var rects: Array[Rect2] = []
 	for entry in entries:
 		var anchor: Vector2 = entry[1]
-		var rect := Rect2(anchor.x - WIDTH * 0.5, anchor.y - HEIGHT, WIDTH, HEIGHT)
-		for _i in MAX_STACK:
-			var hit := _overlap(rect, rects)
-			if hit.size.x <= 0.0:
-				break
-			rect.position.y = hit.position.y - HEIGHT - GAP
+		var base := Rect2(anchor.x - WIDTH * 0.5, anchor.y - HEIGHT, WIDTH, HEIGHT)
+		var rect := base
+		if _overlaps(base, rects):
+			for nudge in NUDGES:
+				var candidate := Rect2(base.position + Vector2(nudge.x * (WIDTH + 14.0 + GAP), nudge.y * (HEIGHT + GAP)), base.size)
+				if not _overlaps(candidate, rects):
+					rect = candidate
+					break
 		rects.append(rect)
 		_placed[entry[0]] = {"rect": rect, "anchor": anchor, "unit": entry[2]}
 		_order.append(entry[0])
@@ -83,11 +86,13 @@ func update(units: Array, anchors: Dictionary, selected: Array) -> void:
 	queue_redraw()
 
 
-static func _overlap(rect: Rect2, rects: Array[Rect2]) -> Rect2:
+## Chevauchement avec un repère déjà placé (pastilles d'état comprises, à droite).
+static func _overlaps(rect: Rect2, rects: Array[Rect2]) -> bool:
+	var wide := rect.grow_individual(0, 0, 14.0, 0)
 	for other in rects:
-		if other.grow(GAP * 0.5).intersects(rect):
-			return other
-	return Rect2()
+		if other.grow_individual(GAP, GAP, 14.0 + GAP, GAP).intersects(wide):
+			return true
+	return false
 
 
 func marker_count() -> int:
@@ -165,8 +170,10 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var plaque := Rect2(rect.position, Vector2(WIDTH, PLAQUE))
 	# Trait de rappel quand le repère a été dépilé.
 	var tip_y := rect.end.y
-	if anchor.y - tip_y > 1.0:
-		draw_line(Vector2(anchor.x, tip_y), anchor, Color(INK, 0.7), 1.0)
+	var tip_point := Vector2(rect.get_center().x, tip_y)
+	if tip_point.distance_to(anchor) > 1.0:
+		draw_line(tip_point, anchor, Color(INK, 0.7), 1.0)
+		draw_circle(anchor, 2.0, Color(INK, 0.7))
 	# Pointe vers la troupe.
 	var tip := PackedVector2Array([
 		Vector2(rect.position.x + WIDTH * 0.5 - 6.0, tip_y - TIP),
