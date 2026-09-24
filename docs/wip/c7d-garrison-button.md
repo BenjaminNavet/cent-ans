@@ -4,7 +4,7 @@ Spec : ordre `Order::GarrisonUnits` (C7a, `core/crates/sim-campaign/src/orders.r
 demande C5/C7a « pas encore de bouton dans l'UI ». Branche :
 `worktree-agent-af13b589dd9cd2655` (main `0a7bc32` fusionné).
 
-## État
+## État : terminé (en attente de fusion par l'orchestrateur)
 
 - [x] `settlement_detail` (pont) : ajout `garrison_cap` et `garrison_free`.
 - [x] `ArmyStrip` : bouton « Garnison » (sélection multiple existante), tooltip française
@@ -12,9 +12,9 @@ demande C5/C7a « pas encore de bouton dans l'UI ». Branche :
 - [x] `MapUI` / `HudController` : calcul de la disponibilité, émission de l'ordre
   `garrison_units`, toast d'erreur si refusé.
 - [x] Extension de `game/tests/c5_settlements_ui_test.gd` (étape 5).
-- [x] `cargo fmt`, `clippy -D warnings` : OK. `cargo test` : en cours.
-- [ ] `build.sh`, smoke + `settlements_render_test` + `c5_settlements_ui_test` (Godot) : à
-  faire.
+- [x] `cargo fmt`, `clippy -D warnings`, `cargo test` : OK.
+- [x] `build.sh`, `--import`, `smoke.gd`, `settlements_render_test.gd`,
+  `c5_settlements_ui_test.gd` (avec l'étape 5, garnison) : tous OK.
 
 ## Décisions
 
@@ -26,6 +26,15 @@ demande C5/C7a « pas encore de bouton dans l'UI ». Branche :
   cœur (le pont ne fait qu'exposer `garrison_cap`/`garrison_free`, le GDScript ne fait que
   lire ces champs).
 
+## Points ouverts
+
+- Pas de test Rust dédié pour les deux nouveaux champs de `settlement_detail` : `CampaignSim`
+  est un objet `#[godot_api]`, pas testable hors moteur ; le calcul (`garrison_cap.get`) est
+  déjà exercé par `orders.rs` (plafond de l'ordre), le test Godot `c5_settlements_ui_test.gd`
+  vérifie les champs et l'ordre bout en bout.
+- Bouton ajouté sous « Séparer » dans l'en-tête du bandeau (VBoxContainer) : la hauteur du
+  bandeau grandit légèrement (pas de capture visuelle demandée pour ce lot).
+
 ## Prochaine étape
 
-Implémentation en cours.
+Terminé : fusion par l'orchestrateur.
