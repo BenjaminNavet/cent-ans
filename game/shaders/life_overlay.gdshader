@@ -1,11 +1,11 @@
 // Lot CV1 : surcouche des maquettes de colonies et des hameaux (`material_overlay`) :
 // - neige sur les toits et le haut des murs l'hiver (poids global `campaign_season`) ;
-// - suie et toits effondrés des villages en ruine (dévastation), par instance (`ruin`).
+// - suie et toits effondrés des villages en ruine (dévastation) : `ruin` (un matériau par palier).
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_back, specular_disabled;
 
 global uniform vec4 campaign_season;
-instance uniform float ruin = 0.0;
+uniform float ruin = 0.0;
 uniform vec3 snow_color : source_color = vec3(0.86, 0.88, 0.92);
 uniform vec3 soot_color : source_color = vec3(0.035, 0.03, 0.028);
 
@@ -29,6 +29,8 @@ float noise3(vec3 p) {
 }
 
 void vertex() {
+	// Légèrement gonflée le long de la normale : pas de lutte de profondeur avec la passe de base.
+	VERTEX += NORMAL * 0.004;
 	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	v_world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
