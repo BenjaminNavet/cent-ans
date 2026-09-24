@@ -125,6 +125,12 @@ fn deployment_phase_validates_zone() {
     assert_eq!((sim.units()[0].x, sim.units()[0].facing), (300.0, 0.3));
     let far = sim.deploy_unit(0, 300.0, zone.z1 + 50.0, None);
     assert_eq!(far, Err(CommandError::OutsideZone(0)));
+    let text = sim.error_text(&far.unwrap_err());
+    let name = &sim.units()[0].name;
+    assert_eq!(
+        text,
+        format!("Les {name} doivent être placés dans votre zone de déploiement")
+    );
     assert_eq!(
         sim.deploy_unit(3, 300.0, 700.0, None),
         Err(CommandError::NotYours(3))
