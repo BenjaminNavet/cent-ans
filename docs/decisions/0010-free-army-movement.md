@@ -1,4 +1,4 @@
-# ADR 0006 — Mouvement libre des armées
+# ADR 0010 — Mouvement libre des armées
 
 Date : 2026-09-24. Statut : accepté. Remplace, dans l'ADR 0005, le choix du déplacement sur le graphe des colonies.
 

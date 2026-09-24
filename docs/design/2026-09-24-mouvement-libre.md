@@ -1,6 +1,6 @@
 # Mouvement libre des armées (façon Total War)
 
-Date : 2026-09-24. Statut : validé par le joueur. Complète `2026-09-24-echelle-colonies.md` et remplace son choix « déplacement sur le graphe des colonies » (ADR 0006).
+Date : 2026-09-24. Statut : validé par le joueur. Complète `2026-09-24-echelle-colonies.md` et remplace son choix « déplacement sur le graphe des colonies » (ADR 0010).
 
 ## 1. Objectif
 
