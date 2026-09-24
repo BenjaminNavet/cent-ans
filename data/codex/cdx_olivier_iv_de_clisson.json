@@ -1,0 +1,12 @@
+{
+  "id": "cdx_olivier_iv_de_clisson",
+  "title": "Olivier IV de Clisson",
+  "category": "personnage",
+  "aliases": ["Olivier IV de Clisson", "seigneur de Clisson"],
+  "era": { "from": "v. 1300", "to": "1343" },
+  "summary": "Grand seigneur breton exécuté à Paris le 2 août 1343 sur soupçon d'intelligence avec les Anglais ; son fils Olivier V de Clisson deviendra connétable de France.",
+  "body": "Olivier IV, seigneur de Clisson, appartient à la haute noblesse bretonne. À la mort du duc Jean III sans héritier direct, en avril 1341, s'ouvre la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]] entre Jean de Montfort, demi-frère du défunt, et Charles de Blois, neveu de [[cdx_philippe_vi|Philippe VI]] par sa femme Jeanne de Penthièvre. Clisson se range d'abord du côté de Charles de Blois et du roi de France.\n\nLors du siège de Vannes en 1342, disputée entre les deux partis, Clisson participe à sa reddition aux forces anglo-montfortistes dans des conditions jugées suspectes par la cour de France : on l'accuse d'avoir sciemment négocié un accord trop favorable à l'ennemi. Convoqué à Paris sous prétexte d'un tournoi ou d'un conseil, il est arrêté sans procès équitable.\n\nLe 2 août 1343, il est décapité aux Halles de Paris, sa tête exposée à Nantes en signe d'avertissement à la noblesse bretonne. Cette exécution sommaire, perçue comme une injustice flagrante, indigne une partie des seigneurs bretons et pousse plusieurs d'entre eux, dont sa veuve Jeanne de Belleville, à se rapprocher du camp anglais. Son fils, Olivier V de Clisson, grandira dans la haine de la France avant de devenir, retournement de l'histoire, l'un de ses plus grands connétables.",
+  "entity": "chr_olivier_iv_de_clisson",
+  "see_also": ["cdx_guerre_de_succession_de_bretagne", "cdx_philippe_vi"],
+  "sources": ["Olivier IV de Clisson", "Guerre de Succession de Bretagne"]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "chr_jean_i_d_armagnac",
+  "name": {
+    "display": "Jean Ier d'Armagnac",
+    "local": "Jean Ier d'Armagnac",
+    "local_language": "gascon"
+  },
+  "sex": "male",
+  "house": "Armagnac",
+  "faction": "fac_france",
+  "role": "noble",
+  "birth": {
+    "value": "1311",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1373-05-16"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte d'Armagnac"
+    },
+    {
+      "title": "Comte de Rodez",
+      "note": "Par héritage."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_cruel"
+  ],
+  "piety": 45,
+  "starting_location": "prov_toulousain",
+  "status": "at_court",
+  "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Lieutenant royal en Languedoc contre les Anglais de Gascogne. Faute d'une province distincte pour le comté d'Armagnac (limitrophe du Toulousain royal), il est placé ici par convention de jeu.",
+  "sources": [
+    "Jean Ier d'Armagnac",
+    "Comté d'Armagnac"
+  ]
+}

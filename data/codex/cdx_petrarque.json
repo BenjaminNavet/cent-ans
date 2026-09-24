@@ -1,0 +1,12 @@
+{
+  "id": "cdx_petrarque",
+  "title": "Pétrarque",
+  "category": "personnage",
+  "aliases": ["Pétrarque", "Francesco Petrarca", "Fontaine-de-Vaucluse"],
+  "era": { "from": "1304", "to": "1374" },
+  "summary": "Poète et lettré toscan installé près d'[[cdx_avignon|Avignon]] en 1337, Pétrarque incarne l'essor de l'humanisme à l'ombre de la cour pontificale.",
+  "body": "Francesco Petrarca naît à Arezzo en 1304, d'une famille florentine exilée comme celle de Dante. Son père, notaire, s'installe bientôt près de la papauté d'Avignon, où affluent les carrières et les bénéfices ecclésiastiques : Pétrarque y passe l'essentiel de sa jeunesse, avant d'étudier le droit à Montpellier puis à Bologne, discipline qu'il délaisse vite pour les lettres antiques.\n\nDe retour dans le Comtat Venaissin, protégé par la puissante famille des Colonna, il obtient divers bénéfices mineurs qui lui assurent un revenu sans l'astreindre à une charge pastorale. En 1337, il se retire dans une maison de campagne à Vaucluse, sur les rives de la Sorgue, où il compose l'essentiel de son œuvre : poèmes latins d'inspiration antique, et surtout les vers en langue vulgaire dédiés à Laure, femme aimée et jamais nommée dont il chante l'amour impossible depuis leur rencontre à Avignon en 1327.\n\nÉrudit passionné de manuscrits antiques, redécouvreur de lettres de Cicéron, il sera couronné poète lauréat au Capitole de Rome en 1341 — premier couronnement de ce genre depuis l'Antiquité — et deviendra l'une des figures fondatrices de l'humanisme naissant, ce mouvement de redécouverte des lettres classiques qui annonce la Renaissance. Il correspond avec les grands esprits de son temps et voyage entre Avignon, Vaucluse, Milan et Arquà, où il meurt en 1374.",
+  "entity": "chr_petrarque",
+  "see_also": ["cdx_avignon"],
+  "sources": ["Pétrarque", "Vaucluse (Fontaine-de-Vaucluse)"]
+}
