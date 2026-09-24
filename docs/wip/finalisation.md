@@ -8,7 +8,7 @@ Plan : `docs/design/v2-finalisation.md`.
 | F2 Icônes et infobulles | **fusionné** (b1405fe) | | 144 ids → 106 SVG, RichTooltip, CREDITS.md ; reste : accesseurs GameDataStore pour retirer GameCatalog |
 | F3 Écrans et flux | **fusionné** | | menu illustré, chargement, pause, réglages, emplacements + auto, rapport de saison, alertes, crédits |
 | F4 Guerre vivante | **fusionné** (374dfa4) | | FR-EN en guerre 73 % du siècle, 7 phases ; hors cible : trésors > 8 saisons par pointes, banqueroutes 0,92 (Écosse) ; Flandre/Bourgogne jamais pro-anglaises |
-| F5 Batailles | F5a + F5b **fusionnés** ; F5c (UI de déploiement, maisons) et F5d (bug démo sans contact, rééquilibrage sièges, renforts) en cours | worktrees | |
+| F5 Batailles | F5a + F5b + F5c **fusionnés** (b50476b) ; F5d (bug démo sans contact, sièges, renforts) en cours | worktree | déploiement, maisons de siège = obstacles, avis de sortie |
 | F6 Rendu carte | **transféré** | session parallèle « visual » | refonte visuelle semi-réaliste (shaders, terrain, marqueurs, modèles, battle_meshes/terrain) : ne pas toucher ces fichiers |
 | F7 Contenu | **fusionné** : factions (3a49557) + F7b 40 événements (90 au total, 7 chaînes) | main | 13 factions, 18 personnages, 6 listes de noms, meubles héraldiques |
 | F8 Tutoriel / encyclopédie | **fusionné** (touche L ; K = codex d'une autre session) | | manuel à écrire en F9 |
@@ -41,3 +41,4 @@ HUD de bataille (`battle_hud.gd`) : cartes d'unités moitié moins larges (icôn
 ## Recette F9 (24/09 midi)
 - Sonde `cargo run --release -p ai --example playthrough [graine]` (3 factions, IA aux commandes du joueur).
 - Graine 1337 avant correctif : France victorieuse en 1343 (tour 24) — objectifs trop faciles. Après `hold_turns` (France 20, Angleterre/Bourgogne 12) : France 1371 (graine 1337), fin de campagne en 1454 (graines 1, 2) ; Angleterre fin 1454 (22-25 provinces) ; Bourgogne fin 1478 avec 2 provinces (faible, IA prudente en joueur) ; 0-15 ordres refusés.
+- 8c81452 : personnages historiques épargnés par la mort naturelle avant leur date réelle − 2 ans (Philippe VI mourait avant 1340 dans ~6 % des parties).
