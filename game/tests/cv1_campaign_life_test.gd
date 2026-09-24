@@ -42,3 +42,26 @@ func _run() -> void:
 	seasons.update(0.6)
 	_check(seasons.weights == Vector4(0, 0, 0, 1), "winter reached")
 	_check(RenderingServer.global_shader_parameter_get_list().has(SeasonVisuals.GLOBAL_PARAM), "global campaign_season declared in project.godot")
+
+	# 2. Terroirs sur les vraies données.
+	var data_dir := MAP_PATHS.default_data_dir()
+	var map_dir := data_dir.path_join("map")
+	var map_data := MapData.load_from_dir(map_dir)
+	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+		return
+	var data := SettlementData.load_from(data_dir, map_dir)
+	var beaune := data.get_settlement("set_beaune")
+	var paris := data.get_settlement("set_paris")
+	if not _check(not beaune.is_empty() and not paris.is_empty(), "set_beaune / set_paris missing"):
+		return
+	var states := {str(beaune["province"]): {"devastation": 60.0, "population": 80000.0}}
+	var mask := TerroirMask.new()
+	mask.build(data.settlements, data.hamlets, states, VegetationFields.landuse(map_data), Vector2(map_data.size))
+	var at_beaune := mask.sample(beaune["px"])
+	var at_paris := mask.sample(paris["px"])
+	_check(at_paris.r > 0.6, "fields around Paris: %s" % at_paris)
+	_check(at_paris.b < 0.01, "no burn around Paris: %s" % at_paris)
+	_check(at_beaune.g > 0.2, "vineyards around Beaune: %s" % at_beaune)
+	_check(at_beaune.b > 0.4, "burnt land in devastated Burgundy: %s" % at_beaune)
+	_check(mask.sample(Vector2(10, 10)).r == 0.0, "no fields in the map corner")
+	print("cv1_campaign_life_test: terroir mask %d ms" % mask.build_ms)
