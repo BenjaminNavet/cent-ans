@@ -61,6 +61,12 @@ pub enum EventKind {
     Table,
     /// H4: tended wounded, epidemic contained.
     Medicine,
+    /// H5: coinage changed, seigniorage, recoinage, inflation.
+    Coinage,
+    /// H6: ransom set, paid, installment due or missed, parole.
+    Ransom,
+    /// H6: chivalric order founded, members named, order broken.
+    Chivalry,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

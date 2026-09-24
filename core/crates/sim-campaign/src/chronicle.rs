@@ -577,6 +577,13 @@ impl CampaignState {
                     .map_or_else(|| event.to_string(), |e| e.title.clone());
                 format!("Suite : « {title} » dans {delay} saison(s)")
             }
+            EventEffect::FoundChivalricOrder { order, .. } => {
+                let name = data
+                    .chivalric_orders
+                    .get(order)
+                    .map_or_else(|| order.to_string(), |o| o.name.display.clone());
+                format!("Fondation de l'ordre « {name} »")
+            }
             EventEffect::Marry { a, b } => format!(
                 "Mariage de {} et {}",
                 self.character_name(data, a),
@@ -929,6 +936,11 @@ pub fn apply_effect(
         EventEffect::Marry { a, b } => {
             marry(state, data, a, b, events);
         }
+        EventEffect::FoundChivalricOrder { order, faction } => {
+            if let Some(faction) = target_faction(faction) {
+                crate::chivalry::found_order_by_event(state, data, &faction, order, events);
+            }
+        }
         EventEffect::PlagueWave { from_year, to_year } => {
             if state.chronicle.plague_wave.is_none() {
                 let years = (to_year - from_year).max(0) as u32;
@@ -1003,6 +1015,7 @@ pub fn release_character(
     let c = state.characters.get_mut(id).expect("checked above");
     c.captive = false;
     c.captor = None;
+    c.ransom_terms = None;
     c.location = capital;
     crate::dynasty::on_ransomed(state, data, id);
     let text = if ransom > 0 {
