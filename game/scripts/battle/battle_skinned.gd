@@ -241,7 +241,7 @@ const STYLES := {
 		"idle": {"set": ["pike_idle"]},
 		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
-		"charging": {"set": ["pike_walk"], "speed": 1.4},
+		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
 		"routing": {"set": ["run"], "speed": 1.1},
 	},

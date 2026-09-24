@@ -60,11 +60,28 @@ FROM_GODOT = TO_GODOT.inverted()
 
 # Human bones kept in the texture (fingers are folded into the wrist).
 HUMAN_BONES = [
-    "Root", "Body", "Hips", "Abdomen", "Torso", "Chest", "Neck", "Head",
-    "Shoulder.L", "UpperArm.L", "LowerArm.L", "Wrist.L",
-    "Shoulder.R", "UpperArm.R", "LowerArm.R", "Wrist.R",
-    "UpperLeg.L", "LowerLeg.L", "Foot.L",
-    "UpperLeg.R", "LowerLeg.R", "Foot.R",
+    "Root",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Wrist.L",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Wrist.R",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "Foot.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "Foot.R",
 ]
 FINGER_PREFIXES = ("Index", "Middle", "Ring", "Pinky", "Thumb")
 
@@ -142,7 +159,11 @@ def set_action(arm, act):
     if arm.animation_data is None:
         arm.animation_data_create()
     arm.animation_data.action = act
-    if getattr(arm.animation_data, "action_slot", None) is None and hasattr(act, "slots") and len(act.slots):
+    if (
+        getattr(arm.animation_data, "action_slot", None) is None
+        and hasattr(act, "slots")
+        and len(act.slots)
+    ):
         arm.animation_data.action_slot = act.slots[0]
 
 
@@ -164,6 +185,7 @@ class Rig:
     """
 
     def __init__(self, name):
+        """Initialise an empty rig with the given texture name."""
         self.name = name
         self.entries = []  # (arm or None, bone name or fn, key)
         self.index = {}  # key -> texture index
@@ -172,14 +194,17 @@ class Rig:
         self.rows = []  # one bytes row per frame
 
     def add(self, arm, bone, key):
+        """Register a real bone (armature and bone name) under the given key."""
         self.index[key] = len(self.entries)
         self.entries.append((arm, bone, key))
 
     def add_virtual(self, key, fn):
+        """Register a virtual bone computed by `fn(rest) -> world matrix` under the given key."""
         self.index[key] = len(self.entries)
         self.entries.append((None, fn, key))
 
     def capture_rest(self):
+        """Store the rest world matrix of each entry for later skinning matrix computation."""
         for arm, bone, key in self.entries:
             if arm is None:
                 self.rest[key] = bone(True)
@@ -201,6 +226,7 @@ class Rig:
         return out
 
     def add_frame(self, mats):
+        """Pack a list of skinning matrices into one bytes row and append it."""
         row = bytearray()
         for m in mats:
             for r in range(3):
@@ -208,9 +234,11 @@ class Rig:
         self.rows.append(bytes(row))
 
     def begin_clip(self):
+        """Return the row index where a new animation clip starts."""
         return len(self.rows)
 
     def end_clip(self, name, start, loop):
+        """Record a finished animation clip spanning rows `start` to the current row."""
         self.clips.append((name, start, len(self.rows) - start, loop))
         print(f"CLIP {self.name}/{name} frames={len(self.rows) - start} loop={loop}")
 
@@ -224,24 +252,33 @@ class Rig:
         return out
 
     def write(self):
+        """Write the compressed rig frames to a `.bones.bin` file in `OUT_DIR`."""
         path = os.path.join(OUT_DIR, f"{self.name}.bones.bin")
         data = b"".join(self.rows)
         with open(path, "wb") as f:
             f.write(b"CAB1")
             f.write(struct.pack("<II", len(self.entries), len(self.rows)))
             f.write(zlib.compress(data, 9))
-        print(f"RIG {self.name} bones={len(self.entries)} frames={len(self.rows)} -> {path}")
+        print(
+            f"RIG {self.name} bones={len(self.entries)} frames={len(self.rows)} -> {path}"
+        )
 
     def manifest(self):
+        """Build the JSON-serialisable manifest describing this rig's texture, bones and clips."""
         return {
             "texture": f"{self.name}.bones.bin",
             "bones": [key for _a, _b, key in self.entries],
             "fps": FPS,
-            "clips": {name: {"start": s, "frames": n, "loop": loop} for name, s, n, loop in self.clips},
+            "clips": {
+                name: {"start": s, "frames": n, "loop": loop}
+                for name, s, n, loop in self.clips
+            },
         }
 
 
-def sample_action(rig, arm, act, overrides=None, mirror=False, frames=None, before=None):
+def sample_action(
+    rig, arm, act, overrides=None, mirror=False, frames=None, before=None
+):
     """Append the frames of `act` to the rig; `overrides(arm, t)` poses bones on top.
 
     `frames` sets the clip length (the source loops); `overrides.source_frame(i, n, first,
@@ -318,7 +355,10 @@ def add_human_virtuals(rig, arm, prefix="", placement=None):
     poses.REST["Wrist.R"] = wrist_r_rest
     poses.REST["Wrist.L"] = wrist_l_rest
     for side in ("L", "R"):
-        forearm = bone_world(arm, f"Wrist.{side}").to_translation() - bone_world(arm, f"LowerArm.{side}").to_translation()
+        forearm = (
+            bone_world(arm, f"Wrist.{side}").to_translation()
+            - bone_world(arm, f"LowerArm.{side}").to_translation()
+        )
         poses.REST["forearm." + side] = forearm.normalized()
 
     def follow(bone, rest_bone, rest_m):
@@ -327,7 +367,11 @@ def add_human_virtuals(rig, arm, prefix="", placement=None):
     def prop(rest):
         if rest:
             return prop_rest
-        return poses.STATE["prop"] if poses.STATE["prop"] is not None else follow("Wrist.R", wrist_r_rest, prop_rest)
+        return (
+            poses.STATE["prop"]
+            if poses.STATE["prop"] is not None
+            else follow("Wrist.R", wrist_r_rest, prop_rest)
+        )
 
     def nock(rest):
         if rest:
@@ -397,7 +441,12 @@ def recolor(obj, mapping, fallback):
         if slot.material is None or "code" in slot.material:
             continue
         name = clean_name(slot.material.name)
-        entry = mapping.get(f"{part}:{name}") or mapping.get(name) or fallback.get(name) or (equip.C_EXACT, (0.5, 0.5, 0.5))
+        entry = (
+            mapping.get(f"{part}:{name}")
+            or mapping.get(name)
+            or fallback.get(name)
+            or (equip.C_EXACT, (0.5, 0.5, 0.5))
+        )
         slot.material = material(*entry)
 
 
@@ -416,7 +465,9 @@ def weld_and_decimate(obj, target_tris):
         mod.decimate_type = "COLLAPSE"
         mod.ratio = max(target_tris / tris, 0.01)
         mod.use_collapse_triangulate = True
-        with bpy.context.temp_override(object=obj, active_object=obj, selected_objects=[obj]):
+        with bpy.context.temp_override(
+            object=obj, active_object=obj, selected_objects=[obj]
+        ):
             bpy.ops.object.modifier_apply(modifier=mod.name)
     return len(obj.data.polygons)
 
@@ -441,7 +492,9 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
     dg = bpy.context.evaluated_depsgraph_get()
     for obj in objs:
         eval_obj = obj.evaluated_get(dg)
-        me = bpy.data.meshes.new_from_object(eval_obj, preserve_all_data_layers=True, depsgraph=dg)
+        me = bpy.data.meshes.new_from_object(
+            eval_obj, preserve_all_data_layers=True, depsgraph=dg
+        )
         me.shade_smooth()
         me.set_sharp_from_angle(angle=math.radians(smooth_angle))
         me.calc_loop_triangles()
@@ -452,15 +505,27 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         uv_layer = me.uv_layers.active
         corner_normals = me.corner_normals
         for tri in me.loop_triangles:
-            mat = obj.material_slots[tri.material_index].material if obj.material_slots else None
-            code = int(mat["code"]) if mat is not None and "code" in mat else equip.C_EXACT
-            rgb = list(mat["rgb"]) if mat is not None and "rgb" in mat else [0.5, 0.5, 0.5]
+            mat = (
+                obj.material_slots[tri.material_index].material
+                if obj.material_slots
+                else None
+            )
+            code = (
+                int(mat["code"]) if mat is not None and "code" in mat else equip.C_EXACT
+            )
+            rgb = (
+                list(mat["rgb"])
+                if mat is not None and "rgb" in mat
+                else [0.5, 0.5, 0.5]
+            )
             mask = mask_attr.data[tri.polygon_index].value if mask_attr else 0
             face = []
             for li in tri.loops:
                 vi = me.loops[li].vertex_index
                 p = TO_GODOT @ (mw @ me.vertices[vi].co)
-                n = (TO_GODOT.to_3x3() @ (nm @ Vector(corner_normals[li].vector))).normalized()
+                n = (
+                    TO_GODOT.to_3x3() @ (nm @ Vector(corner_normals[li].vector))
+                ).normalized()
                 uv = tuple(uv_layer.data[li].uv) if uv_layer else (0.0, 0.0)
                 acc = {}
                 for g in me.vertices[vi].groups:
@@ -504,7 +569,14 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         bpy.data.meshes.remove(me)
     n = len(positions)
     raw = bytearray()
-    for arr, width in ((positions, 3), (normals, 3), (colors, 4), (uvs, 2), (bones, 4), (weights, 4)):
+    for arr, width in (
+        (positions, 3),
+        (normals, 3),
+        (colors, 4),
+        (uvs, 2),
+        (bones, 4),
+        (weights, 4),
+    ):
         for item in arr:
             raw += struct.pack(f"<{width}f", *item)
     raw += struct.pack(f"<{n}f", *masks)
@@ -516,7 +588,9 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
     xs = [p[0] for p in positions]
     ys = [p[1] for p in positions]
     zs = [p[2] for p in positions]
-    print(f"MESH {os.path.basename(path)} verts={n} tris={tris} bbox=({min(xs):.2f},{min(ys):.2f},{min(zs):.2f})-({max(xs):.2f},{max(ys):.2f},{max(zs):.2f})")
+    print(
+        f"MESH {os.path.basename(path)} verts={n} tris={tris} bbox=({min(xs):.2f},{min(ys):.2f},{min(zs):.2f})-({max(xs):.2f},{max(ys):.2f},{max(zs):.2f})"
+    )
     return tris
 
 
@@ -546,9 +620,21 @@ def extract_parts(path):
             "verts": [tuple(mw @ v.co) for v in me.vertices],
             "polys": [tuple(p.vertices) for p in me.polygons],
             "mat_index": [p.material_index for p in me.polygons],
-            "materials": [clean_name(s.material.name) if s.material else "" for s in m.material_slots],
+            "materials": [
+                clean_name(s.material.name) if s.material else ""
+                for s in m.material_slots
+            ],
             "colors": {
-                clean_name(s.material.name): tuple(next((n.inputs[0].default_value[:3] for n in s.material.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), (0.5, 0.5, 0.5)))
+                clean_name(s.material.name): tuple(
+                    next(
+                        (
+                            n.inputs[0].default_value[:3]
+                            for n in s.material.node_tree.nodes
+                            if n.type == "BSDF_PRINCIPLED"
+                        ),
+                        (0.5, 0.5, 0.5),
+                    )
+                )
                 for s in m.material_slots
                 if s.material and s.material.use_nodes
             },
@@ -637,9 +723,22 @@ def export_figure(fig_name, recipe, rigs):
     for level in range(3):
         _arm, objs = build_human(recipe, level)
         name = f"{fig_name}_lod{level}.mesh.bin"
-        tris.append(export_mesh(objs, rig, human_bone_alias, os.path.join(OUT_DIR, name), influences=INFLUENCES[level]))
+        tris.append(
+            export_mesh(
+                objs,
+                rig,
+                human_bone_alias,
+                os.path.join(OUT_DIR, name),
+                influences=INFLUENCES[level],
+            )
+        )
         files.append(name)
-    return {"rig": recipe["rig"], "lods": files, "tris": tris, "variants": recipe.get("variants", 1)}
+    return {
+        "rig": recipe["rig"],
+        "lods": files,
+        "tris": tris,
+        "variants": recipe.get("variants", 1),
+    }
 
 
 def rig_stub(name, bones):
@@ -708,6 +807,7 @@ def preview(png, fig_name, clip_source, frames):
 
 
 def main():
+    """Parse CLI args and drive rig baking, figure export or preview rendering."""
     import battle_skinned_figures as figures
 
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
@@ -746,10 +846,14 @@ def main():
         if recipe["rig"] == "cavalry":
             import battle_skinned_cavalry as cavalry
 
-            manifest["figures"][fig_name] = cavalry.export_cavalry(fig_name, recipe, rigs["cavalry"])
+            manifest["figures"][fig_name] = cavalry.export_cavalry(
+                fig_name, recipe, rigs["cavalry"]
+            )
         else:
             manifest["figures"][fig_name] = export_figure(fig_name, recipe, rigs)
-    manifest["source"] = "tools/blender_scripts/battle_skinned.py (Quaternius CC0, see SOURCE.md)"
+    manifest["source"] = (
+        "tools/blender_scripts/battle_skinned.py (Quaternius CC0, see SOURCE.md)"
+    )
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=1, sort_keys=True)
     print("OK")
