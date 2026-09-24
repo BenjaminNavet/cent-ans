@@ -1,7 +1,10 @@
 """Landmark city generator (lot L1): Paris first, from ``data/landmarks/<id>.json``.
 
 Run headless:
-    blender --background --python landmark_city.py -- <landmark.json> <out.glb> [--preview <png>]
+    blender --background --python landmark_city.py -- <landmark.json> <out.glb> [--siege]
+
+``--siege`` builds the backdrop of siege battles instead (real scale, metres, elements listed in
+the ``siege`` block: the river, the island and the far bank behind the generic besieged town).
 
 The plan (local metres, x east, y true north) is magnified by the radial warp of the
 ``scale`` block: exaggerated centre, map scale again at the edge of the reserved zone, so that the
@@ -115,6 +118,56 @@ class Plan:
         """Densified and warped polygon (without the closing point)."""
         dense = g.densify(points, PLAN_STEP, closed=True)
         return [self.warp(*p) for p in dense]
+
+
+class SiegePlan(Plan):
+    """Siege backdrop: no magnifier, real proportions, plan rotated so that the river runs along x.
+
+    Built at the map's centre scale (so that the world-unit constants of the generator keep their
+    meaning) and scaled to metres at export (``export_scale``).
+    """
+
+    def __init__(self, landmark, meters_per_px):
+        super().__init__(landmark, meters_per_px)
+        siege = landmark["siege"]
+        self.monument_scale = 1.0
+        self.house_scale = 1.0
+        self.height_scale = 1.0
+        self.zone_m = siege["radius_m"]
+        self.zone_px = siege["radius_m"] * self.a
+        angle = math.radians(siege["rotate_deg"])
+        self.rot = (math.cos(angle), math.sin(angle))
+        self.export_scale = 1.0 / self.a
+
+    def radius(self, r):
+        """Linear: no magnifier."""
+        return self.a * r
+
+    def warp(self, x, y):
+        """Rotate then scale."""
+        c, s = self.rot
+        return ((x * c - y * s) * self.a, (x * s + y * c) * self.a)
+
+
+def siege_subset(landmark):
+    """Plan restricted to the elements of the siege backdrop."""
+    siege = landmark["siege"]
+    subset = dict(landmark)
+    for key in ("areas", "monuments", "bridges", "streets", "walls"):
+        keep = set(siege.get(key, []))
+        subset[key] = [item for item in landmark.get(key, []) if item["id"] in keep]
+    # Open spaces: only those on the islands or in the kept quarters (not on the besieged bank).
+    zones = [area["polygon"] for area in subset["areas"]]
+    zones += [island["polygon"] for island in landmark.get("islands", [])]
+
+    def kept(space):
+        poly = space["polygon"]
+        cx = sum(p[0] for p in poly) / len(poly)
+        cy = sum(p[1] for p in poly) / len(poly)
+        return any(g.point_in_polygon(cx, cy, zone) for zone in zones)
+
+    subset["open_spaces"] = [space for space in landmark.get("open_spaces", []) if kept(space)]
+    return subset
 
 
 def active(item):
@@ -494,9 +547,14 @@ def build_fabric(plan, site, layers, rng):
 # --- Blender ---------------------------------------------------------------------------
 
 
-def build(landmark, meters_per_px, seed=1337):
-    """Build every layer of a landmark; returns {name: Layer}."""
-    plan = Plan(landmark, meters_per_px)
+def build(landmark, meters_per_px, seed=1337, siege=False):
+    """Build every layer of a landmark (or of its siege backdrop); returns {name: Layer}."""
+    if siege:
+        plan = SiegePlan(landmark, meters_per_px)
+        landmark = siege_subset(landmark)
+        plan.data = landmark
+    else:
+        plan = Plan(landmark, meters_per_px)
     rng = random.Random(seed)
     layers = {name: g.Layer(name) for name in ("ground", "houses", "blocks", "landmarks")}
     waters, islands, opens = build_ground(plan, layers, rng)
@@ -514,6 +572,22 @@ def build(landmark, meters_per_px, seed=1337):
             build_monument(plan, site, monument, layers, variant)
     houses = build_fabric(plan, site, layers, rng)
     print(f"HOUSES {houses}")
+    if siege:
+        # Metres, and every element shown whatever the year.
+        scale = plan.export_scale
+        merged = {name: g.Layer(name) for name in ("ground", "houses", "landmarks")}
+        for name, layer in layers.items():
+            if name == "blocks":
+                continue
+            target = merged.get(name, merged["landmarks"])
+            for mat, (v, f, a, c) in layer.parts.items():
+                if name.endswith("__charles_v"):
+                    continue
+                target.add(mat, [(x * scale, y * scale, z * scale) for x, y, z in v], f, None, (1.0, 1.0, 1.0))
+                part = target.parts[mat]
+                part[2][len(part[2]) - len(v) :] = [(x * scale, y * scale) for x, y in a]
+                part[3][len(part[3]) - len(v) :] = c
+        layers = merged
     return layers
 
 
@@ -596,13 +670,15 @@ def main() -> None:
     import bpy
 
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    siege = "--siege" in args
+    args = [arg for arg in args if arg != "--siege"]
     if len(args) < 2:
-        raise SystemExit("usage: landmark_city.py -- <landmark.json> <out.glb>")
+        raise SystemExit("usage: landmark_city.py -- <landmark.json> <out.glb> [--siege]")
     landmark_path = Path(args[0])
     landmark = json.loads(landmark_path.read_text(encoding="utf-8"))
     map_json = landmark_path.resolve().parents[1] / "map" / "map.json"
     meters_per_px = json.loads(map_json.read_text(encoding="utf-8"))["meters_per_px"]
-    layers = build(landmark, meters_per_px)
+    layers = build(landmark, meters_per_px, siege=siege)
     export(bpy, layers, Path(args[1]))
     print("OK")
 

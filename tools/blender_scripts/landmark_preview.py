@@ -21,6 +21,9 @@ VIEWS = {
     "centre": ((0.6, -3.4, 2.2), (-0.4, 0.4, 0.0), 35),
     "notre_dame": ((-1.5, 0.45, 0.42), (-0.35, 0.12, 0.3), 40),
     "notre_dame_side": ((-0.75, -1.55, 0.62), (0.0, 0.0, 0.2), 38),
+    # Siege backdrop (metres): from above, and from the besieged town's side.
+    "siege_top": ((0.0, 0.0, 3200.0), (0.0, 0.01, 0.0), 30),
+    "siege_view": ((0.0, -700.0, 120.0), (0.0, 200.0, 20.0), 35),
 }
 
 
@@ -41,7 +44,7 @@ def main() -> None:
         if obj.type == "MESH" and obj.name in ("blocks", "louvre", "charles_v_hidden"):
             obj.hide_render = True
     # Ground plane under everything.
-    bpy.ops.mesh.primitive_plane_add(size=40, location=(0, 0, -0.001))
+    bpy.ops.mesh.primitive_plane_add(size=8000 if "siege" in model.stem else 40, location=(0, 0, -0.001))
     ground = bpy.context.active_object
     mat = bpy.data.materials.new("Terrain")
     mat.use_nodes = True
@@ -67,7 +70,8 @@ def main() -> None:
     scene.render.resolution_y = 800
     scene.view_settings.view_transform = "Standard"
     cam_data = bpy.data.cameras.new("Camera")
-    cam_data.clip_start = 0.01
+    cam_data.clip_start = 0.01 if "siege" not in model.stem else 1.0
+    cam_data.clip_end = 20000.0
     camera = bpy.data.objects.new("Camera", cam_data)
     bpy.context.collection.objects.link(camera)
     scene.camera = camera

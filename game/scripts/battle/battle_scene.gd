@@ -200,6 +200,10 @@ func begin() -> bool:
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
+		# L1 : ville emblématique (Paris) en toile de fond derrière la ville assiégée.
+		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
+		if backdrop != null:
+			add_child(backdrop)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
 	_open_deployment()
 	units = battle.call("get_units")

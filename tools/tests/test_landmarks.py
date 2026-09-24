@@ -96,3 +96,17 @@ def test_landmark_elements_have_unique_ids(path: Path) -> None:
         for item in items:
             if "from_year" in item and "until_year" in item:
                 assert item["from_year"] <= item["until_year"], item["id"]
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_siege_backdrop_references(path: Path) -> None:
+    """The siege backdrop lists existing elements and names an existing province."""
+    landmark = _load(path)
+    siege = landmark.get("siege")
+    if siege is None:
+        return
+    for key in ("areas", "monuments", "bridges", "streets", "walls"):
+        known = {item["id"] for item in landmark.get(key, [])}
+        missing = set(siege.get(key, [])) - known
+        assert not missing, (key, missing)
+    assert (DATA / "provinces" / f"{landmark['province']}.json").exists()
