@@ -52,16 +52,25 @@ bocage + village (contact retardé à 152 s).
   par tick mesuré en dérive).
 
 ## Tests
-- `core/crates/sim-battle/tests/b6.rs` : `battles_without_a_site_are_unchanged` (digests mis à jour,
-  justifiés), suite existante verte.
-- Nouveaux tests à ajouter (en cours) : réseau de haies (bocage dense, cavalerie qui contourne
-  plusieurs obstacles) ; poursuite bornée (chevaliers ne s'éloignent plus au-delà de `PURSUIT_LEASH`).
+`core/crates/sim-battle/tests/b6.rs`, tous verts (`cargo test -p sim-battle`, 12 tests + 4 ignorés) :
+- `battles_without_a_site_are_unchanged` : digests mis à jour, justifiés (voir Choix consignés).
+- `bocage_village_seed_5_engages_near_seventy_seconds` (nouveau) : la graine 5 (bocage + village),
+  pire cas relevé par B6 (contact à 152 s), engage maintenant à 66,6 s (< 90 s asserté). Mesuré sur
+  les 8 graines de `bocage_battles_still_engage` : 60,6-112,3 s (avant : jusqu'à 152 s pour la
+  graine 5), toutes < 180 s (test existant inchangé).
+- `horse_leaves_a_rout_too_far_from_the_line` / `horse_still_chases_a_rout_within_the_leash`
+  (nouveaux) : cavalier isolé, cible en déroute à respectivement 355 m et 155 m de l'ancre de ligne
+  (`PURSUIT_LEASH` = 280 m) — abandonne au-delà, poursuit toujours en deçà. Piège rencontré : avec un
+  seul ennemi en déroute (aucun autre « able »), `ai::plan` s'arrête avant même `plan_field`
+  (garde `view.able_enemies().next().is_none()`) — les deux scénarios ajoutent un second défenseur
+  hors de portée pour garder l'IA active.
+- Réseau de haies (1b) : pas de test synthétique dédié (la contrainte « à ≤ 14 m de la cible » du
+  filtre `HEDGE_COVER_REACH` rend une géométrie à la main peu lisible) ; couvert par la régression
+  du contact bocage + village (graine 5 notamment), qui combine haie-réseau et poursuite.
 - Rythme d'engagement démo : `demo_contact_stays_near_seventy_seconds` toujours vert (55-95 s).
 
 ## Prochaine étape
-1. Ajouter tests dédiés B8 (réseau de haies, poursuite bornée) dans `tests/b6.rs` ou nouveau
-   `tests/b8.rs`.
-2. Mesurer le contact bocage+village graine 5 avant/après (outil `--terrain=bocage --village`).
-3. Minicarte (haies/fossés/village/côte), boue (piétinement B7 réutilisé), sillage/gerbes de gué,
-   infobulle des pastilles regroupées.
-4. Captures `docs/img/b8/`, banc `--benchmark --bench-at=90` avant/après.
+1. Minicarte (haies/fossés/village/côte).
+2. Boue (piétinement B7 réutilisé), sillage/gerbes de gué.
+3. Infobulle des pastilles regroupées.
+4. Captures `docs/img/b8/`, banc `--benchmark --bench-at=90` avant/après (`--units=20`).

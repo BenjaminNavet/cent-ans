@@ -424,6 +424,82 @@ fn cavalry_rides_round_a_hedge() {
     assert!(!has_event(&sim, "se brise sur la haie"));
 }
 
+/// B8: bocage + village, seed 5 — used to be the worst case (French knights
+/// chasing the English mounted archers past the hedge line delayed contact
+/// to 152 s); the leashed pursuit (`PURSUIT_LEASH`) and the hedge-network
+/// detour bring it back near the demo's usual rhythm.
+#[test]
+fn bocage_village_seed_5_engages_near_seventy_seconds() {
+    let mut battle = demo_setup();
+    battle.terrain = data_model::Terrain::Bocage;
+    battle.village = Some(true);
+    let mut sim = BattleSim::new(battle, 5).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    let contact = first_contact(&mut sim, 300.0);
+    assert!(contact.is_some_and(|t| t < 90.0), "contact at {contact:?}");
+}
+
+/// B8: a horse that has already chased a rout far beyond its own battle
+/// line leaves it be, instead of straying even further.
+#[test]
+fn horse_leaves_a_rout_too_far_from_the_line() {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        // A second, able defender keeps the AI engaged with the field (the
+        // sole-routing-unit case makes `ai::plan` bail out early); it stays
+        // out of everyone's reach.
+        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        None,
+    );
+    battle.village = Some(false);
+    let mut sim = BattleSim::new(battle, 4).unwrap();
+    lab(&mut sim);
+    sim.set_ai(SideId::Attacker, true);
+    // The line stays near the deployment line; the knight has already
+    // chased far ahead of it, close enough to the routing target to catch
+    // it (< 350 m) but past the leash from the line (`PURSUIT_LEASH`, 280 m).
+    place(&mut sim, 0, 600.0, ATTACKER_LINE_Z, 0.0);
+    place(&mut sim, 1, 600.0, ATTACKER_LINE_Z + 300.0, 0.0);
+    place(&mut sim, 2, 600.0, ATTACKER_LINE_Z + 400.0, 0.0);
+    place(&mut sim, 3, 1100.0, DEFENDER_LINE_Z, std::f64::consts::PI);
+    sim.units_mut()[2].state = UnitState::Routing;
+    let routed_id = sim.units()[2].id;
+    sim.step();
+    assert_ne!(
+        sim.units()[1].target,
+        Some(routed_id),
+        "the knight should not chase a rout this far from the line"
+    );
+}
+
+/// B8: within the leash, the horse still runs a rout down as before.
+#[test]
+fn horse_still_chases_a_rout_within_the_leash() {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        None,
+    );
+    battle.village = Some(false);
+    let mut sim = BattleSim::new(battle, 4).unwrap();
+    lab(&mut sim);
+    sim.set_ai(SideId::Attacker, true);
+    place(&mut sim, 0, 600.0, ATTACKER_LINE_Z, 0.0);
+    place(&mut sim, 1, 600.0, ATTACKER_LINE_Z + 100.0, 0.0);
+    place(&mut sim, 2, 600.0, ATTACKER_LINE_Z + 200.0, 0.0);
+    place(&mut sim, 3, 1100.0, DEFENDER_LINE_Z, std::f64::consts::PI);
+    sim.units_mut()[2].state = UnitState::Routing;
+    let routed_id = sim.units()[2].id;
+    sim.step();
+    assert_eq!(
+        sim.units()[1].target,
+        Some(routed_id),
+        "the knight should still chase a rout close to the line"
+    );
+}
+
 /// With no way round (a ditch across the whole field), the knights wait.
 #[test]
 fn cavalry_waits_rather_than_charge_through_a_ditch() {
