@@ -321,6 +321,17 @@ func show_season_report(events: Array) -> bool:
 	return season_report.show_report(str(sim.call("get_date_label")), report_groups(events))
 
 
+## Bataille résolue après la fin du tour (dialogue d'avant-bataille, combat ou résolution
+## automatique) : ses événements arrivent après `after_end_turn` et sont fusionnés dans le
+## rapport déjà construit (rouvert s'il avait été fermé entre-temps).
+func report_late_events(events: Array) -> void:
+	if events.is_empty() or season_report == null:
+		return
+	last_events += events
+	if bool(_setting("interface/season_report", true)):
+		season_report.add_events(events, _concerns_player)
+
+
 func _concerns_player(event: Dictionary) -> bool:
 	var player := str(map.get("player_faction"))
 	if str(event.get("faction", "")) == player:
