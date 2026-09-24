@@ -1580,3 +1580,4 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(same, "siege scene: %d houses rendered for %d simulation houses" % [sites.size(), houses.size()])
 	await _check_battle_deployment_f5c(scene)
 	_check(not scene.hud.siege_label.text.contains("sortie"), "siege scene: no sortie at the start")
+	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
