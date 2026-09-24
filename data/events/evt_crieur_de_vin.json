@@ -1,0 +1,41 @@
+{
+  "id": "evt_crieur_de_vin",
+  "title": "Le crieur de vin",
+  "text": "Chaque matin, les crieurs de vin parcourent les rues, un broc et un hanap à la main, annonçant la taverne qui a mis un tonneau en perce et le prix de la pinte ; ils font goûter aux passants. L'un d'eux vient dénoncer un tavernier : il vend pour du [[cdx_clairet|clairet]] de [[cdx_vin_de_gascogne|Gascogne]] un vin du pays coupé d'eau, et ses pots sont plus petits que la mesure jurée. Tromper sur le vin, c'est aussi voler le roi, qui lève des [[cdx_aides|aides]] sur chaque tonneau vendu.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 120
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Défoncer ses tonneaux dans la rue et l'exposer au pilori",
+      "effects": [
+        { "type": "unrest", "amount": -3 },
+        { "type": "wealth", "amount": -1 },
+        { "type": "prestige", "amount": 1 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lui infliger une forte amende",
+      "effects": [
+        { "type": "treasury", "amount": 400 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Ignorer l'affaire : le tavernier a des amis",
+      "effects": [
+        { "type": "unrest", "amount": 2 },
+        { "type": "health", "amount": -1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Livre des métiers",
+    "Crieur public",
+    "Roger Dion, Histoire de la vigne et du vin en France, 1959"
+  ]
+}

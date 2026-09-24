@@ -1,0 +1,45 @@
+{
+  "id": "evt_feu_saint_antoine",
+  "title": "Le feu de Saint-Antoine",
+  "text": "Après un été pourri, des villageois se plaignent d'un feu qui leur brûle les membres ; chez certains, les doigts noircissent et tombent. C'est le [[cdx_feu_de_saint_antoine|feu de Saint-Antoine]], le mal des ardents. Nul ne sait que le coupable est un champignon, l'ergot, caché dans le pain de seigle ; mais on a remarqué que les malades guérissent souvent chez les Antonins, où l'on mange du pain de froment. Des frères au tau bleu proposent d'ouvrir une maison et de mener les plus atteints en [[cdx_pelerinage|pèlerinage]] en Dauphiné.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 150,
+    "conditions": [
+      { "type": "season", "season": "autumn" }
+    ]
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Fonder une maison des Antonins",
+      "effects": [
+        { "type": "treasury", "amount": -1000 },
+        { "type": "health", "amount": 5 },
+        { "type": "piety", "amount": 3 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Distribuer du pain de froment aux malades",
+      "effects": [
+        { "type": "treasury", "amount": -600 },
+        { "type": "health", "amount": 6 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Ordonner des processions à saint Antoine",
+      "effects": [
+        { "type": "piety", "amount": 2 },
+        { "type": "health", "amount": -4 },
+        { "type": "population", "percent": -1 }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Ergotisme",
+    "Ordre des Antonins"
+  ]
+}

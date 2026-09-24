@@ -1,0 +1,41 @@
+{
+  "id": "evt_medecin_de_montpellier",
+  "title": "Un médecin de Montpellier",
+  "text": "Un maître en médecine, formé à la faculté de [[cdx_montpellier|Montpellier]], propose de s'installer en ville contre une pension. Il examine l'urine des malades dans un flacon de verre, consulte les astres avant de saigner et prescrit des régimes selon les [[cdx_humeurs|humeurs]] de chacun. Il a lu Galien et Avicenne en latin, ce que ne font ni les barbiers ni les rebouteux ; il coûte aussi dix fois plus cher qu'eux.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 120,
+    "conditions": [
+      { "type": "year_between", "from": 1337, "to": 1453 }
+    ]
+  },
+  "scope": { "type": "province" },
+  "options": [
+    {
+      "text": "Lui verser une pension de médecin de la ville",
+      "effects": [
+        { "type": "treasury", "amount": -1000 },
+        { "type": "health", "amount": 6 }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Le garder pour la cour seulement",
+      "effects": [
+        { "type": "treasury", "amount": -400 },
+        { "type": "prestige", "amount": 2 }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Les barbiers et les bonnes femmes suffiront",
+      "effects": [],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Faculté de médecine de Montpellier",
+    "Uroscopie",
+    "Danielle Jacquart, La Médecine médiévale dans le cadre parisien, Fayard, 1998"
+  ]
+}
