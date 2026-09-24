@@ -11,7 +11,7 @@ const GRASS_TEXTURE := preload("res://assets/textures/battle/grass_clump.png")
 const MAX_CAMERA_HEIGHT := 170.0
 
 ## [maille (m), rayon (m), échelle des touffes, rayon intérieur (m)]
-const LAYERS := [[0.45, 45.0, 1.0, 0.0], [0.9, 110.0, 1.25, 38.0]]
+const LAYERS := [[0.5, 40.0, 1.0, 0.0], [1.1, 95.0, 1.35, 34.0]]
 
 var _layers: Array[MultiMeshInstance3D] = []
 var _materials: Array[ShaderMaterial] = []
@@ -20,6 +20,7 @@ var _ground_y: float = 0.0
 
 func build(terrain: BattleTerrain, weather: String) -> void:
 	_ground_y = terrain.height_at(600.0, 400.0)
+	if OS.get_environment("BATTLE_EXP").split(",").has("nograss"): return #EXP
 	var mesh := _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
@@ -127,4 +128,5 @@ static func _clump_mesh() -> ArrayMesh:
 			st.set_normal(n)
 			st.set_uv(uvs[idx])
 			st.add_vertex(corners[idx])
+	st.index()
 	return st.commit()

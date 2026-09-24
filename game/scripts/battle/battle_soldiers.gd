@@ -16,6 +16,11 @@ const KINDS := ["infantry", "archer", "cavalry", "siege"]
 const MAX_CORPSES := 4000
 const TRIM_GOLD := Color(0.83, 0.66, 0.24)
 const TRIM_SILVER := Color(0.85, 0.85, 0.82)
+## Niveaux de détail (lot V4b), distance caméra → régiment (m) : maillage complet en deçà de
+## `LOD_DISTANCE` (son ombre est portée par le maillage allégé), maillage allégé au-delà, sans
+## ombre portée après `SHADOW_DISTANCE`.
+const LOD_DISTANCE := 75.0
+const SHADOW_DISTANCE := 190.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -25,6 +30,8 @@ var cast_shadows: bool = true
 
 var _materials: Dictionary = {}  # unit id -> ShaderMaterial
 var _unit_kind: Dictionary = {}  # unit id -> famille de rendu
+var _lod_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (maillage allégé)
+var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
 var _corpse_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, count, next}
 var _side_colors: Dictionary = {}
@@ -36,6 +43,8 @@ var _warned: bool = false
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
 func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> void:
 	_rng.seed = 4242
+	if OS.get_environment("BATTLE_EXP").split(",").has("nosoldiershadow"): cast_shadows = false #EXP
+	if OS.get_environment("BATTLE_EXP").split(",").has("nosoldiers"): return #EXP
 	_side_colors = side_colors
 	for side in side_factions:
 		_side_heraldry[side] = PortraitLoader.heraldry_texture(str(side_factions[side]))
@@ -56,9 +65,20 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		instance.name = "Unit%d_%s" % [id, kind]
 		instance.multimesh = mm
 		instance.material_override = mat
-		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(instance)
 		layers[id] = instance
+		var lod_mm := MultiMesh.new()
+		lod_mm.transform_format = MultiMesh.TRANSFORM_3D
+		lod_mm.mesh = BattleMeshes.soldier(kind, variant, true)
+		lod_mm.instance_count = mm.instance_count
+		lod_mm.visible_instance_count = 0
+		var lod := MultiMeshInstance3D.new()
+		lod.name = "Unit%d_%s_lod" % [id, kind]
+		lod.multimesh = lod_mm
+		lod.material_override = mat
+		add_child(lod)
+		_lod_layers[id] = lod
 		_materials[id] = mat
 		_unit_kind[id] = kind
 
@@ -78,6 +98,11 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	mat.set_shader_parameter("hip", Vector2(1.68, -0.05) if mounted else Vector2(0.93, 0.0))
 	mat.set_shader_parameter("shoulder", Vector2(2.18, -0.05) if mounted else Vector2(1.4, 0.0))
 	mat.set_shader_parameter("corpse", corpse)
+	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
+	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
+	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
+	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
 	return mat
 
 
@@ -102,6 +127,9 @@ static func anim_state(unit: Dictionary) -> int:
 ## Met à jour les instances depuis la simulation ; `anim_dt` = temps simulé écoulé (0 en pause).
 func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> void:
 	anim_time += anim_dt
+	var camera := get_viewport().get_camera_3d()
+	if camera != null:
+		_camera_pos = camera.global_position
 	for side in ["attacker", "defender"]:
 		for kind in KINDS:
 			var buffer: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
@@ -134,16 +162,32 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if n < prev_n and n > 0 and bool(unit["present"]):
 			_spawn_corpses(str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n)
 	_previous[id] = slice
+	var lod: MultiMeshInstance3D = _lod_layers[id]
+	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
 		mm.instance_count = n
+		lod_mm.instance_count = n
+	# Distance au régiment : caméra → centre du régiment (x, z de la simulation).
+	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
+	var near := distance < LOD_DISTANCE
+	var shadow := cast_shadows and distance < SHADOW_DISTANCE
+	instance.visible = n > 0 and near
+	lod.visible = n > 0 and (not near or shadow)
+	if near:
+		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	else:
+		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if n > 0:
 		var padded := slice
 		if padded.size() != mm.instance_count * 12:
 			padded = slice.duplicate()
 			padded.resize(mm.instance_count * 12)
-		mm.buffer = padded
+		if instance.visible:
+			mm.buffer = padded
+		if lod.visible:
+			lod_mm.buffer = padded
 	mm.visible_instance_count = n
-	instance.visible = n > 0
+	lod_mm.visible_instance_count = n
 	var mat: ShaderMaterial = _materials[id]
 	mat.set_shader_parameter("anim_time", anim_time)
 	mat.set_shader_parameter("anim_state", anim_state(unit))
@@ -157,7 +201,7 @@ func _spawn_corpses(side: String, kind: String, variant: int, prev: PackedFloat3
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true
-		mm.mesh = BattleMeshes.soldier(kind, variant)
+		mm.mesh = BattleMeshes.soldier(kind, variant, true)
 		mm.instance_count = 0
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "Corpses_%s_%s_%d" % [side, kind, variant]
@@ -197,8 +241,32 @@ func _spawn_corpses(side: String, kind: String, variant: int, prev: PackedFloat3
 	mm.buffer = data
 
 
+## Banc d'essai : durées d'image relevées depuis `start_timing` (Metal ne donne pas le
+## temps GPU) ; la médiane résiste aux à-coups des autres programmes de la machine.
+var _frame_times: PackedFloat32Array = PackedFloat32Array()
+var _timing: bool = false
+
+
+func start_timing() -> void:
+	_timing = true
+
+
+## Texte « médiane x i/s » pour la ligne du banc d'essai.
+func timing_report() -> String:
+	if _frame_times.is_empty():
+		return ""
+	var sorted := _frame_times.duplicate()
+	sorted.sort()
+	var median := sorted[sorted.size() / 2]
+	var prims := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+	var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	return ", median %.1f FPS, %.2f M primitives, %d draw calls" % [1.0 / maxf(median, 0.0001), prims / 1.0e6, int(draws)]
+
+
 ## Temps d'animation propagé aux cadavres (chute).
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if _timing:
+		_frame_times.append(delta)
 	for key in _corpse_layers:
 		var mat: ShaderMaterial = _corpse_layers[key]["material"]
 		mat.set_shader_parameter("anim_time", anim_time)
