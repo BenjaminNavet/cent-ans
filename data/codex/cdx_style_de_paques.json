@@ -1,0 +1,12 @@
+{
+  "id": "cdx_style_de_paques",
+  "title": "Le style de Pâques et les années décalées",
+  "category": "savoir",
+  "aliases": ["style de Pâques", "ancien style", "nouveau style", "style de l'Annonciation", "mos gallicanus"],
+  "era": { "from": "1100", "to": "1567" },
+  "summary": "Dans la France du XIVe siècle, l'année ne commence pas le 1er janvier mais à Pâques. Un événement de janvier 1345 est donc daté de 1344 dans les documents : les historiens écrivent « 1344 (a. st.) » ou convertissent en « nouveau style ».",
+  "body": "Le Moyen Âge n'a pas de jour de l'an unique. La chancellerie royale française et la plupart des régions du nord commencent l'année à Pâques : c'est le « style de Pâques », ou mos gallicanus. Comme Pâques est une fête mobile (voir les [[cdx_fetes_chretiennes|fêtes]]), les années ont des longueurs inégales, de onze à près de treize mois ; certaines dates du printemps existent deux fois dans la même année, d'autres jamais.\n\nD'autres styles coexistent. L'Angleterre, Florence et Pise commencent l'année à l'Annonciation, le 25 mars ; d'autres régions à Noël ; quelques-unes, dont l'Empire en partie, au 1er janvier. Un même traité peut ainsi porter des années différentes selon la chancellerie qui l'écrit, et un diplomate du XIVe siècle doit convertir comme nous convertissons les fuseaux horaires.\n\nPour les historiens, le piège est constant. Raoul de Brienne, connétable de France, meurt le 19 janvier 1345 lors d'une joute donnée pour les noces de Philippe d'Orléans, fils du roi ; les sources françaises datent l'événement de 1344, puisque Pâques 1345 n'est pas encore passée. De même, la grande ordonnance sur la [[cdx_gabelle|gabelle]] du sel, datée du 20 mars 1342 dans les registres, est de mars 1343 dans notre façon de compter. Les érudits notent « a. st. » (ancien style) et « n. st. » (nouveau style).\n\nCharles IX impose le 1er janvier comme début de l'année par l'édit de Roussillon de 1564, appliqué à partir de 1567 ; l'Angleterre ne le fera qu'en 1752. Le problème s'ajoute au décalage du [[cdx_calendrier_julien|calendrier julien]], qu'il ne faut pas confondre avec lui.",
+  "anachronism": "Le jeu date tous les événements en nouveau style (année commençant au 1er janvier), comme le font les historiens aujourd'hui.",
+  "see_also": ["cdx_calendrier_julien", "cdx_fetes_chretiennes", "cdx_gabelle", "cdx_heures_canoniales"],
+  "sources": ["Style de Pâques", "Début de l'année", "Édit de Roussillon", "Raoul Ier de Brienne"]
+}
