@@ -20,10 +20,10 @@ uniform float rl_valley_green = 0.25;      // fonds de vallée plus verts (prés
 
 uniform sampler2D wetlands : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_wetlands = false;
-uniform vec3 rl_reed_color = vec3(0.15, 0.14, 0.055);
+uniform vec3 rl_reed_color = vec3(0.105, 0.115, 0.042);
 uniform vec3 rl_wet_meadow = vec3(0.06, 0.12, 0.05);
 uniform vec3 rl_marsh_water = vec3(0.04, 0.075, 0.07);
-uniform float rl_pond_cell_px = 0.85;      // taille d'une cellule d'étang (pixels carte ≈ 610 m)
+uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pixels carte ≈ 2 km)
 uniform float rl_forest_edge = 0.35;       // ondulation des lisières (poids de forêt)
 
 float rl_occ_at(vec2 uv) {
@@ -80,14 +80,14 @@ float rl_pond_sd(vec2 p, float density) {
 	if (h > density * 0.75) {
 		return 1.0;
 	}
-	vec2 jitter = (vec2(hash12(cell + 1.3), hash12(cell + 5.9)) - 0.5) * 0.2;
+	vec2 jitter = (vec2(hash12(cell + 1.3), hash12(cell + 5.9)) - 0.5) * 0.28;
 	float ang = hash12(cell + 9.1) * 6.2832;
 	vec2 dir = vec2(cos(ang), sin(ang));
 	vec2 d = local - jitter;
 	vec2 r = vec2(dot(d, dir), dot(d, vec2(-dir.y, dir.x)));
-	float ra = mix(0.2, 0.36, hash12(cell + 2.2));
+	float ra = mix(0.14, 0.34, hash12(cell + 2.2));
 	float rb = ra * mix(0.45, 0.85, hash12(cell + 4.4));
-	float wob = (value_noise(p * 9.0) - 0.5) * 0.06;
+	float wob = (value_noise(p * 5.0) - 0.5) * 0.08 + (value_noise(p * 13.0) - 0.5) * 0.03;
 	float e = length(r / vec2(ra, rb)) - 1.0;
 	float sd = e * rb + wob;
 	// Chaussée (digue) : un côté droit en aval.
@@ -122,8 +122,8 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float land_f, inout vec3 col, 
 	if (wl.r > 0.01) {
 		float reeds = value_noise(p * vec2(5.0, 1.7)) * 0.6 + value_noise(p * 13.0) * 0.4;
 		col = mix(col, rl_reed_color * (0.75 + 0.5 * reeds), smoothstep(0.0, 0.5, wl.r) * 0.85);
-		float n = value_noise(p * 1.1) * 0.55 + value_noise(p * 3.3 + 5.0) * 0.3 + value_noise(p * 9.7) * 0.15;
-		float t = 1.0 - 0.42 * wl.r;
+		float n = value_noise(p * 1.9) * 0.5 + value_noise(p * 5.3 + 5.0) * 0.33 + value_noise(p * 14.1) * 0.17;
+		float t = 1.0 - 0.36 * wl.r;
 		float fw = max(fwidth(n), 0.015);
 		water = max(water, smoothstep(t - fw, t + fw, n));
 	}
@@ -131,10 +131,11 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float land_f, inout vec3 col, 
 	if (wl.g > 0.01) {
 		float sd = rl_pond_sd(p, wl.g);
 		float px = aa / rl_pond_cell_px;
-		float pond = 1.0 - smoothstep(-px, px, sd);
-		float bank = (1.0 - smoothstep(0.0, 0.06 + px, sd)) * (1.0 - pond);
+		float edge = clamp(fwidth(sd), 1e-4, px) * 0.8;
+		float pond = 1.0 - smoothstep(-edge, edge, sd);
+		float bank = (1.0 - smoothstep(0.0, 0.05 + edge, sd)) * (1.0 - pond);
 		float vis = smoothstep(2.0, 6.0, 1.0 / max(px, 1e-3));
-		float coverage = wl.g * 0.75 * 0.2 * 2.5;  // renforcé : lisible au dézoom
+		float coverage = wl.g * 0.75 * 0.25 * 2.0;  // renforcé : lisible au dézoom
 		pond = mix(coverage, pond, vis);
 		col = mix(col, rl_reed_color, bank * vis * 0.8);
 		water = max(water, pond);

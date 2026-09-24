@@ -85,7 +85,10 @@ def smoothstep(edge0: float, edge1: float, x: np.ndarray) -> np.ndarray:
 
 
 def uniform_noise(
-    shape: tuple[int, int], rng: np.random.Generator, base_cells: int = 40, octaves: int = 6
+    shape: tuple[int, int],
+    rng: np.random.Generator,
+    base_cells: int = 40,
+    octaves: int = 6,
 ) -> np.ndarray:
     """Fractal noise remapped to a uniform ``[0, 1]`` marginal (rank transform)."""
     noise = splat.fractal_noise(shape, base_cells, octaves, rng)
@@ -138,7 +141,9 @@ def kk10_cleared(grid: MapGrid, land_use: kk10.LandUse | None) -> np.ndarray:
     return np.clip(values, 0.0, 1.0).astype(np.float32)
 
 
-def area_signed_distance(area: dict, grid: MapGrid) -> tuple[np.ndarray, tuple[slice, slice]]:
+def area_signed_distance(
+    area: dict, grid: MapGrid
+) -> tuple[np.ndarray, tuple[slice, slice]]:
     """Signed distance (pixels, positive inside) of an ellipse or polygon, on its bounding window."""
     size = grid.size_px
     mpp = grid.meters_per_px
@@ -159,7 +164,10 @@ def area_signed_distance(area: dict, grid: MapGrid) -> tuple[np.ndarray, tuple[s
         u = dx * np.cos(angle) + dy_north * np.sin(angle)
         v = -dx * np.sin(angle) + dy_north * np.cos(angle)
         r = np.sqrt((u / a_px) ** 2 + (v / b_px) ** 2)
-        return ((1.0 - r) * min(a_px, b_px)).astype(np.float32), (slice(r0, r1), slice(c0, c1))
+        return ((1.0 - r) * min(a_px, b_px)).astype(np.float32), (
+            slice(r0, r1),
+            slice(c0, c1),
+        )
     lon, lat = zip(*area["polygon"], strict=True)
     px, py = grid.lonlat_to_pixel(np.array(lon), np.array(lat))
     r0 = max(int(np.min(py)) - margin, 0)
@@ -167,12 +175,19 @@ def area_signed_distance(area: dict, grid: MapGrid) -> tuple[np.ndarray, tuple[s
     c0 = max(int(np.min(px)) - margin, 0)
     c1 = min(int(np.max(px)) + margin + 1, size)
     shape = Polygon(zip(np.asarray(px) - c0, np.asarray(py) - r0, strict=True))
-    inside = rasterize([(shape, 1)], out_shape=(r1 - r0, c1 - c0), fill=0, dtype=np.uint8) > 0
-    dist = ndimage.distance_transform_edt(inside) - ndimage.distance_transform_edt(~inside)
+    inside = (
+        rasterize([(shape, 1)], out_shape=(r1 - r0, c1 - c0), fill=0, dtype=np.uint8)
+        > 0
+    )
+    dist = ndimage.distance_transform_edt(inside) - ndimage.distance_transform_edt(
+        ~inside
+    )
     return dist.astype(np.float32), (slice(r0, r1), slice(c0, c1))
 
 
-def area_mask(area: dict, grid: MapGrid, noise: np.ndarray) -> tuple[np.ndarray, tuple[slice, slice]]:
+def area_mask(
+    area: dict, grid: MapGrid, noise: np.ndarray
+) -> tuple[np.ndarray, tuple[slice, slice]]:
     """Soft 0-1 mask of an area with a noisy, natural edge (on its bounding window)."""
     dist, window = area_signed_distance(area, grid)
     amplitude = max(AREA_NOISE_PX, AREA_NOISE_SHARE * area_min_radius_px(area, grid))
@@ -204,7 +219,9 @@ def points_px(map_dir: Path) -> tuple[np.ndarray, np.ndarray]:
         towns = np.array(list(json.loads(path.read_text()).values()), dtype=np.float32)
     path = map_dir / "hamlets.json"
     if path.exists():
-        hamlets = np.array([h["px"] for h in json.loads(path.read_text())], dtype=np.float32)
+        hamlets = np.array(
+            [h["px"] for h in json.loads(path.read_text())], dtype=np.float32
+        )
     return towns, hamlets
 
 
@@ -243,7 +260,9 @@ def river_distance(map_dir: Path, size: int, min_importance: int = 3) -> np.ndar
         shapes.extend((LineString(part), 1) for part in parts if len(part) >= 2)
     if not shapes:
         return np.full((size, size), 1e4, dtype=np.float32)
-    lines = rasterize(shapes, out_shape=(size, size), fill=0, dtype=np.uint8, all_touched=True)
+    lines = rasterize(
+        shapes, out_shape=(size, size), fill=0, dtype=np.uint8, all_touched=True
+    )
     return ndimage.distance_transform_edt(lines == 0).astype(np.float32)
 
 
@@ -324,20 +343,26 @@ def compute_forest(
         if 0 <= index <= max_index:
             province_factor[index] = {"heath": 0.55, "marsh": 0.6}.get(name, 1.0)
     potential = potential * splat.masked_blur(province_factor[ids], land, 8.0)
-    potential = potential * (0.45 + 0.55 * smoothstep(0.5, 2.5, coast))  # dunes, prés salés
+    potential = potential * (
+        0.45 + 0.55 * smoothstep(0.5, 2.5, coast)
+    )  # dunes, prés salés
     potential = potential * (1.0 - 0.85 * np.maximum(wet[..., 0], wet[..., 1] * 0.5))
     potential = potential * (1.0 - 0.6 * wet[..., 2])
     # Hautes terres océaniques (îles Britanniques) : landes et pâtures d'altitude dès 300 m.
     oceanic = smoothstep(49.8, 50.8, lat) * smoothstep(2.2, 0.8, lon)
     potential = potential * (1.0 - 0.75 * oceanic * smoothstep(220.0, 420.0, h))
     # Garrigue méditerranéenne : forêt claire.
-    potential = potential * (1.0 - 0.3 * smoothstep(44.5, 43.0, lat) * smoothstep(800.0, 200.0, h))
+    potential = potential * (
+        1.0 - 0.3 * smoothstep(44.5, 43.0, lat) * smoothstep(800.0, 200.0, h)
+    )
 
     target = potential * (1.0 - cleared)
     edge_noise = uniform_noise((size, size), rng, base_cells=220, octaves=4)
     heath = np.zeros((size, size), dtype=np.float32)
     conifer = 0.03 + 0.8 * smoothstep(750.0, 1350.0, h)
-    conifer = np.maximum(conifer, 0.8 * smoothstep(56.2, 56.8, lat) * smoothstep(100.0, 250.0, h))
+    conifer = np.maximum(
+        conifer, 0.8 * smoothstep(56.2, 56.8, lat) * smoothstep(100.0, 250.0, h)
+    )
     conifer = np.maximum(conifer, 0.45 * smoothstep(44.0, 42.5, lat))
     for area in forests:
         mask, window = area_mask(area, grid, edge_noise)
@@ -349,13 +374,18 @@ def compute_forest(
             boosted = np.maximum(target[window], density * potential[window] ** 0.5)
             target[window] = target[window] + (boosted - target[window]) * mask
         share = CONIFER_BY_KIND[area["kind"]]
-        conifer[window] = conifer[window] + (np.maximum(conifer[window], share) - conifer[window]) * mask
+        conifer[window] = (
+            conifer[window]
+            + (np.maximum(conifer[window], share) - conifer[window]) * mask
+        )
 
     # Préférence de terrain : pentes, crêtes, sols pauvres d'altitude ; défrichés autour des
     # lieux habités et dans les plaines inondables (prés).
     town_d = distance_to_points(towns, size)
     hamlet_d = distance_to_points(hamlets, size)
-    near_settle = np.maximum(np.exp(-((town_d / 3.0) ** 2)), 0.8 * np.exp(-((hamlet_d / 1.6) ** 2)))
+    near_settle = np.maximum(
+        np.exp(-((town_d / 3.0) ** 2)), 0.8 * np.exp(-((hamlet_d / 1.6) ** 2))
+    )
     near_river = np.exp(-((river_dist / 1.3) ** 2))
     # Essarts : terroir défriché autour des villes (≈ 3 km) et des villages.
     target = target * (1.0 - 0.9 * np.exp(-((town_d / 4.0) ** 2)))
@@ -380,7 +410,9 @@ def compute_forest(
     return cover, heath, np.clip(conifer, 0.0, 1.0)
 
 
-def compose_splat(base: np.ndarray, forest: np.ndarray, heath: np.ndarray, wet: np.ndarray) -> np.ndarray:
+def compose_splat(
+    base: np.ndarray, forest: np.ndarray, heath: np.ndarray, wet: np.ndarray
+) -> np.ndarray:
     """New weights: ``base`` R/G/A scaled to the open share, B = ``forest``; heaths and marshes."""
     grass = base[..., 0] * (1.0 + 1.5 * wet[..., 2] + 1.0 * wet[..., 0])
     farm = base[..., 1] * (1.0 - 0.7 * np.maximum(wet[..., 0], wet[..., 2]))
@@ -389,7 +421,9 @@ def compose_splat(base: np.ndarray, forest: np.ndarray, heath: np.ndarray, wet: 
     farm = farm * (1.0 - 0.8 * heath)
     open_mix = np.stack([grass, farm, rock], axis=-1)
     total = open_mix.sum(axis=-1, keepdims=True)
-    open_mix = np.where(total > 1e-6, open_mix / np.maximum(total, 1e-6), [1.0, 0.0, 0.0])
+    open_mix = np.where(
+        total > 1e-6, open_mix / np.maximum(total, 1e-6), [1.0, 0.0, 0.0]
+    )
     open_share = (1.0 - forest)[..., None]
     weights = np.empty(base.shape, dtype=np.float32)
     weights[..., 0] = open_mix[..., 0] * open_share[..., 0]
@@ -401,13 +435,15 @@ def compose_splat(base: np.ndarray, forest: np.ndarray, heath: np.ndarray, wet: 
     return weights
 
 
-def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> LandcoverResult:
+def build(
+    map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR
+) -> LandcoverResult:
     """Write ``splat.png``, ``forest_kind.png`` and ``wetlands.png``."""
     meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
     grid = MapGrid(tuple(meta["bounds_projected"]), int(meta["size_px"][0]))
-    height = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png")).astype(
-        np.float32
-    )
+    height = terrain.uint16_to_height(
+        terrain.read_png16(map_dir / "heightmap.png")
+    ).astype(np.float32)
     with Image.open(map_dir / "land_mask.png") as image:
         land_mask = np.asarray(image.convert("L")) > 127
     with Image.open(map_dir / "province_ids.png") as image:
@@ -423,7 +459,13 @@ def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> Landc
     river_d = river_distance(map_dir, size)
     area_noise = uniform_noise((size, size), rng, base_cells=220, octaves=4)
     wet = build_wetlands(
-        grid, load_areas(map_dir / WETLANDS_FILE), height, land, slope, river_d, area_noise
+        grid,
+        load_areas(map_dir / WETLANDS_FILE),
+        height,
+        land,
+        slope,
+        river_d,
+        area_noise,
     )
     cleared = kk10_cleared(grid, kk10.load())
     towns, hamlets = points_px(map_dir)
@@ -445,15 +487,19 @@ def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> Landc
     weights = compose_splat(base, forest, heath, wet)
 
     splat_path = map_dir / "splat.png"
-    Image.fromarray(splat.encode_splat(weights), mode="RGBA").save(splat_path, compress_level=9)
-    wet_path = map_dir / "wetlands.png"
-    Image.fromarray(np.clip(np.rint(wet * 255.0), 0, 255).astype(np.uint8), mode="RGB").save(
-        wet_path, compress_level=9
+    Image.fromarray(splat.encode_splat(weights), mode="RGBA").save(
+        splat_path, compress_level=9
     )
+    wet_path = map_dir / "wetlands.png"
+    Image.fromarray(
+        np.clip(np.rint(wet * 255.0), 0, 255).astype(np.uint8), mode="RGB"
+    ).save(wet_path, compress_level=9)
     factor = max(1, size // FOREST_KIND_SIZE)
     kind = splat.downsample_mean(np.where(land, conifer, 0.0), factor)
     kind_path = map_dir / "forest_kind.png"
-    terrain.write_png8(np.clip(np.rint(kind * 255.0), 0, 255).astype(np.uint8), kind_path)
+    terrain.write_png8(
+        np.clip(np.rint(kind * 255.0), 0, 255).astype(np.uint8), kind_path
+    )
     return LandcoverResult(
         splat=splat_path,
         forest_kind=kind_path,

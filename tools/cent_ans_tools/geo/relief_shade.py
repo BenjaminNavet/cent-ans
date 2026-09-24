@@ -81,7 +81,12 @@ def copernicus_on_grid(
         for col0 in range(0, size, block):
             window = (col0, row0, block, block)
             w_lon0, w_lon1, w_lat0, w_lat1 = copernicus._window_lonlat(grid, window)
-            if w_lon1 < lon_min or w_lon0 > lon_max or w_lat1 < lat_min or w_lat0 > lat_max:
+            if (
+                w_lon1 < lon_min
+                or w_lon0 > lon_max
+                or w_lat1 < lat_min
+                or w_lat0 > lat_max
+            ):
                 continue
             result[row0 : row0 + block, col0 : col0 + block] = (
                 copernicus.resample_to_grid(grid, window, names)
@@ -98,12 +103,16 @@ def upsample_sign(original_4096: np.ndarray, factor: int) -> np.ndarray:
     return np.repeat(np.repeat(land, factor, axis=0), factor, axis=1)
 
 
-def boost_relief(height_m: np.ndarray, land: np.ndarray, meters_per_px: float) -> np.ndarray:
+def boost_relief(
+    height_m: np.ndarray, land: np.ndarray, meters_per_px: float
+) -> np.ndarray:
     """Render-only unsharp mask of the local relief on land (see module docstring)."""
     sigma = BOOST_SIGMA_M / meters_per_px
     base = ndimage.gaussian_filter(height_m, sigma)
     local = np.clip(height_m - base, -BOOST_LIMIT_M, BOOST_LIMIT_M)
-    t = np.clip((base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0)
+    t = np.clip(
+        (base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0
+    )
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
     boosted = height_m + BOOST_GAIN * local * fade
     return np.where(land, boosted, height_m).astype(np.float32)
@@ -111,15 +120,17 @@ def boost_relief(height_m: np.ndarray, land: np.ndarray, meters_per_px: float) -
 
 def enforce_coast(height_m: np.ndarray, land: np.ndarray) -> np.ndarray:
     """Land pixels stay above :data:`MIN_LAND_M`, sea pixels at or below 0 m."""
-    return np.where(land, np.maximum(height_m, MIN_LAND_M), np.minimum(height_m, 0.0)).astype(
-        np.float32
-    )
+    return np.where(
+        land, np.maximum(height_m, MIN_LAND_M), np.minimum(height_m, 0.0)
+    ).astype(np.float32)
 
 
 def block_mean(array: np.ndarray, factor: int) -> np.ndarray:
     """Mean of ``factor`` x ``factor`` blocks."""
     rows, cols = array.shape[0] // factor, array.shape[1] // factor
-    return array.reshape(rows, factor, cols, factor).mean(axis=(1, 3)).astype(np.float32)
+    return (
+        array.reshape(rows, factor, cols, factor).mean(axis=(1, 3)).astype(np.float32)
+    )
 
 
 def bilinear_upsample(array: np.ndarray, factor: int) -> np.ndarray:
@@ -178,16 +189,17 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     names = copernicus.tiles_in_bbox(copernicus.tile_list())
     copernicus.fetch_tiles(names)
     etopo = relief.resample_heights(
-        grid, download.etopo_tiles(download.etopo_tiles_covering(*grid.geographic_extent()))
+        grid,
+        download.etopo_tiles(download.etopo_tiles_covering(*grid.geographic_extent())),
     )
     cop = copernicus_on_grid(
         grid, names, cache=None if force else CACHE_DIR / f"cop_{grid.size_px}.npy"
     )
     merged = copernicus.merge_with_etopo(cop, etopo)
     del cop, etopo
-    original = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png")).astype(
-        np.float32
-    )
+    original = terrain.uint16_to_height(
+        terrain.read_png16(map_dir / "heightmap.png")
+    ).astype(np.float32)
     land = upsample_sign(original, factor)
     fine = enforce_coast(boost_relief(merged, land, grid.meters_per_px), land)
     del merged
@@ -205,7 +217,9 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     detail[~land] = 0.0
     occ[~land] = 0.0
     shade_path = map_dir / RELIEF_SHADE
-    Image.fromarray(encode_shade(detail, occ), mode="LA").save(shade_path, compress_level=9)
+    Image.fromarray(encode_shade(detail, occ), mode="LA").save(
+        shade_path, compress_level=9
+    )
     relief.update_map_json(map_dir)
     update_map_json(map_dir, names)
     return ReliefShadeResult(
