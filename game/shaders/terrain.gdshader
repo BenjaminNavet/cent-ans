@@ -53,11 +53,21 @@ uniform vec3 tint_rock = vec3(0.19, 0.17, 0.15);
 uniform vec3 tint_heath = vec3(0.15, 0.11, 0.08);
 uniform vec3 tint_snow = vec3(0.78, 0.80, 0.84);
 uniform vec3 tint_sand = vec3(0.48, 0.40, 0.26);
-uniform vec3 crop_wheat = vec3(0.34, 0.27, 0.08);
-uniform vec3 crop_green = vec3(0.13, 0.19, 0.05);
-uniform vec3 crop_ploughed = vec3(0.13, 0.085, 0.045);
-uniform vec3 crop_fallow = vec3(0.17, 0.19, 0.07);
-uniform vec3 hedge_color = vec3(0.03, 0.05, 0.02);
+// Parcellaire (lot V2b) : couleurs linéaires des cultures et des prés.
+uniform vec3 crop_wheat = vec3(0.36, 0.265, 0.075);
+uniform vec3 crop_green = vec3(0.12, 0.175, 0.045);
+uniform vec3 crop_ploughed = vec3(0.15, 0.10, 0.055);
+uniform vec3 crop_fallow = vec3(0.19, 0.175, 0.075);
+uniform vec3 meadow_color = vec3(0.095, 0.16, 0.042);
+uniform vec3 hay_color = vec3(0.24, 0.215, 0.085);
+uniform vec3 vine_soil = vec3(0.19, 0.135, 0.075);
+uniform vec3 vine_leaf = vec3(0.07, 0.10, 0.03);
+uniform vec3 dry_grass = vec3(0.23, 0.19, 0.085);
+uniform vec3 track_color = vec3(0.26, 0.20, 0.12);
+uniform vec3 hedge_color = vec3(0.035, 0.05, 0.02);
+// Occupation du sol (VegetationFields.landuse) : R vigne, G sécheresse, B bocage.
+uniform sampler2D landuse : filter_linear, repeat_disable, hint_default_black;
+uniform bool has_landuse = false;
 uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
 // Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
@@ -70,9 +80,9 @@ uniform float farm_tile_px = 0.6;
 uniform float tile_screen_px = 72.0;
 uniform float detail_strength = 0.85;
 uniform float detail_normal_strength = 0.55;
-// Parcellaire : champs par pixel carte (0,9 ≈ parcelles de 800 m), largeur des haies (fraction).
-uniform float field_freq = 0.7;
-uniform float hedge_width = 0.06;
+// Parcellaire : demi-largeur (px carte) du pied de haie et des chemins.
+uniform float hedge_width = 0.16;
+uniform float track_width = 0.10;
 // Neige : altitude de base (m) ; roche au-dessus de rock_line.
 uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
@@ -173,6 +183,68 @@ void sample_layer(int layer, vec2 uv_a, vec2 uv_b, float mix_b, vec3 tint, float
 	nrm += w * vec3(n.rg * 2.0 - 1.0, n.b);
 }
 
+// --- Parcellaire partagé avec vegetation_fields.gd (mêmes constantes, même hachage) ---
+float hash01i(int n) {
+	uint h = (uint(n) * 1103515245u + 12345u) & 0x7fffffffu;
+	h = ((h ^ (h >> 13u)) * 1274126177u) & 0x7fffffffu;
+	return float(h % 100000u) / 100000.0;
+}
+
+float region_value(vec2 p) {
+	return sin(0.0131 * p.x + 1.3 * sin(0.0093 * p.y)) + sin(0.0117 * p.y + 1.1 * sin(0.0171 * p.x)) - 0.25;
+}
+
+vec2 field_warp(vec2 q, float ph) {
+	float ox = 1.7 * sin(0.071 * q.y + 1.9 * sin(0.027 * q.x) + ph) + 0.55 * sin(0.23 * q.y + 1.3 * sin(0.061 * q.x));
+	float oy = 1.7 * sin(0.063 * q.x + 1.7 * sin(0.023 * q.y) + ph * 1.3) + 0.55 * sin(0.19 * q.x + 1.1 * sin(0.047 * q.y));
+	return vec2(ox, oy);
+}
+
+// Parcelle au point p (trame `lay`). Sorties : tirages d'enclos et de lanière, distances (px carte)
+// au bord à u constant / de rangée et tirages de ces bords, distance au bord de lanière, direction
+// des lanières (repère carte) et coordonnée transverse (rangs de vigne).
+void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du, out float dv,
+		out float roll_u, out float roll_v, out float strip_d, out vec2 strip_dir, out float rows) {
+	float k = lay == 0 ? 0.35 : -0.8;
+	float fu = lay == 0 ? 5.0 : 4.6;
+	float fv = lay == 0 ? 4.2 : 3.8;
+	float ph = lay == 0 ? 0.0 : 2.1;
+	vec2 q = p;
+	for (int i = 0; i < 4; i++) {
+		q = p - field_warp(q, ph);
+	}
+	float u = (q.x + k * q.y) / fu;
+	float v = (q.y - k * q.x) / fv;
+	float inv = inversesqrt(1.0 + k * k);
+	int cu = int(floor(u));
+	float vs = v + hash01i(cu * 5023 + 17 + lay * 101);
+	int cv = int(floor(vs));
+	float fu_f = fract(u);
+	float fv_f = fract(vs);
+	du = min(fu_f, 1.0 - fu_f) * fu * inv;
+	dv = min(fv_f, 1.0 - fv_f) * fv * inv;
+	int uline = fu_f < 0.5 ? cu : cu + 1;
+	int vline = fv_f < 0.5 ? cv : cv + 1;
+	roll_u = hash01i(uline * 7919 + int(floor(v)) * 104729 + lay * 7 + 1);
+	roll_v = hash01i(vline * 7919 + cu * 104729 + lay * 7 + 31);
+	int cell_key = cu * 7919 + cv * 104729 + lay * 7 + 3;
+	cell_h = hash01i(cell_key);
+	float h2 = hash01i(cell_key + 11);
+	float h3 = hash01i(cell_key + 23);
+	// Lanières : 1 à 4 par enclos, dans l'un ou l'autre sens, bords légèrement ondulés.
+	float n = 1.0 + floor(h2 * 4.0);
+	bool along_u = h3 < 0.5;
+	float t = along_u ? fu_f : fv_f;
+	t += 0.035 * sin((along_u ? v : u) * 9.0 + h2 * 6.0);
+	float ts = clamp(t, 0.0, 0.999) * n;
+	float strip = floor(ts);
+	strip_h = hash01i(cell_key + int(strip) * 13 + 5);
+	float sf = fract(ts);
+	strip_d = n > 1.0 ? min(sf, 1.0 - sf) / n * (along_u ? fu : fv) * inv : 1e3;
+	strip_dir = along_u ? normalize(vec2(-k, 1.0)) : normalize(vec2(1.0, k));
+	rows = ts;
+}
+
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
@@ -220,51 +292,75 @@ void fragment() {
 	// Variation macro : légères nuances de teinte pour casser l'uniformité.
 	float tone = 0.85 + 0.3 * macro;
 
-	// --- Parcellaire (cultures) : cellules de Voronoï (parcelles irrégulières) et haies ---
-	float cell_px = 1.0 / max(field_freq * footprint, 1e-4);  // taille d'une parcelle à l'écran
-	float field_vis = smoothstep(3.0, 9.0, cell_px);
-	vec3 farm_tint = tint_farmland;
+	// --- Parcellaire (lot V2b) : enclos, lanières de cultures, prés, vignes, haies, chemins ---
+	vec3 lu = has_landuse ? texture(landuse, uv).rgb : vec3(0.0);
+	float dry = lu.g;
+	float open_land = clamp(s.g + 0.6 * s.r, 0.0, 1.0);
+	float grass_share = s.r / max(s.r + s.g, 1e-3);
+	// Teintes de base (lointain) : même moyenne que les parcelles, sèches au sud.
+	vec3 grass_base = mix(tint_grass, dry_grass, dry * 0.75);
+	vec3 farm_base = mix(tint_farmland, mix(tint_farmland, crop_wheat, 0.35) * vec3(1.05, 0.98, 0.9), dry * 0.6);
+	vec3 grass_tint = grass_base;
+	vec3 farm_tint = farm_base;
 	float hedge = 0.0;
-	float parcel_hash = 0.5;
-	if (field_vis > 0.0 && s.g > 0.03) {
-		vec2 warp = vec2(value_noise(p * 0.21), value_noise(p * 0.21 + 31.7)) - 0.5;
-		// Orientation du parcellaire propre à chaque terroir (cases de ~40 px carte, rotation autour
-		// du centre de la case : pas de tourbillon lié aux grandes coordonnées).
-		vec2 tp = p / 40.0 + (vec2(value_noise(p * 0.05), value_noise(p * 0.05 + 9.2)) - 0.5) * 0.6;
-		vec2 tcell = floor(tp);
-		float terroir = hash12(tcell + 5.7) * 3.14159;
-		mat2 trot = mat2(vec2(cos(terroir), sin(terroir)), vec2(-sin(terroir), cos(terroir)));
-		vec2 fp = trot * ((p - (tcell + 0.5) * 40.0) * field_freq) + warp * 0.8 + tcell * 13.0;
-		vec2 ip = floor(fp);
-		vec2 fr = fract(fp);
-		float d1 = 8.0;
-		float d2 = 8.0;
-		vec2 best = ip;
-		for (int j = -1; j <= 1; j++) {
-			for (int i = -1; i <= 1; i++) {
-				vec2 o = vec2(float(i), float(j));
-				vec2 c = ip + o;
-				vec2 r = o + vec2(hash12(c), hash12(c + 17.3)) * 0.85 + 0.075 - fr;
-				// Parcelles allongées (lanières) : distance anisotrope.
-				r.x *= 0.5;
-				float dd = dot(r, r);
-				if (dd < d1) {
-					d2 = d1;
-					d1 = dd;
-					best = c;
-				} else if (dd < d2) {
-					d2 = dd;
-				}
-			}
+	float track = 0.0;
+	float balk = 0.0;
+	float vine_rows = 0.0;
+	vec2 furrow_dir = vec2(1.0, 0.0);
+	float cell_px = 4.4 / max(footprint, 1e-4);  // taille d'un enclos à l'écran
+	float field_vis = smoothstep(4.0, 12.0, cell_px);
+	if (field_vis > 0.0 && (s.g + s.r) > 0.05) {
+		float rv = region_value(p);
+		int lay = rv > 0.0 ? 1 : 0;
+		float cell_h; float strip_h; float du; float dv; float roll_u; float roll_v; float strip_d; float rows;
+		field_at(p, lay, cell_h, strip_h, du, dv, roll_u, roll_v, strip_d, furrow_dir, rows);
+		// Lanières visibles de plus près que les enclos : sinon, couleur de l'enclos.
+		float strip_vis = smoothstep(3.0, 8.0, cell_px * 0.4);
+		float h = strip_vis > 0.5 ? strip_h : cell_h;
+		float h_b = hash01i(int(h * 99991.0) + 7);
+		// Prés plus fréquents dans les zones herbagères, vigne selon l'occupation du sol.
+		float p_meadow = mix(0.15, 0.85, grass_share);
+		vec3 crop;
+		bool vine = h_b < lu.r * 0.55 && grass_share < 0.8;
+		if (vine) {
+			crop = vine_soil;
+		} else if (h < p_meadow) {
+			float m = h / max(p_meadow, 1e-3);
+			crop = m < 0.6 ? meadow_color * (0.85 + 0.35 * h_b) : (m < 0.85 ? mix(meadow_color, hay_color, 0.55) : hay_color);
+			crop = mix(crop, dry_grass, dry * 0.7);
+		} else {
+			float c = (h - p_meadow) / max(1.0 - p_meadow, 1e-3);
+			crop = c < 0.36 ? crop_wheat : (c < 0.6 ? crop_green : (c < 0.76 ? crop_ploughed : crop_fallow));
+			crop *= 0.9 + 0.2 * h_b;
+			crop = mix(crop, crop * vec3(1.08, 0.96, 0.82), dry);
 		}
-		parcel_hash = hash12(best + 71.3);
-		float hc1 = hash12(best);
-		vec3 crop = hc1 < 0.35 ? crop_wheat : (hc1 < 0.62 ? crop_green : (hc1 < 0.8 ? crop_ploughed : crop_fallow));
-		crop *= 0.9 + 0.2 * parcel_hash;
-		farm_tint = mix(tint_farmland, crop, field_vis * 0.55);
-		float edge = sqrt(d2) - sqrt(d1);
-		float edge_aa = fwidth(edge);
-		hedge = (1.0 - smoothstep(hedge_width - edge_aa, hedge_width + edge_aa, edge)) * smoothstep(6.0, 14.0, cell_px);
+		grass_tint = mix(grass_base, crop, field_vis * 0.8);
+		farm_tint = mix(farm_base, crop, field_vis * 0.85);
+		// Rangs de vigne (de près seulement ; au-delà, teinte moyenne des rangs).
+		if (vine) {
+			float rw = fwidth(rows * 5.0);
+			float r = abs(fract(rows * 5.0) - 0.5);
+			float fine = 1.0 - smoothstep(0.25, 0.6, rw);
+			vine_rows = mix(0.45, 1.0 - smoothstep(0.22 - rw, 0.22 + rw, r), fine) * field_vis;
+		}
+		// Bords : haie (tirage < probabilité), chemin de terre (autre tirage), sinon talus herbeux.
+		float p_hedge = open_land * mix(0.05, 0.6, lu.b);
+		float aa = footprint * 0.75;
+		float hedge_u = step(roll_u, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, du));
+		float hedge_v = step(roll_v, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, dv));
+		// Au-delà d'un pixel, la ligne s'estompe (couverture) au lieu de disparaître.
+		float cover = clamp(2.0 * hedge_width / max(footprint, 1e-4), 0.0, 1.0);
+		hedge = max(hedge_u, hedge_v) * mix(cover, 1.0, cover) * field_vis;
+		float tr_u = step(fract(roll_u * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, du));
+		float tr_v = step(fract(roll_v * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, dv));
+		// Limite entre les deux trames : chemin continu.
+		float rgrad = length(vec2(region_value(p + vec2(1.0, 0.0)) - rv, region_value(p + vec2(0.0, 1.0)) - rv));
+		float rd = abs(rv) / max(rgrad, 1e-4);
+		float tr_r = 1.0 - smoothstep(track_width * 1.3 - aa, track_width * 1.3 + aa, rd);
+		float tcover = clamp(2.0 * track_width / max(footprint, 1e-4), 0.0, 1.0);
+		track = max(max(tr_u, tr_v), tr_r) * tcover * field_vis;
+		float edge = min(min(du, dv), strip_d);
+		balk = (1.0 - smoothstep(0.03, 0.03 + aa * 2.0, edge)) * smoothstep(8.0, 20.0, cell_px) * 0.5;
 	}
 
 	// --- Textures ---
@@ -283,11 +379,10 @@ void fragment() {
 		vec2 uv_b = mat2(vec2(cos(ang), sin(ang)), vec2(-sin(ang), cos(ang))) * p / (tile_a * 2.0) + 0.37;
 		float mix_b = fract(lvl);
 		float det = detail_strength * detail_fade;
-		if (w_grass > 0.01) { sample_layer(0, uv_a, uv_b, mix_b, tint_grass, det, albedo, dn, w_grass); }
+		if (w_grass > 0.01) { sample_layer(0, uv_a, uv_b, mix_b, grass_tint, det, albedo, dn, w_grass); }
 		if (w_farm > 0.01) {
-			// Sillons orientés par parcelle.
-			float a = parcel_hash * 3.14159;
-			mat2 rot = mat2(vec2(cos(a), sin(a)), vec2(-sin(a), cos(a)));
+			// Sillons dans le sens des lanières.
+			mat2 rot = mat2(vec2(furrow_dir.x, -furrow_dir.y), vec2(furrow_dir.y, furrow_dir.x));
 			// Tuile plus fine que les parcelles (sillons) : sous le pixel dès le zoom moyen, donc
 			// moyennée par les mipmaps (pas de trame régulière visible).
 			vec2 uv_f = rot * p / farm_tile_px;
@@ -306,14 +401,18 @@ void fragment() {
 		albedo /= max(wsum, 1e-3);
 		dn /= max(wsum, 1e-3);
 	} else {
-		albedo = (w_grass * tint_grass + w_farm * farm_tint + w_forest * tint_forest + w_rock * tint_rock
+		albedo = (w_grass * grass_tint + w_farm * farm_tint + w_forest * tint_forest + w_rock * tint_rock
 			+ w_heath * tint_heath + snow * tint_snow + sand * tint_sand) / max(wsum, 1e-3);
 		dn = vec3(0.0, 0.0, 0.85);
 	}
 	vec3 col = albedo * mix(1.0, tone, 1.0 - snow);
 	// Canopée : ombrage de volume léger (les forêts paraissent plus sombres et granuleuses).
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;
-	col = mix(col, hedge_color, hedge * w_farm / max(wsum, 1e-3) * 0.35);
+	float open_w = (w_grass + w_farm) / max(wsum, 1e-3);
+	col = mix(col, col * vec3(0.93, 0.95, 0.9), balk * open_w);
+	col = mix(col, vine_leaf, vine_rows * open_w * 0.8);
+	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
+	col = mix(col, hedge_color, hedge * open_w * 0.55);
 
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
