@@ -157,10 +157,10 @@ impl<'a> Context<'a> {
             .sum()
     }
 
+    /// P1: the frontier classification of the campaign (ports and
+    /// provinces next to another faction), shared with the 1337 setup.
     fn is_border(&self, province: &ProvinceId) -> bool {
-        edges(self.data, province)
-            .iter()
-            .any(|(n, _)| self.state.is_hostile_territory(self.faction, n))
+        self.state.is_frontier(self.data, self.faction, province)
     }
 }
 
@@ -368,13 +368,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         if !ctx.owns(id) {
             continue;
         }
-        let keep = if *id == me.capital {
-            3
-        } else if ctx.is_border(id) {
-            2
-        } else {
-            1
-        };
+        // P1: one unit less than the garrison of the same role at the
+        // 1337 start, so the starting garrisons stay put.
+        let keep = state.garrison_role(data, ctx.faction, id).garrison_size() - 1;
         if province.garrison.len() > keep + 1 && province.siege.is_none() {
             orders.push(Order::CreateArmy {
                 province: id.clone(),
