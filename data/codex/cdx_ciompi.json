@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ciompi",
+  "title": "La révolte des Ciompi",
+  "category": "evenement",
+  "aliases": ["Ciompi", "révolte des Ciompi", "Michele di Lando"],
+  "era": { "from": "1378", "to": "1382" },
+  "summary": "En juillet 1378, à Florence, les ouvriers de la laine, les Ciompi, exclus des corporations, se soulèvent et imposent un gouvernement populaire. Leur victoire ne dure que quelques semaines, mais leur révolte reste l'une des plus célèbres du Moyen Âge.",
+  "body": "Florence est au XIVe siècle l'une des grandes capitales de la draperie et de la banque. La ville est gouvernée par les arts, c'est-à-dire les corporations, dominées par les grands marchands de la laine et les banquiers. Mais les milliers d'ouvriers qui cardent, peignent et lavent la laine, payés à la tâche, n'ont pas le droit de former leur propre corporation : ils sont soumis à l'Art de la laine, qui fixe leurs salaires et les juge. On les appelle Ciompi, peut-être d'après le bruit de leurs sabots.\n\nEn juin 1378, les querelles entre grandes familles florentines ouvrent une brèche. En juillet, les Ciompi prennent les armes, occupent le palais de la Seigneurie et imposent leurs revendications : la création de trois nouveaux arts pour les ouvriers et les petits artisans, une place au gouvernement et un allègement des dettes. Un cardeur, Michele di Lando, devient gonfalonier de justice, le premier magistrat de la ville.\n\nLa victoire est de courte durée. Michele di Lando, rallié aux classes aisées, se retourne contre les plus radicaux, qui sont écrasés fin août 1378. L'art des Ciompi est dissous. Les deux autres nouveaux arts, plus modérés, participent encore au pouvoir jusqu'en 1382, avant que l'oligarchie marchande ne reprenne le contrôle.\n\nLa révolte des Ciompi s'inscrit dans une vague de soulèvements qui touche alors toute l'Europe, des [[cdx_maillotins|Maillotins]] de Paris à la [[cdx_revolte_paysans_1381|révolte des paysans anglais]] et aux tisserands de [[cdx_gand|Gand]]. Partout, la crise née de la [[cdx_peste_noire|Peste noire]] et de la guerre attise les tensions entre riches et pauvres.",
+  "entity": "evt_ciompi",
+  "see_also": ["cdx_maillotins", "cdx_revolte_paysans_1381", "cdx_jacquerie"],
+  "sources": ["Révolte des Ciompi"]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_revolte_paysans_1381",
+  "title": "La révolte des paysans anglais de 1381",
+  "category": "evenement",
+  "aliases": ["révolte des paysans", "révolte des paysans anglais", "Peasants' Revolt", "Wat Tyler", "John Ball", "poll tax"],
+  "era": { "from": "1381", "to": "1381" },
+  "summary": "En juin 1381, les paysans et artisans d'Essex et du Kent, révoltés contre un impôt par tête destiné à la guerre de France, marchent sur Londres sous la conduite de Wat Tyler. Le jeune roi Richard II les disperse par de fausses promesses.",
+  "body": "Depuis la [[cdx_peste_noire|Peste noire]], la main-d'œuvre manque en Angleterre, et les paysans réclament de meilleurs salaires et la fin du servage. Les seigneurs, eux, s'appuient sur des lois qui bloquent les salaires. La guerre de France, qui tourne mal depuis la reconquête de [[cdx_charles_v|Charles V]], coûte cher : en 1380, le Parlement vote une troisième poll tax, un impôt par tête d'un shilling, qui frappe pauvres et riches de la même manière.\n\nFin mai 1381, les villageois d'Essex chassent les commissaires chargés de traquer les fraudeurs. La révolte gagne le Kent, où les insurgés choisissent pour chef Wat Tyler et libèrent de prison le prêtre John Ball. Ce dernier prêche l'égalité : « Quand Adam bêchait et qu'Ève filait, qui donc était gentilhomme ? » Des dizaines de milliers de rebelles marchent sur Londres.\n\nLe 13 juin, ils entrent dans la ville et incendient le palais de Savoy, somptueuse demeure de [[cdx_jean_de_gand|Jean de Gand]], jugé responsable des impôts. Le lendemain, ils prennent la Tour de Londres et décapitent l'archevêque de Canterbury, chancelier du royaume, et le trésorier. Le roi Richard II, âgé de quatorze ans, les rencontre à Mile End et promet d'abolir le servage.\n\nLe 15 juin, à Smithfield, au cours d'une nouvelle entrevue, Wat Tyler est frappé à mort par le maire de Londres, William Walworth. Le jeune roi s'avance vers la foule et se proclame son chef ; les rebelles se dispersent, tandis que des troupes, notamment celles de [[cdx_robert_knolles|Robert Knolles]], sécurisent la ville. Les promesses sont annulées et la répression suit. Mais la poll tax est abandonnée, et le servage décline dans les décennies suivantes.",
+  "entity": "evt_peasants_revolt",
+  "see_also": ["cdx_jean_de_gand", "cdx_lollards", "cdx_jacquerie", "cdx_maillotins"],
+  "sources": ["Révolte des paysans (1381)", "Wat Tyler", "John Ball"]
+}
