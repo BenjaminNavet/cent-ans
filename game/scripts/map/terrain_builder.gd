@@ -61,6 +61,7 @@ var _fine_pattern: String = ""
 var _fine_tile_px: int = 0
 var _fine_store: Object = null
 var _lod_frame: int = 0
+var _last_wanted_fine: Array = []
 var _height_texture: ImageTexture
 var _splat_texture: ImageTexture
 var _border_texture: ImageTexture
@@ -270,6 +271,7 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 	_lod_frame += 1
 	_collect_fine_jobs()
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
+	_last_wanted_fine = wanted_fine
 	var builds := 0
 	var half := chunk_px * 0.5
 	for i in _chunks.size():
@@ -415,6 +417,14 @@ func _collect_fine_jobs() -> void:
 		var grid := {"heights": job.heights, "side": job.side, "unit": float(chunk_px) / float(job.side - 1)}
 		_fine_cache[index] = {"mesh": mesh, "grid": grid, "last_used": _lod_frame}
 		build_stats["fine_build_ms_max"] = maxf(float(build_stats.get("fine_build_ms_max", 0.0)), job.build_ms)
+
+
+## Vrai quand toutes les tuiles voulues en relief fin sont affichées (captures, mesures).
+func fine_ready() -> bool:
+	for index in _last_wanted_fine:
+		if _is_near[index] != 2 and not (_fine_cache.has(index) and _fine_cache[index]["mesh"] == _near_meshes.get(index)):
+			return false
+	return true
 
 
 ## Attend les tâches de relief fin en cours (captures, sortie).

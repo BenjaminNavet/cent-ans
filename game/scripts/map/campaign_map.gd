@@ -19,6 +19,8 @@ extends Node3D
 ##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
 ##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
+##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
+##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -60,6 +62,13 @@ var chronicle: ChronicleController = null  # M10
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
+## Lot C6 : paliers de zoom, colonies, hameaux et routes.
+var zoom_tiers: ZoomTiers = null
+var settlement_data: SettlementData = null
+var settlement_layer: SettlementLayer = null
+var roads: RoadRenderer = null
+var _fps_probe_frames: int = -1
+var _fps_probe_start: int = 0
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -85,7 +94,9 @@ func _ready() -> void:
 	coast.build(map_data)
 	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
 	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
+	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
 	cities.build(map_data)
+	_setup_settlements()
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -140,6 +151,31 @@ func _ready() -> void:
 	}
 	print("CampaignMap: %s" % JSON.stringify(startup_stats))
 	_parse_cmdline()
+
+
+## Lot C6 : colonies (icônes, maquettes, étiquettes), hameaux et routes, paliers de zoom.
+func _setup_settlements() -> void:
+	zoom_tiers = ZoomTiers.load_default()
+	settlement_data = SettlementData.load_from(MapPaths.data_dir, MapPaths.map_dir())
+	roads = RoadRenderer.new()
+	roads.name = "Roads"
+	add_child(roads)
+	roads.build(map_data, settlement_data, terrain)
+	settlement_layer = SettlementLayer.new()
+	settlement_layer.name = "Settlements"
+	add_child(settlement_layer)
+	settlement_layer.setup(map_data, terrain, settlement_data, zoom_tiers)
+	settlement_layer.settlement_selected.connect(_on_settlement_selected)
+	var vegetation := get_node_or_null("Vegetation")
+	if vegetation != null:
+		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+
+
+## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
+func _on_settlement_selected(settlement_id: String) -> void:
+	var entry := settlement_data.get_settlement(settlement_id) if settlement_data != null else {}
+	if not entry.is_empty():
+		ui.show_toast("%s (%s)" % [entry.get("name", settlement_id), province_name_of(str(entry.get("province", "")))])
 
 
 ## Pas de sommets proportionnels à la taille de carte (4096 → 4/8, 512 → 1/2).
@@ -217,6 +253,8 @@ func refresh_all() -> void:
 		return
 	_refresh_owner_colors()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
+	if settlement_layer != null:  # C6
+		settlement_layer.refresh(sim, SimFacade.faction_color)
 	_refresh_top_bar()
 	_refresh_construction_markers()
 	if unrest_mode:
@@ -325,7 +363,12 @@ func player_army_ids() -> PackedStringArray:
 func _try_select_army(screen_position: Vector2) -> bool:
 	var army_id := armies.pick_screen(screen_position)
 	if army_id == "":
-		return false
+		# C6 : clic sur une icône ou une maquette de colonie.
+		var settlement_id := settlement_layer.pick_screen(screen_position) if settlement_layer != null else ""
+		if settlement_id == "":
+			return false
+		settlement_layer.select(settlement_id)
+		return true
 	select_army(army_id)
 	return true
 
@@ -805,14 +848,54 @@ func _on_load(path: String) -> void:
 func _process(_delta: float) -> void:
 	if not load_ok:
 		return
-	terrain.update_lod(camera.global_position)
-	cities.update_visibility(camera_rig.distance)
+	var distance := camera_rig.distance
+	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
+	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
+	cities.update_visibility(distance)
+	if zoom_tiers != null:  # C6 : paliers de zoom
+		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
+		settlement_layer.update_view(distance)
+		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
 	armies.update_scale(camera_rig.distance)
 	if _screenshot_countdown > 0:
+		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
+		if _screenshot_countdown == 3 and not terrain.fine_ready():
+			terrain.wait_fine_jobs()
+			return
+		if _screenshot_countdown == 2 and settlement_layer != null:
+			settlement_layer.flush()
+			roads.flush(zoom_tiers.near_weight(distance))
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
+
+
+## `--fps-probe` : FPS moyen sur 240 images une fois le relief fin prêt (mesure de perf C6).
+func _update_fps_probe() -> void:
+	if _fps_probe_frames < 0:
+		return
+	if _fps_probe_frames == 0:
+		if not terrain.fine_ready() or Engine.get_process_frames() < 120:
+			return
+		_fps_probe_start = Time.get_ticks_usec()
+	_fps_probe_frames += 1
+	if _fps_probe_frames == 241:
+		var seconds := (Time.get_ticks_usec() - _fps_probe_start) / 1000000.0
+		print("CampaignMap: fps_probe %s" % JSON.stringify({
+			"fps": snappedf(240.0 / seconds, 0.1),
+			"distance": snappedf(camera_rig.distance, 0.1),
+			"fine_chunks": terrain.fine_chunk_count(),
+			"near_chunks": terrain.near_chunk_count(),
+			"ribbons": roads.ribbon_count() if roads != null else 0,
+			"hamlets": settlement_layer.hamlet_instance_count() if settlement_layer != null else 0,
+			"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+			"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		}))
+		_fps_probe_frames = -1
+		if _screenshot_path == "":
+			get_tree().quit()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -851,6 +934,11 @@ func _parse_cmdline() -> void:
 	for arg in args:
 		if arg.begins_with("--stage="):
 			_screenshot_stage = arg.trim_prefix("--stage=")
+	for arg in args:
+		if arg == "--fps-probe":
+			_fps_probe_frames = 0
+		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
+			settlement_layer.select(arg.trim_prefix("--select-settlement="))
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")

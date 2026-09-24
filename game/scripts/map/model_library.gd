@@ -39,6 +39,8 @@ static func clear_cache() -> void:
 	_tinted_meshes.clear()
 	_unit_categories.clear()
 	_rulers.clear()
+	_hamlet_meshes.clear()
+	_hamlet_meshes_loaded = false
 
 
 static func has_model(model_name: String) -> bool:
@@ -156,6 +158,59 @@ static func city_model(province_id: String) -> Node3D:
 	if node == null and kind != "village":
 		node = instantiate("village", CITY_SCALE)
 	return node
+
+
+# --- Colonies et hameaux (lot C6) ----------------------------------------------------
+
+## Maquettes par type de colonie : `res://assets/models/settlements/<kind>_<variante>.glb`
+## (générées par `tools/blender_scripts/settlements.py`) ; repli sur les modèles M10.
+const SETTLEMENT_VARIANTS := {
+	"city": ["city_a", "city_b"],
+	"town": ["town_a", "town_b"],
+	"castle": ["castle_a", "castle_b"],
+	"abbey": ["abbey_a", "abbey_b"],
+	"village": ["village_a", "village_b"],
+}
+const SETTLEMENT_FALLBACK := {"city": "city_cathedral", "town": "town", "castle": "castle", "abbey": "village", "village": "village"}
+const HAMLET_VARIANTS: Array[String] = ["hamlet_a", "hamlet_b", "hamlet_c"]
+## Échelle monde des maquettes (unités Blender → pixels de carte).
+const SETTLEMENT_SCALE := {"city": 3.4, "town": 3.0, "castle": 3.0, "abbey": 3.0, "village": 2.6}
+const HAMLET_SCALE := 2.6
+
+static var _hamlet_meshes: Array = []
+static var _hamlet_meshes_loaded := false
+
+
+## Maquette d'une colonie (variante choisie de façon déterministe par `variant_seed`), mise à
+## l'échelle monde ; null si aucun modèle n'est disponible.
+static func settlement_model(kind: String, variant_seed: int) -> Node3D:
+	var variants: Array = SETTLEMENT_VARIANTS.get(kind, [])
+	var available: Array = []
+	for variant in variants:
+		if has_model("settlements/" + variant):
+			available.append(variant)
+	var model_scale: float = SETTLEMENT_SCALE.get(kind, 3.0)
+	if not available.is_empty():
+		return instantiate("settlements/" + str(available[absi(variant_seed) % available.size()]), model_scale)
+	var fallback: String = SETTLEMENT_FALLBACK.get(kind, "village")
+	return instantiate(fallback, CITY_SCALE * 0.7)
+
+
+## Maillages des groupes de maisons des hameaux (pour `MultiMesh`) ; vide sans modèles.
+static func hamlet_meshes() -> Array:
+	if _hamlet_meshes_loaded:
+		return _hamlet_meshes
+	_hamlet_meshes_loaded = true
+	for variant in HAMLET_VARIANTS:
+		var scene := get_scene("settlements/" + variant)
+		if scene == null:
+			continue
+		var root := scene.instantiate()
+		var meshes := root.find_children("*", "MeshInstance3D", true, false)
+		if not meshes.is_empty():
+			_hamlet_meshes.append((meshes[0] as MeshInstance3D).mesh)
+		root.free()
+	return _hamlet_meshes
 
 
 # --- Armées ------------------------------------------------------------------------
