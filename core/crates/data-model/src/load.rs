@@ -67,6 +67,8 @@ pub mod folders {
     pub const AI_ALIGNMENT: &str = "alignment.json";
     /// Inside `AI`: wars, alliances and peaces around borders (G5).
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
+    /// Inside `AI`: recruitment doctrines (lot E1); optional.
+    pub const AI_DOCTRINES: &str = "doctrines.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
@@ -202,6 +204,9 @@ pub struct GameData {
     /// `data/ai/diplomacy.json` (G5); the F4 constants
     /// ([`AiDiplomacy::default`]) when absent.
     pub ai_diplomacy: AiDiplomacy,
+    /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
+    /// ranks units by value alone.
+    pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
     /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
@@ -251,6 +256,7 @@ impl GameData {
             settlement_graph: Vec::new(),
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
+            ai_doctrines: None,
             vision_rules: None,
             auto_resolve: Default::default(),
             retinue: None,
@@ -280,6 +286,10 @@ impl GameData {
         let diplomacy_path = root.join(folders::AI).join(folders::AI_DIPLOMACY);
         if diplomacy_path.is_file() {
             data.ai_diplomacy = read_json(&diplomacy_path)?;
+        }
+        let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
+        if doctrines_path.is_file() {
+            data.ai_doctrines = Some(read_json(&doctrines_path)?);
         }
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
