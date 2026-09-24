@@ -649,6 +649,10 @@ func layout_hud() -> void:
 	event_log.position = Vector2(HUD_MARGIN, maxf(top, log_bottom - log_height))
 	# Panneau de province : de la barre jusqu'au-dessus de la cloche.
 	province_panel.anchor_top = 0.0
+	province_panel.anchor_bottom = 1.0
+	# Contenu plus haut que la place : le panneau déborde vers le bas (sur la cloche),
+	# jamais vers le haut (sur la barre supérieure).
+	province_panel.grow_vertical = Control.GROW_DIRECTION_END
 	province_panel.offset_top = top
 	province_panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
 	# Lettres : haut droite, masquées sous un panneau de droite.

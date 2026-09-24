@@ -9,8 +9,8 @@ Branche : `worktree-agent-ac6575fb236a85869` (depuis `lot-a`).
 3. [x] Alertes F3 → cloche (vue `AlertsPanel` retirée), décision de chronique bloquante.
 4. [x] Lettres depuis `add_events` (après `journal_keeps`).
 5. [x] Siège (assaut) déplacé au-dessus du bandeau.
-6. [ ] Mise en page 1440×900 / 1920×1080, captures army/province/chronicle.
-7. [ ] Smoke, hud_components_test, docs (`godot-map.md`, `hud-campagne.md`).
+6. [x] Mise en page 1440×900 / 1920×1080, captures army/province/chronicle.
+7. [x] Smoke, hud_components_test, docs (`godot-map.md`, `hud-campagne.md`).
 
 ## Prochaine étape
-Étape 6 : build, import, smoke, captures (code écrit, pas encore exécuté).
+Terminé : fusion dans main. Correctif final : panneau de province qui débordait vers le haut (onglets min 300 px, extensibles).
