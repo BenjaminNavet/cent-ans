@@ -23,3 +23,5 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - d7336b5 : visual fusionné dans main par l'orchestrateur de main (smoke 16/16). V4b et V2b lancés depuis visual 7e91ce0.
 - ~8 h 30 → 10 h 10 : quota épuisé, V2b et V4b interrompus ; repris à 10 h 15 (V4b : 65403e8 LOD ; V2b : semis des haies et champs en cours).
 - V4b fusionné dans visual (81ffcbb) : LOD arbres/figurines/herbe, livrées variées, chevaux, rivière. 1160 soldats : 74 → 87-101 i/s ; 4800 : 54 → 73-90 i/s. Smoke 16/16. Terminé par l'orchestrateur (agent bloqué en fin de lot).
+- V2b fusionné (parcellaire organique, haies fines, cultures variées, palette chaude, étiquettes sans chevauchement ; carte 61-102 i/s). main réintégré, dylib reconstruite, smoke 17/17 OK.
+- Points ouverts pour la suite : démarrage à chaud de la végétation 4,4 s ; siège 1 170 appels de dessin (regrouper maisons/murailles en MultiMesh) ; démo de bataille qui ne va plus au contact (simulation, autre session).
