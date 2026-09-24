@@ -338,7 +338,7 @@ func _run_minimap_fog() -> void:
 		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
 		for army_id in map.sim.call("get_army_ids"):
 			var army: Dictionary = map.sim.call("get_army", army_id)
-			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location", ""))):
+			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location_province", army.get("location", "")))):
 				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
 		var settings: Node = root.get_node_or_null("/root/Settings")
 		if settings != null:
