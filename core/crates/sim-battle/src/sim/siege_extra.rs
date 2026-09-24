@@ -17,7 +17,7 @@ pub const TOWER_RANGE: f64 = 180.0;
 /// Seconds between two volleys of one tower.
 pub const TOWER_RELOAD: f64 = 8.0;
 /// Shooters per tower.
-pub const TOWER_SHOTS: f64 = 25.0;
+pub const TOWER_SHOTS: f64 = 5.0;
 /// The garrison sallies once the besiegers weigh less than this share of it.
 pub const SORTIE_RATIO: f64 = 0.5;
 /// No sortie in the first minutes of the assault.
