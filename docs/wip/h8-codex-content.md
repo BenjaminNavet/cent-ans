@@ -98,7 +98,10 @@ Conception : `docs/design/2026-09-23-histoire-et-savoir.md` §1 et §5.3. Branch
 - Lot 9 fait (personnages) : christine_de_pizan, guillaume_de_machaut (Ars nova inclus, pas de
   fiche ars_nova séparée), john_chandos, olivier_de_clisson, charles_de_blois,
   jeanne_de_penthievre, jean_de_montfort, jeanne_de_flandre.
-- Fiches H8b écrites : 68.
+- Lot 10 fait : papier (entity tech_paper_mills), robert_d_artois, benoit_xii, louis_d_anjou,
+  jeanne_de_bourgogne. Section H8 de `_todo.md` vide (aucun lien en attente).
+- Fiches H8b écrites : 73.
+- Prochaines étapes H8b : liens dans characters/events/technologies, onglets codex_window, tests.
 
 ## Prochaine étape
 Écrire les ids de la section H8 de `_todo.md` (déjà cités), puis le reste des familles.

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_benoit_xii",
+  "title": "Benoît XII, pape d'Avignon",
+  "category": "personnage",
+  "aliases": ["Benoît XII", "Jacques Fournier", "registre de Jacques Fournier", "Montaillou"],
+  "era": { "from": "v. 1285", "to": "1342" },
+  "summary": "Moine cistercien et ancien inquisiteur, Jacques Fournier devient pape en 1334 sous le nom de Benoît XII. Il entreprend la construction du Palais des Papes à [[cdx_avignon|Avignon]] et tente en vain d'empêcher la guerre entre la France et l'Angleterre.",
+  "body": "Né dans le comté de Foix vers 1285, Jacques Fournier entre chez les cisterciens et devient abbé de Fontfroide, près de Narbonne. Évêque de Pamiers de 1317 à 1326, il y mène une enquête minutieuse contre les derniers cathares du pays. Son registre d'inquisition, qui rapporte mot à mot les interrogatoires des paysans du village de Montaillou, a été redécouvert au XXe siècle : l'historien Emmanuel Le Roy Ladurie en a tiré un livre célèbre sur la vie quotidienne d'un village médiéval.\n\nÉlu pape en décembre 1334, Benoît XII tranche avec le faste de ses prédécesseurs. Il réforme les ordres religieux, lutte contre le cumul des bénéfices et règle par la bulle Benedictus Deus, en 1336, une grave querelle théologique sur la vision de Dieu par les âmes des justes.\n\nIl décide aussi de rester à [[cdx_avignon|Avignon]] et y fait bâtir une forteresse austère, le Palais Vieux, première partie du Palais des Papes. La [[cdx_papaute_avignon|papauté d'Avignon]] s'installe ainsi durablement.\n\nDiplomate, il s'efforce d'éviter la guerre entre [[cdx_philippe_vi|Philippe VI]] et [[cdx_edouard_iii|Édouard III]], multipliant les légats et les propositions de trêve. En 1336, il annule la croisade que préparait Philippe VI ; la flotte réunie en Méditerranée remonte alors vers la Manche, ce qui inquiète l'Angleterre. Ses efforts échouent, et il meurt en avril 1342, alors que la guerre fait rage.",
+  "entity": "chr_benoit_xii",
+  "see_also": ["cdx_papaute_avignon", "cdx_avignon", "cdx_philippe_vi"],
+  "sources": ["Benoît XII", "Registre d'inquisition de Jacques Fournier"]
+}
