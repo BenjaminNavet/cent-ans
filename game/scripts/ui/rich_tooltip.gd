@@ -638,7 +638,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 		lines.append("Prestige du souverain : [color=%s]%s%d / saison[/color]" % [GREEN if prestige > 0 else RED, "+" if prestige > 0 else "", prestige])
 	lines.append("[color=%s][i]Un seul changement de monnaie par année civile.[/i][/color]" % MUTED)
 	if changed_this_year and not current:
-		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; attendez l'hiver prochain passé.[/color]" % RED)
+		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; prochain changement possible l'an prochain.[/color]" % RED)
 	return _join(lines)
 
 

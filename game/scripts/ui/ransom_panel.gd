@@ -52,6 +52,7 @@ func _init() -> void:
 	box.add_child(HSeparator.new())
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	error_label.custom_minimum_size = Vector2(520, 0)
 	error_label.add_theme_font_size_override("font_size", 13)
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
@@ -188,6 +189,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	var sub := Label.new()
 	sub.text = subtitle
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sub.custom_minimum_size = Vector2(440, 0)
 	sub.add_theme_font_size_override("font_size", 12)
 	sub.add_theme_color_override("font_color", MUTED_COLOR)
 	text_box.add_child(sub)
