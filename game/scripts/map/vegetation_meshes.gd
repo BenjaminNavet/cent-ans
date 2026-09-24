@@ -8,8 +8,8 @@ extends RefCounted
 ## Normales « gonflées » (depuis le centre de chaque masse) : ombrage doux de feuillage.
 
 const BARK := Color(0.23, 0.17, 0.11)
-const LEAF_DARK := Color(0.06, 0.11, 0.035)
-const LEAF_LIGHT := Color(0.17, 0.25, 0.07)
+const LEAF_DARK := Color(0.065, 0.10, 0.04)
+const LEAF_LIGHT := Color(0.185, 0.225, 0.085)
 const NEEDLE_DARK := Color(0.04, 0.09, 0.05)
 const NEEDLE_LIGHT := Color(0.10, 0.17, 0.08)
 

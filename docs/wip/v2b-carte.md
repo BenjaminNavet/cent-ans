@@ -27,5 +27,11 @@ Depuis `visual` (V1-V4 fusionnés). Captures de travail dans le scratchpad, fina
 - Étiquettes : anti-chevauchement dans `city_markers.gd` (priorité à la plus grande province,
   rectangles projetés, mise à jour toutes les 0,2 s), `area_px` ajouté aux entrées de `MapData`.
 
+- Palette : détail des textures surtout en luminance (plus de reflets bleutés), couleurs des parcelles
+  fondues plus tard (6 → 24 px) que leur tracé (pas de damier au zoom moyen), feuillage moins
+  jaune-vert, vigne moins fréquente. Captures `scratchpad/v2b/{m2,f1,a2,s1,e1,v2}` vérifiées.
+- Attention : le scratchpad racine est partagé avec V4b (son `cap.sh` a écrasé le mien) ; les
+  scripts V2b sont dans `scratchpad/v2b/`.
+
 ## Prochaine étape
-- Captures mi-distance / France / Alpes / Midi, réglage de la palette, fondus, banc de performance.
+- Banc de performance (`game/tests/vegetation_bench.gd`), captures finales `docs/img/visuel/v2b_*.png`.
