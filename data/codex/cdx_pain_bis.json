@@ -1,0 +1,12 @@
+{
+  "id": "cdx_pain_bis",
+  "title": "Le pain bis",
+  "category": "ingredient",
+  "aliases": ["pain bis", "pain noir", "méteil"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Pain de farine peu blutée, souvent de seigle ou de méteil (froment et seigle mêlés), le pain bis est la base de l'alimentation paysanne : on en mange plus d'un kilo par jour quand la récolte est bonne.",
+  "body": "Au Moyen Âge, la couleur du pain dit le rang de celui qui le mange. Le pain blanc, de pur froment soigneusement tamisé (bluté), est réservé aux tables aisées ; le pain bis, gris ou brun, garde une partie du son et mêle souvent au froment du seigle, de l'orge ou de l'avoine. Le méteil, froment et seigle semés et récoltés ensemble, limite le risque : si l'une des deux céréales souffre de l'hiver, l'autre résiste.\n\nLe pain n'est pas un accompagnement, c'est le repas. Les historiens estiment que les paysans et les soldats en consomment d'ordinaire entre un et un kilo et demi par jour, trempé dans le [[cdx_potage|potage]] ou le vin, et que les céréales fournissent l'essentiel des calories. Les ordonnances municipales fixent le poids du pain vendu au prix d'un denier : quand le blé renchérit, la miche maigrit, et le peuple le voit aussitôt.\n\nLa pâte, préparée à la maison, est souvent cuite au [[cdx_four_banal|four banal]] du seigneur contre une redevance. En ville, les boulangers (les « talemeliers » de Paris, dont le métier est réglé vers 1268 dans le Livre des métiers d'Étienne Boileau) vendent plusieurs qualités de pain, du plus blanc au plus bis. Le pain rassis sert encore d'assiette : c'est le [[cdx_tranchoir|tranchoir]].\n\nLe seigle a son revers : l'ergot, champignon parasite de l'épi, provoque l'ergotisme, le « mal des ardents » ou « feu de saint Antoine », avec gangrène des membres et hallucinations. Les Antonins, ordre hospitalier fondé à la fin du XIe siècle, s'en font une spécialité. On ignore alors la cause ; on sait aujourd'hui que ce sont les alcaloïdes de l'ergot, contrôlés dans les farines modernes.\n\nAu XXIe siècle, le pain bis a pris sa revanche : riche en fibres, le pain complet ou au seigle est recommandé par les nutritionnistes. Celui qui voudrait retrouver le pain médiéval choisira un levain naturel, une farine bise ou un mélange froment-seigle, et une longue cuisson en four à bois.",
+  "entity": "diet_bread_pottage",
+  "see_also": ["cdx_four_banal", "cdx_potage", "cdx_tranchoir", "cdx_assolement_triennal"],
+  "sources": ["Pain", "Méteil", "Ergotisme", "Livre des métiers"]
+}

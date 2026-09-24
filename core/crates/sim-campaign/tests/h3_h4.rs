@@ -89,17 +89,20 @@ fn set_diet_is_validated() {
     let error = set_diet(&mut state, &data, &foreign, "diet_pulses").unwrap_err();
     assert!(error.to_string().contains("n'est pas contrôlée"), "{error}");
 
-    // Dairy needs plains, hills or bocage: a mountain province refuses it.
-    let mountains = state
+    // Dairy needs grazing land: heath and forest (sheep and swine country) refuse it.
+    let grazing_less = state
         .provinces
         .iter()
         .find(|(id, p)| {
             p.controller == fac("fac_france")
-                && data.provinces[*id].terrain == data_model::Terrain::Mountains
+                && matches!(
+                    data.provinces[*id].terrain,
+                    data_model::Terrain::Heath | data_model::Terrain::Forest
+                )
         })
         .map(|(id, _)| id.to_string());
-    if let Some(mountains) = mountains {
-        let error = set_diet(&mut state, &data, &mountains, "diet_dairy").unwrap_err();
+    if let Some(province) = grazing_less {
+        let error = set_diet(&mut state, &data, &province, "diet_dairy").unwrap_err();
         assert!(error.to_string().contains("terrain requis"), "{error}");
     }
 
