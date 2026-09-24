@@ -223,3 +223,266 @@ fn ai_coinage_policy() {
     state.factions.get_mut(&england).unwrap().coinage_changed_year = Some(state.year());
     assert!(coinage::ai_choose_coinage(&state, &data, &england).is_empty());
 }
+
+// ----- H6: ransoms ----------------------------------------------------------------
+
+/// Makes `character` the prisoner of `captor` (chronicle capture).
+fn capture(state: &mut CampaignState, data: &GameData, character: &str, captor: &str) {
+    chronicle::capture_character(state, data, &chr(character), &fac(captor), &mut Vec::new());
+    assert!(state.characters[&chr(character)].captive);
+}
+
+fn pay(
+    state: &mut CampaignState,
+    data: &GameData,
+    character: &str,
+    installments: u32,
+) -> Result<(), OrderError> {
+    state.submit_order(
+        data,
+        Order::PayRansom {
+            character: chr(character),
+            installments,
+        },
+    )
+}
+
+#[test]
+fn ransom_follows_rank_prestige_and_wealth() {
+    let data = data();
+    let mut state = france(&data, 10);
+    let king = chr("chr_philippe_vi");
+    let heir = chr("chr_jean_de_normandie");
+    assert_eq!(ransom::captive_rank(&state, &king), ransom::CaptiveRank::Sovereign);
+    assert_eq!(ransom::captive_rank(&state, &heir), ransom::CaptiveRank::Heir);
+    let king_ransom = ransom::ransom_amount(&state, &data, &king);
+    let heir_ransom = ransom::ransom_amount(&state, &data, &heir);
+    assert!(king_ransom > heir_ransom, "{king_ransom} vs {heir_ransom}");
+    state.characters.get_mut(&king).unwrap().prestige = 100;
+    let famous = ransom::ransom_amount(&state, &data, &king);
+    assert!((famous - 2 * king_ransom).abs() <= 50, "{famous} vs {king_ransom}");
+    assert_eq!(famous % 50, 0);
+    // A poorer realm pays less for its king.
+    let scot = ransom::ransom_amount(&state, &data, &chr("chr_david_ii"));
+    assert!(scot < king_ransom);
+    assert_eq!(ransom::installment_plan(1000, 1), (1000, 1000));
+    assert_eq!(ransom::installment_plan(1000, 4), (1100, 275));
+}
+
+#[test]
+fn full_ransom_frees_the_captive_once() {
+    let data = data();
+    let mut state = france(&data, 11);
+    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    let amount = ransom::ransom_amount(&state, &data, &chr("chr_jean_de_normandie"));
+    let france_id = fac("fac_france");
+    let england = fac("fac_england");
+    state.factions.get_mut(&france_id).unwrap().treasury = 0;
+    assert!(matches!(
+        pay(&mut state, &data, "chr_jean_de_normandie", 1),
+        Err(OrderError::Ransom(RansomError::InsufficientFunds { .. }))
+    ));
+    state.factions.get_mut(&france_id).unwrap().treasury = amount + 10;
+    let english = state.factions[&england].treasury;
+    pay(&mut state, &data, "chr_jean_de_normandie", 1).unwrap();
+    let heir = &state.characters[&chr("chr_jean_de_normandie")];
+    assert!(!heir.captive && heir.captor.is_none() && heir.ransom_terms.is_none());
+    assert_eq!(state.factions[&france_id].treasury, 10);
+    assert_eq!(state.factions[&england].treasury, english + amount);
+    // No double release: neither the order nor a ransom event pays again.
+    assert_eq!(
+        pay(&mut state, &data, "chr_jean_de_normandie", 1),
+        Err(OrderError::Ransom(RansomError::NotCaptive))
+    );
+    let effect = EventEffect::ReleaseCharacter {
+        id: data_model::CharacterRef::Id(chr("chr_jean_de_normandie")),
+        faction: None,
+        ransom: 5000,
+    };
+    let ctx = EventContext {
+        faction: Some(france_id.clone()),
+        province: None,
+    };
+    chronicle::apply_effect(&mut state, &data, &effect, &ctx, &mut Vec::new());
+    assert_eq!(state.factions[&france_id].treasury, 10);
+}
+
+#[test]
+fn installments_are_paid_yearly_and_defaults_are_punished() {
+    let data = data();
+    let mut state = france(&data, 12);
+    let france_id = fac("fac_france");
+    let england = fac("fac_england");
+    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    let amount = ransom::ransom_amount(&state, &data, &chr("chr_jean_de_normandie"));
+    let (total, installment) = ransom::installment_plan(amount, 3);
+    pay(&mut state, &data, "chr_jean_de_normandie", 3).unwrap();
+    assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
+    let debt = state.factions[&france_id].ransom_debts[0].clone();
+    assert_eq!(debt.remaining, total - installment);
+    assert_eq!(debt.creditor, england);
+    assert_eq!(ransom::ransom_debt_total(&state, &france_id), total - installment);
+    // Year one: the installment is paid.
+    state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
+    for _ in 0..4 {
+        state.end_turn_with(&data, idle);
+    }
+    let debt = state.factions[&france_id].ransom_debts[0].clone();
+    assert_eq!(debt.remaining, total - 2 * installment);
+    assert_eq!(debt.missed, 0);
+    // Year two: an empty treasury misses it (+10 %, prestige, opinion).
+    let ruler = state.factions[&france_id].ruler.clone().unwrap();
+    state.factions.get_mut(&france_id).unwrap().treasury = -1_000_000;
+    let prestige = state.characters[&ruler].prestige;
+    for _ in 0..4 {
+        state.end_turn_with(&data, idle);
+    }
+    let after = state.factions[&france_id].ransom_debts[0].clone();
+    assert_eq!(after.missed, 1);
+    assert!(after.remaining > debt.remaining);
+    assert!(state.characters[&ruler].prestige < prestige);
+    assert!(state.factions[&england]
+        .modifiers
+        .iter()
+        .any(|m| m.with == france_id && m.value < 0));
+    assert!(state.events().iter().chain(state.pending_events.iter()).count() > 0);
+}
+
+#[test]
+fn captor_terms_parole_hold_and_cession() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 13).unwrap();
+    state.chronicle.disabled = true;
+    let france_id = fac("fac_france");
+    let england = fac("fac_england");
+    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    // Only the captor sets terms.
+    assert_eq!(
+        state.apply_order(
+            &data,
+            &france_id,
+            Order::SetRansomTerms {
+                character: chr("chr_jean_de_normandie"),
+                terms: RansomTerms::Hold,
+            }
+        ),
+        Err(OrderError::Ransom(RansomError::NotYourPrisoner))
+    );
+    state
+        .submit_order(
+            &data,
+            Order::SetRansomTerms {
+                character: chr("chr_jean_de_normandie"),
+                terms: RansomTerms::Hold,
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        state.apply_order(
+            &data,
+            &france_id,
+            Order::PayRansom {
+                character: chr("chr_jean_de_normandie"),
+                installments: 1,
+            }
+        ),
+        Err(OrderError::Ransom(RansomError::Held))
+    );
+    // Cession of a border province.
+    let cedable = ransom::cedable_provinces(&state, &data, &france_id, &england);
+    assert!(!cedable.is_empty(), "France borders English lands");
+    let province = cedable[0].clone();
+    state
+        .submit_order(
+            &data,
+            Order::SetRansomTerms {
+                character: chr("chr_jean_de_normandie"),
+                terms: RansomTerms::Province {
+                    province: province.clone(),
+                },
+            },
+        )
+        .unwrap();
+    state
+        .apply_order(
+            &data,
+            &france_id,
+            Order::PayRansom {
+                character: chr("chr_jean_de_normandie"),
+                installments: 0,
+            },
+        )
+        .unwrap();
+    assert_eq!(state.provinces[&province].owner, england);
+    assert_eq!(state.provinces[&province].controller, england);
+    assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
+
+    // Parole: prestige for the captor's ruler, goodwill from the freed side.
+    capture(&mut state, &data, "chr_david_ii", "fac_england");
+    let edward = chr("chr_edward_iii");
+    let prestige = state.characters[&edward].prestige;
+    state
+        .submit_order(
+            &data,
+            Order::ReleaseOnParole {
+                character: chr("chr_david_ii"),
+            },
+        )
+        .unwrap();
+    assert!(!state.characters[&chr("chr_david_ii")].captive);
+    assert_eq!(
+        state.characters[&edward].prestige,
+        prestige + ransom::PAROLE_PRESTIGE
+    );
+    assert!(state.factions[&fac("fac_scotland")]
+        .modifiers
+        .iter()
+        .any(|m| m.with == england && m.value > 0));
+}
+
+#[test]
+fn a_captive_king_weighs_on_his_realm() {
+    let data = data();
+    let mut state = france(&data, 14);
+    let france_id = fac("fac_france");
+    capture(&mut state, &data, "chr_philippe_vi", "fac_england");
+    let king = chr("chr_philippe_vi");
+    let prestige = state.characters[&king].prestige;
+    let events = state.end_turn_with(&data, idle);
+    assert!(state.factions[&france_id].regency);
+    assert!(events
+        .iter()
+        .any(|e| e.kind == EventKind::Regency && e.text_fr.contains("captif")));
+    assert_eq!(
+        state.characters[&king].prestige,
+        prestige - ransom::CAPTIVE_RULER_PRESTIGE
+    );
+    // Freed: the regency ends.
+    let amount = ransom::ransom_amount(&state, &data, &king);
+    state.factions.get_mut(&france_id).unwrap().treasury = amount;
+    pay(&mut state, &data, "chr_philippe_vi", 1).unwrap();
+    state.end_turn_with(&data, idle);
+    assert!(!state.factions[&france_id].regency);
+}
+
+#[test]
+fn ai_pays_ransoms_and_frees_knights_at_peace() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 15).unwrap();
+    state.chronicle.disabled = true;
+    let france_id = fac("fac_france");
+    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
+    let orders = ransom::ai_ransom_orders(&state, &data, &france_id);
+    assert_eq!(
+        orders,
+        vec![Order::PayRansom {
+            character: chr("chr_jean_de_normandie"),
+            installments: 1
+        }]
+    );
+    for order in orders {
+        state.apply_order(&data, &france_id, order).unwrap();
+    }
+    assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
+}
