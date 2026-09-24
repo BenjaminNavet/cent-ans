@@ -150,6 +150,7 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 
 ## Hauteurs de la surface affichée sur une grille couvrant la zone réservée.
 func _bake_heights() -> void:
+	var t0 := Time.get_ticks_usec()
 	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
 	for j in HEIGHT_RES:
 		for i in HEIGHT_RES:
@@ -163,6 +164,8 @@ func _bake_heights() -> void:
 		_height_texture.update(image)
 	for material in _materials:
 		_apply_height_params(material)
+	stats["bakes"] = int(stats.get("bakes", 0)) + 1
+	stats["bake_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
 
 
 func _on_chunk_surface_changed(index: int) -> void:
