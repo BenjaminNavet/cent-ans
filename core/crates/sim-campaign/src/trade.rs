@@ -30,7 +30,7 @@ use data_model::{FactionId, GameData, ResourceId, SettlementId, TradeRouteDef};
 use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
-use crate::state::CampaignState;
+use crate::state::{ArmyPosition, CampaignState};
 
 /// Bonus (%) a formal trade agreement adds to the routes between its two factions.
 pub const AGREEMENT_BONUS_PERCENT: f64 = 30.0;
@@ -241,7 +241,7 @@ fn path_security(
             return (0.0, Some(format!("siège de {settlement_id}")));
         }
         let threatened = state.armies.values().any(|army| {
-            &army.location == settlement_id
+            matches!(&army.position, ArmyPosition::Settlement(id) if id == settlement_id)
                 && (state.is_at_war(&army.faction, from_faction)
                     || state.is_at_war(&army.faction, to_faction))
         });
