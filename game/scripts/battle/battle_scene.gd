@@ -51,7 +51,8 @@ var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
-var _banners: Dictionary = {}  # id -> {node, flag_mat, label, count}
+var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
+var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
 var _rings: Dictionary = {}  # id -> MeshInstance3D
 var _left_press: Vector2 = Vector2(-1, -1)
 var _right_press: Vector2 = Vector2(-1, -1)
@@ -184,6 +185,7 @@ func begin() -> bool:
 	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
+	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	hud.set_title(title, str(weather.get("label", "")), [side_colors[player_side], side_colors[enemy_side]])
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
@@ -261,25 +263,7 @@ func _make_banner(unit: Dictionary) -> void:
 	flag.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
-	var label := Label3D.new()
-	label.text = BattleHud.CATEGORY_ICON.get(str(unit["render"]), "⚔") + ("★" if bool(unit["is_general"]) else "")
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.font_size = 64
-	label.pixel_size = 0.02
-	label.outline_size = 10
-	label.modulate = Color(1, 0.97, 0.88)
-	label.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - minf(flag_size.y, 1.7) * 0.5, 0.05)
-	node.add_child(label)
-	var count := Label3D.new()
-	count.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	count.no_depth_test = true
-	count.font_size = 40
-	count.pixel_size = 0.02
-	count.outline_size = 8
-	count.position = Vector3(flag_size.x * 0.5, BANNER_HEIGHT - flag_size.y - 0.6, 0)
-	node.add_child(count)
-	_banners[id] = {"node": node, "flag_mat": flag_mat, "label": label, "count": count, "routing": false}
+	_banners[id] = {"node": node, "flag_mat": flag_mat, "routing": false}
 	var ring := MeshInstance3D.new()
 	var ring_mat := StandardMaterial3D.new()
 	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
@@ -389,9 +373,6 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
-		var count: Label3D = banner["count"]
-		count.text = str(int(unit["soldiers"]))
-		count.modulate = Color(1, 0.85, 0.3) if selected.has(id) else Color(1, 1, 1)
 		if ring.visible:
 			ring.position = pos + Vector3(0, 0.6, 0)
 			ring.rotation = Vector3(0, float(unit["facing"]), 0)
@@ -399,6 +380,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
 				ring.set_meta("size", size)
 				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	_update_markers(banner_scale)
 	_hud_timer -= delta
 	if force or _hud_timer <= 0.0:
 		_hud_timer = 0.1
@@ -435,6 +417,46 @@ static func siege_status(siege: Dictionary) -> String:
 	if bool(siege.get("sortie", false)):
 		text += " · sortie de la garnison !"
 	return text
+
+
+## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
+func _build_markers() -> void:
+	markers = BattleUnitMarkers.new()
+	hud.root.add_child(markers)
+	hud.root.move_child(markers, 0)
+	markers.setup(side_colors, player_side)
+	markers.marker_clicked.connect(_on_card_clicked)
+	markers.marker_right_clicked.connect(_on_marker_right_clicked)
+
+
+## Ancre écran de chaque repère : au-dessus du drapeau 3D du régiment.
+func _update_markers(banner_scale: float) -> void:
+	if markers == null:
+		return
+	var anchors := {}
+	if markers.visible:
+		var camera := camera_rig.camera
+		var screen := get_viewport().get_visible_rect().grow(60.0)
+		for unit in units:
+			if not bool(unit["present"]):
+				continue
+			var top := Vector3(float(unit["x"]), float(unit["y"]) + (BANNER_HEIGHT + 0.6) * banner_scale, float(unit["z"]))
+			if camera.is_position_behind(top):
+				continue
+			var point := camera.unproject_position(top)
+			if screen.has_point(point):
+				anchors[int(unit["id"])] = point
+	markers.update(units, anchors, selected)
+
+
+## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
+func _on_marker_right_clicked(unit_id: int) -> void:
+	if selected.is_empty() or deployment != null and deployment.active:
+		return
+	for unit in units:
+		if int(unit["id"]) == unit_id and str(unit["side"]) == enemy_side:
+			issue({"type": "attack", "units": selected.duplicate(), "target": unit_id, "run": true})
+			return
 
 
 func _banner_scale() -> float:
@@ -503,6 +525,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
 			KEY_F1:
 				hud.toggle_help()
+			KEY_U:
+				if markers != null:
+					markers.toggle()
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
@@ -526,6 +551,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				_right_press_ground = ground_point(button.position)
 			else:
 				_finish_right(button.position)
+	elif event is InputEventMouseMotion and _left_press.x < 0.0 and markers != null:
+		# B2 : survol d'une troupe sur le terrain = repère mis en évidence.
+		var hover_at := (event as InputEventMouseMotion).position
+		var hover := pick_unit(hover_at, player_side)
+		markers.world_hover = hover if hover >= 0 else pick_unit(hover_at, enemy_side)
 	elif event is InputEventMouseMotion and _left_press.x >= 0.0:
 		var motion := event as InputEventMouseMotion
 		var rect := Rect2(_left_press, motion.position - _left_press).abs()

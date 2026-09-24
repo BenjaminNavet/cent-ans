@@ -22,6 +22,7 @@ const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
 • Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
 • F : formation · G : tir à volonté · H : halte · Z X V B N : ordres du chef · Échap : désélectionner.
+• Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
 • Caméra : W A S D, molette, Q / E, bouton du milieu ; clic sur la minicarte : y aller."""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
