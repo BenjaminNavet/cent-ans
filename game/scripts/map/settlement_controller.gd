@@ -33,6 +33,7 @@ func setup(campaign_map: Node) -> void:
 	var province_panel: Control = map.ui.province_panel
 	province_panel.add_sibling(panel)
 	panel.place_like(province_panel)
+	map.ui.dock_right_panel(panel)  # C7b : à gauche de la minicarte
 	panel.hide()
 	panel.recruit_requested.connect(_on_recruit)
 	panel.create_army_requested.connect(_on_create_army)
@@ -76,14 +77,31 @@ func open_settlement(id: String, focus: bool = false) -> void:
 	_opening = true
 	if focus:
 		map.settlement_layer.select(id)
-		var world: Vector3 = map.settlement_layer.world_position_of(id)
-		map.camera_rig.look_at_point(world, minf(map.camera_rig.distance, FOCUS_DISTANCE))
 	# Le panneau de province se ferme (sélection de province remise à zéro).
 	map.ui.hide_province()
 	map.selected_index = 0
 	map.terrain.set_highlight(map.hovered_index, 0)
 	_show(detail)
+	if focus:
+		var world: Vector3 = map.settlement_layer.world_position_of(id)
+		var distance := minf(map.camera_rig.distance, FOCUS_DISTANCE)
+		map.camera_rig.look_at_point(world + _panel_shift(distance), distance)
 	_opening = false
+
+
+## Lot C7b : décalage du point visé pour que la colonie centrée apparaisse au milieu de la
+## partie de l'écran laissée libre à gauche du panneau (même échelle que le glisser de la caméra).
+func _panel_shift(distance: float) -> Vector3:
+	var view: Vector2 = map.get_viewport().get_visible_rect().size
+	var right_edge: float = map.ui.docked_right_x if map.ui.docked_right_x > 0.0 else view.x
+	var width := maxf(panel.custom_minimum_size.x, panel.get_combined_minimum_size().x)
+	var free_center := maxf(right_edge - width, 0.0) * 0.5
+	var shift_px := maxf(view.x * 0.5 - free_center, 0.0)
+	var right: Vector3 = map.camera.global_transform.basis.x
+	right.y = 0.0
+	if right.length_squared() < 0.0001:
+		return Vector3.ZERO
+	return right.normalized() * shift_px * distance * 1.6 / maxf(view.y, 1.0)
 
 
 func _show(detail: Dictionary) -> void:
