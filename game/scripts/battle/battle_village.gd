@@ -10,6 +10,7 @@ extends Node3D
 ## de dessin quel que soit le nombre de maisons.
 
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
+const SEA_SHADER := preload("res://shaders/battle_sea.gdshader")
 ## Niveau de la mer (m) ; le sol plonge sous ce niveau au-delà de la ligne de rivage.
 const SEA_LEVEL := 0.0
 
@@ -38,7 +39,7 @@ func build(terrain: BattleTerrain, data: Dictionary, weather: String) -> void:
 
 func _mat(key: String) -> StandardMaterial3D:
 	if _mats.is_empty():
-		var snow_roof := Color(0.93, 0.94, 0.97)
+		var snow_roof := Color.WHITE
 		_mats = {
 			"stone": BattleSiege._textured("stone", Color(0.86, 0.82, 0.74)),
 			"church": BattleSiege._textured("stone", Color(0.92, 0.88, 0.8)),
@@ -54,6 +55,13 @@ func _mat(key: String) -> StandardMaterial3D:
 			"tiles": BattleSiege._textured("tiles", snow_roof if _snowy else Color(0.62, 0.45, 0.38), 0.85),
 			"slate": BattleSiege._textured("slate", snow_roof if _snowy else Color(0.55, 0.56, 0.6), 0.75),
 		}
+		if _snowy:
+			# Toits sous la neige : manteau blanc uni, légèrement bleuté.
+			var snow := StandardMaterial3D.new()
+			snow.albedo_color = Color(0.9, 0.92, 0.97)
+			snow.roughness = 0.85
+			for roof in ["thatch", "thatch_old", "tiles", "slate"]:
+				_mats[roof] = snow
 	return _mats[key]
 
 
@@ -297,7 +305,7 @@ func _build_pools(pools: Array, weather: String) -> void:
 		mat.set_shader_parameter("clarity", 0.4)
 		mat.set_shader_parameter("macro_noise", _terrain.macro_noise)
 		mat.set_shader_parameter("wave_normal", _terrain.water_waves())
-		mat.set_shader_parameter("sky_color", _terrain.sky_reflection())
+		mat.set_shader_parameter("sky_color", _terrain.sky_reflection().darkened(0.35))
 		if weather == "rain":
 			mat.set_shader_parameter("ripple", 1.0)
 		var mi := MeshInstance3D.new()
@@ -317,15 +325,15 @@ func _build_reeds(data: Dictionary) -> void:
 	for pool in data.get("pools", []):
 		var c := Vector2(float(pool["x"]), float(pool["z"]))
 		var r := float(pool["radius"])
-		for _i in int(TAU * r / 1.3):
+		for _i in int(TAU * r / 0.45):
 			var ang := rng.randf() * TAU
-			spots.append(c + Vector2(cos(ang), sin(ang)) * r * rng.randf_range(0.85, 1.25))
+			spots.append(c + Vector2(cos(ang), sin(ang)) * r * rng.randf_range(0.8, 1.35))
 	var marsh := str(data.get("terrain", "")) == "marsh"
 	if marsh:
 		for zone in data.get("mud", []):
 			var c := Vector2(float(zone["x"]), float(zone["z"]))
 			var r := float(zone["radius"])
-			for _i in int(PI * r * r / 90.0):
+			for _i in int(PI * r * r / 30.0):
 				var ang := rng.randf() * TAU
 				var d := sqrt(rng.randf()) * r
 				spots.append(c + Vector2(cos(ang), sin(ang)) * d)
@@ -377,10 +385,10 @@ static func _reed_mesh() -> ArrayMesh:
 		var base := Vector3(cos(ang), 0, sin(ang)) * rng.randf_range(0.0, 0.35)
 		var h := rng.randf_range(1.3, 2.2)
 		var lean := Vector3(rng.randf_range(-0.3, 0.3), 0, rng.randf_range(-0.3, 0.3))
-		var side := Vector3(cos(ang + 1.3), 0, sin(ang + 1.3)) * 0.035
+		var side := Vector3(cos(ang + 1.3), 0, sin(ang + 1.3)) * 0.06
 		var top := base + Vector3(0, h, 0) + lean
-		var low := Color(0.33, 0.4, 0.16)
-		var tip := Color(0.72, 0.66, 0.4)
+		var low := Color(0.2, 0.26, 0.1)
+		var tip := Color(0.5, 0.47, 0.26)
 		st.set_color(low)
 		st.add_vertex(base - side)
 		st.set_color(low)
@@ -402,56 +410,23 @@ static func _reed_mesh() -> ArrayMesh:
 # --- Mer ----------------------------------------------------------------------------------
 
 
-## Mer le long du flanc côtier : un ruban d'eau (shader de la rivière, eau profonde, houle lente)
-## du rivage jusqu'à l'horizon ; le bord du ruban (UV.x = 0) est la frange claire du rivage.
+## Mer le long du flanc côtier : un plan d'eau (`battle_sea.gdshader`) du rivage jusqu'à l'horizon,
+## commencé un peu dans les terres : la ligne d'eau est là où le sol plonge sous `SEA_LEVEL`.
 func _build_sea(coast: Dictionary, weather: String) -> void:
 	var west := str(coast.get("flank", "west")) == "west"
 	var shore := float(coast.get("shore_x", 0.0))
-	var far := 9000.0
-	var x_far := shore - far if west else shore + far
-	var z0 := -8000.0
-	var z1 := 8800.0
-	var vertices := PackedVector3Array()
-	var uvs := PackedVector2Array()
-	var steps := 24
-	for i in steps + 1:
-		var z := lerpf(z0, z1, float(i) / float(steps))
-		vertices.append(Vector3(shore, SEA_LEVEL, z))
-		uvs.append(Vector2(0.0, z))
-		vertices.append(Vector3(lerpf(shore, x_far, 0.02), SEA_LEVEL, z))
-		uvs.append(Vector2(0.5, z))
-		vertices.append(Vector3(x_far, SEA_LEVEL, z))
-		uvs.append(Vector2(0.5, z))
-	var indices := PackedInt32Array()
-	for i in steps:
-		for j in 2:
-			var a := i * 3 + j
-			var b := a + 1
-			var c := a + 3
-			var d := c + 1
-			if west:
-				indices.append_array([a, c, b, b, c, d])
-			else:
-				indices.append_array([a, b, c, b, d, c])
-	var normals := PackedVector3Array()
-	normals.resize(vertices.size())
-	normals.fill(Vector3.UP)
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_TEX_UV] = uvs
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var inland := shore + (40.0 if west else -40.0)
+	var x_far := shore - 9000.0 if west else shore + 9000.0
+	var x0 := minf(inland, x_far)
+	var x1 := maxf(inland, x_far)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(x1 - x0, 17000.0)
+	plane.subdivide_width = 8
+	plane.subdivide_depth = 8
 	var mat := ShaderMaterial.new()
-	mat.shader = WATER_SHADER
-	mat.set_shader_parameter("river_width", 360.0)
-	mat.set_shader_parameter("flow_speed", 0.12)
-	mat.set_shader_parameter("shallow_color", Color(0.3, 0.42, 0.4))
-	mat.set_shader_parameter("deep_color", Color(0.04, 0.12, 0.16))
-	mat.set_shader_parameter("clarity", 2.5)
-	mat.set_shader_parameter("turbidity", 0.3)
+	mat.shader = SEA_SHADER
+	mat.set_shader_parameter("shore_x", shore)
+	mat.set_shader_parameter("flank", -1.0 if west else 1.0)
 	mat.set_shader_parameter("macro_noise", _terrain.macro_noise)
 	mat.set_shader_parameter("wave_normal", _terrain.water_waves())
 	mat.set_shader_parameter("sky_color", _terrain.sky_reflection())
@@ -459,7 +434,8 @@ func _build_sea(coast: Dictionary, weather: String) -> void:
 		mat.set_shader_parameter("ripple", 1.0)
 	var mi := MeshInstance3D.new()
 	mi.name = "Sea"
-	mi.mesh = mesh
+	mi.mesh = plane
+	mi.position = Vector3((x0 + x1) * 0.5, SEA_LEVEL, 400.0)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
