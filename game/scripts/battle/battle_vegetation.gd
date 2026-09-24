@@ -5,6 +5,7 @@ extends Node3D
 ## clairsemée et plus grande) en `MultiMesh`, déplacées par pas entiers de leur maille pour suivre
 ## le point regardé par la caméra. Tout le placement est dans `battle_grass.gdshader`.
 ## Masquée quand la caméra est très haute (l'herbe n'y serait qu'un bruit de pixels).
+## Lot B5 : teinte et neige selon la saison et le sol du site (`BattleTerrain.snowy()`).
 
 const GRASS_SHADER := preload("res://shaders/battle_grass.gdshader")
 const GRASS_TEXTURE := preload("res://assets/textures/battle/grass_clump.png")
@@ -42,9 +43,20 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		mat.set_shader_parameter("radius", radius)
 		mat.set_shader_parameter("blade_scale", float(layer[2]))
 		mat.set_shader_parameter("inner_radius", float(layer[3]))
-		match weather:
+		# B5 : sol de saison (neige au sol sans chute de neige), herbe d'hiver et d'automne
+		# plus sèche, joncs plus sombres du marais.
+		var ground_weather := "snow" if terrain.snowy() else weather
+		if terrain.site_render and ground_weather == "clear":
+			match terrain.season_key:
+				"winter":
+					mat.set_shader_parameter("base_tint", Color(0.95, 0.88, 0.7))
+				"autumn":
+					mat.set_shader_parameter("base_tint", Color(1.0, 0.92, 0.72))
+			if terrain.terrain_key == "marsh":
+				mat.set_shader_parameter("base_tint", Color(0.82, 0.9, 0.7))
+		match ground_weather:
 			"snow":
-				mat.set_shader_parameter("snow", 1.0)
+				mat.set_shader_parameter("snow", 1.0 if weather == "snow" else 0.8)
 				mat.set_shader_parameter("base_tint", Color(0.85, 0.85, 0.75))
 			"rain":
 				mat.set_shader_parameter("base_tint", Color(0.8, 0.88, 0.75))

@@ -357,7 +357,12 @@ impl BattleSim {
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],
     /// mud[..], river?{points: PackedVector2Array, width, fords[{x, z, half_width}]},
-    /// siege?{...}}` (siege geometry: see [`Self::get_siege`]).
+    /// siege?{...}}` (siege geometry: see [`Self::get_siege`]). B5 (campaign site):
+    /// `terrain` (province terrain key), `season`, `ground` (`dry|muddy|snowy`),
+    /// `ground_label`, `woodland` (0-1), `pools[{x, z, radius}]`,
+    /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch}]`,
+    /// `coast?{flank: west|east, shore_x, beach}`,
+    /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}]}`.
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -380,7 +385,56 @@ impl BattleSim {
             "heights" => &heights,
             "forests" => &zones(&field.forests),
             "mud" => &zones(&field.mud),
+            // B5: campaign site.
+            "terrain" => field.terrain.key(),
+            "season" => season_key(field.season),
+            "ground" => field.ground.key(),
+            "ground_label" => field.ground.label_fr(),
+            "woodland" => field.woodland,
+            "pools" => &zones(&field.pools),
+            "obstacles" => &field
+                .obstacles
+                .iter()
+                .map(|o| {
+                    vdict! {
+                        "a" => Vector2::new(o.a.0 as f32, o.a.1 as f32),
+                        "b" => Vector2::new(o.b.0 as f32, o.b.1 as f32),
+                        "kind" => o.kind.key(),
+                    }
+                    .to_variant()
+                })
+                .collect::<VarArray>(),
         };
+        if let Some(coast) = &field.coast {
+            let flank = match coast.flank {
+                sim_battle::Flank::West => "west",
+                sim_battle::Flank::East => "east",
+            };
+            dict.set(
+                "coast",
+                &vdict! { "flank" => flank, "shore_x" => coast.shore_x, "beach" => coast.beach },
+            );
+        }
+        if let Some(village) = &field.village {
+            let houses: VarArray = village
+                .houses
+                .iter()
+                .map(|h| {
+                    vdict! {
+                        "x" => h.x, "z" => h.z, "length" => h.length, "width" => h.width,
+                        "yaw" => h.yaw, "kind" => h.kind.key(),
+                    }
+                    .to_variant()
+                })
+                .collect();
+            dict.set(
+                "village",
+                &vdict! {
+                    "x" => village.zone.x, "z" => village.zone.z, "radius" => village.zone.radius,
+                    "farm" => village.farm, "houses" => &houses,
+                },
+            );
+        }
         if let Some(river) = &field.river {
             let points: PackedVector2Array = river
                 .polyline(10.0)
@@ -751,5 +805,15 @@ impl CampaignSim {
                 -1
             }
         }
+    }
+}
+
+/// `snake_case` key of a battle season (B5, `get_terrain`).
+fn season_key(season: sim_battle::BattleSeason) -> &'static str {
+    match season {
+        sim_battle::BattleSeason::Spring => "spring",
+        sim_battle::BattleSeason::Summer => "summer",
+        sim_battle::BattleSeason::Autumn => "autumn",
+        sim_battle::BattleSeason::Winter => "winter",
     }
 }

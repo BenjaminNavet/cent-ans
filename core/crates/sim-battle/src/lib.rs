@@ -11,7 +11,10 @@
 //!
 //! - Field of [`FIELD_WIDTH`] × [`FIELD_DEPTH`] metres with procedural hills,
 //!   forests, mud and an optional river with two fords ([`Battlefield`]);
-//!   weather drawn from the season ([`Weather`]).
+//!   weather drawn from the season ([`Weather`]). Lot B5 ([`site`]): the
+//!   campaign site adds the ground of the season (mud, snow), a coast on a
+//!   flank, marsh pools, a village or farm (cover, broken charges) with its
+//!   hedges, fences and ditches, bocage hedgerows.
 //! - Each regiment ([`Unit`]) is an oriented rectangle whose size follows its
 //!   formation; soldiers are laid out in a grid for rendering.
 //! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
@@ -41,6 +44,7 @@ pub mod rng;
 pub mod setup;
 pub mod siege;
 pub mod sim;
+pub mod site;
 pub mod unit;
 
 pub use command::{Command, CommandError};
@@ -59,5 +63,8 @@ pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use sim::{
     BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
     SIEGE_STANDOFF, ZONE_DEPTH,
+};
+pub use site::{
+    Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
 pub use unit::{Formation, Unit, UnitState};

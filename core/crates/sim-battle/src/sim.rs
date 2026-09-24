@@ -217,8 +217,7 @@ impl BattleSim {
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
-        let mut field =
-            Battlefield::generate(setup.terrain, setup.river && !is_siege, weather, &mut rng);
+        let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
         let mut siege = setup
             .siege
             .as_ref()
@@ -588,6 +587,11 @@ impl BattleSim {
 
     pub fn field(&self) -> &Battlefield {
         &self.field
+    }
+
+    /// Mutable field (tests and laboratory set-ups: hedges, villages).
+    pub fn field_mut(&mut self) -> &mut Battlefield {
+        &mut self.field
     }
 
     pub fn weather(&self) -> Weather {
@@ -1147,6 +1151,9 @@ impl BattleSim {
         if self.weather == Weather::Snow {
             speed *= 0.8;
         }
+        speed *= self
+            .field
+            .site_speed_factor(unit.x, unit.z, unit.mounted, self.weather);
         let here = self.field.height(unit.x, unit.z);
         let ahead = self
             .field
@@ -1642,6 +1649,27 @@ impl BattleSim {
             self.log(text, Some(side));
             return;
         }
+        // B5: a hedge or a ditch in front of the target, or the lanes of a
+        // village, break the impact of horsemen.
+        let (from, to) = (
+            (self.units[i].x, self.units[i].z),
+            (self.units[p].x, self.units[p].z),
+        );
+        if cavalry && (self.field.breaks_charge(from, to) || self.field.in_village(to.0, to.1)) {
+            self.units[i].charge_timer = 0.0;
+            self.units[i].morale -= 5.0;
+            let text = if self.field.in_village(to.0, to.1) {
+                format!(
+                    "La charge des {} se brise dans le village.",
+                    self.unit_label(i)
+                )
+            } else {
+                format!("La charge des {} se brise sur la haie.", self.unit_label(i))
+            };
+            let side = self.units[i].side;
+            self.log(text, Some(side));
+            return;
+        }
         self.units[i].charge_timer = CHARGE_IMPACT;
         if cavalry && self.units[p].formation != Formation::Square {
             let shock = if angle == 0 { 8.0 } else { 15.0 };
@@ -1791,6 +1819,14 @@ impl BattleSim {
             * RANGED_RATE;
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
+        }
+        if self.field.in_village(target.x, target.z) {
+            kills *= crate::site::VILLAGE_COVER;
+        } else if self
+            .field
+            .hedge_between((shooter.x, shooter.z), (target.x, target.z))
+        {
+            kills *= crate::site::HEDGE_COVER;
         }
         if let Some(factor) = target.pavise {
             kills *= factor;

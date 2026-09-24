@@ -11,6 +11,14 @@ revient dans la campagne. Design général : `docs/design/2026-09-23-cent-ans-de
   partir d'une graine et du terrain de la province : plaines, collines, forêt, marais, montagne), zones de
   forêt, de boue, un gué/rivière optionnel (si la province a une rivière). Météo tirée à l'initialisation
   selon la saison : clair, pluie (tir -40 %, arcs longs et arbalètes), brouillard (portée -30 %), neige.
+  Lot B5 (`sim-battle/src/site.rs`) : le site de campagne complète le champ, tiré d'un flux dérivé de la
+  graine (les tirages d'avant B5 sont inchangés) — sol de la saison (sec, détrempé : boue en plus, enneigé :
+  marche ×0,9 sans chute de neige), côte sur un flanc si la province est côtière (plage de sable ×0,85, mer
+  hors du champ), mares du marais (eau peu profonde) et fossés de drainage, haies du bocage, village ou ferme
+  (`BattleSetup.village` : forcé, interdit ou tiré selon le terrain ; jamais en siège) avec courtils entourés
+  de haies et de clôtures. Haie : couvert contre les traits (×0,6 derrière une haie que le tir traverse),
+  charge de cavalerie brisée (pas d'impact) ; fossé : charge brisée ; haie, clôture, fossé ralentissent le
+  franchissement (surtout à cheval) ; village : couvert ×0,6, ruelles lentes, charge brisée.
 - Unité (`BattleUnit`) = régiment : type (`data/unit_types`), `soldiers` vivants (depuis la force de campagne ×
   `soldiers`/100), position du centre, orientation, formation (ligne, colonne, carré/schiltron, coin pour
   cavalerie), largeur de front, état (repos, marche, charge, mêlée, tir, déroute, rallié), moral 0-100,
@@ -59,7 +67,8 @@ revient dans la campagne. Design général : `docs/design/2026-09-23-cent-ans-de
   `issue_command(dict) -> {ok, error}`, `get_units() -> [{id, side, type, name, soldiers, max_soldiers,
   morale, fatigue, ammo, state, formation, x, z, facing, is_general}]`, `get_soldier_transforms(side) ->
   PackedFloat32Array` (x, y, z, angle par soldat vivant, pour `MultiMeshInstance3D`),
-  `get_terrain() -> {width, depth, resolution, heights: PackedFloat32Array, forests[], mud[], river?}`,
+  `get_terrain() -> {width, depth, resolution, heights: PackedFloat32Array, forests[], mud[], river?}`
+  (B5 : plus `terrain, season, ground, ground_label, woodland, pools[], obstacles[], coast?, village?`),
   `get_weather()`, `is_finished()`, `get_outcome() -> Dictionary` (format accepté par `resolve_battle`),
   `get_events()` (messages français : « Les chevaliers chargent », « Les archers sont à court de flèches »…).
 
