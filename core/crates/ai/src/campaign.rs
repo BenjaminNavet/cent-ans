@@ -337,7 +337,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         let Some(option) = best else {
             continue;
         };
+        // G1: no more than the province's free recruitment slots.
+        let mut free_slots = state.recruit_slots_free(data, site);
         while recruits < max_recruits
+            && free_slots > 0
             && planned_upkeep + i64::from(option.upkeep)
                 <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
                     target_upkeep.max(i64::from(option.upkeep))
@@ -353,6 +356,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;
+            free_slots -= 1;
             if !ctx.at_war() && recruits % 2 == 0 {
                 continue 'sites;
             }

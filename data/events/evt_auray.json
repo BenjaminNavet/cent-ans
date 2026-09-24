@@ -44,6 +44,14 @@
           "faction": "fac_france",
           "amount": -5,
           "reason": "Montfort duc"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_bretagne"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_bretagne_ouest"
         }
       ],
       "ai_weight": 2

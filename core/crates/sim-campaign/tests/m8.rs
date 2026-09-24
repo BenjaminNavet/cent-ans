@@ -30,6 +30,8 @@ fn unit(data: &GameData, id: &str) -> Unit {
         max_strength: 100,
         experience: 2,
         morale: 80,
+        levy_armor: 0,
+        levy_ranged: 0,
     }
 }
 

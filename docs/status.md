@@ -147,6 +147,14 @@ Dernière mise à jour : 2026-09-23 (session 3, fin de M10).
   trésors dormants dépensés, licenciement anticipé, choix d'événements selon les moyens, mariages de l'IA,
   derniers bastions épargnés ; Pierre Ier de Portugal et Amédée VI de Savoie (héritiers de 1337), souverain
   vaincu tué à 1 %. Tests : `ai/tests/f4_war.rs` (7), `sim-campaign/tests/f4_succession.rs` (4).
+- Dernières règles inertes (G1, `docs/wip/g1-rules.md`) : places de recrutement par province (2, +1 dans la
+  capitale, + `recruit_slots` des bâtiments et techs ; refus « file de recrutement pleine ») ; piété des traits
+  (piété effective : faveur pontificale, hérésie) et des bâtiments (+1 par an au souverain par 10 points,
+  plafond 3) ; armurerie et buttes de tir équipent les unités levées dans la province (armure/tir stockés sur
+  l'unité, auto-résolution et `battle_setup`) ; effet d'événement `transfer_province` (achat du Dauphiné,
+  traité de Guérande, Formigny) ; ordre `release_captive` (libérer contre rançon), fiche personnage « Captif
+  de … — rançon N livres » avec « Payer la rançon » / « Libérer contre rançon » ; alliés de la province dans
+  les assauts de siège. 10 tests (`sim-campaign/tests/g1_rules.rs`).
 
 ### Équilibrage F4 — sonde `century_probe` (5 graines × 464 tours, 1337-1453)
 
@@ -218,12 +226,13 @@ et 3 sous 55 %) ; Bourgogne jouée par l'IA (`playthrough 1`) toujours à 2 prov
 - L'IA ne propose pas encore de mariages (M9).
 - M5 : l'IA diplomatique est volontairement prudente (peu de déclarations de guerre) ; la guerre de Cent Ans peut se conclure tôt par une paix blanche. Les noms des maisons générées viennent de la capitale ; le Portugal n'a pas de liste de prénoms dédiée.
 - M6 : le mock GDScript n'a pas de technologies.
-- F1 : restent sans effet `recruit_slots` (bâtiments), la `Piety` des bâtiments et des traits (la piété du
-  souverain ne bouge qu'avec les événements) et `army_armor`/`army_ranged` des bâtiments (buttes de tir,
-  armurerie : seuls les bonus des technologies s'appliquent en bataille). Les assauts de siège restent à
-  deux (armée assiégeante contre garnison) : les alliés ne rejoignent que les batailles rangées. L'interface
-  n'affiche pas encore le geôlier d'un captif ni la ventilation par classe des effets (exposée par le pont :
-  `effects.by_class`). Pas d'ordre de rançon pour le joueur : les captifs sont libérés par les événements.
+- F1 : l'interface n'affiche pas encore la ventilation par classe des effets (exposée par le pont :
+  `effects.by_class`).
+- G1 : la bataille 3D n'applique toujours pas les bonus des technologies (seuls ceux des bâtiments de la
+  province de levée passent dans `battle_setup`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
+  (elle paie, ou libère sur parole les simples chevaliers). Pas de faction Danemark : l'achat du Jutland
+  (`evt_valdemar_iv`) reste sans cession. Le plafond de recrutement (G1) limite l'IA à 3 levées par tour
+  dans sa capitale et 2 ailleurs (hors bâtiments) : trésors à resurveiller avec `century_probe`.
 - Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
 - Batailles (M7) : pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée.
 - Sièges 3D (M8) : pas de vrai cheminement (les ordres contournent une seule ouverture à la fois ; un

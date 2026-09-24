@@ -136,3 +136,11 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
   `siege 60` → 6/6 (≈ 210 s). La sonde accepte désormais `SEEDS=n`. Test
   `f5d::a_ladder_escalade_wins_about_half_the_time` (2 à 4 victoires sur 6) ; tests de siège M8 et F5a
   verts. Garnison en réserve au-delà de 20 régiments : entre depuis la place (`m7-battles.md` § F5d).
+
+## G1 — alliés dans l'assaut
+`siege::assault_coalition(army)` : l'armée assiégeante puis les armées de sa faction ou de ses alliés dans
+la province, en guerre avec le contrôleur de la place (même règle que `movement::battle_coalition`).
+L'auto-résolution fait donner la coalition (`coalition_side`), les pertes sont réparties par régiment, le
+général commandant est le meilleur par commandement ; `battle_setup` du siège exporte l'armée combinée et
+`resolve_pending_battle` la valide dans le même ordre. L'assaut devient une bataille en attente dès que le
+joueur y a une armée, même alliée. La garnison combat seule.

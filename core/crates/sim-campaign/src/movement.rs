@@ -382,7 +382,7 @@ impl CampaignState {
 }
 
 /// Builds the pure battle description of an army.
-pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Side {
+pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Side {
     let general_command = army
         .general
         .as_ref()
@@ -411,10 +411,15 @@ pub(crate) fn side_from_army(state: &CampaignState, data: &GameData, army: &Army
                     melee: research::boosted(stats.map_or(30, |t| t.stats.melee), tech.melee, 255),
                     ranged: research::boosted(
                         stats.map_or(0, |t| t.stats.ranged),
-                        tech.ranged,
+                        tech.ranged + f64::from(unit.levy_ranged),
                         255,
                     ),
-                    armor: research::boosted(stats.map_or(20, |t| t.stats.armor), tech.armor, 100),
+                    // G1: plus the levying province's buildings (armoury, butts).
+                    armor: research::boosted(
+                        stats.map_or(20, |t| t.stats.armor),
+                        tech.armor + f64::from(unit.levy_armor),
+                        100,
+                    ),
                     is_ranged: stats.is_some_and(|t| {
                         matches!(
                             t.category,
@@ -613,7 +618,7 @@ pub(crate) fn auto_fight(
 /// Splits a coalition's outcome into one outcome per army (F1): each army
 /// takes the losses of its own regiments; only the commander's general can
 /// be captured.
-fn split_outcome(
+pub(crate) fn split_outcome(
     state: &CampaignState,
     ids: &[ArmyId],
     outcome: &crate::battle_auto::SideOutcome,

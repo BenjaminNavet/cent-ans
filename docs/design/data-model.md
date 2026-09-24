@@ -515,7 +515,9 @@ F1 : ne part que programmé par `schedule_event`), `trigger`,
   `loyalty {vassal?, amount}` (défaut : tous les vassaux), `plague_wave {from_year, to_year}` ; F1 :
   `capture_character {id, faction?, captor}`, `release_character {id, faction?, ransom?}` (rançon versée
   au geôlier), `schedule_event {event, delay}` (l'événement part `delay` tours plus tard pour la même
-  faction et province, conditions vérifiées alors), `marry {a, b}` (mariage historique).
+  faction et province, conditions vérifiées alors), `marry {a, b}` (mariage historique) ; G1 :
+  `transfer_province {province, faction?, from?}` (propriété et contrôle ; `from` doit la tenir ; jamais
+  une capitale).
 
 **Chargement.** Erreur (`DataError::InvalidEvent`) : 0 ou plus de 3 options, historique sans `date`,
 aléatoire sans `mean_time_to_happen`/`chance_permille`, `mean_time_to_happen` nul, `schedule_event` de

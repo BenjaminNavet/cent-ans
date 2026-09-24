@@ -220,6 +220,11 @@ fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) 
                     unit.experience,
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
+                // G1: armour / ranged of the levying province's buildings.
+                setup.stats.armor = setup.stats.armor.saturating_add(unit.levy_armor).min(100);
+                if setup.stats.ranged > 0 {
+                    setup.stats.ranged = setup.stats.ranged.saturating_add(unit.levy_ranged);
+                }
                 setup
             }
             None => UnitSetup {
@@ -432,9 +437,10 @@ impl CampaignState {
             .flatten();
         // F1: field battles include the allied armies of the province, in
         // the same order as `battle_setup`.
+        // G1: so do siege assaults (the garrison fights alone).
         let (attackers, defenders) = if request.siege {
             (
-                vec![request.attacker.clone()],
+                crate::siege::assault_coalition(self, &request.attacker),
                 vec![request.defender.clone()],
             )
         } else {
@@ -489,7 +495,7 @@ impl CampaignState {
             crate::siege::apply_assault_result(
                 self,
                 data,
-                &request.attacker,
+                &attackers,
                 &request.province,
                 &result,
                 walls,
@@ -519,10 +525,17 @@ impl CampaignState {
     /// (general: the governor) behind walls of the town's fortification
     /// level, with the campaign breach already done.
     fn siege_battle_setup(&self, data: &GameData, request: &BattleRequest) -> BattleSetup {
-        let attacker = &self.armies[&request.attacker];
+        // G1: the allied armies of the province storm alongside.
+        let attackers = crate::siege::assault_coalition(self, &request.attacker);
+        let attacker = &movement::coalition_army(self, &attackers).expect("live siege");
         let garrison = crate::siege::garrison_army(self, &request.province).expect("live siege");
         let province = data.provinces.get(&request.province);
-        let player_side = if attacker.faction == self.player_faction {
+        let player_attacks = attackers.iter().any(|id| {
+            self.armies
+                .get(id)
+                .is_some_and(|a| a.faction == self.player_faction)
+        });
+        let player_side = if player_attacks {
             Some(SideId::Attacker)
         } else if garrison.faction == self.player_faction {
             Some(SideId::Defender)
@@ -597,6 +610,8 @@ impl CampaignState {
                         max_strength: unit_type.soldiers,
                         morale: unit_type.stats.morale,
                         experience: 0,
+                        levy_armor: 0,
+                        levy_ranged: 0,
                     });
                 }
             }

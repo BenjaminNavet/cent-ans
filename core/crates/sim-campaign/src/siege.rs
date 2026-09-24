@@ -283,7 +283,13 @@ impl CampaignState {
             return Err(AssaultError::NotBesieging);
         }
         let controller = self.provinces[&province].controller.clone();
-        let player_involved = faction == &self.player_faction || controller == self.player_faction;
+        // G1: also when the player only sends allied armies to the assault.
+        let player_ally = assault_coalition(self, army).iter().any(|id| {
+            self.armies
+                .get(id)
+                .is_some_and(|a| a.faction == self.player_faction)
+        });
+        let player_involved = player_ally || controller == self.player_faction;
         if self.interactive_battles && player_involved {
             let already = self
                 .pending_battles
@@ -336,7 +342,23 @@ pub(crate) fn walls_stand(
     breach < 50 && !has_siege_towers(state, data, army)
 }
 
-/// Auto-resolved assault of `army` on the town it besieges.
+/// G1: the armies storming the town with `army`: itself first, then the
+/// armies of its faction or of its allies in the province, at war with the
+/// town's controller (as `movement::battle_coalition` for field battles).
+pub fn assault_coalition(state: &CampaignState, army: &ArmyId) -> Vec<ArmyId> {
+    let Some(controller) = state
+        .armies
+        .get(army)
+        .and_then(|a| state.provinces.get(&a.location))
+        .map(|p| p.controller.clone())
+    else {
+        return Vec::new();
+    };
+    crate::movement::battle_coalition(state, army, &controller)
+}
+
+/// Auto-resolved assault of `army` (and its allies, G1) on the town it
+/// besieges.
 pub(crate) fn auto_assault(
     state: &mut CampaignState,
     data: &GameData,
@@ -350,7 +372,8 @@ pub(crate) fn auto_assault(
     let Some(garrison) = garrison_army(state, &province) else {
         return;
     };
-    let attacker_side = crate::movement::side_from_army(state, data, &state.armies[army]);
+    let attackers = assault_coalition(state, army);
+    let attacker_side = crate::movement::coalition_side(state, data, &attackers);
     let defender_side = crate::movement::side_from_army(state, data, &garrison);
     let context = crate::battle_auto::BattleContext {
         defender_terrain_bonus: false,
@@ -359,29 +382,44 @@ pub(crate) fn auto_assault(
     };
     let result =
         crate::battle_auto::resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
-    apply_assault_result(state, data, army, &province, &result, walls, events);
+    apply_assault_result(state, data, &attackers, &province, &result, walls, events);
 }
 
 /// Applies an assault result (auto-resolved or fought in 3D): losses on
-/// both sides, journal line, capture of the town on victory.
+/// both sides (spread over the storming armies, G1), journal line, capture
+/// of the town on victory. `attackers` starts with the besieging army.
 pub(crate) fn apply_assault_result(
     state: &mut CampaignState,
     data: &GameData,
-    army: &ArmyId,
+    attackers: &[ArmyId],
     province: &ProvinceId,
     result: &crate::battle_auto::BattleResult,
     walls: bool,
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(faction) = state.armies.get(army).map(|a| a.faction.clone()) else {
+    let Some(faction) = attackers
+        .first()
+        .and_then(|army| state.armies.get(army))
+        .map(|a| a.faction.clone())
+    else {
         return;
     };
     let defender_faction = state.provinces[province].controller.clone();
     let won = result.winner == crate::battle_auto::Winner::Attacker;
-    crate::movement::apply_outcome(state, data, army, &result.attacker, events);
+    let general = crate::movement::coalition_commander(state, attackers)
+        .and_then(|id| state.armies.get(&id))
+        .and_then(|a| a.general.clone());
+    for (id, outcome) in crate::movement::split_outcome(state, attackers, &result.attacker) {
+        crate::movement::apply_outcome(state, data, &id, &outcome, events);
+    }
     apply_garrison_losses(state, province, &result.defender);
+    let allies = if attackers.len() > 1 {
+        format!(" (+{} armée(s) alliée(s))", attackers.len() - 1)
+    } else {
+        String::new()
+    };
     let text = format!(
-        "Assaut {} contre {}{} : {}. Pertes : {} contre {}.",
+        "Assaut {}{allies} contre {}{} : {}. Pertes : {} contre {}.",
         crate::events::de(&faction_name(data, &faction)),
         province_name(data, province),
         if walls {
@@ -402,7 +440,6 @@ pub(crate) fn apply_assault_result(
             .province(province)
             .faction(&faction),
     );
-    let general = state.armies.get(army).and_then(|a| a.general.clone());
     if won {
         state.record_battle(&faction, &defender_faction, true);
         capture(state, data, province, &faction, events);

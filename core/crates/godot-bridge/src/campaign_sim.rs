@@ -861,6 +861,40 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
             .to_variant()
         })
         .collect();
+    let captor = state
+        .characters
+        .get(&view.id)
+        .filter(|c| c.captive)
+        .and_then(|c| c.captor.clone());
+    let captor_name = captor.as_ref().map_or(String::new(), |f| {
+        data.factions
+            .get(f)
+            .map_or_else(|| f.to_string(), |d| d.name.display.clone())
+    });
+    let ransom = if captor.is_some() {
+        sim_campaign::ransom::ransom_amount(state, data, &view.id)
+    } else {
+        0
+    };
+    let terms = state
+        .characters
+        .get(&view.id)
+        .and_then(|c| c.ransom_terms.clone())
+        .unwrap_or_default()
+        .key();
+    let player = &state.player_faction;
+    let ransom_action = match &captor {
+        Some(captor) if captor == player => "release",
+        Some(_)
+            if state
+                .characters
+                .get(&view.id)
+                .is_some_and(|c| &c.faction == player) =>
+        {
+            "pay"
+        }
+        _ => "",
+    };
     let title = view
         .title
         .clone()
@@ -898,6 +932,12 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
         "army" => view.army.as_ref().map_or(String::new(), |a| a.to_string()).as_str(),
         "governor_of" => view.governor_of.as_ref().map_or("", |p| p.as_str()),
         "captive" => view.captive,
+        // G1: captor, ransom and the ransom action the player may take.
+        "captor" => captor.as_ref().map_or("", |f| f.as_str()),
+        "captor_name" => captor_name.as_str(),
+        "ransom" => ransom,
+        "ransom_terms" => terms,
+        "ransom_action" => ransom_action,
         "piety" => i64::from(view.piety),
         "prestige" => i64::from(view.prestige),
     }
