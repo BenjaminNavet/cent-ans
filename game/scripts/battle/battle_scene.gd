@@ -28,6 +28,8 @@ const BANNER_HEIGHT := 7.0
 const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
 ## Barre des ordres du chef (F10b).
 const LEADER_ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
+## Musique dynamique par intensité (B3 / T4).
+const BATTLE_MUSIC := preload("res://scripts/battle/battle_music.gd")
 
 var campaign_sim: Object = null
 var battle_index: int = -1
@@ -75,6 +77,8 @@ var _last_group_ms: int = -10000
 var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
 var _deploy_shot: bool = false
 var _sortie_shown: bool = false
+var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
+var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -93,6 +97,7 @@ func configure(p_campaign_sim: Object, index: int, seed: int) -> void:
 func _ready() -> void:
 	_parse_cmdline()
 	hud.card_clicked.connect(_on_card_clicked)
+	hud.card_double_clicked.connect(_on_card_double_clicked)
 	hud.command_pressed.connect(_on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
@@ -156,6 +161,10 @@ func begin() -> bool:
 	setup = campaign_sim.call("get_battle_setup", battle_index)
 	if setup.is_empty():
 		return false
+	# B3 : la musique de campagne cède la place à la musique de bataille (réveillée au retour).
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
 	if _pad_units > 0:
 		_pad_setup(_pad_units)
 	battle = ClassDB.instantiate("BattleSim")
@@ -198,6 +207,10 @@ func begin() -> bool:
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	add_child(LEADER_ORDERS_BAR.new(self))
+	music = BATTLE_MUSIC.new()
+	music.name = "Music"
+	add_child(music)
+	music.setup(self)
 	_refresh_view(true)
 	return true
 
@@ -332,6 +345,8 @@ func _process(delta: float) -> void:
 		return
 	if not paused and not battle.call("is_finished"):
 		battle.call("tick", delta * speed)
+	if music != null:
+		music.update(delta)
 	_refresh_view(false, delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
@@ -489,6 +504,8 @@ func _on_return() -> void:
 		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
 		if not result.get("ok", false):
 			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
+		_audio_director.call("refresh_context")
 	returned.emit(result)
 	if standalone:
 		get_tree().change_scene_to_file("res://scenes/start_menu.tscn")
@@ -527,6 +544,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_command("fire_at_will")
 			KEY_H:
 				_on_command("halt")
+			KEY_C:
+				_toggle_camera_follow()
 			KEY_ESCAPE:
 				selected.clear()
 			KEY_F12:
@@ -673,6 +692,44 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
+func _on_card_double_clicked(unit_id: int) -> void:
+	for unit in units:
+		if int(unit["id"]) == unit_id and bool(unit["present"]):
+			camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)
+			return
+
+
+## Touche `C` : verrouille la caméra sur la sélection (premier régiment présent) ou, à défaut, le
+## général du joueur ; un second appui pendant un suivi le libère.
+func _toggle_camera_follow() -> void:
+	if camera_rig.is_following():
+		camera_rig.stop_follow()
+		return
+	var id := _follow_candidate()
+	if id >= 0:
+		camera_rig.follow_unit(id, _unit_world_position)
+
+
+func _follow_candidate() -> int:
+	for unit in units:
+		if selected.has(int(unit["id"])) and bool(unit["present"]):
+			return int(unit["id"])
+	for unit in units:
+		if str(unit["side"]) == player_side and bool(unit.get("is_general", false)) and bool(unit["present"]):
+			return int(unit["id"])
+	return -1
+
+
+## Callable passée à `BattleCamera.follow_unit` : position au sol du régiment, `null` s'il a
+## quitté le champ (le suivi se libère alors de lui-même).
+func _unit_world_position(id: int) -> Variant:
+	for unit in units:
+		if int(unit["id"]) == id and bool(unit["present"]):
+			return Vector3(float(unit["x"]), 0.0, float(unit["z"]))
+	return null
 
 
 func _on_command(command: String) -> void:
