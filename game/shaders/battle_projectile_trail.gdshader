@@ -5,7 +5,7 @@ render_mode skip_vertex_transform, unshaded, cull_disabled, depth_draw_never, sh
 
 #include "res://shaders/battle_projectile.gdshaderinc"
 
-uniform float trail_alpha = 0.3;
+uniform float trail_alpha = 0.45;
 uniform float trail_length = 5.0;
 
 varying float v_along;
@@ -16,7 +16,8 @@ void vertex() {
 	float scale = f.flying ? f.scale : 0.0;
 	vec3 to_cam = normalize(CAMERA_POSITION_WORLD - f.pos);
 	vec3 across = normalize(cross(f.dir, to_cam) + vec3(0.0, 1e-4, 0.0));
-	vec3 world = f.pos + (across * VERTEX.x + f.dir * VERTEX.z * trail_length) * scale;
+	float widen = clamp(distance(CAMERA_POSITION_WORLD, f.pos) / 30.0, 1.0, 7.0);
+	vec3 world = f.pos + (across * VERTEX.x * widen + f.dir * VERTEX.z * trail_length) * scale;
 	v_along = clamp(-VERTEX.z, 0.0, 1.0);
 	v_alpha = scale;
 	VERTEX = (VIEW_MATRIX * vec4(world, 1.0)).xyz;

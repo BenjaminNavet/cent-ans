@@ -2,15 +2,22 @@ extends SceneTree
 
 ## Lot B4 : rythme de la bataille de démonstration (France 1337, armées principales) jouée par
 ## l'IA des deux camps, sans rendu. Imprime l'instant du premier contact et l'état des
-## régiments toutes les 30 s ; `--dump=<json>` écrit la mise en place de la bataille (fixture
-## des tests Rust `sim-battle/tests/fixtures/`).
+## régiments toutes les 30 s (`--every=<s>`, jusqu'à `--until=<s>`) ; `--dump=<json>` écrit
+## la mise en place de la bataille (fixture des tests Rust `sim-battle/tests/fixtures/`).
 ##   godot --headless --path game --script res://tests/b4_pacing.gd [-- --dump=<json>]
+
+var _every := 30.0
 
 
 func _init() -> void:
 	var dump := ""
+	var until := 600.0
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--dump="):
+		if arg.begins_with("--every="):
+			_every = float(arg.trim_prefix("--every="))
+		elif arg.begins_with("--until="):
+			until = float(arg.trim_prefix("--until="))
+		elif arg.begins_with("--dump="):
 			dump = arg.trim_prefix("--dump=")
 	var sim: Object = ClassDB.instantiate("CampaignSim")
 	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
@@ -30,7 +37,7 @@ func _init() -> void:
 	battle.call("set_ai", "attacker", true)
 	var contact := -1.0
 	var next_report := 0.0
-	while float(battle.call("get_elapsed")) < 600.0 and not battle.call("is_finished"):
+	while float(battle.call("get_elapsed")) < until and not battle.call("is_finished"):
 		battle.call("tick", 0.1)
 		var elapsed := float(battle.call("get_elapsed"))
 		var units: Array = battle.call("get_units")
@@ -41,7 +48,7 @@ func _init() -> void:
 					print("b4_pacing: first contact at %.1f s" % contact)
 					break
 		if elapsed >= next_report:
-			next_report += 30.0
+			next_report += _every
 			print("t=%.0f" % elapsed)
 			for unit in units:
 				if bool(unit["present"]):
