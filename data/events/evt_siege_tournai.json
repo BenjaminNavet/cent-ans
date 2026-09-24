@@ -1,7 +1,7 @@
 {
   "id": "evt_siege_tournai",
   "title": "Le siège de Tournai",
-  "text": "Fort de sa victoire de L'Écluse, le roi Édouard met le siège devant Tournai avec les milices flamandes d'Artevelde. Mais la ville tient, les soldes ne sont plus payées et les banquiers de Florence refusent de nouvelles avances.",
+  "text": "Fort de sa victoire de L'[[cdx_ecluse|Écluse]], le roi Édouard met le siège devant Tournai avec les milices flamandes d'[[cdx_jacob_van_artevelde|Artevelde]]. Mais la ville tient, les soldes ne sont plus payées et les banquiers de Florence refusent de nouvelles avances.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -1,7 +1,7 @@
 {
   "id": "evt_arras",
   "title": "La paix d'Arras",
-  "text": "Sous l'égide des légats du pape, le duc de Bourgogne se réconcilie avec le roi Charles à Arras. Le roi désavoue le meurtre de Montereau ; le duc est dispensé de lui rendre hommage. Les Anglais quittent le congrès, furieux.",
+  "text": "Sous l'égide des légats du pape, le duc de Bourgogne se réconcilie avec le roi Charles à Arras. Le roi désavoue le meurtre de [[cdx_traite_troyes|Montereau]] ; le duc est dispensé de lui rendre hommage. Les Anglais quittent le congrès, furieux.",
   "kind": "historical",
   "trigger": {
     "date": {

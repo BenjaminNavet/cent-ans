@@ -1,7 +1,7 @@
 {
   "id": "evt_auberoche",
   "title": "La surprise d'Auberoche",
-  "text": "Le 21 octobre 1345, le comte de Derby, [[cdx_henri_de_grosmont|Henri de Grosmont]], tombe à l'heure du souper sur le camp des Français qui assiègent Auberoche, en Périgord. Surpris, les assiégeants sont massacrés ou pris : Louis de Poitiers, comte de Valentinois, est tué, le comte de L'Isle-Jourdain capturé avec une foule de barons. Les rançons font la fortune de Derby, et la Guyenne anglaise respire.",
+  "text": "Le 21 octobre 1345, le comte de Derby, [[cdx_henri_de_grosmont|Henri de Grosmont]], tombe à l'heure du souper sur le camp des Français qui assiègent Auberoche, en Périgord. Surpris, les assiégeants sont massacrés ou pris : Louis de [[cdx_poitiers|Poitiers]], comte de Valentinois, est tué, le comte de L'Isle-Jourdain capturé avec une foule de barons. Les rançons font la fortune de Derby, et la Guyenne anglaise respire.",
   "kind": "historical",
   "trigger": {
     "date": {

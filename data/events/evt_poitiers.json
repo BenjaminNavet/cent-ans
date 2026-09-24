@@ -1,7 +1,7 @@
 {
   "id": "evt_poitiers",
   "title": "La prise du roi à Poitiers",
-  "text": "À Maupertuis, près de Poitiers, le prince de Galles écrase l'armée de France. Le roi Jean, combattant à pied avec son jeune fils Philippe, est pris et emmené à Bordeaux puis à Londres. Le royaume est sans tête.",
+  "text": "À Maupertuis, près de Poitiers, le prince de Galles écrase l'armée de France. Le roi Jean, combattant à pied avec son jeune fils Philippe, est pris et emmené à [[cdx_bordeaux|Bordeaux]] puis à Londres. Le royaume est sans tête.",
   "kind": "historical",
   "trigger": {
     "date": {

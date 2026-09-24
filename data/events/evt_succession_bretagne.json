@@ -1,7 +1,7 @@
 {
   "id": "evt_succession_bretagne",
   "title": "La succession de Bretagne",
-  "text": "Le duc Jean III est mort sans fils. Sa nièce Jeanne de Penthièvre, épouse de Charles de Blois, neveu du roi de France, réclame le duché ; son demi-frère Jean de Montfort s'empare de Nantes et du trésor ducal, et fait hommage au roi d'Angleterre.",
+  "text": "Le duc Jean III est mort sans fils. Sa nièce [[cdx_jeanne_de_penthievre|Jeanne de Penthièvre]], épouse de [[cdx_charles_de_blois|Charles de Blois]], neveu du roi de France, réclame le duché ; son demi-frère Jean de Montfort s'empare de Nantes et du trésor ducal, et fait hommage au roi d'Angleterre.",
   "kind": "historical",
   "trigger": {
     "date": {

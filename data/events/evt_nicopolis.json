@@ -1,7 +1,7 @@
 {
   "id": "evt_nicopolis",
   "title": "Le désastre de Nicopolis",
-  "text": "La croisade menée contre les Turcs par Jean, comte de Nevers, fils du duc de Bourgogne, s'est brisée devant Nicopolis. Les chevaliers français ont chargé sans attendre les Hongrois ; le sultan Bayezid fait décapiter les prisonniers et ne garde que les plus riches contre rançon.",
+  "text": "La croisade menée contre les Turcs par Jean, comte de Nevers, fils du duc de Bourgogne, s'est brisée devant Nicopolis. Les chevaliers français ont chargé sans attendre les Hongrois ; le sultan Bayezid fait décapiter les prisonniers et ne garde que les plus riches contre [[cdx_rancon|rançon]].",
   "kind": "historical",
   "trigger": {
     "date": {

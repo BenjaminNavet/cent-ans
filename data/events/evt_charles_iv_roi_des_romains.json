@@ -1,7 +1,7 @@
 {
   "id": "evt_charles_iv_roi_des_romains",
   "title": "Charles de Luxembourg roi des Romains",
-  "text": "À Rhens, cinq princes électeurs, pressés par le pape Clément VI, déposent Louis de Bavière et élisent Charles, fils du roi de Bohême. Les villes d'Empire raillent le « roi des prêtres », mais Louis n'a plus que son épée.",
+  "text": "À Rhens, cinq princes électeurs, pressés par le pape Clément VI, déposent [[cdx_louis_de_baviere|Louis de Bavière]] et élisent Charles, fils du roi de Bohême. Les villes d'Empire raillent le « roi des prêtres », mais Louis n'a plus que son épée.",
   "kind": "historical",
   "trigger": {
     "date": {
