@@ -193,7 +193,7 @@ pub struct MovementRules {
 impl Default for MovementRules {
     fn default() -> Self {
         MovementRules {
-            points_per_step: 150.0,
+            points_per_step: 140.0,
             sea_crossing_steps: 2.0,
             fallback_links_per_neighbor: 2,
         }
