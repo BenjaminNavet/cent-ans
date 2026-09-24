@@ -16,7 +16,9 @@ extends Node3D
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
 ## `--camera=x,z,distance,lacet` (capture : position de caméra imposée), `--deploy-shot` (avec
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
-## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2).
+## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
+## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
+## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
 
 signal returned(result: Dictionary)
 
@@ -54,6 +56,9 @@ var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
+var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
+var _weather_key: String = "clear"
+var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
 var result_screen: BattleResultScreen = null  # B2 : écran de fin
@@ -71,6 +76,7 @@ var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _pad_units: int = 0
 var _closeup: bool = false
+var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -184,6 +190,7 @@ func begin() -> bool:
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
+	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
 	terrain.build(terrain_data, weather_key)
 	if terrain_data.has("siege"):
@@ -251,6 +258,23 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	if _no_effects:
+		return
+	effects = BattleEffects.new()
+	effects.name = "Effects"
+	add_child(effects)
+	var river: Dictionary = terrain.terrain.get("river", {})
+	var half_width := float(river.get("width", 0.0)) * 0.5
+	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+
+
+## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
+func _update_effects(dt: float) -> void:
+	if effects == null:
+		return
+	var camera := get_viewport().get_camera_3d()
+	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -370,6 +394,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
 	var running: bool = not paused and not battle.call("is_finished")
 	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
+	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
 		siege_view.update(battle.call("get_siege"), units)
 	var banner_scale := _banner_scale()
@@ -870,6 +895,10 @@ func _parse_cmdline() -> void:
 			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--result-shot":
 			_result_shot = true
+		elif arg.begins_with("--shot-at="):
+			_shot_at = float(arg.trim_prefix("--shot-at="))
+		elif arg == "--no-effects":
+			_no_effects = true
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -898,7 +927,13 @@ func _stage_screenshot() -> void:
 	for _i in 3000:
 		battle.call("tick", 0.1)
 		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
-		soldiers.update(battle, battle.call("get_units"), 0.1, [])
+		units = battle.call("get_units")
+		soldiers.update(battle, units, 0.1, [])
+		_update_effects(0.1)
+		if _shot_at > 0.0:
+			if float(battle.call("get_elapsed")) >= _shot_at:
+				break
+			continue
 		if contact_time < 0.0:
 			for unit in battle.call("get_units"):
 				if str(unit["state"]) == "melee":
@@ -907,7 +942,7 @@ func _stage_screenshot() -> void:
 		elif float(battle.call("get_elapsed")) > contact_time + (3.0 if _closeup else 12.0) or battle.call("is_finished"):
 			break
 	paused = true
-	print("BattleScene: capture at %.0f s, %d corpses" % [float(battle.call("get_elapsed")), soldiers.corpse_count])
+	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0
@@ -945,7 +980,8 @@ func _stage_screenshot() -> void:
 		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
-	for _i in 40:
+	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
+	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
 
@@ -956,7 +992,9 @@ func _stage_siege_screenshot() -> void:
 	var climb_time := -1.0
 	for _i in 2400:
 		battle.call("tick", 0.1)
-		soldiers.update(battle, battle.call("get_units"), 0.1, [])
+		units = battle.call("get_units")
+		soldiers.update(battle, units, 0.1, [])
+		_update_effects(0.1)
 		var elapsed := float(battle.call("get_elapsed"))
 		if climb_time < 0.0:
 			for unit in battle.call("get_units"):
