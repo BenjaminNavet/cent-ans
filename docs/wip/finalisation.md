@@ -12,11 +12,11 @@ Plan : `docs/design/v2-finalisation.md`.
 | F6 Rendu carte | **transféré** | session parallèle « visual » | refonte visuelle semi-réaliste (shaders, terrain, marqueurs, modèles, battle_meshes/terrain) : ne pas toucher ces fichiers |
 | F7 Contenu | **fusionné** : factions (3a49557) + F7b 40 événements (90 au total, 7 chaînes) | main | 13 factions, 18 personnages, 6 listes de noms, meubles héraldiques |
 | F8 Tutoriel / encyclopédie | **fusionné** (touche L ; K = codex d'une autre session) | | manuel à écrire en F9 |
-| G1 Dernières règles | lancé | worktree | recruit_slots, piété, army_armor/ranged, transfer_province, rançons joueur, alliés aux assauts |
-| G2 IA historique | lancé | worktree | subsides (Écosse), Pays-Bas pro-anglais, Bourgogne opportuniste, trésors |
-| F9 Recette | en cours (orchestrateur) | main | manuel écrit (6a36ffb), victoire tenue N saisons + sonde playthrough (0a5d9fa) ; reste : parties automatisées 3 factions, parcours des écrans, export .app, docs finales |
+| G1 Dernières règles | **fusionné** (d3d0c63) | | recruit_slots, piété, army_armor/ranged, transfer_province, rançons joueur, alliés aux assauts |
+| G2 IA historique | **fusionné** (9e4483d) | | subsides (Écosse), Pays-Bas pro-anglais, Bourgogne opportuniste, trésors |
+| F9 Recette | **terminé** | main | manuel écrit (6a36ffb), victoire tenue N saisons + sonde playthrough (0a5d9fa) ; reste : parties automatisées 3 factions, parcours des écrans, export .app, docs finales |
 
-Prochaine étape : attendre les rapports de la vague 1, fusionner dans main, tests, puis vague 2.
+**État final (24/09) : tous les lots fusionnés.** Prochaine étape éventuelle : portraits après le 1er octobre ; restes listés dans `docs/sessions/2026-09-23-session-04.md`.
 Clé OpenRouter bloquée jusqu'au 1er octobre (limite propre 100 $/mois) : pas de portraits cette session.
 
 ## Coordination avec les sessions parallèles
