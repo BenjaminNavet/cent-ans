@@ -614,6 +614,33 @@ les hameaux, les rubans, le picking de Paris et les poids des paliers.
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
   la caméra), largement au-delà du champ utile en vue comté.
 
+## Interface des colonies (lot C5)
+
+Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
+`panel_widgets.gd` (lignes partagées avec le panneau de province), `reachable_markers.gd` (anneaux).
+Aucune règle en GDScript : options, disponibilités et refus viennent de `CampaignSim`.
+
+- **Panneau de colonie** : clic gauche sur une icône ou une maquette (`SettlementLayer.settlement_selected`).
+  Type, province (lien vers son panneau), propriétaire, contrôleur, fortification, siège, revenu ;
+  onglet Garnison (formation d'armée, recrutement, file de la colonie) et onglet Bâtiments (chantier,
+  constructions permises par le type de colonie). Les ordres nomment la colonie (`settlement`).
+- **Onglet « Colonies »** du panneau de province : une ligne par colonie (cité d'abord) avec contrôleur,
+  garnison et siège ; un clic ouvre le panneau de colonie, sélectionne la colonie et centre la caméra.
+- **Armée sélectionnée** : anneaux verts sur les colonies atteignables ce tour
+  (`get_reachable_settlements`), orange sur la cible survolée ; le survol d'une colonie a priorité sur
+  celui de la province ; clic droit sur une colonie = ordre `move_army` vers elle (`find_path`), clic
+  droit ailleurs = cité de la province (v1).
+- **Aperçu de chemin** : segments entre colonies successives du chemin (arêtes du graphe), posés sur le
+  relief ; il ne suit pas le tracé exact des routes.
+- Getters du pont : `settlement_detail(id)` (avec `buildings_info`, `recruit_slots`,
+  `recruit_slots_free`, `garrison_strength`, `port`, `province_name`), `settlement_buildable(id)`,
+  `get_recruitable(id)`, `province_settlements(province)`.
+- Test : `godot --headless --path game --script res://tests/c5_settlements_ui_test.gd`. Captures :
+  `--stage=settlement` et `--stage=settlement_orders`.
+
+![Panneau de colonie](img/colonies/c5-panneau-colonie.png)
+![Colonies atteignables et chemin sur le graphe](img/colonies/c5-ordres-armee.png)
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |

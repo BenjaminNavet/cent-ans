@@ -88,6 +88,14 @@ var village_view: BattleVillage
 var _coast: Dictionary = {}
 var _pools: Array = []
 var _waves: NoiseTexture2D
+## B7 : neige piétinée (null hors neige au sol).
+const TRAMPLE_TEXEL := 4.0
+const TRAMPLE_STEP := 0.5
+var trample_image: Image = null
+var _trample_texture: ImageTexture
+var _trample_bytes := PackedByteArray()
+var _trample_timer: float = 0.0
+var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
 
 
 ## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
@@ -148,6 +156,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_plan_roads()
 	_build_textures()
 	_build_material(weather)
+	_setup_trample()
 	_add_mesh("Ground", _field_mesh(), true)
 	_add_mesh("NearRing", _ring_mesh(NEAR_RECT, NEAR_STEP, Rect2(0, 0, FIELD_W, FIELD_D), 0.0), true)
 	_add_mesh("FarRing", _ring_mesh(FAR_RECT, FAR_STEP, NEAR_RECT.grow(-2.0 * FAR_STEP), 1.5), false)
@@ -178,6 +187,74 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 ## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?
 func snowy() -> bool:
 	return weather_key == "snow" or (site_render and ground_key == "snowy")
+
+
+## B7 : neige piétinée. Carte L8 sur le rectangle des splatmaps (`TRAMPLE_TEXEL` m le texel)
+## où chaque régiment présent imprime son emprise (rectangle orienté) ; la trace s'accumule au
+## fil des passages, plus vite pour une troupe en mouvement. Rendu seulement, neige au sol
+## seulement (sinon aucun coût).
+func _setup_trample() -> void:
+	trample_image = null
+	_trample_bytes = PackedByteArray()
+	_trample_last.clear()
+	if not snowy():
+		return
+	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
+	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
+	_trample_bytes.resize(w * h)
+	trample_image = Image.create_from_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
+	_trample_texture = ImageTexture.create_from_image(trample_image)
+	ground_material.set_shader_parameter("trample_map", _trample_texture)
+	ground_material.set_shader_parameter("trample_on", 1.0)
+
+
+## B7 : imprime les régiments sur la carte de neige piétinée, au plus tous les `TRAMPLE_STEP`
+## secondes de bataille (`dt` = temps de bataille écoulé, 0 en pause).
+func update_trample(units: Array, dt: float) -> void:
+	if trample_image == null or dt <= 0.0:
+		return
+	_trample_timer += dt
+	if _trample_timer < TRAMPLE_STEP:
+		return
+	var step := _trample_timer
+	_trample_timer = 0.0
+	var w := trample_image.get_width()
+	var h := trample_image.get_height()
+	for unit in units:
+		if not bool(unit["present"]):
+			continue
+		var id := int(unit["id"])
+		var pos := Vector2(float(unit["x"]), float(unit["z"]))
+		var moved := pos.distance_to(_trample_last.get(id, pos)) / step
+		_trample_last[id] = pos
+		# Troupe en marche : ~0,05 par pas (trace nette après une dizaine) ; à l'arrêt, lent.
+		var add := int(clampf(3.0 + moved * 7.0, 3.0, 24.0))
+		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
+		var facing := float(unit["facing"])
+		var axis_x := Vector2(cos(facing), -sin(facing))
+		var axis_z := Vector2(sin(facing), cos(facing))
+		var reach := half.length()
+		var c := (pos - SPLAT_RECT.position) / TRAMPLE_TEXEL
+		var r := reach / TRAMPLE_TEXEL
+		for iz in range(maxi(int(c.y - r), 0), mini(int(c.y + r) + 1, h)):
+			for ix in range(maxi(int(c.x - r), 0), mini(int(c.x + r) + 1, w)):
+				var d := SPLAT_RECT.position + (Vector2(ix, iz) + Vector2(0.5, 0.5)) * TRAMPLE_TEXEL - pos
+				if absf(d.dot(axis_x)) > half.x or absf(d.dot(axis_z)) > half.y:
+					continue
+				var i := iz * w + ix
+				_trample_bytes[i] = mini(_trample_bytes[i] + add, 255)
+	trample_image.set_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
+	_trample_texture.update(trample_image)
+
+
+## B7 : piétinement (0-1) à un point du monde (tests, captures).
+func trample_at(x: float, z: float) -> float:
+	if trample_image == null:
+		return 0.0
+	var c := ((Vector2(x, z) - SPLAT_RECT.position) / TRAMPLE_TEXEL).floor()
+	if c.x < 0 or c.y < 0 or c.x >= trample_image.get_width() or c.y >= trample_image.get_height():
+		return 0.0
+	return float(_trample_bytes[int(c.y) * trample_image.get_width() + int(c.x)]) / 255.0
 
 
 ## Niveau d'une mare : hauteur moyenne du sol de la simulation sur son disque, un peu relevée

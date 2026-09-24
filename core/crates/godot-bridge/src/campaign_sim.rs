@@ -687,7 +687,7 @@ fn building_summary_dict(data: &GameData, id: &BuildingId) -> VarDictionary {
     }
 }
 
-fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
+pub(crate) fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarArray {
     buildings
         .iter()
         .map(|id| building_summary_dict(data, id).to_variant())
@@ -722,7 +722,7 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
     }
 }
 
-fn buildable_array(data: &GameData, options: &[BuildOption]) -> VarArray {
+pub(crate) fn buildable_array(data: &GameData, options: &[BuildOption]) -> VarArray {
     options
         .iter()
         .map(|option| build_option_dict(data, option).to_variant())

@@ -10,7 +10,7 @@ extends Node3D
 ## bataille France–Angleterre mise en scène (`debug_stage_battle`).
 ## Options (après `--`) : `--screenshot=<png>` (joue la bataille jusqu'au contact, capture, quitte),
 ## `--units=<n>` (complète chaque camp à n régiments, banc d'essai sans retour campagne),
-## `--benchmark` (mesure les FPS sur 600 images puis quitte), `--autoplay` (IA des deux camps),
+## `--benchmark` (mesure les FPS sur 600 images puis quitte ; `--bench-at=<s>` avance d'abord la bataille), `--autoplay` (IA des deux camps),
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
@@ -74,6 +74,8 @@ var _screenshot_path: String = ""
 var _benchmark: bool = false
 var _bench_frames: int = 0
 var _bench_time: float = 0.0
+var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
+var _bench_start_elapsed: float = 0.0
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -270,6 +272,7 @@ func _build_soldier_layers() -> void:
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
+	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
 	if effects == null:
 		return
 	var camera := get_viewport().get_camera_3d()
@@ -377,6 +380,9 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		if _bench_frames == 0:
+			if _bench_at > 0.0:
+				_fast_forward(_bench_at)
+			_bench_start_elapsed = float(battle.call("get_elapsed"))
 			soldiers.start_timing()
 			_apply_camera_override()  # banc d'essai rapproché (lot B1)
 		_bench_frames += 1
@@ -387,7 +393,17 @@ func _process(delta: float) -> void:
 			for unit in units:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
+			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
 			get_tree().quit(0)
+
+
+## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
+func _fast_forward(seconds: float) -> void:
+	while float(battle.call("get_elapsed")) < seconds and not battle.call("is_finished"):
+		battle.call("tick", 0.1)
+		units = battle.call("get_units")
+		soldiers.update(battle, units, 0.1, [])
+		_update_effects(0.1)
 
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
@@ -494,7 +510,7 @@ func _update_markers(banner_scale: float) -> void:
 			var point := camera.unproject_position(top)
 			if screen.has_point(point):
 				anchors[int(unit["id"])] = point
-	markers.update(units, anchors, selected)
+	markers.update(units, anchors, selected, camera_rig.distance)
 
 
 ## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
@@ -885,6 +901,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg.begins_with("--units="):
 			_pad_units = int(arg.trim_prefix("--units="))
+		elif arg.begins_with("--bench-at="):
+			_bench_at = float(arg.trim_prefix("--bench-at="))
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
