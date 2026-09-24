@@ -33,6 +33,15 @@ impl BattleRng {
         low + (high - low) * self.unit()
     }
 
+    /// An independent stream derived from the current state and `salt`,
+    /// without advancing `self` (lot B5: new features must not shift the
+    /// draws of older battles).
+    pub fn derive(&self, salt: u64) -> BattleRng {
+        BattleRng {
+            state: mix(self.state ^ salt.wrapping_mul(0xD6E8_FEB8_6659_FD93)),
+        }
+    }
+
     /// Uniform integer in `0..bound` (`bound` > 0).
     pub fn below(&mut self, bound: u32) -> u32 {
         (self.next_u64() % u64::from(bound.max(1))) as u32
