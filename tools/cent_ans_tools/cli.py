@@ -530,5 +530,44 @@ def assets_illustrations(
     )
 
 
+@assets_app.command("codex-art")
+def assets_codex_art(
+    category: str | None = typer.Option(
+        None,
+        "--category",
+        help="Catégories du Codex séparées par des virgules (défaut : toutes sauf personnages et plantes)",
+    ),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal d'illustrations"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """Génère les miniatures des fiches du Codex sans image d'entité (640×360)."""
+    from cent_ans_tools import codex_art, portraits
+
+    categories = (
+        tuple(part.strip() for part in category.split(","))
+        if category
+        else codex_art.CATEGORIES
+    )
+    _run_art_batch(
+        codex_art.plan(categories=categories, limit=limit),
+        model or portraits.DEFAULT_MODEL,
+        envelope,
+        dry_run,
+        "illustration(s)",
+        "Illustrations du Codex",
+        codex_art.convert,
+    )
+
+
 if __name__ == "__main__":
     app()

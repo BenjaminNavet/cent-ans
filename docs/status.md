@@ -1,6 +1,6 @@
 # État de l'application
 
-Dernière mise à jour : 2026-09-24 (session 4, finalisation F1-F9 et G1-G2 ; sessions parallèles « visual »,
+Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustrations, G4 ; session 4, finalisation F1-F9 et G1-G2 ; sessions parallèles « visual »,
 « ui-tw » et « historien »).
 
 ## Où en est-on
@@ -13,8 +13,11 @@ Dernière mise à jour : 2026-09-24 (session 4, finalisation F1-F9 et G1-G2 ; se
 - **Victoire** : tous les objectifs historiques tenus `hold_turns` saisons d'affilée (France 20, Angleterre et
   Bourgogne 12). Sonde : `cargo run --release -p ai --example playthrough [graine]`.
 - **Qualité** : 310 tests Rust, 87 tests Python, smoke Godot 20 étapes, clippy propre.
-- **Reste** : 49 portraits à générer (≈ 2,25 $) quand la clé OpenRouter sera remise à zéro (1er octobre) ; écarts
-  d'équilibrage documentés plus bas (tableaux F4 et G2).
+- **Art** : 88/88 portraits, 117/117 miniatures de chronique (bandeau de la fenêtre de chronique,
+  `cent-ans assets event-art`), 116 illustrations de l'encyclopédie (unités, bâtiments, technologies,
+  factions, `cent-ans assets illustrations`) ; 15,17 $ dépensés sur 50 $ (`docs/budget.md`).
+- **Reste** : écarts d'équilibrage documentés plus bas (tableaux F4, G2, G4) ; lot G5 (voisinage réel de
+  `are_neighbors`) en cours.
 - Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/wip/finalisation.md`.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
@@ -256,10 +259,8 @@ frontières de la carte, le correctif global reste à équilibrer.
   (`get_unit_type`, `get_building`, `get_resource`). Forces/faiblesses d'unité : statistiques à
   ±30 % de la moyenne des types d'unités (heuristique d'affichage). Les infobulles des traits
   n'ont qu'une icône par catégorie, celles des compétences une par branche.
-- M10 assets : **1 portrait sur 50** généré (`chr_afonso_iv`) : la clé OpenRouter a atteint sa limite
-  mensuelle propre (100 $, consommée par d'autres usages ; 0,04 $ restants alors qu'un portrait coûte
-  0,0455 $ réels). Relancer `uv run --project tools cent-ans assets portraits` après la remise à zéro
-  mensuelle (≈ 2,25 $ pour les 49 restants) ; en attendant, la cour affiche l'écu de la faction.
+- M10 assets : les images générées sont des JPEG/PNG chargés à la volée (`PortraitLoader.load_texture`) ;
+  tout le jeu fonctionne sans elles (écu de faction ou bandeau masqué en repli).
 - M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
 - `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
 - Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu (F4 : 20 % au-delà de six saisons) ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
