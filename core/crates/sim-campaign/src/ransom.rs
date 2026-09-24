@@ -152,6 +152,10 @@ pub enum RansomError {
     InsufficientFunds { needed: i64, available: i64 },
     #[error("province impossible : {0}")]
     BadProvince(String),
+    #[error("sa famille refuse : {offered} livres demandés, sa rançon est de {fair} livres")]
+    RansomTooHigh { offered: i64, fair: i64 },
+    #[error("sa faction ne peut payer : {needed} livres demandées, {available} dans son trésor")]
+    PayerCannotPay { needed: i64, available: i64 },
 }
 
 /// Rank of `character` in his own faction.
@@ -474,6 +478,50 @@ pub fn release_on_parole(
         data.factions
             .get(faction)
             .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+    );
+    push_news(state, &owner, faction, text);
+    Ok(())
+}
+
+/// G1: prestige the captor's ruler gains by freeing a prisoner for ransom.
+pub const RELEASE_RANSOM_PRESTIGE: i32 = 3;
+
+/// `release_for_ransom` (order `ReleaseCaptive`): the captor frees a
+/// prisoner against `ransom` livres (default: [`ransom_amount`]; 0 is a
+/// release on parole). His faction pays at once, if the sum is no more than
+/// the computed ransom and its treasury covers it.
+pub fn release_for_ransom(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
+    ransom: Option<i64>,
+) -> Result<(), RansomError> {
+    let owner = own_prisoner(state, faction, character)?;
+    let fair = ransom_amount(state, data, character);
+    let offered = ransom.unwrap_or(fair).max(0);
+    if offered == 0 {
+        return release_on_parole(state, data, faction, character);
+    }
+    if offered > fair {
+        return Err(RansomError::RansomTooHigh { offered, fair });
+    }
+    let available = state.factions.get(&owner).map_or(0, |f| f.treasury);
+    if available < offered {
+        return Err(RansomError::PayerCannotPay {
+            needed: offered,
+            available,
+        });
+    }
+    crate::chronicle::release_character(state, data, character, offered, &mut Vec::new());
+    if let Some(ruler) = state.factions.get(faction).and_then(|f| f.ruler.clone()) {
+        if let Some(r) = state.characters.get_mut(&ruler) {
+            r.prestige += RELEASE_RANSOM_PRESTIGE;
+        }
+    }
+    let text = format!(
+        "{} est libéré contre une rançon de {offered} livres.",
+        state.character_name(data, character)
     );
     push_news(state, &owner, faction, text);
     Ok(())
