@@ -102,7 +102,7 @@ siège en 3D sur le moteur temps réel de M7. **État : terminé (les deux volet
 - **Maisons et rues** : `SiegeWorks.houses` (disques de 9 m, deux couronnes à 75 et 110 m du centre,
   rues rayonnantes de la place vers chaque pan et la porte ; génération sans tirage aléatoire).
   Exposées au pont : `get_siege().houses = [{x, z, radius}]` — **le rendu Godot doit poser ses
-  maisons sur ces disques** (aujourd'hui `battle_siege.gd` place les siennes). Les maisons arrêtent les
+  maisons sur ces disques** (fait en F5c : `battle_siege.gd` lit `houses`). Les maisons arrêtent les
   régiments (sauf en déroute).
 - **Cheminement A*** (`sim/pathing.rs`) : grille de 4 m sur tout le champ ; obstacles = bandes des
   pans intacts et maisons ; brèches, porte enfoncée (et porte ouverte d'une sortie, pour la garnison)
