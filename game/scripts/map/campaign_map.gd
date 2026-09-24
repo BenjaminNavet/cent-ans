@@ -1068,6 +1068,8 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"assault":  # UB1 : écran d'avant-bataille d'un assaut
+					_stage_screenshot_assault()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
 				"tutorial", "encyclopedia":  # F8
@@ -1307,6 +1309,7 @@ func _offer_pending_battles() -> void:
 		ui.add_child(_battle_dialog)
 		_battle_dialog.fight_requested.connect(_on_battle_fight)
 		_battle_dialog.auto_requested.connect(_on_battle_auto)
+		_battle_dialog.withdraw_requested.connect(_on_battle_withdraw)
 	_battle_dialog.show_battle(sim, pending[0])
 
 
@@ -1320,6 +1323,20 @@ func _on_battle_auto(index: int) -> void:
 	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
 	if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
 		flow.report_late_events(events)
+	refresh_all()
+	_offer_pending_battles()
+
+
+## UB1 : « Retraite » ou « Maintenir le siège » (règle et journal dans le cœur).
+func _on_battle_withdraw(index: int) -> void:
+	var result: Dictionary = sim.call("withdraw_pending_battle", index)
+	if result.get("ok", false):
+		var events: Array = result.get("events", [])
+		ui.add_events(events, str(sim.call("get_date_label")))
+		if flow != null:
+			flow.report_late_events(events)
+	else:
+		ui.show_toast(str(result.get("error", "?")), true)
 	refresh_all()
 	_offer_pending_battles()
 
@@ -1352,6 +1369,18 @@ func _set_campaign_active(active: bool) -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if active:
 		camera.make_current()
+
+
+## `--stage=assault` (UB1) : assaut français de la Guyenne mis en scène, écran ouvert.
+func _stage_screenshot_assault() -> void:
+	if not _battles_available() or not sim.has_method("debug_stage_siege"):
+		return
+	var armies := BattleScene.main_armies(sim, player_faction, "fac_england")
+	if armies.is_empty():
+		return
+	sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+	refresh_all()
+	_offer_pending_battles()
 
 
 ## `--stage=battle` : bataille France–Angleterre mise en scène, dialogue ouvert.
