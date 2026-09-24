@@ -477,12 +477,12 @@ def arms(f, sleeve, sleeve_code, glove, glove_code=C_EXACT):
         f.pivot(part, SHOULDER_Y, 0.0)
         s = side
         sections = [
-            ((0.13 * s, 1.44, 0.0), 0.06, 0.06),
-            ((0.19 * s, 1.41, 0.0), 0.07, 0.072),
-            ((0.225 * s, 1.3, -0.01), 0.058, 0.06),
-            ((0.24 * s, 1.13, -0.02), 0.047, 0.05),
-            ((0.245 * s, 1.04, 0.03), 0.048, 0.046),
-            ((0.25 * s, 0.96, 0.085), 0.034, 0.03),
+            ((0.13 * s, 1.44, 0.0), 0.065, 0.065),
+            ((0.19 * s, 1.41, 0.0), 0.078, 0.08),
+            ((0.225 * s, 1.3, -0.01), 0.066, 0.068),
+            ((0.24 * s, 1.13, -0.02), 0.053, 0.056),
+            ((0.245 * s, 1.04, 0.03), 0.054, 0.052),
+            ((0.25 * s, 0.96, 0.085), 0.038, 0.034),
         ]
         f.loft(sections, part, const(sleeve, sleeve_code), ring=7, side=(0.0, 0.0, 1.0))
         # Fist.
@@ -684,12 +684,12 @@ def lance(f, hand, part=P_WEAPON):
 
     def outline(x):
         u = (x + 1.0) * 0.5
-        y_top = 0.12 - 0.06 * u
-        y_bot = -0.12 + 0.06 * u
+        y_top = 0.08 - 0.06 * u
+        y_bot = -0.08 + 0.06 * u
         return y_bot, y_top
 
-    ex = Vector((0.0, 0.0, -0.25))
-    f.plate(outline, top + Vector((0, -0.1, -0.25)), (ex, Vector((0, 1, 0)), Vector((1, 0, 0))), 0.008,
+    ex = Vector((0.0, 0.0, -0.22))
+    f.plate(outline, top + Vector((0, -0.08, -0.22)), (ex, Vector((0, 1, 0)), Vector((1, 0, 0))), 0.008,
             part, C_LIVERY, WHITE, bend=0.02, cols=4, rows=2, back_code=C_LIVERY)
 
 
@@ -927,7 +927,8 @@ def _caparison(f, body, neck):
 
     f.add(verts, faces, P_HORSE, const(WHITE, C_ARMS), subdiv=1, uv_fn=uv_fn)
     crinet = [(c, rx + 0.02, rp + 0.02, rn + 0.015) for c, rx, rp, rn in neck]
-    f.loft(crinet, P_HNECK, const(WHITE, C_LIVERY), ring=8, side=(1.0, 0.0, 0.0), caps=(False, False))
+    # Always dyed (arms code, no arms painted): matches the trapper whatever the rider wears.
+    f.loft(crinet, P_HNECK, const(WHITE, C_ARMS), ring=8, side=(1.0, 0.0, 0.0), caps=(False, False))
 
 
 def rider(f, under, under_code, surcoat, helmet_style, armored):
