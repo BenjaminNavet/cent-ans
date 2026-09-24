@@ -6,20 +6,25 @@ chacun avec un `SOURCE.md` (source, URL, licence, auteur). Crédits ajoutés à 
 
 ## État
 
-- [ ] Polices EB Garamond, IM Fell English
-- [ ] Kenney Fantasy UI Borders, Castle Kit
-- [ ] Poly Haven HDRI (Belfast Open Field, Autumn Field Pure Sky)
+- [x] Polices EB Garamond, IM Fell English
+- [x] Kenney Fantasy UI Borders, Castle Kit
+- [x] Poly Haven HDRI (Belfast Open Field, Autumn Field Pure Sky)
 - [ ] Poly Haven arbres (Pine Tree 01, Fir Tree 01), herbe (Grass Medium 01/02) -> GLB
-- [ ] Parchment GUI (OpenGameArt)
-- [ ] Quaternius Ultimate Modular Men, Animated Animal (cheval), Medieval Village MegaKit
-- [ ] SFX Freesound (Church Bell, Swords Clash)
-- [ ] Musiques incompetech (Lord of the Land, Village Consort)
+  (re-téléchargement en cours après crash machine ; scripts dans `tools/blender_scripts/polyhaven_vegetation.*`)
+- [x] Parchment GUI (OpenGameArt)
+- [x] Quaternius : 4 personnages riggés (King, Adventurer, Hooded Adventurer, Farmer) + Horse, White Horse, Donkey
+- [ ] Quaternius Medieval Village MegaKit : **échec** (itch.io seulement, Google Drive des autres packs en quota dépassé)
+- [ ] SFX Freesound (Church Bell, Swords Clash) : **sautés** (téléchargement de l'original = connexion requise ; Chrome indisponible)
+- [x] Musiques incompetech (Lord of the Land, Village Consort)
+- [ ] Crédits `CREDITS.md`
 - [ ] Import Godot vérifié
 
 ## Prochaine étape
 
-Téléchargements directs (polices, Kenney, Poly Haven).
+Si interrompu : relancer le téléchargement Poly Haven (`api.polyhaven.com/files/<asset>`, blend
+2k pour l'herbe, 1k pour les arbres) dans le scratchpad puis
+`bash tools/blender_scripts/polyhaven_vegetation.sh <work_dir>`. Ensuite CREDITS.md, import Godot.
 
 ## Détail par asset
 
-(à compléter)
+Voir la fin du fichier une fois terminé (tableau complet).
