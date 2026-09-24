@@ -1979,7 +1979,7 @@ func _check_battle_deployment_f5c(scene: BattleScene) -> void:
 	var controller: DeploymentController = scene.deployment
 	if not _check(controller != null and controller.active and bool(scene.battle.call("is_deploying")), "deployment: phase should be open for a player battle"):
 		return
-	_check(controller.zone_view != null and controller.zone_view.get_child_count() == 2, "deployment: zone not drawn")
+	_check(controller.zone_view != null and controller.zone_view.get_child_count() == 1, "deployment: zone not drawn (A1-02: one shader mesh)")
 	_check(controller.banner != null and controller.banner.is_visible_in_tree(), "deployment: banner missing")
 	_check(float(scene.battle.call("get_elapsed")) == 0.0, "deployment: time should be frozen")
 	var zone: Dictionary = controller.zone
