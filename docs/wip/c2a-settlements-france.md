@@ -30,13 +30,13 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 | france_est | prov_champagne | fait (6) |
 | france_est | prov_franche_comte | fait (5) |
 | france_est | prov_lyonnais | fait (5) |
-| france_nord | prov_artois | à faire |
-| france_nord | prov_boulonnais | à faire |
-| france_nord | prov_ile_de_france | à faire |
-| france_nord | prov_normandie | à faire |
-| france_nord | prov_normandie_ouest | à faire |
-| france_nord | prov_picardie | à faire |
-| france_nord | prov_ponthieu | à faire |
+| france_nord | prov_artois | fait (5) |
+| france_nord | prov_boulonnais | fait (4) |
+| france_nord | prov_ile_de_france | fait (6) |
+| france_nord | prov_normandie | fait (5) |
+| france_nord | prov_normandie_ouest | fait (5) |
+| france_nord | prov_picardie | fait (5) |
+| france_nord | prov_ponthieu | fait (4) |
 | france_ouest | prov_anjou | à faire |
 | france_ouest | prov_bretagne | à faire |
 | france_ouest | prov_bretagne_ouest | à faire |
@@ -59,8 +59,10 @@ une city = capital_city, 3-6 colonies, buildings/factions existants, province ==
 - `set_bergerac` (Périgord) — ville close relevant du duché anglais avant sa reprise française de 1345, owner `fac_england`.
 - `set_pons` (Saintonge) — forteresse au sud de la Charente relevant du duché d'Aquitaine anglais jusqu'à la confiscation du 24 mai 1337, owner `fac_england`.
 - `set_besancon` (Franche-Comté) — cité impériale libre, distincte du comté de Bourgogne, owner `fac_empire`.
+- `set_evreux` (Normandie/Rouen) — comté navarrais de Philippe d'Évreux, owner `fac_navarre`.
+- `set_mortain` (Normandie/Caen) — comté cédé à Jeanne II de Navarre en 1336, owner `fac_navarre`.
 
 ## Prochaine étape
 
-Continuer avec `france_nord` (7 provinces), puis `france_ouest`, `languedoc`, `provence_alpes`.
+Continuer avec `france_ouest` (5 provinces), puis `languedoc`, `provence_alpes`.
 Commit `wip:` toutes les ~8 provinces.

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_rouen",
+    "province": "prov_normandie",
+    "kind": "city",
+    "name": { "display": "Rouen", "local": "Roem", "local_language": "ancien français" },
+    "lonlat": [1.0993, 49.4432],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "port": true,
+    "description": "Deuxième ville du royaume, port sur la Seine et capitale de l'apanage de Jean, duc de Normandie.",
+    "sources": ["Rouen"]
+  },
+  {
+    "id": "set_evreux",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": { "display": "Évreux", "local": "Évrues", "local_language": "ancien français" },
+    "lonlat": [1.1500, 49.0267],
+    "weight": 16,
+    "owner": "fac_navarre",
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_stone_walls"],
+    "port": false,
+    "description": "Capitale du comté d'Évreux, enclave normande de Philippe d'Évreux, roi consort de Navarre.",
+    "sources": ["Évreux", "Comté d'Évreux"]
+  },
+  {
+    "id": "set_chateau_gaillard",
+    "province": "prov_normandie",
+    "kind": "castle",
+    "name": { "display": "Château-Gaillard", "local": "Chastel Gaillart", "local_language": "ancien français" },
+    "lonlat": [1.4167, 49.2333],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": ["bld_castle"],
+    "port": false,
+    "description": "Forteresse de Richard Cœur de Lion dominant la Seine aux Andelys, où réside en exil David II, roi d'Écosse.",
+    "sources": ["Château-Gaillard", "David II d'Écosse"]
+  },
+  {
+    "id": "set_dieppe",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": { "display": "Dieppe", "local": "Dieppe", "local_language": "ancien français" },
+    "lonlat": [1.0764, 49.9219],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "port": true,
+    "description": "Port de pêche et d'armement sur la Manche, aux confins du pays de Caux.",
+    "sources": ["Dieppe (Seine-Maritime)"]
+  },
+  {
+    "id": "set_jumieges",
+    "province": "prov_normandie",
+    "kind": "abbey",
+    "name": { "display": "Jumièges", "local": "Gemmetico", "local_language": "ancien français" },
+    "lonlat": [0.6667, 49.4333],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "port": false,
+    "description": "Grande abbaye bénédictine sur la Seine, l'une des plus riches de Normandie.",
+    "sources": ["Abbaye de Jumièges"]
+  }
+]
