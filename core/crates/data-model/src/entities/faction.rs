@@ -131,6 +131,10 @@ pub struct Objective {
 pub struct VictoryConditions {
     pub end_year: i32,
     pub objectives: Vec<Objective>,
+    /// Seasons all objectives must hold in a row before victory (F9);
+    /// absent = immediate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hold_turns: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
 }

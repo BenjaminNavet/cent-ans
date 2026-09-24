@@ -133,6 +133,7 @@
   ],
   "victory": {
     "end_year": 1453,
+    "hold_turns": 20,
     "summary": "Bouter les Anglais hors du royaume, garder Paris et Reims, ramener les grands vassaux dans l'obéissance.",
     "objectives": [
       {

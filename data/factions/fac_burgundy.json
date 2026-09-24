@@ -75,6 +75,7 @@
   ],
   "victory": {
     "end_year": 1477,
+    "hold_turns": 12,
     "summary": "Bâtir entre France et Empire l'État bourguignon : les Pays-Bas, l'indépendance, le lien entre les deux Bourgognes.",
     "objectives": [
       {
