@@ -14,6 +14,7 @@ pub mod ids;
 pub mod load;
 pub mod map;
 pub mod movement_graph;
+pub mod navgrid;
 pub mod settlement_load;
 
 pub use common::{
@@ -71,4 +72,6 @@ pub use ids::{
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
+pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
+pub use navgrid::{MapRasters, NavGrid, ProvinceRaster, IMPASSABLE, PLAIN_COST};
 pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
