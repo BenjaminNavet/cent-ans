@@ -54,8 +54,13 @@ func _ready() -> void:
 
 	_tabs = TabBar.new()
 	_tabs.add_tab(ALL_TAB)
+	# Libellés courts pour que les 9 onglets tiennent sans défilement à 980 px ; le nom complet
+	# de la famille reste en infobulle.
+	_tabs.clip_tabs = false
 	for family in _families():
-		_tabs.add_tab(str(family[0]))
+		var short_label := str(family[2]) if family.size() > 2 else str(family[0])
+		_tabs.add_tab(short_label)
+		_tabs.set_tab_tooltip(_tabs.tab_count - 1, str(family[0]))
 	_tabs.tab_changed.connect(func(_tab: int) -> void: _refresh_list())
 	root.add_child(_tabs)
 
