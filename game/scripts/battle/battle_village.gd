@@ -348,6 +348,7 @@ func _build_reeds(data: Dictionary) -> void:
 	var mesh := _reed_mesh()
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.roughness = 0.9
 	if _snowy:

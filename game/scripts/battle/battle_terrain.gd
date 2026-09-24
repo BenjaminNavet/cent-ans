@@ -828,6 +828,9 @@ func _tree_tint(rng: RandomNumberGenerator) -> Color:
 					w *= 1.15
 				return Color(w * 1.95, w * 0.78, w * 0.36)
 	var autumn := rng.randf() < autumn_share
+	if autumn and site_render and season_key == "autumn":
+		# Automne marqué : roux, ocre et or (la texture des feuilles est verte : forte modulation).
+		return Color(rng.randf_range(1.5, 2.0), rng.randf_range(0.8, 1.05), rng.randf_range(0.3, 0.45))
 	if autumn:
 		return Color(rng.randf_range(1.05, 1.25), rng.randf_range(0.9, 1.0), rng.randf_range(0.55, 0.7))
 	var v := rng.randf_range(0.78, 1.12)
