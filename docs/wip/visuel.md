@@ -21,3 +21,4 @@ Captures « avant » : scratchpad de session (à copier dans docs/img/visuel/).
 - 5 h 30 : V3 et V4 fusionnés dans visual, main fusionné dans visual (conflit trivial battle_scene.gd), smoke 16/16 OK, pytest 65 OK.
 - Prochaine étape : fusion de visual dans main (orchestrateur de main), puis V4b (finitions batailles) et V2b (finitions carte).
 - d7336b5 : visual fusionné dans main par l'orchestrateur de main (smoke 16/16). V4b et V2b lancés depuis visual 7e91ce0.
+- ~8 h 30 → 10 h 10 : quota épuisé, V2b et V4b interrompus ; repris à 10 h 15 (V4b : 65403e8 LOD ; V2b : semis des haies et champs en cours).
