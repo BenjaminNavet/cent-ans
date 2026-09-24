@@ -261,7 +261,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
         })
         .map(|(id, _)| id.clone())
         .find(|id| {
-            ai::alignment::borders(&state, &data, &brabant, id)
+            state.are_neighbors(&data, &brabant, id)
                 && state.faction_power(id) < 0.5 * state.faction_power(&england)
                 && !state.is_at_war(id, &england)
         })

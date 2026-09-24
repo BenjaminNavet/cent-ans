@@ -247,15 +247,15 @@ impl CampaignState {
             .is_some_and(|until| *until > self.turn)
     }
 
-    /// `true` when `a` and `b` control adjacent provinces.
+    /// `true` when `a` and `b` control provinces bordering on the map (land
+    /// borders as armies walk them, [`crate::movement::land_neighbors`]: the
+    /// geometry graph, not the province files' partial `neighbors`).
     pub fn are_neighbors(&self, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
         self.provinces.iter().any(|(id, p)| {
             &p.controller == a
-                && data.provinces.get(id).is_some_and(|pd| {
-                    pd.neighbors
-                        .iter()
-                        .any(|n| self.provinces.get(n).is_some_and(|np| &np.controller == b))
-                })
+                && crate::movement::land_neighbors(data, id)
+                    .iter()
+                    .any(|n| self.provinces.get(n).is_some_and(|np| &np.controller == b))
         })
     }
 

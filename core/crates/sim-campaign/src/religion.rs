@@ -520,15 +520,13 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             continue;
         }
         if value > HERESY_SPREAD_THRESHOLD {
-            if let Some(pd) = data.provinces.get(id) {
-                for neighbor in &pd.neighbors {
-                    if state
-                        .provinces
-                        .get(neighbor)
-                        .is_some_and(|n| n.heresy_religion.is_none())
-                    {
-                        seeds.push((neighbor.clone(), heresy_religion.clone()));
-                    }
+            for neighbor in crate::movement::land_neighbors(data, id) {
+                if state
+                    .provinces
+                    .get(neighbor)
+                    .is_some_and(|n| n.heresy_religion.is_none())
+                {
+                    seeds.push((neighbor.clone(), heresy_religion.clone()));
                 }
             }
         }
