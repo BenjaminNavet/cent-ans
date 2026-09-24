@@ -43,6 +43,26 @@ func show_path(province_ids: PackedStringArray, camera_distance: float) -> void:
 	visible = true
 
 
+## Lot C5 : chemin sur le graphe des colonies. `points` : positions carte (x, z) des colonies
+## successives (départ compris) ; chaque arête est un segment subdivisé posé sur le relief.
+## `ids` : identifiants des colonies (retournés par `shown_ids`).
+func show_points(points_in: PackedVector2Array, camera_distance: float, ids: PackedStringArray = PackedStringArray()) -> void:
+	if points_in.size() < 2 or map_data == null:
+		hide_path()
+		return
+	_shown_ids = ids
+	var points := PackedVector2Array([points_in[0]])
+	for i in range(1, points_in.size()):
+		var previous := points_in[i - 1]
+		var target := points_in[i]
+		var steps := maxi(int(previous.distance_to(target) / SUBDIVISION_PX), 1)
+		for k in range(1, steps + 1):
+			points.append(previous.lerp(target, float(k) / steps))
+	var width := clampf(camera_distance * 0.005, 0.25, 8.0)
+	mesh = PolylineMesh.build([points], [width], map_data, lift)
+	visible = true
+
+
 func hide_path() -> void:
 	_shown_ids = PackedStringArray()
 	visible = false

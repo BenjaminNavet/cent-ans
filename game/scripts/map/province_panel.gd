@@ -11,6 +11,8 @@ signal create_army_requested(province_id: String, unit_indices: Array)
 signal build_requested(province_id: String, building_id: String)
 signal cancel_build_requested(province_id: String)
 signal court_requested
+## Lot C5 : clic sur une colonie de l'onglet « Colonies ».
+signal settlement_requested(settlement_id: String)
 signal closed
 
 const TERRAIN_LABELS := {
@@ -66,6 +68,12 @@ var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
 ## H9 : section « La Table » (onglet Ville, sous les classes), construite en code.
 var table_section: TableSection
+## Lot C5 : onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
+## renvoie les lignes `[{id, name, kind, controller, owner, garrison_units, garrison_strength,
+## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
+var settlements_list: VBoxContainer
+var settlement_rows_provider: Callable = Callable()
+var _label_of: Callable = Callable()
 
 
 func _ready() -> void:
@@ -92,6 +100,7 @@ func _ready() -> void:
 		tabs.set_tab_icon(1, IconLibrary.get_icon("cat_class"))
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
+	_build_settlements_tab()  # C5
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -135,6 +144,8 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 		recruit_panel.hide()
 	_fill_city(city, is_player_owner)
 	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
+	_label_of = label_of
+	_fill_settlements()  # C5
 	show()
 
 
@@ -247,17 +258,7 @@ static func _gauge_color(ratio01: float, invert: bool) -> Color:
 
 
 func _fill_buildings(buildings: Array) -> void:
-	for child in buildings_list.get_children():
-		child.queue_free()
-	if buildings.is_empty():
-		var label := Label.new()
-		label.text = "Aucun bâtiment."
-		buildings_list.add_child(label)
-		return
-	for entry in buildings:
-		var building_id: String = str(entry.get("id", ""))
-		var text := "%s (entretien %s ℔)" % [str(entry.get("name", building_id)), _thousands(int(entry.get("upkeep", 0)))]
-		buildings_list.add_child(IconChip.create(building_id, text, RichTooltip.building(building_id, entry), ROW_ICON, 14, "building"))
+	PanelWidgets.fill_buildings(buildings_list, buildings)
 
 
 func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void:
@@ -272,92 +273,20 @@ func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void
 ## `buildable` avec `available=false, reason="déjà construit"` ; déjà visibles dans la liste
 ## des bâtiments, inutile de les répéter ici).
 func _fill_buildable(buildable: Array, is_player_owner: bool, built_ids: Array = []) -> void:
-	for child in buildable_list.get_children():
-		child.queue_free()
-	if not is_player_owner:
-		return
-	var rows: Array = []
-	for row in buildable:
-		if not built_ids.has(str(row.get("building", ""))):
-			rows.append(row)
-	if rows.is_empty():
-		var label := Label.new()
-		label.text = "—"
-		buildable_list.add_child(label)
-		return
-	for row in rows:
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 8)
-		var button := RichButton.new()
-		button.text = "%s — %s ℔ / %d tour(s)" % [str(row.get("name", row.get("building", "?"))), _thousands(int(row.get("cost", 0))), int(row.get("turns", 1))]
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		var available: bool = bool(row.get("available", false))
-		button.disabled = not available
-		var building_id: String = str(row.get("building", ""))
-		IconLibrary.decorate_button(button, building_id, int(ROW_ICON), "building")
-		button.pressed.connect(func() -> void: build_requested.emit(province_id, building_id))
-		line.add_child(button)
-		if not available:
-			var reason := Label.new()
-			reason.text = str(row.get("reason", "Indisponible"))
-			reason.add_theme_font_size_override("font_size", 13)
-			reason.add_theme_color_override("font_color", Color(0.55, 0.20, 0.15))
-			line.add_child(reason)
-		button.tooltip_text = RichTooltip.building(building_id, row)
-		buildable_list.add_child(line)
+	PanelWidgets.fill_buildable(buildable_list, buildable, is_player_owner, built_ids,
+		func(building_id: String) -> void: build_requested.emit(province_id, building_id))
 
 
 func _fill_garrison(garrison: Array, selectable: bool) -> void:
-	for child in garrison_list.get_children():
-		child.queue_free()
-	_garrison_checks.clear()
 	garrison_header.text = "Garnison (%d unité%s)" % [garrison.size(), "s" if garrison.size() > 1 else ""]
-	for i in garrison.size():
-		var unit: Dictionary = garrison[i]
-		var text := "%s — %d/%d, moral %d" % [
-			unit_label(unit), int(unit.get("strength", 0)),
-			int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
-		var unit_type: String = str(unit.get("unit_type", ""))
-		if selectable:
-			var check := CheckBox.new()
-			check.text = text
-			check.button_pressed = true
-			check.set_script(RichButton)
-			check.theme_type_variation = &"CheckBox"
-			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
-			check.tooltip_text = RichTooltip.unit(unit_type, unit)
-			garrison_list.add_child(check)
-			_garrison_checks.append(check)
-		else:
-			garrison_list.add_child(IconChip.create(unit_type, text, RichTooltip.unit(unit_type, unit), ROW_ICON, 14, "unit"))
+	_garrison_checks = PanelWidgets.fill_garrison(garrison_list, garrison, selectable)
 	create_army_button.disabled = garrison.is_empty()
 
 
 func _fill_recruitable(recruitable: Array) -> void:
-	for child in recruit_list.get_children():
-		child.queue_free()
 	recruit_button.disabled = recruitable.is_empty()
-	for row in recruitable:
-		var line := HBoxContainer.new()
-		var button := RichButton.new()
-		button.text = "%s — %s ℔ / %s ℔" % [str(row.get("name", row.get("unit_type", "?"))), _thousands(int(row.get("cost", 0))), _thousands(int(row.get("upkeep", 0)))]
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		var available: bool = bool(row.get("available", false))
-		button.disabled = not available
-		var unit_type: String = str(row.get("unit_type", ""))
-		IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
-		button.tooltip_text = RichTooltip.unit(unit_type, row)
-		button.pressed.connect(func() -> void: recruit_requested.emit(province_id, unit_type))
-		line.add_child(button)
-		if not available:
-			var reason := Label.new()
-			reason.text = str(row.get("reason", "Indisponible"))
-			reason.add_theme_font_size_override("font_size", 13)
-			reason.add_theme_color_override("font_color", Color(0.55, 0.20, 0.15))
-			line.add_child(reason)
-		recruit_list.add_child(line)
+	PanelWidgets.fill_recruitable(recruit_list, recruitable,
+		func(unit_type: String) -> void: recruit_requested.emit(province_id, unit_type))
 
 
 func _on_create_army() -> void:
@@ -374,12 +303,58 @@ func show_ville_tab() -> void:
 	tabs.current_tab = 1
 
 
+# --- Lot C5 : onglet « Colonies » ----------------------------------------------------
+
+
+func _build_settlements_tab() -> void:
+	var scroll := ScrollContainer.new()
+	scroll.name = "Colonies"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(scroll)
+	settlements_list = VBoxContainer.new()
+	settlements_list.name = "SettlementsList"
+	settlements_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settlements_list.add_theme_constant_override("separation", 4)
+	scroll.add_child(settlements_list)
+	tabs.set_tab_icon(tabs.get_tab_count() - 1, IconLibrary.get_icon("cat_building"))
+
+
+func show_settlements_tab() -> void:
+	tabs.current_tab = tabs.get_tab_count() - 1
+
+
+func _fill_settlements() -> void:
+	PanelWidgets.clear(settlements_list)
+	var rows: Array = settlement_rows_provider.call(province_id) if settlement_rows_provider.is_valid() else []
+	if rows.is_empty():
+		PanelWidgets.placeholder(settlements_list, "Colonies indisponibles.")
+		return
+	for row in rows:
+		settlements_list.add_child(_make_settlement_row(row))
+
+
+func _make_settlement_row(row: Dictionary) -> Control:
+	var settlement_id := str(row.get("id", ""))
+	var button := RichButton.new()
+	button.name = settlement_id
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var kind := str(row.get("kind", ""))
+	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)
+	var text := "%s — %s, %s" % [str(row.get("name", settlement_id)), str(SettlementPanel.KIND_LABELS.get(kind, kind)), controller]
+	text += "\n    garnison : %d unité(s), %s hommes" % [int(row.get("garrison_units", 0)), _thousands(int(row.get("garrison_strength", 0)))]
+	var siege: Dictionary = row.get("siege", {}) if row.get("siege") is Dictionary else {}
+	if not siege.is_empty():
+		text += " — assiégée par %s (%d tour(s))" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), int(siege.get("turns_left", 0))]
+	button.text = text
+	button.tooltip_text = "Ouvrir le panneau de la colonie et centrer la carte"
+	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
+	return button
+
+
 ## Nom d'unité : `name` si la simulation le fournit, sinon l'id rendu lisible.
 static func unit_label(unit: Dictionary) -> String:
-	var name: String = str(unit.get("name", ""))
-	if name != "":
-		return name
-	return str(unit.get("unit_type", "?")).trim_prefix("unit_").capitalize()
+	return PanelWidgets.unit_label(unit)
 
 
 static func _faction_label(faction_id: String, display_name: String, label_of: Callable) -> String:

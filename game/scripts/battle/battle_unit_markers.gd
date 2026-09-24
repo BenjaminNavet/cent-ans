@@ -7,6 +7,9 @@ extends Control
 ## dessine tous les repères ; `_has_point` ne le rend cliquable que sur eux, le reste du champ
 ## reste à la scène. Clic gauche : sélection ; clic droit sur un repère ennemi : attaque.
 ## Deux repères qui se chevauchent sont dépilés vers le haut (un trait les relie à leur troupe).
+## Lot B7 : en vue très lointaine (distance de caméra au-delà de `CLUSTER_ON`), les repères
+## proches d'un même camp se regroupent en une pastille (couleur du camp, nombre de régiments,
+## effectif et moral cumulés) ; clic = sélection de tout le groupe. De près, rien ne change.
 ## Aucune règle : tout vient du dictionnaire de `BattleSim.get_units()` ; seuils d'affichage
 ## (moral bas, épuisement) purement visuels.
 
@@ -28,12 +31,21 @@ const PARCHMENT := Color(0.95, 0.90, 0.78)
 const GOLD := Color(1.0, 0.82, 0.22)
 const ROUT_RED := Color(0.85, 0.12, 0.08)
 const EXHAUSTED_FATIGUE := 60.0  # même seuil que la simulation (vitesse réduite)
+## B7 : regroupement en vue lointaine (distance de caméra en m, hystérésis contre le
+## clignotement) ; deux troupes d'un camp à moins de `CLUSTER_PX` pixels écran se regroupent.
+const CLUSTER_ON := 480.0
+const CLUSTER_OFF := 420.0
+const CLUSTER_PX := 70.0
+const CLUSTER_R := 15.0  # rayon de la pastille de groupe
 
 var icon_library: Node = null
 var side_colors: Dictionary = {}
 var player_side: String = "attacker"
-## id -> {rect, anchor, unit} ; reconstruit à chaque `update`.
+## id -> {rect, anchor, unit, units} ; reconstruit à chaque `update`. Un groupe (B7) est rangé
+## sous l'id de son premier régiment ; `units` liste les unités du repère (une seule hors groupe).
 var _placed: Dictionary = {}
+var _key_of: Dictionary = {}  # id de régiment -> clé de son repère dans `_placed`
+var clustered: bool = false  # B7 : vue lointaine, repères regroupés
 var _order: Array[int] = []
 var _selected: Array = []
 var hovered: int = -1  # repère sous la souris
@@ -54,18 +66,23 @@ func setup(colors: Dictionary, p_player_side: String) -> void:
 
 
 ## `anchors` : id -> position écran du haut de la troupe (absent = hors champ de la caméra).
-func update(units: Array, anchors: Dictionary, selected: Array) -> void:
+## `camera_distance` (B7) : au-delà de `CLUSTER_ON`, les repères proches se regroupent.
+func update(units: Array, anchors: Dictionary, selected: Array, camera_distance: float = 0.0) -> void:
 	_selected = selected
 	_placed.clear()
+	_key_of.clear()
 	_order.clear()
 	if not visible:
 		return
+	clustered = camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
 	var entries: Array = []
 	for unit in units:
 		var id := int(unit["id"])
 		if not bool(unit["present"]) or not anchors.has(id):
 			continue
-		entries.append([id, anchors[id], unit])
+		entries.append([id, anchors[id], unit, [unit]])
+	if clustered:
+		entries = cluster_entries(entries)
 	# Les plus proches de la caméra (bas de l'écran) d'abord : ils gardent leur place.
 	entries.sort_custom(func(a: Array, b: Array) -> bool: return (a[1] as Vector2).y > (b[1] as Vector2).y)
 	var rects: Array[Rect2] = []
@@ -88,11 +105,44 @@ func update(units: Array, anchors: Dictionary, selected: Array) -> void:
 				placed = not _overlaps(rect, rects)
 				level += 1
 		rects.append(rect)
-		_placed[entry[0]] = {"rect": rect, "anchor": anchor, "unit": entry[2]}
+		_placed[entry[0]] = {"rect": rect, "anchor": anchor, "unit": entry[2], "units": entry[3]}
+		for member in entry[3]:
+			_key_of[int(member["id"])] = entry[0]
 		_order.append(entry[0])
 	var mouse := get_local_mouse_position()
 	hovered = marker_at(mouse)
 	queue_redraw()
+
+
+## B7 : regroupe les entrées [id, ancre, unité, unités] d'un même camp dont les ancres écran sont
+## à moins de `CLUSTER_PX` du centre d'un groupe (glouton, dans l'ordre reçu : stable d'une image
+## à l'autre). Un groupe garde l'id et l'unité de son premier régiment, prend l'ancre moyenne et
+## la liste de ses unités.
+static func cluster_entries(entries: Array) -> Array:
+	var groups: Array = []  # [camp, somme des ancres, unités]
+	for entry in entries:
+		var side := str(entry[2]["side"])
+		var anchor: Vector2 = entry[1]
+		var best := -1
+		var best_distance := CLUSTER_PX
+		for i in groups.size():
+			if groups[i][0] != side:
+				continue
+			var center: Vector2 = groups[i][1] / float((groups[i][2] as Array).size())
+			var distance := center.distance_to(anchor)
+			if distance < best_distance:
+				best_distance = distance
+				best = i
+		if best < 0:
+			groups.append([side, anchor, [entry[2]]])
+		else:
+			groups[best][1] += anchor
+			(groups[best][2] as Array).append(entry[2])
+	var result: Array = []
+	for group in groups:
+		var members: Array = group[2]
+		result.append([int(members[0]["id"]), group[1] / float(members.size()), members[0], members])
+	return result
 
 
 ## Chevauchement avec un repère déjà placé (pastilles d'état comprises, à droite).
@@ -108,8 +158,18 @@ func marker_count() -> int:
 	return _placed.size()
 
 
+## Rectangle du repère d'un régiment (celui de son groupe s'il est regroupé, B7).
 func marker_rect(unit_id: int) -> Rect2:
-	return (_placed[unit_id]["rect"] as Rect2) if _placed.has(unit_id) else Rect2()
+	return (_placed[_key_of[unit_id]]["rect"] as Rect2) if _key_of.has(unit_id) else Rect2()
+
+
+## Ids des régiments d'un repère (plusieurs pour un groupe, B7).
+func marker_members(key: int) -> Array[int]:
+	var ids: Array[int] = []
+	if _placed.has(key):
+		for unit in _placed[key]["units"]:
+			ids.append(int(unit["id"]))
+	return ids
 
 
 ## Id du repère sous `point` (coordonnées locales), -1 sinon ; le dernier dessiné l'emporte.
@@ -132,7 +192,10 @@ func _gui_input(event: InputEvent) -> void:
 		if id < 0:
 			return
 		if button.button_index == MOUSE_BUTTON_LEFT:
-			marker_clicked.emit(id, button.shift_pressed)
+			# Groupe (B7) : clic = tout le groupe sélectionné.
+			var members := marker_members(id)
+			for i in members.size():
+				marker_clicked.emit(members[i], button.shift_pressed or i > 0)
 			accept_event()
 		elif button.button_index == MOUSE_BUTTON_RIGHT:
 			marker_right_clicked.emit(id)
@@ -148,6 +211,7 @@ func toggle() -> void:
 	visible = not visible
 	if not visible:
 		_placed.clear()
+		_key_of.clear()
 		_order.clear()
 
 
@@ -165,8 +229,11 @@ func _draw() -> void:
 			draw_line(tip_point, anchor, Color(INK, 0.7), 1.0)
 			draw_circle(anchor, 2.0, Color(INK, 0.7))
 	for id in _order:
-		_draw_marker(id, _placed[id], blink)
-	var focus := hovered if hovered >= 0 else world_hover
+		if (_placed[id]["units"] as Array).size() > 1:
+			_draw_cluster(_placed[id], blink)
+		else:
+			_draw_marker(id, _placed[id], blink)
+	var focus := hovered if hovered >= 0 else int(_key_of.get(world_hover, -1))
 	if _placed.has(focus):
 		_draw_name(_placed[focus])
 
@@ -221,6 +288,58 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var badges := state_badges(unit)
 	for i in badges.size():
 		draw_badge(self, badges[i], Vector2(plaque.end.x + 1.0, plaque.position.y + 1.0 + i * 13.0), blink)
+
+
+## B7 : pastille de groupe (vue lointaine) : disque aux couleurs du camp, sur deux disques
+## décalés (pile), nombre de régiments au centre ; effectif et moral cumulés dessous.
+func _draw_cluster(entry: Dictionary, blink: bool) -> void:
+	var members: Array = entry["units"]
+	var rect: Rect2 = entry["rect"]
+	var color: Color = side_colors.get(str(entry["unit"]["side"]), Color.GRAY)
+	var soldiers := 0.0
+	var initial := 0.0
+	var morale := 0.0
+	var routing := false
+	var is_selected := false
+	var general := false
+	for unit in members:
+		var n := float(unit["soldiers"])
+		soldiers += n
+		initial += float(unit["initial_soldiers"])
+		morale += float(unit["morale"]) * n
+		routing = routing or str(unit["state"]) == "routing"
+		is_selected = is_selected or _selected.has(int(unit["id"]))
+		general = general or bool(unit["is_general"])
+	var key := int(entry["unit"]["id"])
+	var is_hovered: bool = key == hovered or int(_key_of.get(world_hover, -1)) == key
+	var frame := ROUT_RED if routing and blink else color
+	var center := Vector2(rect.position.x + WIDTH * 0.5, rect.position.y + PLAQUE * 0.5)
+	var tip_y := rect.end.y
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(center.x - 6.0, tip_y - TIP), Vector2(center.x + 6.0, tip_y - TIP), Vector2(center.x, tip_y),
+	]), frame)
+	# Pile : deux disques en retrait, puis la pastille.
+	for offset in [Vector2(5, -4), Vector2(2.5, -2)]:
+		draw_circle(center + offset, CLUSTER_R, frame.darkened(0.35))
+		draw_arc(center + offset, CLUSTER_R, 0, TAU, 24, INK, 1.0)
+	if is_selected:
+		draw_arc(center, CLUSTER_R + 3.0, 0, TAU, 28, GOLD, 2.5)
+	elif is_hovered:
+		draw_arc(center, CLUSTER_R + 2.0, 0, TAU, 28, Color(1, 1, 1, 0.85), 1.5)
+	draw_circle(center, CLUSTER_R, frame)
+	draw_circle(center, CLUSTER_R - 3.0, PARCHMENT if not routing else Color(0.95, 0.78, 0.72))
+	draw_arc(center, CLUSTER_R, 0, TAU, 24, INK, 1.0)
+	var font := get_theme_default_font()
+	var text := str(members.size())
+	var size := 15
+	var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size)
+	draw_string(font, center + Vector2(-text_size.x * 0.5, text_size.y * 0.35), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, INK)
+	if general:
+		_draw_star(center + Vector2(-CLUSTER_R + 2.0, -CLUSTER_R + 2.0), 5.0)
+	var y := rect.position.y + PLAQUE + 2.0
+	_draw_bar(Rect2(rect.position.x, y, WIDTH, BAR_H), clampf(soldiers / maxf(initial, 1.0), 0.0, 1.0), Color(0.93, 0.9, 0.8))
+	var ratio := clampf(morale / maxf(soldiers, 1.0) / 100.0, 0.0, 1.0)
+	_draw_bar(Rect2(rect.position.x, y + BAR_H + 1.0, WIDTH, MORALE_H), ratio, morale_color(ratio))
 
 
 func _draw_bar(rect: Rect2, ratio: float, color: Color) -> void:
@@ -298,6 +417,12 @@ func _draw_name(entry: Dictionary) -> void:
 	var font := get_theme_default_font()
 	var size := 13
 	var text := "%s — %d" % [str(unit["name"]), int(unit["soldiers"])]
+	var members: Array = entry["units"]
+	if members.size() > 1:
+		var total := 0
+		for member in members:
+			total += int(member["soldiers"])
+		text = "%d régiments — %d hommes" % [members.size(), total]
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var box := Rect2(rect.get_center().x - width * 0.5 - 5.0, rect.position.y - 22.0, width + 10.0, 18.0)
 	draw_rect(box, Color(PARCHMENT, 0.95))
