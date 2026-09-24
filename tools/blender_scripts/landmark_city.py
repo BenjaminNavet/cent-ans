@@ -75,6 +75,7 @@ class Plan:
     """Radial warp and the plan elements converted to world units."""
 
     def __init__(self, landmark, meters_per_px):
+        """Initialise from the given parameters."""
         self.data = landmark
         scale = landmark["scale"]
         self.a = 1.0 / scale["center_meters_per_unit"]
@@ -128,6 +129,7 @@ class SiegePlan(Plan):
     """
 
     def __init__(self, landmark, meters_per_px):
+        """Initialise from the given parameters."""
         super().__init__(landmark, meters_per_px)
         siege = landmark["siege"]
         self.monument_scale = 1.0
@@ -166,7 +168,9 @@ def siege_subset(landmark):
         cy = sum(p[1] for p in poly) / len(poly)
         return any(g.point_in_polygon(cx, cy, zone) for zone in zones)
 
-    subset["open_spaces"] = [space for space in landmark.get("open_spaces", []) if kept(space)]
+    subset["open_spaces"] = [
+        space for space in landmark.get("open_spaces", []) if kept(space)
+    ]
     return subset
 
 
@@ -225,9 +229,12 @@ def build_ground(plan, layers, rng):
         poly = plan.polygon(space["polygon"])
         kind = space.get("kind", "square")
         opens.append(poly)
-        mat = {"meadow": "Grass", "garden": "Garden", "cemetery": "Garden", "vineyard": "Vine"}.get(
-            kind, "Paving"
-        )
+        mat = {
+            "meadow": "Grass",
+            "garden": "Garden",
+            "cemetery": "Garden",
+            "vineyard": "Vine",
+        }.get(kind, "Paving")
         ground.add(mat, *g.flat(poly, Z_ISLAND + 0.002))
     return waters, islands, opens
 
@@ -236,6 +243,7 @@ class Site:
     """Queries on the warped plan: land, open spaces, monuments, walls, streets."""
 
     def __init__(self, plan, waters, islands, opens):
+        """Initialise from the given parameters."""
         self.plan = plan
         self.waters = waters
         self.islands = islands
@@ -290,10 +298,18 @@ def build_streets(plan, site, layers):
         half = street.get("width_m", 10.0) * plan.a * 0.6
         site.streets.append((line, half))
         normals = g.polyline_normals(line)
-        verts = [(x + nx * half, y + ny * half, Z_STREET) for (x, y), (nx, ny) in zip(line, normals, strict=True)]
-        verts += [(x - nx * half, y - ny * half, Z_STREET) for (x, y), (nx, ny) in zip(line, normals, strict=True)]
+        verts = [
+            (x + nx * half, y + ny * half, Z_STREET)
+            for (x, y), (nx, ny) in zip(line, normals, strict=True)
+        ]
+        verts += [
+            (x - nx * half, y - ny * half, Z_STREET)
+            for (x, y), (nx, ny) in zip(line, normals, strict=True)
+        ]
         n = len(line)
-        layers["ground"].add("Street", verts, [(n + i, n + i + 1, i + 1, i) for i in range(n - 1)])
+        layers["ground"].add(
+            "Street", verts, [(n + i, n + i + 1, i + 1, i) for i in range(n - 1)]
+        )
 
 
 def wall_units(plan, meters):
@@ -314,9 +330,25 @@ def build_wall(plan, site, wall, layer):
         length = math.hypot(bx - ax, by - ay)
         angle = math.atan2(by - ay, bx - ax)
         mid = ((ax + bx) / 2, (ay + by) / 2)
-        layer.add(mat, *g.box(mid[0], mid[1], -g.FOUNDATION, length + thick, thick, h + g.FOUNDATION, angle), anchor=mid)
+        layer.add(
+            mat,
+            *g.box(
+                mid[0],
+                mid[1],
+                -g.FOUNDATION,
+                length + thick,
+                thick,
+                h + g.FOUNDATION,
+                angle,
+            ),
+            anchor=mid,
+        )
         # Wall-walk parapet (slightly wider) for a crenellated silhouette.
-        layer.add(mat, *g.box(mid[0], mid[1], h, length * 0.7, thick * 1.25, h * 0.12, angle), anchor=mid)
+        layer.add(
+            mat,
+            *g.box(mid[0], mid[1], h, length * 0.7, thick * 1.25, h * 0.12, angle),
+            anchor=mid,
+        )
     # Towers along the plan length.
     dense = g.densify(pts, 5.0, wall.get("closed", False))
     spacing = wall.get("tower_spacing_m", 80.0)
@@ -332,26 +364,69 @@ def build_wall(plan, site, wall, layer):
             tx, ty = plan.warp(x1, y1)
             th = h * 1.35
             if round_towers:
-                layer.add(mat, *g.cylinder(tx, ty, -g.FOUNDATION, tr, th + g.FOUNDATION, 8), anchor=(tx, ty))
-                layer.add("Slate", *g.cone(tx, ty, th, tr * 1.1, tr * 2.2, 8), anchor=(tx, ty))
+                layer.add(
+                    mat,
+                    *g.cylinder(tx, ty, -g.FOUNDATION, tr, th + g.FOUNDATION, 8),
+                    anchor=(tx, ty),
+                )
+                layer.add(
+                    "Slate", *g.cone(tx, ty, th, tr * 1.1, tr * 2.2, 8), anchor=(tx, ty)
+                )
             else:
                 angle = math.atan2(y1 - y0, x1 - x0)
-                layer.add(mat, *g.box(tx, ty, -g.FOUNDATION, tr * 1.8, tr * 1.8, th + g.FOUNDATION, angle), anchor=(tx, ty))
-                layer.add(mat, *g.box(tx, ty, th, tr * 2.0, tr * 2.0, h * 0.14, angle), anchor=(tx, ty))
+                layer.add(
+                    mat,
+                    *g.box(
+                        tx,
+                        ty,
+                        -g.FOUNDATION,
+                        tr * 1.8,
+                        tr * 1.8,
+                        th + g.FOUNDATION,
+                        angle,
+                    ),
+                    anchor=(tx, ty),
+                )
+                layer.add(
+                    mat,
+                    *g.box(tx, ty, th, tr * 2.0, tr * 2.0, h * 0.14, angle),
+                    anchor=(tx, ty),
+                )
     # Gates: two towers and a gatehouse.
     for gate in wall.get("gates", []):
         gx, gy = plan.warp(*gate["at"])
-        best = min(range(len(line) - 1), key=lambda k: g.distance_to_segment(gx, gy, *line[k], *line[k + 1]))
+        best = min(
+            range(len(line) - 1),
+            key=lambda k: g.distance_to_segment(gx, gy, *line[k], *line[k + 1]),
+        )
         (ax, ay), (bx, by) = line[best], line[best + 1]
         angle = math.atan2(by - ay, bx - ax)
         c, s = math.cos(angle), math.sin(angle)
         gh = h * 1.6
-        layer.add(mat, *g.box(gx, gy, -g.FOUNDATION, tr * 3.2, tr * 2.6, gh + g.FOUNDATION, angle), anchor=(gx, gy))
-        layer.add("Slate", *g.hip_roof(gx, gy, gh, tr * 3.2, tr * 2.6, tr * 1.6, angle), anchor=(gx, gy))
+        layer.add(
+            mat,
+            *g.box(gx, gy, -g.FOUNDATION, tr * 3.2, tr * 2.6, gh + g.FOUNDATION, angle),
+            anchor=(gx, gy),
+        )
+        layer.add(
+            "Slate",
+            *g.hip_roof(gx, gy, gh, tr * 3.2, tr * 2.6, tr * 1.6, angle),
+            anchor=(gx, gy),
+        )
         for side in (-1, 1):
             px, py = gx + c * side * tr * 1.9, gy + s * side * tr * 1.9
-            layer.add(mat, *g.cylinder(px, py, -g.FOUNDATION, tr * 1.1, gh * 1.1 + g.FOUNDATION, 8), anchor=(gx, gy))
-            layer.add("Slate", *g.cone(px, py, gh * 1.1, tr * 1.2, tr * 2.4, 8), anchor=(gx, gy))
+            layer.add(
+                mat,
+                *g.cylinder(
+                    px, py, -g.FOUNDATION, tr * 1.1, gh * 1.1 + g.FOUNDATION, 8
+                ),
+                anchor=(gx, gy),
+            )
+            layer.add(
+                "Slate",
+                *g.cone(px, py, gh * 1.1, tr * 1.2, tr * 2.4, 8),
+                anchor=(gx, gy),
+            )
     # Ditch: a water strip on the outer side.
     if wall.get("ditch", False):
         normals = g.polyline_normals(line)
@@ -360,7 +435,9 @@ def build_wall(plan, site, wall, layer):
             # Outer side = away from the centre.
             sign = 1.0 if (nx * x + ny * y) > 0 else -1.0
             for offset in (0.035, 0.075):
-                verts.append((x + sign * nx * offset, y + sign * ny * offset, Z_WATER + 0.004))
+                verts.append(
+                    (x + sign * nx * offset, y + sign * ny * offset, Z_WATER + 0.004)
+                )
         n = len(line)
         faces = [(2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2) for i in range(n - 1)]
         layer.add("Water", verts, faces)
@@ -378,14 +455,28 @@ def build_bridge(plan, site, bridge, layer, rng):
     stone = bridge.get("material", "stone") == "stone"
     mat = "WallStone" if stone else "Wood"
     deck = 0.03
-    layer.add(mat, *g.box(mid[0], mid[1], deck - 0.012, length + 0.02, half * 2, 0.014, angle), anchor=mid)
-    layer.add("Street", *g.box(mid[0], mid[1], deck + 0.002, length + 0.02, half * 1.2, 0.001, angle), anchor=mid)
+    layer.add(
+        mat,
+        *g.box(mid[0], mid[1], deck - 0.012, length + 0.02, half * 2, 0.014, angle),
+        anchor=mid,
+    )
+    layer.add(
+        "Street",
+        *g.box(mid[0], mid[1], deck + 0.002, length + 0.02, half * 1.2, 0.001, angle),
+        anchor=mid,
+    )
     c, s = math.cos(angle), math.sin(angle)
     piers = max(2, int(length / 0.06))
     for k in range(1, piers):
         t = k / piers - 0.5
         px, py = mid[0] + c * t * length, mid[1] + s * t * length
-        layer.add(mat, *g.box(px, py, -0.02, 0.012 if stone else 0.006, half * 2.1, deck + 0.01, angle), anchor=mid)
+        layer.add(
+            mat,
+            *g.box(
+                px, py, -0.02, 0.012 if stone else 0.006, half * 2.1, deck + 0.01, angle
+            ),
+            anchor=mid,
+        )
     if bridge.get("inhabited", False):
         step = 0.034
         count = int(length / step)
@@ -396,17 +487,34 @@ def build_bridge(plan, site, bridge, layer, rng):
                 hy = mid[1] + s * t * length + c * side * half * 0.62
                 depth = half * 0.75
                 height = house_height(plan, rng) * 0.9
-                house(layer, hx, hy, deck, step * 0.92, depth, height, angle, rng, anchor=mid)
+                house(
+                    layer,
+                    hx,
+                    hy,
+                    deck,
+                    step * 0.92,
+                    depth,
+                    height,
+                    angle,
+                    rng,
+                    anchor=mid,
+                )
 
 
 def build_monument(plan, site, monument, layers, variant=""):
     """Place a dedicated mesh; returns nothing (adds to the right layer)."""
     x, y = plan.warp(*monument["at"])
     k = plan.a * monument.get("scale", plan.monument_scale)
-    transform = g.Transform((x, y), math.radians(monument.get("angle_deg", 0.0)), k, k * plan.height_scale)
+    transform = g.Transform(
+        (x, y), math.radians(monument.get("angle_deg", 0.0)), k, k * plan.height_scale
+    )
     builder = monuments.BUILDERS[monument["model"]]
     parts = builder(monument.get("size", 1.0), variant)
-    layer_name = monument["id"] if not active(monument) or monument.get("variant_from_year") else "landmarks"
+    layer_name = (
+        monument["id"]
+        if not active(monument) or monument.get("variant_from_year")
+        else "landmarks"
+    )
     if variant:
         layer_name = f"{monument['id']}__{variant}"
     layer = layers.setdefault(layer_name, g.Layer(layer_name))
@@ -447,10 +555,29 @@ def house(layer, x, y, z, width, depth, height, angle, rng, anchor=None, roof=No
     anchor = anchor or (x, y)
     wall = pick(rng, WALLS)
     roof = roof or pick(rng, ROOFS)
-    layer.add(wall, *g.box(x, y, z - g.FOUNDATION, width, depth, height + g.FOUNDATION, angle), anchor=anchor, color=color)
+    layer.add(
+        wall,
+        *g.box(x, y, z - g.FOUNDATION, width, depth, height + g.FOUNDATION, angle),
+        anchor=anchor,
+        color=color,
+    )
     pitch = width * rng.uniform(0.75, 1.0)
     # Gable to the street: ridge along the depth (local y).
-    layer.add(roof, *g.gable_roof(x, y, z + height, depth, width, pitch, angle + math.pi / 2, overhang=width * 0.06), anchor=anchor, color=color)
+    layer.add(
+        roof,
+        *g.gable_roof(
+            x,
+            y,
+            z + height,
+            depth,
+            width,
+            pitch,
+            angle + math.pi / 2,
+            overhang=width * 0.06,
+        ),
+        anchor=anchor,
+        color=color,
+    )
 
 
 def voronoi_cells(radius, rng):
@@ -465,11 +592,18 @@ def voronoi_cells(radius, rng):
                 seeds.append((x, y))
     buckets = {}
     for index, (x, y) in enumerate(seeds):
-        buckets.setdefault((int(math.floor(x / CELL)), int(math.floor(y / CELL))), []).append(index)
+        buckets.setdefault(
+            (int(math.floor(x / CELL)), int(math.floor(y / CELL))), []
+        ).append(index)
     cells = []
     for index, (x, y) in enumerate(seeds):
         half = CELL * 1.6
-        poly = [(x - half, y - half), (x + half, y - half), (x + half, y + half), (x - half, y + half)]
+        poly = [
+            (x - half, y - half),
+            (x + half, y - half),
+            (x + half, y + half),
+            (x - half, y + half),
+        ]
         bx, by = int(math.floor(x / CELL)), int(math.floor(y / CELL))
         for dx in range(-2, 3):
             for dy in range(-2, 3):
@@ -527,19 +661,44 @@ def build_fabric(plan, site, layers, rng):
                 front = (cx - nx * depth * 0.45, cy - ny * depth * 0.45)
                 if not g.point_in_polygon(*back, inset):
                     continue
-                if not (site.on_land(*front) and site.on_land(*back) and site.on_land(cx, cy)):
+                if not (
+                    site.on_land(*front)
+                    and site.on_land(*back)
+                    and site.on_land(cx, cy)
+                ):
                     continue
                 if not site.free(cx, cy) or not site.free(*front):
                     continue
                 roof = "Thatch" if density < 0.4 and rng.random() < 0.5 else None
-                house(houses, cx, cy, 0.0, width * 0.97, depth, house_height(plan, rng), angle, rng, roof=roof)
+                house(
+                    houses,
+                    cx,
+                    cy,
+                    0.0,
+                    width * 0.97,
+                    depth,
+                    house_height(plan, rng),
+                    angle,
+                    rng,
+                    roof=roof,
+                )
                 placed += 1
         count += placed
         if placed >= 4 and land:
             mass = g.inset_polygon(inset, 0.01)
             if len(mass) >= 3:
-                height = 11.0 * plan.a * plan.house_scale * plan.height_scale * min(1.0, 0.5 + density)
-                blocks.add("Plaster", *g.prism(mass, -g.FOUNDATION, height, top=False), color=(0.9, 0.85, 0.8))
+                height = (
+                    11.0
+                    * plan.a
+                    * plan.house_scale
+                    * plan.height_scale
+                    * min(1.0, 0.5 + density)
+                )
+                blocks.add(
+                    "Plaster",
+                    *g.prism(mass, -g.FOUNDATION, height, top=False),
+                    color=(0.9, 0.85, 0.8),
+                )
                 blocks.add("TileOld", *g.flat(mass, height), color=(1.0, 1.0, 1.0))
     return count
 
@@ -556,7 +715,9 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
     else:
         plan = Plan(landmark, meters_per_px)
     rng = random.Random(seed)
-    layers = {name: g.Layer(name) for name in ("ground", "houses", "blocks", "landmarks")}
+    layers = {
+        name: g.Layer(name) for name in ("ground", "houses", "blocks", "landmarks")
+    }
     waters, islands, opens = build_ground(plan, layers, rng)
     site = Site(plan, waters, islands, opens)
     build_streets(plan, site, layers)
@@ -583,9 +744,17 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
             for mat, (v, f, a, c) in layer.parts.items():
                 if name.endswith("__charles_v"):
                     continue
-                target.add(mat, [(x * scale, y * scale, z * scale) for x, y, z in v], f, None, (1.0, 1.0, 1.0))
+                target.add(
+                    mat,
+                    [(x * scale, y * scale, z * scale) for x, y, z in v],
+                    f,
+                    None,
+                    (1.0, 1.0, 1.0),
+                )
                 part = target.parts[mat]
-                part[2][len(part[2]) - len(v) :] = [(x * scale, y * scale) for x, y in a]
+                part[2][len(part[2]) - len(v) :] = [
+                    (x * scale, y * scale) for x, y in a
+                ]
                 part[3][len(part[3]) - len(v) :] = c
         layers = merged
     return layers
@@ -673,7 +842,9 @@ def main() -> None:
     siege = "--siege" in args
     args = [arg for arg in args if arg != "--siege"]
     if len(args) < 2:
-        raise SystemExit("usage: landmark_city.py -- <landmark.json> <out.glb> [--siege]")
+        raise SystemExit(
+            "usage: landmark_city.py -- <landmark.json> <out.glb> [--siege]"
+        )
     landmark_path = Path(args[0])
     landmark = json.loads(landmark_path.read_text(encoding="utf-8"))
     map_json = landmark_path.resolve().parents[1] / "map" / "map.json"
