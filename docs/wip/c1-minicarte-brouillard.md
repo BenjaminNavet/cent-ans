@@ -10,7 +10,12 @@ Spéc : lot T1 de `docs/design/2026-09-24-analyse-total-war.md` ; plan `2026-09-
 - [x] Minicarte `game/scripts/map/campaign_minimap.gd` + `minimap_controller.gd` + shader `campaign_minimap.gdshader`.
 - [x] Brouillard : voile shader terrain, armées masquées (carte + minicarte), réglage `map/fog_of_war`.
 - [x] Smoke étendu (`_run_minimap_fog`), vert.
-- [ ] Captures `docs/img/c1/`.
+- [x] Capture `docs/img/c1/campagne-minicarte-brouillard.png` (1440×900).
 
 ## Prochaine étape
-Captures : `godot --path game res://scenes/campaign_map.tscn -- --screenshot=docs/img/c1/... --stage=map --focus=...`.
+Lot terminé, en attente de fusion. Points ouverts :
+- 106 provinces sur 132 vues par la France en 1337 (alliés écossais, frontières longues) : le voile
+  touche surtout l'Italie, l'Empire lointain, les îles. Régler `data/rules/vision.json` si trop généreux.
+- Le panneau de province d'une province voilée montre encore garnison/état complets (non filtré).
+- La minicarte n'affiche pas les agents/flottes (inexistants) ni les colonies (C5/C6).
+- Recapturer après la fusion des colonies (nouveaux paliers de zoom).
