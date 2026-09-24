@@ -1120,6 +1120,57 @@ pub fn ai_choice(state: &mut CampaignState, event: &Event) -> usize {
     }
 }
 
+/// F4: like [`ai_choice`], but an AI realm first sets aside the options it
+/// cannot afford (a cost above its treasury plus two seasons of income) when
+/// another option remains: a small realm does not rebuild a fleet on credit.
+pub fn ai_affordable_choice(
+    state: &mut CampaignState,
+    event: &Event,
+    decider: Option<&FactionId>,
+) -> usize {
+    let Some(means) = decider.and_then(|f| state.factions.get(f)).map(|f| {
+        f.treasury.max(0) + 2 * f.income_last_turn.max(0)
+    }) else {
+        return ai_choice(state, event);
+    };
+    let cost = |option: &data_model::EventOption| -> i64 {
+        option
+            .effects
+            .iter()
+            .map(|e| match e {
+                EventEffect::Treasury {
+                    faction: None,
+                    amount,
+                } if *amount < 0 => -amount,
+                _ => 0,
+            })
+            .sum()
+    };
+    let affordable: Vec<usize> = event
+        .options
+        .iter()
+        .enumerate()
+        .filter(|(_, o)| cost(o) <= means)
+        .map(|(i, _)| i)
+        .collect();
+    if affordable.is_empty() || affordable.len() == event.options.len() {
+        return ai_choice(state, event);
+    }
+    let best = affordable
+        .iter()
+        .map(|i| event.options[*i].ai_weight)
+        .max()
+        .unwrap_or(0);
+    let candidates: Vec<usize> = affordable
+        .into_iter()
+        .filter(|i| event.options[*i].ai_weight == best)
+        .collect();
+    match candidates.len() {
+        1 => candidates[0],
+        n => candidates[state.rng.below(n as u32) as usize],
+    }
+}
+
 /// Fires `event` for `decider` (None: nobody decides, the AI weights apply).
 fn fire(
     state: &mut CampaignState,
@@ -1156,7 +1207,7 @@ fn fire(
         events.push(entry);
         return;
     }
-    let option = ai_choice(state, event);
+    let option = ai_affordable_choice(state, event, decider.as_ref());
     let ctx = EventContext {
         faction: decider.clone(),
         province: province.clone(),

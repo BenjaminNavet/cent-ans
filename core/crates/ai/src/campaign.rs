@@ -297,7 +297,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         };
         while recruits < max_recruits
             && planned_upkeep + i64::from(option.upkeep)
-                <= if planned_upkeep == 0 {
+                <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
                     target_upkeep.max(i64::from(option.upkeep))
                 } else {
                     target_upkeep

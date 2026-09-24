@@ -79,3 +79,51 @@ l'état, déterministe, qui n'émet que des `Command` validées comme celles du 
 ## 3. Critères de fin
 Tests verts ; sonde `cargo run --release -p ai --example ai_probe` sur 100 tours : guerres menées, sièges
 réussis, pas de faction en faillite durable ; smoke vert ; `docs/status.md` à jour.
+
+## 4. F4 — guerre de Cent Ans vivante (session 4)
+
+Objectifs : `docs/design/v2-finalisation.md` § 2.2. Mesure : `cargo run --release -p ai --example
+century_probe [tours] [graines…]` (5 graines × 464 tours par défaut, en parallèle ; `VERBOSE=1` imprime les
+guerres et paix France-Angleterre, les banqueroutes et trésors dormants par faction). Dans la sonde, la France
+(« joueur ») répond aux offres comme l'IA les jugerait (`evaluate`) ; sans cela aucune paix proposée à la France
+n'était signée et l'Angleterre conquérait tout le royaume.
+
+**Diplomatie** (`sim-campaign/src/diplomacy.rs`, section « Diplomatic AI ») :
+- *Guerre de prétention* : une faction qui revendique le trône d'une autre ou des provinces qu'elle possède
+  (`claim_stakes`) déclare la guerre dès la fin de la trêve si agressivité ≥ 45, attitude < 20 et rapport
+  (sa coalition / la cible seule) ≥ 0,5 avec alliés ou tête de pont (provinces limitrophes), ≥ 0,8 sinon.
+  Guerre opportuniste sans prétention : agressivité ≥ 60, casus belli, rapport de coalitions ≥ 1,5 (règle M5).
+- *Tempo* (`war_ready`) : pas de régence, souverain libre, trésor positif ≥ 2 saisons d'entretien, revenu ≥
+  entretien (ou trésor ≥ 8 saisons d'entretien) ; 12 tours entre deux déclarations ; pas de nouveau front si
+  les ennemis qui pressent (voisins ou occupants) pèsent plus de la moitié de nos forces.
+- *Cobelligérance* : un allié apprécié (attitude > 10) entre dans la guerre de son allié contre un ennemi
+  voisin ou revendiqué si sa coalition pèse ≥ 0,6 fois celle de l'ennemi.
+- *Alliances* contre nos rivaux (ennemis, cibles de prétentions, prétendants) : partenaire qui partage un
+  rival, ou qui craint notre rival plus qu'il ne nous aime pas (contrepoids) ; au plus 4 alliances ;
+  évaluation : « Rival commun » +15, « Contrepoids à un voisin menaçant » +10, « Allié de nos rivaux » −40.
+- *Appel aux armes* (`answers_call_to_arms`) : vassal loyal, suzerain protecteur, sinon attitude > 0 ou
+  rancune commune contre l'agresseur (attitude > −20) ; refus seulement si le trésor est vide.
+- *Vassal opportuniste* (Bourgogne) : loyauté < 50 et suzerain battu (score ≤ −25) par une coalition plus
+  forte → paix blanche avec le vainqueur puis déclaration d'indépendance.
+- *Paix* : paix blanche si chacun l'accepte ; vainqueur (score > 40) : les 2 provinces occupées ; vaincu
+  (score < −40) : cède toutes les provinces occupées (« Conquêtes reconnues » = score du vainqueur). Raisons
+  nouvelles : « Guerre sur un autre front » +15, « Prétention au trône » −10, « Provinces revendiquées » −5.
+
+**Armées** (`ai/src/campaign.rs`) : une prétention au trône rend revendiquées toutes les provinces de la couronne
+(débarquements anglais en France) ; les deux dernières provinces libres d'un royaume sans prétention de
+l'assaillant ne sont ni assiégées ni pillées (`LAST_BASTIONS`) : la paix décide (l'Écosse survit).
+
+**Économie** : trésor au-delà de 3 saisons de revenu brut dépensé en 8 tours (armée, bâtiments), don annuel de
+5 % de l'excédent à l'Église tant que la faveur < 70 ; impôts bas seulement si mécontentement > 55 ; budget
+militaire = part (70 % en guerre, 40 % en paix) du revenu net laissé par les bâtiments ; un bâtiment n'est
+lancé que si son entretien tient dans l'excédent ; licenciement anticipé si le trésor ne couvre pas 8 (guerre)
+ou 3 (paix) saisons de déficit, ou dès qu'un déficit de paix n'est plus couvert par l'excédent ; dettes
+remboursées en 8 tours. Règles (`economy.rs`) : cour opulente 20 % du trésor au-delà de 6 saisons (M10 : 3 %
+au-delà de 8) ; bâtiments d'une province assiégée sans entretien, entretien réduit de la moitié de la dévastation.
+
+**Mariages** : chaque printemps, le souverain puis l'héritier puis l'aîné célibataire de la maison ; conjoint à
+±15 ans, épouse ≤ 35 ans, valeur = prestige + attitude + 40 (maison régnante étrangère) + 20 (allié), refus
+exclus d'avance (`evaluate`), offre au joueur possible.
+
+**Dynastie** : Pierre Ier de Portugal et Amédée VI de Savoie ajoutés (héritiers de 1337) ; un souverain vaincu
+meurt au combat à 1 % (général : 5 %). Tests : `ai/tests/f4_war.rs`, `sim-campaign/tests/f4_succession.rs`.
