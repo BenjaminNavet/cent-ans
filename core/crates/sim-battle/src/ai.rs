@@ -108,6 +108,10 @@ pub const DUEL_TIME: f64 = 480.0;
 /// the archery duel after this long and closes in (F5d: two AI armies
 /// always end up engaging).
 pub const ATTACKER_DUEL_TIME: f64 = 60.0;
+/// The archery duel is fought when the lines stand this close (metres);
+/// EP9b: closer than this, a line closing in after the duel advances in two
+/// echelons.
+pub const DUEL_RANGE: f64 = 320.0;
 /// A side whose losses exceed the enemy's by more than this share is
 /// losing the archery duel and closes in (B4).
 pub const DUEL_LOSS_MARGIN: f64 = 0.04;
@@ -1274,7 +1278,7 @@ fn plan_field(view: &mut View) {
     );
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
-        && contact < 320.0
+        && contact < DUEL_RANGE
         && elapsed
             < if press {
                 ATTACKER_DUEL_TIME
@@ -1286,8 +1290,18 @@ fn plan_field(view: &mut View) {
         && !losing
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
 
+    // EP9b: closing in, the militia (low base morale) marches in a second
+    // echelon behind the solid foot rather than leading the assault through
+    // the arrows. The line is measured on its first echelon (the second
+    // follows it).
+    let (first, second): (Vec<usize>, Vec<usize>) = roles
+        .line
+        .iter()
+        .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
+    let echelons =
+        !defensive && !duel && contact < DUEL_RANGE && !first.is_empty() && !second.is_empty();
     let line_center = view
-        .centroid(&roles.line)
+        .centroid(if echelons { &first } else { &roles.line })
         .or_else(|| view.centroid(&view.own))
         .expect("own not empty");
     let facing = if view.forward > 0.0 {
@@ -1371,14 +1385,8 @@ fn plan_field(view: &mut View) {
         advance(view, line_center)
     };
 
-    // Line. EP9b: closing in, the militia (low base morale) marches in a
-    // second echelon behind the solid foot rather than leading the assault
-    // through the arrows.
-    let (first, second): (Vec<usize>, Vec<usize>) = roles
-        .line
-        .iter()
-        .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
-    let slots = if defensive || first.is_empty() || second.is_empty() {
+    // Line (EP9b: in two echelons when closing in).
+    let slots = if !echelons {
         view.line_slots(&roles.line, anchor, facing)
     } else {
         let depth = duel_rules.second_echelon_depth_m;
