@@ -289,7 +289,9 @@ func _ground(item: Dictionary) -> void:
 			var z_water := float(fine["z_water"])
 			var rise := MapData.display_height(z_water + maxf(float(fine["z_deck"]) - z_water, 3.0), q.x, q.y) - MapData.display_height(z_water, q.x, q.y)
 			var k_h := clampf(rise / maxf(deck_top, 1e-4), 0.3, 12.0)
-			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * FINE_SCALE)
+			# ZG7a : tablier à sa largeur réelle le long du courant.
+			var k_along := BridgeMeshes.fine_deck_scale(str(item["structure"]), float(basis[2]), renderer.map_data.meters_per_px, FINE_SCALE)
+			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * k_along)
 		node.position = Vector3(q.x, maxf(MapData.display_height(float(fine["z_water"]), q.x, q.y), 0.0), q.y)
 		return
 	var p: Vector2 = item["px"]

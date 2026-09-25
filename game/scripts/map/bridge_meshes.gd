@@ -144,6 +144,32 @@ static func deck_width(width: float) -> float:
 	return 0.15 + 0.05 * width
 
 
+## Lot ZG7a : largeur réelle du tablier (m) des ouvrages à l'échelle réelle (ponts fins, ponts-
+## portes). Ponts médiévaux : 4-8 m entre parapets (pont Valentré 5 m, pont Saint-Bénézet 4 m,
+## London Bridge ≈ 6 m hors maisons) ; pont-porte un peu plus large (châtelet).
+const FINE_DECK_M := {"gate": 9.0, "stone": 7.0, "wood": 4.5, "boats": 5.0, "ferry": 8.0, "ford": 6.0}
+
+
+## Largeur du tablier dans le repère du maillage (`build`), parapets compris.
+static func mesh_deck_width(structure: String, width: float) -> float:
+	match structure:
+		"gate":
+			return deck_width(width) * 1.35
+		"wood":
+			return deck_width(width) * 0.9
+		_:
+			return deck_width(width)
+
+
+## Échelle à appliquer le long du courant (axe Z du maillage) pour un tablier de largeur réelle
+## `FINE_DECK_M`, jamais plus que `uniform_scale` (échelle des autres axes). À l'échelle réelle,
+## la largeur du tablier du maillage (0,15 + 0,05 × portée, pensée pour la carte) donnait 30 à
+## 45 m sur la Seine ou la Loire.
+static func fine_deck_scale(structure: String, mesh_width: float, meters_per_unit: float, uniform_scale: float) -> float:
+	var target := float(FINE_DECK_M.get(structure, 7.0)) / maxf(meters_per_unit, 1e-3)
+	return minf(uniform_scale, target / maxf(mesh_deck_width(structure, mesh_width), 1e-4))
+
+
 # --- Formes de base -------------------------------------------------------------------------
 
 
