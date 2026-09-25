@@ -13,7 +13,9 @@ use std::time::Instant;
 
 use godot::classes::RefCounted;
 use godot::prelude::*;
-use vegetation::{reground, scatter_tile, Ground, MapRasters, TileRequest, TileResult, PAGE_PX};
+use vegetation::{
+    reground, scatter_tile, Ground, MapRasters, ReliefFloor, TileRequest, TileResult, PAGE_PX,
+};
 
 struct Job {
     id: i64,
@@ -34,6 +36,7 @@ struct Done {
 #[class(base = RefCounted)]
 pub struct VegetationScatter {
     map: Arc<MapRasters>,
+    floor: Arc<ReliefFloor>,
     jobs: Option<Sender<Job>>,
     done: Option<Receiver<Done>>,
     workers: Vec<JoinHandle<()>>,
@@ -46,6 +49,7 @@ impl IRefCounted for VegetationScatter {
     fn init(base: Base<RefCounted>) -> Self {
         VegetationScatter {
             map: Arc::new(MapRasters::default()),
+            floor: Arc::new(ReliefFloor::default()),
             jobs: None,
             done: None,
             workers: Vec::new(),
@@ -141,6 +145,20 @@ impl VegetationScatter {
         });
     }
 
+    /// Shares the valley floor of the local relief exaggeration (`MapData.relief_floor_grid`,
+    /// lot ZG8) with later requests; an empty grid disables it.
+    #[func]
+    fn set_floor(&mut self, data: PackedFloat32Array, side_x: i64, side_y: i64, cell: f64) {
+        let side = (side_x.max(0) as usize, side_y.max(0) as usize);
+        let data = data.to_vec();
+        let valid = data.len() == side.0 * side.1;
+        self.floor = Arc::new(ReliefFloor {
+            data: if valid { data } else { Vec::new() },
+            side: if valid { side } else { (0, 0) },
+            cell: cell.max(1.0),
+        });
+    }
+
     /// Starts `threads` scattering threads (clamped to 1..=16); later calls are ignored.
     #[func]
     fn start(&mut self, threads: i64) {
@@ -163,8 +181,8 @@ impl VegetationScatter {
     /// Queues a tile under the caller's `id`. `params`: tile_index, origin_x, origin_y, size_px,
     /// spacing, coarse_step, tree_scale, vertical_scale, side, coarse (Array of 7
     /// PackedFloat32Array: forest, crops, conifer, beech, hedge, grove, region), exclusions
-    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`). False if not started or
-    /// malformed.
+    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8).
+    /// False if not started or malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
         if self.jobs.is_none() {
@@ -216,6 +234,8 @@ impl VegetationScatter {
             coarse_step: float_of(&params, "coarse_step", 4.0).max(1.0),
             tree_scale: float_of(&params, "tree_scale", 1.0),
             vertical_scale: float_of(&params, "vertical_scale", 1.0),
+            relief_gain: float_of(&params, "relief_gain", 0.0),
+            floor: Arc::clone(&self.floor),
             coarse: grids,
             side,
             exclusions,
@@ -240,6 +260,7 @@ impl VegetationScatter {
         ground_grid: VarDictionary,
         origin: Vector2,
         vertical_scale: f64,
+        relief_gain: f64,
     ) -> bool {
         let buffers: Vec<Vec<f32>> = buffers
             .iter_shared()
@@ -257,6 +278,8 @@ impl VegetationScatter {
             coarse_step: 1.0,
             tree_scale: 1.0,
             vertical_scale,
+            relief_gain,
+            floor: Arc::clone(&self.floor),
             coarse: Default::default(),
             side: 0,
             exclusions: Vec::new(),
