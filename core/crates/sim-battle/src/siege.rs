@@ -14,6 +14,12 @@ use crate::fire::Blaze;
 use crate::rng::BattleRng;
 use crate::town::{Footprint, Prop, TownRules};
 
+/// Campaign breach (0-100) from which a siege battle starts with one gap
+/// in the front walls (SV4: named so the UI quotes the same threshold)...
+pub const BREACH_ONE_GAP: u8 = 50;
+/// ... and with two gaps.
+pub const BREACH_TWO_GAPS: u8 = 85;
+
 /// Centre of the town (x, z), in metres.
 pub const TOWN_CENTER: (f64, f64) = (600.0, 560.0);
 /// Mean radius of the wall ring.
@@ -816,6 +822,8 @@ impl SiegeWorks {
         self.houses.iter().position(|h| h.church)
     }
 
+    /// Wears the walls by the campaign `breach` (0-100) and opens one gap
+    /// from [`BREACH_ONE_GAP`], two from [`BREACH_TWO_GAPS`].
     pub(crate) fn apply_campaign_breach(&mut self, breach: u8, rng: &mut BattleRng) {
         if breach == 0 {
             return;
@@ -826,9 +834,9 @@ impl SiegeWorks {
                 piece.hp = (piece.max_hp * (1.0 - wear)).round();
             }
         }
-        let open = if breach >= 85 {
+        let open = if breach >= BREACH_TWO_GAPS {
             2
-        } else if breach >= 50 {
+        } else if breach >= BREACH_ONE_GAP {
             1
         } else {
             0

@@ -239,7 +239,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var sub := "%s contre %s" % [str(battle.get("attacker_name", "")), str(battle.get("defender_name", ""))]
 	if siege:
 		var breach := int(battle.get("breach", 0))
-		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= 50 else ""]
+		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= RuleValues.value("breach_open_threshold", INF) else ""]
 	elif str(battle.get("province_name", "")) != "":
 		sub += " · %s" % str(battle.get("province_name", ""))
 	if season != "":
