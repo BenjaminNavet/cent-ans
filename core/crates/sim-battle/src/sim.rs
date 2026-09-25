@@ -21,11 +21,12 @@ use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
 use crate::command::{Command, CommandError};
-use crate::field::{Battlefield, Weather, ATTACKER_LINE_Z, DEFENDER_LINE_Z};
+use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
+use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
@@ -123,6 +124,8 @@ pub struct BattleSim {
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
     assault: siege_assault::AssaultState,
+    /// Scale of the battle (EP1): field size and regiments per side.
+    scale: BattleScale,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -221,8 +224,23 @@ pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) ->
 }
 
 impl BattleSim {
-    /// Deploys both armies and draws the weather and the field from `seed`.
+    /// Deploys both armies and draws the weather and the field from `seed`,
+    /// at the scale of the setup's head count ([`BattleScale::for_setup`]).
     pub fn new(setup: BattleSetup, seed: u64) -> Result<Self, SetupError> {
+        let scale = BattleScale::for_setup(&setup);
+        Self::new_scaled(setup, seed, scale)
+    }
+
+    /// [`Self::new`] at a given scale (EP1: forced tier; sieges always use
+    /// the standard field, whatever `scale` says about the field).
+    pub fn new_scaled(
+        setup: BattleSetup,
+        seed: u64,
+        mut scale: BattleScale,
+    ) -> Result<Self, SetupError> {
+        if setup.siege.is_some() {
+            scale.field = crate::scale::FieldSize::STANDARD;
+        }
         for side in SideId::BOTH {
             if setup.side(side).units.iter().all(|u| u.soldiers == 0) {
                 return Err(SetupError::EmptySide(side));
@@ -231,7 +249,8 @@ impl BattleSim {
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
-        let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
+        let mut field =
+            Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
         let mut siege = setup.siege.as_ref().map(|s| {
             SiegeWorks::for_battle(
                 s.fortification,
@@ -341,6 +360,7 @@ impl BattleSim {
             relief_map: Default::default(),
             fire,
             assault: Default::default(),
+            scale,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -383,8 +403,8 @@ impl BattleSim {
     fn deploy(&mut self) {
         for side in SideId::BOTH {
             let (line_z, facing, back) = match side {
-                SideId::Attacker => (ATTACKER_LINE_Z, 0.0, -1.0),
-                SideId::Defender => (DEFENDER_LINE_Z, std::f64::consts::PI, 1.0),
+                SideId::Attacker => (self.field.attacker_line_z(), 0.0, -1.0),
+                SideId::Defender => (self.field.defender_line_z(), std::f64::consts::PI, 1.0),
             };
             let ids: Vec<usize> = (0..self.units.len())
                 .filter(|&i| self.units[i].side == side && !self.units[i].reserve)
@@ -422,8 +442,9 @@ impl BattleSim {
     /// Cavalry on the wings of a front `front_width` wide, alternating right
     /// and left.
     fn place_wings(&mut self, cavalry: &[usize], front_width: f64, z: f64) {
-        let mut left = 600.0 - front_width * 0.5 - 20.0;
-        let mut right = 600.0 + front_width * 0.5 + 20.0;
+        let center = self.field.size.center_x();
+        let mut left = center - front_width * 0.5 - 20.0;
+        let mut right = center + front_width * 0.5 + 20.0;
         for (k, &i) in cavalry.iter().enumerate() {
             let (w, _) = self.units[i].extent();
             let x = if k % 2 == 0 {
@@ -567,7 +588,7 @@ impl BattleSim {
         self.place_row(&others, cz + 30.0, 1.0);
     }
 
-    /// Places `row` side by side, centred on x = 600, wrapping into extra rows
+    /// Places `row` side by side, centred on the field, wrapping into extra rows
     /// behind when wider than the field. Returns the width of the first row.
     fn place_row(&mut self, row: &[usize], z: f64, back: f64) -> f64 {
         let gap = 12.0;
@@ -593,7 +614,7 @@ impl BattleSim {
             if line_index == 0 {
                 first_width = total.max(0.0);
             }
-            let mut x = 600.0 - total * 0.5;
+            let mut x = self.field.size.center_x() - total * 0.5;
             for &i in line {
                 let (w, _) = self.units[i].extent();
                 let unit = &mut self.units[i];
@@ -613,6 +634,11 @@ impl BattleSim {
 
     pub fn field(&self) -> &Battlefield {
         &self.field
+    }
+
+    /// Scale of the battle (EP1).
+    pub fn scale(&self) -> &BattleScale {
+        &self.scale
     }
 
     /// Mutable field (tests and laboratory set-ups: hedges, villages).

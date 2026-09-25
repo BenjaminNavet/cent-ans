@@ -26,10 +26,9 @@
 
 use data_model::Terrain;
 
-use crate::field::{
-    River, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH, FIELD_WIDTH, GRID_RESOLUTION,
-};
+use crate::field::{River, Zone};
 use crate::rng::BattleRng;
+use crate::scale::{FieldSize, GRID_RESOLUTION};
 
 /// Salt of the derived stream of the relief (lot R2).
 pub(crate) const RELIEF_STREAM: u64 = 0x5232;
@@ -358,55 +357,73 @@ fn draw_count(range: (u32, u32), stream: &mut BattleRng) -> u32 {
     range.0 + stream.below(range.1 - range.0 + 1)
 }
 
+/// `count` scaled by `factor` (EP1: more landforms on a larger field; the
+/// same count on the standard field).
+fn scaled(count: u32, factor: f64) -> u32 {
+    (f64::from(count) * factor).round() as u32
+}
+
 /// x of a valley head, most often on a flank of the field.
-fn flank_x(stream: &mut BattleRng) -> f64 {
+fn flank_x(size: &FieldSize, stream: &mut BattleRng) -> f64 {
+    let width = size.width;
     if stream.unit() < 0.7 {
         if stream.unit() < 0.5 {
             stream.range(60.0, 320.0)
         } else {
-            stream.range(880.0, 1140.0)
+            stream.range(width - 320.0, width - 60.0)
         }
     } else {
-        stream.range(60.0, FIELD_WIDTH - 60.0)
+        stream.range(60.0, width - 60.0)
     }
 }
 
-fn draw_valley(style: &ReliefStyle, river: Option<&River>, stream: &mut BattleRng) -> Valley {
+fn draw_valley(
+    style: &ReliefStyle,
+    size: &FieldSize,
+    river: Option<&River>,
+    stream: &mut BattleRng,
+) -> Valley {
+    let (width, depth) = (size.width, size.depth);
     let seed = stream.next_u64();
     let (start, end, head) = match river {
         Some(river) => {
-            let x0 = flank_x(stream);
+            let x0 = flank_x(size, stream);
             let z0 = if stream.unit() < 0.5 {
                 -60.0
             } else {
-                FIELD_DEPTH + 60.0
+                depth + 60.0
             };
-            let x1 = (x0 + stream.range(-180.0, 180.0)).clamp(40.0, FIELD_WIDTH - 40.0);
+            let x1 = (x0 + stream.range(-180.0, 180.0)).clamp(40.0, width - 40.0);
             ((x0, z0), (x1, river.center_z(x1)), 0.35)
         }
         None if stream.unit() < 0.5 => {
             // Across a flank, from one edge to the other.
-            let x0 = flank_x(stream);
-            let x1 = (x0 + stream.range(-220.0, 220.0)).clamp(40.0, FIELD_WIDTH - 40.0);
+            let x0 = flank_x(size, stream);
+            let x1 = (x0 + stream.range(-220.0, 220.0)).clamp(40.0, width - 40.0);
             let (z0, z1) = if stream.unit() < 0.5 {
-                (-60.0, FIELD_DEPTH + 60.0)
+                (-60.0, depth + 60.0)
             } else {
-                (FIELD_DEPTH + 60.0, -60.0)
+                (depth + 60.0, -60.0)
             };
             ((x0, z0), (x1, z1), 0.5)
         }
         None => {
             // Along the field, in the no man's land or behind a line.
+            let (mid, back, front) = (
+                size.center_z(),
+                size.attacker_line_z(),
+                size.defender_line_z(),
+            );
             let z0 = match stream.below(3) {
-                0 => stream.range(330.0, 470.0),
-                1 => stream.range(60.0, 170.0),
-                _ => stream.range(630.0, 740.0),
+                0 => stream.range(mid - 70.0, mid + 70.0),
+                1 => stream.range(back - 190.0, back - 80.0),
+                _ => stream.range(front + 80.0, front + 190.0),
             };
-            let z1 = (z0 + stream.range(-120.0, 120.0)).clamp(40.0, FIELD_DEPTH - 40.0);
+            let z1 = (z0 + stream.range(-120.0, 120.0)).clamp(40.0, depth - 40.0);
             let (x0, x1) = if stream.unit() < 0.5 {
-                (-60.0, FIELD_WIDTH + 60.0)
+                (-60.0, width + 60.0)
             } else {
-                (FIELD_WIDTH + 60.0, -60.0)
+                (width + 60.0, -60.0)
             };
             ((x0, z0), (x1, z1), 0.5)
         }
@@ -440,9 +457,14 @@ fn draw_valley(style: &ReliefStyle, river: Option<&River>, stream: &mut BattleRn
     }
 }
 
-fn draw_scarps(style: &ReliefStyle, terrain: Terrain, stream: &mut BattleRng) -> Vec<Scarp> {
+fn draw_scarps(
+    style: &ReliefStyle,
+    terrain: Terrain,
+    size: &FieldSize,
+    stream: &mut BattleRng,
+) -> Vec<Scarp> {
     let mut scarps = Vec::new();
-    for _ in 0..draw_count(style.scarps, stream) {
+    for _ in 0..scaled(draw_count(style.scarps, stream), size.area_ratio()) {
         let angle = stream.range(-0.6, 0.6);
         let tangent = (angle.cos(), angle.sin());
         // Hills and mountains: the defender's side (north) is most often the high side.
@@ -452,8 +474,8 @@ fn draw_scarps(style: &ReliefStyle, terrain: Terrain, stream: &mut BattleRng) ->
             stream.unit() < 0.5
         };
         let sign = if upward { 1.0 } else { -1.0 };
-        let cx = stream.range(200.0, FIELD_WIDTH - 200.0);
-        let cz = stream.range(120.0, FIELD_DEPTH - 120.0);
+        let cx = stream.range(200.0, size.width - 200.0);
+        let cz = stream.range(120.0, size.depth - 120.0);
         let length = stream.range(300.0, 700.0);
         let flight = if style.flights {
             1 + stream.below(3)
@@ -478,18 +500,18 @@ fn draw_scarps(style: &ReliefStyle, terrain: Terrain, stream: &mut BattleRng) ->
     scarps
 }
 
-fn grid_dims(heights: &[f64]) -> (usize, usize) {
-    let nx = (FIELD_WIDTH / GRID_RESOLUTION) as usize + 1;
+fn grid_dims(heights: &[f64], size: &FieldSize) -> (usize, usize) {
+    let nx = size.nx();
     (nx, heights.len() / nx)
 }
 
 /// Mean height along the centre of a deployment line.
-fn line_mean(heights: &[f64], line: f64) -> f64 {
-    let (nx, _) = grid_dims(heights);
+fn line_mean(heights: &[f64], size: &FieldSize, line: f64) -> f64 {
+    let (nx, _) = grid_dims(heights, size);
     let iz = (line / GRID_RESOLUTION).round() as usize;
     let (x0, x1) = (
-        ((FIELD_WIDTH * 0.5 - 360.0) / GRID_RESOLUTION) as usize,
-        ((FIELD_WIDTH * 0.5 + 360.0) / GRID_RESOLUTION) as usize,
+        ((size.center_x() - size.line_half()) / GRID_RESOLUTION) as usize,
+        ((size.center_x() + size.line_half()) / GRID_RESOLUTION) as usize,
     );
     let row = &heights[iz * nx + x0..=iz * nx + x1];
     row.iter().sum::<f64>() / row.len() as f64
@@ -499,17 +521,18 @@ fn line_mean(heights: &[f64], line: f64) -> f64 {
 /// of the field at [`GRID_RESOLUTION`]).
 pub(crate) fn shape_relief(
     heights: &mut [f64],
+    size: &FieldSize,
     terrain: Terrain,
     river: Option<&River>,
     stream: &mut BattleRng,
 ) {
     let style = ReliefStyle::of(terrain);
-    let (nx, nz) = grid_dims(heights);
+    let (nx, nz) = grid_dims(heights, size);
     let seeds: [u64; 5] = std::array::from_fn(|_| stream.next_u64());
-    let valleys: Vec<Valley> = (0..draw_count(style.valleys, stream))
-        .map(|_| draw_valley(&style, river, stream))
+    let valleys: Vec<Valley> = (0..scaled(draw_count(style.valleys, stream), size.sx()))
+        .map(|_| draw_valley(&style, size, river, stream))
         .collect();
-    let scarps = draw_scarps(&style, terrain, stream);
+    let scarps = draw_scarps(&style, terrain, size, stream);
     let floodplain = style.macro_amp * 0.35 + 0.8;
     for iz in 0..nz {
         for ix in 0..nx {
@@ -540,13 +563,14 @@ pub(crate) fn shape_relief(
             heights[iz * nx + ix] += detail;
         }
     }
-    soften_lines(heights, style.line_slope);
+    soften_lines(heights, size, style.line_slope);
     if style.defender_rise > 0.0 {
-        let rise = line_mean(heights, DEFENDER_LINE_Z) - line_mean(heights, ATTACKER_LINE_Z);
+        let (attacker_line, defender_line) = (size.attacker_line_z(), size.defender_line_z());
+        let rise =
+            line_mean(heights, size, defender_line) - line_mean(heights, size, attacker_line);
         if rise < style.defender_rise {
-            let (low, high) = (ATTACKER_LINE_Z - 60.0, DEFENDER_LINE_Z + 60.0);
-            let span =
-                smoothstep(low, high, DEFENDER_LINE_Z) - smoothstep(low, high, ATTACKER_LINE_Z);
+            let (low, high) = (attacker_line - 60.0, defender_line + 60.0);
+            let span = smoothstep(low, high, defender_line) - smoothstep(low, high, attacker_line);
             let lift = (style.defender_rise - rise) / span;
             for iz in 0..nz {
                 let ramp = lift * smoothstep(low, high, iz as f64 * GRID_RESOLUTION);
@@ -567,9 +591,10 @@ const SHELF_BLEND: f64 = 135.0;
 /// keeps its mean height and a bounded grade; along the line, the profile is
 /// smoothed until its slope is bounded. The shelf blends into the relief
 /// beyond (a terrace on a hillside), so the high ground is kept.
-fn soften_lines(heights: &mut [f64], max_slope: f64) {
-    let (nx, nz) = grid_dims(heights);
-    for line in [ATTACKER_LINE_Z, DEFENDER_LINE_Z] {
+fn soften_lines(heights: &mut [f64], size: &FieldSize, max_slope: f64) {
+    let (nx, nz) = grid_dims(heights, size);
+    let (center, half) = (size.center_x(), size.line_half());
+    for line in [size.attacker_line_z(), size.defender_line_z()] {
         let rows: Vec<usize> = (0..nz)
             .filter(|&iz| (iz as f64 * GRID_RESOLUTION - line).abs() <= SHELF_HALF)
             .collect();
@@ -617,8 +642,8 @@ fn soften_lines(heights: &mut [f64], max_slope: f64) {
                 continue;
             }
             for ix in 0..nx {
-                let dx = (ix as f64 * GRID_RESOLUTION - FIELD_WIDTH * 0.5).abs();
-                let w = wz * (1.0 - smoothstep(380.0, 470.0, dx));
+                let dx = (ix as f64 * GRID_RESOLUTION - center).abs();
+                let w = wz * (1.0 - smoothstep(half + 20.0, half + 110.0, dx));
                 let shelf = level[ix] + grade[ix] * dz;
                 let h = &mut heights[iz * nx + ix];
                 *h = lerp(*h, shelf, w);
@@ -634,6 +659,7 @@ struct Ground<'a> {
     heights: &'a [f64],
     nx: usize,
     nz: usize,
+    size: FieldSize,
 }
 
 impl Ground<'_> {
@@ -671,21 +697,25 @@ impl Ground<'_> {
 
 /// Same rule as the pre-R2 placement: a disc stays off the centre of both
 /// deployment lines.
-fn near_line(x: f64, z: f64, radius: f64) -> bool {
-    [ATTACKER_LINE_Z, DEFENDER_LINE_Z].iter().any(|line| {
-        (z - line).abs() < radius + 40.0 && (x - FIELD_WIDTH * 0.5).abs() < 360.0 + radius
-    })
+fn near_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
+    [size.attacker_line_z(), size.defender_line_z()]
+        .iter()
+        .any(|line| {
+            (z - line).abs() < radius + 40.0
+                && (x - size.center_x()).abs() < size.line_half() + radius
+        })
 }
 
 fn in_river(river: Option<&River>, x: f64, z: f64, radius: f64) -> bool {
     river.is_some_and(|r| (z - r.center_z(x)).abs() < radius + r.width * 0.5 + 4.0)
 }
 
-fn fits(zone: &Zone, river: Option<&River>) -> bool {
-    !near_line(zone.x, zone.z, zone.radius)
+fn fits(zone: &Zone, ground: &Ground, river: Option<&River>) -> bool {
+    let size = &ground.size;
+    !near_line(size, zone.x, zone.z, zone.radius)
         && !in_river(river, zone.x, zone.z, zone.radius)
-        && (0.0..=FIELD_WIDTH).contains(&zone.x)
-        && (0.0..=FIELD_DEPTH).contains(&zone.z)
+        && (0.0..=size.width).contains(&zone.x)
+        && (0.0..=size.depth).contains(&zone.z)
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -724,7 +754,7 @@ fn settle(
             z: anchor.z + angle.sin() * dist,
             radius: anchor.radius,
         };
-        if !fits(&candidate, river) {
+        if !fits(&candidate, ground, river) {
             continue;
         }
         let score = cover.score(ground, candidate.x, candidate.z) - dist * 0.004;
@@ -761,7 +791,7 @@ fn grow(
                 z: base.z + angle.sin() * dist,
                 radius,
             };
-            if !fits(&lobe, river) {
+            if !fits(&lobe, ground, river) {
                 continue;
             }
             let score = cover.score(ground, lobe.x, lobe.z) + stream.range(0.0, 0.5);
@@ -791,7 +821,7 @@ fn grow(
             z: anchor.z + angle.sin() * dist,
             radius,
         };
-        if fits(&copse, river) {
+        if fits(&copse, ground, river) {
             cluster.push(copse);
         }
     }
@@ -806,11 +836,17 @@ pub(crate) fn shape_cover(
     forests: &mut [Zone],
     mud: &mut [Zone],
     heights: &[f64],
+    size: &FieldSize,
     river: Option<&River>,
     stream: &mut BattleRng,
 ) -> (Vec<Zone>, Vec<Zone>) {
-    let (nx, nz) = grid_dims(heights);
-    let ground = Ground { heights, nx, nz };
+    let (nx, nz) = grid_dims(heights, size);
+    let ground = Ground {
+        heights,
+        nx,
+        nz,
+        size: *size,
+    };
     let mut shape = |zones: &mut [Zone], cover: Cover, reach: f64| {
         let mut parts = Vec::new();
         for zone in zones.iter_mut() {

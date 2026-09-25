@@ -38,6 +38,13 @@ const SHADOW_DISTANCE := 190.0
 ## A1-01 : fondu de lisibilité à distance (teinte de camp, liseré, échelle), en mètres.
 const READABLE_NEAR := 80.0
 const READABLE_FAR := 260.0
+## EP1 (ADR 0031) : budget d'animation décroissant avec la distance. Au-delà de
+## `BUDGET_NEAR` mètres, un régiment n'est remis à jour (tampon d'instances, matériau) qu'une
+## image sur 2, au-delà de `BUDGET_FAR` une sur 3 (décalé selon l'id : charge étalée).
+const BUDGET_NEAR := 450.0
+const BUDGET_FAR := 800.0
+## EP1 : au-delà de `THIN_DISTANCE` mètres, imposteurs à demi-densité (`thin_out` du shader).
+const THIN_DISTANCE := 700.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -68,6 +75,11 @@ var _unit_pos: Dictionary = {}  # unit id -> Vector3 (centre, dernière image)
 var _unit_scale: Dictionary = {}  # unit id -> figurines par soldat simulé
 var _corpse_materials: Dictionary = {}  # "side/kind/variant" -> ShaderMaterial
 var _corpse_total: int = 0
+var _dirty_corpses: Dictionary = {}
+## EP1 : budget d'animation par distance (`--no-ep1-budget` le coupe, mesures A/B).
+var budget_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep1-budget")
+var skipped_updates: int = 0
+var _frame_index: int = 0  # EP1 : cellules de cadavres à renvoyer au GPU
 var _tumble_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, next, material}
 var _hidden: Dictionary = {}  # unit id -> {rang: instant de retour}
 var _lag: Dictionary = {}  # unit id -> retard d'horloge d'animation (chevaux ralentis)
@@ -218,6 +230,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	if camera != null:
 		_camera_pos = camera.global_position
 	_frame_dt = anim_dt
+	_frame_index += 1
 	var smooth := 1.0 - exp(-anim_dt / 0.6)
 	for unit in units:
 		var uid := int(unit["id"])
@@ -251,6 +264,10 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 						push_warning("BattleSoldiers: soldier buffer shorter than expected (%s/%s)" % [side, kind])
 						_warned = true
 					n = maxi(total - offset, 0)
+				if budget_enabled and _skip_far(unit, id, n):
+					offset += n
+					skipped_updates += 1
+					continue
 				var slice := buffer.slice(offset * 12, (offset + n) * 12)
 				offset += n
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
@@ -260,6 +277,20 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 		var impacts: Array = battle.call("get_impacts")
 		if not impacts.is_empty():
 			apply_impacts(impacts)
+	if not _dirty_corpses.is_empty():
+		_flush_corpses()
+
+
+## EP1 : `true` quand le régiment lointain saute cette image (budget d'animation). Jamais quand
+## son effectif dessiné change (morts, renforts) ni pour un régiment encore jamais dessiné.
+func _skip_far(unit: Dictionary, id: int, n: int) -> bool:
+	if not _previous.has(id) or (_previous[id] as PackedFloat32Array).size() != n * 12:
+		return false
+	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
+	if distance < BUDGET_NEAR:
+		return false
+	var period := 3 if distance >= BUDGET_FAR else 2
+	return (_frame_index + id) % period != 0
 
 
 func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32Array, n: int, is_selected: bool) -> void:
@@ -327,6 +358,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		imp_mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
 		imp_mat.set_shader_parameter("imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
 		imp_mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
+		imp_mat.set_shader_parameter("thin_out", 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
@@ -623,10 +655,20 @@ func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: V
 	else:
 		return
 	layer["data"] = data
-	var mm: MultiMesh = layer["mm"]
-	if mm.instance_count != int(layer["count"]):
-		mm.instance_count = int(layer["count"])
-	mm.buffer = data
+	# EP1 : envoi au GPU une fois par image et par cellule (`_flush_corpses`), pas à chaque mort.
+	_dirty_corpses[key] = true
+
+
+## EP1 : envoie les cellules de cadavres modifiées pendant l'image (une copie par cellule au lieu
+## d'une par mort : des centaines de morts par image dans les très grandes batailles).
+func _flush_corpses() -> void:
+	for key in _dirty_corpses:
+		var layer: Dictionary = _corpse_layers[key]
+		var mm: MultiMesh = layer["mm"]
+		if mm.instance_count != int(layer["count"]):
+			mm.instance_count = int(layer["count"])
+		mm.buffer = layer["data"]
+	_dirty_corpses.clear()
 
 
 ## LOD des cellules de cadavres : maillage moyen en deçà de `near_m`, lointain au-delà,

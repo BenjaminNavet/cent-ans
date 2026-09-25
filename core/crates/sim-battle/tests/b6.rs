@@ -123,6 +123,7 @@ fn the_site_reads_in_one_line() {
         flank: sim_battle::Flank::West,
         shore_x: -20.0,
         beach: 40.0,
+        field_width: FIELD_WIDTH,
     });
     assert_eq!(
         sim.field().site_label_fr(),

@@ -9,7 +9,8 @@
 //!
 //! # Model (summary)
 //!
-//! - Field of [`FIELD_WIDTH`] × [`FIELD_DEPTH`] metres with procedural hills,
+//! - Field sized by the head count ([`scale`], EP1: 1200 × 800 m up to
+//!   2400 × 1600 m) with procedural hills,
 //!   forests, mud and an optional river with two fords ([`Battlefield`]);
 //!   weather drawn from the season ([`Weather`]). Lot B5 ([`site`]): the
 //!   campaign site adds the ground of the season (mud, snow), a coast on a
@@ -46,6 +47,7 @@ pub mod outcome;
 pub mod relief;
 pub mod relief_ai;
 pub mod rng;
+pub mod scale;
 pub mod setup;
 pub mod shot;
 pub mod siege;
@@ -66,6 +68,7 @@ pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use relief::ReliefStyle;
 pub use rng::BattleRng;
+pub use scale::{BattleScale, BattleScaleRules, FieldSize, ScaleTier};
 pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
