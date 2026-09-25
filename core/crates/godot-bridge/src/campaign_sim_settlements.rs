@@ -43,7 +43,8 @@ impl CampaignSim {
 
     /// Detail of one settlement (lot C4): `{id, province, kind, name, lonlat,
     /// owner, controller, fortification_level, weight_share, garrison[],
-    /// buildings[], recruit_queue[], construction?, siege?, income,
+    /// buildings[], recruit_queue[] (unit ids; B7b: `recruit_queue_turns[]`
+    /// gives each one's turns of training left), construction?, siege?, income,
     /// is_city}`. Lot C5 adds `buildings_info[]` (`{id, name, category,
     /// upkeep, …}` as in `get_province_city`), `recruit_slots`,
     /// `recruit_slots_free`, `garrison_strength` (sum of unit strengths),
@@ -99,7 +100,12 @@ impl CampaignSim {
             "weight_share" => sim_campaign::settlements::weight_share(data, &id),
             "garrison" => &units_array(data, &live.garrison),
             "buildings" => &ids(live.buildings.iter()),
-            "recruit_queue" => &ids(live.recruit_queue.iter()),
+            "recruit_queue" => &ids(live.recruit_queue.iter().map(|r| &r.unit_type)),
+            "recruit_queue_turns" => &live
+                .recruit_queue
+                .iter()
+                .map(|r| r.turns_left as i32)
+                .collect::<PackedInt32Array>(),
             "income" => income,
             "is_city" => is_city,
             "buildings_info" => &buildings_array(data, &live.buildings),

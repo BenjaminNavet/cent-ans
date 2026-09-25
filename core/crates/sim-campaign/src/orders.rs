@@ -947,7 +947,7 @@ impl CampaignState {
     ) -> Result<(), OrderError> {
         if let Some(state) = self.settlements.get(settlement) {
             let slots = self.recruit_slots(data, settlement);
-            if &state.controller == faction && state.recruit_queue.len() >= slots {
+            if &state.controller == faction && self.recruits_ordered_this_turn(state) >= slots {
                 return Err(OrderError::RecruitQueueFull { slots });
             }
         }
@@ -968,11 +968,22 @@ impl CampaignState {
         }
         let faction_state = self.factions.get_mut(faction).expect("checked");
         faction_state.treasury -= i64::from(option.cost);
+        let turns_left = data
+            .unit_types
+            .get(unit_type)
+            .and_then(|t| t.recruit_time_turns)
+            .unwrap_or(1)
+            .max(1);
+        let ordered_turn = self.turn;
         self.settlements
             .get_mut(settlement)
             .expect("checked")
             .recruit_queue
-            .push(unit_type.clone());
+            .push(crate::state::QueuedRecruit {
+                unit_type: unit_type.clone(),
+                turns_left,
+                ordered_turn,
+            });
         Ok(())
     }
 
@@ -1045,7 +1056,7 @@ impl CampaignState {
             return Some("la colonie est assiégée".to_owned());
         }
         let slots = self.recruit_slots(data, settlement_id);
-        if settlement.recruit_queue.len() >= slots {
+        if self.recruits_ordered_this_turn(settlement) >= slots {
             return Some(format!("file de recrutement pleine ({slots} par tour)"));
         }
         // B7c: a unit listed in some building's `enables_units` needs one of
@@ -1122,13 +1133,24 @@ impl CampaignState {
         BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
     }
 
-    /// Recruitment slots still free this turn in `settlement`.
+    /// Recruitment slots still free this turn in `settlement` (B7b: only the
+    /// recruits ordered this turn use a slot; those still training from an
+    /// earlier turn do not).
     pub fn recruit_slots_free(&self, data: &GameData, settlement: &SettlementId) -> usize {
         let queued = self
             .settlements
             .get(settlement)
-            .map_or(0, |s| s.recruit_queue.len());
+            .map_or(0, |s| self.recruits_ordered_this_turn(s));
         self.recruit_slots(data, settlement).saturating_sub(queued)
+    }
+
+    /// Recruits of `settlement`'s queue ordered during the current turn.
+    pub fn recruits_ordered_this_turn(&self, settlement: &crate::state::SettlementState) -> usize {
+        settlement
+            .recruit_queue
+            .iter()
+            .filter(|r| r.ordered_during(self.turn))
+            .count()
     }
 
     /// Money cost of recruiting `unit_type` in `settlement` for `faction`
