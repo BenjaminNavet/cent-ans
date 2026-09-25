@@ -57,6 +57,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     }
     // The table (H3).
     orders.extend(crate::table::ai_choose_diets(state, data, faction));
+    // Regional edicts (lot C4).
+    orders.extend(crate::edicts::ai_choose_edicts(state, data, faction));
     // Coinage (H5).
     orders.extend(crate::coinage::ai_choose_coinage(state, data, faction));
     // Ransoms (H6).
