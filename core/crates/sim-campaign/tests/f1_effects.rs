@@ -764,6 +764,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         attacker: side(units - 1, 1),
         defender: side(setup.defender.units.len(), 1),
         duration: 60.0,
+        end: Default::default(),
     };
     assert!(state.resolve_pending_battle(&data, index, &short).is_err());
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
@@ -773,6 +774,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         attacker: side(units, 7),
         defender: side(setup.defender.units.len(), 1),
         duration: 60.0,
+        end: Default::default(),
     };
     state
         .resolve_pending_battle(&data, index, &outcome)

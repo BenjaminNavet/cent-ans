@@ -17,7 +17,9 @@ uniform int height_bpp = 1;               // 1 = canal R normalisé (R16/L8), 2 
 uniform bool height_little_endian = false; // LA8 seulement
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
-global uniform float campaign_vertical_scale; // ZG4 : unités monde par mètre (MapData.vertical_scale())
+// ZG4 : échelle verticale (MapData.vertical_scale()) ; ZG8 : relief local exagéré, hauteur affichée
+// `campaign_display_height` (source unique, double GDScript MapData.display_height).
+#include "res://shaders/campaign_relief.gdshaderinc"
 #define height_scale campaign_vertical_scale
 uniform vec2 map_size = vec2(4096.0, 4096.0);
 uniform float meters_per_px = 719.0;
@@ -43,6 +45,13 @@ uniform float fog_cloud_amount = 0.40;
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
+// M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
+uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
+uniform bool fog_by_cell = false;
+uniform vec2 fog_cells_size = vec2(4096.0, 4096.0);   // pixels carte couverts par la texture
+uniform float fog_edge_jitter_px = 7.0;
+uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
+uniform float fog_rim_amount = 0.22;
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -109,6 +118,10 @@ uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
 // Exagération de l'ombrage par rapport à la géométrie (lisibilité du relief).
 uniform float shading_relief = 1.8;
+// ZG8 : roche sur les pentes raides du relief EXAGÉRÉ localement (pente affichée ramenée à l'échelle
+// ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
+uniform float cliff_slope_start = 0.0;
+uniform float cliff_slope_full = 0.0;
 
 // Politique : empreinte (pixels carte par pixel écran) où la couleur de faction prend le dessus.
 uniform float political_start = 0.9;
@@ -301,16 +314,24 @@ void fragment() {
 	float lod = log2(k);
 	vec2 du = vec2(k / map_size.x, 0.0);
 	vec2 dv = vec2(0.0, k / map_size.y);
-	float hc = height_m_lod(uv, max(lod - 1.0, 0.0));
-	float h_l = height_m_lod(uv - du, lod);
-	float h_r = height_m_lod(uv + du, lod);
-	float h_u = height_m_lod(uv - dv, lod);
-	float h_d = height_m_lod(uv + dv, lod);
-	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
-	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	float hc = 0.0;
+	vec2 grad_m = vec2(0.0);
+	// PB2 : sur une page du quadtree, `qt_relief` remplace altitude et gradient (9 lectures de
+	// heightmap et de relief fin évitées, même résultat).
+	if (!qt_has_page()) {
+		hc = height_m_lod(uv, max(lod - 1.0, 0.0));
+		float h_l = height_m_lod(uv - du, lod);
+		float h_r = height_m_lod(uv + du, lod);
+		float h_u = height_m_lod(uv - dv, lod);
+		float h_d = height_m_lod(uv + dv, lod);
+		grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
+		rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	}
 	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
-	vec2 g = grad_m * height_scale * shading_relief;
+	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
+	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
+	vec2 g = grad_disp * shading_relief;
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
@@ -346,6 +367,13 @@ void fragment() {
 	float w_forest = s.b;
 	float w_rock = s.a * rock_frac;
 	float w_heath = s.a * (1.0 - rock_frac);
+	// ZG8 : falaises (pente affichée) en roche, la forêt s'accroche un peu plus longtemps.
+	float before_cliff = w_grass + w_farm + w_forest + w_heath;
+	w_grass *= 1.0 - cliff;
+	w_farm *= 1.0 - cliff;
+	w_heath *= 1.0 - cliff;
+	w_forest *= 1.0 - 0.6 * cliff;
+	w_rock += before_cliff - (w_grass + w_farm + w_forest + w_heath);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
 	snow = season_snow(snow, hc, uv, p, slope, macro, footprint);  // CV1
@@ -602,11 +630,23 @@ void fragment() {
 	}
 
 	if (fog_enabled && id > 0) {
-		float fog = 1.0 - step(0.5, fog_seen(id));
-		if (other_id != id && other_id > 0) {
-			float fog_other = 1.0 - step(0.5, fog_seen(other_id));
-			if (fog_other != fog) {
-				fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+		float fog;
+		if (fog_by_cell) {
+			// M5a : vue par case (texture 512² de la simulation, 255 = vu, seuil à 128).
+			// Bord effrangé : la prise est décalée de quelques pixels par un bruit lent.
+			vec2 jitter = vec2(fbm(p * 0.035), fbm(p * 0.035 + vec2(31.7, 5.3))) - 0.5;
+			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
+			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
+			// Liseré d'encre sépia sur la lisière, comme un bord de parchemin.
+			float rim = smoothstep(0.18, 0.5, seen_r) * (1.0 - smoothstep(0.5, 0.82, seen_r));
+			col = mix(col, fog_rim_color, rim * fog_rim_amount);
+		} else {
+			fog = 1.0 - step(0.5, fog_seen(id));
+			if (other_id != id && other_id > 0) {
+				float fog_other = 1.0 - step(0.5, fog_seen(other_id));
+				if (fog_other != fog) {
+					fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+				}
 			}
 		}
 		if (fog > 0.0) {
@@ -624,7 +664,7 @@ void fragment() {
 
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	vec3 wx_emit = vec3(0.0);
-	col = weather_ground(col, p, hc, slope, roughness, wx_emit);  // CM2 : météo
+	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)

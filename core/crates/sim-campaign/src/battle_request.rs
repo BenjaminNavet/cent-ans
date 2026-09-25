@@ -641,6 +641,29 @@ impl CampaignState {
             attacker: attacker_outcome,
             defender: defender_outcome,
         };
+        // EP9: a refused battle (nobody engaged) is told as such; the
+        // attacker withdraws like a beaten army, without rout or losses.
+        if outcome.end == sim_battle::BattleEnd::Refused {
+            let name = |faction: &FactionId| {
+                data.factions.get(faction).map_or_else(
+                    || faction.to_string(),
+                    |f| f.short_or_display_name().to_owned(),
+                )
+            };
+            events.push(
+                GameEvent::new(
+                    EventKind::Battle,
+                    format!(
+                        "Bataille refusée : l'ost {} n'ose attaquer l'ost {} sur ses positions \
+                         et se retire.",
+                        sim_battle::sim::of_faction(&name(&attacker.faction)),
+                        sim_battle::sim::of_faction(&name(&defender.faction)),
+                    ),
+                )
+                .province(&request.province)
+                .faction(&defender.faction),
+            );
+        }
         // EP5: standards taken in the battle, told in the chronicle.
         for (result, army, enemy) in [
             (&outcome.attacker, attacker, defender),

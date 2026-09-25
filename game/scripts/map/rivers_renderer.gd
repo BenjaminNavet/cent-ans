@@ -398,7 +398,8 @@ func _build_mesh(pieces: Array) -> ArrayMesh:
 			if dir == Vector2.ZERO:
 				dir = Vector2.RIGHT
 			var perp := Vector3(-dir.y, 0.0, dir.x)
-			var center := Vector3(p.x, map_data.surface_world_at(p.x, p.y), p.y)
+			# Altitude × HEIGHT_SCALE sans relief exagéré : le shader pose la hauteur affichée (ZG8).
+			var center := Vector3(p.x, maxf(map_data.height_m_at(p.x, p.y), 0.0) * MapData.HEIGHT_SCALE, p.y)
 			for side in [1.0, -1.0]:
 				vertices.append(center)
 				normals.append(perp * side)

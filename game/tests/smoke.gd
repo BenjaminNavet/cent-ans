@@ -599,10 +599,13 @@ func _run_minimap_fog() -> void:
 		_check(minimap.visible_province_count() > 0 and minimap.visible_province_count() < map.map_data.province_count,
 			"minimap fog mask should cover part of the map (%d visible)" % minimap.visible_province_count())
 		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
+		_check(ctl.fog_by_cell and map.terrain.material.get_shader_parameter("fog_by_cell") == true and ctl.fog_texture != null,
+			"terrain fog should come from the per-cell vision texture (M5a)")
 		for army_id in map.sim.call("get_army_ids"):
 			var army: Dictionary = map.sim.call("get_army", army_id)
-			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location_province", army.get("location", "")))):
-				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
+			# M5a : vue par case ; une armée étrangère dont le point n'est pas vu n'a pas de marqueur.
+			if not ctl.is_army_visible(str(army_id), army):
+				_check(not map.armies.has_army(army_id), "foreign army %s out of sight should have no marker" % army_id)
 		var settings: Node = root.get_node_or_null("/root/Settings")
 		if settings != null:
 			settings.call("set_value", "map/fog_of_war", false, false)
@@ -1224,6 +1227,18 @@ func _run_battle() -> void:
 	_check(result.get("ok", false), "battle: resolve_battle refused: %s" % result.get("error", "?"))
 	_check((sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be gone")
 	print("smoke battle: %d ticks, winner %s, losses %d / %d, %d journal lines" % [ticks, outcome["winner"], int(outcome["attacker"]["total_losses"]), int(outcome["defender"]["total_losses"]), events.size()])
+	# EP9 (ADR 0056) : la même bataille sans aucun ordre du joueur (camp attaquant immobile, IA
+	# adverse) se décide d'elle-même en moins de 12 minutes simulées (recette Q3).
+	var idle: Object = ClassDB.instantiate("BattleSim")
+	if _check(idle.call("setup", setup, int(pending[0]["seed"])), "battle: idle BattleSim.setup refused"):
+		for _i in 7200:
+			idle.call("tick", 0.1)
+			if idle.call("is_finished"):
+				break
+		_check(idle.call("is_finished"), "battle: no-order battle still undecided after 720 simulated s")
+		var idle_outcome: Dictionary = idle.call("get_outcome")
+		_check(str(idle_outcome.get("end", "")) in ["rout", "broken", "refused", "lull"], "battle: no-order battle end is %s" % idle_outcome.get("end", "?"))
+		print("smoke battle without orders: over at %d s, %s, winner %s" % [int(idle.call("get_elapsed")), idle_outcome.get("end", "?"), idle_outcome.get("winner", "?")])
 
 	# Boucle complète par la carte de campagne (vraies données).
 	facade.set_data_dir(data_dir)

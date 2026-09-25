@@ -7,6 +7,9 @@ use sim_battle::{BattleSetup, BattleSim, SideId, SiegeSetup, UnitState};
 
 /// Escalade without breach nor engines (probe `siege 0 ""`): about half
 /// the assaults succeed, as in M8 (the F5a tower fire had cut it to 20 %).
+/// SG4: a foot regiment now takes over the ram when its crew falls, so the
+/// gate gives way more often (13/24 → 20/24 over seeds 0-23): the assault
+/// usually succeeds, but not always.
 #[test]
 fn a_ladder_escalade_wins_about_half_the_time() {
     let data = data();
@@ -42,7 +45,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
         run_to_end(&mut sim);
         wins += u32::from(sim.winner() == Some(SideId::Attacker));
     }
-    assert!((2..=4).contains(&wins), "escalade wins {wins}/6");
+    assert!((2..=5).contains(&wins), "escalade wins {wins}/6");
 }
 
 #[test]

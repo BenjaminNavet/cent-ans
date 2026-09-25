@@ -1,4 +1,4 @@
-//! Economy tuning (lots EQ1, B7a), mirroring
+//! Economy tuning (lots EQ1, B7a, SV4), mirroring
 //! `data/schemas/economy_rules.schema.json` (`data/rules/economy.json`).
 
 use serde::{Deserialize, Serialize};
@@ -46,6 +46,21 @@ pub struct EconomyRules {
     /// unit is imported at the resource's `base_price` times this.
     #[serde(default = "default_resource_import_multiplier")]
     pub resource_import_multiplier: u32,
+    /// SV4: supply lost per season outside friendly territory (points).
+    #[serde(default = "default_supply_loss")]
+    pub supply_loss: u8,
+    /// SV4: supply lost per winter season outside friendly territory.
+    #[serde(default = "default_supply_loss_winter")]
+    pub supply_loss_winter: u8,
+    /// SV4: supply regained per season in friendly territory.
+    #[serde(default = "default_supply_recovery")]
+    pub supply_recovery: u8,
+    /// SV4: strength lost (percent) each season an army sits at zero supply.
+    #[serde(default = "default_starvation_loss_percent")]
+    pub starvation_loss_percent: u32,
+    /// SV4: devastation healed per season in every province.
+    #[serde(default = "default_devastation_decay")]
+    pub devastation_decay: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -101,6 +116,11 @@ impl Default for EconomyRules {
             supply_devastation_recovery_cut_percent:
                 default_supply_devastation_recovery_cut_percent(),
             resource_import_multiplier: default_resource_import_multiplier(),
+            supply_loss: default_supply_loss(),
+            supply_loss_winter: default_supply_loss_winter(),
+            supply_recovery: default_supply_recovery(),
+            starvation_loss_percent: default_starvation_loss_percent(),
+            devastation_decay: default_devastation_decay(),
             description: None,
         }
     }
@@ -108,4 +128,19 @@ impl Default for EconomyRules {
 
 fn default_resource_import_multiplier() -> u32 {
     100
+}
+fn default_supply_loss() -> u8 {
+    20
+}
+fn default_supply_loss_winter() -> u8 {
+    35
+}
+fn default_supply_recovery() -> u8 {
+    40
+}
+fn default_starvation_loss_percent() -> u32 {
+    10
+}
+fn default_devastation_decay() -> u8 {
+    5
 }

@@ -423,9 +423,13 @@ impl Unit {
         self.has(Ability::WallAssault)
     }
 
-    /// Foot soldiers who can scale walls with ladders.
+    /// Foot soldiers who can scale walls with ladders (SG4: archers and
+    /// crossbowmen on foot too, once their quivers are empty).
     pub fn can_climb(&self) -> bool {
-        !self.mounted && !self.synthetic && self.category == UnitCategory::Infantry
+        !self.mounted
+            && !self.synthetic
+            && (self.category == UnitCategory::Infantry
+                || (self.category == UnitCategory::Ranged && self.ammo == 0))
     }
 
     pub fn forward(&self) -> (f64, f64) {
