@@ -34,6 +34,11 @@ func _init() -> void:
 
 func _run() -> void:
 	await wait(5)
+	if phase == "q2tutorial":
+		var settings: Node = root.get_node_or_null("/root/Settings")
+		settings.call("set_value", "tutorial/enabled", true)
+		settings.call("set_value", "tutorial/done", false)
+		settings.call("set_value", "tutorial/step", 0)
 	change_scene_to_file("res://scenes/start_menu.tscn")
 	await wait(90)
 	await shot("menu")
@@ -81,6 +86,8 @@ func _run() -> void:
 		await phase_q2_zoom()
 	if phase == "q2click":
 		await phase_q2_click()
+	if phase == "q2tutorial":
+		await phase_q2_tutorial()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
@@ -163,6 +170,64 @@ func phase_q2_click() -> void:
 			await wait(20)
 		await key(KEY_ESCAPE)
 		await wait(5)
+
+
+## Q2 : le tutoriel suivi comme un joueur (Continuer, sélection de l'ost, marche, province…).
+func phase_q2_tutorial() -> void:
+	var tutorial: Node = map.tutorial
+	log_q1("q2 tutorial: active %s step '%s'" % [tutorial.active, tutorial.current_step_id()])
+	await shot("q2-tuto-intro")
+	await click(find_button(map.ui, "Continuer"))
+	await wait(20)
+	log_q1("q2 tutorial after Continuer: step '%s'" % tutorial.current_step_id())
+	var army_id: String = tutorial.royal_army
+	var army_world: Vector3 = map.armies.world_position_of(army_id)
+	await look_at_world(army_world, 80.0)
+	await click_at(world_to_window(map.armies._markers[army_id].pick_position()))
+	await wait(90)
+	log_q1("q2 tutorial after selecting %s (selected '%s'): step '%s'" % [army_id, map.selected_army, tutorial.current_step_id()])
+	await shot("q2-tuto-selected")
+	var target := world_to_window(army_world) + Vector2(260, 120)
+	await move_to(target)
+	await wait(10)
+	await click_at(target, MOUSE_BUTTON_RIGHT)
+	await wait(120)
+	log_q1("q2 tutorial after moving: step '%s'" % tutorial.current_step_id())
+	await shot("q2-tuto-moved")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	await look_at_world(capital_world(), 60.0)
+	await click_at(world_to_window(capital_world()))
+	await wait(90)
+	log_q1("q2 tutorial after clicking the capital: step '%s'" % tutorial.current_step_id())
+	await shot("q2-tuto-capital")
+	var panel: Control = map.settlements_ctl.panel
+	if panel.visible:
+		var bar: TabBar = panel.tabs.get_tab_bar()
+		var tab_rect := bar.get_tab_rect(1)
+		await click_at(root.get_final_transform() * (bar.get_global_transform_with_canvas() * tab_rect.get_center()))
+		await wait(90)
+		log_q1("q2 tutorial after the Bâtiments tab: step '%s'" % tutorial.current_step_id())
+		await shot("q2-tuto-buildings")
+		var building := first_enabled(panel.buildable_list, 0)
+		if building != null:
+			await click(building)
+			await wait(90)
+		log_q1("q2 tutorial after building: step '%s'" % tutorial.current_step_id())
+		await shot("q2-tuto-built")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	await key(KEY_ESCAPE)
+	await wait(30)
+	log_q1("q2 tutorial pause menu open: overlay visible %s" % tutorial.overlay.visible)
+	await shot("q2-tuto-pause")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	for turn in 3:
+		await key(KEY_ENTER)
+		await wait(240)
+		log_q1("q2 tutorial turn %d: step '%s', visible %s" % [turn + 2, tutorial.current_step_id(), tutorial.overlay.visible])
+		await shot("q2-tuto-turn-%d" % (turn + 2))
 
 
 func _settlement_panel_visible() -> bool:
