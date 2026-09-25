@@ -116,6 +116,15 @@ impl BattleSim {
             .any(|u| !u.synthetic && u.tick_losses > 0.0);
         self.clock.fought |= melee || hit;
         self.clock.melee_seen |= melee;
+        for side in SideId::BOTH {
+            let below = self.fighting_share(side) < self.break_share(side);
+            let since = &mut self.clock.below_since[side.index()];
+            match (below, *since) {
+                (true, None) => *since = Some(self.elapsed),
+                (false, Some(_)) => *since = None,
+                _ => {}
+            }
+        }
         let losses = SideId::BOTH.map(|s| self.loss_share(s));
         let bled = SideId::BOTH.iter().any(|s| {
             losses[s.index()] - self.clock.losses_mark[s.index()]
@@ -150,7 +159,9 @@ impl BattleSim {
             return None;
         }
         let shares = SideId::BOTH.map(|s| self.fighting_share(s));
-        let broken = SideId::BOTH.map(|s| shares[s.index()] < self.break_share(s));
+        let hold = self.decision.break_hold_seconds;
+        let broken = SideId::BOTH
+            .map(|s| self.clock.below_since[s.index()].is_some_and(|t| self.elapsed - t >= hold));
         match broken {
             [true, false] => return Some((SideId::Defender, BattleEnd::Broken)),
             [false, true] => return Some((SideId::Attacker, BattleEnd::Broken)),

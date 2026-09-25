@@ -165,17 +165,19 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// (digests recomputed after merging R2, BV2 and R2b). EP5: standards fall
 /// and are taken under heavy losses (same winners; digests recomputed).
 /// R4: seeds 3 and 11 after the military crest, same winner. Digests
-/// recomputed after merging R4 into the EP lots (same winners).
+/// recomputed after merging R4 into the EP lots (same winners). EP9: the
+/// beaten army breaks sooner (ADR 0056), same winners, 267 s and 294 s
+/// instead of 314 s and 472 s.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 42, 10]",
+            "267 Some(Attacker) [27, 28, 30, 100, 100, 6, 68, 65, 42, 10]",
         ),
         (
             11,
-            "472 Some(Attacker) [14, 28, 35, 97, 96, 13, 59, 107, 115, 0]",
+            "294 Some(Attacker) [14, 33, 35, 97, 100, 13, 64, 107, 115, 21]",
         ),
     ];
     for (seed, digest_before) in expected {

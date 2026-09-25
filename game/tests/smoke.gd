@@ -1207,6 +1207,18 @@ func _run_battle() -> void:
 	_check(result.get("ok", false), "battle: resolve_battle refused: %s" % result.get("error", "?"))
 	_check((sim.call("get_pending_battles") as Array).is_empty(), "battle: pending battle should be gone")
 	print("smoke battle: %d ticks, winner %s, losses %d / %d, %d journal lines" % [ticks, outcome["winner"], int(outcome["attacker"]["total_losses"]), int(outcome["defender"]["total_losses"]), events.size()])
+	# EP9 (ADR 0056) : la même bataille sans aucun ordre du joueur (camp attaquant immobile, IA
+	# adverse) se décide d'elle-même en moins de 12 minutes simulées (recette Q3).
+	var idle: Object = ClassDB.instantiate("BattleSim")
+	if _check(idle.call("setup", setup, int(pending[0]["seed"])), "battle: idle BattleSim.setup refused"):
+		for _i in 7200:
+			idle.call("tick", 0.1)
+			if idle.call("is_finished"):
+				break
+		_check(idle.call("is_finished"), "battle: no-order battle still undecided after 720 simulated s")
+		var idle_outcome: Dictionary = idle.call("get_outcome")
+		_check(str(idle_outcome.get("end", "")) in ["rout", "broken", "refused", "lull"], "battle: no-order battle end is %s" % idle_outcome.get("end", "?"))
+		print("smoke battle without orders: over at %d s, %s, winner %s" % [int(idle.call("get_elapsed")), idle_outcome.get("end", "?"), idle_outcome.get("winner", "?")])
 
 	# Boucle complète par la carte de campagne (vraies données).
 	facade.set_data_dir(data_dir)

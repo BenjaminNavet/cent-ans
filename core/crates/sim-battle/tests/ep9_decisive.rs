@@ -12,7 +12,7 @@ mod common;
 
 use common::*;
 use data_model::Terrain;
-use sim_battle::{BattleScale, BattleSetup, BattleSim, GeneralSetup, SideId, UnitSetup};
+use sim_battle::{BattleEnd, BattleScale, BattleSetup, BattleSim, GeneralSetup, SideId, UnitSetup};
 
 /// Upper bound of the survey runs (simulated seconds).
 const CAP: f64 = 1800.0;
@@ -213,7 +213,6 @@ fn survey() {
 /// The Q3 battle: the demo battle of 1337 (France attacks, the player's
 /// side) with the player giving no order.
 #[test]
-#[ignore]
 fn q3_demo_battle_without_orders_ends() {
     let setup: BattleSetup =
         serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
@@ -224,6 +223,129 @@ fn q3_demo_battle_without_orders_ends() {
         assert!(sim.is_finished(), "seed {seed}: still running at {t:.0} s");
         assert!(t <= 720.0, "seed {seed}: {t:.0} s");
     }
+}
+
+/// Standard tier, no order from the player (or both AIs), four seeds:
+/// every battle ends within 12 minutes (15 with a river to cross).
+#[test]
+fn battles_without_orders_end_in_time() {
+    for (terrain, river, limit) in [
+        (Terrain::Plains, false, 720.0),
+        (Terrain::Hills, false, 720.0),
+        (Terrain::Plains, true, 900.0),
+    ] {
+        for mode in [Mode::AiVsAi, Mode::IdleAttacker, Mode::IdleDefender] {
+            for seed in 0..4 {
+                let mut sim = sim(Tier::Standard, terrain, river, mode, seed);
+                let (t, _, last) = play(&mut sim);
+                assert!(
+                    sim.is_finished() && t <= limit,
+                    "{} river={river} {mode:?} seed {seed}: {t:.0} s « {last} »",
+                    terrain.key()
+                );
+            }
+        }
+    }
+}
+
+/// Large and epic tiers (up to 60 regiments a side): the idle side's
+/// battle ends within 12 minutes too.
+#[test]
+fn large_and_epic_battles_without_orders_end_in_time() {
+    for (tier, terrain, mode, seed) in [
+        (Tier::Large, Terrain::Plains, Mode::IdleAttacker, 0),
+        (Tier::Large, Terrain::Hills, Mode::IdleDefender, 1),
+        (Tier::Epic, Terrain::Plains, Mode::IdleDefender, 0),
+        (Tier::Epic, Terrain::Hills, Mode::IdleAttacker, 1),
+        (Tier::Epic, Terrain::Hills, Mode::AiVsAi, 2),
+    ] {
+        let mut sim = sim(tier, terrain, false, mode, seed);
+        let (t, _, last) = play(&mut sim);
+        assert!(
+            sim.is_finished() && t <= 720.0,
+            "{tier:?} {} {mode:?} seed {seed}: {t:.0} s « {last} »",
+            terrain.key()
+        );
+    }
+}
+
+/// The attacker under the AI always engages: against an idle defender it
+/// never lets the battle be refused (no river to cross).
+#[test]
+fn the_ai_attacker_always_engages() {
+    for terrain in [Terrain::Plains, Terrain::Hills] {
+        for seed in 0..4 {
+            let mut sim = sim(Tier::Standard, terrain, false, Mode::IdleDefender, seed);
+            play(&mut sim);
+            assert_eq!(
+                sim.end_kind(),
+                Some(BattleEnd::Broken),
+                "{} seed {seed}",
+                terrain.key()
+            );
+        }
+    }
+}
+
+/// Nobody engages (the player attacks on paper and stays put, the AI
+/// defender holds its heights): after five minutes the attacker withdraws,
+/// the defender keeps the field. No rout, no loss, a small blow to morale.
+#[test]
+fn an_unfought_battle_is_refused() {
+    let mut sim = sim(Tier::Standard, Terrain::Hills, false, Mode::IdleAttacker, 0);
+    let (t, winner, last) = play(&mut sim);
+    let rules = sim.decision_rules().clone();
+    assert_eq!(sim.end_kind(), Some(BattleEnd::Refused), "« {last} »");
+    assert!((t - rules.refusal_seconds).abs() < 1.0, "{t:.0} s");
+    assert_eq!(winner, Some(SideId::Defender));
+    assert!(last.contains("Bataille refusée"), "« {last} »");
+    let outcome = sim.outcome().unwrap();
+    assert_eq!(outcome.end, BattleEnd::Refused);
+    assert_eq!(outcome.attacker.total_losses, 0);
+    assert!(!outcome.attacker.routed && outcome.attacker.withdrew);
+    assert_eq!(outcome.attacker.morale_delta, rules.refused_morale.attacker);
+    assert_eq!(outcome.defender.morale_delta, rules.refused_morale.defender);
+    // The result survives a round trip through JSON (Godot bridge, saves).
+    let json = serde_json::to_string(&outcome).unwrap();
+    assert!(json.contains("\"end\":\"refused\""), "{json}");
+}
+
+/// A beaten army breaks as a whole: its last regiments rout and the
+/// journal says so.
+#[test]
+fn a_beaten_army_breaks() {
+    let mut sim = sim(
+        Tier::Standard,
+        Terrain::Plains,
+        false,
+        Mode::IdleAttacker,
+        0,
+    );
+    let (_, winner, last) = play(&mut sim);
+    assert_eq!(sim.end_kind(), Some(BattleEnd::Broken));
+    assert_eq!(winner, Some(SideId::Defender));
+    assert!(last.contains("déroute générale"), "« {last} »");
+    assert!(sim
+        .units()
+        .iter()
+        .filter(|u| u.side == SideId::Attacker && u.present())
+        .all(|u| !u.able()));
+    let outcome = sim.outcome().unwrap();
+    assert!(outcome.attacker.routed);
+    assert_eq!(outcome.attacker.morale_delta, -20);
+}
+
+/// Crécy-like: the English on their ridge win most of the time.
+#[test]
+fn crecy_like_the_english_win_most_battles() {
+    let english = (0..6)
+        .filter(|&seed| {
+            let mut sim = crecy(seed, false);
+            play(&mut sim);
+            sim.winner() == Some(SideId::Defender)
+        })
+        .count();
+    assert!(english >= 5, "English won {english}/6");
 }
 
 /// The pre-EP9 end: no army break, no refusal (survey baseline).
@@ -301,6 +423,70 @@ fn survey_crecy() {
             }
         }
         println!("crecy legacy={legacy}: English {english}/12, durations {times:?}");
+    }
+}
+
+/// The reference battles of `ai.rs` (10 a side, river every other seed)
+/// and `ep1_scale.rs` (60 a side, 120 men), legacy end against EP9.
+#[test]
+#[ignore]
+fn survey_reference() {
+    let data = data();
+    for legacy in [true, false] {
+        let mut line = Vec::new();
+        for seed in 0..8u64 {
+            let ids: Vec<&str> = (0..10).map(|i| KINDS[i % KINDS.len()]).collect();
+            let mut battle = setup(units(&data, &ids), units(&data, &ids), None);
+            battle.river = seed % 2 == 0;
+            let mut sim = BattleSim::new(battle, seed).unwrap();
+            if legacy {
+                legacy_rules(&mut sim);
+            }
+            let (t, w, _) = play(&mut sim);
+            line.push(format!(
+                "{t:.0}{}",
+                if w == Some(SideId::Attacker) {
+                    "A"
+                } else {
+                    "D"
+                }
+            ));
+        }
+        println!("ai.rs legacy={legacy}: {}", line.join(" "));
+        let mut line = Vec::new();
+        for seed in [3u64, 5, 11] {
+            let ids: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
+            let mut battle = setup(units(&data, &ids), units(&data, &ids), None);
+            for unit in battle
+                .attacker
+                .units
+                .iter_mut()
+                .chain(battle.defender.units.iter_mut())
+            {
+                unit.soldiers = 120;
+                unit.max_soldiers = 120;
+            }
+            let mut sim = BattleSim::new(battle, seed).unwrap();
+            if legacy {
+                legacy_rules(&mut sim);
+            }
+            let mut melee = 0;
+            while !sim.is_finished() && sim.elapsed() < CAP {
+                sim.step();
+                melee = melee.max(
+                    sim.units()
+                        .iter()
+                        .filter(|u| u.state == sim_battle::UnitState::Melee)
+                        .count(),
+                );
+            }
+            line.push(format!(
+                "seed {seed}: {:.0} s {:?} melee {melee}",
+                sim.elapsed(),
+                sim.winner()
+            ));
+        }
+        println!("ep1 legacy={legacy}: {}", line.join(" | "));
     }
 }
 

@@ -18,6 +18,11 @@
       "maximum": 1,
       "description": "Même seuil une fois le général tué ou pris (plus haut : l'armée sans chef lâche plus tôt)."
     },
+    "break_hold_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "L'armée n'est brisée que si elle reste sous son seuil pendant ce délai : des régiments en déroute qui se rallient aussitôt ne la brisent pas."
+    },
     "refusal_seconds": {
       "type": "number",
       "exclusiveMinimum": 0,
@@ -64,6 +69,7 @@
   "required": [
     "break_share",
     "break_share_without_general",
+    "break_hold_seconds",
     "refusal_seconds",
     "lull_seconds",
     "approach_window_seconds",
