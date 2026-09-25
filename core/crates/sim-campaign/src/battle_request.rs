@@ -529,6 +529,7 @@ impl CampaignState {
             siege_layout: None,
             orders: data.battle_orders.values().cloned().collect(),
             standards: Some(data.battle_standard_rules.clone()),
+            decor_plan: None,
         };
         self.apply_difficulty_setup(data, &mut setup);
         Ok(setup)
@@ -796,6 +797,7 @@ impl CampaignState {
             siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
             standards: Some(data.battle_standard_rules.clone()),
+            decor_plan: None,
         };
         self.apply_difficulty_setup(data, &mut setup);
         setup

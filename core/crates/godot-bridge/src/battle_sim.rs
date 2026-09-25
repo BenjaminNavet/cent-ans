@@ -86,6 +86,122 @@ fn prop_dict(prop: &sim_battle::Prop) -> VarDictionary {
     }
 }
 
+/// EP6: a decor prop `{kind, x, z, yaw, length, depth, count}`.
+fn decor_prop_dict(prop: &sim_battle::DecorProp) -> VarDictionary {
+    vdict! {
+        "kind" => prop.kind.key(),
+        "x" => prop.x,
+        "z" => prop.z,
+        "yaw" => prop.yaw,
+        "length" => prop.length,
+        "depth" => prop.depth,
+        "count" => prop.count as i64,
+    }
+}
+
+/// EP6: a decor area `{kind, x, z, length, width, yaw, state}` (`state`:
+/// ploughed|sown|crop|stubble for ploughland, else "").
+fn decor_area_dict(area: &sim_battle::Area) -> VarDictionary {
+    vdict! {
+        "kind" => area.kind.key(),
+        "x" => area.x,
+        "z" => area.z,
+        "length" => area.length,
+        "width" => area.width,
+        "yaw" => area.yaw,
+        "state" => area.state.map_or("", |s| s.key()),
+    }
+}
+
+/// EP6: the decor of the field (see [`BattleSim::get_terrain`]).
+fn decor_dict(decor: &sim_battle::Decor) -> VarDictionary {
+    let buildings: VarArray = decor
+        .buildings
+        .iter()
+        .map(|h| {
+            vdict! {
+                "x" => h.x, "z" => h.z, "length" => h.length, "width" => h.width,
+                "yaw" => h.yaw, "kind" => h.kind.key(),
+            }
+            .to_variant()
+        })
+        .collect();
+    let hamlets: VarArray = decor
+        .hamlets
+        .iter()
+        .map(|h| {
+            let buildings: PackedInt32Array = h.buildings.iter().map(|&i| i as i32).collect();
+            vdict! {
+                "layout" => h.layout.key(), "x" => h.x, "z" => h.z, "yaw" => h.yaw,
+                "buildings" => &buildings,
+            }
+            .to_variant()
+        })
+        .collect();
+    let areas: VarArray = decor
+        .areas
+        .iter()
+        .map(|a| decor_area_dict(a).to_variant())
+        .collect();
+    let props: VarArray = decor
+        .props
+        .iter()
+        .map(|p| decor_prop_dict(p).to_variant())
+        .collect();
+    let mounds: VarArray = decor
+        .mounds
+        .iter()
+        .map(|m| {
+            vdict! { "x" => m.x, "z" => m.z, "radius" => m.radius, "height" => m.height }
+                .to_variant()
+        })
+        .collect();
+    let moats: VarArray = decor
+        .moats
+        .iter()
+        .map(|m| {
+            vdict! {
+                "x" => m.x, "z" => m.z, "length" => m.length, "width" => m.width,
+                "yaw" => m.yaw, "ring" => m.ring,
+            }
+            .to_variant()
+        })
+        .collect();
+    let camps: VarArray = decor
+        .camps
+        .iter()
+        .map(|c| {
+            let items: VarArray = c
+                .items
+                .iter()
+                .map(|p| decor_prop_dict(p).to_variant())
+                .collect();
+            let convoy: VarArray = c
+                .convoy
+                .iter()
+                .map(|p| decor_prop_dict(p).to_variant())
+                .collect();
+            vdict! {
+                "side" => c.side.key(), "area" => &decor_area_dict(&c.area),
+                "items" => &items, "convoy" => &convoy,
+            }
+            .to_variant()
+        })
+        .collect();
+    vdict! {
+        "profile" => decor.profile.as_str(),
+        "vines_leafy" => decor.vines_leafy,
+        "orchard_blossom" => decor.orchard_blossom,
+        "buildings" => &buildings,
+        "hamlets" => &hamlets,
+        "areas" => &areas,
+        "props" => &props,
+        "mounds" => &mounds,
+        "moats" => &moats,
+        "camps" => &camps,
+    }
+}
+
 fn render_key(unit: &Unit) -> &'static str {
     if unit.ram {
         return "ram";
@@ -627,6 +743,12 @@ impl BattleSim {
     /// deck, stone, arches, stream}]` (`stream` = -1 on the river),
     /// `streams[{kind: tributary|brook, points, width}]`, `roads[{kind:
     /// main|track, points, width}]`; oxbows are appended to `pools`.
+    /// EP6: `decor{profile, vines_leafy, orchard_blossom, buildings[{x, z,
+    /// length, width, yaw, kind}], hamlets[{layout, x, z, yaw, buildings}],
+    /// areas[{kind, x, z, length, width, yaw, state}], props[{kind, x, z,
+    /// yaw, length, depth, count}], mounds[{x, z, radius, height}],
+    /// moats[{x, z, length, width, yaw, ring}], camps[{side, area, items,
+    /// convoy}]}` (windmill mounds are already in `heights`).
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -793,6 +915,7 @@ impl BattleSim {
             })
             .collect();
         dict.set("roads", &roads);
+        dict.set("decor", &decor_dict(&field.decor));
         if sim.siege().is_some() {
             dict.set("siege", &self.get_siege());
         }
@@ -1368,6 +1491,35 @@ impl CampaignSim {
 }
 
 /// `snake_case` key of a battle season (B5, `get_terrain`).
+#[godot_api(secondary)]
+impl BattleSim {
+    /// EP6: state of each side's camp, `[{side, progress (0-1), looted,
+    /// alarmed, looters, guards}]` (empty without camps).
+    #[func]
+    fn get_camps(&self) -> VarArray {
+        let Some(sim) = &self.sim else {
+            return VarArray::new();
+        };
+        sim_battle::SideId::BOTH
+            .iter()
+            .filter_map(|&side| {
+                let state = sim.camp_state(side)?;
+                Some(
+                    vdict! {
+                        "side" => side.key(),
+                        "progress" => state.progress,
+                        "looted" => state.looted,
+                        "alarmed" => state.alarmed,
+                        "looters" => state.looters as i64,
+                        "guards" => state.guards as i64,
+                    }
+                    .to_variant(),
+                )
+            })
+            .collect()
+    }
+}
+
 fn season_key(season: sim_battle::BattleSeason) -> &'static str {
     match season {
         sim_battle::BattleSeason::Spring => "spring",

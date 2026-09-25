@@ -1,0 +1,20 @@
+{
+  "description": "Exemple de décor posé à la main (lot EP6) pour les cartes historiques d'EP7, sur un champ standard de 1200 × 800 m : un moulin à vent sur sa butte derrière la ligne du défenseur (comme à Crécy), un hameau en rue, une église et son cimetière, un manoir à fossé, des vergers, des vignes, des labours, des meules et les deux camps.",
+  "clear": true,
+  "items": [
+    { "type": "windmill", "x": 640, "z": 700, "mound": true },
+    { "type": "hamlet", "layout": "street", "x": 180, "z": 560, "yaw": 0.2, "houses": 10, "seed": 7 },
+    { "type": "church", "x": 1020, "z": 520, "yaw": 0.0 },
+    { "type": "manor", "x": 1060, "z": 180, "yaw": 0.4, "moat": true },
+    { "type": "plot", "kind": "orchard", "x": 260, "z": 660, "length": 60, "width": 45, "yaw": 0.2 },
+    { "type": "plot", "kind": "vineyard", "x": 900, "z": 640, "length": 90, "width": 60, "yaw": -0.1 },
+    { "type": "plot", "kind": "ploughland", "x": 600, "z": 400, "length": 160, "width": 90, "yaw": 0.0, "state": "ploughed" },
+    { "type": "plot", "kind": "meadow", "x": 380, "z": 120, "length": 100, "width": 70 },
+    { "type": "prop", "kind": "haystack", "x": 370, "z": 110 },
+    { "type": "prop", "kind": "haystack", "x": 395, "z": 130 },
+    { "type": "prop", "kind": "cart", "x": 405, "z": 100, "yaw": 1.2 },
+    { "type": "hedge", "a": [300, 300], "b": [420, 310] },
+    { "type": "camp", "side": "attacker", "x": 600, "z": 60, "seed": 1 },
+    { "type": "camp", "side": "defender", "x": 620, "z": 760, "yaw": 3.14159, "seed": 2 }
+  ]
+}

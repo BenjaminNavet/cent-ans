@@ -343,7 +343,7 @@ func _refresh_leader_tooltip() -> void:
 	if _leader.is_empty():
 		leader_seal.tooltip_text = "L'ost combat sans général."
 		return
-	var text := "%s\nCommandement %d / 10" % [str(_leader.get("name", "")), int(_leader.get("command", 0))]
+	var text := "%s\nCommandement %d / %s" % [str(_leader.get("name", "")), int(_leader.get("command", 0)), RuleValues.text("max_skill_level")]
 	if not _leader_unit.is_empty():
 		text += "\nGarde du chef : %d hommes · moral %d" % [int(_leader_unit["soldiers"]), int(_leader_unit["morale"])]
 		if not bool(_leader_unit["present"]):

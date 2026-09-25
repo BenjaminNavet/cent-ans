@@ -2,15 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/vision_rules.schema.json",
   "title": "Règles de vue (brouillard de guerre)",
-  "description": "Fichier data/rules/vision.json : portée de vue d'une faction sur la carte de campagne, en pas terrestres sur le graphe des provinces (lot C1). Les provinces hors de vue sont voilées et leurs armées étrangères masquées.",
+  "description": "Fichier data/rules/vision.json : règles de vue d'une faction sur la carte de campagne (lot C1). Depuis le lot M5a, les rayons de vue sont dans data/movement/rules.json (vision_army_km, vision_settlement_km) et la vue se calcule par case ; ce fichier garde le partage entre alliés et le seuil de province vue.",
   "type": "object",
   "properties": {
-    "controlled_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Pas vus autour de chaque province contrôlée (0 = la province seule)." },
-    "army_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Pas vus autour de la province de chaque armée." },
-    "general_bonus": { "type": "integer", "minimum": 0, "maximum": 3, "description": "Pas supplémentaires pour une armée menée par un chef (coureurs, éclaireurs)." },
-    "share_allied_vision": { "type": "boolean", "description": "Les alliés, vassaux et suzerains partagent provinces et armées." },
+    "controlled_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Ancien réglage du lot C1 (pas terrestres), ignoré depuis le lot M5a." },
+    "army_range": { "type": "integer", "minimum": 0, "maximum": 4, "description": "Ancien réglage du lot C1 (pas terrestres), ignoré depuis le lot M5a." },
+    "general_bonus": { "type": "integer", "minimum": 0, "maximum": 3, "description": "Ancien réglage du lot C1 (pas terrestres), ignoré depuis le lot M5a." },
+    "share_allied_vision": { "type": "boolean", "description": "Les alliés, vassaux et suzerains partagent la vue de leurs armées et colonies." },
+    "province_seen_percent": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Part des terres d'une province (en %) qui doit être vue pour que la province soit visible (lot M5a)." },
+    "own_provinces_visible": { "type": "boolean", "description": "Toutes les terres des provinces contrôlées par la faction ou un allié qui partage sa vue sont vues, comme dans Total War (lot M5a). Défaut : vrai." },
+    "edge_feather_km": { "type": "number", "minimum": 0, "maximum": 20, "description": "Largeur du fondu au bord d'un disque de vue, en km : la case est à moitié vue exactement au rayon (lot SV1). Défaut : 3." },
     "description": { "type": "string" }
   },
-  "required": ["controlled_range", "army_range", "share_allied_vision"],
+  "required": ["share_allied_vision"],
   "additionalProperties": false
 }

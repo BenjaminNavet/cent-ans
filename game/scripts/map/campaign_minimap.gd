@@ -246,6 +246,19 @@ func set_fog(enabled: bool, visible_ids: PackedStringArray) -> void:
 			_visible_count += 1
 	_material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
 	_material.set_shader_parameter("fog_enabled", enabled)
+	_material.set_shader_parameter("fog_by_cell", false)
+
+
+## Brouillard par case (lot M5a) : `cells` = texture de vue de la simulation couvrant `size_px`
+## pixels carte ; `visible_count` = nombre de provinces visibles (statistique, tests).
+func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2, visible_count: int) -> void:
+	fog_enabled = enabled
+	_visible_count = visible_count if enabled else 0
+	var size := Vector2(maxf(size_px.x, 1.0), maxf(size_px.y, 1.0))
+	_material.set_shader_parameter("fog_cells", cells)
+	_material.set_shader_parameter("fog_crop", Vector4(crop.position.x / size.x, crop.position.y / size.y, crop.size.x / size.x, crop.size.y / size.y))
+	_material.set_shader_parameter("fog_by_cell", enabled and cells != null)
+	_material.set_shader_parameter("fog_enabled", enabled)
 
 
 ## Armées affichées : `[{pos: Vector2 (carte), color: Color, player: bool}]` (déjà filtrées).

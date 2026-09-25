@@ -11,7 +11,8 @@ extends RefCounted
 ##   quadrillage) ; chaque bord d'enclos est planté de haie selon un tirage (`hash01`).
 ## - Le shader inverse la déformation par point fixe : mêmes constantes, même hachage entier
 ##   (bits de poids faible identiques en 64 bits GDScript et en `uint` GLSL). Toute modification
-##   ici doit être reportée dans `terrain.gdshader`.
+##   ici doit être reportée dans `terrain.gdshader` et dans le semis natif
+##   (`core/crates/vegetation`, lot PB2, ADR 0062).
 ##
 ## Occupation du sol par province (`landuse`) : image RGBA8 basse résolution floutée, dans le
 ## repère de la carte ; R = part de vigne, G = sécheresse (climat méditerranéen, sud),
