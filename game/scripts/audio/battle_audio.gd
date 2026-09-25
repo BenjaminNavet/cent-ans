@@ -696,8 +696,9 @@ func _stop_front_emitter(key: String) -> void:
 	if emitter.is_empty():
 		return
 	var bed: AudioStreamPlayer3D = emitter["bed"]
-	if bed.playing:
-		bed.stop()
+	bed.stop()
+	bed.stream = null
+	bed.queue_free()
 	_front_emitters.erase(key)
 
 
