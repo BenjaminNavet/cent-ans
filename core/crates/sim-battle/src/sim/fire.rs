@@ -303,37 +303,29 @@ impl BattleSim {
         }
     }
 
+    /// Heat on `unit`: the intensity of the hottest fire (burning house or
+    /// gate) within `heat.radius_m`, 0 when none; BR3b: only
+    /// `heat.wall_walk_factor` of it on the wall walk.
+    pub fn heat_intensity(&self, unit: &Unit) -> f64 {
+        match (self.fire.rules.as_deref(), self.siege.as_ref()) {
+            (Some(rules), Some(works)) => heat_on(works, rules, unit),
+            _ => 0.0,
+        }
+    }
+
     /// Heat: losses and morale for the regiments close to a fire.
     fn fire_heat(&mut self, rules: &FireRules) {
         let Some(works) = self.siege.as_ref() else {
             return;
         };
-        let gate = &works.pieces[works.gate];
-        let gate_fire = works
-            .gate_fire
-            .burning()
-            .then_some(works.gate_fire.intensity);
-        let mut hurt: Vec<(usize, f64)> = Vec::new();
-        for (i, unit) in self.units.iter().enumerate() {
-            if !unit.present() {
-                continue;
-            }
-            let mut intensity: f64 = 0.0;
-            for house in works.houses.iter().filter(|h| h.fire.burning()) {
-                if unit.distance_to_rect(house.x, house.z) - house.radius <= rules.heat.radius_m {
-                    intensity = intensity.max(house.fire.intensity);
-                }
-            }
-            if let Some(gate_intensity) = gate_fire {
-                let (cx, cz) = gate.closest_point(unit.x, unit.z);
-                if unit.distance_to_rect(cx, cz) <= rules.heat.radius_m {
-                    intensity = intensity.max(gate_intensity);
-                }
-            }
-            if intensity > 0.0 {
-                hurt.push((i, intensity));
-            }
-        }
+        let hurt: Vec<(usize, f64)> = self
+            .units
+            .iter()
+            .enumerate()
+            .filter(|(_, unit)| unit.present())
+            .map(|(i, unit)| (i, heat_on(works, rules, unit)))
+            .filter(|&(_, intensity)| intensity > 0.0)
+            .collect();
         for (i, intensity) in hurt {
             let unit = &mut self.units[i];
             let loss = (unit.hp * rules.heat.loss_per_s * intensity * DT).min(unit.hp);
@@ -538,5 +530,26 @@ impl BattleSim {
             );
         }
         Ok(())
+    }
+}
+
+/// Heat of the fires of `works` on `unit` (see [`BattleSim::heat_intensity`]).
+fn heat_on(works: &SiegeWorks, rules: &FireRules, unit: &Unit) -> f64 {
+    let mut intensity: f64 = 0.0;
+    for house in works.houses.iter().filter(|h| h.fire.burning()) {
+        if unit.distance_to_rect(house.x, house.z) - house.radius <= rules.heat.radius_m {
+            intensity = intensity.max(house.fire.intensity);
+        }
+    }
+    if works.gate_fire.burning() {
+        let (cx, cz) = works.pieces[works.gate].closest_point(unit.x, unit.z);
+        if unit.distance_to_rect(cx, cz) <= rules.heat.radius_m {
+            intensity = intensity.max(works.gate_fire.intensity);
+        }
+    }
+    if unit.on_wall {
+        intensity * rules.heat.wall_walk_factor
+    } else {
+        intensity
     }
 }

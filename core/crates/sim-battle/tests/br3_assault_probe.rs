@@ -82,16 +82,7 @@ struct Trace {
 }
 
 fn heat_intensity(sim: &BattleSim, u: &sim_battle::Unit) -> f64 {
-    let (Some(works), Some(rules)) = (sim.siege(), sim.fire_rules()) else {
-        return 0.0;
-    };
-    works
-        .houses
-        .iter()
-        .filter(|h| h.fire.burning())
-        .filter(|h| u.distance_to_rect(h.x, h.z) - h.radius <= rules.heat.radius_m)
-        .map(|h| h.fire.intensity)
-        .fold(0.0, f64::max)
+    sim.heat_intensity(u)
 }
 
 fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outcome {
@@ -124,8 +115,47 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
     let heat = sim.fire_rules().map(|r| r.heat.clone());
     let mut last: Vec<(f64, f64, UnitState)> =
         sim.units().iter().map(|u| (u.x, u.z, u.state)).collect();
+    let mut ram_hp: Option<f64> = sim.units().iter().find(|u| u.ram).map(|u| u.hp);
+    let mut ram_losses: std::collections::BTreeMap<String, f64> = Default::default();
+    let mut shooters_log: Vec<String> = Vec::new();
     while !sim.is_finished() && sim.elapsed() < limit_s {
         sim.step();
+        if std::env::var("BR3_RAM").is_ok() {
+            if let Some(r) = sim.units().iter().find(|u| u.ram) {
+                let before = ram_hp.unwrap_or(r.hp);
+                if r.hp < before - 1e-9 {
+                    let by = r
+                        .loss_by
+                        .and_then(|id| sim.units().iter().find(|u| u.id == id))
+                        .map(|u| format!("{} on_wall {}", u.unit_type, u.on_wall))
+                        .unwrap_or_else(|| "?".to_owned());
+                    *ram_losses
+                        .entry(format!("{:?} by {by}", r.loss_cause))
+                        .or_default() += before - r.hp;
+                }
+                ram_hp = Some(r.hp);
+            }
+            if (sim.elapsed() / sim_battle::DT).round() as u64 % 600 == 0 {
+                let line: Vec<String> = sim
+                    .units()
+                    .iter()
+                    .filter(|u| u.side == SideId::Defender && u.present())
+                    .map(|u| {
+                        format!(
+                            "{}({:.0},{:.0} {:?} wall {} hp {:.0} m {:.0})",
+                            &u.unit_type[5..],
+                            u.x,
+                            u.z,
+                            u.state,
+                            u.on_wall,
+                            u.hp,
+                            u.morale
+                        )
+                    })
+                    .collect();
+                shooters_log.push(format!("{:.0}: {}", sim.elapsed(), line.join(" ")));
+            }
+        }
         if !tracing {
             continue;
         }
@@ -192,6 +222,40 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
         if second && morale_sum.1 > 0 {
             t.inside_morale.push(morale_sum.0 / morale_sum.1 as f64);
         }
+    }
+    if std::env::var("BR3_RAM").is_ok() {
+        let (mut blows, mut oil, mut first_blow, mut gate_at) = (0, 0, None, None);
+        for fx in sim.siege_fx() {
+            match fx.kind {
+                sim_battle::SiegeFxKind::RamStrike { .. } => {
+                    blows += 1;
+                    first_blow.get_or_insert(fx.time.round());
+                }
+                sim_battle::SiegeFxKind::BoilingOil { .. } => oil += 1,
+                sim_battle::SiegeFxKind::GateBroken { .. } => {
+                    gate_at.get_or_insert(fx.time.round());
+                }
+                _ => {}
+            }
+        }
+        let ram = sim
+            .units()
+            .iter()
+            .find(|u| u.ram)
+            .map(|u| (u.hp.round(), u.state));
+        println!("R   ram losses {ram_losses:?}");
+        if std::env::var("BR3_DEF").is_ok() {
+            for l in &shooters_log {
+                println!("R   {l}");
+            }
+        }
+        let w = sim.siege().unwrap();
+        println!(
+            "R {town:?} seed {seed}: won {:?}, blows {blows} (first {first_blow:?}), oil {oil}, gate at {gate_at:?}, gate hp {:.0}/{:.0}, ram {ram:?}",
+            sim.winner(),
+            w.pieces[w.gate].hp,
+            w.pieces[w.gate].max_hp,
+        );
     }
     let lost = |side: SideId| {
         sim.units()
@@ -357,6 +421,22 @@ fn tune_fire(sim: &mut BattleSim) {
         .and_then(|s| s.parse().ok())
     {
         rules.spread.edge_distance_m = v;
+    }
+    let var = |k: &str| std::env::var(k).ok().and_then(|s| s.parse::<f64>().ok());
+    if let Some(v) = var("HEAT_MORALE") {
+        rules.heat.morale_per_s = v;
+    }
+    if let Some(v) = var("HEAT_RADIUS") {
+        rules.heat.radius_m = v;
+    }
+    if let Some(v) = var("HEAT_LOSS") {
+        rules.heat.loss_per_s = v;
+    }
+    if let Some(v) = var("WALL_HEAT") {
+        rules.heat.wall_walk_factor = v;
+    }
+    if let Some(v) = var("OVERSHOOT") {
+        rules.ignition.overshoot_m = v;
     }
     sim.set_fire_rules(Some(rules));
 }
@@ -605,6 +685,22 @@ fn probe_assault_map() {
         for row in grid.iter().rev() {
             println!("T {}", row.iter().collect::<String>());
         }
+        for h in works
+            .houses
+            .iter()
+            .filter(|h| h.fire.burning() || h.fire.burnt())
+        {
+            let f = h.footprint();
+            let wall = works
+                .pieces
+                .iter()
+                .map(|p| f.distance_to_segment(p.a, p.b))
+                .fold(f64::INFINITY, f64::min);
+            println!(
+                "T   fire block ({:.0}, {:.0}) {:.0} x {:.0} rows {} suburb {} burning {}: {wall:.1} m from the wall line",
+                h.x, h.z, h.length, h.depth, h.rows, h.suburb, h.fire.burning()
+            );
+        }
         for u in sim.units().iter().filter(|u| u.present() && !u.synthetic) {
             println!(
                 "T {:?} {:<22} ({:>4.0}, {:>4.0}) {:?} hp {:>4.0} morale {:>3.0} heat {:.2} dest {:?}",
@@ -617,6 +713,23 @@ fn probe_assault_map() {
                 u.morale,
                 heat_intensity(&sim, u),
                 u.destination.map(|d| (d.0.round(), d.1.round()))
+            );
+            let (w, d) = u.extent();
+            let rect = sim_battle::Footprint::new(u.x, u.z, w, d, -u.facing);
+            let gap = works
+                .houses
+                .iter()
+                .filter(|h| h.fire.burning())
+                .map(|h| h.footprint().distance_to(&rect))
+                .fold(f64::INFINITY, f64::min);
+            let wall = works
+                .pieces
+                .iter()
+                .map(|p| p.distance(u.x, u.z))
+                .fold(f64::INFINITY, f64::min);
+            println!(
+                "T     extent {w:.1} x {d:.1}, on wall {}, gap to fire {gap:.1} m, centre to wall line {wall:.1} m",
+                u.on_wall
             );
         }
     }
