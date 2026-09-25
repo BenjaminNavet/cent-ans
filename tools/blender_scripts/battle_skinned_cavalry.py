@@ -143,6 +143,12 @@ def clip_specs():
         ("c_death", "Death", "Death", poses.ride_death, False, 30),
         ("c_death_m", "Death", "Death", poses.ride_death, True, 30),
         ("c_fall", "Idle_HitReact_Right", "Death", poses.ride_fall, False, 30),
+        # Lot EP5: mounted standard bearer (appended: earlier rows keep their place).
+        ("c_std_idle", "Idle", "Idle", poses.ride_std_up, False, None),
+        ("c_std_walk", "Walk", "Idle", poses.ride_std_up, False, None),
+        ("c_std_gallop", "Gallop", "Idle", poses.ride_std_gallop, False, None),
+        ("c_std_wave", "Idle_2", "Idle", poses.ride_std_wave, False, 58),
+        ("c_std_death", "Death", "Death", poses.ride_std_death, False, 30),
     ]
 
 
@@ -197,6 +203,10 @@ def bake_cavalry_rig():
                 "c_bow_walk",
                 "c_javelin_idle",
                 "c_javelin_walk",
+                "c_std_idle",
+                "c_std_walk",
+                "c_std_gallop",
+                "c_std_wave",
             ),
         )
     rig.write()
@@ -512,7 +522,7 @@ def export_cavalry(fig_name, recipe, rig):
             )
         )
         files.append(name)
-    return {
+    entry = {
         "rig": "cavalry",
         "lods": files,
         "tris": tris,
@@ -520,6 +530,9 @@ def export_cavalry(fig_name, recipe, rig):
         "style": recipe.get("style", ""),
         "noble": recipe.get("noble", False),
     }
+    # Lot EP5: pole tip of a mounted standard bearer (rider armature of the last build).
+    entry.update(bs.pole_entry(recipe, poses.RIDE["mount"].rarm))
+    return entry
 
 
 _ = Matrix  # re-exported for pose helpers
