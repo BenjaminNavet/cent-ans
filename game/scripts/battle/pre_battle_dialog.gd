@@ -239,7 +239,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var sub := "%s contre %s" % [str(battle.get("attacker_name", "")), str(battle.get("defender_name", ""))]
 	if siege:
 		var breach := int(battle.get("breach", 0))
-		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= 50 else ""]
+		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= RuleValues.value("breach_open_threshold", INF) else ""]
 	elif str(battle.get("province_name", "")) != "":
 		sub += " · %s" % str(battle.get("province_name", ""))
 	if season != "":
@@ -431,7 +431,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	stars_label.tooltip_text = "Commandement %d / 10" % command
+	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

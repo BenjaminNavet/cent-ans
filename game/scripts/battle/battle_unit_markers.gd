@@ -30,7 +30,6 @@ const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.78)
 const GOLD := Color(1.0, 0.82, 0.22)
 const ROUT_RED := Color(0.85, 0.12, 0.08)
-const EXHAUSTED_FATIGUE := 60.0  # même seuil que la simulation (vitesse réduite)
 ## B7 : regroupement en vue lointaine (distance de caméra en m, hystérésis contre le
 ## clignotement) ; deux troupes d'un camp à moins de `CLUSTER_PX` pixels écran se regroupent.
 const CLUSTER_ON := 480.0
@@ -377,9 +376,15 @@ static func state_badges(unit: Dictionary) -> Array[String]:
 		badges.append("charge")
 	elif state == "melee":
 		badges.append("melee")
-	if float(unit["fatigue"]) >= EXHAUSTED_FATIGUE:
+	if is_exhausted(unit):
 		badges.append("tired")
 	return badges
+
+
+## SV4 : épuisée au-delà du seuil où la simulation lui retire du moral (`exhausted_fatigue`,
+## lu dans le cœur ; jamais épuisée si les données manquent).
+static func is_exhausted(unit: Dictionary) -> bool:
+	return float(unit.get("fatigue", 0.0)) > RuleValues.value("exhausted_fatigue", INF)
 
 
 ## Pastille ronde de 12 px (× `scale`) sur `canvas`, pictogramme vectoriel (pas de glyphe).
