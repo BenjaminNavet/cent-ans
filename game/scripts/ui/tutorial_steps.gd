@@ -39,14 +39,14 @@ const BASE := {
 	},
 	"open_province": {
 		"title": "Vos provinces",
-		"text": "Cliquez sur une province qui vous appartient, par exemple {capital} : le panneau de province montre le propriétaire, la population, le mécontentement, la garnison et le recrutement.",
-		"objective": "Ouvrir le panneau d'une de vos provinces.",
+		"text": "Cliquez sur la ville de {capital} : son panneau montre la garnison, le recrutement et les bâtiments de la ville ; le bouton « Province » (ou un clic dans la campagne alentour) ouvre le panneau de province : propriétaire, population, mécontentement. Si une armée stationne devant la ville, un second clic au même endroit passe de l'armée à la ville.",
+		"objective": "Ouvrir le panneau d'une de vos villes ou provinces.",
 		"target": "capital",
 	},
 	"city_tab": {
 		"title": "La ville",
-		"text": "L'onglet « Ville » montre les quatre classes (paysans, bourgeois, clergé, noblesse) avec leurs jauges, les ressources de la province, ses bâtiments et ce qu'on peut y construire. Survolez une ligne pour l'infobulle détaillée.",
-		"objective": "Ouvrir l'onglet « Ville » du panneau de province.",
+		"text": "Dans le panneau de la ville, l'onglet « Bâtiments » montre ses bâtiments et ce qu'on peut y construire ; dans le panneau de province, l'onglet « Ville » montre aussi les quatre classes (paysans, bourgeois, clergé, noblesse) avec leurs jauges et les ressources. Survolez une ligne pour l'infobulle détaillée.",
+		"objective": "Ouvrir l'onglet « Bâtiments » de la ville (ou « Ville » de la province).",
 		"target": "city_tab",
 	},
 	"build": {

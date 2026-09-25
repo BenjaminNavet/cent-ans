@@ -29,7 +29,7 @@ use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
-use crate::unit::{Formation, Unit, UnitState};
+use crate::unit::{Formation, Unit, UnitFate, UnitState};
 
 /// Fixed simulation step, in seconds.
 pub const DT: f64 = 0.1;
@@ -2646,6 +2646,14 @@ impl BattleSim {
                 losses[unit.setup_index] = unit.initial_soldiers.saturating_sub(unit.soldiers());
             }
             let won = side == winner;
+            let fates: Vec<UnitFate> = self
+                .units
+                .iter()
+                .filter(|u| u.side == side && !u.synthetic)
+                .map(Unit::fate)
+                .collect();
+            let withdrew =
+                !won && fates.contains(&UnitFate::Withdrawn) && !fates.contains(&UnitFate::Routed);
             SideResult {
                 total_losses: losses.iter().sum(),
                 losses,
@@ -2654,6 +2662,7 @@ impl BattleSim {
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],
+                withdrew,
             }
         };
         Some(BattleOutcome {
