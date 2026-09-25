@@ -25,6 +25,7 @@ extends Node3D
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
+##   --hide-armies               masque les marqueurs d'armée (captures des villes emblématiques, L2).
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -103,13 +104,14 @@ func _ready() -> void:
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
 	rivers.minor_max_distance = map_extent * 0.35
-	rivers.build(map_data)
 	coast.build(map_data)
 	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
 	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
 	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
 	cities.build(map_data)
 	_setup_settlements()
+	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
+	rivers.build(map_data, terrain, settlement_layer)
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -880,6 +882,8 @@ func _on_end_turn() -> void:
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
+	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
+		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
@@ -892,8 +896,7 @@ func _on_end_turn() -> void:
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
 	for event in events:
-		# Q1 : seulement les batailles du joueur (le bandeau annonçait Florence contre Vérone).
-		if str(event.get("kind", "")) == "battle" and (flow == null or flow._concerns_player(event)):
+		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
 	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
@@ -1051,10 +1054,14 @@ func _parse_cmdline() -> void:
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):
+			# Force un pas fixe (mesure, comparaison) : désactive le choix adaptatif (T2).
 			terrain.fine_step = int(arg.trim_prefix("--fine-step="))
+			terrain.fine_step_auto = false
 			terrain.fine_enabled = terrain.fine_step > 0
 		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
 			settlement_layer.select(arg.trim_prefix("--select-settlement="))
+		elif arg == "--hide-armies":  # L2 : captures des villes emblématiques
+			armies.visible = false
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
@@ -1073,6 +1080,24 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"codex", "codex_search":  # U11 : fenêtre commune Codex (Histoire / Règles)
+					_focus_capital()
+					var bubbles := get_node_or_null("/root/CodexBubbles")
+					if bubbles != null:
+						bubbles.call("open_entry", "cdx_charles_v")
+					if _screenshot_stage == "codex_search" and ui.codex_hub != null:
+						ui.codex_hub.search.text = "arc"
+						ui.codex_hub._on_search("arc")
+				"turn_banner":  # U5 : bandeau « Tour des autres factions »
+					_focus_capital()
+					ui.show_turn_banner()
+				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
+					_stage_screenshot_court()
+					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
+				"general_picker":  # U10 : choix du général depuis le sceau « Sans chef »
+					_stage_screenshot()
+					if selected_army != "" and hud != null:
+						hud.open_general_picker(selected_army)
 				"siege":
 					_stage_screenshot_siege()  # M8
 				"map":

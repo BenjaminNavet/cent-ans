@@ -51,6 +51,8 @@ uniform float border_dist_scale = 6.0;    // niveaux 8 bits par pixel carte (too
 uniform sampler2D coast_dist : filter_linear, repeat_disable, hint_default_white;
 uniform bool has_coast_dist = false;
 uniform float coast_dist_scale = 2.0;
+// Lot V4 (A1-11) : lit creusé et berges des fleuves.
+#include "res://shaders/river_banks.gdshaderinc"
 
 uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_rough_array : filter_linear_mipmap_anisotropic, repeat_enable;
@@ -276,6 +278,9 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float carve = river_carve(world_pos.xz, map_size);  // lot V4
+	VERTEX.y -= carve;
+	world_pos.y -= carve;
 }
 
 void fragment() {
@@ -482,6 +487,10 @@ void fragment() {
 	float dstrength = detail_normal_strength * detail_fade;
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
+
+	if (hc > 0.0) {
+		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
+	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
 	if (hc <= 0.0) {

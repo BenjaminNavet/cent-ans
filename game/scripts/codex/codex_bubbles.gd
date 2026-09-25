@@ -137,6 +137,10 @@ func set_pinned(bubble: PanelContainer, pinned: bool) -> void:
 
 ## Fenêtre Codex (créée à la demande).
 func window() -> Control:
+	# U11 : sur la carte, la fenêtre commune « Codex » (onglet Histoire) remplace la fenêtre seule.
+	var hub := get_tree().get_first_node_in_group("codex_hub") if is_inside_tree() else null
+	if hub != null and hub.get("codex_window") != null:
+		return hub.get("codex_window")
 	if _window == null:
 		_window = CodexWindow.new()
 		_window.name = "CodexWindow"
@@ -146,7 +150,8 @@ func window() -> Control:
 
 
 func is_window_open() -> bool:
-	return _window != null and _window.visible
+	var current := window()
+	return current != null and current.visible
 
 
 ## Ouvre la fenêtre Codex sur `id` (liste seule si vide) ; les bulles non épinglées se ferment.
@@ -159,7 +164,7 @@ func open_entry(id: String = "") -> void:
 
 func toggle_window() -> void:
 	if is_window_open():
-		_window.hide()
+		window().hide()
 	else:
 		open_entry()
 
@@ -175,7 +180,7 @@ func _input(event: InputEvent) -> void:
 			close_all()
 			get_viewport().set_input_as_handled()
 		elif is_window_open():
-			_window.hide()
+			window().hide()
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed:
 		_on_mouse_pressed(event as InputEventMouseButton)

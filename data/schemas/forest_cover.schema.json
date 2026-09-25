@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/forest_cover.schema.json",
+  "title": "Sources du rendu des forêts",
+  "description": "Fichier data/map/forest_cover.json (lot V4) : d'où la végétation de la carte lit la couverture forestière et, en option, les essences. Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "channel": { "enum": ["r", "g", "b", "a"] }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "cover": {
+      "type": "object",
+      "description": "Raster de couverture forestière (PNG dans data/map/, n'importe quelle taille, calé sur l'emprise de la carte). Densité de semis = smoothstep(low, high, valeur du canal).",
+      "properties": {
+        "file": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+\\.png$" },
+        "channel": { "$ref": "#/$defs/channel" },
+        "low": { "type": "number", "minimum": 0, "maximum": 1 },
+        "high": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["file", "channel", "low", "high"],
+      "additionalProperties": false
+    },
+    "conifer": {
+      "type": "object",
+      "description": "Raster optionnel de la part de résineux dans la forêt (0..1, ex. forest_kind.png du lot R1) ; absent : choix procédural (altitude, latitude). Ignoré si `essences` est fourni.",
+      "properties": {
+        "file": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+\\.png$" },
+        "channel": { "$ref": "#/$defs/channel" }
+      },
+      "required": ["file", "channel"],
+      "additionalProperties": false
+    },
+    "essences": {
+      "description": "Raster optionnel des essences (parts 0..1 par canal) ; null : choix procédural (altitude, latitude, bruit).",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "properties": {
+            "file": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+\\.png$" },
+            "oak": { "$ref": "#/$defs/channel" },
+            "beech": { "$ref": "#/$defs/channel" },
+            "conifer": { "$ref": "#/$defs/channel" }
+          },
+          "required": ["file", "oak", "beech", "conifer"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "beech": {
+      "type": "object",
+      "description": "Choix procédural chênaie / hêtraie : le hêtre gagne avec l'altitude (entre les deux bornes), par taches de `patch_px` pixels ; `south_oak` : part retirée au hêtre dans le Midi.",
+      "properties": {
+        "altitude_low_m": { "type": "number" },
+        "altitude_high_m": { "type": "number" },
+        "patch_px": { "type": "number", "exclusiveMinimum": 0 },
+        "south_oak": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["altitude_low_m", "altitude_high_m", "patch_px", "south_oak"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["cover", "essences", "beech"],
+  "additionalProperties": false
+}

@@ -26,7 +26,7 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(640, 440)
+	panel.custom_minimum_size = Vector2(700, 500)
 	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -46,7 +46,10 @@ func _ready() -> void:
 		_build_display(_tab(tabs, "Affichage"))
 		_build_map(_tab(tabs, "Carte"))
 		_build_game(_tab(tabs, "Partie"))
+		_build_battle(_tab(tabs, "Bataille"))
 		_build_sound(_tab(tabs, "Son"))
+		_build_controls(_tab(tabs, "Commandes"))  # U7
+		_build_accessibility(_tab(tabs, "Accessibilité"))  # U12
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_END
 	buttons.add_theme_constant_override("separation", 10)
@@ -172,6 +175,8 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
+		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
 
 
 func _build_game(grid: GridContainer) -> void:
@@ -182,8 +187,15 @@ func _build_game(grid: GridContainer) -> void:
 		return "Chaque tour" if turns == 1 else "Tous les %d tours" % turns)
 	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
-	_options(grid, "battle/blood", "Sang", [0, 1, 2], ["Désactivé", "Modéré", "Complet"], "Taches, gerbes et cadavres ensanglantés en bataille. Complet : démembrements sur les coups critiques.")
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
+
+
+## BV1 : sang et taille des unités (appliqués à la bataille suivante).
+func _build_battle(grid: GridContainer) -> void:
+	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
+		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
+	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)"],
+		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra est exigeant pour la carte graphique.")
 
 
 ## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
@@ -191,6 +203,60 @@ func _build_sound(grid: GridContainer) -> void:
 	for spec in AudioBuses.PLAYER_BUSES:
 		var bus_name: String = spec[0]
 		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
+
+
+## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.
+func _build_controls(grid: GridContainer) -> void:
+	_options(grid, "input/layout", "Disposition du clavier", Array(ShortcutSheet.LAYOUTS), Array(ShortcutSheet.LAYOUT_LABELS),
+		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY).")
+	var sheet := GridContainer.new()
+	sheet.name = "ShortcutGrid"
+	sheet.columns = 2
+	sheet.add_theme_constant_override("h_separation", 18)
+	sheet.add_theme_constant_override("v_separation", 2)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(sheet)
+	_label(grid, "Raccourcis de la carte")
+	grid.add_child(scroll)
+	_fill_shortcuts(sheet)
+	settings.changed.connect(func(key: String) -> void:
+		if key == "input/layout" and is_instance_valid(sheet):
+			_fill_shortcuts(sheet))
+
+
+func _fill_shortcuts(sheet: GridContainer) -> void:
+	for child in sheet.get_children():
+		sheet.remove_child(child)
+		child.queue_free()
+	for section in ShortcutSheet.sections():
+		var title := Label.new()
+		title.text = str(section["title"])
+		title.add_theme_color_override("font_color", HudStyle.RUBRIC)
+		sheet.add_child(title)
+		sheet.add_child(Control.new())
+		for line in section["lines"]:
+			var keys := Label.new()
+			keys.text = str(line[0])
+			keys.add_theme_font_size_override("font_size", 15)
+			keys.custom_minimum_size = Vector2(90, 0)
+			sheet.add_child(keys)
+			var what := Label.new()
+			what.text = str(line[1])
+			what.add_theme_font_size_override("font_size", 15)
+			sheet.add_child(what)
+
+
+## Lot U12 : mode daltonien, animations réduites, contraste renforcé.
+func _build_accessibility(grid: GridContainer) -> void:
+	_check(grid, Accessibility.KEY_COLORBLIND, "Mode daltonien",
+		"Ajoute motifs et symboles aux couleurs : carte diplomatique hachurée, relations et moral marqués de symboles.")
+	_check(grid, Accessibility.KEY_REDUCE_MOTION, "Réduire les animations",
+		"Supprime les fondus et les travellings de caméra.")
+	_check(grid, Accessibility.KEY_HIGH_CONTRAST, "Contraste renforcé",
+		"Encre plus sombre, parchemin plus clair, bords plus épais.")
 
 
 func _on_reset() -> void:
