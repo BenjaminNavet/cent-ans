@@ -70,3 +70,44 @@ Figurines : +178 µs par image pour 10 423 figurines en plein assaut (57 régime
 - Plus d'obstacles pour la grille A* (≈ 60-85 îlots) : le coût reste borné (évaluation paresseuse
   des cellules, test du cercle englobant d'abord).
 - Les sauvegardes anciennes (maisons sans emprise) retombent sur un carré autour du disque.
+
+## Addendum BR3b (2026-09-25) — équilibre du siège de Paris
+
+Wip : `docs/wip/br3b-equilibre-paris.md` (diagnostic, balayages, tableaux complets).
+
+**Constat.** Le 5/20 de Paris mesuré par BR3 n'existe plus sur main : SG3 (PV des ouvrages dans
+`siege_works.json`) l'a effacé (en remettant les PV d'avant SG3, la sonde redonne exactement les
+chiffres de BR3). Sur main, l'assaillant gagne 17/20 à Paris ; SG3 sans BR3 donnait 11/20. BR3 a
+rendu Paris trop facile, par un seul mécanisme : les engins visent le pan de mur tenu par les
+arbalétriers près de la porte ; leurs projectiles incendiaires (dépassement de 18 m) allument la
+rangée de maisons adossée au rempart (qui n'existait pas avant BR3) ; la chaleur fait fuir les
+arbalétriers, qui ne tuent plus l'équipage du bélier, et la porte tombe vers 250 s. Aucun régiment
+bloqué, chemins A* normaux ; le moral perdu à la chaleur par l'assaillant est faible sur main.
+
+**Décision.**
+- `heat.wall_walk_factor` = 0,3 (`data/rules/siege_fire.json`) : sur le chemin de ronde, au-dessus
+  de la rue et derrière le parapet, un régiment ne reçoit que 30 % de la chaleur des maisons en
+  feu. La chaleur des rues est inchangée.
+- Défaut d'IA révélé et corrigé (`plan_siege_attack`) : un régiment de l'assaillant déjà passé
+  par-dessus le mur, sans ouverture, était renvoyé à son point d'échelle (là où il se tenait) et y
+  restait jusqu'à la nuit ; il marche maintenant vers la place.
+
+**Mesures** (sonde BR3, 20 graines, brèche 40 %, fortification 2) :
+
+| Ville | Victoires assaillant avant → après | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées |
+|---|---|---|---|---|---|
+| générique | 17 → 18/20 | 438 → 441 | 55 → 56 | 197 → 197 | 10.9 → 10.4 |
+| Paris | 17 → 12/20 | 501 → 560 | 85 → 78 | 194 → 166 | 6.7 → 8.9 |
+| Rouen | 2 → 0/20 | 307 → 305 | 91 → 70 | 148 → 157 | 5.6 → 4.0 |
+| Avignon | 18 → 18/20 | 452 → 452 | 154 → 154 | 175 → 175 | 5.0 → 5.0 |
+| Bordeaux | 18 → 12/20 | 463 → 470 | 70 → 85 | 196 → 212 | 17.4 → 19.9 |
+| Bruges | 19 → 19/20 | 413 → 406 | 71 → 69 | 159 → 167 | 5.0 → 4.7 |
+| Calais | 6 → 6/20 | 329 → 334 | 78 → 90 | 152 → 167 | 3.4 → 2.9 |
+| Londres | 18 → 16/20 | 501 → 501 | 81 → 77 | 208 → 169 | 4.3 → 5.3 |
+
+Sonde SG3 (armées de la démo, 10 graines) : Paris 10 → 10/10, Avignon 8 → 10, Bruges 10 → 10,
+Calais 10 → 10, Rouen 8 → 10/10 (sans le correctif d'IA, Rouen tombait à 4/10 par des nuls à 1800 s).
+
+**Limite.** Bordeaux passe de 18 à 12/20 : la même règle y soulage la garnison du rempart. Aucun
+facteur global ne sépare Paris de Bordeaux (0,6 : 15 et 15 ; 0,3 : 12 et 12). Revenir à 0,6 (toutes
+les villes à ±3, Paris 15/20) ou à 1,0 (Paris 17/20) est un changement d'une ligne de données.
