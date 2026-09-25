@@ -201,6 +201,10 @@ pub struct BattleSetup {
     /// order can be given when empty.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub orders: Vec<BattleOrder>,
+    /// Rules of the regimental standards (`data/rules/battle_standards.json`,
+    /// EP5); [`data_model::BattleStandardRules::default`] when `None`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub standards: Option<data_model::BattleStandardRules>,
 }
 
 impl BattleSetup {
