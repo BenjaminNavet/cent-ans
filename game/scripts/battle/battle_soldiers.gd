@@ -80,6 +80,11 @@ var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une c
 var _frame_dt: float = 0.0
 var _audio: Script = null
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
+## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
+var impostors: BattleImpostors = null
+var _imp_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (quadrilatères)
+## BV3 : les pavois des génois sont plantés en rangée (`BattleVolleys`) : celui du dos disparaît.
+var hide_planted_pavise: bool = false
 var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
@@ -136,6 +141,8 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		_unit_kind[id] = kind
 		if skinned:
 			_skinned[id] = true
+			if impostors != null:
+				impostors.request(BattleImpostors.key_of(side, kind, variant), kind, variant, mat)
 
 
 func _make_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
@@ -287,6 +294,14 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		mm.mesh = BattleSkinned.mesh(kind, variant, level) if skinned else BattleMeshes.soldier_level(kind, variant, level)
 	instance.visible = n > 0 and near
 	lod.visible = n > 0 and (not near or shadow)
+	# BV3 : imposteurs au-delà de 300 m (atlas cuit au début de la bataille).
+	var imp: MultiMeshInstance3D = null
+	if impostors != null and skinned and distance > BattleImpostors.DISTANCE:
+		imp = _impostor_layer(id, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), mm.instance_count)
+		if imp != null:
+			lod.visible = false
+	if _imp_layers.has(id):
+		(_imp_layers[id] as MultiMeshInstance3D).visible = imp != null and n > 0
 	if near:
 		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	else:
@@ -300,8 +315,18 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			mm.buffer = padded
 		if lod.visible:
 			lod_mm.buffer = padded
+		if imp != null:
+			if imp.multimesh.instance_count != mm.instance_count:
+				imp.multimesh.instance_count = mm.instance_count
+			imp.multimesh.buffer = padded
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
+	if imp != null:
+		imp.multimesh.visible_instance_count = n
+		var imp_mat := imp.material_override as ShaderMaterial
+		imp_mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
+		imp_mat.set_shader_parameter("imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
+		imp_mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
@@ -338,10 +363,102 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
 		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
+		# BV3 : pavois du dos masqué tant que la rangée est plantée (même règle que BV1).
+		if hide_planted_pavise:
+			var planted := bool(unit.get("pavise_cover", false)) and state != "marching" and state != "charging"
+			if planted != bool(mat.get_meta("bv3_pavise", false)):
+				mat.set_meta("bv3_pavise", planted)
+				mat.set_shader_parameter("hide_pavise", planted)
 		var blood := snappedf(_living_blood(unit, id), 0.02)
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
 			mat.set_shader_parameter("blood", blood)
+
+
+## BV3 : repère (position au sol, cap) de la figurine placée à `rank` (0 première, 1 dernière)
+## dans le tampon courant du régiment ; null si le régiment n'a pas de figurine dessinée.
+func figure_frame(id: int, rank: float) -> Variant:
+	if not _previous.has(id):
+		return null
+	var slice: PackedFloat32Array = _previous[id]
+	var n := slice.size() / 12
+	if n <= 0:
+		return null
+	var o := clampi(int(rank * float(n - 1)), 0, n - 1) * 12
+	var basis := Basis(Vector3(slice[o], slice[o + 4], slice[o + 8]), Vector3(slice[o + 1], slice[o + 5], slice[o + 9]), Vector3(slice[o + 2], slice[o + 6], slice[o + 10]))
+	return Transform3D(basis, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
+## BV3 : rang (indice dans le tampon courant) de la figurine du régiment la plus proche de
+## `point` (-1 : aucune figurine dessinée).
+func figure_slot_near(id: int, point: Vector3) -> int:
+	if not _previous.has(id):
+		return -1
+	var slice: PackedFloat32Array = _previous[id]
+	var best := -1
+	var best_d := INF
+	for i in slice.size() / 12:
+		var dx := slice[i * 12 + 3] - point.x
+		var dz := slice[i * 12 + 11] - point.z
+		var d := dx * dx + dz * dz
+		if d < best_d:
+			best_d = d
+			best = i
+	return best
+
+
+## BV3 : repère de la figurine au rang `slot` du tampon courant.
+func slot_frame(id: int, slot: int) -> Transform3D:
+	var slice: PackedFloat32Array = _previous[id]
+	var o := slot * 12
+	return Transform3D(Basis.IDENTITY, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
+## BV3 : retire la figurine `slot` de la formation jusqu'à l'instant `until` (horloge
+## d'animation), comme les renversés de BV2 (duels).
+func hide_figure(id: int, slot: int, until: float) -> void:
+	var hidden: Dictionary = _hidden.get(id, {})
+	hidden[slot] = maxf(float(hidden.get(slot, 0.0)), until)
+	_hidden[id] = hidden
+
+
+## BV3 : figurine skinnée du régiment (famille, variante, matériau) ; vide sinon.
+func skinned_info(id: int) -> Dictionary:
+	if not _skinned.has(id) or not _unit_info.has(id):
+		return {}
+	var info: Dictionary = _unit_info[id]
+	return {"kind": info["kind"], "variant": info["variant"], "side": info["side"], "material": _materials[id]}
+
+
+## BV3 : nombre de régiments dessinés en imposteurs (bancs d'essai).
+func impostor_regiments() -> int:
+	var n := 0
+	for id in _imp_layers:
+		if (_imp_layers[id] as MultiMeshInstance3D).visible:
+			n += 1
+	return n
+
+
+## BV3 : couche d'imposteurs du régiment (créée quand l'atlas est prêt ; null avant).
+func _impostor_layer(id: int, side: String, kind: String, variant: int, count: int) -> MultiMeshInstance3D:
+	if _imp_layers.has(id):
+		return _imp_layers[id]
+	var key := BattleImpostors.key_of(side, kind, variant)
+	if not impostors.is_ready(key):
+		return null
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = BattleImpostors.quad_mesh()
+	mm.instance_count = count
+	mm.visible_instance_count = 0
+	var imp := MultiMeshInstance3D.new()
+	imp.name = "Unit%d_%s_impostor" % [id, kind]
+	imp.multimesh = mm
+	imp.material_override = impostors.make_material(key)
+	imp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(imp)
+	_imp_layers[id] = imp
+	return imp
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers

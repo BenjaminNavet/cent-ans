@@ -21,9 +21,43 @@
         "monuments": { "type": "array", "items": { "type": "string" } },
         "bridges": { "type": "array", "items": { "type": "string" } },
         "streets": { "type": "array", "items": { "type": "string" } },
-        "walls": { "type": "array", "items": { "type": "string" } }
+        "walls": { "type": "array", "items": { "type": "string" } },
+        "cut_m": { "type": "number", "description": "Lot L3 : rien n'est gardé à plus de `cut_m` en avant de l'origine après rotation (négatif : au-delà de l'origine), pour que rien de la toile de fond ne passe sous la ville assiégée." },
+        "center_x_m": { "type": "number", "description": "Lot L3 : abscisse (après rotation) du point du plan posé face au centre de la ville assiégée (défaut 0, l'origine)." },
+        "battle": {
+          "type": "object",
+          "description": "Lot L3 (ADR 0026) : la ville assiégée de la bataille est tirée du plan. Le cœur enchaîne les enceintes listées en un anneau (fermé par un quai droit s'il reste ouvert, côté fleuve), le ramène à l'échelle du champ de bataille, tourne la porte attaquée face à l'assaillant ; les autres portes deviennent des châtelets, les rues listées restent libres de maisons.",
+          "properties": {
+            "walls": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Enceintes (identifiants de `walls`), dans l'ordre où elles s'enchaînent." },
+            "gate": { "type": "string", "description": "Nom de la porte attaquée (une des `gates` des enceintes)." },
+            "streets": { "type": "array", "items": { "type": "string" }, "description": "Rues (identifiants de `streets`) gardées comme voies dans la ville assiégée." },
+            "square": { "$ref": "#/$defs/point", "description": "Place centrale que l'assaillant doit tenir (défaut : centre de l'anneau)." },
+            "radius_m": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon moyen de l'anneau sur le champ de bataille (défaut : celui de la ville générique)." }
+          },
+          "required": ["walls", "gate"],
+          "additionalProperties": false
+        }
       },
       "required": ["rotate_deg", "radius_m", "bank_offset_m", "areas", "monuments"],
+      "additionalProperties": false
+    },
+    "materials": {
+      "type": "object",
+      "description": "Lot L3 : matériaux de la ville (atlas partagé). `houses` : tirage pondéré des murs et des toits des maisons ; `palette` : couleurs (RVB linéaire) propres à la ville (calcaire blond de Paris, pierre de Caen, pierre du palais des Papes, brique de Bruges).",
+      "properties": {
+        "houses": {
+          "type": "object",
+          "properties": {
+            "walls": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+            "roofs": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }
+          },
+          "additionalProperties": false
+        },
+        "palette": {
+          "type": "object",
+          "additionalProperties": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 }
+        }
+      },
       "additionalProperties": false
     },
     "sources": {

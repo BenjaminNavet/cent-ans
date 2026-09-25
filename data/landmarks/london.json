@@ -4,6 +4,8 @@
   "settlement": "set_londres",
   "period": "vers 1340-1400 (tour du Joyau 1365, horloge de Westminster 1367, Savoy jusqu'en 1381, salle de Richard II en 1394)",
   "province": "prov_middlesex",
+  "siege": {"rotate_deg": 180, "radius_m": 2400, "bank_offset_m": -155, "cut_m": -150, "center_x_m": -1500, "areas": ["southwark", "lambeth"], "monuments": ["southwark_priory", "lambeth_palace", "cog_pool_1", "cog_pool_2", "cog_pool_3"], "bridges": ["london_bridge"], "streets": ["borough_high_street"], "battle": {"walls": ["london_wall"], "gate": "Bishopsgate", "streets": ["bishopsgate_street", "cheapside", "aldgate_street", "newgate_street", "aldersgate_street", "thames_street"]}},
+  "materials": {"houses": {"walls": {"Timber": 0.5, "Plaster": 0.35, "Stone": 0.15}, "roofs": {"Tile": 0.5, "TileOld": 0.3, "Slate": 0.15, "Thatch": 0.05}}, "palette": {"Stone": [0.43, 0.42, 0.37], "NDStone": [0.58, 0.53, 0.42]}},
   "sources": [
     {
       "title": "Civitas Londinum (plan dit « Agas »)",

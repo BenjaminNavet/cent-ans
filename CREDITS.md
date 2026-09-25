@@ -58,6 +58,14 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
   seulement, décimation, matériaux simplifiés.
 
+### Matériaux des villes emblématiques — CC0 1.0
+
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Medieval Blocks 03, Castle Wall
+  Varriation, Medieval Red Brick, Roof Slates 02, Clay Roof Tiles 02, Roof Tiles 14, Clay Plaster,
+  Old Planks 02, Reed Roof 04, Cobblestone Floor 08 (1k). Ramenées à des cartes de détail et
+  assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
+  `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
+
 ### Ciels HDRI — CC0 1.0
 
 - **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).

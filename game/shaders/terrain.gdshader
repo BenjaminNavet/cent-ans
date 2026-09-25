@@ -275,6 +275,9 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/relief_landcover.gdshaderinc"
 // Lot CV1 : saisons, terroirs, dévastation, ombres de nuages (fonctions séparées).
 #include "res://shaders/campaign_life.gdshaderinc"
+// Lot CM2 : vue stratégique parchemin (fondu au zoom maximal) et météo de campagne.
+#include "res://shaders/parchment_map.gdshaderinc"
+#include "res://shaders/campaign_weather.gdshaderinc"
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -613,7 +616,12 @@ void fragment() {
 	}
 
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
+	vec3 wx_emit = vec3(0.0);
+	col = weather_ground(col, p, hc, slope, roughness, wx_emit);  // CM2 : météo
+	vec3 pm_emit;
+	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
 	ALBEDO = col;
+	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	ROUGHNESS = roughness;
 	SPECULAR = mix(0.3, 0.1, lake);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);

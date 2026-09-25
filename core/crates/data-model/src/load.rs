@@ -56,6 +56,8 @@ pub mod folders {
     pub const DIETS: &str = "diets";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
+    /// Landmark cities (lots L1-L3); optional folder.
+    pub const LANDMARKS: &str = "landmarks";
     /// Settlements, one file per province (lot C1); optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
@@ -80,6 +82,8 @@ pub mod folders {
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
+    /// Campaign map weather (lot CM2), inside `rules/`; optional.
+    pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -195,6 +199,9 @@ pub struct GameData {
     pub diets: BTreeMap<DietId, Diet>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
+    /// Landmark cities (L3: siege battles in the historical plan), empty
+    /// when `data/landmarks/` is absent.
+    pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -228,6 +235,9 @@ pub struct GameData {
     /// `data/rules/population.json` (lot E2);
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
+    /// `data/rules/campaign_weather.json` (lot CM2);
+    /// [`crate::CampaignWeatherRules::default`] when absent.
+    pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -272,6 +282,7 @@ impl GameData {
             battle_orders: BTreeMap::new(),
             diets: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
+            landmarks: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
@@ -285,6 +296,7 @@ impl GameData {
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
+            campaign_weather: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -307,6 +319,10 @@ impl GameData {
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let landmarks_dir = root.join(folders::LANDMARKS);
+        if landmarks_dir.is_dir() {
+            data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
         }
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
@@ -335,6 +351,12 @@ impl GameData {
         let population_path = root.join(folders::RULES).join(folders::POPULATION_RULES);
         if population_path.is_file() {
             data.population_rules = read_json(&population_path)?;
+        }
+        let weather_path = root
+            .join(folders::RULES)
+            .join(folders::CAMPAIGN_WEATHER_RULES);
+        if weather_path.is_file() {
+            data.campaign_weather = read_json(&weather_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {
