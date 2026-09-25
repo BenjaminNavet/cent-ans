@@ -108,6 +108,31 @@
       "type": "number",
       "minimum": 0
     },
+    "boarders_per_target": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "IA (NV2) : au plus tant de navires abordent un même navire ennemi."
+    },
+    "assault_range_m": {
+      "type": "number",
+      "minimum": 0,
+      "description": "IA (NV2) : distance sous laquelle la majorité de la flotte doit se trouver pour l'abordage général."
+    },
+    "assault_softening_s": {
+      "type": "number",
+      "minimum": 0,
+      "description": "IA (NV2) : secondes de volées à cette distance avant l'abordage général."
+    },
+    "assault_odds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "IA (NV2) : rapport de forces minimal pour aborder pendant l'abordage général."
+    },
+    "chain_morale": {
+      "type": "number",
+      "minimum": 0,
+      "description": "NV2 : facteur des pertes de moral des navires enchaînés (ils ne peuvent fuir)."
+    },
     "morale_per_loss_percent": {
       "type": "number",
       "minimum": 0
