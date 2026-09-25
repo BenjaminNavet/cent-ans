@@ -10,7 +10,7 @@ extends Node3D
 ## Option de capture : `--landmark-backdrop=<id>` force la toile de fond quelle que soit la province.
 
 const SHADER := preload("res://shaders/landmark.gdshader")
-const HEIGHT_RES := 128
+const HEIGHT_RES := 192
 ## Marge entre la muraille du fond et la berge (m).
 const BANK_MARGIN := 40.0
 
@@ -59,11 +59,19 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	var extent := radius * 2.0
 	var origin := Vector2(position.x - radius, position.z - radius)
 	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
+	# L3 : maximum du relief sur le texel (centre et coins), comme la carte de campagne (L2), pour
+	# que l'eau et les quais ne passent pas sous le terrain entre deux échantillons.
+	var cell := extent / HEIGHT_RES
 	for j in HEIGHT_RES:
 		for i in HEIGHT_RES:
-			var x := origin.x + (float(i) + 0.5) / HEIGHT_RES * extent
-			var z := origin.y + (float(j) + 0.5) / HEIGHT_RES * extent
-			image.set_pixel(i, j, Color(float(height_at.call(x, z)) if height_at.is_valid() else 0.0, 0.0, 0.0))
+			var x := origin.x + (float(i) + 0.5) * cell
+			var z := origin.y + (float(j) + 0.5) * cell
+			var h := 0.0
+			if height_at.is_valid():
+				h = float(height_at.call(x, z))
+				for corner in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.5)]:
+					h = maxf(h, float(height_at.call(x + corner.x * cell, z + corner.y * cell)))
+			image.set_pixel(i, j, Color(h + 0.3, 0.0, 0.0))
 	var texture := ImageTexture.create_from_image(image)
 	var triangles := 0
 	for child in model.find_children("*", "MeshInstance3D", true, false):
