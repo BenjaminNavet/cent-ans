@@ -82,3 +82,7 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
   `b6.rs` recalculés (graines 3 et 11 : vainqueur attaquant inchangé). `ep1_scale` 60 × 60 : le
   défenseur R4 reçoit l'attaque sur son terrain, pic de 15-22 régiments en mêlée (seuil ramené à
   12, compté à chaque pas).
+  Vérifié (9c499c32) : fmt, clippy, cargo test (688), `build.sh`, pytest (531), import Godot,
+  `ep2_horizon_test`, `ep4_audio_test`, smoke entier vert (28 « smoke OK », code 0), captures
+  `--standard-shot=line|foot` (étendards et pennons visibles) et `sg3_siege_shot` (servants de la
+  bombarde et du trébuchet animés). Reste : ff-only dans main.
