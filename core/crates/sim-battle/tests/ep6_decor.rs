@@ -521,8 +521,8 @@ fn looting_an_unguarded_camp_costs_morale() {
     let state = sim.camp_state(SideId::Attacker).unwrap();
     assert!(state.looted, "progress {:.2}", state.progress);
     assert!(has_event(&sim, "sont pillés"));
-    for i in 0..2 {
-        let lost = before[i] - sim.units()[i].morale;
+    for (i, morale) in before.iter().enumerate().take(2) {
+        let lost = morale - sim.units()[i].morale;
         assert!(
             lost >= rules.looted_morale * 0.8,
             "regiment {i} lost {lost:.1} morale"
@@ -579,13 +579,12 @@ fn hand_placed_decor_plan_is_applied() {
     assert!(d.areas.iter().any(|a| a.kind == AreaKind::Vineyard));
     let camp = d.camp(SideId::Defender).unwrap();
     assert!((camp.area.x - 620.0).abs() < 1e-6 && (camp.area.z - 760.0).abs() < 1e-6);
-    assert_eq!(
+    assert!(
         d.props
             .iter()
             .filter(|p| p.kind == DecorPropKind::Haystack)
             .count()
-            >= 2,
-        true
+            >= 2
     );
     // The hand-placed hedge is a rule obstacle.
     assert!(sim

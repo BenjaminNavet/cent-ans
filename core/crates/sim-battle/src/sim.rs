@@ -275,7 +275,13 @@ impl BattleSim {
         if !is_siege {
             // EP6: countryside and camps (derived stream), then the hand-made
             // decor of a historical map.
-            field.lay_decor(&setup.province, &rng);
+            // A bare field (`village: Some(false)`: labs, tests) keeps its
+            // camps only.
+            if setup.village == Some(false) {
+                field.lay_camps(&rng);
+            } else {
+                field.lay_decor(&setup.province, &rng);
+            }
             if let Some(plan) = &setup.decor_plan {
                 field.apply_decor_plan(plan);
             }

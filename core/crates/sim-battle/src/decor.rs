@@ -723,6 +723,17 @@ impl Battlefield {
         self.with_layout(seed, |layout| layout.lay(&key));
     }
 
+    /// Lays only the two camps (a bare field: `BattleSetup::village` set to
+    /// `Some(false)`), from a stream derived from `rng` (not advanced).
+    pub fn lay_camps(&mut self, rng: &BattleRng) {
+        let seed = rng.derive(DECOR_STREAM).next_u64();
+        self.with_layout(seed, |layout| {
+            for side in SideId::BOTH {
+                layout.camp(side, None);
+            }
+        });
+    }
+
     /// Removes the whole decor (camps included). Farm tracks, hedges and
     /// mounds already laid stay.
     pub fn clear_decor(&mut self) {
