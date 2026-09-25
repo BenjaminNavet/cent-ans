@@ -13,12 +13,10 @@ APP="$ROOT/export/Cent Ans.app"
 mkdir -p "$ROOT/export"
 rm -rf "$APP"
 godot --headless --path "$ROOT/game" --import
-# Not headless: the shader baker (export_presets.cfg, shader_baker/enabled) needs the Forward+
-# renderer to precompile the shaders, otherwise the first launch compiles them (~10 s).
-# The windowed editor rewrites project.godot on exit: keep the committed version.
-cp "$ROOT/game/project.godot" "$ROOT/export/project.godot.bak"
-trap 'mv "$ROOT/export/project.godot.bak" "$ROOT/game/project.godot"' EXIT
-godot --path "$ROOT/game" --export-release "macOS" "$APP"
+# Shader baker left off (export_presets.cfg): tested with the Metal toolchain, it saved only
+# ~0.5 s of the ~11 s first launch (driver pipeline compilation dominates) and made the exported
+# game print a ParticlesShaderRD leak at every exit. The warm-up run below is what helps.
+godot --headless --path "$ROOT/game" --export-release "macOS" "$APP"
 mkdir -p "$APP/Contents/Resources"
 rsync -a --delete --exclude "schemas" "$ROOT/data/" "$APP/Contents/Resources/data/"
 cp "$ROOT/CREDITS.md" "$APP/Contents/Resources/CREDITS.md"
