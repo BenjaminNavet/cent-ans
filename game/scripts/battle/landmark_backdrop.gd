@@ -1,10 +1,11 @@
 class_name LandmarkBackdrop
 extends Node3D
 
-## Toile de fond d'une bataille de siège dans une ville emblématique (lot L1, Paris) : la ville
-## assiégée reste celle de la simulation (murailles, maisons-obstacles), le plan historique est
-## posé derrière elle à l'échelle réelle — la Seine au pied de la muraille du fond, l'île de la
-## Cité avec Notre-Dame, la Sainte-Chapelle et le palais, la rive droite et le Louvre.
+## Toile de fond d'une bataille de siège dans une ville emblématique (lot L1, Paris ; L3 : les sept
+## villes) : la ville assiégée vient du cœur (depuis L3, tirée du plan : enceinte, portes, rues ;
+## ADR 0026), ce qui est au-delà de sa muraille du fond est posé derrière elle à l'échelle réelle —
+## à Paris la Seine, l'île de la Cité avec Notre-Dame et la rive droite ; à Londres la Tamise, le
+## pont et Southwark ; à Rouen la Seine et Saint-Sever…
 ## Rendu seulement. Modèle : `landmark_city.py --siege` → `assets/models/landmarks/<id>_siege.glb`
 ## (mètres, origine sur `anchor`, plan tourné de `siege.rotate_deg`, nord vers +Z après pose).
 ## Option de capture : `--landmark-backdrop=<id>` force la toile de fond quelle que soit la province.
@@ -24,12 +25,17 @@ static func create(setup: Dictionary, siege: Dictionary, height_at: Callable) ->
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--landmark-backdrop="):
 			forced = arg.trim_prefix("--landmark-backdrop=")
-	var province := str(setup.get("province", ""))
+	# L3 : la ville assiégée tirée d'un plan (`siege_layout` du cœur) désigne sa toile de fond ; la
+	# province seule ne suffit plus (le Boulonnais a pour ville Boulogne, pas Calais).
+	var layout: Dictionary = setup.get("siege_layout", {}) if setup.get("siege_layout", {}) is Dictionary else {}
+	var wanted := forced if forced != "" else str(layout.get("id", ""))
+	if wanted == "":
+		return null
 	for plan in LandmarkLibrary.all():
 		var plan_dict: Dictionary = plan
 		if not plan_dict.has("siege"):
 			continue
-		if (forced != "" and str(plan_dict.get("id", "")) == forced) or (forced == "" and province != "" and str(plan_dict.get("province", "")) == province):
+		if str(plan_dict.get("id", "")) == wanted:
 			var path := "res://assets/models/landmarks/%s_siege.glb" % str(plan_dict["id"])
 			if not ResourceLoader.exists(path):
 				return null
