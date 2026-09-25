@@ -59,6 +59,22 @@ TIER1_LEVELS = (1, 2)
 TIER2_LEVELS = (3, 4)
 #: ``(lon_min, lat_min, lon_max, lat_max)`` of tier 2 (ADR 0036 "cœur").
 CORE_BBOX = (-6.0, 42.0, 9.0, 56.0)
+#: Parts of :data:`CORE_BBOX` left out of tier 2 to hold the cache budget
+#: (≤ 2.5 GB for E1-E4, ADR 0036: shrink the core before the resolution),
+#: keeping France, England and Wales, the Low Countries and the left bank of the
+#: Rhine. Boxes ``(lon_min, lat_min, lon_max, lat_max)``.
+CORE_EXCLUDE: tuple[tuple[str, tuple[float, float, float, float]], ...] = (
+    ("Espagne (Galice à la Navarre)", (-6.0, 42.0, -1.8, 44.0)),
+    ("Espagne (Aragon, Catalogne)", (-6.0, 42.0, 9.0, 42.35)),
+    ("Italie (Ligurie)", (7.55, 42.0, 9.0, 44.2)),
+    ("Italie (Piémont, Val d'Aoste)", (7.2, 44.2, 9.0, 46.1)),
+    ("Suisse", (6.8, 46.1, 9.0, 47.5)),
+    ("Allemagne (rive droite du Rhin)", (8.0, 47.5, 9.0, 56.0)),
+    ("Allemagne (Westerwald, Sauerland)", (7.2, 50.4, 8.0, 56.0)),
+    ("Allemagne (Bergisches Land, Ruhr)", (7.0, 50.8, 7.2, 56.0)),
+    ("Écosse", (-6.0, 55.1, -2.1, 56.0)),
+    ("Irlande", (-6.0, 51.6, -5.4, 56.0)),
+)
 #: E4 pixels of margin around each tier-2 block (surface correction filters).
 TIER2_MARGIN_PX = 128
 COAST_FADE_PX = 2
@@ -191,6 +207,35 @@ def _interp_axis(array: np.ndarray, coords: np.ndarray, axis: int) -> np.ndarray
     shape[axis] = -1
     t = t.reshape(shape)
     return (a * (1.0 - t) + b * t).astype(np.float32)
+
+
+def sample_level_tiles(
+    map_dir: Path, source_level: int, level: int, window: tuple[int, int, int, int]
+) -> np.ndarray:
+    """Bilinear sample of the cached tiles of ``source_level`` on a finer window.
+
+    NaN where no tile of ``source_level`` exists (``source_level`` >= 1).
+    """
+    col0, row0, cols, rows = window
+    shift = level - source_level
+    factor = float(1 << shift)
+    xs = (np.arange(col0, col0 + cols) + 0.5) / factor - 0.5
+    ys = (np.arange(row0, row0 + rows) + 0.5) / factor - 0.5
+    x_lo, x_hi = int(np.floor(xs[0])) - 1, int(np.ceil(xs[-1])) + 2
+    y_lo, y_hi = int(np.floor(ys[0])) - 1, int(np.ceil(ys[-1])) + 2
+    sub = np.full((y_hi - y_lo, x_hi - x_lo), np.nan, dtype=np.float32)
+    for row in range(y_lo // TILE_PX, (y_hi - 1) // TILE_PX + 1):
+        for col in range(x_lo // TILE_PX, (x_hi - 1) // TILE_PX + 1):
+            path = tile_path(map_dir, TileKey(source_level, col, row))
+            if not path.exists():
+                continue
+            tile = terrain.uint16_to_height(terrain.read_png16(path)).astype(np.float32)
+            ty0, tx0 = row * TILE_PX - y_lo, col * TILE_PX - x_lo
+            a0, b0 = max(ty0, 0), max(tx0, 0)
+            a1, b1 = min(ty0 + TILE_PX, sub.shape[0]), min(tx0 + TILE_PX, sub.shape[1])
+            if a1 > a0 and b1 > b0:
+                sub[a0:a1, b0:b1] = tile[a0 - ty0 : a1 - ty0, b0 - tx0 : b1 - tx0]
+    return _interp_axis(_interp_axis(sub, ys - y_lo, 0), xs - x_lo, 1)
 
 
 def block_any(mask: np.ndarray, factor: int) -> np.ndarray:
@@ -468,15 +513,31 @@ def prepare_work(map_dir: Path = MAP_DIR, force: bool = False) -> dict[str, Path
 
 
 def candidate_tiles(
-    map_dir: Path, level: int, bbox: tuple[float, float, float, float]
+    map_dir: Path,
+    level: int,
+    bbox: tuple[float, float, float, float],
+    exclude: Iterable[tuple[float, float, float, float]] = (),
 ) -> set[tuple[int, int]]:
-    """Tiles of ``level`` whose footprint holds E0 land inside ``bbox``."""
+    """Tiles of ``level`` whose footprint holds E0 land inside ``bbox``.
+
+    Land inside one of the ``exclude`` boxes does not count.
+    """
     e0 = np.load(WORK_DIR / "e0.npy", mmap_mode="r")
     grid0 = relief.fine_grid(map_dir)
     mask = (np.asarray(e0) >= relief_shade.MIN_LAND_M * 0.5) & bbox_mask_e0(grid0, bbox)
+    for box in exclude:
+        mask &= ~bbox_mask_e0(grid0, box)
     footprint = TILE_PX >> level
     rows, cols = np.nonzero(block_any(mask, footprint))
     return {(int(c), int(r)) for c, r in zip(cols, rows, strict=True)}
+
+
+#: Manifest fields of E3-E4 (envelope of the core once reduced).
+TIER2_MANIFEST = {
+    "source": "Copernicus DEM GLO-30 corrigé (canopée, bâti, retenues) ; cœur réduit à la"
+    " France, l'Angleterre et le pays de Galles, le Bénélux et la rive gauche du Rhin",
+    "bbox_lonlat": [-6.0, 42.35, 8.0, 56.0],
+}
 
 
 # ------------------------------------------------------------------ worker plumbing
@@ -662,7 +723,7 @@ def build(
         written += _run_units(
             surface.tier2_unit, jobs[:limit], paths, map_dir, workers, "E3-E4"
         )
-        refresh_manifest(map_dir, tier2)
+        refresh_manifest(map_dir, tier2, {level: TIER2_MANIFEST for level in tier2})
     per_level: dict[int, int] = {}
     for level, _ in written:
         per_level[level] = per_level.get(level, 0) + 1
@@ -706,9 +767,10 @@ def _tier2_jobs(
     map_dir: Path, levels: tuple[int, ...], force: bool
 ) -> tuple[list, int]:
     """One job per E2 footprint holding land of the core bbox; done ones skipped."""
-    e2 = candidate_tiles(map_dir, 2, CORE_BBOX)
-    e3 = candidate_tiles(map_dir, 3, CORE_BBOX)
-    e4 = candidate_tiles(map_dir, 4, CORE_BBOX)
+    exclude = [box for _, box in CORE_EXCLUDE]
+    e2 = candidate_tiles(map_dir, 2, CORE_BBOX, exclude)
+    e3 = candidate_tiles(map_dir, 3, CORE_BBOX, exclude)
+    e4 = candidate_tiles(map_dir, 4, CORE_BBOX, exclude)
     jobs, skipped = [], 0
     for col, row in sorted(e2, key=lambda t: (t[1], t[0])):
         key = TileKey(2, col, row)
