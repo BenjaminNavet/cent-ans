@@ -96,7 +96,7 @@ func _init() -> void:
 			pending.erase("huile")
 			await _view(_gate_point(siege, 6.0), 34.0, _yaw_out(siege, int(siege["gate"])) + 0.7, 0.9)
 			await _shot("sg1_huile.png")
-		elif pending.has("porte") and not pending.has("belier") and not fx._gate_broken and fx.strikes_seen > 0:
+		elif pending.has("porte") and not pending.has("belier") and not fx._gate_broken and fx.strikes_seen > 0 and (not pending.has("echelles") or float(battle.call("get_elapsed")) > 600.0):
 			# Accélère la chute de la porte (le bélier donne le dernier coup) : un coup de plus.
 			battle.call("debug_set_piece_hp", int(siege["gate"]), 1.0)
 			for _k in 40:
