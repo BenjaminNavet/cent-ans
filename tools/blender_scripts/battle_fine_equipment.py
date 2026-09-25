@@ -11,12 +11,11 @@ vertex groups named after the rig's bones and one of the ``MATS`` materials.
 
 import math
 
+import battle_skinned_equipment as eq
 import bmesh
 import bpy
 from mathutils import Vector
 from mathutils.kdtree import KDTree
-
-import battle_skinned_equipment as eq
 
 # name -> (shader code of battle_soldier_skinned, linear colour, roughness, metallic)
 MATS = {
@@ -60,7 +59,11 @@ def dominant(obj):
     out = []
     for v in obj.data.vertices:
         best = max(
-            (g for g in v.groups if names[g.group] not in ("body", "helper-l-eye", "helper-r-eye")),
+            (
+                g
+                for g in v.groups
+                if names[g.group] not in ("body", "helper-l-eye", "helper-r-eye")
+            ),
             key=lambda g: g.weight,
             default=None,
         )
@@ -75,7 +78,11 @@ class Landmarks:
         """Measure the head, eyes, chin, waist and knees of the fitted `body`."""
         mw = body.matrix_world
         dom = dominant(body)
-        head = [mw @ v.co for v, d in zip(body.data.vertices, dom, strict=True) if d == "Head"]
+        head = [
+            mw @ v.co
+            for v, d in zip(body.data.vertices, dom, strict=True)
+            if d == "Head"
+        ]
         self.head_min = Vector(
             (min(p.x for p in head), min(p.y for p in head), min(p.z for p in head))
         )
@@ -100,7 +107,11 @@ class Landmarks:
         self.top = max(head, key=lambda p: p.z)
         self.bone = {b.name: arm.matrix_world @ b.head_local for b in arm.data.bones}
         self.centre = Vector(
-            ((self.head_min.x + self.head_max.x) / 2, (self.head_min.y + self.head_max.y) / 2, 0)
+            (
+                (self.head_min.x + self.head_max.x) / 2,
+                (self.head_min.y + self.head_max.y) / 2,
+                0,
+            )
         )
         self.waist_z = self.bone["Abdomen"].z + 0.02
         self.knee_z = (self.bone["LowerLeg.L"].z + self.bone["LowerLeg.R"].z) / 2
@@ -170,7 +181,9 @@ def trim_body(body, keep_bones=("Head", "Neck", "Wrist.L", "Wrist.R")):
     dom = dominant(body)
     bm = bmesh.new()
     bm.from_mesh(body.data)
-    doomed = [f for f in bm.faces if not any(dom[v.index] in keep_bones for v in f.verts)]
+    doomed = [
+        f for f in bm.faces if not any(dom[v.index] in keep_bones for v in f.verts)
+    ]
     bmesh.ops.delete(bm, geom=doomed, context="FACES")
     loose = [v for v in bm.verts if not v.link_faces]
     bmesh.ops.delete(bm, geom=loose, context="VERTS")
@@ -237,7 +250,9 @@ def body_lookup(body):
             {
                 names[g.group]: g.weight
                 for g in v.groups
-                if g.weight > 0 and not names[g.group].startswith("helper") and names[g.group] != "body"
+                if g.weight > 0
+                and not names[g.group].startswith("helper")
+                and names[g.group] != "body"
             }
         )
     kd.balance()
@@ -293,9 +308,15 @@ def shoes(body):
             bm.verts.new(p)
         hull = bmesh.ops.convex_hull(bm, input=bm.verts)
         bmesh.ops.delete(
-            bm, geom=[g for g in hull["geom_interior"] if isinstance(g, bmesh.types.BMVert)], context="VERTS"
+            bm,
+            geom=[
+                g for g in hull["geom_interior"] if isinstance(g, bmesh.types.BMVert)
+            ],
+            context="VERTS",
         )
-        bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(8), verts=bm.verts, edges=bm.edges)
+        bmesh.ops.dissolve_limit(
+            bm, angle_limit=math.radians(8), verts=bm.verts, edges=bm.edges
+        )
         bmesh.ops.triangulate(bm, faces=bm.faces)
         bm.normal_update()
         for v in bm.verts:
@@ -312,7 +333,9 @@ def to_object_smooth(name, bm, materials, levels=1):
     mod = obj.modifiers.new("sub", "SUBSURF")
     mod.levels = levels
     mod.render_levels = levels
-    with bpy.context.temp_override(object=obj, active_object=obj, selected_objects=[obj]):
+    with bpy.context.temp_override(
+        object=obj, active_object=obj, selected_objects=[obj]
+    ):
         bpy.ops.object.modifier_apply(modifier=mod.name)
     return obj
 
@@ -344,10 +367,17 @@ def surcoat(body, lm, garment, bvh):
     sleeve_cut = lm.shoulder_z - 0.02
 
     def keep(c, bones):
-        if not bones <= set(TORSO) | {"Shoulder.L", "Shoulder.R", "UpperLeg.L", "UpperLeg.R"}:
+        if not bones <= set(TORSO) | {
+            "Shoulder.L",
+            "Shoulder.R",
+            "UpperLeg.L",
+            "UpperLeg.R",
+        }:
             return False
         # Wide armholes: the shoulder yoke only near the neck.
-        if bones & {"Shoulder.L", "Shoulder.R"} and (c.z < sleeve_cut or abs(c.x) > 0.12):
+        if bones & {"Shoulder.L", "Shoulder.R"} and (
+            c.z < sleeve_cut or abs(c.x) > 0.12
+        ):
             return False
         return c.z > lm.waist_z - 0.03
 
@@ -380,7 +410,11 @@ def _skirt(lm, bvh, n=40, rows=10):
         for i in range(n):
             a = 2 * math.pi * i / n
             d = Vector((math.cos(a), math.sin(a), 0))
-            base = _ray_radius(bvh, Vector((centre.x, centre.y, z)), d, 0.17) if t < 0.35 else None
+            base = (
+                _ray_radius(bvh, Vector((centre.x, centre.y, z)), d, 0.17)
+                if t < 0.35
+                else None
+            )
             flare = 0.02 + 0.035 * t
             # Ellipse around both legs: wider across the stance.
             rx = 0.15 + abs(spread.x) * 0.5 + flare
@@ -439,10 +473,16 @@ def belt(lm, bvh, n=40):
     # Brass mounts: small bosses every other segment.
     for i in range(0, n, 3):
         p = (rings[0][i].co + rings[1][i].co) / 2
-        out = (p - centre)
+        out = p - centre
         out.z = 0
         out.normalize()
-        eq.box(bm, p + out * 0.004, (0.009, 0.004, 0.012), (Vector((-out.y, out.x, 0)), out, Vector((0, 0, 1))), 1)
+        eq.box(
+            bm,
+            p + out * 0.004,
+            (0.009, 0.004, 0.012),
+            (Vector((-out.y, out.x, 0)), out, Vector((0, 0, 1))),
+            1,
+        )
     eq.finish(bm)
     obj = eq.to_object("belt", bm, [mat("leather"), mat("brass")])
     eq.bind_rigid(obj, "Hips")
@@ -473,7 +513,9 @@ def _rim_z(lm, a):
     brow = lm.eye.z + 0.035
     jaw = lm.chin.z + 0.035
     # Face opening: brow at the front, down to the jaw on the sides and at the back.
-    return brow * eq.smoothstep(0.55, 0.9, front) + jaw * (1 - eq.smoothstep(0.55, 0.9, front))
+    return brow * eq.smoothstep(0.55, 0.9, front) + jaw * (
+        1 - eq.smoothstep(0.55, 0.9, front)
+    )
 
 
 def bassinet(lm, n=36, rows=12):
@@ -502,7 +544,11 @@ def bassinet(lm, n=36, rows=12):
                 z = zc + 0.02 + (top - zc - 0.02) * math.sin(u * math.pi / 2) ** 0.9
                 k = 1.02 * math.cos(u * math.pi / 2) ** 0.75
             c = Vector((cx, cy + (apex.y - cy) * max(0.0, t - 0.35) * 1.2, z))
-            row.append(bm.verts.new(c + Vector((rx * k * math.cos(a), ry * k * math.sin(a), 0))))
+            row.append(
+                bm.verts.new(
+                    c + Vector((rx * k * math.cos(a), ry * k * math.sin(a), 0))
+                )
+            )
         rings.append(row)
     for a_, b_ in zip(rings, rings[1:], strict=False):
         eq.bridge(bm, a_, b_, 0)
@@ -523,7 +569,13 @@ def bassinet(lm, n=36, rows=12):
             continue
         v = rings[1][i].co
         d = Vector((math.cos(a), math.sin(a), 0))
-        eq.box(bm, v + d * 0.003, (0.004, 0.003, 0.006), (Vector((-d.y, d.x, 0)), d, Vector((0, 0, 1))), 1)
+        eq.box(
+            bm,
+            v + d * 0.003,
+            (0.004, 0.003, 0.006),
+            (Vector((-d.y, d.x, 0)), d, Vector((0, 0, 1))),
+            1,
+        )
     eq.finish(bm)
     obj = eq.to_object("bassinet", bm, [mat("steel"), mat("brass")])
     eq.bind_rigid(obj, "Head")
@@ -556,7 +608,10 @@ def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
             z = z_top + (z_bot - z_top) * t
             hang = top_r + (0.085 - top_r) * eq.smoothstep(0.0, 0.35, t)
             surf = _ray_radius(bvh, Vector((axis.x, axis.y, z)), d, 0.0)
-            surf = max(surf, *(_ray_radius(b, Vector((axis.x, axis.y, z)), d, 0.0) for b in extra))
+            surf = max(
+                surf,
+                *(_ray_radius(b, Vector((axis.x, axis.y, z)), d, 0.0) for b in extra),
+            )
             rad = max(hang, surf + 0.014) if t > 0.15 else hang
             rad = min(rad, 0.2)
             row.append(bm.verts.new(Vector((axis.x, axis.y, z)) + d * rad))
@@ -681,15 +736,25 @@ def heater_shield(ctx, width=0.52, height=0.66, cols=14, rows=16):
         back.append(rb)
     for j in range(rows):
         for i in range(cols):
-            bm.faces.new((front[j][i], front[j][i + 1], front[j + 1][i + 1], front[j + 1][i])).material_index = 0
-            bm.faces.new((back[j][i], back[j + 1][i], back[j + 1][i + 1], back[j][i + 1])).material_index = 1
+            bm.faces.new(
+                (front[j][i], front[j][i + 1], front[j + 1][i + 1], front[j + 1][i])
+            ).material_index = 0
+            bm.faces.new(
+                (back[j][i], back[j + 1][i], back[j + 1][i + 1], back[j][i + 1])
+            ).material_index = 1
     # Edges (rim).
-    border_f = [front[j][0] for j in range(rows + 1)] + front[rows][1:] + [
-        front[j][cols] for j in range(rows - 1, -1, -1)
-    ] + [front[0][i] for i in range(cols - 1, 0, -1)]
-    border_b = [back[j][0] for j in range(rows + 1)] + back[rows][1:] + [
-        back[j][cols] for j in range(rows - 1, -1, -1)
-    ] + [back[0][i] for i in range(cols - 1, 0, -1)]
+    border_f = (
+        [front[j][0] for j in range(rows + 1)]
+        + front[rows][1:]
+        + [front[j][cols] for j in range(rows - 1, -1, -1)]
+        + [front[0][i] for i in range(cols - 1, 0, -1)]
+    )
+    border_b = (
+        [back[j][0] for j in range(rows + 1)]
+        + back[rows][1:]
+        + [back[j][cols] for j in range(rows - 1, -1, -1)]
+        + [back[0][i] for i in range(cols - 1, 0, -1)]
+    )
     m = len(border_f)
     for i in range(m):
         k = (i + 1) % m
@@ -707,6 +772,9 @@ def heater_shield(ctx, width=0.52, height=0.66, cols=14, rows=16):
     for loop in obj.data.loops:
         co = mw_inv @ obj.data.vertices[loop.vertex_index].co
         rel = co - centre
-        uv.data[loop.index].uv = (0.5 + rel.dot(side) / width, 0.35 + rel.dot(fore) / height)
+        uv.data[loop.index].uv = (
+            0.5 + rel.dot(side) / width,
+            0.35 + rel.dot(fore) / height,
+        )
     eq.bind_rigid(obj, "LowerArm.L")
     return [obj]

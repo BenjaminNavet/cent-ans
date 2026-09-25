@@ -35,7 +35,13 @@ import battle_skinned as bs  # noqa: E402
 
 ROOT = bs.ROOT
 MH_BLEND = os.path.join(
-    ROOT, "game", "assets", "third_party", "characters", "makehuman_base", "fg_base_male.blend"
+    ROOT,
+    "game",
+    "assets",
+    "third_party",
+    "characters",
+    "makehuman_base",
+    "fg_base_male.blend",
 )
 IMG_DIR = os.path.join(ROOT, "docs", "img", "fg")
 
@@ -171,7 +177,12 @@ def _mh_head(rig, bone):
 
 def fit_scale(rig, joints):
     """Uniform scale bringing the MakeHuman trunk (hip joint to neck) to the rig's."""
-    q = (joints["Neck"].z - joints["UpperLeg.L"].z + joints["Neck"].z - joints["UpperLeg.R"].z) / 2
+    q = (
+        joints["Neck"].z
+        - joints["UpperLeg.L"].z
+        + joints["Neck"].z
+        - joints["UpperLeg.R"].z
+    ) / 2
     mh = _mh_head(rig, "neck_01").z - _mh_head(rig, "thigh_l").z
     return q / mh
 
@@ -181,7 +192,9 @@ def fit_pose(rig, joints, scale, head_scale=1.0):
     inv = rig.matrix_world.inverted()
     # Trunk placement: the scaled MakeHuman hip joints land on the Quaternius ones.
     q_hips = (inv @ joints["UpperLeg.L"] + inv @ joints["UpperLeg.R"]) / 2
-    mh_hips = (rig.data.bones["thigh_l"].head_local + rig.data.bones["thigh_r"].head_local) / 2
+    mh_hips = (
+        rig.data.bones["thigh_l"].head_local + rig.data.bones["thigh_r"].head_local
+    ) / 2
     offset = q_hips - mh_hips * scale
     posed = {}  # bone -> armature-space pose matrix
     order = []
@@ -217,9 +230,14 @@ def fit_pose(rig, joints, scale, head_scale=1.0):
             delta = posed[p.name] @ p.matrix_local.inverted()
             m = delta @ rest
             loc = m.to_translation()
-            prot = posed[p.name].to_3x3().normalized() @ p.matrix_local.to_3x3().normalized().inverted()
+            prot = (
+                posed[p.name].to_3x3().normalized()
+                @ p.matrix_local.to_3x3().normalized().inverted()
+            )
             rot = prot @ rest_rot
-            curl = FIST_CURL.get(b.name[:-2] if b.name[-2:] in ("_l", "_r") else "", 0.0)
+            curl = FIST_CURL.get(
+                b.name[:-2] if b.name[-2:] in ("_l", "_r") else "", 0.0
+            )
             if curl:
                 rot = rot @ Matrix.Rotation(math.radians(curl * CURL_SIGN), 3, "X")
             s = head_scale * scale if b.name == "head" else scale
@@ -236,7 +254,10 @@ def fit_pose(rig, joints, scale, head_scale=1.0):
         pinky = mw @ posed[f"pinky_01_{s}"].to_translation()
         tip_b = rig.data.bones[f"middle_02_{s}"]
         tip = mw @ (posed[tip_b.name] @ Vector((0, tip_b.length, 0)))
-        FIST[s.upper()] = ((idx + pinky) / 2 * 0.5 + tip * 0.5, (idx - pinky).normalized())
+        FIST[s.upper()] = (
+            (idx + pinky) / 2 * 0.5 + tip * 0.5,
+            (idx - pinky).normalized(),
+        )
     return posed
 
 
@@ -247,7 +268,9 @@ def apply_pose_to_mesh(rig, body, posed):
     do not survive Blender's parent-relative decomposition.
     """
     deform = {
-        name: rig.matrix_world @ m @ rig.data.bones[name].matrix_local.inverted()
+        name: rig.matrix_world
+        @ m
+        @ rig.data.bones[name].matrix_local.inverted()
         @ rig.matrix_world.inverted()
         for name, m in posed.items()
     }
@@ -301,7 +324,12 @@ def remap_weights(body):
     smooth_weights(body)
 
 
-def smooth_weights(obj, factor=0.5, repeat=4, bones=("Chest", "Shoulder.L", "Shoulder.R", "UpperArm.L", "UpperArm.R", "Neck")):
+def smooth_weights(
+    obj,
+    factor=0.5,
+    repeat=4,
+    bones=("Chest", "Shoulder.L", "Shoulder.R", "UpperArm.L", "UpperArm.R", "Neck"),
+):
     """Relax the weights around the shoulders (Laplacian, normalised).
 
     The Quaternius pivots of the chest and shoulders sit elsewhere than MakeHuman's; the
@@ -319,7 +347,9 @@ def smooth_weights(obj, factor=0.5, repeat=4, bones=("Chest", "Shoulder.L", "Sho
         a, b = e.vertices
         adj[a].append(b)
         adj[b].append(a)
-    region = [any(weights[i].get(bn, 0) > 0.01 for bn in bones) for i in range(len(weights))]
+    region = [
+        any(weights[i].get(bn, 0) > 0.01 for bn in bones) for i in range(len(weights))
+    ]
     for _ in range(repeat):
         new = []
         for i, w in enumerate(weights):
@@ -485,10 +515,9 @@ def _tris(obj):
 
 def build_infantry():
     """Fitted body dressed as a man-at-arms c. 1340; returns (armature, objects)."""
-    from mathutils.bvhtree import BVHTree
-
     import battle_fine_equipment as fe
     import battle_skinned_equipment as eq
+    from mathutils.bvhtree import BVHTree
 
     arm, body = fitted_body()
     lm = fe.Landmarks(body, arm)
@@ -571,7 +600,12 @@ def heraldry_factor(nt, uv_name):
     dist = _math(nt, "ABSOLUTE", _math(nt, "SUBTRACT", sep.outputs[0], 0.5))
     h = _math(nt, "MULTIPLY_ADD", dist, -1.3)
     nt.links.new(sep.outputs[1], h.node.inputs[2])
-    return _math(nt, "MULTIPLY", _math(nt, "GREATER_THAN", h, 0.08), _math(nt, "LESS_THAN", h, 0.25))
+    return _math(
+        nt,
+        "MULTIPLY",
+        _math(nt, "GREATER_THAN", h, 0.08),
+        _math(nt, "LESS_THAN", h, 0.25),
+    )
 
 
 def _heraldry(nt, bsdf, field, charge, uv_name="heraldry"):
@@ -713,7 +747,92 @@ def step_current_infantry(out):
     render_views("current_infantry", out)
 
 
+# --- Horse ------------------------------------------------------------------------------
+
+HORSE_TEST = [
+    ("pas", "c_walk", (0.0, 0.5)),
+    ("galop", "c_gallop", (0.0, 0.35, 0.7)),
+    ("mort", "c_death", (0.5, 1.0)),
+]
+
+
+def pose_cavalry(mount, clip, frac):
+    """Pose horse and rider at a fraction of a ``cavalry`` clip, then freeze the pose."""
+    import battle_skinned_cavalry as cav
+    import battle_skinned_poses as poses
+
+    spec = next(c for c in cav.clip_specs() if c[0] == clip)
+    _name, horse_act, rider_act, pose, _mirror, frames = spec
+    h_act = bs.find_action(horse_act, "AnimalArmature")
+    r_act = bs.find_action(rider_act, "CharacterArmature")
+    bs.set_action(mount.harm, h_act)
+    bs.set_action(mount.rarm, r_act)
+    first, last = (int(round(v)) for v in h_act.frame_range)
+    length = last - first + 1
+    count = frames or length
+    i = int(round(frac * (count - 1)))
+    for arm in (mount.harm, mount.rarm):
+        for pb in arm.pose.bones:
+            pb.matrix_basis.identity()
+    f = first + (
+        i % length if frames is None or rider_act != "Death" else min(i, length - 1)
+    )
+    bpy.context.scene.frame_set(f)
+    poses.reset_state()
+    mount.seat_rider()
+    pose(mount.rarm, i / max(count - 1, 1))
+    mount.harm.animation_data.action = None
+    mount.rarm.animation_data.action = None
+    bpy.context.view_layer.update()
+
+
+def rest_cavalry(mount):
+    """Horse and rider back at their bind pose."""
+    for arm in (mount.harm, mount.rarm):
+        bs.rest_pose(arm)
+    mount.seat_rider(Matrix.Identity(4))
+
+
+def step_horse(out):
+    """New horse fitted on the ``cavalry`` rig: bind pose and clip test sheet."""
+    import battle_fine_horse as fh
+    import battle_skinned_cavalry as cav
+
+    mount = cav.Mount()
+    bs.add_human_virtuals(bs.Rig("probe"), mount.rarm, prefix="R:")
+    objs = fh.build_horse(mount)
+    fh.horse_materials(objs)
+    print(f"FIGURE horse_fine LOD0 tris={sum(_tris(o) for o in objs)}")
+    setup_workbench((900, 600))
+    bpy.context.scene.display.shading.color_type = "TEXTURE"
+    cam = camera()
+    look_at(cam, (4.2, -1.2, 1.2), (0, 0, 0.9), 35)
+    render(os.path.join(out, "horse_bind.png"))
+    mount.hmeshes[0].hide_render = False
+    mount.hmeshes[0].location.x += 0.0
+    for o in objs:
+        o.hide_render = True
+    render(os.path.join(out, "horse_q_bind.png"))
+    mount.hmeshes[0].hide_render = True
+    for o in objs:
+        o.hide_render = False
+    for _label, clip, fracs in HORSE_TEST:
+        for k, fr in enumerate(fracs):
+            pose_cavalry(mount, clip, fr)
+            render(os.path.join(out, f"horse_{clip}_{k}.png"))
+            # Same frame on the Quaternius horse, for comparison.
+            q = mount.hmeshes[0]
+            q.hide_render = False
+            for o in objs:
+                o.hide_render = True
+            render(os.path.join(out, f"horse_q_{clip}_{k}.png"))
+            q.hide_render = True
+            for o in objs:
+                o.hide_render = False
+
+
 STEPS = {
+    "horse": step_horse,
     "fit": step_fit,
     "infantry": step_infantry,
     "current_infantry": step_current_infantry,
