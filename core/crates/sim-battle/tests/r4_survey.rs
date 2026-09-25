@@ -101,12 +101,23 @@ fn hedge(z: f64) -> Obstacle {
 /// front of the English deployment line: the English get there before the
 /// French foot).
 fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]) -> BattleSim {
-    let french = [
-        "unit_knights",
-        "unit_knights",
-        "unit_men_at_arms_foot",
-        "unit_crossbowmen",
-    ];
+    // `R4_FRENCH=heavy`: 3 knights + 1 man-at-arms (a close fight).
+    let french: &[&str] = if std::env::var("R4_FRENCH").is_ok_and(|v| v == "heavy") {
+        &[
+            "unit_knights",
+            "unit_knights",
+            "unit_knights",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen",
+        ]
+    } else {
+        &[
+            "unit_knights",
+            "unit_knights",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen",
+        ]
+    };
     let english = [
         "unit_longbowmen",
         "unit_longbowmen",
@@ -114,7 +125,7 @@ fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]
         "unit_men_at_arms_foot",
         "unit_men_at_arms_foot",
     ];
-    let mut battle = setup(units(data, &french), units(data, &english), None);
+    let mut battle = setup(units(data, french), units(data, &english), None);
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
@@ -248,7 +259,10 @@ fn trace_english_position() {
                     u.target
                 );
             }
-            t += 20.0;
+            t += std::env::var("R4_STEP")
+                .ok()
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(20.0);
         }
         sim.step();
     }
