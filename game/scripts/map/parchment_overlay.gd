@@ -148,9 +148,36 @@ func set_weight(value: float, distance: float) -> void:
 	visible = weight > 0.01
 
 
+## RL1 : la couche n'est redessinée que si la vue a changé (caméra, fenêtre, fondu, armées),
+## sinon au rythme lent des petites animations (navires qui tanguent) ; le jeton sélectionné
+## pulse à chaque image. Le dessin complet coûte ≈ 3 ms CPU par image.
+const ANIMATION_INTERVAL_MS := 100
+
+var _last_view: Array = []
+var _last_draw_ms := -ANIMATION_INTERVAL_MS
+
+
 func _process(_delta: float) -> void:
-	if visible:
+	if not visible:
+		return
+	var view := _view_signature()
+	var now := Time.get_ticks_msec()
+	var pulsing := armies != null and armies.selected_army != "" and weight > 0.4
+	if pulsing or view != _last_view or now - _last_draw_ms >= ANIMATION_INTERVAL_MS:
+		_last_view = view
+		_last_draw_ms = now
 		queue_redraw()
+
+
+func _view_signature() -> Array:
+	var markers := Vector3.ZERO
+	if armies != null:
+		for id in armies._markers:
+			var marker: Node3D = armies._markers[id]
+			if marker != null and is_instance_valid(marker):
+				markers += marker.global_position
+	var transform := camera.global_transform if camera != null else Transform3D.IDENTITY
+	return [transform, camera.fov if camera != null else 0.0, get_viewport_rect().size, weight, camera_distance, markers]
 
 
 func _world(px: Vector2) -> Vector3:
@@ -173,9 +200,7 @@ func _draw() -> void:
 	var s := clampf(REF_DISTANCE / maxf(camera_distance, 1.0), 0.7, 1.6)
 	var a := weight
 	var view := get_viewport_rect().grow(60.0)
-	var t0 := Time.get_ticks_usec()
 	_draw_sea_decor(s, a, view)
-	var t1 := Time.get_ticks_usec()
 	# Villes trop proches à l'écran : une seule vignette (grille de cellules, capitales d'abord).
 	var cell := 30.0 * s
 	var occupied: Dictionary = {}
@@ -188,7 +213,6 @@ func _draw() -> void:
 			continue
 		occupied[key] = true
 		_draw_town(p, (11.0 if town["capital"] else 7.5) * s, town, a)
-	var t2 := Time.get_ticks_usec()
 	_draw_weather(s, a, view)
 	# Textes et jetons prennent le relais des étiquettes et étendards 3D à mi-fondu.
 	var text_alpha := smoothstep(0.45, 0.85, a)
@@ -197,10 +221,7 @@ func _draw() -> void:
 		for realm in _realms:
 			placed.append_array(_draw_arched(realm, s, text_alpha))
 		_draw_province_names(s, text_alpha, view, placed)
-	var t3 := Time.get_ticks_usec()
 	_draw_army_tokens(s, smoothstep(0.4, 0.75, a), view)
-	if Engine.get_process_frames() % 60 == 0:
-		print("CM2 draw us sea=%d towns=%d names=%d armies=%d" % [t1 - t0, t2 - t1, t3 - t2, Time.get_ticks_usec() - t3])
 
 
 # --- Mer ------------------------------------------------------------------------------

@@ -12,17 +12,19 @@ extends Node
 ## (dossier isolé, effacé ensuite) → bataille France–Angleterre lancée depuis la carte → sortie.
 ## Imprime une ligne `JOURNEY_JSON {...}` (temps de démarrage, i/s médianes, fins de tour) puis
 ## quitte avec le code 0 (succès) ou 1 (étape échouée).
-## Options : `--turns=<n>` (3), `--frames=<n>` par mesure (180), `--no-battle`.
+## Options : `--turns=<n>` (3), `--frames=<n>` par mesure (180), `--no-battle`, `--uncapped`
+## (vsync coupée, i/s non plafonnées : temps d'image réels).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
 const PARIS := Vector2(2213.0, 1924.0)
-const ZOOMS := [1500.0, 491.0, 150.0]
+const ZOOMS := [1500.0, 1250.0, 491.0, 150.0]
 const TIMEOUT_S := 240.0
 
 var _result: Dictionary = {"ok": false}
 var _turns := 3
 var _frames := 180
 var _battle := true
+var _uncapped := false
 
 
 ## Appelé par `StartMenu._ready` : vrai si la ligne de commande demande le parcours (le nœud
@@ -51,11 +53,17 @@ func _ready() -> void:
 			_frames = int(arg.trim_prefix("--frames="))
 		elif arg == "--no-battle":
 			_battle = false
+		elif arg == "--uncapped":
+			_uncapped = true
 	_run.call_deferred()
 
 
 func _run() -> void:
 	var started := Time.get_ticks_msec()
+	if _uncapped:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		Engine.max_fps = 0
+	_result["uncapped"] = _uncapped
 	var tree := get_tree()
 	var root := tree.root
 	_result["engine_startup_ms"] = started  # moteur, autoloads et menu jusqu'au parcours
