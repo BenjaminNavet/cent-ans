@@ -37,6 +37,8 @@ var _engines: Dictionary = {}  # id -> {model, figures: [Node3D], swing: float, 
 var _movers: Dictionary = {}  # id -> {last: Vector3, roll: float, sway: float}
 var swings_started := 0  # tests et captures
 var predicted_swings := 0
+var crew: SiegeCrewFx  # SG3 : servants (null : figurines skinnées absentes)
+var _camera: Variant = null  # position de la caméra à cette image (null : aucune)
 
 
 ## Réglages (`data/fx/siege_engines.json`), lus une fois ; `{}` si introuvables.
@@ -150,11 +152,27 @@ func setup(p_soldiers: BattleSoldiers, p_effects: BattleEffects, p_siege_view: B
 	effects = p_effects
 	siege_view = p_siege_view
 	cfg = settings()
+	if SiegeCrewFx.enabled() and crew == null:
+		crew = SiegeCrewFx.new()
+		crew.name = "Crew"
+		add_child(crew)
+		crew.setup(soldiers)
+
+
+## SG3 : distances des niveaux de détail des engins (`data/fx/siege_engines.json`, `lod`) :
+## `simple_m` (maillage simplifié au-delà), `far_m` (pose ralentie, servants cachés au-delà ;
+## même distance que les imposteurs de figurines BV3). Lisible par les préréglages de qualité.
+static func lod_distances() -> Dictionary:
+	var lod: Dictionary = settings().get("lod", {})
+	return {"simple_m": float(lod.get("simple_m", 140.0)), "far_m": float(lod.get("far_m", BattleImpostors.DISTANCE)), "far_pose_hz": float(lod.get("far_pose_hz", 6.0))}
 
 
 ## Chaque image, avant les effets (les tirs y démarrent les basculements que `release()` lit).
 func update(units: Array, shots: Variant, now: float, dt: float) -> void:
 	time_now = now
+	_camera = _camera_position()
+	if crew != null:
+		crew.begin(now)
 	var seen := {}
 	for unit in units:
 		var id := int(unit["id"])
@@ -173,10 +191,74 @@ func update(units: Array, shots: Variant, now: float, dt: float) -> void:
 				_on_shot(id)
 	for id in _engines.keys():
 		if not seen.has(id):
-			for node in _engines[id]["figures"]:
-				(node as Node3D).visible = false
+			_engines[id]["shown"] = 0
+			for node in _engines[id]["figures"] + _engines[id].get("lods", []):
+				if node != null:
+					(node as Node3D).visible = false
 	for id in _engines:
 		_pose_engine(id, _engines[id])
+	if crew != null:
+		crew.finish(_camera)
+
+
+func _camera_position() -> Variant:
+	var viewport := get_viewport()
+	var camera := viewport.get_camera_3d() if viewport != null else null
+	return camera.global_position if camera != null else null
+
+
+func _distance(p: Vector3) -> float:
+	return 0.0 if _camera == null else (_camera as Vector3).distance_to(p)
+
+
+# --- Servants (SG3) ---------------------------------------------------------------------
+
+
+## Servants de la figurine `i` de l'engin `id` : geste de chaque rôle d'après le rechargement
+## du cœur (treuil tant que la verge remonte, chargeur en fin de treuil ; bombarde : écouvillon
+## puis charge de la poudre et du boulet), repos sinon.
+func _crew_engine(id: int, i: int, node: Node3D, model: String, c: Dictionary, unit: Dictionary, entry: Dictionary, tau: float) -> void:
+	var layout: Array = crew.cfg.get("layouts", {}).get(model, [])
+	if layout.is_empty():
+		return
+	var fired := bool(entry["fired"])
+	var reloading := fired and float(unit.get("reload", 0.0)) > 0.0
+	var side := str(unit.get("side", ""))
+	var period := maxf(float(unit.get("reload_period", 12.0)), 0.1)
+	var phase := 1.0 - float(unit.get("reload", 0.0)) / period  # 0 : vient de tirer, 1 : prêt
+	var settled := tau >= float(c.get("swing_s", 0.0)) + float(c.get("settle_s", 0.0))
+	var wound := _wound(c, unit, fired)
+	for k in layout.size():
+		var s: Dictionary = layout[k]
+		var role := str(s["role"])
+		var act := "idle"
+		match role:
+			"winch":
+				if reloading and settled and wound < 0.98:
+					act = "winch"
+			"loader":
+				if model == "bombard":
+					var span: Array = crew.cfg.get("bombard_load", [0.45, 0.9])
+					if reloading and phase >= float(span[0]) and phase < float(span[1]):
+						act = "loader"
+				elif reloading and settled and wound >= float(crew.cfg.get("load_from", 0.55)) and wound < 0.98:
+					act = "loader"
+			"swab":
+				if reloading and tau > float(c.get("recoil_s", 0.1)) + float(c.get("hold_s", 0.0)) and phase < float(crew.cfg.get("swab_until", 0.5)):
+					act = "swab"
+		if act == "idle" and s.has("rest"):
+			# Au repos hors du souffle de la bouche (bombarde) : place de repos.
+			var rest: Array = s["rest"]
+			s = {"x": rest[0], "z": rest[1], "yaw_deg": rest[2], "figure": s.get("figure", 0)}
+		_add_servant("e%d/%d/%d" % [id, i, k], node.global_transform, s, crew.clip_of(act), side)
+
+
+func _add_servant(key: String, frame: Transform3D, s: Dictionary, clip: String, side: String) -> void:
+	var local := Transform3D(Basis(Vector3.UP, deg_to_rad(float(s["yaw_deg"]))), Vector3(float(s["x"]), 0.0, float(s["z"])))
+	var xform := frame * local
+	# Pieds au sol (l'engin peut pencher : repère remis d'aplomb).
+	xform.basis = Basis(Vector3.UP, atan2(xform.basis.z.x, xform.basis.z.z))
+	crew.add(key, xform, clip, int(s.get("figure", 0)), side)
 
 
 # --- Engins à tir ----------------------------------------------------------------------
@@ -184,10 +266,11 @@ func update(units: Array, shots: Variant, now: float, dt: float) -> void:
 
 func _update_engine(unit: Dictionary, id: int, model: String) -> void:
 	if not _engines.has(id):
-		_engines[id] = {"model": model, "figures": [], "swing": -1000.0, "fired": false, "unit": unit, "mantlet": 0.0}
+		_engines[id] = {"model": model, "figures": [], "lods": [], "shown": 0, "swing": -1000.0, "fired": false, "unit": unit, "mantlet": 0.0}
 	var entry: Dictionary = _engines[id]
 	entry["unit"] = unit
 	var figures: Array = entry["figures"]
+	var lods: Array = entry["lods"]
 	var present := bool(unit.get("present", false))
 	var count := int(unit.get("figures", 0)) if present else 0
 	var frames := _frames(unit, id, count)
@@ -197,11 +280,25 @@ func _update_engine(unit: Dictionary, id: int, model: String) -> void:
 			return
 		add_child(node)
 		figures.append(node)
+		# SG3 : maillage simplifié (`<modèle>_lod.glb`, mêmes pièces nommées) pour le lointain.
+		var lod := instantiate(model + "_lod") if has_model(model + "_lod") else null
+		if lod != null:
+			add_child(lod)
+		lods.append(lod)
+	entry["shown"] = frames.size()
+	var simple := float(lod_distances()["simple_m"])
 	for i in figures.size():
 		var node: Node3D = figures[i]
-		node.visible = i < frames.size()
-		if node.visible:
+		var lod: Node3D = lods[i]
+		var shown := i < frames.size()
+		var far := lod != null and shown and _distance(frames[i].origin) > simple
+		node.visible = shown and not far
+		if lod != null:
+			lod.visible = far
+		if shown:
 			node.transform = frames[i]
+			if lod != null:
+				lod.transform = frames[i]
 	_maybe_predict(unit, entry)
 
 
@@ -287,7 +384,7 @@ func release(id: int) -> Array:
 	var figures: Array = entry["figures"]
 	for i in figures.size():
 		var node: Node3D = figures[i]
-		if not node.visible:
+		if i >= int(entry.get("shown", 0)):
 			continue
 		var start := float(entry["swing"]) + stagger * i
 		var delay := maxf(start + lead - time_now, 0.0)
@@ -357,11 +454,24 @@ func _pose_engine(id: int, entry: Dictionary) -> void:
 	var unit: Dictionary = entry["unit"]
 	var figures: Array = entry["figures"]
 	var stagger := float(c.get("stagger_s", 0.3))
+	var lods: Array = entry.get("lods", [])
+	var lod_cfg := lod_distances()
 	for i in figures.size():
-		var node: Node3D = figures[i]
-		if not node.visible:
+		if i >= int(entry.get("shown", 0)):
 			continue
+		var node: Node3D = figures[i]
 		var tau := time_now - (float(entry["swing"]) + stagger * i)
+		if crew != null:
+			_crew_engine(id, i, node, model, c, unit, entry, tau)
+		if i < lods.size() and lods[i] != null and (lods[i] as Node3D).visible:
+			# SG3 : au loin, le maillage simplifié ; au-delà de `far_m`, pose rafraîchie
+			# `far_pose_hz` fois par seconde seulement.
+			node = lods[i]
+			if _distance(node.global_position) > float(lod_cfg["far_m"]):
+				var tick := int(floor(time_now * float(lod_cfg["far_pose_hz"])))
+				if int(node.get_meta("pose_tick", -1)) == tick:
+					continue
+				node.set_meta("pose_tick", tick)
 		match model:
 			"trebuchet":
 				_pose_trebuchet(node, c, unit, tau, bool(entry["fired"]))
@@ -513,6 +623,16 @@ func _update_mover(unit: Dictionary, id: int, _dt: float) -> void:
 		(wheel as Node3D).rotation.x = float(state["roll"])
 	var amp := deg_to_rad(float(c.get("sway_deg", 1.0)))
 	var moving := absf(moved) > 0.001
+	if moving:
+		state["moved_at"] = time_now
+	if crew != null:
+		# SG3 : poussée tant que l'engin avance (une seconde de grâce entre deux pas du cœur) ;
+		# à l'arrêt, les servants du bélier tirent les cordes de la poutre.
+		var pushing := time_now - float(state.get("moved_at", -1000.0)) < 1.0
+		var still := "pusher_still" if is_ram else "idle"
+		var layout: Array = crew.cfg.get("layouts", {}).get("ram" if is_ram else "siege_tower", [])
+		for k in layout.size():
+			_add_servant("m%d/%d" % [id, k], machine.global_transform, layout[k], crew.clip_of("pusher" if pushing else still), str(unit.get("side", "")))
 	var body := machine.find_child("Shed" if is_ram else "Body", true, false) as Node3D
 	if body != null:
 		var target := amp * sin(float(state["sway"])) if moving else 0.0

@@ -208,6 +208,38 @@
    ],
    "variants": 2
   },
+  "crew_0": {
+   "lods": [
+    "crew_0_lod0.mesh.bin",
+    "crew_0_lod1.mesh.bin",
+    "crew_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crew",
+   "tris": [
+    1931,
+    411,
+    173
+   ],
+   "variants": 3
+  },
+  "crew_1": {
+   "lods": [
+    "crew_1_lod0.mesh.bin",
+    "crew_1_lod1.mesh.bin",
+    "crew_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crew",
+   "tris": [
+    1971,
+    443,
+    197
+   ],
+   "variants": 2
+  },
   "infantry_0": {
    "lods": [
     "infantry_0_lod0.mesh.bin",
@@ -660,6 +692,11 @@
      "loop": true,
      "start": 871
     },
+    "crank": {
+     "frames": 32,
+     "loop": true,
+     "start": 1336
+    },
     "death": {
      "frames": 26,
      "loop": false,
@@ -700,6 +737,11 @@
      "loop": true,
      "start": 41
     },
+    "haul": {
+     "frames": 36,
+     "loop": true,
+     "start": 1368
+    },
     "hit": {
      "frames": 14,
      "loop": false,
@@ -730,6 +772,11 @@
      "loop": false,
      "start": 303
     },
+    "load": {
+     "frames": 48,
+     "loop": true,
+     "start": 1404
+    },
     "pike_idle": {
      "frames": 41,
      "loop": true,
@@ -754,6 +801,11 @@
      "frames": 33,
      "loop": true,
      "start": 408
+    },
+    "push": {
+     "frames": 33,
+     "loop": true,
+     "start": 1492
     },
     "run": {
      "frames": 20,
@@ -789,6 +841,11 @@
      "frames": 58,
      "loop": true,
      "start": 989
+    },
+    "swab": {
+     "frames": 40,
+     "loop": true,
+     "start": 1452
     },
     "thrust": {
      "frames": 21,

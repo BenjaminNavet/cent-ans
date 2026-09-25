@@ -5,19 +5,19 @@
   "casting": {
     "fac_france": {
       "voices": ["onyx", "ash"],
-      "instructions": "Parle en français. Tu es un grand seigneur français du XIVe siècle qui harangue son armée avant la bataille : voix grave et profonde, débit lent, ton épique et solennel, chaque mot porté pour être entendu des rangs. Marque les pauses."
+      "instructions": "Parle en français. Voix de grand seigneur français du XIVe siècle haranguant son armée : grave et profonde, débit lent, ton épique et solennel, chaque mot porté pour être entendu des rangs. Marque les pauses."
     },
     "fac_england": {
       "voices": ["ballad", "echo"],
-      "instructions": "Parle en français, avec un léger accent anglais : tu es un grand seigneur anglais du XIVe siècle, dont la langue de cour est le français, qui harangue son armée avant la bataille. Voix grave, débit lent, ton épique et solennel. Marque les pauses."
+      "instructions": "Parle en français, avec un léger accent anglais : voix de grand seigneur anglais du XIVe siècle parlant le français de cour, haranguant son armée : grave, débit lent, ton épique et solennel. Marque les pauses."
     },
     "fac_burgundy": {
       "voices": ["verse"],
-      "instructions": "Parle en français. Tu es un prince de la maison de Bourgogne au XIVe siècle, fier et ambitieux, qui harangue son armée avant la bataille : voix grave, débit lent, ton épique et altier. Marque les pauses."
+      "instructions": "Parle en français. Voix de prince bourguignon du XIVe siècle, fier et ambitieux, haranguant son armée : grave, débit lent, ton épique et altier. Marque les pauses."
     },
     "default": {
       "voices": ["onyx", "ash"],
-      "instructions": "Parle en français. Tu es un grand seigneur français du XIVe siècle qui harangue son armée avant la bataille : voix grave et profonde, débit lent, ton épique et solennel, chaque mot porté pour être entendu des rangs. Marque les pauses."
+      "instructions": "Parle en français. Voix de grand seigneur français du XIVe siècle haranguant son armée : grave et profonde, débit lent, ton épique et solennel, chaque mot porté pour être entendu des rangs. Marque les pauses."
     }
   },
   "cry_instructions": "Crie à pleine voix, comme un cri de guerre repris par toute une armée : bref, puissant, exalté."

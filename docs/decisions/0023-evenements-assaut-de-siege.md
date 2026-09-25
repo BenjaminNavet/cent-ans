@@ -72,3 +72,19 @@ versée des mâchicoulis.
 - Démo : `CampaignState::debug_stage_landmark_siege` assiège la ville d'un plan (Avignon,
   Bruges) en déclarant la guerre à son détenteur (campagne jetable) ; menu « Batailles de
   démonstration » (`data/ui/battle_demos.json`).
+
+## Suite SG3 (2026-09-25) : résistance des ouvrages en données, servants, LOD
+
+- Les PV des murs et de la porte et les dégâts du bélier et des engins quittent le code pour
+  `data/rules/siege_works.json` (schéma `siege_works_rules.schema.json`, `SiegeWorkRules`,
+  embarqué à la compilation comme `siege_fire.json`). Réglage : porte en bois 300 + 80 × fort.,
+  bélier 5 PV/s ; mur 1300 + 600 × fort., tir d'engin 1,2 × siege_attack : au niveau 5 la porte
+  cède en 140 s de pilonnage, un pan sous un trébuchet seul en ~10 min. Sonde
+  `sim-campaign/tests/sg3_assault_probe.rs` (5 villes × 10 graines, IA des deux côtés).
+- Servants d'engins : figurines skinnées V2 dédiées (`crew_0`, `crew_1` au refouloir) et clips
+  `crank`, `haul`, `load`, `swab`, `push` ; `SiegeCrewFx` (un MultiMesh par figurine, clip et
+  camp, mode CUSTOM du shader) choisit le geste d'après `reload` / `reload_period` du cœur ;
+  placement et rôles dans `data/fx/siege_engines.json` (`crew`). Rendu seulement.
+- LOD : `<modèle>_lod.glb` (mêmes pièces nommées, petites pièces retirées) au-delà de
+  `lod.simple_m`, pose ralentie et servants cachés au-delà de `lod.far_m` (= distance des
+  imposteurs BV3) ; `SiegeEnginesFx.lod_distances()` pour les préréglages de qualité.

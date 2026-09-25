@@ -237,7 +237,7 @@
         { "id": "nl_move_02", "text": "Blijf bij de banier!", "fr": "Restez près de la bannière !" }
       ],
       "attack": [
-        { "id": "nl_attack_01", "text": "Sla ze dood!", "fr": "Assommez-les !" },
+        { "id": "nl_attack_01", "text": "Sla toe!", "fr": "Frappez !" },
         { "id": "nl_attack_02", "text": "Schild en vriend!", "fr": "Bouclier et ami ! (mot de passe des Mâtines de Bruges)" }
       ],
       "charge": [

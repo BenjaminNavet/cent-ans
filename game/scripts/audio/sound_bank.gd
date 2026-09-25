@@ -36,8 +36,19 @@ var _rng := RandomNumberGenerator.new()
 
 static func load_default() -> SoundBank:
 	var bank := SoundBank.new()
-	bank.load_file(_data_dir().path_join(BANK_PATH))
+	bank.load_file(data_path(BANK_PATH))
 	return bank
+
+
+## Chemin d'un fichier audio de `data/` : dossier de données du jeu (`MapPaths.data_dir`), puis
+## `data/` du dépôt à défaut (jeux de données réduits des tests, qui n'ont que la carte), comme
+## `BattleStandards.read_data` et `FrontEndData.data`.
+static func data_path(relative: String) -> String:
+	var path := _data_dir().path_join(relative)
+	if FileAccess.file_exists(path):
+		return path
+	var fallback := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path().path_join(relative)
+	return fallback if FileAccess.file_exists(fallback) else path
 
 
 static func _data_dir() -> String:

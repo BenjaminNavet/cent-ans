@@ -1,0 +1,17 @@
+{
+  "description": "Résistance des ouvrages de siège en bataille (lot SG3, ADR 0023) : points de vie des pans de mur et de la porte selon le niveau de fortification de la campagne (0-5), dégâts du bélier et des engins. Embarqué dans sim-battle à la compilation.",
+  "wall": {
+    "hp_base": 1300.0,
+    "hp_per_fortification": 600.0
+  },
+  "gate": {
+    "hp_base": 300.0,
+    "hp_per_fortification": 80.0
+  },
+  "ram": {
+    "damage_per_s": 5.0
+  },
+  "engine": {
+    "wall_damage_per_siege_attack": 1.2
+  }
+}

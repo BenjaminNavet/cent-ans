@@ -227,7 +227,7 @@ impl BattleSim {
     /// Volleys resolved since the previous call (BV1): `[{time, shooter,
     /// target (-1: wall), from: Vector2, aim: Vector2, missiles, kills,
     /// kind: arrow|bolt|ball|stone|bullet|javelin (UR2), incendiary,
-    /// cover: none|pavise|stakes|wall}]`.
+    /// cover: none|pavise|stakes|wall, indirect (R4: lobbed over a crest)}]`.
     #[func]
     fn get_shots(&mut self) -> VarArray {
         let Some(sim) = &mut self.sim else {
@@ -247,6 +247,7 @@ impl BattleSim {
                     "kind" => shot.kind.key(),
                     "incendiary" => shot.incendiary,
                     "cover" => shot.cover.key(),
+                    "indirect" => shot.indirect,
                 }
                 .to_variant()
             })

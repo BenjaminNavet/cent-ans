@@ -12,6 +12,21 @@
         "faction_name": { "type": "string" },
         "admiral": { "type": "string" },
         "hold": { "type": "boolean", "description": "La flotte reste à l'ancre (IA)." },
+        "chains": {
+          "type": "array",
+          "description": "Lignes de navires enchaînés en formation défensive (lot NV2) : les navires d'un groupe `chain` sans `position` y sont rangés bord à bord, dans l'ordre du fichier.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "chain": { "type": "integer", "minimum": 0 },
+              "origin": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "Centre de la ligne (m)." },
+              "heading_deg": { "type": "number", "description": "Cap des navires ; la ligne court perpendiculairement." },
+              "spacing_m": { "type": "number", "exclusiveMinimum": 0, "description": "Écart entre deux navires voisins (m)." }
+            },
+            "required": ["chain", "origin"],
+            "additionalProperties": false
+          }
+        },
         "units": {
           "type": "array",
           "minItems": 1,

@@ -73,3 +73,12 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
   placés dans votre zone » vu par EP3 vient de `--deploy-shot`, qui place exprès un régiment hors
   zone pour montrer le refus. cargo test (658), clippy, pytest (450), `ep2_horizon_test`,
   `ep4_audio_test`, capture de déploiement palier epic avec rivière : OK. Digests inchangés.
+- Fusion de main (R4 IA de position, SG3 servants de siège, correctif smoke a2a79044) : conflits
+  `ai.rs` (berge EP3 d'abord quand le passage est tenable, sinon `defensive_ground` R4 ; ADR 0033
+  § « Cohabitation avec R4 »), `unit.rs` (`standard` + `seen_at`), scripts Blender (clips et
+  figurines des deux lots), puis `human.bones.bin` et manifeste régénérés par Blender
+  (`--only crew_0,crew_1,standard_0,standard_1,musician_0,musician_1` : meshes identiques, rig
+  humain rebâti avec `std_*`/`drum_*`/`horn_*` et `crank`/`haul`/`load`/`swab`/`push`). Digests
+  `b6.rs` recalculés (graines 3 et 11 : vainqueur attaquant inchangé). `ep1_scale` 60 × 60 : le
+  défenseur R4 reçoit l'attaque sur son terrain, pic de 15-22 régiments en mêlée (seuil ramené à
+  12, compté à chaque pas).

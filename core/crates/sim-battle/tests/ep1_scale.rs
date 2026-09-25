@@ -121,6 +121,11 @@ fn reinforcements_beyond_the_epic_cap() {
 
 /// AI against AI with 60 regiments a side: both sides close, fight and the
 /// battle ends in time (probe of the tactical AI at scale).
+///
+/// R4 (ADR 0046, merged after EP1): an evenly matched defender receives the
+/// enemy on its ground and its archers thin the attack before contact, so
+/// fewer regiments are locked in melee at once (15-22 over seeds 3, 5, 11
+/// instead of 20+); the melee is counted at every step.
 #[test]
 fn ai_handles_sixty_regiments_a_side() {
     let mut sim = BattleSim::new(big_setup(60), 11).unwrap();
@@ -129,16 +134,14 @@ fn ai_handles_sixty_regiments_a_side() {
     let mut melee_seen = 0usize;
     while !sim.is_finished() && sim.elapsed() < 1800.0 {
         sim.step();
-        if sim.ticks().is_multiple_of(100) {
-            melee_seen = melee_seen.max(
-                sim.units()
-                    .iter()
-                    .filter(|u| u.state == UnitState::Melee)
-                    .count(),
-            );
-        }
+        melee_seen = melee_seen.max(
+            sim.units()
+                .iter()
+                .filter(|u| u.state == UnitState::Melee)
+                .count(),
+        );
     }
-    assert!(melee_seen >= 20, "at most {melee_seen} regiments in melee");
+    assert!(melee_seen >= 12, "at most {melee_seen} regiments in melee");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
     println!(
         "60/side: {melee_seen} regiments in melee at most, over at {:.0} s, winner {:?}",

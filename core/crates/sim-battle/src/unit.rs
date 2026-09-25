@@ -254,11 +254,20 @@ pub struct Unit {
     /// EP5: the regiment's standard.
     #[serde(default)]
     pub standard: StandardState,
+    /// R4: simulated time at which enemy shooters last saw the regiment
+    /// (a target of indirect volleys for a few seconds after).
+    #[serde(default = "unseen")]
+    pub seen_at: f64,
 }
 
 /// `missile_timer` of a regiment never shot at.
 fn never() -> f64 {
     1.0e6
+}
+
+/// `seen_at` of a regiment enemy shooters never saw.
+fn unseen() -> f64 {
+    -1.0e6
 }
 
 impl Unit {
@@ -323,6 +332,7 @@ impl Unit {
             knocked: 0.0,
             knocked_timer: 0.0,
             standard: StandardState::Carried,
+            seen_at: unseen(),
         }
     }
 

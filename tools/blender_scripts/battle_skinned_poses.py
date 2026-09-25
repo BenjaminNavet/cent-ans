@@ -624,7 +624,8 @@ def ride_bow_shoot(arm, t):
 
 def _javelin_grip(arm, cock, aim_v=None):
     """Right-hand javelin held as a prop: `cock` 1 = drawn back by the ear, 0 = arm thrown
-    fully forward (release). Left hand stays on the reins (`ride_javelin_*`)."""
+    fully forward (release). Left hand stays on the reins (`ride_javelin_*`).
+    """
     shoulder = pos(arm, "UpperArm.R")
     if aim_v is None:
         aim_v = aim_dir(10.0, -4.0)
@@ -974,3 +975,118 @@ def horn_blow(arm, t):
 
 
 horn_blow.frames = 84
+
+
+# --- Siege engine crews (SG3) -------------------------------------------------------------
+
+
+def _both_hands(arm, right, left):
+    """IK both arms onto two world points, elbows out and down."""
+    ik2(
+        arm,
+        "UpperArm.R",
+        "LowerArm.R",
+        "Wrist.R",
+        right,
+        pos(arm, "UpperArm.R") + Vector((-0.45, 0.3, -0.45)),
+    )
+    ik2(
+        arm,
+        "UpperArm.L",
+        "LowerArm.L",
+        "Wrist.L",
+        left,
+        pos(arm, "UpperArm.L") + Vector((0.45, 0.3, -0.45)),
+    )
+
+
+def _crouch(arm, depth):
+    """Knees bent by lowering the hips `depth` metres, feet kept on the ground."""
+    if depth <= 1e-4:
+        return
+    hips = pos(arm, "Body")
+    feet = {side: pos(arm, f"Foot.{side}") for side in ("L", "R")}
+    translate(arm, "Body", Vector((0, 0.06 * depth, -depth)))
+    for side in ("L", "R"):
+        ik2(
+            arm,
+            f"UpperLeg.{side}",
+            f"LowerLeg.{side}",
+            f"Foot.{side}",
+            feet[side],
+            hips + Vector((0, -1.0, -0.3)),
+        )
+        translate(arm, f"Foot.{side}", feet[side] - pos(arm, f"Foot.{side}"))
+
+
+def crank(arm, t):
+    """Winding a windlass (loop): both fists on the handle, turning before the belly."""
+    phase = t * 2.0 * math.pi
+    _crouch(arm, 0.08 + 0.04 * math.sin(phase))
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.32 + 0.08 * math.sin(phase))
+    chest = pos(arm, "Chest")
+    centre = Vector((chest.x, chest.y - 0.48, chest.z - 0.42))
+    handle = centre + Vector((0, -0.2 * math.cos(phase), 0.2 * math.sin(phase)))
+    _both_hands(arm, handle + Vector((-0.1, 0, 0)), handle + Vector((0.1, 0, 0)))
+
+
+crank.frames = 32
+
+
+def haul(arm, t):
+    """Hauling on a rope hand over hand (loop), leaning back, the rope running forwards."""
+    phase = t * 2.0 * math.pi
+    _crouch(arm, 0.1)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), -0.22 + 0.06 * math.sin(phase))
+    chest = pos(arm, "Chest")
+    reach_r = 0.5 + 0.5 * math.sin(phase)
+    reach_l = 0.5 - 0.5 * math.sin(phase)
+    right = chest + Vector((-0.04, -0.2 - 0.38 * reach_r, -0.22 + 0.1 * reach_r))
+    left = chest + Vector((0.04, -0.2 - 0.38 * reach_l, -0.22 + 0.1 * reach_l))
+    _both_hands(arm, right, left)
+
+
+haul.frames = 36
+
+
+def load(arm, t):
+    """Loading (loop): stoops for the stone or the ball, lifts it to the chest.
+
+    Then heaves it forwards into the sling or the muzzle and straightens up.
+    """
+    stoop = smooth(0.0, 0.18, t) * (1.0 - smooth(0.32, 0.55, t))
+    lift = smooth(0.32, 0.55, t)
+    heave = smooth(0.62, 0.76, t) * (1.0 - smooth(0.86, 1.0, t))
+    _crouch(arm, 0.32 * stoop)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.1 + 0.75 * stoop + 0.2 * heave)
+    chest = pos(arm, "Chest")
+    low = chest + Vector((0, -0.42, -0.6))
+    held = chest + Vector((0, -0.3, -0.12))
+    out = chest + Vector((0, -0.62, 0.12))
+    hands = low.lerp(held, lift).lerp(out, heave)
+    _both_hands(arm, hands + Vector((-0.12, 0, 0)), hands + Vector((0.12, 0, 0)))
+
+
+load.frames = 48
+
+
+def swab(arm, t):
+    """Swabbing and ramming a bombard (loop): rammer levelled, pushed in, drawn back."""
+    thrust = 0.5 - 0.5 * math.cos(t * 2.0 * math.pi)
+    _crouch(arm, 0.06 + 0.06 * thrust)
+    rotate_about(arm, "Torso", Vector((1, 0, 0)), 0.1 + 0.16 * thrust)
+    _pike_level(arm, thrust=0.45 * thrust)
+
+
+swab.frames = 40
+
+
+def push(arm, t):
+    """Pushing a ram or a siege tower (on the walk): leaning in, both palms on the beam."""
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.42)
+    chest = pos(arm, "Chest")
+    _both_hands(
+        arm,
+        chest + Vector((-0.2, -0.46, 0.14)),
+        chest + Vector((0.2, -0.46, 0.14)),
+    )

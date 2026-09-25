@@ -40,6 +40,8 @@ const STUCK_STRIDE := 5
 ## Doit rester identique à `battle_volley.gdshaderinc` (flèche, carreau, balle, javelot).
 const SPEED := [48.0, 62.0, 210.0, 24.0]
 const ARC := [0.16, 0.06, 0.015, 0.22]
+## Facteur de flèche d'une volée en cloche (R4) ; même valeur que `VOLLEY_LOB` du shader.
+const LOB := 2.5
 const STAGGER := [1.5, 0.8, 0.35, 1.1]
 ## Épaisseur des traits fichés par sorte (voir `battle_stuck_arrow.gdshader`).
 const STUB := [0.0, 1.0, 1.0, 0.4]
@@ -178,9 +180,11 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 			cover = 2
 	var fire := bool(shot.get("incendiary", false))
 	var stride := maxi(STUCK_STRIDE, ceili(float(total) / STUCK_PER_VOLLEY))
-	# kind (2 bits) + 4 × feu + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × pas des flèches
-	# confiées à la couche plantée (voir `battle_volley.gdshaderinc`).
-	var code := kind + (4 if fire else 0) + 8 * cover + 32 * stride
+	# kind (2 bits) + 4 × feu + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × tir en cloche (R4 :
+	# `indirect`, arc plus haut) + 64 × pas des flèches confiées à la couche plantée (voir
+	# `battle_volley.gdshaderinc`).
+	var lobbed := 32 if bool(shot.get("indirect", false)) else 0
+	var code := kind + (4 if fire else 0) + 8 * cover + lobbed + 64 * stride
 	var slope := Vector2((_h(aim.x + 3.0, aim.z) - _h(aim.x - 3.0, aim.z)) / 6.0, (_h(aim.x, aim.z + 3.0) - _h(aim.x, aim.z - 3.0)) / 6.0)
 	var chunk := {
 		"src": from, "tgt": aim, "launch": time_now,
@@ -233,6 +237,7 @@ func arrow_landing(chunk: Dictionary, sh: int, i: int) -> Dictionary:
 	var code := int(chunk["code"])
 	var kind := code & 3
 	var cover := (code >> 3) & 3
+	var arc_k := float(ARC[kind]) * (LOB if (code >> 5) & 1 else 1.0)
 	var src: Vector3 = chunk["src"]
 	var tgt: Vector3 = chunk["tgt"]
 	var d2 := Vector2(tgt.x - src.x, tgt.z - src.z)
@@ -258,8 +263,8 @@ func arrow_landing(chunk: Dictionary, sh: int, i: int) -> Dictionary:
 		end.y = _h(end.x, end.z)  # la couche plantée suit le vrai sol (le shader, un plan)
 	var launch := float(chunk["launch"]) + _rand(sh, i, 6) * float(STAGGER[kind])
 	var dist := start.distance_to(end)
-	var flight := maxf(dist / float(SPEED[kind]) * (1.0 + float(ARC[kind])), 0.05)
-	var arc := dist * float(ARC[kind]) * (0.85 + 0.3 * _rand(sh, i, 7))
+	var flight := maxf(dist / float(SPEED[kind]) * (1.0 + arc_k), 0.05)
+	var arc := dist * arc_k * (0.85 + 0.3 * _rand(sh, i, 7))
 	var fly_dir := (end - start + Vector3(0.0, -arc * 4.0, 0.0)).normalized()
 	return {"pos": end, "dir": fly_dir, "time": launch + flight, "cover": in_cover}
 
