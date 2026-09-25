@@ -378,18 +378,16 @@ func _apply_config(map: Node, config: String) -> void:
 	if terrain != null:
 		terrain.set("fine_enabled", config != "no_fine")
 		terrain.set("fine_step_far", int(config.trim_prefix("fine_step:")) if config.begins_with("fine_step:") else 2)
-		if config.begins_with("fine_bias:"):
-			terrain.set("fine_lod_bias", float(config.trim_prefix("fine_bias:")))
 		for chunk in (terrain as Node).get_children():
 			if chunk is GeometryInstance3D:
 				(chunk as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if config == "terrain_noshadow" else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-			elif chunk.name.begins_with("Fine_"):
-				if config == "fine_hidden" and chunk.visible:
-					chunk.visible = false
-					_hidden.append(chunk)
-				for block in chunk.get_children():
-					var off := config in ["terrain_noshadow", "fine_noshadow"]
-					(block as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if off else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		# PF1 : quadtree de relief (ZG2) : `qt_px:<pixels>`, `qt_items:<n>` (valeurs du niveau sinon).
+		var quadtree: Node = terrain.get("quadtree")
+		if quadtree != null:
+			if config.begins_with("qt_px:"):
+				quadtree.set("max_vertex_px", float(config.trim_prefix("qt_px:")))
+			if config.begins_with("qt_items:"):
+				quadtree.set("max_items", int(config.trim_prefix("qt_items:")))
 	var vegetation := map.get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("enabled", config != "no_veg")
