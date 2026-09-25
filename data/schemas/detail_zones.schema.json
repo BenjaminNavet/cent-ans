@@ -30,9 +30,21 @@
           "minItems": 2,
           "maxItems": 2
         },
-        "half_size_km": { "type": "number", "minimum": 1, "maximum": 40 },
+        "half_size_km": { "type": "number", "minimum": 1, "maximum": 40, "description": "Demi-côté de l'emprise E5 ; E6 = min(half, 6 km), E7 = min(half, 3 km) sauf level_half_km." },
+        "level_half_km": {
+          "type": "object",
+          "description": "Demi-côté (km) de l'emprise d'un étage quand il diffère du défaut.",
+          "patternProperties": { "^[5-7]$": { "type": "number", "minimum": 0.5, "maximum": 40 } },
+          "additionalProperties": false
+        },
         "max_level": { "type": "integer", "minimum": 5, "maximum": 7 },
         "source": { "enum": ["ign_rge_alti", "ea_lidar", "ahn", "dhm_vlaanderen", "wallonie", "glo30"] },
+        "extra_sources": {
+          "type": "array",
+          "description": "Sources complémentaires par priorité décroissante (zones à cheval sur une frontière ; le premier pixel valide l'emporte).",
+          "items": { "enum": ["ign_rge_alti", "ea_lidar", "ahn", "dhm_vlaanderen", "glo30"] },
+          "uniqueItems": true
+        },
         "settlement_id": { "type": "string", "description": "Colonie de data/settlements liée, s'il y en a une." },
         "why": { "type": "string", "description": "Justification historique (événement, date, rôle)." }
       },
