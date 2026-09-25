@@ -422,8 +422,15 @@ func phase_battle() -> void:
 	log_q1("battle scene loaded in %d ms" % (Time.get_ticks_msec() - t))
 	await shot("battle-deploy")
 	await fps_probe("battle-deploy")
-	await key(KEY_ENTER)
-	await wait(60)
+	# BV3 : le discours du chef se joue d'abord ; le premier clic (ou Entrée) l'écourte.
+	var deployment: Object = battle.get("deployment")
+	for attempt in 3:
+		var start_button := find_button(battle, "Commencer la bataille")
+		if start_button == null or deployment == null or not deployment.get("active"):
+			break
+		await click(start_button)
+		await wait(30)
+	log_q1("deployment active after start: %s" % [deployment.get("active") if deployment != null else "?"])
 	await shot("battle-start")
 	for _i in 3:
 		await key(KEY_EQUAL)
