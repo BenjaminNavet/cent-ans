@@ -139,6 +139,7 @@ var _deploy_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
 var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var voices: BattleVoices = null  # VO1 : répliques des régiments
 var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
@@ -323,9 +324,24 @@ func begin() -> bool:
 	battle_audio = BattleAudio.new()
 	add_child(battle_audio)
 	battle_audio.setup(_weather_key, camera_rig.camera)
+	voices = BattleVoices.new()  # VO1
+	add_child(voices)
+	voices.setup(self)
 	_refresh_view(true)
 	_start_speech()
+	_advise_first_battle()
 	return true
+
+
+## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
+func _advise_first_battle() -> void:
+	if autoplay or _benchmark:
+		return
+	var trigger := "first_assault" if siege_view != null else "first_battle"
+	if speech != null:
+		speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+	else:
+		Advisor.say_trigger(trigger)
 
 
 func _faction_color(faction: String, side: String) -> Color:
@@ -773,6 +789,8 @@ func _update_audio(delta: float) -> void:
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
 			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+	if voices != null:
+		voices.update(delta)
 
 
 ## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
@@ -941,6 +959,8 @@ func _banner_scale() -> float:
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
+	if not autoplay and not _benchmark:  # VO1 : conseiller
+		Advisor.say_trigger("first_victory" if str(outcome.get("winner", "")) == player_side else "first_defeat")
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
@@ -1161,6 +1181,8 @@ func _finish_right(position: Vector2) -> void:
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
 	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
+	if voices != null:
+		voices.on_order(command, result)  # VO1 : réplique du régiment
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result

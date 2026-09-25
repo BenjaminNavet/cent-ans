@@ -28,6 +28,11 @@ pub enum MissileKind {
     Ball,
     /// Trebuchet or mangonel stone.
     Stone,
+    /// Handheld firearm bullet (couleuvriniers, lot UR2): drawn with
+    /// ignition smoke at the shooter.
+    Bullet,
+    /// Thrown javelin (jinetes, lot UR2): no arc drop like a bow shot.
+    Javelin,
 }
 
 impl MissileKind {
@@ -37,6 +42,8 @@ impl MissileKind {
             MissileKind::Bolt => "bolt",
             MissileKind::Ball => "ball",
             MissileKind::Stone => "stone",
+            MissileKind::Bullet => "bullet",
+            MissileKind::Javelin => "javelin",
         }
     }
 }

@@ -770,9 +770,12 @@ fn france_income_is_positive_and_in_target_range() {
         .map(|f| f.income_last_turn * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100)
         .sum();
     assert!(tribute > 0, "Burgundy, Brittany and Flanders pay tribute");
+    // C5: trade routes touching a French hub (Troyes, Provins) settle after
+    // the tax income, in their own treasury line.
+    let trade_income = state.factions[&france_id].trade_income_last_turn;
     assert_eq!(
         summary.treasury,
-        treasury_before + effective_income - effective_upkeep + tribute
+        treasury_before + effective_income - effective_upkeep + tribute + trade_income
     );
     assert_eq!(summary.provinces_count, 27);
 }

@@ -27,7 +27,7 @@ fn projected_net_income_is_the_booked_balance() {
     let net = economy.net_income();
     assert_eq!(
         net,
-        economy.projected_income
+        economy.projected_income + economy.trade_income
             - economy.army_upkeep
             - economy.building_upkeep
             - economy.administration_upkeep

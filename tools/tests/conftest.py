@@ -22,3 +22,31 @@ def budget_file(tmp_path: Path) -> Path:
     target = tmp_path / "budget.md"
     target.write_text(header.rstrip("\n") + "\n\n" + EMPTY_TABLE, encoding="utf-8")
     return target
+
+
+@pytest.fixture
+def multi_session_budget_file(budget_file: Path) -> Path:
+    """Same header as `budget_file`, with a first table already spent to 19,20 $.
+
+    A second, titled session is opened underneath it (shape of `docs/budget.md` since
+    session 7).
+    """
+    header = REPO_BUDGET.read_text(encoding="utf-8").split("| Date |", 1)[0]
+    first_table = (
+        "| Date | Service | Objet | Coût estimé | Coût réel | Cumul |\n"
+        "|---|---|---|---|---|---|\n"
+        "| 2026-09-24 | OpenRouter | portraits | 19,00 $ | 19,20 $ | 19,20 $ |\n"
+    )
+    second_table = (
+        "## Session 7 (nuit du 24/09) — enveloppe propre de 50 $\n"
+        "\n"
+        "| Date | Service | Objet | Coût estimé | Coût réel | Cumul session 7 |\n"
+        "|---|---|---|---|---|---|\n"
+        "| 2026-09-25 | OpenRouter | UR1 : illustrations | 0,64 $ | 0,64 $ | 0,64 $ |\n"
+    )
+    target = budget_file.parent / "multi_session_budget.md"
+    target.write_text(
+        header.rstrip("\n") + "\n\n" + first_table + "\n" + second_table,
+        encoding="utf-8",
+    )
+    return target
