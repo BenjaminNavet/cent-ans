@@ -388,7 +388,7 @@ func _fill_ransom(character: Dictionary) -> void:
 	var captor_name: String = str(character.get("captor_name", ""))
 	_ransom_action = str(character.get("ransom_action", ""))
 	_ransom_row.visible = bool(character.get("captive", false)) and captor_name != ""
-	_ransom_label.text = "Captif de %s — rançon %d livres" % [captor_name, int(character.get("ransom", 0))]
+	_ransom_label.text = "Captif de %s — rançon %s" % [captor_name, Money.amount(int(character.get("ransom", 0)))]
 	_ransom_button.text = {"pay": "Payer la rançon", "release": "Libérer contre rançon"}.get(_ransom_action, "")
 	_ransom_button.visible = _ransom_action != ""
 	_ransom_button.tooltip_text = ""

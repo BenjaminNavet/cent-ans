@@ -18,6 +18,7 @@ extends Node3D
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
+## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
 
 signal returned(result: Dictionary)
@@ -50,6 +51,7 @@ var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
 var resolved: bool = false
+var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var siege_demo: bool = false
@@ -58,6 +60,10 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
+var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
+var _blood_override: int = -1  # `--blood=<0|1|2>`
+var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
 var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
@@ -117,6 +123,7 @@ func _ready() -> void:
 	hud.command_pressed.connect(_on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -214,6 +221,9 @@ func begin() -> bool:
 			add_child(backdrop)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
+	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
+	if not _no_bv1:
+		battle.call("set_figure_scale", _unit_size())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -231,6 +241,7 @@ func begin() -> bool:
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
+	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -284,6 +295,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
 	effects = BattleEffects.new()
@@ -292,6 +304,55 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	if not _no_bv1:
+		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
+	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
+	effects.volleys.sound_event.connect(_on_sound_event)
+	effects.sound_event.connect(_on_sound_event)
+	BattleAudio.auto_volley = _no_bv1
+	blood = BattleBlood.new()
+	blood.name = "Blood"
+	effects.add_child(blood)
+	blood.figure_scale = effects.volleys.figure_scale
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
+	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
+	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.
+	if soldiers.bv2_enabled and not _no_bv1:
+		blood.corpse_driven = true
+		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
+			blood.on_corpse(pos, side, kind, cause, _camera_position())
+			effects.volleys.on_corpse(pos, side, kind, cause))
+
+
+## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
+func _unit_size() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
+
+
+func _blood_level() -> int:
+	if _blood_override >= 0:
+		return _blood_override
+	return BattleGore.blood_level()  # même lecture que BV2 (`--blood=off|moderate|full|0|1|2`)
+
+
+func _camera_position() -> Vector3:
+	var camera := get_viewport().get_camera_3d()
+	return camera.global_position if camera != null else Vector3.ZERO
+
+
+## BV1 : sons des tirs du cœur (lâcher, sifflement, impact) joués par l'API du lot AU1
+## (`BattleAudio.play_at` / `play_at_delayed`, bus et banque sonore d'AU1). `delay` en temps de
+## bataille ; `BattleAudio.auto_volley` est coupé pour ne pas doubler ses volées déduites des
+## munitions.
+func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void:
+	if delay > 0.0:
+		BattleAudio.play_at_delayed(str(event), position, delay)
+	else:
+		BattleAudio.play_at(str(event), position)
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
@@ -301,7 +362,11 @@ func _update_effects(dt: float) -> void:
 		return
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
-	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
+	var shots: Variant = battle.call("get_shots")
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
+	if blood != null:
+		blood.tick_time(soldiers.anim_time)
+		blood.update(units, camera_pos)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -406,6 +471,10 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		if _bench_frames == 0:
+			# BV1 : l'autoload `Settings` réimpose la synchro verticale du joueur (60 Hz) ; le banc
+			# d'essai la coupe pour que les FPS départagent enfin les variantes.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
 			if _bench_at > 0.0:
 				_fast_forward(_bench_at)
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
@@ -433,6 +502,8 @@ func _process(delta: float) -> void:
 				var samples: Array = _bench_ab_ms[level]
 				samples.sort()
 				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
+			if effects != null and effects.volleys != null:
+				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
 
 
@@ -606,22 +677,44 @@ func _show_end() -> void:
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	# UB1 : le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
+	# expérience) sur l'écran de fin ; « Retour à la campagne » ne fait plus que rendre la main.
+	var side_setup: Dictionary = setup[player_side]
+	var general: Variant = side_setup.get("general", null)
+	var general_id := str(general.get("character", "")) if general is Dictionary else ""
+	var before := BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id)
+	_resolve_now()
+	var aftermath := {}
+	if bool(_resolution.get("ok", false)):
+		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
-	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
 
 
-## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
-func _on_return() -> void:
+var _resolution: Dictionary = {}
+
+
+## Applique le résultat (`resolve_battle`) une seule fois.
+func _resolve_now() -> void:
 	if resolved:
 		return
 	resolved = true
-	var result := {"ok": false, "error": "bataille non terminée", "events": []}
+	_resolution = {"ok": false, "error": "bataille non terminée", "events": []}
 	if battle != null and battle.call("is_finished") and campaign_sim != null and not padded:
-		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
-		if not result.get("ok", false):
-			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+		_resolution = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
+		if not _resolution.get("ok", false):
+			push_error("BattleScene: resolve_battle refused: %s" % _resolution.get("error", "?"))
+
+
+## « Retour à la campagne » : applique le résultat s'il ne l'est pas encore, puis rend la main.
+func _on_return() -> void:
+	if _returned:
+		return
+	_returned = true
+	_resolve_now()
+	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
 	returned.emit(result)
@@ -800,6 +893,7 @@ func _finish_right(position: Vector2) -> void:
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
+	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
@@ -810,6 +904,17 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## UB1 : clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
+func _on_leader_clicked(double: bool) -> void:
+	var id := hud.leader_unit_id()
+	if id < 0:
+		return
+	if double:
+		_on_card_double_clicked(id)
+	else:
+		_on_card_clicked(id, false)
 
 
 ## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
@@ -994,6 +1099,13 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg == "--no-effects":
 			_no_effects = true
+		elif arg == "--no-bv1":
+			_no_bv1 = true
+		elif arg.begins_with("--unit-size="):
+			_unit_size_override = float(arg.trim_prefix("--unit-size="))
+		elif arg.begins_with("--blood="):
+			var value := arg.trim_prefix("--blood=")
+			_blood_override = ["off", "moderate", "full"].find(value) if not value.is_valid_int() else clampi(int(value), 0, 2)
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -1046,6 +1158,8 @@ func _stage_screenshot() -> void:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
+	if effects != null and blood != null:
+		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0

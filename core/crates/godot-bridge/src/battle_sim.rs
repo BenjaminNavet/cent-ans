@@ -6,7 +6,7 @@
 //! through JSON with the serde types of `sim-battle`; positions go out as
 //! packed float arrays.
 
-use data_model::UnitCategory;
+use data_model::{Ability, UnitCategory};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 use serde_json::Value;
@@ -114,13 +114,20 @@ fn state_label_fr(state: UnitState) -> &'static str {
 #[class(base = RefCounted)]
 pub struct BattleSim {
     sim: Option<sim_battle::BattleSim>,
+    /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
+    /// simulated soldier. Rendering only.
+    figure_scale: f64,
     base: Base<RefCounted>,
 }
 
 #[godot_api]
 impl IRefCounted for BattleSim {
     fn init(base: Base<RefCounted>) -> Self {
-        BattleSim { sim: None, base }
+        BattleSim {
+            sim: None,
+            figure_scale: 1.0,
+            base,
+        }
     }
 }
 
@@ -145,12 +152,84 @@ impl BattleSim {
         }
     }
 
+    /// Visual unit size (BV1, ADR 0016): figures drawn per simulated soldier
+    /// (0.5 small, 1 normal, 1.5 large, 2.5 ultra). Changes only
+    /// `get_soldier_buffer` and the `figures` key of `get_units`.
+    #[func]
+    fn set_figure_scale(&mut self, scale: f64) {
+        self.figure_scale = scale.clamp(0.25, 4.0);
+    }
+
+    #[func]
+    fn get_figure_scale(&self) -> f64 {
+        self.figure_scale
+    }
+
+    /// Volleys resolved since the previous call (BV1): `[{time, shooter,
+    /// target (-1: wall), from: Vector2, aim: Vector2, missiles, kills,
+    /// kind: arrow|bolt|ball|stone, incendiary, cover: none|pavise|stakes|wall}]`.
+    #[func]
+    fn get_shots(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_shots()
+            .iter()
+            .map(|shot| {
+                vdict! {
+                    "time" => shot.time,
+                    "shooter" => i64::from(shot.shooter),
+                    "target" => shot.target.map_or(-1, i64::from),
+                    "from" => Vector2::new(shot.from.0 as f32, shot.from.1 as f32),
+                    "aim" => Vector2::new(shot.aim.0 as f32, shot.aim.1 as f32),
+                    "missiles" => i64::from(shot.missiles),
+                    "kills" => shot.kills,
+                    "kind" => shot.kind.key(),
+                    "incendiary" => shot.incendiary,
+                    "cover" => shot.cover.key(),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// Advances the battle by `dt` seconds (fixed 0.1 s steps inside).
     #[func]
     fn tick(&mut self, dt: f64) {
         if let Some(sim) = &mut self.sim {
             sim.tick(dt);
         }
+    }
+
+    /// Charge impacts resolved since the previous call (BV2): `[{time,
+    /// attacker, defender, kind: shock|pikes|stakes|broken, point: Vector2,
+    /// heading, mass, knocked, unhorsed, depth, cohesion}]`. The renderer
+    /// throws down `knocked` men of the defender, slows the horses over
+    /// `depth` metres and unhorses `unhorsed` riders.
+    #[func]
+    fn get_impacts(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_impacts()
+            .iter()
+            .map(|hit| {
+                vdict! {
+                    "time" => hit.time,
+                    "attacker" => i64::from(hit.attacker),
+                    "defender" => i64::from(hit.defender),
+                    "kind" => hit.kind.key(),
+                    "point" => Vector2::new(hit.point.0 as f32, hit.point.1 as f32),
+                    "heading" => hit.heading,
+                    "mass" => hit.mass,
+                    "knocked" => i64::from(hit.knocked),
+                    "unhorsed" => i64::from(hit.unhorsed),
+                    "depth" => hit.depth,
+                    "cohesion" => hit.cohesion,
+                }
+                .to_variant()
+            })
+            .collect()
     }
 
     /// `{type: "move"|"attack"|"halt"|"formation"|"fire_at_will"|"withdraw"
@@ -272,8 +351,10 @@ impl BattleSim {
                     "category" => category_key(unit.category),
                     "render" => render_key(unit),
                     "soldiers" => i64::from(unit.soldiers()),
+                    "figures" => i64::from(unit.figure_count(self.figure_scale)),
                     "max_soldiers" => i64::from(unit.max_soldiers),
                     "initial_soldiers" => i64::from(unit.initial_soldiers),
+                    "kills" => unit.kills.round() as i64,
                     "morale" => unit.morale,
                     "fatigue" => unit.fatigue,
                     "ammo" => i64::from(unit.ammo),
@@ -306,8 +387,14 @@ impl BattleSim {
                     "siege_tower" => unit.siege_tower(),
                     "wall_breaker" => unit.wall_breaker(),
                     "pavise" => unit.pavise.is_some(),
+                    "pavise_cover" => unit.pavise.is_some()
+                        || (unit.has(Ability::Pavise) && unit.state != UnitState::Marching),
                     "dismounted" => unit.dismounted,
                     "order_morale" => unit.order_morale,
+                    // BV2: cause of the latest deaths (chooses the death drawn).
+                    "loss_cause" => unit.loss_cause.key(),
+                    "loss_by" => unit.loss_by.map_or(-1, i64::from),
+                    "knocked" => if unit.knocked_timer > 0.0 { unit.knocked } else { 0.0 },
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
@@ -344,7 +431,7 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && render_key(u) == render)
         {
-            for (x, z, angle) in unit.soldier_positions() {
+            for (x, z, angle) in unit.figure_positions(self.figure_scale) {
                 let y = sim.standing_height(unit, x, z);
                 let (s, c) = (angle.sin() as f32, angle.cos() as f32);
                 buffer.extend_from_slice(&[
@@ -730,6 +817,42 @@ impl CampaignSim {
                 godot_warn!("CampaignSim.get_battle_setup({index}): {error}");
                 VarDictionary::new()
             }
+        }
+    }
+
+    /// UB1: estimated balance of pending battle `index` for the pre-battle
+    /// screen (`battle_forecast.rs`): `{attacker_power, defender_power,
+    /// attacker_share, attacker_win_chance, attacker_soldiers,
+    /// defender_soldiers, attacker_reinforcements, defender_reinforcements,
+    /// modifiers, can_withdraw, siege}`; empty if unknown.
+    #[func]
+    fn get_battle_forecast(&self, index: i64) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        match state.battle_forecast(data, index.max(0) as usize) {
+            Ok(forecast) => to_dict(&forecast),
+            Err(error) => {
+                godot_warn!("CampaignSim.get_battle_forecast({index}): {error}");
+                VarDictionary::new()
+            }
+        }
+    }
+
+    /// UB1: the player calls off pending battle `index` (attacker only; an
+    /// assault is postponed, the siege goes on) → `{ok, error, events}`.
+    #[func]
+    fn withdraw_pending_battle(&mut self, index: i64) -> VarDictionary {
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return result_dict(Err("aucune campagne en cours".to_owned()));
+        };
+        match state.withdraw_pending_battle(data, index.max(0) as usize) {
+            Ok(events) => {
+                let mut dict = result_dict(Ok(()));
+                dict.set("events", &events_array(&events));
+                dict
+            }
+            Err(error) => result_dict(Err(error.to_string())),
         }
     }
 
