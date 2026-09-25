@@ -152,6 +152,8 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
+	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
+		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
 	var scales: Array = _constant("UI_SCALES")
 	_options(grid, "interface/ui_scale", "Échelle de l'interface", scales, scales.map(func(value: float) -> String: return "%d %%" % roundi(value * 100.0)))
 
@@ -160,7 +162,7 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "camera/edge_pan", "Défilement par les bords de l'écran", "Aussi basculé par F2 sur la carte.")
 	_slider(grid, "Vitesse de la caméra", float(settings.call("get_value", "camera/speed")), 0.4, 2.5, 0.1,
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
-	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées. Portée : data/rules/vision.json.")
+	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
 
@@ -176,9 +178,11 @@ func _build_game(grid: GridContainer) -> void:
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 
+## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
 func _build_sound(grid: GridContainer) -> void:
-	_slider(grid, "Musique", float(settings.call("music_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_music_volume", value))
-	_slider(grid, "Effets", float(settings.call("sfx_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_sfx_volume", value))
+	for spec in AudioBuses.PLAYER_BUSES:
+		var bus_name: String = spec[0]
+		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
 
 
 func _on_reset() -> void:

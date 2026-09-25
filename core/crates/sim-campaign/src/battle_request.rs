@@ -93,6 +93,34 @@ pub(crate) fn defer_player_battle(
     if !involved(attacker_id, &defender.faction) && !involved(defender_id, &attacker.faction) {
         return false;
     }
+    if let Some(ai) = state.ai_turn.clone() {
+        // Lot M3: during an AI faction's turn the battle is auto-resolved
+        // at once; the player reads about it in the season report.
+        let place = defender
+            .settlement()
+            .cloned()
+            .or_else(|| crate::march::nearest_settlement(data, state.army_point(data, defender)));
+        let mut event = GameEvent::new(
+            EventKind::Battle,
+            format!(
+                "Pendant le tour {}, bataille livrée{} : {} contre {} (résolution automatique).",
+                crate::events::de(&faction_name(data, &ai)),
+                place.map_or_else(String::new, |p| format!(
+                    " près de {}",
+                    crate::siege::settlement_name(data, &p)
+                )),
+                faction_name(data, &attacker.faction),
+                faction_name(data, &defender.faction)
+            ),
+        )
+        .army(attacker_id)
+        .faction(player);
+        if let Some(province) = state.army_province(data, defender) {
+            event = event.province(&province);
+        }
+        events.push(event);
+        return false;
+    }
     let Some(location) = defender
         .settlement()
         .cloned()

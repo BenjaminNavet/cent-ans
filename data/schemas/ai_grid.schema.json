@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_grid.schema.json",
+  "title": "Réglages des armées de l'IA sur la grille",
+  "description": "Fichier data/ai/grid.json (lot M3) : l'IA planifie sur le graphe des colonies et exécute sur la grille de navigation. Sans ce fichier, les valeurs par défaut du cœur s'appliquent. Voir docs/design/2026-09-24-mouvement-libre.md § 4.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "attack_ratio": { "type": "number", "minimum": 1, "description": "Une armée de l'IA attaque une armée ennemie de sa bulle quand la puissance de son camp dépasse celle de l'ennemi (murailles comprises) de ce facteur." },
+    "attack_reach_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Une armée ennemie est une cible possible quand sa distance à vol d'oiseau ne dépasse pas cette part des kilomètres que l'armée peut encore parcourir." },
+    "avoid_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Une armée ennemie plus puissante que ce multiple de la puissance de l'armée est évitée : sa zone de contrôle sort de l'itinéraire." },
+    "avoid_radius_km": { "type": "number", "minimum": 0, "description": "Les colonies à moins de cette distance (km) d'une armée évitée sont écartées de l'itinéraire (zone de contrôle et marge)." },
+    "max_legs_per_turn": { "type": "integer", "minimum": 1, "description": "Nombre maximal d'étapes du graphe des colonies qu'une armée reçoit l'ordre de parcourir en un tour (un ordre MoveArmy par étape)." }
+  },
+  "required": ["attack_ratio", "attack_reach_share", "avoid_ratio", "avoid_radius_km", "max_legs_per_turn"],
+  "additionalProperties": false
+}

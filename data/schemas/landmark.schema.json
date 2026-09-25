@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/landmark.schema.json",
+  "title": "Ville emblématique",
+  "description": "Fichier data/landmarks/<id>.json (lot L1) : plan d'une ville emblématique (Paris, Londres…) rendue par une maquette dédiée au lieu de la maquette générique de sa colonie. Coordonnées locales en mètres réels : x vers l'est, y vers le nord (nord vrai), origine = `anchor.lonlat`. Le générateur Blender (`tools/blender_scripts/landmark_city.py`) déforme ce plan par une loupe radiale (`scale`) pour exagérer le centre, pose les monuments à leur propre échelle et remplit les quartiers de maisons. Rendu seulement : aucune règle de jeu.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "settlement": { "type": "string", "pattern": "^set_[a-z0-9_]+$", "description": "Colonie dont la maquette est remplacée." },
+    "period": { "type": "string", "description": "État représenté, en français (ex. « vers 1340-1380 »)." },
+    "province": { "type": "string", "pattern": "^prov_[a-z0-9_]+$", "description": "Province de la colonie (bataille de siège : la toile de fond s'affiche quand le siège a lieu dans cette province)." },
+    "siege": {
+      "type": "object",
+      "description": "Toile de fond des batailles de siège (échelle réelle, en mètres) : la ville assiégée de la simulation reste générique, le plan est posé derrière elle, fleuve et rive opposée compris.",
+      "properties": {
+        "rotate_deg": { "type": "number", "description": "Rotation antihoraire du plan pour que le fleuve longe le fond du champ de bataille." },
+        "radius_m": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon du plan retenu autour de l'origine." },
+        "bank_offset_m": { "type": "number", "description": "Distance de l'origine (après rotation) à la berge proche : la berge est posée au fond du champ." },
+        "areas": { "type": "array", "items": { "type": "string" } },
+        "monuments": { "type": "array", "items": { "type": "string" } },
+        "bridges": { "type": "array", "items": { "type": "string" } },
+        "streets": { "type": "array", "items": { "type": "string" } },
+        "walls": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["rotate_deg", "radius_m", "bank_offset_m", "areas", "monuments"],
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "date": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "license": { "type": "string" },
+          "use": { "type": "string", "description": "Ce que la source a servi à placer." }
+        },
+        "required": ["title", "license"],
+        "additionalProperties": false
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "description": "Origine du plan sur la carte.",
+      "properties": {
+        "lonlat": { "$ref": "#/$defs/lonlat" },
+        "px": { "$ref": "#/$defs/point", "description": "Même point en pixels carte (EPSG:3035, calculé par l'outil géo et vérifié par test)." },
+        "north_bearing_deg": { "type": "number", "minimum": -30, "maximum": 30, "description": "Angle horaire du nord vrai par rapport au haut de la carte (convergence du méridien en EPSG:3035)." }
+      },
+      "required": ["lonlat", "px", "north_bearing_deg"],
+      "additionalProperties": false
+    },
+    "scale": {
+      "type": "object",
+      "description": "Loupe radiale : r_monde = A·r + B·r² jusqu'à `core_radius_m` (A = 1/center_meters_per_unit, B déduit de core_radius_px), puis raccord linéaire jusqu'au bord de la zone réservée où l'échelle redevient celle de la carte (le plan rejoint le fleuve et les routes de la carte).",
+      "properties": {
+        "center_meters_per_unit": { "type": "number", "exclusiveMinimum": 0 },
+        "core_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "core_radius_px": { "type": "number", "exclusiveMinimum": 0 },
+        "zone_radius_px": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon de la zone réservée (pas de fleuve, pont ni végétation génériques) ; reporté dans data/map/river_styles.json (custom_zones) du lot V4." },
+        "monument_scale": { "type": "number", "exclusiveMinimum": 0, "description": "Facteur par défaut des monuments par rapport à l'échelle du centre." },
+        "house_scale": { "type": "number", "exclusiveMinimum": 0 },
+        "height_scale": { "type": "number", "exclusiveMinimum": 0, "description": "Facteur vertical supplémentaire (bâtiments)." }
+      },
+      "required": ["center_meters_per_unit", "core_radius_m", "core_radius_px", "zone_radius_px", "monument_scale", "house_scale", "height_scale"],
+      "additionalProperties": false
+    },
+    "rivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Axe du fleuve d'amont en aval ; chaque point porte la largeur totale du lit (îles comprises).",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "points": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/point_width" } }
+        },
+        "required": ["id", "name", "points"],
+        "additionalProperties": false
+      }
+    },
+    "islands": { "type": "array", "items": { "$ref": "#/$defs/area" } },
+    "areas": {
+      "type": "array",
+      "description": "Quartiers bâtis : densité de maisons (0-1). Un point prend la densité de la première zone qui le contient.",
+      "items": { "$ref": "#/$defs/area" }
+    },
+    "open_spaces": {
+      "type": "array",
+      "description": "Espaces sans maisons : places, cimetières, jardins, prés.",
+      "items": { "$ref": "#/$defs/area" }
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "points": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/point" } },
+          "closed": { "type": "boolean" },
+          "height_m": { "type": "number", "exclusiveMinimum": 0 },
+          "tower_spacing_m": { "type": "number", "exclusiveMinimum": 0 },
+          "tower_shape": { "enum": ["round", "square"] },
+          "ditch": { "type": "boolean" },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "name": { "type": "string" }, "at": { "$ref": "#/$defs/point" } },
+              "required": ["name", "at"],
+              "additionalProperties": false
+            }
+          },
+          "from_year": { "type": "integer" },
+          "until_year": { "type": "integer" }
+        },
+        "required": ["id", "name", "points", "height_m"],
+        "additionalProperties": false
+      }
+    },
+    "bridges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "from": { "$ref": "#/$defs/point" },
+          "to": { "$ref": "#/$defs/point" },
+          "width_m": { "type": "number", "exclusiveMinimum": 0 },
+          "inhabited": { "type": "boolean", "description": "Pont bordé de maisons." },
+          "material": { "enum": ["stone", "wood"] },
+          "from_year": { "type": "integer" },
+          "until_year": { "type": "integer" }
+        },
+        "required": ["id", "name", "from", "to", "width_m"],
+        "additionalProperties": false
+      }
+    },
+    "streets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "points": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/point" } },
+          "width_m": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "required": ["id", "name", "points"],
+        "additionalProperties": false
+      }
+    },
+    "monuments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string" },
+          "model": {
+            "enum": ["notre_dame", "sainte_chapelle", "palais_cite", "louvre", "chatelet", "bastille", "market_halls", "church", "abbey", "keep", "windmill", "tower"],
+            "description": "Maillage dédié ou gabarit paramétré du générateur."
+          },
+          "at": { "$ref": "#/$defs/point" },
+          "angle_deg": { "type": "number", "description": "Rotation antihoraire de l'axe +x du modèle depuis l'est (églises : axe vers le chœur)." },
+          "scale": { "type": "number", "exclusiveMinimum": 0, "description": "Remplace scale.monument_scale." },
+          "size": { "type": "number", "exclusiveMinimum": 0, "description": "Taille relative du gabarit (églises, abbayes)." },
+          "clear_radius_m": { "type": "number", "minimum": 0, "description": "Rayon (m, avant loupe × échelle du monument) sans maisons autour." },
+          "from_year": { "type": "integer" },
+          "until_year": { "type": "integer" },
+          "variant_from_year": {
+            "type": "object",
+            "description": "Variante du modèle à partir d'une année (ex. Louvre de Charles V en 1364).",
+            "additionalProperties": { "type": "integer" }
+          },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "name", "model", "at"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["id", "name", "settlement", "sources", "anchor", "scale", "monuments"],
+  "additionalProperties": false,
+  "$defs": {
+    "lonlat": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "minimum": -11, "maximum": 30 },
+        { "type": "number", "minimum": 35, "maximum": 62 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "point": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+    "point_width": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3, "description": "[x, y, largeur m]" },
+    "area": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["built", "island", "square", "cemetery", "garden", "meadow", "parvis", "vineyard"] },
+        "polygon": { "type": "array", "minItems": 3, "items": { "$ref": "#/$defs/point" } },
+        "density": { "type": "number", "minimum": 0, "maximum": 1 },
+        "from_year": { "type": "integer" },
+        "until_year": { "type": "integer" }
+      },
+      "required": ["id", "name", "polygon"],
+      "additionalProperties": false
+    }
+  }
+}
