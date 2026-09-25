@@ -34,5 +34,10 @@ shader et les mêmes recettes ; FG3 passe après sa fusion. FG0-FG2 et FG4 reste
 
 Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprimé après fusion.
 
+## Pistes ultérieures
+- Figurines scannées (scans de musée, image → 3D, Gaussian Splatting) et animations réalistes
+  (capture, vidéo → mouvement) : analyse dans `docs/research/figurines-scan-et-animation.md`,
+  à reprendre après FG1 (voie pragmatique pour FG2, animations en chantier séparé).
+
 ## Journal
 - 25/09 : plan écrit ; FG0 lancé (agent en worktree).
