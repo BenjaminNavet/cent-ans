@@ -165,6 +165,14 @@ func _run_campaign_sim() -> void:
 			return
 	else:
 		campaign.new_campaign(1337)
+	if campaign.has_method("set_difficulty"):
+		# DF1 : niveau de difficulté choisi au lancement, figé ensuite.
+		var levels: Array = campaign.get_difficulty_levels()
+		_check(levels.size() == 4, "expected 4 difficulty levels, got %d" % levels.size())
+		_check(campaign.get_difficulty() == "normal", "default difficulty should be 'normal', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("hard"), "set_difficulty('hard') refused")
+		_check(campaign.get_difficulty() == "hard", "get_difficulty() should be 'hard', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("normal"), "set_difficulty('normal') refused at turn 0")
 	_check(campaign.get_turn() == 0, "initial turn should be 0, got %d" % campaign.get_turn())
 	_check(campaign.get_date_label() == "Printemps 1337", "initial date should be 'Printemps 1337', got '%s'" % campaign.get_date_label())
 
