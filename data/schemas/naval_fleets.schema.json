@@ -56,6 +56,16 @@
         "type": "string"
       }
     },
+    "port_waters": {
+      "type": "object",
+      "description": "Lot NV2 : nom des eaux d'une traversée qui part d'un port ou y aboutit (Calais, Douvres : « le pas de Calais »), à la place du nom de la mer.",
+      "propertyNames": {
+        "pattern": "^set_[a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "sea_names": {
       "type": "object",
       "propertyNames": {

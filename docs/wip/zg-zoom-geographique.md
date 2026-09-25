@@ -25,8 +25,9 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | **fusionné** dans `integration/zoom` (650d77a5) |
 | ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
 | ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | en cours (branche `zg4-camera` depuis `integration/zoom`, wip `zg4-camera.md`) |
-| ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | en cours (wip `zg5a-hydro-fine.md`) |
-| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | après ZG2 |
+| ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
+| ZG3b | Correctif côte/estuaires des zones E5-E7 (Londres −12 m) | 2 | en cours (Sonnet, wip `zg3-palier3.md`) |
+| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | en cours (wip `zg5b-rendu-fin.md`) |
 | ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
@@ -44,3 +45,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG2 fusionné dans `integration/zoom` (conflit d'ADR : addenda ZG1 + ZG2 + addendum « villes emblématiques » pour VH). `main` fusionné dans l'intégration (995bf6f4). Le smoke plante comme sur `main` (« Message queue out of memory », cause étrangère, correction par l'orchestrateur de nuit). **`main` pas encore avancé** : le checkout principal contient des modifications non commitées du lot PB1 (autre session) sur `terrain_builder.gd` etc. ; demande de coordination envoyée. Les agents de la vague 2 partent donc de `integration/zoom`. PF1 (nuit) sera adapté par-dessus ZG après l'avance de `main`.
 - Disque presque plein (≈ 25 Go) : compiler avec `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` dans les worktrees.
 - 25/09 : **ZG0-ZG3 dans main** (a8e0f3d3, ff-only) après libération du checkout par PB1 (game-project-b3, qui rebase sur ZG). Prévenus : PB1 et l'orchestrateur de nuit (PF1 branchera les préréglages de qualité sur le quadtree ; recalages incrémentaux de landmark_model = ZG4).
+- 25/09 : correctif 3a3c8a95 (quadtree jamais « stable » en vue parchemin, signalé par PB1) ; ZG5a fusionné, **main = 5caa8def**. Anomalie Londres (E5-E7 10-15 m trop bas, côte grossière) → ZG3b. ZG5b lancé en parallèle de ZG4 (ne touche ni caméra ni paliers).

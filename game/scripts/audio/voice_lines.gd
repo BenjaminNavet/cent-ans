@@ -21,7 +21,7 @@ static var _streams: Dictionary = {}  # chemin → AudioStream ou null
 static func data(relative: String) -> Dictionary:
 	if _cache.has(relative):
 		return _cache[relative]
-	var path := SoundBank._data_dir().path_join(relative)
+	var path := SoundBank.data_path(relative)
 	var parsed: Variant = null
 	if FileAccess.file_exists(path):
 		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))

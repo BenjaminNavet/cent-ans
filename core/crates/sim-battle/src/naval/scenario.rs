@@ -57,6 +57,40 @@ pub struct ScenarioShip {
     pub flagship: bool,
 }
 
+/// A line of chained ships in defensive formation (lot NV2): the ships of
+/// group `chain` without a `position` are lashed side by side along a line
+/// through `origin`, perpendicular to their heading, in file order.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ScenarioChain {
+    pub chain: u32,
+    pub origin: [f64; 2],
+    #[serde(default = "default_chain_heading")]
+    pub heading_deg: f64,
+    #[serde(default = "default_chain_spacing")]
+    pub spacing_m: f64,
+}
+
+fn default_chain_heading() -> f64 {
+    180.0
+}
+
+fn default_chain_spacing() -> f64 {
+    12.0
+}
+
+impl ScenarioChain {
+    /// Position of ship `k` of the `count` ships of the line.
+    pub fn slot(&self, k: usize, count: usize) -> [f64; 2] {
+        let h = self.heading_deg.to_radians();
+        let offset = (k as f64 - (count as f64 - 1.0) * 0.5) * self.spacing_m;
+        [
+            self.origin[0] + h.sin() * offset,
+            self.origin[1] - h.cos() * offset,
+        ]
+    }
+}
+
 /// A scenario fleet.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -67,6 +101,8 @@ pub struct ScenarioFleet {
     pub admiral: String,
     #[serde(default)]
     pub hold: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub chains: Vec<ScenarioChain>,
     pub units: Vec<ScenarioUnit>,
     pub ships: Vec<ScenarioShip>,
 }
@@ -112,7 +148,26 @@ impl NavalScenario {
         let fleet = |f: &ScenarioFleet| -> Result<NavalSideSetup, String> {
             let mut aboard = vec![0u32; f.units.len()];
             let mut out_ships = Vec::new();
+            let mut in_chain: BTreeMap<u32, usize> = BTreeMap::new();
             for ship in &f.ships {
+                // Place in its chained line, if the fleet draws one.
+                let line = ship
+                    .chain
+                    .and_then(|c| f.chains.iter().find(|l| l.chain == c));
+                let (position, heading_deg) = match line {
+                    Some(line) if ship.position.is_none() => {
+                        let k = in_chain.entry(line.chain).or_insert(0);
+                        let count = f
+                            .ships
+                            .iter()
+                            .filter(|s| s.chain == Some(line.chain) && s.position.is_none())
+                            .count();
+                        let slot = line.slot(*k, count);
+                        *k += 1;
+                        (Some(slot), ship.heading_deg.or(Some(line.heading_deg)))
+                    }
+                    _ => (ship.position, ship.heading_deg),
+                };
                 let class = ships
                     .get(&ship.class)
                     .ok_or_else(|| format!("classe de navire inconnue : {}", ship.class))?;
@@ -134,8 +189,8 @@ impl NavalScenario {
                     fireship: ship.fireship,
                     chain: ship.chain,
                     fire_arrows: ship.fire_arrows,
-                    position: ship.position,
-                    heading_deg: ship.heading_deg,
+                    position,
+                    heading_deg,
                     flagship: ship.flagship,
                 });
             }

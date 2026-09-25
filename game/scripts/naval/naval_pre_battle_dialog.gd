@@ -19,7 +19,9 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	if player_side == "" or player_side == "<null>":
 		player_side = "attacker"
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
-	title_label.text = "Flotte ennemie en vue : %s" % str(battle.get("sea_name", "en mer"))
+	# Les eaux de la traversée (« le pas de Calais ») plutôt que la mer entière (NV2).
+	var waters := str(setup.get("place_name", ""))
+	title_label.text = "Flotte ennemie en vue : %s" % (waters if waters != "" else str(battle.get("sea_name", "en mer")))
 	subtitle_label.text = "%s barre la traversée de %s · %s" % [str(battle.get("interceptor_name", "")), str(battle.get("faction_name", "")), str(SEASON_FR.get(str(setup.get("season", "")), ""))]
 	_banner_texture = PortraitLoader.load_texture(BANNER_SEA)
 	banner.queue_redraw()

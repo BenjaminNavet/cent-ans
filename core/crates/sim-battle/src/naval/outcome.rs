@@ -141,6 +141,12 @@ pub enum NavalEventKind {
     Escaped {
         ship: u32,
     },
+    /// The fleet of `side` calls the general boarding (`ship`: its flagship
+    /// or leading ship).
+    Assault {
+        ship: u32,
+        side: SideId,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]

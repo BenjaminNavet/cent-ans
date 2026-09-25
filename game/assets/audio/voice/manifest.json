@@ -1,0 +1,2354 @@
+{
+ "advisor/adv_army_destroyed.ogg": {
+  "text": "Une armée entière est perdue. Il faudra du temps et de l'argent pour relever l'ost ; d'ici là, tenez-vous derrière vos murailles.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Une armée entière est perdue. Il faudra du temps et de l'argent pour relever l'ost ; d'ici là, tenez-vous derrière vos murailles.",
+  "seconds": 9.46,
+  "cost_usd": 0.00071
+ },
+ "advisor/adv_bankruptcy.ogg": {
+  "text": "Le trésor est vide. Des soldats sans solde deviennent des routiers : trouvez de l'argent, fût-ce en affaiblissant la monnaie.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le trésor est vide. Des soldats sans solde deviennent des routiers : trouvez de l'argent, fût-ce en affaiblissant la monnaie.",
+  "seconds": 7.01,
+  "cost_usd": 0.0006
+ },
+ "advisor/adv_excommunication.ogg": {
+  "text": "Le pape a lancé l'anathème. Les clercs se détournent, et vos ennemis se disent désormais les soldats de Dieu.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le pape a lancé l’anathème. Les clercs se détournent, et vos ennemis se disent désormais les soldats de Dieu.",
+  "seconds": 7.31,
+  "cost_usd": 0.00062
+ },
+ "advisor/adv_famine.ogg": {
+  "text": "La disette gagne le pays. Un peuple qui a faim n'obéit plus longtemps : allégez l'impôt ou ouvrez les greniers.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La disette gagne le pays. Un peuple qui a faim n’obéit plus longtemps : allégez l’impôt ou ouvrez les greniers.",
+  "seconds": 6.71,
+  "cost_usd": 0.00056
+ },
+ "advisor/adv_first_assault.ogg": {
+  "text": "Un assaut coûte cher en hommes. Que vos engins ouvrent d'abord la brèche ; les échelles ne servent qu'à ceux que la muraille a déjà lassés.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Un assaut coûte cher en hommes. Que vos engins ouvrent d'abord la brèche ; les échelles ne servent qu'à ceux que la muraille a déjà lassés.",
+  "seconds": 8.0,
+  "cost_usd": 0.00066
+ },
+ "advisor/adv_first_battle.ogg": {
+  "text": "Voici votre première journée. Placez vos archers derrière des pieux, gardez vos chevaliers pour le moment décisif, et n'engagez jamais tout votre monde à la fois.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Voici votre première journée. Placez vos archers derrière des pieux, gardez vos chevaliers pour le moment décisif, et n'engagez jamais tout votre monde à la fois.",
+  "seconds": 9.2,
+  "cost_usd": 0.00073
+ },
+ "advisor/adv_first_defeat.ogg": {
+  "text": "La journée est mauvaise, mais la guerre n'est pas perdue. Rassemblez les survivants, rachetez vos captifs, et ne vous laissez plus surprendre.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La journée est mauvaise, mais la guerre n'est pas perdue. Rassemblez les survivants, rachetez vos captifs, et ne vous laissez plus surprendre.",
+  "seconds": 8.57,
+  "cost_usd": 0.0007
+ },
+ "advisor/adv_first_siege.ogg": {
+  "text": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l'assiégeant, et la maladie contre lui. Comptez vos vivres avant ceux de l'ennemi.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l’assiégeant, et la maladie contre lui. Comptez vos vivres avant ceux de l’ennemi.",
+  "seconds": 9.24,
+  "cost_usd": 0.00075
+ },
+ "advisor/adv_first_victory.ogg": {
+  "text": "Belle journée, et que la chronique retiendra. Mais une victoire ne vaut que par ce qu'on en tire : les rançons, les places, et la terreur de l'ennemi.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Belle journée, et que la chronique retiendra. Mais une victoire ne vaut que par ce qu'on en tire : les rançons, les places, et la terreur de l'ennemi.",
+  "seconds": 8.83,
+  "cost_usd": 0.00072
+ },
+ "advisor/adv_general_captured.ogg": {
+  "text": "Un de nos capitaines est prisonnier. Sa rançon sera lourde ; mais un chef qu'on laisse en geôle, c'est une fidélité qu'on perd.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Un de nos capitaines est prisonnier. Sa rançon sera lourde ; mais un chef qu'on laisse en geôle, c'est une fidélité qu'on perd.",
+  "seconds": 8.61,
+  "cost_usd": 0.00067
+ },
+ "advisor/adv_peace_signed.ogg": {
+  "text": "La paix est signée. Profitez de la trêve pour remplir le trésor : nulle paix, en ce siècle, ne dure bien longtemps.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La paix est signée. Profitez de la trêve pour remplir le trésor : nulle paix, en ce siècle, ne dure bien longtemps.",
+  "seconds": 7.83,
+  "cost_usd": 0.00067
+ },
+ "advisor/adv_plague.ogg": {
+  "text": "Sire, la grande mortalité est à nos portes. Rien n'arrête ce fléau ; fermez les villes si vous le pouvez, et priez.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sire, la grande mortalité est à nos portes. Rien n'arrête ce fléau ; fermez les villes si vous le pouvez, et priez.",
+  "seconds": 8.47,
+  "cost_usd": 0.00067
+ },
+ "advisor/adv_province_captured.ogg": {
+  "text": "Une province a changé de maître. Les villes qui tombent ne se reprennent pas sans peine ; tenez fermement celles qui restent.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Une province a changé de maître. Les villes qui tombent ne se reprennent pas sans peine ; tenez fermement celles qui restent.",
+  "seconds": 7.62,
+  "cost_usd": 0.00061
+ },
+ "advisor/adv_revolt.ogg": {
+  "text": "Le peuple s'est soulevé. Vilains et bourgeois ne pardonnent ni l'impôt ni le pillage ; il faut rétablir l'ordre, par la force ou par la clémence.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le peuple s'est soulevé. Vilains et bourgeois ne pardonnent ni l'impôt ni le pillage ; il faut rétablir l'ordre, par la force ou par la clémence.",
+  "seconds": 8.89,
+  "cost_usd": 0.00071
+ },
+ "advisor/adv_siege_started.ogg": {
+  "text": "Un siège est mis devant une ville. Chaque saison compte : l'affamé cède avant le fort.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Un siège est mis devant une ville. Chaque saison compte : l'affamé cède avant le fort.",
+  "seconds": 6.18,
+  "cost_usd": 0.00052
+ },
+ "advisor/adv_start_burgundy.ogg": {
+  "text": "Monseigneur le duc, entre France et Empire, votre maison peut grandir plus qu'aucune autre. Laissez les rois s'épuiser, et gardez l'œil sur les riches villes de Flandre.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Monseigneur le duc, entre France et Empire, votre maison peut grandir plus qu’aucune autre. Laissez les rois s'épuiser, et gardez l’œil sur les riches villes de Flandre.",
+  "seconds": 10.59,
+  "cost_usd": 0.00082
+ },
+ "advisor/adv_start_default.ogg": {
+  "text": "Monseigneur, les rois de France et d'Angleterre vont se déchirer. Qu'ils s'épuisent : un prince avisé tire profit de la querelle des autres.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Monseigneur, les rois de France et d'Angleterre vont se déchirer. Qu'ils s'épuisent : un prince avisé tire profit de la querelle des autres.",
+  "seconds": 8.95,
+  "cost_usd": 0.00072
+ },
+ "advisor/adv_start_england.ogg": {
+  "text": "Monseigneur, le roi Édouard se dit l'héritier de France par sa mère. La Guyenne est à vous, mais la mer vous sépare de vos gens : tenez les ports et ménagez vos alliés de Flandre.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Monseigneur, le roi Édouard se dit l'héritier de France par sa mère. La Guyenne est à vous, mais la mer vous sépare de vos gens : tenez les ports et ménagez vos alliés de Flandre.",
+  "seconds": 11.3,
+  "cost_usd": 0.00087
+ },
+ "advisor/adv_start_france.ogg": {
+  "text": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue.",
+  "seconds": 11.96,
+  "cost_usd": 0.0009
+ },
+ "advisor/adv_succession.ogg": {
+  "text": "Le trône a changé de mains. Un nouveau règne commence : les grands vont éprouver sa force, et les voisins sa patience.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le trône a changé de mains. Un nouveau règne commence : les grands vont éprouver sa force, et les voisins sa patience.",
+  "seconds": 8.43,
+  "cost_usd": 0.00064
+ },
+ "advisor/adv_war_declared.ogg": {
+  "text": "La guerre est déclarée. Les chevauchées vont ravager les campagnes : mettez vos villes en défense et levez vos gens d'armes sans tarder.",
+  "voice": "cedar",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La guerre est déclarée. Les chevauchées vont ravager les campagnes : mettez vos villes en défense et levez vos gens d'armes sans tarder.",
+  "seconds": 7.64,
+  "cost_usd": 0.00064
+ },
+ "barks/an_attack_01.ogg": {
+  "text": "Avant, bannières !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Avant, bannières !",
+  "seconds": 2.6,
+  "cost_usd": 0.00027
+ },
+ "barks/an_attack_02.ogg": {
+  "text": "À eux, pour le droit du roi !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "À eux, pour le droit du roi !",
+  "seconds": 1.79,
+  "cost_usd": 0.00026
+ },
+ "barks/an_charge_01.ogg": {
+  "text": "Saint George ! Guyenne !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Saint George ! Guyenne !",
+  "seconds": 1.9,
+  "cost_usd": 0.00059
+ },
+ "barks/an_charge_02.ogg": {
+  "text": "Pour le roi de France et d'Angleterre !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "pour le roy de France et d'Angleterre !",
+  "seconds": 3.03,
+  "cost_usd": 0.00033
+ },
+ "barks/an_general_01.ogg": {
+  "text": "Hélas ! Monseigneur est abattu !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Hélas ! Monseigneur est abattu !",
+  "seconds": 2.41,
+  "cost_usd": 0.00029
+ },
+ "barks/an_general_02.ogg": {
+  "text": "Relevez la bannière ! Relevez-la !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Relevez la bannière ! Relever-la !",
+  "seconds": 2.74,
+  "cost_usd": 0.00031
+ },
+ "barks/an_move_01.ogg": {
+  "text": "Il sera fait ainsi.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Il sera fait ainsi.",
+  "seconds": 1.53,
+  "cost_usd": 0.00023
+ },
+ "barks/an_move_02.ogg": {
+  "text": "Chevauchons, messires.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Chevauchons, messires.",
+  "seconds": 1.58,
+  "cost_usd": 0.00025
+ },
+ "barks/an_select_01.ogg": {
+  "text": "Sire ?",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sire ?",
+  "seconds": 0.81,
+  "cost_usd": 0.00019
+ },
+ "barks/an_select_02.ogg": {
+  "text": "Nous sommes à votre commandement.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous sommes à votre commandement.",
+  "seconds": 1.5,
+  "cost_usd": 0.00024
+ },
+ "barks/an_select_03.ogg": {
+  "text": "Que veut monseigneur le roi ?",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Que veut monseigneur le roi ?",
+  "seconds": 1.57,
+  "cost_usd": 0.00027
+ },
+ "barks/an_victory_01.ogg": {
+  "text": "Dieu a montré notre droit !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu a montré notre droit !",
+  "seconds": 2.25,
+  "cost_usd": 0.00028
+ },
+ "barks/cy_attack_01.ogg": {
+  "text": "Arnynt!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Arnynt!",
+  "seconds": 0.66,
+  "cost_usd": 0.00017
+ },
+ "barks/cy_charge_01.ogg": {
+  "text": "I'r gad!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "I'r gad!",
+  "seconds": 0.84,
+  "cost_usd": 0.00019
+ },
+ "barks/cy_charge_02.ogg": {
+  "text": "Dewi Sant!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dewi Sant!",
+  "seconds": 0.91,
+  "cost_usd": 0.00021
+ },
+ "barks/cy_move_01.ogg": {
+  "text": "Ymlaen!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ymlaen!",
+  "seconds": 0.68,
+  "cost_usd": 0.00017
+ },
+ "barks/cy_rout_01.ogg": {
+  "text": "Ffowch!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ffowch!",
+  "seconds": 0.74,
+  "cost_usd": 0.0002
+ },
+ "barks/cy_rout_02.ogg": {
+  "text": "Duw a'n helpo!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Duw a'n helpo!",
+  "seconds": 1.32,
+  "cost_usd": 0.00021
+ },
+ "barks/cy_select_01.ogg": {
+  "text": "Ie, arglwydd.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ie, arglwydd.",
+  "seconds": 1.41,
+  "cost_usd": 0.00021
+ },
+ "barks/cy_select_02.ogg": {
+  "text": "Barod.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Barod.",
+  "seconds": 0.62,
+  "cost_usd": 0.00115
+ },
+ "barks/en_attack_01.ogg": {
+  "text": "Have at them!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Have at them!",
+  "seconds": 0.77,
+  "cost_usd": 0.00019
+ },
+ "barks/en_attack_02.ogg": {
+  "text": "Nock! Draw! Loose!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nock! Draw! Loose!",
+  "seconds": 2.52,
+  "cost_usd": 0.00031
+ },
+ "barks/en_attack_03.ogg": {
+  "text": "Let the shafts fly!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Let the shafts fly!",
+  "seconds": 1.85,
+  "cost_usd": 0.00022
+ },
+ "barks/en_attack_04.ogg": {
+  "text": "At them, and spare none!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "At them, and spare none!",
+  "seconds": 2.45,
+  "cost_usd": 0.00029
+ },
+ "barks/en_attack_05.ogg": {
+  "text": "Aye, we'll teach them.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Aye, we'll teach them.",
+  "seconds": 1.56,
+  "cost_usd": 0.00024
+ },
+ "barks/en_charge_01.ogg": {
+  "text": "Saint George!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Saint George!",
+  "seconds": 1.77,
+  "cost_usd": 0.00022
+ },
+ "barks/en_charge_02.ogg": {
+  "text": "For God and King Edward!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "FOR GOD AND KING EDWARD!",
+  "seconds": 1.9,
+  "cost_usd": 0.00024
+ },
+ "barks/en_charge_03.ogg": {
+  "text": "Into them, lads!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "INTO THEM, LADS!",
+  "seconds": 1.45,
+  "cost_usd": 0.00024
+ },
+ "barks/en_charge_04.ogg": {
+  "text": "Spur on! Spur on!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Spur on! Spur on!",
+  "seconds": 2.31,
+  "cost_usd": 0.00069
+ },
+ "barks/en_charge_05.ogg": {
+  "text": "Havoc! Havoc!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Havoc! Havoc!",
+  "seconds": 1.59,
+  "cost_usd": 0.00025
+ },
+ "barks/en_general_01.ogg": {
+  "text": "Our lord is down!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Our lord is down!",
+  "seconds": 1.89,
+  "cost_usd": 0.00026
+ },
+ "barks/en_general_02.ogg": {
+  "text": "The banner has fallen!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "The banner has fallen!",
+  "seconds": 2.35,
+  "cost_usd": 0.00026
+ },
+ "barks/en_general_03.ogg": {
+  "text": "They have slain our captain!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "They have slain our captain!",
+  "seconds": 2.33,
+  "cost_usd": 0.00029
+ },
+ "barks/en_general_04.ogg": {
+  "text": "Christ have mercy, the lord is taken!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Christ have mercy, the lord is taken!",
+  "seconds": 2.98,
+  "cost_usd": 0.00033
+ },
+ "barks/en_move_01.ogg": {
+  "text": "Aye, we go.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Aye, we go.",
+  "seconds": 1.66,
+  "cost_usd": 0.00024
+ },
+ "barks/en_move_02.ogg": {
+  "text": "As ye command.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "As ye command.",
+  "seconds": 1.8,
+  "cost_usd": 0.00022
+ },
+ "barks/en_move_03.ogg": {
+  "text": "Forward, then!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Forward, then!",
+  "seconds": 1.7,
+  "cost_usd": 0.00024
+ },
+ "barks/en_move_04.ogg": {
+  "text": "Follow the banner, lads!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Follow the banner, lads!",
+  "seconds": 1.48,
+  "cost_usd": 0.00022
+ },
+ "barks/en_move_05.ogg": {
+  "text": "On our way, my lord.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "On our way, my lord.",
+  "seconds": 1.82,
+  "cost_usd": 0.00025
+ },
+ "barks/en_rout_01.ogg": {
+  "text": "Run! Run for your lives!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Run! Run for your lives!",
+  "seconds": 2.95,
+  "cost_usd": 0.00032
+ },
+ "barks/en_rout_02.ogg": {
+  "text": "We are undone!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "We are undone!",
+  "seconds": 1.17,
+  "cost_usd": 0.00022
+ },
+ "barks/en_rout_03.ogg": {
+  "text": "Back! Fall back!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Back! Fall back!",
+  "seconds": 1.57,
+  "cost_usd": 0.00023
+ },
+ "barks/en_rout_04.ogg": {
+  "text": "God save us, they are too many!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "God save us, they are too many!",
+  "seconds": 2.74,
+  "cost_usd": 0.00031
+ },
+ "barks/en_rout_05.ogg": {
+  "text": "Every man for himself!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Every man for himself!",
+  "seconds": 2.17,
+  "cost_usd": 0.00028
+ },
+ "barks/en_select_01.ogg": {
+  "text": "My lord?",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "My lord?",
+  "seconds": 0.96,
+  "cost_usd": 0.00072
+ },
+ "barks/en_select_02.ogg": {
+  "text": "Aye, my lord.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Aye, my lord.",
+  "seconds": 1.54,
+  "cost_usd": 0.00022
+ },
+ "barks/en_select_03.ogg": {
+  "text": "What would ye have of us?",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "What would ye have of us?",
+  "seconds": 2.18,
+  "cost_usd": 0.00027
+ },
+ "barks/en_select_04.ogg": {
+  "text": "We are ready.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "We are ready.",
+  "seconds": 1.57,
+  "cost_usd": 0.00023
+ },
+ "barks/en_select_05.ogg": {
+  "text": "Speak, my lord, we hear ye.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Speak, my lord, we hear ye.",
+  "seconds": 2.6,
+  "cost_usd": 0.00028
+ },
+ "barks/en_select_06.ogg": {
+  "text": "Bows strung, my lord.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Bows strung, my lord.",
+  "seconds": 2.25,
+  "cost_usd": 0.00028
+ },
+ "barks/en_victory_01.ogg": {
+  "text": "The day is ours!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "The day is ours!",
+  "seconds": 1.7,
+  "cost_usd": 0.00025
+ },
+ "barks/en_victory_02.ogg": {
+  "text": "Saint George and victory!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Saint George and victory!",
+  "seconds": 1.67,
+  "cost_usd": 0.00022
+ },
+ "barks/en_victory_03.ogg": {
+  "text": "They flee! God be thanked!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "They flee! God be thanked!",
+  "seconds": 2.65,
+  "cost_usd": 0.00029
+ },
+ "barks/en_victory_04.ogg": {
+  "text": "Ransoms for all, lads!",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ransoms for all, lads!",
+  "seconds": 2.48,
+  "cost_usd": 0.00028
+ },
+ "barks/en_victory_05.ogg": {
+  "text": "England! England!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "ENGLAND! ENGLAND!",
+  "seconds": 2.32,
+  "cost_usd": 0.00027
+ },
+ "barks/fr_attack_01.ogg": {
+  "text": "Sus à eux !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sus à eux !",
+  "seconds": 0.83,
+  "cost_usd": 0.00143
+ },
+ "barks/fr_attack_02.ogg": {
+  "text": "À l'ennemi !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "À l'ennemi !",
+  "seconds": 0.87,
+  "cost_usd": 0.00121
+ },
+ "barks/fr_attack_03.ogg": {
+  "text": "Tirez, et visez bien !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tirez, et visez bien !",
+  "seconds": 1.76,
+  "cost_usd": 0.00026
+ },
+ "barks/fr_attack_04.ogg": {
+  "text": "Qu'ils sentent nos lances !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Qu'ils sentent nos lances !",
+  "seconds": 1.56,
+  "cost_usd": 0.00023
+ },
+ "barks/fr_attack_05.ogg": {
+  "text": "Frappez ferme, et gardez le rang !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Frappez ferme, et gardez le rang !",
+  "seconds": 2.53,
+  "cost_usd": 0.00031
+ },
+ "barks/fr_charge_01.ogg": {
+  "text": "Montjoie ! Saint-Denis !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Montjoie ! Saint-Denis !",
+  "seconds": 2.2,
+  "cost_usd": 0.00028
+ },
+ "barks/fr_charge_02.ogg": {
+  "text": "À eux ! À eux !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "À eux ! À eux !",
+  "seconds": 1.29,
+  "cost_usd": 0.00022
+ },
+ "barks/fr_charge_03.ogg": {
+  "text": "Piquez des deux !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "PIQUEZ DES DEUX !",
+  "seconds": 1.09,
+  "cost_usd": 0.00025
+ },
+ "barks/fr_charge_04.ogg": {
+  "text": "Pour Dieu et pour le roi !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "POUR DIEU ET POUR LE ROI !",
+  "seconds": 3.35,
+  "cost_usd": 0.00085
+ },
+ "barks/fr_charge_05.ogg": {
+  "text": "Baissez les lances, et chargez !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Baissez les lances, et chargez !",
+  "seconds": 2.26,
+  "cost_usd": 0.0003
+ },
+ "barks/fr_general_01.ogg": {
+  "text": "Monseigneur est tombé !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Monseigneur est tombé !",
+  "seconds": 1.4,
+  "cost_usd": 0.00026
+ },
+ "barks/fr_general_02.ogg": {
+  "text": "La bannière est à bas !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La bannière est à bas !",
+  "seconds": 1.08,
+  "cost_usd": 0.00024
+ },
+ "barks/fr_general_03.ogg": {
+  "text": "Notre chef est mort ! Que Dieu ait son âme !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Notre chef est mort ! Que Dieu ait son âme !",
+  "seconds": 2.68,
+  "cost_usd": 0.00032
+ },
+ "barks/fr_general_04.ogg": {
+  "text": "Ils ont pris monseigneur !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "ILS ONT PRIS MONSEIGNEUR !",
+  "seconds": 1.75,
+  "cost_usd": 0.00029
+ },
+ "barks/fr_move_01.ogg": {
+  "text": "Nous y allons.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous y allons.",
+  "seconds": 0.93,
+  "cost_usd": 0.0002
+ },
+ "barks/fr_move_02.ogg": {
+  "text": "Comme il vous plaira.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Comme il vous plaira.",
+  "seconds": 1.1,
+  "cost_usd": 0.0002
+ },
+ "barks/fr_move_03.ogg": {
+  "text": "En avant, compagnons !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "En avant, compagnons !",
+  "seconds": 1.69,
+  "cost_usd": 0.00102
+ },
+ "barks/fr_move_04.ogg": {
+  "text": "Suivez la bannière !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Suivez la bannière !",
+  "seconds": 1.47,
+  "cost_usd": 0.00023
+ },
+ "barks/fr_move_05.ogg": {
+  "text": "Bien, monseigneur, nous marchons.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Bien, monseigneur, nous marchons.",
+  "seconds": 2.46,
+  "cost_usd": 0.0003
+ },
+ "barks/fr_rout_01.ogg": {
+  "text": "Sauve qui peut !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sauve qui peut !",
+  "seconds": 1.04,
+  "cost_usd": 0.0016
+ },
+ "barks/fr_rout_02.ogg": {
+  "text": "Nous sommes trahis !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous sommes trahis !",
+  "seconds": 2.14,
+  "cost_usd": 0.00078
+ },
+ "barks/fr_rout_03.ogg": {
+  "text": "Fuyez ! Tout est perdu !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Fuyez ! Tout est perdu !",
+  "seconds": 2.79,
+  "cost_usd": 0.00032
+ },
+ "barks/fr_rout_04.ogg": {
+  "text": "Dieu nous garde ! Arrière !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu nous garde ! Arrière !",
+  "seconds": 1.94,
+  "cost_usd": 0.00027
+ },
+ "barks/fr_rout_05.ogg": {
+  "text": "Ils sont trop ! Repliez-vous !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont trop ! Repliez-vous !",
+  "seconds": 1.91,
+  "cost_usd": 0.00081
+ },
+ "barks/fr_select_01.ogg": {
+  "text": "Monseigneur ?",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Monseigneur ?",
+  "seconds": 1.25,
+  "cost_usd": 0.00019
+ },
+ "barks/fr_select_02.ogg": {
+  "text": "Nous sommes prêts.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous sommes prêts.",
+  "seconds": 1.19,
+  "cost_usd": 0.00023
+ },
+ "barks/fr_select_03.ogg": {
+  "text": "Que voulez-vous de nous ?",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Que voulez-vous de nous ?",
+  "seconds": 1.5,
+  "cost_usd": 0.00025
+ },
+ "barks/fr_select_04.ogg": {
+  "text": "Parlez, sire, nous écoutons.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Parlez, sire, nous écoutons.",
+  "seconds": 2.94,
+  "cost_usd": 0.00032
+ },
+ "barks/fr_select_05.ogg": {
+  "text": "La compagnie attend vos ordres.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La compagnie attend vos ordres.",
+  "seconds": 1.94,
+  "cost_usd": 0.00026
+ },
+ "barks/fr_select_06.ogg": {
+  "text": "Ici, monseigneur !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ici, monseigneur !",
+  "seconds": 1.51,
+  "cost_usd": 0.00025
+ },
+ "barks/fr_victory_01.ogg": {
+  "text": "Victoire ! Dieu est avec nous !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Victoire ! Dieu est avec nous !",
+  "seconds": 2.54,
+  "cost_usd": 0.0003
+ },
+ "barks/fr_victory_02.ogg": {
+  "text": "Noël ! Noël !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Noël ! Noël !",
+  "seconds": 1.65,
+  "cost_usd": 0.00027
+ },
+ "barks/fr_victory_03.ogg": {
+  "text": "Le champ est à nous !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est à nous !",
+  "seconds": 3.57,
+  "cost_usd": 0.00034
+ },
+ "barks/fr_victory_04.ogg": {
+  "text": "Ils fuient ! Montjoie !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils fuient ! Montjoie !",
+  "seconds": 2.91,
+  "cost_usd": 0.00031
+ },
+ "barks/fr_victory_05.ogg": {
+  "text": "Gloire à Dieu et à la bannière des lis !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gloire à Dieu et à la bannière des lis !",
+  "seconds": 2.79,
+  "cost_usd": 0.00033
+ },
+ "barks/nl_attack_01.ogg": {
+  "text": "Sla toe!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sla toe!",
+  "seconds": 0.84,
+  "cost_usd": 0.00022
+ },
+ "barks/nl_attack_02.ogg": {
+  "text": "Schild en vriend!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Schild en vriend!",
+  "seconds": 1.26,
+  "cost_usd": 0.00135
+ },
+ "barks/nl_charge_01.ogg": {
+  "text": "Vlaanderen die Leeuw!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "VLAANDEREN DIE LEEUW!",
+  "seconds": 1.44,
+  "cost_usd": 0.00113
+ },
+ "barks/nl_charge_02.ogg": {
+  "text": "Houdt de rij! Houdt de rij!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Houdt de rij! Houdt de rij!",
+  "seconds": 2.46,
+  "cost_usd": 0.00029
+ },
+ "barks/nl_move_01.ogg": {
+  "text": "Voorwaarts!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Voorwaarts!",
+  "seconds": 0.95,
+  "cost_usd": 0.0002
+ },
+ "barks/nl_move_02.ogg": {
+  "text": "Blijf bij de banier!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Blijf bij de banier!",
+  "seconds": 1.19,
+  "cost_usd": 0.00023
+ },
+ "barks/nl_rout_01.ogg": {
+  "text": "Vlucht! Vlucht!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "VLUCHT! VLUCHT!",
+  "seconds": 1.6,
+  "cost_usd": 0.00025
+ },
+ "barks/nl_rout_02.ogg": {
+  "text": "Wij zijn verloren!",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Wij zijn verloren!",
+  "seconds": 1.31,
+  "cost_usd": 0.00022
+ },
+ "barks/nl_select_01.ogg": {
+  "text": "Ja, heer?",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ja, heer?",
+  "seconds": 0.91,
+  "cost_usd": 0.00019
+ },
+ "barks/nl_select_02.ogg": {
+  "text": "Wij staan gereed.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Wij staan gereed.",
+  "seconds": 1.18,
+  "cost_usd": 0.00022
+ },
+ "barks/oc_attack_01.ogg": {
+  "text": "Tiratz ! Tiratz !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tiratz ! Tiratz !",
+  "seconds": 2.52,
+  "cost_usd": 0.00027
+ },
+ "barks/oc_attack_02.ogg": {
+  "text": "Sus a eths !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Sus a eths !",
+  "seconds": 1.09,
+  "cost_usd": 0.0002
+ },
+ "barks/oc_charge_01.ogg": {
+  "text": "Guiana ! Guiana !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "GUIANA ! GUIANA !",
+  "seconds": 4.67,
+  "cost_usd": 0.00039
+ },
+ "barks/oc_charge_02.ogg": {
+  "text": "Sant Jòrdi !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "SANT JÒRDI !",
+  "seconds": 1.19,
+  "cost_usd": 0.00022
+ },
+ "barks/oc_move_01.ogg": {
+  "text": "Anem !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Anem !",
+  "seconds": 0.66,
+  "cost_usd": 0.00019
+ },
+ "barks/oc_move_02.ogg": {
+  "text": "Anem-i, companhs !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Anem-i, companhs !",
+  "seconds": 1.36,
+  "cost_usd": 0.00021
+ },
+ "barks/oc_rout_01.ogg": {
+  "text": "Hugitz ! Hugitz !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Hugitz ! Hugitz !",
+  "seconds": 1.64,
+  "cost_usd": 0.00098
+ },
+ "barks/oc_rout_02.ogg": {
+  "text": "Diu nos ajude !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Diu nos ajude !",
+  "seconds": 1.31,
+  "cost_usd": 0.00093
+ },
+ "barks/oc_select_01.ogg": {
+  "text": "Òc, mossenhor.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Òc, mossenhor.",
+  "seconds": 2.04,
+  "cost_usd": 0.00026
+ },
+ "barks/oc_select_02.ogg": {
+  "text": "Qu'èm prèstes !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Qu'èm prèstes !",
+  "seconds": 1.21,
+  "cost_usd": 0.00024
+ },
+ "barks/sco_attack_01.ogg": {
+  "text": "Spears doun! Hauld fast!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Spears doun! Hauld fast!",
+  "seconds": 2.82,
+  "cost_usd": 0.00031
+ },
+ "barks/sco_attack_02.ogg": {
+  "text": "Gie them the point!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gie them the point!",
+  "seconds": 1.12,
+  "cost_usd": 0.00114
+ },
+ "barks/sco_charge_01.ogg": {
+  "text": "A Douglas! A Douglas!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "A Douglas! A Douglas!",
+  "seconds": 2.31,
+  "cost_usd": 0.00025
+ },
+ "barks/sco_charge_02.ogg": {
+  "text": "Saint Andrew!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "SAINT ANDREW!",
+  "seconds": 1.37,
+  "cost_usd": 0.00056
+ },
+ "barks/sco_move_01.ogg": {
+  "text": "Forrit, lads!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Forrit, lads!",
+  "seconds": 1.09,
+  "cost_usd": 0.0002
+ },
+ "barks/sco_rout_01.ogg": {
+  "text": "Rin, lads, rin!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Rin, lads, rin!",
+  "seconds": 1.82,
+  "cost_usd": 0.00026
+ },
+ "barks/sco_rout_02.ogg": {
+  "text": "The schiltron's broken!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "The schiltron's broken!",
+  "seconds": 1.67,
+  "cost_usd": 0.00024
+ },
+ "barks/sco_select_01.ogg": {
+  "text": "Aye, my laird.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Aye, my laird.",
+  "seconds": 2.28,
+  "cost_usd": 0.00025
+ },
+ "barks/sco_select_02.ogg": {
+  "text": "We're ready for them.",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "We're ready for them.",
+  "seconds": 1.56,
+  "cost_usd": 0.00024
+ },
+ "barks/sco_victory_01.ogg": {
+  "text": "Scotland! Scotland!",
+  "voice": "fable",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Scotland! Scotland!",
+  "seconds": 2.16,
+  "cost_usd": 0.00025
+ },
+ "speech/ash/0dab20ca2635.ogg": {
+  "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "seconds": 6.0,
+  "cost_usd": 0.0005
+ },
+ "speech/ash/1571c50256b4.ogg": {
+  "text": "Barons, chevaliers, écuyers : voici l'Anglais sur la terre du royaume.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Barons, chevaliers, écuyers : voici l’Anglais sur la terre du royaume.",
+  "seconds": 6.47,
+  "cost_usd": 0.00054
+ },
+ "speech/ash/1656f9f9bc83.ogg": {
+  "text": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "seconds": 4.34,
+  "cost_usd": 0.00041
+ },
+ "speech/ash/168ea94f6032.ogg": {
+  "text": "La pente est notre alliée ; ne la leur cédez pas.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pente est notre alliée ; ne la leur cédez pas.",
+  "seconds": 3.92,
+  "cost_usd": 0.00038
+ },
+ "speech/ash/16d9833a609c.ogg": {
+  "text": "Pour le roi, pour saint Denis et pour la France !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pour le roi, pour saint Denis et pour la France !",
+  "seconds": 4.67,
+  "cost_usd": 0.0004
+ },
+ "speech/ash/185a3ae7dc85.ogg": {
+  "text": "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Suivez ma bannière, et que D ieu reconnaisse les siens !",
+  "seconds": 3.89,
+  "cost_usd": 0.00039
+ },
+ "speech/ash/1b0450e2b978.ogg": {
+  "text": "Le froid mord, mais le combat réchauffe : en avant !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le froid mord, mais le combat réchauffe : en avant !",
+  "seconds": 5.1,
+  "cost_usd": 0.00043
+ },
+ "speech/ash/1c8588755737.ogg": {
+  "text": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "seconds": 5.9,
+  "cost_usd": 0.00047
+ },
+ "speech/ash/1e0e293084c0.ogg": {
+  "text": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "seconds": 7.93,
+  "cost_usd": 0.00062
+ },
+ "speech/ash/22685c2f8f2d.ogg": {
+  "text": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "seconds": 5.43,
+  "cost_usd": 0.00046
+ },
+ "speech/ash/34db0b7988cf.ogg": {
+  "text": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "seconds": 7.02,
+  "cost_usd": 0.00055
+ },
+ "speech/ash/37ed935fac56.ogg": {
+  "text": "À moi ! En avant !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "À MOI ! EN AVANT !",
+  "seconds": 2.7,
+  "cost_usd": 0.00032
+ },
+ "speech/ash/38d7d7e00dbe.ogg": {
+  "text": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
+  "seconds": 6.07,
+  "cost_usd": 0.00052
+ },
+ "speech/ash/455951241da8.ogg": {
+  "text": "Seigneurs et bonnes gens de France, le roi vous regarde, et Dieu avec lui.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Seigneurs et bonnes gens de France, le roi vous regarde, et Dieu avec lui.",
+  "seconds": 5.91,
+  "cost_usd": 0.0005
+ },
+ "speech/ash/51abd54348a4.ogg": {
+  "text": "Saint Andrew !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Saint Andrew !",
+  "seconds": 2.7,
+  "cost_usd": 0.00109
+ },
+ "speech/ash/58a3456df680.ogg": {
+  "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La lande est rase... et le vent y souffle... que vos traits volent avec lui. ...\n\n",
+  "seconds": 8.03,
+  "cost_usd": 0.00063
+ },
+ "speech/ash/711395e2e30a.ogg": {
+  "text": "¡Santiago!",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "¡Santiago !",
+  "seconds": 2.55,
+  "cost_usd": 0.00181
+ },
+ "speech/ash/74f7e164cd0f.ogg": {
+  "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "seconds": 5.39,
+  "cost_usd": 0.00126
+ },
+ "speech/ash/75af279b4ec3.ogg": {
+  "text": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "seconds": 6.44,
+  "cost_usd": 0.00051
+ },
+ "speech/ash/7abec75f9d38.ogg": {
+  "text": "Compagnons d'armes, l'heure est venue.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Compagnons d'armes, l'heure est venue.",
+  "seconds": 3.8,
+  "cost_usd": 0.00036
+ },
+ "speech/ash/9cd62d1a81e1.ogg": {
+  "text": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "seconds": 5.98,
+  "cost_usd": 0.00051
+ },
+ "speech/ash/9ef2be27da4f.ogg": {
+  "text": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "seconds": 5.95,
+  "cost_usd": 0.00049
+ },
+ "speech/ash/a0dd8965383d.ogg": {
+  "text": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "seconds": 5.95,
+  "cost_usd": 0.0005
+ },
+ "speech/ash/a72dba56eb95.ogg": {
+  "text": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "seconds": 6.79,
+  "cost_usd": 0.00054
+ },
+ "speech/ash/ae54d56dbd3b.ogg": {
+  "text": "Soldats, voici l'ennemi devant vous, et rien derrière que la honte.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Soldats, voici l'ennemi devant vous… Et rien derrière que la honte.",
+  "seconds": 6.82,
+  "cost_usd": 0.00151
+ },
+ "speech/ash/b169ecde6ff3.ogg": {
+  "text": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "seconds": 4.87,
+  "cost_usd": 0.00042
+ },
+ "speech/ash/b5e0dc0647ed.ogg": {
+  "text": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "seconds": 5.31,
+  "cost_usd": 0.00047
+ },
+ "speech/ash/b8bfcd08ec4b.ogg": {
+  "text": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "seconds": 4.6,
+  "cost_usd": 0.00134
+ },
+ "speech/ash/beddf2f6668c.ogg": {
+  "text": "Plus un mot : que vos armes parlent pour vous !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Plus un mot : que vos armes parlent pour vous !",
+  "seconds": 3.99,
+  "cost_usd": 0.00038
+ },
+ "speech/ash/c0a1a3dff31e.ogg": {
+  "text": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "seconds": 6.54,
+  "cost_usd": 0.00053
+ },
+ "speech/ash/c11d0cebc537.ogg": {
+  "text": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "seconds": 5.07,
+  "cost_usd": 0.00046
+ },
+ "speech/ash/df95824be33d.ogg": {
+  "text": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "seconds": 4.77,
+  "cost_usd": 0.00043
+ },
+ "speech/ash/e702c533ac27.ogg": {
+  "text": "Que l'oriflamme vous guide : à eux !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Que l'oriflamme vous guide : à eux !",
+  "seconds": 2.5,
+  "cost_usd": 0.0003
+ },
+ "speech/ash/f82aed743fbf.ogg": {
+  "text": "Montjoie ! Saint-Denis !",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "MONJOIE ! SAINT-DENIS !",
+  "seconds": 2.32,
+  "cost_usd": 0.00122
+ },
+ "speech/ash/fd4039b01f58.ogg": {
+  "text": "Nous les passerons comme le vent passe les blés.",
+  "voice": "ash",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous les passerons comme le vent passe les blés.",
+  "seconds": 3.74,
+  "cost_usd": 0.00036
+ },
+ "speech/ballad/0dab20ca2635.ogg": {
+  "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "seconds": 6.04,
+  "cost_usd": 0.0005
+ },
+ "speech/ballad/11fb5a261bbd.ogg": {
+  "text": "Archers, hommes d'armes : nous sommes loin de nos foyers, mais pas de notre bon droit.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Archers, hommes d'armes : nous sommes loin de nos foyers, mais pas de notre bon droit.",
+  "seconds": 7.36,
+  "cost_usd": 0.0006
+ },
+ "speech/ballad/1656f9f9bc83.ogg": {
+  "text": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "seconds": 4.96,
+  "cost_usd": 0.00044
+ },
+ "speech/ballad/168ea94f6032.ogg": {
+  "text": "La pente est notre alliée ; ne la leur cédez pas.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pente est notre alliée ; ne la leur cédez pas.",
+  "seconds": 5.56,
+  "cost_usd": 0.00046
+ },
+ "speech/ballad/1a41ddf4cd6c.ogg": {
+  "text": "Saint George !",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "SAINT GEORGE !",
+  "seconds": 1.35,
+  "cost_usd": 0.00125
+ },
+ "speech/ballad/1b0450e2b978.ogg": {
+  "text": "Le froid mord, mais le combat réchauffe : en avant !",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le froid mord, mais le combat réchauffe : en avant !",
+  "seconds": 5.72,
+  "cost_usd": 0.00048
+ },
+ "speech/ballad/1c8588755737.ogg": {
+  "text": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "seconds": 6.8,
+  "cost_usd": 0.00055
+ },
+ "speech/ballad/1e0e293084c0.ogg": {
+  "text": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont plus nombreux ? T... Tant mieux : plus d'honneur et plus de rançons.",
+  "seconds": 7.73,
+  "cost_usd": 0.0027
+ },
+ "speech/ballad/22685c2f8f2d.ogg": {
+  "text": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "seconds": 5.25,
+  "cost_usd": 0.00046
+ },
+ "speech/ballad/34db0b7988cf.ogg": {
+  "text": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu ne compte pas les lances. ... Serrez les rangs … et tenez ferme.",
+  "seconds": 6.94,
+  "cost_usd": 0.00056
+ },
+ "speech/ballad/58a3456df680.ogg": {
+  "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La lande est rase… et le vent y souffle… que vos traits volent avec lui…",
+  "seconds": 7.19,
+  "cost_usd": 0.00058
+ },
+ "speech/ballad/74f7e164cd0f.ogg": {
+  "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez la hau-teur : qu'ils montent jusqu'à nous, essouff-lés.",
+  "seconds": 5.71,
+  "cost_usd": 0.00049
+ },
+ "speech/ballad/75af279b4ec3.ogg": {
+  "text": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "seconds": 5.92,
+  "cost_usd": 0.00158
+ },
+ "speech/ballad/9cd62d1a81e1.ogg": {
+  "text": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pluie mouille leurs cordes comme les nôtres :  \nc'est à la lance que l'on finira.",
+  "seconds": 5.66,
+  "cost_usd": 0.00051
+ },
+ "speech/ballad/9ef2be27da4f.ogg": {
+  "text": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "seconds": 5.58,
+  "cost_usd": 0.00049
+ },
+ "speech/ballad/a0dd8965383d.ogg": {
+  "text": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "seconds": 5.05,
+  "cost_usd": 0.00146
+ },
+ "speech/ballad/a72dba56eb95.ogg": {
+  "text": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "seconds": 6.22,
+  "cost_usd": 0.00204
+ },
+ "speech/ballad/b169ecde6ff3.ogg": {
+  "text": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est ouvert : riens ne les cachera de nos coups.",
+  "seconds": 4.52,
+  "cost_usd": 0.00042
+ },
+ "speech/ballad/b5e0dc0647ed.ogg": {
+  "text": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "seconds": 5.71,
+  "cost_usd": 0.0005
+ },
+ "speech/ballad/b8bfcd08ec4b.ogg": {
+  "text": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "seconds": 4.51,
+  "cost_usd": 0.0004
+ },
+ "speech/ballad/c0a1a3dff31e.ogg": {
+  "text": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "seconds": 7.35,
+  "cost_usd": 0.00057
+ },
+ "speech/ballad/c11d0cebc537.ogg": {
+  "text": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont moins nombreux que nous : qu’aucun ne rentre dire ce qu'il a vu.",
+  "seconds": 5.36,
+  "cost_usd": 0.00049
+ },
+ "speech/ballad/c3f9e7308b62.ogg": {
+  "text": "Compagnons, ce royaume revient à notre sire ; allons le lui rendre.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Compagnons, ce royaume revient à notre sire ; allons le lui rendre.",
+  "seconds": 6.54,
+  "cost_usd": 0.00053
+ },
+ "speech/ballad/d4adaaf231bb.ogg": {
+  "text": "Bandez vos arcs, et que le ciel s'obscurcisse sur eux !",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Bandez vos arcs, et que le ciel s'obscurcisse sur eux !",
+  "seconds": 5.23,
+  "cost_usd": 0.00047
+ },
+ "speech/ballad/df95824be33d.ogg": {
+  "text": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "seconds": 6.01,
+  "cost_usd": 0.0005
+ },
+ "speech/ballad/fa3d859aec1d.ogg": {
+  "text": "Pour Dieu, pour saint Georges et pour le roi Édouard !",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pour Dieu, pour saint Georges et pour le roi Édouard !",
+  "seconds": 4.77,
+  "cost_usd": 0.00044
+ },
+ "speech/ballad/fd4039b01f58.ogg": {
+  "text": "Nous les passerons comme le vent passe les blés.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous les passerons comme le vent passe les blés.",
+  "seconds": 3.37,
+  "cost_usd": 0.00035
+ },
+ "speech/ballad/fe6977eab1db.ogg": {
+  "text": "Hommes d'Angleterre, vous avez passé la mer pour le droit de votre roi.",
+  "voice": "ballad",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Hommes d'Angleterre, vous avez passé la mer pour le droit de votre roi.",
+  "seconds": 5.49,
+  "cost_usd": 0.00048
+ },
+ "speech/echo/0dab20ca2635.ogg": {
+  "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "seconds": 7.82,
+  "cost_usd": 0.00062
+ },
+ "speech/echo/11fb5a261bbd.ogg": {
+  "text": "Archers, hommes d'armes : nous sommes loin de nos foyers, mais pas de notre bon droit.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Archers, hommes d'armes : nous sommes loin de nos foyers, mais pas de notre bon droit.",
+  "seconds": 5.85,
+  "cost_usd": 0.0005
+ },
+ "speech/echo/1656f9f9bc83.ogg": {
+  "text": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "seconds": 4.93,
+  "cost_usd": 0.00044
+ },
+ "speech/echo/168ea94f6032.ogg": {
+  "text": "La pente est notre alliée ; ne la leur cédez pas.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pente est notre alliée ; ne la leur cédez pas.",
+  "seconds": 3.86,
+  "cost_usd": 0.00042
+ },
+ "speech/echo/1a41ddf4cd6c.ogg": {
+  "text": "Saint George !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Saint George !",
+  "seconds": 2.86,
+  "cost_usd": 0.00182
+ },
+ "speech/echo/1b0450e2b978.ogg": {
+  "text": "Le froid mord, mais le combat réchauffe : en avant !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le froid mord, mais le combat réchauffe : en avant !",
+  "seconds": 5.26,
+  "cost_usd": 0.00046
+ },
+ "speech/echo/1c8588755737.ogg": {
+  "text": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "seconds": 6.18,
+  "cost_usd": 0.00051
+ },
+ "speech/echo/1e0e293084c0.ogg": {
+  "text": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "seconds": 5.21,
+  "cost_usd": 0.00045
+ },
+ "speech/echo/22685c2f8f2d.ogg": {
+  "text": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "seconds": 5.0,
+  "cost_usd": 0.00137
+ },
+ "speech/echo/34db0b7988cf.ogg": {
+  "text": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "seconds": 6.37,
+  "cost_usd": 0.00056
+ },
+ "speech/echo/58a3456df680.ogg": {
+  "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "seconds": 5.8,
+  "cost_usd": 0.00049
+ },
+ "speech/echo/74f7e164cd0f.ogg": {
+  "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez... la hauteur... qu'ils montent... jusqu'à nous... essoufflés...",
+  "seconds": 5.64,
+  "cost_usd": 0.00052
+ },
+ "speech/echo/75af279b4ec3.ogg": {
+  "text": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "seconds": 5.29,
+  "cost_usd": 0.00046
+ },
+ "speech/echo/9cd62d1a81e1.ogg": {
+  "text": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "seconds": 6.3,
+  "cost_usd": 0.00053
+ },
+ "speech/echo/9ef2be27da4f.ogg": {
+  "text": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "seconds": 4.65,
+  "cost_usd": 0.00042
+ },
+ "speech/echo/a0dd8965383d.ogg": {
+  "text": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "seconds": 4.84,
+  "cost_usd": 0.00044
+ },
+ "speech/echo/a72dba56eb95.ogg": {
+  "text": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "seconds": 5.22,
+  "cost_usd": 0.00047
+ },
+ "speech/echo/b169ecde6ff3.ogg": {
+  "text": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "seconds": 3.88,
+  "cost_usd": 0.00039
+ },
+ "speech/echo/b5e0dc0647ed.ogg": {
+  "text": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "seconds": 6.53,
+  "cost_usd": 0.00051
+ },
+ "speech/echo/b8bfcd08ec4b.ogg": {
+  "text": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "seconds": 5.18,
+  "cost_usd": 0.00044
+ },
+ "speech/echo/c0a1a3dff31e.ogg": {
+  "text": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "seconds": 5.86,
+  "cost_usd": 0.00052
+ },
+ "speech/echo/c11d0cebc537.ogg": {
+  "text": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "seconds": 6.04,
+  "cost_usd": 0.0005
+ },
+ "speech/echo/c3f9e7308b62.ogg": {
+  "text": "Compagnons, ce royaume revient à notre sire ; allons le lui rendre.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Compagnons, ce royaume revient à notre sire ; allons le lui rendre.",
+  "seconds": 6.54,
+  "cost_usd": 0.00051
+ },
+ "speech/echo/d4adaaf231bb.ogg": {
+  "text": "Bandez vos arcs, et que le ciel s'obscurcisse sur eux !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Bandez vos arcs, et que le ciel s'obscurcisse sur eux !",
+  "seconds": 4.94,
+  "cost_usd": 0.00045
+ },
+ "speech/echo/df95824be33d.ogg": {
+  "text": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "seconds": 7.01,
+  "cost_usd": 0.00053
+ },
+ "speech/echo/fa3d859aec1d.ogg": {
+  "text": "Pour Dieu, pour saint Georges et pour le roi Édouard !",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pour Dieu, pour saint Georges et pour le roi Édouard !",
+  "seconds": 4.29,
+  "cost_usd": 0.00043
+ },
+ "speech/echo/fd4039b01f58.ogg": {
+  "text": "Nous les passerons comme le vent passe les blés.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous les passerons comme le vent passe les blés.",
+  "seconds": 4.38,
+  "cost_usd": 0.0004
+ },
+ "speech/echo/fe6977eab1db.ogg": {
+  "text": "Hommes d'Angleterre, vous avez passé la mer pour le droit de votre roi.",
+  "voice": "echo",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Hommes d'Angleterre, vous avez passé la mer pour le droit de votre roi.",
+  "seconds": 6.33,
+  "cost_usd": 0.00052
+ },
+ "speech/onyx/0dab20ca2635.ogg": {
+  "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "seconds": 9.44,
+  "cost_usd": 0.00066
+ },
+ "speech/onyx/1571c50256b4.ogg": {
+  "text": "Barons, chevaliers, écuyers : voici l'Anglais sur la terre du royaume.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Barons, chevaliers, écuyers : voici l'Anglais sur la terre du royaume.",
+  "seconds": 6.05,
+  "cost_usd": 0.002
+ },
+ "speech/onyx/1656f9f9bc83.ogg": {
+  "text": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "seconds": 4.9,
+  "cost_usd": 0.00044
+ },
+ "speech/onyx/168ea94f6032.ogg": {
+  "text": "La pente est notre alliée ; ne la leur cédez pas.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pente est notre alliée ; ne la leur cédez pas.",
+  "seconds": 4.04,
+  "cost_usd": 0.00039
+ },
+ "speech/onyx/16d9833a609c.ogg": {
+  "text": "Pour le roi, pour saint Denis et pour la France !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pour le roi, pour saint Denis et pour la France !",
+  "seconds": 4.41,
+  "cost_usd": 0.00133
+ },
+ "speech/onyx/185a3ae7dc85.ogg": {
+  "text": "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+  "seconds": 5.71,
+  "cost_usd": 0.00047
+ },
+ "speech/onyx/1b0450e2b978.ogg": {
+  "text": "Le froid mord, mais le combat réchauffe : en avant !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le... froid... mord... mais... le combat... réchauffe... En avant !",
+  "seconds": 7.14,
+  "cost_usd": 0.00056
+ },
+ "speech/onyx/1c8588755737.ogg": {
+  "text": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "seconds": 6.46,
+  "cost_usd": 0.00051
+ },
+ "speech/onyx/1e0e293084c0.ogg": {
+  "text": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "seconds": 5.9,
+  "cost_usd": 0.0005
+ },
+ "speech/onyx/22685c2f8f2d.ogg": {
+  "text": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "seconds": 5.53,
+  "cost_usd": 0.00047
+ },
+ "speech/onyx/34db0b7988cf.ogg": {
+  "text": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "seconds": 5.71,
+  "cost_usd": 0.00049
+ },
+ "speech/onyx/37ed935fac56.ogg": {
+  "text": "À moi ! En avant !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "À moi ! En avant !",
+  "seconds": 1.95,
+  "cost_usd": 0.00179
+ },
+ "speech/onyx/38d7d7e00dbe.ogg": {
+  "text": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
+  "seconds": 9.25,
+  "cost_usd": 0.00068
+ },
+ "speech/onyx/455951241da8.ogg": {
+  "text": "Seigneurs et bonnes gens de France, le roi vous regarde, et Dieu avec lui.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Seigneurs et bonnes gens de France, le roi vous regarde, et Dieu avec lui.",
+  "seconds": 6.47,
+  "cost_usd": 0.00052
+ },
+ "speech/onyx/51abd54348a4.ogg": {
+  "text": "Saint Andrew !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "SAINT ANDREW !",
+  "seconds": 2.9,
+  "cost_usd": 0.0006
+ },
+ "speech/onyx/58a3456df680.ogg": {
+  "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "seconds": 5.75,
+  "cost_usd": 0.00048
+ },
+ "speech/onyx/711395e2e30a.ogg": {
+  "text": "¡Santiago!",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "¡Santiago !",
+  "seconds": 1.11,
+  "cost_usd": 0.00024
+ },
+ "speech/onyx/74f7e164cd0f.ogg": {
+  "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "TENEZ, la hauteur : qu'ILs MONTENT jusqu'à NOUS, ESSOUFFLÉS.",
+  "seconds": 5.85,
+  "cost_usd": 0.00049
+ },
+ "speech/onyx/75af279b4ec3.ogg": {
+  "text": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "seconds": 5.11,
+  "cost_usd": 0.00046
+ },
+ "speech/onyx/7abec75f9d38.ogg": {
+  "text": "Compagnons d'armes, l'heure est venue.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Compagnons d’armes, l'heure est venue.",
+  "seconds": 3.52,
+  "cost_usd": 0.00035
+ },
+ "speech/onyx/9cd62d1a81e1.ogg": {
+  "text": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La … pluie … mouille … leurs cordes … comme les nôtres … c’est … à la lance … que l’on finira …",
+  "seconds": 7.75,
+  "cost_usd": 0.00063
+ },
+ "speech/onyx/9ef2be27da4f.ogg": {
+  "text": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "seconds": 6.61,
+  "cost_usd": 0.0005
+ },
+ "speech/onyx/a0dd8965383d.ogg": {
+  "text": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions...",
+  "seconds": 5.95,
+  "cost_usd": 0.00052
+ },
+ "speech/onyx/a72dba56eb95.ogg": {
+  "text": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "seconds": 5.49,
+  "cost_usd": 0.00048
+ },
+ "speech/onyx/ae54d56dbd3b.ogg": {
+  "text": "Soldats, voici l'ennemi devant vous, et rien derrière que la honte.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Soldats, voici l'ennemi devant vous, et rien derrière que la honte.",
+  "seconds": 5.82,
+  "cost_usd": 0.00048
+ },
+ "speech/onyx/b169ecde6ff3.ogg": {
+  "text": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "seconds": 4.64,
+  "cost_usd": 0.00041
+ },
+ "speech/onyx/b5e0dc0647ed.ogg": {
+  "text": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils valent ce que nous valons ; mo…ntrons qu’ils valent moins.",
+  "seconds": 5.52,
+  "cost_usd": 0.00048
+ },
+ "speech/onyx/b8bfcd08ec4b.ogg": {
+  "text": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "seconds": 4.22,
+  "cost_usd": 0.0004
+ },
+ "speech/onyx/beddf2f6668c.ogg": {
+  "text": "Plus un mot : que vos armes parlent pour vous !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Plus un mot : que vos armes parlent pour vous !",
+  "seconds": 4.51,
+  "cost_usd": 0.0004
+ },
+ "speech/onyx/c0a1a3dff31e.ogg": {
+  "text": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "seconds": 6.37,
+  "cost_usd": 0.00054
+ },
+ "speech/onyx/c11d0cebc537.ogg": {
+  "text": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont moins nombreux que nous : qu’aucun ne rentre dire ce qu'il a vu.",
+  "seconds": 5.08,
+  "cost_usd": 0.00048
+ },
+ "speech/onyx/df95824be33d.ogg": {
+  "text": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "seconds": 4.71,
+  "cost_usd": 0.00043
+ },
+ "speech/onyx/e702c533ac27.ogg": {
+  "text": "Que l'oriflamme vous guide : à eux !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Que l'oriflamme vous guide... À eux !",
+  "seconds": 2.94,
+  "cost_usd": 0.00032
+ },
+ "speech/onyx/f82aed743fbf.ogg": {
+  "text": "Montjoie ! Saint-Denis !",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Montjoie ! Saint-Denis !",
+  "seconds": 2.52,
+  "cost_usd": 0.00032
+ },
+ "speech/onyx/fd4039b01f58.ogg": {
+  "text": "Nous les passerons comme le vent passe les blés.",
+  "voice": "onyx",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous les passerons comme le vent passe les blés.",
+  "seconds": 3.75,
+  "cost_usd": 0.00037
+ },
+ "speech/verse/04a31647ce9a.ogg": {
+  "text": "Montjoie Saint-Andrieu !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Montjoie... SAINT-ANDRIEU ! ",
+  "seconds": 4.18,
+  "cost_usd": 0.00041
+ },
+ "speech/verse/0dab20ca2635.ogg": {
+  "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
+  "seconds": 5.46,
+  "cost_usd": 0.0005
+ },
+ "speech/verse/1656f9f9bc83.ogg": {
+  "text": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment.",
+  "seconds": 5.25,
+  "cost_usd": 0.00045
+ },
+ "speech/verse/168ea94f6032.ogg": {
+  "text": "La pente est notre alliée ; ne la leur cédez pas.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pente est notre alliée ; ne la leur cédez pas.",
+  "seconds": 3.49,
+  "cost_usd": 0.00036
+ },
+ "speech/verse/185a3ae7dc85.ogg": {
+  "text": "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+  "seconds": 4.34,
+  "cost_usd": 0.0004
+ },
+ "speech/verse/1b0450e2b978.ogg": {
+  "text": "Le froid mord, mais le combat réchauffe : en avant !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le... froid ... mord, ... mais ... le combat ... réchauffe : en avant !",
+  "seconds": 6.21,
+  "cost_usd": 0.00146
+ },
+ "speech/verse/1c8588755737.ogg": {
+  "text": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur.",
+  "seconds": 6.82,
+  "cost_usd": 0.00052
+ },
+ "speech/verse/1e0e293084c0.ogg": {
+  "text": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de ransons.",
+  "seconds": 6.35,
+  "cost_usd": 0.00051
+ },
+ "speech/verse/22685c2f8f2d.ogg": {
+  "text": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+  "seconds": 5.63,
+  "cost_usd": 0.00046
+ },
+ "speech/verse/34db0b7988cf.ogg": {
+  "text": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme.",
+  "seconds": 4.83,
+  "cost_usd": 0.00044
+ },
+ "speech/verse/58a3456df680.ogg": {
+  "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La lande est rase — et le vent y souffle : que vos traits volent avec lui.",
+  "seconds": 5.93,
+  "cost_usd": 0.00049
+ },
+ "speech/verse/74f7e164cd0f.ogg": {
+  "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez la hauteur : … qu'ils montent jusqu'à nous, essoufflés. …",
+  "seconds": 4.69,
+  "cost_usd": 0.00044
+ },
+ "speech/verse/75af279b4ec3.ogg": {
+  "text": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Tenez vos rangs : la ligne qui cède la première perd la journée.",
+  "seconds": 5.11,
+  "cost_usd": 0.00045
+ },
+ "speech/verse/9cd62d1a81e1.ogg": {
+  "text": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira.",
+  "seconds": 5.7,
+  "cost_usd": 0.0005
+ },
+ "speech/verse/9ef2be27da4f.ogg": {
+  "text": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Haies et chemins creux : que chaque compagnie garde son chemin.",
+  "seconds": 5.94,
+  "cost_usd": 0.00047
+ },
+ "speech/verse/a0dd8965383d.ogg": {
+  "text": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions.",
+  "seconds": 5.79,
+  "cost_usd": 0.00051
+ },
+ "speech/verse/a72dba56eb95.ogg": {
+  "text": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Les forces se valent : c'est la hardiesse qui fera la différence.",
+  "seconds": 4.98,
+  "cost_usd": 0.00043
+ },
+ "speech/verse/aca3724111b7.ogg": {
+  "text": "Gens du duc, la maison de Bourgogne ne recule devant personne.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Gens du duc, la maison de Bourgogne ne recule devant personne.",
+  "seconds": 4.72,
+  "cost_usd": 0.00044
+ },
+ "speech/verse/b169ecde6ff3.ogg": {
+  "text": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le champ est ouvert : rien ne les cachera de nos coups.",
+  "seconds": 4.7,
+  "cost_usd": 0.00043
+ },
+ "speech/verse/b5e0dc0647ed.ogg": {
+  "text": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+  "seconds": 5.35,
+  "cost_usd": 0.00046
+ },
+ "speech/verse/b8bfcd08ec4b.ogg": {
+  "text": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Le nombre est pour nous ; que le courage le soit aussi.",
+  "seconds": 3.85,
+  "cost_usd": 0.0004
+ },
+ "speech/verse/bc2bd0b1ca91.ogg": {
+  "text": "Flamands, Bourguignons, Picards : montrez ce que vaut la croix de Saint-André.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Flamands, Bourguignons, Picards : montrez ce que vaut la croix de Saint-André.",
+  "seconds": 6.11,
+  "cost_usd": 0.00166
+ },
+ "speech/verse/beddf2f6668c.ogg": {
+  "text": "Plus un mot : que vos armes parlent pour vous !",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Plus un mot : que vos armes parlent pour vous !",
+  "seconds": 3.69,
+  "cost_usd": 0.00036
+ },
+ "speech/verse/c0a1a3dff31e.ogg": {
+  "text": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera.",
+  "seconds": 6.57,
+  "cost_usd": 0.00053
+ },
+ "speech/verse/c11d0cebc537.ogg": {
+  "text": "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ils sont moins nombreux que nous : qu’aucun ne rentre dire ce qu’il a vu.",
+  "seconds": 5.62,
+  "cost_usd": 0.0005
+ },
+ "speech/verse/df95824be33d.ogg": {
+  "text": "Ces rochers valent une muraille : que chacun y tienne sa place.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Ces rochers valent une muraille : … que chacun … y tienne … sa place.",
+  "seconds": 5.71,
+  "cost_usd": 0.00048
+ },
+ "speech/verse/fd4039b01f58.ogg": {
+  "text": "Nous les passerons comme le vent passe les blés.",
+  "voice": "verse",
+  "model": "openai/gpt-audio-mini",
+  "transcript": "Nous les passerons comme le vent passe les blés.",
+  "seconds": 3.56,
+  "cost_usd": 0.00036
+ }
+}
