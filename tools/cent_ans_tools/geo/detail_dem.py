@@ -84,7 +84,9 @@ BASE_MARGIN_M = 3.0 * BOOST_SIGMA_M
 MIN_LAND_M = 0.5
 WORKERS = max(1, min(8, (os.cpu_count() or 4) - 2))
 #: Bump when the bake changes, so that ``done`` markers are invalidated.
-BAKE_VERSION = 1
+BAKE_VERSION = 2
+#: Grey-opening width (GLO-30 pixels) turning the surface model into rough ground.
+GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
 
 _TO_MAP = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
@@ -435,6 +437,8 @@ def source_heights(
                 src_crs = dataset.crs
                 bounds = dataset.bounds
             data += np.float32(source.datum_offset_m)
+            if source_key == "glo30":
+                data = dsm_to_ground(data)
             window = _dst_window(bounds, str(src_crs), transform, shape)
             if window is None:
                 continue
@@ -455,6 +459,21 @@ def source_heights(
             fill = np.isnan(block) & np.isfinite(part)
             block[fill] = part[fill]
     return result
+
+
+def dsm_to_ground(data: np.ndarray, size_px: int = GLO30_OPENING_PX) -> np.ndarray:
+    """Rough bare earth from the GLO-30 surface model (fallback zones only).
+
+    A grey opening removes bumps narrower than ``size_px`` pixels (buildings,
+    copses, hedgerows at 30 m), then a light blur hides the 30 m grid.
+    """
+    valid = np.isfinite(data)
+    if not valid.any():
+        return data
+    filled = np.where(valid, data, np.nanmedian(data)).astype(np.float32)
+    opened = ndimage.grey_opening(filled, size=(size_px, size_px))
+    smooth = ndimage.gaussian_filter(opened, 1.0)
+    return np.where(valid, smooth, np.nan).astype(np.float32)
 
 
 def _dst_window(

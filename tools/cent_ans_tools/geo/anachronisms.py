@@ -1,7 +1,8 @@
 """Erase modern earthworks from 1-5 m DTMs (lot ZG3, ADR 0036).
 
 A DTM of the 2020s shows the embankments and cuttings of motorways and
-railways, quarries, landfills, reservoirs, modern canals and runways. Before a
+railways, quarries, landfills, reservoirs, modern canals, runways and harbour
+breakwaters. Before a
 detail zone is baked, those features are taken from OpenStreetMap (Overpass
 API, © OpenStreetMap contributors, ODbL 1.0; the answers stay in the gitignored
 raw cache, nothing is redistributed), buffered by a width per feature class,
@@ -34,7 +35,7 @@ from cent_ans_tools.geo.detail_sources import DETAIL_RAW_DIR, USER_AGENT
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OVERPASS_ATTEMPTS = 6
-OSM_FILE = "osm_modern.json"
+OSM_FILE = "osm_modern_v2.json"
 
 #: Half-width (m) of the erased band around each feature class (linear) or
 #: margin around its area (polygons).
@@ -50,6 +51,7 @@ BUFFER_M: dict[str, float] = {
     "abandoned": 12.0,
     "canal": 22.0,
     "runway": 60.0,
+    "breakwater": 12.0,
     "taxiway": 25.0,
     "area": 12.0,
 }
@@ -69,6 +71,7 @@ def overpass_query(bbox_lonlat: tuple[float, float, float, float], canals: bool)
         f'way["natural"="water"]["water"~"^(reservoir|basin)$"]({box});',
         f'relation["natural"="water"]["water"~"^(reservoir|basin)$"]({box});',
         f'way["aeroway"~"^(runway|taxiway)$"]({box});',
+        f'way["man_made"~"^(breakwater|pier|groyne)$"]({box});',
     ]
     if canals:
         parts.append(f'way["waterway"="canal"]({box});')
@@ -81,7 +84,7 @@ def fetch_osm(
     canals: bool,
     force: bool = False,
 ) -> Path:
-    """Overpass answer for a zone, cached in ``raw/detail/<zone>/osm_modern.json``."""
+    """Overpass answer for a zone, cached in ``raw/detail/<zone>/osm_modern_v2.json``."""
     path = DETAIL_RAW_DIR / zone_id / OSM_FILE
     if path.exists() and not force:
         return path
@@ -127,6 +130,8 @@ def feature_class(tags: dict[str, str]) -> str | None:
         return railway
     if tags.get("aeroway") in ("runway", "taxiway"):
         return tags["aeroway"]
+    if tags.get("man_made") in ("breakwater", "pier", "groyne"):
+        return "breakwater"
     if tags.get("waterway") == "canal":
         return "canal"
     if tags.get("landuse") in ("quarry", "landfill", "reservoir", "basin"):
