@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Capitale du comté palatin de Bourgogne, sur le Doubs.",
+    "description": "Ville comtale sur le Doubs, résidence fréquente des comtes palatins de Bourgogne et future capitale du comté (parlement au XVe siècle).",
     "sources": ["Dole (Jura)", "Comté de Bourgogne (Franche-Comté)"]
   },
   {

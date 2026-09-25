@@ -25,9 +25,8 @@
   ],
   "description": "Roues hydrauliques pour moudre, fouler le drap et actionner les martinets des forges.",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Moulin à eau",
+    "Moulin à foulon",
+    "Martinet (forge)"
   ]
 }

@@ -27,9 +27,8 @@
   ],
   "description": "Mécanismes de bandage (tour, cranequin) qui accroissent la puissance de l'arbalète et le pavois des [[cdx_arbalete|arbalétriers]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Arbalète",
+    "Cranequin",
+    "Pavois (bouclier)"
   ]
 }

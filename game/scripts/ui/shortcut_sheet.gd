@@ -40,7 +40,7 @@ const CAMPAIGN_SECTIONS := [
 	{"title": "Partie", "actions": [
 		["campaign_end_turn", "Finir la saison"], ["campaign_pause", "Fermer la fenêtre du dessus, puis menu pause"],
 		["quick_save", "Sauvegarde rapide"], ["quick_load", "Chargement rapide"],
-		["map_screenshot", "Capture d'écran"], ["codex_pin_tooltip", "Épingler l'infobulle du Codex"]]},
+		["map_screenshot", "Capture d'écran"], ["codex_pin_tooltip", "Maintenir ouverte la bulle ou l'infobulle"]]},
 ]
 ## Commandes à la souris (hors `InputMap`).
 const MOUSE_LINES := [

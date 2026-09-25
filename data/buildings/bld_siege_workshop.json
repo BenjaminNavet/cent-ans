@@ -28,9 +28,9 @@
     "unit_siege_tower",
     "unit_bombard"
   ],
-  "description": "Charpentiers et ingénieurs du roi ; construit engins de jet et, plus tard, bombardes.",
+  "description": "Charpentiers et maîtres des engins du roi ; construit engins de jet et, plus tard, bombardes. Voir [[cdx_atelier_d_engins]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Trébuchet",
+    "Engin de siège"
   ]
 }

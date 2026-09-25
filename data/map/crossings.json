@@ -488,13 +488,13 @@
     },
     {
       "id": "bridge_folly_bridge_oxford",
-      "name": "Folly Bridge (Oxford)",
+      "name": "Grandpont (Oxford)",
       "type": "bridge",
       "structure": "stone",
       "river": "Tamise",
       "lonlat": [-1.256, 51.745],
       "source": "Wikipedia (en), « Folly Bridge »",
-      "note": "Grandpont, chaussée et pont du XIe siècle."
+      "note": "Grandpont, chaussée et pont du XIe siècle (le nom de Folly Bridge date du XVIIe siècle)."
     },
     {
       "id": "bridge_pont_de_verdun",

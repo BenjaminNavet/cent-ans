@@ -36,9 +36,10 @@
     "unit_goedendag_militia",
     "unit_culveriners"
   ],
-  "description": "Siège des corporations ; organise les milices de métiers (Flandre) et finance la recherche civile.",
+  "description": "Siège des métiers jurés et des guildes ; organise les milices de métiers (Flandre) et finance la recherche civile. Voir [[cdx_maison_des_metiers]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Livre des métiers",
+    "Corporation (Ancien Régime)",
+    "Bataille de Courtrai (1302)"
   ]
 }

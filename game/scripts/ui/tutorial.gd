@@ -70,15 +70,7 @@ func _ready() -> void:
 	panel.name = "StepPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.95, 0.89, 0.74, 0.97)
-	style.border_color = Color(0.45, 0.28, 0.12)
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(6)
-	style.set_content_margin_all(14)
-	style.shadow_color = Color(0, 0, 0, 0.35)
-	style.shadow_size = 6
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", HudStyle.panel_box(16))
 	add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)

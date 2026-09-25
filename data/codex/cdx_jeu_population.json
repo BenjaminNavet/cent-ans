@@ -1,0 +1,38 @@
+{
+  "id": "cdx_jeu_population",
+  "title": "Population, classes et croissance",
+  "category": "mecanique",
+  "aliases": [
+    "population",
+    "classes sociales",
+    "paysans",
+    "bourgeois",
+    "noblesse",
+    "clergé",
+    "croissance",
+    "santé",
+    "richesse",
+    "satisfaction en biens"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Chaque province compte quatre classes, paysans, bourgeois, clergé et noblesse, qui ont chacune leur nombre, leur richesse, leur santé, leur satisfaction en biens et leur mécontentement. La population paie l'impôt et fournit les recrues.",
+  "body": "La société médiévale se pense en [[cdx_trois_ordres|trois ordres]] : ceux qui prient, ceux qui combattent, ceux qui travaillent. La réalité du XIVe siècle est plus complexe : entre le clergé et la noblesse d'un côté, la masse paysanne de l'autre, les bourgeois des villes, marchands, drapiers, changeurs, gens de métier, pèsent de plus en plus lourd, surtout en Flandre, en Italie et à Paris. Les paysans forment peut-être neuf dixièmes de la population ; clercs et nobles, quelques pour cent chacun.\n\nVers 1328, l'« État des paroisses et des feux » recense environ 2,4 millions de feux dans le domaine royal, soit sans doute seize à vingt millions d'habitants pour le royaume de France, le pays le plus peuplé d'Europe ; l'Angleterre en compte quatre à cinq millions. Ce monde plein, au bord de la surpopulation, a déjà connu la grande famine de 1315-1317.\n\nLa [[cdx_peste_noire|Peste noire]] de 1347-1352 emporte peut-être un tiers ou davantage des Européens, et les retours de peste, les guerres et les famines prolongent la dépression démographique jusqu'au milieu du XVe siècle. La main-d'œuvre devenue rare fait monter les salaires, ce que les princes tentent en vain d'interdire, en Angleterre par le Statut des travailleurs de 1351.",
+  "gameplay": "Le panneau de province affiche pour chaque classe son nombre et quatre jauges : « Santé », « Richesse », « Biens » (satisfaction en biens) et « Mécont. » (voir [[cdx_jeu_ordre_public|ordre public]]). Chaque jauge rejoint chaque saison une part de l'écart avec sa cible : 20 % pour la santé, 15 % pour la richesse, 25 % pour les biens.\n\nCroissance par saison, à santé 100 : paysans +0,4 %, bourgeois +0,3 %, noblesse +0,1 %, clergé +0,05 %. Elle est proportionnelle à (santé − 50) / 50 : sous 50 de santé, la classe diminue. Au-delà de 50 de [[cdx_jeu_devastation|dévastation]], la croissance naturelle s'arrête. La santé vise 50, plus les effets des bâtiments et de la [[cdx_jeu_table|table]], plus un quart de l'écart des biens à 50, moins 2 points par tranche de 10 % de population au-delà de la capacité de la province. Cette capacité vaut 125 % de la population de 1337 (comptée pour 40 000 âmes au moins), plus 10 % par niveau de bâtiment de production. La richesse vise une base propre à chaque classe (paysans 38, clergé 58, bourgeois 63, noblesse 78), plus les effets, moins le poids de l'[[cdx_jeu_impot|impôt]] (6 à 15) et la moitié de la dévastation. Les biens visent 40, plus 10 par catégorie de marchandises (nourriture, matières premières, produits manufacturés, luxe) dont dispose la faction et qui convient à la classe.\n\nL'impôt se calcule par tête et selon la richesse (voir [[cdx_jeu_tresor|trésor]]) ; le recrutement exige une classe assez nombreuse (dix hommes de la classe par soldat, sur la part de la colonie). Conseil : un bourgeois riche rapporte quatre fois plus qu'un paysan ; marchés et foires paient vite.",
+  "see_also": [
+    "cdx_jeu_ordre_public",
+    "cdx_jeu_tresor",
+    "cdx_jeu_famine",
+    "cdx_trois_ordres",
+    "cdx_peste_noire",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Démographie de la France au Moyen Âge",
+    "État des paroisses et des feux",
+    "Grande famine de 1315-1317",
+    "Statut des travailleurs"
+  ]
+}
