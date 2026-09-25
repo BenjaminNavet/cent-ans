@@ -72,6 +72,31 @@ chaleur (0,5 point de moral/s) le fait fuir. Le rectangle du régiment tourne av
 rangées contre le rempart. Expérience : sans chaleur pour les régiments sur le mur, Paris tombe à
 3/20 ; avec un rectangle aligné sur le mur (quelle que soit l'orientation), 3/20 aussi.
 
+### Balayages (générique / Paris / Rouen / Calais, 20 graines)
+
+Chaleur mesurée au rectangle des îlots (et non plus au disque) : aucun effet (17/17/2/5).
+
+| Réglage | Générique | Paris | Rouen | Calais |
+|---|---|---|---|---|
+| référence main | 17 | 17 | 2 | 6 |
+| moral à la chaleur 0,35 /s | 18 | 16 | 4 | 6 |
+| moral à la chaleur 0,25 /s | 18 | 16 | 1 | 10 |
+| moral à la chaleur 0,15 /s | 19 | 16 | 0 | 8 |
+| rayon de chaleur 6 m | 19 | 16 | 0 | 3 |
+| rayon de chaleur 4 m | 19 | 15 | 0 | 4 |
+| dépassement d'allumage 10 m | 19 | 17 | 3 | 5 |
+| chaleur décroissante avec la distance | 19 | 14 | 0 | 4 |
+| pas de chaleur sur le rempart | 18 | 3 | 0 | 6 |
+| rectangle du régiment aligné sur le mur | 18 | 3 | 1 | 6 |
+| chemin de ronde des villes emblématiques 14 m | 17 | 15 | 0 | 7 |
+
+Paris est **bimodale** : avec le rectangle aligné, les 17 défaites sont identiques (équipage du
+bélier tué par les arbalétriers du rempart, porte à 1-4 PV sur 460, escalade ratée à 515 s) ; les
+3 victoires sont les graines où la porte tombe à 254 s. Le résultat se joue sur un seul régiment :
+les arbalétriers près de la porte, rompus ou non par la chaleur de la rangée adossée au rempart.
+Les réglages en tout ou rien donnent 3/20 ou 15-17/20. Levier progressif à l'essai : une part
+seulement de la chaleur atteint le rempart (hauteur et parapet).
+
 ## État
 - [x] Référence sur main (sondes BR3 et SG3), toutes villes emblématiques.
 - [x] Diagnostic instrumenté (traces, carte ASCII).
