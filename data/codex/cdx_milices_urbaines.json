@@ -1,0 +1,31 @@
+{
+  "id": "cdx_milices_urbaines",
+  "title": "Les milices urbaines",
+  "category": "unite",
+  "aliases": [
+    "Milice urbaine",
+    "milices urbaines",
+    "milice communale",
+    "quarteniers",
+    "dizainiers"
+  ],
+  "era": {
+    "from": "1150",
+    "to": "1500"
+  },
+  "summary": "Les bourgeois des villes doivent garder leurs murs et, parfois, suivre l'[[cdx_ost_feodal|ost]] du roi. Peu entraînées à la bataille rangée, les milices tiennent pourtant remparts et barricades : Paris d'[[cdx_etienne_marcel|Étienne Marcel]], Rouen face à [[cdx_henri_v|Henri V]], défenseurs d'[[cdx_orleans|Orléans]].",
+  "body": "Dans chaque ville close, les habitants doivent le guet de nuit et la garde des portes. À [[cdx_paris|Paris]], ils sont encadrés par quartiers : quarteniers, cinquanteniers et dizainiers. Les communes doivent aussi au roi un contingent pour l'ost, armé de vouges, de guisarmes, de piques et d'arbalètes, qu'elles préfèrent souvent racheter en argent.\n\nEn rase campagne, ces milices font rarement le poids face aux gens d'armes. Mais derrière leurs murs, elles sont précieuses : en 1418-1419, les bourgeois de [[cdx_rouen|Rouen]] tiennent six mois contre [[cdx_henri_v|Henri V]] ; en 1428-1429, ceux d'[[cdx_orleans|Orléans]] combattent sur les remparts aux côtés des gens de guerre.\n\nArmer les bourgeois a un revers pour le pouvoir : en 1358, les Parisiens coiffés du chaperon rouge et bleu d'[[cdx_etienne_marcel|Étienne Marcel]] envahissent le palais du dauphin, et en 1382 les [[cdx_maillotins|Maillotins]] s'emparent des maillets de plomb de l'Hôtel de Ville.",
+  "gameplay": "Compagnie de 120 hommes (infanterie). Recrutement : 300 livres payées à l'enrôlement ; entretien 25 livres par mois, soit 100 par saison. Caractéristiques : mêlée 40, armure 30 (laisse passer 77 % des coups), moral 40, vitesse 40 (1,6 m/s). Aucun prérequis de technologie ni de bâtiment. La place doit compter assez de bourgeois (dix fois l'effectif). La troupe la moins chère : solide sur un rempart (pertes ×0,5), fragile en rase campagne avec son moral de 40.",
+  "entity": "unit_urban_militia",
+  "see_also": [
+    "cdx_places_fortes",
+    "cdx_etienne_marcel",
+    "cdx_maillotins",
+    "cdx_arbaletriers_des_villes"
+  ],
+  "sources": [
+    "Commune (Moyen Âge)",
+    "Siège de Rouen (1418-1419)",
+    "Siège d'Orléans"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "cdx_artillerie_de_campagne",
+  "title": "L'artillerie de campagne",
+  "category": "technique",
+  "aliases": [
+    "Artillerie de campagne",
+    "Gaspard Bureau",
+    "Louis Giribault",
+    "Formigny",
+    "bataille de Formigny"
+  ],
+  "era": {
+    "from": "1450",
+    "to": "1500"
+  },
+  "summary": "Des canons assez légers pour suivre l'armée et être mis en batterie sur le champ de bataille : à Formigny (1450) puis à [[cdx_castillon|Castillon]] (1453), l'artillerie de [[cdx_charles_vii|Charles VII]] vient à bout des archers anglais.",
+  "body": "Les frères Jean et Gaspard [[cdx_bombarde|Bureau]], maîtres de l'artillerie royale, organisent un parc de pièces de toutes tailles, avec charrois, poudre et canonniers. Le 15 avril 1450, à Formigny, deux couleuvrines amenées par Louis Giribault forcent les archers anglais retranchés à sortir de leurs positions ; la charge du connétable de Richemont achève leur défaite.\n\nLe 17 juillet 1453, devant [[cdx_castillon|Castillon]], John Talbot attaque le camp retranché où Jean Bureau a disposé ses canons : les Anglais sont fauchés et Talbot est tué. L'artillerie de campagne, encore rudimentaire, vient de décider la guerre.",
+  "gameplay": "Recherche : 600 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_premieres_bouches_a_feu|Bombardes]]. Année historique 1450 : avant 1430, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : +15 en tir des engins de siège ; +20 % d'allure des engins de siège (annule le malus de 20 % du train de siège). Supprime le malus de 20 % d'allure que le train de siège impose à l'armée en campagne.",
+  "entity": "tech_field_artillery",
+  "see_also": [
+    "cdx_bombarde",
+    "cdx_castillon",
+    "cdx_couleuvriniers",
+    "cdx_charles_vii"
+  ],
+  "sources": [
+    "Artillerie médiévale",
+    "Bataille de Formigny",
+    "Bataille de Castillon",
+    "Jean Bureau"
+  ]
+}

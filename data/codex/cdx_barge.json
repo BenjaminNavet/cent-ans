@@ -1,0 +1,31 @@
+{
+  "id": "cdx_barge",
+  "title": "La barge et le balinier",
+  "category": "unite",
+  "aliases": [
+    "Barge",
+    "barges",
+    "balinier",
+    "baliniers",
+    "baleinier",
+    "John Hawley"
+  ],
+  "era": {
+    "from": "1300",
+    "to": "1500"
+  },
+  "summary": "Plus petite que la [[cdx_cogue|cogue]], la barge ou le balinier marche à la voile comme à l'aviron. Vive et de faible tirant d'eau, elle sert d'éclaireur, de transport et de navire de course : parfaite pour les coups de main sur les côtes et dans les estuaires.",
+  "body": "Le balinier tire son nom des embarcations des pêcheurs basques de baleine. Barges et baliniers, longs de quinze à trente mètres, portent un mât à voile carrée et une vingtaine à une quarantaine d'avirons. Ils peuvent remonter les rivières, s'échouer sur une plage et repartir sans attendre le vent.\n\nLes flottes royales en comptent beaucoup : Henri V en fait construire plusieurs pour patrouiller la Manche. Mais ce sont surtout les navires de la guerre de course, que se livrent pendant tout le conflit les marins de Normandie, de Bretagne, de Castille et des Cinq-Ports anglais. John Hawley, maire de Dartmouth vers 1400, s'enrichit ainsi en capturant les navires marchands bretons et français.\n\nRapides mais fragiles, ils ne peuvent tenir tête à une [[cdx_cogue|cogue]] ou à une [[cdx_nef|nef]] dans un combat d'abordage, et prennent la fuite dès que la partie est trop inégale.",
+  "gameplay": "Navire à voile et à rames de 20 m sur 5 m, franc-bord 1,6 m. Coque 140 points ; embarque 40 soldats et 14 marins, plus 30 rameurs. Vitesse : 2,8 m/s à la voile, 2,4 m/s à la rame ; virage 8° par seconde. Châteaux : 8 tireurs y tirent de 2,8 m de haut ; pavesade : traits reçus ×0,85 ; résistance au feu 0,05. Petite et très maniable, elle avance au plus rapide de la voile ou des avirons (×0,8) : parfaite pour éclairer, harceler et fuir. Sa coque fragile et son bord bas la condamnent dans un abordage contre plus gros.",
+  "entity": "ship_barge",
+  "see_also": [
+    "cdx_cogue",
+    "cdx_galee",
+    "cdx_nef"
+  ],
+  "sources": [
+    "Balinier",
+    "Guerre de course",
+    "John Hawley"
+  ]
+}

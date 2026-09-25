@@ -1,0 +1,29 @@
+{
+  "id": "cdx_archers_montes",
+  "title": "Les archers montés",
+  "category": "unite",
+  "aliases": [
+    "Archers montés",
+    "archer monté",
+    "archers à cheval"
+  ],
+  "era": {
+    "from": "v. 1334",
+    "to": "1453"
+  },
+  "summary": "Archers à l'[[cdx_arc_long|arc long]] qui chevauchent un bidet mais combattent à pied : à partir des années 1330, ils rendent les armées anglaises aussi rapides que leur cavalerie et font de la [[cdx_chevauchee|chevauchée]] une arme redoutable.",
+  "body": "Les archers montés apparaissent dans les campagnes écossaises d'[[cdx_edouard_iii|Édouard III]] au milieu des années 1330. Leur cheval, un simple bidet, ne leur sert qu'à se déplacer : au combat, ils mettent pied à terre, confient les montures à des valets à l'arrière et tirent comme les autres archers. Ils sont payés 6 pence par jour, le double d'un archer à pied.\n\nAvec eux, toute l'armée se déplace à cheval. Les grandes [[cdx_chevauchee|chevauchées]] en tirent leur vitesse : celle du [[cdx_prince_noir|Prince noir]] en Languedoc en 1355, celle de [[cdx_robert_knolles|Robert Knolles]] en 1370, celle de [[cdx_jean_de_gand|Jean de Gand]] de Calais à Bordeaux en 1373. À la fin du XIVe siècle, la plupart des archers des retenues sont montés.\n\nIls remplacent les [[cdx_hobelars|hobelars]] comme cavalerie légère de l'armée anglaise, sans jamais charger : leur force reste l'arc, tiré à pied derrière des pieux.",
+  "gameplay": "Compagnie de 100 hommes (tireurs montée). Recrutement : 600 livres payées à l'enrôlement ; entretien 55 livres par mois, soit 220 par saison. Caractéristiques : mêlée 30, tir 65 à 220 m (40 volées), armure 20 (laisse passer 85 % des coups), moral 50, vitesse 75 (3 m/s). Exige la technologie [[cdx_entrainement_arc_long|Entraînement à l'arc long]] ; une province de culture anglaise ou galloise. La place doit compter assez de paysans (dix fois l'effectif). Tir en volée : ignore les collines qui masquent la cible (pas les forêts ni les murs). Escarmouche : tire en marchant, ce que les autres tireurs ne peuvent pas faire ; en résolution automatique, les tireurs montés n'encaissent que la moitié des coups. Pied à terre : ordre irréversible ; vitesse plafonnée à 35, armure +8, plus de charge. À l'assaut d'une place, elle met pied à terre d'elle-même, sans le bonus d'armure. Pluie : précision ×0,6 sous la pluie, ×0,8 sous la neige (et ×0,6 en mer par temps de pluie). La mobilité de la cavalerie et le tir des archers (65 à 220 m) ; sans pieux, ils sont vulnérables à une charge. À cheval pour manœuvrer, pied à terre pour tenir.",
+  "entity": "unit_mounted_archers",
+  "see_also": [
+    "cdx_arc_long",
+    "cdx_chevauchee",
+    "cdx_hobelars",
+    "cdx_retenues_anglaises"
+  ],
+  "sources": [
+    "Arc long anglais",
+    "Chevauchée",
+    "Armée anglaise durant la guerre de Cent Ans"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "cdx_arbaletriers_des_villes",
+  "title": "Les arbalétriers des villes",
+  "category": "unite",
+  "aliases": [
+    "arbalétriers des communes",
+    "arbalétriers des villes",
+    "confrérie d'arbalétriers",
+    "confréries d'arbalétriers",
+    "grand maître des arbalétriers",
+    "papegai"
+  ],
+  "era": {
+    "from": "1200",
+    "to": "1500"
+  },
+  "summary": "Dans les villes du Nord et les garnisons royales, bourgeois et sergents s'exercent à l'[[cdx_arbalete|arbalète]] au sein de confréries de tireurs : un tir lent, mais précis et puissant, redoutable derrière un rempart ou un [[cdx_pavois|pavois]].",
+  "body": "L'arbalète est l'arme de jet des communes et des garnisons. On la bande en posant le pied dans l'étrier et en tirant la corde avec un crochet fixé à la ceinture ; deux carreaux par minute sont un bon rythme. Son maniement s'apprend vite, et sa portée comme sa puissance en font l'arme idéale du défenseur de remparts. Le roi de France confie d'ailleurs l'infanterie et les engins à un grand officier, le maître des arbalétriers.\n\nDans les villes de Flandre, de Picardie et d'Île-de-France, les tireurs se groupent en confréries, souvent placées sous la protection de saint Georges. Elles s'entraînent au tir à l'oiseau (le papegai), défilent aux fêtes et fournissent des contingents à la ville ou au prince. À [[cdx_paris|Paris]], le dauphin Charles, futur [[cdx_charles_v|Charles V]], confirme en 1359 les privilèges de la compagnie des arbalétriers de la ville.\n\nEn bataille rangée, ces arbalétriers souffrent face à l'[[cdx_arc_long|arc long]], plus rapide. Mais dans les sièges, de [[cdx_calais|Calais]] à [[cdx_orleans|Orléans]], ils tiennent les créneaux, et le perfectionnement des mécanismes de bandage ([[cdx_arbalete_a_tour|tour et cranequin]]) les garde en service jusqu'à la fin du XVe siècle.",
+  "gameplay": "Compagnie de 100 hommes (tireurs). Recrutement : 450 livres payées à l'enrôlement ; entretien 40 livres par mois, soit 160 par saison. Caractéristiques : mêlée 35, tir 55 à 180 m (30 volées), armure 35 (laisse passer 73 % des coups), moral 45, vitesse 40 (1,6 m/s). Aucun prérequis de technologie ni de bâtiment. La place doit compter assez de bourgeois (dix fois l'effectif). Pavois : pertes dues aux traits ×0,6 à l'arrêt, ×0,35 avec l'ordre « Dresser les pavois » (×0,7 en résolution automatique) ; rechargement en 9 s au lieu de 6. Pluie : précision ×0,6 sous la pluie, ×0,8 sous la neige (et ×0,6 en mer par temps de pluie). Tireurs bon marché, à leur meilleur sur un rempart (précision ×1,25, pertes subies ×0,5) ; le pavois ralentit leur rechargement (9 s).",
+  "entity": "unit_crossbowmen",
+  "see_also": [
+    "cdx_arbalete",
+    "cdx_pavois",
+    "cdx_arbalete_a_tour",
+    "cdx_milices_urbaines"
+  ],
+  "sources": [
+    "Arbalète",
+    "Confrérie d'arbalétriers",
+    "Grand maître des arbalétriers"
+  ]
+}

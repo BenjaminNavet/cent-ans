@@ -1,0 +1,30 @@
+{
+  "id": "cdx_sergents_montes",
+  "title": "Les sergents à cheval",
+  "category": "unite",
+  "aliases": [
+    "Sergents montés",
+    "sergent monté",
+    "sergents à cheval",
+    "sergent à cheval",
+    "sergents d'armes"
+  ],
+  "era": {
+    "from": "1150",
+    "to": "1400"
+  },
+  "summary": "Hommes de guerre non nobles, moins bien armés et montés que les chevaliers, les sergents à cheval forment la cavalerie moyenne des XIIIe et XIVe siècles : tenanciers de fiefs de sergenterie, bourgeois montés des communes, soudoyers.",
+  "body": "Le sergent (du latin serviens, « celui qui sert ») est à l'origine un serviteur armé. Certains tiennent une terre, la sergenterie, en échange d'un service à cheval dans l'[[cdx_ost_feodal|ost]] de leur seigneur ; d'autres sont fournis par les villes ou simplement soldés. Le roi de France entretient ses propres sergents d'armes, garde rapprochée portant la masse.\n\nMontés sur un roncin plutôt que sur un destrier, protégés d'un haubergeon et d'un chapel de fer, ils chargent à la lance au second rang, poursuivent, escortent les convois et tiennent garnison. Leur solde est bien inférieure à celle d'un chevalier ou d'un écuyer.\n\nAu cours du XIVe siècle, la frontière s'efface : les listes de montre ne distinguent plus que les [[cdx_hommes_d_armes|hommes d'armes]], nobles ou non, pourvu qu'ils aient l'équipement requis. Le sergent à cheval disparaît en tant que catégorie, absorbé dans la gendarmerie.",
+  "gameplay": "Compagnie de 80 hommes (cavalerie montée). Recrutement : 700 livres payées à l'enrôlement ; entretien 65 livres par mois, soit 260 par saison. Caractéristiques : mêlée 55, armure 55 (laisse passer 58 % des coups), moral 55, vitesse 70 (2,8 m/s), charge 60. Aucun prérequis de technologie ni de bâtiment. La place doit compter assez de bourgeois (dix fois l'effectif). Charge à la lance : bonus de charge ×1,5 et davantage d'hommes renversés au choc. Cavalerie moyenne à prix modéré : utile pour les flancs et les poursuites, trop fragile pour une charge frontale contre des hommes d'armes.",
+  "entity": "unit_mounted_sergeants",
+  "see_also": [
+    "cdx_ost_feodal",
+    "cdx_chevalerie",
+    "cdx_hommes_d_armes"
+  ],
+  "sources": [
+    "Sergent (Moyen Âge)",
+    "Sergent d'armes",
+    "Ost"
+  ]
+}
