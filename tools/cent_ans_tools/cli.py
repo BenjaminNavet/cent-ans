@@ -376,6 +376,41 @@ def geo_detail_dem(
         console.print(f"[yellow]{note}[/yellow]")
 
 
+@geo_app.command("hydro-fine")
+def geo_hydro_fine(
+    workers: int = typer.Option(0, "--workers", help="Processus parallèles (0 = auto)"),
+    sources: str = typer.Option(
+        "topage,osor,euhydro,naturalearth",
+        "--sources",
+        help="Sources à traiter, séparées par des virgules",
+    ),
+) -> None:
+    """Réseau hydrographique fin recalé sur la pyramide de relief (ADR 0036, lot ZG5a)."""
+    from cent_ans_tools.geo import hydro_fine
+
+    chosen = tuple(s.strip() for s in sources.split(",") if s.strip())
+    result = hydro_fine.build(
+        workers=workers or None, sources=chosen, log=console.print
+    )
+    for source, km in result.per_source_km.items():
+        console.print(f"{source} : {km:.0f} km")
+    console.print(
+        f"{result.lines} lignes, {result.points} points, {result.tiles} tuiles E2, "
+        f"{result.total_bytes / 1e6:.1f} Mo, {result.seconds:.0f} s → {result.manifest}"
+    )
+
+
+@geo_app.command("anchors-fine")
+def geo_anchors_fine(
+    workers: int = typer.Option(0, "--workers", help="Processus parallèles (0 = auto)"),
+) -> None:
+    """Colonies, hameaux, ponts et routes recalés sur le relief fin (ADR 0036, lot ZG5a)."""
+    from cent_ans_tools.geo import fine_anchors
+
+    result = fine_anchors.build(workers=workers or None, log=console.print)
+    console.print(result.summary())
+
+
 @geo_app.command("navgrid")
 def geo_navgrid(
     lenient: bool = typer.Option(

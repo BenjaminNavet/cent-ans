@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/naval_ship_names.schema.json",
+  "title": "Noms des navires de campagne",
+  "description": "Fichier data/naval/ship_names.json (lot NV2) : noms historiques des navires par faction et par port d'attache. Une flotte qui appareille d'un port prend d'abord les noms de ce port, puis ceux de sa faction.",
+  "type": "object",
+  "$defs": {
+    "names": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "factions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "faction": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+          "names": { "$ref": "#/$defs/names", "description": "Noms sans port d'attache, tirés dans l'ordre (décalé par la graine de la bataille)." },
+          "ports": {
+            "type": "object",
+            "description": "Noms des navires de chaque port (identifiant de colonie portuaire).",
+            "propertyNames": { "pattern": "^set_[a-z0-9_]+$" },
+            "additionalProperties": { "$ref": "#/$defs/names" }
+          }
+        },
+        "required": ["faction", "names"],
+        "additionalProperties": false
+      }
+    },
+    "sources": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["factions"],
+  "additionalProperties": false
+}

@@ -48,6 +48,7 @@
           "uniqueItems": true
         },
         "port": { "type": "boolean", "description": "Sert de port pour les traversées maritimes." },
+        "sea_zone": { "$ref": "common.schema.json#/$defs/sea_zone_id", "description": "Mer sur laquelle ouvre le port quand sa province en borde plusieurs (Calais, Douvres : la Manche) ; mer de la traversée et de son interception (lot NV2)." },
         "description": { "type": "string" },
         "sources": { "$ref": "common.schema.json#/$defs/sources" }
       },

@@ -73,8 +73,133 @@
   },
   "impact_marks": {
     "max_marks": 64,
-    "size_m": [1.8, 3.0],
+    "size_m": [
+      1.8,
+      3.0
+    ],
     "depth_m": 2.0,
     "breach_scale": 1.5
+  },
+  "crew": {
+    "figure_kind": "crew",
+    "detail_m": 24.0,
+    "medium_m": 75.0,
+    "hide_beyond_m": 300.0,
+    "load_from": 0.55,
+    "swab_until": 0.5,
+    "bombard_load": [
+      0.45,
+      0.9
+    ],
+    "clips": {
+      "winch": "crank",
+      "loader": "load",
+      "swab": "swab",
+      "pusher": "push",
+      "pusher_still": "haul",
+      "idle": "idle"
+    },
+    "layouts": {
+      "trebuchet": [
+        {
+          "x": -2.3,
+          "z": -6.2,
+          "yaw_deg": 90,
+          "role": "winch",
+          "figure": 0
+        },
+        {
+          "x": 2.3,
+          "z": -6.2,
+          "yaw_deg": -90,
+          "role": "winch",
+          "figure": 0
+        },
+        {
+          "x": 1.6,
+          "z": -3.4,
+          "yaw_deg": -90,
+          "role": "loader",
+          "figure": 0
+        }
+      ],
+      "mangonel": [
+        {
+          "x": -1.5,
+          "z": -1.55,
+          "yaw_deg": 90,
+          "role": "winch",
+          "figure": 0
+        },
+        {
+          "x": 1.5,
+          "z": -1.55,
+          "yaw_deg": -90,
+          "role": "winch",
+          "figure": 0
+        }
+      ],
+      "bombard": [
+        {
+          "x": 0.15,
+          "z": 3.5,
+          "yaw_deg": 180,
+          "role": "swab",
+          "figure": 1,
+          "rest": [-1.5, 0.6, 60]
+        },
+        {
+          "x": 1.3,
+          "z": 1.4,
+          "yaw_deg": -90,
+          "role": "loader",
+          "figure": 0
+        }
+      ],
+      "ram": [
+        {
+          "x": -0.8,
+          "z": -4.5,
+          "yaw_deg": 0,
+          "role": "pusher",
+          "figure": 0
+        },
+        {
+          "x": 0.8,
+          "z": -4.5,
+          "yaw_deg": 0,
+          "role": "pusher",
+          "figure": 0
+        }
+      ],
+      "siege_tower": [
+        {
+          "x": -1.7,
+          "z": -3.4,
+          "yaw_deg": 0,
+          "role": "pusher",
+          "figure": 0
+        },
+        {
+          "x": 0.0,
+          "z": -3.4,
+          "yaw_deg": 0,
+          "role": "pusher",
+          "figure": 0
+        },
+        {
+          "x": 1.7,
+          "z": -3.4,
+          "yaw_deg": 0,
+          "role": "pusher",
+          "figure": 0
+        }
+      ]
+    }
+  },
+  "lod": {
+    "simple_m": 140.0,
+    "far_m": 300.0,
+    "far_pose_hz": 6.0
   }
 }

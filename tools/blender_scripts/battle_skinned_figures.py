@@ -430,7 +430,9 @@ FIGURES.update(
             # UR2: three variants each bake in their own headgear (bassinet, kettle hat, hood)
             # on top of the body ; scaled down a bit more than usual to stay under the 3,000
             # triangle LOD0 budget once every piece of kit is added together.
-            "budget": budget(Adventurer_Head=0.7, Medieval_Body=0.76, Medieval_Legs=0.78),
+            "budget": budget(
+                Adventurer_Head=0.7, Medieval_Body=0.76, Medieval_Legs=0.78
+            ),
             "equipment": [
                 ("brigandine", 2, {"colour": (0.20, 0.12, 0.05)}),
                 ("bassinet", 2, {"aventail": False}),
@@ -566,6 +568,48 @@ FIGURES.update(
                 ("cloth_cap", 2, {"colour": (0.18, 0.12, 0.06)}),
                 ("lance", 0, {"pennon": False}),
             ],
+            "variants": 2,
+        },
+    }
+)
+
+# SG3: siege engine crews (servants of the trebuchet, mangonel and bombard, pushers of the
+# ram and the siege tower): tunic and hose, cap, straw hat or bare head, no weapon; the
+# second figure holds the bombard's rammer. Animated by `SiegeEnginesFx` (clips crank,
+# haul, load, swab, push), not by the regiment states.
+_CREW_COLORS = {
+    "Farmer_Body:Beige": (eq.C_CLOTH, eq.LINEN),
+    "Farmer_Body:LightBlue": (eq.C_LIVERY, (0.9, 0.9, 0.9)),
+    "Farmer_Pants:LightBlue": (eq.C_CLOTH, HOSE),
+    "Farmer_Head:Beige": (eq.C_CLOTH, STRAW),
+    "Farmer_Head:Red": (eq.C_CLOTH, (0.25, 0.05, 0.03)),
+    "Farmer_Feet:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
+    "Farmer_Feet:Brown2": (eq.C_LEATHER, (0.07, 0.04, 0.02)),
+}
+_CREW_PARTS = [
+    ("farmer.glb", ["Farmer_Body", "Farmer_Pants", "Farmer_Feet", "Farmer_Head"]),
+    ("adventurer.glb", ["Adventurer_Head"]),
+]
+FIGURES.update(
+    {
+        "crew_0": {
+            "rig": "human",
+            "style": "crew",
+            "parts": _CREW_PARTS,
+            "colors": _CREW_COLORS,
+            "masks": {"Adventurer_Head": 3, "Farmer_Head": 4},
+            "budget": budget(Adventurer_Head=0.75, Farmer_Head=0.8),
+            "equipment": [("cloth_cap", 1)],
+            "variants": 3,
+        },
+        "crew_1": {
+            "rig": "human",
+            "style": "crew",
+            "parts": _CREW_PARTS,
+            "colors": _CREW_COLORS,
+            "masks": {"Adventurer_Head": 1, "Farmer_Head": 2},
+            "budget": budget(Adventurer_Head=0.75, Farmer_Head=0.8),
+            "equipment": [("cloth_cap", 1), ("rammer", 0)],
             "variants": 2,
         },
     }

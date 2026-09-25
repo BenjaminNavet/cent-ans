@@ -57,3 +57,21 @@ supposer un champ de 1200 × 800 m (EP1 rend la taille du champ paramétrique).
   principale (les ruisseaux se traversent en ralentissant) : pas d'A* général.
 - Nouvelles réglages à équilibrer avec la sonde IA contre IA
   (`cargo test --release -p sim-battle --test ep3_probe -- --ignored --nocapture`).
+
+## Cohabitation avec R4 (ADR 0046)
+
+À la fusion de main dans `integration/epic`, l'IA de position de R4 (`defensive_ground` : score de
+position, crête militaire, contre-pente, couverts) et la tenue de berge d'EP3 (`river_hold`)
+choisissent toutes deux le terrain d'un camp défensif. Priorité retenue dans `plan_field` :
+
+1. **La berge d'abord** quand la rivière sépare le défenseur de l'ennemi et que le passage que
+   l'ennemi prendrait est tenable, c'est-à-dire à moins de `RIVER_REACH` (420 m) de la ligne de
+   déploiement (`river_hold` rend alors un couvert `CoverKind::River`) : une rivière à franchir sous
+   les traits vaut plus que n'importe quelle hauteur, et c'est l'enjeu même des batailles fluviales.
+2. **Sinon la position R4** (`defensive_ground`) : hauteur, glacis, couverts, crête militaire.
+
+Les déclencheurs de la posture défensive s'additionnent : le défenseur se met sur la défensive s'il
+est plus faible, tient des hauteurs (R2b), a une rivière devant lui (EP3) ou reçoit un ennemi qui
+marche sur lui (R4). L'attaquant qui attend sur ses hauteurs face aux arcs (R4) ne cherche pas de
+passage ; un camp qui avance choisit toujours son passage (EP3). Les tireurs d'une berge n'ont pas de
+crête militaire (le couvert fixe leur poste) ; ceux d'une crête nue gardent celle de R4.

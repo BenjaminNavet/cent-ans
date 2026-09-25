@@ -30,10 +30,65 @@ pub const HOLD_TO_WIN: f64 = 60.0;
 pub const LADDER_TIME: f64 = 45.0;
 /// Seconds to cross onto the wall from a docked siege tower.
 pub const TOWER_CLIMB_TIME: f64 = 8.0;
-/// Gate damage per second from a full-strength ram crew.
-pub const RAM_DAMAGE: f64 = 4.0;
-/// Wall damage per engine shot, per point of `siege_attack`.
-pub const ENGINE_WALL_FACTOR: f64 = 1.6;
+/// HP of a work at fortification level `fort` (0-5): `hp_base + fort × hp_per_fortification`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WorkHp {
+    pub hp_base: f64,
+    pub hp_per_fortification: f64,
+}
+
+impl WorkHp {
+    pub fn at(&self, fort: f64) -> f64 {
+        self.hp_base + self.hp_per_fortification * fort
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RamRules {
+    /// Gate damage per second from a full-strength ram crew.
+    pub damage_per_s: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct EngineRules {
+    /// Wall damage per engine shot, per point of `siege_attack`.
+    pub wall_damage_per_siege_attack: f64,
+}
+
+/// Contents of `data/rules/siege_works.json` (schema
+/// `data/schemas/siege_works_rules.schema.json`, SG3): resistance of the
+/// walls and the gate, damage of the ram and the engines.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SiegeWorkRules {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub wall: WorkHp,
+    pub gate: WorkHp,
+    pub ram: RamRules,
+    pub engine: EngineRules,
+}
+
+const BUNDLED_WORKS: &str = include_str!("../../../../data/rules/siege_works.json");
+
+impl SiegeWorkRules {
+    /// `data/rules/siege_works.json` as compiled into the crate.
+    pub fn bundled() -> &'static SiegeWorkRules {
+        static RULES: std::sync::OnceLock<SiegeWorkRules> = std::sync::OnceLock::new();
+        RULES.get_or_init(|| {
+            serde_json::from_str(BUNDLED_WORKS).expect("data/rules/siege_works.json is valid")
+        })
+    }
+
+    /// Wall and gate HP at fortification `fortification` (capped at 5).
+    pub fn hp(&self, fortification: u32) -> (f64, f64) {
+        let fort = f64::from(fortification.min(5));
+        (self.wall.at(fort), self.gate.at(fort))
+    }
+}
 
 /// What a piece of the ring is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -611,8 +666,7 @@ impl SiegeWorks {
         let fort = f64::from(fortification.min(5));
         let thickness = 2.5 + 0.5 * fort;
         let wall_height = 6.0 + 1.5 * fort;
-        let wall_hp = 500.0 * (1.0 + fort);
-        let gate_hp = 250.0 * (1.0 + fort);
+        let (wall_hp, gate_hp) = SiegeWorkRules::bundled().hp(fortification);
         let step = std::f64::consts::TAU / RING_SIDES as f64;
         // Vertex k at angle 22.5° + 45° k (x = sin, z = cos): side 3→4 faces -z.
         let vertices: Vec<(f64, f64)> = (0..RING_SIDES)

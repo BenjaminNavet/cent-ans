@@ -119,3 +119,15 @@ def test_generated_clips_are_listed() -> None:
         assert (voice_tts.VOICE_DIR / relative).exists(), relative
     for path in voice_tts.VOICE_DIR.rglob("*.ogg"):
         assert path.relative_to(voice_tts.VOICE_DIR).as_posix() in manifest, path
+
+
+def test_clip_checks_reject_improvised_speech() -> None:
+    """The OpenRouter checks accept a verbatim reading and reject an improvisation."""
+    text = "Monseigneur ?"
+    assert voice_tts.transcript_matches(text, "Monseigneur ?")
+    assert not voice_tts.transcript_matches(
+        text, "Je suis là, loyal, la main tremblante. Qu'ordonne-t-on, monseigneur ?"
+    )
+    low, high = voice_tts.plausible_seconds(text)
+    assert low < 1.25 < high
+    assert not low <= 10.8 <= high

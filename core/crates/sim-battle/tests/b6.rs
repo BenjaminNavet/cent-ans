@@ -164,16 +164,18 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// seconds; R2b: the AI reads the relief and its line keeps together
 /// (digests recomputed after merging R2, BV2 and R2b). EP5: standards fall
 /// and are taken under heavy losses (same winners; digests recomputed).
+/// R4: seeds 3 and 11 after the military crest, same winner. Digests
+/// recomputed after merging R4 into the EP lots (same winners).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "253 Some(Attacker) [21, 19, 63, 100, 100, 15, 44, 107, 93, 0]",
+            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 42, 10]",
         ),
         (
             11,
-            "311 Some(Attacker) [3, 40, 59, 100, 100, 13, 52, 96, 105, 9]",
+            "472 Some(Attacker) [14, 28, 35, 97, 96, 13, 59, 107, 115, 0]",
         ),
     ];
     for (seed, digest_before) in expected {

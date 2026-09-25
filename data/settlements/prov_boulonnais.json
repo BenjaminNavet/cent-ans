@@ -10,6 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_stone_walls", "bld_muster_field"],
     "port": true,
+    "sea_zone": "sea_channel",
     "description": "Capitale du comté de Boulogne, tenu par la jeune Jeanne Ire d'Auvergne ; grand port de pêche sur la Manche.",
     "sources": ["Boulogne-sur-Mer", "Comté de Boulogne"]
   },
@@ -24,6 +25,7 @@
     "fortification_level": 3,
     "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
     "port": true,
+    "sea_zone": "sea_channel",
     "description": "Ville close et port français face à l'Angleterre ; sa prise par Édouard III n'aura lieu qu'en 1347.",
     "sources": ["Calais", "Siège de Calais (1346-1347)"]
   },
@@ -52,6 +54,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": true,
+    "sea_zone": "sea_channel",
     "description": "Petit port de pêche du détroit, ancien point de traversée vers l'Angleterre avant l'essor de Calais.",
     "sources": ["Wissant"]
   }

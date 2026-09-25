@@ -5,6 +5,8 @@
 // (couleuvrine, quasi tendue), javelot (jinetes, plus arqué, plus lent).
 const float VOLLEY_SPEED[4] = float[](48.0, 62.0, 210.0, 24.0);
 const float VOLLEY_ARC[4] = float[](0.16, 0.06, 0.015, 0.22);
+// Facteur de flèche de l'arc d'une volée en cloche (R4, `indirect` de `get_shots()`).
+const float VOLLEY_LOB = 2.5;
 const float VOLLEY_STAGGER[4] = float[](1.5, 0.8, 0.35, 1.1);
 // Épaisseur et longueur du ruban : flèche, carreau, balle (court, fin), javelot (long, épais).
 const float VOLLEY_WIDEN[4] = float[](1.0, 1.6, 1.2, 1.3);
@@ -39,11 +41,13 @@ VolleyArrow volley_arrow(mat4 m, vec4 c, int i) {
 	uint sh = volley_pcg(uint(c.x + 0.5));
 	int code = int(c.y + 0.5);
 	// code = kind (2 bits: 0 flèche, 1 carreau, 2 balle, 3 javelot) + 4 × feu
-	// + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × pas des traits confiés à la couche plantée.
+	// + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × tir en cloche (R4) + 64 × pas des traits
+	// confiés à la couche plantée.
 	int kind = code & 3;
 	a.kind = kind;
 	int cover = (code >> 3) & 3;
-	int stride = code >> 5;
+	bool lobbed = ((code >> 5) & 1) != 0;
+	int stride = code >> 6;
 	a.count = int(c.z + 0.5);
 	a.seed_f = c.x;
 	vec3 src = m[0].xyz;
@@ -71,8 +75,10 @@ VolleyArrow volley_arrow(mat4 m, vec4 c, int i) {
 	}
 	a.launch = m[2].x + volley_rand(sh, i, 6) * VOLLEY_STAGGER[kind];
 	float dist = distance(a.start, a.end_p);
-	a.flight = max(dist / VOLLEY_SPEED[kind] * (1.0 + VOLLEY_ARC[kind]), 0.05);
-	a.arc = dist * VOLLEY_ARC[kind] * (0.85 + 0.3 * volley_rand(sh, i, 7));
+	// R4 : une volée en cloche par-dessus une crête monte bien plus haut et vole plus longtemps.
+	float arc_k = VOLLEY_ARC[kind] * (lobbed ? VOLLEY_LOB : 1.0);
+	a.flight = max(dist / VOLLEY_SPEED[kind] * (1.0 + arc_k), 0.05);
+	a.arc = dist * arc_k * (0.85 + 0.3 * volley_rand(sh, i, 7));
 	a.fire = (code & 4) != 0 && volley_rand(sh, i, 9) < 0.5;
 	a.handed_off = stride > 0 && (i % max(stride, 1)) == 0;
 	return a;

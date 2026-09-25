@@ -93,6 +93,9 @@ pub struct ShotEvent {
     /// Fire arrows or incendiary stones (siege attackers able to set fires).
     pub incendiary: bool,
     pub cover: ShotCover,
+    /// R4: lobbed over a crest at a target the shooters do not see (the
+    /// renderer may draw a higher arc).
+    pub indirect: bool,
 }
 
 /// Shots kept for the renderer between two reads; older ones are dropped

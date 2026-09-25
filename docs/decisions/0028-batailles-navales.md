@@ -59,3 +59,30 @@ grappins, abordages, feu.
 - L'état de campagne gagne un champ `naval` (valeur par défaut pour les sauvegardes anciennes,
   pas de changement de `STATE_VERSION`).
 - Les traversées deviennent risquées en mer ennemie ; la maîtrise de la Manche compte.
+
+## Complément NV2 (2026-09-25)
+
+- **Abordage général** (`naval::ai`) : une flotte IA libre appelle l'abordage général quand la
+  majorité de ses navires est à `assault_range_m` de sa cible et la majorité de l'ennemi à
+  portée, depuis `assault_softening_s` ; avant, elle approche et tire en bloc au lieu d'aborder
+  navire par navire. Les cibles sont réparties : les plus forts choisissent d'abord, au plus
+  `boarders_per_target` abordeurs par navire, les navires masqués (seconde ligne) sont pénalisés.
+  Événement `Assault` pour la chronique.
+- **Lignes enchaînées** : formation défensive décrite par le scénario (`chains` : centre, cap,
+  écart), les navires d'un groupe y sont rangés bord à bord. Les abordeurs qui prennent un
+  navire enchaîné passent sur le suivant par-dessus la prise (`CHAIN_CROSSING_S`), et un navire
+  enchaîné frais tombe sur l'ennemi amarré à son voisin. Les équipages enchaînés ne peuvent fuir :
+  leurs pertes de moral aux volées et aux prises sont multipliées par `chain_morale` (0,3), ce
+  qui fait de l'Écluse une mêlée générale (4 à 5 abordages simultanés, 6 à 8 navires anglais à
+  l'abordage) au lieu d'une reddition sous les flèches. L'auto-résolution applique le même
+  facteur ; accord auto/3D 25/26.
+- **Noms des navires de campagne** : `data/naval/ship_names.json` (schéma
+  `naval_ship_names`), par faction et par port d'attache ; l'escadre prend les noms des ports de
+  la faction sur la mer du combat, les transports ceux du port de départ, puis les noms de la
+  faction (décalés par la graine) ; « Nef n°3 » seulement une fois la liste épuisée.
+- **Mer d'une traversée** : un port peut préciser sa mer (`Settlement::sea_zone` : Calais,
+  Wissant, Boulogne, Douvres sur la Manche) ; `fleets.json::port_waters` nomme les eaux (« le pas
+  de Calais »).
+- **Rendu** : coques en bordé à clin procédural (`naval_hull.gdshader`, espace objet, sans
+  texture externe ni triangle ajouté), châteaux peints patinés (`naval_paint.gdshader`),
+  brûlures persistantes ; bandeau des navires compact sur deux lignes et défilant.

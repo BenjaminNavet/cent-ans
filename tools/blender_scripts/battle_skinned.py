@@ -350,6 +350,12 @@ def human_clip_specs():
         ("horn_idle", "Idle", True, poses.horn_idle, False),
         ("horn_walk", "Walk", True, poses.horn_walk, False),
         ("horn_blow", "Idle", True, poses.horn_blow, False),
+        # SG3: siege engine crews (windlass, rope, loading, rammer, pushing).
+        ("crank", "Idle", True, poses.crank, False),
+        ("haul", "Idle", True, poses.haul, False),
+        ("load", "Idle", True, poses.load, False),
+        ("swab", "Idle", True, poses.swab, False),
+        ("push", "Walk", True, poses.push, False),
     ]
 
 
