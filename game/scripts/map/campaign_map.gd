@@ -84,6 +84,8 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
+## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
+var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -126,6 +128,9 @@ func _ready() -> void:
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
+	if terrain.pyramid != null:  # ZG4 : caméra rapprochée selon l'étage de relief sous elle
+		camera_rig.relief = terrain.pyramid
+		camera_rig.ground_height = terrain.surface_height_at
 	camera_rig.setup(bounds, maxf(map_data.size.x, map_data.size.y) * 0.55)
 	picker.setup(camera, map_data)
 	picker.province_hovered.connect(_on_province_hovered)
@@ -133,6 +138,9 @@ func _ready() -> void:
 	picker.province_right_clicked.connect(_on_province_right_clicked)
 	picker.click_interceptor = _try_select_army
 	armies.setup(map_data, camera)
+	if terrain.quadtree != null:  # ZG4 : marqueurs posés sur la surface fine, recalés à l'échelle
+		armies.ground_height = terrain.surface_height_at
+		terrain.vertical_scale_changed.connect(func(_old: float, _new: float) -> void: armies.reground())
 	strategic = StrategicView.new()  # CM2
 	strategic.name = "StrategicView"
 	add_child(strategic)
@@ -1068,6 +1076,8 @@ func _process(_delta: float) -> void:
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
+	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
+		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
@@ -1188,6 +1198,8 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--camera-min="):  # ZG2 : essais et captures seulement (ZG4 : caméra)
 			camera_rig.min_distance = float(arg.trim_prefix("--camera-min="))
 			camera_rig.close_min_distance = camera_rig.min_distance
+		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
+			dynamic_exaggeration = false
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):

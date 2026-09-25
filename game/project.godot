@@ -156,6 +156,10 @@ campaign_parchment={
 "type": "float",
 "value": 0.0
 }
+campaign_vertical_scale={
+"type": "float",
+"value": 0.006
+}
 
 [rendering]
 
