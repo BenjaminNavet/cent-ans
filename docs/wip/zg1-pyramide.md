@@ -8,7 +8,7 @@ Branche : `worktree-agent-a0df650280bb11446`. Doc : `docs/geo.md` (dernière sec
 - **E1-E2 PRÊTES (pour ZG2)** : 313 tuiles E1 (91 Mo) + 1 069 tuiles E2 (≈ 310 Mo), 405 Mo,
   51 s sur 14 cœurs. Cache partagé : `/Users/jean_hubert/dev/game_project/data/map/pyramid/E1`,
   `E2`. Manifeste à jour.
-- **E3-E4** : cuisson complète en cours (`--levels 3,4 --force`, 499 blocs E2, 1 779 tuiles E3 +
+- **E3-E4 CUITES** : 1 779 tuiles E3 + 6 672 tuiles E4 (fin de cuisson par l'orchestrateur après la coupure de quota). Pyramide totale E1-E7 : 2,6 Go.
   6 672 tuiles E4 attendues). Reprendre par `geo pyramid --levels 3,4` (sans `--force` : les
   tuiles présentes sont sautées), puis committer `data/map/relief_pyramid.json`.
 - Code : `geo/pyramid.py` (géométrie, RLE, `update_manifest_levels`, palier 1),
