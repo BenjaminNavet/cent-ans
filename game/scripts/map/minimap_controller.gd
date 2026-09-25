@@ -79,16 +79,10 @@ func legend_open() -> bool:
 
 ## Mode de carte affiché : « diplomacy », « religion », « unrest » ou « political ».
 func current_map_mode() -> String:
-	var diplomacy: Object = map.get("diplomacy")
-	if diplomacy != null:
-		match int(diplomacy.get("mode")):
-			DiplomacyController.MapMode.DIPLOMACY:
-				return "diplomacy"
-			DiplomacyController.MapMode.RELIGION:
-				return "religion"
-	if bool(map.get("unrest_mode")):
-		return "unrest"
-	return "political"
+	# MF1 : un seul filtre actif, porté par `MapModeController`.
+	var modes: Object = map.get("map_modes")
+	var current := str(modes.get("mode")) if modes != null else "political"
+	return current if current in MapLegend.MODES else "political"
 
 
 ## Couleurs du joueur et des royaumes d'exemple (`factions` de la légende).

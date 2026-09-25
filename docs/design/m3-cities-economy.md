@@ -33,7 +33,8 @@ Pour chaque classe (paysans, bourgeois, clergé, noblesse) : `count`, `unrest`, 
   `construction: Option<Construction { building, turns_left }>` (une construction à la fois par province).
 - Ordre `build { province, building }` : requiert contrôle + propriété, prérequis (`required_building`,
   `required_technology` dans `FactionState.technologies`, `required_resource` dans la province, côte/rivière),
-  `upgrades_from` (remplace l'ancien), pas déjà présent, trésor ≥ coût ; coût prélevé immédiatement.
+  `upgrades_from` (remplace l'ancien, dont il porte les effets — lot B7c), pas déjà présent, trésor ≥ coût ; coût prélevé immédiatement
+  (ressources : tirées des provinces productrices accessibles, le manque importé et payé, B7c / ADR 0053).
   `cancel_build { province }` rembourse 50 %.
 - Effets appliqués via une fonction unique `province_effects(&self, data, province) -> EffectTotals`
   qui somme les `Effect` (mode `flat`/`percent`) de tous les bâtiments : `TaxIncome`, `TradeIncome`, `Health`,

@@ -804,6 +804,10 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
         .buildings
         .get(&option.building)
         .map_or("", |b| building_category_key(b.category));
+    let mut imported = VarDictionary::new();
+    for (resource, amount) in &option.imported {
+        imported.set(resource.as_str(), i64::from(*amount));
+    }
     vdict! {
         "building" => option.building.as_str(),
         "name" => option.name.as_str(),
@@ -812,6 +816,10 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
         "turns" => i64::from(option.turns),
         "available" => option.available,
         "reason" => option.reason.as_deref().unwrap_or(""),
+        // B7c: livres of `cost` spent importing missing resources, and the
+        // units imported.
+        "import_cost" => i64::from(option.import_cost),
+        "imported" => &imported,
     }
 }
 
