@@ -83,8 +83,9 @@ const PRESETS := {
 		"glow": true, "fog_grid": [64, 48],
 		# PF1 : filtre moyen sur la carte (ombres douces à contact durci, PCSS) : invisible au
 		# zoom comté, ≈ 4 ms de GPU de moins qu'en « haut ». Quadtree de relief à 6 px par sommet (ZG2 : 4,
-		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins.
-		"relief_vertex_px": 6.0, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
+		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins. Q4 : 7,5 px
+		# (vue de Paris à 40 u., 1080p : 25,9 → 24,2 ms, 7,81 → 7,57 M primitives, captures identiques).
+		"relief_vertex_px": 7.5, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
