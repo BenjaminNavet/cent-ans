@@ -691,8 +691,32 @@ def house_height(plan, rng):
     return rng.uniform(8.0, 14.0) * plan.a * plan.house_scale * plan.height_scale
 
 
-ROOFS = (("Tile", 0.55), ("TileOld", 0.25), ("Slate", 0.2))
-WALLS = (("Plaster", 0.55), ("Timber", 0.3), ("Stone", 0.15))
+DEFAULT_ROOFS = (("Tile", 0.55), ("TileOld", 0.25), ("Slate", 0.2))
+DEFAULT_WALLS = (("Plaster", 0.55), ("Timber", 0.3), ("Stone", 0.15))
+ROOFS = DEFAULT_ROOFS
+WALLS = DEFAULT_WALLS
+BASE_PALETTE = dict(PALETTE)
+
+
+def configure_materials(landmark):
+    """City materials (lot L3, ``materials`` block): house walls and roofs, palette overrides.
+
+    Bruges builds in brick, Rouen in timber under slate, Avignon in stone under canal tiles; the
+    palette gives each city its stone (blond Paris limestone, Caen stone, Avignon stone). The
+    weights only change which material is drawn, not the random stream: the geometry is the same.
+    """
+    global ROOFS, WALLS
+    block = landmark.get("materials", {})
+    houses = block.get("houses", {})
+    ROOFS = tuple(houses.get("roofs", dict(DEFAULT_ROOFS)).items())
+    WALLS = tuple(houses.get("walls", dict(DEFAULT_WALLS)).items())
+    for table in (ROOFS, WALLS):
+        total = sum(weight for _name, weight in table)
+        assert abs(total - 1.0) < 1e-6, table
+    PALETTE.clear()
+    PALETTE.update(BASE_PALETTE)
+    for name, color in block.get("palette", {}).items():
+        PALETTE[name] = (tuple(color), BASE_PALETTE[name][1])
 
 
 def pick(rng, table):
@@ -874,6 +898,7 @@ def build_fabric(plan, site, layers, rng):
 
 def build(landmark, meters_per_px, seed=1337, siege=False):
     """Build every layer of a landmark (or of its siege backdrop); returns {name: Layer}."""
+    configure_materials(landmark)
     if siege:
         plan = SiegePlan(landmark, meters_per_px)
         landmark = siege_subset(landmark)
@@ -902,6 +927,9 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
     if siege:
         # Metres, and every element shown whatever the year.
         scale = plan.export_scale
+        # Optional cut (L3, cities without a river between the besieged town and the backdrop):
+        # nothing is kept whose every vertex lies nearer than `cut_m` in front of the origin.
+        cut = -plan.data["siege"].get("cut_m", math.inf) * plan.a
         merged = {name: g.Layer(name) for name in ("ground", "houses", "landmarks")}
         for name, layer in layers.items():
             if name == "blocks":
@@ -910,6 +938,10 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
             for mat, (v, f, a, c) in layer.parts.items():
                 if name.endswith("__charles_v"):
                     continue
+                if cut > -math.inf:
+                    v, f, a, c = cut_part(v, f, a, c, cut)
+                    if not f:
+                        continue
                 target.add(
                     mat,
                     [(x * scale, y * scale, z * scale) for x, y, z in v],
@@ -924,6 +956,19 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
                 part[3][len(part[3]) - len(v) :] = c
         layers = merged
     return layers
+
+
+def cut_part(verts, faces, anchors, colors, cut_y):
+    """Faces with at least one vertex at y >= ``cut_y``, vertices renumbered."""
+    kept = [face for face in faces if max(verts[i][1] for i in face) >= cut_y]
+    used = sorted({i for face in kept for i in face})
+    index = {old: new for new, old in enumerate(used)}
+    return (
+        [verts[i] for i in used],
+        [tuple(index[i] for i in face) for face in kept],
+        [anchors[i] for i in used],
+        [colors[i] for i in used],
+    )
 
 
 def material(bpy, name):
