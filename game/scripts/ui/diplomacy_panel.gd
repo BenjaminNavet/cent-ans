@@ -163,7 +163,7 @@ func _build_header() -> Control:
 	header.add_child(titles)
 	var donate := Button.new()
 	donate.text = "Don à l'Église (%s)" % Money.amount(DONATION_AMOUNT)
-	donate.tooltip_text = "Augmente la faveur pontificale (+1 par 200 livres)."
+	donate.tooltip_text = RuleValues.format("Augmente la faveur pontificale (+1 par {rule.donation_livres_per_favor} livres).")
 	donate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	donate.pressed.connect(func() -> void:
 		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
@@ -1035,7 +1035,7 @@ func _render_actions(entry: Dictionary) -> void:
 	var id := str(entry["id"])
 	var status := str(entry["status"])
 	if status == "war":
-		_add_action("Médiation pontificale (%s)" % Money.amount(1000), {"type": "request_papal_mediation", "target": id}, "Le pape obtient une trêve.", false)
+		_add_action("Médiation pontificale (%s)" % Money.amount(int(RuleValues.value("mediation_cost", 0.0))), {"type": "request_papal_mediation", "target": id}, "Le pape obtient une trêve.", false)
 	elif status != "alliance" and status != "vassal" and status != "suzerain":
 		_add_action("Déclarer la guerre", {"type": "declare_war", "target": id}, "La guerre est déclarée.", true)
 	if status == "alliance":

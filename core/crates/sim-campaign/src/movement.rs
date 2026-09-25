@@ -31,6 +31,8 @@ use crate::state::{Army, ArmyId, ArmyPosition, CampaignState};
 pub const SEA_EDGE_COST: u32 = 2;
 /// Strength lost (percent) when landing in hostile territory (doubled in winter).
 pub const LANDING_LOSS_PERCENT: u32 = 5;
+/// Winter multiplier of [`LANDING_LOSS_PERCENT`].
+pub const LANDING_WINTER_FACTOR: u32 = 2;
 /// Morale lost by every unit landing in hostile territory.
 pub const LANDING_MORALE_LOSS: u8 = 10;
 
@@ -169,7 +171,7 @@ pub(crate) fn land_on_hostile_shore(
 ) {
     let winter = state.season == crate::state::Season::Winter;
     let percent = if winter {
-        2 * LANDING_LOSS_PERCENT
+        LANDING_WINTER_FACTOR * LANDING_LOSS_PERCENT
     } else {
         LANDING_LOSS_PERCENT
     };

@@ -1107,7 +1107,7 @@ func _process(_delta: float) -> void:
 
 ## Lot ZG4 : paliers vallée / site : frontières et voile du brouillard de guerre estompés sur le
 ## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
-const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount"]
+const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount", "fog_rim_amount"]
 var _close_tier_defaults: Dictionary = {}
 var _close_tier_alphas := Vector2(-1.0, -1.0)
 var _prop_scale: float = 1.0

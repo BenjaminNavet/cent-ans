@@ -8,10 +8,10 @@ extends Node
 ## l'InputMap (`ShortcutSheet`, lot U7) à chaque ouverture (disposition du clavier à jour).
 const HELP_TEXT := """[b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi ; un pays dévasté les nourrit mal, même chez soi.
-• Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte 5 % des hommes (10 % l'hiver).
-• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (20 % de l'excédent au-delà de six saisons de revenu). En dette, toutes les troupes perdent 10 de moral par saison, sans déserter : licenciez.
+• Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte {rule.landing_loss_percent} % des hommes ({rule.landing_loss_winter_percent} % l'hiver).
+• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort ({rule.opulence_percent} % de l'excédent au-delà de {rule.opulence_seasons} saisons de revenu). En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral par saison, sans déserter : licenciez.
 • Recrutez dans le panneau de province, formez des armées, donnez-leur un général (fiche personnage).
-• Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, deux tours pour choisir.
+• Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, {rule.decision_turns} tours pour choisir.
 • Posture « Siège » : l'armée assiège la place ennemie ; quand elle est sélectionnée, l'état du siège (vivres, brèche) et le bouton « Donner l'assaut » apparaissent au-dessus du bandeau d'ost, en bas de l'écran. Posture « Chevauchée » : pillage et butin.
 • Quand vos armées rencontrent l'ennemi, choisissez « Livrer bataille » (bataille 3D) ou la résolution automatique.
 
@@ -95,7 +95,7 @@ func toggle() -> void:
 
 ## Fiche des raccourcis (InputMap) puis principes du jeu.
 static func full_text() -> String:
-	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), CodexText.format(HELP_TEXT, true)]
+	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), CodexText.format(RuleValues.format(HELP_TEXT), true)]
 
 
 func handle_input(event: InputEvent) -> bool:

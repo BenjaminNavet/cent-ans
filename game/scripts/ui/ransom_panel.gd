@@ -231,7 +231,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 			for entry in plans:
 				var count := int(entry.get("installments", 0))
 				plan.add_item("%d échéances de %s (total %s)" % [count, _pounds(int(entry.get("installment", 0))), _pounds(int(entry.get("total", 0)))], count)
-			plan.tooltip_text = "Échéances annuelles, total +10 % ; la première est payée tout de suite et le captif rentre alors."
+			plan.tooltip_text = RuleValues.format("Échéances annuelles, total +{rule.ransom_installment_surcharge_percent} % ; la première est payée tout de suite et le captif rentre alors.")
 			plan.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			plan.fit_to_longest_item = false
 			actions.add_child(plan)
@@ -287,7 +287,7 @@ func _debt_row(debt: Dictionary) -> Control:
 		_pounds(int(debt.get("installment", 0))), when]
 	var missed := int(debt.get("missed", 0))
 	if missed > 0:
-		subtitle += "\nÉchéances impayées : %d (dette +10 %% chacune)" % missed
+		subtitle += "\nÉchéances impayées : %d (dette +%s %% chacune)" % [missed, RuleValues.text("ransom_default_surcharge_percent")]
 	return _identity(character_id, "Rançon de %s" % str(debt.get("name", character_id)), "", subtitle)
 
 

@@ -36,3 +36,13 @@ sans être prélevé ; `satisfies_classes: []` valait « toutes les classes » d
   cathédrale : légère baisse des effets de départ (recherche, piété).
 - Les sauvegardes antérieures chargent (`Construction::paid`/`drawn` par défaut ; remboursement sur
   le coût en argent).
+
+## Complément SV2 (2026-09-25) — ressources des unités
+La même règle s'applique au recrutement : le `cost.resources` d'une unité (engins : bois, fer)
+est tiré de l'offre libre de la faction (`free_supply`) à la commande et réservé par la recrue en
+file (`QueuedRecruit::drawn`) jusqu'à son entrée en garnison ; le manque est importé à
+`base_price × resource_import_multiplier` et ajouté au coût (`RecruitOption::import_cost`).
+Refus seulement si le trésor ne couvre pas le coût total. Il n'existe pas d'annulation de
+recrutement, donc pas de remboursement ; la perte de la colonie vide la file et libère la réserve.
+L'IA prix ses recrues d'un même tour contre l'offre que ses recrues précédentes ont tirée
+(`ai::campaign::reprice_recruits`).

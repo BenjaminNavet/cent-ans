@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/economy_rules.schema.json",
   "title": "Règles d'économie",
-  "description": "Fichier data/rules/economy.json (lots EQ1, B7a) : échelle des effets de trésor des événements selon le revenu de la faction, coût de la cour et de l'administration, pénalité de banqueroute, ravitaillement en pays dévasté.",
+  "description": "Fichier data/rules/economy.json (lots EQ1, B7a, SV4) : échelle des effets de trésor des événements selon le revenu de la faction, coût de la cour et de l'administration, pénalité de banqueroute, ravitaillement (perte, reprise, famine, pays dévasté) et résorption de la dévastation.",
   "type": "object",
   "properties": {
     "description": { "type": "string" },
@@ -16,7 +16,12 @@
     "bankruptcy_morale_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu chaque saison par toutes les unités (armées et garnisons) tant que le trésor est négatif." },
     "supply_devastation_loss_percent": { "type": "number", "minimum": 0, "description": "Hors territoire ami : perte de ravitaillement supplémentaire (en % de la perte de saison) dans une province dévastée à 100 ; proportionnelle en dessous." },
     "supply_devastation_recovery_cut_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous." },
-    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c : prix (livres) d'une unité de ressource de construction manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier." }
+    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c (et SV2 pour les unités) : prix (livres) d'une unité de ressource de construction ou de recrutement manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier ou la levée." },
+    "supply_loss": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement perdus par saison hors du territoire ami (hors hiver)." },
+    "supply_loss_winter": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement perdus par saison d'hiver hors du territoire ami." },
+    "supply_recovery": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement regagnés par saison en territoire ami (avant bâtiments, compétences et dévastation)." },
+    "starvation_loss_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : pourcentage des hommes de chaque unité perdus chaque saison où l'armée est à zéro de ravitaillement." },
+    "devastation_decay": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de dévastation résorbés par saison dans chaque province." }
   },
   "required": [
     "event_treasury_reference_income",
@@ -29,7 +34,12 @@
     "bankruptcy_morale_penalty",
     "supply_devastation_loss_percent",
     "supply_devastation_recovery_cut_percent",
-    "resource_import_multiplier"
+    "resource_import_multiplier",
+    "supply_loss",
+    "supply_loss_winter",
+    "supply_recovery",
+    "starvation_loss_percent",
+    "devastation_decay"
   ],
   "additionalProperties": false
 }
