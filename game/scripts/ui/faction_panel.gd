@@ -130,11 +130,12 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	for r in _tax_buttons:
 		(_tax_buttons[r] as Button).button_pressed = r == rate
 	_updating = false
-	tax_note.text = {
-		"low": "×0,7 sur le revenu fiscal ; apaise le mécontentement.",
-		"normal": "×1,0 sur le revenu fiscal.",
-		"high": "×1,4 sur le revenu fiscal ; augmente le mécontentement.",
-	}.get(rate, "")
+	# SV4 : multiplicateurs lus dans le cœur (`TaxRate::multiplier`).
+	tax_note.text = RuleValues.format({
+		"low": "×{rule.tax_multiplier_low} sur le revenu fiscal ; apaise le mécontentement.",
+		"normal": "×{rule.tax_multiplier_normal} sur le revenu fiscal.",
+		"high": "×{rule.tax_multiplier_high} sur le revenu fiscal ; augmente le mécontentement.",
+	}.get(rate, ""))
 	_fill_goods(economy.get("goods", {}), economy.get("goods_categories", []))
 	show()
 

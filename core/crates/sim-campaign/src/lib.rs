@@ -65,6 +65,7 @@ pub mod religion;
 pub mod research;
 pub mod retinue;
 pub mod rng;
+pub mod rule_constants;
 pub mod save;
 pub mod settlements;
 pub mod setup_1337;
