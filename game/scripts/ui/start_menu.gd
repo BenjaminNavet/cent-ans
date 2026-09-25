@@ -83,6 +83,10 @@ func _ready() -> void:
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
 	for arg in args:
+		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
+		if arg.begins_with("--naval-scenario="):
+			get_tree().change_scene_to_file.call_deferred("res://scenes/naval/naval_battle.tscn")
+			return
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
 			if faction != "":

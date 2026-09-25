@@ -268,6 +268,8 @@ pub struct GameData {
     pub settlement_px: BTreeMap<SettlementId, [f32; 2]>,
     /// Navigation grid and province raster, decoded on first use (lot M2).
     pub rasters: crate::navgrid::RasterHandle,
+    /// `data/naval/` (lot NV1): ship classes, naval rules, fleets of 1337.
+    pub naval: crate::entities::naval::NavalData,
 }
 
 impl GameData {
@@ -318,6 +320,7 @@ impl GameData {
             free_movement: None,
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
+            naval: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -393,6 +396,7 @@ impl GameData {
         if free_movement_path.is_file() {
             data.free_movement = Some(read_json(&free_movement_path)?);
         }
+        data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
         data.build_movement_graph();
@@ -850,7 +854,7 @@ impl ReferenceChecker<'_> {
 }
 
 /// Reads and deserializes one JSON file.
-pub(crate) fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
+pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
     let text = fs::read_to_string(path).map_err(|source| DataError::Io {
         path: path.to_path_buf(),
         source,

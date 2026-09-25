@@ -45,7 +45,7 @@ pub(crate) fn json_to_variant(value: &Value) -> Variant {
     }
 }
 
-fn to_dict<T: serde::Serialize>(value: &T) -> VarDictionary {
+pub(crate) fn to_dict<T: serde::Serialize>(value: &T) -> VarDictionary {
     serde_json::to_value(value)
         .ok()
         .map(|json| json_to_variant(&json))
@@ -53,12 +53,12 @@ fn to_dict<T: serde::Serialize>(value: &T) -> VarDictionary {
         .unwrap_or_default()
 }
 
-fn from_dict<T: serde::de::DeserializeOwned>(dict: &VarDictionary) -> Result<T, String> {
+pub(crate) fn from_dict<T: serde::de::DeserializeOwned>(dict: &VarDictionary) -> Result<T, String> {
     variant_to_json(&dict.to_variant())
         .and_then(|json| serde_json::from_value::<T>(json).map_err(|e| e.to_string()))
 }
 
-fn result_dict(result: Result<(), String>) -> VarDictionary {
+pub(crate) fn result_dict(result: Result<(), String>) -> VarDictionary {
     match result {
         Ok(()) => vdict! { "ok" => true, "error" => "" },
         Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
