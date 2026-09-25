@@ -18,12 +18,15 @@ Lancer en 1920×1080 (en 1280×720 le bouton « Commencer » du menu sort de l'�
       flèche sur la ville ; guide masqué sous pause/réglages/chronique ; parchemin rangé à gauche
       d'un panneau ouvert (il couvrait la liste des bâtiments)
 - [x] P2 son : une seule fenêtre (Menu → Son… ouvre Réglages → Son), curseurs thémés (e35d479c)
-- [ ] P2/P3 restants : toast 3,5 s sur le titre du panneau (11), chronique sur rapport de
-      saison (12), fin de bataille 720p (13), réglage taille des unités (14, à vérifier)
-- [ ] captures C2, C3, C8
-- [ ] édits (C4, dans main f9c2bd98) : section visible sans défilement dans l'onglet Ville —
-      fusionner main d'abord
-- [ ] diagnostic solde anglais (10) : noter seulement
+- [x] P2/P3 : bandeau masqué par un panneau ouvert après lui (11) ; chronique ouverte après
+      la fermeture du rapport de saison (12) ; « Faits notables » sous le bilan (13) ; écran
+      des couronnes réduit d'un bloc sous 1280×860 (bouton « Commencer » visible en 720p) (02a66753)
+- [x] 14 : « Taille des unités » et « Sang » présents dans main (BV1/BV2 fusionnés), rien à faire
+- [x] main fusionné (C4, C5) ; section des édits en tête de l'onglet Ville (6a807c00)
+- [x] captures C2, C8, 720p, édits : `docs/audit/captures/q2/`
+- [ ] 10 (solde anglais négatif) : noté, lot G1
+- [ ] nouveau : la bulle du chroniqueur (VO1, main) couvre le titre du rapport de saison
+      (capture q2/04) — lot VO1
 
 ## Prochaine étape
-Première case non cochée.
+Q2 terminé ; restent les deux points ouverts ci-dessus (autres lots).
