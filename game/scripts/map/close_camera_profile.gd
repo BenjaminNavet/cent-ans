@@ -40,6 +40,9 @@ extends Resource
 @export var pitch_reference_distance: float = 22.0
 @export var pitch_closest_deg: float = 11.0
 @export var pitch_closest_distance: float = 0.3
+## Visée relevée au-dessus du point visé, en fraction de la distance, au plus près (0 à la distance de
+## référence) : la vue rasante montre crêtes et horizon au lieu du sol sous la caméra.
+@export var look_up_factor: float = 0.3
 
 @export var near_factor: float = 0.02
 @export var near_min: float = 0.002
@@ -143,8 +146,16 @@ func close_pitch_deg(distance: float, reference_deg: float) -> float:
 	var lo := log(maxf(pitch_closest_distance, 1e-4))
 	var hi := log(maxf(pitch_reference_distance, pitch_closest_distance * 1.01))
 	var t := clampf((log(maxf(distance, 1e-4)) - lo) / (hi - lo), 0.0, 1.0)
-	# Courbe douce : l'essentiel du rabattement se fait dans la dernière décade (vue « site »).
-	return lerpf(pitch_closest_deg, reference_deg, sqrt(t))
+	# Linéaire en logarithme de la distance : 21° à 5 unités (vallée), 17° à 1,5, 11° à 0,3.
+	return lerpf(pitch_closest_deg, reference_deg, t)
+
+
+## Hauteur (unités) dont la visée est relevée au-dessus du point visé.
+func look_up(distance: float) -> float:
+	var lo := log(maxf(pitch_closest_distance, 1e-4))
+	var hi := log(maxf(pitch_reference_distance, pitch_closest_distance * 1.01))
+	var t := clampf((log(maxf(distance, 1e-4)) - lo) / (hi - lo), 0.0, 1.0)
+	return look_up_factor * (1.0 - t) * distance
 
 
 func near_plane(distance: float) -> float:
