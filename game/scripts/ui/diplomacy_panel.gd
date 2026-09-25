@@ -28,7 +28,7 @@ const STATUS_COLORS := {
 }
 ## Teintes de la carte diplomatique (plus saturées que la carte 3D : fond clair de la minicarte).
 const MAP_COLORS := {
-	"self": Color(0.86, 0.68, 0.18), "war": Color(0.78, 0.10, 0.08), "truce": Color(0.92, 0.78, 0.22),
+	"self": Color(0.86, 0.68, 0.18), "war": Color(0.78, 0.10, 0.08), "truce": Color(0.95, 0.55, 0.15),
 	"alliance": Color(0.18, 0.40, 0.85), "vassal": Color(0.55, 0.25, 0.72), "suzerain": Color(0.55, 0.25, 0.72),
 }
 const FRIENDLY := Color(0.30, 0.62, 0.30)
