@@ -125,9 +125,15 @@ func _draw() -> void:
 	draw_string_outline(font, Vector2(3, size.y - 9), main_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, 4, Color(0.08, 0.05, 0.02))
 	draw_string(font, Vector2(3, size.y - 9), main_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, main_color)
 	if losses >= 0 and killed > 0:
-		var kills := "⚔%d" % killed
-		draw_string_outline(font, Vector2(3, size.y - 27), kills, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color(0.08, 0.05, 0.02))
-		draw_string(font, Vector2(3, size.y - 27), kills, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 0.85, 0.4))
+		# Épées croisées dessinées (pas de glyphe : la police n'en a pas), puis le nombre de tués.
+		var o := Vector2(4, size.y - 36)
+		var gold := Color(1, 0.85, 0.4)
+		for line in [[o, o + Vector2(9, 9)], [o + Vector2(9, 0), o + Vector2(0, 9)]]:
+			draw_line(line[0], line[1], Color(0.08, 0.05, 0.02), 3.5)
+			draw_line(line[0], line[1], gold, 1.6)
+		var kills := str(killed)
+		draw_string_outline(font, Vector2(15, size.y - 27), kills, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color(0.08, 0.05, 0.02))
+		draw_string(font, Vector2(15, size.y - 27), kills, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, gold)
 	var bar := Rect2(2, size.y - 5, size.x - 4, 3)
 	draw_rect(bar, Color(0.15, 0.1, 0.06, 0.9))
 	draw_rect(Rect2(bar.position, Vector2(bar.size.x * clampf(float(soldiers) / float(max_soldiers), 0.0, 1.0), bar.size.y)), Color(0.85, 0.78, 0.55))

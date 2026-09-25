@@ -50,6 +50,7 @@ var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
 var resolved: bool = false
+var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var siege_demo: bool = false
@@ -566,22 +567,44 @@ func _show_end() -> void:
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	# UB1 : le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
+	# expérience) sur l'écran de fin ; « Retour à la campagne » ne fait plus que rendre la main.
+	var side_setup: Dictionary = setup[player_side]
+	var general: Variant = side_setup.get("general", null)
+	var general_id := str(general.get("character", "")) if general is Dictionary else ""
+	var before := BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id)
+	_resolve_now()
+	var aftermath := {}
+	if bool(_resolution.get("ok", false)):
+		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
-	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
 
 
-## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
-func _on_return() -> void:
+var _resolution: Dictionary = {}
+
+
+## Applique le résultat (`resolve_battle`) une seule fois.
+func _resolve_now() -> void:
 	if resolved:
 		return
 	resolved = true
-	var result := {"ok": false, "error": "bataille non terminée", "events": []}
+	_resolution = {"ok": false, "error": "bataille non terminée", "events": []}
 	if battle != null and battle.call("is_finished") and campaign_sim != null and not padded:
-		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
-		if not result.get("ok", false):
-			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+		_resolution = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
+		if not _resolution.get("ok", false):
+			push_error("BattleScene: resolve_battle refused: %s" % _resolution.get("error", "?"))
+
+
+## « Retour à la campagne » : applique le résultat s'il ne l'est pas encore, puis rend la main.
+func _on_return() -> void:
+	if _returned:
+		return
+	_returned = true
+	_resolve_now()
+	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
 	returned.emit(result)
