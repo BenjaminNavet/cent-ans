@@ -281,6 +281,8 @@ func begin() -> bool:
 	var terrain_data: Dictionary = battle.call("get_terrain")
 	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
 	terrain.build(terrain_data, weather_key)
+	if terrain.decor_view != null:
+		terrain.decor_view.bind(battle)  # EP6 : pillage des camps
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
 		siege_view.name = "Siege"

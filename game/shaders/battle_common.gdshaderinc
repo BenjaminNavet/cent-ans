@@ -24,6 +24,15 @@ float bt_value_noise(vec2 p) {
 	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
+// EP6 : parcelle du décor du cœur lue dans `decor_fields` (texel `df`) : x = nature (1 labour,
+// 2 blé, 3 pré, 4 semis, 5 vigne, 6 chaume), y = coordonnée à travers les sillons (qui suivent la
+// longueur de la parcelle), z = distance normalisée au bord.
+vec3 bt_decor_field(vec4 df, vec2 p) {
+	float kind = floor(df.r * 8.0 + 0.5);
+	float yaw = df.g * 3.14159265;
+	return vec3(kind, dot(p, vec2(-sin(yaw), cos(yaw))), df.b);
+}
+
 // Parcelle cultivée au point `p` (m) : x = nature (0 aucune, 1 labour, 2 blé, 3 jachère),
 // y = coordonnée le long des sillons, z = distance normalisée au bord (0 bord, 1 centre).
 vec3 bt_field_info(vec2 p) {
