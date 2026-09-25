@@ -37,11 +37,13 @@ mod convert;
 mod data_store_rules;
 mod naval_sim;
 mod relief_decoder;
+mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 pub use naval_sim::NavalBattleSim;
 pub use relief_decoder::ReliefDecoder;
+pub use vegetation_scatter::VegetationScatter;
 
 struct CentAnsExtension;
 
