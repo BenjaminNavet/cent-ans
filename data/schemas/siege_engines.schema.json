@@ -4,126 +4,486 @@
   "title": "Engins de siège animés (SG2)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["description", "models_dir", "engines", "trebuchet", "mangonel", "bombard", "ram", "siege_tower", "oil", "impact_marks"],
+  "required": [
+    "description",
+    "models_dir",
+    "engines",
+    "trebuchet",
+    "mangonel",
+    "bombard",
+    "ram",
+    "siege_tower",
+    "oil",
+    "impact_marks"
+  ],
   "$defs": {
-    "seconds": {"type": "number", "minimum": 0},
-    "positive": {"type": "number", "exclusiveMinimum": 0},
-    "angle": {"type": "number", "minimum": -720, "maximum": 720},
-    "phase": {"type": "number", "minimum": 0, "maximum": 1}
+    "seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "positive": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "angle": {
+      "type": "number",
+      "minimum": -720,
+      "maximum": 720
+    },
+    "phase": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
   },
   "properties": {
-    "description": {"type": "string"},
-    "models_dir": {"type": "string", "pattern": "^res://.+/$"},
+    "description": {
+      "type": "string"
+    },
+    "models_dir": {
+      "type": "string",
+      "pattern": "^res://.+/$"
+    },
     "engines": {
       "type": "object",
-      "propertyNames": {"pattern": "^unit_[a-z0-9_]+$"},
-      "additionalProperties": {"enum": ["trebuchet", "mangonel", "bombard"]}
+      "propertyNames": {
+        "pattern": "^unit_[a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "enum": [
+          "trebuchet",
+          "mangonel",
+          "bombard"
+        ]
+      }
     },
     "trebuchet": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["cocked_deg", "rest_deg", "overswing_deg", "swing_s", "release_phase", "sling_release_deg", "sling_end_deg", "sling_power", "settle_s", "settle_hz", "settle_damping", "counterweight_lag", "winch_turns", "ready_margin_s", "stagger_s", "predict"],
+      "required": [
+        "cocked_deg",
+        "rest_deg",
+        "overswing_deg",
+        "swing_s",
+        "release_phase",
+        "sling_release_deg",
+        "sling_end_deg",
+        "sling_power",
+        "settle_s",
+        "settle_hz",
+        "settle_damping",
+        "counterweight_lag",
+        "winch_turns",
+        "ready_margin_s",
+        "stagger_s",
+        "predict"
+      ],
       "properties": {
-        "cocked_deg": {"$ref": "#/$defs/angle"},
-        "rest_deg": {"$ref": "#/$defs/angle"},
-        "overswing_deg": {"$ref": "#/$defs/angle"},
-        "swing_s": {"$ref": "#/$defs/positive"},
-        "release_phase": {"$ref": "#/$defs/phase"},
-        "sling_release_deg": {"$ref": "#/$defs/angle"},
-        "sling_end_deg": {"$ref": "#/$defs/angle"},
-        "sling_power": {"$ref": "#/$defs/positive"},
-        "settle_s": {"$ref": "#/$defs/seconds"},
-        "settle_hz": {"$ref": "#/$defs/positive"},
-        "settle_damping": {"$ref": "#/$defs/seconds"},
-        "counterweight_lag": {"$ref": "#/$defs/seconds"},
-        "winch_turns": {"$ref": "#/$defs/seconds"},
-        "ready_margin_s": {"$ref": "#/$defs/seconds"},
-        "stagger_s": {"$ref": "#/$defs/seconds"},
-        "predict": {"type": "boolean"}
+        "cocked_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "rest_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "overswing_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "swing_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "release_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "sling_release_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "sling_end_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "sling_power": {
+          "$ref": "#/$defs/positive"
+        },
+        "settle_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "settle_hz": {
+          "$ref": "#/$defs/positive"
+        },
+        "settle_damping": {
+          "$ref": "#/$defs/seconds"
+        },
+        "counterweight_lag": {
+          "$ref": "#/$defs/seconds"
+        },
+        "winch_turns": {
+          "$ref": "#/$defs/seconds"
+        },
+        "ready_margin_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "stagger_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "predict": {
+          "type": "boolean"
+        }
       }
     },
     "mangonel": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["cocked_deg", "fired_deg", "swing_s", "release_phase", "bounce_deg", "settle_s", "winch_turns", "ready_margin_s", "stagger_s", "predict"],
+      "required": [
+        "cocked_deg",
+        "fired_deg",
+        "swing_s",
+        "release_phase",
+        "bounce_deg",
+        "settle_s",
+        "winch_turns",
+        "ready_margin_s",
+        "stagger_s",
+        "predict"
+      ],
       "properties": {
-        "cocked_deg": {"$ref": "#/$defs/angle"},
-        "fired_deg": {"$ref": "#/$defs/angle"},
-        "swing_s": {"$ref": "#/$defs/positive"},
-        "release_phase": {"$ref": "#/$defs/phase"},
-        "bounce_deg": {"$ref": "#/$defs/angle"},
-        "settle_s": {"$ref": "#/$defs/seconds"},
-        "winch_turns": {"$ref": "#/$defs/seconds"},
-        "ready_margin_s": {"$ref": "#/$defs/seconds"},
-        "stagger_s": {"$ref": "#/$defs/seconds"},
-        "predict": {"type": "boolean"}
+        "cocked_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "fired_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "swing_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "release_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "bounce_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "settle_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "winch_turns": {
+          "$ref": "#/$defs/seconds"
+        },
+        "ready_margin_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "stagger_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "predict": {
+          "type": "boolean"
+        }
       }
     },
     "bombard": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["recoil_m", "recoil_s", "hold_s", "return_s", "mantlet_raised_deg", "mantlet_s", "stagger_s", "smoke_scale"],
+      "required": [
+        "recoil_m",
+        "recoil_s",
+        "hold_s",
+        "return_s",
+        "mantlet_raised_deg",
+        "mantlet_s",
+        "stagger_s",
+        "smoke_scale"
+      ],
       "properties": {
-        "recoil_m": {"$ref": "#/$defs/seconds"},
-        "recoil_s": {"$ref": "#/$defs/positive"},
-        "hold_s": {"$ref": "#/$defs/seconds"},
-        "return_s": {"$ref": "#/$defs/positive"},
-        "mantlet_raised_deg": {"$ref": "#/$defs/angle"},
-        "mantlet_s": {"$ref": "#/$defs/positive"},
-        "stagger_s": {"$ref": "#/$defs/seconds"},
-        "smoke_scale": {"$ref": "#/$defs/positive"}
+        "recoil_m": {
+          "$ref": "#/$defs/seconds"
+        },
+        "recoil_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "hold_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "return_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "mantlet_raised_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "mantlet_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "stagger_s": {
+          "$ref": "#/$defs/seconds"
+        },
+        "smoke_scale": {
+          "$ref": "#/$defs/positive"
+        }
       }
     },
     "ram": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["wheel_radius", "beam_drop", "max_swing_deg", "sway_deg", "sway_per_m"],
+      "required": [
+        "wheel_radius",
+        "beam_drop",
+        "max_swing_deg",
+        "sway_deg",
+        "sway_per_m"
+      ],
       "properties": {
-        "wheel_radius": {"$ref": "#/$defs/positive"},
-        "beam_drop": {"$ref": "#/$defs/positive"},
-        "max_swing_deg": {"$ref": "#/$defs/angle"},
-        "sway_deg": {"$ref": "#/$defs/seconds"},
-        "sway_per_m": {"$ref": "#/$defs/seconds"}
+        "wheel_radius": {
+          "$ref": "#/$defs/positive"
+        },
+        "beam_drop": {
+          "$ref": "#/$defs/positive"
+        },
+        "max_swing_deg": {
+          "$ref": "#/$defs/angle"
+        },
+        "sway_deg": {
+          "$ref": "#/$defs/seconds"
+        },
+        "sway_per_m": {
+          "$ref": "#/$defs/seconds"
+        }
       }
     },
     "siege_tower": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["wheel_radius", "model_height", "bridge_above_wall", "sway_deg", "sway_per_m"],
+      "required": [
+        "wheel_radius",
+        "model_height",
+        "bridge_above_wall",
+        "sway_deg",
+        "sway_per_m"
+      ],
       "properties": {
-        "wheel_radius": {"$ref": "#/$defs/positive"},
-        "model_height": {"$ref": "#/$defs/positive"},
-        "bridge_above_wall": {"type": "number"},
-        "sway_deg": {"$ref": "#/$defs/seconds"},
-        "sway_per_m": {"$ref": "#/$defs/seconds"}
+        "wheel_radius": {
+          "$ref": "#/$defs/positive"
+        },
+        "model_height": {
+          "$ref": "#/$defs/positive"
+        },
+        "bridge_above_wall": {
+          "type": "number"
+        },
+        "sway_deg": {
+          "$ref": "#/$defs/seconds"
+        },
+        "sway_per_m": {
+          "$ref": "#/$defs/seconds"
+        }
       }
     },
     "oil": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["steam_amount", "steam_lifetime_s", "steam_rise", "steam_size_m", "drip_amount", "drip_lifetime_s", "stain_width_m", "stain_seconds", "sound_delay_s"],
+      "required": [
+        "steam_amount",
+        "steam_lifetime_s",
+        "steam_rise",
+        "steam_size_m",
+        "drip_amount",
+        "drip_lifetime_s",
+        "stain_width_m",
+        "stain_seconds",
+        "sound_delay_s"
+      ],
       "properties": {
-        "steam_amount": {"type": "integer", "minimum": 1, "maximum": 1000},
-        "steam_lifetime_s": {"$ref": "#/$defs/positive"},
-        "steam_rise": {"$ref": "#/$defs/seconds"},
-        "steam_size_m": {"$ref": "#/$defs/positive"},
-        "drip_amount": {"type": "integer", "minimum": 1, "maximum": 1000},
-        "drip_lifetime_s": {"$ref": "#/$defs/positive"},
-        "stain_width_m": {"$ref": "#/$defs/positive"},
-        "stain_seconds": {"$ref": "#/$defs/seconds"},
-        "sound_delay_s": {"$ref": "#/$defs/seconds"}
+        "steam_amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "steam_lifetime_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "steam_rise": {
+          "$ref": "#/$defs/seconds"
+        },
+        "steam_size_m": {
+          "$ref": "#/$defs/positive"
+        },
+        "drip_amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "drip_lifetime_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "stain_width_m": {
+          "$ref": "#/$defs/positive"
+        },
+        "stain_seconds": {
+          "$ref": "#/$defs/seconds"
+        },
+        "sound_delay_s": {
+          "$ref": "#/$defs/seconds"
+        }
       }
     },
     "impact_marks": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["max_marks", "size_m", "depth_m", "breach_scale"],
+      "required": [
+        "max_marks",
+        "size_m",
+        "depth_m",
+        "breach_scale"
+      ],
       "properties": {
-        "max_marks": {"type": "integer", "minimum": 0, "maximum": 512},
-        "size_m": {"type": "array", "items": {"$ref": "#/$defs/positive"}, "minItems": 2, "maxItems": 2},
-        "depth_m": {"$ref": "#/$defs/positive"},
-        "breach_scale": {"$ref": "#/$defs/positive"}
+        "max_marks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 512
+        },
+        "size_m": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/positive"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "depth_m": {
+          "$ref": "#/$defs/positive"
+        },
+        "breach_scale": {
+          "$ref": "#/$defs/positive"
+        }
       }
+    },
+    "crew": {
+      "type": "object",
+      "description": "SG3 : servants des engins (figurines skinnées V2 crew_0 sans arme, crew_1 avec refouloir), placés autour de chaque modèle (x, z en mètres dans le repère du modèle, cap en degrés, 0 = face à +Z) ; rôle -> clip selon le rechargement du cœur (treuil, chargement, écouvillon) ou le déplacement (poussée). Cachés au-delà de hide_beyond_m (distance des imposteurs BV3).",
+      "properties": {
+        "figure_kind": {
+          "type": "string"
+        },
+        "detail_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000
+        },
+        "medium_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000
+        },
+        "hide_beyond_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000
+        },
+        "load_from": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du treuil accomplie dès laquelle le chargeur du trébuchet charge la pierre."
+        },
+        "swab_until": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du rechargement de la bombarde pendant laquelle le servant écouvillonne et refoule."
+        },
+        "bombard_load": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Part du rechargement de la bombarde pendant laquelle le chargeur apporte la poudre et le boulet."
+        },
+        "clips": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "layouts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                },
+                "yaw_deg": {
+                  "type": "number"
+                },
+                "role": {
+                  "enum": [
+                    "winch",
+                    "loader",
+                    "swab",
+                    "pusher"
+                  ]
+                },
+                "figure": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "x",
+                "z",
+                "yaw_deg",
+                "role",
+                "figure"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "required": [
+        "figure_kind",
+        "detail_m",
+        "medium_m",
+        "hide_beyond_m",
+        "load_from",
+        "swab_until",
+        "bombard_load",
+        "clips",
+        "layouts"
+      ],
+      "additionalProperties": false
+    },
+    "lod": {
+      "type": "object",
+      "description": "SG3 : niveaux de détail des engins. Au-delà de simple_m, maillage simplifié (<modèle>_lod.glb, pièces animées gardées) ; au-delà de far_m (même distance que les imposteurs de figurines BV3), pose recalculée far_pose_hz fois par seconde seulement et servants cachés. Lisible par les préréglages de qualité (SiegeEnginesFx.lod_distances()).",
+      "properties": {
+        "simple_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000
+        },
+        "far_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000
+        },
+        "far_pose_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 60
+        }
+      },
+      "required": [
+        "simple_m",
+        "far_m",
+        "far_pose_hz"
+      ],
+      "additionalProperties": false
     }
   }
 }
