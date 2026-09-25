@@ -29,6 +29,7 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | 3 | en cours (wip `zg6-villes.md`) |
+| ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
 ## Journal
@@ -49,3 +50,5 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG4 fusionné, **main = a3389a92**, smoke complet OK (28 étapes, après SM1 de la nuit). Défauts visibles de près (captures ZG4) transmis à ZG5b : tranchée de `river_bed.png`, damier de la splat 719 m, texture floue. ZG6 lancé. Prévenus : nuit (PF1, VH peut démarrer), PB1.
 - 25/09 : PF1 (nuit) dans main par-dessus ZG4. ZG3b fusionné : cause = base du rehaussement calculée sur GLO-90 (surface, bâti) au lieu de la source fine + pas de plancher de terre ; corrigé, 34 zones recuites, `geo detail-check` ajouté. `hydro-fine` et `anchors-fine` relancés sur le relief corrigé. **main = 2d36ec2a**. Limite : rives basses de Londres plaquées à 0,5 m (plancher) au lieu de 2-5 m.
 - 25/09 : PB1 dans main. ZG5b fusionné (lit fin creusé dans les pages du quadtree, rubans de fleuves/routes, ponts à l'échelle, parcellaire ; −10 % i/s, p99 115 → 167 ms sous charge) ; smoke 28 OK, tests ZG2/ZG4/ZG5b OK. À reprendre en ZG7 : lit de la Seine trop large (chenal brun), pic de 35 ms au basculement des ponts, ponts-portes encore exagérés, coût GPU du parcellaire non mesuré (pas d'outil Metal).
+- 25/09 : recette Q3 (nuit) : sol beige nu sous 3 unités à Londres (trou entre ZG4/ZG5b/VH), ruban rouge-gris géant sur la Tamise vers 20 unités, arrêt à 7 unités sans cache. → ZG4b lancé ; le cache absent relève de ZG7 (embarquement + message clair).
+- 25/09 21h37 : limite de quota levée, ZG4b (aucun commit encore) et ZG6 (dernier 3b499cf4) relancés avec leur contexte.
