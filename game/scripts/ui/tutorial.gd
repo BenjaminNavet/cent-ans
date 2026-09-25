@@ -104,7 +104,12 @@ func _ready() -> void:
 	toc_box.hide()
 	box.add_child(toc_box)
 	text_label = _rich(15)
+	text_label.mouse_filter = Control.MOUSE_FILTER_PASS  # BP1 : survol des liens du Codex
 	box.add_child(text_label)
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le texte de l'étape.
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", text_label)
 	objective_label = _rich(15)
 	box.add_child(objective_label)
 	var buttons := HBoxContainer.new()
@@ -164,10 +169,10 @@ func show_step(step: Dictionary, index: int, total: int) -> void:
 	current_index = index
 	title_label.text = str(step.get("title", ""))
 	progress_label.text = "Étape %d / %d" % [index + 1, total]
-	var text := str(step.get("text", ""))
+	var text := CodexText.format(str(step.get("text", "")), true)
 	var advice := str(step.get("advice", ""))
 	if advice != "":
-		text += "\n[color=%s][i]%s[/i][/color]" % [MUTED, advice]
+		text += "\n[color=%s][i]%s[/i][/color]" % [MUTED, CodexText.format(advice, true)]
 	text_label.text = text
 	var manual := bool(step.get("manual", false))
 	objective_label.text = "[b]Objectif :[/b] %s" % str(step.get("objective", ""))

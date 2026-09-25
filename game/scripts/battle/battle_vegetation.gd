@@ -20,7 +20,7 @@ var _ground_y: float = 0.0
 
 
 func build(terrain: BattleTerrain, weather: String) -> void:
-	_ground_y = terrain.height_at(600.0, 400.0)
+	_ground_y = terrain.height_at(terrain.FIELD_W * 0.5, terrain.FIELD_D * 0.5)
 	var mesh := _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
@@ -30,7 +30,7 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		mat.shader = GRASS_SHADER
 		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE)
 		mat.set_shader_parameter("height_map", terrain.height_texture)
-		var hr := BattleTerrain.SPLAT_RECT
+		var hr := terrain.SPLAT_RECT
 		var t := BattleTerrain.HEIGHT_TEXEL
 		var hw := float(int(hr.size.x / t) + 1) * t
 		var hh := float(int(hr.size.y / t) + 1) * t

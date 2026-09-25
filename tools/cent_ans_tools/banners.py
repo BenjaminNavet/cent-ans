@@ -8,6 +8,8 @@ shader adds the cloth shading. Output (RGBA, powers of two, transparent outside 
   slightly irregular lower edge, no pole.
 - ``fac_<id>_pennon.png`` 512×128: pennon, arms at the hoist (left), tapering swallow tail
   in the livery colours.
+- ``fac_<id>_standard.png`` 1024×256 (lot EP5): long tapering standard of a great lord,
+  arms at the hoist, livery stripes sown with badges, split rounded tail.
 - ``oriflamme.png``, ``st_george.png``, ``dragon.png`` 256×512: royal battle standards
   (oriflamme of Saint-Denis, cross of St George, dragon banner raised at Crécy in 1346).
 """
@@ -28,6 +30,7 @@ BANNERS_DIR = heraldry.HERALDRY_DIR / "banners"
 BANNER_SIZE = (256, 512)
 BANNER_CLOTH_HEIGHT = 352  # cloth of arms, ratio ≈ 1:1.4 (charges barely stretched)
 PENNON_SIZE = (512, 128)
+STANDARD_SIZE = (1024, 256)
 SUPERSAMPLE = 2
 
 # Dragon passant facing the hoist (normalised square canvas), after the English dragon
@@ -150,6 +153,47 @@ def render_pennon(arms: Image.Image, livery: tuple[Color, Color]) -> Image.Image
     return _finish(canvas, PENNON_SIZE)
 
 
+def render_standard(arms: Image.Image, livery: tuple[Color, Color]) -> Image.Image:
+    """Long standard 1024×256 RGBA (EP5): arms at the hoist, tapering livery fly.
+
+    The standard of a great lord, late 14th century: a square of arms (or the cross of
+    the realm) at the hoist, then the fly parted per fess in the livery colours, sown with
+    roundels of the other tincture, narrowing to a split, rounded tail.
+    """
+    width, height = (value * SUPERSAMPLE for value in STANDARD_SIZE)
+    canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    hoist = height
+
+    def edge(x: float) -> float:
+        """Half height of the fly at `x` (tapering from the hoist to the tail)."""
+        t = (x - hoist) / (width - hoist)
+        return height * 0.5 * (1.0 - 0.45 * t)
+
+    xs = [hoist + (width - hoist) * i / 32 for i in range(33)]
+    mid = height * 0.5
+    upper = [(hoist, 0.0)] + [(x, mid - edge(x)) for x in xs] + [(width, mid)]
+    upper += [(width * 0.9, mid), (hoist, mid)]
+    lower = [(hoist, mid), (width * 0.9, mid), (width, mid)]
+    lower += [(x, mid + edge(x)) for x in reversed(xs)] + [(hoist, float(height))]
+    draw.polygon(upper, fill=(*livery[0], 255))
+    draw.polygon(lower, fill=(*livery[1], 255))
+    # Split tail: a notch cut into the end of the fly.
+    notch = [(width * 0.9, mid), (width + 1, mid - height * 0.12)]
+    notch += [(width + 1, mid + height * 0.12)]
+    draw.polygon(notch, fill=(0, 0, 0, 0))
+    # Badges sown on the fly (roundels of the other tincture).
+    radius = height * 0.07
+    for index, x in enumerate(xs[2:-4:4]):
+        for row, (y, color) in enumerate(((0.28, livery[1]), (0.72, livery[0]))):
+            cy = mid + (y - 0.5) * 2 * edge(x) * 0.8
+            offset = radius * 1.6 if (index + row) % 2 else 0.0
+            box = (x + offset - radius, cy - radius, x + offset + radius, cy + radius)
+            draw.ellipse(box, fill=(*color, 255))
+    canvas.paste(arms.resize((hoist, hoist), Image.Resampling.LANCZOS), (0, 0))
+    return _finish(canvas, STANDARD_SIZE)
+
+
 def render_oriflamme() -> Image.Image:
     """Oriflamme of Saint-Denis: plain red silk ending in pointed tails."""
     width, height = (value * SUPERSAMPLE for value in BANNER_SIZE)
@@ -202,7 +246,7 @@ def render_dragon() -> Image.Image:
 def build(
     factions_dir: Path = heraldry.FACTIONS_DIR, out_dir: Path = BANNERS_DIR
 ) -> list[Path]:
-    """Write the banners and pennons of every faction plus the specials; return paths."""
+    """Write the banners, pennons and standards of every faction plus the specials."""
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     for index, faction in enumerate(heraldry.load_factions(factions_dir)):
@@ -212,6 +256,7 @@ def build(
         for kind, image in (
             ("banner", render_banner(arms, seed=index)),
             ("pennon", render_pennon(arms, livery)),
+            ("standard", render_standard(arms, livery)),
         ):
             path = out_dir / f"{faction['id']}_{kind}.png"
             image.save(path, optimize=True)

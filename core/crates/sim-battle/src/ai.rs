@@ -34,6 +34,14 @@
 //!   shooters; an advancing line shifts each step aside to go round a steep
 //!   rise, runs under arrows, waits for its laggards, and does not charge
 //!   at the run up a steep rise from afar.
+//! - **Water (EP3)**: a defender with the river between itself and the
+//!   enemy holds it (unless much stronger): shooters on its bank at the
+//!   crossing the enemy would take, the line just behind them (the
+//!   bridgehead). An advancing side picks a crossing (bridge, ford or a
+//!   detour) by the march, the width it must file through and the enemy
+//!   shooters covering the far end; it waits on its own bank while its
+//!   shooters duel with a covered crossing (for a while), then crosses and
+//!   forms beyond it. Horsemen do not charge into water or up a steep bank.
 //! - **Shooters** fall back behind the line as soon as enemy foot or horse
 //!   come close, and disengage from a melee.
 //! - **Cavalry** charges isolated shooters, the flanks or rear of enemy
@@ -400,7 +408,7 @@ pub fn dry_z(field: &crate::field::Battlefield, x: f64, z: f64, from_z: f64, for
         return z;
     };
     let center = river.center_z(x);
-    let reach = river.width * 0.5 + RIVER_MARGIN;
+    let reach = river.width_at(x) * 0.5 + RIVER_MARGIN;
     if river.in_ford(x) || (z - center).abs() > reach {
         return z;
     }
@@ -514,7 +522,7 @@ fn roles(view: &View) -> Roles {
 fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
     let field = view.sim.field();
     let map = view.sim.relief_map();
-    let around = deployment_center(view.side);
+    let around = deployment_center(field, view.side);
     let base = field.height(around.0, around.1);
     let width = front_width(view, roles);
     let reverse = view.able_enemies().any(|j| is_shooter(&view.units[j]));
@@ -534,7 +542,11 @@ fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
         for iz in -4..=4 {
             let x = around.0 + f64::from(ix) * 25.0;
             let z = around.1 + f64::from(iz) * 25.0;
-            if !(300.0..=900.0).contains(&x) || !(60.0..=field.depth - 60.0).contains(&z) {
+            // The centre half of the field's width (300-900 m on the standard field).
+            let (center, half) = (field.size.center_x(), 300.0 * field.size.sx());
+            if !(center - half..=center + half).contains(&x)
+                || !(60.0..=field.depth - 60.0).contains(&z)
+            {
                 continue;
             }
             // Never step towards the enemy to find a hill.
@@ -595,8 +607,8 @@ fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
     } else {
         &roles.shooters
     };
-    let from = deployment_center(view.side);
-    let enemy_from = deployment_center(view.side.other());
+    let from = deployment_center(field, view.side);
+    let enemy_from = deployment_center(field, view.side.other());
     let own_speed = walkers
         .iter()
         .map(|&i| f64::from(view.units[i].stats.speed))
@@ -647,11 +659,11 @@ fn front_width(view: &View, roles: &Roles) -> f64 {
 /// R2b: centre of the deployment line of `side`, from which a defensive
 /// side looks for its ground (a fixed reference: searching from the moving
 /// line would let the reverse slope drag the line back step after step).
-fn deployment_center(side: SideId) -> (f64, f64) {
-    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
+/// EP3: read from the field's dimensions (never a fixed 1200 × 800 m).
+fn deployment_center(field: &crate::field::Battlefield, side: SideId) -> (f64, f64) {
     match side {
-        SideId::Attacker => (FIELD_WIDTH * 0.5, ATTACKER_LINE_Z),
-        SideId::Defender => (FIELD_WIDTH * 0.5, DEFENDER_LINE_Z),
+        SideId::Attacker => (field.size.center_x(), field.attacker_line_z()),
+        SideId::Defender => (field.size.center_x(), field.defender_line_z()),
     }
 }
 
@@ -700,6 +712,135 @@ const SHOOTERS_AHEAD: f64 = 30.0;
 pub enum CoverKind {
     Obstacle(crate::site::ObstacleKind),
     Village,
+    /// EP3: the bank of the river at a crossing.
+    River,
+}
+
+/// EP3: shooters hold the bank this far back from the water.
+pub const BANK_SETBACK: f64 = 55.0;
+/// EP3: a crossing farther than this from the deployment line is not held.
+pub const RIVER_REACH: f64 = 420.0;
+/// EP3: an advancing side waits this long on its bank while its shooters
+/// duel with the enemy shooters covering the crossing.
+pub const CROSSING_PATIENCE: f64 = 60.0;
+/// EP3: each enemy shooter covering a crossing's far end costs this many
+/// metres of march.
+pub const CROSSING_EXPOSURE: f64 = 90.0;
+/// EP3: the line forms this far beyond a crossing.
+pub const BRIDGEHEAD_DEPTH: f64 = 45.0;
+
+/// EP3: the bank a defensive `side` holds when the river lies between its
+/// deployment line and the enemy (`enemy`: its centroid): the crossing the
+/// enemy would take (cheapest from the enemy to the deployment line), its
+/// own-side end, shooters [`BANK_SETBACK`] back from the water, along the
+/// river.
+pub fn river_hold(
+    field: &crate::field::Battlefield,
+    side: SideId,
+    enemy: (f64, f64),
+) -> Option<Cover> {
+    let river = field.river.as_ref()?;
+    let home = deployment_center(field, side);
+    if !ReliefMap::river_between(field, home, enemy) {
+        return None;
+    }
+    let own_north = river.north_of(home.0, home.1);
+    let crossing = field
+        .crossings()
+        .into_iter()
+        .map(|c| {
+            let cost = ReliefMap::crossing_cost(field, enemy, &c, home, 40.0);
+            (c, cost)
+        })
+        .min_by(|a, b| a.1.total_cmp(&b.1))?
+        .0;
+    let end = crossing.end(own_north);
+    if (end.0 - home.0).hypot(end.1 - home.1) > RIVER_REACH {
+        return None;
+    }
+    let x = end.0;
+    let away = if own_north { 1.0 } else { -1.0 };
+    let mut center = (
+        x,
+        river.center_z(x) + away * (river.width_at(x) * 0.5 + BANK_SETBACK),
+    );
+    // Off the bridge and the road ramp itself: a little aside when needed.
+    if field.water_at(center.0, center.1).is_some() {
+        center.1 += away * 10.0;
+    }
+    let slope = river.slope(x);
+    let n = (1.0 + slope * slope).sqrt();
+    Some(Cover {
+        kind: CoverKind::River,
+        center,
+        along: (1.0 / n, slope / n),
+        width: 110.0,
+        breaks_charge: true,
+    })
+}
+
+/// EP3: how an advancing side crosses the river.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CrossingPlan {
+    /// End of the crossing on the own bank, and on the enemy's.
+    pub near: (f64, f64),
+    pub far: (f64, f64),
+    /// Enemy shooters covering the far end.
+    pub covered: usize,
+    pub bridge: bool,
+}
+
+/// EP3: the crossing an advancing side takes from `from` towards the enemy
+/// (march with the relief, width filed through, enemy shooters covering the
+/// far end); `None` when the river does not lie between.
+fn crossing_plan(view: &View, from: (f64, f64), line: &[usize]) -> Option<CrossingPlan> {
+    let field = view.sim.field();
+    let river = field.river.as_ref()?;
+    let able: Vec<usize> = view.able_enemies().collect();
+    let enemy = view.centroid(&able)?;
+    if !ReliefMap::river_between(field, from, enemy) {
+        return None;
+    }
+    let frontage = line
+        .iter()
+        .map(|&i| view.units[i].extent().0)
+        .fold(20.0, f64::max);
+    let weather = view.sim.weather().range_factor();
+    let foes: Vec<(f64, f64, f64)> = able
+        .iter()
+        .filter(|&&k| is_shooter(&view.units[k]))
+        .map(|&k| {
+            let e = &view.units[k];
+            (e.x, e.z, f64::from(e.stats.range) * weather)
+        })
+        .collect();
+    let north = river.north_of(from.0, from.1);
+    view.sim
+        .crossings()
+        .iter()
+        .map(|c| {
+            let far = c.end(!north);
+            let covered = ReliefMap::covered(far, &foes);
+            let cost = ReliefMap::crossing_cost(field, from, c, enemy, frontage)
+                + CROSSING_EXPOSURE * covered as f64;
+            (
+                CrossingPlan {
+                    near: c.end(north),
+                    far,
+                    covered,
+                    bridge: c.bridge.is_some(),
+                },
+                cost,
+            )
+        })
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .map(|(plan, _)| plan)
+}
+
+/// EP3: in the river or on a bridge (a regiment finishing its crossing).
+fn crossing_now(view: &View, i: usize) -> bool {
+    let (u, field) = (&view.units[i], view.sim.field());
+    field.water_kind(u.x, u.z).is_some() || field.bridge_at(u.x, u.z).is_some()
 }
 
 /// A defensive position drawn from the site (B6): the front the shooters
@@ -746,12 +887,11 @@ const COVER_THRESHOLD: f64 = 15.0;
 /// Every cover `side` may lean on within reach of its deployment line, with
 /// its B6 score (weight x length minus distance; the village edge last).
 fn cover_candidates(field: &crate::field::Battlefield, side: SideId) -> Vec<(Cover, f64)> {
-    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
     let (line_z, forward) = match side {
-        SideId::Attacker => (ATTACKER_LINE_Z, 1.0),
-        SideId::Defender => (DEFENDER_LINE_Z, -1.0),
+        SideId::Attacker => (field.attacker_line_z(), 1.0),
+        SideId::Defender => (field.defender_line_z(), -1.0),
     };
-    let reference = (FIELD_WIDTH * 0.5, line_z);
+    let reference = (field.size.center_x(), line_z);
     let within = |x: f64, z: f64| {
         let ahead = (z - reference.1) * forward;
         (x - reference.0).abs() <= COVER_LATERAL && (-COVER_BEHIND..=COVER_AHEAD).contains(&ahead)
@@ -887,7 +1027,24 @@ fn cover_slots(view: &View, shooters: &[usize], cover: &Cover) -> Vec<(usize, f6
 fn charge_breaks(view: &View, i: usize, j: usize) -> bool {
     let (u, e) = (&view.units[i], &view.units[j]);
     let field = view.sim.field();
-    field.breaks_charge((u.x, u.z), (e.x, e.z)) || field.in_village(e.x, e.z)
+    field.breaks_charge((u.x, u.z), (e.x, e.z))
+        || field.in_village(e.x, e.z)
+        || charge_breaks_on_water(field, e)
+        || ReliefMap::river_between(field, (u.x, u.z), (e.x, e.z))
+}
+
+/// EP3: a target standing in the water, on a bridge or on a steep bank.
+fn charge_breaks_on_water(field: &crate::field::Battlefield, e: &Unit) -> bool {
+    matches!(
+        field.water_kind(e.x, e.z),
+        Some(
+            crate::hydro::Water::Deep
+                | crate::hydro::Water::Ford
+                | crate::hydro::Water::Stream(_)
+                | crate::hydro::Water::Oxbow
+        )
+    ) || field.bridge_at(e.x, e.z).is_some()
+        || field.bank_kind(e.x, e.z) == Some(crate::hydro::BankKind::Steep)
 }
 
 /// B8: dense bocage can chain several hedges between a horse and its target;
@@ -1004,6 +1161,19 @@ fn plan_field(view: &mut View) {
     // ground to meet it (unless much stronger).
     let holds_heights =
         view.side == SideId::Defender && ratio < HOLD_RATIO && height_edge(view) > HOLD_HEIGHT;
+    // EP3: a defender behind a river holds it (unless much stronger).
+    let enemy_center = {
+        let able: Vec<usize> = view.able_enemies().collect();
+        view.centroid(&able)
+    };
+    let river_ahead = enemy_center.is_some_and(|e| {
+        ReliefMap::river_between(
+            view.sim.field(),
+            deployment_center(view.sim.field(), view.side),
+            e,
+        )
+    });
+    let holds_river = view.side == SideId::Defender && ratio < HOLD_RATIO && river_ahead;
     // R4: an attacker clearly above an enemy made mostly of shooters waits
     // on its heights for a while rather than walking down into the arrows
     // (then attacks: no frozen battle).
@@ -1036,7 +1206,8 @@ fn plan_field(view: &mut View) {
         });
     let defensive = match view.side {
         SideId::Defender => {
-            (ratio < 0.85 || holds_heights || receives) && elapsed < DEFENDER_PATIENCE
+            (ratio < 0.85 || holds_heights || holds_river || receives)
+                && elapsed < DEFENDER_PATIENCE
         }
         SideId::Attacker => (ratio < 0.8 && elapsed < ATTACKER_WAIT) || attacker_holds,
     };
@@ -1096,12 +1267,26 @@ fn plan_field(view: &mut View) {
     // B6/R4: a defensive side takes the best ground within reach, cover
     // and relief scored together: behind a hedge, a ditch or in a village
     // (shooters just behind it, the line behind them), or on a crest.
+    // EP3 first: the river bank at the crossing the enemy would take when
+    // the river lies between us and the enemy and the crossing is within
+    // reach (ADR 0033, "Cohabitation avec R4").
     let ground = if defensive && !attacker_holds {
-        Some(defensive_ground(view, &roles))
+        let bank = enemy_center.and_then(|e| river_hold(view.sim.field(), view.side, e));
+        Some(match bank {
+            Some(bank) => (bank.center, Some(bank)),
+            None => defensive_ground(view, &roles),
+        })
     } else {
         None
     };
     let cover = ground.and_then(|(_, c)| c);
+    // EP3: an advancing side with the river in front picks its crossing.
+    let crossing = if defensive {
+        None
+    } else {
+        crossing_plan(view, line_center, &roles.line)
+    };
+    let mut shooter_anchor = None;
     // Where the line stands this step.
     let anchor = if let Some(c) = cover {
         let back = if roles.shooters.is_empty() {
@@ -1115,6 +1300,29 @@ fn plan_field(view: &mut View) {
     } else if attacker_holds {
         // R4: an attacker above an enemy of shooters waits on its heights.
         line_center
+    } else if let Some(plan) = crossing {
+        // Shooters cover the crossing from the own bank.
+        let (dx, dz) = (plan.far.0 - plan.near.0, plan.far.1 - plan.near.1);
+        let len = dx.hypot(dz).max(1e-6);
+        let ahead = (dx / len, dz / len);
+        shooter_anchor = Some((
+            plan.near.0 - ahead.0 * 8.0,
+            plan.near.1 - ahead.1 * 8.0 - view.forward * SHOOTERS_AHEAD,
+        ));
+        let wait = plan.covered > 0
+            && elapsed < CROSSING_PATIENCE
+            && shooters_have_ammo
+            && !roles.shooters.is_empty()
+            && !losing;
+        if wait {
+            // Do not file across under the arrows: duel from the bank first.
+            (plan.near.0 - ahead.0 * 60.0, plan.near.1 - ahead.1 * 60.0)
+        } else {
+            (
+                plan.far.0 + ahead.0 * BRIDGEHEAD_DEPTH,
+                plan.far.1 + ahead.1 * BRIDGEHEAD_DEPTH,
+            )
+        }
     } else if duel && contact < 260.0 {
         line_center
     } else {
@@ -1131,7 +1339,9 @@ fn plan_field(view: &mut View) {
         // R2b: a regiment well ahead of the line waits for it rather than
         // arriving alone under the enemy arrows (fast archers out of
         // arrows outpace the men-at-arms).
-        let ahead = (view.units[i].z - line_center.1) * view.forward > LINE_SLACK;
+        // EP3: a regiment in the river or on a bridge finishes crossing.
+        let ahead =
+            (view.units[i].z - line_center.1) * view.forward > LINE_SLACK && !crossing_now(view, i);
         match target {
             Some((_, d)) if ahead && !defensive && d >= CHARGE_DISTANCE => view.halt(i),
             Some((j, d)) if !defensive && !duel && d < CHARGE_DISTANCE * 2.0 => {
@@ -1169,17 +1379,14 @@ fn plan_field(view: &mut View) {
             .find(|s| s.0 == i)
             .map(|&(_, x, z)| (x, z))
             .zip(cover);
+        let at = shooter_anchor.unwrap_or(anchor);
+        let line_z = if shooter_anchor.is_some() {
+            at.1
+        } else {
+            line_center.1
+        };
         let crest = ground.filter(|(_, c)| c.is_none()).map(|(p, _)| p);
-        plan_shooter(
-            view,
-            i,
-            anchor,
-            line_center.1,
-            facing,
-            defensive,
-            slot,
-            crest,
-        );
+        plan_shooter(view, i, at, line_z, facing, defensive, slot, crest);
     }
 
     // Reserve.
@@ -1464,7 +1671,12 @@ fn plan_shooter(
     if let Some((j, d)) = view.nearest_enemy(i, |_| true) {
         let e = &view.units[j];
         let range = view.sim.effective_range(unit, e.x, e.z);
-        if let Some(((x, z), _)) = cover {
+        if let Some(((x, z), c)) = cover {
+            // EP3: on the way to the bank, shoot as soon as in range.
+            if c.kind == CoverKind::River && d <= range * 0.95 && dist_to(unit, x, z) < 60.0 {
+                view.halt(i);
+                return;
+            }
             // B6: reach the cover first (the threat above sends them back
             // when the enemy closes in).
             // R4: right up to the slot (6 m short, behind a hedge on a

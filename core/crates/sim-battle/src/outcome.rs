@@ -25,6 +25,34 @@ pub struct SideResult {
     /// than being broken: none of its regiments routed (Q2).
     #[serde(default)]
     pub withdrew: bool,
+    /// EP5: enemy standards taken by this side (trophies).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub standards_taken: Vec<StandardTrophy>,
+    /// EP5: standards of this side taken by the enemy.
+    #[serde(default)]
+    pub standards_lost: u32,
+}
+
+/// A standard taken in battle (lot EP5, ADR 0034).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct StandardTrophy {
+    /// Unit type of the regiment that lost it.
+    pub unit_type: String,
+    /// French name of that regiment.
+    pub unit_name: String,
+    /// Faction id of its owner.
+    pub faction: String,
+    /// The general's banner.
+    #[serde(default)]
+    pub general: bool,
+    /// French name of the regiment that took it (`None`: picked up on the
+    /// field held by the victor at the end).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub captor: Option<String>,
+    /// Simulated seconds since the start.
+    pub time: f64,
+    /// Side that took it.
+    pub taken_by: SideId,
 }
 
 /// Result of a battle, accepted by `CampaignState::resolve_pending_battle`.
