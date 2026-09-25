@@ -30,6 +30,8 @@ var _melee_time: float = 0.0
 var _last_shock: Vector3 = Vector3.ZERO
 var _field_center: Vector3 = Vector3.ZERO
 var _max_flocks: int = 2
+var _flying_sum: Vector3 = Vector3.ZERO
+var _flying_n: int = 0
 
 
 ## `terrain_data` : `BattleSim.get_terrain()` ; `height_at(x, z)` : hauteur du sol.
@@ -104,6 +106,11 @@ func update(units: Array, dt: float, finished: bool) -> void:
 	_advance(dt)
 
 
+## Centre des oiseaux en vol (Vector3.ZERO si aucun) : captures.
+func flying_center() -> Vector3:
+	return _flying_sum / _flying_n if _flying_n > 0 else Vector3.ZERO
+
+
 ## Force l'envol de toutes les volées (captures).
 func launch_all(from: Vector3) -> void:
 	for flock in flocks:
@@ -120,8 +127,8 @@ func _launch(flock: Dictionary, from: Vector3) -> void:
 	flock["away"] = away.normalized()
 	var span: Array = cfg.get("flight_duration_s", [40.0, 70.0])
 	flock["duration"] = _rng.randf_range(float(span[0]), float(span[1]))
-	# Le cercle se tient entre le perchoir et le tumulte, au-dessus du champ.
-	flock["center"] = (flock["roost"] as Vector3).lerp(from, 0.35) + (flock["away"] as Vector3) * 40.0
+	# Le cercle se tient au-dessus du tumulte, un peu du côté du perchoir.
+	flock["center"] = (flock["roost"] as Vector3).lerp(from, 0.7)
 	flock["pos"] = flock["roost"]
 	launched += 1
 
@@ -143,6 +150,8 @@ func _advance(dt: float) -> void:
 	var flee_speed := float(cfg.get("flee_speed_m_s", 14.0))
 	var circle_speed := float(cfg.get("circle_speed_m_s", 9.0))
 	var i := 0
+	_flying_sum = Vector3.ZERO
+	_flying_n = 0
 	for flock in flocks:
 		var state := str(flock["state"])
 		flock["t"] = float(flock["t"]) + dt
@@ -181,6 +190,9 @@ func _advance(dt: float) -> void:
 				else:
 					pos = target
 				heading = Vector3(-sin(a), 0.0, cos(a))
+			if visible:
+				_flying_sum += pos
+				_flying_n += 1
 			_write(i, pos, heading, visible, bird)
 			i += 1
 	_mm.buffer = _buffer

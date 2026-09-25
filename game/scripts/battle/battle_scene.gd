@@ -387,6 +387,30 @@ func _setup_staging(terrain_data: Dictionary) -> void:
 	_update_time_label()
 
 
+## EP8 : captures `--birds-shot` (caméra basse tournée vers les volées) et `--cinematic-shot`
+## (plan cinématique figé à mi-course, bandes noires comprises).
+func _apply_staging_shot() -> void:
+	if staging == null:
+		return
+	if _birds_shot and staging.birds != null:
+		var sky := staging.birds.flying_center()
+		if sky != Vector3.ZERO:
+			camera_rig.set_process(false)
+			var ground := Vector3(sky.x, 0.0, sky.z)
+			var back := Vector3(float(units[0]["x"]), 0.0, float(units[0]["z"])) - ground if not units.is_empty() else Vector3(0, 0, -1)
+			back.y = 0.0
+			var eye := ground + back.normalized() * 50.0
+			eye.y = terrain.world_height(eye.x, eye.z) + 3.0
+			camera_rig.camera.global_position = eye
+			camera_rig.camera.look_at(Vector3(sky.x, terrain.world_height(sky.x, sky.z) + 14.0, sky.z), Vector3.UP)
+	if _cinematic_shot and staging.cinematic != null:
+		selected.clear()
+		_refresh_view(true)
+		var shot := _closeup_shot(units)
+		staging.cinematic.start(shot["focus"], float(shot["yaw"]))
+		staging.cinematic.pose_at(float(staging.cinematic.cfg.get("duration_s", 6.0)) * 0.5)
+
+
 ## EP8 : pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
 func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = "campfire") -> int:
 	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
@@ -1595,6 +1619,12 @@ func _stage_screenshot() -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if staging != null:
+			staging.update(units, 0.1, 0.1, bool(battle.call("is_finished")))
+		if (_birds_shot or _cinematic_shot) and contact_time >= 0.0:
+			# EP8 : envol des oiseaux (6 s après le choc) ou plan cinématique (dès le choc).
+			if float(battle.call("get_elapsed")) - contact_time >= (6.0 if _birds_shot else 0.5):
+				break
 		if _standard_shot == "fallen" or _standard_shot == "captured":
 			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
 			if standards != null:
@@ -1658,6 +1688,7 @@ func _stage_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	_apply_standard_shot()
+	_apply_staging_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
