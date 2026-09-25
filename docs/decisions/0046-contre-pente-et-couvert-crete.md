@@ -181,4 +181,4 @@ périmètre de R4.
   des traits confiés à la couche plantée passe au bit 64).
 - Point ouvert : à rapport de forces serré, la position anglaise perd (voir Mesures) ; question
   d'équilibre des unités. **Traité par l'ADR 0052** (panique des chevaux sous les traits, haie tenue
-  par les tireurs) : crête + haie 4 → 24/32 (mesure à crête décalée), rase campagne toujours perdue.
+  par les tireurs) : crête + haie 8 → 20/32 (mesure à crête décalée), rase campagne toujours perdue.

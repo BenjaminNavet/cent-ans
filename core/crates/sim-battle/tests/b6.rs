@@ -168,17 +168,17 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// recomputed after merging R4 into the EP lots (same winners).
 /// ADR 0052 (horses panic under the arrows): seeds 3 and 11 now go to the
 /// English, whose knights screen their archers; over seeds 0-63 the French
-/// win 38/64 instead of 58/64.
+/// win 30/64 instead of 51/64.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 42, 10]",
+            "391 Some(Defender) [12, 0, 27, 70, 79, 8, 64, 118, 118, 12]",
         ),
         (
             11,
-            "472 Some(Attacker) [14, 28, 35, 97, 96, 13, 59, 107, 115, 0]",
+            "225 Some(Defender) [7, 52, 14, 35, 92, 24, 68, 112, 117, 35]",
         ),
     ];
     for (seed, digest_before) in expected {
