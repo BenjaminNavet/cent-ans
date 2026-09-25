@@ -96,6 +96,10 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   obtenus via [Poly Pizza](https://poly.pizza). Les figurines de bataille skinnées
   (`game/assets/models/battle_skinned/`, lot V2) en dérivent : pièces recolorées, habillées
   d'équipement procédural, décimées, animations rééchantillonnées et complétées.
+- **MakeHuman** ([makehumancommunity.org](http://www.makehumancommunity.org)) : maillage de
+  base, cibles et poids du squelette `game_engine` (CC0 depuis 2020), générés avec l'extension
+  Blender MPFB 2 (code GPL, non redistribué) ; corps de base des figurines fines (lot FG0,
+  `game/assets/third_party/characters/makehuman_base/`).
 - **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
