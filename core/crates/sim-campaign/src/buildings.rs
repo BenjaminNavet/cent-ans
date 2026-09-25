@@ -626,7 +626,7 @@ impl CampaignState {
         if state.construction.is_some() {
             return Some("une construction est déjà en cours".to_owned());
         }
-        if state.buildings.contains(&building.id) {
+        if data.has_building(&state.buildings, &building.id) {
             return Some("déjà construit".to_owned());
         }
         if let Some(from) = &building.upgrades_from {
@@ -639,7 +639,7 @@ impl CampaignState {
             }
         }
         if let Some(required) = &building.required_building {
-            if !state.buildings.contains(required) {
+            if !data.has_building(&state.buildings, required) {
                 let name = data
                     .buildings
                     .get(required)

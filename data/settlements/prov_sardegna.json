@@ -17,10 +17,8 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
-      "bld_abbey",
       "bld_cathedral",
       "bld_palisade",
       "bld_muster_field"
@@ -78,8 +76,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_castle",
-      "bld_port",
-      "bld_stone_walls"
+      "bld_port"
     ],
     "port": true,
     "description": "Bastide fondée vers 1102 par la famille génoise Doria, qui la tient encore en 1337 malgré la conquête aragonaise de l'île ; prise par l'Aragon en 1354, repeuplée de Catalans, elle deviendra L'Alguer.",

@@ -112,6 +112,8 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	_kind_label.text = "✠ Chronique du temps" if decision.get("historical", false) else "✠ Nouvelles du royaume"
 	_title_label.text = str(decision.get("title", ""))
 	_art.texture = PortraitLoader.load_texture(EVENT_ART_DIR + str(decision.get("event", "")) + ".jpg")
+	if _art.texture == null:  # AR1 : décision sans miniature propre, vignette de son genre
+		_art.texture = ArtPlates.texture(ArtPlates.vignette_for_kind(str(decision.get("kind", ""))))
 	_art.visible = _art.texture != null
 	var meta := PackedStringArray()
 	var province_name := str(decision.get("province_name", ""))

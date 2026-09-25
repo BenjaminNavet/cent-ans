@@ -93,10 +93,8 @@
   },
   "buildings": [
     "bld_market",
-    "bld_parish_church",
     "bld_windmill",
     "bld_port",
-    "bld_abbey",
     "bld_cathedral",
     "bld_palisade",
     "bld_muster_field"

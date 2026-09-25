@@ -17,10 +17,8 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_weaving_workshop",
-      "bld_abbey",
       "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
@@ -77,9 +75,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg fortifié du Hainaut, résidence secondaire des comtes.",
     "sources": [

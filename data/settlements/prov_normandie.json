@@ -8,7 +8,7 @@
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
     "port": true,
     "description": "Deuxième ville du royaume, port sur la Seine et capitale de l'apanage de Jean, duc de Normandie.",
     "sources": ["Rouen"]

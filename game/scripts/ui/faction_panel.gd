@@ -54,6 +54,7 @@ var _updating := false
 
 
 func _ready() -> void:
+	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
 	_tax_buttons = {"low": tax_low, "normal": tax_normal, "high": tax_high}
 	for rate in _tax_buttons:
 		var button: Button = _tax_buttons[rate]

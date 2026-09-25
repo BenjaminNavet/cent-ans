@@ -745,6 +745,9 @@ func _bench_finish() -> void:
 		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
 		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
 		"quality": RenderQuality.current(),
+		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
+		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"missiles_launched": effects.launched if effects != null else 0,
 		"wall_s": _bench_wall_elapsed_s(),
 	}
