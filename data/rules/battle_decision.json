@@ -1,0 +1,12 @@
+{
+  "description": "Fin des batailles de campagne (lot EP9, ADR 0056) : une armée dont l'effectif encore en état de combattre (régiments présents et en ordre, plus réserves) tombe sous une part de son effectif initial est brisée (déroute générale) ; si personne n'engage (aucune perte, aucune mêlée, les armées ne se rapprochent plus) pendant un délai, l'attaquant renonce et le défenseur garde le champ (bataille refusée, comme à Buironfosse en 1339). Batailles rangées seulement : les sièges gardent leurs règles. Embarqué dans sim-battle à la compilation.",
+  "break_share": 0.35,
+  "break_share_without_general": 0.45,
+  "refusal_seconds": 300,
+  "approach_meters": 20,
+  "lull_loss_margin": 0.05,
+  "refused_morale": {
+    "attacker": -5,
+    "defender": 2
+  }
+}
