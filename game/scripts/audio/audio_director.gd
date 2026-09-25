@@ -92,7 +92,7 @@ func _ready() -> void:
 		add_child(voice)
 		_sfx_players.append(voice)
 	load_settings()
-	load_playlists(SoundBank._data_dir().path_join(PLAYLISTS_PATH))
+	load_playlists(SoundBank.data_path(PLAYLISTS_PATH))
 	get_tree().node_added.connect(_on_node_added)
 
 
