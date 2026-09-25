@@ -23,6 +23,7 @@ extends Node3D
 ## Purement visuel : aucune règle de jeu.
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
+const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 const SEASON_INDEX := {"spring": 0, "summer": 1, "autumn": 2, "winter": 3}
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
@@ -167,6 +168,9 @@ func _update_season() -> void:
 			value = 1
 	if value != _season and _material != null:
 		_season = value
+		# Hiver seulement : variante à discard (houppiers ajourés) ; le reste de l'année, le shader
+		# sans discard garde le test de profondeur anticipé (moins de surdessin dans les forêts).
+		_material.shader = FOLIAGE_WINTER_SHADER if value == 3 else FOLIAGE_SHADER
 		_material.set_shader_parameter("season", value)
 
 
