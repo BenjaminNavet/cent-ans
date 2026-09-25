@@ -54,6 +54,24 @@ Sur main (ouvrages SG3) : la porte tombe vers 250-270 s avec peu de maisons en f
 moyenne) ; les 3 défaites de Paris sont des escalades tardives (ouverture à 515 s) qui se débandent
 au pied du mur, sans chaleur (moral perdu à la chaleur ≈ 0).
 
+### Contre-épreuve : SG3 sans BR3
+
+Pointe de la branche SG3 (d29e5684, ville d'avant BR3 + ouvrages SG3), même sonde, 20 graines :
+générique 19/20, **Paris 11/20**, Rouen 0/20. Donc sur main, BR3 fait passer Paris de 11 à
+17/20 : l'objectif 8-12 garde son sens, mais dans l'autre sens (Paris est devenue trop facile).
+
+### Mécanisme (main)
+
+À Paris tout se joue entre le bélier et les arbalétriers du rempart (traces `BR3_RAM=1`) :
+l'équipage du bélier (12 hommes) meurt sous les carreaux des arbalétriers sur le mur ; dans les
+défaites la porte reste à 1-4 PV sur 460. Sur main, dans 14 parties sur 20, un régiment
+d'arbalétriers du rempart se débande avant 120 s : les engins visent le pan de mur où il se tient,
+le dépassement de 18 m allume la rangée adossée au rempart (11,3 m de la ligne du mur), et la
+chaleur (0,5 point de moral/s) le fait fuir. Le rectangle du régiment tourne avec son orientation
+(il vise en biais) et s'enfonce jusqu'à 1 m de l'îlot en feu. Avant BR3 il n'y avait pas de
+rangées contre le rempart. Expérience : sans chaleur pour les régiments sur le mur, Paris tombe à
+3/20 ; avec un rectangle aligné sur le mur (quelle que soit l'orientation), 3/20 aussi.
+
 ## État
 - [x] Référence sur main (sondes BR3 et SG3), toutes villes emblématiques.
 - [x] Diagnostic instrumenté (traces, carte ASCII).
