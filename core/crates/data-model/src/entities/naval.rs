@@ -12,7 +12,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Sources};
-use crate::ids::{FactionId, SeaZoneId, ShipClassId};
+use crate::ids::{FactionId, SeaZoneId, ShipClassId, UnitTypeId};
 use crate::load::{load_entities, read_json, DataError};
 
 /// How a ship moves.
@@ -300,8 +300,21 @@ pub struct FactionFleet {
     pub ships: BTreeMap<ShipClassId, u32>,
     /// Seas where the fleet musters (it may intercept there).
     pub seas: Vec<SeaZoneId>,
+    /// Men the fleet embarks when it sails without an army.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub marines: Option<Marines>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
+}
+
+/// Unit types of a fleet's marines.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Marines {
+    /// Shooters (archers, crossbowmen).
+    pub archers: UnitTypeId,
+    /// Boarders (men-at-arms).
+    pub soldiers: UnitTypeId,
 }
 
 /// Contents of `data/naval/fleets.json`.
@@ -311,6 +324,12 @@ pub struct NavalFleets {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub fleets: Vec<FactionFleet>,
+    /// French names of the seas (`sea_channel` → « la Manche »).
+    #[serde(default)]
+    pub sea_names: BTreeMap<SeaZoneId, String>,
+    /// Marines of fleets that give none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_marines: Option<Marines>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
 }
@@ -358,6 +377,15 @@ impl NavalData {
 
     pub fn ship(&self, id: &str) -> Option<&ShipClass> {
         self.ship_classes.get(id)
+    }
+
+    /// French name of a sea (« la Manche »), its id otherwise.
+    pub fn sea_name(&self, sea: &SeaZoneId) -> String {
+        self.fleets
+            .sea_names
+            .get(sea)
+            .cloned()
+            .unwrap_or_else(|| sea.to_string())
     }
 
     /// The starting fleet of `faction`, if any.

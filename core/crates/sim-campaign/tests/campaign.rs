@@ -544,6 +544,9 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
     ));
     state.armies.get_mut(&army).unwrap().movement_left += 1;
     let before = state.army(&army).unwrap().total_strength();
+    // Lot NV1: no French warship to intercept this crossing.
+    state.naval.initialised = true;
+    state.naval.fleets.clear();
     state.submit_order(&data, embark(&army, &to)).unwrap();
     let landed = state.army(&army).unwrap();
     assert!(landed.is_at(&to), "landed in {to}: {:?}", landed.position);
