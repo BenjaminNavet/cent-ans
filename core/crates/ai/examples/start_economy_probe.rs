@@ -21,9 +21,28 @@ fn main() {
     }
     for name in factions {
         let player = FactionId::new(&name).expect("faction id");
-        let mut state = CampaignState::new_1337(&data, player.clone(), 1).expect("setup");
+        // `AI=<seed>`: the faction is played by the AI (the Papacy is the
+        // idle player) and every `STEP` turns are printed.
+        let ai_seed: Option<u64> = std::env::var("AI").ok().and_then(|s| s.parse().ok());
+        let step: u32 = std::env::var("STEP")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(1);
+        let human = if ai_seed.is_some() {
+            FactionId::new("fac_papacy").expect("papacy")
+        } else {
+            player.clone()
+        };
+        let mut state = CampaignState::new_1337(&data, human, ai_seed.unwrap_or(1)).expect("setup");
         state.interactive_battles = false;
-        println!("== {name} (joueur inactif)");
+        println!(
+            "== {name} ({})",
+            if ai_seed.is_some() {
+                "IA"
+            } else {
+                "joueur inactif"
+            }
+        );
         let mut by_kind: std::collections::BTreeMap<String, (usize, usize, i64)> =
             Default::default();
         for s in state
@@ -84,6 +103,73 @@ fn main() {
         }
         for turn in 0..=turns {
             let e = state.faction_economy(&data, &player).expect("economy");
+            if turn % step != 0 {
+                // Orders of the watched faction, printed when its treasury
+                // turns negative (`AI` mode).
+                let before = state.factions[&player].treasury;
+                let logged = std::cell::RefCell::new(Vec::new());
+                let planner = |s: &CampaignState, d: &GameData, f: &FactionId| {
+                    let orders = ai::plan_turn(s, d, f);
+                    if f == &player {
+                        logged.borrow_mut().extend(orders.iter().cloned());
+                    }
+                    orders
+                };
+                let events = state.end_turn_with(&data, planner);
+                let after = state.factions[&player].treasury;
+                if after < 0 && before >= 0 {
+                    let f = &state.factions[&player];
+                    let tributes: Vec<_> = f
+                        .ledger
+                        .tributes
+                        .iter()
+                        .map(|t| (t.to.as_str().to_owned(), t.per_season))
+                        .collect();
+                    println!(
+                        "  t{turn} {before} -> {after} (income {} upkeep {} trade {}, other {}) tributes {tributes:?} suzerain {:?}",
+                        f.income_last_turn,
+                        f.upkeep_last_turn,
+                        f.trade_income_last_turn,
+                        after - before - f.income_last_turn + f.upkeep_last_turn
+                            - f.trade_income_last_turn,
+                        f.suzerain
+                    );
+                    for order in logged.borrow().iter().filter(|o| {
+                        !matches!(
+                            o,
+                            sim_campaign::Order::MoveArmy { .. }
+                                | sim_campaign::Order::SetStance { .. }
+                                | sim_campaign::Order::MoveAgent { .. }
+                        )
+                    }) {
+                        println!("    order {order:?}");
+                    }
+                    for ev in events
+                        .iter()
+                        .filter(|ev| ev.faction.as_ref() == Some(&player))
+                    {
+                        println!("    event {:?} {}", ev.kind, ev.text_fr);
+                    }
+                }
+                continue;
+            }
+            let units: usize = state
+                .armies
+                .values()
+                .filter(|a| a.faction == player)
+                .map(|a| a.units.len())
+                .sum::<usize>();
+            let garrison_units: usize = state
+                .settlements
+                .values()
+                .filter(|s| s.controller == player)
+                .map(|s| s.garrison.len())
+                .sum();
+            println!(
+                "  t{turn} field units {units} garrison units {garrison_units} provinces {} war {}",
+                state.controlled_provinces(&player).len(),
+                state.factions[&player].at_war_with.len()
+            );
             println!(
                 "  t{turn} treasury {} income {} trade {} army {} buildings {} admin {} table {} net {} tax {:?}",
                 e.treasury,
