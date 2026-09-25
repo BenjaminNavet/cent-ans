@@ -31,7 +31,7 @@
   ],
   "required_building": "bld_guild_hall",
   "equipment": "Pique, goedendag (bâton ferré), chapel de fer, plates de corps.",
-  "description": "Milices des métiers de Gand, Bruges et Ypres ; ont brisé la chevalerie française à Courtrai (1302).",
+  "description": "Milices des métiers de [[cdx_bruges|Bruges]], d'Ypres et de [[cdx_gand|Gand]] ; ont brisé la chevalerie française à Courtrai (1302) avant d'être écrasées à [[cdx_roosebeke|Roosebeke]] (1382).",
   "sources": [
     "Bataille des éperons d'or",
     "Goedendag"

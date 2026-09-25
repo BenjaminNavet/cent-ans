@@ -27,7 +27,7 @@
     "rain_penalty"
   ],
   "equipment": "Arbalète à étrier ou à crochet, pavois, chapel de fer, gambison.",
-  "description": "Arbalétriers des communes et des garnisons ; les confréries de tir des villes du Nord fournissent des tireurs entraînés.",
+  "description": "Arbalétriers des [[cdx_milices_urbaines|communes]] et des garnisons ; les confréries de tir des villes du Nord fournissent des tireurs entraînés.",
   "sources": [
     "Arbalète",
     "Confrérie d'arbalétriers"
