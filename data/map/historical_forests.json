@@ -1,0 +1,447 @@
+{
+  "description": "Grandes forêts et landes nommées vers 1340 (lot R1), en ellipses approximatives (lon/lat WGS84, demi-axes en km). Emprises médiévales approchées, souvent plus vastes que les massifs actuels ; elles s'ajoutent au défrichement KK10 (Kaplan et al. 2011) pour donner des massifs nets dans splat.png. Sources générales : R. Bechmann, Des arbres et des hommes. La forêt au Moyen Âge (Flammarion, 1984) ; O. Rackham, The History of the Countryside (Dent, 1986) ; M. L. Bazeley, « The Extent of the English Forest in the Thirteenth Century », Transactions of the Royal Historical Society 4 (1921) ; notices Wikipédia citées par massif.",
+  "areas": [
+    {
+      "id": "orleans",
+      "name": "Forêt d'Orléans",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [2.18, 47.98], "radii_km": [34, 11], "angle_deg": 12 },
+      "source": "Wikipédia (fr), « Forêt d'Orléans » ; Bechmann 1984",
+      "note": "Arc de chênaies d'Orléans à Lorris, domaine royal ; plus étendue au Moyen Âge."
+    },
+    {
+      "id": "biere",
+      "name": "Forêt de Bière (Fontainebleau)",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [2.66, 48.41], "radii_km": [13, 9], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Fontainebleau »"
+    },
+    {
+      "id": "cuise",
+      "name": "Forêt de Cuise (Compiègne)",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [2.93, 49.36], "radii_km": [13, 8], "angle_deg": 10 },
+      "source": "Wikipédia (fr), « Forêt de Compiègne »"
+    },
+    {
+      "id": "retz",
+      "name": "Forêt de Retz",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [3.12, 49.24], "radii_km": [11, 7], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Forêt de Retz »"
+    },
+    {
+      "id": "yveline",
+      "name": "Forêt d'Yveline (Rambouillet)",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [1.83, 48.64], "radii_km": [20, 12], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Rambouillet » ; Bechmann 1984 (Yveline)"
+    },
+    {
+      "id": "laye_marly",
+      "name": "Forêts de Laye et de Marly",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [2.05, 48.91], "radii_km": [7, 4], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Forêt de Saint-Germain-en-Laye »"
+    },
+    {
+      "id": "lyons",
+      "name": "Forêt de Lyons",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [1.48, 49.43], "radii_km": [13, 8], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Lyons »"
+    },
+    {
+      "id": "rouvray_roumare",
+      "name": "Forêts de Roumare, Rouvray et Brotonne",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [0.88, 49.40], "radii_km": [18, 6], "angle_deg": 10 },
+      "source": "Wikipédia (fr), « Forêt de Brotonne », « Forêt de Roumare »"
+    },
+    {
+      "id": "eu",
+      "name": "Forêt d'Eu",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [1.55, 49.93], "radii_km": [12, 5], "angle_deg": 35 },
+      "source": "Wikipédia (fr), « Forêt d'Eu »"
+    },
+    {
+      "id": "perche",
+      "name": "Forêts du Perche (Bellême, Réno-Valdieu)",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [0.62, 48.45], "radii_km": [20, 11], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Forêt de Bellême », « Perche (province) »"
+    },
+    {
+      "id": "berce",
+      "name": "Forêt de Bercé",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [0.40, 47.80], "radii_km": [9, 6], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Bercé »"
+    },
+    {
+      "id": "broceliande",
+      "name": "Forêt de Brécilien (Brocéliande, Paimpont)",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [-2.20, 48.02], "radii_km": [14, 8], "angle_deg": 10 },
+      "source": "Wikipédia (fr), « Forêt de Paimpont »"
+    },
+    {
+      "id": "arree",
+      "name": "Landes des monts d'Arrée",
+      "kind": "heath",
+      "density": 0.7,
+      "ellipse": { "center": [-3.90, 48.40], "radii_km": [25, 9], "angle_deg": 5 },
+      "source": "Wikipédia (fr), « Monts d'Arrée »"
+    },
+    {
+      "id": "landes_gascogne",
+      "name": "Landes de Gascogne",
+      "kind": "heath",
+      "density": 0.65,
+      "ellipse": { "center": [-0.85, 44.25], "radii_km": [72, 52], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Landes de Gascogne » (landes pastorales avant les semis de pins du XIXe siècle)",
+      "note": "Lande rase et marécageuse avec quelques pinèdes (pignadas) près de la côte."
+    },
+    {
+      "id": "double",
+      "name": "Forêt de la Double",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [0.33, 45.12], "radii_km": [18, 10], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Double (région naturelle) »"
+    },
+    {
+      "id": "braconne",
+      "name": "Forêt de la Braconne",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [0.33, 45.72], "radii_km": [8, 6], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de la Braconne »"
+    },
+    {
+      "id": "troncais",
+      "name": "Forêt de Tronçais",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [2.72, 46.66], "radii_km": [9, 7], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Tronçais »"
+    },
+    {
+      "id": "sologne",
+      "name": "Bois et landes de Sologne",
+      "kind": "mixed",
+      "density": 0.5,
+      "ellipse": { "center": [1.90, 47.55], "radii_km": [36, 22], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Sologne »"
+    },
+    {
+      "id": "othe",
+      "name": "Forêt d'Othe",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [3.75, 48.13], "radii_km": [18, 8], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Pays d'Othe »"
+    },
+    {
+      "id": "der",
+      "name": "Forêt du Der",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [4.75, 48.58], "radii_km": [15, 9], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Der (région naturelle) »"
+    },
+    {
+      "id": "argonne",
+      "name": "Forêt d'Argonne",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [4.98, 49.15], "radii_km": [26, 8], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Argonne »"
+    },
+    {
+      "id": "ardenne",
+      "name": "Forêt d'Ardenne",
+      "kind": "mixed",
+      "density": 0.8,
+      "ellipse": { "center": [5.35, 49.98], "radii_km": [75, 32], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Ardenne » ; Bechmann 1984"
+    },
+    {
+      "id": "charbonniere_soignes",
+      "name": "Forêt de Soignes (reste de la forêt Charbonnière)",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [4.42, 50.75], "radii_km": [11, 7], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Forêt de Soignes », « Forêt charbonnière »"
+    },
+    {
+      "id": "mormal",
+      "name": "Forêt de Mormal",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [3.75, 50.21], "radii_km": [9, 6], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Forêt de Mormal »"
+    },
+    {
+      "id": "haye",
+      "name": "Forêt de Haye",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [6.08, 48.67], "radii_km": [9, 6], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Haye »"
+    },
+    {
+      "id": "vosges",
+      "name": "Forêts des Vosges",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [7.05, 48.25], "radii_km": [72, 22], "angle_deg": 68 },
+      "source": "Wikipédia (fr), « Massif des Vosges » (hêtraies-sapinières)"
+    },
+    {
+      "id": "palatinat",
+      "name": "Forêt du Palatinat (Wasgau)",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [7.80, 49.25], "radii_km": [25, 18], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Forêt du Palatinat »"
+    },
+    {
+      "id": "foret_noire",
+      "name": "Forêt-Noire",
+      "kind": "conifer",
+      "density": 0.85,
+      "ellipse": { "center": [8.15, 48.30], "radii_km": [75, 25], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Forêt-Noire »"
+    },
+    {
+      "id": "hunsruck",
+      "name": "Hunsrück",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [7.25, 49.88], "radii_km": [40, 13], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Hunsrück »"
+    },
+    {
+      "id": "eifel",
+      "name": "Eifel",
+      "kind": "mixed",
+      "density": 0.6,
+      "ellipse": { "center": [6.65, 50.30], "radii_km": [38, 22], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Eifel »"
+    },
+    {
+      "id": "chaux",
+      "name": "Forêt de Chaux",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [5.68, 47.10], "radii_km": [12, 7], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Forêt de Chaux »"
+    },
+    {
+      "id": "jura",
+      "name": "Joux du Jura",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [6.05, 46.65], "radii_km": [70, 18], "angle_deg": 45 },
+      "source": "Wikipédia (fr), « Massif du Jura » (joux : sapinières)"
+    },
+    {
+      "id": "morvan",
+      "name": "Forêts du Morvan",
+      "kind": "mixed",
+      "density": 0.8,
+      "ellipse": { "center": [4.05, 47.15], "radii_km": [32, 18], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Morvan »"
+    },
+    {
+      "id": "sherwood",
+      "name": "Sherwood Forest",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [-1.08, 53.17], "radii_km": [15, 7], "angle_deg": 80 },
+      "source": "Wikipedia (en), « Sherwood Forest » ; Bazeley 1921"
+    },
+    {
+      "id": "new_forest",
+      "name": "New Forest",
+      "kind": "mixed",
+      "density": 0.6,
+      "ellipse": { "center": [-1.60, 50.87], "radii_km": [15, 11], "angle_deg": 0 },
+      "source": "Wikipedia (en), « New Forest » ; Rackham 1986 (bois, landes et pâtures)"
+    },
+    {
+      "id": "dean",
+      "name": "Forest of Dean",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [-2.55, 51.80], "radii_km": [10, 8], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Forest of Dean »"
+    },
+    {
+      "id": "weald",
+      "name": "Weald (Andredesweald)",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [0.30, 51.03], "radii_km": [62, 20], "angle_deg": 5 },
+      "source": "Wikipedia (en), « Weald » ; Rackham 1986"
+    },
+    {
+      "id": "arden",
+      "name": "Forest of Arden",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-1.75, 52.33], "radii_km": [19, 12], "angle_deg": 20 },
+      "source": "Wikipedia (en), « Forest of Arden »"
+    },
+    {
+      "id": "epping_waltham",
+      "name": "Forêt de Waltham (Epping)",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [0.05, 51.68], "radii_km": [10, 5], "angle_deg": 70 },
+      "source": "Wikipedia (en), « Epping Forest »"
+    },
+    {
+      "id": "windsor",
+      "name": "Windsor Forest",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-0.70, 51.42], "radii_km": [12, 7], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Windsor Forest » ; Bazeley 1921"
+    },
+    {
+      "id": "savernake",
+      "name": "Savernake Forest",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [-1.65, 51.38], "radii_km": [8, 5], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Savernake Forest »"
+    },
+    {
+      "id": "wychwood",
+      "name": "Wychwood",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [-1.53, 51.85], "radii_km": [8, 6], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Wychwood »"
+    },
+    {
+      "id": "rockingham",
+      "name": "Rockingham Forest",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-0.60, 52.50], "radii_km": [16, 8], "angle_deg": 40 },
+      "source": "Wikipedia (en), « Rockingham Forest »"
+    },
+    {
+      "id": "cannock",
+      "name": "Cannock Chase",
+      "kind": "mixed",
+      "density": 0.6,
+      "ellipse": { "center": [-2.00, 52.74], "radii_km": [10, 7], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Cannock Chase »"
+    },
+    {
+      "id": "galtres",
+      "name": "Forest of Galtres",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-1.12, 54.05], "radii_km": [12, 8], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Forest of Galtres »"
+    },
+    {
+      "id": "inglewood",
+      "name": "Inglewood Forest",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-2.85, 54.75], "radii_km": [20, 10], "angle_deg": 80 },
+      "source": "Wikipedia (en), « Inglewood Forest »"
+    },
+    {
+      "id": "ettrick",
+      "name": "Forêt d'Ettrick (Selkirk)",
+      "kind": "mixed",
+      "density": 0.55,
+      "ellipse": { "center": [-3.10, 55.48], "radii_km": [25, 15], "angle_deg": 20 },
+      "source": "Wikipedia (en), « Ettrick Forest »"
+    },
+    {
+      "id": "caledonie",
+      "name": "Pinèdes calédoniennes (Rannoch, Spey, Dee)",
+      "kind": "conifer",
+      "density": 0.4,
+      "ellipse": { "center": [-4.30, 57.00], "radii_km": [62, 35], "angle_deg": 20 },
+      "source": "Wikipedia (en), « Caledonian Forest » ; Rackham 1986"
+    },
+    {
+      "id": "pennines",
+      "name": "Landes des Pennines",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [-2.05, 54.15], "radii_km": [70, 18], "angle_deg": 80 },
+      "source": "Wikipedia (en), « Pennines » (landes à bruyère et tourbières d'altitude)"
+    },
+    {
+      "id": "north_york_moors",
+      "name": "North York Moors",
+      "kind": "heath",
+      "density": 0.65,
+      "ellipse": { "center": [-0.90, 54.37], "radii_km": [25, 12], "angle_deg": 0 },
+      "source": "Wikipedia (en), « North York Moors »"
+    },
+    {
+      "id": "dartmoor",
+      "name": "Dartmoor",
+      "kind": "heath",
+      "density": 0.75,
+      "ellipse": { "center": [-3.90, 50.57], "radii_km": [15, 12], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Dartmoor »"
+    },
+    {
+      "id": "exmoor",
+      "name": "Exmoor",
+      "kind": "heath",
+      "density": 0.65,
+      "ellipse": { "center": [-3.65, 51.13], "radii_km": [13, 7], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Exmoor »"
+    },
+    {
+      "id": "campine",
+      "name": "Landes de Campine (Kempen)",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [5.20, 51.18], "radii_km": [42, 18], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Campine »"
+    },
+    {
+      "id": "veluwe",
+      "name": "Veluwe",
+      "kind": "heath",
+      "density": 0.5,
+      "ellipse": { "center": [5.85, 52.15], "radii_km": [25, 20], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Veluwe » (landes et bois sur sables)"
+    },
+    {
+      "id": "luneburg",
+      "name": "Landes de Lunebourg",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [10.00, 53.10], "radii_km": [55, 32], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Lande de Lunebourg »"
+    }
+  ]
+}
