@@ -255,3 +255,15 @@ Détail dans `docs/godot-map.md` (« Caméra rapprochée et exagération vertica
   leur rendu (lot VH), exclues via `LandmarkLibrary`.
 - Finage : rayon exposé au parcellaire ZG5b par un tableau d'uniformes (`fp_towns`, 16 villes proches),
   pas par le masque des terroirs (1 px = 2,9 km, trop grossier pour un finage de 1-4 km).
+
+## Addendum (lot ZG4b, 2026-09-25) : correctifs de recette de la vue rapprochée
+
+Détail dans `docs/godot-map.md` (« Correctifs de recette (lot ZG4b) »).
+
+- **Plancher provisoire** au-dessus des villes emblématiques : la caméra ne descend pas sous
+  `CloseCameraProfile.landmark_min_distance` (2,6 unités, `close_camera.tres`) dans leurs zones, plancher
+  adouci au-dehors. Leurs maquettes à la loupe restent visibles (au-dessus du palier site) au lieu d'un sol
+  vide. **VH4 le lève** (valeur 0) en passant ces villes au 1:1.
+- Le « sol beige nu » venait surtout du brouillard matinal de la météo peint sur le sol : atténué de près
+  (`weather_mist_near`) ; le parcellaire ZG5b s'applique aussi aux terres relevées au plancher de 0,5 m.
+- Ponts-portes fins à l'échelle réelle ; bascule des ponts en mode fin étalée (`FrameBudget`).

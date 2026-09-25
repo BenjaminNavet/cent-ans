@@ -140,6 +140,23 @@ func _test_camera() -> void:
 		return 1.0 + maxf(x - 1000.0, 0.0) * 0.5
 	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), 0.3), "E7 zone min distance")
 	_check(is_equal_approx(rig.min_distance_at(Vector3(3000.0, 0.0, 1000.0)), 5.0), "E2 min distance")
+	# ZG4b : plancher provisoire au-dessus d'une ville emblématique (cercle de 3 unités au centre de
+	# la zone E7), adouci au-dehors, désactivable (VH4).
+	var floor_m := rig.profile.landmark_min_distance
+	_check(floor_m >= 2.2, "landmark floor above the site tier (%f)" % floor_m)
+	rig.close_zones = PackedVector3Array([Vector3(1000.0, 1000.0, 3.0)])
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), floor_m), "landmark floor inside the zone")
+	var outside := rig.min_distance_at(Vector3(1005.0, 0.0, 1000.0))
+	_check(outside < floor_m and outside > 0.3, "landmark floor softened outside the zone (%f)" % outside)
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1030.0)), rig.profile.soft_min_distance(Vector2(1000.0, 1030.0), rig.relief)), "no landmark floor far from the zone")
+	rig.look_at_point(Vector3(1000.0, 0.0, 1000.0), 0.1)
+	_check(is_equal_approx(rig.target_distance, floor_m), "zoom clamped to the landmark floor, got %f" % rig.target_distance)
+	rig.profile = rig.profile.duplicate()
+	rig.profile.landmark_min_distance = 0.0
+	rig._soft_min_key = Vector3(INF, INF, INF)
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), 0.3), "landmark floor disabled (VH4)")
+	rig.profile = CloseCameraProfile.load_default()
+	rig.close_zones = PackedVector3Array()
 	rig.look_at_point(Vector3(1000.0, 0.0, 1000.0), 0.1)
 	rig.snap()
 	_check(is_equal_approx(rig.target_distance, 0.3), "zoom clamped to the E7 min distance, got %f" % rig.target_distance)
