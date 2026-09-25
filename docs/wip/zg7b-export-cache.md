@@ -26,5 +26,12 @@ Voisin : ZG7a (perf, lit de la Seine, rives de Londres, PathPreview) — ne pas 
   `MapPaths.relief_root_for` ; export debug réel essayé avec une fausse pyramide (E1 partiel) en
   modes bundle et external : relief trouvé, avis PARTIAL journalisé. Tests `test_export_data.py`.
 
+- 4 fait : addendum ZG7b de l'ADR 0036, `docs/geo.md` (« Cache du relief fin : pipeline complet
+  des paliers 1-3 »), `docs/godot-map.md` (« Vue d'ensemble ZG »), `docs/tools.md` (modes
+  d'export), `CREDITS.md` (préambule, mention GLO-90, textures Poly Haven du terrain).
+- `main` fusionné (2452ef13) ; tests : smoke, zg2, zg4, zg5b, zg7b, zg8 OK ; pytest 581 OK ; ruff OK.
+
 ## Prochaine étape
-- Addendum ADR 0036, docs/geo.md, docs/godot-map.md, CREDITS.md ; puis smoke + tests ZG.
+- Lot terminé, en attente de fusion par l'orchestrateur. Suites possibles : hébergement d'une
+  archive « Cent Ans relief » (non décidé, rien téléversé) ; durée de cuisson E3-E4 d'un trait à
+  mesurer lors d'une prochaine recuisson.
