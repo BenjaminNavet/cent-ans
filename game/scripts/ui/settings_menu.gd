@@ -182,6 +182,7 @@ func _build_game(grid: GridContainer) -> void:
 		return "Chaque tour" if turns == 1 else "Tous les %d tours" % turns)
 	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
+	_options(grid, "battle/blood", "Sang", [0, 1, 2], ["Désactivé", "Modéré", "Complet"], "Taches, gerbes et cadavres ensanglantés en bataille. Complet : démembrements sur les coups critiques.")
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 

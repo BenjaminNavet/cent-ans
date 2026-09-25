@@ -23,6 +23,22 @@ static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 
 
+## Lot BV2 : variante « cadavres » du shader (`BV2_CORPSE` : coupe des parties tranchées par
+## `discard`, réservée aux cadavres pour ne pas pénaliser les soldats vivants).
+static var _corpse_shader: Shader = null
+
+
+static func corpse_shader() -> Shader:
+	if _corpse_shader == null:
+		var code := SHADER.code
+		var cut := code.find("
+", code.find("shader_type"))
+		_corpse_shader = Shader.new()
+		_corpse_shader.code = code.substr(0, cut + 1) + "#define BV2_CORPSE
+" + code.substr(cut + 1)
+	return _corpse_shader
+
+
 static func manifest() -> Dictionary:
 	if not _loaded:
 		_loaded = true
@@ -166,6 +182,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	mat.set_shader_parameter("clips", table)
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
+	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))
 
 
 ## Configuration d'animation {set: [clips], mode, speed, cycle} d'un régiment dans l'état
@@ -186,7 +203,7 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 	var ids: Array[int] = []
 	for c in entry["set"]:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "names": entry["set"], "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
 
@@ -216,7 +233,80 @@ static func _style(kind: String, variant: int) -> String:
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
-const DEATHS_CAVALRY := ["c_death", "c_death_m"]
+## Lot BV2 : `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
+const DEATHS_CAVALRY := ["c_death", "c_death_m", "c_fall"]
+## Lot BV2 : parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
+## os isolés : l'arme suit la main). Entrée 0 : os du cheval (tout ce qui n'est pas `R:`).
+const SEVER_PARTS := {
+	"head": [1, ["Head"]],
+	"arm_r": [2, ["LowerArm.R", "Wrist.R", "Prop"]],
+	"arm_l": [3, ["LowerArm.L", "Wrist.L"]],
+	"leg_r": [4, ["LowerLeg.R", "Foot.R"]],
+	"leg_l": [5, ["LowerLeg.L", "Foot.L"]],
+}
+const CODE_HORSE_FLEES := 6
+
+
+## Indice de `clip` dans le jeu des morts de la figurine (-1 : absent).
+static func death_index(kind: String, variant: int, clip: String) -> int:
+	var names: Array = DEATHS_CAVALRY if kind == "cavalry" else DEATHS_FOOT
+	var clips: Dictionary = rig(kind, variant).get("clips", {})
+	var k := 0
+	for c in names:
+		if clips.has(c):
+			if c == clip:
+				return k
+			k += 1
+	return -1
+
+
+## Durée (s) d'un clip du rig de la figurine.
+static func clip_seconds(kind: String, variant: int, clip: String) -> float:
+	var entry := rig(kind, variant)
+	var c: Dictionary = entry.get("clips", {}).get(clip, {})
+	return float(c.get("frames", 24)) / float(entry.get("fps", 24))
+
+
+## Renversés (lot BV2) : clip `knockdown` en mode CUSTOM (à pied seulement).
+static func knockdown_config(kind: String, variant: int) -> Dictionary:
+	var rig_entry := rig(kind, variant)
+	var ids: Array[int] = [clip_index(rig_entry, "knockdown")]
+	return {"key": "%s/%d/knock" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Table `sever_bones` du shader (lot BV2) pour le rig de la figurine.
+static func sever_table(kind: String, variant: int) -> Array[Vector4i]:
+	var bones: Array = rig(kind, variant).get("bones", [])
+	var prefix := "R:" if kind == "cavalry" else ""
+	var table: Array[Vector4i] = []
+	for i in 6:
+		table.append(Vector4i(-1, -2, -1, -1))
+	if kind == "cavalry":
+		var last := -1
+		for i in bones.size():
+			if not str(bones[i]).begins_with("R:"):
+				last = i
+		table[0] = Vector4i(0, last, -1, -1)
+	for part in SEVER_PARTS:
+		var entry: Array = SEVER_PARTS[part]
+		var ids: Array[int] = []
+		for name in entry[1]:
+			var k := bones.find(prefix + str(name))
+			if k >= 0:
+				ids.append(k)
+		if ids.is_empty():
+			continue
+		# Os consécutifs en plage (x..y), le dernier (arme) en z s'il ne suit pas.
+		var lo: int = ids[0]
+		var hi: int = lo
+		var extra := -1
+		for k in range(1, ids.size()):
+			if ids[k] == hi + 1:
+				hi = ids[k]
+			else:
+				extra = ids[k]
+		table[int(entry[0])] = Vector4i(lo, hi, extra, -1)
+	return table
 
 ## Jeux de clips par style et par état.
 const STYLES := {
@@ -229,12 +319,14 @@ const STYLES := {
 		"routing": {"set": ["run"], "speed": 1.1},
 		"climbing": {"set": ["run"]},
 	},
+	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
 	"militia": {
-		"idle": {"set": ["idle", "guard"]},
-		"marching": {"set": ["walk"]},
+		"idle": {"set": ["pike_idle"]},
+		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
-		"charging": {"set": ["run"]},
-		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
+		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
+		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.15},
 	},
 	"pike": {
@@ -243,6 +335,8 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
+		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
+		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.1},
 	},
 	"bow": {

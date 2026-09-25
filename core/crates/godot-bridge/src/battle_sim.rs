@@ -153,6 +153,37 @@ impl BattleSim {
         }
     }
 
+    /// Charge impacts resolved since the previous call (BV2): `[{time,
+    /// attacker, defender, kind: shock|pikes|stakes|broken, point: Vector2,
+    /// heading, mass, knocked, unhorsed, depth, cohesion}]`. The renderer
+    /// throws down `knocked` men of the defender, slows the horses over
+    /// `depth` metres and unhorses `unhorsed` riders.
+    #[func]
+    fn get_impacts(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_impacts()
+            .iter()
+            .map(|hit| {
+                vdict! {
+                    "time" => hit.time,
+                    "attacker" => i64::from(hit.attacker),
+                    "defender" => i64::from(hit.defender),
+                    "kind" => hit.kind.key(),
+                    "point" => Vector2::new(hit.point.0 as f32, hit.point.1 as f32),
+                    "heading" => hit.heading,
+                    "mass" => hit.mass,
+                    "knocked" => i64::from(hit.knocked),
+                    "unhorsed" => i64::from(hit.unhorsed),
+                    "depth" => hit.depth,
+                    "cohesion" => hit.cohesion,
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// `{type: "move"|"attack"|"halt"|"formation"|"fire_at_will"|"withdraw"
     /// |"target_wall"|"burn"|"leader_order", units: [ids], ...}` → `{ok, error}`.
     /// Siege fire (S2): `{type: "burn", units: [ids], house: i}` or
@@ -308,6 +339,10 @@ impl BattleSim {
                     "pavise" => unit.pavise.is_some(),
                     "dismounted" => unit.dismounted,
                     "order_morale" => unit.order_morale,
+                    // BV2: cause of the latest deaths (chooses the death drawn).
+                    "loss_cause" => unit.loss_cause.key(),
+                    "loss_by" => unit.loss_by.map_or(-1, i64::from),
+                    "knocked" => if unit.knocked_timer > 0.0 { unit.knocked } else { 0.0 },
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
