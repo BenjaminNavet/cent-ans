@@ -27,6 +27,10 @@ signal chunk_surface_changed(index: int)
 ## Lot ZG2 : rectangle carte dont la surface a changé (page de la pyramide arrivée ou évincée),
 ## émis à chaque page, sans regroupement : pour les recalages fins (lot ZG5).
 signal surface_rect_changed(rect: Rect2)
+## Lot ZG4 : l'échelle verticale (`MapData.vertical_scale()`) vient de changer. Les calques
+## d'objets ponctuels (armées, étiquettes) s'y recalent ; les calques par morceau reçoivent en
+## plus `chunk_surface_changed` (étalé, `rescaling_vertical` vrai).
+signal vertical_scale_changed(old_scale: float, new_scale: float)
 
 const CHUNKS := 16
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
@@ -65,6 +69,16 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var max_surface_emits_per_flush: int = 2
 ## Un morceau n'est recalé qu'après ce délai sans nouvelle page (E1 → E2 → E3 → E4 : un seul recalage).
 @export var surface_settle_ms: int = 700
+## Lot ZG4 : budget par image des recalages après un changement d'échelle verticale.
+@export var rescale_budget_ms: float = 3.0
+## Délai sans changement d'échelle avant de recaler les calques (zoom continu : un seul recalage).
+@export var rescale_settle_ms: int = 180
+@export var max_far_rescales_per_frame: int = 1
+## Vrai pendant les `chunk_surface_changed` émis pour un changement d'échelle verticale seul
+## (la surface en mètres n'a pas changé).
+var rescaling_vertical: bool = false
+var _rescale_queue: Dictionary = {}
+var _rescale_changed_ms: int = 0
 
 var map_data: MapData
 ## PF1 : préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`) : densité du quadtree de
@@ -175,6 +189,10 @@ func build(data: MapData) -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	clear_terrain()
+	# ZG4 : nouvelle carte à l'échelle stratégique (les maillages E0 sont cuits à HEIGHT_SCALE).
+	_rescale_queue.clear()
+	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
+	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", MapData.HEIGHT_SCALE)
 	map_data = data
 	chunk_px = ceili(float(maxi(data.size.x, data.size.y)) / CHUNKS)
 	_build_textures()
@@ -553,6 +571,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 			chunk_surface_changed.emit(i)
 			_note_emit(t_emit, 1)
 	_flush_surface_dirty(false)
+	_flush_rescale(view_center)
 
 
 func _on_quadtree_surface_changed(rect: Rect2) -> void:
@@ -624,13 +643,86 @@ func _note_emit(t0: int, count: int) -> void:
 	build_stats["surface_emit_ms_total"] = float(build_stats.get("surface_emit_ms_total", 0.0)) + ms
 
 
-## Lot ZG2 / ZG4 : relit `MapData.vertical_scale()` (shader, quadtree) et signale toutes les
-## surfaces comme changées. Les maillages E0 du repli sans cache gardent `HEIGHT_SCALE`.
-func refresh_vertical_scale() -> void:
-	if material != null:
-		material.set_shader_parameter("height_scale", MapData.vertical_scale())
-	for index in _chunks.size():
+# --- Exagération verticale dynamique (lot ZG4) ------------------------------------------
+
+
+## Change l'échelle verticale (`MapData.set_vertical_scale`, paramètre global des shaders) et
+## recale les calques : `vertical_scale_changed` tout de suite (objets ponctuels, recalage bon
+## marché), puis, l'échelle stable depuis `rescale_settle_ms`, `chunk_surface_changed` morceau par
+## morceau, étalé sur les images suivantes (`rescale_budget_ms` par image, les morceaux les plus
+## proches du point visé d'abord) avec
+## `rescaling_vertical` vrai pendant l'émission (les calques dont la hauteur cuite est en mètres,
+## comme `LandmarkModel`, l'ignorent). Sans quadtree (repli E0, maillages cuits à
+## `HEIGHT_SCALE`), l'échelle ne change pas : rend faux.
+func set_vertical_scale(value: float) -> bool:
+	if quadtree == null or map_data == null:
+		return false
+	var old := MapData.vertical_scale()
+	if not MapData.set_vertical_scale(value):
+		return false
+	quadtree.on_vertical_scale_changed(old, value)
+	_rescale_queue.clear()
+	for index in CHUNKS * CHUNKS:
+		_rescale_queue[index] = true
+	_rescale_changed_ms = Time.get_ticks_msec()
+	build_stats["vertical_rescales"] = int(build_stats.get("vertical_rescales", 0)) + 1
+	var t0 := Time.get_ticks_usec()
+	vertical_scale_changed.emit(old, value)
+	build_stats["vertical_signal_ms_max"] = maxf(float(build_stats.get("vertical_signal_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+	return true
+
+
+## Remet l'échelle stratégique (`HEIGHT_SCALE`) : nouvelle carte, tests.
+func reset_vertical_scale() -> void:
+	_rescale_queue.clear()
+	if MapData.set_vertical_scale(MapData.HEIGHT_SCALE):
+		for index in _chunks.size():
+			chunk_surface_changed.emit(index)
+
+
+## Morceaux restant à recaler après un changement d'échelle (tests, mesures).
+func pending_rescales() -> int:
+	return _rescale_queue.size()
+
+
+## Émet les recalages en attente, une fois l'échelle stable depuis `rescale_settle_ms` (un zoom
+## continu franchit une quinzaine de paliers : un seul recalage à l'arrêt au lieu de quinze) :
+## morceaux proches (niveau ≥ 1) triés par distance au point visé, dans le budget de l'image (au
+## moins un), puis les lointains (niveau 0, objets à peine visibles) au plus
+## `max_far_rescales_per_frame` par image ; tout avec `force`.
+func _flush_rescale(view_center: Vector3, force: bool = false) -> void:
+	if _rescale_queue.is_empty():
+		return
+	if not force and Time.get_ticks_msec() - _rescale_changed_ms < rescale_settle_ms:
+		return
+	var order: Array = []
+	var center := Vector2(view_center.x, view_center.z) if view_center != Vector3.INF else Vector2(2048.0, 2048.0)
+	var half := chunk_px * 0.5
+	for index: int in _rescale_queue:
+		var c := Vector2((index % CHUNKS) * chunk_px + half, (index / CHUNKS) * chunk_px + half)
+		var far_penalty := 0.0 if _is_near[index] >= 1 else 1.0e6
+		order.append([far_penalty + c.distance_to(center), index])
+	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var t0 := Time.get_ticks_usec()
+	var emitted := 0
+	var far_emitted := 0
+	rescaling_vertical = true
+	for entry in order:
+		if not force and emitted > 0 and (Time.get_ticks_usec() - t0) / 1000.0 >= rescale_budget_ms:
+			break
+		var index: int = entry[1]
+		if not force and _is_near[index] == 0:
+			if far_emitted >= max_far_rescales_per_frame:
+				break
+			far_emitted += 1
+		_rescale_queue.erase(index)
 		chunk_surface_changed.emit(index)
+		emitted += 1
+	rescaling_vertical = false
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	build_stats["rescale_emits"] = int(build_stats.get("rescale_emits", 0)) + emitted
+	build_stats["rescale_ms_total"] = float(build_stats.get("rescale_ms_total", 0.0)) + ms
+	build_stats["rescale_ms_max"] = maxf(float(build_stats.get("rescale_ms_max", 0.0)), ms)
 
 
 # --- Relief fin (tuiles 8192²) ---------------------------------------------------------
@@ -746,6 +838,7 @@ func wait_fine_jobs() -> void:
 	if quadtree != null:
 		quadtree.wait_jobs(true)
 		_flush_surface_dirty(true)
+		_flush_rescale(Vector3.INF, true)
 		return
 	_collect_fine_jobs(true)
 
@@ -922,7 +1015,6 @@ func _build_material() -> void:
 	material.set_shader_parameter("height_little_endian", map_data.height_little_endian)
 	material.set_shader_parameter("height_min_m", map_data.height_min_m)
 	material.set_shader_parameter("height_max_m", map_data.height_max_m)
-	material.set_shader_parameter("height_scale", MapData.vertical_scale())
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("meters_per_px", map_data.meters_per_px)
 	material.set_shader_parameter("province_ids", _ids_texture)

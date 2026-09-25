@@ -22,6 +22,10 @@ const SCALE_PER_DISTANCE := 0.014
 ## faisait recouvrir Paris par l'ost au plus près.
 const MIN_SCALE := 0.27
 const MAX_SCALE := 14.0
+## Lot ZG4 : distance sous laquelle l'échelle décroît de nouveau avec la distance.
+const CLOSE_KNEE_DISTANCE := 12.0
+## Lot ZG4 : portée des plaques sous `CLOSE_KNEE_DISTANCE`, en multiples de la distance caméra.
+const CLOSE_PLATE_RANGE_FACTOR := 40.0
 
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
@@ -56,6 +60,9 @@ var settlement_position: Callable = Callable()
 ## Lot UX1 (A3 C8) : noms de ville à éviter, `func(camera: Camera3D) -> Array[Rect2]` (rectangles
 ## écran), posé par la carte ; les plaques s'en écartent (`LabelPlacer`).
 var label_obstacles: Callable = Callable()
+## Lot ZG4 : surface affichée (`TerrainBuilder.surface_height_at`) quand le relief streamé est
+## actif ; à défaut, heightmap 4096 (`MapData.surface_world_at`).
+var ground_height: Callable = Callable()
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
 var _homes: Dictionary = {}  # army_id → position de base issue de la simulation (M4)
@@ -127,7 +134,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		add_child(marker)
 		var faction: String = str(army.get("faction", ""))
 		marker.setup(army_id, army, color_of.call(faction), faction == player_faction)
-		marker.base_position = Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y)
+		marker.base_position = Vector3(centroid.x, _ground(centroid), centroid.y)
 		var stack: int = per_province.get(stack_key, 0)
 		per_province[stack_key] = stack + 1
 		marker.offset_dir = Vector2.ZERO if stack == 0 else Vector2.RIGHT.rotated(stack * TAU / 6.0)
@@ -270,10 +277,28 @@ func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZE
 	if point.x < 0.0:
 		marker.base_position = _homes.get(army_id, marker.base_position)
 	else:
-		marker.base_position = Vector3(point.x, map_data.surface_world_at(point.x, point.y), point.y)
+		marker.base_position = Vector3(point.x, _ground(point), point.y)
 	marker.apply_scale(_current_scale)
 	if heading.length() > 0.01:
 		marker.face(heading.normalized())
+
+
+## Hauteur du sol au point carte `p` (surface affichée si disponible).
+func _ground(p: Vector2) -> float:
+	if ground_height.is_valid():
+		return float(ground_height.call(p.x, p.y))
+	return map_data.surface_world_at(p.x, p.y)
+
+
+## Lot ZG4 : repose tous les marqueurs sur le sol (échelle verticale changée, pages de relief
+## arrivées) ; quelques dizaines d'appels à `surface_height_at`, bon marché.
+func reground() -> void:
+	for army_id: String in _markers:
+		var marker: ArmyMarker = _markers[army_id]
+		var home: Vector3 = _homes.get(army_id, marker.base_position)
+		_homes[army_id] = Vector3(home.x, _ground(Vector2(home.x, home.z)), home.z)
+		marker.base_position.y = _ground(Vector2(marker.base_position.x, marker.base_position.z))
+		marker.apply_scale(_current_scale)
 
 
 ## Position monde d'une armée (pour cadrer la caméra), Vector3.ZERO si absente.
@@ -283,21 +308,25 @@ func world_position_of(army_id: String) -> Vector3:
 
 
 func update_scale(camera_distance: float) -> void:
-	if absf(camera_distance - _camera_distance) > 0.25:
+	if absf(camera_distance - _camera_distance) > minf(0.25, absf(_camera_distance) * 0.05):
 		_camera_distance = camera_distance
 		var weight := figure_weight(camera_distance)
 		for marker in _markers.values():
 			marker.set_view(camera_distance, weight)
 	var new_scale := scale_for_distance(camera_distance)
-	if absf(new_scale - _current_scale) < 0.005:
+	if absf(new_scale - _current_scale) < minf(0.005, new_scale * 0.02):
 		return
 	_current_scale = new_scale
 	for marker in _markers.values():
 		marker.apply_scale(_current_scale)
 
 
-## Échelle des marqueurs d'armée pour une distance caméra (voir `MIN_SCALE`).
+## Échelle des marqueurs d'armée pour une distance caméra (voir `MIN_SCALE`). Lot ZG4 : sous
+## `CLOSE_KNEE_DISTANCE` (vues vallée et site), l'échelle redevient proportionnelle à la distance
+## (taille à l'écran bornée) : pas d'étendard de 2 km au-dessus d'un site vu à 200 m.
 static func scale_for_distance(camera_distance: float) -> float:
+	if camera_distance < CLOSE_KNEE_DISTANCE:
+		return MIN_SCALE * maxf(camera_distance, 0.02) / CLOSE_KNEE_DISTANCE
 	return clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
 
 
@@ -398,7 +427,12 @@ func _update_plates() -> void:
 			plate.visible = false
 			continue
 		var anchor := marker.plate_anchor()
-		if camera.is_position_behind(anchor):
+		if camera.is_position_behind(anchor) or not marker.is_visible_in_tree():
+			plate.visible = false
+			continue
+		# ZG4 : vues vallée / site (rasantes) : pas de plaques d'armées lointaines sur l'horizon.
+		if _camera_distance >= 0.0 and _camera_distance < CLOSE_KNEE_DISTANCE and id != selected_army \
+				and camera.global_position.distance_to(anchor) > CLOSE_PLATE_RANGE_FACTOR * _camera_distance:
 			plate.visible = false
 			continue
 		var screen := camera.unproject_position(anchor)

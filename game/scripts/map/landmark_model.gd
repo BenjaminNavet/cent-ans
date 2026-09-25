@@ -151,43 +151,117 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("height_map", _height_texture)
 	material.set_shader_parameter("map_origin", _origin)
 	material.set_shader_parameter("map_extent", _extent)
+	material.set_shader_parameter("height_in_meters", true)
 
 
-## Hauteurs de la surface affichée sur une grille couvrant la zone réservée.
+## Hauteurs de la surface affichée sur une grille couvrant la zone réservée, en mètres (lot ZG4 :
+## le shader les met à l'échelle verticale courante, `campaign_vertical_scale`, sans nouvelle
+## cuisson quand l'exagération change). Cuisson complète et synchrone (construction) ; ensuite,
+## `_on_chunk_surface_changed` la relance par tranches de lignes étalées sur plusieurs images
+## (`bake_budget_ms`), l'ancienne texture restant affichée jusqu'à la fin.
 func _bake_heights() -> void:
+	_start_bake()
+	_continue_bake(INF)
+
+
+## Budget par image de la cuisson étalée (ms).
+@export var bake_budget_ms: float = 1.5
+var _bake_image: Image
+var _bake_row: int = -1
+var _bake_corners: PackedFloat32Array = PackedFloat32Array()
+var _bake_pending: bool = false
+var _bake_active_us: int = 0
+
+
+func _start_bake() -> void:
+	_bake_image = Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
+	_bake_row = 0
+	_bake_active_us = 0
+	_bake_corners = _corner_row(0)
+
+
+## Hauteur (m) de la surface affichée au point carte ; 0 sans terrain.
+func _surface_m(x: float, z: float) -> float:
+	if _terrain == null:
+		return 0.0
+	return _terrain.surface_height_at(x, z) / maxf(MapData.vertical_scale(), 1e-9)
+
+
+## Hauteurs (m) des coins de texels de la ligne `j` (HEIGHT_RES + 1 valeurs, partagées par les
+## texels voisins : 2,5 fois moins d'appels que cinq échantillons par texel).
+func _corner_row(j: int) -> PackedFloat32Array:
+	var row := PackedFloat32Array()
+	row.resize(HEIGHT_RES + 1)
+	var z := _origin.y + float(j) / HEIGHT_RES * _extent
+	for i in HEIGHT_RES + 1:
+		row[i] = _surface_m(_origin.x + float(i) / HEIGHT_RES * _extent, z)
+	return row
+
+
+## Avance la cuisson dans le budget (ms) ; rend vrai quand elle est terminée.
+func _continue_bake(budget_ms: float) -> bool:
+	if _bake_row < 0:
+		return true
 	var t0 := Time.get_ticks_usec()
-	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
-	var half := 0.5 * _extent / HEIGHT_RES
-	for j in HEIGHT_RES:
+	while _bake_row < HEIGHT_RES:
+		var j := _bake_row
+		var next := _corner_row(j + 1)
+		var z := _origin.y + (float(j) + 0.5) / HEIGHT_RES * _extent
 		for i in HEIGHT_RES:
-			var x := _origin.x + (float(i) + 0.5) / HEIGHT_RES * _extent
-			var z := _origin.y + (float(j) + 0.5) / HEIGHT_RES * _extent
-			var h := 0.0
-			if _terrain != null:
-				# L2 : maximum sur le texel (centre et coins) : le lit creusé d'une rivière de la carte
-				# ne fait plus plonger les rives, l'eau et les quais de la maquette sous le relief.
-				h = _terrain.surface_height_at(x, z)
-				for offset in [Vector2(-half, -half), Vector2(half, -half), Vector2(-half, half), Vector2(half, half)]:
-					h = maxf(h, _terrain.surface_height_at(x + offset.x, z + offset.y))
-			image.set_pixel(i, j, Color(h, 0.0, 0.0))
+			# L2 : maximum sur le texel (centre et coins) : le lit creusé d'une rivière de la carte
+			# ne fait plus plonger les rives, l'eau et les quais de la maquette sous le relief.
+			var h := _surface_m(_origin.x + (float(i) + 0.5) / HEIGHT_RES * _extent, z)
+			h = maxf(maxf(h, maxf(_bake_corners[i], _bake_corners[i + 1])), maxf(next[i], next[i + 1]))
+			_bake_image.set_pixel(i, j, Color(h, 0.0, 0.0))
+		_bake_corners = next
+		_bake_row += 1
+		if (Time.get_ticks_usec() - t0) / 1000.0 >= budget_ms:
+			break
+	_bake_active_us += Time.get_ticks_usec() - t0
+	if _bake_row < HEIGHT_RES:
+		return false
+	_bake_row = -1
 	if _height_texture == null:
-		_height_texture = ImageTexture.create_from_image(image)
+		_height_texture = ImageTexture.create_from_image(_bake_image)
 	else:
-		_height_texture.update(image)
+		_height_texture.update(_bake_image)
+	_bake_image = null
 	for material in _materials:
 		_apply_height_params(material)
 	stats["bakes"] = int(stats.get("bakes", 0)) + 1
-	stats["bake_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
+	stats["bake_ms"] = _bake_active_us / 1000.0
+	stats["bake_ms_total"] = float(stats.get("bake_ms_total", 0.0)) + _bake_active_us / 1000.0
+	return true
+
+
+func _process(_delta: float) -> void:
+	if _bake_row < 0 and _bake_pending:
+		_bake_pending = false
+		_start_bake()
+	if _bake_row >= 0:
+		var t0 := Time.get_ticks_usec()
+		_continue_bake(bake_budget_ms)
+		stats["bake_frame_ms_max"] = maxf(float(stats.get("bake_frame_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+
+
+## Termine tout de suite la cuisson en cours ou en attente (captures, tests).
+func flush_bake() -> void:
+	if _bake_row < 0 and _bake_pending:
+		_bake_pending = false
+		_start_bake()
+	_continue_bake(INF)
 
 
 func _on_chunk_surface_changed(index: int) -> void:
-	if _terrain == null or _terrain.chunk_px <= 0:
+	# ZG4 : un changement d'échelle verticale seul ne touche pas aux hauteurs en mètres.
+	if _terrain == null or _terrain.chunk_px <= 0 or _terrain.rescaling_vertical:
 		return
 	var cx := index % TerrainBuilder.CHUNKS
 	var cy := index / TerrainBuilder.CHUNKS
 	var rect := Rect2(cx * _terrain.chunk_px, cy * _terrain.chunk_px, _terrain.chunk_px, _terrain.chunk_px)
 	if rect.intersects(Rect2(_origin, Vector2(_extent, _extent))):
-		_bake_heights()
+		# Cuisson en cours : relancée à la fin (la surface a pu changer sous les lignes déjà faites).
+		_bake_pending = true
 
 
 ## Affiche les éléments datés de l'année (enceinte de Charles V, Bastille, Louvre de Charles V…).

@@ -13,9 +13,10 @@ extends RefCounted
 
 const HEIGHT_SCALE := 0.006
 ## Facteur vertical courant (unités monde par mètre), propriétaire unique de l'échelle verticale
-## (ADR 0036) : vaut `HEIGHT_SCALE` aujourd'hui ; le lot ZG4 le rendra dynamique (exagération
-## ramenée vers ×1,5 au zoom maximal). Lu par le shader de terrain (`height_scale`), le quadtree
-## et `surface_height_at`.
+## (ADR 0036, lot ZG4) : `HEIGHT_SCALE` (×4,3) en vue stratégique, ramené vers ×1,5 au zoom le
+## plus rapproché quand la pyramide de relief est en cache (`CloseCameraProfile`). Lu par les
+## shaders (paramètre global `campaign_vertical_scale`), le quadtree et `surface_height_at`.
+## Les maillages E0 du repli sans cache restent cuits à `HEIGHT_SCALE` (l'échelle ne bouge pas).
 static var _vertical_scale: float = HEIGHT_SCALE
 
 
@@ -78,6 +79,24 @@ var coastlines: Array[PackedVector2Array] = []
 
 static func vertical_scale() -> float:
 	return _vertical_scale
+
+
+## Lot ZG4 : exagération courante (× par rapport au relief vrai, 1 unité = `meters_per_px` m).
+static func vertical_exaggeration(meters_per_unit: float = 719.0) -> float:
+	return _vertical_scale * meters_per_unit
+
+
+## Lot ZG4 : change l'échelle verticale (propriétaire unique) et la publie aux shaders par le
+## paramètre global `campaign_vertical_scale` (terrain, quadtree, fleuves, maquettes). Rend vrai
+## si la valeur a changé. Appelé par `TerrainBuilder.set_vertical_scale`, qui recale les calques ;
+## ne pas l'appeler directement ailleurs (sinon les objets posés ne suivent pas).
+static func set_vertical_scale(value: float) -> bool:
+	value = maxf(value, 1e-6)
+	if is_equal_approx(value, _vertical_scale):
+		return false
+	_vertical_scale = value
+	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", value)
+	return true
 
 
 static func load_from_dir(dir: String) -> MapData:
