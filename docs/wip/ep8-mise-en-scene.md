@@ -19,17 +19,45 @@ Branche `worktree-agent-a8a54631be0d814c5`. Plan du chantier : `docs/wip/epic.md
   caméra cinématique.
 
 ## État
-| Étape | État |
-|---|---|
-| 0. Données, schémas, test pytest, cœur heure du jour + tests (`tests/ep8_time_of_day.rs`), pont | fait |
-| 1. Lumière selon l'heure (Godot) + `--hour=` + menu démos | fait (capture aube OK) |
-| 2. Ombres de nuages | fait (décal + bruit périodique CPU ; ViewportTexture refusée par Decal) |
-| 3. Poussière enrichie (effectif, terrain, colonnes) | fait, à vérifier en capture |
-| 4. Fumées (`add_smoke_source`, bombardes, incendies S2) | fait, à vérifier en capture |
-| 5. Oiseaux, corbeaux | fait, test `game/tests/ep8_staging_test.gd` OK |
-| 6. Caméra cinématique, ralenti, réglages | fait, à vérifier en capture |
-| 7. Mesures A/B (`tools/bench_ep1.sh`), captures `docs/img/ep8/`, ADR | à faire |
+Toutes les étapes faites (squelette, cœur, lumière, nuages, poussière, fumées, oiseaux, plan
+cinématique, captures, mesures, ADR 0055). `git merge main` (034351af, sans Rust) puis revérifié.
 
-## Prochaine étape
-Captures (`--birds-shot`, `--cinematic-shot` à brancher dans `_stage_screenshot`), crépuscule,
-mesures A/B (`tools/bench_ep1.sh`), ADR 0055, smoke complet.
+## Vérifications (après fusion de main)
+cargo fmt, clippy `-D warnings`, `cargo test --workspace` (704 OK), `core/build.sh`, pytest
+(549 OK), import Godot, `ep8_staging_test`, `ep2_horizon_test`, smoke entier (28 « smoke OK »,
+code 0).
+
+## Options
+`--hour=<dawn|morning|midday|afternoon|dusk|night|h>` ; A/B : `--no-daytime`,
+`--no-cloud-shadows`, `--no-staging-dust`, `--no-smoke`, `--no-birds`, `--no-cinematic`,
+`--no-ep8` ; captures : `--birds-shot`, `--dust-shot`, `--cinematic-shot` (sans `--no-hud` pour
+garder les bandes noires), `--cinematic`. Menu « Batailles de démonstration » : choix de l'heure.
+Réglages : « Plan cinématique au premier choc », « Ralenti du plan cinématique ».
+
+## Mesures (M4 Pro très chargé : charge 26-57, ~20 godot d'autres agents)
+`tools/bench_ep1.sh <étiquette> --units=63 --bench-at=90 --hour=afternoon --weather=clear`
+(15 008 soldats, palier epic 2400 × 1600, Haut) :
+
+| Config | i/s moy. | médiane ms | p95 ms |
+|---|---|---|---|
+| A `--no-ep8` (avant) | 21,6 · 26,8 | 45,8 · 36,1 | 60,6 · 44,9 |
+| B EP8 complet | 26,8 · 26,3 | 36,1 · 36,9 | 44,4 · 45,5 |
+| `--no-daytime` / `--no-cloud-shadows` / `--no-staging-dust` / `--no-smoke` / `--no-birds` | 26,5 / 26,1 / 26,6 / 26,5 / 26,7 | 36,1-36,7 | 44,4-47,0 |
+| crépuscule, EP8 | 26,4 | 36,4 | 46,3 |
+
+Lecture : aucun écart mesurable entre A et B (bruit ±1 i/s) ; la machine plafonne tout à ~27 i/s
+(médiane figée à 36 ms), donc la cible de 40 i/s n'est pas vérifiable ici : EP1 mesurait ~57 i/s
+sur la même scène, machine moins chargée. À remesurer machine calme.
+
+## Captures
+`docs/img/ep8/` : `aube.png`, `crepuscule.png`, `charge_poussiere.png`, `envol_oiseaux.png`,
+`plan_cinematique.png`.
+
+## Points ouverts
+- Mesure à refaire sur machine calme (cible 40 i/s au palier épique).
+- EP6 : appeler `BattleScene.add_smoke_source(position, intensity)` pour ses camps et mettre
+  `staging.auto_campfires = false` (sinon feux par défaut en plus).
+- EP7 : fixer l'heure historique (`BattleSim.set_start_hour`, ex. Crécy en fin d'après-midi).
+- Pas de lever/coucher selon la saison, pas d'étoiles ; villages du champ jamais en feu (S2 ne
+  vit que dans les sièges) ; oiseaux petits à l'écran (taille réelle).
+- `epic.md` (tableau des lots) à mettre à jour par l'orchestrateur à la fusion.
