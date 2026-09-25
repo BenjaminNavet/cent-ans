@@ -2092,6 +2092,10 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
 /// A crown down to `peace.cornered_provinces` provinces of its own (or
 /// fewer) sues for peace every season, whatever the war score (G5: the
 /// Scots after Halidon Hill treat rather than vanish).
+pub fn is_cornered(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
+    cornered(state, data, faction)
+}
+
 fn cornered(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
     let most = data.ai_diplomacy.peace.cornered_provinces;
     most > 0
@@ -2180,8 +2184,22 @@ fn war_target(
 ) -> Option<FactionId> {
     let my_power = state.coalition_power(faction);
     let rules = &data.ai_diplomacy.war;
-    // Never a new front while the current wars weigh.
-    if enemy_power(state, data, faction) > rules.front_share * state.faction_power(faction) {
+    // Never a new front while the current wars weigh (DP1: a pretender
+    // to a throne tolerates a heavier border war, as Edward III kept
+    // fighting the Scots while claiming France).
+    let pressing = enemy_power(state, data, faction);
+    let own = state.faction_power(faction);
+    let pretender = data.ai_diplomacy.negotiation.enabled
+        && state.factions[faction]
+            .claims
+            .iter()
+            .any(|c| c.kind == ClaimKind::Throne);
+    let share = if pretender {
+        rules.front_share * 2.0
+    } else {
+        rules.front_share
+    };
+    if pressing > share * own {
         return None;
     }
     let has_allies = state.factions[faction]
