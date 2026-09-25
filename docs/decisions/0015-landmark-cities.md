@@ -52,3 +52,17 @@ dans 0,2 px : une maquette à l'échelle vraie est illisible, une maquette gén�
 - Sources : plans du domaine public (plan de Bâle, Legrand 1380, Viollet-le-Duc) et OpenStreetMap
   (ODbL) pour le recalage de positions ; citées dans le JSON.
 - La bataille de siège à Paris réutilise le même plan (voir `docs/wip/l1-paris.md`).
+
+## Addendum (lot L2, 2026-09-25)
+
+- Six villes de plus sur le même gabarit : Londres, Avignon, Calais, Rouen, Bordeaux, Bruges
+  (`data/landmarks/<id>.json`, suivi dans `docs/wip/l2-villes.md`).
+- Les monuments passent par des **gabarits paramétrés** (`monuments[].params`, variantes datées
+  fusionnées) : cathédrale gothique, château à enceintes, beffroi, palais à grande salle, porte à
+  tours, cogue ; seul le palais des Papes reste un maillage dédié. Pas de copie de code par ville.
+- **Poids** : ≤ 6 Mo par ville (test `test_landmark_model_weight`) grâce aux maisons sans couvercle,
+  aux couleurs en octets normalisés (`compact_glb`) et à la densité réglée par ville.
+- **Hauteurs cuites** : maximum sur chaque texel (centre et coins) pour que le lit creusé d'une
+  rivière de la carte ne fasse plus disparaître l'eau et les quais de la maquette.
+- Ville côtière (Calais) : ancre posée sur le trait de côte ; la loupe radiale conserve les droites
+  passant par l'ancre, la mer de la carte reste donc à sa place et aucun polygone de mer n'est dessiné.

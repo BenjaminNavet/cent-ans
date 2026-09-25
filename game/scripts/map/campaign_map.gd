@@ -25,6 +25,7 @@ extends Node3D
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
+##   --hide-armies               masque les marqueurs d'armée (captures des villes emblématiques, L2).
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -1054,6 +1055,8 @@ func _parse_cmdline() -> void:
 			terrain.fine_enabled = terrain.fine_step > 0
 		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
 			settlement_layer.select(arg.trim_prefix("--select-settlement="))
+		elif arg == "--hide-armies":  # L2 : captures des villes emblématiques
+			armies.visible = false
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
