@@ -47,10 +47,17 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# UX2 : guide rangé par « Plus tard » (repris à `tutorial/step`) ; conseil « que faire
+	# maintenant » de la carte (encart haut gauche).
+	"tutorial/postponed": false,
+	"interface/next_hint": true,
 	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
 	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra ; EP1 : 4 épique).
 	"battle/blood": 1,
 	"battle/unit_size": 1.0,
+	# FB1 : plafond de figurines dessinées sur tout le champ de bataille ; la taille des unités est
+	# abaissée pour le respecter (rendu seulement, voir ADR 0016).
+	"battle/max_figures": 15000,
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
 	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites
@@ -80,6 +87,8 @@ const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
 const BLOOD_CHOICES: Array[int] = [0, 1, 2]
 const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5, 4.0]  # EP1 : 4 = Épique
+# EP1 : 20 000 à 30 000 pour les batailles rangées (mesuré ≥ 30 i/s à 28 600 figurines, ADR 0031).
+const MAX_FIGURES_CHOICES: Array[int] = [1000, 2000, 3000, 4000, 6000, 8000, 10000, 12000, 15000, 20000, 25000, 30000]
 
 var path: String = SETTINGS_PATH
 var values: Dictionary = {}
