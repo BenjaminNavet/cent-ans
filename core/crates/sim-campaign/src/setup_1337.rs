@@ -242,6 +242,7 @@ impl CampaignState {
                 ransom_debts: Vec::new(),
                 chivalric_order: None,
                 budget_history: Vec::new(),
+                ledger: Default::default(),
                 regency: false,
                 embargoes: BTreeSet::new(),
                 suzerain: faction.suzerain.clone(),
