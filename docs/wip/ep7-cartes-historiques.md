@@ -13,8 +13,7 @@ EP9 (fin de bataille).
   (« batailles » successives), régiments qui tiennent leur position, météo (et changements), heure.
 - Cœur : `sim-battle/src/historical.rs` (types, `battle_setup`, `apply_site`, `start`) ;
   `src/sim/scenario.rs` (déploiement historique, vagues retenues, postes avec laisse, météo qui
-  change) ; filtre des ordres de l'IA dans `sim.rs::step` ; `ai.rs::View::new` ignore les
-  régiments d'une vague retenue (une ligne, hors des zones EP9b).
+  change) ; filtre des ordres de l'IA dans `sim.rs::step` (ai.rs intact).
 - Rendu : tuile d'horizon du site (`hist_<id>`), menu « Batailles historiques », entrée depuis la
   campagne (province + années du `campaign` de la carte).
 

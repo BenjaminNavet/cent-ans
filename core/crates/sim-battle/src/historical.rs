@@ -198,6 +198,10 @@ pub struct Wave {
     /// regiments in a melee, routing or gone).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub after: Option<usize>,
+    /// ... or as soon as the enemy's wave `after_enemy` is engaged (the
+    /// captal de Buch at Poitiers waits for the king's battle).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after_enemy: Option<usize>,
     /// Once released, the wave goes straight at the enemy (the AI no longer
     /// weighs whether to attack: the French "battles" of Crécy).
     #[serde(default)]

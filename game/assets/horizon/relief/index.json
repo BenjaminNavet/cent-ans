@@ -26,6 +26,19 @@
    "sea_share": 0.0,
    "site": "crecy"
   },
+  "hist_poitiers": {
+   "file": "hist_poitiers.bin",
+   "lon": 0.4024,
+   "lat": 46.5165,
+   "ref_m": 124.4,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.13,
+   "relief_max_m": 160.0,
+   "sea_share": 0.0,
+   "site": "poitiers"
+  },
   "prov_agenais": {
    "file": "prov_agenais.bin",
    "lon": 0.4862,

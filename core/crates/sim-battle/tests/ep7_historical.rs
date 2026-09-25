@@ -15,7 +15,7 @@ use common::*;
 use sim_battle::{BattleSim, HistoricalMap, SideId};
 
 /// The historical maps shipped.
-const MAPS: &[&str] = &["crecy", "azincourt"];
+const MAPS: &[&str] = &["crecy", "azincourt", "poitiers"];
 
 fn map(id: &str) -> HistoricalMap {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -175,6 +175,71 @@ fn crecy_is_most_often_an_english_victory() {
 fn azincourt_is_most_often_an_english_victory() {
     let wins = english_wins("azincourt");
     assert!((14..20).contains(&wins), "English won {wins}/20");
+}
+
+/// Poitiers: a closer battle, the English still win most of the time
+/// (between 55 % and 90 % of the seeds).
+#[test]
+fn poitiers_is_closer_but_mostly_english() {
+    let wins = english_wins("poitiers");
+    assert!((11..19).contains(&wins), "English won {wins}/20");
+}
+
+/// The waves of the French hold back until released: at Crécy the first
+/// "battle" of knights has not moved while the Genoese open the fight, and
+/// is released later; the captal de Buch waits at Poitiers.
+#[test]
+fn waves_are_held_then_released() {
+    let (_, mut sim) = start("crecy", 3);
+    let knights: Vec<usize> = (0..sim.units().len())
+        .filter(|&i| {
+            sim.units()[i]
+                .name
+                .starts_with("Chevaliers du comte d'Alençon")
+        })
+        .collect();
+    assert!(!knights.is_empty());
+    let before: Vec<(f64, f64)> = knights
+        .iter()
+        .map(|&i| (sim.units()[i].x, sim.units()[i].z))
+        .collect();
+    run(&mut sim, 60.0);
+    for (k, &i) in knights.iter().enumerate() {
+        assert!(sim.scenario_held(i), "held at 60 s");
+        let u = &sim.units()[i];
+        assert!((u.z - before[k].1).abs() < 5.0, "the held knights stay put");
+    }
+    run(&mut sim, 300.0);
+    assert!(
+        knights.iter().all(|&i| !sim.scenario_held(i)),
+        "released by 360 s"
+    );
+    assert!(sim.scenario_waves(SideId::Attacker)[1].1);
+    let (_, sim) = start("poitiers", 3);
+    let captal = (0..sim.units().len())
+        .find(|&i| sim.units()[i].name.contains("captal"))
+        .expect("the captal de Buch");
+    assert!(sim.scenario_held(captal));
+}
+
+/// The English hold their ground: after the first minutes their posted
+/// regiments are still near their posts.
+#[test]
+fn posted_regiments_hold_their_ground() {
+    let (_, mut sim) = start("azincourt", 5);
+    run(&mut sim, 120.0);
+    for i in 0..sim.units().len() {
+        if let Some((x, z, _, leash)) = sim.scenario_post(i) {
+            let u = &sim.units()[i];
+            if u.able() {
+                assert!(
+                    (u.x - x).hypot(u.z - z) <= leash + 40.0,
+                    "{} left its post",
+                    u.name
+                );
+            }
+        }
+    }
 }
 
 /// Every map loads, lays its site and deploys every regiment on the field,

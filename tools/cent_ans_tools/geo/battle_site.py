@@ -298,13 +298,15 @@ def with_relief(text: str, relief: dict) -> str:
     """Map text with its ``relief`` block replaced (one line, the rest untouched).
 
     The block is written on a single line ``  "relief": {...},`` right before the
-    ``"weather"`` block, so that the hand-written map keeps its layout.
+    top-level ``"weather"`` key, so that the hand-written map keeps its layout.
     """
     line = '  "relief": ' + json.dumps(relief, ensure_ascii=False, separators=(",", ":")) + ","
-    lines = [row for row in text.splitlines() if not row.startswith('  "relief": ')]
+    lines = [row for row in text.splitlines() if not row.lstrip().startswith('"relief": ')]
     at = next(
-        (i for i, row in enumerate(lines) if row.startswith('  "weather": ')), len(lines) - 1
+        (i for i, row in enumerate(lines) if row.lstrip().startswith('"weather": ')), None
     )
+    if at is None:
+        raise ValueError('the map has no "weather" line to put the relief before')
     lines.insert(at, line)
     return "\n".join(lines) + "\n"
 
