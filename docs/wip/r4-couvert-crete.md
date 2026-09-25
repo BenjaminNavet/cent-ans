@@ -16,13 +16,16 @@ Mesure R2b, graines 0-63 : plaine 113/128, bocage 89/128, collines 98/128, monta
 - [x] Attaquant plus haut qui attend (150 s au plus).
 - [x] Tests `tests/r4.rs` (9, vérifiés en retirant chaque fonction) ; surveys `tests/r4_survey.rs`.
 - [x] ADR 0046 (brouillon, chiffres à reporter).
-- [ ] Mesures finales (R2b 0-63 + surveys avant/après), fusion de main, build.sh + smoke.
+- [x] Mesures finales (reportées dans l'ADR 0046), fusion de main (c47a54ce).
+- [ ] fmt/clippy/test après fusion, build.sh + smoke.
 
-## Mesures intermédiaires
-- R2b 0-63 (avant la « course ») : plaine 114, bocage 89, collines 102, montagne 101 (406/512 contre 382).
-- Géométrie A (crête 80 m devant le déploiement) : la crête+haie coûtait la bataille (les Anglais
-  montaient 140 s et se faisaient prendre en marche) → ajout de la course ; surveys passés à une crête
-  45 m devant.
+## Mesures
+Voir ADR 0046 § Mesures. R2b 0-63 : 114/88/102/97 = 401/512 (référence 382). Contre-pente : pertes au
+trait de la ligne avant contact 88,1 → 17,4 par bataille.
 
-## Prochaine étape
-Relire les surveys (avant : copie de afd327d4 dans le scratchpad), remesurer R2b, finir l'ADR.
+## Points ouverts
+- Rendu : `indirect` exporté par `get_shots()` mais pas encore dessiné (cloche plus haute).
+- Crête arrondie sans haie : les archers tiennent le sommet et laissent un angle mort (pas de
+  « crête militaire » sur le versant avant).
+- À rapport de forces serré (3 chevaliers + 1 homme d'armes), la position anglaise crête + haie perd
+  désormais : les arcs ne tirent plus à travers la crête.

@@ -69,6 +69,8 @@ fait surtout d'archers qui n'attendait que ça.
    - contre-pente disponible derrière le front : + 3 (si l'ennemi a des tireurs) ;
    - couvert juste devant le front (à 14 m) : haie 1, fossé 0,8, clôture 0,45 × **14** points × part
      du front couverte ; village : 14 ;
+   - champ de tir : 6 × part du terrain vu à 60, 120 et 180 m devant le front (une crête arrondie
+     laisse un angle mort sous elle ; les archers doivent voir ce qu'ils tirent) ;
    - flancs appuyés (bois, rivière ou mare, marais, pente > 0,35) : 4 par aile à 30 m au plus de son
      extrémité, 2 jusqu'à 60 m. Les « bois de lisière » comptent ici, comme appuis d'aile (Crécy,
      Azincourt), pas comme couvert où poster les archers.
@@ -76,6 +78,15 @@ fait surtout d'archers qui n'attendait que ça.
      déploiement (+ 2 de marge), la grille des hauteurs de R2b (sans couvert, − 0,01/m latéral) et les
      couverts éligibles de B6 (− 0,03/m latéral, − 0,035/m en profondeur) : une haie sur une crête bat
      une crête nue et une haie en creux ; les archers vont derrière la haie de la crête.
+   - Une position que l'ennemi atteindrait presque aussi vite est écartée (« course » : nos tireurs,
+     au pas du plus lent et ralentis en montée, doivent y être en moins de 0,6 fois le temps de
+     l'infanterie ennemie, depuis les lignes de déploiement) : sinon la ligne est prise en marche.
+   - Derrière une haie sur une crête, les tireurs se collent à la haie (7, 5,5 ou 4,5 m) pour voir le
+     glacis ; derrière haie, fossé ou maisons, ils ne reculent devant l'infanterie qu'à 40 m (au lieu
+     de 70 m), puisqu'elle doit franchir l'obstacle.
+   - Un défenseur à égalité de forces (ou dont les tireurs font plus de la moitié de la puissance)
+     attend sur sa position un ennemi qui marche sur lui à moins de 250 m, au lieu de la quitter dès
+     que ses archers ont éclairci les rangs adverses.
    - La ligne recule sur la contre-pente dès que l'ennemi a des tireurs, arcs longs compris.
    - Les tireurs ne s'arrêtent « à portée » que s'ils peuvent tirer ; ils cherchent un poste d'où ils
      voient la cible (le tir en cloche reste un pis-aller).
@@ -88,7 +99,44 @@ fait surtout d'archers qui n'attendait que ça.
 
 ## Mesures
 
-Voir `docs/wip/r4-couvert-crete.md` (mesure R2b sur 512 batailles, surveys `tests/r4_survey.rs`).
+Toutes les mesures sont déterministes (seules les victoires et pertes comptent).
+
+**Non-régression R2b** (IA active contre camp passif, armées miroir, graines 0-63 × 2 camps) :
+
+| Terrain | main afd327d4 | R4 |
+|---|---|---|
+| plaine | 113/128 | 114/128 |
+| bocage | 89/128 | 88/128 |
+| collines | 98/128 | 102/128 |
+| montagne | 82/128 | 97/128 |
+| total | 382/512 | 401/512 |
+
+**Contre-pente contre l'arc long** (`survey_reverse_slope_against_longbows`, 32 graines : défenseur
+2 hommes d'armes + 1 arc long sur une crête, attaquant 3 arcs longs + 3 fantassins) : pertes au trait
+de la ligne du défenseur **avant le contact** 88,1 → **17,4** par bataille (− 80 %). Après le contact,
+35,9 contre 13,2 (les archers anglais tirent en cloche, guidés, sur la ligne pendant la mêlée) ; le
+résultat ne change pas (l'attaquant gagne toujours, il est deux fois plus fort).
+
+**Anglais archers derrière une haie sur une crête contre chevaliers français**
+(`survey_english_position_against_knights`, 32 graines ; 3 arcs longs + 2 hommes d'armes contre
+2 chevaliers + 1 homme d'armes + 1 arbalète ; crête à 45 m devant le déploiement anglais) :
+
+| Terrain | avant R4 : défenseur gagne / pertes françaises au trait | R4 |
+|---|---|---|
+| crête + haie | 32/32 · 300,0 | 32/32 · 300,0 |
+| crête nue | 32/32 · 300,0 | **0/32** · 168,0 |
+| haie en creux + crête | 32/32 · 300,0 | 32/32 · 145,1 |
+| rase campagne | 32/32 · 274,9 | 32/32 · 247,8 |
+
+(300 = armée française détruite par les flèches.) La position anglaise type reste imbattable. En
+revanche, sur la crête nue, les archers anglais qui tiennent la crête perdent désormais : les chevaliers
+montent à couvert dans l'angle mort sous la crête arrondie, les arcs ne tirent plus à travers le relief ;
+avec la haie ou en rase campagne, rien ne change. Avec une force française plus lourde (3 chevaliers +
+2 hommes d'armes), les Anglais perdent partout, avant comme après R4 ; avec 3 chevaliers + 1 homme d'armes,
+avant R4 ils gagnaient sur toutes les crêtes (≈ 300 Français tués au trait) et perdaient en rase
+campagne ; après R4 ils perdent partout, y compris derrière la haie de crête (0/32 ; 112 à 138 tués au
+trait) : les chevaliers approchent dans l'angle mort et les arcs ne tirent plus à l'aveugle à travers
+la crête. À ce rapport de forces, la protection du relief joue contre les archers.
 
 ## Conséquences
 
@@ -99,5 +147,8 @@ Voir `docs/wip/r4-couvert-crete.md` (mesure R2b sur 512 batailles, surveys `test
   qu'au tir indirect des troupes qui tirent des flèches.
 - Les batailles de campagne avec site changent (position défensive et choix de cible) ; mêmes graines,
   mêmes tirages.
+- Point ouvert : un défenseur sur une crête arrondie sans haie devrait avancer ses archers sur le
+  versant avant (la « crête militaire ») ; le score de champ de tir les en dissuade, mais la
+  recherche ne propose que des points de grille à 25 m.
 - Point ouvert : dessiner une cloche plus haute pour les volées `indirect` (le rendu BV1 encode
   l'arc par type de projectile dans le shader ; un bit de plus décalerait le codage des traits).
