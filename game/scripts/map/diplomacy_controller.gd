@@ -110,13 +110,15 @@ func _toggle_mode(target: MapMode) -> void:
 	if not available():
 		return
 	mode = MapMode.NONE if mode == target else target
+	if mode != MapMode.DIPLOMACY:
+		_clear_relation_markers()
 	if mode == MapMode.NONE:
 		map.refresh_all()
 		map.ui.show_toast("Carte politique.")
 		return
 	map.unrest_mode = false
 	refresh()
-	map.ui.show_toast("Carte diplomatique : rouge guerre, bleu alliés, violet vassaux, jaune trêve." if mode == MapMode.DIPLOMACY else "Carte religieuse : bleu Avignon, or Rome, vert hérésie.")
+	map.ui.show_toast("Carte diplomatique : ⚔ rouge guerre, ⚭ bleu alliés, ⚜ violet vassaux, ⌛ jaune trêve." if mode == MapMode.DIPLOMACY else "Carte religieuse : bleu Avignon, or Rome, vert hérésie.")
 
 
 func _province_ids() -> PackedStringArray:
@@ -127,7 +129,8 @@ func _province_ids() -> PackedStringArray:
 
 
 func _color_by_relation() -> void:
-	var relations: PackedStringArray = map.sim.call("get_province_relations", _province_ids())
+	var ids := _province_ids()
+	var relations: PackedStringArray = map.sim.call("get_province_relations", ids)
 	var colors := PackedColorArray()
 	for relation in relations:
 		var color: Color = RELATION_COLORS.get(relation, Color(0, 0, 0, 0))
@@ -135,6 +138,51 @@ func _color_by_relation() -> void:
 			color.a = 0.0
 		colors.append(color)
 	map.terrain.set_province_colors(colors)
+	_place_relation_markers(ids, relations)
+
+
+## Lot U12 : en mode daltonien, un symbole par province sur la carte diplomatique (⚔ guerre,
+## ⚭ alliance, ⚜ vassal ou suzerain, ⌛ trêve), lisible sans distinguer les couleurs.
+const MARKER_FONT := "res://assets/third_party/fonts/noto/NotoSansSymbols2-Subset.ttf"
+const MARKER_FONT_MAIN := "res://assets/third_party/fonts/noto/NotoSansSymbols-Subset.ttf"
+const MARKED_RELATIONS := ["war", "alliance", "vassal", "suzerain", "truce"]
+var _markers: Node3D
+
+
+func _place_relation_markers(ids: PackedStringArray, relations: PackedStringArray) -> void:
+	_clear_relation_markers()
+	if not Accessibility.colorblind() or not (map is Node3D):
+		return
+	_markers = Node3D.new()
+	_markers.name = "RelationMarkers"
+	map.add_child(_markers)
+	var font := FontVariation.new()
+	font.base_font = load(MARKER_FONT_MAIN)
+	font.fallbacks = [load(MARKER_FONT)]
+	for index in mini(ids.size(), relations.size()):
+		var relation := relations[index]
+		if not MARKED_RELATIONS.has(relation):
+			continue
+		var centroid: Vector2 = map.map_data.centroid_of_id(ids[index])
+		var label := Label3D.new()
+		label.text = Accessibility.relation_symbol(relation)
+		label.font = font
+		label.font_size = 72
+		label.outline_size = 14
+		label.outline_modulate = Color(0.97, 0.93, 0.82)
+		label.modulate = (RELATION_COLORS.get(relation, Color.BLACK) as Color).darkened(0.35)
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.no_depth_test = true
+		label.fixed_size = true
+		label.pixel_size = 0.0009
+		label.position = Vector3(centroid.x, map.map_data.surface_world_at(centroid.x, centroid.y) + 0.5, centroid.y)
+		_markers.add_child(label)
+
+
+func _clear_relation_markers() -> void:
+	if _markers != null and is_instance_valid(_markers):
+		_markers.queue_free()
+	_markers = null
 
 
 func _color_by_religion() -> void:

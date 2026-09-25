@@ -172,7 +172,8 @@ func _frames(count: int) -> void:
 func run() -> void:
 	var tree := get_tree()
 	var tween := create_tween()
-	tween.tween_property(_fade, "color:a", 0.0, FADE_SECONDS * 0.6)
+	var fade_time := 0.01 if Accessibility.reduce_motion() else FADE_SECONDS  # U12
+	tween.tween_property(_fade, "color:a", 0.0, fade_time * 0.6)
 	await tween.finished
 
 	# 1. Ressources (chargement en tâche de fond).
@@ -213,7 +214,7 @@ func run() -> void:
 		_set_progress(0.85 + 0.15 * float(frame + 1) / SETTLE_FRAMES)
 	_set_step(STEPS.size(), 1.0)
 	var fade_out := create_tween()
-	fade_out.tween_property(_root_control, "modulate:a", 0.0, FADE_SECONDS)
+	fade_out.tween_property(_root_control, "modulate:a", 0.0, fade_time)
 	await fade_out.finished
 	finished.emit(scene)
 	queue_free()

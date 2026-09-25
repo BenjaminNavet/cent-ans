@@ -195,7 +195,7 @@ func _rebuild(animate_first := false) -> void:
 		letter.item = _items[i]
 		letter.expanded = bool(_expanded.get(_key(_items[i]), false))
 		_box.add_child(letter)
-		if i == 0 and animate_first and is_inside_tree():
+		if i == 0 and animate_first and is_inside_tree() and not Accessibility.reduce_motion():
 			letter.modulate.a = 0.0
 			create_tween().tween_property(letter, "modulate:a", 1.0, 0.35)
 	var hidden := _items.size() - shown

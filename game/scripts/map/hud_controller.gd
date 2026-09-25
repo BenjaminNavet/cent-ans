@@ -220,7 +220,7 @@ func general_candidates(army: Dictionary) -> Array:
 		elif str(character.get("governor_of", "")) != "":
 			entry["reason"] = "gouverne une province"
 		elif str(character.get("location", "")) != location:
-			entry["reason"] = "à %s" % str(map.call("province_name_of", str(character.get("location", ""))))
+			entry["reason"] = "ailleurs : %s" % str(map.call("province_name_of", str(character.get("location", ""))))
 		if str(entry.get("reason", "")) == "":
 			free.append(entry)
 		else:
