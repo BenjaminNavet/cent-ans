@@ -1,7 +1,7 @@
 class_name PortraitFrame
 extends Control
 
-## DA2 (ADR 0056) : portrait vivant encadré. Image choisie par `LivingPortrait` (portrait fixe,
+## DA2 (ADR 0063) : portrait vivant encadré. Image choisie par `LivingPortrait` (portrait fixe,
 ## variante âgée ou archétype) ; marques procédurales sans nouvelle génération :
 ## - cadre selon le rang (or et azur pour un souverain, or pour un grand noble, encre et filet d'or
 ##   pour un chevalier, or et pourpre pour un prélat, encre simple pour un bourgeois) ;

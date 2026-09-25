@@ -1,7 +1,7 @@
 class_name LivingPortrait
 extends RefCounted
 
-## DA2 (ADR 0056) : portraits vivants. Choisit l'image d'un personnage selon son état courant :
+## DA2 (ADR 0063) : portraits vivants. Choisit l'image d'un personnage selon son état courant :
 ## - figure historique : portrait fixe (`assets/portraits/<id>.png`) tant qu'elle est dans la
 ##   tranche d'âge de ce portrait ; variante âgée (`assets/portraits/aged/<id>_<tranche>.jpg`) pour
 ##   les grandes figures listées ; sinon archétype ;
@@ -199,6 +199,14 @@ static func resolve(character: Dictionary, context: Dictionary = {}) -> Dictiona
 	if cfg.is_empty():
 		return result
 	var archetype := _archetype(id, _sex(character), rank, band, culture)
+	# Banque incomplète : une figure historique garde son portrait fixe plutôt que l'habit d'une
+	# autre aire culturelle.
+	var fixed := PortraitLoader.PORTRAITS_DIR + id + ".png"
+	if id != "" and PortraitLoader.load_texture(fixed) != null \
+			and (archetype.is_empty() or str(archetype["culture"]) not in [culture, "any"]):
+		result["path"] = fixed
+		result["kind"] = "fixed"
+		return result
 	if not archetype.is_empty():
 		result.merge(archetype, true)
 		result["kind"] = "archetype"

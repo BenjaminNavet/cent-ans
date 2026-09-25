@@ -80,12 +80,16 @@ func _test_historical_aging() -> void:
 	old["age"] = 62
 	var aged := LivingPortrait.resolve(old, {"data_role": "ruler"})
 	_check(str(aged["path"]).ends_with("aged/chr_edward_iii_old.jpg"), "Edward III at 62 → aged variant (%s)" % aged["path"])
-	# Figure secondaire hors de sa tranche : archétype.
-	var minor := {"id": "chr_godefroy_d_harcourt", "sex": "male", "age": 67, "birth_year": 1300, "faction": "fac_france"}
-	var minor_old := LivingPortrait.resolve(minor, {"data_role": "noble"})
-	_check(str(minor_old["kind"]) != "fixed", "minor figure leaves his fixed portrait when he ages (%s)" % minor_old)
-	minor["age"] = 37
-	_check(str(LivingPortrait.resolve(minor, {"data_role": "noble"})["kind"]) == "fixed", "minor figure in his band keeps his portrait")
+	# Figure secondaire hors de sa tranche : archétype de son aire (chevalier anglais adulte).
+	var minor := {"id": "chr_william_de_bohun", "sex": "male", "age": 40, "birth_year": 1312, "faction": "fac_england"}
+	var minor_old := LivingPortrait.resolve(minor, {"data_role": "commander"})
+	_check(str(minor_old["path"]).contains("knight_male_adult_england_"), "minor figure leaves his fixed portrait when he ages (%s)" % minor_old)
+	minor["age"] = 25
+	_check(str(LivingPortrait.resolve(minor, {"data_role": "commander"})["kind"]) == "fixed", "minor figure in his band keeps his portrait")
+	# Sans archétype de son aire (banque incomplète) : il garde son portrait fixe.
+	var french := {"id": "chr_godefroy_d_harcourt", "sex": "male", "age": 67, "birth_year": 1300, "faction": "fac_france"}
+	var kept := LivingPortrait.resolve(french, {"data_role": "noble"})
+	_check(str(kept["kind"]) == "fixed" or str(kept["culture"]) == "france", "no foreign dress for a historical figure (%s)" % kept)
 
 
 func _test_marks() -> void:

@@ -1,4 +1,4 @@
-// DA2 (ADR 0056) : marques de portrait appliquées à l'image seule (cadre et coiffes à part).
+// DA2 (ADR 0063) : marques de portrait appliquées à l'image seule (cadre et coiffes à part).
 // grey : grisaille d'un défunt ; pallor : pâleur cireuse d'un malade ; dim : captivité (ombre).
 shader_type canvas_item;
 
