@@ -160,7 +160,9 @@ fn a_tribute_the_treasury_cannot_bear_is_budgeted() {
         "units are dismissed to pay the tribute"
     );
     assert!(
-        !orders.iter().any(|o| matches!(o, Order::Recruit { .. } | Order::Build { .. })),
+        !orders
+            .iter()
+            .any(|o| matches!(o, Order::Recruit { .. } | Order::Build { .. })),
         "nothing is bought"
     );
 }
