@@ -78,13 +78,15 @@ déjà présent sur main).
 - Pas de capture en bataille simulée : la démo de `battle_scene.gd` ne choisit pas ses types.
 - Bombardes du XVe siècle / artillerie de campagne non ajoutées (engins : lot SG1).
 - Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours ; `century_probe` non relancé.
-- `tools/cent_ans_tools/budget.py` ne lit pas un fichier à deux tables (section session 7) :
-  la dépense UR1 a été consignée à la main.
+- ~~`tools/cent_ans_tools/budget.py` ne lit pas un fichier à deux tables...~~ **fait (UR2, tâche
+  4)** : lit toutes les tables (sections `## Session N`), cumul et plafond par session courante,
+  `session_totals()`, `add_entry` écrit dans la dernière table. Tests dans `tools/tests/
+  test_budget.py` (nouvelles fixtures multi-sessions), suite complète verte (373 tests).
 
 ## UR2 (suite du lot, agent séparé)
 
 1. Projectile selon les données (voir ci-dessus) : **fait**, commit `5d5edd2d`.
 2. Jinetes, clip de lancer de javeline (Blender V2) : **fait**, commit `9668931a`.
 3. Budget de triangles (routiers, écorcheurs) : **fait**, commit `cde0e583`.
-4. `tools/.../budget.py` (tables multi-sessions) : à faire.
-5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : à faire.
+4. `tools/.../budget.py` (tables multi-sessions) : **fait**, commit `4a205183`.
+5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : en cours.
