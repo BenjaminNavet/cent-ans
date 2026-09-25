@@ -11,9 +11,9 @@ Batailles de 15 000 soldats et plus, fluides (≥ 40 i/s à 15 000 en Haut, ≥ 
 | 0. Squelette : `data/rules/battle_scale.json` + schéma + test, `sim-battle/src/scale.rs` | fait |
 | 1. Dimensions du champ paramétriques (cœur, pont, Godot) | fait (cœur testé ; Godot à vérifier au smoke) |
 | 2. Plafond de régiments par palier (données) | fait (20 / 40 / 80) |
-| 3. Rendu 15 000+ (mesures A/B, imposteurs très lointains, budget d'animation) | à faire |
-| 4. Option « Épique », sonde IA 40 régiments | à faire |
-| 5. ADR 0031 | à faire |
+| 3. Rendu 15 000+ (mesures A/B, imposteurs très lointains, budget d'animation) | fait |
+| 4. Option « Épique » (× 4), sonde IA 60 contre 60 | fait |
+| 5. ADR 0031 | fait |
 
 ## Conception
 - Paliers par effectif total (soldats simulés des deux camps, réserves comprises) :
@@ -70,5 +70,20 @@ régiments présents (`--units=105`), où le coût est côté script par régime
 (`ai_handles_sixty_regiments_a_side`) : jusqu'à 39 régiments en mêlée, fin à 1 160 s, pas
 d'effondrement.
 
+## Fusion de main
+- Conflit avec FB1 (`battle/max_figures`, plafond de figurines par défaut 15 000) dans
+  `settings.gd` / `settings_menu.gd` : les deux réglages gardés ; choix du plafond étendus à
+  20 000, 25 000 et 30 000 (défaut de FB1 inchangé). Avec le plafond par défaut, « Épique » est
+  ramené à 15 000 figurines au total.
+
+## Points ouverts
+- Écran plafonné à 60 Hz malgré `--disable-vsync` : les gains du budget ne se lisent qu'au-delà
+  de ~170 régiments présents ; mesures sur machine très chargée (bruit ±30 %).
+- Sièges toujours sur le champ standard (plan de ville fixe).
+- Rivière : toujours 2 gués (EP3 les multiplie) ; routes, bosquets et rochers décoratifs suivent la
+  taille du champ, les anneaux lointains (EP2) seulement via `NEAR_RECT` / `FAR_RECT`.
+- Au-delà de 172 régiments, le coût est dans le script par régiment (bannières, marqueurs,
+  `get_units`) : piste pour un lot suivant.
+
 ## Prochaine étape
-Mesures à 25 000 figurines (`--unit-size=1.75`) et au-delà ; ADR ; fusion de main.
+Terminé ; à fusionner dans `integration/epic`.
