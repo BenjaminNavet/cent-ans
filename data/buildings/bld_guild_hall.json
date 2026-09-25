@@ -5,12 +5,12 @@
   },
   "category": "commerce",
   "tier": 2,
+  "upgrades_from": "bld_market",
   "cost": {
     "money": 900
   },
   "build_time_turns": 2,
   "upkeep": 10,
-  "required_building": "bld_market",
   "settlement_kinds": [
     "city",
     "town"

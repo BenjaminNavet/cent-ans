@@ -62,12 +62,24 @@ var siege_view: BattleSiege = null  # batailles de siège (M8)
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
+## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
+var siege_province: String = "prov_guyenne"
+var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
+var standards: BattleStandards = null  # BV3 : vent, porte-étendards
+var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
+var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
+var _no_speech: bool = false  # `--no-speech`
+var _speech_shot: String = ""  # `--speech-shot=<png>` (avec `--speech-at=<s>`)
+var _speech_at: float = 6.0
+var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
+var _no_impostors: bool = false  # `--no-impostors` : imposteurs lointains seuls coupés (A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
 var _blood_override: int = -1  # `--blood=<0|1|2>`
 var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
@@ -119,6 +131,7 @@ var _deploy_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
 var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var voices: BattleVoices = null  # VO1 : répliques des régiments
 var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
@@ -184,7 +197,10 @@ func _stage_standalone() -> bool:
 		return false
 	var index: int = -1
 	if siege_demo and sim.has_method("debug_stage_siege"):
-		index = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+		index = sim.call("debug_stage_siege", armies[0], siege_province)
+		if index < 0:
+			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
+			index = sim.call("debug_stage_siege", armies[1], siege_province)
 	else:
 		index = sim.call("debug_stage_battle", armies[0], armies[1])
 	if index < 0:
@@ -249,6 +265,11 @@ func begin() -> bool:
 		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 		if backdrop != null:
 			add_child(backdrop)
+		# L3 : ville assiégée tirée du plan (rues pavées ; murailles et maisons viennent du cœur).
+		if battle.has_method("get_siege_landmark"):
+			landmark_town = LandmarkSiegeTown.create(battle.call("get_siege_landmark"), func(x: float, z: float) -> float: return terrain.height_at(x, z))
+			if landmark_town != null:
+				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
@@ -261,6 +282,8 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
+	if landmark_town != null:
+		title = "Assaut %s (%s)" % [BattleScene.de(str(landmark_town.landmark.get("name", ""))), str(landmark_town.landmark.get("gate_name", ""))]
 	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
 	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
 	# plutôt que d'afficher une météo que les règles n'appliquent pas.
@@ -286,8 +309,24 @@ func begin() -> bool:
 	battle_audio = BattleAudio.new()
 	add_child(battle_audio)
 	battle_audio.setup(_weather_key, camera_rig.camera)
+	voices = BattleVoices.new()  # VO1
+	add_child(voices)
+	voices.setup(self)
 	_refresh_view(true)
+	_start_speech()
+	_advise_first_battle()
 	return true
+
+
+## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
+func _advise_first_battle() -> void:
+	if autoplay or _benchmark:
+		return
+	var trigger := "first_assault" if siege_view != null else "first_battle"
+	if speech != null:
+		speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+	else:
+		Advisor.say_trigger(trigger)
 
 
 func _faction_color(faction: String, side: String) -> Color:
@@ -320,11 +359,17 @@ func _build_soldier_layers() -> void:
 	soldiers = BattleSoldiers.new()
 	soldiers.name = "Soldiers"
 	add_child(soldiers)
+	if not _no_bv3 and not _no_impostors:
+		# BV3 : imposteurs lointains, cuits au début de la bataille (ADR 0024).
+		soldiers.impostors = BattleImpostors.new()
+		soldiers.impostors.name = "Impostors"
+		soldiers.add_child(soldiers.impostors)
 	var factions := {}
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	_setup_standards()
 	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
@@ -358,6 +403,62 @@ func _build_soldier_layers() -> void:
 		assault_fx.name = "AssaultFx"
 		add_child(assault_fx)
 		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
+	_setup_grass_flatten()
+
+
+## BV3 : vent de la météo (drapeaux, herbe) et porte-étendards des régiments.
+func _setup_standards() -> void:
+	if _no_bv3:
+		return
+	var wind := BattleStandards.wind_for(_weather_key, battle_seed)
+	standards = BattleStandards.new()
+	standards.name = "Standards"
+	add_child(standards)
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind)
+	for id in _banners:
+		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
+	if terrain.vegetation != null:
+		terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
+	if soldiers.bv2_enabled:
+		duels = BattleDuels.new()
+		duels.name = "Duels"
+		add_child(duels)
+		duels.setup()
+
+
+## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
+## seulement (pas en `--autoplay`, captures ni bancs), sauf `--speech-shot`.
+func _start_speech() -> void:
+	if _no_bv3 or _no_speech or (autoplay and _speech_shot == ""):
+		return
+	var ours := float(battle.call("get_strength", player_side))
+	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
+	var text := BattleSpeech.compose(setup, player_side, ours / theirs, terrain.terrain_key, _weather_key, battle_seed)
+	speech = BattleSpeech.new()
+	speech.name = "Speech"
+	speech.shot_path = _speech_shot
+	speech.shot_at = _speech_at
+	add_child(speech)
+	if not speech.start(self, text, units, player_side):
+		speech.queue_free()
+		speech = null
+
+
+## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
+## dos masqué quand la rangée de BV1 est plantée.
+func _setup_grass_flatten() -> void:
+	if _no_bv3:
+		return
+	soldiers.hide_planted_pavise = not _no_bv1  # BV1 plante les rangées de pavois
+	if terrain.vegetation == null:
+		return
+	grass_flatten = BattleGrassFlatten.new()
+	grass_flatten.setup()
+	terrain.vegetation.set_flatten(grass_flatten)
+	var blood_amount: float = 0.0 if blood == null else [0.0, 0.6, 1.0][blood.level]
+	if soldiers.bv2_enabled:
+		soldiers.corpse_fallen.connect(func(pos: Vector3, _side: String, kind: String, cause: String) -> void:
+			grass_flatten.on_corpse(pos, kind, 0.0 if cause == "fire" else blood_amount))
 
 
 ## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
@@ -393,6 +494,10 @@ func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
 	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
+	if duels != null:
+		duels.update(units, soldiers, soldiers.anim_time, _camera_position())
+	if grass_flatten != null:
+		grass_flatten.update(units, dt)
 	if effects == null:
 		return
 	var camera := get_viewport().get_camera_3d()
@@ -605,6 +710,10 @@ func _bench_finish() -> void:
 		result["volley_arrows"] = effects.volleys.launched
 		result["arrows_stuck"] = effects.volleys.stuck_count
 		result["figure_scale"] = effects.volleys.figure_scale
+	if self.soldiers.impostors != null:
+		# BV3 : atlas d'imposteurs cuits, régiments dessinés en imposteurs à la fin du banc.
+		result["impostor_atlases"] = self.soldiers.impostors.baked_count
+		result["impostor_regiments"] = self.soldiers.impostor_regiments()
 	print("BENCH_JSON " + JSON.stringify(result))
 	print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (%d repeats)%s" % [units.size(), soldier_count, result["fps_avg"], total_frames, _bench_repeat, self.soldiers.timing_report()])
 	print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
@@ -656,6 +765,8 @@ func _update_audio(delta: float) -> void:
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
 			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+	if voices != null:
+		voices.update(delta)
 
 
 ## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
@@ -716,6 +827,11 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		node.position = pos + Vector3(0, 0, 0)
 		node.scale = Vector3.ONE * banner_scale
 		node.rotation.y = cam_yaw
+		if standards != null:
+			# BV3 : de près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
+			# porté quand celui-ci est affiché.
+			node.rotation.y = lerp_angle(standards.downwind_yaw(), cam_yaw, smoothstep(1.0, 2.5, banner_scale))
+			node.visible = not (banner_scale <= standards.hide_scale() and standards.is_shown(id))
 		var routing := str(unit["state"]) == "routing"
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
@@ -727,6 +843,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
 				ring.set_meta("size", size)
 				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	if standards != null:
+		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
 	_hud_timer -= delta
 	if force or _hud_timer <= 0.0:
@@ -817,6 +935,8 @@ func _banner_scale() -> float:
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
+	if not autoplay and not _benchmark:  # VO1 : conseiller
+		Advisor.say_trigger("first_victory" if str(outcome.get("winner", "")) == player_side else "first_defeat")
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
@@ -1037,6 +1157,8 @@ func _finish_right(position: Vector2) -> void:
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
 	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
+	if voices != null:
+		voices.on_order(command, result)  # VO1 : réplique du régiment
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
@@ -1242,6 +1364,9 @@ func _parse_cmdline() -> void:
 			_deploy_shot = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--siege-province="):
+			siege_demo = true
+			siege_province = arg.trim_prefix("--siege-province=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):
@@ -1254,6 +1379,16 @@ func _parse_cmdline() -> void:
 			_no_effects = true
 		elif arg == "--no-bv1":
 			_no_bv1 = true
+		elif arg == "--no-bv3":
+			_no_bv3 = true
+		elif arg == "--no-impostors":
+			_no_impostors = true
+		elif arg == "--no-speech":
+			_no_speech = true
+		elif arg.begins_with("--speech-shot="):
+			_speech_shot = arg.trim_prefix("--speech-shot=")
+		elif arg.begins_with("--speech-at="):
+			_speech_at = float(arg.trim_prefix("--speech-at="))
 		elif arg.begins_with("--unit-size="):
 			_unit_size_override = float(arg.trim_prefix("--unit-size="))
 		elif arg.begins_with("--blood="):
@@ -1314,6 +1449,12 @@ func _stage_screenshot() -> void:
 	if effects != null and blood != null:
 		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
+	if grass_flatten != null:
+		print("BattleScene: BV3 %d corpses marked on the grass, last at %s" % [grass_flatten.corpse_marks, grass_flatten.last_corpse])
+		for unit in units:
+			if str(unit["state"]) == "melee":
+				print("BattleScene: BV3 melee at (%.0f, %.0f), grass flattened %.2f, blood %.2f" % [float(unit["x"]), float(unit["z"]), grass_flatten.flatten_at(float(unit["x"]), float(unit["z"])), grass_flatten.blood_at(float(unit["x"]), float(unit["z"]))])
+				break
 	var focus := Vector3.ZERO
 	var n := 0
 	for unit in units:

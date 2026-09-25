@@ -4,13 +4,13 @@
     "display": "Abbaye"
   },
   "category": "religious",
-  "tier": 2,
+  "tier": 3,
+  "upgrades_from": "bld_collegiate_church",
   "cost": {
     "money": 1500
   },
   "build_time_turns": 4,
   "upkeep": 20,
-  "required_building": "bld_parish_church",
   "settlement_kinds": [
     "city",
     "town",

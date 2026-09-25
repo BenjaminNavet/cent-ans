@@ -37,8 +37,8 @@ import landmark_monuments as monuments  # noqa: E402
 
 # name: (base colour (linear RGB), roughness)
 PALETTE = {
-    "NDStone": ((0.64, 0.59, 0.48), 0.85),
-    "Stone": ((0.42, 0.39, 0.33), 0.88),
+    "NDStone": ((0.58, 0.50, 0.37), 0.85),
+    "Stone": ((0.47, 0.43, 0.35), 0.88),
     "DarkStone": ((0.30, 0.28, 0.24), 0.9),
     "WallStone": ((0.40, 0.37, 0.31), 0.9),
     "Lead": ((0.17, 0.19, 0.21), 0.45),
@@ -47,7 +47,7 @@ PALETTE = {
     "TileOld": ((0.27, 0.15, 0.09), 0.85),
     "Thatch": ((0.30, 0.23, 0.11), 0.97),
     "Plaster": ((0.58, 0.52, 0.41), 0.92),
-    "Timber": ((0.40, 0.32, 0.22), 0.9),
+    "Timber": ((0.60, 0.53, 0.42), 0.9),
     "Wood": ((0.20, 0.13, 0.08), 0.82),
     "Glass": ((0.03, 0.045, 0.07), 0.25),
     "Dark": ((0.035, 0.03, 0.028), 0.95),
@@ -64,6 +64,53 @@ PALETTE = {
     "Brick": ((0.42, 0.17, 0.09), 0.9),
     "Ochre": ((0.66, 0.53, 0.36), 0.88),
 }
+
+# Layer of the shared material atlas (lot L3, `game/assets/textures/landmarks/build_textures.py`),
+# stored with the exaggeration of the shape in the alpha byte of the tint colour
+# (see `material_code`).
+MATERIAL_LAYERS = 16
+MATERIAL_LAYER = {
+    "NDStone": 0,
+    "Stone": 0,
+    "Ochre": 0,
+    "DarkStone": 1,
+    "WallStone": 1,
+    "Brick": 2,
+    "Slate": 3,
+    "Tile": 4,
+    "TileOld": 5,
+    "Plaster": 6,
+    "Whitewash": 6,
+    "Canvas": 6,
+    "Timber": 7,
+    "Wood": 8,
+    "Thatch": 9,
+    "Paving": 10,
+    "Street": 10,
+    "Lead": 11,
+    "Glass": 12,
+    "Grass": 13,
+    "Garden": 13,
+    "Vine": 13,
+    "Dirt": 13,
+    "Water": 14,
+    "Gold": 14,
+    "Dark": 14,
+}
+
+
+def material_code(mat, exaggeration=1.0):
+    """Alpha byte of the tint: atlas layer × 16 + scale step, as a fraction of 255.
+
+    The step ``s`` (0-15) stores the exaggeration ``k`` of the shape (monument or house drawn
+    ``k`` times larger than life): ``k = 2 ** ((s - 4) / 4)``, from 0.5 to 6.7, so that the shader
+    gives stones, bricks and tiles their real size on an enlarged monument.
+    """
+    layer = MATERIAL_LAYER.get(mat, 14)
+    step = round(4.0 * math.log2(max(exaggeration, 1e-3))) + 4
+    step = min(max(step, 0), 15)
+    return (layer * 16 + step) / 255.0
+
 
 Z_WATER = 0.004
 Z_GROUND = 0.008
@@ -626,9 +673,10 @@ def build_monument(plan, site, monument, layers, variant=""):
     if variant:
         layer_name = f"{monument['id']}__{variant}"
     layer = layers.setdefault(layer_name, g.Layer(layer_name))
+    exaggeration = monument.get("scale", plan.monument_scale)
     for mat, shape in parts:
         verts, faces = transform.apply(shape)
-        layer.add(mat, verts, faces, anchor=(x, y))
+        layer.add(mat, verts, faces, anchor=(x, y), color=(1.0, 1.0, 1.0, exaggeration))
     radius = monument.get("clear_radius_m", 0.0) * k
     if radius > 0 and not variant:
         site.clearings.append((x, y, radius))
@@ -642,8 +690,32 @@ def house_height(plan, rng):
     return rng.uniform(8.0, 14.0) * plan.a * plan.house_scale * plan.height_scale
 
 
-ROOFS = (("Tile", 0.55), ("TileOld", 0.25), ("Slate", 0.2))
-WALLS = (("Plaster", 0.55), ("Timber", 0.3), ("Stone", 0.15))
+DEFAULT_ROOFS = (("Tile", 0.55), ("TileOld", 0.25), ("Slate", 0.2))
+DEFAULT_WALLS = (("Plaster", 0.55), ("Timber", 0.3), ("Stone", 0.15))
+ROOFS = DEFAULT_ROOFS
+WALLS = DEFAULT_WALLS
+BASE_PALETTE = dict(PALETTE)
+
+
+def configure_materials(landmark):
+    """City materials (lot L3, ``materials`` block): house walls and roofs, palette overrides.
+
+    Bruges builds in brick, Rouen in timber under slate, Avignon in stone under canal tiles; the
+    palette gives each city its stone (blond Paris limestone, Caen stone, Avignon stone). The
+    weights only change which material is drawn, not the random stream: the geometry is the same.
+    """
+    global ROOFS, WALLS
+    block = landmark.get("materials", {})
+    houses = block.get("houses", {})
+    ROOFS = tuple(houses.get("roofs", dict(DEFAULT_ROOFS)).items())
+    WALLS = tuple(houses.get("walls", dict(DEFAULT_WALLS)).items())
+    for table in (ROOFS, WALLS):
+        total = sum(weight for _name, weight in table)
+        assert abs(total - 1.0) < 1e-6, table
+    PALETTE.clear()
+    PALETTE.update(BASE_PALETTE)
+    for name, color in block.get("palette", {}).items():
+        PALETTE[name] = (tuple(color), BASE_PALETTE[name][1])
 
 
 def pick(rng, table):
@@ -825,6 +897,7 @@ def build_fabric(plan, site, layers, rng):
 
 def build(landmark, meters_per_px, seed=1337, siege=False):
     """Build every layer of a landmark (or of its siege backdrop); returns {name: Layer}."""
+    configure_materials(landmark)
     if siege:
         plan = SiegePlan(landmark, meters_per_px)
         landmark = siege_subset(landmark)
@@ -853,6 +926,9 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
     if siege:
         # Metres, and every element shown whatever the year.
         scale = plan.export_scale
+        # Optional cut (L3, cities without a river between the besieged town and the backdrop):
+        # nothing is kept whose every vertex lies nearer than `cut_m` in front of the origin.
+        cut = -plan.data["siege"].get("cut_m", math.inf) * plan.a
         merged = {name: g.Layer(name) for name in ("ground", "houses", "landmarks")}
         for name, layer in layers.items():
             if name == "blocks":
@@ -861,6 +937,10 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
             for mat, (v, f, a, c) in layer.parts.items():
                 if name.endswith("__charles_v"):
                     continue
+                if cut > -math.inf:
+                    v, f, a, c = cut_part(v, f, a, c, cut)
+                    if not f:
+                        continue
                 target.add(
                     mat,
                     [(x * scale, y * scale, z * scale) for x, y, z in v],
@@ -875,6 +955,19 @@ def build(landmark, meters_per_px, seed=1337, siege=False):
                 part[3][len(part[3]) - len(v) :] = c
         layers = merged
     return layers
+
+
+def cut_part(verts, faces, anchors, colors, cut_y):
+    """Faces with at least one vertex at y >= ``cut_y``, vertices renumbered."""
+    kept = [face for face in faces if max(verts[i][1] for i in face) >= cut_y]
+    used = sorted({i for face in kept for i in face})
+    index = {old: new for new, old in enumerate(used)}
+    return (
+        [verts[i] for i in used],
+        [tuple(index[i] for i in face) for face in kept],
+        [anchors[i] for i in used],
+        [colors[i] for i in used],
+    )
 
 
 def material(bpy, name):
@@ -892,9 +985,13 @@ def material(bpy, name):
     return mat
 
 
-def layer_object(bpy, layer):
-    """One mesh object per layer: material slots, anchor UV map, tint colour attribute."""
-    verts, faces, anchors, colors, mat_index = [], [], [], [], []
+def layer_object(bpy, layer, exaggeration=1.0):
+    """One mesh object per layer: material slots, anchor UV map, tint colour attribute.
+
+    A colour may carry a 4th value, the exaggeration of its shape (monuments); the others use
+    ``exaggeration`` (the houses' scale).
+    """
+    verts, faces, anchors, colors, mat_index, atlas = [], [], [], [], [], []
     materials = sorted(layer.parts)
     for slot, mat in enumerate(materials):
         v, f, a, c = layer.parts[mat]
@@ -902,8 +999,11 @@ def layer_object(bpy, layer):
         verts.extend(v)
         faces.extend(tuple(i + base for i in face) for face in f)
         anchors.extend(a)
-        colors.extend(c)
+        colors.extend(col[:3] for col in c)
         mat_index.extend([slot] * len(f))
+        atlas.extend(
+            material_code(mat, col[3] if len(col) > 3 else exaggeration) for col in c
+        )
     mesh = bpy.data.meshes.new(layer.name)
     mesh.from_pydata(verts, [], faces)
     for mat in materials:
@@ -922,7 +1022,12 @@ def layer_object(bpy, layer):
     tint_data = []
     for vi in loop_vertices:
         r, gg, b = colors[vi]
-        tint_data += [min(r / 1.2, 1.0), min(gg / 1.2, 1.0), min(b / 1.2, 1.0), 1.0]
+        tint_data += [
+            min(r / 1.2, 1.0),
+            min(gg / 1.2, 1.0),
+            min(b / 1.2, 1.0),
+            atlas[vi],
+        ]
     tint.data.foreach_set("color", tint_data)
     mesh.color_attributes.active_color = tint
     mesh.update()
@@ -931,13 +1036,14 @@ def layer_object(bpy, layer):
     return obj
 
 
-def export(bpy, layers, out_path):
+def export(bpy, layers, out_path, house_scale=1.0):
     """Create the objects and export the glTF binary."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for layer in layers.values():
         if not layer.parts:
             continue
-        obj = layer_object(bpy, layer)
+        houses = layer.name in ("houses", "blocks")
+        obj = layer_object(bpy, layer, house_scale if houses else 1.0)
         obj.select_set(True)
         print(f"LAYER {layer.name} {layer.triangles()}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -951,10 +1057,41 @@ def export(bpy, layers, out_path):
     )
 
 
+def drop_normals(doc, views, data):
+    """Remove the NORMAL attributes (lot L3): `landmark.gdshader` derives flat normals itself.
+
+    Unused accessors and buffer views are removed and the references renumbered. Returns the
+    kept (views, data).
+    """
+    prims = [prim for mesh in doc["meshes"] for prim in mesh["primitives"]]
+    for prim in prims:
+        prim["attributes"].pop("NORMAL", None)
+    used = sorted(
+        {a for prim in prims for a in prim["attributes"].values()}
+        | {prim["indices"] for prim in prims if "indices" in prim}
+    )
+    accessor_map = {old: new for new, old in enumerate(used)}
+    accessors = [doc["accessors"][old] for old in used]
+    kept_views = sorted({a["bufferView"] for a in accessors if "bufferView" in a})
+    view_map = {old: new for new, old in enumerate(kept_views)}
+    for accessor in accessors:
+        if "bufferView" in accessor:
+            accessor["bufferView"] = view_map[accessor["bufferView"]]
+    for prim in prims:
+        prim["attributes"] = {k: accessor_map[v] for k, v in prim["attributes"].items()}
+        if "indices" in prim:
+            prim["indices"] = accessor_map[prim["indices"]]
+    doc["accessors"] = accessors
+    views = [views[old] for old in kept_views]
+    doc["bufferViews"] = views
+    return views, [data[old] for old in kept_views]
+
+
 def compact_glb(path):
     """Store the tint colours as normalised bytes (core glTF) instead of shorts: -9 % of the file.
 
-    Rebuilds the binary chunk (each buffer view repacked, 4-byte aligned). Returns the new size.
+    Also drops the normals (`drop_normals`). Rebuilds the binary chunk (each buffer view
+    repacked, 4-byte aligned). Returns the new size.
     """
     import struct
 
@@ -986,6 +1123,7 @@ def compact_glb(path):
         data[view] = bytearray(bytes((v * 255 + 32767) // 65535 for v in shorts))
         views[view].pop("byteStride", None)
         accessor["componentType"] = 5121
+    views, data = drop_normals(doc, views, data)
     out = bytearray()
     for view, chunk in zip(views, data, strict=True):
         out += b"\0" * (-len(out) % 4)
@@ -1024,7 +1162,8 @@ def main() -> None:
     map_json = landmark_path.resolve().parents[1] / "map" / "map.json"
     meters_per_px = json.loads(map_json.read_text(encoding="utf-8"))["meters_per_px"]
     layers = build(landmark, meters_per_px, siege=siege)
-    export(bpy, layers, Path(args[1]))
+    house_scale = 1.0 if siege else landmark["scale"].get("house_scale", 1.0)
+    export(bpy, layers, Path(args[1]), house_scale)
     print(f"SIZE {compact_glb(Path(args[1])) / 1e6:.2f} MB")
     print("OK")
 

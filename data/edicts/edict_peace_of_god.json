@@ -1,0 +1,14 @@
+{
+  "id": "edict_peace_of_god",
+  "name": {
+    "display": "Paix de Dieu"
+  },
+  "description": "Reprise du mouvement de paix ecclésiastique (conciles de Charroux puis du Puy, fin Xe s.) : le clergé local fait proclamer trêves et protections pour calmer la province, au prix d'un moindre effort de guerre.",
+  "delay_turns": 1,
+  "effects": [
+    { "effect": "unrest", "value": -8 },
+    { "effect": "piety", "value": 2 },
+    { "effect": "recruit_slots", "value": -1 }
+  ],
+  "sources": ["Économie médiévale", "Institutions ecclésiastiques médiévales"]
+}

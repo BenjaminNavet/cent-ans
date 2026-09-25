@@ -50,6 +50,7 @@ pub mod setup;
 pub mod shot;
 pub mod siege;
 pub mod siege_fx;
+pub mod siege_layout;
 pub mod sim;
 pub mod site;
 pub mod unit;
@@ -71,6 +72,7 @@ pub use setup::{
 pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
+pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
     BattleSim, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION,
     MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,

@@ -31,7 +31,13 @@ pub struct Crew {
 
 impl Crew {
     pub fn from_unit(unit_index: usize, unit: &UnitSetup, men: u32, rules: &RangeRules) -> Crew {
-        let bolt = unit.unit_type.contains("crossbow") || unit.abilities.contains(&Ability::Pavise);
+        // Lot UR2: the missile declared by the unit type wins over the id heuristic.
+        let bolt = match unit.missile {
+            Some(missile) => missile == data_model::Missile::Bolt,
+            None => {
+                unit.unit_type.contains("crossbow") || unit.abilities.contains(&Ability::Pavise)
+            }
+        };
         let shooter = unit.stats.ranged > 0 && unit.stats.range > 0 && unit.stats.ammo > 0;
         let range = if !shooter {
             0.0

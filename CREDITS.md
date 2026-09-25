@@ -58,6 +58,14 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
   seulement, décimation, matériaux simplifiés.
 
+### Matériaux des villes emblématiques — CC0 1.0
+
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Medieval Blocks 03, Castle Wall
+  Varriation, Medieval Red Brick, Roof Slates 02, Clay Roof Tiles 02, Roof Tiles 14, Clay Plaster,
+  Old Planks 02, Reed Roof 04, Cobblestone Floor 08 (1k). Ramenées à des cartes de détail et
+  assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
+  `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
+
 ### Ciels HDRI — CC0 1.0
 
 - **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
@@ -127,6 +135,11 @@ Wikipédia ne sont pas recopiés.
   (`battle/`, `ambience/`) viennent de Freesound (CC0, voir plus haut).
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
+- **Voix** (`game/assets/audio/voice/` : répliques des unités, discours des généraux,
+  conseiller) : voix **générées par synthèse vocale** (OpenAI `gpt-4o-mini-tts`), à partir des
+  textes du projet (`data/voice/`, `data/speeches/`) ; aucune voix d'acteur. Outil
+  reproductible `tools/cent_ans_tools/voice_tts.py` (liste des fichiers, voix et coût dans
+  `game/assets/audio/voice/manifest.json`), dépenses consignées dans `docs/budget.md`.
 
 ## Polices
 

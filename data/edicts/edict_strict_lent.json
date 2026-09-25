@@ -1,0 +1,15 @@
+{
+  "id": "edict_strict_lent",
+  "name": {
+    "display": "Carême strict"
+  },
+  "description": "Observance rigoureuse des jours maigres et jeûnes d'Église, prêchée par le clergé local : la province édifie et le souverain y gagne en piété, mais la table appauvrie mécontente la noblesse et la bourgeoisie.",
+  "delay_turns": 1,
+  "effects": [
+    { "effect": "piety", "value": 4 },
+    { "effect": "unrest", "class": "clergy", "value": -6 },
+    { "effect": "unrest", "class": "nobility", "value": 4 },
+    { "effect": "goods_satisfaction", "value": -3 }
+  ],
+  "sources": ["Économie médiévale", "Institutions ecclésiastiques médiévales"]
+}

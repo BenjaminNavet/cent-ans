@@ -252,7 +252,7 @@ fn buildable_reports_the_missing_prerequisite() {
         .unwrap();
     assert!(!guild_hall.available);
     assert!(
-        guild_hall.reason.as_deref().unwrap().contains("bâtiment"),
+        guild_hall.reason.as_deref().unwrap().contains("nécessite"),
         "{:?}",
         guild_hall.reason
     );

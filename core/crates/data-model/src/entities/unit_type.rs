@@ -5,6 +5,21 @@ use serde::{Deserialize, Serialize};
 use crate::common::{Cost, LocalizedName, SocialClass, Sources, UnitCategory};
 use crate::ids::{BuildingId, CultureId, FactionId, TechnologyId, UnitTypeId};
 
+/// Missile a shooting unit looses (lot UR2: data-driven, no more guessing
+/// from the unit id in `sim.rs::missile_kind`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Missile {
+    Arrow,
+    Bolt,
+    /// Handheld firearm (couleuvrine): lead bullet, ignition smoke.
+    Bullet,
+    /// Thrown weapon (jinetes): no reload, short range.
+    Javelin,
+    /// Sling or engine stone.
+    Stone,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Ability {
@@ -81,6 +96,10 @@ pub struct UnitType {
     /// Battle figurine (`<family>_<variant>`, rendering only).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub figure: Option<String>,
+    /// Missile a shooting unit looses (`None`: `sim.rs::missile_kind` falls
+    /// back to the old id/ability heuristic).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub missile: Option<Missile>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
