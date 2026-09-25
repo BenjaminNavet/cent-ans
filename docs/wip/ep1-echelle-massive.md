@@ -37,5 +37,24 @@ Batailles de 15 000 soldats et plus, fluides (≥ 40 i/s à 15 000 en Haut, ≥ 
   (fixées dans `build` par `_set_field_size`), `field_center()`, `field_scale_x()`.
   `battle.tscn -- --scale=<skirmish|large|epic>` force le palier.
 
+## Rendu (étape 3)
+- `battle_soldiers.gd` : budget d'animation par distance (au-delà de 450 m, mise à jour une image
+  sur 2 ; au-delà de 800 m, une sur 3, décalée selon l'id ; jamais quand l'effectif dessiné change) ;
+  cadavres envoyés au GPU une fois par image et par cellule (`_flush_corpses`) au lieu d'une copie
+  complète de la cellule à chaque mort ; imposteurs à demi-densité au-delà de 700 m (`thin_out`
+  du shader : une figurine sur deux effacée, les autres élargies ×1,6).
+- `--no-ep1-budget` coupe les trois (A/B). Banc : `tools/bench_ep1.sh <étiquette> --units=63 …`.
+- JSON du banc : `scale`, `field_w`, `on_field_soldiers`, `figures`, `primitives_m`,
+  `draw_calls`, `skipped_updates`, `process_ms`.
+
+## Mesures (Mac M4 Pro, machine très chargée : charge 200+, 50+ rustc/godot d'autres agents)
+`--disable-vsync --resolution 1600x900 -- --benchmark --quality=high --bench-at=90` ; l'écran
+plafonne à 60 Hz malgré `--disable-vsync` (comme BV3) : les i/s moyennes saturent à ~57-58.
+
+| Scénario | Config | i/s moy. | p95 ms | primitives | figurines | appels |
+|---|---|---|---|---|---|---|
+| `--units=63` (15 120 soldats, palier epic 2400 × 1600) | A sans budget | 57,1 · 56,4 | 23,9 · 25,1 | 2,70 M | 14 644 | 1 370 |
+| idem | B budget EP1 | 57,6 · 57,4 · 57,4 | 23,0 · 25,0 · 24,2 | 2,70 M | 14 644 | 1 364 |
+
 ## Prochaine étape
-Build `core/build.sh`, smoke, puis mesures `--benchmark --units=63` (15 000) et `--units=105`.
+Mesures à 25 000 figurines (`--unit-size=1.75`) et au-delà ; ADR ; fusion de main.
