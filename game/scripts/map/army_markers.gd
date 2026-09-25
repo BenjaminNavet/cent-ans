@@ -440,8 +440,8 @@ func _place_plates(bases: Array) -> void:
 func _plate_before(a: Dictionary, b: Dictionary) -> bool:
 	var ma: ArmyMarker = a["marker"]
 	var mb: ArmyMarker = b["marker"]
-	var sa := a["id"] == selected_army
-	var sb := b["id"] == selected_army
+	var sa: bool = a["id"] == selected_army
+	var sb: bool = b["id"] == selected_army
 	if sa != sb:
 		return sa
 	if ma.is_player != mb.is_player:

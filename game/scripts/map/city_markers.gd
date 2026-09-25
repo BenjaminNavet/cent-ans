@@ -167,7 +167,8 @@ func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 	var rects: Array[Rect2] = []
 	if camera == null or not _labels_visible or _tier_alpha <= 0.15:
 		return rects
+	var view_height := camera.get_viewport().get_visible_rect().size.y
 	for label in _labels:
 		if label.visible and not camera.is_position_behind(label.global_position):
-			rects.append(_label_rect(label, camera, 1.0))
+			rects.append(LabelPlacer.label3d_screen_rect(label, camera, view_height))
 	return rects

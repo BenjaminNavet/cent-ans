@@ -27,17 +27,22 @@ var _choice: Dictionary = {}
 
 
 ## Décalages candidats (par rapport à la base) pour une plaque de taille `size`, par ordre de
-## préférence : base, au-dessus, à droite, à gauche, deux crans au-dessus, dessous.
+## préférence : base, au-dessus, à droite, à gauche (à côté de l'étendard), deux crans au-dessus,
+## dessous, puis en diagonale haute et plus loin sur les côtés.
 static func candidate_offsets(size: Vector2) -> PackedVector2Array:
 	var up := size.y + GAP
-	var side := size.x + SIDE_CLEARANCE
+	var side := size.x * 0.5 + SIDE_CLEARANCE
 	return PackedVector2Array([
 		Vector2.ZERO,
 		Vector2(0.0, -up),
-		Vector2(side * 0.5 + SIDE_CLEARANCE * 0.5, up * 0.5),
-		Vector2(-(side * 0.5 + SIDE_CLEARANCE * 0.5), up * 0.5),
+		Vector2(side, up * 0.5),
+		Vector2(-side, up * 0.5),
 		Vector2(0.0, -2.0 * up),
 		Vector2(0.0, up),
+		Vector2(side, -up),
+		Vector2(-side, -up),
+		Vector2(side * 1.8, up * 0.5),
+		Vector2(-side * 1.8, up * 0.5),
 	])
 
 
@@ -87,6 +92,25 @@ static func _first_free(grid: SpatialGrid, base: Rect2, candidates: PackedVector
 			best_overlap = overlap
 			best = i
 	return best
+
+
+## Rectangle écran d'un `Label3D` à taille fixe (`fixed_size`, billboard) : mesure du texte
+## avec la police de l'étiquette (mise en cache), mise à l'échelle écran de `pixel_size` pour la
+## caméra en perspective, décalage `offset` compris.
+static func label3d_screen_rect(label: Label3D, camera: Camera3D, view_height: float) -> Rect2:
+	var text_size: Vector2 = label.get_meta(&"ux1_text_size", Vector2.ZERO)
+	if text_size == Vector2.ZERO or str(label.get_meta(&"ux1_text", "")) != label.text:
+		var font := label.font if label.font != null else ThemeDB.fallback_font
+		text_size = font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.font_size)
+		text_size += Vector2.ONE * float(label.outline_size)
+		label.set_meta(&"ux1_text_size", text_size)
+		label.set_meta(&"ux1_text", label.text)
+	var scale := 1.0
+	if label.fixed_size and camera.projection == Camera3D.PROJECTION_PERSPECTIVE:
+		scale = label.pixel_size * view_height / (2.0 * tan(deg_to_rad(camera.fov) * 0.5))
+	var center := camera.unproject_position(label.global_position) - label.offset * Vector2(-1.0, 1.0) * scale
+	var size := text_size * scale
+	return Rect2(center - size * 0.5, size)
 
 
 ## Candidat retenu pour `id` au dernier placement (0 = base), -1 si inconnu (tests).
