@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "music.schema.json",
   "title": "Listes de lecture musicales",
-  "description": "Morceaux joués en rotation aléatoire (sans répétition immédiate) par contexte : campagne en paix, guerre, cour. La bataille puise sa piste de base dans « war ». Chemins relatifs à res:// (game/), .ogg ou .mp3. Crédits et licences : CREDITS.md et SOURCE.md de chaque dossier third_party.",
+  "description": "Morceaux joués en rotation aléatoire (sans répétition immédiate) par contexte : campagne générique et par culture (DA4), guerre, cour, menu. Chaque contexte a une liste « primary » (musique d'époque libre de droits, priorité) et une liste « fallback » (repli, notamment Kevin MacLeod, utilisée seulement si aucune piste primary n'est disponible). La bataille puise sa piste de base dans « war ». `culture_regions` associe un identifiant de culture (`data/factions/*.json`, champ `culture`) à une région musicale (`campaign_<région>`) ; une culture absente de la table utilise `campaign`. Chemins relatifs à res:// (game/), .ogg ou .mp3. Crédits et licences : CREDITS.md et SOURCE.md de chaque dossier third_party.",
   "type": "object",
   "required": [
     "playlists"
@@ -14,9 +14,12 @@
       "required": [
         "campaign",
         "war",
-        "court"
+        "court",
+        "menu"
       ],
-      "additionalProperties": false,
+      "additionalProperties": {
+        "$ref": "#/$defs/playlist"
+      },
       "properties": {
         "campaign": {
           "$ref": "#/$defs/playlist"
@@ -26,12 +29,35 @@
         },
         "court": {
           "$ref": "#/$defs/playlist"
+        },
+        "menu": {
+          "$ref": "#/$defs/playlist"
         }
+      }
+    },
+    "culture_regions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["france", "england", "burgundy", "iberia", "italy"]
       }
     }
   },
   "$defs": {
     "playlist": {
+      "type": "object",
+      "required": ["primary"],
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "$ref": "#/$defs/track_list"
+        },
+        "fallback": {
+          "$ref": "#/$defs/track_list"
+        }
+      }
+    },
+    "track_list": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
