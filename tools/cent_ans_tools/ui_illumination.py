@@ -541,41 +541,41 @@ def panel(rng: np.random.Generator) -> tuple[Canvas, Piece]:
     band.frame(4, 3.2)
     gilded(canvas, band, rng)
     filet = Mask(size, size)
-    filet.frame(10, 1.0)
+    filet.frame(8.6, 0.9)
     canvas.paint(filet, GULES, 0.85)
     for cx in (5.6, size - 5.6):
         for cy in (5.6, size - 5.6):
-            corner_boss(canvas, rng, (cx, cy), 11.0)
+            corner_boss(canvas, rng, (cx, cy), 10.0)
     return canvas, Piece("panel", (margin, margin, margin, margin), (18, 14, 18, 15))
 
 
 def panel_illuminated(rng: np.random.Generator) -> tuple[Canvas, Piece]:
     """Large window: gold frame, ivy rinceau band, azure/gules bar, big corner bosses."""
-    margin, period = 46, 128
+    margin, period = 38, 128
     size = 2 * margin + period
     canvas = Canvas.vellum(size, size, margin, period, rng)
-    canvas.shade(edge_vignette(size, size, 22.0, 0.16))
+    canvas.shade(edge_vignette(size, size, 18.0, 0.16))
     outer = Mask(size, size)
     outer.frame(1, 1.4)
     inked(canvas, outer)
     band = Mask(size, size)
     band.frame(3.5, 3.0)
     gilded(canvas, band, rng)
-    vine_band(canvas, rng, margin, period, band_center=21.0, amplitude=5.5, leaf=6.4)
+    vine_band(canvas, rng, margin, period, band_center=17.5, amplitude=4.5, leaf=5.6)
     # Inner baguette on the four sides.
-    b0, b1 = 36.0, 41.0
+    b0, b1 = 29.0, 33.5
     bar_segments(canvas, rng, b0, b0, size - b0, b1, 16.0, True, margin)
     bar_segments(canvas, rng, b0, size - b1, size - b0, size - b0, 16.0, True, margin)
     bar_segments(canvas, rng, b0, b0, b1, size - b0, 16.0, False, margin)
     bar_segments(canvas, rng, size - b1, b0, size - b0, size - b0, 16.0, False, margin)
     for cx in (b0 + 2.5, size - b0 - 2.5):
         for cy in (b0 + 2.5, size - b0 - 2.5):
-            corner_boss(canvas, rng, (cx, cy), 13.0, GULES)
-    for cx in (15.0, size - 15.0):
-        for cy in (15.0, size - 15.0):
-            corner_boss(canvas, rng, (cx, cy), 22.0)
+            corner_boss(canvas, rng, (cx, cy), 11.0, GULES)
+    for cx in (13.0, size - 13.0):
+        for cy in (13.0, size - 13.0):
+            corner_boss(canvas, rng, (cx, cy), 19.0)
     return canvas, Piece(
-        "panel_illuminated", (margin, margin, margin, margin), (54, 50, 54, 52)
+        "panel_illuminated", (margin, margin, margin, margin), (44, 40, 44, 40)
     )
 
 
@@ -623,51 +623,39 @@ def top_bar(rng: np.random.Generator) -> tuple[Canvas, Piece]:
 
 
 def button(rng: np.random.Generator, state: str) -> tuple[Canvas, Piece]:
-    """Cartouche button in four states: normal, hover, pressed (lapis), disabled."""
+    """Cartouche button: normal, hover, pressed (gilded leaf, azure filet), disabled."""
     margin, period = 9, 64
     size = 2 * margin + period
     base = {
         "normal": VELLUM_DARK,
         "hover": VELLUM,
-        "pressed": AZURE,
+        "pressed": np.array([0.960, 0.845, 0.560]),
         "disabled": np.array([0.82, 0.79, 0.72]),
     }[state]
+    canvas = Canvas.vellum(size, size, margin, period, rng, base, 0.2 if state == "disabled" else 0.8)
     if state == "pressed":
-        canvas = Canvas(
-            tile_to(flat_tile(period, AZURE, rng, 0.08), size, size, margin),
-            np.ones((size, size)),
-            margin,
-            period,
-        )
-        yy = np.mgrid[0:size, 0:size][0]
-        canvas.shade(0.25 * (1.0 - yy / size) - 0.05)  # lit from below: pressed-in look
+        yy, xx = np.mgrid[0:size, 0:size]
+        inner = np.clip(1.0 - np.minimum(yy, xx) / 7.0, 0.0, 1.0) ** 2
+        canvas.shade(0.22 * inner)  # pressed into the page: shadow on top-left edges
     else:
-        canvas = Canvas.vellum(
-            size, size, margin, period, rng, base, 0.8 if state != "disabled" else 0.2
-        )
         canvas.shade(edge_vignette(size, size, 7.0, 0.22 if state != "hover" else 0.10))
     outer = Mask(size, size)
     outer.frame(0, 1.2)
     inked(canvas, outer, 0.45 if state == "disabled" else 0.9)
     if state != "disabled":
         band = Mask(size, size)
-        band.frame(2.2, 1.6 if state != "hover" else 2.2)
+        band.frame(2.2, 2.2 if state in ("hover", "pressed") else 1.6)
         gilded(canvas, band, rng, 0.0)
         for cx in (3.2, size - 3.2):
             for cy in (3.2, size - 3.2):
                 dot = Mask(size, size)
                 lozenge(dot, (cx, cy), 3.0, 3.0)
-                canvas.paint(dot, GULES if state != "pressed" else WHITE_LEAD)
+                canvas.paint(dot, canvas.flat(AZURE if state == "pressed" else GULES, rng))
     if state == "pressed":
-        dots = Mask(size, size)
-        for i in range(period // 8):
-            x = margin + 4 + i * 8
-            dots.disc(x, 6.2, 0.55)
-            dots.disc(x, size - 6.2, 0.55)
-        canvas.paint(dots, WHITE_LEAD, 0.8)
-    return canvas, Piece(
-        f"button_{state}", (margin, margin, margin, margin), (12, 5, 12, 5)
-    )
+        filet = Mask(size, size)
+        filet.frame(5.4, 1.2)
+        canvas.paint(filet, canvas.flat(AZURE, rng), 0.9)
+    return canvas, Piece(f"button_{state}", (margin, margin, margin, margin), (12, 5, 12, 5))
 
 
 def tab(rng: np.random.Generator, selected: bool) -> tuple[Canvas, Piece]:

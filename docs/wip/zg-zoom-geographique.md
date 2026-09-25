@@ -21,11 +21,12 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | Lot | Contenu | Vague | État |
 |---|---|---|---|
 | ZG0 | Squelette (ADR, manifeste, schémas, stubs, wip) | 0 | fait |
-| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | en cours (wip `zg1-pyramide.md`) |
+| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | **fusionné** dans `integration/zoom` (3beab01c) ; pyramide E1-E7 complète, 2,6 Go |
 | ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | en cours (wip `zg2-quadtree.md`) |
 | ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
 | ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | — |
-| ZG5 | Hydrographie, côtes, routes, colonies recollées, parcellaire | 2 | — |
+| ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | en cours (wip `zg5a-hydro-fine.md`) |
+| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | après ZG2 |
 | ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
@@ -39,3 +40,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - Coordination VH (session « villes historiques », ADR 0037) : VH démarre après fusion de ZG2
   et ZG4 et reprend les villes emblématiques en 1:1 ; ajouter à l'ADR 0036 l'addendum « loupe
   en vue stratégique, 1:1 au zoom rapproché (lot VH4) ». ZG6 = villes ordinaires seulement.
+- 25/09 : cuisson E3-E4 terminée par l'orchestrateur, ZG1 fusionné (conflit de manifeste résolu : E1-E4 de ZG1, E5-E7 de ZG3). `geo detail-dem --force` relancé dans `../gp-zoom-merge` pour fondre les zones sur E4. ZG5 scindé : ZG5a (données, lancé) et ZG5b (rendu, après ZG2).
