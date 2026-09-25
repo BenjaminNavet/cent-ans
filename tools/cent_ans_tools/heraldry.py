@@ -32,6 +32,8 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
+from cent_ans_tools import heraldic_charges
+
 REPO_DIR = Path(__file__).resolve().parents[2]
 FACTIONS_DIR = REPO_DIR / "data" / "factions"
 HERALDRY_DIR = REPO_DIR / "game" / "assets" / "heraldry"
@@ -518,32 +520,150 @@ def _draw_escutcheons(draw: ImageDraw.ImageDraw, color: Color) -> None:
             )
 
 
-def _draw_guivre(draw: ImageDraw.ImageDraw, color: Color) -> None:
-    points = []
-    for index in range(40):
-        t = index / 39
-        points.append((0.5 + 0.18 * math.sin(t * math.pi * 3), 0.2 + 0.62 * t))
-    draw.line(_px(points), fill=color, width=int(0.09 * CANVAS), joint="curve")
-    head = [(0.38, 0.1), (0.62, 0.1), (0.66, 0.2), (0.5, 0.26), (0.34, 0.2)]
-    draw.polygon(_px(head), fill=color)
-    crown = [
-        (0.4, 0.1),
-        (0.42, 0.03),
-        (0.46, 0.08),
-        (0.5, 0.02),
-        (0.54, 0.08),
-        (0.58, 0.03),
-        (0.6, 0.1),
-    ]
-    draw.polygon(_px(crown), fill=TINCTURES["or"])
-    figure = [(0.44, 0.26), (0.56, 0.26), (0.6, 0.36), (0.4, 0.36)]
-    draw.polygon(_px(figure), fill=TINCTURES["gueules"])
+# --- Vector charges (lot DA1b) -------------------------------------------------------
+
+_TINCTURE_NAMES = "or|argent|gueules|azur|sable|sinople|pourpre"
+_ARMED_RE = re.compile(
+    r"\b(?:arm|lampass|becqu|membr|peautr|lore|barbe|crete)\w*[\w ,']*?"
+    rf"\s(?:d'|de |du )({_TINCTURE_NAMES})\b"
+)
+_CROWN_RE = re.compile(rf"\bcouronn\w*[\w ,']*?\s(?:d'|de |du )({_TINCTURE_NAMES})\b")
+# Details of a sable charge are drawn in a light line, as in the armorials.
+SABLE_OUTLINE: Color = (128, 120, 108)
+
+
+def armed_tincture(text: str, body: Paint, field: Paint | None = None) -> Color:
+    """Claws, tongue, beak (``armé, lampassé, becqué...``); gueules or azur by default."""
+    match = _ARMED_RE.search(_normalize(text))
+    if match:
+        return TINCTURES[match[1]]
+    red = TINCTURES["gueules"]
+    return TINCTURES["azur"] if red in (body, field) else red
+
+
+def crown_tincture(text: str) -> Color:
+    """Tincture of the crown (``couronné d'or``), or by default."""
+    match = _CROWN_RE.search(_normalize(text))
+    return TINCTURES[match[1]] if match else TINCTURES["or"]
+
+
+def lion_variant(text: str) -> tuple[str, bool]:
+    """Drawing of a lion named in ``text`` and whether a crown must be added on it."""
+    text = _normalize(text)
+    crowned = "couronn" in text
+    if "saint marc" in text or "aile" in text.split():
+        return "lion_aile", False
+    if "queue fourchee" in text:
+        crossed = "sautoir" in text or "passee en" in text
+        return (
+            "lion_queue_fourchee_sautoir" if crossed else "lion_queue_fourchee"
+        ), crowned
+    if crowned:
+        return "lion_couronne", False
+    return "lion", False
+
+
+def charge_paints(
+    charge_id: str,
+    body: Paint,
+    text: str = "",
+    field: Paint | None = None,
+) -> dict[str, Paint | None]:
+    """Paint of every role of a charge (None = left unpainted, the field shows through)."""
+    sable = body == TINCTURES["sable"]
+    paints: dict[str, Paint | None] = {
+        "body": body,
+        "armed": armed_tincture(text, body, field),
+        "crown": crown_tincture(text),
+        "openings": None,
+        "issant": TINCTURES["gueules"],
+        "argent": TINCTURES["argent"],
+        "outline": SABLE_OUTLINE if sable else OUTLINE,
+    }
+    if isinstance(body, Image.Image):
+        paints["shade"] = body
+    else:
+        paints["shade"] = tuple(int(c * 0.72) for c in body)
+    if charge_id == "chateau":
+        match = re.search(
+            rf"(?:ouvert|ajoure|maconne)\w*[\w ,']*?\s(?:d'|de |du )({_TINCTURE_NAMES})\b",
+            _normalize(text),
+        )
+        paints["openings"] = TINCTURES[match[1]] if match else None
+    return paints
+
+
+def paint_charge(
+    image: Image.Image,
+    charge_id: str,
+    spots: list[tuple[float, float]],
+    scale: float,
+    paints: dict[str, Paint | None],
+    crowned: bool = False,
+    height: float | None = None,
+) -> None:
+    """Paint a vector charge centred on each spot, fitted in a ``scale`` square.
+
+    ``height`` (canvas fraction) overrides the height of the box, for wide charges such as
+    the leopard. ``crowned`` adds the crown drawing on a charge drawn bareheaded.
+    """
+    box = (int(scale * CANVAS), int((height or scale) * CANVAS))
+    boost = 3 if max(box) >= 96 else 0
+    masks, size = heraldic_charges.fitted_masks(charge_id, box, outline_boost=boost)
+    anchor = heraldic_charges.crown_anchor(charge_id) if crowned else None
+    crown_masks, crown_size = ({}, (0, 0))
+    if anchor:
+        crown_box = (int(anchor[2] * size[0]),) * 2
+        # No thickened outline on the small crown: it would swallow its gold.
+        crown_masks, crown_size = heraldic_charges.fitted_masks("couronne", crown_box)
+    base: dict[str, Image.Image] = {}
+    crown: dict[str, Image.Image] = {}
+    for cx, cy in spots:
+        left = round(cx * CANVAS - size[0] / 2)
+        top = round(cy * CANVAS - size[1] / 2)
+        _accumulate(base, masks, (left, top))
+        if anchor:
+            crown_left = round(left + anchor[0] * size[0] - crown_size[0] / 2)
+            crown_top = round(top + anchor[1] * size[1] - crown_size[1] / 2)
+            _accumulate(crown, crown_masks, (crown_left, crown_top))
+    if crown:
+        # The added crown hides the lines of the head under it.
+        cover = _combine(crown.values())
+        base = {role: ImageChops.subtract(mask, cover) for role, mask in base.items()}
+    for layers in (base, crown):
+        for role in heraldic_charges.ROLE_ORDER:
+            paint = paints.get(role)
+            if role in layers and paint is not None:
+                source = paint if isinstance(paint, Image.Image) else _solid_rgb(paint)
+                image.paste(source, mask=layers[role])
+
+
+def _accumulate(
+    layers: dict[str, Image.Image],
+    masks: dict[str, Image.Image],
+    offset: tuple[int, int],
+) -> None:
+    """Add ``masks`` placed at ``offset`` to the full-canvas ``layers`` (max blend)."""
+    for role, mask in masks.items():
+        if role not in layers:
+            layers[role] = Image.new("L", (CANVAS, CANVAS), 0)
+        box = _box_of(offset, mask)
+        layers[role].paste(ImageChops.lighter(layers[role].crop(box), mask), offset)
+
+
+def _box_of(offset: tuple[int, int], mask: Image.Image) -> tuple[int, int, int, int]:
+    return (offset[0], offset[1], offset[0] + mask.width, offset[1] + mask.height)
+
+
+def _solid_rgb(color: Color) -> Image.Image:
+    return Image.new("RGB", (CANVAS, CANVAS), color)
 
 
 def _draw_quarterly(image: Image.Image, blazon: Blazon) -> None:
     draw = ImageDraw.Draw(image)
     second_field = TINCTURES["argent"] if blazon.has("argent") else blazon.charge
     lion_color = blazon.tincture_after("lion") or blazon.field
+    lion_text = blazon.text.split("lion", 1)[-1]
     for quarter in range(4):
         col, row = quarter % 2, quarter // 2
         box = (col * 0.5, row * 0.5 - 0.04, col * 0.5 + 0.5, row * 0.5 + 0.46)
@@ -557,15 +677,19 @@ def _draw_quarterly(image: Image.Image, blazon: Blazon) -> None:
         )
         cx, cy = col * 0.5 + 0.27, row * 0.46 + 0.26
         if primary_quarter:
-            charge = (
-                LION_RAMPANT
-                if blazon.has("lion") and not blazon.has("chateau")
-                else CASTLE
-            )
-            draw.polygon(_transform(charge, cx, cy, 0.28), fill=blazon.charge)
+            castle = not (blazon.has("lion") and not blazon.has("chateau"))
+            color, text = blazon.charge, blazon.text
+            charge, crowned = ("chateau", False) if castle else lion_variant(lion_text)
+            size = 0.3
+        elif blazon.has("lion"):
+            color, text = lion_color, lion_text
+            charge, crowned = lion_variant(lion_text)
+            size = 0.32
         else:
-            charge = LION_RAMPANT if blazon.has("lion") else FLEUR_DE_LIS
-            draw.polygon(_transform(charge, cx, cy, 0.3), fill=lion_color)
+            draw.polygon(_transform(FLEUR_DE_LIS, cx, cy, 0.3), fill=lion_color)
+            continue
+        paints = charge_paints(charge, color, text, fill)
+        paint_charge(image, charge, [(cx, cy)], size, paints, crowned=crowned)
 
 
 def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
@@ -602,18 +726,22 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
     elif blazon.has("ecussons"):
         _draw_escutcheons(draw, TINCTURES["azur"])
     elif blazon.has("guivre"):
-        _draw_guivre(draw, charge)
+        paints = charge_paints("guivre", charge, blazon.text, blazon.field)
+        paint_charge(image, "guivre", [(0.5, 0.47)], 0.8, paints)
     elif blazon.has("aigle"):
-        draw.polygon(_transform(EAGLE, 0.5, 0.46, 0.72), fill=charge)
+        paints = charge_paints("aigle", charge, blazon.text, blazon.field)
+        paint_charge(image, "aigle", [(0.5, 0.47)], 0.8, paints)
     elif blazon.has("leopard"):
-        count = blazon.count(3)
-        for index in range(count):
-            draw.polygon(
-                _transform(LEOPARD, 0.5, 0.2 + index * 0.24, 0.5 - index * 0.06),
-                fill=charge,
-            )
+        paints = charge_paints("leopard", charge, blazon.text, blazon.field)
+        for index in range(blazon.count(3)):
+            width = 0.7 - index * 0.06
+            spot = [(0.5, 0.2 + index * 0.25)]
+            paint_charge(image, "leopard", spot, width, paints, height=0.24)
     elif blazon.has("lion"):
-        draw.polygon(_transform(LION_RAMPANT, 0.5, 0.46, 0.62), fill=charge)
+        lion, crowned = lion_variant(blazon.text)
+        paints = charge_paints(lion, charge, blazon.text, blazon.field)
+        size = 0.6 if blazon.has("trescheur", "bordure") else 0.74
+        paint_charge(image, lion, [(0.5, 0.47)], size, paints, crowned=crowned)
     elif blazon.has("croix alesee"):
         draw.rectangle(_px([(0.42, 0.18), (0.58, 0.7)]), fill=charge)
         draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
@@ -702,8 +830,14 @@ def load_factions(factions_dir: Path = FACTIONS_DIR) -> list[dict]:
 
 
 def shield_for_faction(faction: dict) -> Image.Image:
-    """Render the shield of one faction dictionary."""
+    """Render the shield of one faction dictionary.
+
+    Quarterly blazons (Castile, Hainaut) go through the grammar v2, which reads the
+    tinctures of each quarter; the others keep the original faction grammar.
+    """
     heraldry = faction["heraldry"]
+    if is_quarterly(heraldry.get("blazon", "")):
+        return finish_shield(render_house_field(heraldry["blazon"]))
     blazon = parse_blazon(
         heraldry.get("blazon", ""),
         heraldry["primary_color"],
@@ -1377,8 +1511,42 @@ def _draw_on_chief(image: Image.Image, piece: Piece) -> None:
     _fill(image, mask, piece.paint)
 
 
+# Charges drawn from the vendored SVG (lot DA1b) instead of polygons.
+VECTOR_KINDS = {"lion", "lionceau", "leopard", "aigle", "chateau", "dauphin"}
+
+
+def _draw_vector_charge(
+    image: Image.Image, piece: Piece, spots: list[tuple[float, float]], scale: float
+) -> None:
+    if piece.kind in ("lion", "lionceau"):
+        charge, crowned = lion_variant(piece.text)
+    elif piece.kind == "leopard":
+        lionne = "lionne" in piece.text.split()[:2]
+        charge, crowned = ("leopard_lionne" if lionne else "leopard"), False
+    else:
+        charge, crowned = piece.kind, False
+    paints = charge_paints(charge, piece.paint, piece.text)
+    if piece.kind == "dauphin":
+        paints["armed"] = _second_tincture(piece, "peautre", "gueules")
+    if charge == "leopard" and piece.count == 3 and not piece.arrangement:
+        for index in range(3):
+            width = 0.7 - index * 0.06
+            spot = [(0.5, 0.2 + index * 0.25)]
+            paint_charge(image, charge, spot, width, paints, height=0.24)
+        return
+    if charge == "leopard":
+        paint_charge(image, charge, spots, scale, paints, height=scale * 0.62)
+        return
+    paint_charge(image, charge, spots, scale, paints, crowned=crowned)
+
+
 def _draw_charge(image: Image.Image, piece: Piece, region: Region) -> None:
     spots, scale = _layout(piece, region)
+    if piece.kind in VECTOR_KINDS:
+        if piece.kind in ("leopard", "aigle", "dauphin") and piece.count == 1:
+            scale *= 1.2
+        _draw_vector_charge(image, piece, spots, scale)
+        return
     if piece.kind == "leopard" and piece.count == 1:
         scale *= 1.25
     if piece.kind in ("gonfanon", "dauphin") and piece.count == 1:
@@ -1425,7 +1593,14 @@ def _draw_pieces(image: Image.Image, pieces: list[Piece]) -> None:
             _draw_charge(image, piece, region)
 
 
-_QUARTERLY = re.compile(r"^ecartele\s*:\s*aux 1 et 4\s+(.+?)\s*;\s*aux 2 et 3\s+(.+)$")
+_QUARTERLY = re.compile(
+    r"^ecartele\s*:\s*aux 1 et 4\s+(.+?)\s*[;,]\s*aux 2 et 3\s+(.+)$"
+)
+
+
+def is_quarterly(blazon: str) -> bool:
+    """Whether ``blazon`` reads ``écartelé : aux 1 et 4 … ; aux 2 et 3 …``."""
+    return _QUARTERLY.match(normalize_blazon(blazon)) is not None
 
 
 def normalize_blazon(blazon: str) -> str:

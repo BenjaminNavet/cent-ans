@@ -8,7 +8,7 @@
       "author": "Smasongarrison",
       "license": "Domaine public",
       "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
-      "crown_anchor": [0.4, 0.035, 0.2]
+      "crown_anchor": [0.5, 0.03, 0.28]
     },
     "lion_couronne": {
       "file": "lion_couronne.svg",
@@ -23,7 +23,7 @@
       "author": "Smasongarrison",
       "license": "Domaine public",
       "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
-      "crown_anchor": [0.33, 0.035, 0.17]
+      "crown_anchor": [0.44, 0.03, 0.24]
     },
     "lion_queue_fourchee_sautoir": {
       "file": "lion_queue_fourchee_sautoir.svg",
@@ -31,7 +31,7 @@
       "author": "Smasongarrison",
       "license": "Domaine public",
       "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
-      "crown_anchor": [0.33, 0.035, 0.17]
+      "crown_anchor": [0.44, 0.03, 0.24]
     },
     "lion_aile": {
       "file": "lion_aile.svg",
