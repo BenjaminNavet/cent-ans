@@ -1,4 +1,4 @@
-# 0048 — Impôt de guerre sur la réserve, troubles qui retombent, un palier par chaîne au départ
+# 0049 — Impôt de guerre sur la réserve, troubles qui retombent, un palier par chaîne au départ
 
 Date : 2026-09-25. Lot : EQ2 (équilibre, suite d'EQ1). Statut : accepté.
 
