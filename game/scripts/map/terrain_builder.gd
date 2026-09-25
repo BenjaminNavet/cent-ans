@@ -59,6 +59,7 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var pyramid_enabled: bool = true
 @export var pyramid_manifest_path: String = ""
 @export var surface_flush_interval_ms: int = 250
+@export var max_surface_emits_per_flush: int = 2
 
 var map_data: MapData
 var material: ShaderMaterial
@@ -436,6 +437,8 @@ func _setup_quadtree() -> void:
 			return
 		if arg.begins_with("--pyramid-dir="):
 			manifest = arg.trim_prefix("--pyramid-dir=").path_join("relief_pyramid.json")
+		if arg.begins_with("--qt-debug="):
+			material.set_shader_parameter("qt_debug", int(arg.trim_prefix("--qt-debug=")))
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()
@@ -473,8 +476,17 @@ func _chunk_bounds_m() -> PackedVector2Array:
 
 
 func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view_center: Vector3, fine_distance: float) -> void:
-	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	# Vue stratégique parchemin (CM2) : le shader « parchemin seul » ne déplace pas les patchs,
+	# on réaffiche alors les morceaux E0.
+	var parchment := material.shader != TERRAIN_SHADER
+	if quadtree.visible == parchment:
+		quadtree.visible = not parchment
+		for chunk in _chunks:
+			chunk.visible = parchment
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() and not parchment else null
+	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
+	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
 	_last_wanted_fine = wanted_fine
 	var half := chunk_px * 0.5
@@ -484,7 +496,9 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		if _is_near[i] != level:
 			_is_near[i] = level
 			_surface_dirty.erase(i)
+			var t_emit := Time.get_ticks_usec()
 			chunk_surface_changed.emit(i)
+			_note_emit(t_emit, 1)
 	_flush_surface_dirty(false)
 
 
@@ -495,13 +509,17 @@ func _on_quadtree_surface_changed(rect: Rect2) -> void:
 	var r0 := clampi(int(floor(rect.position.y / chunk_px)), 0, CHUNKS - 1)
 	var c1 := clampi(int(floor(rect.end.x / chunk_px)), 0, CHUNKS - 1)
 	var r1 := clampi(int(floor(rect.end.y / chunk_px)), 0, CHUNKS - 1)
+	# Morceaux lointains ignorés : leurs objets sont recalés quand ils passent au niveau proche
+	# (signal de changement de niveau), pas à chaque page qui arrive.
 	for r in range(r0, r1 + 1):
 		for c in range(c0, c1 + 1):
-			_surface_dirty[r * CHUNKS + c] = true
+			if _is_near[r * CHUNKS + c] >= 1:
+				_surface_dirty[r * CHUNKS + c] = true
 
 
-## Signale les morceaux dont la surface a changé (pages), au plus toutes les
-## `surface_flush_interval_ms` (sauf `force`).
+## Signale les morceaux dont la surface a changé (pages), au plus `max_surface_emits_per_flush`
+## toutes les `surface_flush_interval_ms` (tous avec `force`) : les recalages (routes, colonies,
+## arbres) sont étalés au lieu de s'empiler dans une image.
 func _flush_surface_dirty(force: bool) -> void:
 	if _surface_dirty.is_empty():
 		return
@@ -510,9 +528,22 @@ func _flush_surface_dirty(force: bool) -> void:
 		return
 	_surface_flush_ms = now
 	var dirty := _surface_dirty.keys()
-	_surface_dirty.clear()
+	if not force and dirty.size() > max_surface_emits_per_flush:
+		dirty = dirty.slice(0, max_surface_emits_per_flush)
+	for index: int in dirty:
+		_surface_dirty.erase(index)
+	var t0 := Time.get_ticks_usec()
 	for index: int in dirty:
 		chunk_surface_changed.emit(index)
+	_note_emit(t0, dirty.size())
+
+
+## Mesure du coût des recalages déclenchés par `chunk_surface_changed` (écouteurs synchrones).
+func _note_emit(t0: int, count: int) -> void:
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	build_stats["surface_emits"] = int(build_stats.get("surface_emits", 0)) + count
+	build_stats["surface_emit_ms_max"] = maxf(float(build_stats.get("surface_emit_ms_max", 0.0)), ms)
+	build_stats["surface_emit_ms_total"] = float(build_stats.get("surface_emit_ms_total", 0.0)) + ms
 
 
 ## Lot ZG2 / ZG4 : relit `MapData.vertical_scale()` (shader, quadtree) et signale toutes les

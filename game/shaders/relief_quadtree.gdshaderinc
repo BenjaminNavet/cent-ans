@@ -15,6 +15,8 @@ uniform sampler2DArray qt_pages : filter_linear_mipmap, repeat_disable;
 uniform vec3 qt_camera = vec3(0.0, 1e6, 0.0);
 uniform float qt_page_h_min = -200.0;
 uniform float qt_page_h_range = 5000.0;
+// Débogage (`--qt-debug=N`) : 1 = teinte par profondeur de nœud, 2 = par étage de la page fine.
+uniform int qt_debug = 0;
 
 // Nœud : origine x, z (monde) ; espacement des sommets s (unités) ; drapeau (≥ 0 : nœud du quadtree).
 instance uniform vec4 qt_node = vec4(0.0, 0.0, 1.0, -1.0);
@@ -145,4 +147,14 @@ void qt_relief(vec2 p, float footprint, inout float hc, inout vec2 grad_m) {
 	}
 	hc = h;
 	grad_m = g;
+}
+
+// Crochet de débogage (fin du fragment) : teintes par niveau pour vérifier sélection et pages.
+vec3 qt_debug_color(vec3 col) {
+	if (qt_debug == 0 || qt_node.w < 0.0) {
+		return col;
+	}
+	float level = qt_debug == 1 ? qt_node.w : (qt_fine.x < 0.0 ? -1.0 : log2(256.0 / qt_fine.w));
+	vec3 tint = 0.5 + 0.5 * cos(6.2832 * (level * 0.13 + vec3(0.0, 0.33, 0.67)));
+	return mix(col, tint * 0.35, 0.55);
 }

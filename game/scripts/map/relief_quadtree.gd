@@ -34,6 +34,7 @@ const ROOT_UNITS := 4096.0
 ## Profondeur n d'un nœud de la taille d'une tuile E0 (étage L = n − DEPTH_E0).
 const DEPTH_E0 := 4
 const PAGE_PX := ReliefPyramid.TILE_PX
+const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_fine_diag", "qt_coarse_nbr", "qt_coarse_diag", "qt_morph"]
 const SIDES: Array[Vector2i] = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
 const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
 
@@ -44,6 +45,10 @@ const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(
 @export var max_pages: int = 256
 @export var max_jobs: int = 4
 @export var max_uploads_per_frame: int = 2
+## Décodage Rust sur le fil principal (≈ 3 ms par tuile) : au plus N tuiles et ce budget par image.
+@export var use_rust_decoder: bool = true
+@export var max_main_decodes_per_frame: int = 2
+@export var main_decode_budget_ms: float = 4.0
 @export var fade_seconds: float = 0.35
 ## Profondeur au-delà de l'étage de données le plus fin (3 = un sommet par pixel de page).
 @export var extra_depth: int = 3
@@ -67,7 +72,10 @@ var _layer_keys: PackedInt64Array = PackedInt64Array()
 var _free_layers: Array[int] = []
 var _page_array: Texture2DArray
 var _jobs: Dictionary = {}
-var _store_available := false
+## Décodeur Rust (`GameDataStore`) du fil principal : godot-rust interdit tout appel depuis un
+## autre fil (liaison mono-fil), le décodage Rust se fait donc ici, borné par image.
+var _main_store: Object = null
+var _main_queue: Array[int] = []
 ## Demandes de l'image courante : clé → priorité (étage × 1e6 + distance).
 var _wanted: Dictionary = {}
 var _items: Array[Dictionary] = []
@@ -85,6 +93,8 @@ var _k_proj: float = 1.0
 var _px_scale: float = 1.0
 var _ranges: PackedFloat32Array = PackedFloat32Array()
 var _page_cache: Dictionary = {}
+var _param_cache: Dictionary = {}
+var _param_cache_version: int = -1
 var _missing_wanted: int = 0
 var _decode_ms: PackedFloat32Array = PackedFloat32Array()
 var _upload_ms_max: float = 0.0
@@ -99,7 +109,8 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	material = terrain_material
 	map_data = data
 	_bounds = chunk_bounds
-	_store_available = ClassDB.class_exists("GameDataStore")
+	_main_store = ClassDB.instantiate("GameDataStore") if use_rust_decoder and ClassDB.class_exists("GameDataStore") else null
+	_main_queue.clear()
 	wait_jobs(false)
 	_pages.clear()
 	_page_bytes.clear()
@@ -324,7 +335,7 @@ func _apply_items() -> void:
 		if fresh or slot.get_meta("sig", Vector4i.ZERO) != sig or fade < 1.0 or slot.get_meta("fading", false):
 			slot.set_meta("sig", sig)
 			slot.set_meta("fading", fade < 1.0)
-			_set_page_params(slot, item, fine, coarse, fade)
+			_set_page_params(slot, item, fine, coarse, fade, fresh)
 	for key: int in _slots.keys():
 		if not alive.has(key):
 			var slot: MeshInstance3D = _slots[key]
@@ -334,21 +345,36 @@ func _apply_items() -> void:
 	stats["items"] = _items.size()
 
 
-func _set_page_params(slot: MeshInstance3D, item: Dictionary, fine: int, coarse: int, fade: float) -> void:
+## Paramètres d'instance du nœud ; seuls ceux qui ont changé depuis la dernière image sont
+## renvoyés au serveur de rendu (valeurs mémorisées dans les métadonnées du nœud).
+func _set_page_params(slot: MeshInstance3D, item: Dictionary, fine: int, coarse: int, fade: float, fresh: bool) -> void:
 	var n: int = item["n"]
 	var s := node_size(n) / PATCH_QUADS
-	slot.set_instance_shader_parameter("qt_fine", _page_vec(fine))
-	slot.set_instance_shader_parameter("qt_coarse", _page_vec(coarse))
-	slot.set_instance_shader_parameter("qt_fine_nbr", _neighbors(fine, false))
-	slot.set_instance_shader_parameter("qt_fine_diag", _neighbors(fine, true))
-	slot.set_instance_shader_parameter("qt_coarse_nbr", _neighbors(coarse, false))
-	slot.set_instance_shader_parameter("qt_coarse_diag", _neighbors(coarse, true))
 	var morph := Vector4(1.0e9, 1.0, fade, minf(s * skirt_factor, skirt_max) + 0.02)
 	if n > 0:
 		var reach: float = _ranges[n]
 		morph.x = morph_ratio * reach
 		morph.y = 1.0 / maxf((1.0 - morph_ratio) * reach, 1e-4)
-	slot.set_instance_shader_parameter("qt_morph", morph)
+	var fine_params := _page_params(fine)
+	var coarse_params := _page_params(coarse)
+	var values := [fine_params[0], coarse_params[0], fine_params[1], fine_params[2], coarse_params[1], coarse_params[2], morph]
+	var previous: Array = [] if fresh else slot.get_meta("params", [])
+	for i in PARAM_NAMES.size():
+		if previous.size() != values.size() or previous[i] != values[i]:
+			slot.set_instance_shader_parameter(PARAM_NAMES[i], values[i])
+	slot.set_meta("params", values)
+
+
+## [emprise, voisines, diagonales] d'une page, mémorisés jusqu'au prochain changement de résidence.
+func _page_params(key: int) -> Array:
+	if _param_cache_version != _residency_version:
+		_param_cache.clear()
+		_param_cache_version = _residency_version
+	var cached: Array = _param_cache.get(key, [])
+	if cached.is_empty():
+		cached = [_page_vec(key), _neighbors(key, false), _neighbors(key, true)]
+		_param_cache[key] = cached
+	return cached
 
 
 func _page_vec(key: int) -> Vector4:
@@ -420,14 +446,24 @@ static func _build_patch(quads: int) -> ArrayMesh:
 # --- Pages : décodage, téléversement, LRU ----------------------------------------------
 
 
+## Pages voulues non chargées, par priorité (étage le plus grossier puis distance) : décodées au
+## début de l'image suivante sur le fil principal par Rust (`_main_queue`, budget
+## `main_decode_budget_ms`), sinon confiées à `WorkerThreadPool` (repli GDScript `Png16`).
 func _start_jobs() -> void:
-	if _jobs.size() >= max_jobs or _wanted.is_empty():
+	_main_queue.clear()
+	if _wanted.is_empty():
 		return
 	var order: Array = []
 	for key: int in _wanted:
 		if not _jobs.has(key):
 			order.append([float(_wanted[key]), key])
 	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	if _main_store != null:
+		for entry in order.slice(0, max_main_decodes_per_frame):
+			_main_queue.append(entry[1])
+		return
+	if _jobs.size() >= max_jobs:
+		return
 	for entry in order:
 		if _jobs.size() >= max_jobs:
 			break
@@ -435,8 +471,6 @@ func _start_jobs() -> void:
 		var job := PageJob.new()
 		job.key = key
 		job.path = pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-		if _store_available:
-			job.store = ClassDB.instantiate("GameDataStore")
 		var task := WorkerThreadPool.add_task(job.run, false, "relief page %d" % key)
 		_jobs[key] = {"task": task, "job": job}
 
@@ -445,20 +479,34 @@ func _start_jobs() -> void:
 ## `block`).
 func _collect_jobs(block: bool = false) -> void:
 	var uploads := 0
+	var t0 := Time.get_ticks_usec()
+	for key in _main_queue:
+		if not block and (uploads >= max_uploads_per_frame or Time.get_ticks_usec() - t0 > main_decode_budget_ms * 1000.0):
+			break
+		var job := PageJob.new()
+		job.key = key
+		job.path = pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
+		job.decode_with(_main_store)
+		if _finish_job(key, job):
+			uploads += 1
+	_main_queue.clear()
 	for key: int in _jobs.keys():
 		var entry: Dictionary = _jobs[key]
 		if not block and (uploads >= max_uploads_per_frame or not WorkerThreadPool.is_task_completed(entry["task"])):
 			continue
 		WorkerThreadPool.wait_for_task_completion(entry["task"])
 		_jobs.erase(key)
-		var job: PageJob = entry["job"]
-		if not job.ok:
-			pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-			push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
-			continue
-		_decode_ms.append(job.decode_ms)
-		if _upload(key, job):
+		if _finish_job(key, entry["job"]):
 			uploads += 1
+
+
+func _finish_job(key: int, job: PageJob) -> bool:
+	if not job.ok:
+		pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
+		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
+		return false
+	_decode_ms.append(job.decode_ms)
+	return _upload(key, job)
 
 
 func _upload(key: int, job: PageJob) -> bool:
@@ -510,6 +558,11 @@ func wait_jobs(upload: bool = true) -> void:
 	if upload:
 		var saved := max_uploads_per_frame
 		max_uploads_per_frame = 1 << 20
+		if _main_store != null:
+			_main_queue.clear()
+			for key: int in _wanted:
+				if not _pages.has(key):
+					_main_queue.append(key)
 		_collect_jobs(true)
 		max_uploads_per_frame = saved
 		return
@@ -521,7 +574,7 @@ func wait_jobs(upload: bool = true) -> void:
 ## Vrai quand toutes les pages voulues à la dernière sélection sont chargées et aucun décodage
 ## n'est en cours (captures, mesures).
 func is_settled() -> bool:
-	return _jobs.is_empty() and _missing_wanted == 0
+	return _jobs.is_empty() and _main_queue.is_empty() and _missing_wanted == 0
 
 
 func page_count() -> int:
@@ -625,14 +678,14 @@ static func sample_pages(pages: Dictionary, top_level: int, h_min: float, h_rang
 	return NAN
 
 
-## Décodage d'une tuile hors fil principal : octets little-endian (Rust, sinon `Png16` puis
-## inversion des octets) et image R16 avec mipmaps prête à téléverser.
+## Décodage d'une tuile : octets little-endian (Rust sur le fil principal avec `decode_with`, ou
+## `Png16` + inversion des octets dans un fil de travail avec `run`) et image R16 avec mipmaps
+## prête à téléverser.
 class PageJob:
 	extends RefCounted
 
 	var key: int = 0
 	var path: String = ""
-	var store: Object = null
 	var bytes: PackedByteArray = PackedByteArray()
 	var image: Image
 	var decode_ms: float = 0.0
@@ -643,8 +696,6 @@ class PageJob:
 		var expected := PAGE_PX * PAGE_PX * 2
 		if not FileAccess.file_exists(path):
 			return
-		if store != null and store.has_method("load_heightmap_u16"):
-			bytes = store.call("load_heightmap_u16", path)
 		if bytes.size() != expected:
 			bytes = PackedByteArray()
 			var decoded := Png16.load_gray16(path)
@@ -655,6 +706,16 @@ class PageJob:
 			for o in range(0, expected, 2):
 				bytes[o] = big[o + 1]
 				bytes[o + 1] = big[o]
+		_finish(t0)
+
+	## Décodage Rust (fil principal seulement).
+	func decode_with(store: Object) -> void:
+		var t0 := Time.get_ticks_usec()
+		bytes = store.call("load_heightmap_u16", path)
+		if bytes.size() == PAGE_PX * PAGE_PX * 2:
+			_finish(t0)
+
+	func _finish(t0: int) -> void:
 		image = Image.create_from_data(PAGE_PX, PAGE_PX, false, Image.FORMAT_R16, bytes)
 		image.generate_mipmaps()
 		decode_ms = (Time.get_ticks_usec() - t0) / 1000.0
