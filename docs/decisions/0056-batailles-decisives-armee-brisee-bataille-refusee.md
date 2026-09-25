@@ -137,13 +137,13 @@ Décision (`data/rules/battle_duel.json`, schéma `battle_duel_rules.schema.json
    `window_seconds` 60 s). L'attaquant gagne le duel quand l'ennemi a perdu sur la fenêtre au moins
    `winning_min_share` (0,5 %) de son effectif et au moins `winning_ratio` (1,5) fois ce qu'il a
    perdu lui-même. Tant qu'il le gagne, il tient la ligne jusqu'à `winning_duel_max_seconds`
-   (420 s) ; sinon (il perd ou fait jeu égal) il marche à l'ennemi après `duel_limit_seconds`
+   (300 s) ; sinon (il perd ou fait jeu égal) il marche à l'ennemi après `duel_limit_seconds`
    (180 s, l'ancienne constante `ATTACKER_DUEL_LIMIT`, désormais en données). Seules les pertes par
    les traits comptent : une escarmouche de cavalerie ne décide pas du duel.
 2. **Pas de bataille refusée par un duel gagné.** Un duel gagné coûte au défenseur au moins 0,5 % de
    son effectif par minute : l'horloge d'engagement (`engagement_loss_share` 1 %) repart au moins
    toutes les deux minutes, la règle des 300 s sans engagement ne peut pas jouer pendant ce duel —
-   c'est la borne de 420 s (et les munitions : le duel cesse quand les tireurs sont à court) qui y
+   c'est la borne de 300 s (et les munitions : le duel cesse quand les tireurs sont à court) qui y
    met fin, pas la bataille refusée. Le test pytest vérifie `duel_limit ≤ winning_duel_max ≤
    duel_limit + refusal_seconds`.
 3. **Milice en second échelon.** Quand la ligne marche à l'ennemi après le duel (ennemi entre

@@ -1,7 +1,7 @@
 {
   "description": "Duel d'archers de l'attaquant et ordre de l'assaut (lot EP9b, ADR 0056 § EP9b). L'armée qui a cherché la bataille ne tient le duel que duel_limit_seconds quand elle ne le gagne pas ; tant que ses tireurs infligent nettement plus de pertes qu'ils n'en subissent (fenêtre glissante), elle le prolonge, au plus jusqu'à winning_duel_max_seconds, puis marche à l'ennemi. À l'assaut, les troupes de pied au moral de base faible (milices) avancent en second échelon, derrière les troupes solides, et serrent sur la première ligne pour la mêlée quand l'ennemi n'est plus qu'à second_echelon_closes_m.",
   "duel_limit_seconds": 180,
-  "winning_duel_max_seconds": 420,
+  "winning_duel_max_seconds": 300,
   "window_seconds": 60,
   "winning_ratio": 1.5,
   "winning_min_share": 0.005,
