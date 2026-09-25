@@ -17,6 +17,6 @@
   "fire_resistance": 0.1,
   "cost": 1400,
   "model": "nef",
-  "description": "Grand navire rond à deux mâts, plus haut que la cogue, aux châteaux larges. Navire amiral des flottes du Nord, il porte plus d'hommes d'armes et d'archers que tout autre.",
+  "description": "Grand navire rond à un mât, plus haut et plus large que la cogue, aux châteaux larges (le second mât ne gagne les mers du Nord qu'à la fin du XIVe siècle). Navire amiral des flottes du Nord, il porte plus d'hommes d'armes et d'archers que tout autre.",
   "sources": ["Nef (navire)", "Christophe (cogue royale anglaise)"]
 }

@@ -18,7 +18,7 @@
     {
       "id": "siege_paris",
       "label": "Siège de Paris",
-      "detail": "L'armée anglaise devant la porte Saint-Jacques, comme en 1360.",
+      "detail": "L'armée anglaise aux portes du sud de Paris, comme en avril 1360 (Édouard III y défia le dauphin sans oser l'assaut).",
       "kind": "siege",
       "province": "prov_ile_de_france",
       "engines": ["unit_trebuchet"]
@@ -26,7 +26,7 @@
     {
       "id": "siege_avignon",
       "label": "Siège d'Avignon",
-      "detail": "Les Grandes Compagnies menacent la cité des papes (1361) : trébuchets et mangonneaux contre les remparts neufs.",
+      "detail": "Les Grandes Compagnies menacent la cité des papes (hiver 1360-1361) : trébuchets et mangonneaux contre les remparts encore en chantier (assaut imaginé : le pape paya leur départ).",
       "kind": "siege",
       "landmark": "avignon",
       "attacker": "fac_england",
@@ -35,7 +35,7 @@
     {
       "id": "siege_bruges",
       "label": "Siège de Bruges",
-      "detail": "L'ost du roi de France devant la ville drapière révoltée : trébuchet et bombarde contre la porte.",
+      "detail": "L'ost du roi de France devant la ville drapière révoltée, siège imaginé (Bruges se soumit sans siège après Cassel, 1328, et Roosebeke, 1382) : trébuchet et bombarde contre la porte.",
       "kind": "siege",
       "landmark": "bruges",
       "attacker": "fac_france",
