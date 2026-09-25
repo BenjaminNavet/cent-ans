@@ -295,3 +295,109 @@ def simplify_indices(points: np.ndarray, tolerance: float) -> np.ndarray:
             stack.append((start, split))
             stack.append((split, end))
     return np.flatnonzero(keep)
+
+
+def lateral_route(
+    points: np.ndarray,
+    sample: Sampler,
+    node_cost: Callable[[np.ndarray, np.ndarray, np.ndarray], np.ndarray],
+    radius_m: float,
+    offsets: int = 13,
+    prior_m: float = 1.0,
+    lateral_cost: float = 0.05,
+    grade_cost: float = 1.0,
+    max_turn: float = 0.5,
+    normal_window_m: float = 150.0,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Shift a road sideways (Viterbi) to ease its grades and avoid bad ground.
+
+    Args:
+        points: Evenly spaced vertices (:func:`resample`).
+        sample: Height sampler.
+        node_cost: ``f(x, y, heights) -> cost`` over the ``(n, m)`` candidates
+            (wet ground, river beds...), in metres of climb equivalent.
+        radius_m: Largest lateral move.
+        offsets: Candidate offsets.
+        prior_m: Cost of a move of ``radius_m`` (trust in the traced road).
+        lateral_cost: Cost per metre of lateral change between vertices.
+        grade_cost: Cost per metre of height change between vertices.
+        max_turn: Largest lateral change per metre along the road.
+        normal_window_m: Tangent smoothing window.
+
+    Returns:
+        ``(points, heights, offsets)`` of the chosen route.
+    """
+    points = np.asarray(points, dtype=np.float64)
+    n = len(points)
+    if n < 2 or radius_m <= 0.0:
+        heights = np.asarray(sample(points[:, 0], points[:, 1]), dtype=np.float64)
+        return points.copy(), heights, np.zeros(n)
+    step = polyline_length(points) / (n - 1)
+    window = max(int(round(normal_window_m / max(step, 1e-6))), 1)
+    normal = normals(points, window)
+    offs = np.linspace(-radius_m, radius_m, offsets)
+    cand_x = points[:, 0, None] + normal[:, 0, None] * offs[None, :]
+    cand_y = points[:, 1, None] + normal[:, 1, None] * offs[None, :]
+    heights = np.asarray(sample(cand_x.ravel(), cand_y.ravel()), dtype=np.float64)
+    heights = heights.reshape(n, offsets)
+    heights = np.where(np.isfinite(heights), heights, np.nanmean(heights))
+    cost = (
+        node_cost(cand_x, cand_y, heights) + prior_m * np.abs(offs)[None, :] / radius_m
+    )
+    radius = curvature_radius(points, window)
+    limit = np.maximum(0.8 * radius, 2.0 * step)
+    centre = offsets // 2
+    too_far = np.abs(offs)[None, :] > limit[:, None]
+    too_far[:, centre] = False
+    cost[too_far] = np.inf
+    jump = np.abs(offs[:, None] - offs[None, :])
+    base = lateral_cost * jump
+    base[jump > max_turn * step + 1e-9] = np.inf
+    total = cost[0].copy()
+    back = np.zeros((n, offsets), dtype=np.int32)
+    for i in range(1, n):
+        climb = grade_cost * np.abs(heights[i][:, None] - heights[i - 1][None, :])
+        candidates = total[None, :] + base + climb
+        best = np.argmin(candidates, axis=1)
+        total = candidates[np.arange(offsets), best] + cost[i]
+        back[i] = best
+    path = np.empty(n, dtype=np.int32)
+    path[-1] = int(np.argmin(total))
+    for i in range(n - 1, 0, -1):
+        path[i - 1] = back[i, path[i]]
+    chosen = offs[path]
+    routed = points + normal * chosen[:, None]
+    return routed, heights[np.arange(n), path], chosen
+
+
+def simplify_indices_3d(
+    points: np.ndarray, heights: np.ndarray, tolerance: float, z_scale: float
+) -> np.ndarray:
+    """Douglas-Peucker on ``(x, y, z * z_scale)`` (keeps the relief of a draped line)."""
+    stacked = np.column_stack([points, np.asarray(heights) * z_scale])
+    n = len(stacked)
+    if n <= 2:
+        return np.arange(n)
+    keep = np.zeros(n, dtype=bool)
+    keep[0] = keep[-1] = True
+    stack = [(0, n - 1)]
+    while stack:
+        start, end = stack.pop()
+        if end <= start + 1:
+            continue
+        a, b = stacked[start], stacked[end]
+        seg = b - a
+        mid = stacked[start + 1 : end]
+        length2 = float(seg @ seg)
+        if length2 == 0.0:
+            dist = np.linalg.norm(mid - a, axis=1)
+        else:
+            t = np.clip((mid - a) @ seg / length2, 0.0, 1.0)
+            dist = np.linalg.norm(mid - (a + t[:, None] * seg), axis=1)
+        index = int(np.argmax(dist))
+        if dist[index] > tolerance:
+            split = start + 1 + index
+            keep[split] = True
+            stack.append((start, split))
+            stack.append((split, end))
+    return np.flatnonzero(keep)
