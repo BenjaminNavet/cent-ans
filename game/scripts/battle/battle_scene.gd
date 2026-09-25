@@ -53,6 +53,7 @@ var resolved: bool = false
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
+var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -185,6 +186,8 @@ func begin() -> bool:
 		_audio_director.call("stop_all")
 	if _pad_units > 0:
 		_pad_setup(_pad_units)
+	if _siege_engines != "" and setup.get("siege") != null:
+		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false
@@ -994,6 +997,8 @@ func _parse_cmdline() -> void:
 			_deploy_shot = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--siege-engines="):
+			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--result-shot":

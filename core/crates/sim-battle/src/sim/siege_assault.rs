@@ -57,13 +57,26 @@ impl BattleSim {
         let (nx, nz) = p.outward();
         let len = p.length();
         let (cx, cz) = p.closest_point(unit.x, unit.z);
-        let along0 = (cx - p.a.0) * tx + (cz - p.a.1) * tz;
-        let span = width.min(len - 4.0).max(2.0);
+        // Keep clear of the round towers at both ends of the piece.
+        let margin = works
+            .towers
+            .iter()
+            .map(|t| t.radius)
+            .fold(0.0, f64::max)
+            .max(1.0)
+            + 1.5;
+        let room = (len - 2.0 * margin).max(2.0);
+        let span = width.min(room);
+        let lo = (len * 0.5 - room * 0.5) + span * 0.5;
+        let hi = (len * 0.5 + room * 0.5) - span * 0.5;
+        // Regiments at the same spot do not share the very same ladders.
+        let jitter =
+            (crate::siege_fx::hash01(u64::from(unit.id), 0x1add) - 0.5) * span / count as f64 * 0.9;
+        let along0 = ((cx - p.a.0) * tx + (cz - p.a.1) * tz + jitter).clamp(lo, hi.max(lo));
         let face = works.thickness * 0.5;
         (0..count)
             .map(|k| {
-                let u = -span * 0.5 + (k as f64 + 0.5) * span / count as f64;
-                let along = (along0 + u).clamp(2.0, (len - 2.0).max(2.0));
+                let along = along0 - span * 0.5 + (k as f64 + 0.5) * span / count as f64;
                 let (lx, lz) = (p.a.0 + tx * along, p.a.1 + tz * along);
                 let top = (lx + nx * face, lz + nz * face);
                 let foot = (

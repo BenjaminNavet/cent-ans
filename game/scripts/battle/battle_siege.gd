@@ -61,7 +61,7 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	towers_root.name = "Towers"
 	add_child(towers_root)
 	for tower in siege.get("towers", []):
-		_build_tower(towers_root, tower)
+		_build_tower(towers_root, SiegeAssaultFx.gatehouse_tower(siege, tower))
 	BattleSiegeBatcher.batch_and_replace(towers_root)
 	_build_square()
 	_build_houses()

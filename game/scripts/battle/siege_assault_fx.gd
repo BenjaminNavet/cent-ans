@@ -18,7 +18,7 @@ const MAX_FLIGHTS := 12
 const CHIP_POOL := 6
 const WOOD := Color(0.45, 0.31, 0.18)
 const STONE_CHIP := Color(0.62, 0.58, 0.52)
-const OIL := Color(0.22, 0.13, 0.04)
+const OIL := Color(0.30, 0.19, 0.07)
 
 var siege_view: BattleSiege
 var effects: BattleEffects
@@ -31,6 +31,7 @@ var thickness := 3.0
 var ram_period := 3.0
 
 var _by_id: Dictionary = {}
+var _ram_snap: Dictionary = {}  # id -> Transform3D imposée (bélier au contact de la porte)
 var _ladder_sets: Dictionary = {}  # "id/piece" -> {piece, nodes: [MeshInstance3D], raised: float, dirs: [...]}
 var _ladder_meshes: Dictionary = {}  # longueur arrondie (m) -> ArrayMesh
 var _rams: Dictionary = {}  # id -> {beam, head, beam_z, head_z, anchor}
@@ -50,6 +51,53 @@ var _door_shake := 0.0
 var _gate_broken := false
 var shots_seen := 0  # tests et captures
 var strikes_seen := 0
+var oils_seen := 0
+
+
+## Tours de la porte (rendu) : le cœur les centre sur les extrémités du passage de 14 m, où
+## leur fût (≈ 6 m de rayon) masquait la porte. Elles sont écartées le long de la courtine pour
+## encadrer un passage visible, comme un châtelet ; les autres tours sont inchangées.
+static func gatehouse_tower(p_siege: Dictionary, tower: Dictionary) -> Dictionary:
+	var pieces: Array = p_siege.get("pieces", [])
+	var gate_index := int(p_siege.get("gate", -1))
+	if gate_index < 0 or gate_index >= pieces.size():
+		return tower
+	var gate: Dictionary = pieces[gate_index]
+	var a: Vector2 = gate["a"]
+	var b: Vector2 = gate["b"]
+	var p := Vector2(float(tower["x"]), float(tower["z"]))
+	var end := a if p.distance_to(a) < 0.5 else (b if p.distance_to(b) < 0.5 else Vector2.INF)
+	if end == Vector2.INF:
+		return tower
+	var away := (end - (b if end == a else a)).normalized()
+	var r := float(tower["radius"])
+	var moved := tower.duplicate()
+	var q := end + away * (r * 1.15 - 0.6)
+	moved["x"] = q.x
+	moved["z"] = q.y
+	return moved
+
+
+## Captures et bancs d'essai (`--siege-engines=unit_trebuchet,unit_bombard,…` après `--`) :
+## ajoute ces régiments à l'assiégeant de `setup` (types lus dans `data/unit_types/`).
+static func add_engines(p_setup: Dictionary, ids: PackedStringArray) -> void:
+	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data/unit_types").simplify_path()
+	var list: Array = p_setup["attacker"]["units"]
+	for id in ids:
+		var file := FileAccess.open(data_dir.path_join(id + ".json"), FileAccess.READ)
+		if file == null:
+			push_warning("SiegeAssaultFx: unknown unit type %s" % id)
+			continue
+		var t: Dictionary = JSON.parse_string(file.get_as_text())
+		var stats := {}
+		for key in (t["stats"] as Dictionary):
+			stats[key] = int(t["stats"][key])  # JSON : nombres flottants, le cœur attend des entiers
+		list.append({
+			"unit_type": id, "name": t["name"]["display"], "category": t["category"],
+			"mounted": bool(t.get("mounted", false)), "soldiers": int(t["soldiers"]),
+			"max_soldiers": int(t["soldiers"]), "morale": int(stats.get("morale", 50)), "experience": 0,
+			"stats": stats, "abilities": t.get("abilities", []),
+		})
 
 
 func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: BattleSoldiers, p_height_at: Callable) -> void:
@@ -65,13 +113,14 @@ func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: Batt
 	if effects != null:
 		effects.siege_walls = true
 	_stone_mesh = SphereMesh.new()
-	_stone_mesh.radius = 0.5
-	_stone_mesh.height = 0.9
+	# Pierre et boulet grossis (lisibilité à la Total War : ~2× la taille réelle).
+	_stone_mesh.radius = 0.8
+	_stone_mesh.height = 1.4
 	_stone_mesh.radial_segments = 8
 	_stone_mesh.rings = 4
 	_ball_mesh = SphereMesh.new()
-	_ball_mesh.radius = 0.28
-	_ball_mesh.height = 0.56
+	_ball_mesh.radius = 0.45
+	_ball_mesh.height = 0.9
 	_ball_mesh.radial_segments = 8
 	_ball_mesh.rings = 4
 	_stone_mat = StandardMaterial3D.new()
@@ -85,7 +134,7 @@ func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: Batt
 	_trail_mat.billboard_keep_scale = true
 	_trail_mat.vertex_color_use_as_albedo = true
 	_trail_mat.albedo_texture = BattleEffects._puff_texture()
-	_trail_mat.albedo_color = Color(0.78, 0.76, 0.72, 0.55)
+	_trail_mat.albedo_color = Color(0.86, 0.84, 0.8, 0.8)
 	for i in CHIP_POOL:
 		_stone_chips.append(_chips("StoneChips%d" % i, STONE_CHIP, 0.28))
 		_wood_chips.append(_chips("WoodChips%d" % i, WOOD, 0.22))
@@ -111,6 +160,15 @@ func update(events: Array, units: Array, now: float, dt: float) -> void:
 	if _door_shake > 0.0:
 		_door_shake = maxf(_door_shake - dt, 0.0)
 		_shake_doors(_door_shake)
+
+
+## Après `BattleSiege.update` (le nœud parent traite son image avant ses enfants) : impose la
+## pose du bélier à la porte.
+func _process(_delta: float) -> void:
+	for id in _ram_snap:
+		var machine: Node3D = siege_view._machines.get(id)
+		if machine != null and machine.visible:
+			machine.transform = _ram_snap[id]
 
 
 func _on_event(event: Dictionary) -> void:
@@ -269,6 +327,14 @@ func _update_rams(units: Array) -> void:
 		var at_gate := bool(unit["present"]) and not _gate_broken and Vector2(pos.x, pos.z).distance_to(Vector2(gate.x, gate.z)) < thickness + 8.0
 		var offset := 0.0
 		if at_gate:
+			# La poutre frappe le milieu des vantaux : le manteau est calé face à la porte
+			# (la simulation le tient à moins de 4 m du pan, parfois décalé par ses voisins).
+			var out := _outward(_piece(int(siege.get("gate", -1))))
+			var spot := _gate_front(5.6)
+			_ram_snap[id] = Transform3D(Basis(Vector3.UP, atan2(-out.x, -out.z)), spot)
+		else:
+			_ram_snap.erase(id)
+		if at_gate:
 			if float(ram["anchor"]) < 0.0:
 				ram["anchor"] = time_now
 			var phase := fposmod(time_now - float(ram["anchor"]), ram_period) / ram_period
@@ -335,6 +401,7 @@ func _update_towers(units: Array) -> void:
 			machine.add_child(pivot)
 			bridge.reparent(pivot, false)
 			bridge.position = Vector3(0.0, 0.0, 1.9)
+			_dress_tower(machine)
 			_towers[id] = {"pivot": pivot, "docked": false, "since": -1000.0}
 		var tower: Dictionary = _towers[id]
 		var t := clampf((time_now - float(tower["since"])) / BRIDGE_LOWER, 0.0, 1.0)
@@ -342,6 +409,43 @@ func _update_towers(units: Array) -> void:
 		# Chute amortie : le pont tombe vite puis rebondit un peu sur le rempart.
 		var eased := 1.0 - pow(1.0 - lowered, 3.0)
 		(tower["pivot"] as Node3D).rotation.x = lerpf(-PI * 0.5, 0.08, eased)
+
+
+## Beffroi plus lisible : poteaux d'angle, lisses d'étage sombres, plate-forme crénelée de
+## planches au sommet (la caisse de `BattleSiege._make_tower` reste en dessous).
+func _dress_tower(machine: Node3D) -> void:
+	var h := wall_height + 4.0
+	var dark := BattleSiege._textured("wood", Color(0.36, 0.26, 0.17))
+	var post_box := BoxMesh.new()
+	post_box.size = Vector3(0.45, h + 1.6, 0.45)
+	for x in [-2.55, 2.55]:
+		for z in [-2.55, 2.55]:
+			var post := MeshInstance3D.new()
+			post.mesh = post_box
+			post.material_override = dark
+			post.position = Vector3(x, (h + 1.6) * 0.5 + 0.8, z)
+			machine.add_child(post)
+	var band_box := BoxMesh.new()
+	band_box.size = Vector3(5.5, 0.3, 5.5)
+	var floors := int(h / 3.2)
+	for k in floors:
+		var band := MeshInstance3D.new()
+		band.mesh = band_box
+		band.material_override = dark
+		band.position = Vector3(0, 0.8 + (k + 1) * h / float(floors + 1), 0)
+		machine.add_child(band)
+	var merlon := BoxMesh.new()
+	merlon.size = Vector3(0.9, 1.1, 0.25)
+	for side in 4:
+		for k in 3:
+			var m := MeshInstance3D.new()
+			m.mesh = merlon
+			m.material_override = dark
+			var along := -1.8 + k * 1.8
+			var basis := Basis(Vector3.UP, side * PI * 0.5)
+			m.position = basis * Vector3(along, h + 1.35, 2.6)
+			m.basis = basis
+			machine.add_child(m)
 
 
 # --- Engins ----------------------------------------------------------------------------
@@ -426,10 +530,10 @@ func _finish_flight(f: Dictionary) -> void:
 
 func _trail_emitter(bombard: bool) -> GPUParticles3D:
 	var particles := GPUParticles3D.new()
-	particles.amount = 36
-	particles.lifetime = 1.4 if not bombard else 0.8
+	particles.amount = 160
+	particles.lifetime = 2.2 if not bombard else 1.0
 	particles.local_coords = false
-	particles.fixed_fps = 30
+	particles.fixed_fps = 0
 	var process := ParticleProcessMaterial.new()
 	process.gravity = Vector3(0, 0.6, 0)
 	process.initial_velocity_min = 0.0
@@ -450,7 +554,8 @@ func _trail_emitter(bombard: bool) -> GPUParticles3D:
 	process.color_ramp = ramp_tex
 	particles.process_material = process
 	var quad := QuadMesh.new()
-	quad.size = Vector2(1.1, 1.1) if not bombard else Vector2(0.7, 0.7)
+	# Boulet rapide (≈ 2 m par image) : bouffées plus grosses pour qu'elles se chevauchent.
+	quad.size = Vector2(2.4, 2.4) if not bombard else Vector2(3.2, 3.2)
 	quad.material = _trail_mat
 	particles.draw_pass_1 = quad
 	particles.emitting = true
@@ -552,8 +657,10 @@ func _oil_emitter() -> GPUParticles3D:
 	quad.size = Vector2(0.18, 0.7)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = OIL
-	mat.metallic_specular = 0.9
-	mat.roughness = 0.15
+	mat.metallic_specular = 0.6
+	mat.roughness = 0.3
+	mat.emission_enabled = true
+	mat.emission = Color(0.25, 0.1, 0.02)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 	mat.billboard_keep_scale = true
 	quad.material = mat
@@ -564,6 +671,7 @@ func _oil_emitter() -> GPUParticles3D:
 
 
 func _on_oil(event: Dictionary) -> void:
+	oils_seen += 1
 	var gate := _piece(int(event["piece"]))
 	if gate.is_empty():
 		return
