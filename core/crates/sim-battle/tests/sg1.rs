@@ -190,7 +190,15 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
     for l in &ladders {
         assert!(wall.outside_offset(l.foot.0, l.foot.1) > wall.outside_offset(l.top.0, l.top.1));
         assert!(l.top_y > l.foot_y + works.wall_height * 0.8);
+        for t in &works.towers {
+            let d = ((l.top.0 - t.x).powi(2) + (l.top.1 - t.z).powi(2)).sqrt();
+            assert!(d > t.radius, "ladder inside a tower");
+        }
     }
+    assert!(
+        ladders.windows(2).all(|w| w[0].foot != w[1].foot),
+        "ladders side by side"
+    );
     let shown = sim.climbers_shown(unit);
     let poses = sim.soldier_poses(unit);
     assert_eq!(poses.len(), unit.soldiers() as usize);

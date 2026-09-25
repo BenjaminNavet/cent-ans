@@ -584,6 +584,23 @@ impl BattleSim {
         }
     }
 
+    /// Debug (captures, SG1): sets the HP of wall piece `index` (clamped to
+    /// its maximum; 0 opens it). `false` outside a siege or for a bad index.
+    #[func]
+    fn debug_set_piece_hp(&mut self, index: i64, hp: f64) -> bool {
+        let Some(works) = self.sim.as_mut().and_then(|s| s.siege_mut()) else {
+            return false;
+        };
+        let Some(piece) = usize::try_from(index)
+            .ok()
+            .and_then(|i| works.pieces.get_mut(i))
+        else {
+            return false;
+        };
+        piece.hp = hp.clamp(0.0, piece.max_hp);
+        true
+    }
+
     /// Ground height at (x, z).
     #[func]
     fn get_height(&self, x: f64, z: f64) -> f64 {
