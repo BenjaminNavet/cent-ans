@@ -24,7 +24,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle", "bld_armoury"],
     "port": false,
-    "description": "Place forte anglaise au confluent du Lot et de la Garonne, avancée du duché d'Aquitaine dans l'Agenais français ; elle sera assiégée sans succès par les Français en 1346.",
+    "description": "Place forte au confluent du Lot et de la Garonne, qui commande la route de La Réole et de Bordeaux ; garnison française en 1337, elle est livrée aux Anglais en 1345 et résiste au siège de Jean de Normandie en 1346.",
     "sources": ["Aiguillon (Lot-et-Garonne)", "Siège d'Aiguillon"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Bastide royale fondée en 1264 au bord du Lot, plan en damier, marché drapier et halles.",
+    "description": "Bastide fondée en 1264 par Alphonse de Poitiers, comte de Toulouse, au bord du Lot : plan en damier, marché et halles.",
     "sources": ["Villeneuve-sur-Lot", "Bastide"]
   },
   {

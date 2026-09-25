@@ -6,7 +6,7 @@
     "name": {
       "display": "Bologne",
       "local": "Bulåggna",
-      "local_language": "lombard"
+      "local_language": "émilien"
     },
     "lonlat": [
       11.3426,
@@ -29,7 +29,7 @@
       "bld_university"
     ],
     "port": false,
-    "description": "Bologne, grande commune d'Émilie sous domination des Pepoli, dotée de la plus ancienne université d'Europe (1088).",
+    "description": "Bologne, grande commune d'Émilie dont Taddeo Pepoli se rendra maître en août 1337 ; son université est la plus ancienne d'Europe (1088, date traditionnelle).",
     "sources": [
       "Taddeo Pepoli",
       "Bologne",
@@ -43,7 +43,7 @@
     "name": {
       "display": "Ravenne",
       "local": "Ravena",
-      "local_language": "vénitien"
+      "local_language": "romagnol"
     },
     "lonlat": [
       12.2035,
