@@ -760,6 +760,9 @@ func _apply_camera_view() -> void:
 			camera_rig.look_at_point(focus, 75.0, camera_rig.yaw + 0.6)
 		"deck":
 			camera_rig.look_at_point(focus + Vector3(0, 4, 0), 24.0, camera_rig.yaw + 1.2)
+		"hull":
+			# Coque de près, de travers (captures NV2 : bordé, goudron, flottaison).
+			camera_rig.look_at_point(focus + Vector3(0, 1.5, 0), 30.0, camera_rig.yaw + 1.4)
 		"melee":
 			camera_rig.look_at_point(focus + Vector3(0, 3, 0), 62.0, pair_yaw)
 		_:

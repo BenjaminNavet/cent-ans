@@ -9,15 +9,15 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 // le long du navire, joints calfatés). Mâts et vergues (près de l'axe, verticaux) : fil du bois
 // seul. Modèles : 1 unité = 1 m, flottaison à y = 0, +X vers l'avant.
 
-uniform vec3 oak_dark : source_color = vec3(0.19, 0.12, 0.07);
-uniform vec3 oak_light : source_color = vec3(0.42, 0.30, 0.18);
+uniform vec3 oak_dark : source_color = vec3(0.25, 0.17, 0.10);
+uniform vec3 oak_light : source_color = vec3(0.54, 0.40, 0.25);
 uniform vec3 tar_color : source_color = vec3(0.03, 0.026, 0.022);
 uniform vec3 iron_color : source_color = vec3(0.13, 0.12, 0.115);
 uniform vec3 rust_color : source_color = vec3(0.36, 0.17, 0.07);
 uniform float strake_height = 0.34;
 uniform float plank_length = 5.2;
-uniform float waterline = 0.3;
-uniform float wet_band = 0.7;
+uniform float waterline = 0.55;
+uniform float wet_band = 0.8;
 uniform float wear = 0.5;
 uniform float tone = 1.0;
 uniform float seed = 0.0;
@@ -92,8 +92,8 @@ void fragment() {
 		float lap_shadow = deck ? smoothstep(0.0, 0.05, across) * smoothstep(1.0, 0.95, across)
 			: smoothstep(0.0, 0.12, across);
 		float lap_edge = deck ? 0.0 : smoothstep(0.88, 1.0, across);
-		float butt = smoothstep(0.0, 0.012, along) * smoothstep(1.0, 0.988, along);
-		albedo *= mix(0.45, 1.0, lap_shadow) * mix(0.55, 1.0, butt);
+		float butt = smoothstep(0.0, 0.007, along) * smoothstep(1.0, 0.993, along);
+		albedo *= mix(0.55, 1.0, lap_shadow) * mix(0.72, 1.0, butt);
 		albedo += lap_edge * 0.05;
 		if (deck) {
 			// Calfatage (étoupe et brai) entre les planches ; usure claire au milieu du pont.
@@ -112,7 +112,7 @@ void fragment() {
 			rough = mix(rough, 0.45, rivet);
 			// Crasse : coulures verticales sous les dalots, plus denses vers le plat-bord.
 			float grime = smoothstep(0.55, 0.85, fbm(vec2(q.x * 3.0, q.y * 0.35) + s)) * smoothstep(waterline, 1.6, p.y);
-			albedo *= 1.0 - grime * 0.35;
+			albedo *= 1.0 - grime * 0.22;
 			// Usure : bois délavé et frotté au plat-bord et aux angles.
 			float scuff = smoothstep(0.6, 0.9, fbm(q * 2.3 + s * 1.7)) * smoothstep(1.2, 2.4, p.y);
 			albedo = mix(albedo, oak_light * 1.2, scuff * 0.3 * wear);

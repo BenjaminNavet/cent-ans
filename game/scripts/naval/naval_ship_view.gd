@@ -164,11 +164,11 @@ func _wood_materials() -> Dictionary:
 		mat.shader = HULL_SHADER
 		mat.set_shader_parameter("seed", float(id) + 0.37)
 		mat.set_shader_parameter("deck", key == "Deck")
-		mat.set_shader_parameter("tone", (0.92 if key == "Hull" else 1.05) + 0.12 * variation)
+		mat.set_shader_parameter("tone", (0.95 if key == "Hull" else 1.05) + 0.12 * variation)
 		mat.set_shader_parameter("wear", 0.35 + 0.4 * variation)
 		# Les galères, basses, ont la flottaison plus près du plat-bord.
-		mat.set_shader_parameter("waterline", 0.2 if model_key == "galley" else 0.3)
-		mat.set_shader_parameter("wet_band", 0.45 if model_key == "galley" else 0.7)
+		mat.set_shader_parameter("waterline", 0.3 if model_key == "galley" else 0.55)
+		mat.set_shader_parameter("wet_band", 0.45 if model_key == "galley" else 0.8)
 		out[key] = mat
 		_surface_mats.append(mat)
 	return out
