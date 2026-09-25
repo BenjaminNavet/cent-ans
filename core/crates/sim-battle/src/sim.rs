@@ -4,6 +4,7 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod camp;
 mod decision;
 mod deployment;
 mod fire;
@@ -18,6 +19,7 @@ mod standards;
 mod time_of_day;
 mod water;
 
+pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
@@ -146,6 +148,11 @@ pub struct BattleSim {
     crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
+    /// EP6: looting of each side's camp.
+    camp_states: [camp::CampState; 2],
+    /// EP6: solid footprints of the decor by cell (derived data, reset by
+    /// `field_mut`).
+    decor_grid: std::cell::OnceCell<obstacles::DecorGrid>,
     /// EP8: hour of the day when the battle began (the day moves on with
     /// `elapsed`) and the phase last announced in the journal.
     start_hour: f64,
@@ -280,6 +287,20 @@ impl BattleSim {
         let is_siege = setup.siege.is_some();
         let mut field =
             Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
+        if !is_siege {
+            // EP6: countryside and camps (derived stream), then the hand-made
+            // decor of a historical map.
+            // A bare field (`village: Some(false)`: labs, tests) keeps its
+            // camps only.
+            if setup.village == Some(false) {
+                field.lay_camps(&rng);
+            } else {
+                field.lay_decor(&setup.province, &rng);
+            }
+            if let Some(plan) = &setup.decor_plan {
+                field.apply_decor_plan(plan);
+            }
+        }
         let mut siege = setup.siege.as_ref().map(|s| {
             SiegeWorks::for_battle(
                 s.fortification,
@@ -401,6 +422,8 @@ impl BattleSim {
             trophies: Vec::new(),
             crossings: Default::default(),
             drown_announced: Vec::new(),
+            camp_states: Default::default(),
+            decor_grid: Default::default(),
             start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
             day_phase: None,
             decision: crate::decision::DecisionRules::bundled().clone(),
@@ -691,6 +714,7 @@ impl BattleSim {
         self.relief_map = Default::default();
         self.crossings = Default::default();
         self.village_props = Default::default();
+        self.decor_grid = Default::default();
         &mut self.field
     }
 
@@ -1235,6 +1259,7 @@ impl BattleSim {
         self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_standards(&contacts);
+        self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
         self.elapsed += DT;
@@ -1925,10 +1950,16 @@ impl BattleSim {
         } else {
             None
         };
+        let decor = if cavalry {
+            self.field.decor_breaks_charge(to.0, to.1)
+        } else {
+            None
+        };
         if cavalry
             && (self.field.breaks_charge(from, to)
                 || self.field.in_village(to.0, to.1)
-                || water.is_some())
+                || water.is_some()
+                || decor.is_some())
         {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
@@ -1939,6 +1970,8 @@ impl BattleSim {
                     "La charge des {} se brise dans le village.",
                     self.unit_label(i)
                 )
+            } else if let Some(place) = decor {
+                format!("La charge des {} se brise {place}.", self.unit_label(i))
             } else {
                 format!("La charge des {} se brise sur la haie.", self.unit_label(i))
             };
@@ -2136,11 +2169,15 @@ impl BattleSim {
         }
         if self.field.in_village(target.x, target.z) {
             kills *= crate::site::VILLAGE_COVER;
-        } else if self
-            .field
-            .hedge_between((shooter.x, shooter.z), (target.x, target.z))
-        {
-            kills *= crate::site::HEDGE_COVER;
+        } else {
+            // EP6: hamlets, churchyards, manors, orchards, vineyards, camps.
+            kills *= self.field.decor_cover(target.x, target.z);
+            if self
+                .field
+                .hedge_between((shooter.x, shooter.z), (target.x, target.z))
+            {
+                kills *= crate::site::HEDGE_COVER;
+            }
         }
         if let Some(factor) = target.pavise {
             kills *= factor;
@@ -2369,7 +2406,9 @@ impl BattleSim {
         let mut damage = attacker.fighting_soldiers() * f64::from(attacker.stats.melee) / 100.0
             * armor_factor(self.defense_points(defender))
             * MELEE_RATE
-            * DT;
+            * DT
+            // EP6: walls, hedges and houses of the decor shelter the defender.
+            / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
             let charge = f64::from(attacker.stats.charge.unwrap_or(20));
             let lance = if attacker.has(Ability::ChargeLance) {
@@ -2816,6 +2855,7 @@ impl BattleSim {
                 withdrew,
                 standards_taken: self.trophies_of(side),
                 standards_lost: self.trophies.iter().filter(|t| t.taken_by != side).count() as u32,
+                baggage_lost: self.camp_states[side.index()].looted,
             }
         };
         Some(BattleOutcome {

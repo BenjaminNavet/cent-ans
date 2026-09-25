@@ -757,6 +757,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         withdrew: false,
         standards_taken: Vec::new(),
         standards_lost: 0,
+        baggage_lost: false,
     };
     // A result sized for the lead army alone is refused...
     let short = BattleOutcome {

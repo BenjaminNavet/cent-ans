@@ -57,6 +57,7 @@ fn side(state: &CampaignState, army: &ArmyId, won: bool) -> SideResult {
         withdrew: false,
         standards_taken: Vec::new(),
         standards_lost: 0,
+        baggage_lost: false,
     }
 }
 
