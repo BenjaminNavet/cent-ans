@@ -230,6 +230,14 @@ pub enum HouseKind {
     Barn,
     /// Small stone church.
     Church,
+    /// EP6: stone house (Midi, mountains).
+    Stone,
+    /// EP6: post mill.
+    Windmill,
+    /// EP6: water mill (wheel on the front, towards the water).
+    Watermill,
+    /// EP6: manor or tower house.
+    Manor,
 }
 
 impl HouseKind {
@@ -239,6 +247,10 @@ impl HouseKind {
             HouseKind::Timbered => "timbered",
             HouseKind::Barn => "barn",
             HouseKind::Church => "church",
+            HouseKind::Stone => "stone",
+            HouseKind::Windmill => "windmill",
+            HouseKind::Watermill => "watermill",
+            HouseKind::Manor => "manor",
         }
     }
 }
