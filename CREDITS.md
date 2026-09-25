@@ -3,6 +3,10 @@
 Ce fichier recense les œuvres de tiers utilisées par le jeu et leurs licences. Les assets
 produits par les outils du projet (`tools/`) sont signalés comme tels.
 
+Licences du projet : code sous GNU GPL v3.0 ([`LICENSE`](LICENSE)), assets et données originaux sous
+CC BY-SA 4.0 ([`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)). Les œuvres de tiers ci-dessous gardent
+leur licence propre.
+
 ## Icônes — game-icons.net (CC BY 3.0)
 
 Icônes de [game-icons.net](https://game-icons.net) (dépôt
@@ -35,6 +39,51 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Village Consort » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Crusade » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Heroic Age » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Celtic Impulse » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Achaidh Cheide » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Crossing the Chasm » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Angevin B » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Procession of the King » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Master of the Feast » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Minstrel Guild » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Moonlight Hall » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Teller of the Tales » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Suonatore di Liuto » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Galway » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Thatched Villagers » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « The Britons » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Folk Round » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Canon in D Major » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Prelude in C - BWV 846 » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+
+### Musique baroque — domaine public / CC0
+
+- Vivaldi, *Les Quatre Saisons* (extraits) — The Modena Chamber Orchestra (Musopen), Public Domain Mark.
+- Vivaldi, Concerto pour mandoline RV 425 — The Milan Baroque Soloists, Public Domain Mark.
+- Bach, Suite n° 2 BWV 1067, Badinerie — European Archive, CC0.
+  Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
 
 ### Polices — SIL Open Font License 1.1
 
@@ -115,6 +164,18 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   Kaplan et al. (2011), *The Holocene* 21(5), doi:10.1177/0959683610386983. Moyenne 1330-1349,
   combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
   `data/map/wetlands.json` (sources par entrée).
+- **Routes** (`data/map/roads.geojson`) : Itiner-e, *A High-Resolution Dataset of Roads of the
+  Roman Empire* (de Soto, Pažout, Brughmans et al.), Zenodo doi:10.5281/zenodo.17122148, licence
+  CC BY 4.0 ; citation : *de Soto P., Pažout A., Brughmans T. et al. (2025). Itiner-e: A
+  high-resolution dataset of roads of the Roman Empire. Scientific Data.
+  doi:10.1038/s41597-025-06140-z*. Complété par des tronçons calculés par le projet.
+- **Hameaux** (`data/map/hamlets.json`) : [GeoNames](https://www.geonames.org/) `cities500`,
+  © GeoNames, licence CC BY 4.0.
+- **Villes emblématiques** (`data/landmarks/`) : quelques dizaines de points de contrôle de position
+  par ville relevés à la main sur © les contributeurs
+  d'[OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL 1.0), arrondis. Les plans
+  anciens de Wikimedia Commons cités dans ces fichiers ont servi de référence et ne sont pas
+  redistribués.
 - Traitement (reprojection EPSG:3035, découpage des provinces) : outils `tools/cent_ans_tools/geo`
   (voir `docs/geo.md`).
 
