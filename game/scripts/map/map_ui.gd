@@ -105,6 +105,10 @@ var _province_panel_id: String = ""
 
 
 func _ready() -> void:
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le journal de campagne.
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", log_text)
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
 	# « Son… » (Q2) : ajouté par `FlowController`, ouvre l'onglet Son des réglages.
 	log_toggle.pressed.connect(_toggle_log)
@@ -481,6 +485,7 @@ func add_events(events: Array, date_text: String) -> void:
 		var text: String = journal_text(event)
 		if text == "":
 			continue
+		text = CodexText.format(text, true)  # BP1 : liens du Codex
 		var line: String
 		if kind == "battle" or kind == "siege" or kind == "province_taken":
 			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
