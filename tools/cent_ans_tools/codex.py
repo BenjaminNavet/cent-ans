@@ -8,6 +8,8 @@ Checks performed by `validate_codex`:
   pending list `data/codex/_*.md` (links recorded by the diet, medicine and event lots);
 - `see_also` ids resolve the same way;
 - aliases (and titles) are unique across entries, case-insensitively;
+- every `exclude_contexts` expression contains the title or an alias of its entry (B8);
+- `[[!text]]` escapes (plain text, never auto-linked) are not links and must not be empty;
 - `entity` points to an existing game entity file.
 """
 
@@ -21,6 +23,7 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 LINK_PATTERN = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
+ESCAPE_PREFIX = "!"
 TODO_ID_PATTERN = re.compile(r"`(cdx_[a-z0-9_]+)`")
 ENTITY_DIRECTORIES = {
     "chr": "characters",
@@ -75,8 +78,21 @@ def iter_strings(value: object, where: str) -> Iterator[tuple[str, str]]:
 
 
 def links_in(text: str) -> list[str]:
-    """Target ids of the `[[…]]` links of a text."""
-    return [match.strip() for match in LINK_PATTERN.findall(text)]
+    """Target ids of the `[[…]]` links of a text (escapes `[[!…]]` excluded)."""
+    return [
+        match.strip()
+        for match in LINK_PATTERN.findall(text)
+        if not match.startswith(ESCAPE_PREFIX)
+    ]
+
+
+def escapes_in(text: str) -> list[str]:
+    """Plain texts of the `[[!…]]` escapes of a text (never auto-linked in game)."""
+    return [
+        match.group(0)[3:-2]
+        for match in LINK_PATTERN.finditer(text)
+        if match.group(1).startswith(ESCAPE_PREFIX)
+    ]
 
 
 def load_todo_ids(codex_dir: Path) -> set[str]:
@@ -124,6 +140,7 @@ def validate_codex(data_dir: Path) -> CodexReport:
         )
 
     _check_aliases(report)
+    _check_exclude_contexts(report)
     for entry_id, entry in report.entries.items():
         for target in entry.get("see_also", []):
             if target not in known:
@@ -145,6 +162,9 @@ def validate_codex(data_dir: Path) -> CodexReport:
                 report.link_count += 1
                 if target not in known:
                     report.errors.append(f"{where}: unresolved link [[{target}]]")
+            for escaped in escapes_in(text):
+                if not escaped.strip():
+                    report.errors.append(f"{where}: empty escape [[!]]")
     return report
 
 
@@ -160,6 +180,24 @@ def _check_aliases(report: CodexReport) -> None:
             owner = owners.setdefault(form, entry_id)
             if owner != entry_id:
                 report.errors.append(f"alias {form!r} shared by {owner} and {entry_id}")
+
+
+def entry_forms(entry: dict) -> set[str]:
+    """Title and aliases of an entry, case-folded (the forms the auto-link recognises)."""
+    forms = {str(entry.get("title", "")).strip().casefold()}
+    forms |= {str(alias).strip().casefold() for alias in entry.get("aliases", [])}
+    return {form for form in forms if len(form) >= 2}
+
+
+def _check_exclude_contexts(report: CodexReport) -> None:
+    """Each excluded expression must contain the title or an alias of its entry."""
+    for entry_id, entry in report.entries.items():
+        forms = entry_forms(entry)
+        for context in entry.get("exclude_contexts", []):
+            if not any(form in str(context).casefold() for form in forms):
+                report.errors.append(
+                    f"{entry_id}.exclude_contexts: {context!r} contains no alias of the entry"
+                )
 
 
 def _entity_exists(data_dir: Path, entity: str) -> bool:
