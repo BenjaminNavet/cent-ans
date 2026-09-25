@@ -13,8 +13,8 @@ plus par camp (15 000 soldats) : le coût par étendard doit rester minime.
 ### Règles (cœur, `sim-battle/src/sim/standards.rs`)
 - Chaque régiment (hors engins et bélier) porte un étendard : `Unit::standard` =
   `Carried | Fallen {x, z, timer} | Captured {by} | Lost {x, z}`.
-- Chute : sous `heavy_losses_below` (60 %) de l'effectif complet, chaque pas où le régiment
-  perd des hommes, probabilité `fall_chance_per_loss_percent` (3 %) par point d'effectif perdu ;
+- Chute : sous `heavy_losses_below` (50 %) de l'effectif complet, chaque pas où le régiment
+  perd des hommes, probabilité `fall_chance_per_loss_percent` (1,5 %) par point d'effectif perdu ;
   débandade au contact : `rout_drop_chance` (35 %) ; le dernier homme tombe avec lui.
 - Tombé : −6 moral d'un coup, −0,5 par seconde, coups de mêlée ×0,85 (cohésion : plus de point
   de ralliement) ; régiments ennemis à 60 m : +4 moral. Après `raise_seconds` (5 s) : pris si un
@@ -54,7 +54,8 @@ Clips cuits dans les textures d'os existantes (ajoutés en fin, rien d'autre ne 
   débordement des mipmaps d'un atlas).
 - L'étoffe lit la matrice de `Prop` dans la texture d'os (même clip, même instant que la
   figurine) : elle suit la hampe quand le porteur marche, charge, brandit ou tombe. Elle flotte
-  dans le vent de la bataille et grandit au loin (×2,2 de 140 à 600 m, émission relevée) : les
+  dans le vent de la bataille et grandit au loin (×3 de 140 à 700 m, émission relevée ; rien
+  au-delà de 1 000 m) : les
   figurines lointaines restent des LOD2 (≈ 230 triangles), les imposteurs d'ADR 0024 ne portent
   pas de drapeau, les étendards restent lisibles jusqu'à ~600 m.
 - Genres (`data/fx/battle_standards.json`) : pennon (bachelier, archers, sergents), bannière
@@ -67,6 +68,15 @@ Clips cuits dans les textures d'os existantes (ajoutés en fin, rien d'autre ne 
   étoffe renversée et sans vent, par une figurine du vainqueur à côté de son porte-étendard.
 - Musiciens (données) à côté du porte-étendard ; sons par l'API de `BattleAudio.play_at`
   (« drum » en marche, « horn » à la charge, à la relève et à la prise).
+
+## Équilibre
+Premier réglage (60 %, 3 %) : l'IA battait moins sûrement une IA passive à forces égales
+(`tests/ai.rs`, graine 0 : le camp passif gagnait). Sonde `ep5_standards::full_battles_see_standards_fall`
+et balayage des réglages sur les graines 0-5 : 50 % et 1,5 % gardent les 12 duels IA / passif
+gagnés par l'IA ; la sonde (6 batailles IA contre IA de 2 × 6 régiments) compte 14 étendards
+tombés et 7 pris (premier réglage : 33 et 13), soit un régiment sur cinq. Les empreintes de `tests/b6.rs` (batailles sans site) sont recalculées (mêmes
+vainqueurs, pertes à quelques hommes près). Graines de `tests/ai.rs` inchangées ; fixture de
+calibration de l'auto-résolution inchangée (test vert).
 
 ## Conséquences
 - `battle_soldiers.gd` : deux fonctions (`figure_at`, `figure_count`) et le masquage des rangs
