@@ -1,7 +1,7 @@
 class_name BattleVoices
 extends Node
 
-## VO1 — répliques des régiments en bataille, à la Total War : sélection, ordre de marche,
+## VO1 — répliques des régiments en bataille : sélection, ordre de marche,
 ## ordre d'attaque (2D, bus « Voix »), charge, déroute, chute du général (3D, spatialisées par
 ## `BattleAudio.play_at` sur le bus « Voix »), victoire. Langue selon l'unité et sa faction
 ## (`VoiceLines.language_for` : français, anglais, anglo-normand pour la noblesse anglaise,

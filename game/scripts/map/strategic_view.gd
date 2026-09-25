@@ -1,8 +1,8 @@
 class_name StrategicView
 extends Node
 
-## Lot CM2 : vue stratégique « parchemin enluminé » au zoom maximal (Three Kingdoms,
-## Medieval II). Pilote le paramètre global de shader `campaign_parchment` (fondu selon la
+## Lot CM2 : vue stratégique « parchemin enluminé » au zoom
+## maximal. Pilote le paramètre global de shader `campaign_parchment` (fondu selon la
 ## distance caméra : terrain, mer, fleuves passent en carte dessinée, cf.
 ## `parchment_*.gdshaderinc`), la couche 2D (`ParchmentOverlay` : noms, vignettes, jetons,
 ## navires et monstres) et retire en fondu les couches 3D qui la doublent (étiquettes de
