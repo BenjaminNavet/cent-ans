@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Sources};
 use crate::entities::province::Province;
-use crate::ids::{BuildingId, FactionId, ProvinceId, SettlementId, UnitTypeId};
+use crate::ids::{BuildingId, FactionId, ProvinceId, SeaZoneId, SettlementId, UnitTypeId};
 
 /// Type of settlement; fixes allowed buildings and the siege model.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -69,6 +69,11 @@ pub struct Settlement {
     pub buildings: Vec<BuildingId>,
     #[serde(default)]
     pub port: bool,
+    /// Sea the port opens onto, when its province touches several (Calais
+    /// and Dover on the Channel, not the North Sea): the sea of a crossing
+    /// and of its interception (lot NV2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sea_zone: Option<SeaZoneId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -97,6 +102,7 @@ impl Settlement {
             fortification_level: province.fortification_level.unwrap_or(0),
             buildings: province.buildings.clone(),
             port: province.coastal && province.has_port(),
+            sea_zone: None,
             description: None,
             sources: Vec::new(),
         }

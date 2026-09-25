@@ -167,6 +167,11 @@
       ]
     }
   ],
+  "port_waters": {
+    "set_calais": "le pas de Calais",
+    "set_dover": "le pas de Calais",
+    "set_wissant": "le pas de Calais"
+  },
   "sea_names": {
     "sea_channel": "la Manche",
     "sea_north_sea": "la mer du Nord",

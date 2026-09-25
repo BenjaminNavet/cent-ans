@@ -31,6 +31,9 @@ pub const OPENING_GAP: f64 = 900.0;
 pub const MAX_PENDING_EVENTS: usize = 512;
 /// Seconds the battle goes on once decided, to let runaways get clear.
 pub const ESCAPE_GRACE: f64 = 90.0;
+/// Seconds the boarders of a taken chained ship need to cross over it onto
+/// the next ship of the chain (lot NV2).
+pub const CHAIN_CROSSING_S: f64 = 10.0;
 
 /// An order given to one ship.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -120,6 +123,14 @@ pub struct NavalSim {
     /// Sides driven by the AI.
     pub ai: [bool; 2],
     ai_clock: f64,
+    /// Time each side's AI called the general boarding (lot NV2).
+    pub assault: [Option<f64>; 2],
+    /// Since when most of each side's ships lie within
+    /// [`NavalRules::assault_range_m`] of the enemy.
+    pub(crate) assault_ready: [Option<f64>; 2],
+    /// Boarders crossing a taken chained ship: (boarder, next ship, time
+    /// they reach it).
+    crossings: Vec<(usize, u32, f64)>,
     finished: bool,
     winner: Option<SideId>,
     decided_at: Option<f64>,
@@ -226,6 +237,9 @@ impl NavalSim {
             rng,
             ai,
             ai_clock: 0.0,
+            assault: [None, None],
+            assault_ready: [None, None],
+            crossings: Vec::new(),
             finished: false,
             winner: None,
             decided_at: None,
@@ -418,7 +432,7 @@ impl NavalSim {
         self.check_end();
     }
 
-    fn push_event(&mut self, kind: NavalEventKind) {
+    pub(crate) fn push_event(&mut self, kind: NavalEventKind) {
         let event = NavalEvent {
             time: self.elapsed,
             kind,
@@ -701,6 +715,7 @@ impl NavalSim {
     fn grapples(&mut self, dt: f64) {
         let rules = self.rules().clone();
         let count = self.ships.len();
+        self.chain_crossings();
         for i in 0..count {
             let ShipOrder::Board { target } = self.ships[i].order else {
                 continue;
@@ -933,8 +948,9 @@ impl NavalSim {
                 let killed = self.ships[t].take_losses(volley.hits * jitter, rules.armor_vs_ranged);
                 if before > 0.0 {
                     let percent = killed / before * 100.0;
+                    let factor = combat::morale_factor(&self.ships[t], &rules);
                     let m = &mut self.ships[t].morale;
-                    *m = (*m - percent * rules.morale_per_loss_percent * 0.6).max(0.0);
+                    *m = (*m - percent * rules.morale_per_loss_percent * 0.6 * factor).max(0.0);
                 }
                 let was_burning = self.ships[t].fire > 0.0;
                 self.ships[t].fire = (self.ships[t].fire + volley.fire).min(1.0);
@@ -961,6 +977,7 @@ impl NavalSim {
                     } else {
                         ShotCover::None
                     },
+                    indirect: false,
                 };
                 if self.shots.len() >= MAX_PENDING_SHOTS {
                     self.shots.remove(0);
@@ -1178,9 +1195,11 @@ impl NavalSim {
         let side = self.ships[i].side;
         let flagship = self.ships[i].flagship;
         let amount = if flagship { amount * 2.5 } else { amount };
+        let rules = self.setup.rules.clone();
         for ship in &mut self.ships {
             if ship.side == side && ship.is_afloat() {
-                ship.morale = (ship.morale - amount).max(0.0);
+                let factor = combat::morale_factor(ship, &rules);
+                ship.morale = (ship.morale - amount * factor).max(0.0);
             }
         }
     }
@@ -1208,6 +1227,12 @@ impl NavalSim {
                 .max_by(|a, b| a.melee_power().total_cmp(&b.melee_power()))
                 .map(|o| o.side);
             if let Some(by) = captor {
+                let captors: Vec<usize> = self.ships[i]
+                    .grappled
+                    .iter()
+                    .map(|&g| g as usize)
+                    .filter(|&g| self.ships[g].side == by && self.ships[g].is_afloat())
+                    .collect();
                 let s = &mut self.ships[i];
                 for (k, crew) in s.crew.iter_mut().enumerate() {
                     s.prisoners[k] += crew.men;
@@ -1220,6 +1245,7 @@ impl NavalSim {
                 self.release(i);
                 self.shake(i, 8.0);
                 self.push_event(NavalEventKind::Capture { ship: i as u32, by });
+                self.chain_onward(i, &captors);
             } else if !self.ships[i].fleeing && self.ships[i].chain.is_none() {
                 self.ships[i].fleeing = true;
                 self.ships[i].order = ShipOrder::Disengage;
@@ -1240,6 +1266,90 @@ impl NavalSim {
                 self.shake(i, 8.0);
                 self.push_event(NavalEventKind::Capture { ship: i as u32, by });
             }
+        }
+    }
+
+    /// Boarding along the chains (l'Écluse): the boarders who took a
+    /// chained ship cross over it onto its chain neighbours, which are
+    /// lashed to it and cannot pull away. Each captor goes for the nearest
+    /// neighbour not yet taken on by [`NavalRules::boarders_per_target`]
+    /// ships.
+    fn chain_onward(&mut self, i: usize, captors: &[usize]) {
+        let Some(chain) = self.ships[i].chain else {
+            return;
+        };
+        let side = self.ships[i].side;
+        let reach = self.ships[i].class.beam_m * 2.5 + 4.0;
+        let capacity = self.rules().boarders_per_target.max(1) as usize;
+        for &c in captors {
+            if !self.ships[c].is_afloat() || self.ships[c].fleeing {
+                continue;
+            }
+            let next = self
+                .ships
+                .iter()
+                .filter(|n| {
+                    n.side == side
+                        && n.chain == Some(chain)
+                        && n.is_afloat()
+                        && n.distance_to(&self.ships[i]) <= reach
+                        && !n.grappled.contains(&self.ships[c].id)
+                        && n.grappled
+                            .iter()
+                            .filter(|&&g| self.ships[g as usize].side != side)
+                            .count()
+                            < capacity
+                })
+                .min_by(|a, b| {
+                    a.distance_to(&self.ships[c])
+                        .total_cmp(&b.distance_to(&self.ships[c]))
+                        .then(a.id.cmp(&b.id))
+                })
+                .map(|n| n.id);
+            let Some(next) = next else {
+                continue;
+            };
+            self.ships[c].order = ShipOrder::Board { target: next };
+            self.crossings
+                .push((c, next, self.elapsed + CHAIN_CROSSING_S));
+        }
+    }
+
+    /// The ship `i`'s boarders are crossing over to, if any.
+    pub(crate) fn crossing_of(&self, i: usize) -> Option<u32> {
+        self.crossings
+            .iter()
+            .find(|&&(c, _, _)| c == i)
+            .map(|&(_, next, _)| next)
+    }
+
+    /// Boarders who crossed a taken chained ship reach the next one.
+    fn chain_crossings(&mut self) {
+        if self.crossings.is_empty() {
+            return;
+        }
+        let now = self.elapsed;
+        let (due, later): (Vec<_>, Vec<_>) = std::mem::take(&mut self.crossings)
+            .into_iter()
+            .partition(|&(_, _, at)| at <= now);
+        self.crossings = later;
+        for (c, next, _) in due {
+            let n = next as usize;
+            let id = self.ships[c].id;
+            if !self.ships[c].is_afloat()
+                || self.ships[c].fleeing
+                || !self.ships[n].is_afloat()
+                || self.ships[c].grappled.contains(&next)
+                || self.ships[c].order != (ShipOrder::Board { target: next })
+            {
+                continue;
+            }
+            self.ships[c].grappled.push(next);
+            self.ships[n].grappled.push(id);
+            self.push_event(NavalEventKind::Board {
+                ship: id,
+                other: next,
+            });
         }
     }
 

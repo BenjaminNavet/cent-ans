@@ -190,8 +190,10 @@ impl NavalState {
     }
 }
 
-/// Sea crossed between two ports: a sea both provinces touch, else the
-/// first sea of the departure.
+/// Sea crossed between two ports: the sea the arrival port opens onto
+/// (`Settlement::sea_zone`: Calais, Dover on the Channel), else the
+/// departure port's if the arrival province touches it, else a sea both
+/// provinces touch, else the first sea of the departure.
 pub fn crossing_sea(
     state: &CampaignState,
     data: &GameData,
@@ -205,7 +207,14 @@ pub fn crossing_sea(
             .map(|p| p.sea_zones.clone())
             .unwrap_or_default()
     };
+    let port_sea = |s: &SettlementId| data.settlements.get(s).and_then(|s| s.sea_zone.clone());
     let (a, b) = (seas(from), seas(to));
+    if let Some(sea) = port_sea(to) {
+        return Some(sea);
+    }
+    if let Some(sea) = port_sea(from).filter(|s| b.contains(s)) {
+        return Some(sea);
+    }
     a.iter()
         .find(|s| b.contains(s))
         .or_else(|| a.first())
@@ -371,6 +380,107 @@ fn ship_name(data: &GameData, class: &ShipClassId, n: usize) -> String {
     format!("{display} n°{}", n + 1)
 }
 
+/// Hands out the historical names of a fleet (`data/naval/ship_names.json`,
+/// lot NV2): the names of its home ports first, in order, then the
+/// faction's names from an offset drawn from the battle's seed, then the
+/// names of its other ports; « Nef n°3 » once they run out. No name is
+/// given twice.
+pub struct ShipNamer {
+    names: Vec<String>,
+    next: usize,
+}
+
+impl ShipNamer {
+    pub fn new(data: &GameData, faction: &FactionId, ports: &[SettlementId], seed: u64) -> Self {
+        let mut names: Vec<String> = Vec::new();
+        if let Some(list) = data.naval.ship_names.of(faction) {
+            for port in ports {
+                for name in list.ports.get(port).into_iter().flatten() {
+                    if !names.contains(name) {
+                        names.push(name.clone());
+                    }
+                }
+            }
+            let general = &list.names;
+            if !general.is_empty() {
+                let offset = (seed % general.len() as u64) as usize;
+                for k in 0..general.len() {
+                    let name = &general[(offset + k) % general.len()];
+                    if !names.contains(name) {
+                        names.push(name.clone());
+                    }
+                }
+            }
+            // A large fleet: ships requisitioned from the faction's other ports.
+            for name in list.ports.values().flatten() {
+                if !names.contains(name) {
+                    names.push(name.clone());
+                }
+            }
+        }
+        ShipNamer { names, next: 0 }
+    }
+
+    /// Name of the `n`-th ship (class `class`) of the fleet.
+    pub fn name(&mut self, data: &GameData, class: &ShipClassId, n: usize) -> String {
+        match self.names.get(self.next) {
+            Some(name) => {
+                self.next += 1;
+                name.clone()
+            }
+            None => ship_name(data, class, n),
+        }
+    }
+}
+
+/// Home ports of an intercepting squadron: the faction's ports (with names
+/// in `ship_names.json`) on the sea of the fight, in file order.
+fn squadron_ports(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    sea: &SeaZoneId,
+) -> Vec<SettlementId> {
+    let Some(list) = data.naval.ship_names.of(faction) else {
+        return Vec::new();
+    };
+    list.ports
+        .keys()
+        .filter(|port| {
+            let on_sea = data
+                .settlements
+                .get(*port)
+                .and_then(|s| s.sea_zone.as_ref())
+                .map(|s| s == sea)
+                .or_else(|| {
+                    state
+                        .settlement_province(port)
+                        .and_then(|p| data.provinces.get(p))
+                        .map(|p| p.sea_zones.contains(sea))
+                })
+                .unwrap_or(false);
+            on_sea
+                && state
+                    .settlements
+                    .get(*port)
+                    .is_some_and(|s| &s.controller == faction)
+        })
+        .cloned()
+        .collect()
+}
+
+/// Waters of a crossing: the named waters of its ports (« le pas de
+/// Calais »), else the sea's name.
+fn waters_name(data: &GameData, request: &NavalRequest) -> String {
+    let fleets = &data.naval.fleets;
+    fleets
+        .port_waters
+        .get(&request.to)
+        .or_else(|| fleets.port_waters.get(&request.from))
+        .cloned()
+        .unwrap_or_else(|| data.naval.sea_name(&request.sea))
+}
+
 /// The battle of a request: the interceptor's squadron with its marines
 /// (attacker) against the crossing army in its transports (defender).
 pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalRequest) -> NavalSetup {
@@ -391,6 +501,8 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
     ];
     let mut ships = Vec::new();
     let mut n = 0;
+    let ports = squadron_ports(state, data, &request.interceptor, &request.sea);
+    let mut namer = ShipNamer::new(data, &request.interceptor, &ports, request.seed);
     for (class_id, &count) in &request.squadron {
         let Some(class) = data.naval.ship(class_id.as_str()) else {
             continue;
@@ -413,7 +525,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
                 }
             }
             ships.push(ShipSetup {
-                name: ship_name(data, class_id, n),
+                name: namer.name(data, class_id, n),
                 class: class.clone(),
                 crew,
                 fireship: false,
@@ -454,7 +566,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         ships,
         hold: false,
     };
-    let defender = transport_side(state, data, &request.army);
+    let defender = transport_side(state, data, &request.army, &request.from, request.seed);
     let player = &state.player_faction;
     let player_side = if &request.interceptor == player {
         Some(SideId::Attacker)
@@ -469,7 +581,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
     };
     NavalSetup {
         sea_zone: request.sea.to_string(),
-        place_name: data.naval.sea_name(&request.sea),
+        place_name: waters_name(data, request),
         season: battle_season(state.season),
         rain: state.season == Season::Autumn || state.season == Season::Winter,
         wind_to_deg: None,
@@ -485,7 +597,13 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
 
 /// The crossing army aboard its transports: warships of its faction's pool
 /// first (nefs, cogs, barges, galleys), hired cogs for the rest.
-fn transport_side(state: &CampaignState, data: &GameData, army_id: &ArmyId) -> NavalSideSetup {
+fn transport_side(
+    state: &CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    port: &SettlementId,
+    seed: u64,
+) -> NavalSideSetup {
     let Some(army) = state.armies.get(army_id) else {
         return NavalSideSetup {
             faction: String::new(),
@@ -531,6 +649,7 @@ fn transport_side(state: &CampaignState, data: &GameData, army_id: &ArmyId) -> N
     }
     let mut ships = Vec::new();
     let mut unit = 0;
+    let mut namer = ShipNamer::new(data, &army.faction, std::slice::from_ref(port), seed);
     for (n, class_id) in classes.iter().enumerate() {
         let Some(class) = data.naval.ship(class_id.as_str()) else {
             continue;
@@ -548,7 +667,7 @@ fn transport_side(state: &CampaignState, data: &GameData, army_id: &ArmyId) -> N
             room -= take;
         }
         ships.push(ShipSetup {
-            name: ship_name(data, class_id, n),
+            name: namer.name(data, class_id, n),
             class: class.clone(),
             crew,
             fireship: false,

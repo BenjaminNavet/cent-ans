@@ -69,6 +69,7 @@
 use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCategory};
 
 use crate::command::Command;
+use crate::position::{military_crest, score_position, Front};
 use crate::relief_ai::ReliefMap;
 use crate::setup::SideId;
 use crate::siege::SiegeWorks;
@@ -82,6 +83,9 @@ pub const CHARGE_DISTANCE: f64 = 60.0;
 pub const COUNTER_CHARGE_DISTANCE: f64 = 45.0;
 /// Shooters fall back when enemy melee troops come this close.
 pub const SHOOTER_SAFETY: f64 = 70.0;
+/// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
+/// foot comes this close.
+pub const COVER_SAFETY: f64 = 20.0;
 /// Enemy shooters farther than this from their own melee troops are
 /// "isolated" (a cavalry target).
 pub const ISOLATION_DISTANCE: f64 = 80.0;
@@ -496,17 +500,36 @@ fn roles(view: &View) -> Roles {
     }
 }
 
-/// Best high ground within reach of the own deployment (defensive posture).
+/// R4: the ground a defensive side takes: the best of its deployment spot,
+/// the heights around it (R2b) and the covers of the site (B6), all scored
+/// by [`score_position`] (height, glacis, reverse slope, cover, flanks): a
+/// hedge on a crest beats a bare crest and a hedge in a hollow. Returns the
+/// front the shooters hold (a crest, or the line behind a cover) and the
+/// cover when it is one.
 ///
 /// R2b: the relief is read, not only the height: a true crest (ground above
 /// its surroundings) and a glacis in front (ground the enemy must climb)
 /// are worth more than a gentle tilt, and a scarp too steep to stand on in
 /// order is avoided.
-fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
+fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
     let field = view.sim.field();
     let map = view.sim.relief_map();
+    let around = deployment_center(view.side);
     let base = field.height(around.0, around.1);
-    let mut best = (around, 0.0);
+    let width = front_width(view, roles);
+    let reverse = view.able_enemies().any(|j| is_shooter(&view.units[j]));
+    let score = |center: (f64, f64)| {
+        let front = Front {
+            center,
+            forward: view.forward,
+            width,
+        };
+        score_position(field, map, front, base, reverse)
+    };
+    // R4: a position the enemy would reach first (or hardly later) is no
+    // position: the line would be caught marching up to it.
+    let first = race(view, roles);
+    let mut best = (around, None, score(around).ground() + GROUND_MARGIN);
     for ix in -8..=8 {
         for iz in -4..=4 {
             let x = around.0 + f64::from(ix) * 25.0;
@@ -518,22 +541,107 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
             if (z - around.1) * view.forward > 30.0 {
                 continue;
             }
-            let h = field.height(x, z);
-            let glacis = (h - field.height(x, z + view.forward * GLACIS_DEPTH)).clamp(0.0, 15.0);
-            let scarp = (ReliefMap::slope(field, x, z) - STAND_SLOPE).max(0.0) * 60.0;
-            let gain = h - base + 0.5 * map.prominence(x, z).max(0.0) + 0.3 * glacis
-                - scarp
-                - (x - around.0).abs() * 0.01;
-            if gain > best.1 + 0.5 && !field.in_forest(x, z) && !field.in_mud(x, z) {
-                best = ((x, z), gain);
+            // R4: the shooters of a bare crest stand on its military crest:
+            // its field of fire is theirs.
+            let mut part = score((x, z));
+            let front = Front {
+                center: (x, z),
+                forward: view.forward,
+                width,
+            };
+            part.fire = crate::position::fire_points(
+                field,
+                Front {
+                    center: military_crest(field, front),
+                    ..front
+                },
+            );
+            let value = part.ground() - (x - around.0).abs() * 0.01;
+            if value > best.2 + 0.5
+                && !field.in_forest(x, z)
+                && !field.in_mud(x, z)
+                && first((x, z))
+            {
+                best = ((x, z), None, value);
             }
         }
     }
-    if best.1 > 2.0 {
-        best.0
-    } else {
-        around
+    for (cover, _) in cover_candidates(field, view.side) {
+        let (x, z) = cover.center;
+        let value = score(cover.center).total()
+            - COVER_LATERAL_COST * (x - around.0).abs()
+            - COVER_DEPTH_COST * (z - around.1).abs();
+        if value > best.2 && first(cover.center) {
+            best = (cover.center, Some(cover), value);
+        }
     }
+    (best.0, best.1)
+}
+
+/// R4: the own line must reach a position in less than this share of the
+/// time the nearest enemy needs to get there.
+const RACE_MARGIN: f64 = 0.6;
+
+/// R4: can the regiments that hold the front (the shooters, else the line;
+/// at the pace of the slowest, uphill slowed as in the simulation) reach a
+/// spot from their deployment line well before the enemy's battle line (its
+/// foot, at the pace of the slowest; the AI's horse waits for its line)
+/// from its own? Both measured from the deployment lines, so that the
+/// choice holds all battle long instead of flipping as the enemy nears.
+fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
+    let field = view.sim.field();
+    let walkers: &[usize] = if roles.shooters.is_empty() {
+        &roles.line
+    } else {
+        &roles.shooters
+    };
+    let from = deployment_center(view.side);
+    let enemy_from = deployment_center(view.side.other());
+    let own_speed = walkers
+        .iter()
+        .map(|&i| f64::from(view.units[i].stats.speed))
+        .fold(f64::INFINITY, f64::min);
+    let enemy_foot = view
+        .able_enemies()
+        .filter(|&j| !view.units[j].mounted)
+        .map(|j| f64::from(view.units[j].stats.speed))
+        .fold(f64::INFINITY, f64::min);
+    let enemy_speed = if enemy_foot.is_finite() {
+        enemy_foot
+    } else {
+        view.able_enemies()
+            .map(|j| f64::from(view.units[j].stats.speed))
+            .fold(1.0, f64::max)
+    }
+    .max(1.0);
+    move |spot: (f64, f64)| {
+        if !own_speed.is_finite() || own_speed <= 0.0 {
+            return true;
+        }
+        let ours = ReliefMap::march_cost(field, from, spot) / own_speed;
+        let theirs = (enemy_from.0 - spot.0).hypot(enemy_from.1 - spot.1) / enemy_speed;
+        ours < RACE_MARGIN * theirs
+    }
+}
+
+/// R4: a spot of the heights must beat the deployment spot by this much.
+const GROUND_MARGIN: f64 = 2.0;
+/// R4: a cover away from the deployment line costs this much per metre
+/// aside and in depth (B6's distance penalty, in points of height).
+const COVER_LATERAL_COST: f64 = 0.03;
+const COVER_DEPTH_COST: f64 = 0.035;
+
+/// Width of the line of a side (the front whose flanks and cover count).
+fn front_width(view: &View, roles: &Roles) -> f64 {
+    let list = if roles.line.is_empty() {
+        &view.own
+    } else {
+        &roles.line
+    };
+    list.iter()
+        .map(|&i| view.units[i].extent().0 + 10.0)
+        .sum::<f64>()
+        .max(40.0)
 }
 
 /// R2b: centre of the deployment line of `side`, from which a defensive
@@ -547,40 +655,26 @@ fn deployment_center(side: SideId) -> (f64, f64) {
     }
 }
 
-/// R2b: depth of the glacis read in front of a defensive position.
-const GLACIS_DEPTH: f64 = 100.0;
-/// R2b: a line stands in order on slopes up to this grade.
-const STAND_SLOPE: f64 = 0.15;
-/// R2b: the line stands at most this far behind the crest its shooters
-/// hold (reverse slope).
-const REVERSE_REACH: f64 = 30.0;
-
 /// R2b: the line of a defensive side on a crest steps back onto the reverse
-/// slope, out of sight, when the enemy shooters need to see their target
-/// (crossbows; longbow volleys drop behind the crest anyway) and its own
-/// shooters hold the crest in front of it.
+/// slope, out of sight, when the enemy has shooters and its own shooters
+/// hold the crest in front of it. R4: longbows too, since a volley at a
+/// target out of sight must be directed by a friend who sees it and
+/// scatters (ADR 0046).
 fn reverse_slope_anchor(view: &View, crest: (f64, f64), shooters: bool) -> (f64, f64) {
+    let front = Front {
+        center: crest,
+        forward: view.forward,
+        width: 0.0,
+    };
     if !shooters {
+        // R4: a line without shooters sees its glacis from the military
+        // crest.
+        return military_crest(view.sim.field(), front);
+    }
+    if !view.able_enemies().any(|j| is_shooter(&view.units[j])) {
         return crest;
     }
-    let (aimed, volley) = view
-        .able_enemies()
-        .filter(|&j| is_shooter(&view.units[j]))
-        .fold((0.0, 0.0), |(a, v), j| {
-            let p = unit_power(&view.units[j]);
-            if view.units[j].has(Ability::Volley) {
-                (a, v + p)
-            } else {
-                (a + p, v)
-            }
-        });
-    if aimed <= volley {
-        return crest;
-    }
-    let field = view.sim.field();
-    ReliefMap::reverse_slope(field, crest, view.forward, 150.0, REVERSE_REACH)
-        .filter(|&(x, z)| !field.in_forest(x, z) && !field.in_mud(x, z))
-        .unwrap_or(crest)
+    crate::position::reverse_slope(view.sim.field(), front).unwrap_or(crest)
 }
 
 /// B6: a defensive side looks for cover this far on either side of the
@@ -593,6 +687,9 @@ pub const COVER_BEHIND: f64 = 90.0;
 /// Shooters stand this far behind a hedge, a fence or a ditch (well within
 /// [`crate::site::HEDGE_COVER_REACH`]).
 pub const COVER_SETBACK: f64 = 7.0;
+/// R4: setbacks tried in turn behind a hedge on a crest (the last one still
+/// clear of the obstacle's [`OBSTACLE_REACH`]).
+const COVER_SETBACKS: [f64; 3] = [COVER_SETBACK, 5.5, 4.5];
 /// Shooters stand this far inside the edge of a village.
 pub const VILLAGE_SETBACK: f64 = 16.0;
 /// Shooters stand this far in front of the line (the usual defensive order).
@@ -634,8 +731,22 @@ impl Cover {
 /// Best cover for `side` within reach of its deployment line, if any
 /// (deterministic: obstacles in index order, strict improvements only).
 pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Option<Cover> {
+    let mut best: Option<(Cover, f64)> = None;
+    for (cover, score) in cover_candidates(field, side) {
+        if best.is_none_or(|(_, s)| score > s) {
+            best = Some((cover, score));
+        }
+    }
+    best.map(|(cover, _)| cover)
+}
+
+/// B6 score a cover must reach to be considered at all.
+const COVER_THRESHOLD: f64 = 15.0;
+
+/// Every cover `side` may lean on within reach of its deployment line, with
+/// its B6 score (weight x length minus distance; the village edge last).
+fn cover_candidates(field: &crate::field::Battlefield, side: SideId) -> Vec<(Cover, f64)> {
     use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
-    use crate::site::ObstacleKind;
     let (line_z, forward) = match side {
         SideId::Attacker => (ATTACKER_LINE_Z, 1.0),
         SideId::Defender => (DEFENDER_LINE_Z, -1.0),
@@ -653,7 +764,7 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
     };
     let penalty =
         |x: f64, z: f64| 0.25 * (x - reference.0).abs() + 0.3 * ((z - reference.1) * forward).abs();
-    let mut best: Option<(Cover, f64)> = None;
+    let mut found: Vec<(Cover, f64)> = Vec::new();
     for obstacle in &field.obstacles {
         let len = obstacle.length();
         if len < 30.0 {
@@ -672,16 +783,32 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
         } else {
             along
         };
-        let weight = match obstacle.kind {
-            ObstacleKind::Hedge => 1.0,
-            ObstacleKind::Ditch => 0.8,
-            ObstacleKind::Fence => 0.45,
-        };
+        let weight = crate::position::obstacle_weight(obstacle.kind);
         let mid = (
             (obstacle.a.0 + obstacle.b.0) * 0.5,
             (obstacle.a.1 + obstacle.b.1) * 0.5,
         );
-        let center = (mid.0, mid.1 - forward * COVER_SETBACK);
+        // R4: on a crest, the shooters stand closer to the hedge when the
+        // ground just behind it would hide the glacis from them.
+        // (Ground seen in front of the hedge, from right below it to bowshot.)
+        let seen = |back: f64| {
+            let spot = (mid.0, mid.1 - forward * back);
+            [10.0, 20.0, 40.0, 70.0, 100.0, 150.0]
+                .iter()
+                .filter(|&&d| {
+                    crate::relief_ai::ReliefMap::sees(field, spot, (mid.0, mid.1 + forward * d))
+                })
+                .count()
+        };
+        let mut setback = COVER_SETBACK;
+        let mut most = seen(COVER_SETBACK);
+        for back in COVER_SETBACKS {
+            let n = seen(back);
+            if n > most {
+                (setback, most) = (back, n);
+            }
+        }
+        let center = (mid.0, mid.1 - forward * setback);
         if !within(mid.0, mid.1) || !standable(center.0, center.1) {
             continue;
         }
@@ -694,8 +821,8 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
             continue;
         }
         let score = weight * len.min(120.0) - penalty(mid.0, mid.1);
-        if best.is_none_or(|(_, s)| score > s) {
-            best = Some((
+        if score > COVER_THRESHOLD {
+            found.push((
                 Cover {
                     kind: CoverKind::Obstacle(obstacle.kind),
                     center,
@@ -716,8 +843,8 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
         if within(edge.0, edge.1) && standable(edge.0, edge.1) {
             let width = (zone.radius * 1.4).max(30.0);
             let score = width.min(120.0) - penalty(edge.0, edge.1);
-            if best.is_none_or(|(_, s)| score > s) {
-                best = Some((
+            if score > COVER_THRESHOLD {
+                found.push((
                     Cover {
                         kind: CoverKind::Village,
                         center: edge,
@@ -730,8 +857,7 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
             }
         }
     }
-    best.filter(|&(_, score)| score > 15.0)
-        .map(|(cover, _)| cover)
+    found
 }
 
 /// Slots of the shooters along the cover front, in lateral order (B6).
@@ -878,9 +1004,41 @@ fn plan_field(view: &mut View) {
     // ground to meet it (unless much stronger).
     let holds_heights =
         view.side == SideId::Defender && ratio < HOLD_RATIO && height_edge(view) > HOLD_HEIGHT;
+    // R4: an attacker clearly above an enemy made mostly of shooters waits
+    // on its heights for a while rather than walking down into the arrows
+    // (then attacks: no frozen battle).
+    let attacker_holds = view.side == SideId::Attacker
+        && ratio < HOLD_RATIO
+        && elapsed < ATTACKER_HOLD_TIME
+        && enemy_shooter_share(view) > SHOOTER_ARMY
+        && side_losses(view.units, view.side)
+            <= side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN
+        && height_edge(view) > HOLD_HEIGHT;
+    // R4: an evenly matched defender whose enemy is marching on it waits
+    // for it on its ground (behind its hedge, on its crest) rather than
+    // leaving it as soon as its archers have thinned the enemy ranks.
+    // An army made mostly of shooters needs the enemy to come to it
+    // (Crécy, Agincourt): its strength counts only while it holds.
+    let receives = view.side == SideId::Defender
+        && (ratio < HOLD_RATIO
+            || roles
+                .shooters
+                .iter()
+                .map(|&i| unit_power(&view.units[i]))
+                .sum::<f64>()
+                > SHOOTER_ARMY * own_power)
+        && enemy_melee.iter().any(|&j| {
+            let e = &view.units[j];
+            matches!(e.state, UnitState::Marching | UnitState::Charging)
+                && front_ref
+                    .iter()
+                    .any(|&i| dist(&view.units[i], e) < RECEIVE_DISTANCE)
+        });
     let defensive = match view.side {
-        SideId::Defender => (ratio < 0.85 || holds_heights) && elapsed < DEFENDER_PATIENCE,
-        SideId::Attacker => ratio < 0.8 && elapsed < ATTACKER_WAIT,
+        SideId::Defender => {
+            (ratio < 0.85 || holds_heights || receives) && elapsed < DEFENDER_PATIENCE
+        }
+        SideId::Attacker => (ratio < 0.8 && elapsed < ATTACKER_WAIT) || attacker_holds,
     };
     let shooters_have_ammo = roles
         .shooters
@@ -935,14 +1093,15 @@ fn plan_field(view: &mut View) {
         && !melee
         && elapsed < ATTACKER_PATIENCE
         && contact < ASSAULT_RANGE;
-    // B6: a defensive side leans on a hedge, a ditch or a village when
-    // there is one within reach (shooters just behind it, the line behind
-    // them), otherwise on the high ground.
-    let cover = if defensive {
-        defensive_cover(view.sim.field(), view.side)
+    // B6/R4: a defensive side takes the best ground within reach, cover
+    // and relief scored together: behind a hedge, a ditch or in a village
+    // (shooters just behind it, the line behind them), or on a crest.
+    let ground = if defensive && !attacker_holds {
+        Some(defensive_ground(view, &roles))
     } else {
         None
     };
+    let cover = ground.and_then(|(_, c)| c);
     // Where the line stands this step.
     let anchor = if let Some(c) = cover {
         let back = if roles.shooters.is_empty() {
@@ -951,9 +1110,11 @@ fn plan_field(view: &mut View) {
             SHOOTERS_AHEAD
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
-    } else if defensive {
-        let crest = high_ground(view, deployment_center(view.side));
+    } else if let Some((crest, _)) = ground {
         reverse_slope_anchor(view, crest, !roles.shooters.is_empty())
+    } else if attacker_holds {
+        // R4: an attacker above an enemy of shooters waits on its heights.
+        line_center
     } else if duel && contact < 260.0 {
         line_center
     } else {
@@ -979,6 +1140,12 @@ fn plan_field(view: &mut View) {
                 view.attack(i, j, run);
             }
             Some((j, d)) if d < COUNTER_CHARGE_DISTANCE => view.attack(i, j, true),
+            // R4: a defensive line comes to the help of its shooters caught
+            // in a melee in front of it (the men-at-arms beside the archers).
+            _ if defensive && rescue(view, i, &roles.shooters).is_some() => {
+                let j = rescue(view, i, &roles.shooters).expect("checked");
+                view.attack(i, j, true);
+            }
             _ => {
                 // R2b: an advancing line under arrows closes at the run
                 // rather than walking up to the enemy shooters.
@@ -1002,7 +1169,17 @@ fn plan_field(view: &mut View) {
             .find(|s| s.0 == i)
             .map(|&(_, x, z)| (x, z))
             .zip(cover);
-        plan_shooter(view, i, anchor, line_center.1, facing, defensive, slot);
+        let crest = ground.filter(|(_, c)| c.is_none()).map(|(p, _)| p);
+        plan_shooter(
+            view,
+            i,
+            anchor,
+            line_center.1,
+            facing,
+            defensive,
+            slot,
+            crest,
+        );
     }
 
     // Reserve.
@@ -1042,6 +1219,52 @@ fn plan_field(view: &mut View) {
 pub const HOLD_HEIGHT: f64 = 6.0;
 /// ... unless it is this much stronger.
 pub const HOLD_RATIO: f64 = 1.25;
+
+/// R4: a defensive line regiment helps its shooters in a melee this close.
+pub const RESCUE_DISTANCE: f64 = 90.0;
+
+/// R4: the nearest enemy in a melee with one of `shooters`, within
+/// [`RESCUE_DISTANCE`] of line regiment `i`.
+fn rescue(view: &View, i: usize, shooters: &[usize]) -> Option<usize> {
+    let u = &view.units[i];
+    view.able_enemies()
+        .filter(|&j| view.units[j].state == UnitState::Melee)
+        .filter(|&j| {
+            shooters.iter().any(|&s| {
+                view.units[s].state == UnitState::Melee
+                    && dist(&view.units[s], &view.units[j]) < 30.0
+            })
+        })
+        .map(|j| (j, dist(u, &view.units[j])))
+        .filter(|&(_, d)| d < RESCUE_DISTANCE)
+        .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
+        .map(|(j, _)| j)
+}
+
+/// R4: shooters run to the military crest when the enemy is this close.
+pub const POST_RUN: f64 = 400.0;
+/// R4: a defender receives an enemy marching on it from this close.
+pub const RECEIVE_DISTANCE: f64 = 250.0;
+/// R4: an attacker above an enemy of shooters waits at most this long.
+pub const ATTACKER_HOLD_TIME: f64 = 150.0;
+/// R4: ... when shooters make more than this share of the enemy's power.
+pub const SHOOTER_ARMY: f64 = 0.5;
+
+/// Share of the able enemy's power in its shooters.
+fn enemy_shooter_share(view: &View) -> f64 {
+    let (shooters, all) = view
+        .able_enemies()
+        .filter(|&j| !view.units[j].synthetic)
+        .fold((0.0, 0.0), |(s, a), j| {
+            let p = unit_power(&view.units[j]);
+            (s + if is_shooter(&view.units[j]) { p } else { 0.0 }, a + p)
+        });
+    if all > 0.0 {
+        shooters / all
+    } else {
+        0.0
+    }
+}
 
 /// R2b: mean ground under the own regiments minus that under the enemy's.
 fn height_edge(view: &View) -> f64 {
@@ -1147,20 +1370,41 @@ fn steep_charge(view: &View, i: usize, j: usize) -> bool {
 }
 
 /// Enemy regiment opposite `i` (smallest lateral offset, a bit of depth).
+/// R4: the strength of the ground each one holds counts too, so that the
+/// line strikes the weak point (the open ground rather than the hedge or
+/// the crest).
 fn opposite(view: &View, i: usize) -> Option<usize> {
     let u = &view.units[i];
+    let field = view.sim.field();
+    let map = view.sim.relief_map();
+    let base = field.height(u.x, u.z);
     view.able_enemies()
         .filter(|&j| !is_horse(&view.units[j]) || view.units[j].state == UnitState::Melee)
         .filter(|&j| view.reachable(i, j))
         .map(|j| {
             let e = &view.units[j];
-            (j, (e.x - u.x).abs() + 0.3 * (e.z - u.z).abs())
+            let front = Front {
+                center: (e.x, e.z),
+                forward: -view.forward,
+                width: e.extent().0,
+            };
+            let strength = score_position(field, map, front, base, false).total();
+            (
+                j,
+                (e.x - u.x).abs() + 0.3 * (e.z - u.z).abs() + WEAK_POINT * strength.max(0.0),
+            )
         })
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
         .map(|(j, _)| j)
 }
 
-/// `cover`: the slot of the shooter behind the site's cover (B6).
+/// R4: metres of lateral offset a line regiment accepts to strike an enemy
+/// holding one point less of ground ([`score_position`]).
+pub const WEAK_POINT: f64 = 1.5;
+
+/// `cover`: the slot of the shooter behind the site's cover (B6); `crest`:
+/// the bare crest the side holds (R4, military crest).
+#[allow(clippy::too_many_arguments)]
 fn plan_shooter(
     view: &mut View,
     i: usize,
@@ -1169,6 +1413,7 @@ fn plan_shooter(
     facing: f64,
     defensive: bool,
     cover: Option<((f64, f64), Cover)>,
+    crest: Option<(f64, f64)>,
 ) {
     let unit = &view.units[i];
     // B6: behind a hedge, a ditch or in a village, horsemen are no threat
@@ -1177,11 +1422,27 @@ fn plan_shooter(
         Some((_, c)) if c.breaks_charge => {
             view.nearest_enemy(i, |e| is_melee_troop(e) && !is_horse(e))
         }
+        // R4: on the military crest of a defensive position, behind
+        // planted stakes, horsemen in front are no threat either (their
+        // charge breaks on the stakes; Crécy, Agincourt): the archers hold
+        // the crest and keep shooting instead of falling back out of sight.
+        _ if defensive && crest.is_some() && unit.stakes_planted => view.nearest_enemy(i, |e| {
+            is_melee_troop(e) && (!is_horse(e) || attack_angle(unit, e.x, e.z) != 0)
+        }),
         _ => view.nearest_enemy(i, is_melee_troop),
     };
     // Engaged or about to be: fall back behind the line.
     if let Some((_, d)) = threat {
-        if d < SHOOTER_SAFETY || view.engaged(i) {
+        // R4: behind a hedge, a ditch or houses, the foot must cross them
+        // too: the shooters keep shooting until it is close.
+        // Behind their stakes on the military crest too: falling back would
+        // leave the glacis out of sight.
+        let safety = match cover {
+            Some((_, c)) if c.breaks_charge => COVER_SAFETY,
+            _ if defensive && crest.is_some() && unit.stakes_planted => COVER_SAFETY,
+            _ => SHOOTER_SAFETY,
+        };
+        if d < safety || view.engaged(i) {
             let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
             let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
@@ -1206,14 +1467,49 @@ fn plan_shooter(
         if let Some(((x, z), _)) = cover {
             // B6: reach the cover first (the threat above sends them back
             // when the enemy closes in).
-            if dist_to(unit, x, z) > 6.0 {
+            // R4: right up to the slot (6 m short, behind a hedge on a
+            // crest, would leave the glacis in dead ground).
+            if dist_to(unit, x, z) > 2.0 {
+                // R4: at the run when the enemy comes on.
                 view.move_to(i, x, z, false, Some(facing));
             } else {
                 view.halt(i);
             }
             return;
         }
-        if d <= range * 0.95 {
+        // R4: holding a crest, the shooters stand on its military crest
+        // (never behind the usual post in front of the line), where they see
+        // the glacis, rather than halting wherever a target first comes in
+        // range.
+        // A crest that sees its glacis needs none of this.
+        let post = crest.filter(|_| defensive).and_then(|(_, cz)| {
+            let front = Front {
+                center: (unit.x, cz),
+                forward: view.forward,
+                width: unit.extent().0,
+            };
+            let mc = military_crest(view.sim.field(), front).1;
+            (mc != cz).then_some(mc)
+        });
+        if let Some(mc) = post {
+            let z = if (mc - front_z) * view.forward > 0.0 {
+                mc
+            } else {
+                front_z
+            };
+            if (unit.z - z).abs() > 6.0 {
+                // At the run when the enemy comes on: the crest must be
+                // held before it arrives.
+                let run = d < POST_RUN;
+                view.move_to(i, unit.x, z, run, Some(facing));
+            } else {
+                view.halt(i);
+            }
+            return;
+        }
+        // R4: in range and able to shoot it (in sight, or lobbing at a
+        // target a friend sees).
+        if d <= range * 0.95 && view.sim.fire_mode(unit, e).is_some() {
             view.halt(i);
             return;
         }
@@ -1245,13 +1541,12 @@ const EXPOSURE_COST: f64 = 60.0;
 
 /// R2b: where shooter `i` should stand to shoot `j`, marching towards it no
 /// farther than `limit` (z): a spot within its range (height counted), from
-/// which it sees the target (unless it shoots volleys), preferably out of
+/// which it sees the target, preferably out of
 /// reach of the enemy shooters and higher than the target; `None` when no
 /// such spot lies ahead.
 fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option<(f64, f64)> {
     let field = view.sim.field();
     let (u, t) = (&view.units[i], &view.units[j]);
-    let volley = u.has(Ability::Volley);
     let weather = view.sim.weather().range_factor();
     let reach = f64::from(u.stats.range) * weather;
     let ht = field.height(t.x, t.z);
@@ -1291,7 +1586,9 @@ fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option<(f64, f64)
             if (t.x - c.0).hypot(t.z - c.1) > range * 0.93 {
                 continue;
             }
-            if !volley && !ReliefMap::sees(field, c, (t.x, t.z)) {
+            // R4: volleys too aim at what they see (a lob over a crest is a
+            // last resort, directed by a friend and scattered).
+            if !ReliefMap::sees(field, c, (t.x, t.z)) {
                 continue;
             }
             let exposed = foes
