@@ -66,8 +66,21 @@ func refresh() -> void:
 		return
 	button.visible = available()
 	var count := pending().size()
-	button.text = "Chronique (%d)" % count if count > 0 else "Chronique"
-	button.disabled = count == 0
+	# UX2 : plus jamais grisé (le bouton paraissait désactivé) ; l'infobulle dit pourquoi il
+	# est vide et quand il se remplira, un clic le rappelle aussi.
+	button.disabled = false
+	button.set_meta("count", count)
+	var tooltip := "[b]Chronique[/b]\n"
+	if count > 0:
+		tooltip += "%s %s votre décision : deux saisons pour choisir, sinon le conseil tranche." % [FrText.count(count, "événement"), "attend" if count == 1 else "attendent"]
+	else:
+		tooltip += "Aucun événement n'attend votre décision pour l'instant. Les grands événements, historiques (Crécy, la Peste noire…) ou aléatoires, arrivent en fin de saison : le bouton affichera alors leur nombre."
+	button.set_meta("tooltip", tooltip)
+	if map.ui.has_method("refresh_top_button") and button.has_meta("top_label"):
+		map.ui.refresh_top_button(button)
+	else:
+		button.text = "Chronique (%d)" % count if count > 0 else "Chronique"
+		button.tooltip_text = tooltip
 
 
 ## Après `end_turn` : ouvre la fenêtre si une décision attend ; Q2 : après la fermeture du

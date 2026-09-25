@@ -16,6 +16,21 @@
         "near_distance_m": {"type": "number", "minimum": 0}
       }
     },
+    "fronts": {
+      "description": "EP4 : émetteurs 3D par front de mêlée (paires de régiments au contact).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_emitters", "near_m", "mid_m", "engaged_full", "event_period_s", "beds"],
+      "properties": {
+        "description": {"type": "string"},
+        "max_emitters": {"type": "integer", "minimum": 1, "maximum": 32},
+        "near_m": {"type": "number", "exclusiveMinimum": 0},
+        "mid_m": {"type": "number", "exclusiveMinimum": 0},
+        "engaged_full": {"type": "number", "exclusiveMinimum": 0},
+        "event_period_s": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2},
+        "beds": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+      }
+    },
     "events": {
       "type": "object",
       "additionalProperties": {"$ref": "#/$defs/event"}
