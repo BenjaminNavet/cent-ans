@@ -1,0 +1,61 @@
+{
+  "description": "Ville assiégée dense et mobilier de rue solide (lot BR3, ADR 0047) : îlots de maisons de la ville générique (anneaux) et des villes emblématiques (treillis), rues, chemin de ronde, emprises des îlots et du mobilier (valeurs du manifeste game/assets/models/buildings/manifest.json), marché de la place, et repoussement des figurines hors des bâtiments. Embarqué dans sim-battle à la compilation.",
+  "block": {
+    "radius_m": 8.5,
+    "frontage_factor": 1.75,
+    "depth_factor": 1.85,
+    "clearance_m": 3.0
+  },
+  "generic": {
+    "rings_m": [50.0, 74.0, 102.0, 126.0],
+    "main_street_m": 11.0,
+    "alley_m": 3.5,
+    "square_street_m": 6.0,
+    "wall_walk_m": 12.0
+  },
+  "landmark": {
+    "spacing_m": 21.0,
+    "lane_m": 11.0,
+    "square_street_m": 6.0,
+    "wall_walk_m": 12.0,
+    "street_align_m": 40.0
+  },
+  "church": {
+    "length_m": 34.0,
+    "depth_m": 12.5,
+    "toward_back_m": 75.0
+  },
+  "suburb": {
+    "frontage_factor": 1.35,
+    "depth_factor": 0.8
+  },
+  "props": {
+    "footprints": {
+      "stall": { "length_m": 3.36, "depth_m": 1.84 },
+      "cart": { "length_m": 4.6, "depth_m": 1.65 },
+      "barrels": { "length_m": 2.54, "depth_m": 1.3 },
+      "woodpile": { "length_m": 3.42, "depth_m": 1.5 },
+      "well": { "length_m": 2.2, "depth_m": 2.2 }
+    },
+    "wall_gap_m": 0.4,
+    "block_row_chances": [0.35, 0.45, 0.2],
+    "square_kinds": ["stall", "stall", "barrels", "cart"],
+    "street_kinds": ["barrels", "barrels", "woodpile", "cart"],
+    "suburb_chance": 0.55,
+    "suburb_kinds": ["woodpile", "cart", "barrels"],
+    "village_chance": 0.5,
+    "village_kinds": ["woodpile", "woodpile", "cart", "barrels"],
+    "market": {
+      "ring_factor": 0.8,
+      "stall_spacing_m": 4.0,
+      "stalls_per_group": [2, 4],
+      "passage_m": 12.0,
+      "extra_chance": 0.7,
+      "extra_kinds": ["cart", "barrels"]
+    },
+    "path_margin_m": 1.0
+  },
+  "figures": {
+    "margin_m": 0.3
+  }
+}
