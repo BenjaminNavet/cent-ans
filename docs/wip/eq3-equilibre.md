@@ -2,7 +2,7 @@
 
 Branche : `worktree-agent-a65913a9ab64f3915` (main 9fe0550a : EQ1, EQ2, DF1, DP1).
 
-## État : réglage retenu (v3), checks finaux
+## État : terminé (à fusionner) ; main fusionné (70d4e17f) ; fmt, clippy, 694 tests, build.sh, import, smoke OK, pytest 522
 
 - [ ] Référence main : century_probe 5 × 464 (normal), balance_probe 8 × 200.
 - [ ] Guerre FR-EN : 3/5 graines dans 55-75 %, au moins 2 trêves par siècle.
@@ -55,5 +55,13 @@ Niveau difficile (`DIFFICULTY=hard century_probe`, nouveau réglage de la sonde)
 [47-63], 3/5 ; après (v3) **60 % [40-66], 4/5** (66/65/61/65/40) ; Écosse jamais détruite,
 5/5 majeures en 1400, banqueroutes 0,21.
 
+## Points ouverts
+- Graine 4 reste à 53 % (normal) et graine 5 à 40 % (difficile) : paix plus longues quand
+  l'Angleterre perd la Guyenne tôt ; piste : casus belli de reconquête plus fort pour le prétendant.
+- La France (« joueur » de la sonde) déclare souvent au XVe s. pour la Guyenne : guerres courtes
+  (1 saison) qui gonflent le nombre de phases.
+- Écosse : jamais détruite ni sur main ni après (0/5, normal et difficile) ; les chutes de 1405 et
+  1444 d'EQ2 ne se reproduisent plus. Banqueroutes écossaises 0,1-1,6 / déc. selon la graine.
+
 ## Prochaine étape
-Attendre la référence, puis analyser les phases de guerre FR-EN (VERBOSE=1).
+Fusion dans main par le coordinateur.
