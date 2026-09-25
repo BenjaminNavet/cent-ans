@@ -160,6 +160,9 @@ var _ep8_disabled: Dictionary = {}  # EP8 : `--no-<effet>`
 var _force_cinematic: bool = false  # EP8 : `--cinematic`
 var _birds_shot: bool = false  # EP8 : `--birds-shot`
 var _cinematic_shot: bool = false  # EP8 : `--cinematic-shot`
+var _dust_shot: bool = false  # EP8 : `--dust-shot` (charge de cavalerie et sa poussière)
+var _dust_unit: int = -1
+var _dust_since: float = -1.0
 var _title_text: String = ""
 var _weather_text: String = ""
 var _tod_key: String = ""
@@ -392,6 +395,12 @@ func _setup_staging(terrain_data: Dictionary) -> void:
 func _apply_staging_shot() -> void:
 	if staging == null:
 		return
+	if _dust_shot and _dust_unit >= 0:
+		for unit in units:
+			if int(unit["id"]) == _dust_unit:
+				var facing := float(unit["facing"])
+				# De trois quarts avant, un peu à l'écart de la trajectoire.
+				camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), 55.0, facing + 0.9)
 	if _birds_shot and staging.birds != null:
 		var sky := staging.birds.flying_center()
 		if sky != Vector3.ZERO:
@@ -409,6 +418,16 @@ func _apply_staging_shot() -> void:
 		var shot := _closeup_shot(units)
 		staging.cinematic.start(shot["focus"], float(shot["yaw"]))
 		staging.cinematic.pose_at(float(staging.cinematic.cfg.get("duration_s", 6.0)) * 0.5)
+
+
+## EP8 : aucun point d'eau (rivière, gué, ruisseau) à moins de `radius` m (capture de poussière).
+func _dry_around(x: float, z: float, radius: float) -> bool:
+	for k in 9:
+		var a := TAU * k / 8.0
+		var r := 0.0 if k == 8 else radius
+		if terrain.in_water(x + cos(a) * r, z + sin(a) * r):
+			return false
+	return true
 
 
 ## EP8 : pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
@@ -1588,6 +1607,8 @@ func _parse_cmdline() -> void:
 			_force_cinematic = true
 		elif arg == "--birds-shot":
 			_birds_shot = true
+		elif arg == "--dust-shot":
+			_dust_shot = true
 		elif arg == "--cinematic-shot":
 			_cinematic_shot = true
 			_force_cinematic = true
@@ -1621,6 +1642,21 @@ func _stage_screenshot() -> void:
 		_update_effects(0.1)
 		if staging != null:
 			staging.update(units, 0.1, 0.1, bool(battle.call("is_finished")))
+		if _dust_shot:
+			# EP8 : une charge de cavalerie lancée depuis 2,5 s (la poussière s'est levée).
+			var charging := -1
+			for unit in units:
+				if bool(unit["present"]) and str(unit["state"]) == "charging" and str(unit["render"]) == "cavalry" and _dry_around(float(unit["x"]), float(unit["z"]), 40.0):
+					charging = int(unit["id"])
+					break
+			if charging < 0:
+				_dust_since = -1.0  # au sec seulement (au gué, ce sont des gerbes d'eau)
+			elif _dust_since < 0.0:
+				_dust_since = float(battle.call("get_elapsed"))
+				_dust_unit = charging
+			if _dust_since >= 0.0 and float(battle.call("get_elapsed")) - _dust_since >= 2.5:
+				break
+			continue
 		if (_birds_shot or _cinematic_shot) and contact_time >= 0.0:
 			# EP8 : envol des oiseaux (6 s après le choc) ou plan cinématique (dès le choc).
 			if float(battle.call("get_elapsed")) - contact_time >= (6.0 if _birds_shot else 0.5):
