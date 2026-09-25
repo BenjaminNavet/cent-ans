@@ -513,3 +513,35 @@ partage son sommet de coupe avec la suivante. Lecture en GDScript :
 - **Colonies, hameaux, ponts** : décaler les modèles aux `px` de `fine_anchors.json` et les poser
   à `z` (le sol le plus fin chargé reste la référence en cas d'écart) ; ponts orientés
   perpendiculairement à `dir`, portée `width_m`, tablier à `z_deck`.
+
+### Relevé du 2026-09-25
+
+- `geo hydro-fine` (8 processus, cache chaud des tables) : 38 594 lignes, 179 400 km TOPAGE,
+  25 600 km OS, 10 900 km EU-Hydro, 45 800 km Natural Earth hors cœur ; 2,41 M sommets,
+  1 306 tuiles E2, **39 Mo** de tuiles (hors git, sous `data/map/pyramid/hydro_fine/`) ;
+  ≈ 2 min (lecture initiale de TOPAGE : ≈ 2 à 10 min selon la charge). Niveau d'eau
+  non croissant vers l'aval sur 100 % des 45 642 lignes de tuiles. `rivers_fine.json` : 0,15 Mo.
+- `geo anchors-fine` : 569 colonies (65 déplacées : 60 pente, 5 lit), 2 999 hameaux (233
+  déplacés), 873 passages dont 813 sur un fleuve fin (historiques : 85 / 102, déplacement
+  médian 140 m depuis leur lon/lat) ; routes : 153 800 km, 0,80 M sommets, 13 Mo de tuiles ;
+  ≈ 1-2 min. `fine_anchors.json` : 0,35 Mo.
+- Aperçus avant/après (rouge : Natural Earth de `rivers.geojson` ; bleu : réseau fin ; brun :
+  routes drapées) sur ombrage E4 et E5/E6 : `docs/img/zg5a/{rouen,orleans,bordeaux,londres}_E*.jpg`.
+
+![Rouen, E4](img/zg5a/rouen_E4.jpg)
+
+### Limites connues
+
+- Réseau moderne : les tracés sont ceux d'aujourd'hui (rectifications, bras comblés) ; les zones
+  de `historical_hydro_notes.json` ne font que **marquer** les lignes (pas de reconstitution des
+  bras de 1340, à faire au rendu ou dans un lot ultérieur).
+- Raccords de frontière : TOPAGE / OS / EU-Hydro ne sont pas cousus topologiquement aux
+  frontières (petits écarts possibles sur la Meuse, l'Escaut, la Moselle, la Sambre).
+- Rhin entre Strasbourg et Mayence, Suisse alémanique, Italie, Espagne : hors du cœur de la
+  pyramide (E3-E4 absents) → Natural Earth recalé sur E1-E2 ; les bacs de Spire, Worms, Mayence
+  et les ponts d'Espagne et d'Italie restent `snapped: false`.
+- Largeurs : ancrages pour 19 fleuves ; ailleurs, estimation par ordre de Strahler (± facteur 2).
+- Passages placés sur un gué de marée (Blanchetaque) ou dans une ville à bras multiples
+  (Amiens, Abbeville) : le plus proche tronçon du même nom peut être un bras secondaire.
+- Londres : les tuiles E5-E7 de la zone `londres` donnent ≈ −12 m au sud de la Tamise (E4 plat à
+  0,5 m) : anomalie de la pyramide (lot ZG3), que le niveau d'eau recopie.

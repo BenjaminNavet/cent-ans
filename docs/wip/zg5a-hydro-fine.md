@@ -18,15 +18,13 @@ fusionnés : code de la pyramide et manifeste rempli). Cache partagé par liens 
 - `geo/hydro_fine.py` : pipeline `geo hydro-fine` (en cours).
 - Données : `data/map/historical_hydro_notes.json` (canaux modernes, zones divagantes/marais/estuaires).
 
-## État
-- [x] squelette, sources téléchargées (TOPAGE, OS, EU-Hydro 420 cellules)
-- [x] pipeline `geo hydro-fine` (testé sur OS + EU-Hydro + NE : 25,7 k km GB, 29 k km EU-Hydro, 46 k km NE, 24 s)
-- [x] `geo anchors-fine` (colonies, hameaux, ponts, routes drapées ; testé sans TOPAGE)
-- [x] schémas + tests (`tools/tests/test_hydro_fine.py`), `docs/geo.md`, `CREDITS.md`
-- [ ] préparation TOPAGE (`cache/links_topage.npz`, lecture de 3 Go lente sous charge) puis run complet
-- [ ] aperçus `docs/img/zg5a/` (Rouen, Orléans, Bordeaux, Londres), commit de `rivers_fine.json` et `fine_anchors.json`
+## État : terminé (à fusionner)
+- [x] sources (TOPAGE, OS, EU-Hydro), pipeline `geo hydro-fine`, `geo anchors-fine`
+- [x] schémas, tests (`tools/tests/test_hydro_fine.py`, 23 tests), `docs/geo.md`, `CREDITS.md`
+- [x] run complet : `rivers_fine.json`, `fine_anchors.json` versionnés ; tuiles (39 + 13 Mo) dans le cache
+- [x] aperçus `docs/img/zg5a/`
 
-## Prochaine étape
-Attendre `links_topage.npz` (tâche de fond, sinon relancer `hydro_fine.prepare_topage()`),
-puis `cent-ans geo hydro-fine --workers 6` et `cent-ans geo anchors-fine --workers 6`,
-aperçus via `hydro_preview.render_all`.
+## Suites possibles
+- ZG5b : rendu (contrat dans `docs/geo.md`, section « Hydrographie fine »).
+- Coutures aux frontières TOPAGE/OS/EU-Hydro ; EU-Hydro sur le Rhin moyen si le cœur s'étend.
+- Anomalie de relief E5-E7 à Londres (≈ −12 m) à signaler à ZG3.
