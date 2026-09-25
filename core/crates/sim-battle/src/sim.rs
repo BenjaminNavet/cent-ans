@@ -6,6 +6,7 @@
 
 mod deployment;
 mod fire;
+mod indirect;
 mod pathing;
 mod reinforcements;
 mod separation;
@@ -1986,10 +1987,8 @@ impl BattleSim {
                 return false;
             }
         }
-        shooter.has(Ability::Volley)
-            || !self
-                .field
-                .blocks_sight((shooter.x, shooter.z), (target.x, target.z))
+        // R4: direct at a target in sight, lobbed over a crest otherwise.
+        self.fire_mode(shooter, target).is_some()
     }
 
     fn pick_shooting_target(&self, i: usize) -> Option<usize> {
@@ -2074,6 +2073,12 @@ impl BattleSim {
             kills *= 1.3;
         }
         kills *= self.smoke_factor(shooter, target);
+        // R4: an indirect volley scatters over ground nobody aims at.
+        let mode = self.fire_mode(shooter, target);
+        kills *= mode.map_or(1.0, |m| {
+            m.accuracy(crate::missile_arc::MissileArcRules::bundled())
+        });
+        let indirect = mode.is_some_and(|m| m.indirect());
         let aim = (target.x, target.z);
         let reload = shooter.reload_period();
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
@@ -2100,8 +2105,12 @@ impl BattleSim {
             kind: Self::missile_kind(shooter),
             incendiary: self.shoots_fire(i),
             cover,
+            indirect,
         };
         self.record_shot(shot);
+        if mode.is_some_and(|m| m != crate::missile_arc::FireMode::Remembered) {
+            self.units[t].seen_at = self.elapsed;
+        }
         let cause = Self::missile_cause(&self.units[i]);
         let shooter_id = self.units[i].id;
         self.units[t].hp -= kills;
@@ -2194,6 +2203,7 @@ impl BattleSim {
             kind: Self::missile_kind(unit),
             incendiary: self.shoots_fire(i),
             cover: ShotCover::Wall,
+            indirect: false,
         };
         self.record_shot(shot);
         let shooter = &mut self.units[i];
