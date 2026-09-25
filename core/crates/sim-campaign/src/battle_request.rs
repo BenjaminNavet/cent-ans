@@ -285,6 +285,7 @@ fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) 
                 experience: unit.experience,
                 stats: fallback_stats(),
                 abilities: Vec::<Ability>::new(),
+                missile: None,
             },
         })
         .collect();
