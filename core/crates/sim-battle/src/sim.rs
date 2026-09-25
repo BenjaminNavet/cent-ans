@@ -9,11 +9,13 @@ mod fire;
 mod pathing;
 mod reinforcements;
 mod separation;
+mod siege_assault;
 mod siege_extra;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
+pub use siege_assault::Ladder;
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -119,6 +121,8 @@ pub struct BattleSim {
     relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
+    /// SG1: renderer events of the assault, ram and oil timers.
+    assault: siege_assault::AssaultState,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -327,6 +331,7 @@ impl BattleSim {
             path_cache: Default::default(),
             relief_map: Default::default(),
             fire,
+            assault: Default::default(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1128,6 +1133,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
+        self.boiling_oil();
         self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
@@ -1135,6 +1141,7 @@ impl BattleSim {
         self.elapsed += DT;
         self.ticks += 1;
         self.release_reserves();
+        self.record_siege_transitions();
         self.check_end();
     }
 
@@ -1407,6 +1414,10 @@ impl BattleSim {
         };
         let side = self.units[i].side;
         self.log(text, Some(side));
+        if !tower {
+            let unit = self.units[i].id;
+            self.push_fx(crate::siege_fx::SiegeFxKind::LaddersRaised { unit, piece });
+        }
     }
 
     /// One step of climbing; on the top the regiment stands on the wall walk
@@ -1453,6 +1464,8 @@ impl BattleSim {
             let text = format!("Les {} prennent pied sur le rempart !", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            let unit = self.units[i].id;
+            self.push_fx(crate::siege_fx::SiegeFxKind::OnWall { unit, piece });
         }
     }
 
@@ -1495,15 +1508,23 @@ impl BattleSim {
                 }
             }
         }
-        // The ram batters the gate.
+        // The ram batters the gate, one blow every `RAM_PERIOD` seconds (SG1).
         let gate = works.gate;
-        for unit in self.units.iter_mut() {
-            if !unit.ram || !unit.able() || !works.pieces[gate].intact() {
+        let mut blows: Vec<(u32, bool)> = Vec::new();
+        for (index, unit) in self.units.iter_mut().enumerate() {
+            if !unit.ram {
                 continue;
             }
-            if works.pieces[gate].distance(unit.x, unit.z) < band + 4.0 {
+            let at_gate = unit.able()
+                && works.pieces[gate].intact()
+                && works.pieces[gate].distance(unit.x, unit.z) < band + 4.0;
+            let Some(seconds) = Self::ram_blow(&mut self.assault.ram_timers, index, at_gate) else {
+                continue;
+            };
+            {
                 let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
-                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * DT;
+                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * seconds;
+                blows.push((unit.id, works.pieces[gate].hp <= 0.0));
                 if works.pieces[gate].hp <= 0.0 {
                     works.pieces[gate].hp = 0.0;
                     logs.push((
@@ -1535,6 +1556,13 @@ impl BattleSim {
         }
         for (text, side) in logs {
             self.log(text, side);
+        }
+        for (unit, breached) in blows {
+            self.push_fx(crate::siege_fx::SiegeFxKind::RamStrike {
+                unit,
+                piece: gate,
+                breached,
+            });
         }
     }
 
@@ -2196,6 +2224,18 @@ impl BattleSim {
                 self.unit_destroyed(j);
             }
         }
+        // SG1: where the stone struck (deterministic hash, no random draw).
+        let id = self.units[i].id;
+        let along = 0.15 + 0.7 * crate::siege_fx::hash01(self.ticks, u64::from(id));
+        let height = 0.25 + 0.6 * crate::siege_fx::hash01(self.ticks ^ 0x5eed, u64::from(id));
+        self.push_fx(crate::siege_fx::SiegeFxKind::EngineShot {
+            unit: id,
+            piece,
+            x: p.a.0 + (p.b.0 - p.a.0) * along,
+            z: p.a.1 + (p.b.1 - p.a.1) * along,
+            height,
+            breached,
+        });
         self.incendiary_volley(i, p.midpoint());
     }
 
@@ -2631,9 +2671,7 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && category.is_none_or(|c| c == u.category))
         {
-            for (x, z, angle) in unit.soldier_positions() {
-                result.push([x, self.standing_height(unit, x, z), z, angle]);
-            }
+            result.extend(self.soldier_poses(unit, 1.0));
         }
         result
     }

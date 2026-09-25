@@ -395,6 +395,43 @@ crossbow_shoot.frames = 120  # 5 s: release at 0.35 s, spanning, back on aim at 
 # --- Deaths and knock-downs ---------------------------------------------------------------
 
 
+def climb(arm, t):
+    """Scaling a ladder (SG1, loop): leaning in, hands and feet reaching up rung by rung."""
+    phase = t * 2.0 * math.pi
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.22)
+    translate(arm, "Body", Vector((0, 0, 0.05 * math.sin(2.0 * phase))))
+    hips = pos(arm, "Body")
+    for side, sx, shift in (("R", -1.0, 0.0), ("L", 1.0, math.pi)):
+        reach = math.sin(phase + shift)
+        shoulder = pos(arm, f"UpperArm.{side}")
+        hand = shoulder + Vector((0.05 * sx, -0.34, 0.22 + 0.3 * reach))
+        ik2(
+            arm,
+            f"UpperArm.{side}",
+            f"LowerArm.{side}",
+            f"Wrist.{side}",
+            hand,
+            shoulder + Vector((0.5 * sx, 0.3, -0.5)),
+        )
+        aim(arm, f"Wrist.{side}", Vector((0, -0.4, 1.0)))
+        # Foot on the rung below the opposite hand: lifted while that hand is low.
+        foot = pos(arm, f"Foot.{side}")
+        lift = max(0.0, -reach)
+        target = foot + Vector((0, -0.16 - 0.1 * lift, 0.34 * lift))
+        ik2(
+            arm,
+            f"UpperLeg.{side}",
+            f"LowerLeg.{side}",
+            f"Foot.{side}",
+            target,
+            hips + Vector((0, -1.0, -0.3)),
+        )
+        translate(arm, f"Foot.{side}", target - foot)
+
+
+climb.frames = 24
+
+
 def death_knees(arm, t):
     """Knees give way, then the body pitches forwards onto the face."""
     sink = smooth(0.0, 0.35, t)
