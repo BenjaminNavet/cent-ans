@@ -58,6 +58,9 @@ const DEFAULTS := {
 	# FB1 : plafond de figurines dessinées sur tout le champ de bataille ; la taille des unités est
 	# abaissée pour le respecter (rendu seulement, voir ADR 0016).
 	"battle/max_figures": 15000,
+	# EP8 : plan cinématique facultatif au premier choc, et son ralenti.
+	"battle/cinematic": true,
+	"battle/cinematic_slowmo": true,
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
 	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites

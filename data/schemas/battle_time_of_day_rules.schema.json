@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_time_of_day_rules.schema.json",
+  "title": "Heure du jour des batailles",
+  "description": "Fichier data/rules/battle_time_of_day.json (lot EP8) : phases de la journée, visibilité des tireurs, écoulement du temps et tirage de l'heure par la campagne. Lu par sim-battle (TimeOfDayRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "minutes_per_battle_second": { "type": "number", "exclusiveMinimum": 0, "maximum": 5, "description": "Minutes de la journée écoulées par seconde de bataille simulée (0,2 : une bataille de 20 min dure 4 h)." },
+    "default_hour": { "type": "number", "minimum": 0, "exclusiveMaximum": 24, "description": "Heure de début quand ni la campagne ni les réglages ne la donnent." },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Phases qui couvrent les 24 heures sans trou.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z_]+$" },
+          "label": { "type": "string", "description": "Nom affiché (français)." },
+          "from_hour": { "type": "number", "minimum": 0, "exclusiveMaximum": 24 },
+          "to_hour": { "type": "number", "minimum": 0, "maximum": 24, "description": "Fin (exclue) ; inférieure à from_hour si la phase passe minuit." },
+          "start_hour": { "type": "number", "minimum": 0, "exclusiveMaximum": 24, "description": "Heure de début d'une bataille livrée dans cette phase." },
+          "visibility": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Facteur sur la portée efficace des tireurs (cumulé avec la météo)." },
+          "announce": { "type": "string", "description": "Ligne du journal de bataille quand la phase commence." },
+          "selectable": { "type": "boolean", "description": "Proposée dans les réglages de bataille rapide (vrai par défaut)." }
+        },
+        "required": ["key", "label", "from_hour", "to_hour", "start_hour", "visibility", "announce"],
+        "additionalProperties": false
+      }
+    },
+    "campaign_draw": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Poids du tirage de la phase de début d'une bataille de campagne.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "phase": { "type": "string", "pattern": "^[a-z_]+$" },
+          "weight": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["phase", "weight"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["minutes_per_battle_second", "default_hour", "phases", "campaign_draw"],
+  "additionalProperties": false
+}
