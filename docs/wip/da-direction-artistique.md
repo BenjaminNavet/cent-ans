@@ -50,3 +50,7 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
     Reste : pytest, sonde 3 images, génération, tout le GDScript, captures après, ADR.
 - 25/09 ~23 h 15 : reprise dans un nouveau terminal (clé OpenRouter personnelle du joueur, 50 $).
   Le joueur veut valider la direction artistique **avant** de relancer DA1/DA2.
+- 25/09 ~23 h 40 : DA validée par le joueur (bible § 0) ; planche `docs/img/da/planche/planche_da.jpg`
+  validée (6 portraits sondes, bouton cloche, icônes encre ; 0,36 $). Liste d'assets validée
+  (≈ 11,5 $ prévus : DA1 0 $, DA2 ≈ 6,4 $, DA5 boutons ≈ 0,7 $ + icônes ≈ 3,6 $, DA3 ≈ 0,7 $,
+  DA4 musique libre 0 $, DA6 0 $). Relance DA1 + DA2, lancement DA5 + DA4.
