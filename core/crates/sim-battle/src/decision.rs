@@ -122,4 +122,7 @@ pub(crate) struct EngagementClock {
     pub losses_mark: [f64; 2],
     /// Since when each side has been below its break share.
     pub below_since: [Option<f64>; 2],
+    /// EP9b: loss share of each side sampled every AI period (oldest
+    /// first), for the attacker's archery duel (`duel.rs`).
+    pub loss_log: std::collections::VecDeque<(f64, [f64; 2])>,
 }

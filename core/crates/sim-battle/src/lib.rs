@@ -42,6 +42,7 @@ pub mod ai;
 pub mod command;
 pub mod crest;
 pub mod decision;
+pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
@@ -71,6 +72,7 @@ pub mod unit;
 
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
+pub use duel::DuelRules;
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,

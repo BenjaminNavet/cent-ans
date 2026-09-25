@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_duel_rules.schema.json",
+  "title": "Duel d'archers de l'attaquant et second échelon",
+  "description": "Fichier data/rules/battle_duel.json (lot EP9b, ADR 0056) : combien de temps l'attaquant IA échange des traits avant de marcher à l'ennemi, selon qu'il gagne le duel ou non, et quelles troupes avancent en second échelon. Lu par sim-battle (DuelRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "duel_limit_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 600,
+      "description": "Durée du duel de l'attaquant qui le perd ou fait jeu égal (secondes)."
+    },
+    "winning_duel_max_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 600,
+      "description": "Borne haute du duel de l'attaquant qui le gagne (secondes) ; ensuite il marche à l'ennemi."
+    },
+    "window_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 300,
+      "description": "Fenêtre glissante sur laquelle les pertes infligées et subies sont comparées (secondes)."
+    },
+    "winning_ratio": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "L'attaquant gagne le duel quand il inflige au moins ce multiple des pertes qu'il subit sur la fenêtre (en part d'effectif)."
+    },
+    "winning_min_share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.2,
+      "description": "Part minimale de l'effectif ennemi abattue sur la fenêtre pour que le duel compte (quelques flèches perdues ne suffisent pas)."
+    },
+    "second_echelon_morale": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Les régiments de ligne dont le moral de base est sous ce seuil avancent en second échelon."
+    },
+    "second_echelon_depth_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 150,
+      "description": "Distance du second échelon derrière la première ligne (mètres)."
+    }
+  },
+  "required": [
+    "duel_limit_seconds",
+    "winning_duel_max_seconds",
+    "window_seconds",
+    "winning_ratio",
+    "winning_min_share",
+    "second_echelon_morale",
+    "second_echelon_depth_m"
+  ],
+  "additionalProperties": false
+}

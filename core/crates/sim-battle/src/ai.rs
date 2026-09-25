@@ -108,9 +108,6 @@ pub const DUEL_TIME: f64 = 480.0;
 /// the archery duel after this long and closes in (F5d: two AI armies
 /// always end up engaging).
 pub const ATTACKER_DUEL_TIME: f64 = 60.0;
-/// EP9 (ADR 0056): the side that sought the battle trades volleys at most
-/// this long, then closes in (it must attack; the defender may wait).
-pub const ATTACKER_DUEL_LIMIT: f64 = 180.0;
 /// A side whose losses exceed the enemy's by more than this share is
 /// losing the archery duel and closes in (B4).
 pub const DUEL_LOSS_MARGIN: f64 = 0.04;
@@ -1266,6 +1263,15 @@ fn plan_field(view: &mut View) {
     let press = view.side == SideId::Attacker && ratio * 0.85 > 1.0;
     let losing = side_losses(view.units, view.side)
         > side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN;
+    // EP9 (ADR 0056): the side that sought the battle must attack; it trades
+    // volleys only for a while. EP9b: longer while its shooters are clearly
+    // winning the duel (sliding window, `data/rules/battle_duel.json`).
+    let duel_rules = crate::duel::DuelRules::bundled();
+    let window = duel_rules.window_seconds;
+    let winning_duel = duel_rules.winning(
+        view.sim.recent_losses(view.side, window),
+        view.sim.recent_losses(view.side.other(), window),
+    );
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
         && contact < 320.0
@@ -1273,7 +1279,7 @@ fn plan_field(view: &mut View) {
             < if press {
                 ATTACKER_DUEL_TIME
             } else if view.side == SideId::Attacker {
-                ATTACKER_DUEL_LIMIT
+                duel_rules.attacker_limit(winning_duel)
             } else {
                 DUEL_TIME
             }
@@ -1365,8 +1371,22 @@ fn plan_field(view: &mut View) {
         advance(view, line_center)
     };
 
-    // Line.
-    let slots = view.line_slots(&roles.line, anchor, facing);
+    // Line. EP9b: closing in, the militia (low base morale) marches in a
+    // second echelon behind the solid foot rather than leading the assault
+    // through the arrows.
+    let (first, second): (Vec<usize>, Vec<usize>) = roles
+        .line
+        .iter()
+        .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
+    let slots = if defensive || first.is_empty() || second.is_empty() {
+        view.line_slots(&roles.line, anchor, facing)
+    } else {
+        let depth = duel_rules.second_echelon_depth_m;
+        let behind = (anchor.0, anchor.1 - view.forward * depth);
+        let mut slots = view.line_slots(&first, anchor, facing);
+        slots.extend(view.line_slots(&second, behind, facing));
+        slots
+    };
     for (i, x, z) in slots {
         if !view.free(i) {
             continue;
