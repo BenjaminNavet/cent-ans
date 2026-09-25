@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_standard_rules.schema.json",
+  "title": "Règles des étendards en bataille",
+  "description": "Fichier data/rules/battle_standards.json (lot EP5, ADR 0034) : chute, relève et prise de l'étendard d'un régiment, effets sur le moral et la cohésion.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "two_bearers_from_soldiers": { "type": "integer", "minimum": 1, "description": "Effectif complet à partir duquel le régiment porte deux étendards (rendu : second porte-étendard)." },
+    "heavy_losses_below": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'effectif complet sous laquelle l'étendard peut tomber." },
+    "fall_chance_per_loss_percent": { "type": "number", "minimum": 0, "maximum": 1, "description": "Probabilité de chute par point de pourcentage de l'effectif complet perdu en un pas de simulation." },
+    "rout_drop_chance": { "type": "number", "minimum": 0, "maximum": 1, "description": "Probabilité que l'étendard soit lâché quand le régiment se débande au contact." },
+    "raise_seconds": { "type": "number", "minimum": 0.5, "maximum": 60, "description": "Secondes avant que l'étendard tombé soit relevé (le régiment tient) ou pris (l'ennemi tient la place)." },
+    "capture_radius_m": { "type": "number", "minimum": 1, "maximum": 100, "description": "Distance (m) de l'étendard tombé en deçà de laquelle un régiment ennemi apte tient la place et le prend." },
+    "fall_morale_shock": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral perdu d'un coup par le régiment dont l'étendard tombe." },
+    "fallen_morale_per_second": { "type": "number", "minimum": 0, "maximum": 10, "description": "Moral perdu par seconde tant que l'étendard est à terre." },
+    "fallen_melee_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Facteur des coups portés en mêlée tant que l'étendard est à terre (cohésion)." },
+    "enemy_morale_bonus": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral gagné d'un coup par les régiments ennemis proches quand l'étendard tombe." },
+    "enemy_bonus_radius_m": { "type": "number", "minimum": 0, "maximum": 500, "description": "Rayon (m) du bonus ennemi et de la consternation d'une prise." },
+    "capture_morale_shock": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral perdu par les régiments du camp proches d'un étendard pris (le double pour le régiment lui-même)." },
+    "captor_morale_bonus": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral gagné par le régiment qui prend l'étendard." },
+    "general_factor": { "type": "number", "minimum": 1, "maximum": 5, "description": "Multiplicateur des effets de moral pour la bannière du général." },
+    "lost_morale_cap": { "type": "number", "minimum": 0, "maximum": 50, "description": "Baisse du plafond de moral du régiment dont l'étendard est pris, jusqu'à la fin de la bataille." }
+  },
+  "required": ["two_bearers_from_soldiers", "heavy_losses_below", "fall_chance_per_loss_percent", "rout_drop_chance", "raise_seconds", "capture_radius_m", "fall_morale_shock", "fallen_morale_per_second", "fallen_melee_factor", "enemy_morale_bonus", "enemy_bonus_radius_m", "capture_morale_shock", "captor_morale_bonus", "general_factor", "lost_morale_cap"],
+  "additionalProperties": false
+}

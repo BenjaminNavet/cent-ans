@@ -587,3 +587,79 @@ for _name, _style in _STYLES.items():
     FIGURES[_name]["style"] = _style
 FIGURES["infantry_0"]["noble"] = True
 FIGURES["cavalry_0"]["noble"] = True
+
+# --- Lot EP5: standard bearers and musicians ----------------------------------------------
+# No weapon nor shield. `pole` = distance along the `Prop` axis from the upper fist to the
+# tip of the pole (manifest `pole_top` / `pole_axis`, where Godot hangs the cloth).
+
+FIGURES.update(
+    {
+        # Standard bearer on foot: harness under an armorial jupon, open bassinet or kettle
+        # hat, the pole held in both hands.
+        "standard_0": {
+            "rig": "human",
+            "style": "standard",
+            "noble": True,
+            "parts": KING_PARTS,
+            "colors": PLATE_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("bassinet", 1, {"aventail": False}),
+                ("kettle_hat", 2),
+                ("standard_pole", 0),
+            ],
+            "pole": 3.8 - 1.2,
+            "variants": 2,
+        },
+        # Mounted standard bearer: squire in harness on a caparisoned horse, butt of the
+        # pole by the right stirrup.
+        "standard_1": {
+            "rig": "cavalry",
+            "style": "standard_mounted",
+            "noble": True,
+            "parts": KING_PARTS,
+            "colors": PLATE_COLORS,
+            "budget": RIDER_BUDGET,
+            "horse_budget": HORSE_BUDGET,
+            "horse_equipment": [("caparison", 0), ("saddle", 0)],
+            "equipment": [
+                ("bassinet", 1, {"aventail": False}),
+                ("bassinet", 2),
+                ("standard_pole", 0, {"length": 4.0, "below": 1.1}),
+            ],
+            "pole": 4.0 - 1.1,
+            "variants": 2,
+        },
+        # Drummer: livery tabard over the tunic, felt cap or kettle hat, tabor and sticks.
+        "musician_0": {
+            "rig": "human",
+            "style": "drum",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("tabard", 0),
+                ("cloth_cap", 1, {"colour": (0.22, 0.05, 0.04)}),
+                ("kettle_hat", 2),
+                ("tabor", 0),
+                ("drum_sticks", 0),
+            ],
+            "variants": 2,
+        },
+        # Trumpeter: livery tabard, felt cap or bare head, long straight busine with a
+        # small banner of the arms.
+        "musician_1": {
+            "rig": "human",
+            "style": "horn",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("tabard", 0),
+                ("cloth_cap", 1, {"colour": (0.08, 0.10, 0.22)}),
+                ("busine", 0),
+            ],
+            "variants": 2,
+        },
+    }
+)

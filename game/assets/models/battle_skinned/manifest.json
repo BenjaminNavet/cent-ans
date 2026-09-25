@@ -351,6 +351,90 @@
     302
    ],
    "variants": 3
+  },
+  "musician_0": {
+   "lods": [
+    "musician_0_lod0.mesh.bin",
+    "musician_0_lod1.mesh.bin",
+    "musician_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "drum",
+   "tris": [
+    2132,
+    539,
+    229
+   ],
+   "variants": 2
+  },
+  "musician_1": {
+   "lods": [
+    "musician_1_lod0.mesh.bin",
+    "musician_1_lod1.mesh.bin",
+    "musician_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "horn",
+   "tris": [
+    1902,
+    453,
+    189
+   ],
+   "variants": 2
+  },
+  "standard_0": {
+   "lods": [
+    "standard_0_lod0.mesh.bin",
+    "standard_0_lod1.mesh.bin",
+    "standard_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.21707,
+    0.92733,
+    2.77106
+   ],
+   "rig": "human",
+   "style": "standard",
+   "tris": [
+    2396,
+    523,
+    231
+   ],
+   "variants": 2
+  },
+  "standard_1": {
+   "lods": [
+    "standard_1_lod0.mesh.bin",
+    "standard_1_lod1.mesh.bin",
+    "standard_1_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.21751,
+    1.7135,
+    3.07709
+   ],
+   "rig": "cavalry",
+   "style": "standard_mounted",
+   "tris": [
+    3178,
+    794,
+    398
+   ],
+   "variants": 2
   }
  },
  "rigs": {
@@ -488,6 +572,31 @@
      "loop": true,
      "start": 419
     },
+    "c_std_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 751
+    },
+    "c_std_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 678
+    },
+    "c_std_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 568
+    },
+    "c_std_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 649
+    },
+    "c_std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 693
+    },
     "c_thrust": {
      "frames": 28,
      "loop": false,
@@ -571,6 +680,21 @@
      "loop": false,
      "start": 221
     },
+    "drum_beat": {
+     "frames": 24,
+     "loop": true,
+     "start": 1154
+    },
+    "drum_idle": {
+     "frames": 48,
+     "loop": true,
+     "start": 1073
+    },
+    "drum_march": {
+     "frames": 33,
+     "loop": true,
+     "start": 1121
+    },
     "guard": {
      "frames": 41,
      "loop": true,
@@ -580,6 +704,21 @@
      "frames": 14,
      "loop": false,
      "start": 181
+    },
+    "horn_blow": {
+     "frames": 84,
+     "loop": true,
+     "start": 1252
+    },
+    "horn_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 1178
+    },
+    "horn_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 1219
     },
     "idle": {
      "frames": 41,
@@ -625,6 +764,31 @@
      "frames": 25,
      "loop": false,
      "start": 135
+    },
+    "std_death": {
+     "frames": 26,
+     "loop": false,
+     "start": 1047
+    },
+    "std_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 895
+    },
+    "std_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 969
+    },
+    "std_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 936
+    },
+    "std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 989
     },
     "thrust": {
      "frames": 21,

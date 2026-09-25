@@ -93,6 +93,8 @@ pub mod folders {
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
     pub const AGENT_RULES: &str = "agents.json";
+    /// Regimental standards in battle (lot EP5), inside `rules/`; optional.
+    pub const BATTLE_STANDARD_RULES: &str = "battle_standards.json";
     /// Trade hubs and routes (lot C5); optional folder.
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
@@ -258,6 +260,9 @@ pub struct GameData {
     /// `data/rules/agents.json` (lot C6, campaign agents); the defaults of
     /// [`AgentRules::default`] when absent.
     pub agent_rules: Option<AgentRules>,
+    /// `data/rules/battle_standards.json` (lot EP5, regimental standards);
+    /// [`crate::BattleStandardRules::default`] when absent.
+    pub battle_standard_rules: crate::entities::battle_standards::BattleStandardRules,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
@@ -320,6 +325,7 @@ impl GameData {
             campaign_weather: Default::default(),
             retinue: None,
             agent_rules: None,
+            battle_standard_rules: Default::default(),
             movement_graph: Default::default(),
             trade: None,
             free_movement: None,
@@ -396,6 +402,12 @@ impl GameData {
         let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
         if agents_path.is_file() {
             data.agent_rules = Some(read_json(&agents_path)?);
+        }
+        let standards_path = root
+            .join(folders::RULES)
+            .join(folders::BATTLE_STANDARD_RULES);
+        if standards_path.is_file() {
+            data.battle_standard_rules = read_json(&standards_path)?;
         }
         let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
         if trade_path.is_file() {

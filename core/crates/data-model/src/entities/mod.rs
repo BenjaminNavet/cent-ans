@@ -7,6 +7,7 @@ pub mod ai_doctrine;
 pub mod ai_grid;
 pub mod auto_resolve;
 pub mod battle_order;
+pub mod battle_standards;
 pub mod building;
 pub mod campaign_weather;
 pub mod character;
