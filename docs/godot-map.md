@@ -1182,7 +1182,8 @@ carte MF1 inchangés.
   lointain), objets posés (sommets E0 et maquettes : sol affiché = hauteur affichée).
 - ZG2 et ZG4 adaptés (surface = `display_height`, nombre de paliers selon le plancher) ; ZG5b, ZG6 OK.
 - Captures : `godot --path game --script res://tests/zg8_relief_shots.gd -- --out=<dossier>
-  --prefix=apres` (et `--prefix=avant --no-relief-exaggeration`), `docs/img/zg8/`.
+  --prefix=apres` (et `--prefix=avant --no-relief-exaggeration`) ; la météo et la saison tirées au
+  lancement peuvent différer entre les deux séries.
 - Banc `--bench-map` avec et sans : machine chargée par d'autres sessions (≈ 20 Godot), écarts dans le
   bruit ; coût GPU ajouté : 4 `texelFetch` par sommet du quadtree et 4 par fragment (gradient du fond).
 
@@ -1191,9 +1192,14 @@ relief (plateaux entiers au-dessus de leur fond sur ~10 km) forme une rampe douc
 les sommets alpins très découpés deviennent plus aigus en vue moyenne (le gain lointain reste modeste) ;
 `vegetation_mask` et le parcellaire lisent encore les pentes vraies (voulu : règles d'occupation du sol).
 
-![Pyrénées](img/zg8/pyrenees_apres.jpg)
-![Coteaux de Seine](img/zg8/coteaux_seine_apres.jpg)
-![Paris (plaine)](img/zg8/paris_apres.jpg)
+Captures (`docs/img/zg8/{avant,apres}_<vue>.jpg`) : Pyrénées (d = 40 et 7), Alpes (45), Massif central
+(30), pays de Galles (40), falaises normandes (6), coteaux de Seine aux Andelys (8), Paris (10, plaine :
+inchangée), France entière (900).
+
+![Coteaux de Seine, avant](img/zg8/avant_coteaux_seine.jpg)
+![Coteaux de Seine, après](img/zg8/apres_coteaux_seine.jpg)
+![Pyrénées de près, après](img/zg8/apres_pyrenees_pres.jpg)
+![Paris, après (plaine inchangée)](img/zg8/apres_paris.jpg)
 
 ## Interface des colonies (lot C5)
 

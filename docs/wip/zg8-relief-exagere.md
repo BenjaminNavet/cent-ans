@@ -1,6 +1,6 @@
 # ZG8 — relief exagéré façon Total War (visuel seulement)
 
-État : EN COURS (branche worktree-agent-a324124257f1dc359).
+État : TERMINÉ (branche worktree-agent-a324124257f1dc359, main fusionnée), à fusionner dans main.
 
 ## Avancement
 - [x] Squelette : `ReliefExaggerationProfile` (+ `resources/relief_exaggeration.tres`), `ReliefFloor`
@@ -13,8 +13,13 @@
   main ne compile pas à cette heure — hors lot).
 - [x] Banc `--bench-map` lancé avec/sans (`--no-relief-exaggeration`) : machine chargée (21 Godot),
   mesures non concluantes, pas de régression visible ; fond calculé en 90 ms au chargement.
-- [ ] Captures définitives `docs/img/zg8/` (script `tests/zg8_relief_shots.gd`), docs (godot-map.md, ADR 0036),
-  fusion de main (ZG4b).
+- [x] Captures `docs/img/zg8/` (script `tests/zg8_relief_shots.gd`), docs (godot-map.md, ADR 0036),
+  fusion de main (ZG4b pas encore dans main : à sa fusion, son plancher de caméra lit
+  `surface_height_at`, déjà à la hauteur affichée).
+- Après fusion de main + dylib reconstruite : smoke OK, ZG2/ZG4/ZG5b/ZG6/ZG8 OK.
+
+Suites possibles : affiner gains et plancher en jeu (`relief_exaggeration.tres`) ; captures dans des
+conditions météo figées ; banc sur machine calme.
 
 Prochaine étape : voir la première case non cochée.
 
