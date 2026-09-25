@@ -170,9 +170,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    3747,
-    872,
-    395
+    2952,
+    713,
+    345
    ],
    "variants": 2
   },
@@ -346,9 +346,9 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    3372,
-    703,
-    337
+    2980,
+    624,
+    302
    ],
    "variants": 3
   }
