@@ -345,6 +345,10 @@ func _build_negotiation() -> Control:
 	_counter_box.hide()
 	page.add_child(_counter_box)
 	page.add_child(_reasons)
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans les motifs de refus/acceptation.
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", _reasons)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 6)
 	var counter := Button.new()
@@ -376,6 +380,8 @@ func _build_negotiation() -> Control:
 	_unilateral_hint.fit_content = true
 	_unilateral_hint.scroll_active = false
 	page.add_child(_unilateral_hint)
+	if bubbles != null:
+		bubbles.call("attach", _unilateral_hint)
 	return page
 
 
@@ -837,12 +843,12 @@ func _render_chance() -> void:
 		return
 	var text := ""
 	if blocked != "":
-		text += "[color=#8b1a1a][b]Impossible :[/b] %s[/color]\n" % blocked
+		text += "[color=#8b1a1a][b]Impossible :[/b] %s[/color]\n" % CodexText.format(blocked, true)
 	var context: Array = _verdict.get("context", [])
 	var parts := PackedStringArray()
 	for reason in context:
 		var v := int(reason["value"])
-		parts.append("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason["text"]])
+		parts.append("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, CodexText.format(str(reason["text"]), true)])
 	if not parts.is_empty():
 		text += "[b]Considérations :[/b] " + " · ".join(parts)
 	_reasons.text = text
@@ -1121,7 +1127,8 @@ func _show_consequences(order: Dictionary, unilateral: bool) -> void:
 	var parts := PackedStringArray()
 	for reason in verdict.get("reasons", []):
 		var v := int(reason["value"])
-		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason["text"]]) if v != 0 else str(reason["text"]))
+		var reason_text := CodexText.format(str(reason["text"]), true)
+		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason_text]) if v != 0 else reason_text)
 	_unilateral_hint.text = text + " · ".join(parts)
 
 

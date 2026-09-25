@@ -99,7 +99,7 @@ impl BattleSim {
                 (from.0 + px * k).clamp(1.0, width - 1.0),
                 (from.1 + pz * k).clamp(1.0, depth - 1.0),
             );
-            if self.wall_block(i, from, to).is_some() {
+            if self.wall_block(i, from, to).is_some() || self.water_blocks(i, from, to) {
                 continue;
             }
             self.units[i].x = to.0;

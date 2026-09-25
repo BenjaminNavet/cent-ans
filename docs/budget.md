@@ -40,4 +40,18 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul batailles épiques |
 |---|---|---|---|---|---|
-| 2026-09-25 | Freesound (CC0) | EP4 : 27 sons libres supplémentaires (chocs acier/acier et acier/bois, impacts d'armure, cris d'effort, râles, chutes, chevaux, 3e nappe de mêlée), licence vérifiée page par page, aucun appel payant | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « picardy_plains » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,04 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « channel_coast » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,08 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « pyrenees » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,12 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « alps » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,16 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « massif_central » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 0,21 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « wooded_hills » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,25 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « norman_bocage » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,29 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « loire_valley » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,33 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « gascony_hills » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,37 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « flanders_flat » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,41 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « moorland_hills » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,45 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « mediterranean_hills » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,49 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « winter_lowlands » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,53 $ |
+| 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « flanders_flat » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,57 $ |
+| 2026-09-25 | Freesound (CC0) | EP4 : 27 sons libres supplémentaires (chocs acier/acier et acier/bois, impacts d'armure, cris d'effort, râles, chutes, chevaux, 3e nappe de mêlée), licence vérifiée page par page, aucun appel payant | 0,00 $ | 0,00 $ | 0,57 $ |

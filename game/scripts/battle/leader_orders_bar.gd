@@ -240,18 +240,11 @@ class OrderButton extends Button:
 	var hotkey: String = ""
 
 	func _make_custom_tooltip(_for_text: String) -> Object:
-		var box := PanelContainer.new()
-		box.theme = load(THEME_PATH)
-		var text := RichTextLabel.new()
-		text.bbcode_enabled = true
-		text.fit_content = true
-		text.custom_minimum_size = Vector2(340, 0)
-		text.add_theme_color_override("default_color", INK)
 		var lines: Array[String] = []
 		lines.append("[b]%s[/b]   [color=#6b5a45][%s][/color]" % [order.get("name", ""), hotkey])
 		if str(order.get("label", "")) != str(order.get("name", "")):
 			lines.append("[i]%s[/i]" % order.get("label", ""))
-		lines.append(CodexText.format(str(order.get("description", "")), true))
+		lines.append(str(order.get("description", "")))
 		var facts: Array[String] = []
 		var cooldown := float(order.get("cooldown", 0.0))
 		if cooldown > 0.0:
@@ -263,6 +256,6 @@ class OrderButton extends Button:
 			lines.append("[color=#6b5a45]%s[/color]" % " · ".join(facts))
 		if not bool(order.get("available", false)):
 			lines.append("[color=#8a2a1a]Indisponible : %s[/color]" % order.get("reason", ""))
-		text.text = "\n".join(lines)
-		box.add_child(text)
-		return box
+		# BP1 : `RichTooltip.make_panel` applique les liens du Codex et enregistre l'infobulle
+		# pour la conversion en bulle épinglée (touche T, `CodexBubbles.pin_native_tooltip`).
+		return RichTooltip.make_panel("\n".join(lines))

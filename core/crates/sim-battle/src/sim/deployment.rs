@@ -14,7 +14,9 @@ use super::BattleSim;
 use crate::command::CommandError;
 use crate::setup::SideId;
 
-/// Depth of a field-battle deployment zone (metres from the own edge).
+/// Depth of a field-battle deployment zone on the standard field (metres
+/// from the own edge); EP1: the zone is [`crate::scale::FieldSize::zone_depth`]
+/// deep and its front 50 m beyond the side's battle line.
 pub const ZONE_DEPTH: f64 = 300.0;
 /// Besiegers deploy at least this far from the front of the walls.
 pub const SIEGE_STANDOFF: f64 = 60.0;
@@ -232,19 +234,26 @@ impl BattleSim {
                 },
             };
         }
+        let size = self.field.size;
         match side {
-            SideId::Attacker => DeploymentZone {
-                x0: margin,
-                z0: margin,
-                x1: w - margin,
-                z1: ZONE_DEPTH,
-            },
-            SideId::Defender => DeploymentZone {
-                x0: margin,
-                z0: d - ZONE_DEPTH,
-                x1: w - margin,
-                z1: d - margin,
-            },
+            SideId::Attacker => {
+                let front = size.attacker_line_z() + 50.0;
+                DeploymentZone {
+                    x0: margin,
+                    z0: (front - size.zone_depth).max(margin),
+                    x1: w - margin,
+                    z1: front,
+                }
+            }
+            SideId::Defender => {
+                let front = size.defender_line_z() - 50.0;
+                DeploymentZone {
+                    x0: margin,
+                    z0: front,
+                    x1: w - margin,
+                    z1: (front + size.zone_depth).min(d - margin),
+                }
+            }
         }
     }
 }
