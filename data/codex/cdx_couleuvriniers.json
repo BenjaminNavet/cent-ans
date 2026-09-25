@@ -1,0 +1,33 @@
+{
+  "id": "cdx_couleuvriniers",
+  "title": "Les couleuvriniers",
+  "category": "unite",
+  "aliases": [
+    "Couleuvriniers",
+    "couleuvrinier",
+    "couleuvrine",
+    "couleuvrines",
+    "couleuvrine à main"
+  ],
+  "era": {
+    "from": "v. 1410",
+    "to": "1500"
+  },
+  "summary": "Les couleuvriniers manient la couleuvrine à main, tube de fer ou de bronze monté sur un fût de bois et mis à feu à la mèche. Nés dans les villes et les arsenaux au début du XVe siècle, ils tirent à [[cdx_castillon|Castillon]] en 1453 avec l'artillerie de [[cdx_bombarde|Jean Bureau]].",
+  "body": "Les premières armes à feu portatives, les [[cdx_batons_a_feu|bâtons à feu]], apparaissent en Italie et en Flandre dans les années 1360-1380. Le mot « couleuvrine » (de couleuvre, le serpent) se répand en France au début du XVe siècle pour désigner des pièces longues et fines, du canon à main que l'on épaule jusqu'à la petite pièce sur affût.\n\nLes villes s'en équipent les premières pour défendre leurs murs. Au siège d'[[cdx_orleans|Orléans]] (1428-1429), un couleuvrinier lorrain, maître Jean, devient célèbre dans les deux camps pour les Anglais qu'il abat depuis les remparts. Les [[cdx_hussites|hussites]] de Bohême, dans les années 1420, montrent ce que peuvent des tireurs abrités derrière des chariots.\n\nL'arme est lente à recharger et la pluie mouille la poudre et la mèche, mais sa balle de plomb perce les meilleures plates à courte distance. Sous [[cdx_charles_vii|Charles VII]], les frères Bureau intègrent couleuvrines et couleuvriniers à l'artillerie royale, décisive à Formigny (1450) et à [[cdx_castillon|Castillon]] (1453).",
+  "anachronism": "Le jeu rend les couleuvriniers disponibles dès 1380 avec la technologie des bâtons à feu ; les véritables troupes de couleuvriniers ne se forment qu'au XVe siècle.",
+  "gameplay": "Compagnie de 100 hommes (tireurs). Recrutement : 540 livres payées à l'enrôlement ; entretien 48 livres par mois, soit 192 par saison. Caractéristiques : mêlée 32, tir 66 à 120 m (24 volées), armure 32 (laisse passer 75 % des coups), moral 48, vitesse 40 (1,6 m/s). Exige la technologie [[cdx_batons_a_feu|Bâtons à feu]] ; le bâtiment Arsenal dans la place. Recrutable à partir de 1380. La place doit compter assez de bourgeois (dix fois l'effectif). Pavois : pertes dues aux traits ×0,6 à l'arrêt, ×0,35 avec l'ordre « Dresser les pavois » (×0,7 en résolution automatique) ; rechargement en 9 s au lieu de 6. Pluie : précision ×0,6 sous la pluie, ×0,8 sous la neige (et ×0,6 en mer par temps de pluie). Tir puissant (66) mais à courte portée (120 m) : abritez-les derrière d'autres troupes et évitez de les engager sous la pluie.",
+  "entity": "unit_culveriners",
+  "see_also": [
+    "cdx_batons_a_feu",
+    "cdx_wagenburg",
+    "cdx_bombarde",
+    "cdx_castillon"
+  ],
+  "sources": [
+    "Couleuvrine",
+    "Canon à main",
+    "Bataille de Castillon",
+    "Siège d'Orléans"
+  ]
+}

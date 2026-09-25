@@ -11,7 +11,7 @@
   ],
   "historical_year": {
     "value": "1450",
-    "note": "Couleuvrines des frères Bureau à Formigny (1450) et Castillon (1453)."
+    "note": "Deux couleuvrines de Louis Giribault décident de Formigny (1450) ; le parc retranché de Jean Bureau écrase l'armée de Talbot à Castillon (1453)."
   },
   "unlocks": {},
   "effects": [
@@ -29,9 +29,9 @@
   ],
   "description": "Canons légers sur affût mobiles, organisés par les frères Bureau ; décisifs à [[cdx_castillon|Castillon]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
     "Artillerie médiévale",
-    "Économie médiévale"
+    "Bataille de Formigny",
+    "Bataille de Castillon",
+    "Jean Bureau"
   ]
 }

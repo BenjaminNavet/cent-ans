@@ -1,0 +1,32 @@
+{
+  "id": "cdx_retenues_anglaises",
+  "title": "Les retenues anglaises",
+  "category": "unite",
+  "aliases": [
+    "Hommes d'armes des retenues",
+    "retenue",
+    "retenues",
+    "endenture",
+    "indenture",
+    "contrat d'endenture"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Les armées d'[[cdx_edouard_iii|Édouard III]] sont faites de retenues : chaque capitaine s'engage par contrat (endenture) à servir le roi avec un nombre fixé d'[[cdx_hommes_d_armes|hommes d'armes]] et d'archers, contre des gages. Ces troupes soldées et disciplinées gagnent [[cdx_crecy|Crécy]], [[cdx_poitiers|Poitiers]] et [[cdx_azincourt|Azincourt]].",
+  "body": "L'endenture est un contrat écrit deux fois sur le même parchemin, puis coupé d'un trait dentelé : chaque partie garde sa moitié, et l'on prouve l'authenticité en rapprochant les deux bords. Le capitaine y promet un effectif, une durée de service et une montre (revue) ; le roi y fixe les gages et le partage du butin et des [[cdx_rancon|rançons]], dont il prélève un tiers de la part du capitaine.\n\nLes gages sont hiérarchisés : 4 shillings par jour pour un banneret, 2 pour un chevalier, 1 pour un écuyer, 6 pence pour un archer monté. Les grands capitaines, [[cdx_henri_de_grosmont|Henri de Grosmont]], [[cdx_john_chandos|Jean Chandos]] ou [[cdx_robert_knolles|Robert Knolles]], lèvent ainsi des compagnies fidèles qui servent campagne après campagne.\n\nAu combat, les hommes d'armes des retenues mettent pied à terre au centre, entre des ailes d'archers : c'est la [[cdx_tactique_anglaise|tactique anglaise]]. La proportion d'archers ne cesse de croître, d'environ un pour un dans les années 1340 à plus de trois pour un à [[cdx_azincourt|Azincourt]] en 1415.",
+  "gameplay": "Compagnie de 80 hommes (infanterie). Recrutement : 1150 livres payées à l'enrôlement ; entretien 110 livres par mois, soit 440 par saison. Caractéristiques : mêlée 72, armure 78 (laisse passer 40 % des coups), moral 80, vitesse 35 (1,4 m/s). Exige la technologie [[cdx_tactique_anglaise|Tactique des hommes d'armes à pied]] ; la faction Royaume d'Angleterre. La place doit compter assez de nobles (dix fois l'effectif). Pied à terre : ordre irréversible ; vitesse plafonnée à 35, armure +8, plus de charge. À l'assaut d'une place, elle met pied à terre d'elle-même, sans le bonus d'armure. Le meilleur fantassin anglais : au centre, entre deux ailes d'[[cdx_arc_long|archers]] plantés sur leurs pieux, il reçoit la charge que les flèches ont déjà désorganisée. Lent : ne comptez pas sur lui pour poursuivre.",
+  "entity": "unit_english_retinue",
+  "see_also": [
+    "cdx_hommes_d_armes",
+    "cdx_tactique_anglaise",
+    "cdx_arc_long",
+    "cdx_rancon"
+  ],
+  "sources": [
+    "Endenture",
+    "Armée anglaise durant la guerre de Cent Ans",
+    "Bataille d'Azincourt"
+  ]
+}

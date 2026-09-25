@@ -2,12 +2,30 @@
   "id": "cdx_taille",
   "title": "La taille royale",
   "category": "economie",
-  "aliases": ["taille royale", "tailles", "fouage", "fouages", "impôt par feu"],
-  "era": { "from": "1360", "to": "1789" },
+  "aliases": [
+    "taille royale",
+    "tailles",
+    "fouage",
+    "fouages",
+    "impôt par feu"
+  ],
+  "era": {
+    "from": "1360",
+    "to": "1789"
+  },
   "summary": "La taille est un impôt direct levé sur chaque foyer. D'abord temporaire, sous la forme du fouage, elle devient permanente sous [[cdx_charles_vii|Charles VII]] à partir de 1439 pour payer une armée permanente. Nobles et clercs en sont exemptés.",
   "body": "À l'origine, la taille est un prélèvement seigneurial : le seigneur « taille », c'est-à-dire prélève, une part des biens de ses paysans. Pendant la guerre de Cent Ans, le roi reprend le principe à l'échelle du royaume. Pour financer la défense, [[cdx_charles_v|Charles V]] lève à partir de 1363 des fouages, impôts calculés par feu, c'est-à-dire par foyer, qu'il répartit entre les paroisses.\n\nCes impôts directs doivent en principe être consentis par des assemblées, comme les [[cdx_etats_generaux|états généraux]] ou les états des provinces, et ne durer que le temps de la guerre. Charles V abolit les fouages sur son lit de mort en 1380, mais les besoins sont trop grands : sous [[cdx_charles_vi|Charles VI]], des tailles sont régulièrement levées, alimentant la colère contre les princes qui les dépensent.\n\nLe tournant se situe en 1439. Réunis à Orléans, les états généraux acceptent que le roi lève chaque année une taille pour entretenir une armée permanente, qui doit mettre fin aux ravages des Écorcheurs. Ce seront les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] de 1445, puis les [[cdx_franc_archer|francs-archers]]. Dès lors, [[cdx_charles_vii|Charles VII]] et ses successeurs lèvent la taille sans plus demander l'accord des états.\n\nLa taille est répartie par le conseil du roi entre les provinces, puis par les élus entre les paroisses, où des collecteurs choisis parmi les habitants la font rentrer. Le clergé et la noblesse en sont exemptés, de même que de nombreuses villes privilégiées. Elle pèse donc surtout sur les paysans, jusqu'à son abolition en 1789.",
-  "gameplay": "Le jeu ne lève pas la taille comme un impôt séparé : l'impôt direct est réglé par le [[cdx_jeu_impot|taux d'imposition]] (bas, normal ou haut), qui pèse sur toutes les classes de la population. La technologie « Fiscalité royale », liée à cette fiche, représente la naissance de l'impôt permanent : +10 % d'impôts et +3 de mécontentement des bourgeois. La technologie « Francs-archers » rappelle l'exemption de taille accordée aux archers des paroisses, et « Armée permanente » l'union de la taille et des compagnies d'ordonnance.",
+  "gameplay": "Le jeu ne lève pas la taille comme un impôt séparé : l'impôt direct est réglé par le [[cdx_jeu_impot|taux d'imposition]] (bas, normal ou haut), qui pèse sur toutes les classes de la population. La technologie « Fiscalité royale », liée à cette fiche, représente la naissance de l'impôt permanent : +10 % d'impôts et +3 de mécontentement des bourgeois. La technologie « Francs-archers » rappelle l'exemption de taille accordée aux archers des paroisses, et « Armée permanente » l'union de la taille et des compagnies d'ordonnance.\n\n« Fiscalité royale » coûte 200 points de recherche, sans prérequis. Les bourgeois paient et le font savoir : surveillez l'agitation des villes.",
   "entity": "tech_royal_taxation",
-  "see_also": ["cdx_jeu_impot", "cdx_aides", "cdx_gabelle", "cdx_compagnies_ordonnance", "cdx_etats_generaux"],
-  "sources": ["Taille (impôt)", "Fouage"]
+  "see_also": [
+    "cdx_jeu_impot",
+    "cdx_aides",
+    "cdx_gabelle",
+    "cdx_compagnies_ordonnance",
+    "cdx_etats_generaux"
+  ],
+  "sources": [
+    "Taille (impôt)",
+    "Fouage"
+  ]
 }

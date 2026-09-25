@@ -1,0 +1,31 @@
+{
+  "id": "cdx_barbiers_chirurgiens",
+  "title": "Barbiers et chirurgiens",
+  "category": "technique",
+  "aliases": [
+    "Barbiers-chirurgiens",
+    "barbier-chirurgien",
+    "barbiers",
+    "chirurgiens de robe courte",
+    "confrérie de Saint-Côme"
+  ],
+  "era": {
+    "from": "1268",
+    "to": "1500"
+  },
+  "summary": "Loin des médecins savants, barbiers et chirurgiens de métier saignent, pansent, réduisent les fractures et retirent les flèches. Ce sont eux qui suivent les armées et soignent les blessés des batailles.",
+  "body": "À Paris, le Livre des métiers d'Étienne Boileau (v. 1268) réglemente déjà les barbiers. Au-dessus d'eux, les chirurgiens « de robe longue », réunis dans la confrérie de Saint-Côme, revendiquent un savoir écrit ; les barbiers, « de robe courte », rasent, saignent et soignent les plaies courantes. Les querelles entre les deux corps et la faculté de médecine durent tout le Moyen Âge.\n\nSur les champs de bataille, ce sont eux qui extraient les pointes de flèche, cautérisent et recousent. Les grands traités, comme la Chirurgia magna de [[cdx_guy_de_chauliac|Guy de Chauliac]] (1363), transmettent leurs gestes, et l'[[cdx_pavot|éponge soporifique]] leur permet d'opérer un patient endormi.",
+  "gameplay": "Recherche : 200 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_humeurs|Théorie des humeurs]]. Effets, pour toute la faction : +15 % des pertes d'une bataille rangée reviennent dans les rangs (plafond 50 %).",
+  "entity": "tech_barber_surgeons",
+  "see_also": [
+    "cdx_guy_de_chauliac",
+    "cdx_medecine_medievale",
+    "cdx_humeurs",
+    "cdx_pavot"
+  ],
+  "sources": [
+    "Barbier-chirurgien",
+    "Livre des métiers",
+    "Collège de Saint-Côme"
+  ]
+}
