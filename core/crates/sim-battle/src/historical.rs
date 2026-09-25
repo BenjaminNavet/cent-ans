@@ -198,6 +198,10 @@ pub struct Wave {
     /// regiments in a melee, routing or gone).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub after: Option<usize>,
+    /// Once released, the wave goes straight at the enemy (the AI no longer
+    /// weighs whether to attack: the French "battles" of Crécy).
+    #[serde(default)]
+    pub assault: bool,
 }
 
 /// General of a historical army.
@@ -483,6 +487,12 @@ impl HistoricalMap {
         self.apply_site(sim.field_mut());
         sim.set_weather(self.weather.start);
         sim.set_start_hour(self.start_hour);
+        let weather = if self.weather.label.is_empty() {
+            self.weather.start.label_fr().to_owned()
+        } else {
+            self.weather.label.clone()
+        };
+        sim.set_opening_line(format!("{}, {} : {}.", self.name, self.site.place, weather));
         sim.deploy_historical(&self.armies, &self.weather.changes);
         Ok(sim)
     }

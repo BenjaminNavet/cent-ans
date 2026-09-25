@@ -280,6 +280,25 @@ def geo_horizon(
     )
 
 
+@geo_app.command("battle-site")
+def geo_battle_site(
+    maps: str = typer.Option(
+        "",
+        "--maps",
+        help="Ne cuire que ces cartes (ids séparés par des virgules)",
+    ),
+    no_tiles: bool = typer.Option(
+        False, "--no-tiles", help="Relief du champ seulement, sans tuile d'horizon"
+    ),
+) -> None:
+    """Relief réel des champs de bataille historiques et tuile d'horizon du site (EP7)."""
+    from cent_ans_tools.geo import battle_site
+
+    only = [m.strip() for m in maps.split(",") if m.strip()]
+    done = battle_site.bake(only or None, tiles=not no_tiles)
+    console.print(f"Sites cuits : {', '.join(done) or 'aucun'}")
+
+
 @app.command("export-data")
 def export_data_command(
     app_path: str = typer.Option(
