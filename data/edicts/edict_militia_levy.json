@@ -3,7 +3,7 @@
   "name": {
     "display": "Levée de la milice"
   },
-  "description": "Arrière-ban et milices communales mis sur pied (comme pour le guet des villes ou l'arrière-ban féodal) : la province lève et arme plus vite, au prix de la paix sociale et des champs délaissés.",
+  "description": "[[cdx_ost_feodal|Arrière-ban]] et milices communales mis sur pied (comme pour le guet des villes) : la province [[cdx_jeu_recrutement|lève et arme]] plus vite, au prix de la [[cdx_jeu_ordre_public|paix sociale]] et des champs délaissés.",
   "delay_turns": 1,
   "effects": [
     { "effect": "recruit_slots", "value": 1 },

@@ -22,11 +22,10 @@
       "value": 1
     }
   ],
-  "description": "Enceintes de pierre à tours flanquantes et courtines crénelées.",
+  "description": "Enceintes de pierre à tours flanquantes et courtines crénelées, qui font des [[cdx_places_fortes|villes closes]] et des châteaux des places difficiles à prendre.",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Château fort",
+    "Architecture philippienne",
+    "Enceinte urbaine"
   ]
 }

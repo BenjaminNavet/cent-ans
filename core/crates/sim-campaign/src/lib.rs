@@ -41,6 +41,7 @@ pub mod characters;
 pub mod chivalry;
 pub mod chronicle;
 pub mod coinage;
+pub mod difficulty;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;

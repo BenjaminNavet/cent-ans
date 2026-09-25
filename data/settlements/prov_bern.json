@@ -51,7 +51,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville fondée par les ducs de Zähringen au bord de l'Aar, alliée de Berne.",
+    "description": "Ville et château des Zähringen, puis des comtes de Kybourg, au débouché du lac de Thoune ; elle ne passera à Berne qu'en 1384.",
     "sources": [
       "Thoune"
     ]
@@ -77,7 +77,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château zähringien surplombant l'Emme, ancienne résidence seigneuriale.",
+    "description": "Château zähringien surplombant l'Emme, résidence des comtes de Kybourg, adversaires de Berne à Laupen (1339).",
     "sources": [
       "Berthoud"
     ]

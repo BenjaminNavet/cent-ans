@@ -12,6 +12,12 @@ extends RefCounted
 ## sauf si la feature porte une propriété explicite `index`.
 
 const HEIGHT_SCALE := 0.006
+## Facteur vertical courant (unités monde par mètre), propriétaire unique de l'échelle verticale
+## (ADR 0036) : vaut `HEIGHT_SCALE` aujourd'hui ; le lot ZG4 le rendra dynamique (exagération
+## ramenée vers ×1,5 au zoom maximal). Lu par le shader de terrain (`height_scale`), le quadtree
+## et `surface_height_at`.
+static var _vertical_scale: float = HEIGHT_SCALE
+
 
 var map_dir: String = ""
 var load_error: String = ""
@@ -68,6 +74,10 @@ var province_index_by_id: Dictionary = {}
 ## `importance` = ordre de Strahler si présent, sinon 12 − scalerank (Natural Earth).
 var rivers: Array[Dictionary] = []
 var coastlines: Array[PackedVector2Array] = []
+
+
+static func vertical_scale() -> float:
+	return _vertical_scale
 
 
 static func load_from_dir(dir: String) -> MapData:
@@ -364,7 +374,7 @@ func height_m_at(x: float, y: float) -> float:
 
 ## Altitude monde (Y Godot) en coordonnées carte.
 func height_world_at(x: float, y: float) -> float:
-	return height_m_at(x, y) * HEIGHT_SCALE
+	return height_m_at(x, y) * vertical_scale()
 
 
 ## Altitude monde, jamais sous le niveau de la mer (pour poser des objets).

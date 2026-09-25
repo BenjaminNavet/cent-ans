@@ -1,0 +1,20 @@
+{
+  "id": "cdx_jeu_brulots",
+  "title": "Feu, brûlots et naufrages",
+  "category": "mecanique",
+  "aliases": [
+    "brûlot",
+    "brûlots",
+    "flèches enflammées",
+    "le feu prend à bord",
+    "naufrage",
+    "noyés"
+  ],
+  "era": { "from": "1338", "to": "1453" },
+  "summary": "Un navire de bois, de chanvre et de poix brûle comme une torche. Sur mer, le feu est l'arme la plus redoutée : il gagne les navires amarrés, chasse l'équipage à l'eau, et les hommes en armure s'y noient.",
+  "body": "Coques calfatées à la poix, voiles et cordages de chanvre, ponts encombrés : un navire médiéval prend feu facilement et s'éteint difficilement, surtout par grand vent. Les marins luttent avec des seaux d'eau de mer, du sable et des peaux mouillées tendues sur les bords ; si le feu gagne les voiles et la mâture, il n'y a plus qu'à abandonner le navire.\n\nÀ La Rochelle, les 22 et 23 juin 1372, les galères castillanes d'Ambrosio Boccanegra, venues au secours de [[cdx_charles_v|Charles V]], accablent de traits enflammés et de projectiles incendiaires les cogues anglaises du comte de Pembroke, échouées à marée basse. La flotte anglaise brûle ; Pembroke est pris avec l'argent qu'il apportait pour payer les troupes de Guyenne, et la mer de Gascogne passe pour des années aux alliés du roi de France.\n\nLe brûlot, navire chargé de matières inflammables qu'on lance allumé contre la flotte ennemie, est connu depuis l'Antiquité ; mais c'est surtout aux XVIe et XVIIe siècles qu'il devient une arme courante. Dans une mêlée de navires accrochés les uns aux autres, le feu d'un seul peut détruire amis et ennemis à la fois.\n\nQuand un navire sombre, ceux qui tombent à la mer sans savoir nager — la plupart — ou lestés de fer se noient : à [[cdx_ecluse|l'Écluse]], les chroniqueurs décrivent des milliers de Français noyés dans le Zwin.",
+  "anachronism": "La bataille de démonstration de La Rochelle donne aux Castillans deux barges lancées en brûlots ; les sources parlent plutôt de traits et de projectiles incendiaires.",
+  "gameplay": "Ordre « Flèches enflammées » : 15 % des tireurs du navire lancent des traits enflammés, chacun ajoutant un peu de feu à la cible (moins sur une cogue ou une nef, un peu résistantes au feu, que sur une galère). Le feu d'un navire croît de 3 à 9 % de sa valeur par seconde selon la force du vent ; ses marins le combattent (jusqu'à 1 point par seconde à plein effectif). Il ronge la coque, tue des hommes, sape le moral de l'équipage et gagne les navires accrochés ou bord à bord. À 75 %, l'équipage abandonne le navire et se jette à l'eau.\n\nUne coque détruite sombre en 25 secondes. Les hommes à la mer se noient à 35 %, plus la moitié de leur armure en pour cent (un homme d'armes en plates, armure 75, se noie à plus de 70 %) ; les autres gagnent à la nage le navire ami le plus proche. La perte d'un navire (coulé, pris, en fuite) ébranle le moral de toute sa flotte, et deux fois et demie plus si c'est le navire amiral. Un brûlot fonce sur sa cible, y met un grand feu (45 %) et son équipage s'éloigne à la rame.\n\nConseil : tirez des flèches enflammées sur une ligne ennemie amarrée, mais décrochez vos propres navires d'un ennemi en feu avant qu'il ne les embrase.",
+  "see_also": ["cdx_jeu_bataille_navale", "cdx_jeu_abordage", "cdx_jeu_incendies", "cdx_ecluse", "cdx_charles_v", "cdx_castille"],
+  "sources": ["Bataille de La Rochelle (1372)", "Brûlot", "Bataille de l'Écluse"]
+}

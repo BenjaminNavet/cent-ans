@@ -14,6 +14,7 @@ use godot::prelude::*;
 mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_agents;
+mod campaign_sim_difficulty;
 mod campaign_sim_diplomacy;
 mod campaign_sim_edicts;
 mod campaign_sim_events;
@@ -32,10 +33,12 @@ mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
 mod naval_sim;
+mod relief_decoder;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 pub use naval_sim::NavalBattleSim;
+pub use relief_decoder::ReliefDecoder;
 
 struct CentAnsExtension;
 

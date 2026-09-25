@@ -1,7 +1,7 @@
 {
   "id": "evt_la_rochelle",
   "title": "La bataille de La Rochelle",
-  "text": "Devant La Rochelle, les galères de Castille, alliées du roi de France, attaquent la flotte du comte de Pembroke. Deux jours durant, elles lancent huile et feu sur les nefs anglaises ; Pembroke est pris, et avec lui la solde de l'armée d'Aquitaine.",
+  "text": "Devant [[cdx_bataille_de_la_rochelle|La Rochelle]], les galères de Castille, alliées du roi de France, attaquent la flotte du comte de Pembroke. Deux jours durant, elles lancent huile et feu sur les nefs anglaises ; Pembroke est pris, et avec lui la solde de l'armée d'Aquitaine.",
   "kind": "historical",
   "trigger": {
     "date": {
