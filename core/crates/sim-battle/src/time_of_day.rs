@@ -1,4 +1,4 @@
-//! Time of day of a battle (lot EP8, ADR 0052): dawn, morning, midday,
+//! Time of day of a battle (lot EP8, ADR 0055): dawn, morning, midday,
 //! afternoon, dusk and night (`data/rules/battle_time_of_day.json`, schema
 //! `data/schemas/battle_time_of_day_rules.schema.json`).
 //!

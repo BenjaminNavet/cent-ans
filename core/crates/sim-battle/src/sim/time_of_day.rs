@@ -1,4 +1,4 @@
-//! EP8: the hour of the day on the battlefield (ADR 0052). The day moves on
+//! EP8: the hour of the day on the battlefield (ADR 0055). The day moves on
 //! with the battle; dawn, dusk and night shorten the shooters' range.
 
 use super::BattleSim;

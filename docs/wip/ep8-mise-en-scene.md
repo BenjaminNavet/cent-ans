@@ -1,6 +1,6 @@
 # Lot EP8 — Mise en scène des batailles
 
-Branche `worktree-agent-a8a54631be0d814c5`. Plan du chantier : `docs/wip/epic.md`. ADR : 0052
+Branche `worktree-agent-a8a54631be0d814c5`. Plan du chantier : `docs/wip/epic.md`. ADR : 0055
 (à écrire ; 0053 est pris ailleurs, vérifier avant de commiter).
 
 ## Conception
@@ -32,4 +32,4 @@ Branche `worktree-agent-a8a54631be0d814c5`. Plan du chantier : `docs/wip/epic.md
 
 ## Prochaine étape
 Captures (`--birds-shot`, `--cinematic-shot` à brancher dans `_stage_screenshot`), crépuscule,
-mesures A/B (`tools/bench_ep1.sh`), ADR 0052, smoke complet.
+mesures A/B (`tools/bench_ep1.sh`), ADR 0055, smoke complet.
