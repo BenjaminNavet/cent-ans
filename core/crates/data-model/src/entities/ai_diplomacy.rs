@@ -157,6 +157,14 @@ pub struct NegotiationRules {
     pub demand_score: i32,
     /// Minimum acceptance chance (percent) of a treaty the AI sends.
     pub ai_min_chance: u8,
+    /// Truce (seasons) after a treaty peace (the Hundred Years' War was a
+    /// string of short truces: Malestroit 1343, Bordeaux 1357).
+    pub peace_truce_turns: u32,
+    /// A pretender to the other's throne resists any peace that gives it
+    /// no land, unless badly beaten.
+    pub pretender_reluctance: i32,
+    /// Most weariness gained in one season.
+    pub max_weariness_gain: u32,
 }
 
 impl Default for NegotiationRules {
@@ -185,6 +193,9 @@ impl Default for NegotiationRules {
             unmet_goals_reluctance: 15,
             demand_score: 20,
             ai_min_chance: 60,
+            peace_truce_turns: 12,
+            pretender_reluctance: 20,
+            max_weariness_gain: 3,
         }
     }
 }

@@ -24,6 +24,7 @@ mod campaign_sim_settlements;
 mod campaign_sim_siege;
 mod campaign_sim_table;
 mod campaign_sim_tech;
+mod campaign_sim_treaty;
 mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod convert;
