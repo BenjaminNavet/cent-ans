@@ -1,7 +1,7 @@
 class_name RosterCard
 extends Control
 
-## Carte de régiment des écrans d'avant- et d'après-bataille (UB1), à la Total War : illustration
+## Carte de régiment des écrans d'avant- et d'après-bataille (UB1) : illustration
 ## peinte du type d'unité (`assets/illustrations/<type>.jpg`) ou, à défaut, blason + icône,
 ## bandeau aux couleurs du camp, effectif en gros, chevrons d'expérience, barre d'effectif.
 ## En mode « bilan » (`set_losses`), la part tombée est voilée de rouge et la carte affiche

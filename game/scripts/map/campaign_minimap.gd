@@ -1,7 +1,7 @@
 class_name CampaignMinimap
 extends PanelContainer
 
-## Minicarte de campagne (lot C1), façon Total War, dans un cadre de parchemin : terres et mer,
+## Minicarte de campagne (lot C1), dans un cadre de parchemin : terres et mer,
 ## couleurs de faction par province, frontières, provinces voilées par le brouillard, armées
 ## visibles en points, cadre de la vue caméra. Clic ou glisser = `clicked(map_pos)` (la carte
 ## recentre la caméra). Deux modes : politique (aplats de faction) et relief.

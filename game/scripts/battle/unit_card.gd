@@ -1,7 +1,7 @@
 class_name UnitCard
 extends RichPanel
 
-## Carte d'unité en vignette à la Total War (lot B2, après F5b) : illustration du type d'unité en
+## Carte d'unité en vignette (lot B2, après F5b) : illustration du type d'unité en
 ## fond (`res://assets/illustrations/<type>.jpg` si elle existe ; sinon composition du blason de
 ## la faction, de la couleur du camp et de l'icône de classe), effectif en gros, barres fines
 ## moral / fatigue / munitions, état en pastille, étoile du général, numéros de groupe. Le nom,

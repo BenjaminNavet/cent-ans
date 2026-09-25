@@ -1,7 +1,7 @@
 class_name CharacterSheet
 extends PanelContainer
 
-## Fiche personnage à la Total War (lot C3) : colonne de gauche = grand portrait encadré
+## Fiche personnage (lot C3) : colonne de gauche = grand portrait encadré
 ## d'or avec l'écu de la faction, titres, pastilles d'âge/piété/prestige, niveaux des
 ## domaines, famille, actions (gouverneur/commandement/mariage) ; à droite = description
 ## (Codex), traits en pastilles illustrées (infobulles riches) et arbre de compétences
@@ -277,7 +277,7 @@ func _show_blockers(character: Dictionary, governable: Array, commandable: Array
 	_blocker_label.visible = not lines.is_empty()
 
 
-# --- C3 : présentation à la Total War ------------------------------------------------------
+# --- C3 : présentation ---------------------------------------------------------------------
 
 
 func _build_tw_layout() -> void:
