@@ -17,10 +17,8 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_port",
-      "bld_abbey",
       "bld_cathedral",
       "bld_palisade",
       "bld_muster_field"
@@ -77,8 +75,7 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_castle",
-      "bld_stone_walls"
+      "bld_castle"
     ],
     "port": true,
     "description": "Château royal danois commandant le détroit vers Falster, résidence des Valdemar ; en 1337 le royaume est engagé aux comtes de Holstein.",
