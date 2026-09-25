@@ -1,0 +1,36 @@
+{
+  "id": "crecy",
+  "name": "Bataille de Crécy",
+  "date": "1346-08-26",
+  "year": 1346,
+  "summary": "Squelette (EP7) : carte en cours de construction.",
+  "province": "prov_ponthieu",
+  "province_name": "Ponthieu",
+  "terrain": "plains",
+  "season": "summer",
+  "site": { "lon": 1.9, "lat": 50.262, "bearing_deg": 315, "place": "Crécy-en-Ponthieu" },
+  "field": { "width_m": 2400, "depth_m": 1600, "line_gap_m": 700, "zone_depth_m": 500, "max_regiments_per_side": 80 },
+  "weather": { "start": "rain", "changes": [{ "at_s": 60, "weather": "clear" }] },
+  "start_hour": 17.0,
+  "armies": {
+    "attacker": {
+      "faction": "fac_france",
+      "faction_name": "France",
+      "regiments": [
+        { "unit_type": "unit_genoese_crossbowmen", "count": 4, "x": 1200, "z": 450, "facing_deg": 0 },
+        { "unit_type": "unit_knights", "count": 4, "x": 1200, "z": 300, "facing_deg": 0, "wave": 1 }
+      ],
+      "waves": [{ "label": "Les arbalétriers génois" }, { "label": "La bataille du comte d'Alençon", "release_s": 120, "after": 0 }]
+    },
+    "defender": {
+      "faction": "fac_england",
+      "faction_name": "Angleterre",
+      "regiments": [
+        { "unit_type": "unit_longbowmen", "count": 4, "x": 1200, "z": 1150, "facing_deg": 180, "hold": true },
+        { "unit_type": "unit_men_at_arms_foot", "count": 3, "x": 1200, "z": 1200, "facing_deg": 180, "hold": true }
+      ]
+    }
+  },
+  "historical_winner": "defender",
+  "campaign": { "from_year": 1337, "to_year": 1360 }
+}

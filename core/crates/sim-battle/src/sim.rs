@@ -12,6 +12,7 @@ mod indirect;
 mod obstacles;
 mod pathing;
 mod reinforcements;
+mod scenario;
 mod separation;
 mod siege_assault;
 mod siege_extra;
@@ -165,6 +166,8 @@ pub struct BattleSim {
     decision: crate::decision::DecisionRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
+    /// EP7: scenario of a historical battle (waves, posts, weather).
+    scenario: Option<Box<scenario::Scenario>>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -432,6 +435,7 @@ impl BattleSim {
             decision: crate::decision::DecisionRules::bundled().clone(),
             clock: Default::default(),
             end: None,
+            scenario: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1241,10 +1245,14 @@ impl BattleSim {
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
+            self.tick_scenario();
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
-                        let _ = self.apply_command(command, Some(side));
+                        // EP7: held waves and posted regiments (historical maps).
+                        if let Some(command) = self.scenario_filter(command) {
+                            let _ = self.apply_command(command, Some(side));
+                        }
                     }
                 }
             }

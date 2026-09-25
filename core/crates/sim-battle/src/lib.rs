@@ -51,6 +51,7 @@ mod decor_gen;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod historical;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
@@ -86,6 +87,7 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use historical::HistoricalMap;
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,
