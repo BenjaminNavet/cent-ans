@@ -1,7 +1,8 @@
 shader_type canvas_item;
 
 // Minicarte de campagne (lot C1) : fond pré-calculé (relief/mer, index de province réduits),
-// couleurs de faction et brouillard en textures 1D indexées par province, frontières
+// couleurs de faction en texture 1D indexée par province, brouillard par case (M5a, texture de
+// vue de la simulation ; repli : masque 1D par province), frontières
 // détectées sur les texels voisins. Aucun calcul de règle : couleurs et masque viennent du jeu.
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable;
@@ -9,6 +10,11 @@ uniform sampler2D relief : filter_linear, repeat_disable;
 uniform sampler2D faction_colors : filter_nearest, repeat_disable, hint_default_transparent;
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
+// M5a : brouillard par case (texture de vue R8, 255 = vu) ; `fog_crop` = emprise affichée
+// (origine, taille) en coordonnées normalisées de cette texture.
+uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
+uniform bool fog_by_cell = false;
+uniform vec4 fog_crop = vec4(0.0, 0.0, 1.0, 1.0);
 uniform bool political = true;
 uniform vec3 parchment : source_color = vec3(0.90, 0.84, 0.68);
 uniform vec3 ink : source_color = vec3(0.22, 0.14, 0.07);
@@ -26,9 +32,13 @@ vec4 faction_of(int id) {
 	return texelFetch(faction_colors, ivec2(clamp(id, 0, textureSize(faction_colors, 0).x - 1), 0), 0);
 }
 
-float seen(int id) {
+float seen(int id, vec2 uv) {
 	if (!fog_enabled || id <= 0) {
 		return 1.0;
+	}
+	if (fog_by_cell) {
+		float r = texture(fog_cells, fog_crop.xy + uv * fog_crop.zw).r;
+		return smoothstep(0.3, 0.7, r);
 	}
 	return texelFetch(fog_mask, ivec2(clamp(id, 0, textureSize(fog_mask, 0).x - 1), 0), 0).r;
 }
@@ -66,11 +76,14 @@ void fragment() {
 		col = mix(col, ink, 0.75 * realm_edge);
 		// Brouillard (A1-03) : province hors de vue désaturée et voilée de brume claire
 		// (parchemin), légèrement hachurée ; jamais noircie.
-		if (seen(id) < 0.5) {
+		// M5a : par case, fondu doux sur la lisière (masque filtré).
+		float hidden = 1.0 - seen(id, UV);
+		if (hidden > 0.0) {
 			float lum = dot(col, vec3(0.299, 0.587, 0.114));
-			col = mix(mix(col, vec3(lum), 0.8), veil, 0.55);
+			vec3 fogged = mix(mix(col, vec3(lum), 0.8), veil, 0.55);
 			float hatch = step(3.0, mod(FRAGCOORD.x + FRAGCOORD.y, 5.0));
-			col = mix(col, ink, 0.08 * hatch);
+			fogged = mix(fogged, ink, 0.08 * hatch);
+			col = mix(col, fogged, hidden);
 		}
 	}
 	COLOR = vec4(col, 1.0);
