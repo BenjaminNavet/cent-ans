@@ -11,7 +11,8 @@
   ],
   "historical_year": {
     "value": "1346",
-    "note": "Bombardes anglaises à Crécy (1346) ; sièges de Calais (1346-1347)."
+    "note": "Premiers canons figurés dans le manuscrit de Walter de Milemete (1326) ; petites bouches à feu anglaises à Crécy (1346) discutées, canons attestés au siège de Calais (1346-1347).",
+    "uncertain": true
   },
   "unlocks": {
     "units": [
@@ -24,11 +25,10 @@
       "value": -5
     }
   ],
-  "description": "Canons de fer forgé à frettes tirant des boulets de pierre : premiers engins à poudre efficaces contre les murailles.",
+  "description": "Canons de fer forgé à frettes tirant des boulets de pierre : premiers engins à poudre efficaces contre les murailles, ancêtres des grandes [[cdx_bombarde|bombardes]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
+    "Bombarde",
     "Artillerie médiévale",
-    "Économie médiévale"
+    "Siège de Calais (1346-1347)"
   ]
 }

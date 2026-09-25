@@ -1,0 +1,30 @@
+{
+  "id": "cdx_coutiliers",
+  "title": "Les coutiliers",
+  "category": "unite",
+  "aliases": [
+    "Coutiliers",
+    "coutilier",
+    "coustille",
+    "coustilliers"
+  ],
+  "era": {
+    "from": "1445",
+    "to": "1500"
+  },
+  "summary": "Le coutilier est le second combattant de la « lance fournie » des [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] : un valet de guerre armé de la coustille, longue dague ou épée courte, qui soutient l'[[cdx_hommes_d_armes|homme d'armes]] et achève l'adversaire jeté à terre.",
+  "body": "La coustille, ou coutille, est une lame étroite et longue, à mi-chemin entre la dague et l'épée courte. Dès [[cdx_crecy|Crécy]], Froissart montre des Gallois et des Cornouaillais « qui portaient grandes coutilles » achevant les chevaliers français renversés. Le mot désigne ensuite le combattant lui-même, valet armé qui accompagne un homme d'armes.\n\nLes ordonnances de [[cdx_charles_vii|Charles VII]] (1445) donnent au coutilier une place fixe dans la « lance fournie », l'unité de base des [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] : un homme d'armes, un coutilier, un page et deux archers, tous montés. Moins bien armé que son maître (brigandine ou jaque, salade, gantelets), il combat à ses côtés, à cheval ou à pied, et se charge des adversaires désarçonnés. Charles le Téméraire reprend la même organisation dans ses propres ordonnances bourguignonnes (1471-1473).\n\nÀ la fin du XVe siècle, les coutiliers se fondent dans la cavalerie légère, tandis que la lance fournie se réduit peu à peu à l'homme d'armes et à ses archers.",
+  "gameplay": "Compagnie de 100 hommes (infanterie). Recrutement : 460 livres payées à l'enrôlement ; entretien 42 livres par mois, soit 168 par saison. Caractéristiques : mêlée 52, armure 42 (laisse passer 68 % des coups), moral 52, vitesse 52 (2,08 m/s). Exige la technologie [[cdx_ordonnance_louppy|Compagnies d'ordonnance]] ; l'une des factions Royaume de France, Duché de Bretagne ou Duché de Bourgogne. Recrutable à partir de 1445. La place doit compter assez de paysans (dix fois l'effectif). Infanterie moyenne bon marché des ordonnances : à placer derrière les gendarmes pour exploiter une charge, tenir un flanc ou achever une troupe en fuite (dégâts ×1,5 contre une compagnie en déroute).",
+  "entity": "unit_coutiliers",
+  "see_also": [
+    "cdx_compagnies_ordonnance",
+    "cdx_hommes_d_armes",
+    "cdx_ordonnance_louppy",
+    "cdx_lanciers_gallois"
+  ],
+  "sources": [
+    "Coutilier",
+    "Compagnie d'ordonnance",
+    "Lance fournie"
+  ]
+}
