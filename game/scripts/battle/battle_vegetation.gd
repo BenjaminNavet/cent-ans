@@ -39,6 +39,10 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		mat.set_shader_parameter("macro_noise", terrain.macro_noise)
 		mat.set_shader_parameter("splat_a", terrain.splat_a)
 		mat.set_shader_parameter("splat_b", terrain.splat_b)
+		if terrain.decor_on:
+			# EP6 : parcelles du décor (labours sans herbe, blé haut, chaume ras).
+			mat.set_shader_parameter("decor_fields", terrain.decor_fields)
+			mat.set_shader_parameter("decor_on", 1.0)
 		mat.set_shader_parameter("splat_rect", Vector4(hr.position.x, hr.position.y, hr.size.x, hr.size.y))
 		mat.set_shader_parameter("spacing", spacing)
 		mat.set_shader_parameter("radius", radius)
