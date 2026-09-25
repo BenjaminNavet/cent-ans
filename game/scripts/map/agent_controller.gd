@@ -284,7 +284,7 @@ func order_move(agent_id: String, settlement_id: String) -> Dictionary:
 func _unhandled_input(event: InputEvent) -> void:
 	if not available():
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_G:
+	if event.is_action_pressed("map_toggle_agents") and not event.is_echo():  # U7
 		toggle_registry()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel") and selected_agent != "":

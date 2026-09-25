@@ -146,7 +146,7 @@ func _refresh() -> void:
 		var supply := int(army.get("supply", 0))
 		_add_status("supply", "%d %%" % supply, "Ravitaillement", HudStyle.gauge_color(supply / 100.0))
 		var moves := int(army.get("movement_points", 0))
-		_add_status("movement", str(moves), "Mouvement restant : %d point(s)" % moves)
+		_add_status("movement", str(moves), "Mouvement restant : %s" % FrText.count(moves, "point"))
 	tooltip_text = _tooltip_text()
 	queue_redraw()
 
@@ -188,7 +188,7 @@ func _tooltip_text() -> String:
 	var lines := PackedStringArray([_name_label.text])
 	var points := unspent_points()
 	if points > 0:
-		lines.append("%d point(s) de compétence à dépenser" % points)
+		lines.append("%s de compétence à dépenser" % FrText.count(points, "point"))
 	lines.append("Clic : fiche du personnage")
 	return "\n".join(lines)
 

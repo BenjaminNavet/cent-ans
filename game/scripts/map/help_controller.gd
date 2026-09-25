@@ -4,15 +4,9 @@ extends Node
 ## Aide en jeu (F1 ou Menu → Aide) : commandes et principes du jeu, en français. Séparé de
 ## `campaign_map.gd` ; celui-ci n'appelle que `setup` et `handle_input`.
 
-const HELP_TEXT := """[b]Commandes de la carte[/b]
-• Déplacer la caméra : W A S D (Z Q S D en AZERTY), flèches ou bords d'écran (F2 pour désactiver) ; molette : zoom ; Q / E (A / E en AZERTY) : rotation.
-• Clic gauche : sélectionner une armée ou une province. Clic droit (armée sélectionnée) : ordre de déplacement.
-• Entrée : fin du tour. Échap : désélectionner.
-• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. G : agents. K : Codex. L : tutoriel. F1 : cette aide. F5 : sauvegarde rapide, F9 : chargement rapide. Échap : ferme la fenêtre du dessus.
-• Modes de carte : M mécontentement, N diplomatie, R religion. F12 : capture d'écran.
-• Volumes de la musique et des effets : menu de départ ou Menu → Son…
-
-[b]La campagne[/b]
+## Principes du jeu ; la fiche des commandes de la carte, en tête, est générée depuis
+## l'InputMap (`ShortcutSheet`, lot U7) à chaque ouverture (disposition du clavier à jour).
+const HELP_TEXT := """[b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
 • Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte 5 % des hommes (10 % l'hiver).
 • Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (3 % de l'excédent au-delà de huit saisons de revenu). En dette, les troupes perdent du moral : licenciez.
@@ -36,6 +30,7 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 
 var map: Node = null  # CampaignMap
 var panel: PanelContainer
+var text: RichTextLabel
 
 
 func setup(campaign_map: Node) -> void:
@@ -61,9 +56,9 @@ func setup(campaign_map: Node) -> void:
 	close.pressed.connect(func() -> void: panel.hide())
 	header.add_child(close)
 	box.add_child(header)
-	var text := RichTextLabel.new()
+	text = RichTextLabel.new()
 	text.bbcode_enabled = true
-	text.text = HELP_TEXT
+	text.text = full_text()
 	text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	text.add_theme_font_size_override("normal_font_size", 15)
 	text.add_theme_font_size_override("bold_font_size", 17)
@@ -78,11 +73,18 @@ func setup(campaign_map: Node) -> void:
 
 
 func toggle() -> void:
+	if not panel.visible:
+		text.text = full_text()
 	panel.visible = not panel.visible
 
 
+## Fiche des raccourcis (InputMap) puis principes du jeu.
+static func full_text() -> String:
+	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), HELP_TEXT]
+
+
 func handle_input(event: InputEvent) -> bool:
-	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_F1:
+	if event.is_action_pressed("help_open") and not event.is_echo():  # U7 : action de l'InputMap
 		toggle()
 		return true
 	return false

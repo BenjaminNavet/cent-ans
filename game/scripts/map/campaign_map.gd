@@ -882,6 +882,8 @@ func _on_end_turn() -> void:
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
+	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
+		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
@@ -894,7 +896,7 @@ func _on_end_turn() -> void:
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
 	for event in events:
-		if str(event.get("kind", "")) == "battle":
+		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
 	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
@@ -1078,6 +1080,24 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"codex", "codex_search":  # U11 : fenêtre commune Codex (Histoire / Règles)
+					_focus_capital()
+					var bubbles := get_node_or_null("/root/CodexBubbles")
+					if bubbles != null:
+						bubbles.call("open_entry", "cdx_charles_v")
+					if _screenshot_stage == "codex_search" and ui.codex_hub != null:
+						ui.codex_hub.search.text = "arc"
+						ui.codex_hub._on_search("arc")
+				"turn_banner":  # U5 : bandeau « Tour des autres factions »
+					_focus_capital()
+					ui.show_turn_banner()
+				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
+					_stage_screenshot_court()
+					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
+				"general_picker":  # U10 : choix du général depuis le sceau « Sans chef »
+					_stage_screenshot()
+					if selected_army != "" and hud != null:
+						hud.open_general_picker(selected_army)
 				"siege":
 					_stage_screenshot_siege()  # M8
 				"map":
