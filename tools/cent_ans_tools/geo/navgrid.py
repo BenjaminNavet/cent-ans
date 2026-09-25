@@ -8,10 +8,12 @@ entered. ``map.json`` gains ``"navgrid": {"size_px", "file", "scale"}``.
 Layers, in order (costs from ``data/movement/rules.json``):
 
 1. **Terrain**: the most expensive class that applies to the cell among
-   plains, hills (altitude or slope), forest (``splat.png`` forest weight),
-   marsh (flat lowland of a ``marsh`` province) and mountains (altitude,
-   slope or rock weight). Slopes above ``slope_impassable_threshold`` are
-   impassable.
+   plains, hills (altitude or slope), forest (share of the cell under the
+   historical forests of ``splat.png``, lot R3), marsh (flat lowland of a
+   ``marsh`` province, reed beds and dense pond country of ``wetlands.png``)
+   and mountains (altitude, slope or rock weight). Slopes above
+   ``slope_impassable_threshold`` are impassable. Forests and marshes are
+   slow, never impassable.
 2. **Minor rivers** (every ``rivers.geojson`` line that is not a major river):
    ``+ minor_river_extra``.
 3. **Roads** (``roads.geojson``, 1 cell wide): ``× road_cost_factor``.
@@ -112,6 +114,9 @@ FOREST_MIN_WEIGHT = 0.5
 MARSH_MAX_M = 15.0
 MARSH_MAX_SLOPE = 0.01
 MARSH_TERRAIN = "marsh"
+WETLANDS_FILE = "wetlands.png"
+WETLAND_MARSH_MIN = 0.5  # share of reed beds and open water (R) for a marsh cell
+WETLAND_PONDS_MIN = 0.5  # pond-country density (G) for a marsh cell
 
 # Crossings.
 CROSSING_SNAP_CELLS = 8  # search radius for the named river around a bridge
@@ -249,6 +254,7 @@ def terrain_cost(
     weights: np.ndarray,
     marsh_province: np.ndarray,
     rules: dict,
+    wetland: np.ndarray | None = None,
 ) -> np.ndarray:
     """Base cost per cell (float), :data:`IMPASSABLE` above the slope limit.
 
@@ -258,12 +264,16 @@ def terrain_cost(
         weights: Splat weights ``(rows, cols, 4)`` in ``[0, 1]`` (grass, farm, forest, rock).
         marsh_province: Cells of a province whose dominant terrain is ``marsh``.
         rules: ``data/movement/rules.json``.
+        wetland: Cells of a curated wetland (``wetlands.png``): marsh whatever
+            their height and slope.
     """
     costs = rules["terrain_costs"]
     cost = np.full(height.shape, float(costs["plains"]))
     hills = (height >= HILLS_MIN_M) | (slope >= HILLS_MIN_SLOPE)
     forest = weights[..., 2] >= FOREST_MIN_WEIGHT
     marsh = marsh_province & (height <= MARSH_MAX_M) & (slope <= MARSH_MAX_SLOPE)
+    if wetland is not None:
+        marsh = marsh | wetland
     mountains = (
         (height >= MOUNTAINS_MIN_M)
         | (slope >= MOUNTAINS_MIN_SLOPE)
@@ -435,24 +445,57 @@ def _marsh_provinces(map_dir: Path, ids: np.ndarray) -> np.ndarray:
     return marsh[ids]
 
 
-#: Forêts des règles, figées (lot R1, ADR 0019) : ``splat.png`` est devenu un raster de rendu
-#: (forêts historiques KK10) ; la grille de navigation garde la splat V2 tant qu'on ne choisit
-#: pas de la régénérer (changement de règle : coûts de déplacement du cœur).
-RULES_SPLAT_FILE = "navgrid_splat.png"
+def _block_mean(array: np.ndarray, size: int) -> np.ndarray:
+    """Block average of a ``(rows, cols[, channels])`` raster down to ``size``² cells.
+
+    A raster already at (or below) the grid size is sampled by nearest cell.
+    """
+    rows = array.shape[0]
+    if rows <= size:
+        index = (np.arange(size) * rows) // size
+        return array[index][:, index]
+    factor = rows // size
+    if array.ndim == 2:
+        return splat.downsample_mean(array, factor)
+    return np.stack(
+        [
+            splat.downsample_mean(array[..., channel], factor)
+            for channel in range(array.shape[2])
+        ],
+        axis=-1,
+    )
 
 
 def _splat_weights(map_dir: Path, size: int) -> np.ndarray:
-    path = map_dir / RULES_SPLAT_FILE
-    if not path.exists():
-        path = map_dir / "splat.png"
+    """Splat weights ``(size, size, 4)`` in ``[0, 1]``, block-averaged from ``splat.png``.
+
+    Lot R3 (ADR 0045): the historical forests of lot R1 are what the rules
+    read. ``splat.png`` is 4096² (2 × 2 map pixels per cell): the forest
+    weight of a cell is the share of its pixels under forest, so a cell is a
+    forest (``FOREST_MIN_WEIGHT``) when at least half of it is wooded.
+    """
+    path = map_dir / "splat.png"
     if not path.exists():
         return np.zeros((size, size, 4), dtype=np.float32)
     with Image.open(path) as image:
         array = np.asarray(image.convert("RGBA"), dtype=np.float32) / 255.0
-    if array.shape[0] != size:
-        step = array.shape[0] // size
-        array = array[::step, ::step]
-    return array
+    return _block_mean(array, size)
+
+
+def _wetland_marsh(map_dir: Path, size: int) -> np.ndarray:
+    """Cells slowed like a marsh by ``wetlands.png`` (lot R1): reed beds, dense ponds.
+
+    R (marsh) is a share of reed beds and open water, G (ponds) the density of
+    a pond country (Dombes, Brenne: at most 0.75, so ponds never cover a whole
+    cell and never block it). Wet meadows (B) do not slow an army.
+    """
+    path = map_dir / WETLANDS_FILE
+    if not path.exists():
+        return np.zeros((size, size), dtype=bool)
+    with Image.open(path) as image:
+        array = np.asarray(image.convert("RGB"), dtype=np.float32) / 255.0
+    wet = _block_mean(array, size)
+    return (wet[..., 0] >= WETLAND_MARSH_MIN) | (wet[..., 1] >= WETLAND_PONDS_MIN)
 
 
 def compute(
@@ -486,6 +529,7 @@ def compute(
         _splat_weights(map_dir, size),
         _marsh_provinces(map_dir, labels),
         rules,
+        _wetland_marsh(map_dir, size),
     )
     steep = slope > rules["slope_impassable_threshold"]
 
