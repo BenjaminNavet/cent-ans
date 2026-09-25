@@ -1582,6 +1582,16 @@ fn front_z(works: &SiegeWorks) -> f64 {
         .fold(f64::INFINITY, f64::min)
 }
 
+/// SG1: the `k`-th rallying point of the garrison on the central square.
+fn square_point(works: &SiegeWorks, k: usize) -> (f64, f64) {
+    let angle = k as f64 * 2.4;
+    let r = works.square_radius * 0.45;
+    (
+        works.center.0 + r * angle.sin(),
+        works.center.1 + r * angle.cos(),
+    )
+}
+
 fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
     let units = view.units;
     let band = works.band();
@@ -1600,6 +1610,8 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
         .filter(|&j| units[j].climbing.is_some())
         .collect();
     let mut blockers = 0usize;
+    let gate_down = !works.pieces[works.gate].intact();
+    let mut square_slot = 0usize;
     for &i in &own {
         let unit = &units[i];
         if !view.free(i) {
@@ -1628,6 +1640,13 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
                 .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
             if let Some((j, _)) = near_climber {
                 view.attack(i, j, false);
+            } else if gate_down {
+                // SG1: the gate is down, nobody climbs here: come down and
+                // regroup on the square.
+                let k = square_slot;
+                square_slot += 1;
+                let (x, z) = square_point(works, k);
+                view.move_to(i, x, z, true, None);
             } else {
                 view.halt(i);
             }
@@ -1639,7 +1658,21 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
                 continue;
             }
         }
-        // Block the openings from inside, one regiment per opening first.
+        // Block the openings from inside, one regiment per opening first;
+        // SG1: beyond `BLOCKERS_PER_OPENING` per opening, the foot regroups
+        // on the central square (and holds it) instead of crowding the gap.
+        if !openings.is_empty()
+            && blockers >= openings.len() * crate::siege_fx::BLOCKERS_PER_OPENING
+            && !is_horse(unit)
+        {
+            if !works.in_square(unit.x, unit.z) {
+                let k = square_slot;
+                square_slot += 1;
+                let (x, z) = square_point(works, k);
+                view.move_to(i, x, z, true, None);
+            }
+            continue;
+        }
         if !openings.is_empty() {
             let p = openings[blockers % openings.len()];
             blockers += 1;
