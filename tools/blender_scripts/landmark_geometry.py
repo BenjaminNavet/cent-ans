@@ -164,6 +164,24 @@ def inset_polygon(poly, distance):
     return result
 
 
+def offset_polygon(poly, distance):
+    """Grow (distance > 0) a counter-clockwise polygon by mitred vertex offsets (any shape)."""
+    n = len(poly)
+    result = []
+    for i in range(n):
+        px, py = poly[i - 1]
+        x, y = poly[i]
+        qx, qy = poly[(i + 1) % n]
+        normals = []
+        for (ax, ay), (bx, by) in (((px, py), (x, y)), ((x, y), (qx, qy))):
+            length = math.hypot(bx - ax, by - ay) or 1e-9
+            normals.append(((by - ay) / length, -(bx - ax) / length))
+        (n1x, n1y), (n2x, n2y) = normals
+        k = distance / max(1.0 + n1x * n2x + n1y * n2y, 0.3)
+        result.append((x + (n1x + n2x) * k, y + (n1y + n2y) * k))
+    return result
+
+
 def polyline_normals(points):
     """Unit left normals at each vertex of a polyline (averaged at joints)."""
     normals = []
@@ -180,8 +198,11 @@ def polyline_normals(points):
 # --- 3D shapes (local frame) -----------------------------------------------------------
 
 
-def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False):
-    """Box of footprint ``sx`` x ``sy`` centred on (cx, cy), from z0 to z0 + h."""
+def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False, top=True):
+    """Box of footprint ``sx`` x ``sy`` centred on (cx, cy), from z0 to z0 + h.
+
+    ``top`` False drops the lid (hidden under a roof: fewer vertices in the glTF).
+    """
     c, s = math.cos(angle), math.sin(angle)
     corners = []
     for lx, ly in (
@@ -192,7 +213,9 @@ def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False):
     ):
         corners.append((cx + lx * c - ly * s, cy + lx * s + ly * c))
     verts = [(x, y, z0) for x, y in corners] + [(x, y, z0 + h) for x, y in corners]
-    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (4, 5, 6, 7)]
+    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+    if top:
+        faces.append((4, 5, 6, 7))
     if bottom:
         faces.append((3, 2, 1, 0))
     return verts, faces
