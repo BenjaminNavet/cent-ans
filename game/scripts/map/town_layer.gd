@@ -48,6 +48,7 @@ var _stream_timer := 0
 var _last_distance := INF
 var _plan_usec: Array[int] = []
 var _step_max_usec := 0
+var _task_max_usec := 0
 ## Captures et mesures : `--town-lod=blocks` (blocs seuls), `--town-lod=detail` (kit partout),
 ## `--no-towns` (rendu d'avant ZG6).
 var _detail_override := 1.0
@@ -60,6 +61,7 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	terrain = p_terrain
 	tiers = p_tiers if p_tiers != null else ZoomTiers.new()
 	profile = TownRenderProfile.load_default()
+	TownBuilder.manifest()  # chargé ici : les fils de travail le lisent (`TownBuilder.prepare`)
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_ids.clear()
 	for id in settlement_ids:
@@ -236,6 +238,7 @@ func _start_plan(id: String) -> void:
 func _run_plan(id: String, town: Dictionary, params: Dictionary, heights: TownPlan.Heights) -> void:
 	var t0 := Time.get_ticks_usec()
 	var plan := TownPlan.generate(town, params, heights)
+	TownBuilder.prepare(plan)
 	plan["plan_usec"] = Time.get_ticks_usec() - t0
 	_mutex.lock()
 	_results[id] = plan
@@ -244,6 +247,7 @@ func _run_plan(id: String, town: Dictionary, params: Dictionary, heights: TownPl
 
 func _run_reground(id: String, plan: Dictionary, heights: TownPlan.Heights) -> void:
 	TownPlan.reground(plan, heights)
+	TownBuilder.prepare(plan)
 	_mutex.lock()
 	_results[id] = plan
 	_mutex.unlock()
@@ -301,7 +305,12 @@ func _step_builders(budget_usec: int) -> void:
 		var left := budget_usec - (Time.get_ticks_usec() - t0)
 		if left <= 0:
 			break
-		if b.step(left):
+		var finished := b.step(left)
+		if b.task_max_usec > _task_max_usec:
+			_task_max_usec = b.task_max_usec
+			stats["build_task_max_ms"] = _task_max_usec / 1000.0
+			stats["build_task_max"] = b.task_max_name
+		if finished:
 			var previous: TownBuilder = entry.get("builder")
 			if previous != null:
 				previous.free_nodes()
@@ -392,6 +401,7 @@ func flush(center: Variant = null) -> void:
 		if entry.get("builder") == null:
 			continue
 		TownPlan.reground(entry["plan"], _heights_for(id))
+		entry["plan"].erase("prepared")
 		_start_build(id)
 	_step_builders(1 << 30)
 	FrameBudget.unlimited = false

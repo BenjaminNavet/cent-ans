@@ -13,6 +13,8 @@ extends RefCounted
 const KIT_DIR := "res://assets/models/town_kit/"
 const SHADER := preload("res://shaders/town_building.gdshader")
 ## Hauteur moyenne (m) des blocs du HLOD lointain, par type de maison.
+const GROUND_STRIP_ROWS := 24
+const STREET_GROUP := 40
 const BLOCK_HEIGHT := {"townhouse": 13.5, "timber": 11.2, "stonehouse": 11.2, "cottage": 7.2, "longere": 7.3, "barn": 11.6}
 
 static var _manifest: Dictionary = {}
@@ -31,10 +33,10 @@ var block_shadows := false
 var done := false
 ## Nœuds géométriques avec leurs bornes de base (m) : recalage des AABB à l'échelle verticale.
 var geometry: Array = []  # [GeometryInstance3D, base_min, base_max, top_m, Rect2 xz (m)]
-## Maisons par cellule : clé Vector2i → PackedInt32Array d'indices.
-var _cells: Dictionary = {}
-var _cell_keys: Array = []
 var _tasks: Array[Callable] = []
+## Tâche la plus longue (µs) : une tâche est indivisible, elle borne le coût d'une image.
+var task_max_usec := 0
+var task_max_name := ""
 
 
 static func manifest() -> Dictionary:
@@ -69,6 +71,10 @@ static func pick(kind: String, front: float, depth: float, key: int) -> String:
 		var rb := float(all[b]["length"]) / float(all[b]["depth"])
 		return absf(log(ra / target)) < absf(log(rb / target)))
 	return candidates[key % mini(2, candidates.size())]
+
+
+func _load_model(model_name: String) -> void:
+	kit_mesh(model_name)
 
 
 static func kit_mesh(model_name: String) -> Mesh:
@@ -232,21 +238,27 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 	var s := 1.0 / meters_per_unit
 	root.transform = Transform3D(Basis().scaled(Vector3(s, s, s)), Vector3(anchor.x, 0.0, anchor.y))
 	parent.add_child(root)
-	var houses: Dictionary = plan["houses"]
-	var xs: PackedFloat32Array = houses["x"]
-	var ys: PackedFloat32Array = houses["y"]
-	for i in xs.size():
-		var key := Vector2i(floori(xs[i] / cell_m), floori(ys[i] / cell_m))
-		if not _cells.has(key):
-			_cells[key] = PackedInt32Array()
-			_cell_keys.append(key)
-		_cells[key].append(i)
-	_tasks.append(_build_ground)
-	_tasks.append(_build_streets)
+	if not plan.has("prepared"):
+		prepare(plan, cell_m)
+	var prepared: Dictionary = plan["prepared"]
+	var strips: Array = prepared["ground"]
+	for k in strips.size():
+		_tasks.append(_draped_node.bind("Ground_%d" % k, strips[k], 0.7, 2.0, false))
+	var groups: Array = prepared["streets"]
+	for k in groups.size():
+		_tasks.append(_draped_node.bind("Streets_%d" % k, groups[k], 0.9, 2.0, false))
 	_tasks.append(_build_walls)
 	_tasks.append(_build_monuments)
-	for key in _cell_keys:
-		_tasks.append(_build_cell.bind(key))
+	# Modèles du kit pas encore chargés : un chargement par tâche (étalé sur les images).
+	var to_load := {}
+	for cell in prepared["cells"]:
+		for model in cell["detail"]:
+			if not _meshes.has(model):
+				to_load[model] = true
+	for model in to_load:
+		_tasks.append(_load_model.bind(model))
+	for cell in prepared["cells"]:
+		_tasks.append(_build_cell.bind(cell))
 
 
 ## Avance la construction ; rend vrai quand tout est fait. Au moins une étape par appel.
@@ -254,7 +266,12 @@ func step(budget_usec: int) -> bool:
 	var t0 := Time.get_ticks_usec()
 	while not _tasks.is_empty():
 		var task: Callable = _tasks.pop_front()
+		var t_task := Time.get_ticks_usec()
 		task.call()
+		var spent := Time.get_ticks_usec() - t_task
+		if spent > task_max_usec:
+			task_max_usec = spent
+			task_max_name = task.get_method()
 		if Time.get_ticks_usec() - t0 >= budget_usec or not FrameBudget.has_time():
 			break
 	done = _tasks.is_empty()
@@ -328,13 +345,8 @@ func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: fl
 	root.add_child(g)
 
 
-## MultiMesh depuis des transformations (mètres) et des (base, teinte) par instance.
-func _multimesh(mesh: Mesh, xforms: Array, bases: PackedFloat32Array, tints: PackedFloat32Array, mat: Material, lod: String, top: float) -> MultiMeshInstance3D:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = mesh
-	mm.instance_count = xforms.size()
+## Tampon MultiMesh (transformation 3 × 4 + données d'instance : base en m, teinte) et bornes.
+static func pack_instances(xforms: Array, bases: Array, tints: Array) -> Dictionary:
 	var buf := PackedFloat32Array()
 	buf.resize(xforms.size() * 16)
 	var lo := INF
@@ -355,76 +367,137 @@ func _multimesh(mesh: Mesh, xforms: Array, bases: PackedFloat32Array, tints: Pac
 		buf[o + 9] = t.basis.y.z
 		buf[o + 10] = t.basis.z.z
 		buf[o + 11] = t.origin.z
-		buf[o + 12] = bases[i]
-		buf[o + 13] = tints[i] if i < tints.size() else 0.5
-		buf[o + 14] = 0.0
-		buf[o + 15] = 0.0
-		lo = minf(lo, bases[i])
-		hi = maxf(hi, bases[i])
+		buf[o + 12] = float(bases[i])
+		buf[o + 13] = float(tints[i]) if i < tints.size() else 0.5
+		lo = minf(lo, float(bases[i]))
+		hi = maxf(hi, float(bases[i]))
 		var p := Vector2(t.origin.x, t.origin.z)
 		rect = Rect2(p, Vector2.ZERO) if i == 0 else rect.expand(p)
-	mm.buffer = buf
+	return {"buffer": buf, "count": xforms.size(), "lo": lo, "hi": hi, "rect": rect.grow(60.0)}
+
+
+## Préparation hors fil principal (fil de travail du plan) : tampons des maisons par cellule
+## (détail et blocs) et tableaux des maillages drapés (sol, rues, murailles). Le fil principal
+## n'a plus qu'à créer les nœuds (`step`). Le manifeste du kit doit être chargé avant (`manifest()`).
+static func prepare(plan: Dictionary, cell_m: float = 250.0) -> void:
+	var houses: Dictionary = plan["houses"]
+	var xs: PackedFloat32Array = houses["x"]
+	var ys: PackedFloat32Array = houses["y"]
+	var cells := {}
+	var keys: Array = []
+	for i in xs.size():
+		var key := Vector2i(floori(xs[i] / cell_m), floori(ys[i] / cell_m))
+		if not cells.has(key):
+			cells[key] = []
+			keys.append(key)
+		(cells[key] as Array).append(i)
+	var all := manifest()
+	var out_cells: Array = []
+	for key in keys:
+		var groups := {}  # modèle → [xforms, bases, tints]
+		var block_x: Array = []
+		var block_b: Array = []
+		var block_t: Array = []
+		for i: int in cells[key]:
+			var kind: String = TownPlan.HOUSE_KINDS[houses["kind"][i]]
+			var front: float = houses["front"][i]
+			var depth: float = houses["depth"][i]
+			var yaw: float = houses["yaw"][i]
+			var d := Vector2(cos(yaw), sin(yaw))
+			var pos := Vector3(xs[i], 0.0, ys[i])
+			var model := pick(kind, front, depth, i)
+			if model != "":
+				var entry: Dictionary = all[model]
+				var sx := front / float(entry["length"])
+				var sz := depth / float(entry["depth"])
+				var sy := clampf(sqrt(sx * sz), 0.85, 1.2)
+				if not groups.has(model):
+					groups[model] = [[], [], []]
+				groups[model][0].append(Transform3D(basis_x(d, Vector3(sx, sy, sz)), pos))
+				groups[model][1].append(houses["base"][i])
+				groups[model][2].append(houses["tint"][i])
+			var h: float = BLOCK_HEIGHT.get(kind, 10.0)
+			# Faîtage du bloc le long du grand côté (maison de ville : pignon sur rue).
+			if depth > front:
+				block_x.append(Transform3D(basis_x(Vector2(-d.y, d.x), Vector3(depth, h, front)), pos))
+			else:
+				block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
+			block_b.append(houses["base"][i])
+			block_t.append(houses["tint"][i])
+		var detail := {}
+		for model in groups:
+			var g: Array = groups[model]
+			detail[model] = pack_instances(g[0], g[1], g[2])
+		out_cells.append({"key": key, "detail": detail, "blocks": pack_instances(block_x, block_b, block_t)})
+	plan["prepared"] = {"cells": out_cells, "ground": _ground_strips(plan), "streets": _street_groups(plan), "walls": _wall_arrays(plan)}
+
+
+func _instances_node(mesh: Mesh, packed: Dictionary, mat: Material, lod: String, top: float) -> MultiMeshInstance3D:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = true
+	mm.mesh = mesh
+	mm.instance_count = int(packed["count"])
+	mm.buffer = packed["buffer"]
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.material_override = mat
-	_register(mmi, lod, lo, hi, top, rect.grow(60.0))
+	_register(mmi, lod, float(packed["lo"]), float(packed["hi"]), top, packed["rect"])
 	return mmi
 
 
-func _build_cell(key: Vector2i) -> void:
-	var indices: PackedInt32Array = _cells[key]
-	var houses: Dictionary = plan["houses"]
+## MultiMesh depuis des transformations (mètres) et des (base, teinte) par instance.
+func _multimesh(mesh: Mesh, xforms: Array, bases: Variant, tints: Variant, mat: Material, lod: String, top: float) -> MultiMeshInstance3D:
+	return _instances_node(mesh, pack_instances(xforms, Array(bases), Array(tints)), mat, lod, top)
+
+
+func _build_cell(cell: Dictionary) -> void:
+	var key: Vector2i = cell["key"]
 	var mat := material(0, false, 0.0, meters_per_unit)
-	var block_mat := material(0, true, 0.0, meters_per_unit)
-	var groups := {}  # modèle → [xforms, bases, tints, indices]
-	var block_x: Array = []
-	var block_b := PackedFloat32Array()
-	var block_t := PackedFloat32Array()
-	var all := manifest()
-	for i in indices:
-		var kind: String = TownPlan.HOUSE_KINDS[houses["kind"][i]]
-		var front: float = houses["front"][i]
-		var depth: float = houses["depth"][i]
-		var yaw: float = houses["yaw"][i]
-		var d := Vector2(cos(yaw), sin(yaw))
-		var pos := Vector3(houses["x"][i], 0.0, houses["y"][i])
-		var model := pick(kind, front, depth, i)
-		if model != "":
-			var entry: Dictionary = all[model]
-			var sx := front / float(entry["length"])
-			var sz := depth / float(entry["depth"])
-			var sy := clampf(sqrt(sx * sz), 0.85, 1.2)
-			if not groups.has(model):
-				groups[model] = [[], PackedFloat32Array(), PackedFloat32Array(), PackedInt32Array()]
-			(groups[model][0] as Array).append(Transform3D(basis_x(d, Vector3(sx, sy, sz)), pos))
-			groups[model][1].append(houses["base"][i])
-			groups[model][2].append(houses["tint"][i])
-			groups[model][3].append(i)
-		var h: float = BLOCK_HEIGHT.get(kind, 10.0)
-		# Faîtage du bloc le long du grand côté (maison de ville : pignon sur rue).
-		if depth > front:
-			block_x.append(Transform3D(basis_x(Vector2(-d.y, d.x), Vector3(depth, h, front)), pos))
-		else:
-			block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
-		block_b.append(houses["base"][i])
-		block_t.append(houses["tint"][i])
-	for model in groups:
+	for model in cell["detail"]:
 		var mesh := kit_mesh(model)
-		if mesh == null:
-			continue
-		var g: Array = groups[model]
-		var mmi := _multimesh(mesh, g[0], g[1], g[2], mat, "detail", 30.0)
-		mmi.name = "Detail_%d_%d_%s" % [key.x, key.y, model]
-	if not block_x.is_empty():
-		var bmi := _multimesh(block_mesh(), block_x, block_b, block_t, block_mat, "block", 20.0)
-		bmi.name = "Blocks_%d_%d" % [key.x, key.y]
+		if mesh != null:
+			_instances_node(mesh, cell["detail"][model], mat, "detail", 30.0).name = "Detail_%d_%d_%s" % [key.x, key.y, model]
+	var blocks: Dictionary = cell["blocks"]
+	if int(blocks["count"]) > 0:
+		_instances_node(block_mesh(), blocks, material(0, true, 0.0, meters_per_unit), "block", 20.0).name = "Blocks_%d_%d" % [key.x, key.y]
 
 
-## Sol de terre battue, cours et jardins sous la ville (grille drapée, teinte fondue au bord).
-func _build_ground() -> void:
-	var ground: Dictionary = plan.get("ground", {})
-	if ground.is_empty():
+## Nœud d'un maillage drapé préparé (`prepare`).
+func _draped_node(node_name: String, prepared: Dictionary, lift_m: float, top: float, shadows: bool) -> void:
+	if prepared.is_empty():
 		return
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, prepared["arrays"])
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	mi.mesh = mesh
+	mi.material_override = material(1, false, lift_m, meters_per_unit)
+	_register(mi, "all", float(prepared["lo"]), float(prepared["hi"]), top, prepared["rect"])
+	if not shadows:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
+## Sol en bandes de `GROUND_STRIP_ROWS` rangées : une bande par tâche (envoi au GPU étalé).
+static func _ground_strips(plan: Dictionary) -> Array:
+	var ground: Dictionary = plan.get("ground", {})
+	var out: Array = []
+	if ground.is_empty():
+		return out
+	var n: int = ground["n"]
+	var row := 0
+	while row < n - 1:
+		var strip := _ground_arrays(plan, row, mini(row + GROUND_STRIP_ROWS, n - 1))
+		if not strip.is_empty():
+			out.append(strip)
+		row += GROUND_STRIP_ROWS
+	return out
+
+
+## Sol de terre battue, cours et jardins sous la ville (grille drapée, teinte fondue au bord),
+## rangées de mailles [row0, row1).
+static func _ground_arrays(plan: Dictionary, row0: int, row1: int) -> Dictionary:
+	var ground: Dictionary = plan.get("ground", {})
 	var n: int = ground["n"]
 	var step: float = ground["step"]
 	var origin: Vector2 = ground["origin"]
@@ -435,41 +508,54 @@ func _build_ground() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var lo := INF
 	var hi := -INF
-	for j in n - 1:
+	var colors := PackedColorArray()
+	colors.resize(n * n)
+	for k in range(row0 * n, mini((row1 + 1) * n, n * n)):
+		if mask[k] == 1:
+			var p: Vector2 = origin + Vector2(k % n, k / n) * step
+			var edge := clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
+			colors[k] = layer_color("Rubble", Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge))
+			lo = minf(lo, h[k])
+			hi = maxf(hi, h[k])
+	if lo == INF:
+		return {}
+	var used := false
+	for j in range(row0, row1):
 		for i in n - 1:
-			var ks := [j * n + i, j * n + i + 1, (j + 1) * n + i + 1, (j + 1) * n + i]
-			var ok := true
-			for k in ks:
-				if mask[k] == 0:
-					ok = false
-			if not ok:
+			var k0 := j * n + i
+			if mask[k0] == 0 or mask[k0 + 1] == 0 or mask[k0 + n] == 0 or mask[k0 + n + 1] == 0:
 				continue
-			for idx in [0, 1, 2, 0, 2, 3]:
-				var k: int = ks[idx]
+			for k: int in [k0, k0 + 1, k0 + n + 1, k0, k0 + n + 1, k0 + n]:
 				var p: Vector2 = origin + Vector2(k % n, k / n) * step
-				var edge := clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
-				st.set_color(layer_color("Rubble", Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge)))
+				st.set_color(colors[k])
 				st.set_normal(Vector3.UP)
 				st.set_uv(p)
 				st.set_uv2(Vector2(h[k], 0.0))
 				st.add_vertex(Vector3(p.x, 0.0, p.y))
-				lo = minf(lo, h[k])
-				hi = maxf(hi, h[k])
-	if lo == INF:
-		return
-	var mi := MeshInstance3D.new()
-	mi.name = "Ground"
-	mi.mesh = st.commit()
-	mi.material_override = material(1, false, 0.7, meters_per_unit)
+				used = true
+	if not used:
+		return {}
 	var half := (n - 1) * 0.5 * step
-	_register(mi, "all", lo, hi, 2.0, Rect2(-half, -half, half * 2.0, half * 2.0))
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var rect := Rect2(origin.x, origin.y + row0 * step, half * 2.0, (row1 - row0) * step)
+	return {"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect}
 
 
-func _build_streets() -> void:
+## Rues par paquets de `STREET_GROUP` : un maillage par tâche.
+static func _street_groups(plan: Dictionary) -> Array:
 	var streets: Array = plan["streets"]
+	var out: Array = []
+	var k := 0
+	while k < streets.size():
+		var group := _street_arrays(streets.slice(k, k + STREET_GROUP))
+		if not group.is_empty():
+			out.append(group)
+		k += STREET_GROUP
+	return out
+
+
+static func _street_arrays(streets: Array) -> Dictionary:
 	if streets.is_empty():
-		return
+		return {}
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var earth := layer_color("Rubble", Color(0.62, 0.55, 0.46))
@@ -510,85 +596,74 @@ func _build_streets() -> void:
 				rect = Rect2(p, Vector2.ZERO) if first else rect.expand(p)
 				first = false
 			along += seg
-	var mi := MeshInstance3D.new()
-	mi.name = "Streets"
-	mi.mesh = st.commit()
-	mi.material_override = material(1, false, 0.9, meters_per_unit)
-	_register(mi, "all", lo, hi, 2.0, rect.grow(10.0))
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return {"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect.grow(10.0)}
+
+
+static func _wall_arrays(plan: Dictionary) -> Dictionary:
+	var ring: PackedVector2Array = plan.get("wall_ring", PackedVector2Array())
+	if ring.size() < 3:
+		return {}
+	var bases: PackedFloat32Array = plan["wall_bases"]
+	var gaps: PackedInt32Array = plan["wall_gaps"]
+	var height := float(plan.get("wall_height", 8.0))
+	var half := float(plan.get("wall_thickness", 2.0)) * 0.5
+	var palisade := str(plan.get("walls", "stone")) == "palisade"
+	var color := layer_color("Planks" if palisade else "Masonry", Color(0.95, 0.93, 0.88))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var along := 0.0
+	var lo := INF
+	var hi := -INF
+	var rect := Rect2(ring[0], Vector2.ZERO)
+	for i in range(1, ring.size()):
+		var a := ring[i - 1]
+		var b := ring[i]
+		var seg := a.distance_to(b)
+		rect = rect.expand(b)
+		lo = minf(lo, bases[i])
+		hi = maxf(hi, bases[i])
+		if gaps[i] == 1 or gaps[i - 1] == 1:
+			along += seg
+			continue
+		var na := a.normalized() * half
+		var nb := b.normalized() * half
+		var ha := bases[i - 1]
+		var hb := bases[i]
+		# Face extérieure, intérieure, chemin de ronde.
+		_wall_quad(st, a + na, b + nb, ha, hb, -2.5, height, along, seg, color)
+		_wall_quad(st, b - nb, a - na, hb, ha, -2.5, height, along, seg, color)
+		_wall_top(st, a + na, b + nb, b - nb, a - na, ha, hb, height, color)
+		along += seg
+	return {"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect.grow(10.0), "top": height + 2.0}
 
 
 func _build_walls() -> void:
-	var ring: PackedVector2Array = plan.get("wall_ring", PackedVector2Array())
-	if ring.size() >= 3:
-		var bases: PackedFloat32Array = plan["wall_bases"]
-		var gaps: PackedInt32Array = plan["wall_gaps"]
-		var height := float(plan.get("wall_height", 8.0))
-		var half := float(plan.get("wall_thickness", 2.0)) * 0.5
-		var palisade := str(plan.get("walls", "stone")) == "palisade"
-		var color := layer_color("Planks" if palisade else "Masonry", Color(0.95, 0.93, 0.88))
-		var st := SurfaceTool.new()
-		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var along := 0.0
-		var lo := INF
-		var hi := -INF
-		var rect := Rect2(ring[0], Vector2.ZERO)
-		for i in range(1, ring.size()):
-			var a := ring[i - 1]
-			var b := ring[i]
-			var seg := a.distance_to(b)
-			rect = rect.expand(b)
-			lo = minf(lo, bases[i])
-			hi = maxf(hi, bases[i])
-			if gaps[i] == 1 or gaps[i - 1] == 1:
-				along += seg
-				continue
-			var na := a.normalized() * half
-			var nb := b.normalized() * half
-			var ha := bases[i - 1]
-			var hb := bases[i]
-			# Face extérieure, intérieure, chemin de ronde.
-			for face in [[a + na, b + nb, 1.0], [b - nb, a - na, -1.0]]:
-				var p0: Vector2 = face[0]
-				var p1: Vector2 = face[1]
-				var h0 := ha if float(face[2]) > 0 else hb
-				var h1 := hb if float(face[2]) > 0 else ha
-				_wall_quad(st, p0, p1, h0, h1, -2.5, height, along, seg, color)
-			_wall_top(st, a + na, b + nb, b - nb, a - na, ha, hb, height, color)
-			along += seg
-		var mi := MeshInstance3D.new()
-		mi.name = "Walls"
-		mi.mesh = st.commit()
-		mi.material_override = material(1, false, 0.0, meters_per_unit)
-		_register(mi, "all", lo, hi, height + 2.0, rect.grow(10.0))
+	var walls: Dictionary = plan["prepared"]["walls"]
+	_draped_node("Walls", walls, 0.0, float(walls.get("top", 12.0)), true)
 	# Tours et portes.
 	var towers: Array = plan.get("towers", [])
 	if not towers.is_empty():
 		var xs: Array = []
-		var tb := PackedFloat32Array()
-		var tt := PackedFloat32Array()
+		var tb: Array = []
 		for t in towers:
 			var r := float(t["radius"])
 			xs.append(Transform3D(Basis().scaled(Vector3(r, float(t["height"]), r)), Vector3(t["x"], 0, t["y"])))
 			tb.append(t["base"])
-			tt.append(0.5)
-		_multimesh(tower_mesh(), xs, tb, tt, material(0, true, 0.0, meters_per_unit), "all", 30.0).name = "Towers"
+		_multimesh(tower_mesh(), xs, tb, [], material(0, true, 0.0, meters_per_unit), "all", 30.0).name = "Towers"
 	var gates: Array = plan.get("gates", [])
 	if not gates.is_empty():
 		var gx: Array = []
-		var gb := PackedFloat32Array()
-		var gt := PackedFloat32Array()
+		var gb: Array = []
 		var palisade := str(plan.get("walls", "stone")) == "palisade"
 		for g in gates:
 			var d := Vector2(cos(float(g["yaw"])), sin(float(g["yaw"])))
 			var h := 7.0 if palisade else float(g.get("height", 16.0))
 			gx.append(Transform3D(basis_x(d, Vector3(12.0, h, 11.0)), Vector3(g["x"], 0, g["y"])))
 			gb.append(g["base"])
-			gt.append(0.5)
-		_multimesh(box_mesh("Planks" if palisade else "Masonry"), gx, gb, gt, material(0, true, 0.0, meters_per_unit), "all", 30.0).name = "Gates"
+		_multimesh(box_mesh("Planks" if palisade else "Masonry"), gx, gb, [], material(0, true, 0.0, meters_per_unit), "all", 30.0).name = "Gates"
 
 
-func _wall_quad(st: SurfaceTool, p0: Vector2, p1: Vector2, h0: float, h1: float, bottom: float, top: float, along: float, seg: float, color: Color) -> void:
+static func _wall_quad(st: SurfaceTool, p0: Vector2, p1: Vector2, h0: float, h1: float, bottom: float, top: float, along: float, seg: float, color: Color) -> void:
 	var verts := [
 		[Vector3(p0.x, bottom, p0.y), h0, Vector2(along, -bottom)], [Vector3(p1.x, bottom, p1.y), h1, Vector2(along + seg, -bottom)],
 		[Vector3(p1.x, top, p1.y), h1, Vector2(along + seg, -top)], [Vector3(p0.x, top, p0.y), h0, Vector2(along, -top)],
@@ -603,7 +678,7 @@ func _wall_quad(st: SurfaceTool, p0: Vector2, p1: Vector2, h0: float, h1: float,
 		st.add_vertex(v[0])
 
 
-func _wall_top(st: SurfaceTool, a: Vector2, b: Vector2, c: Vector2, d: Vector2, ha: float, hb: float, top: float, color: Color) -> void:
+static func _wall_top(st: SurfaceTool, a: Vector2, b: Vector2, c: Vector2, d: Vector2, ha: float, hb: float, top: float, color: Color) -> void:
 	var verts := [[a, ha], [b, hb], [c, hb], [d, ha]]
 	for k in [0, 2, 1, 0, 3, 2]:
 		var v: Array = verts[k]
