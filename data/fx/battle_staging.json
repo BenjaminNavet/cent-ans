@@ -1,5 +1,5 @@
 {
-  "description": "Mise en scène des batailles (lot EP8, ADR 0052) : lumière selon l'heure (images clés interpolées, facteurs appliqués au préréglage météo de BattleAtmosphere), ombres de nuages, poussière des charges et des colonnes, fumées (feux de camp, bombardes, incendies), oiseaux, plan cinématique au premier choc. Purement visuel : la règle de visibilité est dans data/rules/battle_time_of_day.json (cœur).",
+  "description": "Mise en scène des batailles (lot EP8, ADR 0055) : lumière selon l'heure (images clés interpolées, facteurs appliqués au préréglage météo de BattleAtmosphere), ombres de nuages, poussière des charges et des colonnes, fumées (feux de camp, bombardes, incendies), oiseaux, plan cinématique au premier choc. Purement visuel : la règle de visibilité est dans data/rules/battle_time_of_day.json (cœur).",
   "time_of_day": {
     "update_period_s": 1.5,
     "keyframes": [

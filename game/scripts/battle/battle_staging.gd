@@ -1,7 +1,7 @@
 class_name BattleStaging
 extends Node3D
 
-## EP8 (ADR 0052) : mise en scène des batailles, rendu seulement. Orchestre :
+## EP8 (ADR 0055) : mise en scène des batailles, rendu seulement. Orchestre :
 ## - la lumière selon l'heure (`BattleTimeOfDay`) : l'heure vient du cœur
 ##   (`BattleSim.get_time_of_day()`, tirée par la campagne ou choisie en bataille rapide) et
 ##   avance avec la bataille ; le panorama EP2 est reteinté ;
