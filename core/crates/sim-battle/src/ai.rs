@@ -89,6 +89,9 @@ use crate::unit::{Formation, Unit, UnitState};
 pub const CHARGE_DISTANCE: f64 = 60.0;
 /// A defensive line counter-charges enemies this close.
 pub const COUNTER_CHARGE_DISTANCE: f64 = 45.0;
+/// SG4: shooters behind their planted stakes on the military crest of a
+/// defensive position fall back when enemy foot comes this close.
+pub const CREST_STAKES_SAFETY: f64 = 45.0;
 /// Shooters fall back when enemy melee troops come this close.
 pub const SHOOTER_SAFETY: f64 = 70.0;
 /// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
@@ -190,6 +193,10 @@ fn is_melee_troop(unit: &Unit) -> bool {
 fn bristling(unit: &Unit) -> bool {
     unit.stakes_planted || unit.formation == Formation::Square || unit.has(Ability::PikeSquare)
 }
+
+/// SG4: enemy horse this close to one of our shooters draws our horse's
+/// counter-charge.
+pub const SHOOTER_GUARD: f64 = 160.0;
 
 /// R2b: horsemen keep this far from the front of planted stakes.
 pub const STAKES_GUARD: f64 = 35.0;
@@ -1661,7 +1668,7 @@ fn plan_shooter(
         // leave the glacis out of sight.
         let safety = match cover {
             Some((_, c)) if c.breaks_charge => COVER_SAFETY,
-            _ if defensive && crest.is_some() && unit.stakes_planted => COVER_SAFETY,
+            _ if defensive && crest.is_some() && unit.stakes_planted => CREST_STAKES_SAFETY,
             _ => SHOOTER_SAFETY,
         };
         if d < safety || view.engaged(i) {
@@ -1944,11 +1951,19 @@ fn plan_horse(
         }
         return;
     }
-    // 1. Enemy cavalry close to us or our shooters: counter-charge.
+    // 1. Enemy cavalry close to us or our shooters: counter-charge (SG4:
+    // the shooters' guard too, not only the horse the enemy rides at).
     let threatened = view.able_enemies().find(|&j| {
-        is_horse(&units[j])
-            && matches!(units[j].state, UnitState::Charging | UnitState::Marching)
-            && dist(unit, &units[j]) < 160.0
+        let e = &units[j];
+        is_horse(e)
+            && matches!(e.state, UnitState::Charging | UnitState::Marching)
+            && (dist(unit, e) < 160.0
+                || (!defensive
+                    && dist(unit, e) < CAVALRY_REACH
+                    && roles
+                        .shooters
+                        .iter()
+                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD)))
     });
     if let Some(j) = threatened {
         if !bristling(&units[j]) {
