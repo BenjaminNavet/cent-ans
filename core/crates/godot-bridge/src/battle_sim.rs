@@ -360,6 +360,10 @@ impl BattleSim {
                     "fatigue" => unit.fatigue,
                     "ammo" => i64::from(unit.ammo),
                     "max_ammo" => i64::from(if unit.can_shoot() { unit.stats.ammo } else { 0 }),
+                    // SG2: seconds before the next shot and the full reload (engines
+                    // are wound back over it).
+                    "reload" => unit.reload.max(0.0),
+                    "reload_period" => unit.reload_period(),
                     "state" => unit.state.key(),
                     "state_label" => state_label_fr(unit.state),
                     "formation" => unit.formation.key(),
@@ -373,6 +377,8 @@ impl BattleSim {
                     "present" => unit.present(),
                     "reserve" => unit.reserve,
                     "left_field" => unit.left_field,
+                    // Q2: end-of-battle fate (destroyed, routed, withdrawn, reserve, held).
+                    "fate" => unit.fate().key(),
                     "fire_at_will" => unit.fire_at_will,
                     "can_shoot" => unit.can_shoot(),
                     "running" => unit.running,
@@ -1038,6 +1044,26 @@ impl CampaignSim {
             Ok(index) => index as i64,
             Err(error) => {
                 godot_warn!("CampaignSim.debug_stage_siege: {error}");
+                -1
+            }
+        }
+    }
+
+    /// SG2 demo: `army` besieges the town drawn from landmark plan
+    /// `landmark` (`data/landmarks/<id>.json`, e.g. `avignon`, `bruges`),
+    /// at war with its holder if needed. Returns the battle index or -1.
+    #[func]
+    fn debug_stage_landmark_siege(&mut self, army: GString, landmark: GString) -> i64 {
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
+            return -1;
+        };
+        match state.debug_stage_landmark_siege(data, &army, &landmark.to_string()) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_landmark_siege: {error}");
                 -1
             }
         }

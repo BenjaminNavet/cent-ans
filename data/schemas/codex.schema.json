@@ -5,51 +5,108 @@
   "description": "Fiche d'encyclopédie historique (H2) : résumé affiché dans les bulles, corps affiché dans la fenêtre Codex. Les textes peuvent contenir des liens `[[cdx_id]]` ou `[[cdx_id|libellé]]`.",
   "type": "object",
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/codex_id" },
-    "title": { "type": "string", "minLength": 1 },
+    "id": {
+      "$ref": "common.schema.json#/$defs/codex_id"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
     "category": {
       "type": "string",
       "enum": [
-        "personnage", "dynastie", "lieu", "bataille", "evenement", "institution", "societe",
-        "guerre", "religion", "economie", "cuisine", "ingredient", "recette", "medecine",
-        "plante", "savoir", "vie_quotidienne"
+        "personnage",
+        "dynastie",
+        "lieu",
+        "bataille",
+        "evenement",
+        "institution",
+        "societe",
+        "guerre",
+        "religion",
+        "economie",
+        "cuisine",
+        "ingredient",
+        "recette",
+        "medecine",
+        "plante",
+        "savoir",
+        "vie_quotidienne",
+        "mecanique",
+        "batiment",
+        "unite",
+        "technique"
       ]
     },
     "aliases": {
       "type": "array",
       "description": "Formes reconnues dans les textes générés (auto-liens, mot entier, casse ignorée). Uniques entre fiches.",
-      "items": { "type": "string", "minLength": 2 },
+      "items": {
+        "type": "string",
+        "minLength": 2
+      },
       "uniqueItems": true
     },
     "era": {
       "type": "object",
       "description": "Période couverte (années, éventuellement approximatives : « v. 1300 »).",
       "properties": {
-        "from": { "type": "string" },
-        "to": { "type": "string" }
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
-    "summary": { "type": "string", "minLength": 1, "description": "1 à 3 phrases, affichées dans la bulle." },
-    "body": { "type": "string", "minLength": 1, "description": "Fiche complète ; paragraphes séparés par une ligne vide." },
-    "anachronism": { "type": "string", "description": "Liberté prise par le jeu, signalée au joueur." },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "1 à 3 phrases, affichées dans la bulle."
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Fiche complète ; paragraphes séparés par une ligne vide."
+    },
+    "anachronism": {
+      "type": "string",
+      "description": "Liberté prise par le jeu, signalée au joueur."
+    },
+    "gameplay": {
+      "type": "string",
+      "description": "« En jeu » : comment le jeu modélise le sujet (règles, chiffres, conseils). Affiché dans la fiche et, en une phrase, dans la bulle ; peut contenir des liens [[cdx_id]]."
+    },
     "entity": {
       "type": "string",
-      "description": "Entité de jeu liée (personnage, événement, technologie, bâtiment, unité, province, faction, régime, ressource).",
-      "pattern": "^(chr|evt|tech|bld|unit|prov|fac|diet|res)_[a-z0-9_]+$"
+      "description": "Entité de jeu liée (personnage, événement, technologie, bâtiment, unité, province, faction, régime, ressource, édit, ordre de bataille, navire). Le titre de l'infobulle riche de cette entité devient un lien vers la fiche.",
+      "pattern": "^(chr|evt|tech|bld|unit|prov|fac|diet|res|edict|order|ship)_[a-z0-9_]+$"
     },
     "see_also": {
       "type": "array",
-      "items": { "$ref": "common.schema.json#/$defs/codex_id" },
+      "items": {
+        "$ref": "common.schema.json#/$defs/codex_id"
+      },
       "uniqueItems": true
     },
     "sources": {
       "type": "array",
       "description": "Titres d'articles Wikipédia (français sauf mention).",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "minItems": 1
     }
   },
-  "required": ["id", "title", "category", "summary", "body", "sources"],
+  "required": [
+    "id",
+    "title",
+    "category",
+    "summary",
+    "body",
+    "sources"
+  ],
   "additionalProperties": false
 }

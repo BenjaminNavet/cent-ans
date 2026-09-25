@@ -12,13 +12,21 @@ extends Node3D
 
 const MARKER_SCENE := preload("res://scenes/map/army_marker.tscn")
 const PICK_RADIUS_PX := 26.0
-## Échelle du marqueur = distance caméra × facteur, bornée.
+## Échelle du marqueur = distance caméra × facteur, bornée : taille constante à l'écran aux
+## paliers moyen et loin (lisible comme un pion), taille monde fixe au plus près.
 const SCALE_PER_DISTANCE := 0.014
-const MIN_SCALE := 0.8
+## Q2 : plafond de taille monde au palier « près » (comme Total War : la ville domine l'armée).
+## À cette échelle l'étendard royal fait ~3 unités et l'escorte ~2,5 de large, soit environ un
+## quart du diamètre de Paris (L1, `core_radius_px` 6) et moins qu'une ville L2/L3 (4,5-7) ;
+## les figurines ont la hauteur des maisons. Atteint vers la distance 20 ; 0,8 auparavant, qui
+## faisait recouvrir Paris par l'ost au plus près.
+const MIN_SCALE := 0.27
 const MAX_SCALE := 14.0
 
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
+## Q2 : marge hors de la zone d'une grande ville L1-L3 pour une armée qui y stationne.
+const LANDMARK_MARGIN_PX := 1.5
 
 ## Couche des plaques : au-dessus du monde 3D, sous l'interface (`CanvasLayer` 1).
 const PLATE_LAYER := 0
@@ -40,6 +48,10 @@ var hidden_provinces: Dictionary = {}
 ## étrangère n'a de marqueur que si son point est vu.
 var visible_armies: Dictionary = {}
 var army_filter_active: bool = false
+## Q2 : zones des grandes villes détaillées L1-L3 (`SettlementLayer.landmark_zones()`,
+## (x, z, rayon) en pixels de carte) ; une armée stationnée dans l'une d'elles se tient devant
+## ses murs plutôt qu'au milieu de la maquette (lisible et cliquable séparément).
+var landmark_zones: PackedVector3Array = PackedVector3Array()
 ## C4/C6 : position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
 ## la carte ; à défaut, `MapData.settlement_px`.
 var settlement_position: Callable = Callable()
@@ -105,6 +117,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 				continue
 			if not army.has("position"):
 				centroid = _clear_of_city(location, centroid)
+			centroid = _clear_of_landmark(centroid)
 			stack_key = "settlement:" + str(army.get("settlement", army.get("location", "")))
 		var marker: ArmyMarker = MARKER_SCENE.instantiate()
 		add_child(marker)
@@ -169,6 +182,18 @@ func _clear_of_city(location: String, centroid: Vector2) -> Vector2:
 	return capital + direction * CITY_CLEARANCE_PX
 
 
+## Q2 : pousse le point hors de la zone d'une grande ville détaillée (L1-L3), côté sud-est.
+func _clear_of_landmark(point: Vector2) -> Vector2:
+	for zone in landmark_zones:
+		var center := Vector2(zone.x, zone.y)
+		var away := point - center
+		if away.length() >= zone.z + LANDMARK_MARGIN_PX:
+			continue
+		var direction := away.normalized() if away.length() > 0.5 else Vector2(1.0, 0.6).normalized()
+		return center + direction * (zone.z + LANDMARK_MARGIN_PX)
+	return point
+
+
 func set_selected(army_id: String) -> void:
 	selected_army = army_id
 	for id in _markers:
@@ -203,8 +228,14 @@ func plate_text(army_id: String) -> String:
 ## Armée la plus proche du point écran dans `PICK_RADIUS_PX` (étendard, figurines ou plaque),
 ## sinon "".
 func pick_screen(screen_position: Vector2) -> String:
+	return str(pick_screen_scored(screen_position).get("id", ""))
+
+
+## Q2 : comme `pick_screen`, avec `score` (distance / `PICK_RADIUS_PX` ; 0 sur la plaque) pour
+## départager une armée et une colonie sous le même clic ; {} si rien.
+func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	if camera == null:
-		return ""
+		return {}
 	var best := ""
 	var best_distance := PICK_RADIUS_PX
 	for id in _markers:
@@ -218,8 +249,8 @@ func pick_screen(screen_position: Vector2) -> String:
 				best = id
 		var plate: PanelContainer = _plates.get(id)
 		if plate != null and plate.visible and plate.get_global_rect().has_point(screen_position):
-			return id
-	return best
+			return {"id": id, "score": 0.0}
+	return {"id": best, "score": best_distance / PICK_RADIUS_PX} if best != "" else {}
 
 
 ## Lot M4 (animation) : pose le marqueur de `army_id` au point carte `point`, tourné vers
@@ -251,12 +282,17 @@ func update_scale(camera_distance: float) -> void:
 		var weight := figure_weight(camera_distance)
 		for marker in _markers.values():
 			marker.set_view(camera_distance, weight)
-	var new_scale := clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
-	if absf(new_scale - _current_scale) < 0.01:
+	var new_scale := scale_for_distance(camera_distance)
+	if absf(new_scale - _current_scale) < 0.005:
 		return
 	_current_scale = new_scale
 	for marker in _markers.values():
 		marker.apply_scale(_current_scale)
+
+
+## Échelle des marqueurs d'armée pour une distance caméra (voir `MIN_SCALE`).
+static func scale_for_distance(camera_distance: float) -> float:
+	return clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
 
 
 ## Lot CV2 : présence des figurines (1 aux paliers près et moyen, 0 au palier loin, fondu

@@ -534,6 +534,7 @@ fn fight(state: &mut CampaignState, data: &GameData) -> (ArmyId, ArmyId) {
         general_killed: false,
         general_captured: false,
         no_quarter: false,
+        withdrew: false,
     };
     let outcome = BattleOutcome {
         winner: SideId::Attacker,

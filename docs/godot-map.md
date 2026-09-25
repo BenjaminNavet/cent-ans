@@ -444,7 +444,7 @@ replis). Les points d'accroche dans les scripts existants sont marqués `# M10 a
   personnage (96 px), la barre supérieure, la liste de la Diplomatie et les cartes du menu de départ.
 - **`AudioDirector`** (autoload, `scripts/audio/audio_director.gd`) : bus « Musique » et « Effets »,
   volumes 0..1 persistés dans `user://settings.cfg` (section `audio`), curseurs sous les boutons du
-  menu de départ et fenêtre « Son… » du menu de la carte. Musique en boucle avec fondu de 1,5 s :
+  menu de départ et entrée « Son… » du menu de la carte (onglet Son des réglages, Q2). Musique en boucle avec fondu de 1,5 s :
   `campaign` (menu et paix), `war` dès que `get_diplomacy(joueur)` contient un statut `war`, `court`
   tant que le panneau de la Cour est ouvert. Effets : clic sur tout bouton (`SceneTree.node_added`),
   page tournée à l'ouverture d'un panneau de la carte, cloche de fin de tour puis, 0,7 s après,

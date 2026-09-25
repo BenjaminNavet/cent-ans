@@ -17,6 +17,8 @@ const PAUSE_MENU_SCENE := "res://scenes/ui/pause_menu.tscn"
 const SEASON_REPORT_SCENE := "res://scenes/ui/season_report.tscn"
 const MENU_SETTINGS_ID := 910
 const MENU_PAUSE_ID := 911
+## Q2 : « Son… » ouvre l'onglet Son des réglages (une seule fenêtre de volumes).
+const MENU_SOUND_ID := 930
 const BASE_PAN_SPEED := 1.2
 
 var map: Node = null  # CampaignMap
@@ -54,10 +56,13 @@ func setup(campaign_map: Node) -> void:
 	ui.load_requested.connect(_on_load_requested)
 	var popup: PopupMenu = ui.menu_button.get_popup()
 	popup.add_item("Réglages…", MENU_SETTINGS_ID)
+	popup.add_item("Son…", MENU_SOUND_ID)
 	popup.add_item("Menu pause (Échap)", MENU_PAUSE_ID)
 	popup.id_pressed.connect(func(id: int) -> void:
 		if id == MENU_SETTINGS_ID:
 			open_settings()
+		elif id == MENU_SOUND_ID:
+			open_settings("Son")
 		elif id == MENU_PAUSE_ID:
 			open_pause())
 	if settings != null:
@@ -98,10 +103,12 @@ func _on_setting_changed(key: String) -> void:
 		apply_settings()
 
 
-func open_settings() -> void:
+## `tab` : onglet ouvert d'emblée (« Son » depuis Menu → Son…).
+func open_settings(tab: String = "") -> void:
 	if _settings_menu != null and is_instance_valid(_settings_menu):
 		return
 	_settings_menu = SettingsMenu.new()
+	_settings_menu.initial_tab = tab
 	_settings_menu.closed.connect(func() -> void: _settings_menu = null)
 	map.get("ui").add_child(_settings_menu)
 

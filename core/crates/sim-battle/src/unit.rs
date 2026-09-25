@@ -70,6 +70,34 @@ impl UnitState {
     }
 }
 
+/// What became of a regiment, as shown on the end-of-battle screen (Q2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum UnitFate {
+    /// No soldier left.
+    Destroyed,
+    /// Fleeing, on the field or already off it.
+    Routed,
+    /// Ordered off the field (retreat or general retreat), in good order.
+    Withdrawn,
+    /// Never committed (reinforcement waiting off the field).
+    Reserve,
+    /// Still standing on the field.
+    Held,
+}
+
+impl UnitFate {
+    pub fn key(self) -> &'static str {
+        match self {
+            UnitFate::Destroyed => "destroyed",
+            UnitFate::Routed => "routed",
+            UnitFate::Withdrawn => "withdrawn",
+            UnitFate::Reserve => "reserve",
+            UnitFate::Held => "held",
+        }
+    }
+}
+
 /// A regiment on the field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Unit {
@@ -302,9 +330,38 @@ impl Unit {
         !self.left_field && !self.reserve && self.hp > 0.0
     }
 
+    /// Fate of the regiment (end-of-battle screen): a withdrawing unit has
+    /// withdrawn even if the battle ended before it reached the edge.
+    pub fn fate(&self) -> UnitFate {
+        if self.soldiers() == 0 {
+            UnitFate::Destroyed
+        } else if self.state == UnitState::Routing {
+            UnitFate::Routed
+        } else if self.withdrawing || self.left_field {
+            UnitFate::Withdrawn
+        } else if self.reserve {
+            UnitFate::Reserve
+        } else {
+            UnitFate::Held
+        }
+    }
+
     /// Present and not routing: counts for the end of the battle.
     pub fn able(&self) -> bool {
         self.present() && self.state != UnitState::Routing && !self.withdrawing
+    }
+
+    /// Seconds between two shots of this regiment ([`Self::reload`] restarts
+    /// from it after each volley): engines 12 s, pavise crossbowmen 9 s,
+    /// other shooters 6 s.
+    pub fn reload_period(&self) -> f64 {
+        if self.category == UnitCategory::Siege {
+            crate::shot::ENGINE_RELOAD
+        } else if self.has(Ability::Pavise) {
+            crate::shot::PAVISE_RELOAD
+        } else {
+            crate::shot::VOLLEY_RELOAD
+        }
     }
 
     /// Engine able to batter walls (`siege_attack`).
