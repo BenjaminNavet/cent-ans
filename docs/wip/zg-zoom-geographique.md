@@ -29,8 +29,8 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
-| ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
-| ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | à lancer |
+| ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | **dans main** |
+| ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | **dans main** |
 | ZG7 | Perf, recette aux 3 paliers (relief ZG8 compris), export, docs, crédits | 4 | — |
 
 ## Journal
@@ -55,3 +55,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 21h37 : limite de quota levée, ZG4b (aucun commit encore) et ZG6 (dernier 3b499cf4) relancés avec leur contexte.
 - 25/09 : ZG6 fusionné (villes ordinaires 1:1 vers 1340, finage raccordé au parcellaire ZG5b), **main = 7f38c532**, tests ZG2/4/5b/6 + smoke OK. Coût : 48 vs 57 i/s, appels de dessin ×3 (MultiMesh par cellule → par ville à faire en ZG7). Suites VH3 : populations 1328, Gand vide au sud.
 - 25/09 : ajout de ZG8 à la demande du joueur (capture Total War) : exagérer le relief local, pas l'altitude ; purement visuel, une seule fonction de hauteur affichée. Passe avant la recette ZG7.
+- 25/09 : ZG4b et ZG8 fusionnés, plus le correctif C5 (le « ruban géant » de la Tamise était la couche des routes commerciales, affichée hors mode Commerce). Tests ZG2/4/5b/6/8 + smoke OK. ZG4b : brume météo trop couvrante de près (vraie cause du sol beige), parcellaire absent des rives à 0,5 m, plancher caméra 2,6 au-dessus des villes emblématiques (à lever par VH4), portes et bascule des ponts étalée. ZG8 : hauteur affichée = s·(h + g·max(h − fond, 0)), près ×2,5, gains 0,3/0,8 réglés à l'œil (à affiner en jeu), `--no-relief-exaggeration`. Reste à signaler à d'autres lots : `PathPreview` à l'échelle de la carte de près. Prochain : ZG7.
