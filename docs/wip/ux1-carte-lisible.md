@@ -23,10 +23,10 @@ Branche : `worktree-agent-a90f2668279e9e81c`. Plan d'ensemble : `docs/wip/ux-pri
 - [x] thème parchemin minicarte
 - [x] stages `legend` / `legend_armies`, test `game/tests/ux1_test.gd` (« ux1 OK »)
 - [x] captures `docs/audit/captures/ux1/` (avant = captures UI3 ; après = carte 1280, légende 1600)
-- [ ] smoke, `git merge main`
+- [x] smoke, pytest (424), `git merge main` (sans conflit), ux1_test après fusion
 
 ## Prochaine étape
-Smoke, fusion de main, rapport.
+Fusion ff-only dans main par l’orchestrateur. Suites possibles : jetons d’agents comme obstacles ; capture au tour 7 (sièges).
 
 ## Limites connues
 - Les jetons d'agents (couche 2D à part) ne sont pas des obstacles pour les plaques.
