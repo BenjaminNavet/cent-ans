@@ -63,7 +63,7 @@ provinces (villes) ; la France part à ~23 %.
 
 - **Guerre FR-EN, trêves** : au niveau normal, dans la bande (60 %, 8/10 graines, 12,5 trêves).
   Plus bas qu'à la mesure EQ3 (67 %) : les graines diffèrent et DP2 (fusionné après EQ3)
-  ajoute des incidents de passage ; aucune guerre sans fin (plus longue guerre 6-12 ans).
+  ajoute des incidents de passage ; aucune guerre sans fin (plus longue guerre 6-13 ans).
 - **Révoltes** : la sonde du siècle en donne ~3 par 200 tours, mais la cible EQ1 se lit sur
   `balance_probe` 200 tours : 3,1 sur les graines 1-8, **7,1 sur les graines 9-16**, 5,1 en
   moyenne. Pas de dérive : l'écart vient des graines.
