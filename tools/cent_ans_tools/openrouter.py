@@ -122,15 +122,30 @@ def request_image(
     prompt: str,
     client: httpx.Client | None = None,
     max_tokens: int | None = None,
+    images: list[bytes] | None = None,
 ) -> tuple[bytes, Decimal | None]:
     """Paid call without budget bookkeeping: return (image bytes, ``usage.cost`` or None).
 
     Callers must check and record the budget themselves (see :func:`generate_image`
-    or ``cent_ans_tools.portraits``, which records one row per batch).
+    or ``cent_ans_tools.portraits``, which records one row per batch). ``images``
+    are optional reference pictures (PNG or JPEG bytes) sent with the prompt, e.g.
+    the existing portrait of a character to age (lot DA2).
     """
+    content: str | list[dict[str, Any]] = prompt
+    if images:
+        content = [{"type": "text", "text": prompt}]
+        for image in images:
+            kind = "jpeg" if image[:2] == b"\xff\xd8" else "png"
+            encoded = base64.b64encode(image).decode()
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/{kind};base64,{encoded}"},
+                }
+            )
     body = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": content}],
         "modalities": ["image", "text"],
         "usage": {"include": True},
     }

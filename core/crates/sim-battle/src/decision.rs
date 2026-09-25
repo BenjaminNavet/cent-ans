@@ -122,4 +122,10 @@ pub(crate) struct EngagementClock {
     pub losses_mark: [f64; 2],
     /// Since when each side has been below its break share.
     pub below_since: [Option<f64>; 2],
+    /// EP9b: soldiers of each side struck down by missiles so far.
+    pub missile_losses: [f64; 2],
+    /// EP9b: share of its initial soldiers each side lost to missiles,
+    /// sampled every AI period (oldest first), for the attacker's archery
+    /// duel (`duel.rs`).
+    pub missile_log: std::collections::VecDeque<(f64, [f64; 2])>,
 }

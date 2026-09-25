@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "battle_layers.schema.json",
+  "title": "Couches instrumentales de la musique de bataille (DA4)",
+  "description": "Paramétrage de `BattleMusicDirector` (`game/scripts/battle/battle_music.gd`) : une piste de base (tirée de la liste « war » de `music.json`, filtrée passe-bas) plus des couches d'instruments d'époque jouées en boucle et mélangées en fondu selon l'état d'intensité (`approach`, `engagement`, `critical`, `victory`, `defeat`). `mute_when_battle_audio_active` liste les couches à couper quand l'audio spatialisé de bataille (AU1) est actif, pour éviter un doublon.",
+  "type": "object",
+  "required": ["fade_seconds", "hysteresis_seconds", "layers", "states"],
+  "additionalProperties": false,
+  "properties": {
+    "fade_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "hysteresis_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "layers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^assets/.+\\.(ogg|mp3|wav)$"
+      }
+    },
+    "mute_when_battle_audio_active": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "states": {
+      "type": "object",
+      "required": ["approach", "engagement", "critical", "victory", "defeat"],
+      "additionalProperties": false,
+      "properties": {
+        "approach": {"$ref": "#/$defs/state"},
+        "engagement": {"$ref": "#/$defs/state"},
+        "critical": {"$ref": "#/$defs/state"},
+        "victory": {"$ref": "#/$defs/state"},
+        "defeat": {"$ref": "#/$defs/state"}
+      }
+    },
+    "stingers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^assets/.+\\.(ogg|mp3|wav)$"
+      }
+    }
+  },
+  "$defs": {
+    "state": {
+      "type": "object",
+      "required": ["base_db", "base_cutoff_hz", "base_pitch", "layers"],
+      "additionalProperties": false,
+      "properties": {
+        "base_db": {"type": "number"},
+        "base_cutoff_hz": {"type": "number", "exclusiveMinimum": 0},
+        "base_pitch": {"type": "number", "exclusiveMinimum": 0},
+        "layers": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        }
+      }
+    }
+  }
+}

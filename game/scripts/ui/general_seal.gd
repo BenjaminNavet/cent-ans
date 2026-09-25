@@ -99,7 +99,7 @@ func set_general(new_character: Dictionary, new_army: Dictionary = {}, faction: 
 		_portrait = PortraitLoader.load_texture(portrait_path)
 	elif str(character.get("id", "")) != "":
 		_portrait = PortraitLoader.portrait_texture(str(character["id"]))
-	_heraldry = PortraitLoader.heraldry_texture(faction_id)
+	_heraldry = PortraitLoader.house_heraldry_texture(str(character.get("house", "")), faction_id)  # DA1
 	_refresh()
 
 

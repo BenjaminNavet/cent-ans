@@ -33,7 +33,12 @@ correspondance identifiant → fichier → auteur est versionnée dans
 Chaque dossier contient un `SOURCE.md` (URL, licence, auteur, modifications). Les assets CC0
 n'exigent aucune attribution ; ils sont crédités par courtoisie.
 
-### Musique — CC BY 4.0 (attribution obligatoire)
+### Musique — Kevin MacLeod (incompetech.com), CC BY 4.0 (repli, DA4)
+
+Ces pistes ne servent plus qu'en repli (« fallback » de `data/audio/music.json`, utilisées
+seulement si aucune piste d'époque n'est disponible) : trop reconnaissables et anachroniques par
+rapport à la musique d'époque de la section suivante. Elles restent créditées et disponibles,
+sans avoir été retirées du jeu.
 
 - « Lord of the Land » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
@@ -70,14 +75,42 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
 - « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 
-### Musique médiévale et Renaissance — Wikimedia Commons (CC BY-SA)
+### Musique médiévale et Renaissance — Wikimedia Commons (DA4)
 
-- Estampie « Retrove », Robertsbridge Codex — Metzner, CC BY-SA 3.0.
-- « Chominciamento di gioia » — Ririkuku, CC BY-SA 4.0.
+Musique d'époque libre de droits, organisée par culture (bible DA § 9 : France, Angleterre,
+Bourgogne/Flandre, Ibérie, Italie) et par contexte (campagne, cour, guerre, menu). Licence vérifiée
+page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
+
+- Estampie « Retrove », Robertsbridge Codex (Angleterre, XIVe s.) — Metzner, CC BY-SA 3.0.
+- « Chominciamento di gioia » (Italie, XIVe s.) — Ririkuku, CC BY-SA 4.0.
 - Guillaume Dufay, « Se la face ay pale » — Ensemble Asteria, CC BY-SA 2.5.
+- Guillaume Dufay, « Ave Regina caelorum » — enregistrement Commons, CC0.
 - Folía d'Ahigal — Loreto Galindo, tamborilero (Fundación Joaquín Díaz), CC BY-SA 3.0.
 - Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, 1553) — Phillip W. Serna, CC BY-SA 4.0.
-  Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
+- Cantigas de Santa María (Alphonse X, XIIIe s.), tradition orale castillane — Fundación Joaquín
+  Díaz, CC BY-SA 3.0.
+- Guillaume de Machaut, « Douce Dame Jolie » et « Riches d'amour et mandians d'amie » (Ars nova,
+  XIVe s.), Solage, « Fumeux fume par fumée » (Ars subtilior) — réalisations MIDI, Tetraktys,
+  domaine public.
+- Francesco Landini, « Ecco la primavera » et « Si dolce non sono » (XIVe s.) — réalisations MIDI,
+  Tetraktys, domaine public.
+- « Deo gracias Anglia » (Agincourt Carol, anonyme, XVe s.) — réalisation instrumentale, domaine
+  public.
+- « Sumer is Icumen In » (rota anglaise, XIIIe s.) — Brandtnight2000, CC BY-SA 4.0.
+- Gilles Binchois, « Triste plaisir » et « Dueil angoisseux » — réalisations MIDI, Tetraktys,
+  CC BY 3.0.
+- Démonstration de chalemie (Schalmei), utilisée aussi comme couche de bataille — Ajta,
+  CC BY-SA 3.0.
+
+Sources détaillées (URL, licence exacte, traitement) :
+`game/assets/third_party/music/wikimedia/SOURCE.md`.
+
+### Couches instrumentales de bataille — Freesound, CC0 1.0 (DA4)
+
+Musique de bataille en couches superposables (tambour, trompette droite, bourdon de cornemuse) au
+travers de `BattleMusicDirector` (`data/audio/battle_layers.json`) : enregistrements CC0
+(licence vérifiée page par page), coupés en boucles courtes, normalisés à -16 LUFS. Détail :
+`game/assets/audio/music/battle_layers/SOURCE.md`.
 
 ### Polices — SIL Open Font License 1.1
 
