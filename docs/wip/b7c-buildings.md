@@ -28,7 +28,9 @@ Branche `b7c-buildings` (worktree agent). Ne pas fusionner dans main (orchestrat
 
 ## État
 - [x] 1 [x] 2 [x] 3 (vérifié) [x] 4 [x] 5 [x] 6 [x] UI tooltips/encyclopédie/mock [x] ADR 0053 ; cargo fmt/clippy/test verts
-- [ ] Codex (sous-agent en cours) [ ] build.sh + smoke Godot [ ] pytest
+- [x] Codex (26 fiches, validateur vert) [x] build.sh + import + smoke Godot verts [x] pytest 515 verts
+
+Lot terminé, en attente de fusion par l'orchestrateur (branche b7c-buildings).
 
 ## Prochaine étape
-Codex, puis contrôles Godot/pytest. f1_effects `scholar_ruler…` : tolérance d'arrondi ±1 (points de recherche fractionnaires, baisse au départ due à drop_superseded).
+Aucune (fusion). Note : f1_effects `scholar_ruler…` : tolérance d'arrondi ±1 (points de recherche fractionnaires, baisse au départ due à drop_superseded).
