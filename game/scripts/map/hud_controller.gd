@@ -187,8 +187,46 @@ func _on_general_clicked(character_id: String) -> void:
 	if character_id != "":
 		map.call("_on_character_selected", character_id)
 	elif str(ui.current_army_id) != "" and bool(map.call("_characters_available")):
-		map.set("_court_open", true)
-		map.call("_show_court_panel", CourtPanel.FILTER_GENERAL)
+		open_general_picker(ui.current_army_id)  # U10 : « Sans chef » → choix du général
+
+
+## Lot U10 : choix du général de l'armée `army_id` (armée du joueur).
+func open_general_picker(army_id: String) -> void:
+	var army: Dictionary = _sim().call("get_army", army_id)
+	if str(army.get("faction", "")) != str(map.get("player_faction")):
+		return
+	var place := str(map.call("province_name_of", str(army.get("location_province", army.get("location", "")))))
+	ui.show_general_picker(army_id, "Choisir le chef de l'ost (%s)" % place, general_candidates(army))
+
+
+## Lot U10 : personnages du joueur pour commander `army` : `[{id, name, detail, reason}]`, les
+## disponibles sur place d'abord (`reason` vide), puis les autres avec leur empêchement.
+func general_candidates(army: Dictionary) -> Array:
+	var sim := _sim()
+	var location := str(army.get("location_province", army.get("location", "")))
+	var free: Array = []
+	var busy: Array = []
+	for id in sim.call("get_faction_characters", str(map.get("player_faction"))):
+		var character: Dictionary = sim.call("get_character", id)
+		if character.is_empty() or not bool(character.get("alive", true)):
+			continue
+		var command := int((character.get("skills", {}) as Dictionary).get("command", 0))
+		var entry := {"id": str(id), "name": str(character.get("name", "?")), "detail": "commandement %d" % command, "command": command}
+		var female := str(character.get("sex", "")) == "female"
+		if bool(character.get("captive", false)):
+			entry["reason"] = "retenue captive" if female else "retenu captif"
+		elif str(character.get("army", "")) != "":
+			entry["reason"] = "commande déjà une armée"
+		elif str(character.get("governor_of", "")) != "":
+			entry["reason"] = "gouverne une province"
+		elif str(character.get("location", "")) != location:
+			entry["reason"] = "à %s" % str(map.call("province_name_of", str(character.get("location", ""))))
+		if str(entry.get("reason", "")) == "":
+			free.append(entry)
+		else:
+			busy.append(entry)
+	free.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["command"]) > int(b["command"]))
+	return free + busy.slice(0, 6)
 
 
 func _on_split_requested(army_id: String, unit_indices: Array) -> void:
