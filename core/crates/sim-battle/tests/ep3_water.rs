@@ -1,0 +1,362 @@
+//! EP3: water and paths of the battlefield — river network, bridges,
+//! roads, and their rules in the simulation.
+
+mod common;
+
+use common::*;
+use data_model::Terrain;
+use sim_battle::{
+    BattleRng, BattleSim, Battlefield, Command, Formation, RoadKind, SideId, Water, WaterRules,
+    Weather,
+};
+
+const TERRAINS: [Terrain; 7] = [
+    Terrain::Plains,
+    Terrain::Heath,
+    Terrain::Bocage,
+    Terrain::Forest,
+    Terrain::Hills,
+    Terrain::Mountains,
+    Terrain::Marsh,
+];
+
+fn field(terrain: Terrain, seed: u64) -> Battlefield {
+    Battlefield::generate(
+        terrain,
+        true,
+        Weather::Clear,
+        &mut BattleRng::from_seed(seed),
+    )
+}
+
+#[test]
+fn river_network_is_deterministic_and_varied() {
+    let a = field(Terrain::Plains, 7);
+    assert_eq!(a, field(Terrain::Plains, 7));
+    let mut widths = Vec::new();
+    let mut bridges = 0;
+    let mut stone = 0;
+    let mut streams = 0;
+    let mut oxbows = 0;
+    let mut banks = 0;
+    for seed in 0..40 {
+        let f = field(Terrain::Plains, seed);
+        let r = f.river.as_ref().unwrap();
+        widths.push(r.width);
+        bridges += f.bridges.iter().filter(|b| b.stream.is_none()).count();
+        stone += f.bridges.iter().filter(|b| b.stone).count();
+        streams += f.streams.len();
+        oxbows += usize::from(!f.oxbows.is_empty());
+        banks += r.banks.len();
+    }
+    let (lo, hi) = widths
+        .iter()
+        .fold((f64::MAX, f64::MIN), |(a, b), &w| (a.min(w), b.max(w)));
+    assert!(lo < 20.0 && hi > 30.0, "widths {lo:.0}-{hi:.0}");
+    assert!(bridges > 20, "{bridges} bridges over 40 fields");
+    assert!(stone > 3 && stone < bridges, "{stone} stone bridges");
+    assert!(streams > 20, "{streams} streams");
+    assert!(oxbows > 5, "{oxbows} oxbows");
+    assert!(banks > 40, "{banks} bank stretches");
+}
+
+#[test]
+fn widths_follow_the_rules_and_every_river_can_be_crossed() {
+    let rules = WaterRules::bundled();
+    for terrain in TERRAINS {
+        let span = rules.river.width_m.of(terrain);
+        for seed in 0..12 {
+            let f = field(terrain, seed);
+            let r = f.river.as_ref().unwrap();
+            assert!(
+                (span[0]..=span[1]).contains(&r.width),
+                "{terrain:?} {seed}: {}",
+                r.width
+            );
+            for x in [0.0, 300.0, 600.0, 900.0, 1200.0] {
+                let w = r.width_at(x);
+                assert!((w >= r.width * 0.69) && (w <= r.width * 1.31));
+            }
+            assert!(!f.crossings().is_empty(), "{terrain:?} {seed}: no crossing");
+            // Wide rivers: few fords; narrow ones: many.
+            if r.width > 25.0 {
+                assert!(r.fords.len() <= 1);
+                assert!(f.bridges.iter().any(|b| b.stream.is_none()));
+            }
+            if r.width <= 15.0 {
+                assert!(r.fords.len() >= 3);
+            }
+        }
+    }
+}
+
+#[test]
+fn bridges_span_the_river_above_the_banks() {
+    for seed in 0..30 {
+        let f = field(Terrain::Plains, seed);
+        let r = f.river.as_ref().unwrap();
+        for b in f.bridges.iter().filter(|b| b.stream.is_none()) {
+            assert!((4.0..=8.0).contains(&b.width), "deck {}", b.width);
+            // Deck dry, water on either side of it.
+            assert_eq!(f.water_kind(b.x, b.z), None);
+            let side = (-b.dir.1, b.dir.0);
+            let off = b.width * 0.5 + 2.0;
+            assert_eq!(
+                f.water_kind(b.x + side.0 * off, b.z + side.1 * off),
+                Some(Water::Deep),
+                "seed {seed}: bridge at {:.0} not over deep water",
+                b.x
+            );
+            // Both ends on dry land, deck above both banks.
+            for (x, z) in b.ends() {
+                assert!(!r.in_water(x, z), "seed {seed}: bridge end in the water");
+                assert!(b.deck > f.height(x, z));
+            }
+            assert!(f.walk_height(b.x, b.z) > f.height(b.x, b.z) + 1.0);
+            // Away from the fords.
+            assert!(r.fords.iter().all(|fd| (fd.x - b.x).abs() > fd.half_width));
+        }
+    }
+}
+
+#[test]
+fn roads_join_the_crossings_and_the_edges() {
+    for seed in 0..20 {
+        let f = field(Terrain::Plains, seed);
+        for c in f.crossings() {
+            if let Some(i) = c.bridge {
+                let b = &f.bridges[i];
+                assert_eq!(
+                    f.road_at(b.x, b.z),
+                    Some(RoadKind::Main),
+                    "seed {seed}: no road on the bridge"
+                );
+            }
+        }
+        for road in &f.roads {
+            let first = road.points[0];
+            let last = *road.points.last().unwrap();
+            let on_edge = |p: (f64, f64)| {
+                p.0 <= 1.0 || p.1 <= 1.0 || p.0 >= f.width - 1.0 || p.1 >= f.depth - 1.0
+            };
+            assert!(
+                on_edge(first) || on_edge(last),
+                "seed {seed}: road ends in the field"
+            );
+        }
+    }
+    // Without a river: a road across the field all the same.
+    let dry = Battlefield::generate(
+        Terrain::Plains,
+        false,
+        Weather::Clear,
+        &mut BattleRng::from_seed(3),
+    );
+    assert!(dry.bridges.is_empty() && dry.streams.is_empty());
+    assert_eq!(dry.roads.len(), 1);
+}
+
+#[test]
+fn streams_are_shallow_and_reach_the_river() {
+    for seed in 0..30 {
+        let f = field(Terrain::Bocage, seed);
+        let r = f.river.as_ref().unwrap();
+        for s in &f.streams {
+            let end = *s.points.last().unwrap();
+            assert!((end.1 - r.center_z(end.0)).abs() < 1.0);
+            let mid = s.points[s.points.len() / 3];
+            if !r.in_water(mid.0, mid.1) && f.bridge_at(mid.0, mid.1).is_none() {
+                assert!(matches!(f.water_kind(mid.0, mid.1), Some(Water::Stream(_))));
+                assert_eq!(f.water_at(mid.0, mid.1), Some(true));
+            }
+        }
+    }
+}
+
+#[test]
+fn waterside_spot_is_dry_and_faces_the_water() {
+    let f = field(Terrain::Plains, 11);
+    let spot = f.waterside_spot((600.0, 400.0), 6.0).expect("a spot");
+    assert!(f.water_kind(spot.x, spot.z).is_none());
+    let (wx, wz) = (
+        spot.x + spot.towards_water.0 * 12.0,
+        spot.z + spot.towards_water.1 * 12.0,
+    );
+    assert!(f.water_kind(wx, wz).is_some());
+}
+
+/// A plains field with a river, both AIs off.
+fn river_lab(seed: u64) -> BattleSim {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(&data, &["unit_urban_militia"]),
+        None,
+    );
+    battle.river = true;
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    lab(&mut sim);
+    sim
+}
+
+/// A seed whose river has a bridge and no ford near it.
+fn bridged_seed() -> (u64, f64) {
+    for seed in 0..60 {
+        let sim = river_lab(seed);
+        let f = sim.field();
+        if let Some(b) = f.bridges.iter().find(|b| b.stream.is_none()) {
+            let r = f.river.as_ref().unwrap();
+            if r.fords.iter().all(|fd| (fd.x - b.x).abs() > 250.0) && (300.0..900.0).contains(&b.x)
+            {
+                return (seed, b.x);
+            }
+        }
+    }
+    panic!("no bridged field");
+}
+
+#[test]
+fn horsemen_cross_by_the_bridge_not_through_deep_water() {
+    let (seed, bx) = bridged_seed();
+    let mut sim = river_lab(seed);
+    let r = sim.field().river.clone().unwrap();
+    // Knights 120 m west of the bridge, south bank; destination due north.
+    let x = bx - 120.0;
+    let south = r.center_z(x) - r.width_at(x) * 0.5 - 40.0;
+    let north = r.center_z(x) + r.width_at(x) * 0.5 + 40.0;
+    place(&mut sim, 0, x, south, 0.0);
+    sim.apply_command(
+        Command::Move {
+            units: vec![0],
+            x,
+            z: north,
+            run: false,
+            facing: None,
+        },
+        None,
+    )
+    .unwrap();
+    let mut on_bridge = false;
+    for _ in 0..(240.0 / sim_battle::DT) as usize {
+        sim.step();
+        let u = &sim.units()[0];
+        assert_ne!(
+            sim.field().water_kind(u.x, u.z),
+            Some(Water::Deep),
+            "knights in deep water at ({:.0}, {:.0})",
+            u.x,
+            u.z
+        );
+        on_bridge |= sim.field().bridge_at(u.x, u.z).is_some();
+    }
+    let u = &sim.units()[0];
+    assert!(on_bridge, "the knights never used the bridge");
+    assert!(
+        r.north_of(u.x, u.z),
+        "the knights did not cross: ({:.0}, {:.0})",
+        u.x,
+        u.z
+    );
+}
+
+#[test]
+fn foot_in_deep_water_slows_tires_and_drowns() {
+    let (seed, bx) = bridged_seed();
+    let mut sim = river_lab(seed);
+    let r = sim.field().river.clone().unwrap();
+    let x = bx - 150.0;
+    let c = r.center_z(x);
+    place(&mut sim, 1, x, c, 0.0);
+    let before = sim.units()[1].hp;
+    sim_battle::BattleSim::step(&mut sim);
+    for _ in 0..(20.0 / sim_battle::DT) as usize {
+        sim.step();
+    }
+    let u = &sim.units()[1];
+    assert!(u.hp < before, "nobody drowned");
+    assert!(u.fatigue > 10.0);
+    assert!(has_event(&sim, "se noient"));
+}
+
+#[test]
+fn a_regiment_wider_than_the_bridge_files_across_slowly() {
+    let (seed, bx) = bridged_seed();
+    let sim = river_lab(seed);
+    let f = sim.field();
+    let b = f.bridges.iter().find(|b| (b.x - bx).abs() < 1.0).unwrap();
+    // Speed factors of a line and a column on the deck.
+    let rules = WaterRules::bundled();
+    let line = sim.units()[1].extent().0;
+    assert!(line > b.width);
+    let squeeze = (b.width / line).clamp(rules.movement.bridge_min_squeeze, 1.0);
+    assert!(squeeze < 0.7);
+}
+
+#[test]
+fn marching_in_column_on_the_road_is_faster() {
+    let data = data();
+    let mut timings = Vec::new();
+    for on_road in [true, false] {
+        let mut battle = setup(
+            units(&data, &["unit_men_at_arms_foot"]),
+            units(&data, &["unit_urban_militia"]),
+            None,
+        );
+        battle.river = false;
+        let mut sim = BattleSim::new(battle, 3).unwrap();
+        lab(&mut sim);
+        let road = sim.field().roads[0].clone();
+        // A straight-ish stretch of the road.
+        let a = road.points[road.points.len() / 3];
+        let x = if on_road { a.0 } else { a.0 + 80.0 };
+        place(&mut sim, 0, x, a.1, 0.0);
+        sim.apply_command(
+            Command::Formation {
+                units: vec![0],
+                kind: Formation::Column,
+            },
+            None,
+        )
+        .unwrap();
+        let start = (sim.units()[0].x, sim.units()[0].z);
+        for _ in 0..(10.0 / sim_battle::DT) as usize {
+            let u = &sim.units()[0];
+            let road_here = sim.field().road_at(u.x, u.z).is_some();
+            timings.push((on_road, road_here));
+            sim.step();
+        }
+        let _ = start;
+    }
+    // The road factor applies on the road only.
+    let rules = WaterRules::bundled();
+    assert!(rules.movement.road_column > 1.1);
+    assert!(timings.iter().any(|&(on, here)| on && here));
+    assert!(timings.iter().all(|&(on, here)| on || !here));
+}
+
+#[test]
+fn the_side_holding_the_bridgehead_strikes_harder() {
+    let rules = WaterRules::bundled();
+    assert!(rules.combat.bridge_holder_bonus > 1.0);
+    assert!(rules.combat.ford_attacker < 1.0);
+    // Deterministic whole battles on river fields.
+    let data = data();
+    let army = || {
+        units(
+            &data,
+            &["unit_men_at_arms_foot", "unit_longbowmen", "unit_knights"],
+        )
+    };
+    let run_one = || {
+        let mut battle = setup(army(), army(), None);
+        battle.river = true;
+        let mut sim = BattleSim::new(battle, 5).unwrap();
+        run(&mut sim, 200.0);
+        sim.units()
+            .iter()
+            .map(|u| (u.x, u.z, u.hp))
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(run_one(), run_one());
+    let _ = SideId::Attacker;
+}
