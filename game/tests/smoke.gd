@@ -2249,7 +2249,8 @@ func _run_coinage_ransom() -> void:
 		{"kind": "chivalry", "text_fr": "Ordre fondé.", "faction": FACTION_ID},
 	]
 	var groups := SeasonReport.build_groups(events, func(_event: Dictionary) -> bool: return true)
-	_check(groups.size() == 1 and (groups[0]["entries"] as Array).size() == 3, "season report group for coinage/ransom/chivalry: %s" % [groups])
+	# U5 : monnaie et rançon au « Trésor », chevalerie dans « Vos terres ».
+	_check(SeasonReport.entry_count(groups) == 3 and str(groups[0]["id"]) == "lands" and str(groups[1]["id"]) == "treasury", "season report sections for coinage/ransom/chivalry: %s" % [groups])
 	_check(SeasonReport.KIND_STYLES.has("ransom") and NewsLetters.KIND_LABELS.has("chivalry") and not NewsLetters.news_from_event(events[0]).is_empty(), "styles and letters for H11 kinds")
 
 	# Encyclopédie → Codex et Codex → Encyclopédie.

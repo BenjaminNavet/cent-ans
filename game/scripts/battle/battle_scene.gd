@@ -59,6 +59,8 @@ var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
+var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
+var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -216,6 +218,9 @@ func begin() -> bool:
 		_audio_director.call("stop_all")
 	if _pad_units > 0:
 		_pad_setup(_pad_units)
+	if _siege_engines != "" and setup.get("siege") != null:
+		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
+		padded = true  # régiments hors campagne : pas de résultat à rapporter
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false
@@ -348,6 +353,11 @@ func _build_soldier_layers() -> void:
 		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
+	if siege_view != null:
+		assault_fx = SiegeAssaultFx.new()
+		assault_fx.name = "AssaultFx"
+		add_child(assault_fx)
+		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
 
 
 ## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
@@ -392,6 +402,8 @@ func _update_effects(dt: float) -> void:
 	if blood != null:
 		blood.tick_time(soldiers.anim_time)
 		blood.update(units, camera_pos)
+	if assault_fx != null:
+		assault_fx.update(battle.call("get_siege_events"), units, soldiers.anim_time, dt)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -1230,6 +1242,8 @@ func _parse_cmdline() -> void:
 			_deploy_shot = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--siege-engines="):
+			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--result-shot":

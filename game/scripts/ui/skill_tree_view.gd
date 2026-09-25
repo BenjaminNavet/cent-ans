@@ -199,10 +199,14 @@ class SkillNode:
 		node.mouse_filter = Control.MOUSE_FILTER_STOP
 		if node_state == SkillTreeView.STATE_AVAILABLE:
 			node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		node._icon = HudStyle.icon("branch_" + str(data.get("branch", "")), "branch")
+		# U10 (audit A3, P2) : une icône par compétence ; à défaut, celle de sa branche.
+		node._icon = HudStyle.icon(str(data.get("id", "")), "skill")
+		if node._icon == null:
+			node._icon = HudStyle.icon("branch_" + str(data.get("branch", "")), "branch")
 		var hint := ""
 		if node_state == SkillTreeView.STATE_AVAILABLE:
-			hint = "\n[color=#8b1a1a]Clic : apprendre (%d point(s))[/color]" % int(data.get("cost", 0))
+			var cost := int(data.get("cost", 0))
+			hint = "\n[color=#8b1a1a]Clic : apprendre (%d point%s)[/color]" % [cost, "s" if cost > 1 else ""]
 		node.tooltip_text = RichTooltip.skill(data, str(SkillTreeView.STATE_LABELS.get(node_state, ""))) + hint
 		node.mouse_entered.connect(func() -> void:
 			node._hover = true
@@ -252,7 +256,7 @@ class SkillNode:
 		var ink := HudStyle.INK if (learned or available) else HudStyle.INK_FADED
 		var text_left := center.x + radius + 5.0
 		var text_width := size.x - text_left - 4.0
-		draw_multiline_string(font, Vector2(text_left, 20), str(entry.get("name", entry.get("id", "?"))), HORIZONTAL_ALIGNMENT_LEFT, text_width, 12, 2, ink)
+		draw_multiline_string(font, Vector2(text_left, 20), str(entry.get("name", entry.get("id", "?"))), HORIZONTAL_ALIGNMENT_LEFT, text_width, 13, 2, ink)
 		var status := "%s · %d pt" % [SkillTreeView.STATE_LABELS.get(state, ""), int(entry.get("cost", 0))]
 		var status_color := HudStyle.GOOD if learned else (HudStyle.RUBRIC if available else HudStyle.INK_FADED)
-		draw_string(font, Vector2(text_left, size.y - 8), status, HORIZONTAL_ALIGNMENT_LEFT, text_width, 10, status_color)
+		draw_string(font, Vector2(text_left, size.y - 8), status, HORIZONTAL_ALIGNMENT_LEFT, text_width, 11, status_color)

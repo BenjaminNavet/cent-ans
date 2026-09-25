@@ -151,3 +151,18 @@ et pots à feu de l'assaillant, propagation selon la distance, le vent et la mé
 ruines franchissables par l'A*. Pont : `get_siege().houses[i]` gagne `fire = {state, intensity}` et
 `suburb` ; la racine gagne `gate_fire`, `wind`, `houses_burning`, `houses_burnt` ; commande
 `{type: "burn", units, house | gate: true}` ; `debug_ignite(house)`. ADR `0008-incendies-regle-coeur.md`.
+
+## SG1 — assauts spectaculaires (ADR `0023-evenements-assaut-de-siege.md`)
+- Événements de rendu `BattleSim.get_siege_events()` (`sim-battle/src/siege_fx.rs`) : `engine_shot`
+  (point d'impact sur le pan), `ram_strike`, `tower_volley`, `ladders_raised`, `tower_docked` /
+  `tower_undocked`, `on_wall`, `boiling_oil`, `gate_broken`, `wall_breached`, `defenders_fall_back`.
+- Règles : bélier par coups toutes les 3 s (`RAM_PERIOD`, même usure moyenne) ; huile bouillante
+  toutes les 30 s (`OIL_PERIOD`) si un défenseur garde la porte (≤ 50 m, dedans), sur les
+  assaillants à moins de 10 m de sa face : 3 hommes × armure à moitié efficace, −4 de moral,
+  0,5 servant pour le bélier ; porte tombée : 2 régiments au plus par ouverture la bouchent, le
+  reste de l'infanterie de la garnison IA se regroupe sur la place (y compris celle du rempart qui
+  n'a pas de grimpeur à moins de 70 m).
+- Grimpeurs : `BattleSim::ladders`, `climbers_shown`, `soldier_poses` (échelles réparties sur le
+  front du régiment, à l'écart des tours) ; pont : `get_units().climbers_shown`, `ladder_lines`.
+- Tests `sim-battle/tests/sg1.rs` (7). Captures `docs/audit/captures/sg1/`
+  (`game/tests/sg1_siege_shot.gd`).
