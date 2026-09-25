@@ -900,6 +900,128 @@ exagération dynamique) et `-4_site_avant` (même vue, `--static-exaggeration`).
 ![Rouen, site (exagération dynamique)](img/zg4/rouen-3_site_apres.jpg)
 ![Puy de Dôme, site](img/zg4/puy-de-dome-3_site_apres.jpg)
 
+## Hydrographie fine, routes drapées, ancrages et parcellaire de près (lot ZG5b, ADR 0036)
+
+Rendu seulement : les données viennent du lot ZG5a (`docs/geo.md`, « Hydrographie fine »), les règles
+(`core/`, `navgrid.png`, positions des colonies) ne changent pas. Actif quand la pyramide de relief **et**
+les tuiles ZG5a sont en cache (`data/map/pyramid/hydro_fine`, `roads_fine`), en deçà du palier comté
+(`ZoomTiers.near_weight`) ; sans cache, avec `--no-pyramid` ou `--no-fine-geo`, rien ne change (rubans
+V4 / C6, lit `river_bed.png`).
+
+| Fichier | Rôle |
+|---|---|
+| `scripts/map/cafv_tile.gd` | Lecture d'une tuile CAFV v1 (en-tête de 28 octets), emprise et **rang** de chaque ligne. |
+| `scripts/map/fine_geo_store.gd` | Index `rivers_fine.json` / `fine_anchors.json`, tuiles chargées dans `WorkerThreadPool`, cache LRU (64 tuiles par couche, verrou : lisible depuis les fils), ancrages. |
+| `scripts/map/fine_bed_carver.gd` | Lit creusé dans les pages du quadtree (tâche de fil par page). |
+| `scripts/map/fine_ribbon_job.gd` | Maillage des rubans d'une tuile E2 (fleuves + routes), dans un fil. |
+| `scripts/map/fine_geo_layer.gd` | `Rivers/FineGeo` : tuiles voulues, construction, installation, fondu, ponts-portes, qualité. |
+| `shaders/river_fine.gdshader`, `shaders/road_fine.gdshader` | Eau et routes de près. |
+| `shaders/fine_parcels.gdshaderinc` | Parcellaire, bords de la splat, détail de près (3 crochets dans `terrain.gdshader`). |
+| `tests/zg5b_fine_geo_test.gd` | Test headless (voir plus bas). |
+
+### Streaming
+
+- Tuiles E2 (64 unités ≈ 46 km) coupant un disque autour du point visé, rayon = distance × 1,3 (40 à
+  170 unités, × 0,6 / 0,8 en qualité Basse / Moyenne), triées par distance ; lecture dans des fils
+  (`FineGeoStore.request` / `poll`), puis maillage dans des fils (`FineRibbonJob`, 2 à la fois) ;
+  installation des `ArrayMesh` sur le fil principal, au moins une par image puis dans le budget commun de
+  PB1 (`FrameBudget.has_time()`), au plus 2. 40 tuiles maillées en cache (LRU).
+- **Hauteurs en mètres** dans `VERTEX.y`, multipliées par `campaign_vertical_scale` (ZG4) dans les
+  shaders : l'exagération dynamique ne demande aucun remaillage (boîtes `custom_aabb` calculées à l'échelle
+  maximale `HEIGHT_SCALE`).
+- Surface sous les rubans : instantané des pages (`ReliefQuadtree.surface_snapshot`) échantillonné dans le
+  fil. Remaillage quand l'étage de page le plus fin qui touche la tuile change (jusqu'à E4 ; les arrivées
+  E5-E7 et le va-et-vient du LRU des pages n'en déclenchent pas), 600 ms après la dernière page.
+- **Rang** d'une ligne = max(ordre de Strahler, ordre équivalent à sa largeur maximale : 16 m → 5, 30 → 6,
+  60 → 7, 120 → 8, 220 → 9) : l'ordre calculé par ZG5a sous-estime les grands fleuves (Seine à Rouen :
+  ordre 4 pour 1 000 m de large). Affichage : rang ≥ 3 (≥ 4 en Moyenne, ≥ 5 en Basse), les petits rangs
+  s'effacent avec la distance caméra → sommet (rang 3 sous 30 unités, × 2 par rang).
+
+### Lit creusé : abaissement des pages
+
+Choix : **retoucher les pages de hauteurs** plutôt qu'une texture de lit à part. `ReliefQuadtree.page_filter`
+(crochet de ZG5b) appelle `FineBedCarver.carve_job(key)` quand une page est décodée : pour les pages
+**≥ E3**, une tâche de fil lit les tuiles CAFV voisines (cache verrouillé) et abaisse, sous chaque ligne de
+rang suffisant (≥ 5 à E3, ≥ 3 au-delà), les hauteurs sous le niveau d'eau `z` : fond parabolique
+(0,6 m + 1,2 % de la largeur, ≤ 4 m ; 0,25 m sous l'eau au bord), berge fondue sur 35 % de la largeur
+(1,5 pixel de page à 250 m) ; au moins 0,75 pixel de page de demi-largeur (sillon d'un ruisseau). Rien sous
+les emprises des colonies (l'eau passe sous les villes). La page téléversée **et** les octets gardés pour
+`surface_height_at` sont les mêmes : déplacement des patchs, normales (berges ombrées), morphing vers la
+page parente (creusée à sa résolution), pose des ponts et des maquettes voient le même lit. Coût : ≈ 8-10 ms
+de fil par page E4 réelle (Seine à Rouen, 11 700 pixels abaissés), 0 sur le fil principal.
+Les pages E1-E2 ne sont pas creusées : l'eau y flotte 0,35 m au-dessus de la surface (lointain de la
+vue comté). Le lit `river_bed.png` (719 m/px, tuiles de relief fin) n'est plus creusé quand le rendu fin
+est actif, et ses berges peintes s'effacent dans le disque fin (large tranchée sombre des captures ZG4).
+
+### Rubans et fondu
+
+- Fleuves (`river_fine.gdshader`) : sommets doublés sur l'axe, demi-largeur réelle `w / 2` (au moins 1,2 px
+  écran, estompé en dessous), eau à plat au niveau `z` (ou 0,35 m au-dessus de la surface si le lit n'est
+  pas creusé à cet étage), léger décalage vers la caméra (0,15 % de la distance) contre les facettes du
+  relief ; couleur selon l'épaisseur d'eau (tampon de profondeur), rides dans le sens du courant (lignes
+  orientées vers l'aval), reflet du ciel. Drapeaux : **divagant** → grèves et bancs de sable dans le lit
+  (bande de berge + 35 %), **marée** → eau saumâtre et vasières découvertes selon une marée de 90 s (bande
+  + 80 %), **marais** → roselières (bande + 90 %), **intermittent** → lit de galets, filet d'eau au centre.
+- Routes (`road_fine.gdshader`) : largeur réelle (6 / 4 / 3 m), au moins 2,2 px (3,2 px pour les voies
+  principales) ; hauteur = max(surface, `z` de la tuile) + 0,25 m (remblais et tabliers) ; ornières, voie
+  principale plus claire, **pavé** près des villes et cités (rayon de la maquette × 1,6 + 0,4), **chaussée**
+  talutée en zone humide (drapeau 32). Densifiées tous les 0,08 unité (57 m).
+- Fondu : disque `fine_zone` (centre = point visé, rayon = distance jusqu'à la première tuile voulue pas
+  encore maillée, poids = palier près) passé aux nouveaux matériaux et aux anciens (`river_water`, berges
+  de `river_banks.gdshaderinc` via `fine_zone_mask`, rubans de `road.gdshader`) : dedans le nouveau
+  rendu, dehors l'ancien, fondu sur les 15 % extérieurs. Les traits du palier moyen ne changent pas.
+- `--fine-debug` : fleuves en magenta (bord jaune), routes en jaune, opaques.
+
+### Ancrages
+
+- Colonies et hameaux : `SettlementLayer.apply_fine_anchors` pose les maquettes (hors villes
+  emblématiques) et les hameaux aux `px` de `fine_anchors.json` (≤ 300 m hors des lits et des pentes
+  fortes), recalés sur la surface affichée (le sol le plus fin chargé fait foi, pas le `z` du fichier) ;
+  étiquettes de près au-dessus de la maquette ancrée. Icônes, étiquettes du palier moyen, picking,
+  `world_position_of` (armées) et règles gardent les positions de `data`.
+- Ponts (`RiverCrossings.set_fine_anchors` / `set_fine_mode`, bascule au poids du palier près ≥ 0,5) :
+  ouvrages historiques et génériques sur le fleuve fin (position, perpendiculaires à `dir`, portée
+  `width_m`), **à l'échelle réelle** (maillage d'une largeur `width / 0,14` réduit de 0,14 : culées de 50 m,
+  tablier de 10-25 m), origine au niveau d'eau `z_water` × échelle verticale, hauteur mise à l'échelle pour
+  que le tablier soit à `z_deck` (recalculée à chaque changement d'exagération). Ponts-portes V4 cachés,
+  remplacés par des ponts-portes calculés sur le fleuve fin au bord des emprises des colonies
+  (`FineRibbonJob` → `FineGeoLayer._build_gates`). Les ponts restent visibles au palier site avec le rendu
+  fin (ZG4 les cachait).
+
+### Parcellaire, splat et détail de près
+
+Trois crochets d'une ligne dans `terrain.gdshader`, logique dans `fine_parcels.gdshaderinc` :
+
+- `fp_splat` : de près (empreinte < 0,12 unité par pixel), la splat 4096² est lue en coordonnées
+  déformées (bruit à 3 échelles, ± 0,8 px carte) : plus de damier de carrés de 719 m.
+- `fp_tile_level` : l'échelle des textures de détail continue de diminuer de près (niveau ≥ −7, tuile
+  ≈ 17 m au lieu de 2 km) : sol net aux paliers vallée / site.
+- `fp_parcels` (empreinte < 0,05 unité par pixel, plein sous 0,015) : coordonnées locales en mètres par
+  blocs de 8 unités (précision flottante, cellules alignées sur les blocs) ;
+  **openfield** (où `landuse.b` est faible : nord, est) : quartiers de Voronoï (~400 m) de lanières de
+  15-35 m orientées par quartier, un tenancier par lanière (teinte), soles de l'assolement triennal
+  (~1,5 km : blé d'hiver, céréales de printemps, jachère, selon la saison de CV1), raies et tournières
+  enherbées, sillons en relief ; **bocage** (`landuse.b` fort : ouest) : enclos irréguliers (~150 m,
+  déformés) bordés de haies arborées de 5-10 m (houppiers bosselés, cœur sombre), prés et champs ;
+  **vignes** sur les coteaux exposés au sud (pente 4-45 %, exposition tirée du gradient du relief fin,
+  `landuse.r`), rangs de 1,8 m le long des courbes de niveau, terrasses sur les pentes > 25 % ; **prés de
+  fauche** en fond de vallée (occlusion de `relief_shade` < 0 et pente < 5 %, prés humides de `wetlands`),
+  andains ; **essarts** aux lisières (forêt partielle), souches ; **friches** loin des villages et hameaux
+  (masque des terroirs CV1 : finage R et pâtures A faibles).
+- Qualité (`FineGeoLayer.apply_render_quality`, déduite de `relief_items` du préréglage PF1) : Basse →
+  `fp_quality` 0 (rien, ni splat déformée ni détail), Moyenne → 1 (pas d'enclos du bocage), Haute / Ultra → 2.
+
+### Test, banc, captures
+
+- `godot --headless --path game --script res://tests/zg5b_fine_geo_test.gd` : tuile CAFV écrite et relue
+  (drapeaux, rang), store (index, chargement dans un fil, LRU borné, ancrages), lit creusé d'une page
+  plate (fond sous l'eau, berge fondue, rien au loin, rien sous une colonie, E1-E2 jamais, rang 3 pas à
+  E3), rubans (hauteur en mètres, relevée au-dessus d'une surface non creusée, coupe et ponts-portes au
+  bord d'une emprise, route densifiée), pont sur son ancrage fin (position, niveau d'eau, axe, portée,
+  tablier à `z_deck`, retour au tracé V4) ; avec le cache : tuile de Rouen, page E4 réelle creusée.
+- Banc : `--bench-map` imprime aussi `fine_update_ms_avg/max`, `fine_builds`, `fine_build_ms_avg`,
+  `fine_install_ms_max`, `carved_pages`.
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
