@@ -113,14 +113,9 @@ func _build() -> void:
 	column.add_child(title)
 
 	var frame := PanelContainer.new()
-	var frame_style := StyleBoxFlat.new()
-	frame_style.bg_color = FrontEndStyle.GOLD_DARK
-	frame_style.border_color = FrontEndStyle.GOLD
-	frame_style.set_border_width_all(3)
-	frame_style.set_content_margin_all(6)
-	frame_style.shadow_color = Color(0, 0, 0, 0.6)
-	frame_style.shadow_size = 22
-	frame.add_theme_stylebox_override("panel", frame_style)
+	# Cadre du kit enluminé UI1 (vélin, filets d'or et vermillon, bossettes) : même style que
+	# les fenêtres du jeu.
+	frame.add_theme_stylebox_override("panel", HudStyle.panel_box(14))
 	frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	frame.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	column.add_child(frame)
