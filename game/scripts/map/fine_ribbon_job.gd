@@ -64,7 +64,8 @@ func _surface_m(px: float, py: float) -> float:
 		return NAN
 	var pages: Dictionary = snapshot["qt_pages"]
 	var h := ReliefQuadtree.sample_pages(pages, snapshot["max_level"], snapshot["h_min"], snapshot["h_range"], px, py)
-	return h / snapshot_scale if not is_nan(h) else NAN
+	# Même échelle que celle que `_bilinear` vient d'appliquer (ZG4 : dynamique).
+	return h / MapData.vertical_scale() if not is_nan(h) else NAN
 
 
 func _cover_at(p: Vector2) -> int:

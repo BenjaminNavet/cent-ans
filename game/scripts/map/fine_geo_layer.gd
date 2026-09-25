@@ -144,9 +144,8 @@ func update_view(camera_distance: float) -> void:
 	store.poll()
 	var scale := MapData.vertical_scale()
 	if scale != _scale:
+		# Rubans : `campaign_vertical_scale` (paramètre global, ZG4) ; ponts-portes recalés ici.
 		_scale = scale
-		for material in [river_material, road_material]:
-			material.set_shader_parameter("height_scale", scale)
 		_reground_gates()
 	var weight := tiers.near_weight(camera_distance)
 	if weight != _weight:
