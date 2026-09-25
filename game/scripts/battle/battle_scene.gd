@@ -59,6 +59,7 @@ var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
+var engines_fx: SiegeEnginesFx = null  # SG2 : engins de siège animés
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
@@ -382,10 +383,17 @@ func _build_soldier_layers() -> void:
 		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
+	# SG2 : engins animés (trébuchet, mangonneau, bombarde, roues du bélier et du beffroi).
+	engines_fx = SiegeEnginesFx.new()
+	engines_fx.name = "EnginesFx"
+	add_child(engines_fx)
+	engines_fx.setup(soldiers, effects, siege_view)
+	effects.engine_fx = engines_fx
 	if siege_view != null:
 		assault_fx = SiegeAssaultFx.new()
 		assault_fx.name = "AssaultFx"
 		add_child(assault_fx)
+		assault_fx.engines_fx = engines_fx
 		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	_setup_grass_flatten()
 
@@ -487,6 +495,8 @@ func _update_effects(dt: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
 	var shots: Variant = battle.call("get_shots")
+	if engines_fx != null:
+		engines_fx.update(units, shots, soldiers.anim_time, dt)
 	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
 	if blood != null:
 		blood.tick_time(soldiers.anim_time)
