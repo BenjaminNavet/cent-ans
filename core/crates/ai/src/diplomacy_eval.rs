@@ -4,6 +4,8 @@
 //!
 //! - **Trade agreements** with friendly partners that are not rivals.
 //! - **Military access** swapped between co-belligerents.
+//! - **Right of passage** (EQ5) asked of the realms whose lands our armies
+//!   stand on without it.
 //!
 //! Every treaty is judged by the recipient through
 //! `sim_campaign::negotiation::evaluate_treaty`; the AI only sends what the
@@ -43,8 +45,8 @@ pub fn plan_treaties(state: &CampaignState, data: &GameData, faction: &FactionId
     let phase = (state.turn + slot(faction)) % PLAN_PERIOD;
     let order = match phase {
         0 => plan_trade(state, data, faction),
-        3 => plan_access(state, data, faction),
-        _ => None,
+        3 => plan_access(state, data, faction).or_else(|| plan_passage(state, data, faction)),
+        _ => plan_passage(state, data, faction),
     };
     order.into_iter().collect()
 }
@@ -125,6 +127,42 @@ fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> O
         }
         would_sign(state, data, faction, id, &treaty).then(|| Order::ProposeTreaty {
             target: id.clone(),
+            articles: treaty,
+        })
+    })
+}
+
+/// EQ5: our armies camp on the lands of a realm at peace without right of
+/// passage: ask it for military access (ours in exchange when it has none),
+/// rather than let the incidents pile up. AI realms only (the player is not
+/// pestered every season), the largest trespassing force first.
+fn plan_passage(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let me = state.factions.get(faction)?;
+    let mut owners: std::collections::BTreeMap<FactionId, usize> = Default::default();
+    for army in state.armies.values().filter(|a| &a.faction == faction) {
+        let owner = state
+            .army_province(data, army)
+            .and_then(|p| sim_campaign::passage::trespassed_owner(state, faction, &p));
+        if let Some(owner) = owner {
+            *owners.entry(owner).or_default() += army.units.len();
+        }
+    }
+    let mut owners: Vec<(FactionId, usize)> = owners
+        .into_iter()
+        .filter(|(id, _)| negotiable(state, id) && id != &state.player_faction)
+        .collect();
+    owners.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    owners.into_iter().find_map(|(id, _)| {
+        let mut treaty = vec![Article::MilitaryAccess {
+            giver: Party::Recipient,
+        }];
+        if !me.ledger.military_access.contains(&id) {
+            treaty.push(Article::MilitaryAccess {
+                giver: Party::Proposer,
+            });
+        }
+        would_sign(state, data, faction, &id, &treaty).then(|| Order::ProposeTreaty {
+            target: id,
             articles: treaty,
         })
     })
