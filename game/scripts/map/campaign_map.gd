@@ -134,6 +134,10 @@ func _ready() -> void:
 	weather_view.setup(self)
 	if strategic.overlay != null:
 		strategic.overlay.weather_view = weather_view
+	var turn_light := TurnLight.new()  # CM2 : soir doré pendant le tour des autres factions
+	turn_light.name = "TurnLight"
+	add_child(turn_light)
+	turn_light.setup(self)
 	path_preview.setup(map_data)
 	_connect_ui()
 	settlements_ctl = SettlementController.new()  # C5
