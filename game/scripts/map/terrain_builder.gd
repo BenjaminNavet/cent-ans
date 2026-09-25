@@ -15,6 +15,13 @@ extends Node3D
 ## cache LRU (`max_cached_fine`). `surface_height_at` donne la hauteur exacte de la surface
 ## affichée (quel que soit le niveau) pour poser les objets ; `chunk_surface_changed` signale
 ## qu'une tuile a changé de niveau (les objets posés dessus doivent être recalés).
+##
+## Lot ZG2 (ADR 0036) : quand la pyramide de relief est en cache (`ReliefPyramid`), un
+## `ReliefQuadtree` dessine tout le terrain (patchs déplacés au GPU, pages streamées) et les
+## morceaux E0 sont masqués ; `surface_height_at` rend alors la surface de la page chargée la plus
+## fine, `surface_grid` un instantané de ces pages, et `chunk_surface_changed` signale aussi
+## l'arrivée d'une page (au plus toutes les `surface_flush_interval_ms`). Sans cache (ou
+## `--no-pyramid`), comportement inchangé.
 
 signal chunk_surface_changed(index: int)
 
@@ -47,6 +54,11 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var max_fine_jobs: int = 2
 @export var max_cached_fine: int = 10
 @export var fine_enabled: bool = true
+## Lot ZG2 : quadtree de relief si la pyramide est en cache ; `pyramid_manifest_path` remplace
+## `data/map/relief_pyramid.json` (essais, `--pyramid-dir=<dossier>` contenant le manifeste).
+@export var pyramid_enabled: bool = true
+@export var pyramid_manifest_path: String = ""
+@export var surface_flush_interval_ms: int = 250
 
 var map_data: MapData
 var material: ShaderMaterial
@@ -94,6 +106,11 @@ var _faction_texture: ImageTexture
 var _mask_texture: ImageTexture
 var _owner_colors: Dictionary = {}
 var _province_colors: PackedColorArray = PackedColorArray()
+var pyramid: ReliefPyramid
+var quadtree: ReliefQuadtree
+## Morceaux dont la surface a changé (page arrivée ou évincée), signalés par paquets.
+var _surface_dirty: Dictionary = {}
+var _surface_flush_ms: int = 0
 
 
 ## Palette de repli (couleurs héraldiques), utilisée seulement sans `GameDataStore`
@@ -131,8 +148,10 @@ func build(data: MapData) -> void:
 			_chunks.append(instance)
 			_far_meshes.append(mesh)
 	_setup_fine_tiles()
+	_setup_quadtree()
 	build_stats = {
 		"fine_tiles": _fine_tiles_dir != "",
+		"quadtree": quadtree != null,
 		"chunks": _chunks.size(),
 		"far_vertices": vertex_count,
 		"far_step": far_step,
@@ -143,6 +162,10 @@ func build(data: MapData) -> void:
 
 func clear_terrain() -> void:
 	_wait_fine_jobs()
+	if quadtree != null:
+		quadtree.wait_jobs(false)
+		quadtree.queue_free()
+		quadtree = null
 	for chunk in _chunks:
 		chunk.queue_free()
 	_chunks.clear()
@@ -194,6 +217,9 @@ func chunk_index_at(x: float, y: float) -> int:
 func surface_height_at(x: float, y: float) -> float:
 	if map_data == null:
 		return 0.0
+	if quadtree != null:
+		var h := quadtree.surface_height_at(x, y)
+		return maxf(h if not is_nan(h) else map_data.height_world_at(x, y), 0.0)
 	var index := chunk_index_at(x, y)
 	if index < 0:
 		return map_data.surface_world_at(x, y)
@@ -209,6 +235,9 @@ func surface_height_at(x: float, y: float) -> float:
 func surface_grid(index: int) -> Dictionary:
 	if index < 0 or index >= _is_near.size():
 		return {}
+	if quadtree != null:
+		var origin := Vector2((index % CHUNKS) * chunk_px, (index / CHUNKS) * chunk_px)
+		return quadtree.surface_snapshot(Rect2(origin, Vector2(chunk_px, chunk_px)), origin)
 	return _grid_for(index)
 
 
@@ -224,7 +253,10 @@ func _grid_for(index: int) -> Dictionary:
 
 
 ## Hauteur dans une grille régulière triangulée comme les maillages (diagonale a → d).
+## Lot ZG2 : accepte aussi un instantané du quadtree (`ReliefQuadtree.surface_snapshot`).
 static func grid_height(grid: Dictionary, lx: float, ly: float) -> float:
+	if grid.has("qt_pages"):
+		return ReliefQuadtree.sample_snapshot(grid, lx, ly)
 	var heights: PackedFloat32Array = grid["heights"]
 	var side: int = grid["side"]
 	var unit: float = grid["unit"]
@@ -308,6 +340,9 @@ func set_highlight(hovered_index: int, selected_index: int) -> void:
 ## rig sous `fine_distance`, les tuiles les plus proches du point visé passent en relief fin.
 func update_lod(camera_position: Vector3, camera_distance: float = INF, view_center: Vector3 = Vector3.INF, fine_distance: float = 0.0) -> void:
 	_lod_frame += 1
+	if quadtree != null:
+		_update_lod_quadtree(camera_position, camera_distance, view_center, fine_distance)
+		return
 	if _current_fine_step == 0:
 		_current_fine_step = fine_step
 	_current_fine_step = _select_fine_step(camera_distance)
@@ -373,7 +408,7 @@ func _select_fine_step(camera_distance: float) -> int:
 ## Tuiles voulues en relief fin (les plus proches du point visé), triées par distance.
 func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: float) -> Array:
 	var result: Array = []
-	if not fine_enabled or _fine_tiles_dir == "" or view_center == Vector3.INF or camera_distance >= fine_distance:
+	if not fine_enabled or (_fine_tiles_dir == "" and quadtree == null) or view_center == Vector3.INF or camera_distance >= fine_distance:
 		return result
 	var center := Vector2(view_center.x, view_center.z)
 	var radius := maxf(fine_radius, camera_distance * 1.2)
@@ -388,6 +423,105 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 	for item in candidates.slice(0, max_fine_chunks):
 		result.append(item[1])
 	return result
+
+
+# --- Relief streamé (lot ZG2) ----------------------------------------------------------
+
+
+func _setup_quadtree() -> void:
+	pyramid = null
+	var manifest := pyramid_manifest_path
+	for arg in OS.get_cmdline_user_args():
+		if arg == "--no-pyramid":
+			return
+		if arg.begins_with("--pyramid-dir="):
+			manifest = arg.trim_prefix("--pyramid-dir=").path_join("relief_pyramid.json")
+	if not pyramid_enabled:
+		return
+	var relief := ReliefPyramid.new()
+	if not relief.load_manifest(map_data.map_dir, manifest):
+		return
+	pyramid = relief
+	quadtree = ReliefQuadtree.new()
+	quadtree.name = "ReliefQuadtree"
+	add_child(quadtree)
+	quadtree.setup(pyramid, material, map_data, _chunk_bounds_m())
+	quadtree.surface_changed.connect(_on_quadtree_surface_changed)
+	for chunk in _chunks:
+		chunk.visible = false
+	print("TerrainBuilder: relief pyramid E1-E%d (%d tiles), streamed quadtree on" % [pyramid.max_level, pyramid.tile_count()])
+
+
+## Bornes (min, max) en mètres des morceaux E0, depuis les maillages lointains (lissés : marges).
+func _chunk_bounds_m() -> PackedVector2Array:
+	var bounds := PackedVector2Array()
+	bounds.resize(CHUNKS * CHUNKS)
+	for i in bounds.size():
+		var lo := 0.0
+		var hi := 0.0
+		if i < _far_grids.size():
+			var heights: PackedFloat32Array = _far_grids[i]["heights"]
+			lo = INF
+			hi = -INF
+			for h in heights:
+				lo = minf(lo, h)
+				hi = maxf(hi, h)
+		lo /= MapData.HEIGHT_SCALE
+		hi /= MapData.HEIGHT_SCALE
+		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))
+	return bounds
+
+
+func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view_center: Vector3, fine_distance: float) -> void:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	quadtree.update_view(camera)
+	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
+	_last_wanted_fine = wanted_fine
+	var half := chunk_px * 0.5
+	for i in _chunks.size():
+		var center := _chunks[i].position + Vector3(half, 0.0, half)
+		var level := 2 if wanted_fine.has(i) else (1 if camera_position.distance_to(center) < near_distance else 0)
+		if _is_near[i] != level:
+			_is_near[i] = level
+			_surface_dirty.erase(i)
+			chunk_surface_changed.emit(i)
+	_flush_surface_dirty(false)
+
+
+func _on_quadtree_surface_changed(rect: Rect2) -> void:
+	if chunk_px <= 0:
+		return
+	var c0 := clampi(int(floor(rect.position.x / chunk_px)), 0, CHUNKS - 1)
+	var r0 := clampi(int(floor(rect.position.y / chunk_px)), 0, CHUNKS - 1)
+	var c1 := clampi(int(floor(rect.end.x / chunk_px)), 0, CHUNKS - 1)
+	var r1 := clampi(int(floor(rect.end.y / chunk_px)), 0, CHUNKS - 1)
+	for r in range(r0, r1 + 1):
+		for c in range(c0, c1 + 1):
+			_surface_dirty[r * CHUNKS + c] = true
+
+
+## Signale les morceaux dont la surface a changé (pages), au plus toutes les
+## `surface_flush_interval_ms` (sauf `force`).
+func _flush_surface_dirty(force: bool) -> void:
+	if _surface_dirty.is_empty():
+		return
+	var now := Time.get_ticks_msec()
+	if not force and now - _surface_flush_ms < surface_flush_interval_ms:
+		return
+	_surface_flush_ms = now
+	var dirty := _surface_dirty.keys()
+	_surface_dirty.clear()
+	for index: int in dirty:
+		chunk_surface_changed.emit(index)
+
+
+## Lot ZG2 / ZG4 : relit `MapData.vertical_scale()` (shader, quadtree) et signale toutes les
+## surfaces comme changées. Les maillages E0 du repli sans cache gardent `HEIGHT_SCALE`.
+func refresh_vertical_scale() -> void:
+	if material != null:
+		material.set_shader_parameter("height_scale", MapData.vertical_scale())
+	for index in _chunks.size():
+		chunk_surface_changed.emit(index)
 
 
 # --- Relief fin (tuiles 8192²) ---------------------------------------------------------
@@ -489,6 +623,8 @@ func _collect_fine_jobs(block: bool = false) -> void:
 
 ## Vrai quand toutes les tuiles voulues en relief fin sont affichées (captures, mesures).
 func fine_ready() -> bool:
+	if quadtree != null:
+		return quadtree.is_settled()
 	for index in _last_wanted_fine:
 		if _is_near[index] != 2 and not (_fine_cache.has(index) and _fine_cache[index]["mesh"] == _near_meshes.get(index)):
 			return false
@@ -498,6 +634,10 @@ func fine_ready() -> bool:
 ## Attend les tâches de relief fin en cours (captures, sortie).
 ## Les maillages sont installés au prochain `update_lod`.
 func wait_fine_jobs() -> void:
+	if quadtree != null:
+		quadtree.wait_jobs(true)
+		_flush_surface_dirty(true)
+		return
 	_collect_fine_jobs(true)
 
 
@@ -673,7 +813,7 @@ func _build_material() -> void:
 	material.set_shader_parameter("height_little_endian", map_data.height_little_endian)
 	material.set_shader_parameter("height_min_m", map_data.height_min_m)
 	material.set_shader_parameter("height_max_m", map_data.height_max_m)
-	material.set_shader_parameter("height_scale", MapData.HEIGHT_SCALE)
+	material.set_shader_parameter("height_scale", MapData.vertical_scale())
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("meters_per_px", map_data.meters_per_px)
 	material.set_shader_parameter("province_ids", _ids_texture)
