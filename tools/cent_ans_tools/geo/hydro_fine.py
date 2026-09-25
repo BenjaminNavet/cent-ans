@@ -129,7 +129,12 @@ def prepare_topage(force: bool = False) -> Path:
     path = links_cache("topage")
     if path.exists() and not force:
         return path
-    table = hydro_sources.read_topage(hydro_sources.ensure_topage())
+    raw = hydro_sources.CACHE_DIR / "links_topage_raw.npz"
+    if raw.exists() and not force:
+        table = hydro_sources.LinkTable.load(raw)
+    else:
+        table = hydro_sources.read_topage(hydro_sources.ensure_topage())
+        table.save(raw)
     table.strahler = hydro_sources.compute_strahler(table)
     table.save(path)
     return path
