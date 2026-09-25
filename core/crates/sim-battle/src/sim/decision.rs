@@ -22,7 +22,7 @@ impl BattleSim {
         self.end
     }
 
-    /// Seconds since the last engagement (loss, melee, approach).
+    /// Seconds since the last engagement (melee, telling losses, approach).
     pub fn quiet_time(&self) -> f64 {
         self.elapsed - self.clock.last
     }
@@ -106,12 +106,24 @@ impl BattleSim {
 
     /// Updates the engagement clock (every step, after the fighting).
     pub(super) fn track_engagement(&mut self) {
-        let fighting = self.units.iter().any(|u| {
-            u.present() && !u.synthetic && (u.tick_losses > 0.0 || u.state == UnitState::Melee)
+        let melee = self
+            .units
+            .iter()
+            .any(|u| u.present() && !u.synthetic && u.state == UnitState::Melee);
+        let hit = self
+            .units
+            .iter()
+            .any(|u| !u.synthetic && u.tick_losses > 0.0);
+        self.clock.fought |= melee || hit;
+        self.clock.melee_seen |= melee;
+        let losses = SideId::BOTH.map(|s| self.loss_share(s));
+        let bled = SideId::BOTH.iter().any(|s| {
+            losses[s.index()] - self.clock.losses_mark[s.index()]
+                >= self.decision.engagement_loss_share
         });
-        if fighting {
+        if melee || bled {
             self.clock.last = self.elapsed;
-            self.clock.fought = true;
+            self.clock.losses_mark = losses;
         }
         let period = (AI_PERIOD / DT).round() as u64;
         if !self.ticks.is_multiple_of(period) {
@@ -120,14 +132,15 @@ impl BattleSim {
         let Some(gap) = self.army_gap() else {
             return;
         };
+        let window = self.decision.approach_window_seconds;
         match self.clock.gap_mark {
-            Some(mark) if gap <= mark - self.decision.approach_meters => {
-                self.clock.last = self.clock.last.max(self.elapsed);
-                self.clock.gap_mark = Some(gap);
+            Some((mark, _)) if gap <= mark - self.decision.approach_meters => {
+                self.clock.last = self.elapsed;
+                self.clock.gap_mark = Some((gap, self.elapsed));
+                self.clock.losses_mark = SideId::BOTH.map(|s| self.loss_share(s));
             }
-            Some(mark) if gap > mark => self.clock.gap_mark = Some(gap),
-            Some(_) => {}
-            None => self.clock.gap_mark = Some(gap),
+            Some((_, since)) if self.elapsed - since < window => {}
+            _ => self.clock.gap_mark = Some((gap, self.elapsed)),
         }
     }
 
@@ -151,7 +164,12 @@ impl BattleSim {
             }
             [false, false] => {}
         }
-        if self.quiet_time() < self.decision.refusal_seconds {
+        let patience = if self.clock.melee_seen {
+            self.decision.lull_seconds
+        } else {
+            self.decision.refusal_seconds
+        };
+        if self.quiet_time() < patience {
             return None;
         }
         if !self.clock.fought {

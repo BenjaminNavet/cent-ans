@@ -9,11 +9,12 @@
 //!   general (killed or taken) the army lets go sooner
 //!   ([`DecisionRules::break_share_without_general`]).
 //! - **Refused battle**: when nobody engages for
-//!   [`DecisionRules::refusal_seconds`] (no loss, no melee, and the armies no
-//!   longer draw closer by [`DecisionRules::approach_meters`]), the attacker
+//!   [`DecisionRules::refusal_seconds`] (no melee, losses under
+//!   [`DecisionRules::engagement_loss_share`], and the armies no longer
+//!   draw closer by [`DecisionRules::approach_meters`]), the attacker
 //!   gives up and withdraws, the defender keeps the field (Buironfosse,
-//!   1339). After a fight followed by such a lull the side that suffered
-//!   less keeps the field (the defender unless the attacker lost clearly
+//!   1339). After a melee, a shorter lull ([`DecisionRules::lull_seconds`])
+//!   is enough: the side that suffered less keeps the field (the defender unless the attacker lost clearly
 //!   less, [`DecisionRules::lull_loss_margin`]).
 //!
 //! Siege battles keep their own end (the square held, the garrison beaten).
@@ -42,8 +43,16 @@ pub struct DecisionRules {
     pub break_share_without_general: f64,
     /// Seconds without engagement before the battle ends.
     pub refusal_seconds: f64,
+    /// The same once a melee has taken place (the fight died down).
+    pub lull_seconds: f64,
+    /// Window over which an approach is measured.
+    pub approach_window_seconds: f64,
     /// Drawing this much closer to the enemy restarts the clock.
     pub approach_meters: f64,
+    /// Missiles restart the clock once either side has lost this share of
+    /// its initial soldiers since the last engagement (a few stray arrows
+    /// across a river do not keep a battle going).
+    pub engagement_loss_share: f64,
     /// After a lull, the attacker keeps the field only when its share of
     /// losses is lower than the defender's by this margin.
     pub lull_loss_margin: f64,
@@ -99,9 +108,13 @@ impl BattleEnd {
 pub(crate) struct EngagementClock {
     /// Time of the last loss, melee or approach.
     pub last: f64,
-    /// Gap between the armies when the clock last restarted (or the widest
-    /// since).
-    pub gap_mark: Option<f64>,
+    /// Gap between the armies at the start of the approach window, and
+    /// when that window began.
+    pub gap_mark: Option<(f64, f64)>,
     /// A loss or a melee happened at some point.
     pub fought: bool,
+    /// A melee happened at some point.
+    pub melee_seen: bool,
+    /// Loss share of each side when the clock last restarted.
+    pub losses_mark: [f64; 2],
 }

@@ -304,17 +304,37 @@ fn survey_crecy() {
     }
 }
 
-/// Trace of one demo battle (ignored): `EP9_SEED`.
+/// Trace of one battle (ignored): `EP9_CASE=demo,1` or
+/// `EP9_CASE=epic,river,IdleDefender,9` (tier, `plains`/`hills`/`river`,
+/// mode, seed).
 #[test]
 #[ignore]
-fn trace_demo() {
-    let setup: BattleSetup =
-        serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
-    let seed: u64 = std::env::var("EP9_SEED")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(1);
-    let mut sim = BattleSim::new(setup, 1337 + seed).unwrap();
+fn trace() {
+    let case = std::env::var("EP9_CASE").unwrap_or_else(|_| "demo,1".into());
+    let parts: Vec<&str> = case.split(',').collect();
+    let seed: u64 = parts.last().and_then(|s| s.parse().ok()).unwrap_or(1);
+    let mut sim = if parts[0] == "demo" {
+        let setup: BattleSetup =
+            serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
+        BattleSim::new(setup, 1337 + seed).unwrap()
+    } else {
+        let tier = match parts[0] {
+            "large" => Tier::Large,
+            "epic" => Tier::Epic,
+            _ => Tier::Standard,
+        };
+        let (terrain, river) = match parts[1] {
+            "hills" => (Terrain::Hills, false),
+            "river" => (Terrain::Plains, true),
+            _ => (Terrain::Plains, false),
+        };
+        let mode = match parts[2] {
+            "IdleAttacker" => Mode::IdleAttacker,
+            "IdleDefender" => Mode::IdleDefender,
+            _ => Mode::AiVsAi,
+        };
+        sim(tier, terrain, river, mode, seed)
+    };
     let mut next = 0.0;
     let mut seen = 0;
     while !sim.is_finished() && sim.elapsed() < CAP {
@@ -325,12 +345,28 @@ fn trace_demo() {
         seen = sim.events().len();
         if sim.elapsed() >= next {
             next += 30.0;
+            let melee = sim
+                .units()
+                .iter()
+                .filter(|u| u.state == sim_battle::UnitState::Melee)
+                .count();
+            let mean_z = |side: SideId| {
+                let list: Vec<f64> = sim
+                    .units()
+                    .iter()
+                    .filter(|u| u.side == side && u.able())
+                    .map(|u| u.z)
+                    .collect();
+                list.iter().sum::<f64>() / list.len().max(1) as f64
+            };
             println!(
-                "t {:4.0} quiet {:4.0} share att {:.2} def {:.2}",
+                "t {:4.0} quiet {:4.0} share att {:.2} def {:.2} melee {melee} z att {:.0} def {:.0}",
                 sim.elapsed(),
                 sim.quiet_time(),
                 sim.fighting_share(SideId::Attacker),
-                sim.fighting_share(SideId::Defender)
+                sim.fighting_share(SideId::Defender),
+                mean_z(SideId::Attacker),
+                mean_z(SideId::Defender),
             );
         }
     }

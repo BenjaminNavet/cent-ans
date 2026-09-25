@@ -21,12 +21,28 @@
     "refusal_seconds": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "description": "Secondes de bataille sans engagement (aucune perte, aucune mêlée, armées qui ne se rapprochent plus) au bout desquelles la bataille se termine : l'attaquant renonce, le défenseur garde le champ."
+      "description": "Secondes de bataille sans engagement (aucune mêlée, pertes sous engagement_loss_share, armées qui ne se rapprochent plus) au bout desquelles la bataille se termine : l'attaquant renonce, le défenseur garde le champ."
+    },
+    "lull_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Même délai une fois qu'une mêlée a eu lieu : le combat retombe, les deux armées épuisées se regardent ; le camp qui a le moins souffert garde le champ."
+    },
+    "approach_window_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "L'approche se mesure sur cette fenêtre glissante : une armée qui se rapproche de moins de approach_meters dans ce délai piétine, elle ne marche pas à l'ennemi."
     },
     "approach_meters": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "description": "Une armée qui réduit l'écart avec l'ennemi d'au moins cette distance relance le délai (marche d'approche)."
+      "description": "Une armée qui réduit l'écart avec l'ennemi d'au moins cette distance en approach_window_seconds relance le délai (marche d'approche)."
+    },
+    "engagement_loss_share": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Des tirs qui coûtent à l'un des camps au moins cette part de son effectif initial depuis le dernier engagement relancent le délai ; quelques flèches perdues ne suffisent pas (duel d'archers à travers une rivière)."
     },
     "lull_loss_margin": {
       "type": "number",
@@ -49,7 +65,10 @@
     "break_share",
     "break_share_without_general",
     "refusal_seconds",
+    "lull_seconds",
+    "approach_window_seconds",
     "approach_meters",
+    "engagement_loss_share",
     "lull_loss_margin",
     "refused_morale"
   ],
