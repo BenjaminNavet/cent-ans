@@ -22,6 +22,9 @@ var image: Image
 var texture: ImageTexture
 var build_ms: int = 0
 var _scale: float = 0.25  # pixels masque par pixel carte
+var _task: int = -1
+var _pending := PackedByteArray()
+var _pending_ms: int = 0
 
 
 ## `settlements` : `SettlementData.settlements` ; `hamlets` : `SettlementData.hamlets` ;
@@ -29,6 +32,57 @@ var _scale: float = 0.25  # pixels masque par pixel carte
 ## (R vigne, B bocage) ; `map_size` en pixels carte.
 func build(settlements: Array, hamlets: Array, province_states: Dictionary, landuse: Image, map_size: Vector2) -> void:
 	var t0 := Time.get_ticks_msec()
+	_apply(_compute(settlements, hamlets, province_states, landuse, map_size))
+	build_ms = Time.get_ticks_msec() - t0
+
+
+## PB1 : même calcul que `build` dans un fil de travail (fin de tour non bloquée) ; `poll()`
+## (fil principal, chaque image) installe l'image une fois prête. Un nouvel appel pendant un
+## calcul en cours attend celui-ci (l'ordre des masques est conservé).
+func build_async(settlements: Array, hamlets: Array, province_states: Dictionary, landuse: Image, map_size: Vector2) -> void:
+	if _task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_task)
+		_task = -1
+		poll()
+	var t0 := Time.get_ticks_msec()
+	# Copies : le fil ne voit pas les modifications ultérieures du fil principal.
+	var states := province_states.duplicate(true)
+	_task = WorkerThreadPool.add_task(func() -> void:
+		_pending = _compute(settlements, hamlets, states, landuse, map_size)
+		_pending_ms = Time.get_ticks_msec() - t0, false, "terroir mask")
+
+
+## Installe le masque calculé par `build_async` ; vrai si la texture vient de changer.
+func poll() -> bool:
+	if _task >= 0:
+		if not WorkerThreadPool.is_task_completed(_task):
+			return false
+		WorkerThreadPool.wait_for_task_completion(_task)
+		_task = -1
+	if _pending.is_empty():
+		return false
+	_apply(_pending)
+	_pending = PackedByteArray()
+	build_ms = _pending_ms
+	return true
+
+
+## Attend un calcul en cours (sortie de scène).
+func wait() -> void:
+	if _task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_task)
+		_task = -1
+
+
+func _apply(data: PackedByteArray) -> void:
+	image = Image.create_from_data(SIZE, SIZE, false, Image.FORMAT_RGBA8, data)
+	if texture == null:
+		texture = ImageTexture.create_from_image(image)
+	else:
+		texture.update(image)
+
+
+func _compute(settlements: Array, hamlets: Array, province_states: Dictionary, landuse: Image, map_size: Vector2) -> PackedByteArray:
 	_scale = float(SIZE) / maxf(map_size.x, map_size.y)
 	var data := PackedByteArray()
 	data.resize(SIZE * SIZE * 4)
@@ -49,12 +103,7 @@ func build(settlements: Array, hamlets: Array, province_states: Dictionary, land
 		var hpx: Vector2 = hamlet["px"]
 		var lu_h := _landuse_at(landuse, hpx, map_size)
 		_paint(data, hpx, HAMLET_RADIUS, 0.55, lu_h.r, lu_h.b, float(state_h.get("devastation", 0.0)))
-	image = Image.create_from_data(SIZE, SIZE, false, Image.FORMAT_RGBA8, data)
-	if texture == null:
-		texture = ImageTexture.create_from_image(image)
-	else:
-		texture.update(image)
-	build_ms = Time.get_ticks_msec() - t0
+	return data
 
 
 static func _landuse_at(landuse: Image, px: Vector2, map_size: Vector2) -> Color:

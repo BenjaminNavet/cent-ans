@@ -522,44 +522,82 @@ def boost_base(
 ) -> np.ndarray:
     """σ 5 km base of the render boost on the cluster raster.
 
-    Built at 90 m (level 2) on GLO-90 around the cluster, the fine source
-    replacing it where it has data, blurred, then sampled bilinearly.
+    Built at 90 m (level 2) from the cluster's own fine source, extended
+    outward by nearest-neighbour fill and blurred, then sampled bilinearly.
+
+    ZG3b fix: the footprint of a detail zone at E6-E7 (3-6 km half-size) is
+    much smaller than 3σ (15 km, :data:`BASE_MARGIN_M`), so a base built by
+    overlaying the fine source onto GLO-90 *before* blurring barely differs
+    from unblended GLO-90 at the footprint's centre -- the blur draws almost
+    entirely on the surrounding margin. GLO-90 is a surface model (biased
+    high by buildings in cities) and, being genuinely regional, also carries
+    real relief several km away (hills around a river valley); either one
+    pulled into the base pushes ``local = fine - base`` deeply negative and
+    :func:`apply_boost` then digs real, positive-elevation land below sea
+    level (observed: Southwark/Bermondsey/Lambeth/Kennington at -11 to -15 m
+    against a real +2-5 m ODN, the City at 4.9-7.6 m against a real ~15 m).
+    Extending the fine source itself outward (instead of leaking in GLO-90)
+    keeps the base representative of the zone's own relief. GLO-90 is only
+    used where the whole raster carries no fine data at all (an isolated
+    cluster at the pyramid's edge).
     """
     level = cluster.level
     factor = 2 ** (level - BASE_LEVEL)
     base_m = grid.pixel_m(BASE_LEVEL)
     margin = int(math.ceil(BASE_MARGIN_M / base_m))
-    c0 = cluster.col0 * TILE_PX // factor - margin
-    r0 = cluster.row0 * TILE_PX // factor - margin
     cols = cluster.shape[1] // factor + 2 * margin
     rows = cluster.shape[0] // factor + 2 * margin
-    size = grid.tiles_per_side(BASE_LEVEL) * TILE_PX
-    map_grid = MapGrid(
-        (grid.minx, grid.maxy - size * base_m, grid.minx + size * base_m, grid.maxy),
-        size,
-    )
-    names = [p.stem for p in copernicus.RAW_DIR.glob("Copernicus_DSM_COG_30_*.tif")]
-    coarse = copernicus.resample_to_grid(map_grid, (c0, r0, cols, rows), names)
     fine_coarse = detail_sources.block_reduce_mean(fine, factor)
-    inner = coarse[
+    extended = np.full((rows, cols), np.nan, dtype=np.float32)
+    extended[
         margin : margin + fine_coarse.shape[0], margin : margin + fine_coarse.shape[1]
-    ]
-    valid = np.isfinite(fine_coarse)
-    inner[valid] = fine_coarse[valid]
-    coarse = np.where(np.isfinite(coarse), coarse, 0.0).astype(np.float32)
-    blurred = ndimage.gaussian_filter(coarse, BOOST_SIGMA_M / base_m)
+    ] = fine_coarse
+    valid = np.isfinite(extended)
+    if valid.any():
+        indices = ndimage.distance_transform_edt(
+            ~valid, return_distances=False, return_indices=True
+        )
+        filled = extended[tuple(indices)]
+    else:
+        c0 = cluster.col0 * TILE_PX // factor - margin
+        r0 = cluster.row0 * TILE_PX // factor - margin
+        size = grid.tiles_per_side(BASE_LEVEL) * TILE_PX
+        map_grid = MapGrid(
+            (
+                grid.minx,
+                grid.maxy - size * base_m,
+                grid.minx + size * base_m,
+                grid.maxy,
+            ),
+            size,
+        )
+        names = [p.stem for p in copernicus.RAW_DIR.glob("Copernicus_DSM_COG_30_*.tif")]
+        coarse = copernicus.resample_to_grid(map_grid, (c0, r0, cols, rows), names)
+        filled = np.where(np.isfinite(coarse), coarse, 0.0).astype(np.float32)
+    blurred = ndimage.gaussian_filter(filled, BOOST_SIGMA_M / base_m)
     return bilinear(blurred, cluster.shape, factor, margin, margin)
 
 
 def apply_boost(height: np.ndarray, base: np.ndarray) -> np.ndarray:
-    """:func:`relief_shade.boost_relief` with an external base, on land (> 0 m)."""
+    """:func:`relief_shade.boost_relief` with an external base, on land (> 0 m).
+
+    ZG3b fix: mirrors :func:`relief_shade.enforce_coast`, which the E0-E4
+    pyramid already applies after boosting -- land (source height above
+    :data:`MIN_LAND_M`) never drops below it once boosted, even where the
+    base still runs higher than the fine source nearby (real hills a few km
+    off, a residual GLO-90 fallback at a data gap). Without this floor,
+    genuine dry land could bake in below sea level; ``bake_cluster`` had no
+    equivalent of ``enforce_coast`` before this fix.
+    """
     local = np.clip(height - base, -BOOST_LIMIT_M, BOOST_LIMIT_M)
     t = np.clip(
         (base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0
     )
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
     boosted = height + BOOST_GAIN * local * fade
-    return np.where(height > MIN_LAND_M, boosted, height).astype(np.float32)
+    land = height > MIN_LAND_M
+    boosted = np.where(land, np.maximum(boosted, MIN_LAND_M), boosted)
+    return np.where(land, boosted, height).astype(np.float32)
 
 
 # -------------------------------------------------------------------------- blend
@@ -1106,3 +1144,85 @@ def _zones_bbox(zones: list[Zone], level: int) -> list[float] | None:
         max(b[2] for b in boxes),
         max(b[3] for b in boxes),
     ]
+
+
+# ---------------------------------------------------------------------- coast check
+
+
+@dataclass
+class LandGap:
+    """E5-vs-E4 land gap of one zone (lot ZG3b): :func:`e5_e4_land_gap`."""
+
+    zone_id: str
+    n_pixels: int
+    median_m: float | None
+    p95_m: float | None
+    max_m: float | None
+
+
+#: Above this p95 gap (m), a zone is flagged (docstring of :func:`e5_e4_land_gap`).
+LAND_GAP_ALERT_M = 5.0
+#: Interior margin (of a footprint's half-size) excluded from the check: the
+#: footprint edge blends into the E4 ancestor by construction (blend()), so a
+#: gap there is expected and not a bake defect.
+LAND_GAP_EDGE_WEIGHT = 0.98
+
+
+def e5_e4_land_gap(zone: Zone, grid: PyramidGrid, map_dir: Path = MAP_DIR) -> LandGap:
+    """Compare baked E5 land to the E4 ancestor over one zone's footprint.
+
+    ``E5`` should read close to ``E4`` on land away from the footprint edge
+    (E4 is itself only a coarser, boosted average of the same relief): a
+    systematic gap flags a bake defect such as the ZG3b render-boost leak
+    (real land baked far below the coarser levels, or below sea level). Water
+    pixels (baked below :data:`MIN_LAND_M`) are excluded: E5-E7 legitimately
+    show real river channels/foreshore the E4 ancestor cannot resolve.
+
+    Returns ``LandGap`` with ``median_m/p95_m/max_m`` as ``None`` when the
+    zone has no E5 tiles on disk (not yet baked).
+    """
+    level = 5
+    box = footprint(zone, level)
+    if box is None:
+        return LandGap(zone.id, 0, None, None, None)
+    col0, row0, col1, row1 = grid.tile_range(level, box)
+    shape = ((row1 - row0 + 1) * TILE_PX, (col1 - col0 + 1) * TILE_PX)
+    e5 = np.full(shape, np.nan, dtype=np.float32)
+    any_tile = False
+    for row in range(row0, row1 + 1):
+        for col in range(col0, col1 + 1):
+            tile = read_tile_m(tile_path(map_dir, level, col, row))
+            if tile is None:
+                continue
+            any_tile = True
+            r, c = (row - row0) * TILE_PX, (col - col0) * TILE_PX
+            e5[r : r + TILE_PX, c : c + TILE_PX] = tile
+    if not any_tile:
+        return LandGap(zone.id, 0, None, None, None)
+    ancestor = ancestor_heights(grid, level, col0, row0, shape, map_dir)
+    single = Cluster(level, [zone], col0, row0, col1, row1, set())
+    weight = footprint_weight(grid, single)
+    land = np.isfinite(e5) & (e5 > MIN_LAND_M) & (weight >= LAND_GAP_EDGE_WEIGHT)
+    land &= np.isfinite(ancestor)
+    if not land.any():
+        return LandGap(zone.id, 0, None, None, None)
+    gap = np.abs(e5[land] - ancestor[land])
+    return LandGap(
+        zone.id,
+        int(land.sum()),
+        float(np.median(gap)),
+        float(np.percentile(gap, 95)),
+        float(np.max(gap)),
+    )
+
+
+def land_gap_report(
+    zone_ids: tuple[str, ...] = (), map_dir: Path = MAP_DIR
+) -> list[LandGap]:
+    """:func:`e5_e4_land_gap` of every zone (or ``zone_ids``), sorted by p95 gap."""
+    grid = PyramidGrid.from_map(map_dir)
+    zones = load_zones()
+    wanted = set(zone_ids) or {z.id for z in zones}
+    results = [e5_e4_land_gap(z, grid, map_dir) for z in zones if z.id in wanted]
+    results.sort(key=lambda r: (r.p95_m is None, -(r.p95_m or 0.0)))
+    return results
