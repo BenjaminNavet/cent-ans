@@ -176,7 +176,8 @@ func stream_radius(rig_distance: float) -> float:
 
 
 ## Demande les villes proches, décharge les lointaines.
-func _stream(rig_distance: float, center: Variant = null) -> void:
+## Rend le nombre de villes voulues pas encore chargées ni en cours.
+func _stream(rig_distance: float, center: Variant = null) -> int:
 	var here: Vector2 = center if center is Vector2 else _camera_ground()
 	var radius := stream_radius(rig_distance)
 	var wanted: Array = []
@@ -187,6 +188,7 @@ func _stream(rig_distance: float, center: Variant = null) -> void:
 		elif d > radius * profile.unload_factor and _entries.has(id):
 			_unload(id)
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var missing := 0
 	for w in wanted:
 		var id: String = w[1]
 		if _entries.has(id) or _jobs.has(id):
@@ -198,11 +200,13 @@ func _stream(rig_distance: float, center: Variant = null) -> void:
 			_start_build(id)
 			continue
 		if _jobs.size() >= profile.max_plan_jobs:
-			break
+			missing += 1
+			continue
 		_start_plan(id)
 	stats["loaded"] = _entries.size()
 	stats["jobs"] = _jobs.size()
 	stats["radius"] = radius
+	return missing
 
 
 func _heights_for(id: String) -> TownPlan.Heights:
@@ -369,12 +373,12 @@ func flush(center: Variant = null) -> void:
 		return
 	FrameBudget.unlimited = true
 	for _round in 64:
-		_stream(_last_distance if _last_distance < INF else 1.0, center)
+		var missing := _stream(_last_distance if _last_distance < INF else 1.0, center)
 		for id in _jobs.keys():
 			WorkerThreadPool.wait_for_task_completion(_jobs[id][0])
 		_force_poll()
 		_step_builders(1 << 30)
-		var busy := not _jobs.is_empty()
+		var busy := not _jobs.is_empty() or missing > 0
 		for entry in _entries.values():
 			if entry.get("pending") != null or int(entry.get("dirty_ms", 0)) > 0:
 				busy = true
@@ -392,6 +396,7 @@ func flush(center: Variant = null) -> void:
 	_step_builders(1 << 30)
 	FrameBudget.unlimited = false
 	_update_stats()
+	print("TownLayer: flush %s, shown %s" % [JSON.stringify(stats), str(_entries.keys())])
 
 
 ## Collecte des tâches déjà attendues (`flush`) : `is_task_completed` peut rester faux jusqu'à

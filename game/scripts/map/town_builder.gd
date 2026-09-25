@@ -460,7 +460,7 @@ func _build_ground() -> void:
 	var mi := MeshInstance3D.new()
 	mi.name = "Ground"
 	mi.mesh = st.commit()
-	mi.material_override = material(1, false, 0.5, meters_per_unit)
+	mi.material_override = material(1, false, 0.7, meters_per_unit)
 	var half := (n - 1) * 0.5 * step
 	_register(mi, "all", lo, hi, 2.0, Rect2(-half, -half, half * 2.0, half * 2.0))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -311,7 +311,7 @@ static func generate(town: Dictionary, params: Dictionary, heights: Heights) -> 
 		var at := Vector2(float(bridge["at"][0]), float(bridge["at"][1]))
 		var d := Vector2(float(bridge["dir"][0]), float(bridge["dir"][1])).normalized()
 		out["bridge"] = {"x": at.x, "y": at.y, "yaw": atan2(d.y, d.x) + PI * 0.5, "length": float(bridge["width_m"]) + 24.0, "width": 7.0, "deck": float(bridge["z_deck"]), "water": float(bridge["z_water"])}
-	out["ground"] = _ground_grid(radii, heights, 20.0)
+	out["ground"] = _ground_grid(radii, heights, 10.0)
 	var dwellings := int(out["house_budget"]["core"]) + int(out["house_budget"]["out"]) - maxi(int(budget["core"]), 0) - maxi(int(budget["out"]), 0)
 	out["stats"] = {"dwellings": dwellings, "houses": houses["x"].size(), "streets": out["streets"].size(), "usec": Time.get_ticks_usec() - t0}
 	return out

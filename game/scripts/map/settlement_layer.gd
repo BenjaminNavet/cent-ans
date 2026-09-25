@@ -412,7 +412,7 @@ func update_view(camera_distance: float) -> void:
 		_site_hidden = site
 		_icon_material.set_shader_parameter("alpha", weights.y)
 		_icons.visible = weights.y > 0.01
-		_models_root.visible = weights.x > 0.35 and not site
+		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
 		_hamlets_root.visible = weights.x > 0.35 and not site
 		_landmarks_root.visible = not site
 		_update_label_heights()
@@ -444,7 +444,10 @@ func _update_label_heights() -> void:
 	for i in _labels.size():
 		var label := _labels[i]
 		var px: Vector2 = data.settlements[i]["px"]
-		if near and _models[i] != null:
+		if near and _models[i] != null and _towns_active() and not _landmarks.has(i):
+			label.position.y = _model_base_y(i) + 0.12  # ZG6 : ville 1:1, pas de maquette
+			label.offset = Vector2.ZERO
+		elif near and _models[i] != null:
 			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
 			label.offset = Vector2.ZERO
 		else:
@@ -802,16 +805,21 @@ func _setup_towns() -> void:
 	towns.setup(map_data, terrain, tiers, ids)
 
 
-## Rendu 1:1 aux paliers vallée / site ; la maquette d'une colonie dont la ville 1:1 est affichée
-## est masquée (au palier site, toutes les maquettes le sont déjà, ZG4).
+## Rendu 1:1 aux paliers vallée / site. Tant qu'il est actif, les maquettes à la loupe des
+## colonies ordinaires sont masquées (au loin, une ville vraie de 1340 n'est qu'une tache : les
+## maquettes géantes à l'horizon disparaissent) ; les villes emblématiques restent au lot VH.
 func _update_towns(camera_distance: float) -> void:
 	if towns == null:
 		return
+	var was_active := towns.active
 	towns.update_view(camera_distance)
 	if towns.version == _towns_version:
 		return
 	_towns_version = towns.version
-	for i in _models.size():
-		if _models[i] == null or _landmarks.has(i):
-			continue
-		(_models[i] as Node3D).visible = not towns.is_shown(str(data.settlements[i]["id"]))
+	if was_active != towns.active:
+		_models_root.visible = _weights.x > 0.35 and not _site_hidden and not towns.active
+		_update_label_heights()
+
+
+func _towns_active() -> bool:
+	return towns != null and towns.active
