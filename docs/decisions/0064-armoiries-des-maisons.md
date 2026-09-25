@@ -69,4 +69,10 @@ faction que sur l'écu, le pavois et le caparaçon. Le surcot restait d'une livr
   - les cadavres, partagés par camp, prennent les trois premiers bannerets du camp ;
   - les imposteurs lointains cuisent le matériau d'un régiment ;
   - les étendards (EP5) portent encore les armes de la faction.
-- Mesure de perf : voir `docs/wip/da1-heraldique.md`.
+- **Perf** : le banc de bataille (`--benchmark`) est trop bruité sur la machine partagée pour
+  voir 3 %. Sur 10 paires alternées, les écarts vont de 35 à 93 i/s d'une passe à l'autre, et
+  les dernières paires, machine calme, donnent 90-93 i/s dans les deux cas. La mesure retenue
+  vient de `res://tests/da1_perf.gd` : une foule skinnée en gros plan, en un seul processus, où
+  les rendus DA1 et shader de main (`--base-shader=`) alternent toutes les 30 images. Écart
+  mesuré : +0,22 %, -0,17 % (29,7 ms par image, `--density=3`) et +0,03 % (plafond à 60 Hz,
+  `--density=2`). Coût négligeable, bien sous le seuil de 3 %.

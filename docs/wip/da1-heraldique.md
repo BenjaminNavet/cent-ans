@@ -17,8 +17,9 @@ basée sur main + merge de `feat/da-direction-artistique` (bible DA). Bible :
   poitrine/dos (boîte `BattleSkinned.chest_box`), croix du commun ; rigide : armes du
   seigneur pour les nobles ; `--no-da1` pour A/B.
 - [x] Captures `docs/img/da1/` (avant = `--no-da1` dans `res://tests/da1_arms_shot.gd`).
-- [ ] Mesure perf (`res://tests/da1_perf.gd`, A/B dans un seul processus contre le shader de
-  main), smoke, commit final.
+- [x] Mesure perf (`res://tests/da1_perf.gd`, A/B dans un seul processus contre le shader de
+  main) : +0,22 % / -0,17 % / +0,03 % → négligeable. Smoke vert, pytest 567 passés.
+- Lot terminé, en attente de fusion par l'orchestrateur DA.
 
 ## Notes
 - Le buste des figurines regarde -Z en pose de repos (demi-tour cuit dans les os) : d'où le
