@@ -1,0 +1,14 @@
+{
+  "id": "edict_feudal_aid",
+  "name": {
+    "display": "Aide féodale"
+  },
+  "description": "Levée de l'aide féodale exceptionnelle (rançon du seigneur, adoubement de l'aîné, mariage de la fille aînée, ou simple nécessité de guerre) : le trésor s'en trouve renfloué, mais les sujets grognent.",
+  "delay_turns": 0,
+  "effects": [
+    { "effect": "tax_income", "value": 20, "mode": "percent" },
+    { "effect": "unrest", "value": 10 },
+    { "effect": "unrest", "class": "peasants", "value": 5 }
+  ],
+  "sources": ["Économie médiévale"]
+}

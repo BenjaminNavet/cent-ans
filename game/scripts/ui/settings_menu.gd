@@ -155,8 +155,10 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
-	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
-		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
+	var detected_label: String = RenderQuality.LABELS[RenderQuality.LEVELS.find(RenderQuality.detected_level())]
+	_options(grid, "video/quality", "Qualité graphique", [RenderQuality.AUTO] + Array(RenderQuality.LEVELS),
+		["Automatique (%s)" % detected_label] + Array(RenderQuality.LABELS),
+		"Automatique : choisie selon la carte graphique détectée. Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
 	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
@@ -203,6 +205,9 @@ func _build_sound(grid: GridContainer) -> void:
 	for spec in AudioBuses.PLAYER_BUSES:
 		var bus_name: String = spec[0]
 		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
+	# VO1 : voix.
+	_check(grid, "voice/advisor", "Conseiller", "Le chroniqueur Jean le Bel commente le premier tour, la première bataille, le premier siège et les alertes importantes (voix et sous-titre).")
+	_check(grid, "voice/barks", "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute.")
 
 
 ## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.

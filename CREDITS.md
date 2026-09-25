@@ -140,6 +140,11 @@ Wikipédia ne sont pas recopiés.
   textures de bois Poly Haven (CC0) déjà créditées.
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
+- **Voix** (`game/assets/audio/voice/` : répliques des unités, discours des généraux,
+  conseiller) : voix **générées par synthèse vocale** (OpenAI `gpt-4o-mini-tts`), à partir des
+  textes du projet (`data/voice/`, `data/speeches/`) ; aucune voix d'acteur. Outil
+  reproductible `tools/cent_ans_tools/voice_tts.py` (liste des fichiers, voix et coût dans
+  `game/assets/audio/voice/manifest.json`), dépenses consignées dans `docs/budget.md`.
 
 ## Polices
 

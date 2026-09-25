@@ -41,6 +41,7 @@ var _view: TextureRect
 var _overlay: Control
 var _material: ShaderMaterial
 var _mode_buttons: Dictionary = {}  # mode → Button
+var _modes_row: HBoxContainer
 var _armies: Array = []  # [{pos: Vector2 carte, color: Color, player: bool}]
 var _frame := PackedVector2Array()  # quadrilatère de la vue caméra (coordonnées carte)
 var _visible_count: int = -1
@@ -74,6 +75,7 @@ func _init() -> void:
 	modes.add_theme_constant_override("separation", 4)
 	modes.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(modes)
+	_modes_row = modes
 	for entry in [[MODE_POLITICAL, "Politique", "Couleurs des royaumes"], [MODE_RELIEF, "Relief", "Terres, montagnes et mers"]]:
 		var button := Button.new()
 		button.name = "Mode_%s" % entry[0]
@@ -90,6 +92,19 @@ func _init() -> void:
 	_material.shader = SHADER
 	_view.material = _material
 	_sync_mode_buttons()
+
+
+## Lot C5 : range un bouton de couche de la carte (routes commerciales) dans la rangée des modes,
+## en tête ; la barre du haut n'a plus la place de le porter en 1280 px.
+func add_layer_button(button: Button) -> void:
+	if _modes_row == null or button == null:
+		return
+	if button.get_parent() != null:
+		button.get_parent().remove_child(button)
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
+	_modes_row.add_child(button)
+	_modes_row.move_child(button, 0)
 
 
 ## Pré-calcule le fond : emprise des provinces, index de province et relief réduits.

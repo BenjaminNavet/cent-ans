@@ -478,22 +478,25 @@ pub struct ProvinceCity {
 
 impl CampaignState {
     /// Sum of the building effects of every settlement of `province`, plus
-    /// its governor's trait/skill effects if any (spec § 2).
+    /// its governor's trait/skill effects and its active regional edict
+    /// (spec § 2, lot C4).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
         let mut totals = effects_of(data, &self.province_buildings(province));
         totals.merge(&self.governor_effects(data, province));
+        totals.merge(&crate::edicts::edict_effects(self, data, province));
         totals
     }
 
     /// Sum of the building effects of `settlement`, plus the trait/skill
     /// effects of its province's governor (lot C4: garrison, walls,
-    /// recruitment).
+    /// recruitment) and its province's active regional edict.
     pub fn settlement_effects(&self, data: &GameData, settlement: &SettlementId) -> EffectTotals {
         let Some(state) = self.settlements.get(settlement) else {
             return EffectTotals::default();
         };
         let mut totals = effects_of(data, &state.buildings);
         totals.merge(&self.governor_effects(data, &state.province));
+        totals.merge(&crate::edicts::edict_effects(self, data, &state.province));
         totals
     }
 

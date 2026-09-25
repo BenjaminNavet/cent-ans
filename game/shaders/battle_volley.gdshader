@@ -10,8 +10,10 @@
 //   MODEL_MATRIX[2].xyz = (instant de tir, demi-front du tireur, demi-profondeur du tireur)
 //   MODEL_MATRIX[3].xyz = (demi-front de la cible, demi-profondeur de la cible, pente z du sol)
 //   INSTANCE_CUSTOM     = (graine, code, nombre de flèches du paquet, pente x du sol)
-//   code = sorte (0 flèche, 1 carreau) + 2 × feu + 4 × couvert (0, 1 pavois, 2 pieux)
-//          + 16 × pas des flèches confiées à la couche plantée.
+//   code = sorte (0 flèche, 1 carreau, 2 balle, 3 javelot) + 4 × feu + 8 × couvert (0, 1 pavois,
+//          2 pieux) + 32 × pas des flèches confiées à la couche plantée.
+//   UV.x > 0.5 : panneau face caméra, flamme d'une flèche enflammée à la pointe, ou fumée de
+//   mise à feu d'une couleuvrine (balle) figée au point de tir.
 shader_type spatial;
 render_mode skip_vertex_transform, cull_disabled, specular_disabled, shadows_disabled;
 
@@ -48,23 +50,35 @@ void vertex() {
 	v_quad = VERTEX.xy;
 	v_flicker = fract(float(i) * 0.618 + a.seed_f * 0.013);
 	if (UV.x > 0.5) {
-		// Flamme d'une flèche enflammée : panneau face caméra à la pointe.
+		// Flamme d'une flèche enflammée à la pointe, ou fumée de mise à feu d'une couleuvrine
+		// (balle, lot UR2) figée à la bouche : deux panneaux face caméra partageant le même quad.
 		bool burning = a.fire && age >= 0.0 && age < a.flight + burn_after;
-		float s = (burning && i < a.count) ? 0.2 * clamp(d / 40.0, 1.0, 4.0) : 0.0;
+		bool smoking = a.kind == 2 && age >= -0.05 && age < 0.55;
+		float s = 0.0;
+		vec3 panel_pos = pos;
+		if (smoking && i < a.count) {
+			// La fumée reste à la bouche du canon, ne suit pas la balle.
+			float puff = clamp((age + 0.05) / 0.6, 0.0, 1.0);
+			s = 0.3 * (1.0 + puff * 1.8) * clamp(d / 40.0, 1.0, 4.0);
+			panel_pos = a.start + vec3(0.0, puff * 0.6, 0.0);
+		} else if (burning && i < a.count) {
+			s = 0.2 * clamp(d / 40.0, 1.0, 4.0);
+		}
 		vec3 right = INV_VIEW_MATRIX[0].xyz;
 		vec3 up = INV_VIEW_MATRIX[1].xyz;
-		world = pos + (right * VERTEX.x + up * (VERTEX.y + 0.35) * 1.5) * s;
+		world = panel_pos + (right * VERTEX.x + up * (VERTEX.y + 0.35) * 1.5) * s;
+		v_flicker = v_flicker + (smoking ? 100.0 : 0.0);
 	} else {
 		// Ruban tourné vers la caméra autour de l'axe du trait : épaissi de loin (lisible comme un
 		// trait d'un pixel), allongé en vol (flou de bougé : la pluie de flèches se lit en traînées).
 		vec3 to_cam = normalize(cam - pos);
 		vec3 across = normalize(cross(dir, to_cam) + vec3(0.0, 1e-4, 0.0));
 		// Fichées : comme la couche plantée (fines, invisibles au-delà de 240 m).
-		float widen = (flying ? clamp(d / 30.0, 1.0, 6.0) : clamp(d / 60.0, 1.0, 1.5)) * (a.bolt ? 1.6 : 1.0);
+		float widen = (flying ? clamp(d / 30.0, 1.0, 6.0) : clamp(d / 60.0, 1.0, 1.5)) * VOLLEY_WIDEN[a.kind];
 		if (stuck && d > 240.0) {
 			scale = 0.0;
 		}
-		float stretch = (a.bolt ? 0.5 : 1.0) * (flying ? 1.0 + clamp(d / 70.0, 0.0, 2.5) : 1.0);
+		float stretch = VOLLEY_STRETCH[a.kind] * (flying ? 1.0 + clamp(d / 70.0, 0.0, 2.5) : 1.0);
 		world = pos + across * VERTEX.x * widen * scale + dir * VERTEX.z * stretch * scale;
 	}
 	VERTEX = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
@@ -72,7 +86,16 @@ void vertex() {
 }
 
 void fragment() {
-	if (v_part > 0.5) {
+	if (v_part > 0.5 && v_flicker > 50.0) {
+		// Fumée de mise à feu d'une couleuvrine (balle, lot UR2) : nuage rond, gris, sans lueur.
+		float fl = v_flicker - 100.0;
+		vec2 q = v_quad;
+		float shape = 1.0 - smoothstep(0.25, 0.5, length(q + vec2(0.0, 0.1 * sin(fl * 30.0))));
+		ALBEDO = vec3(0.55, 0.53, 0.5);
+		EMISSION = vec3(0.0);
+		ALPHA = shape * 0.55;
+		ALPHA_SCISSOR_THRESHOLD = 0.05;
+	} else if (v_part > 0.5) {
 		// Goutte de flamme : large en bas, effilée en haut, qui vacille.
 		vec2 q = v_quad;
 		float flick = 0.85 + 0.15 * sin(time_now * 23.0 + v_flicker * 40.0);

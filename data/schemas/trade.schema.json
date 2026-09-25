@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/trade.schema.json",
+  "title": "Commerce",
+  "description": "Places de marché historiques et routes commerciales qui les relient (lot C5, data/economy/trade.json). Les règles qui en tirent un revenu (distance, sécurité, accords, monnaie) vivent dans sim-campaign::trade.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "hubs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/hub" }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/route" }
+    }
+  },
+  "required": ["hubs", "routes"],
+  "additionalProperties": false,
+  "$defs": {
+    "hub_id": { "type": "string", "pattern": "^hub_[a-z0-9_]+$" },
+    "route_id": { "type": "string", "pattern": "^route_[a-z0-9_]+$" },
+    "hub": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/hub_id" },
+        "settlement": { "$ref": "common.schema.json#/$defs/settlement_id" },
+        "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+        "goods": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "common.schema.json#/$defs/resource_id" },
+          "uniqueItems": true
+        },
+        "description": { "type": "string" },
+        "sources": { "$ref": "common.schema.json#/$defs/sources" }
+      },
+      "required": ["id", "settlement", "name", "goods"],
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/route_id" },
+        "from_hub": { "$ref": "#/$defs/hub_id" },
+        "to_hub": { "$ref": "#/$defs/hub_id" },
+        "goods": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "common.schema.json#/$defs/resource_id" },
+          "uniqueItems": true
+        },
+        "base_value": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Revenu saisonnier (livres) à sécurité pleine et distance de référence, avant partage entre les deux bouts."
+        },
+        "declining": {
+          "type": "boolean",
+          "description": "Déclin historique (foires de Champagne dépassées par les routes maritimes dès les années 1330)."
+        },
+        "description": { "type": "string" },
+        "sources": { "$ref": "common.schema.json#/$defs/sources" }
+      },
+      "required": ["id", "from_hub", "to_hub", "goods", "base_value"],
+      "additionalProperties": false
+    }
+  }
+}

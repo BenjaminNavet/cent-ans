@@ -253,14 +253,14 @@ fn a_refusal_is_reported_with_its_chance() {
 }
 
 #[test]
-fn trade_agreements_raise_income_and_end_with_war() {
+fn trade_agreements_are_stored_once_and_end_with_war() {
     let data = data();
     let mut state = start(&data, "fac_aragon", 8);
     let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
     negotiation::apply_treaty(&mut state, &data, &ar, &ca, &[Article::TradeAgreement]).unwrap();
     assert!(state.factions[&ar].ledger.trade_agreements.contains(&ca));
-    assert!(negotiation::trade_income_factor(&state, &ar) > 1.0);
-    assert!(state.embargo_income_factor(&ar) > 1.0);
+    // C5 (ADR 0012): the treaty article is the trade agreement of the routes.
+    assert!(state.has_trade_agreement(&ar, &ca) && state.has_trade_agreement(&ca, &ar));
     state.declare_war(&data, &ar, &ca).unwrap();
     state.end_turn_with(&data, idle);
     assert!(state.factions[&ar].ledger.trade_agreements.is_empty());
