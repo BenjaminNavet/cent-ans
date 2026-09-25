@@ -289,6 +289,23 @@ impl BattleSim {
                     units: kept,
                 })
             }
+            Command::Halt { units } => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::Halt { units: kept })
+            }
+            Command::FireAtWill { units, enabled } => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::FireAtWill {
+                    units: kept,
+                    enabled,
+                })
+            }
             Command::Formation { units, kind } => {
                 let kept: Vec<u32> = units
                     .into_iter()

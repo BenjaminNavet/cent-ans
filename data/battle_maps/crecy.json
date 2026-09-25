@@ -81,7 +81,7 @@
         { "unit_type": "unit_knights", "count": 6, "soldiers": 150, "x": 1100, "z": 190, "facing_deg": 0, "gap_m": 10, "wave": 2, "label": "Chevaliers du duc de Lorraine et du comte de Blois" },
         { "unit_type": "unit_mounted_sergeants", "count": 4, "soldiers": 150, "x": 1100, "z": 140, "facing_deg": 0, "gap_m": 10, "wave": 2, "label": "Sergents à cheval de la deuxième bataille" },
         { "unit_type": "unit_knights", "count": 6, "soldiers": 150, "x": 1000, "z": 80, "facing_deg": 0, "gap_m": 10, "wave": 3, "label": "Chevaliers de la bataille du roi" },
-        { "unit_type": "unit_urban_militia", "count": 6, "soldiers": 200, "x": 1000, "z": 30, "facing_deg": 0, "gap_m": 8, "wave": 3, "morale": 35, "label": "Communes des bonnes villes" }
+        { "unit_type": "unit_urban_militia", "count": 6, "soldiers": 200, "x": 1000, "z": 30, "facing_deg": 0, "gap_m": 8, "wave": 3, "morale": 35, "label": "Miliciens des communes" }
       ],
       "waves": [
         { "label": "Les arbalétriers génois", "assault": true },
@@ -96,7 +96,7 @@
       "army": "Armée d'Édouard III",
       "general": { "name": "Édouard III", "character": "chr_edward_iii", "regiment": 0, "command": 9, "sovereign": true },
       "regiments": [
-        { "unit_type": "unit_english_retinue", "count": 3, "soldiers": 130, "x": 1330, "z": 1395, "facing_deg": 180, "gap_m": 8, "hold": true, "leash_m": 450, "label": "Maison du roi Édouard (au moulin)" },
+        { "unit_type": "unit_english_retinue", "count": 3, "soldiers": 130, "x": 1330, "z": 1395, "facing_deg": 180, "gap_m": 8, "hold": true, "leash_m": 450, "label": "Chevaliers de la maison du roi Édouard (au moulin)" },
         { "unit_type": "unit_longbowmen", "count": 2, "soldiers": 180, "x": 1330, "z": 1340, "facing_deg": 180, "gap_m": 8, "hold": true, "leash_m": 300, "label": "Archers de la bataille du roi" },
         { "unit_type": "unit_men_at_arms_foot", "count": 4, "soldiers": 130, "x": 1680, "z": 1190, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 3, "label": "Hommes d'armes du prince de Galles" },
         { "unit_type": "unit_welsh_spearmen", "count": 2, "soldiers": 150, "x": 1680, "z": 1245, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 110, "label": "Lanciers gallois du prince" },
