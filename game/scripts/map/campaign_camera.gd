@@ -218,7 +218,7 @@ func _apply_transform() -> void:
 		eye.y += _occlusion_lift
 		eye.y = maxf(eye.y, float(ground_height.call(eye.x, eye.z)) + clear)
 	camera.global_position = eye
-	camera.look_at(focus, Vector3.UP)
+	camera.look_at(focus + Vector3.UP * (profile.look_up(distance) if profile != null and ground_height.is_valid() else 0.0), Vector3.UP)
 	if profile != null:
 		camera.near = profile.near_plane(distance)
 		camera.far = profile.far_plane(distance)

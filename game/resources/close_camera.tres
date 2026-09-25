@@ -25,3 +25,4 @@ clearance_factor = 0.06
 clearance_min = 0.004
 occlusion_samples = 6
 occlusion_min_t = 0.25
+look_up_factor = 0.3
