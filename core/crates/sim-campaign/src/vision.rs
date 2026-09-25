@@ -7,7 +7,9 @@
 //! `share_allied_vision` (`data/rules/vision.json`, [`VisionRules`]), allies
 //! (vassals and overlords included, see [`CampaignState::is_allied`]) lend
 //! their armies and settlements. C6 agents still keep whole provinces in
-//! sight ([`CampaignState::agent_sight`], spread in land steps).
+//! sight ([`CampaignState::agent_sight`], spread in land steps), and with
+//! `own_provinces_visible` every land cell of a province controlled by the
+//! faction or a lending ally is seen.
 //!
 //! The seen area is rasterised as discs on a reduced grid ([`VisionMask`],
 //! 512² texels over the 4096² map, one texel = 4×4 navigation cells); the
@@ -58,7 +60,8 @@ pub struct VisionMask {
     pub coverage: Vec<u8>,
     /// Armies and settlements lending sight.
     pub sources: Vec<SightSource>,
-    /// Provinces kept in sight whole (C6 agents, intelligence).
+    /// Provinces kept in sight whole: held provinces (own and lending
+    /// allies', `own_provinces_visible`), C6 agents, intelligence.
     pub watched_provinces: BTreeSet<ProvinceId>,
 }
 
@@ -166,7 +169,17 @@ impl CampaignState {
             let best = range.entry(province).or_insert(steps);
             *best = (*best).max(steps);
         }
-        let watched_provinces = spread_sight(data, range);
+        let mut watched_provinces = spread_sight(data, range);
+        // Total War: a faction always sees the land of the provinces it (or
+        // an ally lending sight) controls.
+        if rules.own_provinces_visible {
+            watched_provinces.extend(
+                self.provinces
+                    .keys()
+                    .filter(|id| self.province_controller(id).is_some_and(lends_sight))
+                    .cloned(),
+            );
+        }
 
         let map_w = (grid.width * grid.scale) as f32;
         let map_h = (grid.height * grid.scale) as f32;
