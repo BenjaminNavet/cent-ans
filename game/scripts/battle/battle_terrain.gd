@@ -131,6 +131,8 @@ var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
 var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
 ## EP2 : horizon (relief réel lointain, panorama peint) ; province du lieu, posée par la scène.
 var province_id: String = ""
+## EP7 : tuile d'horizon d'un site historique (`hist_crecy`), cadrée et orientée sur le champ.
+var horizon_site: String = ""
 var horizon: BattleHorizon = null
 
 
@@ -1639,6 +1641,7 @@ func _setup_horizon() -> void:
 	horizon.name = "Horizon"
 	add_child(horizon)
 	var flank := str(_coast.get("flank", "")) if not _coast.is_empty() else ""
+	horizon.site_key = horizon_site  # EP7
 	horizon.setup(province_id, field_size(), _mean_height, flank, terrain_key, season_key)
 
 

@@ -348,6 +348,50 @@ impl HistoricalMap {
         }
     }
 
+    /// The date in French ("26 août 1346").
+    pub fn date_fr(&self) -> String {
+        const MONTHS: [&str; 12] = [
+            "janvier",
+            "février",
+            "mars",
+            "avril",
+            "mai",
+            "juin",
+            "juillet",
+            "août",
+            "septembre",
+            "octobre",
+            "novembre",
+            "décembre",
+        ];
+        let parts: Vec<&str> = self.date.split('-').collect();
+        match parts.as_slice() {
+            [year, month, day] => {
+                let month = month
+                    .parse::<usize>()
+                    .ok()
+                    .and_then(|m| MONTHS.get(m.wrapping_sub(1)));
+                let day = day.parse::<u32>().unwrap_or(0);
+                match month {
+                    Some(m) if day == 1 => format!("1er {m} {year}"),
+                    Some(m) => format!("{day} {m} {year}"),
+                    None => self.date.clone(),
+                }
+            }
+            _ => self.date.clone(),
+        }
+    }
+
+    /// Weather at the end of the scripted changes (the sky the battle is
+    /// rendered under; a shower at the start falls from it).
+    pub fn final_weather(&self) -> Weather {
+        self.weather
+            .changes
+            .iter()
+            .max_by(|a, b| a.at_s.total_cmp(&b.at_s))
+            .map_or(self.weather.start, |c| c.weather)
+    }
+
     /// Key of the horizon tile of the site.
     pub fn horizon_key(&self) -> String {
         if self.horizon.is_empty() {

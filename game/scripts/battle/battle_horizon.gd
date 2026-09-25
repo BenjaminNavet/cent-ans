@@ -29,6 +29,10 @@ static var _data: Dictionary = {}
 ## Relief réel chargé et actif (sinon repli sur le seul relief généré).
 var active: bool = false
 var province: String = ""
+## EP7 : tuile d'un site historique (`hist_crecy`, cuite par `cent-ans geo battle-site` déjà
+## tournée dans le repère du champ) à la place de celle de la province ; relief réel dès le bord.
+var site_key: String = ""
+const SITE_BLEND_M := Vector2(120.0, 1400.0)
 var panorama_id: String = ""
 var field_size: Vector2 = Vector2(1200, 800)
 var centre: Vector2 = Vector2(600, 400)
@@ -111,7 +115,13 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 	var index: Variant = JSON.parse_string(FileAccess.get_file_as_string(index_path))
 	if not (index is Dictionary):
 		return false
-	var entry: Dictionary = ((index as Dictionary).get("provinces", {}) as Dictionary).get(province, {})
+	var tiles: Dictionary = (index as Dictionary).get("provinces", {})
+	var entry: Dictionary = tiles.get(province, {})
+	if site_key != "" and tiles.has(site_key):
+		entry = tiles[site_key]
+		_blend_start = SITE_BLEND_M.x
+		_blend_end = SITE_BLEND_M.y
+		flank = ""
 	if entry.is_empty():
 		return false
 	if not _load_tile(index_path.get_base_dir().path_join(str(entry["file"]))):

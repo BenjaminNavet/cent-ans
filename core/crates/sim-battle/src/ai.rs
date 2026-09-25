@@ -273,8 +273,6 @@ impl<'a> View<'a> {
         let units = sim.units();
         let own = (0..units.len())
             .filter(|&i| units[i].side == side && units[i].able())
-            // EP7: a historical "battle" held back takes no AI order yet.
-            .filter(|&i| !sim.scenario_held(i))
             .collect();
         let enemies = (0..units.len())
             .filter(|&j| units[j].side != side && units[j].present() && !units[j].synthetic)
