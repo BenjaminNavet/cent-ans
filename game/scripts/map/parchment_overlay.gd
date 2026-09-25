@@ -154,6 +154,8 @@ func set_weight(value: float, distance: float) -> void:
 const ANIMATION_INTERVAL_MS := 100
 
 var _last_view: Array = []
+## Nombre de dessins complets (mesure du parcours RL1).
+var draw_count := 0
 var _last_draw_ms := -ANIMATION_INTERVAL_MS
 
 
@@ -197,6 +199,7 @@ func _screen_w(world: Vector3) -> Vector2:
 func _draw() -> void:
 	if camera == null or map_data == null or weight <= 0.01:
 		return
+	draw_count += 1
 	var s := clampf(REF_DISTANCE / maxf(camera_distance, 1.0), 0.7, 1.6)
 	var a := weight
 	var view := get_viewport_rect().grow(60.0)
