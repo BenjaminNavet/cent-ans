@@ -1443,8 +1443,9 @@ func _plant_orchards(sets: Dictionary, tints: Dictionary) -> void:
 				t.origin.y = height_at(p.x, p.y) - 0.2
 				sets["oak"].append(t)
 				if blossom:
-					var w := rng.randf_range(1.6, 2.1)
-					tints["oak"].append(Color(w, w * rng.randf_range(0.82, 0.95), w * rng.randf_range(0.85, 0.98)))
+					# Fleurs blanc rosé mêlées aux jeunes feuilles : éclairci, pas blanc pur.
+					var w := rng.randf_range(1.12, 1.35)
+					tints["oak"].append(Color(w * 1.08, w * rng.randf_range(0.92, 1.0), w * rng.randf_range(0.82, 0.92)))
 				else:
 					tints["oak"].append(_tree_tint(rng) * Color(0.95, 1.05, 0.9))
 			v += step

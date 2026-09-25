@@ -380,8 +380,13 @@ func begin() -> bool:
 func _setup_staging(terrain_data: Dictionary) -> void:
 	staging = BattleStaging.new()
 	add_child(staging)
+	var decor_view: BattleDecor = terrain.decor_view
+	if decor_view != null and decor_view.has_camps():
+		staging.auto_campfires = false  # EP6 : les camps du décor portent leurs feux
 	staging.setup(self, battle, world_env.environment, sun, _weather_key, terrain_data, _ep8_disabled)
 	staging.configure_effects(effects, str(terrain_data.get("terrain", "plains")), terrain.season_key)
+	if decor_view != null:
+		decor_view.attach_smoke(self, staging, _weather_key)
 	if effects != null:
 		effects.cannon_fired.connect(staging.on_cannon_fired)
 	if staging.cinematic != null and not _force_cinematic and (autoplay or _benchmark or _screenshot_path != ""):

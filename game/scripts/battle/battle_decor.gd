@@ -34,6 +34,9 @@ var _camp_timer := 0.0
 ## camp -> {batch, tents: [poignées], fires: [Vector3], looted}
 var _camps: Dictionary = {}
 var _smoke_root: Node3D = null
+## EP8 : scène qui porte les sources de fumée durables (`add_smoke_source`), null sans EP8.
+var _smoke_scene: Node = null
+var smoke_sources := 0
 var building_count := 0
 var prop_count := 0
 var vine_segments := 0
@@ -69,6 +72,34 @@ func build(terrain: BattleTerrain, decor: Dictionary, weather: String) -> void:
 	set_process(false)
 	print("BattleDecor: %s, %d buildings, %d props, %d vine segments, %d tents, %d horses" % [
 		str(decor.get("profile", "")), building_count, prop_count, vine_segments, tent_count, horse_count])
+
+
+## Vrai si le décor pose ses propres camps (EP8 ne pose alors pas ses feux par défaut).
+func has_camps() -> bool:
+	return not _camps.is_empty()
+
+
+## EP8 : fumée des feux de camp par `BattleScene.add_smoke_source` ; au plus
+## `camp_fires_per_side` feux fumants par camp (réglage de qualité d'EP8), répartis dans le camp,
+## aucun par temps de pluie ou de neige (`no_campfire_weather`).
+func attach_smoke(scene: Node, staging: BattleStaging, weather: String) -> void:
+	if scene == null or staging == null or staging.smoke == null or not staging.cfg.has("smoke"):
+		return
+	_smoke_scene = scene
+	var smoke_cfg: Dictionary = staging.cfg["smoke"]
+	if (smoke_cfg.get("no_campfire_weather", []) as Array).has(weather):
+		return
+	var per_side: Dictionary = smoke_cfg.get("camp_fires_per_side", {})
+	var count := int(per_side.get(RenderQuality.current(), per_side.get("high", 2)))
+	for side in _camps:
+		var fires: Array = _camps[side]["fires"]
+		var n := mini(count, fires.size())
+		for i in n:
+			var fire: Vector3 = fires[int((i + 0.5) * fires.size() / float(n))]
+			var id := int(scene.call("add_smoke_source", fire + Vector3(0, 0.6, 0), 0.6 + 0.4 * BuildingKit.hash01(i, 73), "campfire"))
+			if id >= 0:
+				smoke_sources += 1
+	print("BattleDecor: %d camp fire smoke sources" % smoke_sources)
 
 
 ## Relie la simulation : l'état des camps (pillage) est relu une fois par seconde.
@@ -377,6 +408,8 @@ func _build_camp(camp: Dictionary) -> void:
 	_build_posts(root, posts)
 	_build_fires(root, fires)
 	_camps[side] = {"batch": batch, "tents": tents, "fires": fires, "looted": false, "root": root}
+	var area: Dictionary = camp.get("area", {})
+	print("BattleDecor: camp %s at (%.0f, %.0f), %d fires" % [side, float(area.get("x", 0.0)), float(area.get("z", 0.0)), fires.size()])
 
 
 ## Chevaux au piquet des deux côtés d'une corde tendue entre deux poteaux, tête vers la corde.
@@ -475,8 +508,12 @@ func _loot(side: String) -> void:
 	var fires: Array = camp["fires"]
 	var root: Node3D = camp["root"]
 	for i in mini(fires.size(), 3):
-		var smoke := _smoke(fires[i])
-		root.add_child(smoke)
+		# EP8 : colonne de fumée noire partagée avec les incendies ; sinon particules locales.
+		var id := -1
+		if _smoke_scene != null:
+			id = int(_smoke_scene.call("add_smoke_source", fires[i] + Vector3(0, 1.5, 0), 1.2, "column"))
+		if id < 0:
+			root.add_child(_smoke(fires[i]))
 	print("BattleDecor: camp %s looted" % side)
 
 
