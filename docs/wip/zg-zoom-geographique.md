@@ -30,7 +30,8 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
 | ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
-| ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
+| ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | à lancer |
+| ZG7 | Perf, recette aux 3 paliers (relief ZG8 compris), export, docs, crédits | 4 | — |
 
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
@@ -53,3 +54,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : recette Q3 (nuit) : sol beige nu sous 3 unités à Londres (trou entre ZG4/ZG5b/VH), ruban rouge-gris géant sur la Tamise vers 20 unités, arrêt à 7 unités sans cache. → ZG4b lancé ; le cache absent relève de ZG7 (embarquement + message clair).
 - 25/09 21h37 : limite de quota levée, ZG4b (aucun commit encore) et ZG6 (dernier 3b499cf4) relancés avec leur contexte.
 - 25/09 : ZG6 fusionné (villes ordinaires 1:1 vers 1340, finage raccordé au parcellaire ZG5b), **main = 7f38c532**, tests ZG2/4/5b/6 + smoke OK. Coût : 48 vs 57 i/s, appels de dessin ×3 (MultiMesh par cellule → par ville à faire en ZG7). Suites VH3 : populations 1328, Gand vide au sud.
+- 25/09 : ajout de ZG8 à la demande du joueur (capture Total War) : exagérer le relief local, pas l'altitude ; purement visuel, une seule fonction de hauteur affichée. Passe avant la recette ZG7.

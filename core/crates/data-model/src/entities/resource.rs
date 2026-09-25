@@ -22,8 +22,9 @@ pub struct Resource {
     pub category: ResourceCategory,
     /// Base price of one trade unit in livres tournois.
     pub base_price: u32,
-    /// Classes whose goods satisfaction depends on this resource.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    /// Classes whose goods satisfaction depends on this resource; empty:
+    /// none (a material such as stone or iron, not a consumer good).
+    #[serde(default)]
     pub satisfies_classes: Vec<SocialClass>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,

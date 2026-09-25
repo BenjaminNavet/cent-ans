@@ -1,0 +1,29 @@
+# ZG8 — relief exagéré façon Total War (visuel seulement)
+
+État : spécifié, à lancer (après ou en parallèle de ZG4b, fusion de main avant la fin).
+
+## Constat (capture Total War Warhammer III fournie par le joueur, 25/09)
+- Exagération non uniforme : plaines plates, montagnes en falaises.
+- Roche posée selon la pente, pas l'altitude.
+- Lumière rasante, ombres longues : le relief se lit par l'ombrage.
+- Exagération forte même de près. Chez nous ZG4 descend à ×1,5 près du sol, d'où une vue rapprochée plate.
+
+## Objectif
+Accentuer le relief **local** : hauteur affichée = s(d)·h + k(d)·(h − fond(x, z)).
+- `fond` = fond de vallée lissé (flou ou min-flou ~5-10 km), grille basse résolution calculée une fois au chargement.
+- `s(d)` : échelle ZG4 existante, avec le plancher de près relevé à ~×2,5-3 (réglable).
+- `k(d)` : gain de relief local (~1-2), réglable, 0 = comportement actuel.
+- Plaines inchangées, rivières au fond (h ≈ fond) donc ponts et berges stables.
+
+## Contraintes
+- Purement visuel : rien dans `core/`, aucune règle ne change (déplacement, vision, batailles en mètres réels).
+- **Une seule fonction** : `campaign_display_height` dans un `.gdshaderinc` commun, et son double GDScript (`MapData` / `TerrainBuilder.surface_height_at`).
+  Tous les consommateurs de `campaign_vertical_scale` passent par elle : terrain, fleuves, routes, villes, monuments, ancrages, armées, caméra (plancher), sondes de survol.
+- Réglages dans `close_camera.tres` (ou une ressource voisine), avec un interrupteur pour revenir à l'état actuel.
+- Roche selon la pente dans `terrain.gdshader` (triplanaire ou étirement corrigé sur falaises).
+- Ombrage plus marqué (lumière plus rasante), sans casser le parchemin ni les filtres de carte.
+
+## Recette
+- Captures avant/après : Pyrénées, Alpes, Massif central, Vosges, pays de Galles, falaises normandes, coteaux de Seine et de Loire, Paris (plaine, doit rester plate).
+- Tests ZG2/ZG4/ZG5b/ZG6 + smoke. Test dédié : plaine inchangée, sommet rehaussé, objet posé = hauteur affichée du sol.
+- Banc `--bench-map` : coût ≤ quelques %.

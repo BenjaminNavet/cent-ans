@@ -11,13 +11,13 @@
     "base_price": { "type": "integer", "minimum": 1, "description": "Prix de base d'une unité de commerce en livres tournois." },
     "satisfies_classes": {
       "type": "array",
-      "description": "Classes dont la satisfaction en biens dépend de cette ressource.",
+      "description": "Classes dont la satisfaction en biens dépend de cette ressource. Liste vide : aucune classe (matériau de construction ou d'armement, comme la pierre et le fer, qui ne compte pas pour la satisfaction en biens).",
       "items": { "$ref": "common.schema.json#/$defs/social_class" },
       "uniqueItems": true
     },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },
-  "required": ["id", "name", "category", "base_price"],
+  "required": ["id", "name", "category", "base_price", "satisfies_classes"],
   "additionalProperties": false
 }

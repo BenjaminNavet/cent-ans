@@ -315,6 +315,14 @@ fn full_supplies() -> u8 {
 pub struct Construction {
     pub building: BuildingId,
     pub turns_left: u32,
+    /// B7c: livres paid at the start (money cost plus imported resources),
+    /// half of which `cancel_build` refunds; 0 in pre-B7c saves.
+    #[serde(default)]
+    pub paid: u32,
+    /// B7c: resource units drawn from the faction's own producing provinces
+    /// (`goods`), reserved until the construction ends.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub drawn: BTreeMap<data_model::ResourceId, u32>,
 }
 
 /// Dynamic state of a province (static data stays in [`GameData`]).
@@ -374,12 +382,70 @@ pub struct SettlementState {
     /// One building under construction at a time.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub construction: Option<Construction>,
-    /// Units paid for this turn that join the garrison at the end of the turn.
+    /// Units paid for and still training (B7b): each joins the garrison
+    /// at the end of the turn its `turns_left` runs out
+    /// (`UnitType::recruit_time_turns`, one turn by default).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub recruit_queue: Vec<UnitTypeId>,
+    pub recruit_queue: Vec<QueuedRecruit>,
     /// Base fortification level from the data (0 village, 1-4 otherwise).
     #[serde(default)]
     pub fortification_level: u8,
+}
+
+/// Turn marker of a queue entry loaded from a save written before B7b (a
+/// bare unit id, always ordered in the turn being played).
+pub const LEGACY_RECRUIT_TURN: u32 = u32::MAX;
+
+/// One recruit of a settlement's queue (B7b).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(from = "QueuedRecruitRepr")]
+pub struct QueuedRecruit {
+    pub unit_type: UnitTypeId,
+    /// End-of-turn phases left before the unit joins the garrison (1: at
+    /// the end of this turn).
+    pub turns_left: u32,
+    /// Turn of the order: the recruitment slots are counted per turn.
+    pub ordered_turn: u32,
+}
+
+impl QueuedRecruit {
+    /// `true` when the entry uses one of the recruitment slots of `turn`.
+    pub fn ordered_during(&self, turn: u32) -> bool {
+        self.ordered_turn == turn || self.ordered_turn == LEGACY_RECRUIT_TURN
+    }
+}
+
+/// Save compatibility: before B7b the queue held bare unit ids.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum QueuedRecruitRepr {
+    Legacy(UnitTypeId),
+    Full {
+        unit_type: UnitTypeId,
+        turns_left: u32,
+        ordered_turn: u32,
+    },
+}
+
+impl From<QueuedRecruitRepr> for QueuedRecruit {
+    fn from(repr: QueuedRecruitRepr) -> Self {
+        match repr {
+            QueuedRecruitRepr::Legacy(unit_type) => QueuedRecruit {
+                unit_type,
+                turns_left: 1,
+                ordered_turn: LEGACY_RECRUIT_TURN,
+            },
+            QueuedRecruitRepr::Full {
+                unit_type,
+                turns_left,
+                ordered_turn,
+            } => QueuedRecruit {
+                unit_type,
+                turns_left,
+                ordered_turn,
+            },
+        }
+    }
 }
 
 impl SettlementState {

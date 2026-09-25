@@ -2,13 +2,34 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/economy_rules.schema.json",
   "title": "Règles d'économie",
-  "description": "Fichier data/rules/economy.json (lot EQ1) : échelle des effets de trésor des événements selon le revenu de la faction.",
+  "description": "Fichier data/rules/economy.json (lots EQ1, B7a) : échelle des effets de trésor des événements selon le revenu de la faction, coût de la cour et de l'administration, pénalité de banqueroute, ravitaillement en pays dévasté.",
   "type": "object",
   "properties": {
     "description": { "type": "string" },
     "event_treasury_reference_income": { "type": "integer", "minimum": 1, "description": "Revenu de saison (livres) à partir duquel l'effet de trésor d'un événement s'applique en entier ; en dessous, il est proportionnel au revenu." },
-    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." }
+    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." },
+    "administration_base": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du revenu dépensée chaque saison par la cour et l'administration, quelle que soit la taille du royaume (0-1)." },
+    "administration_per_province": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part supplémentaire par province contrôlée (0-1)." },
+    "administration_max": { "type": "number", "minimum": 0, "maximum": 1, "description": "Plafond de la part d'administration (0-1)." },
+    "opulence_seasons": { "type": "integer", "minimum": 0, "description": "Nombre de saisons de revenu au-delà duquel le trésor nourrit une cour opulente." },
+    "opulence_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage de cet excédent dépensé par la cour chaque saison." },
+    "bankruptcy_morale_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu chaque saison par toutes les unités (armées et garnisons) tant que le trésor est négatif." },
+    "supply_devastation_loss_percent": { "type": "number", "minimum": 0, "description": "Hors territoire ami : perte de ravitaillement supplémentaire (en % de la perte de saison) dans une province dévastée à 100 ; proportionnelle en dessous." },
+    "supply_devastation_recovery_cut_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous." },
+    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c : prix (livres) d'une unité de ressource de construction manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier." }
   },
-  "required": ["event_treasury_reference_income", "event_treasury_min_scale"],
+  "required": [
+    "event_treasury_reference_income",
+    "event_treasury_min_scale",
+    "administration_base",
+    "administration_per_province",
+    "administration_max",
+    "opulence_seasons",
+    "opulence_percent",
+    "bankruptcy_morale_penalty",
+    "supply_devastation_loss_percent",
+    "supply_devastation_recovery_cut_percent",
+    "resource_import_multiplier"
+  ],
   "additionalProperties": false
 }

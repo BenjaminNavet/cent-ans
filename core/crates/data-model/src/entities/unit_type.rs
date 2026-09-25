@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Cost, LocalizedName, SocialClass, Sources, UnitCategory};
-use crate::ids::{BuildingId, CultureId, FactionId, TechnologyId, UnitTypeId};
+use crate::ids::{CultureId, FactionId, TechnologyId, UnitTypeId};
 
 /// Missile a shooting unit looses (lot UR2: data-driven, no more guessing
 /// from the unit id in `sim.rs::missile_kind`).
@@ -79,8 +79,6 @@ pub struct UnitType {
     pub abilities: Vec<Ability>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub required_technology: Option<TechnologyId>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub required_building: Option<BuildingId>,
     /// Province cultures allowed to recruit (empty = all).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub required_culture: Vec<CultureId>,

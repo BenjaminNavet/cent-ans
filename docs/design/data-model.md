@@ -112,8 +112,9 @@ archers chez les paysans, hommes d'armes et chevaliers chez la noblesse, milices
 bourgeois), `mounted`, `mercenary`, `soldiers` (60-120 ; 4-8 pour les engins), `cost`, `upkeep`,
 `stats` (`melee`, `ranged`, `range` en mètres, `armor`, `morale`, `speed`, `ammo`, `charge`,
 `siege_attack`), `abilities` (stakes, pike_square, volley, pavise, charge_lance, dismount,
-wall_breach, wall_assault, rain_penalty...), `required_technology`, `required_building`,
-`required_culture`, `required_faction`, `equipment`.
+wall_breach, wall_assault, rain_penalty...), `required_technology`,
+`required_culture`, `required_faction`, `equipment`. Le bâtiment exigé pour lever une unité se lit
+uniquement dans `enables_units` des bâtiments (lot B7c : `required_building` des unités supprimé).
 
 ### 4.4 Bâtiment (`building.schema.json`)
 `category` : `production`, `commerce`, `military`, `religious`, `sanitary`, `fortification` (les six
@@ -121,6 +122,12 @@ familles du document de conception). `tier`, `upgrades_from` (chaîne d'amélior
 enceinte de pierre → château → boulevard d'artillerie), `cost`, `build_time_turns`, `upkeep`,
 `required_technology` / `required_building` / `required_resource`, `requires_coastal`,
 `requires_river`, `effects`, `enables_units`.
+Lot B7c : une amélioration porte le total de sa chaîne — le chargeur refuse une amélioration qui perd
+ou affaiblit un effet du niveau remplacé ; un prérequis (`required_building`, `enables_units`,
+compagnons, régimes) est satisfait par le bâtiment ou l'une de ses améliorations. `enables_units`
+est la seule source du « bâtiment exigé » pour recruter. `cost.resources` : unités tirées des
+provinces productrices accessibles (réservées pendant le chantier), le manque importé à
+`base_price × resource_import_multiplier` (`data/rules/economy.json`).
 
 ### 4.5 Technologie (`technology.schema.json`)
 `branch` (`military`, `civil`), `tier`, `cost` en points de recherche, `prerequisites`,
@@ -198,7 +205,8 @@ Isabeau...) et quelques surnoms/épithètes neutres, plus la liste des `cultures
 associées. Utilisée par `sim-campaign` pour nommer les personnages générés à la naissance.
 
 ### 4.7 Ressource (`resource.schema.json`)
-`category` (food, raw_material, manufactured, luxury), `base_price`, `satisfies_classes`.
+`category` (food, raw_material, manufactured, luxury), `base_price`, `satisfies_classes`
+(obligatoire ; liste vide = aucune classe, lot B7c).
 Blé, laine, vin, sel, fer, bois, pierre, poisson, drap.
 
 ### 4.8 Religion (`religion.schema.json`)
@@ -310,7 +318,7 @@ vides par défaut ; les booléens à `default` du schéma (`playable`, `mounted`
 | Sévérité | Références |
 |---|---|
 | **Avertissement** (`Warning`) | toute référence à une **province** inconnue : `faction.capital`, `province.neighbors`, `character.starting_location`, ids de `provinces.geojson`. Toléré tant que la carte est partielle (section 4.2). |
-| **Erreur** (`DataError::References`, toutes listées d'un coup) | faction : `ruler`, `heir`, `religion`, `suzerain`, `starting_technologies`, `relations[].faction` ; province : `owner`, `overlord`, `holder`, `religion`, `resources`, `buildings` ; unité : `required_technology`, `required_building`, `required_faction`, `cost.resources` ; bâtiment : `upgrades_from`, `required_technology`, `required_building`, `required_resource`, `enables_units`, `cost.resources` ; technologie : `prerequisites`, `unlocks.units`, `unlocks.buildings` ; personnage : `faction`, `family.*`, **`traits` (M4 : chaque `trait_*` doit exister dans `data/traits/`)** ; religion : `parent`, `head_faction` ; **trait : `opposites` (M4)** ; **compétence : `prerequisites` (M4)**. |
+| **Erreur** (`DataError::References`, toutes listées d'un coup) | faction : `ruler`, `heir`, `religion`, `suzerain`, `starting_technologies`, `relations[].faction` ; province : `owner`, `overlord`, `holder`, `religion`, `resources`, `buildings` ; unité : `required_technology`, `required_faction`, `cost.resources` ; bâtiment : `upgrades_from`, `required_technology`, `required_building`, `required_resource`, `enables_units`, `cost.resources` ; technologie : `prerequisites`, `unlocks.units`, `unlocks.buildings` ; personnage : `faction`, `family.*`, **`traits` (M4 : chaque `trait_*` doit exister dans `data/traits/`)** ; religion : `parent`, `head_faction` ; **trait : `opposites` (M4)** ; **compétence : `prerequisites` (M4)**. |
 
 Les cultures (`cul_`) et zones maritimes (`sea_`) restent un vocabulaire libre : seul le préfixe est
 vérifié. Depuis M4, les traits (`trait_`) ne le sont plus : `character.traits[]` et `trait.opposites[]`
