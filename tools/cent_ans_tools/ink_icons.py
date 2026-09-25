@@ -32,6 +32,8 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
+from scipy import ndimage
+from skimage.morphology import skeletonize
 
 from cent_ans_tools.portraits import PortraitJob
 
@@ -47,8 +49,8 @@ INK_RGB = (56, 36, 18)
 # Raw sources are stored downscaled (JPEG) to keep the repository small.
 RAW_ICON_SIZE = 512
 RAW_MEDALLION_SIZE = 768
-# Target stroke width of every icon at 128 px (so ~1.2 px at 24 px).
-TARGET_STROKE_PX = 6.0
+# Target stroke width of every icon at 128 px (so ~1 px at 24 px).
+TARGET_STROKE_PX = 5.0
 # Alpha below this share of full ink is parchment texture, not a stroke.
 ALPHA_FLOOR = 0.18
 # Medallion flood fill tolerance (per channel sum distance to the corner colour).
@@ -166,16 +168,27 @@ def _to_raw(image_bytes: bytes, size: int) -> bytes:
 
 
 def ink_alpha(image: Image.Image) -> np.ndarray:
-    """Ink coverage in [0, 1] from luminance: 0 on the parchment, 1 on the darkest ink."""
+    """Ink coverage in [0, 1]: 0 on the parchment, 1 on the darkest ink.
+
+    The parchment level is estimated locally (grey closing wider than any stroke, then
+    blurred), so a vignette or an uneven wash does not turn into grey ink.
+    """
     gray = np.asarray(image.convert("L"), dtype=np.float32)
-    border = np.concatenate(
-        [gray[:8].ravel(), gray[-8:].ravel(), gray[:, :8].ravel(), gray[:, -8:].ravel()]
+    # Closing at quarter resolution (fast), then back to full size.
+    small = gray[::4, ::4]
+    closing = max(5, small.shape[0] // 12) | 1
+    paper_small = ndimage.grey_closing(small, size=(closing, closing))
+    paper_small = ndimage.gaussian_filter(paper_small, sigma=closing / 3.0)
+    paper = ndimage.zoom(
+        paper_small,
+        (gray.shape[0] / small.shape[0], gray.shape[1] / small.shape[1]),
+        order=1,
     )
-    paper = float(np.median(border))
-    ink = float(np.percentile(gray, 1.0))
-    if paper - ink < 20.0:
+    depth = paper - gray
+    ink = float(np.percentile(depth, 99.5))
+    if ink < 20.0:
         return np.zeros_like(gray)
-    alpha = np.clip((paper - gray) / (paper - ink), 0.0, 1.0)
+    alpha = np.clip(depth / ink, 0.0, 1.0)
     alpha = np.where(
         alpha < ALPHA_FLOOR, 0.0, (alpha - ALPHA_FLOOR) / (1.0 - ALPHA_FLOOR)
     )
@@ -183,13 +196,15 @@ def ink_alpha(image: Image.Image) -> np.ndarray:
 
 
 def stroke_width(alpha: np.ndarray) -> float:
-    """Mean stroke width in pixels: 2 x inked area / outline length (thin-stroke estimate)."""
+    """Median stroke width in pixels: twice the distance to the paper along the skeleton."""
     mask = alpha > 0.5
-    area = float(mask.sum())
-    if area == 0:
+    if not mask.any():
         return 0.0
-    edges = (mask[:, 1:] != mask[:, :-1]).sum() + (mask[1:, :] != mask[:-1, :]).sum()
-    return 2.0 * area / max(float(edges), 1.0)
+    inside = ndimage.distance_transform_edt(mask)
+    skeleton = skeletonize(mask)
+    if not skeleton.any():
+        return 0.0
+    return float(2.0 * np.median(inside[skeleton]))
 
 
 def _crop_square(alpha: np.ndarray, margin: float = 0.08) -> np.ndarray:
@@ -207,29 +222,36 @@ def _crop_square(alpha: np.ndarray, margin: float = 0.08) -> np.ndarray:
     return canvas
 
 
+def offset_strokes(alpha: np.ndarray, radius: float) -> np.ndarray:
+    """Round, antialiased offset of the ink: ``radius`` > 0 thickens, < 0 thins."""
+    mask = alpha > 0.5
+    outside = ndimage.distance_transform_edt(~mask)
+    inside = ndimage.distance_transform_edt(mask)
+    signed = np.where(mask, -inside + 0.5, outside - 0.5)  # > 0 on the paper
+    return np.clip(0.5 - (signed - radius), 0.0, 1.0).astype(np.float32)
+
+
 def process_icon(raw: Image.Image, size: int = 128) -> tuple[Image.Image, float]:
-    """Game icon (RGBA, RGB = ink colour) and its final stroke width in pixels."""
+    """Game icon (RGBA, RGB = ink colour) and its final stroke width in pixels.
+
+    The drawing is cropped to its ink, then its strokes are offset (signed distance)
+    so that the median stroke is ``TARGET_STROKE_PX`` wide at ``size``: every icon of
+    the family has the same line weight whatever its extent in the raw picture.
+    """
     alpha = _crop_square(ink_alpha(raw))
     work = 4 * size
     mask = Image.fromarray((alpha * 255).astype(np.uint8)).resize(
         (work, work), Image.Resampling.LANCZOS
     )
-    # Normalise the stroke: measured at the working size, scaled to the final size.
-    # A k x k max (min) filter widens (thins) every stroke by k - 1 working pixels.
-    for _ in range(4):
-        width = stroke_width(np.asarray(mask, dtype=np.float32) / 255.0) * size / work
-        if width <= 0.0 or abs(width - TARGET_STROKE_PX) < TARGET_STROKE_PX * 0.15:
-            break
-        delta = abs(TARGET_STROKE_PX - width) * work / size
-        if width > TARGET_STROKE_PX:
-            delta = min(delta, width * work / size * 0.5)  # never erase a stroke
-        kernel = max(3, int(round(delta)) // 2 * 2 + 1)
-        grow = width < TARGET_STROKE_PX
-        mask = mask.filter(
-            ImageFilter.MaxFilter(kernel) if grow else ImageFilter.MinFilter(kernel)
-        )
+    work_alpha = np.asarray(mask, dtype=np.float32) / 255.0
+    width = stroke_width(work_alpha) * size / work
+    if width > 0.0 and abs(width - TARGET_STROKE_PX) > TARGET_STROKE_PX * 0.1:
+        radius = (TARGET_STROKE_PX - width) * 0.5 * work / size
+        radius = max(radius, -0.4 * width * work / size)  # never erase a stroke
+        work_alpha = offset_strokes(work_alpha, radius)
+    width = stroke_width(work_alpha) * size / work
+    mask = Image.fromarray((work_alpha * 255).astype(np.uint8))
     final = mask.resize((size, size), Image.Resampling.LANCZOS)
-    width = stroke_width(np.asarray(final, dtype=np.float32) / 255.0)
     rgba = Image.new("RGBA", (size, size), (*INK_RGB, 0))
     rgba.putalpha(final)
     return rgba, width
