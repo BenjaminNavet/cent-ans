@@ -48,7 +48,7 @@ const DEFAULTS := {
 	"tutorial/step": 0,
 	"tutorial/done": false,
 	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
-	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
+	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra ; EP1 : 4 épique).
 	"battle/blood": 1,
 	"battle/unit_size": 1.0,
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
@@ -79,7 +79,7 @@ const FONT_SIZE_KEYS := ["font_size", "normal_font_size", "bold_font_size", "ita
 const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
 const BLOOD_CHOICES: Array[int] = [0, 1, 2]
-const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5]
+const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5, 4.0]  # EP1 : 4 = Épique
 
 var path: String = SETTINGS_PATH
 var values: Dictionary = {}
