@@ -39,10 +39,7 @@ impl CampaignSim {
     /// has been loaded yet).
     #[func]
     fn get_difficulty_levels(&self) -> VarArray {
-        let data = self
-            .data
-            .clone()
-            .or_else(|| crate::campaign_sim::loaded_data());
+        let data = self.data.clone().or_else(crate::campaign_sim::loaded_data);
         let rules = data
             .as_ref()
             .map_or_else(Default::default, |d| d.difficulty.clone());
