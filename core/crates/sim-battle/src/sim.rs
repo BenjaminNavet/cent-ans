@@ -14,6 +14,7 @@ mod separation;
 mod siege_assault;
 mod siege_extra;
 mod standards;
+mod time_of_day;
 mod water;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
@@ -143,6 +144,10 @@ pub struct BattleSim {
     crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
+    /// EP8: hour of the day when the battle began (the day moves on with
+    /// `elapsed`) and the phase last announced in the journal.
+    start_hour: f64,
+    day_phase: Option<String>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -389,6 +394,8 @@ impl BattleSim {
             trophies: Vec::new(),
             crossings: Default::default(),
             drown_announced: Vec::new(),
+            start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
+            day_phase: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -859,12 +866,13 @@ impl BattleSim {
         new
     }
 
-    /// Effective shooting range of `unit` (weather, height advantage).
+    /// Effective shooting range of `unit` (weather, time of day, height
+    /// advantage).
     pub fn effective_range(&self, unit: &Unit, target_x: f64, target_z: f64) -> f64 {
         let height_gain = (self.standing_height(unit, unit.x, unit.z)
             - self.field.height(target_x, target_z))
         .max(0.0);
-        f64::from(unit.stats.range) * self.weather.range_factor() * (1.0 + height_gain / 100.0)
+        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0)
     }
 
     pub(crate) fn log(&mut self, text_fr: String, side: Option<SideId>) {
@@ -1192,6 +1200,7 @@ impl BattleSim {
             unit.tick_losses = 0.0;
             unit.flanked = 0;
         }
+        self.advance_day();
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
@@ -2185,6 +2194,14 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
+        // ADR 0052: the arrows wound the horses too, and they panic, unless
+        // the riders are already locked in a melee.
+        let target = &self.units[t];
+        self.units[t].morale -= crate::missile_morale::MissileMoraleRules::bundled().panic(
+            target.mounted && target.state != UnitState::Melee,
+            kills,
+            target.max_soldiers,
+        );
         if kills > 0.0 {
             self.units[t].missile_timer = 0.0;
             self.units[t].loss_cause = cause;
@@ -2227,7 +2244,7 @@ impl BattleSim {
         if !unit.wall_breaker() || unit.target.is_some() {
             return None;
         }
-        let range = f64::from(unit.stats.range) * self.weather.range_factor();
+        let range = f64::from(unit.stats.range) * self.range_factor();
         let in_range = |p: usize| {
             let piece = &works.pieces[p];
             piece.intact()
