@@ -330,7 +330,8 @@ func report_late_events(events: Array) -> void:
 		return
 	last_events += events
 	if bool(_setting("interface/season_report", true)):
-		season_report.add_events(events, _concerns_player)
+		var sim: Object = map.get("sim")
+		season_report.add_events(events, _concerns_player, str(sim.call("get_date_label")) if sim != null else "")
 
 
 func _concerns_player(event: Dictionary) -> bool:
