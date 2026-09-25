@@ -766,3 +766,170 @@ def adarga(ctx, width=0.5, height=0.62):
     )
     bind_rigid(obj, "LowerArm.L")
     return [obj]
+
+
+# --- Lot EP5: standard bearers and musicians ----------------------------------------------
+
+# Pole of the standard (virtual bone `Prop`): total length and length below the upper
+# (right) hand. The cloth itself is drawn by Godot at the tip of the pole (`pole_top` of the
+# manifest), following the baked `Prop` matrix.
+STANDARD_LENGTH = 3.8
+STANDARD_BELOW = 1.2
+STANDARD_MOUNTED_LENGTH = 4.0
+STANDARD_MOUNTED_BELOW = 1.1
+# Drum (tabor) centre relative to the rest head of the `Hips` bone (world axes): at the
+# waist, in front and a little to the left; radius and depth of the shell.
+DRUM_OFFSET = Vector((0.07, -0.27, 0.08))
+DRUM_AXIS = Vector((0.0, -0.3, 1.0)).normalized()
+DRUM_RADIUS = 0.16
+DRUM_DEPTH = 0.13
+# Busine (long straight trumpet): mouthpiece behind the fist, bell ahead (prop frame).
+HORN_BACK = 0.2
+HORN_FRONT = 1.0
+
+
+def standard_top(length=STANDARD_LENGTH, below=STANDARD_BELOW):
+    """Distance along the prop axis from the fist to the tip of the pole (cloth anchor)."""
+    return length - below
+
+
+def standard_pole(ctx, length=STANDARD_LENGTH, below=STANDARD_BELOW):
+    """Standard pole: ash shaft with an iron ferrule and a small leaf-shaped finial."""
+    fr = prop_frame(ctx)
+    bm = bmesh.new()
+    n = ctx.seg(6, 4, 3)
+    top = standard_top(length, below)
+    tube(bm, _at(fr, (0, -below, 0)), _at(fr, (0, top, 0)), 0.022, 0.017, n, 0)
+    if ctx.level < 2:
+        tube(
+            bm, _at(fr, (0, -below, 0)), _at(fr, (0, -below + 0.06, 0)), 0.026, 0.024, n, 1
+        )
+        tube(bm, _at(fr, (0, top - 0.03, 0)), _at(fr, (0, top + 0.03, 0)), 0.026, 0.026, n, 1)
+    tip_n = max(n - 1, 3)
+    tube(bm, _at(fr, (0, top, 0)), _at(fr, (0, top + 0.08, 0)), 0.018, 0.034, tip_n, 1, caps=False)
+    tube(
+        bm,
+        _at(fr, (0, top + 0.08, 0)),
+        _at(fr, (0, top + 0.24, 0)),
+        0.034,
+        0.002,
+        tip_n,
+        1,
+        caps=False,
+    )
+    finish(bm)
+    obj = to_object(
+        "standard_pole",
+        bm,
+        [ctx.material(C_WOOD, WOOD), ctx.material(C_PLATE, (0.35, 0.35, 0.36))],
+    )
+    bind_rigid(obj, "Prop")
+    return [obj]
+
+
+def tabor(ctx):
+    """Tabor: shallow drum hung at the waist from a baldric, heads of pale hide."""
+    from battle_skinned_equipment import cap
+
+    centre = ctx.head("Hips") + DRUM_OFFSET
+    bm = bmesh.new()
+    n = ctx.seg(12, 8, 6)
+    a = centre - DRUM_AXIS * DRUM_DEPTH * 0.5
+    b = centre + DRUM_AXIS * DRUM_DEPTH * 0.5
+    ring_a, ring_b = tube(bm, a, b, DRUM_RADIUS, DRUM_RADIUS, n, 0, caps=False)
+    cap(bm, ring_a, 1, flip=False)
+    cap(bm, ring_b, 1, flip=True)
+    if ctx.level < 2:
+        r = DRUM_RADIUS + 0.008
+        tube(bm, a, a + DRUM_AXIS * 0.02, r, r, n, 2, caps=False)
+        tube(bm, b - DRUM_AXIS * 0.02, b, r, r, n, 2, caps=False)
+    if ctx.level == 0:
+        shoulder = ctx.head("Shoulder.R") + Vector((0.0, -0.1, 0.1))
+        tube(bm, shoulder, centre + Vector((-0.12, 0.05, 0.1)), 0.012, 0.012, 3, 3)
+    finish(bm)
+    obj = to_object(
+        "tabor",
+        bm,
+        [
+            ctx.material(C_LIVERY, (1.0, 1.0, 1.0)),
+            ctx.material(C_EXACT, (0.60, 0.52, 0.38)),
+            ctx.material(C_WOOD, WOOD),
+            ctx.material(C_LEATHER, LEATHER),
+        ],
+    )
+    bind_by(obj, lambda p: {"Hips": 0.55, "Abdomen": 0.45})
+    return [obj]
+
+
+def drum_sticks(ctx, length=0.3):
+    """Two drumsticks, one in each fist (along the fist's forward axis at rest)."""
+    out = []
+    for side in ("R", "L"):
+        c, along, _up, _out = grip(ctx, side)
+        bm = bmesh.new()
+        n = ctx.seg(5, 3, 3)
+        tube(bm, c - along * 0.06, c + along * length, 0.011, 0.008, n, 0)
+        if ctx.level < 2:
+            tube(bm, c + along * length, c + along * (length + 0.035), 0.018, 0.012, n, 0)
+        finish(bm)
+        obj = to_object(f"drumstick_{side}", bm, [ctx.material(C_WOOD, WOOD_LIGHT)])
+        bind_rigid(obj, f"Wrist.{side}")
+        out.append(obj)
+    return out
+
+
+def busine(ctx):
+    """Busine: long straight brass trumpet on `Prop`, a small banner of the arms under it."""
+    fr = prop_frame(ctx)
+    bm = bmesh.new()
+    n = ctx.seg(7, 4, 3)
+    tube(bm, _at(fr, (0, -HORN_BACK, 0)), _at(fr, (0, -HORN_BACK + 0.03, 0)), 0.014, 0.009, n, 0)
+    tube(
+        bm,
+        _at(fr, (0, -HORN_BACK + 0.03, 0)),
+        _at(fr, (0, HORN_FRONT - 0.22, 0)),
+        0.008,
+        0.011,
+        n,
+        0,
+        caps=False,
+    )
+    tube(
+        bm,
+        _at(fr, (0, HORN_FRONT - 0.22, 0)),
+        _at(fr, (0, HORN_FRONT, 0)),
+        0.011,
+        0.075,
+        n + 3,
+        0,
+        caps=False,
+    )
+    if ctx.level < 2:
+        for k in (0.15, 0.45):
+            tube(bm, _at(fr, (0, k, 0)), _at(fr, (0, k + 0.04, 0)), 0.016, 0.016, n, 0)
+    panel = []
+    top_a = _at(fr, (0, 0.28, -0.012))
+    if ctx.level < 2:
+        _o, x, y, z = fr
+        top_b = _at(fr, (0, 0.62, -0.012))
+        quad = [top_a, top_b, top_b - z * 0.3, top_a - z * 0.3]
+        for flip in (False, True):
+            verts = [bm.verts.new(p + x * (0.002 if flip else 0.0)) for p in quad]
+            face = bm.faces.new(verts[::-1] if flip else verts)
+            face.material_index = 1
+            panel.append(face)
+    finish(bm)
+    if panel:
+        _o, x, y, z = fr
+        uv = bm.loops.layers.uv.new("UVMap")
+        for face in panel:
+            for loop in face.loops:
+                rel = loop.vert.co - top_a
+                loop[uv].uv = (0.15 + 0.7 * rel.dot(y) / 0.34, 0.1 + 0.8 * -rel.dot(z) / 0.3)
+    obj = to_object(
+        "busine",
+        bm,
+        [ctx.material(C_PLATE, (0.62, 0.45, 0.16)), ctx.material(C_ARMS, (1, 1, 1))],
+    )
+    bind_rigid(obj, "Prop")
+    return [obj]
