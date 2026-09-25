@@ -16,8 +16,15 @@ Mesure R2b, graines 0-63 : plaine 113/128, bocage 89/128, collines 98/128, monta
 - [x] Attaquant plus haut qui attend (150 s au plus).
 - [x] Tests `tests/r4.rs` (9, vérifiés en retirant chaque fonction) ; surveys `tests/r4_survey.rs`.
 - [x] ADR 0046 (brouillon, chiffres à reporter).
-- [x] Mesures finales (reportées dans l'ADR 0046), fusion de main (c47a54ce).
-- [ ] fmt/clippy/test après fusion, build.sh + smoke.
+- [x] Mesures finales (reportées dans l'ADR 0046), fusion de main (c47a54ce puis 848119b5).
+- [x] Après fusion : `cargo fmt --check`, `clippy --all-targets -D warnings`, `cargo test --release`
+  verts ; `core/build.sh` OK ; test Python du schéma vert.
+- Smoke : avec main c47a54ce, 17 « smoke OK » dont bataille, déploiement et siège ; seuls échecs
+  « music playlist too short » (lot musique cb1b4416, connu sur main). Avec main 848119b5, le smoke
+  plante à l'étape campagne (« Message queue out of memory », code 138, 3 OK) : régression connue de
+  main (signalée dans 848119b5, présente sans R3 ni R4), les étapes de bataille ne sont pas atteintes.
+
+## État : terminé (non fusionné dans main)
 
 ## Mesures
 Voir ADR 0046 § Mesures. R2b 0-63 : 114/88/102/97 = 401/512 (référence 382). Contre-pente : pertes au
