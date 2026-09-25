@@ -12,14 +12,14 @@ Branche : `b9a-fiches` (partie de `integration/historien`).
 | 3 | `cdx_carrare` | écrite (ligue, paix de Venise ; liens fac_venice, fac_verona, chr_mastino) |
 | 4 | `cdx_mastino_ii_della_scala` | écrite (entité chr_mastino_ii_della_scala) |
 | 5 | `cdx_azzone_visconti` | écrite (entité chr_azzone_visconti ; lien fac_milan) |
-| 6 | `cdx_taddeo_pepoli` | à faire |
-| 7 | `cdx_savoie_achaie` | à faire |
-| 8 | `cdx_conquete_de_la_sardaigne` | à faire |
+| 6 | `cdx_taddeo_pepoli` | écrite (entité prov_bologna) |
+| 7 | `cdx_savoie_achaie` | écrite (entité prov_piemont ; description corrigée : Suse au comte) |
+| 8 | `cdx_conquete_de_la_sardaigne` | écrite (entité prov_sardegna) |
 | — | Vérification Breteuil / Romorantin (fiches jeu) | à faire |
 | — | Rapport audit § 10 | à faire |
 
 ## Prochaine étape
 
-Écrire 6, 7, 8 ; vérifier Breteuil et Romorantin ; mettre à jour l'audit ; validateur + `pytest tools/tests/test_codex.py`.
+Vérifier Breteuil et Romorantin ; mettre à jour l'audit ; validateur + `pytest tools/tests/test_codex.py`.
 
 Pas de build (disque plein) : seul le validateur Python.
