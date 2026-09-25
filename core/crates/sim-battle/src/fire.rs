@@ -149,6 +149,14 @@ pub struct HeatRules {
     pub radius_m: f64,
     pub loss_per_s: f64,
     pub morale_per_s: f64,
+    /// BR3b: share of the heat that reaches a regiment on the wall walk
+    /// (raised above the street, behind the parapet).
+    #[serde(default = "full_heat")]
+    pub wall_walk_factor: f64,
+}
+
+fn full_heat() -> f64 {
+    1.0
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

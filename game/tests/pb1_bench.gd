@@ -20,6 +20,7 @@ var _result: Dictionary = {}
 ## `--trace` : temps cumulé par écouteur de `chunk_surface_changed` (µs) et nombre d'appels.
 var _trace: Dictionary = {}
 var _trace_frame: Dictionary = {}
+var _last_trace_s := -1
 
 
 func _init() -> void:
@@ -59,7 +60,9 @@ func _run() -> void:
 			vegetation.max_concurrent_jobs = int(arg.trim_prefix("--veg-jobs="))
 	if "--trace" in OS.get_cmdline_user_args():
 		_wrap_listeners(terrain)
-	_result["first_settle_ms"] = await _settle(settled) + (Time.get_ticks_msec() - t_load)
+	# Temps depuis le début du chargement jusqu'à la vue initiale complète (relief et végétation).
+	await _settle(settled)
+	_result["first_settle_ms"] = Time.get_ticks_msec() - t_load
 	var surface_y := data.surface_world_at(PARIS.x, PARIS.y)
 	var per_view: Dictionary = {}
 	for d in views:
@@ -126,6 +129,11 @@ func _settle_measured(condition: Callable) -> Dictionary:
 		var frame_ms := (now - last) / 1000.0
 		worst = maxf(worst, frame_ms)
 		last = now
+		if "--trace" in OS.get_cmdline_user_args() and Time.get_ticks_msec() / 1000 != _last_trace_s:
+			_last_trace_s = Time.get_ticks_msec() / 1000
+			var map_now := root.get_child(-1)
+			print("PB1_T %d ms veg_pending=%d fine_ready=%s frame=%.1f" % [Time.get_ticks_msec() - t0,
+				(map_now.get_node("Vegetation") as Vegetation).pending_jobs(), (map_now.get("terrain") as TerrainBuilder).fine_ready(), frame_ms])
 		if frame_ms > 60.0 and root.get_child(-1).get("_PT") != null:
 			var map_times: Dictionary = {}
 			var pt: Dictionary = root.get_child(-1).get("_PT")

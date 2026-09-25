@@ -241,3 +241,17 @@ Détail dans `docs/godot-map.md` (« Caméra rapprochée et exagération vertica
 - Quadtree : pas de réglage nécessaire pour la vue rasante (≈ 165 nœuds dans la descente, budget 700 jamais
   atteint, `px_scale` 1) ; si PF1 abaisse le budget, appliquer un multiplicateur en vue rasante plutôt que
   d'écraser ses préréglages.
+
+## Addendum (lot ZG6, 2026-09-25) : villes ordinaires à l'échelle réelle
+
+- Emprises calculées hors ligne (`cent-ans geo towns` → `data/map/towns_1340.json`, règles sourcées dans
+  `data/rules/town_footprint.json`), plan procédural et géométrie dans le `WorkerThreadPool`, fil principal
+  limité à la création des nœuds sous `FrameBudget` (ADR 0051). Détail dans `docs/godot-map.md`.
+- Écart : les hauteurs des villes sont en **mètres** (base par instance, × `campaign_vertical_scale` dans le
+  shader) plutôt que recalées au CPU : l'exagération dynamique ZG4 ne coûte rien.
+- Écart : la couche est active dès le palier vallée (poids ≥ 0,5), pas seulement au palier site ; tant
+  qu'elle l'est, les maquettes « à la loupe » des colonies ordinaires sont masquées (une vraie ville de
+  1340 n'est qu'une tache à 10 km : pas de maquettes géantes à l'horizon). Les villes emblématiques gardent
+  leur rendu (lot VH), exclues via `LandmarkLibrary`.
+- Finage : rayon exposé au parcellaire ZG5b par un tableau d'uniformes (`fp_towns`, 16 villes proches),
+  pas par le masque des terroirs (1 px = 2,9 km, trop grossier pour un finage de 1-4 km).
