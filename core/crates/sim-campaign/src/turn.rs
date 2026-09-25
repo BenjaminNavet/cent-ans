@@ -130,6 +130,9 @@ impl CampaignState {
         // 8b. Diplomacy (vassal tribute after the economy, expiries,
         // rebellions) and religion (favour, Schism, heresy) before the
         // population reads their unrest (M5).
+        // DP2: armies camping on the lands of a faction at peace without
+        // right of passage (incident, casus belli), before the diplomacy.
+        crate::passage::resolve_trespass(self, data, events);
         diplomacy::resolve_diplomacy(self, data, events);
         religion::resolve_religion(self, data, events);
         // 8b'. Agents: upkeep, counter-espionage, stale intelligence (C6).

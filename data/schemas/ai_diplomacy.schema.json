@@ -84,6 +84,24 @@
         "min_war_turns": {"type": "integer", "minimum": 0, "description": "Saisons de guerre avant que l'IA ne propose un traité de paix (sauf si elle est acculée)."}
       },
       "additionalProperties": false
+    },
+    "passage": {
+      "type": "object",
+      "description": "Lot DP2 (ADR 0031) : droit de passage. Une armée qui finit la saison sur les terres d'une faction en paix, sans accès militaire, crée un incident (malus d'attitude croissant, casus belli pour la victime). Sans cette section (ou avec enabled faux), l'intrusion est ignorée.",
+      "properties": {
+        "enabled": {"type": "boolean", "description": "Active les incidents d'intrusion."},
+        "base_penalty": {"type": "integer", "minimum": 0, "description": "Malus d'attitude de la première saison d'intrusion."},
+        "per_season_penalty": {"type": "integer", "minimum": 0, "description": "Malus ajouté par saison consécutive d'intrusion."},
+        "max_penalty": {"type": "integer", "minimum": 0, "description": "Malus maximal d'un incident."},
+        "memory_turns": {"type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles la victime s'en souvient après la dernière intrusion."},
+        "casus_belli_seasons": {"type": "integer", "minimum": 1, "description": "Saisons consécutives d'intrusion qui donnent un casus belli à la victime."},
+        "truce_grace_seasons": {"type": "integer", "minimum": 0, "description": "Saisons tolérées pendant une trêve (armées qui se retirent après une paix)."},
+        "ai_violate_aggression": {"type": "integer", "minimum": 0, "maximum": 101, "description": "IA en guerre : agressivité (0-100) à partir de laquelle elle traverse les terres neutres."},
+        "ai_violate_attitude": {"type": "integer", "description": "IA en guerre : attitude envers le propriétaire à partir de laquelle (ou en dessous) elle passe outre."},
+        "ai_violate_power_ratio": {"type": "number", "minimum": 0, "description": "IA en guerre : rapport de puissance sur le propriétaire à partir duquel elle passe outre."},
+        "tension_attitude": {"type": "integer", "description": "Carte diplomatique : attitude (ou en dessous) qui fait passer un voisin en paix en « tension »."}
+      },
+      "additionalProperties": false
     }
   },
   "required": ["menacing_neighbour", "war", "join_war", "peace"],
