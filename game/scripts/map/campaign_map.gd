@@ -60,12 +60,12 @@ var _last_pick_target := ""
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
-var unrest_mode: bool = false
 var trade_mode: bool = false  # C5 : couche des routes commerciales
 var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
+var map_modes: MapModeController = null  # MF1 : filtres de la carte
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
@@ -164,6 +164,10 @@ func _ready() -> void:
 	diplomacy = DiplomacyController.new()
 	add_child(diplomacy)
 	diplomacy.setup(self)
+	map_modes = MapModeController.new()  # MF1
+	map_modes.name = "MapModeController"
+	add_child(map_modes)
+	map_modes.setup(self)
 	sieges = SiegeController.new()
 	add_child(sieges)
 	sieges.setup(self)
@@ -340,8 +344,8 @@ func refresh_all() -> void:
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
-	if unrest_mode:
-		_refresh_unrest_colors()
+	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
+		map_modes.refresh()
 	if selected_army != "":
 		if armies.has_army(selected_army):
 			select_army(selected_army)
@@ -584,6 +588,18 @@ func province_info(index: int) -> Dictionary:
 	return province
 
 
+## MF1 : nom de la province survolée suivi de sa valeur dans le filtre de carte actif.
+func _with_mode_value(province: Dictionary) -> Dictionary:
+	if map_modes == null or not map_modes.active() or province.is_empty():
+		return province
+	var value := map_modes.hover_text(str(province.get("id", "")))
+	if value == "":
+		return province
+	var named := province.duplicate()
+	named["display_name"] = "%s — %s" % [province.get("display_name", province.get("name", "")), value]
+	return named
+
+
 func _on_province_hovered(index: int) -> void:
 	hovered_index = index
 	terrain.set_highlight(hovered_index, selected_index)
@@ -591,7 +607,7 @@ func _on_province_hovered(index: int) -> void:
 	if movement_ctl != null and movement_ctl.active():
 		return  # M4 : l'aperçu suit le curseur (ArmyMovementController)
 	if selected_army == "" or index == 0 or sim == null:
-		ui.set_hovered(province)
+		ui.set_hovered(_with_mode_value(province))
 		if selected_army != "":
 			_apply_reachable_mask(PackedInt32Array())
 			path_preview.hide_path()
@@ -859,20 +875,6 @@ func _stage_screenshot_tech() -> void:
 	refresh_all()
 
 
-## Mode d'affichage « mécontentement » (touche M) : teinte les provinces vert → rouge par
-## mécontentement moyen pondéré au lieu de la couleur de faction. Sans `get_province_city`,
-## le mode ne fait rien (bascule ignorée, notification).
-func _toggle_unrest_mode() -> void:
-	if not _city_available():
-		ui.show_toast("Données de mécontentement indisponibles avec cette simulation.", true)
-		return
-	unrest_mode = not unrest_mode
-	if unrest_mode:
-		_refresh_unrest_colors()
-	else:
-		_refresh_owner_colors()
-
-
 ## Lot C5 : bascule la couche des routes commerciales (touche `map_toggle_trade` ou bouton de
 ## la barre de filtres).
 func _toggle_trade_layer() -> void:
@@ -929,27 +931,6 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 	if security < 0.99:
 		text += " — menacée"
 	return text
-
-
-## Couleur par province = vert (0 mécontentement) → rouge (100), moyenne pondérée par classe.
-func _refresh_unrest_colors() -> void:
-	var colors := PackedColorArray()
-	colors.resize(map_data.province_count)
-	for index in range(1, map_data.province_count + 1):
-		var id := str(map_data.get_province(index).get("id", ""))
-		var city: Dictionary = sim.call("get_province_city", id) if id != "" else {}
-		var classes: Dictionary = city.get("classes", {})
-		var total := 0.0
-		var weighted := 0.0
-		for class_id in classes:
-			var count := float(classes[class_id].get("count", 0))
-			total += count
-			weighted += count * float(classes[class_id].get("unrest", 0))
-		var ratio := clampf(weighted / total, 0.0, 1.0) if total > 0.0 else 0.0
-		var color := Color(0.20, 0.55, 0.20).lerp(Color(0.75, 0.15, 0.10), ratio)
-		color.a = 1.0 if not classes.is_empty() else 0.0
-		colors[index - 1] = color
-	terrain.set_province_colors(colors)
 
 
 ## Marteau sur les provinces avec une construction en cours (`get_province_city`).
@@ -1130,6 +1111,8 @@ func _update_fps_probe() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if diplomacy != null and diplomacy.handle_input(event):
 		return
+	if map_modes != null and map_modes.handle_input(event):  # MF1
+		return
 	if victory != null and victory.handle_input(event):
 		return
 	if help != null and help.handle_input(event):
@@ -1140,8 +1123,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_take_screenshot(path, false)
 	elif event.is_action_pressed("map_toggle_edge_pan"):
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
-	elif event.is_action_pressed("map_toggle_unrest"):
-		_toggle_unrest_mode()
 	elif event.is_action_pressed("map_toggle_trade"):
 		_toggle_trade_layer()
 	elif event.is_action_pressed("map_toggle_court"):
@@ -1236,7 +1217,7 @@ func _parse_cmdline() -> void:
 					diplomacy.panel.stage_example()
 				"diplomacy_map":
 					_focus_capital()
-					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)
+					map_modes.set_mode("diplomacy")
 				"tech":
 					_stage_screenshot_tech()  # M6
 				"chronicle":  # M10
