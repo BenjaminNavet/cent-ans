@@ -261,6 +261,36 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("pyramid")
+def geo_pyramid(
+    levels: str = typer.Option(
+        "1,2,3,4", "--levels", help="Étages à cuire parmi 1-4 (ex. « 1,2 »)"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Réécrit les tuiles déjà présentes dans le cache"
+    ),
+    workers: int = typer.Option(0, "--workers", help="Processus (0 = tous les cœurs)"),
+    limit: int = typer.Option(
+        0, "--limit", help="Au plus N blocs par palier (essais ; 0 = tout)"
+    ),
+) -> None:
+    """Pyramide de relief E1-E4 (GLO-90 puis GLO-30 corrigé) et manifeste (ADR 0036)."""
+    from cent_ans_tools.geo import pyramid as geo_pyramid_step
+
+    wanted = tuple(sorted({int(part) for part in levels.split(",") if part.strip()}))
+    if not wanted or any(level not in (1, 2, 3, 4) for level in wanted):
+        raise typer.BadParameter("--levels : étages 1 à 4")
+    result = geo_pyramid_step.build(
+        levels=wanted, force=force, workers=workers or None, limit=limit or None
+    )
+    counts = ", ".join(f"E{k} {n}" for k, n in sorted(result.per_level.items()))
+    console.print(
+        f"{result.tiles_written} tuiles écrites ({counts or 'aucune'}), "
+        f"{result.total_bytes / 1e6:.1f} Mo, {result.skipped_units} blocs déjà faits "
+        f"({result.seconds:.0f} s)"
+    )
+
+
 @geo_app.command("landcover")
 def geo_landcover() -> None:
     """Occupation du sol vers 1340 : splat.png (forêts KK10 + massifs nommés), wetlands.png, forest_kind.png."""
