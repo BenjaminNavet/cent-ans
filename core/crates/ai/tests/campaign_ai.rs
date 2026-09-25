@@ -77,7 +77,7 @@ fn a_threatened_province_is_defended() {
         .unwrap();
     let ponthieu = ProvinceId::new("prov_ponthieu").unwrap();
     let city = state.province_city_id(&ponthieu).unwrap().clone();
-    state.armies.get_mut(&english).unwrap().location = city;
+    state.armies.get_mut(&english).unwrap().position = sim_campaign::ArmyPosition::Settlement(city);
     let orders = ai::plan_turn(&state, &data, &france);
     let near = [
         "prov_picardie",
@@ -86,12 +86,15 @@ fn a_threatened_province_is_defended() {
         "prov_normandie",
     ];
     let moves_towards_threat = orders.iter().any(|o| match o {
-        Order::MoveArmy { path, .. } => path.last().is_some_and(|p| match p {
+        Order::MoveArmy {
+            target: sim_campaign::MoveOrderTarget::Place(p),
+            ..
+        } => match p {
             Place::Settlement(s) => state
                 .settlement_province(s)
                 .is_some_and(|p| near.contains(&p.as_str())),
             Place::Province(p) => near.contains(&p.as_str()),
-        }),
+        },
         _ => false,
     });
     let stays = orders.iter().all(|o| !matches!(o, Order::MoveArmy { .. }));
@@ -147,7 +150,7 @@ fn governors_and_generals_are_appointed() {
         .all(|a| {
             a.general.is_some()
                 || state.characters.values().all(|c| {
-                    c.location.as_ref() != state.settlement_province(&a.location)
+                    c.location.as_ref() != a.settlement().and_then(|s| state.settlement_province(s))
                         || c.faction != france
                         || c.army.is_some()
                         || c.governor_of.is_some()

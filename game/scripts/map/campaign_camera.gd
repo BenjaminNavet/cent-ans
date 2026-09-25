@@ -19,6 +19,10 @@ extends Node3D
 @export var edge_pan_enabled: bool = true
 @export var edge_margin_px: float = 14.0
 @export var damping: float = 10.0
+## Lot L1 : zoom plus proche au-dessus des villes emblématiques (Paris) ; `close_zones` liste
+## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
+@export var close_min_distance: float = 7.0
+var close_zones: PackedVector3Array = PackedVector3Array()
 
 var focus: Vector3 = Vector3.ZERO
 var distance: float = 500.0
@@ -52,16 +56,24 @@ func snap() -> void:
 func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
 	target_focus = point
 	if new_distance > 0.0:
-		target_distance = clampf(new_distance, min_distance, max_distance)
+		target_distance = clampf(new_distance, min_distance_at(point), max_distance)
+
+
+## Distance minimale au-dessus d'un point : plus courte dans une ville emblématique.
+func min_distance_at(point: Vector3) -> float:
+	for zone in close_zones:
+		if Vector2(point.x, point.z).distance_to(Vector2(zone.x, zone.y)) <= zone.z:
+			return minf(close_min_distance, min_distance)
+	return min_distance
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 - zoom_step), min_distance, max_distance)
+			target_distance = clampf(target_distance * (1.0 - zoom_step), min_distance_at(target_focus), max_distance)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 + zoom_step), min_distance, max_distance)
+			target_distance = clampf(target_distance * (1.0 + zoom_step), min_distance_at(target_focus), max_distance)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = mb.pressed
 	elif event is InputEventMouseMotion and _dragging:
@@ -81,6 +93,8 @@ func _process(delta: float) -> void:
 		_pan(pan.normalized() * pan_speed * distance * delta)
 	var rotate := Input.get_action_strength("map_rotate_right") - Input.get_action_strength("map_rotate_left")
 	target_yaw += deg_to_rad(rotate_speed_deg) * rotate * delta
+	if not close_zones.is_empty():
+		target_distance = maxf(target_distance, min_distance_at(target_focus))
 
 	var t := 1.0 - exp(-damping * delta)
 	focus = focus.lerp(target_focus, t)

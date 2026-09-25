@@ -1,30 +1,30 @@
-//! Settlement graph, pathfinding and the movement phase of `end_turn`
-//! (lot C4, spec § 4.4).
+//! Settlement graph, movement allowance, field battles and the retreat of
+//! the beaten.
 //!
-//! Armies stand on settlements and walk along the edges of
-//! `GameData::movement_graph` (the C3 graph, or the fallback graph of
-//! `data_model::movement_graph`). Costs and movement points are in
-//! kilometres of plain; a season grants `Season::movement_steps` ×
-//! `MovementRules::points_per_step` points, so that an army covers about the
-//! same distance per season as in v1 (3 province steps). An edge dearer than
-//! an army's full allowance costs exactly that allowance (one whole season).
+//! Lot M2 (`docs/design/2026-09-24-mouvement-libre.md`): armies march
+//! freely on the navigation grid (`march.rs`, `navigation.rs`). The
+//! settlement graph (`GameData::movement_graph`, lot C3/C4) remains the
+//! skeleton of the AI's strategic planning, of the agents' walks and of the
+//! sea crossings (port to port). Allowances are computed here in
+//! kilometres of plain (`season_points` of C7a) and converted to grid
+//! costs by `CampaignState::army_grid_allowance`.
 //!
-//! Entering a settlement held by an enemy stops the march (siege, or the
-//! capture of an unfortified village); entering a settlement holding an
-//! enemy army triggers a battle.
+//! Battles are fought at once when an army attacks another within
+//! `engage_radius_km`; the loser falls back on the grid (§ 3.3).
 
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, SettlementKind, Terrain};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId, Terrain};
 
 use crate::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
 use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
-use crate::orders::OrderError;
+use crate::march::{km_to_grid_points, px_per_km};
+use crate::navigation::{self, Cell};
 use crate::research;
 use crate::skills;
-use crate::state::{Army, ArmyId, CampaignState};
+use crate::state::{Army, ArmyId, ArmyPosition, CampaignState};
 
 /// Province steps of a port-to-port crossing (v1 value; the fallback graph
 /// reads `MovementRules::sea_crossing_steps`).
@@ -78,28 +78,6 @@ pub fn edges(data: &GameData, from: &SettlementId) -> Vec<(SettlementId, u32)> {
         .iter()
         .map(|edge| (edge.to.clone(), (edge.cost.round() as u32).max(1)))
         .collect()
-}
-
-/// Checks that `path` is a chain of connected settlements starting next to `from`.
-pub(crate) fn validate_path(
-    data: &GameData,
-    from: &SettlementId,
-    path: &[SettlementId],
-) -> Result<(), OrderError> {
-    let mut current = from;
-    for next in path {
-        if !data.settlements.contains_key(next) {
-            return Err(OrderError::UnknownSettlement(next.clone()));
-        }
-        if edge_cost(data, current, next).is_none() {
-            return Err(OrderError::NotAdjacent {
-                from: current.to_string(),
-                to: next.to_string(),
-            });
-        }
-        current = next;
-    }
-    Ok(())
 }
 
 /// Dijkstra result: cost to reach each settlement and the settlement before it.
@@ -181,160 +159,9 @@ pub fn path_to(
     Some(path)
 }
 
-impl CampaignState {
-    /// Settlements `army` can reach this turn with its remaining movement points.
-    pub fn reachable(&self, data: &GameData, army: &ArmyId) -> BTreeMap<SettlementId, u32> {
-        let Some(army) = self.armies.get(army) else {
-            return BTreeMap::new();
-        };
-        let cap = self.army_movement_allowance(data, army);
-        dijkstra(
-            self,
-            data,
-            &army.faction,
-            &army.location,
-            Some(army.movement_points),
-            Some(cap),
-        )
-        .into_iter()
-        .filter(|(id, _)| id != &army.location)
-        .map(|(id, reach)| (id, reach.cost))
-        .collect()
-    }
-
-    /// Provinces `army` can reach this turn: the cheapest reachable
-    /// settlement of each province other than the army's own.
-    pub fn reachable_provinces(&self, data: &GameData, army: &ArmyId) -> BTreeMap<ProvinceId, u32> {
-        let own = self
-            .armies
-            .get(army)
-            .and_then(|a| self.settlement_province(&a.location))
-            .cloned();
-        let mut result: BTreeMap<ProvinceId, u32> = BTreeMap::new();
-        for (settlement, cost) in self.reachable(data, army) {
-            let Some(province) = self.settlement_province(&settlement) else {
-                continue;
-            };
-            if Some(province) == own.as_ref() {
-                continue;
-            }
-            let entry = result.entry(province.clone()).or_insert(cost);
-            *entry = (*entry).min(cost);
-        }
-        result
-    }
-
-    /// Cheapest path for `army` to `target` (may span several turns).
-    pub fn find_path(
-        &self,
-        data: &GameData,
-        army: &ArmyId,
-        target: &SettlementId,
-    ) -> Option<Vec<SettlementId>> {
-        let army = self.armies.get(army)?;
-        if &army.location == target {
-            return Some(Vec::new());
-        }
-        let cap = self.army_movement_allowance(data, army);
-        let table = dijkstra(self, data, &army.faction, &army.location, None, Some(cap));
-        path_to(&table, target)
-    }
-
-    /// Cheapest path for `army` to the city of `province` (empty when the
-    /// army already stands on it).
-    pub fn find_path_to_province(
-        &self,
-        data: &GameData,
-        army: &ArmyId,
-        province: &ProvinceId,
-    ) -> Option<Vec<SettlementId>> {
-        let city = self.province_city_id(province)?.clone();
-        self.find_path(data, army, &city)
-    }
-}
-
-/// Phase 2 of `end_turn`: every army advances along its path, one settlement
-/// per step, all armies interleaved. Entering a settlement with a hostile
-/// army triggers a battle and stops both; entering a settlement held by an
-/// enemy stops the march (an unfortified village is taken at once).
-pub(crate) fn resolve_movement(
-    state: &mut CampaignState,
-    data: &GameData,
-    events: &mut Vec<GameEvent>,
-) {
-    let allowances: BTreeMap<ArmyId, u32> = state
-        .armies
-        .iter()
-        .map(|(id, army)| (id.clone(), state.army_movement_allowance(data, army)))
-        .collect();
-    loop {
-        let mut progressed = false;
-        let ids: Vec<ArmyId> = state.armies.keys().cloned().collect();
-        for id in ids {
-            let Some(army) = state.armies.get(&id) else {
-                continue;
-            };
-            let Some(next) = army.path.first().cloned() else {
-                continue;
-            };
-            let from = army.location.clone();
-            let faction = army.faction.clone();
-            let Some(cost) = edge_cost(data, &from, &next) else {
-                state.armies.get_mut(&id).expect("exists").path.clear();
-                continue;
-            };
-            let cost = allowances
-                .get(&id)
-                .map_or(cost, |full| cost.min((*full).max(1)));
-            if cost > army.movement_points {
-                continue;
-            }
-            {
-                let army = state.armies.get_mut(&id).expect("exists");
-                army.location = next.clone();
-                army.movement_points -= cost;
-                army.path.remove(0);
-            }
-            move_general(state, &id);
-            progressed = true;
-            let next_province = state.settlement_province(&next).cloned();
-            if is_sea_crossing(data, &from, &next)
-                && next_province
-                    .as_ref()
-                    .is_some_and(|p| state.is_hostile_territory(&faction, p))
-            {
-                land_on_hostile_shore(state, &id, next_province.as_ref(), events);
-            }
-
-            let hostiles = state.hostile_armies_at(&faction, &next);
-            if let Some(defender) = strongest(state, &hostiles) {
-                fight(state, data, &id, &defender, &from, events);
-                if let Some(army) = state.armies.get_mut(&id) {
-                    army.path.clear();
-                }
-                if let Some(army) = state.armies.get_mut(&defender) {
-                    army.path.clear();
-                }
-                continue;
-            }
-            if state.is_hostile_settlement(&faction, &next) {
-                if let Some(army) = state.armies.get_mut(&id) {
-                    army.path.clear();
-                }
-                if state.settlement_kind(&next) == SettlementKind::Village {
-                    crate::siege::enter_village(state, data, &id, events);
-                }
-            }
-        }
-        if !progressed {
-            break;
-        }
-    }
-}
-
 /// A landing on a hostile shore (M10 balance): the army is spent for the turn
 /// and pays in men and morale for the disembarkation.
-fn land_on_hostile_shore(
+pub(crate) fn land_on_hostile_shore(
     state: &mut CampaignState,
     army_id: &ArmyId,
     province: Option<&ProvinceId>,
@@ -349,7 +176,7 @@ fn land_on_hostile_shore(
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };
-    army.movement_points = 0;
+    army.movement_left = 0;
     let mut lost = 0;
     for unit in &mut army.units {
         let casualties = (unit.strength * percent)
@@ -372,17 +199,18 @@ fn land_on_hostile_shore(
     events.push(event);
 }
 
-fn strongest(state: &CampaignState, ids: &[ArmyId]) -> Option<ArmyId> {
+pub(crate) fn strongest(state: &CampaignState, ids: &[ArmyId]) -> Option<ArmyId> {
     ids.iter()
         .max_by_key(|id| (state.armies[*id].total_strength(), Reverse((*id).clone())))
         .cloned()
 }
 
-pub(crate) fn move_general(state: &mut CampaignState, army_id: &ArmyId) {
+/// Keeps the province of an army's general in step with the army.
+pub(crate) fn move_general(state: &mut CampaignState, data: &GameData, army_id: &ArmyId) {
     let Some(army) = state.armies.get(army_id) else {
         return;
     };
-    let Some(location) = state.settlement_province(&army.location).cloned() else {
+    let Some(location) = state.army_province(data, army) else {
         return;
     };
     if let Some(general) = army.general.clone() {
@@ -505,43 +333,75 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
     }
 }
 
-/// A field battle between two armies standing on the same settlement: deferred
+/// A field battle between two armies within reach of each other: deferred
 /// to the player when interactive battles are on and the player takes part
-/// (M7, see `battle_request`), auto-resolved otherwise.
+/// (M7, see `battle_request`), auto-resolved otherwise. Neither side moves
+/// again this turn (lot M2).
 pub(crate) fn fight(
     state: &mut CampaignState,
     data: &GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
-    attacker_origin: &SettlementId,
     events: &mut Vec<GameEvent>,
 ) {
-    if crate::battle_request::defer_player_battle(
-        state,
-        data,
-        attacker_id,
-        defender_id,
-        attacker_origin,
-        events,
-    ) {
+    for id in [attacker_id, defender_id] {
+        if let Some(army) = state.armies.get_mut(id) {
+            army.movement_left = 0;
+            army.clear_plan();
+        }
+    }
+    if crate::battle_request::defer_player_battle(state, data, attacker_id, defender_id, events) {
         return;
     }
-    auto_fight(
-        state,
-        data,
-        attacker_id,
-        defender_id,
-        attacker_origin,
-        events,
-    );
+    auto_fight(state, data, attacker_id, defender_id, events);
 }
 
-/// Armies fighting on `lead`'s side where it stands (F1): `lead` first, then
-/// every other army on the same settlement belonging to `lead`'s faction or to an
-/// ally of it, and at war with `enemy` (id order).
-pub fn battle_coalition(state: &CampaignState, lead: &ArmyId, enemy: &FactionId) -> Vec<ArmyId> {
+/// Armies fighting on `lead`'s side (F1): `lead` first, then every other
+/// army of `lead`'s faction or of an ally of it, at war with `enemy`, and
+/// standing in the same settlement or within `engage_radius_km` of `lead`
+/// (lot M2), in id order.
+pub fn battle_coalition(
+    state: &CampaignState,
+    data: &GameData,
+    lead: &ArmyId,
+    enemy: &FactionId,
+) -> Vec<ArmyId> {
     let Some(lead_army) = state.armies.get(lead) else {
         return Vec::new();
+    };
+    let engage = data.free_movement_rules().engage_radius_km;
+    let mut ids = vec![lead.clone()];
+    ids.extend(
+        state
+            .armies
+            .iter()
+            .filter(|(id, army)| {
+                *id != lead
+                    && state.is_allied(&lead_army.faction, &army.faction)
+                    && state.is_at_war(&army.faction, enemy)
+                    && match (army.settlement(), lead_army.settlement()) {
+                        (Some(a), Some(b)) => a == b,
+                        _ => state.army_distance_km(data, army, lead_army) <= engage,
+                    }
+            })
+            .map(|(id, _)| id.clone()),
+    );
+    ids
+}
+
+/// Armies of `lead`'s side stationed in its settlement (sieges, G1):
+/// `lead` first, then the armies of its faction or allies there at war with
+/// `enemy`, in id order.
+pub fn settlement_coalition(
+    state: &CampaignState,
+    lead: &ArmyId,
+    enemy: &FactionId,
+) -> Vec<ArmyId> {
+    let Some(lead_army) = state.armies.get(lead) else {
+        return Vec::new();
+    };
+    let Some(place) = lead_army.settlement() else {
+        return vec![lead.clone()];
     };
     let mut ids = vec![lead.clone()];
     ids.extend(
@@ -550,7 +410,7 @@ pub fn battle_coalition(state: &CampaignState, lead: &ArmyId, enemy: &FactionId)
             .iter()
             .filter(|(id, army)| {
                 *id != lead
-                    && army.location == lead_army.location
+                    && army.is_at(place)
                     && state.is_allied(&lead_army.faction, &army.faction)
                     && state.is_at_war(&army.faction, enemy)
             })
@@ -638,14 +498,13 @@ pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[Army
     side
 }
 
-/// Auto-resolves a field battle between two armies standing on the same
-/// settlement; the allied armies there join either side (F1).
+/// Auto-resolves a field battle between two armies within reach of each
+/// other; the allied armies nearby join either side (F1).
 pub(crate) fn auto_fight(
     state: &mut CampaignState,
     data: &GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
-    attacker_origin: &SettlementId,
     events: &mut Vec<GameEvent>,
 ) {
     let (Some(attacker), Some(defender)) =
@@ -654,8 +513,8 @@ pub(crate) fn auto_fight(
         return;
     };
     let province = state
-        .settlement_province(&attacker.location)
-        .and_then(|p| data.provinces.get(p));
+        .army_province(data, defender)
+        .and_then(|p| data.provinces.get(&p));
     let context = BattleContext {
         defender_terrain_bonus: province.is_some_and(|p| {
             matches!(
@@ -666,20 +525,12 @@ pub(crate) fn auto_fight(
         river_crossing: province.is_some_and(|p| !p.rivers.is_empty()),
         walls: false,
     };
-    let attackers = battle_coalition(state, attacker_id, &defender.faction);
-    let defenders = battle_coalition(state, defender_id, &attacker.faction);
+    let attackers = battle_coalition(state, data, attacker_id, &defender.faction);
+    let defenders = battle_coalition(state, data, defender_id, &attacker.faction);
     let attacker_side = coalition_side(state, data, &attackers);
     let defender_side = coalition_side(state, data, &defenders);
     let result = resolve_auto(&attacker_side, &defender_side, &context, &mut state.rng);
-    apply_battle_result(
-        state,
-        data,
-        &attackers,
-        &defenders,
-        attacker_origin,
-        &result,
-        events,
-    );
+    apply_battle_result(state, data, &attackers, &defenders, &result, events);
 }
 
 /// Splits a coalition's outcome into one outcome per army (F1): each army
@@ -722,7 +573,6 @@ pub(crate) fn apply_battle_result(
     data: &GameData,
     attackers: &[ArmyId],
     defenders: &[ArmyId],
-    attacker_origin: &SettlementId,
     result: &crate::battle_auto::BattleResult,
     events: &mut Vec<GameEvent>,
 ) {
@@ -734,9 +584,10 @@ pub(crate) fn apply_battle_result(
     else {
         return;
     };
-    let Some(province_id) = state.settlement_province(&attacker.location).cloned() else {
+    let Some(province_id) = state.army_province(data, defender) else {
         return;
     };
+    let battlefield = state.army_point(data, defender);
     let province = data.provinces.get(&province_id);
     let attacker_faction = attacker.faction.clone();
     let defender_faction = defender.faction.clone();
@@ -852,101 +703,171 @@ pub(crate) fn apply_battle_result(
         Winner::Defender => attackers,
     };
     for loser_id in losers {
-        // A beaten attacker falls back where it came from, unless an enemy
-        // army now stands there; everyone else follows the C7a rule.
-        let origin = (result.winner == Winner::Defender && loser_id == attacker_id)
-            .then(|| attacker_origin.clone())
-            .filter(|origin| {
-                state.armies.get(loser_id).is_some_and(|army| {
-                    origin != &army.location
-                        && state.hostile_armies_at(&army.faction, origin).is_empty()
-                })
-            });
-        match origin {
-            Some(target) => move_beaten_army(state, loser_id, target),
-            None => retreat_beaten_army(state, data, loser_id, events),
-        }
+        retreat_beaten_army(state, data, loser_id, battlefield, events);
     }
 }
 
-/// How a beaten army leaves the battlefield (lot C7a, `rules.json` § `retreat`).
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// How a beaten army leaves the battlefield (lot C7a rule on the grid, spec
+/// § 3.3).
+#[derive(Debug, Clone, PartialEq)]
 pub enum Retreat {
     /// To a friendly settlement (own or allied) within the friendly radius.
     Friendly(SettlementId),
-    /// To a settlement no enemy holds within the neutral radius, losing
-    /// stragglers.
-    Neutral(SettlementId),
+    /// Back `retreat_fallback_km` away from the victor, losing stragglers
+    /// (map-pixel point).
+    Fallback([f32; 2]),
     /// Nowhere to go: a rout. The survivors rally at the given friendly
     /// settlement (any distance) or disperse (`None`).
     Rout(Option<SettlementId>),
 }
 
-/// Where `army_id`, just beaten where it stands, falls back (pure, lot C7a).
+/// Directions tried for the fallback, in degrees off the line away from the
+/// victor.
+const FALLBACK_ANGLES: [f32; 5] = [0.0, 45.0, -45.0, 90.0, -90.0];
+
+/// Where `army_id`, just beaten at `battlefield` (map pixels), falls back
+/// (pure, lot M2 on the C7a rule):
 ///
-/// 1. The nearest settlement held by the army's faction or an ally, free
-///    of enemy armies, within `friendly_radius_steps`, along a path that
-///    crosses no enemy place (the Dijkstra of the movement phase);
-/// 2. otherwise the nearest settlement no enemy holds, free of enemy
-///    armies, within `neutral_radius_steps` (neutral land);
+/// 1. the nearest settlement held by the army's faction or an ally, free of
+///    enemy armies, within `friendly_radius_steps` × `points_per_step`
+///    kilometres of march on the grid, without crossing an enemy zone of
+///    control (those around the battlefield excepted) nor an enemy place;
+/// 2. otherwise a point `retreat_fallback_km` away from the victor (or
+///    slightly aside), reachable the same way;
 /// 3. otherwise a rout: the survivors rally at the nearest friendly
-///    settlement at any distance, if one can be reached.
+///    settlement of the same land mass, at any distance.
 ///
-/// Ties are broken by settlement id: the result is deterministic.
-pub fn retreat_target(state: &CampaignState, data: &GameData, army_id: &ArmyId) -> Option<Retreat> {
+/// Ties are broken by cell and settlement id: the result is deterministic.
+pub fn retreat_target(
+    state: &CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    battlefield: [f32; 2],
+) -> Option<Retreat> {
     let army = state.armies.get(army_id)?;
     let rules = data.retreat_rules();
-    let step = points_per_step(data);
-    let table = dijkstra(state, data, &army.faction, &army.location, None, None);
-    let nearest = |accept: &dyn Fn(&SettlementId) -> bool| {
-        table
-            .iter()
-            .filter(|(id, _)| {
-                *id != &army.location
-                    && state.hostile_armies_at(&army.faction, id).is_empty()
-                    && accept(id)
-            })
-            .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
-            .map(|(id, reach)| (id.clone(), f64::from(reach.cost)))
+    let free = data.free_movement_rules();
+    let grid = data.navgrid();
+    let start_point = state.army_point(data, army);
+    let start = Cell::of_point(grid, start_point);
+    let zoc_px = free.zoc_radius_km as f32 * px_per_km(data);
+    let dist = |a: [f32; 2], b: [f32; 2]| ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt();
+    let enemies: Vec<[f32; 2]> = state
+        .armies
+        .iter()
+        .filter(|(id, a)| *id != army_id && state.is_at_war(&army.faction, &a.faction))
+        .map(|(_, a)| state.army_point(data, a))
+        .filter(|p| dist(*p, start_point) > zoc_px && dist(*p, battlefield) > zoc_px)
+        .collect();
+    // Hostile places and the zones of control of the enemies away from the
+    // battlefield, as a set of blocked cells.
+    let mut blocker = state.hostile_blocker(data, &army.faction);
+    let zoc_cells = (zoc_px / grid.scale as f32).ceil() as i64 + 1;
+    for enemy in &enemies {
+        let centre = Cell::of_point(grid, *enemy);
+        for dy in -zoc_cells..=zoc_cells {
+            for dx in -zoc_cells..=zoc_cells {
+                let (x, y) = (i64::from(centre.x) + dx, i64::from(centre.y) + dy);
+                if !grid.contains(x, y) {
+                    continue;
+                }
+                let cell = Cell::new(x as u32, y as u32);
+                if dist(cell.center(grid), *enemy) <= zoc_px {
+                    blocker.insert(cell);
+                }
+            }
+        }
+    }
+    let blocker = &blocker;
+    let friendly: std::collections::BTreeMap<Cell, SettlementId> = state
+        .settlements
+        .keys()
+        .filter(|id| {
+            !army.is_at(id)
+                && state.is_friendly_settlement(&army.faction, id)
+                && state.hostile_armies_at(&army.faction, id).is_empty()
+        })
+        .filter_map(|id| {
+            data.settlement_point(id)
+                .map(|p| (Cell::of_point(grid, p), id.clone()))
+        })
+        .rev()
+        .collect();
+    let budget = km_to_grid_points(data, rules.friendly_radius_steps * points_per_step(data));
+    if let Some((cell, _)) =
+        navigation::bounded_dijkstra(grid, start, budget, blocker, |cell, _| {
+            friendly.contains_key(&cell)
+        })
+    {
+        return Some(Retreat::Friendly(friendly[&cell].clone()));
+    }
+    // Away from the victor.
+    let (dx, dy) = (
+        start_point[0] - battlefield[0],
+        start_point[1] - battlefield[1],
+    );
+    let length = (dx * dx + dy * dy).sqrt();
+    let (ux, uy) = if length > 1e-3 {
+        (dx / length, dy / length)
+    } else {
+        (1.0, 0.0)
     };
-    let friendly = nearest(&|id| state.is_friendly_settlement(&army.faction, id));
-    if let Some((id, cost)) = &friendly {
-        if *cost <= rules.friendly_radius_steps * step {
-            return Some(Retreat::Friendly(id.clone()));
+    let reach = free.retreat_fallback_km as f32 * px_per_km(data);
+    let fallback_budget = km_to_grid_points(data, 2.0 * free.retreat_fallback_km);
+    for angle in FALLBACK_ANGLES {
+        let (sin, cos) = angle.to_radians().sin_cos();
+        let (vx, vy) = (ux * cos - uy * sin, ux * sin + uy * cos);
+        let target = [start_point[0] + vx * reach, start_point[1] + vy * reach];
+        let cell = Cell::of_point(grid, target);
+        if blocker.contains(cell) {
+            continue;
+        }
+        if navigation::find_path(grid, start, cell, blocker, Some(fallback_budget)).is_some() {
+            return Some(Retreat::Fallback(cell.center(grid)));
         }
     }
-    if let Some((id, cost)) = nearest(&|id| !state.is_hostile_settlement(&army.faction, id)) {
-        if cost <= rules.neutral_radius_steps * step {
-            return Some(Retreat::Neutral(id));
-        }
-    }
-    Some(Retreat::Rout(friendly.map(|(id, _)| id)))
+    // Rout: rally at the nearest friendly place of the same land mass.
+    let (sx, sy) = (i64::from(start.x), i64::from(start.y));
+    let component = grid.component(sx, sy);
+    let rally = crate::march::nearest_settlement_where(data, start_point, |id| {
+        state.is_friendly_settlement(&army.faction, id)
+            && state.hostile_armies_at(&army.faction, id).is_empty()
+            && data.settlement_point(id).is_some_and(|p| {
+                let c = Cell::of_point(grid, p);
+                grid.component(i64::from(c.x), i64::from(c.y)) == component
+            })
+    });
+    Some(Retreat::Rout(rally))
 }
 
-/// Applies the C7a retreat rule to a beaten army (see [`retreat_target`]).
+/// Applies the retreat rule to a beaten army (see [`retreat_target`]).
 fn retreat_beaten_army(
     state: &mut CampaignState,
     data: &GameData,
     army_id: &ArmyId,
+    battlefield: [f32; 2],
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(retreat) = retreat_target(state, data, army_id) else {
+    let Some(retreat) = retreat_target(state, data, army_id, battlefield) else {
         return;
     };
     let rules = data.retreat_rules();
     match retreat {
-        Retreat::Friendly(target) => move_beaten_army(state, army_id, target),
-        Retreat::Neutral(target) => {
+        Retreat::Friendly(target) => {
+            move_beaten_army(state, data, army_id, ArmyPosition::Settlement(target))
+        }
+        Retreat::Fallback(point) => {
             let lost = decimate(state, army_id, rules.neutral_loss_percent);
             push_retreat_event(
                 state,
+                data,
                 army_id,
                 format!(
-                    "L'armée {army_id}, coupée de ses places, se replie en terre neutre et perd {lost} traînards."
+                    "L'armée {army_id}, coupée de ses places, recule et perd {lost} traînards."
                 ),
                 events,
             );
-            move_beaten_army(state, army_id, target);
+            move_beaten_army(state, data, army_id, ArmyPosition::field(point));
         }
         Retreat::Rout(rally) => {
             let lost = decimate(state, army_id, rules.rout_loss_percent);
@@ -963,30 +884,35 @@ fn retreat_beaten_army(
                 Some(target) => {
                     push_retreat_event(
                         state,
+                        data,
                         army_id,
                         format!(
                             "Débandade : l'armée {army_id}, coupée de ses places, perd {lost} hommes avant de se rallier."
                         ),
                         events,
                     );
-                    move_beaten_army(state, army_id, target);
+                    move_beaten_army(state, data, army_id, ArmyPosition::Settlement(target));
                 }
-                None => disperse_army(state, army_id, events),
+                None => disperse_army(state, data, army_id, events),
             }
         }
     }
 }
 
-/// Moves a beaten army to `target`, spent for the turn.
-fn move_beaten_army(state: &mut CampaignState, army_id: &ArmyId, target: SettlementId) {
+/// Moves a beaten army to `position`, spent for the turn.
+fn move_beaten_army(
+    state: &mut CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    position: ArmyPosition,
+) {
     if let Some(army) = state.armies.get_mut(army_id) {
-        army.location = target;
-        army.movement_points = 0;
-        army.path.clear();
-        move_general(state, army_id);
+        army.position = position;
+        army.movement_left = 0;
+        army.clear_plan();
+        move_general(state, data, army_id);
     }
 }
-
 /// Removes `percent` of every unit of `army_id` (rounded up); units under
 /// 5 % of their maximum are disbanded, as after a battle. Returns the men lost.
 fn decimate(state: &mut CampaignState, army_id: &ArmyId, percent: u32) -> u32 {
@@ -1006,6 +932,7 @@ fn decimate(state: &mut CampaignState, army_id: &ArmyId, percent: u32) -> u32 {
 
 fn push_retreat_event(
     state: &CampaignState,
+    data: &GameData,
     army_id: &ArmyId,
     text: String,
     events: &mut Vec<GameEvent>,
@@ -1016,19 +943,24 @@ fn push_retreat_event(
     let mut event = GameEvent::new(EventKind::Attrition, text)
         .army(army_id)
         .faction(&army.faction);
-    if let Some(province) = state.settlement_province(&army.location) {
-        event = event.province(province);
+    if let Some(province) = state.army_province(data, army) {
+        event = event.province(&province);
     }
     events.push(event);
 }
 
 /// A routed army with nowhere to rally melts away; its general escapes.
-fn disperse_army(state: &mut CampaignState, army_id: &ArmyId, events: &mut Vec<GameEvent>) {
+fn disperse_army(
+    state: &mut CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) {
     let Some(army) = state.armies.get(army_id) else {
         return;
     };
     let faction = army.faction.clone();
-    let province = state.settlement_province(&army.location).cloned();
+    let province = state.army_province(data, army);
     if let Some(general) = army.general.clone() {
         state.detach_general(&general);
     }
@@ -1074,15 +1006,14 @@ pub(crate) fn apply_outcome(
     }
     army.units
         .retain(|unit| unit.strength > 0 && unit.strength * 20 >= unit.max_strength);
-    let settlement = army.location.clone();
     let faction = army.faction.clone();
-    let location = state
-        .settlements
-        .get(&settlement)
-        .map_or_else(province_placeholder, |s| s.province.clone());
     let Some(army) = state.armies.get(army_id) else {
         return;
     };
+    let location = state
+        .army_province(data, army)
+        .unwrap_or_else(province_placeholder);
+
     if tended > 0 && faction == state.player_faction {
         events.push(
             GameEvent::new(

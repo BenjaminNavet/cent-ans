@@ -16,7 +16,12 @@ extends Node
 
 const SETTINGS_PATH := "user://settings.cfg"
 const MUSIC_BUS := "Musique"
-const SFX_BUS := "Effets"
+## AU1 : les effets d'interface (clic, page, cloche de tour) passent par le bus « Interface ».
+const SFX_BUS := "Interface"
+## AU1 : volumes par défaut des bus réglables (voir `AudioBuses.PLAYER_BUSES`).
+const DEFAULT_BUS_VOLUMES := {"Master": 1.0, "Musique": 0.6, "Ambiance": 0.8, "Bataille": 0.9, "Interface": 0.8, "Voix": 0.9}
+const DUCK_ATTACK := 0.25
+const DUCK_RELEASE := 1.5
 const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const SFX_VOICES := 6
@@ -42,6 +47,11 @@ const EVENT_SFX := [
 
 var music_volume: float = 0.6
 var sfx_volume: float = 0.8
+## AU1 : volume linéaire 0..1 par bus (Master, Musique, Ambiance, Bataille, Interface, Voix) ;
+## `music_volume` / `sfx_volume` restent synchronisés avec « Musique » / « Interface ».
+var bus_volumes: Dictionary = DEFAULT_BUS_VOLUMES.duplicate()
+## AU1 : ambiances de la carte de campagne (créées par `attach_campaign`).
+var campaign_ambience: CampaignAmbience = null
 var current_context: String = ""
 ## Headless (smoke test, serveur) : flux chargés et contextes suivis, mais rien n'est joué
 ## (le pilote audio factice ne libère pas les lectures OGG à la sortie).
@@ -55,13 +65,14 @@ var _next_voice := 0
 var _campaign: Node = null
 var _base_context := "campaign"
 var _court_open := false
+var _duck_tween: Tween = null
+var _duck_until: float = 0.0
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	silent = DisplayServer.get_name() == "headless"
-	_ensure_bus(MUSIC_BUS)
-	_ensure_bus(SFX_BUS)
+	AudioBuses.ensure_layout()
 	for index in 2:
 		var player := AudioStreamPlayer.new()
 		player.name = "Music%d" % index
@@ -80,6 +91,8 @@ func _ready() -> void:
 
 ## Arrête tout et libère les flux (appelé à la sortie ; évite des fuites signalées par Godot).
 func stop_all() -> void:
+	if campaign_ambience != null:
+		campaign_ambience.silence()
 	for player in _music_players + _sfx_players:
 		player.stop()
 		player.stream = null
@@ -94,44 +107,46 @@ func _exit_tree() -> void:
 # --- Réglages --------------------------------------------------------------------
 
 
-func _ensure_bus(bus_name: String) -> void:
-	if AudioServer.get_bus_index(bus_name) != -1:
+## Volume du joueur (linéaire 0..1) d'un bus réglable ; persisté par défaut.
+func set_bus_volume(bus_name: String, linear: float, persist: bool = true) -> void:
+	if not bus_volumes.has(bus_name):
 		return
-	AudioServer.add_bus()
-	var index := AudioServer.bus_count - 1
-	AudioServer.set_bus_name(index, bus_name)
-	AudioServer.set_bus_send(index, "Master")
+	var value := clampf(linear, 0.0, 1.0)
+	bus_volumes[bus_name] = value
+	if bus_name == MUSIC_BUS:
+		music_volume = value
+	elif bus_name == SFX_BUS:
+		sfx_volume = value
+	AudioBuses.set_linear_volume(bus_name, value)
+	if persist:
+		save_settings()
 
 
-func _apply_volume(bus_name: String, linear: float) -> void:
-	var index := AudioServer.get_bus_index(bus_name)
-	if index == -1:
-		return
-	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(linear, 0.0001)))
-	AudioServer.set_bus_mute(index, linear <= 0.001)
+func bus_volume(bus_name: String) -> float:
+	return float(bus_volumes.get(bus_name, 0.0))
 
 
 func set_music_volume(linear: float, persist: bool = true) -> void:
-	music_volume = clampf(linear, 0.0, 1.0)
-	_apply_volume(MUSIC_BUS, music_volume)
-	if persist:
-		save_settings()
+	set_bus_volume(MUSIC_BUS, linear, persist)
 
 
 func set_sfx_volume(linear: float, persist: bool = true) -> void:
-	sfx_volume = clampf(linear, 0.0, 1.0)
-	_apply_volume(SFX_BUS, sfx_volume)
-	if persist:
-		save_settings()
+	set_bus_volume(SFX_BUS, linear, persist)
 
 
 func load_settings(path: String = SETTINGS_PATH) -> void:
 	var config := ConfigFile.new()
 	if config.load(path) == OK:
-		music_volume = float(config.get_value("audio", "music_volume", music_volume))
-		sfx_volume = float(config.get_value("audio", "sfx_volume", sfx_volume))
-	set_music_volume(music_volume, false)
-	set_sfx_volume(sfx_volume, false)
+		for bus_name in bus_volumes:
+			bus_volumes[bus_name] = float(config.get_value("audio", "bus_" + str(bus_name), bus_volumes[bus_name]))
+		# Clés historiques (M10) : elles priment pour la musique et l'interface.
+		bus_volumes[MUSIC_BUS] = float(config.get_value("audio", "music_volume", music_volume))
+		bus_volumes[SFX_BUS] = float(config.get_value("audio", "sfx_volume", sfx_volume))
+	else:
+		bus_volumes[MUSIC_BUS] = music_volume
+		bus_volumes[SFX_BUS] = sfx_volume
+	for bus_name in bus_volumes:
+		set_bus_volume(bus_name, float(bus_volumes[bus_name]), false)
 
 
 func save_settings(path: String = SETTINGS_PATH) -> Error:
@@ -139,7 +154,37 @@ func save_settings(path: String = SETTINGS_PATH) -> Error:
 	config.load(path)  # conserve les autres sections éventuelles
 	config.set_value("audio", "music_volume", music_volume)
 	config.set_value("audio", "sfx_volume", sfx_volume)
+	for bus_name in bus_volumes:
+		config.set_value("audio", "bus_" + str(bus_name), bus_volumes[bus_name])
 	return config.save(path)
+
+
+# --- Ducking (AU1) -----------------------------------------------------------------
+
+
+## Atténue la musique de `db` (≤ 0) pendant `hold` secondes (moments forts : cri de guerre, mort
+## d'un général, effondrement de muraille), puis la rétablit en `DUCK_RELEASE` s. Un ducking plus
+## fort ou plus long en cours n'est pas raccourci.
+func duck_music(db: float, hold: float = 3.0) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	var depth := minf(db, 0.0)
+	var ducking := _duck_tween != null and _duck_tween.is_valid()
+	if ducking:
+		if depth >= AudioBuses.music_duck_db() and now + hold <= _duck_until:
+			return
+		depth = minf(depth, AudioBuses.music_duck_db())
+		_duck_tween.kill()
+	else:
+		_duck_until = 0.0
+	_duck_until = maxf(_duck_until, now + hold)
+	_duck_tween = create_tween()
+	_duck_tween.tween_method(AudioBuses.set_music_duck_db, AudioBuses.music_duck_db(), depth, DUCK_ATTACK)
+	_duck_tween.tween_interval(maxf(_duck_until - now - DUCK_ATTACK, 0.0))
+	_duck_tween.tween_method(AudioBuses.set_music_duck_db, depth, 0.0, DUCK_RELEASE)
+
+
+func music_duck_db() -> float:
+	return AudioBuses.music_duck_db()
 
 
 # --- Flux ------------------------------------------------------------------------
@@ -231,6 +276,8 @@ func _on_button_pressed() -> void:
 ## Écran de démarrage : musique calme.
 func enter_menu() -> void:
 	_campaign = null
+	if campaign_ambience != null:
+		campaign_ambience.setup(null)
 	_court_open = false
 	_base_context = "campaign"
 	play_music("campaign")
@@ -248,6 +295,12 @@ func attach_campaign(campaign: Node) -> void:
 				if not panel.has_meta("m10_audio"):
 					panel.set_meta("m10_audio", true)
 					panel.visibility_changed.connect(_on_panel_visibility.bind(panel))
+	# AU1 : ambiances de carte (enfant du directeur : il survit à la mise en veille de la carte).
+	if campaign_ambience == null:
+		campaign_ambience = CampaignAmbience.new()
+		campaign_ambience.name = "CampaignAmbience"
+		add_child(campaign_ambience)
+	campaign_ambience.setup(campaign)
 	refresh_context()
 
 
@@ -304,28 +357,29 @@ static func event_sfx(events: Array) -> String:
 # --- Interface de réglage --------------------------------------------------------
 
 
-## Deux curseurs « Musique » / « Effets » (0..100 %), persistés à chaque changement.
+## AU1 : un curseur par bus réglable (Général, Musique, Ambiance, Bataille, Interface, Voix),
+## 0..100 %, persisté à chaque changement.
 func make_volume_controls() -> Control:
-	var box := HBoxContainer.new()
-	box.name = "SoundControls"
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 10)
-	for spec in [["Musique", music_volume, set_music_volume], ["Effets", sfx_volume, set_sfx_volume]]:
+	var grid := GridContainer.new()
+	grid.name = "SoundControls"
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	for spec in AudioBuses.PLAYER_BUSES:
+		var bus_name: String = spec[0]
 		var label := Label.new()
-		label.text = spec[0]
-		box.add_child(label)
+		label.text = str(spec[1])
+		grid.add_child(label)
 		var slider := HSlider.new()
-		slider.name = "%sSlider" % spec[0]
+		slider.name = "%sSlider" % bus_name
 		slider.min_value = 0.0
 		slider.max_value = 1.0
 		slider.step = 0.05
-		slider.value = spec[1]
-		slider.custom_minimum_size = Vector2(140, 0)
+		slider.value = bus_volume(bus_name)
+		slider.custom_minimum_size = Vector2(220, 0)
 		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		var setter: Callable = spec[2]
-		slider.value_changed.connect(func(value: float) -> void: setter.call(value))
-		box.add_child(slider)
-	return box
+		slider.value_changed.connect(func(value: float) -> void: set_bus_volume(bus_name, value))
+		grid.add_child(slider)
+	return grid
 
 
 ## Ajoute « Son… » au menu de la carte ; ouvre une fenêtre avec les curseurs.
@@ -345,4 +399,4 @@ func _open_sound_dialog(host: Node) -> void:
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
 	host.add_child(dialog)
-	dialog.popup_centered(Vector2i(460, 110))
+	dialog.popup_centered(Vector2i(420, 260))

@@ -3,6 +3,7 @@
 pub mod agent;
 pub mod ai_alignment;
 pub mod ai_diplomacy;
+pub mod ai_grid;
 pub mod battle_order;
 pub mod building;
 pub mod character;
@@ -10,6 +11,7 @@ pub mod chivalric_order;
 pub mod diet;
 pub mod event;
 pub mod faction;
+pub mod movement;
 pub mod names;
 pub mod province;
 pub mod religion;
