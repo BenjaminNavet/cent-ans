@@ -135,7 +135,7 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
                 }
                 ram_hp = Some(r.hp);
             }
-            if (sim.elapsed() / sim_battle::DT).round() as u64 % 600 == 0 {
+            if ((sim.elapsed() / sim_battle::DT).round() as u64).is_multiple_of(600) {
                 let line: Vec<String> = sim
                     .units()
                     .iter()
@@ -166,7 +166,7 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
             t.burnt_at_opening = works.burnt_houses() + works.burning_houses();
         }
         t.best_hold = t.best_hold.max(works.hold_time);
-        let second = (now / DT).round() as u64 % (1.0 / DT).round() as u64 == 0;
+        let second = ((now / DT).round() as u64).is_multiple_of((1.0 / DT).round() as u64);
         let mut morale_sum = (0.0, 0usize);
         for (i, u) in sim.units().iter().enumerate() {
             let (px, pz, pstate) = last[i];
