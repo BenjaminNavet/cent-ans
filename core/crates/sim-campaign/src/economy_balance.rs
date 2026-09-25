@@ -112,7 +112,7 @@ impl FactionEconomy {
     /// (recoinage included) and the Table. This is exactly what
     /// `resolve_economy` will add to the treasury if nothing changes.
     pub fn net_income(&self) -> i64 {
-        self.projected_income
+        self.projected_income + self.trade_income
             - self.army_upkeep
             - self.building_upkeep
             - self.administration_upkeep
@@ -126,7 +126,11 @@ impl FactionEconomy {
             .iter()
             .map(|&kind| {
                 let (projected, booked) = match kind {
-                    BudgetLineKind::Receipts => (self.projected_income, last.map(|r| r.receipts)),
+                    BudgetLineKind::Receipts => (
+                        // C5: taxes plus the trade routes.
+                        self.projected_income + self.trade_income,
+                        last.map(|r| r.receipts),
+                    ),
                     BudgetLineKind::Armies => (-self.army_upkeep, last.map(|r| -r.armies)),
                     BudgetLineKind::Buildings => {
                         (-self.building_upkeep, last.map(|r| -r.buildings))
@@ -171,7 +175,7 @@ impl CampaignState {
     /// every upkeep, the Table included); `None` for an unknown faction.
     pub fn faction_net_last_turn(&self, id: &FactionId) -> Option<i64> {
         let faction = self.factions.get(id)?;
-        Some(faction.income_last_turn - faction.upkeep_last_turn)
+        Some(faction.income_last_turn + faction.trade_income_last_turn - faction.upkeep_last_turn)
     }
 
     /// Treasury of every faction, taken at the start of a turn so that
@@ -199,7 +203,8 @@ impl CampaignState {
             let mut record = BudgetRecord {
                 turn,
                 treasury: faction.treasury,
-                receipts: faction.income_last_turn,
+                // C5: trade routes are credited after the taxes, apart.
+                receipts: faction.income_last_turn + faction.trade_income_last_turn,
                 armies,
                 buildings,
                 administration: faction.upkeep_last_turn - armies - buildings - table,

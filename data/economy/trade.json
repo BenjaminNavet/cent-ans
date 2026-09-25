@@ -1,0 +1,266 @@
+{
+  "description": "Places de marché historiques du XIVe siècle et routes commerciales qui les relient (lot C5). Le revenu réel (distance, sécurité, accords, monnaie) est calculé par sim-campaign::trade à partir de ce catalogue.",
+  "hubs": [
+    {
+      "id": "hub_bruges",
+      "settlement": "set_bruges",
+      "name": {
+        "display": "Bruges"
+      },
+      "goods": [
+        "res_wool",
+        "res_cloth"
+      ],
+      "description": "Marché des draps de Flandre, entrepôt de la Hanse et des galées génoises.",
+      "sources": [
+        "Murray, Bruges, Cradle of Capitalism, 2005"
+      ]
+    },
+    {
+      "id": "hub_calais",
+      "settlement": "set_calais",
+      "name": {
+        "display": "Calais"
+      },
+      "goods": [
+        "res_wool"
+      ],
+      "description": "Étape des laines anglaises vers le continent (staple).",
+      "sources": [
+        "Lloyd, The English Wool Trade in the Middle Ages, 1977"
+      ]
+    },
+    {
+      "id": "hub_londres",
+      "settlement": "set_londres",
+      "name": {
+        "display": "Londres"
+      },
+      "goods": [
+        "res_wool",
+        "res_cloth"
+      ],
+      "description": "Port de sortie de la laine anglaise, marché des drapiers flamands."
+    },
+    {
+      "id": "hub_southampton",
+      "settlement": "set_southampton",
+      "name": {
+        "display": "Southampton"
+      },
+      "goods": [
+        "res_wool"
+      ],
+      "description": "Terminus anglais des galées de Flandre génoises et vénitiennes."
+    },
+    {
+      "id": "hub_bordeaux",
+      "settlement": "set_bordeaux",
+      "name": {
+        "display": "Bordeaux"
+      },
+      "goods": [
+        "res_wine"
+      ],
+      "description": "Premier port viticole d'Europe, le vin de Guyenne part chaque automne pour l'Angleterre.",
+      "sources": [
+        "James, The Medieval Wine Trade, 1971"
+      ]
+    },
+    {
+      "id": "hub_la_rochelle",
+      "settlement": "set_la_rochelle",
+      "name": {
+        "display": "La Rochelle"
+      },
+      "goods": [
+        "res_salt",
+        "res_wine"
+      ],
+      "description": "Port du sel et du vin de Saintonge, rival de Bordeaux."
+    },
+    {
+      "id": "hub_antwerp",
+      "settlement": "set_antwerp",
+      "name": {
+        "display": "Anvers"
+      },
+      "goods": [
+        "res_cloth",
+        "res_wool"
+      ],
+      "description": "Débouché brabançon du commerce flamand, en essor au XIVe siècle."
+    },
+    {
+      "id": "hub_troyes",
+      "settlement": "set_troyes",
+      "name": {
+        "display": "Troyes"
+      },
+      "goods": [
+        "res_cloth"
+      ],
+      "description": "Foires de Champagne : carrefour du drap flamand et des marchands italiens, déjà supplanté par la route maritime directe Gênes-Bruges."
+    },
+    {
+      "id": "hub_provins",
+      "settlement": "set_provins",
+      "name": {
+        "display": "Provins"
+      },
+      "goods": [
+        "res_cloth"
+      ],
+      "description": "Autre foire de Champagne, en déclin depuis l'ouverture du détroit de Gibraltar à la navigation génoise (1277)."
+    },
+    {
+      "id": "hub_genes",
+      "settlement": "set_genes",
+      "name": {
+        "display": "Gênes"
+      },
+      "goods": [
+        "res_cloth",
+        "res_iron"
+      ],
+      "description": "Galées génoises : la ligne régulière vers Bruges et Southampton court-circuite les foires de Champagne."
+    },
+    {
+      "id": "hub_venise",
+      "settlement": "set_venise",
+      "name": {
+        "display": "Venise"
+      },
+      "goods": [
+        "res_cloth"
+      ],
+      "description": "Convois d'État vénitiens (mude) vers la Flandre."
+    }
+  ],
+  "routes": [
+    {
+      "id": "route_bruges_londres",
+      "from_hub": "hub_bruges",
+      "to_hub": "hub_londres",
+      "goods": [
+        "res_wool",
+        "res_cloth"
+      ],
+      "base_value": 180,
+      "description": "Laine anglaise brute vers les métiers à tisser flamands, drap fini vers l'Angleterre."
+    },
+    {
+      "id": "route_calais_londres",
+      "from_hub": "hub_calais",
+      "to_hub": "hub_londres",
+      "goods": [
+        "res_wool"
+      ],
+      "base_value": 150,
+      "description": "Étape des laines : toute laine exportée du royaume y passe par ordonnance royale."
+    },
+    {
+      "id": "route_bruges_calais",
+      "from_hub": "hub_bruges",
+      "to_hub": "hub_calais",
+      "goods": [
+        "res_wool",
+        "res_cloth"
+      ],
+      "base_value": 120
+    },
+    {
+      "id": "route_bordeaux_londres",
+      "from_hub": "hub_bordeaux",
+      "to_hub": "hub_londres",
+      "goods": [
+        "res_wine"
+      ],
+      "base_value": 220,
+      "description": "La flotte des vins descend chaque automne (vendanges) vers l'Angleterre."
+    },
+    {
+      "id": "route_la_rochelle_londres",
+      "from_hub": "hub_la_rochelle",
+      "to_hub": "hub_londres",
+      "goods": [
+        "res_salt",
+        "res_wine"
+      ],
+      "base_value": 130
+    },
+    {
+      "id": "route_bruges_southampton",
+      "from_hub": "hub_bruges",
+      "to_hub": "hub_southampton",
+      "goods": [
+        "res_wool",
+        "res_cloth"
+      ],
+      "base_value": 140
+    },
+    {
+      "id": "route_genes_bruges",
+      "from_hub": "hub_genes",
+      "to_hub": "hub_bruges",
+      "goods": [
+        "res_cloth",
+        "res_iron"
+      ],
+      "base_value": 160,
+      "description": "Ligne régulière des galées génoises ouverte en 1277 (détroit de Gibraltar)."
+    },
+    {
+      "id": "route_venise_bruges",
+      "from_hub": "hub_venise",
+      "to_hub": "hub_bruges",
+      "goods": [
+        "res_cloth"
+      ],
+      "base_value": 150,
+      "description": "Convoi d'État des mude de Flandre."
+    },
+    {
+      "id": "route_bruges_troyes",
+      "from_hub": "hub_bruges",
+      "to_hub": "hub_troyes",
+      "goods": [
+        "res_cloth"
+      ],
+      "base_value": 70,
+      "declining": true,
+      "description": "Drap flamand vers les foires de Champagne, route terrestre en perte de vitesse."
+    },
+    {
+      "id": "route_troyes_provins",
+      "from_hub": "hub_troyes",
+      "to_hub": "hub_provins",
+      "goods": [
+        "res_cloth"
+      ],
+      "base_value": 50,
+      "declining": true
+    },
+    {
+      "id": "route_provins_genes",
+      "from_hub": "hub_provins",
+      "to_hub": "hub_genes",
+      "goods": [
+        "res_cloth"
+      ],
+      "base_value": 50,
+      "declining": true,
+      "description": "Marchands italiens des foires de Champagne, itinéraire supplanté par la mer."
+    },
+    {
+      "id": "route_bruges_antwerp",
+      "from_hub": "hub_bruges",
+      "to_hub": "hub_antwerp",
+      "goods": [
+        "res_cloth",
+        "res_wool"
+      ],
+      "base_value": 90
+    }
+  ]
+}

@@ -688,7 +688,9 @@ func _render_detail() -> void:
 	if int(entry.get("truce_turns_left", 0)) > 0:
 		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
 	if bool(entry.get("trade_agreement", false)):
-		facts.append("Accord commercial")
+		# C5 : un embargo suspend les routes sans rompre l'accord (la guerre le rompt).
+		var suspended := bool(entry.get("embargo_by_us", false)) or bool(entry.get("embargo_on_us", false))
+		facts.append("Accord commercial" + (" (suspendu)" if suspended else ""))
 	if bool(entry.get("access_received", false)):
 		facts.append("Accès militaire accordé")
 	if int(entry.get("loyalty", -1)) >= 0:
@@ -700,6 +702,7 @@ func _render_detail() -> void:
 	var facts_label := HudStyle.label(" · ".join(facts), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
 	facts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_head.add_child(facts_label)
+	_render_trade_routes(_head, _selected)
 	if _draft_for != _selected:
 		_draft_for = _selected
 		_articles = [{"kind": "peace"}] if status == "war" else []
@@ -949,6 +952,34 @@ func _render_actions(entry: Dictionary) -> void:
 		{"type": "set_embargo", "target": id, "active": not embargo},
 		"Embargo levé." if embargo else "Embargo imposé.", true)
 	_add_action("Présents (%s)" % Money.amount(GIFT_AMOUNT), {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
+	# C5 : l'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
+	if bool(entry.get("trade_agreement", false)):
+		_add_action("Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
+
+
+## Lot C5 : routes commerciales entre nous et cette faction (revenu par saison, biens, coupure).
+func _render_trade_routes(parent: Control, id: String) -> void:
+	if sim == null or not sim.has_method("get_trade_routes"):
+		return
+	var lines := PackedStringArray()
+	for route_variant in sim.call("get_trade_routes"):
+		var route: Dictionary = route_variant
+		var from_f := str(route.get("from_faction", ""))
+		var to_f := str(route.get("to_faction", ""))
+		if not ((from_f == player_faction and to_f == id) or (from_f == id and to_f == player_faction)):
+			continue
+		if bool(route.get("cut", false)):
+			lines.append("%s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
+		else:
+			var goods: PackedStringArray = route.get("goods", PackedStringArray())
+			lines.append("%s ↔ %s : %s/saison (%s)" % [route["from_hub_name"], route["to_hub_name"],
+				Money.amount(int(route["total_value"])), ", ".join(goods)])
+	if lines.is_empty():
+		return
+	var label := HudStyle.label("Commerce — " + " · ".join(lines), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	label.name = "TradeRoutes"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	parent.add_child(label)
 
 
 func _add_action(label: String, order: Dictionary, success_text: String, unilateral: bool) -> void:
