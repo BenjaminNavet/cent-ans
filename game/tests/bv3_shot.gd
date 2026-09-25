@@ -8,6 +8,32 @@ extends SceneTree
 ## `--no-bv3` : même scène sans herbe couchée (captures « avant »).
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
+
+
+## Simulation factice : `get_soldier_buffer` rend les figurines rangées des régiments du décor.
+class FakeBattle:
+	extends RefCounted
+	var units: Array = []
+
+	func get_soldier_buffer(side: String, kind: String) -> PackedFloat32Array:
+		var out := PackedFloat32Array()
+		for unit in units:
+			if str(unit["side"]) != side or str(unit["render"]) != kind or not bool(unit["present"]):
+				continue
+			var facing := float(unit["facing"])
+			var c := cos(facing)
+			var s := sin(facing)
+			var n := int(unit["figures"])
+			var files := int(ceil(float(unit["width"]) / (2.6 if kind == "cavalry" else 1.0)))
+			for i in n:
+				var fx := (float(i % files) - (files - 1) * 0.5) * float(unit["width"]) / files
+				var fz := (float(i / files) + 0.5) * (2.8 if kind == "cavalry" else 1.1) - float(unit["depth"]) * 0.5
+				var x := float(unit["x"]) + c * fx - s * fz
+				var z := float(unit["z"]) - s * fx - c * fz
+				out.append_array(PackedFloat32Array([c, 0, s, x, 0, 1, 0, float(unit["y"]), -s, 0, c, z]))
+		return out
+
+
 var _center := Vector3(600, 0, 400)
 
 var _no_bv3 := false
@@ -78,6 +104,9 @@ func _init() -> void:
 		if flatten != null:
 			flatten.on_corpse(pos, kind, blood_amount))
 	match shot:
+		"standards":
+			await _standards_shot(world, terrain, soldiers, camera, out)
+			return
 		"atlas", "impostor":
 			await _impostor_shot(world, soldiers, camera, out, shot)
 			return
@@ -204,3 +233,70 @@ func _impostor_shot(world: Node3D, soldiers: BattleSoldiers, camera: Camera3D, o
 	var err := image.save_png(out)
 	print("bv3_shot: impostor %s (%s)" % [out, error_string(err)])
 	quit(0 if err == OK else 1)
+
+
+## Régiment de décor au format de `get_units()`.
+func _stage_unit(id: int, side: String, type: String, render: String, pos: Vector3, facing: float, soldiers: int, general: bool) -> Dictionary:
+	var width := 24.0 if render != "cavalry" else 30.0
+	return {"id": id, "side": side, "type": type, "render": render, "soldiers": soldiers, "figures": soldiers, "initial_soldiers": soldiers, "present": true, "x": pos.x, "y": pos.y, "z": pos.z, "facing": facing, "width": width, "depth": ceil(float(soldiers) / width) * (2.8 if render == "cavalry" else 1.1), "state": "idle", "running": false, "ammo": 0, "is_general": general}
+
+
+## Décor : hommes d'armes et chevaliers du général (France) face à des hommes d'armes anglais.
+func _stage(terrain: BattleTerrain, soldiers: BattleSoldiers) -> FakeBattle:
+	var fake := FakeBattle.new()
+	var c := _center
+	fake.units = [
+		_stage_unit(1, "attacker", "unit_men_at_arms_foot", "infantry", Vector3(c.x - 16, 0, c.z), 0.0, 72, false),
+		_stage_unit(2, "attacker", "unit_knights", "cavalry", Vector3(c.x + 20, 0, c.z - 4), 0.0, 30, true),
+		_stage_unit(3, "defender", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z + 40), PI, 72, false),
+	]
+	for unit in fake.units:
+		unit["y"] = terrain.world_height(float(unit["x"]), float(unit["z"]))
+	soldiers.setup(fake.units, _colors(), _factions())
+	return fake
+
+
+func _colors() -> Dictionary:
+	return {"attacker": Color(0.16, 0.25, 0.62), "defender": Color(0.72, 0.12, 0.12)}
+
+
+func _factions() -> Dictionary:
+	return {"attacker": "fac_france", "defender": "fac_england"}
+
+
+## `standards` : étendards portés dans le vent (et herbe dans le même vent).
+func _standards_shot(world: Node3D, terrain: BattleTerrain, soldiers: BattleSoldiers, camera: Camera3D, out: String) -> void:
+	var fake := _stage(terrain, soldiers)
+	var c := _center
+	var standards := BattleStandards.new()
+	world.add_child(standards)
+	var wind := BattleStandards.wind_for("clear", 7)
+	var factions := _factions()
+	standards.setup(fake.units, _colors(), func(unit: Dictionary) -> Dictionary: return _cloth(unit, str(factions[str(unit["side"])])), wind)
+	terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
+	camera.look_at_from_position(Vector3(c.x - 6, c.y + 7, c.z - 26), Vector3(c.x + 2, c.y + 2.5, c.z + 4))
+	for i in 30:
+		soldiers.update(fake, fake.units, 1.0 / 30.0, [])
+		standards.update(fake.units, soldiers, camera.position)
+		await process_frame
+	await RenderingServer.frame_post_draw
+	var image := root.get_texture().get_image()
+	var err := image.save_png(out)
+	print("bv3_shot: standards %s (%s), %d shown, wind %s strength %.2f" % [out, error_string(err), standards.shown_count, wind["dir"], float(wind["strength"])])
+	quit(0 if err == OK else 1)
+
+
+## Étoffe (même choix que `BattleScene._banner_cloth`, sans le « pas de quartier »).
+func _cloth(unit: Dictionary, faction: String) -> Dictionary:
+	var dir := "res://assets/heraldry/banners/"
+	var candidates: Array = []
+	if bool(unit.get("is_general", false)) and faction == "fac_england":
+		candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	if str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]:
+		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
+	candidates.append([dir + "%s_pennon.png" % faction, Vector2(3.0, 0.75)])
+	for candidate in candidates:
+		var texture := PortraitLoader.load_texture(candidate[0])
+		if texture != null:
+			return {"texture": texture, "size": candidate[1], "full": true}
+	return {"texture": PortraitLoader.heraldry_texture(faction), "size": Vector2(2.6, 1.7), "full": false}

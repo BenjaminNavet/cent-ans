@@ -104,6 +104,13 @@ func set_flatten(flatten: BattleGrassFlatten) -> void:
 		mat.set_shader_parameter("flatten_on", 1.0)
 
 
+## BV3 : vent de la bataille (même direction que les drapeaux).
+func set_wind(direction: Vector2, strength: float) -> void:
+	for mat in _materials:
+		mat.set_shader_parameter("wind_dir", direction.normalized())
+		mat.set_shader_parameter("wind_strength", strength)
+
+
 func _process(_delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera == null or _layers.is_empty():

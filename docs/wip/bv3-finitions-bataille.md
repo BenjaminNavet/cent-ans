@@ -10,12 +10,13 @@ Coordination : SG1 (sièges), Q1 (recette) ; HUD de bataille (UB1) intouché sau
 | 1. Herbe couchée (piétinement, corps, mêlée) + sang lisible en prairie | **fait** |
 | 2. Pavois du dos masqué quand la rangée est plantée | **fait** |
 | 3. Imposteurs lointains (Ultra) | **fait** (ADR 0024) |
-| 4. Bannières au vent, porte-étendards, étendard du général | à faire |
+| 4. Bannières au vent, porte-étendards, étendard du général | **fait** |
 | 5. Duels appariés (cosmétique, déterministe) | à faire |
 | 6. Discours du général | à faire |
 
 ## Prochaine étape
-Lot 4 : bannières au vent (shader de tissu), porte-étendards, étendard du général.
+Lot 5 : duels appariés cosmétiques (`battle_duels.gd`, section `duels` de
+`data/fx/battle_finish.json`, déjà écrite et validée).
 
 ## Lot 1 — herbe couchée, sang en prairie
 - `battle_grass_flatten.gd` (`BattleGrassFlatten`) : carte RG8 à 1 m sur (0, −100)-(1200, 900),
@@ -52,3 +53,19 @@ Lot 4 : bannières au vent (shader de tissu), porte-étendards, étendard du gé
 - Captures `avant_ultra_imposteurs` / `apres_ultra_imposteurs` (`--shot-at=60 --units=20
   --unit-size=2.5 --camera=600,420,420,200`).
 - Piège : sans relever l'alpha selon le niveau de mipmap, les régiments lointains disparaissent.
+
+## Lot 4 — vent, bannières, porte-étendards
+- Données : `data/fx/battle_finish.json` (+ `data/schemas/battle_finish.schema.json`,
+  `tools/tests/test_battle_finish_schema.py`) : vent par météo, étendards, duels (lot 5).
+- `battle_standards.gd` (`BattleStandards`) : vent (direction tirée de la graine de bataille,
+  force et rafales selon la météo : clair 0,55, pluie 0,85, brouillard 0,12, neige 0,6) ;
+  étendard à l'échelle 1 (hampe 4,2 m, étoffe du régiment ×0,55) porté par la figurine du
+  milieu du tampon (`figure_frame`), à droite du porteur, plus haut à cheval ; général : hampe
+  5,6 m, étendard royal ×0,85. Affichés à moins de 220 m.
+- `battle_banner.gdshader` : `wind_strength` / `wind_gust` (vitesse, amplitude, drapeau qui
+  pend sans vent, rafales lentes par drapeau).
+- `BattleScene` : drapeaux-repères (V4) dans le vent de près (orientés vers la caméra en
+  s'éloignant, comme avant), effacés devant l'étendard porté quand leur échelle ≤ 1,05 ;
+  herbe dans le même vent (`BattleVegetation.set_wind`).
+- Capture `apres_etendards_vent` (`tests/bv3_shot.gd --shot=standards`, décor factice
+  `FakeBattle` qui rend les figurines rangées sans simulation).

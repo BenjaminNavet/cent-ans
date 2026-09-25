@@ -62,6 +62,7 @@ var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombard
 var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
 var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
+var standards: BattleStandards = null  # BV3 : vent, porte-étendards
 var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
 var _no_impostors: bool = false  # `--no-impostors` : imposteurs lointains seuls coupés (A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
@@ -303,6 +304,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	_setup_standards()
 	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
@@ -332,6 +334,21 @@ func _build_soldier_layers() -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
 	_setup_grass_flatten()
+
+
+## BV3 : vent de la météo (drapeaux, herbe) et porte-étendards des régiments.
+func _setup_standards() -> void:
+	if _no_bv3:
+		return
+	var wind := BattleStandards.wind_for(_weather_key, battle_seed)
+	standards = BattleStandards.new()
+	standards.name = "Standards"
+	add_child(standards)
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind)
+	for id in _banners:
+		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
+	if terrain.vegetation != null:
+		terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
 
 
 ## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
@@ -603,6 +620,11 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		node.position = pos + Vector3(0, 0, 0)
 		node.scale = Vector3.ONE * banner_scale
 		node.rotation.y = cam_yaw
+		if standards != null:
+			# BV3 : de près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
+			# porté quand celui-ci est affiché.
+			node.rotation.y = lerp_angle(standards.downwind_yaw(), cam_yaw, smoothstep(1.0, 2.5, banner_scale))
+			node.visible = not (banner_scale <= standards.hide_scale() and standards.is_shown(id))
 		var routing := str(unit["state"]) == "routing"
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
@@ -614,6 +636,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
 				ring.set_meta("size", size)
 				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	if standards != null:
+		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
 	_hud_timer -= delta
 	if force or _hud_timer <= 0.0:

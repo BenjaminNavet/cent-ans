@@ -373,6 +373,20 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			mat.set_shader_parameter("blood", blood)
 
 
+## BV3 : repère (position au sol, cap) de la figurine placée à `rank` (0 première, 1 dernière)
+## dans le tampon courant du régiment ; null si le régiment n'a pas de figurine dessinée.
+func figure_frame(id: int, rank: float) -> Variant:
+	if not _previous.has(id):
+		return null
+	var slice: PackedFloat32Array = _previous[id]
+	var n := slice.size() / 12
+	if n <= 0:
+		return null
+	var o := clampi(int(rank * float(n - 1)), 0, n - 1) * 12
+	var basis := Basis(Vector3(slice[o], slice[o + 4], slice[o + 8]), Vector3(slice[o + 1], slice[o + 5], slice[o + 9]), Vector3(slice[o + 2], slice[o + 6], slice[o + 10]))
+	return Transform3D(basis, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
 ## BV3 : nombre de régiments dessinés en imposteurs (bancs d'essai).
 func impostor_regiments() -> int:
 	var n := 0
