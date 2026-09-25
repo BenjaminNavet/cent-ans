@@ -64,6 +64,8 @@ def load_oga():
     fetch_oga()
     with bpy.data.libraries.load(OGA_BLEND, link=False) as (src, dst):
         dst.objects = [n for n in src.objects if n in PIECES or n == "Armature"]
+        # Legacy (2.6) materials lose their texture slots: append the packed images.
+        dst.images = list(src.images)
     out = {}
     for o in dst.objects:
         bpy.context.scene.collection.objects.link(o)
@@ -137,7 +139,18 @@ def similarity(pieces, mount):
     )
     for o in pieces.values():
         o.data.transform(T)
-    print(f"HORSE scale={s0 * s1:.4f} back={q_back:.3f}")
+    # 4. Barrel width: the rider's stirrups (fixed by ``Mount``) are set for the slimmer
+    # Quaternius horse; a draught barrel would swallow his legs. Narrow the whole horse.
+    pts = _verts(body)
+
+    def half_width(ps):
+        band = [p for p in ps if abs(p.y - mount.seat.y) < 0.15 and 1.0 < p.z < 1.35]
+        return max(abs(p.x) for p in band)
+
+    sx = min(1.0, half_width(q_pts) * 1.08 / half_width(pts))
+    for o in pieces.values():
+        o.data.transform(Matrix.Diagonal((sx, 1.0, 1.0, 1.0)))
+    print(f"HORSE scale={s0 * s1:.4f} back={q_back:.3f} width={sx:.3f}")
     return s0 * s1
 
 
@@ -333,9 +346,9 @@ def decimate(obj, target):
 
 
 HORSE_BUDGET = {
-    "horse_body": 5200,
-    "horse_mane": 1300,
-    "horse_tail": 800,
+    "horse_body": 4200,
+    "horse_mane": 1000,
+    "horse_tail": 600,
     "horse_eye_l": 80,
     "horse_eye_r": 80,
 }
@@ -547,9 +560,106 @@ def horse_materials(objs):
         )
 
 
-def hide_under(objs, cover, margin=0.03):
-    """Delete horse body faces hidden under `cover` (e.g. the caparison) at rest."""
-    del objs, cover, margin  # FG4: not needed for the style sheet
+TORSO = {
+    "Back",
+    "Torso",
+    "Torso2",
+    "Torso3",
+    "Neck1",
+    "FrontShoulder.L",
+    "FrontShoulder.R",
+    "BackShoulder.L",
+    "BackShoulder.R",
+    "BackLeg.L",
+    "BackLeg.R",
+}
 
 
-_ = bmesh
+def caparison(mount, body, hem=0.48, stations=26, around=24):
+    """Trapper in livery from the withers to the croup, hanging in soft folds.
+
+    Same principle as ``battle_skinned_cavalry.caparison`` (rings along the body, flat
+    sides falling to `hem`), finer and fitted to the new horse; UV ``heraldry`` = arms on
+    both flanks; weights of the nearest horse torso vertex (legs excluded).
+    """
+    import battle_fine_equipment as fe
+    import battle_skinned_equipment as eq
+    from mathutils.kdtree import KDTree
+
+    names = {g.index: g.name for g in body.vertex_groups}
+    mw = body.matrix_world
+    pts = []
+    for v in body.data.vertices:
+        best = max(v.groups, key=lambda g: g.weight, default=None)
+        if best is not None and names[best.group] in TORSO:
+            pts.append(
+                (
+                    mw @ v.co,
+                    [(names[g.group], g.weight) for g in v.groups if g.weight > 0],
+                )
+            )
+    ys = [p.y for p, _w in pts]
+    y0, y1 = min(ys) + 0.12, max(ys) - 0.1
+    bm = bmesh.new()
+    rings = []
+    for k in range(stations + 1):
+        u = k / stations
+        y = y0 + (y1 - y0) * u
+        near = [p for p, _w in pts if abs(p.y - y) < 0.08]
+        half = max((abs(p.x) for p in near), default=0.3) + 0.025
+        top = max((p.z for p in near), default=1.4) + 0.035
+        ring = []
+        for j in range(around + 1):
+            a = math.pi * j / around  # 0 = left hem, pi = right hem
+            side = math.cos(a)
+            lift = math.sin(a)
+            if lift > 0.5:
+                z = top - (1 - lift) * 0.33
+                x = half * side * 1.04
+            else:
+                f = lift / 0.5
+                z = hem + (top - 0.33 - hem) * f
+                sx = 1.0 if side > 0 else -1.0
+                # Folds: stronger towards the hem, a few along the flank.
+                fold = 0.022 * (1 - f) * math.sin(u * math.pi * 11 + 0.7)
+                x = sx * (half * (1.02 + 0.07 * (1 - f)) + fold)
+            ring.append(bm.verts.new(Vector((x, y, z))))
+        rings.append(ring)
+    # Two-piece trapper, parted at the saddle: the rider's legs hang between the halves.
+    gap = (mount.seat.y - 0.24, mount.seat.y + 0.2)
+    for ra, rb in zip(rings, rings[1:], strict=False):
+        if gap[0] < (ra[0].co.y + rb[0].co.y) / 2 < gap[1]:
+            continue
+        for j in range(around):
+            bm.faces.new((ra[j], ra[j + 1], rb[j + 1], rb[j]))
+    bmesh.ops.delete(
+        bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS"
+    )
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
+            f.normal_flip()
+    uv = bm.loops.layers.uv.new("heraldry")
+    ymid = (y0 + y1) / 2
+    zmid = hem + 0.45
+    for f in bm.faces:
+        for loop in f.loops:
+            p = loop.vert.co
+            uu = (p.y - ymid) / 0.75 + 0.5
+            loop[uv].uv = (uu if p.x > 0 else 1 - uu, 0.5 - (p.z - zmid) / 0.75)
+    obj = eq.to_object("caparison", bm, [fe.mat("arms")])
+    tree = KDTree(len(pts))
+    for i, (p, _w) in enumerate(pts):
+        tree.insert(Vector((p.x * 0.6, p.y, p.z)), i)
+    tree.balance()
+    groups = {}
+    for v in obj.data.vertices:
+        p = obj.matrix_world @ v.co
+        _co, idx, _d = tree.find(Vector((p.x * 0.6, p.y, max(p.z, 1.0))))
+        for name, w in pts[idx][1]:
+            if name not in groups:
+                groups[name] = obj.vertex_groups.new(name=name)
+            groups[name].add([v.index], w, "REPLACE")
+    obj.data.shade_smooth()
+    return [obj]

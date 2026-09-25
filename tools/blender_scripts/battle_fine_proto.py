@@ -382,12 +382,17 @@ def attach(obj, arm):
     mod.object = arm
 
 
-def fitted_body(head_scale=1.0):
-    """Quaternius armature and the MakeHuman body fitted and skinned to it."""
-    arm, meshes = load_human_rig(keep_meshes=True)
-    joints = q_joints(arm, meshes)
-    for m in meshes:
-        bpy.data.objects.remove(m)
+def fitted_body(head_scale=1.0, arm=None):
+    """Quaternius armature and the MakeHuman body fitted and skinned to it.
+
+    `arm`: an existing ``human`` armature at bind pose (e.g. the rider of a ``Mount``);
+    by default a fresh scene with the foot soldier's armature.
+    """
+    if arm is None:
+        arm, meshes = load_human_rig(keep_meshes=True)
+        for m in meshes:
+            bpy.data.objects.remove(m)
+    joints = q_joints(arm)
     rig, body = append_makehuman()
     scale = fit_scale(rig, joints)
     print(f"FIT scale={scale:.3f}")
@@ -513,13 +518,17 @@ def _tris(obj):
     return len(obj.data.loop_triangles)
 
 
-def build_infantry():
-    """Fitted body dressed as a man-at-arms c. 1340; returns (armature, objects)."""
+def build_infantry(arm=None, mounted=False, budget=None):
+    """Fitted body dressed as a man-at-arms c. 1340; returns (armature, objects).
+
+    `mounted`: knight's kit (lance instead of the drawn sword, sword in its scabbard).
+    """
     import battle_fine_equipment as fe
     import battle_skinned_equipment as eq
     from mathutils.bvhtree import BVHTree
 
-    arm, body = fitted_body()
+    budget = budget or FOOT_BUDGET
+    arm, body = fitted_body(arm=arm)
     lm = fe.Landmarks(body, arm)
     hauberk = fe.hauberk(body, lm)[0]
     objs = [hauberk]
@@ -534,20 +543,29 @@ def build_infantry():
     objs += helm
     objs += fe.aventail(lm, frame, bvh, extra=(bvh_coat,))
     ctx = eq.Context(arm, 0, bs.material, bs.bone_world)
-    objs += fe.sword(ctx, fist=FIST.get("R"))
+    if mounted:
+        import battle_skinned_cavalry as cav
+
+        objs += cav.lance(ctx)
+        mats = objs[-1].data.materials
+        for i, name in enumerate(("wood", "steel", "livery")[: len(mats)]):
+            mats[i] = fe.mat(name)
+    else:
+        objs += fe.sword(ctx, fist=FIST.get("R"))
     objs += fe.heater_shield(ctx)
     fe.trim_body(body)
     fe.assign_body_materials(body)
     objs.insert(0, body)
     for o in objs:
-        target = FOOT_BUDGET.get(o.name.split(".")[0], 0)
+        target = budget.get(o.name.split(".")[0], 0)
         tris = bs.weld_and_decimate(o, target) if target else _tris(o)
         print(f"PIECE {o.name} tris={tris}")
-        if o.parent is None:
+        if not any(m.type == "ARMATURE" for m in o.modifiers):
             attach(o, arm)
         o.data.shade_smooth()
         o.data.set_sharp_from_angle(angle=math.radians(60))
-    print(f"FIGURE infantry_fine LOD0 tris={sum(_tris(o) for o in objs)}")
+    kind = "rider" if mounted else "infantry"
+    print(f"FIGURE {kind}_fine LOD0 tris={sum(_tris(o) for o in objs)}")
     return arm, objs
 
 
@@ -659,7 +677,7 @@ def setup_eevee(res=(800, 1000)):
         scene.render.engine = "BLENDER_EEVEE_NEXT"
     scene.render.resolution_x, scene.render.resolution_y = res
     scene.render.resolution_percentage = 100
-    scene.render.film_transparent = False
+    scene.render.film_transparent = True
     if hasattr(scene.eevee, "taa_render_samples"):
         scene.eevee.taa_render_samples = 64
     world = scene.world or bpy.data.worlds.new("fg_world")
@@ -676,7 +694,7 @@ def setup_eevee(res=(800, 1000)):
         sun = bpy.data.objects.new("fg_sun", light)
         scene.collection.objects.link(sun)
         sun.rotation_euler = (math.radians(52), 0, math.radians(-35))
-    if bpy.data.objects.get("fg_floor") is None:
+    if FLOOR and bpy.data.objects.get("fg_floor") is None:
         me = bpy.data.meshes.new("fg_floor")
         s_ = 60.0
         me.from_pydata(
@@ -692,6 +710,8 @@ def setup_eevee(res=(800, 1000)):
     scene.view_settings.view_transform = "AgX"
     return scene
 
+
+FLOOR = False  # the style sheet composites the renders on a neutral backdrop
 
 VIEWS = {
     # name: (eye, target, lens, resolution)
@@ -740,7 +760,8 @@ def step_current_infantry(out):
     """Current ``infantry_0`` (LOD0) rendered with the same light."""
     import battle_skinned_figures as figures
 
-    _arm, objs = bs.build_human(figures.FIGURES["infantry_0"], 0)
+    arm, objs = bs.build_human(figures.FIGURES["infantry_0"], 0)
+    objs = apply_variant(objs, 0)  # with the heater shield
     for m in bpy.data.materials:
         look_current(m)
     print(f"FIGURE infantry_0 LOD0 tris={sum(_tris(o) for o in objs)}")
@@ -784,6 +805,7 @@ def pose_cavalry(mount, clip, frac):
     mount.harm.animation_data.action = None
     mount.rarm.animation_data.action = None
     bpy.context.view_layer.update()
+    follow_prop([o for o in bpy.data.objects if o.type == "MESH"], "R:")
 
 
 def rest_cavalry(mount):
@@ -831,7 +853,163 @@ def step_horse(out):
                 o.hide_render = False
 
 
+RIDER_BUDGET = {
+    "MH_Body": 2000,
+    "hauberk": 1800,
+    "chausses": 900,
+    "shoes": 300,
+    "surcoat": 900,
+    "aventail": 700,
+    "bassinet": 800,
+}
+
+CAVALRY_VIEWS = {
+    "face": ((0.0, -6.2, 1.5), (0.0, -0.2, 1.3), 50, (900, 1000)),
+    "trois_quarts": ((-4.2, -4.6, 1.9), (0.0, -0.1, 1.25), 50, (900, 1000)),
+    "tete": ((-0.45, -1.35, 2.45), (0.0, -0.08, 2.32), 85, (700, 700)),
+}
+
+
+def build_cavalry():
+    """Prototype knight: fitted rider on the ``cavalry`` rig, CC0 horse and caparison."""
+    import battle_fine_horse as fh
+    import battle_skinned_cavalry as cav
+
+    mount = cav.Mount()
+    PROBE["rig"] = probe_rig(mount.rarm, "R:")
+    # FG4 note: stirrups 6 cm wider than the Quaternius mount (thicker legs, broader barrel);
+    # in production this means re-baking the cavalry bone texture (same bones, same clips).
+    for side, sx in (("L", 1), ("R", -1)):
+        mount.stirrups[side] = mount.seat + Vector((0.36 * sx, -0.08, -0.84))
+    horse = fh.build_horse(mount)
+    fh.horse_materials(horse)
+    _arm, rider = build_infantry(arm=mount.rarm, mounted=True, budget=RIDER_BUDGET)
+    body = next(o for o in horse if o.name == "horse_body")
+    extra = fh.caparison(mount, body)
+    extra += cav.saddle(mount, _Ctx())
+    for o in extra:
+        if not o.data.materials or "fg" not in o.data.materials[0]:
+            import battle_fine_equipment as fe
+
+            o.data.materials.clear()
+            o.data.materials.append(fe.mat("leather"))
+        mod = o.modifiers.new("arm", "ARMATURE")
+        mod.object = mount.harm
+        o.parent = mount.harm
+        o.matrix_parent_inverse = mount.harm.matrix_world.inverted()
+    total = sum(_tris(o) for o in horse + rider + extra)
+    print(f"FIGURE cavalry_fine LOD0 tris={total}")
+    return mount, horse, rider, extra
+
+
+PROBE = {}
+
+
+def probe_rig(arm, prefix=""):
+    """Rig holding the virtual bones (prop, nock, arrow) of a human armature."""
+    rig = bs.Rig("probe")
+    bs.add_human_virtuals(rig, arm, prefix=prefix)
+    return rig
+
+
+def follow_prop(objs, prefix=""):
+    """Move the pieces bound to the virtual ``Prop`` bone (lance, pike) with it.
+
+    Blender cannot deform by a virtual bone: the rest placement is kept in ``fg_rest``.
+    """
+    rig = PROBE.get("rig")
+    if rig is None:
+        return
+    fn = rig.entries[rig.index[prefix + "Prop"]][1]
+    delta = fn(False) @ fn(True).inverted()
+    for o in objs:
+        if any(g.name.endswith("Prop") for g in o.vertex_groups):
+            if "fg_rest" not in o:
+                o["fg_rest"] = [list(r) for r in o.matrix_world]
+                o.modifiers.clear()
+                o.parent = None
+            rest = Matrix(o["fg_rest"])
+            o.matrix_world = delta @ rest
+
+
+def apply_variant(objs, variant):
+    """Delete the faces of a current figure hidden for `variant` (face attribute vmask)."""
+    import bmesh
+
+    keep = []
+    for o in objs:
+        attr = o.data.attributes.get("vmask")
+        if attr is None:
+            keep.append(o)
+            continue
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        layer = bm.faces.layers.int.get("vmask")
+        doomed = [f for f in bm.faces if f[layer] and not (f[layer] & (1 << variant))]
+        bmesh.ops.delete(bm, geom=doomed, context="FACES")
+        bm.to_mesh(o.data)
+        bm.free()
+        if len(o.data.polygons):
+            keep.append(o)
+        else:
+            bpy.data.objects.remove(o)
+    return keep
+
+
+class _Ctx:
+    """Minimal builder context for the Quaternius saddle."""
+
+    level = 0
+
+    @staticmethod
+    def material(code, rgb, name=None):
+        return bs.material(code, rgb, name)
+
+
+def step_cavalry(out):
+    """Prototype knight: build, count, render (no baked maps)."""
+    mount, _h, _r, _e = build_cavalry()
+    pose_cavalry(mount, "c_idle", 0.0)
+    for m in bpy.data.materials:
+        if m.get("fg"):
+            look_fine(m)
+    VIEWS.update(CAVALRY_VIEWS)
+    render_views("proto_cavalry", out)
+
+
+def step_current_cavalry(out):
+    """Current ``cavalry_0`` (LOD0) rendered with the same light, seated (clip c_idle)."""
+    import battle_skinned_cavalry as cav
+    import battle_skinned_figures as figures
+    import battle_skinned_poses as poses
+
+    objs = cav.build_cavalry(figures.FIGURES["cavalry_0"], 0)
+    objs = apply_variant(objs, 1)  # bassinet variant, like the prototype
+    mount = poses.RIDE["mount"]
+    PROBE["rig"] = probe_rig(mount.rarm, "R:")
+    for o in objs:
+        if not any(m.type == "ARMATURE" for m in o.modifiers):
+            rider = any(g.name.startswith("R:") for g in o.vertex_groups)
+            arm = mount.rarm if rider else mount.harm
+            if rider:
+                for g in o.vertex_groups:
+                    g.name = g.name[2:]
+            mod = o.modifiers.new("arm", "ARMATURE")
+            mod.object = arm
+            mw = o.matrix_world.copy()
+            o.parent = arm
+            o.matrix_world = mw
+    pose_cavalry(mount, "c_idle", 0.0)
+    for m in bpy.data.materials:
+        look_current(m)
+    print(f"FIGURE cavalry_0 LOD0 tris={sum(_tris(o) for o in objs)}")
+    VIEWS.update(CAVALRY_VIEWS)
+    render_views("current_cavalry", out)
+
+
 STEPS = {
+    "cavalry": step_cavalry,
+    "current_cavalry": step_current_cavalry,
     "horse": step_horse,
     "fit": step_fit,
     "infantry": step_infantry,
