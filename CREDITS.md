@@ -151,6 +151,22 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
     port) : masques calculés à partir d'OpenStreetMap, © les contributeurs d'OpenStreetMap,
     [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) — méthode seulement : aucune donnée
     OSM n'est redistribuée (masques intermédiaires hors dépôt).
+- **Réseau hydrographique fin (lot ZG5a, ADR 0036)** — tracés recalés sur la pyramide de relief,
+  canaux postérieurs à 1340 retirés :
+  - France : BD TOPAGE® 2025, tronçons hydrographiques (IGN, OFB, agences de l'eau ; diffusion
+    SANDRE, `services.sandre.eaufrance.fr`),
+    [Licence Ouverte Etalab 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/).
+    Mention : « Source : BD TOPAGE® – IGN, OFB ».
+  - Grande-Bretagne : OS Open Rivers, Ordnance Survey,
+    [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+    Mention : « Contains OS data © Crown copyright and database right 2026. »
+  - Bénélux, Rhénanie, versants suisse, italien et espagnol du cœur : EU-Hydro River Network
+    Database v1.3, Copernicus Land Monitoring Service, Agence européenne pour l'environnement,
+    lue sur le service ArcGIS public `image.discomap.eea.europa.eu` ; accès libre, complet et
+    gratuit selon la politique de données Copernicus (règlement délégué (UE) n° 1159/2013).
+    Mention : « © European Union, Copernicus Land Monitoring Service 2020, European Environment
+    Agency (EEA). »
+  - Hors cœur : Natural Earth (voir ci-dessus).
 - Traitement (reprojection EPSG:3035, découpage des provinces) : outils `tools/cent_ans_tools/geo`
   (voir `docs/geo.md`).
 
