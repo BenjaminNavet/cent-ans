@@ -64,3 +64,44 @@ fn unknown_landmark_or_own_town_is_refused() {
         .is_err());
     assert!(state.pending_battles.is_empty());
 }
+
+/// The assault paths of the demo towns work: with both sides under AI, the
+/// ram reaches the gate or ladders are raised against the walls of the plan.
+#[test]
+fn avignon_and_bruges_assault_paths_reach_the_walls() {
+    use sim_battle::{BattleSim, SideId, SiegeFxKind};
+    let data = data();
+    for (landmark, attacker) in [("avignon", "fac_england"), ("bruges", "fac_france")] {
+        let mut state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 5)
+            .expect("1337 start");
+        state.chronicle.disabled = true;
+        let army = largest_army(&state, attacker);
+        let index = state
+            .debug_stage_landmark_siege(&data, &army, landmark)
+            .unwrap();
+        let setup = state.battle_setup(&data, index).expect("setup");
+        let mut sim = BattleSim::new(setup, 11).expect("battle");
+        sim.set_ai(SideId::Attacker, true);
+        sim.set_ai(SideId::Defender, true);
+        if sim.is_deploying() {
+            sim.start_battle().expect("start");
+        }
+        let mut steps = 0;
+        while !sim.is_finished() && steps < 6000 {
+            sim.step();
+            steps += 1;
+        }
+        let count = |pred: fn(&SiegeFxKind) -> bool| sim.siege_fx().iter().filter(|f| pred(&f.kind)).count();
+        let strikes = count(|k| matches!(k, SiegeFxKind::RamStrike { .. }));
+        let ladders = count(|k| matches!(k, SiegeFxKind::LaddersRaised { .. }));
+        let on_wall = count(|k| matches!(k, SiegeFxKind::OnWall { .. }));
+        let gate = count(|k| matches!(k, SiegeFxKind::GateBroken { .. }));
+        println!(
+            "{landmark}: {strikes} ram blows, gate broken {gate}, {ladders} ladders, {on_wall} on the wall, {steps} steps"
+        );
+        assert!(
+            strikes > 0 || ladders > 0,
+            "{landmark}: the assault never reached the walls"
+        );
+    }
+}
