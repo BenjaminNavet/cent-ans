@@ -46,6 +46,7 @@ pub mod outcome;
 pub mod relief;
 pub mod relief_ai;
 pub mod rng;
+pub mod scale;
 pub mod setup;
 pub mod shot;
 pub mod siege;
@@ -66,6 +67,7 @@ pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
 pub use relief::ReliefStyle;
 pub use rng::BattleRng;
+pub use scale::{BattleScale, BattleScaleRules, FieldSize, ScaleTier};
 pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
