@@ -125,9 +125,9 @@ faisait passer l'armée sous le seuil de 40 % : armée brisée vers 340 s.
 Ce que disent les sources : on n'envoie pas les milices communales en tête d'un assaut. À Crécy
 comme à Poitiers, les « batailles » françaises attaquent avec les hommes d'armes (à cheval puis à
 pied) devant ; les piétons des communes suivent ou restent en arrière (Sumption, t. I-II ;
-Contamine, *Guerre, État et société à la fin du Moyen Âge*, 1972). Et un camp dont les archers
-gagnent l'échange n'a aucune raison de le rompre : à Morlaix (1342) comme à Auray (1364), c'est
-celui qui perd l'échange de traits qui se résout à charger.
+Contamine, *Guerre, État et société à la fin du Moyen Âge*, 1972). Et un camp dont les tireurs
+gagnent l'échange n'a pas de raison de le rompre : c'est à celui qui le perd de se résoudre à
+charger (règle déjà suivie par l'IA depuis B4, `DUEL_LOSS_MARGIN`).
 
 Décision (`data/rules/battle_duel.json`, schéma `battle_duel_rules.schema.json`, `sim-battle/src/duel.rs`,
 `DuelRules` gardées dans `BattleSim`, remplaçables par `set_duel_rules`) :
