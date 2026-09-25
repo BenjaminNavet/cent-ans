@@ -143,11 +143,13 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 ## dialogue d'avant-bataille, dont le résultat n'est connu qu'après la fermeture de ce
 ## dialogue) dans les rubriques déjà construites, et rouvre le rapport s'il avait été fermé.
 ## `is_relevant` : voir `build_groups`.
-func add_events(new_events: Array, is_relevant: Callable) -> bool:
+func add_events(new_events: Array, is_relevant: Callable, date_label: String = "") -> bool:
 	var new_groups := build_groups(new_events, is_relevant)
 	if new_groups.is_empty():
 		return false
 	groups = merge_groups(groups, new_groups)
+	if _title == "":  # Q1 : bataille livrée avant la première fin de tour (titre vide)
+		_title = date_label
 	_render()
 	show()
 	_fit_height.call_deferred()
