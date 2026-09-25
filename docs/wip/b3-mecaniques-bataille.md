@@ -4,23 +4,31 @@ Conception : `docs/design/2026-09-25-bulles-partout.md` (lot B3). Suivi généra
 
 ## Périmètre
 Fiches `category: "mecanique"` (ids `cdx_jeu_…`) sur la bataille 3D, l'auto-résolution, les sièges
-(campagne et assaut 3D), les incendies, les engins, la guerre navale et le débarquement ; une fiche par
-ordre du chef (`entity: "order_…"`) ; `gameplay` ajouté à `cdx_deroute_debandade` ; liens `[[cdx_…]]`
-dans les descriptions de `data/battle_orders/`.
+(campagne et assaut 3D), les incendies, les engins et la guerre navale ; une fiche par ordre du chef
+(`entity: "order_…"`) ; `gameplay` ajouté à `cdx_deroute_debandade` ; liens `[[cdx_…]]` dans les
+descriptions de `data/battle_orders/`.
 
 Chiffres : tirés de `core/crates/sim-battle/src/` (sim.rs, impact.rs, unit.rs, site.rs, siege*.rs,
 orders.rs, naval/), `core/crates/sim-campaign/src/` (battle_auto.rs, siege.rs, naval.rs, movement.rs,
-battle_request.rs, battle_forecast.rs, dynasty.rs), `data/rules/*.json`, `data/naval/rules.json`.
+battle_request.rs, battle_forecast.rs, dynasty.rs), `data/rules/*.json`, `data/naval/rules.json`,
+`data/settlements/rules.json` (repli).
 
-Liens vers des fiches d'unités de B5 pas encore écrites : `data/codex/_b3_links.md` (ids probables).
+## État : terminé (32 fiches + gameplay de cdx_deroute_debandade), validateur vert
+- Bataille (15) : moral, fatigue, formations, deploiement, charge, pieux, melee, tir, flancs,
+  terrain_bataille, relief_bataille, meteo_bataille, general, resolution_auto, pertes_prisonniers.
+- Siège (8) : siege, murailles, assaut, belier, sortie, engins_siege, huile_bouillante, incendies.
+- Naval (4) : bataille_navale, abordage, brulots, maitrise_mer. Le débarquement est laissé à
+  `cdx_jeu_traversee` (B2), qui le traitait déjà (fiche B3 supprimée).
+- Ordres (5) : pied_a_terre, pavois, pas_de_quartier, ralliement, cri_de_guerre.
 
-## État
-- [x] Squelette (ce fichier, `_b3_links.md`)
-- [x] Fiches bataille (moral, fatigue, formations, déploiement, charge, pieux, mêlée, tir, flancs, terrain, relief, météo, général, résolution auto, pertes et prisonniers)
-- [ ] Fiches siège (faites : siège, murailles, assaut, bélier, sortie ; restent engins, huile, incendies)
-- [ ] Fiches navales
-- [ ] Fiches des ordres + liens dans `data/battle_orders`
-- [ ] Validateur Codex + pytest verts
+## Coordination avec B2/B4/B5
+- `data/codex/_b3_links.md` : ids des autres lots liés depuis B3 (existants sur leurs branches,
+  `cdx_galere` supposé). À supprimer après fusion de tous les lots.
+- Alias cédés pour éviter les doublons : « schiltron » (B5 cdx_schiltron), « pavescheur » (B5
+  cdx_pavois), « pierrières » (B5 cdx_mangonneau), « mâchicoulis », « hourds », « chemin de ronde »
+  (B4 cdx_enceinte_de_pierre). Recontrôler les alias à la fusion (lots encore en cours).
 
-## Prochaine étape
-Fiches siège restantes (cdx_jeu_engins_siege, cdx_jeu_huile_bouillante, cdx_jeu_incendies), puis naval, puis ordres. Les liens vers des cdx_jeu_ pas encore écrits font échouer le validateur jusqu'à la fin du lot.
+## Points ouverts
+- La barre d'ordres (`leader_orders_bar.gd`) affiche la description brute : les liens `[[…]]`
+  ajoutés aux descriptions d'ordres doivent passer par `CodexText.format` (lot B1).
+- L'ordre « incendier » existe dans le cœur mais n'a pas de commande à l'écran (dit dans la fiche).
