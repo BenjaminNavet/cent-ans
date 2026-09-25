@@ -229,3 +229,13 @@ Conséquences : empreintes `b6.rs` (graines 3 et 11) recalculées, mêmes vainqu
 (graine 11) : pic de 10 régiments en mêlée (16 et 26 aux graines 3 et 5, 41-47 aux graines 1, 2, 4) ;
 le test compte aussi les régiments qui ont combattu au corps à corps au moins une fois (55 à 95 sur
 120) et exige au moins 10 au pic et 40 en tout.
+
+Après fusion d'EP9 (ADR 0056, armée brisée à 40 % d'effectif en état de combattre ; batailles de
+5-6 min) — victoires attaquant / défenseur, 10 graines, main EP9 seul → EP9 + SG4 :
+plat avec pieux 3/7 → 3/7 ; plat sans pieux **0/10 → 0/10** ; crête 0/10 → 0/10 (avec et sans
+pieux) ; plaine générée 2/8 → 2/8 et 6/4 → 5/5 ; comme `ep1_scale` 3/7 → 2/8. SG4 ne change plus
+l'issue : l'armée cède avant le duel de cavalerie et la mêlée. Sur le plat sans pieux, la milice de
+l'attaquant (moral 40) traverse 180 m de flèches après `ATTACKER_DUEL_LIMIT` (180 s, EP9) et se
+débande (moral 14 à 300 s) alors que ses tireurs gagnaient le duel ; son armée est brisée. Point
+ouvert pour EP9 (logique hors de SG4). `b6.rs` : empreintes recalculées sur EP9 + SG4 (mêmes
+vainqueurs) ; `ep1_scale` : pic 10-19 en mêlée, 28-59 régiments au contact (seuil 25).

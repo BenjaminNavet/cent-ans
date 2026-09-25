@@ -34,3 +34,11 @@ Branche `worktree-agent-af1d6ff622ee45890` (worktree `agent-af1d6ff622ee45890`).
 - La capture « échelles sur plusieurs pans » n'a pas eu lieu à la graine 11 (la porte tombe avant
   l'escalade) ; la règle est couverte par la sonde.
 - Issue des batailles épiques très sensible au duel de cavalerie (10 graines : ± 3 victoires).
+
+## Fusion d'EP9 (b4bc9707)
+- Conflits `lib.rs` (`crest` + `decision`), `b6.rs`, `ep1_scale.rs` résolus, logique EP9 intacte.
+- Empreintes `b6.rs` recalculées sur EP9 + SG4 (graine 3 : 406 s, graine 11 : 186 s, défenseur).
+- `ep1_scale` : critère « régiments au contact » abaissé à 25 (28-59 mesurés, batailles de 5-6 min).
+- Matrice : identique à EP9 seul ; plat sans pieux 0/10 pour l'attaquant et crête 0/10 (voir
+  ADR 0046, point ouvert pour EP9 : `ATTACKER_DUEL_LIMIT` et milice en première ligne).
+- Sièges inchangés (sonde ENGINES=1 : 10/10 partout, 0 nul).

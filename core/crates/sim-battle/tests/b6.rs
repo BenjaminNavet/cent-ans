@@ -169,15 +169,20 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// ADR 0052 (horses panic under the arrows): seeds 3 and 11 now go to the
 /// English, whose knights screen their archers; over seeds 0-63 the French
 /// win 30/64 instead of 51/64.
+/// EP9 (ADR 0056): the beaten army breaks as a whole before its last
+/// regiment flees, same winners, 292 s and 186 s instead of 391 s and 225 s.
 /// SG4 (the horse counter-charges enemy horse riding at its shooters,
-/// melee height advantage): digests recomputed, same winners.
+/// melee height advantage): digests recomputed on EP9 + SG4, same winners.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
-        (3, "840 Some(Defender) [0, 0, 0, 37, 88, 8, 42, 59, 71, 0]"),
+        (
+            3,
+            "406 Some(Defender) [4, 0, 0, 89, 90, 8, 60, 101, 120, 0]",
+        ),
         (
             11,
-            "236 Some(Defender) [7, 53, 0, 35, 92, 24, 64, 112, 120, 35]",
+            "186 Some(Defender) [7, 66, 43, 48, 92, 24, 78, 112, 120, 35]",
         ),
     ];
     for (seed, digest_before) in expected {
