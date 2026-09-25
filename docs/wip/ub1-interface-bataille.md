@@ -21,12 +21,19 @@ Sources : `docs/audit/a3-ui.md` (U9, U13, défauts B1-B7), `docs/audit/backlog-t
   siège). Cœur : `battle_forecast.rs` (`battle_forecast`, `withdraw_pending_battle`, test
   `tests/ub1_forecast.rs`) ; pont `get_battle_forecast`, `withdraw_pending_battle`. Mise en scène
   `--stage=assault`. Captures 10, 11, 12.
-- [ ] Lot 2 — HUD de bataille compact (U9)
+- [x] Lot 2 — HUD de bataille compact (U9) : bandeau de 128 px (au lieu de 182, 14 % de 900),
+  sceau du chef (portrait, anneau de moral de sa garde, clic / double clic), cartes avec barres
+  santé / moral / munitions et pastilles agrandies (déroute, charge, épuisée…), noms distincts des
+  homonymes (« Chevaliers II ») en infobulle, ordres en icônes, « Retraite générale » isolée et
+  confirmée (Échap annule), journal regroupé (×2) et repliable (bouton, touche J), barre des
+  ordres du chef recalée. `tests/ub1_screenshots.gd` (captures 22, 23). Captures 20, 21.
+  L'erreur « doivent être placés dans votre zone » de la capture A3 21 vient de la mise en scène
+  `--deploy-shot` (refus volontaire) : aucune erreur à l'ouverture en jeu.
 - [ ] Lot 3 — écran de fin détaillé
 - [ ] Lot 4 — sons d'interface (U13)
 
 ## Prochaine étape
-Lot 2 : HUD de bataille compact (`battle_hud.gd`, `unit_card.gd`).
+Lot 3 : écran de fin détaillé (`battle_result_screen.gd`).
 
 ## Reprise
 `core/build.sh`, `godot --headless --path game --import`. Captures :

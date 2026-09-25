@@ -111,6 +111,7 @@ func _ready() -> void:
 	hud.command_pressed.connect(_on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -220,6 +221,7 @@ func begin() -> bool:
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
+	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -768,6 +770,17 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## UB1 : clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
+func _on_leader_clicked(double: bool) -> void:
+	var id := hud.leader_unit_id()
+	if id < 0:
+		return
+	if double:
+		_on_card_double_clicked(id)
+	else:
+		_on_card_clicked(id, false)
 
 
 ## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
