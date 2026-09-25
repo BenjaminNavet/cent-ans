@@ -165,19 +165,21 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// (digests recomputed after merging R2, BV2 and R2b). EP5: standards fall
 /// and are taken under heavy losses (same winners; digests recomputed).
 /// R4: seeds 3 and 11 after the military crest, same winner. Digests
-/// recomputed after merging R4 into the EP lots (same winners). EP6: each
-/// army's camp stands behind its lines (seed 11 ends a second later: a
-/// fleeing regiment crosses its camp).
+/// recomputed after merging R4 into the EP lots (same winners).
+/// ADR 0052 (horses panic under the arrows): seeds 3 and 11 now go to the
+/// English, whose knights screen their archers; over seeds 0-63 the French
+/// win 30/64 instead of 51/64. EP6: each army's camp stands behind its
+/// lines (both digests unchanged).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 42, 10]",
+            "391 Some(Defender) [12, 0, 27, 70, 79, 8, 64, 118, 118, 12]",
         ),
         (
             11,
-            "473 Some(Attacker) [14, 28, 35, 97, 96, 13, 59, 107, 115, 0]",
+            "225 Some(Defender) [7, 52, 14, 35, 92, 24, 68, 112, 117, 35]",
         ),
     ];
     for (seed, digest_before) in expected {

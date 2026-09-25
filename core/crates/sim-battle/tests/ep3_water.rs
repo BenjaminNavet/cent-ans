@@ -6,8 +6,8 @@ mod common;
 use common::*;
 use data_model::Terrain;
 use sim_battle::{
-    BattleRng, BattleSim, Battlefield, Command, Formation, RoadKind, SideId, Water, WaterRules,
-    Weather,
+    BattleRng, BattleSim, Battlefield, Command, Formation, RoadKind, SideId, UnitState, Water,
+    WaterRules, Weather,
 };
 
 const TERRAINS: [Terrain; 7] = [
@@ -487,8 +487,11 @@ fn the_attacker_crosses_by_the_bridges_and_fords() {
                 if f.bridge_at(u.x, u.z).is_some() || f.water_kind(u.x, u.z) == Some(Water::Ford) {
                     used_crossing[k] = true;
                 }
-                // Horsemen never stand in deep water.
-                if u.category == data_model::UnitCategory::Cavalry {
+                // Horsemen never stand in deep water, unless they flee in a
+                // rout (`water_route`: routers throw themselves in and drown;
+                // ADR 0052 lets the arrows rout the knights).
+                if u.category == data_model::UnitCategory::Cavalry && u.state != UnitState::Routing
+                {
                     assert_ne!(f.water_kind(u.x, u.z), Some(Water::Deep), "seed {seed}");
                 }
                 if r.north_of(u.x, u.z) != own_north && !used_crossing[k] {

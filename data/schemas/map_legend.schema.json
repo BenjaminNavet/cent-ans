@@ -25,7 +25,7 @@
         "from": {"$ref": "#/$defs/hex_color"},
         "to": {"$ref": "#/$defs/hex_color"},
         "color": {"$ref": "#/$defs/hex_color"},
-        "relation": {"type": "string", "enum": ["self", "war", "truce", "peace", "alliance", "vassal", "suzerain"]},
+        "relation": {"type": "string", "enum": ["self", "war", "truce", "peace", "alliance", "vassal", "suzerain", "ally", "agreement", "neutral", "tension"]},
         "kind": {"type": "string", "enum": ["city", "town", "castle", "abbey", "village", "spy", "emissary", "preacher"]},
         "owner": {"$ref": "#/$defs/owner"},
         "men": {"type": "integer", "minimum": 0},
