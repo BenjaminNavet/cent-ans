@@ -1377,6 +1377,10 @@ def _stone_hall(
     buttresses=False,
     ends=True,
     door_side=False,
+    win_lo=0.35,
+    win_hi=0.8,
+    bay=4.2,
+    win_w=0.9,
 ):
     """Ashlar rectangle with lancet windows and stepped buttresses (church nave, choir, hall)."""
     x0, y0, x1, y1 = -L / 2, -W / 2, L / 2, W / 2
@@ -1388,14 +1392,14 @@ def _stone_hall(
         along = k.norm((b[0] - a[0], b[1] - a[1], 0.0))
         width = math.hypot(b[0] - a[0], b[1] - a[1])
         ops = []
-        bays = max(1, int(width / 4.2))
+        bays = max(1, int(width / bay))
         if lancets and i in (0, 2):
             for bi in range(bays):
                 cx = (bi + 0.5) * width / bays
                 if door_side and i == 0 and bi == 1:
                     ops.append(Opening(cx - 0.8, 0.0, cx + 0.8, 3.0, "door"))
                     continue
-                ops.append(Opening(cx - 0.45, h * 0.35, cx + 0.45, h * 0.8, "window"))
+                ops.append(Opening(cx - win_w / 2, h * win_lo, cx + win_w / 2, h * win_hi, "window"))
         elif lancets and i == 1 and ends:
             ops.append(
                 Opening(width / 2 - 0.7, h * 0.3, width / 2 + 0.7, h * 0.85, "window")
@@ -1889,6 +1893,122 @@ def windmill(g, rng, detail="high", length=None, depth=None, ruined=False):
     return {"height": 3.8 + zr + 4.0, "length": 7.0, "depth": 7.0}
 
 
+def _rose(g, center, radius, normal_axis, sign, detail):
+    """Rose window: dark disc with a stone ring, on a wall facing ``sign`` along X or Y."""
+    n = 16 if detail == "high" else 10
+    cx, cy, cz = center
+
+    def P(a, r, d):
+        u, v = math.cos(a) * r, math.sin(a) * r
+        if normal_axis == "x":
+            return (cx + sign * d, cy + u * sign, cz + v)
+        return (cx - u * sign, cy + sign * d, cz + v)
+
+    ring = [2 * math.pi * i / n for i in range(n)]
+    g.poly([P(a, radius, 0.03) for a in ring], "Window")
+    if detail == "high":
+        for i, a in enumerate(ring):
+            b = ring[(i + 1) % n]
+            g.quad(P(a, radius, 0.06), P(b, radius, 0.06), P(b, radius * 1.18, 0.06), P(a, radius * 1.18, 0.06), "Ashlar", color=WHITE)
+            if i % 2 == 0:
+                g.quad(P(a - 0.03, radius * 0.15, 0.05), P(a + 0.03, radius * 0.15, 0.05), P(a + 0.03, radius, 0.05), P(a - 0.03, radius, 0.05), "Ashlar", color=WHITE)
+
+
+def cathedral(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Gothic cathedral: clerestoried nave, aisles with flying buttresses, transept with rose
+    windows, polygonal chevet, twin west towers, crossing spire."""
+    L = length or rng.uniform(95.0, 115.0)
+    W = depth or rng.uniform(28.0, 34.0)
+    nave_w = W * 0.46
+    aisle_w = (W - nave_w) / 2
+    tint = pick(rng, STONE_TINTS[:2])
+    st = Style(wall="Ashlar", roof="RoofSlate", pitch=56, stone_tint=tint, roof_tint=(0.85, 0.88, 0.95))
+    h = rng.uniform(28.0, 33.0)
+    ah = h * 0.42
+    z0 = 0.4
+    tower = aisle_w + 2.5
+    west = -L / 2
+    apse_r = nave_w / 2
+    body_len = L - apse_r
+    k.box(g, (0.0, 0.0, (z0 - FOUNDATION_DEPTH) / 2), (L + 1.0, W + 3.0, z0 + FOUNDATION_DEPTH), "Ashlar", color=tint)
+    # Nave and choir: tall clerestory walls, windows above the aisle roofs.
+    body_cx = west + body_len / 2
+    with frame(g, (body_cx, 0.0, 0.0)):
+        _stone_hall(g, rng, body_len, nave_w, z0, h, st, detail, lancets=True, ends=False, win_lo=(ah + 4.0) / h, win_hi=0.9, bay=6.5, win_w=2.2)
+        g.eave_z = h + z0
+        zr = roof_gable(g, body_len, nave_w, h + z0, st, detail, overhang=0.3, gable_over=0.0)
+        g.eave_z = None
+    # West facade: portal, rose window, gable.
+    fw = [Opening(nave_w / 2 - 2.2, 0.0, nave_w / 2 + 2.2, 7.5, "door")] if detail == "high" else []
+    k.wall(g, (west, nave_w / 2, z0), (0.0, -1.0, 0.0), nave_w, h, "Ashlar", fw, depth=1.2, color=tint)
+    gable_wall(g, west, nave_w, h + z0, st.pitch, "Ashlar", -1, color=tint)
+    _rose(g, (west, 0.0, z0 + h * 0.62), nave_w * 0.3, "x", -1, detail)
+    if detail == "high":
+        g.poly([(west - 0.05, 2.2, z0 + 7.5), (west - 0.05, -2.2, z0 + 7.5), (west - 0.05, 0.0, z0 + 11.0)], "Ashlar", color=tint)
+    # Aisles with lean-to roofs, buttress piers and flying buttresses.
+    ax0 = west + tower
+    alen = body_len - tower
+    bays = max(2, int(alen / 6.5))
+    for side in (-1, 1):
+        yc = side * (nave_w / 2 + aisle_w / 2)
+        with frame(g, (ax0 + alen / 2, yc, 0.0)):
+            _stone_hall(g, rng, alen, aisle_w, z0, ah, st, detail, lancets=True, ends=True, bay=6.5, win_w=1.8, win_lo=0.3, win_hi=0.82)
+        rise = aisle_w * math.tan(math.radians(28))
+        yi, yo = side * nave_w / 2, side * (W / 2 + 0.5)
+        zt, zb = z0 + ah + rise, z0 + ah - 0.2
+        quad = [(ax0, yo, zb), (ax0 + alen, yo, zb), (ax0 + alen, yi, zt), (ax0, yi, zt)]
+        if side > 0:
+            quad = [quad[1], quad[0], quad[3], quad[2]]
+        with tinted(g, st.roof_tint):
+            k.slab(g, quad, 0.2, "RoofSlate", cell=2.0 if detail == "high" else 0.0)
+        for b in range(bays + 1):
+            x = ax0 + alen * b / bays
+            pier_y = side * (W / 2 + 0.9)
+            k.box(g, (x, pier_y, (z0 + ah + 6.0) / 2 - 1.0), (1.4, 1.8, z0 + ah + 8.0), "Ashlar", color=tint)
+            k.cone(g, (x, pier_y, z0 + ah + 7.0), 0.9, 4.0, "Ashlar", sides=4, phase=math.pi / 4, color=tint)
+            if detail == "high":
+                k.beam(g, (x, pier_y - side * 0.5, z0 + ah + 5.0), (x, side * nave_w / 2, z0 + h * 0.82), 0.9, 0.7, "Ashlar", (1.0, 0.0, 0.0), color=tint)
+                k.beam(g, (x, pier_y - side * 0.5, z0 + ah + 2.0), (x, side * nave_w / 2, z0 + h * 0.62), 0.7, 0.6, "Ashlar", (1.0, 0.0, 0.0), color=tint)
+    # Transept: arms beyond the aisles, rose windows in the gables.
+    tx = west + body_len * 0.58
+    arm = W / 2 + 5.0
+    with frame(g, (tx, 0.0, 0.0), math.pi / 2):
+        for sign in (-1, 1):
+            with frame(g, (sign * (nave_w / 2 + (arm - nave_w / 2) / 2), 0.0, 0.0)):
+                _stone_hall(g, rng, arm - nave_w / 2, nave_w, z0, h, st, detail, lancets=True, ends=True, bay=6.5, win_w=2.0, win_lo=0.4, win_hi=0.85)
+        g.eave_z = h + z0
+        roof_gable(g, arm * 2, nave_w, h + z0, st, detail, overhang=0.3, gable_over=0.2)
+        for sign in (-1, 1):
+            gable_wall(g, sign * arm, nave_w, h + z0, st.pitch, "Ashlar", sign, color=tint)
+            _rose(g, (sign * arm, 0.0, z0 + h * 0.66), nave_w * 0.28, "x", sign, detail)
+        g.eave_z = None
+    # Chevet.
+    with frame(g, (west + body_len, 0.0, 0.0)):
+        _apse(g, 0.0, nave_w, z0, h, st, detail)
+    # Twin west towers.
+    top_kind = rng.random()
+    for side in (-1, 1):
+        with frame(g, (west + tower / 2, side * (nave_w / 2 + tower / 2 - 0.5), 0.0)):
+            th = h + rng.uniform(22.0, 28.0)
+            _tower(g, rng, tower, th, st, detail)
+            if top_kind < 0.5:
+                if detail == "high":
+                    for i in range(8):
+                        t = -tower / 2 + tower * (i + 0.5) / 8
+                        for pos in ((t, -tower / 2 - 0.1), (t, tower / 2 + 0.1), (-tower / 2 - 0.1, t), (tower / 2 + 0.1, t)):
+                            k.box(g, (pos[0], pos[1], th + 0.9), (0.6, 0.6, 1.0), "Ashlar", color=tint)
+            else:
+                with tinted(g, st.roof_tint):
+                    k.cone(g, (0.0, 0.0, th + 0.4), tower * 0.55, th * 0.75, "RoofSlate", sides=8, phase=math.pi / 8)
+    # Crossing spire (flèche) of lead-covered timber.
+    spire_h = h * 1.3
+    with tinted(g, (0.8, 0.82, 0.9)):
+        k.box(g, (tx, 0.0, zr - 1.0), (3.0, 3.0, 5.0), "RoofSlate")
+        k.cone(g, (tx, 0.0, zr + 1.5), 2.2, spire_h, "RoofSlate", sides=8, phase=math.pi / 8)
+    _cross(g, (tx, 0.0, zr + 1.5 + spire_h), detail)
+    return {"height": zr + spire_h, "length": L, "depth": W + 10.0}
+
+
 RECIPES = {
     "cottage": cottage,
     "longere": longere,
@@ -1897,6 +2017,7 @@ RECIPES = {
     "stonehouse": stone_house,
     "barn": barn,
     "church": church,
+    "cathedral": cathedral,
     "manor": manor,
     "hall": market_hall,
     "well": well,

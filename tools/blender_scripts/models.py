@@ -451,6 +451,10 @@ def church(x, y, angle, scale=1.0, roof="Slate"):
 
 def cathedral_building(x=0.0, y=0.0, angle=0.0, s=1.0):
     """Gothic cathedral: nave, aisles, transept, apse, twin west towers, crossing spire."""
+    if KIT:
+        import kit_campaign
+
+        return kit_campaign.cathedral(x, y, angle, s)
     parts = []
     ca, sa = math.cos(angle), math.sin(angle)
 
