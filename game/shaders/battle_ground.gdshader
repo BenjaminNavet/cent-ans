@@ -2,6 +2,10 @@
 // splatmap cuite par `battle_terrain.gd` (sous-bois, chemins, boue, galets, berges), la pente
 // (roche), des parcelles cultivées procédurales et la météo (humidité, neige). Deux échelles
 // d'échantillonnage et une macro-variation cassent le tuilage.
+// Lot R2 : relief de détail sous la grille de 10 m (normales procédurales, rendu seulement) et
+// couleurs selon la carte de relief cuite par `battle_terrain.gd` (pente, creux, crêtes) :
+// roche affleurante sur les pentes et les crêtes des collines, terre et cailloux des crêtes,
+// herbe grasse, humidité et ombre des creux.
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
@@ -37,13 +41,22 @@ uniform sampler2D trample_map : filter_linear, repeat_disable;
 uniform float trample_on = 0.0;
 uniform vec3 grass_tint : source_color = vec3(0.9, 1.0, 0.8);
 uniform float detail_scale = 1.0;
+// Lot R2 : r = pente (1 = 50 %), g = creux (> 0,5) / bosse (< 0,5) à 30 m, b = idem à 90 m.
+uniform sampler2D relief_map : filter_linear, repeat_disable;
+uniform vec4 relief_rect = vec4(-405.0, -405.0, 2010.0, 1610.0);
+uniform float relief_on = 0.0;
+// Roche affleurante (0 en plaine, 1 en montagne) et force des normales de détail.
+uniform float outcrops : hint_range(0.0, 1.0) = 0.0;
+uniform float detail_bump = 0.7;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
+varying float view_dist;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	view_dist = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	// Projection plane en x/z : tangente = +X, binormale = +Z.
 	TANGENT = normalize(vec3(1.0, 0.0, 0.0) - NORMAL * NORMAL.x);
 	BINORMAL = normalize(cross(TANGENT, NORMAL));
@@ -76,6 +89,15 @@ void sample_layer(float layer, vec2 p, float blend, inout vec3 albedo, inout vec
 	nrm += n * w;
 }
 
+// Lot R2 : hauteur procédurale de détail (m) : mottes et ornières (3 m), bosses (9 m),
+// ondulations (26 m) ; `rough` renforce les petites échelles (sol caillouteux).
+float detail_height(vec2 p, float rough) {
+	float h = (texture(macro_noise, p / 26.0 + vec2(0.13, 0.57)).r - 0.5) * 0.55;
+	h += (texture(macro_noise, p / 9.0 + vec2(0.71, 0.29)).r - 0.5) * 0.22;
+	h += (texture(macro_noise, p / 3.1 + vec2(0.43, 0.91)).r - 0.5) * mix(0.05, 0.14, rough);
+	return h;
+}
+
 void fragment() {
 	vec2 p = world_pos.xz;
 	float macro = texture(macro_noise, p * 0.0021).r;
@@ -106,6 +128,26 @@ void fragment() {
 	float w_pebbles = smoothstep(0.25, 0.7, sa.a + (fine - 0.5) * 0.3);
 	float slope = 1.0 - clamp(world_normal.y, 0.0, 1.0);
 	float w_rock = smoothstep(0.16, 0.3, slope + (macro - 0.5) * 0.12);
+	// Lot R2 : pente, creux et crêtes lus sur la carte de relief (grille de la simulation).
+	vec4 relief = vec4(0.0, 0.5, 0.5, 1.0);
+	if (relief_on > 0.0) {
+		vec2 ruv = (p - relief_rect.xy) / relief_rect.zw;
+		if (all(greaterThanEqual(ruv, vec2(0.0))) && all(lessThanEqual(ruv, vec2(1.0)))) {
+			relief = texture(relief_map, ruv);
+		}
+	}
+	float grade = relief.r * 0.5;
+	float hollow = clamp((relief.g - 0.5) * 2.0 + (relief.b - 0.5) * 1.2, -1.0, 1.0);
+	float crest = smoothstep(0.05, 0.5, -hollow);
+	float dip = smoothstep(0.05, 0.5, hollow);
+	// Roche affleurante : pentes fortes et crêtes des collines et montagnes, en taches.
+	float outcrop = outcrops * smoothstep(0.5, 0.95, grade * 1.9 + crest * 0.4 + (fine - 0.5) * 0.5 + (macro - 0.5) * 0.35);
+	w_rock = max(w_rock, outcrop);
+	// Crêtes : sol maigre, terre et cailloux ; creux : pas de roche.
+	float thin_soil = smoothstep(0.3, 0.8, -hollow) * smoothstep(0.55, 0.85, fine + macro * 0.3) * mix(0.3, 0.8, outcrops);
+	w_dirt = max(w_dirt, thin_soil * 0.5);
+	w_pebbles = max(w_pebbles, thin_soil * outcrops * 0.5);
+	w_rock *= 1.0 - dip * 0.8;
 	float w_plough = field.x == 1.0 ? field_w : 0.0;
 	float w_meadow = smoothstep(0.25, 0.55, macro2 + (fine - 0.5) * 0.2);
 	if (field.x == 3.0) {
@@ -160,6 +202,9 @@ void fragment() {
 	tint = mix(tint, tint * vec3(1.35, 1.12, 0.62), dry * 0.85);
 	tint = mix(tint, tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
 	tint = mix(tint, tint * vec3(1.15, 0.92, 0.72), rust * 0.45);
+	// Lot R2 : herbe grasse et sombre dans les creux, sèche et blonde sur les crêtes.
+	tint = mix(tint, tint * vec3(0.78, 0.92, 0.72), dip * 0.7);
+	tint = mix(tint, tint * vec3(1.14, 1.06, 0.8), crest * 0.55);
 	albedo = mix(albedo, albedo * tint, grassy);
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
 	// Sillons des labours.
@@ -191,9 +236,24 @@ void fragment() {
 	albedo = mix(albedo, albedo * vec3(0.62, 0.54, 0.46), mud_trample * 0.7);
 	// Berges humides et sol trempé par la pluie.
 	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.4), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
+	// Lot R2 : l'eau reste dans les creux (plus humides sous la pluie), ombre douce des fonds.
+	wet = clamp(wet + dip * (0.12 + wetness * 0.45) * (1.0 - w[int(L_SNOW)]), 0.0, 1.0);
 	albedo *= mix(1.0, 0.62, wet);
+	albedo *= 1.0 - dip * 0.08;
 
 	ALBEDO = albedo;
+	// Lot R2 : relief de détail sous la grille de 10 m (normales, rendu seulement), plus marqué sur
+	// les sols caillouteux, effacé au loin (anti-crénelage) et sous la neige.
+	float bump_fade = (1.0 - smoothstep(120.0, 420.0, view_dist)) * detail_bump * (1.0 - snowy_w * 0.7);
+	if (bump_fade > 0.01) {
+		float rough = clamp(outcrops + w[int(L_ROCK)] + w[int(L_PEBBLES)], 0.0, 1.0);
+		float e = 0.6;
+		float h0 = detail_height(p, rough);
+		vec2 grad = vec2(detail_height(p + vec2(e, 0.0), rough) - h0, detail_height(p + vec2(0.0, e), rough) - h0) / e;
+		vec3 n_ts = nrm * 2.0 - 1.0;
+		n_ts.xy -= grad * 2.2 * bump_fade;
+		nrm = normalize(n_ts) * 0.5 + 0.5;
+	}
 	NORMAL_MAP = nrm;
 	NORMAL_MAP_DEPTH = 1.0;
 	// Boue tassée : plus luisante que le sol détrempé environnant.

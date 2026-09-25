@@ -364,6 +364,8 @@ impl BattleSim {
     /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch}]`,
     /// `coast?{flank: west|east, shore_x, beach}`,
     /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}]}`.
+    /// R2: `forests` and `mud` are overlapping discs (anchors first, then
+    /// lobes and copses).
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -384,8 +386,10 @@ impl BattleSim {
             "nx" => field.nx as i64,
             "nz" => field.nz as i64,
             "heights" => &heights,
-            "forests" => &zones(&field.forests),
-            "mud" => &zones(&field.mud),
+            // R2: a wood (a patch of mud) is its anchor disc plus its lobes
+            // and copses; the discs overlap.
+            "forests" => &zones(&[field.forests.as_slice(), &field.forest_parts].concat()),
+            "mud" => &zones(&[field.mud.as_slice(), &field.mud_parts].concat()),
             // B5: campaign site.
             "terrain" => field.terrain.key(),
             "season" => season_key(field.season),
