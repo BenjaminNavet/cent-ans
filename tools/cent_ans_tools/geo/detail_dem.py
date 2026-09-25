@@ -385,6 +385,8 @@ def ancestor_heights(
         last = grid.tiles_per_side(coarse) - 1
         tc0, tr0 = max(tc0, 0), max(tr0, 0)
         tc1, tr1 = min(tc1, last), min(tr1, last)
+        if tc0 > tc1 or tr0 > tr1:
+            continue
         mosaic = np.full(
             ((tr1 - tr0 + 1) * TILE_PX, (tc1 - tc0 + 1) * TILE_PX), np.nan, np.float32
         )

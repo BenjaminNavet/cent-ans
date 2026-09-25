@@ -61,6 +61,10 @@ USER_AGENT = (
     "one-off relief bake, rate limited)"
 )
 ATTEMPTS = 6
+#: Simultaneous requests per host (the Géoplateforme is sized for it; others: one).
+HOST_CONCURRENCY = {"data.geopf.fr": 3, "service.pdok.nl": 2}
+#: Cached heights are rounded to 1/64 m (exact in binary: better compression).
+QUANTUM_M = 1.0 / 64.0
 #: Heights outside this range are nodata (sources use ±3.4e38, -9999, -99999).
 VALID_RANGE_M = (-150.0, 5000.0)
 
@@ -148,24 +152,26 @@ SOURCES: dict[str, Source] = {
 
 
 class _HostGate:
-    """Per-host concurrency (one request at a time) and minimum interval."""
+    """Per-host concurrency limit and minimum interval between request starts."""
 
     def __init__(self) -> None:
-        self._locks: dict[str, threading.Lock] = {}
-        self._last: dict[str, float] = {}
+        self._slots: dict[str, threading.Semaphore] = {}
+        self._next: dict[str, float] = {}
         self._guard = threading.Lock()
 
-    def lock(self, host: str) -> threading.Lock:
+    def slot(self, host: str) -> threading.Semaphore:
         with self._guard:
-            return self._locks.setdefault(host, threading.Lock())
+            return self._slots.setdefault(
+                host, threading.Semaphore(HOST_CONCURRENCY.get(host, 1))
+            )
 
     def wait(self, host: str, interval: float) -> None:
-        elapsed = time.monotonic() - self._last.get(host, 0.0)
-        if elapsed < interval:
-            time.sleep(interval - elapsed)
-
-    def done(self, host: str) -> None:
-        self._last[host] = time.monotonic()
+        with self._guard:
+            now = time.monotonic()
+            start = max(now, self._next.get(host, 0.0))
+            self._next[host] = start + interval
+        if start > now:
+            time.sleep(start - now)
 
 
 _GATE = _HostGate()
@@ -178,11 +184,11 @@ class FetchError(RuntimeError):
 def http_get(
     url: str, host: str, min_interval_s: float, timeout: float = 300.0
 ) -> bytes:
-    """GET ``url`` politely: one request at a time per host, retries with back-off."""
+    """GET ``url`` politely: few requests at a time per host, retries with back-off."""
     delay = 2.0
     last_error = ""
     for attempt in range(ATTEMPTS):
-        with _GATE.lock(host):
+        with _GATE.slot(host):
             _GATE.wait(host, min_interval_s)
             try:
                 response = httpx.get(
@@ -194,8 +200,6 @@ def http_get(
                 status, body = response.status_code, response.content
             except httpx.HTTPError as error:
                 status, body, last_error = 0, b"", str(error)
-            finally:
-                _GATE.done(host)
         if status == 200:
             return body
         if status:
@@ -341,8 +345,9 @@ def write_chunk(
         "blockxsize": 256,
         "blockysize": 256,
     }
+    quantised = (np.round(data / QUANTUM_M) * QUANTUM_M).astype(np.float32)
     with rasterio.open(partial, "w", **profile) as target:
-        target.write(data.astype(np.float32), 1)
+        target.write(quantised, 1)
     partial.replace(path)
 
 
