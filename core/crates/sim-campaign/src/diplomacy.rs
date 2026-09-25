@@ -1075,8 +1075,9 @@ impl CampaignState {
     }
 
     /// EQ3: the (ally or vassal, enemy) pairs bound by a peace between `a`
-    /// and `b`: a faction allied to (or vassal of) one side, at war with the
-    /// other since this war began or later (it answered the call), not rebels.
+    /// and `b`: a weaker faction allied to (or vassal of) one side, at war
+    /// with the other since this war began or later (it answered the call),
+    /// not rebels.
     fn cobelligerents(&self, a: &FactionId, b: &FactionId) -> Vec<(FactionId, FactionId)> {
         let mut pairs = Vec::new();
         for (side, enemy) in [(a, b), (b, a)] {
@@ -1093,7 +1094,11 @@ impl CampaignState {
                     continue;
                 }
                 let joined = f.war_started.get(enemy).is_some_and(|t| *t >= began);
-                let bound = self.is_allied(id, side) || f.suzerain.as_ref() == Some(side);
+                // Only the junior partner follows: a great crown is not bound
+                // by the peace of a lesser ally it came to help.
+                let junior = self.faction_power(id) < self.faction_power(side);
+                let bound =
+                    junior && (self.is_allied(id, side) || f.suzerain.as_ref() == Some(side));
                 if joined && bound && f.at_war_with.contains(enemy) {
                     pairs.push((id.clone(), enemy.clone()));
                 }

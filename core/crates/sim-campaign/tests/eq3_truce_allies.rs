@@ -77,3 +77,24 @@ fn peace_binds_the_allies_who_joined_the_war() {
     assert!(state.is_at_war(&fac("fac_naples"), &en));
     assert!(state.is_at_war(&fac("fac_castile"), &en));
 }
+
+#[test]
+fn a_great_crown_is_not_bound_by_a_lesser_ally() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    state.turn = 20;
+    // England falls on Scotland; France answers the Auld Alliance.
+    set_allied(&mut state, "fac_scotland", "fac_france", true);
+    war(&mut state, "fac_scotland", "fac_england", 10);
+    war(&mut state, "fac_france", "fac_england", 10);
+    apply_treaty(
+        &mut state,
+        &data,
+        &fac("fac_england"),
+        &fac("fac_scotland"),
+        &[Article::Peace],
+    )
+    .unwrap();
+    assert!(!state.is_at_war(&fac("fac_scotland"), &fac("fac_england")));
+    assert!(state.is_at_war(&fac("fac_france"), &fac("fac_england")));
+}

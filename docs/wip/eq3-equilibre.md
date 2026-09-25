@@ -21,5 +21,10 @@ achète (or, tribut) ; après la paix, l'Angleterre reste en guerre avec les all
 entrés sur appel (Bretagne, Bourgogne, Naples, Écosse…) : sa fatigue continue de monter en
 « paix » (jusqu'à 100 en 1407) et son trésor ne remonte pas, d'où des paix de 5 à 8 ans.
 
+## Itérations
+- v1 (trêve liant tous les alliés entrés après le début) : guerre FR-EN **32 %** [20-39], 15-23
+  paix par siècle : la paix d'un petit allié (Écosse) entraînait la France. Rejeté.
+- v2 : seul le partenaire le plus faible suit la paix du plus fort (mesure en cours).
+
 ## Prochaine étape
 Attendre la référence, puis analyser les phases de guerre FR-EN (VERBOSE=1).
