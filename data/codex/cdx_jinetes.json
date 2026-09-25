@@ -1,0 +1,29 @@
+{
+  "id": "cdx_jinetes",
+  "title": "Les jinetes",
+  "category": "unite",
+  "aliases": [
+    "Jinetes",
+    "jinete",
+    "à la jineta",
+    "adarga"
+  ],
+  "era": {
+    "from": "1300",
+    "to": "1500"
+  },
+  "summary": "Cavaliers légers de la frontière de Grenade, les jinetes montent à étriers courts, « à la jineta », à la manière des Zénètes berbères. Armés de javelines et d'un bouclier de cuir, l'adarga, ils harcèlent et se dérobent : [[cdx_pierre_le_cruel|Pierre le Cruel]] comme son demi-frère Henri de Trastamare en alignent.",
+  "body": "Le nom vient des Zénètes, cavaliers berbères au service des sultans de Grenade et des Mérinides du Maroc, comme [[cdx_abu_al_hasan_ali|Abu al-Hasan Ali]], vaincu au Salado en 1340. Les chrétiens de [[cdx_castille|Castille]] adoptent leur monte : selle légère, étriers courts, jambes pliées, qui permet de se dresser pour lancer la javeline et de tourner bride très vite.\n\nPendant la guerre civile castillane, les jinetes servent dans les deux camps. À Nájera, le 3 avril 1367, ceux d'Henri de Trastamare harcèlent l'armée du [[cdx_prince_noir|Prince noir]], mais les archers anglais les tiennent à distance, et la bataille se décide entre gens d'armes à pied : [[cdx_du_guesclin|Du Guesclin]] y est fait prisonnier.\n\nLes jinetes restent l'une des cavaleries les plus originales d'Europe jusqu'aux guerres de Grenade (1482-1492) et aux guerres d'Italie, où les capitaines castillans les emploient encore.",
+  "gameplay": "Compagnie de 80 hommes (tireurs montés). Recrutement : 480 livres payées à l'enrôlement ; entretien 42 livres par mois, soit 168 par saison. Caractéristiques : mêlée 42, tir 55 à 80 m (12 volées), armure 24 (laisse passer 82 % des coups), moral 52, vitesse 86 (3,44 m/s). Exige une province de culture castillane, andalouse ou galicienne. La place doit compter assez de paysans (dix fois l'effectif). Escarmouche : tire en marchant, ce que les autres tireurs ne peuvent pas faire ; en résolution automatique, les tireurs montés n'encaissent que la moitié des coups. Harcèlent en lançant leurs javelines au trot, puis se dérobent ; seulement 12 volées et une mêlée médiocre : ne les laissez pas se faire prendre par des gens d'armes.",
+  "entity": "unit_jinetes",
+  "see_also": [
+    "cdx_castille",
+    "cdx_pierre_le_cruel",
+    "cdx_du_guesclin"
+  ],
+  "sources": [
+    "Jinete",
+    "Bataille de Nájera",
+    "Zénètes"
+  ]
+}

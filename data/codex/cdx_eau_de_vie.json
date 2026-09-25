@@ -1,0 +1,32 @@
+{
+  "id": "cdx_eau_de_vie",
+  "title": "L'eau-de-vie des médecins",
+  "category": "technique",
+  "aliases": [
+    "Eau-de-vie des médecins",
+    "eau-de-vie",
+    "aqua vitae",
+    "aqua ardens",
+    "quintessence",
+    "alambic"
+  ],
+  "era": {
+    "from": "v. 1300",
+    "to": "1500"
+  },
+  "summary": "Distillé à l'alambic, le vin donne une « eau ardente » que les médecins tiennent pour une quintessence capable de préserver le corps de la corruption. Au XIVe siècle, l'eau-de-vie est un remède avant d'être une boisson.",
+  "body": "Les traités attribués à Arnaud de Villeneuve (mort en 1311) vantent l'aqua vitae, et le franciscain Jean de Roquetaillade décrit vers 1351-1352, dans son De consideratione quintae essentiae, la distillation répétée du vin et ses vertus. On y fait macérer des plantes, comme le [[cdx_romarin|romarin]], pour en tirer des eaux médicinales.\n\nLes apothicaires la vendent à prix d'or, contre la peste, la mélancolie ou la vieillesse. Ce n'est qu'à la fin du XVe siècle que l'on commence à la boire pour le plaisir.",
+  "gameplay": "Recherche : 700 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_theriaque|Thériaque et apothicaires]], [[cdx_montpellier|Faculté de médecine de Montpellier]]. Effets, pour toute la faction : +3 à la santé visée ; +5 % de revenus du commerce (sur l'assiette fiscale des bourgeois).",
+  "entity": "tech_aqua_vitae",
+  "see_also": [
+    "cdx_romarin",
+    "cdx_apothicaires",
+    "cdx_montpellier",
+    "cdx_theriaque"
+  ],
+  "sources": [
+    "Eau-de-vie",
+    "Jean de Roquetaillade",
+    "Arnaud de Villeneuve"
+  ]
+}

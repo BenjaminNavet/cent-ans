@@ -1,7 +1,7 @@
 {
   "id": "evt_black_death",
   "title": "La Grande Mortalité",
-  "text": "Des galères venues de Caffa ont apporté à Marseille une pestilence inouïe. Les malades crachent le sang et meurent en trois jours ; les vivants ne suffisent plus à enterrer les morts. Le mal remonte le Rhône et gagne tout le royaume, puis les îles et le Nord.",
+  "text": "Des galères venues de Caffa ont apporté à Marseille une [[cdx_peste_noire|pestilence]] inouïe. Les malades crachent le sang et meurent en trois jours ; les vivants ne suffisent plus à enterrer les morts. Le mal remonte le Rhône et gagne tout le royaume, puis les îles et le Nord.",
   "kind": "historical",
   "trigger": {
     "date": {

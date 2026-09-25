@@ -1,0 +1,13 @@
+{
+  "id": "cdx_bataille_de_la_rochelle",
+  "title": "La Rochelle, 1372 : la flotte castillane",
+  "category": "bataille",
+  "aliases": ["bataille de La Rochelle", "comte de Pembroke", "Ambrosio Boccanegra", "Boccanegra"],
+  "era": { "from": "1372", "to": "1372" },
+  "summary": "Les 22 et 23 juin 1372, devant La Rochelle, la flotte de [[cdx_castille|Castille]] d'Ambrosio Boccanegra, alliée de [[cdx_charles_v|Charles V]], détruit l'escadre du comte de Pembroke venu prendre le commandement en Aquitaine. La mer de Gascogne échappe aux Anglais.",
+  "body": "En 1369, la guerre reprend. [[cdx_charles_v|Charles V]] a un atout que ses prédécesseurs n'avaient pas : le roi de Castille Henri de Trastamare, qui lui doit son trône depuis la mort de [[cdx_pierre_le_cruel|Pierre le Cruel]], met à son service la flotte de guerre castillane.\n\nAu printemps 1372, [[cdx_edouard_iii|Édouard III]] envoie en Aquitaine John Hastings, comte de Pembroke, avec de quoi lever une armée : 12 000 livres sterling en monnaie d'argent. Le 22 juin, son escadre arrive devant La Rochelle et trouve l'amiral Ambrosio Boccanegra qui l'attend. Selon le chroniqueur castillan López de Ayala, Boccanegra a douze galères ; les autres sources vont de treize à vingt-deux navires. La flotte anglaise, une vingtaine de bâtiments dont trois navires de guerre selon les historiens modernes, est surtout faite de transports.\n\nLe combat dure deux jours. Les Castillans profitent de la marée et de leurs arbalétriers ; ils arrosent d'huile les ponts anglais et y mettent le feu avec des flèches enflammées. Pembroke est capturé avec ses chevaliers et le trésor de la solde est perdu. Emmené en Castille, il ne sera libéré qu'après de longues tractations et meurt sur le chemin du retour en 1375.\n\nLa défaite prive la Guyenne anglaise de renforts au moment où [[cdx_du_guesclin|Du Guesclin]] reconquiert le Poitou et la Saintonge ; La Rochelle elle-même se donne au roi de France en septembre 1372.",
+  "anachronism": "Dans la bataille navale du jeu, la flotte castillane n'aligne que des galères et deux brûlots, et les noms des navires anglais sont inventés ; les historiens discutent encore la part des galères et des grandes nefs dans la flotte de Boccanegra.",
+  "entity": "evt_la_rochelle",
+  "see_also": ["cdx_castille", "cdx_charles_v", "cdx_du_guesclin", "cdx_ecluse"],
+  "sources": ["Bataille de La Rochelle (1372)", "Battle of La Rochelle (en)", "Jonathan Sumption, The Hundred Years War III: Divided Houses"]
+}

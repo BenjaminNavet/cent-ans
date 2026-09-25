@@ -20,9 +20,9 @@
       "value": 1
     }
   ],
-  "description": "Enceinte de bois et de terre ; suffit contre les bandes et les chevauchées légères.",
+  "description": "Enceinte de bois et de terre ; suffit contre les bandes et les chevauchées légères. Voir [[cdx_palissade]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Palissade",
+    "Motte castrale"
   ]
 }

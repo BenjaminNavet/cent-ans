@@ -1,0 +1,12 @@
+{
+  "id": "cdx_siege_d_aiguillon",
+  "title": "Le siège d'Aiguillon (1346)",
+  "category": "bataille",
+  "aliases": ["Aiguillon", "siège d'Aiguillon"],
+  "era": { "from": "1346", "to": "1346" },
+  "summary": "D'avril à août 1346, Jean, duc de Normandie, assiège avec une grande armée la petite place anglaise d'Aiguillon, au confluent du Lot et de la Garonne. Il échoue, et l'armée qui manque à [[cdx_philippe_vi|Philippe VI]] ne sera pas à [[cdx_crecy|Crécy]].",
+  "body": "Aiguillon, au confluent du Lot et de la Garonne, est dans le jeu une place anglaise dès 1337 ; en réalité, ses habitants l'ont livrée à [[cdx_henri_de_grosmont|Henri de Grosmont]] à la fin de novembre 1345, pendant sa campagne victorieuse en Guyenne. Pour la France, c'est une épine : la place commande la navigation des deux rivières et ouvre l'Agenais aux Anglais.\n\nLe 1er avril 1346, le fils aîné du roi, Jean, duc de Normandie (le futur [[cdx_jean_ii|Jean II]]), met le siège avec une armée de quinze à vingt mille hommes. En face, le comte de Stafford tient la place avec environ trois cents hommes d'armes et six cents archers ; [[cdx_froissart|Froissart]] y place aussi [[cdx_gautier_de_mauny|Gautier de Mauny]]. Les Français mettent des semaines à jeter un pont sur la Garonne, que les sorties de la garnison détruisent à plusieurs reprises. En juillet, un assaut mené depuis des tours dressées sur des barges échoue quand l'une d'elles chavire sous les coups d'un engin anglais. Grosmont réussit à ravitailler les assiégés. Le 10 août, Philippe, fils unique du duc Eudes IV de Bourgogne, se tue en tombant de cheval devant la place.\n\nLe 12 juillet, [[cdx_edouard_iii|Édouard III]] débarque en Normandie. Philippe VI ordonne à son fils de lever le siège ; Jean, qui a juré de ne partir qu'Aiguillon prise, s'entête. La dysenterie, les désertions et le manque de vivres finissent par le décider : il lève le camp le 20 août 1346. Six jours plus tard, son père est vaincu à [[cdx_crecy|Crécy]] sans lui.",
+  "anachronism": "Dans le jeu, Aiguillon est une place anglaise dès le printemps 1337 ; elle ne le devient qu'en novembre 1345.",
+  "see_also": ["cdx_crecy", "cdx_jean_ii", "cdx_henri_de_grosmont", "cdx_campagne_de_gascogne_1345", "cdx_guyenne"],
+  "sources": ["Siège d'Aiguillon", "Siege of Aiguillon (en)", "Gascon campaign of 1345 (en)"]
+}

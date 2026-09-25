@@ -1,0 +1,28 @@
+{
+  "id": "cdx_cotte_de_plates",
+  "title": "La cotte de plates",
+  "category": "technique",
+  "aliases": [
+    "Cotte de plates",
+    "cottes de plates",
+    "plates cousues"
+  ],
+  "era": {
+    "from": "v. 1250",
+    "to": "1400"
+  },
+  "summary": "Au XIVe siècle, les chevaliers renforcent leur cotte de mailles de plaques de fer cousues ou rivetées sous un vêtement de toile ou de cuir : la cotte de plates, première étape vers l'armure complète.",
+  "body": "Contre les coups de lance et les flèches, la maille seule ne suffit plus. On la double d'une cotte de plates, faite de grandes plaques de fer fixées à l'intérieur d'un vêtement. Les fouilles des fosses de la bataille de Visby, sur l'île de Gotland (1361), en ont livré des dizaines d'exemplaires encore portés par les morts.\n\nLa cotte de plates est l'armure type des hommes d'armes de [[cdx_crecy|Crécy]] et de [[cdx_poitiers|Poitiers]]. Elle évolue vers la [[cdx_brigandine|brigandine]] pour les gens de pied, et vers la cuirasse d'une seule pièce puis le [[cdx_harnois|harnois blanc]] pour les chevaliers.",
+  "gameplay": "Recherche : 150 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +5 en armure de l'infanterie ; +5 en armure de la cavalerie.",
+  "entity": "tech_coat_of_plates",
+  "see_also": [
+    "cdx_harnois",
+    "cdx_brigandine",
+    "cdx_hommes_d_armes"
+  ],
+  "sources": [
+    "Cotte de plates",
+    "Armure de plates",
+    "Bataille de Visby"
+  ]
+}

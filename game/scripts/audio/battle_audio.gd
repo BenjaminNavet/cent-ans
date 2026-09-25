@@ -15,11 +15,22 @@ extends Node3D
 ## - **Distance et zoom** : atténuation 3D en distance inverse + filtre d'absorption de l'air ;
 ##   au-delà de `near_distance_m`, les sons passent par le bus « BatailleLointain » dont le
 ##   passe-bas et la réverbération suivent la hauteur de la caméra (`AudioBuses`).
-## - **Événements** déduits des transitions d'état : charge (cri, galop, hennissement), contact
-##   (chocs de boucliers et d'épées), volée (décoche, sifflement, impacts à l'arrivée), pertes en
-##   mêlée (râles), déroute, mort de général (cor, ducking de la musique), cri de guerre au premier
-##   engagement d'un camp ; siège : bélier, impacts de pierres, effondrement, cloche d'alarme, feu.
+## - **Événements** déduits des transitions d'état : charge (cri, galop, hennissement, grondement
+##   de cavalerie qui enfle puis impact), contact (chocs de boucliers et d'épées), volée (décoche,
+##   sifflement, impacts à l'arrivée, sifflement au-dessus de la caméra si elle est proche de la
+##   trajectoire), pertes en mêlée (râles), déroute (la clameur suit le régiment en fuite), mort de
+##   général (cor, ducking de la musique), cri de guerre au premier engagement d'un camp ; siège :
+##   bélier, impacts de pierres, effondrement, cloche d'alarme, feu.
 ## - Météo : pluie, vent (fort sous la neige), tonnerre occasionnel sous la pluie.
+## - **Fronts de mêlée (EP4)** : les régiments en mêlée sont groupés en fronts (paires
+##   régiment/cible), triés par distance à la caméra ; les `fronts.max_emitters` plus proches
+##   reçoivent un émetteur 3D dédié (`_front_emitter`). Sous `fronts.near_m` : chocs individuels
+##   (acier/acier, acier/bois, armure, cris d'effort, chutes, râles) tirés au hasard sans répéter
+##   le même deux fois de suite, densité et volume selon l'effectif engagé et les pertes récentes.
+##   Entre `near_m` et `mid_m` : une des `fronts.beds` (3 nappes de mêlée massives différentes,
+##   une par émetteur) remplace les chocs individuels, plus quelques chocs épars. Au-delà de
+##   `mid_m` : pas d'émetteur dédié, la nappe globale (`_update_beds`) et l'ambiance lointaine
+##   filtrée prennent le relais -- transition sans à-coup car les deux se recouvrent en volume.
 ##
 ## API pour les autres modules (BV1…) : `BattleAudio.play_at(événement, position)`.
 ## Headless : les voix sont créées et les décisions prises (testables), rien n'est joué.
@@ -42,6 +53,14 @@ const MISSILE_SPEED := {"arrow": 48.0, "bolt": 62.0, "ball": 110.0, "stone": 34.
 const DEATH_GROAN_CHANCE := 0.25
 const BELL_PERIOD := 22.0
 const BELL_UNTIL := 150.0
+## EP4 : événements de choc de proximité par front de mêlée, du plus au moins fréquent, avec leur
+## poids relatif (`NEAR_EVENT_WEIGHTS`) ; les pertes récentes font grimper le poids des deux
+## derniers (chute, râle).
+const NEAR_EVENTS := ["sword_clash", "shield_bash", "armor_hit", "effort_cry", "body_fall", "death_groan"]
+const NEAR_EVENT_WEIGHTS := [4, 3, 2, 3, 1, 1]
+## Distance (m) autour d'un front dans laquelle les chocs individuels sont dispersés.
+const FRONT_NEAR_SPREAD := 6.0
+const FRONT_MID_SPREAD := 14.0
 
 var bank: SoundBank
 var silent: bool = false
@@ -69,6 +88,10 @@ var _battle_time: float = 0.0
 var _next_bell: float = 4.0
 var _next_thunder: float = 20.0
 var _rng := RandomNumberGenerator.new()
+## EP4 : émetteurs par front de mêlée. clé "id1:id2" → {bed, bed_name, level, timer, last_event}.
+var _front_emitters: Dictionary = {}
+## EP4 : derniers effectifs connus par régiment (pertes récentes = régiment engagé dans un front).
+var _front_soldiers: Dictionary = {}
 
 
 ## `weather` : clé météo du rendu ; `cam` : caméra de la bataille (écouteur).
@@ -135,6 +158,9 @@ func _exit_tree() -> void:
 	for player in _ambience.values():
 		(player as AudioStreamPlayer).stop()
 		(player as AudioStreamPlayer).stream = null
+	for emitter in _front_emitters.values():
+		(emitter["bed"] as AudioStreamPlayer3D).stop()
+		(emitter["bed"] as AudioStreamPlayer3D).stream = null
 
 
 # --- API ---------------------------------------------------------------------------
@@ -290,6 +316,7 @@ func update(units: Array, focus: Vector3, camera_height: float, dt: float, real_
 	if dt > 0.0:
 		_detect_events(units, elapsed)
 	_update_beds(units, focus, real_dt)
+	_update_fronts(units, dt, real_dt)
 	_update_weather(real_dt)
 
 
@@ -407,6 +434,9 @@ func _detect_events(units: Array, elapsed: float) -> void:
 			play_event("charge_cry", pos)
 			if mounted:
 				play_event("horse_neigh", pos)
+				# EP4 : grondement de charge qui enfle puis impact (limité par `cooldown_s`/
+				# `max_instances` de l'événement, pas de garde par camp : plusieurs vagues sonnent).
+				play_event("cavalry_charge_impact", pos)
 		if state == "melee" and prev_state != "melee":
 			var front := pos + _forward(unit) * float(unit.get("depth", 6.0)) * 0.5
 			play_event("contact", front, 2.0 if prev_state == "charging" else 0.0)
@@ -443,8 +473,28 @@ func _on_volley(unit: Dictionary, by_id: Dictionary) -> void:
 	if kind == "arrow" or kind == "bolt":
 		schedule("arrow_whistle", pos.lerp(aim, 0.55) + Vector3(0, 12, 0), minf(flight * 0.35, 1.5))
 		schedule("arrow_impact", aim, flight)
+		_maybe_flyby_over_camera(pos, aim, flight)
 	else:
 		schedule("stone_impact", aim, flight)
+
+
+## Si la trajectoire d'une volee passe pres de la camera, un sifflement supplementaire est
+## programme juste au-dessus d'elle au moment ou elle survole ce point (EP4).
+func _maybe_flyby_over_camera(pos: Vector3, aim: Vector3, flight: float) -> void:
+	var listener := _listener_position()
+	var flat_pos := Vector3(pos.x, 0.0, pos.z)
+	var flat_aim := Vector3(aim.x, 0.0, aim.z)
+	var flat_listener := Vector3(listener.x, 0.0, listener.z)
+	var seg := flat_aim - flat_pos
+	var length_sq := seg.length_squared()
+	if length_sq < 1.0:
+		return
+	var t := clampf((flat_listener - flat_pos).dot(seg) / length_sq, 0.0, 1.0)
+	var closest := flat_pos.lerp(flat_aim, t)
+	if closest.distance_to(flat_listener) > 55.0:
+		return
+	var over := Vector3(closest.x, listener.y + 10.0, closest.z)
+	schedule("arrow_flyby", over, flight * t)
 
 
 func _update_beds(units: Array, focus: Vector3, real_dt: float) -> void:
@@ -522,6 +572,165 @@ func _drive_bed(bed_name: String, target: float, acc: Array, focus: Vector3, rea
 		bed.play(_rng.randf_range(0.0, maxf(bed.stream.get_length() - 1.0, 0.0)))
 	elif level <= 0.01 and bed.playing:
 		bed.stop()
+
+
+# --- Fronts de melee (EP4) ----------------------------------------------------------
+
+
+## Regroupe les regiments en melee en fronts (paires regiment/cible), n'en garde que les
+## `fronts.max_emitters` plus proches de la camera et leur donne un emetteur 3D dedie dont la
+## couche (chocs individuels ou nappe massive) suit la distance ; les fronts trop loin retombent
+## sur la nappe globale de `_update_beds`.
+func _update_fronts(units: Array, dt: float, real_dt: float) -> void:
+	var by_id := {}
+	for unit in units:
+		by_id[int(unit["id"])] = unit
+	var candidates: Array = []
+	var seen := {}
+	for unit in units:
+		if not bool(unit.get("present", false)) or str(unit.get("state", "")) != "melee":
+			continue
+		var id := int(unit["id"])
+		var target_id := int(unit.get("target", -1))
+		if target_id < 0 or not by_id.has(target_id):
+			continue
+		var target: Dictionary = by_id[target_id]
+		if not bool(target.get("present", false)) or str(target.get("state", "")) != "melee":
+			continue
+		var key := "%d:%d" % [mini(id, target_id), maxi(id, target_id)]
+		if seen.has(key):
+			continue
+		seen[key] = true
+		var soldiers_a := float(unit.get("soldiers", 0))
+		var soldiers_b := float(target.get("soldiers", 0))
+		var prev_a := float(_front_soldiers.get(id, soldiers_a))
+		var prev_b := float(_front_soldiers.get(target_id, soldiers_b))
+		var losses := maxf(prev_a - soldiers_a, 0.0) + maxf(prev_b - soldiers_b, 0.0)
+		candidates.append({
+			"key": key,
+			"pos": (_pos(unit) + _pos(target)) * 0.5,
+			"engaged": soldiers_a + soldiers_b,
+			"losses": losses,
+		})
+	for unit in units:
+		if bool(unit.get("present", false)):
+			_front_soldiers[int(unit["id"])] = float(unit.get("soldiers", 0))
+	var listener := _listener_position()
+	for c in candidates:
+		c["dist"] = listener.distance_to(c["pos"] as Vector3)
+	candidates.sort_custom(func(a, b): return float(a["dist"]) < float(b["dist"]))
+	var max_emitters := int(bank.fronts.get("max_emitters", 6))
+	var near_m := float(bank.fronts.get("near_m", 40.0))
+	var mid_m := float(bank.fronts.get("mid_m", 200.0))
+	var full := float(bank.fronts.get("engaged_full", 250.0))
+	var period: Array = bank.fronts.get("event_period_s", [0.5, 1.6])
+	var bed_names: Array = bank.fronts.get("beds", ["melee_bed_1", "melee_bed_2"])
+	var active_keys := {}
+	for i in mini(candidates.size(), max_emitters):
+		var c: Dictionary = candidates[i]
+		var key := str(c["key"])
+		active_keys[key] = true
+		var dist := float(c["dist"])
+		if dist >= mid_m:
+			# Trop loin pour un emetteur dedie : la nappe globale et l'ambiance lointaine suffisent.
+			if _front_emitters.has(key):
+				_stop_front_emitter(key)
+			continue
+		var pos: Vector3 = c["pos"]
+		var level := _level(float(c["engaged"]), full)
+		var burst := clampf(float(c["losses"]) / 6.0, 0.0, 1.0)
+		var emitter := _front_emitter(key, bed_names, i)
+		emitter["level"] = lerpf(float(emitter.get("level", 0.0)), level, clampf(real_dt * BED_SMOOTHING, 0.0, 1.0))
+		var bed: AudioStreamPlayer3D = emitter["bed"]
+		bed.global_position = pos
+		# Couche moyenne (nappe massive) : montee entre `near_m` et `mid_m`, coupee tout pres (les
+		# chocs individuels prennent le relais pour ne pas sommer les deux).
+		var mid_gain := clampf((dist - near_m) / maxf(near_m, 1.0), 0.0, 1.0)
+		var base_db := float(bank.beds.get(str(emitter["bed_name"]), {}).get("volume_db", -3.0))
+		bed.volume_db = base_db + linear_to_db(maxf(float(emitter["level"]) * mid_gain, 0.0001))
+		if not silent and bed.stream != null:
+			if float(emitter["level"]) * mid_gain > 0.03 and not bed.playing:
+				bed.play(_rng.randf_range(0.0, maxf(bed.stream.get_length() - 1.0, 0.0)))
+			elif float(emitter["level"]) * mid_gain <= 0.02 and bed.playing:
+				bed.stop()
+		# Chocs individuels : denses tout pres, epars entre `near_m` et `mid_m`.
+		emitter["timer"] = float(emitter.get("timer", 0.0)) - dt
+		if emitter["timer"] <= 0.0 and level > 0.05 and dt > 0.0:
+			var sparse := 1.0 if dist < near_m else 2.6
+			var density := clampf(level * (1.0 + burst), 0.05, 2.0)
+			emitter["timer"] = sparse * lerpf(float(period[1]), float(period[0]), clampf(density, 0.0, 1.0))
+			var spread := FRONT_NEAR_SPREAD if dist < near_m else FRONT_MID_SPREAD
+			var count := 2 if (dist < near_m and burst > 0.3) else 1
+			for n in count:
+				var offset := Vector3(_rng.randf_range(-spread, spread), 0.0, _rng.randf_range(-spread, spread))
+				_play_front_event(emitter, pos + offset, burst)
+	for key in _front_emitters.keys():
+		if not active_keys.has(key):
+			_stop_front_emitter(key)
+
+
+## Emetteur 3D d'un front (cree au besoin) : une nappe massive parmi `fronts.beds`, choisie par
+## rang de proximite pour que plusieurs fronts proches sonnent differemment.
+func _front_emitter(key: String, bed_names: Array, rank: int) -> Dictionary:
+	if _front_emitters.has(key):
+		return _front_emitters[key]
+	var bed_name := str(bed_names[rank % bed_names.size()]) if not bed_names.is_empty() else "melee_bed_1"
+	var bed := AudioStreamPlayer3D.new()
+	bed.name = "Front_" + key.replace(":", "_")
+	bed.stream = bank.bed_stream(bed_name)
+	var entry: Dictionary = bank.beds.get(bed_name, {})
+	bed.bus = str(entry.get("bus", AudioBuses.BATTLE))
+	bed.unit_size = float(entry.get("unit_size_m", 35.0))
+	bed.max_distance = float(entry.get("max_distance_m", 500.0))
+	bed.attenuation_filter_cutoff_hz = 8000.0
+	bed.attenuation_filter_db = -12.0
+	bed.volume_db = -80.0
+	add_child(bed)
+	var emitter := {"bed": bed, "bed_name": bed_name, "level": 0.0, "timer": 0.0, "last_event": ""}
+	_front_emitters[key] = emitter
+	return emitter
+
+
+func _stop_front_emitter(key: String) -> void:
+	var emitter: Dictionary = _front_emitters.get(key, {})
+	if emitter.is_empty():
+		return
+	var bed: AudioStreamPlayer3D = emitter["bed"]
+	bed.stop()
+	bed.stream = null
+	bed.queue_free()
+	_front_emitters.erase(key)
+
+
+## Un choc de proximite tire au hasard (pondere, jamais deux fois de suite le meme type sur ce
+## front) ; `SoundBank.pick_stream` evite en plus de repeter le meme fichier au sein d'un type.
+func _play_front_event(emitter: Dictionary, position: Vector3, burst: float) -> void:
+	var event_name := _pick_near_event(emitter, burst)
+	play_event(event_name, position)
+	emitter["last_event"] = event_name
+
+
+func _pick_near_event(emitter: Dictionary, burst: float) -> String:
+	var last := str(emitter.get("last_event", ""))
+	var weights: Array = NEAR_EVENT_WEIGHTS.duplicate()
+	if burst > 0.4:
+		# Pertes recentes : plus de chutes et de rales.
+		weights[4] = int(weights[4]) + 3
+		weights[5] = int(weights[5]) + 3
+	var total := 0
+	for w in weights:
+		total += int(w)
+	var pick := _rng.randi_range(0, maxi(total - 1, 0))
+	var acc := 0
+	var chosen := str(NEAR_EVENTS[0])
+	for i in NEAR_EVENTS.size():
+		acc += int(weights[i])
+		if pick < acc:
+			chosen = str(NEAR_EVENTS[i])
+			break
+	if chosen == last and NEAR_EVENTS.size() > 1:
+		chosen = str(NEAR_EVENTS[(NEAR_EVENTS.find(chosen) + 1) % NEAR_EVENTS.size()])
+	return chosen
 
 
 func _ambience_db(layer: String, offset: float) -> float:

@@ -9,7 +9,7 @@
   "prerequisites": [],
   "historical_year": {
     "value": "1330",
-    "note": "Arc long gallois adopté par Édouard Ier ; obligations de tir (assize of arms, statuts d'Édouard III)."
+    "note": "Arc long gallois adopté par Édouard Ier ; statut de Winchester (1285) et ordre d'Édouard III (1363) imposant le tir le dimanche et les jours de fête."
   },
   "unlocks": {
     "units": [
@@ -24,11 +24,10 @@
       "value": 5
     }
   ],
-  "description": "Tir massé et discipline des archers : obligation d'entraînement dominical, ravitaillement en flèches par la Couronne.",
+  "description": "Tir massé et discipline des archers à l'[[cdx_arc_long|arc long]] : obligation d'entraînement dominical, ravitaillement en flèches par la Couronne.",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Arc long anglais",
+    "Yeoman",
+    "Statut de Winchester"
   ]
 }

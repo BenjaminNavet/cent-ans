@@ -51,6 +51,17 @@ func setup(campaign_map: Node) -> void:
 	title.add_theme_font_size_override("font_size", 22)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
+	# UX2 : le guide pas à pas se relance (ou reprend là où « Plus tard » l'a laissé) d'ici.
+	var guide := Button.new()
+	guide.name = "TutorialButton"
+	guide.text = "Tutoriel pas à pas"
+	guide.tooltip_text = "Reprend le tutoriel à l'étape où vous l'aviez laissé, sinon le relance depuis le début."
+	guide.pressed.connect(func() -> void:
+		panel.hide()
+		var tutorial: Node = map.get("tutorial")
+		if tutorial != null:
+			tutorial.call("reopen"))
+	header.add_child(guide)
 	var close := Button.new()
 	close.text = "×"
 	close.pressed.connect(func() -> void: panel.hide())
