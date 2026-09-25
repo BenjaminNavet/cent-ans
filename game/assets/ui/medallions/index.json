@@ -1,0 +1,8 @@
+{
+ "source": "data/ui/icons_ink.json (lot DA5)",
+ "icons": {
+  "hud_codex": "codex.png",
+  "hud_diplomacy": "diplomacy.png",
+  "hud_end_turn": "end_turn.png"
+ }
+}

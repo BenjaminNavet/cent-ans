@@ -1,0 +1,12 @@
+{
+ "source": "data/ui/icons_ink.json (lot DA5)",
+ "color": "#382412",
+ "stroke_px": {
+  "treasury": 5.41,
+  "halt": 5.0
+ },
+ "icons": {
+  "battle_halt": "halt.png",
+  "hud_treasury": "treasury.png"
+ }
+}
