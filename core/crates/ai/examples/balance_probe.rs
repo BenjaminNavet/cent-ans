@@ -118,6 +118,24 @@ struct CampaignRun {
     france_orders: (u32, u32),
     /// Attacker wins / battles.
     battles: (u32, u32),
+    /// EQ1: mean unrest of all provinces, sampled every 10 turns.
+    unrest_samples: Vec<f64>,
+    /// EQ1: every revolt (not the hand-over to the rebels): unrest one and
+    /// four turns before and at the revolt, occupied or not.
+    revolts: Vec<RevoltSample>,
+    /// EQ1: seasons ending with a negative treasury, per faction.
+    bankruptcies: BTreeMap<String, u32>,
+    /// EQ1: seasons of each faction alive.
+    alive_turns: u32,
+}
+
+/// EQ1: context of one revolt.
+#[derive(Clone, Copy)]
+struct RevoltSample {
+    before4: f64,
+    before1: f64,
+    at: f64,
+    occupied: bool,
 }
 
 fn campaign_mode(data: &GameData, args: &[String]) {
@@ -177,7 +195,14 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
     let mut prev_buildings = building_set(&state);
     let mut prev_owner = owners(&state);
     let mut high_tax_samples = (0u32, 0u32);
+    // EQ1: weighted unrest per province over the last turns.
+    let mut unrest_history: std::collections::VecDeque<BTreeMap<String, f64>> =
+        std::collections::VecDeque::new();
     for turn in 0..turns {
+        unrest_history.push_back(unrest_map(&state));
+        if unrest_history.len() > 4 {
+            unrest_history.pop_front();
+        }
         for offer in state.factions[&france].offers.clone() {
             let accept = sim_campaign::diplomacy::evaluate(
                 &state,
@@ -221,6 +246,30 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
         }
         let events = state.end_turn_with(data, planner);
         for event in &events {
+            if event.kind == EventKind::Revolt && !event.text_fr.contains("passe aux mains") {
+                if let Some(p) = &event.province {
+                    let key = p.as_str();
+                    let get = |m: Option<&BTreeMap<String, f64>>| {
+                        m.and_then(|m| m.get(key)).copied().unwrap_or(0.0)
+                    };
+                    let province = &state.provinces[p];
+                    let occupied = state
+                        .settlements
+                        .get(&province.city)
+                        .is_some_and(|c| c.controller != c.owner);
+                    run.revolts.push(RevoltSample {
+                        before4: get(unrest_history.front()),
+                        before1: get(unrest_history.back()),
+                        at: sim_campaign::population::weighted_unrest(&province.population),
+                        occupied,
+                    });
+                }
+            }
+            if event.kind == EventKind::Bankruptcy {
+                if let Some(f) = &event.faction {
+                    *run.bankruptcies.entry(f.as_str().to_owned()).or_default() += 1;
+                }
+            }
             *run.event_kinds
                 .entry(format!("{:?}", event.kind))
                 .or_default() += 1;
@@ -243,6 +292,16 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
         }
         if state.is_at_war(&france, &england) {
             run.war_fr_en_turns += 1;
+        }
+        run.alive_turns += state
+            .factions
+            .iter()
+            .filter(|(id, f)| f.alive && id.as_str() != "fac_rebels")
+            .count() as u32;
+        if (turn + 1) % 10 == 0 {
+            let map = unrest_map(&state);
+            run.unrest_samples
+                .push(map.values().sum::<f64>() / map.len().max(1) as f64);
         }
         let current = building_set(&state);
         for (_, building) in current.difference(&prev_buildings) {
@@ -301,6 +360,19 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
     run
 }
 
+fn unrest_map(state: &CampaignState) -> BTreeMap<String, f64> {
+    state
+        .provinces
+        .iter()
+        .map(|(id, p)| {
+            (
+                id.as_str().to_owned(),
+                sim_campaign::population::weighted_unrest(&p.population),
+            )
+        })
+        .collect()
+}
+
 fn building_set(state: &CampaignState) -> BTreeSet<(String, String)> {
     state
         .settlements
@@ -344,6 +416,11 @@ fn run_json(run: &CampaignRun) -> Value {
         "field_men": run.field_men,
         "france_orders": [run.france_orders.0, run.france_orders.1],
         "battles": {"attacker_wins": run.battles.0, "total": run.battles.1},
+        "unrest_samples": run.unrest_samples,
+        "revolts": run.revolts.iter().map(|r| json!({
+            "before4": r.before4, "before1": r.before1, "at": r.at, "occupied": r.occupied,
+        })).collect::<Vec<_>>(),
+        "bankruptcies": run.bankruptcies,
     })
 }
 
@@ -438,7 +515,60 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
         .map(|r| f64::from(r.event_kinds.get("Revolt").copied().unwrap_or(0)))
         .sum::<f64>()
         / n;
-    let _ = writeln!(md, "| Révoltes par partie | {revolts:.1} | — |");
+    let _ = writeln!(
+        md,
+        "| Révoltes par partie (événements) | {revolts:.1} | — |"
+    );
+    // EQ1: time-averaged unrest, revolts proper and their context.
+    let samples: Vec<f64> = runs
+        .iter()
+        .flat_map(|r| r.unrest_samples.iter().copied())
+        .collect();
+    let _ = writeln!(
+        md,
+        "| Mécontentement moyen (tous les 10 tours) | {:.1} | 15-35 (EQ1) |",
+        samples.iter().sum::<f64>() / samples.len().max(1) as f64
+    );
+    let all_revolts: Vec<RevoltSample> = runs
+        .iter()
+        .flat_map(|r| r.revolts.iter().copied())
+        .collect();
+    let count = all_revolts.len().max(1) as f64;
+    let _ = writeln!(
+        md,
+        "| Révoltes par partie (hors passage aux rebelles) | {:.1} | 4-10 (EQ1) |",
+        all_revolts.len() as f64 / n
+    );
+    let _ = writeln!(
+        md,
+        "| Révoltes : trouble 4 tours / 1 tour avant / au moment | {:.0} / {:.0} / {:.0} | — |",
+        all_revolts.iter().map(|r| r.before4).sum::<f64>() / count,
+        all_revolts.iter().map(|r| r.before1).sum::<f64>() / count,
+        all_revolts.iter().map(|r| r.at).sum::<f64>() / count
+    );
+    let _ = writeln!(
+        md,
+        "| Révoltes soudaines (trouble < 50 quatre tours avant) | {:.0} % | — |",
+        100.0 * all_revolts.iter().filter(|r| r.before4 < 50.0).count() as f64 / count
+    );
+    let _ = writeln!(
+        md,
+        "| Révoltes en province occupée | {:.0} % | — |",
+        100.0 * all_revolts.iter().filter(|r| r.occupied).count() as f64 / count
+    );
+    let decades = f64::from(turns) / 40.0;
+    let alive: f64 =
+        runs.iter().map(|r| f64::from(r.alive_turns)).sum::<f64>() / f64::from(turns.max(1)) / n;
+    let bankrupt: f64 = runs
+        .iter()
+        .map(|r| f64::from(r.bankruptcies.values().sum::<u32>()))
+        .sum::<f64>()
+        / n;
+    let _ = writeln!(
+        md,
+        "| Banqueroutes / faction / décennie | {:.2} | < 0,5 (EQ1) |",
+        bankrupt / alive.max(1.0) / decades.max(0.1)
+    );
     let changes: f64 = runs.iter().map(|r| f64::from(r.owner_changes)).sum::<f64>() / n;
     let _ = writeln!(md, "| Changements de propriétaire | {changes:.1} | — |");
     let (att_wins, battles) = runs
