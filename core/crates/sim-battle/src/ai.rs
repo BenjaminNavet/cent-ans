@@ -997,8 +997,48 @@ fn cover_candidates(field: &crate::field::Battlefield, side: SideId) -> Vec<(Cov
             }
         }
     }
+    // EP6: the edge of a hamlet, churchyard, manor or farm of the decor
+    // facing the enemy (walls, hedges and houses: cover like the village).
+    let effects = &crate::decor::DecorRules::bundled().effects;
+    for area in &field.decor.areas {
+        let effect = effects.of(area.kind);
+        if effect.cover > VILLAGE_COVER_MAX || !effect.breaks_charge {
+            continue;
+        }
+        let fp = area.footprint();
+        // Half extent of the area along z (towards the enemy).
+        let (ax, az) = fp.axis();
+        let (fx, fz) = fp.front();
+        let half_z = fp.half_length * az.abs() + fp.half_depth * fz.abs();
+        let half_x = fp.half_length * ax.abs() + fp.half_depth * fx.abs();
+        let edge = (
+            area.x,
+            area.z + forward * (half_z - VILLAGE_SETBACK).max(0.0),
+        );
+        if !within(edge.0, edge.1) || !standable(edge.0, edge.1) || !area.contains(edge.0, edge.1) {
+            continue;
+        }
+        let width = (half_x * 1.6).max(30.0);
+        let score = width.min(120.0) * (1.0 - effect.cover) * 2.0 - penalty(edge.0, edge.1);
+        if score > COVER_THRESHOLD {
+            found.push((
+                Cover {
+                    kind: CoverKind::Village,
+                    center: edge,
+                    along: (1.0, 0.0),
+                    width,
+                    breaks_charge: true,
+                },
+                score,
+            ));
+        }
+    }
     found
 }
+
+/// EP6: decor areas whose missile cover is at most this good count as a
+/// defensive position (hamlets, churchyards, manors, farms).
+const VILLAGE_COVER_MAX: f64 = 0.7;
 
 /// Slots of the shooters along the cover front, in lateral order (B6).
 fn cover_slots(view: &View, shooters: &[usize], cover: &Cover) -> Vec<(usize, f64, f64)> {

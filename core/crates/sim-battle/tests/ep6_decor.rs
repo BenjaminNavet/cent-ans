@@ -502,6 +502,30 @@ fn raid(guarded: bool) -> BattleSim {
 }
 
 #[test]
+fn a_manor_before_the_line_is_a_defensive_cover() {
+    let mut f = decor_field(
+        "prov_test",
+        Terrain::Plains,
+        BattleSeason::Summer,
+        FieldSize::STANDARD,
+        2,
+    );
+    f.clear_decor();
+    f.village = None;
+    f.obstacles.clear();
+    assert!(sim_battle::ai::defensive_cover(&f, SideId::Defender).is_none());
+    f.place_manor(600.0, f.defender_line_z() - 30.0, 0.0, false);
+    let cover =
+        sim_battle::ai::defensive_cover(&f, SideId::Defender).expect("the manor is a cover");
+    assert_eq!(cover.kind, sim_battle::ai::CoverKind::Village);
+    assert_eq!(
+        f.decor_area_at(cover.center.0, cover.center.1)
+            .map(|a| a.kind),
+        Some(AreaKind::Manor)
+    );
+}
+
+#[test]
 fn looting_an_unguarded_camp_costs_morale() {
     let mut sim = raid(false);
     let rules = &sim_battle::DecorRules::bundled().camp;
