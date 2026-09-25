@@ -36,15 +36,31 @@ Incendie d'une maison près de la place, 10 min sans combat :
 | paris | 32 | 2.0 | 6 % |
 | rouen | 36 | 9.9 | 28 % |
 
+## Mesures intermédiaires (ville dense, sans mobilier)
+
+Incendie, 10 min : avec l'ancien réglage (portée 30 m, 0,06/période) toute la ville brûle
+(100 % / 95 % / 100 %). Balayage (portée × chance) → retenu **portée 15 m, chance 0,025** :
+
+| Ville | Îlots | Touchés après 10 min | Part |
+|---|---|---|---|
+| générique | 59 | 14.9 | 25 % |
+| paris | 61 | 7.3 | 12 % |
+| rouen | 78 | 13.2 | 17 % |
+
+Assauts (même sonde) : générique 8/10, 349 s ; Paris 2/10, 706 s ; Rouen 0/10, 318 s.
+Paris à surveiller (5/10 avant) : refaire sur 20 graines après le mobilier.
+
 ## État
 
 - [x] Mesures avant, sonde.
 - [x] Squelette : données, schéma, test pytest, `town.rs`, `props.rs` vide.
-- [ ] Partie A : ville dense.
+- [x] Partie A : ville dense (anneaux d'îlots orientés + rangées le long du rempart ; villes
+  emblématiques : rangées le long du rempart et des rues du plan, puis treillis ; église ;
+  cheminement sur rectangles ; incendie entre rectangles, réglage 15 m / 0,025).
 - [ ] Partie B : mobilier + collisions + figurines.
 - [ ] Pont + Godot + captures.
 - [ ] Mesures après, ADR, docs.
 
 ## Prochaine étape
 
-Emprises des îlots dans `siege.rs` + `build_houses` dense.
+Partie B : `props.rs` (façades, faubourgs, marché, village), `sim/obstacles.rs` (figurines).
