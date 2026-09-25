@@ -91,6 +91,10 @@ func _ready() -> void:
 	_build_top_bar()
 	_build_log()
 	_build_bottom()
+	# UB1 / U13 : sons d'interface (bus Interface d'AU1).
+	ui_feedback.connect(func(kind: String) -> void:
+		if kind == "card" or kind == "alert":
+			UiSounds.play(kind))
 
 
 func _label(text: String, size: int = 16) -> Label:

@@ -215,8 +215,6 @@ func _layout() -> void:
 	if panel == null:
 		return
 	var view := get_viewport_rect().size
-	position = Vector2.ZERO
-	self.size = view
 	var width := minf(PANEL_MAX.x, view.x - 32.0)
 	panel.custom_minimum_size = Vector2(width, 0)
 	var height := minf(panel.get_combined_minimum_size().y, minf(PANEL_MAX.y, view.y - 32.0))
@@ -273,6 +271,8 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	else:
 		withdraw_button.tooltip_text = "Impossible : vous êtes attaqué, il faut tenir ou laisser trancher la fortune."
 	_layout()
+	if not visible:
+		UiSounds.play("alert")  # UB1 / U13 : bataille en vue
 	visible = true
 	_layout.call_deferred()
 

@@ -38,10 +38,19 @@ Sources : `docs/audit/a3-ui.md` (U9, U13, défauts B1-B7), `docs/audit/backlog-t
   `kills` dans `get_units`, `experience` dans les unités de `get_army`. `battle_scene.gd` applique
   `resolve_battle` dès la fin (plus au retour) pour lire les suites avant / après
   (`battle_aftermath.gd`). Captures 30, 31, 24 (siège 1280×720).
-- [ ] Lot 4 — sons d'interface (U13)
+- [x] Lot 4 — sons d'interface (U13) : 8 événements `ui_*` (bus Interface) dans
+  `data/audio/sound_bank.json`, clips WAV `game/assets/audio/ui/` découpés hors ligne par
+  `tools/cent_ans_tools/ui_sounds.py` dans la banque AU1 (CC0) et les `sfx/` procéduraux
+  (`ui/SOURCE.md`) ; lecteur `game/scripts/audio/ui_sounds.gd` (`UiSounds.play`, priorité,
+  recharge, limite d'instances, muet en headless). Branchements : ordres de bataille
+  (`battle_scene.issue`), cartes d'unité et sceau, confirmation de retraite, écran d'avant-bataille
+  (alerte), ordres de campagne (`campaign_map._submit` : recrutement / construction / ordre /
+  refus ; clic droit ; `army_movement_controller`), sélection d'armée, lettres
+  (`news_letters.push_news`). Test headless `game/tests/ub1_ui_test.gd` (sons, prévision,
+  retraite, écran d'avant-bataille, HUD, écran de fin). Test Python de la banque adapté aux WAV.
 
 ## Prochaine étape
-Lot 4 : sons d'interface (banque AU1, bus Interface).
+Fusion de main, vérifications complètes (cargo, build, import, smoke).
 
 ## Reprise
 `core/build.sh`, `godot --headless --path game --import`. Captures :
