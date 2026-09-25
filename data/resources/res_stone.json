@@ -6,8 +6,10 @@
   "category": "raw_material",
   "base_price": 5,
   "satisfies_classes": [],
-  "description": "Carrières de calcaire et de grès pour murailles, châteaux et cathédrales.",
+  "description": "Carrières de calcaire, de tuffeau et de grès pour murailles, châteaux et cathédrales ; la pierre de Caen s'exporte jusqu'en Angleterre. Voir [[cdx_pierre]].",
   "sources": [
+    "Pierre de taille",
+    "Pierre de Caen",
     "Économie médiévale (Wikipédia)"
   ]
 }

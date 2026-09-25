@@ -1,0 +1,17 @@
+{
+  "id": "cdx_jeu_pieux",
+  "title": "Les pieux des archers",
+  "category": "mecanique",
+  "aliases": [
+    "pieux",
+    "pieux des archers",
+    "plantent leurs pieux",
+    "s'empalent sur les pieux"
+  ],
+  "era": { "from": "1396", "to": "1453" },
+  "summary": "Chaque archer anglais porte un pieu taillé en pointe aux deux bouts, qu'il plante de biais devant lui : une haie hérissée où les chevaux s'empalent. Mais il faut le temps de les planter.",
+  "body": "Les pieux défensifs ne sont pas une invention anglaise : les Ottomans en couvrent leurs archers à [[cdx_nicopolis|Nicopolis]] (1396), où la chevalerie franco-bourguignonne s'y brise. [[cdx_henri_v|Henri V]] en fait une règle : pendant la marche vers Calais, en octobre 1415, il ordonne à chaque archer de tailler un pieu de six pieds, affûté aux deux bouts. À [[cdx_azincourt|Azincourt]], les archers les plantent devant eux, inclinés vers l'ennemi, à hauteur de poitrail : la charge des ailes françaises s'y empale ou s'en détourne, et les chevaux blessés refluent à travers les hommes d'armes à pied.\n\nLa parade a son point faible : elle demande quelques instants, et une troupe en marche en est dépourvue. À Patay, le 18 juin 1429, l'avant-garde française de La Hire tombe sur les archers de Talbot avant qu'ils n'aient fini de planter leurs pieux ; ils sont balayés, et l'armée anglaise avec eux.",
+  "gameplay": "Des archers dotés de pieux (les [[cdx_arc_long|archers à l'arc long]]) qui restent immobiles 15 secondes plantent leurs pieux (journal : « Les … plantent leurs pieux. »). Tout mouvement ou une déroute les leur fait perdre ; il faut de nouveau 15 secondes d'arrêt.\n\nUne [[cdx_jeu_charge|charge]] de cavalerie qui les aborde de face s'empale : 12 % des cavaliers sont tués sur le coup, le régiment perd 15 points de [[cdx_jeu_moral|moral]] et sa charge n'a aucun effet de choc. De flanc ou de dos, les pieux ne protègent pas. L'IA évite de charger de front des archers retranchés. En résolution automatique, des archers à pieux qui défendent ne subissent que 60 % de la charge.\n\nConseil : déployez vos archers avant l'arrivée de la cavalerie ennemie et ne les déplacez plus ; contre eux, tournez-les par les ailes ou surprenez-les en marche, comme à Patay.",
+  "see_also": ["cdx_arc_long", "cdx_jeu_charge", "cdx_jeu_flancs", "cdx_azincourt", "cdx_nicopolis"],
+  "sources": ["Bataille d'Azincourt", "Bataille de Patay", "Bataille de Nicopolis"]
+}

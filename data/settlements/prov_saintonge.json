@@ -66,7 +66,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Abbaye cistercienne fondée en 1111 près de Saintes.",
+    "description": "Abbaye bénédictine fondée en 1111 près de Saintes.",
     "sources": ["Abbaye de Fontdouce"]
   }
 ]

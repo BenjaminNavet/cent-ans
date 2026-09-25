@@ -1,0 +1,34 @@
+{
+  "id": "cdx_piquiers_flamands",
+  "title": "Les piquiers des métiers flamands",
+  "category": "unite",
+  "aliases": [
+    "Piquiers flamands",
+    "piquiers",
+    "métiers flamands",
+    "bataille des Éperons d'or",
+    "Courtrai",
+    "bataille de Courtrai"
+  ],
+  "era": {
+    "from": "1302",
+    "to": "1382"
+  },
+  "summary": "Organisées par métiers (tisserands, foulons, bouchers…), les milices des villes de Flandre tiennent en rangs serrés derrière leurs piques et leurs [[cdx_goedendag|goedendags]]. Leur victoire sur la chevalerie française à Courtrai (1302) hante la noblesse jusqu'à la revanche de [[cdx_roosebeke|Roosebeke]] (1382).",
+  "body": "Le 11 juillet 1302, près de Courtrai, les milices de Bruges, du Franc et d'Ypres, retranchées derrière des fossés, massacrent la chevalerie de Philippe le Bel commandée par Robert II d'Artois, qui y est tué. On suspend dans l'église Notre-Dame de Courtrai les éperons dorés des chevaliers morts : c'est la bataille des Éperons d'or. Pour la première fois, des piétons roturiers battent en rase campagne la fine fleur de la chevalerie.\n\nLes villes drapières de [[cdx_flandre_laine|Flandre]], [[cdx_gand|Gand]], [[cdx_bruges|Bruges]] et Ypres, arment leurs métiers : chaque corporation fournit son contingent, sous sa bannière et avec ses capitaines. Alliées à l'Angleterre sous [[cdx_jacob_van_artevelde|Jacob van Artevelde]] (1338-1345), elles marchent avec Édouard III vers Tournai en 1340, mais sont battues à Saint-Omer la même année.\n\nImmobile, la masse des piquiers est vulnérable dès qu'elle quitte sa position ou qu'on la prend de flanc. À [[cdx_roosebeke|Roosebeke]], le 27 novembre 1382, l'armée de Philippe van Artevelde, fils de Jacob, est enveloppée par les gens d'armes de [[cdx_charles_vi|Charles VI]] : pressés les uns contre les autres, beaucoup meurent étouffés.",
+  "gameplay": "Compagnie de 120 hommes (infanterie). Recrutement : 650 livres payées à l'enrôlement ; entretien 60 livres par mois, soit 240 par saison. Caractéristiques : mêlée 55, armure 40 (laisse passer 69 % des coups), moral 60, vitesse 40 (1,6 m/s). Exige le bâtiment Maison des métiers dans la place ; une province de culture flamande. La place doit compter assez de bourgeois (dix fois l'effectif). Piques : une charge de cavalerie de face ou contre le carré est arrêtée net (8 % des cavaliers tombent, −10 de moral) ; en mêlée, la cavalerie ne frappe plus qu'à ×0,25 contre le carré (×0,7 hors carré) et les piques la frappent à ×1,8. En résolution automatique, charges subies ×0,25 et dégâts contre la cavalerie ×3. Un mur contre la cavalerie, surtout formé en carré ; lents et mal protégés contre les traits, ils souffrent face aux archers et aux arbalétriers. Tournez-les par le flanc avec de l'infanterie.",
+  "entity": "unit_flemish_pikemen",
+  "see_also": [
+    "cdx_goedendag",
+    "cdx_roosebeke",
+    "cdx_gand",
+    "cdx_jacob_van_artevelde",
+    "cdx_comte_de_flandre"
+  ],
+  "sources": [
+    "Bataille de Courtrai (1302)",
+    "Bataille de Roosebeke",
+    "Bataille de Saint-Omer (1340)",
+    "Goedendag"
+  ]
+}

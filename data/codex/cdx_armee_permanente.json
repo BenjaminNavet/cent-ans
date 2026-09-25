@@ -1,0 +1,28 @@
+{
+  "id": "cdx_armee_permanente",
+  "title": "L'armée permanente",
+  "category": "technique",
+  "aliases": [
+    "Armée permanente",
+    "armée soldée"
+  ],
+  "era": {
+    "from": "1445",
+    "to": "1500"
+  },
+  "summary": "Payée par un impôt permanent, la [[cdx_taille|taille]], l'armée de [[cdx_charles_vii|Charles VII]] ne se disperse plus à la fin des campagnes : compagnies d'ordonnance, francs-archers et artillerie forment la première armée permanente d'Europe occidentale.",
+  "body": "Jusqu'au milieu du XVe siècle, les rois lèvent des armées pour une campagne, puis les licencient, ce qui jette sur les routes les [[cdx_grandes_compagnies|Grandes Compagnies]] et les [[cdx_ecorcheurs|écorcheurs]]. [[cdx_charles_vii|Charles VII]] rompt avec cette pratique : les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] (1445), les [[cdx_franc_archer|francs-archers]] (1448) et l'artillerie des frères Bureau restent sous les armes en temps de paix, logées et payées régulièrement.\n\nCette force disciplinée et expérimentée achève la guerre en quatre ans, de la Normandie à la Guyenne. Elle devient le modèle des monarchies européennes, qui s'appuient désormais sur l'impôt permanent pour entretenir leurs soldats.",
+  "gameplay": "Recherche : 800 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_ordonnance_louppy|Compagnies d'ordonnance]], [[cdx_artillerie_de_campagne|Artillerie de campagne]]. Année historique 1448 : avant 1428, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : entretien des armées et garnisons −10 % ; +2 d'expérience pour les nouvelles recrues. Réduit durablement la charge des grandes armées.",
+  "entity": "tech_standing_companies",
+  "see_also": [
+    "cdx_ordonnance_louppy",
+    "cdx_ordonnance_montils",
+    "cdx_compagnies_ordonnance",
+    "cdx_taille"
+  ],
+  "sources": [
+    "Compagnie d'ordonnance",
+    "Francs-archers",
+    "Armée permanente"
+  ]
+}

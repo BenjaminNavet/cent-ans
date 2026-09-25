@@ -1,0 +1,32 @@
+{
+  "id": "cdx_premieres_bouches_a_feu",
+  "title": "Les premières bouches à feu",
+  "category": "technique",
+  "aliases": [
+    "bouches à feu",
+    "canon de Milemete",
+    "pot de fer",
+    "pots de fer",
+    "ribaudequin",
+    "ribaudequins"
+  ],
+  "era": {
+    "from": "1326",
+    "to": "1400"
+  },
+  "summary": "Un vase de métal couché sur une table, tirant une grosse flèche : c'est le premier canon connu en Occident, peint en 1326. Vingt ans plus tard, de petites bouches à feu tonnent peut-être à [[cdx_crecy|Crécy]] et sûrement devant [[cdx_calais|Calais]].",
+  "body": "Le manuscrit offert par Walter de Milemete au jeune [[cdx_edouard_iii|Édouard III]] en 1326 montre un « pot de fer » en forme de vase, mis à feu par un chevalier. Un document de [[cdx_rouen|Rouen]] mentionne en 1338 un « pot de fer à traire garros » pour la flotte française. Les chroniqueurs évoquent des canons anglais à [[cdx_crecy|Crécy]] (1346), ce qui reste discuté, et les comptes royaux prouvent leur emploi au siège de [[cdx_calais|Calais]] (1346-1347).\n\nCes premières pièces sont petites, faites de fer forgé en barres cerclées ou de bronze coulé, et leur effet est surtout moral. Les ribaudequins, plusieurs tubes montés sur une charrette, servent en bataille. Il faut attendre la fin du XIVe siècle pour que grossissent les [[cdx_bombarde|bombardes]] capables de briser des murs.",
+  "gameplay": "Recherche : 350 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_poudre_noire|Poudre noire]]. Effets, pour toute la faction : les places que vous assiégez résistent moins (−5 points de résistance, soit des brèches plus rapides). Débloque : [[cdx_bombarde|Bombarde primitive]]. Indispensable pour prendre les grandes places fortes.",
+  "entity": "tech_bombards",
+  "see_also": [
+    "cdx_bombarde",
+    "cdx_poudre_noire",
+    "cdx_calais",
+    "cdx_crecy"
+  ],
+  "sources": [
+    "Bombarde",
+    "Artillerie médiévale",
+    "Siège de Calais (1346-1347)"
+  ]
+}

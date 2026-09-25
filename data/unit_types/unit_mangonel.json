@@ -31,7 +31,7 @@
   ],
   "required_building": "bld_siege_workshop",
   "equipment": "Engin à traction ou à contrepoids léger, projectiles de pierre, pots à feu occasionnels.",
-  "description": "Engin de jet léger et mobile, utile contre palissades, portes et défenseurs sur les remparts.",
+  "description": "Engin de jet léger et mobile, moins puissant que le [[cdx_trebuchet|trébuchet]], utile contre palissades, portes et défenseurs sur les remparts.",
   "sources": [
     "Mangonneau"
   ]

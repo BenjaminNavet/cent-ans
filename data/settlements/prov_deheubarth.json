@@ -81,7 +81,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Puissant château de l'Earldom de Pembroke, verrou du sud-ouest gallois.",
+    "description": "Puissant château des comtes de Pembroke, verrou du sud-ouest gallois.",
     "sources": [
       "Château de Pembroke"
     ]
@@ -134,7 +134,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne mère de toutes les maisons cisterciennes galloises.",
+    "description": "Abbaye cistercienne, mère de la plupart des abbayes cisterciennes du Galles gallois (Strata Florida, Strata Marcella…).",
     "sources": [
       "Abbaye de Whitland"
     ]

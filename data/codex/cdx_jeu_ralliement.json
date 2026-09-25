@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_ralliement",
+  "title": "Ordre : rallier les fuyards",
+  "category": "mecanique",
+  "aliases": [
+    "rallier",
+    "ralliement",
+    "se rallient",
+    "fuyards"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Une troupe qui fuit n'est pas perdue tant qu'un chef peut la rejoindre, bannière haute, et lui faire honte ou lui rendre courage. Encore faut-il que ce chef ait l'autorité de se faire entendre.",
+  "body": "Ramener au combat des hommes qui fuient est l'épreuve du vrai capitaine. À Cocherel, le 16 mai 1364, [[cdx_du_guesclin|Bertrand du Guesclin]] tient ses hommes en main malgré une retraite simulée qui aurait pu tourner à la débandade, puis les ramène à l'attaque au moment où les Anglo-Navarrais descendent de leur colline : la manœuvre lui vaut la victoire et sa renommée.\n\nLa bannière du chef est le point de ralliement : tant qu'elle reste debout, les fuyards savent où se reformer. C'est pourquoi on la confie à un chevalier éprouvé et pourquoi sa chute sème la panique. Devant [[cdx_orleans|Orléans]], le 7 mai 1429, [[cdx_jeanne_darc|Jeanne d'Arc]], blessée, revient à l'assaut des Tourelles avec son étendard, et les hommes découragés la suivent de nouveau.\n\nMais beaucoup de défaites se jouent précisément là : à [[cdx_crecy|Crécy]] comme à [[cdx_poitiers|Poitiers]], aucun chef ne parvient à reformer les batailles françaises une fois rompues.",
+  "gameplay": "Ordre « Rallier » : le général, s'il est vivant et à la tête de l'armée, tente de ramener les régiments en déroute à moins de 200 m de lui. Pour chacun, la chance de réussite vaut 25 % plus 6 % par point de commandement (de 25 % à 85 %). Un régiment rallié s'arrête, se reforme 5 secondes et remonte à 45 de moral au moins ; en cas d'échec, « Les … n'entendent pas l'appel ». Recharge de 90 secondes.\n\nSans ordre, un régiment en [[cdx_deroute_debandade|déroute]] regagne 0,8 point de moral par seconde tant qu'aucun ennemi n'est à moins de 150 m ; il se rallie de lui-même au-dessus de 40, s'il garde au moins 20 % de ses hommes. Conseil : amenez le général derrière la ligne qui plie avant qu'elle ne fuie hors du champ ; un chef à fort commandement vaut plusieurs régiments de réserve.",
+  "entity": "order_rally",
+  "see_also": ["cdx_deroute_debandade", "cdx_jeu_moral", "cdx_jeu_general", "cdx_du_guesclin", "cdx_jeanne_darc"],
+  "sources": ["Bataille de Cocherel", "Siège d'Orléans"]
+}

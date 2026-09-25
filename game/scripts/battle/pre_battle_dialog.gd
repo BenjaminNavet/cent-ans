@@ -203,7 +203,7 @@ func _build_buttons() -> Control:
 
 
 func _button(text: String, font_size: int) -> Button:
-	var button := Button.new()
+	var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, 44)
@@ -362,6 +362,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 		var reinf := BattleUiKit.label("Renforts : " + ", ".join(parts), 14, BattleUiKit.GOOD, false, true)
 		reinf.clip_text = true
 		reinf.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		reinf.set_script(RichLabel)
 		reinf.tooltip_text = reinf.text
 		reinf.mouse_filter = Control.MOUSE_FILTER_PASS
 		column.add_child(reinf)
@@ -390,6 +391,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var composition := BattleUiKit.label(_composition(units), 14, BattleUiKit.INK_SOFT)
 	composition.clip_text = true
 	composition.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	composition.set_script(RichLabel)
 	composition.tooltip_text = composition.text
 	composition.mouse_filter = Control.MOUSE_FILTER_PASS
 	column.add_child(composition)
@@ -428,6 +430,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	texts.add_child(name_label)
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
+	stars_label.set_script(RichLabel)
 	stars_label.tooltip_text = "Commandement %d / 10" % command
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
