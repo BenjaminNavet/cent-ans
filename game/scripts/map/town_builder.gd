@@ -126,8 +126,8 @@ static func block_mesh() -> Mesh:
 		return _meshes["__block"]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var wall := layer_color("Plaster", Color(0.55, 0.49, 0.41))
-	var roof := layer_color("RoofTile", Color(1.0, 0.72, 0.6))
+	var wall := layer_color("Plaster", Color(0.47, 0.42, 0.36))
+	var roof := layer_color("RoofTile", Color(0.8, 0.58, 0.5))
 	var eave := 0.52
 	var y0 := -0.15
 	var corners := [Vector3(-0.5, 0, -0.5), Vector3(0.5, 0, -0.5), Vector3(0.5, 0, 0.5), Vector3(-0.5, 0, 0.5)]
