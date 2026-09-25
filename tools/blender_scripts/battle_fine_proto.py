@@ -267,6 +267,49 @@ def remap_weights(body):
             if q not in groups:
                 groups[q] = body.vertex_groups.new(name=q)
             groups[q].add([vi], w, "REPLACE")
+    smooth_weights(body)
+
+
+def smooth_weights(obj, factor=0.5, repeat=4, bones=("Chest", "Shoulder.L", "Shoulder.R", "UpperArm.L", "UpperArm.R", "Neck")):
+    """Relax the weights around the shoulders (Laplacian, normalised).
+
+    The Quaternius pivots of the chest and shoulders sit elsewhere than MakeHuman's; the
+    sharp weight borders of the renamed groups then crease the shoulders in the thrust.
+    """
+    me = obj.data
+    names = {g.index: g.name for g in obj.vertex_groups}
+    index = {g.name: g.index for g in obj.vertex_groups}
+    weights = [
+        {names[g.group]: g.weight for g in v.groups if names[g.group] not in ("body",)}
+        for v in me.vertices
+    ]
+    adj = [[] for _ in me.vertices]
+    for e in me.edges:
+        a, b = e.vertices
+        adj[a].append(b)
+        adj[b].append(a)
+    region = [any(weights[i].get(bn, 0) > 0.01 for bn in bones) for i in range(len(weights))]
+    for _ in range(repeat):
+        new = []
+        for i, w in enumerate(weights):
+            if not region[i] or not adj[i]:
+                new.append(w)
+                continue
+            acc = {k: v * (1 - factor) for k, v in w.items()}
+            share = factor / len(adj[i])
+            for j in adj[i]:
+                for k, v in weights[j].items():
+                    acc[k] = acc.get(k, 0.0) + v * share
+            total = sum(acc.values()) or 1.0
+            new.append({k: v / total for k, v in acc.items()})
+        weights = new
+    for i, w in enumerate(weights):
+        if not region[i]:
+            continue
+        for k, v in w.items():
+            if k not in index:
+                index[k] = obj.vertex_groups.new(name=k).index
+            obj.vertex_groups[index[k]].add([i], v, "REPLACE")
 
 
 def attach(obj, arm):
@@ -316,6 +359,8 @@ def pose_clip(arm, clip, frac):
     poses.reset_state()
     if overrides:
         overrides(arm, i / max(count - 1, 1))
+    # Freeze the pose: a render re-evaluates the action and would drop the overrides.
+    arm.animation_data.action = None
     bpy.context.view_layer.update()
 
 
@@ -383,7 +428,9 @@ def step_fit(out):
     for label, clip, fracs in TEST_CLIPS:
         for k, fr in enumerate(fracs):
             pose_clip(arm, clip, fr)
-            look_at(cam, (2.6, -3.0, 1.2), (0, 0, 0.8), 45)
+            look_at(cam, (1.6, -2.2, 1.4), (0, 0, 1.0), 45)
+            if clip == "thrust":
+                look_at(cam, (0.9, 1.6, 1.6), (0, 0, 1.25), 50)
             render(os.path.join(out, f"fit_{clip}_{k}.png"))
         print("CLIP", label, clip)
 
