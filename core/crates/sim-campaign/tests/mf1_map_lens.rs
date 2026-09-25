@@ -32,7 +32,11 @@ fn every_province_has_values_in_range() {
     let lens = map_lens(&state, &data, &fac("fac_france"));
     assert_eq!(lens.len(), state.provinces.len());
     for (id, values) in &lens {
-        assert!((0.0..=100.0).contains(&values.unrest), "{id}: {}", values.unrest);
+        assert!(
+            (0.0..=100.0).contains(&values.unrest),
+            "{id}: {}",
+            values.unrest
+        );
         assert!(values.income >= 0.0, "{id}");
     }
     let paris = &lens[&prov("prov_ile_de_france")];
