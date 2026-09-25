@@ -97,3 +97,15 @@ vérifications (fmt, clippy, test, build.sh, import, smoke), rapport.
 - Jamais en `--autoplay` (bancs, captures, smoke) ni avec `--no-speech` / `--no-bv3` ;
   `--speech-shot=<png> --speech-at=<s>` force le discours et capture.
 - Captures `discours_travelling` (6 s), `discours_cri` (25 s).
+
+## Mesures (`--disable-vsync --resolution 1600x900 -- --benchmark --bench-at=90 --units=50`, 11 800 soldiers)
+A/B alterné `--no-bv3` / BV3, machine partagée avec d'autres agents (bruit ±30 % entre passes
+identiques ; l'écran plafonne souvent à 60 Hz malgré `--disable-vsync`).
+| Config | `--no-bv3` (FPS moyens) | BV3 | Primitives |
+|---|---|---|---|
+| Normale (5 paires) | 48,8 · 79,1 · 58,6 · 59,4 · 43,8 (moy. 57,9) | 43,6 · 58,6 · 58,3 · 65,6 · 50,9 (moy. 55,4) | 2,19-2,24 M → 1,29-1,37 M |
+| Ultra ×2,5 (2 paires) | 61,1 · 58,3 | 62,4 · 56,5 | 3,81 M → 1,42-1,63 M |
+| Ultra, imposteurs seuls (`--no-impostors`, 1 paire non plafonnée) | 41,4 | 54,6 (+32 %) | 3,79 M → 1,42 M |
+- Normale : −4 % en moyenne, dans le bruit (seuil −10 % tenu) ; les imposteurs retirent 40 %
+  des primitives, ce qui compense le coût de l'herbe couchée, des étendards et des duels.
+- Ultra : la baisse de 20-25 % mesurée par BV1 est rattrapée (primitives ÷2,3 à 2,7).
