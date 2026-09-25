@@ -131,25 +131,45 @@ func add_layer_button(button: Button) -> void:
 ## Pré-calcule le fond : emprise des provinces, index de province et relief réduits.
 func setup(data: MapData) -> void:
 	map_data = data
-	crop = _province_extent(data)
-	var aspect := crop.size.y / maxf(crop.size.x, 1.0)
+	var cached := _textures_for(data)
+	crop = cached["crop"]
+	_view.custom_minimum_size = cached["view_size"]
+	_material.set_shader_parameter("province_ids", cached["ids"])
+	_material.set_shader_parameter("relief", cached["relief"])
+	_view.texture = cached["relief"]
+	set_province_colors(PackedColorArray())
+	set_fog(false, PackedStringArray())
+
+
+## PB1 : textures d'identifiants et de relief calculées une fois par carte (pixel par pixel en
+## GDScript, ~0,5 s) puis partagées par toutes les mini-cartes (carte de campagne, panneau de
+## diplomatie) : elles ne dépendent que de `MapData` et des constantes d'affichage.
+static var _texture_cache: Dictionary = {}
+
+
+static func _textures_for(data: MapData) -> Dictionary:
+	var key := data.get_instance_id()
+	if _texture_cache.has(key):
+		return _texture_cache[key]
+	_texture_cache.clear()  # une seule carte vivante à la fois
+	var crop_rect := _province_extent(data)
+	var aspect := crop_rect.size.y / maxf(crop_rect.size.x, 1.0)
 	var view_size := Vector2(MAP_WIDTH, MAP_WIDTH * aspect)
 	if view_size.y > MAX_MAP_HEIGHT:
 		view_size = Vector2(MAX_MAP_HEIGHT / aspect, MAX_MAP_HEIGHT)
-	_view.custom_minimum_size = view_size.round()
 	# Texture à 1,5 fois l'affichage : frontières nettes pour un coût de calcul modéré.
 	var tex_size := Vector2i((view_size * TEXTURE_SCALE).round())
 	var id_bytes := PackedByteArray()
 	id_bytes.resize(tex_size.x * tex_size.y * 2)
 	var rgb_bytes := PackedByteArray()
 	rgb_bytes.resize(tex_size.x * tex_size.y * 3)
-	var step := crop.size / Vector2(tex_size)
+	var step := crop_rect.size / Vector2(tex_size)
 	var slope_step := maxi(int(step.x), 1)
 	var offset := 0
 	for ty in tex_size.y:
-		var py := int(crop.position.y + (ty + 0.5) * step.y)
+		var py := int(crop_rect.position.y + (ty + 0.5) * step.y)
 		for tx in tex_size.x:
-			var px := int(crop.position.x + (tx + 0.5) * step.x)
+			var px := int(crop_rect.position.x + (tx + 0.5) * step.x)
 			var index := data.province_index_at(px, py)
 			id_bytes[offset * 2] = index & 0xFF
 			id_bytes[offset * 2 + 1] = (index >> 8) & 0xFF
@@ -160,11 +180,14 @@ func setup(data: MapData) -> void:
 			offset += 1
 	var ids := Image.create_from_data(tex_size.x, tex_size.y, false, Image.FORMAT_RG8, id_bytes)
 	var shaded := Image.create_from_data(tex_size.x, tex_size.y, false, Image.FORMAT_RGB8, rgb_bytes)
-	_material.set_shader_parameter("province_ids", ImageTexture.create_from_image(ids))
-	_material.set_shader_parameter("relief", ImageTexture.create_from_image(shaded))
-	_view.texture = ImageTexture.create_from_image(shaded)
-	set_province_colors(PackedColorArray())
-	set_fog(false, PackedStringArray())
+	var result := {
+		"crop": crop_rect,
+		"view_size": view_size.round(),
+		"ids": ImageTexture.create_from_image(ids),
+		"relief": ImageTexture.create_from_image(shaded),
+	}
+	_texture_cache[key] = result
+	return result
 
 
 ## Emprise des provinces (anneaux), élargie de `CROP_MARGIN`, dans les bornes de la carte.

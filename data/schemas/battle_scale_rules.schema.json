@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_scale_rules.schema.json",
+  "title": "Échelle des batailles",
+  "description": "Fichier data/rules/battle_scale.json (lot EP1, ADR 0031) : paliers de taille du champ de bataille selon l'effectif total. Lu par sim-battle (BattleScaleRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "tiers": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Paliers dans l'ordre croissant d'effectif ; le dernier n'a pas de max_soldiers.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z_]+$" },
+          "label": { "type": "string", "description": "Nom affiché (français)." },
+          "max_soldiers": { "type": "integer", "minimum": 1, "description": "Effectif total (deux camps) couvert par ce palier ; absent pour le dernier." },
+          "width_m": { "type": "number", "minimum": 600, "maximum": 4000, "multipleOf": 10, "description": "Largeur du champ (x), multiple de la grille de 10 m." },
+          "depth_m": { "type": "number", "minimum": 600, "maximum": 3000, "multipleOf": 10, "description": "Profondeur du champ (z), multiple de la grille de 10 m." },
+          "line_gap_m": { "type": "number", "minimum": 150, "maximum": 1000, "description": "Écart entre les lignes de bataille des deux camps, centrées sur le milieu du champ." },
+          "zone_depth_m": { "type": "number", "minimum": 100, "maximum": 1000, "description": "Profondeur d'une zone de déploiement ; la ligne de bataille est à 50 m de son bord avant." },
+          "max_regiments_per_side": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Régiments présents à la fois par camp ; le surplus attend en renfort." }
+        },
+        "required": ["key", "label", "width_m", "depth_m", "line_gap_m", "zone_depth_m", "max_regiments_per_side"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["tiers"],
+  "additionalProperties": false
+}

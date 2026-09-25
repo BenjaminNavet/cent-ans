@@ -44,6 +44,7 @@ fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
         siege: None,
         siege_layout: None,
         orders: Vec::new(),
+        standards: None,
     }
 }
 
@@ -399,6 +400,7 @@ fn general_death_shakes_the_army() {
         charge_percent: 0.0,
         ranged_percent: 0.0,
         defense_percent: 0.0,
+        sovereign: false,
     });
     let mut sim = BattleSim::new(s, 5).unwrap();
     sim.set_ai(SideId::Attacker, false);

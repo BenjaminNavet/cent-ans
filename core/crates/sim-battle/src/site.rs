@@ -9,8 +9,9 @@
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
-use crate::field::{Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH, FIELD_WIDTH};
+use crate::field::{Weather, Zone};
 use crate::rng::BattleRng;
+use crate::scale::FieldSize;
 use crate::setup::BattleSeason;
 
 /// State of the ground at the time of the battle (season and weather).
@@ -84,6 +85,13 @@ pub struct Coast {
     pub shore_x: f64,
     /// Width of the sand strip inside the field, in metres.
     pub beach: f64,
+    /// Width of the field (EP1: the east edge is at x = `field_width`).
+    #[serde(default = "standard_width")]
+    pub field_width: f64,
+}
+
+fn standard_width() -> f64 {
+    FieldSize::STANDARD.width
 }
 
 impl Coast {
@@ -99,7 +107,7 @@ impl Coast {
     pub fn from_edge(&self, x: f64) -> f64 {
         match self.flank {
             Flank::West => x,
-            Flank::East => FIELD_WIDTH - x,
+            Flank::East => self.field_width - x,
         }
     }
 
@@ -326,11 +334,19 @@ pub struct Occupied<'a> {
     pub parts: &'a [Zone],
     /// z of the river centre line at x, when there is a river.
     pub river_z: Option<&'a dyn Fn(f64) -> f64>,
+    /// Size of the field (EP1).
+    pub size: FieldSize,
+    /// EP3: distance from (x, z) to the nearest water's edge (the river at
+    /// its local width, streams, oxbow), when there is a river.
+    pub water_gap: Option<&'a dyn Fn(f64, f64) -> f64>,
 }
 
 impl Occupied<'_> {
     fn near_river(&self, x: f64, z: f64, margin: f64) -> bool {
+        // Margins were measured from the centre of an 18 m river (EP3: from
+        // the water's edge, 9 m less, whatever the water).
         self.river_z.is_some_and(|f| (z - f(x)).abs() < margin)
+            || self.water_gap.is_some_and(|g| g(x, z) < margin - 9.0)
     }
 
     fn in_zones(&self, x: f64, z: f64, margin: f64) -> bool {
@@ -346,10 +362,13 @@ impl Occupied<'_> {
 
 /// `true` when a disc at (x, z) of `radius` sits on the centre of a
 /// deployment line (the armies must be able to form up).
-fn on_line(x: f64, z: f64, radius: f64) -> bool {
-    [ATTACKER_LINE_Z, DEFENDER_LINE_Z].iter().any(|line| {
-        (z - line).abs() < radius + 40.0 && (x - FIELD_WIDTH * 0.5).abs() < 360.0 + radius
-    })
+fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
+    [size.attacker_line_z(), size.defender_line_z()]
+        .iter()
+        .any(|line| {
+            (z - line).abs() < radius + 40.0
+                && (x - size.center_x()).abs() < size.line_half() + radius
+        })
 }
 
 impl SiteFeatures {
@@ -388,12 +407,13 @@ impl SiteFeatures {
             let offset = rng.range(15.0, 40.0);
             let shore_x = match flank {
                 Flank::West => -offset,
-                Flank::East => FIELD_WIDTH + offset,
+                Flank::East => occupied.size.width + offset,
             };
             features.coast = Some(Coast {
                 flank,
                 shore_x,
                 beach,
+                field_width: occupied.size.width,
             });
         }
         let wants_village = site
@@ -404,7 +424,7 @@ impl SiteFeatures {
             features.village = draw_village(farm, site.terrain, &features, occupied, rng);
         }
         if let Some(village) = &features.village {
-            features.obstacles = crofts(village, rng);
+            features.obstacles = crofts(village, &occupied.size, rng);
         }
         if site.terrain == Terrain::Bocage {
             let mut hedgerows = bocage_hedgerows(&features, occupied, rng);
@@ -428,15 +448,15 @@ fn free_zone(
 ) -> Option<Zone> {
     for _ in 0..40 {
         let zone = Zone {
-            x: rng.range(0.0, FIELD_WIDTH),
-            z: rng.range(60.0, FIELD_DEPTH - 60.0),
+            x: rng.range(0.0, occupied.size.width),
+            z: rng.range(60.0, occupied.size.depth - 60.0),
             radius: rng.range(radius_low, radius_high),
         };
         let clash = extra.iter().any(|other| {
             (zone.x - other.x).powi(2) + (zone.z - other.z).powi(2)
                 < (zone.radius + other.radius + 10.0).powi(2)
         });
-        if !on_line(zone.x, zone.z, zone.radius)
+        if !on_line(&occupied.size, zone.x, zone.z, zone.radius)
             && !clash
             && !occupied.near_river(zone.x, zone.z, zone.radius + 20.0)
         {
@@ -478,6 +498,7 @@ fn draw_village(
     } else {
         rng.range(60.0, 85.0)
     };
+    let (width, depth) = (occupied.size.width, occupied.size.depth);
     for attempt in 0..60 {
         // Flanks first (the classic village on the wing), then anywhere
         // off the lines.
@@ -486,16 +507,16 @@ fn draw_village(
             let x = if west {
                 rng.range(radius + 30.0, 300.0)
             } else {
-                rng.range(FIELD_WIDTH - 300.0, FIELD_WIDTH - radius - 30.0)
+                rng.range(width - 300.0, width - radius - 30.0)
             };
-            (x, rng.range(radius + 60.0, FIELD_DEPTH - radius - 60.0))
+            (x, rng.range(radius + 60.0, depth - radius - 60.0))
         } else {
             (
-                rng.range(radius + 30.0, FIELD_WIDTH - radius - 30.0),
-                rng.range(radius + 40.0, FIELD_DEPTH - radius - 40.0),
+                rng.range(radius + 30.0, width - radius - 30.0),
+                rng.range(radius + 40.0, depth - radius - 40.0),
             )
         };
-        if on_line(x, z, radius)
+        if on_line(&occupied.size, x, z, radius)
             || occupied.in_zones(x, z, radius + 15.0)
             || occupied.near_river(x, z, radius + 25.0)
             || features
@@ -640,7 +661,7 @@ fn apart(a: &House, b: &House, gap: f64) -> bool {
 
 /// Crofts behind the houses and the pound: hedged and fenced plots around
 /// the village, with gaps for the lanes.
-fn crofts(village: &Village, rng: &mut BattleRng) -> Vec<Obstacle> {
+fn crofts(village: &Village, size: &FieldSize, rng: &mut BattleRng) -> Vec<Obstacle> {
     let zone = village.zone;
     let mut obstacles = Vec::new();
     let sides = if village.farm { 7 } else { 12 };
@@ -685,12 +706,12 @@ fn crofts(village: &Village, rng: &mut BattleRng) -> Vec<Obstacle> {
     }
     obstacles
         .into_iter()
-        .filter(|o| inside_field(o.a) && inside_field(o.b))
+        .filter(|o| inside_field(size, o.a) && inside_field(size, o.b))
         .collect()
 }
 
-fn inside_field(p: (f64, f64)) -> bool {
-    (5.0..=FIELD_WIDTH - 5.0).contains(&p.0) && (5.0..=FIELD_DEPTH - 5.0).contains(&p.1)
+fn inside_field(size: &FieldSize, p: (f64, f64)) -> bool {
+    (5.0..=size.width - 5.0).contains(&p.0) && (5.0..=size.depth - 5.0).contains(&p.1)
 }
 
 /// Bocage: hedgerows on banks on a skewed grid of fields 90-170 m wide,
@@ -705,18 +726,16 @@ fn bocage_hedgerows(
     let skew = rng.range(-0.25, 0.25);
     let (c, s) = (skew.cos(), skew.sin());
     let cell = rng.range(110.0, 150.0);
+    let (width, depth) = (occupied.size.width, occupied.size.depth);
     let mut v = -200.0;
-    while v < FIELD_DEPTH + 200.0 {
+    while v < depth + 200.0 {
         let mut u = -200.0;
-        while u < FIELD_WIDTH + 200.0 {
+        while u < width + 200.0 {
             let pu = u + rng.range(-20.0, 20.0);
             let pv = v + rng.range(-20.0, 20.0);
             let to_world = |du: f64, dv: f64| {
-                let (uu, vv) = (pu + du - FIELD_WIDTH * 0.5, pv + dv - FIELD_DEPTH * 0.5);
-                (
-                    FIELD_WIDTH * 0.5 + uu * c - vv * s,
-                    FIELD_DEPTH * 0.5 + uu * s + vv * c,
-                )
+                let (uu, vv) = (pu + du - width * 0.5, pv + dv - depth * 0.5);
+                (width * 0.5 + uu * c - vv * s, depth * 0.5 + uu * s + vv * c)
             };
             // One field corner: a hedge along u and one along v.
             for horizontal in [true, false] {
@@ -756,9 +775,12 @@ fn marsh_ditches(
     rng: &mut BattleRng,
 ) -> Vec<Obstacle> {
     let mut ditches = Vec::new();
-    for _ in 0..8 {
-        let x = rng.range(40.0, FIELD_WIDTH - 40.0);
-        let z = rng.range(40.0, FIELD_DEPTH - 40.0);
+    let (width, depth) = (occupied.size.width, occupied.size.depth);
+    // EP1: as many ditches per hectare on a larger field.
+    let count = (8.0 * occupied.size.area_ratio()).round() as usize;
+    for _ in 0..count {
+        let x = rng.range(40.0, width - 40.0);
+        let z = rng.range(40.0, depth - 40.0);
         let angle = rng.range(-0.3, 0.3)
             + if rng.unit() < 0.5 {
                 0.0
@@ -781,7 +803,8 @@ fn marsh_ditches(
 /// A line obstacle stays inside the field, off the deployment lines, the
 /// river, the forests and the village.
 fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> bool {
-    if !inside_field(line.a) || !inside_field(line.b) || line.length() < 25.0 {
+    let size = &occupied.size;
+    if !inside_field(size, line.a) || !inside_field(size, line.b) || line.length() < 25.0 {
         return false;
     }
     let samples = (line.length() / 10.0).ceil() as usize;
@@ -789,7 +812,7 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
         let t = i as f64 / samples as f64;
         let x = line.a.0 + (line.b.0 - line.a.0) * t;
         let z = line.a.1 + (line.b.1 - line.a.1) * t;
-        !on_line(x, z, 0.0)
+        !on_line(size, x, z, 0.0)
             && !occupied.near_river(x, z, 30.0)
             && !occupied.forests.iter().any(|f| f.contains(x, z))
             && !occupied.parts.iter().any(|f| f.contains(x, z))
@@ -803,7 +826,7 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
                 .is_some_and(|c| c.from_edge(x) < c.beach + 10.0)
     }) && {
         let (mx, mz) = line.midpoint();
-        (0.0..=FIELD_WIDTH).contains(&mx) && (0.0..=FIELD_DEPTH).contains(&mz)
+        (0.0..=size.width).contains(&mx) && (0.0..=size.depth).contains(&mz)
     }
 }
 

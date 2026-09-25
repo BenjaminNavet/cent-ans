@@ -168,10 +168,15 @@ fn destinations_in_the_river_move_to_a_bank() {
     let wading = sim_battle::ai::dry_z(field, x, c, c + 2.0, 1.0);
     assert!(south < c - river.width * 0.5 && !river.in_water(x, south));
     assert!(wading > c + river.width * 0.5 && !river.in_water(x, wading));
-    // Fords and dry land are left alone.
-    let ford = river.fords[0].x;
-    let ford_c = river.center_z(ford);
-    assert_eq!(sim_battle::ai::dry_z(field, ford, ford_c, 0.0, 1.0), ford_c);
+    // Fords and dry land are left alone (EP3: the demo river may have
+    // bridges only).
+    if let Some(ford) = river.fords.first() {
+        let ford_c = river.center_z(ford.x);
+        assert_eq!(
+            sim_battle::ai::dry_z(field, ford.x, ford_c, 0.0, 1.0),
+            ford_c
+        );
+    }
     assert_eq!(
         sim_battle::ai::dry_z(field, x, c - 100.0, 0.0, 1.0),
         c - 100.0

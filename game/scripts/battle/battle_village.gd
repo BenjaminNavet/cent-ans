@@ -400,6 +400,28 @@ func _build_reeds(data: Dictionary) -> void:
 		for _i in int(TAU * r / 0.45):
 			var ang := rng.randf() * TAU
 			spots.append(c + Vector2(cos(ang), sin(ang)) * r * rng.randf_range(0.8, 1.35))
+	# EP3 : roselières le long des berges marécageuses de la rivière, touffes au bord des ruisseaux.
+	for bank in data.get("river", {}).get("banks", []):
+		if str(bank["kind"]) != "marsh":
+			continue
+		var side := 1.0 if bool(bank["north"]) else -1.0
+		var x := float(bank["x0"])
+		while x < float(bank["x1"]):
+			var zc := _terrain.river_center_z(x)
+			var w := _terrain.river_width_at(x)
+			for _k in 3:
+				spots.append(Vector2(x + rng.randf_range(-1.0, 1.0), zc + side * (w * 0.5 + rng.randf_range(-1.5, 7.0))))
+			x += 1.2
+	for stream in data.get("streams", []):
+		var pts: PackedVector2Array = stream["points"]
+		var w := float(stream["width"])
+		for i in range(pts.size() - 1):
+			if rng.randf() < 0.55:
+				continue
+			var dir := (pts[i + 1] - pts[i]).normalized()
+			var n := Vector2(-dir.y, dir.x) * (1.0 if rng.randf() < 0.5 else -1.0)
+			for _k in 6:
+				spots.append(pts[i].lerp(pts[i + 1], rng.randf()) + n * (w * 0.5 + rng.randf_range(-0.3, 1.2)))
 	var marsh := str(data.get("terrain", "")) == "marsh"
 	if marsh:
 		for zone in data.get("mud", []):
@@ -508,7 +530,7 @@ func _build_sea(coast: Dictionary, weather: String) -> void:
 	var mi := MeshInstance3D.new()
 	mi.name = "Sea"
 	mi.mesh = plane
-	mi.position = Vector3((x0 + x1) * 0.5, SEA_LEVEL, 400.0)
+	mi.position = Vector3((x0 + x1) * 0.5, SEA_LEVEL, _terrain.FIELD_D * 0.5)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
