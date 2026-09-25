@@ -72,6 +72,15 @@ pub struct UnitType {
     /// Factions allowed to recruit (empty = all).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub required_faction: Vec<FactionId>,
+    /// First year the unit can be recruited (lot UR1: period units).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub available_from: Option<i32>,
+    /// Last year the unit can be recruited (disbanded bands, outdated units).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub available_until: Option<i32>,
+    /// Battle figurine (`<family>_<variant>`, rendering only).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub figure: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

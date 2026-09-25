@@ -6,7 +6,9 @@
     "archer_0_lod1.mesh.bin",
     "archer_0_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "human",
+   "style": "bow",
    "tris": [
     2094,
     503,
@@ -20,7 +22,9 @@
     "archer_1_lod1.mesh.bin",
     "archer_1_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "human",
+   "style": "crossbow",
    "tris": [
     2220,
     518,
@@ -34,11 +38,61 @@
     "archer_2_lod1.mesh.bin",
     "archer_2_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "human",
+   "style": "crossbow",
    "tris": [
     2360,
     562,
     258
+   ],
+   "variants": 2
+  },
+  "archer_3": {
+   "lods": [
+    "archer_3_lod0.mesh.bin",
+    "archer_3_lod1.mesh.bin",
+    "archer_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "bow",
+   "tris": [
+    2294,
+    551,
+    229
+   ],
+   "variants": 2
+  },
+  "archer_4": {
+   "lods": [
+    "archer_4_lod0.mesh.bin",
+    "archer_4_lod1.mesh.bin",
+    "archer_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    2392,
+    578,
+    266
+   ],
+   "variants": 2
+  },
+  "archer_5": {
+   "lods": [
+    "archer_5_lod0.mesh.bin",
+    "archer_5_lod1.mesh.bin",
+    "archer_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    2264,
+    563,
+    253
    ],
    "variants": 2
   },
@@ -48,7 +102,9 @@
     "cavalry_0_lod1.mesh.bin",
     "cavalry_0_lod2.mesh.bin"
    ],
+   "noble": true,
    "rig": "cavalry",
+   "style": "lance",
    "tris": [
     3052,
     800,
@@ -62,7 +118,9 @@
     "cavalry_1_lod1.mesh.bin",
     "cavalry_1_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "cavalry",
+   "style": "lance",
    "tris": [
     2747,
     693,
@@ -76,11 +134,77 @@
     "cavalry_2_lod1.mesh.bin",
     "cavalry_2_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "cavalry",
+   "style": "horse_bow",
    "tris": [
     2549,
     682,
     310
+   ],
+   "variants": 2
+  },
+  "cavalry_3": {
+   "lods": [
+    "cavalry_3_lod0.mesh.bin",
+    "cavalry_3_lod1.mesh.bin",
+    "cavalry_3_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    3105,
+    777,
+    391
+   ],
+   "variants": 2
+  },
+  "cavalry_4": {
+   "lods": [
+    "cavalry_4_lod0.mesh.bin",
+    "cavalry_4_lod1.mesh.bin",
+    "cavalry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    3747,
+    872,
+    395
+   ],
+   "variants": 2
+  },
+  "cavalry_5": {
+   "lods": [
+    "cavalry_5_lod0.mesh.bin",
+    "cavalry_5_lod1.mesh.bin",
+    "cavalry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    2493,
+    674,
+    334
+   ],
+   "variants": 2
+  },
+  "cavalry_6": {
+   "lods": [
+    "cavalry_6_lod0.mesh.bin",
+    "cavalry_6_lod1.mesh.bin",
+    "cavalry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    2607,
+    688,
+    336
    ],
    "variants": 2
   },
@@ -90,7 +214,9 @@
     "infantry_0_lod1.mesh.bin",
     "infantry_0_lod2.mesh.bin"
    ],
+   "noble": true,
    "rig": "human",
+   "style": "sword",
    "tris": [
     2374,
     517,
@@ -104,7 +230,9 @@
     "infantry_1_lod1.mesh.bin",
     "infantry_1_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "human",
+   "style": "pike",
    "tris": [
     2200,
     505,
@@ -118,13 +246,111 @@
     "infantry_2_lod1.mesh.bin",
     "infantry_2_lod2.mesh.bin"
    ],
+   "noble": false,
    "rig": "human",
+   "style": "militia",
    "tris": [
     2231,
     561,
     277
    ],
    "variants": 4
+  },
+  "infantry_3": {
+   "lods": [
+    "infantry_3_lod0.mesh.bin",
+    "infantry_3_lod1.mesh.bin",
+    "infantry_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    2014,
+    479,
+    221
+   ],
+   "variants": 3
+  },
+  "infantry_4": {
+   "lods": [
+    "infantry_4_lod0.mesh.bin",
+    "infantry_4_lod1.mesh.bin",
+    "infantry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "pike",
+   "tris": [
+    2550,
+    615,
+    299
+   ],
+   "variants": 3
+  },
+  "infantry_5": {
+   "lods": [
+    "infantry_5_lod0.mesh.bin",
+    "infantry_5_lod1.mesh.bin",
+    "infantry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    2278,
+    554,
+    228
+   ],
+   "variants": 2
+  },
+  "infantry_6": {
+   "lods": [
+    "infantry_6_lod0.mesh.bin",
+    "infantry_6_lod1.mesh.bin",
+    "infantry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    3078,
+    588,
+    270
+   ],
+   "variants": 2
+  },
+  "infantry_7": {
+   "lods": [
+    "infantry_7_lod0.mesh.bin",
+    "infantry_7_lod1.mesh.bin",
+    "infantry_7_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    2562,
+    579,
+    297
+   ],
+   "variants": 2
+  },
+  "infantry_8": {
+   "lods": [
+    "infantry_8_lod0.mesh.bin",
+    "infantry_8_lod1.mesh.bin",
+    "infantry_8_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "sword",
+   "tris": [
+    3372,
+    703,
+    337
+   ],
+   "variants": 3
   }
  },
  "rigs": {

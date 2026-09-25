@@ -159,7 +159,7 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
 	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
 	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
-	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
 	return mat
 
@@ -177,7 +177,7 @@ func _make_skinned_material(side: String, kind: String, variant: int, corpse: bo
 	mat.set_shader_parameter("has_heraldry", arms != null)
 	BattleSkinned.setup_material(mat, kind, variant)
 	mat.set_shader_parameter("reload_time", 9.0 if kind == "archer" and variant == 2 else 6.0)
-	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.92 if noble else 0.6)
 	if corpse:
 		BattleSkinned.apply_config(mat, BattleSkinned.death_config(kind, variant), anim_time)

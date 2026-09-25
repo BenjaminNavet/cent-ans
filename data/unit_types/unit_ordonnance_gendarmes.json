@@ -1,0 +1,45 @@
+{
+  "id": "unit_ordonnance_gendarmes",
+  "name": {
+    "display": "Gendarmes des compagnies d'ordonnance",
+    "local": "gens d'armes des ordonnances",
+    "local_language": "moyen français"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1600
+  },
+  "upkeep": 150,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 76,
+    "ranged": 0,
+    "range": 0,
+    "armor": 85,
+    "morale": 82,
+    "speed": 66,
+    "ammo": 0,
+    "charge": 90
+  },
+  "abilities": [
+    "charge_lance",
+    "dismount"
+  ],
+  "required_technology": "tech_compagnies_d_ordonnance",
+  "required_faction": [
+    "fac_france"
+  ],
+  "available_from": 1445,
+  "figure": "cavalry_3",
+  "equipment": "Harnois blanc complet (armure de plates polie, milanaise), salade à bavière ou armet, lance, épée, cheval barde de chanfrein et de flançois.",
+  "description": "Première armée permanente d'Europe : quinze compagnies de cent lances payées par la taille des gens de guerre (1445), qui reconquièrent la Normandie et la Guyenne.",
+  "sources": [
+    "Compagnie d'ordonnance",
+    "Ordonnance de Louppy-le-Châtel (1445)",
+    "P. Contamine, Guerre, État et société à la fin du Moyen Âge, 1972",
+    "Bataille de Formigny"
+  ]
+}

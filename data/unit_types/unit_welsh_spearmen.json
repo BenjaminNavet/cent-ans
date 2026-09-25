@@ -1,0 +1,40 @@
+{
+  "id": "unit_welsh_spearmen",
+  "name": {
+    "display": "Lanciers gallois",
+    "local": "gwŷr traed",
+    "local_language": "moyen gallois"
+  },
+  "category": "infantry",
+  "source_class": "peasants",
+  "soldiers": 120,
+  "cost": {
+    "money": 380
+  },
+  "upkeep": 32,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 46,
+    "ranged": 0,
+    "range": 0,
+    "armor": 22,
+    "morale": 48,
+    "speed": 55,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall"
+  ],
+  "required_culture": [
+    "cul_welsh"
+  ],
+  "figure": "infantry_3",
+  "equipment": "Lance de frêne, long couteau, petit écu rond, jaque ou tunique vert et blanc (livrée des levées galloises), jambes nues.",
+  "description": "Fantassins des marches galloises levés par commissions d'array ; rapides et bon marché, ils achevaient les chevaliers démontés à Crécy et fournissaient le gros des lances des armées d'Édouard III.",
+  "sources": [
+    "Soldats gallois de la guerre de Cent Ans (Wikipédia : Welsh longbowmen, Welsh spearmen)",
+    "M. Prestwich, Armies and Warfare in the Middle Ages: The English Experience, Yale, 1996, ch. 6",
+    "A. Ayton, Knights and Warhorses, Boydell, 1994",
+    "Froissart, Chroniques, I (Crécy : « des Gallois et des Cornouaillais qui portaient grandes coutilles »)"
+  ]
+}

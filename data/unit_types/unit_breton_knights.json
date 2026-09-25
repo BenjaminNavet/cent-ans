@@ -1,0 +1,43 @@
+{
+  "id": "unit_breton_knights",
+  "name": {
+    "display": "Chevaliers bretons",
+    "local": "marchegerien",
+    "local_language": "moyen breton"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1350
+  },
+  "upkeep": 125,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 74,
+    "ranged": 0,
+    "range": 0,
+    "armor": 72,
+    "morale": 82,
+    "speed": 70,
+    "ammo": 0,
+    "charge": 86
+  },
+  "abilities": [
+    "charge_lance",
+    "dismount"
+  ],
+  "required_culture": [
+    "cul_breton"
+  ],
+  "figure": "cavalry_0",
+  "equipment": "Destrier, lance, épée, mailles et plates, bassinet, cotte d'armes d'hermine ou aux armes du lignage.",
+  "description": "Petite noblesse bretonne aguerrie par la guerre de Succession (Combat des Trente 1351, Auray 1364) ; vivier des capitaines de Charles V (Du Guesclin, Clisson).",
+  "sources": [
+    "Guerre de Succession de Bretagne",
+    "Combat des Trente",
+    "Bertrand du Guesclin",
+    "M. Jones, Ducal Brittany 1364-1399, Oxford, 1970"
+  ]
+}

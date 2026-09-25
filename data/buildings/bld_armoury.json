@@ -31,7 +31,9 @@
     }
   ],
   "enables_units": [
-    "unit_men_at_arms_foot"
+    "unit_men_at_arms_foot",
+    "unit_english_retinue",
+    "unit_culveriners"
   ],
   "description": "Réserve d'armes et d'armures de la Couronne (Tour de Londres, Louvre).",
   "sources": [
