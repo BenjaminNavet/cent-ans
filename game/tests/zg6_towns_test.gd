@@ -128,7 +128,7 @@ func _test_builder(data: TownData) -> void:
 	var houses: int = plan["houses"]["x"].size()
 	_check(detail == houses and blocks == houses, "one detail and one block instance per house (%d / %d / %d)" % [detail, blocks, houses])
 	_check(base_ok, "base heights (m) carried by the instance data")
-	_check(builder.root.get_node_or_null("Streets") != null and builder.root.get_node_or_null("Walls") != null, "streets and walls meshes")
+	_check(builder.root.get_node_or_null("Streets_0") != null and builder.root.get_node_or_null("Ground_0") != null and builder.root.get_node_or_null("Walls") != null, "streets and walls meshes")
 	_check(is_equal_approx(builder.root.scale.x, 1.0 / data.meters_per_unit), "town root in metres")
 	builder.free_nodes()
 	parent.queue_free()

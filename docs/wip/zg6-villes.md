@@ -31,3 +31,8 @@ puis copie dans `game/bin/libcent_ans.debug.dylib`. Aucun changement Rust prévu
 
 ## Prochaine étape
 Lancer le jeu sur Amiens / Troyes / Poitiers au palier site (`--stage=map --focus=x,y,d`), régler.
+
+## 2026-09-25 — construction hors fil principal
+- `TownBuilder.prepare(plan)` (fil de travail, après `TownPlan.generate`/`reground`) : tampons MultiMesh par cellule/modèle, tableaux de sol (bandes de 24 rangées), rues (paquets de 40), murailles via `SurfaceTool.commit_to_arrays`.
+- Fil principal : création des nœuds seulement, une tâche indivisible ≤ ~1-2 ms (charge machine ~100) ; modèles du kit chargés un par tâche. Stat `build_task_max_ms`.
+- Prochaine étape : banc de descente (villes ordinaires), captures `docs/img/zg6/`, docs, fusion de main + `cent-ans geo towns`.
