@@ -72,6 +72,11 @@ func _init() -> void:
 			await process_frame
 		for i in 40:
 			await process_frame
+		# Interface masquée : le relief seul (toutes les couches 2D, remises à chaque vue).
+		for layer in root.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		for i in 3:
+			await process_frame
 		var image := root.get_viewport().get_texture().get_image()
 		if image.get_width() > 960:
 			image.resize(960, roundi(image.get_height() * 960.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
