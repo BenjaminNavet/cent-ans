@@ -274,6 +274,7 @@ impl BattleSim {
                     "soldiers" => i64::from(unit.soldiers()),
                     "max_soldiers" => i64::from(unit.max_soldiers),
                     "initial_soldiers" => i64::from(unit.initial_soldiers),
+                    "kills" => unit.kills.round() as i64,
                     "morale" => unit.morale,
                     "fatigue" => unit.fatigue,
                     "ammo" => i64::from(unit.ammo),
