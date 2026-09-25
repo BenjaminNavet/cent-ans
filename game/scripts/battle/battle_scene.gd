@@ -436,7 +436,10 @@ func _setup_standards() -> void:
 	standards = BattleStandards.new()
 	standards.name = "Standards"
 	add_child(standards)
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind)
+	var factions := {}
+	for side in ["attacker", "defender"]:
+		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
