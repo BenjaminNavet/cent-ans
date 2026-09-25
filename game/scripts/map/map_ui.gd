@@ -148,6 +148,21 @@ func _ready() -> void:
 	_decorate_top_bar()  # F2
 	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
 	_setup_panel_stack()  # U1
+	_apply_access_args()  # U12 : captures
+
+
+## Captures (lot U12) : `--access=colorblind,contrast,motion` active ces réglages sans les
+## enregistrer dans le fichier du joueur.
+func _apply_access_args() -> void:
+	var settings := get_node_or_null("/root/Settings")
+	if settings == null:
+		return
+	var keys := {"colorblind": Accessibility.KEY_COLORBLIND, "contrast": Accessibility.KEY_HIGH_CONTRAST, "motion": Accessibility.KEY_REDUCE_MOTION}
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--access="):
+			for word in arg.trim_prefix("--access=").split(","):
+				if keys.has(word):
+					settings.call("set_value", keys[word], true, false)
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------

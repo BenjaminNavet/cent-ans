@@ -116,6 +116,10 @@ func _layout() -> void:
 
 
 func _play_intro() -> void:
+	if Accessibility.reduce_motion():  # U12 : pas de fondu
+		fade.color.a = 0.0
+		cards.modulate.a = 1.0
+		return
 	fade.color.a = 1.0
 	cards.modulate.a = 0.0
 	var tween := create_tween()

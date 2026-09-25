@@ -132,6 +132,8 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 			RenderQuality.reapply(get_tree())
 	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
 		apply_display()
+	elif key == "access/high_contrast":
+		Accessibility.apply_contrast(load(PARCHMENT_THEME) as Theme, bool(get_value(key)))
 	if persist:
 		save_settings()
 	changed.emit(key)
@@ -193,6 +195,7 @@ func apply_display() -> void:
 		return
 	_apply_ui_scale()
 	apply_text_size()
+	Accessibility.apply_contrast(load(PARCHMENT_THEME) as Theme, bool(get_value("access/high_contrast")))
 	if not apply_display_enabled:
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if get_value("video/vsync") else DisplayServer.VSYNC_DISABLED)

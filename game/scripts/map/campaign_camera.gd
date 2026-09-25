@@ -57,6 +57,8 @@ func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
 	target_focus = point
 	if new_distance > 0.0:
 		target_distance = clampf(new_distance, min_distance_at(point), max_distance)
+	if Accessibility.reduce_motion():  # U12 : coupe franche au lieu d'un travelling
+		snap()
 
 
 ## Distance minimale au-dessus d'un point : plus courte dans une ville emblématique.
