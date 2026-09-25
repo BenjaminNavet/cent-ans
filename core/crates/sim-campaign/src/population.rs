@@ -83,7 +83,9 @@ fn goods_categories(
         let Some(resource) = data.resources.get(resource_id) else {
             continue;
         };
-        if !resource.satisfies_classes.is_empty() && !resource.satisfies_classes.contains(&class) {
+        // B7c: an empty `satisfies_classes` serves no class (stone, iron:
+        // building and arms materials, not consumer goods).
+        if !resource.satisfies_classes.contains(&class) {
             continue;
         }
         if !categories.contains(&resource.category) {
@@ -416,5 +418,33 @@ pub(crate) fn resolve_population(
                 .faction(&controller),
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn resource(json: &str) -> data_model::Resource {
+        serde_json::from_str(json).expect("valid resource")
+    }
+
+    /// B7c: an empty `satisfies_classes` serves no class.
+    #[test]
+    fn a_resource_without_classes_satisfies_nobody() {
+        let mut data = GameData::default();
+        let stone = resource(
+            r#"{"id":"res_stone","name":{"display":"Pierre"},"category":"raw_material","base_price":5,"satisfies_classes":[]}"#,
+        );
+        let wood = resource(
+            r#"{"id":"res_wood","name":{"display":"Bois"},"category":"raw_material","base_price":3,"satisfies_classes":["peasants"]}"#,
+        );
+        let mut goods = std::collections::BTreeMap::new();
+        for r in [stone, wood] {
+            goods.insert(r.id.clone(), 1);
+            data.resources.insert(r.id.clone(), r);
+        }
+        assert_eq!(goods_categories(&data, &goods, SocialClass::Peasants), 1);
+        assert_eq!(goods_categories(&data, &goods, SocialClass::Clergy), 0);
     }
 }

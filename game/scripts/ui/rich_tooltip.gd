@@ -92,12 +92,12 @@ const GAUGE_TEXTS := {
 	"devastation": ["Dévastation", "Pillages et combats : freine la croissance (nulle au-delà de 50), la richesse et nourrit le mécontentement."],
 	"population": ["Population", "Habitants de la province, toutes classes confondues ; croît avec la santé."],
 	"morale": ["Moral", "Au plus bas, l'unité rompt et fuit le combat."],
-	"supply": ["Ravitaillement", "Vivres de l'armée : baisse en territoire hostile ou dévasté, remonte en territoire ami."],
+	"supply": ["Ravitaillement", "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."],
 	"movement": ["Mouvement", "Points de mouvement restants ce tour."],
 	"strength": ["Effectif", "Hommes présents / effectif complet de l'unité."],
 }
 const HUD_TEXTS := {
-	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, les troupes se débandent."],
+	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent 10 de moral chaque saison."],
 	"hud_income": ["Solde", "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."],
 	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
 	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
@@ -367,8 +367,12 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	var requires := PackedStringArray()
 	if str(definition.get("required_technology", "")) != "":
 		requires.append("%s %s" % [icon_bbcode(str(definition["required_technology"]), 14), GameCatalog.display_name(str(definition["required_technology"]))])
-	if str(definition.get("required_building", "")) != "":
-		requires.append("%s %s" % [icon_bbcode(str(definition["required_building"]), 14), GameCatalog.display_name(str(definition["required_building"]))])
+	# B7c : le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
+	var enablers := PackedStringArray()
+	for building_id in enabling_buildings(str(definition.get("id", ""))):
+		enablers.append("%s %s" % [icon_bbcode(building_id, 14), GameCatalog.display_name(building_id)])
+	if not enablers.is_empty():
+		requires.append(" ou ".join(enablers) + " (ou supérieur)")
 	if not requires.is_empty():
 		lines.append("Requiert : " + ", ".join(requires))
 	var period := unit_period(definition)
@@ -382,6 +386,27 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 
 
 # --- Bâtiments ----------------------------------------------------------------------------
+
+
+## B7c : bâtiments dont `enables_units` contient `unit_id` (triés).
+static func enabling_buildings(unit_id: String) -> Array:
+	var found: Array = []
+	var buildings := GameCatalog.definitions("buildings")
+	for building_id in buildings:
+		if unit_id in (buildings[building_id] as Dictionary).get("enables_units", []):
+			found.append(str(building_id))
+	found.sort()
+	return found
+
+
+## B7c : vrai si un autre bâtiment s'élève à la place de `building_id` (un prérequis accepte alors
+## l'amélioration).
+static func has_upgrade(building_id: String) -> bool:
+	var buildings := GameCatalog.definitions("buildings")
+	for other in buildings:
+		if str((buildings[other] as Dictionary).get("upgrades_from", "")) == building_id:
+			return true
+	return false
 
 
 ## `live` : ligne de `buildable` (`cost`, `turns`, `available`, `reason`) ou bâtiment
@@ -409,6 +434,11 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 	lines.append(" · ".join(cost_line))
 	if live.has("cost") and definition.has("cost") and (definition["cost"] as Dictionary).has("resources"):
 		lines.append("Matériaux : " + cost_text({"resources": definition["cost"]["resources"]}))
+	# B7c : matériaux tirés des provinces productrices ; le manque est importé et compté dans le coût.
+	if int(live.get("import_cost", 0)) > 0:
+		lines.append("[color=%s]Dont importation : %s %s (%s manquant)[/color]" % [RED, thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
+	elif definition.has("cost") and (definition["cost"] as Dictionary).has("resources"):
+		lines.append("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × 100).")
 	lines.append(_effects_block(definition.get("effects", [])))
 	var units := PackedStringArray()
 	for unit_id in definition.get("enables_units", []):
@@ -419,7 +449,12 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 	for key in ["upgrades_from", "required_building", "required_technology", "required_resource"]:
 		var value: String = str(definition.get(key, ""))
 		if value != "":
-			requires.append("%s %s%s" % [icon_bbcode(value, 14), GameCatalog.display_name(value), " (amélioration)" if key == "upgrades_from" else ""])
+			var note := ""
+			if key == "upgrades_from":
+				note = " (amélioration : le remplace et garde ses effets)"
+			elif key == "required_building" and has_upgrade(value):
+				note = " ou supérieur"
+			requires.append("%s %s%s" % [icon_bbcode(value, 14), GameCatalog.display_name(value), note])
 	if bool(definition.get("requires_coastal", false)):
 		requires.append("province côtière")
 	if bool(definition.get("requires_river", false)):
@@ -564,6 +599,8 @@ static func resource(resource_id: String, stock: int = -1) -> String:
 		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 14), str(CLASS_LABELS.get(class_id, class_id)).to_lower()])
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
+	elif definition.has("satisfies_classes"):
+		lines.append("Satisfait : aucune classe (matériau)")
 	lines.append(_description(definition))
 	return _join(lines)
 

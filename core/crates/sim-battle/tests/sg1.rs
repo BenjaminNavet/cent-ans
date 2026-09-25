@@ -405,3 +405,39 @@ fn tower_volleys_are_reported_and_the_events_are_deterministic() {
     assert!(sim.take_new_siege_fx().is_empty());
     let _ = UnitState::Idle;
 }
+
+/// BR3b: an attacker regiment already inside the walls while no gate or
+/// breach is open (it came over by the ladders) makes for the square
+/// instead of standing on its ladder point, which it has passed.
+#[test]
+fn an_attacker_over_the_wall_makes_for_the_square() {
+    let data = data();
+    let mut sim = siege(&data, &[], 2, 11);
+    if sim.is_deploying() {
+        sim.start_battle().expect("start");
+    }
+    sim.set_ai(SideId::Attacker, true);
+    sim.set_ai(SideId::Defender, false);
+    clear_the_gate(&mut sim);
+    let (cx, cz) = sim.siege().unwrap().center;
+    let (px, pz) = {
+        let works = sim.siege().unwrap();
+        let p = works.front_walls()[0];
+        let (mx, mz) = works.pieces[p].midpoint();
+        let (nx, nz) = works.pieces[p].outward();
+        (mx - nx * 25.0, mz - nz * 25.0)
+    };
+    // The men-at-arms (id 0) stand on the ladder point, inside the walls.
+    place(&mut sim, 0, px, pz, 0.0);
+    assert!(sim.siege().unwrap().inside(px, pz));
+    assert!(sim.siege().unwrap().openings().is_empty());
+    let before = (px - cx).hypot(pz - cz);
+    run(&mut sim, 40.0);
+    let u = &sim.units()[0];
+    assert!(sim.siege().unwrap().openings().is_empty());
+    let after = (u.x - cx).hypot(u.z - cz);
+    assert!(
+        after < before - 20.0,
+        "towards the square: {before:.0} m -> {after:.0} m"
+    );
+}

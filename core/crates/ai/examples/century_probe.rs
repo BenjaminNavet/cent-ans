@@ -5,7 +5,8 @@
 //! bankruptcies, marriages, battles, map changes and survivals.
 //!
 //! Usage: `century_probe [turns] [seed...]`; `VERBOSE=1` prints the
-//! France-England wars and peaces.
+//! France-England wars and peaces; `DIFFICULTY=hard` (any DF1 level id)
+//! plays at that level instead of normal.
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
@@ -51,6 +52,10 @@ struct Report {
     turns: u32,
     war_turns: u32,
     war_phases: u32,
+    /// EQ3: France-England peaces (a war phase that ended before the last turn).
+    truces: u32,
+    /// EQ3: longest France-England war phase, in turns.
+    longest_war: u32,
     /// Turns England dominates the French realm (G2).
     dominance_turns: u32,
     /// Most French provinces (of 1337) England held at once.
@@ -168,6 +173,14 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     let france = id("fac_france");
     let england = id("fac_england");
     let mut state = CampaignState::new_1337(data, france.clone(), seed).expect("state");
+    // EQ3: `DIFFICULTY=hard` (DF1 level id) plays the campaign at that
+    // level, France being the "player"; the default is normal.
+    if let Some(level) = std::env::var("DIFFICULTY")
+        .ok()
+        .and_then(|id| sim_campaign::difficulty::Difficulty::from_id(&id))
+    {
+        state.set_difficulty(level);
+    }
     let mut report = Report {
         seed,
         turns,
@@ -201,6 +214,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     // measure of a realm's revenue.
     let mut incomes: BTreeMap<FactionId, Vec<i64>> = BTreeMap::new();
     let mut was_at_war = false;
+    let mut war_run = 0u32;
     for _ in 0..turns {
         // France is the "player": it answers offers as the AI would judge
         // them (otherwise no peace offered to France is ever signed).
@@ -271,9 +285,16 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         let at_war = state.is_at_war(&france, &england);
         if at_war {
             report.war_turns += 1;
+            war_run += 1;
+            report.longest_war = report.longest_war.max(war_run);
             if !was_at_war {
                 report.war_phases += 1;
             }
+        } else {
+            if was_at_war {
+                report.truces += 1;
+            }
+            war_run = 0;
         }
         was_at_war = at_war;
         report.max_held = report.max_held.max(ai::alignment::realm_held_by(
@@ -543,6 +564,14 @@ fn print_summary(reports: &[Report], decades: f64) {
     println!(
         "  Guerre FR-EN : moy. {mean:.0} % [{min:.0}-{max:.0}], {in_band}/{} graines dans 55-75 %",
         reports.len()
+    );
+    let truces: Vec<String> = reports
+        .iter()
+        .map(|r| format!("{} ({} ans)", r.truces, r.longest_war / 4))
+        .collect();
+    println!(
+        "  Paix FR-EN par siècle (plus longue guerre) : {}",
+        truces.join(" | ")
     );
     for label in ["Auld Alliance", "Angl.-Brabant", "Bourg.-France"] {
         let index = pair(label);
