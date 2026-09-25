@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_works_rules.schema.json",
+  "title": "Résistance des ouvrages de siège",
+  "description": "Fichier data/rules/siege_works.json (lot SG3, ADR 0023) : points de vie des murs et de la porte (base + par niveau de fortification 0-5), dégâts du bélier par seconde (équipage complet) et dégâts d'un tir d'engin sur un mur par point de siege_attack. Lu par sim-battle (SiegeWorkRules).",
+  "type": "object",
+  "$defs": {
+    "hp": {
+      "type": "object",
+      "properties": {
+        "hp_base": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000, "description": "PV au niveau de fortification 0." },
+        "hp_per_fortification": { "type": "number", "minimum": 0, "maximum": 5000, "description": "PV ajoutés par niveau de fortification (plafonné à 5)." }
+      },
+      "required": ["hp_base", "hp_per_fortification"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "wall": { "$ref": "#/$defs/hp", "description": "Pan de mur de pierre (brèche à 0 PV)." },
+    "gate": { "$ref": "#/$defs/hp", "description": "Porte en bois (enfoncée à 0 PV ; le feu la ronge aussi, siege_fire.json)." },
+    "ram": {
+      "type": "object",
+      "properties": {
+        "damage_per_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "PV de porte ôtés par seconde de pilonnage, équipage complet (un coup toutes les 3 s)." }
+      },
+      "required": ["damage_per_s"],
+      "additionalProperties": false
+    },
+    "engine": {
+      "type": "object",
+      "properties": {
+        "wall_damage_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 20, "description": "PV de mur ôtés par tir d'engin, par point de siege_attack, équipage complet." }
+      },
+      "required": ["wall_damage_per_siege_attack"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["wall", "gate", "ram", "engine"],
+  "additionalProperties": false
+}
