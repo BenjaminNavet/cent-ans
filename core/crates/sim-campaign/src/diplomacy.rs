@@ -367,6 +367,10 @@ impl CampaignState {
         if fa.allies.iter().any(|ally| self.is_at_war(ally, b)) {
             return Some("défense d'un allié".to_owned());
         }
+        // DP2: armies camping on our lands without right of passage.
+        if crate::passage::has_grievance(self, a, b) {
+            return Some("violation de nos frontières".to_owned());
+        }
         if religion::faith_relation(self, data, a, b) == religion::FaithRelation::Different {
             return Some("guerre de religion".to_owned());
         }
@@ -1049,8 +1053,66 @@ impl CampaignState {
 
     /// Ends the war between `a` and `b`: each listed province passes to the
     /// other party, `tribute` is paid by `b` to `a` (negative: `a` pays),
-    /// and a truce of `truce_turns` starts.
+    /// and a truce of `truce_turns` starts. EQ3 (`negotiation.truce_binds_allies`):
+    /// the allies and vassals who joined this war on either side sign the
+    /// same truce (Leulinghem 1389 bound Scotland and the allies of both crowns).
     pub(crate) fn make_peace(
+        &mut self,
+        data: &GameData,
+        a: &FactionId,
+        b: &FactionId,
+        provinces: &[ProvinceId],
+        tribute: i64,
+        truce_turns: u32,
+    ) {
+        let bound = if data.ai_diplomacy.negotiation.truce_binds_allies {
+            self.cobelligerents(a, b)
+        } else {
+            Vec::new()
+        };
+        self.make_peace_between(data, a, b, provinces, tribute, truce_turns);
+        for (ally, enemy) in bound {
+            if self.is_at_war(&ally, &enemy) {
+                self.make_peace_between(data, &ally, &enemy, &[], 0, truce_turns);
+            }
+        }
+    }
+
+    /// EQ3: the (ally or vassal, enemy) pairs bound by a peace between `a`
+    /// and `b`: a weaker faction allied to (or vassal of) one side, at war
+    /// with the other since this war began or later (it answered the call),
+    /// not rebels.
+    fn cobelligerents(&self, a: &FactionId, b: &FactionId) -> Vec<(FactionId, FactionId)> {
+        let mut pairs = Vec::new();
+        for (side, enemy) in [(a, b), (b, a)] {
+            let Some(began) = self
+                .factions
+                .get(side)
+                .and_then(|f| f.war_started.get(enemy))
+                .copied()
+            else {
+                continue;
+            };
+            for (id, f) in &self.factions {
+                if id == a || id == b || is_rebels(id) || !f.alive {
+                    continue;
+                }
+                let joined = f.war_started.get(enemy).is_some_and(|t| *t >= began);
+                // Only the junior partner follows: a great crown is not bound
+                // by the peace of a lesser ally it came to help.
+                let junior = self.faction_power(id) < self.faction_power(side);
+                let bound =
+                    junior && (self.is_allied(id, side) || f.suzerain.as_ref() == Some(side));
+                if joined && bound && f.at_war_with.contains(enemy) {
+                    pairs.push((id.clone(), enemy.clone()));
+                }
+            }
+        }
+        pairs
+    }
+
+    /// Ends the war between `a` and `b` alone (see [`Self::make_peace`]).
+    fn make_peace_between(
         &mut self,
         data: &GameData,
         a: &FactionId,

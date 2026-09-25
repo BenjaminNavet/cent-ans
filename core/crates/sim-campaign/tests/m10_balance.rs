@@ -4,7 +4,6 @@
 use std::path::PathBuf;
 
 use data_model::{FactionId, GameData};
-use sim_campaign::economy::{OPULENCE_PERCENT, OPULENCE_SEASONS};
 use sim_campaign::{CampaignState, Order};
 
 fn data() -> GameData {
@@ -56,9 +55,13 @@ fn a_hoarded_treasury_feeds_the_court() {
     let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
     let base = state.faction_administration_upkeep(&data, &france);
     let income = state.faction_income_effective(&data, &france);
-    state.factions.get_mut(&france).unwrap().treasury = OPULENCE_SEASONS * income + 1_000_000;
+    state.factions.get_mut(&france).unwrap().treasury =
+        data.economy_rules.opulence_seasons * income + 1_000_000;
     let rich = state.faction_administration_upkeep(&data, &france);
-    assert_eq!(rich - base, 1_000_000 * OPULENCE_PERCENT / 100);
+    assert_eq!(
+        rich - base,
+        1_000_000 * data.economy_rules.opulence_percent / 100
+    );
 }
 
 #[test]

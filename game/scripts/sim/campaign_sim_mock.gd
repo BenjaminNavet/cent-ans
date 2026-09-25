@@ -189,7 +189,10 @@ func get_province_state(id: String) -> Dictionary:
 		"owner": province["owner"],
 		"controller": province["controller"],
 		"garrison": province["garrison"].duplicate(true),
-		"unrest": province["unrest"],
+		# B7a : comme le pont, le mécontentement qui déclenche les révoltes (moyenne pondérée
+		# des classes) ; la jauge propre de la province est le désordre.
+		"unrest": roundi(weighted_unrest(id)) if not (province.get("classes", {}) as Dictionary).is_empty() else province["unrest"],
+		"disorder": province["unrest"],
 		"devastation": province["devastation"],
 		"population_total": province["population_total"],
 	}
@@ -407,7 +410,7 @@ func _buildable_list(province: Dictionary) -> Array:
 	var ids := _buildings.keys()
 	ids.sort()
 	for bld_id in ids:
-		if built.has(bld_id):
+		if _provides(built, bld_id):
 			continue
 		var info: Dictionary = _buildings[bld_id]
 		var cost := int(info.get("cost", 0))
@@ -417,7 +420,7 @@ func _buildable_list(province: Dictionary) -> Array:
 		if province.get("construction") != null:
 			reasons.append("Construction déjà en cours")
 		var required_building: String = str(info.get("required_building", ""))
-		if required_building != "" and not built.has(required_building):
+		if required_building != "" and not _provides(built, required_building):
 			reasons.append("Bâtiment requis : %s" % _buildings.get(required_building, {}).get("name", required_building))
 		var upgrades_from: String = str(info.get("upgrades_from", ""))
 		if upgrades_from != "" and not built.has(upgrades_from):
@@ -1812,3 +1815,16 @@ func set_difficulty(id: String) -> bool:
 
 func get_difficulty() -> String:
 	return _difficulty
+
+
+## B7c (miroir du core `GameData::has_building`) : `required` est bâti, ou l'une de ses améliorations.
+func _provides(built: Array, required: String) -> bool:
+	for bld_id in built:
+		var current := str(bld_id)
+		for _step in 16:
+			if current == required:
+				return true
+			current = str(_buildings.get(current, {}).get("upgrades_from", ""))
+			if current == "":
+				break
+	return false

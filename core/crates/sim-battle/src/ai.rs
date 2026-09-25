@@ -1349,7 +1349,13 @@ fn plan_field(view: &mut View) {
         if !view.free(i) {
             continue;
         }
-        let target = view.nearest_enemy(i, |e| e.state != UnitState::Routing);
+        // ADR 0052: archers out of arrows fall only on horsemen already held
+        // in a melee (Agincourt); they do not walk alone into fresh knights.
+        let spent_archers = view.units[i].category == UnitCategory::Ranged;
+        let target = view.nearest_enemy(i, |e| {
+            e.state != UnitState::Routing
+                && !(spent_archers && is_horse(e) && e.state != UnitState::Melee)
+        });
         // R2b: a regiment well ahead of the line waits for it rather than
         // arriving alone under the enemy arrows (fast archers out of
         // arrows outpace the men-at-arms).
@@ -2405,9 +2411,12 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 continue;
             }
         }
+        // BR3b: a regiment already over the wall (or on it) makes for the
+        // square instead of its ladder point, which it has passed.
+        let over = unit.on_wall || works.inside(unit.x, unit.z);
         if storm {
             view.move_to(i, square.0, square.1, true, None);
-        } else if escalade && unit.can_climb() {
+        } else if escalade && unit.can_climb() && !over {
             // Climb at a docked tower if any, else ladders along the front.
             let piece = if !docked.is_empty() {
                 docked[ladder_slot % docked.len()]
@@ -2425,7 +2434,7 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 outer_point(works, piece, -25.0)
             };
             view.move_to(i, x, z, true, None);
-        } else if unit.on_wall || works.inside(unit.x, unit.z) {
+        } else if over {
             view.move_to(i, square.0, square.1, true, None);
         } else {
             // Wait out of bowshot for the engines and towers.

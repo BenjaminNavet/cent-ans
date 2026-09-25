@@ -31,7 +31,8 @@
     "res_wheat",
     "res_fish",
     "res_wood",
-    "res_salt"
+    "res_salt",
+    "res_stone"
   ],
   "capital_city": {
     "name": {

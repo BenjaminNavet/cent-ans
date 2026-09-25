@@ -1042,6 +1042,22 @@ func _run_diplomacy() -> void:
 	_check(sim.call("counter_treaty", "fac_england", treaty) is Dictionary, "counter_treaty should answer")
 	_check((sim.call("get_war_summary", "fac_england") as Dictionary).has("war_score"), "get_war_summary should report the war score")
 	_check(sim.call("get_treaty_history", FACTION_ID) is Array, "get_treaty_history should be an array")
+	# DP2 : refus expliqués, positions diplomatiques, droit de passage.
+	if sim.has_method("explain_treaty"):
+		var explained: Dictionary = sim.call("explain_treaty", "fac_flanders", [{"kind": "trade_agreement"}, {"kind": "gold", "giver": "recipient", "amount": 20000}])
+		_check(bool(explained.get("ok", false)) and not (explained.get("lines", []) as Array).is_empty() and str(explained.get("summary", "")) != "", "explain_treaty should list weighted reasons: %s" % explained)
+		var stances: PackedStringArray = sim.call("get_province_stances", PackedStringArray(["prov_ile_de_france", "prov_guyenne"]))
+		_check(stances.size() == 2 and stances[0] == "self", "get_province_stances: %s" % stances)
+		_check(DiplomaticStances.COLORS.has(stances[1]), "unknown stance %s" % stances[1])
+		_check(str((sim.call("get_faction_stance", "fac_flanders") as Dictionary).get("key", "")) != "", "get_faction_stance expected")
+		_check((sim.call("get_trespass", "fac_flanders") as Dictionary).has("theirs"), "get_trespass expected")
+		var army_ids: PackedStringArray = sim.call("get_army_ids")
+		for army_id in army_ids:
+			var army: Dictionary = sim.call("get_army", army_id)
+			if str(army.get("faction", "")) == FACTION_ID:
+				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 2000.0)
+				_check(passage.is_empty() or passage.has("ok"), "find_path_trespass should answer")
+				break
 
 	# Panneau réel : instanciation, rafraîchissement, brouillon de traité.
 	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
@@ -1053,6 +1069,7 @@ func _run_diplomacy() -> void:
 	panel.select_faction("fac_england")
 	panel.stage_example()
 	await process_frame
+	_check(str(panel.get("_reasons").text) != "", "diplomacy panel should explain the verdict")
 	panel.queue_free()
 
 	# 20 tours : pas d'erreur ; offres et religion lisibles.
