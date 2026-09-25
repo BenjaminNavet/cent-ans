@@ -32,9 +32,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import shapely
 from PIL import Image
 from scipy import ndimage
-from shapely.geometry import Point, shape
+from shapely.geometry import shape
 
 from cent_ans_tools.geo import copernicus, relief, terrain
 from cent_ans_tools.geo.project import MapGrid
@@ -57,8 +58,8 @@ EARTH_RADIUS_M = 6_371_000.0
 REFRACTION = 0.13
 SEA_CLASS = 255
 FOREST_MAX = 200
-#: Coastal provinces: target distance to the sea of the representative point.
-COAST_TARGET_PX = (3.0, 5.0)
+#: Coastal provinces: target distance (4096 px ≈ 720 m) to the open sea of the point.
+COAST_TARGET_PX = (4.0, 7.0)
 #: Half extent (m) of the field footprint used for the reference altitude.
 FIELD_HALF_M = (600.0, 400.0)
 
@@ -246,7 +247,14 @@ class Sources:
         splat = np.asarray(Image.open(map_dir / "splat.png"), dtype=np.uint8)
         self.forest = splat[:, :, 2].astype(np.float32) / 255.0
         self.forest_mpp = (self.bounds[2] - self.bounds[0]) / self.forest.shape[0]
-        self.coast_px = ndimage.distance_transform_edt(self.land)
+        # Open sea: fine relief under the sea (ETOPO bathymetry where Copernicus shows the
+        # sea surface), large connected bodies only (no estuaries, lagoons or lakes).
+        sea = self.fine[::2, ::2] < -1.0
+        labels, count = ndimage.label(sea)
+        sizes = ndimage.sum(sea, labels, np.arange(1, count + 1))
+        big = np.zeros(count + 1, dtype=bool)
+        big[1:] = sizes > 4000
+        self.coast_px = ndimage.distance_transform_edt(~big[labels])
         geo = json.loads((map_dir / "provinces.geojson").read_text(encoding="utf-8"))
         self.provinces = {f["properties"]["id"]: f for f in geo["features"]}
         self.copernicus_names = copernicus.tiles_in_bbox(
@@ -288,15 +296,20 @@ class Sources:
             return float(cx), float(cy)
         polygon = shape(feature["geometry"])
         lo, hi = COAST_TARGET_PX
-        rows, cols = np.nonzero(
-            self.land & (self.coast_px >= lo) & (self.coast_px <= hi)
-        )
-        order = np.argsort((cols + 0.5 - cx) ** 2 + (rows + 0.5 - cy) ** 2)
-        for index in order[:4000]:
-            px, py = float(cols[index]) + 0.5, float(rows[index]) + 0.5
-            if polygon.contains(Point(px, py)):
-                return px, py
-        return float(cx), float(cy)
+        minx, miny, maxx, maxy = (int(v) for v in polygon.bounds)
+        window = (slice(max(miny, 0), maxy + 2), slice(max(minx, 0), maxx + 2))
+        near = (self.coast_px[window] >= lo) & (self.coast_px[window] <= hi)
+        rows, cols = np.nonzero(near & self.land[window])
+        if rows.size == 0:
+            return float(cx), float(cy)
+        xs = cols + window[1].start + 0.5
+        ys = rows + window[0].start + 0.5
+        inside = shapely.contains_xy(polygon, xs, ys)
+        if not inside.any():
+            return float(cx), float(cy)
+        xs, ys = xs[inside], ys[inside]
+        best = int(np.argmin((xs - cx) ** 2 + (ys - cy) ** 2))
+        return float(xs[best]), float(ys[best])
 
 
 def bake_tile(sources: Sources, province: str, coastal: bool) -> HorizonTile:

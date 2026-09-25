@@ -519,19 +519,19 @@ func _build_silhouettes(terrain: BattleTerrain, far_rect: Rect2, weather: String
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var villages := _range_count(rng, cfg.get("villages", [2, 5]))
 	var sites: Array[Vector3] = []
-	for v in villages:
+	for _v in villages:
 		var p := _pick_site(terrain, rng, dmin, dmax, far_rect, false)
 		if p == Vector3.INF:
 			continue
 		sites.append(p)
 		_add_church(st, p, rng.randf() * TAU, scale, stone, roof)
-		for h in rng.randi_range(4, 8):
+		for _h in rng.randi_range(4, 8):
 			var off := Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(25.0, 90.0)
 			var q := Vector3(p.x + off.x, 0.0, p.z + off.y)
 			q.y = terrain.world_height(q.x, q.z)
 			_add_house(st, q, rng.randf() * TAU, scale * rng.randf_range(0.8, 1.2), stone.lightened(0.15), roof)
 		silhouette_count += 1
-	for c in _range_count(rng, cfg.get("castles", [0, 1])):
+	for _c in _range_count(rng, cfg.get("castles", [0, 1])):
 		var p := _pick_site(terrain, rng, dmin, dmax, far_rect, true)
 		if p == Vector3.INF:
 			continue
@@ -580,7 +580,7 @@ static func _range_count(rng: RandomNumberGenerator, bounds: Variant) -> int:
 ## Site au sol entre `dmin` et `dmax` du champ ; `high` : le plus haut de plusieurs essais.
 func _pick_site(terrain: BattleTerrain, rng: RandomNumberGenerator, dmin: float, dmax: float, far_rect: Rect2, high: bool) -> Vector3:
 	var best := Vector3.INF
-	for attempt in (40 if high else 12):
+	for _attempt in (40 if high else 12):
 		var a := rng.randf() * TAU
 		var d := rng.randf_range(dmin, dmax)
 		var p := centre + Vector2(sin(a), -cos(a)) * (d + field_size.length() * 0.5)
