@@ -68,7 +68,8 @@ proche) ; les hameaux n'en ont pas.
 - Bateaux posés sur `surface_height_at` : si V4 creuse le lit des fleuves, les baisser d'autant.
 - Château Kenney : toits bleus du kit (teinte grise multipliée) ; à remplacer si BR1 fournit un
   château réaliste.
-- Paris exclu par identifiant (`SettlementGrowth.EXCLUDED`) : pas de point d'accroche L1 dans `main`.
+- Villes emblématiques L1 (Paris) : exclues via `SettlementLayer.model_holder` (null pour un monument)
+  et `SettlementGrowth.EXCLUDED`. Fusion de `main` (L1, V3, AU1) faite, import + smoke OK (23 blocs).
 - Neige de plaine : bruit de valeur légèrement en plaques au zoom moyen.
 
 ## Prochaine étape
