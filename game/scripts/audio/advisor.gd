@@ -221,12 +221,18 @@ func _build(data: Dictionary) -> void:
 	style.content_margin_top = 10
 	style.content_margin_bottom = 12
 	_panel.add_theme_stylebox_override("panel", style)
-	_panel.anchor_left = 0.0
-	_panel.anchor_right = 0.0
-	_panel.anchor_top = 0.0
-	_panel.anchor_bottom = 0.0
-	_panel.offset_left = 16
-	_panel.offset_top = 96
+	# Bottom centre, above the battle unit cards: top-left covered the season
+	# report and other campaign panels (Q2).
+	_panel.anchor_left = 0.5
+	_panel.anchor_right = 0.5
+	_panel.anchor_top = 1.0
+	_panel.anchor_bottom = 1.0
+	_panel.offset_left = -220
+	_panel.offset_right = 220
+	_panel.offset_bottom = -176
+	_panel.offset_top = -176
+	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_panel.custom_minimum_size = Vector2(440, 0)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.tooltip_text = "Clic : faire taire le conseiller (Réglages → Son pour le désactiver)."
