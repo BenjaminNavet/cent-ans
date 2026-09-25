@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ship_class.schema.json",
+  "title": "Classe de navire",
+  "description": "Fichier data/naval/ships/<id>.json (lot NV1, ADR 0028) : cogue, nef, galère, barge. Hauteurs en mètres au-dessus de l'eau, vitesses en m/s.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^ship_[a-z0-9_]+$" },
+    "name": {
+      "type": "object",
+      "properties": {
+        "display": { "type": "string", "minLength": 1 },
+        "local": { "type": "string" },
+        "local_language": { "type": "string" }
+      },
+      "required": ["display"],
+      "additionalProperties": false
+    },
+    "propulsion": { "enum": ["sail", "oars", "mixed"] },
+    "length_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 80 },
+    "beam_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+    "freeboard_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 10, "description": "Hauteur du pont au-dessus de l'eau." },
+    "forecastle_m": { "type": "number", "minimum": 0, "maximum": 8, "description": "Hauteur du château avant au-dessus du pont (0 : aucun)." },
+    "aftcastle_m": { "type": "number", "minimum": 0, "maximum": 8, "description": "Hauteur du château arrière au-dessus du pont (0 : aucun)." },
+    "castle_capacity": { "type": "integer", "minimum": 0, "description": "Tireurs que tiennent les châteaux." },
+    "hull": { "type": "integer", "minimum": 1, "description": "Points de coque." },
+    "soldiers": { "type": "integer", "minimum": 0, "description": "Soldats embarqués." },
+    "sailors": { "type": "integer", "minimum": 0 },
+    "rowers": { "type": "integer", "minimum": 0 },
+    "sail_speed": { "type": "number", "minimum": 0, "maximum": 10 },
+    "oar_speed": { "type": "number", "minimum": 0, "maximum": 10 },
+    "turn_rate": { "type": "number", "exclusiveMinimum": 0, "maximum": 45, "description": "Degrés par seconde." },
+    "bulwark": { "type": "number", "minimum": 0, "maximum": 0.9, "description": "Part des traits arrêtée par le pavois de bord." },
+    "ram": { "type": "number", "minimum": 0, "description": "Dégâts d'éperon par m/s d'impact (0 : pas d'éperon)." },
+    "fire_resistance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "cost": { "type": "integer", "minimum": 0 },
+    "model": { "enum": ["cog", "nef", "galley", "barge"] },
+    "description": { "type": "string" },
+    "sources": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["id", "name", "propulsion", "length_m", "beam_m", "freeboard_m", "hull", "soldiers", "sailors", "turn_rate", "bulwark", "model"],
+  "additionalProperties": false
+}
