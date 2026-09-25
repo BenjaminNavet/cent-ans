@@ -60,6 +60,8 @@ uniform float release_at = 1.0;
 
 // Variantes (casques, armes...) : bit v de UV2.x = pièce visible pour la variante v.
 uniform int variant_count = 1;
+// BV3 : bit 7 du masque = pavois porté au dos (génois), masqué quand la rangée est plantée.
+uniform bool hide_pavise = false;
 uniform float size_jitter = 0.05;
 // Distance (m) au-delà de laquelle les images ne sont plus interpolées.
 uniform float interp_distance = 45.0;
@@ -203,6 +205,9 @@ void vertex() {
 	int mask = int(UV2.x + 0.5);
 	int variant = min(int(h.w * float(variant_count)), variant_count - 1);
 	bool shown = mask == 0 || ((mask >> variant) & 1) == 1;
+	if (hide_pavise && (mask & 128) != 0) {
+		shown = false;
+	}
 
 	ivec4 idx = ivec4(CUSTOM0 + 0.5);
 	vec4 w = CUSTOM1;

@@ -80,6 +80,8 @@ var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une c
 var _frame_dt: float = 0.0
 var _audio: Script = null
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
+## BV3 : les pavois des génois sont plantés en rangée (`BattleVolleys`) : celui du dos disparaît.
+var hide_planted_pavise: bool = false
 var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
@@ -336,6 +338,12 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
+		# BV3 : pavois du dos masqué tant que la rangée est plantée (même règle que BV1).
+		if hide_planted_pavise:
+			var planted := bool(unit.get("pavise_cover", false)) and state != "marching" and state != "charging"
+			if planted != bool(mat.get_meta("bv3_pavise", false)):
+				mat.set_meta("bv3_pavise", planted)
+				mat.set_shader_parameter("hide_pavise", planted)
 		var blood := snappedf(_living_blood(unit, id), 0.02)
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
