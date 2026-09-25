@@ -128,6 +128,11 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	var population := int(state.get("population_total", province.get("population_total", 0)))
 	population_value.text = _thousands(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
+	# EQ1: the revolt countdown, as soon as unrest is above the threshold.
+	var revolt_seasons := int(state.get("revolt_seasons", 0))
+	if revolt_seasons > 0:
+		var left := maxi(int(state.get("revolt_seasons_needed", 3)) - revolt_seasons, 1)
+		unrest_value.text += " — révolte dans %s" % FrText.count(left, "saison")
 	devastation_value.text = ("%d %%" % int(state["devastation"])) if state.has("devastation") else "—"
 	unrest_value.tooltip_text = RichTooltip.gauge("unrest", float(state.get("unrest", -1)))
 	devastation_value.tooltip_text = RichTooltip.gauge("devastation", float(state.get("devastation", -1)))
