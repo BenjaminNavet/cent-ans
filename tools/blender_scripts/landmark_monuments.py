@@ -1330,12 +1330,14 @@ def castle(params):
     moat = params.get("moat")
     if moat:
         poly = g.ccw([tuple(p) for p in moat["points"]])
-        outer = g.inset_polygon(poly, -moat.get("width", 20.0))
+        outer = g.offset_polygon(poly, moat.get("width", 20.0))
         n = len(poly)
         verts = [(x, y, 0.15) for x, y in outer] + [(x, y, 0.15) for x, y in poly]
         faces = [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n)]
         parts.append(("Water", (verts, faces)))
     rings = params.get("rings", [])
+    if len(rings) > 1:
+        parts.append(("Dirt", g.flat([tuple(p) for p in rings[-1]["points"]], 0.18)))
     if rings:
         parts.append(
             (

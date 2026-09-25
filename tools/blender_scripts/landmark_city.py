@@ -525,28 +525,28 @@ def build_bridge(plan, site, bridge, layer, rng):
         for part_mat, shape in monuments.church(0.9, tower_spire=False):
             verts, faces = transform.apply(shape)
             layer.add(part_mat, verts, faces, anchor=mid)
-        busy.append((t, 0.06 / max(length, 1e-6) * 1.4))
+        busy.append((t, 0.035 / max(length, 1e-6)))
     for t in bridge.get("gatehouses_at", []):
         gx, gy = along(t)
-        gw = half * 2.3
+        gw = half * 2.6
         layer.add(
             "WallStone",
-            *g.box(gx, gy, deck - 0.01, gw * 0.9, gw, k_house * 18.0, angle),
+            *g.box(gx, gy, deck - 0.01, gw * 1.1, gw, k_house * 13.0, angle),
             anchor=mid,
         )
         for side in (-1, 1):
             tx, ty = gx - s * side * gw / 2, gy + c * side * gw / 2
             layer.add(
                 "WallStone",
-                *g.cylinder(tx, ty, -0.02, gw * 0.22, deck + k_house * 22.0, 8),
+                *g.cylinder(tx, ty, -0.02, gw * 0.26, deck + k_house * 16.0, 8),
                 anchor=mid,
             )
             layer.add(
                 "Slate",
-                *g.cone(tx, ty, deck + k_house * 22.0, gw * 0.24, gw * 0.4, 8),
+                *g.cone(tx, ty, deck + k_house * 16.0, gw * 0.28, gw * 0.45, 8),
                 anchor=mid,
             )
-        busy.append((t, gw / max(length, 1e-6)))
+        busy.append((t, gw * 0.7 / max(length, 1e-6)))
     if "drawbridge_at" in bridge:
         t = bridge["drawbridge_at"]
         dx, dy = along(t)
@@ -567,7 +567,7 @@ def build_bridge(plan, site, bridge, layer, rng):
                 hx = mid[0] + c * t * length - s * side * half * 0.62
                 hy = mid[1] + s * t * length + c * side * half * 0.62
                 depth = half * 0.75
-                height = house_height(plan, rng) * 0.9
+                height = house_height(plan, rng) * 0.75
                 house(
                     layer,
                     hx,

@@ -164,6 +164,24 @@ def inset_polygon(poly, distance):
     return result
 
 
+def offset_polygon(poly, distance):
+    """Grow (distance > 0) a counter-clockwise polygon by mitred vertex offsets (any shape)."""
+    n = len(poly)
+    result = []
+    for i in range(n):
+        px, py = poly[i - 1]
+        x, y = poly[i]
+        qx, qy = poly[(i + 1) % n]
+        normals = []
+        for (ax, ay), (bx, by) in (((px, py), (x, y)), ((x, y), (qx, qy))):
+            length = math.hypot(bx - ax, by - ay) or 1e-9
+            normals.append(((by - ay) / length, -(bx - ax) / length))
+        (n1x, n1y), (n2x, n2y) = normals
+        k = distance / max(1.0 + n1x * n2x + n1y * n2y, 0.3)
+        result.append((x + (n1x + n2x) * k, y + (n1y + n2y) * k))
+    return result
+
+
 def polyline_normals(points):
     """Unit left normals at each vertex of a polyline (averaged at joints)."""
     normals = []

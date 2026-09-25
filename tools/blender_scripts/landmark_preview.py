@@ -4,7 +4,8 @@ Run headless:
     blender --background --python landmark_preview.py -- <model.glb> <out_dir> [view ...]
 
 Views: ``top`` (whole zone), ``centre`` (oblique over the Cité), ``notre_dame`` (close-up of
-the west front), ``notre_dame_side`` (south side, flying buttresses). Renders with EEVEE and a sun,
+the west front), ``notre_dame_side`` (south side, flying buttresses), or any camera written
+``name=x,y,z,tx,ty,tz,lens`` (lot L2: views of the other cities). Renders with EEVEE and a sun,
 at 1280 x 800. Only for documentation: the game renders the GLB itself.
 """
 
@@ -43,6 +44,13 @@ def main() -> None:
     for obj in bpy.data.objects:
         if obj.type == "MESH" and obj.name in ("blocks", "louvre", "charles_v_hidden"):
             obj.hide_render = True
+        # Other cities (lot L2): show the base state, not the later variants.
+        if (
+            obj.type == "MESH"
+            and "__" in obj.name
+            and not model.stem.startswith("paris")
+        ):
+            obj.hide_render = True
     # Ground plane under everything.
     bpy.ops.mesh.primitive_plane_add(
         size=8000 if "siege" in model.stem else 40, location=(0, 0, -0.001)
@@ -79,6 +87,10 @@ def main() -> None:
     scene.camera = camera
     out_dir.mkdir(parents=True, exist_ok=True)
     for view in views:
+        if "=" in view:
+            view, numbers = view.split("=", 1)
+            values = [float(v) for v in numbers.split(",")]
+            VIEWS[view] = (tuple(values[0:3]), tuple(values[3:6]), values[6])
         location, target, lens = VIEWS[view]
         camera.location = location
         cam_data.lens = lens
