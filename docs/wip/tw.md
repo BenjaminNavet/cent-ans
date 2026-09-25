@@ -20,15 +20,13 @@ Choix du joueur au lancement :
 | 5 | C6 agents Medieval II (espion, émissaire, prédicateur) ; C2 zone de contrôle après C7a colonies | C6 **fusionné** (12a53bc, ADR 0009) ; C2 relancé en vague 6 |
 | 6 | C2 zone de contrôle (**suspendu** : remplacé par M2 mouvement libre d'une autre session, `docs/design/2026-09-24-mouvement-libre.md`, ZdC 8 km sur grille ; reprendre après M2 pour effets diplomatiques/UI non couverts) ; C5 routes commerciales + accords ; C4 édits régionaux + chaînes de bâtiments ; B8 suites B6/B7 (IA attaquant/bocage/poursuite, minicarte de site, boue, écume de gué) | **en cours** (4 agents, notes `docs/wip/c2-zone-controle.md`, `c5-commerce.md`, `c4-edits-chaines.md`, `b8-suites-bataille.md` dans leurs branches) |
 
-## État courant (24/09 nuit, reprise après crash de l'ordinateur)
+## État courant (25/09, passation à l'orchestrateur de nuit)
 
-main : B8 IA fusionné (39e0e3e). Fusionnés : P1, P2, B1-B7, B8 (IA), C1, C3, C6, C7.
-En cours (agents relancés après le crash) : C4 édits/chaînes (`worktree-agent-ac3308295100c32fa`, ADR **0011**), C5 commerce (`worktree-agent-ae7dec5cc632f4a8c`, ADR **0012**), B8b visuels bataille (`worktree-agent-a57288477a02508ab`). Il leur restait smoke, captures et banc.
-Partage avec les autres sessions (convenu par message) :
-- session 7 « nuit » (`docs/wip/nuit.md`, fusion via `../gp-night-merge`) : D0, V1, G1, U1, A5 ; ADR 0013 et au-delà ;
-- session mouvement libre (`docs/wip/mouvement-libre.md`) : M2-M5, réécrit `movement.rs` ; C2 zone de contrôle suspendu jusqu'après M2 (`docs/wip/c2-zone-controle.md`) ;
-- chacun prévient les autres à chaque push de main.
-Échec pytest connu hors TW : `tools/tests/test_portraits.py::test_dry_run_makes_no_network_call`.
+Fusionnés par cette session : P1, P2, B1-B7, B8 (IA), B8b (visuels, b420bd6), C1, C3, C6, C7.
+**C4 et C5 fusionnés par l'orchestrateur de nuit** (92ed8a4c ; accord commercial unifié avec les traités DP1). **Vague 6 TW close** ; pistes d'équilibre transmises à EQ1 (nuit).
+Travail d'intégration transmis : `integration/tw` (6ebe9658) = C5 + C4 par-dessus M2, vérifié (58 suites, smoke 23 OK dont trade et edicts) ; commits utiles 321222ae (clippy c5_trade) et 7d754085 (C5 adapté à `ArmyPosition`). Après M3 : `resolve_trade` dans `resolve_end_of_turn`, `ai_choose_edicts` dans `plan_turn`.
+C2 zone de contrôle : couvert en grande partie par M2 (ZdC 8 km) ; reste éventuel l'affichage (`docs/wip/c2-zone-controle.md`).
+Main a fortement évolué pendant la nuit (M2/M3 mouvement libre, G1, UI2, V2-V4, BV1/BV2, NV1 batailles navales…) : relire `docs/wip/nuit.md` et `docs/wip/mouvement-libre.md` avant toute nouvelle vague TW.
 
 ## Reprise
 1. Si la vague 4 est interrompue : lire `docs/wip/b6-*.md`, `b7-*.md`, `c7-*.md` dans les worktrees (`git worktree list`), relancer un agent de reprise par lot inachevé.

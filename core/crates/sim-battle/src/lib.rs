@@ -80,4 +80,4 @@ pub use sim::{
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
-pub use unit::{Formation, Unit, UnitState};
+pub use unit::{Formation, Unit, UnitFate, UnitState};
