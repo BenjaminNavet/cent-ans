@@ -13,7 +13,7 @@
 use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, ProvinceId};
-use sim_campaign::{CampaignState, EventKind, TaxRate};
+use sim_campaign::{CampaignState, TaxRate};
 
 fn fid(s: &str) -> FactionId {
     FactionId::new(s).expect("well-formed id")
@@ -37,6 +37,7 @@ struct Totals {
     fr_en_peaces: u32,
     fr_en_wars: u32,
     longest: Vec<(u32, String, u64)>,
+    longest_peace: u32,
 }
 
 fn main() {
@@ -84,8 +85,8 @@ fn main() {
     println!("| Édits | {} |", edicts.join(", "));
     println!("| Guerre FR-EN | {:.0} % |", pct(t.war_turns, t.turns));
     println!(
-        "| Paix / guerres FR-EN par partie | {} / {} |",
-        t.fr_en_peaces, t.fr_en_wars
+        "| Paix / guerres FR-EN (total) ; plus longue paix | {} / {} ; {} saisons |",
+        t.fr_en_peaces, t.fr_en_wars, t.longest_peace
     );
     t.longest.sort();
     for (len, province, seed) in t.longest.iter().rev().take(5) {
@@ -101,22 +102,28 @@ fn run(data: &GameData, seed: u64, turns: u32, watch: Option<&str>, t: &mut Tota
     state.interactive_battles = false;
     let mut streak: BTreeMap<ProvinceId, u32> = BTreeMap::new();
     let mut best: (u32, String) = (0, String::new());
+    let mut was_war = state.factions[&france].at_war_with.contains(&england);
+    let mut peace_len = 0u32;
     let planner = |s: &CampaignState, d: &GameData, f: &FactionId| ai::plan_turn(s, d, f);
     for turn in 0..turns {
-        let events = state.end_turn_with(data, planner);
-        for e in &events {
-            let pair = e.text_fr.contains("France") && e.text_fr.contains("Angleterre");
-            if pair && e.kind == EventKind::PeaceSigned {
+        state.end_turn_with(data, planner);
+        t.turns += 1;
+        let war = state.factions[&france].at_war_with.contains(&england);
+        if war {
+            t.war_turns += 1;
+            peace_len = 0;
+        } else {
+            peace_len += 1;
+            t.longest_peace = t.longest_peace.max(peace_len);
+        }
+        if war != was_war {
+            if war {
+                t.fr_en_wars += 1;
+            } else {
                 t.fr_en_peaces += 1;
             }
-            if pair && e.kind == EventKind::WarDeclared {
-                t.fr_en_wars += 1;
-            }
         }
-        t.turns += 1;
-        if state.factions[&france].at_war_with.contains(&england) {
-            t.war_turns += 1;
-        }
+        was_war = war;
         for (id, p) in &state.provinces {
             t.disorder_sum += f64::from(p.unrest);
             t.disorder_n += 1;
