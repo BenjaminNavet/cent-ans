@@ -672,3 +672,63 @@ func vegetation_exclusions() -> PackedVector3Array:
 		var hpx: Vector2 = hamlet["px"]
 		result.append(Vector3(hpx.x, hpx.y, ModelLibrary.HAMLET_SCALE * 0.6))
 	return result
+
+
+# --- Lot CV1 : accès pour la campagne vivante (croissance, fumées) -------------------------
+
+
+## Support (Node3D posé sur le relief) de la maquette de la colonie `i`, null sans maquette.
+func model_holder(i: int) -> Node3D:
+	if _is_landmark(i):
+		return null  # ville emblématique (L1) : pas de croissance ni de surcouche génériques
+	return _models[i] if i >= 0 and i < _models.size() else null
+
+
+## Rayon au sol et hauteur (unités monde) de la maquette de la colonie `i`.
+func model_radius(i: int) -> float:
+	return _model_radius[i] if i >= 0 and i < _model_radius.size() else 2.0
+
+
+func model_top(i: int) -> float:
+	return _model_top[i] if i >= 0 and i < _model_top.size() else 2.0
+
+
+## Remplace la maquette de la colonie `i` (lot CV1 : croissance) ; `model` est déjà à l'échelle
+## monde. Garde position, orientation, portée de visibilité et teinte de bannière ; l'écart
+## aux voisines (`_fit_models`) est réappliqué.
+func replace_model(i: int, model: Node3D) -> void:
+	var holder: Node3D = model_holder(i)
+	if holder == null or model == null:
+		return
+	for child in holder.get_children():
+		holder.remove_child(child)
+		child.queue_free()
+	holder.add_child(model)
+	var aabb := _model_aabb(model)
+	_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
+	_model_top[i] = aabb.end.y
+	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
+		var g := geometry as GeometryInstance3D
+		g.visibility_range_end = tiers.model_range
+		g.visibility_range_end_margin = tiers.model_range * 0.15
+	if i < _colors.size():
+		ModelLibrary.tint_banner(holder, _colors[i])
+	_ground_model(i)
+	_update_label_heights()
+
+
+## Hameau brûlé (même tirage que `_build_hamlets`), pour les fumées d'incendie.
+func hamlet_burned(h: int) -> bool:
+	var hamlet: Dictionary = data.hamlets[h]
+	var px: Vector2 = hamlet["px"]
+	var seed_value := _hash(str(hamlet["name"]) + str(px))
+	var devastation: float = _devastation.get(hamlet["province"], 0.0)
+	return devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
+
+
+## Force une dévastation affichée (captures CV1 `--devastate`) et reconstruit les hameaux.
+func override_devastation(values: Dictionary) -> void:
+	for province_id in values:
+		_devastation[province_id] = float(values[province_id])
+	for index in _hamlet_nodes:
+		_hamlet_dirty[index] = true

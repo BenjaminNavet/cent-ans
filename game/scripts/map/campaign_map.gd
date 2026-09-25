@@ -71,6 +71,7 @@ var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
+var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -200,6 +201,10 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+	life = CampaignLife.new()  # CV1
+	life.name = "CampaignLife"
+	add_child(life)
+	life.setup(self)
 
 
 ## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
@@ -290,6 +295,8 @@ func refresh_all() -> void:
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
 	if settlement_layer != null:  # C6
 		settlement_layer.refresh(sim, SimFacade.faction_color)
+	if life != null:  # CV1
+		life.refresh(sim)
 	if minimap_ctl != null:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
@@ -913,6 +920,8 @@ func _on_load(path: String) -> void:
 	ui.hide_province()
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (partie chargée)" % sim.call("get_date_label"))
+	if life != null:  # CV1 : relire saison, dévastation et croissance de la partie chargée
+		life.invalidate()
 	refresh_all()
 	ui.show_toast("Partie chargée.")
 
@@ -933,6 +942,8 @@ func _process(_delta: float) -> void:
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+	if life != null:  # CV1
+		life.update_view(distance)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
