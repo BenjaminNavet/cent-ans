@@ -754,8 +754,13 @@ func phase_naval() -> void:
 	if dialog == null or not dialog.visible:
 		log_q("naval: no pre-battle dialog")
 		return
+	await wait(60)
 	var t := Time.get_ticks_msec()
 	await click(dialog.fight_button)
+	if dialog.visible:
+		log_q("naval: first click on Combattre ignored, clicking again")
+		await wait(30)
+		await click(dialog.fight_button)
 	var scene: Node = null
 	while scene == null and Time.get_ticks_msec() - t < 60000:
 		await wait(1)
