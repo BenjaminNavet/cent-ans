@@ -76,12 +76,12 @@ def pike(ctx, length=4.6, below=1.25, bone="Prop"):
 
 
 def spear(ctx, length=2.3):
-    """Spear in the right fist (militia)."""
-    return pike(ctx, length=length, below=0.9, bone="Wrist.R")
+    """Spear held in both hands like a short pike (militia, lot BV2)."""
+    return pike(ctx, length=length, below=0.9, bone="Prop")
 
 
 def bill(ctx):
-    """Bill (hooked hedging blade on a staff) in the right fist: militia and peasants."""
+    """Bill (hooked hedging blade on a staff) in both hands: militia and peasants (BV2)."""
     fr = prop_frame(ctx)
     _o, x, y, z = fr
     bm = bmesh.new()
@@ -100,7 +100,7 @@ def bill(ctx):
     obj = to_object(
         "bill", bm, [ctx.material(C_WOOD, WOOD), ctx.material(C_PLATE, IRON)]
     )
-    bind_rigid(obj, "Wrist.R")
+    bind_rigid(obj, "Prop")
     return [obj]
 
 
@@ -132,7 +132,7 @@ def pitchfork(ctx):
     obj = to_object(
         "pitchfork", bm, [ctx.material(C_WOOD, WOOD_LIGHT), ctx.material(C_PLATE, IRON)]
     )
-    bind_rigid(obj, "Wrist.R")
+    bind_rigid(obj, "Prop")
     return [obj]
 
 

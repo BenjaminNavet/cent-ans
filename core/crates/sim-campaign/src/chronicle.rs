@@ -397,9 +397,11 @@ impl CampaignState {
         };
         match effect {
             EventEffect::Treasury { faction, amount } => {
+                // UI audit A3 E3: livres tournois with the ₶ sign and
+                // grouped digits, as everywhere else in the interface.
                 format!(
-                    "Trésor {} livres{}",
-                    signed(*amount),
+                    "Trésor {}{}",
+                    crate::economy_balance::signed_livres(*amount),
                     faction_label(faction)
                 )
             }

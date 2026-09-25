@@ -126,6 +126,9 @@ func _kit_house(batch: BuildingKit.Batch, house: Dictionary) -> bool:
 	var flip := PI if rng.randf() < 0.5 else 0.0
 	var basis := Basis(Vector3.UP, -yaw + flip) * Basis.from_scale(BuildingKit.fit_scale(model, length, width))
 	batch.add(model, Transform3D(basis, Vector3(p.x, minf(high, low + 1.4) - 0.05, p.y)))
+	# BR2 : bûcher, charrette ou tonneaux devant les maisons (pas l'église).
+	if str(house["kind"]) != "church" and rng.randf() < 0.5:
+		BuildingKit.add_front_prop(batch, rng, ["woodpile", "woodpile", "cart", "barrels"], p, -yaw + flip, length, width, _terrain.height_at)
 	return true
 
 
