@@ -1397,7 +1397,13 @@ fn plan_field(view: &mut View) {
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if let Some((crest, _)) = ground {
-        reverse_slope_anchor(view, crest, !roles.shooters.is_empty())
+        let a = reverse_slope_anchor(view, crest, !roles.shooters.is_empty());
+        let back: f64 = std::env::var("SG5_LINEBACK").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
+        if back > 0.0 && height_edge(view) > HOLD_HEIGHT && !roles.shooters.is_empty() {
+            (a.0, a.1 - view.forward * back)
+        } else {
+            a
+        }
     } else if attacker_holds {
         // R4: an attacker above an enemy of shooters waits on its heights.
         line_center
@@ -2283,6 +2289,7 @@ fn plan_horse(
             .filter(|&&k| (units[k].x - anchor.0) * side > 0.0)
             .map(|&k| (units[k].x - anchor.0).abs() + units[k].extent().0 * 0.5)
             .fold(half, f64::max);
+        let reach = if std::env::var("SG5_ORIGWING").is_ok() { half } else { reach };
         let gap: f64 = std::env::var("SG5_GAP").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_gap_m);
         let depth: f64 = std::env::var("SG5_DEPTH").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_depth_m);
         // Side by side outwards, not all on one spot (a broken regiment
