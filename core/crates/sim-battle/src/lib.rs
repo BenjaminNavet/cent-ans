@@ -43,6 +43,7 @@ pub mod impact;
 pub mod orders;
 pub mod outcome;
 pub mod relief;
+pub mod relief_ai;
 pub mod rng;
 pub mod setup;
 pub mod shot;
