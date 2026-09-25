@@ -74,6 +74,21 @@ uniform vec3 livery : source_color = vec3(0.2, 0.3, 0.75);
 uniform vec3 trim : source_color = vec3(0.85, 0.7, 0.25);
 uniform sampler2D heraldry : source_color, filter_linear_mipmap, repeat_disable;
 uniform bool has_heraldry = false;
+// DA1 : atlas d'armoiries de la bataille (Texture2DArray : factions, maisons des généraux,
+// bannerets) et couches du régiment : x = seigneur (ou faction), y/z/w = bannerets (-1 : aucun),
+// portés par `vassal_share` des figurines (tirage par hachage de l'instance, sans donnée CPU).
+uniform sampler2DArray arms_atlas : source_color, filter_linear_mipmap, repeat_disable;
+uniform bool use_atlas = false;
+uniform ivec4 arms_layers = ivec4(0, -1, -1, -1);
+uniform float vassal_share = 0.3;
+// DA1 : buste en pose de repos (centre x/y, largeur/hauteur) et profondeur z : armoiries sur la
+// poitrine et le dos du surcot (nobles, `chest_arms`) ou croix de livrée du commun (`badge_*`,
+// alpha > 0,5 = actif ; pièce d'étoffe sous la croix).
+uniform bool chest_arms = false;
+uniform vec4 chest_box = vec4(0.0, 1.22, 0.3, 0.38);
+uniform vec2 chest_depth = vec2(-0.1, 0.3);
+uniform vec4 badge_cross : source_color = vec4(0.0);
+uniform vec4 badge_patch : source_color = vec4(0.0);
 uniform float livery_share = 0.7;
 uniform float highlight = 0.0;
 // Sang du régiment 0-1 (taches progressives, lot BV2) ; par soldat, fraction de
@@ -325,6 +340,25 @@ float noise2(vec2 p) {
 	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
+// DA1 : couche d'armoiries de la figurine (seigneur, ou l'un des bannerets).
+float arms_layer() {
+	int layer = arms_layers.x;
+	int count = int(arms_layers.y >= 0) + int(arms_layers.z >= 0) + int(arms_layers.w >= 0);
+	float r = fract(v_var.x * 17.23 + v_var.w * 7.91);
+	if (count > 0 && r < vassal_share) {
+		int k = min(int(r / vassal_share * float(count)), count - 1);
+		layer = k == 0 ? arms_layers.y : (k == 1 ? arms_layers.z : arms_layers.w);
+	}
+	return float(layer);
+}
+
+vec4 arms_sample(vec2 uv) {
+	if (use_atlas) {
+		return texture(arms_atlas, vec3(uv, arms_layer()));
+	}
+	return has_heraldry ? texture(heraldry, uv) : vec4(0.0);
+}
+
 void fragment() {
 	int code = int(v_code * 16.0 + 0.5);
 	vec3 albedo = v_color;
@@ -347,6 +381,25 @@ void fragment() {
 			livery_surface = true;
 		} else {
 			albedo = PLAIN[int(h6 * 7.99)] * mix(0.85, 1.15, v_var.z) * v_color * 1.6;
+		}
+		// DA1 : armoiries (nobles) ou croix de livrée (commun) sur la poitrine et le dos.
+		vec2 cq = vec2((v_rest.x - chest_box.x) / chest_box.z + 0.5, (chest_box.y + 0.5 * chest_box.w - v_rest.y) / chest_box.w);
+		bool torso = abs(v_rest_n.z) > 0.35 && v_rest.z > chest_depth.x && v_rest.z < chest_depth.y
+			&& cq.x > 0.0 && cq.x < 1.0 && cq.y > 0.0 && cq.y < 1.0 && dist < 60.0;
+		if (torso && chest_arms && wears) {
+			// Le buste regarde -Z en pose de repos (le squelette cuit le demi-tour) : vu de face
+			// ou de dos, l'écu se lit dans le même sens (dextre à gauche du spectateur).
+			vec2 uv = vec2(v_rest_n.z > 0.0 ? 1.0 - cq.x : cq.x, cq.y);
+			vec4 arms = arms_sample(mix(vec2(0.1, 0.06), vec2(0.9, 0.94), uv));
+			albedo = mix(albedo, arms.rgb * mix(0.86, 0.98, v_var.y) * v_color, arms.a);
+		} else if (torso && badge_cross.a > 0.5) {
+			vec2 d = abs(cq - vec2(0.5, 0.56));
+			if (badge_patch.a > 0.5 && d.x < 0.3 && d.y < 0.28) {
+				albedo = badge_patch.rgb * mix(0.8, 0.95, v_var.y) * v_color;
+			}
+			if ((d.x < 0.07 && d.y < 0.26) || (abs(cq.y - 0.5) < 0.06 && d.x < 0.26)) {
+				albedo = badge_cross.rgb * mix(0.8, 0.95, v_var.y) * v_color;
+			}
 		}
 		// Tissage : fin quadrillage, effacé quand il devient plus petit que le pixel.
 		vec2 g = q * 260.0;
@@ -386,8 +439,9 @@ void fragment() {
 		}
 	} else if (code == C_ARMS) {
 		bool inside = UV.x >= 0.0 && UV.x <= 1.0 && UV.y >= 0.0 && UV.y <= 1.0;
-		vec4 arms = has_heraldry && inside ? texture(heraldry, vec2(mix(0.08, 0.92, UV.x), mix(0.06, 0.94, UV.y))) : vec4(0.0);
-		vec3 painted = mix(arms.rgb, vec3(dot(arms.rgb, vec3(0.3, 0.59, 0.11))), 0.2) * mix(0.72, 0.92, v_var.y);
+		vec4 arms = inside ? arms_sample(vec2(mix(0.08, 0.92, UV.x), mix(0.06, 0.94, UV.y))) : vec4(0.0);
+		// DA1 (bible § 2, 3.1) : armoiries saturées, étoffe teinte (±6 % de luminosité).
+		vec3 painted = arms.rgb * mix(0.84, 0.96, v_var.y);
 		albedo = mix(dyed, painted, arms.a);
 		roughness = 0.65;
 		livery_surface = true;

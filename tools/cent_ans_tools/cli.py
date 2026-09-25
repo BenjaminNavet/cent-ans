@@ -649,6 +649,10 @@ def assets_heraldry() -> None:
 
     paths = heraldry.build()
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
+    houses = heraldry.build_houses()
+    console.print(
+        f"[green]OK[/green] : {len(houses)} écus de maison dans {heraldry.HOUSES_DIR}"
+    )
 
 
 @assets_app.command("banners")
@@ -778,6 +782,47 @@ def assets_portraits(
     )
     console.print(
         f"[green]OK[/green] : {len(result.written)} portrait(s), estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
+    )
+
+
+@assets_app.command("portrait-archetypes")
+def assets_portrait_archetypes(
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Clés à générer seules (sonde), répétable"
+    ),
+    no_aged: bool = typer.Option(False, "--no-aged", help="Archétypes seulement"),
+    no_archetypes: bool = typer.Option(
+        False, "--no-archetypes", help="Variantes âgées seulement"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        8.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """DA2 : archétypes de portraits et variantes âgées (512×512 JPEG)."""
+    from cent_ans_tools import portrait_archetypes, portraits
+
+    model = model or portraits.DEFAULT_MODEL
+    jobs = portrait_archetypes.plan(
+        archetypes=not no_archetypes,
+        aged=not no_aged,
+        only=only or None,
+        limit=limit,
+    )
+    _run_art_batch(
+        jobs,
+        model,
+        envelope,
+        dry_run,
+        "portrait(s) vivant(s)",
+        "DA2 : portraits vivants (archétypes et variantes âgées)",
+        portrait_archetypes.to_archetype_jpg,
     )
 
 

@@ -102,10 +102,22 @@ var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au débu
 ## EP5 : figurines du tampon remplacées par un porte-étendard ou un musicien dédié
 ## (`BattleStandards`) : unit id -> PackedInt32Array des rangs masqués.
 var reserved: Dictionary = {}
+## DA1 : atlas d'armoiries (Texture2DArray : une couche par écu, 128²), couche de la faction et
+## du seigneur (maison du général) par camp, bannerets possibles par camp, croix du commun.
+## `--no-da1` après `--` : rendu d'avant DA1 (mesures A/B).
+var da1_enabled: bool = not OS.get_cmdline_user_args().has("--no-da1")
+var arms_atlas: Texture2DArray = null
+var arms_layer_ids: Array[String] = []  # couche -> "fac_x" ou id de maison
+var _side_faction_layer: Dictionary = {}
+var _side_lord_layer: Dictionary = {}
+var _side_lord_texture: Dictionary = {}
+var _side_vassal_layers: Dictionary = {}  # side -> Array[int]
+var _side_badge: Dictionary = {}
 
 
-## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
-func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> void:
+## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp ;
+## `side_houses` (DA1) : maison du général de chaque camp (armes des figurines nobles).
+func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, side_houses: Dictionary = {}) -> void:
 	_rng.seed = 4242
 	_gore = BattleGore.settings()
 	_level = BattleGore.level_settings()
@@ -117,6 +129,7 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 	_side_colors = side_colors
 	for side in side_factions:
 		_side_heraldry[side] = PortraitLoader.heraldry_texture(str(side_factions[side]))
+	_build_arms_atlas(side_factions, side_houses)
 	for unit in units:
 		var kind := str(unit["render"])
 		if not KINDS.has(kind):
@@ -126,7 +139,7 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		var side := str(unit["side"])
 		_unit_info[id] = {"type": str(unit.get("type", "")), "kind": kind, "variant": variant, "side": side}
 		var skinned := BattleSkinned.has_figure(kind, variant)
-		var mat := _make_skinned_material(side, kind, variant, false) if skinned else _make_material(side, kind, variant, false)
+		var mat := _make_skinned_material(side, kind, variant, false, id) if skinned else _make_material(side, kind, variant, false)
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.mesh = BattleSkinned.mesh(kind, variant, 0) if skinned else BattleMeshes.soldier(kind, variant)
@@ -160,13 +173,106 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 				impostors.request(BattleImpostors.key_of(side, kind, variant), kind, variant, mat)
 
 
+## DA1 : atlas des armoiries de la bataille, construit une fois (aucune texture par figurine).
+## Couches : armes de chaque faction, de la maison de chaque général, et des maisons vassales
+## (`vassal_of` de `data/heraldry/houses.json`) dont les bannerets suivent l'armée.
+func _build_arms_atlas(side_factions: Dictionary, side_houses: Dictionary) -> void:
+	for side in side_factions:
+		var house := str(side_houses.get(side, ""))
+		_side_lord_texture[side] = HouseArms.texture(house) if house != "" else null
+	if not da1_enabled:
+		return
+	var images: Array[Image] = []
+	var index_of := {}
+	var add := func(key: String, texture: Texture2D) -> int:
+		if texture == null:
+			return -1
+		if index_of.has(key):
+			return int(index_of[key])
+		var image := texture.get_image()
+		if image == null or image.is_empty():
+			return -1
+		image = image.duplicate()
+		if image.is_compressed():
+			image.decompress()
+		image.convert(Image.FORMAT_RGBA8)
+		if image.get_width() != 128 or image.get_height() != 128:
+			image.resize(128, 128, Image.INTERPOLATE_LANCZOS)
+		image.generate_mipmaps()
+		index_of[key] = images.size()
+		images.append(image)
+		arms_layer_ids.append(key)
+		return images.size() - 1
+	for side in side_factions:
+		var faction := str(side_factions[side])
+		var faction_layer: int = add.call(faction, _side_heraldry.get(side))
+		_side_faction_layer[side] = faction_layer
+		var lord := HouseArms.id_of(str(side_houses.get(side, "")))
+		var lord_layer: int = add.call(lord, HouseArms.texture(lord)) if lord != "" else -1
+		_side_lord_layer[side] = lord_layer if lord_layer >= 0 else faction_layer
+		var vassals: Array[int] = []
+		for house in HouseArms.vassals(faction, lord):
+			var layer: int = add.call(house, HouseArms.texture(house))
+			if layer >= 0 and layer != _side_lord_layer[side]:
+				vassals.append(layer)
+		_side_vassal_layers[side] = vassals
+		_side_badge[side] = HouseArms.badge(faction)
+	if images.is_empty():
+		return
+	arms_atlas = Texture2DArray.new()
+	arms_atlas.create_from_images(images)
+
+
+## DA1 : uniformes d'armoiries d'un matériau skinné (atlas, couches, buste, croix du commun).
+func _apply_arms(mat: ShaderMaterial, side: String, kind: String, variant: int, noble: bool, unit_id: int) -> void:
+	if arms_atlas == null or int(_side_faction_layer.get(side, -1)) < 0:
+		return
+	mat.set_shader_parameter("arms_atlas", arms_atlas)
+	mat.set_shader_parameter("use_atlas", true)
+	var layers := Vector4i(int(_side_faction_layer[side]), -1, -1, -1)
+	var box := BattleSkinned.chest_box(kind, variant)
+	if not box.is_empty():
+		var center: Vector2 = box["center"]
+		var size: Vector2 = box["size"]
+		mat.set_shader_parameter("chest_box", Vector4(center.x, center.y, size.x, size.y))
+		mat.set_shader_parameter("chest_depth", box["depth"])
+	if noble:
+		layers.x = int(_side_lord_layer[side])
+		# Bannerets : trois maisons vassales tirées par régiment (graine = id d'unité).
+		var pool: Array = (_side_vassal_layers.get(side, []) as Array).duplicate()
+		if unit_id >= 0 and pool.size() > 3:
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash("da1/%d" % unit_id)
+			for i in range(pool.size() - 1, 0, -1):
+				var j := rng.randi_range(0, i)
+				var swap: Variant = pool[i]
+				pool[i] = pool[j]
+				pool[j] = swap
+		layers.y = int(pool[0]) if pool.size() > 0 else -1
+		layers.z = int(pool[1]) if pool.size() > 1 else -1
+		layers.w = int(pool[2]) if pool.size() > 2 else -1
+		mat.set_shader_parameter("chest_arms", not box.is_empty())
+	else:
+		var badge: Dictionary = _side_badge.get(side, {})
+		if not badge.is_empty() and not box.is_empty():
+			var cross: Color = badge["cross"]
+			mat.set_shader_parameter("badge_cross", Color(cross.r, cross.g, cross.b, 1.0))
+			if badge.get("patch") != null:
+				var patch: Color = badge["patch"]
+				mat.set_shader_parameter("badge_patch", Color(patch.r, patch.g, patch.b, 1.0))
+	mat.set_shader_parameter("arms_layers", layers)
+
+
 func _make_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = SOLDIER_SHADER
 	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
 	mat.set_shader_parameter("livery", color)
 	mat.set_shader_parameter("trim", TRIM_SILVER if color.get_luminance() > 0.55 or (color.r > 0.6 and color.g > 0.5) else TRIM_GOLD)
+	# DA1 : les nobles portent les armes de la maison du général (repli : faction).
 	var arms: Texture2D = _side_heraldry.get(side)
+	if BattleSkinned.is_noble(kind, variant) and _side_lord_texture.get(side) != null:
+		arms = _side_lord_texture[side]
 	mat.set_shader_parameter("heraldry", arms)
 	mat.set_shader_parameter("has_heraldry", arms != null)
 	mat.set_shader_parameter("weapon_mode", BattleMeshes.weapon_mode(kind, variant))
@@ -188,7 +294,9 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 
 ## Matériau des figurines skinnées (lot V2) : même livrée et blason que `_make_material`,
 ## texture d'os et table des clips du rig ; cadavres en mode CUSTOM (clips de mort).
-func _make_skinned_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
+## DA1 : `unit_id` (>= 0) tire les bannerets du régiment ; les cadavres (partagés par camp)
+## prennent les trois premiers bannerets du camp.
+func _make_skinned_material(side: String, kind: String, variant: int, corpse: bool, unit_id: int = -1) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER
 	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
@@ -201,6 +309,7 @@ func _make_skinned_material(side: String, kind: String, variant: int, corpse: bo
 	mat.set_shader_parameter("reload_time", 9.0 if kind == "archer" and variant == 2 else 6.0)
 	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.92 if noble else 0.6)
+	_apply_arms(mat, side, kind, variant, noble, unit_id)
 	if corpse:
 		BattleSkinned.apply_config(mat, BattleSkinned.death_config(kind, variant), anim_time)
 	else:

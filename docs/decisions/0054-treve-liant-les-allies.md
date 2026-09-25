@@ -36,3 +36,23 @@ comprenait l'Écosse, la Castille et les alliés de l'Angleterre.
 - Moins de guerres résiduelles : banqueroutes en baisse (0,30 → ~0,1 / faction / décennie).
 - L'Écosse n'est détruite dans aucune graine (déjà le cas sur main).
 - La trêve de l'allié est une paix ordinaire : un événement « Paix entre … » par allié lié.
+
+## Addendum (lot EQ4, 2026-09-26) — mesure combinée, aucune règle changée
+
+Mesure de EQ1, EQ2, EQ3, DP2, DF1, C4/C5 et SG4 ensemble (`century_probe`, nouveau tableau
+« EQ4 », détail : `docs/wip/eq4-equilibre-combine.md`). Niveau normal, 10 graines × 464 tours :
+guerre FR-EN **60 % [52-67]**, 8/10 graines dans 55-75 % ; **12,5 trêves** par siècle [10-16] ;
+banqueroutes **0,17** / faction / décennie ; révoltes 5,1 par partie de 200 tours
+(`balance_probe`, 16 graines) ; un siège sur trois se termine par une prise ; la 1re faction
+tient 25 % des provinces en 1437 comme en 1453 (34 % au pire) : pas de boule de neige ; 0,3
+faction mineure éliminée par partie, aucune majeure.
+
+- SG4 ne touche que la bataille de siège 3D ; la campagne IA contre IA n'en est pas changée.
+- DP2 : l'IA accorde ~120 accès militaires par siècle ; désactiver le passage laisse la guerre
+  FR-EN inchangée au niveau normal (59 %) et la remonte de 56 à 60 % en difficile. Le passage ne
+  rend pas les guerres interminables.
+- Difficile / très difficile : 56 % / 51 % de guerre FR-EN et une Angleterre plus grosse
+  (jusqu'à 38 % des provinces), effet attendu de DF1 sur une France jouée par l'IA.
+
+Deux correctifs de données essayés puis annulés faute de dérive réelle (Paix de Dieu adoucie ;
+entretien IA en facile).
