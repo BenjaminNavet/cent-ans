@@ -44,6 +44,9 @@ var _homes: Dictionary = {}  # army_id → position de base issue de la simulati
 var _plates: Dictionary = {}  # army_id → PanelContainer
 var _plate_layer: CanvasLayer
 var _current_scale: float = 1.0
+## Lot CV2 : paliers de zoom (fondu des figurines au palier « loin ») et dernière distance.
+var _zoom_tiers: ZoomTiers
+var _camera_distance: float = -1.0
 
 
 func setup(data: MapData, view_camera: Camera3D) -> void:
@@ -105,6 +108,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		marker.face(_heading(army, centroid))
 		marker.set_selected(army_id == selected_army)
 		marker.apply_scale(_current_scale)
+		if _camera_distance >= 0.0:
+			marker.set_view(_camera_distance, figure_weight(_camera_distance))
 		_markers[army_id] = marker
 		_homes[army_id] = marker.base_position
 		if _plate_layer != null:
@@ -214,6 +219,8 @@ func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZE
 	var marker: ArmyMarker = _markers.get(army_id)
 	if marker == null:
 		return
+	# Lot CV2 : les figurines marchent pendant l'animation du déplacement.
+	marker.set_walking(point.x >= 0.0)
 	if point.x < 0.0:
 		marker.base_position = _homes.get(army_id, marker.base_position)
 	else:
@@ -230,12 +237,25 @@ func world_position_of(army_id: String) -> Vector3:
 
 
 func update_scale(camera_distance: float) -> void:
+	if absf(camera_distance - _camera_distance) > 0.25:
+		_camera_distance = camera_distance
+		var weight := figure_weight(camera_distance)
+		for marker in _markers.values():
+			marker.set_view(camera_distance, weight)
 	var new_scale := clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
 	if absf(new_scale - _current_scale) < 0.01:
 		return
 	_current_scale = new_scale
 	for marker in _markers.values():
 		marker.apply_scale(_current_scale)
+
+
+## Lot CV2 : présence des figurines (1 aux paliers près et moyen, 0 au palier loin, fondu
+## sur la bande de transition de `ZoomTiers`) ; au loin restent l'étendard et la plaque.
+func figure_weight(camera_distance: float) -> float:
+	if _zoom_tiers == null:
+		_zoom_tiers = ZoomTiers.load_default()
+	return 1.0 - _zoom_tiers.far_weight(camera_distance)
 
 
 func _process(_delta: float) -> void:
