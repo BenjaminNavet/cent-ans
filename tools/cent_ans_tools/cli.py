@@ -261,6 +261,25 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("horizon")
+def geo_horizon(
+    province: str = typer.Option(
+        "",
+        "--province",
+        help="Ne cuire que ces provinces (liste séparée par des virgules)",
+    ),
+) -> None:
+    """Relief réel autour de chaque province pour l'horizon des batailles (EP2)."""
+    from cent_ans_tools.geo import horizon as geo_horizon_step
+
+    only = [p.strip() for p in province.split(",") if p.strip()]
+    result = geo_horizon_step.build(only=only or None)
+    console.print(
+        f"{result.tiles} tuiles d'horizon ({result.total_bytes / 1e6:.1f} Mo, "
+        f"{result.seconds:.0f} s) dans game/assets/horizon/relief/"
+    )
+
+
 @geo_app.command("landcover")
 def geo_landcover() -> None:
     """Occupation du sol vers 1340 : splat.png (forêts KK10 + massifs nommés), wetlands.png, forest_kind.png."""
