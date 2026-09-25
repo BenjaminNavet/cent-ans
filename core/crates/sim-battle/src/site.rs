@@ -336,11 +336,17 @@ pub struct Occupied<'a> {
     pub river_z: Option<&'a dyn Fn(f64) -> f64>,
     /// Size of the field (EP1).
     pub size: FieldSize,
+    /// EP3: distance from (x, z) to the nearest water's edge (the river at
+    /// its local width, streams, oxbow), when there is a river.
+    pub water_gap: Option<&'a dyn Fn(f64, f64) -> f64>,
 }
 
 impl Occupied<'_> {
     fn near_river(&self, x: f64, z: f64, margin: f64) -> bool {
+        // Margins were measured from the centre of an 18 m river (EP3: from
+        // the water's edge, 9 m less, whatever the water).
         self.river_z.is_some_and(|f| (z - f(x)).abs() < margin)
+            || self.water_gap.is_some_and(|g| g(x, z) < margin - 9.0)
     }
 
     fn in_zones(&self, x: f64, z: f64, margin: f64) -> bool {

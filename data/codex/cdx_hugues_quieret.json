@@ -2,11 +2,11 @@
   "id": "cdx_hugues_quieret",
   "title": "Hugues Quiéret, amiral de France",
   "category": "personnage",
-  "aliases": ["Hugues Quiéret", "Quiéret", "Nicolas Béhuchet", "Béhuchet", "sac de Southampton"],
+  "aliases": ["Hugues Quiéret", "Quiéret", "sac de Southampton"],
   "era": { "from": "1336", "to": "1340" },
   "summary": "Amiral de France, Hugues Quiéret ravage avec Nicolas Béhuchet les côtes anglaises, dont Southampton en octobre 1338. Il est tué lors de la défaite navale de l'[[cdx_ecluse|Écluse]], le 24 juin 1340.",
   "body": "Seigneur picard de Tours-en-Vimeu, Hugues Quiéret a servi comme sénéchal de Beaucaire avant d'être nommé amiral de France en 1336. Il partage le commandement de la flotte avec Nicolas Béhuchet, un administrateur des finances royales devenu marin. Leur flotte rassemble des navires normands et picards, des galères louées à Gênes et des bateaux marchands réquisitionnés.\n\nAu début de la guerre, ce sont eux qui prennent l'initiative. En 1338, ils attaquent Portsmouth puis, le 4 octobre, débarquent à Southampton : la ville est pillée et incendiée, et nombre d'habitants sont tués. D'autres raids frappent les îles anglo-normandes et les côtes du sud de l'Angleterre, semant la panique outre-Manche.\n\nEn juin 1340, Philippe VI rassemble une grande flotte dans l'estuaire du Zwin, devant l'Écluse, pour empêcher [[cdx_edouard_iii|Édouard III]] de débarquer en Flandre. Contre l'avis du capitaine génois Barbavera, qui conseille de gagner la haute mer, Quiéret et Béhuchet disposent leurs navires en lignes serrées, parfois enchaînés entre eux. Le 24 juin, la flotte anglaise attaque avec le vent et le soleil dans le dos ; les archers anglais balaient les ponts français.\n\nLa bataille de l'[[cdx_ecluse|Écluse]] est un désastre. Quiéret est tué, peut-être achevé après sa capture ; Béhuchet est pendu au mât de son navire. La maîtrise de la Manche passe pour longtemps aux Anglais, qui peuvent désormais débarquer en France presque à leur guise.",
   "entity": "evt_sac_de_southampton",
-  "see_also": ["cdx_ecluse", "cdx_philippe_vi", "cdx_edouard_iii"],
+  "see_also": ["cdx_ecluse", "cdx_nicolas_behuchet", "cdx_arnemuiden", "cdx_philippe_vi", "cdx_edouard_iii"],
   "sources": ["Hugues Quiéret", "Bataille de L'Écluse", "Raid on Southampton (en)"]
 }

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_campagne_de_gascogne_1345",
+  "title": "La campagne de Derby en Gascogne (1345)",
+  "category": "guerre",
+  "aliases": ["campagne de Gascogne", "prise de Bergerac", "bataille de Bergerac", "campagne de Derby"],
+  "era": { "from": "1345", "to": "1345" },
+  "summary": "Débarqué à Bordeaux le 9 août 1345 avec deux mille combattants, le comte de Derby, [[cdx_henri_de_grosmont|Henri de Grosmont]], prend Bergerac, écrase les Français à Auberoche et reprend La Réole et Aiguillon : en quatre mois, la [[cdx_guyenne|Guyenne]] anglaise respire.",
+  "body": "En 1345, [[cdx_edouard_iii|Édouard III]] veut frapper la France sur plusieurs fronts. Il envoie en [[cdx_guyenne|Guyenne]] son cousin Henri de Grosmont, comte de Derby, avec une petite armée : cinq cents hommes d'armes et quinze cents archers anglais et gallois, dont cinq cents montés. Derby arrive à Bordeaux le 9 août.\n\nIl ne perd pas de temps. Le 26 août, il surprend l'armée française de Bertrand de L'Isle-Jourdain devant Bergerac, la bat dans une poursuite et prend la ville, qui commande le passage de la Dordogne. En octobre, les Français assiègent le château d'Auberoche, en Périgord ; le 21 octobre, Derby tombe sur leur camp à l'heure du souper avec une poignée d'hommes. Louis de Poitiers, comte de Valentinois, est tué, L'Isle-Jourdain et des dizaines de barons sont pris : les rançons font la fortune de Derby.\n\nLe 8 novembre, les habitants de La Réole ouvrent une porte aux Anglais ; à la fin du mois, ceux d'Aiguillon chassent leur garnison française et livrent la ville. En quelques mois, avec quelques milliers d'hommes, Derby a repris l'Agenais et le Périgord occidental. La riposte française, le [[cdx_siege_d_aiguillon|siège d'Aiguillon]] de 1346, retiendra dans le Sud la meilleure armée de [[cdx_philippe_vi|Philippe VI]] l'été de [[cdx_crecy|Crécy]].",
+  "anachronism": "Dans le jeu, Bergerac et Aiguillon sont anglaises dès 1337 ; elles ne le deviennent qu'en 1345.",
+  "see_also": ["cdx_henri_de_grosmont", "cdx_siege_d_aiguillon", "cdx_guyenne", "cdx_chevauchee"],
+  "sources": ["Gascon campaign of 1345 (en)", "Bataille de Bergerac", "Bataille d'Auberoche"]
+}

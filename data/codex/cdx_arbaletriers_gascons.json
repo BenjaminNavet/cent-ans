@@ -1,0 +1,29 @@
+{
+  "id": "cdx_arbaletriers_gascons",
+  "title": "Les arbalétriers gascons",
+  "category": "unite",
+  "aliases": [
+    "Arbalétriers gascons",
+    "arbalétrier gascon",
+    "balestièrs"
+  ],
+  "era": {
+    "from": "1294",
+    "to": "1453"
+  },
+  "summary": "La [[cdx_guyenne|Guyenne]] anglaise et les seigneuries pyrénéennes fournissent des arbalétriers réputés, loués au roi-duc d'Angleterre comme aux comtes de Foix. Ils forment le gros des garnisons du Sud-Ouest pendant toute la guerre.",
+  "body": "En Gascogne, l'arbalète est l'arme commune des villes, des bastides et des petites seigneuries. Le roi d'Angleterre, duc de [[cdx_guyenne|Guyenne]], y recrute par l'intermédiaire de son sénéchal de [[cdx_bordeaux|Bordeaux]] des piétons et des arbalétriers pour tenir ses châteaux face aux Français, dès la guerre de Guyenne de 1294-1297 puis pendant toute la guerre de Cent Ans.\n\nLes grands seigneurs du Midi en emploient aussi : le comte de Foix [[cdx_gaston_ii_de_foix_bearn|Gaston II]] et plus encore son fils Gaston Fébus, ou le comte d'Armagnac [[cdx_jean_i_d_armagnac|Jean Ier]]. Les montagnards du Béarn, du pays basque et de la Navarre passent pour d'excellents tireurs.\n\nMoins célèbres que les [[cdx_arbalete|Génois]], ils sont moins chers et plus fidèles, car ils défendent souvent leur propre pays. On les retrouve jusqu'aux derniers sièges de la guerre, lors de la conquête française de la Guyenne en 1451-1453.",
+  "gameplay": "Compagnie de 100 hommes (tireurs). Recrutement : 540 livres payées à l'enrôlement ; entretien 48 livres par mois, soit 192 par saison. Caractéristiques : mêlée 40, tir 55 à 190 m (30 volées), armure 38 (laisse passer 71 % des coups), moral 52, vitesse 45 (1,8 m/s). Exige une province de culture occitane, basque ou navarraise. La place doit compter assez de bourgeois (dix fois l'effectif). Pavois : pertes dues aux traits ×0,6 à l'arrêt, ×0,35 avec l'ordre « Dresser les pavois » (×0,7 en résolution automatique) ; rechargement en 9 s au lieu de 6. Pluie : précision ×0,6 sous la pluie, ×0,8 sous la neige (et ×0,6 en mer par temps de pluie). Arbalétriers solides et plus résistants en mêlée que les autres tireurs ; parfaits pour les garnisons de Guyenne et de Navarre.",
+  "entity": "unit_gascon_crossbowmen",
+  "see_also": [
+    "cdx_guyenne",
+    "cdx_arbalete",
+    "cdx_bordeaux",
+    "cdx_gaston_ii_de_foix_bearn"
+  ],
+  "sources": [
+    "Guyenne (province)",
+    "Arbalète",
+    "Gaston III de Foix-Béarn"
+  ]
+}

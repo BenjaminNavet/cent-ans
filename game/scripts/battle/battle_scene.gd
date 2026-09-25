@@ -406,9 +406,8 @@ func _build_soldier_layers() -> void:
 	effects = BattleEffects.new()
 	effects.name = "Effects"
 	add_child(effects)
-	var river: Dictionary = terrain.terrain.get("river", {})
-	var half_width := float(river.get("width", 0.0)) * 0.5
-	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	# EP3 : l'eau à la largeur locale de la rivière, et les ruisseaux.
+	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if terrain.in_water(x, z) else 0)
 	if not _no_bv1:
 		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
 	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
@@ -419,7 +418,7 @@ func _build_soldier_layers() -> void:
 	blood.name = "Blood"
 	effects.add_child(blood)
 	blood.figure_scale = effects.volleys.figure_scale
-	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if terrain.in_water(x, z) else 0)
 	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
 	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
 	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.

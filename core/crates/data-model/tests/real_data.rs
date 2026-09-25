@@ -76,6 +76,16 @@ fn battle_standard_rules_match_their_default() {
     assert_eq!(from_file, data_model::BattleStandardRules::default());
 }
 
+/// Lot DF1: `data/rules/difficulty.json` is read and mirrored by the default.
+#[test]
+fn difficulty_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.difficulty.clone();
+    assert!(from_file.description.is_some(), "difficulty.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::DifficultyRules::default());
+}
+
 #[test]
 fn economy_rules_match_their_default() {
     let (data, _) = GameData::load(&data_root()).expect("data");

@@ -48,6 +48,7 @@ pub use entities::campaign_weather::{
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
+pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
 pub use entities::economy_rules::EconomyRules;
 pub use entities::edict::Edict;
 pub use entities::event::{

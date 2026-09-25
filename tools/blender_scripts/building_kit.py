@@ -2537,6 +2537,257 @@ def woodpile(g, rng, detail="high", length=None, depth=None, ruined=False):
     return {"height": 0.9, "length": L + 0.9, "depth": 1.5}
 
 
+# --- Bridges (lot EP3, ADR 0033) ---------------------------------------------------------------
+#
+# Modular pieces assembled in Godot (``battle_bridges.gd``): the deck runs along +X, the road
+# surface is at z = 0 (Godot places it at the deck height of the simulation), width along Y.
+# ``*_bay`` pieces are centred on the origin and repeated (then stretched along X) across the
+# water; ``*_end`` pieces run from x = 0 (against the last bay) to x = +5 (on the bank), their
+# ramp going down by the deck's height above the bank (2.4 m stone, 1.0 m wood, as in the
+# simulation: ``hydro.rs`` ``STONE_DECK_RISE`` / ``WOOD_DECK_RISE``).
+
+STONE_BAY = 9.0  # one arch and a pier
+STONE_WIDTH = 6.0
+STONE_RISE = 2.4
+WOOD_BAY = 4.0
+WOOD_WIDTH = 5.0
+WOOD_RISE = 1.0
+BRIDGE_END = 5.0
+BRIDGE_BOTTOM = -7.0  # piers and walls go this deep (river bed well below)
+
+
+def _face_x_z(g, y, x0, x1, z0a, z0b, z1a, z1b, mat, sign, **kw):
+    """Quad in the plane y = ``y`` between (x0, z0a)-(x1, z0b) below and (x0, z1a)-(x1, z1b) above.
+
+    ``sign`` -1 faces -Y, +1 faces +Y.
+    """
+    pts = [(x0, y, z0a), (x1, y, z0b), (x1, y, z1b), (x0, y, z1a)]
+    if sign > 0:
+        pts.reverse()
+    g.poly(pts, mat, **kw)
+
+
+def _arch_points(span, crown, spring, n):
+    """Segmental arch intrados from x = -span/2 to +span/2 (z at each point)."""
+    rise = crown - spring
+    radius = (span * span / 4 + rise * rise) / (2 * rise)
+    cz = crown - radius
+    a0 = math.asin(min((span / 2) / radius, 1.0))
+    pts = []
+    for i in range(n + 1):
+        a = -a0 + 2 * a0 * i / n
+        pts.append((radius * math.sin(a), cz + radius * math.cos(a)))
+    return pts, radius, cz
+
+
+def bridge_stone_bay(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """One bay of a stone bridge: a segmental arch between two half piers with cutwaters,
+    rubble spandrels, a voussoir ring, a string course, parapets with coping, cobbled road."""
+    g.ground_ao = False
+    L = length or STONE_BAY
+    W = depth or STONE_WIDTH
+    hl, hw = L / 2, W / 2
+    pier = 1.0
+    span = L - 2 * pier
+    crown, spring = -0.8, -3.6
+    n = 14 if detail == "high" else 7
+    arch, radius, cz = _arch_points(span, crown, spring, n)
+    stone = STONE_TINTS[rng.randrange(len(STONE_TINTS))]
+    rubble = (0.9, 0.86, 0.8)
+    with tinted(g, rubble):
+        for sign in (-1, 1):
+            y = sign * hw
+            # Half piers down to the river bed.
+            _face_x_z(g, y, -hl, -span / 2, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, 0.0, "Rubble", sign)
+            _face_x_z(g, y, span / 2, hl, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, 0.0, "Rubble", sign)
+            # Spandrel between the arch and the road.
+            for (xa, za), (xb, zb) in zip(arch, arch[1:], strict=False):
+                _face_x_z(g, y, xa, xb, za, zb, 0.0, 0.0, "Rubble", sign)
+        # Pier faces under the springing (inside the arch opening).
+        for sx in (-1, 1):
+            x = sx * span / 2
+            pts = [(x, -hw, BRIDGE_BOTTOM), (x, hw, BRIDGE_BOTTOM), (x, hw, spring), (x, -hw, spring)]
+            if sx < 0:
+                pts.reverse()
+            g.poly(pts, "Rubble")
+    # Intrados (barrel vault underside).
+    with tinted(g, stone):
+        for (xa, za), (xb, zb) in zip(arch, arch[1:], strict=False):
+            g.poly([(xa, -hw, za), (xa, hw, za), (xb, hw, zb), (xb, -hw, zb)], "Ashlar")
+        # Voussoir ring, slightly proud of the spandrel, on both faces.
+        ring = 0.55
+        for sign in (-1, 1):
+            y = sign * (hw + 0.06)
+            for (xa, za), (xb, zb) in zip(arch, arch[1:], strict=False):
+                # Outward radial offsets.
+                def out(x, z):
+                    dx, dz = x, z - cz
+                    d = math.hypot(dx, dz) or 1.0
+                    return (x + dx / d * ring, z + dz / d * ring)
+
+                oa, ob = out(xa, za), out(xb, zb)
+                pts = [(xa, y, za), (xb, y, zb), (ob[0], y, ob[1]), (oa[0], y, oa[1])]
+                if sign > 0:
+                    pts.reverse()
+                g.poly(pts, "Ashlar")
+            # String course under the parapet.
+            k.box(g, (0.0, sign * (hw + 0.05), -0.12), (L, 0.2, 0.24), "Ashlar")
+        # Cutwaters (half of each pointed nose at both ends of the bay), up to below the ring.
+        top = spring + 1.1
+        for sx in (-1, 1):
+            xe = sx * hl
+            xi = sx * (hl - pier)
+            for sy in (-1, 1):
+                ye = sy * hw
+                apex = (xe, sy * (hw + 1.4))
+                face = [(xi, ye, BRIDGE_BOTTOM), (apex[0], apex[1], BRIDGE_BOTTOM), (apex[0], apex[1], top), (xi, ye, top)]
+                if sx * sy > 0:
+                    face.reverse()
+                g.poly(face, "Ashlar")
+                cap = [(xi, ye, top), (apex[0], apex[1], top), (xe, ye, top)]
+                if sx * sy < 0:
+                    cap.reverse()
+                g.poly(cap, "Ashlar")
+                # Sloped cap stone.
+                cap_top = [(xi, ye, top), (apex[0], apex[1], top), (xe, ye, top + 0.5)]
+                if sx * sy < 0:
+                    cap_top.reverse()
+                g.poly(cap_top, "Ashlar")
+    # Parapets and coping.
+    with tinted(g, rubble):
+        for sign in (-1, 1):
+            k.box(g, (0.0, sign * (hw - 0.22), 0.45), (L, 0.44, 0.9), "Rubble")
+    with tinted(g, stone):
+        for sign in (-1, 1):
+            k.box(g, (0.0, sign * (hw - 0.22), 0.96), (L, 0.56, 0.14), "Ashlar")
+    # Cobbled road.
+    with tinted(g, (0.62, 0.6, 0.56)):
+        g.poly([(-hl, -hw + 0.44, 0.0), (hl, -hw + 0.44, 0.0), (hl, hw - 0.44, 0.0), (-hl, hw - 0.44, 0.0)], "Rubble")
+    return {"height": 1.1 - BRIDGE_BOTTOM, "length": L, "depth": W + 2.8}
+
+
+def bridge_stone_end(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Abutment of a stone bridge: a ramp from the deck (x = 0) down to the bank (x = +5), side
+    walls down to the river bed, parapets following the slope, ending on a stone post."""
+    g.ground_ao = False
+    L = length or BRIDGE_END
+    W = depth or STONE_WIDTH
+    hw = W / 2
+    drop = STONE_RISE
+    stone = STONE_TINTS[rng.randrange(len(STONE_TINTS))]
+    rubble = (0.9, 0.86, 0.8)
+
+    def road(x):
+        return -drop * (x / L)
+
+    with tinted(g, rubble):
+        for sign in (-1, 1):
+            y = sign * hw
+            _face_x_z(g, y, 0.0, L, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, road(L), "Rubble", sign)
+        # Parapets (sloping boxes as quads).
+        for sign in (-1, 1):
+            for y0, y1 in ((hw - 0.44, hw),):
+                ya, yb = sign * y0, sign * y1
+                lo, hi = min(ya, yb), max(ya, yb)
+                # Outer and inner faces.
+                for y, s in ((hi, 1), (lo, -1)):
+                    _face_x_z(g, y, 0.0, L, 0.0, road(L), 0.9, road(L) + 0.9, "Rubble", s)
+                # Top.
+                g.poly([(0.0, lo, 0.9), (L, lo, road(L) + 0.9), (L, hi, road(L) + 0.9), (0.0, hi, 0.9)][::-1], "Rubble")
+        # Wing wall face at the bank end (x = L), below the road.
+        g.poly([(L, -hw, BRIDGE_BOTTOM), (L, hw, BRIDGE_BOTTOM), (L, hw, road(L)), (L, -hw, road(L))], "Rubble")
+    with tinted(g, stone):
+        for sign in (-1, 1):
+            yc = sign * (hw - 0.22)
+            # Coping along the slope.
+            lo, hi = yc - 0.28, yc + 0.28
+            g.poly([(0.0, lo, 1.04), (L, lo, road(L) + 1.04), (L, hi, road(L) + 1.04), (0.0, hi, 1.04)][::-1], "Ashlar")
+            for y, s in ((hi, 1), (lo, -1)):
+                _face_x_z(g, y, 0.0, L, 0.9, road(L) + 0.9, 1.04, road(L) + 1.04, "Ashlar", s)
+            # End post.
+            k.box(g, (L - 0.3, yc, road(L) + 0.7), (0.6, 0.62, 1.4), "Ashlar")
+            k.box(g, (L - 0.3, yc, road(L) + 1.47), (0.72, 0.74, 0.14), "Ashlar")
+            # String course.
+            _face_x_z(g, sign * (hw + 0.05), 0.0, L, -0.24, road(L) - 0.24, 0.0, road(L), "Ashlar", sign)
+    with tinted(g, (0.62, 0.6, 0.56)):
+        g.poly([(0.0, -hw + 0.44, 0.0), (L, -hw + 0.44, road(L)), (L, hw - 0.44, road(L)), (0.0, hw - 0.44, 0.0)], "Rubble")
+    return {"height": 1.5 - BRIDGE_BOTTOM, "length": L, "depth": W}
+
+
+def _rail(g, x0, x1, z0, z1, y, tint):
+    """Handrail and mid rail from x0 to x1 (sloping from z0 to z1), posts at both ends."""
+    for h in (0.5, 0.98):
+        k.beam(g, (x0, y, z0 + h), (x1, y, z1 + h), 0.1, 0.1, "Timber", (0.0, 1.0 if y > 0 else -1.0, 0.0), color=tint)
+
+
+def bridge_wood_bay(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """One bay of a wooden bridge: plank deck on stringers, a pile bent (three or four piles, cap
+    beam, cross braces) at the +X end, railings with posts."""
+    g.ground_ao = False
+    L = length or WOOD_BAY
+    W = depth or WOOD_WIDTH
+    hl, hw = L / 2, W / 2
+    tint = TIMBER_TINTS[rng.randrange(len(TIMBER_TINTS))]
+    planks = (0.95, 0.9, 0.84)
+    # Deck.
+    with tinted(g, planks):
+        k.box(g, (0.0, 0.0, -0.1), (L, W, 0.2), "Planks", bottom=True)
+    # Stringers.
+    count = 4 if W > 4.5 else 3
+    for i in range(count):
+        y = -hw + 0.4 + (W - 0.8) * i / (count - 1)
+        k.box(g, (0.0, y, -0.4), (L, 0.26, 0.4), "Timber", bottom=True, color=tint)
+    # Pile bent at +X.
+    piles = [-hw + 0.35, 0.0, hw - 0.35] if W <= 4.5 else [-hw + 0.35, -hw / 3, hw / 3, hw - 0.35]
+    for y in piles:
+        k.box(g, (hl - 0.2, y, (BRIDGE_BOTTOM - 0.6) / 2), (0.32, 0.32, -BRIDGE_BOTTOM - 0.6), "Timber", color=tint)
+    k.box(g, (hl - 0.2, 0.0, -0.75), (0.36, W + 0.3, 0.3), "Timber", bottom=True, color=tint)
+    # Cross braces between the outer piles.
+    xb = hl - 0.02
+    for ya, yb in ((-hw + 0.35, hw - 0.35), (hw - 0.35, -hw + 0.35)):
+        k.beam(g, (xb, ya, -0.9), (xb, yb, -3.2), 0.14, 0.12, "Timber", (1.0, 0.0, 0.0), color=tint)
+    # Railing: posts at both ends and mid-bay, rails.
+    for sign in (-1, 1):
+        y = sign * (hw - 0.08)
+        for x in (-hl + 0.1, 0.0):
+            k.box(g, (x, y, 0.5), (0.14, 0.14, 1.0), "Timber", color=tint)
+        _rail(g, -hl, hl, 0.0, 0.0, y, tint)
+    return {"height": 1.0 - BRIDGE_BOTTOM, "length": L, "depth": W + 0.3}
+
+
+def bridge_wood_end(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Landing of a wooden bridge: a plank ramp from the deck (x = 0) down to the bank (x = +5)
+    on a sill beam and a pile bent, sloping railings ending on stout posts."""
+    g.ground_ao = False
+    L = length or BRIDGE_END
+    W = depth or WOOD_WIDTH
+    hw = W / 2
+    drop = WOOD_RISE
+    tint = TIMBER_TINTS[rng.randrange(len(TIMBER_TINTS))]
+    planks = (0.95, 0.9, 0.84)
+
+    def road(x):
+        return -drop * (x / L)
+
+    with tinted(g, planks):
+        # Sloping deck (top and bottom).
+        g.poly([(0.0, -hw, 0.0), (L, -hw, road(L)), (L, hw, road(L)), (0.0, hw, 0.0)], "Planks")
+        g.poly([(0.0, -hw, -0.2), (0.0, hw, -0.2), (L, hw, road(L) - 0.2), (L, -hw, road(L) - 0.2)], "Planks")
+        for sign in (-1, 1):
+            _face_x_z(g, sign * hw, 0.0, L, -0.2, road(L) - 0.2, 0.0, road(L), "Planks", sign)
+    # Pile bent at mid-ramp and a sill on the bank.
+    for y in (-hw + 0.35, hw - 0.35):
+        k.box(g, (L * 0.45, y, (BRIDGE_BOTTOM + road(L * 0.45) - 0.3) / 2), (0.3, 0.3, road(L * 0.45) - 0.3 - BRIDGE_BOTTOM), "Timber", color=tint)
+    k.box(g, (L * 0.45, 0.0, road(L * 0.45) - 0.4), (0.34, W + 0.2, 0.26), "Timber", bottom=True, color=tint)
+    k.box(g, (L - 0.3, 0.0, road(L) - 0.45), (0.5, W + 0.4, 0.5), "Timber", bottom=True, color=tint)
+    for sign in (-1, 1):
+        y = sign * (hw - 0.08)
+        k.box(g, (L * 0.5, y, road(L * 0.5) + 0.5), (0.14, 0.14, 1.0), "Timber", color=tint)
+        k.box(g, (L - 0.15, y, road(L) + 0.6), (0.22, 0.22, 1.2), "Timber", color=tint)
+        _rail(g, 0.0, L, 0.0, road(L), y, tint)
+    return {"height": 1.2 - BRIDGE_BOTTOM, "length": L, "depth": W}
+
+
 RECIPES = {
     "cottage": cottage,
     "longere": longere,
@@ -2554,6 +2805,10 @@ RECIPES = {
     "cart": cart,
     "barrels": barrels,
     "woodpile": woodpile,
+    "bridge_stone_bay": bridge_stone_bay,
+    "bridge_stone_end": bridge_stone_end,
+    "bridge_wood_bay": bridge_wood_bay,
+    "bridge_wood_end": bridge_wood_end,
 }
 
 

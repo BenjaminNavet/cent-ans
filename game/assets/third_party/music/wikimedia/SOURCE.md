@@ -1,17 +1,22 @@
-# Wikimedia Commons — musique baroque (anachronisme assumé)
+# Wikimedia Commons — musique médiévale et Renaissance (instruments d'époque)
 
-Enregistrements du domaine public (marque « Public Domain Mark » déposée par l'ayant droit, Musopen)
-ou CC0. Aucune attribution requise ; on crédite quand même les interprètes.
+Enregistrements sous licence libre, choisis pour leurs instruments d'époque (orgue positif, flûte et
+tambourin, luth, voix, viole de gambe) : pas de violons ni d'orchestre à cordes baroque.
+Licences compatibles avec les assets du projet (CC BY-SA 4.0, voir `LICENSE-ASSETS.md`).
 
 - **Récupéré le** : 2026-09-25, via l'API Commons (licence lue dans `extmetadata.LicenseShortName`)
-- **Traitement** : OGG d'origine réencodé en MP3 128 kbit/s (ffmpeg/libmp3lame), métadonnées retirées
+- **Traitement** : OGG d'origine réencodé en MP3 128 kbit/s (ffmpeg/libmp3lame), métadonnées retirées.
+  Aucune modification musicale.
+- **Retirés le 2026-09-25** : six mouvements de Vivaldi et la Badinerie de Bach (cordes baroques, trop
+  « Grand Siècle » pour la guerre de Cent Ans).
 
 | Fichier | Œuvre | Interprètes | Licence | Durée | Source |
 |---|---|---|---|---|---|
-| `vivaldi_spring_allegro.mp3` | Vivaldi — Le Printemps, RV 269, I. Allegro | The Modena Chamber Orchestra (Musopen) | Public Domain Mark | 3:34 | https://commons.wikimedia.org/wiki/File:The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Spring,_RV_269_-_I._Allegro.ogg |
-| `vivaldi_summer_presto.mp3` | Vivaldi — L'Été, RV 315, III. Presto | The Modena Chamber Orchestra (Musopen) | Public Domain Mark | 2:57 | https://commons.wikimedia.org/wiki/File:The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Summer,_RV_315_-_III._Presto.ogg |
-| `vivaldi_autumn_allegro.mp3` | Vivaldi — L'Automne, RV 293, I. Allegro | The Modena Chamber Orchestra (Musopen) | Public Domain Mark | 5:29 | https://commons.wikimedia.org/wiki/File:The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Autumn,_RV_293_-_I._Allegro.ogg |
-| `vivaldi_winter_allegro.mp3` | Vivaldi — L'Hiver, RV 297, I. Allegro non molto | The Modena Chamber Orchestra (Musopen) | Public Domain Mark | 3:26 | https://commons.wikimedia.org/wiki/File:The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Winter,_RV_297_-_I._Allegro_non_molto.ogg |
-| `vivaldi_winter_largo.mp3` | Vivaldi — L'Hiver, RV 297, II. Largo | The Modena Chamber Orchestra (Musopen) | Public Domain Mark | 2:44 | https://commons.wikimedia.org/wiki/File:The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Winter,_RV_297_-_II._Largo.ogg |
-| `vivaldi_mandolin_rv425.mp3` | Vivaldi — Concerto pour mandoline en ut majeur, RV 425 | The Milan Baroque Soloists | Public Domain Mark | 8:20 | https://commons.wikimedia.org/wiki/File:Antonio_Vivaldi,_Mandolin_Concerto_in_C_major,_RV_425.ogg |
-| `bach_badinerie.mp3` | Bach — Suite n° 2 en si mineur, BWV 1067, Badinerie | European Archive | CC0 1.0 | 1:23 | https://commons.wikimedia.org/wiki/File:Bach,_Johann_Sebastian_-_Suite_No.2_in_B_Minor_-_X._Badinerie.ogg |
+| `estampie_retrove_robertsbridge.mp3` | Estampie « Retrove », Robertsbridge Codex (Angleterre, début XIVᵉ s.), orgue | Metzner (concert, v. 1990) | CC BY-SA 3.0 | 2:29 | https://commons.wikimedia.org/wiki/File:Estampie_Retrove_Robertsbridge.ogg |
+| `chominciamento_di_gioia.mp3` | Istampitta « Chominciamento di gioia », ms. Londres Add. 29987 (Italie, XIVᵉ s.) | Ririkuku | CC BY-SA 4.0 | 6:07 | https://commons.wikimedia.org/wiki/File:Chominciamento_de_Gioia1.ogg |
+| `dufay_se_la_face_ay_pale.mp3` | Guillaume Dufay — « Se la face ay pale » (v. 1430) | Ensemble Asteria | CC BY-SA 2.5 | 2:45 | https://commons.wikimedia.org/wiki/File:Guillaume_Dufay_-_Se_La_Face_Ay_Pale.ogg |
+| `folia_ahigal_tamborilero.mp3` | Folía traditionnelle d'Ahigal (Cáceres), flûte à trois trous et tambourin | Loreto Galindo, tamborilero (Fundación Joaquín Díaz, 1988) | CC BY-SA 3.0 | 2:14 | https://commons.wikimedia.org/wiki/File:Fundaci%C3%B3n_Joaqu%C3%ADn_D%C3%ADaz_-_ATO_00330_01_-_Fol%C3%ADa.ogg |
+| `ortiz_recercada_primera.mp3` | Diego Ortiz — Recercada primera sobre tenores italianos, *Trattado de Glosas* (1553) | Phillip W. Serna, viole de gambe | CC BY-SA 4.0 | 1:37 | https://commons.wikimedia.org/wiki/File:Diego_Ortiz_(1510-1570)_-_Recercada_primera_sobre_tenores_italianos_from_Trattado_de_Glosas,_Libro_Secundo_(1553).ogg |
+| `ortiz_recercada_segunda.mp3` | Diego Ortiz — Recercada segunda sobre tenores italianos, *Trattado de Glosas* (1553) | Phillip W. Serna, viole de gambe | CC BY-SA 4.0 | 1:25 | https://commons.wikimedia.org/wiki/File:Diego_Ortiz_(1510-1570)_-_Recercada_segunda_sobre_tenores_italianos_from_Trattado_de_Glosas_(1553).ogg |
+
+Attribution à afficher : « <Œuvre> », <Interprètes>, Wikimedia Commons, licence indiquée ci-dessus.

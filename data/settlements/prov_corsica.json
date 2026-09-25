@@ -52,7 +52,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Port fortifié fondé par les Génois sur la côte nord de l'île.",
+    "description": "Port fortifié de la côte nord de l'île, fidèle à Gênes depuis la fin du XIIIe siècle.",
     "sources": [
       "Calvi (Haute-Corse)"
     ]
@@ -78,7 +78,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Place forte de l'intérieur, verrou du contrôle génois sur la Corse centrale.",
+    "description": "Bourg perché de l'intérieur, au cœur des seigneuries corses de l'En-deçà-des-Monts, que Gênes ne contrôle pas. (Anachronisme de jeu : sa citadelle n'est élevée qu'en 1419 par Vincentello d'Istria.)",
     "sources": [
       "Corte (Haute-Corse)"
     ]

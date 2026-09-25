@@ -40,6 +40,7 @@ pub mod command;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod hydro;
 pub mod impact;
 pub mod naval;
 pub mod orders;
@@ -63,6 +64,10 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use hydro::{
+    Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
+    WatersideSpot,
+};
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};

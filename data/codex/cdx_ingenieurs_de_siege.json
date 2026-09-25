@@ -1,0 +1,31 @@
+{
+  "id": "cdx_ingenieurs_de_siege",
+  "title": "Ingénieurs et maîtres des engins",
+  "category": "technique",
+  "aliases": [
+    "Ingénierie de siège",
+    "maître des engins",
+    "maîtres des engins",
+    "sape",
+    "mine de siège"
+  ],
+  "era": {
+    "from": "1200",
+    "to": "1450"
+  },
+  "summary": "Prendre une place forte est un métier : maîtres charpentiers, mineurs et « engigneurs » construisent [[cdx_trebuchet|trébuchets]], [[cdx_beffroi|beffrois]], chats et galeries de sape, et mènent le siège selon des règles éprouvées.",
+  "body": "Les rois entretiennent des maîtres des engins, charpentiers spécialisés qui dessinent et montent les machines sur place avec le bois des forêts voisines. Les mineurs creusent sous les murs des galeries étayées de bois, auxquelles on met ensuite le feu pour faire s'effondrer la muraille ; les défenseurs répondent par des contre-mines.\n\nLe siège se prépare longuement : blocus, lignes de contrevallation, bombardement, puis assaut ou capitulation négociée. Beaucoup de places se rendent par composition avant l'assaut, qui autorise le pillage. Les traités de guerre, comme celui de [[cdx_christine_de_pizan|Christine de Pizan]], détaillent le matériel à réunir.",
+  "gameplay": "Recherche : 220 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : les places que vous assiégez résistent moins (−5 points de résistance, soit des brèches plus rapides). Débloque : [[cdx_trebuchet|Trébuchet]], [[cdx_beffroi|Tour de siège]].",
+  "entity": "tech_siege_engineering",
+  "see_also": [
+    "cdx_trebuchet",
+    "cdx_mangonneau",
+    "cdx_beffroi",
+    "cdx_places_fortes"
+  ],
+  "sources": [
+    "Trébuchet",
+    "Tour de siège",
+    "Poliorcétique"
+  ]
+}
