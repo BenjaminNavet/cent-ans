@@ -24,11 +24,11 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | **fusionné** dans `integration/zoom` (3beab01c) ; pyramide E1-E7 complète, 2,6 Go |
 | ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | **fusionné** dans `integration/zoom` (650d77a5) |
 | ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
-| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | en cours (branche `zg4-camera` depuis `integration/zoom`, wip `zg4-camera.md`) |
+| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | **dans main** (a3389a92) |
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
 | ZG3b | Correctif côte/estuaires des zones E5-E7 (Londres −12 m) | 2 | en cours (Sonnet, wip `zg3-palier3.md`) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | en cours (wip `zg5b-rendu-fin.md`) |
-| ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | 3 | en cours (wip `zg6-villes.md`) |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
 ## Journal
@@ -46,3 +46,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - Disque presque plein (≈ 25 Go) : compiler avec `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` dans les worktrees.
 - 25/09 : **ZG0-ZG3 dans main** (a8e0f3d3, ff-only) après libération du checkout par PB1 (game-project-b3, qui rebase sur ZG). Prévenus : PB1 et l'orchestrateur de nuit (PF1 branchera les préréglages de qualité sur le quadtree ; recalages incrémentaux de landmark_model = ZG4).
 - 25/09 : correctif 3a3c8a95 (quadtree jamais « stable » en vue parchemin, signalé par PB1) ; ZG5a fusionné, **main = 5caa8def**. Anomalie Londres (E5-E7 10-15 m trop bas, côte grossière) → ZG3b. ZG5b lancé en parallèle de ZG4 (ne touche ni caméra ni paliers).
+- 25/09 : ZG4 fusionné, **main = a3389a92**, smoke complet OK (28 étapes, après SM1 de la nuit). Défauts visibles de près (captures ZG4) transmis à ZG5b : tranchée de `river_bed.png`, damier de la splat 719 m, texture floue. ZG6 lancé. Prévenus : nuit (PF1, VH peut démarrer), PB1.
