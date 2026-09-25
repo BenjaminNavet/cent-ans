@@ -157,3 +157,21 @@ Vagues : ZG1 + ZG2 + ZG3 ; puis ZG4 + ZG5 ; puis ZG6 ; puis ZG7.
 - Les paysages proches reflètent le relief réel débarrassé des principales traces modernes, pas
   un relevé de 1340 : haies, chemins creux, forêts et villages restent des reconstructions.
 - `FineTerrainJob` et les tuiles E0 restent le repli sans cache.
+
+## Mise en œuvre des paliers 1-2 (lot ZG1)
+
+- **Emprise du cœur réduite** pour tenir le cache E1-E4 sous 2,5 Go : lon −6 → 9, lat 42 → 56
+  moins l'Espagne, l'Italie, la Suisse, l'Allemagne de la rive droite du Rhin, l'Écosse et la
+  frange irlandaise (`pyramid.CORE_EXCLUDE`) ; restent la France, l'Angleterre et le pays de
+  Galles, le Bénélux et la rive gauche du Rhin. Enveloppe du manifeste : [−6 ; 42,35 ; 8 ; 56].
+- **Bâti** : une interpolation depuis les bords du masque effacerait le relief des grandes villes
+  (Paris couvre 40 km, la vallée de la Seine disparaîtrait) et dépendrait du découpage en blocs.
+  Le bâti est remplacé par une estimation morphologique locale du sol (ouverture de 340 m sur la
+  surface brute, fermeture de 180 m, lissage), sans couture entre blocs.
+- **Canopée** : décalage de 10 m × fraction arborée WorldCover, mesuré sur les lisières en
+  terrain plat (forêt d'Orléans 11,4 m, Sologne 10,0, Weald 12,1, Ardenne 11,7 ; Landes 0,8 m,
+  coupes rases postérieures aux acquisitions radar).
+- **Continuité** : la base floue du rehaussement est celle d'E0 (reconstruit à 0,04 m près),
+  échantillonnée à chaque étage ; E1 = moyenne 2 × 2 d'E2, E3 = moyenne 2 × 2 d'E4. E0 porte des
+  coutures le long des méridiens et parallèles entiers (lecture tuile par tuile de GLO-90,
+  jusqu'à ~300 m dans les Alpes) que les étages fins n'ont pas.

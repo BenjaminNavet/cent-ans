@@ -340,3 +340,48 @@ par `geo pyramid`, restent identiques octet pour octet).
   sur 2 pixels là où la source n'a pas de donnée (mer : côte de la source). Après chaque étage,
   les tuiles parentes E5/E6 reprennent la moyenne 2 × 2 de leurs enfants (pondérée par le
   fondu) : la pyramide reste cohérente d'un étage à l'autre.
+
+## Pyramide de relief, paliers 1-2 (lot ZG1, ADR 0036)
+
+```sh
+uv run --project tools cent-ans geo pyramid                 # E1-E4 (reprise : tuiles présentes sautées)
+uv run --project tools cent-ans geo pyramid --levels 1,2    # palier 1 seul (≈ 1 min sur 14 cœurs)
+uv run --project tools cent-ans geo pyramid --levels 3,4 --workers 8 --limit 5   # essai
+uv run --project tools cent-ans geo pyramid --force         # réécrit tout
+```
+
+Modules : `pyramid.py` (géométrie, palier 1, manifeste), `surface.py` (correction de GLO-30,
+palier 2), `glo30.py` (téléchargements GLO-30 et WorldCover, mosaïque avant reprojection).
+
+- **Tuiles** : `data/map/pyramid/E{k}/{col}_{row}.png` (hors git ; dans un worktree, lien
+  symbolique vers le dépôt principal). PNG 16 bits 512², même encodage qu'E0
+  (`[-200, 4 800] m`), grille EPSG:3035 de `map.json` à `8192 · 2^k` pixels, pixel centré.
+  Étage k : `359,49 / 2^k` m/px ; enfants de (k, c, r) : (k+1, 2c+dx, 2r+dy). Pas de tuile
+  entièrement en mer (terre d'E0 ≥ 0,25 m dans l'empreinte).
+- **E1-E2 (palier 1)** : Copernicus GLO-90 (cache de `geo relief-shade`), terres de l'emprise
+  lon −11 → 12, lat 41 → 60. Par tuile E1 : E2 = moyenne de zone de la mosaïque GLO-90 (les
+  tuiles 1° sont assemblées **avant** la reprojection : warper tuile par tuile laisse des
+  coutures, présentes dans E0), E1 = moyenne 2 × 2 d'E2. Trait de côte d'E0 (surface bilinéaire
+  d'E0 > 0).
+- **E3-E4 (palier 2)** : Copernicus GLO-30 (172 tuiles, 5,2 Go, `tools/geo/raw/copernicus30/`)
+  corrigé en modèle de terrain avec ESA WorldCover 2021 (23 tuiles, 1,5 Go,
+  `tools/geo/raw/worldcover/`, lues au 1/2 ≈ 20 m) : canopée (10 m × fraction arborée, valeur
+  mesurée aux lisières sur terrain plat), bâti (ouverture morphologique de 340 m sur la surface
+  brute puis fermeture de 180 m contre les trous radar, fondu au bord du masque), retenues de
+  `data/map/modern_reservoirs.json` (plan d'eau détecté : eau WorldCover au niveau plat de
+  GLO-30 ; remplacé par une membrane interpolée depuis les berges moins un profil de vallée qui
+  prolonge la pente des berges, plafonné à 0,8 × la hauteur du barrage ; rapport de détection
+  dans `tools/geo/raw/pyramid_work/reservoirs/report.json`). Par tuile E2 du cœur : E4 calculé sur
+  2 048² + marge de 128 px, E3 = moyenne 2 × 2. Côte : celle de la source le long du rivage d'E0
+  (bande d'un pixel E0), celle d'E0 ailleurs, fondu de 2 pixels vers l'eau ; sans GLO-30 (bord du
+  cœur), repli sur E2. Cœur : lon −6 → 9, lat 42 → 56 **moins** `pyramid.CORE_EXCLUDE` (Espagne,
+  Italie, Suisse, Allemagne de la rive droite du Rhin, Écosse, Irlande) pour tenir le budget.
+- **Rehaussement** : celui de `heightmap_render.png` (ADR 0019), avec la **même base floue**
+  qu'E0 (`tools/geo/raw/pyramid_work/base.npy`, flou σ 5 km de la mosaïque Copernicus + ETOPO
+  8192²) échantillonnée bilinéairement à chaque étage : E0 se reconstruit à 0,04 m près depuis
+  cette base, et seul l'écrêtage à ±120 m n'est pas linéaire entre étages.
+- **Manifeste** `data/map/relief_pyramid.json` : `update_manifest_levels` ne réécrit que les
+  lignes des étages cuits (une entrée de `levels` par ligne) et la ligne `cache` (taille et nombre
+  de tuiles de **tout** le cache, étages de ZG3 compris).
+- **Cache de travail** : `tools/geo/raw/pyramid_work/` (`e0.npy`, `base.npy`, `coast.npy`,
+  256 Mo chacun ; `reservoirs/*.npz`).
