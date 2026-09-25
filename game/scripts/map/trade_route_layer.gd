@@ -21,6 +21,10 @@ var _cut_mesh: MeshInstance3D
 
 ## Routes affichées ce tour : id -> {points: PackedVector2Array (carte), route: Dictionary}.
 var _routes_screen: Dictionary = {}
+## Lot ZG4 : rubans larges d'un kilomètre ou plus (lisibles en vue stratégique), masqués aux
+## paliers vallée / site ; `_wanted_visible` garde l'état voulu par la couche.
+var _wanted_visible: bool = false
+var _close_hidden: bool = false
 
 
 func setup(data: MapData, layer: SettlementLayer, settlements: SettlementData) -> void:
@@ -30,7 +34,8 @@ func setup(data: MapData, layer: SettlementLayer, settlements: SettlementData) -
 	_cut_mesh = MeshInstance3D.new()
 	_cut_mesh.name = "CutRoutes"
 	add_child(_cut_mesh)
-	visible = false
+	_wanted_visible = false
+	_apply_visible()
 
 
 ## `routes` : tableau de dictionnaires `CampaignSim.get_trade_routes()`. `visible_provinces` :
@@ -87,11 +92,24 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 		_cut_mesh.mesh = PolylineMesh.build(cut_lines, cut_widths, map_data, 0.5)
 		_cut_mesh.material_override = PolylineMesh.flat_material(COLOR_CUT)
 		_cut_mesh.material_override.render_priority = 1
-	visible = true
+	_wanted_visible = true
+	_apply_visible()
 
 
 func set_layer_visible(value: bool) -> void:
-	visible = value
+	_wanted_visible = value
+	_apply_visible()
+
+
+## Lot ZG4 : masque la couche aux paliers vallée / site sans perdre l'état voulu.
+func set_close_hidden(value: bool) -> void:
+	if value != _close_hidden:
+		_close_hidden = value
+		_apply_visible()
+
+
+func _apply_visible() -> void:
+	visible = _wanted_visible and not _close_hidden
 
 
 ## Route la plus proche de `world_xz` (carte), en dessous de `max_distance` (unités carte,
