@@ -1110,6 +1110,12 @@
       "source": "lorc/cannon",
       "author": "Lorc"
     },
+    "unit_breton_knights": {
+      "file": "lorc-crested-helmet.svg",
+      "category": "unit",
+      "source": "lorc/crested-helmet",
+      "author": "Lorc"
+    },
     "unit_category_archer": {
       "file": "lorc-bowman.svg",
       "category": "unit",
@@ -1152,11 +1158,35 @@
       "source": "delapouite/siege-tower",
       "author": "Delapouite"
     },
+    "unit_coutiliers": {
+      "file": "lorc-plain-dagger.svg",
+      "category": "unit",
+      "source": "lorc/plain-dagger",
+      "author": "Lorc"
+    },
     "unit_crossbowmen": {
       "file": "carl-olsen-crossbow.svg",
       "category": "unit",
       "source": "carl-olsen/crossbow",
       "author": "Carl Olsen"
+    },
+    "unit_culveriners": {
+      "file": "skoll-musket.svg",
+      "category": "unit",
+      "source": "skoll/musket",
+      "author": "Skoll"
+    },
+    "unit_ecorcheurs": {
+      "file": "delapouite-torch.svg",
+      "category": "unit",
+      "source": "delapouite/torch",
+      "author": "Delapouite"
+    },
+    "unit_english_retinue": {
+      "file": "lorc-battle-axe.svg",
+      "category": "unit",
+      "source": "lorc/battle-axe",
+      "author": "Lorc"
     },
     "unit_flemish_pikemen": {
       "file": "delapouite-pikeman.svg",
@@ -1164,10 +1194,40 @@
       "source": "delapouite/pikeman",
       "author": "Delapouite"
     },
+    "unit_francs_archers": {
+      "file": "lorc-pocket-bow.svg",
+      "category": "unit",
+      "source": "lorc/pocket-bow",
+      "author": "Lorc"
+    },
+    "unit_gascon_crossbowmen": {
+      "file": "carl-olsen-crossbow.svg",
+      "category": "unit",
+      "source": "carl-olsen/crossbow",
+      "author": "Carl Olsen"
+    },
     "unit_genoese_crossbowmen": {
       "file": "lorc-arrows-shield.svg",
       "category": "unit",
       "source": "lorc/arrows-shield",
+      "author": "Lorc"
+    },
+    "unit_goedendag_militia": {
+      "file": "lorc-spiked-mace.svg",
+      "category": "unit",
+      "source": "lorc/spiked-mace",
+      "author": "Lorc"
+    },
+    "unit_hobelars": {
+      "file": "lorc-horse-head.svg",
+      "category": "unit",
+      "source": "lorc/horse-head",
+      "author": "Lorc"
+    },
+    "unit_jinetes": {
+      "file": "lorc-thrown-spear.svg",
+      "category": "unit",
+      "source": "lorc/thrown-spear",
       "author": "Lorc"
     },
     "unit_knights": {
@@ -1206,6 +1266,24 @@
       "source": "delapouite/horse-head",
       "author": "Delapouite"
     },
+    "unit_ordonnance_gendarmes": {
+      "file": "lorc-visored-helm.svg",
+      "category": "unit",
+      "source": "lorc/visored-helm",
+      "author": "Lorc"
+    },
+    "unit_routiers": {
+      "file": "lorc-broadsword.svg",
+      "category": "unit",
+      "source": "lorc/broadsword",
+      "author": "Lorc"
+    },
+    "unit_scottish_spearmen": {
+      "file": "lorc-spiked-fence.svg",
+      "category": "unit",
+      "source": "lorc/spiked-fence",
+      "author": "Lorc"
+    },
     "unit_siege_tower": {
       "file": "delapouite-siege-tower.svg",
       "category": "unit",
@@ -1222,6 +1300,12 @@
       "file": "lorc-halberd.svg",
       "category": "unit",
       "source": "lorc/halberd",
+      "author": "Lorc"
+    },
+    "unit_welsh_spearmen": {
+      "file": "lorc-stone-spear.svg",
+      "category": "unit",
+      "source": "lorc/stone-spear",
       "author": "Lorc"
     }
   }

@@ -1,0 +1,46 @@
+{
+  "id": "unit_ecorcheurs",
+  "name": {
+    "display": "Écorcheurs",
+    "local": "escorcheurs",
+    "local_language": "moyen français"
+  },
+  "category": "cavalry",
+  "source_class": "peasants",
+  "mounted": true,
+  "mercenary": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 600
+  },
+  "upkeep": 65,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 56,
+    "ranged": 0,
+    "range": 0,
+    "armor": 50,
+    "morale": 50,
+    "speed": 76,
+    "ammo": 0,
+    "charge": 60
+  },
+  "abilities": [
+    "dismount"
+  ],
+  "required_culture": [
+    "cul_french",
+    "cul_occitan",
+    "cul_german"
+  ],
+  "available_from": 1435,
+  "available_until": 1445,
+  "figure": "cavalry_4",
+  "equipment": "Chevaux de pillage, brigandine ou jaque, salade, épée, lance légère ; guenilles et prises de guerre.",
+  "description": "Bandes montées de la paix d'Arras (La Hire, Rodrigue de Villandrando) qui dévastent la France, la Lorraine et l'Alsace jusqu'à leur intégration aux compagnies d'ordonnance (1445).",
+  "sources": [
+    "Écorcheurs",
+    "Rodrigue de Villandrando",
+    "A. Tuetey, Les Écorcheurs sous Charles VII, Montbéliard, 1874"
+  ]
+}
