@@ -72,6 +72,8 @@ var map_data: MapData
 var quality_fine: bool = true
 var _quality: Dictionary = {}
 var _base_near_distance: float = -1.0
+## Bancs (`--map-ab`, `relief_cast:<n>`) : impose le nombre de cascades (0 = préréglage).
+var relief_shadow_override: int = 0
 var material: ShaderMaterial
 var chunk_px: int = 0
 var build_stats: Dictionary = {}
@@ -152,6 +154,20 @@ func _apply_quadtree_quality() -> void:
 	quadtree.max_vertex_px = float(_quality.get("relief_vertex_px", quadtree.max_vertex_px))
 	quadtree.max_items = int(_quality.get("relief_items", quadtree.max_items))
 	quadtree.extra_depth = int(_quality.get("relief_extra_depth", quadtree.extra_depth))
+
+
+## PF1 : portée des ombres portées par le relief du quadtree : bord de la cascade
+## `relief_shadow_cascades` du soleil (1 = première cascade ; 4 ou plus = toutes).
+func _relief_shadow_distance() -> float:
+	var cascades := relief_shadow_override if relief_shadow_override > 0 else int(_quality.get("relief_shadow_cascades", 4))
+	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D if get_parent() != null else null
+	if sun == null or not sun.shadow_enabled:
+		return INF
+	var splits := 4 if sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS else 2
+	if cascades >= splits:
+		return INF
+	var edges := [sun.directional_shadow_split_1, sun.directional_shadow_split_2, sun.directional_shadow_split_3]
+	return sun.directional_shadow_max_distance * float(edges[cascades - 1])
 
 
 func build(data: MapData) -> void:
@@ -518,6 +534,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		for chunk in _chunks:
 			chunk.visible = parchment
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() and not parchment else null
+	quadtree.shadow_cast_distance = _relief_shadow_distance()
 	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
 	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
