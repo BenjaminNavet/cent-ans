@@ -1,0 +1,36 @@
+{
+  "id": "cdx_jeu_commerce",
+  "title": "Les routes commerciales",
+  "category": "mecanique",
+  "aliases": [
+    "routes commerciales",
+    "route commerciale",
+    "route coupée",
+    "accord commercial",
+    "comptoir",
+    "comptoirs",
+    "place de marché"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Onze grandes places de marché, de Londres à Venise, sont reliées par douze routes commerciales. Chaque saison, elles enrichissent ceux qui tiennent leurs deux bouts, tant que la guerre, un siège ou un embargo ne les coupe pas.",
+  "body": "L'économie de l'Europe du Nord-Ouest au XIVe siècle tourne autour de quelques axes. La laine anglaise traverse la Manche vers les draperies de [[cdx_flandre_laine|Flandre]], par l'étape de Calais à partir de 1363 ; le [[cdx_vin_de_gascogne|vin de Gascogne]] part chaque automne de [[cdx_bordeaux|Bordeaux]] vers Londres et Southampton, et fait la fortune de la [[cdx_guyenne|Guyenne]] anglaise ; les galées de Gênes et de Venise gagnent directement [[cdx_bruges|Bruges]] par Gibraltar depuis la fin du XIIIe siècle, apportant [[cdx_epices_medievales|épices]], soieries et alun.\n\nLes foires de Champagne, à Troyes et Provins, qui avaient été au XIIIe siècle le grand carrefour entre l'Italie et la Flandre, déclinent au XIVe siècle : la route maritime les contourne, et la guerre rend les chemins terrestres peu sûrs. Bruges, où la [[cdx_hanse|Hanse]] a son comptoir, devient la place centrale de l'Occident.\n\nLe commerce est aussi une arme. [[cdx_edouard_iii|Édouard III]] interdit en 1336 l'exportation de laine vers la Flandre pour forcer les villes flamandes à choisir son camp, ce qui pousse [[cdx_jacob_van_artevelde|Jacob van Artevelde]] et Gand dans l'alliance anglaise. Les princes accordent des sauf-conduits, signent des trêves marchandes, ou saisissent les navires ennemis.",
+  "gameplay": "Les places de marché sont Bruges, Calais, Londres, Southampton, Bordeaux, La Rochelle, Anvers, Troyes, Provins, Gênes et Venise. Valeurs de base des routes, en livres par saison : Bordeaux-Londres 220, Bruges-Londres 180, Gênes-Bruges 160, Calais-Londres et Venise-Bruges 150, Bruges-Southampton 140, La Rochelle-Londres 130, Bruges-Calais 120, Bruges-Anvers 90 ; les routes des foires de Champagne valent 70 (Bruges-Troyes) et 50 (Troyes-Provins, Provins-Gênes), mais leur déclin les ampute encore de 40 %.\n\nLa valeur réelle se multiplie par un facteur de distance, 400 / (400 + coût du chemin), par la sécurité (chaque colonie du chemin qui abrite une armée ennemie divise la valeur par deux) et par la tenue de la [[cdx_mutations_monetaires|monnaie]] (de 1 à 0,4 quand les prix montent). Un accord commercial, signé en [[cdx_jeu_diplomatie|diplomatie]], ajoute 30 %. Qui tient les deux places touche tout ; sinon chaque contrôleur en touche la moitié. La route est coupée s'il n'y a plus de chemin, si une place n'a pas de maître, si les deux maîtres sont en guerre, en cas d'embargo, ou si une colonie du chemin est assiégée.\n\nLe commerce est réglé après l'impôt et apparaît sur la ligne « Commerce » du panneau de faction ; la carte affiche chaque route avec son revenu ou la raison de sa coupure. Conseil : Bordeaux et Bruges valent chacune une armée ; une [[cdx_chevauchee|chevauchée]] qui stationne sur une route ennemie en divise le revenu.",
+  "see_also": [
+    "cdx_jeu_tresor",
+    "cdx_bruges",
+    "cdx_bordeaux",
+    "cdx_commerce_de_bordeaux",
+    "cdx_hanse",
+    "cdx_flandre_laine",
+    "cdx_jeu_diplomatie"
+  ],
+  "sources": [
+    "Foires de Champagne",
+    "Hanse",
+    "Étape de Calais",
+    "Bruges"
+  ]
+}
