@@ -29,6 +29,7 @@ pub(crate) struct WaveState {
     pub label: String,
     pub release_s: f64,
     pub after: Option<usize>,
+    pub after_enemy: Option<usize>,
     pub released: bool,
     /// Once released, the wave's regiments go at the enemy (scripted).
     pub assault: bool,
@@ -81,6 +82,7 @@ impl BattleSim {
                     label: String::new(),
                     release_s: 0.0,
                     after: None,
+                    after_enemy: None,
                     released: true,
                     assault: false,
                 }]
@@ -92,7 +94,9 @@ impl BattleSim {
                         label: w.label.clone(),
                         release_s: w.release_s,
                         after: w.after,
-                        released: k == 0 || w.release_s <= 0.0 && w.after.is_none(),
+                        after_enemy: w.after_enemy,
+                        released: k == 0
+                            || w.release_s <= 0.0 && w.after.is_none() && w.after_enemy.is_none(),
                         assault: w.assault,
                     })
                     .collect()
@@ -363,7 +367,10 @@ impl BattleSim {
                 let due = wave.release_s > 0.0 && elapsed >= wave.release_s;
                 let triggered = wave
                     .after
-                    .is_some_and(|w| self.wave_engaged(&scenario, side, w));
+                    .is_some_and(|w| self.wave_engaged(&scenario, side, w))
+                    || wave
+                        .after_enemy
+                        .is_some_and(|w| self.wave_engaged(&scenario, side.other(), w));
                 if due || triggered {
                     let label = wave.label.clone();
                     scenario.waves[side.index()][k].released = true;

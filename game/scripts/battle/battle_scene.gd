@@ -408,7 +408,9 @@ func _build_scene() -> bool:
 	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
 	# plutôt que d'afficher une météo que les règles n'appliquent pas.
 	var weather_label := str(weather.get("label", ""))
-	if weather_key != str(weather.get("key", "clear")):
+	if not historical.is_empty() and _weather_override == "" and str(historical.get("weather_label", "")) != "":
+		weather_label = str(historical["weather_label"])  # EP7 : « Averse d'orage, puis… »
+	elif weather_key != str(weather.get("key", "clear")):
 		weather_label += " (rendu forcé : %s)" % weather_key
 		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
 	_title_text = title
@@ -1771,7 +1773,8 @@ func _stage_screenshot() -> void:
 		await _stage_result_screenshot()
 		return
 	var contact_time := -1.0
-	for _i in 3000:
+	# EP7 : sur une carte historique, les batailles françaises montent longtemps avant le choc.
+	for _i in (9000 if not historical.is_empty() else 3000):
 		battle.call("tick", 0.1)
 		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
 		units = battle.call("get_units")
