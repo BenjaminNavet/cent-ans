@@ -166,7 +166,15 @@ func _exit_tree() -> void:
 
 ## Sélection des nœuds, demandes de pages, téléversements et paramètres d'instance pour `camera`.
 func update_view(camera: Camera3D) -> void:
-	if pyramid == null or camera == null:
+	if pyramid == null:
+		return
+	if camera == null:
+		# Vue parchemin (CM2) ou hors arbre : rien n'est dessiné ni voulu. Sans cette remise à
+		# zéro, les pages voulues de la dernière vue en relief resteraient comptées comme
+		# manquantes et `is_settled()` ne deviendrait jamais vrai (constaté par PB1 à d = 1500).
+		_collect_jobs()
+		_wanted.clear()
+		_missing_wanted = 0
 		return
 	_frame += 1
 	var t0 := Time.get_ticks_usec()
