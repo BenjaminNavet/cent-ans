@@ -92,12 +92,12 @@ const GAUGE_TEXTS := {
 	"devastation": ["Dévastation", "Pillages et combats : freine la croissance (nulle au-delà de 50), la richesse et nourrit le mécontentement."],
 	"population": ["Population", "Habitants de la province, toutes classes confondues ; croît avec la santé."],
 	"morale": ["Moral", "Au plus bas, l'unité rompt et fuit le combat."],
-	"supply": ["Ravitaillement", "Vivres de l'armée : baisse en territoire hostile ou dévasté, remonte en territoire ami."],
+	"supply": ["Ravitaillement", "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."],
 	"movement": ["Mouvement", "Points de mouvement restants ce tour."],
 	"strength": ["Effectif", "Hommes présents / effectif complet de l'unité."],
 }
 const HUD_TEXTS := {
-	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, les troupes se débandent."],
+	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent 10 de moral chaque saison."],
 	"hud_income": ["Solde", "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."],
 	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
 	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
