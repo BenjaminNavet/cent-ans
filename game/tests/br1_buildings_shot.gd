@@ -86,6 +86,13 @@ func _siege_shots(scene: Node, battle: Object) -> void:
 	scene.camera_rig.look_at_point(focus + Vector3(60, 0, 20), 55.0, 2.2)
 	await _wait(2.0)
 	await _shot(_prefix + "-rue.png")
+	# BR3 : la place du marché (puits, étals du cœur) et une rue d'îlots vue de plus près.
+	scene.camera_rig.look_at_point(focus, 45.0, 1.0)
+	await _wait(2.0)
+	await _shot(_prefix + "-marche.png")
+	scene.camera_rig.look_at_point(focus + Vector3(-70, 0, 40), 35.0, 0.6)
+	await _wait(2.0)
+	await _shot(_prefix + "-ilots.png")
 
 
 func _wait(seconds: float) -> void:

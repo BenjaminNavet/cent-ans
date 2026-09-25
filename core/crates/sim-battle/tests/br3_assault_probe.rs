@@ -191,3 +191,57 @@ fn probe_fire_spread() {
         );
     }
 }
+
+/// Cost of the figure poses (BR3 push-out) in a crowded siege at 2.5
+/// figures per soldier, against the bare layout of the figures.
+#[test]
+#[ignore = "probe: prints the cost of the figure poses"]
+fn probe_figure_cost() {
+    let data = data();
+    let mut attackers = Vec::new();
+    let mut defenders = Vec::new();
+    for _ in 0..4 {
+        attackers.extend(units(&data, &BESIEGERS[..8]));
+        defenders.extend(units(&data, &GARRISON));
+    }
+    let s = setup(
+        attackers,
+        defenders,
+        Some(SiegeSetup {
+            fortification: 2,
+            breach: 60,
+        }),
+    );
+    let mut sim = BattleSim::new(s, 3).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    sim.set_ai(SideId::Defender, true);
+    if sim.is_deploying() {
+        sim.start_battle().expect("start");
+    }
+    run(&mut sim, 240.0);
+    let scale = 2.5;
+    let figures: usize = sim
+        .units()
+        .iter()
+        .map(|u| sim.soldier_poses(u, scale).len())
+        .sum();
+    let frames = 50;
+    let t = std::time::Instant::now();
+    for _ in 0..frames {
+        for u in sim.units() {
+            std::hint::black_box(sim.soldier_poses(u, scale));
+        }
+    }
+    let with = t.elapsed().as_secs_f64() * 1e6 / f64::from(frames);
+    let t = std::time::Instant::now();
+    for _ in 0..frames {
+        for u in sim.units() {
+            std::hint::black_box(u.figure_positions(scale));
+        }
+    }
+    let raw = t.elapsed().as_secs_f64() * 1e6 / f64::from(frames);
+    println!(
+        "{} regiments, {figures} figures: poses {with:.0} µs/frame, bare layout {raw:.0} µs/frame",
+        sim.units().len()
+    );
+}
