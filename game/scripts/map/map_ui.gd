@@ -90,6 +90,10 @@ var docked_right_x: float = 0.0
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
+## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
+var panels := PanelStack.new()
+## Province affichée par le panneau de province (une autre province = nouvelle sélection).
+var _province_panel_id: String = ""
 
 
 func _ready() -> void:
@@ -143,6 +147,7 @@ func _ready() -> void:
 	toast.hide()
 	_decorate_top_bar()  # F2
 	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
+	_setup_panel_stack()  # U1
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
@@ -210,48 +215,71 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-## `economy` : `get_faction_economy` (vide si indisponible). Affiche le revenu **net** prévu
-## (recettes - entretien des armées, des bâtiments et de la cour) ; détail en infobulle.
-## Sans économie, repli sur `income` (revenu brut du dernier tour).
+## `economy` : `get_faction_economy` (vide si indisponible). Affiche le solde **net** prévu
+## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
+## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
-	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
+	treasury_label.text = "Trésor : %s" % Money.amount(treasury)
 	if economy.is_empty():
-		income_label.text = "Revenu : %s ℔" % _signed(income)
+		income_label.text = "Revenu : %s" % Money.signed(income)
 		income_label.tooltip_text = "Revenu brut du dernier tour."
 		return
-	var gross := int(economy.get("projected_income", income))
-	var armies := int(economy.get("army_upkeep", 0))
-	var buildings := int(economy.get("building_upkeep", 0))
-	var court := int(economy.get("administration_upkeep", 0))
-	var table := int(economy.get("table_upkeep", 0))  # H3 : la Table (diètes des provinces)
-	# H5 : le seigneuriage est déjà dans les recettes, la refonte dans l'administration.
-	var seigniorage := int(economy.get("seigniorage", 0))
-	var recoinage := int(economy.get("recoinage", 0))
-	# Solde calculé par `core/` (`FactionEconomy::net_income`, audit A3 E1/E4) : l'interface
-	# n'additionne rien, le panneau de faction affiche le même chiffre.
 	var net := int(economy.get("net_income", 0))
-	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
-	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
-	var lines := PackedStringArray(["Prévision pour la prochaine saison"])
-	lines.append("Recettes : %s ℔" % ProvincePanel._thousands(gross))
-	if seigniorage != 0:
-		lines.append("    dont seigneuriage : %s ℔" % _signed(seigniorage))
-	lines.append("Armées : -%s ℔" % ProvincePanel._thousands(armies))
-	lines.append("Bâtiments : -%s ℔" % ProvincePanel._thousands(buildings))
-	lines.append("Cour et administration : -%s ℔" % ProvincePanel._thousands(court))
-	if recoinage != 0:
-		lines.append("    dont refonte des monnaies : -%s ℔" % ProvincePanel._thousands(recoinage))
-	if table != 0:
-		lines.append("La Table : -%s ℔" % ProvincePanel._thousands(table))
-	lines.append("Solde prévu : %s ℔" % _signed(net))
-	if economy.has("net_income_last_turn"):
-		lines.append("Saison passée : %s ℔" % _signed(int(economy["net_income_last_turn"])))
+	income_label.text = "Solde : %s / saison" % Money.signed(net)
+	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
+	income_label.tooltip_text = budget_tooltip(economy)
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
+
+
+## Infobulle du solde : rubriques signées (prévu, et saison passée entre parenthèses), solde,
+## puis l'écart par rapport à la saison passée et sa principale cause.
+static func budget_tooltip(economy: Dictionary) -> String:
+	var lines := PackedStringArray(["[b]Solde prévu pour la prochaine saison[/b]"])
+	var has_past := economy.has("net_change")
+	var biggest_key := ""
+	var biggest := 0
+	for line in economy.get("budget_lines", []):
+		var key := str(line.get("key", ""))
+		if key == "other":
+			continue
+		var projected := int(line.get("projected", 0))
+		var text := "%s : [color=#%s]%s[/color]" % [BudgetTable.RUBRICS.get(key, key), Money.color_of(projected).to_html(false), Money.signed(projected)]
+		if has_past and line.has("last"):
+			text += " (saison passée %s)" % Money.signed(int(line["last"]))
+		lines.append(text)
+		var delta := int(line.get("delta", 0))
+		if has_past and absi(delta) > absi(biggest):
+			biggest = delta
+			biggest_key = key
+	var net := int(economy.get("net_income", 0))
+	lines.append("[b]Solde : [color=#%s]%s[/color][/b]" % [Money.color_of(net).to_html(false), Money.signed(net)])
+	if has_past:
+		var change := int(economy.get("net_change", 0))
+		var sentence := "%s par rapport à la saison passée" % Money.signed(change)
+		if change != 0 and biggest_key != "" and biggest != 0:
+			sentence += ", dont %s sur « %s »" % [Money.signed(biggest), str(BudgetTable.RUBRICS.get(biggest_key, biggest_key)).to_lower()]
+		lines.append("[color=#%s]%s.[/color]" % [Money.color_of(change).to_html(false), sentence])
+	else:
+		lines.append("Premier tour : pas encore de saison passée.")
 	lines.append("Détail : panneau de faction (clic sur le blason).")
-	income_label.tooltip_text = "\n".join(lines)
+	return "\n".join(lines)
+
+
+## Infobulle du trésor : variation de la dernière saison, hors budget compris.
+static func treasury_tooltip(economy: Dictionary) -> String:
+	var history: Array = economy.get("budget_history", [])
+	if history.is_empty():
+		return "Aucune saison résolue pour l'instant."
+	var last: Dictionary = history.back()
+	var text := "Saison passée : %s au trésor" % Money.signed(int(last.get("change", 0)))
+	var other := int(last.get("other", 0))
+	if other != 0:
+		text += " (dont %s hors budget : rançons, tributs, agents, chronique)" % Money.signed(other)
+	return text + "."
 
 
 static func _signed(value: int) -> String:
-	return ("+" if value >= 0 else "-") + ProvincePanel._thousands(absi(value))
+	return Money.signed(value)
 
 
 func set_date(text: String) -> void:
@@ -459,10 +487,18 @@ func log_line_count() -> int:
 
 
 func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable(), city: Dictionary = {}) -> void:
+	# U1 : une autre province choisie sur la carte referme les grands panneaux ; la même
+	# province (rafraîchissement de fin de tour) reste de côté sous le panneau central.
+	var id := str(province.get("id", ""))
+	if id != _province_panel_id:
+		panels.reveal(province_panel)
+	_province_panel_id = id
 	province_panel.show_province(province, state, recruitable, is_player_owner, label_of, city)
 
 
 func hide_province() -> void:
+	_province_panel_id = ""
+	panels.forget_suspended(province_panel)
 	province_panel.hide()
 
 
@@ -649,6 +685,74 @@ func _setup_hud() -> void:
 	queue_layout()
 
 
+# --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
+
+
+func _setup_panel_stack() -> void:
+	panels.register(province_panel, PanelStack.Kind.DOCKED)
+	panels.register(faction_panel, PanelStack.Kind.CENTRAL)
+	panels.register(court_panel, PanelStack.Kind.CENTRAL)
+	panels.register(tech_panel, PanelStack.Kind.CENTRAL)
+	panels.register(character_sheet, PanelStack.Kind.COMPANION, [court_panel])
+	panels.register(save_load_dialog, PanelStack.Kind.MODAL)
+	for panel in docked_panels:
+		panels.register(panel, PanelStack.Kind.DOCKED)
+	for child in get_children():
+		_auto_register(child)
+	child_entered_tree.connect(_auto_register)
+	panels.changed.connect(queue_layout)
+
+
+## Enregistre un panneau de la carte : `kind` = `PanelStack.Kind` ; `companion_of` : panneaux
+## centraux qu'il accompagne (fiche à côté de la Cour…).
+func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array = []) -> void:
+	panels.register(panel, kind, companion_of)
+	if not panel.resized.is_connected(queue_layout):
+		panel.resized.connect(queue_layout)
+
+
+## Panneaux ajoutés par les contrôleurs (diplomatie, chronique, agents, rançons, flow).
+func _auto_register(node: Node) -> void:
+	if not (node is Control) or panels.is_registered(node):
+		return
+	if node is DiplomacyPanel or node is ChronicleWindow or node.name == &"AgentRegistry":
+		register_panel(node, PanelStack.Kind.CENTRAL)
+	elif node is RansomPanel:
+		register_panel(node, PanelStack.Kind.COMPANION, [faction_panel])
+	elif node is PauseMenu or node is SettingsMenu or node is SeasonReport:
+		register_panel(node, PanelStack.Kind.MODAL)
+
+
+## Échap ferme le panneau du dessus avant que la carte (désélection) ou le menu pause ne la
+## reçoivent (`_shortcut_input` passe avant `_unhandled_input`).
+func _shortcut_input(event: InputEvent) -> void:
+	if get_tree().paused or not visible or event.is_echo():
+		return
+	# Lot U7 (partiel) : sauvegarde rapide F5, chargement rapide F9.
+	if event is InputEventKey and event.pressed and not panels.has_modal_open():
+		var key := (event as InputEventKey).physical_keycode
+		if key == KEY_F5:
+			save_requested.emit(QUICK_SAVE_NAME)
+			get_viewport().set_input_as_handled()
+			return
+		if key == KEY_F9:
+			var path := SaveSlots.SAVES_DIR.path_join(QUICK_SAVE_NAME.validate_filename() + ".json")
+			if FileAccess.file_exists(path):
+				load_requested.emit(path)
+			else:
+				show_toast("Aucune sauvegarde rapide (F5 pour en faire une).", true)
+			get_viewport().set_input_as_handled()
+			return
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if panels.close_top():
+		get_viewport().set_input_as_handled()
+
+
+## Nom de l'emplacement de la sauvegarde rapide (F5 / F9).
+const QUICK_SAVE_NAME := "Sauvegarde rapide"
+
+
 ## Replace le HUD au prochain cycle (plusieurs demandes → un seul placement).
 func queue_layout() -> void:
 	if _layout_queued or not is_inside_tree():
@@ -706,14 +810,21 @@ func layout_hud() -> void:
 	var docked_open := province_panel.visible
 	for panel in docked_panels:
 		docked_open = docked_open or panel.visible
-	var wide_panel_open := faction_panel.visible or character_sheet.visible
+	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
+	# dès qu'un grand panneau la recouvrirait (elle ne passe plus jamais par-dessus).
+	var wide_panel_open := false
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION:
+			_keep_on_screen(panel, top, view)
+			wide_panel_open = true
 	var letters_top := top
 	# Bord droit (distance au bord de l'écran) des panneaux de province et de colonie.
 	var dock_right := HUD_MARGIN
 	if minimap != null:
 		minimap.size = minimap.get_combined_minimum_size()
 		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
-		minimap.visible = not wide_panel_open
+		minimap.visible = not _covers(minimap.get_global_rect())
 		letters_top = minimap.position.y + minimap.size.y + 10.0
 		if minimap.visible:
 			dock_right = view.x - minimap.position.x + 8.0
@@ -726,12 +837,42 @@ func layout_hud() -> void:
 		_dock_panel(panel, top, dock_right)
 
 
+## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
+func _covers(rect: Rect2) -> bool:
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and panel.get_global_rect().intersects(rect):
+			return true
+	return false
+
+
+## U1 : le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
+func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
+	if panel.get_parent() != self:
+		return
+	# Trop grand pour l'écran : rétréci (dans la limite de sa taille minimale).
+	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
+	if panel.size.x > room.x or panel.size.y > room.y:
+		panel.size = Vector2(minf(panel.size.x, room.x), minf(panel.size.y, room.y))
+	var rect := panel.get_global_rect()
+	var shift := Vector2.ZERO
+	if rect.end.x > view.x - 4.0:
+		shift.x = view.x - 4.0 - rect.end.x
+	if rect.position.x + shift.x < 4.0:
+		shift.x = 4.0 - rect.position.x
+	if rect.position.y < top:
+		shift.y = top - rect.position.y
+	if shift != Vector2.ZERO:
+		panel.position += shift
+
+
 ## Lot C7b : ancre `panel` (panneau de colonie) comme le panneau de province, à gauche de la
 ## minicarte ; replacé à chaque `layout_hud`.
 func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
 		return
 	docked_panels.append(panel)
+	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()
 

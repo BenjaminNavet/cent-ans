@@ -151,6 +151,10 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	# U1 : objectifs et aide dans la pile des panneaux (exclusifs, Échap).
+	ui.register_panel(victory.panel, PanelStack.Kind.CENTRAL)
+	ui.register_panel(victory.end_dialog, PanelStack.Kind.MODAL)
+	ui.register_panel(help.panel, PanelStack.Kind.CENTRAL)
 	flow = FlowController.new()  # F3
 	add_child(flow)
 	flow.setup(self)
@@ -305,15 +309,20 @@ func refresh_all() -> void:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
 		_show_faction_panel(_faction_panel_id)
+	# U1 : un panneau fermé (×, Échap, exclusivité) ne se rouvre pas au rafraîchissement.
+	_court_open = _court_open and ui.court_panel_visible()
 	if _court_open:
 		_show_court_panel()
-	if _open_character_id != "":
+	if _open_character_id != "" and ui.character_sheet.visible:
 		_show_character_sheet(_open_character_id)
+	else:
+		_open_character_id = ""
 	if diplomacy != null:
 		diplomacy.refresh()
 	if chronicle != null:  # M10
 		chronicle.refresh()
 	_refresh_research()  # M6
+	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
 		_show_tech_panel()
 	if flow != null:  # F3
@@ -1040,6 +1049,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_city()
 				"faction":
 					_stage_screenshot_faction()
+				"budget":  # U3 : budget et courbe du trésor après quelques saisons
+					_stage_screenshot_budget()
 				"court":
 					_stage_screenshot_court()
 				"skills":
@@ -1231,6 +1242,19 @@ func _stage_screenshot_faction() -> void:
 	_ensure_city_capable_sim()
 	_focus_capital()
 	ui.hide_province()
+	_show_faction_panel(player_faction)
+
+
+## Mise en scène « budget » (lot U3) : six saisons jouées, puis le panneau de faction (tableau
+## du budget avec la saison passée et l'écart, courbe du trésor).
+func _stage_screenshot_budget() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.hide_province()
+	selected_index = 0
+	for _i in 6:
+		sim.call("end_turn")
+	refresh_all()
 	_show_faction_panel(player_faction)
 
 
