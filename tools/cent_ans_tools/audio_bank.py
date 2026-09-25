@@ -113,6 +113,50 @@ SOURCES: dict[int, str] = {
     474342: "forest birds",
     424790: "crowded street at a medieval market",
     444900: "crowd murmuring",
+    # EP4 -- steel-on-steel (sword_clash 5-12)
+    442769: "sword hit",
+    547041: "hit swing sword small",
+    706204: "anime sword hit",
+    426322: "single sword hit",
+    518992: "sword clash",
+    275159: "sword clash",
+    334169: "sword clash",
+    844258: "sword tap",
+    # EP4 -- steel-on-wood, shield/haft (shield_bash 4-8)
+    114683: "wooden whack",
+    114684: "wooden whack",
+    114685: "wooden whack",
+    330997: "stick hitting a dreadlock (small thud)",
+    319217: "sticks hitting sticks",
+    # EP4 -- armour / mail impacts (armor_hit)
+    638613: "metal thud",
+    164220: "metallic thud",
+    424424: "metal flick hit",
+    812592: "metal clang",
+    733887: "sword impact",
+    616492: "metal clank",
+    # EP4 -- effort / rage cries (effort_cry)
+    511023: "male fight grunts (compilation)",
+    718967: "shouting punches, male (compilation)",
+    623449: "kingly yell",
+    670857: "warrior pain",
+    621370: "male grunt",
+    661242: "swing grunt",
+    # EP4 -- wounded cries (death_groan 8-10)
+    131710: "male being impaled / beaten (compilation)",
+    567989: "wounded male, short (compilation)",
+    104028: "short scream",
+    # EP4 -- body / armour falls (body_fall)
+    504626: "very heavy body fall on dirt",
+    346695: "body fall",
+    266346: "body falls (compilation)",
+    395567: "collapsing in grass",
+    815415: "sword fall on dirt",
+    # EP4 -- horses (horse_neigh 5-6)
+    826753: "horse neigh",
+    636554: "whinnying horse, far away",
+    # EP4 -- third massive melee bed
+    675093: "large crowd fighting indoors with swords",
 }
 
 
@@ -553,6 +597,26 @@ def _battle_distant(get: Sources) -> np.ndarray:
     return loopify(np.stack([left, right], axis=1).astype(np.float32), 2.0)
 
 
+def _cavalry_charge_impact(get: Sources) -> np.ndarray:
+    """Cavalry charge: hoofbeat rumble swelling then a crashing impact of shields and blades.
+
+    No dedicated CC0 "cavalry impact" recording was found; built from sources already
+    verified for other clips: the gallop bed and shield/sword hits.
+    """
+    gallop = loudest_window(mono(get(527430)), 3.6)
+    ramp = np.linspace(0.12, 1.0, len(gallop)).astype(np.float32)
+    swell = filtered(gallop, "low", 1800.0) * ramp
+    hits = [
+        hit(mono(get(182112)), 0, 0.5, 6),
+        hit(mono(get(182112)), 2, 0.5, 6),
+        hit(mono(get(471095)), 0, 0.5, 4),
+        hit(mono(get(370203)), 0, 0.4, 4),
+    ]
+    impact = mix([(h, i * 0.03, 0.8) for i, h in enumerate(hits)], length=0.7)
+    combined = mix([(swell, 0.0, 0.85), (impact, 3.45, 1.0)], length=4.3)
+    return fade(combined, 0.05, 0.6)
+
+
 def _clips() -> list[Clip]:
     b = "battle/"
     a = "ambience/"
@@ -641,6 +705,68 @@ def _clips() -> list[Clip]:
         ),
         Clip(b + "thunder_1", [399656], _take(399656, 0.0, 10.0, 3.0)),
         Clip(b + "thunder_2", [652690], _take(652690, 0.0, 10.0, 3.0)),
+        # EP4 -- steel-on-steel, 8 more (12 total).
+        Clip(b + "sword_clash_5", [442769], _take(442769, 0.0, 0.8, 0.15)),
+        Clip(b + "sword_clash_6", [547041], _take(547041, 0.0, 1.3, 0.2)),
+        Clip(b + "sword_clash_7", [706204], _hit(706204, 0, 1.0, 4)),
+        Clip(b + "sword_clash_8", [426322], _take(426322, 0.0, 0.8, 0.15)),
+        Clip(b + "sword_clash_9", [518992], _hit(518992, 0, 1.0, 5)),
+        Clip(b + "sword_clash_10", [275159], _take(275159, 0.0, 0.6, 0.12)),
+        Clip(b + "sword_clash_11", [334169], _take(334169, 0.0, 0.5, 0.1)),
+        Clip(b + "sword_clash_12", [844258], _take(844258, 0.0, 1.0, 0.2)),
+        # EP4 -- steel-on-wood (shield rim, haft), 5 more (8 total).
+        Clip(b + "shield_bash_4", [114683], _take(114683, 0.0, 0.4, 0.1)),
+        Clip(b + "shield_bash_5", [114684], _take(114684, 0.0, 0.5, 0.1)),
+        Clip(b + "shield_bash_6", [114685], _take(114685, 0.0, 0.6, 0.1)),
+        Clip(b + "shield_bash_7", [330997], _take(330997, 0.0, 0.7, 0.15)),
+        Clip(b + "shield_bash_8", [319217], _hit(319217, 1, 0.7, 8)),
+        # EP4 -- armour / mail impacts (new event, 6).
+        Clip(b + "armor_hit_1", [638613], _take(638613, 0.0, 0.9, 0.15)),
+        Clip(b + "armor_hit_2", [164220], _take(164220, 0.0, 0.8, 0.15)),
+        Clip(b + "armor_hit_3", [424424], _take(424424, 0.0, 1.0, 0.2)),
+        Clip(b + "armor_hit_4", [812592], _take(812592, 0.0, 0.5, 0.12)),
+        Clip(b + "armor_hit_5", [733887], _hit(733887, 0, 1.4, 4)),
+        Clip(b + "armor_hit_6", [616492], _take(616492, 0.0, 0.5, 0.12)),
+        # EP4 -- effort / rage cries during melee (new event, 10).
+        Clip(b + "effort_cry_1", [511023], _hit(511023, 0, 1.3, 12)),
+        Clip(b + "effort_cry_2", [511023], _hit(511023, 4, 1.3, 12)),
+        Clip(b + "effort_cry_3", [511023], _hit(511023, 8, 1.3, 12)),
+        Clip(b + "effort_cry_4", [718967], _hit(718967, 0, 1.4, 10)),
+        Clip(b + "effort_cry_5", [718967], _hit(718967, 4, 1.4, 10)),
+        Clip(b + "effort_cry_6", [718967], _hit(718967, 7, 1.4, 10)),
+        Clip(b + "effort_cry_7", [623449], _window(623449, 2.2, 0.5)),
+        Clip(b + "effort_cry_8", [670857], _take(670857, 0.0, 1.3, 0.3)),
+        Clip(b + "effort_cry_9", [621370], _window(621370, 1.6, 0.4)),
+        Clip(b + "effort_cry_10", [661242], _take(661242, 0.0, 1.0, 0.2)),
+        # EP4 -- wounded cries, 3 more (10 total).
+        Clip(b + "death_groan_8", [131710], _hit(131710, 2, 1.6, 10)),
+        Clip(b + "death_groan_9", [567989], _hit(567989, 1, 1.8, 10)),
+        Clip(b + "death_groan_10", [104028], _take(104028, 0.0, 2.0, 0.4)),
+        # EP4 -- body / armour falls (new event, 6).
+        Clip(b + "body_fall_1", [504626], _take(504626, 0.0, 1.5, 0.3)),
+        Clip(b + "body_fall_2", [346695], _take(346695, 0.0, 1.5, 0.3)),
+        Clip(b + "body_fall_3", [266346], _hit(266346, 1, 1.6, 10)),
+        Clip(b + "body_fall_4", [266346], _hit(266346, 5, 1.6, 10)),
+        Clip(b + "body_fall_5", [395567], _window(395567, 2.0, 0.4)),
+        Clip(b + "body_fall_6", [815415], _take(815415, 0.0, 1.5, 0.3)),
+        # EP4 -- horses, 2 more (6 total).
+        Clip(b + "horse_neigh_5", [826753], _take(826753, 0.0, 1.8, 0.4)),
+        Clip(b + "horse_neigh_6", [636554], _window(636554, 3.0, 0.6)),
+        # EP4 -- cavalry charge: rumble swelling into an impact of shields and blades.
+        Clip(
+            b + "cavalry_charge_impact",
+            [527430, 182112, 471095, 370203],
+            _cavalry_charge_impact,
+            note="gallop swell (existing cavalry bed source) + shield/sword impact layer",
+        ),
+        # EP4 -- third massive melee bed (distinct source from melee_bed_1/2).
+        Clip(
+            b + "melee_bed_3",
+            [675093],
+            _loop(675093, 20.0, 1),
+            loop=True,
+            level="rms",
+        ),
         # Nappes 3D en boucle (mono).
         Clip(
             b + "melee_bed_1", [376646], _loop(376646, 40.0, 1), loop=True, level="rms"
