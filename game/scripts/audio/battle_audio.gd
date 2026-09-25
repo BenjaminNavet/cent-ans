@@ -62,6 +62,7 @@ var _ambience_targets: Dictionary = {}  # nom → volume_db visé
 var _track: Dictionary = {}  # id → {state, ammo, soldiers, present}
 var _side_cried: Dictionary = {}
 var _siege_track: Dictionary = {}
+var wall_impacts_external := false  # SG1
 var _weather: String = "clear"
 var _time: float = 0.0
 var _battle_time: float = 0.0
@@ -312,7 +313,11 @@ func update_siege(siege: Dictionary, elapsed: float) -> void:
 		if _siege_track.has(key):
 			var prev: Dictionary = _siege_track[key]
 			if hp < float(prev["hp"]) - 0.001:
-				play_event("ram_hit" if str(piece.get("kind", "")) == "gate" else "stone_impact", mid)
+				# SG1 : l'impact d'une pierre sur un pan est joué à son arrivée par `SiegeAssaultFx`.
+				if str(piece.get("kind", "")) == "gate":
+					play_event("ram_hit", mid)
+				elif not wall_impacts_external:
+					play_event("stone_impact", mid)
 			if bool(prev["intact"]) and not intact:
 				play_event("wall_collapse", mid)
 		_siege_track[key] = {"hp": hp, "intact": intact}

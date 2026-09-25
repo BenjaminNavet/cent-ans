@@ -33,8 +33,42 @@ def _warp(scale: dict, meters_per_px: float, radius_m: float) -> float:
 
 
 def test_landmarks_exist() -> None:
-    """Paris is described."""
-    assert (DATA / "landmarks" / "paris.json").exists()
+    """Paris (L1) and the cities of lot L2 are described."""
+    for city in ("paris", "london", "avignon", "calais", "rouen", "bordeaux", "bruges"):
+        assert (DATA / "landmarks" / f"{city}.json").exists(), city
+
+
+MODELS = DATA.parent / "game" / "assets" / "models" / "landmarks"
+BLENDER_SCRIPTS = DATA.parent / "tools" / "blender_scripts"
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_model_weight(path: Path) -> None:
+    """Each landmark has its generated model; L2 cities stay under 6 MB (Paris, L1: 10 MB)."""
+    glb = MODELS / f"{path.stem}.glb"
+    assert glb.exists(), f"run landmark_city.py for {path.stem}"
+    if path.stem != "paris":
+        assert glb.stat().st_size <= 6_000_000, glb.stat().st_size
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_monuments_build(path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Every monument (and each dated variant) builds a valid mesh from its template and params."""
+    monkeypatch.syspath_prepend(str(BLENDER_SCRIPTS))
+    import landmark_monuments
+
+    for monument in _load(path)["monuments"]:
+        builder = landmark_monuments.BUILDERS[monument["model"]]
+        for variant in ["", *monument.get("variant_from_year", {})]:
+            parts = builder(
+                monument.get("size", 1.0), variant, monument.get("params", {})
+            )
+            assert parts, (monument["id"], variant)
+            for _material, (verts, faces) in parts:
+                assert all(0 <= i < len(verts) for face in faces for i in face), (
+                    monument["id"],
+                    variant,
+                )
 
 
 @pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)

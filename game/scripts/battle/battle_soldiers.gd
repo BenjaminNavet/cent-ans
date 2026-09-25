@@ -360,6 +360,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
+		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
+		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
 		# BV3 : pavois du dos masqué tant que la rangée est plantée (même règle que BV1).
 		if hide_planted_pavise:

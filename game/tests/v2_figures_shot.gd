@@ -19,6 +19,7 @@ var _cols := 5
 var _rows := 2
 var _rigid := false
 var _hide_pavise := false  # BV3 : `--hide-pavise` (pavois du dos masqué, rangée plantée)
+var _split := 0  # SG1 : `--split=N`, N premiers soldats en escalade (état climbing)
 
 
 func _init() -> void:
@@ -42,6 +43,8 @@ func _init() -> void:
 			_rows = int(arg.trim_prefix("--rows="))
 		elif arg.begins_with("--cam="):
 			cam = arg.trim_prefix("--cam=").split_floats(",")
+		elif arg.begins_with("--split="):
+			_split = int(arg.trim_prefix("--split="))
 		elif arg == "--rigid":
 			_rigid = true
 		elif arg == "--hide-pavise":
@@ -147,6 +150,7 @@ func _rank(world: Node3D, kind: String, variant: int, side: int, origin: Vector3
 		BattleSkinned.setup_material(mat, kind, variant)
 		var config := BattleSkinned.death_config(kind, variant) if corpse else BattleSkinned.state_config(kind, variant, _state, _state == "running")
 		BattleSkinned.apply_config(mat, config, 0.0)
+		mat.set_shader_parameter("split_count", _split)
 		mat.set_shader_parameter("blend_since", -100.0)
 		mat.set_shader_parameter("volley_time", _time - _since)
 		mat.set_shader_parameter("livery_share", 0.9)

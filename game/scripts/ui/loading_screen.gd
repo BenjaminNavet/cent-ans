@@ -1,8 +1,10 @@
 class_name LoadingScreen
 extends CanvasLayer
 
-## F3 — écran de chargement entre le menu et la carte : fond illustré voilé, écu et nom de
-## la faction, étapes cochées au fil du chargement, barre de progression, conseil.
+## F3, refait par MM1 — écran de chargement entre le menu et la carte : miniature du Codex ou
+## des événements (de préférence propre à la faction) en grand dans un cadre d'or, la même en
+## fond assombri, écu et nom de la faction, citation historique datée, conseil de jeu, étape en
+## cours et barre de progression. Textes et illustrations : `data/ui/front_end.json` (`loading`).
 ##
 ## Étapes (celles de `campaign_map.tscn`) :
 ##  1. ressources de la scène (chargement en tâche de fond, progression réelle du
@@ -20,31 +22,26 @@ const SCENE_PATH := "res://scenes/ui/loading_screen.tscn"
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
 const SETTLE_FRAMES := 12
 const FADE_SECONDS := 0.45
+const ART_SIZE := Vector2(800, 450)
 const STEPS := [
 	"Ressources de la carte",
 	"Relief, provinces et terrain ; mise en place de la campagne",
 	"Premières images",
-]
-## Conseils affichés pendant le chargement (texte d'interface).
-const TIPS := [
-	"Un tour est une saison : l'hiver ralentit les armées et affame celles qui sont en terre ennemie.",
-	"Échap ouvre le menu pause : sauvegarde, réglages, aide et retour au menu.",
-	"Le rapport de saison résume chaque fin de tour ; cliquez une ligne pour y porter la caméra.",
-	"Les alertes à droite signalent sièges, armées ennemies aux frontières et dettes.",
-	"Un général expérimenté vaut plusieurs compagnies : confiez vos armées à vos meilleurs vassaux.",
-	"La chronique propose des décisions historiques : vous avez deux tours pour choisir.",
-	"Les archers anglais redoutent la pluie ; les chevaliers, la boue et les pieux.",
 ]
 
 var scene_path: String = CAMPAIGN_SCENE
 var progress: float = 0.0
 var step_index: int = -1
 var result_scene: Node = null
+## Illustration, citation et conseil tirés pour cet écran (captures, tests).
+var illustration_path: String = ""
+var quote: Dictionary = {}
+var tip: String = ""
 
 var _root_control: Control
-var _background: MenuBackground
 var _bar: ProgressBar
-var _step_labels: Array[Label] = []
+var _step_label: Label
+var _percent_label: Label
 var _fade: ColorRect
 
 
@@ -68,24 +65,8 @@ func _build() -> void:
 	_root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.theme = load("res://scenes/ui/parchment_theme.tres")
 	add_child(_root_control)
-	_background = MenuBackground.new()
-	_background.dim = 0.35
-	_root_control.add_child(_background)
-
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_root_control.add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(620, 0)
-	center.add_child(panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
-	panel.add_child(box)
 
 	var facade := get_node_or_null("/root/SimFacade")
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 14)
-	box.add_child(header)
 	var faction_id := ""
 	var subtitle := "Nouvelle campagne — printemps 1337"
 	if facade != null:
@@ -100,44 +81,133 @@ func _build() -> void:
 				if meta is Dictionary:
 					faction_id = str(meta.get("faction", faction_id))
 					subtitle += " — %s" % meta.get("date", "")
+	illustration_path = FrontEndData.random_illustration(faction_id)
+	quote = FrontEndData.random_quote()
+	tip = FrontEndData.random_tip()
+	var art_texture := PortraitLoader.load_texture(illustration_path) if illustration_path != "" else null
+
+	# Fond : la miniature couvrant l'écran, très assombrie ; à défaut, la carte ancienne.
+	var base := ColorRect.new()
+	base.color = FrontEndStyle.NIGHT
+	base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_root_control.add_child(base)
+	if art_texture != null:
+		var backdrop := TextureRect.new()
+		backdrop.texture = art_texture
+		backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		backdrop.modulate = Color(0.24, 0.2, 0.17)
+		_root_control.add_child(backdrop)
+	else:
+		var map := MenuBackground.new()
+		map.dim = 0.6
+		_root_control.add_child(map)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 64)
+	margin.add_theme_constant_override("margin_right", 64)
+	margin.add_theme_constant_override("margin_top", 48)
+	margin.add_theme_constant_override("margin_bottom", 40)
+	_root_control.add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 18)
+	margin.add_child(column)
+
+	# En-tête : écu, nom de la faction, sous-titre.
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 16)
+	column.add_child(header)
 	var shield_texture := PortraitLoader.heraldry_texture(faction_id)
 	if shield_texture != null:
 		var shield := TextureRect.new()
 		shield.texture = shield_texture
-		shield.custom_minimum_size = Vector2(64, 72)
+		shield.custom_minimum_size = Vector2(56, 64)
 		shield.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		header.add_child(shield)
 	var titles := VBoxContainer.new()
+	titles.add_theme_constant_override("separation", -4)
 	header.add_child(titles)
-	var title := Label.new()
-	title.text = str(facade.call("faction_info", faction_id).get("name", "Cent Ans")) if facade != null and faction_id != "" else "Cent Ans"
-	title.add_theme_font_size_override("font_size", 28)
-	titles.add_child(title)
-	var sub := Label.new()
-	sub.text = subtitle
-	sub.add_theme_color_override("font_color", Color(0.40, 0.28, 0.14))
-	titles.add_child(sub)
+	var name := str(facade.call("faction_info", faction_id).get("name", "Cent Ans")) if facade != null and faction_id != "" else "Cent Ans"
+	titles.add_child(FrontEndStyle.label(name, 38, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6))
+	titles.add_child(FrontEndStyle.label(subtitle, 19, FrontEndStyle.GOLD, FrontEndStyle.title_italic(), 4))
 
-	box.add_child(HSeparator.new())
-	for text in STEPS:
-		var label := Label.new()
-		label.text = "○  %s" % text
-		label.add_theme_color_override("font_color", Color(0.45, 0.38, 0.30))
-		box.add_child(label)
-		_step_labels.append(label)
+	# Corps : miniature encadrée à gauche, citation et conseil à droite.
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 44)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(body)
+	var frame := PanelContainer.new()
+	var frame_style := StyleBoxFlat.new()
+	frame_style.bg_color = FrontEndStyle.GOLD_DARK
+	frame_style.border_color = FrontEndStyle.GOLD
+	frame_style.set_border_width_all(3)
+	frame_style.set_content_margin_all(6)
+	frame_style.shadow_color = Color(0, 0, 0, 0.6)
+	frame_style.shadow_size = 20
+	frame.add_theme_stylebox_override("panel", frame_style)
+	frame.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	body.add_child(frame)
+	var art := TextureRect.new()
+	art.texture = art_texture
+	art.custom_minimum_size = ART_SIZE
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	frame.add_child(art)
+
+	var side := VBoxContainer.new()
+	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side.alignment = BoxContainer.ALIGNMENT_CENTER
+	side.add_theme_constant_override("separation", 14)
+	body.add_child(side)
+	if not quote.is_empty():
+		var mark := FrontEndStyle.label("«", 64, Color(FrontEndStyle.GOLD, 0.8), FrontEndStyle.title_font())
+		mark.custom_minimum_size = Vector2(0, 40)
+		side.add_child(mark)
+		var quote_label := FrontEndStyle.label(str(quote.get("text", "")), 26, Color(0.95, 0.90, 0.78), FrontEndStyle.title_italic(), 4)
+		quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		side.add_child(quote_label)
+		var source := str(quote.get("author", ""))
+		if str(quote.get("source", "")) != "":
+			source += ", %s" % quote["source"]
+		var attribution := FrontEndStyle.label("— %s (%s)" % [source, quote.get("date", "")], 18, FrontEndStyle.GOLD, FrontEndStyle.body_font(), 3)
+		attribution.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		side.add_child(attribution)
+	var rule := ColorRect.new()
+	rule.color = Color(FrontEndStyle.GOLD, 0.5)
+	rule.custom_minimum_size = Vector2(0, 1)
+	side.add_child(rule)
+	if tip != "":
+		side.add_child(FrontEndStyle.label("Conseil", 20, FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3))
+		var tip_label := FrontEndStyle.label(tip, 19, Color(0.88, 0.83, 0.72), FrontEndStyle.body_font(), 3)
+		tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		side.add_child(tip_label)
+
+	# Pied : étape en cours, pourcentage, barre dorée.
+	var footer := HBoxContainer.new()
+	column.add_child(footer)
+	_step_label = FrontEndStyle.label("", 18, Color(0.88, 0.83, 0.72), FrontEndStyle.body_italic(), 3)
+	_step_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(_step_label)
+	_percent_label = FrontEndStyle.label("", 18, FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3)
+	footer.add_child(_percent_label)
 	_bar = ProgressBar.new()
 	_bar.min_value = 0.0
 	_bar.max_value = 1.0
 	_bar.step = 0.001
-	_bar.custom_minimum_size = Vector2(0, 18)
-	box.add_child(_bar)
-	var tip := Label.new()
-	tip.text = "Conseil : %s" % TIPS[randi() % TIPS.size()]
-	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tip.add_theme_font_size_override("font_size", 14)
-	tip.add_theme_color_override("font_color", Color(0.35, 0.24, 0.12))
-	box.add_child(tip)
+	_bar.show_percentage = false
+	_bar.custom_minimum_size = Vector2(0, 12)
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0, 0, 0, 0.6)
+	bar_bg.border_color = Color(FrontEndStyle.GOLD_DARK, 0.9)
+	bar_bg.set_border_width_all(1)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = FrontEndStyle.GOLD
+	_bar.add_theme_stylebox_override("background", bar_bg)
+	_bar.add_theme_stylebox_override("fill", bar_fill)
+	column.add_child(_bar)
 
 	_fade = ColorRect.new()
 	_fade.color = Color(0, 0, 0, 1)
@@ -147,14 +217,10 @@ func _build() -> void:
 
 
 func _set_step(index: int, value: float) -> void:
-	for i in _step_labels.size():
-		var label := _step_labels[i]
-		if i < index:
-			label.text = "✓  %s" % STEPS[i]
-			label.add_theme_color_override("font_color", Color(0.22, 0.36, 0.16))
-		elif i == index:
-			label.text = "▸  %s…" % STEPS[i]
-			label.add_theme_color_override("font_color", Color(0.22, 0.14, 0.07))
+	if index < STEPS.size():
+		_step_label.text = "%s…  (%d / %d)" % [STEPS[index], index + 1, STEPS.size()]
+	else:
+		_step_label.text = "Prêt."
 	step_index = index
 	_set_progress(value)
 
@@ -162,6 +228,7 @@ func _set_step(index: int, value: float) -> void:
 func _set_progress(value: float) -> void:
 	progress = clampf(value, 0.0, 1.0)
 	_bar.value = progress
+	_percent_label.text = "%d %%" % int(round(progress * 100.0))
 
 
 func _frames(count: int) -> void:
@@ -172,7 +239,8 @@ func _frames(count: int) -> void:
 func run() -> void:
 	var tree := get_tree()
 	var tween := create_tween()
-	tween.tween_property(_fade, "color:a", 0.0, FADE_SECONDS * 0.6)
+	var fade_time := 0.01 if Accessibility.reduce_motion() else FADE_SECONDS  # U12
+	tween.tween_property(_fade, "color:a", 0.0, fade_time * 0.6)
 	await tween.finished
 
 	# 1. Ressources (chargement en tâche de fond).
@@ -213,7 +281,7 @@ func run() -> void:
 		_set_progress(0.85 + 0.15 * float(frame + 1) / SETTLE_FRAMES)
 	_set_step(STEPS.size(), 1.0)
 	var fade_out := create_tween()
-	fade_out.tween_property(_root_control, "modulate:a", 0.0, FADE_SECONDS)
+	fade_out.tween_property(_root_control, "modulate:a", 0.0, fade_time)
 	await fade_out.finished
 	finished.emit(scene)
 	queue_free()

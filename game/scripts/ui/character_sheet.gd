@@ -181,12 +181,13 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	_heraldry.tooltip_text = "Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else ""
 	swatch.move_child(_heraldry, -1)
 	var alive_now: bool = bool(character.get("alive", true))
+	var female := str(character.get("sex", "")) == "female"
 	swatch.modulate = Color.WHITE if alive_now else Color(0.75, 0.75, 0.75)
 	var epithet: String = str(character.get("epithet", ""))
 	name_label.text = "%s%s" % [str(character.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
 	subtitle_label.text = "%s — %s — Maison %s%s" % [
 		str(character.get("title", "")), _life_text(character),
-		str(character.get("house", "")), "" if alive_now else " — défunt(e)",
+		str(character.get("house", "")), "" if alive_now else (" — défunte" if female else " — défunt"),
 	]
 	_fill_titles(character)
 	_fill_stats(character)
@@ -213,10 +214,67 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	governor_button.disabled = not governable_ok
 	general_button.disabled = not commandable_ok
 	marry_button.disabled = not (alive and not captive and str(character.get("spouse", "")) == "" and not candidates.is_empty())
+	_show_blockers(character, governable, commandable, candidates)
 
 	_fill_ransom(character)  # G1
 	_fill_skill_tree()
 	show()
+
+
+# --- U10 : motifs des actions grisées ------------------------------------------------------
+
+## Libellés des actions de la fiche (motifs des boutons grisés).
+const ACTION_NAMES := {"governor": "Nommer gouverneur", "general": "Donner le commandement", "marry": "Marier"}
+var _blocker_label: Label
+
+
+## Motif pour lequel l'action `kind` (« governor », « general », « marry ») est impossible,
+## vide si elle est possible. Lecture seule de l'état déjà fourni par `core/`.
+static func action_blocker(kind: String, character: Dictionary, entries: Array) -> String:
+	var female := str(character.get("sex", "")) == "female"
+	if not bool(character.get("alive", true)):
+		return "défunte" if female else "défunt"
+	if bool(character.get("captive", false)):
+		return "retenue captive" if female else "retenu captif"
+	match kind:
+		"governor":
+			if str(character.get("army", "")) != "":
+				return "commande déjà une armée"
+			if entries.is_empty():
+				return "aucune province à gouverner"
+		"general":
+			if str(character.get("governor_of", "")) != "":
+				return "gouverne déjà une province"
+			if entries.is_empty():
+				return "aucune armée sans chef"
+		"marry":
+			if str(character.get("spouse", "")) != "":
+				return "déjà mariée" if female else "déjà marié"
+			if entries.is_empty():
+				return "aucun parti disponible"
+	return ""
+
+
+## Infobulle et ligne « Pourquoi ? » sous les boutons grisés (audit A3, P3).
+func _show_blockers(character: Dictionary, governable: Array, commandable: Array, candidates: Array) -> void:
+	if _blocker_label == null:
+		_blocker_label = Label.new()
+		_blocker_label.name = "Blockers"
+		_blocker_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_blocker_label.add_theme_font_size_override("font_size", 13)
+		_blocker_label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
+		var actions := governor_button.get_parent()
+		actions.get_parent().add_child(_blocker_label)
+		actions.get_parent().move_child(_blocker_label, actions.get_index() + 1)
+	var lines := PackedStringArray()
+	for pair in [["governor", governor_button, governable], ["general", general_button, commandable], ["marry", marry_button, candidates]]:
+		var button: Button = pair[1]
+		var reason := action_blocker(str(pair[0]), character, pair[2]) if button.disabled else ""
+		button.tooltip_text = ("Impossible : %s." % reason) if reason != "" else ""
+		if reason != "":
+			lines.append("%s : %s." % [ACTION_NAMES[pair[0]], reason])
+	_blocker_label.text = "\n".join(lines)
+	_blocker_label.visible = not lines.is_empty()
 
 
 # --- C3 : présentation à la Total War ------------------------------------------------------
