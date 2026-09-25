@@ -22,7 +22,9 @@ extends Node3D
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
 ## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
-## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
+## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
+## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
+## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 
 signal returned(result: Dictionary)
 
@@ -270,6 +272,7 @@ func begin() -> bool:
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
+	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
 	terrain.build(terrain_data, weather_key)
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
@@ -286,6 +289,8 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	if terrain.horizon != null:
+		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:

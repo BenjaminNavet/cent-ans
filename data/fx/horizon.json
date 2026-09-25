@@ -92,7 +92,7 @@
       "path": "res://assets/horizon/panoramas/flanders_flat.webp",
       "label": "Plat pays de Flandre",
       "repeats": 6,
-      "prompt": "the flat country of Flanders seen to the far horizon: perfectly flat wet meadows and fields, long rows of pollarded willows and poplars, drainage ditches, a very low flat horizon under a wide sky, fading into grey haze"
+      "prompt": "the flat country of Flanders seen from a church tower, only the far distance several kilometres away: perfectly flat wet meadows and fields, small distant rows of willows and poplars, a very low flat horizon at mid-height of the picture, fading into grey haze; no road, no near trees"
     },
     "moorland_hills": {
       "path": "res://assets/horizon/panoramas/moorland_hills.webp",

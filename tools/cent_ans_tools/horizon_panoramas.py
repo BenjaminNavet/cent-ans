@@ -74,12 +74,13 @@ def sky_model(rgb: np.ndarray, jump: float = 0.12, spread: float = 0.07) -> np.n
     median = ndimage.uniform_filter1d(np.median(rgb, axis=1), size=15, axis=0)
     spread_row = np.median(np.abs(rgb - median[:, None, :]).sum(axis=2), axis=1)
     end = h
-    for row in range(16, h):
+    start = max(16, int(0.06 * h))  # the painted canvas is often darker at the very top
+    for row in range(start, h):
         step = np.abs(median[row] - median[row - 12]).sum()
         if step > jump or spread_row[row] > spread:
             end = row
             break
-    fit_from = max(end - max(end // 5, 8), 0)
+    fit_from = max(end - max(end // 5, 8), min(start, end - 2), 0)
     rows = np.arange(fit_from, end)
     model = median.copy()
     if end < h and rows.size >= 2:
@@ -115,7 +116,11 @@ def sky_mask(rgb: np.ndarray, threshold: float = 0.08) -> np.ndarray:
     )
     solid[:4] = False
     first = np.where(solid.any(axis=0), solid.argmax(axis=0), h - 1).astype(np.float64)
-    return ndimage.median_filter(first, size=9, mode="wrap")
+    crest = ndimage.median_filter(first, size=9, mode="wrap")
+    # Thin upward spikes (keying noise on a painted sky) are clipped to the local crest.
+    crest = ndimage.grey_closing(crest, size=15, mode="wrap")
+    wide = ndimage.median_filter(crest, size=61, mode="wrap")
+    return np.maximum(crest, wide - 0.06 * h)
 
 
 def process(raw: Image.Image, width: int = OUT_WIDTH, depth: float = 0.16) -> Band:
