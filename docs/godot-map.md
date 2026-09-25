@@ -900,6 +900,44 @@ exagération dynamique) et `-4_site_avant` (même vue, `--static-exaggeration`).
 ![Rouen, site (exagération dynamique)](img/zg4/rouen-3_site_apres.jpg)
 ![Puy de Dôme, site](img/zg4/puy-de-dome-3_site_apres.jpg)
 
+### Correctifs de recette (lot ZG4b)
+
+Relevés par la recette Q3 (`docs/audit/q3-recette.md`, P1 n° 2) ; rendu seulement.
+
+- **Plancher provisoire au-dessus des villes emblématiques** : `CloseCameraProfile.landmark_min_distance`
+  (`game/resources/close_camera.tres`, **2,6 unités**, au-dessus du palier site qui masque les maquettes à
+  la loupe) dans les cercles `SettlementLayer.landmark_zones()` (`camera_rig.close_zones`), adouci au-dehors
+  avec `min_distance_slope` (`landmark_floor`). Avant, la caméra descendait à 0,3 unité au-dessus de Londres
+  sur un sol vide (maquette masquée, rien de fin dans la zone). **Le lot VH4 le lève** (`landmark_min_distance
+  = 0`) quand les villes emblématiques passent à l'échelle réelle.
+- **Brouillard matinal de la météo (CM2) de près** : la nappe peinte sur le sol (`weather_ground`, jusqu'à
+  80 % de gris) recouvrait tout le sol d'un beige uniforme de près (textures et parcellaire effacés : c'était
+  le « sol beige nu » de Londres, région souvent dans la brume). Elle ne garde que `weather_mist_near` (20 %)
+  quand l'empreinte d'un pixel passe sous `weather_mist_near_footprint` (0,06 unité, palier vallée) ;
+  l'atmosphère de près (ZG4) donne le voile en profondeur. Joueur français : le voile beige sur Londres est
+  le brouillard de guerre, normal.
+- **Parcellaire des terres basses** : `fp_parcels` sautait `hc <= 0,5`, or ZG3b relève les terres sous le
+  niveau de la mer au plancher `MIN_LAND_M` = 0,5 m (rives de la Tamise, polders) : test `hc < 0,25`.
+- **Ponts-portes fins à l'échelle réelle** : `FineGeoLayer._build_gates` posait les ponts-portes (bords des
+  emprises des colonies, fleuve fin) à l'échelle exagérée de la carte (×2 en hauteur et en tablier) ; ils
+  suivent maintenant la règle des ponts ancrés (portée du fleuve fin, maillage `width / FINE_SCALE` réduit de
+  `FINE_SCALE`, tablier à `GATE_DECK_RISE_M` = 7 m au-dessus de l'eau × échelle verticale, recalculé à chaque
+  palier d'exagération).
+- **Bascule des ponts étalée** : `RiverCrossings.set_fine_mode` remaillait tous les ponts construits d'un bloc
+  (~35 ms) ; file d'attente vidée au moins d'un ouvrage par image puis tant que `FrameBudget.has_time()`
+  (`pump_reshape`, vidée d'un coup par `FineGeoLayer.flush`), un maillage gardé par mode (le retour ne remaille
+  rien), mode porté par chaque ouvrage (cohérent pendant la bascule).
+- **Hors lot** : le ruban rouge et gris géant de Londres vers 20 unités (`en3-011`) n'est pas un pont mais la
+  couche des routes commerciales C5 (`TradeRouteLayer`) : `refresh()` force `_wanted_visible = true`, la couche
+  apparaît donc sans le mode Commerce (route active sépia + route coupée Calais-Londres grise par-dessus).
+  L'aperçu de chemin d'armée (`PathPreview`, orange) reste lui aussi à l'échelle de la carte aux paliers
+  vallée / site.
+
+Captures (`docs/img/zg4b/`, 1 280 × 720) : `avant-londres-20` / `-8` / `-plus-pres` (recette Q3) ;
+`apres-londres-20`, `-8`, `-0.3` (plancher : 2,6), `apres-paris-0.3`, `apres-pont-porte-orleans`.
+
+![Londres au plus près (plancher ZG4b)](img/zg4b/apres-londres-0.3.jpg)
+
 ## Hydrographie fine, routes drapées, ancrages et parcellaire de près (lot ZG5b, ADR 0036)
 
 Rendu seulement : les données viennent du lot ZG5a (`docs/geo.md`, « Hydrographie fine »), les règles
