@@ -1206,11 +1206,20 @@ func _run_battle() -> void:
 	_check(str(dialog.body_label.text).contains("Météo prévue"), "battle: dialog should show the weather forecast")
 	_check(str(dialog.body_label.text).contains("Site : ") and dialog.site_label_text != "", "battle: dialog should show the battle site (B6)")
 	dialog.fight_button.emit_signal("pressed")
-	await process_frame
+	# AR1 : la bataille se construit derrière l'écran de chargement illustré (quelques images).
 	var scene: Node = null
+	for _frame in 120:
+		await process_frame
+		for child in root.get_children():
+			if child is BattleScene:
+				scene = child
+		if scene != null:
+			break
+	var loading_card_shown := false
 	for child in root.get_children():
-		if child is BattleScene:
-			scene = child
+		if child is BattleLoadingCard:
+			loading_card_shown = true
+	_check(loading_card_shown, "battle: illustrated loading card (AR1) should cover the battle build")
 	if not _check(scene != null, "battle: battle.tscn not opened by « Livrer bataille »"):
 		map.queue_free()
 		return
