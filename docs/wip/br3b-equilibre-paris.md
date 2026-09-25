@@ -184,3 +184,6 @@ en ne gardant que le correctif d'IA ; (d) un levier propre à Paris ou à Bordea
 
 ## Prochaine étape
 Terminé ; à fusionner par l'orchestrateur. Décision ouverte : Bordeaux (options a-d ci-dessus).
+
+## Décision de l'orchestrateur (2026-09-25)
+Option (a) retenue : `wall_walk_factor` = 0,3. Paris est à 12/20, dans la cible. Bordeaux passe de 17 à 12/20 : la ville penche toujours vers l'assaillant, et l'écart de ±3 n'était qu'une cible interne. Après la fusion d'EP8 dans la branche, la sonde donne exactement les mêmes chiffres. Fusionné dans main.
