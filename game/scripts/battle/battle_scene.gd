@@ -220,6 +220,7 @@ func begin() -> bool:
 		_pad_setup(_pad_units)
 	if _siege_engines != "" and setup.get("siege") != null:
 		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
+		padded = true  # régiments hors campagne : pas de résultat à rapporter
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false

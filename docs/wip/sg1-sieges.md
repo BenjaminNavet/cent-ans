@@ -52,6 +52,14 @@ cède, garnison qui se replie sur la place.
 | SG1 + 4 engins (`--siege-engines=`) | 58,5 | 0,92 ms |
 Pas de perte mesurable (l'écran plafonne à 60 Hz même avec `--disable-vsync --max-fps 0`).
 
+## Après fusion de main (BV1/BV2)
+- `soldier_poses(unit, figure_scale)` / `climbers_shown(unit, figure_scale)` suivent le nombre de
+  figurines de BV1 (`figure_positions`).
+- BV1 rend les tirs du cœur (`get_shots`) : un tir d'engin sur un pan (`cover == "wall"`) est laissé
+  à `SiegeAssaultFx` (`BattleEffects.siege_walls`), sinon deux pierres et deux impacts.
+- `--siege-engines=` marque la bataille `padded` (régiments hors campagne : pas de résultat rapporté).
+- Captures refaites après fusion (`docs/audit/captures/sg1/`, sauf `sg1_place.png` : `--units=10`).
+
 ## Points ouverts
 - Le trébuchet lui-même n'est pas animé (verge qui bascule) : figurine d'engin B1 inchangée.
 - Le point d'impact est choisi au tir (le cœur applique les dégâts au tir) : l'effondrement S1
