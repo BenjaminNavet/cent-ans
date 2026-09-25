@@ -33,6 +33,10 @@ Captures commentées : `docs/audit/captures/q1/`.
 | C7 | Aide F1 : « L : tutoriel » (L ouvre l'encyclopédie) ; volumes indiqués dans « Menu → Son… » alors qu'ils sont dans Réglages → Son (6 bus) | F8 / AU1 | texte d'aide (f1c7da4b) |
 | C8 | **Rapport de saison sans date** (« Rapport de saison — ») quand une bataille est livrée avant la première fin de tour | UB1 / F3 | la date est passée avec les événements tardifs (5c3089ba) |
 
+Après la fusion de main (0c082a82 : UI3, MM1, SG1) : C4 et C7 recouvrent des changements d'UI3
+(filtre `keeps_news`, fiche des raccourcis générée depuis l'InputMap) ; la version d'UI3 a été
+gardée. C1, C2, C3, C5, C6 et C8 restent nécessaires et ont été revérifiés en jeu.
+
 ## Restant, par priorité
 
 ### P1 — à traiter vite
