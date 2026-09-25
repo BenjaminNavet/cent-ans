@@ -1270,11 +1270,11 @@ fn plan_field(view: &mut View) {
     // EP9 (ADR 0056): the side that sought the battle must attack; it trades
     // volleys only for a while. EP9b: longer while its shooters are clearly
     // winning the duel (sliding window, `data/rules/battle_duel.json`).
-    let duel_rules = crate::duel::DuelRules::bundled();
+    let duel_rules = view.sim.duel_rules();
     let window = duel_rules.window_seconds;
     let winning_duel = duel_rules.winning(
-        view.sim.recent_losses(view.side, window),
-        view.sim.recent_losses(view.side.other(), window),
+        view.sim.recent_missile_losses(view.side, window),
+        view.sim.recent_missile_losses(view.side.other(), window),
     );
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
@@ -1298,8 +1298,12 @@ fn plan_field(view: &mut View) {
         .line
         .iter()
         .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
-    let echelons =
-        !defensive && !duel && contact < DUEL_RANGE && contact >= duel_rules.second_echelon_closes_m && !first.is_empty() && !second.is_empty();
+    let echelons = !defensive
+        && !duel
+        && contact < DUEL_RANGE
+        && contact >= duel_rules.second_echelon_closes_m
+        && !first.is_empty()
+        && !second.is_empty();
     let line_center = view
         .centroid(if echelons { &first } else { &roles.line })
         .or_else(|| view.centroid(&view.own))
