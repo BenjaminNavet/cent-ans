@@ -312,7 +312,7 @@ func _start_job(key: int) -> void:
 	job.river_tile = store.get_tile(CafvTile.LAYER_RIVERS, col, row)
 	job.road_tile = store.get_tile(CafvTile.LAYER_ROADS, col, row)
 	job.snapshot = terrain.quadtree.surface_snapshot(rect.grow(1.0), rect.position)
-	job.finest = _finest_level(terrain.quadtree.surface_snapshot(rect, rect.position))
+	job.finest = terrain.quadtree.finest_levels([rect] as Array[Rect2])[0]
 	job.snapshot_scale = MapData.vertical_scale()
 	job.meters_per_unit = map_data.meters_per_px
 	job.min_order = _min_order
@@ -418,24 +418,26 @@ func _evict() -> void:
 ## pendant un panoramique).
 func _on_surface_rect_changed(rect: Rect2) -> void:
 	var now := Time.get_ticks_msec()
+	# ZG7a : étages les plus fins de toutes les tuiles touchées en un parcours des pages (un
+	# instantané par tuile coûtait jusqu'à 9 ms par page arrivée sous charge).
+	var keys: Array[int] = []
+	var rects: Array[Rect2] = []
 	for key: int in _built:
 		var tile_rect := FineGeoStore.tile_rect(key & 0xFFF, key >> 12)
-		if not tile_rect.intersects(rect):
-			continue
-		var entry: Dictionary = _built[key]
-		var finest := _finest_level(terrain.quadtree.surface_snapshot(tile_rect, tile_rect.position))
+		if tile_rect.intersects(rect):
+			keys.append(key)
+			rects.append(tile_rect)
+	if keys.is_empty():
+		return
+	var levels := terrain.quadtree.finest_levels(rects)
+	for i in keys.size():
+		var entry: Dictionary = _built[keys[i]]
+		var finest := levels[i]
 		var built_at := int(entry.get("finest", -1))
 		# E5-E7 (zones de détail) : lit déjà creusé dans leurs pages, écart de surface faible ; on
 		# ne remaille que jusqu'à E4.
 		if finest != built_at and mini(finest, 4) != mini(built_at, 4):
 			entry["dirty"] = now
-
-
-static func _finest_level(snapshot: Dictionary) -> int:
-	var finest := -1
-	for page_key: int in snapshot.get("qt_pages", {}):
-		finest = maxi(finest, ReliefPyramid.level_of_key(page_key))
-	return finest
 
 
 # --- Ponts ----------------------------------------------------------------------------
