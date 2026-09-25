@@ -24,6 +24,8 @@ const MIN_SCALE := 0.27
 const MAX_SCALE := 14.0
 ## Lot ZG4 : distance sous laquelle l'échelle décroît de nouveau avec la distance.
 const CLOSE_KNEE_DISTANCE := 12.0
+## Lot ZG4 : portée des plaques sous `CLOSE_KNEE_DISTANCE`, en multiples de la distance caméra.
+const CLOSE_PLATE_RANGE_FACTOR := 40.0
 
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
@@ -306,7 +308,7 @@ func world_position_of(army_id: String) -> Vector3:
 
 
 func update_scale(camera_distance: float) -> void:
-	if absf(camera_distance - _camera_distance) > 0.25:
+	if absf(camera_distance - _camera_distance) > minf(0.25, absf(_camera_distance) * 0.05):
 		_camera_distance = camera_distance
 		var weight := figure_weight(camera_distance)
 		for marker in _markers.values():
@@ -425,7 +427,12 @@ func _update_plates() -> void:
 			plate.visible = false
 			continue
 		var anchor := marker.plate_anchor()
-		if camera.is_position_behind(anchor):
+		if camera.is_position_behind(anchor) or not marker.is_visible_in_tree():
+			plate.visible = false
+			continue
+		# ZG4 : vues vallée / site (rasantes) : pas de plaques d'armées lointaines sur l'horizon.
+		if _camera_distance >= 0.0 and _camera_distance < CLOSE_KNEE_DISTANCE and id != selected_army \
+				and camera.global_position.distance_to(anchor) > CLOSE_PLATE_RANGE_FACTOR * _camera_distance:
 			plate.visible = false
 			continue
 		var screen := camera.unproject_position(anchor)

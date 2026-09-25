@@ -19,3 +19,6 @@ site_fade = 0.8
 site_border_alpha = 0.2
 site_fog_alpha = 0.35
 close_label_range_factor = 40.0
+prop_scale_distance = 22.0
+prop_scale_exponent = 0.8
+prop_scale_min = 0.04

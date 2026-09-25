@@ -14,6 +14,9 @@ uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
 // Lot CV1 : saison (poids printemps, été, automne, hiver, somme 1), publiée par season_visuals.gd.
 // Lot V4 : teintes par essence (UV.x) pondérées par ces poids.
 global uniform vec4 campaign_season;
+// Lot ZG4 : échelle des arbres aux paliers vallée / site (1 au palier comté et au-delà ; les arbres
+// de la carte font ~1 km de haut, lisibles de loin, absurdes vus à 200 m). ZoomTiers.prop_scale.
+global uniform float campaign_prop_scale;
 uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);
 uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
 uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
@@ -70,7 +73,7 @@ void vertex() {
 	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
 	VERTEX.x += sway * weight;
 	VERTEX.z += sway * 0.6 * weight;
-	VERTEX *= keep;
+	VERTEX *= keep * campaign_prop_scale;
 	v_ao = mix(0.55, 1.0, COLOR.a);
 	v_tint = INSTANCE_CUSTOM.rgb;
 }
