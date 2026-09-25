@@ -354,12 +354,12 @@ func _draw_medallion(center: Vector2, blocked: bool) -> void:
 	elif _hover:
 		state = "hover"
 	var texture: Texture2D = _medallion.get(state, _medallion["normal"])
-	# L'image porte les fleurons aux points cardinaux : l'anneau d'or vaut ~0.86 du demi-côté.
-	var half := BUTTON_RADIUS / 0.86
-	draw_circle(center + Vector2(2, 3), BUTTON_RADIUS, HudStyle.SHADOW)
+	# Les fleurons de l'image touchent le bord du disque ; l'anneau d'or vaut ~0.86 du rayon.
+	var half := BUTTON_RADIUS
+	draw_circle(center + Vector2(2, 3), BUTTON_RADIUS * 0.86, HudStyle.SHADOW)
 	draw_texture_rect(texture, Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0), false)
 	if blocked:
-		draw_arc(center, BUTTON_RADIUS + 2.0, 0.0, TAU, 64, HudStyle.RUBRIC, 3.5, true)
+		draw_arc(center, BUTTON_RADIUS * 0.86 + 2.0, 0.0, TAU, 64, HudStyle.RUBRIC, 3.5, true)
 	var font := get_theme_default_font()
 	var parts := date_label.split(" ", false)
 	var line1 := "Décision" if blocked else (parts[0] if parts.size() > 0 else "Fin de tour")

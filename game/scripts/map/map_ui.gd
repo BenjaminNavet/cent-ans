@@ -243,7 +243,7 @@ const TOP_MEDALLIONS := {
 	"hud_agents": "agents", "hud_menu": "menu",
 }
 ## Diamètre du médaillon dans la barre (l'icône à l'encre reste le repli à `TOP_ICON_SIZE`).
-const TOP_MEDALLION_SIZE := 30
+const TOP_MEDALLION_SIZE := 26
 
 
 ## Médaillon enluminé sur un bouton de la barre (DA5) : le médaillon remplace le fond plat au
