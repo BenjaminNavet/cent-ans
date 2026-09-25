@@ -2044,7 +2044,11 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         let pretender = me.claims.iter().any(|c| c.kind == ClaimKind::Throne);
         me.ledger.weariness > if pretender { most + 20 } else { most }
     };
-    let ready = turn >= 4 && rested && !weary && war_ready(state, faction);
+    let ready = turn >= 4
+        && rested
+        && !weary
+        && (war_ready(state, faction)
+            || crate::negotiation::pretender_ready(state, data, faction));
     let mut declared = false;
     if ready && (turn + slot).is_multiple_of(2) {
         if let Some(target) = war_target(state, data, faction, aggression) {

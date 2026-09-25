@@ -1605,7 +1605,8 @@ pub(crate) fn resolve_negotiation(
             .iter()
             .filter(|e| !is_rebels(e))
             .filter(|e| {
-                state.are_neighbors(data, id, e)
+                (state.are_neighbors(data, id, e)
+                    && state.faction_power(e) >= 0.25 * state.faction_power(id))
                     || state.war_score(data, id, e) < 0
                     || state.provinces.keys().any(|p| {
                         state.province_owner(p) == Some(id) && state.controls_province(e, p)
@@ -1642,6 +1643,30 @@ pub(crate) fn resolve_negotiation(
         ledger.weariness = next;
         ledger.weariness_unrest = next / rules.weariness_unrest_divisor.max(1);
     }
+}
+
+/// A pretender to a throne goes to war on credit (Edward III and the
+/// Bardi): one season of upkeep in the chest is enough, instead of the
+/// two of `diplomacy::war_ready`.
+pub fn pretender_ready(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
+    let Some(me) = state.factions.get(faction) else {
+        return false;
+    };
+    let pretender = me
+        .claims
+        .iter()
+        .any(|c| c.kind == data_model::ClaimKind::Throne);
+    let ruler_free = me
+        .ruler
+        .as_ref()
+        .and_then(|r| state.characters.get(r))
+        .is_none_or(|r| !r.captive);
+    rules(data).enabled
+        && pretender
+        && !me.regency
+        && ruler_free
+        && me.treasury > 0
+        && me.treasury >= me.upkeep_last_turn.max(0)
 }
 
 /// Income factor of the trade agreements of `faction` (+2 % each, +8 %
@@ -1691,8 +1716,15 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
             .total_cmp(&state.faction_power(a))
             .then_with(|| a.cmp(b))
     });
+    let cornered = diplomacy::is_cornered(state, data, faction);
     for enemy in enemies {
         let enemy_is_player = enemy == &state.player_faction;
+        // A campaign season does not end a war: no treaty before
+        // `min_war_turns`, unless the realm is down to its last lands.
+        let started = me.war_started.get(enemy).copied().unwrap_or(0);
+        if !cornered && state.turn < started + rules.min_war_turns {
+            continue;
+        }
         let score = state.war_score(data, faction, enemy);
         let chance = |articles: &[Article]| -> u8 {
             evaluate_treaty(state, data, faction, enemy, articles).chance
@@ -1738,8 +1770,8 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         // Only a beaten or exhausted crown buys its peace (lands, gold,
         // tribute); otherwise the war goes on until one side prevails.
         let beaten = score < 2 * diplomacy::SURRENDER_WAR_SCORE
-            || me.ledger.weariness >= 60
-            || diplomacy::is_cornered(state, data, faction);
+            || me.ledger.weariness >= rules.sue_weariness
+            || cornered;
         if beaten {
             if let Some(treaty) = counter_proposal(state, data, faction, enemy, &white) {
                 if enemy_is_player || chance(&treaty) >= min_chance {

@@ -165,6 +165,11 @@ pub struct NegotiationRules {
     pub pretender_reluctance: i32,
     /// Most weariness gained in one season.
     pub max_weariness_gain: u32,
+    /// Weariness from which the AI buys its peace (lands, gold, tribute).
+    pub sue_weariness: u32,
+    /// Seasons of war before the AI proposes any treaty peace (unless
+    /// cornered).
+    pub min_war_turns: u32,
 }
 
 impl Default for NegotiationRules {
@@ -196,6 +201,8 @@ impl Default for NegotiationRules {
             peace_truce_turns: 12,
             pretender_reluctance: 20,
             max_weariness_gain: 3,
+            sue_weariness: 60,
+            min_war_turns: 0,
         }
     }
 }
