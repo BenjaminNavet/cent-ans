@@ -13,4 +13,4 @@ Branche : `feature/df1-difficulty` (worktree agent). Ne pas merger soi-même.
 - [x] ADR 0037 (pas de codex mécaniques sur main : rien créé).
 
 ## Prochaine étape
-Construire la dylib (core/build.sh), lancer le smoke Godot, vérifier cargo test complet + clippy, pytest.
+Checks Rust et pytest verts ; smoke Godot en cours de validation. Ensuite : rapport final, pas de merge.
