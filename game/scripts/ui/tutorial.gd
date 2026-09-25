@@ -89,7 +89,7 @@ func _ready() -> void:
 	title_label = Label.new()
 	title_label.add_theme_font_size_override("font_size", 21)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	header.add_child(title_label)
 	progress_label = Label.new()
 	progress_label.add_theme_font_size_override("font_size", 14)
@@ -223,12 +223,26 @@ func _rebuild_toc() -> void:
 	for child in toc_box.get_children():
 		toc_box.remove_child(child)
 		child.queue_free()
+	var plain := StyleBoxEmpty.new()
+	plain.content_margin_left = 6
+	plain.content_margin_top = 2
+	plain.content_margin_bottom = 2
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = Color(0.85, 0.74, 0.52, 0.6)
+	hover.set_corner_radius_all(3)
+	hover.content_margin_left = 6
+	hover.content_margin_top = 2
+	hover.content_margin_bottom = 2
 	for index in step_titles.size():
 		var row := Button.new()
 		row.flat = true
 		row.focus_mode = Control.FOCUS_NONE
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.add_theme_font_size_override("font_size", 14)
+		for state in ["normal", "pressed", "focus", "disabled"]:
+			row.add_theme_stylebox_override(state, plain)
+		row.add_theme_stylebox_override("hover", hover)
+		row.add_theme_stylebox_override("hover_pressed", hover)
 		var mark := "✔" if index < current_index else ("▸" if index == current_index else "  ")
 		row.text = "%s %d. %s" % [mark, index + 1, step_titles[index]]
 		if index == current_index:

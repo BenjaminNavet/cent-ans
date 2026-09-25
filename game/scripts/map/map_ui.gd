@@ -1254,11 +1254,11 @@ func press_action(action: String) -> void:
 # --- UX2 : libellés de la barre du haut (audit A3, C9) ------------------------------------
 
 ## Taille du texte des boutons libellés de la barre.
-const TOP_LABEL_FONT := 16
+const TOP_LABEL_FONT := 15
 ## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
 const TOP_COLLAPSE_ORDER := ["Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
 ## Marge laissée à droite de la barre (bord, respiration).
-const TOP_BAR_SLACK := 12.0
+const TOP_BAR_SLACK := 4.0
 
 ## Boutons libellés : `{button, label, glyph, labelled}`.
 var _top_labels: Array[Dictionary] = []
@@ -1298,6 +1298,9 @@ func _apply_top_label(entry: Dictionary, labelled: bool) -> void:
 	var text := " ".join(parts)
 	if count > 0:
 		text = ("%s (%d)" % [text, count]) if labelled else ("%s %d" % [text, count]).strip_edges()
+	# Cartouche de touche au coin bas droit : un blanc fixe évite qu'elle morde la dernière lettre.
+	if labelled and button.has_node("Keycap"):
+		text += "\u2007"
 	button.text = text
 	if button.has_meta("tooltip"):  # infobulle d'état fournie par le propriétaire (Chronique)
 		button.tooltip_text = str(button.get_meta("tooltip"))
@@ -1331,8 +1334,8 @@ func queue_fit_top_bar() -> void:
 ## `TOP_COLLAPSE_ORDER` jusqu'à ce que la barre tienne dans la largeur de l'écran.
 func fit_top_bar() -> void:
 	_fit_queued = false
-	var top_bar := $TopBar as Control
-	var available := top_bar.size.x if top_bar.size.x > 0.0 else get_viewport().get_visible_rect().size.x
+	# Largeur de l'écran (la barre, ancrée, s'élargit au-delà quand son contenu déborde).
+	var available := get_viewport().get_visible_rect().size.x
 	for entry in _top_labels:
 		_apply_top_label(entry, true)
 	for label in TOP_COLLAPSE_ORDER:
