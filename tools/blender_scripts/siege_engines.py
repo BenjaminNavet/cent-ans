@@ -54,6 +54,7 @@ def g2b(v) -> Vector:
 
 
 def material(name: str):
+    """Named material shared by every model (colour for the Blender previews only)."""
     mat = bpy.data.materials.get(name)
     if mat is None:
         mat = bpy.data.materials.new(name)
@@ -72,6 +73,7 @@ class Part:
     """A mesh node under construction: geometry in its local Godot axes, per-face material."""
 
     def __init__(self) -> None:
+        """Empty geometry."""
         self.bm = bmesh.new()
         self.names: list[str] = []
 
@@ -94,35 +96,73 @@ class Part:
         if rot is not None:
             axis, angle = rot
             m = Matrix.Rotation(angle, 4, g2b(axis).normalized()) @ m
-        bmesh.ops.transform(self.bm, matrix=Matrix.Translation(g2b(center)) @ m, verts=verts)
+        bmesh.ops.transform(
+            self.bm, matrix=Matrix.Translation(g2b(center)) @ m, verts=verts
+        )
         self._faces({f for v in verts for f in v.link_faces}, mat)
 
-    def beam(self, a, b, r1: float, r2: float | None = None, sides: int = 6, mat: str = "Timber", cap: bool = True) -> None:
+    def beam(
+        self,
+        a,
+        b,
+        r1: float,
+        r2: float | None = None,
+        sides: int = 6,
+        mat: str = "Timber",
+        cap: bool = True,
+    ) -> None:
         """Tapered prism from ``a`` to ``b`` (Godot points)."""
         r2 = r1 if r2 is None else r2
         pa, pb = g2b(a), g2b(b)
         axis = pb - pa
         length = axis.length
         geom = bmesh.ops.create_cone(
-            self.bm, cap_ends=cap, cap_tris=False, segments=sides, radius1=r1, radius2=r2, depth=length
+            self.bm,
+            cap_ends=cap,
+            cap_tris=False,
+            segments=sides,
+            radius1=r1,
+            radius2=r2,
+            depth=length,
         )
         verts = geom["verts"]
-        rot = Vector((0, 0, 1)).rotation_difference(axis.normalized()).to_matrix().to_4x4()
-        bmesh.ops.transform(self.bm, matrix=Matrix.Translation((pa + pb) * 0.5) @ rot, verts=verts)
+        rot = (
+            Vector((0, 0, 1))
+            .rotation_difference(axis.normalized())
+            .to_matrix()
+            .to_4x4()
+        )
+        bmesh.ops.transform(
+            self.bm, matrix=Matrix.Translation((pa + pb) * 0.5) @ rot, verts=verts
+        )
         self._faces({f for v in verts for f in v.link_faces}, mat)
 
     def sphere(self, center, radius: float, mat: str = "Stone") -> None:
+        """Low icosphere (a stone)."""
         geom = bmesh.ops.create_icosphere(self.bm, subdivisions=1, radius=radius)
         verts = geom["verts"]
-        bmesh.ops.transform(self.bm, matrix=Matrix.Translation(g2b(center)), verts=verts)
+        bmesh.ops.transform(
+            self.bm, matrix=Matrix.Translation(g2b(center)), verts=verts
+        )
         self._faces({f for v in verts for f in v.link_faces}, mat)
 
-    def wheel(self, center, radius: float, width: float, mat: str = "TimberDark") -> None:
+    def wheel(
+        self, center, radius: float, width: float, mat: str = "TimberDark"
+    ) -> None:
         """Solid wheel on an axle along x: rim prism, hub, four spokes on the outer face."""
         x, y, z = center
-        self.beam((x - width * 0.5, y, z), (x + width * 0.5, y, z), radius, radius, 10, mat)
+        self.beam(
+            (x - width * 0.5, y, z), (x + width * 0.5, y, z), radius, radius, 10, mat
+        )
         side = 1.0 if x >= 0 else -1.0
-        self.beam((x, y, z), (x + side * (width * 0.5 + 0.12), y, z), radius * 0.22, radius * 0.22, 6, "Iron")
+        self.beam(
+            (x, y, z),
+            (x + side * (width * 0.5 + 0.12), y, z),
+            radius * 0.22,
+            radius * 0.22,
+            6,
+            "Iron",
+        )
         for k in range(2):
             angle = k * math.pi * 0.5
             dy, dz = math.sin(angle) * radius * 0.92, math.cos(angle) * radius * 0.92
@@ -136,6 +176,7 @@ class Part:
             )
 
     def build(self, name: str, parent=None, pivot=(0.0, 0.0, 0.0)):
+        """Mesh object ``name`` under ``parent``, its origin (pivot) at ``pivot``."""
         mesh = bpy.data.meshes.new(name)
         self.bm.to_mesh(mesh)
         self.bm.free()
@@ -149,6 +190,7 @@ class Part:
 
 
 def empty(name: str, parent=None, pivot=(0.0, 0.0, 0.0)):
+    """Empty node (a pivot) under ``parent``."""
     obj = bpy.data.objects.new(name, None)
     bpy.context.scene.collection.objects.link(obj)
     obj.parent = parent
@@ -195,7 +237,9 @@ def trebuchet() -> dict:
     winch.build("Winch", root, (0.0, 1.5, -6.2))
     arm = empty("Arm", root, (0.0, h, 0.0))
     beam = Part()
-    beam.beam((0.0, 0.0, -TREB_LONG), (0.0, 0.0, TREB_SHORT + 0.2), 0.14, 0.26, 6, "Timber")
+    beam.beam(
+        (0.0, 0.0, -TREB_LONG), (0.0, 0.0, TREB_SHORT + 0.2), 0.14, 0.26, 6, "Timber"
+    )
     beam.beam((-1.9, 0.0, 0.0), (1.9, 0.0, 0.0), 0.12, 0.12, 8, "Iron")
     for z in (-6.0, -3.5, -1.2, 1.2):
         r = 0.2 + 0.1 * (z + TREB_LONG) / TREB_LONG
@@ -210,13 +254,17 @@ def trebuchet() -> dict:
     for x in (-1.12, 1.12):
         for y in (-1.4, -2.6):
             box.box((x, y, 0.0), (0.06, 0.14, 1.96), "Iron")
-    for i, (x, z) in enumerate(((-0.5, -0.4), (0.4, 0.3), (0.0, 0.1), (-0.3, 0.5), (0.5, -0.5))):
+    for i, (x, z) in enumerate(
+        ((-0.5, -0.4), (0.4, 0.3), (0.0, 0.1), (-0.3, 0.5), (0.5, -0.5))
+    ):
         box.sphere((x, -1.05 + 0.08 * (i % 2), z), 0.34, "Stone")
     box.build("CounterweightBox", counter)
     sling = empty("Sling", arm, (0.0, 0.0, -TREB_LONG))
     rope = Part()
     for x in (-0.14, 0.14):
-        rope.beam((0.0, 0.0, 0.0), (x, 0.0, TREB_SLING), 0.035, 0.035, 4, "Rope", cap=False)
+        rope.beam(
+            (0.0, 0.0, 0.0), (x, 0.0, TREB_SLING), 0.035, 0.035, 4, "Rope", cap=False
+        )
     rope.box((0.0, -0.18, TREB_SLING), (0.7, 0.12, 0.8), "Hide")
     rope.build("SlingRope", sling)
     stone = Part()
@@ -231,7 +279,9 @@ def trebuchet() -> dict:
 
 
 def mangonel() -> dict:
-    """Torsion mangonel. ``Arm`` pivots in the twisted skein (rotation about x: 0 = upright,
+    """Torsion mangonel.
+
+    ``Arm`` pivots in the twisted skein (rotation about x: 0 = upright,
     negative = drawn back); ``Stone`` sits in the cup; ``Winch`` at the back.
     """
     root = empty("Mangonel")
@@ -245,7 +295,14 @@ def mangonel() -> dict:
         frame.box((0.0, 0.25, z), (1.96, 0.22, 0.24), "TimberDark")
     frame.box((0.0, 2.0, 0.4), (2.0, 0.24, 0.24))
     frame.box((0.0, 2.0, 0.28), (0.8, 0.3, 0.1), "Hide")  # padded stop
-    frame.beam((-0.75, 0.8, MANGONEL_PIVOT[2]), (0.75, 0.8, MANGONEL_PIVOT[2]), 0.26, 0.26, 8, "Rope")
+    frame.beam(
+        (-0.75, 0.8, MANGONEL_PIVOT[2]),
+        (0.75, 0.8, MANGONEL_PIVOT[2]),
+        0.26,
+        0.26,
+        8,
+        "Rope",
+    )
     frame.build("Frame", root)
     winch = Part()
     winch.beam((-0.8, 0.0, 0.0), (0.8, 0.0, 0.0), 0.16, 0.16, 8)
@@ -256,7 +313,14 @@ def mangonel() -> dict:
     arm = empty("Arm", root, MANGONEL_PIVOT)
     beam = Part()
     beam.beam((0.0, -0.1, 0.0), (0.0, MANGONEL_ARM, 0.0), 0.1, 0.08, 6, "Timber")
-    beam.beam((0.0, MANGONEL_ARM + 0.05, 0.0), (0.0, MANGONEL_ARM + 0.25, 0.0), 0.28, 0.32, 8, "Hide")
+    beam.beam(
+        (0.0, MANGONEL_ARM + 0.05, 0.0),
+        (0.0, MANGONEL_ARM + 0.25, 0.0),
+        0.28,
+        0.32,
+        8,
+        "Hide",
+    )
     beam.build("ArmBeam", arm)
     stone = Part()
     stone.sphere((0.0, 0.0, 0.0), 0.26, "Stone")
@@ -265,7 +329,9 @@ def mangonel() -> dict:
 
 
 def bombard() -> dict:
-    """Bombard on its timber bed. ``Barrel`` recoils along -z; ``Mantlet`` (hinged at the top of
+    """Bombard on its timber bed.
+
+    ``Barrel`` recoils along -z; ``Mantlet`` (hinged at the top of
     its posts, rotation about x) is raised to fire.
     """
     root = empty("Bombard")
@@ -276,7 +342,9 @@ def bombard() -> dict:
         bed.box((x, 0.7, -0.2), (0.2, 0.35, 4.0))
     bed.box((0.0, 0.75, -2.45), (1.5, 1.1, 0.45), "TimberDark")  # backstop
     for x in (-0.6, 0.6):
-        bed.beam((x, -0.4, -2.95), (x, 1.2, -2.6), 0.09, 0.07, 5)  # stakes behind the backstop
+        bed.beam(
+            (x, -0.4, -2.95), (x, 1.2, -2.6), 0.09, 0.07, 5
+        )  # stakes behind the backstop
     for x in (-1.35, 1.35):
         bed.beam((x, 0.0, 2.3), (x, 2.5, 2.3), 0.11, 0.1, 6)
     bed.box((0.0, 2.5, 2.3), (2.9, 0.2, 0.2))
@@ -297,7 +365,9 @@ def bombard() -> dict:
 
 
 def ram() -> dict:
-    """Ram shed (« chat ») on four wheels. ``BeamPivot`` (ropes under the ridge, rotation about x)
+    """Ram shed (« chat ») on four wheels.
+
+    ``BeamPivot`` (ropes under the ridge, rotation about x)
     swings the ``Beam`` with its iron head; ``Wheel_*`` turn about x.
     """
     root = empty("Ram")
@@ -311,13 +381,17 @@ def ram() -> dict:
         shed.box((0.0, 0.55, z), (3.1, 0.24, 0.24), "TimberDark")
     for side in (-1.0, 1.0):
         angle = side * math.radians(52.0)
-        shed.box((side * 0.82, 3.1, 0.0), (2.3, 0.14, 8.2), "Hide", rot=((0, 0, 1), -angle))
+        shed.box(
+            (side * 0.82, 3.1, 0.0), (2.3, 0.14, 8.2), "Hide", rot=((0, 0, 1), -angle)
+        )
     shed.box((0.0, 3.95, 0.0), (0.3, 0.3, 8.3), "TimberDark")
     shed.build("Shed", root)
-    for i, (x, z) in enumerate(((-1.62, -2.4), (1.62, -2.4), (-1.62, 2.4), (1.62, 2.4))):
+    for i, (x, z) in enumerate(
+        ((-1.62, -2.4), (1.62, -2.4), (-1.62, 2.4), (1.62, 2.4))
+    ):
         wheel = Part()
         wheel.wheel((0.0, 0.0, 0.0), 0.55, 0.26)
-        wheel.build("Wheel_%d" % i, root, (x, 0.55, z))
+        wheel.build(f"Wheel_{i}", root, (x, 0.55, z))
     pivot = empty("BeamPivot", root, (0.0, 3.2, 0.4))
     beam = Part()
     for z in (-2.4, 2.4):
@@ -331,7 +405,9 @@ def ram() -> dict:
 
 
 def siege_tower() -> dict:
-    """Siege tower (beffroi) 12 m high. ``Body`` (scaled in height by the renderer),
+    """Siege tower (beffroi) 12 m high.
+
+    ``Body`` (scaled in height by the renderer),
     ``BridgePivot`` (hinged at the front, rotation about x: -90° raised, 0 lowered), ``Wheel_*``.
     """
     root = empty("SiegeTower")
@@ -350,8 +426,12 @@ def siege_tower() -> dict:
         body.box((0.0, y - 0.1, 0.0), (4.8, 0.12, 4.8), "Timber")
     body.box((0.0, base + 0.2, 0.0), (5.4, 0.4, 5.4), "TimberDark")
     for x in (-2.45, 2.45):  # cross bracing of the lower storeys (open at the back)
-        body.beam((x, base + 0.4, -2.3), (x, base + h * 0.5, 2.3), 0.1, 0.1, 4, "Timber")
-        body.beam((x, base + 0.4, 2.3), (x, base + h * 0.5, -2.3), 0.1, 0.1, 4, "Timber")
+        body.beam(
+            (x, base + 0.4, -2.3), (x, base + h * 0.5, 2.3), 0.1, 0.1, 4, "Timber"
+        )
+        body.beam(
+            (x, base + 0.4, 2.3), (x, base + h * 0.5, -2.3), 0.1, 0.1, 4, "Timber"
+        )
     # Wet hides over the upper half (front and sides), open planks at the back.
     body.box((0.0, base + h * 0.62, 2.55), (5.0, h * 0.62, 0.1), "Hide")
     for x in (-2.55, 2.55):
@@ -371,10 +451,12 @@ def siege_tower() -> dict:
             size = (0.9, 1.1, 0.2) if side < 2 else (0.2, 1.1, 0.9)
             body.box(center, size, "Timber")
     body.build("Body", root)
-    for i, (x, z) in enumerate(((-2.25, -1.8), (2.25, -1.8), (-2.25, 1.8), (2.25, 1.8))):
+    for i, (x, z) in enumerate(
+        ((-2.25, -1.8), (2.25, -1.8), (-2.25, 1.8), (2.25, 1.8))
+    ):
         wheel = Part()
         wheel.wheel((0.0, 0.0, 0.0), 0.8, 0.36)
-        wheel.build("Wheel_%d" % i, root, (x, TOWER_AXLE, z))
+        wheel.build(f"Wheel_{i}", root, (x, TOWER_AXLE, z))
     pivot = empty("BridgePivot", root, (0.0, base + h - 3.2, 2.5))
     bridge = Part()
     bridge.box((0.0, 0.0, 2.0), (3.2, 0.24, 4.0), "Timber")
@@ -383,7 +465,12 @@ def siege_tower() -> dict:
     for z in (0.8, 2.0, 3.2):
         bridge.box((0.0, 0.14, z), (3.1, 0.06, 0.14), "TimberDark")
     bridge.build("Bridge", pivot)
-    return {"height": h, "axle": TOWER_AXLE, "bridge_pivot": [0.0, base + h - 3.2, 2.5], "wheel_radius": 0.8}
+    return {
+        "height": h,
+        "axle": TOWER_AXLE,
+        "bridge_pivot": [0.0, base + h - 3.2, 2.5],
+        "wheel_radius": 0.8,
+    }
 
 
 BUILDERS = {
@@ -396,6 +483,7 @@ BUILDERS = {
 
 
 def clear_scene() -> None:
+    """Removes every object and mesh."""
     for obj in list(bpy.data.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
     for mesh in list(bpy.data.meshes):
@@ -403,6 +491,7 @@ def clear_scene() -> None:
 
 
 def triangles() -> int:
+    """Triangles of the current scene."""
     count = 0
     for obj in bpy.data.objects:
         if obj.type == "MESH":
@@ -411,8 +500,13 @@ def triangles() -> int:
 
 
 def main() -> None:
+    """Builds and exports every engine, then the manifest."""
     argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
-    out = Path(argv[0]) if argv else Path(__file__).resolve().parents[2] / "game/assets/models/siege"
+    out = (
+        Path(argv[0])
+        if argv
+        else Path(__file__).resolve().parents[2] / "game/assets/models/siege"
+    )
     out.mkdir(parents=True, exist_ok=True)
     manifest = {}
     for name, builder in BUILDERS.items():
@@ -431,7 +525,9 @@ def main() -> None:
             export_texcoords=False,
             export_animations=False,
         )
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (out / "manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+    )
     print("siege engines:", {k: v["triangles"] for k, v in manifest.items()})
 
 
