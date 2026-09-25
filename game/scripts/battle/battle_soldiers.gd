@@ -166,7 +166,7 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 ## texture d'os et table des clips du rig ; cadavres en mode CUSTOM (clips de mort).
 func _make_skinned_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = BattleSkinned.corpse_shader() if corpse else BattleSkinned.SHADER
+	mat.shader = BattleSkinned.SHADER
 	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
 	mat.set_shader_parameter("livery", color)
 	mat.set_shader_parameter("trim", TRIM_SILVER if color.get_luminance() > 0.55 or (color.r > 0.6 and color.g > 0.5) else TRIM_GOLD)
@@ -460,11 +460,15 @@ func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: V
 	var cell_m := float(limits.get("cell_m", 80.0))
 	var cx := int(floor(pos.x / cell_m))
 	var cz := int(floor(pos.z / cell_m))
-	var skey := "%s/%s/%d" % [side, kind, variant]
+	# Démembrés : couche à part avec la variante `discard` du shader (early-z conservé ailleurs).
+	var severed := int(record[15]) >= 1 and int(record[15]) <= 5
+	var skey := "%s/%s/%d%s" % [side, kind, variant, "/cut" if severed else ""]
 	var key := "%s/%d/%d" % [skey, cx, cz]
 	if not _corpse_layers.has(key):
 		if not _corpse_materials.has(skey):
 			var material := _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
+			if severed:
+				material.shader = BattleSkinned.corpse_shader()
 			if skinned:
 				material.set_shader_parameter("gravity", 9.8)
 			_corpse_materials[skey] = material
