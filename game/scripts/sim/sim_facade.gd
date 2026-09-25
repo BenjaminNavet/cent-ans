@@ -10,7 +10,10 @@ extends Node
 ## Transporte aussi la requête de démarrage entre `start_menu.tscn` et
 ## `campaign_map.tscn` (`pending_faction`, `pending_seed`, `pending_load_path`).
 
-const SAVES_DIR := "user://saves"
+## T2 : redirigeable par `use_test_saves_dir` (smoke test, bancs de perf) pour ne pas partager
+## `user://saves` entre plusieurs exécutions en parallèle (plusieurs worktrees d'agents pointent
+## vers le même `user://` Godot, dérivé du nom du projet et non du chemin sur disque).
+var SAVES_DIR := "user://saves"
 const SAVE_VERSION := 1
 const DEFAULT_FACTION := "fac_france"
 const DEFAULT_SEED := 1337
@@ -66,6 +69,11 @@ func store_loaded() -> bool:
 
 func engine_label() -> String:
 	return "réelle" if is_real else "factice"
+
+
+## T2 : isole les sauvegardes (smoke test) dans un dossier dédié à cette exécution.
+func use_test_saves_dir(dir: String) -> void:
+	SAVES_DIR = dir
 
 
 ## Repointe `data/` (tests) : recharge le store et une simulation neuve.

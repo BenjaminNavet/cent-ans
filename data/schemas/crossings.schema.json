@@ -30,6 +30,10 @@
         "id": { "type": "string", "pattern": "^(bridge|ford|pass)_[a-z0-9_]+$" },
         "name": { "type": "string", "minLength": 1, "description": "Nom affiché, en français." },
         "type": { "enum": ["bridge", "ford", "pass"], "description": "Pont, gué (ou bac) ou col." },
+        "structure": {
+          "enum": ["stone", "wood", "boats", "ferry", "ford"],
+          "description": "Rendu (lot V4) : ouvrage dominant en 1337 — pont de pierre, de bois ou de bateaux ; bac ; gué. Estimation à affiner par l'historien ; défaut : pierre (pont), gué (gué)."
+        },
         "river": { "type": "string", "description": "Cours d'eau franchi (pont, gué), tel que nommé dans rivers.geojson ou en français." },
         "lonlat": { "$ref": "#/$defs/lonlat" },
         "route": {

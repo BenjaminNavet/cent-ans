@@ -75,7 +75,8 @@ pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };
 pub use battle_auto::{
-    resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
+    resolve_auto, resolve_field, resolve_with, BattleContext, BattleResult, BattleUnit,
+    FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};

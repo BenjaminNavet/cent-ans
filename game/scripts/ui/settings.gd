@@ -28,6 +28,14 @@ const DEFAULTS := {
 	"interface/text_size": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
+	# Lot U5 (audit A3, T2) : portée des lettres et du bandeau (`NewsInterest.MODES`).
+	"interface/news_filter": "interest",
+	# Lot U7 : disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
+	"input/layout": "auto",
+	# Lot U12 : accessibilité.
+	"access/colorblind": false,
+	"access/reduce_motion": false,
+	"access/high_contrast": false,
 	"camera/edge_pan": true,
 	"camera/speed": 1.0,
 	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
@@ -42,6 +50,8 @@ const DEFAULTS := {
 	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
 	"battle/blood": 1,
 	"battle/unit_size": 1.0,
+	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	"interface/intro_seen": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
@@ -130,6 +140,8 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 			RenderQuality.reapply(get_tree())
 	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
 		apply_display()
+	elif key == "access/high_contrast":
+		Accessibility.apply_contrast(load(PARCHMENT_THEME) as Theme, bool(get_value(key)))
 	if persist:
 		save_settings()
 	changed.emit(key)
@@ -191,6 +203,7 @@ func apply_display() -> void:
 		return
 	_apply_ui_scale()
 	apply_text_size()
+	Accessibility.apply_contrast(load(PARCHMENT_THEME) as Theme, bool(get_value("access/high_contrast")))
 	if not apply_display_enabled:
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if get_value("video/vsync") else DisplayServer.VSYNC_DISABLED)
