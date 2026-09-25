@@ -28,9 +28,11 @@ var shield_rows: int = 1
 ## Catalogue du dossier de données courant (`MapPaths`, variable `CENT_ANS_DATA_DIR` comprise),
 ## repli sur `data/` du dépôt (jeux d'essai sans ce fichier).
 static func load_default() -> SettlementMarkers:
-	var path := MapPaths.default_data_dir().path_join("map").path_join(FILE_NAME)
+	# Script chargé à l'exécution : l'autoload `MapPaths` est inconnu des tests `--script`.
+	var paths: GDScript = load("res://scripts/map/map_paths.gd")
+	var path: String = str(paths.call("default_data_dir")).path_join("map").path_join(FILE_NAME)
 	if not FileAccess.file_exists(path):
-		path = MapPaths.project_root().path_join("data/map").path_join(FILE_NAME)
+		path = str(paths.call("project_root")).path_join("data/map").path_join(FILE_NAME)
 	return load_from(path)
 
 

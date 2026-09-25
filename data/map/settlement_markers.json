@@ -39,7 +39,7 @@
     {"kind": "abbey", "min_weight": 15, "rank": 2}
   ],
   "default_rank": 1,
-  "size_px": {"1": 26, "2": 32, "3": 40, "4": 48},
+  "size_px": {"1": 32, "2": 40, "3": 50, "4": 58},
   "kind_size_factor": {"village": 0.8},
   "visibility": [
     {"tier": "comté et province rapprochée", "max_distance": 380, "min_rank": {"city": 1, "town": 1, "village": 1, "castle": 1, "abbey": 1}},
@@ -47,6 +47,6 @@
     {"tier": "Europe", "max_distance": 100000, "min_rank": {"city": 3, "castle": 3}}
   ],
   "fade_distance": 60,
-  "shield": {"center": [0.8, 0.22], "half_size": 0.2},
+  "shield": {"center": [0.79, 0.24], "half_size": 0.22},
   "badge": {"center": [0.18, 0.2], "half_size": 0.18}
 }
