@@ -84,6 +84,11 @@
       }
     },
     "islands": { "type": "array", "items": { "$ref": "#/$defs/area" } },
+    "waters": {
+      "type": "array",
+      "description": "Plans d'eau libres (lot L2) : mer, port, bassin, fossé large, marais ; dessinés en eau, sans maisons.",
+      "items": { "$ref": "#/$defs/area" }
+    },
     "areas": {
       "type": "array",
       "description": "Quartiers bâtis : densité de maisons (0-1). Un point prend la densité de la première zone qui le contient.",
@@ -135,6 +140,10 @@
           "width_m": { "type": "number", "exclusiveMinimum": 0 },
           "inhabited": { "type": "boolean", "description": "Pont bordé de maisons." },
           "material": { "enum": ["stone", "wood"] },
+          "arches": { "type": "integer", "minimum": 1, "description": "Nombre d'arches (piles à avant-becs) ; défaut : une pile tous les 0,06 unité." },
+          "chapel_at": { "type": "number", "minimum": 0, "maximum": 1, "description": "Chapelle sur une pile (fraction de la longueur depuis `from`) : Saint-Thomas de London Bridge, Saint-Nicolas du pont d'Avignon." },
+          "gatehouses_at": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "description": "Portes fortifiées sur le tablier (fractions de la longueur)." },
+          "drawbridge_at": { "type": "number", "minimum": 0, "maximum": 1, "description": "Travée levante (fraction de la longueur)." },
           "from_year": { "type": "integer" },
           "until_year": { "type": "integer" }
         },
@@ -164,8 +173,13 @@
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
           "name": { "type": "string" },
           "model": {
-            "enum": ["notre_dame", "sainte_chapelle", "palais_cite", "louvre", "chatelet", "bastille", "market_halls", "church", "abbey", "keep", "windmill", "tower"],
-            "description": "Maillage dédié ou gabarit paramétré du générateur."
+            "enum": ["notre_dame", "sainte_chapelle", "palais_cite", "louvre", "chatelet", "bastille", "market_halls", "church", "abbey", "keep", "windmill", "tower", "gothic_cathedral", "castle", "papal_palace", "belfry", "royal_palace", "gate_tower", "cog"],
+            "description": "Maillage dédié ou gabarit paramétré du générateur (landmark_monuments.py). Gabarits réutilisables du lot L2 : gothic_cathedral, castle, belfry, royal_palace, gate_tower, cog (navire)."
+          },
+          "params": {
+            "type": "object",
+            "description": "Paramètres du gabarit (lot L2), longueurs en mètres réels : voir la docstring du constructeur dans landmark_monuments.py (ex. gothic_cathedral : length_m, spire_m, west_towers ; castle : rings, keep).",
+            "additionalProperties": true
           },
           "at": { "$ref": "#/$defs/point" },
           "angle_deg": { "type": "number", "description": "Rotation antihoraire de l'axe +x du modèle depuis l'est (églises : axe vers le chœur)." },
@@ -205,7 +219,7 @@
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
-        "kind": { "enum": ["built", "island", "square", "cemetery", "garden", "meadow", "parvis", "vineyard"] },
+        "kind": { "enum": ["built", "island", "square", "cemetery", "garden", "meadow", "parvis", "vineyard", "water", "harbour", "sea", "marsh", "hill"] },
         "polygon": { "type": "array", "minItems": 3, "items": { "$ref": "#/$defs/point" } },
         "density": { "type": "number", "minimum": 0, "maximum": 1 },
         "from_year": { "type": "integer" },

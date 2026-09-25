@@ -19,7 +19,7 @@ const INK := Color(0.22, 0.14, 0.07)
 const BORDER := Color(0.42, 0.29, 0.16)
 const BORDER_SELECTED := Color(0.95, 0.75, 0.15)
 const FORMATION_LABELS := {"line": "ligne", "column": "colonne", "square": "schiltron", "wedge": "coin"}
-const BAR_H := 3.0
+const BAR_H := 4.0
 
 var unit_id: int = -1
 var unit_type: String = ""
@@ -185,7 +185,9 @@ func _draw_art() -> void:
 	art.draw_polygon(PackedVector2Array([Vector2(0, shade_top), Vector2(size.x, shade_top), Vector2(size.x, size.y), Vector2(0, size.y)]),
 		PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0, 0, 0, 0.85), Color(0, 0, 0, 0.85)]))
 	var count := str(int(_unit["soldiers"]))
-	var bars: Array = [[float(_unit["morale"]) / 100.0, BattleUnitMarkers.morale_color(float(_unit["morale"]) / 100.0)], [float(_unit["fatigue"]) / 100.0, Color(0.85, 0.5, 0.15)]]
+	# UB1 / U9 : santé (effectif restant), moral, munitions ; la fatigue passe en pastille « épuisée ».
+	var health := float(_unit["soldiers"]) / maxf(float(_unit.get("initial_soldiers", _unit["soldiers"])), 1.0)
+	var bars: Array = [[health, Color(0.86, 0.80, 0.58)], [float(_unit["morale"]) / 100.0, BattleUnitMarkers.morale_color(float(_unit["morale"]) / 100.0)]]
 	if bool(_unit["can_shoot"]):
 		bars.append([float(_unit["ammo"]) / maxf(float(_unit["max_ammo"]), 1.0), Color(0.55, 0.75, 0.45)])
 	var bar_y := size.y - 2.0 - bars.size() * (BAR_H + 1.0)
@@ -200,7 +202,7 @@ func _draw_art() -> void:
 	var badges := BattleUnitMarkers.state_badges(_unit)
 	var blink := fmod(Time.get_ticks_msec() / 1000.0, 0.6) < 0.3
 	for i in badges.size():
-		BattleUnitMarkers.draw_badge(art, badges[i], Vector2(size.x - 15, 20 + i * 14), blink)
+		BattleUnitMarkers.draw_badge(art, badges[i], Vector2(size.x - 19, 19 + i * 18), blink, 1.3)
 	if not bool(_unit["present"]) or bool(_unit["left_field"]):
 		art.draw_rect(body, Color(0.25, 0.22, 0.2, 0.65))
 		_draw_cross(size)
@@ -229,6 +231,8 @@ func _draw_cross(size: Vector2) -> void:
 ## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
 func _refresh_tooltip(unit: Dictionary) -> void:
 	var detail := "État : %s" % state_text(unit)
+	if float(unit["fatigue"]) >= BattleUnitMarkers.EXHAUSTED_FATIGUE:
+		detail += " · épuisée"
 	detail += "\nEffectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
 	if bool(unit["can_shoot"]):
 		detail += "\nMunitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"]

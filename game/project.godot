@@ -132,6 +132,13 @@ quick_load={
 
 3d/physics_engine="Jolt Physics"
 
+[shader_globals]
+
+campaign_season={
+"type": "vec4",
+"value": Vector4(1, 0, 0, 0)
+}
+
 [rendering]
 
 textures/vram_compression/import_etc2_astc=true

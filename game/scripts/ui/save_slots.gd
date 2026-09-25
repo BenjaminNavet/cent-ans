@@ -9,10 +9,16 @@ extends RefCounted
 ## - `latest()` pour « Continuer ».
 ## Les autoloads sont obtenus par le nœud racine (script compilé tôt par le smoke test).
 
-const SAVES_DIR := "user://saves"
+## T2 : redirigeable par `use_test_dir` (smoke test), voir `SimFacade.use_test_saves_dir`.
+static var SAVES_DIR := "user://saves"
 const AUTOSAVE_PREFIX := "auto_"
 const AUTOSAVE_SLOTS := 3
 const THUMBNAIL_SIZE := Vector2i(320, 180)
+
+
+## T2 : isole les sauvegardes (smoke test) dans un dossier dédié à cette exécution.
+static func use_test_dir(dir: String) -> void:
+	SAVES_DIR = dir
 
 
 static func _facade() -> Node:

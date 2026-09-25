@@ -190,6 +190,7 @@ func try_right_click(screen_position: Vector2) -> bool:
 	if target.is_empty():
 		return false
 	var report := order_target(map.selected_army, target)
+	UiSounds.play_order_result(report)  # UB1 / U13
 	if not report.get("ok", false):
 		map.ui.show_toast(str(report.get("error", "Ordre refusé")), true)
 	return true

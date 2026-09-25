@@ -55,11 +55,11 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
 - **Caméra** : W A S D (Z Q S D en AZERTY) ou flèches, bords de l'écran (F2 active ou coupe ce défilement),
   molette pour le zoom, Q / E pour la rotation.
 - **Clic gauche** : sélectionner une armée, une province ou une colonie (une colonie sous le curseur est
-  prioritaire sur sa province). **Clic droit** (armée sélectionnée) : ordre de marche sur le graphe des
-  colonies ; un clic droit sur une colonie la désigne comme cible. Le chemin s'affiche en orange le long des
-  colonies traversées, avec son coût ; des **anneaux verts** au sol marquent les colonies atteignables cette
-  saison, un **anneau orange** la colonie visée.
-- **Entrée** ou bouton **Fin du tour** : la saison s'écoule, toutes les factions agissent en même temps.
+  prioritaire sur sa province). **Clic droit** (armée sélectionnée) : l'armée marche aussitôt vers le point
+  visé du sol, attaque l'armée ennemie visée, ou marche sur la colonie visée (voir § 5, « Mouvement libre
+  des armées »). La **bulle** dorée au sol montre jusqu'où elle peut aller cette saison.
+- **Entrée** ou bouton **Fin du tour** : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
+  après l'autre, puis la saison s'écoule (économie, sièges, population, événements).
 - **Échap** : désélectionner, puis menu pause (sauvegarder, charger, réglages, aide, menu principal).
 - **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.
 - **Barre du haut** : trésor, revenu de la saison et prévision, date, recherche en cours, boutons
@@ -70,8 +70,8 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
   terminé, décision de chronique en attente.
 
 Un tour est une saison : l'hiver ralentit les marches et affame les armées en pays ennemi. Les armées
-traversent la mer entre deux ports (une cogue marque la traversée) ; débarquer en terre hostile épuise le
-mouvement et coûte des hommes.
+traversent la mer entre deux ports (une cogue marque la traversée) ; embarquer consomme tout le mouvement de
+la saison, et débarquer en terre hostile coûte des hommes.
 
 ## 5. Provinces et colonies
 
@@ -131,27 +131,65 @@ Le mécontentement monte avec l'impôt, la dévastation, le manque de biens et d
 de 90 elle passe aux rebelles. La **peste** (Peste noire à partir de 1347) et la **famine** frappent les
 populations ; hôtels-Dieu et adductions d'eau les protègent.
 
-### Déplacement sur le graphe des colonies
+### Mouvement libre des armées
 
-Les armées ne se déplacent plus en continu : elles vont de colonie en colonie sur un graphe de routes,
-de liaisons entre colonies voisines d'une même province ou de provinces voisines, et de traversées
-maritimes entre colonies portuaires. Une route coûte deux fois moins qu'un terrain nu. Une saison couvre
-environ 1,5 pas de province en plaine (2 sur route) ; l'hiver ralentit encore la marche. Entrer sur une
-colonie ennemie arrête l'armée : siège si elle a une garnison, prise immédiate pour un village qui n'en a
-pas ; deux armées ennemies sur la même colonie se combattent.
+Les armées se déplacent librement sur la terre, comme dans un Total War : une armée en campagne se tient en
+un point quelconque de la carte, ou dans une colonie (stationnée, en garnison ou assiégeant la place).
+
+- **Bulle de portée** : sélectionnez une armée ; une zone dorée au sol, dont le voile s'épaissit vers le
+  bord, montre les lieux qu'elle peut atteindre avec les points de mouvement qui lui restent cette saison.
+- **Chemin en deux couleurs** : en survolant le sol, le chemin s'affiche en **vert** pour la part parcourue
+  cette saison et en **rouge** pour les saisons suivantes, avec un jalon à chaque fin de tour ; l'étiquette
+  donne le nombre de tours et le coût. L'aperçu ne tient pas compte des zones de contrôle : la marche réelle
+  peut s'arrêter plus tôt.
+- **Clic droit sur le sol** : l'armée part aussitôt, avance case par case et s'arrête au point visé ou quand
+  ses points sont épuisés. Elle peut repartir dans la même saison s'il lui en reste.
+- **Trajets sur plusieurs tours** : une cible hors de portée est gardée en mémoire ; au début de chaque tour,
+  l'armée reprend d'elle-même sa marche, sauf nouvel ordre.
+- **Portée** : environ 210 km de plaine par saison au printemps, en été et en automne, 140 km en hiver ; une
+  route ancienne coûte un quart de moins. Collines, forêts, marais et montagnes coûtent de 1,5 à 3 fois une
+  plaine ; les pentes trop raides sont infranchissables. De Paris, Orléans, Rouen ou Reims sont à une saison,
+  Lyon à deux, Bordeaux ou Toulouse à trois. Compétences, technologies et traits du général allongent la
+  marche ; un train de siège la ralentit.
+- **Zone de contrôle** : chaque armée tient un cercle de 8 km autour d'elle (affiché en rouge au survol d'une
+  armée ennemie). Une armée ennemie qui y entre s'arrête net.
+- **Attaque** : clic droit sur une armée ennemie à portée ; votre armée marche au contact (à moins de 5 km)
+  et la bataille est livrée aussitôt, tactique ou automatique à votre choix. Plus aucun mouvement ensuite.
+- **Colonies** : clic droit sur une colonie ennemie pour l'**assiéger** (l'armée s'y installe ; le siège
+  progresse à partir de la fin du tour suivant) ; un village sans garnison est pris sur-le-champ. L'assaut
+  reste un ordre à part. Sur une colonie amie, l'armée **stationne** : elle peut y laisser des unités en
+  garnison et en ressortir dans la même saison si elle a encore des points.
+- **Fleuves et gués** : les grands fleuves (Loire, Seine, Somme, Rhône, Saône, Garonne, Dordogne, Meuse,
+  Escaut, Rhin, Tamise…) ne se franchissent qu'aux **ponts et gués** de 1337 (Orléans, Blois, Tours,
+  Avignon, Pont-Saint-Esprit, London Bridge, Blanchetaque sur la Somme…), aux villes bâties sur leur rive et
+  là où une ancienne voie romaine passe près d'une ville. Les rivières secondaires ralentissent seulement.
+  Le chemin fait donc parfois un détour jusqu'au pont le plus proche.
+- **Cols** : Alpes et Pyrénées ne se passent qu'aux cols connus (Mont-Cenis, Montgenèvre, Grand-Saint-Bernard,
+  Simplon, Saint-Gothard, Somport, Roncevaux, le Perthus…), au prix d'une marche de montagne.
+- **Mer** : marchez jusqu'à un port, puis clic droit sur la colonie portuaire d'arrivée ; la traversée
+  prend toute la saison et l'armée débarque au port visé.
+- **Tour séquentiel** : vous jouez d'abord toutes vos armées, dans l'ordre que vous voulez ; chaque ordre
+  s'exécute tout de suite. À la fin de votre tour, chaque faction IA joue à son tour, dans un ordre fixe :
+  ses armées reprennent leurs marches, puis elle donne et exécute ses ordres un par un. Les batailles qu'une
+  IA engage contre vous pendant son tour sont résolues automatiquement et racontées dans le rapport de
+  saison.
 
 ### Repli après une défaite
 
 Une armée battue se replie automatiquement, dans cet ordre :
 
-1. vers la colonie amie (à soi ou à un allié) la plus proche, libre de toute armée ennemie, à deux pas au
-   plus sur le graphe, par un chemin qui ne traverse aucune place ennemie ;
-2. sinon vers une colonie neutre (que nul ennemi ne tient) à un pas au plus, en perdant 10 % de traînards ;
+1. vers la colonie amie (à soi ou à un allié) la plus proche, libre de toute armée ennemie, à 280 km de
+   marche au plus, par un chemin qui ne traverse ni place ennemie ni zone de contrôle ennemie (celles du
+   champ de bataille exceptées) ;
+2. sinon elle recule de 15 km à l'opposé du vainqueur, en perdant 10 % de traînards — à condition de
+   garder un **refuge** : une colonie que nul ennemi ne tient, à 140 km de marche au plus par le même genre
+   de chemin, et de ne pas avoir été **écrasée** (42 % de ses hommes perdus ou plus dans la bataille) ;
 3. sinon c'est la **débandade** : 50 % de pertes, puis les survivants rejoignent la place amie la plus
    proche à toute distance s'ils gardent au moins 30 % de leurs effectifs, sinon l'armée se disperse et son
    général s'échappe seul.
 
-Une armée attaquante battue revient d'où elle venait, sauf si un ennemi s'y est entre-temps installé.
+Une armée qui s'enfonce en terre ennemie, loin de ses places et entourée d'armées adverses, risque donc bien
+plus la débandade qu'une armée battue près de chez elle.
 
 ### Sièges des places secondaires
 
@@ -165,9 +203,7 @@ pris dès l'arrivée d'une armée ennemie.
 - **Panneau de colonie** : garnison, bâtiments, recrutement, construction (comme l'ancien panneau de ville,
   mais par colonie).
 - **Onglet Colonies** du panneau de province : liste des colonies avec contrôleur, garnison et siège.
-- **Clic droit sur une colonie** : la désigne comme cible de marche pour l'armée sélectionnée.
-- **Anneaux verts** autour des colonies atteignables cette saison par l'armée sélectionnée ; **anneau
-  orange** sur la colonie visée par l'ordre de marche en cours.
+- **Clic droit sur une colonie** : l'armée sélectionnée y marche aussitôt (stationnement, siège ou prise).
 - **Paliers de zoom** : de loin, provinces coloriées par contrôleur (hachurées si partagées) ; à moyenne
   distance, icônes des colonies (type et couleur du contrôleur), noms des cités, routes principales ; en vue
   rapprochée (échelle du comté), maquettes de colonies par type, hameaux, routes, champs et forêts, et
