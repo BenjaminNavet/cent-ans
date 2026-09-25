@@ -435,8 +435,21 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
 
 
-## Sort d'un régiment en fin de bataille (libellé court).
+## Q2 : libellés du sort d'un régiment calculé par le cœur (`Unit::fate`, clé `fate`).
+const FATE_LABELS := {
+	"destroyed": "anéanti",
+	"routed": "en déroute",
+	"withdrawn": "s'est retiré",
+	"reserve": "en réserve",
+	"held": "tient le champ",
+}
+
+
+## Sort d'un régiment en fin de bataille (libellé court) : celui du cœur (`fate`), sinon
+## déduit de l'état (anciens dictionnaires, doubles de test).
 static func unit_fate(unit: Dictionary) -> String:
+	if FATE_LABELS.has(str(unit.get("fate", ""))):
+		return str(FATE_LABELS[str(unit["fate"])])
 	if int(unit["soldiers"]) <= 0:
 		return "anéanti"
 	if bool(unit.get("left_field", false)):
@@ -470,7 +483,9 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 			lines.append("Le chef de l'ost %s est aux mains de l'ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
 		if bool(result.get("no_quarter", false)):
 			lines.append("%s a déployé l'étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
-		if bool(result.get("routed", false)):
+		if bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
+			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
+		elif bool(result.get("routed", false)):
 			lines.append("L'ost %s a été mis en déroute." % BattleScene.de(side_name))
 	if lines.is_empty():
 		lines.append("Aucun fait d'armes notable : les deux osts se sont séparés en bon ordre.")
