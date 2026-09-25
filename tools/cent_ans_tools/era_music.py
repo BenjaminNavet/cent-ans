@@ -54,6 +54,7 @@ class WikimediaTrack:
     performers: str
     culture: str  # france / england / burgundy / iberia / italy
     context: str  # campaign / court / war
+    licence: str  # verified once via the Commons API when this list was built (DA4)
 
 
 WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
@@ -64,6 +65,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "france",
         "campaign",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Guillaume de Machaut - Riches d'amour et mandians d'amie.ogg",
@@ -72,6 +74,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "france",
         "campaign",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Solage - Fumeux fume par fumée.ogg",
@@ -80,6 +83,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "france",
         "court",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Landini - Ecco la primavera.ogg",
@@ -88,6 +92,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "italy",
         "campaign",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Landini - Si dolce non sono.ogg",
@@ -96,6 +101,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "italy",
         "court",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Agincourt carol - Deo gracias 01.wav",
@@ -104,6 +110,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation instrumentale (anonyme, Commons)",
         "england",
         "war",
+        "Public domain",
     ),
     WikimediaTrack(
         "File:Sumer Is Icumen In (13th century English round).ogg",
@@ -112,6 +119,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Brandtnight2000 (Commons)",
         "england",
         "campaign",
+        "CC BY-SA 4.0",
     ),
     WikimediaTrack(
         "File:Triste plaisir.ogg",
@@ -120,6 +128,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "burgundy",
         "court",
+        "CC BY 3.0",
     ),
     WikimediaTrack(
         "File:Dueil angoisseux.ogg",
@@ -128,6 +137,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Réalisation MIDI, Tetraktys",
         "burgundy",
         "campaign",
+        "CC BY 3.0",
     ),
     WikimediaTrack(
         "File:Dufay Ave Regina.ogg",
@@ -136,6 +146,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Enregistrement Commons (CC0)",
         "burgundy",
         "court",
+        "CC0",
     ),
     WikimediaTrack(
         "File:Fundación Joaquín Díaz - ATO 00722 04 - Cantigas de Santa María.ogg",
@@ -144,6 +155,7 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Fundación Joaquín Díaz",
         "iberia",
         "campaign",
+        "CC BY-SA 3.0",
     ),
 ]
 
@@ -160,8 +172,18 @@ class BattleLayer:
 
 BATTLE_LAYER_SOURCES: list[BattleLayer] = [
     BattleLayer(274223, "battle_drum", "war drum loop", "drums"),
-    BattleLayer(350428, "straight_trumpet_fanfare", "trumpet fanfare (stinger/critical)", "straight_trumpet"),
-    BattleLayer(260864, "bagpipe_drone", "mittelalter sackpfeife (bagpipe) drone", "bagpipe_drone"),
+    BattleLayer(
+        350428,
+        "straight_trumpet_fanfare",
+        "trumpet fanfare (stinger/critical)",
+        "straight_trumpet",
+    ),
+    BattleLayer(
+        260864,
+        "bagpipe_drone",
+        "mittelalter sackpfeife (bagpipe) drone",
+        "bagpipe_drone",
+    ),
 ]
 
 # The shawm layer comes from Wikimedia Commons (CC BY-SA 3.0), not Freesound: it is a clean
@@ -175,6 +197,15 @@ def _curl(url: str, out: Path | None = None) -> str:
     if out is not None:
         out.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run([*args, "-o", str(out), url], check=True)
+        # Wikimedia serves rate-limit / error pages as HTML with a 200 or 429 status; curl -sL
+        # would otherwise cache that HTML as if it were the audio file.
+        with out.open("rb") as handle:
+            head = handle.read(256)
+        if head.lstrip().startswith(b"<!DOCTYPE") or head.lstrip().startswith(b"<html"):
+            out.unlink(missing_ok=True)
+            raise RuntimeError(
+                f"{url}: reponse HTML (limite de debit ?), pas telecharge"
+            )
         return ""
     result = subprocess.run([*args, url], capture_output=True, text=True, check=True)
     return result.stdout
@@ -204,6 +235,10 @@ def fetch_wikimedia(track: WikimediaTrack) -> Path:
     licence = info.get("extmetadata", {}).get("LicenseShortName", {}).get("value", "")
     if licence not in ACCEPTED_LICENSES:
         raise RuntimeError(f"{track.file_title}: licence refusee ({licence!r})")
+    if track.licence and licence != track.licence:
+        raise RuntimeError(
+            f"{track.file_title}: licence changee sur Commons ({licence!r}, attendu {track.licence!r})"
+        )
     url = info["url"]
     suffix = Path(urllib.parse.urlparse(url).path).suffix or ".ogg"
     cached = CACHE_DIR / "wikimedia" / f"{track.out_name}{suffix}"
@@ -218,12 +253,20 @@ def fetch_freesound(sound_id: int) -> Path:
     page_path = cache / f"{sound_id}.html"
     if not page_path.exists():
         page_path.parent.mkdir(parents=True, exist_ok=True)
-        page_path.write_text(_curl(f"https://freesound.org/s/{sound_id}/"), encoding="utf-8")
+        page_path.write_text(
+            _curl(f"https://freesound.org/s/{sound_id}/"), encoding="utf-8"
+        )
     page = page_path.read_text(encoding="utf-8")
-    deeds = set(re.findall(r"creativecommons\.org/(?:licenses|publicdomain)/[a-z0-9.\-/]*", page))
+    deeds = set(
+        re.findall(
+            r"creativecommons\.org/(?:licenses|publicdomain)/[a-z0-9.\-/]*", page
+        )
+    )
     if not deeds or any("publicdomain/zero" not in deed for deed in deeds):
         raise RuntimeError(f"Freesound {sound_id}: licence n'est pas exclusivement CC0")
-    preview_match = re.search(rf"https://cdn\.freesound\.org/previews/\d+/{sound_id}_\d+-hq\.mp3", page)
+    preview_match = re.search(
+        rf"https://cdn\.freesound\.org/previews/\d+/{sound_id}_\d+-hq\.mp3", page
+    )
     if preview_match is None:
         raise RuntimeError(f"Freesound {sound_id}: aperçu introuvable")
     audio_path = cache / f"{sound_id}.mp3"
@@ -238,7 +281,15 @@ def convert_music(src: Path, dst: Path, *, max_seconds: float | None = None) -> 
     cmd = ["ffmpeg", "-y", "-i", str(src)]
     if max_seconds is not None:
         cmd += ["-t", str(max_seconds)]
-    cmd += ["-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-b:a", "128k", str(dst)]
+    cmd += [
+        "-af",
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "-ar",
+        "44100",
+        "-b:a",
+        "128k",
+        str(dst),
+    ]
     subprocess.run(cmd, check=True, capture_output=True)
 
 
@@ -253,7 +304,9 @@ def convert_layer(src: Path, dst: Path, *, loop_seconds: float = 8.0) -> None:
         "-t",
         str(loop_seconds),
         "-af",
-        "loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=in:d=0.3,afade=t=out:st=" + str(loop_seconds - 0.5) + ":d=0.5",
+        "loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=in:d=0.3,afade=t=out:st="
+        + str(loop_seconds - 0.5)
+        + ":d=0.5",
         "-ac",
         "2",
         "-ar",
@@ -270,6 +323,7 @@ def convert_layer(src: Path, dst: Path, *, loop_seconds: float = 8.0) -> None:
 
 
 def write_wikimedia_source_md() -> None:
+    """Rewrite `wikimedia/SOURCE.md` from the manifests above (existing + `WIKIMEDIA_TRACKS`)."""
     lines = [
         "# Wikimedia Commons — musique médiévale et Renaissance (instruments d'époque)",
         "",
@@ -310,11 +364,9 @@ def write_wikimedia_source_md() -> None:
         "https://commons.wikimedia.org/wiki/File:Diego_Ortiz_(1510-1570)_-_Recercada_segunda_sobre_tenores_italianos_from_Trattado_de_Glosas_(1553).ogg |",
     ]
     for track in WIKIMEDIA_TRACKS:
-        info = _commons_imageinfo(track.file_title)
-        licence = info.get("extmetadata", {}).get("LicenseShortName", {}).get("value", "")
         url = "https://commons.wikimedia.org/wiki/" + track.file_title.replace(" ", "_")
         lines.append(
-            f"| `{track.out_name}.mp3` | {track.work} | {track.performers} | {licence} | "
+            f"| `{track.out_name}.mp3` | {track.work} | {track.performers} | {track.licence} | "
             f"{track.culture} | {track.context} | {url} |"
         )
     lines.append(
@@ -331,6 +383,7 @@ def write_wikimedia_source_md() -> None:
 
 
 def write_battle_layers_source_md() -> None:
+    """Rewrite `battle_layers/SOURCE.md` from `BATTLE_LAYER_SOURCES` and the shawm layer."""
     lines = [
         "# Couches instrumentales de bataille (DA4)",
         "",
@@ -356,10 +409,13 @@ def write_battle_layers_source_md() -> None:
         "shawm | https://commons.wikimedia.org/wiki/File:Schalmei_sound.ogg |"
     )
     lines.append("")
-    (BATTLE_LAYERS_DIR / "SOURCE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (BATTLE_LAYERS_DIR / "SOURCE.md").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> None:
+    """Download, convert and credit every era-music track and battle layer (idempotent)."""
     failures: list[str] = []
     for track in WIKIMEDIA_TRACKS:
         dst = WIKIMEDIA_DIR / f"{track.out_name}.mp3"
@@ -373,14 +429,18 @@ def main() -> None:
             failures.append(f"{track.file_title}: {exc}")
             print(f"  echec: {exc}")
 
-    shawm_track = WikimediaTrack(SHAWM_WIKIMEDIA_FILE, SHAWM_OUT_NAME, "", "", "", "battle")
+    shawm_track = WikimediaTrack(
+        SHAWM_WIKIMEDIA_FILE, SHAWM_OUT_NAME, "", "", "", "battle", "CC BY-SA 3.0"
+    )
     shawm_dst = WIKIMEDIA_DIR / f"{SHAWM_OUT_NAME}.mp3"
     if not shawm_dst.exists():
         print(f"[wikimedia] {SHAWM_WIKIMEDIA_FILE}")
         try:
             shawm_src = fetch_wikimedia(shawm_track)
             convert_music(shawm_src, shawm_dst, max_seconds=6.0)
-            convert_layer(shawm_src, BATTLE_LAYERS_DIR / f"{SHAWM_OUT_NAME}.ogg", loop_seconds=6.0)
+            convert_layer(
+                shawm_src, BATTLE_LAYERS_DIR / f"{SHAWM_OUT_NAME}.ogg", loop_seconds=6.0
+            )
         except Exception as exc:  # noqa: BLE001
             failures.append(f"{SHAWM_WIKIMEDIA_FILE}: {exc}")
             print(f"  echec: {exc}")
@@ -399,11 +459,19 @@ def main() -> None:
 
     if all((WIKIMEDIA_DIR / f"{t.out_name}.mp3").exists() for t in WIKIMEDIA_TRACKS):
         write_wikimedia_source_md()
-    if all((BATTLE_LAYERS_DIR / f"{layer.out_name}.ogg").exists() for layer in BATTLE_LAYER_SOURCES) and shawm_dst.exists():
+    if (
+        all(
+            (BATTLE_LAYERS_DIR / f"{layer.out_name}.ogg").exists()
+            for layer in BATTLE_LAYER_SOURCES
+        )
+        and shawm_dst.exists()
+    ):
         write_battle_layers_source_md()
 
     if failures:
-        print("\nEchecs (relancer le script pour reessayer, cache/telechargements repris) :")
+        print(
+            "\nEchecs (relancer le script pour reessayer, cache/telechargements repris) :"
+        )
         for failure in failures:
             print(f"  - {failure}")
     else:
