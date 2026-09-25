@@ -1,6 +1,17 @@
 # ZG8 — relief exagéré façon Total War (visuel seulement)
 
-État : spécifié, à lancer (après ou en parallèle de ZG4b, fusion de main avant la fin).
+État : EN COURS (branche worktree-agent-a324124257f1dc359).
+
+## Avancement
+- [x] Squelette : `ReliefExaggerationProfile` (+ `resources/relief_exaggeration.tres`), `ReliefFloor`
+  (fond min+flou, WorkerThreadPool), `MapData.display_height` / `height_from_display` / `set_relief_floor`,
+  `shaders/campaign_relief.gdshaderinc` (`campaign_display_height`), globaux `campaign_relief_*`.
+- [ ] Brancher tous les consommateurs (terrain/quadtree, E0, fleuves, routes, villes, monuments, ponts).
+- [ ] Roche selon la pente affichée, soleil plus rasant.
+- [ ] Test `tests/zg8_relief_test.gd`, tests ZG2/ZG4/ZG5b/ZG6 + smoke.
+- [ ] Captures avant/après `docs/img/zg8/`, banc `--bench-map`, docs (godot-map.md, ADR 0036).
+
+Prochaine étape : voir la première case non cochée.
 
 ## Constat (capture Total War Warhammer III fournie par le joueur, 25/09)
 - Exagération non uniforme : plaines plates, montagnes en falaises.
