@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_huile_bouillante",
+  "title": "L'huile bouillante : un mythe tenace",
+  "category": "mecanique",
+  "aliases": [
+    "huile bouillante",
+    "mâchicoulis",
+    "assommoirs",
+    "hourds"
+  ],
+  "era": { "from": "XIIe siècle", "to": "XVe siècle" },
+  "summary": "Le chaudron d'huile bouillante renversé sur les assaillants est une image de roman et de cinéma plus que d'histoire : l'huile coûtait trop cher. Des mâchicoulis tombaient surtout des pierres, de l'eau bouillante, de la chaux vive ou de la poix.",
+  "body": "Le mythe a une origine ancienne : l'historien Flavius Josèphe raconte que les défenseurs de Jotapata, assiégée par les Romains en 67, versèrent de l'huile bouillante sur les légionnaires, qui s'infiltrait sous leurs cuirasses. Quelques chroniques médiévales mentionnent aussi, çà et là, de l'huile ou de la graisse brûlante. Mais ces mentions sont rares, et les historiens de la fortification s'accordent à y voir une exception.\n\nLa raison est simple : l'huile coûte cher. Dans la France du Nord, l'huile d'olive est une marchandise importée du Midi ; les huiles de noix, de lin ou de navette servent à la cuisine des jours maigres et à l'éclairage, et on ne les gaspille pas par chaudrons entiers. Il faut en outre beaucoup de bois et de temps pour chauffer de grandes quantités au sommet d'une tour. Les comptes de défense des villes qui nous sont parvenus parlent surtout de pierres, de bois, de carreaux d'arbalète et de poudre.\n\nCe que les défenseurs laissent tomber par les hourds de bois, puis par les mâchicoulis de pierre qui les remplacent au XIVe siècle, et par les assommoirs percés au-dessus des passages d'entrée, ce sont d'abord des pierres, des poutres, de l'eau bouillante, du sable chauffé, de la chaux vive qui brûle les yeux, de la poix ou des fagots enflammés contre les engins. Les mâchicoulis servent aussi et surtout à tirer à la verticale sur ceux qui sapent le pied du mur.",
+  "anachronism": "Le jeu montre de l'huile bouillante qui coule des mâchicoulis de la porte, parce que l'image est attendue et lisible ; son effet vaut pour tout ce qu'une garnison jetait sur les assaillants de la porte (pierres, eau bouillante, chaux, poix).",
+  "gameplay": "En bataille de siège, tant qu'un régiment de la garnison garde la porte (dedans, à moins de 50 m), les mâchicoulis de la porte frappent toutes les 30 secondes les régiments assaillants à moins de 10 m de sa face extérieure : 3 hommes par régiment avant armure (l'armure ne compte qu'à moitié) et 4 points de moral ; le [[cdx_jeu_belier|bélier]], sous son toit, n'y perd qu'un demi-servant. L'effet est faible mais continu : il use les régiments qui attendent devant la porte.\n\nConseil : ne massez pas vos troupes devant la porte tant qu'elle tient ; laissez le bélier travailler seul et dressez vos échelles ou ouvrez une [[cdx_jeu_murailles|brèche]] ailleurs, pour attirer les défenseurs loin de la porte.",
+  "see_also": ["cdx_jeu_belier", "cdx_jeu_assaut", "cdx_jeu_murailles", "cdx_jours_maigres", "cdx_eclairage"],
+  "sources": ["Mâchicoulis", "Hourd", "Siège de Jotapata", "Poliorcétique"]
+}
