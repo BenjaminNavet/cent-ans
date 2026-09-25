@@ -33,7 +33,16 @@ couches selon la distance caméra. S'appuie sur AU1 (`docs/wip/au1-audio.md`,
 - [x] Test headless `game/tests/ep4_audio_test.gd` : comptes de clips, front proche avec émetteur
       / front loin sans émetteur, pas de répétition immédiate d'un type de choc, budget de voix
       jamais dépassé (8 fronts denses), charge de cavalerie, sifflement au-dessus de la caméra.
-- [ ] Smoke (`core/build.sh` en cours), merge main, rapport.
+- [x] `core/build.sh`, `godot --headless --path game --import`, test `ep4_audio_test.gd` et
+      `au1_audio_test.gd` OK, `smoke.gd` OK (exit 0, aucune erreur de script). `git merge main`
+      (fast-forward puis merge propre, aucun conflit). `pytest tools/tests/test_audio_bank.py`
+      OK, `ruff check`/`ruff format --check` propres. `docs/budget.md` : ligne EP4 à 0 $.
+
+## État : terminé
+
+Reste à l'oreille (pas de session d'écoute ici) : régler `volume_db` des nouveaux événements et
+la densité des fronts si trop chargé/creux en jeu réel ; EP5 peut ajouter tambours/trompettes via
+`BattleAudio.play_at(clip, position)` sans toucher à `_update_fronts`.
 
 ## Décisions
 
