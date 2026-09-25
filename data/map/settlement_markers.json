@@ -17,7 +17,7 @@
     {"id": "tower", "cell": 8, "label": "Tour", "subject": "a single fortified stone tower house (donjon) on a small grassy motte seen from the front, crenellated top, one small wooden hoarding"},
     {"id": "abbey_major", "cell": 9, "label": "Grande abbaye", "subject": "a great Benedictine abbey seen from the front: a large Romanesque-Gothic abbey church with a tall crossing tower and a western bell tower, cloister buildings and an enclosure wall"},
     {"id": "abbey", "cell": 10, "label": "Abbaye", "subject": "a small monastery priory seen from the front: a stone church with a small bell tower topped by a cross, a low cloister range with a red tiled roof"},
-    {"id": "port", "cell": 11, "label": "Port", "badge": true, "subject": "a single small medieval cog ship with one square sail, seen from the side, riding on stylised curling waves"}
+    {"id": "port", "cell": 11, "label": "Port", "badge": true, "subject": "a single small 14th-century cog seen from the side: a high round-bellied clinker-built hull with a straight stem and sternpost, a small crenellated aftercastle, one mast with a single square sail, riding on stylised curling waves"}
   ],
   "kinds": {
     "city": {"1": "city", "2": "city", "3": "city_major", "4": "city_capital"},
