@@ -161,7 +161,7 @@ fn plan_passage(state: &CampaignState, data: &GameData, faction: &FactionId) -> 
                 giver: Party::Proposer,
             });
         }
-        would_sign(state, data, faction, &id, &treaty).then(|| Order::ProposeTreaty {
+        would_sign(state, data, faction, &id, &treaty).then_some(Order::ProposeTreaty {
             target: id,
             articles: treaty,
         })
