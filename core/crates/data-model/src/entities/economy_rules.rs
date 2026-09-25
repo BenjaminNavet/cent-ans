@@ -13,6 +13,11 @@ pub struct EconomyRules {
     pub event_treasury_reference_income: i64,
     /// ... but never less than this share of the written amount (0-1).
     pub event_treasury_min_scale: f64,
+    /// B7c: a construction's `cost.resources` come from the provinces
+    /// producing them that the faction can reach (`goods`); each missing
+    /// unit is imported at the resource's `base_price` times this.
+    #[serde(default = "default_resource_import_multiplier")]
+    pub resource_import_multiplier: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -24,7 +29,12 @@ impl Default for EconomyRules {
         EconomyRules {
             event_treasury_reference_income: 4000,
             event_treasury_min_scale: 0.25,
+            resource_import_multiplier: default_resource_import_multiplier(),
             description: None,
         }
     }
+}
+
+fn default_resource_import_multiplier() -> u32 {
+    100
 }

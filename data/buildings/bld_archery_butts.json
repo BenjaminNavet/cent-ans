@@ -29,10 +29,6 @@
       "value": 1
     }
   ],
-  "enables_units": [
-    "unit_longbowmen",
-    "unit_francs_archers"
-  ],
   "description": "Buttes de terre où les hommes s'exercent à l'arc les dimanches et jours de fête, sur ordre d'Édouard III (1363). Voir [[cdx_butte_de_tir]].",
   "sources": [
     "Arc long anglais",

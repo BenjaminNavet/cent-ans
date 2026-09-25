@@ -199,7 +199,8 @@ pub fn try_acquire(
                 continue;
             }
             if let Some(building) = &rule.building {
-                if !buildings.contains(building) {
+                // B7c: an upgrade (fair for a market) counts too.
+                if !crate::buildings::provides(data, buildings, building) {
                     continue;
                 }
             }

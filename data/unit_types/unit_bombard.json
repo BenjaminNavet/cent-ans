@@ -30,7 +30,6 @@
     "wall_breach"
   ],
   "required_technology": "tech_bombards",
-  "required_building": "bld_siege_workshop",
   "equipment": "Tube de fer forgé à frettes sur affût de bois, boulets de pierre, poudre noire, canonniers.",
   "description": "Premier canon de siège, héritier des [[cdx_premieres_bouches_a_feu|premières bouches à feu]] ; lent et peu fiable mais dévastateur contre les murailles hautes et minces. Verrouillé par la technologie Bombardes.",
   "sources": [
