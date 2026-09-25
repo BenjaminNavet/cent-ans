@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/towns_1340.schema.json",
+  "title": "Emprise des villes ordinaires vers 1340",
+  "description": "Fichier data/map/towns_1340.json (lot ZG6, ADR 0036), généré par `cent-ans geo towns`. Coordonnées locales en mètres depuis l'ancrage fin de la colonie (x vers +X monde / est, y vers +Z monde / sud), hauteurs en mètres non exagérées. Lu par game/scripts/map/town_data.gd. Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "xy": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+    "range": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2},
+    "wall": {
+      "type": "object",
+      "properties": {
+        "height_m": {"type": "number", "minimum": 0},
+        "thickness_m": {"type": "number", "minimum": 0},
+        "tower_spacing_m": {"type": "number", "minimum": 0},
+        "tower_radius_m": {"type": "number", "minimum": 0},
+        "tower_height_m": {"type": "number", "minimum": 0}
+      },
+      "required": ["height_m", "thickness_m", "tower_spacing_m", "tower_radius_m", "tower_height_m"]
+    },
+    "town": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "pattern": "^set_"},
+        "kind": {"enum": ["city", "town", "castle", "abbey", "village"]},
+        "seed": {"type": "integer", "minimum": 0},
+        "px": {"$ref": "#/$defs/xy", "description": "Ancrage fin (unités monde), repris de fine_anchors.json."},
+        "population": {"type": "integer", "minimum": 1},
+        "population_basis": {"type": "string", "description": "`model` ou `reference:<source>` (data/rules/town_footprint.json)."},
+        "density": {"type": "number", "exclusiveMinimum": 0, "description": "Habitants par hectare bâti."},
+        "households": {"type": "integer", "minimum": 0},
+        "built_ha": {"type": "number", "minimum": 0},
+        "core_ha": {"type": "number", "minimum": 0, "description": "Surface du polygone (intra-muros, ou noyau d'un bourg ouvert)."},
+        "core_population": {"type": "integer", "minimum": 0},
+        "walls": {"enum": ["stone", "palisade", "none"]},
+        "site": {"enum": ["spur", "river", "coast", "plain"]},
+        "relief_m": {"type": "number", "minimum": 0},
+        "z_m": {"type": "number"},
+        "radii": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 8, "description": "Rayon du polygone (m) par relèvement régulier, 0 = est, sens horaire vu du dessus (vers le sud)."},
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "bearing": {"type": "number", "minimum": 0, "maximum": 360},
+              "type": {"enum": ["main", "secondary", "computed", "track"]}
+            },
+            "required": ["bearing", "type"],
+            "additionalProperties": false
+          }
+        },
+        "faubourgs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "bearing": {"type": "number"},
+              "start_m": {"type": "number", "minimum": 0},
+              "length_m": {"type": "number", "exclusiveMinimum": 0},
+              "population": {"type": "integer", "minimum": 0}
+            },
+            "required": ["bearing", "start_m", "length_m", "population"],
+            "additionalProperties": false
+          }
+        },
+        "monuments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {"enum": ["castle", "cathedral", "abbey", "hall", "windmill"]},
+              "at": {"$ref": "#/$defs/xy"},
+              "size_m": {"type": "number", "exclusiveMinimum": 0},
+              "yaw": {"type": "number"},
+              "keep": {"type": "boolean"}
+            },
+            "required": ["kind", "at", "size_m", "yaw"],
+            "additionalProperties": false
+          }
+        },
+        "parishes": {"type": "integer", "minimum": 0},
+        "river": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "properties": {
+                "point": {"$ref": "#/$defs/xy"},
+                "tangent": {"$ref": "#/$defs/xy"},
+                "width_m": {"type": "number", "minimum": 0},
+                "line": {"type": "array", "items": {"$ref": "#/$defs/xy"}, "minItems": 2}
+              },
+              "required": ["point", "tangent", "width_m", "line"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "bridge": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "at": {"$ref": "#/$defs/xy"},
+                "dir": {"$ref": "#/$defs/xy", "description": "Direction du fleuve (unités monde)."},
+                "width_m": {"type": "number", "minimum": 0},
+                "z_deck": {"type": "number"},
+                "z_water": {"type": "number"}
+              },
+              "required": ["id", "at", "dir", "width_m", "z_deck", "z_water"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "finage_radius_m": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "required": ["id", "kind", "seed", "px", "population", "population_basis", "density", "households", "built_ha", "core_ha", "core_population", "walls", "site", "relief_m", "z_m", "radii", "gates", "faubourgs", "monuments", "parishes", "river", "bridge", "finage_radius_m"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "version": {"const": 1},
+    "generated_at": {"type": "string"},
+    "year": {"type": "integer"},
+    "meters_per_unit": {"type": "number", "exclusiveMinimum": 0},
+    "bearings": {"type": "integer", "minimum": 8},
+    "walls": {
+      "type": "object",
+      "properties": {
+        "stone": {"$ref": "#/$defs/wall"},
+        "palisade": {"$ref": "#/$defs/wall"},
+        "gate_depth_m": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "required": ["stone", "palisade", "gate_depth_m"],
+      "additionalProperties": false
+    },
+    "plan": {"type": "object", "description": "Section `plan` de data/rules/town_footprint.json (sans sa description)."},
+    "towns": {"type": "object", "additionalProperties": {"$ref": "#/$defs/town"}}
+  },
+  "required": ["description", "version", "generated_at", "year", "meters_per_unit", "bearings", "walls", "plan", "towns"],
+  "additionalProperties": false
+}

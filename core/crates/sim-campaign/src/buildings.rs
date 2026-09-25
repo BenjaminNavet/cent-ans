@@ -24,6 +24,9 @@ use crate::state::{CampaignState, Construction, SettlementState};
 pub const BASE_CAPACITY: u64 = 40_000;
 /// Share of a construction's money cost refunded by `cancel_build`.
 pub const CANCEL_REFUND_PERCENT: u32 = 50;
+/// B7b: most a settlement's `ConstructionSpeed` can shorten a build (+100 %:
+/// half the time).
+pub const MAX_CONSTRUCTION_SPEED_PERCENT: f64 = 100.0;
 
 /// One `flat` + `percent` pair of a summed [`EffectKind`].
 #[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
@@ -421,6 +424,17 @@ pub fn levy_bonus(data: &GameData, buildings: &[BuildingId], category: UnitCateg
     (cap(armor), cap(ranged))
 }
 
+/// B7c: buildings whose `enables_units` list `unit_type` — the only source of
+/// the "building required to recruit" rule; empty when no building gates it.
+pub fn enabling_buildings<'a>(
+    data: &'a GameData,
+    unit_type: &'a data_model::UnitTypeId,
+) -> impl Iterator<Item = &'a data_model::Building> + 'a {
+    data.buildings
+        .values()
+        .filter(move |b| b.enables_units.contains(unit_type))
+}
+
 /// Population capacity of a province: [`BASE_CAPACITY`] times one plus the
 /// sum of the tiers of its `production`-category buildings (spec § 1.1).
 pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]) -> u64 {
@@ -459,6 +473,49 @@ pub struct BuildOption {
     pub available: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
+    /// B7c: part of `cost` paid to import the missing resource units.
+    #[serde(default)]
+    pub import_cost: u32,
+    /// B7c: resource units the faction lacks and must import.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub imported: BTreeMap<ResourceId, u32>,
+}
+
+/// B7c: how a construction's `cost.resources` are met — units drawn from the
+/// faction's producing provinces and units imported, with their price.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ResourceDraw {
+    pub drawn: BTreeMap<ResourceId, u32>,
+    pub imported: BTreeMap<ResourceId, u32>,
+    /// Import price in livres (before coinage).
+    pub import_cost: i64,
+}
+
+/// B7c: splits `needed` between the free `supply` and imports priced at
+/// `base_price × resource_import_multiplier` a unit.
+pub fn resource_draw(
+    data: &GameData,
+    supply: &BTreeMap<ResourceId, u32>,
+    needed: &BTreeMap<ResourceId, u32>,
+) -> ResourceDraw {
+    let mut draw = ResourceDraw::default();
+    let multiplier = i64::from(data.economy_rules.resource_import_multiplier);
+    for (resource, &amount) in needed {
+        let own = supply.get(resource).copied().unwrap_or(0).min(amount);
+        if own > 0 {
+            draw.drawn.insert(resource.clone(), own);
+        }
+        let missing = amount - own;
+        if missing > 0 {
+            draw.imported.insert(resource.clone(), missing);
+            let price = data
+                .resources
+                .get(resource)
+                .map_or(0, |r| i64::from(r.base_price));
+            draw.import_cost += i64::from(missing) * price * multiplier;
+        }
+    }
+    draw
 }
 
 /// Snapshot of a province's city panel (bridge input, spec § 2): the
@@ -570,31 +627,103 @@ impl CampaignState {
         let Some(faction) = self.factions.get(&state.controller) else {
             return Vec::new();
         };
+        let supply = self.free_supply(data, &state.controller);
         data.buildings
             .values()
             .filter(|building| building.allowed_in(state.kind))
             .map(|building| {
+                let draw = resource_draw(data, &supply, &building.cost.resources);
+                let priced = |livres: i64| crate::coinage::priced(self, &state.controller, livres);
+                let cost = priced(i64::from(building.cost.money) + draw.import_cost);
                 let mut option = BuildOption {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
-                    cost: crate::coinage::priced(
-                        self,
-                        &state.controller,
-                        i64::from(building.cost.money),
-                    ) as u32,
-                    turns: building.build_time_turns,
+                    cost: cost as u32,
+                    turns: self.build_time(data, settlement, building.build_time_turns),
                     available: true,
                     reason: None,
+                    import_cost: priced(draw.import_cost) as u32,
+                    imported: draw.imported,
                 };
-                if let Some(reason) =
-                    self.build_blocker(data, settlement, state, province_data, faction, building)
-                {
+                if let Some(reason) = self.build_blocker(
+                    data,
+                    settlement,
+                    state,
+                    province_data,
+                    faction,
+                    building,
+                    cost,
+                ) {
                     option.available = false;
                     option.reason = Some(reason);
                 }
                 option
             })
             .collect()
+    }
+
+    /// B7c: resource units `faction` can still draw for a new construction:
+    /// one per producing province it controls or its allies control
+    /// ([`goods_map`]), less what its ongoing constructions have reserved.
+    pub fn free_supply(
+        &self,
+        data: &GameData,
+        faction: &data_model::FactionId,
+    ) -> BTreeMap<ResourceId, u32> {
+        let mut supply = goods_map(data, self, faction);
+        for settlement in self
+            .settlements
+            .values()
+            .filter(|s| &s.controller == faction)
+        {
+            let Some(construction) = &settlement.construction else {
+                continue;
+            };
+            for (resource, amount) in &construction.drawn {
+                if let Some(left) = supply.get_mut(resource) {
+                    *left = left.saturating_sub(*amount);
+                }
+            }
+        }
+        supply
+    }
+
+    /// B7b `ConstructionSpeed` of `settlement` in percent: its buildings and
+    /// its province's edict, plus the best of its province's governor and
+    /// its controller's ruler (a builder on the throne or in the province
+    /// hurries the works; the two do not stack).
+    pub fn construction_speed_percent(&self, data: &GameData, settlement: &SettlementId) -> f64 {
+        let Some(state) = self.settlements.get(settlement) else {
+            return 0.0;
+        };
+        let mut local = effects_of(data, &state.buildings);
+        local.merge(&crate::edicts::edict_effects(self, data, &state.province));
+        let governor = self
+            .governor_effects(data, &state.province)
+            .construction_speed
+            .percent;
+        let ruler = self
+            .factions
+            .get(&state.controller)
+            .and_then(|f| f.ruler.as_ref())
+            .filter(|r| self.characters.get(*r).is_some_and(|c| c.alive))
+            .map_or(0.0, |r| {
+                crate::skills::character_effects(self, data, r)
+                    .construction_speed
+                    .percent
+            });
+        local.construction_speed.percent + governor.max(ruler)
+    }
+
+    /// Turns needed to build something of `base_turns` in `settlement`
+    /// (B7b): `base × 100 / (100 + speed %)`, rounded, at least one turn
+    /// (+15 % turns 4 into 3, +50 % turns 8 into 5).
+    pub fn build_time(&self, data: &GameData, settlement: &SettlementId, base_turns: u32) -> u32 {
+        let percent = self
+            .construction_speed_percent(data, settlement)
+            .clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
+        let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
+        (turns as u32).max(1)
     }
 
     /// Build options of the city of `province` (v1 signature).
@@ -608,6 +737,7 @@ impl CampaignState {
             .unwrap_or_default()
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn build_blocker(
         &self,
         data: &GameData,
@@ -616,6 +746,7 @@ impl CampaignState {
         province_data: &data_model::Province,
         faction: &crate::state::FactionState,
         building: &data_model::Building,
+        cost: i64,
     ) -> Option<String> {
         if !building.allowed_in(state.kind) {
             return Some("impossible dans ce type de colonie".to_owned());
@@ -680,7 +811,6 @@ impl CampaignState {
         {
             return Some("unique pour la faction (déjà construit ailleurs)".to_owned());
         }
-        let cost = crate::coinage::priced(self, &state.controller, i64::from(building.cost.money));
         if faction.treasury < cost {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }

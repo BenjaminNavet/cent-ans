@@ -699,11 +699,15 @@ impl Battlefield {
     }
 
     /// `true` when a hedge stands between `from` and a target at `to`, close
-    /// in front of the target (B5: archers behind a hedge).
+    /// in front of the target (B5: archers behind a hedge). Shooters nearer
+    /// the hedge than their target hold it: they shoot over their own hedge
+    /// (Poitiers), and the target on the far side gets no cover from it.
     pub fn hedge_between(&self, from: (f64, f64), to: (f64, f64)) -> bool {
         self.obstacles.iter().any(|o| {
+            let target_distance = o.distance(to.0, to.1);
             o.kind.gives_cover()
-                && o.distance(to.0, to.1) <= HEDGE_COVER_REACH
+                && target_distance <= HEDGE_COVER_REACH
+                && target_distance <= o.distance(from.0, from.1)
                 && o.crosses(from, to)
         })
     }

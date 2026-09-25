@@ -19,6 +19,7 @@ use std::rc::Rc;
 
 use data_model::{AiGrid, FactionId, GameData, SettlementId, PLAIN_COST};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
+use sim_campaign::passage;
 use sim_campaign::{Army, ArmyId, CampaignState, Order};
 
 /// A Dijkstra table of the settlement graph.
@@ -47,6 +48,10 @@ pub struct GridPlanner<'a> {
     /// Settlements held by an enemy or holding an enemy army: reached (a
     /// siege, a battle) but never passed through.
     stops: BTreeSet<SettlementId>,
+    /// Lot DP2: settlements in the lands of a faction at peace that this
+    /// faction's AI will not cross without right of passage
+    /// (`passage::ai_may_trespass`): never reached nor passed through.
+    forbidden: BTreeSet<SettlementId>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
     tables: RefCell<BTreeMap<TableKey, Rc<Table>>>,
 }
@@ -94,6 +99,23 @@ impl<'a> GridPlanner<'a> {
             .cloned()
             .collect();
         stops.extend(enemies.iter().filter_map(|e| e.settlement.clone()));
+        let mut may_cross: BTreeMap<FactionId, bool> = BTreeMap::new();
+        let forbidden: BTreeSet<SettlementId> = state
+            .settlements
+            .keys()
+            .filter(|id| {
+                let Some(owner) = state
+                    .settlement_province(id)
+                    .and_then(|p| passage::trespassed_owner(state, faction, p))
+                else {
+                    return false;
+                };
+                !*may_cross
+                    .entry(owner.clone())
+                    .or_insert_with(|| passage::ai_may_trespass(state, data, faction, &owner))
+            })
+            .cloned()
+            .collect();
         GridPlanner {
             state,
             data,
@@ -102,6 +124,7 @@ impl<'a> GridPlanner<'a> {
             px_per_km,
             enemies,
             stops,
+            forbidden,
             tables: RefCell::new(BTreeMap::new()),
         }
     }
@@ -150,6 +173,9 @@ impl<'a> GridPlanner<'a> {
                 continue;
             }
             for (next, edge) in edges(self.data, &current) {
+                if self.forbidden.contains(&next) {
+                    continue;
+                }
                 let total = cost + edge.min(cap.max(1));
                 if total > budget {
                     continue;

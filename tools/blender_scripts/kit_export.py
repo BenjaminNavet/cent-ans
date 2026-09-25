@@ -2,6 +2,7 @@
 
 Run headless:
     blender --background --python kit_export.py -- export <out_dir> [kind ...]
+    blender --background --python kit_export.py -- export-town <out_dir>
     blender --background --python kit_export.py -- preview <prefix> [kind[:seed][!] ...] [--low]
 
 ``export`` writes the battle set (``high`` detail, a few seeds per kind, burned ruins) to
@@ -332,6 +333,55 @@ def export_battle(out_dir: Path, kinds: list[str] | None = None) -> None:
     print("OK")
 
 
+# Town set (lot ZG6, towns at real scale on the campaign map): ``low`` detail, more variants of
+# the town kinds, one cathedral; same manifest format as the battle set.
+TOWN_SET = {
+    "cottage": [(s, {}) for s in (211, 212, 213, 214)],
+    "longere": [(s, {}) for s in (221, 222, 223)],
+    "timber": [(s, {}) for s in (231, 232, 233, 234, 235)],
+    "townhouse": [(s, {}) for s in (241, 242, 243, 244, 245, 246)],
+    "stonehouse": [(s, {}) for s in (251, 252, 253)],
+    "barn": [(261, {}), (262, {})],
+    "church": [
+        (271, {"length": 19.0, "depth": 8.0}),
+        (272, {"length": 24.0, "depth": 9.0}),
+        (273, {"length": 36.0, "depth": 13.0}),
+    ],
+    "cathedral": [(275, {})],
+    "manor": [(281, {}), (282, {})],
+    "hall": [(291, {})],
+    "well": [(295, {})],
+    "windmill": [(297, {})],
+}
+
+
+def export_town(out_dir: Path) -> None:
+    """Write the low-detail town set (lot ZG6) and its manifest."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    manifest = {}
+    for kind, entries in TOWN_SET.items():
+        for n, (seed, dims) in enumerate(entries):
+            reset_scene()
+            g, info = kit.build(kind, seed, "low", False, **dims)
+            name = f"{kind}_{n}"
+            obj = to_object(g, name)
+            atlas(obj)
+            export_glb(obj, out_dir / f"{name}.glb")
+            manifest[name] = {
+                "kind": kind,
+                "ruined": False,
+                "length": round(info["length"], 2),
+                "depth": round(info["depth"], 2),
+                "height": round(info["height"], 2),
+                "triangles": info["triangles"],
+            }
+            print("MODEL", name, info["triangles"])
+    (out_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=1, sort_keys=True) + "\n"
+    )
+    print("OK")
+
+
 def _setup_stage(scene) -> None:
     """Ground, sun, sky and AgX for previews."""
     bpy.ops.mesh.primitive_plane_add(size=600, location=(0, 0, -0.01))
@@ -589,6 +639,8 @@ def main() -> None:
             export_horses(out_dir)
         if kinds is None or building_kinds:
             export_battle(out_dir, building_kinds)
+    elif command == "export-town":
+        export_town(Path(argv[1]))
     elif command == "preview":
         args = argv[2:]
         detail = "low" if "--low" in args else "high"

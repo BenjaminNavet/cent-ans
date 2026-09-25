@@ -76,10 +76,12 @@ fn recruit_and_build_orders_address_a_non_city_settlement() {
             },
         )
         .expect("recruit in a town");
-    assert_eq!(
-        state.settlements[&town].recruit_queue,
-        vec![recruit.unit_type]
-    );
+    let queued: Vec<_> = state.settlements[&town]
+        .recruit_queue
+        .iter()
+        .map(|r| r.unit_type.clone())
+        .collect();
+    assert_eq!(queued, vec![recruit.unit_type]);
     assert!(state.settlements[&city].recruit_queue.is_empty());
 
     let build = state
