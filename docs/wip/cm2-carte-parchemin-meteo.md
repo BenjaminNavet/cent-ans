@@ -27,7 +27,7 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
   plus, tant que le bandeau « Tour des autres factions » est affiché ; aube rosée au retour).
   `--dusk` fige le soir (capture `apres_soir_ia_400.png`).
 - [x] Mesures FPS (3 zooms), captures `docs/audit/captures/cm2/`
-- [ ] Fusion de main, smoke
+- [x] Fusion de main (44bcdc16, sans conflit), cargo fmt/clippy/test, build.sh, import, smoke (24 OK), test CM2 OK
 
 ## Mesures de référence (avant CM2, Vulkan, 1600×900, `--fps-probe`, charge ≈ 30)
 | Distance | i/s | GPU ms |
@@ -49,5 +49,19 @@ cher que le rendu 3D. Dans la bande de fondu, les deux rendus sont calculés : b
 1180 → 1440 (transitoire pendant le zoom). Couche 2D : ≈ 3 ms CPU (vignettes pré-rendues ;
 `draw_colored_polygon` par image coûtait 70 ms pour 130 villes).
 
+## État : terminé (à fusionner par l'orchestrateur)
+
+## Points ouverts
+- Dans la bande de fondu (1180 → 1440), terrain 3D et parchemin sont calculés tous les deux
+  (+15 à +50 % GPU tant que la caméra y reste) ; au-delà, shader « parchemin seul ».
+- Météo sur la mer : aucune (le masque est par province terrestre) ; nuées et pluie s'arrêtent
+  à la côte.
+- Les nuées (non éclairées) ne prennent pas la teinte dorée du soir.
+- La météo n'a aucun effet de règle (ADR 0027) ; les batailles gardent leur tirage N1.
+- Jetons d'armée : la sélection passe toujours par les marqueurs 3D (masqués mais cliquables aux
+  mêmes positions) ; pas d'animation de marche des jetons en dehors de celle de M4.
+- Vignettes de villes : une seule forme (pré-rendue) ; les capitales ont un fanion aux couleurs.
+- Toute la couche 2D est redessinée à chaque image en vue parchemin (≈ 3 ms CPU).
+
 ## Prochaine étape
-Lot 3 : lumière dorée pendant le tour de l'IA ; puis mesures FPS, fusion de main, smoke.
+Rien : fusion par l'orchestrateur.
