@@ -202,8 +202,8 @@ func _build_game(grid: GridContainer) -> void:
 func _build_battle(grid: GridContainer) -> void:
 	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
 		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
-	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)"],
-		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra est exigeant pour la carte graphique.")
+	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)", "Épique (× 4)"],
+		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra et Épique sont exigeants pour la carte graphique (Épique : masses serrées, pour les grandes batailles).")
 	var budgets: Array = _constant("MAX_FIGURES_CHOICES")
 	_options(grid, "battle/max_figures", "Figurines maximum", budgets, budgets.map(func(count: int) -> String: return _thousands(count)),
 		"Nombre maximal de figurines dessinées sur tout le champ de bataille. Si les armées sont plus nombreuses, la taille des unités est réduite pour tenir dans ce plafond. Baissez-le si les grandes batailles ralentissent.")

@@ -511,7 +511,11 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
         for iz in -4..=4 {
             let x = around.0 + f64::from(ix) * 25.0;
             let z = around.1 + f64::from(iz) * 25.0;
-            if !(300.0..=900.0).contains(&x) || !(60.0..=field.depth - 60.0).contains(&z) {
+            // The centre half of the field's width (300-900 m on the standard field).
+            let (center, half) = (field.size.center_x(), 300.0 * field.size.sx());
+            if !(center - half..=center + half).contains(&x)
+                || !(60.0..=field.depth - 60.0).contains(&z)
+            {
                 continue;
             }
             // Never step towards the enemy to find a hill.
@@ -539,11 +543,10 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
 /// R2b: centre of the deployment line of `side`, from which a defensive
 /// side looks for its ground (a fixed reference: searching from the moving
 /// line would let the reverse slope drag the line back step after step).
-fn deployment_center(side: SideId) -> (f64, f64) {
-    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
+fn deployment_center(field: &crate::field::Battlefield, side: SideId) -> (f64, f64) {
     match side {
-        SideId::Attacker => (FIELD_WIDTH * 0.5, ATTACKER_LINE_Z),
-        SideId::Defender => (FIELD_WIDTH * 0.5, DEFENDER_LINE_Z),
+        SideId::Attacker => (field.size.center_x(), field.attacker_line_z()),
+        SideId::Defender => (field.size.center_x(), field.defender_line_z()),
     }
 }
 
@@ -634,13 +637,12 @@ impl Cover {
 /// Best cover for `side` within reach of its deployment line, if any
 /// (deterministic: obstacles in index order, strict improvements only).
 pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Option<Cover> {
-    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
     use crate::site::ObstacleKind;
     let (line_z, forward) = match side {
-        SideId::Attacker => (ATTACKER_LINE_Z, 1.0),
-        SideId::Defender => (DEFENDER_LINE_Z, -1.0),
+        SideId::Attacker => (field.attacker_line_z(), 1.0),
+        SideId::Defender => (field.defender_line_z(), -1.0),
     };
-    let reference = (FIELD_WIDTH * 0.5, line_z);
+    let reference = (field.size.center_x(), line_z);
     let within = |x: f64, z: f64| {
         let ahead = (z - reference.1) * forward;
         (x - reference.0).abs() <= COVER_LATERAL && (-COVER_BEHIND..=COVER_AHEAD).contains(&ahead)
@@ -952,7 +954,7 @@ fn plan_field(view: &mut View) {
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if defensive {
-        let crest = high_ground(view, deployment_center(view.side));
+        let crest = high_ground(view, deployment_center(view.sim.field(), view.side));
         reverse_slope_anchor(view, crest, !roles.shooters.is_empty())
     } else if duel && contact < 260.0 {
         line_center

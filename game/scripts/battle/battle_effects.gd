@@ -797,7 +797,7 @@ func _projectile_layer(node_name: String, mesh: Mesh, count: int, is_trail: bool
 	instance.material_override = mat
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Les transformées portent des trajectoires, pas des positions : boîte fixe sur le champ.
-	instance.custom_aabb = AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
+	instance.custom_aabb = AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
 	add_child(instance)
 	return mm
 

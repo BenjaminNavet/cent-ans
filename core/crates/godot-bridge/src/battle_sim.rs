@@ -117,6 +117,9 @@ pub struct BattleSim {
     /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
     /// simulated soldier. Rendering only.
     figure_scale: f64,
+    /// Forced battle scale tier (EP1, `data/rules/battle_scale.json`);
+    /// empty: by head count.
+    scale_key: String,
     base: Base<RefCounted>,
 }
 
@@ -126,6 +129,7 @@ impl IRefCounted for BattleSim {
         BattleSim {
             sim: None,
             figure_scale: 1.0,
+            scale_key: String::new(),
             base,
         }
     }
@@ -136,8 +140,13 @@ impl BattleSim {
     /// Builds the battle from a `CampaignSim.get_battle_setup` dictionary.
     #[func]
     fn setup(&mut self, setup: VarDictionary, seed: i64) -> bool {
+        let forced = sim_battle::BattleScale::named(&self.scale_key);
         let parsed = from_dict::<BattleSetup>(&setup).and_then(|setup| {
-            sim_battle::BattleSim::new(setup, seed as u64).map_err(|e| e.to_string())
+            match forced {
+                Some(scale) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
+                None => sim_battle::BattleSim::new(setup, seed as u64),
+            }
+            .map_err(|e| e.to_string())
         });
         match parsed {
             Ok(sim) => {
@@ -150,6 +159,41 @@ impl BattleSim {
                 false
             }
         }
+    }
+
+    /// Forces the scale tier of the next `setup` (EP1: `skirmish`, `large`,
+    /// `epic`…; empty or unknown: by head count).
+    #[func]
+    fn set_scale_tier(&mut self, key: GString) {
+        self.scale_key = key.to_string();
+    }
+
+    /// Scale of the battle (EP1): `{key, width, depth, attacker_line_z,
+    /// defender_line_z, zone_depth, max_on_field}`.
+    #[func]
+    fn get_scale(&self) -> VarDictionary {
+        let Some(sim) = &self.sim else {
+            return VarDictionary::new();
+        };
+        let scale = sim.scale();
+        let size = sim.field().size;
+        vdict! {
+            "key" => scale.key.as_str(),
+            "width" => size.width,
+            "depth" => size.depth,
+            "attacker_line_z" => size.attacker_line_z(),
+            "defender_line_z" => size.defender_line_z(),
+            "zone_depth" => size.zone_depth,
+            "max_on_field" => scale.max_on_field as i64,
+        }
+    }
+
+    /// Width and depth of the field in metres (EP1), `(0, 0)` before `setup`.
+    #[func]
+    fn get_field_size(&self) -> Vector2 {
+        self.sim.as_ref().map_or(Vector2::ZERO, |sim| {
+            Vector2::new(sim.field().width as f32, sim.field().depth as f32)
+        })
     }
 
     /// Visual unit size (BV1, ADR 0016): figures drawn per simulated soldier
@@ -495,6 +539,9 @@ impl BattleSim {
         let mut dict = vdict! {
             "width" => field.width,
             "depth" => field.depth,
+            // EP1: battle lines of the field (250 / 550 on the standard one).
+            "attacker_line_z" => field.attacker_line_z(),
+            "defender_line_z" => field.defender_line_z(),
             "resolution" => field.resolution,
             "nx" => field.nx as i64,
             "nz" => field.nz as i64,
@@ -557,7 +604,7 @@ impl BattleSim {
         }
         if let Some(river) = &field.river {
             let points: PackedVector2Array = river
-                .polyline(10.0)
+                .polyline(10.0, field.width)
                 .iter()
                 .map(|(x, z)| Vector2::new(*x as f32, *z as f32))
                 .collect();
