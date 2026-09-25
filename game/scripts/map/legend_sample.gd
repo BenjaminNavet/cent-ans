@@ -9,7 +9,7 @@ extends Control
 ## `build(sample, context)` renvoie le contrôle adapté ; `context` : {player_color: Color,
 ## player_faction: String, factions: [[id, Color, nom]]}.
 
-const SIZE := Vector2(64, 30)
+const SIZE := Vector2(96, 30)
 const AGENT_SCRIPT := "res://scripts/map/agent_controller.gd"
 const NEUTRAL := Color(0.62, 0.6, 0.55)  # colonie sans contrôleur (`SettlementLayer.refresh`)
 const ICON_INK := Color(0.10, 0.07, 0.04)
@@ -106,7 +106,7 @@ static func _banner(legend_context: Dictionary) -> Control:
 	rect.texture = texture
 	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	rect.custom_minimum_size = Vector2(30, 30)
+	rect.custom_minimum_size = Vector2(26, 44)
 	return rect
 
 
@@ -136,7 +136,7 @@ func _draw() -> void:
 	var center := size * 0.5
 	match str(sample.get("type", "")):
 		"settlement":
-			draw_settlement(self, str(sample.get("kind", "village")), center, 11.0, _owner_color(str(sample.get("owner", "player"))))
+			draw_settlement(self, str(sample.get("kind", "village")), center, 13.0, _owner_color(str(sample.get("owner", "player"))))
 		"settlement_owners":
 			var colors: Array = [context.get("player_color", NEUTRAL)]
 			for entry in (context.get("factions", []) as Array).slice(0, 2):

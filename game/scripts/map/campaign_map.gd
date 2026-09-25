@@ -22,7 +22,7 @@ extends Node3D
 ##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
 ##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné ;
 ##   --stage=agents_registry    idem, registre des agents (G) ouvert.
-##   --stage=legend             UX1 : carte seule, légende de la carte ouverte.
+##   --stage=legend|legend_armies  UX1 : légende de la carte ouverte (en haut, ou aux armées).
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
@@ -1225,8 +1225,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_siege()  # M8
 				"map":
 					pass  # V2 : carte seule, sans sélection ni panneau (captures du terrain)
-				"legend":  # UX1 : légende de la carte ouverte
+				"legend", "legend_armies":  # UX1 : légende de la carte ouverte (haut, ou armées)
 					minimap_ctl.set_legend_open(true)
+					if _screenshot_stage == "legend_armies":
+						get_tree().create_timer(0.5).timeout.connect(func() -> void: minimap_ctl.legend.scroll_to_section("armies"))
 				"help":
 					help.toggle()  # M10
 				"objectives":

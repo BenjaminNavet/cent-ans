@@ -11,8 +11,10 @@ signal closed
 
 const DATA_PATH := "ui/map_legend.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
-const WIDTH := 380.0
+const WIDTH := 410.0
 const MODES := ["political", "unrest", "diplomacy", "religion"]
+## Interligne resserré des petits textes (les polices de secours du thème l'élargissent).
+const SMALL_LINE_SPACING := -9
 
 static var _data: Dictionary = {}
 
@@ -87,6 +89,7 @@ func _init() -> void:
 	if intro != "":
 		var intro_label := HudStyle.label(intro, HudStyle.FONT_SMALL, HudStyle.INK_FADED)
 		intro_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		intro_label.add_theme_constant_override("line_spacing", SMALL_LINE_SPACING)
 		intro_label.custom_minimum_size = Vector2(WIDTH - 24.0, 0)
 		box.add_child(intro_label)
 	_scroll = ScrollContainer.new()
@@ -149,6 +152,13 @@ func set_max_height(height: float) -> void:
 		reset_size()
 
 
+## Fait défiler la légende jusqu'à la section `section_id` (captures).
+func scroll_to_section(section_id: String) -> void:
+	var heading := _sections_box.get_node_or_null("Section_" + section_id) as Control
+	if heading != null:
+		_scroll.scroll_vertical = int(heading.position.y)
+
+
 func close_legend() -> void:
 	hide()
 	closed.emit()
@@ -167,6 +177,7 @@ func _entry_row(entry: Dictionary) -> Control:
 	text_box.add_child(HudStyle.label(str(entry.get("label", "")), HudStyle.FONT_BODY, HudStyle.INK))
 	var text := HudStyle.label(str(entry.get("text", "")), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_theme_constant_override("line_spacing", SMALL_LINE_SPACING)
 	text.custom_minimum_size = Vector2(WIDTH - LegendSample.SIZE.x - 44.0, 0)
 	text_box.add_child(text)
 	return row

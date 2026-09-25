@@ -58,7 +58,7 @@ func setup(campaign_map: Node) -> void:
 func set_legend_open(open: bool) -> void:
 	if open and legend == null:
 		legend = MapLegend.new()
-		var ui: Control = map.get("ui")
+		var ui: Node = map.get("ui")
 		ui.add_child(legend)
 		ui.move_child(legend, minimap.get_index() + 1)
 		legend.closed.connect(func() -> void: minimap.legend_button.set_pressed_no_signal(false))

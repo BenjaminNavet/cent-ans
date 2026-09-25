@@ -91,7 +91,7 @@
         {"sample": {"type": "army_banner", "owner": "player"}, "label": "Étendard", "text": "Une armée : figurines et étendard aux armes de son royaume. L'anneau au sol est doré quand l'armée est sélectionnée."},
         {"sample": {"type": "army_plate", "men": 620, "status": "", "owner": "player"}, "label": "Effectif", "text": "Nombre d'hommes. Cadre doré : votre armée ; cadre brun : une armée étrangère."},
         {"sample": {"type": "army_plate", "men": 429, "status": "siege", "owner": "other"}, "label": "« siège »", "text": "L'armée assiège la place où elle se tient."},
-        {"sample": {"type": "army_plate", "men": 1040, "status": "moving", "owner": "player"}, "label": "« » »", "text": "L'armée est en marche."},
+        {"sample": {"type": "army_plate", "men": 1040, "status": "moving", "owner": "player"}, "label": "Chevron « » »", "text": "L'armée est en marche."},
         {"sample": {"type": "army_plate", "men": 800, "status": "embarked", "owner": "other"}, "label": "« à bord »", "text": "L'armée est embarquée sur une flotte."}
       ]
     },
