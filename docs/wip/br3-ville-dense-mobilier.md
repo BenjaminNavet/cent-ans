@@ -47,8 +47,32 @@ Incendie, 10 min : avec l'ancien réglage (portée 30 m, 0,06/période) toute la
 | paris | 61 | 7.3 | 12 % |
 | rouen | 78 | 13.2 | 17 % |
 
-Assauts (même sonde) : générique 8/10, 349 s ; Paris 2/10, 706 s ; Rouen 0/10, 318 s.
-Paris à surveiller (5/10 avant) : refaire sur 20 graines après le mobilier.
+## Mesures après (ville dense + mobilier, 20 graines, brèche 40 %, fort. 2, deux IA)
+
+Avant = main afd327d4 recompilé depuis une archive du commit, avec la même sonde.
+
+| Ville | Îlots avant → après | Victoires assaillant | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées (moy.) |
+|---|---|---|---|---|---|---|
+| générique | 21 → 59 | 17/20 → 17/20 | 332 → 349 | 54 → 46 | 188 → 177 | 4.5 → 6.2 |
+| paris | 32 → 61 | 10/20 → 5/20 | 733 → 706 | 93 → 97 | 203 → 187 | 16.5 → 20.9 |
+| rouen | 36 → 78 | 0/20 → 1/20 | 305 → 307 | 72 → 96 | 155 → 150 | 4.8 → 6.4 |
+
+Paris : l'assaillant gagne moins (10 → 5/20). Diagnostic (`BR3_VERBOSE=1`) : les défaites sont des
+déroutes vers 600-800 s sans jamais tenir la place ; le résultat suit surtout l'incendie (avec
+l'ancien feu, 30 m / 0,06, Paris 13/20 mais 37 îlots brûlés sur 59). Compensations essayées sans
+effet mesurable : rues du plan et voie de la porte 11 → 14 m (3/20), chemin de ronde 8 → 12 m
+(5/20), rue autour de la place 6 → 12 m (5/20) ; autres réglages du feu : 0,035/15 m → 6/20,
+0,045/15 m → 8/20 (mais 34-55 % de la ville en feu en 10 min). Gardé : 0,025/15 m (ville générique
+inchangée, incendie comparable à avant). Reste ouvert pour l'équilibre (SG3/EQ).
+
+Coût des figurines (`probe_figure_cost`, 57 régiments, 10 423 figurines à 2,5 figurines/soldat,
+en plein assaut) : `soldier_poses` 354 µs/image contre 176 µs pour la disposition seule, soit
++178 µs/image (≈ +260 µs extrapolé à 15 000 figurines). Sans obstacle proche, aucun coût (filtre
+par cercle englobant).
+
+Captures : avant = `docs/audit/captures/br1/apres/siege-*.png` (BR2) ; après =
+`docs/audit/captures/br3/siege-{large,rue,marche,ilots,assaut}.png` (Bordeaux, siège de la
+Guyenne, `--no-speech`).
 
 ## État
 
@@ -61,10 +85,18 @@ Paris à surveiller (5/10 avant) : refaire sur 20 graines après le mobilier.
   le cheminement (puits exclu : figurines seulement), `sim/obstacles.rs` (repoussement des
   figurines dans `soldier_poses`), tests `tests/br3.rs`. Pont : `props` + emprises dans
   `get_siege`, `props` dans le village.
-- [ ] Pont + Godot + captures.
-- [ ] Mesures après, ADR, docs.
+- [x] Godot : maisons et mobilier posés depuis le cœur (`battle_siege.gd`, `battle_village.gd`,
+  `BuildingKit.prop_model/prop_transform`, `add_front_prop` supprimé), captures.
+- [x] ADR 0047, codex (`cdx_jeu_incendies`, `cdx_jeu_assaut`), `br1-batiments.md`, fusion de main.
+
+## Limites
+
+- Paris : taux de victoire de l'assaillant divisé par deux (voir plus haut).
+- Mobilier du village : figurines seulement (les maisons du village ne bloquent pas les régiments,
+  règle B5 inchangée).
+- Le puits ne bloque que les figurines (le centre de la place est l'objectif des régiments).
+- Le repoussement peut aligner des figurines contre une façade dans une ruelle étroite.
 
 ## Prochaine étape
 
-Godot : `battle_siege.gd` (`_build_kit_town` depuis les emprises du cœur, `_kit_market`
-remplacé par les `props`), `battle_village.gd` (props du cœur), smoke, captures ; mesures après.
+Rien d'obligatoire. Fusion par l'orchestrateur ; équilibre de Paris à reprendre avec SG3.
