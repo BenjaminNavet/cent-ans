@@ -158,7 +158,7 @@ func _build_display(grid: GridContainer) -> void:
 	var detected_label: String = RenderQuality.LABELS[RenderQuality.LEVELS.find(RenderQuality.detected_level())]
 	_options(grid, "video/quality", "Qualité graphique", [RenderQuality.AUTO] + Array(RenderQuality.LEVELS),
 		["Automatique (%s)" % detected_label] + Array(RenderQuality.LABELS),
-		"Automatique : choisie selon la carte graphique détectée. Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
+		"Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples et proches, sans occlusion ni halo, relief sans détail fin, moitié moins d'arbres et de particules, soldats simplifiés plus tôt. Moyenne : occlusion ambiante, trois quarts des arbres et de l'herbe. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps, tout le détail. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres et détails plus lointains.")
 	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
