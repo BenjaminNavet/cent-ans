@@ -31,3 +31,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   vivants, ≤ 8 $, wip `da2-portraits-vivants.md`), agents en worktrees, chacun fusionne d'abord
   `feat/da-direction-artistique` pour la bible. L'orchestrateur fusionne (jamais les agents).
   Vague 2 (DA3 marqueurs après ZG4b, DA4 musique, DA5 icônes) après retour de la vague 1.
+- 25/09 ~23 h : **PAUSE demandée par le joueur** ; reprise dans un autre terminal. DA1 et DA2
+  ont reçu l'ordre de commiter un `wip:` et de s'arrêter. Reprise : `git worktree list | grep
+  agent` pour retrouver leurs worktrees/branches, lire `docs/wip/da1-heraldique.md` et
+  `docs/wip/da2-portraits-vivants.md` sur ces branches, vérifier la dépense DA2 dans
+  `docs/budget.md` avant toute génération.
