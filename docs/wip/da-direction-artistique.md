@@ -63,3 +63,10 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   à lancer par le joueur (`uv run --project tools cent-ans assets portrait-archetypes --envelope 7.6`
   dans le worktree de DA2, ≈ 6,42 $), puis import Godot, commit des images, captures `apres`,
   fusion. DA3/DA5 risquent le même blocage pour leurs images.
+- 26/09 : **DA4 dans main** (`fa3cee8d`) avec revue DA : rendus MIDI (Machaut, Solage, Landini,
+  Binchois) passés en repli (bible § 9, test `test_midi_renders_are_fallback_only`) ; test des
+  playlists adapté. Dette : vrais enregistrements libres d'Ars nova pour France/Italie.
+- 26/09 : **DA1 fusionné** (ADR 0064) ; vérifié en bataille réelle après EP6
+  (`docs/img/da1/apres_bataille_reelle.jpg`), smoke + pytest 601 OK. Suites : **DA1b** meubles
+  animaux (lions, léopards, aigles) trop schématiques dans `heraldry.py` ; armes du général sur
+  les étendards EP5.
