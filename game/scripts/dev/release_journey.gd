@@ -368,9 +368,9 @@ func _apply_config(map: Node, config: String) -> void:
 	var terrain: Node = map.get("terrain")
 	if terrain != null:
 		terrain.set("fine_enabled", config != "no_fine")
-		var step := int(config.trim_prefix("fine_step:")) if config.begins_with("fine_step:") else 2
-		terrain.set("fine_step_far", step)
-		terrain.set("fine_lod_bias", float(config.trim_prefix("fine_bias:")) if config.begins_with("fine_bias:") else 1.0)
+		terrain.set("fine_step_far", int(config.trim_prefix("fine_step:")) if config.begins_with("fine_step:") else 2)
+		if config.begins_with("fine_bias:"):
+			terrain.set("fine_lod_bias", float(config.trim_prefix("fine_bias:")))
 		for chunk in (terrain as Node).get_children():
 			if chunk is GeometryInstance3D:
 				(chunk as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if config == "terrain_noshadow" else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
@@ -385,13 +385,14 @@ func _apply_config(map: Node, config: String) -> void:
 	if vegetation != null:
 		vegetation.set("enabled", config != "no_veg")
 		vegetation.set("cast_shadows", config != "veg_noshadow")
+		if config.begins_with("veg_density:"):
+			vegetation.set("quality_density", float(config.trim_prefix("veg_density:")))
+	# Ombres de la carte remises par `reapply` (CampaignAtmosphere) ; variantes ci-dessous.
 	var sun := map.get_node("Sun") as DirectionalLight3D
-	sun.shadow_enabled = _map_ab < 650.0
-	if not sun.has_meta("pf1_shadow"):
-		sun.set_meta("pf1_shadow", [sun.directional_shadow_mode, sun.directional_shadow_max_distance])
-	var shadow_base: Array = sun.get_meta("pf1_shadow")
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if config == "splits2" else shadow_base[0]
-	sun.directional_shadow_max_distance = float(shadow_base[1]) * (float(config.trim_prefix("shadow_range:")) if config.begins_with("shadow_range:") else 1.0)
+	if config == "splits2":
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	if config.begins_with("shadow_range:"):
+		sun.directional_shadow_max_distance *= float(config.trim_prefix("shadow_range:"))
 	match config:
 		"no_ssil":
 			env.ssil_enabled = false
@@ -405,6 +406,8 @@ func _apply_config(map: Node, config: String) -> void:
 			get_tree().root.msaa_3d = Viewport.MSAA_DISABLED
 		"shadow_4096":
 			RenderingServer.directional_shadow_atlas_set_size(4096, true)
+		"soft_medium":
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM)
 		"soft_low":
 			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
 		"soft_hard":
