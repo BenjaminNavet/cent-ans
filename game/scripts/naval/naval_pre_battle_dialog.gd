@@ -4,10 +4,13 @@ extends PreBattleDialog
 ## Écran d'avant-bataille navale (lot NV1), même présentation qu'UB1 (`PreBattleDialog`) :
 ## « Flotte ennemie en vue », chances estimées par le cœur (`win_chance` de
 ## `get_pending_naval_battles`, cinq résolutions automatiques), navires et équipages des deux
-## flottes, vent prévu (aperçu `NavalBattleSim` à la même graine), puis « Combattre » /
-## « Résolution automatique » / « Retraite » (la flotte interceptée rentre au port).
+## flottes, vent prévu (aperçu `NavalBattleSim` à la même graine), puis « Résolution
+## automatique » / « Retraite » (la flotte interceptée rentre au port). « Combattre » (scène 3D)
+## est masqué depuis le 25/09 à la demande du joueur (`PLAYABLE_3D`).
 
 const BANNER_SEA := "res://assets/events/evt_sluys.jpg"
+## Bataille navale jouée en 3D proposée au joueur ; désactivée (résolution automatique seule).
+const PLAYABLE_3D := false
 const COMPASS := ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"]
 
 
@@ -50,6 +53,9 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	modifiers_label.visible = true
 	fight_button.text = "Combattre"
 	fight_button.disabled = setup.is_empty()
+	# Choix du joueur (25/09) : les batailles navales se règlent par la résolution automatique ;
+	# la scène 3D reste accessible en debug (`--naval-scenario`).
+	fight_button.visible = PLAYABLE_3D
 	withdraw_button.text = "Rentrer au port" if player_side == "defender" else "Refuser le combat"
 	withdraw_button.disabled = false
 	withdraw_button.tooltip_text = "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."

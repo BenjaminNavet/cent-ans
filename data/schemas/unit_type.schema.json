@@ -43,7 +43,6 @@
       "uniqueItems": true
     },
     "required_technology": { "$ref": "common.schema.json#/$defs/technology_id" },
-    "required_building": { "$ref": "common.schema.json#/$defs/building_id" },
     "required_culture": {
       "type": "array",
       "description": "Cultures de province autorisées au recrutement (vide = toutes).",

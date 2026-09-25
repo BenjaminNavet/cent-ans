@@ -4,7 +4,9 @@
 //! before R4.
 //!
 //! `cargo test --release -p sim-battle --test r4_survey -- --ignored --nocapture`
-//! (`R4_SEEDS=0..32` by default).
+//! (`R4_SEEDS=0..32` by default; `R4_JITTER=1` moves the crest and its
+//! hedges by up to 16 m per seed, so the seeds sample several geometries
+//! instead of replaying almost the same battle).
 
 mod common;
 
@@ -89,6 +91,15 @@ fn run_and_count(
     tally.duration += sim.elapsed();
 }
 
+/// Crest shift of a seed under `R4_JITTER=1` (−16 to +16 m), else 0.
+fn jitter(seed: u64) -> f64 {
+    if std::env::var("R4_JITTER").is_ok_and(|v| v == "1") {
+        (seed * 7 % 9) as f64 * 4.0 - 16.0
+    } else {
+        0.0
+    }
+}
+
 fn hedge(z: f64) -> Obstacle {
     Obstacle {
         a: (460.0, z),
@@ -129,12 +140,19 @@ fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
+    let shift = jitter(seed);
     if crest {
-        shape(&mut sim, ridge(505.0));
+        shape(&mut sim, ridge(505.0 + shift));
     } else {
         shape(&mut sim, |_| 0.0);
     }
-    sim.field_mut().obstacles.extend_from_slice(hedges);
+    sim.field_mut()
+        .obstacles
+        .extend(hedges.iter().map(|&h| Obstacle {
+            a: (h.a.0, h.a.1 + shift),
+            b: (h.b.0, h.b.1 + shift),
+            ..h
+        }));
     sim
 }
 

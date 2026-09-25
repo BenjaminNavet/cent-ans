@@ -40,12 +40,14 @@
 
 pub mod ai;
 pub mod command;
+pub mod decision;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
+pub mod missile_morale;
 pub mod naval;
 pub mod orders;
 pub mod outcome;
@@ -67,6 +69,7 @@ pub mod town;
 pub mod unit;
 
 pub use command::{Command, CommandError};
+pub use decision::{BattleEnd, DecisionRules};
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,

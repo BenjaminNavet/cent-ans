@@ -70,12 +70,20 @@ encyclopédie, aide F1, tutoriel, diplomatie, HUD de bataille, barre d'ordres du
 | Lot | Contenu | Branche | État |
 |---|---|---|---|
 | BP1 Bulles partout (UI) | brancher + auto-lier les textes ci-dessus ; comptage 21/27 unités de l'encyclopédie | bp1-ui-links | **fusionné** — smoke complet vert, encyclopédie 27 unités (le 21 venait d'une dylib périmée) |
-| B7a Économie & ordre | cour (aide ↔ code), dette, ravitaillement « dévasté », deux mécontentements, carte du mécontentement | b7a-economy-order | lancé |
-| B7b Données non lues | piété des édits, vitesse de construction (traits), `recruit_time_turns`, vision armée/ville | b7b-unread-data | lancé |
-| B7c Bâtiments | améliorations qui effacent, `enables_units`, piété/prestige, coût en pierre, `satisfies_classes: []`, pierre de Normandie | b7c-buildings | lancé |
+| B7a Économie & ordre | cour (aide ↔ code), dette, ravitaillement « dévasté », deux mécontentements, carte du mécontentement | b7a-economy-order | **fusionné** — constantes dans `data/rules/economy.json`, « dévasté » pèse sur le ravitaillement, textes dette alignés |
+| B7b Données non lues | piété des édits, vitesse de construction (traits), `recruit_time_turns`, vision armée/ville | b7b-unread-data | **fusionné** — piété annuelle des édits, `build_time` (plafond +100 %), file de recrutement ; vision laissée à `m5a-vision` |
+| B7c Bâtiments | améliorations qui effacent, `enables_units`, piété/prestige, coût en pierre, `satisfies_classes: []`, pierre de Normandie | b7c-buildings | **fusionné** — ADR 0053 ; à la fusion, `has_building`/`normalize_building_tiers` (EQ2, main) gardés à la place de `provides`/`drop_superseded` |
 | B10 Codex (données) | doublon `prov_flandre`, gabelle 1341/1342, `fac_venice` 1336 | b10-codex-data | **fusionné** (integration/bulles3) |
 
 Fusion : worktree d'intégration `../gp-bulles3-merge` (branche `integration/bulles3`), puis ff-only dans main.
+
+**État vague 3** : BP1, B7a, B7b, B7c, B10 tous fusionnés. cargo clippy/test verts, pytest 545 verts.
+Suites ouvertes (hors bulles) :
+- chiffres d'UI encore codés en dur dans certains GDScript ; constantes de ravitaillement encore dans `economy.rs` ;
+- panneau de province : n'affiche pas encore le surcoût d'import de pierre (`BuildOption.import_cost`) ;
+- coûts en ressources des unités non prélevés ; prestige des bâtiments sans plafond ;
+- vision armée/ville : attend la fusion de `m5a-vision` ;
+- `render_quality.gd` : erreur `scale_particles` en boucle pendant le smoke (lot pf1).
 
 ## B10 Codex : données (25/09, worktree, branche b10-codex-data)
 - Doublon d'entity `prov_flandre` (cdx_gand, cdx_flandre_laine) : `entity` retiré de `cdx_gand.json` (fiche de la ville), conservé sur `cdx_flandre_laine.json` (fiche générale du comté, alias « Flandre »). Script de contrôle sur `data/codex/*.json` : plus aucun doublon d'`entity`.
