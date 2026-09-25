@@ -55,6 +55,12 @@ impl WorkHp {
 pub struct RamRules {
     /// Gate damage per second from a full-strength ram crew.
     pub damage_per_s: f64,
+    /// SG4: a foot regiment of the attacker this close to the ram replaces
+    /// its fallen crew (0: no relief).
+    pub relief_range_m: f64,
+    /// SG4: men passed per second from the regiment to the ram, up to its
+    /// full crew.
+    pub relief_men_per_s: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

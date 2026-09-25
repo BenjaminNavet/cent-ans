@@ -18,6 +18,14 @@ const HEIGHT_SCALE := 0.006
 ## shaders (paramètre global `campaign_vertical_scale`), le quadtree et `surface_height_at`.
 ## Les maillages E0 du repli sans cache restent cuits à `HEIGHT_SCALE` (l'échelle ne bouge pas).
 static var _vertical_scale: float = HEIGHT_SCALE
+## Lot ZG8 : relief exagéré (hauteur affichée = s·(h + g·max(h − fond, 0)), voir
+## `ReliefExaggerationProfile`). Gain de relief local courant (fonction de l'échelle, publié avec
+## elle), fond de vallée (m, grille `ReliefFloor`, lecture seule une fois publiée : lisible depuis
+## les fils de travail). Sans fond publié, le gain est nul : comportement du lot ZG4.
+static var _relief_gain: float = 0.0
+static var _floor: PackedFloat32Array = PackedFloat32Array()
+static var _floor_side: Vector2i = Vector2i.ZERO
+static var _floor_cell: float = 8.0
 
 
 var map_dir: String = ""
@@ -97,7 +105,106 @@ static func set_vertical_scale(value: float) -> bool:
 		return false
 	_vertical_scale = value
 	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", value)
+	_publish_gain()
 	return true
+
+
+# --- Relief exagéré (lot ZG8) ------------------------------------------------------------
+
+
+## Plancher de l'échelle verticale de près (unités monde par mètre), selon les profils.
+static func near_vertical_scale() -> float:
+	var camera := CloseCameraProfile.load_default()
+	return HEIGHT_SCALE * camera.near_exaggeration() / camera.exaggeration_far
+
+
+## Gain de relief local pour une échelle donnée (nul sans fond publié).
+static func relief_gain_for_scale(scale: float) -> float:
+	if _floor.is_empty():
+		return 0.0
+	return ReliefExaggerationProfile.load_default().gain_for_scale(scale, near_vertical_scale())
+
+
+## Gain de relief local courant.
+static func relief_gain() -> float:
+	return _relief_gain
+
+
+## Plus grand gain possible (boîtes englobantes conservatrices : y ≤ s·(1 + g_max)·h).
+static func relief_max_gain() -> float:
+	return 0.0 if _floor.is_empty() else ReliefExaggerationProfile.load_default().max_gain()
+
+
+static func _publish_gain() -> void:
+	var gain := relief_gain_for_scale(_vertical_scale)
+	_relief_gain = gain
+	RenderingServer.global_shader_parameter_set("campaign_relief_gain", gain)
+
+
+## Publie le fond de vallée (`ReliefFloor.compute`) aux shaders et au double GDScript ; grille
+## vide : relief exagéré désactivé (gain nul).
+static func set_relief_floor(grid: Dictionary) -> void:
+	var data: PackedFloat32Array = grid.get("data", PackedFloat32Array())
+	var side: Vector2i = grid.get("side", Vector2i.ZERO)
+	if data.is_empty() or side.x * side.y != data.size():
+		_floor = PackedFloat32Array()
+		_floor_side = Vector2i.ZERO
+	else:
+		_floor = data
+		_floor_side = side
+		_floor_cell = float(grid.get("cell", 8.0))
+		RenderingServer.global_shader_parameter_set("campaign_relief_floor", ReliefFloor.texture_of(grid))
+		RenderingServer.global_shader_parameter_set("campaign_relief_floor_info", Vector4(_floor_cell, 0.5 * (_floor_cell - 1.0), 0.0, 0.0))
+	_publish_gain()
+
+
+## Vrai si un fond de vallée est publié.
+static func has_relief_floor() -> bool:
+	return not _floor.is_empty()
+
+
+## Fond de vallée (m) au point carte (x, z) : bilinéaire entre centres de cellules, bords
+## répliqués. Même calcul que `campaign_relief_floor_m` (texelFetch, pas de filtrage matériel).
+static func relief_floor_at(x: float, z: float) -> float:
+	if _floor.is_empty():
+		return 0.0
+	var fx := clampf((x - 0.5 * (_floor_cell - 1.0)) / _floor_cell, 0.0, _floor_side.x - 1.0)
+	var fz := clampf((z - 0.5 * (_floor_cell - 1.0)) / _floor_cell, 0.0, _floor_side.y - 1.0)
+	var i := mini(int(fx), _floor_side.x - 2)
+	var j := mini(int(fz), _floor_side.y - 2)
+	var tx := fx - i
+	var tz := fz - j
+	var o := j * _floor_side.x + i
+	var top := lerpf(_floor[o], _floor[o + 1], tx)
+	var bottom := lerpf(_floor[o + _floor_side.x], _floor[o + _floor_side.x + 1], tx)
+	return lerpf(top, bottom, tz)
+
+
+## Hauteur affichée (unités monde) d'une altitude `h_m` (m) au point carte (x, z), à l'échelle et
+## au gain courants. Double GDScript de `campaign_display_height` (campaign_relief.gdshaderinc) :
+## tout ce qui pose un objet au sol passe par ici.
+static func display_height(h_m: float, x: float, z: float) -> float:
+	return display_height_with(h_m, x, z, _vertical_scale, _relief_gain)
+
+
+## `display_height` à une échelle et un gain donnés (maillages cuits, fils de travail).
+static func display_height_with(h_m: float, x: float, z: float, scale: float, gain: float) -> float:
+	if gain == 0.0:
+		return h_m * scale
+	return scale * (h_m + gain * maxf(h_m - relief_floor_at(x, z), 0.0))
+
+
+## Inverse de `display_height` : altitude (m) dont la hauteur affichée en (x, z) vaut `y`.
+static func height_from_display(y: float, x: float, z: float) -> float:
+	return height_from_display_with(y, x, z, _vertical_scale, _relief_gain)
+
+
+static func height_from_display_with(y: float, x: float, z: float, scale: float, gain: float) -> float:
+	var v := y / maxf(scale, 1e-9)
+	if gain == 0.0:
+		return v
+	var f := relief_floor_at(x, z)
+	return v if v <= f else (v + gain * f) / (1.0 + gain)
 
 
 static func load_from_dir(dir: String) -> MapData:
@@ -410,7 +517,7 @@ func height_m_at(x: float, y: float) -> float:
 
 ## Altitude monde (Y Godot) en coordonnées carte.
 func height_world_at(x: float, y: float) -> float:
-	return height_m_at(x, y) * vertical_scale()
+	return display_height(height_m_at(x, y), x, y)
 
 
 ## Altitude monde, jamais sous le niveau de la mer (pour poser des objets).

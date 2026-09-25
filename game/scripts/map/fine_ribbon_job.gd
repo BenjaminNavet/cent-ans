@@ -65,9 +65,8 @@ func _surface_m(px: float, py: float) -> float:
 	if snapshot.is_empty():
 		return NAN
 	var pages: Dictionary = snapshot["qt_pages"]
-	var h := ReliefQuadtree.sample_pages(pages, snapshot["max_level"], snapshot["h_min"], snapshot["h_range"], px, py)
-	# Même échelle que celle que `_bilinear` vient d'appliquer (ZG4 : dynamique).
-	return h / MapData.vertical_scale() if not is_nan(h) else NAN
+	# Mètres (ZG8 : la hauteur affichée est posée par le shader, `campaign_display_height`).
+	return ReliefQuadtree.sample_pages_m(pages, snapshot["max_level"], snapshot["h_min"], snapshot["h_range"], px, py)
 
 
 func _cover_at(p: Vector2) -> int:
@@ -318,9 +317,10 @@ class _Arrays:
 	func aabb() -> AABB:
 		if vertices.is_empty():
 			return AABB()
-		# Hauteurs en mètres : boîte valable pour toute échelle verticale ≤ HEIGHT_SCALE.
+		# Hauteurs en mètres : boîte valable pour toute échelle verticale ≤ HEIGHT_SCALE et tout
+		# gain de relief local ≤ le gain maximal (ZG8).
 		var y0 := minf(lo.y * MapData.HEIGHT_SCALE, 0.0) - 1.0
-		var y1 := maxf(hi.y * MapData.HEIGHT_SCALE, 0.0) + 1.0
+		var y1 := maxf(hi.y * MapData.HEIGHT_SCALE * (1.0 + MapData.relief_max_gain()), 0.0) + 1.0
 		return AABB(Vector3(lo.x, y0, lo.z), Vector3(hi.x - lo.x, y1 - y0, hi.z - lo.z))
 
 	func commit() -> Array:

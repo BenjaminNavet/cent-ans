@@ -40,7 +40,8 @@ func _check(condition: bool, message: String) -> bool:
 func _test_profile() -> void:
 	var profile := CloseCameraProfile.load_default()
 	_check(absf(profile.exaggeration_at(1500.0) - profile.exaggeration_far) < 1e-4, "far exaggeration")
-	_check(absf(profile.exaggeration_at(0.3) - profile.exaggeration_near) < 1e-4, "near exaggeration")
+	# ZG8 : plancher relevé par le relief exagéré (`near_exaggeration`, ZG4 si désactivé).
+	_check(absf(profile.exaggeration_at(0.3) - profile.near_exaggeration()) < 1e-4, "near exaggeration")
 	_check(absf(profile.vertical_scale_at(200.0) - MapData.HEIGHT_SCALE) < 1e-9, "strategic scale = HEIGHT_SCALE")
 	var previous := 0.0
 	var curve := []
@@ -61,7 +62,9 @@ func _test_profile() -> void:
 		steps[snappedf(current, 1e-7)] = true
 	var values: Array = steps.keys()
 	values.sort()
-	_check(values.size() >= 20 and values.size() <= 40, "expected 20-40 quantized steps, got %d" % values.size())
+	# ×4,31 → plancher par paliers de 4 % (27 paliers au plancher ZG4 ×1,5, 12 au plancher ZG8 ×2,75).
+	var expected := log(profile.exaggeration_far / profile.near_exaggeration()) / log(1.04)
+	_check(values.size() >= int(expected * 0.7) and values.size() <= int(expected * 1.5) + 2, "expected ~%d quantized steps, got %d" % [roundi(expected), values.size()])
 	for i in range(1, values.size()):
 		var ratio: float = values[i] / values[i - 1]
 		_check(absf(ratio - 1.04) < 0.002, "step ratio %f" % ratio)
@@ -140,6 +143,23 @@ func _test_camera() -> void:
 		return 1.0 + maxf(x - 1000.0, 0.0) * 0.5
 	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), 0.3), "E7 zone min distance")
 	_check(is_equal_approx(rig.min_distance_at(Vector3(3000.0, 0.0, 1000.0)), 5.0), "E2 min distance")
+	# ZG4b : plancher provisoire au-dessus d'une ville emblématique (cercle de 3 unités au centre de
+	# la zone E7), adouci au-dehors, désactivable (VH4).
+	var floor_m := rig.profile.landmark_min_distance
+	_check(floor_m >= 2.2, "landmark floor above the site tier (%f)" % floor_m)
+	rig.close_zones = PackedVector3Array([Vector3(1000.0, 1000.0, 3.0)])
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), floor_m), "landmark floor inside the zone")
+	var outside := rig.min_distance_at(Vector3(1005.0, 0.0, 1000.0))
+	_check(outside < floor_m and outside > 0.3, "landmark floor softened outside the zone (%f)" % outside)
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1030.0)), rig.profile.soft_min_distance(Vector2(1000.0, 1030.0), rig.relief)), "no landmark floor far from the zone")
+	rig.look_at_point(Vector3(1000.0, 0.0, 1000.0), 0.1)
+	_check(is_equal_approx(rig.target_distance, floor_m), "zoom clamped to the landmark floor, got %f" % rig.target_distance)
+	rig.profile = rig.profile.duplicate()
+	rig.profile.landmark_min_distance = 0.0
+	rig._soft_min_key = Vector3(INF, INF, INF)
+	_check(is_equal_approx(rig.min_distance_at(Vector3(1000.0, 0.0, 1000.0)), 0.3), "landmark floor disabled (VH4)")
+	rig.profile = CloseCameraProfile.load_default()
+	rig.close_zones = PackedVector3Array()
 	rig.look_at_point(Vector3(1000.0, 0.0, 1000.0), 0.1)
 	rig.snap()
 	_check(is_equal_approx(rig.target_distance, 0.3), "zoom clamped to the E7 min distance, got %f" % rig.target_distance)
@@ -238,6 +258,7 @@ func _test_rescale() -> void:
 		terrain.wait_fine_jobs()
 		await process_frame
 	var before := terrain.surface_height_at(paris.x, paris.y)
+	var before_m := MapData.height_from_display(before, paris.x, paris.y)
 	var signals := [0, 0]
 	var rescaling := [0]
 	terrain.vertical_scale_changed.connect(func(_old: float, _new: float) -> void: signals[0] += 1)
@@ -251,7 +272,8 @@ func _test_rescale() -> void:
 	var global_value: Variant = RenderingServer.global_shader_parameter_get("campaign_vertical_scale")
 	if global_value != null:  # serveur factice (--headless) : pas de paramètres globaux lisibles
 		_check(is_equal_approx(float(global_value), target), "global shader parameter updated")
-	_check(absf(terrain.surface_height_at(paris.x, paris.y) - before * target / MapData.HEIGHT_SCALE) < 1e-4, "surface follows the scale")
+	# ZG8 : la surface suit la hauteur affichée (échelle et gain local), pas seulement l'échelle.
+	_check(absf(terrain.surface_height_at(paris.x, paris.y) - MapData.display_height(before_m, paris.x, paris.y)) < 1e-4, "surface follows the scale")
 	_check(terrain.pending_rescales() == 256, "all chunks queued, got %d" % terrain.pending_rescales())
 	terrain.update_lod(camera.global_position, 11.0, focus, 170.0)
 	_check(terrain.pending_rescales() == 256, "rescale waits for the scale to settle")

@@ -148,7 +148,8 @@ func _run() -> void:
 	var origin := ReliefPyramid.tile_origin(1, 17, 15)
 	var x := origin.x + 100.5 * 0.25
 	var y := origin.y + 200.5 * 0.25
-	var expected := (-200.0 + decoded.decode_u16((200 * 512 + 100) * 2) / 65535.0 * 5000.0) * MapData.vertical_scale()
+	# ZG8 : hauteur affichée (relief local exagéré) de l'altitude de la page.
+	var expected := MapData.display_height(-200.0 + decoded.decode_u16((200 * 512 + 100) * 2) / 65535.0 * 5000.0, x, y)
 	if qt.surface_height_at(x, y) == qt.surface_height_at(x, y):  # page E1 chargée
 		_check(absf(qt.surface_height_at(x, y) - expected) < 1e-4, "E1 surface %f vs %f" % [qt.surface_height_at(x, y), expected])
 		var index := terrain.chunk_index_at(x, y)

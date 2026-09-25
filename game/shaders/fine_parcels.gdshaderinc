@@ -134,7 +134,9 @@ float fp_tile_level(float lvl) {
 void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, float hc, vec4 s, vec3 lu,
 		vec4 terroir, float open_w, float forest_w, inout vec3 col, inout float roughness, inout vec3 n) {
 	float vis = fp_near(footprint);
-	if (vis <= 0.0 || open_w + forest_w < 0.05 || hc <= 0.5) {
+	// ZG4b : les terres basses sont relevées au plancher `MIN_LAND_M` = 0,5 m (ZG3b, rives de la
+	// Tamise, polders) ; le test `hc <= 0.5` les privait de parcellaire (sol nu de près).
+	if (vis <= 0.0 || open_w + forest_w < 0.05 || hc < 0.25) {
 		return;
 	}
 	vec2 blk = floor(p / FP_BLOCK);
