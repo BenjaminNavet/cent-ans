@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_maitrise_mer",
+  "title": "Maîtrise de la mer, interception et blocus",
+  "category": "mecanique",
+  "aliases": [
+    "maîtrise de la mer",
+    "interception",
+    "escadre",
+    "blocus",
+    "ports fermés",
+    "guerre de course"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Aucun roi n'entretient de flotte de guerre permanente : on réquisitionne les navires marchands, on loue des galères. Qui tient la Manche fait passer ses armées et ferme les ports de l'ennemi ; qui la perd voit ses traversées interceptées.",
+  "body": "Au début de la guerre, la France a l'avantage sur mer : ses navires normands et picards, renforcés de galères génoises et du clos des Galées de Rouen, ravagent Southampton (1338) et prennent la Christophe à Arnemuiden. La victoire d'[[cdx_edouard_iii|Édouard III]] à [[cdx_ecluse|l'Écluse]], en 1340, retourne la situation : pendant trente ans, les armées anglaises traversent la Manche presque à volonté, jusqu'à Saint-Vaast-la-Hougue en 1346 ou [[cdx_calais|Calais]], dont la prise en 1347 leur donne un port sûr pour deux siècles.\n\nLa roue tourne encore quand [[cdx_charles_v|Charles V]] s'allie à la [[cdx_castille|Castille]] : après La Rochelle (1372), les galères castillanes et françaises tiennent le golfe de Gascogne et lancent des raids sur les côtes anglaises. Entre les grandes batailles, la guerre sur mer est surtout une guerre de course : navires marchands capturés, ports bloqués, vins de [[cdx_guyenne|Guyenne]] et laines de Flandre qui n'arrivent plus.\n\nLes flottes de guerre sont faites de navires de commerce réquisitionnés, armés de châteaux de bois et remplis d'archers et d'hommes d'armes pour une campagne, puis rendus à leurs propriétaires : les Cinq-Ports, Yarmouth et Bristol pour l'Angleterre, les ports normands pour la France.",
+  "gameplay": "Pas de flotte à déplacer sur la carte : chaque puissance a une réserve de navires par classe et une maîtrise de chaque mer (0 à 100). Quand une armée traverse (d'un port à un autre), une puissance en guerre qui arme des navires dans cette mer peut l'intercepter : 20 % de chance, plus la moitié de sa maîtrise de cette mer, moins le quart de celle de la puissance qui traverse (90 % au plus). Elle y envoie une escadre de la moitié de sa réserve (1 à 12 navires). Si l'armée du joueur est en cause, la bataille navale se livre en 3D ou se résout automatiquement ; on peut aussi rentrer au port sans combattre, mais l'armée ne traverse pas ce tour.\n\nLe vainqueur gagne 40 de maîtrise de la mer (qui se reprend d'abord sur celle de l'adversaire). Si l'escadre l'emporte, la traversée est brisée et les survivants restent au port ; les régiments embarqués perdent des hommes et 10 de moral, et une armée entièrement perdue « a péri en mer ». Les navires pris passent dans la réserve du vainqueur. La maîtrise décline de 10 par saison.\n\nBlocus : à 60 de maîtrise ou plus, les ports ennemis de cette mer sont fermés ; chaque port bloqué coûte 150 livres de commerce par saison à son possesseur. Chaque saison, les chantiers et les réquisitions rendent un dixième de la réserve de départ, jusqu'à ce niveau. Conseil : gagnez une grande bataille navale avant de lancer vos invasions, et tenez la mer pour étrangler le commerce ennemi.",
+  "see_also": ["cdx_jeu_bataille_navale", "cdx_jeu_debarquement", "cdx_jeu_abordage", "cdx_ecluse", "cdx_hanse", "cdx_commerce_de_bordeaux"],
+  "sources": ["Bataille de l'Écluse", "Clos des Galées", "Raid sur Southampton", "Guerre de course"]
+}
