@@ -1,0 +1,34 @@
+{
+  "id": "cdx_jeu_traversee",
+  "title": "Traversées et débarquements",
+  "category": "mecanique",
+  "aliases": [
+    "traversée",
+    "traversées",
+    "embarquer",
+    "embarquement",
+    "débarquement",
+    "débarquement en terre hostile",
+    "traversée de la Manche"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Une armée stationnée dans un port peut passer la mer vers un autre port relié : la traversée prend toute la saison, peut être interceptée par la flotte ennemie, et débarquer en terre ennemie coûte des hommes.",
+  "body": "La guerre de Cent Ans est d'abord une guerre d'outre-mer pour les Anglais. Chaque campagne commence par la réunion d'une flotte : le roi réquisitionne les navires marchands des ports, cogues et nefs, qu'on équipe de châteaux de bois et de rampes pour les chevaux. Il faut des semaines pour rassembler les bateaux, attendre le vent, embarquer hommes, chevaux et vivres. En 1346, l'armée d'[[cdx_edouard_iii|Édouard III]] débarque à Saint-Vaast-la-Hougue ; en 1415, celle d'[[cdx_henri_v|Henri V]] à l'embouchure de la Seine, devant Harfleur.\n\nLa traversée elle-même est brève, mais dangereuse : tempêtes, flottes ennemies, corsaires. La maîtrise de la Manche change de mains au fil de la guerre : victoire anglaise de l'[[cdx_ecluse|Écluse]] en 1340, raids français et castillans sur Winchelsea, Rye ou Southampton, désastre de la flotte anglaise devant La Rochelle en 1372.\n\nLe débarquement est le moment critique : chevaux affaiblis par le voyage, hommes malades, aucune place pour se replier. Les Anglais préfèrent donc débarquer dans leurs propres ports, [[cdx_calais|Calais]] après 1347, [[cdx_bordeaux|Bordeaux]] et la [[cdx_guyenne|Guyenne]], ou chez un allié comme la Bretagne de Montfort.",
+  "gameplay": "Pour embarquer, l'armée doit stationner dans une colonie portuaire reliée par mer au port visé (29 liaisons maritimes sur la carte) et n'avoir pas encore bougé de la saison. La traversée se fait d'un port à l'autre dans le tour, mais consomme tout le [[cdx_jeu_mouvement|mouvement]] de la saison.\n\nLes navires sont pris d'abord dans la flotte de la faction (nefs 120 hommes, cogues 70, barges 40, galères 50), et des cogues louées complètent sans limite : le nombre de navires ne limite pas la traversée, mais il compte si la flotte ennemie intercepte. Si un ennemi en guerre a des navires dans cette mer, la chance d'interception vaut 20 %, plus la moitié de sa maîtrise de la mer (que donnent les victoires navales), moins le quart de la vôtre, entre 0 et 90 % ; l'interception provoque une bataille navale.\n\nDébarquer en terre hostile coûte à chaque unité 5 % de ses hommes (10 % en hiver) et 10 points de moral. Si une armée ennemie tient le port, il faut livrer bataille ; si le port est ennemi, l'armée l'assiège ou le prend. Conseil : débarquez dans un port ami, [[cdx_calais|Calais]] ou [[cdx_bordeaux|Bordeaux]] pour les Anglais, et évitez l'hiver.",
+  "see_also": [
+    "cdx_jeu_mouvement",
+    "cdx_ecluse",
+    "cdx_calais",
+    "cdx_bordeaux",
+    "cdx_edouard_iii",
+    "cdx_henri_v"
+  ],
+  "sources": [
+    "Bataille de L'Écluse",
+    "Cogue",
+    "Bataille de La Rochelle (1372)"
+  ]
+}
