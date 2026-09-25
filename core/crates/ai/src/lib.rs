@@ -1,12 +1,14 @@
 //! Campaign and battle AI.
 //!
-//! [`plan_turn`] is the strategic campaign planner of M9 (`campaign.rs`); the
+//! [`plan_turn`] is the strategic campaign planner of M9 (`campaign.rs`),
+//! executed on the navigation grid by `grid.rs` (lot M3); the
 //! Godot bridge resolves turns with it through `CampaignState::end_turn_with`.
 //! The simulation's own tests keep using the minimal planner of M2
 //! (`sim_campaign::ai_minimal`), which `CampaignState::end_turn` defaults to.
 
 pub mod alignment;
 pub mod campaign;
+pub mod grid;
 pub mod support;
 
 pub use campaign::plan_turn;

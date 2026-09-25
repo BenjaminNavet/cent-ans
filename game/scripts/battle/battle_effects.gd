@@ -729,8 +729,20 @@ func _clod_material() -> StandardMaterial3D:
 	return mat
 
 
-func _smoke_material() -> StandardMaterial3D:
-	return _billboard(Color(0.86, 0.85, 0.82), false, false)
+## Fumée de bombarde : planche de fumée animée du lot V3 (A1-13, `fire_smoke.gdshader`), blanche
+## (poudre noire), sans lueur de feu ; disque flou (B4) si la planche n'est pas importée.
+func _smoke_material() -> Material:
+	var flipbook := "res://assets/textures/fx/smoke_flipbook.png"
+	if not ResourceLoader.exists(flipbook):
+		return _billboard(Color(0.86, 0.85, 0.82), false, false)
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/fire_smoke.gdshader")
+	mat.set_shader_parameter("flipbook", load(flipbook))
+	mat.set_shader_parameter("smoke_color", Color(0.8, 0.79, 0.76))
+	mat.set_shader_parameter("ember_glow_energy", 0.0)
+	mat.set_shader_parameter("density", 1.4)
+	mat.set_shader_parameter("soft_distance", 1.5)
+	return mat
 
 
 func _flash_material() -> StandardMaterial3D:
