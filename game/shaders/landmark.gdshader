@@ -23,6 +23,10 @@ uniform float map_extent = 1.0;
 uniform float water = 0.0;
 // Échelle de la maquette : mètres par unité locale (1 : toiles de fond de siège, menu).
 uniform float meters_per_unit = 1.0;
+// Hauteur locale des plaques de sol et des îles (unités) : le pied des murs y commence
+// (défaut : Paris en toile de fond, 0,010 unité de carte × 205 m).
+uniform float ground_height = 2.05;
+uniform int debug_view = 0;
 // 0 : couleurs unies (ancien rendu) ; 1 : matériaux de l'atlas.
 uniform float material_detail : hint_range(0.0, 1.0) = 1.0;
 uniform float aging : hint_range(0.0, 2.0) = 1.0;
@@ -34,7 +38,7 @@ varying vec3 local_pos;
 varying vec2 anchor;
 
 // Taille d'une répétition de chaque couche (m).
-const float TILE[16] = float[16](3.2, 3.5, 2.2, 2.6, 2.4, 2.6, 3.0, 5.0, 2.4, 3.0, 3.0, 2.4, 1.6, 6.0, 4.0, 9.0);
+const float TILE[16] = float[16](4.6, 3.5, 2.2, 2.6, 2.4, 2.6, 3.0, 5.0, 2.4, 3.0, 3.0, 2.4, 4.0, 6.0, 4.0, 9.0);
 // Rugosité par couche (-1 : celle de la palette).
 const float ROUGH[16] = float[16](0.88, 0.92, 0.9, 0.55, 0.78, 0.85, 0.93, 0.9, 0.85, 0.97, 0.92, 0.42, 0.18, 0.97, -1.0, 0.9);
 // Pied de mur (salissures, 1) et mousse sur les faces au ciel (0-1).
@@ -74,11 +78,15 @@ void fragment() {
 	if (dot(n_view_geo, VIEW) < 0.0) {
 		n_local = -n_local;
 	}
-	int layer = int(clamp(floor(COLOR.a * 16.0), 0.0, 15.0));
+	// Alpha = couche × 16 + pas d'exagération (`material_code` de `landmark_city.py`).
+	int code = int(round(COLOR.a * 255.0));
+	int layer = clamp(code / 16, 0, 15);
+	float exaggeration = exp2(float(code % 16 - 4) * 0.25);
 	if (material_detail > 0.0 && water < 0.5 && layer != 14) {
 		float seed = hash12(floor(anchor * 97.0) + 0.37);
 		float seed2 = hash12(floor(anchor * 61.0) + 11.7);
-		vec3 p_m = local_pos * meters_per_unit;
+		// Mètres « réels » : une pierre garde sa taille sur un monument agrandi.
+		vec3 p_m = local_pos * meters_per_unit / exaggeration;
 		// Décalage par bâtiment pour que deux façades voisines ne se répètent pas.
 		vec3 p = p_m / TILE[layer] + vec3(seed * 7.0, seed2 * 3.0, seed2 * 5.0);
 		vec3 w = pow(abs(n_local), vec3(4.0));
@@ -86,28 +94,35 @@ void fragment() {
 		float fl = float(layer);
 		vec3 d = pow(tri(landmark_albedo_array, p, w, fl).rgb, vec3(2.2));
 		vec3 nm = tri(landmark_normal_array, p, w, fl).xyz * 2.0 - 1.0;
-		vec3 detail_col = (layer == 12) ? d * 0.5 : base * d * 2.0;
+		vec3 detail_col = (layer == 12) ? d * 0.1 : base * d * 2.0;
 		// Variation par bâtiment : valeur et chaleur.
 		detail_col *= 0.9 + 0.2 * seed;
 		detail_col *= mix(vec3(1.0), vec3(1.04, 1.0, 0.94), seed2 - 0.3);
 		// Vieillissement.
 		vec3 masks = tri(landmark_albedo_array, p_m / TILE[15], w, 15.0).rgb;
-		float h_m = max(local_pos.y * meters_per_unit, 0.0);
+		// Grandes nuances (pierres de carrières différentes, reprises, patine) sur ~40 m.
+		vec3 macro = tri(landmark_albedo_array, p_m / 41.0 + seed, w, 15.0).rgb;
+		detail_col *= 0.84 + 0.32 * macro.r;
+		detail_col *= mix(vec3(1.0), vec3(0.95, 0.97, 1.03), macro.b);
+		float h_m = max((local_pos.y - ground_height) * meters_per_unit / exaggeration, 0.0);
 		float vertical = 1.0 - abs(n_local.y);
 		float age = aging * (0.55 + 0.9 * seed2);
 		// Pied des murs : éclaboussures de boue et remontées d'humidité.
-		float foot = (1.0 - smoothstep(0.0, 2.2 + 1.5 * masks.r, h_m)) * vertical * GRIME[layer];
-		detail_col = mix(detail_col, detail_col * vec3(0.55, 0.52, 0.45), clamp(foot * 0.8 * age, 0.0, 0.85));
-		// Coulures verticales sous les rebords.
+		float foot = (1.0 - smoothstep(0.0, 2.5 + 2.5 * masks.r, h_m)) * vertical * GRIME[layer];
+		detail_col = mix(detail_col, detail_col * vec3(0.5, 0.48, 0.4), clamp(foot * 0.9 * age, 0.0, 0.85));
+		// Coulures verticales sous les rebords (noircissement de la pluie et de la suie).
 		float streak = masks.g * vertical * GRIME[layer] * smoothstep(1.5, 5.0, h_m);
-		detail_col *= 1.0 - clamp(streak * 0.32 * age, 0.0, 0.5);
+		detail_col *= 1.0 - clamp(streak * 0.45 * age, 0.0, 0.6);
 		// Salissure diffuse (plaques).
-		detail_col *= 1.0 - 0.18 * age * smoothstep(0.45, 0.85, masks.r) * GRIME[layer];
+		detail_col *= 1.0 - 0.22 * age * smoothstep(0.4, 0.85, masks.r) * GRIME[layer];
 		// Mousse et lichen sur les faces au ciel (toits, glacis, sommets de mur).
 		float up = smoothstep(0.25, 0.8, n_local.y);
 		float moss = up * MOSS[layer] * smoothstep(0.5, 0.78, masks.b + 0.18 * (seed - 0.5)) * age;
 		detail_col = mix(detail_col, vec3(0.11, 0.13, 0.05) * (0.8 + 0.4 * masks.r), clamp(moss * 0.55, 0.0, 0.7));
 		base = mix(base, detail_col, material_detail);
+		if (debug_view == 3) { base = vec3(foot, streak, moss); }
+		if (debug_view == 4) { base = masks; }
+		if (debug_view == 5) { base = vec3(h_m / 20.0, exaggeration / 4.0, float(layer) / 15.0); }
 		float r_layer = ROUGH[layer];
 		rough = r_layer < 0.0 ? roughness : clamp(r_layer + (0.5 - d.g) * 0.2 + moss * 0.1, 0.05, 1.0);
 		// Normale perturbée (mélange « whiteout » par plan), en repère local puis vue.
@@ -125,6 +140,9 @@ void fragment() {
 	}
 	ALBEDO = base;
 	ROUGHNESS = rough;
+	if (debug_view >= 3) { ALBEDO = base; }
+	if (debug_view == 1) { ALBEDO = vec3(fract(local_pos.y * meters_per_unit / 5.0)); }
+	if (debug_view == 2) { ALBEDO = abs(n_local); }
 	if (water > 0.5) {
 		ROUGHNESS = 0.08;
 		SPECULAR = 0.6;

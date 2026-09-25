@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://bub23b0egvexe"
+path.s3tc="res://.godot/imported/landmark_albedo_array.jpg-2621b39c3d9eb6832a96ccd131f568e0.s3tc.ctexarray"
+path.etc2="res://.godot/imported/landmark_albedo_array.jpg-2621b39c3d9eb6832a96ccd131f568e0.etc2.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/landmarks/landmark_albedo_array.jpg"
+dest_files=["res://.godot/imported/landmark_albedo_array.jpg-2621b39c3d9eb6832a96ccd131f568e0.s3tc.ctexarray", "res://.godot/imported/landmark_albedo_array.jpg-2621b39c3d9eb6832a96ccd131f568e0.etc2.ctexarray"]
 
 [params]
 
