@@ -253,6 +253,19 @@ func arrow_landing(chunk: Dictionary, sh: int, i: int) -> Dictionary:
 	return {"pos": end, "dir": fly_dir, "time": launch + flight, "cover": in_cover}
 
 
+## Fusion BV2 : un homme tué par un trait (`corpse_fallen`, cause « arrow » ou « bolt ») garde
+## un à trois traits fichés dans le corps, dans la même couche statique que ceux du sol.
+func on_corpse(pos: Vector3, _side: String, kind: String, cause: String) -> void:
+	if cause != "arrow" and cause != "bolt":
+		return
+	var bolt := 1 if cause == "bolt" else 0
+	var height := 0.9 if kind == "cavalry" else 0.22  # corps couché ; cheval : flanc
+	for _i in _rng.randi_range(1, 3):
+		var tip := pos + Vector3(_rng.randf_range(-0.45, 0.45), height + _rng.randf_range(-0.05, 0.1), _rng.randf_range(-0.45, 0.45))
+		var dir := Vector3(_rng.randf_range(-0.6, 0.6), -1.0, _rng.randf_range(-0.6, 0.6)).normalized()
+		_add_stuck(tip, dir, time_now, bolt, true)
+
+
 # --- Paquets -----------------------------------------------------------------------------
 
 

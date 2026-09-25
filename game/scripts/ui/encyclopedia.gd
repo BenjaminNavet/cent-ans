@@ -1027,8 +1027,8 @@ static func _agent_fiche(definition: Dictionary) -> String:
 	var kind_labels := {"city": "cité", "town": "ville", "castle": "château", "abbey": "abbaye", "village": "village"}
 	for kind in kinds:
 		places.append(str(kind_labels.get(str(kind), kind)))
-	var recruit := "Coût %d livres, entretien %d par saison, %d au plus par faction. Recrutement : %s%s." % [
-		int(definition.get("cost", 0)), int(definition.get("upkeep", 0)), int(definition.get("max_per_faction", 0)),
+	var recruit := "Coût %s, entretien %s par saison, %d au plus par faction. Recrutement : %s%s." % [
+		Money.amount(int(definition.get("cost", 0))), Money.amount(int(definition.get("upkeep", 0))), int(definition.get("max_per_faction", 0)),
 		", ".join(places),
 		" (avec un bâtiment religieux, ou une abbaye)" if bool(definition.get("requires_religious_building", false)) else "",
 	]

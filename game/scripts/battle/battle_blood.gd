@@ -30,6 +30,12 @@ var level: int = MODERATE
 var figure_scale: float = 1.0
 var time_now: float = 0.0
 var decal_count: int = 0
+## Fusion BV1/BV2 : une seule source par événement. Quand BV2 est actif, chaque mort arrive par
+## `on_corpse` (signal `BattleSoldiers.corpse_fallen`) : BV2 dessine la gerbe (gouttes de
+## `BattleGore`), BV1 seulement la flaque persistante sous le corps. Les pertes en mêlée et les
+## touches des volées ne produisent alors plus rien ici (elles aboutissent à ces mêmes morts).
+## Sans BV2 (`--no-bv2`) : ancien chemin BV1 (gerbes GPU et flaques sur pertes et touches).
+var corpse_driven: bool = false
 ## Dernier décalque posé (captures : cadrer la caméra dessus).
 var last_pos: Vector3 = Vector3.ZERO
 
@@ -84,9 +90,21 @@ func tick_time(now: float) -> void:
 		_wound(hit["pos"], float(hit["strength"]), Vector3.ZERO)
 
 
+## Mort d'une figurine (BV2, `corpse_fallen`) : flaque sous le corps, éclaboussures en complet ;
+## pas de gerbe (celle de BV2 suffit).
+func on_corpse(pos: Vector3, _side: String, kind: String, cause: String, camera_pos: Vector3) -> void:
+	if level == OFF or camera_pos.distance_to(pos) > BLOOD_DISTANCE or cause == "fire":
+		return
+	var size := _rng.randf_range(0.7, 1.4) * (1.0 if level == FULL else 0.7) * (1.4 if kind == "cavalry" else 1.0)
+	_add_decal(pos, 0, Vector2(size, size * _rng.randf_range(0.7, 1.0)), _rng.randf() * TAU, 1.0)
+	if level == FULL and _rng.randf() < 0.5:
+		var off := Vector3(_rng.randf_range(-0.8, 0.8), 0, _rng.randf_range(-0.8, 0.8))
+		_add_decal(pos + off, 1, Vector2.ONE * _rng.randf_range(1.0, 1.8), _rng.randf() * TAU, 0.9)
+
+
 ## Touche d'un trait qui se fichera à l'instant `time` (le trait est encore en vol).
 func add_hit(pos: Vector3, time: float, camera_pos: Vector3) -> void:
-	if level == OFF or camera_pos.distance_to(pos) > BLOOD_DISTANCE:
+	if level == OFF or corpse_driven or camera_pos.distance_to(pos) > BLOOD_DISTANCE:
 		return
 	_pending.append({"time": time, "pos": pos, "strength": 0.7})
 	_pending.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["time"]) < float(b["time"]))
@@ -118,7 +136,7 @@ func update(units: Array, camera_pos: Vector3) -> void:
 		var depth := float(unit.get("depth", 4.0))
 		if lost > 0:
 			rec["losses"] = float(rec["losses"]) + lost
-		if lost > 0 and (state == "melee" or state == "routing"):
+		if lost > 0 and not corpse_driven and (state == "melee" or state == "routing"):
 			# Au premier rang, là où l'on se bat (les pertes au tir arrivent avec les traits).
 			for _i in mini(ceili(lost * figure_scale), MAX_PER_UNIT):
 				var p := pos + fwd * depth * 0.5 * _rng.randf_range(0.4, 1.1) + right * width * 0.5 * _rng.randf_range(-1.0, 1.0)

@@ -44,14 +44,16 @@ const HEDGE_DISTANCE := 1100.0
 ## B5 : réglages de rendu par terrain de province. `relief` = échelle des collines de l'horizon,
 ## `near_woods` / `far_woods` = seuil du bruit des bois décoratifs (plus bas = plus de bois),
 ## `rocks` = facteur des rochers, `snow_line` = altitude des neiges (hiver, montagne).
+## R2 : `ridges` = part de crêtes (bruit « ridged ») dans les collines de l'horizon, `rolls` =
+## amplitude (m) des ondulations moyennes qui prolongent le relief du champ au-delà du bord.
 const BIOMES := {
-	"plains": {"relief": 0.45, "near_woods": 0.3, "far_woods": 0.26, "rocks": 0.6, "snow_line": 10000.0},
-	"heath": {"relief": 0.6, "near_woods": 0.4, "far_woods": 0.36, "rocks": 1.2, "snow_line": 10000.0},
-	"bocage": {"relief": 0.7, "near_woods": 0.24, "far_woods": 0.16, "rocks": 0.6, "snow_line": 10000.0},
-	"forest": {"relief": 0.9, "near_woods": 0.08, "far_woods": 0.02, "rocks": 0.8, "snow_line": 10000.0},
-	"hills": {"relief": 1.5, "near_woods": 0.26, "far_woods": 0.2, "rocks": 1.3, "snow_line": 10000.0},
-	"mountains": {"relief": 3.4, "near_woods": 0.22, "far_woods": 0.18, "rocks": 2.2, "snow_line": 150.0},
-	"marsh": {"relief": 0.2, "near_woods": 0.42, "far_woods": 0.38, "rocks": 0.2, "snow_line": 10000.0},
+	"plains": {"relief": 0.45, "near_woods": 0.3, "far_woods": 0.26, "rocks": 0.6, "snow_line": 10000.0, "ridges": 0.0, "rolls": 3.0},
+	"heath": {"relief": 0.6, "near_woods": 0.4, "far_woods": 0.36, "rocks": 1.2, "snow_line": 10000.0, "ridges": 0.25, "rolls": 4.5},
+	"bocage": {"relief": 0.7, "near_woods": 0.24, "far_woods": 0.16, "rocks": 0.6, "snow_line": 10000.0, "ridges": 0.1, "rolls": 5.0},
+	"forest": {"relief": 0.9, "near_woods": 0.08, "far_woods": 0.02, "rocks": 0.8, "snow_line": 10000.0, "ridges": 0.2, "rolls": 5.5},
+	"hills": {"relief": 1.5, "near_woods": 0.26, "far_woods": 0.2, "rocks": 1.3, "snow_line": 10000.0, "ridges": 0.55, "rolls": 11.0},
+	"mountains": {"relief": 3.4, "near_woods": 0.22, "far_woods": 0.18, "rocks": 2.2, "snow_line": 150.0, "ridges": 0.8, "rolls": 22.0},
+	"marsh": {"relief": 0.2, "near_woods": 0.42, "far_woods": 0.38, "rocks": 0.2, "snow_line": 10000.0, "ridges": 0.0, "rolls": 1.0},
 }
 
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
@@ -77,6 +79,10 @@ var _mean_height: float = 0.0
 var _river_points: PackedVector2Array = PackedVector2Array()  # prolongée hors du champ
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
+## R2 : crêtes et ondulations de l'horizon, carte de relief du sol (pente, creux, crêtes).
+var _ridges := FastNoiseLite.new()
+var _rolls := FastNoiseLite.new()
+var relief_texture: ImageTexture
 ## B5 : site de campagne.
 var terrain_key: String = "plains"
 var season_key: String = "summer"
@@ -153,6 +159,15 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_woods.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 	_woods.frequency = 1.0 / 420.0
 	_woods.fractal_octaves = 3
+	_ridges.seed = 2718
+	_ridges.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_ridges.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	_ridges.frequency = 1.0 / 1600.0
+	_ridges.fractal_octaves = 4
+	_rolls.seed = 3141
+	_rolls.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_rolls.frequency = 1.0 / 520.0
+	_rolls.fractal_octaves = 3
 	_extend_river()
 	_plan_roads()
 	_build_textures()
@@ -344,7 +359,13 @@ func world_height(x: float, z: float) -> float:
 		return base
 	var t := smoothstep(0.0, 450.0, d)
 	var n := _hills.get_noise_2d(x, z) * 0.5 + 0.5
+	var ridge_share := float(biome.get("ridges", 0.0))
+	if ridge_share > 0.0:
+		# R2 : crêtes et croupes de l'horizon (collines, montagnes), comme le champ.
+		n = lerpf(n, clampf(_ridges.get_noise_2d(x, z) * 0.6 + 0.35, 0.0, 1.0), ridge_share)
 	var hills := pow(n, 1.6) * lerpf(22.0, 160.0, smoothstep(300.0, 4500.0, d)) * float(biome["relief"])
+	# R2 : ondulations moyennes qui prolongent le relief du champ (pas de plateau lisse au bord).
+	hills += _rolls.get_noise_2d(x, z) * float(biome.get("rolls", 3.0)) * smoothstep(0.0, 250.0, d)
 	var rd := river_distance(x, z)
 	if rd < INF:
 		hills *= smoothstep(25.0, 320.0, rd)
@@ -370,6 +391,25 @@ func _in_zones(zones: Array, x: float, z: float, margin: float = 0.0) -> bool:
 		if dx * dx + dz * dz <= r * r:
 			return true
 	return false
+
+
+## R2 : (x, z) est-il dans l'un des `count` premiers disques de `zones` ?
+func _in_zones_before(zones: Array, count: int, x: float, z: float) -> bool:
+	for i in count:
+		var zone: Dictionary = zones[i]
+		var r := float(zone["radius"])
+		if Vector2(x - float(zone["x"]), z - float(zone["z"])).length_squared() <= r * r:
+			return true
+	return false
+
+
+## R2 : profondeur (m) de (x, z) dans la réunion des disques `zones` (0 ou moins : dehors).
+func _zones_edge_distance(zones: Array, x: float, z: float) -> float:
+	var best := -INF
+	for zone in zones:
+		var d := float(zone["radius"]) - Vector2(x - float(zone["x"]), z - float(zone["z"])).length()
+		best = maxf(best, d)
+	return best
 
 
 ## Distance au lit de la rivière (prolongée au-delà du champ), INF sans rivière.
@@ -532,6 +572,7 @@ func _build_textures() -> void:
 				hdata[iz * hw + ix] = world_height(x, z)
 	var himage := Image.create_from_data(hw, hh, false, Image.FORMAT_RF, hdata.to_byte_array())
 	height_texture = ImageTexture.create_from_image(himage)
+	relief_texture = _relief_map(hdata, hw, hh)
 	var noise := FastNoiseLite.new()
 	noise.seed = 7
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -540,6 +581,31 @@ func _build_textures() -> void:
 	var noise_image := noise.get_seamless_image(512, 512)
 	noise_image.generate_mipmaps()
 	macro_noise = ImageTexture.create_from_image(noise_image)
+
+
+## R2 : carte de relief du sol, cuite sur la grille de 10 m des hauteurs (rendu seulement) :
+## r = pente (0,5 = 50 %), g = creux (> 0,5) ou bosse (< 0,5) à l'échelle de 30 m (talus, crêtes
+## fines), b = idem à 90 m (vallons, croupes). Le shader de sol en tire roche affleurante, terre
+## et cailloux des crêtes, herbe grasse et humidité des creux, ombre des fonds.
+func _relief_map(hdata: PackedFloat32Array, hw: int, hh: int) -> ImageTexture:
+	var bytes := PackedByteArray()
+	bytes.resize(hw * hh * 4)
+	var at := func(ix: int, iz: int) -> float:
+		return hdata[clampi(iz, 0, hh - 1) * hw + clampi(ix, 0, hw - 1)]
+	for iz in hh:
+		for ix in hw:
+			var h: float = hdata[iz * hw + ix]
+			var gx: float = (at.call(ix + 1, iz) - at.call(ix - 1, iz)) / (2.0 * HEIGHT_TEXEL)
+			var gz: float = (at.call(ix, iz + 1) - at.call(ix, iz - 1)) / (2.0 * HEIGHT_TEXEL)
+			var near: float = (at.call(ix + 3, iz) + at.call(ix - 3, iz) + at.call(ix, iz + 3) + at.call(ix, iz - 3)) * 0.25 - h
+			var far: float = (at.call(ix + 9, iz) + at.call(ix - 9, iz) + at.call(ix, iz + 9) + at.call(ix, iz - 9)) * 0.25 - h
+			var i := (iz * hw + ix) * 4
+			bytes[i] = int(clampf(sqrt(gx * gx + gz * gz) / 0.5, 0.0, 1.0) * 255.0)
+			bytes[i + 1] = int(clampf(0.5 + near / 4.0, 0.0, 1.0) * 255.0)
+			bytes[i + 2] = int(clampf(0.5 + far / 10.0, 0.0, 1.0) * 255.0)
+			bytes[i + 3] = 255
+	var image := Image.create_from_data(hw, hh, false, Image.FORMAT_RGBA8, bytes)
+	return ImageTexture.create_from_image(image)
 
 
 ## B5 : mares (vase et berges humides), fossés (vase), cour et ruelles du village (terre battue,
@@ -633,6 +699,15 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("splat_rect", Vector4(SPLAT_RECT.position.x, SPLAT_RECT.position.y, SPLAT_RECT.size.x, SPLAT_RECT.size.y))
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	ground_material.set_shader_parameter("calm_rect", calm)
+	# R2 : relief de détail (rendu seulement) : carte de relief (texels centrés sur la grille de
+	# 10 m des hauteurs), roche affleurante selon le terrain, force des normales de détail.
+	var hw := int(SPLAT_RECT.size.x / HEIGHT_TEXEL) + 1
+	var hh := int(SPLAT_RECT.size.y / HEIGHT_TEXEL) + 1
+	ground_material.set_shader_parameter("relief_map", relief_texture)
+	ground_material.set_shader_parameter("relief_rect", Vector4(SPLAT_RECT.position.x - HEIGHT_TEXEL * 0.5, SPLAT_RECT.position.y - HEIGHT_TEXEL * 0.5, hw * HEIGHT_TEXEL, hh * HEIGHT_TEXEL))
+	ground_material.set_shader_parameter("relief_on", 1.0)
+	ground_material.set_shader_parameter("outcrops", clampf((float(biome["rocks"]) - 0.7) / 1.5, 0.0, 1.0))
+	ground_material.set_shader_parameter("detail_bump", lerpf(0.5, 1.0, clampf(float(biome["relief"]) / 3.4, 0.0, 1.0)))
 	if site_render:
 		# B5 : sol de saison (neige au sol sans chute de neige, sol détrempé sans pluie), neiges
 		# des sommets en montagne, herbe d'hiver ou de plein été.
@@ -940,22 +1015,35 @@ func _build_trees() -> void:
 	var far_woods := float(biome["far_woods"])
 	# B5 : densité des bois selon le terrain (forêt serrée, lande clairsemée).
 	var area_per_tree := lerpf(85.0, 36.0, woodland) if site_render else 55.0
-	# Bois de la simulation : denses, lisière de buissons.
-	for zone in terrain.get("forests", []):
+	# Bois de la simulation : denses, lisière de buissons. R2 : un bois est une grappe de disques
+	# qui se chevauchent (ancre, lobes, bosquets) : un arbre tiré dans un disque déjà couvert par
+	# un disque précédent est écarté (densité uniforme), les buissons de lisière ne restent que
+	# sur le pourtour de la réunion ; les arbres des lisières sont plus petits et plus clairsemés.
+	var forests: Array = terrain.get("forests", [])
+	for k in forests.size():
+		var zone: Dictionary = forests[k]
 		var r := float(zone["radius"])
-		var count := clampi(int(PI * r * r / area_per_tree), 10, 1000)
+		var count := clampi(int(PI * r * r / area_per_tree), 4, 1000)
 		for _i in count:
 			var angle := rng.randf() * TAU
 			var dist := sqrt(rng.randf()) * r
 			var x := float(zone["x"]) + cos(angle) * dist
 			var z := float(zone["z"]) + sin(angle) * dist
+			if _in_zones_before(forests, k, x, z):
+				continue
+			var edge := _zones_edge_distance(forests, x, z)
+			if edge < 6.0 and rng.randf() < 0.35:
+				continue
 			var kind := "poplar" if rng.randf() < 0.15 else "oak"
-			sets[kind].append(_tree_transform(rng, x, z, 0.75, 1.3))
+			var grow := lerpf(0.75, 1.0, clampf(edge / 14.0, 0.0, 1.0))
+			sets[kind].append(_tree_transform(rng, x, z, 0.75 * grow, 1.3 * grow))
 			tints[kind].append(_tree_tint(rng))
 		for _i in int(TAU * r / 6.0):
 			var angle := rng.randf() * TAU
 			var x := float(zone["x"]) + cos(angle) * (r + rng.randf_range(-2.0, 5.0))
 			var z := float(zone["z"]) + sin(angle) * (r + rng.randf_range(-2.0, 5.0))
+			if _zones_edge_distance(forests, x, z) > 1.0:
+				continue
 			sets["bush"].append(_tree_transform(rng, x, z, 0.6, 1.4))
 			tints["bush"].append(_tree_tint(rng))
 	var field := Rect2(0, 0, FIELD_W, FIELD_D)

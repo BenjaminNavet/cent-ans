@@ -389,8 +389,16 @@ def _marsh_provinces(map_dir: Path, ids: np.ndarray) -> np.ndarray:
     return marsh[ids]
 
 
+#: Forêts des règles, figées (lot R1, ADR 0019) : ``splat.png`` est devenu un raster de rendu
+#: (forêts historiques KK10) ; la grille de navigation garde la splat V2 tant qu'on ne choisit
+#: pas de la régénérer (changement de règle : coûts de déplacement du cœur).
+RULES_SPLAT_FILE = "navgrid_splat.png"
+
+
 def _splat_weights(map_dir: Path, size: int) -> np.ndarray:
-    path = map_dir / "splat.png"
+    path = map_dir / RULES_SPLAT_FILE
+    if not path.exists():
+        path = map_dir / "splat.png"
     if not path.exists():
         return np.zeros((size, size, 4), dtype=np.float32)
     with Image.open(path) as image:
