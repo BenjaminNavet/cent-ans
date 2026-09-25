@@ -77,6 +77,7 @@ var chronicle: ChronicleController = null  # M10
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
+var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
@@ -195,6 +196,10 @@ func _ready() -> void:
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
+	next_hint = NextHintController.new()  # UX2
+	next_hint.name = "NextHintController"
+	add_child(next_hint)
+	next_hint.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -1264,8 +1269,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_assault()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
-				"tutorial", "encyclopedia":  # F8
+				"tutorial", "encyclopedia", "tutorial_toc":  # F8, UX2 (sommaire)
 					tutorial.stage_screenshot(_screenshot_stage)
+				"next_hint":  # UX2 : conseil « que faire maintenant » au premier tour
+					next_hint.stage_screenshot()
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
 				"trade":  # C5 : routes commerciales
