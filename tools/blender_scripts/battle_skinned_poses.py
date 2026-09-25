@@ -678,3 +678,299 @@ def ride_fall(arm, t):
     hop = math.sin(min(t / 0.55, 1.0) * math.pi) * 0.35
     ground = Matrix.Translation(Vector((0.15, 1.5, -0.6 + hop)))
     m.seat_rider(m.delta().lerp(ground, s))
+
+
+# --- Lot EP5: standard bearers and musicians ----------------------------------------------
+
+# Values kept between the frames of one clip (frames are baked in order, t = 0 first).
+CLIP_CACHE = {}
+STD_BELOW = 1.2  # pole length under the upper (right) hand; = weapons.STANDARD_BELOW
+STD_MOUNTED_BELOW = 1.1  # = weapons.STANDARD_MOUNTED_BELOW
+STD_LEFT_HAND = -0.45  # left fist along the pole, under the right one
+
+
+def _std_grip(arm, forward=0.0, lift=0.0, side=0.0):
+    """Upper-hand position of the standard: in front of the right side of the chest."""
+    return pos(arm, "Chest") + Vector((-0.2 + side, -0.28 - forward, 0.02 + lift))
+
+
+def _std_hands(arm, prop, left=True, release=0.0):
+    """Both fists on the pole (right high, left low); `release` 0-1 lets go (death)."""
+    wrist_r = pos(arm, "Wrist.R")
+    wrist_l = pos(arm, "Wrist.L")
+    if release < 1.0:
+        target = prop @ Vector((0, 0, 0))
+        target = target.lerp(wrist_r, release)
+        grip_prop = prop.copy()
+        grip_prop.translation = target
+        hand_to_prop(
+            arm, "R", grip_prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.5, 0.3, -0.4))
+        )
+        if release < 0.05:
+            fist_on_prop(arm, prop)
+    if left and release < 1.0:
+        target = (prop @ Vector((0, STD_LEFT_HAND, 0))).lerp(wrist_l, release)
+        grip_prop = prop.copy()
+        grip_prop.translation = target
+        hand_to_prop(
+            arm, "L", grip_prop, 0.0, pos(arm, "UpperArm.L") + Vector((0.5, 0.2, -0.6))
+        )
+
+
+def _std_hold(arm, axis, forward=0.0, lift=0.0, side=0.0):
+    grip = _std_grip(arm, forward, lift, side)
+    prop = prop_matrix(grip, axis, Vector((0, -1, 0)))
+    STATE["prop"] = prop
+    _std_hands(arm, prop)
+    return prop
+
+
+def std_idle(arm, t):
+    """Standard held upright in both hands, swaying gently (loop)."""
+    s = math.sin(2 * math.pi * t)
+    _std_hold(arm, Vector((0.03 * s, -0.05, 1.0)))
+
+
+def std_walk(arm, t):
+    """Walking with the standard upright (loop, cadence of `Walk`)."""
+    s = math.sin(4 * math.pi * t)
+    _std_hold(arm, Vector((0.025 * s, -0.08, 1.0)))
+
+
+def std_run(arm, t):
+    """Running / charging: the standard raised and slanted forwards (loop)."""
+    s = math.sin(4 * math.pi * t)
+    _std_hold(arm, Vector((0.03 * s, -0.32, 1.0)), forward=0.08, lift=0.08)
+
+
+def std_wave(arm, t):
+    """Melee: the standard brandished overhead, swept from side to side (loop)."""
+    phase = 2 * math.pi * t
+    s = math.sin(phase)
+    rotate_about(arm, "Torso", Vector((0, 0, 1)), 0.18 * s)
+    lift = 0.22 + 0.08 * abs(math.sin(phase))
+    _std_hold(
+        arm,
+        Vector((0.55 * s, -0.12 - 0.1 * abs(s), 1.0)),
+        forward=0.05,
+        lift=lift,
+        side=0.08 * s,
+    )
+
+
+std_wave.frames = 58  # 2.4 s
+
+
+def std_death(arm, t):
+    """Struck down (`Death`, falling backwards): the pole goes down with him, toppling
+    backwards and a little to the right about its butt, and lies on the ground."""
+    if t == 0.0 or "std_death" not in CLIP_CACHE:
+        grip = _std_grip(arm)
+        axis = Vector((0.0, -0.05, 1.0)).normalized()
+        CLIP_CACHE["std_death"] = (grip - axis * STD_BELOW, axis)
+    butt0, axis0 = CLIP_CACHE["std_death"]
+    fall = smooth(0.05, 0.62, t)
+    rot = Matrix.Rotation(-0.3 * fall, 3, "Y") @ Matrix.Rotation(-1.58 * fall, 3, "X")
+    axis = (rot @ axis0).normalized()
+    butt = butt0 + Vector((-0.1, 0.5, 0.0)) * fall
+    butt.z = lerp(butt0.z, 0.03, fall)
+    grip = butt + axis * STD_BELOW
+    prop = prop_matrix(grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1)))
+    STATE["prop"] = prop
+    _std_hands(arm, prop, release=smooth(0.35, 0.6, t))
+
+
+# Mounted standard bearer (the cavalry baker seats the rider before these run).
+
+
+def _ride_std(arm, tilt=0.0, sway=0.0, lift=0.0, both=False):
+    m = _mount()
+    butt = _hp(m.stirrups["R"] + Vector((-0.1, -0.06, 0.24 + lift)))
+    axis = _hv(Vector((-0.04 + sway, -0.1 - tilt, 1.0)))
+    grip = butt + axis * STD_MOUNTED_BELOW
+    prop = prop_matrix(grip, axis, _hv(Vector((0, -1, 0))))
+    STATE["prop"] = prop
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + _hv(Vector((-0.6, 0.3, -0.5)))
+    )
+    fist_on_prop(arm, prop)
+    if both:
+        hand_to_prop(
+            arm,
+            "L",
+            prop,
+            STD_LEFT_HAND,
+            pos(arm, "UpperArm.L") + _hv(Vector((0.5, 0.2, -0.6))),
+        )
+    else:
+        _reins(arm)
+    return prop
+
+
+def ride_std_up(arm, t):
+    """At a halt or walking: the standard upright, butt by the right stirrup."""
+    _ride_legs(arm)
+    _ride_std(arm, sway=0.03 * math.sin(2 * math.pi * t))
+
+
+def ride_std_gallop(arm, t):
+    """Gallop: leaning forwards, the standard slanted forwards."""
+    _ride_legs(arm)
+    _lean(arm, 0.15)
+    _ride_std(arm, tilt=0.25, lift=0.05)
+
+
+def ride_std_wave(arm, t):
+    """Melee: the standard raised in both hands and swept from side to side."""
+    _ride_legs(arm)
+    s = math.sin(2 * math.pi * t)
+    rotate_about(arm, "Torso", _hv(Vector((0, 0, 1))), 0.15 * s)
+    _ride_std(arm, sway=0.45 * s, tilt=0.05, lift=0.2 + 0.08 * abs(s), both=True)
+
+
+ride_std_wave.frames = 58
+
+
+def ride_std_death(arm, t):
+    """Horse and rider down: the standard falls to the right about its butt."""
+    m = _mount()
+    if t == 0.0 or "ride_std_death" not in CLIP_CACHE:
+        _ride_legs(arm)
+        prop = _ride_std(arm)
+        CLIP_CACHE["ride_std_death"] = (
+            prop @ Vector((0, -STD_MOUNTED_BELOW, 0)),
+            (prop.to_3x3() @ Vector((0, 1, 0))).normalized(),
+        )
+    butt0, axis0 = CLIP_CACHE["ride_std_death"]
+    ride_death(arm, t)
+    fall = smooth(0.1, 0.7, t)
+    # Falls forwards, ahead of the horse (the cloth lies clear of the bodies).
+    rot = Matrix.Rotation(1.53 * fall, 3, Vector((1.0, 0.15, 0.0)).normalized())
+    axis = (rot @ axis0).normalized()
+    butt = butt0 + Vector((0.2, -0.2, 0.0)) * fall
+    butt.z = lerp(butt0.z, 0.03, fall)
+    grip = butt + axis * STD_MOUNTED_BELOW
+    STATE["prop"] = prop_matrix(grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1)))
+    _ = m
+
+
+# Drummer: tabor at the waist (see `battle_skinned_weapons.tabor`), two sticks.
+
+
+def _drum_top(arm):
+    import battle_skinned_weapons as weapons
+
+    hips = world(arm, "Hips")
+    rest = REST.get("Hips")
+    centre = pos(arm, "Hips") + weapons.DRUM_OFFSET
+    if rest is not None:
+        # Follow the rotation of the hips (the drum is bound to them).
+        delta = hips.to_3x3().normalized() @ rest.to_3x3().normalized().inverted()
+        centre = pos(arm, "Hips") + delta @ weapons.DRUM_OFFSET
+        axis = (delta @ weapons.DRUM_AXIS).normalized()
+    else:
+        axis = weapons.DRUM_AXIS
+    return centre + axis * weapons.DRUM_DEPTH * 0.5, axis
+
+
+def _drum_hands(arm, beats, t):
+    """Alternate strokes of the two sticks, `beats` strokes per hand over the clip."""
+    top, axis = _drum_top(arm)
+    for side, sx, shift in (("R", -1.0, 0.0), ("L", 1.0, math.pi)):
+        lift = 0.5 + 0.5 * math.cos(2 * math.pi * beats * t + shift)
+        lift = lift**1.6  # quick stroke, longer hold up
+        hit = top + Vector((0.055 * sx, 0.0, 0.0))
+        stick = Vector((0.0, -0.45, -0.89)).normalized()
+        wrist = hit - stick * 0.3 + Vector((0.05 * sx, 0.0, 0.0)) + Vector((0, 0.03, 0.13)) * lift
+        shoulder = pos(arm, f"UpperArm.{side}")
+        ik2(
+            arm,
+            f"UpperArm.{side}",
+            f"LowerArm.{side}",
+            f"Wrist.{side}",
+            wrist,
+            shoulder + Vector((0.5 * sx, 0.3, -0.4)),
+        )
+        fore = (pos(arm, f"Wrist.{side}") - pos(arm, f"LowerArm.{side}")).normalized()
+        tip_target = hit + Vector((0, 0, 0.12)) * lift
+        direction = (tip_target - pos(arm, f"Wrist.{side}")).normalized()
+        orient_rest_axes(
+            arm,
+            f"Wrist.{side}",
+            Vector((0, -1, 0)),
+            direction,
+            REST["forearm." + side],
+            fore,
+        )
+    _ = axis
+
+
+def drum_idle(arm, t):
+    """Standing, a slow beat (two strokes per hand in two seconds, loop)."""
+    _drum_hands(arm, 2, t)
+
+
+drum_idle.frames = 48
+
+
+def drum_march(arm, t):
+    """Walking and beating the march: one stroke per step (loop, cadence of `Walk`)."""
+    _drum_hands(arm, 1, t)
+
+
+def drum_beat(arm, t):
+    """Standing, a quick roll (charge, melee; loop)."""
+    _drum_hands(arm, 3, t)
+
+
+drum_beat.frames = 24
+
+
+# Busine player: the trumpet on `Prop` (mouthpiece `HORN_BACK` m behind the fist).
+
+
+def _horn(arm, raise_t):
+    import battle_skinned_weapons as weapons
+
+    shoulder = pos(arm, "UpperArm.R")
+    low_grip = shoulder + Vector((-0.1, -0.12, -0.5))
+    low_axis = Vector((-0.08, -0.4, -1.0)).normalized()
+    if raise_t > 0.0:
+        rotate_about(arm, "Torso", Vector((1, 0, 0)), -0.1 * raise_t)
+    head = pos(arm, "Head")
+    mouth = head + Vector((-0.01, -0.13, 0.06))
+    blow_axis = aim_dir(22.0, -4.0)
+    blow_grip = mouth + blow_axis * weapons.HORN_BACK
+    grip = low_grip.lerp(blow_grip, raise_t)
+    axis = low_axis.lerp(blow_axis, raise_t).normalized()
+    up = Vector((0, -1, 0)).lerp(Vector((0, 0, 1)), raise_t).normalized()
+    prop = prop_matrix(grip, axis, up)
+    STATE["prop"] = prop
+    hand_to_prop(arm, "R", prop, 0.0, shoulder + Vector((-0.5, 0.2, -0.4)))
+    fist_on_prop(arm, prop)
+    if raise_t > 0.0:
+        wrist_l = pos(arm, "Wrist.L")
+        target = (prop @ Vector((0, 0.38, 0))).lerp(wrist_l, 1.0 - raise_t)
+        support = prop.copy()
+        support.translation = target
+        hand_to_prop(
+            arm, "L", support, 0.0, pos(arm, "UpperArm.L") + Vector((0.5, 0.1, -0.6))
+        )
+
+
+def horn_idle(arm, t):
+    """Standing, the busine held low at the right side (loop)."""
+    _horn(arm, 0.0)
+
+
+def horn_walk(arm, t):
+    """Walking, the busine held low (loop, cadence of `Walk`)."""
+    _horn(arm, 0.0)
+
+
+def horn_blow(arm, t):
+    """Raise the busine to the lips, sound a call (about 2 s), lower it (loop, 3.5 s)."""
+    _horn(arm, smooth(0.0, 0.2, t) * (1 - smooth(0.8, 1.0, t)))
+
+
+horn_blow.frames = 84

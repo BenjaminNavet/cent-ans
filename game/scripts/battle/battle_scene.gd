@@ -22,7 +22,10 @@ extends Node3D
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
 ## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
-## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
+## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
+## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
+## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
+## étendard pris porté par le vainqueur).
 
 signal returned(result: Dictionary)
 
@@ -132,6 +135,7 @@ var _pad_units: int = 0
 var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
+var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -442,7 +446,10 @@ func _setup_standards() -> void:
 	standards = BattleStandards.new()
 	standards.name = "Standards"
 	add_child(standards)
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind)
+	var factions := {}
+	for side in ["attacker", "defender"]:
+		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
@@ -897,7 +904,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			# BV3 : de près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
 			# porté quand celui-ci est affiché.
 			node.rotation.y = lerp_angle(standards.downwind_yaw(), cam_yaw, smoothstep(1.0, 2.5, banner_scale))
-			node.visible = not (banner_scale <= standards.hide_scale() and standards.is_shown(id))
+			node.visible = not (banner_scale <= standards.hide_scale() and standards.handles(id))
 		var routing := str(unit["state"]) == "routing"
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
@@ -1451,6 +1458,8 @@ func _parse_cmdline() -> void:
 			_result_shot = true
 		elif arg.begins_with("--shot-at="):
 			_shot_at = float(arg.trim_prefix("--shot-at="))
+		elif arg.begins_with("--standard-shot="):
+			_standard_shot = arg.trim_prefix("--standard-shot=")
 		elif arg == "--no-effects":
 			_no_effects = true
 		elif arg == "--no-bv1":
@@ -1501,6 +1510,19 @@ func _stage_screenshot() -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if _standard_shot == "fallen" or _standard_shot == "captured":
+			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
+			if standards != null:
+				standards.update(units, soldiers, _camera_position())
+			var down := false
+			for unit in units:
+				if _standard_shot == "fallen" and str(unit.get("standard", "")) == "fallen" and float(unit.get("standard_timer", 99.0)) < 3.0:
+					down = true
+				elif _standard_shot == "captured" and int(unit.get("standard_by", -1)) >= 0:
+					down = true
+			if down:
+				break
+			continue
 		if _shot_at > 0.0:
 			if float(battle.call("get_elapsed")) >= _shot_at:
 				break
@@ -1550,6 +1572,7 @@ func _stage_screenshot() -> void:
 		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
+	_apply_standard_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
@@ -1655,6 +1678,61 @@ func _stage_result_screenshot() -> void:
 	for _i in 30:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Capture EP5 (`--standard-shot=`) : cadre un porte-étendard (à pied, à cheval), la ligne de
+## bataille et ses étendards au loin, ou un étendard tombé.
+func _apply_standard_shot() -> void:
+	if _standard_shot == "" or standards == null:
+		return
+	selected.clear()
+	var best: Dictionary = {}
+	for unit in units:
+		if not bool(unit["present"]) or not unit.has("bearer_slots"):
+			continue
+		var render := str(unit["render"])
+		var ok := false
+		match _standard_shot:
+			"foot":
+				ok = render == "infantry" and str(unit.get("standard", "")) == "carried"
+			"mounted":
+				ok = render == "cavalry" and str(unit.get("standard", "")) == "carried"
+			"fallen":
+				ok = str(unit.get("standard", "")) in ["fallen", "lost"]
+			"line":
+				ok = str(unit["side"]) == player_side
+			"captured":
+				for other in units:
+					if int(other.get("standard_by", -1)) == int(unit["id"]):
+						ok = true
+		if ok and (best.is_empty() or (str(unit["side"]) == player_side and str(best["side"]) != player_side)):
+			best = unit
+	if best.is_empty():
+		push_warning("BattleScene: no regiment for --standard-shot=%s" % _standard_shot)
+		return
+	var facing := float(best["facing"])
+	var ahead := Vector3(sin(facing), 0, cos(facing))
+	if _standard_shot == "line":
+		# Derrière la ligne du joueur, haut et loin : les étendards ennemis à 300-600 m.
+		camera_rig.look_at_point(Vector3(float(best["x"]), 0, float(best["z"])) + ahead * 25.0, 45.0, atan2(-ahead.x, -ahead.z) + 0.35)
+		print("BattleScene: EP5 line shot, %d standards shown, %d figures" % [standards.shown_count, standards.figure_count])
+		return
+	var point := Vector3(float(best.get("standard_x", best["x"])), 0, float(best.get("standard_z", best["z"])))
+	if _standard_shot != "fallen":
+		var frame: Variant = soldiers.figure_at(int(best["id"]), int((best["bearer_slots"] as PackedInt32Array)[0]))
+		if frame != null:
+			point = (frame as Transform3D).origin
+	# De trois quarts, devant le porte-étendard.
+	var yaw := atan2(ahead.x, ahead.z) + 0.6
+	camera_rig.look_at_point(point, 8.0 if _standard_shot == "foot" else 12.0, yaw)
+	if _standard_shot == "fallen" and camera_rig.camera != null:
+		# Vue plongeante : l'étendard gît dans la mêlée, caché par les hommes debout.
+		camera_rig.set_process(false)
+		var ground := terrain.height_at(point.x, point.z)
+		var at := Vector3(point.x, ground, point.z)
+		camera_rig.camera.global_position = at + Vector3(sin(yaw), 0, cos(yaw)) * 6.0 + Vector3(0, 7.5, 0)
+		camera_rig.camera.look_at(at, Vector3.UP)
+	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
 
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).

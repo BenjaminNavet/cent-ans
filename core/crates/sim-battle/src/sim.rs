@@ -11,6 +11,7 @@ mod reinforcements;
 mod separation;
 mod siege_assault;
 mod siege_extra;
+mod standards;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
@@ -126,6 +127,12 @@ pub struct BattleSim {
     assault: siege_assault::AssaultState,
     /// Scale of the battle (EP1): field size and regiments per side.
     scale: BattleScale,
+    /// EP5: rules of the standards, their own random stream, the routs
+    /// already seen and the standards taken so far.
+    standard_rules: data_model::BattleStandardRules,
+    standard_rng: BattleRng,
+    standard_rout_seen: Vec<bool>,
+    trophies: Vec<crate::outcome::StandardTrophy>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -330,6 +337,8 @@ impl BattleSim {
                 .any(|u| u.side == SideId::Defender && u.is_general),
         ];
         let count = units.len();
+        let standard_rng = rng.derive(standards::STANDARD_SALT);
+        let standard_rules = setup.standards.clone().unwrap_or_default();
         let mut sim = BattleSim {
             setup,
             field,
@@ -361,6 +370,10 @@ impl BattleSim {
             fire,
             assault: Default::default(),
             scale,
+            standard_rules,
+            standard_rng,
+            standard_rout_seen: vec![false; count],
+            trophies: Vec::new(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1183,6 +1196,7 @@ impl BattleSim {
         self.boiling_oil();
         self.resolve_fire();
         self.resolve_melee(&contacts);
+        self.resolve_standards(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
         self.elapsed += DT;
@@ -2336,6 +2350,10 @@ impl BattleSim {
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;
+        // EP5: without its standard the regiment loses its rallying point.
+        if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
+            damage *= self.standard_rules.fallen_melee_factor;
+        }
         damage
     }
 
@@ -2616,6 +2634,7 @@ impl BattleSim {
         };
         self.finished = true;
         self.winner = Some(winner);
+        self.collect_field_standards(winner);
         let loser = winner.other();
         if self.general_alive[loser.index()] {
             if let Some(unit) = self.units.iter().find(|u| u.side == loser && u.is_general) {
@@ -2689,6 +2708,8 @@ impl BattleSim {
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],
                 withdrew,
+                standards_taken: self.trophies_of(side),
+                standards_lost: self.trophies.iter().filter(|t| t.taken_by != side).count() as u32,
             }
         };
         Some(BattleOutcome {
