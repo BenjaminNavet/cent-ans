@@ -1,0 +1,465 @@
+class_name FactionSelect
+extends Control
+
+## Lot MM1 — choix de faction à la Total War, posé sur le décor 3D du menu : date de départ,
+## trois grandes cartes opaques (miniature de la faction, écu, nom, accroche, souverain avec son
+## portrait, difficulté), fiche détaillée de la faction choisie (introduction, forces,
+## faiblesses, objectifs historiques), options avancées (graine) et barre d'actions
+## (« Retour », « Commencer — <faction> »). Textes : `data/ui/front_end.json` (`factions`,
+## `start_dates`) ; noms, blasons et objectifs : données des factions via `SimFacade`.
+## Double-clic sur une carte : commencer.
+
+signal back_requested
+signal start_requested(faction_id: String, seed_value: int, start_date: String)
+
+const CARD_SIZE := Vector2(372, 392)
+const ART_HEIGHT := 194.0
+
+var selected_faction: String = "fac_france"
+var selected_start: String = ""
+var start_button: Button
+var back_button: Button
+var seed_edit: LineEdit
+
+var _cards: Dictionary = {}  # faction_id → PanelContainer
+var _card_styles: Dictionary = {}  # faction_id → [normal, selected]
+var _detail_intro: RichTextLabel
+var _detail_strengths: VBoxContainer
+var _detail_weaknesses: VBoxContainer
+var _detail_objectives: Label
+var _detail_title: Label
+var _advanced_box: Control
+
+
+func _ready() -> void:
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	_build()
+	var entries := FrontEndData.start_dates()
+	if not entries.is_empty():
+		selected_start = str((entries[0] as Dictionary).get("id", ""))
+	select(selected_faction if _cards.has(selected_faction) else _first_faction())
+
+
+func _facade() -> Node:
+	return get_node_or_null("/root/SimFacade")
+
+
+func _first_faction() -> String:
+	return str(_cards.keys()[0]) if not _cards.is_empty() else ""
+
+
+func card_count() -> int:
+	return _cards.size()
+
+
+# --- Construction ------------------------------------------------------------------------------
+
+
+func _build() -> void:
+	# Voile : le décor reste visible mais ne gêne pas la lecture.
+	var veil := ColorRect.new()
+	veil.color = Color(0.02, 0.015, 0.01, 0.42)
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(veil)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side, 48)
+	margin.add_theme_constant_override("margin_top", 26)
+	margin.add_theme_constant_override("margin_bottom", 22)
+	add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 14)
+	margin.add_child(column)
+
+	# En-tête : titre et date de départ.
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 24)
+	column.add_child(header)
+	var heading := FrontEndStyle.label("Choisissez votre couronne", 44, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 8)
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(heading)
+	header.add_child(_build_start_dates())
+
+	var cards := HBoxContainer.new()
+	cards.alignment = BoxContainer.ALIGNMENT_CENTER
+	cards.add_theme_constant_override("separation", 22)
+	column.add_child(cards)
+	for entry in FrontEndData.factions():
+		var faction_id := str((entry as Dictionary).get("id", ""))
+		if faction_id == "":
+			continue
+		cards.add_child(_build_card(entry))
+	if _cards.is_empty():
+		# Données d'accueil manquantes : cartes minimales des trois couronnes.
+		for faction_id in ["fac_france", "fac_england", "fac_burgundy"]:
+			cards.add_child(_build_card({"id": faction_id}))
+
+	column.add_child(_build_detail())
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(spacer)
+	column.add_child(_build_actions())
+
+
+func _build_start_dates() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var group := ButtonGroup.new()
+	var first := true
+	for entry in FrontEndData.start_dates():
+		var info: Dictionary = entry
+		var button := Button.new()
+		button.toggle_mode = true
+		button.button_group = group
+		button.button_pressed = first
+		first = false
+		button.text = "%s %d — %s" % [str(info.get("season", "")).capitalize(), int(info.get("year", 1337)), str(info.get("title", ""))]
+		button.tooltip_text = str(info.get("text", ""))
+		FrontEndStyle.style_action_button(button, false, 20)
+		var id := str(info.get("id", ""))
+		button.pressed.connect(func() -> void: selected_start = id)
+		row.add_child(button)
+	return row
+
+
+func _build_card(entry: Dictionary) -> Control:
+	var faction_id := str(entry.get("id", ""))
+	var facade := _facade()
+	var info: Dictionary = facade.call("faction_info", faction_id) if facade != null else {}
+	var color: Color = info.get("color", Color(0.4, 0.4, 0.5))
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = CARD_SIZE
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	var normal := FrontEndStyle.vellum_panel(FrontEndStyle.GOLD_DARK)
+	normal.set_content_margin_all(0)
+	var chosen := normal.duplicate() as StyleBoxFlat
+	chosen.border_color = FrontEndStyle.GOLD
+	chosen.set_border_width_all(4)
+	chosen.shadow_color = Color(FrontEndStyle.GOLD, 0.45)
+	chosen.shadow_size = 18
+	panel.add_theme_stylebox_override("panel", normal)
+	_card_styles[faction_id] = [normal, chosen]
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 0)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(box)
+
+	# Miniature de la faction, bandeau aux couleurs, écu en surimpression.
+	var art_holder := Control.new()
+	art_holder.custom_minimum_size = Vector2(0, ART_HEIGHT)
+	art_holder.clip_contents = true
+	art_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(art_holder)
+	var art_path := str(entry.get("illustration", "res://assets/illustrations/%s.jpg" % faction_id))
+	var art_texture := PortraitLoader.load_texture(art_path)
+	if art_texture != null:
+		var art := TextureRect.new()
+		art.texture = art_texture
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		art_holder.add_child(art)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.0)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art_holder.add_child(shade)
+	var band := ColorRect.new()
+	band.color = color
+	band.custom_minimum_size = Vector2(0, 6)
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(band)
+	var shield_texture := PortraitLoader.heraldry_texture(faction_id)
+
+	var body := MarginContainer.new()
+	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side in ["left", "right", "top", "bottom"]:
+		body.add_theme_constant_override("margin_" + side, 12)
+	box.add_child(body)
+	var text_box := VBoxContainer.new()
+	text_box.add_theme_constant_override("separation", 4)
+	text_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_child(text_box)
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 10)
+	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_box.add_child(title_row)
+	if shield_texture != null:
+		var shield := TextureRect.new()
+		shield.texture = shield_texture
+		shield.custom_minimum_size = Vector2(46, 54)
+		shield.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		shield.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		title_row.add_child(shield)
+	var names := VBoxContainer.new()
+	names.add_theme_constant_override("separation", -2)
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_row.add_child(names)
+	var name_text := str(info.get("name", faction_id)) if not info.is_empty() else faction_id
+	var name_label := FrontEndStyle.label(name_text, 25, FrontEndStyle.INK, FrontEndStyle.title_font())
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	names.add_child(name_label)
+	var tagline := FrontEndStyle.label(str(entry.get("tagline", "")), 16, FrontEndStyle.GULES, FrontEndStyle.body_italic())
+	tagline.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	names.add_child(tagline)
+
+	text_box.add_child(_ruler_row(str(info.get("ruler", ""))))
+	text_box.add_child(_difficulty_row(int(entry.get("difficulty", 1))))
+
+	panel.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			select(faction_id)
+			if event.double_click:
+				_on_start())
+	panel.mouse_entered.connect(func() -> void:
+		if faction_id != selected_faction:
+			shade.color = Color(1, 0.9, 0.6, 0.08))
+	panel.mouse_exited.connect(func() -> void: shade.color = Color(0, 0, 0, 0.0))
+	_cards[faction_id] = panel
+	return panel
+
+
+func _ruler_row(ruler_id: String) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if ruler_id == "":
+		return row
+	var portrait := PortraitLoader.portrait_texture(ruler_id)
+	if portrait != null:
+		var frame := PanelContainer.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = FrontEndStyle.GOLD_DARK
+		style.set_content_margin_all(2)
+		frame.add_theme_stylebox_override("panel", style)
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var picture := TextureRect.new()
+		picture.texture = portrait
+		picture.custom_minimum_size = Vector2(64, 64)
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.add_child(picture)
+		row.add_child(frame)
+	var character := _character(ruler_id)
+	var texts := VBoxContainer.new()
+	texts.alignment = BoxContainer.ALIGNMENT_CENTER
+	texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(texts)
+	var caption := FrontEndStyle.label("Souverain", 13, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic())
+	texts.add_child(caption)
+	var name := str(character.get("name", ruler_id.trim_prefix("chr_").capitalize()))
+	var ruler_label := FrontEndStyle.label(name, 19, FrontEndStyle.INK, FrontEndStyle.title_font())
+	ruler_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	texts.add_child(ruler_label)
+	var titles: Array = Array(character.get("titles", PackedStringArray()))
+	if not titles.is_empty():
+		var title_label := FrontEndStyle.label(str(titles[0]), 14, FrontEndStyle.FADED_INK)
+		texts.add_child(title_label)
+	for child in texts.get_children():
+		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return row
+
+
+func _character(character_id: String) -> Dictionary:
+	var facade := _facade()
+	if facade == null:
+		return {}
+	var store: Variant = facade.get("store")
+	if store is Object and (store as Object).has_method("get_character"):
+		return (store as Object).call("get_character", character_id)
+	return {}
+
+
+func _difficulty_row(level: int) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(FrontEndStyle.label("Difficulté :", 15, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
+	var pips := HBoxContainer.new()
+	pips.add_theme_constant_override("separation", 4)
+	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for i in 4:
+		var pip := ColorRect.new()
+		pip.custom_minimum_size = Vector2(12, 12)
+		pip.color = FrontEndStyle.GULES if i <= level else Color(0.7, 0.64, 0.52)
+		pip.rotation = PI / 4.0
+		pip.pivot_offset = Vector2(6, 6)
+		pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pips.add_child(pip)
+	row.add_child(pips)
+	row.add_child(FrontEndStyle.label(FrontEndData.difficulty_label(level), 16, FrontEndStyle.GULES, FrontEndStyle.title_font()))
+	for child in row.get_children():
+		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return row
+
+
+func _build_detail() -> Control:
+	var panel := PanelContainer.new()
+	var style := FrontEndStyle.vellum_panel(FrontEndStyle.GOLD_DARK)
+	style.set_content_margin_all(18)
+	panel.add_theme_stylebox_override("panel", style)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 26)
+	panel.add_child(row)
+
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 1.6
+	left.add_theme_constant_override("separation", 6)
+	row.add_child(left)
+	_detail_title = FrontEndStyle.label("", 26, FrontEndStyle.INK, FrontEndStyle.title_font())
+	left.add_child(_detail_title)
+	_detail_intro = RichTextLabel.new()
+	_detail_intro.fit_content = true
+	_detail_intro.scroll_active = false
+	_detail_intro.bbcode_enabled = false
+	_detail_intro.add_theme_font_override("normal_font", FrontEndStyle.body_font())
+	_detail_intro.add_theme_font_size_override("normal_font_size", 18)
+	_detail_intro.add_theme_color_override("default_color", FrontEndStyle.INK)
+	left.add_child(_detail_intro)
+	_detail_objectives = FrontEndStyle.label("", 16, FrontEndStyle.GULES, FrontEndStyle.body_italic())
+	_detail_objectives.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	left.add_child(_detail_objectives)
+
+	row.add_child(VSeparator.new())
+	_detail_strengths = _list_column(row, "Forces", Color(0.18, 0.36, 0.14))
+	_detail_weaknesses = _list_column(row, "Faiblesses", FrontEndStyle.GULES)
+	return panel
+
+
+func _list_column(parent: Control, heading: String, color: Color) -> VBoxContainer:
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 6)
+	parent.add_child(column)
+	column.add_child(FrontEndStyle.label(heading, 22, color, FrontEndStyle.title_font()))
+	var items := VBoxContainer.new()
+	items.add_theme_constant_override("separation", 6)
+	column.add_child(items)
+	items.set_meta("color", color)
+	return items
+
+
+func _build_actions() -> Control:
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", FrontEndStyle.night_panel(0.72))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	bar.add_child(row)
+	back_button = Button.new()
+	back_button.text = "Retour"
+	FrontEndStyle.style_action_button(back_button, false)
+	back_button.pressed.connect(func() -> void: back_requested.emit())
+	row.add_child(back_button)
+
+	var advanced := Button.new()
+	advanced.text = "Options avancées"
+	advanced.toggle_mode = true
+	FrontEndStyle.style_action_button(advanced, false, 18)
+	row.add_child(advanced)
+	var seed_row := HBoxContainer.new()
+	seed_row.add_theme_constant_override("separation", 8)
+	seed_row.visible = false
+	_advanced_box = seed_row
+	var seed_label := FrontEndStyle.label("Graine aléatoire", 17, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
+	seed_label.tooltip_text = "Même graine, même tirage des événements et des batailles : utile pour rejouer une partie."
+	seed_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	seed_row.add_child(seed_label)
+	seed_edit = LineEdit.new()
+	seed_edit.custom_minimum_size = Vector2(130, 0)
+	var facade := _facade()
+	seed_edit.text = str(facade.get("pending_seed")) if facade != null else "1337"
+	seed_row.add_child(seed_edit)
+	row.add_child(seed_row)
+	advanced.toggled.connect(func(on: bool) -> void: seed_row.visible = on)
+
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(spacer)
+	start_button = Button.new()
+	start_button.text = "Commencer"
+	FrontEndStyle.style_action_button(start_button, true, 26)
+	start_button.pressed.connect(_on_start)
+	row.add_child(start_button)
+	return bar
+
+
+# --- Sélection ---------------------------------------------------------------------------------
+
+
+func select(faction_id: String) -> void:
+	if not _cards.has(faction_id):
+		return
+	selected_faction = faction_id
+	for id in _cards:
+		var panel: PanelContainer = _cards[id]
+		var styles: Array = _card_styles[id]
+		panel.add_theme_stylebox_override("panel", styles[1] if id == faction_id else styles[0])
+		panel.modulate = Color.WHITE if id == faction_id else Color(0.82, 0.8, 0.76)
+	var facade := _facade()
+	var short_name := str(facade.call("faction_short_name", faction_id)) if facade != null else faction_id
+	start_button.text = "Commencer — %s" % short_name
+	_fill_detail(faction_id)
+
+
+func _fill_detail(faction_id: String) -> void:
+	var entry := FrontEndData.faction(faction_id)
+	var facade := _facade()
+	var info: Dictionary = facade.call("faction_info", faction_id) if facade != null else {}
+	_detail_title.text = str(info.get("name", faction_id))
+	_detail_intro.text = str(entry.get("intro", info.get("description", "")))
+	var summary := str(info.get("victory_summary", ""))
+	_detail_objectives.text = "Objectifs historiques (avant %d) : %s" % [int(info.get("victory_end_year", 1453)), summary] if summary != "" else ""
+	_detail_objectives.visible = summary != ""
+	_fill_list(_detail_strengths, entry.get("strengths", []), "✦")
+	_fill_list(_detail_weaknesses, entry.get("weaknesses", []), "✧")
+
+
+func _fill_list(items: VBoxContainer, lines: Array, bullet: String) -> void:
+	for child in items.get_children():
+		child.queue_free()
+	var color: Color = items.get_meta("color", FrontEndStyle.INK)
+	for line in lines:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var mark := FrontEndStyle.label(bullet, 16, color)
+		mark.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		row.add_child(mark)
+		var text := FrontEndStyle.label(str(line), 17, FrontEndStyle.INK)
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		items.add_child(row)
+
+
+func seed_value() -> int:
+	return int(seed_edit.text) if seed_edit.text.is_valid_int() else seed_edit.text.hash()
+
+
+func _on_start() -> void:
+	start_requested.emit(selected_faction, seed_value(), selected_start)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		back_requested.emit()
+	elif event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_LEFT or event.keycode == KEY_RIGHT):
+		var ids: Array = _cards.keys()
+		var index := ids.find(selected_faction)
+		index = clampi(index + (1 if event.keycode == KEY_RIGHT else -1), 0, ids.size() - 1)
+		select(str(ids[index]))
+		get_viewport().set_input_as_handled()
