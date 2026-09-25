@@ -2,9 +2,10 @@ class_name SettlementLayer
 extends Node3D
 
 ## Colonies et hameaux sur la carte de campagne (lot C6), rendu seulement :
-## - palier moyen : icônes (`settlement_icon.gdshader`, un `MultiMesh`) de forme selon le type et
-##   de la couleur du contrôleur, cité plus grande ; noms des cités (et des villes en se
-##   rapprochant) ;
+## - paliers Europe et moyen : marqueurs (`settlement_icon.gdshader`, un `MultiMesh`), langage
+##   unique du lot DA3 (ADR 0060, `SettlementMarkers`) : pictogramme peint selon le type, écu du
+##   détenteur, taille selon le rang, dé-encombrement par distance caméra (données) ; noms des
+##   cités (et des villes en se rapprochant) ;
 ## - palier près : maquettes 3D par type (`ModelLibrary.settlement_model`), posées sur la surface
 ##   exacte du terrain affiché et recalées quand une tuile change de niveau ; hameaux en
 ##   `MultiMesh` par tuile (orientation et variante déterministes, brûlés selon la dévastation de
@@ -15,10 +16,11 @@ extends Node3D
 signal settlement_selected(id: String)
 
 const KIND_INDEX := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
-const ICON_SCALE := {"city": 1.45, "town": 1.1, "castle": 1.0, "abbey": 0.95, "village": 0.7}
 const LABEL_FONT := {"city": 22, "town": 18, "castle": 16, "abbey": 16, "village": 15}
-## Rayon (px écran) de picking d'une icône.
-const PICK_ICON_PX := 12.0
+## Rayon de picking d'un marqueur, en fraction de sa taille écran.
+const PICK_ICON_FRACTION := 0.45
+## Hauteur du centre du marqueur au-dessus du lieu, en fraction de sa taille (cf. shader).
+const ICON_CENTER_LIFT := 0.42
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
 ## Partage de l'écart entre deux maquettes voisines (voir `_fit_models`).
@@ -26,7 +28,8 @@ const FIT_WEIGHT := {"city": 3.0, "town": 2.0, "castle": 1.5, "abbey": 1.3, "vil
 const MIN_FIT_SCALE := 0.55
 
 @export var tiers: ZoomTiers
-@export var icon_size_px: float = 20.0
+## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
+@export var icon_size_scale: float = 1.0
 @export var label_color: Color = Color(0.16, 0.10, 0.05)
 @export var label_outline: Color = Color(0.95, 0.90, 0.78)
 @export var declutter_interval: float = 0.15
@@ -41,6 +44,14 @@ var stats: Dictionary = {}
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
+## Lot DA3 : catalogue des marqueurs ; par colonie : rang, taille écran (px), distance de retrait.
+var markers: SettlementMarkers
+var _marker_rank: PackedInt32Array = PackedInt32Array()
+var _marker_size: PackedFloat32Array = PackedFloat32Array()
+var _marker_until: PackedFloat32Array = PackedFloat32Array()
+## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
+var _marker_holder: PackedStringArray = PackedStringArray()
+var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
 var _models: Array = []  # par colonie : Node3D ou null
 var _model_radius: PackedFloat32Array = PackedFloat32Array()
@@ -309,7 +320,19 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	_labels.append(label)
 
 
+## Instance du `MultiMesh` d'une colonie : ordre inverse de la priorité, pour que les lieux de
+## rang élevé (cités, triées en tête) soient dessinés par-dessus les petits.
+func _icon_instance(i: int) -> int:
+	return data.settlements.size() - 1 - i
+
+
 func _build_icons() -> void:
+	markers = SettlementMarkers.load_default()
+	var count := data.settlements.size()
+	_marker_rank.resize(count)
+	_marker_size.resize(count)
+	_marker_until.resize(count)
+	_marker_holder.resize(count)
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	var multimesh := MultiMesh.new()
@@ -317,17 +340,30 @@ func _build_icons() -> void:
 	multimesh.use_colors = true
 	multimesh.use_custom_data = true
 	multimesh.mesh = quad
-	multimesh.instance_count = data.settlements.size()
-	for i in data.settlements.size():
+	multimesh.instance_count = count
+	for i in count:
 		var entry: Dictionary = data.settlements[i]
 		var px: Vector2 = entry["px"]
 		var kind := str(entry["kind"])
-		multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)))
-		multimesh.set_instance_color(i, _colors[i])
-		multimesh.set_instance_custom_data(i, Color(KIND_INDEX.get(kind, 4), 0.0, ICON_SCALE.get(kind, 1.0), 0.0))
+		var rank := markers.rank_of(entry)
+		_marker_rank[i] = rank
+		_marker_size[i] = markers.size_px(kind, rank)
+		_marker_until[i] = markers.visible_until(kind, rank)
+		_marker_holder[i] = ""
+		var cell := markers.cell_of(markers.pictogram_for(kind, rank))
+		var k := _icon_instance(i)
+		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)))
+		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 0.0, 1.0))
+		multimesh.set_instance_custom_data(k, Color(cell, 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
-	_icon_material.set_shader_parameter("size_px", icon_size_px)
+	_icon_material.set_shader_parameter("atlas", markers.atlas)
+	_icon_material.set_shader_parameter("atlas_grid", Vector2(markers.atlas_columns, markers.atlas_rows))
+	_icon_material.set_shader_parameter("port_cell", float(markers.port_cell()))
+	_icon_material.set_shader_parameter("shield_place", markers.placement("shield"))
+	_icon_material.set_shader_parameter("badge_place", markers.placement("badge"))
+	_icon_material.set_shader_parameter("fade_distance", markers.fade_distance())
+	_icon_material.set_shader_parameter("size_scale", icon_size_scale)
 	_icon_material.render_priority = 2
 	_icons = MultiMeshInstance3D.new()
 	_icons.name = "Icons"
@@ -336,6 +372,47 @@ func _build_icons() -> void:
 	_icons.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_icons.extra_cull_margin = 64.0
 	add_child(_icons)
+
+
+## Lot DA3 : écus des détenteurs. L'atlas d'écus est recomposé quand une faction nouvelle
+## apparaît (rare : révolte, succession), sinon seules les instances changées sont réécrites.
+func _refresh_shields() -> void:
+	if _icons == null or markers == null:
+		return
+	var factions: Array = []
+	var missing := markers.shield_atlas == null
+	for entry in data.settlements:
+		var controller := str(entry["controller"])
+		if controller != "" and not factions.has(controller):
+			factions.append(controller)
+			if not markers.shield_index.has(controller):
+				missing = true
+	if missing:
+		factions.sort()
+		markers.build_shield_atlas(factions)
+		_icon_material.set_shader_parameter("shields", markers.shield_atlas)
+		_icon_material.set_shader_parameter("shield_grid", Vector2(markers.shield_columns, markers.shield_rows))
+		_marker_holder.fill("?")
+	var multimesh := _icons.multimesh
+	for i in data.settlements.size():
+		var controller := str(data.settlements[i]["controller"])
+		if controller == _marker_holder[i]:
+			continue
+		_marker_holder[i] = controller
+		var k := _icon_instance(i)
+		var color := multimesh.get_instance_color(k)
+		color.r = float(markers.shield_of(controller))
+		multimesh.set_instance_color(k, color)
+
+
+## Taille écran (px) du marqueur d'une colonie (légende, étiquettes, picking).
+func marker_size(i: int) -> float:
+	return _marker_size[i] * icon_size_scale if i >= 0 and i < _marker_size.size() else 24.0
+
+
+## Vrai si le marqueur de la colonie `i` est affiché à la distance caméra courante.
+func marker_visible(i: int) -> bool:
+	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until[i] and _weights.x < 0.65
 
 
 func _build_selection_ring() -> void:
@@ -371,7 +448,7 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		if year > 0:
 			for landmark in _landmarks.values():
 				(landmark as LandmarkModel).set_year(year)
-	var multimesh := _icons.multimesh if _icons != null else null
+	_refresh_shields()
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
 		var controller := str(entry["controller"])
@@ -381,8 +458,6 @@ func refresh(sim: Object, color_of: Callable) -> void:
 			color.a = 1.0
 		if color != _colors[i]:
 			_colors[i] = color
-			if multimesh != null:
-				multimesh.set_instance_color(i, color)
 			if _models[i] != null:
 				ModelLibrary.tint_banner(_models[i], color)
 	var devastation := {}
@@ -414,8 +489,11 @@ func update_view(camera_distance: float) -> void:
 	if weights != _weights or site != _site_hidden:
 		_weights = weights
 		_site_hidden = site
-		_icon_material.set_shader_parameter("alpha", weights.y)
-		_icons.visible = weights.y > 0.01
+		# DA3 : marqueurs aux paliers Europe et moyen (dé-encombrés par le shader), retirés au
+		# profit des maquettes au palier près.
+		var icon_alpha := 1.0 - weights.x
+		_icon_material.set_shader_parameter("alpha", icon_alpha)
+		_icons.visible = icon_alpha > 0.01
 		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
 		_hamlets_root.visible = weights.x > 0.35 and not site
 		_landmarks_root.visible = not site
@@ -424,6 +502,9 @@ func update_view(camera_distance: float) -> void:
 	if _labels_dirty:
 		_labels_dirty = false
 		_update_label_heights()
+	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
+		_icon_distance = camera_distance
+		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_towns(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
@@ -461,7 +542,7 @@ func _update_label_heights() -> void:
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
 			label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-			label.offset = Vector2(0.0, icon_size_px * 0.9 + label.font_size * 0.5)
+			label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
@@ -657,7 +738,7 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	if camera == null or data == null:
 		return {}
 	var near := _weights.x > 0.35
-	var icons := _weights.y > 0.2
+	var icons := _weights.x < 0.65
 	var best := ""
 	var best_score := INF
 	for i in data.settlements.size():
@@ -674,12 +755,14 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 			if d < radius_px and d / radius_px < best_score:
 				best_score = d / radius_px
 				best = str(data.settlements[i]["id"])
-		elif icons:
+		elif icons and marker_visible(i):
 			var world := Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
 			if camera.is_position_behind(world):
 				continue
-			var radius := PICK_ICON_PX * float(ICON_SCALE.get(str(data.settlements[i]["kind"]), 1.0))
-			var d_icon := camera.unproject_position(world).distance_to(screen_position)
+			var size := marker_size(i)
+			var radius := size * PICK_ICON_FRACTION
+			var center_px := camera.unproject_position(world) - Vector2(0.0, size * ICON_CENTER_LIFT)
+			var d_icon := center_px.distance_to(screen_position)
 			if d_icon < radius and d_icon / radius < best_score:
 				best_score = d_icon / radius
 				best = str(data.settlements[i]["id"])
@@ -689,16 +772,16 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 ## Sélectionne une colonie ("" = aucune) : surbrillance de l'icône, anneau au sol, signal.
 func select(id: String) -> void:
 	if _icons != null and selected_id != "" and data.index_by_id.has(selected_id):
-		var old: int = data.index_by_id[selected_id]
+		var old := _icon_instance(data.index_by_id[selected_id])
 		var custom := _icons.multimesh.get_instance_custom_data(old)
 		custom.g = 0.0
 		_icons.multimesh.set_instance_custom_data(old, custom)
 	selected_id = id if data.index_by_id.has(id) else ""
 	if selected_id != "":
 		var index: int = data.index_by_id[selected_id]
-		var custom_new := _icons.multimesh.get_instance_custom_data(index)
+		var custom_new := _icons.multimesh.get_instance_custom_data(_icon_instance(index))
 		custom_new.g = 1.0
-		_icons.multimesh.set_instance_custom_data(index, custom_new)
+		_icons.multimesh.set_instance_custom_data(_icon_instance(index), custom_new)
 		var entry: Dictionary = data.settlements[index]
 		print("SettlementLayer: selected %s (%s, %s, controller %s)" % [selected_id, entry["name"], entry["kind"], entry["controller"]])
 		settlement_selected.emit(selected_id)
