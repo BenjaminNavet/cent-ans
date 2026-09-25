@@ -1,0 +1,20 @@
+{
+  "description": "Heure du jour des batailles (lot EP8, ADR 0055) : phases de la journée, visibilité (facteur sur la portée efficace des tireurs, cumulé avec la météo), écoulement du temps pendant la bataille et tirage de l'heure de début par la campagne. Heures décimales (0-24) ; une phase peut passer minuit (from_hour > to_hour). Embarqué dans sim-battle à la compilation.",
+  "minutes_per_battle_second": 0.2,
+  "default_hour": 12.0,
+  "phases": [
+    { "key": "dawn", "label": "Aube", "from_hour": 5.0, "to_hour": 7.0, "start_hour": 5.5, "visibility": 0.7, "announce": "Le jour se lève : la lumière rasante gêne encore les tireurs." },
+    { "key": "morning", "label": "Matin", "from_hour": 7.0, "to_hour": 11.0, "start_hour": 8.5, "visibility": 1.0, "announce": "Le jour est levé : les tireurs voient loin." },
+    { "key": "midday", "label": "Midi", "from_hour": 11.0, "to_hour": 14.0, "start_hour": 12.0, "visibility": 1.0, "announce": "Le soleil est au plus haut." },
+    { "key": "afternoon", "label": "Après-midi", "from_hour": 14.0, "to_hour": 18.0, "start_hour": 15.0, "visibility": 1.0, "announce": "L'après-midi s'avance." },
+    { "key": "dusk", "label": "Crépuscule", "from_hour": 18.0, "to_hour": 20.5, "start_hour": 18.5, "visibility": 0.7, "announce": "Le crépuscule tombe : les tireurs voient moins loin." },
+    { "key": "night", "label": "Nuit", "from_hour": 20.5, "to_hour": 5.0, "start_hour": 21.0, "visibility": 0.45, "announce": "La nuit tombe sur le champ : on ne tire plus qu'à courte portée.", "selectable": false }
+  ],
+  "campaign_draw": [
+    { "phase": "dawn", "weight": 2 },
+    { "phase": "morning", "weight": 5 },
+    { "phase": "midday", "weight": 3 },
+    { "phase": "afternoon", "weight": 5 },
+    { "phase": "dusk", "weight": 2 }
+  ]
+}
