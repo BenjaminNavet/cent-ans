@@ -23,7 +23,7 @@ Branche : `b4-batiments`. Conception : `docs/design/2026-09-25-bulles-partout.md
 - Validateur Codex vert, `uv run --project tools pytest` vert (418 tests).
 
 ## Reste / points ouverts
-- `cargo test` (en cours au dernier commit).
+- `cargo test -p data-model -p sim-campaign` vert (crates qui lisent les données).
 - À la fusion avec B2 : supprimer `_b4_links.md` si les 5 fiches `cdx_jeu_*` existent sous ces ids.
 - Équilibrage à arbitrer (voir audit) : boulevard d'artillerie qui remplace le château fort ;
   `enables_units` purement indicatif ; piété/prestige des bâtiments non calculés ; coûts en pierre
