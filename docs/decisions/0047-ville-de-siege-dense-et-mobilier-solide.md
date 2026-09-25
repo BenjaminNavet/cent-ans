@@ -92,22 +92,24 @@ bloqué, chemins A* normaux ; le moral perdu à la chaleur par l'assaillant est 
   par-dessus le mur, sans ouverture, était renvoyé à son point d'échelle (là où il se tenait) et y
   restait jusqu'à la nuit ; il marche maintenant vers la place.
 
-**Mesures** (sonde BR3, 20 graines, brèche 40 %, fortification 2) :
+**Mesures** (sonde BR3, 20 graines, brèche 40 %, fortification 2, après fusion de main :
+main seul 034351af → main + BR3b e885d011) :
 
-| Ville | Victoires assaillant avant → après | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées |
+| Ville | Victoires assaillant | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées |
 |---|---|---|---|---|---|
-| générique | 17 → 18/20 | 438 → 441 | 55 → 56 | 197 → 197 | 10.9 → 10.4 |
-| Paris | 17 → 12/20 | 501 → 560 | 85 → 78 | 194 → 166 | 6.7 → 8.9 |
-| Rouen | 2 → 0/20 | 307 → 305 | 91 → 70 | 148 → 157 | 5.6 → 4.0 |
-| Avignon | 18 → 18/20 | 452 → 452 | 154 → 154 | 175 → 175 | 5.0 → 5.0 |
-| Bordeaux | 18 → 12/20 | 463 → 470 | 70 → 85 | 196 → 212 | 17.4 → 19.9 |
-| Bruges | 19 → 19/20 | 413 → 406 | 71 → 69 | 159 → 167 | 5.0 → 4.7 |
-| Calais | 6 → 6/20 | 329 → 334 | 78 → 90 | 152 → 167 | 3.4 → 2.9 |
-| Londres | 18 → 16/20 | 501 → 501 | 81 → 77 | 208 → 169 | 4.3 → 5.3 |
+| générique | 18 → 19/20 | 431 → 434 | 51 → 52 | 194 → 195 | 10.8 → 10.4 |
+| Paris | 17 → 12/20 | 501 → 550 | 80 → 73 | 186 → 160 | 6.5 → 8.8 |
+| Rouen | 2 → 2/20 | 307 → 305 | 93 → 72 | 147 → 151 | 5.8 → 4.3 |
+| Avignon | 19 → 19/20 | 447 → 447 | 155 → 154 | 172 → 171 | 4.8 → 4.8 |
+| Bordeaux | 17 → 12/20 | 452 → 471 | 69 → 86 | 194 → 212 | 17.4 → 20.1 |
+| Bruges | 20 → 20/20 | 404 → 403 | 65 → 65 | 151 → 157 | 4.7 → 4.7 |
+| Calais | 7 → 7/20 | 330 → 332 | 79 → 90 | 152 → 166 | 3.4 → 3.0 |
+| Londres | 17 → 18/20 | 500 → 502 | 80 → 76 | 204 → 168 | 4.3 → 5.3 |
 
-Sonde SG3 (armées de la démo, 10 graines) : Paris 10 → 10/10, Avignon 8 → 10, Bruges 10 → 10,
-Calais 10 → 10, Rouen 8 → 10/10 (sans le correctif d'IA, Rouen tombait à 4/10 par des nuls à 1800 s).
+Sonde SG3 (armées de la démo, 10 graines) : Paris, Avignon, Bruges, Calais 10/10 inchangés, Rouen
+8 → 10/10 (durée médiane 546 → 329 s). Sans le correctif d'IA, la chaleur réduite faisait tomber
+Rouen à 4/10 par des nuls à 1800 s.
 
-**Limite.** Bordeaux passe de 18 à 12/20 : la même règle y soulage la garnison du rempart. Aucun
+**Limite.** Bordeaux passe de 17 à 12/20 : la même règle y soulage la garnison du rempart. Aucun
 facteur global ne sépare Paris de Bordeaux (0,6 : 15 et 15 ; 0,3 : 12 et 12). Revenir à 0,6 (toutes
 les villes à ±3, Paris 15/20) ou à 1,0 (Paris 17/20) est un changement d'une ligne de données.

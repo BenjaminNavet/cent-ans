@@ -140,14 +140,38 @@ Sonde SG3 (armées de la démo, 10 graines), victoires de l'assaillant main → 
 Paris 10 → 9 → 10, Avignon 8 → 8 → 10, Bruges 10 → 10 → 10, Calais 10 → 10 → 10, Rouen 8 → 4 → 10 ;
 durées médianes après : 240, 294, 285, 262, 329 s (main : 233, 421, 243, 262, 546).
 
-## Écart à l'objectif
+## Mesures finales après fusion de main (e885d011)
 
-Bordeaux perd 6 victoires (18 → 12/20), au-delà de ±3 : la même garnison sur le rempart y est
-elle aussi soulagée de la chaleur. Aucun réglage global ne sépare Paris de Bordeaux (0,6 : Paris
-15, Bordeaux 15 ; 0,3 : 12 et 12). Options : (a) garder 0,3 (Paris dans la cible, Bordeaux 12/20) ;
-(b) 0,6 (toutes les villes à ±3, Paris 15/20) ; (c) 1,0 = main (Paris 17/20), en ne gardant que le
-correctif d'IA ; (d) un levier propre à Paris, à inventer (le bloc `siege.battle` n'offre que
-murs, porte, rues, place, rayon, et le rayon est chaotique).
+Main seul = 034351af (archive temporaire, supprimée) ; main + BR3b = e885d011. Sonde BR3,
+20 graines, brèche 40 %, fortification 2, deux IA.
+
+| Ville | Victoires assaillant main → BR3b | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées (moy.) |
+|---|---|---|---|---|---|
+| générique | 18 → 19/20 | 431 → 434 | 51 → 52 | 194 → 195 | 10.8 → 10.4 |
+| paris | 17 → **12/20** | 501 → 550 | 80 → 73 | 186 → 160 | 6.5 → 8.8 |
+| rouen | 2 → 2/20 | 307 → 305 | 93 → 72 | 147 → 151 | 5.8 → 4.3 |
+| avignon | 19 → 19/20 | 447 → 447 | 155 → 154 | 172 → 171 | 4.8 → 4.8 |
+| bordeaux | 17 → **12/20** | 452 → 471 | 69 → 86 | 194 → 212 | 17.4 → 20.1 |
+| bruges | 20 → 20/20 | 404 → 403 | 65 → 65 | 151 → 157 | 4.7 → 4.7 |
+| calais | 7 → 7/20 | 330 → 332 | 79 → 90 | 152 → 166 | 3.4 → 3.0 |
+| london | 17 → 18/20 | 500 → 502 | 80 → 76 | 204 → 168 | 4.3 → 5.3 |
+
+Sonde SG3 (armées de la démo, 10 graines), main → BR3b : Paris 10 → 10/10 (230 → 232 s),
+Avignon 10 → 10 (413 → 293 s), Bruges 10 → 10 (243 → 285 s), Calais 10 → 10 (262 → 262 s),
+Rouen 8 → 10 (546 → 329 s).
+
+Objectifs : Paris 12/20 ✓ (8-12 ; 13/20 sur 40 graines avant fusion), générique 19/20 ✓, Rouen
+2/20 ✓, maisons brûlées à Paris 8,8 ✓, autres villes à ±1 sauf **Bordeaux −5** ✗.
+
+## Écart à l'objectif : Bordeaux
+
+Bordeaux perd 5 victoires (17 → 12/20) : la même garnison sur le rempart y est soulagée de la
+chaleur. Aucun réglage global ne sépare Paris de Bordeaux (balayage avant fusion : facteur 1 →
+17/18, 0,6 → 15/15, 0,45 → 14/12, 0,3 → 12/12). Options : (a) garder 0,3 (retenu : Paris dans la
+cible, Bordeaux 12/20) ; (b) 0,6 (toutes les villes à ±3, Paris 15/20) ; (c) 1,0 (Paris 17/20),
+en ne gardant que le correctif d'IA ; (d) un levier propre à Paris ou à Bordeaux (le bloc
+`siege.battle` n'offre que murs, porte, rues, place, rayon ; le rayon est chaotique : Paris à
+135 m ou 175 m → 20/20).
 
 ## État
 - [x] Référence sur main (sondes BR3 et SG3), toutes villes emblématiques.
@@ -155,7 +179,8 @@ murs, porte, rues, place, rayon, et le rayon est chaotique).
 - [x] Contre-épreuve : SG3 sans BR3 (pointe de la branche SG3 d29e5684).
 - [x] Correctif : chaleur sur le chemin de ronde (données) + IA d'assaut (défaut révélé).
 - [x] Mesures après, addendum ADR 0047, codex.
-- [ ] Vérifications (fmt, clippy, test, pytest, build.sh, smoke siège), fusion de main.
+- [x] Fusion de main (e885d011), mesures finales main seul / main + BR3b.
+- [ ] Vérifications après fusion (fmt, clippy, test, pytest, build.sh, smoke siège).
 
 ## Prochaine étape
-Vérifications complètes, fusion de main, rapport.
+Vérifications après fusion, rapport.
