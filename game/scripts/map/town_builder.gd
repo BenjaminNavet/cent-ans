@@ -485,9 +485,10 @@ static func _ground_strips(plan: Dictionary) -> Array:
 	if ground.is_empty():
 		return out
 	var n: int = ground["n"]
+	var built := _built_density(plan, ground)
 	var row := 0
 	while row < n - 1:
-		var strip := _ground_arrays(plan, row, mini(row + GROUND_STRIP_ROWS, n - 1))
+		var strip := _ground_arrays(plan, built, row, mini(row + GROUND_STRIP_ROWS, n - 1))
 		if not strip.is_empty():
 			out.append(strip)
 		row += GROUND_STRIP_ROWS
@@ -496,7 +497,41 @@ static func _ground_strips(plan: Dictionary) -> Array:
 
 ## Sol de terre battue, cours et jardins sous la ville (grille drapée, teinte fondue au bord),
 ## rangées de mailles [row0, row1).
-static func _ground_arrays(plan: Dictionary, row0: int, row1: int) -> Dictionary:
+## Part bâtie (0-1) autour de chaque sommet de la grille du sol : maisons à moins de ~25 m.
+## Les grands vides de l'enceinte (jardins, prés, vignes intra-muros) restent verts.
+static func _built_density(plan: Dictionary, ground: Dictionary) -> PackedFloat32Array:
+	var n: int = ground["n"]
+	var step: float = ground["step"]
+	var origin: Vector2 = ground["origin"]
+	var out := PackedFloat32Array()
+	out.resize(n * n)
+	var houses: Dictionary = plan["houses"]
+	var xs: PackedFloat32Array = houses["x"]
+	var ys: PackedFloat32Array = houses["y"]
+	var reach := 2
+	for i in xs.size():
+		var ci := roundi((xs[i] - origin.x) / step)
+		var cj := roundi((ys[i] - origin.y) / step)
+		for dj in range(-reach, reach + 1):
+			for di in range(-reach, reach + 1):
+				var gi := ci + di
+				var gj := cj + dj
+				if gi < 0 or gj < 0 or gi >= n or gj >= n:
+					continue
+				var w := 1.0 - Vector2(di, dj).length() / (reach + 1.0)
+				if w > 0.0:
+					var k := gj * n + gi
+					out[k] = minf(out[k] + w * 0.5, 1.0)
+	for street in plan["streets"]:
+		for p: Vector2 in street["points"]:
+			var gi := roundi((p.x - origin.x) / step)
+			var gj := roundi((p.y - origin.y) / step)
+			if gi >= 0 and gj >= 0 and gi < n and gj < n:
+				out[gj * n + gi] = maxf(out[gj * n + gi], 0.6)
+	return out
+
+
+static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: int, row1: int) -> Dictionary:
 	var ground: Dictionary = plan.get("ground", {})
 	var n: int = ground["n"]
 	var step: float = ground["step"]
@@ -514,7 +549,8 @@ static func _ground_arrays(plan: Dictionary, row0: int, row1: int) -> Dictionary
 		if mask[k] == 1:
 			var p: Vector2 = origin + Vector2(k % n, k / n) * step
 			var edge := clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
-			colors[k] = layer_color("Rubble", Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge))
+			var yard := Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge)
+			colors[k] = layer_color("Rubble", Color(0.17, 0.23, 0.11).lerp(yard, built[k]))
 			lo = minf(lo, h[k])
 			hi = maxf(hi, h[k])
 	if lo == INF:
