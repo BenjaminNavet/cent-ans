@@ -800,8 +800,11 @@ et `game/resources/zoom_tiers.tres` (paliers vallée / site).
   zones L1 `close_zones` (7), champ par étage). `close_zones` reste valable sans pyramide.
 - **Point visé au sol** (`ground_height` = `TerrainBuilder.surface_height_at`) ; **garde au sol** : la
   caméra reste à au moins `max(0,06 × distance, 0,004)` au-dessus de la surface sous elle.
-- **Tangage** : courbe historique au-dessus de 22 unités ; en deçà, `lerp(11°, 30°, sqrt(t))` avec t le
-  logarithme normalisé de la distance entre 0,3 et 22 (24° à 2,6 ; 17° à 0,8 ; 11° à 0,3).
+- **Tangage** : courbe historique au-dessus de 22 unités ; en deçà, `lerp(11°, 30°, t)` avec t le
+  logarithme normalisé de la distance entre 0,3 et 22 (23,5° à 5 ; 18° à 1,5 ; 11° à 0,3) ; la visée est
+  relevée de `0,3 × (1 − t) × distance` au-dessus du point visé (`look_up` : crêtes et horizon dans le
+  cadre). **Crêtes** : six échantillons de `surface_height_at` le long de la visée (au-delà de 25 % de la
+  distance) ; si une crête cache le point visé, la caméra monte d'autant (vite), puis redescend lentement.
 - **Plans** : `near = clamp(0,02 × distance, 0,002, 1)`, `far = min(4 × distance + 700, 6000)` (tampon
   de profondeur inversé de Godot 4 : aucune perte de précision à 0,006 / 700).
 - Zoom multiplicatif (15 % par cran) et panoramique proportionnel à la distance (inchangés) : ~26 crans de
