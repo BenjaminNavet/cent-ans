@@ -29,3 +29,4 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul session 7 |
 |---|---|---|---|---|---|
+| 2026-09-25 | OpenRouter | UR1 : illustrations des 14 nouveaux types d'unités (14 × openai/gpt-5-image-mini, script hors registre automatique car le parseur de `budget.py` ne lit pas la table de session 7) | 0,64 $ | 0,64 $ | 0,64 $ |

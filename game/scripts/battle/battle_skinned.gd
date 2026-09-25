@@ -222,7 +222,12 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 
 
+## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
+## historique par famille et variante.
 static func _style(kind: String, variant: int) -> String:
+	var style := str(figure(kind, variant).get("style", ""))
+	if STYLES.has(style):
+		return style
 	match kind:
 		"infantry":
 			return "sword" if variant == 0 else "pike" if variant == 1 else "militia"
@@ -231,6 +236,38 @@ static func _style(kind: String, variant: int) -> String:
 		"cavalry":
 			return "horse_bow" if variant == 2 else "lance"
 	return "sword"
+
+
+## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste (lot UR1), sinon
+## variante 0 des fantassins et des cavaliers.
+static func is_noble(kind: String, variant: int) -> bool:
+	var fig := figure(kind, variant)
+	if fig.has("noble"):
+		return bool(fig["noble"])
+	return variant == 0 and (kind == "infantry" or kind == "cavalry")
+
+
+## Variante des figurines rigides (B1/B4, trois par famille) la plus proche d'une figurine
+## skinnée de variante quelconque (lot UR1), d'après son style d'animation.
+static func rigid_variant(kind: String, variant: int) -> int:
+	if variant <= 2 or kind == "siege":
+		return variant
+	match _style(kind, variant):
+		"sword":
+			return 0
+		"pike":
+			return 1
+		"militia":
+			return 2
+		"bow":
+			return 0
+		"crossbow":
+			return 1
+		"horse_bow":
+			return 2
+		"lance":
+			return 0 if is_noble(kind, variant) else 1
+	return 0
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]

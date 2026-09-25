@@ -739,6 +739,8 @@ def export_figure(fig_name, recipe, rigs):
         "lods": files,
         "tris": tris,
         "variants": recipe.get("variants", 1),
+        "style": recipe.get("style", ""),
+        "noble": recipe.get("noble", False),
     }
 
 
