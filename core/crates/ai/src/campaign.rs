@@ -471,6 +471,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
         .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
     let mut composition = crate::doctrine::field_composition(state, ctx.faction);
+    // SV2: the resource units this turn's recruits draw (siege engines:
+    // wood, iron) leave the faction's free supply; the next ones of the
+    // same kind are priced with their import (B7c rule, ADR 0053).
+    let mut supply = state.free_supply(data, ctx.faction);
     'sites: for site in &sites {
         if !ctx.owns_settlement(site) {
             continue;
@@ -494,7 +498,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                     target_upkeep
                 }
             };
-            let fitting: Vec<&sim_campaign::RecruitOption> = options
+            let repriced = reprice_recruits(state, data, ctx.faction, site, &options, &supply);
+            let fitting: Vec<&sim_campaign::RecruitOption> = repriced
                 .iter()
                 .filter(|o| {
                     planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
@@ -513,6 +518,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 unit_type: option.unit_type.clone(),
             });
             *composition.entry(option.unit_type.clone()).or_default() += 1;
+            draw_supply(&mut supply, &option.resources);
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;
@@ -1399,5 +1405,48 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             ctx.grid
                 .march_orders(army_id, army, &anchor, &target, &table),
         );
+    }
+}
+
+/// SV2: `options` priced against the free resource `supply` left by the
+/// recruits already planned this turn — a second trebuchet imports the wood
+/// the first one drew (B7c rule, ADR 0053). Options without resources keep
+/// their price.
+pub fn reprice_recruits(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    settlement: &SettlementId,
+    options: &[sim_campaign::RecruitOption],
+    supply: &BTreeMap<data_model::ResourceId, u32>,
+) -> Vec<sim_campaign::RecruitOption> {
+    options
+        .iter()
+        .map(|option| {
+            let mut option = option.clone();
+            if !option.resources.is_empty() {
+                if let Some(price) =
+                    state.recruit_price(data, faction, settlement, &option.unit_type, supply)
+                {
+                    option.cost = price.cost;
+                    option.import_cost = price.import_cost;
+                    option.imported = price.draw.imported;
+                }
+            }
+            option
+        })
+        .collect()
+}
+
+/// SV2: removes `needed` from the running `supply` (what is lacking is
+/// imported, not owed).
+pub fn draw_supply(
+    supply: &mut BTreeMap<data_model::ResourceId, u32>,
+    needed: &BTreeMap<data_model::ResourceId, u32>,
+) {
+    for (resource, amount) in needed {
+        if let Some(left) = supply.get_mut(resource) {
+            *left = left.saturating_sub(*amount);
+        }
     }
 }

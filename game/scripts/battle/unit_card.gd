@@ -231,7 +231,7 @@ func _draw_cross(size: Vector2) -> void:
 ## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
 func _refresh_tooltip(unit: Dictionary) -> void:
 	var detail := "État : %s" % state_text(unit)
-	if float(unit["fatigue"]) >= BattleUnitMarkers.EXHAUSTED_FATIGUE:
+	if BattleUnitMarkers.is_exhausted(unit):
 		detail += " · épuisée"
 	detail += "\nEffectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
 	if bool(unit["can_shoot"]):

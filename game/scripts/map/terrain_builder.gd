@@ -466,6 +466,18 @@ func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
 			image.set_pixel(index, 0, Color(1.0, 0, 0))
 	material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
 	material.set_shader_parameter("fog_enabled", enabled)
+	material.set_shader_parameter("fog_by_cell", false)
+
+
+## Brouillard par case (lot M5a) : `cells` = texture de vue R8 de la simulation (255 = vu,
+## bords doux), couvrant `size_px` pixels carte depuis l'origine. Remplace le masque par province.
+func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2) -> void:
+	if material == null:
+		return
+	material.set_shader_parameter("fog_cells", cells)
+	material.set_shader_parameter("fog_cells_size", size_px)
+	material.set_shader_parameter("fog_by_cell", enabled and cells != null)
+	material.set_shader_parameter("fog_enabled", enabled)
 
 
 func set_highlight(hovered_index: int, selected_index: int) -> void:
@@ -581,7 +593,10 @@ func _setup_quadtree() -> void:
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()
-	if not relief.load_manifest(map_data.map_dir, manifest):
+	# ZG7b : pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
+	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
+	var tiles_override := relief_root.path_join("pyramid") if manifest == "" and relief_root != map_data.map_dir else ""
+	if not relief.load_manifest(map_data.map_dir, manifest, tiles_override):
 		return
 	pyramid = relief
 	quadtree = ReliefQuadtree.new()

@@ -523,6 +523,12 @@ impl GameData {
         &self.rasters.get().navgrid
     }
 
+    /// The decoded `province_ids.png`, when present (lot M5a: vision
+    /// counts seen land per province).
+    pub fn province_raster(&self) -> Option<&ProvinceRaster> {
+        self.rasters.get().provinces.as_ref()
+    }
+
     /// Province under map pixel `(px, py)` according to `province_ids.png`
     /// (`None` at sea, off the map or without the raster).
     pub fn province_at_point(&self, px: f32, py: f32) -> Option<&ProvinceId> {
