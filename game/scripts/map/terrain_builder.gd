@@ -80,6 +80,7 @@ var _height_texture: ImageTexture
 var _splat_texture: ImageTexture
 var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
+var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
 var _albedo_array: Texture2DArray
 var _normal_array: Texture2DArray
@@ -526,6 +527,7 @@ func _build_textures() -> void:
 	_splat_texture = _optional_texture(map_data.splat_image)
 	_border_texture = _optional_texture(map_data.border_dist_image)
 	_coast_texture = _optional_texture(map_data.coast_dist_image)
+	_river_bed_texture = _optional_texture(map_data.river_bed_image)
 	_build_material_arrays()
 	_build_faction_texture()
 
@@ -566,6 +568,23 @@ func height_texture() -> Texture2D:
 
 func coast_texture() -> Texture2D:
 	return _coast_texture
+
+
+## Lot V4 : texture du lit des fleuves (null si absente) ; `RiversRenderer` la partage avec l'eau
+## et y efface le lit sous les villes fortifiées (`update_river_bed`).
+func river_bed_texture() -> ImageTexture:
+	return _river_bed_texture
+
+
+## Rectangles (x0, z0, x1, z1) des tuiles affichées en relief fin (niveau 2).
+func fine_chunk_rects() -> PackedVector4Array:
+	var rects := PackedVector4Array()
+	for index in _is_near.size():
+		if _is_near[index] == 2:
+			var cx := index % CHUNKS
+			var cy := index / CHUNKS
+			rects.append(Vector4(cx * chunk_px, cy * chunk_px, (cx + 1) * chunk_px, (cy + 1) * chunk_px))
+	return rects
 
 
 static func _optional_texture(image: Image) -> ImageTexture:
@@ -665,6 +684,9 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_border_dist", _border_texture != null)
 	material.set_shader_parameter("coast_dist", _coast_texture)
 	material.set_shader_parameter("has_coast_dist", _coast_texture != null)
+	# Lot V4 : lit des fleuves (les tuiles creusées sont réglées par RiversRenderer).
+	material.set_shader_parameter("river_bed", _river_bed_texture)
+	material.set_shader_parameter("has_river_bed", _river_bed_texture != null)
 	# Occupation du sol (vigne, sécheresse, bocage) partagée avec la végétation (lot V2b).
 	_landuse_texture = ImageTexture.create_from_image(VegetationFields.landuse(map_data))
 	material.set_shader_parameter("landuse", _landuse_texture)
