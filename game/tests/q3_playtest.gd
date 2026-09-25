@@ -310,7 +310,7 @@ func phase_edicts() -> void:
 func phase_diplomacy() -> void:
 	await key(KEY_P)
 	await wait(30)
-	var panels := map.ui.find_children("*", "Control", true, false).filter(func(n: Node) -> bool: return n.get_script() == load("res://scripts/ui/diplomacy_panel.gd") and (n as Control).is_visible_in_tree())
+	var panels: Array = map.ui.find_children("*", "Control", true, false).filter(func(n: Node) -> bool: return n.get_script() == load("res://scripts/ui/diplomacy_panel.gd") and (n as Control).is_visible_in_tree())
 	if panels.is_empty():
 		log_q("diplomacy panel not open after P")
 		return
@@ -451,9 +451,10 @@ func phase_agent() -> void:
 	await shot("agent-ordered")
 	var action := first_enabled(ctl.get("_bar_actions"), 0)
 	if action != null:
+		var action_text := _text_of(action).replace("\n", " ")
 		await click(action)
 		await wait(20)
-		log_q("agent: action '%s' → report %s" % [_text_of(action).replace("\n", " "), map.sim.call("get_last_agent_report")])
+		log_q("agent: action '%s' → report %s" % [action_text, map.sim.call("get_last_agent_report")])
 		await shot("agent-action")
 	else:
 		log_q("agent: no action available at %s" % agent.get("location_name", "?"))
@@ -470,11 +471,11 @@ func phase_zoom() -> void:
 	await fps_probe("zoom-max", 60)
 	var marks := [800.0, 300.0, 120.0, 50.0, 20.0, 8.0, 3.0, 1.0, 0.3]
 	var next := 0
-	var last := map.camera_rig.distance
+	var last: float = map.camera_rig.distance
 	var stalls := 0
 	for step in 160:
 		var centre := world_to_window(capital)
-		await wheel(centre, MOUSE_BUTTON_WHEEL_DOWN)
+		await wheel(centre, MOUSE_BUTTON_WHEEL_UP)
 		await wait(6)
 		var distance: float = map.camera_rig.distance
 		while next < marks.size() and distance <= marks[next]:
@@ -659,6 +660,10 @@ func phase_siege() -> void:
 	await wait(20)
 	await shot("siege-army-bar")
 	var assault: Button = map.sieges.assault_button if map.sieges != null else null
+	var box: Control = map.ui.army_actions_box
+	for node in [box.get_parent(), box] + box.find_children("*", "Control", true, false):
+		var control := node as Control
+		log_q("siege box: %s %s visible %s min %s size %s pos %s" % [control.name, control.get_class(), control.visible, control.get_combined_minimum_size(), control.size, control.global_position])
 	if assault != null and assault.is_visible_in_tree():
 		log_q("siege: '%s' / '%s'" % [map.sieges.status_label.text, assault.text])
 		await click(assault)
@@ -782,9 +787,14 @@ func phase_save() -> void:
 
 
 func phase_settings() -> void:
-	await key(KEY_ESCAPE)
-	await wait(15)
-	await click(find_button(root, "Réglages"))
+	var settings_button: BaseButton = null
+	for attempt in 3:
+		await key(KEY_ESCAPE)
+		await wait(15)
+		settings_button = find_button(root, "Réglages")
+		if settings_button != null:
+			break
+	await click(settings_button)
 	await wait(20)
 	var menus := root.find_children("*", "Control", true, false).filter(func(n: Node) -> bool: return n.get_script() == load("res://scripts/ui/settings_menu.gd"))
 	if menus.is_empty():
