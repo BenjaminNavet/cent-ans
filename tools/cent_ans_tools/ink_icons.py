@@ -325,6 +325,7 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
         else:
             image = process_medallion(raw, catalog["medallion_style"]["size"])
         image.save(entry.out_path, optimize=True)
+        ensure_import_settings(entry.out_path)
         report[f"{entry.kind}s"].append(entry.id)
         for target in entry.targets:
             indexes[entry.kind][target] = entry.out_path.name
@@ -393,3 +394,33 @@ def lot_spent(ledger) -> Decimal:  # noqa: ANN001
         (entry.actual for entry in ledger.entries if entry.subject.startswith("DA5")),
         Decimal("0.00"),
     )
+
+
+# Godot import settings: lossless, mipmaps so that 128/256 px images stay smooth at 16-40 px.
+IMPORT_TEMPLATE = """[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[params]
+
+compress/mode=0
+mipmaps/generate=true
+process/fix_alpha_border=true
+"""
+
+
+def ensure_import_settings(png_path: Path) -> bool:
+    """Creates ``<png>.import`` with mipmaps on (kept as is when Godot already wrote one)."""
+    import_path = png_path.with_name(png_path.name + ".import")
+    if import_path.exists():
+        text = import_path.read_text(encoding="utf-8")
+        if "mipmaps/generate=false" not in text:
+            return False
+        import_path.write_text(
+            text.replace("mipmaps/generate=false", "mipmaps/generate=true"),
+            encoding="utf-8",
+        )
+        return True
+    import_path.write_text(IMPORT_TEMPLATE, encoding="utf-8")
+    return True

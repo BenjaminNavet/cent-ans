@@ -6,6 +6,8 @@ extends RefCounted
 ## disponibilité et les raisons de refus viennent de la simulation.
 
 const ROW_ICON := 20.0
+## DA5 : diamètre des médaillons enluminés des boutons d'action (Recruter, Former une armée).
+const MEDALLION_SIZE := 26
 const REASON_COLOR := Color(0.55, 0.20, 0.15)
 
 
