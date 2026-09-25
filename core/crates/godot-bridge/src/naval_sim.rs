@@ -150,6 +150,12 @@ fn event_dict(time: f64, kind: &NavalEventKind) -> VarDictionary {
         } => ("ram", ship, Some(other), damage),
         NavalEventKind::Flee { ship } => ("flee", ship, None, 0.0),
         NavalEventKind::Escaped { ship } => ("escaped", ship, None, 0.0),
+        NavalEventKind::Assault { ship, side } => (
+            "assault",
+            ship,
+            None,
+            if side == SideId::Attacker { 0.0 } else { 1.0 },
+        ),
     };
     vdict! {
         "time" => time,

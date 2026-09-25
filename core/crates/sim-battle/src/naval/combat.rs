@@ -90,6 +90,16 @@ pub fn climb_factor(climb: f64, rules: &NavalRules) -> f64 {
     1.0 - (climb * rules.climb_per_m).clamp(-rules.climb_cap, rules.climb_cap)
 }
 
+/// Factor of the morale losses of `ship` to volleys and to the loss of
+/// other ships: chained crews cannot run and fight on (lot NV2).
+pub fn morale_factor(ship: &Ship, rules: &NavalRules) -> f64 {
+    if ship.chain.is_some() {
+        rules.chain_morale
+    } else {
+        1.0
+    }
+}
+
 /// Result of one volley of one crew group.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Volley {

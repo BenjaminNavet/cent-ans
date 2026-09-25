@@ -384,7 +384,7 @@ func _on_events(events: Array) -> void:
 				lines.append(["%s lance ses grappins sur %s." % [name_cap, other.get("name", "?")], BattleUiKit.INK])
 				_play("shield_bash", pos)
 			"board":
-				lines.append(["Abordage ! %s monte à l'assaut de %s." % [name_cap, other.get("name", "?")], good if ours else bad])
+				lines.append(["Abordage ! %s monte à l'assaut %s." % [name_cap, _de(str(other.get("name", "?")))], good if ours else bad])
 				_play("war_cry", pos)
 				_play("contact", pos)
 			"capture":
@@ -413,6 +413,10 @@ func _on_events(events: Array) -> void:
 				lines.append(["%s a échappé." % name_cap, BattleUiKit.INK_SOFT])
 			"cut":
 				lines.append(["%s coupe les grappins." % name_cap, BattleUiKit.INK_SOFT])
+			"assault":
+				# `ship` : navire amiral (ou de tête) de la flotte qui lance l'assaut.
+				lines.append(["Abordage général ! %s" % ("Toute la flotte se jette à l'abordage." if ours else "La flotte ennemie se jette à l'abordage de toutes parts."), good if ours else bad])
+				_play("war_cry", pos)
 	if not lines.is_empty():
 		hud.add_log(lines)
 
@@ -756,6 +760,9 @@ func _apply_camera_view() -> void:
 			camera_rig.look_at_point(focus, 75.0, camera_rig.yaw + 0.6)
 		"deck":
 			camera_rig.look_at_point(focus + Vector3(0, 4, 0), 24.0, camera_rig.yaw + 1.2)
+		"hull":
+			# Coque de près, de travers (captures NV2 : bordé, goudron, flottaison).
+			camera_rig.look_at_point(focus + Vector3(0, 1.5, 0), 30.0, camera_rig.yaw + 1.4)
 		"melee":
 			camera_rig.look_at_point(focus + Vector3(0, 3, 0), 62.0, pair_yaw)
 		_:
