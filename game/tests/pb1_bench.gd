@@ -17,6 +17,9 @@ const SWEEP_FRAMES := 240
 
 var _viewport_rid: RID
 var _result: Dictionary = {}
+## `--trace` : temps cumulé par écouteur de `chunk_surface_changed` (µs) et nombre d'appels.
+var _trace: Dictionary = {}
+var _trace_frame: Dictionary = {}
 
 
 func _init() -> void:
@@ -51,6 +54,8 @@ func _run() -> void:
 	var rig: CampaignCamera = map.camera_rig
 	var data: MapData = map.map_data
 	var settled := func() -> bool: return vegetation.pending_jobs() == 0 and terrain.fine_ready()
+	if "--trace" in OS.get_cmdline_user_args():
+		_wrap_listeners(terrain)
 	_result["first_settle_ms"] = await _settle(settled) + (Time.get_ticks_msec() - t_load)
 	var surface_y := data.surface_world_at(PARIS.x, PARIS.y)
 	var per_view: Dictionary = {}
@@ -93,6 +98,8 @@ func _run() -> void:
 		"total_ms": snappedf(_sum(frame_times), 1.0),
 	}
 	_result["ok"] = true
+	if not _trace.is_empty():
+		_result["trace"] = _trace
 	print("PB1_JSON ", JSON.stringify(_result))
 	map.queue_free()
 	await process_frame
@@ -109,11 +116,20 @@ func _settle_measured(condition: Callable) -> Dictionary:
 	var worst := 0.0
 	var last := Time.get_ticks_usec()
 	await process_frame
+	_trace_frame.clear()
 	while not condition.call() and Time.get_ticks_msec() - t0 < SETTLE_TIMEOUT_MS:
 		await process_frame
 		var now := Time.get_ticks_usec()
-		worst = maxf(worst, (now - last) / 1000.0)
+		var frame_ms := (now - last) / 1000.0
+		worst = maxf(worst, frame_ms)
 		last = now
+		if frame_ms > 60.0 and not _trace_frame.is_empty():
+			print("PB1_SPIKE %.1f ms: %s" % [frame_ms, _trace_frame])
+		_trace_frame.clear()
+	if not condition.call():
+		print("PB1_UNSETTLED vegetation pending=%d fine_ready=%s" % [
+			(root.get_child(-1).get_node("Vegetation") as Vegetation).pending_jobs(),
+			(root.get_child(-1).get("terrain") as TerrainBuilder).fine_ready()])
 	return {"ms": Time.get_ticks_msec() - t0, "worst": snappedf(worst, 0.01)}
 
 
@@ -143,3 +159,17 @@ func _sum(values: Array[float]) -> float:
 	for v in values:
 		total += v
 	return total
+
+
+func _wrap_listeners(terrain: TerrainBuilder) -> void:
+	for connection in terrain.get_signal_connection_list("chunk_surface_changed"):
+		var callable: Callable = connection["callable"]
+		var label := "%s.%s" % [(callable.get_object() as Node).name, callable.get_method()]
+		terrain.chunk_surface_changed.disconnect(callable)
+		terrain.chunk_surface_changed.connect(func(index: int) -> void:
+			var t := Time.get_ticks_usec()
+			callable.call(index)
+			var dt := Time.get_ticks_usec() - t
+			var entry: Array = _trace.get(label, [0, 0])
+			_trace[label] = [entry[0] + dt, entry[1] + 1]
+			_trace_frame[label] = int(_trace_frame.get(label, 0)) + dt / 1000)
