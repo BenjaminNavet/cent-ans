@@ -1,6 +1,6 @@
 # Lot BV1 — Bataille vivante (1) : volées, sang au sol, poussière, taille des unités
 
-Branche `worktree-agent-a3fb69eecbaf4f8a1` (main fusionné à `817bc7fc`, avec V2 et AU1). Backlog :
+Branche `worktree-agent-a3fb69eecbaf4f8a1` (main fusionné en dernier à `821a4ceb` : V2, AU1, V3 et L1 compris). Backlog :
 `docs/audit/backlog-tw.md` § Bataille (idées J). Coordination : V2 (soldats VAT) possède le maillage
 et le shader des soldats, V3 l'environnement global et AU1 l'audio (bus, pool, banque). BV1 ne
 touche à aucun des trois : un seul point de contact avec V2, le nombre de figurines dans
@@ -83,6 +83,18 @@ entre passes atteignent ±30 %. Metal ne donne pas le temps GPU.
   sur cette bataille chargée).
 - « Avant » sur machine calme (début de session) : 99 FPS en moyenne pour `--units=20` et 122 pour
   la démo.
+
+### Après fusion de V2, AU1 et V3 (figurines skinnées, flammes dans une couche à part)
+Écran plafonné à 60 Hz (la synchro verticale est revenue avec la fusion). Temps de rendu CPU
+fourni par V3 ; Metal renvoie 0 pour le temps GPU.
+| Config (`--units=20`) | FPS (2 passes) | Primitives | Appels | Rendu CPU |
+|---|---|---|---|---|
+| sans BV1 | 58,7 / 58,7 | 2,43 M | 890 | 0,70-0,72 ms |
+| Normale | 58,4 / 58,7 | 2,61 M (+7 %) | 906 | 0,71-0,73 ms |
+| Ultra | 55,5 / 58,7 | 4,86 M (×2) | 907-911 | 0,75-0,90 ms |
+Série non plafonnée, avant cette fusion (4 paires alternées, machine chargée) : sans BV1 35,6 /
+44,7 / 81,4 / 43,3 et Normale 35,1 / 44,6 / 37,7 / 54,7. Parité hors la passe aberrante à 81,4.
+Sans rendu (headless), les deux configs tournent à 135,7 FPS : BV1 n'a pas de coût CPU mesurable.
 
 ## Captures (`docs/audit/captures/bv1/`)
 `avant_bataille_volee` / `apres_bataille_volee` (`--shot-at=59 --camera=600,360,45,200`, avec ou
