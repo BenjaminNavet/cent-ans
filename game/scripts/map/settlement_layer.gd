@@ -537,6 +537,8 @@ func flush() -> void:
 	max_hamlet_builds_per_frame = 1 << 20
 	_update_hamlets()
 	max_hamlet_builds_per_frame = saved
+	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
+		landmark.flush_bake()
 
 
 func hamlet_instance_count() -> int:
