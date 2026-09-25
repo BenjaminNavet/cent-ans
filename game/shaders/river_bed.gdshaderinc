@@ -16,6 +16,17 @@ uniform float river_carve_depth = 0.075;
 uniform vec4 carved_rects[4];
 uniform int carved_rect_count = 0;
 uniform float carve_edge_px = 3.0;
+// Lot ZG5b : disque où l'hydrographie fine (FineGeoLayer) remplace ce rendu : centre x, z ;
+// rayon couvert par les tuiles maillées ; poids du palier près.
+uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
+
+// 1 là où le rendu fin a pris le relais, 0 ailleurs (fondu sur les 15 % extérieurs du rayon).
+float fine_zone_mask(vec2 p) {
+	if (fine_zone.z <= 0.0 || fine_zone.w <= 0.0) {
+		return 0.0;
+	}
+	return fine_zone.w * (1.0 - smoothstep(fine_zone.z * 0.85, fine_zone.z, distance(p, fine_zone.xy)));
+}
 
 float river_sd_at(vec2 p, vec2 size) {
 	return (textureLod(river_bed, (p + vec2(0.5)) / size, 0.0).r * 255.0 - 128.0) / river_bed_scale;
