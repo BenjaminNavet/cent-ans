@@ -1220,6 +1220,7 @@ func refresh_keycaps() -> void:
 	for entry in _keycaps:
 		if is_instance_valid(entry[0]):
 			_update_keycap(entry)
+	queue_fit_top_bar()  # UX2 : marge du cartouche selon la nouvelle lettre
 
 
 ## Bouton de la barre qui déclenche une action de l'InputMap (même chemin que le clavier).
@@ -1298,12 +1299,37 @@ func _apply_top_label(entry: Dictionary, labelled: bool) -> void:
 	var text := " ".join(parts)
 	if count > 0:
 		text = ("%s (%d)" % [text, count]) if labelled else ("%s %d" % [text, count]).strip_edges()
-	# Cartouche de touche au coin bas droit : un blanc fixe évite qu'elle morde la dernière lettre.
-	if labelled and button.has_node("Keycap"):
-		text += "\u2007"
 	button.text = text
+	_pad_for_keycap(button, labelled)
 	if button.has_meta("tooltip"):  # infobulle d'état fournie par le propriétaire (Chronique)
 		button.tooltip_text = str(button.get_meta("tooltip"))
+
+
+## États du bouton dont la marge droite s'élargit pour le cartouche de touche.
+const KEYCAP_PAD_STATES := ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]
+## Écart entre la fin du libellé et le cartouche.
+const KEYCAP_GAP := 4.0
+
+
+## Bouton libellé portant un cartouche (coin bas droit) : marge droite du style élargie de la
+## largeur du cartouche + `KEYCAP_GAP`, pour que le cartouche ne morde plus la dernière lettre.
+## La largeur minimale du bouton l'inclut, donc `fit_top_bar` en tient compte. Icône seule :
+## styles du thème (le cartouche se loge dans le coin, hors de l'icône).
+func _pad_for_keycap(button: Button, labelled: bool) -> void:
+	var cap := button.get_node_or_null("Keycap") as Label
+	for state: String in KEYCAP_PAD_STATES:
+		if button.has_theme_stylebox_override(state):
+			button.remove_theme_stylebox_override(state)
+	if cap == null or not cap.visible or not labelled:
+		return
+	var cap_width := cap.get_combined_minimum_size().x
+	for state: String in KEYCAP_PAD_STATES:
+		var base := button.get_theme_stylebox(state)
+		if base == null:
+			continue
+		var padded := base.duplicate() as StyleBox
+		padded.content_margin_right = maxf(base.get_margin(SIDE_RIGHT), 0.0) + cap_width + KEYCAP_GAP
+		button.add_theme_stylebox_override(state, padded)
 
 
 ## Réapplique le libellé de `button` (après un changement de méta `count` ou `tooltip`).

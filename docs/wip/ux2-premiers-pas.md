@@ -37,6 +37,9 @@ Audit : `docs/audit/a3-ui.md` (C9, C13, U1, U2, lot U15). Captures : `docs/audit
 ## Limites
 - La touche L reste à l'encyclopédie (déjà liée) : la reprise du guide passe par le conseil,
   F1 ou le menu, pas par L.
-- À 1600 px, « Agents » reste en icône seule (la place manque de peu).
+- Suite (cartouches) : les boutons libellés portant une touche ont une marge droite = largeur du
+  cartouche + 4 px (`MapUI._pad_for_keycap`), comptée par `fit_top_bar`. Plus de lettre mordue ;
+  en contrepartie, à 1600 px, « Objectifs » et « Agents » passent en icône seule ; à 1280 px,
+  Diplomatie et Chronique gardent leur libellé.
 - Le conseil « armée sans ordre » considère toute armée à pleins points de mouvement sans
   chemin ; une armée laissée volontairement en garnison le déclenche (croix pour la saison).

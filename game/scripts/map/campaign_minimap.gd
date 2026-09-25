@@ -13,6 +13,8 @@ extends PanelContainer
 
 signal clicked(map_pos: Vector2)
 signal mode_changed(mode: String)
+## UX1 : bouton « Légende » basculé (le contrôleur ouvre ou ferme `MapLegend`).
+signal legend_toggled(pressed: bool)
 
 const SHADER := preload("res://shaders/campaign_minimap.gdshader")
 const MODE_POLITICAL := "political"
@@ -42,6 +44,7 @@ var _overlay: Control
 var _material: ShaderMaterial
 var _mode_buttons: Dictionary = {}  # mode → Button
 var _modes_row: HBoxContainer
+var legend_button: Button
 var _armies: Array = []  # [{pos: Vector2 carte, color: Color, player: bool}]
 var _frame := PackedVector2Array()  # quadrilatère de la vue caméra (coordonnées carte)
 var _visible_count: int = -1
@@ -50,6 +53,8 @@ var _visible_count: int = -1
 func _init() -> void:
 	name = "CampaignMinimap"
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# UX1 : boutons des modes au thème parchemin, comme le reste du HUD.
+	theme = load("res://scenes/ui/parchment_theme.tres")
 	add_theme_stylebox_override("panel", HudStyle.panel_box(6))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
@@ -88,6 +93,22 @@ func _init() -> void:
 		button.pressed.connect(func() -> void: set_mode(mode_id))
 		modes.add_child(button)
 		_mode_buttons[mode_id] = button
+	# UX1 : bouton de la légende de la carte, au bout de la rangée des modes.
+	legend_button = Button.new()
+	legend_button.name = "LegendButton"
+	legend_button.text = "Légende"
+	legend_button.tooltip_text = "Légende : ce que montrent les symboles de la carte"
+	legend_button.toggle_mode = true
+	legend_button.focus_mode = Control.FOCUS_NONE
+	legend_button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
+	var book := HudStyle.icon("hud_codex")
+	if book != null:
+		legend_button.icon = book
+		legend_button.add_theme_constant_override("icon_max_width", 14)
+	else:
+		legend_button.text = "? Légende"
+	legend_button.toggled.connect(func(pressed: bool) -> void: legend_toggled.emit(pressed))
+	modes.add_child(legend_button)
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
 	_view.material = _material
