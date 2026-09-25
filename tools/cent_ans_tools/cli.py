@@ -685,6 +685,72 @@ def assets_icons(
     )
 
 
+@assets_app.command("ink-icons")
+def assets_ink_icons(
+    kind: str = typer.Option(
+        "all", "--kind", help="icon, medallion ou all (les deux, icônes d'abord)"
+    ),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls (sonde), répétable"
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    build_only: bool = typer.Option(
+        False, "--build-only", help="Aucune génération : dérive les PNG des sources"
+    ),
+    envelope: float | None = typer.Option(
+        None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5)"
+    ),
+) -> None:
+    """DA5 : icônes d'action à l'encre et boutons-médaillons (une image par icône)."""
+    from decimal import Decimal
+
+    from cent_ans_tools import ink_icons
+    from cent_ans_tools.budget import BudgetLedger
+
+    catalog = ink_icons.load_catalog()
+    model = catalog["model"]
+    if not build_only:
+        spent = ink_icons.lot_spent(BudgetLedger())
+        remaining = Decimal(str(catalog["budget_cap_usd"])) - spent
+        if envelope is not None:
+            remaining = min(remaining, Decimal(str(envelope)))
+        console.print(
+            f"Lot DA5 : {spent:.2f} $ déjà dépensés, enveloppe {remaining:.2f} $"
+        )
+        kinds = ["icon", "medallion"] if kind == "all" else [kind]
+        for current in kinds:
+            jobs = ink_icons.plan(catalog, kind=current, only=only or None, limit=limit)
+            convert = (
+                ink_icons.to_raw_icon
+                if current == "icon"
+                else ink_icons.to_raw_medallion
+            )
+            before = ink_icons.lot_spent(BudgetLedger())
+            _run_art_batch(
+                jobs,
+                model,
+                float(remaining),
+                dry_run,
+                f"image(s) ({current})",
+                ink_icons.BUDGET_SUBJECT,
+                convert,
+            )
+            remaining -= ink_icons.lot_spent(BudgetLedger()) - before
+        if dry_run:
+            return
+    report = ink_icons.build(catalog)
+    sheet = ink_icons.contact_sheet(catalog)
+    console.print(
+        f"[green]OK[/green] : {len(report['icons'])} icône(s), "
+        f"{len(report['medallions'])} médaillon(s) ; planche {sheet}"
+    )
+    if report["missing"]:
+        console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
+
+
 @assets_app.command("menu-art")
 def assets_menu_art() -> None:
     """Dessine l'illustration du menu (carte ancienne 2560×1440) dans game/assets/ui/."""
