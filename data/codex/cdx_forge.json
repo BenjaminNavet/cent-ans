@@ -2,12 +2,36 @@
   "id": "cdx_forge",
   "title": "La forge",
   "category": "batiment",
-  "aliases": ["forge", "forges", "forgeron", "forgerons", "bas fourneau", "bas fourneaux", "haut fourneau", "martinet", "martinets", "maréchal-ferrant"],
-  "era": { "from": "1000", "to": "1500" },
+  "aliases": [
+    "forge",
+    "forges",
+    "forgeron",
+    "forgerons",
+    "bas fourneau",
+    "bas fourneaux",
+    "haut fourneau",
+    "martinets",
+    "maréchal-ferrant"
+  ],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
   "summary": "Du bas fourneau où l'on réduit le minerai à la forge du village qui ferre les chevaux et répare les socs, le fer passe par le feu du charbon de bois et le marteau. Au XIVe siècle, la roue à eau commence à actionner soufflets et martinets.",
   "body": "Au Moyen Âge, on produit le fer au bas fourneau : une cuve d'argile ou de pierre où l'on empile minerai et charbon de bois, attisés par des soufflets. Le métal ne fond pas ; il se rassemble en une masse spongieuse, la loupe, mêlée de scories, que le forgeron doit réchauffer et marteler longuement pour l'épurer. Il faut beaucoup de [[cdx_bois|bois]] pour faire le charbon : les forges s'installent donc près des forêts et du minerai, dans le Berry, en Lorraine, dans le Pays de Liège, en Biscaye, dont le fer s'exporte dans toute l'Europe, et en Angleterre dans le Weald et la forêt de Dean.\n\nDepuis le XIIe siècle, les moines cisterciens et les seigneurs installent des forges hydrauliques : une roue à eau actionne les soufflets, et un arbre à cames soulève le martinet, un lourd marteau qui bat le fer bien plus fort qu'un bras. Le haut fourneau, qui atteint une température assez haute pour faire fondre le fer et le couler en fonte, apparaît en Suède, puis dans les régions de Liège et de Namur au cours des XIVe et XVe siècles ; il ne gagne la France et l'Angleterre qu'à la fin du Moyen Âge, et servira notamment à couler des boulets.\n\nDans chaque village, le forgeron, souvent aussi maréchal-ferrant, ferre les chevaux et les bœufs, fabrique et répare les socs de charrue, les faux, les clous et les outils : un personnage essentiel, parfois soumis à une banalité. La guerre fait vivre les forges : la forêt de Dean fournit au roi d'Angleterre des dizaines de milliers de carreaux d'arbalète et de fers de flèche, et les armuriers transforment le meilleur fer en acier pour les lames et les [[cdx_harnois|harnois]].",
   "gameplay": "Bâtiment de production de niveau 1, constructible dans une cité, une ville, un château ou un village (pas une abbaye), dans une province qui produit du [[cdx_fer|fer]]. Coût 600 livres (ajusté selon la monnaie), 2 tours, entretien 10 livres par tour.\n\nEffets : production +10 % (la moitié du gain, +5 %, s'ajoute à l'impôt des paysans et des bourgeois ; voir [[cdx_jeu_tresor]]) et coût de recrutement −5 % pour toutes les unités recrutées dans cette colonie (les réductions cumulées ne descendent jamais sous −75 %). Bâtiment de production, il relève aussi de 10 % la capacité de population de la province.",
   "entity": "bld_forge",
-  "see_also": ["cdx_fer", "cdx_bois", "cdx_arsenal", "cdx_harnois", "cdx_moulin_a_eau"],
-  "sources": ["Bas fourneau", "Haut fourneau", "Forge", "Sidérurgie"]
+  "see_also": [
+    "cdx_fer",
+    "cdx_bois",
+    "cdx_arsenal",
+    "cdx_harnois",
+    "cdx_moulin_a_eau"
+  ],
+  "sources": [
+    "Bas fourneau",
+    "Haut fourneau",
+    "Forge",
+    "Sidérurgie"
+  ]
 }

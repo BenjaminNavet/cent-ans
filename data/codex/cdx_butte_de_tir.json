@@ -2,12 +2,32 @@
   "id": "cdx_butte_de_tir",
   "title": "Les buttes de tir",
   "category": "batiment",
-  "aliases": ["butte de tir", "buttes de tir", "butts", "proclamation de 1363", "papegai", "confrérie d'archers", "confréries d'arbalétriers"],
-  "era": { "from": "1285", "to": "1500" },
+  "aliases": [
+    "butte de tir",
+    "buttes de tir",
+    "butts",
+    "proclamation de 1363",
+    "confrérie d'archers"
+  ],
+  "era": {
+    "from": "1285",
+    "to": "1500"
+  },
   "summary": "Tertres de terre où l'on plante les cibles, les buttes sont le terrain d'entraînement des archers. En 1363, Édouard III ordonne à tous les hommes valides d'Angleterre de s'y exercer les jours de fête plutôt que de jouer au ballon.",
   "body": "L'arc long anglais ne s'improvise pas : il faut des années d'exercice, depuis l'enfance, pour bander un arc d'if de plus de cinquante kilos de tension et tirer dix à douze flèches par minute. La Couronne anglaise l'a compris tôt. Le statut de Winchester, en 1285, oblige chaque homme libre à posséder des armes selon sa fortune, l'arc et les flèches pour les petits propriétaires. En 1363, après les victoires de [[cdx_crecy|Crécy]] et de [[cdx_poitiers|Poitiers]], [[cdx_edouard_iii|Édouard III]] écrit aux shérifs : chaque homme valide devra, les dimanches et jours de fête, s'exercer à l'arc, sous peine de prison, et laisser le jet de pierres, la balle à main ou au pied, la crosse et les combats de coqs, « jeux vains et sans profit ».\n\nOn tire aux buttes, levées de terre dressées à la sortie des villages et des villes, où l'on accroche la cible ; de nombreuses rues et places d'Angleterre s'appellent encore « Butts ». On pratique aussi le tir au long, sur des marques espacées de plus de deux cents mètres, qui entraîne à la volée plongeante des batailles (voir [[cdx_arc_long|l'arc long]]).\n\nEn France et en Flandre, le tir est l'affaire des confréries d'archers et d'arbalétriers des villes, placées sous le patronage de saint Sébastien ou de saint Georges, qui s'entraînent au tir du papegai, un oiseau de bois perché au sommet d'un mât. [[cdx_charles_v|Charles V]] encourage lui aussi le tir en 1369, en interdisant dés et jeux de hasard ; mais la noblesse craint une paysannerie trop bien armée, et l'expérience n'a pas de lendemain. Il faudra attendre les [[cdx_franc_archer|francs-archers]] de [[cdx_charles_vii|Charles VII]], en 1448, pour qu'un roi de France lève une infanterie de tir dans chaque paroisse.",
   "gameplay": "Bâtiment militaire de niveau 1. Il exige un [[cdx_ost_feodal|champ de montre]] dans la même colonie, qui ne se bâtit que dans une cité, une ville ou un château : c'est donc là seulement qu'on peut l'élever. Coût 300 livres (ajusté selon la monnaie), 1 tour, entretien 5 livres par tour.\n\nEffets, appliqués aux unités recrutées dans cette colonie et conservés par l'unité où qu'elle combatte : tir +3 pour les unités de tir (bonus plafonné à 10 avec les autres bâtiments) et expérience +1 pour toutes les recrues (plafond 10). Unités associées : archers à l'arc long et francs-archers ; leur recrutement n'exige pas la butte, mais ceux levés ici tirent mieux. Construction rapide et bon marché : à placer dans les provinces qui fournissent vos archers.",
   "entity": "bld_archery_butts",
-  "see_also": ["cdx_arc_long", "cdx_franc_archer", "cdx_arbalete", "cdx_ost_feodal", "cdx_edouard_iii"],
-  "sources": ["Arc long anglais", "Statut de Winchester", "Tir à l'arc", "Tir au papegai"]
+  "see_also": [
+    "cdx_arc_long",
+    "cdx_franc_archer",
+    "cdx_arbalete",
+    "cdx_ost_feodal",
+    "cdx_edouard_iii"
+  ],
+  "sources": [
+    "Arc long anglais",
+    "Statut de Winchester",
+    "Tir à l'arc",
+    "Tir au papegai"
+  ]
 }
