@@ -4,10 +4,15 @@ extends Node
 ##
 ## - Bus « Musique » et « Effets » (créés au démarrage s'ils manquent), volumes linéaires
 ##   0..1 persistés dans `user://settings.cfg` (section `audio`).
-## - Musique selon le contexte (`campaign`, `war` si le joueur est en guerre, `court` quand la
-##   cour est ouverte), fondu enchaîné entre deux lecteurs. Chaque contexte a une liste de
-##   lecture (`data/audio/music.json`) jouée en ordre aléatoire, sans répéter le morceau
-##   précédent ; à défaut, `music/<contexte>.ogg` en boucle.
+## - Musique selon le contexte (`campaign` — ou `campaign_<région>` selon la culture de la
+##   faction jouée : france/england/burgundy/iberia/italy, DA4 —, `war` si le joueur est en
+##   guerre, `court` quand la cour est ouverte, `menu` à l'écran-titre), fondu enchaîné entre
+##   deux lecteurs. Chaque contexte a deux listes de lecture (`data/audio/music.json`) : `primary`
+##   (musique d'époque libre de droits, tirée en priorité) et `fallback` (repli, notamment les
+##   pistes Kevin MacLeod, utilisées seulement si `primary` ne fournit aucun fichier présent),
+##   jouées en ordre aléatoire sans répéter le morceau précédent ; à défaut de tout,
+##   `music/<contexte>.ogg` en boucle. `culture_regions` associe la culture de la faction jouée
+##   (`data/factions/<id>.json`, champ `culture`) à une région musicale.
 ## - Effets : clic sur tout bouton (via `SceneTree.node_added`), page tournée à l'ouverture
 ##   des panneaux de la carte, cloche de fin de tour puis l'effet de l'événement le plus
 ##   marquant du tour (bataille, naissance, mort, guerre, paix, religion).
@@ -68,8 +73,12 @@ var _base_context := "campaign"
 var _court_open := false
 var _duck_tween: Tween = null
 var _duck_until: float = 0.0
-## Listes de lecture par contexte (chemins `res://`) et dernier morceau joué par contexte.
+## Listes de lecture par contexte : `{context: {"primary": [chemins res://], "fallback": [...]}}`.
 var _playlists: Dictionary = {}
+## DA4 : culture (`data/factions/<id>.json`, champ `culture`) → région musicale
+## (`campaign_<région>`), lue dans `data/audio/music.json` (clé `culture_regions`).
+var _culture_regions: Dictionary = {}
+var _faction_cultures: Dictionary = {}  # cache faction_id -> culture id
 var _last_track: Dictionary = {}
 var _music_rng := RandomNumberGenerator.new()
 
@@ -231,9 +240,11 @@ func has_music(context: String) -> bool:
 	return _pick_track(context, false) != null
 
 
-## Charge les listes de lecture (`{"playlists": {contexte: [chemin relatif à res://]}}`).
+## Charge les listes de lecture (`{"playlists": {contexte: {"primary": [...], "fallback": [...]}},
+## "culture_regions": {culture: région}}`, chemins relatifs à res://).
 func load_playlists(path: String) -> bool:
 	_playlists.clear()
+	_culture_regions.clear()
 	if not FileAccess.file_exists(path):
 		return false
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -242,34 +253,71 @@ func load_playlists(path: String) -> bool:
 		return false
 	var playlists: Dictionary = (parsed as Dictionary).get("playlists", {})
 	for context in playlists:
-		var tracks: Array[String] = []
-		for track in playlists[context]:
-			tracks.append("res://" + str(track))
-		_playlists[str(context)] = tracks
+		var entry: Variant = playlists[context]
+		var primary: Array[String] = []
+		var fallback: Array[String] = []
+		if entry is Dictionary:
+			for track in (entry as Dictionary).get("primary", []):
+				primary.append("res://" + str(track))
+			for track in (entry as Dictionary).get("fallback", []):
+				fallback.append("res://" + str(track))
+		elif entry is Array:
+			# Compat : ancien format (liste simple), toute la liste en primary.
+			for track in entry:
+				primary.append("res://" + str(track))
+		_playlists[str(context)] = {"primary": primary, "fallback": fallback}
+	for culture in (parsed as Dictionary).get("culture_regions", {}):
+		_culture_regions[str(culture)] = str((parsed as Dictionary)["culture_regions"][culture])
 	return true
 
 
-## Morceaux du contexte (vide si aucune liste de lecture).
+## Morceaux du contexte (primary puis fallback ; vide si aucune liste de lecture).
 func playlist(context: String) -> Array:
-	return _playlists.get(context, [])
+	var entry: Dictionary = _playlists.get(context, {})
+	var combined: Array = (entry.get("primary", []) as Array).duplicate()
+	combined.append_array(entry.get("fallback", []) as Array)
+	return combined
 
 
-## Choisit un morceau du contexte au hasard, différent du précédent si possible ; repli sur
+## Choisit un morceau du contexte au hasard parmi `primary`, différent du précédent si possible ;
+## repli sur `fallback` si `primary` ne fournit aucun fichier présent, puis sur
 ## `music/<contexte>.ogg` en boucle. `remember` : note le choix pour éviter la répétition.
 func _pick_track(context: String, remember: bool = true) -> AudioStream:
-	var candidates: Array = playlist(context).duplicate()
-	if candidates.size() > 1:
-		candidates.erase(_last_track.get(context, ""))
-	while not candidates.is_empty():
-		var index := _music_rng.randi_range(0, candidates.size() - 1)
-		var path: String = candidates[index]
-		var stream := _load_music(path)
-		if stream != null:
-			if remember:
-				_last_track[context] = path
-			return stream
-		candidates.remove_at(index)
+	var entry: Dictionary = _playlists.get(context, {})
+	for tier in [entry.get("primary", []), entry.get("fallback", [])]:
+		var candidates: Array = (tier as Array).duplicate()
+		if candidates.size() > 1:
+			candidates.erase(_last_track.get(context, ""))
+		while not candidates.is_empty():
+			var index := _music_rng.randi_range(0, candidates.size() - 1)
+			var path: String = candidates[index]
+			var stream := _load_music(path)
+			if stream != null:
+				if remember:
+					_last_track[context] = path
+				return stream
+			candidates.remove_at(index)
 	return _load_stream(MUSIC_DIR, context, true)
+
+
+## Région musicale (france/england/burgundy/iberia/italy) de la culture d'une faction, "" si
+## inconnue ou absente de `culture_regions` (`data/audio/music.json`).
+func culture_region(faction_id: String) -> String:
+	if faction_id == "":
+		return ""
+	if not _faction_cultures.has(faction_id):
+		var data := SoundBank.data_path("factions/" + faction_id + ".json")
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data)) if FileAccess.file_exists(data) else null
+		_faction_cultures[faction_id] = str((parsed as Dictionary).get("culture", "")) if parsed is Dictionary else ""
+	return str(_culture_regions.get(_faction_cultures[faction_id], ""))
+
+
+## Contexte de campagne (paix) pour une faction : `campaign_<région>` si sa culture a une région
+## musicale connue et que la liste de lecture existe, sinon `campaign`.
+func campaign_context(faction_id: String) -> String:
+	var region := culture_region(faction_id)
+	var context := "campaign_%s" % region if region != "" else "campaign"
+	return context if _playlists.has(context) else "campaign"
 
 
 ## Morceau d'une liste de lecture, sans boucle (la fin enchaîne sur le suivant).
@@ -344,14 +392,14 @@ func _on_button_pressed() -> void:
 	play_sfx("ui_click")
 
 
-## Écran de démarrage : musique calme.
+## Écran de démarrage : musique de menu (DA4).
 func enter_menu() -> void:
 	_campaign = null
 	if campaign_ambience != null:
 		campaign_ambience.setup(null)
 	_court_open = false
 	_base_context = "campaign"
-	play_music("campaign")
+	play_music("menu")
 
 
 ## Carte de campagne : page tournée à l'ouverture des panneaux, contexte guerre/cour.
@@ -397,7 +445,11 @@ func player_at_war() -> bool:
 
 
 func refresh_context() -> void:
-	_base_context = "war" if player_at_war() else "campaign"
+	if player_at_war():
+		_base_context = "war"
+	else:
+		var faction := str(_campaign.get("player_faction")) if _campaign != null else ""
+		_base_context = campaign_context(faction)
 	_update_music()
 
 
