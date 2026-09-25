@@ -8,7 +8,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0010-f
 | M2 cœur | **fusionné** (8d8a1a6) | API et limites : `docs/wip/m2-core-movement.md` ; `c5_settlements_ui_test.gd` échoue (2 points, exécution immédiate) → à adapter en M4 |
 | M3 tour séquentiel + IA | **fusionné** (e8056c2d) | batailles de campagne et débarquements anglais rétablis ; IA 2,4 ms/faction en moyenne (p99 15 ms) ; notes `docs/wip/m3-tour-ia.md` |
 | M4 pont + UI | **fusionné** (99606cf) | bulle, chemin 2 couleurs, clic droit, animation, cercle ZdC ; captures `docs/img/m4/` ; notes `docs/wip/m4-pont-ui.md` |
-| M5 vision, équilibrage, docs | M5b **fusionné** (99db2366) ; M5a (vision) en cours | M5b : débandades rétablies (1,8/graine), croisements route/fleuve 362→77, Saône et Somme, manuel/codex/tutoriel ; notes `docs/wip/m5b-equilibrage-docs.md` |
+| M5 vision, équilibrage, docs | M5b **fusionné** (99db2366) ; M5a (vision) **fusionné** via le lot SV1 (branche `sv1-vision`, en attente d'intégration dans main) | M5a : vue par case 512², brouillard par case (terrain, minicarte), armées étrangères masquées hors de vue, `own_provinces_visible` ; notes `docs/wip/m5a-vision.md`, `docs/godot-map.md` § « Vision par rayon ». M5b : débandades rétablies (1,8/graine), croisements route/fleuve 362→77, Saône et Somme, manuel/codex/tutoriel ; notes `docs/wip/m5b-equilibrage-docs.md` |
 
 ## Décisions prises en cours de route
 
@@ -20,6 +20,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md`. ADR : `docs/decisions/0010-f
 - M4 : l'aperçu du chemin ignore les zones de contrôle (la marche réelle peut s'arrêter avant) ; armées IA non animées pendant le tour IA ; M4 a touché `march.rs`/`orders.rs` (`StopReason::Engaged`), M3 doit l'intégrer.
 - M3 : débandades à 0 depuis M2 (le recul de 15 km réussit presque toujours) ; Écosse fragile (banqueroutes) ; l'évitement de ZdC porte sur les colonies du graphe, pas sur le segment de grille ; `resolve_trade` (C5) doit aller dans `resolve_end_of_turn` et `ai_choose_edicts` (C4) dans `plan_turn`.
 - M5b : batailles 89/graine (59 avant M2) — goulets des ponts + tour séquentiel ; ponts ni coupables ni gardables ; Écosse = problème d'économie, hors périmètre.
+- SV1 (25/09) : M5a fusionné dans `sv1-vision` sans conflit textuel avec main (ZG, MF1, bulles) ; rayons `vision_army_km` / `vision_settlement_km` lus par `CampaignState::vision` (tests `sight_radii_follow_the_data`), bord doux `edge_feather_km` sorti du code vers `data/rules/vision.json` ; liseré du brouillard estompé aux paliers vallée/site (ZG4) comme le voile.
 - À la fusion de M2 (fait), vérifier : `agents.rs` (C6, Dijkstra sur le graphe des colonies, s'appuie sur `movement.rs` ; les agents ne sont pas arrêtés par la zone de contrôle) et la ligne C7 dans `apply_outcome`.
 
 ## Prochaine étape

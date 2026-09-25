@@ -1,6 +1,7 @@
 {
-  "description": "Brouillard de guerre de la carte de campagne (lot C1, vue par rayon du lot M5a). Toutes les terres des provinces tenues par la faction ou ses alliés sont vues (own_provinces_visible) ; ailleurs, une case est vue à moins de vision_army_km d'une armée amie ou de vision_settlement_km d'une colonie tenue (data/movement/rules.json) ; alliés, vassaux et suzerains partagent leur vue. Une province est visible quand au moins province_seen_percent % de ses terres sont vues, qu'elle contient une colonie vue ou une armée amie, ou qu'un agent la surveille.",
+  "description": "Brouillard de guerre de la carte de campagne (lot C1, vue par rayon du lot M5a). Toutes les terres des provinces tenues par la faction ou ses alliés sont vues (own_provinces_visible) ; ailleurs, une case est vue à moins de vision_army_km d'une armée amie ou de vision_settlement_km d'une colonie tenue (data/movement/rules.json) ; alliés, vassaux et suzerains partagent leur vue. Une province est visible quand au moins province_seen_percent % de ses terres sont vues, qu'elle contient une colonie vue ou une armée amie, ou qu'un agent la surveille. Le bord d'un disque de vue s'estompe sur edge_feather_km (la case est à moitié vue au rayon).",
   "share_allied_vision": true,
   "province_seen_percent": 25,
-  "own_provinces_visible": true
+  "own_provinces_visible": true,
+  "edge_feather_km": 3
 }

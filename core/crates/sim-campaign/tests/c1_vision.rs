@@ -5,6 +5,7 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::time::Instant;
 
+use data_model::entities::movement::FreeMovementRules;
 use data_model::{FactionId, GameData, ProvinceId, VisionRules};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState};
 
@@ -96,6 +97,92 @@ fn vision_rules_come_from_the_data() {
     let free = data.free_movement_rules();
     assert_eq!(free.vision_army_km, 30.0);
     assert_eq!(free.vision_settlement_km, 20.0);
+    assert_eq!(rules.edge_feather_km, 3.0);
+}
+
+/// Radius-only data with the sight radii (`data/movement/rules.json`) and
+/// the soft edge (`data/rules/vision.json`) overridden.
+fn tuned_data(army_km: f64, settlement_km: f64, feather_km: f64) -> GameData {
+    let mut data = radius_only_data();
+    data.free_movement = Some(FreeMovementRules {
+        vision_army_km: army_km,
+        vision_settlement_km: settlement_km,
+        ..data.free_movement_rules().clone()
+    });
+    if let Some(rules) = data.vision_rules.as_mut() {
+        rules.edge_feather_km = feather_km;
+    }
+    data
+}
+
+#[test]
+fn sight_radii_follow_the_data() {
+    // SV1: no radius is hard-coded, the core reads both from the data.
+    let france = fac("fac_france");
+    let wide = tuned_data(50.0, 10.0, 3.0);
+    let mut state = CampaignState::new_1337(&wide, france.clone(), 1).unwrap();
+    let spot = remote_point(&state, &wide, &france, 120.0);
+    let army = first_army(&state, &france);
+    state.armies.get_mut(&army).unwrap().position = ArmyPosition::Field {
+        x: spot[0],
+        y: spot[1],
+    };
+    let vision = state.vision(&wide, &france);
+    assert!(
+        vision.mask.sees_point(&wide, east(&wide, spot, 45.0)),
+        "a 50 km army radius sees 45 km away"
+    );
+    assert!(!vision.mask.sees_point(&wide, east(&wide, spot, 55.0)));
+    assert!(vision.mask.coverage_at(east(&wide, spot, 45.0)) >= 128);
+    let source = vision
+        .mask
+        .sources
+        .iter()
+        .find(|s| s.point == spot)
+        .expect("the army is a sight source");
+    assert!((source.radius_px - 50.0 * px_per_km(&wide)).abs() < 1e-3);
+    // Settlements take their own radius from the data too.
+    let army_px = 50.0 * px_per_km(&wide);
+    let settlement_px = 10.0 * px_per_km(&wide);
+    let is = |r: f32, px: f32| (r - px).abs() < 1e-3;
+    assert!(vision
+        .mask
+        .sources
+        .iter()
+        .all(|s| is(s.radius_px, army_px) || is(s.radius_px, settlement_px)));
+    assert!(vision
+        .mask
+        .sources
+        .iter()
+        .any(|s| is(s.radius_px, settlement_px)));
+    // Same state, default data: the 30 km radius does not reach 45 km.
+    let data = radius_only_data();
+    let vision = state.vision(&data, &france);
+    assert!(!vision.mask.sees_point(&data, east(&data, spot, 45.0)));
+}
+
+#[test]
+fn the_soft_edge_width_follows_the_data() {
+    let france = fac("fac_france");
+    let sharp = tuned_data(30.0, 20.0, 0.0);
+    let soft = tuned_data(30.0, 20.0, 20.0);
+    let mut state = CampaignState::new_1337(&sharp, france.clone(), 1).unwrap();
+    let spot = remote_point(&state, &sharp, &france, 80.0);
+    let army = first_army(&state, &france);
+    state.armies.get_mut(&army).unwrap().position = ArmyPosition::Field {
+        x: spot[0],
+        y: spot[1],
+    };
+    // 5 km inside the radius (a texel is ~6 km): fully seen with a sharp
+    // edge, partly with a 20 km fade.
+    let inside = east(&sharp, spot, 25.0);
+    let sharp_cov = state.vision(&sharp, &france).mask.coverage_at(inside);
+    let soft_cov = state.vision(&soft, &france).mask.coverage_at(inside);
+    assert_eq!(sharp_cov, 255);
+    assert!(
+        (128..255).contains(&soft_cov),
+        "soft edge coverage {soft_cov}"
+    );
 }
 
 #[test]
