@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "map_legend.schema.json",
+  "title": "Légende de la carte de campagne (UX1)",
+  "description": "Textes de la légende de la carte de campagne : sections, symboles et échantillon dessiné pour chacun. Une section peut ne s'afficher que dans certains modes de carte. Rendu et textes seulement.",
+  "type": "object",
+  "required": ["title", "intro", "factions", "mode_titles", "sections"],
+  "additionalProperties": false,
+  "$defs": {
+    "mode": {"type": "string", "enum": ["political", "unrest", "diplomacy", "religion"]},
+    "hex_color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "owner": {"type": "string", "enum": ["player", "other"]},
+    "sample": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "faction_colors", "gradient", "relation", "color", "fog", "settlement",
+            "settlement_owners", "army_banner", "army_plate", "agent", "path", "ring",
+            "construction", "trade_route", "minimap_army", "minimap_frame"
+          ]
+        },
+        "from": {"$ref": "#/$defs/hex_color"},
+        "to": {"$ref": "#/$defs/hex_color"},
+        "color": {"$ref": "#/$defs/hex_color"},
+        "relation": {"type": "string", "enum": ["self", "war", "truce", "peace", "alliance", "vassal", "suzerain"]},
+        "kind": {"type": "string", "enum": ["city", "town", "castle", "abbey", "village", "spy", "emissary", "preacher"]},
+        "owner": {"$ref": "#/$defs/owner"},
+        "men": {"type": "integer", "minimum": 0},
+        "status": {"type": "string", "enum": ["", "siege", "moving", "embarked"]}
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {"if": {"properties": {"type": {"const": "gradient"}}}, "then": {"required": ["from", "to"]}},
+        {"if": {"properties": {"type": {"enum": ["color", "ring"]}}}, "then": {"required": ["color"]}},
+        {"if": {"properties": {"type": {"const": "relation"}}}, "then": {"required": ["relation"]}},
+        {"if": {"properties": {"type": {"const": "settlement"}}}, "then": {"required": ["kind"], "properties": {"kind": {"enum": ["city", "town", "castle", "abbey", "village"]}}}},
+        {"if": {"properties": {"type": {"const": "agent"}}}, "then": {"required": ["kind"], "properties": {"kind": {"enum": ["spy", "emissary", "preacher"]}}}},
+        {"if": {"properties": {"type": {"const": "army_plate"}}}, "then": {"required": ["men", "status"]}}
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "required": ["sample", "label", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "sample": {"$ref": "#/$defs/sample"},
+        "label": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "properties": {
+    "title": {"type": "string", "minLength": 1},
+    "intro": {"type": "string"},
+    "factions": {
+      "description": "Royaumes montrés en exemple de couleurs (en plus de celui du joueur).",
+      "type": "array",
+      "items": {"type": "string", "pattern": "^fac_[a-z_]+$"},
+      "maxItems": 6
+    },
+    "mode_titles": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/mode"},
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "entries"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z_]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "modes": {"description": "Modes de carte où la section s'affiche (toujours si absent).", "type": "array", "items": {"$ref": "#/$defs/mode"}, "minItems": 1},
+          "entries": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 class_name BattleResultScreen
 extends Control
 
-## Écran de fin de bataille à la Total War (lot B2 / T2, refait par UB1) : grande bannière
+## Écran de fin de bataille (lot B2 / T2, refait par UB1) : grande bannière
 ## illustrée « Victoire », « Défaite » ou « Victoire à la Pyrrhus » avec le verdict nuancé, bilan
 ## chiffré, puis pour chaque camp les régiments en cartes (`RosterCard` : pertes, ennemis abattus,
 ## héros) et un tableau par régiment (engagés, pertes, tués, sort) ; ensuite le héros de la

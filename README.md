@@ -91,6 +91,21 @@ historique ajoutée cite ses sources (champ `sources`).
 Le projet est développé avec l'assistance de Claude Code (Anthropic) ; `CLAUDE.md` et `docs/wip/`
 contiennent les consignes et notes de travail des agents.
 
+## Remerciements
+
+Cent Ans n'existerait pas sans les jeux qui l'ont inspiré. Merci à leurs équipes pour des années
+de parties mémorables :
+
+- **[Total War](https://www.totalwar.com/)** (Creative Assembly) : l'alliance d'une carte de campagne et
+  de batailles en temps réel où l'on voit chaque régiment se battre.
+- **[Crusader Kings](https://www.paradoxinteractive.com/games/crusader-kings-iii/about)** (Paradox
+  Interactive) : les dynasties, les personnages et les intrigues qui donnent vie au Moyen Âge.
+- **[Civilization](https://civilization.2k.com/)** (Firaxis Games) : le plaisir du « encore un tour »
+  et la façon de rendre l'histoire accessible à tous.
+
+Si vous aimez Cent Ans, jouez à leurs jeux : ce sont des chefs-d'œuvre du genre, et ils vont bien
+plus loin que ce projet amateur.
+
 ## Licence
 
 - **Code** (`core/`, `game/` hors assets, `tools/`) : [GNU GPL v3.0](LICENSE).
@@ -98,4 +113,6 @@ contiennent les consignes et notes de travail des agents.
 - **Assets tiers** (`game/assets/third_party/`, icônes, données géographiques) : leurs licences
   propres (CC0, CC BY, OFL, domaine public…), détaillées dans [`CREDITS.md`](CREDITS.md).
 
-*Total War* est une marque de Creative Assembly / SEGA ; ce projet n'y est pas affilié.
+*Total War* est une marque de Creative Assembly / SEGA, *Crusader Kings* une marque de Paradox
+Interactive, *Civilization* une marque de Take-Two Interactive. Ce projet n'est affilié à aucun de
+ces éditeurs ni approuvé par eux ; il n'utilise aucun de leurs assets.
