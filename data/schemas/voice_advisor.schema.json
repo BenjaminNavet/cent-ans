@@ -11,7 +11,7 @@
     "voice": { "type": "string", "minLength": 1 },
     "instructions": { "type": "string", "minLength": 1 },
     "alert_cooldown_turns": { "type": "integer", "minimum": 0, "description": "Tours minimum entre deux alertes du même type." },
-    "min_gap_s": { "type": "number", "minimum": 0, "description": "Écart minimal entre deux interventions (s)." },
+    "min_gap_s": { "type": "number", "minimum": 0, "description": "Pause entre deux interventions en file (s)." },
     "linger_s": { "type": "number", "minimum": 0, "description": "Durée d'affichage du sous-titre après la fin de la voix (s)." },
     "lines": {
       "type": "array",

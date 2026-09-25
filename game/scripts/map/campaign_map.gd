@@ -171,6 +171,8 @@ func _ready() -> void:
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
+	if sim != null and int(sim.call("get_turn")) == 0 and not TutorialController.capture_mode():  # VO1
+		Advisor.say_trigger("campaign_start", player_faction)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -888,6 +890,7 @@ func _on_end_turn() -> void:
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
 		audio.on_turn_events(events)
+	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
