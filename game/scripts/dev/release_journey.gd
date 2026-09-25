@@ -382,6 +382,7 @@ func _apply_config(map: Node, config: String) -> void:
 			if chunk is GeometryInstance3D:
 				(chunk as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if config == "terrain_noshadow" else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		# PF1 : quadtree de relief (ZG2) : `qt_px:<pixels>`, `qt_items:<n>` (valeurs du niveau sinon).
+		terrain.set("relief_shadow_override", int(config.trim_prefix("relief_cast:")) if config.begins_with("relief_cast:") else 0)
 		var quadtree: Node = terrain.get("quadtree")
 		if quadtree != null:
 			if config.begins_with("qt_px:"):
