@@ -133,6 +133,11 @@ Wikipédia ne sont pas recopiés.
 - **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
   procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances
   (`battle/`, `ambience/`) viennent de Freesound (CC0, voir plus haut).
+  Exception : l'huile bouillante des sièges (`battle/boiling_oil_*.ogg`, lot SG2) est une
+  synthèse procédurale (`tools/cent_ans_tools/sg2_sounds.py`).
+- **Engins de siège** (`game/assets/models/siege/`, lot SG2) : trébuchet, mangonneau, bombarde,
+  bélier et beffroi modélisés par script Blender (`tools/blender_scripts/siege_engines.py`),
+  textures de bois Poly Haven (CC0) déjà créditées.
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
 
