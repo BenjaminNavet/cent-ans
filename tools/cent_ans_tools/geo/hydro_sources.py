@@ -429,6 +429,13 @@ def build_strokes(table: LinkTable, lengths: np.ndarray | None = None) -> list[S
 # ---------------------------------------------------------------- canal notes
 
 
+ARTIFICIAL_NAME = re.compile(
+    r"canal(?!is)|kanaal|kanal|rigole|d[ée]rivation|foss[ée]|\bcut\b|drain|navigation|"
+    r"\bleat\b|dyke|\bdike\b|vaart|\bgracht\b|\bsloot\b|\bbief\b|contre[- ]?canal",
+    re.IGNORECASE,
+)
+
+
 @dataclass(frozen=True)
 class CanalFilter:
     """Name patterns of ``historical_hydro_notes.json``."""
@@ -462,7 +469,12 @@ class CanalFilter:
         names = [str(v) for v in table.name]
         kept = np.array([self.is_kept(v) for v in names], dtype=bool)
         modern = np.array([self.is_modern(v) for v in names], dtype=bool)
-        return (table.canal & ~kept) | modern
+        # A canalised river keeps its river name (``la Somme``): its bed is older
+        # than the canal. Only unnamed or canal-named artificial links go.
+        artificial = np.array(
+            [not v or bool(ARTIFICIAL_NAME.search(v)) for v in names], dtype=bool
+        )
+        return (table.canal & artificial & ~kept) | modern
 
 
 # ------------------------------------------------------------------- download
