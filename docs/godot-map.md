@@ -714,6 +714,28 @@ colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le com
 ![Bulle et chemin sur deux tours](img/m4/bulle-chemin.png)
 ![Bord de la bulle, fin de l'étape de ce tour](img/m4/bord-de-bulle.png)
 
+## Vision par rayon (lot M5a)
+
+- Règle (cœur, `sim-campaign/src/vision.rs`) : un point est vu à moins de `vision_army_km` (30) d'une
+  armée amie ou de `vision_settlement_km` (20) d'une colonie tenue (`data/movement/rules.json`) ;
+  alliés, vassaux et suzerains partagent leur vue (`data/rules/vision.json`). Une province est
+  visible si `province_seen_percent` (25 %) de ses terres sont vues, si elle contient une colonie
+  vue ou une armée amie, ou si un agent la surveille. La vue est recalculée, jamais sauvegardée
+  (≈ 1 ms par faction en release).
+- Pont : `get_vision(faction)` → `{image (R8 512², 255 = vu, bord doux, vu dès 128), size,
+  texel_px, provinces, armies, seen_share}` ; `get_visible_army_ids`, `is_point_visible` ;
+  `get_visible_provinces` inchangé.
+- Rendu : `MinimapController.refresh_fog` pose la texture sur le terrain
+  (`TerrainBuilder.set_fog_cells`, `terrain.gdshader` : prise filtrée, bord effrangé par un bruit
+  lent, liseré sépia) et sur la minicarte (`CampaignMinimap.set_fog_cells`). Les armées étrangères
+  dont le point n'est pas vu n'ont ni marqueur (`ArmyMarkers.visible_armies`) ni point sur la
+  minicarte. Sans `get_vision` (simulation de repli), l'ancien masque par province reste utilisé.
+- Test : `godot --headless --path game --script res://tests/m5a_vision_ui_test.gd`.
+
+![Avant : brouillard par province](img/m5a/avant-brouillard-province.png)
+![Après : brouillard par case](img/m5a/apres-brouillard-case.png)
+![Lisière du brouillard, gros plan](img/m5a/apres-lisiere-proche.png)
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |
