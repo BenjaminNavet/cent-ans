@@ -487,7 +487,7 @@ func _build_sea(coast: Dictionary, weather: String) -> void:
 	var mi := MeshInstance3D.new()
 	mi.name = "Sea"
 	mi.mesh = plane
-	mi.position = Vector3((x0 + x1) * 0.5, SEA_LEVEL, 400.0)
+	mi.position = Vector3((x0 + x1) * 0.5, SEA_LEVEL, _terrain.FIELD_D * 0.5)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)

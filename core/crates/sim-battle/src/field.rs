@@ -8,18 +8,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::relief;
 use crate::rng::BattleRng;
+use crate::scale::FieldSize;
+pub use crate::scale::GRID_RESOLUTION;
 use crate::setup::BattleSeason;
 use crate::site::{
     self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, Village, HEDGE_COVER_REACH,
     OBSTACLE_REACH,
 };
 
-/// Width of the field along x, in metres.
-pub const FIELD_WIDTH: f64 = 1200.0;
-/// Depth of the field along z, in metres.
-pub const FIELD_DEPTH: f64 = 800.0;
-/// Spacing of the height grid, in metres.
-pub const GRID_RESOLUTION: f64 = 10.0;
+/// Width of the standard field (skirmishes, sieges) along x, in metres.
+/// EP1: fields are sized by [`crate::scale`]; game code reads
+/// [`Battlefield::width`] (this constant is for tests and siege layouts).
+pub const FIELD_WIDTH: f64 = FieldSize::STANDARD.width;
+/// Depth of the standard field along z, in metres (see [`FIELD_WIDTH`]).
+pub const FIELD_DEPTH: f64 = FieldSize::STANDARD.depth;
 
 /// A circular zone (forest or mud).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -68,12 +70,13 @@ impl River {
         self.fords.iter().any(|f| (x - f.x).abs() <= f.half_width)
     }
 
-    /// Centre line sampled every `step` metres (for rendering).
-    pub fn polyline(&self, step: f64) -> Vec<(f64, f64)> {
-        let count = (FIELD_WIDTH / step).ceil() as usize;
+    /// Centre line sampled every `step` metres from x = 0 to `width` (for
+    /// rendering).
+    pub fn polyline(&self, step: f64, width: f64) -> Vec<(f64, f64)> {
+        let count = (width / step).ceil() as usize;
         (0..=count)
             .map(|i| {
-                let x = (i as f64 * step).min(FIELD_WIDTH);
+                let x = (i as f64 * step).min(width);
                 (x, self.center_z(x))
             })
             .collect()
@@ -157,6 +160,10 @@ impl Weather {
 pub struct Battlefield {
     pub width: f64,
     pub depth: f64,
+    /// Size and battle lines of the field (EP1); `width` and `depth` repeat
+    /// its dimensions.
+    #[serde(default)]
+    pub size: FieldSize,
     pub resolution: f64,
     /// Grid points along x.
     pub nx: usize,
@@ -215,22 +222,47 @@ struct Hill {
     height: f64,
 }
 
-/// z of the attacker's and defender's battle lines at deployment.
+/// z of the attacker's and defender's battle lines at deployment on the
+/// standard field (EP1: game code reads [`Battlefield::attacker_line_z`]).
 pub const ATTACKER_LINE_Z: f64 = 250.0;
 pub const DEFENDER_LINE_Z: f64 = 550.0;
 
 impl Battlefield {
-    /// Builds the field for `terrain`, adding a river when `river` is set and
-    /// extra mud in the rain or snow (no coast, no village: pre-B5 field).
+    /// Builds a standard field for `terrain`, adding a river when `river` is
+    /// set and extra mud in the rain or snow (no coast, no village: pre-B5
+    /// field).
     pub fn generate(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
-        Self::generate_base(terrain, river, weather, rng)
+        Self::generate_base(FieldSize::STANDARD, terrain, river, weather, rng)
     }
 
-    /// Builds the field of a campaign site (B5): the pre-B5 field (same
-    /// draws from `rng`), then ground, coast, pools, village and hedges from
-    /// a derived stream that leaves `rng` where the pre-B5 field left it.
+    /// [`Self::generate`] on a field of `size` (EP1).
+    pub fn generate_sized(
+        size: FieldSize,
+        terrain: Terrain,
+        river: bool,
+        weather: Weather,
+        rng: &mut BattleRng,
+    ) -> Self {
+        Self::generate_base(size, terrain, river, weather, rng)
+    }
+
+    /// Builds the standard field of a campaign site (B5), see
+    /// [`Self::generate_site_sized`].
     pub fn generate_site(site: &FieldSite, weather: Weather, rng: &mut BattleRng) -> Self {
-        let mut field = Self::generate_base(site.terrain, site.river, weather, rng);
+        Self::generate_site_sized(site, FieldSize::STANDARD, weather, rng)
+    }
+
+    /// Builds the field of a campaign site (B5) on a field of `size` (EP1):
+    /// the pre-B5 field (same draws from `rng`), then ground, coast, pools,
+    /// village and hedges from a derived stream that leaves `rng` where the
+    /// pre-B5 field left it.
+    pub fn generate_site_sized(
+        site: &FieldSite,
+        size: FieldSize,
+        weather: Weather,
+        rng: &mut BattleRng,
+    ) -> Self {
+        let mut field = Self::generate_base(size, site.terrain, site.river, weather, rng);
         field.season = site.season;
         let mut stream = rng.derive(SITE_STREAM);
         let parts: Vec<Zone> = field
@@ -247,6 +279,7 @@ impl Battlefield {
             mud: &field.mud,
             parts: &parts,
             river_z: field.river.is_some().then_some(river_fn),
+            size: field.size,
         };
         let features = SiteFeatures::draw(site, weather, &occupied, &mut stream);
         field.ground = features.ground;
@@ -287,7 +320,25 @@ impl Battlefield {
         }
     }
 
-    fn generate_base(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
+    /// z of the attacker's battle line at deployment.
+    pub fn attacker_line_z(&self) -> f64 {
+        self.size.attacker_line_z()
+    }
+
+    /// z of the defender's battle line at deployment.
+    pub fn defender_line_z(&self) -> f64 {
+        self.size.defender_line_z()
+    }
+
+    fn generate_base(
+        size: FieldSize,
+        terrain: Terrain,
+        river: bool,
+        weather: Weather,
+        rng: &mut BattleRng,
+    ) -> Self {
+        let (width, depth) = (size.width, size.depth);
+        let (attacker_line, defender_line) = (size.attacker_line_z(), size.defender_line_z());
         // R2: the relief detail and the shapes of woods and mud come from a
         // derived stream; the draws below are the pre-R2 ones, unchanged.
         let mut relief_stream = rng.derive(relief::RELIEF_STREAM);
@@ -300,10 +351,17 @@ impl Battlefield {
             Terrain::Mountains => (8, 45.0, 3, 0),
             Terrain::Marsh => (3, 2.0, 1, 8),
         };
+        // EP1: as many hills, woods and mud per hectare on a larger field.
+        let per_area = |count: usize| (count as f64 * size.area_ratio()).round() as usize;
+        let (hill_count, forest_count, mud_count) = (
+            per_area(hill_count),
+            per_area(forest_count),
+            per_area(mud_count),
+        );
         let mut hills: Vec<Hill> = (0..hill_count)
             .map(|_| Hill {
-                x: rng.range(0.0, FIELD_WIDTH),
-                z: rng.range(0.0, FIELD_DEPTH),
+                x: rng.range(0.0, width),
+                z: rng.range(0.0, depth),
                 radius: rng.range(80.0, 260.0),
                 height: hill_height * rng.range(0.4, 1.0),
             })
@@ -311,25 +369,24 @@ impl Battlefield {
         // Hills and mountains: the defender holds the high ground.
         if matches!(terrain, Terrain::Hills | Terrain::Mountains) {
             hills.push(Hill {
-                x: FIELD_WIDTH * 0.5,
-                z: DEFENDER_LINE_Z + 60.0,
+                x: size.center_x(),
+                z: defender_line + 60.0,
                 radius: 320.0,
                 height: hill_height * 0.8,
             });
         }
-        let nx = (FIELD_WIDTH / GRID_RESOLUTION) as usize + 1;
-        let nz = (FIELD_DEPTH / GRID_RESOLUTION) as usize + 1;
+        let (nx, nz) = (size.nx(), size.nz());
         let tilt_x = rng.range(-0.004, 0.004);
         let tilt_z = rng.range(-0.004, 0.004);
         let river_def = river.then(|| {
             let fords = (0..2)
                 .map(|i| Ford {
-                    x: FIELD_WIDTH * (0.3 + 0.4 * i as f64) + rng.range(-80.0, 80.0),
+                    x: width * (0.3 + 0.4 * i as f64) + rng.range(-80.0, 80.0),
                     half_width: 35.0,
                 })
                 .collect();
             River {
-                z0: (ATTACKER_LINE_Z + DEFENDER_LINE_Z) * 0.5 + rng.range(-30.0, 30.0),
+                z0: (attacker_line + defender_line) * 0.5 + rng.range(-30.0, 30.0),
                 amplitude: rng.range(10.0, 35.0),
                 wavelength: rng.range(500.0, 900.0),
                 phase: rng.range(0.0, std::f64::consts::TAU),
@@ -342,8 +399,7 @@ impl Battlefield {
             for ix in 0..nx {
                 let x = ix as f64 * GRID_RESOLUTION;
                 let z = iz as f64 * GRID_RESOLUTION;
-                let mut h =
-                    3.0 + tilt_x * (x - FIELD_WIDTH * 0.5) + tilt_z * (z - FIELD_DEPTH * 0.5);
+                let mut h = 3.0 + tilt_x * (x - width * 0.5) + tilt_z * (z - depth * 0.5);
                 for hill in &hills {
                     let d2 = (x - hill.x).powi(2) + (z - hill.z).powi(2);
                     h += hill.height * (-d2 / (hill.radius * hill.radius)).exp();
@@ -360,6 +416,7 @@ impl Battlefield {
         }
         relief::shape_relief(
             &mut heights,
+            &size,
             terrain,
             river_def.as_ref(),
             &mut relief_stream,
@@ -367,15 +424,15 @@ impl Battlefield {
         // Forests and mud stay off the centre of the deployment lines.
         let zone = |radius_low: f64, radius_high: f64, rng: &mut BattleRng| loop {
             let candidate = Zone {
-                x: rng.range(0.0, FIELD_WIDTH),
-                z: rng.range(60.0, FIELD_DEPTH - 60.0),
+                x: rng.range(0.0, width),
+                z: rng.range(60.0, depth - 60.0),
                 radius: rng.range(radius_low, radius_high),
             };
             let near_line = |line: f64| {
                 (candidate.z - line).abs() < candidate.radius + 40.0
-                    && (candidate.x - FIELD_WIDTH * 0.5).abs() < 360.0 + candidate.radius
+                    && (candidate.x - size.center_x()).abs() < size.line_half() + candidate.radius
             };
-            if !near_line(ATTACKER_LINE_Z) && !near_line(DEFENDER_LINE_Z) {
+            if !near_line(attacker_line) && !near_line(defender_line) {
                 break candidate;
             }
         };
@@ -388,12 +445,14 @@ impl Battlefield {
             &mut forests,
             &mut mud,
             &heights,
+            &size,
             river_def.as_ref(),
             &mut relief_stream,
         );
         Battlefield {
-            width: FIELD_WIDTH,
-            depth: FIELD_DEPTH,
+            width,
+            depth,
+            size,
             resolution: GRID_RESOLUTION,
             nx,
             nz,
