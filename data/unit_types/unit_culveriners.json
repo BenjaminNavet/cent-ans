@@ -1,0 +1,41 @@
+{
+  "id": "unit_culveriners",
+  "name": {
+    "display": "Couleuvriniers",
+    "local": "coulevriniers",
+    "local_language": "moyen français"
+  },
+  "category": "ranged",
+  "source_class": "burghers",
+  "soldiers": 100,
+  "cost": {
+    "money": 540
+  },
+  "upkeep": 48,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 32,
+    "ranged": 66,
+    "range": 120,
+    "armor": 32,
+    "morale": 48,
+    "speed": 40,
+    "ammo": 24
+  },
+  "abilities": [
+    "pavise",
+    "rain_penalty"
+  ],
+  "required_technology": "tech_handgonnes",
+  "required_building": "bld_armoury",
+  "available_from": 1380,
+  "figure": "archer_5",
+  "equipment": "Couleuvrine à main (tube de bronze ou de fer sur fût de bois, mise à feu à la mèche), poire à poudre, balles de plomb, salade, jaque ; pavois.",
+  "description": "Tireurs d'armes à feu portatives des villes et des arsenaux royaux (Bureau) ; lents et sensibles à la pluie, leur plomb perce les plates à courte portée (Audenarde 1382, Formigny 1450, Castillon 1453).",
+  "sources": [
+    "Couleuvrine",
+    "Canon à main",
+    "Bataille de Castillon",
+    "B. S. Hall, Weapons and Warfare in Renaissance Europe, Johns Hopkins, 1997"
+  ]
+}

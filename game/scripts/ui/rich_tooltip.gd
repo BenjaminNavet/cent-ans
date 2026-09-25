@@ -258,6 +258,20 @@ static func _join(lines: Array) -> String:
 
 
 ## Forces et faiblesses : statistiques ≥ 130 % ou ≤ 70 % de la moyenne des types d'unités.
+## Lot UR1 : époque de recrutement d'un type d'unité (`available_from` / `available_until`),
+## « » si l'unité est de tout temps.
+static func unit_period(definition: Dictionary) -> String:
+	var from := int(definition.get("available_from", 0))
+	var until := int(definition.get("available_until", 0))
+	if from > 0 and until > 0:
+		return "%d-%d" % [from, until]
+	if from > 0:
+		return "à partir de %d" % from
+	if until > 0:
+		return "jusqu'en %d" % until
+	return ""
+
+
 static func strengths_weaknesses(definition: Dictionary) -> Array:
 	var strengths := PackedStringArray()
 	var weaknesses := PackedStringArray()
@@ -330,6 +344,9 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 		requires.append("%s %s" % [icon_bbcode(str(definition["required_building"]), 14), GameCatalog.display_name(str(definition["required_building"]))])
 	if not requires.is_empty():
 		lines.append("Requiert : " + ", ".join(requires))
+	var period := unit_period(definition)
+	if period != "":
+		lines.append("Époque : " + period)
 	if str(definition.get("source_class", "")) != "":
 		lines.append("Recrutés parmi : %s" % str(CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
 	lines.append(_description(definition))
