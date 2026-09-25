@@ -9,10 +9,11 @@ Branche : `worktree-agent-a213f64dfca3b3a18`.
 | Données : 14 types, schéma (`available_from`, `available_until`, `figure`), doctrines, `enables_units` | fait |
 | Cœur : refus de recrutement hors époque (`orders.rs::recruit_blocker`), tests `sim-campaign/tests/ur1_units.rs` | fait |
 | Équilibre : sondes `matrix`, `campaign`, `rt` | fait (voir plus bas) |
-| Figurines (pipeline V2) | en cours (agent « figurines ») |
+| Figurines (pipeline V2) : 13 nouvelles (infantry_3-8, archer_3-5, cavalry_3-6), style et noblesse dans le manifeste, `BattleMeshes.variant_of` lit `figure` | fait |
+| Coups critiques : armes des 14 types dans `data/fx/battle_gore.json` | fait |
 | Cartes d'unité : 14 illustrations (0,64 $, `docs/budget.md` session 7), 12 icônes game-icons.net, `CREDITS.md` | fait |
 | Encyclopédie et infobulles : époque, factions, mercenaires | fait |
-| Captures `docs/audit/captures/ur1/` | en cours (agent « figurines ») |
+| Captures `docs/audit/captures/ur1/` (rangs hors simulation : repos, mêlée, tir) | fait |
 
 ## Équilibre
 
@@ -54,6 +55,16 @@ déjà présent sur main).
 | unit_gascon_crossbowmen | Arbalétriers gascons | cultures occitane, basque, navarraise | archer_4 |
 | unit_culveriners | Couleuvriniers | tech. couleuvrines, arsenal ; dès 1380 | archer_5 |
 
-## Prochaine étape
+## État : terminé (non fusionné), `main` fusionné (03a42b82), tests, clippy, pytest, smoke verts.
 
-Sonde `matrix` puis `campaign 200 1..8` ; figurines ; illustrations.
+## Points ouverts
+
+- Couleuvriniers : la simulation tire encore des flèches (`sim.rs::missile_kind` décide par id) ;
+  il faudrait un type de projectile « balle de plomb » (fumée, son) côté cœur et rendu.
+- Jinetes : pas d'animation de lancer de javeline (repos pendant le tir).
+- Routiers et écorcheurs : 3,4 k et 3,7 k triangles au LOD0 (au-dessus du budget de 2,4 k).
+- Pas de capture en bataille simulée : la démo de `battle_scene.gd` ne choisit pas ses types.
+- Bombardes du XVe siècle / artillerie de campagne non ajoutées (engins : lot SG1).
+- Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours ; `century_probe` non relancé.
+- `tools/cent_ans_tools/budget.py` ne lit pas un fichier à deux tables (section session 7) :
+  la dépense UR1 a été consignée à la main.
