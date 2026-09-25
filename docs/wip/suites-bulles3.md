@@ -4,7 +4,7 @@ Origine : fin de `docs/wip/bulles-partout.md` (« Suites ouvertes »). Le joueur
 
 | Lot | Contenu | Branche | État |
 |---|---|---|---|
-| SV1 Vision | fusion de `m5a-vision` dans main + portée de vision armée/ville lue depuis les données | sv1-vision | en cours : m5a fusionné, rayons lus depuis `data/movement/rules.json`, bord doux dans `data/rules/vision.json` ; vérifications en cours |
+| SV1 Vision | fusion de `m5a-vision` dans main + portée de vision armée/ville lue depuis les données | sv1-vision | **terminé** (branche prête, non fusionnée dans main) : `m5a-vision` fusionné sans conflit ; rayons `vision_army_km`/`vision_settlement_km` lus par le cœur (déjà branchés par M5a, prouvés par `sight_radii_follow_the_data`) ; bord doux `edge_feather_km` sorti du code vers `data/rules/vision.json` ; liseré du brouillard estompé aux paliers ZG4 ; cargo test (104 binaires), smoke, `m5a_vision_ui_test`, pytest (561) verts |
 | SV2 Coûts unités | coûts en ressources des unités réellement prélevés (cœur, pont, UI, IA) | sv2-unit-resources | lancé |
 | SV3 Panneau + particules | surcoût d'import de pierre dans le panneau de province ; erreur `scale_particles` en boucle au smoke | sv3-panel-particles | lancé |
 | SV4 Chiffres en dur | chiffres de règles écrits en dur dans les GDScript → lus depuis le cœur / `data/` | sv4-ui-numbers | lancé |
