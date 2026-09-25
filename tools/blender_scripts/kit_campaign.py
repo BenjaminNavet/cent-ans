@@ -167,6 +167,18 @@ def church(x, y, angle, scale=1.0):
     return parts
 
 
+def cathedral(x, y, angle, s=1.0):
+    """Kit replacement for ``models.cathedral_building`` (same footprint, gothic cathedral)."""
+    g = kg.Geometry()
+    rng = random.Random(_seed(x, y, 113))
+    g.seed_shift = rng.uniform(0, 1000)
+    length, depth = 1.75 * s * METERS_PER_UNIT, 0.52 * s * METERS_PER_UNIT
+    kit.cathedral(g, rng, "low", length=length, depth=depth)
+    parts = [_place(g, "kit_cathedral", (x, y, 0.0), angle)]
+    parts.append(m.box((1.75 * s, 0.6 * s, m.FOUNDATION), (x, y, -m.FOUNDATION / 2 - 0.02), "DarkStone", rotation=(0, 0, angle)))
+    return parts
+
+
 def finish_parts(parts) -> None:
     """Metric UVs, vertex colours and kit material names on the legacy (non-kit) parts."""
     for obj in parts:
