@@ -22,7 +22,9 @@ extends Node3D
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
 ## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
-## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
+## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
+## `--standard-shot=<foot|mounted|line|fallen>` (capture EP5 : gros plan d'un porte-étendard à
+## pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé).
 
 signal returned(result: Dictionary)
 
@@ -131,6 +133,7 @@ var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
+var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen>`
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -1410,6 +1413,8 @@ func _parse_cmdline() -> void:
 			_result_shot = true
 		elif arg.begins_with("--shot-at="):
 			_shot_at = float(arg.trim_prefix("--shot-at="))
+		elif arg.begins_with("--standard-shot="):
+			_standard_shot = arg.trim_prefix("--standard-shot=")
 		elif arg == "--no-effects":
 			_no_effects = true
 		elif arg == "--no-bv1":
@@ -1509,6 +1514,7 @@ func _stage_screenshot() -> void:
 		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
+	_apply_standard_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
@@ -1614,6 +1620,50 @@ func _stage_result_screenshot() -> void:
 	for _i in 30:
 		await get_tree().process_frame
 	_take_screenshot(_screenshot_path, true)
+
+
+## Capture EP5 (`--standard-shot=`) : cadre un porte-étendard (à pied, à cheval), la ligne de
+## bataille et ses étendards au loin, ou un étendard tombé.
+func _apply_standard_shot() -> void:
+	if _standard_shot == "" or standards == null:
+		return
+	selected.clear()
+	var best: Dictionary = {}
+	for unit in units:
+		if not bool(unit["present"]) or not unit.has("bearer_slots"):
+			continue
+		var render := str(unit["render"])
+		var ok := false
+		match _standard_shot:
+			"foot":
+				ok = render == "infantry" and str(unit.get("standard", "")) == "carried"
+			"mounted":
+				ok = render == "cavalry" and str(unit.get("standard", "")) == "carried"
+			"fallen":
+				ok = str(unit.get("standard", "")) in ["fallen", "lost"]
+			"line":
+				ok = str(unit["side"]) == player_side
+		if ok and (best.is_empty() or (str(unit["side"]) == player_side and str(best["side"]) != player_side)):
+			best = unit
+	if best.is_empty():
+		push_warning("BattleScene: no regiment for --standard-shot=%s" % _standard_shot)
+		return
+	var facing := float(best["facing"])
+	var ahead := Vector3(sin(facing), 0, cos(facing))
+	if _standard_shot == "line":
+		# Derrière la ligne du joueur, haut et loin : les étendards ennemis à 300-600 m.
+		camera_rig.look_at_point(Vector3(float(best["x"]), 0, float(best["z"])) + ahead * 120.0, 260.0, atan2(-ahead.x, -ahead.z))
+		print("BattleScene: EP5 line shot, %d standards shown, %d figures" % [standards.shown_count, standards.figure_count])
+		return
+	var point := Vector3(float(best.get("standard_x", best["x"])), 0, float(best.get("standard_z", best["z"])))
+	if _standard_shot != "fallen":
+		var frame: Variant = soldiers.figure_at(int(best["id"]), int((best["bearer_slots"] as PackedInt32Array)[0]))
+		if frame != null:
+			point = (frame as Transform3D).origin
+	# De trois quarts, devant le porte-étendard.
+	var yaw := atan2(ahead.x, ahead.z) + 0.6
+	camera_rig.look_at_point(point + Vector3(0, 1.5, 0), 11.0 if _standard_shot != "mounted" else 14.0, yaw)
+	print("BattleScene: EP5 %s shot on %s (%s), standard %s, %d standards, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), str(best.get("standard", "")), standards.shown_count, standards.fallen_count])
 
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
