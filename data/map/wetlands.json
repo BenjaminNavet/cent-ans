@@ -1,0 +1,279 @@
+{
+  "description": "Zones humides historiques vers 1340 (lot R1) : marais littoraux et de fond de vallée, pays d'étangs médiévaux (piscicultures seigneuriales et monastiques), prés humides et tourbières. Ellipses approximatives (lon/lat WGS84, demi-axes en km). Les grands lacs restent ceux de Natural Earth (masque de terre). Sources générales : J.-M. Derex, La gestion de l'eau et des zones humides en Brie et dans le Bassin parisien (2001) ; R. Abad, La conjuration contre les carpes (Fayard, 2006) pour les étangs ; H. C. Darby, The Medieval Fenland (Cambridge, 1940) ; notices Wikipédia citées par zone.",
+  "areas": [
+    {
+      "id": "dombes",
+      "name": "Étangs de la Dombes",
+      "kind": "ponds",
+      "density": 0.75,
+      "ellipse": { "center": [5.05, 45.99], "radii_km": [16, 12], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Dombes » (étangs créés aux XIIIe-XIVe siècles) ; Abad 2006"
+    },
+    {
+      "id": "brenne",
+      "name": "Étangs de la Brenne",
+      "kind": "ponds",
+      "density": 0.7,
+      "ellipse": { "center": [1.20, 46.72], "radii_km": [16, 12], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Brenne » (étangs creusés par les moines dès le Moyen Âge)"
+    },
+    {
+      "id": "sologne",
+      "name": "Étangs de Sologne",
+      "kind": "ponds",
+      "density": 0.4,
+      "ellipse": { "center": [1.90, 47.55], "radii_km": [36, 22], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Sologne » ; Abad 2006"
+    },
+    {
+      "id": "woevre",
+      "name": "Étangs de la Woëvre",
+      "kind": "ponds",
+      "density": 0.45,
+      "ellipse": { "center": [5.75, 49.00], "radii_km": [26, 12], "angle_deg": 75 },
+      "source": "Wikipédia (fr), « Woëvre »"
+    },
+    {
+      "id": "etangs_lorraine",
+      "name": "Pays des étangs (Lindre, Gondrexange)",
+      "kind": "ponds",
+      "density": 0.6,
+      "ellipse": { "center": [6.85, 48.75], "radii_km": [14, 9], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Étang de Lindre » (étang médiéval des ducs de Lorraine)"
+    },
+    {
+      "id": "bresse",
+      "name": "Étangs de Bresse",
+      "kind": "ponds",
+      "density": 0.3,
+      "ellipse": { "center": [5.20, 46.55], "radii_km": [22, 16], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Bresse »"
+    },
+    {
+      "id": "fens",
+      "name": "Fens (Fenland)",
+      "kind": "marsh",
+      "density": 0.85,
+      "polygon": [[-0.35, 52.95], [0.25, 52.95], [0.45, 52.75], [0.55, 52.45], [0.40, 52.30], [0.05, 52.25], [-0.20, 52.40], [-0.30, 52.60], [-0.35, 52.80]],
+      "max_height_m": 8,
+      "source": "Darby, The Medieval Fenland (1940) ; Wikipedia (en), « The Fens »"
+    },
+    {
+      "id": "somerset_levels",
+      "name": "Somerset Levels",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [-2.85, 51.15], "radii_km": [20, 10], "angle_deg": 10 },
+      "max_height_m": 12,
+      "source": "Wikipedia (en), « Somerset Levels »"
+    },
+    {
+      "id": "romney_marsh",
+      "name": "Romney Marsh",
+      "kind": "wet_meadow",
+      "density": 0.75,
+      "ellipse": { "center": [0.88, 51.00], "radii_km": [11, 7], "angle_deg": 40 },
+      "max_height_m": 6,
+      "source": "Wikipedia (en), « Romney Marsh » (en partie endigué et pâturé au XIVe siècle)"
+    },
+    {
+      "id": "hatfield_chase",
+      "name": "Hatfield Chase et landes tourbeuses de Thorne",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [-0.92, 53.57], "radii_km": [13, 9], "angle_deg": 0 },
+      "max_height_m": 10,
+      "source": "Wikipedia (en), « Hatfield Chase », « Thorne and Hatfield Moors »"
+    },
+    {
+      "id": "broads",
+      "name": "Broads du Norfolk",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [1.55, 52.68], "radii_km": [13, 9], "angle_deg": 30 },
+      "max_height_m": 8,
+      "source": "Wikipedia (en), « The Broads » (tourbières médiévales inondées au XIVe siècle)"
+    },
+    {
+      "id": "chat_moss",
+      "name": "Mousses du Lancashire (Chat Moss)",
+      "kind": "wet_meadow",
+      "density": 0.7,
+      "ellipse": { "center": [-2.45, 53.46], "radii_km": [9, 5], "angle_deg": 0 },
+      "source": "Wikipedia (en), « Chat Moss »"
+    },
+    {
+      "id": "bog_of_allen",
+      "name": "Tourbières du centre de l'Irlande (Bog of Allen)",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [-7.10, 53.30], "radii_km": [45, 22], "angle_deg": 10 },
+      "source": "Wikipedia (en), « Bog of Allen »"
+    },
+    {
+      "id": "marais_poitevin",
+      "name": "Marais poitevin",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [-1.00, 46.35], "radii_km": [32, 11], "angle_deg": 5 },
+      "max_height_m": 8,
+      "source": "Wikipédia (fr), « Marais poitevin » (dessèchements monastiques entrepris au XIIIe siècle)"
+    },
+    {
+      "id": "briere",
+      "name": "Grande Brière",
+      "kind": "marsh",
+      "density": 0.9,
+      "ellipse": { "center": [-2.25, 47.36], "radii_km": [9, 7], "angle_deg": 0 },
+      "max_height_m": 8,
+      "source": "Wikipédia (fr), « Brière »"
+    },
+    {
+      "id": "goulaine",
+      "name": "Marais de Goulaine",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [-1.40, 47.20], "radii_km": [5, 3], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Marais de Goulaine »"
+    },
+    {
+      "id": "brouage",
+      "name": "Marais de Brouage et de Rochefort",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [-1.05, 45.88], "radii_km": [13, 8], "angle_deg": 80 },
+      "max_height_m": 8,
+      "source": "Wikipédia (fr), « Marais de Brouage » (marais salants)"
+    },
+    {
+      "id": "camargue",
+      "name": "Camargue",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [4.55, 43.55], "radii_km": [23, 15], "angle_deg": 0 },
+      "max_height_m": 6,
+      "source": "Wikipédia (fr), « Camargue »"
+    },
+    {
+      "id": "somme",
+      "name": "Marais de la Somme",
+      "kind": "marsh",
+      "density": 0.75,
+      "polygon": [[1.62, 50.13], [1.85, 50.07], [2.10, 49.97], [2.35, 49.91], [2.62, 49.90], [2.95, 49.93], [2.96, 49.89], [2.62, 49.86], [2.35, 49.87], [2.08, 49.93], [1.83, 50.03], [1.60, 50.10]],
+      "max_height_m": 45,
+      "source": "Wikipédia (fr), « Somme (fleuve) » (vallée tourbeuse)"
+    },
+    {
+      "id": "audomarois",
+      "name": "Marais audomarois",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [2.28, 50.77], "radii_km": [6, 5], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Marais audomarois »"
+    },
+    {
+      "id": "moeres",
+      "name": "Moëres",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [2.55, 51.04], "radii_km": [6, 4], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Moëres » (lacs asséchés au XVIIe siècle seulement)"
+    },
+    {
+      "id": "polders_flandre",
+      "name": "Polders de la plaine maritime flamande et du Zwin",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [3.05, 51.18], "radii_km": [38, 8], "angle_deg": 30 },
+      "max_height_m": 6,
+      "source": "Wikipédia (fr), « Plaine maritime flamande », « Zwin »"
+    },
+    {
+      "id": "zeelande",
+      "name": "Schorres et polders de Zélande",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [3.85, 51.55], "radii_km": [30, 18], "angle_deg": 30 },
+      "max_height_m": 4,
+      "source": "Wikipédia (fr), « Zélande » ; inondation de la Sainte-Élisabeth (1404) postérieure"
+    },
+    {
+      "id": "hollande_veen",
+      "name": "Tourbières de Hollande",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [4.60, 52.10], "radii_km": [32, 20], "angle_deg": 60 },
+      "max_height_m": 3,
+      "source": "Wikipédia (fr), « Hollande » ; défrichement des tourbières (ontginning) Xe-XIIIe siècles"
+    },
+    {
+      "id": "bourtange",
+      "name": "Tourbière de Bourtange",
+      "kind": "wet_meadow",
+      "density": 0.65,
+      "ellipse": { "center": [7.10, 52.85], "radii_km": [25, 15], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Bourtange »"
+    },
+    {
+      "id": "saint_gond",
+      "name": "Marais de Saint-Gond",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [3.85, 48.83], "radii_km": [9, 3], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Marais de Saint-Gond »"
+    },
+    {
+      "id": "marais_vernier",
+      "name": "Marais Vernier",
+      "kind": "marsh",
+      "density": 0.9,
+      "ellipse": { "center": [0.45, 49.42], "radii_km": [5, 3], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Marais Vernier »"
+    },
+    {
+      "id": "cotentin",
+      "name": "Marais du Cotentin et du Bessin",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [-1.25, 49.28], "radii_km": [15, 8], "angle_deg": 10 },
+      "max_height_m": 10,
+      "source": "Wikipédia (fr), « Marais du Cotentin et du Bessin »"
+    },
+    {
+      "id": "dol",
+      "name": "Marais de Dol",
+      "kind": "wet_meadow",
+      "density": 0.7,
+      "ellipse": { "center": [-1.72, 48.57], "radii_km": [11, 5], "angle_deg": 0 },
+      "max_height_m": 8,
+      "source": "Wikipédia (fr), « Marais de Dol »"
+    },
+    {
+      "id": "dives",
+      "name": "Marais de la Dives",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [-0.05, 49.18], "radii_km": [12, 3], "angle_deg": 80 },
+      "max_height_m": 12,
+      "source": "Wikipédia (fr), « Marais de la Dives »"
+    },
+    {
+      "id": "delta_ebre",
+      "name": "Delta de l'Èbre",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [0.75, 40.70], "radii_km": [12, 9], "angle_deg": 0 },
+      "max_height_m": 5,
+      "source": "Wikipédia (fr), « Delta de l'Èbre »"
+    },
+    {
+      "id": "delta_po",
+      "name": "Valli et lagunes du delta du Pô",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [11.95, 44.85], "radii_km": [20, 16], "angle_deg": 0 },
+      "max_height_m": 5,
+      "source": "Wikipédia (fr), « Delta du Pô »"
+    }
+  ]
+}

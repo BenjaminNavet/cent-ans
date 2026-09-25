@@ -50,6 +50,7 @@ var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
 var resolved: bool = false
+var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var siege_demo: bool = false
@@ -117,6 +118,7 @@ func _ready() -> void:
 	hud.command_pressed.connect(_on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -231,6 +233,7 @@ func begin() -> bool:
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
+	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -606,22 +609,44 @@ func _show_end() -> void:
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	# UB1 : le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
+	# expérience) sur l'écran de fin ; « Retour à la campagne » ne fait plus que rendre la main.
+	var side_setup: Dictionary = setup[player_side]
+	var general: Variant = side_setup.get("general", null)
+	var general_id := str(general.get("character", "")) if general is Dictionary else ""
+	var before := BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id)
+	_resolve_now()
+	var aftermath := {}
+	if bool(_resolution.get("ok", false)):
+		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
-	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
 
 
-## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
-func _on_return() -> void:
+var _resolution: Dictionary = {}
+
+
+## Applique le résultat (`resolve_battle`) une seule fois.
+func _resolve_now() -> void:
 	if resolved:
 		return
 	resolved = true
-	var result := {"ok": false, "error": "bataille non terminée", "events": []}
+	_resolution = {"ok": false, "error": "bataille non terminée", "events": []}
 	if battle != null and battle.call("is_finished") and campaign_sim != null and not padded:
-		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
-		if not result.get("ok", false):
-			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+		_resolution = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
+		if not _resolution.get("ok", false):
+			push_error("BattleScene: resolve_battle refused: %s" % _resolution.get("error", "?"))
+
+
+## « Retour à la campagne » : applique le résultat s'il ne l'est pas encore, puis rend la main.
+func _on_return() -> void:
+	if _returned:
+		return
+	_returned = true
+	_resolve_now()
+	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
 	returned.emit(result)
@@ -800,6 +825,7 @@ func _finish_right(position: Vector2) -> void:
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
+	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
@@ -810,6 +836,17 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## UB1 : clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
+func _on_leader_clicked(double: bool) -> void:
+	var id := hud.leader_unit_id()
+	if id < 0:
+		return
+	if double:
+		_on_card_double_clicked(id)
+	else:
+		_on_card_clicked(id, false)
 
 
 ## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
