@@ -190,7 +190,13 @@ pub fn resolve_trespass(state: &mut CampaignState, data: &GameData, events: &mut
             f.modifiers
                 .retain(|m| !(m.with == intruder && m.reason_fr == TRESPASS_REASON));
         }
-        state.add_modifier(&victim, &intruder, -malus, TRESPASS_REASON, rules.memory_turns);
+        state.add_modifier(
+            &victim,
+            &intruder,
+            -malus,
+            TRESPASS_REASON,
+            rules.memory_turns,
+        );
         let grievance = counted >= rules.casus_belli_seasons;
         if grievance {
             if let Some(t) = state
@@ -298,11 +304,10 @@ pub fn ai_may_trespass(
     if !rules.enabled {
         return true;
     }
-    let at_war = state.factions.get(faction).is_some_and(|f| {
-        f.at_war_with
-            .iter()
-            .any(|e| e.as_str() != REBELS_FACTION)
-    });
+    let at_war = state
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.at_war_with.iter().any(|e| e.as_str() != REBELS_FACTION));
     if !at_war {
         return false;
     }
