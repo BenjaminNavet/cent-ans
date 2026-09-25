@@ -600,10 +600,13 @@ func _fit_minimap() -> void:
 	if holder == null or view == null or _minimap.crop.size.x <= 0.0:
 		return
 	var aspect := _minimap.crop.size.y / _minimap.crop.size.x
-	var width := maxf(holder.size.x - 16.0, 200.0)
+	# Habillage réel de la minicarte (cadre, boutons) autour de la vue, plus un jeu de 4 px :
+	# une marge fixe plus petite que le cadre ferait grandir le conteneur à chaque `resized`.
+	var chrome := _minimap.get_combined_minimum_size() - view.get_combined_minimum_size() + Vector2(4.0, 4.0)
+	var width := maxf(holder.size.x - chrome.x, 200.0)
 	var height := width * aspect
-	if height > holder.size.y - 16.0:
-		height = maxf(holder.size.y - 16.0, 150.0)
+	if height > holder.size.y - chrome.y:
+		height = maxf(holder.size.y - chrome.y, 150.0)
 		width = height / aspect
 	view.custom_minimum_size = Vector2(width, height).floor()
 	_minimap.tooltip_text = ""
