@@ -387,16 +387,17 @@ void fragment() {
 		bool torso = abs(v_rest_n.z) > 0.35 && v_rest.z > chest_depth.x && v_rest.z < chest_depth.y
 			&& cq.x > 0.0 && cq.x < 1.0 && cq.y > 0.0 && cq.y < 1.0 && dist < 60.0;
 		if (torso && chest_arms && wears) {
-			// Vu de dos, l'écu se lit dans le même sens que de face (dextre à gauche du spectateur).
-			vec2 uv = vec2(v_rest_n.z < 0.0 ? 1.0 - cq.x : cq.x, cq.y);
+			// Le buste regarde -Z en pose de repos (le squelette cuit le demi-tour) : vu de face
+			// ou de dos, l'écu se lit dans le même sens (dextre à gauche du spectateur).
+			vec2 uv = vec2(v_rest_n.z > 0.0 ? 1.0 - cq.x : cq.x, cq.y);
 			vec4 arms = arms_sample(mix(vec2(0.1, 0.06), vec2(0.9, 0.94), uv));
 			albedo = mix(albedo, arms.rgb * mix(0.86, 0.98, v_var.y) * v_color, arms.a);
 		} else if (torso && badge_cross.a > 0.5) {
-			vec2 d = abs(cq - vec2(0.5, 0.42));
-			if (badge_patch.a > 0.5 && d.x < 0.3 && d.y < 0.3) {
+			vec2 d = abs(cq - vec2(0.5, 0.56));
+			if (badge_patch.a > 0.5 && d.x < 0.3 && d.y < 0.28) {
 				albedo = badge_patch.rgb * mix(0.8, 0.95, v_var.y) * v_color;
 			}
-			if ((d.x < 0.07 && d.y < 0.3) || (abs(cq.y - 0.38) < 0.06 && d.x < 0.3)) {
+			if ((d.x < 0.07 && d.y < 0.26) || (abs(cq.y - 0.5) < 0.06 && d.x < 0.26)) {
 				albedo = badge_cross.rgb * mix(0.8, 0.95, v_var.y) * v_color;
 			}
 		}
