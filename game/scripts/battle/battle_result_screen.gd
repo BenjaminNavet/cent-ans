@@ -122,7 +122,7 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	_banner_color = {"victory": Color(0.98, 0.86, 0.45), "pyrrhic": Color(0.95, 0.78, 0.55), "defeat": Color(0.95, 0.55, 0.45)}[banner_key]
 	panel = PanelContainer.new()
 	panel.name = "Scroll"
-	panel.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(0))
+	panel.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(34))
 	add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
