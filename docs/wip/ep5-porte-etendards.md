@@ -6,30 +6,32 @@ Plan d'ensemble : `docs/wip/epic.md`.
 ## État
 | Partie | État |
 |---|---|
-| 0. Squelette, contrat | en cours |
-| 1. Figurines Blender (porte-étendard à pied / à cheval, tambour, busine) + clips | à faire (sous-agent) |
-| 2. Données (`data/rules/battle_standards.json`, `data/fx/battle_standards.json`) + schémas | à faire |
-| 3. Règles cœur (chute, relève, prise, trophées) + tests | à faire |
-| 4. Rendu Godot (figurines dédiées, drapeaux instanciés jusqu'à 600 m, tombé/pris) | à faire |
-| 5. Musiciens (sons) | à faire |
-| 6. Écran de fin + chronique | à faire |
-| 7. Captures `docs/img/ep5/`, ADR | à faire |
+| 0. Squelette, contrat | fait |
+| 1. Figurines Blender (porte-étendard à pied / à cheval, tambour, busine) + clips | fait (sous-agent, commits 64bccfdd, 81b87442) |
+| 2. Données (`data/rules/battle_standards.json`, `data/fx/battle_standards.json`) + schémas + pytest | fait |
+| 3. Règles cœur (chute, relève, prise, trophées) + tests `sim-battle/tests/ep5_standards.rs` | fait |
+| 4. Rendu Godot (`battle_standards.gd` réécrit, `battle_standard_flag.gdshader`) | écrit, à vérifier en jeu |
+| 5. Musiciens (sons via `BattleAudio.play_at`, API existante : « drum », « horn ») | écrit |
+| 6. Écran de fin (mentions + butin) + chronique (`GameEvent` Battle) | écrit, test campagne `ep5_trophies.rs` |
+| 7. Captures `docs/img/ep5/`, ADR 0034 | à faire |
 
 ## Contrat figurines (Blender → Godot)
 Figurines du manifeste `game/assets/models/battle_skinned/manifest.json` (nom `kind_variant`) :
-- `standard_0` : porte-étendard à pied (rig `human`), `style` = `standard`.
-- `standard_1` : porte-étendard à cheval (rig `cavalry`), `style` = `standard_mounted`.
-- `musician_0` : tambourin (rig `human`), `style` = `drum`.
-- `musician_1` : busine / trompette (rig `human`), `style` = `horn`.
-Pas d'arme ni d'écu ; tabard de livrée (code livrée + armoiries), hampe de 3,8 m tenue des deux
-mains et portée par l'os virtuel `Prop` (pour les porte-étendards).
-Entrée de manifeste en plus pour `standard_*` : `pole_top` = [x, y, z] (pointe de la hampe en
-espace de repos Godot) et `pole_axis` = [x, y, z] (vecteur unitaire le long de la hampe, vers le
-haut, en repos). Godot place l'étoffe au sommet par la matrice de `Prop` lue dans la texture d'os.
-Clips `human` : `std_idle`, `std_walk`, `std_run`, `std_wave` (mêlée : brandir), `std_death`
-(chute avec la hampe), `drum_idle`, `drum_march`, `drum_beat`, `horn_idle`, `horn_walk`,
-`horn_blow`. Clips `cavalry` : `c_std_idle`, `c_std_walk`, `c_std_gallop`, `c_std_wave`,
-`c_std_death`.
+`standard_0` (à pied, rig human), `standard_1` (à cheval, rig cavalry), `musician_0` (tambour),
+`musician_1` (busine). `pole_top` / `pole_axis` (espace de repos ; la hampe est horizontale au
+repos, toujours appliquer la matrice de `Prop` / `R:Prop`). Clips `std_*`, `drum_*`, `horn_*`,
+`c_std_*`.
+
+## Choix
+- Règles : flux aléatoire propre (`BattleRng::derive`), les autres tirages des batailles ne
+  bougent pas. Chute : sous 60 % de l'effectif, 3 % par point d'effectif perdu dans le pas ;
+  débandade au contact : 35 %. Tombé : −6 moral d'un coup, −0,5/s, coups ×0,85 ; ennemis à
+  60 m +4. Relevé après 5 s si le régiment tient, pris si un ennemi apte est à 15 m. Pris :
+  −10 moral au régiment, −5 aux voisins, plafond −10 ; preneur +8. Général ×2.
+- Deux porte-étendards à partir de 120 soldats (le second porte un pennon).
+- Rendu : aucun nœud par drapeau ; MultiMesh par (camp, rôle, LOD), étoffes en Texture2DArray,
+  drapeau lu sur l'os `Prop` de la texture d'os ; agrandi ×2,2 entre 140 et 600 m.
 
 ## Prochaine étape
-Squelette commité ; lancer le sous-agent Blender ; règles cœur.
+cargo test complet ; build.sh ; import Godot (nouvelles étoffes `*_standard.png`) ; essai en
+bataille (`--shot-at`), captures, smoke, ADR.
