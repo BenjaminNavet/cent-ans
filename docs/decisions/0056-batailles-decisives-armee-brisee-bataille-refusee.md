@@ -113,3 +113,44 @@ IA-IA 107 à 669 s selon les paliers ; seules des graines avec rivière dépasse
 - Écarts connus : à l'échelle rangée, l'attaquant IA perd souvent contre un défenseur immobile
   (archers tirant à volonté) ; au passage d'une rivière profonde, l'attaquant IA se noie et se brise
   souvent. Ce sont des limites de l'IA d'attaque (R4, EP3), pas de la fin de bataille.
+
+## EP9b (2026-09-26) : duel de l'attaquant gagné, milice en second échelon
+
+Constat (SG4, ADR 0046 § Suite SG4) : sur un terrain plat sans pieux, 60 régiments × 120 hommes par
+camp, armées miroir, IA des deux côtés, le défenseur gagnait 10 batailles sur 10. À 180 s,
+`ATTACKER_DUEL_LIMIT` envoyait la ligne attaquante en avant, milice (moral 40) en tête avec les
+hommes d'armes ; elle traversait 180 m de flèches, se débandait, et la déroute des voisins (contagion)
+faisait passer l'armée sous le seuil de 40 % : armée brisée vers 340 s.
+
+Ce que disent les sources : on n'envoie pas les milices communales en tête d'un assaut. À Crécy
+comme à Poitiers, les « batailles » françaises attaquent avec les hommes d'armes (à cheval puis à
+pied) devant ; les piétons des communes suivent ou restent en arrière (Sumption, t. I-II ;
+Contamine, *Guerre, État et société à la fin du Moyen Âge*, 1972). Et un camp dont les archers
+gagnent l'échange n'a aucune raison de le rompre : à Morlaix (1342) comme à Auray (1364), c'est
+celui qui perd l'échange de traits qui se résout à charger.
+
+Décision (`data/rules/battle_duel.json`, schéma `battle_duel_rules.schema.json`, `sim-battle/src/duel.rs`,
+`DuelRules` gardées dans `BattleSim`, remplaçables par `set_duel_rules`) :
+
+1. **Duel gagné, duel prolongé.** L'horloge d'engagement relève à chaque période d'IA la part de
+   l'effectif de chaque camp abattue par les traits (`recent_missile_losses`, fenêtre glissante
+   `window_seconds` 60 s). L'attaquant gagne le duel quand l'ennemi a perdu sur la fenêtre au moins
+   `winning_min_share` (0,5 %) de son effectif et au moins `winning_ratio` (1,5) fois ce qu'il a
+   perdu lui-même. Tant qu'il le gagne, il tient la ligne jusqu'à `winning_duel_max_seconds`
+   (420 s) ; sinon (il perd ou fait jeu égal) il marche à l'ennemi après `duel_limit_seconds`
+   (180 s, l'ancienne constante `ATTACKER_DUEL_LIMIT`, désormais en données). Seules les pertes par
+   les traits comptent : une escarmouche de cavalerie ne décide pas du duel.
+2. **Pas de bataille refusée par un duel gagné.** Un duel gagné coûte au défenseur au moins 0,5 % de
+   son effectif par minute : l'horloge d'engagement (`engagement_loss_share` 1 %) repart au moins
+   toutes les deux minutes, la règle des 300 s sans engagement ne peut pas jouer pendant ce duel —
+   c'est la borne de 420 s (et les munitions : le duel cesse quand les tireurs sont à court) qui y
+   met fin, pas la bataille refusée. Le test pytest vérifie `duel_limit ≤ winning_duel_max ≤
+   duel_limit + refusal_seconds`.
+3. **Milice en second échelon.** Quand la ligne marche à l'ennemi après le duel (ennemi entre
+   `DUEL_RANGE` 320 m et `second_echelon_closes_m` 120 m), les régiments de ligne au moral de base
+   (`morale_cap`) inférieur à `second_echelon_morale` (50 : milices) avancent
+   `second_echelon_depth_m` (35 m) derrière les troupes solides ; la ligne est mesurée sur son
+   premier échelon. À 120 m, le second échelon serre sur la première ligne et suit l'assaut dans
+   la mêlée. Une ligne en défense, ou qui tient pendant le duel, reste sur un seul rang.
+
+Mesures : voir le tableau ci-dessous (à compléter).
