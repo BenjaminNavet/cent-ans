@@ -713,6 +713,10 @@ pub struct CampaignState {
     /// change of [`STATE_VERSION`]).
     #[serde(default)]
     pub agents: crate::agents::AgentsState,
+    /// Lot NV1: warship pools, sea control, intercepted crossings (absent
+    /// from older saves; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub naval: crate::naval::NavalState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -753,6 +757,7 @@ impl CampaignState {
             outcome: None,
             victory_streak: 0,
             agents: crate::agents::AgentsState::default(),
+            naval: crate::naval::NavalState::default(),
             ai_turn: None,
         }
     }

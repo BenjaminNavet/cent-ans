@@ -226,7 +226,7 @@ fn battle_season(season: Season) -> BattleSeason {
     }
 }
 
-fn fallback_stats() -> UnitStats {
+pub(crate) fn fallback_stats() -> UnitStats {
     UnitStats {
         melee: 30,
         ranged: 0,
@@ -240,7 +240,12 @@ fn fallback_stats() -> UnitStats {
     }
 }
 
-fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) -> SideSetup {
+pub(crate) fn side_setup(
+    state: &CampaignState,
+    data: &GameData,
+    id: &ArmyId,
+    army: &Army,
+) -> SideSetup {
     let units: Vec<UnitSetup> = army
         .units
         .iter()

@@ -50,6 +50,7 @@ pub mod frontier;
 pub mod march;
 pub mod medicine;
 pub mod movement;
+pub mod naval;
 pub mod navigation;
 pub mod orders;
 pub mod path_plan;
