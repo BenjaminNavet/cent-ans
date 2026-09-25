@@ -562,6 +562,10 @@ def assets_heraldry() -> None:
 
     paths = heraldry.build()
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
+    houses = heraldry.build_houses()
+    console.print(
+        f"[green]OK[/green] : {len(houses)} écus de maison dans {heraldry.HOUSES_DIR}"
+    )
 
 
 @assets_app.command("banners")
