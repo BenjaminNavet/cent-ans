@@ -263,7 +263,7 @@ static func rigid_variant(kind: String, variant: int) -> int:
 			return 0
 		"crossbow":
 			return 1
-		"horse_bow":
+		"horse_bow", "horse_javelin":
 			return 2
 		"lance":
 			return 0 if is_noble(kind, variant) else 1
@@ -412,6 +412,16 @@ const STYLES := {
 		"charging": {"set": ["c_gallop"]},
 		"shooting": {"set": ["c_bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["c_thrust", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"routing": {"set": ["c_gallop"]},
+	},
+	## UR2 : jinetes (javelot au lieu de l'arc, cavalerie légère skirmish).
+	"horse_javelin": {
+		"idle": {"set": ["c_javelin_idle"]},
+		"marching": {"set": ["c_javelin_walk"]},
+		"running": {"set": ["c_gallop"]},
+		"charging": {"set": ["c_gallop"]},
+		"shooting": {"set": ["c_javelin_throw"], "mode": M_VOLLEY, "release": 0.69},
+		"melee": {"set": ["c_thrust", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"routing": {"set": ["c_gallop"]},
 	},
 }

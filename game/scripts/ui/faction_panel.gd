@@ -34,6 +34,9 @@ const CATEGORY_LABELS := {
 var faction_id: String = ""
 ## H9 : ligne « Table » (régimes des provinces) ajoutée en code après l'entretien des bâtiments.
 var table_upkeep_value: Label
+## C5 : revenu des routes commerciales (n'entre pas dans `income`/`projected_income`, réglé
+## après l'impôt) ajoutée en code après la Table.
+var trade_income_value: Label
 ## H11 : postes de la monnaie (budget), sections Monnaie et Ordre de chevalerie, fenêtre des rançons.
 var seigniorage_value: Label
 var recoinage_value: Label
@@ -59,6 +62,7 @@ func _ready() -> void:
 		hide()
 		closed.emit())
 	_add_table_row()
+	_add_trade_row()
 	_add_h11_sections()
 	_arrange_budget()
 	_build_budget_view()
@@ -90,6 +94,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		building_upkeep_value.text = "—"
 		administration_value.text = "—"
 		table_upkeep_value.text = "—"
+		trade_income_value.text = "—"
 		seigniorage_value.text = "—"
 		recoinage_value.text = "—"
 		budget_table.show_budget({})
@@ -116,6 +121,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	net_value.text = _signed(net)
 	net_value.add_theme_color_override("font_color", Money.color_of(net))
 	_show_table_upkeep(economy)
+	_show_trade_income(economy)
 	_show_h11(economy)
 	_set_tax_buttons_disabled(false)
 	var rate: String = str(economy.get("tax_rate", "normal"))
@@ -142,6 +148,36 @@ func _add_table_row() -> void:
 	key.add_sibling(table_upkeep_value)
 
 
+func _add_trade_row() -> void:
+	var key := Label.new()
+	key.text = "Commerce"
+	trade_income_value = RichLabel.new()
+	trade_income_value.text = "—"
+	trade_income_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	table_upkeep_value.add_sibling(key)
+	key.add_sibling(trade_income_value)
+
+
+## Revenu des routes commerciales (projection courante) ; détail des routes en infobulle.
+func _show_trade_income(economy: Dictionary) -> void:
+	trade_income_value.text = "%s ℔" % _thousands(int(economy.get("trade_income", 0)))
+	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt (lot C5).",
+		"Saison passée : %s ℔" % _thousands(int(economy.get("trade_income_last_turn", 0)))])
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null and sim.has_method("get_trade_routes"):
+		var routes: Array = sim.call("get_trade_routes")
+		for route_variant in routes:
+			var route: Dictionary = route_variant
+			if str(route.get("from_faction", "")) != faction_id and str(route.get("to_faction", "")) != faction_id:
+				continue
+			if bool(route.get("cut", false)):
+				lines.append("• %s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
+			else:
+				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], _thousands(int(route["total_value"]))])
+	trade_income_value.tooltip_text = "\n".join(lines)
+
+
 ## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
 func _show_table_upkeep(economy: Dictionary) -> void:
 	table_upkeep_value.text = _charge(int(economy.get("table_upkeep", 0)))
@@ -163,7 +199,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 ## H11 : lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
 ## sous les biens. Tout est construit en code (la scène n'est pas modifiée).
 func _add_h11_sections() -> void:
-	var anchor: Control = table_upkeep_value
+	var anchor: Control = trade_income_value
 	for pair in [["Seigneuriage (revenu)", "seigniorage_value"], ["Refonte (administration)", "recoinage_value"]]:
 		var key := Label.new()
 		key.text = pair[0]

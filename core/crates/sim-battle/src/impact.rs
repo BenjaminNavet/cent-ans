@@ -67,6 +67,10 @@ pub enum LossCause {
     Ball,
     /// Trebuchet or mangonel stone.
     Stone,
+    /// Handheld firearm bullet (couleuvriniers, lot UR2).
+    Bullet,
+    /// Thrown javelin (jinetes, lot UR2).
+    Javelin,
     Melee,
     /// Melee while the attacker's charge impact lasts.
     Charge,
@@ -83,6 +87,8 @@ impl LossCause {
             LossCause::Bolt => "bolt",
             LossCause::Ball => "ball",
             LossCause::Stone => "stone",
+            LossCause::Bullet => "bullet",
+            LossCause::Javelin => "javelin",
             LossCause::Melee => "melee",
             LossCause::Charge => "charge",
             LossCause::Stakes => "stakes",

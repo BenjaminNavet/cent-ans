@@ -149,6 +149,7 @@ fn ram_setup() -> UnitSetup {
             siege_attack: None,
         },
         abilities: Vec::new(),
+        missile: None,
     }
 }
 
@@ -732,7 +733,20 @@ impl BattleSim {
     }
 
     /// Missile kind of a shooting regiment (engines: bombard ball or stone).
+    ///
+    /// UR2: reads `unit_types/*.missile` (data-driven) when the type sets
+    /// it; otherwise falls back to the old id/ability heuristic so units
+    /// without the field (older fixtures, `ram_setup`) keep working.
     pub fn missile_kind(unit: &Unit) -> MissileKind {
+        if let Some(missile) = unit.missile {
+            return match missile {
+                data_model::Missile::Arrow => MissileKind::Arrow,
+                data_model::Missile::Bolt => MissileKind::Bolt,
+                data_model::Missile::Bullet => MissileKind::Bullet,
+                data_model::Missile::Javelin => MissileKind::Javelin,
+                data_model::Missile::Stone => MissileKind::Stone,
+            };
+        }
         if unit.category == UnitCategory::Siege {
             if unit.unit_type == "unit_bombard" {
                 MissileKind::Ball
@@ -768,18 +782,17 @@ impl BattleSim {
         self.impacts.push_back(event);
     }
 
-    /// Cause of the casualties a volley of `unit` inflicts (BV2).
+    /// Cause of the casualties a volley of `unit` inflicts (BV2). Mirrors
+    /// [`Self::missile_kind`] (same data field, same fallback) so a bullet or
+    /// a javelin kill draws the matching corpse decoration.
     fn missile_cause(unit: &Unit) -> LossCause {
-        if unit.category == UnitCategory::Siege {
-            if unit.unit_type == "unit_bombard" {
-                LossCause::Ball
-            } else {
-                LossCause::Stone
-            }
-        } else if unit.unit_type.contains("crossbow") || unit.has(Ability::Pavise) {
-            LossCause::Bolt
-        } else {
-            LossCause::Arrow
+        match Self::missile_kind(unit) {
+            MissileKind::Arrow => LossCause::Arrow,
+            MissileKind::Bolt => LossCause::Bolt,
+            MissileKind::Ball => LossCause::Ball,
+            MissileKind::Stone => LossCause::Stone,
+            MissileKind::Bullet => LossCause::Bullet,
+            MissileKind::Javelin => LossCause::Javelin,
         }
     }
 
