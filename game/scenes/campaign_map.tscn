@@ -225,7 +225,7 @@ text = "Technologies"
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
-tooltip_text = "Routes commerciales (R)"
+tooltip_text = "Routes commerciales (X)"
 theme_override_font_sizes/font_size = 15
 text = "Commerce"
 
