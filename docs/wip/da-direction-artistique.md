@@ -4,7 +4,7 @@ Demande du joueur (25/09 soir) : « tu es le directeur artistique, que manque-t-
 comparé à Total War et Crusader Kings ? » puis « ok pour la recommandation ».
 Bible : `docs/design/2026-09-25-bible-da.md` (à lire avant tout lot DA).
 Branche d'orchestration : `feat/da-direction-artistique` (worktree `../gp-da`).
-Budget propre : **15 $** (section « Direction artistique » de `docs/budget.md`).
+Budget propre : **50 $** sur la clé OpenRouter personnelle du joueur (relevé de 15 $ le 25/09 ~23 h) (section « Direction artistique » de `docs/budget.md`).
 
 ## Lots
 
@@ -48,3 +48,5 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
     `data/portraits/archetypes.json` + schéma (122 archétypes + 25 variantes âgées), générateur
     `portrait_archetypes.py` (`--dry-run` : 147 images ≈ 6,69 $), captures avant `docs/img/da2/`.
     Reste : pytest, sonde 3 images, génération, tout le GDScript, captures après, ADR.
+- 25/09 ~23 h 15 : reprise dans un nouveau terminal (clé OpenRouter personnelle du joueur, 50 $).
+  Le joueur veut valider la direction artistique **avant** de relancer DA1/DA2.
