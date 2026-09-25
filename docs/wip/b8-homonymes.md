@@ -14,7 +14,7 @@ Branche : `feat/b8-homonymes` (worktree agent). Contexte : `docs/wip/bulles-part
   (et signale `[[!]]` vide).
 - [x] Audit `tools/cent_ans_tools/codex_homonyms.py` + `tools/tests/test_codex_homonyms.py`.
 - [x] Corrections (ci-dessous).
-- [ ] Smoke `codex_bubbles` : cas B8.
+- [x] Smoke `codex_bubbles` : cas B8 (`_check_codex_homonyms_b8`), vert.
 
 ## Audit
 Lancer : `uv run --project tools python -m cent_ans_tools.codex_homonyms`.
@@ -67,4 +67,4 @@ Paris », « clos des Galées de Rouen »), « Olivier V de Clisson » (c'est bi
   connu n'est pas signalé.
 
 ## Prochaine étape
-Smoke `codex_bubbles` (cas B8), puis validateur, pytest complet, rapport.
+Terminé : validateur Codex vert, pytest 437 verts, smoke `CENT_ANS_SMOKE_ONLY=codex_bubbles` vert. Reste : fusion dans main (orchestrateur).

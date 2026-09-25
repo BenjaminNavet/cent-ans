@@ -1801,9 +1801,37 @@ func _run_codex_bubbles_b1() -> void:
 	_check(tip_footer != null and tip_footer.text.begins_with("T : maintenir ouverte"), "B1: rich tooltip footer expected")
 	panel.free()
 	_check(RichTooltip.title_entry(RichTooltip.resource("res_nothing_here")) == "", "B1: unlinked titles stay plain")
+	_check_codex_homonyms_b8()
 	store.call("reset_discoveries")
 	if _failures == failures_before:
 		print("smoke OK: B1 bubbles, T pins bubble / plain tooltip, 3-level pinned chain, gameplay, linked titles")
+
+
+## B8 : auto-lien sans homonymes (exclusions, alias le plus long, tiret, échappement `[[!…]]`).
+func _check_codex_homonyms_b8() -> void:
+	var failures_before := _failures
+	var poitiers_link := "[url=cdx:cdx_poitiers]"
+	var excluded := CodexText.format("Louis de Poitiers, comte de Valentinois, est tué.", true)
+	_check(not excluded.contains(poitiers_link), "B8: « Louis de Poitiers » must not link the battle: %s" % excluded)
+	var place := CodexText.format("Le roi est pris à Poitiers.", true)
+	_check(place.contains(poitiers_link + "[color="), "B8: « à Poitiers » should link the battle: %s" % place)
+	var both := CodexText.format("Louis de Poitiers meurt ; dix ans plus tard, à Poitiers.", true)
+	_check(both.count("url=cdx:cdx_poitiers") == 1 and both.find(poitiers_link) > both.find("à "), "B8: only the later « à Poitiers » is linked: %s" % both)
+	var longest := CodexText.format("Le duc Louis d'Orléans est assassiné.", true)
+	_check(longest.contains("[url=cdx:cdx_louis_d_orleans]") and not longest.contains("[url=cdx:cdx_orleans]"), "B8: the longest alias should win: %s" % longest)
+	var hyphen := CodexText.format("Les foires de Poitiers-la-Neuve.", true)
+	_check(not hyphen.contains(poitiers_link), "B8: an alias glued by a hyphen is not linked: %s" % hyphen)
+	var escaped := CodexText.format("[[!Poitiers]] reste une ville ; rien à lier ici.", true)
+	var rich := RichTextLabel.new()
+	rich.bbcode_enabled = true
+	rich.text = escaped
+	_check(not escaped.contains("url=") and not escaped.contains("!") and rich.get_parsed_text() == "Poitiers reste une ville ; rien à lier ici.", "B8: [[!…]] should render as plain text: %s" % escaped)
+	var twice := CodexText.format(escaped, true)
+	_check(not twice.contains(poitiers_link), "B8: an escape survives a second format: %s" % twice)
+	rich.free()
+	_check(CodexText.plain("[[!Louis de Poitiers]], [[cdx_crecy|Crécy]]") == "Louis de Poitiers, Crécy", "B8: plain() should strip escapes")
+	if _failures == failures_before:
+		print("smoke OK: B8 homonyms (exclude_contexts, longest alias, hyphen, [[!…]] escape)")
 
 
 ## Survole le premier lien du Codex de `bubble` et attend la bulle fille (null si aucun lien).
