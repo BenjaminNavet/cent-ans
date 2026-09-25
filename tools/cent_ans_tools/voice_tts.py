@@ -243,7 +243,9 @@ def synthesise(job: Job, api_key: str) -> Path:
         timeout=120.0,
     )
     if response.status_code != 200:
-        raise RuntimeError(f"{job.path}: HTTP {response.status_code} {response.text[:300]}")
+        raise RuntimeError(
+            f"{job.path}: HTTP {response.status_code} {response.text[:300]}"
+        )
     tmp = raw.with_suffix(".part")
     tmp.write_bytes(response.content)
     tmp.replace(raw)
@@ -251,7 +253,7 @@ def synthesise(job: Job, api_key: str) -> Path:
 
 
 def filter_chain(reverb: bool) -> str:
-    """ffmpeg audio filters: trim silences, optional room reverb, loudness."""
+    """Ffmpeg audio filters: trim silences, optional room reverb, loudness."""
     trim = "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05"
     filters = [trim, "areverse", trim, "areverse"]
     if reverb:
@@ -318,7 +320,9 @@ def summarise(jobs: list[Job]) -> Decimal:
         cost = sum((job.estimated_cost() for job in selected), Decimal(0))
         seconds = sum(job.estimated_seconds() for job in selected)
         total += cost
-        print(f"{kind:8} {len(selected):4} clips  ~{seconds / 60:5.1f} min  ~{cost:.3f} $")
+        print(
+            f"{kind:8} {len(selected):4} clips  ~{seconds / 60:5.1f} min  ~{cost:.3f} $"
+        )
     print(f"total    {len(jobs):4} clips  ~{total:.3f} $")
     return total
 
@@ -326,10 +330,16 @@ def summarise(jobs: list[Job]) -> Decimal:
 def main(argv: list[str] | None = None) -> int:
     """Entry point."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--dry-run", action="store_true", help="estimate only, no API call")
-    parser.add_argument("--only", choices=["barks", "advisor", "speech"], action="append")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="estimate only, no API call"
+    )
+    parser.add_argument(
+        "--only", choices=["barks", "advisor", "speech"], action="append"
+    )
     parser.add_argument("--limit", type=int, default=0, help="at most N clips")
-    parser.add_argument("--cap", type=Decimal, default=DEFAULT_CAP, help="cost ceiling ($)")
+    parser.add_argument(
+        "--cap", type=Decimal, default=DEFAULT_CAP, help="cost ceiling ($)"
+    )
     args = parser.parse_args(argv)
 
     jobs = pending(all_jobs())
@@ -338,7 +348,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.limit:
         jobs = jobs[: args.limit]
     manifest = load_manifest()
-    spent = sum((Decimal(str(e.get("cost_usd", 0))) for e in manifest.values()), Decimal(0))
+    spent = sum(
+        (Decimal(str(e.get("cost_usd", 0))) for e in manifest.values()), Decimal(0)
+    )
     print(f"already generated: {len(manifest)} clips, {spent:.3f} $ (measured)")
     estimate = summarise(jobs)
     if args.dry_run or not jobs:
@@ -348,14 +360,21 @@ def main(argv: list[str] | None = None) -> int:
         print("OPENAI_API_KEY missing", file=sys.stderr)
         return 2
     if spent + estimate > args.cap:
-        print(f"refused: {spent:.3f} + {estimate:.3f} $ would exceed the cap of {args.cap} $")
+        print(
+            f"refused: {spent:.3f} + {estimate:.3f} $ would exceed the cap of {args.cap} $"
+        )
         return 3
     run_cost = Decimal(0)
     for index, job in enumerate(jobs, 1):
         if spent + run_cost + job.estimated_cost() > args.cap:
             print(f"stopped before the cap ({args.cap} $)")
             break
-        raw = synthesise(job, api_key)
+        try:
+            raw = synthesise(job, api_key)
+        except RuntimeError as error:  # refused key, quota, invalid voice...
+            print(f"API error, stopping: {error}", file=sys.stderr)
+            print(f"this run: {run_cost:.3f} $ before the error")
+            return 4
         seconds = encode(raw, job)
         # Billed audio is the raw answer, silences included.
         cost = cost_for(duration(raw), job.text, job.instructions)

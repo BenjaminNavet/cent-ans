@@ -33,7 +33,7 @@ Plafond de dépense du lot : **3 $** (estimation avant tout appel, consignée da
 - [x] Réglages (onglet Son) : « Conseiller » (`voice/advisor`), « Répliques des unités »
       (`voice/barks`) ; le curseur « Voix » existait (AU1).
 - [x] Crédits (`CREDITS.md`), budget (ligne VO1, 0,00 $ réel).
-- [ ] Test headless `game/tests/vo1_voice_test.gd`, smoke, merge main.
+- [x] Test headless `game/tests/vo1_voice_test.gd` OK ; smoke 24 « smoke OK », au1/ub1/bv3 OK, capture du discours fenêtrée OK, pytest 382 OK.
 
 ## Prochaine étape
 Faire passer `vo1_voice_test.gd` et le smoke. Quand une clé OpenAI valide est disponible :
