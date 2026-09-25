@@ -15,12 +15,12 @@ battle_request.rs, battle_forecast.rs, dynasty.rs), `data/rules/*.json`, `data/n
 Liens vers des fiches d'unités de B5 pas encore écrites : `data/codex/_b3_links.md` (ids probables).
 
 ## État
-- [ ] Squelette (ce fichier, `_b3_links.md`)
-- [ ] Fiches bataille
-- [ ] Fiches siège
+- [x] Squelette (ce fichier, `_b3_links.md`)
+- [x] Fiches bataille (moral, fatigue, formations, déploiement, charge, pieux, mêlée, tir, flancs, terrain, relief, météo, général, résolution auto, pertes et prisonniers)
+- [ ] Fiches siège (faites : siège, murailles, assaut, bélier, sortie ; restent engins, huile, incendies)
 - [ ] Fiches navales
 - [ ] Fiches des ordres + liens dans `data/battle_orders`
 - [ ] Validateur Codex + pytest verts
 
 ## Prochaine étape
-Écrire les fiches bataille (moral, fatigue, formations, déploiement, charge…).
+Fiches siège restantes (cdx_jeu_engins_siege, cdx_jeu_huile_bouillante, cdx_jeu_incendies), puis naval, puis ordres. Les liens vers des cdx_jeu_ pas encore écrits font échouer le validateur jusqu'à la fin du lot.

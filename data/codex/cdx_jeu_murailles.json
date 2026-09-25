@@ -1,0 +1,22 @@
+{
+  "id": "cdx_jeu_murailles",
+  "title": "Murailles, brèches et effondrements",
+  "category": "mecanique",
+  "aliases": [
+    "murailles",
+    "muraille",
+    "brèche",
+    "brèches",
+    "brèche ouverte",
+    "murailles intactes",
+    "pan de muraille",
+    "chemin de ronde",
+    "rempart"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Courtines de pierre, tours flanquantes, chemin de ronde crénelé : l'enceinte tient l'assaillant à distance et abrite les défenseurs. Il faut des semaines de pierres, puis de boulets, pour y ouvrir une brèche.",
+  "body": "L'enceinte d'une ville ou d'un château du XIVe siècle aligne des courtines épaisses de plusieurs mètres, hautes de huit à quinze, reliées par des tours qui battent le pied des murs de leurs traits. Au sommet, le chemin de ronde court derrière un parapet crénelé : les merlons abritent les arbalétriers, les créneaux leur laissent tirer. Pour abattre un pan de mur, les assiégeants disposent de la sape (on creuse sous la fondation, on étaie, on met le feu aux étais), de la mine et des engins à contrepoids, qui martèlent le même point pendant des jours.\n\nLa poudre change la donne au XVe siècle. En 1415, les canons d'[[cdx_henri_v|Henri V]] ruinent les murs et les tours d'Harfleur en cinq semaines ; en 1449-1450, l'artillerie des frères Bureau (voir [[cdx_bombarde|bombardes]]) reprend toute la Normandie, place après place, en un peu plus d'un an. Les hauts murs minces, faits pour résister à l'escalade, s'écroulent sous les boulets : les ingénieurs commencent alors à abaisser et à épaissir les remparts, à percer des canonnières, préparant les bastions de la Renaissance.\n\nUne brèche n'est pas une victoire : les défenseurs l'étayent, la barrent de palissades et de tonneaux, et l'assaut qui s'y engouffre se heurte à un mur de piques.",
+  "gameplay": "En campagne, la brèche (0 à 100) progresse chaque tour de siège de la somme des attaques de siège des engins (trébuchet 70, mangonneau 40, bombarde 85, selon leur effectif) divisée par 2 × (1 + fortification), réduite par la résistance de la place (bâtiments et techniques, 80 % au plus). Tant que la place est fortifiée, que la brèche est sous 50 et que l'assiégeant n'a pas de tour de siège, les murailles tiennent : l'assaut automatique ne porte qu'à 70 % et le tir de la garnison compte 30 % de plus.\n\nEn bataille de siège, l'enceinte (ou le plan réel d'une grande ville) a des pans de 500 × (1 + fortification) points de solidité, une porte de 250 × (1 + fortification), une épaisseur de 2,5 + 0,5 × fortification m et une hauteur de 6 + 1,5 × fortification m. La brèche de campagne use les pans (jusqu'à 40 %) et ouvre un pan de la façade dès 50, deux dès 85. Un pan intact arrête les régiments, la mêlée et la vue ; chaque engin bat le pan le plus proche (ou celui qu'on lui désigne) toutes les 12 secondes, pour 1,6 × son attaque de siège (moins s'il a perdu des servants) : un trébuchet abat un pan de fortification 2 en quatorze tirs. Le pan qui s'effondre fait tomber ses défenseurs (12 % tués, −10 de moral) et devient une brèche que les régiments empruntent d'eux-mêmes.\n\nSur le chemin de ronde, les défenseurs tirent 25 % plus juste et plus loin, ne reçoivent que la moitié des traits, ressentent 30 % de moins leurs pertes et reprennent courage même au contact ; en déroute, ils abandonnent le rempart. Les tours encore reliées à un pan debout tirent 5 carreaux toutes les 8 secondes à 180 m. Voir [[cdx_jeu_assaut|assaut]] et [[cdx_jeu_engins_siege|engins de siège]].",
+  "see_also": ["cdx_jeu_siege", "cdx_jeu_assaut", "cdx_jeu_engins_siege", "cdx_jeu_belier", "cdx_bombarde", "cdx_places_fortes"],
+  "sources": ["Rempart", "Chemin de ronde", "Siège d'Harfleur (1415)", "Poliorcétique"]
+}
