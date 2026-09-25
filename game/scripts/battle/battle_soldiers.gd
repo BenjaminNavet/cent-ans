@@ -335,6 +335,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
+		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
+		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
 		var blood := snappedf(_living_blood(unit, id), 0.02)
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):

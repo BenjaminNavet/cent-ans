@@ -34,6 +34,9 @@ const int M_LOOP = 0;
 const int M_CYCLE = 1;
 const int M_VOLLEY = 2;
 const int M_CUSTOM = 3;
+// SG1 : les `split_count` premiers soldats jouent set.x (escalade sur l'échelle), les autres
+// tirent parmi le reste du jeu (au pied du mur).
+const int M_SPLIT = 4;
 
 uniform sampler2D bone_tex : filter_nearest, repeat_disable;
 uniform float bone_fps = 24.0;
@@ -57,6 +60,7 @@ uniform float cycle_len = 1.5;
 uniform float volley_time = -1000.0;
 uniform float reload_time = 6.0;
 uniform float release_at = 1.0;
+uniform int split_count = 0;
 
 // Variantes (casques, armes...) : bit v de UV2.x = pièce visible pour la variante v.
 uniform int variant_count = 1;
@@ -133,9 +137,12 @@ float part_weight(int part, ivec4 idx, vec4 w) {
 }
 
 // Clip et temps local d'un soldat pour un jeu de clips et un mode.
-void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, out int clip, out float t) {
+void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, float id, out int clip, out float t) {
 	int n = max(size, 1);
-	if (mode == M_CUSTOM) {
+	if (mode == M_SPLIT) {
+		clip = id < float(split_count) || n < 2 ? set.x : pick(set, 1 + min(int(h.x * float(n - 1)), n - 2));
+		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
+	} else if (mode == M_CUSTOM) {
 		clip = pick(set, int(mod(custom.y, float(n))));
 		t = anim_time - custom.x;
 	} else if (mode == M_CYCLE) {
@@ -208,7 +215,7 @@ void vertex() {
 	vec4 w = CUSTOM1;
 	int clip;
 	float t;
-	choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, clip, t);
+	choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, id, clip, t);
 	vec4 a; vec4 b; vec4 c;
 	// Au loin, image la plus proche sans interpolation (moitié moins de lectures).
 	bool smooth_frames = length((MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz) < interp_distance;
@@ -217,7 +224,7 @@ void vertex() {
 	if (blend < 1.0 && clip_mode != M_CUSTOM) {
 		int pclip;
 		float pt;
-		choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, pclip, pt);
+		choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, id, pclip, pt);
 		vec4 pa; vec4 pb; vec4 pc;
 		pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
 		float s = smoothstep(0.0, 1.0, blend);
