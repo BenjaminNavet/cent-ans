@@ -178,7 +178,7 @@ func _tooltip(option: Dictionary) -> String:
 	if option.is_empty():
 		return ""
 	var lines: PackedStringArray = []
-	lines.append("[b]%s[/b]" % str(option.get("name", "")))
+	lines.append("[b]%s[/b]" % RichTooltip.entity_name(str(option.get("id", "")), str(option.get("name", ""))))
 	var delay := int(option.get("delay_turns", 0))
 	if delay > 0:
 		lines.append("Délai avant effet : %d tour(s)" % delay)

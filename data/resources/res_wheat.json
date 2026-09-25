@@ -9,8 +9,10 @@
     "peasants",
     "burghers"
   ],
-  "description": "Céréale de base ; l'openfield du Bassin parisien et de l'Angleterre du Sud.",
+  "description": "Froment et autres blés (seigle, méteil, orge) : céréale de base des openfields du Bassin parisien et de l'Angleterre du Sud. Voir [[cdx_ble]].",
   "sources": [
+    "Blé",
+    "Méteil",
     "Économie médiévale (Wikipédia)"
   ]
 }

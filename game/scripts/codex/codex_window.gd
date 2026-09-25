@@ -43,6 +43,9 @@ var _art: TextureRect
 ## H11 : « Voir dans l'encyclopédie » quand la fiche a une `entity` connue de l'Encyclopédie.
 var encyclopedia_button: Button
 var _body: RichTextLabel
+## B1 : encadré « En jeu » (champ `gameplay` : comment le jeu modélise le sujet).
+var gameplay_box: PanelContainer
+var gameplay_label: RichTextLabel
 var _anachronism_box: PanelContainer
 var _anachronism: RichTextLabel
 var _see_also: RichTextLabel
@@ -167,6 +170,20 @@ func _build_page() -> Control:
 	page.add_child(HSeparator.new())
 	_body = _rich_text(16)
 	page.add_child(_body)
+
+	gameplay_box = PanelContainer.new()
+	gameplay_box.name = "GameplayBox"
+	var gameplay_style := StyleBoxFlat.new()
+	gameplay_style.bg_color = Color(0.80, 0.84, 0.72, 1)  # vert de gris : règles, pas histoire
+	gameplay_style.border_color = Color(0.25, 0.36, 0.20)
+	gameplay_style.set_border_width_all(1)
+	gameplay_style.border_width_left = 4
+	gameplay_style.set_corner_radius_all(3)
+	gameplay_style.set_content_margin_all(10)
+	gameplay_box.add_theme_stylebox_override("panel", gameplay_style)
+	gameplay_label = _rich_text(14)
+	gameplay_box.add_child(gameplay_label)
+	page.add_child(gameplay_box)
 
 	_anachronism_box = PanelContainer.new()
 	var style := StyleBoxFlat.new()
@@ -304,6 +321,9 @@ func _show_entry(id: String) -> void:
 	_art.visible = _art.texture != null
 	encyclopedia_button.visible = _encyclopedia() != null and not Encyclopedia.definition_of(str(entry.get("entity", ""))).is_empty()
 	_body.text = CodexText.format(str(entry.get("body", entry.get("summary", ""))))
+	var gameplay := str(entry.get("gameplay", ""))
+	gameplay_box.visible = gameplay != ""
+	gameplay_label.text = "[b]En jeu[/b]\n%s" % CodexText.format(gameplay)
 	var anachronism := str(entry.get("anachronism", ""))
 	_anachronism_box.visible = anachronism != ""
 	_anachronism.text = "[b]Liberté prise par le jeu[/b]\n%s" % CodexText.format(anachronism)

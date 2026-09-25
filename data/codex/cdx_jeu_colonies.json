@@ -1,0 +1,36 @@
+{
+  "id": "cdx_jeu_colonies",
+  "title": "Colonies : cités, villes, châteaux, abbayes et villages",
+  "category": "mecanique",
+  "aliases": [
+    "colonie",
+    "colonies",
+    "garnison",
+    "garnisons",
+    "niveau de fortification",
+    "aux mains de",
+    "province complète",
+    "garnison complète"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Chaque province compte trois à six colonies, une cité et des villes, châteaux, abbayes ou villages, prenables une à une. Qui tient la cité tient la province ; qui les tient toutes touche un bonus.",
+  "body": "Un comté ou un duché du XIVe siècle n'est pas un bloc. Autour de la cité épiscopale, siège du bailli ou du sénéchal, s'égrènent des villes closes et des bastides, des châteaux tenus par des châtelains pour le prince ou pour eux-mêmes, des abbayes fortifiées, des bourgs ouverts (voir [[cdx_places_fortes|places fortes]]). La guerre de Cent Ans est d'abord une guerre de ces places : on les prend, on les perd, on les rachète, et chacune a son capitaine et sa garnison.\n\nTenir la capitale ne suffit donc pas. En Normandie, en Guyenne, en Bretagne, les deux camps tiennent des forteresses imbriquées pendant des décennies ; les garnisons vivent sur le plat pays et lèvent des « appatis » sur les paroisses d'alentour. La reconquête de [[cdx_du_guesclin|du Guesclin]], dans les années 1370, est une suite patiente de sièges de châteaux, et celle de [[cdx_charles_vii|Charles VII]], dans les années 1440-1450, reprend place après place la Normandie et la Guyenne.\n\nChaque type de place a son rôle : la cité est le cœur administratif et religieux, la ville close vit du commerce et de son droit de murage, le château commande une route ou un gué, l'abbaye possède terres et greniers, le village nourrit tout ce monde.",
+  "gameplay": "Il y a cinq types de colonies : cité (une par province, sa capitale), ville, château, abbaye et village. Le contrôle de la province suit celui de sa cité ; population, mécontentement, dévastation et [[cdx_jeu_table|table]] restent à la province, tandis que chaque colonie a son maître, sa garnison, ses bâtiments, son chantier et ses recrues. Il n'y a pas de niveau de colonie : seul compte le niveau de fortification (0 pour un village, 1 à 4 ailleurs), relevé par la « Palissade et fossé » (+1), l'« Enceinte de pierre » (+2), le « Château fort » (+3), le « Boulevard d'artillerie » (+1) et la technologie « Maçonnerie militaire » (+1, seulement pour une place déjà fortifiée) ; chaque étage de la chaîne remplace le précédent. La croissance des villes à l'écran n'est qu'un décor.\n\nL'impôt de la province se partage entre ses colonies selon leur poids ; une colonie assiégée ne rapporte rien. Tenir toutes les colonies d'une province donne +10 % de revenu et permet les [[cdx_jeu_edits|édits]]. Une armée peut y laisser au plus 8 unités de garnison dans une cité, 4 dans un château, 3 dans une ville, 2 dans une abbaye, 1 dans un village ; la couronne n'en paie qu'une part (voir [[cdx_jeu_entretien|entretien]]).\n\nUne colonie sans garnison ni armée est prise dès qu'une armée ennemie y entre ; un village gardé est emporté d'assaut aussitôt ; les autres places demandent un siège (posture « Siège »). Après une prise, le panneau de colonie garde le propriétaire de droit (« Propriétaire ») et montre le vainqueur sous « Aux mains de » ; la garnison, le siège et les recrues en attente disparaissent. Conseil : une province n'est vraiment à vous qu'une fois toutes ses places prises.",
+  "see_also": [
+    "cdx_places_fortes",
+    "cdx_jeu_construction",
+    "cdx_jeu_recrutement",
+    "cdx_jeu_entretien",
+    "cdx_seigneurie",
+    "cdx_du_guesclin"
+  ],
+  "sources": [
+    "Château fort",
+    "Bastide",
+    "Ville close",
+    "Abbaye"
+  ]
+}

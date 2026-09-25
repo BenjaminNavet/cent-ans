@@ -11,22 +11,18 @@
       "assets/third_party/music/kevin_macleod/the_britons.mp3",
       "assets/third_party/music/kevin_macleod/folk_round.mp3",
       "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_spring_allegro.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_autumn_allegro.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_mandolin_rv425.mp3",
-      "assets/third_party/music/kevin_macleod/canon_in_d_major.mp3"
+      "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
+      "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
+      "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3"
     ],
     "war": [
       "assets/audio/music/war.ogg",
       "assets/third_party/music/kevin_macleod/crusade.mp3",
-      "assets/third_party/music/kevin_macleod/heroic_age.mp3",
       "assets/third_party/music/kevin_macleod/celtic_impulse.mp3",
       "assets/third_party/music/kevin_macleod/achaidh_cheide.mp3",
-      "assets/third_party/music/kevin_macleod/crossing_the_chasm.mp3",
       "assets/third_party/music/kevin_macleod/angevin_b.mp3",
       "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_summer_presto.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_winter_allegro.mp3"
+      "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
     ],
     "court": [
       "assets/audio/music/court.ogg",
@@ -35,10 +31,9 @@
       "assets/third_party/music/kevin_macleod/moonlight_hall.mp3",
       "assets/third_party/music/kevin_macleod/village_consort.mp3",
       "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
-      "assets/third_party/music/kevin_macleod/prelude_in_c_bwv_846.mp3",
-      "assets/third_party/music/wikimedia/vivaldi_winter_largo.mp3",
-      "assets/third_party/music/wikimedia/bach_badinerie.mp3",
-      "assets/third_party/music/kevin_macleod/canon_in_d_major.mp3"
+      "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
+      "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
+      "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3"
     ]
   }
 }

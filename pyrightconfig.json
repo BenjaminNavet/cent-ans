@@ -1,0 +1,16 @@
+{
+  "include": ["tools"],
+  "exclude": [
+    "**/.venv",
+    "**/__pycache__",
+    "**/node_modules",
+    ".claude",
+    "core/target*",
+    "game/.godot",
+    "tools/geo/raw",
+    "data/map/pyramid",
+    "export"
+  ],
+  "venvPath": "tools",
+  "venv": ".venv"
+}

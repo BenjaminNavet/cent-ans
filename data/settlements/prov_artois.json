@@ -59,14 +59,14 @@
     "id": "set_azincourt",
     "province": "prov_artois",
     "kind": "village",
-    "name": { "display": "Azincourt", "local": "Agincourt", "local_language": "ancien français" },
+    "name": { "display": "Azincourt", "local": "Azincourt", "local_language": "ancien français" },
     "lonlat": [2.1300, 50.4667],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Village agricole aux confins de l'Artois et du Ponthieu.",
+    "description": "Village agricole aux confins de l'Artois et du comté de Saint-Pol, où se livrera la bataille du 25 octobre 1415.",
     "sources": ["Azincourt"]
   }
 ]

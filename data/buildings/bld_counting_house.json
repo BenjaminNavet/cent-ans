@@ -28,9 +28,10 @@
       "mode": "percent"
     }
   ],
-  "description": "Loge des marchands italiens ou hanséates ; lettres de change et crédit.",
+  "description": "Succursale d'une compagnie italienne (Bardi, Peruzzi) ou comptoir de la Hanse (Steelyard de Londres) : dépôts, crédit et, chez les Italiens, lettres de change. Voir [[cdx_comptoir_marchand]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Lettre de change",
+    "Comptoir de la Hanse",
+    "Compagnie des Bardi"
   ]
 }

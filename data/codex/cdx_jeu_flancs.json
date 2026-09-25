@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_flancs",
+  "title": "Flancs et arrières",
+  "category": "mecanique",
+  "aliases": [
+    "flanc",
+    "flancs",
+    "de flanc",
+    "prise à revers",
+    "arrières",
+    "débordement"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Une ligne médiévale ne se bat bien que vers l'avant : prise de côté ou par derrière, elle ne peut ni faire face ni se reformer à temps. Les batailles se décident souvent par une troupe qui surgit sur un flanc.",
+  "body": "Des hommes serrés sur plusieurs rangs, la lance ou la hache tournées vers l'ennemi, ne pivotent pas d'un bloc : pour faire face à une attaque de côté, il faut rompre l'ordre au pire moment. Les chefs de la guerre de Cent Ans le savent et gardent une troupe mobile pour le coup de flanc.\n\nÀ [[cdx_poitiers|Poitiers]] (1356), alors que la bataille du roi Jean est engagée de front, le captal de Buch contourne la colline avec une poignée de cavaliers et d'archers et tombe sur son flanc et ses arrières : la ligne française se défait et le roi est pris. À Cocherel (1364), [[cdx_du_guesclin|Du Guesclin]] feint la retraite pour attirer les Navarrais hors de leur colline, puis les fait prendre à revers. À Formigny (1450), l'arrivée du connétable de Richemont sur le flanc de l'armée anglaise, déjà aux prises avec les Français de Clermont, achève sa destruction.\n\nC'est aussi pourquoi les chefs appuient leurs ailes à un obstacle — bois, rivière, village, parc de chariots — que l'ennemi ne peut tourner, comme [[cdx_henri_v|Henri V]] entre les bois d'[[cdx_azincourt|Azincourt]].",
+  "gameplay": "L'angle d'attaque se mesure depuis le front du régiment attaqué : de face (moins de 60° de part et d'autre de son orientation), de flanc, ou de dos (au-delà de 120°). Un régiment en schiltron n'a ni flanc ni dos (voir [[cdx_jeu_formations|formations]]).\n\nEn [[cdx_jeu_melee|mêlée]], les coups portés de flanc comptent ×1,5, de dos ×2. Tant qu'il est attaqué de flanc, le régiment perd 1,5 point de [[cdx_jeu_moral|moral]] par seconde, 3 s'il l'est de dos. Une [[cdx_jeu_charge|charge]] de flanc ou de dos coûte 15 points de moral au lieu de 8 et renverse 1,4 à 1,8 fois plus d'hommes ; les [[cdx_jeu_pieux|pieux]] et les piques n'arrêtent que les charges de face. Les tirs reçus dans le dos tuent 30 % de plus.\n\nAu contact, un fantassin ne se retourne que de 3° par seconde (un cavalier de 8°) : un flanc pris le reste longtemps. L'IA coordonne ses cavaliers pour prendre les deux flancs d'un même ennemi. Conseil : fixez l'ennemi de face avec l'infanterie, puis lancez la cavalerie sur son flanc ; appuyez vos propres ailes à un bois, une rivière ou un village.",
+  "see_also": ["cdx_jeu_melee", "cdx_jeu_charge", "cdx_jeu_moral", "cdx_jeu_formations", "cdx_jeu_deploiement", "cdx_poitiers"],
+  "sources": ["Bataille de Poitiers (1356)", "Bataille de Cocherel", "Bataille de Formigny"]
+}
