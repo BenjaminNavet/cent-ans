@@ -60,7 +60,7 @@ text = "—"
 
 [node name="ControllerKey" type="Label" parent="VBox/Grid"]
 layout_mode = 2
-text = "Contrôleur"
+text = "Aux mains de"
 
 [node name="ControllerValue" type="Label" parent="VBox/Grid"]
 unique_name_in_owner = true

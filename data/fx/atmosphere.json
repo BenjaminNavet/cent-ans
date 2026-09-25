@@ -1,0 +1,79 @@
+{
+  "description": "Ciels HDRI et étalonnage (lot V3, A1-05). Purement visuel. skies : panoramas Poly Haven (CC0) avec la position de leur soleil (tools/cent_ans_tools/hdri_sun.py) et leur luminance moyenne ; battle : par météo de la simulation, ciel par saison, exposition visée, teinte, étalonnage ; campaign : par saison ; seasons : étalonnage de saison commun (appliqué avant celui de la météo). Un étalonnage devient une LUT 3D (lift/gamma/gain, température, contraste, saturation, virage des ombres et des hautes lumières).",
+  "lut_size": 24,
+  "skies": {
+    "clear_midday": {
+      "path": "res://assets/third_party/skies/kloofendal_48d_partly_cloudy_puresky/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "sun_azimuth_deg": 34.2, "sun_elevation_deg": 47.9, "mean": 1.173, "sunny": true
+    },
+    "autumn_clear": {
+      "path": "res://assets/third_party/skies/autumn_field_puresky/autumn_field_puresky_2k.hdr",
+      "sun_azimuth_deg": 36.3, "sun_elevation_deg": 29.1, "mean": 1.332, "sunny": true
+    },
+    "winter_clear": {
+      "path": "res://assets/third_party/skies/syferfontein_18d_clear_puresky/syferfontein_18d_clear_puresky_2k.hdr",
+      "sun_azimuth_deg": 35.9, "sun_elevation_deg": 18.4, "mean": 1.555, "sunny": true
+    },
+    "dawn": {
+      "path": "res://assets/third_party/skies/kloppenheim_06_puresky/kloppenheim_06_puresky_2k.hdr",
+      "sun_azimuth_deg": 40.7, "sun_elevation_deg": 4.7, "mean": 0.827, "sunny": false
+    },
+    "misty_morning": {
+      "path": "res://assets/third_party/skies/kloofendal_misty_morning_puresky/kloofendal_misty_morning_puresky_2k.hdr",
+      "sun_azimuth_deg": 42.5, "sun_elevation_deg": 44.4, "mean": 1.197, "sunny": false
+    },
+    "overcast": {
+      "path": "res://assets/third_party/skies/kloofendal_overcast_puresky/kloofendal_overcast_puresky_2k.hdr",
+      "sun_azimuth_deg": 29.4, "sun_elevation_deg": 23.1, "mean": 1.247, "sunny": false
+    },
+    "storm": {
+      "path": "res://assets/third_party/skies/overcast_soil_puresky/overcast_soil_puresky_2k.hdr",
+      "sun_azimuth_deg": 348.1, "sun_elevation_deg": 34.7, "mean": 1.436, "sunny": false
+    },
+    "snow": {
+      "path": "res://assets/third_party/skies/snow_field_puresky/snow_field_puresky_2k.hdr",
+      "sun_azimuth_deg": 43.3, "sun_elevation_deg": 16.6, "mean": 0.773, "sunny": false
+    },
+    "overcast_field": {
+      "path": "res://assets/third_party/skies/belfast_open_field/belfast_open_field_2k.hdr",
+      "sun_azimuth_deg": 56.3, "sun_elevation_deg": 44.2, "mean": 1.293, "sunny": false
+    }
+  },
+  "seasons": {
+    "spring": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "gain": [0.99, 1.01, 1.0]},
+    "summer": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03},
+    "autumn": {"temperature": 0.34, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
+    "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
+  },
+  "battle": {
+    "clear": {
+      "sky": {"spring": "clear_midday", "summer": "clear_midday", "autumn": "autumn_clear", "winter": "winter_clear"},
+      "sky_luminance": 0.62, "sky_saturation": 1.0, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
+      "grade": {"contrast": 1.05, "saturation": 0.98, "shadows": [0.98, 0.99, 1.03]}
+    },
+    "fog": {
+      "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},
+      "sky_luminance": 0.7, "sky_saturation": 0.6, "sky_tint": [1.0, 0.99, 0.97], "sun_disc": 0.0, "haze": 0.7,
+      "grade": {"contrast": 0.95, "saturation": 0.86, "lift": [0.02, 0.02, 0.022]}
+    },
+    "rain": {
+      "sky": {"spring": "overcast", "summer": "storm", "autumn": "storm", "winter": "overcast"},
+      "sky_luminance": 0.5, "sky_saturation": 0.75, "sky_tint": [0.95, 0.98, 1.03], "sun_disc": 0.0, "haze": 0.5,
+      "grade": {"temperature": -0.2, "contrast": 1.05, "saturation": 0.8, "shadows": [0.96, 0.98, 1.04]}
+    },
+    "snow": {
+      "sky": {"spring": "snow", "summer": "snow", "autumn": "snow", "winter": "snow"},
+      "sky_luminance": 0.78, "sky_saturation": 0.7, "sky_tint": [0.97, 0.99, 1.03], "sun_disc": 0.0, "haze": 0.55,
+      "grade": {"temperature": -0.15, "contrast": 1.02, "saturation": 0.9, "gain": [1.01, 1.01, 1.02]}
+    }
+  },
+  "campaign": {
+    "grade_strength": 0.85,
+    "seasons": {
+      "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.8, 0.8, 0.76]},
+      "summer": {"sky": "autumn_clear", "sky_luminance": 0.72, "haze": 0.45, "fog_color": [0.83, 0.8, 0.72]},
+      "autumn": {"sky": "overcast", "sky_luminance": 0.66, "haze": 0.5, "fog_color": [0.8, 0.76, 0.68]},
+      "winter": {"sky": "overcast_field", "sky_luminance": 0.7, "haze": 0.55, "fog_color": [0.8, 0.82, 0.85]}
+    }
+  }
+}

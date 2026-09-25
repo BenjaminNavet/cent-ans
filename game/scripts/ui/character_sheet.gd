@@ -435,7 +435,9 @@ func _fill_family(character: Dictionary) -> void:
 		child.queue_free()
 	var spouse_id: String = str(character.get("spouse", ""))
 	if spouse_id != "":
-		family_list.add_child(_family_row("Conjoint(e)", spouse_id, _name_of(spouse_id, str(character.get("spouse_name", "")))))
+		# Audit A3 P4 : le sexe est connu ; les mariages du jeu unissent un homme et une femme.
+		var spouse_label := "Épouse" if str(character.get("sex", "")) == "male" else ("Époux" if str(character.get("sex", "")) == "female" else "Conjoint")
+		family_list.add_child(_family_row(spouse_label, spouse_id, _name_of(spouse_id, str(character.get("spouse_name", "")))))
 	for child_entry in character.get("children", []):
 		family_list.add_child(_family_row("Enfant", str(child_entry.get("id", "")), "%s (%d ans)" % [str(child_entry.get("name", "?")), int(child_entry.get("age", 0))]))
 	var father_id: String = str(character.get("father", ""))

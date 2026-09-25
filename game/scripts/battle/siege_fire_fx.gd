@@ -8,16 +8,25 @@ extends Node3D
 ## une `OmniLight3D` qui vacille ; une maison brûlée s'effondre (instances abaissées dans les
 ## `MultiMesh` des maisons de `BattleSiege`) et laisse un tas noirci de poutres calcinées.
 ## Paramètres : `data/fx/siege_fire.json` (schéma `data/schemas/fx_siege_fire.schema.json`).
+## Lot V3 (A1-13) : flammes et fumée en planches animées procédurales (`fire_flame.gdshader`,
+## `fire_smoke.gdshader`, planches de `tools/cent_ans_tools/fire_flipbooks.py`), braises
+## (`fire_ember.gdshader`) qui dérivent au vent, lumière qui vacille (bruit, couleur, position).
 
 const FX_PATH := "fx/siege_fire.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
+const FLAME_SHADER := preload("res://shaders/fire_flame.gdshader")
+const SMOKE_SHADER := preload("res://shaders/fire_smoke.gdshader")
+const EMBER_SHADER := preload("res://shaders/fire_ember.gdshader")
+const FLAME_FLIPBOOK := "res://assets/textures/fx/flame_flipbook.png"
+const SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 const DEFAULTS := {
 	"update_period_s": 0.2,
 	"flame_height_m": 7.5,
 	"max_lights": 8,
 	"light": {"color": [1.0, 0.52, 0.18], "energy": 5.0, "range_m": 30.0, "height_m": 7.0, "flicker_speed": 9.0, "flicker_amount": 0.35},
-	"flames": {"amount": 72, "lifetime_s": 1.2, "size_m": [2.0, 4.2], "velocity_m_s": [2.5, 5.0], "spread_m": 5.0, "color_start": [1.0, 0.62, 0.12, 0.95], "color_end": [0.7, 0.1, 0.0, 0.0]},
+	"flames": {"amount": 26, "lifetime_s": 1.5, "size_m": [3.5, 7.0], "velocity_m_s": [1.2, 2.8], "spread_m": 4.5, "color_start": [1.0, 0.72, 0.28, 1.0], "color_end": [0.35, 0.03, 0.0, 1.0], "anim_loops": 1.5, "emission": 3.2},
 	"smoke": {"amount": 48, "lifetime_s": 10.0, "size_m": [5.0, 14.0], "velocity_m_s": [2.0, 4.0], "spread_m": 4.0, "color": [0.13, 0.12, 0.11, 0.7], "wind_drift_m_s": 3.5},
+	"embers": {"amount": 36, "lifetime_s": 3.0, "size_m": [0.12, 0.3], "velocity_m_s": [3.0, 7.0], "energy": 6.0},
 	"ruin": {"char_color": [0.07, 0.06, 0.05], "rubble_height_m": 1.3, "collapse_scale": 0.25, "beams": 5, "embers": 10},
 }
 
@@ -32,8 +41,10 @@ var _light_keys: Array = []
 var _last_update_ms: int = -1000000
 var _time: float = 0.0
 var _wind := Vector2.ZERO
-var _flame_mat: StandardMaterial3D
-var _smoke_mat: StandardMaterial3D
+var _flame_mat: Material
+var _smoke_mat: Material
+var _ember_mat: ShaderMaterial
+var _base_light_color := Color(1.0, 0.52, 0.18)
 var _char_mat: StandardMaterial3D
 ## Compteurs lus par le smoke test.
 var burning_count: int = 0
@@ -47,12 +58,16 @@ func setup(p_siege_view: Node3D, p_height_at: Callable) -> void:
 	params = _load_params()
 	houses_root = p_siege_view.get_node_or_null("Houses")
 	siege_view = p_siege_view
-	_flame_mat = _particle_material(false)  # mélange alpha : l'additif vire au crème en plein jour
-	_smoke_mat = _particle_material(false)
+	_flame_mat = _flame_material(params["flames"])
+	_smoke_mat = _smoke_material(_color(params["smoke"]["color"]))
+	_ember_mat = ShaderMaterial.new()
+	_ember_mat.shader = EMBER_SHADER
+	_ember_mat.set_shader_parameter("energy", float(params["embers"]["energy"]))
 	_char_mat = StandardMaterial3D.new()
 	_char_mat.albedo_color = _color(params["ruin"]["char_color"])
 	_char_mat.roughness = 1.0
 	var light_params: Dictionary = params["light"]
+	_base_light_color = _color(light_params["color"])
 	for i in int(params["max_lights"]):
 		var light := OmniLight3D.new()
 		light.light_color = _color(light_params["color"])
@@ -147,6 +162,10 @@ func _show_fire(key: Variant, p: Vector2, radius: float, intensity: float) -> vo
 	var drift := float(params["smoke"]["wind_drift_m_s"])
 	var smoke_process := (fire["smoke"] as GPUParticles3D).process_material as ParticleProcessMaterial
 	smoke_process.gravity = Vector3(_wind.x * drift, 0.6, _wind.y * drift)
+	var embers := fire.get("embers", null) as GPUParticles3D
+	if embers != null:
+		embers.amount_ratio = ratio
+		(embers.process_material as ParticleProcessMaterial).gravity = Vector3(_wind.x * drift * 0.8, 0.4, _wind.y * drift * 0.8)
 
 
 func _make_fire(p: Vector2, radius: float) -> Dictionary:
@@ -156,17 +175,60 @@ func _make_fire(p: Vector2, radius: float) -> Dictionary:
 	add_child(root)
 	var flame_params: Dictionary = params["flames"]
 	var smoke_params: Dictionary = params["smoke"]
-	var flames := _emitter(flame_params, _flame_mat, radius, _color(flame_params["color_start"]), _color(flame_params["color_end"]))
-	flames.position.y = float(params["flame_height_m"]) * 0.6
+	# Flammes : planche animée (boucles pendant la vie), base du panneau au foyer.
+	var flames := _emitter(flame_params, _flame_mat, radius, Color.WHITE, Color.WHITE, 0.45)
+	var flame_process := flames.process_material as ParticleProcessMaterial
+	var loops := float(flame_params.get("anim_loops", 1.5))
+	flame_process.anim_speed_min = loops * 0.8
+	flame_process.anim_speed_max = loops * 1.2
+	flame_process.anim_offset_max = 1.0
+	flames.position.y = float(params["flame_height_m"]) * 0.45
 	root.add_child(flames)
+	# Fumée : bouffées qui tournent, grossissent en montant et dérivent au vent.
 	var smoke_color := _color(smoke_params["color"])
-	var smoke := _emitter(smoke_params, _smoke_mat, radius, smoke_color, Color(smoke_color, 0.0))
-	smoke.position.y = float(params["flame_height_m"]) + 1.5
+	var smoke := _emitter(smoke_params, _smoke_mat, radius, smoke_color, Color(smoke_color, smoke_color.a * 0.6), 0.0)
+	var smoke_process := smoke.process_material as ParticleProcessMaterial
+	smoke_process.angle_min = -180.0
+	smoke_process.angle_max = 180.0
+	smoke_process.angular_velocity_min = -12.0
+	smoke_process.angular_velocity_max = 12.0
+	var growth := Curve.new()
+	growth.add_point(Vector2(0.0, 0.5))
+	growth.add_point(Vector2(0.35, 0.8))
+	growth.add_point(Vector2(1.0, 1.25))
+	var growth_texture := CurveTexture.new()
+	growth_texture.curve = growth
+	smoke_process.scale_curve = growth_texture
+	smoke_process.damping_min = 0.15
+	smoke_process.damping_max = 0.3
+	smoke.position.y = float(params["flame_height_m"]) + 1.0
+	smoke.sorting_offset = -1.0  # derrière les flammes
 	root.add_child(smoke)
-	return {"node": root, "flames": flames, "smoke": smoke, "intensity": 0.0, "p": p}
+	var embers := _make_embers(radius)
+	embers.position.y = float(params["flame_height_m"]) * 0.6
+	root.add_child(embers)
+	return {"node": root, "flames": flames, "smoke": smoke, "embers": embers, "intensity": 0.0, "p": p}
 
 
-func _emitter(spec: Dictionary, material: StandardMaterial3D, radius: float, start: Color, end: Color) -> GPUParticles3D:
+## Braises : étincelles qui montent en tourbillonnant et que le vent emporte.
+func _make_embers(radius: float) -> GPUParticles3D:
+	var spec: Dictionary = params["embers"]
+	var embers := _emitter({"amount": maxi(int(spec["amount"]), 1), "lifetime_s": spec["lifetime_s"], "spread_m": radius * 0.7,
+		"velocity_m_s": spec["velocity_m_s"], "size_m": spec["size_m"]}, _ember_mat, radius, Color.WHITE, Color.WHITE, 0.0)
+	var process := embers.process_material as ParticleProcessMaterial
+	process.spread = 35.0
+	process.turbulence_enabled = true
+	process.turbulence_noise_strength = 2.5
+	process.turbulence_noise_scale = 3.0
+	process.turbulence_influence_min = 0.1
+	process.turbulence_influence_max = 0.3
+	process.damping_min = 0.5
+	process.damping_max = 1.2
+	embers.visibility_aabb = AABB(Vector3(-40, -5, -40), Vector3(80, 50, 80))
+	return embers
+
+
+func _emitter(spec: Dictionary, material: Material, radius: float, start: Color, end: Color, quad_lift: float = 0.0) -> GPUParticles3D:
 	var particles := GPUParticles3D.new()
 	particles.amount = int(spec["amount"])
 	particles.lifetime = float(spec["lifetime_s"])
@@ -193,10 +255,34 @@ func _emitter(spec: Dictionary, material: StandardMaterial3D, radius: float, sta
 	particles.process_material = process
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
+	quad.center_offset = Vector3(0.0, quad_lift, 0.0)
 	quad.material = material
 	particles.draw_pass_1 = quad
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return particles
+
+
+## Flammes : planche animée si elle est importée, sinon disque flou (matériau S2).
+func _flame_material(spec: Dictionary) -> Material:
+	if not ResourceLoader.exists(FLAME_FLIPBOOK):
+		return _particle_material(false)
+	var material := ShaderMaterial.new()
+	material.shader = FLAME_SHADER
+	material.set_shader_parameter("flipbook", load(FLAME_FLIPBOOK))
+	material.set_shader_parameter("color_hot", _color(spec["color_start"]))
+	material.set_shader_parameter("color_cold", _color(spec["color_end"]))
+	material.set_shader_parameter("emission", float(spec.get("emission", 3.2)))
+	return material
+
+
+func _smoke_material(color: Color) -> Material:
+	if not ResourceLoader.exists(SMOKE_FLIPBOOK):
+		return _particle_material(false)
+	var material := ShaderMaterial.new()
+	material.shader = SMOKE_SHADER
+	material.set_shader_parameter("flipbook", load(SMOKE_FLIPBOOK))
+	material.set_shader_parameter("smoke_color", Color(color, 1.0))
+	return material
 
 
 static func _particle_material(additive: bool) -> StandardMaterial3D:
@@ -233,7 +319,7 @@ func _make_ruin(index: int, p: Vector2, radius: float) -> void:
 	add_child(root)
 	if siege_view != null and siege_view.has_method("ruin_site") and siege_view.ruin_site(index):
 		# BR1 : les ruines calcinées du kit remplacent la maison ; il ne reste que les braises.
-		var kit_embers := _emitter({"amount": int(ruin_params["embers"]), "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _flame_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
+		var kit_embers := _emitter({"amount": int(ruin_params["embers"]), "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _ember_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
 		kit_embers.position.y = 1.0
 		root.add_child(kit_embers)
 		_ruins[index] = root
@@ -261,7 +347,7 @@ func _make_ruin(index: int, p: Vector2, radius: float) -> void:
 		root.add_child(beam)
 	var embers_count := int(ruin_params["embers"])
 	if embers_count > 0:
-		var embers := _emitter({"amount": embers_count, "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _flame_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
+		var embers := _emitter({"amount": embers_count, "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _ember_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
 		embers.position.y = rubble_height
 		root.add_child(embers)
 	_ruins[index] = root
@@ -295,6 +381,7 @@ func _assign_lights() -> void:
 			var fire: Dictionary = _fires[keys[i]]
 			var p: Vector2 = fire["p"]
 			light.position = Vector3(p.x, _ground(p.x, p.y) + height, p.y)
+			light.set_meta("base_position", light.position)
 			light.visible = true
 			_light_keys[i] = keys[i]
 		else:
@@ -315,6 +402,13 @@ func _process(delta: float) -> void:
 		var key: Variant = _light_keys[i]
 		if not light.visible or key == null or not _fires.has(key):
 			continue
+		# Vacillement : trois fréquences non commensurables (pas de motif répété), la lumière
+		# jaunit dans les pics et danse de quelques décimètres (ombres portées qui bougent).
 		var phase := float(i) * 1.37
-		var flicker := 1.0 + amount * (0.6 * sin(_time * speed + phase) + 0.4 * sin(_time * speed * 2.3 + phase * 2.0))
+		var t := _time * speed
+		var wave := 0.5 * sin(t + phase) + 0.3 * sin(t * 2.31 + phase * 2.0) + 0.2 * sin(t * 5.17 + phase * 3.3)
+		var flicker := 1.0 + amount * wave
 		light.light_energy = energy * float(_fires[key]["intensity"]) * flicker
+		light.light_color = _base_light_color.lerp(Color(1.0, 0.78, 0.42), clampf(wave, 0.0, 1.0) * 0.35)
+		var base: Vector3 = light.get_meta("base_position", light.position)
+		light.position = base + Vector3(sin(t * 0.73 + phase), sin(t * 1.1 + phase) * 0.5, cos(t * 0.91 + phase)) * 0.35

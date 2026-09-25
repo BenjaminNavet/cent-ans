@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sound_bank.schema.json",
+  "title": "Banque sonore (AU1)",
+  "description": "Événements sonores ponctuels, nappes 3D et ambiances 2D. Chemins relatifs à game/assets/audio/, sans extension.",
+  "type": "object",
+  "required": ["voices", "events", "beds", "ambience"],
+  "additionalProperties": false,
+  "properties": {
+    "voices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_voices", "near_distance_m"],
+      "properties": {
+        "max_voices": {"type": "integer", "minimum": 4, "maximum": 64},
+        "near_distance_m": {"type": "number", "minimum": 0}
+      }
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/event"}
+    },
+    "beds": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/loop"}
+    },
+    "ambience": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/loop"}
+    }
+  },
+  "$defs": {
+    "path": {"type": "string", "pattern": "^[a-z0-9_]+/[a-z0-9_]+$"},
+    "bus": {"enum": ["Bataille", "Ambiance", "Interface", "Voix", "Musique"]},
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+        "layers": {"type": "array", "items": {"type": "string"}},
+        "bus": {"$ref": "#/$defs/bus"},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 10},
+        "volume_db": {"type": "number", "minimum": -40, "maximum": 12},
+        "pitch": {"type": "array", "items": {"type": "number", "minimum": 0.5, "maximum": 2.0}, "minItems": 2, "maxItems": 2},
+        "max_instances": {"type": "integer", "minimum": 1, "maximum": 16},
+        "cooldown_s": {"type": "number", "minimum": 0},
+        "unit_size_m": {"type": "number", "exclusiveMinimum": 0},
+        "max_distance_m": {"type": "number", "exclusiveMinimum": 0},
+        "duck_music_db": {"type": "number", "maximum": 0},
+        "duck_seconds": {"type": "number", "minimum": 0}
+      },
+      "anyOf": [
+        {"required": ["files"], "properties": {"files": {"minItems": 1}}},
+        {"required": ["layers"], "properties": {"layers": {"minItems": 1}}}
+      ]
+    },
+    "loop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file"],
+      "properties": {
+        "description": {"type": "string"},
+        "file": {"$ref": "#/$defs/path"},
+        "bus": {"$ref": "#/$defs/bus"},
+        "volume_db": {"type": "number", "minimum": -40, "maximum": 12},
+        "unit_size_m": {"type": "number", "exclusiveMinimum": 0},
+        "max_distance_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}

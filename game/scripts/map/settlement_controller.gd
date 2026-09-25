@@ -196,11 +196,17 @@ func settlement_name(id: String) -> String:
 	return str(entry.get("name", id))
 
 
+## Lot M4 : le mouvement libre (`ArmyMovementController`) remplace les anneaux et l'aperçu
+## sur le graphe des colonies ; le panneau de colonie reste.
+func _free_movement() -> bool:
+	return map != null and map.get("movement_ctl") != null and map.movement_ctl.available()
+
+
 ## Armée sélectionnée (ou "" / armée étrangère) : anneaux des colonies atteignables.
 func on_army_selected(army_id: String, is_player: bool) -> void:
 	reachable = {}
 	hovered_settlement = ""
-	if not available() or army_id == "" or not is_player:
+	if not available() or army_id == "" or not is_player or _free_movement():
 		markers.clear()
 		return
 	reachable = map.sim.call("get_reachable_settlements", army_id)
@@ -353,7 +359,7 @@ func _process(_delta: float) -> void:
 	if markers.visible and not is_equal_approx(distance, _last_distance):
 		_last_distance = distance
 		markers.update_scale(distance)
-	if not _mouse_dirty or map.selected_army == "" or not available():
+	if not _mouse_dirty or map.selected_army == "" or not available() or _free_movement():
 		return
 	_mouse_dirty = false
 	var id: String = map.settlement_layer.pick_screen(get_viewport().get_mouse_position())

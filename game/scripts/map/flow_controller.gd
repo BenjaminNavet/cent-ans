@@ -174,7 +174,8 @@ func _default_save_name() -> String:
 		return "partie"
 	var facade := get_node_or_null("/root/SimFacade")
 	var faction := str(facade.call("faction_short_name", map.get("player_faction"))) if facade != null else "partie"
-	return ("%s %s" % [faction, sim.call("get_date_label")]).to_lower().replace(" ", "_")
+	# Audit A3 T4 : nom lisible (« France, printemps 1337 ») plutôt qu'un identifiant à tirets bas.
+	return "%s, %s" % [faction, str(sim.call("get_date_label")).to_lower()]
 
 
 ## Échap : ferme ce qui est ouvert (réglages, rapport), laisse la carte désélectionner
