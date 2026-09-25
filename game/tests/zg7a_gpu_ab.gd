@@ -83,7 +83,20 @@ func _run() -> void:
 	quit(0)
 
 
+var _saved := {}
+
+
 func _apply(config: String, on: bool) -> void:
+	# `mat:nom=valeur;nom=valeur` : uniformes du matériau du terrain (restaurés ensuite).
+	if config.begins_with("mat:"):
+		for pair in config.trim_prefix("mat:").split(";"):
+			var kv := pair.split("=")
+			if on:
+				_saved[kv[0]] = _terrain.material.get_shader_parameter(kv[0])
+				_terrain.material.set_shader_parameter(kv[0], int(kv[1]) if kv[1].is_valid_int() else float(kv[1]))
+			else:
+				_terrain.material.set_shader_parameter(kv[0], _saved[kv[0]])
+		return
 	match config:
 		"no_parcels":
 			_terrain.material.set_shader_parameter("fp_quality", 0 if on else 2)
