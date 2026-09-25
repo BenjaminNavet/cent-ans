@@ -253,9 +253,15 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if not player_owner:
 		recruit_panel.hide()
 	var queue: Array = Array(detail.get("recruit_queue", PackedStringArray()))
+	var queue_turns: Array = Array(detail.get("recruit_queue_turns", PackedInt32Array()))
 	var queue_names: Array = []
-	for unit_type in queue:
-		queue_names.append(GameCatalog.display_name(str(unit_type)))
+	for index in queue.size():
+		var queue_name := GameCatalog.display_name(str(queue[index]))
+		# B7b : une recrue longue à lever reste plusieurs tours dans la file.
+		var turns_left := int(queue_turns[index]) if index < queue_turns.size() else 1
+		if turns_left > 1:
+			queue_name += " (%s)" % FrText.count(turns_left, "tour")
+		queue_names.append(queue_name)
 	queue_label.visible = player_owner or not queue.is_empty()
 	var free_slots := int(detail.get("recruit_slots_free", 0))
 	queue_label.text = "Recrues attendues : %s (%s libre%s ce tour sur %d)" % [

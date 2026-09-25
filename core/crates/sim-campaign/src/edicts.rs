@@ -271,6 +271,22 @@ pub fn edict_effects(
     totals
 }
 
+/// Yearly piety the ruler of `faction` draws from its edicts (lot B7b): the
+/// flat `Piety` of the edict in force in each province it wholly holds —
+/// only the best province counts, so that a big realm does not multiply it
+/// (same rule as the court table, `table::resolve_lent`). Paid each winter
+/// by `dynasty::resolve_court_prestige`.
+pub fn yearly_edict_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    state
+        .controlled_provinces(faction)
+        .iter()
+        .filter(|id| state.holds_whole_province(faction, id))
+        .map(|id| edict_effects(state, data, id).piety.flat.round() as i32)
+        .max()
+        .unwrap_or(0)
+        .max(0)
+}
+
 /// Unrest at which the AI weighs an edict's unrest effects at face value
 /// (EQ1): less in a calm province, more near revolt.
 const AI_EDICT_UNREST_REFERENCE: f64 = 30.0;
@@ -489,6 +505,52 @@ mod tests {
         let unknown = EdictId::new("edict_does_not_exist").expect("well-formed id");
         let err = set_edict(&mut state, &data, &faction, &province, &unknown).unwrap_err();
         assert!(matches!(err, EdictError::UnknownEdict(_)));
+    }
+
+    #[test]
+    fn edict_piety_reaches_the_ruler_each_winter() {
+        let (mut state, data) = setup();
+        let faction = state.player_faction.clone();
+        let provinces: Vec<ProvinceId> = state
+            .controlled_provinces(&faction)
+            .into_iter()
+            .filter(|p| state.holds_whole_province(&faction, p))
+            .take(2)
+            .collect();
+        assert_eq!(provinces.len(), 2, "player holds two whole provinces");
+        assert_eq!(yearly_edict_piety(&state, &data, &faction), 0);
+        let lent = EdictId::new("edict_strict_lent").expect("well-formed id");
+        let peace = EdictId::new("edict_peace_of_god").expect("well-formed id");
+        set_edict(&mut state, &data, &faction, &provinces[0], &lent).expect("valid order");
+        set_edict(&mut state, &data, &faction, &provinces[1], &peace).expect("valid order");
+        // Not in force before the delay.
+        assert_eq!(yearly_edict_piety(&state, &data, &faction), 0);
+        state.turn += 1;
+        let expected = |id: &EdictId| -> i32 {
+            data.edicts[id]
+                .effects
+                .iter()
+                .filter(|e| e.effect == EffectKind::Piety)
+                .map(|e| e.value.round() as i32)
+                .sum()
+        };
+        // Only the best province counts (no stacking across the realm).
+        let best = expected(&lent).max(expected(&peace));
+        assert!(best > 0, "strict Lent gives piety in data/edicts");
+        assert_eq!(yearly_edict_piety(&state, &data, &faction), best);
+
+        let ruler = state.factions[&faction].ruler.clone().expect("a ruler");
+        state.characters.get_mut(&ruler).expect("ruler").piety = 40;
+        let buildings = crate::dynasty::yearly_building_piety(&state, &data, &faction);
+        state.season = crate::state::Season::Summer;
+        crate::dynasty::resolve_court_prestige(&mut state, &data);
+        assert_eq!(state.characters[&ruler].piety, 40, "paid in winter only");
+        state.season = crate::state::Season::Winter;
+        crate::dynasty::resolve_court_prestige(&mut state, &data);
+        assert_eq!(
+            i32::from(state.characters[&ruler].piety),
+            40 + buildings + best
+        );
     }
 
     #[test]

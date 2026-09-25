@@ -7,9 +7,9 @@ extends Node
 ## Principes du jeu ; la fiche des commandes de la carte, en tête, est générée depuis
 ## l'InputMap (`ShortcutSheet`, lot U7) à chaque ouverture (disposition du clavier à jour).
 const HELP_TEXT := """[b]La campagne[/b]
-• Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
+• Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi ; un pays dévasté les nourrit mal, même chez soi.
 • Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte 5 % des hommes (10 % l'hiver).
-• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (3 % de l'excédent au-delà de huit saisons de revenu). En dette, les troupes perdent du moral : licenciez.
+• Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (20 % de l'excédent au-delà de six saisons de revenu). En dette, toutes les troupes perdent 10 de moral par saison, sans déserter : licenciez.
 • Recrutez dans le panneau de province, formez des armées, donnez-leur un général (fiche personnage).
 • Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, deux tours pour choisir.
 • Posture « Siège » : l'armée assiège la place ennemie ; quand elle est sélectionnée, l'état du siège (vivres, brèche) et le bouton « Donner l'assaut » apparaissent au-dessus du bandeau d'ost, en bas de l'écran. Posture « Chevauchée » : pillage et butin.

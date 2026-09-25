@@ -93,7 +93,7 @@ pub use ids::{
     FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, ShipClassId,
     SkillId, TechnologyId, TraitId, UnitTypeId,
 };
-pub use load::{DataError, GameData, ReferenceError, Warning};
+pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
 pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use navgrid::{MapRasters, NavGrid, ProvinceRaster, IMPASSABLE, PLAIN_COST};

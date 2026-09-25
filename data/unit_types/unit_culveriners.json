@@ -27,7 +27,6 @@
     "rain_penalty"
   ],
   "required_technology": "tech_handgonnes",
-  "required_building": "bld_guild_hall",
   "available_from": 1380,
   "figure": "archer_5",
   "missile": "bullet",
