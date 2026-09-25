@@ -3,6 +3,7 @@
 use data_model::{Ability, UnitCategory, UnitStats};
 use serde::{Deserialize, Serialize};
 
+use crate::impact::LossCause;
 use crate::rng::jitter;
 use crate::setup::{SideId, UnitSetup};
 
@@ -149,6 +150,10 @@ pub struct Unit {
     /// Casualties taken during the current tick (for morale).
     #[serde(skip)]
     pub tick_losses: f64,
+    /// UB1: enemy soldiers this unit struck down (volleys and melee), for
+    /// the result screen only; no rule reads it.
+    #[serde(default)]
+    pub kills: f64,
     /// Attacked on the flank / rear during the current tick.
     #[serde(skip)]
     pub flanked: u8,
@@ -168,6 +173,17 @@ pub struct Unit {
     /// Heavy horse fighting on foot (order or siege assault).
     #[serde(default)]
     pub dismounted: bool,
+    /// BV2: cause of the latest casualties and the regiment that inflicted them.
+    #[serde(default)]
+    pub loss_cause: LossCause,
+    #[serde(default)]
+    pub loss_by: Option<u32>,
+    /// BV2: men knocked down by a charge (not fighting) and the seconds left
+    /// before they are back on their feet.
+    #[serde(default)]
+    pub knocked: f64,
+    #[serde(default)]
+    pub knocked_timer: f64,
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -224,12 +240,17 @@ impl Unit {
             ram: false,
             blocked_by: None,
             tick_losses: 0.0,
+            kills: 0.0,
             flanked: 0,
             order_morale: 0.0,
             order_morale_timer: 0.0,
             pavise: None,
             missile_timer: never(),
             dismounted: false,
+            loss_cause: LossCause::Other,
+            loss_by: None,
+            knocked: 0.0,
+            knocked_timer: 0.0,
         }
     }
 
@@ -362,7 +383,13 @@ impl Unit {
             Formation::Wedge => f64::from(files) * 3.0,
             _ => f64::from(files) * 2.0,
         };
-        front.min(self.hp.max(0.0))
+        // BV2: men knocked down by a charge do not fight until they get up.
+        let down = if self.knocked_timer > 0.0 {
+            self.knocked
+        } else {
+            0.0
+        };
+        (front - down).max(0.0).min(self.hp.max(0.0))
     }
 
     /// Support of the formation rectangle along the unit vector `dir`.
