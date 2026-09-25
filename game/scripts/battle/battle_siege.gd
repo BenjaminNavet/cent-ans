@@ -34,6 +34,7 @@ var fire_fx: Node3D = null  # S2 : incendies des maisons (`siege_fire_fx.gd`)
 var _kit_batch: BuildingKit.Batch = null  # BR1 : bâtiments du kit (MultiMesh par modèle)
 var _kit_sites: Dictionary = {}  # BR1 : indice de maison → [[poignée, ruine, Transform3D], …]
 var _kit_ruins: Dictionary = {}  # indice de maison → true (ruine déjà posée)
+var external_ladders := false  # SG1 : échelles posées contre le mur par `SiegeAssaultFx`
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -642,7 +643,7 @@ func _update_machines(units: Array) -> void:
 				var z := float(unit["z"])
 				machine.position = Vector3(x, _ground(x, z), z)
 				machine.rotation.y = float(unit["facing"])
-		if bool(unit.get("ladders", false)) and present:
+		if bool(unit.get("ladders", false)) and present and not external_ladders:
 			seen[id] = true
 			if not _ladders.has(id):
 				_ladders[id] = _make_ladder_group(float(unit["width"]))

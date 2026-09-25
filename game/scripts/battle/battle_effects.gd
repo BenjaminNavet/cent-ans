@@ -72,6 +72,9 @@ var _dirty: bool = false  # tampon des flèches à renvoyer à la carte graphiqu
 
 ## `weather` : clé météo du rendu ; `height_at(x, z)` : hauteur du sol ; `water_at(x, z)` :
 ## 0 terre ferme, 1 eau (gué ou rivière).
+var siege_walls := false  # SG1 : les tirs d'engins sur les murs sont rendus ailleurs
+
+
 func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	_rng.seed = 7351
 	_height_at = height_at
@@ -279,6 +282,9 @@ func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, c
 	var mid := (pos + aim) * 0.5
 	var lod := 1.0 if camera_pos.distance_to(mid) < 350.0 else 0.4
 	if kind == BALL or kind == STONE:
+		# SG1 : sans régiment visé, l'engin bat la muraille (`SiegeAssaultFx`, `engine_shot`).
+		if siege_walls and int(unit.get("target", -1)) < 0:
+			return
 		var engines := soldiers.soldier_positions(int(unit["id"]), 4) if soldiers != null else PackedVector3Array()
 		if engines.is_empty():
 			engines.append(pos)
