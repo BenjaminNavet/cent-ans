@@ -24,6 +24,21 @@ Mesure R2b, graines 0-63 : plaine 113/128, bocage 89/128, collines 98/128, monta
   plante à l'étape campagne (« Message queue out of memory », code 138, 3 OK) : régression connue de
   main (signalée dans 848119b5, présente sans R3 ni R4), les étapes de bataille ne sont pas atteintes.
 
+## Reprise 2 (demande du coordinateur) : crête militaire
+- [x] `position::military_crest` / `dead_ground` ; tireurs d'une crête nue sur la crête militaire
+  (au pas de course si l'ennemi est à < 400 m) ; score des hauteurs sur le champ de tir de leur
+  crête militaire ; pieux plantés sur la crête militaire : pas de repli devant les cavaliers de face,
+  repli à 20 m devant l'infanterie (`COVER_SAFETY` 20 aussi derrière haie) ; ligne défensive au
+  secours de ses tireurs en mêlée (`RESCUE_DISTANCE` 90 m).
+- [x] Test `archers_leave_no_dead_ground_below_a_rounded_crest` (échoue sans la crête militaire).
+- [x] Rendu : `indirect` → cloche 2,5 × (shader + `arrow_landing`, bit 32, pas des traits au bit 64) ;
+  contrôle ajouté dans `tests/bv1_check.gd` (seul échec restant : « traits dans les pavois »,
+  préexistant : le test pose `code = 4` = feu, pas pavois).
+- [x] Empreintes `b6.rs` (graines 3 et 11) recalculées, mêmes vainqueurs.
+- Mesures : crête nue 32/32 (était 0/32), tous les cas du survey = avant R4 ; contre-pente 2,3 pertes
+  avant contact (88,1 avant R4) ; R2b 399/512. Cas serré (`R4_FRENCH=heavy`) : 0/32 partout, analyse
+  dans l'ADR 0046 (tir à l'aveugle d'avant R4 ; équilibre hors périmètre).
+
 ## État : terminé (non fusionné dans main)
 
 ## Mesures
