@@ -5,7 +5,7 @@
   "voice": "cedar",
   "instructions": "Parle en français. Tu es Jean le Bel, vieux chanoine et chroniqueur du XIVe siècle, qui conseille son seigneur à voix posée : voix grave et chaleureuse de lettré, débit lent et clair, ton confidentiel et un peu solennel, comme dans une salle voûtée.",
   "alert_cooldown_turns": 8,
-  "min_gap_s": 6.0,
+  "min_gap_s": 1.5,
   "linger_s": 2.5,
   "lines": [
     { "id": "adv_start_france", "trigger": "campaign_start", "faction": "fac_france", "text": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue." },

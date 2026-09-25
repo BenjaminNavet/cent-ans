@@ -10,6 +10,11 @@ extends Node
 ## son `war_cry`. Échap, Entrée, espace ou un clic : passer. La caméra est rendue telle qu'elle
 ## était. Joué à l'ouverture du déploiement (simulation figée) ; sans déploiement, la bataille
 ## est mise en pause le temps du discours.
+##
+## VO1 : chaque phrase et le cri sont dits par une voix synthétique propre au général (voix de sa
+## faction, `data/voice/speech_voices.json`, fichiers `assets/audio/voice/speech/`), sur le bus
+## « Voix », musique atténuée ; la durée d'une phrase s'allonge à celle de sa voix (sous-titre
+## synchronisé). Phrase sans fichier (nom du général) : sous-titre seul, durée fixe.
 
 signal finished
 
@@ -41,6 +46,13 @@ var _cry_label: Label = null
 var _band: Control = null
 var _cried: bool = false
 var _shot_done: bool = false
+## VO1 : voix du général, début et durée de chaque phrase.
+var voice: String = ""
+var _voice_player: AudioStreamPlayer = null
+var _starts: PackedFloat32Array = PackedFloat32Array()
+var _durations: PackedFloat32Array = PackedFloat32Array()
+var _spoken_index: int = -1
+var _cry_stream: AudioStream = null
 
 
 ## Discours de `side` : {lines: [phrases], cry, speaker}. `ratio` = nos hommes / les leurs.
@@ -84,6 +96,8 @@ static func compose(setup: Dictionary, side: String, ratio: float, terrain_key: 
 		"speaker": general_name if general_name != "" else str(data.get("speaker_without_general", "le capitaine")),
 		"line_seconds": float(data.get("line_seconds", 4.6)),
 		"cry_seconds": float(data.get("cry_seconds", 3.0)),
+		"faction": faction,
+		"general_id": str((general as Dictionary).get("character", general_name)) if general is Dictionary else "",
 	}
 
 
@@ -99,6 +113,7 @@ func start(scene: Node, speech: Dictionary, units: Array, side: String) -> bool:
 	_cry_s = float(speech["cry_seconds"])
 	if not _build_path(units, side):
 		return false
+	_schedule_voice(speech)
 	var rig: BattleCamera = scene.camera_rig
 	_saved = {"target": rig.target, "distance": rig.distance, "yaw": rig.yaw}
 	_paused_before = bool(scene.paused)
@@ -113,7 +128,55 @@ func start(scene: Node, speech: Dictionary, units: Array, side: String) -> bool:
 
 
 func total_seconds() -> float:
-	return _line_s * float(lines.size()) + _cry_s
+	return _speaking_seconds() + _cry_s
+
+
+func _speaking_seconds() -> float:
+	if _durations.size() == lines.size() and not lines.is_empty():
+		return _starts[lines.size() - 1] + _durations[lines.size() - 1]
+	return _line_s * float(lines.size())
+
+
+## VO1 : voix du général et calendrier des phrases (durée = max(durée écrite, voix + pause)).
+func _schedule_voice(speech: Dictionary) -> void:
+	var faction := str(speech.get("faction", ""))
+	voice = VoiceLines.speech_voice(faction, str(speech.get("general_id", speaker)))
+	var padding := float(VoiceLines.speech_casting().get("line_padding_s", 0.6))
+	_starts = PackedFloat32Array()
+	_durations = PackedFloat32Array()
+	var t := 0.0
+	for line in lines:
+		var stream := VoiceLines.speech_stream(voice, str(line))
+		var length := _line_s if stream == null else maxf(_line_s, stream.get_length() + padding)
+		_starts.append(t)
+		_durations.append(length)
+		t += length
+	_cry_stream = VoiceLines.speech_stream(voice, cry)
+	if _cry_stream != null:
+		_cry_s = maxf(_cry_s, _cry_stream.get_length() + float(VoiceLines.speech_casting().get("cry_padding_s", 0.3)))
+	_voice_player = AudioStreamPlayer.new()
+	_voice_player.name = "GeneralVoice"
+	_voice_player.bus = "Voix" if AudioServer.get_bus_index("Voix") >= 0 else "Master"
+	add_child(_voice_player)
+	var director := get_node_or_null("/root/AudioDirector")
+	if director != null and director.has_method("duck_music"):
+		director.call("duck_music", -8.0, total_seconds())
+
+
+func _line_index(t: float) -> int:
+	var index := 0
+	for i in _starts.size():
+		if t >= _starts[i]:
+			index = i
+	return mini(index, lines.size() - 1)
+
+
+func _say(stream: AudioStream) -> void:
+	if _voice_player == null or stream == null or DisplayServer.get_name() == "headless":
+		return
+	_voice_player.stop()
+	_voice_player.stream = stream
+	_voice_player.play()
 
 
 ## Chemin de la caméra : centres des régiments du joueur, rangés le long du front.
@@ -156,20 +219,23 @@ func _process(delta: float) -> void:
 
 
 func _update(_delta: float) -> void:
-	var speaking := _line_s * float(lines.size())
+	var speaking := _speaking_seconds()
 	var rig: BattleCamera = _scene.camera_rig
 	if _t < speaking:
 		var u := smoothstep(0.0, 1.0, _t / speaking)
 		# Travelling le long des lignes, de trois quarts, la caméra tournant d'un flanc à l'autre.
 		rig.look_at_point(_point_at(u), CAMERA_DISTANCE, _yaw + lerpf(0.75, -0.75, u))
-		var index := mini(int(_t / _line_s), lines.size() - 1)
+		var index := _line_index(_t)
+		if index != _spoken_index:
+			_spoken_index = index
+			_say(VoiceLines.speech_stream(voice, str(lines[index])))
 		var text := str(lines[index])
 		if index == 0:
 			text = "« " + text
 		if index == lines.size() - 1:
 			text += " »"
 		_line_label.text = text
-		var local := fmod(_t, _line_s) / _line_s
+		var local := clampf((_t - _starts[index]) / _durations[index], 0.0, 1.0) if index < _durations.size() else fmod(_t, _line_s) / _line_s
 		_line_label.modulate.a = smoothstep(0.0, 0.08, local) * (1.0 - smoothstep(0.92, 1.0, local))
 		_cry_label.visible = false
 	else:
@@ -183,12 +249,16 @@ func _update(_delta: float) -> void:
 		if not _cried:
 			_cried = true
 			BattleAudio.play_at("war_cry", _point_at(0.5))
+			_say(_cry_stream)
 
 
 func stop() -> void:
 	if not active:
 		return
 	active = false
+	if _voice_player != null:
+		_voice_player.stop()
+		_voice_player.stream = null
 	var rig: BattleCamera = _scene.camera_rig
 	rig.look_at_point(_saved["target"], float(_saved["distance"]), float(_saved["yaw"]))
 	_scene.paused = _paused_before
