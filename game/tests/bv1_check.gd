@@ -34,6 +34,14 @@ func _init() -> void:
 		_check(float(a["time"]) > 3.0 and float(a["time"]) < 6.5, "durée de vol plausible : %.2f" % float(a["time"]))
 		_check(Vector3(a["dir"]).y < -0.3, "le trait retombe")
 	_check(inside == 256, "traits dans la zone visée : %d/256" % inside)
+	# R4 : une volée en cloche (`indirect`) vole plus longtemps et retombe plus raide, au même point.
+	var flat_arrow: Dictionary = volleys.arrow_landing(chunk, sh, 0)
+	chunk["code"] = 32
+	var lobbed_arrow: Dictionary = volleys.arrow_landing(chunk, sh, 0)
+	chunk["code"] = 0
+	_check(float(lobbed_arrow["time"]) > float(flat_arrow["time"]) + 0.5, "cloche plus longue : %.2f / %.2f" % [float(lobbed_arrow["time"]), float(flat_arrow["time"])])
+	_check(Vector3(lobbed_arrow["dir"]).y < Vector3(flat_arrow["dir"]).y, "cloche plus raide")
+	_check(Vector3(lobbed_arrow["pos"]).is_equal_approx(Vector3(flat_arrow["pos"])), "même point de chute")
 	# Hachage : identique à `volley_pcg` (GLSL, uint 32 bits) sur quelques valeurs de référence.
 	_check(BattleVolleys._pcg(0) == 129708002, "pcg(0) = %d" % BattleVolleys._pcg(0))
 	_check(BattleVolleys._pcg(1) == 2831084092, "pcg(1) = %d" % BattleVolleys._pcg(1))

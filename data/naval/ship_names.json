@@ -1,0 +1,187 @@
+{
+  "description": "Noms des navires de campagne (lot NV2), par faction et par port d'attache. Une flotte qui appareille d'un port prend d'abord les noms de ce port, puis les noms généraux de sa faction. Les navires médiévaux portaient surtout des noms de saints (la Marie, le Saint-Denis), souvent suivis du port : « la Marguerite de Rye », « la Nicolas de Sandwich ». Les noms des rôles de 1337-1340 (Cinq-Ports, flotte de l'Écluse) sont complétés de noms plausibles de la même forme.",
+  "factions": [
+    {
+      "faction": "fac_england",
+      "names": [
+        "la Christophe",
+        "le Thomas",
+        "l'Édouard",
+        "la Grâce-Dieu",
+        "la Philippe",
+        "la Marie de la Tour",
+        "la Trinité royale",
+        "la Jeannette",
+        "la Rose",
+        "l'Isabelle",
+        "le Saint-Esprit",
+        "la Plenty",
+        "la Godbiete",
+        "le Swallow",
+        "la Welfare",
+        "la Katherine",
+        "la Sainte-Marie",
+        "la Michel",
+        "la Gabriel",
+        "la Jésus"
+      ],
+      "ports": {
+        "set_rye": ["la Marguerite de Rye", "la Nicolas de Rye", "la Sainte-Marie de Rye"],
+        "set_winchelsea": ["la Trinité de Winchelsea", "la Sainte-Croix de Winchelsea", "la Blythe de Winchelsea"],
+        "set_hastings": ["la Marie de Hastings", "la Nicolas de Hastings"],
+        "set_sandwich": ["la Nicolas de Sandwich", "la Christophe de Sandwich", "la Katherine de Sandwich"],
+        "set_dover": ["la Jonette de Douvres", "la Michel de Douvres", "la Sainte-Marie de Douvres"],
+        "set_londres": ["la Welfare de Londres", "la Paul de Londres", "la Katherine de Londres"],
+        "set_colchester": ["la Marie de Colchester"],
+        "set_maldon": ["la Botolph de Maldon"],
+        "set_yarmouth": ["la Michel de Yarmouth", "la George de Yarmouth", "la Christophe de Yarmouth"],
+        "set_lynn": ["le Saint-Jacques de Lynn", "la Trinité de Lynn"],
+        "set_boston": ["la Marie de Boston"],
+        "set_hull": ["la Plenty de Hull", "la Katherine de Hull"],
+        "set_scarborough": ["la Nicolas de Scarborough"],
+        "set_whitby": ["la Hilda de Whitby"],
+        "set_newcastle": ["la Katherine de Newcastle", "la Cuthbert de Newcastle"],
+        "set_bristol": ["la Blythe de Bristol", "la Marie de Bristol", "la Nicolas de Bristol"],
+        "set_southampton": ["la Nicolas de Southampton", "la Sainte-Marie de Southampton"],
+        "set_portsmouth": ["la Gabriel de Portsmouth"],
+        "set_plymouth": ["la Sainte-Marie de Plymouth", "la Christophe de Plymouth"],
+        "set_dartmouth": ["la Marie de Dartmouth", "la Trinité de Dartmouth"],
+        "set_fowey": ["la Gabriel de Fowey", "la Michel de Fowey"],
+        "set_bayonne": ["la Sainte-Marie de Bayonne", "la Nicolas de Bayonne"],
+        "set_bordeaux": ["la Trinité de Bordeaux", "la Marie de Bordeaux"],
+        "set_libourne": ["la Marguerite de Libourne"]
+      }
+    },
+    {
+      "faction": "fac_france",
+      "names": [
+        "le Saint-Denis",
+        "la Riche de Leure",
+        "le Saint-Aubin",
+        "le Saint-Nicolas de Harfleur",
+        "la Notre-Dame",
+        "le Saint-Louis",
+        "la Sainte-Catherine",
+        "la Pèlerine",
+        "la Marguerite",
+        "le Saint-Georges",
+        "la Julienne",
+        "la Sainte-Anne",
+        "le Saint-Michel",
+        "la Madeleine",
+        "le Saint-Jean",
+        "la Rose"
+      ],
+      "ports": {
+        "set_rouen": ["la galée Saint-Louis", "la Sainte-Catherine de Rouen", "le Saint-Romain de Rouen"],
+        "set_dieppe": ["la Marie de Dieppe", "le Saint-Pierre de Dieppe", "la Sainte-Anne de Dieppe"],
+        "set_caen": ["la Trinité de Caen"],
+        "set_cherbourg": ["le Saint-Nicolas de Cherbourg"],
+        "set_boulogne": ["la Julienne de Boulogne", "la Notre-Dame de Boulogne"],
+        "set_calais": ["la Sainte-Marie de Calais", "le Saint-Pierre de Calais"],
+        "set_wissant": ["la Marguerite de Wissant"],
+        "set_saint_valery_sur_somme": ["la Sainte-Marie de Saint-Valery"],
+        "set_le_crotoy": ["le Saint-Nicolas du Crotoy"],
+        "set_abbeville": ["la Notre-Dame d'Abbeville"],
+        "set_la_rochelle": ["la Notre-Dame de La Rochelle", "le Saint-Sauveur de La Rochelle"],
+        "set_aigues_mortes": ["la Sainte-Marie d'Aigues-Mortes"]
+      }
+    },
+    {
+      "faction": "fac_flanders",
+      "names": ["la Sainte-Gertrude", "le Saint-Bavon", "la Notre-Dame", "le Saint-Nicolas", "la Sainte-Walburge", "le Saint-Pierre"],
+      "ports": {
+        "set_sluis": ["la Sainte-Marie de l'Écluse", "le Saint-Nicolas de l'Écluse"],
+        "set_bruges": ["le Saint-Donatien de Bruges", "la Notre-Dame de Bruges"]
+      }
+    },
+    {
+      "faction": "fac_castile",
+      "names": ["la Santa María", "la San Salvador", "la Santiago", "la San Juan", "la Santa Clara", "la San Clemente", "la Santa Catalina", "la San Pedro"],
+      "ports": {
+        "set_seville": ["la Santa María de Séville", "la San Clemente de Séville"],
+        "set_cadiz": ["la San Juan de Cadix"],
+        "set_bilbao": ["la Santa María de Bilbao"],
+        "set_san_sebastian": ["la San Pedro de Saint-Sébastien"],
+        "set_a_coruna": ["la Santiago de La Corogne"],
+        "set_cartagena": ["la San Ginés de Carthagène"]
+      }
+    },
+    {
+      "faction": "fac_genoa",
+      "names": ["la galère Saint-Georges", "la Sainte-Claire", "la galère Saint-Laurent", "la Sainte-Marie", "la galère Saint-Jean", "la Saint-Antoine"],
+      "ports": {
+        "set_genes": ["la galère Saint-Georges de Gênes", "la Sainte-Claire de Gênes"],
+        "set_savona": ["la Saint-Jean de Savone"],
+        "set_portovenere": ["la Saint-Pierre de Portovenere"]
+      }
+    },
+    {
+      "faction": "fac_venice",
+      "names": ["la galère Saint-Marc", "la Sainte-Hélène", "la galère Saint-Nicolas", "la Sainte-Marie", "la Saint-Théodore"],
+      "ports": {
+        "set_venise": ["la galère Saint-Marc de Venise", "la Sainte-Marie de Venise"],
+        "set_chioggia": ["la Sainte-Félicité de Chioggia"]
+      }
+    },
+    {
+      "faction": "fac_aragon",
+      "names": ["la Sant Jordi", "la Santa Eulàlia", "la Santa Maria", "la Sant Nicolau"],
+      "ports": {
+        "set_barcelone": ["la Santa Eulàlia de Barcelone", "la Sant Jordi de Barcelone"],
+        "set_valence": ["la Sant Vicent de Valence"],
+        "set_palma": ["la Santa Maria de Palma"]
+      }
+    },
+    {
+      "faction": "fac_portugal",
+      "names": ["la Santa Maria", "la São Vicente", "la São Pedro", "la Santa Catarina"],
+      "ports": {
+        "set_lisbonne": ["la São Vicente de Lisbonne", "la Santa Maria de Lisbonne"],
+        "set_porto": ["la São Pedro de Porto"]
+      }
+    },
+    {
+      "faction": "fac_brittany",
+      "names": ["la Sainte-Anne", "le Saint-Yves", "la Notre-Dame", "le Saint-Malo", "la Sainte-Catherine"],
+      "ports": {
+        "set_saint_malo": ["la Notre-Dame de Saint-Malo", "le Saint-Aaron de Saint-Malo"],
+        "set_nantes": ["la Sainte-Anne de Nantes"],
+        "set_brest": ["le Saint-Mathieu de Brest"]
+      }
+    },
+    {
+      "faction": "fac_scotland",
+      "names": ["le Saint-André", "la Sainte-Marguerite", "la Sainte-Marie", "le Saint-Columba"],
+      "ports": {
+        "set_berwick": ["la Marie de Berwick"],
+        "set_aberdeen": ["la Sainte-Marie d'Aberdeen"],
+        "set_dundee": ["le Saint-André de Dundee"]
+      }
+    },
+    {
+      "faction": "fac_holstein",
+      "names": ["la cogue Sainte-Marie", "le Saint-Pierre", "la Saint-Nicolas", "la Saint-Georges"],
+      "ports": {
+        "set_lubeck": ["la cogue Sainte-Marie de Lübeck", "la Saint-Nicolas de Lübeck"],
+        "set_hamburg": ["la Saint-Pierre de Hambourg"],
+        "set_kiel": ["la Saint-Georges de Kiel"]
+      }
+    },
+    {
+      "faction": "fac_naples",
+      "names": ["la galère Saint-Janvier", "la Sainte-Claire", "la galère Saint-Louis", "la Sainte-Marie"],
+      "ports": {
+        "set_naples": ["la galère Saint-Janvier de Naples"],
+        "set_salerno": ["la Saint-Matthieu de Salerne"]
+      }
+    }
+  ],
+  "sources": [
+    "Bataille de l'Écluse",
+    "Cinque Ports",
+    "Clos des Galées",
+    "Jonathan Sumption, The Hundred Years War I: Trial by Battle",
+    "N. A. M. Rodger, The Safeguard of the Sea"
+  ]
+}

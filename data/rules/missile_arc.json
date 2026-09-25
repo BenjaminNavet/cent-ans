@@ -1,0 +1,10 @@
+{
+  "description": "Tir tendu et tir en cloche des troupes de trait en bataille (lot R4, ADR 0046). Une cible vue est tirée à vue. Une cible masquée par le relief ne peut être prise qu'en volée indirecte, par les seules troupes qui tirent en volée à l'arc (arc long, francs-archers, archers montés), si un allié la voit ou si elle a été vue récemment, et si une trajectoire lancée sous l'angle maximal passe au-dessus de la crête. La dispersion de ces volées réduit fortement leur précision.",
+  "indirect_missiles": ["arrow"],
+  "max_launch_angle_deg": 45.0,
+  "clearance_m": 2.0,
+  "indirect_accuracy": 0.3,
+  "remembered_accuracy": 0.2,
+  "spotter_range_m": 350.0,
+  "memory_s": 12.0
+}

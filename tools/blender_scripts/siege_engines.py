@@ -47,6 +47,13 @@ MANGONEL_ARM = 2.3
 TOWER_HEIGHT = 12.0
 TOWER_AXLE = 0.8
 
+# SG3: simplified level of detail (`<name>_lod.glb`): small boxes and short thin beams are
+# dropped, prisms and wheels get fewer sides; the named, pivoted nodes stay (animation).
+LOD = {"on": False}
+LOD_MIN_BOX = 0.4
+LOD_THIN = 0.16
+LOD_MIN_BEAM = 1.0
+
 
 def g2b(v) -> Vector:
     """Godot axes (x right, y up, z forward) to Blender axes."""
@@ -89,6 +96,9 @@ class Part:
 
     def box(self, center, size, mat: str = "Timber", rot=None) -> None:
         """Axis-aligned box (``rot``: optional (axis, angle) rotation about its centre)."""
+        dims = sorted(size)
+        if LOD["on"] and (dims[2] < LOD_MIN_BOX or dims[1] < LOD_THIN):
+            return
         geom = bmesh.ops.create_cube(self.bm, size=1.0)
         verts = geom["verts"]
         sx, sy, sz = size
@@ -116,6 +126,10 @@ class Part:
         pa, pb = g2b(a), g2b(b)
         axis = pb - pa
         length = axis.length
+        if LOD["on"]:
+            if length < LOD_MIN_BEAM and max(r1, r2) < 0.15:
+                return
+            sides = max(3, sides // 2)
         geom = bmesh.ops.create_cone(
             self.bm,
             cap_ends=cap,
@@ -510,21 +524,28 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     manifest = {}
     for name, builder in BUILDERS.items():
-        clear_scene()
-        info = builder()
-        info["triangles"] = triangles()
-        manifest[name] = info
-        bpy.ops.object.select_all(action="SELECT")
-        bpy.ops.export_scene.gltf(
-            filepath=str(out / f"{name}.glb"),
-            export_format="GLB",
-            use_selection=True,
-            export_yup=True,
-            export_apply=False,
-            export_normals=True,
-            export_texcoords=False,
-            export_animations=False,
-        )
+        for lod in (False, True):
+            LOD["on"] = lod
+            clear_scene()
+            info = builder()
+            if lod:
+                manifest[name]["lod_triangles"] = triangles()
+            else:
+                info["triangles"] = triangles()
+                manifest[name] = info
+            bpy.ops.object.select_all(action="SELECT")
+            suffix = "_lod" if lod else ""
+            bpy.ops.export_scene.gltf(
+                filepath=str(out / f"{name}{suffix}.glb"),
+                export_format="GLB",
+                use_selection=True,
+                export_yup=True,
+                export_apply=False,
+                export_normals=True,
+                export_texcoords=False,
+                export_animations=False,
+            )
+    LOD["on"] = False
     (out / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )

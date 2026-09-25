@@ -338,6 +338,12 @@ def human_clip_specs():
         ("xbow_idle", "Idle", True, poses.crossbow_rest, False),
         ("xbow_walk", "Walk", True, poses.crossbow_rest, False),
         ("climb", "Idle", True, poses.climb, False),
+        # SG3: siege engine crews (windlass, rope, loading, rammer, pushing).
+        ("crank", "Idle", True, poses.crank, False),
+        ("haul", "Idle", True, poses.haul, False),
+        ("load", "Idle", True, poses.load, False),
+        ("swab", "Idle", True, poses.swab, False),
+        ("push", "Walk", True, poses.push, False),
     ]
 
 
