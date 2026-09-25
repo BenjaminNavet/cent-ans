@@ -38,7 +38,6 @@ func setup(campaign_map: Node) -> void:
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
-	minimap.mode_changed.connect(_on_mode_changed)
 	# Lot C5 : le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
 	var trade_button: Button = ui.get("trade_button")
 	if trade_button != null:
@@ -50,18 +49,6 @@ func setup(campaign_map: Node) -> void:
 				map.call("refresh_all"))
 	minimap.legend_toggled.connect(func(pressed: bool) -> void: set_legend_open(pressed))
 	ui.call("queue_layout")
-
-
-## Lot DP2 : le bouton « Diplomatie » de la minicarte bascule aussi la carte 3D dans le mode
-## diplomatique (touche N), et en sort quand on choisit un autre mode.
-func _on_mode_changed(new_mode: String) -> void:
-	var diplomacy: Object = map.get("diplomacy")
-	if diplomacy == null or not diplomacy.has_method("set_diplomacy_mode"):
-		return
-	if new_mode == CampaignMinimap.MODE_DIPLOMACY and not DiplomaticStances.available(_sim()):
-		minimap.set_mode(CampaignMinimap.MODE_POLITICAL)
-		return
-	diplomacy.call("set_diplomacy_mode", new_mode == CampaignMinimap.MODE_DIPLOMACY)
 
 
 # --- Légende de la carte (lot UX1) ------------------------------------------------------
@@ -92,16 +79,10 @@ func legend_open() -> bool:
 
 ## Mode de carte affiché : « diplomacy », « religion », « unrest » ou « political ».
 func current_map_mode() -> String:
-	var diplomacy: Object = map.get("diplomacy")
-	if diplomacy != null:
-		match int(diplomacy.get("mode")):
-			DiplomacyController.MapMode.DIPLOMACY:
-				return "diplomacy"
-			DiplomacyController.MapMode.RELIGION:
-				return "religion"
-	if bool(map.get("unrest_mode")):
-		return "unrest"
-	return "political"
+	# MF1 : un seul filtre actif, porté par `MapModeController`.
+	var modes: Object = map.get("map_modes")
+	var current := str(modes.get("mode")) if modes != null else "political"
+	return current if current in MapLegend.MODES else "political"
 
 
 ## Couleurs du joueur et des royaumes d'exemple (`factions` de la légende).
