@@ -1,0 +1,8 @@
+{
+  "description": "Réglages des armées de l'IA sur la grille de navigation (lot M3, spec 2026-09-24-mouvement-libre § 4) : attaque d'une armée ennemie dans la bulle, évitement des zones de contrôle d'armées plus fortes, étapes de marche par tour.",
+  "attack_ratio": 1.5,
+  "attack_reach_share": 0.8,
+  "avoid_ratio": 1.0,
+  "avoid_radius_km": 12,
+  "max_legs_per_turn": 6
+}

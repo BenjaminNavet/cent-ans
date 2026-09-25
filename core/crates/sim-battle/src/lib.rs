@@ -40,6 +40,7 @@ pub mod fire;
 pub mod formation_ai;
 pub mod orders;
 pub mod outcome;
+pub mod relief;
 pub mod rng;
 pub mod setup;
 pub mod siege;
@@ -55,6 +56,7 @@ pub use field::{
 pub use fire::{Blaze, FireRules, FireState};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
+pub use relief::ReliefStyle;
 pub use rng::BattleRng;
 pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
