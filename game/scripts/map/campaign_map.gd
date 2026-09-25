@@ -74,6 +74,7 @@ var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
+var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -127,6 +128,12 @@ func _ready() -> void:
 	strategic.name = "StrategicView"
 	add_child(strategic)
 	strategic.setup(self)
+	weather_view = CampaignWeatherView.new()  # CM2
+	weather_view.name = "Weather"
+	add_child(weather_view)
+	weather_view.setup(self)
+	if strategic.overlay != null:
+		strategic.overlay.weather_view = weather_view
 	path_preview.setup(map_data)
 	_connect_ui()
 	settlements_ctl = SettlementController.new()  # C5
@@ -304,6 +311,8 @@ func refresh_all() -> void:
 		settlement_layer.refresh(sim, SimFacade.faction_color)
 	if life != null:  # CV1
 		life.refresh(sim)
+	if weather_view != null:  # CM2
+		weather_view.refresh(sim)
 	if strategic != null:  # CM2
 		strategic.refresh(sim)
 	if minimap_ctl != null:
@@ -962,6 +971,7 @@ func _process(_delta: float) -> void:
 	if life != null:  # CV1
 		life.update_view(distance)
 	strategic.update_view(distance)  # CM2
+	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()

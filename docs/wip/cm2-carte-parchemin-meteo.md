@@ -15,7 +15,14 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
   `terrain_parchment.gdshader` (substitué au poids 1 : le rendu 3D n'est plus payé),
   `parchment_overlay.gd` (noms, vignettes pré-rendues, jetons, navires et monstres),
   `parchment_decor.gd` (roses, navires, monstres placés par la distance à la côte)
-- [ ] 2. Météo
+- [x] 2. Météo : cœur `sim-campaign/src/weather.rs` (fonction pure : graine, tour, saison,
+  capitale ; fronts classés du sec à l'humide, chances par climat `data/rules/campaign_weather.json`),
+  pont `campaign_sim_weather.rs` (`get_campaign_weather`, `get_province_weather`), ADR 0027
+  (visuelle seulement). Rendu : `campaign_weather_view.gd` (masque par province, nuées
+  `campaign_clouds.gdshader`, pluie / neige en particules de près, éclairs), sol
+  `campaign_weather.gdshaderinc` (mouillé, neige fraîche, brouillard matinal qui se lève,
+  ombres des nuées), nuées dessinées sur le parchemin. AU1 : `CampaignAmbience.map_weather`.
+  Test `game/tests/cm2_parchment_weather_test.gd`, `cargo test --test cm2_weather`.
 - [ ] 3. Lumière de fin de tour
 - [ ] Mesures FPS (3 zooms), captures `docs/audit/captures/cm2/`, fusion de main, smoke
 
@@ -27,4 +34,4 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
 | 1500 | 65,4 | 10,28 |
 
 ## Prochaine étape
-Lot 2 : météo dans `core/` (module `weather.rs`), pont, rendu, AU1.
+Lot 3 : lumière dorée pendant le tour de l'IA ; puis mesures FPS, fusion de main, smoke.

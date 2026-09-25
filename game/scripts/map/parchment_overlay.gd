@@ -25,6 +25,8 @@ var camera: Camera3D
 var map_data: MapData
 var decor: ParchmentDecor
 var armies: ArmyMarkers
+## Lot CM2 météo : nuées dessinées sur le parchemin (pluie, neige, orage, brouillard).
+var weather_view: CampaignWeatherView
 
 var _realms: Array[Dictionary] = []  # {name, points: PackedVector2Array (arc), size}
 var _provinces: Array[Dictionary] = []  # {name, px, area}
@@ -58,7 +60,7 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 		owner_of[id] = owner
 		var name := str(province.get("name", id))
 		var paren := name.find(" (")
-		_provinces.append({"name": name.substr(0, paren) if paren > 0 else name, "px": province["centroid"], "world": _world(province["centroid"]), "area": float(province.get("area_px", 0.0))})
+		_provinces.append({"id": id, "name": name.substr(0, paren) if paren > 0 else name, "px": province["centroid"], "world": _world(province["centroid"]), "area": float(province.get("area_px", 0.0))})
 	_provinces.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["area"] > b["area"])
 	_build_realms(owner_of)
 	if settlement_data != null:
@@ -74,7 +76,7 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 			var province_id := str(entry.get("province", ""))
 			var owner := str(owner_of.get(province_id, ""))
 			var cap: Vector2 = capitals.get(province_id, Vector2(-1, -1))
-			_towns.append({"px": px, "world": _world(px), "capital": cap.distance_to(px) < 6.0, "color": SimFacade.faction_color(owner) if owner != "" else INK})
+			_towns.append({"px": px, "world": _world(px), "capital": cap.distance_to(px) < 6.0, "color": _faction_info(owner).get("color", INK) if owner != "" else INK})
 	_towns.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["capital"] and not b["capital"])
 	queue_redraw()
 
@@ -124,11 +126,20 @@ func _build_realms(owner_of: Dictionary) -> void:
 			cov += Vector3(d.x * d.x, d.x * d.y, d.y * d.y) * w
 		var angle := 0.5 * atan2(2.0 * cov.y, cov.x - cov.z)
 		angle = clampf(angle, deg_to_rad(-28.0), deg_to_rad(28.0))
-		var info := SimFacade.faction_info(owner)
+		var info := _faction_info(owner)
 		var name := str(info.get("name", owner)).to_upper()
 		var half := clampf(sqrt(area) * 0.42, 120.0, 520.0)
 		var dir := Vector2(cos(angle), sin(angle))
 		_realms.append({"name": name, "a": c - dir * half, "b": c + dir * half, "c": c, "size": clampf(sqrt(area) / 22.0, 14.0, 30.0)})
+
+
+## Fiche de faction (autoload SimFacade, cherché dans l'arbre : ce script se compile aussi
+## hors du jeu, dans les tests headless).
+func _faction_info(faction: String) -> Dictionary:
+	var facade := get_node_or_null("/root/SimFacade") if is_inside_tree() else null
+	if facade == null:
+		return {"name": faction, "color": INK}
+	return facade.call("faction_info", faction)
 
 
 func set_weight(value: float, distance: float) -> void:
@@ -178,6 +189,7 @@ func _draw() -> void:
 		occupied[key] = true
 		_draw_town(p, (11.0 if town["capital"] else 7.5) * s, town, a)
 	var t2 := Time.get_ticks_usec()
+	_draw_weather(s, a, view)
 	# Textes et jetons prennent le relais des étiquettes et étendards 3D à mi-fondu.
 	var text_alpha := smoothstep(0.45, 0.85, a)
 	var placed: Array[Rect2] = []
@@ -354,6 +366,79 @@ var _town_glyph: Texture2D
 func _make_glyphs() -> void:
 	_town_glyph = _make_glyph(GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_town(ci, GLYPH_ANCHOR, GLYPH_UNIT))
 	_make_sea_glyphs()
+	for kind in WEATHER_GLYPHS:
+		_weather_glyphs[kind] = _make_glyph(WEATHER_GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_weather(ci, WEATHER_ANCHOR, WEATHER_UNIT, kind))
+
+
+# --- Météo (lot CM2) ---------------------------------------------------------------------
+
+const WEATHER_GLYPHS := ["rain", "snow", "storm", "fog"]
+const WEATHER_GLYPH_SIZE := Vector2i(64, 56)
+const WEATHER_ANCHOR := Vector2(32.0, 24.0)
+const WEATHER_UNIT := 14.0
+
+var _weather_glyphs: Dictionary = {}
+
+
+## Une nuée dessinée par province touchée (au-dessus du centre, décalée), sans chevauchement.
+func _draw_weather(s: float, a: float, view: Rect2) -> void:
+	if weather_view == null or weather_view.weather.is_empty():
+		return
+	var cell := 64.0 * s
+	var occupied: Dictionary = {}
+	for province in _provinces:
+		var kind := str(weather_view.weather.get(province["id"], {}).get("kind", "clear"))
+		if not _weather_glyphs.has(kind):
+			continue
+		var p := _screen_w(province["world"]) + Vector2(18.0, -26.0) * s
+		if not view.has_point(p):
+			continue
+		var key := Vector2i(int(p.x / cell), int(p.y / cell))
+		if occupied.has(key):
+			continue
+		occupied[key] = true
+		var k := 11.0 * s / WEATHER_UNIT
+		var tex: Texture2D = _weather_glyphs[kind]
+		draw_texture_rect(tex, Rect2(p - WEATHER_ANCHOR * k, Vector2(WEATHER_GLYPH_SIZE) * k), false, Color(1, 1, 1, 0.9 * a))
+
+
+## Nuée à l'encre (festons), pluie en traits obliques, neige en étoiles, orage en éclair,
+## brouillard en filets ondulés.
+static func paint_weather(ci: CanvasItem, p: Vector2, u: float, kind: String) -> void:
+	var ink := Color(0.25, 0.22, 0.24)
+	var fill := Color(0.86, 0.85, 0.82) if kind != "storm" else Color(0.45, 0.44, 0.50)
+	var lobes := [Vector2(-0.9, 0.1), Vector2(-0.35, -0.35), Vector2(0.35, -0.3), Vector2(0.9, 0.1), Vector2(0.0, 0.15)]
+	var radii := [0.55, 0.7, 0.62, 0.5, 0.6]
+	if kind == "fog":
+		for k in 3:
+			var pts := PackedVector2Array()
+			for i in 13:
+				var x := lerpf(-1.6, 1.6, i / 12.0)
+				pts.append(p + Vector2(x, -0.4 + k * 0.55 + sin(i * 1.3 + k) * 0.12) * u)
+			ci.draw_polyline(pts, Color(ink, 0.8), 2.0, true)
+		return
+	for i in lobes.size():
+		ci.draw_circle(p + lobes[i] * u, radii[i] * u + 1.6, ink)
+	for i in lobes.size():
+		ci.draw_circle(p + lobes[i] * u, radii[i] * u, fill)
+	var below := p + Vector2(0.0, 0.8) * u
+	match kind:
+		"rain":
+			for i in 5:
+				var x := lerpf(-1.0, 1.0, i / 4.0)
+				ci.draw_line(below + Vector2(x, 0.0) * u, below + Vector2(x - 0.3, 0.9) * u, Color(0.16, 0.28, 0.45), 2.0, true)
+		"snow":
+			for i in 4:
+				var c := below + Vector2(lerpf(-0.9, 0.9, i / 3.0), 0.35 + 0.3 * (i % 2)) * u
+				for k in 3:
+					var ang := k * PI / 3.0
+					ci.draw_line(c - Vector2(cos(ang), sin(ang)) * 0.22 * u, c + Vector2(cos(ang), sin(ang)) * 0.22 * u, Color(0.25, 0.35, 0.55), 1.6, true)
+		"storm":
+			var bolt := PackedVector2Array([below + Vector2(0.1, -0.1) * u, below + Vector2(-0.35, 0.55) * u, below + Vector2(0.05, 0.5) * u, below + Vector2(-0.25, 1.15) * u, below + Vector2(0.45, 0.3) * u, below + Vector2(0.05, 0.35) * u, below + Vector2(0.35, -0.1) * u])
+			ci.draw_colored_polygon(bolt, Color(0.95, 0.72, 0.15))
+			var closed := bolt.duplicate()
+			closed.append(bolt[0])
+			ci.draw_polyline(closed, Color(0.45, 0.12, 0.05), 1.4, true)
 
 
 func _make_glyph(size: Vector2i, painter: Callable) -> Texture2D:
