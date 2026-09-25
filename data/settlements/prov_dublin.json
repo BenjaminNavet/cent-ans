@@ -26,7 +26,7 @@
       "bld_archery_butts"
     ],
     "port": true,
-    "description": "Seigneurie d'Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent le Pale depuis les monts de Wicklow.",
+    "description": "Seigneurie d'Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent les terres anglaises (le futur « Pale », mot du XVe siècle) depuis les monts de Wicklow.",
     "sources": [
       "Seigneurie d'Irlande",
       "Dublin",
@@ -39,8 +39,8 @@
     "kind": "town",
     "name": {
       "display": "Drogheda",
-      "local": "Drochet Atha",
-      "local_language": "moyen anglais"
+      "local": "Droichead Átha",
+      "local_language": "gaélique irlandais"
     },
     "lonlat": [
       -6.3478,
@@ -66,7 +66,7 @@
     "kind": "town",
     "name": {
       "display": "Waterford",
-      "local": "Vadrafjord",
+      "local": "Waterford",
       "local_language": "moyen anglais"
     },
     "lonlat": [
@@ -82,7 +82,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Ancien port viking devenu cité royale fidèle, dite « Urbs Intacta » pour n'avoir jamais été prise.",
+    "description": "Ancien port viking (Veðrafjǫrðr) devenu cité royale fidèle à la couronne ; sa devise « Urbs Intacta » ne lui sera donnée qu'en 1487.",
     "sources": [
       "Waterford"
     ]
@@ -94,7 +94,7 @@
     "name": {
       "display": "Mellifont",
       "local": "Mainistir Mór",
-      "local_language": "moyen anglais"
+      "local_language": "gaélique irlandais"
     },
     "lonlat": [
       -6.4667,
