@@ -1,6 +1,6 @@
 {
   "description": "Étendards des régiments en bataille (lot EP5, ADR 0034) : chute sous de lourdes pertes, relève, prise par l'ennemi, effets sur le moral et la cohésion.",
-  "two_bearers_from_soldiers": 160,
+  "two_bearers_from_soldiers": 120,
   "heavy_losses_below": 0.6,
   "fall_chance_per_loss_percent": 0.03,
   "rout_drop_chance": 0.35,

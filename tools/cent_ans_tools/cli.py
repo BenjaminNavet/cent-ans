@@ -413,7 +413,7 @@ def assets_heraldry() -> None:
 
 @assets_app.command("banners")
 def assets_banners() -> None:
-    """Dessine bannières (256×512) et pennons (512×128) de chaque faction (F10c)."""
+    """Dessine bannières (256×512), pennons (512×128) et étendards (1024×256) de chaque faction."""
     from cent_ans_tools import banners
 
     paths = banners.build()

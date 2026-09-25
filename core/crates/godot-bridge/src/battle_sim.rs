@@ -412,6 +412,15 @@ impl BattleSim {
                 let bearers = sim.standard_bearers(unit.id as usize);
                 if bearers > 0 {
                     dict.set("standard", unit.standard.key());
+                    if unit.is_general {
+                        let sovereign = sim
+                            .setup()
+                            .side(unit.side)
+                            .general
+                            .as_ref()
+                            .is_some_and(|g| g.sovereign);
+                        dict.set("sovereign", sovereign);
+                    }
                     if let Some((x, z)) = unit.standard.ground() {
                         dict.set("standard_x", x);
                         dict.set("standard_z", z);

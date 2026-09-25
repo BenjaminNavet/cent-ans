@@ -58,7 +58,7 @@ impl Default for BattleStandardRules {
     /// to that file (checked by `tests/real_data.rs`).
     fn default() -> Self {
         BattleStandardRules {
-            two_bearers_from_soldiers: 160,
+            two_bearers_from_soldiers: 120,
             heavy_losses_below: 0.6,
             fall_chance_per_loss_percent: 0.03,
             rout_drop_chance: 0.35,
