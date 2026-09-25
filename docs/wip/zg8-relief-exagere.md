@@ -6,10 +6,15 @@
 - [x] Squelette : `ReliefExaggerationProfile` (+ `resources/relief_exaggeration.tres`), `ReliefFloor`
   (fond min+flou, WorkerThreadPool), `MapData.display_height` / `height_from_display` / `set_relief_floor`,
   `shaders/campaign_relief.gdshaderinc` (`campaign_display_height`), globaux `campaign_relief_*`.
-- [ ] Brancher tous les consommateurs (terrain/quadtree, E0, fleuves, routes, villes, monuments, ponts).
-- [ ] Roche selon la pente affichée, soleil plus rasant.
-- [ ] Test `tests/zg8_relief_test.gd`, tests ZG2/ZG4/ZG5b/ZG6 + smoke.
-- [ ] Captures avant/après `docs/img/zg8/`, banc `--bench-map`, docs (godot-map.md, ADR 0036).
+- [x] Brancher tous les consommateurs (terrain/quadtree, E0, fleuves, routes, villes, monuments, ponts).
+- [x] Roche selon la pente affichée, soleil plus rasant (34°).
+- [x] Test `tests/zg8_relief_test.gd` OK ; ZG2/ZG4/ZG5b/ZG6 OK (ZG2/ZG4 adaptés à la formule) ; smoke :
+  mêmes 15 échecs avec et sans ZG8 (dylib périmée vs `data/unit_types` : `required_building`, le core de
+  main ne compile pas à cette heure — hors lot).
+- [x] Banc `--bench-map` lancé avec/sans (`--no-relief-exaggeration`) : machine chargée (21 Godot),
+  mesures non concluantes, pas de régression visible ; fond calculé en 90 ms au chargement.
+- [ ] Captures définitives `docs/img/zg8/` (script `tests/zg8_relief_shots.gd`), docs (godot-map.md, ADR 0036),
+  fusion de main (ZG4b).
 
 Prochaine étape : voir la première case non cochée.
 
