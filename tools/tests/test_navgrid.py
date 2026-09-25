@@ -177,6 +177,22 @@ def test_splat_is_block_averaged_to_the_grid() -> None:
     assert cost.tolist() == [[costs["forest"], costs["plains"]]]
 
 
+def test_lowland_heath_is_not_a_mountain() -> None:
+    """Lot R3: the rock/heath weight makes a mountain on hills only."""
+    rules = navgrid.load_rules()
+    costs = rules["terrain_costs"]
+    weights = np.zeros((1, 2, 4))
+    weights[0, :, 3] = 0.8
+    result = navgrid.terrain_cost(
+        np.array([[40.0, 500.0]]),
+        np.full((1, 2), 0.01),
+        weights,
+        np.zeros((1, 2), dtype=bool),
+        rules,
+    )
+    assert result.tolist() == [[costs["plains"], costs["mountains"]]]
+
+
 def test_forest_and_marsh_are_never_walls() -> None:
     """Forests and marshes are slower than plains but always passable."""
     costs = navgrid.load_rules()["terrain_costs"]

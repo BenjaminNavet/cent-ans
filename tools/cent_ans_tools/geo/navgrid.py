@@ -277,7 +277,10 @@ def terrain_cost(
     mountains = (
         (height >= MOUNTAINS_MIN_M)
         | (slope >= MOUNTAINS_MIN_SLOPE)
-        | (weights[..., 3] >= MOUNTAINS_MIN_ROCK)
+        # Rock or heath (splat A): mountains on hills only. Since lot R1 the
+        # channel also carries the lowland heaths (Landes, Campine, Lüneburg),
+        # which are open country, not mountains (lot R3).
+        | ((weights[..., 3] >= MOUNTAINS_MIN_ROCK) & hills)
     )
     for mask, name in (
         (hills, "hills"),
