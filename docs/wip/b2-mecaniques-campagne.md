@@ -10,7 +10,7 @@ Spec : `docs/design/2026-09-25-bulles-partout.md` (lot B2). Branche : `worktree-
 - [ ] Validateur Codex + pytest verts
 
 ## Fiches écrites
-cdx_jeu_tresor, cdx_jeu_impot, cdx_jeu_entretien, cdx_jeu_edits, cdx_jeu_commerce
+cdx_jeu_tresor, cdx_jeu_impot, cdx_jeu_entretien, cdx_jeu_edits, cdx_jeu_commerce, cdx_jeu_ordre_public, cdx_jeu_population, cdx_jeu_devastation, cdx_jeu_famine, cdx_jeu_table
 
 ## Prochaine étape
 Écrire les ids restants listés dans `data/codex/_b2_links.md` (liste temporaire tolérée par le validateur ; à supprimer en fin de lot).
