@@ -42,6 +42,8 @@ const DEFAULTS := {
 	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
 	"battle/blood": 1,
 	"battle/unit_size": 1.0,
+	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	"interface/intro_seen": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
