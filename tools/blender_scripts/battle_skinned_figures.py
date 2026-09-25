@@ -13,6 +13,10 @@ import copy
 
 import battle_skinned_equipment as eq
 
+# Variant mask of the Genoese back pavise: shown for variants 0 and 1, plus bit 7 as a
+# part flag read by battle_soldier_skinned.gdshader (`hide_pavise`, BV3).
+PAVISE_MASK = 0b1000_0011
+
 HUMAN_BUDGET = [
     {
         "*": 450,
@@ -264,7 +268,8 @@ FIGURES = {
             ("kettle_hat", 2),
             ("crossbow", 0),
             ("quiver", 0, {"arrows": False}),
-            ("pavise", 0),
+            # Bit 7 flags the back pavise (hidden by the shader once the row is planted, BV3).
+            ("pavise", PAVISE_MASK),
         ],
         "variants": 2,
     },
