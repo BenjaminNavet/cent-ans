@@ -589,6 +589,68 @@ func hide_army() -> void:
 	queue_layout()
 
 
+## Lot U10 (audit A3 § 4) : choix du général d'une armée sans chef, ouvert depuis le sceau
+## « Sans chef ». `candidates` : `[{id, name, detail, reason}]` (`reason` non vide = grisé, avec
+## le motif). Choisir émet `general_requested(personnage, armée)` ; « Toute la Cour… » émet
+## `court_panel_requested`.
+var general_picker: PanelContainer
+
+
+func show_general_picker(army_id: String, title: String, candidates: Array) -> void:
+	if general_picker == null:
+		general_picker = PanelContainer.new()
+		general_picker.name = "GeneralPicker"
+		general_picker.theme = event_log.theme
+		general_picker.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
+		add_child(general_picker)
+		register_panel(general_picker, PanelStack.Kind.CENTRAL)
+	for child in general_picker.get_children():
+		general_picker.remove_child(child)
+		child.queue_free()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	general_picker.add_child(box)
+	var header := HBoxContainer.new()
+	box.add_child(header)
+	var heading := HudStyle.label(title, HudStyle.FONT_TITLE + 1, HudStyle.RUBRIC)
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(heading)
+	var close := Button.new()
+	close.text = "×"
+	close.tooltip_text = "Fermer (Échap)"
+	close.pressed.connect(general_picker.hide)
+	header.add_child(close)
+	var any_free := false
+	for candidate in candidates:
+		var reason := str(candidate.get("reason", ""))
+		var button := Button.new()
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.text = "%s — %s" % [str(candidate.get("name", "?")), str(candidate.get("detail", ""))]
+		if reason != "":
+			button.text += " (%s)" % reason
+			button.disabled = true
+			button.tooltip_text = "Impossible : %s." % reason
+		else:
+			any_free = true
+			var character_id := str(candidate.get("id", ""))
+			button.pressed.connect(func() -> void:
+				general_picker.hide()
+				general_requested.emit(character_id, army_id))
+		box.add_child(button)
+	if not any_free:
+		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+	var court := Button.new()
+	court.text = "Toute la Cour…"
+	court.pressed.connect(func() -> void:
+		general_picker.hide()
+		court_panel_requested.emit())
+	box.add_child(court)
+	general_picker.show()
+	general_picker.reset_size()
+	var view := get_viewport().get_visible_rect().size
+	general_picker.position = Vector2(HUD_MARGIN, maxf(60.0, view.y - general_seal.size.y - HUD_MARGIN - general_picker.size.y - 8.0))
+
+
 func show_court(rows: Array[Dictionary], faction_label: String, faction_color: Color, preset_filter: int = -1) -> void:
 	court_panel.show_court(rows, faction_label, faction_color, preset_filter)
 

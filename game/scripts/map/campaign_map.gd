@@ -1057,6 +1057,13 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
+					_stage_screenshot_court()
+					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
+				"general_picker":  # U10 : choix du général depuis le sceau « Sans chef »
+					_stage_screenshot()
+					if selected_army != "" and hud != null:
+						hud.open_general_picker(selected_army)
 				"siege":
 					_stage_screenshot_siege()  # M8
 				"map":
