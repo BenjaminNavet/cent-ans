@@ -329,7 +329,6 @@ func _build_negotiation() -> Control:
 	_reasons.bbcode_enabled = true
 	_reasons.fit_content = true
 	_reasons.scroll_active = false
-	page.add_child(_reasons)
 	_counter_box = HBoxContainer.new()
 	_counter_box.name = "CounterOffer"
 	_counter_box.add_theme_constant_override("separation", 8)
@@ -346,6 +345,7 @@ func _build_negotiation() -> Control:
 	_counter_box.add_child(adopt)
 	_counter_box.hide()
 	page.add_child(_counter_box)
+	page.add_child(_reasons)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 6)
 	var counter := Button.new()
@@ -874,7 +874,7 @@ func _render_explanation() -> bool:
 	var counter: Array = _explanation.get("counter", [])
 	if not accept and not counter.is_empty():
 		_counter_articles = counter
-		_counter_label.text = "Contre-offre : %s — %d %% de chances." % [_explanation.get("counter_text", ""), int(_explanation.get("counter_chance", 0))]
+		_counter_label.text = "Leur contre-offre (%d %%) : %s." % [int(_explanation.get("counter_chance", 0)), _explanation.get("counter_text", "")]
 		_counter_box.show()
 	return true
 
@@ -1191,6 +1191,13 @@ func stage_example() -> void:
 			_articles.append({"kind": "cede_province", "giver": "recipient", "province": province["id"]})
 			break
 	_articles.append({"kind": "trade_agreement"})
+	_render_draft()
+
+
+## DP2 (captures) : une offre généreuse gâchée par une seule exigence d'or excessive.
+func stage_counter_example() -> void:
+	_articles = [{"kind": "trade_agreement"}, {"kind": "gold", "giver": "proposer", "amount": 2500},
+		{"kind": "gold", "giver": "recipient", "amount": 10000}]
 	_render_draft()
 
 

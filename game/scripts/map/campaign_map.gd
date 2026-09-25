@@ -1235,6 +1235,10 @@ func _parse_cmdline() -> void:
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
 					diplomacy.panel.stage_example()
+				"diplomacy_counter":  # DP2 : un seul point bloque, contre-offre
+					_focus_capital()
+					diplomacy.open_panel("fac_aragon")
+					diplomacy.panel.stage_counter_example()
 				"diplomacy_map":
 					_focus_capital()
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)
