@@ -1,7 +1,7 @@
 # ZG5b — rendu de l'hydrographie fine, des routes drapées, des ancrages et du parcellaire de près
 
 Branche `worktree-agent-a1d8f6f50c1e29cce` (depuis `main` 5a33ec1f ; `main` refusionné après ZG4,
-PF1, PB1). Cache partagé par liens symboliques non versionnés `data/map/pyramid`, `tools/geo/raw`.
+PF1, PB1, puis epic + bulles3 le 2026-09-25 ; tests zg2, zg5b, smoke verts après fusion). Cache partagé par liens symboliques non versionnés `data/map/pyramid`, `tools/geo/raw`.
 ADR 0036, contrat `docs/geo.md` § « Hydrographie fine ». Doc : `docs/godot-map.md` § « Hydrographie
 fine, routes drapées, ancrages et parcellaire de près (lot ZG5b) ».
 
