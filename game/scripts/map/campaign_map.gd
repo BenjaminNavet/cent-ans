@@ -1051,7 +1051,9 @@ func _parse_cmdline() -> void:
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):
+			# Force un pas fixe (mesure, comparaison) : désactive le choix adaptatif (T2).
 			terrain.fine_step = int(arg.trim_prefix("--fine-step="))
+			terrain.fine_step_auto = false
 			terrain.fine_enabled = terrain.fine_step > 0
 		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
 			settlement_layer.select(arg.trim_prefix("--select-settlement="))
