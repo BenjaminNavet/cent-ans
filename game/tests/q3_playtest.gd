@@ -768,7 +768,7 @@ func phase_naval() -> void:
 	await key(KEY_3)
 	var t_fight := Time.get_ticks_msec()
 	var next_shot := 15000
-	while not scene.get("_finished_shown") and Time.get_ticks_msec() - t_fight < 120000:
+	while not scene.get("_finished_shown") and Time.get_ticks_msec() - t_fight < 300000:
 		await wait(10)
 		if Time.get_ticks_msec() - t_fight > next_shot:
 			await shot("naval-%ds" % (next_shot / 1000))
