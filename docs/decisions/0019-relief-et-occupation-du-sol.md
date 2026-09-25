@@ -45,7 +45,8 @@ pixel existaient.
   `data/map/navgrid_splat.png` et lue en priorité : `navgrid.png` reste identique (test
   `test_committed_navgrid_is_up_to_date`). Aligner les coûts sur les forêts historiques
   (régénérer la grille depuis la nouvelle `splat.png`) est une décision de règle laissée à
-  l'orchestrateur.
+  l'orchestrateur. *Remplacé par l'ADR 0045 (lot R3) : la grille lit désormais les forêts
+  historiques et les zones humides de R1 ; `navgrid_splat.png` est supprimé.*
 - **Lecture du relief** : `relief_shade.png` (LA8, 8192²) cuit hors ligne depuis le relief fin :
   L = détail d'altitude par rapport à la heightmap de rendu filtrée bilinéairement (normales
   d'ombrage sous le pixel 4096), A = courbure multi-échelle (0,5 / 1,5 / 4,5 km) : creux et fonds
