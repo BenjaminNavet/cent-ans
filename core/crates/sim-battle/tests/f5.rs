@@ -44,16 +44,18 @@ fn a_charge_passes_through_friends() {
         run: true,
     };
     sim.issue_command(command).unwrap();
-    run(&mut sim, 60.0);
+    // R2: the militia may break before the minute is out (relief of the
+    // field), so the contact is looked for during the run.
+    let mut reached = false;
+    for _ in 0..60 {
+        run(&mut sim, 1.0);
+        reached |= sim.units()[1].state == UnitState::Melee;
+    }
     assert!(
         (sim.units()[0].x - 600.0).abs() < 0.5,
         "the foot are not shoved"
     );
-    assert_eq!(
-        sim.units()[1].state,
-        UnitState::Melee,
-        "the knights reach the enemy"
-    );
+    assert!(reached, "the knights reach the enemy");
 }
 
 #[test]
