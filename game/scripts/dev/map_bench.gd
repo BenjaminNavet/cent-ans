@@ -23,6 +23,11 @@ const PAN_PATH: Array[Vector2] = [
 const WARMUP_FRAMES := 90
 ## ZG4 : lieux de la descente (x, y carte) : Rouen (zone E7), Grande Chartreuse (E4), Paris (E7).
 const DESCENT_SITES: Array[Vector2] = [Vector2(2096.5, 1819.7), Vector2(2537.6, 2492.0), Vector2(2212.9, 1924.5)]
+## ZG6 : `--bench-towns` descend plutôt sur des villes ordinaires rendues à l'échelle 1:1
+## (Amiens, Troyes, Poitiers, Gand ; Chartres et Lincoln ne sont pas dans les données), pause
+## allongée pour laisser la construction progressive se faire sous la caméra.
+const TOWN_DESCENT_SITES: Array[Vector2] = [Vector2(2224.0, 1763.6), Vector2(2381.4, 2026.4), Vector2(1964.9, 2249.3), Vector2(2380.6, 1598.2)]
+const TOWN_DESCENT_HOLD := 4.0
 const DESCENT_SECONDS := 6.0
 const DESCENT_HOLD := 1.5
 
@@ -43,6 +48,8 @@ var _primitives: PackedFloat32Array = PackedFloat32Array()
 var _draw_calls: PackedFloat32Array = PackedFloat32Array()
 var _descent_only := false
 var _descent_site := 0
+var _descent_sites: Array[Vector2] = DESCENT_SITES
+var _descent_hold := DESCENT_HOLD
 var _descent_ms: PackedFloat32Array = PackedFloat32Array()
 var _descent_t_start := 0
 var _descent_us := 0
@@ -56,6 +63,9 @@ func _ready() -> void:
 			pan_seconds = float(arg.trim_prefix("--bench-seconds="))
 		elif arg == "--bench-descent-only":
 			_descent_only = true
+		elif arg == "--bench-towns":
+			_descent_sites = TOWN_DESCENT_SITES
+			_descent_hold = TOWN_DESCENT_HOLD
 	if OS.get_cmdline_user_args().has("--bench-listeners"):
 		_wrap_listeners.call_deferred()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
@@ -122,19 +132,19 @@ func _process(delta: float) -> void:
 			_frame_ms.append((now - _last_us) / 1000.0)
 			_sample()
 			_phase_t += delta
-			var site := DESCENT_SITES[_descent_site]
+			var site := _descent_sites[_descent_site]
 			var lowest := camera_rig.min_distance_at(Vector3(site.x, 0.0, site.y))
 			# Descente en logarithme de la distance (150 → 5 → minimum), pause, remontée.
 			var u := 1.0
 			if _phase_t < DESCENT_SECONDS:
 				u = smoothstep(0.0, 1.0, _phase_t / DESCENT_SECONDS)
-			elif _phase_t >= DESCENT_SECONDS + DESCENT_HOLD:
-				u = 1.0 - smoothstep(0.0, 1.0, (_phase_t - DESCENT_SECONDS - DESCENT_HOLD) / (DESCENT_SECONDS * 0.5))
+			elif _phase_t >= DESCENT_SECONDS + _descent_hold:
+				u = 1.0 - smoothstep(0.0, 1.0, (_phase_t - DESCENT_SECONDS - _descent_hold) / (DESCENT_SECONDS * 0.5))
 			_place(site, exp(lerpf(log(150.0), log(lowest), u)))
-			if _phase_t >= DESCENT_SECONDS * 1.5 + DESCENT_HOLD:
+			if _phase_t >= DESCENT_SECONDS * 1.5 + _descent_hold:
 				_descent_site += 1
 				_phase_t = 0.0
-				if _descent_site >= DESCENT_SITES.size():
+				if _descent_site >= _descent_sites.size():
 					_descent_us = now - _descent_t_start
 					_report(now)
 					_phase = "done"
@@ -189,8 +199,13 @@ func _report(now: int) -> void:
 		bakes += int(landmark.stats.get("bakes", 0))
 		bake_frame_max = maxf(bake_frame_max, float(landmark.stats.get("bake_frame_ms_max", 0.0)))
 		bake_total += float(landmark.stats.get("bake_ms_total", 0.0))
+	var towns := {}
+	var town_layer := get_tree().root.find_child("Towns", true, false) as TownLayer
+	if town_layer != null:
+		towns = town_layer.stats.duplicate()
 	var report := {
 		"descent": descent,
+		"towns": towns,
 		"landmark_bakes": bakes, "landmark_bake_frame_ms_max": snappedf(bake_frame_max, 0.01),
 		"landmark_bake_ms_total": snappedf(bake_total, 0.01),
 		"frames": count,
