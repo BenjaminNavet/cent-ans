@@ -11,7 +11,7 @@
       "label": "bannière",
       "note": "Bannière carrée (plus haute que large) aux armes pleines : réservée au chevalier banneret qui mène sa compagnie ; aussi la bannière d'une commune ou d'une ville.",
       "cloth": "banner",
-      "size_m": [1.2, 2.4]
+      "size_m": [1.0, 2.0]
     },
     "standard": {
       "label": "étendard",
@@ -96,10 +96,10 @@
     "sound_distance_m": 260
   },
   "render": {
-    "max_distance_m": 650,
-    "far_scale": 2.2,
+    "max_distance_m": 1000,
+    "far_scale": 3.0,
     "far_scale_from_m": 140,
-    "far_scale_to_m": 600,
+    "far_scale_to_m": 700,
     "general_scale": 1.25,
     "lod0_distance_m": 24,
     "lod1_distance_m": 75,

@@ -413,7 +413,8 @@ func figure_count(id: int) -> int:
 
 ## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
 func _hide_reserved(slots: PackedInt32Array, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
-	var out := slice
+	# Copie : `_previous` (même tableau) garde les vraies places (`figure_at`).
+	var out := slice.duplicate()
 	for slot in slots:
 		if slot >= 0 and slot < n:
 			var o := slot * 12

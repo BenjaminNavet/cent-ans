@@ -351,7 +351,7 @@ func _group(side: String, role: String) -> Dictionary:
 		mmi.name = "EP5_%s_%s_lod%d" % [side, role, level]
 		mmi.set_meta("far_blend", [0.0, 0.1, 0.7][level])
 		lods.append(mmi)
-	var group := {"lods": lods, "rows": [PackedFloat32Array(), PackedFloat32Array(), PackedFloat32Array()], "mat": mat}
+	var group := {"lods": lods, "rows": [[], [], []], "mat": mat}
 	_groups[key] = group
 	return group
 
@@ -364,7 +364,7 @@ func _dead_group(side: String, role: String) -> Dictionary:
 	var mat := _figure_material(side, role, DEATH_SETS[role])
 	var mmi := _new_mmi(BattleSkinned.mesh(str(figure[0]), int(figure[1]), 1), mat, true)
 	mmi.name = "EP5_%s_%s_fallen" % [side, role]
-	var group := {"mmi": mmi, "rows": PackedFloat32Array(), "mat": mat}
+	var group := {"mmi": mmi, "rows": [], "mat": mat}
 	_dead_groups[key] = group
 	return group
 
@@ -412,27 +412,25 @@ func _flag_layer(key: String) -> Dictionary:
 	mesh.custom_aabb = AABB(Vector3(-10, -1, -10), Vector3(20, 20, 20))
 	var mmi := _new_mmi(mesh, mat, true)
 	mmi.name = "EP5_flags_%s_%s" % [parts[0], parts[1]]
-	var layer := {"mmi": mmi, "rows": PackedFloat32Array(), "mat": mat, "skinned": skinned}
+	var layer := {"mmi": mmi, "rows": [], "mat": mat, "skinned": skinned}
 	_flag_layers[key] = layer
 	return layer
 
 
-static func _append(rows: PackedFloat32Array, t: Transform3D, custom: Vector4) -> void:
+static func _append(rows: Array, t: Transform3D, custom: Vector4) -> void:
 	var b := t.basis
-	rows.append_array(PackedFloat32Array([b.x.x, b.y.x, b.z.x, t.origin.x, b.x.y, b.y.y, b.z.y, t.origin.y, b.x.z, b.y.z, b.z.z, t.origin.z, custom.x, custom.y, custom.z, custom.w]))
+	rows.append_array(([b.x.x, b.y.x, b.z.x, t.origin.x, b.x.y, b.y.y, b.z.y, t.origin.y, b.x.z, b.y.z, b.z.z, t.origin.z, custom.x, custom.y, custom.z, custom.w]))
 
 
-static func _flush(mmi: MultiMeshInstance3D, rows: PackedFloat32Array) -> void:
+static func _flush(mmi: MultiMeshInstance3D, rows: Array) -> void:
 	var mm := mmi.multimesh
 	var n := rows.size() / 16
 	if n > mm.instance_count:
 		mm.instance_count = maxi(n, mm.instance_count * 2)
 	mmi.visible = n > 0
 	if n > 0:
-		var padded := rows
-		if padded.size() != mm.instance_count * 16:
-			padded = rows.duplicate()
-			padded.resize(mm.instance_count * 16)
+		var padded := PackedFloat32Array(rows)
+		padded.resize(mm.instance_count * 16)
 		mm.buffer = padded
 	mm.visible_instance_count = n
 
@@ -467,9 +465,9 @@ func update(units: Array, soldiers: BattleSoldiers, camera_pos: Vector3) -> void
 	_shown.clear()
 	for group in _groups.values():
 		for k in 3:
-			group["rows"][k] = PackedFloat32Array()
+			group["rows"][k] = []
 	for key in _flag_layers:
-		(_flag_layers[key] as Dictionary)["rows"] = PackedFloat32Array()
+		(_flag_layers[key] as Dictionary)["rows"] = []
 	_poll_no_quarter(units)
 	var by_id: Dictionary = {}
 	for unit in units:
@@ -618,7 +616,7 @@ func _track_standard(rec: Dictionary, unit: Dictionary, standard: String) -> voi
 func _place_fallen(camera_pos: Vector3, max_d: float) -> void:
 	fallen_count = 0
 	for group in _dead_groups.values():
-		group["rows"] = PackedFloat32Array()
+		group["rows"] = []
 	for entry in _fallen:
 		var xform: Transform3D = entry["xform"]
 		if camera_pos.distance_to(xform.origin) > max_d:
@@ -676,3 +674,9 @@ func hide_scale() -> float:
 
 func is_shown(id: int) -> bool:
 	return _shown.has(id)
+
+
+## EP5 : le régiment a un étendard rendu ici (porté, tombé ou pris) : de près, son
+## drapeau-repère s'efface.
+func handles(id: int) -> bool:
+	return _records.has(id) and (_shown.has(id) or str((_records[id] as Dictionary)["standard"]) != "carried")
