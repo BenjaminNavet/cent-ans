@@ -34,6 +34,8 @@ const SETTLEMENT_COVER := 0.8
 var map_data: MapData
 var terrain: TerrainBuilder
 var crossings: RiverCrossings
+## Lot ZG5b : hydrographie fine, routes drapées et ancrages au palier près (null sans cache).
+var fine: FineGeoLayer
 ## Tronçons affichés : {name, importance, points: PackedVector2Array, widths: PackedFloat32Array}.
 var rivers: Array[Dictionary] = []
 ## Zones personnalisées : {id, name, px: Vector2, radius_px, boundary_bridges}.
@@ -93,6 +95,14 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	add_child(crossings)
 	crossings.build(self, settlements)
 	_set_fords(crossings.ford_uniforms())
+	if fine != null:
+		fine.queue_free()
+	fine = FineGeoLayer.new()
+	fine.name = "FineGeo"
+	add_child(fine)
+	if not fine.setup(self, settlements):
+		fine.queue_free()
+		fine = null
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	_rects_dirty = true
@@ -103,6 +113,7 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 		"covers": covers.size(),
 		"zones": zones.size(),
 		"bridges": crossings.bridge_count(),
+		"fine": fine != null,
 		"build_ms": Time.get_ticks_msec() - t0,
 	}
 	print("RiversRenderer: %s" % JSON.stringify(stats))
@@ -123,6 +134,8 @@ func in_custom_zone(p: Vector2, margin: float = 0.0) -> bool:
 func update_visibility(camera_distance: float) -> void:
 	if _rects_dirty:
 		_update_carved_rects()
+	if fine != null:
+		fine.update_view(camera_distance)
 	var should_show := camera_distance < minor_max_distance
 	if should_show == _minor_visible or _minor == null:
 		return
@@ -139,7 +152,8 @@ func _update_carved_rects() -> void:
 	_rects_dirty = false
 	if terrain == null or terrain.material == null:
 		return
-	var found := terrain.fine_chunk_rects()
+	# ZG5b : avec le réseau fin, le lit est creusé dans les pages du quadtree (FineBedCarver).
+	var found := terrain.fine_chunk_rects() if fine == null else PackedVector4Array()
 	var rects: Array[Vector4] = []
 	for i in mini(found.size(), 4):
 		rects.append(found[i])
@@ -438,3 +452,24 @@ func _set_fords(fords: Array[Vector4]) -> void:
 	for material: ShaderMaterial in [_water_major, _water_minor]:
 		material.set_shader_parameter("fords", padded)
 		material.set_shader_parameter("ford_count", mini(fords.size(), 32))
+
+
+## Lot ZG5b : matériaux des anciens rubans (fondu dans le disque du réseau fin).
+func old_materials() -> Array[ShaderMaterial]:
+	var result: Array[ShaderMaterial] = []
+	for material in [_water_major, _water_minor]:
+		if material != null:
+			result.append(material)
+	return result
+
+
+## Lot ZG5b : routes de près (lot C6) à effacer dans le disque des routes fines.
+func attach_roads(roads: RoadRenderer) -> void:
+	if fine != null:
+		fine.attach_roads(roads)
+
+
+## Lot ZG5b : charge et maille tout de suite le réseau fin autour de la vue (captures, tests).
+func flush_fine(camera_distance: float) -> void:
+	if fine != null:
+		fine.flush(camera_distance)
