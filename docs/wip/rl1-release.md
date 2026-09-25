@@ -11,7 +11,7 @@ ci-dessous donne la charge ; les comparaisons fiables sont celles faites dans le
 1. [x] Build de release + export macOS vérifié (menu, partie, carte, fin de tour, sauvegarde, bataille)
 2. [x] Performance globale : 3 goulets identifiés, 2 corrigés, 1 documenté
 3. [x] Préréglage de qualité par défaut selon le GPU détecté
-4. [x] Premier lancement : shaders pré-calculés à l'export, cache Metal préchauffé, écran de démarrage
+4. [x] Premier lancement : cache Metal préchauffé à l'export, écran de démarrage (pré-calcul des shaders essayé, gain nul)
 
 ## Procédure de release (à suivre telle quelle)
 ```
@@ -19,15 +19,14 @@ tools/export_macos.sh            # build release Rust, import, export, data/, si
 open "export/Cent Ans.app"       # ou : "export/Cent Ans.app/Contents/MacOS/Cent Ans"
 ```
 - Prérequis (une fois par machine) : modèles d'export Godot 4.7.2 (déjà installés dans
-  `~/Library/Application Support/Godot/export_templates/4.7.2.stable`) et **Metal Toolchain**
-  d'Xcode (`xcodebuild -downloadComponent MetalToolchain`, installée cette nuit) : sans elle le
-  pré-calcul des shaders s'arrête au SPIR-V (« Metal shader baking limited to SPIR-V »).
-- L'export n'est **pas** headless : le pré-calcul des shaders (`shader_baker/enabled=true` dans
-  `export_presets.cfg`) a besoin du rendu Forward+ ; une fenêtre d'éditeur s'ouvre ~30 s. L'éditeur
-  fenêtré réécrit `project.godot` en sortant : le script le sauvegarde et le restaure (`trap`).
-- macOS minimum 14.0 (arm64) : avec 11.0, cible Metal Apple7/MSL 2.3 et 4 shaders moteur
-  (`SceneForwardClusteredShaderRD`, brouillard volumétrique, FSR2) restaient à compiler au
-  lancement (« requires Apple6 / MSL 3.1 »). Le modèle d'export n'existe qu'en « universal ».
+  `~/Library/Application Support/Godot/export_templates/4.7.2.stable`, modèle « universal » seul).
+- Pré-calcul des shaders (`shader_baker/enabled`) **essayé puis laissé coupé** : il demande un
+  export fenêtré (pas headless) et la Metal Toolchain d'Xcode (`xcodebuild -downloadComponent
+  MetalToolchain`, installée cette nuit ; sinon « Metal shader baking limited to SPIR-V ») et, avec
+  macOS 11 minimum, 4 shaders moteur restaient à compiler (« requires Apple6 / MSL 3.1 »). Mesuré :
+  11,2 s sans, 10,7 s SPIR-V seul, 10,6 s metallib complet (macOS 14 minimum) avant le menu au
+  premier lancement : gain négligeable, car le coût est la compilation finale des pipelines par le
+  pilote Metal. Export headless conservé (plus simple, pas de réécriture de `project.godot`).
 - Fin du script : un parcours automatique du jeu exporté (`-- --journey --frames=30 --turns=1`)
   vérifie le build et remplit le cache Metal de macOS (`$(getconf DARWIN_USER_CACHE_DIR)/fr.navet.centans`) :
   le joueur de cette machine n'a donc pas le premier lancement lent. `CENT_ANS_NO_WARMUP=1` le saute.
@@ -47,8 +46,10 @@ Banc de bataille T8 dans le jeu exporté : `-- --journey=battle --benchmark --un
 
 ### Vérification du jeu exporté
 Journal sans erreur ni avertissement de script sur tout le parcours (menu, carte, fins de tour,
-sauvegarde, bataille). Deux erreurs de fuite à la sortie (`ParticlesShaderRD`) venaient de la sortie
-en pleine bataille du parcours : bataille et carte libérées avant `quit` désormais. Ressources :
+sauvegarde, bataille). Seule trace : à la fermeture du jeu exporté, « 1 shaders of type
+ParticlesShaderRD were never freed » (+ la fuite de RID associée), apparue avec la fusion de CM2
+(particules de pluie et neige de campagne, `campaign_weather_view.gd`, probable ordre de
+destruction du moteur) : sans effet en jeu, absente de l'éditeur ; non corrigée. Ressources :
 rien ne manquait (filtre `all_resources` + `assets/*` inclut .glb, .ogg, textures des shaders
 globaux ; `data/` est copié dans `Contents/Resources/data`, lu par `MapPaths`). Les replis
 `res://../data` restants (`battle_standards`, `battle_gore`, `sound_bank`…) ne servent qu'après
@@ -66,11 +67,11 @@ Metal ne rend pas de temps GPU (0), mesuré sous Vulkan (`--rendering-driver vul
 | « Combattre » → bataille affichée | 6,8-7,0 s | **0,70-0,73 s** |
 Éditeur (`godot --path game`, lib debug optimisée T1) : menu 1,1-1,3 s, carte 4,0-4,5 s, bataille 0,9-1,0 s.
 
-Le pré-calcul des shaders n'a presque rien changé au premier lancement (11,2 s sans, 10,7 s
-SPIR-V seul, 10,6 s metallib complet) : le coût est la compilation finale des pipelines par le
-pilote Metal (propre au GPU, mise en cache par macOS par application), que Godot ne peut pas
-livrer pré-compilée. D'où le préchauffage en fin d'export et l'écran de démarrage à l'image du jeu
-(`application/boot_splash`, `assets/ui/boot_splash.png`) au lieu du logo Godot.
+Le pré-calcul des shaders n'a presque rien changé au premier lancement (voir procédure) : le coût
+est la compilation finale des pipelines par le pilote Metal (propre au GPU, mise en cache par macOS
+pour chaque application), que Godot ne peut pas livrer pré-compilée. D'où le préchauffage en fin
+d'export et l'écran de démarrage à l'image du jeu (`application/boot_splash`,
+`assets/ui/boot_splash.png`) au lieu du logo Godot pendant l'attente.
 
 ### Fin de tour (France, graine 1337, tours 1-4)
 | | release (export) | debug optimisée (éditeur) |
@@ -97,6 +98,12 @@ Banc T8 (éditeur, charge 6-10, `--bench-at=40`, `--bench-repeat=2`, 1200 images
 | Siège de Guyenne (`--siege`) | 966 | 59,2 | 16,7 | 16,7 |
 | Siège de Paris (`--siege-province=prov_ile_de_france`) | 927 | 59,3 | 16,7 | 16,8 |
 
+Même banc dans le **jeu exporté** (`-- --journey=battle …`, charge 5-10 ; l'export n'est pas
+plafonné à 60 ici) : 20 par camp 88,5 i/s (médiane 8,6 ms, p95 16,7) ; 50 par camp 100,4 i/s
+(médiane 8,3 ms) ; siège de Paris 98,0 i/s (médiane 8,8 ms).
+Parcours final exporté (charge 4-16) : menu 0,78 s, carte 3,3 s, bataille 0,68 s, fin de tour
+cœur 64-93 ms / complète 297 ms, carte 1500/1250/491 à 16,7 ms, 150 à 18,4 ms, bataille 16,7 ms.
+
 ### Coûts isolés sur la carte (`--map-ab`, Vulkan, même processus, GPU ms médian)
 | Config | d=491 (GPU libre) | d=491 (GPU disputé) | d=150 (GPU disputé) |
 |---|---|---|---|
@@ -112,9 +119,9 @@ Banc T8 (éditeur, charge 6-10, `--bench-at=40`, `--bench-repeat=2`, 1200 images
 
 ## Les 3 goulets
 1. **Premier lancement** (≈ 11 s d'écran figé avant le menu, 8 s de plus à la carte, 7 s à la
-   première bataille) : compilation des pipelines par le pilote Metal. Corrigé autant que possible :
-   shaders pré-calculés (metallib, MSL 3.1), cache préchauffé par le script d'export, écran de
-   démarrage aux couleurs du jeu. Lancements suivants : menu < 0,9 s.
+   première bataille) : compilation des pipelines par le pilote Metal. Traité : cache préchauffé
+   par le script d'export (le joueur de cette machine ne le voit pas), écran de démarrage aux
+   couleurs du jeu pendant l'attente ailleurs. Lancements suivants : menu < 0,9 s.
 2. **Couche 2D du parchemin redessinée à chaque image** (≈ 3 ms CPU selon CM2) : redessinée
    seulement quand la vue change (caméra, fenêtre, fondu, positions des armées), sinon à 10 Hz
    pour le tangage des navires ; le jeton sélectionné pulse à chaque image. Caméra immobile :
@@ -143,4 +150,6 @@ joueur (`low`…`ultra` dans `settings.cfg`) l'emporte toujours. Menu Réglages 
   12 Go de `core/target` par agent) ; j'ai seulement vidé les `incremental/` de mon worktree.
 
 ## État
-Terminé ; reste la fusion de main finale, import, smoke, export et parcours.
+Terminé. Fusion de main faite (après CM2/DP1/Q1…), build.sh debug et release, import, smoke
+(26 « smoke OK », code 0), `rl1_quality_test` OK, export + préchauffage + parcours OK.
+Rust non modifié (pas de fmt/clippy/test nécessaires).
