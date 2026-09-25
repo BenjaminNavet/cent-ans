@@ -133,10 +133,15 @@ def prepare_topage(force: bool = False) -> Path:
     if raw.exists() and not force:
         table = hydro_sources.LinkTable.load(raw)
     else:
-        table = hydro_sources.read_topage(hydro_sources.ensure_topage())
+        gpkg = hydro_sources.ensure_topage()
+        table = hydro_sources.read_topage(gpkg)
         table.save(raw)
+        # The unzipped GeoPackage (3 GB) is re-extracted from the zip if ever needed.
+        gpkg.unlink(missing_ok=True)
     table.strahler = hydro_sources.compute_strahler(table)
-    table.save(path)
+    # Order-1 streams are never drawn: keep the cache small (raw download budget).
+    table.subset(table.strahler >= 2).save(path)
+    raw.unlink(missing_ok=True)
     return path
 
 
@@ -374,6 +379,10 @@ def snap_all(
                     log(
                         f"  {source} : {done}/{len(todo)} lots ({time.time() - started:.0f} s)"
                     )
+    current = {Path(job["out"]).name for job in jobs}
+    for stale in SNAP_DIR.glob(f"{source}_*.npz"):
+        if stale.name not in current:
+            stale.unlink()
     results: list[tuple[np.ndarray, np.ndarray, np.ndarray] | None] = [None] * len(
         strokes
     )

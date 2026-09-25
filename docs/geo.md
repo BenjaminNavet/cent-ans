@@ -408,8 +408,8 @@ Données de rendu seulement : `rivers_render.json`, `river_bed.png`, `crossings*
 
 EU-Hydro complet (téléchargement par bassin) exige un compte WEkEO/CLMS : le service de
 consultation de l'AEE suffit. Aucune donnée OpenStreetMap. Les fichiers bruts sont dans
-`tools/geo/raw/hydro/` (≈ 4 Go avec le gpkg TOPAGE décompressé), les tables de tronçons
-projetées dans `tools/geo/raw/hydro/cache/links_<source>.npz`.
+`tools/geo/raw/hydro/`, les tables de tronçons
+projetées dans `tools/geo/raw/hydro/cache/links_<source>.npz` (TOPAGE : ordres ≥ 2 seulement ; le gpkg décompressé est supprimé après lecture et réextrait du zip au besoin ; les lots de recalage et de routes périmés sont purgés : ≈ 2,7 Go au total).
 
 ### Méthode (`geo/hydro_sources.py`, `geo/hydro_fine.py`, `geo/valley_snap.py`)
 
@@ -516,13 +516,13 @@ partage son sommet de coupe avec la suivante. Lecture en GDScript :
 
 ### Relevé du 2026-09-25
 
-- `geo hydro-fine` (8 processus, cache chaud des tables) : 38 594 lignes, 179 400 km TOPAGE,
-  25 600 km OS, 10 900 km EU-Hydro, 45 800 km Natural Earth hors cœur ; 2,41 M sommets,
+- `geo hydro-fine` (8 processus, cache chaud des tables) : 38 636 lignes, 181 800 km TOPAGE,
+  25 600 km OS, 11 700 km EU-Hydro, 45 800 km Natural Earth hors cœur ; 2,41 M sommets,
   1 306 tuiles E2, **39 Mo** de tuiles (hors git, sous `data/map/pyramid/hydro_fine/`) ;
   ≈ 2 min (lecture initiale de TOPAGE : ≈ 2 à 10 min selon la charge). Niveau d'eau
-  non croissant vers l'aval sur 100 % des 45 642 lignes de tuiles. `rivers_fine.json` : 0,15 Mo.
+  non croissant vers l'aval sur 100 % des 45 719 lignes de tuiles. `rivers_fine.json` : 0,15 Mo.
 - `geo anchors-fine` : 569 colonies (65 déplacées : 60 pente, 5 lit), 2 999 hameaux (233
-  déplacés), 873 passages dont 813 sur un fleuve fin (historiques : 85 / 102, déplacement
+  déplacés), 873 passages dont 815 sur un fleuve fin (historiques : 85 / 102, déplacement
   médian 140 m depuis leur lon/lat) ; routes : 153 800 km, 0,80 M sommets, 13 Mo de tuiles ;
   ≈ 1-2 min. `fine_anchors.json` : 0,35 Mo.
 - Aperçus avant/après (rouge : Natural Earth de `rivers.geojson` ; bleu : réseau fin ; brun :
