@@ -440,9 +440,14 @@ def build_wall(plan, site, wall, layer):
     if wall.get("ditch", False):
         normals = g.polyline_normals(line)
         verts = []
+        # Outer side = away from the centre: the enclosed area's centroid for a closed wall
+        # (the anchor may lie outside the town, Calais), else the plan origin.
+        ox, oy = (0.0, 0.0)
+        if wall.get("closed", False):
+            ox = sum(p[0] for p in line) / len(line)
+            oy = sum(p[1] for p in line) / len(line)
         for (x, y), (nx, ny) in zip(line, normals, strict=True):
-            # Outer side = away from the centre.
-            sign = 1.0 if (nx * x + ny * y) > 0 else -1.0
+            sign = 1.0 if (nx * (x - ox) + ny * (y - oy)) > 0 else -1.0
             for offset in (0.035, 0.075):
                 verts.append(
                     (x + sign * nx * offset, y + sign * ny * offset, Z_WATER + 0.004)
