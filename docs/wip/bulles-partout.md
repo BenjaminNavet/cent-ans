@@ -58,7 +58,7 @@ Fusion : 17 conflits B5/B6 résolus (textes B6 + liens B2/B5), 21 alias dédoubl
 
 **État vague 2 (25/09)** : B8, B9a, B9b fusionnés (main 3ec20811). Codex 406 fiches, validateur 0 erreur, pytest 484 verts, smoke codex_bubbles vert (B1 + B8).
 Audit des homonymes : `uv run --project tools python -m cent_ans_tools.codex_homonyms` — 38 signalements restants relus, tous légitimes (personne ↔ territoire, lieu dans un nom composé). À relancer après chaque ajout de fiches.
-Reste : B7 correctif code ↔ UI (session code) ; comptage 21/27 unités du smoke.
+Reste : B7 correctif code ↔ UI (session code).
 
 ## Vague 3 (25/09, après-midi) — couverture du survol + correctif B7
 Vérification du survol réel (souris système, `game/tests/hover_probe.gd`, à lancer **fenêtré**) :
@@ -69,7 +69,7 @@ encyclopédie, aide F1, tutoriel, diplomatie, HUD de bataille, barre d'ordres du
 
 | Lot | Contenu | Branche | État |
 |---|---|---|---|
-| BP1 Bulles partout (UI) | brancher + auto-lier les textes ci-dessus ; comptage 21/27 unités de l'encyclopédie | bp1-ui-links | lancé |
+| BP1 Bulles partout (UI) | brancher + auto-lier les textes ci-dessus ; comptage 21/27 unités de l'encyclopédie | bp1-ui-links | **fusionné** — smoke complet vert, encyclopédie 27 unités (le 21 venait d'une dylib périmée) |
 | B7a Économie & ordre | cour (aide ↔ code), dette, ravitaillement « dévasté », deux mécontentements, carte du mécontentement | b7a-economy-order | lancé |
 | B7b Données non lues | piété des édits, vitesse de construction (traits), `recruit_time_turns`, vision armée/ville | b7b-unread-data | lancé |
 | B7c Bâtiments | améliorations qui effacent, `enables_units`, piété/prestige, coût en pierre, `satisfies_classes: []`, pierre de Normandie | b7c-buildings | lancé |
