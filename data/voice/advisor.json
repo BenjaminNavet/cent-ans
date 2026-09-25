@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "name": "Jean le Bel",
+  "title": "chanoine de Liège, chroniqueur",
+  "voice": "cedar",
+  "instructions": "Parle en français. Tu es Jean le Bel, vieux chanoine et chroniqueur du XIVe siècle, qui conseille son seigneur à voix posée : voix grave et chaleureuse de lettré, débit lent et clair, ton confidentiel et un peu solennel, comme dans une salle voûtée.",
+  "alert_cooldown_turns": 8,
+  "min_gap_s": 6.0,
+  "linger_s": 2.5,
+  "lines": [
+    { "id": "adv_start_france", "trigger": "campaign_start", "faction": "fac_france", "text": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue." },
+    { "id": "adv_start_england", "trigger": "campaign_start", "faction": "fac_england", "text": "Monseigneur, le roi Édouard se dit l'héritier de France par sa mère. La Guyenne est à vous, mais la mer vous sépare de vos gens : tenez les ports et ménagez vos alliés de Flandre." },
+    { "id": "adv_start_burgundy", "trigger": "campaign_start", "faction": "fac_burgundy", "text": "Monseigneur le duc, entre France et Empire, votre maison peut grandir plus qu'aucune autre. Laissez les rois s'épuiser, et gardez l'œil sur les riches villes de Flandre." },
+    { "id": "adv_start_default", "trigger": "campaign_start", "text": "Monseigneur, les rois de France et d'Angleterre vont se déchirer. Qu'ils s'épuisent : un prince avisé tire profit de la querelle des autres." },
+    { "id": "adv_first_battle", "trigger": "first_battle", "text": "Voici votre première journée. Placez vos archers derrière des pieux, gardez vos chevaliers pour le moment décisif, et n'engagez jamais tout votre monde à la fois." },
+    { "id": "adv_first_assault", "trigger": "first_assault", "text": "Un assaut coûte cher en hommes. Que vos engins ouvrent d'abord la brèche ; les échelles ne servent qu'à ceux que la muraille a déjà lassés." },
+    { "id": "adv_first_siege", "trigger": "first_siege", "text": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l'assiégeant, et la maladie contre lui. Comptez vos vivres avant ceux de l'ennemi." },
+    { "id": "adv_first_victory", "trigger": "first_victory", "text": "Belle journée, et que la chronique retiendra. Mais une victoire ne vaut que par ce qu'on en tire : les rançons, les places, et la terreur de l'ennemi." },
+    { "id": "adv_first_defeat", "trigger": "first_defeat", "text": "La journée est mauvaise, mais la guerre n'est pas perdue. Rassemblez les survivants, rachetez vos captifs, et ne vous laissez plus surprendre." },
+    { "id": "adv_war_declared", "trigger": "alert", "event": "war_declared", "text": "La guerre est déclarée. Les chevauchées vont ravager les campagnes : mettez vos villes en défense et levez vos gens d'armes sans tarder." },
+    { "id": "adv_siege_started", "trigger": "alert", "event": "siege_started", "text": "Un siège est mis devant une ville. Chaque saison compte : l'affamé cède avant le fort." },
+    { "id": "adv_plague", "trigger": "alert", "event": "plague", "text": "Sire, la grande mortalité est à nos portes. Rien n'arrête ce fléau ; fermez les villes si vous le pouvez, et priez." },
+    { "id": "adv_famine", "trigger": "alert", "event": "famine", "text": "La disette gagne le pays. Un peuple qui a faim n'obéit plus longtemps : allégez l'impôt ou ouvrez les greniers." },
+    { "id": "adv_revolt", "trigger": "alert", "event": "revolt", "text": "Le peuple s'est soulevé. Vilains et bourgeois ne pardonnent ni l'impôt ni le pillage ; il faut rétablir l'ordre, par la force ou par la clémence." },
+    { "id": "adv_bankruptcy", "trigger": "alert", "event": "bankruptcy", "text": "Le trésor est vide. Des soldats sans solde deviennent des routiers : trouvez de l'argent, fût-ce en affaiblissant la monnaie." },
+    { "id": "adv_excommunication", "trigger": "alert", "event": "excommunication", "text": "Le pape a lancé l'anathème. Les clercs se détournent, et vos ennemis se disent désormais les soldats de Dieu." },
+    { "id": "adv_succession", "trigger": "alert", "event": "succession", "text": "Le trône a changé de mains. Un nouveau règne commence : les grands vont éprouver sa force, et les voisins sa patience." },
+    { "id": "adv_general_captured", "trigger": "alert", "event": "general_captured", "text": "Un de nos capitaines est prisonnier. Sa rançon sera lourde ; mais un chef qu'on laisse en geôle, c'est une fidélité qu'on perd." },
+    { "id": "adv_army_destroyed", "trigger": "alert", "event": "army_destroyed", "text": "Une armée entière est perdue. Il faudra du temps et de l'argent pour relever l'ost ; d'ici là, tenez-vous derrière vos murailles." },
+    { "id": "adv_province_captured", "trigger": "alert", "event": "province_captured", "text": "Une province a changé de maître. Les villes qui tombent ne se reprennent pas sans peine ; tenez fermement celles qui restent." },
+    { "id": "adv_peace_signed", "trigger": "alert", "event": "peace_signed", "text": "La paix est signée. Profitez de la trêve pour remplir le trésor : nulle paix, en ce siècle, ne dure bien longtemps." }
+  ]
+}
