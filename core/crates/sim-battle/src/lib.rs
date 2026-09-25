@@ -45,6 +45,7 @@
 pub mod ai;
 pub mod command;
 pub mod decor;
+mod decor_gen;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;

@@ -29,15 +29,17 @@ convoi de bagages derrière chaque armée ; pieux des archers.
 - [x] Squelette : données + schéma + test pytest, `decor.rs` (types, API), `sim/camp.rs`,
   `tests/ep6_decor.rs` (tests désactivés), champ `Battlefield::decor`, `BattleSetup::decor_plan`,
   `SideResult::baggage_lost`, `HouseKind::{Stone, Windmill, Watermill, Manor}`.
-- [ ] Génération procédurale (hameaux, moulins, église, manoir, parcelles, meules, charrettes,
-  haies, camps) + tests.
-- [ ] Règles : effets des zones (vitesse, couvert, défense, charges), figurines hors des
-  bâtiments, pillage du camp + tests.
-- [ ] Pose à la main (EP7) + `DecorPlan` + exemple `data/battle_maps/decor_plan_example.json`.
+- [x] Génération procédurale (`decor_gen.rs` : hameaux en rue / groupés, fermes, moulins,
+  église, manoir, parcelles, meules, charrettes, haies, camps et convoi) + tests.
+- [x] Règles : effets des zones (vitesse, couvert, défense, charges), figurines hors des
+  bâtiments, pillage du camp + tests (`tests/ep6_decor.rs`, 8 tests verts).
+- [x] Pose à la main (EP7) + `DecorPlan` + exemple `data/battle_maps/decor_plan_example.json`.
+- [x] Kit Blender (sous-agent) : 27 modèles (watermill, tent, pavilion, haystack, wagon,
+  campfire, wall_run, lychgate, graves, vine_row, horse) exportés ; aperçus `docs/img/ep6/kit_*`.
 - [ ] Pont GDExtension (`get_terrain().decor`, `get_camps()`).
-- [ ] Kit Blender (sous-agent) + import Godot.
+- [ ] Import Godot des nouveaux modèles.
 - [ ] Rendu Godot `battle_decor.gd` (MultiMesh, LOD), vergers, labours, fossé, feux, pieux.
 - [ ] Banc EP1 avant/après, captures `docs/img/ep6/`, fusion de main, vérifications finales.
 
 ## Prochaine étape
-Implémenter la génération procédurale dans `decor.rs`.
+Suite complète `cargo test` (régressions B6/EP3 ?), puis pont GDExtension et rendu Godot.
