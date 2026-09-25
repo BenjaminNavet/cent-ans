@@ -59,13 +59,16 @@ fn main() {
         f64::from(summer) * km_per_point,
         f64::from(winter) * km_per_point
     );
-    println!("| destination | à vol d'oiseau (km) | chemin (km de plaine) | tours été | tours hiver |");
+    println!(
+        "| destination | à vol d'oiseau (km) | chemin (km de plaine) | tours été | tours hiver |"
+    );
     println!("|---|---|---|---|---|");
     let from = data.settlement_point(&paris).unwrap();
     for destination in DESTINATIONS {
         let id = SettlementId::new(*destination).unwrap();
         let to = data.settlement_point(&id).unwrap();
-        let straight = ((to[0] - from[0]).powi(2) + (to[1] - from[1]).powi(2)).sqrt() / px_per_km(&data);
+        let straight =
+            ((to[0] - from[0]).powi(2) + (to[1] - from[1]).powi(2)).sqrt() / px_per_km(&data);
         let Some(path) = state.find_path(&data, &army_id, to) else {
             println!("| {destination} | {straight:.0} | inatteignable | - | - |");
             continue;
