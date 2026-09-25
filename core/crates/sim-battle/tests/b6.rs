@@ -173,6 +173,7 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// regiment flees, same winners, 292 s and 186 s instead of 391 s and 225 s.
 /// SG4 (the horse counter-charges enemy horse riding at its shooters,
 /// melee height advantage): digests recomputed on EP9 + SG4, same winners.
+/// EP6: each army's camp stands behind its lines (digests unchanged).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [

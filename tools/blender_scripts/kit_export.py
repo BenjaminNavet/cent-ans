@@ -21,11 +21,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import battle_skinned as bs  # noqa: E402
 import bpy  # noqa: E402
 import building_kit as kit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 TEXTURES = ROOT / "game" / "assets" / "textures" / "buildings"
+QUATERNIUS = (
+    ROOT / "game" / "assets" / "third_party" / "animals" / "quaternius_animated_animals"
+)
 
 # name: (texture id or None, texture tile size in metres, fallback linear colour, roughness)
 MATERIALS = {
@@ -276,6 +280,17 @@ BATTLE_SET = {
     "bridge_stone_end": [(142, {}, False)],
     "bridge_wood_bay": [(143, {}, False)],
     "bridge_wood_end": [(144, {}, False)],
+    # EP6: villages and battlefield decor (seeds from 150).
+    "watermill": [(150, {}, False), (151, {}, False)],
+    "tent": [(152, {}, False), (153, {}, False), (154, {}, False)],
+    "pavilion": [(155, {}, False), (156, {}, False), (157, {}, False)],
+    "haystack": [(158, {}, False), (159, {}, False), (160, {}, False)],
+    "wagon": [(161, {}, False), (162, {}, False), (163, {}, False)],
+    "campfire": [(164, {}, False), (165, {}, False)],
+    "wall_run": [(166, {}, False), (167, {}, False)],
+    "lychgate": [(168, {}, False)],
+    "graves": [(169, {}, False), (170, {}, False), (171, {}, False)],
+    "vine_row": [(172, {}, False), (173, {}, False)],
 }
 
 
@@ -492,6 +507,124 @@ def preview_glb(png_prefix: Path, glbs: list[str]) -> None:
         print("PREVIEW", scene.render.filepath)
 
 
+# --- Horse (lot EP6): static grazing horse from the Quaternius rig -----------------------------
+# Not part of ``building_kit.RECIPES`` (it comes from a skinned glTF, not pure-Python geometry):
+# a dedicated export path that still writes ``horse_<n>.glb`` into the same directory and merges
+# entries of the same shape (kind, ruined, length/depth/height, triangles) into the manifest.
+
+HORSE_COAT_VARIANTS = [
+    (
+        "bay",
+        {
+            "Main": (0.24, 0.13, 0.08),
+            "Main_Dark": (0.05, 0.04, 0.03),
+            "Main_Light": (0.22, 0.12, 0.07),
+            "Muzzle": (0.05, 0.04, 0.03),
+            "Hair": (0.04, 0.03, 0.02),
+        },
+    ),
+    (
+        "chestnut",
+        {
+            "Main": (0.42, 0.22, 0.12),
+            "Main_Dark": (0.30, 0.16, 0.09),
+            "Main_Light": (0.40, 0.22, 0.12),
+            "Muzzle": (0.20, 0.11, 0.07),
+            "Hair": (0.32, 0.17, 0.09),
+        },
+    ),
+    (
+        "grey",
+        {
+            "Main": (0.62, 0.62, 0.62),
+            "Main_Dark": (0.40, 0.40, 0.40),
+            "Main_Light": (0.82, 0.82, 0.82),
+            "Muzzle": (0.30, 0.30, 0.30),
+            "Hair": (0.55, 0.55, 0.55),
+        },
+    ),
+]
+
+
+def _bbox(obj):
+    """World-space (lo, hi) corners of a mesh object's vertices."""
+    import mathutils
+
+    lo = mathutils.Vector((1e9, 1e9, 1e9))
+    hi = mathutils.Vector((-1e9, -1e9, -1e9))
+    for v in obj.data.vertices:
+        w = obj.matrix_world @ v.co
+        lo = mathutils.Vector(map(min, lo, w))
+        hi = mathutils.Vector(map(max, hi, w))
+    return lo, hi
+
+
+def _horse_recolor(coat: dict) -> None:
+    """Set the flat base colour of the horse's named materials (static export, no textures)."""
+    for name, rgb in coat.items():
+        mat = bpy.data.materials.get(name)
+        if mat is None or not mat.use_nodes:
+            continue
+        bsdf = next(
+            (n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None
+        )
+        if bsdf is not None:
+            bsdf.inputs["Base Color"].default_value = (*rgb, 1.0)
+        mat.diffuse_color = (*rgb, 1.0)
+
+
+def export_horses(out_dir: Path, seed_start: int = 150) -> None:
+    """Static grazing horse (head-low ``Eating`` pose baked from the Quaternius rig), three coats, bare (no tack); writes ``horse_0..2.glb`` and merges them into the existing manifest."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = out_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    for i, (_coat_name, coat) in enumerate(HORSE_COAT_VARIANTS):
+        reset_scene()
+        arm, meshes, roots = bs.import_glb(str(QUATERNIUS / "horse.glb"))
+        horse = next(m for m in meshes if m.name == "Horse")
+        for r in roots:
+            r.scale = (bs.HORSE_SCALE,) * 3
+        bpy.context.view_layer.update()
+        act = bs.find_action("Eating", "AnimalArmature")
+        bs.set_action(arm, act)
+        bpy.context.scene.frame_set(40)
+        bpy.context.view_layer.update()
+        bpy.ops.object.select_all(action="DESELECT")
+        horse.select_set(True)
+        bpy.context.view_layer.objects.active = horse
+        bpy.ops.object.modifier_apply(modifier="Armature")
+        # Flatten onto the mesh: unparent (keep the world transform), then bake it in, turn the
+        # horse to face -X (length along X, per the contract) and drop it to the ground.
+        bpy.ops.object.parent_clear(type="CLEAR_KEEP_TRANSFORM")
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        horse.rotation_mode = "XYZ"
+        horse.rotation_euler[2] = -math.pi / 2
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        lo, _hi = _bbox(horse)
+        horse.location.z -= lo.z
+        bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+        _horse_recolor(coat)
+        for obj in list(bpy.context.scene.objects):
+            if obj is not horse:
+                bpy.data.objects.remove(obj, do_unlink=True)
+        name = f"horse_{i}"
+        horse.name = name
+        export_glb(horse, out_dir / f"{name}.glb")
+        lo, hi = _bbox(horse)
+        tris = sum(len(p.vertices) - 2 for p in horse.data.polygons)
+        manifest[name] = {
+            "kind": "horse",
+            "ruined": False,
+            "length": round(hi.x - lo.x, 2),
+            "depth": round(hi.y - lo.y, 2),
+            "height": round(hi.z - lo.z, 2),
+            "triangles": tris,
+        }
+        print("MODEL", name, tris)
+    manifest_path.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
+    print("OK")
+
+
 def main() -> None:
     """Command line entry point."""
     argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
@@ -499,7 +632,13 @@ def main() -> None:
         raise SystemExit("usage: -- export <dir> | preview <png> [kind ...]")
     command = argv[0]
     if command == "export":
-        export_battle(Path(argv[1]), argv[2:] or None)
+        kinds = argv[2:] or None
+        out_dir = Path(argv[1])
+        building_kinds = [k for k in (kinds or []) if k != "horse"] or None
+        if kinds is None or "horse" in kinds:
+            export_horses(out_dir)
+        if kinds is None or building_kinds:
+            export_battle(out_dir, building_kinds)
     elif command == "export-town":
         export_town(Path(argv[1]))
     elif command == "preview":

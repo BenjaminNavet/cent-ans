@@ -52,6 +52,7 @@ pub fn setup(
         siege_layout: None,
         orders: Vec::new(),
         standards: None,
+        decor_plan: None,
     }
 }
 

@@ -231,6 +231,9 @@ pub struct Battlefield {
     /// EP3: roads and tracks.
     #[serde(default)]
     pub roads: Vec<crate::hydro::Road>,
+    /// EP6: hamlets, mills, church, manor, plots, props and the camps.
+    #[serde(default)]
+    pub decor: crate::decor::Decor,
 }
 
 fn default_terrain() -> Terrain {
@@ -543,6 +546,7 @@ impl Battlefield {
             bridges: Vec::new(),
             oxbows: Vec::new(),
             roads: Vec::new(),
+            decor: Default::default(),
         };
         hydro::draw_streams(&mut field, water_rules, &mut hydro_stream);
         field
@@ -602,6 +606,8 @@ impl Battlefield {
         self.bridges.clear();
         self.oxbows.clear();
         self.roads.clear();
+        // EP6: no countryside decor nor camps round a besieged town.
+        self.decor = Default::default();
     }
 
     /// Speed multiplier of the site features at (x, z) (B5): hedges, fences
@@ -627,7 +633,9 @@ impl Battlefield {
         if self.coast.is_some_and(|c| c.on_beach(x)) {
             factor *= Coast::SAND_FACTOR;
         }
-        factor
+        // EP6: lanes of the hamlets, vines, orchards, muddy furrows, camps.
+        let wet = weather == Weather::Rain || self.ground == Ground::Muddy;
+        factor * self.decor_speed_factor(x, z, mounted, wet)
     }
 
     /// Parts of the one-line description of the site (B6), in French:

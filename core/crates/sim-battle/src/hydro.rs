@@ -456,7 +456,7 @@ fn segments_cross(
 }
 
 /// Two passes of Chaikin smoothing (ends kept).
-fn chaikin(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
+pub(crate) fn chaikin(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
     let mut result = points.to_vec();
     for _ in 0..2 {
         if result.len() < 3 {
@@ -942,7 +942,7 @@ fn road_to_edge(
 }
 
 /// Nearest point of the polyline `points` to `p`.
-fn nearest_on(points: &[(f64, f64)], p: (f64, f64)) -> (f64, f64) {
+pub(crate) fn nearest_on(points: &[(f64, f64)], p: (f64, f64)) -> (f64, f64) {
     let mut best = (points[0], f64::INFINITY);
     for w in points.windows(2) {
         let (a, b) = (w[0], w[1]);
