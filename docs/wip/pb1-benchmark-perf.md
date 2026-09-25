@@ -53,7 +53,23 @@ jusqu'à 28 800 soldats. Il reste de la marge.
 6. Chargement : six masques décodés en parallèle (582 → 208 ms), sommets des 256 tuiles
    lointaines en parallèle.
 
+## PB1b (soir du 2026-09-25) : végétation au démarrage
+- Constat : juste après le chargement, première image figée ~2 s (démarrage à chaud de la
+  végétation qui attend 5 tuiles) puis ~13 s avant la vue initiale complète. Une tuile coûte
+  ~300 ms (GPU libre), dont ~75 % pour les haies : 145 000 candidats pour ~1 750 buissons.
+- `VegetationTileJob._scatter_hedges` : borne sûre `p_max` de `hedge_probability` par tuile ;
+  un bord dont le tirage haché la dépasse est sauté sans calculer `to_map`. Tirages aléatoires
+  après les tests déterministes : les bords plantés sont les mêmes, trouées et arbres de haie
+  gardent leur loi. Nombre d'instances ±0,3 %.
+- Mesures (meilleur de 3, machine très chargée) : semis 282 → 181 ms (forêt d'Orléans),
+  329 → 299 (bocage), 303 → 237 (Île-de-France), 250 → 92 (nord). Démarrage : image figée
+  2,0 → 1,35 s ; vue initiale complète 17,1 → 11,5 s depuis le début du chargement.
+- Banc : `godot --headless --path game --script res://tests/pb1_veg_job.gd` (coût par étape).
+- Correction du banc : `first_settle_ms` comptait deux fois l'attente.
+
 ## Pistes non traitées (par ordre de gain estimé)
+- Végétation : `VegetationMask.sample` (~35-110 ms par tuile, un dictionnaire par point) ; le
+  bocage garde des haies chères (`p_max` haut) → portage natif possible si besoin.
 - Shader du terrain (~12 ms GPU de près) : partagé avec ZG/R1/CM2, en évolution. Profiler par
   bloc (parcellaire `field_at`, couches, côtes) avant de toucher.
 - Premier `refresh_all` au chargement (~800 ms : croissance des colonies 384 ms, figurines).
