@@ -1,5 +1,5 @@
 {
-  "description": "Niveaux de difficulté de la campagne (lot DF1, ADR 0030) : choisis au lancement et figés pour la partie. « Normale » est neutre (le jeu tel qu'il est équilibré) ; les autres niveaux modulent les revenus, l'entretien et le recrutement des IA, les revenus et l'agitation du joueur, l'hostilité des IA envers le joueur et le moral des armées IA qui l'affrontent (bataille 3D et auto-résolution).",
+  "description": "Niveaux de difficulté de la campagne (lot DF1, ADR 0037) : choisis au lancement et figés pour la partie. « Normale » est neutre (le jeu tel qu'il est équilibré) ; les autres niveaux modulent les revenus, l'entretien et le recrutement des IA, les revenus et l'agitation du joueur, l'hostilité des IA envers le joueur et le moral des armées IA qui l'affrontent (bataille 3D et auto-résolution).",
   "default": "normal",
   "levels": [
     {

@@ -406,8 +406,13 @@ impl CampaignState {
                 raw * garrison_upkeep_percent(data, s.kind) / 100 * (100 - relief) / 100
             })
             .sum();
+        // DF1: the AI's armies cost less at higher difficulty.
+        let upkeep = crate::difficulty::scale_i64(
+            armies + garrisons,
+            self.difficulty_upkeep_percent(data, faction),
+        );
         // H5: prices follow the coinage.
-        crate::coinage::priced(self, faction, armies + garrisons)
+        crate::coinage::priced(self, faction, upkeep)
     }
 
     /// Upkeep of the army (field armies + garrisons), without buildings.
@@ -462,7 +467,9 @@ impl CampaignState {
             })
             .sum();
         // Embargoes (M5) cut trade.
-        (gross as f64 * self.embargo_income_factor(faction)).round() as i64
+        let net = (gross as f64 * self.embargo_income_factor(faction)).round() as i64;
+        // DF1: difficulty (AI or player income).
+        crate::difficulty::scale_i64(net, self.difficulty_income_percent(data, faction))
     }
 
     /// Court and administration costs of the season: a share of income that

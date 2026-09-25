@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/difficulty_rules.schema.json",
   "title": "Niveaux de difficulté de la campagne",
-  "description": "Fichier data/rules/difficulty.json (lot DF1, ADR 0030) : quatre niveaux choisis au lancement de la campagne et figés pour la partie. Chaque niveau porte des modificateurs chiffrés ; « normal » est entièrement neutre (100 %, 0).",
+  "description": "Fichier data/rules/difficulty.json (lot DF1, ADR 0037) : quatre niveaux choisis au lancement de la campagne et figés pour la partie. Chaque niveau porte des modificateurs chiffrés ; « normal » est entièrement neutre (100 %, 0).",
   "type": "object",
   "$defs": {
     "level_id": { "enum": ["easy", "normal", "hard", "very_hard"] },

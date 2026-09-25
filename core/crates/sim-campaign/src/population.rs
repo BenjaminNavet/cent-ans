@@ -241,6 +241,9 @@ pub(crate) fn resolve_population(
             &controller,
         ));
         effects.unrest.flat += state.political_unrest(&id);
+        // DF1: the player's provinces are calmer (easy) or quicker to
+        // grumble (hard).
+        effects.unrest.flat += state.difficulty_unrest(data, &controller);
         let cap = capacity(data, &id, &buildings);
         // H3: the province's diet, possibly aimed at one class.
         let class_effects: Vec<EffectTotals> = SocialClass::ALL
