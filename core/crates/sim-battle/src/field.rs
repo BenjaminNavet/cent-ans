@@ -6,6 +6,7 @@
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
+use crate::hydro;
 use crate::relief;
 use crate::rng::BattleRng;
 use crate::setup::BattleSeason;
@@ -50,8 +51,24 @@ pub struct River {
     pub amplitude: f64,
     pub wavelength: f64,
     pub phase: f64,
+    /// Mean width of the water (EP3: drawn by terrain; see [`River::width_at`]).
     pub width: f64,
     pub fords: Vec<Ford>,
+    /// EP3: relative variation of the width along the course ...
+    #[serde(default)]
+    pub width_amp: f64,
+    /// ... its wavelength (0: constant width) ...
+    #[serde(default)]
+    pub width_wave: f64,
+    /// ... and phase.
+    #[serde(default)]
+    pub width_phase: f64,
+    /// EP3: stretches of steep or marshy bank.
+    #[serde(default)]
+    pub banks: Vec<crate::hydro::Bank>,
+    /// EP3: x of the bridges (see [`Battlefield::bridges`]).
+    #[serde(default)]
+    pub bridge_xs: Vec<f64>,
 }
 
 impl River {
@@ -61,7 +78,7 @@ impl River {
     }
 
     pub fn in_water(&self, x: f64, z: f64) -> bool {
-        (z - self.center_z(x)).abs() <= self.width * 0.5
+        (z - self.center_z(x)).abs() <= self.width_at(x) * 0.5
     }
 
     pub fn in_ford(&self, x: f64) -> bool {
@@ -195,6 +212,18 @@ pub struct Battlefield {
     pub obstacles: Vec<Obstacle>,
     #[serde(default)]
     pub village: Option<Village>,
+    /// EP3: tributary and brooks (shallow).
+    #[serde(default)]
+    pub streams: Vec<crate::hydro::Stream>,
+    /// EP3: bridges over the river and the tributary.
+    #[serde(default)]
+    pub bridges: Vec<crate::hydro::Bridge>,
+    /// EP3: still water of an oxbow (arc of discs).
+    #[serde(default)]
+    pub oxbows: Vec<Zone>,
+    /// EP3: roads and tracks.
+    #[serde(default)]
+    pub roads: Vec<crate::hydro::Road>,
 }
 
 fn default_terrain() -> Terrain {
@@ -223,7 +252,34 @@ impl Battlefield {
     /// Builds the field for `terrain`, adding a river when `river` is set and
     /// extra mud in the rain or snow (no coast, no village: pre-B5 field).
     pub fn generate(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
-        Self::generate_base(terrain, river, weather, rng)
+        let mut field = Self::generate_base(terrain, river, weather, rng);
+        field.finish_water(rng);
+        field
+    }
+
+    /// EP3: bridges (deck on the final banks) and roads, from a stream
+    /// derived from `rng` (not advanced).
+    fn finish_water(&mut self, rng: &BattleRng) {
+        let rules = hydro::WaterRules::bundled();
+        let mut stream = rng.derive(hydro::ROADS_STREAM);
+        hydro::build_bridges(self, rules, &mut stream);
+        hydro::lay_roads(self, rules, &mut stream);
+    }
+
+    /// EP3: distance from (x, z) to the nearest water's edge (river,
+    /// streams, oxbow); infinite without water.
+    pub fn water_gap(&self, x: f64, z: f64) -> f64 {
+        let mut gap = f64::INFINITY;
+        if let Some(r) = &self.river {
+            gap = gap.min((z - r.center_z(x)).abs() - r.width_at(x) * 0.5);
+        }
+        for s in &self.streams {
+            gap = gap.min(s.distance(x, z) - s.width * 0.5);
+        }
+        for o in &self.oxbows {
+            gap = gap.min((x - o.x).hypot(z - o.z) - o.radius);
+        }
+        gap
     }
 
     /// Builds the field of a campaign site (B5): the pre-B5 field (same
@@ -242,11 +298,15 @@ impl Battlefield {
         let river = field.river.clone();
         let river_z = move |x: f64| river.as_ref().map_or(f64::NAN, |r| r.center_z(x));
         let river_fn: &dyn Fn(f64) -> f64 = &river_z;
+        // EP3: wider rivers, streams and oxbows are kept clear too.
+        let gap = |x: f64, z: f64| field.water_gap(x, z);
+        let gap_fn: &dyn Fn(f64, f64) -> f64 = &gap;
         let occupied = Occupied {
             forests: &field.forests,
             mud: &field.mud,
             parts: &parts,
             river_z: field.river.is_some().then_some(river_fn),
+            water_gap: field.river.is_some().then_some(gap_fn),
         };
         let features = SiteFeatures::draw(site, weather, &occupied, &mut stream);
         field.ground = features.ground;
@@ -258,6 +318,7 @@ impl Battlefield {
         if let Some(coast) = field.coast {
             field.shape_coast(coast);
         }
+        field.finish_water(rng);
         field
     }
 
@@ -321,7 +382,7 @@ impl Battlefield {
         let nz = (FIELD_DEPTH / GRID_RESOLUTION) as usize + 1;
         let tilt_x = rng.range(-0.004, 0.004);
         let tilt_z = rng.range(-0.004, 0.004);
-        let river_def = river.then(|| {
+        let mut river_def = river.then(|| {
             let fords = (0..2)
                 .map(|i| Ford {
                     x: FIELD_WIDTH * (0.3 + 0.4 * i as f64) + rng.range(-80.0, 80.0),
@@ -335,8 +396,20 @@ impl Battlefield {
                 phase: rng.range(0.0, std::f64::consts::TAU),
                 width: 18.0,
                 fords,
+                width_amp: 0.0,
+                width_wave: 0.0,
+                width_phase: 0.0,
+                banks: Vec::new(),
+                bridge_xs: Vec::new(),
             }
         });
+        // EP3: width, fords, bridges and banks from a derived stream (the
+        // draws above are the pre-EP3 ones).
+        let mut hydro_stream = rng.derive(hydro::HYDRO_STREAM);
+        let water_rules = hydro::WaterRules::bundled();
+        if let Some(r) = river_def.as_mut() {
+            hydro::shape_river(r, terrain, FIELD_WIDTH, water_rules, &mut hydro_stream);
+        }
         let mut heights = Vec::with_capacity(nx * nz);
         for iz in 0..nz {
             for ix in 0..nx {
@@ -349,11 +422,7 @@ impl Battlefield {
                     h += hill.height * (-d2 / (hill.radius * hill.radius)).exp();
                 }
                 if let Some(r) = &river_def {
-                    let d = (z - r.center_z(x)).abs();
-                    if d < r.width * 1.5 {
-                        let depth = if r.in_ford(x) { 0.6 } else { 1.6 };
-                        h -= depth * (1.0 - d / (r.width * 1.5));
-                    }
+                    h -= hydro::river_carve(r, x, z);
                 }
                 heights.push(h);
             }
@@ -391,7 +460,7 @@ impl Battlefield {
             river_def.as_ref(),
             &mut relief_stream,
         );
-        Battlefield {
+        let mut field = Battlefield {
             width: FIELD_WIDTH,
             depth: FIELD_DEPTH,
             resolution: GRID_RESOLUTION,
@@ -411,7 +480,13 @@ impl Battlefield {
             coast: None,
             obstacles: Vec::new(),
             village: None,
-        }
+            streams: Vec::new(),
+            bridges: Vec::new(),
+            oxbows: Vec::new(),
+            roads: Vec::new(),
+        };
+        hydro::draw_streams(&mut field, water_rules, &mut hydro_stream);
+        field
     }
 
     /// Siege battles: flattens the ground under and around the town and
@@ -462,6 +537,12 @@ impl Battlefield {
                 .all(|&(x, z)| keep(&Zone { x, z, radius: 0.0 }))
         });
         self.river = None;
+        // EP3: no streams, bridges nor roads in a siege (the gate road is
+        // drawn by the renderer).
+        self.streams.clear();
+        self.bridges.clear();
+        self.oxbows.clear();
+        self.roads.clear();
     }
 
     /// Speed multiplier of the site features at (x, z) (B5): hedges, fences
@@ -516,8 +597,17 @@ impl Battlefield {
         if !self.pools.is_empty() {
             parts.push("mares".to_owned());
         }
-        if self.river.is_some() {
-            parts.push("rivière et gués".to_owned());
+        if let Some(river) = &self.river {
+            let bridges = self.bridges.iter().filter(|b| b.stream.is_none()).count();
+            let fords = river.fords.len();
+            parts.push(match (bridges, fords) {
+                (0, _) => "rivière et gués".to_owned(),
+                (_, 0) => "rivière et ponts".to_owned(),
+                _ => "rivière, gués et ponts".to_owned(),
+            });
+        }
+        if !self.streams.is_empty() {
+            parts.push("ruisseaux".to_owned());
         }
         if let Some(coast) = &self.coast {
             parts.push(
@@ -590,14 +680,10 @@ impl Battlefield {
     }
 
     /// `Some(true)` in a ford, `Some(false)` in deep water, `None` on land.
-    /// Marsh pools count as shallow water (B5).
+    /// Marsh pools count as shallow water (B5); so do streams and oxbows,
+    /// and a bridge deck is dry land (EP3, [`Self::water_kind`]).
     pub fn water_at(&self, x: f64, z: f64) -> Option<bool> {
-        if let Some(river) = &self.river {
-            if river.in_water(x, z) {
-                return Some(river.in_ford(x));
-            }
-        }
-        self.pools.iter().any(|p| p.contains(x, z)).then_some(true)
+        self.water_kind(x, z).map(|w| !w.deep())
     }
 
     pub fn inside(&self, x: f64, z: f64) -> bool {
