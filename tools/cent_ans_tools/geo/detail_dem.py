@@ -522,44 +522,82 @@ def boost_base(
 ) -> np.ndarray:
     """σ 5 km base of the render boost on the cluster raster.
 
-    Built at 90 m (level 2) on GLO-90 around the cluster, the fine source
-    replacing it where it has data, blurred, then sampled bilinearly.
+    Built at 90 m (level 2) from the cluster's own fine source, extended
+    outward by nearest-neighbour fill and blurred, then sampled bilinearly.
+
+    ZG3b fix: the footprint of a detail zone at E6-E7 (3-6 km half-size) is
+    much smaller than 3σ (15 km, :data:`BASE_MARGIN_M`), so a base built by
+    overlaying the fine source onto GLO-90 *before* blurring barely differs
+    from unblended GLO-90 at the footprint's centre -- the blur draws almost
+    entirely on the surrounding margin. GLO-90 is a surface model (biased
+    high by buildings in cities) and, being genuinely regional, also carries
+    real relief several km away (hills around a river valley); either one
+    pulled into the base pushes ``local = fine - base`` deeply negative and
+    :func:`apply_boost` then digs real, positive-elevation land below sea
+    level (observed: Southwark/Bermondsey/Lambeth/Kennington at -11 to -15 m
+    against a real +2-5 m ODN, the City at 4.9-7.6 m against a real ~15 m).
+    Extending the fine source itself outward (instead of leaking in GLO-90)
+    keeps the base representative of the zone's own relief. GLO-90 is only
+    used where the whole raster carries no fine data at all (an isolated
+    cluster at the pyramid's edge).
     """
     level = cluster.level
     factor = 2 ** (level - BASE_LEVEL)
     base_m = grid.pixel_m(BASE_LEVEL)
     margin = int(math.ceil(BASE_MARGIN_M / base_m))
-    c0 = cluster.col0 * TILE_PX // factor - margin
-    r0 = cluster.row0 * TILE_PX // factor - margin
     cols = cluster.shape[1] // factor + 2 * margin
     rows = cluster.shape[0] // factor + 2 * margin
-    size = grid.tiles_per_side(BASE_LEVEL) * TILE_PX
-    map_grid = MapGrid(
-        (grid.minx, grid.maxy - size * base_m, grid.minx + size * base_m, grid.maxy),
-        size,
-    )
-    names = [p.stem for p in copernicus.RAW_DIR.glob("Copernicus_DSM_COG_30_*.tif")]
-    coarse = copernicus.resample_to_grid(map_grid, (c0, r0, cols, rows), names)
     fine_coarse = detail_sources.block_reduce_mean(fine, factor)
-    inner = coarse[
+    extended = np.full((rows, cols), np.nan, dtype=np.float32)
+    extended[
         margin : margin + fine_coarse.shape[0], margin : margin + fine_coarse.shape[1]
-    ]
-    valid = np.isfinite(fine_coarse)
-    inner[valid] = fine_coarse[valid]
-    coarse = np.where(np.isfinite(coarse), coarse, 0.0).astype(np.float32)
-    blurred = ndimage.gaussian_filter(coarse, BOOST_SIGMA_M / base_m)
+    ] = fine_coarse
+    valid = np.isfinite(extended)
+    if valid.any():
+        indices = ndimage.distance_transform_edt(
+            ~valid, return_distances=False, return_indices=True
+        )
+        filled = extended[tuple(indices)]
+    else:
+        c0 = cluster.col0 * TILE_PX // factor - margin
+        r0 = cluster.row0 * TILE_PX // factor - margin
+        size = grid.tiles_per_side(BASE_LEVEL) * TILE_PX
+        map_grid = MapGrid(
+            (
+                grid.minx,
+                grid.maxy - size * base_m,
+                grid.minx + size * base_m,
+                grid.maxy,
+            ),
+            size,
+        )
+        names = [p.stem for p in copernicus.RAW_DIR.glob("Copernicus_DSM_COG_30_*.tif")]
+        coarse = copernicus.resample_to_grid(map_grid, (c0, r0, cols, rows), names)
+        filled = np.where(np.isfinite(coarse), coarse, 0.0).astype(np.float32)
+    blurred = ndimage.gaussian_filter(filled, BOOST_SIGMA_M / base_m)
     return bilinear(blurred, cluster.shape, factor, margin, margin)
 
 
 def apply_boost(height: np.ndarray, base: np.ndarray) -> np.ndarray:
-    """:func:`relief_shade.boost_relief` with an external base, on land (> 0 m)."""
+    """:func:`relief_shade.boost_relief` with an external base, on land (> 0 m).
+
+    ZG3b fix: mirrors :func:`relief_shade.enforce_coast`, which the E0-E4
+    pyramid already applies after boosting -- land (source height above
+    :data:`MIN_LAND_M`) never drops below it once boosted, even where the
+    base still runs higher than the fine source nearby (real hills a few km
+    off, a residual GLO-90 fallback at a data gap). Without this floor,
+    genuine dry land could bake in below sea level; ``bake_cluster`` had no
+    equivalent of ``enforce_coast`` before this fix.
+    """
     local = np.clip(height - base, -BOOST_LIMIT_M, BOOST_LIMIT_M)
     t = np.clip(
         (base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0
     )
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
     boosted = height + BOOST_GAIN * local * fade
-    return np.where(height > MIN_LAND_M, boosted, height).astype(np.float32)
+    land = height > MIN_LAND_M
+    boosted = np.where(land, np.maximum(boosted, MIN_LAND_M), boosted)
+    return np.where(land, boosted, height).astype(np.float32)
 
 
 # -------------------------------------------------------------------------- blend
