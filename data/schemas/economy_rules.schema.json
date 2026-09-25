@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/economy_rules.schema.json",
+  "title": "Règles d'économie",
+  "description": "Fichier data/rules/economy.json (lot EQ1) : échelle des effets de trésor des événements selon le revenu de la faction.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "event_treasury_reference_income": { "type": "integer", "minimum": 1, "description": "Revenu de saison (livres) à partir duquel l'effet de trésor d'un événement s'applique en entier ; en dessous, il est proportionnel au revenu." },
+    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." }
+  },
+  "required": ["event_treasury_reference_income", "event_treasury_min_scale"],
+  "additionalProperties": false
+}

@@ -1,7 +1,7 @@
 {
   "id": "evt_sac_de_southampton",
   "title": "Le sac de Southampton",
-  "text": "Le 4 octobre 1338, les galères et les nefs de l'amiral [[cdx_hugues_quieret|Hugues Quiéret]] et de Nicolas Béhuchet, renforcées de marins génois, surgissent devant Southampton. Repoussés d'abord, les assaillants forcent la ville, la pillent et l'incendient avant de rembarquer chargés de butin. La côte anglaise découvre à son tour la guerre.",
+  "text": "Le 4 octobre 1338, les galères et les nefs de l'amiral [[cdx_hugues_quieret|Hugues Quiéret]] et de [[cdx_nicolas_behuchet|Nicolas Béhuchet]], renforcées de marins génois, surgissent devant Southampton. Repoussés d'abord, les assaillants forcent la ville, la pillent et l'incendient avant de rembarquer chargés de butin. La côte anglaise découvre à son tour la guerre.",
   "kind": "historical",
   "trigger": {
     "date": {

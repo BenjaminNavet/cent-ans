@@ -38,7 +38,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château de basalte dominant le pays de Besse, seigneurie du Chariol.",
+    "description": "Château de basalte dominant la vallée de la Couze Chambon, berceau des seigneurs de Murol.",
     "sources": ["Château de Murol"]
   },
   {

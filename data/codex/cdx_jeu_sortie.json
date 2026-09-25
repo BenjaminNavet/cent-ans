@@ -1,0 +1,17 @@
+{
+  "id": "cdx_jeu_sortie",
+  "title": "La sortie de la garnison",
+  "category": "mecanique",
+  "aliases": [
+    "sortie",
+    "sorties",
+    "sortie de la garnison",
+    "fait une sortie"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Une garnison n'attend pas toujours derrière ses murs : quand l'assiégeant s'affaiblit ou se relâche, elle ouvre ses portes, tombe sur son camp, brûle ses engins et rentre avant qu'il ne se reprenne.",
+  "body": "La sortie est l'arme de l'assiégé actif. En 1342, à Hennebont, [[cdx_jeanne_de_flandre|Jeanne de Flandre]], qui défend la place pour son mari Jean de Montfort, voit les assiégeants partis à l'assaut d'un autre côté ; elle sort par une poterne à la tête de quelques centaines de cavaliers, met le feu à leur camp, puis, coupée de la ville, s'échappe et y rentre quelques jours plus tard avec des renforts. [[cdx_froissart|Froissart]] en fait l'une de ses plus belles pages.\n\nLes sorties visent d'abord les engins et les ouvrages d'approche : brûler un trébuchet ou un beffroi, combler une mine, c'est gagner des semaines. Devant [[cdx_orleans|Orléans]], en 1428-1429, les Orléanais multiplient les sorties contre les bastilles anglaises avant que l'arrivée de [[cdx_jeanne_darc|Jeanne d'Arc]] ne les transforme en offensive.\n\nLe risque est grand : une sortie repoussée peut laisser la porte ouverte à l'ennemi qui poursuit les fuyards, et la garnison y laisse ses meilleurs hommes.",
+  "gameplay": "En campagne, à chaque tour de siège, la garnison sort si sa puissance dépasse 1,3 fois celle de l'armée assiégeante : une bataille résolue automatiquement devant les murs, sur le terrain de la province. Victorieuse, elle lève le [[cdx_jeu_siege|siège]] ; repoussée, elle perd des hommes et le siège continue.\n\nEn bataille de siège, une garnison menée par l'IA fait une sortie après 2 minutes si la valeur des assiégeants tombe sous la moitié de la sienne : « La garnison ouvre ses portes et fait une sortie ! ». La porte laisse passer ses fantassins et ses cavaliers (les tireurs du rempart restent en place), qui chargent l'assiégeant le plus proche. Au début d'un siège, la garnison IA peut aussi incendier les faubourgs (voir [[cdx_jeu_incendies|incendies]]).\n\nConseil : n'assiégez pas une place avec une armée plus faible que sa garnison ; en défense, gardez vos cavaliers sur la place pour frapper quand l'assaillant s'épuise.",
+  "see_also": ["cdx_jeu_siege", "cdx_jeu_assaut", "cdx_jeanne_de_flandre", "cdx_orleans", "cdx_jeu_incendies"],
+  "sources": ["Siège d'Hennebont", "Jeanne de Flandre", "Siège d'Orléans"]
+}

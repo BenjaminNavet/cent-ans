@@ -41,9 +41,9 @@
       "value": 0.25
     }
   ],
-  "description": "Siège de l'évêque ; chantier gothique de plusieurs générations, source de prestige.",
+  "description": "Siège de l'évêque ; chantier gothique de plusieurs générations, source de prestige. Voir [[cdx_cathedrale]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Cathédrale",
+    "Architecture gothique"
   ]
 }

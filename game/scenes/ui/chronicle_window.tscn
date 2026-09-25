@@ -4,5 +4,6 @@
 [ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
 
 [node name="ChronicleWindow" type="PanelContainer"]
+theme_type_variation = &"IlluminatedPanel"
 theme = ExtResource("2_theme")
 script = ExtResource("1_window")

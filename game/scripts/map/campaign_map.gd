@@ -22,6 +22,7 @@ extends Node3D
 ##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
 ##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné ;
 ##   --stage=agents_registry    idem, registre des agents (G) ouvert.
+##   --stage=legend|legend_armies  UX1 : légende de la carte ouverte (en haut, ou aux armées).
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
@@ -74,6 +75,7 @@ var chronicle: ChronicleController = null  # M10
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
+var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
@@ -192,6 +194,10 @@ func _ready() -> void:
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
+	next_hint = NextHintController.new()  # UX2
+	next_hint.name = "NextHintController"
+	add_child(next_hint)
+	next_hint.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -227,6 +233,8 @@ func _setup_settlements() -> void:
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
+	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
+		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
@@ -1231,6 +1239,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_siege()  # M8
 				"map":
 					pass  # V2 : carte seule, sans sélection ni panneau (captures du terrain)
+				"legend", "legend_armies":  # UX1 : légende de la carte ouverte (haut, ou armées)
+					minimap_ctl.set_legend_open(true)
+					if _screenshot_stage == "legend_armies":
+						get_tree().create_timer(0.5).timeout.connect(func() -> void: minimap_ctl.legend.scroll_to_section("armies"))
 				"help":
 					help.toggle()  # M10
 				"objectives":
@@ -1260,8 +1272,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_assault()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
-				"tutorial", "encyclopedia":  # F8
+				"tutorial", "encyclopedia", "tutorial_toc":  # F8, UX2 (sommaire)
 					tutorial.stage_screenshot(_screenshot_stage)
+				"next_hint":  # UX2 : conseil « que faire maintenant » au premier tour
+					next_hint.stage_screenshot()
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
 				"trade":  # C5 : routes commerciales

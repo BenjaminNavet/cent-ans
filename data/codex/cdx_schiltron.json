@@ -1,0 +1,30 @@
+{
+  "id": "cdx_schiltron",
+  "title": "Le schiltron écossais",
+  "category": "unite",
+  "aliases": [
+    "Schiltron écossais",
+    "schiltron",
+    "schiltrons",
+    "lanciers écossais"
+  ],
+  "era": {
+    "from": "1297",
+    "to": "1424"
+  },
+  "summary": "Masse compacte de fantassins écossais hérissée de lances de douze pieds, le schiltron triomphe de la chevalerie anglaise à Bannockburn (1314). Mais immobile, il fond sous les flèches anglaises à Halidon Hill (1333) et à [[cdx_ecosse|Neville's Cross]] (1346).",
+  "body": "Le schiltron est une formation, ronde ou allongée, de lanciers serrés épaule contre épaule, les premiers rangs genou à terre. Les Écossais, pauvres en chevaliers et en chevaux lourds, en font l'arme de leurs guerres d'indépendance. À Falkirk (1298), les schiltrons de William Wallace repoussent la cavalerie d'Édouard Ier avant d'être criblés de flèches ; à Bannockburn (1314), Robert Bruce les lance au contraire à l'attaque et écrase l'armée d'Édouard II.\n\nLes Anglais retiennent la leçon. À Dupplin Moor (1332) et à Halidon Hill (1333), archers et hommes d'armes à pied de la [[cdx_tactique_anglaise|tactique anglaise]] brisent les masses écossaises. En 1346, [[cdx_david_ii|David II]], envahissant l'Angleterre pour soulager son allié français, est vaincu et pris à Neville's Cross.\n\nFidèles à l'[[cdx_ecosse|Auld Alliance]], des milliers d'Écossais combattent ensuite en France pour [[cdx_charles_vii|Charles VII]] : vainqueurs à Baugé (1421), ils sont décimés à Verneuil (1424).",
+  "gameplay": "Compagnie de 120 hommes (infanterie). Recrutement : 560 livres payées à l'enrôlement ; entretien 50 livres par mois, soit 200 par saison. Caractéristiques : mêlée 44, armure 32 (laisse passer 75 % des coups), moral 60, vitesse 35 (1,4 m/s). Exige une province de culture écossaise. La place doit compter assez de paysans (dix fois l'effectif). Piques : une charge de cavalerie de face ou contre le carré est arrêtée net (8 % des cavaliers tombent, −10 de moral) ; en mêlée, la cavalerie ne frappe plus qu'à ×0,25 contre le carré (×0,7 hors carré) et les piques la frappent à ×1,8. En résolution automatique, charges subies ×0,25 et dégâts contre la cavalerie ×3. Le carré de lances arrête la cavalerie, mais sa lenteur (35) et sa faible armure (32) en font la proie des archers : à éviter face à une armée anglaise retranchée.",
+  "entity": "unit_scottish_spearmen",
+  "see_also": [
+    "cdx_ecosse",
+    "cdx_david_ii",
+    "cdx_tactique_anglaise"
+  ],
+  "sources": [
+    "Schiltron",
+    "Bataille de Bannockburn",
+    "Bataille de Halidon Hill",
+    "Bataille de Neville's Cross"
+  ]
+}

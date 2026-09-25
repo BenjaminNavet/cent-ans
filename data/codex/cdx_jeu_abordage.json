@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_abordage",
+  "title": "Grappins et abordage",
+  "category": "mecanique",
+  "aliases": [
+    "abordage",
+    "abordages",
+    "aborder",
+    "grappins",
+    "grappiné",
+    "passerelles"
+  ],
+  "era": { "from": "1338", "to": "1453" },
+  "summary": "La plupart des combats sur mer se terminent au corps à corps : on jette les grappins, on se range bord à bord et les hommes d'armes passent sur le pont ennemi. Celui qui doit monter sur un bord plus haut part perdant.",
+  "body": "Au XIVe siècle, aucun navire ne coule un autre au canon. Pour vaincre, il faut le prendre : on l'accroche avec des grappins de fer lancés au bout de cordes ou de chaînes, on le tire contre son propre bord, puis les hommes d'armes sautent à l'abordage pendant que les archers des châteaux balaient le pont adverse. Le vaincu est pris avec sa cargaison et son équipage, et le navire change de pavillon : à Arnemuiden, en 1338, les Français s'emparent ainsi de la Christophe, grande cogue d'[[cdx_edouard_iii|Édouard III]], que les Anglais reprennent à [[cdx_ecluse|l'Écluse]].\n\nLa hauteur du bord compte beaucoup : les grandes nefs du Nord dominent les galères, dont les équipages doivent escalader leurs flancs sous les coups. À l'Écluse, les navires français, enchaînés les uns aux autres, se prêtent main-forte d'un pont à l'autre ; mais ils ne peuvent plus fuir, et sont pris un à un.\n\nUne mêlée de pont est sans issue pour le vaincu : acculés à la mer, les hommes se rendent ou se jettent à l'eau, où le poids de leur armure les noie. Pour [[cdx_froissart|Froissart]], l'Écluse fut l'une des batailles les plus meurtrières de son temps.",
+  "gameplay": "Ordre « Aborder » (clic droit sur un navire ennemi) : à moins de 6 m, le navire lance ses grappins (35 % de chance par seconde, moins s'il a perdu des marins), se range bord à bord et ses passerelles tombent. La mêlée s'engage entre les deux équipages : chaque mètre de bord à monter réduit de 12 % la force de l'assaillant (45 % au plus), celui qui saute sur un pont plus bas gagne d'autant ; les navires à châteaux se défendent 15 % mieux ; sur une ligne enchaînée, chaque voisin ami qui n'est pas lui-même accroché envoie des renforts (+12 %).\n\nUn équipage dont le moral tombe sous 18 ou dont il reste moins de 12 % des combattants se rend : s'il est accroché à l'ennemi, son navire est pris (prise ramenée au port, équipage prisonnier) ; sinon il rompt et fuit. Un navire enchaîné dont il reste moins de 6 % des combattants est pris par l'ennemi le plus proche. « Se désengager » coupe les grappins (10 % de chance par seconde, selon les marins) et fuit vent arrière ; un navire qui s'éloigne à plus de 1 150 m du combat a échappé.\n\nEn campagne, les navires pris passent dans la réserve du vainqueur. Conseil : abordez depuis le navire le plus haut, après avoir fait tirer vos archers sur le pont ennemi, et concentrez deux navires sur un seul.",
+  "see_also": ["cdx_jeu_bataille_navale", "cdx_jeu_brulots", "cdx_jeu_maitrise_mer", "cdx_ecluse", "cdx_froissart"],
+  "sources": ["Abordage", "Bataille de l'Écluse", "Bataille d'Arnemuiden"]
+}

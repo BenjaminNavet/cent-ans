@@ -25,9 +25,10 @@
       "value": 5
     }
   ],
-  "description": "Halle et marché hebdomadaire ; base des échanges locaux.",
+  "description": "Halle et marché hebdomadaire concédés par le seigneur ou le roi ; base des échanges locaux. Voir [[cdx_marche]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Marché (lieu)",
+    "Halle (construction)",
+    "Tonlieu"
   ]
 }

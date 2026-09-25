@@ -1,0 +1,29 @@
+{
+  "id": "cdx_lettre_de_change",
+  "title": "La lettre de change",
+  "category": "technique",
+  "aliases": [
+    "Lettres de change",
+    "lettre de change",
+    "Bardi",
+    "Peruzzi"
+  ],
+  "era": {
+    "from": "v. 1300",
+    "to": "1500"
+  },
+  "summary": "Plutôt que de transporter des sacs de monnaie sur des routes dangereuses, le marchand remet son argent à un banquier qui lui délivre un ordre de paiement sur son correspondant d'une autre ville. La lettre de change fait voyager l'argent sans escorte.",
+  "body": "Nées dans les foires de Champagne et chez les marchands italiens, les lettres de change se généralisent au XIVe siècle. Elles jouent aussi sur les différences de monnaie entre les places, ce qui permet de rémunérer discrètement le prêt malgré l'interdiction de l'usure.\n\nLes compagnies florentines des Bardi et des Peruzzi financent ainsi les débuts de la guerre d'[[cdx_edouard_iii|Édouard III]]. Quand celui-ci ne rembourse pas, elles s'effondrent : les Peruzzi en 1343, les Bardi en 1346. La guerre de Cent Ans commence par une crise bancaire.",
+  "gameplay": "Recherche : 300 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_taille|Fiscalité royale]]. Effets, pour toute la faction : +10 % de revenus du commerce (sur l'assiette fiscale des bourgeois).",
+  "entity": "tech_letters_of_credit",
+  "see_also": [
+    "cdx_comptabilite_marchande",
+    "cdx_partie_double",
+    "cdx_bruges"
+  ],
+  "sources": [
+    "Lettre de change",
+    "Compagnie des Bardi",
+    "Compagnie des Peruzzi"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_cri_de_guerre",
+  "title": "Ordre : le cri de guerre",
+  "category": "mecanique",
+  "aliases": [
+    "cri de guerre",
+    "cris de guerre",
+    "cri d'armes",
+    "Montjoie"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Chaque maison noble a son cri d'armes, que ses hommes reprennent en chargeant : il rassemble, il désigne le chef, il donne du cœur. « Montjoie ! Saint-Denis ! » pour le roi de France, « Saint George ! » pour les Anglais.",
+  "body": "Le cri d'armes est, avec la bannière et le blason, un signe de reconnaissance de la noblesse : les [[cdx_herauts|hérauts]] les recueillent dans leurs armoriaux. Le roi de France crie « Montjoie ! Saint-Denis ! », du nom de l'abbaye qui garde l'oriflamme ; les Anglais d'[[cdx_edouard_iii|Édouard III]] invoquent saint Georges, patron de l'ordre de la [[cdx_ordre_de_la_jarretiere|Jarretière]] ; les ducs de Bourgogne crient « Montjoie Saint-Andrieu ! », du nom de leur saint patron, André ; [[cdx_du_guesclin|Du Guesclin]] lance « Notre-Dame Guesclin ! ».\n\nDans le vacarme d'une mêlée, où les visages disparaissent sous les heaumes, le cri permet de retrouver les siens et de se rallier autour du seigneur. Il sert aussi de défi : à [[cdx_poitiers|Poitiers]] comme ailleurs, les chroniqueurs rapportent les cris échangés au moment du choc, et l'on juge du courage d'une troupe à la force de son cri.",
+  "gameplay": "Ordre « Cri de guerre » (libellé selon la faction : « Montjoie ! Saint-Denis ! », « Saint George ! », « Montjoie Saint-Andrieu ! », « Saint Andrew ! », « ¡Santiago! ») : le général, vivant et à la tête de l'armée, lance le cri, repris par les régiments en état de combattre à moins de 150 m de lui. Pendant 30 secondes, ils gagnent 12 points de moral et 12 de plafond de moral. Recharge de 120 secondes.\n\nL'IA crie quand l'ennemi est à moins de 90 m et qu'au moins deux régiments entourent son chef. Conseil : lancez-le juste avant le choc ou quand une ligne vacille, pas au début de la bataille ; il est encore plus efficace combiné au [[cdx_jeu_ralliement|ralliement]].",
+  "entity": "order_war_cry",
+  "see_also": ["cdx_jeu_moral", "cdx_jeu_general", "cdx_jeu_ralliement", "cdx_jeu_pas_de_quartier", "cdx_herauts", "cdx_armoriaux"],
+  "sources": ["Cri de guerre", "Montjoie Saint-Denis"]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "cdx_batons_a_feu",
+  "title": "Les bâtons à feu",
+  "category": "technique",
+  "aliases": [
+    "Bâtons à feu",
+    "bâton à feu",
+    "canon à main",
+    "canons à main",
+    "handgonne"
+  ],
+  "era": {
+    "from": "v. 1360",
+    "to": "1450"
+  },
+  "summary": "Un petit tube de fer ou de bronze fixé au bout d'une hampe, qu'on tient sous le bras et qu'on met à feu avec une mèche : le canon à main apparaît en Italie et en Flandre dans la seconde moitié du XIVe siècle.",
+  "body": "En 1364, la commune de Pérouse commande cinq cents petites bombardes « d'une paume » que l'on peut porter à la main. Les villes flamandes et allemandes s'en équipent à leur tour. Le tireur coince la hampe sous l'aisselle ou contre le sol, vise approximativement et approche la mèche de la lumière : le coup part avec fracas et beaucoup de fumée.\n\nImprécis et lent, le bâton à feu effraie surtout les chevaux et les hommes. Mais il est simple et bon marché, et ses progrès donnent au XVe siècle la [[cdx_couleuvriniers|couleuvrine à main]] puis l'arquebuse.",
+  "gameplay": "Recherche : 320 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_poudre_noire|Poudre noire]]. Année historique 1364 : avant 1344, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : +4 en tir des tireurs. Débloque : [[cdx_couleuvriniers|Couleuvriniers]].",
+  "entity": "tech_handgonnes",
+  "see_also": [
+    "cdx_couleuvriniers",
+    "cdx_poudre_noire",
+    "cdx_wagenburg"
+  ],
+  "sources": [
+    "Canon à main",
+    "Artillerie médiévale"
+  ]
+}
