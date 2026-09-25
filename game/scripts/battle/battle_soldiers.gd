@@ -298,7 +298,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	lod.visible = n > 0 and (not near or shadow)
 	# BV3 : imposteurs au-delà de 300 m (atlas cuit au début de la bataille).
 	var imp: MultiMeshInstance3D = null
-	if impostors != null and skinned and distance > BattleImpostors.DISTANCE * lod_k:
+	# Imposteurs pas avant 80 % de leur distance : plus près, leur teinte pâle se remarque.
+	if impostors != null and skinned and distance > BattleImpostors.DISTANCE * maxf(lod_k, 0.8):
 		imp = _impostor_layer(id, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), mm.instance_count)
 		if imp != null:
 			lod.visible = false
