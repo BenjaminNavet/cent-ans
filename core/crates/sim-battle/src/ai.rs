@@ -105,6 +105,8 @@ pub const ENGINE_PATIENCE: f64 = 420.0;
 /// R2b: a rise steeper than this (metres per metre over 20 m) is not
 /// charged at the run from afar: the regiment walks up and charges close.
 pub const STEEP_CLIMB: f64 = 0.12;
+/// R2b: a regiment hit by missiles within this many seconds is under fire.
+pub const UNDER_FIRE: f64 = 6.0;
 /// R2b: below this distance a regiment charges whatever the slope.
 pub const CLOSE_CHARGE: f64 = 25.0;
 
@@ -956,7 +958,16 @@ fn plan_field(view: &mut View) {
                 view.attack(i, j, run);
             }
             Some((j, d)) if d < COUNTER_CHARGE_DISTANCE => view.attack(i, j, true),
-            _ => view.move_to(i, x, z, false, Some(facing)),
+            _ => {
+                // R2b: an advancing line under arrows closes at the run
+                // rather than walking up to the enemy shooters.
+                let u = &view.units[i];
+                let run = !defensive
+                    && !duel
+                    && u.missile_timer < UNDER_FIRE
+                    && (z - u.z) * view.forward > 5.0;
+                view.move_to(i, x, z, run, Some(facing));
+            }
         }
     }
 
