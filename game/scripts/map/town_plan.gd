@@ -311,8 +311,32 @@ static func generate(town: Dictionary, params: Dictionary, heights: Heights) -> 
 		var at := Vector2(float(bridge["at"][0]), float(bridge["at"][1]))
 		var d := Vector2(float(bridge["dir"][0]), float(bridge["dir"][1])).normalized()
 		out["bridge"] = {"x": at.x, "y": at.y, "yaw": atan2(d.y, d.x) + PI * 0.5, "length": float(bridge["width_m"]) + 24.0, "width": 7.0, "deck": float(bridge["z_deck"]), "water": float(bridge["z_water"])}
-	out["stats"] = {"houses": houses["x"].size(), "streets": out["streets"].size(), "usec": Time.get_ticks_usec() - t0}
+	out["ground"] = _ground_grid(radii, heights, 20.0)
+	var dwellings := int(out["house_budget"]["core"]) + int(out["house_budget"]["out"]) - maxi(int(budget["core"]), 0) - maxi(int(budget["out"]), 0)
+	out["stats"] = {"dwellings": dwellings, "houses": houses["x"].size(), "streets": out["streets"].size(), "usec": Time.get_ticks_usec() - t0}
 	return out
+
+
+## Sol de la ville (cours, jardins, terre battue) : grille drapée de `step` m, sommets à
+## l'intérieur du noyau ; hauteurs (m) aux sommets. {origin, step, n, inside, heights, radii}.
+static func _ground_grid(radii: PackedFloat32Array, heights: Heights, step: float) -> Dictionary:
+	var r_max := 0.0
+	for r in radii:
+		r_max = maxf(r_max, r)
+	var n := int(ceil(r_max / step)) * 2 + 1
+	var origin := Vector2(-(n - 1) * 0.5 * step, -(n - 1) * 0.5 * step)
+	var inside_mask := PackedByteArray()
+	inside_mask.resize(n * n)
+	var h := PackedFloat32Array()
+	h.resize(n * n)
+	for j in n:
+		for i in n:
+			var p := origin + Vector2(i, j) * step
+			var k := j * n + i
+			if inside(radii, p, -step):
+				inside_mask[k] = 1
+				h[k] = heights.height_m(p.x, p.y)
+	return {"origin": origin, "step": step, "n": n, "inside": inside_mask, "heights": h, "radii": radii}
 
 
 ## Recalcule seulement les hauteurs de base (m) d'un plan (pages plus fines arrivées).
@@ -341,6 +365,9 @@ static func reground(plan: Dictionary, heights: Heights) -> void:
 		trees[i].z = heights.height_m(trees[i].x, trees[i].y)
 	plan["trees"] = trees
 	plan["market"]["base"] = heights.height_m(0.0, 0.0)
+	var ground: Dictionary = plan.get("ground", {})
+	if not ground.is_empty():
+		plan["ground"] = _ground_grid(ground["radii"], heights, float(ground["step"]))
 
 
 # --- Géométrie ------------------------------------------------------------------------------
@@ -547,35 +574,60 @@ static func _line_parcels(pts: PackedVector2Array, width: float, radii: PackedFl
 				if not main and zone == ZONE_INTRA:
 					depth *= 0.8
 				var center_along := mid + u * (front * 0.5)
-				var parcel_center := center_along + n * (width * 0.5 + 0.8 + depth * 0.5)
-				if _parcel_ok(zone, parcel_center, radii, occ, u, front, depth):
-					occ.rect(parcel_center, u, front * 0.5, depth * 0.5, false)
-					var mix_key := "intra" if zone == ZONE_INTRA else ("faubourg" if zone == ZONE_FAUBOURG else "village")
-					var hk := _pick(mixes.get(mix_key, {"townhouse": 1.0}), rng)
-					var range_d: Array = HOUSE_DEPTH.get(hk, [8.0, 10.0])
-					var house_depth := minf(rng.randf_range(float(range_d[0]), float(range_d[1])), depth * 0.7)
-					var house_front := minf(front - (0.0 if zone == ZONE_INTRA else rng.randf_range(1.0, 3.0)), float(HOUSE_MAX_FRONT.get(hk, 12.0)))
-					var hc := center_along + n * (width * 0.5 + 0.8 + house_depth * 0.5)
-					# Façade (+Z du modèle) vers la rue (-n) ; `yaw` = direction de l'axe X du modèle
-					# (façade), voir `TownBuilder.basis_x`.
-					var yaw := atan2(n.x, -n.y)
-					houses["kind"].append(HOUSE_KINDS.find(hk))
-					houses["x"].append(hc.x)
-					houses["y"].append(hc.y)
-					houses["yaw"].append(yaw)
-					houses["front"].append(house_front)
-					houses["depth"].append(house_depth)
-					houses["base"].append(footprint_base(heights, hc, yaw, house_front, house_depth))
-					houses["tint"].append(rng.randf())
-					houses["zone"].append(zone)
-					budget[key] = int(budget[key]) - 1
-					if depth - house_depth > 10.0 and rng.randf() < 0.4:
-						var tp := center_along + n * (width * 0.5 + 0.8 + house_depth + (depth - house_depth) * 0.6)
-						out["trees"].append(Vector3(tp.x, tp.y, heights.height_m(tp.x, tp.y)))
-					s += front
-				else:
-					s += 3.0
+				# Parcelle aussi profonde que possible : pleine, puis raccourcie (îlots étroits).
+				var placed := false
+				for factor: float in [1.0, 0.7, 0.5]:
+					var d := maxf(depth * factor, 13.0)
+					var parcel_center := center_along + n * (width * 0.5 + 0.8 + d * 0.5)
+					if _parcel_ok(zone, parcel_center, radii, occ, u, front, d):
+						# Marquage en retrait de 1,3 m le long de la rue : la parcelle suivante (testée en
+						# retrait de 1,5 m) reste contiguë malgré les cases de 2,5 m.
+						occ.rect(parcel_center, u, maxf(front * 0.5 - 1.3, 0.5), d * 0.5, false)
+						_add_house(center_along, n, width, front, d, zone, rng, mixes, heights, houses, out)
+						budget[key] = int(budget[key]) - 1
+						placed = true
+						break
+				s += front if placed else 3.0
 			carry = s - seg_len
+
+
+## Maison sur rue d'une parcelle (façade vers la rue), dépendance au fond (cour, atelier,
+## grange) et arbre du jardin selon la profondeur libre.
+static func _add_house(center_along: Vector2, n: Vector2, width: float, front: float, depth: float, zone: int, rng: RandomNumberGenerator, mixes: Dictionary, heights: Heights, houses: Dictionary, out: Dictionary) -> void:
+	var mix_key := "intra" if zone == ZONE_INTRA else ("faubourg" if zone == ZONE_FAUBOURG else "village")
+	var hk := _pick(mixes.get(mix_key, {"townhouse": 1.0}), rng)
+	var range_d: Array = HOUSE_DEPTH.get(hk, [8.0, 10.0])
+	var house_depth := minf(rng.randf_range(float(range_d[0]), float(range_d[1])), depth * 0.7)
+	var house_front := minf(front - (0.0 if zone == ZONE_INTRA else rng.randf_range(1.0, 3.0)), float(HOUSE_MAX_FRONT.get(hk, 12.0)))
+	var hc := center_along + n * (width * 0.5 + 0.8 + house_depth * 0.5)
+	# Façade (+Z du modèle) vers la rue (-n) ; `yaw` = direction de l'axe X du modèle (façade),
+	# voir `TownBuilder.basis_x`.
+	var yaw := atan2(n.x, -n.y)
+	_append_house(houses, HOUSE_KINDS.find(hk), hc, yaw, house_front, house_depth, zone, rng.randf(), heights)
+	var free_depth := depth - house_depth
+	# Dépendance au fond de la parcelle (intra-muros : arrière-boutique, atelier ; ailleurs : grange).
+	if free_depth > 14.0 and rng.randf() < (0.45 if zone == ZONE_INTRA else 0.35):
+		var annex_kind := "stonehouse" if zone == ZONE_INTRA else "barn"
+		var annex_front := minf(front - 1.0, 7.0 if zone == ZONE_INTRA else 10.0)
+		var annex_depth := rng.randf_range(5.0, 7.0)
+		var ac := center_along + n * (width * 0.5 + 0.8 + depth - annex_depth * 0.5 - 1.0)
+		_append_house(houses, HOUSE_KINDS.find(annex_kind), ac, yaw + PI, annex_front, annex_depth, zone, rng.randf(), heights)
+		free_depth -= annex_depth + 2.0
+	if free_depth > 10.0 and rng.randf() < 0.4:
+		var tp := center_along + n * (width * 0.5 + 0.8 + house_depth + free_depth * 0.5)
+		out["trees"].append(Vector3(tp.x, tp.y, heights.height_m(tp.x, tp.y)))
+
+
+static func _append_house(houses: Dictionary, kind: int, center: Vector2, yaw: float, front: float, depth: float, zone: int, tint: float, heights: Heights) -> void:
+	houses["kind"].append(kind)
+	houses["x"].append(center.x)
+	houses["y"].append(center.y)
+	houses["yaw"].append(yaw)
+	houses["front"].append(front)
+	houses["depth"].append(depth)
+	houses["base"].append(footprint_base(heights, center, yaw, front, depth))
+	houses["tint"].append(tint)
+	houses["zone"].append(zone)
 
 
 static func _parcel_ok(zone: int, center: Vector2, radii: PackedFloat32Array, occ: Occupancy, u: Vector2, front: float, depth: float) -> bool:

@@ -48,6 +48,10 @@ var _stream_timer := 0
 var _last_distance := INF
 var _plan_usec: Array[int] = []
 var _step_max_usec := 0
+## Captures et mesures : `--town-lod=blocks` (blocs seuls), `--town-lod=detail` (kit partout),
+## `--no-towns` (rendu d'avant ZG6).
+var _detail_override := 1.0
+var _disabled := false
 
 
 func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settlement_ids: Array, p_data: TownData = null) -> void:
@@ -71,6 +75,13 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 			terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 		if not terrain.vertical_scale_changed.is_connected(_on_vertical_scale_changed):
 			terrain.vertical_scale_changed.connect(_on_vertical_scale_changed)
+	for arg in OS.get_cmdline_user_args():
+		if arg == "--town-lod=blocks":
+			_detail_override = 0.001
+		elif arg == "--town-lod=detail":
+			_detail_override = 10.0
+		elif arg == "--no-towns":
+			_disabled = true
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {"towns": _ids.size()}
@@ -124,7 +135,8 @@ func apply_render_quality(_preset: Dictionary) -> void:
 
 
 func _configure(b: TownBuilder) -> void:
-	b.set_ranges(profile.detail_range * float(_quality.get("detail", 1.0)), profile.block_range * float(_quality.get("block", 1.0)), bool(_quality.get("detail_shadows", true)), bool(_quality.get("block_shadows", false)))
+	var detail := profile.detail_range * float(_quality.get("detail", 1.0)) * _detail_override
+	b.set_ranges(detail, profile.block_range * float(_quality.get("block", 1.0)), bool(_quality.get("detail_shadows", true)), bool(_quality.get("block_shadows", false)))
 
 
 # --- Mise à jour par image ----------------------------------------------------------------
@@ -133,7 +145,7 @@ func _configure(b: TownBuilder) -> void:
 func update_view(rig_distance: float) -> void:
 	if data == null or _ids.is_empty():
 		return
-	var usable := force_active or (terrain != null and terrain.quadtree != null)
+	var usable := not _disabled and (force_active or (terrain != null and terrain.quadtree != null))
 	var now_active := usable and tiers.valley_weight(rig_distance) >= profile.min_valley_weight
 	if now_active != active:
 		active = now_active

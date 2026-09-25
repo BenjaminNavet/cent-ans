@@ -67,9 +67,10 @@ func _test_plan(data: TownData) -> void:
 		print("zg6_towns_test: %s population %d households %d → %d houses, %d streets, %d monuments, %.0f ms" % [id, town["population"], town["households"], count, a["streets"].size(), a["monuments"].size(), a["stats"]["usec"] / 1000.0])
 		_check(count == (b["houses"]["x"] as PackedFloat32Array).size() and houses["x"] == b["houses"]["x"] and houses["base"] == b["houses"]["base"], "%s: deterministic plan" % id)
 		var wanted: int = a["house_budget"]["core"] + a["house_budget"]["out"]
+		var dwellings: int = a["stats"]["dwellings"]
 		var share := 0.35 if str(town["kind"]) in ["city", "town"] else 0.2
-		_check(count >= wanted * share or id == "set_sully_sur_loire", "%s: enough houses (%d for %d wanted)" % [id, count, wanted])
-		_check(count <= wanted, "%s: not more houses than households" % id)
+		_check(dwellings >= wanted * share or id == "set_sully_sur_loire", "%s: enough dwellings (%d for %d wanted)" % [id, dwellings, wanted])
+		_check(dwellings <= wanted and count >= dwellings, "%s: not more dwellings than households" % id)
 		var radii: PackedFloat32Array = a["radii"]
 		var outside_core := 0
 		var floating := 0
