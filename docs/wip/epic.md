@@ -32,11 +32,11 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 
 | Lot | Objet | ADR | Dépend de | État |
 |---|---|---|---|---|
-| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **dans integration/epic** (87b9d1ee) |
-| EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **dans integration/epic** (7d10edba) |
-| EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **dans integration/epic** (a1465985) |
+| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **fusionné** 13506bf1 |
+| EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **fusionné** 13506bf1 |
+| EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **fusionné** 13506bf1 |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
-| EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **dans integration/epic** (87b9d1ee) |
+| EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **fusionné** 13506bf1 |
 | EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | vague 2 |
 | EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | vague 2 |
 | EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | — | EP2 | vague 2 |
@@ -85,4 +85,18 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
   Vérifié (9c499c32) : fmt, clippy, cargo test (688), `build.sh`, pytest (531), import Godot,
   `ep2_horizon_test`, `ep4_audio_test`, smoke entier vert (28 « smoke OK », code 0), captures
   `--standard-shot=line|foot` (étendards et pennons visibles) et `sg3_siege_shot` (servants de la
-  bombarde et du trébuchet animés). Reste : ff-only dans main.
+  bombarde et du trébuchet animés).
+- **25/09 : vague 1 dans main (ff-only, 13506bf1)** : EP1, EP2, EP3, EP5 (EP4 déjà fusionné).
+  Dernières fusions de main : `cli.py` (sous-commandes EP2 `horizon-panoramas` + AR1 `art-plates`,
+  `geo horizon` + `geo pyramid`). Vérifié : cargo test (692), pytest (545), smoke 28 OK code 0.
+
+## Points ouverts après la vague 1
+- Équilibrage : avec R4, le défenseur gagne à forces égales à l'échelle épique (graines 3, 5, 11) ;
+  sonde `ep3_probe` (rivière) non relancée.
+- `--standard-shot=foot` cadre parfois dans une pile de pont sur un site EP3 : décaler la caméra.
+- `battle_skinned_poses.py` : défauts ruff (docstrings) antérieurs, venus d'EP5.
+- Au-delà de 172 régiments présents, le coût est dans le script par régiment (EP1).
+
+## Prochaine étape
+Vague 2 : EP6 (villages et décor du champ), puis EP7 (Crécy, Poitiers, Azincourt) et EP8 (mise en
+scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
