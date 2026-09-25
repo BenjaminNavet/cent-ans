@@ -12,6 +12,8 @@
   tri de conteneurs dans une seule vidange de la file (tailles > 60 000 px au plantage).
 - Correction : soustraire le cadre réel (`minimap.combined_min − view.combined_min`) + 4 px.
   Point fixe stable, quel que soit le thème. Pas de changement de la taille de la file.
+- Note : la session UI1 a poussé en parallèle une correction équivalente dans main
+  (8dd69a75) ; à la fusion, sa version a été gardée (même principe, même jeu de 4 px).
 
 ## 2. « music playlist too short » (campaign, war, court)
 - Cause : le smoke pointe `MapPaths.data_dir` vers `game/tests/fixtures` (carte seule) ;
