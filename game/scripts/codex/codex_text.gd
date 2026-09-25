@@ -7,12 +7,22 @@ extends RefCounted
 ## entier, casse ignorée) de chaque alias du Codex dans les textes produits par la simulation
 ## (chronique, messages), hors balises et hors liens existants.
 ##
+## B8 homonymes : à une même position, l'alias le plus long gagne ; une fiche peut lister des
+## `exclude_contexts` (« Louis de Poitiers » ne lie pas la bataille) ; `[[!texte]]` rend `texte`
+## en texte simple, jamais auto-lié (échappement explicite).
+##
 ## `CodexStore` est obtenu par `/root/CodexStore` (le smoke `--script` est compilé avant les
 ## autoloads). Sans lui, les liens sont rendus en texte simple.
 
 const META_PREFIX := "cdx:"
 const UNREAD_COLOR := "#8b1a1a"
 const READ_COLOR := "#5a3a1a"
+## Préfixe d'échappement : `[[!Louis de Poitiers]]` = texte simple, sans auto-lien.
+const ESCAPE_PREFIX := "!"
+## Balise neutre (langue du texte) qui protège un passage échappé de l'auto-lien, y compris si
+## le BBCode repasse par `format`.
+const NO_LINK_OPEN := "[lang=fr]"
+const NO_LINK_CLOSE := "[/lang]"
 
 static var _link_regex: RegEx
 static var _tag_regex: RegEx
@@ -61,7 +71,9 @@ static func plain(text: String) -> String:
 	for match in _links().search_all(text):
 		out += text.substr(cursor, match.get_start() - cursor)
 		var label := match.get_string(2)
-		if label == "":
+		if match.get_string(1).begins_with(ESCAPE_PREFIX):
+			label = _escaped_text(match)
+		elif label == "":
 			label = str(codex.call("title", match.get_string(1).strip_edges())) if codex != null else match.get_string(1)
 		out += label
 		cursor = match.get_end()
@@ -87,7 +99,9 @@ static func _replace_links(text: String, codex: Node, linked: Dictionary) -> Str
 		out += text.substr(cursor, match.get_start() - cursor)
 		var id := match.get_string(1).strip_edges()
 		var label := match.get_string(2).strip_edges()
-		if codex == null or not bool(codex.call("has_entry", id)):
+		if match.get_string(1).begins_with(ESCAPE_PREFIX):
+			out += NO_LINK_OPEN + _escaped_text(match) + NO_LINK_CLOSE
+		elif codex == null or not bool(codex.call("has_entry", id)):
 			out += label if label != "" else (str(codex.call("title", id)) if codex != null else id)
 		else:
 			out += link(id, label)
@@ -96,8 +110,13 @@ static func _replace_links(text: String, codex: Node, linked: Dictionary) -> Str
 	return out + text.substr(cursor)
 
 
+## Texte d'un échappement `[[!texte]]` (un éventuel `|…` en fait partie).
+static func _escaped_text(match: RegExMatch) -> String:
+	return match.get_string(0).substr(3, match.get_string(0).length() - 5)
+
+
 ## Lie la première occurrence de chaque fiche dans les segments de texte hors balises et hors
-## `[url]…[/url]` / `[img]…[/img]` ; une fiche déjà liée (explicitement ou plus haut) ne l'est pas deux fois.
+## `[url]…[/url]` / `[img]…[/img]` / passages échappés `[lang=fr]…[/lang]` ; une fiche déjà liée (explicitement ou plus haut) ne l'est pas deux fois.
 static func _auto_link(bbcode: String, codex: Node, linked: Dictionary) -> String:
 	var regex: RegEx = codex.call("alias_regex")
 	if regex == null:
@@ -114,9 +133,9 @@ static func _auto_link(bbcode: String, codex: Node, linked: Dictionary) -> Strin
 		if tag == null:
 			break
 		var tag_text: String = tag.get_string()
-		if tag_text.begins_with("[url") or tag_text.begins_with("[img"):
+		if tag_text.begins_with("[url") or tag_text.begins_with("[img") or tag_text.begins_with("[lang"):
 			skip_depth += 1
-		elif tag_text == "[/url]" or tag_text == "[/img]":
+		elif tag_text == "[/url]" or tag_text == "[/img]" or tag_text == "[/lang]":
 			skip_depth = maxi(0, skip_depth - 1)
 		out += tag_text
 		cursor = tag.get_end()
@@ -132,6 +151,8 @@ static func _link_segment(segment: String, regex: RegEx, codex: Node, linked: Di
 		var id := str(codex.call("id_for_alias", match.get_string(1)))
 		if id == "" or linked.has(id):
 			continue
+		if bool(codex.call("is_excluded", id, segment, match.get_start(1), match.get_end(1))):
+			continue  # homonyme : « Louis de Poitiers » n'est pas la bataille
 		linked[id] = true
 		out += segment.substr(cursor, match.get_start() - cursor) + link(id, match.get_string(1))
 		cursor = match.get_end()

@@ -22,9 +22,10 @@ use serde::{Deserialize, Serialize};
 use crate::fire::Blaze;
 use crate::rng::BattleRng;
 use crate::siege::{
-    House, PieceKind, SiegeWorks, Tower, WallPiece, GATE_WIDTH, HOUSE_RADIUS, RING_RADIUS,
-    SQUARE_RADIUS, STREET_WIDTH, TOWN_CENTER,
+    place_church, House, PieceKind, SiegeWorks, Tower, TownPlan, WallPiece, GATE_WIDTH,
+    RING_RADIUS, SQUARE_RADIUS, TOWN_CENTER,
 };
+use crate::town::{Footprint, TownRules};
 
 /// Longest straight wall piece (m): longer stretches are split (towers).
 pub const MAX_PIECE: f64 = 55.0;
@@ -121,12 +122,6 @@ fn segment_distance(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
     let len2 = (dx * dx + dz * dz).max(1e-12);
     let t = (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0);
     dist(p, (a.0 + dx * t, a.1 + dz * t))
-}
-
-fn polyline_distance(line: &[(f64, f64)], p: (f64, f64)) -> f64 {
-    line.windows(2)
-        .map(|w| segment_distance(w[0], w[1], p))
-        .fold(f64::INFINITY, f64::min)
 }
 
 /// Closest point of the closed polygon `ring` to `p`.
@@ -566,6 +561,7 @@ impl SiegeWorks {
             gate,
             hold_time: 0.0,
             houses: Vec::new(),
+            props: Vec::new(),
             sortie: false,
             gate_fire: Blaze::default(),
             wind: (0.0, 0.0),
@@ -574,7 +570,7 @@ impl SiegeWorks {
         if works.front_walls().is_empty() {
             return None;
         }
-        works.houses = lattice_houses(&works, &streets, gate_point);
+        works.houses = lattice_houses(&works, &streets, gate_point, TownRules::bundled());
         works.landmark = Some(SiegeLandmark {
             id: layout.id.clone(),
             name: layout.name.clone(),
@@ -584,57 +580,76 @@ impl SiegeWorks {
             quay,
             plan_scale: 1.0 / transform.scale,
         });
+        works.lay_props();
         works.apply_campaign_breach(breach, rng);
         Some(works)
     }
 }
 
 /// House blocks on a hexagonal lattice inside the ring, off the streets, the
-/// square, the lane from the gate to the square and the wall band.
+/// square, the lane from the gate to the square and the wall walk (BR3:
+/// oriented blocks, a denser lattice from `data/rules/siege_town.json`; a
+/// block near a street of the plan lines up with it, the others with the
+/// lattice; the church replaces the block nearest the back of the town).
 fn lattice_houses(
     works: &SiegeWorks,
     streets: &[Vec<(f64, f64)>],
     gate_point: (f64, f64),
+    rules: &TownRules,
 ) -> Vec<House> {
-    let spacing = 2.0 * HOUSE_RADIUS + STREET_WIDTH;
-    let row = spacing * 3.0_f64.sqrt() * 0.5;
-    let lane = STREET_WIDTH * 0.5 + HOUSE_RADIUS;
-    let wall_clearance = works.band() + HOUSE_RADIUS + 8.0;
-    let reach = works.outer_radius() + spacing;
-    let rows = (reach / row).ceil() as i32;
-    let cols = (reach / spacing).ceil() as i32;
+    let l = &rules.landmark;
+    let block = &rules.block;
+    let mut lanes: Vec<Vec<(f64, f64)>> = streets.to_vec();
+    lanes.push(vec![gate_point, TOWN_CENTER]);
+    let plan = TownPlan {
+        center: TOWN_CENTER,
+        square: works.square_radius + l.square_street_m,
+        streets: lanes,
+        street_half: l.lane_m * 0.5,
+        pieces: &works.pieces,
+        towers: &works.towers,
+        wall_clear: works.band() + l.wall_walk_m,
+        alley: rules.generic.alley_m,
+        ring: &works.vertices,
+    };
+    let half = block.depth_m * 0.5;
+    let (min, max) = (block.min_frontage_m, block.max_frontage_m);
+    // Houses along the rampart street and the streets of the plan first,
+    // then blocks on a lattice in what is left.
     let mut houses = Vec::new();
+    plan.wall_rows(&mut houses, half, min, max);
+    plan.street_rows(&mut houses, half, min, max);
+    let reach = works.outer_radius() + l.pitch_x_m.max(l.pitch_z_m);
+    let rows = (reach / l.pitch_z_m).ceil() as i32;
+    let cols = (reach / l.pitch_x_m).ceil() as i32;
     for j in -rows..=rows {
-        let offset = if j.rem_euclid(2) == 1 {
-            spacing * 0.5
-        } else {
-            0.0
-        };
         for i in -cols..=cols {
             let p = (
-                TOWN_CENTER.0 + f64::from(i) * spacing + offset,
-                TOWN_CENTER.1 + f64::from(j) * row,
+                TOWN_CENTER.0 + f64::from(i) * l.pitch_x_m,
+                TOWN_CENTER.1 + f64::from(j) * l.pitch_z_m,
             );
-            if !works.inside(p.0, p.1)
-                || dist(p, TOWN_CENTER) < works.square_radius + HOUSE_RADIUS + 6.0
-                || works
-                    .pieces
-                    .iter()
-                    .any(|w| w.distance(p.0, p.1) < wall_clearance)
-                || segment_distance(gate_point, TOWN_CENTER, p) < lane
-                || streets.iter().any(|s| polyline_distance(s, p) < lane)
-            {
+            if !works.inside(p.0, p.1) {
                 continue;
             }
-            houses.push(House {
-                x: p.0,
-                z: p.1,
-                radius: HOUSE_RADIUS,
-                fire: Blaze::default(),
-                suburb: false,
-            });
+            // Row 0 turned towards the square.
+            let yaw = if p.1 > TOWN_CENTER.1 { PI } else { 0.0 };
+            let front = (-yaw.sin(), yaw.cos());
+            // The whole block, else the row on the square's side, else the
+            // other one.
+            for (shift, rows) in [(0.0, 2_u8), (half * 0.5, 1), (-half * 0.5, 1)] {
+                let d = if rows == 2 { block.depth_m } else { half };
+                let (x, z) = (p.0 + front.0 * shift, p.1 + front.1 * shift);
+                let fp = Footprint::new(x, z, l.frontage_m, d, yaw);
+                if plan.fits(&fp, &houses) {
+                    let mut house = House::block(x, z, l.frontage_m, d, yaw);
+                    house.rows = rows;
+                    houses.push(house);
+                    break;
+                }
+            }
         }
     }
+    place_church(&mut houses, &plan, rules);
     houses
 }
 
@@ -683,11 +698,12 @@ mod tests {
         assert_eq!(landmark.gatehouses.len(), 1);
         // The north street runs from the gate through the centre: no house on it.
         let street = &landmark.streets[0];
-        assert!(works
-            .houses
-            .iter()
-            .all(|h| polyline_distance(street, (h.x, h.z))
-                >= STREET_WIDTH * 0.5 + HOUSE_RADIUS - 1e-9));
+        let lane = TownRules::bundled().landmark.lane_m;
+        assert!(works.houses.iter().all(|h| {
+            street
+                .windows(2)
+                .all(|w| h.footprint().distance_to_segment(w[0], w[1]) >= lane * 0.5 - 1e-6)
+        }));
         assert!(!works.houses.is_empty());
         assert!(works.pieces.iter().all(|p| p.length() <= MAX_PIECE + 1e-6));
     }
