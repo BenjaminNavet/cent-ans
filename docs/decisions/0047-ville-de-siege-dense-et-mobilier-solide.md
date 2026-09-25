@@ -49,8 +49,19 @@ Deux limites de BR2 relevées par le joueur :
 
 ## Mesures
 
-Voir `docs/wip/br3-ville-dense-mobilier.md` (tableaux avant/après : îlots, incendie, assauts,
-coût des figurines).
+Sonde `core/crates/sim-battle/tests/br3_assault_probe.rs` (20 graines, deux IA, brèche 40 %) :
+
+| Ville | Îlots | Victoires assaillant | Durée médiane (s) | Maisons brûlées |
+|---|---|---|---|---|
+| générique | 21 → 59 | 17/20 → 17/20 | 332 → 349 | 4.5 → 6.2 |
+| Paris | 32 → 61 | 10/20 → 5/20 | 733 → 706 | 16.5 → 20.9 |
+| Rouen | 36 → 78 | 0/20 → 1/20 | 305 → 307 | 4.8 → 6.4 |
+
+Paris perd la moitié de ses victoires d'assaillant : le résultat y suit surtout l'incendie ; élargir
+les rues, le chemin de ronde ou la rue de la place n'y change rien de mesurable (détail dans
+`docs/wip/br3-ville-dense-mobilier.md`). Point laissé à l'équilibre des sièges.
+
+Figurines : +178 µs par image pour 10 423 figurines en plein assaut (57 régiments).
 
 ## Conséquences
 
