@@ -1,0 +1,11 @@
+{
+  "id": "cdx_ordre_de_montesa",
+  "title": "L'ordre de Montesa",
+  "category": "religion",
+  "aliases": ["ordre de Montesa", "Montesa", "chevaliers de Montesa"],
+  "era": { "from": "1317", "to": "1587" },
+  "summary": "Ordre religieux et militaire fondé en 1317 à la demande du roi Jacques II d'Aragon pour recevoir les biens des Templiers dans le royaume de Valence. Ses chevaliers gardent la frontière méridionale de la couronne d'Aragon et sa nombreuse population musulmane.",
+  "body": "Après la suppression de l'ordre du Temple par le concile de Vienne en 1312, le pape attribue ses biens aux Hospitaliers de Saint-Jean. Le roi d'Aragon Jacques II refuse de voir un ordre international, déjà puissant, s'implanter davantage dans le royaume de Valence, terre de conquête récente où vivent encore de nombreux musulmans et qui borde la Castille et, plus loin, Grenade. Il obtient du pape Jean XXII, le 10 juin 1317, la création d'un ordre nouveau, installé au château de Montesa, qui reçoit les biens valenciens du Temple et l'essentiel de ceux de l'Hôpital dans ce royaume. L'ordre prend forme en 1319.\n\nMontesa dépend de l'ordre castillan de Calatrava et suit, comme lui, une règle cistercienne : ses chevaliers sont à la fois des moines, liés par des vœux, et des combattants. Le maître gouverne un réseau de commanderies et de châteaux, dont Peñíscola, ancienne place templière dressée sur la mer. Au temps de la guerre de Cent Ans, l'ordre sert le roi d'Aragon Pierre IV, notamment dans la guerre des Deux Pierre qui l'oppose de 1356 à 1369 à [[cdx_pierre_le_cruel|Pierre le Cruel]] de [[cdx_castille|Castille]], dont le royaume de Valence est l'un des principaux théâtres.\n\nEn 1400, l'ordre absorbe celui de Saint-Georges d'Alfama, avec l'accord du pape d'Avignon Benoît XIII, que l'Aragon reconnaît pendant le [[cdx_grand_schisme|Grand Schisme]]. À la fin du XVIe siècle, sous Philippe II, la maîtrise est réunie à la Couronne, comme celles des ordres castillans. Le château de Montesa, siège de l'ordre, est ruiné par un tremblement de terre en 1748.",
+  "see_also": ["cdx_chevalerie", "cdx_castille", "cdx_pierre_le_cruel", "cdx_grand_schisme", "cdx_jacques_iii_de_majorque"],
+  "sources": ["Ordre de Montesa", "Ordre du Temple", "Guerre des Deux Pierre", "Peñíscola"]
+}
