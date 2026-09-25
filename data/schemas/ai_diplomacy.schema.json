@@ -49,6 +49,36 @@
       },
       "required": ["keep_capital", "cornered_provinces"],
       "additionalProperties": false
+    },
+    "negotiation": {
+      "type": "object",
+      "description": "Lot DP1 (ADR 0025) : traités à plusieurs articles, buts de guerre, score et fatigue de guerre. Sans cette section (ou avec enabled faux), la paix de l'IA reste celle de G5.",
+      "properties": {
+        "enabled": {"type": "boolean", "description": "Active les buts de guerre, la fatigue de guerre et la paix par traité de l'IA."},
+        "chance_scale": {"type": "number", "minimum": 0.1, "description": "Échelle logistique de la chance d'acceptation : 100 / (1 + e^(-score / échelle))."},
+        "livres_per_point": {"type": "integer", "minimum": 1, "description": "Livres valant un point de valeur de traité (or, tribut, rançon)."},
+        "max_gold_points": {"type": "integer", "minimum": 0, "description": "Plafond de la valeur d'un article d'or ou de tribut."},
+        "war_goal_count": {"type": "integer", "minimum": 0, "description": "Nombre de provinces visées comme buts de guerre par un belligérant."},
+        "war_goal_score": {"type": "integer", "minimum": 0, "description": "Score de guerre supplémentaire par province but de guerre occupée."},
+        "settlement_score": {"type": "integer", "minimum": 0, "description": "Score de guerre par place secondaire (château, bourg) occupée."},
+        "province_cost": {"type": "integer", "minimum": 0, "description": "Valeur perdue en cédant une province."},
+        "capital_cost": {"type": "integer", "minimum": 0, "description": "Valeur perdue en cédant la capitale."},
+        "settlement_cost": {"type": "integer", "minimum": 0, "description": "Valeur perdue en cédant une place secondaire."},
+        "occupied_cost_percent": {"type": "integer", "minimum": 0, "description": "Part du coût (en %) qui reste quand la province est déjà occupée par celui qui la reçoit."},
+        "war_goal_bonus": {"type": "integer", "minimum": 0, "description": "Bonus quand on reçoit une province qui est l'un de nos buts de guerre."},
+        "weariness_per_war": {"type": "integer", "minimum": 0, "description": "Fatigue de guerre gagnée par saison et par guerre."},
+        "weariness_losing": {"type": "integer", "minimum": 0, "description": "Fatigue supplémentaire quand le score de guerre est inférieur à -20."},
+        "weariness_occupied": {"type": "integer", "minimum": 0, "description": "Fatigue supplémentaire par province occupée par l'ennemi (3 au plus)."},
+        "weariness_bankrupt": {"type": "integer", "minimum": 0, "description": "Fatigue supplémentaire quand le trésor est vide."},
+        "weariness_recovery": {"type": "integer", "minimum": 0, "description": "Fatigue perdue par saison de paix."},
+        "weariness_unrest_divisor": {"type": "integer", "minimum": 1, "description": "Points de fatigue par point de mécontentement dans le royaume."},
+        "weariness_peace_divisor": {"type": "integer", "minimum": 1, "description": "Points de fatigue par point de valeur accordée à la paix."},
+        "max_weariness_to_declare": {"type": "integer", "minimum": 0, "description": "Au-delà de cette fatigue, l'IA ne déclare plus de guerre."},
+        "unmet_goals_reluctance": {"type": "integer", "minimum": 0, "description": "Réticence d'un belligérant dont les buts de guerre ne sont pas atteints à signer une paix sans cession."},
+        "demand_score": {"type": "integer", "description": "Score de guerre à partir duquel l'IA victorieuse exige des cessions."},
+        "ai_min_chance": {"type": "integer", "minimum": 0, "maximum": 100, "description": "Chance d'acceptation minimale (en %) d'un traité envoyé par l'IA."}
+      },
+      "additionalProperties": false
     }
   },
   "required": ["menacing_neighbour", "war", "join_war", "peace"],

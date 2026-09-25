@@ -224,6 +224,11 @@ pub enum Order {
     ProposeAlliance {
         target: FactionId,
     },
+    /// Lot DP1: a treaty of several articles (`negotiation::Article`).
+    ProposeTreaty {
+        target: FactionId,
+        articles: Vec<crate::negotiation::Article>,
+    },
     BreakAlliance {
         target: FactionId,
     },
@@ -686,6 +691,9 @@ impl CampaignState {
             )?),
             Order::ProposeAlliance { target } => {
                 Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
+            }
+            Order::ProposeTreaty { target, articles } => {
+                Ok(self.propose(data, faction, &target, Proposal::Treaty { articles })?)
             }
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
             Order::SetEmbargo { target, active } => {
