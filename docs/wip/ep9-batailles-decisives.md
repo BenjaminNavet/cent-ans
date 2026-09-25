@@ -5,16 +5,28 @@ Branche : `worktree-agent-a6207325088470391` (worktree agent). ADR visé : 0056.
 
 ## État
 
-- [x] Squelette : sondes `core/crates/sim-battle/tests/ep9_decisive.rs` (ignorées).
-- [ ] Mesure « avant » (12 graines, 3 paliers, plaine / collines / rivière, IA-IA, joueur attaquant immobile, joueur défenseur immobile).
-- [ ] Correctif : attaquant qui attaque toujours, bataille refusée, déroutes qui vont au bout.
-- [ ] ADR 0056, tests activés, smoke.
+- [x] Squelette : sondes `core/crates/sim-battle/tests/ep9_decisive.rs` (`survey`, `survey_crecy`, `q3_demo_battle_without_orders_ends`, `trace_demo`).
+- [x] Mesure « avant » (12 graines, 3 paliers).
+- [x] Règles `data/rules/battle_decision.json` (+ schéma, pytest) ; `src/decision.rs`, `src/sim/decision.rs` :
+  armée brisée (part en état de combattre < 35 %, 45 % sans général), bataille refusée / accalmie
+  (300 s sans perte, mêlée ni approche de 20 m), `BattleOutcome::end`.
+- [x] IA : le défenseur reste sur sa position tant que personne ne combat (`DEFENDER_QUIET` 60 s) ;
+  l'attaquant ne tient le duel d'archers que 180 s (`ATTACKER_DUEL_LIMIT`).
+- [ ] Cas longs restants : rivière (IdleAttacker large 983 s, IdleDefender épique 1426 s).
+- [ ] Tests activés, ep1_scale seuil 12 → 20, digests, campagne (chronique « bataille refusée »), UI résultat, smoke.
+- [ ] ADR 0056.
 
-## Mesures
+## Mesures (durée min/méd/max en s, 12 graines)
 
-Bataille de démo 1337 (France attaquante = joueur, sans ordre) : 744 s, victoire anglaise
-(l'IA anglaise ne sort qu'après `DEFENDER_PATIENCE` = 480 s ; la recette Q3 s'est arrêtée à 7 min 14 s).
+Avant : standard IA-IA 420/486/627 ; joueur immobile jusqu'à 1800 (plafond) avec rivière.
+Large et épique : joueur immobile (attaquant ou défenseur) = presque toujours non terminée à 30 min.
+Épique IA-IA plaine 493/971/1800.
+
+Après (commit courant) : tout se termine ; IA-IA 3-9 min ; joueur attaquant immobile sans rivière
+300-622 s (refusée ou brisée) ; rivière encore jusqu'à 983 / 1426 s sur quelques graines.
+Crécy-like (IA-IA, Anglais sur la crête) : Anglais 11/12 avant et après.
+Démo 1337 (Q3) : 580-688 s au lieu de 744-911 s.
 
 ## Prochaine étape
 
-Lancer `survey` et lire les durées.
+Graines longues avec rivière, puis activer les tests.

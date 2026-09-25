@@ -27,6 +27,13 @@ impl BattleSim {
         self.elapsed - self.clock.last
     }
 
+    /// Nobody has engaged for `seconds` and the refusal rule can end the
+    /// battle (field battle, end checks on): a defender on its ground has
+    /// no reason to come out (AI).
+    pub fn quiet_for(&self, seconds: f64) -> bool {
+        self.end_conditions && self.siege.is_none() && self.quiet_time() >= seconds
+    }
+
     /// Soldiers of `side` still able to fight (present and in good order),
     /// plus its reserves, as a share of its initial soldiers.
     pub fn fighting_share(&self, side: SideId) -> f64 {
