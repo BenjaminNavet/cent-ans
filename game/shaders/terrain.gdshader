@@ -314,13 +314,19 @@ void fragment() {
 	float lod = log2(k);
 	vec2 du = vec2(k / map_size.x, 0.0);
 	vec2 dv = vec2(0.0, k / map_size.y);
-	float hc = height_m_lod(uv, max(lod - 1.0, 0.0));
-	float h_l = height_m_lod(uv - du, lod);
-	float h_r = height_m_lod(uv + du, lod);
-	float h_u = height_m_lod(uv - dv, lod);
-	float h_d = height_m_lod(uv + dv, lod);
-	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
-	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	float hc = 0.0;
+	vec2 grad_m = vec2(0.0);
+	// PB2 : sur une page du quadtree, `qt_relief` remplace altitude et gradient (9 lectures de
+	// heightmap et de relief fin évitées, même résultat).
+	if (!qt_has_page()) {
+		hc = height_m_lod(uv, max(lod - 1.0, 0.0));
+		float h_l = height_m_lod(uv - du, lod);
+		float h_r = height_m_lod(uv + du, lod);
+		float h_u = height_m_lod(uv - dv, lod);
+		float h_d = height_m_lod(uv + dv, lod);
+		grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
+		rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	}
 	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
