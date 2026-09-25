@@ -1631,7 +1631,7 @@ func _run_icons() -> void:
 	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
 	root.add_child(panel)
 	await process_frame
-	_check(panel.get_node_or_null("Text") is RichTextLabel, "tooltip panel text expected")
+	_check(panel.find_child("Text", true, false) is RichTextLabel, "tooltip panel text expected")
 	panel.queue_free()
 	var chip := IconChip.create("res_wine", "Vin", "x")
 	_check(chip.icon_rect != null and chip.icon_rect.texture != null, "icon chip texture expected")
