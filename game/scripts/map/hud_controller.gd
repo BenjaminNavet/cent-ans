@@ -1,7 +1,7 @@
 class_name HudController
 extends Node
 
-## HUD « à la Total War » branché sur la carte (lot F10b) : bandeau d'ost + sceau du chef pour
+## HUD de campagne branché sur la carte (lot F10b) : bandeau d'ost + sceau du chef pour
 ## l'armée sélectionnée, cloche de fin de saison et ses alertes, lettres scellées. Les
 ## composants vivent dans `MapUI` (nœuds `ArmyStrip`, `GeneralSeal`, `EndTurnCluster`,
 ## `NewsLetters`) ; ce contrôleur les alimente depuis la simulation et relie leurs signaux.

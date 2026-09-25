@@ -15,7 +15,7 @@ const PICK_RADIUS_PX := 26.0
 ## Échelle du marqueur = distance caméra × facteur, bornée : taille constante à l'écran aux
 ## paliers moyen et loin (lisible comme un pion), taille monde fixe au plus près.
 const SCALE_PER_DISTANCE := 0.014
-## Q2 : plafond de taille monde au palier « près » (comme Total War : la ville domine l'armée).
+## Q2 : plafond de taille monde au palier « près » (la ville doit dominer l'armée).
 ## À cette échelle l'étendard royal fait ~3 unités et l'escorte ~2,5 de large, soit environ un
 ## quart du diamètre de Paris (L1, `core_radius_px` 6) et moins qu'une ville L2/L3 (4,5-7) ;
 ## les figurines ont la hauteur des maisons. Atteint vers la distance 20 ; 0,8 auparavant, qui
