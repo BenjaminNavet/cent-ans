@@ -399,9 +399,12 @@ impl CampaignState {
             EventEffect::Treasury { faction, amount } => {
                 // UI audit A3 E3: livres tournois with the ₶ sign and
                 // grouped digits, as everywhere else in the interface.
+                // EQ1: the amount the faction will really pay or receive.
+                let target = faction.clone().or(ctx.faction.clone());
+                let amount = event_treasury_amount(self, data, target.as_ref(), *amount);
                 format!(
                     "Trésor {}{}",
-                    crate::economy_balance::signed_livres(*amount),
+                    crate::economy_balance::signed_livres(amount),
                     faction_label(faction)
                 )
             }
@@ -661,6 +664,36 @@ fn for_each_class(
     }
 }
 
+/// EQ1 (`data/rules/economy.json`): the treasury effect `amount` of an
+/// event for `faction`, scaled down for a faction whose seasonal income is
+/// below the reference (never below the minimum share): event costs are
+/// written for a middling realm, and a small county must not be ruined by a
+/// fire it could not have prevented.
+pub fn event_treasury_amount(
+    state: &CampaignState,
+    data: &GameData,
+    faction: Option<&FactionId>,
+    amount: i64,
+) -> i64 {
+    let rules = &data.economy_rules;
+    let Some(f) = faction.and_then(|id| state.factions.get(id).map(|f| (id, f))) else {
+        return amount;
+    };
+    let income = if f.1.income_last_turn > 0 {
+        f.1.income_last_turn
+    } else {
+        state.faction_income_effective(data, f.0)
+    };
+    let reference = rules.event_treasury_reference_income.max(1);
+    if income >= reference {
+        return amount;
+    }
+    let scale = (income.max(0) as f64 / reference as f64)
+        .max(rules.event_treasury_min_scale)
+        .min(1.0);
+    (amount as f64 * scale).round() as i64
+}
+
 /// Applies one effect in `ctx` (the deciding faction and the event's
 /// province). Unknown ids and impossible actions are ignored.
 pub fn apply_effect(
@@ -673,7 +706,9 @@ pub fn apply_effect(
     let target_faction = |explicit: &Option<FactionId>| explicit.clone().or(ctx.faction.clone());
     match effect {
         EventEffect::Treasury { faction, amount } => {
-            if let Some(f) = target_faction(faction).and_then(|f| state.factions.get_mut(&f)) {
+            let target = target_faction(faction);
+            let amount = event_treasury_amount(state, data, target.as_ref(), *amount);
+            if let Some(f) = target.and_then(|f| state.factions.get_mut(&f)) {
                 f.treasury += amount;
             }
         }
@@ -1225,6 +1260,7 @@ pub fn ai_choice(state: &mut CampaignState, event: &Event) -> usize {
 /// another option remains: a small realm does not rebuild a fleet on credit.
 pub fn ai_affordable_choice(
     state: &mut CampaignState,
+    data: &GameData,
     event: &Event,
     decider: Option<&FactionId>,
 ) -> usize {
@@ -1242,7 +1278,7 @@ pub fn ai_affordable_choice(
                 EventEffect::Treasury {
                     faction: None,
                     amount,
-                } if *amount < 0 => -amount,
+                } if *amount < 0 => -event_treasury_amount(state, data, decider, *amount),
                 _ => 0,
             })
             .sum()
@@ -1331,7 +1367,7 @@ fn fire(
         events.push(entry);
         return;
     }
-    let option = ai_affordable_choice(state, event, decider.as_ref());
+    let option = ai_affordable_choice(state, data, event, decider.as_ref());
     let ctx = EventContext {
         faction: decider.clone(),
         province: province.clone(),

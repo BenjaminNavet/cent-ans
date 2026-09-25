@@ -43,12 +43,8 @@ const HEALTH_SPEED: f64 = 0.20;
 const WEALTH_SPEED: f64 = 0.15;
 const GOODS_SPEED: f64 = 0.25;
 const UNREST_SPEED: f64 = 0.20;
-/// Weighted-average unrest above which a province is at risk of revolt.
-pub const REVOLT_UNREST_THRESHOLD: u8 = 75;
-/// Consecutive seasons above [`REVOLT_UNREST_THRESHOLD`] before it revolts.
-pub const REVOLT_SEASONS: u32 = 2;
-/// Weighted-average unrest above which a revolting province changes hands.
-pub const REVOLT_CONTROL_THRESHOLD: u8 = 90;
+// EQ1: the revolt thresholds and delay are in `data/rules/population.json`
+// (`PopulationRules::revolt_*`).
 /// Garrison lost to a revolt.
 pub const REVOLT_GARRISON_LOSS_PERCENT: u32 = 25;
 /// Average health below which a plague may strike.
@@ -112,6 +108,7 @@ fn update_class(
     goods_category_count: usize,
     occupied: bool,
     foreign_religion: bool,
+    disorder: u8,
     garrison_strength: u32,
     effects: &EffectTotals,
     population_total: u64,
@@ -183,6 +180,10 @@ fn update_class(
     if foreign_religion {
         unrest_target += rules.foreign_religion_unrest;
     }
+    // EQ1: recent captures, raids and regencies (the province's own
+    // disorder gauge, which fades by itself).
+    unrest_target +=
+        (f64::from(disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
     // Building `Unrest` effects: negative values are appeasement.
     unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
     // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
@@ -203,7 +204,7 @@ pub(crate) fn resolve_population(
     let winter = state.season == crate::state::Season::Winter;
     let ids: Vec<ProvinceId> = state.provinces.keys().cloned().collect();
     for id in ids {
-        let (controller, owner, devastation, buildings, garrison_strength) = {
+        let (controller, owner, devastation, disorder, buildings, garrison_strength) = {
             let p = &state.provinces[&id];
             let Some(city) = state.settlements.get(&p.city) else {
                 continue;
@@ -212,6 +213,7 @@ pub(crate) fn resolve_population(
                 city.controller.clone(),
                 city.owner.clone(),
                 p.devastation,
+                p.unrest,
                 state.province_buildings(&id),
                 state.province_garrison_strength(&id),
             )
@@ -274,6 +276,7 @@ pub(crate) fn resolve_population(
                 goods_categories_count,
                 occupied,
                 foreign_religion,
+                disorder,
                 garrison_strength,
                 class_effects,
                 population_total,
@@ -283,13 +286,18 @@ pub(crate) fn resolve_population(
         }
 
         // ----- revolt tracking ---------------------------------------------
+        let rules = &data.population_rules;
         let weighted = weighted_unrest(&province.population);
-        if weighted > f64::from(REVOLT_UNREST_THRESHOLD) {
+        // EQ1: a province the rebels already hold does not rise against them.
+        if weighted > rules.revolt_unrest_threshold && !crate::diplomacy::is_rebels(&controller) {
             province.revolt_seasons += 1;
         } else {
             province.revolt_seasons = 0;
         }
-        if province.revolt_seasons >= REVOLT_SEASONS {
+        if province.revolt_seasons >= rules.revolt_seasons.max(1) {
+            // EQ1: a revolt vents the anger for a while; the next one needs
+            // as many seasons of high unrest again.
+            province.revolt_seasons = 0;
             let province_name = province_data.name.display.clone();
             // Lot C4: the rebels rise at the city.
             let city_id = province.city.clone();
@@ -319,7 +327,7 @@ pub(crate) fn resolve_population(
                 .province(&id)
                 .faction(&controller),
             );
-            if weighted > f64::from(REVOLT_CONTROL_THRESHOLD) {
+            if weighted > rules.revolt_control_threshold {
                 if let Ok(rebels) = FactionId::new("fac_rebels") {
                     if state.factions.contains_key(&rebels) {
                         let province = state.provinces.get_mut(&id).expect("exists");
