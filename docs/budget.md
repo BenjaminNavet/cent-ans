@@ -64,3 +64,5 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-25 | OpenRouter | DA : planche de style, bouton de fin de tour (cloche) et planche d'icônes à l'encre (2 × openai/gpt-5-image-mini) | 0,09 $ | 0,09 $ | 0,36 $ |
 | 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 0,45 $ |
 | 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 0,54 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (76 × openai/gpt-5-image-mini) | 3,46 $ | 3,43 $ | 3,97 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (12 × openai/gpt-5-image-mini) | 0,55 $ | 0,54 $ | 4,51 $ |
