@@ -117,6 +117,8 @@ fn survey_epic_attacker_defender() {
     let cases: Vec<(u8, bool)> = match std::env::var("SG4_CASES").as_deref() {
         Ok("flat") => vec![(0, true), (0, false)],
         Ok("generated") => vec![(2, true), (2, false)],
+        Ok("flat_bare") => vec![(0, false)],
+        Ok("crest") => vec![(1, true), (1, false)],
         _ => vec![
             (0, true),
             (0, false),
@@ -133,8 +135,58 @@ fn survey_epic_attacker_defender() {
             let sides: Vec<SideId> = sim.units().iter().map(|u| u.side).collect();
             let mut shot = [0.0f64; 2];
             let mut contact_at: Option<f64> = None;
+            let trace = std::env::var("SG4_TRACE").is_ok();
+            let mut next_trace = 120.0;
             while !sim.is_finished() && sim.elapsed() < 1800.0 {
                 sim.step();
+                if std::env::var("SG4_HORSE").is_ok()
+                    && sim.elapsed() > 180.0
+                    && sim.elapsed() < 260.0
+                    && sim.ticks() % 25 == 0
+                {
+                    for u in sim.units().iter().filter(|u| u.unit_type == "unit_knights" && u.present()).take(200) {
+                        let tgt = u.target.map(|t| {
+                            let e = &sim.units()[t as usize];
+                            format!("{}:{}", t, &e.unit_type[5..9])
+                        });
+                        eprintln!(
+                            "  t {:.0} {:?} {:>3} {:?} run {} ({:.0},{:.0}) face {:.2} tgt {:?} dest {:?} mor {:.0}",
+                            sim.elapsed(), u.side, u.id, u.state, u.running, u.x, u.z, u.facing, tgt,
+                            u.destination.map(|(x, z)| (x.round(), z.round())), u.morale
+                        );
+                    }
+                }
+                if trace && sim.elapsed() >= next_trace {
+                    next_trace += 30.0;
+                    eprintln!("  t {:.0}", sim.elapsed());
+                    for side in [SideId::Attacker, SideId::Defender] {
+                        for k in KINDS {
+                            let us: Vec<&sim_battle::Unit> = sim
+                                .units()
+                                .iter()
+                                .filter(|u| u.side == side && u.unit_type == k && u.present())
+                                .collect();
+                            let n = us.len().max(1) as f64;
+                            let count = |st: sim_battle::UnitState| {
+                                us.iter().filter(|u| u.state == st).count()
+                            };
+                            eprintln!(
+                                "    {:?} {:<22} n {:>2} hp {:>4.0} mor {:>3.0} fat {:>3.0} z {:>5.0} melee {} chg {} march {} rout {} idle {} shoot {}",
+                                side, k, us.len(),
+                                us.iter().map(|u| u.hp).sum::<f64>() / n,
+                                us.iter().map(|u| u.morale).sum::<f64>() / n,
+                                us.iter().map(|u| u.fatigue).sum::<f64>() / n,
+                                us.iter().map(|u| u.z).sum::<f64>() / n,
+                                count(sim_battle::UnitState::Melee),
+                                count(sim_battle::UnitState::Charging),
+                                count(sim_battle::UnitState::Marching),
+                                count(sim_battle::UnitState::Routing),
+                                count(sim_battle::UnitState::Idle),
+                                count(sim_battle::UnitState::Shooting),
+                            );
+                        }
+                    }
+                }
                 for s in sim.take_shots() {
                     if let Some(t) = s.target {
                         shot[sides[t as usize].index()] += s.kills;
@@ -161,6 +213,27 @@ fn survey_epic_attacker_defender() {
                 shot[0] / initial(SideId::Attacker) * 100.0,
                 shot[1] / initial(SideId::Defender) * 100.0,
                 contact_at.unwrap_or(-1.0)
+            );
+            let by_kind = |side: SideId| -> String {
+                KINDS
+                    .iter()
+                    .map(|k| {
+                        let (l, f) = sim
+                            .units()
+                            .iter()
+                            .filter(|u| u.side == side && u.unit_type == *k)
+                            .fold((0.0, 0.0), |(l, f), u| {
+                                (l + u.hp.max(0.0), f + f64::from(u.initial_soldiers))
+                            });
+                        format!("{} {:.0}", &k[5..9], (1.0 - l / f64::max(f, 1.0)) * 100.0)
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            };
+            eprintln!(
+                "   lost by kind: att [{}] def [{}]",
+                by_kind(SideId::Attacker),
+                by_kind(SideId::Defender)
             );
             match sim.winner() {
                 Some(SideId::Attacker) => t.attacker += 1,
