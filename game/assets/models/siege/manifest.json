@@ -1,0 +1,52 @@
+{
+  "trebuchet": {
+    "axle": [
+      0.0,
+      6.4,
+      0.0
+    ],
+    "long_arm": 8.5,
+    "short_arm": 2.2,
+    "sling": 4.4,
+    "triangles": 808
+  },
+  "mangonel": {
+    "pivot": [
+      0.0,
+      0.8,
+      -0.6
+    ],
+    "arm": 2.3,
+    "triangles": 360
+  },
+  "bombard": {
+    "barrel": [
+      0.0,
+      1.05,
+      0.0
+    ],
+    "muzzle_z": 1.5,
+    "triangles": 528
+  },
+  "ram": {
+    "beam_pivot": [
+      0.0,
+      3.2,
+      0.4
+    ],
+    "beam_drop": 1.95,
+    "wheel_radius": 0.55,
+    "triangles": 712
+  },
+  "siege_tower": {
+    "height": 12.0,
+    "axle": 0.8,
+    "bridge_pivot": [
+      0.0,
+      9.600000000000001,
+      2.5
+    ],
+    "wheel_radius": 0.8,
+    "triangles": 932
+  }
+}

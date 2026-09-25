@@ -585,9 +585,15 @@ func _build_hamlets(index: int) -> void:
 
 ## Colonie sous un point écran (icône au palier moyen, maquette au palier près), "" sinon.
 func pick_screen(screen_position: Vector2) -> String:
+	return str(pick_screen_scored(screen_position).get("id", ""))
+
+
+## Q2 : comme `pick_screen`, avec `score` (distance au centre / rayon de prise, 0 = en plein
+## centre) pour départager une colonie et une armée sous le même clic ; {} si rien.
+func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera == null or data == null:
-		return ""
+		return {}
 	var near := _weights.x > 0.35
 	var icons := _weights.y > 0.2
 	var best := ""
@@ -615,7 +621,7 @@ func pick_screen(screen_position: Vector2) -> String:
 			if d_icon < radius and d_icon / radius < best_score:
 				best_score = d_icon / radius
 				best = str(data.settlements[i]["id"])
-	return best
+	return {"id": best, "score": best_score} if best != "" else {}
 
 
 ## Sélectionne une colonie ("" = aucune) : surbrillance de l'icône, anneau au sol, signal.

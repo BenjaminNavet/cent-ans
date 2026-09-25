@@ -59,11 +59,19 @@ var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
+var engines_fx: SiegeEnginesFx = null  # SG2 : engins de siège animés
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
 ## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
 var siege_province: String = "prov_guyenne"
+## SG2 : ville assiégée dans son plan (`--siege-landmark=avignon`, guerre déclarée au détenteur si
+## besoin) et faction de l'assiégeant (`--siege-attacker=fac_england`).
+var siege_landmark: String = ""
+var siege_attacker: String = "fac_france"
+## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
+## commande puis oubliées.
+static var demo_args: PackedStringArray = []
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -196,7 +204,10 @@ func _stage_standalone() -> bool:
 	if armies.is_empty():
 		return false
 	var index: int = -1
-	if siege_demo and sim.has_method("debug_stage_siege"):
+	if siege_demo and siege_landmark != "" and sim.has_method("debug_stage_landmark_siege"):
+		var besieger: String = armies[1] if siege_attacker == "fac_england" else armies[0]
+		index = sim.call("debug_stage_landmark_siege", besieger, siege_landmark)
+	elif siege_demo and sim.has_method("debug_stage_siege"):
 		index = sim.call("debug_stage_siege", armies[0], siege_province)
 		if index < 0:
 			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
@@ -240,7 +251,11 @@ func begin() -> bool:
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false
-	player_side = str(setup.get("player_side", "attacker"))
+	var setup_side: Variant = setup.get("player_side", "attacker")
+	player_side = str(setup_side) if setup_side != null else ""
+	if player_side == "" and standalone and siege_landmark != "":
+		# SG2 : démo d'Avignon ou de Bruges, sans le joueur de la campagne : il mène l'assaut.
+		player_side = "attacker"
 	if player_side == "":
 		player_side = "attacker"
 		autoplay = true
@@ -274,7 +289,7 @@ func begin() -> bool:
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:
-		battle.call("set_figure_scale", _unit_size())
+		battle.call("set_figure_scale", _figure_scale())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -398,10 +413,17 @@ func _build_soldier_layers() -> void:
 		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
+	# SG2 : engins animés (trébuchet, mangonneau, bombarde, roues du bélier et du beffroi).
+	engines_fx = SiegeEnginesFx.new()
+	engines_fx.name = "EnginesFx"
+	add_child(engines_fx)
+	engines_fx.setup(soldiers, effects, siege_view)
+	effects.engine_fx = engines_fx
 	if siege_view != null:
 		assault_fx = SiegeAssaultFx.new()
 		assault_fx.name = "AssaultFx"
 		add_child(assault_fx)
+		assault_fx.engines_fx = engines_fx
 		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	_setup_grass_flatten()
 
@@ -469,6 +491,27 @@ func _unit_size() -> float:
 	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
 
 
+## FB1 : taille des unités effective. Le multiplicateur choisi est abaissé pour que le total de
+## figurines tienne dans « Figurines maximum » (`battle/max_figures`) ; `--unit-size=` l'emporte.
+func _figure_scale() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	var budget: int = int(settings.call("get_value", "battle/max_figures")) if settings != null else 0
+	var men := 0
+	for unit in battle.call("get_units"):
+		men += int(unit.get("soldiers", 0))
+	return BattleScene.capped_figure_scale(_unit_size(), men, budget)
+
+
+## Multiplicateur de figurines borné par le plafond `budget` pour `men` hommes simulés
+## (0 = pas de plafond).
+static func capped_figure_scale(unit_size: float, men: int, budget: int) -> float:
+	if men <= 0 or budget <= 0:
+		return unit_size
+	return minf(unit_size, float(budget) / float(men))
+
+
 func _blood_level() -> int:
 	if _blood_override >= 0:
 		return _blood_override
@@ -503,6 +546,8 @@ func _update_effects(dt: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
 	var shots: Variant = battle.call("get_shots")
+	if engines_fx != null:
+		engines_fx.update(units, shots, soldiers.anim_time, dt)
 	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
 	if blood != null:
 		blood.tick_time(soldiers.anim_time)
@@ -1340,7 +1385,10 @@ func ground_point(screen: Vector2) -> Vector3:
 
 
 func _parse_cmdline() -> void:
-	for arg in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	args.append_array(demo_args)
+	demo_args = PackedStringArray()
+	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 			autoplay = true
@@ -1370,6 +1418,11 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--siege-province="):
 			siege_demo = true
 			siege_province = arg.trim_prefix("--siege-province=")
+		elif arg.begins_with("--siege-landmark="):
+			siege_demo = true
+			siege_landmark = arg.trim_prefix("--siege-landmark=")
+		elif arg.begins_with("--siege-attacker="):
+			siege_attacker = arg.trim_prefix("--siege-attacker=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):

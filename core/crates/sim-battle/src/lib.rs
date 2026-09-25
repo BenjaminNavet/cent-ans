@@ -40,6 +40,7 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod impact;
+pub mod naval;
 pub mod orders;
 pub mod outcome;
 pub mod relief;
@@ -79,4 +80,4 @@ pub use sim::{
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
-pub use unit::{Formation, Unit, UnitState};
+pub use unit::{Formation, Unit, UnitFate, UnitState};

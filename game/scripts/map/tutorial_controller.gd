@@ -12,6 +12,10 @@ extends Node
 ## tutoriel ») ; ne démarre qu'en début de partie et jamais pendant les captures.
 ##
 ## Encyclopédie : touche L ou Menu → Encyclopédie. Menu → Tutoriel relance le guide.
+##
+## Lot UX2 (U15) : « Plus tard » range le guide (`postpone`, réglage `tutorial/postponed`) ;
+## il reprend à la même étape (`resume`) par le conseil « que faire maintenant », l'aide (F1)
+## ou Menu → Tutoriel. Le sommaire du parchemin mène à n'importe quelle étape (`jump_to`).
 ## Aucune règle de jeu : lecture de l'état seulement.
 
 const TUTORIAL_SCENE := "res://scenes/ui/tutorial.tscn"
@@ -37,6 +41,8 @@ var _check_timer := 0.0
 var _done_timer := -1.0
 ## Faux en capture : la progression du joueur n'est pas modifiée.
 var persist_progress := true
+## UX2 : étape où le guide a été rangé par « Plus tard » (-1 : aucun guide en attente).
+var _postponed_step := -1
 
 
 func setup(campaign_map: Node) -> void:
@@ -53,6 +59,10 @@ func setup(campaign_map: Node) -> void:
 	overlay.continue_pressed.connect(advance)
 	overlay.skip_step_pressed.connect(advance)
 	overlay.skip_all_pressed.connect(skip_all)
+	overlay.later_pressed.connect(postpone)
+	overlay.step_chosen.connect(jump_to)
+	if bool(_setting("tutorial/postponed", false)) and not bool(_setting("tutorial/done", false)):
+		_postponed_step = int(_setting("tutorial/step", 0))
 	var menu_button: MenuButton = ui.get("menu_button")
 	if menu_button != null:
 		var popup := menu_button.get_popup()
@@ -62,7 +72,7 @@ func setup(campaign_map: Node) -> void:
 			if id == MENU_ENCYCLOPEDIA_ID:
 				encyclopedia.open_window()
 			elif id == MENU_TUTORIAL_ID:
-				restart())
+				reopen())
 	if should_autostart():
 		start(int(_setting("tutorial/step", 0)))
 
@@ -88,6 +98,8 @@ static func capture_mode() -> bool:
 func should_autostart() -> bool:
 	var sim: Object = map.get("sim")
 	if sim == null or capture_mode() or not bool(_setting("tutorial/enabled", true)) or bool(_setting("tutorial/done", false)):
+		return false
+	if _postponed_step >= 0:  # UX2 : rangé par « Plus tard », repris à la demande
 		return false
 	return int(sim.call("get_turn")) <= EARLY_TURNS or int(_setting("tutorial/step", 0)) > 0
 
@@ -123,6 +135,11 @@ func start(from_step: int = 0) -> void:
 	steps = TutorialSteps.steps(str(map.get("player_faction")), _context())
 	royal_army = find_royal_army()
 	active = true
+	_clear_postponed()
+	var titles := PackedStringArray()
+	for step in steps:
+		titles.append(str(step.get("title", "")))
+	overlay.set_steps(titles)
 	_enter_step(clampi(from_step, 0, steps.size() - 1))
 
 
@@ -131,6 +148,61 @@ func restart() -> void:
 	_set_setting("tutorial/done", false)
 	_set_setting("tutorial/enabled", true)
 	start(0)
+
+
+## UX2 : « Plus tard » — le guide se range et garde son étape (reprise par `resume`).
+func postpone(notify: bool = true) -> void:
+	if not active:
+		return
+	var index := step_index
+	active = false
+	step_index = -1
+	overlay.hide()
+	overlay.set_target({})
+	_postponed_step = index
+	_set_setting("tutorial/step", index)
+	_set_setting("tutorial/postponed", true)
+	if notify:
+		var ui: Node = map.get("ui")
+		ui.call("show_toast", "Guide mis de côté à l'étape %d : reprenez-le par le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel." % (index + 1))
+
+
+## UX2 : reprend le guide à l'étape où « Plus tard » l'avait laissé (sinon au début).
+func resume() -> void:
+	if active:
+		return
+	var index := maxi(_postponed_step, 0)
+	_set_setting("tutorial/done", false)
+	_set_setting("tutorial/enabled", true)
+	start(index)
+
+
+## UX2 : Menu → Tutoriel et bouton de l'aide : reprise du guide rangé, sinon depuis le début.
+func reopen() -> void:
+	if active:
+		return
+	if _postponed_step >= 0:
+		resume()
+	else:
+		restart()
+
+
+## UX2 : étape du guide rangé par « Plus tard », -1 sinon (conseil « Reprendre le guide »).
+func postponed_step() -> int:
+	return -1 if active else _postponed_step
+
+
+## UX2 : sommaire — aller directement à l'étape `index`.
+func jump_to(index: int) -> void:
+	if not active or index < 0 or index >= steps.size():
+		return
+	_enter_step(index)
+
+
+func _clear_postponed() -> void:
+	if _postponed_step >= 0 or bool(_setting("tutorial/postponed", false)):
+		_set_setting("tutorial/postponed", false)
+	_postponed_step = -1
 
 
 func current_step_id() -> String:
@@ -163,13 +235,14 @@ func finish() -> void:
 	overlay.set_target({})
 	_set_setting("tutorial/done", true)
 	_set_setting("tutorial/step", 0)
+	_clear_postponed()
 
 
 ## « Passer le tutoriel » : fermé pour de bon (relançable par Menu → Tutoriel).
 func skip_all() -> void:
 	finish()
 	var ui: Node = map.get("ui")
-	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel pour le relancer.")
+	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel ou l'aide (F1) pour le relancer.")
 
 
 ## Vérifie l'objectif tout de suite ; passe à l'étape suivante s'il est rempli. Sert au smoke.
@@ -185,7 +258,22 @@ func check_now() -> bool:
 func _process(delta: float) -> void:
 	if not active or not map.get("visible"):
 		return
+	# Q2 : le guide s'efface sous le menu pause, les réglages et la décision de chronique.
+	var covered := modal_open()
+	if overlay.visible == covered:
+		overlay.visible = not covered
+	if covered:
+		return
 	overlay.set_target(resolve_target(str(steps[step_index].get("target", ""))))
+	var avoid: Array = []
+	# UX2 : aussi le bandeau d'ost, la cloche, le sceau et le journal (le parchemin ne les
+	# couvre que faute de place ailleurs).
+	for panel in [_ui_node("province_panel") as Control, _settlement_panel(), _ui_node("army_strip") as Control,
+			_ui_node("end_turn_cluster") as Control, _ui_node("general_seal") as Control, _ui_node("event_log") as Control,
+			_ui_node("tech_panel") as Control, _ui_node("court_panel") as Control, _ui_node("faction_panel") as Control]:
+		if panel != null and panel.is_visible_in_tree():
+			avoid.append(panel.get_global_rect())
+	overlay.set_avoid(avoid)
 	if _done_timer >= 0.0:
 		_done_timer -= delta
 		if _done_timer < 0.0:
@@ -207,6 +295,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key.is_action_pressed("encyclopedia_open") and not key.ctrl_pressed and not key.meta_pressed:  # U7
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
+
+
+## Q2 : vrai quand une fenêtre modale couvre la carte (menu pause, réglages, fenêtre de
+## chronique hors de l'étape qui la demande) : le guide ne s'affiche pas par-dessus.
+func modal_open() -> bool:
+	var flow: Node = map.get("flow")
+	if flow != null:
+		if bool(flow.call("is_paused")):
+			return true
+		var settings_menu: Variant = flow.get("_settings_menu")
+		if settings_menu != null and is_instance_valid(settings_menu):
+			return true
+	var chronicle: Node = map.get("chronicle")
+	if chronicle != null and current_step_id() != "chronicle":
+		var window := chronicle.get("window") as Control
+		if window != null and window.is_visible_in_tree():
+			return true
+	return false
 
 
 # --- Objectifs ------------------------------------------------------------------------
@@ -272,11 +378,26 @@ func _constructions() -> int:
 	if not sim.has_method("get_province_city"):
 		return 0
 	var count := 0
+	var settlements := sim.has_method("province_settlements")
 	for province_id in _player_provinces():
 		var city: Dictionary = sim.call("get_province_city", province_id)
 		if not (city.get("construction", {}) as Dictionary).is_empty():
 			count += 1
+		if not settlements:
+			continue
+		# Q2 (C5) : chantiers lancés depuis le panneau d'une colonie.
+		for settlement_id in sim.call("province_settlements", province_id):
+			var detail: Dictionary = sim.call("settlement_detail", settlement_id)
+			if str(detail.get("owner", "")) == _player() and not (detail.get("construction", {}) as Dictionary).is_empty():
+				count += 1
 	return count
+
+
+## Q2 (C5) : panneau de colonie ouvert (clic sur une ville), sinon null.
+func _settlement_panel() -> Control:
+	var controller: Node = map.get("settlements_ctl")
+	var panel: Control = controller.get("panel") if controller != null else null
+	return panel if panel != null and panel.is_visible_in_tree() else null
 
 
 func _governors() -> Dictionary:
@@ -356,12 +477,21 @@ func objective_met(step_id: String) -> bool:
 					return true
 			return false
 		"open_province":
+			# Q2 : un clic sur la ville ouvre le panneau de la colonie (C5), qui compte aussi.
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null and bool(settlement_panel.get("is_player_owner")):
+				return true
 			var panel := _ui_node("province_panel")
 			if panel == null or not (panel as Control).is_visible_in_tree():
 				return false
 			var state: Dictionary = sim.call("get_province_state", str(panel.get("province_id")))
 			return str(state.get("owner", "")) == _player()
 		"city_tab":
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null:
+				var settlement_tabs: TabContainer = settlement_panel.get("tabs")
+				if settlement_tabs != null and settlement_tabs.current_tab == SettlementPanel.TAB_BUILDINGS:
+					return true
 			var panel := _ui_node("province_panel")
 			if panel == null or not (panel as Control).is_visible_in_tree():
 				return false
@@ -431,6 +561,18 @@ func _province_point(province_id: String) -> Dictionary:
 	return _world_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y))
 
 
+## Q2 : la ville capitale (maquette ou icône de colonie), sinon le centre de la province.
+func _capital_point() -> Dictionary:
+	var sim := _sim()
+	var layer: Node = map.get("settlement_layer")
+	var city := str((sim.call("get_province_state", _capital()) as Dictionary).get("city", "")) if sim != null else ""
+	if city != "" and layer != null:
+		var world: Vector3 = layer.call("world_position_of", city)
+		if world != Vector3.ZERO:
+			return _world_point(world)
+	return _province_point(_capital())
+
+
 func _capital() -> String:
 	return str(GameCatalog.definitions("factions").get(_player(), {}).get("capital", ""))
 
@@ -453,11 +595,24 @@ func resolve_target(target: String) -> Dictionary:
 				return _control_rect(_ui_control("selected_army_widget", "army_panel"))
 			return marker
 		"capital":
-			return _province_point(_capital())
+			return _capital_point()
 		"city_tab", "buildable":
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null:  # Q2 (C5) : panneau de la ville cliquée
+				var settlement_tabs: TabContainer = settlement_panel.get("tabs")
+				if target == "buildable" and settlement_tabs != null and settlement_tabs.current_tab == SettlementPanel.TAB_BUILDINGS:
+					var list := _control_rect(settlement_panel.get("buildable_list") as Control)
+					if not list.is_empty():
+						return list
+				if settlement_tabs != null and settlement_tabs.get_tab_count() > SettlementPanel.TAB_BUILDINGS:
+					var settlement_bar := settlement_tabs.get_tab_bar()
+					var settlement_rect := settlement_bar.get_tab_rect(SettlementPanel.TAB_BUILDINGS)
+					settlement_rect.position += settlement_bar.get_global_rect().position
+					return {"rect": settlement_rect}
+				return _control_rect(settlement_panel)
 			var panel := _ui_node("province_panel") as Control
 			if panel == null or not panel.is_visible_in_tree():
-				return _province_point(_capital())
+				return _capital_point()
 			var tabs: TabContainer = panel.get("tabs")
 			if target == "buildable" and tabs != null and tabs.current_tab == 1:
 				var buildable: Control = panel.get("buildable_list")
@@ -539,6 +694,12 @@ func stage_screenshot(stage: String) -> void:
 			map.call("_stage_screenshot")
 			start(TutorialSteps.STEP_IDS.find("move_army"))
 			overlay.set_target(resolve_target("royal_army"))
+		"tutorial_toc":  # UX2 : sommaire ouvert, cible dans la barre du haut
+			map.call("_focus_capital")
+			map.get("ui").call("hide_province")
+			start(TutorialSteps.STEP_IDS.find("research"))
+			overlay.set_toc_open(true)
+			overlay.set_target(resolve_target("research"))
 		"encyclopedia":
 			map.call("_focus_capital")
 			map.get("ui").call("hide_province")

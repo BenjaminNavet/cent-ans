@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/naval_rules.schema.json",
+  "title": "Règles navales",
+  "description": "Fichier data/naval/rules.json (lot NV1, ADR 0028) : coefficients du combat naval (tir, abordage, feu, éperon, naufrage), de l'auto-résolution par phases et des conséquences de campagne (interception, maîtrise de la mer, blocus). Le sens de chaque champ est documenté dans NavalRules (core/crates/data-model/src/entities/naval.rs).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "bow_range_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "crossbow_range_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "bow_reload_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "crossbow_reload_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ranged_lethality": {
+      "type": "number",
+      "minimum": 0
+    },
+    "armor_vs_ranged": {
+      "type": "number",
+      "minimum": 0
+    },
+    "height_per_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "height_cap": {
+      "type": "number",
+      "minimum": 0
+    },
+    "wind_gauge": {
+      "type": "number",
+      "minimum": 0
+    },
+    "castle_cover": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_per_missile": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_arrow_share": {
+      "type": "number",
+      "minimum": 0
+    },
+    "wind_speed_min": {
+      "type": "number",
+      "minimum": 0
+    },
+    "close_hauled_deg": {
+      "type": "number",
+      "minimum": 0
+    },
+    "rower_stamina_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "drift_speed": {
+      "type": "number",
+      "minimum": 0
+    },
+    "grapple_gap_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "grapple_chance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "cut_chance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "melee_lethality": {
+      "type": "number",
+      "minimum": 0
+    },
+    "armor_vs_melee": {
+      "type": "number",
+      "minimum": 0
+    },
+    "climb_per_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "climb_cap": {
+      "type": "number",
+      "minimum": 0
+    },
+    "castle_defense": {
+      "type": "number",
+      "minimum": 0
+    },
+    "chain_support": {
+      "type": "number",
+      "minimum": 0
+    },
+    "morale_per_loss_percent": {
+      "type": "number",
+      "minimum": 0
+    },
+    "surrender_morale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "surrender_crew_share": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_growth": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_fighting": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_hull": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_crew": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_spread": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_abandon": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fireship_fire": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ram_speed": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ram_high_factor": {
+      "type": "number",
+      "minimum": 0
+    },
+    "sink_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "drown_base": {
+      "type": "number",
+      "minimum": 0
+    },
+    "drown_armor": {
+      "type": "number",
+      "minimum": 0
+    },
+    "escape_radius_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "max_duration_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_volleys": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "auto_gauge_volleys": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "auto_rounds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "auto_round_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_jitter": {
+      "type": "number",
+      "minimum": 0
+    },
+    "intercept_base": {
+      "type": "number",
+      "minimum": 0
+    },
+    "intercept_per_control": {
+      "type": "number",
+      "minimum": 0
+    },
+    "control_victory": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "control_decay": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blockade_control": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blockade_toll": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "squadron_share": {
+      "type": "number",
+      "minimum": 0
+    },
+    "squadron_max": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "marine_archer_share": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "bow_range_m",
+    "crossbow_range_m",
+    "bow_reload_s",
+    "crossbow_reload_s",
+    "ranged_lethality",
+    "armor_vs_ranged",
+    "height_per_m",
+    "height_cap",
+    "wind_gauge",
+    "castle_cover",
+    "fire_per_missile",
+    "fire_arrow_share",
+    "wind_speed_min",
+    "close_hauled_deg",
+    "rower_stamina_s",
+    "drift_speed",
+    "grapple_gap_m",
+    "grapple_chance",
+    "cut_chance",
+    "melee_lethality",
+    "armor_vs_melee",
+    "climb_per_m",
+    "climb_cap",
+    "castle_defense",
+    "chain_support",
+    "morale_per_loss_percent",
+    "surrender_morale",
+    "surrender_crew_share",
+    "fire_growth",
+    "fire_fighting",
+    "fire_hull",
+    "fire_crew",
+    "fire_spread",
+    "fire_abandon",
+    "fireship_fire",
+    "ram_speed",
+    "ram_high_factor",
+    "sink_seconds",
+    "drown_base",
+    "drown_armor",
+    "escape_radius_m",
+    "max_duration_s",
+    "auto_volleys",
+    "auto_gauge_volleys",
+    "auto_rounds",
+    "auto_round_seconds",
+    "auto_jitter",
+    "intercept_base",
+    "intercept_per_control",
+    "control_victory",
+    "control_decay",
+    "blockade_control",
+    "blockade_toll",
+    "squadron_share",
+    "squadron_max",
+    "marine_archer_share"
+  ],
+  "additionalProperties": false
+}

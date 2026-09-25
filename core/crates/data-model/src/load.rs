@@ -86,6 +86,7 @@ pub mod folders {
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
+    pub const ECONOMY_RULES: &str = "economy.json";
     /// Campaign map weather (lot CM2), inside `rules/`; optional.
     pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
@@ -245,6 +246,9 @@ pub struct GameData {
     /// `data/rules/population.json` (lot E2);
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
+    /// `data/rules/economy.json` (lot EQ1); [`crate::EconomyRules::default`]
+    /// when absent.
+    pub economy_rules: crate::entities::economy_rules::EconomyRules,
     /// `data/rules/campaign_weather.json` (lot CM2);
     /// [`crate::CampaignWeatherRules::default`] when absent.
     pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
@@ -268,6 +272,8 @@ pub struct GameData {
     pub settlement_px: BTreeMap<SettlementId, [f32; 2]>,
     /// Navigation grid and province raster, decoded on first use (lot M2).
     pub rasters: crate::navgrid::RasterHandle,
+    /// `data/naval/` (lot NV1): ship classes, naval rules, fleets of 1337.
+    pub naval: crate::entities::naval::NavalData,
 }
 
 impl GameData {
@@ -310,6 +316,7 @@ impl GameData {
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
+            economy_rules: Default::default(),
             campaign_weather: Default::default(),
             retinue: None,
             agent_rules: None,
@@ -318,6 +325,7 @@ impl GameData {
             free_movement: None,
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
+            naval: Default::default(),
         };
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
@@ -371,6 +379,10 @@ impl GameData {
         if population_path.is_file() {
             data.population_rules = read_json(&population_path)?;
         }
+        let economy_path = root.join(folders::RULES).join(folders::ECONOMY_RULES);
+        if economy_path.is_file() {
+            data.economy_rules = read_json(&economy_path)?;
+        }
         let weather_path = root
             .join(folders::RULES)
             .join(folders::CAMPAIGN_WEATHER_RULES);
@@ -393,6 +405,7 @@ impl GameData {
         if free_movement_path.is_file() {
             data.free_movement = Some(read_json(&free_movement_path)?);
         }
+        data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
         data.build_movement_graph();
@@ -850,7 +863,7 @@ impl ReferenceChecker<'_> {
 }
 
 /// Reads and deserializes one JSON file.
-pub(crate) fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
+pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, DataError> {
     let text = fs::read_to_string(path).map_err(|source| DataError::Io {
         path: path.to_path_buf(),
         source,

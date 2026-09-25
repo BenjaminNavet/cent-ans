@@ -33,7 +33,8 @@
   ],
   "enables_units": [
     "unit_flemish_pikemen",
-    "unit_goedendag_militia"
+    "unit_goedendag_militia",
+    "unit_culveriners"
   ],
   "description": "Siège des corporations ; organise les milices de métiers (Flandre) et finance la recherche civile.",
   "sources": [

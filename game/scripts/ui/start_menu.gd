@@ -4,14 +4,14 @@ extends Control
 ## Écran titre et menu principal (F3, refait par MM1) : décor 3D vivant (`MenuBackdrop3D` : Paris
 ## au crépuscule, l'ost et ses bannières, plans de caméra lents enchaînés en fondu), titre enluminé
 ## (`IlluminatedTitle`), colonne de boutons à gauche (Nouvelle partie, Continuer, Charger une
-## partie, Prologue, Codex, Réglages, Crédits, Quitter), légende du plan en bas à droite.
+## partie, Prologue, Codex, Batailles de démonstration, Réglages, Crédits, Quitter), légende du plan en bas à droite.
 ## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
 ## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
 ## illustré 2D (`MenuBackground`).
 ##
 ## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`,
-## `credits`, `faction`, `intro` ou `loading` ouvre l'écran correspondant avant la capture ;
+## `credits`, `faction`, `intro`, `demos` ou `loading` ouvre l'écran correspondant avant la capture ;
 ## `--autostart[=fac_x]` démarre directement une campagne (jeu exporté).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
@@ -29,6 +29,7 @@ var new_game_button: Button
 var load_button: Button
 var intro_button: Button
 var codex_button: Button
+var demos_button: Button
 var settings_button: Button
 var credits_button: Button
 var quit_button: Button
@@ -83,6 +84,10 @@ func _ready() -> void:
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
 	for arg in args:
+		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
+		if arg.begins_with("--naval-scenario="):
+			get_tree().change_scene_to_file.call_deferred("res://scenes/naval/naval_battle.tscn")
+			return
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
 			if faction != "":
@@ -99,6 +104,9 @@ func _ready() -> void:
 			staged = true
 		elif arg == "--menu-stage=faction":
 			show_faction_select(true)
+			staged = true
+		elif arg == "--menu-stage=demos":
+			open_demos()
 			staged = true
 		elif arg == "--menu-stage=intro":
 			open_intro()
@@ -212,6 +220,7 @@ func _build_main_column() -> void:
 	load_button = _menu_button(column, "Charger une partie", func() -> void: save_load_dialog.open_load())
 	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
 	codex_button = _menu_button(column, "Codex", open_codex)
+	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
 	settings_button = _menu_button(column, "Réglages", open_settings)
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
@@ -345,6 +354,11 @@ func open_intro() -> void:
 		_overlay = null
 		new_game_button.grab_focus.call_deferred())
 	_open_overlay(intro, false)
+
+
+## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
+func open_demos() -> void:
+	_open_overlay(BattleDemosMenu.new())
 
 
 func open_codex() -> void:

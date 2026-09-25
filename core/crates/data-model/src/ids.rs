@@ -176,6 +176,11 @@ define_id!(
     "sea_"
 );
 define_id!(
+    /// Identifier of a ship class (`ship_cog`), lot NV1.
+    ShipClassId,
+    "ship_"
+);
+define_id!(
     /// Identifier of a regional edict (`edict_peace_of_god`), lot C4.
     EdictId,
     "edict_"
