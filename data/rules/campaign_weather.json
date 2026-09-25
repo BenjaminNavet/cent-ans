@@ -1,0 +1,32 @@
+{
+  "description": "Météo de la carte de campagne (lot CM2) : tirée à chaque tour pour chaque province à partir de la graine de la partie, de la date et de la position de sa capitale (fronts qui balaient la carte d'ouest en est). Chances en pour cent par climat et par saison, du plus sec au plus humide. Purement visuelle et sonore pour l'instant (ADR 0027).",
+  "front_scale_deg": 3.5,
+  "local_jitter": 0.22,
+  "drift_deg_per_turn": [2.2, 0.35],
+  "climates": {
+    "oceanic": {
+      "spring": { "clear": 45, "fog": 10, "rain": 38, "snow": 2, "storm": 5 },
+      "summer": { "clear": 60, "fog": 6, "rain": 24, "snow": 0, "storm": 10 },
+      "autumn": { "clear": 32, "fog": 22, "rain": 40, "snow": 0, "storm": 6 },
+      "winter": { "clear": 28, "fog": 20, "rain": 37, "snow": 12, "storm": 3 }
+    },
+    "continental": {
+      "spring": { "clear": 52, "fog": 10, "rain": 30, "snow": 3, "storm": 5 },
+      "summer": { "clear": 62, "fog": 5, "rain": 15, "snow": 0, "storm": 18 },
+      "autumn": { "clear": 42, "fog": 25, "rain": 28, "snow": 3, "storm": 2 },
+      "winter": { "clear": 32, "fog": 22, "rain": 16, "snow": 30, "storm": 0 }
+    },
+    "mediterranean": {
+      "spring": { "clear": 62, "fog": 6, "rain": 24, "snow": 0, "storm": 8 },
+      "summer": { "clear": 80, "fog": 2, "rain": 5, "snow": 0, "storm": 13 },
+      "autumn": { "clear": 50, "fog": 10, "rain": 28, "snow": 0, "storm": 12 },
+      "winter": { "clear": 45, "fog": 15, "rain": 32, "snow": 6, "storm": 2 }
+    },
+    "mountain": {
+      "spring": { "clear": 40, "fog": 12, "rain": 23, "snow": 20, "storm": 5 },
+      "summer": { "clear": 55, "fog": 10, "rain": 17, "snow": 3, "storm": 15 },
+      "autumn": { "clear": 38, "fog": 20, "rain": 22, "snow": 17, "storm": 3 },
+      "winter": { "clear": 30, "fog": 15, "rain": 5, "snow": 50, "storm": 0 }
+    }
+  }
+}

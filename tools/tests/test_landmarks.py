@@ -44,11 +44,41 @@ BLENDER_SCRIPTS = DATA.parent / "tools" / "blender_scripts"
 
 @pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
 def test_landmark_model_weight(path: Path) -> None:
-    """Each landmark has its generated model; L2 cities stay under 6 MB (Paris, L1: 10 MB)."""
-    glb = MODELS / f"{path.stem}.glb"
-    assert glb.exists(), f"run landmark_city.py for {path.stem}"
-    if path.stem != "paris":
-        assert glb.stat().st_size <= 6_000_000, glb.stat().st_size
+    """Each landmark has its campaign model and its siege backdrop (L3), each under 6 MB."""
+    for suffix in ("", "_siege"):
+        glb = MODELS / f"{path.stem}{suffix}.glb"
+        assert glb.exists(), f"run landmark_city.py for {path.stem}{suffix}"
+        assert glb.stat().st_size <= 6_000_000, (glb.name, glb.stat().st_size)
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_model_material_codes(path: Path) -> None:
+    """GLB (L3): no normals, a byte tint whose alpha codes an atlas layer for every palette name."""
+    import struct
+
+    blob = (MODELS / f"{path.stem}.glb").read_bytes()
+    json_len = struct.unpack("<I", blob[12:16])[0]
+    doc = json.loads(blob[20 : 20 + json_len])
+    for mesh in doc["meshes"]:
+        for prim in mesh["primitives"]:
+            assert "NORMAL" not in prim["attributes"], mesh["name"]
+            colour = doc["accessors"][prim["attributes"]["COLOR_0"]]
+            assert colour["type"] == "VEC4" and colour["componentType"] == 5121
+
+
+def test_material_code_round_trip(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Layer and exaggeration survive the alpha byte, decoded as in `landmark.gdshader`."""
+    monkeypatch.syspath_prepend(str(BLENDER_SCRIPTS))
+    import landmark_city
+
+    for name, layer in landmark_city.MATERIAL_LAYER.items():
+        assert name in landmark_city.PALETTE, name
+        for exaggeration in (1.0, 1.5, 1.9, 2.6):
+            code = round(landmark_city.material_code(name, exaggeration) * 255)
+            assert code // 16 == layer
+            decoded = 2 ** ((code % 16 - 4) / 4)
+            assert abs(math.log2(decoded / exaggeration)) <= 0.13, (name, exaggeration)
+    assert set(landmark_city.PALETTE) <= set(landmark_city.MATERIAL_LAYER)
 
 
 @pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
@@ -152,3 +182,16 @@ def test_landmark_siege_backdrop_references(path: Path) -> None:
         missing = set(siege.get(key, [])) - known
         assert not missing, (key, missing)
     assert (DATA / "provinces" / f"{landmark['province']}.json").exists()
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_siege_battle_references(path: Path) -> None:
+    """L3: every city describes its besieged town; walls, attacked gate and streets exist."""
+    landmark = _load(path)
+    battle = landmark["siege"]["battle"]
+    walls = {wall["id"]: wall for wall in landmark["walls"]}
+    assert set(battle["walls"]) <= set(walls), battle["walls"]
+    gates = {g["name"] for w in battle["walls"] for g in walls[w].get("gates", [])}
+    assert battle["gate"] in gates, (battle["gate"], gates)
+    streets = {street["id"] for street in landmark["streets"]}
+    assert set(battle.get("streets", [])) <= streets

@@ -62,6 +62,9 @@ var siege_view: BattleSiege = null  # batailles de siège (M8)
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
+## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
+var siege_province: String = "prov_guyenne"
+var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
@@ -194,7 +197,10 @@ func _stage_standalone() -> bool:
 		return false
 	var index: int = -1
 	if siege_demo and sim.has_method("debug_stage_siege"):
-		index = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+		index = sim.call("debug_stage_siege", armies[0], siege_province)
+		if index < 0:
+			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
+			index = sim.call("debug_stage_siege", armies[1], siege_province)
 	else:
 		index = sim.call("debug_stage_battle", armies[0], armies[1])
 	if index < 0:
@@ -259,6 +265,11 @@ func begin() -> bool:
 		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 		if backdrop != null:
 			add_child(backdrop)
+		# L3 : ville assiégée tirée du plan (rues pavées ; murailles et maisons viennent du cœur).
+		if battle.has_method("get_siege_landmark"):
+			landmark_town = LandmarkSiegeTown.create(battle.call("get_siege_landmark"), func(x: float, z: float) -> float: return terrain.height_at(x, z))
+			if landmark_town != null:
+				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
@@ -271,6 +282,8 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
+	if landmark_town != null:
+		title = "Assaut %s (%s)" % [BattleScene.de(str(landmark_town.landmark.get("name", ""))), str(landmark_town.landmark.get("gate_name", ""))]
 	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
 	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
 	# plutôt que d'afficher une météo que les règles n'appliquent pas.
@@ -1351,6 +1364,9 @@ func _parse_cmdline() -> void:
 			_deploy_shot = true
 		elif arg == "--siege":
 			siege_demo = true
+		elif arg.begins_with("--siege-province="):
+			siege_demo = true
+			siege_province = arg.trim_prefix("--siege-province=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):

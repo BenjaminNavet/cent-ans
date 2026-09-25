@@ -49,6 +49,7 @@ pub fn setup(
         defender: side("Angleterre", defender),
         player_side: None,
         siege,
+        siege_layout: None,
         orders: Vec::new(),
     }
 }
