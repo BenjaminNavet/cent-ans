@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/historical_hydro_notes.schema.json",
+  "title": "Hydrographie vers 1340 : canaux modernes et zones historiques",
+  "description": "Fichier data/map/historical_hydro_notes.json (lot ZG5a, ADR 0036) : canaux postérieurs à 1340 exclus du réseau fin, cours artificiels anciens conservés, zones (cours divagants, tronçons rectifiés, marais non drainés, estuaires) qui marquent les lignes du réseau fin. Rendu seulement, aucune règle de jeu.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "canal_policy": { "type": "string" },
+    "modern_canals": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/canal" } },
+    "kept_artificial": { "type": "array", "items": { "$ref": "#/$defs/kept" } },
+    "zones": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/zone" } }
+  },
+  "required": ["modern_canals", "kept_artificial", "zones"],
+  "additionalProperties": false,
+  "$defs": {
+    "country": { "enum": ["FR", "GB", "BE", "NL", "LU", "DE", "CH", "ES", "IT"] },
+    "patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 3 },
+      "description": "Expressions régulières (insensibles à la casse) cherchées dans le nom du cours d'eau."
+    },
+    "canal": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "name": { "type": "string" },
+        "country": { "$ref": "#/$defs/country" },
+        "opened": { "type": "integer", "minimum": 1341, "description": "Ouverture (postérieure à 1340 par construction)." },
+        "patterns": { "$ref": "#/$defs/patterns" },
+        "source": { "type": "string", "minLength": 5 }
+      },
+      "required": ["id", "name", "country", "opened", "patterns", "source"],
+      "additionalProperties": false
+    },
+    "kept": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "name": { "type": "string" },
+        "country": { "$ref": "#/$defs/country" },
+        "patterns": { "$ref": "#/$defs/patterns" },
+        "note": { "type": "string" },
+        "source": { "type": "string", "minLength": 5 }
+      },
+      "required": ["id", "name", "patterns", "source"],
+      "additionalProperties": false
+    },
+    "zone": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "kind": { "enum": ["divagating", "wetland", "estuary"] },
+        "name": { "type": "string" },
+        "flags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["divagating", "rectified", "wetland", "tidal"] }
+        },
+        "polygon_lonlat": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              { "type": "number", "minimum": -11, "maximum": 16 },
+              { "type": "number", "minimum": 35, "maximum": 60 }
+            ]
+          }
+        },
+        "note": { "type": "string" },
+        "source": { "type": "string", "minLength": 5 }
+      },
+      "required": ["id", "kind", "name", "flags", "polygon_lonlat", "note", "source"],
+      "additionalProperties": false
+    }
+  }
+}
