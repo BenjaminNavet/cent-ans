@@ -125,7 +125,7 @@ var _select_ms: float = 0.0
 var _update_ms_total: float = 0.0
 ## ZG7a : pires durées (ms) des étapes de `update_view` (collecte et téléversement des pages,
 ## écouteurs de `surface_changed` compris ; sélection ; application des nœuds ; demandes).
-var _step_ms_max: Dictionary = {"collect": 0.0, "emit": 0.0, "select": 0.0, "apply": 0.0, "start": 0.0}
+var _step_ms_max: Dictionary = {"collect": 0.0, "poll": 0.0, "carve_job": 0.0, "layer": 0.0, "emit": 0.0, "select": 0.0, "apply": 0.0, "start": 0.0}
 
 
 ## `pyramid` doit être disponible ; `terrain_material` est le matériau partagé des morceaux E0
@@ -568,6 +568,7 @@ func _start_jobs() -> void:
 ## `block`).
 func _collect_jobs(block: bool = false) -> void:
 	var uploads := 0
+	var t_poll := Time.get_ticks_usec()
 	if _decoder != null:
 		var guard := 0
 		while not _requested.is_empty() and guard < 2000:
@@ -590,6 +591,7 @@ func _collect_jobs(block: bool = false) -> void:
 				break
 			OS.delay_msec(1)
 			guard += 1
+	_note_step("poll", Time.get_ticks_usec() - t_poll)
 	var t0 := Time.get_ticks_usec()
 	for key in _main_queue:
 		if not block and (uploads >= max_uploads_per_frame or Time.get_ticks_usec() - t0 > main_decode_budget_ms * 1000.0):
@@ -617,7 +619,9 @@ func _collect_jobs(block: bool = false) -> void:
 func _dispatch_image(key: int, job: PageJob) -> void:
 	job.filter_checked = true
 	if page_filter != null:
+		var t_carve := Time.get_ticks_usec()
 		var task: Object = page_filter.call("carve_job", key)
+		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
 			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
@@ -631,7 +635,9 @@ func _finish_job(key: int, job: PageJob) -> bool:
 		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
 		return false
 	if page_filter != null and job.filter == null and not job.filter_checked:
+		var t_carve := Time.get_ticks_usec()
 		var task: Object = page_filter.call("carve_job", key)
+		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
 			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
@@ -649,6 +655,7 @@ func _upload(key: int, job: PageJob) -> bool:
 	var t0 := Time.get_ticks_usec()
 	_page_array.update_layer(job.image, layer)
 	_upload_ms_max = maxf(_upload_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
+	_note_step("layer", Time.get_ticks_usec() - t0)
 	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": Time.get_ticks_msec() / 1000.0}
 	_page_bytes[key] = job.bytes
 	_layer_keys[layer] = key
@@ -697,10 +704,15 @@ func _alloc_layer() -> int:
 	_page_bytes.erase(oldest)
 	_residency_version += 1
 	var rect := _tile_rect(oldest)
-	var touched := _chunks_of(rect)
-	for index in touched:
-		_chunk_top[index] = -1
-	for key: int in _pages:
+	# ZG7a : seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
+	# (un parcours des 256 pages par éviction, deux évictions par image au pire, sinon).
+	var old_level := ReliefPyramid.level_of_key(oldest)
+	var touched := PackedInt32Array()
+	for index in _chunks_of(rect):
+		if _chunk_top[index] <= old_level:
+			touched.append(index)
+			_chunk_top[index] = -1
+	for key: int in (_pages if not touched.is_empty() else {}):
 		var level := ReliefPyramid.level_of_key(key)
 		var page_rect := _tile_rect(key)
 		for index in touched:
