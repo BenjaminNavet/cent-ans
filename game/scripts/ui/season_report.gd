@@ -354,7 +354,13 @@ func _update_vignette() -> void:
 
 ## Hauteur ajustée au contenu (au plus `MAX_LIST_HEIGHT`, défilement au-delà).
 func _fit_height() -> void:
-	scroll.custom_minimum_size.y = minf(list_box.get_combined_minimum_size().y, MAX_LIST_HEIGHT)
+	var list_height := minf(list_box.get_combined_minimum_size().y, MAX_LIST_HEIGHT)
+	if is_inside_tree():
+		# Q3: with the AR1 vignette the report overflowed a 720p window and hid « Continuer ».
+		scroll.custom_minimum_size.y = 0.0
+		var room := get_viewport_rect().size.y - position.y - get_combined_minimum_size().y - 12.0
+		list_height = minf(list_height, maxf(room, 80.0))
+	scroll.custom_minimum_size.y = list_height
 	reset_size()
 
 
