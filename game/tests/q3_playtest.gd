@@ -458,8 +458,12 @@ func phase_agent() -> void:
 		await shot("agent-action")
 	else:
 		log_q("agent: no action available at %s" % agent.get("location_name", "?"))
-	await key(KEY_ESCAPE)
+	# Échap ouvre le menu pause au lieu de désélectionner l'agent : on ferme la barre par ✕.
+	var close := find_button(ctl.bar, "✕")
+	if close != null:
+		await click(close)
 	await wait(5)
+	log_q("agent: bar visible after close %s, pause menu %s" % [ctl.bar.visible, find_button(root, "Reprendre") != null])
 
 
 ## Zoom (ZG) : molette au-dessus de la capitale, de la vue stratégique au plus près.
