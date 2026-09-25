@@ -19,6 +19,9 @@ func setup(campaign_map: Node) -> void:
 	box.name = "SiegeBox"
 	status_label = Label.new()
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Fixed wrap width: at width 1 the wrapped label is ~1800 px tall on its first layout and the
+	# action panel keeps that height, pushing « Donner l'assaut » off screen (Q3).
+	status_label.custom_minimum_size = Vector2(320, 0)
 	box.add_child(status_label)
 	assault_button = Button.new()
 	assault_button.text = "Donner l'assaut"
