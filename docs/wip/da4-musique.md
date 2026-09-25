@@ -42,3 +42,12 @@ Lot DA4 (agent solo). Bible : `docs/design/2026-09-25-bible-da.md` § 9. ADR : `
   la superposition (clause de repli explicitement prévue par le mandat DA4).
 - Pas d'écoute humaine des niveaux (session sans sortie audio), comme déjà noté par AU1.
 - Taille ajoutée : ~18 Mo (musique) + ~360 Ko (couches de bataille), très sous le plafond de 80 Mo.
+
+## Revue de l'orchestrateur DA (26/09)
+
+Les réalisations MIDI (Machaut ×2, Solage, Landini ×2, Binchois ×2) contredisent la bible § 9
+(« pas de synthé ») : elles passent en `fallback`, avant Kevin MacLeod, et ne jouent donc que
+si aucun enregistrement réel n'existe. France : `campaign.ogg`, estampie de Robertsbridge,
+Dufay *Se la face ay pale* ; Bourgogne : Dufay ×2 ; Italie : *Chominciamento*, Ortiz.
+Test `test_midi_renders_are_fallback_only`. Dette : trouver de vrais enregistrements libres
+d'Ars nova (Machaut, Landini) pour la France et l'Italie.

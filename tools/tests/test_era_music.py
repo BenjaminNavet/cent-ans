@@ -126,6 +126,26 @@ def test_kevin_macleod_is_fallback_only() -> None:
             )
 
 
+MIDI_RENDERS = {
+    "machaut_douce_dame_jolie.mp3",
+    "machaut_riches_damour.mp3",
+    "solage_fumeux_fume.mp3",
+    "landini_ecco_la_primavera.mp3",
+    "landini_si_dolce_non_sono.mp3",
+    "binchois_triste_plaisir.mp3",
+    "binchois_dueil_angoisseux.mp3",
+}
+
+
+def test_midi_renders_are_fallback_only() -> None:
+    """Bible DA § 9 (pas de synthé) : les réalisations MIDI ne sont jamais en `primary`."""
+    for context, playlist in _music()["playlists"].items():
+        for track in playlist.get("primary", []):
+            assert track.rsplit("/", 1)[-1] not in MIDI_RENDERS, (
+                f"{context} : {track} est un rendu MIDI, à garder en repli"
+            )
+
+
 def test_battle_layers_reference_existing_files_with_credits() -> None:
     """Chaque couche et stinger de `battle_layers.json` existe et (hors sfx AU1) est crédité."""
     config = _battle_layers()
