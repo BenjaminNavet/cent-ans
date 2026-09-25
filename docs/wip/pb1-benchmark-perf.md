@@ -70,8 +70,8 @@ jusqu'à 28 800 soldats. Il reste de la marge.
 ## Pistes non traitées (par ordre de gain estimé)
 - ~~Végétation : portage natif~~ → fait en PB2 (ADR 0062, `docs/wip/pb2-vegetation-shader.md`) ;
   reste `VegetationMask.sample` (25-35 ms par tuile, hors fil).
-- Shader du terrain (~12 ms GPU de près) : partagé avec ZG/R1/CM2, en évolution. Profiler par
-  bloc (parcellaire `field_at`, couches, côtes) avant de toucher.
+- Shader du terrain : profilé par bloc en PB2 (`docs/wip/pb2-vegetation-shader.md`) ; gains
+  exacts faits (−0,3 à −0,6 ms), le reste demande d'accepter un léger changement visuel.
 - Premier `refresh_all` au chargement (~800 ms : croissance des colonies 384 ms, figurines).
 - `settlement_layer.setup` (~630 ms) et `rivers.build` (~260 ms) au chargement (domaine ZG4).
 - Végétation au zoom 491 : ~15 s pour la forêt complète (tâches ~1 s ; 10 en parallèle ne
