@@ -8,8 +8,8 @@ Chaque mesure est faite 2 fois ; on donne la médiane des deux (ou l'intervalle)
 ## Tâches
 1. [x] Préréglages Basse / Moyenne qui réduisent vraiment la géométrie et les effets
 2. [x] Zoom comté en Haute tenu à 16,7 ms (relief fin en blocs + LOD, filtre d'ombre de la carte)
-3. [ ] Fuite « ParticlesShaderRD were never freed » (export à tester)
-4. [x] user:// du jeu exporté isolé + copie unique des fichiers du joueur (ADR 0031) — à vérifier sur l'export
+3. [x] Fuite « ParticlesShaderRD were never freed » : corrigée, vérifiée sur le jeu exporté
+4. [x] user:// du jeu exporté isolé + copie unique des fichiers du joueur (ADR 0031), vérifié sur l'export
 
 ## Ce que règle chaque niveau (`RenderQuality.PRESETS`)
 | | Basse | Moyenne | Haute | Ultra |
@@ -87,6 +87,32 @@ Résultat (Metal, jeu lancé par l'éditeur, 1440×900 Retina) :
 - Banc de bataille : `primitives` et `draw_calls` dans `BENCH_JSON`.
 - Test : `godot --headless --path game --script res://tests/pf1_quality_test.gd`.
 
-## Prochaine étape
-Export (`tools/export_macos.sh`) : fuite de particules (bissection `--no-battle`,
-`--no-map-weather`), dossier utilisateur et copie des sauvegardes.
+## Fuite de particules (tâche 3)
+Bissection sur le jeu exporté (`-- --journey --no-battle` + options de test temporaires) :
+fuite présente dès la carte seule, absente avec `--no-map-weather` ; due à la **pluie** de CM2
+(il pleut sur Paris au tour 1) ; la neige forcée (`--map-weather=snow`) fuit aussi. Ni la
+turbulence, ni le recalage des paramètres au zoom, ni le retrait du matériau dans `_exit_tree` ne
+changent rien : une particule **émettrice** à `ParticleProcessMaterial` laissait une entrée du
+cache statique de shaders du moteur à la fermeture (modèle d'export seulement ; pas dans l'éditeur).
+Correction : pluie et neige de campagne en `ShaderMaterial` de particules maison
+(`game/shaders/campaign_precipitation.gdshader` : boîte d'émission, cône, vitesses, ondulation de
+la neige ; mêmes paramètres pilotés par le zoom). Jeu exporté : parcours complet (carte, fins de
+tour, sauvegarde, bataille) et carte sous neige forcée, **journal sans erreur à la fermeture**.
+Captures pluie avant/après : identiques.
+
+## Dossier utilisateur (tâche 4, ADR 0031)
+Jeu exporté : `~/Library/Application Support/Cent Ans` (`use_custom_user_dir.template`), éditeur
+et tests inchangés. Premier lancement de l'export : « 14 fichiers repris » (réglages, codex,
+3 sauvegardes automatiques + sauvegarde rapide avec métadonnées et vignettes ; `smoke.json`
+écarté), marqueur écrit ; lancements suivants : aucune copie.
+
+## Points ouverts
+- ADR 0036 (ZG, relief streamé) va réécrire le relief de la carte : le découpage en blocs + LOD
+  de `FineTerrainJob` / `TerrainBuilder` (PF1) est à reprendre ou à fusionner avec soin.
+- Au parchemin (d=1500), 1 772 appels de dessin pour 378 k primitives, coût 2D indépendant du
+  niveau : piste pour Basse (regrouper les marqueurs).
+- Les distances de LOD de bataille et l'herbe sont lues à la construction de la bataille : un
+  changement de niveau en pleine bataille vaut pour la suivante (effets d'écran et particules :
+  immédiats).
+- Mesures faites sous une charge de 20 à 230 : les temps absolus bougent d'une exécution à
+  l'autre ; les rapports entre niveaux (même processus) sont stables.
