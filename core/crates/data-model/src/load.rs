@@ -180,6 +180,32 @@ pub enum DataError {
     References(Vec<ReferenceError>),
 }
 
+/// B7c: effects of `base` that `upgrade` (which replaces it) drops or
+/// weakens. An upgrade carries the total of its chain, so every effect of
+/// the level below must reappear with the same target (`effect`, `mode`,
+/// `class`, `unit_category`) and a value at least as strong in the same
+/// direction (−5 unrest is stronger than −3). Returns one description per
+/// lost effect.
+pub fn upgrade_regressions(base: &Building, upgrade: &Building) -> Vec<String> {
+    base.effects
+        .iter()
+        .filter(|lower| {
+            let kept = upgrade.effects.iter().find(|upper| {
+                upper.effect == lower.effect
+                    && upper.mode == lower.mode
+                    && upper.class == lower.class
+                    && upper.unit_category == lower.unit_category
+            });
+            match kept {
+                None => true,
+                Some(upper) if lower.value >= 0.0 => upper.value < lower.value,
+                Some(upper) => upper.value > lower.value,
+            }
+        })
+        .map(|lower| format!("{:?} {}", lower.effect, lower.value))
+        .collect()
+}
+
 fn format_reference_errors(errors: &[ReferenceError]) -> String {
     errors
         .iter()
@@ -644,9 +670,6 @@ impl ReferenceChecker<'_> {
             if let Some(tech) = &unit.required_technology {
                 self.require(id, "required_technology", tech, &data.technologies);
             }
-            if let Some(building) = &unit.required_building {
-                self.require(id, "required_building", building, &data.buildings);
-            }
             self.require_all(
                 id,
                 "required_faction",
@@ -667,6 +690,15 @@ impl ReferenceChecker<'_> {
         for (id, building) in &data.buildings {
             if let Some(base) = &building.upgrades_from {
                 self.require(id, "upgrades_from", base, &data.buildings);
+                if let Some(base_building) = data.buildings.get(base) {
+                    for lost in upgrade_regressions(base_building, building) {
+                        self.errors.push(ReferenceError {
+                            entity: id.to_string(),
+                            field: "effects".to_owned(),
+                            target: format!("upgrade of {base} loses {lost}"),
+                        });
+                    }
+                }
             }
             if let Some(tech) = &building.required_technology {
                 self.require(id, "required_technology", tech, &data.technologies);

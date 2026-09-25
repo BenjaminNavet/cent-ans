@@ -23,11 +23,19 @@
   "effects": [
     {
       "effect": "fortification_level",
-      "value": 1
+      "value": 4
+    },
+    {
+      "effect": "garrison",
+      "value": 3
     },
     {
       "effect": "siege_resistance",
       "value": 30
+    },
+    {
+      "effect": "loyalty",
+      "value": 5
     }
   ],
   "description": "Boulevard de terre et de bois devant les portes, tours basses et épaisses percées de canonnières ; réponse du XVe siècle à la bombarde. Voir [[cdx_boulevard_artillerie]].",

@@ -161,7 +161,7 @@ pub fn diet_blockers(
             requirements
                 .any_building
                 .iter()
-                .any(|b| buildings.contains(b))
+                .any(|b| crate::buildings::provides(data, &buildings, b))
         })
     {
         let names: Vec<String> = requirements

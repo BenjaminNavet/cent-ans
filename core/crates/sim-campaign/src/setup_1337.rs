@@ -136,6 +136,8 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 buildings.push(building.clone());
             }
         }
+        // B7c: an upgrade carries the effects of the levels it replaced.
+        crate::buildings::drop_superseded(data, &mut buildings);
         state.settlements.insert(
             id.clone(),
             SettlementState {

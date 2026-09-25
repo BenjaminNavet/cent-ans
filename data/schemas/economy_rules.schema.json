@@ -7,7 +7,8 @@
   "properties": {
     "description": { "type": "string" },
     "event_treasury_reference_income": { "type": "integer", "minimum": 1, "description": "Revenu de saison (livres) à partir duquel l'effet de trésor d'un événement s'applique en entier ; en dessous, il est proportionnel au revenu." },
-    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." }
+    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." },
+    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c : prix (livres) d'une unité de ressource de construction manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier." }
   },
   "required": ["event_treasury_reference_income", "event_treasury_min_scale"],
   "additionalProperties": false

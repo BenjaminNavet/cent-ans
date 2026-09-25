@@ -27,7 +27,8 @@ Branche `b7c-buildings` (worktree agent). Ne pas fusionner dans main (orchestrat
 6. **Normandie** : `res_stone` ajouté (pierre de Caen).
 
 ## État
-- [ ] 1 [ ] 2 [ ] 3 [ ] 4 [ ] 5 [ ] 6 [ ] Codex [ ] UI tooltips [ ] contrôles
+- [x] 1 [x] 2 [x] 3 (vérifié) [x] 4 [x] 5 [x] 6 [x] UI tooltips/encyclopédie/mock [x] ADR 0053 ; cargo fmt/clippy/test verts
+- [ ] Codex (sous-agent en cours) [ ] build.sh + smoke Godot [ ] pytest
 
 ## Prochaine étape
-Implémenter dans l'ordre 5, 6, 1, 2, 4, puis Codex et infobulles.
+Codex, puis contrôles Godot/pytest. f1_effects `scholar_ruler…` : tolérance d'arrondi ±1 (points de recherche fractionnaires, baisse au départ due à drop_superseded).

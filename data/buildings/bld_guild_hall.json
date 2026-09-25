@@ -17,14 +17,23 @@
   ],
   "effects": [
     {
-      "effect": "wealth",
-      "class": "burghers",
+      "effect": "trade_income",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "goods_satisfaction",
       "value": 5
     },
     {
+      "effect": "wealth",
+      "value": 5,
+      "class": "burghers"
+    },
+    {
       "effect": "unrest",
-      "class": "burghers",
-      "value": -5
+      "value": -5,
+      "class": "burghers"
     },
     {
       "effect": "research_points",
