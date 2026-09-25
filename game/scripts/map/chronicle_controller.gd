@@ -11,6 +11,8 @@ const WINDOW_SCENE := "res://scenes/ui/chronicle_window.tscn"
 var map: Node = null  # CampaignMap
 var window: ChronicleWindow
 var button: Button
+## Q2 : rapport de saison surveillé (la décision s'ouvre quand il est fermé).
+var _watched_report: Control = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -68,10 +70,32 @@ func refresh() -> void:
 	button.disabled = count == 0
 
 
-## Après `end_turn` : ouvre la fenêtre si une décision attend.
+## Après `end_turn` : ouvre la fenêtre si une décision attend ; Q2 : après la fermeture du
+## rapport de saison s'il s'affiche (plus deux fenêtres modales empilées à chaque tour).
 func after_end_turn() -> void:
 	refresh()
 	if not pending().is_empty():
+		_open_after_report.call_deferred()
+
+
+func _open_after_report() -> void:
+	var flow: Node = map.get("flow")
+	var report: Control = flow.get("season_report") if flow != null else null
+	if report != null and report.visible:
+		if _watched_report != report:
+			_watched_report = report
+			report.visibility_changed.connect(_on_report_visibility)
+		return
+	if not pending().is_empty() and not window.visible:
+		open_window()
+
+
+func _on_report_visibility() -> void:
+	if _watched_report == null or _watched_report.visible:
+		return
+	_watched_report.visibility_changed.disconnect(_on_report_visibility)
+	_watched_report = null
+	if not pending().is_empty() and not window.visible:
 		open_window()
 
 

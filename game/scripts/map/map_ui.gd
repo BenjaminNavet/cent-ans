@@ -49,6 +49,9 @@ const MENU_MAIN := 3
 const MENU_QUIT := 4
 const MAX_LOG_LINES := 200
 const TOAST_SECONDS := 3.5
+## Q2 : un panneau ouvert plus de tant de ms après le bandeau le fait disparaître s'il le
+## chevauche (le message d'avant ne masque plus le titre du panneau suivant).
+const TOAST_GRACE_MS := 300
 
 @onready var faction_swatch: ColorRect = %FactionSwatch
 @onready var faction_label: Label = %FactionLabel
@@ -90,6 +93,7 @@ var docked_right_x: float = 0.0
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
+var _toast_shown_at := 0
 ## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
 var panels := PanelStack.new()
 ## Province affichée par le panneau de province (une autre province = nouvelle sélection).
@@ -366,11 +370,23 @@ func show_toast(text: String, is_error: bool = false) -> void:
 	# Q1 : le bandeau passait sous les panneaux ancrés et le rapport de saison (message invisible).
 	toast.move_to_front()
 	toast.show()
+	_toast_shown_at = Time.get_ticks_msec()
 	_toast_timer = get_tree().create_timer(TOAST_SECONDS)
 	var timer := _toast_timer
 	timer.timeout.connect(func() -> void:
 		if _toast_timer == timer:
 			toast.hide())
+
+
+## Q2 : masque le bandeau quand un panneau ouvert après lui le chevauche.
+func _hide_toast_under_panels() -> void:
+	if not toast.visible or Time.get_ticks_msec() - _toast_shown_at < TOAST_GRACE_MS:
+		return
+	var rect := toast.get_global_rect()
+	for panel in panels.visible_panels():
+		if panel != toast and panel.get_global_rect().intersects(rect):
+			toast.hide()
+			return
 
 
 # --- Journal des événements ------------------------------------------------------------
@@ -892,6 +908,7 @@ func _setup_panel_stack() -> void:
 		_auto_register(child)
 	child_entered_tree.connect(_auto_register)
 	panels.changed.connect(queue_layout)
+	panels.changed.connect(func() -> void: _hide_toast_under_panels.call_deferred())
 
 
 ## Enregistre un panneau de la carte : `kind` = `PanelStack.Kind` ; `companion_of` : panneaux
