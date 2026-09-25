@@ -653,6 +653,28 @@ def assets_illustrations(
     )
 
 
+@assets_app.command("horizon-panoramas")
+def assets_horizon_panoramas(
+    ids: str = typer.Option(
+        "", "--ids", help="Panoramas à générer (virgules ; défaut : tous)"
+    ),
+    generate: bool = typer.Option(
+        False, "--generate", help="Appels payants OpenRouter (sinon traitement seul)"
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Affiche les invites"),
+) -> None:
+    """Panoramas d'horizon peints des batailles (EP2) : génération puis détourage."""
+    from cent_ans_tools import horizon_panoramas
+
+    data = horizon_panoramas.load_data()
+    wanted = [i.strip() for i in ids.split(",") if i.strip()] or list(data["panoramas"])
+    if generate or dry_run:
+        horizon_panoramas.generate(wanted, dry_run=dry_run, data=data)
+    if not dry_run:
+        meta = horizon_panoramas.process_all(data)
+        console.print(f"{len(meta['panoramas'])} panoramas traités")
+
+
 @assets_app.command("codex-art")
 def assets_codex_art(
     category: str | None = typer.Option(
