@@ -151,6 +151,9 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 			setup["village"] = false
 		elif arg == "--coast":
 			setup["coastal"] = true
+		elif arg.begins_with("--province="):
+			# EP6 : paysage d'une autre province (vignoble, bocage…), captures et essais.
+			setup["province"] = arg.trim_prefix("--province=")
 
 
 func build(p_terrain: Dictionary, weather: String) -> void:
