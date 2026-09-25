@@ -382,11 +382,19 @@ func preview_target(target: Dictionary) -> void:
 		path_line.hide_path()
 		_set_hover_text("%s — aucun chemin" % _target_label(target))
 		return
-	path_line.show_plan(preview["points"], int(preview["stop_index"]), preview["turn_ends"], map.camera_rig.distance)
+	# Lot DP2 : avertissement avant l'ordre quand la marche entre sans droit de passage.
+	var trespass: Dictionary = {}
+	if map.sim.has_method("find_path_trespass"):
+		trespass = map.sim.call("find_path_trespass", map.selected_army, point.x, point.y)
+	var warning := str(trespass.get("warning", ""))
+	path_line.show_plan(preview["points"], int(preview["stop_index"]), preview["turn_ends"], map.camera_rig.distance, warning != "")
 	var turns := int(preview.get("turns", 1))
 	var when := "ce tour" if bool(preview.get("reachable_this_turn", false)) else "%d tours" % turns
 	var action := "clic droit pour attaquer" if str(target["kind"]) == "army" and is_enemy_faction(str(target.get("faction", ""))) else "clic droit pour partir"
-	_set_hover_text("→ %s : %s, coût %d — %s" % [_target_label(target), when, int(preview.get("cost", 0)), action])
+	var text := "→ %s : %s, coût %d — %s" % [_target_label(target), when, int(preview.get("cost", 0)), action]
+	if warning != "":
+		text += "\n⚠ %s." % warning
+	_set_hover_text(text)
 
 
 func _clear_preview() -> void:

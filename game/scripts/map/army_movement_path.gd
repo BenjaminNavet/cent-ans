@@ -13,6 +13,8 @@ const LIFT := 0.5
 @export var now_color: Color = Color(0.40, 0.88, 0.32, 1.0)
 @export var later_color: Color = Color(0.92, 0.36, 0.20, 0.95)
 @export var marker_color: Color = Color(1.0, 0.90, 0.60, 1.0)
+## Lot DP2 : chemin sans droit de passage (incident diplomatique), en rouge franc.
+@export var trespass_color: Color = Color(0.93, 0.08, 0.06, 1.0)
 
 var map_data: MapData
 var _now: MeshInstance3D
@@ -21,6 +23,7 @@ var _markers: MultiMeshInstance3D
 var _points := PackedVector2Array()
 var _stop_index := 0
 var _turn_ends := PackedInt32Array()
+var _warning := false
 
 
 func setup(data: MapData) -> void:
@@ -66,10 +69,13 @@ func _line_instance(node_name: String, color: Color, min_px: float, priority: in
 
 ## `points` : polyligne carte (départ compris) ; `stop_index` : fin de ce tour ;
 ## `turn_ends` : fin de chaque tour (la dernière = fin du trajet).
-func show_plan(points: PackedVector2Array, stop_index: int, turn_ends: PackedInt32Array, camera_distance: float) -> void:
+## `warning` (lot DP2) : la marche entre sans droit de passage sur les terres d'une faction en
+## paix ; le chemin est tracé en rouge.
+func show_plan(points: PackedVector2Array, stop_index: int, turn_ends: PackedInt32Array, camera_distance: float, warning: bool = false) -> void:
 	if points.size() < 2 or map_data == null:
 		hide_path()
 		return
+	_set_warning(warning)
 	_points = points
 	_stop_index = clampi(stop_index, 0, points.size() - 1)
 	_turn_ends = turn_ends
@@ -80,6 +86,21 @@ func show_plan(points: PackedVector2Array, stop_index: int, turn_ends: PackedInt
 	_later.mesh = PolylineMesh.build_screen_lines([later_part], [width * 0.8], map_data, LIFT) if later_part.size() >= 2 else null
 	_place_markers(camera_distance)
 	visible = true
+
+
+func _set_warning(on: bool) -> void:
+	if on == _warning or _now == null:
+		return
+	_warning = on
+	for pair in [[_now, now_color], [_later, later_color]]:
+		var material := (pair[0] as MeshInstance3D).material_override as ShaderMaterial
+		if material != null:
+			material.set_shader_parameter("color", trespass_color if on else pair[1])
+
+
+## Vrai si le chemin affiché est un avertissement d'intrusion (DP2).
+func is_warning() -> bool:
+	return visible and _warning
 
 
 func hide_path() -> void:
@@ -125,7 +146,8 @@ func _place_markers(camera_distance: float) -> void:
 		var origin := Vector3(p.x, map_data.surface_world_at(p.x, p.y) + LIFT, p.y)
 		multimesh.set_instance_transform(i, Transform3D(basis, origin))
 		var last := i == ends.size() - 1
-		multimesh.set_instance_color(i, marker_color if ends[i] == _stop_index and not last else (now_color if ends[i] <= _stop_index else later_color))
+		var color := marker_color if ends[i] == _stop_index and not last else (now_color if ends[i] <= _stop_index else later_color)
+		multimesh.set_instance_color(i, trespass_color if _warning else color)
 
 
 func _subdivide(points: PackedVector2Array) -> PackedVector2Array:

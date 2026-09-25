@@ -36,6 +36,7 @@ func setup(campaign_map: Node) -> void:
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
+	minimap.mode_changed.connect(_on_mode_changed)
 	# Lot C5 : le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
 	var trade_button: Button = ui.get("trade_button")
 	if trade_button != null:
@@ -46,6 +47,18 @@ func setup(campaign_map: Node) -> void:
 			if key == FOG_SETTING:
 				map.call("refresh_all"))
 	ui.call("queue_layout")
+
+
+## Lot DP2 : le bouton « Diplomatie » de la minicarte bascule aussi la carte 3D dans le mode
+## diplomatique (touche N), et en sort quand on choisit un autre mode.
+func _on_mode_changed(new_mode: String) -> void:
+	var diplomacy: Object = map.get("diplomacy")
+	if diplomacy == null or not diplomacy.has_method("set_diplomacy_mode"):
+		return
+	if new_mode == CampaignMinimap.MODE_DIPLOMACY and not DiplomaticStances.available(_sim()):
+		minimap.set_mode(CampaignMinimap.MODE_POLITICAL)
+		return
+	diplomacy.call("set_diplomacy_mode", new_mode == CampaignMinimap.MODE_DIPLOMACY)
 
 
 func _sim() -> Object:

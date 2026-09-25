@@ -4,10 +4,12 @@ extends PanelContainer
 ## Écran de diplomatie plein écran (lot DP1, ADR 0025), à la manière de Three Kingdoms ou de
 ## Warhammer III, en registre de manuscrit enluminé :
 ## - à gauche, les factions (blason, souverain, relation, attitude ; raisons en infobulle) ;
-## - au centre, la carte diplomatique (provinces teintées selon la relation et l'attitude envers
-##   nous ; un clic choisit la faction qui tient la province) ;
+## - au centre, la carte diplomatique (provinces teintées selon notre position diplomatique,
+##   lot DP2 : allié, accord, neutre, tension, guerre, vassal ; un clic choisit la faction qui
+##   tient la province) ;
 ## - à droite, la fiche de la faction choisie et trois onglets : « Négociation » (clauses
 ##   communes, colonnes « Vous offrez » / « Vous demandez », barre d'acceptation en direct,
+##   leur raisonnement ligne à ligne et la contre-offre quand un seul point bloque (DP2),
 ##   « Que faudrait-il ? », actions unilatérales), « Guerre » (score, fatigue, buts de guerre),
 ##   « Traités » (historique).
 ## Aucune règle ici : tout vient de `CampaignSim` (`get_diplomacy`, `treaty_options`,
@@ -78,6 +80,11 @@ var _demand_menu: MenuButton
 var _chance_bar: ProgressBar
 var _chance_label: Label
 var _reasons: RichTextLabel
+## Lot DP2 : contre-offre proposée quand un seul point bloque.
+var _counter_box: HBoxContainer
+var _counter_label: Label
+var _counter_articles: Array = []
+var _explanation: Dictionary = {}
 var _actions: HFlowContainer
 var _war_page: VBoxContainer
 var _history_page: VBoxContainer
@@ -208,7 +215,7 @@ func _build_map_column() -> Control:
 	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	holder.resized.connect(_fit_minimap)
 	column.add_child(holder)
-	column.add_child(_legend())
+	column.add_child(DiplomaticStances.legend(HudStyle.FONT_SMALL))  # DP2
 	_map_hint = HudStyle.label("Cliquez une province pour traiter avec son seigneur. Les terres voilées sont hors de vue de vos agents et de vos armées.", HudStyle.FONT_SMALL, HudStyle.INK_FADED)
 	_map_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_map_hint)
@@ -323,6 +330,22 @@ func _build_negotiation() -> Control:
 	_reasons.fit_content = true
 	_reasons.scroll_active = false
 	page.add_child(_reasons)
+	_counter_box = HBoxContainer.new()
+	_counter_box.name = "CounterOffer"
+	_counter_box.add_theme_constant_override("separation", 8)
+	_counter_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK)
+	_counter_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_counter_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_counter_box.add_child(_counter_label)
+	var adopt := Button.new()
+	adopt.name = "AdoptCounter"
+	adopt.text = "Reprendre leur contre-offre"
+	adopt.tooltip_text = "Remplacer le brouillon par la contre-offre (il reste à la proposer)."
+	adopt.focus_mode = Control.FOCUS_NONE
+	adopt.pressed.connect(_adopt_counter)
+	_counter_box.add_child(adopt)
+	_counter_box.hide()
+	page.add_child(_counter_box)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 6)
 	var counter := Button.new()
@@ -617,6 +640,20 @@ func _render_map() -> void:
 	var ids := PackedStringArray()
 	for index in range(1, map_data.province_count + 1):
 		ids.append(str(map_data.get_province(index).get("id", "")))
+	# DP2 : mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
+	if DiplomaticStances.available(sim):
+		var stances := DiplomaticStances.stances(sim, ids)
+		var stance_colors := PackedColorArray()
+		for index in ids.size():
+			var key := stances[index] if index < stances.size() else ""
+			var stance_color := DiplomaticStances.color_of(key)
+			if key != "" and key != "self":
+				var owner_state: Dictionary = sim.call("get_province_state", ids[index])
+				if str(owner_state.get("controller", "")) == _selected:
+					stance_color = stance_color.lightened(0.3)
+			stance_colors.append(stance_color)
+		_minimap.set_province_colors(stance_colors)
+		return
 	var relations: PackedStringArray = sim.call("get_province_relations", ids)
 	var attitude_of := {}
 	for entry in _entries:
@@ -693,6 +730,7 @@ func _render_detail() -> void:
 		facts.append("Accord commercial" + (" (suspendu)" if suspended else ""))
 	if bool(entry.get("access_received", false)):
 		facts.append("Accès militaire accordé")
+	facts.append_array(_passage_facts(_selected))
 	if int(entry.get("loyalty", -1)) >= 0:
 		facts.append("Loyauté %d/100" % int(entry["loyalty"]))
 	if bool(entry.get("embargo_by_us", false)):
@@ -776,6 +814,9 @@ func _fallback_label(article: Dictionary) -> String:
 
 func _render_chance() -> void:
 	var fill := StyleBoxFlat.new()
+	_counter_box.hide()
+	_counter_articles = []
+	_explanation = {}
 	if _articles.is_empty():
 		_chance_label.text = "Ajoutez des clauses"
 		_chance_bar.value = 0
@@ -788,6 +829,8 @@ func _render_chance() -> void:
 	_chance_bar.add_theme_stylebox_override("fill", fill)
 	var word := "accepterait" if chance >= 66 else ("hésite" if chance >= 34 else "refuserait")
 	_chance_label.text = "Chance d'acceptation : %d %% (%s)" % [chance, word]
+	if _render_explanation():
+		return
 	var text := ""
 	if blocked != "":
 		text += "[color=#8b1a1a][b]Impossible :[/b] %s[/color]\n" % blocked
@@ -799,6 +842,48 @@ func _render_chance() -> void:
 	if not parts.is_empty():
 		text += "[b]Considérations :[/b] " + " · ".join(parts)
 	_reasons.text = text
+
+
+## Lot DP2 : leur raisonnement ligne à ligne, chaque raison avec son poids (à la Warhammer III :
+## « Ils se méfient de vous −12 », « Accord commercial — routes communes +8 »), puis la
+## contre-offre quand un seul point bloque. Faux si la simulation ne l'explique pas.
+func _render_explanation() -> bool:
+	if sim == null or not sim.has_method("explain_treaty"):
+		return false
+	_explanation = sim.call("explain_treaty", _selected, _articles)
+	if not bool(_explanation.get("ok", false)):
+		return false
+	var blocker: Dictionary = _explanation.get("blocker", {})
+	var blocker_text := str(blocker.get("text", ""))
+	var accept := bool(_explanation.get("accept", false))
+	var text := "[b][color=%s]%s[/color][/b]\n" % ["#2a6a2a" if accept else "#8b1a1a", _explanation.get("summary", "")]
+	var lines: Array = _explanation.get("lines", [])
+	var shown := 0
+	for line in lines:
+		var v := int(line["value"])
+		var line_text := str(line["text"])
+		var entry := "[color=%s]%+d[/color]  %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, line_text]
+		if blocker_text != "" and (line_text == blocker_text or line_text.begins_with(blocker_text + " — ")):
+			entry = "[b]%s[/b]  ◄" % entry
+		text += entry + "\n"
+		shown += 1
+		if shown >= 14 and lines.size() > 15:
+			text += "[color=#6b5a45]… %d autres raisons de moindre poids[/color]\n" % (lines.size() - shown)
+			break
+	_reasons.text = text.strip_edges()
+	var counter: Array = _explanation.get("counter", [])
+	if not accept and not counter.is_empty():
+		_counter_articles = counter
+		_counter_label.text = "Contre-offre : %s — %d %% de chances." % [_explanation.get("counter_text", ""), int(_explanation.get("counter_chance", 0))]
+		_counter_box.show()
+	return true
+
+
+func _adopt_counter() -> void:
+	if _counter_articles.is_empty():
+		return
+	_articles = _counter_articles.duplicate(true)
+	_render_draft()
 
 
 func _fill_menu(menu: MenuButton) -> void:
@@ -955,6 +1040,35 @@ func _render_actions(entry: Dictionary) -> void:
 	# C5 : l'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
 	if bool(entry.get("trade_agreement", false)):
 		_add_action("Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
+
+
+## Lot DP2 : position diplomatique, droit de passage et intrusions entre nous et `id`.
+func _passage_facts(id: String) -> PackedStringArray:
+	var facts := PackedStringArray()
+	if sim == null:
+		return facts
+	if sim.has_method("get_faction_stance"):
+		var stance: Dictionary = sim.call("get_faction_stance", id)
+		if not stance.is_empty():
+			facts.append("Position : %s" % stance.get("label", ""))
+	if not sim.has_method("get_trespass"):
+		return facts
+	var info: Dictionary = sim.call("get_trespass", id)
+	if info.is_empty():
+		return facts
+	var theirs: Dictionary = info.get("theirs", {})
+	var ours: Dictionary = info.get("ours", {})
+	if bool(info.get("access_given", false)):
+		facts.append("Droit de passage donné")
+	if int(theirs.get("seasons", 0)) > 0:
+		facts.append("Leurs armées campent sur nos terres (%s)" % FrText.count(int(theirs["seasons"]), "saison", "saisons"))
+	if bool(theirs.get("grievance", false)):
+		facts.append("Casus belli : violation de nos frontières")
+	if int(ours.get("seasons", 0)) > 0:
+		facts.append("Nos armées campent chez eux sans droit de passage (%s)" % FrText.count(int(ours["seasons"]), "saison", "saisons"))
+	if bool(ours.get("grievance", false)):
+		facts.append("Ils tiennent un casus belli contre nous (intrusion)")
+	return facts
 
 
 ## Lot C5 : routes commerciales entre nous et cette faction (revenu par saison, biens, coupure).
