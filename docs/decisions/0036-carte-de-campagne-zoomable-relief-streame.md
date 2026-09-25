@@ -157,3 +157,59 @@ Vagues : ZG1 + ZG2 + ZG3 ; puis ZG4 + ZG5 ; puis ZG6 ; puis ZG7.
 - Les paysages proches reflètent le relief réel débarrassé des principales traces modernes, pas
   un relevé de 1340 : haies, chemins creux, forêts et villages restent des reconstructions.
 - `FineTerrainJob` et les tuiles E0 restent le repli sans cache.
+
+## Mise en œuvre des paliers 1-2 (lot ZG1)
+
+- **Emprise du cœur réduite** pour tenir le cache E1-E4 sous 2,5 Go : lon −6 → 9, lat 42 → 56
+  moins l'Espagne, l'Italie, la Suisse, l'Allemagne de la rive droite du Rhin, l'Écosse et la
+  frange irlandaise (`pyramid.CORE_EXCLUDE`) ; restent la France, l'Angleterre et le pays de
+  Galles, le Bénélux et la rive gauche du Rhin. Enveloppe du manifeste : [−6 ; 42,35 ; 8 ; 56].
+- **Bâti** : une interpolation depuis les bords du masque effacerait le relief des grandes villes
+  (Paris couvre 40 km, la vallée de la Seine disparaîtrait) et dépendrait du découpage en blocs.
+  Le bâti est remplacé par une estimation morphologique locale du sol (ouverture de 340 m sur la
+  surface brute, fermeture de 180 m, lissage), sans couture entre blocs.
+- **Canopée** : décalage de 10 m × fraction arborée WorldCover, mesuré sur les lisières en
+  terrain plat (forêt d'Orléans 11,4 m, Sologne 10,0, Weald 12,1, Ardenne 11,7 ; Landes 0,8 m,
+  coupes rases postérieures aux acquisitions radar).
+- **Continuité** : la base floue du rehaussement est celle d'E0 (reconstruit à 0,04 m près),
+  échantillonnée à chaque étage ; E1 = moyenne 2 × 2 d'E2, E3 = moyenne 2 × 2 d'E4. E0 porte des
+  coutures le long des méridiens et parallèles entiers (lecture tuile par tuile de GLO-90,
+  jusqu'à ~300 m dans les Alpes) que les étages fins n'ont pas.
+
+## Addendum (lot ZG2, 2026-09-25) : moteur tel que réalisé
+
+Détail dans `docs/godot-map.md` (« Relief streamé : pyramide et quadtree »). Écarts et précisions
+par rapport à la décision :
+
+- **Le quadtree dessine tout le terrain** quand le cache existe (les morceaux E0 restent construits
+  mais masqués : repli, bornes, vue parchemin), au lieu de ne couvrir que le proche. `chunk_level`
+  et `chunk_surface_changed` gardent leur sens pour les couches (routes, colonies, maquettes).
+- **Sélection CDLOD** (distance ↔ espacement des sommets projeté ≤ 4 px, soit ≤ 0,5 px par pixel de
+  page) avec **morphing géomorphe** au vertex shader au lieu d'une hystérésis : pas de saut de
+  géométrie au changement de niveau. Jupes en plus contre les écarts transitoires.
+- **Pages en `FORMAT_R16` avec mipmaps** (entier 16 bits normalisé, même codage que les PNG) :
+  ni flottants 32 bits (deux fois plus de VRAM) ni reconstruction ; 256 couches 512² = 171 Mo.
+  Table de pages en `instance uniform` par nœud (page fine, page du parent, 8 voisines).
+- **Décodage en Rust dans des fils natifs** (`ReliefDecoder`, `request`/`poll`) : godot-rust est
+  mono-fil, `GameDataStore` ne peut pas être appelé depuis `WorkerThreadPool` (panique). Replis :
+  décodage Rust sur le fil principal (≤ 2 tuiles, ≤ 4 ms par image), puis `Png16` GDScript
+  (0,1-1 s par tuile : repli seulement).
+- **Recalages des couches** : les pages qui arrivent ne signalent un morceau proche que lorsque son
+  étage le plus fin chargé change, **après 700 ms sans nouvelle page** (la chaîne E1 → E4 donne un
+  seul recalage), au plus 2 morceaux toutes les 250 ms. Sans ce délai, les recalages des maquettes
+  (50-300 ms chacun) doublaient le coût du panoramique.
+- **Mesures** (banc `--bench-map`, 1 440 × 900, Apple Silicon, machine partagée à une charge de
+  200+ : chiffres relatifs seulement, pyramide réelle E1-E7 de 11 943 tuiles) : deux essais appariés
+  quadtree / repli E0 : 31,3 / 31,2 i/s puis 31,5 / 34,1 i/s ; médiane 24,7-26,5 ms contre
+  24,3-26,3 ms ; images > 50 ms 54 contre 57-63 ; `update_view` 4,7 ms en moyenne ; ≈ 1 100 pages
+  décodées en 28 s (≈ 6 ms par tuile, fils natifs) ; 9,5 M primitives contre 11 M. La cible
+  « 60 i/s au palier 2 » reste à vérifier sur machine au repos ; à parité avec le repli E0, le
+  quadtree n'est pas le goulot (les recalages synchrones des maquettes, ≈ 2,5 s cumulées, le sont).
+
+## Addendum (orchestrateur, 2026-09-25) : villes emblématiques
+
+Les villes emblématiques (maquettes L1/L2 sous loupe radiale ×3,5, ADR 0015) gardent la loupe en
+vue stratégique mais passent en **1:1 géoréférencé au zoom rapproché** : sur un relief de 3 m, la
+Seine d'une maquette agrandie ne tomberait plus dans la vraie vallée. Ce passage est le lot VH4
+du chantier « villes historiques » (ADR 0037, `docs/wip/vh-villes-historiques.md`), qui démarre
+après la fusion de ZG2 et ZG4. ZG6 ne traite que les villes ordinaires.

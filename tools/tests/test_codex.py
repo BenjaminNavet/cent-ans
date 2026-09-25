@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from cent_ans_tools.codex import links_in, validate_codex
+from cent_ans_tools.codex import escapes_in, links_in, validate_codex
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -66,3 +66,39 @@ def test_detects_broken_data(tmp_path: Path) -> None:
     assert "chr_ghost" in errors
     assert "differs from file name" in errors
     assert "evt_x.json.text: unresolved link [[cdx_missing]]" in errors
+
+
+def test_escapes_are_not_links() -> None:
+    """`[[!…]]` escapes are plain text, not links (B8)."""
+    text = "[[!Louis de Poitiers]] et [[cdx_poitiers|Poitiers]]"
+    assert links_in(text) == ["cdx_poitiers"]
+    assert escapes_in(text) == ["Louis de Poitiers"]
+
+
+def test_exclude_contexts_must_contain_an_alias(tmp_path: Path) -> None:
+    """Each `exclude_contexts` expression contains the title or an alias (B8)."""
+    for schema in (DATA / "schemas").glob("*.schema.json"):
+        _write(
+            tmp_path / "schemas" / schema.name,
+            json.loads(schema.read_text(encoding="utf-8")),
+        )
+    base = {"category": "bataille", "summary": "s", "body": "b", "sources": ["x"]}
+    _write(
+        tmp_path / "codex" / "cdx_p.json",
+        base
+        | {
+            "id": "cdx_p",
+            "title": "Bataille de Poitiers",
+            "aliases": ["Poitiers"],
+            "exclude_contexts": ["Louis de POITIERS", "Jean de Gand"],
+        },
+    )
+    _write(
+        tmp_path / "events" / "evt_x.json",
+        {"id": "evt_x", "text": "[[!Louis de Poitiers]] [[!]]"},
+    )
+    errors = "\n".join(validate_codex(tmp_path).errors)
+    assert "'Jean de Gand' contains no alias" in errors
+    assert "Louis de POITIERS" not in errors
+    assert "empty escape" in errors
+    assert "unresolved link" not in errors

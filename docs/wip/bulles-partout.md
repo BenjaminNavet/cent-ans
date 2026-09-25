@@ -52,6 +52,10 @@ Fusion : 17 conflits B5/B6 résolus (textes B6 + liens B2/B5), 21 alias dédoubl
 ## Vague 2 (lancée le 25/09)
 | Lot | État | Notes |
 |---|---|---|
-| B8 Auto-lien homonymes | lancé | alias le plus long prioritaire + exceptions |
-| B9a Fiches historiques 1-9 (audit § 10) | lancé | + relecture Breteuil/Romorantin 1356 |
-| B9b Fiches historiques 10-18 (audit § 10) | lancé | |
+| B8 Auto-lien homonymes | **fusionné** (main 3ec20811) | alias le plus long prioritaire + exceptions |
+| B9a Fiches historiques 1-9 (audit § 10) | **fusionné** | + relecture Breteuil/Romorantin 1356 |
+| B9b Fiches historiques 10-18 (audit § 10) | **fusionné** | |
+
+**État vague 2 (25/09)** : B8, B9a, B9b fusionnés (main 3ec20811). Codex 406 fiches, validateur 0 erreur, pytest 484 verts, smoke codex_bubbles vert (B1 + B8).
+Audit des homonymes : `uv run --project tools python -m cent_ans_tools.codex_homonyms` — 38 signalements restants relus, tous légitimes (personne ↔ territoire, lieu dans un nom composé). À relancer après chaque ajout de fiches.
+Reste : B7 correctif code ↔ UI (session code) ; doublon d'entity prov_flandre ; comptage 21/27 unités du smoke ; `fac_venice` date de la ligue (1er vs 22 juin 1336) à vérifier.

@@ -75,25 +75,27 @@ static func fit_scale(model_name: String, length: float, width: float) -> Vector
 	return Vector3(sx, sy, sz)
 
 
-## BR2 : pose éventuellement un accessoire de rue (`kinds` : `stall`, `cart`, `barrels`,
-## `woodpile`) adossé à la façade d'un bâtiment centré en `center`, façade tournée selon le lacet
-## Godot `theta` (+Z du modèle → (sin θ, cos θ)), emprise `length` × `depth`. Taille réelle, dos au
-## mur. `ground` : Callable(x, z) → hauteur. Renvoie [poignée, "", transformation] ou [].
-static func add_front_prop(batch: Batch, rng: RandomNumberGenerator, kinds: Array, center: Vector2, theta: float, length: float, depth: float, ground: Callable) -> Array:
-	var models := models_of(str(kinds[rng.randi_range(0, kinds.size() - 1)]))
+## BR3 : modèle du kit pour une pièce de mobilier du cœur (`kind` : `stall`, `cart`, `barrels`,
+## `woodpile`, `well`), choisi par son indice (déterministe) ; "" si aucun.
+static func prop_model(kind: String, index: int) -> String:
+	var models := models_of(kind)
 	if models.is_empty():
-		return []
-	var model: String = models[rng.randi_range(0, models.size() - 1)]
-	var entry: Dictionary = manifest()[model]
-	var prop_length := float(entry["length"])
-	var prop_depth := float(entry["depth"])
-	var facing := Vector2(sin(theta), cos(theta))
-	var tangent := Vector2(cos(theta), -sin(theta))
-	var slack := maxf(0.0, (length - prop_length) * 0.5)
-	var p := center + facing * (depth * 0.5 + prop_depth * 0.5 + 0.4) + tangent * rng.randf_range(-slack, slack)
-	var basis := Basis(Vector3.UP, theta + rng.randf_range(-0.06, 0.06))
-	var xform := Transform3D(basis, Vector3(p.x, float(ground.call(p.x, p.y)) - 0.03, p.y))
-	return [batch.add(model, xform), "", xform]
+		return ""
+	return models[int(hash01(index, 29) * models.size()) % models.size()]
+
+
+## BR3 : transformation d'une pièce de mobilier du cœur `{x, z, yaw}` (lacet du cœur : longueur
+## le long de (cos, sin), face avant (+Z du modèle) vers (-sin, cos)), posée à la hauteur `y`.
+## Taille réelle : les emprises des données (`data/rules/siege_town.json`) sont celles du manifeste.
+static func prop_transform(prop: Dictionary, y: float) -> Transform3D:
+	var basis := Basis(Vector3.UP, -float(prop["yaw"]))
+	return Transform3D(basis, Vector3(float(prop["x"]), y, float(prop["z"])))
+
+
+## Tirage déterministe dans [0, 1) à partir d'un entier et d'un sel (variété du rendu seulement).
+static func hash01(key: int, salt: int) -> float:
+	var h := hash(Vector2i(key, salt))
+	return float(h & 0xFFFFFF) / float(0x1000000)
 
 
 ## Maillage importé du modèle (premier `MeshInstance3D` du GLB), matériaux non remplacés.
