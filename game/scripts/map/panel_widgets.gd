@@ -126,8 +126,22 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		line.add_child(button)
 		if not available:
 			line.add_child(reason_label(str(row.get("reason", "Indisponible"))))
+		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
+		# pour ne pas avoir à ouvrir la bulle pour le repérer.
+		var import_cost := int(row.get("import_cost", 0))
+		if import_cost > 0:
+			line.add_child(import_cost_label(import_cost))
 		button.tooltip_text = RichTooltip.building(building_id, row)
 		list.add_child(line)
+
+
+## SV3 : « Dont import : X ₶ » en rouge, même couleur que la bulle (`RichTooltip.RED`).
+static func import_cost_label(import_cost: int) -> Label:
+	var label := Label.new()
+	label.text = "Dont import : %s" % Money.amount(import_cost)
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color(RichTooltip.RED))
+	return label
 
 
 static func reason_label(text: String) -> Label:
