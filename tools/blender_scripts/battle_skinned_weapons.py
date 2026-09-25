@@ -430,6 +430,10 @@ def _torso_shell(ctx, name, material, skirt, flare, margin=0.018):
     rows = ctx.seg(6, 3, 2)
     bm = bmesh.new()
     rings = []
+    mid_z = (chest.z + hips.z) / 2
+    mid = [p.x for p in body if abs(p.z - mid_z) < 0.05] or [p.x for p in body]
+    # No flaring collar: shoulders (wide on some bodies) are capped to the waist's width.
+    max_rx = (max(mid) - min(mid)) / 2 * 1.15 + margin
     for r in range(rows + 1):
         t = r / rows
         z = top_z + (bottom_z - top_z) * t
@@ -439,11 +443,11 @@ def _torso_shell(ctx, name, material, skirt, flare, margin=0.018):
         below = smoothstep(hips.z, bottom_z, z)
         cx = (min(xs) + max(xs)) / 2
         cy = (min(ys) + max(ys)) / 2
-        rx = (max(xs) - min(xs)) / 2 + margin + flare * below
+        rx = min((max(xs) - min(xs)) / 2 + margin, max_rx) + flare * below
         ry = (max(ys) - min(ys)) / 2 + margin + flare * 0.6 * below
         if r == 0:  # narrower at the neck opening
-            rx *= 0.78
-            ry *= 0.92
+            rx *= 0.86
+            ry *= 1.0
         rings.append(ring(bm, Vector((cx, cy, z)), rx, ry, n))
     for a, b in zip(rings, rings[1:], strict=False):
         bridge(bm, a, b, 0)
@@ -473,7 +477,7 @@ def jack(ctx, colour=(0.55, 0.47, 0.32), skirt=0.3, livery=False):
     `livery=True` dyes it in the side's colours (francs-archers' hoquetons).
     """
     code = C_LIVERY if livery else C_QUILT
-    obj, _rings = _torso_shell(ctx, "jack", ctx.material(code, colour), skirt, 0.06)
+    obj, _rings = _torso_shell(ctx, "jack", ctx.material(code, colour), skirt, 0.06, margin=0.03)
     return [obj]
 
 
