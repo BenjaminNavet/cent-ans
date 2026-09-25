@@ -13,6 +13,48 @@
       "radius_px": 6.8,
       "boundary_bridges": false,
       "note": "Le rendu générique (eau, lit creusé, berges, ponts, ponts aux murs) se retire dans ce cercle : le modèle dédié de Paris (Seine, île de la Cité, ponts habités) y prend le relais."
+    },
+    {
+      "id": "london",
+      "name": "Londres (lot L2)",
+      "lonlat": [-0.11, 51.5125],
+      "radius_px": 8.0,
+      "boundary_bridges": false
+    },
+    {
+      "id": "avignon",
+      "name": "Avignon (lot L2)",
+      "lonlat": [4.8075, 43.9508],
+      "radius_px": 6.3,
+      "boundary_bridges": false
+    },
+    {
+      "id": "calais",
+      "name": "Calais (lot L2)",
+      "lonlat": [1.851, 50.96257],
+      "radius_px": 5.3,
+      "boundary_bridges": false
+    },
+    {
+      "id": "rouen",
+      "name": "Rouen (lot L2)",
+      "lonlat": [1.095, 49.4402],
+      "radius_px": 6.3,
+      "boundary_bridges": false
+    },
+    {
+      "id": "bordeaux",
+      "name": "Bordeaux (lot L2)",
+      "lonlat": [-0.5776, 44.8378],
+      "radius_px": 6.4,
+      "boundary_bridges": false
+    },
+    {
+      "id": "bruges",
+      "name": "Bruges (lot L2)",
+      "lonlat": [3.2247, 51.2089],
+      "radius_px": 6.3,
+      "boundary_bridges": false
     }
   ],
   "rivers": {
