@@ -9,7 +9,7 @@ Essences (height 1.0, base at the origin, Y up in Godot / Z up here):
 * ``beech``: straighter slender grey trunk, taller rounder crown with fewer larger lumps;
 * ``fir``: mountain conifer (silver fir / spruce), narrow spire of drooping jagged tiers.
 
-Each essence has a detailed variant (crown + trunk, a few hundred triangles) and a ``_low``
+Each essence has a detailed variant (crown + trunk, about ninety triangles) and a ``_low``
 variant (about twenty triangles, no trunk) for distant tiles. Objects are named
 ``<essence>[_low]_crown`` and ``<essence>_trunk``: Godot (``VegetationMeshes``) merges them,
 paints vertex colours and inflates the crown normals, so the palette stays in the game code.
@@ -70,8 +70,8 @@ def add_trunk(bm: bmesh.types.BMesh, base: Vector, top: Vector, r0: float, r1: f
         bm.faces.new((rings[0][i], rings[0][j], rings[1][j], rings[1][i]))
 
 
-def add_tier(bm: bmesh.types.BMesh, z0: float, z1: float, radius: float, points: int, rng: random.Random, droop: float) -> None:
-    """One conifer tier: jagged cone (star outline) with drooping tips."""
+def add_tier(bm: bmesh.types.BMesh, z0: float, z1: float, radius: float, points: int, rng: random.Random, droop: float, underside: bool = True) -> None:
+    """One conifer tier: jagged cone (star outline) with drooping tips; ``underside`` closes it below."""
     apex = bm.verts.new((0.0, 0.0, z1))
     center = bm.verts.new((0.0, 0.0, z0 + (z1 - z0) * 0.25))
     ring = []
@@ -84,7 +84,8 @@ def add_tier(bm: bmesh.types.BMesh, z0: float, z1: float, radius: float, points:
     for i in range(n):
         j = (i + 1) % n
         bm.faces.new((ring[i], ring[j], apex))
-        bm.faces.new((ring[j], ring[i], center))
+        if underside:
+            bm.faces.new((ring[j], ring[i], center))
 
 
 def oak(rng: random.Random, low: bool) -> dict:
@@ -101,10 +102,9 @@ def oak(rng: random.Random, low: bool) -> dict:
     ]
     for k, (center, radii) in enumerate(lumps):
         jitter = Vector((rng.uniform(-0.04, 0.04), rng.uniform(-0.04, 0.04), rng.uniform(-0.03, 0.03)))
-        add_lump(crown, center + jitter, radii * rng.uniform(0.9, 1.1), 2 if k == 0 else 1, rng, 0.25)
+        add_lump(crown, center + jitter, radii * rng.uniform(0.9, 1.1), 1, rng, 0.25)
     trunk = bmesh.new()
     add_trunk(trunk, Vector((0, 0, -0.05)), Vector((0, 0, 0.42)), 0.065, 0.045, 5)
-    add_trunk(trunk, Vector((0, 0, 0.38)), Vector((0.2, 0.05, 0.6)), 0.035, 0.02, 4)
     return {"crown": crown, "trunk": trunk}
 
 
@@ -121,7 +121,7 @@ def beech(rng: random.Random, low: bool) -> dict:
         (Vector((-0.19, 0.12, 0.52)), Vector((0.23, 0.23, 0.2))),
     ]
     for k, (center, radii) in enumerate(lumps):
-        add_lump(crown, center, radii * rng.uniform(0.92, 1.08), 2 if k == 0 else 1, rng, 0.14)
+        add_lump(crown, center, radii * rng.uniform(0.92, 1.08), 1, rng, 0.14)
     trunk = bmesh.new()
     add_trunk(trunk, Vector((0, 0, -0.05)), Vector((0, 0, 0.55)), 0.045, 0.028, 5)
     return {"crown": crown, "trunk": trunk}
@@ -139,7 +139,8 @@ def fir(rng: random.Random, low: bool) -> dict:
         z0 = 0.1 + t * 0.74
         z1 = z0 + 0.3 - t * 0.08
         radius = 0.3 * (1.0 - t * 0.82) + 0.04
-        add_tier(crown, z0, min(z1, 1.0), radius, 6, rng, 0.05 * (1.0 - t))
+        # Dessous des étages : invisible depuis la caméra de campagne (vue plongeante), sauf le plus bas.
+        add_tier(crown, z0, min(z1, 1.0), radius, 6, rng, 0.05 * (1.0 - t), underside=i == 0)
     trunk = bmesh.new()
     add_trunk(trunk, Vector((0, 0, -0.05)), Vector((0, 0, 0.3)), 0.035, 0.025, 5)
     return {"crown": crown, "trunk": trunk}
