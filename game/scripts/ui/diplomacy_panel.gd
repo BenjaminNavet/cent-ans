@@ -1,8 +1,7 @@
 class_name DiplomacyPanel
 extends PanelContainer
 
-## Écran de diplomatie plein écran (lot DP1, ADR 0025), à la manière de Three Kingdoms ou de
-## Warhammer III, en registre de manuscrit enluminé :
+## Écran de diplomatie plein écran (lot DP1, ADR 0025), en registre de manuscrit enluminé :
 ## - à gauche, les factions (blason, souverain, relation, attitude ; raisons en infobulle) ;
 ## - au centre, la carte diplomatique (provinces teintées selon notre position diplomatique,
 ##   lot DP2 : allié, accord, neutre, tension, guerre, vassal ; un clic choisit la faction qui

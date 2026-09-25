@@ -22,6 +22,8 @@ var minimap: CampaignMinimap = null
 ## Provinces vues par le joueur (id → true) ; vide quand le brouillard est inactif.
 var visible_provinces: Dictionary = {}
 var fog_active: bool = false
+## Lot UX1 : légende de la carte (créée à la première ouverture).
+var legend: MapLegend = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -46,6 +48,7 @@ func setup(campaign_map: Node) -> void:
 		settings.connect("changed", func(key: String) -> void:
 			if key == FOG_SETTING:
 				map.call("refresh_all"))
+	minimap.legend_toggled.connect(func(pressed: bool) -> void: set_legend_open(pressed))
 	ui.call("queue_layout")
 
 
@@ -59,6 +62,70 @@ func _on_mode_changed(new_mode: String) -> void:
 		minimap.set_mode(CampaignMinimap.MODE_POLITICAL)
 		return
 	diplomacy.call("set_diplomacy_mode", new_mode == CampaignMinimap.MODE_DIPLOMACY)
+
+
+# --- Légende de la carte (lot UX1) ------------------------------------------------------
+
+
+## Ouvre ou ferme la légende (panneau posé à gauche de la minicarte).
+func set_legend_open(open: bool) -> void:
+	if open and legend == null:
+		legend = MapLegend.new()
+		var ui: Node = map.get("ui")
+		ui.add_child(legend)
+		ui.move_child(legend, minimap.get_index() + 1)
+		legend.closed.connect(func() -> void: minimap.legend_button.set_pressed_no_signal(false))
+	if legend == null:
+		return
+	if open:
+		legend.build(current_map_mode(), legend_context())
+		legend.show()
+		_place_legend()
+	else:
+		legend.hide()
+	minimap.legend_button.set_pressed_no_signal(open)
+
+
+func legend_open() -> bool:
+	return legend != null and legend.visible
+
+
+## Mode de carte affiché : « diplomacy », « religion », « unrest » ou « political ».
+func current_map_mode() -> String:
+	var diplomacy: Object = map.get("diplomacy")
+	if diplomacy != null:
+		match int(diplomacy.get("mode")):
+			DiplomacyController.MapMode.DIPLOMACY:
+				return "diplomacy"
+			DiplomacyController.MapMode.RELIGION:
+				return "religion"
+	if bool(map.get("unrest_mode")):
+		return "unrest"
+	return "political"
+
+
+## Couleurs du joueur et des royaumes d'exemple (`factions` de la légende).
+func legend_context() -> Dictionary:
+	var facade: Node = get_node_or_null("/root/SimFacade")
+	var player := str(map.get("player_faction"))
+	var factions: Array = []
+	for id in MapLegend.data().get("factions", []):
+		if str(id) == player:
+			continue
+		var color: Color = facade.call("faction_color", id) if facade != null else Color.GRAY
+		var label: String = str(facade.call("faction_short_name", id)) if facade != null else str(id)
+		factions.append([str(id), color, label])
+	var player_color: Color = facade.call("faction_color", player) if facade != null else Color(0.25, 0.35, 0.7)
+	return {"player_faction": player, "player_color": player_color, "factions": factions}
+
+
+func _place_legend() -> void:
+	var view := minimap.get_viewport_rect().size
+	var top := minimap.position.y
+	legend.set_max_height(view.y - top - 150.0)
+	legend.size = legend.get_combined_minimum_size()
+	var x := minimap.position.x - legend.size.x - 8.0 if minimap.visible else view.x - legend.size.x - 12.0
+	legend.position = Vector2(maxf(x, 8.0), top)
 
 
 func _sim() -> Object:
@@ -140,6 +207,9 @@ func center_camera_on(map_pos: Vector2) -> void:
 
 
 func _process(_delta: float) -> void:
+	if legend_open():  # UX1 : suit le mode de carte et la place de la minicarte
+		legend.set_mode(current_map_mode())
+		_place_legend()
 	if minimap == null or not minimap.is_visible_in_tree():
 		return
 	minimap.set_view_frame(view_frame())

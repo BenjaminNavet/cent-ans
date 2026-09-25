@@ -67,6 +67,48 @@ Les effets `sfx/` et musiques `music/` d'origine restent de la synthèse procéd
 | `battle/wall_collapse_2.ogg` | [389303](https://freesound.org/people/AlanCat/sounds/389303/) AlanCat — rockfall2a.wav<br>[567249](https://freesound.org/people/iwanPlays/sounds/567249/) iwanPlays — Bricks/Stones/Rocks/Gravel Falling<br>[703248](https://freesound.org/people/xkeril/sounds/703248/) xkeril — Fall debris (crash) | ponctuel, mono ; rockfall + bricks + debris |
 | `battle/thunder_1.ogg` | [399656](https://freesound.org/people/bajko/sounds/399656/) bajko — sfx_thunder blast.wav | ponctuel, mono |
 | `battle/thunder_2.ogg` | [652690](https://freesound.org/people/AyaDrevis/sounds/652690/) AyaDrevis — Thunder strike | ponctuel, mono |
+| `battle/sword_clash_5.ogg` | [442769](https://freesound.org/people/qubodup/sounds/442769/) qubodup — Sword Hit | ponctuel, mono |
+| `battle/sword_clash_6.ogg` | [547041](https://freesound.org/people/CogFireStudios/sounds/547041/) CogFireStudios — Hit Swing Sword Small 3 | ponctuel, mono |
+| `battle/sword_clash_7.ogg` | [706204](https://freesound.org/people/xkeril/sounds/706204/) xkeril — Nice anime sword hit | ponctuel, mono |
+| `battle/sword_clash_8.ogg` | [426322](https://freesound.org/people/MTJohnson/sounds/426322/) MTJohnson — Single Sword Hit.wav | ponctuel, mono |
+| `battle/sword_clash_9.ogg` | [518992](https://freesound.org/people/Amaiguri/sounds/518992/) Amaiguri — SwordClash.wav | ponctuel, mono |
+| `battle/sword_clash_10.ogg` | [275159](https://freesound.org/people/Bird_man/sounds/275159/) Bird_man — Sword Clash.wav | ponctuel, mono |
+| `battle/sword_clash_11.ogg` | [334169](https://freesound.org/people/loudernoises/sounds/334169/) loudernoises — Sword Clash | ponctuel, mono |
+| `battle/sword_clash_12.ogg` | [844258](https://freesound.org/people/Foxfire-/sounds/844258/) Foxfire- — Sword Tap | ponctuel, mono |
+| `battle/shield_bash_4.ogg` | [114683](https://freesound.org/people/Qat/sounds/114683/) Qat — whack02.mp3 | ponctuel, mono |
+| `battle/shield_bash_5.ogg` | [114684](https://freesound.org/people/Qat/sounds/114684/) Qat — whack03.mp3 | ponctuel, mono |
+| `battle/shield_bash_6.ogg` | [114685](https://freesound.org/people/Qat/sounds/114685/) Qat — whack04.mp3 | ponctuel, mono |
+| `battle/shield_bash_7.ogg` | [330997](https://freesound.org/people/Rudmer_Rotteveel/sounds/330997/) Rudmer_Rotteveel — Stick Hitting a Dreadlock (Small thud) | ponctuel, mono |
+| `battle/shield_bash_8.ogg` | [319217](https://freesound.org/people/worthahep88/sounds/319217/) worthahep88 — Sticks Hitting sticks.wav | ponctuel, mono |
+| `battle/armor_hit_1.ogg` | [638613](https://freesound.org/people/CaptainYulef/sounds/638613/) CaptainYulef — metal-thud.wav | ponctuel, mono |
+| `battle/armor_hit_2.ogg` | [164220](https://freesound.org/people/deleted_user_2104797/sounds/164220/) deleted_user_2104797 — Thud_metallic_1.wav | ponctuel, mono |
+| `battle/armor_hit_3.ogg` | [424424](https://freesound.org/people/Lavacoal123/sounds/424424/) Lavacoal123 — metal flick-hit | ponctuel, mono |
+| `battle/armor_hit_4.ogg` | [812592](https://freesound.org/people/qubodup/sounds/812592/) qubodup — Clang | ponctuel, mono |
+| `battle/armor_hit_5.ogg` | [733887](https://freesound.org/people/velcronator/sounds/733887/) velcronator — Sword Impact | ponctuel, mono |
+| `battle/armor_hit_6.ogg` | [616492](https://freesound.org/people/Empiremonkey/sounds/616492/) Empiremonkey — clank.wav | ponctuel, mono |
+| `battle/effort_cry_1.ogg` | [511023](https://freesound.org/people/ale-batec/sounds/511023/) ale-batec — Male Fight Grunts | ponctuel, mono |
+| `battle/effort_cry_2.ogg` | [511023](https://freesound.org/people/ale-batec/sounds/511023/) ale-batec — Male Fight Grunts | ponctuel, mono |
+| `battle/effort_cry_3.ogg` | [511023](https://freesound.org/people/ale-batec/sounds/511023/) ale-batec — Male Fight Grunts | ponctuel, mono |
+| `battle/effort_cry_4.ogg` | [718967](https://freesound.org/people/BaggoNotes/sounds/718967/) BaggoNotes — ShoutingPunches_Male | ponctuel, mono |
+| `battle/effort_cry_5.ogg` | [718967](https://freesound.org/people/BaggoNotes/sounds/718967/) BaggoNotes — ShoutingPunches_Male | ponctuel, mono |
+| `battle/effort_cry_6.ogg` | [718967](https://freesound.org/people/BaggoNotes/sounds/718967/) BaggoNotes — ShoutingPunches_Male | ponctuel, mono |
+| `battle/effort_cry_7.ogg` | [623449](https://freesound.org/people/WelvynZPorterSamples/sounds/623449/) WelvynZPorterSamples — Kingly Yell - NO reverb.wav | ponctuel, mono |
+| `battle/effort_cry_8.ogg` | [670857](https://freesound.org/people/EvilOldScratch/sounds/670857/) EvilOldScratch — WarriorPain1.wav | ponctuel, mono |
+| `battle/effort_cry_9.ogg` | [621370](https://freesound.org/people/WelvynZPorterSamples/sounds/621370/) WelvynZPorterSamples — Male Grunt 3 - WITH reverb.wav | ponctuel, mono |
+| `battle/effort_cry_10.ogg` | [661242](https://freesound.org/people/DeqstersLab/sounds/661242/) DeqstersLab — Swing grunt.mp3 | ponctuel, mono |
+| `battle/death_groan_8.ogg` | [131710](https://freesound.org/people/oldedgar/sounds/131710/) oldedgar — Male Being Impaled/Beaten AC.wav | ponctuel, mono |
+| `battle/death_groan_9.ogg` | [567989](https://freesound.org/people/AncientWarrior/sounds/567989/) AncientWarrior — WoundedMaleShort.wav | ponctuel, mono |
+| `battle/death_groan_10.ogg` | [104028](https://freesound.org/people/RutgerMuller/sounds/104028/) RutgerMuller — Scream1_Short.aif | ponctuel, mono |
+| `battle/body_fall_1.ogg` | [504626](https://freesound.org/people/leonelmail/sounds/504626/) leonelmail — BODY FALL - V HVY - DIRT | ponctuel, mono |
+| `battle/body_fall_2.ogg` | [346695](https://freesound.org/people/deleted_user_2104797/sounds/346695/) deleted_user_2104797 — Body fall_01.wav | ponctuel, mono |
+| `battle/body_fall_3.ogg` | [266346](https://freesound.org/people/Ephisus/sounds/266346/) Ephisus — body falls.wav | ponctuel, mono |
+| `battle/body_fall_4.ogg` | [266346](https://freesound.org/people/Ephisus/sounds/266346/) Ephisus — body falls.wav | ponctuel, mono |
+| `battle/body_fall_5.ogg` | [395567](https://freesound.org/people/SoundsForHim/sounds/395567/) SoundsForHim — Collapsing in grass.MP3 | ponctuel, mono |
+| `battle/body_fall_6.ogg` | [815415](https://freesound.org/people/AwenAudio/sounds/815415/) AwenAudio — AAD SWORD FALL ON DIRT | ponctuel, mono |
+| `battle/horse_neigh_5.ogg` | [826753](https://freesound.org/people/Salsero_classic/sounds/826753/) Salsero_classic — Renill de cavall / Horse Neigh | ponctuel, mono |
+| `battle/horse_neigh_6.ogg` | [636554](https://freesound.org/people/L.Finck/sounds/636554/) L.Finck — Whinnying horse-far away.WAV | ponctuel, mono |
+| `battle/cavalry_charge_impact.ogg` | [527430](https://freesound.org/people/bruno.auzet/sounds/527430/) bruno.auzet — 6 horses gallop.wav<br>[182112](https://freesound.org/people/PixelsphereStudios/sounds/182112/) PixelsphereStudios — Shield / sword hits.wav<br>[471095](https://freesound.org/people/spycrah/sounds/471095/) spycrah — Sword clash 1.wav<br>[370203](https://freesound.org/people/nekoninja/sounds/370203/) nekoninja — shield guard | ponctuel, mono ; gallop swell (existing cavalry bed source) + shield/sword impact layer |
+| `battle/melee_bed_3.ogg` | [675093](https://freesound.org/people/craigsmith/sounds/675093/) craigsmith — S30-20 Large crowd fighting indoors with swords in BG.wav | boucle, mono |
 | `battle/melee_bed_1.ogg` | [376646](https://freesound.org/people/DeadVDI/sounds/376646/) DeadVDI — Vikings in battle (swords crossing, shields bashing, men yelling) | boucle, mono |
 | `battle/melee_bed_2.ogg` | [175950](https://freesound.org/people/freefire66/sounds/175950/) freefire66 — SwordBattle1.wav | boucle, mono |
 | `battle/clamor_bed.ogg` | [384401](https://freesound.org/people/FillMat/sounds/384401/) FillMat — Crowd/Mob/Riot Noise (Voices Only) - 14 people, 2 minutes HENRY VI | boucle, mono |

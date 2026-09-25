@@ -1,4 +1,4 @@
-// Lot CM2 : vue stratégique « parchemin enluminé » (Three Kingdoms, Medieval II), fonctions
+// Lot CM2 : vue stratégique « parchemin enluminé », fonctions
 // communes au terrain (parchment_map.gdshaderinc) et à la mer (parchment_sea.gdshaderinc).
 // `campaign_parchment` (paramètre global, `project.godot` § shader_globals) : 0 = carte 3D,
 // 1 = parchemin ; piloté par StrategicView selon la distance caméra (fondu, sans coupure).

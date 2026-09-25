@@ -1,4 +1,4 @@
-//! Pre-battle forecast and withdrawal (lot UB1, Total War style pre-battle
+//! Pre-battle forecast and withdrawal (lot UB1, pre-battle
 //! screen).
 //!
 //! [`CampaignState::battle_forecast`] estimates, without touching the RNG, the

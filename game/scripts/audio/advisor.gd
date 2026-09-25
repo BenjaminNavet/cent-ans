@@ -1,7 +1,7 @@
 class_name Advisor
 extends Node
 
-## VO1 — le conseiller, à la Total War : Jean le Bel, chanoine de Liège et chroniqueur, intervient
+## VO1 — le conseiller : Jean le Bel, chanoine de Liège et chroniqueur, intervient
 ## brièvement (voix sur le bus « Voix » + sous-titre) au premier tour d'une partie, à la première
 ## bataille, au premier assaut, au premier siège, à la première victoire ou défaite et lors des
 ## alertes importantes du tour (guerre, peste, famine, révolte, banqueroute…). Textes :
