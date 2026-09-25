@@ -110,8 +110,25 @@ pub fn sim(tier: Tier, terrain: Terrain, river: bool, mode: Mode, seed: u64) -> 
 
 /// Runs to the end (or [`CAP`]): `(seconds, winner, last journal line)`.
 pub fn play(sim: &mut BattleSim) -> (f64, Option<SideId>, String) {
+    let mut first_melee = None;
     while !sim.is_finished() && sim.elapsed() < CAP {
         sim.step();
+        if first_melee.is_none()
+            && sim
+                .units()
+                .iter()
+                .any(|u| u.state == sim_battle::UnitState::Melee)
+        {
+            first_melee = Some(sim.elapsed());
+        }
+    }
+    if std::env::var("EP9_VERBOSE").is_ok() {
+        println!(
+            "    first melee {first_melee:?}, fighting share att {:.2} def {:.2}, end {:?}",
+            sim.fighting_share(SideId::Attacker),
+            sim.fighting_share(SideId::Defender),
+            sim.end_kind()
+        );
     }
     let last = sim
         .events()
@@ -124,10 +141,14 @@ pub fn play(sim: &mut BattleSim) -> (f64, Option<SideId>, String) {
 fn row(tier: Tier, terrain: Terrain, river: bool, mode: Mode, seeds: u64) -> Vec<f64> {
     let mut times = Vec::new();
     let (mut att, mut def, mut open) = (0, 0, 0);
+    let mut ends = std::collections::BTreeMap::new();
     for seed in 0..seeds {
         let mut s = sim(tier, terrain, river, mode, seed);
         let (t, w, last) = play(&mut s);
         times.push(t);
+        *ends
+            .entry(s.end_kind().map_or("open", |e| e.key()))
+            .or_insert(0) += 1;
         match w {
             Some(SideId::Attacker) => att += 1,
             Some(SideId::Defender) => def += 1,
@@ -140,7 +161,7 @@ fn row(tier: Tier, terrain: Terrain, river: bool, mode: Mode, seeds: u64) -> Vec
     let mut sorted = times.clone();
     sorted.sort_by(f64::total_cmp);
     println!(
-        "{:9} {:9} river={:5} {:13} min {:4.0} med {:4.0} max {:4.0}  att {att:2} def {def:2} open {open:2}",
+        "{:9} {:9} river={:5} {:13} min {:4.0} med {:4.0} max {:4.0}  att {att:2} def {def:2} open {open:2} {ends:?}",
         tier.key(),
         terrain.key(),
         river,
