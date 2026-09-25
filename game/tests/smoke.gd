@@ -266,6 +266,9 @@ func _run_start_menu() -> void:
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
 	menu.show_faction_select(true)
 	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	# DF1 : sélecteur de difficulté de campagne, Normale par défaut.
+	_check(menu.faction_select.difficulty_count() == 4, "faction select should offer 4 difficulty levels, got %d" % menu.faction_select.difficulty_count())
+	_check(menu.faction_select.selected_difficulty == "normal", "default campaign difficulty should be normal, got %s" % menu.faction_select.selected_difficulty)
 	menu.open_intro()
 	await process_frame
 	_check(menu.overlay_open(), "prologue overlay should open")

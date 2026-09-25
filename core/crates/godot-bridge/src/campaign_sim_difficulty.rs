@@ -57,7 +57,7 @@ impl CampaignSim {
                 "id" => level.id.as_str(),
                 "label" => level.label.as_str(),
                 "description" => level.description.as_str(),
-                "effects" => packed,
+                "effects" => &packed,
                 "summary" => effects.join("\n").as_str(),
                 "default" => level.id == rules.default,
             };
