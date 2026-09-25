@@ -132,9 +132,9 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	_updating = false
 	# SV4 : multiplicateurs lus dans le cœur (`TaxRate::multiplier`).
 	tax_note.text = RuleValues.format({
-		"low": "×{rule.tax_multiplier_low} sur le revenu fiscal ; apaise le mécontentement.",
-		"normal": "×{rule.tax_multiplier_normal} sur le revenu fiscal.",
-		"high": "×{rule.tax_multiplier_high} sur le revenu fiscal ; augmente le mécontentement.",
+		"low": "×{rule.tax_multiplier_low:1} sur le revenu fiscal ; apaise le mécontentement.",
+		"normal": "×{rule.tax_multiplier_normal:1} sur le revenu fiscal.",
+		"high": "×{rule.tax_multiplier_high:1} sur le revenu fiscal ; augmente le mécontentement.",
 	}.get(rate, ""))
 	_fill_goods(economy.get("goods", {}), economy.get("goods_categories", []))
 	show()

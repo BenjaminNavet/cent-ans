@@ -14,7 +14,9 @@ use std::collections::BTreeMap;
 use data_model::GameData;
 
 use crate::state::Season;
-use crate::{agents, diplomacy, economy, population, ransom, religion, research, retinue, table};
+use crate::{
+    agents, chronicle, diplomacy, economy, population, ransom, religion, research, retinue, table,
+};
 
 /// Every rule value the interface may quote, by name.
 pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
@@ -147,6 +149,9 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
     let agent_rules = agents::rules(data);
     values.insert("agent_xp_success", f64::from(agent_rules.xp_success));
     values.insert("agent_xp_failure", f64::from(agent_rules.xp_failure));
+
+    // Chronicle decisions.
+    values.insert("decision_turns", f64::from(chronicle::DECISION_TURNS));
 
     // Tax brackets (spec § 1.4).
     values.insert("tax_multiplier_low", economy::TaxRate::Low.multiplier());
