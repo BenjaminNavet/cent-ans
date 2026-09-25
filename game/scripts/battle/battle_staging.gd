@@ -108,7 +108,7 @@ func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3
 		clouds = BattleCloudShadows.new()
 		add_child(clouds)
 		# Le champ et ses abords (bois de l'anneau proche) : 600 m de marge de chaque côté.
-		clouds.setup(cfg["cloud_shadows"], center, Vector2(width + 1200.0, depth + 1200.0), weather, wind)
+		clouds.setup(cfg["cloud_shadows"], center, Vector2(width + 1200.0, depth + 1200.0), weather, wind, int(scene.get("battle_seed")) + 3)
 		clouds.set_light_level(time_of_day.light_level if time_of_day != null else 1.0)
 	if is_on("smoke") and cfg.has("smoke"):
 		smoke = BattleSmoke.new()

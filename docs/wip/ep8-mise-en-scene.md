@@ -22,13 +22,14 @@ Branche `worktree-agent-a8a54631be0d814c5`. Plan du chantier : `docs/wip/epic.md
 | Étape | État |
 |---|---|
 | 0. Données, schémas, test pytest, cœur heure du jour + tests (`tests/ep8_time_of_day.rs`), pont | fait |
-| 1. Lumière selon l'heure (Godot) + `--hour=` + menu démos | à faire |
-| 2. Ombres de nuages | à faire |
-| 3. Poussière enrichie (effectif, terrain, colonnes) | à faire |
-| 4. Fumées (`add_smoke_source`, bombardes, incendies S2) | à faire |
-| 5. Oiseaux, corbeaux | à faire |
-| 6. Caméra cinématique, ralenti, réglages | à faire |
+| 1. Lumière selon l'heure (Godot) + `--hour=` + menu démos | fait (capture aube OK) |
+| 2. Ombres de nuages | fait (décal + bruit périodique CPU ; ViewportTexture refusée par Decal) |
+| 3. Poussière enrichie (effectif, terrain, colonnes) | fait, à vérifier en capture |
+| 4. Fumées (`add_smoke_source`, bombardes, incendies S2) | fait, à vérifier en capture |
+| 5. Oiseaux, corbeaux | fait, test `game/tests/ep8_staging_test.gd` OK |
+| 6. Caméra cinématique, ralenti, réglages | fait, à vérifier en capture |
 | 7. Mesures A/B (`tools/bench_ep1.sh`), captures `docs/img/ep8/`, ADR | à faire |
 
 ## Prochaine étape
-Étape 1 : `game/scripts/battle/battle_staging.gd` + branchement dans `battle_scene.gd`.
+Captures (`--birds-shot`, `--cinematic-shot` à brancher dans `_stage_screenshot`), crépuscule,
+mesures A/B (`tools/bench_ep1.sh`), ADR 0052, smoke complet.

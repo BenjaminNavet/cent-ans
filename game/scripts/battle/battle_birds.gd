@@ -83,7 +83,7 @@ func update(units: Array, dt: float, finished: bool) -> void:
 	if in_melee and not _first_shock_seen:
 		_first_shock_seen = true
 		# Premier choc : la volée la plus proche s'envole, où qu'elle soit.
-		var nearest := _nearest_perched(_last_shock)
+		var nearest: Variant = _nearest_perched(_last_shock)
 		if nearest != null:
 			_launch(nearest, _last_shock)
 	var radius := float(cfg.get("trigger_radius_m", 240.0))
