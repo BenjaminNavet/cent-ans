@@ -413,6 +413,10 @@ func _on_events(events: Array) -> void:
 				lines.append(["%s a échappé." % name_cap, BattleUiKit.INK_SOFT])
 			"cut":
 				lines.append(["%s coupe les grappins." % name_cap, BattleUiKit.INK_SOFT])
+			"assault":
+				# `ship` : navire amiral (ou de tête) de la flotte qui lance l'assaut.
+				lines.append(["Abordage général ! %s" % ("Toute la flotte se jette à l'abordage." if ours else "La flotte ennemie se jette à l'abordage de toutes parts."), good if ours else bad])
+				_play("war_cry", pos)
 	if not lines.is_empty():
 		hud.add_log(lines)
 

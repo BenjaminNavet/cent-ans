@@ -310,8 +310,10 @@ fn volley_round(
             let before = ships[t].fighting_men();
             let killed = ships[t].take_losses(v.hits * count * luck, rules.armor_vs_ranged);
             if before > 0.0 {
+                let factor = combat::morale_factor(&ships[t], rules);
                 let m = &mut ships[t].morale;
-                *m = (*m - killed / before * 100.0 * rules.morale_per_loss_percent * 0.6).max(0.0);
+                *m = (*m - killed / before * 100.0 * rules.morale_per_loss_percent * 0.6 * factor)
+                    .max(0.0);
             }
             ships[t].fire = (ships[t].fire + v.fire * count).min(1.0);
         }

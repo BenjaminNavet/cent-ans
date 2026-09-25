@@ -159,6 +159,26 @@ pub struct NavalRules {
     pub castle_defense: f64,
     /// Bonus per free chained neighbour (reinforcements over the chains).
     pub chain_support: f64,
+    // ----- AI: general boarding (lot NV2) -----------------------------------
+    /// The AI shares its targets out: at most this many of its ships board
+    /// one enemy ship.
+    #[serde(default = "default_boarders_per_target")]
+    pub boarders_per_target: u32,
+    /// A fleet calls the general boarding once most of its ships are within
+    /// this distance of an enemy, metres.
+    #[serde(default = "default_assault_range_m")]
+    pub assault_range_m: f64,
+    /// Seconds of volleys at that range before the general boarding.
+    #[serde(default = "default_assault_softening_s")]
+    pub assault_softening_s: f64,
+    /// In the general boarding, a ship boards when its fighting power (after
+    /// the climb) reaches this share of its target's.
+    #[serde(default = "default_assault_odds")]
+    pub assault_odds: f64,
+    /// Chained crews cannot run: their morale losses to volleys and to the
+    /// loss of other ships are multiplied by this.
+    #[serde(default = "default_chain_morale")]
+    pub chain_morale: f64,
     // ----- morale and surrender --------------------------------------------
     pub morale_per_loss_percent: f64,
     /// Crew morale under which a ship strikes (or flees if free).
@@ -227,6 +247,26 @@ pub struct NavalRules {
     pub marine_archer_share: f64,
 }
 
+fn default_boarders_per_target() -> u32 {
+    2
+}
+
+fn default_assault_range_m() -> f64 {
+    250.0
+}
+
+fn default_assault_softening_s() -> f64 {
+    30.0
+}
+
+fn default_assault_odds() -> f64 {
+    0.55
+}
+
+fn default_chain_morale() -> f64 {
+    0.3
+}
+
 impl Default for NavalRules {
     fn default() -> Self {
         NavalRules {
@@ -256,6 +296,11 @@ impl Default for NavalRules {
             climb_cap: 0.45,
             castle_defense: 0.15,
             chain_support: 0.12,
+            boarders_per_target: default_boarders_per_target(),
+            assault_range_m: default_assault_range_m(),
+            assault_softening_s: default_assault_softening_s(),
+            assault_odds: default_assault_odds(),
+            chain_morale: default_chain_morale(),
             morale_per_loss_percent: 1.1,
             surrender_morale: 18.0,
             surrender_crew_share: 0.12,
