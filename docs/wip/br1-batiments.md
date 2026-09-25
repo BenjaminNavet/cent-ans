@@ -53,12 +53,12 @@ plusieurs heures, autonomie complète).
 
 ## Limites / suites
 
-- La disposition des maisons de siège vient du cœur (`siege.rs`, 2 anneaux de disques de 9 m) :
-  la ville reste aérée. Densifier (3e anneau, rues plus étroites) change le cheminement et la
-  propagation du feu : à décider avec l'équilibre (A1-12 côté règles).
+- ~~Ville de siège aérée~~ : **résolu par BR3** (ADR 0047, `docs/wip/br3-ville-dense-mobilier.md`) :
+  îlots rectangulaires denses décidés par le cœur (données `data/rules/siege_town.json`).
 - Le Paris emblématique (L1) remplacera la maquette générique `castle.glb` de Paris.
-- Mobilier sans collision (visuel seulement) : une troupe peut traverser un étal.
+- ~~Mobilier sans collision~~ : **résolu par BR3** : mobilier généré par le cœur, solide pour les
+  figurines (et pour le cheminement sur la place du marché).
 
 ## Prochaine étape
 
-Fusion BR2 dans main (ff-only). Ensuite : rien d'obligatoire ; pistes = densité du siège (cœur).
+BR2 fusionné ; densité du siège et mobilier solide traités par BR3.
