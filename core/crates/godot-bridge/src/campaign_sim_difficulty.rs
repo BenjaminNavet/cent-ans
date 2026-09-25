@@ -1,4 +1,4 @@
-//! `CampaignSim` campaign difficulty (lot DF1, ADR 0030): the level chosen
+//! `CampaignSim` campaign difficulty (lot DF1, ADR 0037): the level chosen
 //! on the faction screen, set right after `new_campaign` and frozen once the
 //! first turn is played.
 

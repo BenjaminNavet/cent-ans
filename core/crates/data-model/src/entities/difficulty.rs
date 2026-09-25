@@ -1,4 +1,4 @@
-//! Campaign difficulty levels (lot DF1, ADR 0030), mirroring
+//! Campaign difficulty levels (lot DF1, ADR 0037), mirroring
 //! `data/schemas/difficulty_rules.schema.json` (`data/rules/difficulty.json`).
 
 use serde::{Deserialize, Serialize};

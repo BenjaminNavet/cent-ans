@@ -527,8 +527,16 @@ pub(crate) fn auto_fight(
     };
     let attackers = battle_coalition(state, data, attacker_id, &defender.faction);
     let defenders = battle_coalition(state, data, defender_id, &attacker.faction);
-    let attacker_side = coalition_side(state, data, &attackers);
-    let defender_side = coalition_side(state, data, &defenders);
+    let mut attacker_side = coalition_side(state, data, &attackers);
+    let mut defender_side = coalition_side(state, data, &defenders);
+    // DF1: the AI's morale against the player follows the difficulty.
+    state.apply_difficulty_morale(
+        data,
+        &mut attacker_side,
+        state.coalition_has_player(&attackers),
+        &mut defender_side,
+        state.coalition_has_player(&defenders),
+    );
     // N1: phased auto-resolve on the province's terrain, season and weather.
     let result = resolve_field(
         state,

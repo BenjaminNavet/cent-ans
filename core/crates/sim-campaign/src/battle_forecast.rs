@@ -116,10 +116,13 @@ impl CampaignState {
             return Err(BattleRequestError::Stale(index));
         }
         let mut modifiers = Vec::new();
-        let (attacker_side, defender_side, context, attackers, defenders) = if request.siege {
+        let mut garrison_is_player = false;
+        let (mut attacker_side, mut defender_side, context, attackers, defenders) = if request.siege
+        {
             let attackers = crate::siege::assault_coalition(self, &request.attacker);
             let garrison = crate::siege::garrison_army(self, &request.location)
                 .ok_or(BattleRequestError::Stale(index))?;
+            garrison_is_player = garrison.faction == self.player_faction;
             let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.location);
             let context = BattleContext {
                 defender_terrain_bonus: false,
@@ -158,6 +161,22 @@ impl CampaignState {
                 defenders,
             )
         };
+        // DF1: the AI's morale against the player, as in the auto-resolver.
+        let attacker_has_player = self.coalition_has_player(&attackers);
+        let defender_has_player = garrison_is_player || self.coalition_has_player(&defenders);
+        self.apply_difficulty_morale(
+            data,
+            &mut attacker_side,
+            attacker_has_player,
+            &mut defender_side,
+            defender_has_player,
+        );
+        let ai_morale = self.difficulty_modifiers(data).ai_morale_vs_player;
+        if ai_morale != 0 && attacker_has_player != defender_has_player {
+            modifiers.push(format!(
+                "Niveau de difficulté : moral de l'IA {ai_morale:+}"
+            ));
+        }
         let mut attacker_modifier = 1.0;
         if context.river_crossing {
             attacker_modifier *= 0.8;

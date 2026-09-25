@@ -1,4 +1,4 @@
-//! Campaign difficulty (lot DF1, ADR 0030): the level chosen at launch and
+//! Campaign difficulty (lot DF1, ADR 0037): the level chosen at launch and
 //! frozen for the campaign, and the rule hooks that read its modifiers
 //! (`data/rules/difficulty.json`).
 //!

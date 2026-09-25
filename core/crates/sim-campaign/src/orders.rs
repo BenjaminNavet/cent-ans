@@ -1140,6 +1140,13 @@ impl CampaignState {
             .round()
             .max(base / 4.0)
             .max(0.0);
+        // DF1: the AI recruits cheaper at higher difficulty.
+        let difficulty = self.difficulty_recruit_percent(data, faction);
+        let cost = if difficulty == 100 {
+            cost
+        } else {
+            (cost * f64::from(difficulty) / 100.0).round()
+        };
         (cost * prices) as u32
     }
 
