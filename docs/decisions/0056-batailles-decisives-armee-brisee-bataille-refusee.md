@@ -153,4 +153,44 @@ Décision (`data/rules/battle_duel.json`, schéma `battle_duel_rules.schema.json
    premier échelon. À 120 m, le second échelon serre sur la première ligne et suit l'assaut dans
    la mêlée. Une ligne en défense, ou qui tient pendant le duel, reste sur un seul rang.
 
-Mesures : voir le tableau ci-dessous (à compléter).
+Mesures (main avec SG4 et EP6 ; « avant » = mêmes binaires, EP9b neutralisé dans les données :
+duel gagné borné à 180 s, pas de second échelon ; victoires attaquant / défenseur) :
+
+| Cas | Avant | Après |
+|---|---|---|
+| **plat, sans pieux, 60 rég./camp, champ nu** (`ep9b_duel`, 10 graines) | **0/10** | **7/3** |
+| même cas avec le décor EP6 (hameaux, parcelles, camps) | 5/5 | 6/4 |
+| `sg4_balance` plat, pieux | 3/7 | 3/7 |
+| `sg4_balance` crête, pieux | 0/10 | 6/4 |
+| `sg4_balance` crête, sans pieux | 0/10 | 1/9 |
+| `sg4_balance` plaine générée, pieux / sans pieux | 2/8 ; 5/5 | 2/8 ; 6/4 |
+| `sg4_balance` comme `ep1_scale` | 4/6 | 6/4 |
+| Crécy-like (12 graines, victoires anglaises) | 11/12 | 12/12 |
+
+Sonde EP9 complète (`ep9_decisive survey`, 12 graines × 3 paliers × 3 terrains × 3 modes) : toutes
+les batailles se terminent (aucune ouverte). IA contre IA : vainqueurs toujours partagés (attaquant
+3 à 9 sur 12), durées médianes 268-459 s (avant 267-445 s). Joueur attaquant immobile : inchangé.
+Joueur **défenseur** immobile : plus long (médianes 519-707 s au lieu de 366-439 s hors rivière),
+parce que l'attaquant IA qui gagne le duel contre des archers immobiles le prolonge jusqu'à 300 s
+avant de marcher ; maximum 969 s avec une rivière (957 s avant).
+
+Tests : `sim-battle/tests/ep9b_duel.rs` — `symmetric_flat_battle_is_open` (3 à 7 victoires sur 10),
+`a_won_duel_holds_the_line_then_the_battle_ends` (les hommes d'armes d'un attaquant dont les
+archers gagnent le duel sont encore > 20 m en arrière à 270 s par rapport au même combat sans
+prolongation ; la bataille se termine et n'est pas refusée) ; sondes `survey` (`EP9B_DECOR=1`),
+`probe_duel`, `probe_epic_duel` ignorées. `ep9_decisive`, `ep1_scale`, `b6`, `ai.rs` inchangés et
+verts (empreintes `b6` identiques : ces batailles n'ont ni duel gagné ni milice en ligne d'assaut).
+
+Écarts et limites :
+- **Crête avec pieux** (armées miroir, `sg4_balance`) : le défenseur ne gagne plus que 4 fois sur 10.
+  Sa ligne cède par contagion de déroute (archers et cavalerie qui refluent à travers elle, −0,4
+  de moral par seconde et par régiment en déroute à moins de 120 m) avant même la mêlée ; avant
+  EP9b c'était la milice attaquante, en tête, qui cédait la première. Sans pieux, la crête reste au
+  défenseur (9/10) ; Crécy-like reste anglais (12/12). À reprendre côté R4/SG4 (position des archers
+  sur la crête militaire), pas dans la règle du duel.
+- L'issue d'une bataille miroir à cette échelle est presque déterministe d'une graine à l'autre :
+  un réglage fait basculer tout un cas (profondeur du second échelon 15 / 35 / 60 m : plat sans
+  pieux 8/2, 7/3, 10/0). Les valeurs retenues sont celles qui gardent tous les cas mesurés ouverts
+  sauf les crêtes.
+- `ATTACKER_DUEL_LIMIT` disparaît de `ai.rs` (donnée `duel_limit_seconds`) ; nouvelle constante
+  `DUEL_RANGE` (320 m, la portée du duel déjà codée en dur).
