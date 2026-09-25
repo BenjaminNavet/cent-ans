@@ -145,7 +145,9 @@ func _draw() -> void:
 			for i in colors.size():
 				draw_settlement(self, "city", Vector2(9.0 + i * 15.5, center.y), 7.5, colors[i])
 		"relation":
-			_draw_swatch(DiplomacyController.RELATION_COLORS.get(str(sample.get("relation", "")), NEUTRAL))
+			# DP2 : positions diplomatiques (allié, accord, neutre, tension...) d'abord.
+			var relation := str(sample.get("relation", ""))
+			_draw_swatch(DiplomaticStances.COLORS.get(relation, DiplomacyController.RELATION_COLORS.get(relation, NEUTRAL)))
 		"color":
 			_draw_swatch(Color.html(str(sample.get("color", "#808080"))))
 		"gradient":
