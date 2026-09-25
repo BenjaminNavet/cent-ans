@@ -52,6 +52,10 @@ Agent MM1 (session 7). Sources : `docs/audit/a3-ui.md` (§ 3.1, M1-M6), `docs/wi
   procédurale (pas de faubourgs Saint-Germain) ; façade de Notre-Dame à une tour (gabarit L1).
 - Pas de lumières aux fenêtres ni de fumées de cheminées au crépuscule.
 - Headless ou `--no-menu-3d` : ancien fond 2D (`MenuBackground`).
+- Premier lancement après un changement de shaders (cache vide) : première image en 3,2 s ; ensuite ≈ 1 s.
+- Données de test (fixtures) : `FrontEndData` retombe sur `data/ui/front_end.json` du dépôt.
+
+Fusion de `main` faite (conflit `settings.gd` résolu : clés BV1/BV2 + `interface/intro_seen`) ; import OK, smoke 24 « OK », exit 0.
 
 ## Prochaine étape éventuelle
 Faubourgs de la rive gauche dans la maquette ; lumières de fenêtres ; autres dates de départ
