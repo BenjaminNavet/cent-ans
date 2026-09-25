@@ -39,6 +39,7 @@ const KIND_LABELS := {
 	"revolt": "Révolte",
 	"plague": "Peste",
 	"table": "La Table",  # H9
+	"edict": "Édit régional",  # lot C4
 	"medicine": "Médecine",  # H9
 	"coinage": "Monnaie",  # H11
 	"ransom": "Rançon",  # H11

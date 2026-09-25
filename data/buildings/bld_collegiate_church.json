@@ -1,0 +1,38 @@
+{
+  "id": "bld_collegiate_church",
+  "name": {
+    "display": "Collégiale"
+  },
+  "category": "religious",
+  "tier": 2,
+  "upgrades_from": "bld_parish_church",
+  "cost": {
+    "money": 900
+  },
+  "build_time_turns": 3,
+  "upkeep": 12,
+  "settlement_kinds": [
+    "city",
+    "town",
+    "abbey"
+  ],
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 5
+    },
+    {
+      "effect": "unrest",
+      "value": -4
+    },
+    {
+      "effect": "research_points",
+      "value": 0.15
+    }
+  ],
+  "description": "Chapitre de chanoines séculiers, entre la paroisse et l'abbaye : offices solennels, école capitulaire.",
+  "sources": [
+    "Économie médiévale",
+    "Institutions ecclésiastiques médiévales"
+  ]
+}

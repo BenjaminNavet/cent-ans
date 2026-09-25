@@ -115,12 +115,14 @@ func _init() -> void:
 	await _run_characters()
 	await _run_technologies()
 	await _run_diplomacy()
+	await _run_trade()  # C5
 	await _run_battle()
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
 	await _run_icons()  # F2
 	await _run_codex()  # H2
 	await _run_table_medicine()  # H9
+	_run_edicts()  # C4 (TW)
 	await _run_coinage_ransom()  # H11
 	await _run_siege_battle()
 	await _run_flow()  # F3
@@ -1034,6 +1036,88 @@ func _run_diplomacy() -> void:
 	if _failures == 0:
 		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
 			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
+## C5 (docs/design/2026-09-24-rapprochement-total-war.md) : routes commerciales et accords.
+## Vraie simulation uniquement (le mock n'a pas de commerce).
+func _run_trade() -> void:
+	const FACTION_ID := "fac_france"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_trade_routes")):
+		print("smoke trade: skipped, CampaignSim has no get_trade_routes (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "trade: new_campaign failed"):
+		return
+	var routes: Array = sim.call("get_trade_routes")
+	_check(routes.size() >= 8, "get_trade_routes should list >= 8 routes, got %d" % routes.size())
+	var bruges_londres: Dictionary = {}
+	for route_variant in routes:
+		var route: Dictionary = route_variant
+		if str(route.get("id", "")) == "route_bruges_londres":
+			bruges_londres = route
+	_check(not bruges_londres.is_empty(), "route_bruges_londres should be in the catalogue")
+	_check(bruges_londres.get("path", PackedStringArray()).size() >= 2, "route path should have >= 2 settlements")
+	_check(bruges_londres.has("total_value") and bruges_londres.has("security") and bruges_londres.has("cut"), "route fields expected")
+
+	# Accord commercial (C5 unifié avec DP1, ADR 0012) : article de traité, présence dans
+	# get_diplomacy, doublon refusé, rupture unilatérale. L'IA peut refuser : on essaie
+	# plusieurs partenaires et on garde le premier qui signe.
+	var trade_treaty := [{"kind": "trade_agreement"}]
+	var partner := ""
+	for candidate in ["fac_flanders", "fac_castile", "fac_brittany", "fac_scotland", "fac_aragon", "fac_navarre", "fac_burgundy", "fac_papacy"]:
+		var propose: Dictionary = sim.call("submit_order", {"type": "propose_treaty", "target": candidate, "articles": trade_treaty})
+		if bool(propose.get("ok", false)):
+			partner = candidate
+			break
+	_check(partner != "", "no faction signed a trade agreement treaty")
+	if partner != "":
+		var diplomacy_entries: Array = sim.call("get_diplomacy", FACTION_ID)
+		var partner_entry: Dictionary = {}
+		for entry in diplomacy_entries:
+			if str(entry["id"]) == partner:
+				partner_entry = entry
+		_check(bool(partner_entry.get("trade_agreement", false)), "trade_agreement should be true after the trade treaty")
+		var duplicate: Dictionary = sim.call("submit_order", {"type": "propose_treaty", "target": partner, "articles": trade_treaty})
+		_check(not duplicate.get("ok", true), "a second trade agreement with the same faction should be refused")
+		var broken: Dictionary = sim.call("submit_order", {"type": "break_trade_agreement", "target": partner})
+		_check(broken.get("ok", false), "break_trade_agreement refused: %s" % broken.get("error", "?"))
+
+	# Embargo : coupe la route entre les deux mêmes comptoirs.
+	var embargo: Dictionary = sim.call("submit_order", {"type": "set_embargo", "target": "fac_flanders", "active": true})
+	_check(embargo.get("ok", false), "set_embargo refused: %s" % embargo.get("error", "?"))
+	var after_embargo: Array = sim.call("get_trade_routes")
+	var cut_by_embargo := false
+	for route_variant in after_embargo:
+		var route: Dictionary = route_variant
+		if str(route.get("id", "")) == "route_bruges_londres" and bool(route.get("cut", false)):
+			cut_by_embargo = true
+	_check(cut_by_embargo, "route_bruges_londres should be cut by the England-Flanders embargo")
+	sim.call("submit_order", {"type": "set_embargo", "target": "fac_flanders", "active": false})
+
+	# Économie : le revenu commercial apparaît dans get_faction_economy.
+	sim.call("end_turn")
+	var economy: Dictionary = sim.call("get_faction_economy", FACTION_ID)
+	_check(economy.has("trade_income") and economy.has("trade_income_last_turn"), "faction economy should report trade income")
+
+	# Panneaux réels : diplomatie (section Commerce) et faction (ligne Commerce).
+	var diplomacy_panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
+	root.add_child(diplomacy_panel)
+	await process_frame
+	diplomacy_panel.sim = sim
+	diplomacy_panel.player_faction = FACTION_ID
+	diplomacy_panel.refresh()
+	diplomacy_panel.select_faction("fac_flanders")
+	await process_frame
+	diplomacy_panel.queue_free()
+	var faction_panel: Node = (load("res://scenes/ui/faction_panel.tscn") as PackedScene).instantiate()
+	root.add_child(faction_panel)
+	await process_frame
+	faction_panel.show_faction(FACTION_ID, "France", Color.WHITE, economy)
+	await process_frame
+	faction_panel.queue_free()
+
+	if _failures == 0:
+		print("smoke OK: trade (real), %d routes, agreement proposed/broken, embargo cuts a route, economy + panels" % routes.size())
+
+
 ## M7 (docs/design/m7-battles.md § 4) : bataille réelle France–Angleterre mise en scène par
 ## `debug_stage_battle`, ≤ 12 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
 ## `resolve_battle` accepté ; puis la boucle complète par la carte : dialogue d'avant-bataille,
@@ -1613,6 +1697,37 @@ func _run_codex() -> void:
 ## `get_diet_options`, sinon skip imprimé) : section Table d'une province française, changement
 ## de régime par l'interface, refus affiché, infobulle de tech médecine (plantes, note),
 ## genres `table` / `medicine` mappés (rapport, lettres, alertes), herbier silencieux.
+## C4 (TW) : édits régionaux par le pont réel (options, ordre `set_edict`, délai) et section UI.
+func _run_edicts() -> void:
+	const FACTION_ID := "fac_france"
+	const PROVINCE_ID := "prov_berry"
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_edict_options")):
+		print("smoke edicts: skipped, CampaignSim has no get_edict_options (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), FACTION_ID, 1337), "edicts: new_campaign failed"):
+		return
+	var failures_before := _failures
+	var options: Array = sim.call("get_edict_options", PROVINCE_ID)
+	_check(options.size() >= 6, "edicts: expected at least 6 options, got %d" % options.size())
+	var result: Dictionary = sim.call("submit_order", {"type": "set_edict", "province": PROVINCE_ID, "edict": "edict_militia_levy"})
+	_check(bool(result.get("ok", false)), "edicts: set_edict refused: %s" % str(result.get("error", "")))
+	var edict: Dictionary = sim.call("get_province_edict", PROVINCE_ID)
+	_check(bool(edict.get("pending", false)) and str(edict.get("edict", "")) == "edict_none", "edicts: militia levy should be pending, got %s" % [edict])
+	var again: Dictionary = sim.call("submit_order", {"type": "set_edict", "province": PROVINCE_ID, "edict": "edict_feudal_aid"})
+	_check(not bool(again.get("ok", true)), "edicts: second change in the same turn should be refused")
+	sim.call("end_turn")
+	edict = sim.call("get_province_edict", PROVINCE_ID)
+	_check(str(edict.get("edict", "")) == "edict_militia_levy", "edicts: militia levy should be active after one turn, got %s" % [edict])
+	var section := EdictSection.new()
+	root.add_child(section)
+	section.show_for(PROVINCE_ID, true, sim)
+	_check(section.visible and section.option_buttons.size() == options.size(), "edicts: section should list every edict")
+	section.queue_free()
+	if _failures == failures_before:
+		print("smoke OK: edicts (real), %d options, militia levy pending then active, second change refused" % options.size())
+
+
 func _run_table_medicine() -> void:
 	const FACTION_ID := "fac_france"
 	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_diet_options")):

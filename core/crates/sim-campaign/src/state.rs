@@ -348,6 +348,10 @@ pub struct ProvinceState {
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diet: Option<crate::table::DietChoice>,
+    /// Lot C4: regional edict chosen by the controller (`None`: the default
+    /// `edict_none`); see [`CampaignState::province_edict`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edict: Option<crate::edicts::EdictChoice>,
 }
 
 /// Dynamic state of a settlement (spec § 4.2).
@@ -500,6 +504,10 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
+    // ----- C5: trade (`trade.rs`) --------------------------------------------
+    /// Trade income collected during the last resolved turn.
+    #[serde(default)]
+    pub trade_income_last_turn: i64,
     // ----- UI audit A3, lot U3: budget history ------------------------------
     /// Last resolved seasons of the purse, oldest first (at most
     /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
@@ -903,6 +911,20 @@ impl CampaignState {
 
     pub fn is_allied(&self, a: &FactionId, b: &FactionId) -> bool {
         a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
+    }
+
+    /// Lot C5: a formal trade agreement is in force between `a` and `b` (also
+    /// `true` for a faction and itself, its own trade always flows). Single
+    /// representation: the DP1 ledger (`FactionState::ledger`), filled by
+    /// the treaty article [`crate::negotiation::Article::TradeAgreement`]
+    /// and erased by war; an embargo only suspends the routes
+    /// ([`crate::trade::trade_routes`]). ADR 0012.
+    pub fn has_trade_agreement(&self, a: &FactionId, b: &FactionId) -> bool {
+        a == b
+            || self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.ledger.trade_agreements.contains(b))
     }
 
     /// `true` when `province` is controlled by `faction` or one of its allies.

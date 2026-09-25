@@ -20,6 +20,7 @@
     "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
     "codex_id": { "type": "string", "pattern": "^cdx_[a-z0-9_]+$" },
     "diet_id": { "type": "string", "pattern": "^diet_[a-z0-9_]+$" },
+    "edict_id": { "type": "string", "pattern": "^edict_[a-z0-9_]+$" },
     "chivalric_order_id": { "type": "string", "pattern": "^ord_[a-z0-9_]+$" },
     "date_string": {
       "type": "string",

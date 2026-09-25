@@ -170,9 +170,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    3747,
-    872,
-    395
+    2952,
+    713,
+    345
    ],
    "variants": 2
   },
@@ -184,7 +184,7 @@
    ],
    "noble": false,
    "rig": "cavalry",
-   "style": "lance",
+   "style": "horse_javelin",
    "tris": [
     2493,
     674,
@@ -346,9 +346,9 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    3372,
-    703,
-    337
+    2980,
+    624,
+    302
    ],
    "variants": 3
   }
@@ -451,17 +451,17 @@
     "c_death": {
      "frames": 30,
      "loop": false,
-     "start": 338
+     "start": 478
     },
     "c_death_m": {
      "frames": 30,
      "loop": false,
-     "start": 368
+     "start": 508
     },
     "c_fall": {
      "frames": 30,
      "loop": false,
-     "start": 398
+     "start": 538
     },
     "c_gallop": {
      "frames": 15,
@@ -472,6 +472,21 @@
      "frames": 81,
      "loop": true,
      "start": 0
+    },
+    "c_javelin_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 338
+    },
+    "c_javelin_throw": {
+     "frames": 30,
+     "loop": false,
+     "start": 448
+    },
+    "c_javelin_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 419
     },
     "c_thrust": {
      "frames": 28,

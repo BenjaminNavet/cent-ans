@@ -81,6 +81,13 @@ static func fill_buildings(list: Container, buildings: Array) -> void:
 
 ## Constructions possibles (`buildable`), sans celles déjà construites (`built_ids`) ;
 ## `on_build(building_id)` au clic. Rien si `is_player_owner` est faux.
+## Lot C4 : rang de chaîne de `building_id` (`Building.tier`, 1 = palier de
+## base), pour lire les options de construction comme un arbre trié plutôt
+## qu'un ordre alphabétique.
+static func _building_tier(building_id: String) -> int:
+	return int(GameCatalog.building(building_id).get("tier", 1))
+
+
 static func fill_buildable(list: Container, buildable: Array, is_player_owner: bool, built_ids: Array, on_build: Callable) -> void:
 	clear(list)
 	if not is_player_owner:
@@ -92,6 +99,18 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 	if rows.is_empty():
 		placeholder(list, "—")
 		return
+	# Lot C4 : catégorie puis rang, pour que chaque chaîne (marché → maison des
+	# métiers → foire, etc.) s'affiche dans l'ordre de ses paliers.
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var cat_a: String = str(GameCatalog.building(str(a.get("building", ""))).get("category", ""))
+		var cat_b: String = str(GameCatalog.building(str(b.get("building", ""))).get("category", ""))
+		if cat_a != cat_b:
+			return cat_a < cat_b
+		var tier_a := _building_tier(str(a.get("building", "")))
+		var tier_b := _building_tier(str(b.get("building", "")))
+		if tier_a != tier_b:
+			return tier_a < tier_b
+		return str(a.get("name", "")) < str(b.get("name", "")))
 	for row in rows:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 8)
