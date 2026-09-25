@@ -1,0 +1,12 @@
+{
+  "id": "cdx_edouard_balliol",
+  "title": "Édouard Balliol, roi d'Écosse des Anglais",
+  "category": "personnage",
+  "aliases": ["Édouard Balliol", "Edward Balliol", "Balliol", "Dupplin Moor", "Halidon Hill", "bataille de Halidon Hill"],
+  "era": { "from": "1283", "to": "1364" },
+  "summary": "Fils du roi détrôné Jean Balliol, Édouard Balliol conquiert la couronne d'[[cdx_ecosse|Écosse]] en 1332 avec les « Déshérités » et l'appui d'[[cdx_edouard_iii|Édouard III]], contre le jeune [[cdx_david_ii|David II]]. Roi fantoche, jamais vraiment maître du pays, il cède ses droits au roi d'Angleterre en 1356.",
+  "body": "Édouard Balliol naît vers 1283, fils de Jean Balliol, roi d'Écosse de 1292 à 1296, que les Anglais ont déposé. Il grandit en exil en Angleterre et en France. Après la mort de Robert Bruce (1329), la couronne passe à un enfant, [[cdx_david_ii|David II]] : l'occasion est belle pour les « Déshérités », barons écossais et anglais privés de leurs terres d'Écosse par les Bruce.\n\nEn août 1332, Balliol débarque dans le Fife avec quelques centaines d'hommes d'armes et d'archers. Le 11 août, à Dupplin Moor, sa petite armée à pied, flanquée d'archers, écrase une armée écossaise bien plus nombreuse. Il est couronné à Scone le 24 septembre 1332, mais surpris à Annan en décembre, il s'enfuit à demi vêtu en Angleterre. [[cdx_edouard_iii|Édouard III]] le reprend alors sous sa protection : le 19 juillet 1333, à Halidon Hill, devant Berwick, archers anglais et hommes d'armes démontés détruisent l'armée écossaise. C'est la répétition générale de [[cdx_crecy|Crécy]].\n\nLe prix de ce soutien est lourd : en 1334, Balliol cède à l'Angleterre les comtés du sud de l'Écosse. Le parti de David II, qui s'est réfugié en France en 1334, ne désarme pas ; au printemps 1337, Balliol ne tient plus que quelques places, et c'est l'accueil de David par [[cdx_philippe_vi|Philippe VI]] qui envenime les relations franco-anglaises. Après le retour de David (1341) et sa capture à Neville's Cross (1346), Balliol n'est plus utile à personne. Le 20 janvier 1356, à Roxburgh, il remet sa couronne et ses droits à Édouard III contre une pension. Il meurt sans héritier en 1364, dans le Yorkshire.",
+  "entity": "chr_edward_balliol",
+  "see_also": ["cdx_ecosse", "cdx_david_ii", "cdx_edouard_iii", "cdx_arc_long"],
+  "sources": ["Édouard Balliol", "Bataille de Dupplin Moor", "Bataille de Halidon Hill"]
+}

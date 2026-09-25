@@ -6,7 +6,7 @@
     "name": {
       "display": "Ferrare",
       "local": "Ferara",
-      "local_language": "vénitien"
+      "local_language": "émilien"
     },
     "lonlat": [
       11.6198,
@@ -66,7 +66,7 @@
     "name": {
       "display": "Modène",
       "local": "Modena",
-      "local_language": "lombard"
+      "local_language": "émilien"
     },
     "lonlat": [
       10.9252,
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville tenue par la maison d'Este, vicaires pontificaux d'Émilie.",
+    "description": "Ville passée à la maison d'Este en 1336, vicaires pontificaux d'Émilie.",
     "sources": [
       "Modène",
       "Maison d'Este"
