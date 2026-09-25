@@ -271,6 +271,10 @@ pub fn edict_effects(
     totals
 }
 
+/// Unrest at which the AI weighs an edict's unrest effects at face value
+/// (EQ1): less in a calm province, more near revolt.
+const AI_EDICT_UNREST_REFERENCE: f64 = 30.0;
+
 /// Simple deterministic AI, one pass per faction (mirrors
 /// `table::ai_choose_diets`'s scoring, without the budget check since
 /// edicts cost nothing): in each wholly-held province, switch to the
@@ -297,6 +301,17 @@ pub fn ai_choose_edicts(state: &CampaignState, data: &GameData, faction: &Factio
         let current = state
             .edict_choice(&id)
             .map_or_else(default_edict, |c| c.edict.clone());
+        // EQ1: the scores follow the province and the realm: appeasement
+        // matters in proportion to the local unrest, taxes and levies when
+        // the realm is at war or in deficit (the static score always chose
+        // the Peace of God, 89 % of the provinces).
+        let unrest = state
+            .provinces
+            .get(&id)
+            .map_or(0.0, |p| crate::population::weighted_unrest(&p.population));
+        let unrest_weight = (unrest / AI_EDICT_UNREST_REFERENCE).clamp(0.25, 3.0);
+        let needs_money = !f.at_war_with.is_empty() || f.income_last_turn < f.upkeep_last_turn;
+        let needs_men = !f.at_war_with.is_empty();
         let score = |edict: &Edict| -> f64 {
             edict
                 .effects
@@ -308,7 +323,21 @@ pub fn ai_choose_edicts(state: &CampaignState, data: &GameData, faction: &Factio
                         e.value / 10.0
                     };
                     match e.effect {
-                        EffectKind::Unrest => -value,
+                        EffectKind::Unrest => -value * unrest_weight,
+                        EffectKind::TaxIncome if needs_money => value * 2.0,
+                        EffectKind::RecruitSlots
+                        | EffectKind::RecruitCost
+                        | EffectKind::Garrison
+                            if needs_men =>
+                        {
+                            let value = if e.effect == EffectKind::RecruitCost {
+                                -value
+                            } else {
+                                value
+                            };
+                            value * 2.0
+                        }
+                        EffectKind::RecruitCost => -value,
                         _ => value,
                     }
                 })
