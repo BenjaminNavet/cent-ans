@@ -189,7 +189,10 @@ func get_province_state(id: String) -> Dictionary:
 		"owner": province["owner"],
 		"controller": province["controller"],
 		"garrison": province["garrison"].duplicate(true),
-		"unrest": province["unrest"],
+		# B7a : comme le pont, le mécontentement qui déclenche les révoltes (moyenne pondérée
+		# des classes) ; la jauge propre de la province est le désordre.
+		"unrest": roundi(weighted_unrest(id)) if not (province.get("classes", {}) as Dictionary).is_empty() else province["unrest"],
+		"disorder": province["unrest"],
 		"devastation": province["devastation"],
 		"population_total": province["population_total"],
 	}

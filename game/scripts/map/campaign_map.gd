@@ -964,7 +964,7 @@ func _refresh_unrest_colors() -> void:
 			var count := float(classes[class_id].get("count", 0))
 			total += count
 			weighted += count * float(classes[class_id].get("unrest", 0))
-		var ratio := clampf(weighted / total, 0.0, 1.0) if total > 0.0 else 0.0
+		var ratio := clampf(weighted / total / 100.0, 0.0, 1.0) if total > 0.0 else 0.0  # B7a : jauge 0-100
 		var color := Color(0.20, 0.55, 0.20).lerp(Color(0.75, 0.15, 0.10), ratio)
 		color.a = 1.0 if not classes.is_empty() else 0.0
 		colors[index - 1] = color
