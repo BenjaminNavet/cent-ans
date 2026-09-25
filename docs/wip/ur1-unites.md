@@ -8,10 +8,32 @@ Branche : `worktree-agent-a213f64dfca3b3a18`.
 |---|---|
 | Données : 14 types, schéma (`available_from`, `available_until`, `figure`), doctrines, `enables_units` | fait |
 | Cœur : refus de recrutement hors époque (`orders.rs::recruit_blocker`), tests `sim-campaign/tests/ur1_units.rs` | fait |
-| Équilibre : sondes `matrix` et `campaign` | à faire |
-| Figurines (pipeline V2) | à faire |
-| Cartes d'unité (illustrations, icônes) | à faire |
-| Captures `docs/audit/captures/ur1/` | à faire |
+| Équilibre : sondes `matrix`, `campaign`, `rt` | fait (voir plus bas) |
+| Figurines (pipeline V2) | en cours (agent « figurines ») |
+| Cartes d'unité : 14 illustrations (0,64 $, `docs/budget.md` session 7), 12 icônes game-icons.net, `CREDITS.md` | fait |
+| Encyclopédie et infobulles : époque, factions, mercenaires | fait |
+| Captures `docs/audit/captures/ur1/` | en cours (agent « figurines ») |
+
+## Équilibre
+
+Retouches hors nouveaux types : hommes d'armes à pied 950 / 90 → **1 050 / 100** (81-83 % sinon),
+piquiers flamands 600 / 55 → **650 / 60** (85 % sinon), sergents montés 750 / 70 → **700 / 65**
+(18 % sinon). La matrice est très sensible aux seuils (nombre entier d'unités pour 9 000 livres).
+
+Matrice à budget égal (victoires moyennes, 23 types) : chevaliers 80, retenues anglaises 76,
+arbalétriers gascons 77, schiltron 77, gendarmes d'ordonnance 69, goedendag 67, archers longs 60,
+piquiers flamands 59, francs-archers 58, arbalétriers 57, hommes d'armes 56, chevaliers bretons 55,
+hobelars 51, génois 47, lanciers gallois 40, écorcheurs 35, jinetes 31, couleuvriniers 30,
+coutiliers 29, milice 28, routiers 27, archers montés 26, sergents montés 23 : **toutes entre 20 et 80 %**.
+
+Campagne `200 1..8` (main 8c058417 → UR1) : milice 34,5 → **32,7 %** ; archers longs 51 → **60 %**
+des recrutements anglais ; types recrutés par partie (min) 9 → **15** ; guerre FR-EN 33 → 36 % ;
+batailles 217 → 206 ; changements de propriétaire 6,9 → 7,4. Nouveaux types recrutés par l'IA :
+jinetes, routiers, schiltron, goedendag, hobelars, chevaliers bretons, retenues anglaises (les
+types du XVe siècle n'apparaissent pas en 200 tours, soit 1337-1387).
+
+`rt 3` (3D contre auto-résolution) : 19 / 20 comme main (désaccord piquiers contre hommes d'armes
+déjà présent sur main).
 
 ## Nouveaux types
 
