@@ -12,10 +12,11 @@ Coordination : SG1 (sièges), Q1 (recette) ; HUD de bataille (UB1) intouché sau
 | 3. Imposteurs lointains (Ultra) | **fait** (ADR 0024) |
 | 4. Bannières au vent, porte-étendards, étendard du général | **fait** |
 | 5. Duels appariés (cosmétique, déterministe) | **fait** |
-| 6. Discours du général | à faire |
+| 6. Discours du général | **fait** |
 
 ## Prochaine étape
-Lot 6 : discours du général (données `data/`, sous-titre, travelling, cri de guerre).
+Mesures finales (`--units=50`, Normale et Ultra, A/B `--no-bv3`), fusion de `main`,
+vérifications (fmt, clippy, test, build.sh, import, smoke), rapport.
 
 ## Lot 1 — herbe couchée, sang en prairie
 - `battle_grass_flatten.gd` (`BattleGrassFlatten`) : carte RG8 à 1 m sur (0, −100)-(1200, 900),
@@ -82,3 +83,17 @@ Lot 6 : discours du général (données `data/`, sous-titre, travelling, cri de 
   estocs de lance alternés. Pas de nouveaux clips appariés cuits dans Blender (écart à la
   demande : les clips existants synchronisés suffisent à la lecture ; piste ouverte).
 - Captures `duel_passe_1` / `duel_passe_4` (`tests/bv3_shot.gd --shot=duel`).
+
+## Lot 6 — discours du général
+- Données : `data/speeches/battle_speeches.json` (+ schéma, `tools/tests/test_battle_speeches_schema.py`) :
+  ouverture par faction, phrase du général ({general}), rapport de forces (fort ≥ 1,3, faible
+  ≤ 0,77), terrain, météo, conclusion par faction ; cri de guerre repris de
+  `data/battle_orders/order_war_cry.json`. Choix déterministes (graine de la bataille).
+- `battle_speech.gd` (`BattleSpeech`) : sous-titre dans une couche à part (le HUD d'UB1 n'est
+  pas modifié), travelling de trois quarts le long des régiments du joueur (4,6 s par phrase),
+  cri de guerre en grand, caméra qui recule, son `war_cry` d'AU1 ; Échap / Entrée / espace /
+  clic : passer ; caméra rendue ensuite. Joué à l'ouverture du déploiement (simulation figée) ;
+  sans déploiement, la bataille est mise en pause pendant le discours.
+- Jamais en `--autoplay` (bancs, captures, smoke) ni avec `--no-speech` / `--no-bv3` ;
+  `--speech-shot=<png> --speech-at=<s>` force le discours et capture.
+- Captures `discours_travelling` (6 s), `discours_cri` (25 s).
