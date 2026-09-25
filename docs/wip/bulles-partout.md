@@ -6,8 +6,8 @@ Conception : `docs/design/2026-09-25-bulles-partout.md`.
 |---|---|---|---|
 | Squelette (schéma, catégories, validateur) | fait | main | |
 | B1 Infra T universel | fini, fusionné dans integration/historien (1a87dcd5), tests en cours | feat/b1-bulles-infra | |
-| B2 Mécaniques campagne | fini (27 fiches cdx_jeu_*, 12 gameplay) | worktree-agent-a1391ebbb72a033ca | |
-| B3 Mécaniques bataille/siège/naval | lancé (worktree agent) | | |
+| B2 Mécaniques campagne | fini (27 fiches cdx_jeu_*, 12 gameplay), fusionné dans integration | worktree-agent-a1391ebbb72a033ca | |
+| B3 Mécaniques bataille/siège/naval | fini (32 fiches), fusionné dans integration | worktree-agent-a8fac39c8d71471d7 | supprimer `data/codex/_b3_links.md` après B4/B5 ; B6 doit relire Breteuil/Romorantin 1356 |
 | B4 Bâtiments + ressources | lancé (worktree agent) | | |
 | B5 Unités, navires, techniques | lancé (worktree agent) | | |
 | B6 Audit historique récent | lancé (worktree agent) | | |
