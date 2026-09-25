@@ -10,6 +10,7 @@ relief the player sees: rivers and roads must sit on it.
 
 from __future__ import annotations
 
+import warnings
 from collections import OrderedDict
 from pathlib import Path
 
@@ -160,7 +161,9 @@ class FineRelief:
         h11 = self._gather(level, u0 + 1, v0 + 1)
         # A neighbour outside the sparse level: reuse the available corners.
         corners = np.stack([h00, h10, h01, h11])
-        fallback = np.nanmean(np.where(np.isfinite(corners), corners, np.nan), axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)  # all four corners missing
+            fallback = np.nanmean(corners, axis=0)
         h00, h10, h01, h11 = (np.where(np.isfinite(h), h, fallback) for h in corners)
         top = h00 * (1 - tu) + h10 * tu
         bottom = h01 * (1 - tu) + h11 * tu
