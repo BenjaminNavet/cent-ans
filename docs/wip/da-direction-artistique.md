@@ -36,3 +36,15 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   agent` pour retrouver leurs worktrees/branches, lire `docs/wip/da1-heraldique.md` et
   `docs/wip/da2-portraits-vivants.md` sur ces branches, vérifier la dépense DA2 dans
   `docs/budget.md` avant toute génération.
+- 25/09 ~23 h : pause confirmée par les deux agents (rien fusionné dans main).
+  - DA1 : branche `worktree-agent-addd87848de848c53` (worktree
+    `.claude/worktrees/agent-addd87848de848c53`), commit `6fc9d9fc`. Fait : `data/heraldry/houses.json`
+    (51 maisons, sources, `arms_of`, `vassal_of`, `badges`) + schéma. 3 substitutions (Artevelde,
+    Béhuchet, Le Bel), Petrarca incertain. Reste : test du schéma, grammaire `heraldry.py`
+    (écus de faction inchangés à l'octet), `house_heraldry_texture` + interface, atlas
+    `sampler2DArray` dans le shader skinné, captures, A/B perf, ADR.
+  - DA2 : branche `worktree-agent-ade9b18af852c5bfe` (worktree
+    `.claude/worktrees/agent-ade9b18af852c5bfe`), commit `495470d9`, **0 $ dépensé**. Fait :
+    `data/portraits/archetypes.json` + schéma (122 archétypes + 25 variantes âgées), générateur
+    `portrait_archetypes.py` (`--dry-run` : 147 images ≈ 6,69 $), captures avant `docs/img/da2/`.
+    Reste : pytest, sonde 3 images, génération, tout le GDScript, captures après, ADR.
