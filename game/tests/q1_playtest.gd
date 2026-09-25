@@ -88,6 +88,8 @@ func _run() -> void:
 		await phase_q2_click()
 	if phase == "q2tutorial":
 		await phase_q2_tutorial()
+	if phase == "q2misc":
+		await phase_q2_misc()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
@@ -228,6 +230,39 @@ func phase_q2_tutorial() -> void:
 		await wait(240)
 		log_q1("q2 tutorial turn %d: step '%s', visible %s" % [turn + 2, tutorial.current_step_id(), tutorial.overlay.visible])
 		await shot("q2-tuto-turn-%d" % (turn + 2))
+
+
+## Q2 : bandeau puis panneau (plus de chevauchement), menu Son…, fins de tour (rapport de
+## saison puis chronique, jamais ensemble).
+func phase_q2_misc() -> void:
+	map.ui.show_toast("cette armée n'a plus de points de mouvement ce tour", true)
+	await wait(40)
+	await key(KEY_P)
+	await wait(20)
+	log_q1("q2 toast visible after opening diplomacy: %s" % map.ui.toast.visible)
+	await shot("q2-toast-diplomacy")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	var popup: PopupMenu = map.ui.menu_button.get_popup()
+	popup.id_pressed.emit(930)
+	await wait(20)
+	await shot("q2-sound-menu")
+	var settings_menu: Node = map.flow.get("_settings_menu")
+	log_q1("q2 Menu > Son opens settings: %s" % (settings_menu != null and is_instance_valid(settings_menu)))
+	if settings_menu != null:
+		settings_menu.call("close")
+		await wait(5)
+	for turn in turns:
+		await key(KEY_ENTER)
+		await wait(200)
+		var report: Control = map.flow.get("season_report")
+		var chronicle: Control = map.chronicle.window
+		log_q1("q2 turn %d: report %s, chronicle %s" % [turn + 2, report != null and report.visible, chronicle.visible])
+		if report != null and report.visible and chronicle.visible:
+			await shot("q2-report-and-chronicle")
+		await dismiss_dialogs()
+		await wait(20)
+		log_q1("q2 turn %d after dismiss: report %s, chronicle %s" % [turn + 2, report != null and report.visible, chronicle.visible])
 
 
 func _settlement_panel_visible() -> bool:
