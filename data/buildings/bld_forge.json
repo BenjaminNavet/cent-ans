@@ -29,9 +29,10 @@
       "mode": "percent"
     }
   ],
-  "description": "Forge et haut fourneau primitif ; réduit le coût des armures et des engins.",
+  "description": "Bas fourneau et forge au charbon de bois, parfois à soufflets et martinet hydrauliques ; réduit le coût d'équipement des recrues. Voir [[cdx_forge]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Bas fourneau",
+    "Forge",
+    "Sidérurgie"
   ]
 }
