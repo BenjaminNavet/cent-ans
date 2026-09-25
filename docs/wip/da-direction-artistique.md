@@ -54,3 +54,7 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   validée (6 portraits sondes, bouton cloche, icônes encre ; 0,36 $). Liste d'assets validée
   (≈ 11,5 $ prévus : DA1 0 $, DA2 ≈ 6,4 $, DA5 boutons ≈ 0,7 $ + icônes ≈ 3,6 $, DA3 ≈ 0,7 $,
   DA4 musique libre 0 $, DA6 0 $). Relance DA1 + DA2, lancement DA5 + DA4.
+- 25/09 ~23 h 45 : **autonomie totale** accordée par le joueur pour tous les lots DA. En cours :
+  DA1 et DA2 repris (mêmes worktrees), DA5 boutons + icônes (≤ 5 $), DA3 marqueurs (≤ 1,5 $,
+  ZG4b fusionné), DA4 musique libre (Sonnet, 0 $). DA6 attend la fin d'EP6. Fusions : par
+  l'orchestrateur dans `feat/da-direction-artistique` (../gp-da), puis ff dans main.
