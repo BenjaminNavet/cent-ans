@@ -10,6 +10,7 @@ extends Control
 ## player_faction: String, factions: [[id, Color, nom]]}.
 
 const SIZE := Vector2(64, 30)
+const AGENT_SCRIPT := "res://scripts/map/agent_controller.gd"
 const NEUTRAL := Color(0.62, 0.6, 0.55)  # colonie sans contrôleur (`SettlementLayer.refresh`)
 const ICON_INK := Color(0.10, 0.07, 0.04)
 const ICON_DOT := Color(0.97, 0.94, 0.86)
@@ -39,10 +40,12 @@ static func build(sample_data: Dictionary, legend_context: Dictionary) -> Contro
 		"army_plate":
 			child = _plate(sample_data, legend_context)
 		"agent":
-			var token := AgentController.Token.new()
-			token.kind = str(sample_data.get("kind", "spy"))
-			token.level = 2
-			token.faction_color = legend_context.get("player_color", Color.WHITE)
+			# Chargé à l'exécution : `agent_controller.gd` nomme l'autoload SimFacade, inconnu
+			# à la compilation des tests headless (`--script`).
+			var token: Control = load(AGENT_SCRIPT).Token.new()
+			token.set("kind", str(sample_data.get("kind", "spy")))
+			token.set("level", 2)
+			token.set("faction_color", legend_context.get("player_color", Color.WHITE))
 			child = token
 		"army_banner":
 			child = _banner(legend_context)
