@@ -79,9 +79,20 @@ Sonde `rt 6` (20 scénarios) : accord auto / 3D sur le vainqueur **12 / 20 (60 %
 - `campaign 200 1..8` : milice 36 %, 9 types, guerre FR-EN 44 %.
 - `century_probe 464 1..5` : guerre FR-EN 57, 41, 56, 46, 37 % (moyenne 47 %) ; majeures en 1400 : 5/5.
 
+### Après fusion de main (M2-M4, C4, C5, U1, CV1...)
+
+- Conflits : `movement.rs` (appel `resolve_field` rebranché dans le nouveau `auto_fight` de M2) ; déclarations `ai_grid` (M3) et doctrines/règles côte à côte dans `data-model` et `ai/src/lib.rs`. La boucle de recrutement par doctrines a fusionné sans conflit dans le `campaign.rs` de C4.
+- Sièges : assauts et sorties passent par `battle_auto::resolve_profiled` (profils de la garnison via `army_profiles`) ; l'assaut garde les murailles sans terrain, la sortie se bat sur le terrain de la province.
+- IA : impôt « Haut » seulement sous un mécontentement de 18 (`HIGH_TAX_MAX_UNREST`, avant 30).
+- Référence main (70c9e2e5), `century_probe 464 1..5` : guerre FR-EN 39, 19, 34, 52, 46 % (moyenne 38 %), batailles FR/EN 43 à 113 par décennie, majeures 5/5.
+- G1 fusionné, `century_probe 464 1..5` : guerre FR-EN 46, 45, 41, 33, 32 % (moyenne **39 %**), batailles FR/EN 42 à 91 par décennie, majeures **5/5** : pas de régression par rapport à main. La cible 55-75 % n'est pas tenue, ni sur main ni ici.
+- G1 fusionné, `campaign 200 1..8` : milice 34 %, archers longs 51 % des recrutements anglais, 9 types au minimum, mécontentement moyen 7,2, impôt « Haut » 38 % des échantillons (cible E2 < 40 % désormais tenue), 7,2 révoltes par partie, 153 batailles.
+- `rt 0` : 20 / 20. `cargo test` : 67 lots ok. Smoke Godot : OK (24 lignes OK).
+- Note : sur le main intermédiaire fusionné d'abord (23f9e0a9^2), les batailles FR/EN tombaient à 3-5 par décennie, avec ou sans G1 (mesuré par variantes) ; corrigé par main depuis.
+
 ## Prochaine étape
 
-Hors G1 : baisser le seuil « impôt Haut » de l'IA (30 → 15 ou 20) pour que l'impôt redevienne un arbitrage ; fatigue de guerre (N2) ; recalibrer la cible de mécontentement (termes santé et bâtiments d'apaisement) ; passer les assauts (`siege.rs`) par `resolve_field` après la fusion de M2.
+Hors G1 : guerre FR-EN sous la cible (main compris) ; fatigue de guerre (N2) ; cible de mécontentement encore basse (7 contre 15-35) ; la sonde compte mal les victoires de l'attaquant depuis M2 si le texte des batailles change encore.
 
 ## Contraintes
 
