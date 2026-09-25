@@ -111,13 +111,26 @@ fn scottish_surrender(data: &GameData) -> Vec<Vec<ProvinceId>> {
     for turn in 8..16 {
         state.turn = turn;
         for order in plan_diplomacy(&state, data, &scotland) {
-            if let Order::ProposePeace {
-                target, provinces, ..
-            } = order
-            {
-                if target == england {
-                    offers.push(provinces);
+            match order {
+                Order::ProposePeace {
+                    target, provinces, ..
+                } if target == england => offers.push(provinces),
+                // DP1: the treaty peace lists the ceded provinces as articles.
+                Order::ProposeTreaty { target, articles } if target == england => {
+                    offers.push(
+                        articles
+                            .into_iter()
+                            .filter_map(|a| match a {
+                                sim_campaign::negotiation::Article::CedeProvince {
+                                    province,
+                                    ..
+                                } => Some(province),
+                                _ => None,
+                            })
+                            .collect(),
+                    );
                 }
+                _ => {}
             }
         }
     }

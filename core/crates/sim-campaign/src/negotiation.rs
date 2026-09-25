@@ -503,7 +503,13 @@ pub fn check_treaty(
                     return Err(DiplomacyError::InvalidProvince(province.clone()));
                 }
                 let owned = state.owned_provinces(giver.expect("giver")).len();
-                if owned <= 1 {
+                let ceded = articles
+                    .iter()
+                    .filter(|a| {
+                        matches!(a, Article::CedeProvince { .. }) && a.giver() == article.giver()
+                    })
+                    .count();
+                if ceded >= owned {
                     return Err(DiplomacyError::Refused(
                         "on ne cède pas sa dernière province".to_owned(),
                     ));
@@ -608,7 +614,13 @@ fn context_reasons(
     let rules = rules(data);
     let mut reasons: Vec<(String, i32)> = Vec::new();
     let (attitude, _) = state.attitude(data, recipient, proposer);
-    reasons.push(("Attitude".to_owned(), attitude / 3));
+    // A peace is judged on the war, not on the hatred the war feeds.
+    let divisor = if articles.iter().any(Article::ends_war) {
+        5
+    } else {
+        3
+    };
+    reasons.push(("Attitude".to_owned(), attitude / divisor));
     // Trust: the proposer's word (perjuries, hostages, marriages, treaties).
     let rec = &state.factions[recipient];
     let perjuries = rec
