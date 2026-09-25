@@ -30,7 +30,8 @@ Plan d'ensemble : `docs/wip/epic.md`.
 - [x] intégration Godot (anneau, mer, cylindre, silhouettes), test `game/tests/ep2_horizon_test.gd`
 - [x] brume / fog (densité par météo dans `horizon.json`)
 - [x] mesures A/B, captures `docs/img/ep2/` (before_/after_ : plaine, cote, montagne, alpes, hiver)
-- [ ] fusion de main, smoke
+- [x] fusion de main (EP4 audio, playlists, UI1 enluminée, EQ1 équilibrage, UX1/UX2 ; un seul
+  conflit, `docs/budget.md`, résolu en gardant les deux séries de lignes de dépense)
 
 ## Mesures (M4 Pro partagé avec d'autres agents, Vulkan, 1600 × 900, qualité Haute, 1 160 soldats)
 `--benchmark --bench-repeat=2 --terrain=hills --horizon-province=prov_bearn [--camera=600,740,40,180]
@@ -40,9 +41,40 @@ Plan d'ensemble : `docs/wip/epic.md`.
   machine chargée) ; sans 10,77 / 9,22 / 9,06 → **+0,6 à +0,9 ms** au pire, dans le budget de 1 ms.
   Anneau d'horizon : 5 004 triangles ; panorama : 256 triangles ; silhouettes : quelques centaines.
 
+## Fusion et vérifications (25/09)
+- `git merge main` : un seul conflit (`docs/budget.md`), résolu en conservant les deux séries de
+  lignes (EP2 panoramas + EP4 sons Freesound) sous la même section « Batailles épiques ».
+  `tools/cent_ans_tools/cli.py` fusionné automatiquement.
+- EP1 (taille de champ paramétrique) n'est pas encore dans `main` : `battle_terrain.gd` a toujours
+  `FIELD_W`/`FIELD_D` en `const`. `BattleHorizon` reçoit déjà `field_size`/`centre` en paramètre de
+  `load()` (pas de constante dupliquée côté horizon), donc rien à rendre paramétrique côté EP2 pour
+  l'instant ; à revérifier quand EP1 fusionnera si `NEAR_RECT`/`FAR_RECT` deviennent des variables.
+- `cargo fmt --all`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` :
+  **OK** (Rust modifié par la fusion — retinue/ai/négociation/agents — pas par EP2 lui-même).
+- `core/build.sh` : **OK** après un `cargo clean -p data-model -p godot-bridge` (un premier essai a
+  échoué avec une erreur du linker sur un objet obsolète, `libdata_model-*.rlib` incohérent après le
+  premier `cargo build -p godot-bridge` isolé — probablement un artefact incrémental corrompu par la
+  fusion de nombreux commits Rust d'un coup ; le rebuild propre l'a résolu).
+- `uv run --project tools pytest` : **OK**.
+- `godot --headless --path game --import` : **OK**.
+- `godot --headless --path game --script res://tests/smoke.gd` : **bloqué**, reproductible 2 fois de
+  suite à l'identique. Le flux carte de campagne (`_run_campaign_map`) charge la simulation réelle
+  (`smoke campaign: simulation REAL ... store loaded`), fait tourner `CampaignLife` un cycle, puis
+  plante systématiquement sur `Failed method: Container::_sort_children. Message queue out of memory.`
+  Aucun lien avec EP2 : le crash a lieu sur la carte de campagne, avant toute scène de bataille (le
+  code d'horizon n'est même pas chargé). Ça sent une boucle de redimensionnement UI (thème enluminé
+  UI1 + panneau de province EQ1 « vrai mécontentement ») entrée en résonance avec les vraies données
+  de campagne. Hors périmètre EP2 (`game/scripts/map/*`, `game/scripts/ui/*` appartiennent à
+  UI1/EQ1/UX1/UX2) — je n'y touche pas. À signaler à l'orchestrateur avant fusion dans
+  `integration/epic` : le smoke complet de `main` fusionné est actuellement rouge pour une raison
+  indépendante de l'horizon.
+
 ## Prochaine étape
-Fusion de main, smoke ; ensuite (hors lot) : tuile au lieu exact de la bataille quand la campagne
-exportera une position, tuiles des sites historiques pour EP7.
+Le code EP2 est fusionné, testé (Rust/Python) et prêt pour `integration/epic` du point de vue de
+l'horizon lui-même. Le blocage restant (`Container::_sort_children`, carte de campagne) est un bug
+pré-existant d'un autre lot fusionné (UI1/EQ1) à faire corriger avant de considérer le smoke général
+vert. Ensuite (hors lot) : tuile au lieu exact de la bataille quand la campagne exportera une
+position, tuiles des sites historiques pour EP7.
 
 ## Captures
 `godot --path game --resolution 1600x900 res://scenes/battle/battle.tscn -- --deploy-shot
