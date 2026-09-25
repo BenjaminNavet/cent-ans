@@ -82,11 +82,14 @@ func _on_withdraw(index: int) -> void:
 
 
 func _on_fight(index: int, seed: int) -> void:
+	var card := BattleLoadingCard.open(get_tree(), "naval")  # AR1
+	await card.drawn
 	var scene: Node = load(NAVAL_SCENE).instantiate()
 	scene.call("configure", map.get("sim"), index, seed)
 	scene.connect("returned", _on_returned.bind(scene))
 	map.call("_set_campaign_active", false)
 	get_tree().root.add_child(scene)
+	card.close()
 
 
 func _on_returned(result: Dictionary, scene: Node) -> void:

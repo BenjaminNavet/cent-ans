@@ -16,18 +16,12 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_weaving_workshop",
-      "bld_abbey",
       "bld_cathedral",
       "bld_fair",
-      "bld_guild_hall",
       "bld_hotel_dieu",
-      "bld_stone_walls",
       "bld_castle",
-      "bld_muster_field",
       "bld_forge",
       "bld_armoury"
     ],
@@ -57,7 +51,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,
@@ -111,8 +105,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_castle",
-      "bld_parish_church",
-      "bld_stone_walls"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Ville où est conservée la Couronne de fer des rois lombards, résidence viscontéenne.",

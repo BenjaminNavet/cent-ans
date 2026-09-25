@@ -23,7 +23,9 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	var waters := str(setup.get("place_name", ""))
 	title_label.text = "Flotte ennemie en vue : %s" % (waters if waters != "" else str(battle.get("sea_name", "en mer")))
 	subtitle_label.text = "%s barre la traversée de %s · %s" % [str(battle.get("interceptor_name", "")), str(battle.get("faction_name", "")), str(SEASON_FR.get(str(setup.get("season", "")), ""))]
-	_banner_texture = PortraitLoader.load_texture(BANNER_SEA)
+	_banner_texture = ArtPlates.texture(ArtPlates.random_loading_screen("naval"))  # AR1
+	if _banner_texture == null:
+		_banner_texture = PortraitLoader.load_texture(BANNER_SEA)
 	banner.queue_redraw()
 	for i in 2:
 		var side := player_side if i == 0 else enemy_side

@@ -35,3 +35,8 @@ lisible mais triste. Demande du joueur : des assets « moines », enluminures.
   cadre réel. Les boîtes de bataille gardent exactement leurs anciennes marges.
 - Retoucher le style = modifier le générateur puis relancer la commande ; les marges du thème
   suivent `kit.json`.
+- **Lettrines de titres** (ajout du 2026-09-25) : `Lettrine.attach(label)` (`scripts/ui/lettrine.gd`)
+  pose une initiale d'or sur champ d'azur en surimpression du titre des grandes fenêtres
+  (province, cour, faction, techniques, fiche). Le `Label` garde son texte (scripts et tests le
+  lisent toujours) et devient transparent ; l'initiale est dessinée sans accent, comme dans les
+  manuscrits.

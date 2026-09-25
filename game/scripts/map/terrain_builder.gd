@@ -81,6 +81,13 @@ var _rescale_queue: Dictionary = {}
 var _rescale_changed_ms: int = 0
 
 var map_data: MapData
+## PF1 : préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`) : densité du quadtree de
+## relief (ZG2) et, sans pyramide en cache, relief fin `FineTerrainJob` et LOD proche.
+var quality_fine: bool = true
+var _quality: Dictionary = {}
+var _base_near_distance: float = -1.0
+## Bancs (`--map-ab`, `relief_cast:<n>`) : impose le nombre de cascades (0 = préréglage).
+var relief_shadow_override: int = 0
 var material: ShaderMaterial
 var chunk_px: int = 0
 var build_stats: Dictionary = {}
@@ -145,8 +152,42 @@ const FALLBACK_PALETTE: Array[Color] = [
 ]
 
 
+func apply_render_quality(p: Dictionary) -> void:
+	_quality = p
+	if _base_near_distance < 0.0:
+		_base_near_distance = near_distance
+	quality_fine = bool(p.get("fine_relief", true))
+	near_distance = _base_near_distance * float(p.get("terrain_near", 1.0))
+	if quadtree != null:
+		_apply_quadtree_quality()
+
+
+## Quadtree : espacement des sommets à l'écran, budget de nœuds et profondeur au-delà des données
+## (immédiats) ; couches de pages (au prochain chargement de la carte : tableau alloué au `setup`).
+func _apply_quadtree_quality() -> void:
+	quadtree.max_vertex_px = float(_quality.get("relief_vertex_px", quadtree.max_vertex_px))
+	quadtree.max_items = int(_quality.get("relief_items", quadtree.max_items))
+	quadtree.extra_depth = int(_quality.get("relief_extra_depth", quadtree.extra_depth))
+
+
+## PF1 : portée des ombres portées par le relief du quadtree : bord de la cascade
+## `relief_shadow_cascades` du soleil (1 = première cascade ; 4 ou plus = toutes).
+func _relief_shadow_distance() -> float:
+	var cascades := relief_shadow_override if relief_shadow_override > 0 else int(_quality.get("relief_shadow_cascades", 4))
+	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D if get_parent() != null else null
+	if sun == null or not sun.shadow_enabled:
+		return INF
+	var splits := 4 if sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS else 2
+	if cascades >= splits:
+		return INF
+	var edges := [sun.directional_shadow_split_1, sun.directional_shadow_split_2, sun.directional_shadow_split_3]
+	return sun.directional_shadow_max_distance * float(edges[cascades - 1])
+
+
 func build(data: MapData) -> void:
 	var t0 := Time.get_ticks_msec()
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	clear_terrain()
 	# ZG4 : nouvelle carte à l'échelle stratégique (les maillages E0 sont cuits à HEIGHT_SCALE).
 	_rescale_queue.clear()
@@ -434,7 +475,7 @@ func _select_fine_step(camera_distance: float) -> int:
 ## Tuiles voulues en relief fin (les plus proches du point visé), triées par distance.
 func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: float) -> Array:
 	var result: Array = []
-	if not fine_enabled or (_fine_tiles_dir == "" and quadtree == null) or view_center == Vector3.INF or camera_distance >= fine_distance:
+	if not fine_enabled or not quality_fine or (_fine_tiles_dir == "" and quadtree == null) or view_center == Vector3.INF or camera_distance >= fine_distance:
 		return result
 	var center := Vector2(view_center.x, view_center.z)
 	var radius := maxf(fine_radius, camera_distance * 1.2)
@@ -472,6 +513,8 @@ func _setup_quadtree() -> void:
 	pyramid = relief
 	quadtree = ReliefQuadtree.new()
 	quadtree.name = "ReliefQuadtree"
+	quadtree.max_pages = int(_quality.get("relief_pages", quadtree.max_pages))
+	_apply_quadtree_quality()
 	add_child(quadtree)
 	quadtree.setup(pyramid, material, map_data, _chunk_bounds_m())
 	quadtree.surface_changed.connect(_on_quadtree_surface_changed)
@@ -509,6 +552,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		for chunk in _chunks:
 			chunk.visible = parchment
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() and not parchment else null
+	quadtree.shadow_cast_distance = _relief_shadow_distance()
 	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
 	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)

@@ -8,7 +8,7 @@
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
     "port": false,
     "description": "Carrefour du Rhône et de la Saône, rattachée au royaume de France en 1312 par le traité de Vienne.",
     "sources": ["Lyon", "Traité de Vienne (1312)"]
