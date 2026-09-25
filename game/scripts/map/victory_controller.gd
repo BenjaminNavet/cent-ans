@@ -77,6 +77,7 @@ func setup(campaign_map: Node) -> void:
 	end_dialog.add_child(shade)
 	var card := PanelContainer.new()
 	card.theme = theme
+	card.add_theme_stylebox_override("panel", HudStyle.illuminated_box())  # page enluminée UI1
 	card.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	card.custom_minimum_size = Vector2(720, 0)
 	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
