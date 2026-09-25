@@ -4,7 +4,7 @@ Demande du joueur (25/09 soir) : « tu es le directeur artistique, que manque-t-
 comparé à Total War et Crusader Kings ? » puis « ok pour la recommandation ».
 Bible : `docs/design/2026-09-25-bible-da.md` (à lire avant tout lot DA).
 Branche d'orchestration : `feat/da-direction-artistique` (worktree `../gp-da`).
-Budget propre : **15 $** (section « Direction artistique » de `docs/budget.md`).
+Budget propre : **50 $** sur la clé OpenRouter personnelle du joueur (relevé de 15 $ le 25/09 ~23 h) (section « Direction artistique » de `docs/budget.md`).
 
 ## Lots
 
@@ -27,3 +27,30 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
 - 25/09 ~22 h : inventaire, captures à jour depuis `../gp-da` (l'arbre principal avait un cache
   de classes Godot périmé : `FineGeoLayer` introuvable ; import refait dans le worktree), bible
   écrite. Prochaine étape : lancer DA1 et DA2 (agents en worktree).
+- 25/09 ~22 h 30 : vague 1 lancée — DA1 (héraldique, wip `da1-heraldique.md`) et DA2 (portraits
+  vivants, ≤ 8 $, wip `da2-portraits-vivants.md`), agents en worktrees, chacun fusionne d'abord
+  `feat/da-direction-artistique` pour la bible. L'orchestrateur fusionne (jamais les agents).
+  Vague 2 (DA3 marqueurs après ZG4b, DA4 musique, DA5 icônes) après retour de la vague 1.
+- 25/09 ~23 h : **PAUSE demandée par le joueur** ; reprise dans un autre terminal. DA1 et DA2
+  ont reçu l'ordre de commiter un `wip:` et de s'arrêter. Reprise : `git worktree list | grep
+  agent` pour retrouver leurs worktrees/branches, lire `docs/wip/da1-heraldique.md` et
+  `docs/wip/da2-portraits-vivants.md` sur ces branches, vérifier la dépense DA2 dans
+  `docs/budget.md` avant toute génération.
+- 25/09 ~23 h : pause confirmée par les deux agents (rien fusionné dans main).
+  - DA1 : branche `worktree-agent-addd87848de848c53` (worktree
+    `.claude/worktrees/agent-addd87848de848c53`), commit `6fc9d9fc`. Fait : `data/heraldry/houses.json`
+    (51 maisons, sources, `arms_of`, `vassal_of`, `badges`) + schéma. 3 substitutions (Artevelde,
+    Béhuchet, Le Bel), Petrarca incertain. Reste : test du schéma, grammaire `heraldry.py`
+    (écus de faction inchangés à l'octet), `house_heraldry_texture` + interface, atlas
+    `sampler2DArray` dans le shader skinné, captures, A/B perf, ADR.
+  - DA2 : branche `worktree-agent-ade9b18af852c5bfe` (worktree
+    `.claude/worktrees/agent-ade9b18af852c5bfe`), commit `495470d9`, **0 $ dépensé**. Fait :
+    `data/portraits/archetypes.json` + schéma (122 archétypes + 25 variantes âgées), générateur
+    `portrait_archetypes.py` (`--dry-run` : 147 images ≈ 6,69 $), captures avant `docs/img/da2/`.
+    Reste : pytest, sonde 3 images, génération, tout le GDScript, captures après, ADR.
+- 25/09 ~23 h 15 : reprise dans un nouveau terminal (clé OpenRouter personnelle du joueur, 50 $).
+  Le joueur veut valider la direction artistique **avant** de relancer DA1/DA2.
+- 25/09 ~23 h 40 : DA validée par le joueur (bible § 0) ; planche `docs/img/da/planche/planche_da.jpg`
+  validée (6 portraits sondes, bouton cloche, icônes encre ; 0,36 $). Liste d'assets validée
+  (≈ 11,5 $ prévus : DA1 0 $, DA2 ≈ 6,4 $, DA5 boutons ≈ 0,7 $ + icônes ≈ 3,6 $, DA3 ≈ 0,7 $,
+  DA4 musique libre 0 $, DA6 0 $). Relance DA1 + DA2, lancement DA5 + DA4.
