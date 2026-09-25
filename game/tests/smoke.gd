@@ -86,10 +86,15 @@ func _init() -> void:
 		await _run_coinage_ransom()
 		quit(1 if _failures > 0 else 0)
 		return
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "ui_layout":
+		await _run_ui_layout()
+		quit(1 if _failures > 0 else 0)
+		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
 	await _run_minimap_fog()  # C1
+	await _run_ui_layout()  # UI2 : pile des panneaux (U1), échelle et 4 résolutions (U4)
 	await _run_agents()  # C6 agents
 	_run_city_economy()
 	await _run_characters()
@@ -395,6 +400,84 @@ func _run_agents() -> void:
 ## C1 : minicarte présente dans le HUD (haut droite, lettres dessous, sans chevaucher la cloche),
 ## clic = caméra recentrée ; brouillard (vraie simulation) : au moins une province voilée, aucune
 ## armée étrangère marquée hors de vue, réglage désactivable.
+## UI2 (audit A3, lots U1 et U4) : aux quatre résolutions de référence, l'échelle automatique
+## vaut hauteur / 900 bornée entre 0,9 et 1,6 ; la barre du haut tient dans la largeur ; faction,
+## Cour et technologies s'ouvrent une à une (exclusivité), leur bouton × reste à l'écran et la
+## minicarte ne les recouvre jamais ; Échap (pile) ferme le panneau du dessus et la province
+## mise de côté revient.
+const UI_RESOLUTIONS: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1440, 900), Vector2i(1920, 1080), Vector2i(2560, 1440)]
+
+
+func _run_ui_layout() -> void:
+	var real_data := _project_root().path_join("data")
+	if ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json")):
+		facade.set_data_dir(real_data)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
+	var map: Node3D = scene.instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "ui layout: campaign scene failed to start"):
+		map.queue_free()
+		return
+	var ui: Node = map.ui
+	var initial_size := root.size
+	var checked := 0
+	for resolution in UI_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		if root.size != resolution:
+			print("smoke ui layout: window cannot be resized here (%s), resolution %s skipped" % [root.size, resolution])
+			continue
+		var expected := clampf(resolution.y / 900.0, 0.9, 1.6)
+		_check(is_equal_approx(root.content_scale_factor, expected), "ui scale at %s should be %.3f, got %.3f" % [resolution, expected, root.content_scale_factor])
+		var view: Vector2 = ui.get_viewport().get_visible_rect().size
+		var bar: Control = ui.get_node("TopBar")
+		_check(bar.get_combined_minimum_size().x <= view.x + 1.0, "top bar (%.0f px) wider than the screen (%.0f) at %s" % [bar.get_combined_minimum_size().x, view.x, resolution])
+		# Province choisie, puis les grands panneaux un à un.
+		map.picker.select_index(1)
+		await process_frame
+		var openers := [
+			["faction", func() -> void: map._show_faction_panel(map.player_faction), ui.faction_panel, ui.faction_panel.close_button],
+			["court", func() -> void: map._on_court_panel_requested(), ui.court_panel, ui.court_panel.close_button],
+			["tech", func() -> void: map._on_tech_panel_requested(), ui.tech_panel, ui.tech_panel.close_button],
+		]
+		for entry in openers:
+			(entry[1] as Callable).call()
+			await process_frame
+			ui.layout_hud()
+			await process_frame
+			ui.layout_hud()
+			var panel: Control = entry[2]
+			var close_button: Control = entry[3]
+			if not panel.visible:
+				continue  # simulation sans cette fonction (mock)
+			var open_centrals := 0
+			for other in ui.panels.visible_panels():
+				if ui.panels.kind_of(other) == PanelStack.Kind.CENTRAL:
+					open_centrals += 1
+			_check(open_centrals == 1, "%s at %s: %d central panels open (exclusive expected)" % [entry[0], resolution, open_centrals])
+			_check(not ui.province_panel.visible, "%s at %s: the province panel should be set aside" % [entry[0], resolution])
+			var close_rect := close_button.get_global_rect()
+			_check(Rect2(Vector2.ZERO, view).encloses(close_rect), "%s at %s: close button %s off screen %s" % [entry[0], resolution, close_rect, view])
+			if ui.minimap != null and ui.minimap.visible:
+				_check(not ui.minimap.get_global_rect().intersects(panel.get_global_rect()), "%s at %s: minimap drawn over the panel" % [entry[0], resolution])
+			checked += 1
+		# Échap : ferme le panneau du dessus ; la province revient.
+		_check(ui.panels.close_top(), "escape should close the top panel at %s" % resolution)
+		_check(not ui.tech_panel.visible and ui.province_panel.visible, "province should come back after the last central panel at %s" % resolution)
+		_check(ui.panels.close_top() and not ui.province_panel.visible and map.selected_index == 0, "escape should then close and deselect the province at %s" % resolution)
+	root.size = initial_size
+	await process_frame
+	map.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: ui layout (%d panel checks at %d resolutions, auto scale, exclusive panels, escape)" % [checked, UI_RESOLUTIONS.size()])
+
+
 func _run_minimap_fog() -> void:
 	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
 	var map: Node3D = scene.instantiate()
