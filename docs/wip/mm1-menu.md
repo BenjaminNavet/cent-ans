@@ -19,8 +19,8 @@ Agent MM1 (session 7). Sources : `docs/audit/a3-ui.md` (§ 3.1, M1-M6), `docs/wi
 
 ## État
 - [x] Étape 1 (données, schéma, test : 3 OK)
-- [ ] Étape 2
+- [x] Étape 2 (décor 3D : Paris, Seine prolongée, champs, bosquets, ost de 422 figurines, herbe ; 3 plans ; construction ≈ 90 ms)
 - [ ] Étapes 3-7
 
 ## Prochaine étape
-Décor 3D du menu.
+Menu principal (start_menu refait) puis choix de faction.
