@@ -150,8 +150,10 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// pursuit (`PURSUIT_LEASH`) also changes how a rout on either side plays
 /// out. A defender squarely in front is unaffected by the lean (`dx` ~ 0);
 /// see `advance`'s own doc comment. R2 (relief of the fields) moves the
-/// digests again (same winners, same order of magnitude of the losses), and
-/// so does R2b (the AI reads the relief; the line keeps together).
+/// digests again (same winners, same order of magnitude of the losses).
+/// BV2: men knocked down by the knights' charge stop fighting for a few
+/// seconds; R2b: the AI reads the relief and its line keeps together
+/// (digests recomputed after merging R2, BV2 and R2b).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
