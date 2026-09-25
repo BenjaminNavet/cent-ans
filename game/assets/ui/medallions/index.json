@@ -1,8 +1,20 @@
 {
  "source": "data/ui/icons_ink.json (lot DA5)",
  "icons": {
+  "act_form_army": "form_army.png",
+  "act_recruit": "recruit.png",
+  "hud_agents": "agents.png",
+  "hud_chronicle": "chronicle.png",
   "hud_codex": "codex.png",
+  "hud_court": "court.png",
   "hud_diplomacy": "diplomacy.png",
-  "hud_end_turn": "end_turn.png"
+  "hud_end_turn": "end_turn.png",
+  "hud_journal": "journal.png",
+  "hud_menu": "menu.png",
+  "hud_objectives": "objectives.png",
+  "hud_research": "research.png",
+  "hud_technologies": "technologies.png",
+  "map_filters": "filters.png",
+  "map_legend": "legend.png"
  }
 }
