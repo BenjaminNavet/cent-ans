@@ -1,0 +1,48 @@
+{
+  "fade_seconds": 2.0,
+  "hysteresis_seconds": 2.5,
+  "layers": {
+    "melee_din": "assets/audio/sfx/sword_clash.ogg",
+    "drums": "assets/audio/music/battle_layers/battle_drum.ogg",
+    "straight_trumpet": "assets/audio/music/battle_layers/straight_trumpet_fanfare.ogg",
+    "bagpipe_drone": "assets/audio/music/battle_layers/bagpipe_drone.ogg",
+    "shawm": "assets/audio/music/battle_layers/shawm_note.ogg"
+  },
+  "mute_when_battle_audio_active": ["melee_din"],
+  "states": {
+    "approach": {
+      "base_db": -11.0,
+      "base_cutoff_hz": 900.0,
+      "base_pitch": 1.0,
+      "layers": {"melee_din": -80.0, "drums": -80.0, "straight_trumpet": -80.0, "bagpipe_drone": -18.0, "shawm": -80.0}
+    },
+    "engagement": {
+      "base_db": -3.0,
+      "base_cutoff_hz": 20000.0,
+      "base_pitch": 1.0,
+      "layers": {"melee_din": -14.0, "drums": -10.0, "straight_trumpet": -80.0, "bagpipe_drone": -14.0, "shawm": -12.0}
+    },
+    "critical": {
+      "base_db": 0.0,
+      "base_cutoff_hz": 20000.0,
+      "base_pitch": 1.05,
+      "layers": {"melee_din": -8.0, "drums": -3.0, "straight_trumpet": -6.0, "bagpipe_drone": -10.0, "shawm": -6.0}
+    },
+    "victory": {
+      "base_db": -40.0,
+      "base_cutoff_hz": 20000.0,
+      "base_pitch": 1.0,
+      "layers": {"melee_din": -80.0, "drums": -80.0, "straight_trumpet": -2.0, "bagpipe_drone": -80.0, "shawm": -80.0}
+    },
+    "defeat": {
+      "base_db": -40.0,
+      "base_cutoff_hz": 500.0,
+      "base_pitch": 0.94,
+      "layers": {"melee_din": -80.0, "drums": -80.0, "straight_trumpet": -80.0, "bagpipe_drone": -80.0, "shawm": -80.0}
+    }
+  },
+  "stingers": {
+    "victory": "assets/audio/sfx/fanfare.ogg",
+    "defeat": "assets/audio/sfx/choir.ogg"
+  }
+}

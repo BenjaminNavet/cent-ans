@@ -240,6 +240,55 @@ static func _style(kind: String, variant: int) -> String:
 
 ## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste (lot UR1), sinon
 ## variante 0 des fantassins et des cavaliers.
+## DA1 : boîte du buste en pose de repos, où le shader peint les armoiries (surcot, jaque) ou la
+## croix de livrée : sommets livrée (code 0) dont l'os dominant est le torse ou la poitrine.
+## {center: Vector2(x, y), size: Vector2(largeur, hauteur), depth: Vector2(z min, z max)} ;
+## vide si la figurine n'a pas de livrée au buste (plates complètes).
+static var _chest_boxes: Dictionary = {}
+
+
+static func chest_box(kind: String, variant: int) -> Dictionary:
+	var key := figure_name(kind, variant)
+	if _chest_boxes.has(key):
+		return _chest_boxes[key]
+	var result := {}
+	var mesh_lod := mesh(kind, variant, 0)
+	var bones: Array = rig(kind, variant).get("bones", [])
+	var torso := {}
+	for index in bones.size():
+		var bone_name := str(bones[index]).trim_prefix("R:")
+		if bone_name == "Torso" or bone_name == "Chest":
+			torso[index] = true
+	if mesh_lod != null and not torso.is_empty():
+		var arrays := mesh_lod.surface_get_arrays(0)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+		var bone_idx: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM0]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM1]
+		var low := Vector3(INF, INF, INF)
+		var high := -low
+		for i in verts.size():
+			if int(colors[i].a * 16.0 + 0.5) != 0:
+				continue
+			var best := 0
+			for k in range(1, 4):
+				if weights[i * 4 + k] > weights[i * 4 + best]:
+					best = k
+			if not torso.has(int(bone_idx[i * 4 + best] + 0.5)):
+				continue
+			low = low.min(verts[i])
+			high = high.max(verts[i])
+		if low.x < high.x:
+			var width := (high.x - low.x) + 0.06
+			result = {
+				"center": Vector2((low.x + high.x) * 0.5, (low.y + high.y) * 0.5),
+				"size": Vector2(width, width * 1.25),
+				"depth": Vector2(low.z - 0.06, high.z + 0.06),
+			}
+	_chest_boxes[key] = result
+	return result
+
+
 static func is_noble(kind: String, variant: int) -> bool:
 	var fig := figure(kind, variant)
 	if fig.has("noble"):

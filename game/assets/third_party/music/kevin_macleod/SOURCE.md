@@ -1,4 +1,9 @@
-# Kevin MacLeod — musiques (incompetech)
+# Kevin MacLeod — musiques (incompetech), en repli depuis DA4
+
+**Repli (`fallback`) uniquement depuis le 2026-09-25 (DA4, `docs/decisions/0060-musique-d-epoque.md`)** :
+ces pistes ne jouent plus que si aucune piste d'époque (`game/assets/third_party/music/wikimedia/`)
+n'est disponible pour le contexte demandé (`data/audio/music.json`). Elles restent créditées et sur
+le disque, non supprimées.
 
 - **Auteur** : Kevin MacLeod (https://incompetech.com)
 - **Licence** : CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/ (**attribution obligatoire**)

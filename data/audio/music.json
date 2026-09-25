@@ -1,39 +1,138 @@
 {
   "playlists": {
-    "campaign": [
-      "assets/audio/music/campaign.ogg",
-      "assets/third_party/music/kevin_macleod/lord_of_the_land.mp3",
-      "assets/third_party/music/kevin_macleod/village_consort.mp3",
-      "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3",
-      "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
-      "assets/third_party/music/kevin_macleod/galway.mp3",
-      "assets/third_party/music/kevin_macleod/thatched_villagers.mp3",
-      "assets/third_party/music/kevin_macleod/the_britons.mp3",
-      "assets/third_party/music/kevin_macleod/folk_round.mp3",
-      "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3",
-      "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
-      "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
-      "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3"
-    ],
-    "war": [
-      "assets/audio/music/war.ogg",
-      "assets/third_party/music/kevin_macleod/crusade.mp3",
-      "assets/third_party/music/kevin_macleod/celtic_impulse.mp3",
-      "assets/third_party/music/kevin_macleod/achaidh_cheide.mp3",
-      "assets/third_party/music/kevin_macleod/angevin_b.mp3",
-      "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3",
-      "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
-    ],
-    "court": [
-      "assets/audio/music/court.ogg",
-      "assets/third_party/music/kevin_macleod/master_of_the_feast.mp3",
-      "assets/third_party/music/kevin_macleod/minstrel_guild.mp3",
-      "assets/third_party/music/kevin_macleod/moonlight_hall.mp3",
-      "assets/third_party/music/kevin_macleod/village_consort.mp3",
-      "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
-      "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
-      "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
-      "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3"
-    ]
+    "campaign": {
+      "primary": [
+        "assets/audio/music/campaign.ogg",
+        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
+        "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/lord_of_the_land.mp3",
+        "assets/third_party/music/kevin_macleod/village_consort.mp3",
+        "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3",
+        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
+        "assets/third_party/music/kevin_macleod/galway.mp3",
+        "assets/third_party/music/kevin_macleod/thatched_villagers.mp3",
+        "assets/third_party/music/kevin_macleod/the_britons.mp3",
+        "assets/third_party/music/kevin_macleod/folk_round.mp3",
+        "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3"
+      ]
+    },
+    "campaign_france": {
+      "primary": [
+        "assets/audio/music/campaign.ogg",
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
+        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3",
+        "assets/third_party/music/wikimedia/machaut_riches_damour.mp3",
+        "assets/third_party/music/wikimedia/solage_fumeux_fume.mp3",
+        "assets/third_party/music/kevin_macleod/the_britons.mp3",
+        "assets/third_party/music/kevin_macleod/folk_round.mp3"
+      ]
+    },
+    "campaign_england": {
+      "primary": [
+        "assets/third_party/music/wikimedia/sumer_is_icumen_in.mp3",
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
+        "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/thatched_villagers.mp3",
+        "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3"
+      ]
+    },
+    "campaign_burgundy": {
+      "primary": [
+        "assets/third_party/music/wikimedia/dufay_ave_regina.mp3",
+        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/binchois_dueil_angoisseux.mp3",
+        "assets/third_party/music/kevin_macleod/village_consort.mp3",
+        "assets/third_party/music/kevin_macleod/galway.mp3"
+      ]
+    },
+    "campaign_iberia": {
+      "primary": [
+        "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
+        "assets/third_party/music/wikimedia/cantigas_santa_maria.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3"
+      ]
+    },
+    "campaign_italy": {
+      "primary": [
+        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/landini_ecco_la_primavera.mp3",
+        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
+        "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3"
+      ]
+    },
+    "war": {
+      "primary": [
+        "assets/audio/music/war.ogg",
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
+        "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/crusade.mp3",
+        "assets/third_party/music/kevin_macleod/celtic_impulse.mp3",
+        "assets/third_party/music/kevin_macleod/achaidh_cheide.mp3",
+        "assets/third_party/music/kevin_macleod/angevin_b.mp3",
+        "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3"
+      ]
+    },
+    "court": {
+      "primary": [
+        "assets/audio/music/court.ogg",
+        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/landini_si_dolce_non_sono.mp3",
+        "assets/third_party/music/wikimedia/binchois_triste_plaisir.mp3",
+        "assets/third_party/music/wikimedia/solage_fumeux_fume.mp3",
+        "assets/third_party/music/kevin_macleod/master_of_the_feast.mp3",
+        "assets/third_party/music/kevin_macleod/minstrel_guild.mp3",
+        "assets/third_party/music/kevin_macleod/moonlight_hall.mp3",
+        "assets/third_party/music/kevin_macleod/village_consort.mp3",
+        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3"
+      ]
+    },
+    "menu": {
+      "primary": [
+        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3",
+        "assets/third_party/music/kevin_macleod/village_consort.mp3"
+      ]
+    }
+  },
+  "culture_regions": {
+    "cul_french": "france",
+    "cul_breton": "france",
+    "cul_english": "england",
+    "cul_flemish": "burgundy",
+    "cul_dutch": "burgundy",
+    "cul_german": "burgundy",
+    "cul_czech": "burgundy",
+    "cul_catalan": "iberia",
+    "cul_castilian": "iberia",
+    "cul_andalusi": "iberia",
+    "cul_navarrese": "iberia",
+    "cul_tuscan": "italy",
+    "cul_ligurian": "italy",
+    "cul_lombard": "italy",
+    "cul_neapolitan": "italy"
   }
 }
