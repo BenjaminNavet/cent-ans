@@ -509,7 +509,7 @@ FIGURES.update(
         # Jinetes: light tunic, cap or kettle hat, adarga, javelin; light horse.
         "cavalry_5": {
             "rig": "cavalry",
-            "style": "lance",
+            "style": "horse_javelin",  # UR2: throws javelins rather than fighting with a lance.
             "parts": COMMONER_PARTS,
             "colors": {
                 **COMMONER_COLORS,
