@@ -114,7 +114,7 @@ fn first_contact(sim: &mut BattleSim, limit: f64) -> Option<f64> {
 /// B4: in the demo the French crossbows trade volleys with stronger
 /// English longbows (G3 techs); the French line used to hold for the whole
 /// duel (until the crossbows ran short of bolts) and the armies only met
-/// after 300 s. Armies meet within one to three minutes, as in Total War.
+/// after 300 s. Armies should meet within one to three minutes.
 #[test]
 fn demo_battle_reaches_contact_quickly() {
     let mut sim = demo_sim();
