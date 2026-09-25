@@ -622,6 +622,44 @@ def ride_bow_shoot(arm, t):
     bow_shoot(arm, t)
 
 
+def _javelin_grip(arm, cock, aim_v=None):
+    """Right-hand javelin held as a prop: `cock` 1 = drawn back by the ear, 0 = arm thrown
+    fully forward (release). Left hand stays on the reins (`ride_javelin_*`)."""
+    shoulder = pos(arm, "UpperArm.R")
+    if aim_v is None:
+        aim_v = aim_dir(10.0, -4.0)
+    back = shoulder + Vector((-0.06, 0.16, 0.3))
+    forward = shoulder + aim_v * 0.68
+    grip = forward.lerp(back, cock)
+    prop = prop_matrix(grip, aim_v, Vector((0, 0, 1)))
+    STATE["prop"] = prop
+    hand_to_prop(arm, "R", prop, 0.0, shoulder + Vector((-0.3, 0.3, 0.15)))
+    fist_on_prop(arm, prop)
+    return aim_v
+
+
+def ride_javelin_rest(arm, t):
+    """Pose: mounted jinete, a javelin held cocked back by the ear, ready to throw."""
+    _ride_legs(arm)
+    _javelin_grip(arm, 1.0)
+    _reins(arm, "L")
+
+
+def ride_javelin_throw(arm, t):
+    """Cocked (0-0.35), snapped forward to release (0.35-0.55), arm recovers to cocked.
+
+    No nock/draw like the bow: a jinete carries two or three loose javelins (azagayas) and
+    throws them one at a time, so the clip loops back to the cocked pose rather than to rest.
+    """
+    _ride_legs(arm)
+    cock = 1.0 - smooth(0.35, 0.55, t)
+    _javelin_grip(arm, max(cock, 0.0))
+    _reins(arm, "L")
+
+
+ride_javelin_throw.frames = 30  # release at 0.55 * 30 / 24 = 0.69 s
+
+
 def ride_death(arm, t):
     """Horse and rider down: the rider slides off to the left and falls on his back."""
     m = _mount()

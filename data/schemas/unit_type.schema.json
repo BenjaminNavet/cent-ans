@@ -73,6 +73,11 @@
       "pattern": "^(infantry|archer|cavalry)_[0-9]+$",
       "description": "Figurine de bataille (rendu seulement) : `<famille>_<variante>` du manifeste des figurines skinnées (repli : variante 0 de la famille)."
     },
+    "missile": {
+      "type": "string",
+      "enum": ["arrow", "bolt", "bullet", "javelin", "stone"],
+      "description": "Projectile tiré (flèche, carreau, balle de couleuvrine, javelot, pierre) ; absent = repli sur l'ancienne heuristique (id/pavois) du cœur."
+    },
     "equipment": { "type": "string", "description": "Équipement historique (armes, armure) pour les assets 3D." },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
