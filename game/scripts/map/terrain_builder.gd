@@ -947,7 +947,7 @@ func _evict_fine() -> void:
 func _build_relief_floor() -> void:
 	var relief := ReliefExaggerationProfile.load_default()
 	_relief_floor_ms = 0.0
-	if relief.enabled and not OS.get_cmdline_user_args().has("--no-relief-exaggeration"):
+	if relief.enabled:
 		var grid := ReliefFloor.compute(map_data, relief)
 		_relief_floor_ms = float(grid["ms"])
 		MapData.set_relief_floor(grid)

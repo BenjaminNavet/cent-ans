@@ -18,10 +18,10 @@ extends Resource
 
 @export var enabled: bool = true
 ## Plancher de l'exagération verticale de près (× relief vrai).
-@export var near_exaggeration: float = 2.75
+@export var near_exaggeration: float = 2.5
 ## Gain de relief local en vue stratégique et au plus près.
-@export var gain_far: float = 0.5
-@export var gain_near: float = 1.0
+@export var gain_far: float = 0.3
+@export var gain_near: float = 0.8
 
 ## Fond de vallée : taille d'une cellule (pixels de la carte 4096, 1 px = 719 m), pas
 ## d'échantillonnage dans la cellule, rayon du filtre min (cellules) puis flou (passes de boîte
@@ -52,6 +52,10 @@ static func load_default() -> ReliefExaggerationProfile:
 		_default = load(path) as ReliefExaggerationProfile
 	if _default == null:
 		_default = ReliefExaggerationProfile.new()
+	# `--no-relief-exaggeration` (après `--`) : comportement du lot ZG4 (captures « avant »).
+	if _default.enabled and OS.get_cmdline_user_args().has("--no-relief-exaggeration"):
+		_default = _default.duplicate()
+		_default.enabled = false
 	return _default
 
 
