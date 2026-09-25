@@ -47,7 +47,7 @@ PALETTE = {
     "TileOld": ((0.27, 0.15, 0.09), 0.85),
     "Thatch": ((0.30, 0.23, 0.11), 0.97),
     "Plaster": ((0.58, 0.52, 0.41), 0.92),
-    "Timber": ((0.40, 0.32, 0.22), 0.9),
+    "Timber": ((0.60, 0.53, 0.42), 0.9),
     "Wood": ((0.20, 0.13, 0.08), 0.82),
     "Glass": ((0.03, 0.045, 0.07), 0.25),
     "Dark": ((0.035, 0.03, 0.028), 0.95),
@@ -63,6 +63,38 @@ PALETTE = {
     "Whitewash": ((0.78, 0.76, 0.70), 0.85),
     "Brick": ((0.42, 0.17, 0.09), 0.9),
     "Ochre": ((0.66, 0.53, 0.36), 0.88),
+}
+
+# Layer of the shared material atlas (lot L3, `game/assets/textures/landmarks/build_textures.py`),
+# stored in the alpha of the tint colour: (layer + 0.5) / MATERIAL_LAYERS.
+MATERIAL_LAYERS = 16
+MATERIAL_LAYER = {
+    "NDStone": 0,
+    "Stone": 0,
+    "Ochre": 0,
+    "DarkStone": 1,
+    "WallStone": 1,
+    "Brick": 2,
+    "Slate": 3,
+    "Tile": 4,
+    "TileOld": 5,
+    "Plaster": 6,
+    "Whitewash": 6,
+    "Canvas": 6,
+    "Timber": 7,
+    "Wood": 8,
+    "Thatch": 9,
+    "Paving": 10,
+    "Street": 10,
+    "Lead": 11,
+    "Glass": 12,
+    "Grass": 13,
+    "Garden": 13,
+    "Vine": 13,
+    "Dirt": 13,
+    "Water": 14,
+    "Gold": 14,
+    "Dark": 14,
 }
 
 Z_WATER = 0.004
@@ -894,7 +926,7 @@ def material(bpy, name):
 
 def layer_object(bpy, layer):
     """One mesh object per layer: material slots, anchor UV map, tint colour attribute."""
-    verts, faces, anchors, colors, mat_index = [], [], [], [], []
+    verts, faces, anchors, colors, mat_index, atlas = [], [], [], [], [], []
     materials = sorted(layer.parts)
     for slot, mat in enumerate(materials):
         v, f, a, c = layer.parts[mat]
@@ -904,6 +936,7 @@ def layer_object(bpy, layer):
         anchors.extend(a)
         colors.extend(c)
         mat_index.extend([slot] * len(f))
+        atlas.extend([(MATERIAL_LAYER.get(mat, 14) + 0.5) / MATERIAL_LAYERS] * len(v))
     mesh = bpy.data.meshes.new(layer.name)
     mesh.from_pydata(verts, [], faces)
     for mat in materials:
@@ -922,7 +955,7 @@ def layer_object(bpy, layer):
     tint_data = []
     for vi in loop_vertices:
         r, gg, b = colors[vi]
-        tint_data += [min(r / 1.2, 1.0), min(gg / 1.2, 1.0), min(b / 1.2, 1.0), 1.0]
+        tint_data += [min(r / 1.2, 1.0), min(gg / 1.2, 1.0), min(b / 1.2, 1.0), atlas[vi]]
     tint.data.foreach_set("color", tint_data)
     mesh.color_attributes.active_color = tint
     mesh.update()
