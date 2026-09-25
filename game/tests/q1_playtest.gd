@@ -77,6 +77,10 @@ func _run() -> void:
 	await wait(120)
 	await shot("campaign-start")
 	await fps_probe("campaign-start")
+	if phase == "q2zoom":
+		await phase_q2_zoom()
+	if phase == "q2click":
+		await phase_q2_click()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
@@ -92,6 +96,95 @@ func _run() -> void:
 		await phase_save_settings()
 	log_q1("done")
 	quit(0)
+
+
+# --- Q2 : vérifications ciblées ------------------------------------------------------
+
+
+## Q2 : échelle des figurines d'armée autour de la capitale, du plus près au palier moyen.
+func phase_q2_zoom() -> void:
+	var capital := capital_world()
+	var army_ids: PackedStringArray = map.player_army_ids()
+	for distance in [8.0, 15.0, 25.0, 40.0, 60.0, 150.0]:
+		await look_at_world(capital, distance)
+		await wait(40)
+		for army_id in army_ids:
+			var marker: Node3D = map.armies._markers.get(army_id)
+			if marker != null and marker.global_position.distance_to(capital) < 60.0:
+				var box := world_aabb(marker)
+				log_q1("q2 zoom %d: army %s scale %.2f size %.1f x %.1f x %.1f at %.1f from capital" % [int(distance), army_id, marker.scale.x, box.size.x, box.size.y, box.size.z, marker.global_position.distance_to(capital)])
+		await shot("q2-zoom-%d" % int(distance))
+
+
+## Q2 : clic sur la ville où stationne l'armée royale : ville, armée, alternance.
+func phase_q2_click() -> void:
+	var capital := capital_world()
+	var army_ids: PackedStringArray = map.player_army_ids()
+	var army_id := ""
+	for id in army_ids:
+		if map.armies.world_position_of(id).distance_to(capital) < 30.0:
+			army_id = id
+	log_q1("q2 click: army at capital '%s'" % army_id)
+	for distance in [25.0, 60.0, 150.0]:
+		await look_at_world(capital, distance)
+		await wait(30)
+		# Clic au centre de la ville.
+		await click_at(world_to_window(capital))
+		await wait(15)
+		log_q1("q2 click %d city centre: army '%s', settlement '%s', panel %s" % [int(distance), map.selected_army, map.settlement_layer.selected_id, _settlement_panel_visible()])
+		await shot("q2-click-%d-city" % int(distance))
+		await key(KEY_ESCAPE)
+		await wait(5)
+		# Clic sur l'armée.
+		var army_point := world_to_window(map.armies._markers[army_id].pick_position()) if army_id != "" else Vector2.ZERO
+		await click_at(army_point)
+		await wait(15)
+		log_q1("q2 click %d army: army '%s', panel %s" % [int(distance), map.selected_army, _settlement_panel_visible()])
+		await shot("q2-click-%d-army" % int(distance))
+		# Point où l'armée et la ville sont toutes deux sous le curseur : alternance.
+		var scale := root.get_final_transform().get_scale().x
+		var both := Vector2(-1, -1)
+		var from: Vector2 = map.camera.unproject_position(map.armies._markers[army_id].pick_position()) if army_id != "" else Vector2.ZERO
+		var to: Vector2 = map.camera.unproject_position(capital)
+		for step in 21:
+			var candidate: Vector2 = from.lerp(to, step / 20.0)
+			if map.armies.pick_screen(candidate) != "" and map.settlement_layer.pick_screen(candidate) != "":
+				both = candidate
+				break
+		if both.x < 0.0:
+			log_q1("q2 click %d: no overlap between army and city" % int(distance))
+			await key(KEY_ESCAPE)
+			continue
+		var window := both * scale
+		for attempt in 3:
+			await click_at(window)
+			await wait(15)
+			log_q1("q2 click %d overlap #%d: army '%s', settlement '%s', panel %s" % [int(distance), attempt + 1, map.selected_army, map.settlement_layer.selected_id, _settlement_panel_visible()])
+			await wait(20)
+		await key(KEY_ESCAPE)
+		await wait(5)
+
+
+func _settlement_panel_visible() -> bool:
+	var controller: Node = map.get("settlements_ctl")
+	var panel: Control = controller.get("panel") if controller != null else null
+	return panel != null and panel.is_visible_in_tree()
+
+
+func world_aabb(node: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for child in node.find_children("*", "VisualInstance3D", true, false):
+		var visual := child as VisualInstance3D
+		if not visual.is_visible_in_tree() or visual is GPUParticles3D:
+			continue
+		var local := visual.get_aabb()
+		if local.size.length() < 0.001:
+			continue
+		var global := visual.global_transform * local
+		box = global if first else box.merge(global)
+		first = false
+	return box
 
 
 # --- Actions de campagne -----------------------------------------------------------
