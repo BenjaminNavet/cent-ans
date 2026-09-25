@@ -12,9 +12,16 @@ signal demo_started(id: String)
 
 const DEMOS_FILE := "ui/battle_demos.json"
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
+## EP8 : phases proposées pour l'heure de la bataille (règles du cœur, libellés des données).
+const TIME_OF_DAY_FILE := "rules/battle_time_of_day.json"
+
+## EP8 : heure choisie (clé de phase, "" : tirée par la campagne), gardée d'une démo à l'autre.
+static var chosen_hour: String = ""
 
 var demos: Array = []
 var buttons: Dictionary = {}  # id -> Button (tests)
+var hour_option: OptionButton = null
+var hour_keys: Array[String] = [""]
 
 
 ## Démos déclarées (`[]` si le fichier manque).
@@ -34,9 +41,32 @@ static func load_demos() -> Array:
 	return []
 
 
+## EP8 : phases sélectionnables `[{key, label}]` (`[]` si le fichier manque).
+static func load_day_phases() -> Array:
+	var tree := Engine.get_main_loop() as SceneTree
+	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
+	var dirs: Array[String] = []
+	if paths != null:
+		dirs.append(str(paths.get("data_dir")))
+	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
+	for dir in dirs:
+		var path := dir.path_join(TIME_OF_DAY_FILE)
+		if FileAccess.file_exists(path):
+			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			if parsed is Dictionary:
+				var out: Array = []
+				for phase in (parsed as Dictionary).get("phases", []):
+					if bool((phase as Dictionary).get("selectable", true)):
+						out.append({"key": str(phase["key"]), "label": str(phase["label"])})
+				return out
+	return []
+
+
 ## Options de la scène de bataille pour la démo `demo` (mêmes options que la ligne de commande).
 static func args_for(demo: Dictionary) -> PackedStringArray:
 	var args := PackedStringArray()
+	if chosen_hour != "":
+		args.append("--hour=" + chosen_hour)
 	if str(demo.get("kind", "field")) == "siege":
 		if demo.has("landmark"):
 			args.append("--siege-landmark=" + str(demo["landmark"]))
@@ -78,6 +108,23 @@ func _ready() -> void:
 	hint.add_theme_font_size_override("font_size", 15)
 	hint.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(hint)
+	# EP8 : heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
+	var hour_row := HBoxContainer.new()
+	box.add_child(hour_row)
+	var hour_label := Label.new()
+	hour_label.text = "Heure de la bataille"
+	hour_label.tooltip_text = "L'aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
+	hour_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	hour_row.add_child(hour_label)
+	hour_option = OptionButton.new()
+	hour_option.name = "HourOption"
+	hour_option.add_item("Au hasard (comme en campagne)", 0)
+	for phase in load_day_phases():
+		hour_keys.append(str(phase["key"]))
+		hour_option.add_item(str(phase["label"]), hour_keys.size() - 1)
+	hour_option.selected = maxi(hour_keys.find(chosen_hour), 0)
+	hour_option.item_selected.connect(func(index: int) -> void: chosen_hour = hour_keys[index])
+	hour_row.add_child(hour_option)
 	for demo in demos:
 		var entry := demo as Dictionary
 		var button := Button.new()
