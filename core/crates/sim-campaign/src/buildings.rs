@@ -24,6 +24,9 @@ use crate::state::{CampaignState, Construction, SettlementState};
 pub const BASE_CAPACITY: u64 = 40_000;
 /// Share of a construction's money cost refunded by `cancel_build`.
 pub const CANCEL_REFUND_PERCENT: u32 = 50;
+/// B7b: most a settlement's `ConstructionSpeed` can shorten a build (+100 %:
+/// half the time).
+pub const MAX_CONSTRUCTION_SPEED_PERCENT: f64 = 100.0;
 
 /// One `flat` + `percent` pair of a summed [`EffectKind`].
 #[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
@@ -582,7 +585,7 @@ impl CampaignState {
                         &state.controller,
                         i64::from(building.cost.money),
                     ) as u32,
-                    turns: building.build_time_turns,
+                    turns: self.build_time(data, settlement, building.build_time_turns),
                     available: true,
                     reason: None,
                 };
@@ -595,6 +598,44 @@ impl CampaignState {
                 option
             })
             .collect()
+    }
+
+    /// B7b `ConstructionSpeed` of `settlement` in percent: its buildings and
+    /// its province's edict, plus the best of its province's governor and
+    /// its controller's ruler (a builder on the throne or in the province
+    /// hurries the works; the two do not stack).
+    pub fn construction_speed_percent(&self, data: &GameData, settlement: &SettlementId) -> f64 {
+        let Some(state) = self.settlements.get(settlement) else {
+            return 0.0;
+        };
+        let mut local = effects_of(data, &state.buildings);
+        local.merge(&crate::edicts::edict_effects(self, data, &state.province));
+        let governor = self
+            .governor_effects(data, &state.province)
+            .construction_speed
+            .percent;
+        let ruler = self
+            .factions
+            .get(&state.controller)
+            .and_then(|f| f.ruler.as_ref())
+            .filter(|r| self.characters.get(*r).is_some_and(|c| c.alive))
+            .map_or(0.0, |r| {
+                crate::skills::character_effects(self, data, r)
+                    .construction_speed
+                    .percent
+            });
+        local.construction_speed.percent + governor.max(ruler)
+    }
+
+    /// Turns needed to build something of `base_turns` in `settlement`
+    /// (B7b): `base × 100 / (100 + speed %)`, rounded, at least one turn
+    /// (+15 % turns 4 into 3, +50 % turns 8 into 5).
+    pub fn build_time(&self, data: &GameData, settlement: &SettlementId, base_turns: u32) -> u32 {
+        let percent = self
+            .construction_speed_percent(data, settlement)
+            .clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
+        let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
+        (turns as u32).max(1)
     }
 
     /// Build options of the city of `province` (v1 signature).
