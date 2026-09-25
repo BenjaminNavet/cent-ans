@@ -22,6 +22,7 @@ const OIL := Color(0.30, 0.19, 0.07)
 
 var siege_view: BattleSiege
 var engines_fx: SiegeEnginesFx  # SG2 : engins animés (point et instant du lâcher)
+var marks: SiegeMarksFx  # SG2 : cratères des impacts, huile (vapeur, coulures, taches)
 var effects: BattleEffects
 var soldiers: BattleSoldiers
 var height_at: Callable
@@ -140,6 +141,10 @@ func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: Batt
 		_stone_chips.append(_chips("StoneChips%d" % i, STONE_CHIP, 0.28))
 		_wood_chips.append(_chips("WoodChips%d" % i, WOOD, 0.22))
 	_oil = _oil_emitter()
+	marks = SiegeMarksFx.new()
+	marks.name = "Marks"
+	add_child(marks)
+	marks.setup(SiegeEnginesFx.settings())
 
 
 ## Chaque image (et à chaque pas de l'avance rapide des captures) : `events` = nouveaux
@@ -158,6 +163,7 @@ func update(events: Array, units: Array, now: float, dt: float) -> void:
 	_update_towers(units)
 	_update_flights()
 	_update_debris(dt)
+	marks.update(now)
 	if _door_shake > 0.0:
 		_door_shake = maxf(_door_shake - dt, 0.0)
 		_shake_doors(_door_shake)
@@ -196,6 +202,7 @@ func _on_event(event: Dictionary) -> void:
 			_on_gate_broken(int(event["piece"]))
 		"wall_breached":
 			_drop_ladders(int(event["piece"]))
+			marks.clear_piece(int(event["piece"]))
 
 
 # --- Pans et porte ---------------------------------------------------------------------
@@ -521,12 +528,12 @@ func _on_engine_shot(event: Dictionary) -> void:
 			var shift := (h - 0.5) * 2.0 * minf(8.0, half * 0.8)
 			shift = clampf(along_now + shift, -half * 0.85, half * 0.85) - along_now
 			target = end + along * shift + Vector3(0, (h - 0.5) * wall_height * 0.3, 0)
-		_launch_stone(r["pos"], target, out, time_now + float(r["delay"]), bombard, breached and k == 0, r.get("dir", Vector3.ZERO))
+		_launch_stone(r["pos"], target, out, time_now + float(r["delay"]), bombard, breached and k == 0, r.get("dir", Vector3.ZERO), int(event["piece"]))
 
 
 ## Pierre ou boulet lancé de `start` à l'instant `t0` (invisible avant), vol raccourci du délai
 ## de lâcher pour que l'impact reste proche du tir du cœur (les dégâts sont déjà appliqués).
-func _launch_stone(start: Vector3, end: Vector3, out: Vector3, t0: float, bombard: bool, breached: bool, dir: Vector3) -> void:
+func _launch_stone(start: Vector3, end: Vector3, out: Vector3, t0: float, bombard: bool, breached: bool, dir: Vector3, piece: int) -> void:
 	var distance := start.distance_to(end)
 	var delay := maxf(t0 - time_now, 0.0)
 	var flight := clampf(distance / (140.0 if bombard else 60.0), 0.6 if bombard else 1.5, 3.5)
@@ -544,7 +551,7 @@ func _launch_stone(start: Vector3, end: Vector3, out: Vector3, t0: float, bombar
 	node.add_child(trail)
 	if dir == Vector3.ZERO:
 		dir = (end - start).normalized()
-	var entry := {"node": node, "trail": trail, "start": start, "end": end, "t0": t0, "flight": flight, "arc": 0.0 if bombard else distance * STONE_ARC, "out": out, "breached": breached, "bombard": bombard, "dir": dir, "launched": false}
+	var entry := {"node": node, "trail": trail, "start": start, "end": end, "t0": t0, "flight": flight, "arc": 0.0 if bombard else distance * STONE_ARC, "out": out, "breached": breached, "bombard": bombard, "dir": dir, "launched": false, "piece": piece}
 	_flights.append(entry)
 	if delay <= 0.0:
 		_on_launch(entry)
@@ -592,6 +599,8 @@ func _finish_flight(f: Dictionary) -> void:
 	get_tree().create_timer(2.0).timeout.connect(trail.queue_free)
 	node.queue_free()
 	_chips_at("stone", end, out, 1.4 if bool(f["breached"]) else 1.0)
+	if int(f.get("piece", -1)) >= 0 and not bool(f["breached"]):
+		marks.mark_impact(int(f["piece"]), end, out, false)
 	if effects != null:
 		effects.burst(end + out * 1.2, "impact", 2.4 if bool(f["breached"]) else 1.6)
 		effects.burst(end + out * 0.5 + Vector3(0, -2.0, 0), "smoke", 1.4)
@@ -760,6 +769,9 @@ func _on_oil(event: Dictionary) -> void:
 				effects.burst(ground, "smoke", 2.2)
 				effects.burst(ground + out * 2.0, "smoke", 1.6))
 	BattleAudio.play_at_delayed("death_groan", ground, 1.0)
+	var a: Vector2 = gate["a"]
+	var b: Vector2 = gate["b"]
+	marks.pour_oil(top, ground, out, a.distance_to(b), wall_height)
 
 
 # --- Porte enfoncée --------------------------------------------------------------------
