@@ -17,8 +17,48 @@ extends RefCounted
 ## Échap ferme le panneau du dessus (le dernier ouvert). Fermer un panneau = le masquer puis
 ## émettre son signal `closed` s'il en a un (le propriétaire met son état à jour : province
 ## désélectionnée, etc.). Aucune règle de jeu ici : ce n'est que de l'agencement.
+##
+## ORDRE D'AFFICHAGE DE L'INTERFACE (Q4, après la recette Q3)
+## -----------------------------------------------------------
+## Règle : HUD < panneaux < bandeaux < fenêtres modales < tutoriel ; le conseiller est sous les
+## modales (il se cache, ou attend pour parler, tant qu'une fenêtre bloquante est ouverte) ;
+## seuls l'écran de chargement et les bulles du Codex passent au-dessus de tout.
+##
+## 1. Calques (`CanvasLayer.layer`), du fond vers l'avant :
+##    - `-1` fondu du menu 3D ; `0` (`LAYER_WORLD`) étiquettes posées sur la carte (plaques
+##      d'armée, vue stratégique, jetons d'agent) ;
+##    - `1` (`LAYER_HUD`) : `MapUI` (tout le HUD de campagne, ses panneaux et ses modales, voir 2)
+##      et le HUD de bataille (`battle_hud.gd`, écran de fin compris) ;
+##    - `2` barre des ordres du chef (bataille) ; `5` HUD naval (écran de fin compris) ;
+##    - `8` (`LAYER_ADVISOR`) : bulle du conseiller (VO1). Au-dessus du HUD pour rester lisible,
+##      mais elle ne capte que son bouton « × », se pose à gauche hors des boutons d'action et de
+##      la barre d'unités, et s'efface dès qu'une fenêtre du groupe `BLOCKING_GROUP` est
+##      visible : elle n'est donc jamais par-dessus une modale ;
+##    - `20` (`LAYER_SPEECH`) discours du chef (bataille, siège), bloquant pour le conseiller ;
+##    - `100` écran de chargement ; `110` bulles et fenêtre du Codex.
+## 2. Dans `MapUI` (un seul calque), l'ordre des enfants fait foi pour le dessin **et** pour la
+##    souris : `restack` les trie (tri stable) par étage `Tier` — `HUD` (barre du haut, journal,
+##    cloche et pastilles d'alerte, carte « que faire maintenant », barre d'agent, bandeau
+##    d'ost), `PANEL` (panneaux ancrés, centraux, compagnons), `BANNER` (bandeau « tour des
+##    autres factions »), `MODAL` (pause, réglages, sauvegarde, rapport de saison, chronique,
+##    avant-bataille terrestre et navale, confirmations, fin de partie), `TUTORIAL`.
+##    L'étage vient de la méta `TIER_META` si elle est posée (`set_tier`), sinon du genre dans
+##    la pile (`MODAL` → `MODAL`, autres → `PANEL`), sinon `HUD`.
+## 3. Fenêtres bloquantes (`BLOCKING_GROUP`) : panneaux centraux, compagnons et modaux de la
+##    pile, dialogues d'avant-bataille, écrans de fin (bataille, siège, naval), discours.
 
 enum Kind { DOCKED, CENTRAL, COMPANION, MODAL }
+
+## Étages de l'interface de campagne (voir l'en-tête).
+enum Tier { HUD, PANEL, BANNER, MODAL, TUTORIAL }
+
+const LAYER_WORLD := 0
+const LAYER_HUD := 1
+const LAYER_ADVISOR := 8
+const LAYER_SPEECH := 20
+## Groupe des fenêtres devant lesquelles le conseiller s'efface.
+const BLOCKING_GROUP := &"ui_blocking"
+const TIER_META := &"ui_tier"
 
 ## Émis quand l'ensemble des panneaux visibles change (le HUD se replace).
 signal changed
@@ -43,6 +83,8 @@ func register(panel: Control, kind: Kind, companion_of: Array = []) -> void:
 		if other is Control:
 			companions.append(other)
 	_entries[panel] = {"kind": kind, "companion_of": companions}
+	if kind != Kind.DOCKED:
+		panel.add_to_group(BLOCKING_GROUP)
 	panel.visibility_changed.connect(_on_visibility_changed.bind(panel))
 	panel.tree_exiting.connect(_forget.bind(panel))
 	if panel.visible:
@@ -222,3 +264,54 @@ func _close_quiet(panel: Control) -> void:
 	panel.hide()
 	if panel.has_signal("closed"):
 		panel.emit_signal("closed")
+
+
+# --- Ordre d'affichage (Q4) --------------------------------------------------------------
+
+
+## Fixe l'étage de `node` dans l'interface de campagne ; `blocking` : le conseiller s'efface
+## tant qu'il est visible.
+static func set_tier(node: Node, tier: Tier, blocking: bool = false) -> void:
+	node.set_meta(TIER_META, tier)
+	if blocking:
+		node.add_to_group(BLOCKING_GROUP)
+
+
+## Marque `node` comme fenêtre bloquante (le conseiller s'efface tant qu'il est visible).
+static func mark_blocking(node: Node) -> void:
+	node.add_to_group(BLOCKING_GROUP)
+
+
+## Vrai si une fenêtre bloquante est visible à l'écran.
+static func blocking_open(tree: SceneTree) -> bool:
+	if tree == null:
+		return false
+	for node in tree.get_nodes_in_group(BLOCKING_GROUP):
+		if node is CanvasItem and (node as CanvasItem).is_visible_in_tree():
+			return true
+	return false
+
+
+## Étage d'un enfant de l'interface de campagne.
+func tier_of(node: Node) -> int:
+	if node.has_meta(TIER_META):
+		return int(node.get_meta(TIER_META))
+	if _entries.has(node):
+		return Tier.MODAL if kind_of(node) == Kind.MODAL else Tier.PANEL
+	return Tier.HUD
+
+
+## Trie les enfants de `parent` par étage (tri stable : l'ordre d'un même étage est gardé).
+func restack(parent: Node) -> void:
+	var children := parent.get_children()
+	var buckets: Array = []
+	for _tier in Tier.size():
+		buckets.append([])
+	for child in children:
+		buckets[clampi(tier_of(child), 0, Tier.size() - 1)].append(child)
+	var ordered: Array = []
+	for bucket in buckets:
+		ordered.append_array(bucket)
+	for i in ordered.size():
+		if (ordered[i] as Node).get_index() != i:
+			parent.move_child(ordered[i], i)

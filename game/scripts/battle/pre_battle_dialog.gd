@@ -51,6 +51,7 @@ var _colors: Array[Color] = [Color(0.2, 0.3, 0.75), Color(0.75, 0.15, 0.12)]
 
 
 func _ready() -> void:
+	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Q4 : modale, le conseiller s'efface
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	theme = load("res://scenes/ui/parchment_theme.tres")

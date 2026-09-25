@@ -19,6 +19,13 @@ const BUS := "Voix"
 const DUCK_DB := -9.0
 const READ_CHARS_PER_SECOND := 14.0
 const MAX_QUEUE := 2
+## Q4 : une réplique qui attend la fermeture d'une fenêtre est oubliée au-delà.
+const MAX_WAIT_S := 120.0
+const BLOCK_CHECK_S := 0.2
+## Q4 : largeur de la bulle et place (bord gauche, au-dessus du bas d'écran : hors des boutons
+## d'action du panneau de province, de la barre d'unités et des ordres du chef).
+const BUBBLE_WIDTH := 420.0
+const BUBBLE_BOTTOM := 0.62
 
 var silent := false
 ## Faux en capture et en test : les « premières fois » ne sont pas enregistrées.
@@ -30,11 +37,14 @@ var _player: AudioStreamPlayer = null
 var _layer: CanvasLayer = null
 var _panel: PanelContainer = null
 var _text_label: Label = null
+var _close_button: Button = null
 var _queue: Array = []
 var _until: float = 0.0
 var _time: float = 0.0
 var _last_end: float = -1000.0
 var _alert_turns: Dictionary = {}  # événement → tour de la dernière alerte
+var _block_check := 0.0
+var _is_blocked := false
 
 
 static func current() -> Advisor:
@@ -154,11 +164,21 @@ func turn_events(events: Array, player_faction: String, turn: int) -> void:
 
 
 ## Dit `line` ({id, text}) maintenant, ou après l'intervention en cours (file de 2 au plus).
+## Q4 : tant qu'une fenêtre bloquante est ouverte (avant-bataille, fin de bataille, discours,
+## rapport de saison, panneaux centraux…), la réplique attend sa fermeture (`MAX_WAIT_S` au plus).
 func say(line: Dictionary) -> void:
-	if speaking():
+	if speaking() or _blocked():
 		if _queue.size() < MAX_QUEUE:
-			_queue.append(line)
+			_queue.append({"line": line, "at": _time})
 		return
+	_start(line)
+
+
+func _blocked() -> bool:
+	return PanelStack.blocking_open(get_tree())
+
+
+func _start(line: Dictionary) -> void:
 	var id := str(line.get("id", ""))
 	said.append(id)
 	if said.size() > 16:
@@ -178,7 +198,7 @@ func say(line: Dictionary) -> void:
 		director.call("duck_music", DUCK_DB, spoken + 0.5)
 
 
-## Coupe l'intervention en cours (clic sur le sous-titre).
+## Coupe l’intervention en cours (bouton « × » de la bulle).
 func dismiss() -> void:
 	_until = _time
 	_player.stop()
@@ -188,11 +208,21 @@ func dismiss() -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_block_check -= delta
+	if _block_check <= 0.0:
+		_block_check = BLOCK_CHECK_S
+		_is_blocked = _blocked()
 	if _panel != null and _panel.visible and not speaking():
 		_panel.visible = false
 		_last_end = _time
-	if not speaking() and not _queue.is_empty() and _time - _last_end >= float(VoiceLines.advisor().get("min_gap_s", 1.5)):
-		say(_queue.pop_front())
+	# Q4 : une fenêtre bloquante s'ouvre pendant qu'il parle : le sous-titre s'efface (la voix
+	# finit sa phrase) et ne revient pas par-dessus la fenêtre.
+	if _panel != null and _panel.visible and _is_blocked:
+		_panel.visible = false
+	while not _queue.is_empty() and _time - float(_queue[0]["at"]) > MAX_WAIT_S:
+		_queue.pop_front()
+	if not speaking() and not _is_blocked and not _queue.is_empty() and _time - _last_end >= float(VoiceLines.advisor().get("min_gap_s", 1.5)):
+		_start(_queue.pop_front()["line"])
 
 
 # --- Sous-titre ------------------------------------------------------------------------
@@ -209,7 +239,7 @@ func _show(text: String, data: Dictionary) -> void:
 
 func _build(data: Dictionary) -> void:
 	_layer = CanvasLayer.new()
-	_layer.layer = 40
+	_layer.layer = PanelStack.LAYER_ADVISOR  # Q4 : sous les modales (voir PanelStack)
 	add_child(_layer)
 	_panel = PanelContainer.new()
 	_panel.name = "AdvisorPanel"
@@ -219,35 +249,50 @@ func _build(data: Dictionary) -> void:
 	style.content_margin_left = 20
 	style.content_margin_right = 20
 	_panel.add_theme_stylebox_override("panel", style)
-	# Bottom centre, above the battle unit cards: top-left covered the season
-	# report and other campaign panels (Q2).
-	_panel.anchor_left = 0.5
-	_panel.anchor_right = 0.5
-	_panel.anchor_top = 1.0
-	_panel.anchor_bottom = 1.0
-	_panel.offset_left = -220
-	_panel.offset_right = 220
-	_panel.offset_bottom = -176
-	_panel.offset_top = -176
-	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	# Q4: left edge, bottom at 62 % of the height. Bottom centre (Q2) covered the
+	# province panel's « Recruter » and the modal dialogs; the left edge between the
+	# « que faire » card and the journal (campaign) or the leader's orders (battle) is free.
+	_panel.anchor_left = 0.0
+	_panel.anchor_right = 0.0
+	_panel.anchor_top = BUBBLE_BOTTOM
+	_panel.anchor_bottom = BUBBLE_BOTTOM
+	_panel.offset_left = 16
+	_panel.offset_right = 16 + BUBBLE_WIDTH
+	_panel.offset_bottom = 0
+	_panel.offset_top = 0
 	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_panel.custom_minimum_size = Vector2(440, 0)
-	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.tooltip_text = "Clic : faire taire le conseiller (Réglages → Son pour le désactiver)."
-	_panel.gui_input.connect(func(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.pressed:
-			dismiss())
+	_panel.custom_minimum_size = Vector2(BUBBLE_WIDTH, 0)
+	# Q4 : la bulle ne capte plus la souris (le clic passe au jeu) ; seul « × » la ferme.
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_layer.add_child(_panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.add_child(box)
+	var head := HBoxContainer.new()
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(head)
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [str(data.get("name", "Le conseiller")), str(data.get("title", ""))]
 	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
-	box.add_child(name_label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	head.add_child(name_label)
+	_close_button = Button.new()
+	_close_button.name = "Dismiss"
+	_close_button.text = "×"
+	_close_button.flat = true
+	_close_button.focus_mode = Control.FOCUS_NONE
+	_close_button.custom_minimum_size = Vector2(24, 20)
+	_close_button.add_theme_font_size_override("font_size", 16)
+	_close_button.add_theme_color_override("font_color", HudStyle.RUBRIC)
+	_close_button.tooltip_text = "Faire taire le conseiller (Réglages → Son pour le désactiver)."
+	_close_button.pressed.connect(dismiss)
+	head.add_child(_close_button)
 	_text_label = Label.new()
-	_text_label.custom_minimum_size = Vector2(404, 0)
+	_text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_text_label.custom_minimum_size = Vector2(BUBBLE_WIDTH - 36, 0)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", 17)
 	_text_label.add_theme_color_override("font_color", HudStyle.INK)
