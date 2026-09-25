@@ -73,9 +73,9 @@
       "id": "settlements",
       "title": "Places (vue moyenne)",
       "entries": [
-        {"sample": {"type": "settlement", "pictogram": "city_capital", "owner": "player"}, "label": "Capitale, grande cité", "text": "Plus la place compte, plus son dessin est grand : capitale d'un royaume, grande cité, puis cité à cathédrale. Seules les capitales, grandes cités et forteresses restent à la vue d'Europe."},
+        {"sample": {"type": "settlement", "kind": "city", "pictogram": "city_capital", "owner": "player"}, "label": "Capitale, grande cité", "text": "Plus la place compte, plus son dessin est grand : capitale d'un royaume, grande cité, puis cité à cathédrale. Seules les capitales, grandes cités et forteresses restent à la vue d'Europe."},
         {"sample": {"type": "settlement", "kind": "city", "owner": "player"}, "label": "Cité", "text": "Ville close à cathédrale, dont le nom est écrit en plus grand."},
-        {"sample": {"type": "settlement", "pictogram": "town_walled", "owner": "player"}, "label": "Ville", "text": "Ville close si elle est fortifiée, bourg de maisons sinon. Les petites places n'apparaissent qu'en rapprochant la caméra."},
+        {"sample": {"type": "settlement", "kind": "town", "pictogram": "town_walled", "owner": "player"}, "label": "Ville", "text": "Ville close si elle est fortifiée, bourg de maisons sinon. Les petites places n'apparaissent qu'en rapprochant la caméra."},
         {"sample": {"type": "settlement", "kind": "castle", "rank": 3, "owner": "player"}, "label": "Château", "text": "Forteresse, château ou simple tour, selon sa force."},
         {"sample": {"type": "settlement", "kind": "abbey", "owner": "player"}, "label": "Abbaye", "text": "Abbaye ou prieuré."},
         {"sample": {"type": "settlement", "kind": "village", "owner": "player"}, "label": "Village", "text": "Chaumières et chapelle."},
