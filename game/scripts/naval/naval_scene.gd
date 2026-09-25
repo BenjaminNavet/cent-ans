@@ -10,7 +10,7 @@ extends Node3D
 ## rendu par `resolve_naval_battle` au retour) ou un scénario historique autonome
 ## (`--naval-scenario=sluys`). Options de ligne de commande (après `--`) : `--screenshot=<png>`
 ## (capture puis quitte), `--shot-at=<s>` (avance rapide jusqu'à cet instant), `--camera=<vue>`
-## (overview, close, deck, melee), `--autoplay` (IA des deux camps), `--benchmark` (i/s, JSON),
+## (overview, close, deck, melee, fire), `--autoplay` (IA des deux camps), `--benchmark` (i/s, JSON),
 ## `--seed=<n>`.
 
 signal returned(result: Dictionary)
@@ -141,6 +141,11 @@ func _begin() -> void:
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = BattleUiKit.faction_color(faction, Color(0.2, 0.3, 0.75) if side == "attacker" else Color(0.75, 0.15, 0.12))
 		side_heraldry[side] = PortraitLoader.heraldry_texture(faction)
+	# Deux camps aux couleurs voisines (Castille et Angleterre) : l'ennemi est assombri.
+	var a: Color = side_colors["attacker"]
+	var d: Color = side_colors["defender"]
+	if Vector3(a.r - d.r, a.g - d.g, a.b - d.b).length() < 0.3:
+		side_colors[enemy_side] = (side_colors[enemy_side] as Color).darkened(0.5)
 	wind = battle.call("get_wind")
 	var weather_key := "rain" if bool(setup_data.get("rain", false)) else "clear"
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, str(setup_data.get("season", "summer")))
@@ -705,6 +710,8 @@ func _apply_camera_view() -> void:
 		if str(ship["status"]) != "afloat":
 			continue
 		var weight := float((ship.get("grappled", PackedInt32Array()) as PackedInt32Array).size()) * 100.0 + float(ship["fire"]) * 50.0 + float(ship["soldiers"]) * 0.01
+		if _camera_view == "fire":
+			weight = float(ship["fire"]) * 1000.0 + float(ship["soldiers"]) * 0.01
 		if str(ship["side"]) == player_side:
 			weight += 1.0
 		if weight > best:
@@ -735,8 +742,8 @@ func _apply_camera_view() -> void:
 	match _camera_view:
 		"overview":
 			camera_rig.look_at_point(focus, 420.0, camera_rig.yaw)
-		"close":
-			camera_rig.look_at_point(focus, 60.0, camera_rig.yaw + 0.6)
+		"close", "fire":
+			camera_rig.look_at_point(focus, 75.0, camera_rig.yaw + 0.6)
 		"deck":
 			camera_rig.look_at_point(focus + Vector3(0, 4, 0), 24.0, camera_rig.yaw + 1.2)
 		"melee":
