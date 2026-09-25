@@ -246,6 +246,10 @@ func _crew_engine(id: int, i: int, node: Node3D, model: String, c: Dictionary, u
 			"swab":
 				if reloading and tau > float(c.get("recoil_s", 0.1)) + float(c.get("hold_s", 0.0)) and phase < float(crew.cfg.get("swab_until", 0.5)):
 					act = "swab"
+		if act == "idle" and s.has("rest"):
+			# Au repos hors du souffle de la bouche (bombarde) : place de repos.
+			var rest: Array = s["rest"]
+			s = {"x": rest[0], "z": rest[1], "yaw_deg": rest[2], "figure": s.get("figure", 0)}
 		_add_servant("e%d/%d/%d" % [id, i, k], node.global_transform, s, crew.clip_of(act), side)
 
 
