@@ -25,7 +25,7 @@ plusieurs heures, autonomie complète).
       (`building_atlas.gdshader`, `building_albedo_array.jpg`, couche = alpha de la couleur de
       sommet) : 3 surfaces par maquette
 - [x] 5. Captures `docs/audit/captures/br1/` (avant/après siège, village, Paris, Rouen, Troyes)
-- [ ] 6. Fusion dans main
+- [x] 6. Fusion dans main (ff, 8a2198c9)
 
 ## Mesures (charge machine ≈ 85, FPS non significatifs ; appels et primitives fiables)
 
@@ -52,4 +52,4 @@ plusieurs heures, autonomie complète).
 
 ## Prochaine étape
 
-Fusion dans main (worktree de fusion, ff-only).
+Polissage : mobilier de rue du siège, captures hiver ; densité de siège à décider côté règles.
