@@ -43,6 +43,10 @@ var standard_mode: int = 0
 @onready var selection: Decal = $Selection
 
 var _flag_material: ShaderMaterial
+## Lot CV2 : figurines animées (null en repli sur les figurines M10/V3).
+var figures: ArmyFigures
+## Hauteurs de repos de la hampe, du fleuron et du drapeau (avant décalage vers le porteur).
+var _rest_y: Array = []
 var _selected := false
 var _shadows_on := true
 
@@ -76,9 +80,22 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 	_flag_material.set_shader_parameter("faction_color", color)
 	_apply_standard(standard_for(faction_id, army))
 	(banner.material_override as StandardMaterial3D).albedo_color = color
-	# Figurines 3D (ou cogue, + camp de siège) si les modèles existent.
-	ModelLibrary.dress_army_marker(self, army, color)
-	if status == "embarked":
+	_rest_y = [pole.position.y, $Finial.position.y, flag.position.y]
+	# Lot CV2 : figurines skinnées animées (général, porte-étendard, escorte), flotte, camp ;
+	# repli sur les figurines M10/V3 (`--legacy-army-markers` ou modèles absents).
+	var previous := get_node_or_null(ModelLibrary.MODEL_NODE)
+	if previous != null:
+		remove_child(previous)
+		previous.queue_free()
+	if ArmyFigures.enabled():
+		figures = ArmyFigures.build(army, color, _heraldry(faction_id), id)
+		add_child(figures)
+		banner.visible = false
+		face(Vector2(1.0, 0.45).normalized())
+	else:
+		figures = null
+		ModelLibrary.dress_army_marker(self, army, color)
+	if status == "embarked" and figures == null:
 		# À bord : l'étendard flotte au mât de la cogue.
 		pole.visible = false
 		$Finial.visible = false
@@ -181,6 +198,30 @@ func face(direction: Vector2) -> void:
 		return
 	# Les modèles regardent +X ; Basis(UP, a) envoie X sur (cos a, 0, −sin a).
 	model.rotation.y = atan2(-direction.y, direction.x)
+	if figures != null:
+		_follow_bearer()
+
+
+## Lot CV2 : la hampe suit le porte-étendard (ou la hampe de poupe du navire amiral).
+func _follow_bearer() -> void:
+	var anchor := figures.bearer_anchor()
+	if _rest_y.size() < 3:
+		return
+	pole.position = Vector3(anchor.x, float(_rest_y[0]) + anchor.y, anchor.z)
+	$Finial.position = Vector3(anchor.x, float(_rest_y[1]) + anchor.y, anchor.z)
+	flag.position = Vector3(anchor.x, float(_rest_y[2]) + anchor.y, anchor.z)
+
+
+## Lot CV2 : marche (animation du déplacement) ou repos des figurines.
+func set_walking(value: bool) -> void:
+	if figures != null:
+		figures.set_walking(value)
+
+
+## Lot CV2 : niveau de détail et présence des figurines selon la distance caméra.
+func set_view(camera_distance: float, weight: float) -> void:
+	if figures != null:
+		figures.set_view(camera_distance, weight)
 
 
 ## Point écran de référence pour le picking (milieu de l'étendard).

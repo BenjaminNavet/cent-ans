@@ -8,7 +8,7 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 • Déplacer la caméra : W A S D (Z Q S D en AZERTY), flèches ou bords d'écran (F2 pour désactiver) ; molette : zoom ; Q / E (A / E en AZERTY) : rotation.
 • Clic gauche : sélectionner une armée ou une province. Clic droit (armée sélectionnée) : ordre de déplacement.
 • Entrée : fin du tour. Échap : désélectionner.
-• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. G : agents. K : Codex. L : tutoriel. F1 : cette aide.
+• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. G : agents. K : Codex. L : tutoriel. F1 : cette aide. F5 : sauvegarde rapide, F9 : chargement rapide. Échap : ferme la fenêtre du dessus.
 • Modes de carte : M mécontentement, N diplomatie, R religion. F12 : capture d'écran.
 • Volumes de la musique et des effets : menu de départ ou Menu → Son…
 

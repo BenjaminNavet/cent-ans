@@ -34,6 +34,7 @@
 pub mod agents;
 pub mod ai_minimal;
 pub mod battle_auto;
+pub mod battle_forecast;
 pub mod battle_request;
 pub mod buildings;
 pub mod characters;
