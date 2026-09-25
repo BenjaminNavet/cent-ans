@@ -42,9 +42,52 @@ convoi de bagages derrière chaque armée ; pieux des archers.
   (`battle_camp_fire.gdshader`), camp pillé, pieux (`battle_volleys._stake_mesh`) ;
   `--no-ep6-decor` (A/B), `--province=<id>` (paysage d'une province, captures).
 - [x] ADR 0061 (`docs/decisions/0061-villages-et-decor-du-champ-de-bataille.md`).
-- [ ] Import Godot, premier lancement (erreurs de script), retouches kit (roue du moulin, cheval :
-  sous-agent relancé).
-- [ ] Banc EP1 avant/après, captures `docs/img/ep6/`, fusion de main, vérifications finales.
+- [x] Import Godot, premier lancement sans erreur de script ; retouches kit (roue ajourée du
+  moulin, chevaux nus) commitées.
+- [x] Grille des emprises du décor (`sim/obstacles.rs::DecorGrid`, cellules de 64 m) ; l'IA prend
+  les zones du décor comme couverts (`ai.rs`, test `a_manor_before_the_line_is_a_defensive_cover`).
+- [x] Fusion de main (EP8, d0be0f2b) ; feux des camps → `BattleScene.add_smoke_source` (au plus
+  `camp_fires_per_side` par camp, pas sous la pluie/neige), `staging.auto_campfires = false` dès
+  que le décor a des camps ; camp pillé → sources « column » d'EP8. Fumée vérifiée en capture.
+- [ ] Banc EP1 avant/après, captures `docs/img/ep6/`, vérifications finales (smoke Godot, pytest).
+
+## API de pose explicite (pour EP7)
+
+Deux voies, au choix, toutes deux dans le cœur (`core/crates/sim-battle/src/decor.rs`) :
+
+1. **Plan JSON** (recommandé pour les cartes historiques) : `BattleSetup::decor_plan:
+   Option<DecorPlan>`, appliqué par `BattleSim::new_scaled` après le décor procédural. Schéma
+   `data/schemas/battle_decor_plan.schema.json`, exemple commenté
+   `data/battle_maps/decor_plan_example.json`. `{"description", "clear": bool, "items": [...]}` ;
+   `clear: true` retire d'abord le décor procédural (les camps procéduraux restent sauf si le plan
+   pose les siens). Éléments (`type`) :
+   - `building` {kind: cottage|timbered|barn|church|stone|windmill|watermill|manor, x, z, yaw, length?, width?}
+   - `windmill` {x, z, yaw?, mound?} — moulin sur pivot, butte levée dans la grille des hauteurs
+   - `watermill` {x, z, yaw?} — roue vers `(-sin yaw, cos yaw)`
+   - `church` {x, z, yaw?} — église + cimetière clos (zone `church`)
+   - `manor` {x, z, yaw?, moat?} — maison forte, cour, grange, puits, fossé en eau
+   - `hamlet` {layout: street|green|farmstead, x, z, yaw?, houses? (0 = usuel), seed?} — disposé
+     autour des routes et de l'eau ; `street` suit la route la plus proche de (x, z)
+   - `plot` {kind: orchard|vineyard|ploughland|meadow|hamlet|church|manor|farmstead|camp, x, z, length, width, yaw?, state?
+     (ploughed|sown|crop|stubble)} — les prés reçoivent les meules de la saison
+   - `prop` {kind: haystack|cart|tent|pavilion|wagon|campfire|horse_line|graves|well|woodpile, x, z, yaw?}
+   - `camp` {side: attacker|defender, x, z, yaw? (front vers l'ennemi), seed?} — remplace le camp du camp
+   - `hedge` {a: [x, z], b: [x, z]}
+2. **Appels Rust** sur `Battlefield` : `clear_decor()`, `place_building(kind, x, z, yaw, length,
+   width) -> usize`, `place_windmill(x, z, yaw, mound)`, `place_watermill(x, z, yaw)`,
+   `place_church(x, z, yaw)`, `place_manor(x, z, yaw, moat)`, `place_hamlet(layout, x, z, yaw,
+   houses, seed) -> bool`, `place_plot(kind, x, z, length, width, yaw, state)`, `place_prop(kind,
+   x, z, yaw)`, `place_camp(side, x, z, yaw, seed) -> bool`, `apply_decor_plan(&plan)`.
+   Pose à la main = sans contrôle (sauf `place_hamlet`/`place_camp`, qui évitent routes et eau).
+   Après modification du champ d'une simulation déjà créée, passer par `BattleSim::field_mut()`
+   (remet à zéro la grille des emprises).
+- Requêtes d'effets : `decor_area_at`, `decor_effect_at`, `decor_speed_factor`, `decor_cover`,
+  `decor_defense`, `decor_breaks_charge`, `decor_footprints_near`. Rendu : aucun travail côté
+  Godot, `get_terrain().decor` porte tout (le rendu relit le décor tel quel).
+- Coordonnées en mètres dans le repère du champ (`FieldSize`, 0..width × 0..depth ; attaquant côté
+  z petit). `yaw` en radians : longueur le long de `(cos, sin)`, façade vers `(-sin, cos)`.
 
 ## Prochaine étape
-`core/build.sh` (en cours), import Godot, lancer une bataille (`--province=prov_guyenne`), corriger, banc A/B `tools/bench_ep1.sh` avec et sans `--no-ep6-decor`, captures.
+Banc A/B `tools/bench_ep1.sh ep6 --units=63 --bench-at=90 --scale=epic` avec et sans
+`--no-ep6-decor` ; captures (vue d'ensemble hameau/moulin/camp, gros plan village en mêlée) ;
+smoke Godot, pytest, ruff ; rapport.
