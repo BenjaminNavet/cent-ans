@@ -223,6 +223,9 @@ pub struct DiplomaticLedger {
     /// Latest treaties, oldest first.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub history: Vec<TreatyRecord>,
+    /// Lot DP2: armies of other factions trespassing on our lands.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub trespassers: BTreeMap<FactionId, crate::passage::Trespass>,
 }
 
 fn is_zero(value: &u32) -> bool {
