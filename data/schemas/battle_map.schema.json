@@ -90,7 +90,8 @@
             "properties": {
               "label": { "type": "string" },
               "release_s": { "type": "number", "minimum": 0, "maximum": 3600 },
-              "after": { "type": "integer", "minimum": 0 }
+              "after": { "type": "integer", "minimum": 0 },
+              "assault": { "type": "boolean", "description": "Une fois lâchée, la vague marche droit sur l'ennemi (charges successives), sans que l'IA pèse l'attaque." }
             }
           }
         }

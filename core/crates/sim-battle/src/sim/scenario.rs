@@ -30,6 +30,8 @@ pub(crate) struct WaveState {
     pub release_s: f64,
     pub after: Option<usize>,
     pub released: bool,
+    /// Once released, the wave's regiments go at the enemy (scripted).
+    pub assault: bool,
 }
 
 /// Scenario state of a historical battle.
@@ -42,10 +44,15 @@ pub(crate) struct Scenario {
     pub waves: [Vec<WaveState>; 2],
     pub weather_changes: Vec<WeatherChange>,
     pub next_change: usize,
+    /// By unit index: where it deployed (assault shooters out of missiles
+    /// fall back there).
+    pub origin: Vec<(f64, f64)>,
 }
 
 /// A posted regiment idle this far from its post walks back to it.
 const POST_RETURN: f64 = 0.5;
+/// An assault wave breaks into a run this close to its target (m).
+const ASSAULT_RUN: f64 = 140.0;
 
 impl BattleSim {
     /// EP7: deploys the regiments of a historical map where the map puts
@@ -57,6 +64,7 @@ impl BattleSim {
         let mut scenario = Scenario {
             posts: vec![None; n],
             wave_of: vec![0; n],
+            origin: vec![(0.0, 0.0); n],
             weather_changes: weather.to_vec(),
             ..Scenario::default()
         };
@@ -74,6 +82,7 @@ impl BattleSim {
                     release_s: 0.0,
                     after: None,
                     released: true,
+                    assault: false,
                 }]
             } else {
                 army.waves
@@ -84,6 +93,7 @@ impl BattleSim {
                         release_s: w.release_s,
                         after: w.after,
                         released: k == 0 || w.release_s <= 0.0 && w.after.is_none(),
+                        assault: w.assault,
                     })
                     .collect()
             };
@@ -135,6 +145,7 @@ impl BattleSim {
                     unit.destination = None;
                     unit.target = None;
                     scenario.wave_of[i] = block.wave;
+                    scenario.origin[i] = (x, z);
                     if block.hold {
                         scenario.posts[i] = Some(Post {
                             x,
@@ -150,6 +161,15 @@ impl BattleSim {
         self.path_cache = Default::default();
     }
 
+    /// EP7: replaces the opening line of the journal (the weather drawn
+    /// before the map set its own).
+    pub fn set_opening_line(&mut self, text: String) {
+        match self.events.first_mut() {
+            Some(first) if first.time == 0.0 => first.text_fr = text,
+            _ => self.log(text, None),
+        }
+    }
+
     /// EP7: is regiment `index` in a wave not yet released (no AI order)?
     pub fn scenario_held(&self, index: usize) -> bool {
         self.scenario.as_ref().is_some_and(|s| {
@@ -158,6 +178,18 @@ impl BattleSim {
             s.waves[unit.side.index()]
                 .get(wave)
                 .is_some_and(|w| !w.released)
+        })
+    }
+
+    /// EP7: is regiment `index` in a released assault wave (it goes at the
+    /// enemy on the scenario's orders, not the AI's)?
+    pub fn scenario_assault(&self, index: usize) -> bool {
+        self.scenario.as_ref().is_some_and(|s| {
+            let unit = &self.units[index];
+            let wave = s.wave_of.get(index).copied().unwrap_or(0);
+            s.waves[unit.side.index()]
+                .get(wave)
+                .is_some_and(|w| w.released && w.assault)
         })
     }
 
@@ -195,7 +227,7 @@ impl BattleSim {
             let Some(i) = index_of(id) else {
                 return true;
             };
-            if self.scenario_held(i) {
+            if self.scenario_held(i) || self.scenario_assault(i) {
                 return false;
             }
             match (scenario.posts.get(i).copied().flatten(), to) {
@@ -245,6 +277,24 @@ impl BattleSim {
                     .filter(|&id| allowed(id, None, 0.0))
                     .collect();
                 (!kept.is_empty()).then_some(Command::Withdraw { units: kept })
+            }
+            Command::LeaderOrder { side, order, units } if !units.is_empty() => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::LeaderOrder {
+                    side,
+                    order,
+                    units: kept,
+                })
+            }
+            Command::Formation { units, kind } => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::Formation { units: kept, kind })
             }
             other => Some(other),
         }
@@ -307,8 +357,66 @@ impl BattleSim {
                 }
             }
         }
-        // Posted regiments drift back to their posts when idle.
+        // Assault waves go at the nearest enemy regiment, at the run once
+        // close (the successive charges of Crécy).
         let mut back = Vec::new();
+        for i in 0..self.units.len() {
+            let unit = &self.units[i];
+            if unit.side == SideId::Defender && !self.ai_enabled[1]
+                || unit.side == SideId::Attacker && !self.ai_enabled[0]
+            {
+                continue;
+            }
+            let wave = scenario.wave_of.get(i).copied().unwrap_or(0);
+            let assault = scenario.waves[unit.side.index()]
+                .get(wave)
+                .is_some_and(|w| w.released && w.assault);
+            if !assault || !unit.able() || unit.state == UnitState::Melee {
+                continue;
+            }
+            // Shooters out of missiles fall back behind the next wave
+            // instead of charging (the Genoese at Crécy).
+            if unit.category == data_model::UnitCategory::Ranged && unit.ammo == 0 {
+                let (x, z) = scenario.origin.get(i).copied().unwrap_or((unit.x, unit.z));
+                if unit.destination.is_none() && (unit.x - x).hypot(unit.z - z) > 30.0 {
+                    back.push((
+                        unit.side,
+                        Command::Move {
+                            units: vec![unit.id],
+                            x,
+                            z,
+                            run: false,
+                            facing: Some(unit.facing),
+                        },
+                    ));
+                }
+                continue;
+            }
+            if unit
+                .target
+                .and_then(|t| self.units.get(t as usize))
+                .is_some_and(|t| t.able())
+            {
+                continue;
+            }
+            let nearest = self
+                .units
+                .iter()
+                .filter(|e| e.side != unit.side && e.able() && !e.synthetic)
+                .map(|e| (e.id, (e.x - unit.x).hypot(e.z - unit.z)))
+                .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+            if let Some((target, d)) = nearest {
+                back.push((
+                    unit.side,
+                    Command::Attack {
+                        units: vec![unit.id],
+                        target,
+                        run: d < ASSAULT_RUN,
+                    },
+                ));
+            }
+        }
+        // Posted regiments drift back to their posts when idle.
         for (i, post) in scenario.posts.iter().enumerate() {
             let Some(post) = post else { continue };
             let unit = &self.units[i];
@@ -321,26 +429,21 @@ impl BattleSim {
                 continue;
             }
             if (unit.x - post.x).hypot(unit.z - post.z) > post.leash * POST_RETURN + 5.0 {
-                back.push(Command::Move {
-                    units: vec![unit.id],
-                    x: post.x,
-                    z: post.z,
-                    run: false,
-                    facing: Some(post.facing),
-                });
+                back.push((
+                    unit.side,
+                    Command::Move {
+                        units: vec![unit.id],
+                        x: post.x,
+                        z: post.z,
+                        run: false,
+                        facing: Some(post.facing),
+                    },
+                ));
             }
         }
         self.scenario = Some(scenario);
-        for command in back {
-            let side = self
-                .units
-                .iter()
-                .find(|u| match &command {
-                    Command::Move { units, .. } => units.first() == Some(&u.id),
-                    _ => false,
-                })
-                .map(|u| u.side);
-            let _ = self.apply_command(command, side);
+        for (side, command) in back {
+            let _ = self.apply_command(command, Some(side));
         }
     }
 

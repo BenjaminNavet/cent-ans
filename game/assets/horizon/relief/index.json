@@ -1,5 +1,18 @@
 {
  "provinces": {
+  "hist_crecy": {
+   "file": "hist_crecy.bin",
+   "lon": 1.9032,
+   "lat": 50.2581,
+   "ref_m": 59.9,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.33,
+   "relief_max_m": 142.0,
+   "sea_share": 0.0,
+   "site": "crecy"
+  },
   "prov_agenais": {
    "file": "prov_agenais.bin",
    "lon": 0.4862,
