@@ -71,7 +71,7 @@ void fragment() {
 		// Haies et chemins entre les parcelles.
 		vec2 f = fract(q / vec2(170.0, 95.0));
 		float edge = min(min(f.x, 1.0 - f.x) * 170.0, min(f.y, 1.0 - f.y) * 95.0);
-		crop = mix(meadow * 0.85, crop, smoothstep(0.6, 2.5, edge));
+		crop = mix(mix(crop, meadow, 0.5) * 0.85, crop, smoothstep(0.4, 1.6, edge));
 		vec2 in_zone = step(meadow_zone.xy, p) * step(p, meadow_zone.zw);
 		float zone = in_zone.x * in_zone.y;
 		crop = mix(crop, meadow * (0.9 + 0.2 * fbm(p * 0.02)), zone);
