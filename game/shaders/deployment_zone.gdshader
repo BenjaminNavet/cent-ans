@@ -1,5 +1,5 @@
 shader_type spatial;
-// A1-02 : zone de déploiement discrète, façon Warhammer III. Un liseré lumineux net sur le
+// A1-02 : zone de déploiement discrète. Un liseré lumineux net sur le
 // contour, un halo qui se fond vers l'intérieur, des hachures diagonales dans une bande de bordure
 // et un voile presque invisible au centre. Les hachures et le halo s'estompent quand la caméra
 // s'éloigne ; le liseré garde une largeur minimale à l'écran pour rester lisible de loin.
