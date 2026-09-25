@@ -509,11 +509,11 @@ class FamilyTreeNode:
 		var date_size := int(round(11.0 * z))
 		draw_string(font, Vector2(4, size.y - 8.0 * z), dates_text(), HORIZONTAL_ALIGNMENT_CENTER, width - 8, date_size, HudStyle.RUBRIC if alive else HudStyle.INK_SOFT)
 		if is_heir:
-			# Cartouche « HÉRITIER » à cheval sur le bas du cartouche (le médaillon couvre le haut).
+			# Cartouche « HÉRITIER » sous le cartouche du nom (le médaillon couvre le haut).
 			var tag := "HÉRITIÈRE" if str(entry.get("sex", "")) == "female" else "HÉRITIER"
 			var tag_size := int(round(10.0 * z))
 			var tag_width := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, tag_size).x + 10.0 * z
-			var tag_rect := Rect2(Vector2((width - tag_width) * 0.5, card.end.y - 5.0 * z), Vector2(tag_width, 13.0 * z))
+			var tag_rect := Rect2(Vector2((width - tag_width) * 0.5, card.end.y + 1.0 * z), Vector2(tag_width, 13.0 * z))
 			draw_rect(tag_rect, HudStyle.RUBRIC)
 			draw_rect(tag_rect, HudStyle.GOLD, false, maxf(1.0, z))
 			draw_string(font, Vector2(tag_rect.position.x + 5.0 * z, tag_rect.end.y - 3.0 * z), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, tag_size, HudStyle.PARCHMENT_LIGHT)

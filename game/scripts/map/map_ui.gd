@@ -869,6 +869,10 @@ func _setup_panel_stack() -> void:
 	panels.register(save_load_dialog, PanelStack.Kind.MODAL)
 	for panel in docked_panels:
 		panels.register(panel, PanelStack.Kind.DOCKED)
+	# U11 : fenêtre commune « Codex » (Histoire / Règles), panneau central.
+	codex_hub = CodexHub.new()
+	add_child(codex_hub)
+	register_panel(codex_hub, PanelStack.Kind.CENTRAL)
 	for child in get_children():
 		_auto_register(child)
 	child_entered_tree.connect(_auto_register)
@@ -883,8 +887,15 @@ func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array =
 		panel.resized.connect(queue_layout)
 
 
+## Lot U11 : fenêtre commune Codex / encyclopédie.
+var codex_hub: CodexHub
+
+
 ## Panneaux ajoutés par les contrôleurs (diplomatie, chronique, agents, rançons, flow).
 func _auto_register(node: Node) -> void:
+	if node is Encyclopedia and codex_hub != null:
+		codex_hub.adopt_encyclopedia.call_deferred(node)  # U11 : onglet « Règles »
+		return
 	if not (node is Control) or panels.is_registered(node):
 		return
 	if node is DiplomacyPanel or node is ChronicleWindow or node.name == &"AgentRegistry":

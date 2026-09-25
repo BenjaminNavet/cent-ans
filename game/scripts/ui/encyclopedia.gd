@@ -98,6 +98,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var panel := PanelContainer.new()
+	_window_panel = panel
 	panel.name = "Window"
 	panel.custom_minimum_size = Vector2(1060, 680)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -143,6 +144,7 @@ func _ready() -> void:
 	close.tooltip_text = "Fermer (Échap ou K)"
 	close.pressed.connect(close_window)
 	header.add_child(close)
+	_close_button = close
 	tab_bar = TabBar.new()
 	tab_bar.name = "Tabs"
 	tab_bar.clip_tabs = false
@@ -212,7 +214,8 @@ func open_window(entry_id: String = "") -> void:
 	show()
 	if entry_id != "":
 		open_entry(entry_id)
-	search_field.grab_focus.call_deferred()
+	if not embedded:
+		search_field.grab_focus.call_deferred()
 
 
 func close_window() -> void:
@@ -371,6 +374,39 @@ func build_entries() -> void:
 		_entries[tab_id] = rows
 
 
+## Lot U11 : vue intégrée à la fenêtre `CodexHub` (onglet « Règles ») : sans cadre, titre,
+## recherche ni bouton de fermeture propres (ceux de la fenêtre commune les remplacent).
+var embedded := false
+var _window_panel: PanelContainer
+var _close_button: Button
+
+
+func set_embedded(on: bool) -> void:
+	embedded = on
+	if _window_panel == null:
+		return
+	_window_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new() if on else _window_panel.get_theme_stylebox("panel"))
+	_window_panel.custom_minimum_size = Vector2(1060, 600) if on else Vector2(1060, 680)
+	custom_minimum_size = Vector2(1180, 600) if on else Vector2.ZERO
+	size_flags_vertical = Control.SIZE_EXPAND_FILL if on else Control.SIZE_FILL
+	title_label.visible = not on
+	search_field.visible = not on
+	_close_button.visible = not on
+	if on:
+		CodexHub.style_tabs(tab_bar, 14, 7)
+
+
+## Nombre d'entrées de tous les onglets qui répondent à la recherche courante.
+func match_count() -> int:
+	var needle := fold(query.strip_edges())
+	var count := 0
+	for tab_id in _entries:
+		for row in _entries[tab_id]:
+			if needle == "" or str(row["search"]).contains(needle):
+				count += 1
+	return count
+
+
 func tab_ids() -> PackedStringArray:
 	var ids := PackedStringArray()
 	for tab in TABS:
@@ -410,6 +446,14 @@ func set_query(text: String) -> void:
 	if search_field.text != text:
 		search_field.text = text
 	_fill_list()
+	# U11 : recherche commune — l'onglet courant sans résultat cède la place au premier qui en a.
+	if embedded and _visible_ids.is_empty() and fold(query.strip_edges()) != "":
+		for index in TABS.size():
+			var tab_id := str(TABS[index]["id"])
+			for row in _entries.get(tab_id, []):
+				if str(row["search"]).contains(fold(query.strip_edges())):
+					select_tab(index)
+					return
 
 
 func _fill_list() -> void:

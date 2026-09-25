@@ -1057,6 +1057,14 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_court()
 				"skills":
 					_stage_screenshot_skills()
+				"codex", "codex_search":  # U11 : fenêtre commune Codex (Histoire / Règles)
+					_focus_capital()
+					var bubbles := get_node_or_null("/root/CodexBubbles")
+					if bubbles != null:
+						bubbles.call("open_entry", "cdx_charles_v")
+					if _screenshot_stage == "codex_search" and ui.codex_hub != null:
+						ui.codex_hub.search.text = "arc"
+						ui.codex_hub._on_search("arc")
 				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
 					_stage_screenshot_court()
 					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
