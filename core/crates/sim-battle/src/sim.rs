@@ -2075,13 +2075,7 @@ impl BattleSim {
         }
         kills *= self.smoke_factor(shooter, target);
         let aim = (target.x, target.z);
-        let reload = if shooter.category == UnitCategory::Siege {
-            12.0
-        } else if shooter.has(Ability::Pavise) {
-            9.0
-        } else {
-            6.0
-        };
+        let reload = shooter.reload_period();
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
         let cover = if target.on_wall {
@@ -2203,7 +2197,7 @@ impl BattleSim {
         };
         self.record_shot(shot);
         let shooter = &mut self.units[i];
-        shooter.reload = 12.0;
+        shooter.reload = crate::shot::ENGINE_RELOAD;
         shooter.ammo = shooter.ammo.saturating_sub(1);
         shooter.facing = turn_towards(shooter.facing, heading, 0.5);
         if shooter.state != UnitState::Marching {

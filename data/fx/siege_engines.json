@@ -1,0 +1,80 @@
+{
+  "description": "Engins de siège animés (lot SG2) : modèles Blender à pièces nommées (tools/blender_scripts/siege_engines.py), animés par nœuds d'après les tirs du cœur (get_shots, get_siege_events) et le rechargement qu'il expose (get_units().reload). Rendu seulement : aucune règle ici. Angles en degrés, durées en secondes (temps de bataille), longueurs en mètres.",
+  "models_dir": "res://assets/models/siege/",
+  "engines": {
+    "unit_trebuchet": "trebuchet",
+    "unit_mangonel": "mangonel",
+    "unit_bombard": "bombard"
+  },
+  "trebuchet": {
+    "cocked_deg": -38.0,
+    "rest_deg": 90.0,
+    "overswing_deg": 132.0,
+    "swing_s": 1.6,
+    "release_phase": 0.62,
+    "sling_release_deg": 318.0,
+    "sling_end_deg": 400.0,
+    "sling_power": 1.7,
+    "settle_s": 3.2,
+    "settle_hz": 0.55,
+    "settle_damping": 1.1,
+    "counterweight_lag": 0.1,
+    "winch_turns": 5.0,
+    "ready_margin_s": 1.0,
+    "stagger_s": 0.35,
+    "predict": true
+  },
+  "mangonel": {
+    "cocked_deg": -72.0,
+    "fired_deg": 40.0,
+    "swing_s": 0.42,
+    "release_phase": 0.8,
+    "bounce_deg": 7.0,
+    "settle_s": 1.2,
+    "winch_turns": 3.0,
+    "ready_margin_s": 1.0,
+    "stagger_s": 0.3,
+    "predict": true
+  },
+  "bombard": {
+    "recoil_m": 0.8,
+    "recoil_s": 0.09,
+    "hold_s": 1.2,
+    "return_s": 3.0,
+    "mantlet_raised_deg": -78.0,
+    "mantlet_s": 1.2,
+    "stagger_s": 0.25,
+    "smoke_scale": 1.6
+  },
+  "ram": {
+    "wheel_radius": 0.55,
+    "beam_drop": 1.95,
+    "max_swing_deg": 48.0,
+    "sway_deg": 1.2,
+    "sway_per_m": 0.9
+  },
+  "siege_tower": {
+    "wheel_radius": 0.8,
+    "model_height": 12.8,
+    "bridge_above_wall": 0.8,
+    "sway_deg": 1.6,
+    "sway_per_m": 0.55
+  },
+  "oil": {
+    "steam_amount": 90,
+    "steam_lifetime_s": 3.2,
+    "steam_rise": 2.4,
+    "steam_size_m": 2.4,
+    "drip_amount": 48,
+    "drip_lifetime_s": 1.4,
+    "stain_width_m": 3.2,
+    "stain_seconds": 40.0,
+    "sound_delay_s": 0.9
+  },
+  "impact_marks": {
+    "max_marks": 64,
+    "size_m": [1.8, 3.0],
+    "depth_m": 2.0,
+    "breach_scale": 1.5
+  }
+}
