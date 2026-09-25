@@ -34,6 +34,7 @@ const ROOT_UNITS := 4096.0
 ## Profondeur n d'un nœud de la taille d'une tuile E0 (étage L = n − DEPTH_E0).
 const DEPTH_E0 := 4
 const PAGE_PX := ReliefPyramid.TILE_PX
+const ROOT_TILE_UNITS := ReliefPyramid.ROOT_TILE_UNITS
 const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_fine_diag", "qt_coarse_nbr", "qt_coarse_diag", "qt_morph"]
 const SIDES: Array[Vector2i] = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
 const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
@@ -76,6 +77,10 @@ var _jobs: Dictionary = {}
 ## autre fil (liaison mono-fil), le décodage Rust se fait donc ici, borné par image.
 var _main_store: Object = null
 var _main_queue: Array[int] = []
+## Décodeur Rust asynchrone (`ReliefDecoder`, fils natifs) quand l'extension l'expose : préféré à
+## tout le reste ; clés demandées et pas encore rendues.
+var _decoder: Object = null
+var _requested: Dictionary = {}
 ## Demandes de l'image courante : clé → priorité (étage × 1e6 + distance).
 var _wanted: Dictionary = {}
 var _items: Array[Dictionary] = []
@@ -93,6 +98,16 @@ var _k_proj: float = 1.0
 var _px_scale: float = 1.0
 var _ranges: PackedFloat32Array = PackedFloat32Array()
 var _page_cache: Dictionary = {}
+## Par morceau E0 (16 × 16, coordonnées carte) : étage le plus fin des pages chargées qui le
+## touchent (-1 : aucune) ; `surface_height_at` y commence sa recherche.
+var _chunk_top: PackedInt32Array = PackedInt32Array()
+## Cache de la dernière page lue par `surface_height_at`.
+var _hit_level: int = -1
+var _hit_version: int = -1
+var _hit_origin: Vector2 = Vector2.ZERO
+var _hit_units: float = 0.0
+var _hit_px: float = 1.0
+var _hit_bytes: PackedByteArray = PackedByteArray()
 var _param_cache: Dictionary = {}
 var _param_cache_version: int = -1
 var _missing_wanted: int = 0
@@ -109,8 +124,17 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	material = terrain_material
 	map_data = data
 	_bounds = chunk_bounds
-	_main_store = ClassDB.instantiate("GameDataStore") if use_rust_decoder and ClassDB.class_exists("GameDataStore") else null
+	_decoder = null
+	_main_store = null
+	_requested.clear()
+	if use_rust_decoder and ClassDB.class_exists("ReliefDecoder"):
+		_decoder = ClassDB.instantiate("ReliefDecoder")
+		_decoder.call("start", max_jobs)
+	elif use_rust_decoder and ClassDB.class_exists("GameDataStore"):
+		_main_store = ClassDB.instantiate("GameDataStore")
 	_main_queue.clear()
+	_chunk_top.resize(256)
+	_chunk_top.fill(-1)
 	wait_jobs(false)
 	_pages.clear()
 	_page_bytes.clear()
@@ -458,6 +482,17 @@ func _start_jobs() -> void:
 		if not _jobs.has(key):
 			order.append([float(_wanted[key]), key])
 	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	if _decoder != null:
+		for entry in order:
+			if _requested.size() >= max_jobs:
+				break
+			var key: int = entry[1]
+			if _requested.has(key):
+				continue
+			var path := pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
+			if _decoder.call("request", key, path):
+				_requested[key] = path
+		return
 	if _main_store != null:
 		for entry in order.slice(0, max_main_decodes_per_frame):
 			_main_queue.append(entry[1])
@@ -479,6 +514,25 @@ func _start_jobs() -> void:
 ## `block`).
 func _collect_jobs(block: bool = false) -> void:
 	var uploads := 0
+	if _decoder != null:
+		var guard := 0
+		while not _requested.is_empty() and guard < 2000:
+			for item: Dictionary in _decoder.call("poll", 1 << 20 if block else max_uploads_per_frame - uploads):
+				var key := int(item["id"])
+				var job := PageJob.new()
+				job.key = key
+				job.path = str(_requested.get(key, ""))
+				_requested.erase(key)
+				job.bytes = item["bytes"]
+				if job.bytes.size() == PAGE_PX * PAGE_PX * 2:
+					job._finish(Time.get_ticks_usec())
+					job.decode_ms = float(item["ms"])
+				if _finish_job(key, job):
+					uploads += 1
+			if not block or _requested.is_empty():
+				break
+			OS.delay_msec(1)
+			guard += 1
 	var t0 := Time.get_ticks_usec()
 	for key in _main_queue:
 		if not block and (uploads >= max_uploads_per_frame or Time.get_ticks_usec() - t0 > main_decode_budget_ms * 1000.0):
@@ -522,8 +576,25 @@ func _upload(key: int, job: PageJob) -> bool:
 	_page_bytes[key] = job.bytes
 	_layer_keys[layer] = key
 	_residency_version += 1
-	surface_changed.emit(_tile_rect(key))
+	var rect := _tile_rect(key)
+	var level := ReliefPyramid.level_of_key(key)
+	for index in _chunks_of(rect):
+		_chunk_top[index] = maxi(_chunk_top[index], level)
+	surface_changed.emit(rect)
 	return true
+
+
+## Morceaux E0 (index ligne × 16 + colonne) touchés par un rectangle carte.
+static func _chunks_of(rect: Rect2) -> PackedInt32Array:
+	var result := PackedInt32Array()
+	var c0 := clampi(int(floor(rect.position.x / 256.0)), 0, 15)
+	var r0 := clampi(int(floor(rect.position.y / 256.0)), 0, 15)
+	var c1 := clampi(int(ceil(rect.end.x / 256.0)) - 1, 0, 15)
+	var r1 := clampi(int(ceil(rect.end.y / 256.0)) - 1, 0, 15)
+	for r in range(r0, r1 + 1):
+		for c in range(c0, c1 + 1):
+			result.append(r * 16 + c)
+	return result
 
 
 func _alloc_layer() -> int:
@@ -542,7 +613,17 @@ func _alloc_layer() -> int:
 	_pages.erase(oldest)
 	_page_bytes.erase(oldest)
 	_residency_version += 1
-	surface_changed.emit(_tile_rect(oldest))
+	var rect := _tile_rect(oldest)
+	var touched := _chunks_of(rect)
+	for index in touched:
+		_chunk_top[index] = -1
+	for key: int in _pages:
+		var level := ReliefPyramid.level_of_key(key)
+		var page_rect := _tile_rect(key)
+		for index in touched:
+			if level > _chunk_top[index] and page_rect.intersects(Rect2((index % 16) * 256.0, (index / 16) * 256.0, 256.0, 256.0)):
+				_chunk_top[index] = level
+	surface_changed.emit(rect)
 	return layer
 
 
@@ -563,18 +644,30 @@ func wait_jobs(upload: bool = true) -> void:
 			for key: int in _wanted:
 				if not _pages.has(key):
 					_main_queue.append(key)
+		if _decoder != null:
+			for key: int in _wanted:
+				if not _pages.has(key) and not _requested.has(key):
+					var path := pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
+					if _decoder.call("request", key, path):
+						_requested[key] = path
 		_collect_jobs(true)
 		max_uploads_per_frame = saved
 		return
 	for entry: Dictionary in _jobs.values():
 		WorkerThreadPool.wait_for_task_completion(entry["task"])
 	_jobs.clear()
+	_requested.clear()
 
 
 ## Vrai quand toutes les pages voulues à la dernière sélection sont chargées et aucun décodage
 ## n'est en cours (captures, mesures).
 func is_settled() -> bool:
-	return _jobs.is_empty() and _main_queue.is_empty() and _missing_wanted == 0
+	return _jobs.is_empty() and _main_queue.is_empty() and _requested.is_empty() and _missing_wanted == 0
+
+
+## Étage le plus fin des pages chargées qui touchent le morceau E0 `index` (-1 : aucune).
+func chunk_top(index: int) -> int:
+	return _chunk_top[index] if index >= 0 and index < _chunk_top.size() else -1
 
 
 func page_count() -> int:
@@ -582,7 +675,7 @@ func page_count() -> int:
 
 
 func pending_jobs() -> int:
-	return _jobs.size()
+	return _jobs.size() + _requested.size() + _main_queue.size()
 
 
 func item_count() -> int:
@@ -616,9 +709,54 @@ func perf_stats() -> Dictionary:
 ## Hauteur monde de la surface la plus fine chargée en (x, y) carte (bilinéaire dans la page),
 ## NAN si aucune page de la pyramide ne couvre le point.
 func surface_height_at(x: float, y: float) -> float:
-	if pyramid == null:
+	if pyramid == null or x < 0.0 or y < 0.0 or x >= 4096.0 or y >= 4096.0:
 		return NAN
-	return sample_pages(_page_bytes, pyramid.max_level, pyramid.height_min_m, pyramid.height_range_m, x, y)
+	var top := _chunk_top[int(y / 256.0) * 16 + int(x / 256.0)]
+	if top < 0:
+		return NAN
+	# Dernière page utilisée : valable si elle contient le point et qu'aucune page plus fine ne
+	# touche ce morceau (requêtes groupées dans une zone : maquettes, routes, arbres).
+	if _hit_level == top and _hit_version == _residency_version:
+		var lx := x - _hit_origin.x
+		var ly := y - _hit_origin.y
+		if lx >= 0.0 and ly >= 0.0 and lx < _hit_units and ly < _hit_units:
+			return _bilinear(_hit_bytes, lx / _hit_px - 0.5, ly / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m)
+	var side := 1 << top
+	for level in range(top, -1, -1):
+		var units := ROOT_TILE_UNITS / side
+		var col := int(floor((x + 0.5) / units))
+		var row := int(floor((y + 0.5) / units))
+		var key := (level << 24) | (row << 12) | col
+		side >>= 1
+		if not _page_bytes.has(key):
+			continue
+		var bytes: PackedByteArray = _page_bytes[key]
+		_hit_level = level if level == top else -1
+		_hit_version = _residency_version
+		_hit_origin = Vector2(col * units - 0.5, row * units - 0.5)
+		_hit_units = units
+		_hit_px = units / PAGE_PX
+		_hit_bytes = bytes
+		return _bilinear(bytes, (x - _hit_origin.x) / _hit_px - 0.5, (y - _hit_origin.y) / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m)
+	return NAN
+
+
+## Bilinéaire aux coordonnées pixel (fx, fy) d'une page (bornées au bord), hauteur monde.
+static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float, h_range: float) -> float:
+	fx = clampf(fx, 0.0, PAGE_PX - 1.0)
+	fy = clampf(fy, 0.0, PAGE_PX - 1.0)
+	var i := mini(int(fx), PAGE_PX - 2)
+	var j := mini(int(fy), PAGE_PX - 2)
+	var tx := fx - i
+	var ty := fy - j
+	var o := (j * PAGE_PX + i) * 2
+	var a := bytes.decode_u16(o)
+	var b := bytes.decode_u16(o + 2)
+	var c := bytes.decode_u16(o + PAGE_PX * 2)
+	var d := bytes.decode_u16(o + PAGE_PX * 2 + 2)
+	var top := a + (b - a) * tx
+	var v := (top + (c + (d - c) * tx - top) * ty) / 65535.0
+	return (h_min + v * h_range) * MapData.vertical_scale()
 
 
 ## Instantané des pages chargées qui touchent `rect`, lisible depuis un fil de travail sans
@@ -659,22 +797,9 @@ static func sample_pages(pages: Dictionary, top_level: int, h_min: float, h_rang
 		var key := ReliefPyramid.key_of(level, t.x, t.y)
 		if not pages.has(key):
 			continue
-		var bytes: PackedByteArray = pages[key]
 		var origin := ReliefPyramid.tile_origin(level, t.x, t.y)
 		var px_units := ReliefPyramid.pixel_units(level)
-		var fx := clampf((x - origin.x) / px_units - 0.5, 0.0, PAGE_PX - 1.0)
-		var fy := clampf((y - origin.y) / px_units - 0.5, 0.0, PAGE_PX - 1.0)
-		var i := mini(int(fx), PAGE_PX - 2)
-		var j := mini(int(fy), PAGE_PX - 2)
-		var tx := fx - i
-		var ty := fy - j
-		var o := (j * PAGE_PX + i) * 2
-		var a := bytes.decode_u16(o)
-		var b := bytes.decode_u16(o + 2)
-		var c := bytes.decode_u16(o + PAGE_PX * 2)
-		var d := bytes.decode_u16(o + PAGE_PX * 2 + 2)
-		var v := lerpf(lerpf(a, b, tx), lerpf(c, d, tx), ty) / 65535.0
-		return (h_min + v * h_range) * MapData.vertical_scale()
+		return _bilinear(pages[key], (x - origin.x) / px_units - 0.5, (y - origin.y) / px_units - 0.5, h_min, h_range)
 	return NAN
 
 

@@ -37,10 +37,27 @@ func _ready() -> void:
 			pan_distance = float(arg.trim_prefix("--bench-distance="))
 		elif arg.begins_with("--bench-seconds="):
 			pan_seconds = float(arg.trim_prefix("--bench-seconds="))
+	if OS.get_cmdline_user_args().has("--bench-listeners"):
+		_wrap_listeners.call_deferred()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	camera_rig.edge_pan_enabled = false
 	_place(PAN_PATH[0], pan_distance)
+
+
+## `--bench-listeners` : mesure le temps passé dans chaque écouteur de `chunk_surface_changed`.
+var _listener_ms: Dictionary = {}
+
+
+func _wrap_listeners() -> void:
+	for connection: Dictionary in terrain.chunk_surface_changed.get_connections():
+		var callable: Callable = connection["callable"]
+		var label := "%s.%s" % [str(callable.get_object().get_script().resource_path.get_file()) if callable.get_object() != null and callable.get_object().get_script() != null else "?", callable.get_method()]
+		terrain.chunk_surface_changed.disconnect(callable)
+		terrain.chunk_surface_changed.connect(func(index: int) -> void:
+			var t0 := Time.get_ticks_usec()
+			callable.call(index)
+			_listener_ms[label] = float(_listener_ms.get(label, 0.0)) + (Time.get_ticks_usec() - t0) / 1000.0)
 
 
 func _place(p: Vector2, distance: float) -> void:
@@ -101,8 +118,10 @@ func _report(now: int) -> void:
 	}
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
-	for key in ["surface_emits", "surface_emit_ms_max", "surface_emit_ms_total", "qt_update_ms_max"]:
+	for key in ["surface_emits", "surface_page_emits", "surface_emit_ms_max", "surface_emit_ms_total", "qt_update_ms_max"]:
 		if terrain.build_stats.has(key):
 			report[key] = snappedf(float(terrain.build_stats[key]), 0.01)
+	if not _listener_ms.is_empty():
+		report["listener_ms"] = _listener_ms
 	print("CampaignMap: bench_map %s" % JSON.stringify(report))
 	get_tree().quit()
