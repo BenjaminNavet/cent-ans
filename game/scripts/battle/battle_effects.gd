@@ -50,6 +50,8 @@ const GROUND_CLODS := {"dry": Color(0.34, 0.26, 0.17), "muddy": Color(0.2, 0.15,
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
 signal hit_landed(pos: Vector3, time: float)
+## EP8 : coup de bombarde (fumée qui s'attarde, `BattleStaging.on_cannon_fired`).
+signal cannon_fired(muzzle: Vector3)
 ## BV1 : sons des engins (bombarde, trébuchet) tirés par le cœur ; `delay` en temps de bataille.
 signal sound_event(event: StringName, position: Vector3, delay: float)
 
@@ -87,6 +89,11 @@ var _pending: Array = []  # [{time, pos, kind}] impacts à venir
 var _track: Dictionary = {}  # unit id -> {ammo, state}
 var _dust_spots: Array = []  # [{pos, size, strength}] poussière imposée (captures)
 var _dirty: bool = false  # tampon des flèches à renvoyer à la carte graphique
+## EP8 : poussière selon l'effectif, le terrain et la saison (`configure_staging`) ; colonnes de
+## poussière des troupes en marche au loin (émetteurs larges et clairsemés, nombre selon PF1).
+var _dust_cfg: Dictionary = {}
+var _dust_scale: float = 1.0
+var _columns: Array[GPUParticles3D] = []
 
 
 ## `weather` : clé météo du rendu ; `height_at(x, z)` : hauteur du sol ; `water_at(x, z)` :
@@ -176,6 +183,9 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 	var wet: Array = []
 	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
 	var clodsy: Array = []  # BV1 : cavalerie lancée hors de l'eau (mottes)
+	var columns: Array = []  # EP8 : colonnes de poussière des troupes en marche au loin
+	var column_distance := float(_dust_cfg.get("column_distance_m", 0.0)) if not _columns.is_empty() else 0.0
+	var column_men := int(_dust_cfg.get("column_min_soldiers", 400))
 	for unit in units:
 		var id := int(unit["id"])
 		var present := bool(unit["present"])
@@ -192,15 +202,21 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 				burst(pos + fwd * float(unit.get("depth", 6.0)) * 0.5, "impact", 1.6 if str(unit["render"]) == "cavalry" else 1.0)
 		var was_wet := bool(prev.get("wet", false))
 		_track[id] = {"ammo": ammo, "state": state, "wet": false}
-		if not present or not near:
+		if not present:
 			continue
 		var moving := state == "marching" or state == "charging" or state == "routing"
 		if not moving:
+			continue
+		if not near:
+			var far_d := camera_pos.distance_to(pos)
+			if enabled_dust and far_d < column_distance and int(unit.get("soldiers", 0)) >= column_men:
+				columns.append({"unit": unit, "pos": pos, "strength": dust_factor(unit), "score": float(unit.get("soldiers", 0)) / (1.0 + far_d / 300.0)})
 			continue
 		var mounted := str(unit["render"]) == "cavalry"
 		var fast := state == "charging" or bool(unit.get("running", false)) or state == "routing"
 		var strength := (1.0 if fast else 0.45) * (1.0 if mounted else 0.55)
 		var d := camera_pos.distance_to(pos)
+		var dusty_strength := strength * dust_factor(unit)
 		var entry := {"unit": unit, "pos": pos, "strength": strength, "score": strength / (1.0 + d / 120.0)}
 		# B7 : la troupe est dans l'eau dès qu'une partie de son emprise y est (pas seulement son
 		# centre : la rivière fait ~18 m, un régiment 8 à 15 m de profondeur) ; les éclaboussures
@@ -224,13 +240,19 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 					burst(pos + fwd * mid + Vector3(0, 0.45, 0), "ford", 2.2 if state == "charging" else 1.4)
 		else:
 			if enabled_dust and d < DUST_DISTANCE:
-				dusty.append(entry)
+				var dust_entry := entry.duplicate()
+				dust_entry["strength"] = dusty_strength
+				dust_entry["score"] = dusty_strength / (1.0 + d / 120.0)
+				dusty.append(dust_entry)
+			elif enabled_dust and d < column_distance and int(unit.get("soldiers", 0)) >= column_men:
+				columns.append({"unit": unit, "pos": pos, "strength": dust_factor(unit), "score": float(unit.get("soldiers", 0)) / (1.0 + d / 300.0)})
 			# BV1 : mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
 			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty():
 				clodsy.append(entry)
 	if _dust_spots.is_empty():
 		_assign(_dust, dusty)
 		_assign(_clods, clodsy)
+		_assign(_columns, columns)
 	_assign(_splash, wet)
 	_assign_wake(_wake, wakes)
 
@@ -245,6 +267,9 @@ func configure_ground(ground: String, weather: String) -> void:
 	for emitter in _dust:
 		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
 		mat.albedo_color = dust_color * Color(0.9, 0.9, 0.9)
+	for emitter in _columns:
+		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+		mat.albedo_color = dust_color * Color(0.9, 0.9, 0.9)
 	for emitter in _clods:
 		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
 		mat.albedo_color = GROUND_CLODS[_ground]
@@ -252,6 +277,30 @@ func configure_ground(ground: String, weather: String) -> void:
 		var process := emitter.process_material as ParticleProcessMaterial
 		process.scale_min = 0.08 if _ground == "snowy" else 0.12
 		process.scale_max = 0.18 if _ground == "snowy" else (0.32 if _ground == "muddy" else 0.24)
+
+
+## EP8 : poussière enrichie (`data/fx/battle_staging.json`, `dust`) : force selon l'effectif du
+## régiment (racine de soldats / `reference_soldiers`, plafonnée à `max_strength`), le terrain et
+## la saison ; colonnes de poussière des grosses troupes qui marchent au loin (au-delà de
+## `DUST_DISTANCE`, jusqu'à `column_distance_m`).
+func configure_staging(dust_cfg: Dictionary, terrain_key: String, season: String) -> void:
+	_dust_cfg = dust_cfg
+	_dust_scale = float((dust_cfg.get("terrain", {}) as Dictionary).get(terrain_key, 1.0)) * float((dust_cfg.get("season", {}) as Dictionary).get(season, 1.0))
+	var budget: Dictionary = dust_cfg.get("column_emitters", {})
+	var count := int(budget.get(RenderQuality.current(), budget.get("high", 4)))
+	for i in count:
+		var column := _emitter("DustColumn%d" % i, _dust_material(false), 36, 6.0, false)
+		column.visibility_aabb = AABB(Vector3(-120, -5, -120), Vector3(240, 80, 240))
+		_columns.append(column)
+
+
+## EP8 : facteur de poussière d'un régiment (1 sans `configure_staging`).
+func dust_factor(unit: Dictionary) -> float:
+	if _dust_cfg.is_empty():
+		return 1.0
+	var reference := maxf(float(_dust_cfg.get("reference_soldiers", 240)), 1.0)
+	var men := sqrt(maxf(float(unit.get("soldiers", reference)), 0.0) / reference)
+	return clampf(men, 0.7, float(_dust_cfg.get("max_strength", 1.6))) * _dust_scale
 
 
 ## Poussière imposée à un endroit (captures hors simulation).
@@ -308,6 +357,7 @@ func _process(_delta: float) -> void:
 
 ## Coup de bombarde : éclair, fumée à la bouche (`muzzle`, direction `dir`).
 func cannon_fire(muzzle: Vector3, dir: Vector3, _launch_time: float) -> void:
+	cannon_fired.emit(muzzle + dir * 1.5)
 	burst(muzzle + dir * 0.4, "flash", 1.0)
 	burst(muzzle + dir * 1.2, "smoke", 1.0)
 	_flash.position = muzzle + dir * 1.0 + Vector3(0, 0.5, 0)
@@ -524,6 +574,17 @@ func _place(emitter: GPUParticles3D, pos: Vector3, size: Vector2, facing: float,
 	if mat.emission_box_extents.distance_to(extents) > 0.5:
 		mat.emission_box_extents = extents
 	emitter.amount_ratio = clampf(strength, 0.05, 1.0)
+	# EP8 : au-delà de 1 (grosse troupe sur sol sec), des nuages plus gros plutôt que plus de
+	# particules (budget fixe).
+	var grow := sqrt(maxf(strength, 1.0))
+	if absf(float(emitter.get_meta("grow", 1.0)) - grow) > 0.08:
+		emitter.set_meta("grow", grow)
+		var base_min := float(emitter.get_meta("scale_min", mat.scale_min))
+		var base_max := float(emitter.get_meta("scale_max", mat.scale_max))
+		emitter.set_meta("scale_min", base_min)
+		emitter.set_meta("scale_max", base_max)
+		mat.scale_min = base_min * grow
+		mat.scale_max = base_max * grow
 	if not emitter.emitting:
 		emitter.emitting = true
 
@@ -566,7 +627,20 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 	mat.angle_min = -180.0
 	mat.angle_max = 180.0
 	var grow := Curve.new()
-	if node_name.begins_with("Dust"):
+	if node_name.begins_with("DustColumn"):
+		# EP8 : colonne de poussière d'une troupe en marche au loin : gros nuages lents, hauts.
+		mat.spread = 50.0
+		mat.initial_velocity_min = 0.8
+		mat.initial_velocity_max = 2.2
+		mat.gravity = Vector3(0.4, 0.35, 0)
+		mat.damping_min = 0.2
+		mat.damping_max = 0.5
+		mat.scale_min = 9.0
+		mat.scale_max = 16.0
+		grow.add_point(Vector2(0, 0.4))
+		grow.add_point(Vector2(1, 1.3))
+		mat.color_ramp = _ramp([0.0, 0.2, 1.0], [0.0, 0.45, 0.0])
+	elif node_name.begins_with("Dust"):
 		mat.spread = 70.0
 		mat.initial_velocity_min = 0.4
 		mat.initial_velocity_max = 1.6
