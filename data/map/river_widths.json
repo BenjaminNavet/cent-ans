@@ -64,7 +64,7 @@
       "source": "Dordogne à Libourne ~300 m (marée), à Bergerac ~150 m."
     },
     {
-      "id": "somme", "names": ["la Somme", "Somme"],
+      "id": "somme", "names": ["la Somme", "Somme", "la Somme Canalisée"],
       "anchors": [
         { "place": "Péronne", "lonlat": [2.935, 49.93], "width_m": 20 },
         { "place": "Amiens", "lonlat": [2.30, 49.895], "width_m": 30 },

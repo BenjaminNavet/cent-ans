@@ -115,6 +115,13 @@ class RiverIndex:
         self.side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
         self.cache: OrderedDict[tuple[int, int], dict | None] = OrderedDict()
         self.cache_size = cache
+        widths = json.loads(
+            (map_dir / hydro_fine.WIDTHS_FILE).read_text(encoding="utf-8")
+        )
+        self.alias_groups = [
+            {hydro_fine.normalise_name(n) for n in river["names"]}
+            for river in widths["rivers"]
+        ]
 
     def _tile(self, col: int, row: int) -> dict | None:
         key = (col, row)
@@ -157,6 +164,14 @@ class RiverIndex:
             self.cache.popitem(last=False)
         return entry
 
+    def aliases(self, name: str) -> set[str]:
+        """Normalised names of a river, with the aliases of ``river_widths.json``."""
+        key = hydro_fine.normalise_name(name)
+        for group in self.alias_groups:
+            if key in group:
+                return group
+        return {key}
+
     def tiles_around(self, metres: np.ndarray, margin_m: float) -> list[dict]:
         """Loaded tiles overlapping the box of ``metres`` grown by ``margin_m``."""
         lo = self.frame.to_units(metres.min(axis=0) - margin_m)
@@ -191,7 +206,7 @@ class RiverIndex:
         self, point: np.ndarray, radius_m: float, name: str | None = None
     ) -> dict | None:
         """Nearest river vertex (optionally of a named river) within ``radius_m``."""
-        wanted = hydro_fine.normalise_name(name) if name else None
+        wanted = self.aliases(name) if name else None
         best = None
         for tile in self.tiles_around(point.reshape(1, 2), radius_m):
             indices = tile["tree"].query_ball_point(point, radius_m)
@@ -203,7 +218,9 @@ class RiverIndex:
                     hydro_fine.normalise_name(self.names[f])
                     for f in tile["feature"][indices]
                 ]
-                indices = indices[[n == wanted or wanted in n.split() for n in names]]
+                indices = indices[
+                    [n in wanted or any(w in n.split() for w in wanted) for n in names]
+                ]
                 if len(indices) == 0:
                     continue
             dist = np.hypot(*(tile["points"][indices] - point).T)
