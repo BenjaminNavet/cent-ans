@@ -23,6 +23,7 @@ const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil", "medicine": "
 
 
 func _ready() -> void:
+	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])
 	tabs.set_tab_title(2, BRANCH_LABELS["medicine"])

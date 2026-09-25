@@ -40,6 +40,7 @@ var aftermath_box: HBoxContainer
 var hero_label: Label
 var panel: PanelContainer
 var banner: Control
+var backdrop: TextureRect
 var _banner_texture: Texture2D
 var _banner_color := GREEN
 var _tables: Dictionary = {}  # side -> GridContainer
@@ -80,6 +81,16 @@ func _ready() -> void:
 	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(veil)
+	# AR1 : enluminure plein écran de l'issue (victoire / défaite) derrière le parchemin.
+	backdrop = TextureRect.new()
+	backdrop.name = "Backdrop"
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.modulate = Color(0.55, 0.5, 0.45)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backdrop.hide()
+	add_child(backdrop)
 	get_viewport().size_changed.connect(_layout)
 
 
@@ -118,7 +129,12 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	var enemy_ratio := float(totals[enemy_side]["ratio"])
 	var big_title := banner_title(won, own_ratio, enemy_ratio)
 	var banner_key := "defeat" if not won else ("pyrrhic" if big_title != "Victoire" else "victory")
-	_banner_texture = PortraitLoader.load_texture(BANNERS[banner_key])
+	var ending := ArtPlates.ending("battle_defeat" if banner_key == "defeat" else "battle_victory")
+	_banner_texture = ArtPlates.texture(ending)
+	if _banner_texture == null:
+		_banner_texture = PortraitLoader.load_texture(BANNERS[banner_key])
+	backdrop.texture = _banner_texture
+	backdrop.visible = _banner_texture != null
 	_banner_color = {"victory": Color(0.98, 0.86, 0.45), "pyrrhic": Color(0.95, 0.78, 0.55), "defeat": Color(0.95, 0.55, 0.45)}[banner_key]
 	panel = PanelContainer.new()
 	panel.name = "Scroll"
@@ -432,6 +448,12 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 		loot_lines.append("%s ₶ de rançons à percevoir." % BattleUiKit.thousands(total))
 	else:
 		loot_lines.append("Aucun butin : pas de rançon à percevoir.")
+	var trophies: Array = (outcome.get(player_side, {}) as Dictionary).get("standards_taken", [])
+	if not trophies.is_empty():
+		loot_lines.append("Trophées : %s." % ", ".join(trophy_labels(trophies)))
+	var lost_standards := int((outcome.get(player_side, {}) as Dictionary).get("standards_lost", 0))
+	if lost_standards > 0:
+		loot_lines.append("%s aux mains de l'ennemi." % ("Un de nos étendards" if lost_standards == 1 else "%d de nos étendards" % lost_standards))
 	loot_lines.append("Le pillage vient des chevauchées et des villes prises.")
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
 
@@ -484,6 +506,10 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 			lines.append("Le chef de l'ost %s est aux mains de l'ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
 		if bool(result.get("no_quarter", false)):
 			lines.append("%s a déployé l'étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
+		# EP5 : étendards pris à l'ennemi (trophées comptés par le cœur).
+		var taken: Array = result.get("standards_taken", [])
+		if not taken.is_empty():
+			lines.append("%s a pris %s : %s." % [side_name, "un étendard" if taken.size() == 1 else "%d étendards" % taken.size(), ", ".join(trophy_labels(taken))])
 		if bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
 			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
 		elif bool(result.get("routed", false)):
@@ -491,6 +517,18 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 	if lines.is_empty():
 		lines.append("Aucun fait d'armes notable : les deux osts se sont séparés en bon ordre.")
 	return lines
+
+
+## EP5 : libellés des étendards pris (`SideResult.standards_taken` du cœur).
+static func trophy_labels(trophies: Array) -> Array[String]:
+	var out: Array[String] = []
+	for trophy in trophies:
+		var entry: Dictionary = trophy
+		var label := "la bannière du chef" if bool(entry.get("general", false)) else "l'étendard des %s" % str(entry.get("unit_name", "?"))
+		if entry.get("captor") != null and str(entry.get("captor", "")) != "":
+			label += " (par les %s)" % str(entry["captor"])
+		out.append(label)
+	return out
 
 
 func row_count() -> int:

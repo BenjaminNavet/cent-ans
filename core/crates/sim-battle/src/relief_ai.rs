@@ -8,11 +8,15 @@
 //! - **march cost**: the length of a march weighted like the simulation's
 //!   slowdown uphill, to go round a slope by a valley or a shelf;
 //! - **line of sight** (does the ground mask the target?);
-//! - **reverse slope**: a spot just behind a crest, masked from the enemy.
+//! - **reverse slope**: a spot just behind a crest, masked from the enemy;
+//! - **water** (EP3): does the river lie between two points, what a crossing
+//!   costs (march, a narrow deck filed across, a steep far bank), and how
+//!   many enemy shooters cover a crossing's far end.
 //!
 //! Pure and deterministic (grid order, strict improvements only).
 
 use crate::field::Battlefield;
+use crate::hydro::{BankKind, Crossing};
 
 /// Half-side of the square window of the local mean (cells of the field
 /// grid, 10 m): prominence compares a point with the ground within ~80 m.
@@ -167,5 +171,53 @@ impl ReliefMap {
             back += STEP;
         }
         None
+    }
+
+    /// EP3: does the main river lie between `a` and `b`?
+    pub fn river_between(field: &Battlefield, a: (f64, f64), b: (f64, f64)) -> bool {
+        field
+            .river
+            .as_ref()
+            .is_some_and(|r| r.north_of(a.0, a.1) != r.north_of(b.0, b.1))
+    }
+
+    /// EP3: cost (metres of march) of going from `from` to `to` by
+    /// `crossing`: the march to its near end and from its far end (relief
+    /// counted), the crossing itself lengthened when a front of `frontage`
+    /// metres must file across a narrower deck or ford, and a steep far
+    /// bank.
+    pub fn crossing_cost(
+        field: &Battlefield,
+        from: (f64, f64),
+        crossing: &Crossing,
+        to: (f64, f64),
+        frontage: f64,
+    ) -> f64 {
+        let north = field
+            .river
+            .as_ref()
+            .is_some_and(|r| r.north_of(from.0, from.1));
+        let (near, far) = (crossing.end(north), crossing.end(!north));
+        let across = (far.0 - near.0).hypot(far.1 - near.1);
+        let squeeze = (frontage / crossing.width.max(1.0)).max(1.0);
+        let steep = if field.bank_kind(far.0, far.1 + (far.1 - near.1).signum() * 4.0)
+            == Some(BankKind::Steep)
+        {
+            40.0
+        } else {
+            0.0
+        };
+        Self::march_cost(field, from, near)
+            + across * squeeze
+            + Self::march_cost(field, far, to)
+            + steep
+    }
+
+    /// EP3: how many of the enemy shooters `foes` (x, z, range) reach the
+    /// far end `end` of a crossing.
+    pub fn covered(end: (f64, f64), foes: &[(f64, f64, f64)]) -> usize {
+        foes.iter()
+            .filter(|&&(x, z, r)| (x - end.0).hypot(z - end.1) <= r + 10.0)
+            .count()
     }
 }

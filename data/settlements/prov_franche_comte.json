@@ -8,7 +8,7 @@
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Ville comtale sur le Doubs, résidence fréquente des comtes palatins de Bourgogne et future capitale du comté (parlement au XVe siècle).",
     "sources": ["Dole (Jura)", "Comté de Bourgogne (Franche-Comté)"]
@@ -22,7 +22,7 @@
     "weight": 20,
     "owner": "fac_empire",
     "fortification_level": 3,
-    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
     "port": false,
     "description": "Cité impériale libre dans une boucle du Doubs, distincte du comté de Bourgogne bien qu'enclavée en son sein, directement rattachée à l'Empire.",
     "sources": ["Besançon", "Ville libre d'Empire"]

@@ -151,8 +151,6 @@ pub const SUPPLY_RECOVERY: u8 = 40;
 pub const STARVATION_LOSS_PERCENT: u32 = 10;
 /// Devastation healed per turn.
 pub const DEVASTATION_DECAY: u8 = 5;
-/// Unrest healed per turn.
-pub const UNREST_DECAY: u8 = 2;
 
 /// Seasonal tax income of a province (livres).
 pub fn province_income(province: &ProvinceState) -> f64 {
@@ -825,9 +823,16 @@ pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
         })
         .cloned()
         .collect();
+    let rules = &data.population_rules;
     for (id, province) in state.provinces.iter_mut() {
         province.devastation = province.devastation.saturating_sub(DEVASTATION_DECAY);
-        province.unrest = province.unrest.saturating_sub(UNREST_DECAY);
+        // EQ2: the decay grows with the gauge (it stayed at 100 for years in
+        // provinces taken and retaken, at 2 points a season).
+        let decay = u32::from(rules.disorder_decay_flat)
+            + u32::from(province.unrest) * u32::from(rules.disorder_decay_percent) / 100;
+        province.unrest = province
+            .unrest
+            .saturating_sub(decay.min(u32::from(u8::MAX)) as u8);
         if bonus != 0 && whole.contains(id) {
             province.unrest = (i32::from(province.unrest) + bonus).clamp(0, 100) as u8;
         }

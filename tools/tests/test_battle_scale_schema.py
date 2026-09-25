@@ -1,0 +1,35 @@
+"""Validates the battle scale rules against their schema (lot EP1)."""
+
+import json
+from pathlib import Path
+
+from jsonschema import Draft202012Validator
+
+DATA = Path(__file__).resolve().parents[2] / "data"
+
+
+def _load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_battle_scale_matches_schema() -> None:
+    """The battle scale file matches its schema."""
+    schema = _load(DATA / "schemas" / "battle_scale_rules.schema.json")
+    document = _load(DATA / "rules" / "battle_scale.json")
+    Draft202012Validator.check_schema(schema)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
+    )
+    assert not errors, [error.message for error in errors]
+
+
+def test_battle_scale_tiers_are_ordered() -> None:
+    """Tiers grow with the head count; only the last one is unbounded."""
+    tiers = _load(DATA / "rules" / "battle_scale.json")["tiers"]
+    bounds = [tier.get("max_soldiers") for tier in tiers]
+    assert all(bound is not None for bound in bounds[:-1])
+    assert bounds[-1] is None
+    assert bounds[:-1] == sorted(bounds[:-1])
+    for tier in tiers:
+        # Both deployment zones fit in the depth of the field.
+        assert tier["line_gap_m"] + 2 * (tier["zone_depth_m"] - 50) <= tier["depth_m"]

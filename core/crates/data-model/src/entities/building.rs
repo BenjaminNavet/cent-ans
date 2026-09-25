@@ -67,3 +67,85 @@ impl Building {
         }
     }
 }
+
+impl crate::load::GameData {
+    /// `true` when `present` is `required` or a later step of its upgrade
+    /// chain (EQ2: a fair still counts as the market it replaced, so a
+    /// building or unit requiring the market is not lost by upgrading).
+    pub fn building_satisfies(&self, present: &BuildingId, required: &BuildingId) -> bool {
+        let mut current = Some(present);
+        // The chain is short; the bound guards against a cycle in the data.
+        for _ in 0..16 {
+            match current {
+                Some(id) if id == required => return true,
+                Some(id) => {
+                    current = self
+                        .buildings
+                        .get(id)
+                        .and_then(|b| b.upgrades_from.as_ref());
+                }
+                None => return false,
+            }
+        }
+        false
+    }
+
+    /// `true` when one of `buildings` satisfies `required`
+    /// ([`GameData::building_satisfies`]).
+    pub fn has_building(&self, buildings: &[BuildingId], required: &BuildingId) -> bool {
+        buildings
+            .iter()
+            .any(|present| self.building_satisfies(present, required))
+    }
+
+    /// `buildings` with one step per upgrade chain: every building another
+    /// one of the list upgrades (directly or not) is dropped, and of two
+    /// branches of the same chain the higher tier is kept (then the
+    /// costlier: the cathedral over the abbey; then the first listed) (EQ2: starting settlements, where the data once stacked the
+    /// market, the guild hall and the fair).
+    pub fn normalize_building_tiers(&self, buildings: &[BuildingId]) -> Vec<BuildingId> {
+        let chain_root = |id: &BuildingId| -> BuildingId {
+            let mut current = id.clone();
+            for _ in 0..16 {
+                match self
+                    .buildings
+                    .get(&current)
+                    .and_then(|b| b.upgrades_from.clone())
+                {
+                    Some(base) => current = base,
+                    None => break,
+                }
+            }
+            current
+        };
+        let rank = |id: &BuildingId| {
+            self.buildings
+                .get(id)
+                .map_or((0, 0), |b| (b.tier, b.cost.money))
+        };
+        let mut kept: Vec<BuildingId> = Vec::new();
+        for id in buildings {
+            if kept.contains(id) {
+                continue;
+            }
+            if buildings
+                .iter()
+                .any(|other| other != id && self.building_satisfies(other, id))
+            {
+                continue;
+            }
+            let root = chain_root(id);
+            if let Some(index) = kept
+                .iter()
+                .position(|k| *k != root && chain_root(k) == root && root != *id)
+            {
+                if rank(id) > rank(&kept[index]) {
+                    kept[index] = id.clone();
+                }
+                continue;
+            }
+            kept.push(id.clone());
+        }
+        kept
+    }
+}

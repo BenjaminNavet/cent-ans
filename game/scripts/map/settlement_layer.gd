@@ -68,6 +68,10 @@ var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
 var _camera_distance := 0.0
 var _regrounded: Dictionary = {}
+## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
+## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
+var _anchor_px: Dictionary = {}
+var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -270,7 +274,7 @@ func _ground_model(i: int) -> void:
 	var holder: Node3D = _models[i]
 	if holder == null or _landmarks.has(i):
 		return
-	var px: Vector2 = data.settlements[i]["px"]
+	var px := model_px(i)
 	var radius := _model_radius[i] * 0.7
 	var low := terrain.surface_height_at(px.x, px.y)
 	for k in 8:
@@ -440,11 +444,15 @@ func _update_label_heights() -> void:
 		var label := _labels[i]
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
+			if not _landmarks.has(i):
+				var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
+				label.position.x = model_at.x
+				label.position.z = model_at.y
 			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
 			label.offset = Vector2.ZERO
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-			label.position.y = map_data.surface_world_at(px.x, px.y) + 0.5
+			label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
 			label.offset = Vector2(0.0, icon_size_px * 0.9 + label.font_size * 0.5)
 
 
@@ -539,7 +547,7 @@ func _update_hamlets() -> void:
 		var node: Node3D = _hamlet_nodes.get(index)
 		if show and level >= 1:
 			if node == null or _hamlet_dirty.has(index):
-				if builds >= max_hamlet_builds_per_frame:
+				if builds >= max_hamlet_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
 				builds += 1
 				_build_hamlets(index)
@@ -554,7 +562,9 @@ func _update_hamlets() -> void:
 func flush() -> void:
 	var saved := max_hamlet_builds_per_frame
 	max_hamlet_builds_per_frame = 1 << 20
+	FrameBudget.unlimited = true
 	_update_hamlets()
+	FrameBudget.unlimited = false
 	max_hamlet_builds_per_frame = saved
 	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
 		landmark.flush_bake()
@@ -590,6 +600,7 @@ func _build_hamlets(index: int) -> void:
 		if not _landmarks.is_empty() and covered_by_landmark(px):
 			continue
 		var seed_value := _hash(str(hamlet["name"]) + str(px))
+		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
 		var variant := seed_value % meshes.size()
 		var devastation: float = _devastation.get(hamlet["province"], 0.0)
 		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
@@ -703,6 +714,41 @@ func world_position_of(id: String) -> Vector3:
 		return Vector3.ZERO
 	var px: Vector2 = data.settlements[index]["px"]
 	return Vector3(px.x, terrain.surface_height_at(px.x, px.y), px.y)
+
+
+## Lot ZG5b : position de rendu de la maquette `i` (ancrage fin, sinon position de règle).
+func model_px(i: int) -> Vector2:
+	return _anchor_px.get(i, data.settlements[i]["px"])
+
+
+## Lot ZG5b : position de rendu du hameau `h` (ancrage fin, sinon `hamlets.json`).
+func hamlet_px(h: int) -> Vector2:
+	if h < _hamlet_anchors.size():
+		var a := _hamlet_anchors[h]
+		return Vector2(a.x, a.y)
+	return data.hamlets[h]["px"]
+
+
+## Lot ZG5b : maquettes (hors villes emblématiques) et hameaux posés aux ancrages fins de
+## `fine_anchors.json` (déplacés de ≤ 300 m hors des lits et des pentes fortes), puis recalés
+## sur la surface affichée. Icônes, étiquettes du palier moyen, picking et règles gardent les
+## positions de `data`.
+func apply_fine_anchors(store: FineGeoStore) -> void:
+	_anchor_px.clear()
+	for i in data.settlements.size():
+		var id := str(data.settlements[i]["id"])
+		if _landmarks.has(i) or not store.settlements.has(id) or _models[i] == null:
+			continue
+		var p: Vector2 = store.settlements[id]["px"]
+		_anchor_px[i] = p
+		var holder := _models[i] as Node3D
+		holder.position.x = p.x
+		holder.position.z = p.y
+		_ground_model(i)
+	_hamlet_anchors = store.hamlets if store.hamlets.size() == data.hamlets.size() else PackedVector4Array()
+	for index in _hamlet_nodes:
+		_hamlet_dirty[index] = true
+	_update_label_heights()
 
 
 ## Cercles d'exclusion de la végétation (x, y, rayon en px carte) : colonies et hameaux.

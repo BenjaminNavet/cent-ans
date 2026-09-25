@@ -58,4 +58,28 @@ Fusion : 17 conflits B5/B6 résolus (textes B6 + liens B2/B5), 21 alias dédoubl
 
 **État vague 2 (25/09)** : B8, B9a, B9b fusionnés (main 3ec20811). Codex 406 fiches, validateur 0 erreur, pytest 484 verts, smoke codex_bubbles vert (B1 + B8).
 Audit des homonymes : `uv run --project tools python -m cent_ans_tools.codex_homonyms` — 38 signalements restants relus, tous légitimes (personne ↔ territoire, lieu dans un nom composé). À relancer après chaque ajout de fiches.
-Reste : B7 correctif code ↔ UI (session code) ; doublon d'entity prov_flandre ; comptage 21/27 unités du smoke ; `fac_venice` date de la ligue (1er vs 22 juin 1336) à vérifier.
+Reste : B7 correctif code ↔ UI (session code).
+
+## Vague 3 (25/09, après-midi) — couverture du survol + correctif B7
+Vérification du survol réel (souris système, `game/tests/hover_probe.gd`, à lancer **fenêtré**) :
+lien dans un texte d'UI → bulle, lien dans une bulle → bulle fille : OK, y compris dans du gras.
+En headless le survol ne se teste pas (la position souris reste (0,0)).
+Trou constaté : textes en gras **non branchés** sur les bulles — journal de campagne (`map_ui.gd`),
+encyclopédie, aide F1, tutoriel, diplomatie, HUD de bataille, barre d'ordres du chef, choix de faction.
+
+| Lot | Contenu | Branche | État |
+|---|---|---|---|
+| BP1 Bulles partout (UI) | brancher + auto-lier les textes ci-dessus ; comptage 21/27 unités de l'encyclopédie | bp1-ui-links | **fusionné** — smoke complet vert, encyclopédie 27 unités (le 21 venait d'une dylib périmée) |
+| B7a Économie & ordre | cour (aide ↔ code), dette, ravitaillement « dévasté », deux mécontentements, carte du mécontentement | b7a-economy-order | lancé |
+| B7b Données non lues | piété des édits, vitesse de construction (traits), `recruit_time_turns`, vision armée/ville | b7b-unread-data | lancé |
+| B7c Bâtiments | améliorations qui effacent, `enables_units`, piété/prestige, coût en pierre, `satisfies_classes: []`, pierre de Normandie | b7c-buildings | lancé |
+| B10 Codex (données) | doublon `prov_flandre`, gabelle 1341/1342, `fac_venice` 1336 | b10-codex-data | **fusionné** (integration/bulles3) |
+
+Fusion : worktree d'intégration `../gp-bulles3-merge` (branche `integration/bulles3`), puis ff-only dans main.
+
+## B10 Codex : données (25/09, worktree, branche b10-codex-data)
+- Doublon d'entity `prov_flandre` (cdx_gand, cdx_flandre_laine) : `entity` retiré de `cdx_gand.json` (fiche de la ville), conservé sur `cdx_flandre_laine.json` (fiche générale du comté, alias « Flandre »). Script de contrôle sur `data/codex/*.json` : plus aucun doublon d'`entity`.
+- Gabelle : l'ordonnance généralisant les greniers à sel est datée « mars 1341 » dans les registres royaux (style de Pâques, année commençant à Pâques) ; en style moderne (1er janvier) cela correspond à mars 1342, date usuellement citée (Wikipédia, France Pittoresque). `data/events/evt_gabelle_du_sel.json` corrigé (texte + `historical_date`, était erronément converti en 1343) ; `data/codex/cdx_gabelle.json` (1341, institution initiale) et `tech_royal_taxation` (1341) laissés inchangés, cohérents.
+- `fac_venice` / ligue anti-Scaliger : confirmé 22 juin 1336 (Wikipédia en, « Scaliger War ») et non 1er juin. Corrigé dans `data/factions/fac_venice.json`, `fac_florence.json`, `fac_verona.json` (`since.value`) et `data/codex/cdx_carrare.json` (texte).
+- Validation : validateur codex 0 erreur, `uv run --project tools pytest` 515 verts / 2 skipped. Alias non touchés → audit homonymes non relancé (pas nécessaire).
+- Pas de fusion dans main ; travail sur worktree, branche `b10-codex-data`.

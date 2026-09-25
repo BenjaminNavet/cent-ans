@@ -36,7 +36,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle", "bld_market"],
+    "buildings": ["bld_castle"],
     "port": false,
     "description": "Forteresse plantagenêt sur la Vienne, réunie au domaine royal en 1205, ville marchande à ses pieds.",
     "sources": ["Château de Chinon"]

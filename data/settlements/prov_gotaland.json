@@ -17,10 +17,8 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
-      "bld_abbey",
       "bld_cathedral",
       "bld_palisade",
       "bld_muster_field"
@@ -103,7 +101,7 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_port"
     ],
     "port": true,
@@ -128,10 +126,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market",
-      "bld_fair"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Bourg de pêcheurs de Scanie (suédoise depuis 1332), site de l'immense foire saisonnière au hareng fréquentée par les marchands hanséates.",
     "sources": [

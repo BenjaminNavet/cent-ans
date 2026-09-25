@@ -17,6 +17,7 @@ fn general(unit_index: usize, command: u8) -> GeneralSetup {
         charge_percent: 0.0,
         ranged_percent: 0.0,
         defense_percent: 0.0,
+        sovereign: false,
     }
 }
 

@@ -1,0 +1,109 @@
+{
+  "description": "Étendards et musiciens des régiments en bataille (lot EP5, ADR 0034), rendu seulement : forme et étoffe de l'étendard selon l'unité et le rang de son chef, bannière du général (oriflamme de Saint-Denis quand le roi de France est présent), musiciens, distances d'affichage. Les règles (chute, relève, prise) sont dans data/rules/battle_standards.json.",
+  "kinds": {
+    "pennon": {
+      "label": "pennon",
+      "note": "Petit drapeau triangulaire ou à queue d'aronde du chevalier bachelier, porté au bout de la lance ou d'une hampe ; aussi celui des compagnies d'archers et de sergents.",
+      "cloth": "pennon",
+      "size_m": [1.9, 0.5]
+    },
+    "banner": {
+      "label": "bannière",
+      "note": "Bannière carrée (plus haute que large) aux armes pleines : réservée au chevalier banneret qui mène sa compagnie ; aussi la bannière d'une commune ou d'une ville.",
+      "cloth": "banner",
+      "size_m": [1.0, 2.0]
+    },
+    "standard": {
+      "label": "étendard",
+      "note": "Étendard long et effilé à queue fendue des grands seigneurs (fin du XIVe siècle) : croix du royaume au guindant, livrée et devise sur le battant.",
+      "cloth": "standard",
+      "size_m": [3.4, 0.85]
+    },
+    "royal": {
+      "label": "bannière royale",
+      "note": "Bannière aux armes du souverain portée auprès du général : France ancien (azur semé de lis d'or), écartelé de France et d'Angleterre depuis 1340.",
+      "cloth": "banner",
+      "size_m": [1.5, 3.0]
+    },
+    "oriflamme": {
+      "label": "oriflamme",
+      "note": "Oriflamme de Saint-Denis : étoffe de soie vermeille à flammes, levée à l'abbaye et portée devant le roi de France en personne ; signifie qu'on ne fera pas de quartier.",
+      "cloth": "oriflamme",
+      "size_m": [1.5, 3.0]
+    },
+    "st_george": {
+      "label": "bannière de saint Georges",
+      "note": "Croix de gueules sur champ d'argent : bannière de l'armée royale anglaise.",
+      "cloth": "st_george",
+      "size_m": [1.5, 3.0]
+    },
+    "dragon": {
+      "label": "dragon",
+      "note": "Bannière au dragon levée par Édouard III à Crécy (1346) : pas de quartier.",
+      "cloth": "dragon",
+      "size_m": [1.5, 3.0]
+    }
+  },
+  "by_unit_type": {
+    "unit_knights": "banner",
+    "unit_breton_knights": "banner",
+    "unit_ordonnance_gendarmes": "standard",
+    "unit_english_retinue": "standard",
+    "unit_men_at_arms_foot": "banner",
+    "unit_urban_militia": "banner",
+    "unit_goedendag_militia": "banner",
+    "unit_flemish_pikemen": "banner",
+    "unit_scottish_spearmen": "banner",
+    "unit_ecorcheurs": "pennon",
+    "unit_routiers": "pennon",
+    "unit_mounted_sergeants": "pennon",
+    "unit_hobelars": "pennon",
+    "unit_jinetes": "pennon",
+    "unit_mounted_archers": "pennon",
+    "unit_longbowmen": "pennon",
+    "unit_crossbowmen": "pennon",
+    "unit_genoese_crossbowmen": "banner",
+    "unit_gascon_crossbowmen": "pennon",
+    "unit_francs_archers": "pennon",
+    "unit_culveriners": "pennon",
+    "unit_welsh_spearmen": "pennon",
+    "unit_coutiliers": "pennon"
+  },
+  "default_kind": "pennon",
+  "second_bearer_kind": "pennon",
+  "general": {
+    "kind": "royal",
+    "by_faction": { "fac_england": "st_george" },
+    "sovereign_by_faction": { "fac_france": "oriflamme", "fac_england": "royal" },
+    "no_quarter_by_faction": { "fac_france": "oriflamme", "fac_england": "dragon" }
+  },
+  "musicians": {
+    "note": "Tambourins (tabors) et busines (trompettes droites) : les communes et les compagnies à pied marchent au tambour ; les busines sonnent la charge et le ralliement auprès des grands seigneurs.",
+    "by_unit_type": {
+      "unit_men_at_arms_foot": ["horn"],
+      "unit_english_retinue": ["drum", "horn"],
+      "unit_urban_militia": ["drum"],
+      "unit_goedendag_militia": ["drum"],
+      "unit_flemish_pikemen": ["drum", "horn"],
+      "unit_scottish_spearmen": ["horn"],
+      "unit_welsh_spearmen": ["horn"],
+      "unit_genoese_crossbowmen": ["drum"],
+      "unit_francs_archers": ["drum"],
+      "unit_coutiliers": ["drum"]
+    },
+    "general": ["drum", "horn"],
+    "drum_every_s": 6.0,
+    "sound_distance_m": 260
+  },
+  "render": {
+    "max_distance_m": 1000,
+    "far_scale": 3.0,
+    "far_scale_from_m": 140,
+    "far_scale_to_m": 700,
+    "general_scale": 1.25,
+    "lod0_distance_m": 24,
+    "lod1_distance_m": 75,
+    "trophy_slot_offset": 2,
+    "max_fallen_bearers": 96
+  }
+}
