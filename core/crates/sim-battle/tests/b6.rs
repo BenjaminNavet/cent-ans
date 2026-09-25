@@ -153,17 +153,18 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// digests again (same winners, same order of magnitude of the losses).
 /// BV2: men knocked down by the knights' charge stop fighting for a few
 /// seconds; R2b: the AI reads the relief and its line keeps together
-/// (digests recomputed after merging R2, BV2 and R2b).
+/// (digests recomputed after merging R2, BV2 and R2b). EP5: standards fall
+/// and are taken under heavy losses (same winners; digests recomputed).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "248 Some(Attacker) [21, 16, 63, 100, 100, 18, 40, 107, 91, 0]",
+            "253 Some(Attacker) [21, 19, 63, 100, 100, 15, 44, 107, 93, 0]",
         ),
         (
             11,
-            "327 Some(Attacker) [0, 39, 57, 99, 100, 13, 44, 94, 100, 9]",
+            "311 Some(Attacker) [3, 40, 59, 100, 100, 13, 52, 96, 105, 9]",
         ),
     ];
     for (seed, digest_before) in expected {
