@@ -28,6 +28,9 @@
 //!   breach the walls, victory by holding the central square.
 //! - Siege fires ([`fire`], spec `docs/design/s2-incendies.md`): incendiary
 //!   volleys, spread from house to house, heat, smoke, burnt ruins.
+//! - Dense besieged town and solid street furniture ([`town`], [`props`],
+//!   lot BR3, ADR 0047): house blocks and props are oriented rectangles that
+//!   block the pathing and push the figures out.
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 //! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
@@ -45,6 +48,7 @@ pub mod naval;
 pub mod orders;
 pub mod outcome;
 pub mod position;
+pub mod props;
 pub mod relief;
 pub mod relief_ai;
 pub mod rng;
@@ -55,6 +59,7 @@ pub mod siege_fx;
 pub mod siege_layout;
 pub mod sim;
 pub mod site;
+pub mod town;
 pub mod unit;
 
 pub use command::{Command, CommandError};
@@ -82,4 +87,5 @@ pub use sim::{
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
+pub use town::{Footprint, Prop, PropKind, TownRules};
 pub use unit::{Formation, Unit, UnitFate, UnitState};

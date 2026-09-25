@@ -7,6 +7,7 @@
 mod deployment;
 mod fire;
 mod indirect;
+mod obstacles;
 mod pathing;
 mod reinforcements;
 mod separation;
@@ -120,6 +121,9 @@ pub struct BattleSim {
     /// Tactical reading of the relief for the AI (R2b; derived data, read
     /// once per battle, reset by [`BattleSim::field_mut`]).
     relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
+    /// BR3: props of the battle village (derived data, reset by
+    /// [`BattleSim::field_mut`]).
+    village_props: std::cell::OnceCell<Vec<crate::town::Prop>>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
@@ -244,6 +248,8 @@ impl BattleSim {
         let mut fire = fire::FireSystem::new(seed, is_siege);
         if let Some(works) = siege.as_mut() {
             fire.prepare(works);
+            // BR3: props of the suburbs too (deterministic, no draw).
+            works.lay_props();
         }
         if let Some(works) = siege.as_ref() {
             field.prepare_for_siege_around(if works.landmark.is_some() {
@@ -340,6 +346,7 @@ impl BattleSim {
             deploying: false,
             path_cache: Default::default(),
             relief_map: Default::default(),
+            village_props: Default::default(),
             fire,
             assault: Default::default(),
         };
@@ -619,6 +626,7 @@ impl BattleSim {
     /// Mutable field (tests and laboratory set-ups: hedges, villages).
     pub fn field_mut(&mut self) -> &mut Battlefield {
         self.relief_map = Default::default();
+        self.village_props = Default::default();
         &mut self.field
     }
 

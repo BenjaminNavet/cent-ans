@@ -28,7 +28,7 @@ var _ladder_mesh: ArrayMesh
 var wall_height: float = 8.0
 var thickness: float = 3.0
 var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
-var house_sites: Array = []  # F5c : [{p: Vector2, radius}] = obstacles de la simulation
+var house_sites: Array = []  # F5c/BR3 : [{p, radius, length, depth, yaw, rows, church}] = obstacles de la simulation
 var _fx: WallCollapseFx  # S1 : effondrement physique (rendu seulement)
 var fire_fx: Node3D = null  # S2 : incendies des maisons (`siege_fire_fx.gd`)
 var _kit_batch: BuildingKit.Batch = null  # BR1 : bâtiments du kit (MultiMesh par modèle)
@@ -307,7 +307,7 @@ func _build_square() -> void:
 	disc.name = "Square"
 	add_child(disc)
 	if BuildingKit.available():
-		return  # BR2 : puits et marché du kit (`_kit_market`).
+		return  # BR3 : puits et marché du cœur (`_kit_props`).
 	# Puits au centre.
 	var well := MeshInstance3D.new()
 	var ring := CylinderMesh.new()
@@ -320,57 +320,56 @@ func _build_square() -> void:
 	add_child(well)
 
 
-## Maisons et église posées sur les disques de la simulation (`get_siege().houses`, F5c) : le
-## rendu coïncide avec les obstacles du cheminement. Les maisons (statiques) sont ensuite regroupées
-## en `MultiMeshInstance3D` par `BattleSiegeBatcher` (V6, perf) ; l'église (unique) reste un nœud normal.
+## Maisons et église posées sur les emprises de la simulation (`get_siege().houses`, F5c ; BR3 :
+## rectangles orientés `{x, z, length, depth, yaw, rows, church}`) : le rendu coïncide avec les
+## obstacles du cheminement et des figurines. Les maisons (statiques) sont ensuite regroupées en
+## `MultiMeshInstance3D` par `BattleSiegeBatcher` (V6, perf) ; l'église (unique) reste un nœud normal.
 func _build_houses() -> void:
 	var center: Vector2 = siege.get("center", Vector2(600, 560))
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1340
 	house_sites = _house_sites()
-	# L'église prend le disque le plus proche du fond de la ville, les autres des maisons.
 	var church_index := -1
 	for i in house_sites.size():
-		var p: Vector2 = house_sites[i]["p"]
-		if church_index < 0 or p.distance_to(center + Vector2(0, 75)) < (house_sites[church_index]["p"] as Vector2).distance_to(center + Vector2(0, 75)):
+		if bool(house_sites[i]["church"]):
 			church_index = i
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
 	if BuildingKit.available():
-		_build_kit_town(houses_root, church_index, center)
+		_build_kit_town(houses_root, center)
 		return
 	for i in house_sites.size():
-		var r := float(house_sites[i]["radius"])
-		# Emprise inscrite dans le disque (demi-diagonale ≤ rayon).
+		var site: Dictionary = house_sites[i]
 		if i != church_index:
-			_house(houses_root, house_sites[i]["p"], rng.randf_range(1.1, 1.4) * r, rng.randf_range(0.8, 1.0) * r, rng.randf_range(4.0, 7.0), rng.randf() * TAU)
+			var h := 4.0 + 3.0 * BuildingKit.hash01(i, 11)
+			_house(houses_root, site["p"], float(site["length"]) * 0.95, float(site["depth"]) * 0.95, h, -float(site["yaw"]))
 	BattleSiegeBatcher.batch_and_replace(houses_root)
 	if church_index < 0:
 		return
 	# L'église, au fond de la ville.
 	var church: Vector2 = house_sites[church_index]["p"]
-	if Geometry2D.is_point_in_polygon(church, _ring()):
-		if _place_model("cathedral", church, 20.0):
-			return
-		_house(self, church, 18.0, 10.0, 11.0, 0.0)
-		var spire := MeshInstance3D.new()
-		var cone := CylinderMesh.new()
-		cone.top_radius = 0.0
-		cone.bottom_radius = 3.2
-		cone.height = 14.0
-		cone.radial_segments = 8
-		spire.mesh = cone
-		spire.material_override = _textured("slate", Color(0.62, 0.64, 0.7), 0.7)
-		spire.position = Vector3(church.x - 8.0, _ground(church.x, church.y) + 11.0 + 7.0 + 4.0, church.y)
-		add_child(spire)
+	if _place_model("cathedral", church, 20.0):
+		return
+	_house(self, church, 18.0, 10.0, 11.0, -float(house_sites[church_index]["yaw"]))
+	var spire := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 3.2
+	cone.height = 14.0
+	cone.radial_segments = 8
+	spire.mesh = cone
+	spire.material_override = _textured("slate", Color(0.62, 0.64, 0.7), 0.7)
+	spire.position = Vector3(church.x - 8.0, _ground(church.x, church.y) + 11.0 + 7.0 + 4.0, church.y)
+	add_child(spire)
 
 
-## BR1 : ville du kit Blender. Chaque disque intra-muros devient un îlot de deux rangées dos à
-## dos de maisons de ville mitoyennes (pignon sur rue, 2-3 étages en encorbellement, boutiques) ;
-## les disques des faubourgs reçoivent une maison rurale ; l'église du fond est la grande église
-## du kit. Emprise des îlots : environ 1,75 rayon × 1,85 rayon (les disques restent les obstacles).
-func _build_kit_town(houses_root: Node3D, church_index: int, center: Vector2) -> void:
+## BR1 + BR3 : ville du kit Blender, posée sur les emprises du cœur. Un îlot de deux rangées
+## (`rows` = 2) reçoit deux rangées dos à dos de maisons de ville mitoyennes (pignon sur rue, 2-3
+## étages en encorbellement, boutiques), façades vers l'avant (rangée 0, vers la place) et vers
+## l'arrière ; un îlot d'une rangée (le long du rempart ou d'une rue) une seule rangée tournée
+## vers l'avant ; un faubourg une maison rurale ; l'église la grande église du kit. Le mobilier
+## (étals, charrettes, tonneaux, bûches, puits, marché) vient aussi du cœur (`props`) : il est
+## solide pour les figurines, le rendu ne fait que le poser.
+func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 	_kit_batch = BuildingKit.Batch.new("", 2000.0)
 	_kit_sites.clear()
 	_kit_ruins.clear()
@@ -379,83 +378,69 @@ func _build_kit_town(houses_root: Node3D, church_index: int, center: Vector2) ->
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
 		var p: Vector2 = site["p"]
-		var r := float(site["radius"])
+		var length := float(site["length"])
+		var depth := float(site["depth"])
+		var yaw := float(site["yaw"])
 		var handles: Array = []
-		if i == church_index and Geometry2D.is_point_in_polygon(p, _ring()):
-			var yaw := (p - center).angle() + PI * 0.5
-			handles.append(_kit_place("church", p, 34.0, 12.5, yaw, rng))
-		elif bool(site.get("suburb", false)):
+		if bool(site["church"]):
+			handles.append(_kit_place("church", p, length, depth, yaw, rng))
+		elif bool(site["suburb"]):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
-			var yaw := rng.randf() * TAU
-			handles.append(_kit_place(kind, p, r * 1.35, r * 0.8, yaw, rng))
-			if rng.randf() < 0.55:
-				handles.append(BuildingKit.add_front_prop(_kit_batch, rng, ["woodpile", "cart", "barrels"], p, -yaw, r * 1.35, r * 0.8, _ground))
+			handles.append(_kit_place(kind, p, length, depth, yaw, rng))
 		else:
-			# Îlot de deux rangées dos à dos : façades vers la place et vers la rue extérieure.
-			var inward := (center - p).normalized()
-			var tangent := Vector2(-inward.y, inward.x)
-			var frontage := r * 1.75
-			var depth := r * 0.92
-			for row in 2:
-				var facing := inward if row == 0 else -inward
-				var yaw := atan2(facing.y, facing.x) - PI * 0.5
-				var row_center := p + facing * depth * 0.5
-				var n := 3 if rng.randf() < 0.65 else 2
+			var tangent := Vector2(cos(yaw), sin(yaw))
+			var front := Vector2(-sin(yaw), cos(yaw))
+			var rows := int(site["rows"])
+			var row_depth := depth / float(rows)
+			for row in rows:
+				var facing := front if row == 0 else -front
+				var row_yaw := yaw if row == 0 else yaw + PI
+				var row_tangent := tangent if row == 0 else -tangent
+				var row_center := p + facing * (row_depth * 0.5 if rows == 2 else 0.0)
+				var n := clampi(int(round(length / 6.5)), 2, 5)
 				var widths: Array = []
 				var total := 0.0
 				for k in n:
 					var w := rng.randf_range(0.8, 1.25)
 					widths.append(w)
 					total += w
-				var x := -frontage * 0.5
+				var x := -length * 0.5
 				for k in n:
-					var w: float = frontage * float(widths[k]) / total
+					var w: float = length * float(widths[k]) / total
 					var kind := "townhouse"
-					if n == 2 and rng.randf() < 0.35:
+					if n <= 3 and rng.randf() < 0.3:
 						kind = ["stonehouse", "timber"][rng.randi_range(0, 1)]
-					var d := depth * (rng.randf_range(0.9, 1.05) if kind == "townhouse" else 0.9)
-					var q := row_center + tangent * (x + w * 0.5) - facing * (depth - d) * 0.5
-					handles.append(_kit_place(kind, q, w, d, yaw, rng))
-					# BR2 : étals côté place, tonneaux, charrettes et bûches côté rue.
-					if rng.randf() < 0.3:
-						var kinds := ["stall", "stall", "barrels", "cart"] if row == 0 else ["barrels", "barrels", "woodpile", "cart"]
-						handles.append(BuildingKit.add_front_prop(_kit_batch, rng, kinds, q, -yaw, w, d, _ground))
+					# Façade alignée sur l'emprise, arrière parfois moins profond (cours).
+					var d := row_depth * (rng.randf_range(0.85, 1.0) if kind == "townhouse" else 0.9)
+					var q := row_center + row_tangent * (x + w * 0.5) - facing * (row_depth - d) * 0.5
+					handles.append(_kit_place(kind, q, w, d, row_yaw, rng))
 					x += w
 		_kit_sites[i] = handles.filter(func(h: Array) -> bool: return not h.is_empty())
-	_kit_market(center, rng)
+	_kit_props(center)
 	_kit_batch.build(houses_root)
 
 
-## BR2 : place du marché. Puits du kit au centre, étals en couronne au bord de la place (face au
-## centre, par groupes, en laissant des passages vers les rues), quelques charrettes et tonneaux ;
-## le centre reste dégagé pour la mêlée. Tout est posé sur le dessus du dallage.
-func _kit_market(center: Vector2, rng: RandomNumberGenerator) -> void:
-	var radius := float(siege.get("square_radius", 35.0))
-	var top := _ground(center.x, center.y) + 0.2
-	var wells := BuildingKit.models_of("well")
-	if not wells.is_empty():
-		_kit_batch.add(wells[0], Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(center.x, top - 0.1, center.y)))
-	var stalls := BuildingKit.models_of("stall")
-	var extras := BuildingKit.models_of("cart") + BuildingKit.models_of("barrels")
-	if stalls.is_empty():
-		return
-	var groups := 5
-	for g in groups:
-		var base := TAU * float(g) / groups + rng.randf_range(-0.15, 0.15)
-		var count := rng.randi_range(2, 4)
-		for k in count:
-			var a := base + float(k) * 4.0 / (radius * 0.8)
-			var p := center + Vector2(cos(a), sin(a)) * radius * 0.8
-			# Façade (+Z du modèle) vers le centre de la place.
-			var to_center := (center - p).normalized()
-			var theta := atan2(to_center.x, to_center.y)
-			var model: String = stalls[rng.randi_range(0, stalls.size() - 1)]
-			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, theta), Vector3(p.x, top, p.y)))
-		if not extras.is_empty() and rng.randf() < 0.7:
-			var a := base - 5.0 / (radius * 0.8)
-			var p := center + Vector2(cos(a), sin(a)) * radius * 0.86
-			var model: String = extras[rng.randi_range(0, extras.size() - 1)]
-			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(p.x, top, p.y)))
+## BR3 : mobilier du cœur (`get_siege().props`) : façades des îlots et place du marché (puits,
+## étals en couronne). Le mobilier d'une maison est rangé avec elle (`ruin_site` le cache quand
+## elle brûle) ; celui de la place est posé sur le dallage.
+func _kit_props(center: Vector2) -> void:
+	var paving := _ground(center.x, center.y) + 0.2
+	var props: Array = siege.get("props", [])
+	for k in props.size():
+		var prop: Dictionary = props[k]
+		var model := BuildingKit.prop_model(str(prop["kind"]), k)
+		if model == "":
+			continue
+		var house := int(prop["house"])
+		var x := float(prop["x"])
+		var z := float(prop["z"])
+		var y := paving - (0.1 if str(prop["kind"]) == "well" else 0.0) if house < 0 else _ground(x, z) - 0.03
+		var xform := BuildingKit.prop_transform(prop, y)
+		var handle := _kit_batch.add(model, xform)
+		if house >= 0:
+			if not _kit_sites.has(house):
+				_kit_sites[house] = []
+			(_kit_sites[house] as Array).append([handle, "", xform])
 
 
 ## Pose un bâtiment du kit (emprise `length` le long de son axe X, façade vers +Z, lacet `yaw`).
@@ -821,10 +806,20 @@ func _make_ladder_group(width: float) -> Node3D:
 	return node
 
 
-## Source des maisons (F5c) : disques `{x, z, radius}` de `get_siege().houses`, obstacles de la
-## simulation (F5a). Aucune position n'est inventée ici.
+## Source des maisons (F5c, BR3) : emprises `{x, z, radius, length, depth, yaw, rows, church}` de
+## `get_siege().houses`, obstacles de la simulation. Aucune position n'est inventée ici.
 func _house_sites() -> Array:
 	var sites: Array = []
 	for house in siege.get("houses", []):
-		sites.append({"p": Vector2(float(house["x"]), float(house["z"])), "radius": float(house["radius"]), "suburb": bool(house.get("suburb", false))})
+		var r := float(house["radius"])
+		sites.append({
+			"p": Vector2(float(house["x"]), float(house["z"])),
+			"radius": r,
+			"suburb": bool(house.get("suburb", false)),
+			"length": float(house.get("length", r * 1.75)),
+			"depth": float(house.get("depth", r * 1.85)),
+			"yaw": float(house.get("yaw", 0.0)),
+			"rows": int(house.get("rows", 2)),
+			"church": bool(house.get("church", false)),
+		})
 	return sites
