@@ -36,6 +36,10 @@ Les sondes (`balance_probe` 8 × 200 tours, `century_probe` 5 × 464 tours) mont
    trésor s'applique en entier à partir de 4 000 ₶ de revenu de saison, en proportion en
    dessous, jamais sous 25 % du montant écrit. L'infobulle de la décision affiche le montant réel.
 6. **Les rebelles sont hors de l'économie** : ni impôt, ni entretien, ni banqueroute.
+7. **Commerce** : une armée ennemie en rase campagne dans sa zone de contrôle (`zoc_radius_km`)
+   autour d'une colonie de la route menace la route comme une armée campée dans la colonie.
+8. **Édits de l'IA** : le score dépend du mécontentement local (apaisement) et de la guerre ou
+   du déficit (impôt, levées), au lieu d'un score fixe qui donnait la Paix de Dieu partout.
 
 ## Conséquences
 
