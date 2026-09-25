@@ -10,7 +10,7 @@ extends Node3D
 ## rendu par `resolve_naval_battle` au retour) ou un scénario historique autonome
 ## (`--naval-scenario=sluys`). Options de ligne de commande (après `--`) : `--screenshot=<png>`
 ## (capture puis quitte), `--shot-at=<s>` (avance rapide jusqu'à cet instant), `--camera=<vue>`
-## (overview, close, deck, melee, fire), `--autoplay` (IA des deux camps), `--benchmark` (i/s, JSON),
+## (overview, close, deck, melee, fire), `--shot-when=melee` (au premier abordage), `--autoplay` (IA des deux camps), `--benchmark` (i/s, JSON),
 ## `--seed=<n>`.
 
 signal returned(result: Dictionary)
@@ -53,6 +53,7 @@ var _hud_timer: float = 0.0
 var _screenshot_path: String = ""
 var _shot_at: float = -1.0
 var _camera_view: String = ""
+var _shot_when: String = ""  # `--shot-when=melee` : capture au premier abordage (mêlée > 4 s)
 var _benchmark: bool = false
 var _bench_frames: int = 0
 var _bench_time: float = 0.0
@@ -660,6 +661,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg.begins_with("--shot-at="):
 			_shot_at = float(arg.trim_prefix("--shot-at="))
+		elif arg.begins_with("--shot-when="):
+			_shot_when = arg.trim_prefix("--shot-when=")
 		elif arg.begins_with("--camera="):
 			_camera_view = arg.trim_prefix("--camera=")
 		elif arg.begins_with("--seed="):
@@ -687,6 +690,9 @@ func _stage_screenshot() -> void:
 	camera_rig.edge_pan_enabled = false
 	if _shot_at > 0.0:
 		_fast_forward(_shot_at)
+	if _shot_when == "melee":
+		while not _melee_ongoing() and not bool(battle.call("is_finished")) and anim_time < 1200.0:
+			_fast_forward(anim_time + 0.5)
 	paused = true
 	_apply_camera_view()
 	for _i in 90:
@@ -697,8 +703,18 @@ func _stage_screenshot() -> void:
 		path = ProjectSettings.globalize_path("res://").path_join(path)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
-	print("NavalScene: screenshot %s at %.0f s (%s)" % [path, anim_time, error_string(err)])
+	var grappled := 0
+	for ship in ships:
+		grappled += (ship.get("grappled", PackedInt32Array()) as PackedInt32Array).size()
+	print("NavalScene: screenshot %s at %.0f s (%s), %d grapples, %d ropes drawn" % [path, anim_time, error_string(err), grappled / 2, effects.pairs_drawn])
 	get_tree().quit(0 if err == OK else 1)
+
+
+func _melee_ongoing() -> bool:
+	for ship in ships:
+		if (ship.get("grappled", PackedInt32Array()) as PackedInt32Array).size() > 0 and float(ship.get("melee_time", 0.0)) > 4.0:
+			return true
+	return false
 
 
 ## Cadrages des captures : overview (flottes), close (navire au contact), deck (à hauteur de
@@ -732,13 +748,7 @@ func _apply_camera_view() -> void:
 			if men > most:
 				most = men
 				focus = (a.global_position + b.global_position) * 0.5
-				var line := b.global_position - a.global_position
-				var perp := Vector3(-line.z, 0.0, line.x).normalized()
-				# Du côté de la caméra actuelle (pas à travers le reste de la flotte).
-				var current := Vector3(sin(camera_rig.yaw), 0.0, cos(camera_rig.yaw))
-				if perp.dot(current) < 0.0:
-					perp = -perp
-				pair_yaw = atan2(perp.x, perp.z) + 0.35
+				pair_yaw = _clear_yaw(focus, [int(ship["id"]), int(grappled[0])], 62.0)
 	match _camera_view:
 		"overview":
 			camera_rig.look_at_point(focus, 420.0, camera_rig.yaw)
@@ -747,9 +757,30 @@ func _apply_camera_view() -> void:
 		"deck":
 			camera_rig.look_at_point(focus + Vector3(0, 4, 0), 24.0, camera_rig.yaw + 1.2)
 		"melee":
-			camera_rig.look_at_point(focus + Vector3(0, 3, 0), 85.0, pair_yaw)
+			camera_rig.look_at_point(focus + Vector3(0, 3, 0), 62.0, pair_yaw)
 		_:
 			camera_rig.look_at_point(focus, 140.0, camera_rig.yaw + 0.4)
+
+
+## Cap de caméra (autour de `focus`, à `dist` m) dont la ligne de visée passe le plus loin des
+## autres navires (captures : la paire abordée n'est pas cachée derrière la flotte).
+func _clear_yaw(focus: Vector3, exclude: Array, dist: float) -> float:
+	var best_yaw := camera_rig.yaw
+	var best_score := -INF
+	for k in 16:
+		var yaw := TAU * float(k) / 16.0
+		var eye := Vector2(focus.x, focus.z) + Vector2(sin(yaw), cos(yaw)) * dist * 0.85
+		var score := INF
+		for ship in ships:
+			if exclude.has(int(ship["id"])) or str(ship["status"]) in ["sunk", "escaped"]:
+				continue
+			var p := Vector2(float(ship["x"]), float(ship["z"]))
+			var closest := Geometry2D.get_closest_point_to_segment(p, eye, Vector2(focus.x, focus.z))
+			score = minf(score, p.distance_to(closest))
+		if score > best_score + 0.5:
+			best_score = score
+			best_yaw = yaw
+	return best_yaw
 
 
 func _bench_frame(delta: float) -> void:

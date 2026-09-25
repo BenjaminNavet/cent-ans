@@ -20,8 +20,8 @@ var pairs_drawn: int = 0
 func setup() -> void:
 	name = "NavalEffects"
 	var rope_mesh := CylinderMesh.new()
-	rope_mesh.top_radius = 0.035
-	rope_mesh.bottom_radius = 0.035
+	rope_mesh.top_radius = 0.06
+	rope_mesh.bottom_radius = 0.06
 	rope_mesh.height = 1.0
 	rope_mesh.radial_segments = 4
 	rope_mesh.rings = 1
