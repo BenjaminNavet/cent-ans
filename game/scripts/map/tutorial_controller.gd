@@ -185,7 +185,18 @@ func check_now() -> bool:
 func _process(delta: float) -> void:
 	if not active or not map.get("visible"):
 		return
+	# Q2 : le guide s'efface sous le menu pause, les réglages et la décision de chronique.
+	var covered := modal_open()
+	if overlay.visible == covered:
+		overlay.visible = not covered
+	if covered:
+		return
 	overlay.set_target(resolve_target(str(steps[step_index].get("target", ""))))
+	var avoid: Array = []
+	for panel in [_ui_node("province_panel") as Control, _settlement_panel()]:
+		if panel != null and panel.is_visible_in_tree():
+			avoid.append(panel.get_global_rect())
+	overlay.set_avoid(avoid)
 	if _done_timer >= 0.0:
 		_done_timer -= delta
 		if _done_timer < 0.0:
@@ -207,6 +218,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key.is_action_pressed("encyclopedia_open") and not key.ctrl_pressed and not key.meta_pressed:  # U7
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
+
+
+## Q2 : vrai quand une fenêtre modale couvre la carte (menu pause, réglages, fenêtre de
+## chronique hors de l'étape qui la demande) : le guide ne s'affiche pas par-dessus.
+func modal_open() -> bool:
+	var flow: Node = map.get("flow")
+	if flow != null:
+		if bool(flow.call("is_paused")):
+			return true
+		var settings_menu: Variant = flow.get("_settings_menu")
+		if settings_menu != null and is_instance_valid(settings_menu):
+			return true
+	var chronicle: Node = map.get("chronicle")
+	if chronicle != null and current_step_id() != "chronicle":
+		var window := chronicle.get("window") as Control
+		if window != null and window.is_visible_in_tree():
+			return true
+	return false
 
 
 # --- Objectifs ------------------------------------------------------------------------
@@ -272,11 +301,26 @@ func _constructions() -> int:
 	if not sim.has_method("get_province_city"):
 		return 0
 	var count := 0
+	var settlements := sim.has_method("province_settlements")
 	for province_id in _player_provinces():
 		var city: Dictionary = sim.call("get_province_city", province_id)
 		if not (city.get("construction", {}) as Dictionary).is_empty():
 			count += 1
+		if not settlements:
+			continue
+		# Q2 (C5) : chantiers lancés depuis le panneau d'une colonie.
+		for settlement_id in sim.call("province_settlements", province_id):
+			var detail: Dictionary = sim.call("settlement_detail", settlement_id)
+			if str(detail.get("owner", "")) == _player() and not (detail.get("construction", {}) as Dictionary).is_empty():
+				count += 1
 	return count
+
+
+## Q2 (C5) : panneau de colonie ouvert (clic sur une ville), sinon null.
+func _settlement_panel() -> Control:
+	var controller: Node = map.get("settlements_ctl")
+	var panel: Control = controller.get("panel") if controller != null else null
+	return panel if panel != null and panel.is_visible_in_tree() else null
 
 
 func _governors() -> Dictionary:
@@ -356,12 +400,21 @@ func objective_met(step_id: String) -> bool:
 					return true
 			return false
 		"open_province":
+			# Q2 : un clic sur la ville ouvre le panneau de la colonie (C5), qui compte aussi.
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null and bool(settlement_panel.get("is_player_owner")):
+				return true
 			var panel := _ui_node("province_panel")
 			if panel == null or not (panel as Control).is_visible_in_tree():
 				return false
 			var state: Dictionary = sim.call("get_province_state", str(panel.get("province_id")))
 			return str(state.get("owner", "")) == _player()
 		"city_tab":
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null:
+				var settlement_tabs: TabContainer = settlement_panel.get("tabs")
+				if settlement_tabs != null and settlement_tabs.current_tab == SettlementPanel.TAB_BUILDINGS:
+					return true
 			var panel := _ui_node("province_panel")
 			if panel == null or not (panel as Control).is_visible_in_tree():
 				return false
@@ -431,6 +484,18 @@ func _province_point(province_id: String) -> Dictionary:
 	return _world_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y))
 
 
+## Q2 : la ville capitale (maquette ou icône de colonie), sinon le centre de la province.
+func _capital_point() -> Dictionary:
+	var sim := _sim()
+	var layer: Node = map.get("settlement_layer")
+	var city := str((sim.call("get_province_state", _capital()) as Dictionary).get("city", "")) if sim != null else ""
+	if city != "" and layer != null:
+		var world: Vector3 = layer.call("world_position_of", city)
+		if world != Vector3.ZERO:
+			return _world_point(world)
+	return _province_point(_capital())
+
+
 func _capital() -> String:
 	return str(GameCatalog.definitions("factions").get(_player(), {}).get("capital", ""))
 
@@ -453,11 +518,24 @@ func resolve_target(target: String) -> Dictionary:
 				return _control_rect(_ui_control("selected_army_widget", "army_panel"))
 			return marker
 		"capital":
-			return _province_point(_capital())
+			return _capital_point()
 		"city_tab", "buildable":
+			var settlement_panel := _settlement_panel()
+			if settlement_panel != null:  # Q2 (C5) : panneau de la ville cliquée
+				var settlement_tabs: TabContainer = settlement_panel.get("tabs")
+				if target == "buildable" and settlement_tabs != null and settlement_tabs.current_tab == SettlementPanel.TAB_BUILDINGS:
+					var list := _control_rect(settlement_panel.get("buildable_list") as Control)
+					if not list.is_empty():
+						return list
+				if settlement_tabs != null and settlement_tabs.get_tab_count() > SettlementPanel.TAB_BUILDINGS:
+					var settlement_bar := settlement_tabs.get_tab_bar()
+					var settlement_rect := settlement_bar.get_tab_rect(SettlementPanel.TAB_BUILDINGS)
+					settlement_rect.position += settlement_bar.get_global_rect().position
+					return {"rect": settlement_rect}
+				return _control_rect(settlement_panel)
 			var panel := _ui_node("province_panel") as Control
 			if panel == null or not panel.is_visible_in_tree():
-				return _province_point(_capital())
+				return _capital_point()
 			var tabs: TabContainer = panel.get("tabs")
 			if target == "buildable" and tabs != null and tabs.current_tab == 1:
 				var buildable: Control = panel.get("buildable_list")
