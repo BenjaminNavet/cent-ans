@@ -466,6 +466,18 @@ func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
 			image.set_pixel(index, 0, Color(1.0, 0, 0))
 	material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
 	material.set_shader_parameter("fog_enabled", enabled)
+	material.set_shader_parameter("fog_by_cell", false)
+
+
+## Brouillard par case (lot M5a) : `cells` = texture de vue R8 de la simulation (255 = vu,
+## bords doux), couvrant `size_px` pixels carte depuis l'origine. Remplace le masque par province.
+func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2) -> void:
+	if material == null:
+		return
+	material.set_shader_parameter("fog_cells", cells)
+	material.set_shader_parameter("fog_cells_size", size_px)
+	material.set_shader_parameter("fog_by_cell", enabled and cells != null)
+	material.set_shader_parameter("fog_enabled", enabled)
 
 
 func set_highlight(hovered_index: int, selected_index: int) -> void:

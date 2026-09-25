@@ -200,10 +200,20 @@ static func _install_particle_hook(tree: SceneTree) -> void:
 	tree.node_added.connect(_on_node_added)
 
 
-## Différé : les scripts règlent souvent `amount` juste après `add_child`.
+## Différé : les scripts règlent souvent `amount` juste après `add_child`. Les particules d'un
+## effet ponctuel (ex. incendie) peuvent être libérées avant que l'appel différé ne s'exécute ;
+## passer l'objet directement à `call_deferred` fait alors échouer la file de messages (« Cannot
+## convert argument 1 from Object to Object », le slot mémoire étant réutilisé par un autre objet
+## d'ici là). On passe donc l'ID d'instance et on ne résout le nœud qu'au moment de l'appel.
 static func _on_node_added(node: Node) -> void:
 	if node is GPUParticles3D or node is CPUParticles3D:
-		scale_particles.call_deferred(node)
+		_scale_particles_by_id.call_deferred(node.get_instance_id())
+
+
+static func _scale_particles_by_id(id: int) -> void:
+	var node := instance_from_id(id)
+	if node != null:
+		scale_particles(node)
 
 
 static func scale_particles(node: Node) -> void:

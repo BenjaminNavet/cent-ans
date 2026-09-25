@@ -662,9 +662,10 @@ impl CampaignState {
             .collect()
     }
 
-    /// B7c: resource units `faction` can still draw for a new construction:
-    /// one per producing province it controls or its allies control
-    /// ([`goods_map`]), less what its ongoing constructions have reserved.
+    /// B7c: resource units `faction` can still draw for a new construction
+    /// or recruit: one per producing province it controls or its allies
+    /// control ([`goods_map`]), less what its ongoing constructions and its
+    /// recruits in training (SV2) have reserved.
     pub fn free_supply(
         &self,
         data: &GameData,
@@ -676,12 +677,18 @@ impl CampaignState {
             .values()
             .filter(|s| &s.controller == faction)
         {
-            let Some(construction) = &settlement.construction else {
-                continue;
-            };
-            for (resource, amount) in &construction.drawn {
-                if let Some(left) = supply.get_mut(resource) {
-                    *left = left.saturating_sub(*amount);
+            // SV2: recruits in training hold what they drew, like the
+            // constructions.
+            let reserved = settlement
+                .construction
+                .iter()
+                .map(|c| &c.drawn)
+                .chain(settlement.recruit_queue.iter().map(|r| &r.drawn));
+            for drawn in reserved {
+                for (resource, amount) in drawn {
+                    if let Some(left) = supply.get_mut(resource) {
+                        *left = left.saturating_sub(*amount);
+                    }
                 }
             }
         }

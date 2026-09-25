@@ -8,6 +8,8 @@
 //! A [`Place`] also accepts a province id, which stands for its city (the v1
 //! JSON field name `province` is still read as an alias).
 
+use std::collections::BTreeMap;
+
 use data_model::{
     BuildingId, CharacterId, CharacterStatus, FactionId, GameData, ProvinceId, SettlementId,
     SkillId, TechnologyId, UnitTypeId,
@@ -511,6 +513,28 @@ pub struct RecruitOption {
     /// French explanation when `available` is `false`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
+    /// SV2: resource units the unit needs (`cost.resources`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub resources: BTreeMap<data_model::ResourceId, u32>,
+    /// SV2: part of `cost` paid to import the missing resource units
+    /// (B7c rule, ADR 0053).
+    #[serde(default)]
+    pub import_cost: u32,
+    /// SV2: resource units the faction lacks and must import.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub imported: BTreeMap<data_model::ResourceId, u32>,
+}
+
+/// SV2: full price of one recruit — money cost plus the import of the
+/// resource units the faction's free supply lacks.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct RecruitPrice {
+    /// Total livres (recruitment cost plus imports, at current prices).
+    pub cost: u32,
+    /// Part of `cost` paid for imports.
+    pub import_cost: u32,
+    /// Units drawn from the supply and imported.
+    pub draw: crate::buildings::ResourceDraw,
 }
 
 impl CampaignState {
@@ -966,6 +990,14 @@ impl CampaignState {
                 Err(OrderError::RecruitUnavailable(reason))
             };
         }
+        // SV2: the resources come from the faction's producing provinces
+        // (reserved while the recruit trains), the rest is imported and
+        // paid (B7c rule, ADR 0053).
+        let supply = self.free_supply(data, faction);
+        let drawn = self
+            .recruit_price(data, faction, settlement, unit_type, &supply)
+            .map(|price| price.draw.drawn)
+            .unwrap_or_default();
         let faction_state = self.factions.get_mut(faction).expect("checked");
         faction_state.treasury -= i64::from(option.cost);
         let turns_left = data
@@ -983,6 +1015,7 @@ impl CampaignState {
                 unit_type: unit_type.clone(),
                 turns_left,
                 ordered_turn,
+                drawn,
             });
         Ok(())
     }
@@ -996,9 +1029,12 @@ impl CampaignState {
         else {
             return Vec::new();
         };
+        let supply = self.free_supply(data, &controller);
         data.unit_types
             .keys()
-            .filter_map(|unit_type| self.recruit_option(data, &controller, settlement, unit_type))
+            .filter_map(|unit_type| {
+                self.recruit_option_with_supply(data, &controller, settlement, unit_type, &supply)
+            })
             .collect()
     }
 
@@ -1021,16 +1057,34 @@ impl CampaignState {
         settlement: &SettlementId,
         unit_type_id: &UnitTypeId,
     ) -> Option<RecruitOption> {
+        let supply = self.free_supply(data, faction);
+        self.recruit_option_with_supply(data, faction, settlement, unit_type_id, &supply)
+    }
+
+    /// [`CampaignState::recruit_option`] with the faction's free resource
+    /// `supply` already computed (SV2).
+    fn recruit_option_with_supply(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        unit_type_id: &UnitTypeId,
+        supply: &BTreeMap<data_model::ResourceId, u32>,
+    ) -> Option<RecruitOption> {
         let unit_type = data.unit_types.get(unit_type_id)?;
+        let price = self.recruit_price(data, faction, settlement, unit_type_id, supply)?;
         let mut option = RecruitOption {
             unit_type: unit_type_id.clone(),
             name: unit_type.name.display.clone(),
-            cost: self.recruit_cost(data, faction, settlement, unit_type),
+            cost: price.cost,
             upkeep: unit_type.upkeep,
             available: true,
             reason: None,
+            resources: unit_type.cost.resources.clone(),
+            import_cost: price.import_cost,
+            imported: price.draw.imported,
         };
-        let reason = self.recruit_blocker(data, faction, settlement, unit_type);
+        let reason = self.recruit_blocker(data, faction, settlement, unit_type, price.cost);
         if let Some(reason) = reason {
             option.available = false;
             option.reason = Some(reason);
@@ -1044,6 +1098,7 @@ impl CampaignState {
         faction: &FactionId,
         settlement_id: &SettlementId,
         unit_type: &data_model::UnitType,
+        cost: u32,
     ) -> Option<String> {
         let settlement = self.settlements.get(settlement_id)?;
         let province_state = self.provinces.get(&settlement.province)?;
@@ -1106,7 +1161,6 @@ impl CampaignState {
         if (class.count as f64 * share) < f64::from(unit_type.soldiers) * 10.0 {
             return Some("classe sociale trop peu nombreuse".to_owned());
         }
-        let cost = self.recruit_cost(data, faction, settlement_id, unit_type);
         if faction_state.treasury < i64::from(cost) {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
         }
@@ -1151,6 +1205,34 @@ impl CampaignState {
             .iter()
             .filter(|r| r.ordered_during(self.turn))
             .count()
+    }
+
+    /// SV2: full price of recruiting `unit_type` in `settlement` for
+    /// `faction` when `supply` resource units are still free
+    /// ([`CampaignState::free_supply`]): [`CampaignState::recruit_cost`]
+    /// plus the import of the missing `cost.resources` at
+    /// `base_price × resource_import_multiplier` (B7c rule, ADR 0053), at
+    /// the faction's prices. The AI passes its own running supply to price
+    /// several recruits of one turn.
+    pub fn recruit_price(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        unit_type: &UnitTypeId,
+        supply: &BTreeMap<data_model::ResourceId, u32>,
+    ) -> Option<RecruitPrice> {
+        let unit_type = data.unit_types.get(unit_type)?;
+        let draw = crate::buildings::resource_draw(data, supply, &unit_type.cost.resources);
+        let import_cost = crate::coinage::priced(self, faction, draw.import_cost).max(0) as u32;
+        let cost = self
+            .recruit_cost(data, faction, settlement, unit_type)
+            .saturating_add(import_cost);
+        Some(RecruitPrice {
+            cost,
+            import_cost,
+            draw,
+        })
     }
 
     /// Money cost of recruiting `unit_type` in `settlement` for `faction`
