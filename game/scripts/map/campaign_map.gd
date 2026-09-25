@@ -123,6 +123,7 @@ func _ready() -> void:
 	_setup_settlements()
 	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
+	rivers.attach_roads(roads)  # ZG5b : routes drapées fines
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -1093,6 +1094,7 @@ func _process(_delta: float) -> void:
 		if _screenshot_countdown == 2 and settlement_layer != null:
 			settlement_layer.flush()
 			roads.flush(zoom_tiers.near_weight(distance))
+			rivers.flush_fine(distance)  # ZG5b
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)

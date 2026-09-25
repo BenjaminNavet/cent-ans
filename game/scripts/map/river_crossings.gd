@@ -30,6 +30,12 @@ var renderer: RiversRenderer
 var items: Array[Dictionary] = []
 
 var _by_chunk: Dictionary = {}
+## Lot ZG5b : ancrages fins (`fine_anchors.json` → `crossings`, ordre de `crossings_px.json`) et
+## mode fin (au palier près, sur le fleuve fin : position, sens du courant, largeur réelle, eau
+## à `z_water`) ; ponts-portes cachés (recalculés sur le fleuve fin par `FineGeoLayer`).
+var _fine_anchors: Array[Dictionary] = []
+var _fine_mode := false
+var _gates_hidden := false
 
 
 func build(rivers_renderer: RiversRenderer, settlements: SettlementLayer) -> void:
@@ -79,7 +85,9 @@ func _load_crossings() -> Array[Dictionary]:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if not (parsed is Dictionary):
 		return result
-	for raw: Dictionary in parsed.get("crossings", []):
+	var raw_list: Array = parsed.get("crossings", [])
+	for raw_index in raw_list.size():
+		var raw: Dictionary = raw_list[raw_index]
 		if not bool(raw.get("snapped", false)):
 			continue
 		var px: Array = raw.get("px", [0, 0])
@@ -93,6 +101,7 @@ func _load_crossings() -> Array[Dictionary]:
 			"width": float(raw.get("width", 0.5)),
 			"type": str(raw.get("type", "bridge")),
 			"in_custom_zone": bool(raw.get("in_custom_zone", false)),
+			"index": raw_index,
 		}
 		var axis: Variant = raw.get("axis")
 		if axis is Array:
@@ -189,24 +198,34 @@ func _add(entry: Dictionary) -> void:
 
 
 func _instantiate(item: Dictionary) -> void:
-	var dir: Vector2 = item["dir"]
 	var instance := MeshInstance3D.new()
 	instance.name = str(item["id"])
-	instance.mesh = BridgeMeshes.build(str(item["structure"]), float(item["width"]), absi(str(item["id"]).hash()))
+	instance.visibility_range_end = VISIBILITY_RANGE
+	instance.visibility_range_end_margin = VISIBILITY_RANGE * 0.15
+	instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	add_child(instance)
+	item["node"] = instance
+	if not item.has("index"):
+		instance.visible = not _gates_hidden
+	_shape(item)
+
+
+## Maillage et orientation de l'ouvrage (ancrage fin en mode fin, sinon tracé V4).
+func _shape(item: Dictionary) -> void:
+	var instance: MeshInstance3D = item["node"]
+	var fine := _fine_of(item)
+	var dir: Vector2 = fine["dir"] if not fine.is_empty() else item["dir"]
+	var width: float = fine["width"] if not fine.is_empty() else float(item["width"])
+	instance.mesh = BridgeMeshes.build(str(item["structure"]), width, absi(str(item["id"]).hash()))
 	# X local en travers du fleuve (ou selon la route portée), Z = X × Y (repère direct).
 	var across := Vector3(-dir.y, 0.0, dir.x)
-	if item.has("axis"):
+	if item.has("axis") and fine.is_empty():
 		var axis: Vector2 = item["axis"]
 		across = Vector3(axis.x, 0.0, axis.y)
 	var along := across.cross(Vector3.UP)
 	# Exagération (comme les maquettes de colonies) : hauteur et largeur du tablier ; la longueur
 	# reste celle du fleuve à franchir.
 	instance.transform = Transform3D(Basis(across, Vector3.UP * HEIGHT_SCALE, along * DECK_SCALE), Vector3.ZERO)
-	instance.visibility_range_end = VISIBILITY_RANGE
-	instance.visibility_range_end_margin = VISIBILITY_RANGE * 0.15
-	instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-	add_child(instance)
-	item["node"] = instance
 	_ground(item)
 
 
@@ -224,6 +243,12 @@ func _ground(item: Dictionary) -> void:
 	var node: MeshInstance3D = item["node"]
 	if node == null:
 		return
+	var fine := _fine_of(item)
+	if not fine.is_empty():
+		# ZG5b : origine au niveau de l'eau du fleuve fin (lit creusé dessous).
+		var q: Vector2 = fine["px"]
+		node.position = Vector3(q.x, maxf(float(fine["z_water"]) * MapData.vertical_scale(), 0.0), q.y)
+		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)
 	if renderer.terrain != null:
@@ -240,3 +265,58 @@ func _on_chunk_surface_changed(index: int) -> void:
 				_instantiate(item)
 		else:
 			_ground(item)
+
+
+# --- Lot ZG5b : ancrages fins -------------------------------------------------------------
+
+
+## Ancrages de `fine_anchors.json` (même ordre que `crossings_px.json`).
+func set_fine_anchors(anchors: Array[Dictionary]) -> void:
+	_fine_anchors = anchors
+
+
+## Ancrage fin d'un ouvrage en mode fin : {px, dir, width (unités), z_water} ou {}.
+func _fine_of(item: Dictionary) -> Dictionary:
+	if not _fine_mode or not item.has("index"):
+		return {}
+	var index: int = item["index"]
+	if index < 0 or index >= _fine_anchors.size():
+		return {}
+	var anchor: Dictionary = _fine_anchors[index]
+	if not bool(anchor.get("snapped", false)) or str(anchor.get("id", "")) != str(item["id"]):
+		return {}
+	var width_m := float(anchor.get("width_m", 0.0))
+	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(width_m / renderer.map_data.meters_per_px, 0.05), "z_water": anchor["z_water"]}
+
+
+## Ancrage fin (mode fin actif ou non) de l'ouvrage `id`, pour les tests : {} si aucun.
+func fine_anchor_of(id: String) -> Dictionary:
+	for item in items:
+		if str(item["id"]) == id and item.has("index"):
+			var index: int = item["index"]
+			return _fine_anchors[index] if index < _fine_anchors.size() else {}
+	return {}
+
+
+## Bascule tous les ouvrages construits entre le tracé V4 et les ancrages fins.
+func set_fine_mode(on: bool) -> void:
+	if on == _fine_mode:
+		return
+	_fine_mode = on
+	for item in items:
+		if item["node"] != null and item.has("index"):
+			_shape(item)
+
+
+## Ponts-portes et ponts de zone (tracé V4) cachés quand `FineGeoLayer` pose les siens.
+func set_gates_hidden(hidden: bool) -> void:
+	if hidden == _gates_hidden:
+		return
+	_gates_hidden = hidden
+	for item in items:
+		if not item.has("index") and item["node"] != null:
+			(item["node"] as Node3D).visible = not hidden
+
+
+func fine_mode() -> bool:
+	return _fine_mode

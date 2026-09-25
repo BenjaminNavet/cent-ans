@@ -152,6 +152,7 @@ void fragment() {
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
+	ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
 	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet
 	ALBEDO = mix(ALBEDO, pm_river_ink * (1.0 - pm_emission), pm_w);
 	EMISSION = pm_river_ink * pm_emission * pm_emission_gain * pm_w;
