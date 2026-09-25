@@ -1,0 +1,31 @@
+{
+  "id": "cdx_galee",
+  "title": "La galée",
+  "category": "unite",
+  "aliases": [
+    "Galère",
+    "galères",
+    "galée",
+    "galées"
+  ],
+  "era": {
+    "from": "1294",
+    "to": "1450"
+  },
+  "summary": "Longue et basse, mue par plus d'une centaine de rameurs, la galée de guerre avance contre le vent. Les rois de France la louent à Gênes et à Monaco et la construisent au clos des Galées de [[cdx_rouen|Rouen]] ; les Castillans en font l'arme de leur victoire à La Rochelle (1372).",
+  "body": "La galée méditerranéenne, longue d'une quarantaine de mètres, porte un ou deux mâts à voile latine mais se bat à la rame, ce qui la rend indépendante du vent. Sa proue se termine par un éperon qui brise les rames et sert de pont d'abordage. Une pavesade d'arbalétriers borde les flancs. Philippe le Bel fonde en 1294 le clos des Galées de [[cdx_rouen|Rouen]], arsenal où des charpentiers génois construisent des galées royales.\n\nAu début de la guerre, Philippe VI loue des galées génoises et monégasques, commandées par Ayton Doria, Carlo Grimaldi ou Barbavera. Avec elles, [[cdx_hugues_quieret|Hugues Quiéret]] mène en 1338 les raids qui ravagent Southampton. À l'[[cdx_ecluse|Écluse]] (1340), Barbavera, qui a conseillé en vain de gagner le large, s'échappe avec ses galées pendant que le reste de la flotte est détruit.\n\nLes galées de [[cdx_castille|Castille]], alliée de la France, écrasent la flotte anglaise du comte de Pembroke devant La Rochelle (22-23 juin 1372), puis, avec l'amiral Jean de Vienne, incendient Rye et d'autres ports anglais en 1377. Mais sur les mers froides et agitées du Nord, la galée basse sur l'eau souffre face aux hauts bords des [[cdx_cogue|cogues]].",
+  "gameplay": "Navire à rames de 40 m sur 5,5 m, franc-bord 1,2 m. Coque 170 points ; embarque 50 soldats et 20 marins, plus 150 rameurs. Vitesse : 2,2 m/s à la voile, 3,4 m/s à la rame ; virage 9° par seconde. Châteaux : 12 tireurs y tirent de 2,2 m de haut ; pavesade : traits reçus ×0,7 ; aucune résistance au feu. Éperon 6 : dégâts = éperon × vitesse, à 1,5 m au plus et 1,5 m/s au moins, ×0,4 contre un bord de 2,5 m ou plus ; l'attaquant encaisse 15 % du choc puis aborde. Indépendante du vent et rapide à la rame, elle éperonne puis aborde ; mais ses rameurs s'épuisent (240 s de nage à pleine cadence) et son bord de 1,2 m la désavantage lourdement à l'abordage d'une cogue ou d'une nef. En résolution automatique, les galées vaincues s'échappent plus souvent.",
+  "entity": "ship_galley",
+  "see_also": [
+    "cdx_ecluse",
+    "cdx_hugues_quieret",
+    "cdx_castille",
+    "cdx_cogue"
+  ],
+  "sources": [
+    "Galère",
+    "Clos des Galées",
+    "Bataille de La Rochelle (1372)",
+    "Bataille de l'Écluse"
+  ]
+}

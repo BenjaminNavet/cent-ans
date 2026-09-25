@@ -209,9 +209,7 @@ func _build_bottom() -> void:
 	panel.offset_right = -8
 	panel.offset_top = -BAND_HEIGHT - 6
 	panel.offset_bottom = -6
-	var band_style := BattleUiKit.parchment_box(6)
-	band_style.shadow_size = 6
-	panel.add_theme_stylebox_override("panel", band_style)
+	panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
 	root.add_child(panel)
 	var outer := HBoxContainer.new()
 	outer.add_theme_constant_override("separation", 8)
@@ -251,16 +249,16 @@ func _build_bottom() -> void:
 	buttons.add_theme_constant_override("v_separation", 4)
 	commands.add_child(buttons)
 	for entry in COMMANDS:
-		var button := Button.new()
+		var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 		button.name = "Command_%s" % entry[0]
 		button.custom_minimum_size = Vector2(52, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		var key_hint := " (%s)" % entry[2] if str(entry[2]) != "" else ""
-		button.tooltip_text = "%s%s\n%s" % [entry[1], key_hint, entry[3]]
+		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[3]]
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), str(entry[2])))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
-	withdraw_all_button = Button.new()
+	withdraw_all_button = RichButton.new()
 	withdraw_all_button.name = "WithdrawAll"
 	withdraw_all_button.text = "Retraite générale"
 	withdraw_all_button.focus_mode = Control.FOCUS_NONE
@@ -393,7 +391,7 @@ func _build_confirm() -> void:
 	confirm_panel.anchor_bottom = 0.38
 	confirm_panel.offset_left = -260
 	confirm_panel.offset_right = 260
-	confirm_panel.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(18, BattleUiKit.PARCHMENT, BattleUiKit.RUBRIC, 2))
+	confirm_panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(18))
 	confirm_panel.visible = false
 	root.add_child(confirm_panel)
 	var box := VBoxContainer.new()

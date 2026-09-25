@@ -21,11 +21,12 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | Lot | Contenu | Vague | État |
 |---|---|---|---|
 | ZG0 | Squelette (ADR, manifeste, schémas, stubs, wip) | 0 | fait |
-| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | en cours (wip `zg1-pyramide.md`) |
-| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | en cours (wip `zg2-quadtree.md`) |
-| ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | en cours (wip `zg3-palier3.md`) |
-| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | — |
-| ZG5 | Hydrographie, côtes, routes, colonies recollées, parcellaire | 2 | — |
+| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | **fusionné** dans `integration/zoom` (3beab01c) ; pyramide E1-E7 complète, 2,6 Go |
+| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | **fusionné** dans `integration/zoom` (650d77a5) |
+| ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
+| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | en cours (branche `zg4-camera` depuis `integration/zoom`, wip `zg4-camera.md`) |
+| ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | en cours (wip `zg5a-hydro-fine.md`) |
+| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | après ZG2 |
 | ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
@@ -33,3 +34,13 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
   `geo/pyramid.py`, `geo/detail_dem.py`, `relief_pyramid.gd`, `relief_quadtree.gd`).
 - 25/09 : vague 1 lancée (ZG1, ZG2, ZG3 en worktrees d'agents ; cache partagé par liens symboliques). Suite : fusion dans `integration/zoom`, puis vague 2 (ZG4 caméra + échelle verticale, ZG5 hydro/routes/parcellaire), vague 3 (ZG6 villes), vague 4 (ZG7 perf/recette/export/docs).
+- 25/09 : ZG3 fusionné dans `integration/zoom` (445 tests Python OK). Coupure de quota vers
+  10 h : ZG1 arrêté à ~97 % de la cuisson E3-E4 (reprise par l'orchestrateur, commande
+  idempotente), ZG2 relancé avec son contexte (décodeur Rust asynchrone non commité).
+- Coordination VH (session « villes historiques », ADR 0037) : VH démarre après fusion de ZG2
+  et ZG4 et reprend les villes emblématiques en 1:1 ; ajouter à l'ADR 0036 l'addendum « loupe
+  en vue stratégique, 1:1 au zoom rapproché (lot VH4) ». ZG6 = villes ordinaires seulement.
+- 25/09 : cuisson E3-E4 terminée par l'orchestrateur, ZG1 fusionné (conflit de manifeste résolu : E1-E4 de ZG1, E5-E7 de ZG3). `geo detail-dem --force` relancé dans `../gp-zoom-merge` pour fondre les zones sur E4. ZG5 scindé : ZG5a (données, lancé) et ZG5b (rendu, après ZG2).
+- 25/09 : ZG2 fusionné dans `integration/zoom` (conflit d'ADR : addenda ZG1 + ZG2 + addendum « villes emblématiques » pour VH). `main` fusionné dans l'intégration (995bf6f4). Le smoke plante comme sur `main` (« Message queue out of memory », cause étrangère, correction par l'orchestrateur de nuit). **`main` pas encore avancé** : le checkout principal contient des modifications non commitées du lot PB1 (autre session) sur `terrain_builder.gd` etc. ; demande de coordination envoyée. Les agents de la vague 2 partent donc de `integration/zoom`. PF1 (nuit) sera adapté par-dessus ZG après l'avance de `main`.
+- Disque presque plein (≈ 25 Go) : compiler avec `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` dans les worktrees.
+- 25/09 : **ZG0-ZG3 dans main** (a8e0f3d3, ff-only) après libération du checkout par PB1 (game-project-b3, qui rebase sur ZG). Prévenus : PB1 et l'orchestrateur de nuit (PF1 branchera les préréglages de qualité sur le quadtree ; recalages incrémentaux de landmark_model = ZG4).

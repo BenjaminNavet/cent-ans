@@ -66,7 +66,7 @@ func _ready() -> void:
 	# Bandeau du haut.
 	var top := PanelContainer.new()
 	top.name = "TopBanner"
-	top.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(10))
+	top.add_theme_stylebox_override("panel", BattleUiKit.page_box(10))
 	top.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	top.position = Vector2(-330, 8)
 	top.custom_minimum_size = Vector2(660, 0)
@@ -428,7 +428,7 @@ func show_result(outcome: Dictionary, side_names: Dictionary, button_text: Strin
 		return
 	_result = PanelContainer.new()
 	_result.name = "Result"
-	_result.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(22))
+	_result.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(22))
 	_result.set_anchors_preset(Control.PRESET_CENTER)
 	_result.custom_minimum_size = Vector2(620, 0)
 	_result.position = Vector2(-310, -230)

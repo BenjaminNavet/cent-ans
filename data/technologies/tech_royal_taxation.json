@@ -26,9 +26,9 @@
   ],
   "description": "Impôts permanents ([[cdx_gabelle|gabelle]], fouage, aides) votés par les États et prélevés par des élus.",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Gabelle",
+    "Aides (impôt)",
+    "Taille (impôt)",
+    "Fouage"
   ]
 }

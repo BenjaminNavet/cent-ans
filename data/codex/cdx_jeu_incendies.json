@@ -1,0 +1,20 @@
+{
+  "id": "cdx_jeu_incendies",
+  "title": "Les incendies de siège",
+  "category": "mecanique",
+  "aliases": [
+    "incendie",
+    "incendies",
+    "maisons en feu",
+    "maison en feu",
+    "faubourgs",
+    "pots à feu",
+    "traits incendiaires"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Les villes du XIVe siècle sont de bois et de torchis : une flèche à étoupe ou un pot à feu lancé par-dessus les murs suffit à allumer une maison, et le vent fait le reste. Seules la pluie et la neige arrêtent vraiment le feu.",
+  "body": "Derrière leurs murailles de pierre, les villes médiévales sont faites de pans de bois, de torchis et de toits de chaume ou de bardeaux, serrées le long de rues étroites. Les assiégeants le savent : ils lancent des traits enveloppés d'étoupe enflammée, et leurs engins jettent par-dessus les remparts des pots remplis de poix, de soufre et de graisse. Un quartier qui brûle occupe la garnison et les habitants, affole la population et pousse à traiter.\n\nLes défenseurs, eux, brûlent souvent leurs propres faubourgs à l'approche de l'ennemi, pour dégager le glacis et priver l'assiégeant d'abris et de matériaux : en octobre 1428, les Orléanais incendient le faubourg du Portereau et ses églises, sur la rive sud de la Loire, avant l'arrivée des Anglais devant [[cdx_orleans|Orléans]].\n\nLe feu sert aussi contre les portes, en bois ferré : on entasse des fagots contre les vantaux quand le bélier tarde. Selon [[cdx_froissart|Froissart]], le [[cdx_prince_noir|Prince noir]] obtient en 1356 la reddition du donjon de Romorantin en y lançant des feux qui embrasent sa toiture ; la garnison de Boucicaut capitule le 3 septembre. Murailles et tours de pierre, elles, ne brûlent pas.",
+  "gameplay": "Seules les batailles de siège connaissent le feu. Les maisons de la ville, quatre maisons de faubourg hors des murs et la porte peuvent brûler. Chaque volée de l'assiégeant a une chance d'allumer la maison la plus proche du point d'impact (prolongé de 18 m par-dessus le rempart, à moins de 30 m) ou la porte (à moins de 12 m) : 22 % pour un mangonneau, 18 % pour un trébuchet, 10 % pour une bombarde, 1,5 % pour des archers à l'arc long, 1 % pour des archers montés, 0,6 % pour des arbalétriers.\n\nUne maison brûle 180 secondes, s'intensifie puis décline, et devient une ruine qu'on peut traverser. Toutes les 2 secondes, le feu gagne un îlot voisin (bords à moins de 15 m) avec au plus 2,5 % de chance à pleine intensité, moins avec la distance, jusqu'à 70 % de plus sous le vent (tiré au début de la bataille). Météo : sous la pluie, allumage ×0,2 et propagation ×0,15 ; sous la neige ×0,25 et ×0,2 ; dans le brouillard ×0,8. La porte en feu perd 4 points de solidité par seconde à pleine intensité pendant 200 secondes : assez pour une porte de fortification 0 ou 1, pas pour une plus forte.\n\nChaleur : un régiment à moins de 8 m d'une maison en feu perd 0,15 % de ses hommes et 0,5 point de moral par seconde à pleine intensité. Fumée : un tir qui passe près d'une maison qui flambe ne fait que la moitié de son effet (sauf pour les engins). Une garnison menée par l'IA incendie ses faubourgs au début de la bataille (chaque maison avec 50 % de chance). L'ordre « incendier » (torche à moins de 8 m, 90 % de chance) existe dans les règles mais n'a pas encore de commande à l'écran. Conseil : par temps sec, bombardez la ville pour occuper la garnison, mais n'envoyez pas vos troupes dans les rues en flammes.",
+  "see_also": ["cdx_jeu_engins_siege", "cdx_jeu_meteo_bataille", "cdx_jeu_belier", "cdx_jeu_brulots", "cdx_orleans"],
+  "sources": ["Siège d'Orléans", "Incendie", "Pan de bois", "Siege of Romorantin (en)", "Froissart, Chroniques, I"]
+}

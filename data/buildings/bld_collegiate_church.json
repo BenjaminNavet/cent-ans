@@ -30,9 +30,9 @@
       "value": 0.15
     }
   ],
-  "description": "Chapitre de chanoines séculiers, entre la paroisse et l'abbaye : offices solennels, école capitulaire.",
+  "description": "Chapitre de chanoines séculiers, entre la paroisse et l'abbaye : offices solennels, école capitulaire. Voir [[cdx_collegiale]].",
   "sources": [
-    "Économie médiévale",
-    "Institutions ecclésiastiques médiévales"
+    "Collégiale",
+    "Chanoine"
   ]
 }

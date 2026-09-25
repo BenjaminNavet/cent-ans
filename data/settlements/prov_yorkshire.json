@@ -96,7 +96,7 @@
     "kind": "abbey",
     "name": {
       "display": "Whitby",
-      "local": "Streoneshalh",
+      "local": "Whiteby",
       "local_language": "moyen anglais"
     },
     "lonlat": [
@@ -111,7 +111,7 @@
       "bld_scriptorium"
     ],
     "port": true,
-    "description": "Ancienne abbaye anglo-saxonne dominant la côte du Yorkshire.",
+    "description": "Abbaye bénédictine dominant la côte du Yorkshire, refondée après la conquête normande sur le site du monastère anglo-saxon de sainte Hilda.",
     "sources": [
       "Abbaye de Whitby"
     ]

@@ -1,0 +1,58 @@
+{
+  "description": "Niveaux de difficulté de la campagne (lot DF1, ADR 0037) : choisis au lancement et figés pour la partie. « Normale » est neutre (le jeu tel qu'il est équilibré) ; les autres niveaux modulent les revenus, l'entretien et le recrutement des IA, les revenus et l'agitation du joueur, l'hostilité des IA envers le joueur et le moral des armées IA qui l'affrontent (bataille 3D et auto-résolution).",
+  "default": "normal",
+  "levels": [
+    {
+      "id": "easy",
+      "label": "Facile",
+      "description": "Pour découvrir la guerre de Cent Ans : vos coffres se remplissent mieux, les princes rivaux sont moins riches et moins belliqueux, et leurs troupes plient plus vite.",
+      "ai_income_percent": 80,
+      "player_income_percent": 115,
+      "ai_upkeep_percent": 100,
+      "ai_recruit_cost_percent": 100,
+      "player_unrest": -5,
+      "ai_attitude_to_player": 10,
+      "ai_war_ratio_percent": 120,
+      "ai_morale_vs_player": -5
+    },
+    {
+      "id": "normal",
+      "label": "Normale",
+      "description": "Le jeu tel qu'il est équilibré : aucune faveur, aucun handicap, ni pour vous ni pour l'IA.",
+      "ai_income_percent": 100,
+      "player_income_percent": 100,
+      "ai_upkeep_percent": 100,
+      "ai_recruit_cost_percent": 100,
+      "player_unrest": 0,
+      "ai_attitude_to_player": 0,
+      "ai_war_ratio_percent": 100,
+      "ai_morale_vs_player": 0
+    },
+    {
+      "id": "hard",
+      "label": "Difficile",
+      "description": "Les couronnes rivales lèvent davantage d'impôts, entretiennent leurs armées à moindre coût et vous regardent d'un œil plus hostile ; leurs soldats tiennent mieux face à vous.",
+      "ai_income_percent": 120,
+      "player_income_percent": 100,
+      "ai_upkeep_percent": 90,
+      "ai_recruit_cost_percent": 100,
+      "player_unrest": 3,
+      "ai_attitude_to_player": -10,
+      "ai_war_ratio_percent": 90,
+      "ai_morale_vs_player": 5
+    },
+    {
+      "id": "very_hard",
+      "label": "Très difficile",
+      "description": "Pour les connétables aguerris : l'IA est riche, recrute et entretient ses osts à bon compte et vous déclare la guerre au moindre signe de faiblesse ; vos revenus sont maigres et vos provinces promptes à gronder.",
+      "ai_income_percent": 140,
+      "player_income_percent": 90,
+      "ai_upkeep_percent": 80,
+      "ai_recruit_cost_percent": 85,
+      "player_unrest": 6,
+      "ai_attitude_to_player": -20,
+      "ai_war_ratio_percent": 80,
+      "ai_morale_vs_player": 10
+    }
+  ]
+}
