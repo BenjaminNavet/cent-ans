@@ -304,6 +304,68 @@ fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
     }
 }
 
+/// EQ5: one line of `faction`'s budget and economic orders at plan time.
+fn trace_economy(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    orders: &[sim_campaign::Order],
+) {
+    use sim_campaign::Order;
+    let Some(f) = state.factions.get(faction) else {
+        return;
+    };
+    let field: usize = state
+        .armies
+        .values()
+        .filter(|a| &a.faction == faction)
+        .map(|a| a.units.len())
+        .sum();
+    let armies_abroad = state
+        .armies
+        .values()
+        .filter(|a| &a.faction == faction)
+        .count();
+    let garrison: usize = state
+        .settlements
+        .values()
+        .filter(|s| &s.controller == faction)
+        .map(|s| s.garrison.len())
+        .sum();
+    let count = |pred: fn(&Order) -> bool| orders.iter().filter(|o| pred(o)).count();
+    println!(
+        "{:>16} tr {:>7} inc {:>5} (last {:>5}) adm {:>5} army {:>5} bld {:>5} upk_last {:>5} table {:>4} tax {:?} war {} | armies {} units {} garr {} | disb {} recr {} build {} other {:?}",
+        state.date_label(),
+        f.treasury,
+        state.faction_income_effective(data, faction),
+        f.income_last_turn,
+        state.faction_administration_upkeep(data, faction),
+        state.faction_army_upkeep(data, faction),
+        state.faction_building_upkeep(data, faction),
+        f.upkeep_last_turn,
+        f.table_upkeep_last_turn,
+        f.tax_rate,
+        f.at_war_with.len(),
+        armies_abroad,
+        field,
+        garrison,
+        count(|o| matches!(o, Order::DisbandUnit { .. })),
+        count(|o| matches!(o, Order::Recruit { .. })),
+        count(|o| matches!(o, Order::Build { .. })),
+        orders
+            .iter()
+            .filter(|o| !matches!(
+                o,
+                Order::DisbandUnit { .. }
+                    | Order::Recruit { .. }
+                    | Order::Build { .. }
+                    | Order::MoveArmy { .. }
+            ))
+            .map(|o| format!("{o:?}").chars().take(40).collect::<String>())
+            .collect::<Vec<_>>(),
+    );
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     // `TRACE=1` follows Burgundy; any other value filters events by that word.
     let trace_word =
@@ -358,6 +420,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     let mut was_at_war = false;
     let mut war_run = 0u32;
     let mut eq4_before = snapshot(&state);
+    // EQ5: `ECON_TRACE=fac_swiss` dumps that faction's budget and economic
+    // orders every turn.
+    let econ_trace = std::env::var("ECON_TRACE").ok().map(|f| id(&f));
     for _ in 0..turns {
         // France is the "player": it answers offers as the AI would judge
         // them (otherwise no peace offered to France is ever signed).
@@ -385,7 +450,42 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 report.refused += 1;
             }
         }
-        let events = state.end_turn_with(data, ai::plan_turn);
+        let treasuries_before: BTreeMap<FactionId, i64> = state
+            .factions
+            .iter()
+            .map(|(f, s)| (f.clone(), s.treasury))
+            .collect();
+        let events = match &econ_trace {
+            Some(traced) => state.end_turn_with(data, |s, d, f| {
+                let orders = ai::plan_turn(s, d, f);
+                if f == traced {
+                    trace_economy(s, d, f, &orders);
+                }
+                orders
+            }),
+            None => state.end_turn_with(data, ai::plan_turn),
+        };
+        if let Some(traced) = &econ_trace {
+            let residual = |f: &FactionId| {
+                let now = &state.factions[f];
+                now.treasury
+                    - treasuries_before.get(f).copied().unwrap_or(0)
+                    - (now.income_last_turn - now.upkeep_last_turn)
+            };
+            let own = residual(traced);
+            if own.abs() > 100 {
+                let others: Vec<(String, i64)> = state
+                    .factions
+                    .keys()
+                    .filter(|f| *f != traced && residual(f).abs() > 100)
+                    .map(|f| (f.as_str().to_owned(), residual(f)))
+                    .collect();
+                println!("{:>16}   residual {own} ; others {others:?}", "");
+            }
+            for event in events.iter().filter(|e| e.faction.as_ref() == Some(traced)) {
+                println!("{:>16}   event {:?}: {}", "", event.kind, event.text_fr);
+            }
+        }
         for event in &events {
             match event.kind {
                 EventKind::Bankruptcy => {
