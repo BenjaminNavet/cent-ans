@@ -24,9 +24,7 @@ def test_difficulty_rules_match_schema() -> None:
     schema = json.loads(
         (DATA / "schemas" / "difficulty_rules.schema.json").read_text(encoding="utf-8")
     )
-    rules = json.loads(
-        (DATA / "rules" / "difficulty.json").read_text(encoding="utf-8")
-    )
+    rules = json.loads((DATA / "rules" / "difficulty.json").read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
     errors = sorted(
         Draft202012Validator(schema).iter_errors(rules), key=lambda e: e.path
