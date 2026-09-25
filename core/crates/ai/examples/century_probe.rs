@@ -32,6 +32,14 @@ const PAIRS: &[(&str, &str, &str)] = &[
     ("Bourg.-Angl.", "fac_burgundy", "fac_england"),
 ];
 const MAJORS: &[&str] = &["fac_england", "fac_france", "fac_burgundy", "fac_scotland"];
+/// UR2: the 15th-century unit types (lot UR1, `available_from` 1380-1448), checked so that a
+/// probe over the whole 1337-1453 span can confirm the AI actually recruits them.
+const CENTURY_15: &[(&str, &str)] = &[
+    ("ordonnance", "unit_ordonnance_gendarmes"),
+    ("francs-archers", "unit_francs_archers"),
+    ("coutiliers", "unit_coutiliers"),
+    ("couleuvriniers", "unit_culveriners"),
+];
 
 fn id(s: &str) -> FactionId {
     FactionId::new(s).expect("well-formed id")
@@ -71,6 +79,8 @@ struct Report {
     destroyed: u32,
     issued: u32,
     refused: u32,
+    /// UR2: whether each of `CENTURY_15` was ever seen in an army or a garrison (any faction).
+    recruited_15th: Vec<bool>,
     seconds: f64,
 }
 
@@ -166,6 +176,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         alliance_first: vec![None; PAIRS.len()],
         majors_1400: vec![true; MAJORS.len()],
         majors_fall: vec![None; MAJORS.len()],
+        recruited_15th: vec![false; CENTURY_15.len()],
         ..Report::default()
     };
     let names: Vec<String> = [&france, &england]
@@ -326,6 +337,25 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 report.majors_1400[index] = state.factions[&id(major)].alive;
             }
         }
+        if report.recruited_15th.iter().any(|seen| !seen) {
+            for (index, (_, unit_type)) in CENTURY_15.iter().enumerate() {
+                if !report.recruited_15th[index]
+                    && state
+                        .armies
+                        .values()
+                        .flat_map(|army| army.units.iter())
+                        .chain(
+                            state
+                                .settlements
+                                .values()
+                                .flat_map(|settlement| settlement.garrison.iter()),
+                        )
+                        .any(|unit| unit.unit_type.as_str() == *unit_type)
+                {
+                    report.recruited_15th[index] = true;
+                }
+            }
+        }
     }
     report.idle_count = over_limit.values().filter(|n| **n > 4).count();
     report.factions = state
@@ -471,6 +501,15 @@ fn main() {
         })
         .collect();
     println!("Survie en 1400 : {}", survivors.join(", "));
+    let century_15: Vec<String> = CENTURY_15
+        .iter()
+        .enumerate()
+        .map(|(index, (label, _))| {
+            let n = reports.iter().filter(|r| r.recruited_15th[index]).count();
+            format!("{label} {n}/{}", reports.len())
+        })
+        .collect();
+    println!("Types du XVe s. recrutés (UR2) : {}", century_15.join(", "));
     print_summary(&reports, decades);
 }
 
