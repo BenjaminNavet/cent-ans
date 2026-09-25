@@ -101,6 +101,11 @@ func _init() -> void:
 		_cleanup_test_dir()
 		quit(1 if _failures > 0 else 0)
 		return
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "codex_bubbles":
+		await _run_codex_bubbles_b1()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "ui_layout":
 		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
@@ -121,6 +126,7 @@ func _init() -> void:
 	await _run_assets()  # M10 assets
 	await _run_icons()  # F2
 	await _run_codex()  # H2
+	await _run_codex_bubbles_b1()  # B1 bulles partout
 	await _run_table_medicine()  # H9
 	_run_edicts()  # C4 (TW)
 	await _run_coinage_ransom()  # H11
@@ -165,6 +171,14 @@ func _run_campaign_sim() -> void:
 			return
 	else:
 		campaign.new_campaign(1337)
+	if campaign.has_method("set_difficulty"):
+		# DF1 : niveau de difficulté choisi au lancement, figé ensuite.
+		var levels: Array = campaign.get_difficulty_levels()
+		_check(levels.size() == 4, "expected 4 difficulty levels, got %d" % levels.size())
+		_check(campaign.get_difficulty() == "normal", "default difficulty should be 'normal', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("hard"), "set_difficulty('hard') refused")
+		_check(campaign.get_difficulty() == "hard", "get_difficulty() should be 'hard', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("normal"), "set_difficulty('normal') refused at turn 0")
 	_check(campaign.get_turn() == 0, "initial turn should be 0, got %d" % campaign.get_turn())
 	_check(campaign.get_date_label() == "Printemps 1337", "initial date should be 'Printemps 1337', got '%s'" % campaign.get_date_label())
 
@@ -258,6 +272,9 @@ func _run_start_menu() -> void:
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
 	menu.show_faction_select(true)
 	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	# DF1 : sélecteur de difficulté de campagne, Normale par défaut.
+	_check(menu.faction_select.difficulty_count() == 4, "faction select should offer 4 difficulty levels, got %d" % menu.faction_select.difficulty_count())
+	_check(menu.faction_select.selected_difficulty == "normal", "default campaign difficulty should be normal, got %s" % menu.faction_select.selected_difficulty)
 	menu.open_intro()
 	await process_frame
 	_check(menu.overlay_open(), "prologue overlay should open")
@@ -1626,7 +1643,7 @@ func _run_icons() -> void:
 	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
 	root.add_child(panel)
 	await process_frame
-	_check(panel.get_node_or_null("Text") is RichTextLabel, "tooltip panel text expected")
+	_check(panel.find_child("Text", true, false) is RichTextLabel, "tooltip panel text expected")
 	panel.queue_free()
 	var chip := IconChip.create("res_wine", "Vin", "x")
 	_check(chip.icon_rect != null and chip.icon_rect.texture != null, "icon chip texture expected")
@@ -1703,6 +1720,116 @@ func _run_codex() -> void:
 	store.call("reset_discoveries")
 	if _failures == 0:
 		print("smoke OK: codex, %d entries, links, 3-bubble stack, discoveries, window (%s)" % [total, counter])
+
+
+## B1 : T universel (bulle non épinglée, infobulle simple convertie), chaîne de bulles
+## imbriquées épinglées, pieds, champ `gameplay` (bulle + fenêtre), titres d'infobulles liés.
+## Seule : CENT_ANS_SMOKE_ONLY=codex_bubbles.
+func _run_codex_bubbles_b1() -> void:
+	var store: Node = root.get_node_or_null("/root/CodexStore")
+	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
+	if not _check(store != null and bubbles != null, "B1: CodexStore / CodexBubbles autoloads missing"):
+		return
+	store.call("use_test_file", _test_codex_path)
+	store.call("reload", _project_root().path_join("data/codex"))
+	bubbles.call("close_all")
+	var failures_before := _failures
+
+	# T sans rien à verrouiller : l'événement reste libre (T ouvre aussi l'arbre des techniques).
+	_check(not bool(bubbles.call("pin_current")), "B1: T with nothing to pin should not be consumed")
+
+	# T sur une bulle non épinglée : elle est verrouillée, le pied change.
+	var first: PanelContainer = bubbles.call("open", "cdx_crecy", Vector2(120, 120))
+	var footer := first.find_child("Footer", true, false) as Label
+	_check(footer != null and footer.text.contains("T : maintenir ouverte") and footer.text.contains("Clic : lire la fiche"), "B1: unpinned footer: %s" % (footer.text if footer != null else "?"))
+	_check(bool(bubbles.call("pin_current")) and bool(first.get_meta("pinned", false)), "B1: T should pin the unpinned bubble")
+	_check(footer.text.contains("Clic droit : détacher") and not footer.text.contains("T :"), "B1: pinned footer: %s" % footer.text)
+
+	# Bulle fille d'une bulle épinglée (survol d'un lien), puis petite-fille ; T sur la
+	# petite-fille garde toute la chaîne.
+	var child := await _hover_first_link(bubbles, first)
+	_check(child != null and bubbles.call("parent_of", child) == first and not bool(child.get_meta("pinned", false)), "B1: hovering a link of a pinned bubble should open an unpinned child")
+	var grandchild: PanelContainer = await _hover_first_link(bubbles, child) if child != null else null
+	_check(grandchild != null and bubbles.call("parent_of", grandchild) == child, "B1: grandchild bubble expected")
+	if grandchild != null:
+		_check(bool(bubbles.call("pin_current")) and bool(grandchild.get_meta("pinned", false)) and bool(child.get_meta("pinned", false)), "B1: pinning a grandchild pins its ancestors")
+		await create_timer(0.7).timeout
+		_check(int(bubbles.call("bubble_count")) == 3, "B1: pinned chain survives the mouse leaving (count %d)" % int(bubbles.call("bubble_count")))
+		bubbles.call("set_pinned", child, false)
+		_check(not bool(grandchild.get_meta("pinned", false)), "B1: detaching a bubble detaches its descendants")
+		await create_timer(0.7).timeout
+		_check(int(bubbles.call("bubble_count")) == 1, "B1: detached chain closes after the grace delay (count %d)" % int(bubbles.call("bubble_count")))
+	bubbles.call("close_all")
+
+	# T sur un contrôle à infobulle simple : bulle épinglée auto-liée.
+	var alias := str(store.call("title", "cdx_peste_noire"))
+	var holder := PanelContainer.new()
+	holder.tooltip_text = "En 1348, %s ravage le royaume." % alias
+	holder.mouse_filter = Control.MOUSE_FILTER_STOP
+	var inner := Label.new()
+	inner.text = "survol"
+	inner.mouse_filter = Control.MOUSE_FILTER_PASS
+	holder.add_child(inner)
+	root.add_child(holder)
+	_check(bool(bubbles.call("pin_control_tooltip", inner, Vector2(2, 2))), "B1: T on a control with tooltip_text should open a bubble")
+	var converted: PanelContainer = bubbles.get("bubbles")[-1] if int(bubbles.call("bubble_count")) > 0 else null
+	var converted_text := converted.find_child("Text", true, false) as RichTextLabel if converted != null else null
+	_check(converted != null and bool(converted.get_meta("pinned", false)) and converted_text.text.contains("[url=cdx:cdx_peste_noire]"), "B1: converted tooltip should be pinned and auto-linked")
+	var bare := Label.new()
+	_check(not bool(bubbles.call("pin_control_tooltip", bare, Vector2.ZERO)), "B1: a control without tooltip pins nothing")
+	bare.free()
+	holder.queue_free()
+	bubbles.call("close_all")
+
+	# `gameplay` : ligne « En jeu » (1re phrase) dans la bulle, encadré dans la fenêtre.
+	var entry: Dictionary = store.call("entry", "cdx_crecy")
+	var had_gameplay := entry.has("gameplay")
+	var old_gameplay: Variant = entry.get("gameplay", "")
+	entry["gameplay"] = "Les [[cdx_arc_long|archers]] tirent avant la mêlée. Seconde phrase du test."
+	var bubble: PanelContainer = bubbles.call("open", "cdx_crecy", Vector2(80, 80))
+	var bubble_text := (bubble.find_child("Text", true, false) as RichTextLabel).text
+	_check(bubble_text.contains("[i]En jeu :[/i] Les ") and bubble_text.contains("tirent avant la mêlée.") and not bubble_text.contains("Seconde phrase"), "B1: gameplay line in bubble: %s" % bubble_text)
+	bubbles.call("close_all")
+	bubbles.call("open_entry", "cdx_crecy")
+	var window: Control = bubbles.call("window")
+	var box: Control = window.get("gameplay_box")
+	var box_label: RichTextLabel = window.get("gameplay_label")
+	_check(box != null and box.visible and box_label.text.contains("En jeu") and box_label.text.contains("Seconde phrase"), "B1: gameplay box in the codex window")
+	window.call("navigate", "cdx_poitiers")
+	_check(not box.visible or str((store.call("entry", "cdx_poitiers") as Dictionary).get("gameplay", "")) != "", "B1: gameplay box hidden without gameplay")
+	window.hide()
+	if had_gameplay:
+		entry["gameplay"] = old_gameplay
+	else:
+		entry.erase("gameplay")
+
+	# Titres d'infobulles riches liés via `entity`, pied « T : maintenir ouverte ».
+	var unit_entry := str(store.call("entry_for_entity", "unit_longbowmen"))
+	var unit_tip := RichTooltip.unit("unit_longbowmen")
+	_check(unit_entry != "" and RichTooltip.title_entry(unit_tip) == unit_entry, "B1: unit tooltip title should link to %s" % unit_entry)
+	var panel := RichTooltip.make_panel(unit_tip)
+	var tip_footer := panel.find_child("Footer", true, false) as Label
+	_check(tip_footer != null and tip_footer.text.begins_with("T : maintenir ouverte"), "B1: rich tooltip footer expected")
+	panel.free()
+	_check(RichTooltip.title_entry(RichTooltip.resource("res_nothing_here")) == "", "B1: unlinked titles stay plain")
+	store.call("reset_discoveries")
+	if _failures == failures_before:
+		print("smoke OK: B1 bubbles, T pins bubble / plain tooltip, 3-level pinned chain, gameplay, linked titles")
+
+
+## Survole le premier lien du Codex de `bubble` et attend la bulle fille (null si aucun lien).
+func _hover_first_link(bubbles: Node, bubble: PanelContainer) -> PanelContainer:
+	var label := bubble.find_child("Text", true, false) as RichTextLabel
+	var found := RegEx.create_from_string("\\[url=(cdx:[^\\]]+)\\]").search(label.text)
+	if found == null:
+		return null
+	var count := int(bubbles.call("bubble_count"))
+	label.meta_hover_started.emit(found.get_string(1))
+	await create_timer(0.5).timeout
+	label.meta_hover_ended.emit(found.get_string(1))
+	if int(bubbles.call("bubble_count")) != count + 1:
+		return null
+	return bubbles.get("bubbles")[-1]
 
 
 ## H9 : interface de la Table et de la médecine (vraie simulation si elle expose

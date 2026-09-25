@@ -1,0 +1,16 @@
+{
+  "id": "cdx_jeu_moral",
+  "title": "Le moral en bataille",
+  "category": "mecanique",
+  "aliases": [
+    "moral",
+    "moral des troupes",
+    "courage"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Une bataille médiévale se gagne moins en tuant qu'en faisant fuir : un régiment tient tant que ses hommes croient pouvoir tenir. Pertes, attaques de flanc, fatigue, fuite des voisins et mort du chef usent ce courage jusqu'à la déroute.",
+  "body": "Les chroniqueurs de la guerre de Cent Ans décrivent peu de massacres face à face et beaucoup de lignes qui se rompent. Une troupe cède rarement parce qu'elle n'a plus d'hommes : elle cède quand les premiers rangs reculent, que la rumeur court que le chef est tombé ou que la bataille voisine s'enfuit. À [[cdx_crecy|Crécy]], les arbalétriers génois décimés par les archers refluent à travers la chevalerie française, qui les sabre en les traitant de lâches : la panique d'un corps se communique au suivant.\n\nLe courage tient à la cohésion : des hommes qui se connaissent, qui servent le même seigneur sous la même bannière, qui voient le chef et l'entendent. D'où l'importance des bannières, des cris d'armes et de la présence du capitaine, que [[cdx_froissart|Froissart]] ne cesse de souligner. Un régiment attaqué de flanc ou de dos, qui ne voit plus l'ennemi venir, se défait bien plus vite qu'un front intact.\n\nÀ l'inverse, des troupes retranchées derrière des pieux, une haie ou une muraille tiennent longtemps sous le tir : les archers anglais de [[cdx_poitiers|Poitiers]], abrités par les haies et les vignes, encaissent charge après charge.",
+  "gameplay": "Chaque régiment a un moral de 0 à 100 : celui qu'il a en campagne, plus le bonus de moral du [[cdx_jeu_general|général]]. Il remonte vers ce plafond hors du combat (+0,3 par seconde quand aucun ennemi n'est à moins de 100 m). Il baisse : avec les pertes (perdre 10 % de l'effectif d'un coup coûte 6 points ; 30 % de moins derrière un rempart), pris de [[cdx_jeu_flancs|flanc]] (−1,5 par seconde) ou de dos (−3 par seconde), au-delà de 60 de [[cdx_jeu_fatigue|fatigue]], en mêlée quand il est tombé sous la moitié de son effectif (−0,3 par seconde), pour chaque régiment ami en déroute à moins de 120 m (−0,4 par seconde, trois au plus), sous le choc d'une [[cdx_jeu_charge|charge]] (−8 de face, −15 de flanc ou de dos) et à la mort du général (−25 pour toute l'armée).\n\nLe général entretient le moral des régiments à moins de 150 m (+0,1 par seconde, plus 0,05 par point de commandement). Sous 20, le régiment part en [[cdx_deroute_debandade|déroute]]. Le moral compte aussi dans les coups portés : un régiment frappe à 60 % de sa force à moral nul et à 100 % à moral 100.\n\nConseil : gardez le général près du centre, couvrez les flancs et relevez un régiment éprouvé avant qu'il ne casse ; le [[cdx_jeu_cri_de_guerre|cri de guerre]] et le [[cdx_jeu_pas_de_quartier|pas de quartier]] donnent un sursaut au bon moment.",
+  "see_also": ["cdx_deroute_debandade", "cdx_jeu_fatigue", "cdx_jeu_flancs", "cdx_jeu_general", "cdx_jeu_cri_de_guerre", "cdx_jeu_ralliement"],
+  "sources": ["Bataille de Crécy", "Bataille de Poitiers (1356)", "Jean Froissart"]
+}

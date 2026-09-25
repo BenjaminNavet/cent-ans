@@ -299,7 +299,7 @@
     {
       "id": "fac_england",
       "tagline": "Des archers redoutés, une couronne à conquérir",
-      "intro": "Édouard III a vingt-quatre ans et vient de soumettre l'Écosse. Duc d'Aquitaine, il refuse de voir la Guyenne confisquée et revendique la couronne de France par sa mère Isabelle. Un royaume de quatre à cinq millions d'âmes, riche de sa laine, face au géant capétien : il faudra des alliés, des chevauchées et des victoires éclatantes.",
+      "intro": "Édouard III a vingt-quatre ans et guerroie en Écosse depuis quatre ans pour son protégé Édouard Balliol. Duc d'Aquitaine, il refuse de voir la Guyenne confisquée et revendique la couronne de France par sa mère Isabelle. Un royaume de quatre à cinq millions d'âmes, riche de sa laine, face au géant capétien : il faudra des alliés, des chevauchées et des victoires éclatantes.",
       "strengths": [
         "Archers à l'arc long et tactiques à pied éprouvées",
         "Fiscalité efficace, laine vendue aux villes de Flandre",
@@ -432,7 +432,7 @@
         "date": "Poitiers, 19 septembre 1356"
       },
       {
-        "text": "Honni soit qui mal y pense.",
+        "text": "Honi soit qui mal y pense.",
         "author": "Devise de l'ordre de la Jarretière",
         "source": "fondé par Édouard III",
         "date": "vers 1348"

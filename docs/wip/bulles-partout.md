@@ -5,12 +5,12 @@ Conception : `docs/design/2026-09-25-bulles-partout.md`.
 | Lot | État | Branche | Notes |
 |---|---|---|---|
 | Squelette (schéma, catégories, validateur) | fait | main | |
-| B1 Infra T universel | fini, smoke+pytest verts avec B2/B3 ; main fusionné dans integration (03c8b1ec), tests finaux en cours | feat/b1-bulles-infra | |
-| B2 Mécaniques campagne | fini (27 fiches cdx_jeu_*, 12 gameplay), fusionné dans integration | worktree-agent-a1391ebbb72a033ca | |
-| B3 Mécaniques bataille/siège/naval | fini (32 fiches), fusionné dans integration | worktree-agent-a8fac39c8d71471d7 | supprimer `data/codex/_b3_links.md` après B4/B5 ; B6 doit relire Breteuil/Romorantin 1356 |
-| B4 Bâtiments + ressources | fini (33 fiches, 8 enrichies, audit batiments), fusionné dans integration (967f6a9a) | b4-batiments | conflit gabelle résolu ; cdx_jeu_nourriture → famine/population ; alias comptoir → bâtiment |
-| B5 Unités, navires, techniques | lancé (worktree agent) | | |
-| B6 Audit historique récent | fini (149 corrections, 8 fiches), à fusionner | b6-audit-historique | rapport docs/histoire/audit-2026-09-25.md |
+| B1 Infra T universel | **fusionné** (main a51353d8) | feat/b1-bulles-infra | capture docs/img/bulles-imbriquees.png |
+| B2 Mécaniques campagne | **fusionné** (main a51353d8) | worktree-agent-a1391ebbb72a033ca | |
+| B3 Mécaniques bataille/siège/naval | **fusionné** (main a51353d8) | worktree-agent-a8fac39c8d71471d7 | supprimer `data/codex/_b3_links.md` après B4/B5 ; B6 doit relire Breteuil/Romorantin 1356 |
+| B4 Bâtiments + ressources | **fusionné** (main a51353d8) | b4-batiments | conflit gabelle résolu ; cdx_jeu_nourriture → famine/population ; alias comptoir → bâtiment |
+| B5 Unités, navires, techniques | **fusionné** (main a51353d8) | | |
+| B6 Audit historique récent | **fusionné** (main a51353d8) | b6-audit-historique | rapport docs/histoire/audit-2026-09-25.md |
 
 Fusion : worktree `../gp-historien-merge` (branche `integration/historien`) puis ff-only dans main.
 Commits avec chemins explicites (index partagé avec d'autres sessions).
@@ -36,3 +36,22 @@ Commits avec chemins explicites (index partagé avec d'autres sessions).
 - Champs de jeu historiquement faux laissés (décision de design) : owner Bergerac/Aiguillon (anglaises dès 1337, en réalité 1345), Padoue, Pavie ; kind de Rye, Binche, Andechs, Vilvorde, Corte, Linz/Vienne inversées ; fortification de Vincennes ; Ronda. Détail : rapport § 9.
 - Auto-lien par alias : homonymes (« Louis de Poitiers » → bataille). Prévoir exclusion (alias plus long prioritaire / liste d'exceptions).
 - 18 fiches proposées (rapport § 10) : Barbavera, Charles de la Cerda, Carrare, Mastino II, Azzone Visconti, Pepoli, Achaïe, Baudouin de Trèves, Marguerite Maultasch, Cassel 1328, Dunbar, palais des papes…
+
+## État au 25/09 (fin de vague 1)
+Tous les lots B1-B6 fusionnés dans main (a51353d8). Codex : 388 fiches (231 avant), validateur 0 erreur ; pytest 429 verts ; smoke vert sauf « music playlist too short: court », dû à 36 musiques non commitées par une autre session (hors bulles).
+Fusion : 17 conflits B5/B6 résolus (textes B6 + liens B2/B5), 21 alias dédoublonnés (fiche la plus précise), `_b3_links.md`/`_b4_links.md` supprimés, `cdx_galere` → `cdx_galee`, `cdx_jeu_nourriture` → famine/population, références à des jeux commerciaux retirées (capture renommée).
+
+## Suite possible (vague 2)
+- B7 correctif code ↔ UI (listes B2/B4/B5 ci-dessus) : session code, pas historien.
+- B8 auto-lien : alias le plus long prioritaire + exceptions (homonymes « Louis de Poitiers »).
+- B9 18 fiches historiques proposées par B6 ; relecture Breteuil/Romorantin 1356 (B3).
+- ~~Décision owner/kind~~ : tranché le 25/09 — on garde l'équilibre actuel (libertés assumées, audit § 9).
+- Doublon d'entity `prov_flandre` (cdx_gand, cdx_flandre_laine).
+- Unités : l'encyclopédie du smoke en compte 21 au lieu de 27 (les 27 sont chargées ; cause non trouvée).
+
+## Vague 2 (lancée le 25/09)
+| Lot | État | Notes |
+|---|---|---|
+| B8 Auto-lien homonymes | lancé | alias le plus long prioritaire + exceptions |
+| B9a Fiches historiques 1-9 (audit § 10) | lancé | + relecture Breteuil/Romorantin 1356 |
+| B9b Fiches historiques 10-18 (audit § 10) | lancé | |

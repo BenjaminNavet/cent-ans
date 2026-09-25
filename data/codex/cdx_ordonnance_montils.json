@@ -1,0 +1,27 @@
+{
+  "id": "cdx_ordonnance_montils",
+  "title": "L'ordonnance des francs-archers",
+  "category": "technique",
+  "aliases": [
+    "ordonnance de Montils-lès-Tours",
+    "Montils-lès-Tours",
+    "ordonnance de 1448"
+  ],
+  "era": {
+    "from": "1448",
+    "to": "1480"
+  },
+  "summary": "Le 28 avril 1448, à Montils-lès-Tours, [[cdx_charles_vii|Charles VII]] ordonne que chaque paroisse arme et entretienne un archer, exempté de [[cdx_taille|taille]] : les [[cdx_franc_archer|francs-archers]] complètent l'armée permanente née en 1445.",
+  "body": "L'ordonnance fixe l'effectif, en principe un homme pour cinquante feux, et l'équipement : arc ou arbalète, salade, brigandine ou jaque, épée ou dague, fournis par la paroisse. L'archer s'exerce les jours de fête et doit se tenir prêt à partir au premier mandement du roi ; en échange, il est franc de taille.\n\nAvec les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] créées par l'[[cdx_ordonnance_louppy|ordonnance de 1445]], la France dispose désormais d'une cavalerie et d'une infanterie permanentes, qui reprennent la Normandie et la Guyenne. Louis XI supprime l'institution en 1480, après la médiocre tenue des francs-archers à Guinegatte.",
+  "gameplay": "Recherche : 450 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_pavois|Pavois]], [[cdx_arbalete_a_tour|Arbalète à tour et à cranequin]]. Année historique 1448 : avant 1428, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : +4 en moral des tireurs ; coût de recrutement des tireurs −10 %. Débloque : [[cdx_franc_archer|Francs-archers]].",
+  "entity": "tech_francs_archers",
+  "see_also": [
+    "cdx_franc_archer",
+    "cdx_ordonnance_louppy",
+    "cdx_armee_permanente"
+  ],
+  "sources": [
+    "Francs-archers",
+    "Charles VII (roi de France)"
+  ]
+}

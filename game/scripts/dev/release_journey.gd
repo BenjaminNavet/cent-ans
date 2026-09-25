@@ -346,6 +346,7 @@ func _ab(map: Node) -> Dictionary:
 
 
 var _hidden: Array[Node] = []
+var _no_cast: Array[Node] = []
 
 
 func _apply_config(map: Node, config: String) -> void:
@@ -356,6 +357,14 @@ func _apply_config(map: Node, config: String) -> void:
 			node.set("visible", true)
 	_hidden.clear()
 	var env := (map.get_node("WorldEnvironment") as WorldEnvironment).environment
+	# PB1 : ombres et brouillard remis à l'état de la scène (sinon `no_shadows`/`no_fog` restent
+	# actifs pour toutes les configurations suivantes et faussent la « base »).
+	if not env.has_meta("rl1_fog"):
+		env.set_meta("rl1_fog", env.fog_enabled)
+	env.fog_enabled = bool(env.get_meta("rl1_fog"))
+	var atmosphere := map.get_node_or_null("Atmosphere")
+	if atmosphere != null:
+		atmosphere.call("apply_distance", float(map.get("camera_rig").get("distance")))
 	var camera := map.get("camera") as Camera3D
 	var attributes := camera.attributes as CameraAttributesPractical
 	if attributes == null:
@@ -389,6 +398,18 @@ func _apply_config(map: Node, config: String) -> void:
 			vegetation.set("quality_density", float(config.trim_prefix("veg_density:")))
 	# Ombres de la carte remises par `reapply` (CampaignAtmosphere) ; variantes ci-dessous.
 	var sun := map.get_node("Sun") as DirectionalLight3D
+	if not sun.has_meta("rl1_angular"):
+		sun.set_meta("rl1_angular", sun.light_angular_distance)
+		sun.set_meta("rl1_blend", sun.directional_shadow_blend_splits)
+	sun.light_angular_distance = float(sun.get_meta("rl1_angular"))
+	sun.directional_shadow_blend_splits = bool(sun.get_meta("rl1_blend"))
+	for part in config.split("+"):  # réglages d'ombre combinables : angular:0+soft:3+no_blend
+		if part.begins_with("angular:"):
+			sun.light_angular_distance = float(part.trim_prefix("angular:"))
+		elif part.begins_with("soft:"):
+			RenderingServer.directional_soft_shadow_filter_set_quality(int(part.trim_prefix("soft:")))
+		elif part == "no_blend":
+			sun.directional_shadow_blend_splits = false
 	if config == "splits2":
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	if config.begins_with("shadow_range:"):
@@ -412,6 +433,19 @@ func _apply_config(map: Node, config: String) -> void:
 			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
 		"soft_hard":
 			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_HARD)
+	for node in _no_cast:
+		if is_instance_valid(node):
+			(node as GeometryInstance3D).cast_shadow = node.get_meta("rl1_cast")
+	_no_cast.clear()
+	if config.begins_with("nocast:"):
+		var cast_root := map.find_child(config.trim_prefix("nocast:"), true, false)
+		if cast_root != null:
+			for node in cast_root.find_children("*", "GeometryInstance3D", true, false):
+				var geometry := node as GeometryInstance3D
+				if geometry.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+					geometry.set_meta("rl1_cast", geometry.cast_shadow)
+					geometry.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+					_no_cast.append(geometry)
 	if config.begins_with("hide:"):
 		var node := map.find_child(config.trim_prefix("hide:"), true, false)
 		if node != null and node.get("visible") != null:

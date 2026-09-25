@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=31 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
 [ext_resource type="Script" path="res://scripts/visual/campaign_atmosphere.gd" id="v1_atmosphere"]
@@ -77,15 +77,6 @@ dof_blur_far_distance = 600.0
 dof_blur_far_transition = 800.0
 dof_blur_amount = 0.06
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
-content_margin_left = 16.0
-content_margin_top = 6.0
-content_margin_right = 16.0
-content_margin_bottom = 6.0
-bg_color = Color(0.93, 0.87, 0.72, 1)
-border_width_bottom = 2
-border_color = Color(0.42, 0.29, 0.16, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
 content_margin_left = 10.0
 content_margin_top = 4.0
@@ -109,7 +100,6 @@ camera_attributes = SubResource("CameraAttributes_map")
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 200, 0)
 light_color = Color(1, 0.95, 0.86, 1)
 light_energy = 1.1
-light_angular_distance = 0.8
 shadow_enabled = true
 shadow_bias = 0.04
 shadow_normal_bias = 1.5
@@ -170,7 +160,7 @@ anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
 theme = ExtResource("15_theme")
-theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+theme_type_variation = &"TopBarPanel"
 
 [node name="HBox" type="HBoxContainer" parent="UI/TopBar"]
 layout_mode = 2

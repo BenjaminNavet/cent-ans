@@ -1,0 +1,20 @@
+{
+  "id": "cdx_jeu_siege",
+  "title": "Le siège : blocus et famine",
+  "category": "mecanique",
+  "aliases": [
+    "siège",
+    "sièges",
+    "met le siège",
+    "vivres de la place",
+    "garnison affamée",
+    "capitule",
+    "siège levé"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "La plupart des places fortes ne tombent ni sous les pierres ni à l'assaut, mais par la faim : on les enferme, on attend, et la garnison finit par traiter. Une armée de secours, une sortie heureuse ou l'hiver peuvent seuls les sauver.",
+  "body": "La guerre de Cent Ans est d'abord une guerre de sièges. Les murailles du XIVe siècle résistent longtemps aux engins, et l'assaut coûte cher : le moyen le plus sûr reste le blocus. Devant [[cdx_calais|Calais]], [[cdx_edouard_iii|Édouard III]] bâtit en 1346 une véritable ville de bois, Villeneuve-la-Hardie, et attend onze mois ; la flotte anglaise ferme la mer, l'armée de secours de [[cdx_philippe_vi|Philippe VI]] se retire sans combattre, et les bourgeois affamés se rendent en août 1347.\n\nDevant [[cdx_rouen|Rouen]], en 1418-1419, [[cdx_henri_v|Henri V]] entoure la ville de fossés et de camps fortifiés. La famine est telle que la garnison expulse les « bouches inutiles » : des milliers de femmes, d'enfants et de vieillards meurent de faim et de froid dans les fossés, entre les murs et les lignes anglaises, que le roi refuse de laisser passer. La ville capitule en janvier 1419.\n\nUn blocus imparfait échoue : à [[cdx_orleans|Orléans]], en 1428-1429, les Anglais ne peuvent fermer tout le pourtour de la ville, les convois passent, et l'arrivée de [[cdx_jeanne_darc|Jeanne d'Arc]] fait lever le siège. À Hennebont (1342), [[cdx_jeanne_de_flandre|Jeanne de Flandre]] tient jusqu'à ce que la flotte de [[cdx_gautier_de_mauny|Gautier de Mauny]] la délivre.",
+  "gameplay": "Une armée en posture « Siège » sur une colonie ennemie fortifiée l'assiège ; le décompte commence au tour suivant. Une colonie sans garnison est prise aussitôt. La place a des vivres (100, moins la moitié de la dévastation de la province, 10 au moins) qui baissent chaque tour de 100 / (2 + niveau de fortification), arrondi au-dessus, durée raccourcie par la compétence de siège du général assiégeant : une place de fortification 2 perd 25 par tour et tient quatre tours. À zéro, la garnison affamée capitule et la place est prise.\n\nChaque tour, les engins de l'assiégeant ouvrent la brèche (voir [[cdx_jeu_murailles|murailles et brèches]]). La garnison fait une sortie si elle est 1,3 fois plus forte que l'armée assiégeante (voir [[cdx_jeu_sortie|sortie]]) ; le siège est levé si une armée amie de la place vient s'y poster ou si les assiégeants partent. À tout moment, « Donner l'assaut » lance une bataille de siège, en 3D ou automatique (voir [[cdx_jeu_assaut|assaut]]) ; l'IA donne l'assaut quand ses chances atteignent 65 %.\n\nPrendre une place ajoute 20 d'agitation à la province (10 pour une colonie qui n'est pas la cité) ; prendre la cité donne la province. Conseil : contre une place forte, amenez des engins et laissez la faim travailler ; gardez une armée pour intercepter les secours.",
+  "see_also": ["cdx_jeu_murailles", "cdx_jeu_assaut", "cdx_jeu_sortie", "cdx_jeu_engins_siege", "cdx_places_fortes", "cdx_calais", "cdx_rouen"],
+  "sources": ["Siège de Calais (1346-1347)", "Siège de Rouen (1418-1419)", "Siège d'Orléans", "Siège d'Hennebont"]
+}

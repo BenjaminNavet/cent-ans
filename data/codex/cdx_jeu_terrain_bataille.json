@@ -1,0 +1,21 @@
+{
+  "id": "cdx_jeu_terrain_bataille",
+  "title": "Le terrain de la bataille",
+  "category": "mecanique",
+  "aliases": [
+    "terrain de la bataille",
+    "haie",
+    "haies",
+    "fossé",
+    "fossés",
+    "clôtures",
+    "boue",
+    "mares"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Bois, boue, gués, haies, fossés et villages font les batailles autant que les hommes : ils ralentissent la marche, cassent les charges et abritent les tireurs. Qui choisit le terrain choisit souvent l'issue.",
+  "body": "Les grandes victoires anglaises doivent beaucoup au terrain. À [[cdx_poitiers|Poitiers]], le [[cdx_prince_noir|Prince noir]] poste ses archers derrière des haies et dans des vignes, que la cavalerie française ne peut aborder que par un chemin creux où elle se fait tirer comme au piège. À [[cdx_azincourt|Azincourt]], les labours gorgés d'eau par la pluie de la nuit transforment l'avance des hommes d'armes français en calvaire.\n\nLes Flamands avaient montré la voie à Courtrai (1302) : des fossés et des ruisseaux devant leur ligne brisent l'élan des chevaliers. Les rivières et leurs gués commandent la marche des armées (voir [[cdx_ponts_gues|ponts et gués]]) : Édouard III force le passage de la Somme à Blanchetaque avant Crécy, sous les traits des Génois.\n\nLes villages, avec leurs courtils enclos de haies et de clôtures, sont des positions fortes pour l'infanterie et des coupe-gorge pour les cavaliers ; les bois abritent des embuscades et masquent les mouvements. Les chefs prudents, avant de livrer bataille, font reconnaître le terrain par leurs [[cdx_zone_controle|coureurs]] et leurs [[cdx_herauts|hérauts]].",
+  "gameplay": "Le champ (1 200 × 800 m) est tiré du terrain de la province, de la saison et de la météo : bois, boue, rivière et gués, mares du marais, haies du bocage, village ou ferme avec ses clôtures et ses fossés, côte sur un flanc.\n\nMarche (multiplicateurs de vitesse) : bois ×0,65 à pied, ×0,4 à cheval ; boue ×0,55 (×0,45 sous la pluie) ; gué ou mare ×0,5, eau profonde ×0,25 ; haie ×0,6 à pied, ×0,3 à cheval ; fossé ×0,6 et ×0,4 ; clôture ×0,85 et ×0,6 ; ruelles du village ×0,8 et ×0,55 ; plage ×0,85 ; sol enneigé ×0,9.\n\nCouvert contre les traits : ×0,5 dans un bois, où l'on n'est vu qu'à moins de 60 m ; ×0,6 dans un village ou à moins de 14 m derrière une haie que le tir traverse. Une haie, un fossé ou un village brisent toute [[cdx_jeu_charge|charge]] de cavalerie (plus de choc, −5 de moral pour les cavaliers).\n\nEn résolution automatique, le terrain de la province pèse sur la charge, le tir et la défense (voir [[cdx_jeu_resolution_auto|résolution automatique]]). Conseil : archers derrière une haie, infanterie dans le village, cavalerie en terrain ouvert et sec ; évitez de combattre dans la rivière. Pour les pentes, voir [[cdx_jeu_relief_bataille|relief]].",
+  "see_also": ["cdx_jeu_relief_bataille", "cdx_jeu_meteo_bataille", "cdx_jeu_charge", "cdx_jeu_tir", "cdx_ponts_gues", "cdx_poitiers"],
+  "sources": ["Bataille de Poitiers (1356)", "Bataille de Courtrai", "Bataille d'Azincourt", "Bocage"]
+}

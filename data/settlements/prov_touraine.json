@@ -45,7 +45,7 @@
     "id": "set_marmoutier_tours",
     "province": "prov_touraine",
     "kind": "abbey",
-    "name": { "display": "Marmoutier", "local": "Maior Monasterium", "local_language": "ancien français" },
+    "name": { "display": "Marmoutier", "local": "Marmoustier", "local_language": "ancien français" },
     "lonlat": [0.6975, 47.4064],
     "weight": 8,
     "owner": null,

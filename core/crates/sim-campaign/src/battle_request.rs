@@ -469,7 +469,7 @@ impl CampaignState {
         let defender = movement::coalition_army(self, &defenders).expect("live battle");
         let province = data.provinces.get(&request.province);
         let player_side = self.player_side_of(data, request);
-        Ok(BattleSetup {
+        let mut setup = BattleSetup {
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
@@ -483,7 +483,9 @@ impl CampaignState {
             siege: None,
             siege_layout: None,
             orders: data.battle_orders.values().cloned().collect(),
-        })
+        };
+        self.apply_difficulty_setup(data, &mut setup);
+        Ok(setup)
     }
 
     /// Applies the result of a battle fought outside the campaign (3D battle):
@@ -698,7 +700,7 @@ impl CampaignState {
             .map_or(0, |s| s.breach);
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
-        BattleSetup {
+        let mut setup = BattleSetup {
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
@@ -715,6 +717,28 @@ impl CampaignState {
             }),
             siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
+        };
+        self.apply_difficulty_setup(data, &mut setup);
+        setup
+    }
+
+    /// DF1: the AI side facing the player gets the difficulty's morale
+    /// bonus on every regiment (morale and its cap, as a general's
+    /// `ArmyMorale` does in `sim-battle`), matching the auto-resolver.
+    fn apply_difficulty_setup(&self, data: &GameData, setup: &mut BattleSetup) {
+        let Some(player_side) = setup.player_side else {
+            return;
+        };
+        let bonus = self.difficulty_morale_bonus(data, false, true);
+        if bonus == 0.0 {
+            return;
+        }
+        let ai_side = match player_side {
+            SideId::Attacker => &mut setup.defender,
+            SideId::Defender => &mut setup.attacker,
+        };
+        for unit in &mut ai_side.units {
+            unit.morale = research::boosted(unit.morale, bonus, 100);
         }
     }
 

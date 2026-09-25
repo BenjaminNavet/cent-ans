@@ -25,11 +25,10 @@
       "value": 5
     }
   ],
-  "description": "Caractères mobiles métalliques : diffusion massive des textes en fin de période.",
+  "description": "Caractères mobiles métalliques : diffusion massive des textes en fin de période, qui supplante peu à peu les [[cdx_enluminure|manuscrits]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Imprimerie",
+    "Johannes Gutenberg",
+    "Première imprimerie parisienne"
   ]
 }

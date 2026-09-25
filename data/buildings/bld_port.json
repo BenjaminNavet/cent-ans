@@ -22,9 +22,10 @@
       "value": 10
     }
   ],
-  "description": "Quais, entrepôts et douane ; permet le transport maritime et le commerce lointain.",
+  "description": "Quais, entrepôts et douane ; permet le transport maritime et le commerce lointain. Voir [[cdx_port]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Port",
+    "Cinq-Ports",
+    "Cogue"
   ]
 }

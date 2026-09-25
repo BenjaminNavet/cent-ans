@@ -31,11 +31,10 @@
       "value": 3
     }
   ],
-  "description": "Adduction d'eau, pavage et évacuation des immondices ; limite mortalité et épidémies.",
+  "description": "Adduction d'eau, pavage et évacuation des immondices ; limite la mortalité et les épidémies après la [[cdx_peste_noire|Peste noire]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Hygiène au Moyen Âge",
+    "Voirie",
+    "Peste noire"
   ]
 }

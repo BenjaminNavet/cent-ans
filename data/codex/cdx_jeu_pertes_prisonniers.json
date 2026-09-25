@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_pertes_prisonniers",
+  "title": "Pertes, blessés et prisonniers",
+  "category": "mecanique",
+  "aliases": [
+    "pertes",
+    "prisonniers",
+    "fait prisonnier",
+    "captifs",
+    "blessés soignés"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Après la bataille, les hérauts comptent les morts ; les nobles vaincus deviennent des captifs qu'on garde pour leur rançon, les piétons meurent ou se dispersent, les blessés que l'on sait soigner reviennent dans les rangs.",
+  "body": "Le lendemain de [[cdx_crecy|Crécy]], [[cdx_edouard_iii|Édouard III]] envoie ses [[cdx_herauts|hérauts]] reconnaître les morts à leurs armoiries : ils comptent plus de quinze cents chevaliers et écuyers tués, sans parler des piétons que personne ne compte. Les chroniqueurs nomment les nobles, estiment les autres : les chiffres des batailles médiévales restent incertains.\n\nUn chevalier vaincu qui se rend a plus de valeur vivant que mort : il se rachète par une [[cdx_rancon|rançon]] qui peut enrichir un simple écuyer. À [[cdx_poitiers|Poitiers]], les Anglais font près de deux mille prisonniers, dont le roi [[cdx_jean_ii|Jean II]], taxé à trois millions d'écus. Le piéton, lui, n'a rien à offrir, et la poursuite est impitoyable. À [[cdx_azincourt|Azincourt]], [[cdx_henri_v|Henri V]], craignant un retour offensif pendant que ses hommes gardaient leurs captifs, fait égorger une grande partie des prisonniers : un scandale pour les contemporains, parce qu'il détruisait à la fois des vies et des fortunes.\n\nLes blessés meurent souvent de leurs plaies, de la fièvre ou de l'infection ; les chirurgiens militaires, comme [[cdx_guy_de_chauliac|Guy de Chauliac]] le décrit, savent pourtant extraire les flèches, réduire les fractures et panser les coups de taille.",
+  "gameplay": "En bataille 3D, un régiment perd les hommes tués ; ceux d'un régiment qui quitte le champ (retraite ou fuite réussie) sont sauvés et rentrent en campagne. Le bilan compte engagés, pertes et survivants par régiment ; chaque régiment vainqueur gagne un point d'expérience (un chevron), chaque régiment voit son moral changer de +5 (victoire) ou −20 (défaite). Un régiment réduit à moins de 5 % de son effectif est dissous.\n\nPrisonniers : seul le chef vaincu peut être pris (voir [[cdx_jeu_general|le chef de l'ost]]) ; sa [[cdx_rancon|rançon]] se négocie ensuite à la cour. Si le vainqueur avait déployé la bannière du [[cdx_jeu_pas_de_quartier|pas de quartier]], le chef pris est tué, aucune rançon n'est due et le général vainqueur perd 5 de piété.\n\nBlessés : les technologies de chirurgie et un barbier-chirurgien dans la suite du général rendent aux régiments survivants une part des pertes, jusqu'à la moitié (« blessés soignés rejoignent les rangs »). L'armée vaincue se replie ensuite ou se débande (voir [[cdx_deroute_debandade|déroute et débandade]]).",
+  "see_also": ["cdx_rancon", "cdx_jeu_general", "cdx_jeu_pas_de_quartier", "cdx_deroute_debandade", "cdx_herauts", "cdx_medecine_medievale"],
+  "sources": ["Bataille de Crécy", "Bataille d'Azincourt", "Rançon"]
+}

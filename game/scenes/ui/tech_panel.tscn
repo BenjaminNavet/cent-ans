@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/ui/tech_tree_view.gd" id="3_tree"]
 
 [node name="TechPanel" type="PanelContainer"]
+theme_type_variation = &"IlluminatedPanel"
 unique_name_in_owner = true
 anchors_preset = 8
 anchor_left = 0.5

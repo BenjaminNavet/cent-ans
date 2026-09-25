@@ -547,8 +547,16 @@ pub(crate) fn auto_assault(
         return;
     };
     let attackers = assault_coalition(state, army);
-    let attacker_side = crate::movement::coalition_side(state, data, &attackers);
-    let defender_side = crate::movement::side_from_army(state, data, &garrison);
+    let mut attacker_side = crate::movement::coalition_side(state, data, &attackers);
+    let mut defender_side = crate::movement::side_from_army(state, data, &garrison);
+    // DF1: the AI's morale against the player follows the difficulty.
+    state.apply_difficulty_morale(
+        data,
+        &mut attacker_side,
+        state.coalition_has_player(&attackers),
+        &mut defender_side,
+        garrison.faction == state.player_faction,
+    );
     let context = crate::battle_auto::BattleContext {
         defender_terrain_bonus: false,
         river_crossing: false,
@@ -671,8 +679,16 @@ fn sortie(
     if garrison_power <= 1.3 * state.army_power(data, target) {
         return false;
     }
-    let sallying = crate::movement::side_from_army(state, data, &garrison);
-    let besieging = crate::movement::side_from_army(state, data, &state.armies[target]);
+    let mut sallying = crate::movement::side_from_army(state, data, &garrison);
+    let mut besieging = crate::movement::side_from_army(state, data, &state.armies[target]);
+    // DF1: the AI's morale against the player follows the difficulty.
+    state.apply_difficulty_morale(
+        data,
+        &mut sallying,
+        garrison.faction == state.player_faction,
+        &mut besieging,
+        state.armies[target].faction == state.player_faction,
+    );
     // N1: a sortie is a field battle before the walls.
     let sallying_profiles = crate::battle_auto::army_profiles(data, &garrison);
     let besieging_profiles = crate::battle_auto::army_profiles(data, &state.armies[target]);

@@ -1,7 +1,7 @@
 {
   "id": "evt_epidemie_locale",
   "title": "Une épidémie",
-  "text": "Une fièvre maligne frappe la ville et ses environs. Les médecins prescrivent saignées et processions ; les riches fuient à la campagne.",
+  "text": "Une [[cdx_jeu_famine|fièvre maligne]] frappe la ville et ses environs. Les médecins prescrivent saignées et processions ; les riches fuient à la campagne.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80
