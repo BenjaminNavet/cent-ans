@@ -50,8 +50,9 @@ func _ready() -> void:
 
 
 func _announce() -> void:
+	# Deux images traitées : l'écran est dessiné (frame_post_draw n'arrive pas en --headless).
 	await get_tree().process_frame
-	await RenderingServer.frame_post_draw
+	await get_tree().process_frame
 	await _maybe_screenshot()
 	drawn.emit()
 
