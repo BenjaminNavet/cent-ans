@@ -598,9 +598,11 @@ def _battle_distant(get: Sources) -> np.ndarray:
 
 
 def _cavalry_charge_impact(get: Sources) -> np.ndarray:
-    """Cavalry charge: hoofbeat rumble swelling for ~3.5 s, then a crashing impact of shields
-    and blades (no dedicated CC0 "cavalry impact" recording was found; built from sources
-    already verified for other clips: the gallop bed and shield/sword hits)."""
+    """Cavalry charge: hoofbeat rumble swelling then a crashing impact of shields and blades.
+
+    No dedicated CC0 "cavalry impact" recording was found; built from sources already
+    verified for other clips: the gallop bed and shield/sword hits.
+    """
     gallop = loudest_window(mono(get(527430)), 3.6)
     ramp = np.linspace(0.12, 1.0, len(gallop)).astype(np.float32)
     swell = filtered(gallop, "low", 1800.0) * ramp
