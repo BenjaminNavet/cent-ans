@@ -1,5 +1,6 @@
 //! Siege pathing (F5a § 4): A* on a grid of [`CELL`]-metre cells where the
-//! intact wall bands and the houses are obstacles; breaches, the broken gate
+//! intact wall bands and the houses are obstacles (BR3: oriented blocks
+//! and the stalls of the market square); breaches, the broken gate
 //! (or the open gate of a sortie, for the garrison) and the streets are
 //! free, and so are burnt houses (S2). Paths are cached per regiment and recomputed when its goal cell
 //! or the walls (openings, sortie) change. Deterministic: integer costs,
@@ -14,8 +15,16 @@ use crate::siege::{PieceKind, SiegeWorks};
 
 /// Grid cell size, in metres.
 pub const CELL: f64 = 4.0;
-/// Clearance kept around houses (metres).
-const HOUSE_MARGIN: f64 = 3.0;
+/// Clearance kept around house blocks (metres, BR3: from
+/// `data/rules/siege_town.json`).
+fn house_margin() -> f64 {
+    crate::town::TownRules::bundled().block.clearance_m
+}
+
+/// Clearance kept around the props of the market square (metres).
+fn prop_margin() -> f64 {
+    crate::town::TownRules::bundled().props.path_margin_m
+}
 
 /// A regiment's cached path.
 #[derive(Debug, Clone, PartialEq)]
@@ -57,7 +66,7 @@ impl Grid<'_> {
             .pieces
             .iter()
             .any(|p| !open(p) && p.distance(x, z) < clearance);
-        !wall && w.house_at(x, z, HOUSE_MARGIN).is_none()
+        !wall && w.house_at(x, z, house_margin()).is_none() && !w.prop_at(x, z, prop_margin())
     }
 
     /// A* from `start` to `goal` (both treated as free); cell path.
@@ -142,14 +151,43 @@ pub(crate) fn segment_clear(works: &SiegeWorks, a: (f64, f64), b: (f64, f64)) ->
     }) {
         return false;
     }
-    works.houses.iter().filter(|h| h.standing()).all(|h| {
-        let t = (((h.x - a.0) * dx + (h.z - a.1) * dz) / len2).clamp(0.0, 1.0);
+    // BR3: the blocks are rectangles; a quick disc test first.
+    let clear = |f: crate::town::Footprint, margin: f64| {
+        let t = (((f.x - a.0) * dx + (f.z - a.1) * dz) / len2).clamp(0.0, 1.0);
         let (px, pz) = (a.0 + dx * t, a.1 + dz * t);
-        (px - h.x).powi(2) + (pz - h.z).powi(2) >= (h.radius + HOUSE_MARGIN).powi(2)
-    })
+        (px - f.x).hypot(pz - f.z) >= f.bounding_radius() + margin
+            || f.distance_to_segment(a, b) >= margin
+    };
+    let (house, prop) = (house_margin(), prop_margin());
+    works
+        .houses
+        .iter()
+        .filter(|h| h.standing())
+        .all(|h| clear(h.footprint(), house))
+        && works.path_props().all(|p| clear(p.footprint(), prop))
 }
 
 impl BattleSim {
+    /// BR3 (tests, probes): the A* way on the siege grid from `from` to `to`
+    /// for a regiment of `side`, as cell centres; `None` when the streets
+    /// give no way (or in a field battle).
+    pub fn siege_route(
+        &self,
+        side: SideId,
+        from: (f64, f64),
+        to: (f64, f64),
+    ) -> Option<Vec<(f64, f64)>> {
+        let works = self.siege.as_ref()?;
+        let grid = Grid {
+            works,
+            nx: (self.field.width / CELL).ceil() as usize,
+            nz: (self.field.depth / CELL).ceil() as usize,
+            side,
+        };
+        let cells = grid.search(grid.cell(from.0, from.1), grid.cell(to.0, to.1))?;
+        Some(cells.into_iter().map(|c| grid.centre(c)).collect())
+    }
+
     /// A step from `from` to `to` walks into a house (routing regiments slip
     /// through the alleys; leaving a house one stands in is free).
     pub(super) fn house_block(&self, index: usize, from: (f64, f64), to: (f64, f64)) -> bool {
@@ -159,10 +197,17 @@ impl BattleSim {
         if self.units[index].state == crate::unit::UnitState::Routing {
             return false;
         }
-        works.houses.iter().filter(|h| h.standing()).any(|h| {
-            let d = |p: (f64, f64)| ((p.0 - h.x).powi(2) + (p.1 - h.z).powi(2)).sqrt();
-            d(to) < h.radius + 1.0 && d(to) < d(from)
-        })
+        // BR3: the blocks and the market props are rectangles.
+        let into = |f: crate::town::Footprint| {
+            let d = |p: (f64, f64)| f.signed_distance(p.0, p.1);
+            d(to) < 1.0 && d(to) < d(from)
+        };
+        works
+            .houses
+            .iter()
+            .filter(|h| h.standing())
+            .any(|h| into(h.footprint()))
+            || works.path_props().any(|p| into(p.footprint()))
     }
 
     /// A* waypoint towards (tx, tz) for regiment `index`; `None` when no

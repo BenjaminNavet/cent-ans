@@ -261,6 +261,36 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("pyramid")
+def geo_pyramid(
+    levels: str = typer.Option(
+        "1,2,3,4", "--levels", help="Étages à cuire parmi 1-4 (ex. « 1,2 »)"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Réécrit les tuiles déjà présentes dans le cache"
+    ),
+    workers: int = typer.Option(0, "--workers", help="Processus (0 = tous les cœurs)"),
+    limit: int = typer.Option(
+        0, "--limit", help="Au plus N blocs par palier (essais ; 0 = tout)"
+    ),
+) -> None:
+    """Pyramide de relief E1-E4 (GLO-90 puis GLO-30 corrigé) et manifeste (ADR 0036)."""
+    from cent_ans_tools.geo import pyramid as geo_pyramid_step
+
+    wanted = tuple(sorted({int(part) for part in levels.split(",") if part.strip()}))
+    if not wanted or any(level not in (1, 2, 3, 4) for level in wanted):
+        raise typer.BadParameter("--levels : étages 1 à 4")
+    result = geo_pyramid_step.build(
+        levels=wanted, force=force, workers=workers or None, limit=limit or None
+    )
+    counts = ", ".join(f"E{k} {n}" for k, n in sorted(result.per_level.items()))
+    console.print(
+        f"{result.tiles_written} tuiles écrites ({counts or 'aucune'}), "
+        f"{result.total_bytes / 1e6:.1f} Mo, {result.skipped_units} blocs déjà faits "
+        f"({result.seconds:.0f} s)"
+    )
+
+
 @geo_app.command("landcover")
 def geo_landcover() -> None:
     """Occupation du sol vers 1340 : splat.png (forêts KK10 + massifs nommés), wetlands.png, forest_kind.png."""
@@ -295,6 +325,36 @@ def geo_rivers_render() -> None:
         console.print(
             f"[yellow]Hors fleuve affiché : {', '.join(result.unsnapped)}[/yellow]"
         )
+
+
+@geo_app.command("detail-dem")
+def geo_detail_dem(
+    zones: str = typer.Option(
+        "",
+        "--zones",
+        help="Identifiants de zones séparés par des virgules (toutes sinon)",
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Recuit les zones même si elles sont à jour"
+    ),
+) -> None:
+    """Relief palier 3 (E5-E7, 11 → 2,8 m) sur les zones de détail (ADR 0036, lot ZG3)."""
+    from cent_ans_tools.geo import detail_dem
+
+    zone_ids = tuple(z.strip() for z in zones.split(",") if z.strip())
+    result = detail_dem.build(zone_ids, force=force, log=console.print)
+    for level in sorted(result.tiles):
+        console.print(
+            f"E{level} : {result.tiles[level]} tuiles, "
+            f"{result.bytes_by_level[level] / 1e6:.1f} Mo"
+        )
+    total = sum(result.bytes_by_level.values())
+    console.print(
+        f"Palier 3 : {total / 1e9:.2f} Go de tuiles, bruts {result.raw_bytes / 1e9:.2f} Go, "
+        f"{result.seconds:.0f} s"
+    )
+    for note in result.notes:
+        console.print(f"[yellow]{note}[/yellow]")
 
 
 @geo_app.command("navgrid")

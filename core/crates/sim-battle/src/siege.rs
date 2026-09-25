@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::fire::Blaze;
 use crate::rng::BattleRng;
+use crate::town::{Footprint, Prop, TownRules};
 
 /// Centre of the town (x, z), in metres.
 pub const TOWN_CENTER: (f64, f64) = (600.0, 560.0);
@@ -123,8 +124,10 @@ pub struct Tower {
 }
 
 /// A house block inside the walls (F5a): an obstacle for movement and
-/// pathing, a disc of `radius` metres. Streets run between them from the
-/// square to every wall piece.
+/// pathing. Streets run between them from the square to every wall piece.
+/// BR3: the block is an oriented rectangle (two rows of town houses back to
+/// back, [`Footprint`]) — what the renderer draws, what the regiments and
+/// the figures go round; the disc of `radius` metres drives the fire.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct House {
     pub x: f64,
@@ -136,30 +139,333 @@ pub struct House {
     /// A suburb house outside the walls (S2).
     #[serde(default)]
     pub suburb: bool,
+    /// BR3: size of the block along its frontage (0: a disc, older saves).
+    #[serde(default)]
+    pub length: f64,
+    /// BR3: depth of the block (both rows).
+    #[serde(default)]
+    pub depth: f64,
+    /// BR3: frontage along `(cos yaw, sin yaw)`, row 0 facing
+    /// `(-sin yaw, cos yaw)` (towards the square).
+    #[serde(default)]
+    pub yaw: f64,
+    /// BR3: the parish church (a single building, not a block of houses).
+    #[serde(default)]
+    pub church: bool,
+    /// BR3: rows of houses in the block (2 back to back, 1 against the
+    /// wall walk).
+    #[serde(default = "two_rows")]
+    pub rows: u8,
+}
+
+fn two_rows() -> u8 {
+    2
 }
 
 impl House {
+    /// A block of `length` × `depth` metres; its fire disc has the same
+    /// area.
+    pub fn block(x: f64, z: f64, length: f64, depth: f64, yaw: f64) -> Self {
+        House {
+            x,
+            z,
+            radius: (length * depth / std::f64::consts::PI).sqrt(),
+            fire: Blaze::default(),
+            suburb: false,
+            length,
+            depth,
+            yaw,
+            church: false,
+            rows: 2,
+        }
+    }
+
     /// The house still blocks movement and pathing (not a burnt ruin).
     pub fn standing(&self) -> bool {
         !self.fire.burnt()
     }
 
-    /// Distance from (x, z) to the edge of the house disc (negative inside).
+    /// Distance from (x, z) to the edge of the house (negative inside):
+    /// BR3: its rectangle, the disc for a house without footprint.
     pub fn edge_distance(&self, x: f64, z: f64) -> f64 {
-        ((x - self.x).powi(2) + (z - self.z).powi(2)).sqrt() - self.radius
+        if self.has_footprint() {
+            self.footprint().signed_distance(x, z)
+        } else {
+            ((x - self.x).powi(2) + (z - self.z).powi(2)).sqrt() - self.radius
+        }
+    }
+
+    /// BR3: the house has a rectangle (not an older disc-only house).
+    pub fn has_footprint(&self) -> bool {
+        self.length > 0.0 && self.depth > 0.0
+    }
+
+    /// BR3: gap between two houses (fire spread): between their rectangles,
+    /// else between their discs.
+    pub fn gap_to(&self, other: &House) -> f64 {
+        if self.has_footprint() && other.has_footprint() {
+            self.footprint().distance_to(&other.footprint())
+        } else {
+            ((self.x - other.x).powi(2) + (self.z - other.z).powi(2)).sqrt()
+                - self.radius
+                - other.radius
+        }
+    }
+
+    /// BR3: the rectangle of the block (a square round the disc when the
+    /// house has no footprint).
+    pub fn footprint(&self) -> Footprint {
+        if self.has_footprint() {
+            Footprint::new(self.x, self.z, self.length, self.depth, self.yaw)
+        } else {
+            let side = self.radius * 2.0;
+            Footprint::new(self.x, self.z, side, side, self.yaw)
+        }
     }
 }
 
-/// Radii (from the town centre) of the two rings of houses.
-pub const HOUSE_RINGS: [f64; 2] = [75.0, 110.0];
-/// Radius of a house block.
-pub const HOUSE_RADIUS: f64 = 9.0;
-/// Street width kept free between two blocks.
-pub const STREET_WIDTH: f64 = 12.0;
+/// Where the blocks of a town may stand (BR3): off the streets, the square,
+/// the wall walk and the towers, and apart from each other.
+pub(crate) struct TownPlan<'a> {
+    pub center: (f64, f64),
+    /// Keep-out distance from the centre (square and its street).
+    pub square: f64,
+    /// Street centre lines (polylines) and the half width kept free.
+    pub streets: Vec<Vec<(f64, f64)>>,
+    pub street_half: f64,
+    pub pieces: &'a [WallPiece],
+    pub towers: &'a [Tower],
+    /// Free band from the wall centre line (wall band + wall walk).
+    pub wall_clear: f64,
+    /// Gap kept between two blocks.
+    pub alley: f64,
+    /// Ring of the walls.
+    pub ring: &'a [(f64, f64)],
+}
 
-/// Houses between the radial streets (deterministic, no random draw).
-fn build_houses(center: (f64, f64), pieces: &[WallPiece]) -> Vec<House> {
-    let mut streets: Vec<f64> = pieces
+impl TownPlan<'_> {
+    /// Single rows of houses backing onto the wall walk, parallel to each
+    /// wall piece (not the gate), clear of the towers.
+    pub fn wall_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
+        let end = self.towers.iter().map(|t| t.radius).fold(0.0, f64::max) + self.alley;
+        for piece in self.pieces {
+            if piece.kind == PieceKind::Gate {
+                continue;
+            }
+            let (nx, nz) = piece.outward();
+            let inset = self.wall_clear + depth * 0.5 + 0.05;
+            self.row_along(
+                houses,
+                (piece.a, piece.b),
+                (-nx * inset, -nz * inset),
+                end,
+                depth,
+                (min, max),
+            );
+        }
+    }
+
+    /// Rows of houses on both sides of every street of the plan, facing it.
+    pub fn street_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
+        let streets = self.streets.clone();
+        for line in &streets {
+            for w in line.windows(2) {
+                let (dx, dz) = (w[1].0 - w[0].0, w[1].1 - w[0].1);
+                let l = dx.hypot(dz);
+                if l < min {
+                    continue;
+                }
+                let off = self.street_half + depth * 0.5 + 0.05;
+                for side in [1.0, -1.0] {
+                    let (nx, nz) = (-dz / l * side, dx / l * side);
+                    self.row_along(
+                        houses,
+                        (w[0], w[1]),
+                        (nx * off, nz * off),
+                        0.0,
+                        depth,
+                        (min, max),
+                    );
+                }
+            }
+        }
+    }
+
+    /// One row of single-row blocks along `line` shifted by `offset`, its
+    /// fronts facing the line, between the streets that cross it (and
+    /// `end` metres off both ends), where they fit among the blocks
+    /// already laid; a stretch that does not fit is halved.
+    fn row_along(
+        &self,
+        houses: &mut Vec<House>,
+        line: ((f64, f64), (f64, f64)),
+        offset: (f64, f64),
+        end: f64,
+        depth: f64,
+        (min, max): (f64, f64),
+    ) {
+        let (a, b) = line;
+        let len = (b.0 - a.0).hypot(b.1 - a.1);
+        if len < 1e-6 {
+            return;
+        }
+        let (tx, tz) = ((b.0 - a.0) / len, (b.1 - a.1) / len);
+        let off = offset.0.hypot(offset.1).max(1e-9);
+        let yaw = yaw_facing(-offset.0 / off, -offset.1 / off);
+        let origin = (a.0 + offset.0, a.1 + offset.1);
+        let mut blocked: Vec<(f64, f64)> = vec![(-1e9, end), (len - end, 1e9)];
+        for street in &self.streets {
+            for w in street.windows(2) {
+                let (dx, dz) = (w[1].0 - w[0].0, w[1].1 - w[0].1);
+                let l = dx.hypot(dz);
+                if l < 1e-6 {
+                    continue;
+                }
+                let (ux, uz) = (dx / l, dz / l);
+                let sin = (ux * tz - uz * tx).abs();
+                if sin < 0.2 {
+                    continue;
+                }
+                // Crossing of the street with the row line.
+                let (ox, oz) = (w[0].0 - origin.0, w[0].1 - origin.1);
+                let denom = tx * uz - tz * ux;
+                let t = (ox * uz - oz * ux) / denom;
+                let s = (ox * tz - oz * tx) / denom;
+                if s < -depth || s > l + depth {
+                    continue;
+                }
+                let cos = (ux * tx + uz * tz).abs();
+                let half = (self.street_half + depth * 0.5 * cos) / sin + 0.5;
+                blocked.push((t - half, t + half));
+            }
+        }
+        blocked.sort_by(|p, q| p.0.total_cmp(&q.0));
+        let mut free: Vec<(f64, f64)> = Vec::new();
+        let mut at = f64::NEG_INFINITY;
+        for (b0, b1) in blocked {
+            if at.is_finite() && b0 > at {
+                free.push((at, b0));
+            }
+            at = at.max(b1);
+        }
+        let mut stretches: Vec<(f64, f64)> = Vec::new();
+        for (f0, f1) in free {
+            let count = ((f1 - f0) / (max + self.alley)).ceil().max(1.0) as usize;
+            let step = (f1 - f0) / count as f64;
+            stretches
+                .extend((0..count).map(|k| (f0 + k as f64 * step, f0 + (k + 1) as f64 * step)));
+        }
+        stretches.reverse();
+        while let Some((s0, s1)) = stretches.pop() {
+            let frontage = s1 - s0 - self.alley;
+            if frontage < min {
+                continue;
+            }
+            let along = (s0 + s1) * 0.5;
+            let (x, z) = (origin.0 + tx * along, origin.1 + tz * along);
+            let fp = Footprint::new(x, z, frontage, depth, yaw);
+            if self.fits(&fp, houses) {
+                let mut house = House::block(x, z, frontage, depth, yaw);
+                house.rows = 1;
+                houses.push(house);
+            } else {
+                let mid = (s0 + s1) * 0.5;
+                stretches.push((mid, s1));
+                stretches.push((s0, mid));
+            }
+        }
+    }
+
+    /// `fp` keeps clear of the square, the streets, the walls, the towers
+    /// and the blocks already laid (`placed`), and lies inside the ring.
+    pub fn fits(&self, fp: &Footprint, placed: &[House]) -> bool {
+        if fp
+            .corners()
+            .iter()
+            .any(|&(x, z)| !point_in_ring(self.ring, x, z))
+        {
+            return false;
+        }
+        if fp.signed_distance(self.center.0, self.center.1) < self.square {
+            return false;
+        }
+        if self.streets.iter().any(|line| {
+            line.windows(2)
+                .any(|w| fp.distance_to_segment(w[0], w[1]) < self.street_half - 1e-6)
+        }) {
+            return false;
+        }
+        if self
+            .pieces
+            .iter()
+            .any(|p| fp.distance_to_segment(p.a, p.b) < self.wall_clear)
+        {
+            return false;
+        }
+        if self
+            .towers
+            .iter()
+            .any(|t| fp.signed_distance(t.x, t.z) < t.radius + self.alley)
+        {
+            return false;
+        }
+        let reach = fp.bounding_radius();
+        placed.iter().all(|h| {
+            let other = h.footprint();
+            (h.x - fp.x).hypot(h.z - fp.z) > reach + other.bounding_radius() + self.alley
+                || !overlaps(fp, &other, self.alley)
+        })
+    }
+}
+
+/// Two rectangles closer than `gap`.
+pub(crate) fn overlaps(a: &Footprint, b: &Footprint, gap: f64) -> bool {
+    (a.x - b.x).hypot(a.z - b.z) < a.bounding_radius() + b.bounding_radius() + gap
+        && a.distance_to(b) < gap
+}
+
+/// Point-in-polygon test on a ring of vertices.
+pub(crate) fn point_in_ring(vertices: &[(f64, f64)], x: f64, z: f64) -> bool {
+    let n = vertices.len();
+    let mut inside = false;
+    let mut j = n - 1;
+    for i in 0..n {
+        let (xi, zi) = vertices[i];
+        let (xj, zj) = vertices[j];
+        if (zi > z) != (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi {
+            inside = !inside;
+        }
+        j = i;
+    }
+    inside
+}
+
+/// Yaw of a block whose row 0 faces `(fx, fz)` (unit vector).
+pub(crate) fn yaw_facing(fx: f64, fz: f64) -> f64 {
+    (-fx).atan2(fz)
+}
+
+/// BR3: dense rings of oriented blocks between the radial streets that run
+/// from the square to the middle of every wall piece, off the wall walk
+/// (deterministic, no random draw; layout from `data/rules/siege_town.json`).
+/// In each ring, a sector is filled by blocks of equal frontage (between the
+/// minimum and the maximum of the rules) separated by alleys; a block that
+/// runs into the wall walk keeps only its inner row.
+fn build_houses(plan: &TownPlan, rules: &TownRules) -> Vec<House> {
+    let g = &rules.generic;
+    let block = &rules.block;
+    let center = plan.center;
+    // The houses along the rampart street first, then the rings.
+    let mut houses: Vec<House> = Vec::new();
+    plan.wall_rows(
+        &mut houses,
+        block.depth_m * 0.5,
+        block.min_frontage_m,
+        block.max_frontage_m,
+    );
+    let depth = block.depth_m;
+    let mut streets: Vec<f64> = plan
+        .pieces
         .iter()
         .map(|p| {
             let (mx, mz) = p.midpoint();
@@ -168,28 +474,81 @@ fn build_houses(center: (f64, f64), pieces: &[WallPiece]) -> Vec<House> {
         .collect();
     streets.sort_by(f64::total_cmp);
     let tau = std::f64::consts::TAU;
-    let mut houses = Vec::new();
-    for (k, &a) in streets.iter().enumerate() {
-        let next = streets.get(k + 1).copied().unwrap_or(streets[0] + tau);
-        let gap = next - a;
-        for r in HOUSE_RINGS {
-            // Blocks spread evenly in the gap, streets on both ends.
-            let usable = gap * r - STREET_WIDTH;
-            let count = (usable / (2.0 * HOUSE_RADIUS + STREET_WIDTH)).floor() as i32;
-            for j in 0..count.max(0) {
-                let t = (f64::from(j) + 0.5) / f64::from(count);
-                let angle = a + gap * t;
-                houses.push(House {
-                    x: center.0 + angle.sin() * r,
-                    z: center.1 + angle.cos() * r,
-                    radius: HOUSE_RADIUS,
-                    fire: Blaze::default(),
-                    suburb: false,
-                });
+    for &r in &g.rings_m {
+        let r_in = r - depth * 0.5;
+        if r_in <= 1.0 {
+            continue;
+        }
+        for (k, &a) in streets.iter().enumerate() {
+            let next = streets.get(k + 1).copied().unwrap_or(streets[0] + tau);
+            let gap = next - a;
+            // Angles seen from the centre at the inner edge of the ring.
+            let beta = |width: f64| (width * 0.5 / r_in).min(1.0).asin();
+            let free = gap - 2.0 * beta(g.main_street_m);
+            if free <= 0.0 {
+                continue;
+            }
+            let span = |n: usize| (free - (n - 1) as f64 * 2.0 * beta(g.alley_m)) / n as f64;
+            let frontage = |theta: f64| 2.0 * r_in * (theta * 0.5).tan();
+            let mut n = 1;
+            while frontage(span(n)) > block.max_frontage_m {
+                n += 1;
+            }
+            let theta = span(n);
+            let length = frontage(theta);
+            if theta <= 0.0 || length < block.min_frontage_m {
+                continue;
+            }
+            for j in 0..n {
+                let angle = a
+                    + beta(g.main_street_m)
+                    + theta * 0.5
+                    + j as f64 * (theta + 2.0 * beta(g.alley_m));
+                let (sin, cos) = angle.sin_cos();
+                // Row 0 faces the square.
+                let yaw = yaw_facing(-sin, -cos);
+                for rows in [2_u8, 1] {
+                    let d = depth * f64::from(rows) * 0.5;
+                    let rc = r_in + d * 0.5;
+                    let (x, z) = (center.0 + sin * rc, center.1 + cos * rc);
+                    let fp = Footprint::new(x, z, length, d, yaw);
+                    if plan.fits(&fp, &houses) {
+                        let mut house = House::block(x, z, length, d, yaw);
+                        house.rows = rows;
+                        houses.push(house);
+                        break;
+                    }
+                }
             }
         }
     }
     houses
+}
+
+/// BR3: the parish church replaces the block nearest a point towards the
+/// back of the town (+z) where the whole church fits; the blocks it would
+/// touch are dropped. Its fire disc covers its nave.
+pub(crate) fn place_church(houses: &mut Vec<House>, plan: &TownPlan, rules: &TownRules) {
+    let c = &rules.church;
+    let target = (plan.center.0, plan.center.1 + c.toward_back_m);
+    let mut order: Vec<usize> = (0..houses.len()).filter(|&i| !houses[i].suburb).collect();
+    order.sort_by(|&a, &b| {
+        let d = |i: usize| (houses[i].x - target.0).hypot(houses[i].z - target.1);
+        d(a).total_cmp(&d(b)).then(a.cmp(&b))
+    });
+    for i in order {
+        let h = houses[i];
+        let fp = Footprint::new(h.x, h.z, c.length_m, c.depth_m, h.yaw);
+        if !plan.fits(&fp, &[]) {
+            continue;
+        }
+        let mut church = House::block(h.x, h.z, c.length_m, c.depth_m, h.yaw);
+        church.church = true;
+        church.rows = 1;
+        houses.retain(|o| o.suburb || !overlaps(&fp, &o.footprint(), plan.alley));
+        houses.push(church);
+        return;
+    }
 }
 
 /// The town walls during a siege battle (mutable: pieces lose HP).
@@ -225,6 +584,9 @@ pub struct SiegeWorks {
     /// Town drawn from a landmark plan (L3, ADR 0026); `None`: generic town.
     #[serde(default)]
     pub landmark: Option<crate::siege_layout::SiegeLandmark>,
+    /// BR3: street furniture (façades, suburbs, market square).
+    #[serde(default)]
+    pub props: Vec<Prop>,
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -322,9 +684,9 @@ impl SiegeWorks {
                 height: wall_height + 3.0,
             });
         }
-        let houses = build_houses(TOWN_CENTER, &pieces);
         let mut works = SiegeWorks {
-            houses,
+            houses: Vec::new(),
+            props: Vec::new(),
             sortie: false,
             gate_fire: Blaze::default(),
             wind: (0.0, 0.0),
@@ -340,8 +702,64 @@ impl SiegeWorks {
             hold_time: 0.0,
             landmark: None,
         };
+        works.lay_generic_town(TownRules::bundled());
         works.apply_campaign_breach(breach, rng);
         works
+    }
+
+    /// BR3: the dense blocks, the church and the props of the generic town.
+    pub(crate) fn lay_generic_town(&mut self, rules: &TownRules) {
+        let houses = {
+            let g = &rules.generic;
+            let plan = TownPlan {
+                center: self.center,
+                square: self.square_radius + g.square_street_m,
+                streets: self
+                    .pieces
+                    .iter()
+                    .map(|p| {
+                        // Radial, from the square to just past the wall.
+                        let (mx, mz) = p.midpoint();
+                        let (dx, dz) = (mx - self.center.0, mz - self.center.1);
+                        let k = 1.0 + 8.0 / dx.hypot(dz).max(1.0);
+                        vec![
+                            self.center,
+                            (self.center.0 + dx * k, self.center.1 + dz * k),
+                        ]
+                    })
+                    .collect(),
+                street_half: g.main_street_m * 0.5,
+                pieces: &self.pieces,
+                towers: &self.towers,
+                wall_clear: self.band() + g.wall_walk_m,
+                alley: g.alley_m,
+                ring: &self.vertices,
+            };
+            let mut houses = build_houses(&plan, rules);
+            place_church(&mut houses, &plan, rules);
+            houses
+        };
+        self.houses = houses;
+        self.lay_props();
+    }
+
+    /// BR3: lays the street furniture out again from the houses (after the
+    /// suburbs are added). Deterministic, no random draw.
+    pub fn lay_props(&mut self) {
+        self.props = crate::props::siege_props(self, TownRules::bundled());
+    }
+
+    /// BR3: the props still standing (those of a burnt house are gone).
+    pub fn standing_props(&self) -> impl Iterator<Item = &Prop> {
+        self.props.iter().filter(|p| {
+            p.house
+                .is_none_or(|h| self.houses.get(h).is_none_or(House::standing))
+        })
+    }
+
+    /// BR3: the church, if the town has one.
+    pub fn church(&self) -> Option<usize> {
+        self.houses.iter().position(|h| h.church)
     }
 
     pub(crate) fn apply_campaign_breach(&mut self, breach: u8, rng: &mut BattleRng) {
@@ -389,18 +807,7 @@ impl SiegeWorks {
 
     /// Point-in-polygon test (inside the ring).
     pub fn inside(&self, x: f64, z: f64) -> bool {
-        let n = self.vertices.len();
-        let mut inside = false;
-        let mut j = n - 1;
-        for i in 0..n {
-            let (xi, zi) = self.vertices[i];
-            let (xj, zj) = self.vertices[j];
-            if (zi > z) != (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi {
-                inside = !inside;
-            }
-            j = i;
-        }
-        inside
+        point_in_ring(&self.vertices, x, z)
     }
 
     pub fn in_square(&self, x: f64, z: f64) -> bool {
@@ -487,11 +894,33 @@ impl SiegeWorks {
         }
     }
 
-    /// The standing house (not a burnt ruin) whose disc (plus `margin`)
-    /// contains (x, z).
+    /// The standing house (not a burnt ruin) whose block (BR3: its
+    /// rectangle, grown by `margin`) contains (x, z).
     pub fn house_at(&self, x: f64, z: f64, margin: f64) -> Option<usize> {
         self.houses.iter().position(|h| {
-            h.standing() && (x - h.x).powi(2) + (z - h.z).powi(2) < (h.radius + margin).powi(2)
+            if !h.standing() {
+                return false;
+            }
+            let f = h.footprint();
+            (x - h.x).hypot(z - h.z) < f.bounding_radius() + margin.max(0.0)
+                && f.contains(x, z, margin)
+        })
+    }
+
+    /// BR3: props that stop the regiments (the stalls, carts and barrels of
+    /// the market square; the well and the props against the houses only
+    /// stop the figures — the latter stand in the houses' clearance).
+    pub fn path_props(&self) -> impl Iterator<Item = &Prop> {
+        self.standing_props()
+            .filter(|p| p.on_square() && p.kind != crate::town::PropKind::Well)
+    }
+
+    /// BR3: a path-blocking prop (grown by `margin`) contains (x, z).
+    pub fn prop_at(&self, x: f64, z: f64, margin: f64) -> bool {
+        self.path_props().any(|p| {
+            let f = p.footprint();
+            (x - p.x).hypot(z - p.z) < f.bounding_radius() + margin.max(0.0)
+                && f.contains(x, z, margin)
         })
     }
 

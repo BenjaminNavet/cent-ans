@@ -1,0 +1,12 @@
+{
+  "id": "cdx_siege_de_dunbar",
+  "title": "Le siège de Dunbar (1338)",
+  "category": "bataille",
+  "aliases": ["siège de Dunbar", "château de Dunbar"],
+  "era": { "from": "1338", "to": "1338" },
+  "summary": "Du 13 janvier au 10 juin 1338, le comte de Salisbury assiège en vain le château de Dunbar, que défend la comtesse Agnès Randolph. L'échec, coûteux, montre qu'Édouard III ne peut mener à la fois la conquête de l'Écosse et la guerre contre la France.",
+  "body": "Le château de Dunbar, bâti sur des rochers battus par la mer du Nord, garde la route côtière entre l'Angleterre et Édimbourg. En 1338, il appartient à Patrick, comte de March, rallié au parti du jeune roi [[cdx_david_ii|David II]], alors en exil à [[cdx_chateau_gaillard|Château-Gaillard]]. En son absence, sa femme Agnès Randolph, [[cdx_black_agnes|Black Agnes]], commande la garnison.\n\nLe 13 janvier 1338, William Montagu, comte de Salisbury, l'un des plus proches compagnons d'[[cdx_edouard_iii|Édouard III]], met le siège devant la place, bientôt rejoint par le comte d'Arundel. Les Anglais dressent des engins qui battent les murs de pierres ; ils approchent une « truie », galerie couverte qui doit abriter les sapeurs, mais un bloc lancé du rempart la brise. Pour couper le château de la mer, Édouard III loue des galères génoises ; une nuit pourtant, Alexander Ramsay de Dalhousie se glisse jusqu'à la poterne avec des barques et fait entrer vivres et renforts.\n\nLes chroniqueurs écossais du XVe siècle, Andrew de Wyntoun et Walter Bower, ont embelli le récit : la comtesse faisant épousseter ses créneaux après chaque volée, Salisbury menaçant de pendre sous les murs le frère d'Agnès, le comte de Moray, prisonnier des Anglais, et s'entendant répondre que sa mort ferait d'elle l'héritière du comté. Ces anecdotes, célèbres, ne sont pas attestées par des sources contemporaines et doivent être lues comme la légende d'une héroïne nationale.\n\nLe 10 juin 1338, après près de cinq mois, Salisbury lève le siège : son roi a besoin de ses hommes et de son argent pour la campagne qu'il prépare aux Pays-Bas contre [[cdx_philippe_vi|Philippe VI]]. L'Écosse, soutenue par la France au nom de l'alliance franco-écossaise, échappe ainsi à la conquête, et le front du Nord reste pour l'Angleterre une charge permanente.",
+  "entity": "evt_siege_de_dunbar",
+  "see_also": ["cdx_black_agnes", "cdx_ecosse", "cdx_david_ii", "cdx_edouard_balliol", "cdx_jeu_siege"],
+  "sources": ["Siege of Dunbar (1338) (en)", "Agnes Randolph (en)", "Château de Dunbar"]
+}
