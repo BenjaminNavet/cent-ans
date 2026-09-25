@@ -96,6 +96,27 @@ Série non plafonnée, avant cette fusion (4 paires alternées, machine chargée
 44,7 / 81,4 / 43,3 et Normale 35,1 / 44,6 / 37,7 / 54,7. Parité hors la passe aberrante à 81,4.
 Sans rendu (headless), les deux configs tournent à 135,7 FPS : BV1 n'a pas de coût CPU mesurable.
 
+## Fusion avec BV2 (main `abc03449`)
+- Cœur : `shot.rs`/`ShotEvent` (BV1) et `impact.rs`/`loss_cause` (BV2) coexistent dans `sim.rs`.
+  Tous les tests passent, goldens compris (`b6.rs`, etc.), sans aucune empreinte recalculée :
+  les événements de tir ne changent aucune règle.
+- Réglage `battle/blood` : une seule définition (`settings.gd`), dans l'onglet « Bataille » de BV1.
+  La bataille lit le niveau comme BV2 (`BattleGore.blood_level()`, `--blood=off|moderate|full|0|1|2`).
+- Taille des unités : `battle_soldiers.gd` de BV2 dérive déjà `_unit_scale` de `figures / soldiers` ;
+  cadavres, renversés et places vides suivent le nombre de figurines.
+- Une seule source par événement de sang : chaque mort passe par `corpse_fallen`. La gerbe
+  (gouttes) revient à BV2 (`BattleGore`), la flaque persistante et les éclaboussures au sol
+  (réglage complet) à BV1 (`BattleBlood.on_corpse`). Les pertes en mêlée et les touches de volées
+  ne produisent plus rien de leur côté (`corpse_driven`). BV1 garde seul les traînées des
+  fuyards. Avec `--no-bv2`, BV1 reprend son ancien chemin.
+- Traits dans les corps : un mort par flèche ou par carreau reçoit 1 à 3 traits dans la couche
+  statique (`BattleVolleys.on_corpse`).
+- Vérifications : fmt, clippy, cargo test, `core/build.sh`, import, `bv1_check`, smoke
+  (24 « smoke OK », 0 erreur). Capture `fusion_bv2_melee_sang.png`.
+- Limite : dans la démo, la mêlée se joue dans la rivière, sans flaque. Sur la prairie, l'herbe
+  haute masque en partie les décalques plats (à revoir : décalque au-dessus de l'herbe, ou
+  herbe couchée sous les corps).
+
 ## Captures (`docs/audit/captures/bv1/`)
 `avant_bataille_volee` / `apres_bataille_volee` (`--shot-at=59 --camera=600,360,45,200`, avec ou
 sans `--no-bv1`) ; `taille_normale` / `taille_ultra` (`--shot-at=50 --camera=640,470,70,200`) ;

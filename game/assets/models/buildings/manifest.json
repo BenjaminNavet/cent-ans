@@ -1,0 +1,458 @@
+{
+ "barn_0": {
+  "depth": 8.14,
+  "height": 10.72,
+  "kind": "barn",
+  "length": 13.92,
+  "ruined": false,
+  "triangles": 636
+ },
+ "barn_1": {
+  "depth": 8.43,
+  "height": 10.49,
+  "kind": "barn",
+  "length": 13.43,
+  "ruined": false,
+  "triangles": 434
+ },
+ "barn_2": {
+  "depth": 7.67,
+  "height": 9.94,
+  "kind": "barn",
+  "length": 14.91,
+  "ruined": false,
+  "triangles": 562
+ },
+ "barn_ruin_0": {
+  "depth": 7.53,
+  "height": 1.6,
+  "kind": "barn",
+  "length": 17.52,
+  "ruined": true,
+  "triangles": 583
+ },
+ "barrels_0": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 2.53,
+  "ruined": false,
+  "triangles": 440
+ },
+ "barrels_1": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 2.54,
+  "ruined": false,
+  "triangles": 172
+ },
+ "barrels_2": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 1.89,
+  "ruined": false,
+  "triangles": 248
+ },
+ "cart_0": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 610
+ },
+ "cart_1": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 322
+ },
+ "cart_2": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 322
+ },
+ "cart_3": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 338
+ },
+ "church_0": {
+  "depth": 8.0,
+  "height": 21.61,
+  "kind": "church",
+  "length": 19.0,
+  "ruined": false,
+  "triangles": 1140
+ },
+ "church_1": {
+  "depth": 8.5,
+  "height": 24.87,
+  "kind": "church",
+  "length": 21.0,
+  "ruined": false,
+  "triangles": 1160
+ },
+ "church_2": {
+  "depth": 13.0,
+  "height": 34.57,
+  "kind": "church",
+  "length": 36.0,
+  "ruined": false,
+  "triangles": 1628
+ },
+ "cottage_0": {
+  "depth": 5.61,
+  "height": 7.23,
+  "kind": "cottage",
+  "length": 8.9,
+  "ruined": false,
+  "triangles": 1458
+ },
+ "cottage_1": {
+  "depth": 5.01,
+  "height": 7.02,
+  "kind": "cottage",
+  "length": 7.93,
+  "ruined": false,
+  "triangles": 578
+ },
+ "cottage_2": {
+  "depth": 5.22,
+  "height": 7.12,
+  "kind": "cottage",
+  "length": 10.05,
+  "ruined": false,
+  "triangles": 636
+ },
+ "cottage_3": {
+  "depth": 5.33,
+  "height": 6.09,
+  "kind": "cottage",
+  "length": 10.32,
+  "ruined": false,
+  "triangles": 454
+ },
+ "cottage_4": {
+  "depth": 6.18,
+  "height": 6.98,
+  "kind": "cottage",
+  "length": 7.97,
+  "ruined": false,
+  "triangles": 544
+ },
+ "cottage_5": {
+  "depth": 5.49,
+  "height": 6.93,
+  "kind": "cottage",
+  "length": 8.84,
+  "ruined": false,
+  "triangles": 1348
+ },
+ "cottage_ruin_0": {
+  "depth": 5.92,
+  "height": 2.7,
+  "kind": "cottage",
+  "length": 8.37,
+  "ruined": true,
+  "triangles": 355
+ },
+ "cottage_ruin_1": {
+  "depth": 5.59,
+  "height": 2.7,
+  "kind": "cottage",
+  "length": 8.09,
+  "ruined": true,
+  "triangles": 355
+ },
+ "hall_0": {
+  "depth": 13.85,
+  "height": 11.11,
+  "kind": "hall",
+  "length": 18.97,
+  "ruined": false,
+  "triangles": 1846
+ },
+ "longere_0": {
+  "depth": 6.02,
+  "height": 6.94,
+  "kind": "longere",
+  "length": 16.4,
+  "ruined": false,
+  "triangles": 803
+ },
+ "longere_1": {
+  "depth": 5.98,
+  "height": 7.43,
+  "kind": "longere",
+  "length": 18.99,
+  "ruined": false,
+  "triangles": 798
+ },
+ "longere_2": {
+  "depth": 6.39,
+  "height": 7.51,
+  "kind": "longere",
+  "length": 14.42,
+  "ruined": false,
+  "triangles": 787
+ },
+ "longere_ruin_0": {
+  "depth": 5.99,
+  "height": 2.7,
+  "kind": "longere",
+  "length": 18.99,
+  "ruined": true,
+  "triangles": 571
+ },
+ "manor_0": {
+  "depth": 7.95,
+  "height": 23.38,
+  "kind": "manor",
+  "length": 20.48,
+  "ruined": false,
+  "triangles": 2647
+ },
+ "stall_0": {
+  "depth": 1.79,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.34,
+  "ruined": false,
+  "triangles": 524
+ },
+ "stall_1": {
+  "depth": 1.84,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.17,
+  "ruined": false,
+  "triangles": 342
+ },
+ "stall_2": {
+  "depth": 1.69,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.19,
+  "ruined": false,
+  "triangles": 288
+ },
+ "stall_3": {
+  "depth": 1.73,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 2.78,
+  "ruined": false,
+  "triangles": 440
+ },
+ "stall_4": {
+  "depth": 1.72,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.36,
+  "ruined": false,
+  "triangles": 524
+ },
+ "stonehouse_0": {
+  "depth": 7.35,
+  "height": 11.87,
+  "kind": "stonehouse",
+  "length": 13.28,
+  "ruined": false,
+  "triangles": 1932
+ },
+ "stonehouse_1": {
+  "depth": 8.41,
+  "height": 11.31,
+  "kind": "stonehouse",
+  "length": 11.94,
+  "ruined": false,
+  "triangles": 1546
+ },
+ "stonehouse_2": {
+  "depth": 8.41,
+  "height": 12.22,
+  "kind": "stonehouse",
+  "length": 12.85,
+  "ruined": false,
+  "triangles": 1589
+ },
+ "stonehouse_ruin_0": {
+  "depth": 8.44,
+  "height": 3.2,
+  "kind": "stonehouse",
+  "length": 11.93,
+  "ruined": true,
+  "triangles": 487
+ },
+ "timber_0": {
+  "depth": 6.83,
+  "height": 11.11,
+  "kind": "timber",
+  "length": 10.74,
+  "ruined": false,
+  "triangles": 4286
+ },
+ "timber_1": {
+  "depth": 7.33,
+  "height": 10.81,
+  "kind": "timber",
+  "length": 11.6,
+  "ruined": false,
+  "triangles": 3246
+ },
+ "timber_2": {
+  "depth": 7.78,
+  "height": 12.23,
+  "kind": "timber",
+  "length": 9.11,
+  "ruined": false,
+  "triangles": 3868
+ },
+ "timber_3": {
+  "depth": 7.92,
+  "height": 11.16,
+  "kind": "timber",
+  "length": 11.59,
+  "ruined": false,
+  "triangles": 3416
+ },
+ "timber_4": {
+  "depth": 7.33,
+  "height": 11.11,
+  "kind": "timber",
+  "length": 11.46,
+  "ruined": false,
+  "triangles": 4528
+ },
+ "timber_5": {
+  "depth": 7.85,
+  "height": 10.93,
+  "kind": "timber",
+  "length": 11.67,
+  "ruined": false,
+  "triangles": 3421
+ },
+ "timber_ruin_0": {
+  "depth": 7.25,
+  "height": 3.2,
+  "kind": "timber",
+  "length": 11.37,
+  "ruined": true,
+  "triangles": 451
+ },
+ "timber_ruin_1": {
+  "depth": 7.05,
+  "height": 3.2,
+  "kind": "timber",
+  "length": 8.26,
+  "ruined": true,
+  "triangles": 379
+ },
+ "townhouse_0": {
+  "depth": 11.74,
+  "height": 13.95,
+  "kind": "townhouse",
+  "length": 7.03,
+  "ruined": false,
+  "triangles": 3994
+ },
+ "townhouse_1": {
+  "depth": 11.58,
+  "height": 10.56,
+  "kind": "townhouse",
+  "length": 5.65,
+  "ruined": false,
+  "triangles": 2096
+ },
+ "townhouse_2": {
+  "depth": 11.72,
+  "height": 13.75,
+  "kind": "townhouse",
+  "length": 6.13,
+  "ruined": false,
+  "triangles": 4240
+ },
+ "townhouse_3": {
+  "depth": 10.05,
+  "height": 10.12,
+  "kind": "townhouse",
+  "length": 5.55,
+  "ruined": false,
+  "triangles": 3474
+ },
+ "townhouse_4": {
+  "depth": 9.76,
+  "height": 10.57,
+  "kind": "townhouse",
+  "length": 5.88,
+  "ruined": false,
+  "triangles": 3108
+ },
+ "townhouse_5": {
+  "depth": 10.04,
+  "height": 11.84,
+  "kind": "townhouse",
+  "length": 6.92,
+  "ruined": false,
+  "triangles": 3224
+ },
+ "townhouse_ruin_0": {
+  "depth": 11.02,
+  "height": 5.75,
+  "kind": "townhouse",
+  "length": 5.89,
+  "ruined": true,
+  "triangles": 907
+ },
+ "townhouse_ruin_1": {
+  "depth": 11.81,
+  "height": 3.2,
+  "kind": "townhouse",
+  "length": 5.8,
+  "ruined": true,
+  "triangles": 427
+ },
+ "well_0": {
+  "depth": 2.2,
+  "height": 3.4,
+  "kind": "well",
+  "length": 2.2,
+  "ruined": false,
+  "triangles": 118
+ },
+ "windmill_0": {
+  "depth": 7.0,
+  "height": 14.53,
+  "kind": "windmill",
+  "length": 7.0,
+  "ruined": false,
+  "triangles": 506
+ },
+ "woodpile_0": {
+  "depth": 1.5,
+  "height": 0.9,
+  "kind": "woodpile",
+  "length": 2.93,
+  "ruined": false,
+  "triangles": 497
+ },
+ "woodpile_1": {
+  "depth": 1.5,
+  "height": 0.9,
+  "kind": "woodpile",
+  "length": 3.42,
+  "ruined": false,
+  "triangles": 497
+ }
+}

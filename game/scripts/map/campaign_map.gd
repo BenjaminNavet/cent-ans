@@ -71,6 +71,7 @@ var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
+var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -151,6 +152,10 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	# U1 : objectifs et aide dans la pile des panneaux (exclusifs, Échap).
+	ui.register_panel(victory.panel, PanelStack.Kind.CENTRAL)
+	ui.register_panel(victory.end_dialog, PanelStack.Kind.MODAL)
+	ui.register_panel(help.panel, PanelStack.Kind.CENTRAL)
 	flow = FlowController.new()  # F3
 	add_child(flow)
 	flow.setup(self)
@@ -196,6 +201,10 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+	life = CampaignLife.new()  # CV1
+	life.name = "CampaignLife"
+	add_child(life)
+	life.setup(self)
 
 
 ## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
@@ -286,6 +295,8 @@ func refresh_all() -> void:
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
 	if settlement_layer != null:  # C6
 		settlement_layer.refresh(sim, SimFacade.faction_color)
+	if life != null:  # CV1
+		life.refresh(sim)
 	if minimap_ctl != null:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
@@ -305,15 +316,20 @@ func refresh_all() -> void:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
 		_show_faction_panel(_faction_panel_id)
+	# U1 : un panneau fermé (×, Échap, exclusivité) ne se rouvre pas au rafraîchissement.
+	_court_open = _court_open and ui.court_panel_visible()
 	if _court_open:
 		_show_court_panel()
-	if _open_character_id != "":
+	if _open_character_id != "" and ui.character_sheet.visible:
 		_show_character_sheet(_open_character_id)
+	else:
+		_open_character_id = ""
 	if diplomacy != null:
 		diplomacy.refresh()
 	if chronicle != null:  # M10
 		chronicle.refresh()
 	_refresh_research()  # M6
+	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
 		_show_tech_panel()
 	if flow != null:  # F3
@@ -904,6 +920,8 @@ func _on_load(path: String) -> void:
 	ui.hide_province()
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (partie chargée)" % sim.call("get_date_label"))
+	if life != null:  # CV1 : relire saison, dévastation et croissance de la partie chargée
+		life.invalidate()
 	refresh_all()
 	ui.show_toast("Partie chargée.")
 
@@ -924,6 +942,8 @@ func _process(_delta: float) -> void:
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+	if life != null:  # CV1
+		life.update_view(distance)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
@@ -1040,6 +1060,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_city()
 				"faction":
 					_stage_screenshot_faction()
+				"budget":  # U3 : budget et courbe du trésor après quelques saisons
+					_stage_screenshot_budget()
 				"court":
 					_stage_screenshot_court()
 				"skills":
@@ -1231,6 +1253,19 @@ func _stage_screenshot_faction() -> void:
 	_ensure_city_capable_sim()
 	_focus_capital()
 	ui.hide_province()
+	_show_faction_panel(player_faction)
+
+
+## Mise en scène « budget » (lot U3) : six saisons jouées, puis le panneau de faction (tableau
+## du budget avec la saison passée et l'écart, courbe du trésor).
+func _stage_screenshot_budget() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.hide_province()
+	selected_index = 0
+	for _i in 6:
+		sim.call("end_turn")
+	refresh_all()
 	_show_faction_panel(player_faction)
 
 

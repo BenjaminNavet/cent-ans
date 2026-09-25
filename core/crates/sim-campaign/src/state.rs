@@ -500,6 +500,11 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
+    // ----- UI audit A3, lot U3: budget history ------------------------------
+    /// Last resolved seasons of the purse, oldest first (at most
+    /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub budget_history: Vec<crate::economy_balance::BudgetRecord>,
 }
 
 fn default_faction_loyalty() -> u8 {

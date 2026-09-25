@@ -66,7 +66,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 	if int(summary.get("treasury", 0)) < 0:
 		result.append({
 			"id": "debt", "kind": "debt", "severity": "danger",
-			"text": "Trésor endetté : %s ℔" % _thousands(int(summary.get("treasury", 0))),
+			"text": "Trésor endetté : %s" % Money.amount(int(summary.get("treasury", 0))),
 			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l'impôt.",
 		})
 	if sim.has_method("get_research") and sim.has_method("get_tech_tree"):
@@ -119,7 +119,7 @@ static func ransom_alerts(sim: Object) -> Array:
 			"id": "captive:%s" % str(captive.get("character", "")), "kind": "ransom", "glyph": style["glyph"],
 			"severity": "warning", "character_id": str(captive.get("character", "")),
 			"text": "%s est captif de %s" % [str(captive.get("name", "")), _faction_name(str(captive.get("captor", "")))],
-			"tooltip": "Rançon : %s ℔. Payer depuis le panneau de faction → Captifs et rançons." % _thousands(int(captive.get("ransom", 0))),
+			"tooltip": "Rançon : %s. Payer depuis le panneau de faction → Captifs et rançons." % Money.amount(int(captive.get("ransom", 0))),
 		})
 	var turn := int(sim.call("get_turn")) if sim.has_method("get_turn") else 0
 	for debt in ransoms.get("debts", []):
@@ -128,8 +128,8 @@ static func ransom_alerts(sim: Object) -> Array:
 		result.append({
 			"id": "ransom_due:%s" % str(debt.get("character", "")), "kind": "ransom", "glyph": style["glyph"],
 			"severity": "danger" if int(debt.get("missed", 0)) > 0 else "warning",
-			"text": "Échéance de rançon : %s ℔ dus à %s" % [_thousands(int(debt.get("installment", 0))), _faction_name(str(debt.get("creditor", "")))],
-			"tooltip": "Rançon de %s, reste %s ℔. Sans trésor suffisant, la dette grossit de 10 %%." % [str(debt.get("name", "")), _thousands(int(debt.get("remaining", 0)))],
+			"text": "Échéance de rançon : %s dus à %s" % [Money.amount(int(debt.get("installment", 0))), _faction_name(str(debt.get("creditor", "")))],
+			"tooltip": "Rançon de %s, reste %s. Sans trésor suffisant, la dette grossit de 10 %%." % [str(debt.get("name", "")), Money.amount(int(debt.get("remaining", 0)))],
 		})
 	return result
 

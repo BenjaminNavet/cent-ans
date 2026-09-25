@@ -313,6 +313,13 @@ func _build_soldier_layers() -> void:
 	blood.figure_scale = effects.volleys.figure_scale
 	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
 	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
+	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
+	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.
+	if soldiers.bv2_enabled and not _no_bv1:
+		blood.corpse_driven = true
+		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
+			blood.on_corpse(pos, side, kind, cause, _camera_position())
+			effects.volleys.on_corpse(pos, side, kind, cause))
 
 
 ## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
@@ -326,8 +333,7 @@ func _unit_size() -> float:
 func _blood_level() -> int:
 	if _blood_override >= 0:
 		return _blood_override
-	var settings := get_node_or_null("/root/Settings")
-	return int(settings.call("get_value", "battle/blood")) if settings != null else BattleBlood.MODERATE
+	return BattleGore.blood_level()  # même lecture que BV2 (`--blood=off|moderate|full|0|1|2`)
 
 
 func _camera_position() -> Vector3:
@@ -1061,7 +1067,8 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--unit-size="):
 			_unit_size_override = float(arg.trim_prefix("--unit-size="))
 		elif arg.begins_with("--blood="):
-			_blood_override = int(arg.trim_prefix("--blood="))
+			var value := arg.trim_prefix("--blood=")
+			_blood_override = ["off", "moderate", "full"].find(value) if not value.is_valid_int() else clampi(int(value), 0, 2)
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
