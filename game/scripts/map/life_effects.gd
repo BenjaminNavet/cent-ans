@@ -36,6 +36,8 @@ var _fire_material: ShaderMaterial
 var _chimney_points: Array = []
 var _fire_points: Array = []
 var _reground_timer := -1.0
+var _reground_chunks: Dictionary = {}
+var _last_rebuild_key := ""
 var _windmill_bodies: MultiMeshInstance3D
 var _windmill_sails: MultiMeshInstance3D
 ## Moulins : [Vector2 px, lacet, graine, tourne (bool)].
@@ -91,6 +93,13 @@ func _make_instance(node_name: String, material: ShaderMaterial) -> MultiMeshIns
 func rebuild(province_states: Dictionary) -> void:
 	if _layer == null or _layer.data == null:
 		return
+	# PB1 : `CampaignLife` rappelle `rebuild` dès qu'un palier de population change ; les effets
+	# ne dépendent que de la dévastation, des sièges, de la taille des maquettes et des hameaux
+	# brûlés. Mêmes entrées → mêmes effets : rien à reconstruire.
+	var key := _rebuild_key(province_states)
+	if key == _last_rebuild_key:
+		return
+	_last_rebuild_key = key
 	_chimney_points.clear()
 	_fire_points.clear()
 	var data := _layer.data
@@ -126,6 +135,38 @@ func rebuild(province_states: Dictionary) -> void:
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
 	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size(), "windmills": _windmill_points.size(), "ruins": _ruin.size()}
+
+
+## Entrées effectives de `rebuild` : sièges, seuils de dévastation (feux, moulins, ruines),
+## palier de ruine par colonie (seul `_overlay_for` le lit, par paliers de 0,2), taille et
+## maquette affichée des colonies, hameaux brûlés.
+func _rebuild_key(province_states: Dictionary) -> String:
+	var data := _layer.data
+	var parts := PackedStringArray()
+	for i in data.settlements.size():
+		var entry: Dictionary = data.settlements[i]
+		var state: Dictionary = province_states.get(str(entry["province"]), {})
+		var devastation := float(state.get("devastation", 0.0))
+		var kind := str(entry["kind"])
+		var amount := 0.0
+		if kind == "village" or kind == "abbey":
+			amount = clampf((devastation - RUIN_MIN_DEVASTATION + 10.0) / 50.0, 0.0, 0.85)
+		elif devastation >= RUIN_MIN_DEVASTATION:
+			amount = clampf((devastation - RUIN_MIN_DEVASTATION) / 120.0, 0.0, 0.35)
+		var siege := bool(state.get("siege", false))
+		if siege:
+			amount = maxf(amount, 0.3)
+		var holder := _layer.model_holder(i)
+		var model_id := holder.get_child(0).get_instance_id() if holder != null and holder.get_child_count() > 0 else 0
+		parts.append("%d%d%d%d%d:%s:%s:%d" % [int(siege), int(devastation >= FIRE_MIN_DEVASTATION),
+			int(devastation >= RUIN_MIN_DEVASTATION), int(amount > 0.0), int(round(amount * 5.0)),
+			_layer.model_radius(i), _layer.model_top(i), model_id])
+	var burned := PackedByteArray()
+	burned.resize(data.hamlets.size())
+	for h in data.hamlets.size():
+		var devastation := float(province_states.get(str(data.hamlets[h]["province"]), {}).get("devastation", 0.0))
+		burned[h] = (2 if _layer.hamlet_burned(h) else 0) + (1 if devastation >= FIRE_MIN_DEVASTATION else 0)
+	return "%s|%s" % [",".join(parts), Marshalls.raw_to_base64(burned)]
 
 
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
@@ -268,9 +309,15 @@ func _ground(point: Array) -> Vector3:
 	return Vector3(px.x, y + float(point[1]), px.y)
 
 
+## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
+## la hauteur d'un point ne dépend que de sa tuile.
 func _reground() -> void:
+	var changed := _reground_chunks
+	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
 		for n in _windmill_points.size():
+			if not _point_changed(_windmill_points[n], changed):
+				continue
 			var xforms := _windmill_transforms(_windmill_points[n])
 			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
@@ -279,13 +326,38 @@ func _reground() -> void:
 		var points: Array = pair[1]
 		if mmi.multimesh == null:
 			continue
+		# Tampon complet lu et écrit une fois (12 flottants de transformation + 4 de données
+		# personnalisées par instance ; hauteur de l'origine au rang 7) plutôt que deux appels au
+		# serveur de rendu par point.
+		var buffer := mmi.multimesh.buffer
+		var stride := 16
+		if buffer.size() != points.size() * stride:
+			# Rendu factice (headless) : pas de tampon lisible, repli point par point.
+			for n in points.size():
+				if _point_changed(points[n], changed):
+					var xform := mmi.multimesh.get_instance_transform(n)
+					xform.origin = _ground(points[n])
+					mmi.multimesh.set_instance_transform(n, xform)
+			continue
+		var touched := false
 		for n in points.size():
-			var xform := mmi.multimesh.get_instance_transform(n)
-			xform.origin = _ground(points[n])
-			mmi.multimesh.set_instance_transform(n, xform)
+			if not _point_changed(points[n], changed):
+				continue
+			buffer[n * stride + 7] = _ground(points[n]).y
+			touched = true
+		if touched:
+			mmi.multimesh.buffer = buffer
 
 
-func _on_surface_changed(_index: int) -> void:
+func _point_changed(point: Array, changed: Dictionary) -> bool:
+	if _terrain == null:
+		return true
+	var px: Vector2 = point[0]
+	return changed.has(_terrain.chunk_index_at(px.x, px.y))
+
+
+func _on_surface_changed(index: int) -> void:
+	_reground_chunks[index] = true
 	if _reground_timer < 0.0:
 		_reground_timer = 0.4
 
