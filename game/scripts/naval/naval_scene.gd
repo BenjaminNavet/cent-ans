@@ -376,7 +376,7 @@ func _on_events(events: Array) -> void:
 				_play("war_cry", pos)
 				_play("contact", pos)
 			"capture":
-				lines.append(["%s est pris !" % name_cap, bad if ours else good])
+				lines.append(["Prise %s !" % _de(name_text), bad if ours else good])
 				_play("rout_cry", pos)
 			"ignite":
 				lines.append(["Le feu prend à bord de %s." % name_text, bad if ours else good])
@@ -403,6 +403,15 @@ func _on_events(events: Array) -> void:
 				lines.append(["%s coupe les grappins." % name_cap, BattleUiKit.INK_SOFT])
 	if not lines.is_empty():
 		hud.add_log(lines)
+
+
+## « de » + nom de navire avec article : du Thomas, de la Rose, de l'Édouard.
+static func _de(name: String) -> String:
+	if name.begins_with("le "):
+		return "du " + name.substr(3)
+	if name.begins_with("les "):
+		return "des " + name.substr(4)
+	return "de " + name
 
 
 func _play(event_name: String, at: Vector3) -> void:
@@ -696,6 +705,27 @@ func _apply_camera_view() -> void:
 			best = weight
 			var view: NavalShipView = views[int(ship["id"])]
 			focus = view.global_position
+	# Abordage : milieu de la paire grappinée la plus fournie, vue de travers.
+	var pair_yaw := camera_rig.yaw + 0.9
+	if _camera_view == "melee":
+		var most := -1.0
+		for ship in ships:
+			var grappled: PackedInt32Array = ship.get("grappled", PackedInt32Array())
+			if grappled.is_empty() or not by_id.has(int(grappled[0])):
+				continue
+			var a: NavalShipView = views[int(ship["id"])]
+			var b: NavalShipView = views[int(grappled[0])]
+			var men := float(ship["soldiers"]) + float(by_id[int(grappled[0])]["soldiers"])
+			if men > most:
+				most = men
+				focus = (a.global_position + b.global_position) * 0.5
+				var line := b.global_position - a.global_position
+				var perp := Vector3(-line.z, 0.0, line.x).normalized()
+				# Du côté de la caméra actuelle (pas à travers le reste de la flotte).
+				var current := Vector3(sin(camera_rig.yaw), 0.0, cos(camera_rig.yaw))
+				if perp.dot(current) < 0.0:
+					perp = -perp
+				pair_yaw = atan2(perp.x, perp.z) + 0.35
 	match _camera_view:
 		"overview":
 			camera_rig.look_at_point(focus, 420.0, camera_rig.yaw)
@@ -704,7 +734,7 @@ func _apply_camera_view() -> void:
 		"deck":
 			camera_rig.look_at_point(focus + Vector3(0, 4, 0), 24.0, camera_rig.yaw + 1.2)
 		"melee":
-			camera_rig.look_at_point(focus, 38.0, camera_rig.yaw + 0.9)
+			camera_rig.look_at_point(focus + Vector3(0, 3, 0), 85.0, pair_yaw)
 		_:
 			camera_rig.look_at_point(focus, 140.0, camera_rig.yaw + 0.4)
 
