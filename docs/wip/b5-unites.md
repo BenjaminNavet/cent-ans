@@ -14,11 +14,12 @@ d'après `data/` et `core/crates` ; audit historique des JSON dans
 - [x] Fiches technologies (45) : 29 nouvelles + 16 enrichies (tech_aqua_vitae passe de cdx_romarin à cdx_eau_de_vie)
 - [x] Sources génériques des technologies remplacées, notes d'années corrigées
 - [x] Audit écrit (`docs/histoire/audit-2026-09-25-unites.md`) + corrections JSON unités/navires + liens dans les descriptions
-- [ ] pytest, cargo test, relecture finale
+- [x] Validateur Codex vert (288 fiches), pytest vert (418)
+- [ ] cargo test (en cours)
 - [ ] Validateur Codex, pytest, cargo test
 
 ## Prochaine étape
-Tests (pytest, cargo test) puis rapport.
+Confirmer cargo test, puis fusion par l'orchestrateur. Coordination B4 : `cdx_jardin_des_simples`, `cdx_universite_paris`, `cdx_hotel_dieu` et `cdx_apothicaires` restent disponibles/déjà liés ; les technologies utilisent des fiches distinctes (`cdx_culture_des_simples`, `cdx_universites`, `cdx_hydraulique_medievale`, `cdx_moulin_a_pivot`, `cdx_fortification_artillerie`, `cdx_maconnerie_militaire`, `cdx_hygiene_urbaine`, `cdx_comptabilite_marchande`) sans alias de bâtiment.
 
 Générateur : les textes « En jeu » sont produits par un script (chiffres lus dans `data/`), constantes de règles relevées dans `core/crates` (capacités `sim-battle/src/sim.rs`, économie `sim-campaign/src/economy.rs`, recherche `research.rs`, naval `sim-battle/src/naval/`). Champs sans effet en jeu (non mentionnés) : `shield_wall`, `wall_breach` (capacité), `mercenary`, `recruit_time_turns`, `cost.resources`, `tier`, `cost` des navires.
 
