@@ -867,6 +867,8 @@ func _on_end_turn() -> void:
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	var events: Array = sim.call("end_turn")
+	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
+		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
@@ -879,7 +881,7 @@ func _on_end_turn() -> void:
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
 	for event in events:
-		if str(event.get("kind", "")) == "battle":
+		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
 	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison

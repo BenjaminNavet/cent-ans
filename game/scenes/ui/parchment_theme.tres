@@ -1,7 +1,9 @@
-[gd_resource type="Theme" load_steps=15 format=3 uid="uid://cent_ans_parchment_theme"]
+[gd_resource type="Theme" load_steps=17 format=3 uid="uid://cent_ans_parchment_theme"]
 
 [ext_resource type="FontFile" uid="uid://08eqnjqbuchh" path="res://assets/third_party/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf" id="1_garamond"]
 [ext_resource type="FontFile" uid="uid://drerjxjfsdmvt" path="res://assets/third_party/fonts/eb_garamond/EBGaramond-Italic-VariableFont_wght.ttf" id="2_garamond_italic"]
+[ext_resource type="FontFile" path="res://assets/third_party/fonts/noto/NotoSerif-Currency.ttf" id="3_noto_currency"]
+[ext_resource type="FontFile" path="res://assets/third_party/fonts/noto/NotoSansSymbols-Subset.ttf" id="4_noto_symbols"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 16.0
@@ -130,24 +132,28 @@ expand_margin_right = 2.0
 expand_margin_bottom = 2.0
 
 [sub_resource type="FontVariation" id="FontVariation_body"]
+fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols")])
 base_font = ExtResource("1_garamond")
 variation_opentype = {
 2003265652: 470
 }
 
 [sub_resource type="FontVariation" id="FontVariation_bold"]
+fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols")])
 base_font = ExtResource("1_garamond")
 variation_opentype = {
 2003265652: 650
 }
 
 [sub_resource type="FontVariation" id="FontVariation_italic"]
+fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols")])
 base_font = ExtResource("2_garamond_italic")
 variation_opentype = {
 2003265652: 470
 }
 
 [sub_resource type="FontVariation" id="FontVariation_bold_italic"]
+fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols")])
 base_font = ExtResource("2_garamond_italic")
 variation_opentype = {
 2003265652: 650

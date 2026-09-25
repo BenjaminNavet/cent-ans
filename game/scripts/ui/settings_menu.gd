@@ -172,6 +172,8 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
+		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
 
 
 func _build_game(grid: GridContainer) -> void:
