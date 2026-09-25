@@ -1,0 +1,40 @@
+{
+  "id": "unit_routiers",
+  "name": {
+    "display": "Routiers des Grandes Compagnies",
+    "local": "routiers",
+    "local_language": "ancien français"
+  },
+  "category": "infantry",
+  "source_class": "peasants",
+  "mercenary": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 720
+  },
+  "upkeep": 80,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 64,
+    "ranged": 0,
+    "range": 0,
+    "armor": 64,
+    "morale": 62,
+    "speed": 42,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall",
+    "dismount"
+  ],
+  "available_from": 1356,
+  "available_until": 1395,
+  "figure": "infantry_8",
+  "equipment": "Harnois dépareillé pris sur l'ennemi, bassinet, brigandine ou haubergeon, épée, lance raccourcie ou hache, rondache.",
+  "description": "Soudoyers démobilisés après Poitiers et Brétigny, organisés en compagnies (Brignais 1362) ; aguerris et chers, loyaux à la solde seulement, enrôlés en Castille par Du Guesclin (1365-1367).",
+  "sources": [
+    "Grandes Compagnies",
+    "Bataille de Brignais",
+    "K. Fowler, Medieval Mercenaries, I: The Great Companies, Blackwell, 2001"
+  ]
+}

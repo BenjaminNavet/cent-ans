@@ -1,0 +1,42 @@
+{
+  "id": "unit_gascon_crossbowmen",
+  "name": {
+    "display": "Arbalétriers gascons",
+    "local": "balestièrs",
+    "local_language": "gascon"
+  },
+  "category": "ranged",
+  "source_class": "burghers",
+  "soldiers": 100,
+  "cost": {
+    "money": 540
+  },
+  "upkeep": 48,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 40,
+    "ranged": 55,
+    "range": 190,
+    "armor": 38,
+    "morale": 52,
+    "speed": 45,
+    "ammo": 30
+  },
+  "abilities": [
+    "pavise",
+    "rain_penalty"
+  ],
+  "required_culture": [
+    "cul_occitan",
+    "cul_basque",
+    "cul_navarrese"
+  ],
+  "figure": "archer_4",
+  "equipment": "Arbalète à étrier ou à cranequin, carreaux, bassinet, haubergeon et jaque, braquemart ; pavois.",
+  "description": "Arbalétriers et piétons des villes et seigneuries de Guyenne, fournis au roi-duc anglais (sénéchaussée de Bordeaux) comme au comte de Foix ; réputés dans les garnisons du Sud-Ouest.",
+  "sources": [
+    "Guyenne (province)",
+    "M. Vale, The Angevin Legacy and the Hundred Years War 1250-1340, Blackwell, 1990",
+    "M. Vale, English Gascony 1399-1453, Oxford, 1970"
+  ]
+}

@@ -754,6 +754,17 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 		for culture in cultures:
 			names.append(str(culture).trim_prefix("cul_").replace("_", " "))
 		requires.append("Cultures : " + ", ".join(names))
+	var factions: Array = definition.get("required_faction", [])
+	if not factions.is_empty():
+		var faction_links := PackedStringArray()
+		for faction in factions:
+			faction_links.append(link(str(faction)))
+		requires.append("Factions : " + ", ".join(faction_links))
+	var period := RichTooltip.unit_period(definition)
+	if period != "":
+		requires.append("Époque : " + period)
+	if bool(definition.get("mercenary", false)):
+		requires.append("Mercenaires")
 	return _join([
 		_heading(entry_id, name_of(entry_id), subtitle, "unit"), _description(definition),
 		" · ".join(costs), _section("Caractéristiques", " · ".join(stat_lines)), "\n".join(traits),
