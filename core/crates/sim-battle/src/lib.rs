@@ -46,6 +46,7 @@ pub mod formation_ai;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
+pub mod missile_morale;
 pub mod naval;
 pub mod orders;
 pub mod outcome;

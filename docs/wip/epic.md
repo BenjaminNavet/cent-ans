@@ -37,9 +37,9 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 | EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **fusionné** 13506bf1 |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
 | EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **fusionné** 13506bf1 |
-| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | vague 2 |
+| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | en cours (repris 25/09 soir) |
 | EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | vague 2 |
-| EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | — | EP2 | vague 2 |
+| EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | 0055 | EP2 | **fusionné** 3805ef66 |
 
 ## Budget (plafond 20 $)
 Prévu : panoramas EP2 (≈ 12 images, ≈ 0,6 $), fonds de cartes historiques EP7 (≈ 0,3 $). Sons : banques
@@ -100,3 +100,10 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
 ## Prochaine étape
 Vague 2 : EP6 (villages et décor du champ), puis EP7 (Crécy, Poitiers, Azincourt) et EP8 (mise en
 scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
+
+### 25/09 soir
+- EP8 fusionné dans main (3805ef66) : heure du jour (`BattleSim::range_factor`, midi par défaut, donc
+  sans effet sur l'équilibre), fumées, poussière, caméra ; ADR 0055.
+- EP6 (villages) et EP9 (batailles décisives) coupés par le quota à 15 h 50, relancés depuis leur
+  `docs/wip/ep6-villages-decor.md` et `docs/wip/ep9-batailles-decisives.md`.
+- EP7 attend EP6 (API de placement explicite) et utilise `set_start_hour` d'EP8.

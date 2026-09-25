@@ -46,7 +46,8 @@
   "heat": {
     "radius_m": 8.0,
     "loss_per_s": 0.0015,
-    "morale_per_s": 0.5
+    "morale_per_s": 0.5,
+    "wall_walk_factor": 0.3
   },
   "smoke": {
     "min_intensity": 0.3,
