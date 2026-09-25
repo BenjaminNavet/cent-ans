@@ -15,6 +15,7 @@ mod separation;
 mod siege_assault;
 mod siege_extra;
 mod standards;
+mod time_of_day;
 mod water;
 
 pub use camp::CampState;
@@ -150,6 +151,10 @@ pub struct BattleSim {
     /// EP6: solid footprints of the decor by cell (derived data, reset by
     /// `field_mut`).
     decor_grid: std::cell::OnceCell<obstacles::DecorGrid>,
+    /// EP8: hour of the day when the battle began (the day moves on with
+    /// `elapsed`) and the phase last announced in the journal.
+    start_hour: f64,
+    day_phase: Option<String>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -412,6 +417,8 @@ impl BattleSim {
             drown_announced: Vec::new(),
             camp_states: Default::default(),
             decor_grid: Default::default(),
+            start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
+            day_phase: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -883,12 +890,13 @@ impl BattleSim {
         new
     }
 
-    /// Effective shooting range of `unit` (weather, height advantage).
+    /// Effective shooting range of `unit` (weather, time of day, height
+    /// advantage).
     pub fn effective_range(&self, unit: &Unit, target_x: f64, target_z: f64) -> f64 {
         let height_gain = (self.standing_height(unit, unit.x, unit.z)
             - self.field.height(target_x, target_z))
         .max(0.0);
-        f64::from(unit.stats.range) * self.weather.range_factor() * (1.0 + height_gain / 100.0)
+        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0)
     }
 
     pub(crate) fn log(&mut self, text_fr: String, side: Option<SideId>) {
@@ -1216,6 +1224,7 @@ impl BattleSim {
             unit.tick_losses = 0.0;
             unit.flanked = 0;
         }
+        self.advance_day();
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
@@ -2264,7 +2273,7 @@ impl BattleSim {
         if !unit.wall_breaker() || unit.target.is_some() {
             return None;
         }
-        let range = f64::from(unit.stats.range) * self.weather.range_factor();
+        let range = f64::from(unit.stats.range) * self.range_factor();
         let in_range = |p: usize| {
             let piece = &works.pieces[p];
             piece.intact()

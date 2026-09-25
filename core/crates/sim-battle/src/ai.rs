@@ -805,7 +805,7 @@ fn crossing_plan(view: &View, from: (f64, f64), line: &[usize]) -> Option<Crossi
         .iter()
         .map(|&i| view.units[i].extent().0)
         .fold(20.0, f64::max);
-    let weather = view.sim.weather().range_factor();
+    let weather = view.sim.range_factor();
     let foes: Vec<(f64, f64, f64)> = able
         .iter()
         .filter(|&&k| is_shooter(&view.units[k]))
@@ -1799,7 +1799,7 @@ const EXPOSURE_COST: f64 = 60.0;
 fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option<(f64, f64)> {
     let field = view.sim.field();
     let (u, t) = (&view.units[i], &view.units[j]);
-    let weather = view.sim.weather().range_factor();
+    let weather = view.sim.range_factor();
     let reach = f64::from(u.stats.range) * weather;
     let ht = field.height(t.x, t.z);
     let foes: Vec<(f64, f64, f64, f64)> = view
@@ -2347,7 +2347,7 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         });
     for &i in &engines {
         let unit = &units[i];
-        let range = f64::from(unit.stats.range) * view.sim.weather().range_factor();
+        let range = f64::from(unit.stats.range) * view.sim.range_factor();
         match target_piece {
             Some(p) if openings.len() < 2 => {
                 let d = works.pieces[p].distance(unit.x, unit.z);

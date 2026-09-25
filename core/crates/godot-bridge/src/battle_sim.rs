@@ -280,7 +280,11 @@ impl BattleSim {
             .map_err(|e| e.to_string())
         });
         match parsed {
-            Ok(sim) => {
+            Ok(mut sim) => {
+                // EP8: starting hour drawn by the campaign (`get_battle_setup`).
+                if let Some(hour) = setup.get("hour").and_then(|v| v.try_to::<f64>().ok()) {
+                    sim.set_start_hour(hour);
+                }
                 self.sim = Some(sim);
                 true
             }
@@ -289,6 +293,47 @@ impl BattleSim {
                 self.sim = None;
                 false
             }
+        }
+    }
+
+    /// EP8: starts the battle at `hour` (0-24), e.g. a quick battle setting.
+    #[func]
+    fn set_start_hour(&mut self, hour: f64) {
+        if let Some(sim) = &mut self.sim {
+            sim.set_start_hour(hour);
+        }
+    }
+
+    /// EP8: starts the battle in phase `key` (`dawn`, `morning`, `midday`,
+    /// `afternoon`, `dusk`); false if unknown.
+    #[func]
+    fn set_start_phase(&mut self, key: GString) -> bool {
+        let rules = sim_battle::TimeOfDayRules::bundled();
+        match (rules.start_hour_of(&key.to_string()), &mut self.sim) {
+            (Some(hour), Some(sim)) => {
+                sim.set_start_hour(hour);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// EP8: time of day now: `{hour, start_hour, key, label, visibility,
+    /// range_factor, minutes_per_second}` (empty before `setup`).
+    #[func]
+    fn get_time_of_day(&self) -> VarDictionary {
+        let Some(sim) = &self.sim else {
+            return VarDictionary::new();
+        };
+        let phase = sim.day_phase();
+        vdict! {
+            "hour" => sim.hour(),
+            "start_hour" => sim.start_hour(),
+            "key" => phase.key.as_str(),
+            "label" => phase.label.as_str(),
+            "visibility" => sim.visibility(),
+            "range_factor" => sim.range_factor(),
+            "minutes_per_second" => sim_battle::TimeOfDayRules::bundled().minutes_per_battle_second,
         }
     }
 
@@ -1269,7 +1314,21 @@ impl CampaignSim {
             return VarDictionary::new();
         };
         match state.battle_setup(data, index.max(0) as usize) {
-            Ok(setup) => to_dict(&setup),
+            Ok(setup) => {
+                let mut dict = to_dict(&setup);
+                // EP8: hour of the day drawn from the battle (turn, index,
+                // province), no random stream consumed.
+                let key = sim_battle::time_of_day::campaign_battle_key(
+                    state.turn(),
+                    index.max(0) as usize,
+                    &setup.province,
+                );
+                dict.set(
+                    "hour",
+                    sim_battle::TimeOfDayRules::bundled().campaign_hour(key),
+                );
+                dict
+            }
             Err(error) => {
                 godot_warn!("CampaignSim.get_battle_setup({index}): {error}");
                 VarDictionary::new()
