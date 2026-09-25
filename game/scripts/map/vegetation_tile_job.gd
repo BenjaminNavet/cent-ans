@@ -204,6 +204,18 @@ const HEDGE_TREE := 0.07
 
 func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 	var rect := Rect2(Vector2(origin_px), Vector2(size_px, size_px))
+	# PB1 : borne sûre de `hedge_probability` sur la tuile (croissante en culture et en bocage, et
+	# les valeurs interpolées restent entre celles de la grille) : un bord dont le tirage la
+	# dépasse n'est jamais planté ; on le saute sans calculer sa déformation (~98 % des candidats
+	# étaient rejetés après coup).
+	var crops_max := 0.0
+	var hedge_max := 0.0
+	for k in _crops.size():
+		crops_max = maxf(crops_max, _crops[k])
+		hedge_max = maxf(hedge_max, _hedge[k])
+	if crops_max < 0.2:
+		return
+	var p_max := VegetationFields.hedge_probability(crops_max, hedge_max)
 	# La déformation du repère déplace les lignes de ±2,3 px au plus.
 	var bounds := rect.grow(3.0)
 	for layout in VegetationFields.LAYOUTS.size():
@@ -241,14 +253,23 @@ func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 			var v := v_min
 			while v < range_v.x:
 				v += dv
-			var cur := VegetationFields.to_map(layout, line, v)
+			# Point courant réutilisé comme précédent du pas suivant ; recalculé seulement après un
+			# segment sauté (`to_map` est pure : mêmes valeurs).
+			var cur := Vector2.ZERO
+			var cur_ok := false
 			while v < range_v.y:
 				var next_v := v + dv
-				var nxt := VegetationFields.to_map(layout, line, next_v)
 				var roll := VegetationFields.roll_u_edge(layout, line, floori(v))
-				_hedge_point(raw, rng, rect, layout, roll, cur, nxt)
+				if roll < p_max:
+					if not cur_ok:
+						cur = VegetationFields.to_map(layout, line, v)
+					var nxt := VegetationFields.to_map(layout, line, next_v)
+					_hedge_point(raw, rng, rect, layout, roll, cur, nxt)
+					cur = nxt
+					cur_ok = true
+				else:
+					cur_ok = false
 				v = next_v
-				cur = nxt
 		# Bords de rangée : décalés d'une colonne à l'autre (jonctions en T). Même resserrement,
 		# avec une marge couvrant la largeur de la colonne (le tirage `u` varie sur
 		# `[column, column+1]`, pas un point unique comme pour les lignes ci-dessus).
@@ -268,6 +289,8 @@ func _scatter_hedges(raw: Array, rng: RandomNumberGenerator) -> void:
 			var row_hi := ceili(range_row.y + offset) + 2
 			for row in range(row_lo, row_hi):
 				var roll := VegetationFields.roll_v_edge(layout, row, column)
+				if roll >= p_max:
+					continue
 				var v_row := row - offset
 				var u := float(column) + du * 0.5
 				var cur := VegetationFields.to_map(layout, u, v_row)
@@ -295,10 +318,6 @@ static func _clip_linear(coeff: float, offset: float, lo: float, hi: float, cur_
 func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: int, roll: float, pos: Vector2, next: Vector2) -> void:
 	if not rect.has_point(pos):
 		return
-	# Tirages consommés avant tout test : semis identique quel que soit l'ordre des rejets.
-	var gap := rng.randf()
-	var tree := rng.randf()
-	var jitter := Vector2(rng.randf_range(-0.07, 0.07), rng.randf_range(-0.07, 0.07))
 	var gx := (pos.x - origin_px.x) / coarse_step
 	var gy := (pos.y - origin_px.y) / coarse_step
 	# Région interpolée sur la grille grossière (au lieu des 4 sinus de `region_value` exact) :
@@ -313,6 +332,11 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 		return
 	if roll >= VegetationFields.hedge_probability(crops, _lerp_grid(_hedge, gx, gy)):
 		return
+	# PB1 : tirages après les tests déterministes (les bords plantés ne dépendent que du tirage
+	# haché `roll`) ; trouées, arbres de haie et petites variations gardent leur loi.
+	var gap := rng.randf()
+	var tree := rng.randf()
+	var jitter := Vector2(rng.randf_range(-0.07, 0.07), rng.randf_range(-0.07, 0.07))
 	if gap < HEDGE_GAP:
 		return
 	if not exclusions.is_empty() and _excluded(pos.x, pos.y):
