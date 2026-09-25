@@ -199,13 +199,16 @@ impl CampaignSim {
                 .to_variant()
             })
             .collect();
-        let blocker = explanation.blocker.as_ref().map_or_else(VarDictionary::new, |b| {
-            vdict! {
-                "text" => b.text.as_str(),
-                "value" => i64::from(b.value),
-                "article" => index(b.article),
-            }
-        });
+        let blocker = explanation
+            .blocker
+            .as_ref()
+            .map_or_else(VarDictionary::new, |b| {
+                vdict! {
+                    "text" => b.text.as_str(),
+                    "value" => i64::from(b.value),
+                    "article" => index(b.article),
+                }
+            });
         let counter = explanation
             .counter
             .as_deref()
