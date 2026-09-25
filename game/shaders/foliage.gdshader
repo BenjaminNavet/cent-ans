@@ -17,7 +17,11 @@ uniform float wind_strength = 0.035;
 uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
 
+// Lot CV1 : saison (poids printemps, été, automne, hiver), voir season_visuals.gd.
+global uniform vec4 campaign_season;
+
 varying float v_ao;
+varying float v_seed;  // CV1
 varying vec3 v_tint;
 varying vec3 v_local;
 
@@ -56,16 +60,33 @@ void vertex() {
 	VERTEX *= keep;
 	v_ao = mix(0.55, 1.0, COLOR.a);
 	v_tint = INSTANCE_CUSTOM.rgb;
+	v_seed = seed;  // CV1
+}
+
+// Lot CV1 : feuillus roux et dorés à l'automne, nus (gris-brun, givrés) l'hiver ; résineux
+// (aiguilles, rapport R/V bas) et troncs inchangés, sinon un peu de neige sur le dessus.
+vec3 season_foliage(vec3 base, float seed, float up) {
+	vec4 w = campaign_season;
+	float ratio = base.r / max(base.g, 1e-3);
+	float leafy = smoothstep(0.55, 0.62, ratio) * (1.0 - smoothstep(1.0, 1.2, ratio));
+	vec3 spring = base * vec3(0.95, 1.2, 0.85);
+	vec3 autumn_leaf = seed < 0.4 ? vec3(0.30, 0.10, 0.02) : (seed < 0.75 ? vec3(0.34, 0.20, 0.03) : vec3(0.20, 0.16, 0.05));
+	vec3 autumn = mix(base, autumn_leaf * 0.85, leafy * 0.85);
+	vec3 winter = mix(base * 0.8, vec3(0.115, 0.098, 0.085), leafy);
+	vec3 col = mix(base, spring, leafy) * w.x + base * w.y + autumn * w.z + winter * w.w;
+	float snow = w.w * smoothstep(0.45, 0.9, up) * mix(0.4, 0.7, 1.0 - leafy);
+	return mix(col, vec3(0.75, 0.77, 0.80), snow);
 }
 
 void fragment() {
 	vec3 tint = v_tint;
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
-	ALBEDO = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
+	vec3 base_color = season_foliage(COLOR.rgb, v_seed, (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).y);  // CV1
+	ALBEDO = base_color * tint * mix(0.72, 1.18, leaves);
 	ROUGHNESS = roughness_value;
 	SPECULAR = 0.25;
 	AO = v_ao;
 	AO_LIGHT_AFFECT = 0.4;
 	// Lumière transmise à travers le feuillage, vue à contre-jour.
-	BACKLIGHT = COLOR.rgb * tint * 0.35;
+	BACKLIGHT = base_color * tint * 0.35;
 }
