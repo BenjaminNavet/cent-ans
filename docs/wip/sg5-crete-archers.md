@@ -40,6 +40,14 @@ Branche `worktree-agent-add3a9bbd7d238220`. Suite de SG4 (`docs/wip/sg4-assaut.m
   derrière leurs pavois, les archers de l'attaquant tirent sur eux).
 - Cavaliers d'une aile tous sur le même point (empilés) : une déroute emporte toute l'aile.
 
+## Sonde élargie (crête, 40/60/80 régiments × 10 graines ; victoires de l'attaquant sur 60)
+- départ : 13/60 (seul 60 rég. avec pieux cède, 6/4) ;
+- cavalerie aux ailes hors des tireurs (écart 20-60 m, retrait 15-40 m) : 28 à 42/60 — rejeté ;
+- cavaliers étalés sur l'aile (non empilés) : 38/60 — rejeté (la masse gagne le duel de cavalerie) ;
+- laisse des sorties contre les tireurs isolés (150-300 m) : 42/60 à 13/60 — rien de mieux ;
+- tir de contre-batterie seul : 18/60 ;
+- ligne reculée sur la contre-pente de 50 m : 29/60 ; de 100 m : 12/60 (60 sans pieux 10/0).
+
 ## Prochaine étape
 Sonde élargie (40/60/80 régiments × 10 graines, `sweep2.sh` du scratchpad) pour choisir entre :
 aile de cavalerie hors des tireurs et étalée, laisse des sorties, tir de contre-batterie.
