@@ -147,8 +147,9 @@ void fragment() {
 	vec3 water_col = mix(shallow_color, deep_color, depth_t);
 	water_col = mix(water_col, brackish_color, v_flags.g * 0.6);
 	water_col *= 0.92 + 0.16 * n2;
-	float contact = 1.0 - smoothstep(0.0, 0.0015, thickness);
-	water_col = mix(water_col, foam_color, contact * 0.35 + smoothstep(0.85, 1.0, edge / max(water_edge, 0.1)) * 0.15 * (0.5 + n2));
+	// Liseré clair au contact de la berge (discret : les facettes du relief le découpent).
+	float contact = 1.0 - smoothstep(0.0, 0.004, thickness);
+	water_col = mix(water_col, foam_color, contact * 0.08 + smoothstep(0.85, 1.0, edge / max(water_edge, 0.1)) * 0.12 * (0.5 + n2));
 
 	// Berges dans la bande hors de l'eau.
 	vec3 bank_col = gravel_color * (0.85 + 0.3 * coarse);
