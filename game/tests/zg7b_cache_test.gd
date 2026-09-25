@@ -56,14 +56,14 @@ func _remove_tree(path: String) -> void:
 	DirAccess.remove_absolute(path)
 
 
-## Manifeste : E1 = 2 × 2 tuiles, E2 = une ligne de 100 tuiles (échantillonnée).
+## Manifeste : E1 = 2 × 2 tuiles, E2 = une ligne de 50 tuiles (échantillonnée).
 func _write_map(map_dir: String) -> void:
 	_write_json(map_dir.path_join("relief_pyramid.json"), {
 		"version": 1, "tile_px": 512, "root_tile_units": 256, "dir": "pyramid",
 		"pattern": "E{level}/{col}_{row}.png",
 		"levels": [
 			{"level": 1, "tiles_rle": [{"row": 14, "runs": [[16, 2]]}, {"row": 15, "runs": [[16, 2]]}]},
-			{"level": 2, "tiles_rle": [{"row": 30, "runs": [[10, 100]]}]},
+			{"level": 2, "tiles_rle": [{"row": 30, "runs": [[5, 50]]}]},
 			{"level": 5, "tiles_rle": []},
 		],
 	})
@@ -82,7 +82,7 @@ func _write_level(root: String, level: int) -> void:
 			for col in range(16, 18):
 				_touch(root.path_join("pyramid/E1/%d_%d.png" % [col, row]))
 	else:
-		for col in range(10, 110):
+		for col in range(5, 55):
 			_touch(root.path_join("pyramid/E2/%d_30.png" % col))
 
 
@@ -109,7 +109,7 @@ func _run() -> void:
 	status = ReliefCacheStatus.check(map_dir)
 	_check(status.state == ReliefCacheStatus.State.MISSING, "listed tiles, no pyramid dir → MISSING (got %d)" % status.state)
 	_check(status.needs_notice(), "MISSING needs the notice")
-	_check(status.expected.get(1, 0) == 4 and status.expected.get(2, 0) == 100, "RLE expanded (E1 4, E2 100)")
+	_check(status.expected.get(1, 0) == 4 and status.expected.get(2, 0) == 50, "RLE expanded (E1 4, E2 50)")
 	_check(not status.expected.has(5), "empty level ignored")
 	_check(int(status.sampled.get(2, 0)) == ReliefCacheStatus.SAMPLES_PER_LEVEL, "large level sampled, not scanned")
 	_check(status.notice_text().contains("introuvable"), "MISSING text says the cache is missing")
