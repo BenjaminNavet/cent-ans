@@ -14,6 +14,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md` § 5. Branche : `m5a-vision` 
 ## Décisions
 
 - Point (armée, colonie) : distance exacte aux sources ; texture : disques rastérisés 512² (8 px carte par texel), bord doux de 3 km centré sur le rayon.
+- Correction de l'orchestrateur (comme Total War) : toutes les terres des provinces tenues par la faction ou un allié qui partage sa vue sont vues (`own_provinces_visible: true`, `data/rules/vision.json`, défaut serde vrai) ; test `held_province_land_is_seen_far_from_any_source`. Part de carte vue au tour 1 (France) : 13,4 % des texels (2,8 % avant la correction). Vision ≈ 0,56 ms (meilleur de 20, release).
 - Province visible : ≥ 25 % de ses texels de terre vus, ou colonie vue, ou armée amie dedans, ou agent (C6, pas terrestres conservés).
 - L'IA ne lit pas la vision (elle voit tout, comme avant M5a) : comportement gardé, documenté dans `vision.rs`.
 - Anciennes portées en pas (`controlled_range`, `army_range`, `general_bonus`) ignorées, gardées en option pour compatibilité ; le bonus de chef disparaît.
@@ -22,7 +23,6 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md` § 5. Branche : `m5a-vision` 
 
 ## Limites
 
-- Avec 20 km autour des colonies, une grande partie du royaume du joueur est voilée entre ses villes (règle de la spec) ; à rééquilibrer si le rendu paraît trop « troué ».
 - Les maquettes, forêts et hameaux ne sont pas voilés (seul le sol l'est), comme avant.
 - La mer n'est jamais voilée (id de province 0), comme avant.
 

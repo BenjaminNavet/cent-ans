@@ -718,7 +718,8 @@ colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le com
 
 - Règle (cœur, `sim-campaign/src/vision.rs`) : un point est vu à moins de `vision_army_km` (30) d'une
   armée amie ou de `vision_settlement_km` (20) d'une colonie tenue (`data/movement/rules.json`) ;
-  alliés, vassaux et suzerains partagent leur vue (`data/rules/vision.json`). Une province est
+  alliés, vassaux et suzerains partagent leur vue (`data/rules/vision.json`). Toutes les terres des
+  provinces tenues par la faction ou ses alliés sont vues (`own_provinces_visible`). Une province est
   visible si `province_seen_percent` (25 %) de ses terres sont vues, si elle contient une colonie
   vue ou une armée amie, ou si un agent la surveille. La vue est recalculée, jamais sauvegardée
   (≈ 1 ms par faction en release).
