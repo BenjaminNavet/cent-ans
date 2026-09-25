@@ -22,8 +22,8 @@ use serde::{Deserialize, Serialize};
 use crate::fire::Blaze;
 use crate::rng::BattleRng;
 use crate::siege::{
-    House, PieceKind, SiegeWorks, Tower, WallPiece, GATE_WIDTH, HOUSE_RADIUS, RING_RADIUS,
-    SQUARE_RADIUS, STREET_WIDTH, TOWN_CENTER,
+    House, PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece, GATE_WIDTH, HOUSE_RADIUS,
+    RING_RADIUS, SQUARE_RADIUS, STREET_WIDTH, TOWN_CENTER,
 };
 
 /// Longest straight wall piece (m): longer stretches are split (towers).
@@ -361,8 +361,7 @@ impl SiegeWorks {
         let fort = f64::from(fortification.min(5));
         let thickness = 2.5 + 0.5 * fort;
         let wall_height = 6.0 + 1.5 * fort;
-        let wall_hp = 500.0 * (1.0 + fort);
-        let gate_hp = 250.0 * (1.0 + fort);
+        let (wall_hp, gate_hp) = SiegeWorkRules::bundled().hp(fortification);
         // Frame: square at the centre, attacked gate towards −z.
         let origin = layout.square.unwrap_or_else(|| centroid(&layout.ring));
         let gate_plan = snap_to_ring(&layout.ring, layout.gates[layout.gate].at);

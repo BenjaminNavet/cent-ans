@@ -85,6 +85,24 @@ def spear(ctx, length=2.3):
     return pike(ctx, length=length, below=0.9, bone="Prop")
 
 
+def rammer(ctx, length=2.6, below=0.9):
+    """Bombard rammer (SG3): pole with a sheepskin swab at the tip, held in both hands."""
+    fr = prop_frame(ctx)
+    bm = bmesh.new()
+    n = ctx.seg(5, 4, 3)
+    top = _at(fr, (0, length - below, 0))
+    tube(bm, _at(fr, (0, -below, 0)), top, 0.02, 0.018, n, 0)
+    tube(bm, top, _at(fr, (0, length - below + 0.3, 0)), 0.075, 0.07, n + 2, 1)
+    finish(bm)
+    obj = to_object(
+        "rammer",
+        bm,
+        [ctx.material(C_WOOD, WOOD), ctx.material(C_LEATHER, (0.42, 0.36, 0.28))],
+    )
+    bind_rigid(obj, "Prop")
+    return [obj]
+
+
 def bill(ctx):
     """Bill (hooked hedging blade on a staff) in both hands: militia and peasants (BV2)."""
     fr = prop_frame(ctx)
@@ -395,8 +413,16 @@ def tabard(ctx, length=0.34, colour=(1.0, 1.0, 1.0)):
 
 
 TORSO_GROUPS = {
-    "Hips", "Abdomen", "Torso", "Chest", "Body", "Neck",
-    "Shoulder.L", "Shoulder.R", "UpperLeg.L", "UpperLeg.R",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Body",
+    "Neck",
+    "Shoulder.L",
+    "Shoulder.R",
+    "UpperLeg.L",
+    "UpperLeg.R",
 }
 
 
@@ -410,7 +436,11 @@ def _body_points(ctx, groups):
         mw = obj.matrix_world
         for v in obj.data.vertices:
             best = max(v.groups, key=lambda g: g.weight, default=None)
-            if best is not None and best.weight > 0.5 and names.get(best.group) in groups:
+            if (
+                best is not None
+                and best.weight > 0.5
+                and names.get(best.group) in groups
+            ):
                 out.append(mw @ v.co)
     return out
 
@@ -477,7 +507,9 @@ def jack(ctx, colour=(0.55, 0.47, 0.32), skirt=0.3, livery=False):
     `livery=True` dyes it in the side's colours (francs-archers' hoquetons).
     """
     code = C_LIVERY if livery else C_QUILT
-    obj, _rings = _torso_shell(ctx, "jack", ctx.material(code, colour), skirt, 0.06, margin=0.03)
+    obj, _rings = _torso_shell(
+        ctx, "jack", ctx.material(code, colour), skirt, 0.06, margin=0.03
+    )
     return [obj]
 
 
@@ -544,9 +576,7 @@ def round_shield(ctx, radius=0.2, back=False, arms=True, boss=True):
     bmesh.ops.triangulate(bm, faces=bm.faces)
     _uv_panel(bm, centre, side, -up, 2 * radius, 2 * radius)
     finish(bm)
-    face = (
-        ctx.material(C_ARMS, (1, 1, 1)) if arms else ctx.material(C_WOOD, WOOD_LIGHT)
-    )
+    face = ctx.material(C_ARMS, (1, 1, 1)) if arms else ctx.material(C_WOOD, WOOD_LIGHT)
     obj = to_object("round_shield", bm, [face, ctx.material(C_LEATHER, LEATHER)])
     if back:
         bind_by(obj, lambda p: {"Chest": 0.7, "Torso": 0.3})
@@ -737,7 +767,10 @@ def adarga(ctx, width=0.5, height=0.62):
         t = 2 * math.pi * i / steps
         hx = math.sin(t) ** 3
         hy = (
-            13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
+            13 * math.cos(t)
+            - 5 * math.cos(2 * t)
+            - 2 * math.cos(3 * t)
+            - math.cos(4 * t)
         ) / 17
         pts.append((hx * width / 2, hy * height / 2))
     bm = bmesh.new()
