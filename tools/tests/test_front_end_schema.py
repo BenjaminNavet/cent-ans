@@ -36,6 +36,8 @@ def test_front_end_references_exist() -> None:
         assert (DATA / "factions" / f"{regiment['faction']}.json").is_file()
         if "banner" in regiment:
             assert (banners / regiment["banner"]).is_file(), regiment["banner"]
+    for loop in backdrop.get("ambience", []):
+        assert _res_exists(loop["stream"]), loop["stream"]
     paths = [card["illustration"] for card in front_end["intro"]["cards"]]
     paths += front_end["loading"]["illustrations"]
     for faction_paths in front_end["loading"].get("faction_illustrations", {}).values():

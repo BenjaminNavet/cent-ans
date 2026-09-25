@@ -296,6 +296,27 @@
               }
             }
           }
+        },
+        "ambience": {
+          "type": "array",
+          "description": "Boucles d'ambiance jouées sous la musique du menu (bus Ambiance).",
+          "items": {
+            "type": "object",
+            "required": [
+              "stream"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "stream": {
+                "type": "string",
+                "pattern": "^res://.+\\.ogg$"
+              },
+              "volume_db": {
+                "type": "number",
+                "maximum": 6
+              }
+            }
+          }
         }
       }
     },
