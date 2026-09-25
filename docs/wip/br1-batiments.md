@@ -25,7 +25,16 @@ plusieurs heures, autonomie complète).
       (`building_atlas.gdshader`, `building_albedo_array.jpg`, couche = alpha de la couleur de
       sommet) : 3 surfaces par maquette
 - [x] 5. Captures `docs/audit/captures/br1/` (avant/après siège, village, Paris, Rouen, Troyes)
-- [ ] 6. Fusion dans main
+- [x] 6. Fusion dans main (ff 8a2198c9)
+- [x] 7. Neige : la variante `snow` blanchit bien les toits quand le sol est enneigé
+      (`--ground=snowy`, captures `village-neige-*`) ; « hiver » seul peut être un sol détrempé
+- [x] 8. BR2 mobilier : recettes `stall`, `cart`, `barrels`, `woodpile` (primitive `tube` pour
+      rondins, tonneaux bombés, roues cerclées) ; `BuildingKit.add_front_prop` adosse un
+      accessoire à une façade (taille réelle) ; siège : étals côté place, tonneaux/charrettes/
+      bûches côté rue, faubourgs ; place du marché (`_kit_market`) : puits du kit, 5 groupes
+      d'étals en couronne au bord (centre dégagé) ; villages : une maison sur deux. Les
+      accessoires d'une maison brûlée disparaissent avec elle (`ruin_site`). Purement visuel :
+      pas d'obstacle de cheminement (adossés aux façades pour ne pas barrer les rues).
 
 ## Mesures (charge machine ≈ 85, FPS non significatifs ; appels et primitives fiables)
 
@@ -48,8 +57,8 @@ plusieurs heures, autonomie complète).
   la ville reste aérée. Densifier (3e anneau, rues plus étroites) change le cheminement et la
   propagation du feu : à décider avec l'équilibre (A1-12 côté règles).
 - Le Paris emblématique (L1) remplacera la maquette générique `castle.glb` de Paris.
-- Pas encore de mobilier (étals, charrettes, tonneaux) dans les rues de siège.
+- Mobilier sans collision (visuel seulement) : une troupe peut traverser un étal.
 
 ## Prochaine étape
 
-Fusion dans main (worktree de fusion, ff-only).
+Fusion BR2 dans main (ff-only). Ensuite : rien d'obligatoire ; pistes = densité du siège (cœur).
