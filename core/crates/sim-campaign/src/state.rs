@@ -713,6 +713,10 @@ pub struct CampaignState {
     /// change of [`STATE_VERSION`]).
     #[serde(default)]
     pub agents: crate::agents::AgentsState,
+    /// Lot M3: the AI faction whose turn is being played inside `end_turn`
+    /// (its battles against the player are auto-resolved); never saved.
+    #[serde(skip)]
+    pub(crate) ai_turn: Option<FactionId>,
 }
 
 impl CampaignState {
@@ -749,6 +753,7 @@ impl CampaignState {
             outcome: None,
             victory_streak: 0,
             agents: crate::agents::AgentsState::default(),
+            ai_turn: None,
         }
     }
 

@@ -152,6 +152,8 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
+	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
+		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
 	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
@@ -183,9 +185,11 @@ func _build_game(grid: GridContainer) -> void:
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 
+## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
 func _build_sound(grid: GridContainer) -> void:
-	_slider(grid, "Musique", float(settings.call("music_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_music_volume", value))
-	_slider(grid, "Effets", float(settings.call("sfx_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_sfx_volume", value))
+	for spec in AudioBuses.PLAYER_BUSES:
+		var bus_name: String = spec[0]
+		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
 
 
 func _on_reset() -> void:
