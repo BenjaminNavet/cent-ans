@@ -32,7 +32,7 @@
   "figure": "archer_5",
   "missile": "bullet",
   "equipment": "Couleuvrine à main (tube de bronze ou de fer sur fût de bois, mise à feu à la mèche), poire à poudre, balles de plomb, salade, jaque ; pavois.",
-  "description": "Tireurs d'armes à feu portatives des villes et des arsenaux royaux (Bureau) ; lents et sensibles à la pluie, leur plomb perce les plates à courte portée (Audenarde 1382, Formigny 1450, Castillon 1453).",
+  "description": "Tireurs d'armes à feu portatives des villes et des arsenaux royaux (Bureau) ; lents et sensibles à la pluie, leur plomb perce les plates à courte portée (Audenarde 1382, Formigny 1450, [[cdx_castillon|Castillon]] 1453).",
   "sources": [
     "Couleuvrine",
     "Canon à main",
