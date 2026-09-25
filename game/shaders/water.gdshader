@@ -38,6 +38,8 @@ uniform float specular_amount = 0.06;
 uniform float sun_spec_power = 180.0;
 uniform float sun_spec_intensity = 0.1;
 uniform float sun_spec_max = 0.1;
+// Lot CM2 : mer des portulans (vue stratégique parchemin).
+#include "res://shaders/parchment_sea.gdshaderinc"
 
 varying float v_far;
 
@@ -138,8 +140,11 @@ void fragment() {
 	// Fresnel discret : le large reflète un peu plus le ciel en vue rasante.
 	float fres = pow(1.0 - clamp(dot(normalize(VIEW), NORMAL), 0.0, 1.0), 5.0);
 	col += vec3(0.02, 0.035, 0.045) * fres;
+	vec3 pm_emit;
+	parchment_sea(p, uv, footprint, coast, lake_f, col, alpha, n, pm_emit);  // CM2
 
 	ALBEDO = col;
+	EMISSION = pm_emit;  // CM2
 	ALPHA = alpha;
 	ROUGHNESS = mix(mix(roughness_near, roughness_far, far_t), 0.8, foam);
 	SPECULAR = specular_amount * (1.0 - foam);
@@ -152,5 +157,5 @@ void light() {
 	vec3 h = normalize(VIEW + LIGHT);
 	float power = mix(sun_spec_power, sun_spec_power * 0.25, v_far);
 	float spec = pow(max(dot(NORMAL, h), 0.0), power) * sun_spec_intensity * (1.0 - 0.7 * v_far);
-	SPECULAR_LIGHT += min(spec, sun_spec_max) * ATTENUATION * LIGHT_COLOR / PI;
+	SPECULAR_LIGHT += min(spec, sun_spec_max) * ATTENUATION * LIGHT_COLOR / PI * (1.0 - pm_weight());  // CM2
 }

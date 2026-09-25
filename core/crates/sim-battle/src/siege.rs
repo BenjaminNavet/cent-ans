@@ -222,6 +222,9 @@ pub struct SiegeWorks {
     /// Wind of the fires (S2): direction × strength (0-1), x and z.
     #[serde(default)]
     pub wind: (f64, f64),
+    /// Town drawn from a landmark plan (L3, ADR 0026); `None`: generic town.
+    #[serde(default)]
+    pub landmark: Option<crate::siege_layout::SiegeLandmark>,
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -335,12 +338,13 @@ impl SiegeWorks {
             square_radius: SQUARE_RADIUS,
             gate,
             hold_time: 0.0,
+            landmark: None,
         };
         works.apply_campaign_breach(breach, rng);
         works
     }
 
-    fn apply_campaign_breach(&mut self, breach: u8, rng: &mut BattleRng) {
+    pub(crate) fn apply_campaign_breach(&mut self, breach: u8, rng: &mut BattleRng) {
         if breach == 0 {
             return;
         }

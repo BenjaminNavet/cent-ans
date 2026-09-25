@@ -252,12 +252,14 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 ## Fusionne des événements survenus après l'affichage initiale (batailles résolues via le
 ## dialogue d'avant-bataille, dont le résultat n'est connu qu'après la fermeture de ce
 ## dialogue) dans les rubriques déjà construites, et rouvre le rapport s'il avait été fermé.
-## Mêmes paramètres que `build_groups`.
-func add_events(new_events: Array, is_relevant: Callable, keeps_world: Callable = Callable(), player: String = "") -> bool:
+## Mêmes paramètres que `build_groups`. `date_label` : titre du rapport s'il n'en a pas encore.
+func add_events(new_events: Array, is_relevant: Callable, keeps_world: Callable = Callable(), player: String = "", date_label: String = "") -> bool:
 	var new_groups := build_groups(new_events, is_relevant, keeps_world, player)
 	if new_groups.is_empty():
 		return false
 	groups = merge_groups(groups, new_groups)
+	if _title == "":  # Q1 : bataille livrée avant la première fin de tour (titre vide)
+		_title = date_label
 	_render()
 	show()
 	_fit_height.call_deferred()

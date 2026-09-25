@@ -995,7 +995,18 @@ func _run_diplomacy() -> void:
 	var war: Dictionary = sim.call("submit_order", {"type": "declare_war", "target": "fac_navarre"})
 	_check(war.get("ok", false), "declare_war refused: %s" % war.get("error", "?"))
 
-	# Panneau réel : instanciation et rafraîchissement.
+	# DP1 : traité à plusieurs clauses (chance d'acceptation, contre-proposition, options).
+	var treaty := [{"kind": "peace"}, {"kind": "gold", "giver": "proposer", "amount": 5000}]
+	var treaty_verdict: Dictionary = sim.call("evaluate_treaty", "fac_england", treaty)
+	_check(bool(treaty_verdict.get("ok", false)) and (treaty_verdict.get("articles", []) as Array).size() == 2, "evaluate_treaty should value each article: %s" % treaty_verdict)
+	_check(int(treaty_verdict.get("chance", -1)) >= 0 and int(treaty_verdict.get("chance", -1)) <= 100, "evaluate_treaty chance out of range")
+	var options: Dictionary = sim.call("treaty_options", "fac_england")
+	_check(not ((options.get("theirs", {}) as Dictionary).get("provinces", []) as Array).is_empty(), "treaty_options should list English provinces")
+	_check(sim.call("counter_treaty", "fac_england", treaty) is Dictionary, "counter_treaty should answer")
+	_check((sim.call("get_war_summary", "fac_england") as Dictionary).has("war_score"), "get_war_summary should report the war score")
+	_check(sim.call("get_treaty_history", FACTION_ID) is Array, "get_treaty_history should be an array")
+
+	# Panneau réel : instanciation, rafraîchissement, brouillon de traité.
 	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
 	root.add_child(panel)
 	await process_frame
@@ -1003,6 +1014,7 @@ func _run_diplomacy() -> void:
 	panel.player_faction = FACTION_ID
 	panel.refresh()
 	panel.select_faction("fac_england")
+	panel.stage_example()
 	await process_frame
 	panel.queue_free()
 

@@ -193,6 +193,10 @@ pub struct BattleSetup {
     /// Siege battle: the defender holds the town walls (M8 § 2).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub siege: Option<SiegeSetup>,
+    /// Siege in a landmark city (L3, ADR 0026): the besieged town is drawn
+    /// from the plan instead of the generic octagon. Ignored without `siege`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub siege_layout: Option<crate::siege_layout::SiegeLayout>,
     /// Catalogue of the leader's orders (`data/battle_orders/`, F10b); no
     /// order can be given when empty.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

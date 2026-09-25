@@ -217,6 +217,19 @@ fn province_name(data: &GameData, id: &ProvinceId) -> String {
         .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
+/// L3 (ADR 0026): the besieged town of a landmark city is drawn from its plan
+/// (`data/landmarks/<id>.json`, block `siege.battle`); `None` elsewhere or
+/// when the block is missing or broken (the generic town is used).
+fn siege_layout(
+    data: &GameData,
+    settlement: &data_model::SettlementId,
+) -> Option<sim_battle::SiegeLayout> {
+    data.landmarks
+        .values()
+        .find(|l| l.settlement == settlement.as_str())
+        .and_then(|l| sim_battle::SiegeLayout::from_landmark(l).ok())
+}
+
 fn battle_season(season: Season) -> BattleSeason {
     match season {
         Season::Spring => BattleSeason::Spring,
@@ -463,6 +476,7 @@ impl CampaignState {
             defender: side_setup(self, data, &request.defender, &defender),
             player_side,
             siege: None,
+            siege_layout: None,
             orders: data.battle_orders.values().cloned().collect(),
         })
     }
@@ -694,6 +708,7 @@ impl CampaignState {
                 fortification: self.fortification_level(data, &request.location),
                 breach,
             }),
+            siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
         }
     }
