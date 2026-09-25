@@ -70,10 +70,9 @@
     "cloud_shadows": {
       "type": "object",
       "properties": {
-        "texture_px": { "type": "integer", "minimum": 32, "maximum": 1024 },
-        "tile_m": { "type": "number", "minimum": 200 },
+        "texture_px": { "type": "integer", "minimum": 64, "maximum": 1024, "description": "Deux fois la résolution d'une tuile de bruit (px)." },
+        "tile_m": { "type": "number", "minimum": 200, "description": "Côté d'une tuile du bruit périodique (m) : le décal glisse d'au plus une tuile." },
         "wind_speed_m_s": { "type": "number", "minimum": 0, "description": "Vitesse des ombres pour un vent de force 1." },
-        "update_period_s": { "type": "number", "exclusiveMinimum": 0 },
         "by_weather": {
           "type": "object",
           "additionalProperties": {
@@ -91,7 +90,7 @@
           "additionalProperties": false
         }
       },
-      "required": ["texture_px", "tile_m", "wind_speed_m_s", "update_period_s", "by_weather", "quality"],
+      "required": ["texture_px", "tile_m", "wind_speed_m_s", "by_weather", "quality"],
       "additionalProperties": false
     },
     "dust": {

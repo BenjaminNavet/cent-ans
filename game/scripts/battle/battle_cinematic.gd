@@ -105,8 +105,8 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return
-	var skip_key := event is InputEventKey and event.pressed and not event.echo and ((event as InputEventKey).keycode in [KEY_ESCAPE, KEY_SPACE, KEY_ENTER])
-	var click := event is InputEventMouseButton and event.pressed
+	var skip_key: bool = event is InputEventKey and event.pressed and not event.echo and ((event as InputEventKey).keycode in [KEY_ESCAPE, KEY_SPACE, KEY_ENTER])
+	var click: bool = event is InputEventMouseButton and event.pressed
 	if skip_key or click:
 		skip()
 		get_viewport().set_input_as_handled()

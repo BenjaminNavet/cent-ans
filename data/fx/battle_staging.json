@@ -5,7 +5,7 @@
     "keyframes": [
       { "hour": 0.0, "elevation_mul": 0.55, "sun_yaw_deg": 200, "energy_mul": 0.14, "sun_tint": [0.55, 0.65, 1.0], "zenith_tint": [0.08, 0.1, 0.2], "horizon_tint": [0.14, 0.16, 0.28], "fog_tint": [0.16, 0.18, 0.3], "ambient_mul": 0.3, "exposure": 0.9, "hdri": false, "sun_disc": 0.0, "shadow_opacity": 0.5 },
       { "hour": 4.6, "elevation_mul": 0.4, "sun_yaw_deg": 250, "energy_mul": 0.16, "sun_tint": [0.6, 0.68, 1.0], "zenith_tint": [0.12, 0.14, 0.28], "horizon_tint": [0.24, 0.24, 0.36], "fog_tint": [0.24, 0.25, 0.36], "ambient_mul": 0.34, "exposure": 0.9, "hdri": false, "sun_disc": 0.0, "shadow_opacity": 0.5 },
-      { "hour": 5.5, "elevation_mul": 0.1, "sun_yaw_deg": 95, "energy_mul": 0.55, "sun_tint": [1.0, 0.58, 0.34], "zenith_tint": [0.46, 0.5, 0.78], "horizon_tint": [1.3, 0.82, 0.62], "fog_tint": [1.1, 0.82, 0.72], "ambient_mul": 0.62, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 0.85 },
+      { "hour": 5.5, "elevation_mul": 0.1, "sun_yaw_deg": 95, "energy_mul": 0.55, "sun_tint": [1.0, 0.66, 0.44], "zenith_tint": [0.46, 0.5, 0.78], "horizon_tint": [1.3, 0.82, 0.62], "fog_tint": [1.1, 0.82, 0.72], "ambient_mul": 0.62, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 0.85 },
       { "hour": 7.0, "elevation_mul": 0.36, "sun_yaw_deg": 120, "energy_mul": 0.85, "sun_tint": [1.0, 0.8, 0.6], "zenith_tint": [0.82, 0.88, 1.0], "horizon_tint": [1.12, 0.98, 0.88], "fog_tint": [1.05, 0.96, 0.9], "ambient_mul": 0.85, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 1.0 },
       { "hour": 9.0, "elevation_mul": 0.7, "sun_yaw_deg": 170, "energy_mul": 1.0, "sun_tint": [1.0, 0.95, 0.88], "zenith_tint": [1.0, 1.0, 1.0], "horizon_tint": [1.0, 1.0, 1.0], "fog_tint": [1.0, 1.0, 1.0], "ambient_mul": 1.0, "exposure": 1.0, "hdri": true, "sun_disc": 1.0, "shadow_opacity": 1.0 },
       { "hour": 12.0, "elevation_mul": 1.0, "sun_yaw_deg": 218, "energy_mul": 1.0, "sun_tint": [1.0, 1.0, 1.0], "zenith_tint": [1.0, 1.0, 1.0], "horizon_tint": [1.0, 1.0, 1.0], "fog_tint": [1.0, 1.0, 1.0], "ambient_mul": 1.0, "exposure": 1.0, "hdri": true, "sun_disc": 1.0, "shadow_opacity": 1.0 },
@@ -18,11 +18,10 @@
   },
   "cloud_shadows": {
     "texture_px": 256,
-    "tile_m": 2400,
+    "tile_m": 1200,
     "wind_speed_m_s": 7.0,
-    "update_period_s": 0.25,
     "by_weather": {
-      "clear": { "strength": 0.42, "coverage": 0.48 },
+      "clear": { "strength": 0.32, "coverage": 0.45 },
       "fog": { "strength": 0.0, "coverage": 0.0 },
       "rain": { "strength": 0.14, "coverage": 0.7 },
       "snow": { "strength": 0.1, "coverage": 0.65 }
