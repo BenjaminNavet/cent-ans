@@ -9,8 +9,10 @@ var map: Node = null  # CampaignMap
 var panel: PanelContainer
 var list: VBoxContainer
 var score_label: Label
-var end_dialog: PanelContainer
+var end_dialog: Control
+var end_art: TextureRect
 var end_title: Label
+var end_caption: Label
 var end_text: Label
 var _announced: String = "ongoing"
 ## Q1 : largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
@@ -44,18 +46,62 @@ func setup(campaign_map: Node) -> void:
 	map.ui.add_child(panel)
 	panel.hide()
 
-	end_dialog = _centered_panel(theme, Vector2(560, 260))
+	# AR1 : écran de fin illustré — enluminure plein écran, cartouche de parchemin en bas.
+	end_dialog = Control.new()
+	end_dialog.name = "CampaignEnding"
+	end_dialog.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	end_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	var night := ColorRect.new()
+	night.color = Color(0.06, 0.04, 0.02)
+	night.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	end_dialog.add_child(night)
+	end_art = TextureRect.new()
+	end_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	end_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	end_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	end_art.modulate = Color(0.9, 0.87, 0.82)
+	end_dialog.add_child(end_art)
+	var shade := TextureRect.new()
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0, 0, 0, 0))
+	gradient.set_color(1, Color(0.05, 0.03, 0.01, 0.85))
+	var gradient_texture := GradientTexture2D.new()
+	gradient_texture.gradient = gradient
+	gradient_texture.fill_from = Vector2(0, 0.35)
+	gradient_texture.fill_to = Vector2(0, 1)
+	shade.texture = gradient_texture
+	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	shade.stretch_mode = TextureRect.STRETCH_SCALE
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	end_dialog.add_child(shade)
+	var card := PanelContainer.new()
+	card.theme = theme
+	card.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	card.custom_minimum_size = Vector2(720, 0)
+	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	card.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	card.offset_left = -360
+	card.offset_right = 360
+	card.offset_bottom = -48
+	end_dialog.add_child(card)
 	var end_box := VBoxContainer.new()
-	end_box.add_theme_constant_override("separation", 12)
-	end_dialog.add_child(end_box)
+	end_box.add_theme_constant_override("separation", 10)
+	card.add_child(end_box)
 	end_title = Label.new()
-	end_title.add_theme_font_size_override("font_size", 30)
+	end_title.add_theme_font_size_override("font_size", 40)
+	end_title.add_theme_color_override("font_color", Color(0.45, 0.10, 0.06))
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_box.add_child(end_title)
+	end_caption = Label.new()
+	end_caption.add_theme_font_size_override("font_size", 15)
+	end_caption.add_theme_color_override("font_color", Color(0.40, 0.30, 0.18))
+	end_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	end_box.add_child(end_caption)
 	end_text = Label.new()
 	end_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	end_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	end_text.custom_minimum_size.x = 680
 	end_box.add_child(end_text)
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -167,8 +213,16 @@ func after_end_turn() -> void:
 	if state == "ongoing" or state == _announced:
 		return
 	_announced = state
-	end_title.text = {"victory": "Victoire !", "defeat": "Défaite", "ended": "Fin de la campagne"}.get(state, "Fin")
-	end_text.text = "%s\nScore final : %d." % [outcome.get("text", ""), int(outcome.get("score", 0))]
+	show_ending(state, str(outcome.get("text", "")), int(outcome.get("score", 0)))
+
+
+## Écran de fin illustré (AR1) pour `state` (`victory`, `defeat`, `ended`).
+func show_ending(state: String, text: String, score: int) -> void:
+	var plate := ArtPlates.ending("campaign_defeat" if state == "defeat" else "campaign_victory")
+	end_art.texture = ArtPlates.texture(plate)
+	end_title.text = {"victory": str(plate.get("title", "Victoire !")), "defeat": str(plate.get("title", "Défaite")), "ended": "Fin de la campagne"}.get(state, "Fin")
+	end_caption.text = str(plate.get("caption", ""))
+	end_text.text = "%s\nScore final : %d." % [text, score]
 	end_dialog.show()
 
 

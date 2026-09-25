@@ -245,7 +245,10 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	if season != "":
 		sub += " · %s" % season
 	subtitle_label.text = sub
-	_banner_texture = PortraitLoader.load_texture(BANNER_SIEGE if siege else BANNER_FIELD)
+	# AR1 : enluminure du contexte (siège ou bataille rangée), repli sur l'ancienne miniature.
+	_banner_texture = ArtPlates.texture(ArtPlates.random_loading_screen("siege" if siege else "battle"))
+	if _banner_texture == null:
+		_banner_texture = PortraitLoader.load_texture(BANNER_SIEGE if siege else BANNER_FIELD)
 	banner.queue_redraw()
 	# Couleurs des camps.
 	for i in 2:
