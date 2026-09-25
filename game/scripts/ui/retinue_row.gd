@@ -1,7 +1,7 @@
 class_name RetinueRow
 extends HFlowContainer
 
-## Ligne de vignettes de la suite d'un général (lot C7, « retinue » à la Medieval II) :
+## Ligne de vignettes de la suite d'un général (lot C7) :
 ## un médaillon carré par compagnon (glyphe coloré selon la famille), infobulle riche (effets,
 ## obtention, transmission). Clic sur une vignette = `companion_pressed` (la fiche propose alors
 ## de confier le compagnon à un autre général). Aucune règle ici : tout vient de
