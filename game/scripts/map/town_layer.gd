@@ -382,6 +382,14 @@ func flush(center: Variant = null) -> void:
 			break
 		for entry in _entries.values():
 			entry["dirty_ms"] = 0
+	# Hauteurs à jour (pages arrivées depuis le plan) : recalcul et reconstruction immédiats.
+	for id in _entries:
+		var entry: Dictionary = _entries[id]
+		if entry.get("builder") == null:
+			continue
+		TownPlan.reground(entry["plan"], _heights_for(id))
+		_start_build(id)
+	_step_builders(1 << 30)
 	FrameBudget.unlimited = false
 	_update_stats()
 
