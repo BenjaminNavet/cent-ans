@@ -96,6 +96,14 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		_materials.append(mat)
 
 
+## BV3 : herbe couchée et tachée de sang (`BattleGrassFlatten`), sur toutes les couches.
+func set_flatten(flatten: BattleGrassFlatten) -> void:
+	for mat in _materials:
+		mat.set_shader_parameter("flatten_map", flatten.texture)
+		mat.set_shader_parameter("flatten_rect", flatten.rect_vec())
+		mat.set_shader_parameter("flatten_on", 1.0)
+
+
 func _process(_delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera == null or _layers.is_empty():

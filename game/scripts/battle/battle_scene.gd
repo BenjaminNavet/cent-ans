@@ -61,6 +61,8 @@ var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
+var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
 var _blood_override: int = -1  # `--blood=<0|1|2>`
 var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
@@ -323,6 +325,24 @@ func _build_soldier_layers() -> void:
 		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
+	_setup_grass_flatten()
+
+
+## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
+## dos masqué quand la rangée de BV1 est plantée.
+func _setup_grass_flatten() -> void:
+	if _no_bv3:
+		return
+	soldiers.hide_planted_pavise = not _no_bv1  # BV1 plante les rangées de pavois
+	if terrain.vegetation == null:
+		return
+	grass_flatten = BattleGrassFlatten.new()
+	grass_flatten.setup()
+	terrain.vegetation.set_flatten(grass_flatten)
+	var blood_amount: float = 0.0 if blood == null else [0.0, 0.6, 1.0][blood.level]
+	if soldiers.bv2_enabled:
+		soldiers.corpse_fallen.connect(func(pos: Vector3, _side: String, kind: String, cause: String) -> void:
+			grass_flatten.on_corpse(pos, kind, 0.0 if cause == "fire" else blood_amount))
 
 
 ## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
@@ -358,6 +378,8 @@ func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
 	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
+	if grass_flatten != null:
+		grass_flatten.update(units, dt)
 	if effects == null:
 		return
 	var camera := get_viewport().get_camera_3d()
@@ -1101,6 +1123,8 @@ func _parse_cmdline() -> void:
 			_no_effects = true
 		elif arg == "--no-bv1":
 			_no_bv1 = true
+		elif arg == "--no-bv3":
+			_no_bv3 = true
 		elif arg.begins_with("--unit-size="):
 			_unit_size_override = float(arg.trim_prefix("--unit-size="))
 		elif arg.begins_with("--blood="):
@@ -1161,6 +1185,12 @@ func _stage_screenshot() -> void:
 	if effects != null and blood != null:
 		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
+	if grass_flatten != null:
+		print("BattleScene: BV3 %d corpses marked on the grass, last at %s" % [grass_flatten.corpse_marks, grass_flatten.last_corpse])
+		for unit in units:
+			if str(unit["state"]) == "melee":
+				print("BattleScene: BV3 melee at (%.0f, %.0f), grass flattened %.2f, blood %.2f" % [float(unit["x"]), float(unit["z"]), grass_flatten.flatten_at(float(unit["x"]), float(unit["z"])), grass_flatten.blood_at(float(unit["x"]), float(unit["z"]))])
+				break
 	var focus := Vector3.ZERO
 	var n := 0
 	for unit in units:
