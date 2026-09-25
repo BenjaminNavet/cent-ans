@@ -60,3 +60,5 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul DA |
 |---|---|---|---|---|---|
+| 2026-09-25 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (6 × openai/gpt-5-image-mini) | 0,28 $ | 0,27 $ | 0,27 $ |
+| 2026-09-25 | OpenRouter | DA : planche de style, bouton de fin de tour (cloche) et planche d'icônes à l'encre (2 × openai/gpt-5-image-mini) | 0,09 $ | 0,09 $ | 0,36 $ |
