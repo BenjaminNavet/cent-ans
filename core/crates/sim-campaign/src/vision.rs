@@ -12,7 +12,8 @@
 //! faction or a lending ally is seen.
 //!
 //! The seen area is rasterised as discs on a reduced grid ([`VisionMask`],
-//! 512² texels over the 4096² map, one texel = 4×4 navigation cells); the
+//! 512² texels over the 4096² map, one texel = 4×4 navigation cells, soft
+//! edge `edge_feather_km` wide, `data/rules/vision.json`); the
 //! point tests (armies, settlements) use the exact distance to the sources.
 //! A province is visible when `province_seen_percent` of its land texels
 //! are seen, when one of its settlements is seen, when a lending army stands
@@ -34,9 +35,6 @@ use crate::state::{Army, ArmyId, CampaignState};
 
 /// Side of the exported vision mask, in texels (the map is square).
 pub const VISION_MASK_SIZE: u32 = 512;
-/// Soft edge of a sight disc in the mask, in kilometres (the texel value
-/// crosses 50 % exactly at the radius).
-const EDGE_FEATHER_KM: f32 = 3.0;
 /// Texel value from which a texel counts as seen.
 pub const SEEN_THRESHOLD: u8 = 128;
 
@@ -194,7 +192,7 @@ impl CampaignState {
             sources,
             watched_provinces,
         };
-        rasterise_discs(&mut mask, EDGE_FEATHER_KM * px_per_km);
+        rasterise_discs(&mut mask, rules.edge_feather_km as f32 * px_per_km);
         let provinces = self.province_sight(data, rules, &mut mask, source_provinces);
         Vision {
             faction: faction.clone(),

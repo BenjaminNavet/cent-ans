@@ -13,7 +13,7 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md` § 5. Branche : `m5a-vision` 
 
 ## Décisions
 
-- Point (armée, colonie) : distance exacte aux sources ; texture : disques rastérisés 512² (8 px carte par texel), bord doux de 3 km centré sur le rayon.
+- Point (armée, colonie) : distance exacte aux sources ; texture : disques rastérisés 512² (8 px carte par texel), bord doux de 3 km centré sur le rayon (`edge_feather_km`, `data/rules/vision.json`, depuis SV1).
 - Correction de l'orchestrateur (comme Total War) : toutes les terres des provinces tenues par la faction ou un allié qui partage sa vue sont vues (`own_provinces_visible: true`, `data/rules/vision.json`, défaut serde vrai) ; test `held_province_land_is_seen_far_from_any_source`. Part de carte vue au tour 1 (France) : 13,4 % des texels (2,8 % avant la correction). Vision ≈ 0,56 ms (meilleur de 20, release).
 - Province visible : ≥ 25 % de ses texels de terre vus, ou colonie vue, ou armée amie dedans, ou agent (C6, pas terrestres conservés).
 - L'IA ne lit pas la vision (elle voit tout, comme avant M5a) : comportement gardé, documenté dans `vision.rs`.
@@ -28,4 +28,4 @@ Spec : `docs/design/2026-09-24-mouvement-libre.md` § 5. Branche : `m5a-vision` 
 
 ## Prochaine étape
 
-Fusion par l'orchestrateur.
+Fusionné dans `sv1-vision` (lot SV1, voir `docs/wip/suites-bulles3.md`) ; intégration dans main par l'orchestrateur.
