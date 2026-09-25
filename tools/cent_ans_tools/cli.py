@@ -280,6 +280,42 @@ def geo_horizon(
     )
 
 
+@app.command("export-data")
+def export_data_command(
+    app_path: str = typer.Option(
+        ..., "--app", help="Application exportée (…/Cent Ans.app)"
+    ),
+    relief: str = typer.Option(
+        "bundle",
+        "--relief",
+        help="Cache du relief fin : bundle (dans l'app), external (dossier « Cent Ans relief » à côté), none",
+    ),
+) -> None:
+    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, lot ZG7b)."""
+    from pathlib import Path
+
+    from cent_ans_tools import export_data
+
+    result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    console.print(f"data/ : {result.data_bytes / 1e6:.0f} Mo → {result.data_dir}")
+    if result.relief_dir is not None:
+        console.print(
+            f"Relief fin : {result.relief_bytes / 1e9:.2f} Go → {result.relief_dir}"
+        )
+    else:
+        console.print(
+            "[yellow]Relief fin non embarqué (zoom rapproché limité).[/yellow]"
+        )
+    if relief != "none" and not result.report.complete:
+        for line in result.report.lines():
+            console.print(line)
+        console.print(
+            "[yellow]Cache de relief incomplet : le jeu exporté affichera l'avis "
+            "« relief rapproché limité ». Compléter avec : "
+            "uv run --project tools cent-ans geo relief-all[/yellow]"
+        )
+
+
 @geo_app.command("pyramid")
 def geo_pyramid(
     levels: str = typer.Option(
