@@ -59,6 +59,8 @@ pub enum EventKind {
     Chronicle,
     /// H3 « La Table »: diet fallback, Lent.
     Table,
+    /// Regional edict change or lapse (lot C4).
+    Edict,
     /// H4: tended wounded, epidemic contained.
     Medicine,
     /// H5: coinage changed, seigniorage, recoinage, inflation.
@@ -69,6 +71,8 @@ pub enum EventKind {
     Chivalry,
     /// C6: spies, heralds and preachers (actions, captures).
     Agent,
+    /// C5: trade agreements, routes cut by war/siege/blockade.
+    Trade,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

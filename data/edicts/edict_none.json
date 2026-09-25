@@ -1,0 +1,10 @@
+{
+  "id": "edict_none",
+  "name": {
+    "display": "Aucun édit"
+  },
+  "description": "La province n'est soumise à aucun édit régional particulier ; l'administration ordinaire suffit.",
+  "delay_turns": 0,
+  "effects": [],
+  "sources": []
+}

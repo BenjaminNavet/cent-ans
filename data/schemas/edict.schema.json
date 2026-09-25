@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/edict.schema.json",
+  "title": "Édit régional",
+  "description": "Édit qu'un contrôleur de province peut choisir (lot C4, un seul actif par province, province entièrement contrôlée). Effets appliqués via le système de modificateurs existant, après un délai en tours. Les règles vivent dans `sim-campaign::edicts`.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/edict_id" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "description": {
+      "type": "string",
+      "description": "Texte français ; peut contenir des liens codex `[[cdx_id]]` ou `[[cdx_id|libellé]]`."
+    },
+    "delay_turns": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Tours entre le choix et la prise d'effet (0 : immédiat). Le précédent édit reste actif pendant le délai."
+    },
+    "effects": {
+      "type": "array",
+      "description": "Effets appliqués à la province (et, pour ceux ciblant une colonie, à ses colonies).",
+      "items": { "$ref": "common.schema.json#/$defs/effect" }
+    },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "description"],
+  "additionalProperties": false
+}

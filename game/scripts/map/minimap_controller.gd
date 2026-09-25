@@ -36,6 +36,10 @@ func setup(campaign_map: Node) -> void:
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
+	# Lot C5 : le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
+	var trade_button: Button = ui.get("trade_button")
+	if trade_button != null:
+		minimap.add_layer_button(trade_button)
 	var settings := get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.connect("changed", func(key: String) -> void:

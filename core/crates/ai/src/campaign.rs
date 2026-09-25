@@ -289,6 +289,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         orders.push(Order::Research { technology });
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
+    orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
     // G2: a realm whose buildings eat half its income does not debase: the
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
     let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;

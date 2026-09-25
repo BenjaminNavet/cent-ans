@@ -185,6 +185,8 @@ pub enum DiplomacyError {
     NoSchism,
     #[error("obédience invalide")]
     InvalidObedience,
+    #[error("pas d'accord commercial à rompre")]
+    NoTradeAgreement,
     #[error("la faction virtuelle des rebelles ne négocie pas")]
     Rebels,
 }
@@ -1428,6 +1430,40 @@ impl CampaignState {
         Ok(())
     }
 
+    /// Lot C5: ends a trade agreement concluded by a DP1 treaty article
+    /// ([`crate::negotiation::Article::TradeAgreement`]); the player's call,
+    /// the AI never breaks one on its own.
+    pub fn break_trade_agreement(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        target: &FactionId,
+    ) -> Result<(), DiplomacyError> {
+        self.check_pair(faction, target)?;
+        if !self.has_trade_agreement(faction, target) {
+            return Err(DiplomacyError::NoTradeAgreement);
+        }
+        self.factions
+            .get_mut(faction)
+            .expect("checked")
+            .ledger
+            .trade_agreements
+            .remove(target);
+        self.factions
+            .get_mut(target)
+            .expect("checked")
+            .ledger
+            .trade_agreements
+            .remove(faction);
+        let text = format!(
+            "{} rompt son accord commercial avec {}.",
+            faction_name(data, faction),
+            faction_name(data, target)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(faction));
+        Ok(())
+    }
+
     pub fn release_vassal(
         &mut self,
         data: &GameData,
@@ -1486,7 +1522,6 @@ impl CampaignState {
             .count();
         (1.0 - EMBARGO_TARGET_PENALTY * suffered as f64 - EMBARGO_IMPOSER_PENALTY * imposed as f64)
             .max(0.5)
-            * crate::negotiation::trade_income_factor(self, faction)
     }
 
     /// Diplomatic view of every other living faction for `faction`.
@@ -1531,6 +1566,7 @@ impl CampaignState {
                     } else {
                         None
                     },
+                    trade_agreement: self.has_trade_agreement(faction, id),
                 }
             })
             .collect()
@@ -1551,6 +1587,10 @@ pub struct DiplomacyEntry {
     pub casus_belli: Option<String>,
     pub claims: Vec<String>,
     pub loyalty: Option<u8>,
+    /// Lot C5: a formal trade agreement is in force (erased by war, its
+    /// routes suspended by an embargo — see [`CampaignState::has_trade_agreement`]).
+    #[serde(default)]
+    pub trade_agreement: bool,
 }
 
 fn offer_text(
