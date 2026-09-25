@@ -10,13 +10,13 @@ Branche `b7a-economy-order` (depuis main 04657c09). Liste d'origine : `docs/wip/
 5. **Carte du mécontentement** : ratio divisé par 100 dans `campaign_map.gd` (la version MF1 de `feat/map-modes` le fait déjà).
 
 ## État
-- [ ] squelette
-- [ ] 1 constantes → données + textes
-- [ ] 2 textes dette
-- [ ] 3 ravitaillement × dévastation + tests + textes
-- [ ] 4 mock + fiche ordre public
-- [ ] 5 carte
+- [x] squelette
+- [x] 1 constantes → données + textes
+- [x] 2 textes dette
+- [x] 3 ravitaillement × dévastation + tests + textes
+- [x] 4 mock + fiche ordre public
+- [x] 5 carte
 - [ ] validations (cargo, build, smoke, pytest, codex)
 
 ## Prochaine étape
-Implémenter le point 1 (EconomyRules).
+Validations : cargo test complet, build.sh, import + smoke Godot, pytest.

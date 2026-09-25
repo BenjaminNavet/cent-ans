@@ -65,7 +65,8 @@ pub struct FactionEconomy {
     pub projected_income: i64,
     pub army_upkeep: i64,
     pub building_upkeep: i64,
-    /// Court and administration (M10 balance), see [`administration_rate`].
+    /// Court and administration (M10 balance), see
+    /// [`data_model::EconomyRules::administration_rate`].
     #[serde(default)]
     pub administration_upkeep: i64,
     /// H3 « Table »: diets of the controlled provinces this season.
@@ -102,23 +103,6 @@ pub struct FactionEconomy {
     pub trade_income_last_turn: i64,
 }
 
-/// Base share of income spent on the court and administration.
-pub const ADMINISTRATION_BASE: f64 = 0.08;
-/// Extra share per province controlled.
-pub const ADMINISTRATION_PER_PROVINCE: f64 = 0.01;
-/// Ceiling of the administration share.
-pub const ADMINISTRATION_MAX: f64 = 0.35;
-
-/// A treasury above this many seasons of income feeds an opulent court (F4: 8 → 6).
-pub const OPULENCE_SEASONS: i64 = 6;
-/// Share of that excess spent by the court every season (percent; F4: 3 → 20).
-pub const OPULENCE_PERCENT: i64 = 20;
-
-/// Share of income taken by administration for a realm of `provinces`.
-pub fn administration_rate(provinces: usize) -> f64 {
-    (ADMINISTRATION_BASE + ADMINISTRATION_PER_PROVINCE * provinces as f64).min(ADMINISTRATION_MAX)
-}
-
 /// Livres per head and per season, by social class.
 pub fn tax_per_head(class: SocialClass) -> f64 {
     match class {
@@ -139,8 +123,6 @@ pub const TAX_EFFICIENCY: f64 = 0.082;
 pub const UPKEEP_MONTHS_PER_SEASON: i64 = 4;
 /// Garrison units are part-time local levies: they cost this share of field upkeep.
 pub const GARRISON_UPKEEP_PERCENT: i64 = 50;
-/// Morale lost by every unit when the treasury is negative.
-pub const BANKRUPTCY_MORALE_PENALTY: u8 = 10;
 /// Supply lost per turn outside friendly territory.
 pub const ATTRITION_SUPPLY_LOSS: u8 = 20;
 /// Supply lost per winter turn outside friendly territory.
@@ -473,16 +455,19 @@ impl CampaignState {
     }
 
     /// Court and administration costs of the season: a share of income that
-    /// grows with the number of provinces held, plus 20 % of any treasury
-    /// above six seasons of income (M10 balance, F4).
+    /// grows with the number of provinces held, plus a share of any treasury
+    /// above some seasons of income (M10 balance, F4; B7a:
+    /// `data/rules/economy.json`, 20 % above six seasons).
     pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
+        let rules = &data.economy_rules;
         let provinces = self.controlled_provinces(faction).len();
         let income = self.faction_income_effective(data, faction);
-        let share = (income as f64 * administration_rate(provinces)).round() as i64;
+        let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
         // An idle hoard feeds court luxury, patronage and embezzlement.
         let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
-        let opulence =
-            (treasury - OPULENCE_SEASONS * income.max(0)).max(0) * OPULENCE_PERCENT / 100;
+        let opulence = (treasury - rules.opulence_seasons * income.max(0)).max(0)
+            * rules.opulence_percent
+            / 100;
         share + opulence
     }
 
@@ -573,13 +558,15 @@ pub(crate) fn resolve_economy(
             );
         }
         if treasury < 0 {
+            // B7a: the troops grumble (morale), they do not desert.
+            let penalty = data.economy_rules.bankruptcy_morale_penalty;
             for army in state
                 .armies
                 .values_mut()
                 .filter(|a| a.faction == faction_id)
             {
                 for unit in &mut army.units {
-                    unit.morale = unit.morale.saturating_sub(BANKRUPTCY_MORALE_PENALTY);
+                    unit.morale = unit.morale.saturating_sub(penalty);
                 }
             }
             for settlement in state
@@ -588,13 +575,13 @@ pub(crate) fn resolve_economy(
                 .filter(|s| s.controller == faction_id)
             {
                 for unit in &mut settlement.garrison {
-                    unit.morale = unit.morale.saturating_sub(BANKRUPTCY_MORALE_PENALTY);
+                    unit.morale = unit.morale.saturating_sub(penalty);
                 }
             }
             events.push(
                 GameEvent::new(
                     EventKind::Bankruptcy,
-                    "Le trésor est vide : les troupes grondent (moral -10).",
+                    format!("Le trésor est vide : les troupes grondent (moral -{penalty})."),
                 )
                 .faction(&faction_id),
             );
@@ -693,6 +680,11 @@ fn reinforce_garrison(settlement: &mut SettlementState, effects: &EffectTotals) 
 /// territory the province's buildings (ports) and the general's flat
 /// `Supply` add to the seasonal recovery; outside it the general's `Supply`
 /// and `AttritionResistance` percents shrink the supply lost.
+///
+/// B7a: the armies live off the land, so a devastated province feeds them
+/// badly (design § ravitaillement, « attrition … en territoire ravagé »):
+/// in friendly territory it cuts the recovery, outside it worsens the loss,
+/// both in proportion to the devastation (`data/rules/economy.json`).
 fn supply_modifiers(
     state: &CampaignState,
     data: &GameData,
@@ -703,15 +695,26 @@ fn supply_modifiers(
     let general_fx = general
         .map(|g| crate::skills::character_effects(state, data, g))
         .unwrap_or_default();
+    let rules = &data.economy_rules;
+    let devastation = state
+        .provinces
+        .get(location)
+        .map_or(0.0, |p| f64::from(p.devastation.min(100)) / 100.0);
     if friendly {
         let province_fx = state.province_effects(data, location);
         let bonus = province_fx.supply.apply(0.0) + general_fx.supply.flat;
-        (bonus, 0.0)
+        let cut = (f64::from(SUPPLY_RECOVERY) + bonus).max(0.0)
+            * devastation
+            * rules.supply_devastation_recovery_cut_percent
+            / 100.0;
+        (bonus - cut, 0.0)
     } else {
         let relief = general_fx.supply.percent
             + general_fx.attrition_resistance.percent
             + general_fx.attrition_resistance.flat;
-        (0.0, relief.clamp(-100.0, 90.0))
+        // A negative relief is an extra loss (-100: the loss doubles).
+        let ravaged = devastation * rules.supply_devastation_loss_percent;
+        (0.0, (relief.clamp(-100.0, 90.0) - ravaged).max(-100.0))
     }
 }
 
