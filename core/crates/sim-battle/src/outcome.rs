@@ -64,6 +64,9 @@ pub struct BattleOutcome {
     /// Simulated seconds.
     #[serde(default)]
     pub duration: f64,
+    /// EP9: how the battle ended (a refused battle carries no rout).
+    #[serde(default)]
+    pub end: crate::decision::BattleEnd,
 }
 
 impl BattleOutcome {

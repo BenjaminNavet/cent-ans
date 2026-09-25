@@ -242,6 +242,16 @@ func _test_bridge(store: FineGeoStore) -> void:
 	_check(absf(deck - 11.0 * MapData.vertical_scale()) < 1e-4, "deck not at z_deck: %.4f" % deck)
 	crossings.set_fine_mode(false)
 	_check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.3, 1890.4)), "bridge did not return to the V4 crossing")
+	# ZG4b : bascule étalée — budget de l'image épuisé, un seul ouvrage remis en forme par image.
+	for k in 3:
+		crossings._add({"id": "bridge_test", "name": "Pont", "structure": "stone", "px": Vector2(2080.3 + k, 1890.4), "dir": Vector2(0.0, 1.0), "width": 0.4, "type": "bridge", "index": 0})
+	FrameBudget.begin_frame()
+	FrameBudget._frame_start_usec -= 1000000
+	crossings.set_fine_mode(true)
+	_check(crossings.pending_reshapes() == 3, "spread bridge switch: %d pending" % crossings.pending_reshapes())
+	crossings.pump_reshape(true)
+	_check(crossings.pending_reshapes() == 0 and Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.0, 1890.0)), "bridge switch completed")
+	FrameBudget._frame = -1
 	crossings.queue_free()
 	renderer.free()
 

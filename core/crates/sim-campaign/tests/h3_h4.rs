@@ -543,6 +543,7 @@ fn fight(state: &mut CampaignState, data: &GameData) -> (ArmyId, ArmyId) {
         attacker: side(losses(&attacker), 5),
         defender: side(losses(&defender), -10),
         duration: 0.0,
+        end: Default::default(),
     };
     state.resolve_pending_battle(data, index, &outcome).unwrap();
     (attacker, defender)

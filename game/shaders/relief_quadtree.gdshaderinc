@@ -89,7 +89,7 @@ vec3 qt_vertex(vec3 v) {
 	float lod_fine = max(log2(s) - 1.0, 0.0);
 	float lod_coarse = max(log2(2.0 * s) - 1.0, 0.0);
 	vec2 p = qt_node.xy + g * s;
-	float h0 = qt_height_m(p, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse) * height_scale;
+	float h0 = campaign_display_height(qt_height_m(p, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse), p);
 	float dist = distance(qt_camera, vec3(p.x, h0, p.y));
 	float k = clamp((dist - qt_morph.x) * qt_morph.y, 0.0, 1.0);
 	vec2 gm = g - fract(g * 0.5) * 2.0 * k;
@@ -97,7 +97,7 @@ vec3 qt_vertex(vec3 v) {
 	float hc = qt_height_m(pm, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse);
 	float hf = qt_fine.x >= 0.0 && qt_fine.x == qt_coarse.x ? hc
 		: qt_height_m(pm, qt_fine, qt_fine_nbr, qt_fine_diag, lod_fine);
-	float h = mix(hc, hf, qt_morph.z * (1.0 - k)) * height_scale;
+	float h = campaign_display_height(mix(hc, hf, qt_morph.z * (1.0 - k)), pm);  // ZG8 : relief exagéré
 	if (v.y < -0.5) {
 		h -= qt_morph.w;
 	}

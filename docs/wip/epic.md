@@ -104,6 +104,8 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 ### 25/09 soir
 - EP8 fusionné dans main (3805ef66) : heure du jour (`BattleSim::range_factor`, midi par défaut, donc
   sans effet sur l'équilibre), fumées, poussière, caméra ; ADR 0055.
-- EP6 (villages) et EP9 (batailles décisives) coupés par le quota à 15 h 50, relancés depuis leur
+- EP9 fusionné (b4bc9707, ADR 0056 : armée brisée, bataille refusée, accalmie). EP6 et EP9 avaient été coupés par le quota à 15 h 50, relancés depuis leur
   `docs/wip/ep6-villages-decor.md` et `docs/wip/ep9-batailles-decisives.md`.
 - EP7 attend EP6 (API de placement explicite) et utilise `set_start_hour` d'EP8.
+- Points ouverts EP9 : passage de rivière profonde par l'IA attaquante (jusqu'à 22 min) ; l'IA
+  attaquante perd face à un défenseur immobile (10-12/12) ; seuil `ep1_scale` à 10 régiments en mêlée.
