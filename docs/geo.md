@@ -464,7 +464,7 @@ Petit-boutiste :
 
 | Champ | Type | Contenu |
 |---|---|---|
-| en-tête | `4s H H H H I I I I` (32 o) | `CAFV`, version 1, couche (1 fleuves, 2 routes), étage (2), 0, col, row, nombre de lignes, nombre de sommets |
+| en-tête | `4s H H H H I I I I` (28 o) | `CAFV`, version 1, couche (1 fleuves, 2 routes), étage (2), 0, col, row, nombre de lignes, nombre de sommets |
 | lignes | `u32 × 4` par ligne | entité, premier sommet, nombre de sommets, drapeaux |
 | `x`, `y` | `f32 × n` chacun | unités monde (pixels carte 4096, origine nord-ouest) |
 | `z` | `f32 × n` | niveau d'eau / surface de route en mètres (non exagéré) |
