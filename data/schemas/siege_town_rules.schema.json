@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_town_rules.schema.json",
+  "title": "Règles de la ville assiégée et du mobilier de rue",
+  "description": "Fichier data/rules/siege_town.json (lot BR3, ADR 0047) : disposition des îlots de maisons de la ville de siège générique et des villes emblématiques, emprises du mobilier de rue, marché de la place et marge des figurines. Lu par sim-battle (TownRules).",
+  "type": "object",
+  "$defs": {
+    "distance": { "type": "number", "minimum": 0, "maximum": 400 },
+    "positive": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+    "factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
+    "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "kind": { "enum": ["stall", "cart", "barrels", "woodpile", "well"] },
+    "kinds": { "type": "array", "items": { "$ref": "#/$defs/kind" }, "minItems": 1 },
+    "footprint": {
+      "type": "object",
+      "properties": {
+        "length_m": { "$ref": "#/$defs/positive", "description": "Longueur le long de la façade (axe X du modèle)." },
+        "depth_m": { "$ref": "#/$defs/positive", "description": "Profondeur (axe Z du modèle, face avant vers +Z)." }
+      },
+      "required": ["length_m", "depth_m"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "block": {
+      "type": "object",
+      "description": "Îlot de maisons intra-muros : rectangle orienté de deux rangées de maisons dos à dos (obstacle du cheminement, des figurines, source et cible du feu).",
+      "properties": {
+        "depth_m": { "$ref": "#/$defs/positive", "description": "Profondeur d'un îlot de deux rangées." },
+        "min_frontage_m": { "$ref": "#/$defs/positive", "description": "Façade minimale d'un îlot (ville générique)." },
+        "max_frontage_m": { "$ref": "#/$defs/positive", "description": "Façade maximale : au-delà, l'anneau est coupé par une ruelle de plus." },
+        "clearance_m": { "$ref": "#/$defs/distance", "description": "Marge gardée par le centre d'un régiment autour d'un îlot (grille A*)." }
+      },
+      "required": ["depth_m", "min_frontage_m", "max_frontage_m", "clearance_m"],
+      "additionalProperties": false
+    },
+    "generic": {
+      "type": "object",
+      "description": "Ville générique : anneaux d'îlots entre les rues principales qui vont de la place à chaque pan de mur.",
+      "properties": {
+        "rings_m": { "type": "array", "items": { "$ref": "#/$defs/positive" }, "minItems": 1, "description": "Rayons des anneaux d'îlots depuis le centre." },
+        "main_street_m": { "$ref": "#/$defs/positive", "description": "Largeur minimale d'une rue principale (entre deux îlots)." },
+        "alley_m": { "$ref": "#/$defs/distance", "description": "Largeur minimale d'une ruelle entre deux îlots voisins." },
+        "square_street_m": { "$ref": "#/$defs/distance", "description": "Rue libre autour de la place." },
+        "wall_walk_m": { "$ref": "#/$defs/distance", "description": "Bande libre au pied du rempart (défenseurs, échelles)." }
+      },
+      "required": ["rings_m", "main_street_m", "alley_m", "square_street_m", "wall_walk_m"],
+      "additionalProperties": false
+    },
+    "landmark": {
+      "type": "object",
+      "description": "Villes emblématiques : rangées de maisons le long du chemin de ronde et des rues du plan (et de la voie porte-place), puis treillis d'îlots dans le reste.",
+      "properties": {
+        "frontage_m": { "$ref": "#/$defs/positive", "description": "Façade d'un îlot du treillis." },
+        "pitch_x_m": { "$ref": "#/$defs/positive", "description": "Pas du treillis le long de x (façade + ruelle)." },
+        "pitch_z_m": { "$ref": "#/$defs/positive", "description": "Pas du treillis le long de z (profondeur + rue)." },
+        "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur libre des rues du plan et de la voie porte-place." },
+        "square_street_m": { "$ref": "#/$defs/distance" },
+        "wall_walk_m": { "$ref": "#/$defs/distance" }
+      },
+      "required": ["frontage_m", "pitch_x_m", "pitch_z_m", "lane_m", "square_street_m", "wall_walk_m"],
+      "additionalProperties": false
+    },
+    "church": {
+      "type": "object",
+      "description": "Église paroissiale : l'îlot le plus proche d'un point au fond de la ville.",
+      "properties": {
+        "length_m": { "$ref": "#/$defs/positive" },
+        "depth_m": { "$ref": "#/$defs/positive" },
+        "toward_back_m": { "$ref": "#/$defs/distance", "description": "Distance du centre au point visé, vers le fond (+z)." }
+      },
+      "required": ["length_m", "depth_m", "toward_back_m"],
+      "additionalProperties": false
+    },
+    "suburb": {
+      "type": "object",
+      "description": "Maison de faubourg (hors les murs) : emprise en facteurs du rayon des faubourgs de data/rules/siege_fire.json.",
+      "properties": {
+        "frontage_factor": { "$ref": "#/$defs/factor" },
+        "depth_factor": { "$ref": "#/$defs/factor" }
+      },
+      "required": ["frontage_factor", "depth_factor"],
+      "additionalProperties": false
+    },
+    "props": {
+      "type": "object",
+      "description": "Mobilier de rue (étals, charrettes, tonneaux, bûches, puits) : obstacle des figurines ; celui de la place bloque aussi le cheminement.",
+      "properties": {
+        "footprints": {
+          "type": "object",
+          "properties": {
+            "stall": { "$ref": "#/$defs/footprint" },
+            "cart": { "$ref": "#/$defs/footprint" },
+            "barrels": { "$ref": "#/$defs/footprint" },
+            "woodpile": { "$ref": "#/$defs/footprint" },
+            "well": { "$ref": "#/$defs/footprint" }
+          },
+          "required": ["stall", "cart", "barrels", "woodpile", "well"],
+          "additionalProperties": false
+        },
+        "wall_gap_m": { "$ref": "#/$defs/distance", "description": "Écart entre le dos du mobilier et la façade." },
+        "block_row_chances": { "type": "array", "items": { "$ref": "#/$defs/chance" }, "minItems": 1, "description": "Chances d'avoir 0, 1, 2… objets devant une rangée d'îlot." },
+        "square_kinds": { "$ref": "#/$defs/kinds", "description": "Rangée tournée vers la place." },
+        "street_kinds": { "$ref": "#/$defs/kinds", "description": "Rangée tournée vers la rue extérieure." },
+        "suburb_chance": { "$ref": "#/$defs/chance" },
+        "suburb_kinds": { "$ref": "#/$defs/kinds" },
+        "village_chance": { "$ref": "#/$defs/chance" },
+        "village_kinds": { "$ref": "#/$defs/kinds" },
+        "market": {
+          "type": "object",
+          "properties": {
+            "ring_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Rayon de la couronne d'étals en part du rayon de la place." },
+            "stall_spacing_m": { "$ref": "#/$defs/positive" },
+            "stalls_per_group": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 12 }, "minItems": 2, "maxItems": 2 },
+            "passage_m": { "$ref": "#/$defs/distance", "description": "Passage libre laissé face à chaque rue." },
+            "extra_chance": { "$ref": "#/$defs/chance" },
+            "extra_kinds": { "$ref": "#/$defs/kinds" }
+          },
+          "required": ["ring_factor", "stall_spacing_m", "stalls_per_group", "passage_m", "extra_chance", "extra_kinds"],
+          "additionalProperties": false
+        },
+        "path_margin_m": { "$ref": "#/$defs/distance", "description": "Marge du centre d'un régiment autour du mobilier de la place." }
+      },
+      "required": ["footprints", "wall_gap_m", "block_row_chances", "square_kinds", "street_kinds", "suburb_chance", "suburb_kinds", "village_chance", "village_kinds", "market", "path_margin_m"],
+      "additionalProperties": false
+    },
+    "figures": {
+      "type": "object",
+      "properties": {
+        "margin_m": { "$ref": "#/$defs/distance", "description": "Distance gardée par une figurine repoussée hors d'une emprise." }
+      },
+      "required": ["margin_m"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["block", "generic", "landmark", "church", "suburb", "props", "figures"],
+  "additionalProperties": false
+}
