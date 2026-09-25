@@ -270,9 +270,10 @@ def compute_strahler(table: LinkTable) -> np.ndarray:
         rest = np.flatnonzero(~done)
         if len(rest) == 0:
             break
-        # Cycle: release the pending link with the most processed parents.
-        scores = [sum(order[j] for j in parents[i]) for i in rest]
-        queue.append(int(rest[int(np.argmax(scores))]))
+        # Cycles (two-way links, loops): release every pending link that has a
+        # processed parent at once (O(n) per round), or all of them if none has.
+        ready = [int(i) for i in rest if any(done[j] for j in parents[i])]
+        queue.extend(ready if ready else [int(i) for i in rest])
     return order
 
 
