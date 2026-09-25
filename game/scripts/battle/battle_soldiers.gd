@@ -333,7 +333,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
-		mat.set_shader_parameter("blood", _living_blood(unit, id))
+		# Sang : uniforme mis à jour seulement quand il change sensiblement.
+		var blood := snappedf(_living_blood(unit, id), 0.02)
+		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
+			mat.set_meta("bv2_blood", blood)
+			mat.set_shader_parameter("blood", blood)
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
