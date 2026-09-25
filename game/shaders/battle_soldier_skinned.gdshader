@@ -394,7 +394,8 @@ void fragment() {
 		albedo = COATS[int(v_var.w * 4.99)] * v_color;
 		roughness = 0.6;
 	}
-	if (v_blood > 0.0 && code != C_PLATE) {
+	// Taches de sang : invisibles au loin, pas calculées au-delà de 90 m (coût des vivants).
+	if (v_blood > 0.0 && code != C_PLATE && dist < 90.0) {
 		// Deux octaves : taches arrondies et éclaboussures fines (lot BV2).
 		float spots = noise2(q * 7.0 + v_var.xy * 40.0) * 0.7 + noise2(q * 26.0 + v_var.zw * 17.0) * 0.3;
 		float amount = smoothstep(1.0 - v_blood * 0.6, 1.0, spots);

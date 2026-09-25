@@ -47,7 +47,7 @@ func _init() -> void:
 			var names := ["death", "death_m", "death_knees", "death_back", "death_back"]
 			var rows := []
 			for i in names.size():
-				rows.append([BattleSkinned.death_index("infantry", 0, names[i]), [0.0, 0.3, 0.0, 3.0, 7.0][i], 0.25 * i])
+				rows.append([BattleSkinned.death_index("infantry", 0, names[i]), [0.0, 0.3, 0.0, 3.0, 7.0][i], 0.1 + 0.2 * i])
 			_rank(world, "infantry", 0, "dead", rows, t0, Vector3(0, 0, 0))
 			_rank(world, "archer", 0, "dead", rows, t0 + 0.3, Vector3(0, 0, -3.0))
 		"sever":
@@ -113,7 +113,11 @@ func _rank(world: Node3D, kind: String, variant: int, mode: String, rows: Array,
 		var row: Array = rows[k]
 		mm.set_instance_transform(k, Transform3D(Basis.IDENTITY, origin + Vector3(k * spacing, 0, 0)))
 		if mode != "living":
-			mm.set_instance_custom_data(k, Color(t0, float(row[0]), float(row[1]), float(row[2])))
+			# Sang selon le réglage (`--blood=`), comme dans BattleSoldiers.
+			var w := float(row[2])
+			var code := floorf(w + 0.001)
+			var blood := (w - code) * float(BattleGore.level_settings().get("corpse_blood", 0.0))
+			mm.set_instance_custom_data(k, Color(t0, float(row[0]), float(row[1]), code + blood))
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER if mode == "living" else BattleSkinned.corpse_shader()
 	BattleSkinned.setup_material(mat, kind, variant)
@@ -130,7 +134,7 @@ func _rank(world: Node3D, kind: String, variant: int, mode: String, rows: Array,
 	mat.set_shader_parameter("trim", Color(0.83, 0.66, 0.24))
 	mat.set_shader_parameter("livery_share", 0.9)
 	if mode == "living":
-		mat.set_shader_parameter("blood", 0.8)
+		mat.set_shader_parameter("blood", 0.8 * float(BattleGore.level_settings().get("stains", 0.0)))
 	var inst := MultiMeshInstance3D.new()
 	inst.multimesh = mm
 	inst.material_override = mat
