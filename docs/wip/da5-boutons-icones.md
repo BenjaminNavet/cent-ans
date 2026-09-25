@@ -19,10 +19,13 @@ Bible : `docs/design/2026-09-25-bible-da.md` § 5, § 8. Plafond du lot : 5 $ (s
 ## État
 
 - [x] Inventaire, catalogue, schéma, captures avant (`docs/img/da5/avant_*.png`)
-- [ ] Générateur + tests (dry-run)
-- [ ] Sonde 4 images, génération
-- [ ] Branchement Godot, captures après, planche 24 px, ADR
+- [x] Générateur + tests (dry-run ≈ 4,19 $), sonde 4 images (0,18 $) validée
+- [~] Génération complète en cours (`cent-ans assets ink-icons`, reprise idempotente : relancer
+  la même commande, les sources déjà dans `tools/da5_raw/` ne sont pas refaites)
+- [x] Branchement Godot (IconLibrary, bandeau, cloche, fiches, bataille, filtres), ADR 0065
+- [ ] Revue visuelle des 88 images, reprises (≤ 2 par image), captures après, planche 24 px
 
 ## Prochaine étape
 
-Écrire `ink_icons.py` (plan, prompts, extraction d'alpha, médaillons) et ses tests.
+Fin de la génération → `--build-only`, import Godot, revue de `docs/img/da5/planche_icones_24px.png`,
+captures après (carte, ville, bataille), smoke.
