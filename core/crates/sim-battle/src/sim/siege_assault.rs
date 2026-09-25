@@ -119,7 +119,9 @@ impl BattleSim {
     /// `scale` = figures per soldier (BV1): one pose per figure of
     /// [`Unit::figure_positions`].
     pub fn soldier_poses(&self, unit: &Unit, scale: f64) -> Vec<[f64; 4]> {
-        let positions = unit.figure_positions(scale);
+        let mut positions = unit.figure_positions(scale);
+        // BR3: no figure in a house or a prop.
+        self.push_figures_out(unit, &mut positions);
         let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
             return positions
                 .iter()

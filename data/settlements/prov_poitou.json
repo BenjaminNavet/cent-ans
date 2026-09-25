@@ -66,7 +66,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Abbaye bénédictine fortifiée aux confins du Marais poitevin.",
+    "description": "Abbaye bénédictine fortifiée aux confins du Marais poitevin, érigée en évêché en 1317.",
     "sources": ["Abbaye de Maillezais"]
   }
 ]

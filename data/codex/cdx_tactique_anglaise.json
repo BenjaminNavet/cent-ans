@@ -1,0 +1,31 @@
+{
+  "id": "cdx_tactique_anglaise",
+  "title": "La tactique anglaise",
+  "category": "technique",
+  "aliases": [
+    "Tactique des hommes d'armes à pied",
+    "tactique anglaise",
+    "Dupplin Moor",
+    "Halidon Hill",
+    "bataille de Halidon Hill"
+  ],
+  "era": {
+    "from": "1332",
+    "to": "1453"
+  },
+  "summary": "Hommes d'armes démontés au centre, archers sur les ailes protégés par des pieux, sur une position choisie : essayée contre les Écossais à Dupplin Moor (1332) et Halidon Hill (1333), la recette anglaise triomphe à [[cdx_crecy|Crécy]], [[cdx_poitiers|Poitiers]] et [[cdx_azincourt|Azincourt]].",
+  "body": "À Dupplin Moor (1332), une petite armée d'exilés anglais écrase les Écossais en combattant à pied, archers sur les flancs. L'année suivante, à Halidon Hill, [[cdx_edouard_iii|Édouard III]] reprend le dispositif : les [[cdx_schiltron|schiltrons]] écossais, obligés de gravir une pente sous les flèches, sont anéantis. La leçon est retenue : les [[cdx_hommes_d_armes|hommes d'armes]] renvoient leurs chevaux à l'arrière et forment un mur, tandis que les archers à l'[[cdx_arc_long|arc long]] criblent l'assaillant.\n\nCette tactique défensive exige que l'ennemi attaque. Les Français s'y brisent à [[cdx_crecy|Crécy]] et à [[cdx_poitiers|Poitiers]], avant que [[cdx_du_guesclin|Du Guesclin]] refuse la bataille rangée. Ils la retrouvent à [[cdx_azincourt|Azincourt]] (1415), puis en viennent à bout grâce à l'artillerie à Formigny et à [[cdx_castillon|Castillon]].",
+  "gameplay": "Recherche : 200 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_entrainement_arc_long|Entraînement à l'arc long]]. Effets, pour toute la faction : +5 en moral de l'infanterie ; +3 en tir des tireurs. Débloque : [[cdx_retenues_anglaises|Hommes d'armes des retenues]].",
+  "entity": "tech_dismounted_tactics",
+  "see_also": [
+    "cdx_hommes_d_armes",
+    "cdx_arc_long",
+    "cdx_retenues_anglaises",
+    "cdx_crecy"
+  ],
+  "sources": [
+    "Bataille de Dupplin Moor",
+    "Bataille de Halidon Hill",
+    "Bataille de Crécy"
+  ]
+}

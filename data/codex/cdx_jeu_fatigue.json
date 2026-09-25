@@ -1,0 +1,16 @@
+{
+  "id": "cdx_jeu_fatigue",
+  "title": "La fatigue",
+  "category": "mecanique",
+  "aliases": [
+    "fatigue",
+    "épuisement",
+    "hors d'haleine"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Un homme d'armes en harnois qui marche, charge et frappe s'épuise en quelques minutes. La fatigue ralentit la troupe, affaiblit ses coups et finit par entamer son moral ; seul le repos la dissipe.",
+  "body": "Un combattant du XVe siècle porte vingt à vingt-cinq kilos de [[cdx_harnois|harnois]], répartis sur tout le corps : il peut courir, se relever, monter à cheval, mais il chauffe vite et respire mal sous la visière. Le corps à corps épuise en quelques minutes ; les mêlées de l'époque se font par reprises, les rangs se relayant et les combattants s'écartant pour souffler.\n\n[[cdx_azincourt|Azincourt]] (25 octobre 1415) en est l'exemple le plus cruel. Les hommes d'armes français, démontés, avancent sur plusieurs centaines de mètres de labours détrempés par la pluie de la nuit, enfonçant jusqu'aux chevilles sous le tir des archers. Ils arrivent hors d'haleine au contact d'Anglais restés immobiles et reposés ; serrés, trébuchant sur les morts, beaucoup ne peuvent plus se défendre.\n\nLes capitaines expérimentés ménagent donc leurs hommes : attendre l'ennemi sur place, le laisser venir à soi, garder une réserve fraîche. C'est tout l'art défensif anglais de [[cdx_crecy|Crécy]] et de [[cdx_poitiers|Poitiers]].",
+  "gameplay": "Chaque régiment a une fatigue de 0 à 100. Elle monte chaque seconde selon ce qu'il fait : +0,02 en tirant, +0,05 au pas, +0,25 au pas de course ou en retraite, +0,4 en [[cdx_jeu_charge|charge]], +0,3 en mêlée, à l'escalade ou en déroute (×1,3 sous la neige, ×0,8 pour les cavaliers). À l'arrêt, elle baisse de 0,8 par seconde : deux minutes de repos effacent un épuisement complet.\n\nEffets : la vitesse est multipliée par 1 − fatigue/200 (moitié moins vite à 100), les coups en mêlée par 1 − fatigue/250 (−40 % à 100), l'escalade des échelles est ralentie comme la marche, et au-delà de 60 le [[cdx_jeu_moral|moral]] s'effrite de 0,02 point par seconde et par point de fatigue en trop.\n\nConseil : ne faites pas courir l'infanterie lourde sur de longues distances, laissez l'ennemi venir à vous et gardez une réserve reposée pour la fin de la bataille.",
+  "see_also": ["cdx_jeu_moral", "cdx_jeu_meteo_bataille", "cdx_jeu_terrain_bataille", "cdx_harnois", "cdx_azincourt"],
+  "sources": ["Bataille d'Azincourt", "Armure de plates"]
+}

@@ -6,7 +6,7 @@
     "name": {
       "display": "Brunswick",
       "local": "Brunswik",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       10.5268,
@@ -41,7 +41,7 @@
     "name": {
       "display": "Brême",
       "local": "Bremen",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       8.8017,
@@ -56,7 +56,7 @@
       "bld_cathedral"
     ],
     "port": true,
-    "description": "Ville libre d'empire et siège archiépiscopal, grand port hanséatique de la Weser.",
+    "description": "Ville hanséatique largement autonome face à son archevêque, grand port de la Weser (elle ne sera reconnue ville libre d'Empire qu'en 1646).",
     "sources": [
       "Brême"
     ]
@@ -68,7 +68,7 @@
     "name": {
       "display": "Hildesheim",
       "local": "Hildensem",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       9.95,
@@ -94,8 +94,8 @@
     "kind": "abbey",
     "name": {
       "display": "Loccum",
-      "local": "Lucca",
-      "local_language": "moyen haut-allemand"
+      "local": "Luccum",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       9.1667,

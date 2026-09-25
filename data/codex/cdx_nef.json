@@ -1,0 +1,31 @@
+{
+  "id": "cdx_nef",
+  "title": "La nef",
+  "category": "unite",
+  "aliases": [
+    "Nef",
+    "nefs",
+    "navire rond",
+    "navires ronds",
+    "Grâce-Dieu"
+  ],
+  "era": {
+    "from": "1200",
+    "to": "1500"
+  },
+  "summary": "Au Moyen Âge, « nef » désigne le grand navire rond en général. Plus haute et plus large que la [[cdx_cogue|cogue]], elle sert de vaisseau amiral : ses châteaux portent des dizaines d'archers et d'hommes d'armes, et les plus grandes reçoivent un second mât à la fin du XIVe siècle.",
+  "body": "Le mot vient du latin navis. Les nefs de Méditerranée, comme celles que Saint Louis loue à Gênes et à Marseille pour ses croisades, sont déjà de grands navires à deux mâts et voiles latines, capables de porter des centaines de passagers. Dans le Nord, où règnent la [[cdx_cogue|cogue]] et la hourque, les grands navires à un mât dominent jusqu'à la fin du XIVe siècle ; les nefs à deux puis trois mâts, annonçant la caraque, se répandent au XVe siècle.\n\nLes rois font de ces grands navires des vaisseaux amiraux, dont les hauts châteaux abritent leurs meilleurs tireurs. [[cdx_henri_v|Henri V]] fait construire à Southampton la Grâce-Dieu, lancée en 1418, l'un des plus grands navires de son temps ; trop grande pour les ports et difficile à manœuvrer, elle ne prend jamais la mer au combat et finit désarmée sur la rivière Hamble.\n\nDevant Winchelsea, en 1350, les grandes nefs castillanes, plus hautes que les navires anglais, écrasent de pierres et de traits les ponts ennemis ; Édouard III ne l'emporte qu'au prix d'abordages acharnés. Dans ces combats, la hauteur de bord est un avantage décisif.",
+  "gameplay": "Navire à voile de 30 m sur 9 m, franc-bord 3,4 m. Coque 360 points ; embarque 120 soldats et 34 marins. Vitesse : 3 m/s à la voile ; virage 4° par seconde. Châteaux : 36 tireurs y tirent de 6,4 m de haut ; pavesade : traits reçus ×0,7 ; résistance au feu 0,1. Le plus grand navire du jeu : la coque la plus solide, le plus d'hommes et de tireurs, les châteaux les plus hauts. Lente à virer et soumise au vent, elle écrase à l'abordage tout ce qui est plus bas qu'elle.",
+  "entity": "ship_nef",
+  "see_also": [
+    "cdx_cogue",
+    "cdx_galee",
+    "cdx_henri_v",
+    "cdx_castille"
+  ],
+  "sources": [
+    "Nef (navire)",
+    "Grace Dieu (1418)",
+    "Bataille de Winchelsea (1350)"
+  ]
+}

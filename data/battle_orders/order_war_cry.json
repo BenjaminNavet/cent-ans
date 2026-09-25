@@ -10,7 +10,7 @@
     "fac_scotland": "Saint Andrew !",
     "fac_castile": "¡Santiago!"
   },
-  "description": "Le chef lance le cri d'armes de sa maison, repris par les régiments qui l'entourent : le moral remonte pour un temps. Chaque ost avait le sien : « Montjoie ! Saint-Denis ! » pour le roi de France, « Saint George ! » pour les Anglais d'Édouard III, « Montjoie Saint-Andrieu ! » pour les Bourguignons.",
+  "description": "Le chef lance le cri d'armes de sa maison, repris par les régiments qui l'entourent : le [[cdx_jeu_moral|moral]] remonte pour un temps. Chaque ost avait le sien : « Montjoie ! Saint-Denis ! » pour le roi de France, « Saint George ! » pour les Anglais d'[[cdx_edouard_iii|Édouard III]], « Montjoie Saint-Andrieu ! » pour les Bourguignons.",
   "icon": "war_cry",
   "scope": "radius",
   "requires_general": true,

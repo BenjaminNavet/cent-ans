@@ -1,0 +1,32 @@
+{
+  "id": "cdx_lanciers_gallois",
+  "title": "Les lanciers gallois",
+  "category": "unite",
+  "aliases": [
+    "Lanciers gallois",
+    "lancier gallois",
+    "fantassins gallois",
+    "Owain Lawgoch",
+    "Yvain de Galles"
+  ],
+  "era": {
+    "from": "1282",
+    "to": "1415"
+  },
+  "summary": "Levés par commissions d'array dans les marches et les comtés du pays de Galles, vêtus de vert et de blanc, les fantassins gallois fournissent à [[cdx_edouard_iii|Édouard III]] des lanciers rapides et bon marché. À [[cdx_crecy|Crécy]], selon Froissart, ils achèvent au couteau les chevaliers français tombés.",
+  "body": "Depuis la conquête du pays de Galles par Édouard Ier (1282-1283), les rois d'Angleterre lèvent des milliers de Gallois pour leurs guerres. Les commissaires d'array choisissent les hommes dans chaque seigneurie ; ceux de Flint et du nord du pays portent dans les années 1330-1340 une livrée de drap vert et blanc, l'un des premiers uniformes connus. Lanciers et archers gallois marchent côte à côte : les seconds deviendront célèbres avec l'[[cdx_arc_long|arc long]].\n\nPeu protégés, jambes souvent nues, armés d'une lance et d'un long couteau, ils sont rapides et coûtent peu : 2 pence par jour. À [[cdx_crecy|Crécy]], Froissart montre des « Gallois et Cornouaillais qui portaient grandes coutilles » se glissant parmi les chevaliers renversés pour les tuer, au grand dépit d'Édouard III qui aurait préféré les rançonner.\n\nTous les Gallois ne servent pas l'Angleterre. Owain Lawgoch, « Yvain de Galles », héritier des princes de Gwynedd, combat pour [[cdx_charles_v|Charles V]] jusqu'à son assassinat au siège de Mortagne-sur-Gironde en 1378, et la révolte d'Owain Glyndŵr (1400-1415) reçoit l'appui de la France.",
+  "gameplay": "Compagnie de 120 hommes (infanterie). Recrutement : 380 livres payées à l'enrôlement ; entretien 32 livres par mois, soit 128 par saison. Caractéristiques : mêlée 46, armure 22 (laisse passer 83 % des coups), moral 48, vitesse 55 (2,2 m/s). Exige une province de culture galloise. La place doit compter assez de paysans (dix fois l'effectif). Lanciers rapides et bon marché : couvrent les archers et achèvent les troupes en déroute (dégâts ×1,5 contre une compagnie qui fuit) ; peu protégés contre les traits.",
+  "entity": "unit_welsh_spearmen",
+  "see_also": [
+    "cdx_arc_long",
+    "cdx_crecy",
+    "cdx_coutiliers",
+    "cdx_retenues_anglaises"
+  ],
+  "sources": [
+    "Owain Lawgoch",
+    "Owain Glyndŵr",
+    "Bataille de Crécy",
+    "Armée anglaise durant la guerre de Cent Ans"
+  ]
+}

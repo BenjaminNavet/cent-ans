@@ -59,7 +59,7 @@
     "id": "set_jumieges",
     "province": "prov_normandie",
     "kind": "abbey",
-    "name": { "display": "Jumièges", "local": "Gemmetico", "local_language": "ancien français" },
+    "name": { "display": "Jumièges", "local": "Jumieges", "local_language": "ancien français" },
     "lonlat": [0.6667, 49.4333],
     "weight": 8,
     "owner": null,

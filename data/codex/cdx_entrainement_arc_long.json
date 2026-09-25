@@ -1,0 +1,28 @@
+{
+  "id": "cdx_entrainement_arc_long",
+  "title": "L'entraînement des archers anglais",
+  "category": "technique",
+  "aliases": [
+    "Entraînement à l'arc long",
+    "statut de Winchester",
+    "ordonnance de 1363"
+  ],
+  "era": {
+    "from": "1285",
+    "to": "1500"
+  },
+  "summary": "Tirer à l'[[cdx_arc_long|arc long]] demande des années de pratique. Les rois d'Angleterre en font une obligation : le statut de Winchester (1285) impose aux hommes libres de posséder un arc, et Édouard III ordonne en 1363 le tir le dimanche et les jours de fête.",
+  "body": "Un arc long de guerre demande une traction de plusieurs dizaines de kilos : les squelettes d'archers retrouvés dans l'épave de la Mary Rose (1545) portent les déformations d'une pratique commencée dès l'enfance. Le statut de Winchester (1285) oblige chaque homme libre à s'équiper selon sa fortune, et les plus modestes à posséder arc et flèches.\n\nEn 1363, [[cdx_edouard_iii|Édouard III]] ordonne aux shérifs de faire tirer les hommes valides les dimanches et jours de fête, et d'interdire les jeux inutiles comme le football ou le jet de pierre. La couronne constitue aussi des réserves de flèches et d'arcs dans la Tour de Londres. Cette politique donne à l'Angleterre des milliers de [[cdx_retenues_anglaises|archers]] expérimentés.",
+  "gameplay": "Recherche : 120 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +5 en tir des tireurs. Débloque : [[cdx_arc_long|Archers à l'arc long]], [[cdx_archers_montes|Archers montés]].",
+  "entity": "tech_longbow_drill",
+  "see_also": [
+    "cdx_arc_long",
+    "cdx_archers_montes",
+    "cdx_retenues_anglaises"
+  ],
+  "sources": [
+    "Arc long anglais",
+    "Yeoman",
+    "Statut de Winchester"
+  ]
+}

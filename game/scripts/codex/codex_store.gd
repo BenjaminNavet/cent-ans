@@ -40,6 +40,7 @@ var entries: Dictionary = {}  # id → fiche
 var codex_dir: String = ""
 var _aliases: Dictionary = {}  # alias en minuscules → id
 var _by_entity: Dictionary = {}  # entité de jeu → id
+var _exclusions: Dictionary = {}  # id → expressions en minuscules où l'alias n'est pas lié (B8)
 var _discovered: Dictionary = {}  # id → true
 var _save_path: String = SAVE_PATH
 var _alias_regex: RegEx
@@ -56,6 +57,7 @@ func reload(directory: String = "") -> void:
 	entries.clear()
 	_aliases.clear()
 	_by_entity.clear()
+	_exclusions.clear()
 	_alias_regex = null
 	var dir := DirAccess.open(codex_dir)
 	if dir != null:
@@ -97,6 +99,13 @@ func _add(entry: Dictionary) -> void:
 	var entity := str(entry.get("entity", ""))
 	if entity != "":
 		_by_entity[entity] = id
+	var contexts: Array = []
+	for context in entry.get("exclude_contexts", []):
+		var lowered := str(context).strip_edges().to_lower()
+		if lowered != "":
+			contexts.append(lowered)
+	if not contexts.is_empty():
+		_exclusions[id] = contexts
 
 
 func has_entry(id: String) -> bool:
@@ -136,7 +145,34 @@ func id_for_alias(alias: String) -> String:
 	return str(_aliases.get(alias.strip_edges().to_lower(), ""))
 
 
-## Expression régulière de tous les alias (les plus longs d'abord, mots entiers), ou null.
+## Expressions (minuscules) de la fiche `id` dans lesquelles un alias n'est pas auto-lié
+## (`exclude_contexts`, B8 : « Louis de Poitiers » pour la bataille de Poitiers).
+func exclude_contexts(id: String) -> Array:
+	return _exclusions.get(id, [])
+
+
+## Vrai si l'occurrence `[start, end[` d'un alias de `id` dans `text` fait partie d'une de ses
+## expressions exclues (casse ignorée).
+func is_excluded(id: String, text: String, start: int, end: int) -> bool:
+	var contexts: Array = _exclusions.get(id, [])
+	if contexts.is_empty():
+		return false
+	var alias := text.substr(start, end - start).to_lower()
+	for context: String in contexts:
+		var offset := context.find(alias)
+		while offset >= 0:
+			var from := start - offset
+			if from >= 0 and text.substr(from, context.length()).to_lower() == context:
+				return true
+			offset = context.find(alias, offset + 1)
+	return false
+
+
+## Expression régulière de tous les alias, ou null. Les plus longs d'abord : à une même
+## position, l'alternance retient l'alias le plus long (« Philippe VI » avant « Philippe »).
+## Mots entiers : ni lettre, chiffre ou `_` accolés, ni tiret entre deux mots (« Saint-Omer »
+## ne lie pas « Omer », « Poitiers-sur-… » ne lie pas « Poitiers ») ; l'apostrophe sépare
+## (« d'Artois » lie « Artois »).
 func alias_regex() -> RegEx:
 	if _alias_regex != null or _aliases.is_empty():
 		return _alias_regex
@@ -145,7 +181,7 @@ func alias_regex() -> RegEx:
 	var escaped := PackedStringArray()
 	for key in keys:
 		escaped.append(_escape(str(key)))
-	_alias_regex = RegEx.create_from_string("(?i)(?<![\\p{L}\\p{N}_])(%s)(?![\\p{L}\\p{N}_])" % "|".join(escaped))
+	_alias_regex = RegEx.create_from_string("(?i)(?<![\\p{L}\\p{N}_]|[\\p{L}\\p{N}]-)(%s)(?![\\p{L}\\p{N}_]|-[\\p{L}\\p{N}])" % "|".join(escaped))
 	return _alias_regex
 
 

@@ -1,0 +1,35 @@
+{
+  "id": "cdx_jeu_suite",
+  "title": "La suite d'un personnage",
+  "category": "mecanique",
+  "aliases": [
+    "suite",
+    "compagnon",
+    "compagnons",
+    "retenue",
+    "écuyer",
+    "porte-bannière",
+    "banquier lombard",
+    "pourvoyeur",
+    "guide du pays"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Un seigneur ne voyage jamais seul : écuyer, porte-bannière, confesseur, chroniqueur, banquier lombard… Jusqu'à huit compagnons rejoignent sa suite au fil des batailles et des séjours, et lui apportent chacun un talent.",
+  "body": "Un grand seigneur du XIVe siècle vit entouré d'un « hôtel » : chevaliers et écuyers de sa maison, chapelain et confesseur, médecin ou « physicien », barbier, clercs qui tiennent ses comptes, ménestrels, hérauts qui portent ses armes et ses messages. En campagne, cette maison forme le cœur de sa « retenue » : l'écuyer porte sa lance et son heaume, le porte-bannière tient l'étendard autour duquel se rallient ses hommes.\n\nLa suite dit le rang. [[cdx_froissart|Froissart]] fut clerc de la reine [[cdx_philippa_de_hainaut|Philippa de Hainaut]], puis suivit les cours de Gaston Fébus et de Wenceslas de Brabant ; [[cdx_guillaume_de_machaut|Guillaume de Machaut]] fut secrétaire de Jean de Luxembourg, roi de Bohême, qu'il accompagna sur les routes d'Europe. Les princes s'entourent aussi de financiers, souvent italiens, les « Lombards », qui leur avancent l'argent de la guerre.\n\nEn guerre, ces compagnons font la différence : un bon pourvoyeur nourrit l'armée, un guide du pays trouve le gué ou le chemin creux, un maître des engins abrège le siège, un chroniqueur fait la gloire de son maître.",
+  "gameplay": "La « Suite » de la fiche personnage compte au plus 8 compagnons, parmi quinze, répartis en Guerre, Cour, Foi, Savoir, Négoce et Renseignement. On ne les achète pas : ils viennent d'eux-mêmes après une bataille livrée ou gagnée, un siège gagné, une chevauchée menée, une rançon reçue, ou une saison passée dans une colonie amie dont la province a le bon bâtiment ; un seul peut arriver à chaque occasion. Exemples : Écuyer (200 ‰ par bataille livrée ; charge +5, moral +2), Porte-bannière (150 ‰ par victoire, après 2 batailles ; moral +5), Maître des engins (250 ‰ par siège gagné ; vitesse de siège +15 %), Banquier lombard (400 ‰ par rançon reçue ; entretien de l'armée −10 %), Pourvoyeur (marché, foire ou chevauchée ; [[cdx_jeu_ravitaillement|ravitaillement]] +1 et attrition −10 %), Guide du pays (chevauchée ou victoire ; mouvement +10 %, qui ne fait gagner un pas qu'ajouté à d'autres bonus, les pas étant arrondis à l'entier inférieur), Chroniqueur (prestige +3), Confesseur (piété +3, moral +2).\n\nLes effets s'ajoutent aux traits et compétences du personnage ; le prestige est versé chaque hiver. Deux généraux réunis peuvent se confier un compagnon. À la mort de leur maître, les compagnons héritables (écuyer, héraut d'armes, chroniqueur, ménestrel, banquier lombard) passent à son fils aîné adulte, sinon à sa fille, sinon au nouveau souverain ; les autres s'en vont.\n\nConseil : un général qui se bat souvent se forme une suite militaire ; les séjours dans une cité bien bâtie attirent physicien, confesseur et banquier.",
+  "see_also": [
+    "cdx_jeu_personnages",
+    "cdx_jeu_recrutement",
+    "cdx_herauts",
+    "cdx_froissart",
+    "cdx_chevalerie"
+  ],
+  "sources": [
+    "Écuyer",
+    "Hôtel du roi",
+    "Lombard (banquier)"
+  ]
+}

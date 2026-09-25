@@ -295,17 +295,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # --- Barre d'actions ----------------------------------------------------------------------
 
 
-func _panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.94, 0.89, 0.76, 0.97)
-	style.border_color = Color(0.45, 0.30, 0.14)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left = 12
-	style.content_margin_right = 12
-	style.content_margin_top = 8
-	style.content_margin_bottom = 8
-	return style
+func _panel_style() -> StyleBox:
+	return HudStyle.panel_box(10)
 
 
 func _build_bar() -> void:

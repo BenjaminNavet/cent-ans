@@ -94,13 +94,19 @@ fn add_suburbs(works: &mut SiegeWorks, rules: &FireRules) {
         let (mx, mz) = piece.midpoint();
         let (nx, nz) = piece.outward();
         let (tx, tz) = piece.tangent();
-        works.houses.push(House {
-            x: mx + nx * s.distance_m + tx * along,
-            z: mz + nz * s.distance_m + tz * along,
-            radius: s.radius_m,
-            fire: Blaze::default(),
-            suburb: true,
-        });
+        // BR3: a rural house along the wall, its rectangle for the figures.
+        let town = &crate::town::TownRules::bundled().suburb;
+        let mut house = House::block(
+            mx + nx * s.distance_m + tx * along,
+            mz + nz * s.distance_m + tz * along,
+            s.radius_m * town.frontage_factor,
+            s.radius_m * town.depth_factor,
+            tz.atan2(tx),
+        );
+        house.suburb = true;
+        house.radius = s.radius_m;
+        house.rows = 1;
+        works.houses.push(house);
     }
 }
 
@@ -258,7 +264,8 @@ impl BattleSim {
                 if n == b || target.fire != Blaze::default() {
                     continue;
                 }
-                let gap = target.edge_distance(source.x, source.z) - source.radius;
+                // BR3: between the blocks' rectangles.
+                let gap = source.gap_to(target);
                 if gap > reach {
                     continue;
                 }
@@ -268,7 +275,11 @@ impl BattleSim {
                 draws.push((Fuel::House(n), chance));
             }
             if gate_open {
-                let gap = gate.distance(source.x, source.z) - source.radius;
+                let gap = if source.has_footprint() {
+                    source.footprint().distance_to_segment(gate.a, gate.b)
+                } else {
+                    gate.distance(source.x, source.z) - source.radius
+                };
                 if gap <= reach {
                     let chance = base
                         * (1.0 - gap.max(0.0) / reach)

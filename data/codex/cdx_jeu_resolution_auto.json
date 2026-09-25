@@ -1,0 +1,17 @@
+{
+  "id": "cdx_jeu_resolution_auto",
+  "title": "La résolution automatique",
+  "category": "mecanique",
+  "aliases": [
+    "résolution automatique",
+    "auto-résolution",
+    "rapport de forces",
+    "chances de victoire"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Toute bataille peut se régler sans être livrée en 3D : le jeu la joue par phases, comme les chroniqueurs la racontent — duel des tireurs, charge, puis mêlée jusqu'à ce qu'un camp se rompe.",
+  "body": "Les récits de bataille de [[cdx_froissart|Froissart]] ou de [[cdx_jean_le_bel|Jean le Bel]] suivent presque toujours le même ordre. Les armées se rangent ; les archers et les arbalétriers ouvrent le combat ; la cavalerie charge, sur les ailes ou contre les tireurs ; puis les batailles à pied s'affrontent jusqu'à ce que l'une plie. La déroute et la poursuite font ensuite l'essentiel des morts : c'est dans la fuite, quand on tourne le dos, qu'on est tué ou pris.\n\nLes chiffres de ces récits sont à prendre avec prudence : les chroniqueurs grossissent volontiers l'ennemi et comptent les morts nobles plutôt que les piétons. Mais ils s'accordent sur l'essentiel : un camp bien armé, bien placé et bien commandé l'emporte souvent sur un adversaire plus nombreux, et le vaincu perd bien plus d'hommes que le vainqueur.",
+  "gameplay": "Choisir « Résolution automatique » (ou laisser une bataille en attente jusqu'au tour suivant) la joue en trois volées, une charge et quatre reprises de mêlée ; les batailles entre puissances IA sont toujours résolues ainsi. Chaque phase coûte à un camp 1 point de moral par pour cent d'hommes perdus ; sous 25, il se rompt. Le vainqueur poursuit : 5 % des survivants vaincus, plus 20 % multipliés par le rapport entre les cavaliers du vainqueur et ces survivants (les cavaliers vaincus s'échappent mieux). Pertes bornées : 35 % au plus pour le vainqueur, de 10 à 70 % pour le vaincu ; moral +5 au vainqueur, −20 au vaincu.\n\nVolées : les tireurs tirent, l'armure en arrête jusqu'à 80 %, les cavaliers ne reçoivent que la moitié des traits, les pavois en arrêtent 30 % ; derrière un front qui fait au moins le quart de l'armée, les tireurs sont peu exposés. Charge : les cavaliers frappent selon leur statistique de charge, surtout les tireurs à découvert (×1,5) ; les piquiers n'en reçoivent que 25 % et la rendent, les archers à pieux en défense 60 %. Mêlée : les piquiers frappent les cavaliers trois fois plus fort ; les tireurs combattent à moitié et continuent de tirer. Chaque phase est tirée à ±15 % de fortune.\n\nCirconstances : commandement du général (+3 % par point), expérience et vivres des régiments, moral de départ ; [[cdx_jeu_meteo_bataille|météo]] de la saison ; terrain de la province (charge ×0,8 et défenseur ×1,15 en collines, charge ×0,5 et défenseur ×1,25 en montagne, charge réduite en forêt (×0,5), dans les marais (×0,5) et le bocage (×0,7), tir réduit en forêt (×0,7) et dans le bocage (×0,85)) ; assaillant ×0,8 dans une province à rivière ; devant des [[cdx_jeu_murailles|murailles]] intactes, assaillant ×0,7 et tir du défenseur ×1,3. Le « rapport de forces » de l'écran d'avant-bataille estime les chances de victoire sans rien tirer au sort.",
+  "see_also": ["cdx_jeu_moral", "cdx_jeu_charge", "cdx_jeu_tir", "cdx_jeu_terrain_bataille", "cdx_jeu_pertes_prisonniers", "cdx_deroute_debandade"],
+  "sources": ["Jean Froissart", "Bataille de Crécy"]
+}
