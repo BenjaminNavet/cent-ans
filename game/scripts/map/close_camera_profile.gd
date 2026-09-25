@@ -133,13 +133,21 @@ func landmark_floor(p: Vector2, zones: PackedVector3Array) -> float:
 	return best
 
 
+
+## Plancher effectif de l'exagération de près : `exaggeration_near` (lot ZG4), relevé par le relief
+## exagéré du lot ZG8 (`ReliefExaggerationProfile.near_exaggeration`) quand il est actif.
+func near_exaggeration() -> float:
+	return ReliefExaggerationProfile.load_default().near_floor(exaggeration_near)
+
+
 ## Exagération verticale continue (×) pour une distance caméra.
 func exaggeration_at(distance: float) -> float:
+	var near := near_exaggeration()
 	var lo := log(maxf(exaggeration_near_distance, 1e-4))
 	var hi := log(maxf(exaggeration_far_distance, exaggeration_near_distance * 1.01))
 	var t := smoothstep(lo, hi, log(maxf(distance, 1e-4)))
 	# Interpolation géométrique : paliers de quantification réguliers sur toute la plage.
-	return exaggeration_near * pow(exaggeration_far / exaggeration_near, t)
+	return near * pow(exaggeration_far / near, t)
 
 
 ## Échelle verticale continue (unités monde par mètre) : `MapData.HEIGHT_SCALE` en vue
@@ -159,7 +167,7 @@ func quantized_scale(distance: float, current: float = -1.0) -> float:
 		var current_index := roundf(log(current / MapData.HEIGHT_SCALE) / step)
 		if absf(x - current_index) < 0.5 + exaggeration_hysteresis:
 			index = current_index
-	var lowest := ceilf(log(exaggeration_near / exaggeration_far) / step - 0.5)
+	var lowest := ceilf(log(near_exaggeration() / exaggeration_far) / step - 0.5)
 	index = clampf(index, lowest, 0.0)
 	return MapData.HEIGHT_SCALE * exp(index * step)
 

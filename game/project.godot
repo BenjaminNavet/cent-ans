@@ -170,6 +170,18 @@ campaign_prop_scale={
 "type": "float",
 "value": 1.0
 }
+campaign_relief_gain={
+"type": "float",
+"value": 0.0
+}
+campaign_relief_floor={
+"type": "sampler2D",
+"value": ""
+}
+campaign_relief_floor_info={
+"type": "vec4",
+"value": Vector4(8, 3.5, 0, 0)
+}
 
 [rendering]
 
