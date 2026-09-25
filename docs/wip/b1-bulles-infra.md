@@ -3,13 +3,14 @@
 Branche : `feat/b1-bulles-infra` (worktree agent). Spec : `docs/design/2026-09-25-bulles-partout.md`.
 
 ## État
-- [ ] T universel (bulle non épinglée > infobulle riche > infobulle simple du contrôle survolé)
-- [ ] Chaîne parent → enfant (méta `parent`, épingler un enfant épingle ses ancêtres)
-- [ ] Pieds « T : maintenir ouverte » / « Clic droit : détacher » / « Clic : lire la fiche »
-- [ ] `gameplay` : encadré « En jeu » (fenêtre) + ligne dans la bulle
-- [ ] Titres d'infobulles riches liés via `entity`
-- [ ] Conversion infobulles simples → riches (map_ui, province_panel, faction_panel, battle_hud, pre_battle_dialog, army_strip)
-- [ ] Tests smoke + capture `docs/img/bulles-bg3.png`
+- [x] T universel (`CodexBubbles.pin_current`) : bulle non épinglée (ou en attente) > infobulle riche > infobulle simple du contrôle survolé (après le délai d'infobulle)
+- [x] Chaîne parent → enfant (méta `parent`, `parent_of`) : épingler épingle les ancêtres, détacher détache les descendantes, une bulle retirée rattache ses filles à sa parente
+- [x] Pieds « T : maintenir ouverte » / « Clic droit : détacher » / « Clic : lire la fiche » ; pied des infobulles riches
+- [x] `gameplay` : encadré « En jeu » (fenêtre, `gameplay_box`) + ligne « En jeu : » (1re phrase) dans la bulle
+- [x] Titres d'infobulles riches liés via `entity` (`RichTooltip.entity_name`, `title_entry`), édits compris
+- [x] Conversions : army_strip (cartes de régiment, en-tête), battle_hud (ordres, retraite), pre_battle_dialog (boutons, renforts, composition, commandement), map_ui (recherche via `RichBox`, choix du général). province_panel et faction_panel étaient déjà riches.
+- [ ] Vérifier smoke (`CENT_ANS_SMOKE_ONLY=codex_bubbles` puis complet) et pytest
+- [ ] Capture `docs/img/bulles-bg3.png` (`godot --path game --script res://tests/bubbles_screenshot.gd`)
 
 ## Prochaine étape
-Implémenter `codex_bubbles.gd`.
+Build GDExtension, import, lancer le smoke.
