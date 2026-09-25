@@ -1,0 +1,5 @@
+{
+  "description": "Avantage de la hauteur en mêlée (lot SG4, suite de R4, ADR 0046) : un régiment qui combat vers le bas (plus haut que son adversaire) frappe plus fort, un régiment qui combat en montée frappe moins fort. L'écart de hauteur entre les deux régiments est plafonné. Réglé pour qu'à forces égales à l'échelle épique un défenseur sur une crête l'emporte le plus souvent, sans rendre l'attaque en plaine perdue d'avance.",
+  "melee_per_m": 0.04,
+  "max_height_m": 6.0
+}
