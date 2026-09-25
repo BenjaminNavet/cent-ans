@@ -216,11 +216,20 @@ pub struct Unit {
     pub knocked: f64,
     #[serde(default)]
     pub knocked_timer: f64,
+    /// R4: simulated time at which enemy shooters last saw the regiment
+    /// (a target of indirect volleys for a few seconds after).
+    #[serde(default = "unseen")]
+    pub seen_at: f64,
 }
 
 /// `missile_timer` of a regiment never shot at.
 fn never() -> f64 {
     1.0e6
+}
+
+/// `seen_at` of a regiment enemy shooters never saw.
+fn unseen() -> f64 {
+    -1.0e6
 }
 
 impl Unit {
@@ -284,6 +293,7 @@ impl Unit {
             loss_by: None,
             knocked: 0.0,
             knocked_timer: 0.0,
+            seen_at: unseen(),
         }
     }
 
