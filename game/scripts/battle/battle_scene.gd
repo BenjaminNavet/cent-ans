@@ -783,6 +783,7 @@ func _finish_right(position: Vector2) -> void:
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
+	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result

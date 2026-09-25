@@ -419,6 +419,8 @@ func select_army(army_id: String) -> void:
 	if army.is_empty():
 		deselect_army()
 		return
+	if selected_army != army_id:
+		UiSounds.play("army")  # UB1 / U13 : piétinement de la troupe
 	selected_army = army_id
 	armies.set_selected(army_id)
 	if agents_ctl != null:  # C6 agents : une seule sélection à la fois
@@ -573,6 +575,7 @@ func _on_province_right_clicked(index: int) -> void:
 		return
 	var target_id: String = str(map_data.get_province(index).get("id", ""))
 	var result := order_move(selected_army, target_id)
+	UiSounds.play_order_result(result)  # UB1 / U13
 	if not result["ok"]:
 		ui.show_toast(str(result.get("error", "Ordre refusé")), true)
 
@@ -843,9 +846,12 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 		return {"ok": false, "error": "Simulation absente"}
 	var result: Dictionary = sim.call("submit_order", order)
 	if result.get("ok", false):
+		# UB1 / U13 : recrutement, construction ou ordre ordinaire.
+		UiSounds.play({"recruit": "recruit", "build": "build"}.get(str(order.get("type", "")), "order"))
 		ui.show_toast(success_text)
 		refresh_all()
 	else:
+		UiSounds.play("refused")
 		ui.show_toast(str(result.get("error", "Ordre refusé")), true)
 	return result
 
