@@ -78,12 +78,12 @@ func _init() -> void:
 	if _wants("push"):
 		await _pushers("tower", "beffroi_pousse")
 		await _pushers("ram", "belier_pousse")
+	if _wants("lod"):
+		await _lod_view()
 	if _wants("bombard"):
 		await _bombard_fire()
 	if _wants("treb"):
 		await _trebuchet_crew()
-	if _wants("lod"):
-		await _lod_view()
 	print("sg3_siege_shot: done at %.0f s, %d servants drawn" % [float(battle.call("get_elapsed")), engines.crew.shown if engines.crew != null else 0])
 	quit(0)
 
