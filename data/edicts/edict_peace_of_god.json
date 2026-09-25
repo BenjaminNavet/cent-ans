@@ -6,8 +6,8 @@
   "description": "Reprise du mouvement de paix ecclésiastique (assemblées du Puy en 975 puis de Charroux en 989) : le clergé local fait proclamer trêves et protections pour [[cdx_jeu_ordre_public|calmer la province]], au prix d'un moindre effort de guerre.",
   "delay_turns": 1,
   "effects": [
-    { "effect": "unrest", "value": -8 },
-    { "effect": "piety", "value": 2 },
+    { "effect": "unrest", "value": -6 },
+    { "effect": "piety", "value": 1 },
     { "effect": "recruit_slots", "value": -1 }
   ],
   "sources": ["Économie médiévale", "Institutions ecclésiastiques médiévales"]
