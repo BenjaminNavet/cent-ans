@@ -50,6 +50,15 @@ camps, réserves comprises) :
   anneaux), caméra (bornes, recul maximal), minicarte, brume au sol, herbe couchée et boîtes
   englobantes des effets suivent la taille du champ.
 - Taille des unités : option **Épique (× 4)** en plus de Petite à Ultra (ADR 0016, rendu seul).
+- Rendu des grandes masses (`battle_soldiers.gd`, imposteurs de l'ADR 0024) : budget d'animation
+  par distance (au-delà de 450 m un régiment n'est remis à jour qu'une image sur 2, au-delà de
+  800 m une sur 3, jamais quand son effectif dessiné change) ; imposteurs à demi-densité au-delà
+  de 700 m (une figurine sur deux effacée par le shader, les autres élargies) ; cadavres envoyés au
+  GPU une fois par image et par cellule. Les ombres restaient déjà coupées à 190 m et les cadavres
+  plafonnés par cellule et au total (BV2). `--no-ep1-budget` coupe ces trois mesures.
+- Mesures (M4 Pro chargé, 1600 × 900, Haut) : 15 000 soldats ≈ 57 i/s (plafond de l'écran),
+  25 600 figurines ≈ 50 i/s, 19 000 soldats présents (172 régiments) 36 i/s contre 30 sans le
+  budget. Détail dans le suivi.
 
 ## Conséquences
 
