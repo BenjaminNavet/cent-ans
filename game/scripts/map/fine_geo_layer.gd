@@ -23,6 +23,9 @@ const RIVER_SHADER := preload("res://shaders/river_fine.gdshader")
 const ROAD_SHADER := preload("res://shaders/road_fine.gdshader")
 const WALLED := ["city", "town", "castle"]
 const GATE_MIN_WIDTH := 0.3
+## Lot ZG4b : hauteur (m) du tablier des ponts-portes au-dessus de l'eau (pas d'ancrage `z_deck`
+## pour eux) ; ouvrages à l'échelle réelle comme les ponts ancrés (`RiverCrossings.FINE_SCALE`).
+const GATE_DECK_RISE_M := 7.0
 
 ## Rayon (unités) des tuiles voulues autour du point visé : distance caméra × facteur, borné.
 @export var radius_factor: float = 1.3
@@ -439,13 +442,20 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		var structure := ("gate" if width >= GATE_MIN_WIDTH else "stone") if kind in WALLED else "wood"
 		var instance := MeshInstance3D.new()
 		instance.name = "Gate_%d" % index
-		instance.mesh = BridgeMeshes.build(structure, maxf(width, 0.15), absi(str(index).hash()) + nodes.size())
+		# ZG4b : échelle réelle (ZG5b les laissait à l'échelle exagérée de la carte, ×2 en hauteur et
+		# en largeur de tablier, culées de 50-100 m) : maillage d'une portée `width / FINE_SCALE`
+		# réduit de `FINE_SCALE`, hauteur recalculée à chaque échelle verticale (`_ground_gate`).
+		var mesh_width := maxf(width, 0.01) / RiverCrossings.FINE_SCALE
+		instance.mesh = BridgeMeshes.build(structure, mesh_width, absi(str(index).hash()) + nodes.size())
 		var dir: Vector2 = gate["dir"]
 		var across := Vector3(-dir.y, 0.0, dir.x)
 		var along := across.cross(Vector3.UP)
 		var p: Vector2 = gate["px"]
-		instance.transform = Transform3D(Basis(across, Vector3.UP * RiverCrossings.HEIGHT_SCALE, along * RiverCrossings.DECK_SCALE), Vector3(p.x, 0.0, p.y))
+		instance.position = Vector3(p.x, 0.0, p.y)
 		instance.set_meta("z_m", float(gate["z"]))
+		instance.set_meta("across", across)
+		instance.set_meta("along", along)
+		instance.set_meta("mesh_width", mesh_width)
 		instance.visibility_range_end = RiverCrossings.VISIBILITY_RANGE
 		(entry["node"] as Node3D).add_child(instance)
 		instance.visible = _bridges_fine
@@ -455,7 +465,12 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 
 
 func _ground_gate(instance: MeshInstance3D) -> void:
-	instance.position.y = maxf(float(instance.get_meta("z_m", 0.0)) * MapData.vertical_scale(), 0.0)
+	var vs := MapData.vertical_scale()
+	var k := RiverCrossings.FINE_SCALE
+	var deck_top := (0.05 + 0.02 * float(instance.get_meta("mesh_width", 1.0))) * k
+	var k_h := clampf(GATE_DECK_RISE_M * vs / maxf(deck_top, 1e-4), 0.3, 12.0)
+	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k)
+	instance.position.y = maxf(float(instance.get_meta("z_m", 0.0)) * vs, 0.0)
 
 
 func _reground_gates() -> void:
@@ -492,6 +507,8 @@ func flush(camera_distance: float) -> void:
 		_collect_jobs(true)
 		_install_ready(1 << 20)
 	update_view(camera_distance)
+	if rivers.crossings != null:
+		rivers.crossings.pump_reshape(true)  # ZG4b : bascule étalée des ponts terminée
 	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count(), "road_vertices": road_vertex_count()}.merged(perf_stats())))
 
 
