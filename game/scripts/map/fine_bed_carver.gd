@@ -4,7 +4,7 @@ extends RefCounted
 ## Lit des fleuves fins creusé dans les pages du quadtree de relief (lot ZG5b, ADR 0036).
 ##
 ## Choix : **abaissement des pages** plutôt qu'une texture de lit à part. Chaque page de hauteurs
-## (tuile 512² de la pyramide, étage ≥ E2) est retouchée dans un fil de travail avant son
+## (tuile 512² de la pyramide, étage ≥ E3) est retouchée dans un fil de travail avant son
 ## téléversement (`ReliefQuadtree.page_filter`) : sous chaque fleuve fin, la hauteur descend sous
 ## le niveau d'eau `z` de la tuile CAFV (profil parabolique, berges fondues sur `bank` mètres).
 ## Un seul état pour tout le monde : déplacement des patchs (vertex shader), normales d'ombrage
@@ -12,12 +12,16 @@ extends RefCounted
 ## surface côté processeur (`surface_height_at` : ponts, maquettes, rubans). Aucun coût par image.
 ##
 ## Largeur creusée : au moins `min_half_px` pixels de page de chaque côté (un ruisseau de 5 m sur
-## E3 à 45 m/px creuse un sillon d'un pixel et demi). Ordres de Strahler creusés : ≥ 5 aux étages
-## ≤ E2 (palier 1), ≥ 3 au-delà (palier 2-3), comme l'affichage des rubans. Pas de lit sous les
+## E4 à 22 m/px creuse un sillon d'un pixel et demi). Rangs creusés (ordre de Strahler ou largeur) :
+## ≥ 5 à E3, ≥ 3 au-delà. Pas de lit sous les
 ## emprises des colonies (l'eau passe sous les villes, comme `RiversRenderer`).
 
 ## Pixels de page minimaux de chaque côté de l'axe (sillon des cours d'eau étroits).
 const MIN_HALF_PX := 0.75
+## Étage minimal creusé : E3 (45 m). Les pages E1-E2 (vue moyenne, lointain de la vue comté) ne
+## le sont pas : l'eau y flotte au-dessus de la surface (`FineRibbonJob.RIVER_LIFT_M`), invisible à
+## cette distance, et le panoramique ne paie pas le creusement de centaines de pages E2.
+const MIN_LEVEL := 3
 ## Largeur de berge : part de la largeur du lit, au moins `BANK_MIN_PX` pixels de page.
 const BANK_FRACTION := 0.35
 const BANK_MIN_PX := 1.5
@@ -49,20 +53,19 @@ func _init(fine_store: FineGeoStore, m_per_unit: float, h_min: float, h_range: f
 
 
 static func min_order_for_level(level: int) -> int:
-	return 5 if level <= 2 else 3
+	return 5 if level <= 3 else 3
 
 
 ## Appelé par `ReliefQuadtree` sur le fil principal quand une page est décodée : rend une tâche
-## (`apply(bytes)`, exécutée dans un fil) ou null s'il n'y a rien à creuser.
+## (`apply(bytes)`, exécutée dans un fil : lecture des tuiles CAFV comprise) ou null s'il n'y a
+## rien à creuser. Aucune entrée-sortie ici (fil principal).
 func carve_job(key: int) -> Object:
 	var level := ReliefPyramid.level_of_key(key)
-	if level < 2 or store == null:
+	if level < MIN_LEVEL or store == null:
 		return null
 	var origin := ReliefPyramid.tile_origin(level, ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
 	var units := ReliefPyramid.tile_units(level)
-	var reach := MAX_REACH_M / meters_per_unit
-	var rect := Rect2(origin, Vector2(units, units)).grow(reach)
-	var min_order := min_order_for_level(level)
+	var rect := Rect2(origin, Vector2(units, units)).grow(MAX_REACH_M / meters_per_unit)
 	var task := CarveTask.new()
 	var c0 := int(floor(rect.position.x / FineGeoStore.TILE_UNITS))
 	var c1 := int(floor(rect.end.x / FineGeoStore.TILE_UNITS))
@@ -70,26 +73,17 @@ func carve_job(key: int) -> Object:
 	var r1 := int(floor(rect.end.y / FineGeoStore.TILE_UNITS))
 	for row in range(r0, r1 + 1):
 		for col in range(c0, c1 + 1):
-			var tile := store.load_sync(CafvTile.LAYER_RIVERS, col, row)
-			if tile == null:
-				continue
-			var picked := PackedInt32Array()
-			for i in tile.lines():
-				if tile.line_rank[i] < min_order:
-					continue
-				var b := tile.line_bounds[i]
-				if b.z < rect.position.x or b.x > rect.end.x or b.w < rect.position.y or b.y > rect.end.y:
-					continue
-				picked.append(i)
-			if not picked.is_empty():
-				task.tiles.append(tile)
-				task.lines.append(picked)
-	if task.tiles.is_empty():
+			if store.has_tile(CafvTile.LAYER_RIVERS, col, row):
+				task.tile_keys.append(Vector2i(col, row))
+	if task.tile_keys.is_empty():
 		stats["skipped"] = int(stats["skipped"]) + 1
 		return null
 	for c in covers:
 		if rect.grow(c.z).has_point(Vector2(c.x, c.y)):
 			task.covers.append(c)
+	task.store = store
+	task.rect = rect
+	task.min_order = min_order_for_level(level)
 	task.origin = origin
 	task.px_units = units / ReliefPyramid.TILE_PX
 	task.meters_per_unit = meters_per_unit
@@ -103,6 +97,10 @@ func carve_job(key: int) -> Object:
 class CarveTask:
 	extends RefCounted
 
+	var store: FineGeoStore
+	var tile_keys: Array[Vector2i] = []
+	var rect: Rect2
+	var min_order: int = 3
 	var tiles: Array[CafvTile] = []
 	var lines: Array[PackedInt32Array] = []
 	var covers: PackedVector4Array = PackedVector4Array()
@@ -117,6 +115,7 @@ class CarveTask:
 		var side := ReliefPyramid.TILE_PX
 		if bytes.size() != side * side * 2:
 			return bytes
+		_gather()
 		var out := bytes
 		var px_m := px_units * meters_per_unit
 		var to_code := 65535.0 / h_range
@@ -128,6 +127,26 @@ class CarveTask:
 				for k in range(s, e):
 					_segment(out, side, tile, k, px_m, to_code)
 		return out
+
+	## Lignes des tuiles CAFV qui touchent la page (lecture dans ce fil).
+	func _gather() -> void:
+		tiles.clear()
+		lines.clear()
+		for k in tile_keys:
+			var tile := store.fetch_threadsafe(CafvTile.LAYER_RIVERS, k.x, k.y)
+			if tile == null:
+				continue
+			var picked := PackedInt32Array()
+			for i in tile.lines():
+				if tile.line_rank[i] < min_order:
+					continue
+				var b := tile.line_bounds[i]
+				if b.z < rect.position.x or b.x > rect.end.x or b.w < rect.position.y or b.y > rect.end.y:
+					continue
+				picked.append(i)
+			if not picked.is_empty():
+				tiles.append(tile)
+				lines.append(picked)
 
 	func _segment(out: PackedByteArray, side: int, tile: CafvTile, k: int, px_m: float, to_code: float) -> void:
 		var ax := tile.x[k]

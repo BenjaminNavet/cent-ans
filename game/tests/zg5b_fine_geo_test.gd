@@ -154,15 +154,21 @@ func _run() -> void:
 		_check(absf(_page_h(covered, origin, px_units, Vector2(2100.0, 1890.0)) - 50.0) < 0.1, "carved under a settlement cover")
 		carver.covers = PackedVector4Array()
 	_check(carver.carve_job(ReliefPyramid.key_of(1, 16, 14)) == null, "E1 page carved")
-	# Page E2 (32, 29) : seul l'ordre ≥ 5 est creusé ; le ruisseau d'ordre 3 ne l'est pas.
-	var e2_key := ReliefPyramid.key_of(2, 32, 29)
-	var e2_task: Object = carver.carve_job(e2_key)
-	if _check(e2_task != null, "no carve task for E2"):
-		var e2 := (e2_task.call("apply", _flat_page(80.0)) as PackedByteArray)
-		var o2 := ReliefPyramid.tile_origin(2, 32, 29)
-		var u2 := ReliefPyramid.pixel_units(2)
-		_check(_page_h(e2, o2, u2, Vector2(2080.0, 1890.0)) < 47.0, "E2 order-5 river not carved")
-		_check(absf(_page_h(e2, o2, u2, Vector2(2090.0, 1870.0)) - 80.0) < 0.1, "E2 order-3 brook carved")
+	# Pages E1-E2 jamais creusées ; E3 : seul le rang ≥ 5 (le ruisseau de 5 m, rang 3, ne l'est pas).
+	_check(carver.carve_job(ReliefPyramid.key_of(2, 32, 29)) == null, "E2 page carved")
+	var e3_key := ReliefPyramid.key_of(3, 65, 59)
+	var e3_task: Object = carver.carve_job(e3_key)
+	if _check(e3_task != null, "no carve task for E3"):
+		var e3 := (e3_task.call("apply", _flat_page(80.0)) as PackedByteArray)
+		var o3 := ReliefPyramid.tile_origin(3, 65, 59)
+		var u3 := ReliefPyramid.pixel_units(3)
+		_check(_page_h(e3, o3, u3, Vector2(2090.0, 1890.0)) < 47.0, "E3 rank-7 river not carved")
+	var brook_key := ReliefPyramid.key_of(3, 65, 58)
+	var brook_task: Object = carver.carve_job(brook_key)
+	var brook := _flat_page(80.0)
+	if brook_task != null:
+		brook = brook_task.call("apply", brook)
+	_check(absf(_page_h(brook, ReliefPyramid.tile_origin(3, 65, 58), ReliefPyramid.pixel_units(3), Vector2(2090.0, 1870.0)) - 80.0) < 0.1, "E3 rank-3 brook carved")
 
 	# 4. Rubans.
 	var job := FineRibbonJob.new()

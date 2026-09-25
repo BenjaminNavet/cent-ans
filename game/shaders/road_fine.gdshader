@@ -14,8 +14,9 @@ global uniform float campaign_vertical_scale;  // ZG4 : unités monde par mètre
 #define height_scale campaign_vertical_scale
 uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
 uniform float fine_weight = 1.0;
-uniform float min_px = 1.6;
-uniform float main_min_px = 2.4;
+uniform bool debug_flat = false;  // `--fine-debug` : routes en jaune opaque
+uniform float min_px = 2.2;
+uniform float main_min_px = 3.2;
 uniform float depth_bias = 0.0012;
 uniform vec3 dirt_color : source_color = vec3(0.47, 0.38, 0.25);
 uniform vec3 main_color : source_color = vec3(0.60, 0.51, 0.36);
@@ -89,4 +90,8 @@ void fragment() {
 	ROUGHNESS = mix(1.0, 0.85, v_kind.b);
 	float edge = 1.0 - smoothstep(0.75, 1.0, side + (n - 0.5) * 0.2);
 	ALPHA = edge * v_alpha * zone;
+	if (debug_flat) {
+		ALBEDO = vec3(1.0, 0.9, 0.0);
+		ALPHA = 1.0;
+	}
 }
