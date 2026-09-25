@@ -42,7 +42,7 @@ impl BattleSim {
     /// Does a regiment of the shooter's side (other than the shooter) see
     /// `target` from close enough to direct the shooting?
     fn spotted(&self, shooter: &Unit, target: &Unit, rules: &MissileArcRules) -> bool {
-        let reach = rules.spotter_range_m * self.weather.range_factor();
+        let reach = rules.spotter_range_m * self.range_factor();
         let to = (target.x, target.z);
         self.units.iter().any(|u| {
             u.id != shooter.id
