@@ -337,6 +337,7 @@ def human_clip_specs():
         ("xbow_shoot", "Idle", False, poses.crossbow_shoot, False),
         ("xbow_idle", "Idle", True, poses.crossbow_rest, False),
         ("xbow_walk", "Walk", True, poses.crossbow_rest, False),
+        ("climb", "Idle", True, poses.climb, False),
     ]
 
 
